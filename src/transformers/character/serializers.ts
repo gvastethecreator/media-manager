@@ -4,11 +4,11 @@
  */
 
 import type {
-    CharacterExtended,
-    CharacterFilter,
-    CharacterRelationship,
-    CharacterStats,
-    CharacterSummary,
+	CharacterExtended,
+	CharacterFilter,
+	CharacterRelationship,
+	CharacterStats,
+	CharacterSummary,
 } from '@/types/entities/character';
 import type { Character as PrismaCharacter } from '@prisma/client';
 
@@ -18,24 +18,24 @@ import type { Character as PrismaCharacter } from '@prisma/client';
  * @returns CharacterExtended con propiedades adicionales
  */
 export function toCharacterExtended(character: PrismaCharacter): CharacterExtended {
-    return {
-        ...character,
-        // Propiedades adicionales de UI
-        isSelected: false,
-        isHovered: false,
-        isOpen: false,
-        isLoading: false,
-        hasError: false,
-        // Calculados/runtime
-        parsedFilters: character.filters ? parseCharacterFilters(character.filters) : [],
-        parsedStats: character.stats ? parseCharacterStats(character.stats) : {},
-        parsedRelationships: character.relationships ? parseCharacterRelationships(character.relationships) : [],
-        parsedGoals: character.goals ? parseStringArray(character.goals) : [],
-        parsedFears: character.fears ? parseStringArray(character.fears) : [],
-        parsedBeliefs: character.beliefs ? parseStringArray(character.beliefs) : [],
-        parsedPersonality: character.personality ? parseStringArray(character.personality) : [],
-        imageCount: 0,
-    };
+	return {
+		...character,
+		// Propiedades adicionales de UI
+		isSelected: false,
+		isHovered: false,
+		isOpen: false,
+		isLoading: false,
+		hasError: false,
+		// Calculados/runtime
+		parsedFilters: character.filters ? parseCharacterFilters(character.filters) : [],
+		parsedStats: character.stats ? parseCharacterStats(character.stats) : {},
+		parsedRelationships: character.relationships ? parseCharacterRelationships(character.relationships) : [],
+		parsedGoals: character.goals ? parseStringArray(character.goals) : [],
+		parsedFears: character.fears ? parseStringArray(character.fears) : [],
+		parsedBeliefs: character.beliefs ? parseStringArray(character.beliefs) : [],
+		parsedPersonality: character.personality ? parseStringArray(character.personality) : [],
+		imageCount: 0,
+	};
 }
 
 /**
@@ -45,20 +45,20 @@ export function toCharacterExtended(character: PrismaCharacter): CharacterExtend
  * @returns CharacterSummary con datos básicos
  */
 export function toCharacterSummary(
-    character: PrismaCharacter | CharacterExtended,
-    imageCount?: number
+	character: PrismaCharacter | CharacterExtended,
+	imageCount?: number
 ): CharacterSummary {
-    return {
-        id: character.id,
-        name: character.name,
-        emoji: character.emoji || '👤',
-        color: character.color || '#3b82f6',
-        class: character.class || 'unknown',
-        race: character.race || 'unknown',
-        level: character.level || 1,
-        imageCount: imageCount || 0,
-        category: character.category,
-    };
+	return {
+		id: character.id,
+		name: character.name,
+		emoji: character.emoji || '👤',
+		color: character.color || '#3b82f6',
+		class: character.class || 'unknown',
+		race: character.race || 'unknown',
+		level: character.level || 1,
+		imageCount: imageCount || 0,
+		category: character.category,
+	};
 }
 
 /**
@@ -68,95 +68,83 @@ export function toCharacterSummary(
  * @returns Datos limpios para guardar en BD
  */
 export function toPrismaCharacter(character: Partial<CharacterExtended>): Partial<PrismaCharacter> {
-    // Extraer solo las propiedades que existen en PrismaCharacter
-    const {
-        id,
-        name,
-        emoji,
-        color,
-        description,
-        shortcut,
-        level,
-        class: characterClass,
-        race,
-        alignment,
-        backstory,
-        stats,
-        sortBy,
-        filters,
-        psychologicalProfile,
-        socialProfile,
-        relationships,
-        goals,
-        fears,
-        beliefs,
-        personality,
-        featuredImage,
-        isFavorite,
-        createdAt,
-        updatedAt,
-        category,
-        presetId,
-    } = character;
+	// Extraer solo las propiedades que existen en PrismaCharacter
+	const {
+		id,
+		name,
+		emoji,
+		color,
+		description,
+		shortcut,
+		level,
+		class: characterClass,
+		race,
+		alignment,
+		backstory,
+		stats,
+		sortBy,
+		filters,
+		psychologicalProfile,
+		socialProfile,
+		relationships,
+		goals,
+		fears,
+		beliefs,
+		personality,
+		featuredImage,
+		isFavorite,
+		createdAt,
+		updatedAt,
+		category,
+		presetId,
+	} = character;
 
-    // Serializar datos complejos si es necesario
-    const serializedFilters = character.parsedFilters
-        ? JSON.stringify(character.parsedFilters)
-        : filters;
+	// Serializar datos complejos si es necesario
+	const serializedFilters = character.parsedFilters ? JSON.stringify(character.parsedFilters) : filters;
 
-    const serializedStats = character.parsedStats
-        ? JSON.stringify(character.parsedStats)
-        : stats;
+	const serializedStats = character.parsedStats ? JSON.stringify(character.parsedStats) : stats;
 
-    const serializedRelationships = character.parsedRelationships
-        ? JSON.stringify(character.parsedRelationships)
-        : relationships;
+	const serializedRelationships = character.parsedRelationships
+		? JSON.stringify(character.parsedRelationships)
+		: relationships;
 
-    const serializedGoals = character.parsedGoals
-        ? JSON.stringify(character.parsedGoals)
-        : goals;
+	const serializedGoals = character.parsedGoals ? JSON.stringify(character.parsedGoals) : goals;
 
-    const serializedFears = character.parsedFears
-        ? JSON.stringify(character.parsedFears)
-        : fears;
+	const serializedFears = character.parsedFears ? JSON.stringify(character.parsedFears) : fears;
 
-    const serializedBeliefs = character.parsedBeliefs
-        ? JSON.stringify(character.parsedBeliefs)
-        : beliefs;
+	const serializedBeliefs = character.parsedBeliefs ? JSON.stringify(character.parsedBeliefs) : beliefs;
 
-    const serializedPersonality = character.parsedPersonality
-        ? JSON.stringify(character.parsedPersonality)
-        : personality;
+	const serializedPersonality = character.parsedPersonality ? JSON.stringify(character.parsedPersonality) : personality;
 
-    return {
-        id,
-        name,
-        emoji,
-        color,
-        description,
-        shortcut,
-        level,
-        class: characterClass,
-        race,
-        alignment,
-        backstory,
-        stats: serializedStats,
-        sortBy,
-        filters: serializedFilters,
-        psychologicalProfile,
-        socialProfile,
-        relationships: serializedRelationships,
-        goals: serializedGoals,
-        fears: serializedFears,
-        beliefs: serializedBeliefs,
-        personality: serializedPersonality,
-        featuredImage,
-        isFavorite,
-        createdAt,
-        updatedAt,
-        category,
-        presetId,
-    };
+	return {
+		id,
+		name,
+		emoji,
+		color,
+		description,
+		shortcut,
+		level,
+		class: characterClass,
+		race,
+		alignment,
+		backstory,
+		stats: serializedStats,
+		sortBy,
+		filters: serializedFilters,
+		psychologicalProfile,
+		socialProfile,
+		relationships: serializedRelationships,
+		goals: serializedGoals,
+		fears: serializedFears,
+		beliefs: serializedBeliefs,
+		personality: serializedPersonality,
+		featuredImage,
+		isFavorite,
+		createdAt,
+		updatedAt,
+		category,
+		presetId,
+	};
 }
 
 /**
@@ -165,25 +153,25 @@ export function toPrismaCharacter(character: Partial<CharacterExtended>): Partia
  * @returns Array de objetos CharacterFilter
  */
 export function parseCharacterFilters(filtersStr: string): CharacterFilter[] {
-    try {
-        // Si es "empty_array", retornar un array vacío
-        if (filtersStr === 'empty_array') {
-            return [];
-        }
+	try {
+		// Si es "empty_array", retornar un array vacío
+		if (filtersStr === 'empty_array') {
+			return [];
+		}
 
-        // Intentar parsear el JSON
-        const parsedFilters = JSON.parse(filtersStr);
+		// Intentar parsear el JSON
+		const parsedFilters = JSON.parse(filtersStr);
 
-        // Validar que sea un array
-        if (!Array.isArray(parsedFilters)) {
-            return [];
-        }
+		// Validar que sea un array
+		if (!Array.isArray(parsedFilters)) {
+			return [];
+		}
 
-        return parsedFilters;
-    } catch (error) {
-        console.error('Error al parsear filtros de personaje:', error);
-        return [];
-    }
+		return parsedFilters;
+	} catch (error) {
+		console.error('Error al parsear filtros de personaje:', error);
+		return [];
+	}
 }
 
 /**
@@ -192,25 +180,25 @@ export function parseCharacterFilters(filtersStr: string): CharacterFilter[] {
  * @returns Objeto CharacterStats
  */
 export function parseCharacterStats(statsStr: string): CharacterStats {
-    try {
-        // Si es "{}", retornar un objeto vacío
-        if (statsStr === '{}') {
-            return {};
-        }
+	try {
+		// Si es "{}", retornar un objeto vacío
+		if (statsStr === '{}') {
+			return {};
+		}
 
-        // Intentar parsear el JSON
-        const parsedStats = JSON.parse(statsStr);
+		// Intentar parsear el JSON
+		const parsedStats = JSON.parse(statsStr);
 
-        // Validar que sea un objeto
-        if (typeof parsedStats !== 'object' || parsedStats === null || Array.isArray(parsedStats)) {
-            return {};
-        }
+		// Validar que sea un objeto
+		if (typeof parsedStats !== 'object' || parsedStats === null || Array.isArray(parsedStats)) {
+			return {};
+		}
 
-        return parsedStats;
-    } catch (error) {
-        console.error('Error al parsear estadísticas de personaje:', error);
-        return {};
-    }
+		return parsedStats;
+	} catch (error) {
+		console.error('Error al parsear estadísticas de personaje:', error);
+		return {};
+	}
 }
 
 /**
@@ -219,25 +207,25 @@ export function parseCharacterStats(statsStr: string): CharacterStats {
  * @returns Array de objetos CharacterRelationship
  */
 export function parseCharacterRelationships(relationshipsStr: string): CharacterRelationship[] {
-    try {
-        // Si es "empty_array", retornar un array vacío
-        if (relationshipsStr === 'empty_array') {
-            return [];
-        }
+	try {
+		// Si es "empty_array", retornar un array vacío
+		if (relationshipsStr === 'empty_array') {
+			return [];
+		}
 
-        // Intentar parsear el JSON
-        const parsedRelationships = JSON.parse(relationshipsStr);
+		// Intentar parsear el JSON
+		const parsedRelationships = JSON.parse(relationshipsStr);
 
-        // Validar que sea un array
-        if (!Array.isArray(parsedRelationships)) {
-            return [];
-        }
+		// Validar que sea un array
+		if (!Array.isArray(parsedRelationships)) {
+			return [];
+		}
 
-        return parsedRelationships;
-    } catch (error) {
-        console.error('Error al parsear relaciones de personaje:', error);
-        return [];
-    }
+		return parsedRelationships;
+	} catch (error) {
+		console.error('Error al parsear relaciones de personaje:', error);
+		return [];
+	}
 }
 
 /**
@@ -246,25 +234,25 @@ export function parseCharacterRelationships(relationshipsStr: string): Character
  * @returns Array de strings
  */
 export function parseStringArray(str: string): string[] {
-    try {
-        // Si es "empty_array", retornar un array vacío
-        if (str === 'empty_array') {
-            return [];
-        }
+	try {
+		// Si es "empty_array", retornar un array vacío
+		if (str === 'empty_array') {
+			return [];
+		}
 
-        // Intentar parsear el JSON
-        const parsedArray = JSON.parse(str);
+		// Intentar parsear el JSON
+		const parsedArray = JSON.parse(str);
 
-        // Validar que sea un array
-        if (!Array.isArray(parsedArray)) {
-            return [];
-        }
+		// Validar que sea un array
+		if (!Array.isArray(parsedArray)) {
+			return [];
+		}
 
-        return parsedArray;
-    } catch (error) {
-        console.error('Error al parsear array de strings:', error);
-        return [];
-    }
+		return parsedArray;
+	} catch (error) {
+		console.error('Error al parsear array de strings:', error);
+		return [];
+	}
 }
 
 /**
@@ -273,16 +261,16 @@ export function parseStringArray(str: string): string[] {
  * @returns String serializado
  */
 export function serializeArray(array: any[]): string {
-    try {
-        if (!array || array.length === 0) {
-            return 'empty_array';
-        }
+	try {
+		if (!array || array.length === 0) {
+			return 'empty_array';
+		}
 
-        return JSON.stringify(array);
-    } catch (error) {
-        console.error('Error al serializar array:', error);
-        return 'empty_array';
-    }
+		return JSON.stringify(array);
+	} catch (error) {
+		console.error('Error al serializar array:', error);
+		return 'empty_array';
+	}
 }
 
 /**
@@ -291,14 +279,14 @@ export function serializeArray(array: any[]): string {
  * @returns String serializado
  */
 export function serializeObject(obj: Record<string, any>): string {
-    try {
-        if (!obj || Object.keys(obj).length === 0) {
-            return '{}';
-        }
+	try {
+		if (!obj || Object.keys(obj).length === 0) {
+			return '{}';
+		}
 
-        return JSON.stringify(obj);
-    } catch (error) {
-        console.error('Error al serializar objeto:', error);
-        return '{}';
-    }
+		return JSON.stringify(obj);
+	} catch (error) {
+		console.error('Error al serializar objeto:', error);
+		return '{}';
+	}
 }

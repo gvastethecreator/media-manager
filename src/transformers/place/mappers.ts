@@ -4,20 +4,16 @@
  */
 
 import {
-    type CreatePlaceData,
-    type Place,
-    type PlaceBase,
-    type PlaceVisualConfig,
-    type PlaceVisualConfigUpdateData,
-    type UpdatePlaceData,
-    PlaceCategory,
-    PlaceType
+	type CreatePlaceData,
+	type Place,
+	type PlaceBase,
+	type PlaceVisualConfig,
+	type PlaceVisualConfigUpdateData,
+	type UpdatePlaceData,
+	PlaceCategory,
+	PlaceType,
 } from '../../types/entities/place';
-import {
-    parseJsonFields,
-    parseVisualConfig,
-    serializePlaceFilters
-} from './serializers';
+import { parseJsonFields, parseVisualConfig, serializePlaceFilters } from './serializers';
 
 /**
  * Genera un color aleatorio para un lugar basado en su nombre y categoría
@@ -26,31 +22,31 @@ import {
  * @returns Color hexadecimal
  */
 export function generatePlaceColor(name: string, category?: string | null): string {
-  // Colores predeterminados por categoría
-  const categoryColors: Record<string, string> = {
-    [PlaceCategory.SETTLEMENT]: '#3b82f6', // Azul
-    [PlaceCategory.LANDSCAPE]: '#10b981', // Verde
-    [PlaceCategory.STRUCTURE]: '#6366f1', // Índigo
-    [PlaceCategory.BIOME]: '#84cc16', // Lima
-    [PlaceCategory.UNDERGROUND]: '#7c3aed', // Violeta
-    [PlaceCategory.MYTHICAL]: '#ec4899', // Rosa
-    [PlaceCategory.HISTORICAL]: '#f59e0b', // Ámbar
-    [PlaceCategory.OTHER]: '#64748b', // Gris azulado
-  };
+	// Colores predeterminados por categoría
+	const categoryColors: Record<string, string> = {
+		[PlaceCategory.SETTLEMENT]: '#3b82f6', // Azul
+		[PlaceCategory.LANDSCAPE]: '#10b981', // Verde
+		[PlaceCategory.STRUCTURE]: '#6366f1', // Índigo
+		[PlaceCategory.BIOME]: '#84cc16', // Lima
+		[PlaceCategory.UNDERGROUND]: '#7c3aed', // Violeta
+		[PlaceCategory.MYTHICAL]: '#ec4899', // Rosa
+		[PlaceCategory.HISTORICAL]: '#f59e0b', // Ámbar
+		[PlaceCategory.OTHER]: '#64748b', // Gris azulado
+	};
 
-  // Si hay una categoría válida, usar su color
-  if (category && categoryColors[category]) {
-    return categoryColors[category];
-  }
+	// Si hay una categoría válida, usar su color
+	if (category && categoryColors[category]) {
+		return categoryColors[category];
+	}
 
-  // Si no hay categoría, generar un color basado en el nombre
-  const hash = Array.from(name).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const hue = hash % 360;
-  const saturation = 65 + (hash % 20);
-  const lightness = 45 + (hash % 10);
+	// Si no hay categoría, generar un color basado en el nombre
+	const hash = Array.from(name).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+	const hue = hash % 360;
+	const saturation = 65 + (hash % 20);
+	const lightness = 45 + (hash % 10);
 
-  // Convertir HSL a hexadecimal
-  return hslToHex(hue, saturation, lightness);
+	// Convertir HSL a hexadecimal
+	return hslToHex(hue, saturation, lightness);
 }
 
 /**
@@ -60,52 +56,50 @@ export function generatePlaceColor(name: string, category?: string | null): stri
  * @returns Emoji representativo
  */
 export function generatePlaceEmoji(name: string, type?: string | null): string {
-  // Emojis por tipo de lugar
-  const typeEmojis: Record<string, string> = {
-    [PlaceType.CITY]: '🏙️',
-    [PlaceType.TOWN]: '🏘️',
-    [PlaceType.VILLAGE]: '🏡',
-    [PlaceType.RUIN]: '🏚️',
-    [PlaceType.CASTLE]: '🏰',
-    [PlaceType.FORTRESS]: '🗿',
-    [PlaceType.DUNGEON]: '🔒',
-    [PlaceType.CAVE]: '🕳️',
-    [PlaceType.FOREST]: '🌲',
-    [PlaceType.MOUNTAIN]: '⛰️',
-    [PlaceType.VALLEY]: '🏞️',
-    [PlaceType.ISLAND]: '🏝️',
-    [PlaceType.LAKE]: '🌊',
-    [PlaceType.RIVER]: '🌊',
-    [PlaceType.OCEAN]: '🌊',
-    [PlaceType.DESERT]: '🏜️',
-    [PlaceType.TUNDRA]: '❄️',
-    [PlaceType.JUNGLE]: '🌴',
-    [PlaceType.SWAMP]: '🦟',
-    [PlaceType.OTHER]: '📍',
-  };
+	// Emojis por tipo de lugar
+	const typeEmojis: Record<string, string> = {
+		[PlaceType.CITY]: '🏙️',
+		[PlaceType.TOWN]: '🏘️',
+		[PlaceType.VILLAGE]: '🏡',
+		[PlaceType.RUIN]: '🏚️',
+		[PlaceType.CASTLE]: '🏰',
+		[PlaceType.FORTRESS]: '🗿',
+		[PlaceType.DUNGEON]: '🔒',
+		[PlaceType.CAVE]: '🕳️',
+		[PlaceType.FOREST]: '🌲',
+		[PlaceType.MOUNTAIN]: '⛰️',
+		[PlaceType.VALLEY]: '🏞️',
+		[PlaceType.ISLAND]: '🏝️',
+		[PlaceType.LAKE]: '🌊',
+		[PlaceType.RIVER]: '🌊',
+		[PlaceType.OCEAN]: '🌊',
+		[PlaceType.DESERT]: '🏜️',
+		[PlaceType.TUNDRA]: '❄️',
+		[PlaceType.JUNGLE]: '🌴',
+		[PlaceType.SWAMP]: '🦟',
+		[PlaceType.OTHER]: '📍',
+	};
 
-  // Si hay un tipo válido, usar su emoji
-  if (type && typeEmojis[type]) {
-    return typeEmojis[type];
-  }
+	// Si hay un tipo válido, usar su emoji
+	if (type && typeEmojis[type]) {
+		return typeEmojis[type];
+	}
 
-  // Si no hay tipo, seleccionar un emoji basado en el nombre
-  const commonWords = ['city', 'town', 'village', 'castle', 'forest', 'mountain', 'island', 'lake', 'river', 'desert'];
-  const lowerName = name.toLowerCase();
+	// Si no hay tipo, seleccionar un emoji basado en el nombre
+	const commonWords = ['city', 'town', 'village', 'castle', 'forest', 'mountain', 'island', 'lake', 'river', 'desert'];
+	const lowerName = name.toLowerCase();
 
-  for (const word of commonWords) {
-    if (lowerName.includes(word)) {
-      const matchingType = Object.keys(typeEmojis).find(
-        type => type.toLowerCase() === word
-      );
-      if (matchingType) {
-        return typeEmojis[matchingType];
-      }
-    }
-  }
+	for (const word of commonWords) {
+		if (lowerName.includes(word)) {
+			const matchingType = Object.keys(typeEmojis).find((type) => type.toLowerCase() === word);
+			if (matchingType) {
+				return typeEmojis[matchingType];
+			}
+		}
+	}
 
-  // Emoji por defecto si no hay coincidencias
-  return '📍';
+	// Emoji por defecto si no hay coincidencias
+	return '📍';
 }
 
 /**
@@ -116,34 +110,54 @@ export function generatePlaceEmoji(name: string, type?: string | null): string {
  * @returns Color hexadecimal
  */
 function hslToHex(h: number, s: number, l: number): string {
-  s /= 100;
-  l /= 100;
+	s /= 100;
+	l /= 100;
 
-  const c = (1 - Math.abs(2 * l - 1)) * s;
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-  const m = l - c / 2;
+	const c = (1 - Math.abs(2 * l - 1)) * s;
+	const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+	const m = l - c / 2;
 
-  let r = 0, g = 0, b = 0;
+	let r = 0,
+		g = 0,
+		b = 0;
 
-  if (h >= 0 && h < 60) {
-    r = c; g = x; b = 0;
-  } else if (h >= 60 && h < 120) {
-    r = x; g = c; b = 0;
-  } else if (h >= 120 && h < 180) {
-    r = 0; g = c; b = x;
-  } else if (h >= 180 && h < 240) {
-    r = 0; g = x; b = c;
-  } else if (h >= 240 && h < 300) {
-    r = x; g = 0; b = c;
-  } else {
-    r = c; g = 0; b = x;
-  }
+	if (h >= 0 && h < 60) {
+		r = c;
+		g = x;
+		b = 0;
+	} else if (h >= 60 && h < 120) {
+		r = x;
+		g = c;
+		b = 0;
+	} else if (h >= 120 && h < 180) {
+		r = 0;
+		g = c;
+		b = x;
+	} else if (h >= 180 && h < 240) {
+		r = 0;
+		g = x;
+		b = c;
+	} else if (h >= 240 && h < 300) {
+		r = x;
+		g = 0;
+		b = c;
+	} else {
+		r = c;
+		g = 0;
+		b = x;
+	}
 
-  const rHex = Math.round((r + m) * 255).toString(16).padStart(2, '0');
-  const gHex = Math.round((g + m) * 255).toString(16).padStart(2, '0');
-  const bHex = Math.round((b + m) * 255).toString(16).padStart(2, '0');
+	const rHex = Math.round((r + m) * 255)
+		.toString(16)
+		.padStart(2, '0');
+	const gHex = Math.round((g + m) * 255)
+		.toString(16)
+		.padStart(2, '0');
+	const bHex = Math.round((b + m) * 255)
+		.toString(16)
+		.padStart(2, '0');
 
-  return `#${rHex}${gHex}${bHex}`;
+	return `#${rHex}${gHex}${bHex}`;
 }
 
 /**
@@ -152,7 +166,7 @@ function hslToHex(h: number, s: number, l: number): string {
  * @returns Lugar extendido
  */
 export function extendPlace(place: PlaceBase): Place {
-  return parseJsonFields(place);
+	return parseJsonFields(place);
 }
 
 /**
@@ -161,7 +175,7 @@ export function extendPlace(place: PlaceBase): Place {
  * @returns Lista de lugares extendidos
  */
 export function extendPlaces(places: PlaceBase[]): Place[] {
-  return places.map(place => extendPlace(place));
+	return places.map((place) => extendPlace(place));
 }
 
 /**
@@ -170,31 +184,31 @@ export function extendPlaces(places: PlaceBase[]): Place[] {
  * @returns Datos preparados para la base de datos
  */
 export function prepareCreatePlaceData(data: CreatePlaceData): Record<string, any> {
-  const emoji = data.emoji || generatePlaceEmoji(data.name, data.type);
-  const color = data.color || generatePlaceColor(data.name, data.category);
+	const emoji = data.emoji || generatePlaceEmoji(data.name, data.type);
+	const color = data.color || generatePlaceColor(data.name, data.category);
 
-  return {
-    name: data.name,
-    emoji,
-    color,
-    description: data.description || null,
-    shortcut: data.shortcut || null,
-    region: data.region || null,
-    type: data.type || null,
-    climate: data.climate || null,
-    population: data.population || null,
-    government: data.government || null,
-    dangers: data.dangers || null,
-    resources: data.resources || null,
-    lore: data.lore || null,
-    history: data.history || null,
-    stats: data.stats || null,
-    sortBy: data.sortBy || null,
-    filters: data.filters || null,
-    featuredImage: data.featuredImage || null,
-    isFavorite: data.isFavorite || false,
-    category: data.category || null,
-  };
+	return {
+		name: data.name,
+		emoji,
+		color,
+		description: data.description || null,
+		shortcut: data.shortcut || null,
+		region: data.region || null,
+		type: data.type || null,
+		climate: data.climate || null,
+		population: data.population || null,
+		government: data.government || null,
+		dangers: data.dangers || null,
+		resources: data.resources || null,
+		lore: data.lore || null,
+		history: data.history || null,
+		stats: data.stats || null,
+		sortBy: data.sortBy || null,
+		filters: data.filters || null,
+		featuredImage: data.featuredImage || null,
+		isFavorite: data.isFavorite || false,
+		category: data.category || null,
+	};
 }
 
 /**
@@ -203,16 +217,16 @@ export function prepareCreatePlaceData(data: CreatePlaceData): Record<string, an
  * @returns Datos preparados para la base de datos
  */
 export function prepareUpdatePlaceData(data: UpdatePlaceData): Record<string, any> {
-  const updateData: Record<string, any> = {};
+	const updateData: Record<string, any> = {};
 
-  // Copiar solo propiedades definidas
-  Object.entries(data).forEach(([key, value]) => {
-    if (value !== undefined) {
-      updateData[key] = value;
-    }
-  });
+	// Copiar solo propiedades definidas
+	Object.entries(data).forEach(([key, value]) => {
+		if (value !== undefined) {
+			updateData[key] = value;
+		}
+	});
 
-  return updateData;
+	return updateData;
 }
 
 /**
@@ -221,21 +235,21 @@ export function prepareUpdatePlaceData(data: UpdatePlaceData): Record<string, an
  * @returns Datos preparados para la base de datos
  */
 export function prepareVisualConfigUpdateData(data: PlaceVisualConfigUpdateData): Record<string, any> {
-  const updateData: Record<string, any> = {};
+	const updateData: Record<string, any> = {};
 
-  // Mapear y formatear propiedades
-  if (data.view !== undefined) updateData.view = data.view;
-  if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
-  if (data.lastViewedPlaceId !== undefined) updateData.lastViewedPlaceId = data.lastViewedPlaceId;
-  if (data.expandedPlaceIds !== undefined) updateData.expandedPlaceIds = data.expandedPlaceIds;
-  if (data.selectedPlaceIds !== undefined) updateData.selectedPlaceIds = data.selectedPlaceIds;
+	// Mapear y formatear propiedades
+	if (data.view !== undefined) updateData.view = data.view;
+	if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
+	if (data.lastViewedPlaceId !== undefined) updateData.lastViewedPlaceId = data.lastViewedPlaceId;
+	if (data.expandedPlaceIds !== undefined) updateData.expandedPlaceIds = data.expandedPlaceIds;
+	if (data.selectedPlaceIds !== undefined) updateData.selectedPlaceIds = data.selectedPlaceIds;
 
-  // Serializar filtros si existen
-  if (data.filters !== undefined) {
-    updateData.filters = serializePlaceFilters(data.filters);
-  }
+	// Serializar filtros si existen
+	if (data.filters !== undefined) {
+		updateData.filters = serializePlaceFilters(data.filters);
+	}
 
-  return updateData;
+	return updateData;
 }
 
 /**
@@ -244,7 +258,7 @@ export function prepareVisualConfigUpdateData(data: PlaceVisualConfigUpdateData)
  * @returns Configuración visual parseada
  */
 export function mapVisualConfig(config: PlaceVisualConfig) {
-  return parseVisualConfig(config);
+	return parseVisualConfig(config);
 }
 
 /**
@@ -253,20 +267,20 @@ export function mapVisualConfig(config: PlaceVisualConfig) {
  * @returns Objeto con formato para Prisma
  */
 export function mapCreatePlaceDataToPrisma(data: any): any {
-    return {
-        name: data.name,
-        emoji: data.emoji || null,
-        color: data.color || null,
-        description: data.description || null,
-        type: data.type || null,
-        location: data.location || null,
-        coordinates: data.coordinates || null,
-        tags: Array.isArray(data.tags) ? data.tags.join(',') : data.tags || null,
-        isFavorite: data.isFavorite || false,
-        featuredImageId: data.featuredImage || null,
-        parentId: data.parentId || null,
-        details: typeof data.details === 'object' ? JSON.stringify(data.details) : data.details,
-    };
+	return {
+		name: data.name,
+		emoji: data.emoji || null,
+		color: data.color || null,
+		description: data.description || null,
+		type: data.type || null,
+		location: data.location || null,
+		coordinates: data.coordinates || null,
+		tags: Array.isArray(data.tags) ? data.tags.join(',') : data.tags || null,
+		isFavorite: data.isFavorite || false,
+		featuredImageId: data.featuredImage || null,
+		parentId: data.parentId || null,
+		details: typeof data.details === 'object' ? JSON.stringify(data.details) : data.details,
+	};
 }
 
 /**
@@ -275,31 +289,29 @@ export function mapCreatePlaceDataToPrisma(data: any): any {
  * @returns Objeto con formato para Prisma
  */
 export function mapUpdatePlaceDataToPrisma(data: any): any {
-    const updateData: any = {};
+	const updateData: any = {};
 
-    // Solo incluir campos que estén presentes en los datos
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.emoji !== undefined) updateData.emoji = data.emoji;
-    if (data.color !== undefined) updateData.color = data.color;
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.type !== undefined) updateData.type = data.type;
-    if (data.location !== undefined) updateData.location = data.location;
-    if (data.coordinates !== undefined) updateData.coordinates = data.coordinates;
+	// Solo incluir campos que estén presentes en los datos
+	if (data.name !== undefined) updateData.name = data.name;
+	if (data.emoji !== undefined) updateData.emoji = data.emoji;
+	if (data.color !== undefined) updateData.color = data.color;
+	if (data.description !== undefined) updateData.description = data.description;
+	if (data.type !== undefined) updateData.type = data.type;
+	if (data.location !== undefined) updateData.location = data.location;
+	if (data.coordinates !== undefined) updateData.coordinates = data.coordinates;
 
-    if (data.tags !== undefined) {
-        updateData.tags = Array.isArray(data.tags) ? data.tags.join(',') : data.tags;
-    }
+	if (data.tags !== undefined) {
+		updateData.tags = Array.isArray(data.tags) ? data.tags.join(',') : data.tags;
+	}
 
-    if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-    if (data.featuredImage !== undefined) updateData.featuredImageId = data.featuredImage;
-    if (data.parentId !== undefined) updateData.parentId = data.parentId;
+	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+	if (data.featuredImage !== undefined) updateData.featuredImageId = data.featuredImage;
+	if (data.parentId !== undefined) updateData.parentId = data.parentId;
 
-    // Convertir details a string si es un objeto
-    if (data.details !== undefined) {
-        updateData.details = typeof data.details === 'object'
-            ? JSON.stringify(data.details)
-            : data.details;
-    }
+	// Convertir details a string si es un objeto
+	if (data.details !== undefined) {
+		updateData.details = typeof data.details === 'object' ? JSON.stringify(data.details) : data.details;
+	}
 
-    return updateData;
+	return updateData;
 }

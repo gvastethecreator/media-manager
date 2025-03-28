@@ -156,5 +156,14 @@
   // Formateo al guardar
   "editor.formatOnSave": true,
   "editor.formatOnPaste": false,
-  "editor.formatOnType": false
+  "editor.formatOnType": false,
+
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell",
+      "args": ["-NoProfile"],
+      "icon": "terminal-powershell"
+    }
+  }
 }

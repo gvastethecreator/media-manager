@@ -39,8 +39,9 @@ export const noiseTextureLayer: LayerComponent<NoiseTextureConfig> = {
 
 // Exportar componentes y acciones
 export {
-	deleteNoiseTextureConfig, getNoiseTextureConfig,
-	updateNoiseTextureConfig
+	deleteNoiseTextureConfig,
+	getNoiseTextureConfig,
+	updateNoiseTextureConfig,
 } from './actions/noise-texture-config.action';
 export type { NoiseTextureConfig } from './actions/noise-texture-config.action';
 export { NoiseTextureLayer } from './noise-texture-layer';
@@ -51,4 +52,3 @@ export * from './components/noise-texture-settings';
 export * from './hooks/use-noise-texture';
 export { noiseTextureImplementation } from './noise-texture-implementation';
 export * from './utils/noise-algorithms';
-

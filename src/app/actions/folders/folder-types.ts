@@ -1,17 +1,14 @@
 import type {
-    CreateFolderData,
-    FolderBase,
-    FolderExtended,
-    FolderStats,
-    FolderSummary,
-    UpdateFolderData
+	CreateFolderData,
+	FolderBase,
+	FolderExtended,
+	FolderStats,
+	FolderSummary,
+	UpdateFolderData,
 } from '@/types/entities/folder';
 
 // Re-exportamos los tipos principales
-export type {
-    CreateFolderData, FolderBase,
-    FolderExtended, FolderStats, FolderSummary, UpdateFolderData
-};
+export type { CreateFolderData, FolderBase, FolderExtended, FolderStats, FolderSummary, UpdateFolderData };
 
 // Estos tipos son específicos de las operaciones de procesamiento
 // y no forman parte del modelo de datos central

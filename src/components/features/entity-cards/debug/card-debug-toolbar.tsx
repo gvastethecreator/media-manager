@@ -2,12 +2,25 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from "@/components/ui/card";
+import { Card } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Toggle } from '@/components/ui/toggle';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Bug, Circle, Component, Dices, Film, Laptop, Layers, Palette, PictureInPicture, Snowflake, Sparkles, XCircle } from 'lucide-react';
+import {
+	Bug,
+	Circle,
+	Component,
+	Dices,
+	Film,
+	Laptop,
+	Layers,
+	Palette,
+	PictureInPicture,
+	Snowflake,
+	Sparkles,
+	XCircle,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 // Tipo para el estado de configuración de depuración
@@ -109,7 +122,7 @@ export function CardDebugToolbar({ onStateChange, className }: CardDebugToolbarP
 			const now = performance.now();
 
 			if (now - lastTime >= 1000) {
-				setFps(Math.round(frameCount * 1000 / (now - lastTime)));
+				setFps(Math.round((frameCount * 1000) / (now - lastTime)));
 				frameCount = 0;
 				lastTime = now;
 			}
@@ -125,29 +138,29 @@ export function CardDebugToolbar({ onStateChange, className }: CardDebugToolbarP
 	// Efecto para contar renders cuando está habilitado
 	useEffect(() => {
 		if (debugState.performance.showRenderCount) {
-			setRenderCount(prev => prev + 1);
+			setRenderCount((prev) => prev + 1);
 		}
 	}, [debugState.performance.showRenderCount]);
 
 	// Función para cambiar estado de un sistema
 	const toggleSystem = (system: keyof CardDebugState['systems']) => {
-		setDebugState(prev => ({
+		setDebugState((prev) => ({
 			...prev,
 			systems: {
 				...prev.systems,
-				[system]: !prev.systems[system]
-			}
+				[system]: !prev.systems[system],
+			},
 		}));
 	};
 
 	// Función para cambiar estado de monitoreo de rendimiento
 	const togglePerformance = (metric: keyof CardDebugState['performance']) => {
-		setDebugState(prev => ({
+		setDebugState((prev) => ({
 			...prev,
 			performance: {
 				...prev.performance,
-				[metric]: !prev.performance[metric]
-			}
+				[metric]: !prev.performance[metric],
+			},
 		}));
 	};
 
@@ -166,8 +179,11 @@ export function CardDebugToolbar({ onStateChange, className }: CardDebugToolbarP
 						<Button
 							size="icon"
 							variant="ghost"
-							className={cn("fixed bottom-4 right-4 z-50 opacity-60 hover:opacity-100 bg-background/80 backdrop-blur-sm", className)}
-							onClick={() => setDebugState(prev => ({ ...prev, enabled: true }))}
+							className={cn(
+								'fixed bottom-4 right-4 z-50 opacity-60 hover:opacity-100 bg-background/80 backdrop-blur-sm',
+								className
+							)}
+							onClick={() => setDebugState((prev) => ({ ...prev, enabled: true }))}
 						>
 							<Bug className="h-5 w-5 text-primary" />
 						</Button>
@@ -181,23 +197,20 @@ export function CardDebugToolbar({ onStateChange, className }: CardDebugToolbarP
 	}
 
 	return (
-		<Card className={cn(
-			"fixed z-50 transition-all duration-300",
-			isMinimized
-				? "bottom-4 right-4 w-auto h-auto p-2"
-				: isCollapsed
-					? "bottom-4 right-4 w-auto p-3"
-					: "bottom-4 right-4 w-72 shadow-xl border-primary/30",
-			className
-		)}>
+		<Card
+			className={cn(
+				'fixed z-50 transition-all duration-300',
+				isMinimized
+					? 'bottom-4 right-4 w-auto h-auto p-2'
+					: isCollapsed
+						? 'bottom-4 right-4 w-auto p-3'
+						: 'bottom-4 right-4 w-72 shadow-xl border-primary/30',
+				className
+			)}
+		>
 			{isMinimized ? (
 				// Modo minimizado - solo un icono
-				<Button
-					size="icon"
-					variant="ghost"
-					className="p-1"
-					onClick={() => setIsMinimized(false)}
-				>
+				<Button size="icon" variant="ghost" className="p-1" onClick={() => setIsMinimized(false)}>
 					<Bug className="h-5 w-5 text-primary" />
 				</Button>
 			) : (
@@ -223,23 +236,13 @@ export function CardDebugToolbar({ onStateChange, className }: CardDebugToolbarP
 
 						<div className="flex items-center gap-1">
 							{!isCollapsed && (
-								<Button
-									size="icon"
-									variant="ghost"
-									className="h-6 w-6"
-									onClick={() => setIsCollapsed(true)}
-								>
+								<Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsCollapsed(true)}>
 									<PictureInPicture className="h-3 w-3" />
 								</Button>
 							)}
 
 							{isCollapsed && (
-								<Button
-									size="icon"
-									variant="ghost"
-									className="h-6 w-6"
-									onClick={() => setIsCollapsed(false)}
-								>
+								<Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsCollapsed(false)}>
 									<Component className="h-3 w-3" />
 								</Button>
 							)}
@@ -248,7 +251,7 @@ export function CardDebugToolbar({ onStateChange, className }: CardDebugToolbarP
 								size="icon"
 								variant="ghost"
 								className="h-6 w-6 text-destructive"
-								onClick={() => setDebugState(prev => ({ ...prev, enabled: false }))}
+								onClick={() => setDebugState((prev) => ({ ...prev, enabled: false }))}
 							>
 								<XCircle className="h-3 w-3" />
 							</Button>
@@ -387,22 +390,13 @@ export function CardDebugToolbar({ onStateChange, className }: CardDebugToolbarP
 							<div className="pt-2 flex justify-between border-t border-border/50">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button
-											variant="outline"
-											size="sm"
-											className="text-xs h-8"
-										>
+										<Button variant="outline" size="sm" className="text-xs h-8">
 											Opciones
 										</Button>
 									</PopoverTrigger>
 									<PopoverContent className="w-48 p-2">
 										<div className="grid gap-2">
-											<Button
-												variant="destructive"
-												size="sm"
-												className="text-xs h-8 w-full"
-												onClick={resetConfig}
-											>
+											<Button variant="destructive" size="sm" className="text-xs h-8 w-full" onClick={resetConfig}>
 												Restablecer
 											</Button>
 											<Button
@@ -478,7 +472,7 @@ export const useCardDebug = () => {
 		shouldRenderLayer: (layerName: keyof CardDebugState['systems']) => {
 			if (!debugState?.enabled) return true;
 			return debugState.systems[layerName];
-		}
+		},
 	};
 };
 

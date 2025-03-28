@@ -4,15 +4,15 @@
  */
 
 import {
-    type ParsedWorldItemVisualConfig,
-    type WorldItem,
-    type WorldItemBase,
-    type WorldItemFilters,
-    type WorldItemProperty,
-    type WorldItemRequirement,
-    type WorldItemStats,
-    type WorldItemVisualConfig,
-    RarityLevel
+	type ParsedWorldItemVisualConfig,
+	type WorldItem,
+	type WorldItemBase,
+	type WorldItemFilters,
+	type WorldItemProperty,
+	type WorldItemRequirement,
+	type WorldItemStats,
+	type WorldItemVisualConfig,
+	RarityLevel,
 } from '../../types/entities/world-item';
 
 /**
@@ -21,12 +21,12 @@ import {
  * @returns JSON string de propiedades
  */
 export function serializeWorldItemProperties(properties: WorldItemProperty[]): string {
-  try {
-    return JSON.stringify(properties);
-  } catch (error) {
-    console.error('Error al serializar las propiedades del objeto:', error);
-    return JSON.stringify([]);
-  }
+	try {
+		return JSON.stringify(properties);
+	} catch (error) {
+		console.error('Error al serializar las propiedades del objeto:', error);
+		return JSON.stringify([]);
+	}
 }
 
 /**
@@ -35,14 +35,14 @@ export function serializeWorldItemProperties(properties: WorldItemProperty[]): s
  * @returns Array de propiedades
  */
 export function deserializeWorldItemProperties(propertiesJson: string | null): WorldItemProperty[] {
-  if (!propertiesJson || propertiesJson === 'empty_array') return [];
+	if (!propertiesJson || propertiesJson === 'empty_array') return [];
 
-  try {
-    return JSON.parse(propertiesJson) as WorldItemProperty[];
-  } catch (error) {
-    console.error('Error al deserializar las propiedades del objeto:', error);
-    return [];
-  }
+	try {
+		return JSON.parse(propertiesJson) as WorldItemProperty[];
+	} catch (error) {
+		console.error('Error al deserializar las propiedades del objeto:', error);
+		return [];
+	}
 }
 
 /**
@@ -51,12 +51,12 @@ export function deserializeWorldItemProperties(propertiesJson: string | null): W
  * @returns JSON string de requisitos
  */
 export function serializeWorldItemRequirements(requirements: Record<string, WorldItemRequirement>): string {
-  try {
-    return JSON.stringify(requirements);
-  } catch (error) {
-    console.error('Error al serializar los requisitos del objeto:', error);
-    return JSON.stringify({});
-  }
+	try {
+		return JSON.stringify(requirements);
+	} catch (error) {
+		console.error('Error al serializar los requisitos del objeto:', error);
+		return JSON.stringify({});
+	}
 }
 
 /**
@@ -64,15 +64,17 @@ export function serializeWorldItemRequirements(requirements: Record<string, Worl
  * @param requirementsJson JSON string de requisitos
  * @returns Objeto de requisitos
  */
-export function deserializeWorldItemRequirements(requirementsJson: string | null): Record<string, WorldItemRequirement> {
-  if (!requirementsJson || requirementsJson === '{}') return {};
+export function deserializeWorldItemRequirements(
+	requirementsJson: string | null
+): Record<string, WorldItemRequirement> {
+	if (!requirementsJson || requirementsJson === '{}') return {};
 
-  try {
-    return JSON.parse(requirementsJson) as Record<string, WorldItemRequirement>;
-  } catch (error) {
-    console.error('Error al deserializar los requisitos del objeto:', error);
-    return {};
-  }
+	try {
+		return JSON.parse(requirementsJson) as Record<string, WorldItemRequirement>;
+	} catch (error) {
+		console.error('Error al deserializar los requisitos del objeto:', error);
+		return {};
+	}
 }
 
 /**
@@ -81,12 +83,12 @@ export function deserializeWorldItemRequirements(requirementsJson: string | null
  * @returns JSON string de estadísticas
  */
 export function serializeWorldItemStats(stats: WorldItemStats): string {
-  try {
-    return JSON.stringify(stats);
-  } catch (error) {
-    console.error('Error al serializar las estadísticas del objeto:', error);
-    return JSON.stringify({});
-  }
+	try {
+		return JSON.stringify(stats);
+	} catch (error) {
+		console.error('Error al serializar las estadísticas del objeto:', error);
+		return JSON.stringify({});
+	}
 }
 
 /**
@@ -95,14 +97,14 @@ export function serializeWorldItemStats(stats: WorldItemStats): string {
  * @returns Objeto de estadísticas
  */
 export function deserializeWorldItemStats(statsJson: string | null): WorldItemStats {
-  if (!statsJson || statsJson === '{}') return {};
+	if (!statsJson || statsJson === '{}') return {};
 
-  try {
-    return JSON.parse(statsJson) as WorldItemStats;
-  } catch (error) {
-    console.error('Error al deserializar las estadísticas del objeto:', error);
-    return {};
-  }
+	try {
+		return JSON.parse(statsJson) as WorldItemStats;
+	} catch (error) {
+		console.error('Error al deserializar las estadísticas del objeto:', error);
+		return {};
+	}
 }
 
 /**
@@ -111,12 +113,12 @@ export function deserializeWorldItemStats(statsJson: string | null): WorldItemSt
  * @returns JSON string de filtros
  */
 export function serializeWorldItemFilters(filters: WorldItemFilters): string {
-  try {
-    return JSON.stringify(filters);
-  } catch (error) {
-    console.error('Error al serializar los filtros de objeto del mundo:', error);
-    return JSON.stringify({});
-  }
+	try {
+		return JSON.stringify(filters);
+	} catch (error) {
+		console.error('Error al serializar los filtros de objeto del mundo:', error);
+		return JSON.stringify({});
+	}
 }
 
 /**
@@ -125,14 +127,14 @@ export function serializeWorldItemFilters(filters: WorldItemFilters): string {
  * @returns Objeto de filtros
  */
 export function deserializeWorldItemFilters(filtersJson: string | null): WorldItemFilters {
-  if (!filtersJson || filtersJson === 'empty_array' || filtersJson === '{}') return {};
+	if (!filtersJson || filtersJson === 'empty_array' || filtersJson === '{}') return {};
 
-  try {
-    return JSON.parse(filtersJson) as WorldItemFilters;
-  } catch (error) {
-    console.error('Error al deserializar los filtros de objeto del mundo:', error);
-    return {};
-  }
+	try {
+		return JSON.parse(filtersJson) as WorldItemFilters;
+	} catch (error) {
+		console.error('Error al deserializar los filtros de objeto del mundo:', error);
+		return {};
+	}
 }
 
 /**
@@ -141,22 +143,22 @@ export function deserializeWorldItemFilters(filtersJson: string | null): WorldIt
  * @returns Objeto del mundo con campos parseados
  */
 export function parseJsonFields(worldItem: WorldItemBase): WorldItem {
-  // Campos básicos
-  const parsedItem: WorldItem = {
-    ...worldItem,
-    propertiesArray: deserializeWorldItemProperties(worldItem.properties),
-    requirementsObject: deserializeWorldItemRequirements(worldItem.requirements),
-    statsObject: deserializeWorldItemStats(worldItem.stats),
-    filtersObject: deserializeWorldItemFilters(worldItem.filters)
-  };
+	// Campos básicos
+	const parsedItem: WorldItem = {
+		...worldItem,
+		propertiesArray: deserializeWorldItemProperties(worldItem.properties),
+		requirementsObject: deserializeWorldItemRequirements(worldItem.requirements),
+		statsObject: deserializeWorldItemStats(worldItem.stats),
+		filtersObject: deserializeWorldItemFilters(worldItem.filters),
+	};
 
-  // Campos derivados
-  parsedItem.displayRarity = getRarityDisplay(worldItem.rarity);
-  parsedItem.displayValue = getValueDisplay(parsedItem.statsObject);
-  parsedItem.displayLevel = getLevelDisplay(parsedItem.statsObject);
-  parsedItem.rarityClass = getRarityClass(worldItem.rarity);
+	// Campos derivados
+	parsedItem.displayRarity = getRarityDisplay(worldItem.rarity);
+	parsedItem.displayValue = getValueDisplay(parsedItem.statsObject);
+	parsedItem.displayLevel = getLevelDisplay(parsedItem.statsObject);
+	parsedItem.rarityClass = getRarityClass(worldItem.rarity);
 
-  return parsedItem;
+	return parsedItem;
 }
 
 /**
@@ -165,18 +167,18 @@ export function parseJsonFields(worldItem: WorldItemBase): WorldItem {
  * @returns Visualización formateada
  */
 function getRarityDisplay(rarity: string): string {
-  const rarityMap: Record<string, string> = {
-    [RarityLevel.COMMON]: 'Común',
-    [RarityLevel.UNCOMMON]: 'Poco común',
-    [RarityLevel.RARE]: 'Raro',
-    [RarityLevel.EPIC]: 'Épico',
-    [RarityLevel.LEGENDARY]: 'Legendario',
-    [RarityLevel.MYTHIC]: 'Mítico',
-    [RarityLevel.UNIQUE]: 'Único',
-    [RarityLevel.ARTIFACT]: 'Artefacto'
-  };
+	const rarityMap: Record<string, string> = {
+		[RarityLevel.COMMON]: 'Común',
+		[RarityLevel.UNCOMMON]: 'Poco común',
+		[RarityLevel.RARE]: 'Raro',
+		[RarityLevel.EPIC]: 'Épico',
+		[RarityLevel.LEGENDARY]: 'Legendario',
+		[RarityLevel.MYTHIC]: 'Mítico',
+		[RarityLevel.UNIQUE]: 'Único',
+		[RarityLevel.ARTIFACT]: 'Artefacto',
+	};
 
-  return rarityMap[rarity] || rarity;
+	return rarityMap[rarity] || rarity;
 }
 
 /**
@@ -185,8 +187,8 @@ function getRarityDisplay(rarity: string): string {
  * @returns Visualización formateada
  */
 function getValueDisplay(stats: WorldItemStats): string {
-  if (!stats.value && stats.value !== 0) return 'N/A';
-  return `${stats.value} monedas`;
+	if (!stats.value && stats.value !== 0) return 'N/A';
+	return `${stats.value} monedas`;
 }
 
 /**
@@ -195,8 +197,8 @@ function getValueDisplay(stats: WorldItemStats): string {
  * @returns Visualización formateada
  */
 function getLevelDisplay(stats: WorldItemStats): string {
-  if (!stats.level && stats.level !== 0) return 'N/A';
-  return `Nivel ${stats.level}`;
+	if (!stats.level && stats.level !== 0) return 'N/A';
+	return `Nivel ${stats.level}`;
 }
 
 /**
@@ -205,18 +207,18 @@ function getLevelDisplay(stats: WorldItemStats): string {
  * @returns Clase CSS
  */
 function getRarityClass(rarity: string): string {
-  const rarityClassMap: Record<string, string> = {
-    [RarityLevel.COMMON]: 'rarity-common',
-    [RarityLevel.UNCOMMON]: 'rarity-uncommon',
-    [RarityLevel.RARE]: 'rarity-rare',
-    [RarityLevel.EPIC]: 'rarity-epic',
-    [RarityLevel.LEGENDARY]: 'rarity-legendary',
-    [RarityLevel.MYTHIC]: 'rarity-mythic',
-    [RarityLevel.UNIQUE]: 'rarity-unique',
-    [RarityLevel.ARTIFACT]: 'rarity-artifact'
-  };
+	const rarityClassMap: Record<string, string> = {
+		[RarityLevel.COMMON]: 'rarity-common',
+		[RarityLevel.UNCOMMON]: 'rarity-uncommon',
+		[RarityLevel.RARE]: 'rarity-rare',
+		[RarityLevel.EPIC]: 'rarity-epic',
+		[RarityLevel.LEGENDARY]: 'rarity-legendary',
+		[RarityLevel.MYTHIC]: 'rarity-mythic',
+		[RarityLevel.UNIQUE]: 'rarity-unique',
+		[RarityLevel.ARTIFACT]: 'rarity-artifact',
+	};
 
-  return rarityClassMap[rarity] || 'rarity-common';
+	return rarityClassMap[rarity] || 'rarity-common';
 }
 
 /**
@@ -225,8 +227,8 @@ function getRarityClass(rarity: string): string {
  * @returns Configuración visual parseada
  */
 export function parseVisualConfig(config: WorldItemVisualConfig): ParsedWorldItemVisualConfig {
-  return {
-    ...config,
-    filtersObject: deserializeWorldItemFilters(config.filters)
-  };
+	return {
+		...config,
+		filtersObject: deserializeWorldItemFilters(config.filters),
+	};
 }

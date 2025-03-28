@@ -9,7 +9,7 @@ const HoverLayer = {
 	id: 'hover-layer',
 	name: 'Hover Layer',
 	type: 'interactive',
-	Component: ({ enabled, config, onInteraction }) => (
+	Component: ({ enabled, config, onInteraction }) =>
 		enabled ? (
 			<div
 				data-testid="hover-layer"
@@ -18,25 +18,19 @@ const HoverLayer = {
 			>
 				{config?.text || 'Hover Me'}
 			</div>
-		) : null
-	)
+		) : null,
 };
 
 const ClickLayer = {
 	id: 'click-layer',
 	name: 'Click Layer',
 	type: 'interactive',
-	Component: ({ enabled, config, onInteraction }) => (
+	Component: ({ enabled, config, onInteraction }) =>
 		enabled ? (
-			<button
-				type="button"
-				data-testid="click-layer"
-				onClick={() => onInteraction?.('click', { x: 0, y: 0 })}
-			>
+			<button type="button" data-testid="click-layer" onClick={() => onInteraction?.('click', { x: 0, y: 0 })}>
 				{config?.text || 'Click Me'}
 			</button>
-		) : null
-	)
+		) : null,
 };
 
 const DragLayer = {
@@ -48,16 +42,11 @@ const DragLayer = {
 		const handleDragEnd = () => onInteraction?.('drag:end');
 
 		return enabled ? (
-			<div
-				data-testid="drag-layer"
-				draggable
-				onDragStart={handleDragStart}
-				onDragEnd={handleDragEnd}
-			>
+			<div data-testid="drag-layer" draggable onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
 				{config?.text || 'Drag Me'}
 			</div>
 		) : null;
-	}
+	},
 };
 
 // 🧪 Componente de prueba que usa el hook useLayerInteraction
@@ -72,21 +61,19 @@ function TestInteractionComponent() {
 				layers={{
 					'hover-layer': {
 						enabled: true,
-						onInteraction: registerInteraction
+						onInteraction: registerInteraction,
 					},
 					'click-layer': {
 						enabled: true,
-						onInteraction: registerInteraction
+						onInteraction: registerInteraction,
 					},
 					'drag-layer': {
 						enabled: true,
-						onInteraction: registerInteraction
-					}
+						onInteraction: registerInteraction,
+					},
 				}}
 			/>
-			<pre data-testid="last-interaction">
-				{JSON.stringify(lastInteraction)}
-			</pre>
+			<pre data-testid="last-interaction">{JSON.stringify(lastInteraction)}</pre>
 		</div>
 	);
 }
@@ -231,20 +218,15 @@ describe('Interactive Layers', () => {
 			const InvalidLayer = {
 				...ClickLayer,
 				id: 'invalid-layer',
-				Component: ({ enabled, onInteraction }) => (
+				Component: ({ enabled, onInteraction }) =>
 					enabled ? (
-						<button
-							type="button"
-							data-testid="invalid-layer"
-							onClick={() => onInteraction?.('invalid:type')}
-						>
+						<button type="button" data-testid="invalid-layer" onClick={() => onInteraction?.('invalid:type')}>
 							Invalid
 						</button>
-					) : null
-				)
+					) : null,
 			};
 
-			const consoleError = jest.spyOn(console, 'error').mockImplementation(() => { });
+			const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 			render(
 				<EntityCardProvider>
@@ -283,7 +265,7 @@ describe('Interactive Layers', () => {
 						x,
 						y,
 						deltaX: x - startX,
-						deltaY: y - startY
+						deltaY: y - startY,
 					});
 				};
 
@@ -301,7 +283,7 @@ describe('Interactive Layers', () => {
 						Gesture Area
 					</div>
 				) : null;
-			}
+			},
 		};
 
 		it('should handle complex gesture interactions', () => {
@@ -316,12 +298,12 @@ describe('Interactive Layers', () => {
 
 			// Simular inicio del gesto
 			fireEvent.touchStart(gestureElement, {
-				touches: [{ clientX: 0, clientY: 0 }]
+				touches: [{ clientX: 0, clientY: 0 }],
 			});
 
 			// Simular movimiento
 			fireEvent.touchMove(gestureElement, {
-				touches: [{ clientX: 100, clientY: 50 }]
+				touches: [{ clientX: 100, clientY: 50 }],
 			});
 
 			// Simular fin del gesto

@@ -83,11 +83,16 @@ export function ImageLayer({
 	// 🎨 Obtener clase de borde redondeado
 	const getBorderRadiusClass = () => {
 		switch (config.borderRadius) {
-			case 'sm': return 'rounded-sm';
-			case 'md': return 'rounded-md';
-			case 'lg': return 'rounded-lg';
-			case 'full': return 'rounded-full';
-			default: return '';
+			case 'sm':
+				return 'rounded-sm';
+			case 'md':
+				return 'rounded-md';
+			case 'lg':
+				return 'rounded-lg';
+			case 'full':
+				return 'rounded-full';
+			default:
+				return '';
 		}
 	};
 
@@ -113,11 +118,16 @@ export function ImageLayer({
 	// 🎨 Obtener clase de ajuste de imagen
 	const getObjectFitClass = () => {
 		switch (config.objectFit) {
-			case 'cover': return 'object-cover';
-			case 'contain': return 'object-contain';
-			case 'fill': return 'object-fill';
-			case 'none': return 'object-none';
-			default: return 'object-cover';
+			case 'cover':
+				return 'object-cover';
+			case 'contain':
+				return 'object-contain';
+			case 'fill':
+				return 'object-fill';
+			case 'none':
+				return 'object-none';
+			default:
+				return 'object-cover';
 		}
 	};
 

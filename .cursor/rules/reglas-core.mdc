@@ -4,7 +4,7 @@ globs:
 alwaysApply: true
 ---
 <CORE_PRINCIPLES>
-- Siempre, pero SIEMPRE prioriza usar tus herramientas internas para buscar, manipular, borrar archivos antes que intentar con linea de comandos de terminal. funcionan mejor.
+- SIEMPRE prioriza usar tus herramientas internas para buscar, manipular, borrar archivos antes que intentar con linea de comandos de terminal. funcionan mejor!!
 - Always answer and comment in spanish.
 - Always analyze the code/task flow carefully. Search the codebase if unsure.
 - Anticipate needs, suggest solutions, and consider unconventional ideas.
@@ -31,6 +31,8 @@ alwaysApply: true
 - Before starting your task, create a plan of action in @progress.md to keep track of your work.
 - When adjusting code, show only relevant changes—brief and clear.
 - Don't create directories, just add the file ( that will work )
+
+- Always check your current task on CURRENT-TASK.md , check for guidelines and complete if needed.
 
 # Important!! 
 - Never forget the current stack stack and follow up the rules // check @package.json 

@@ -24,12 +24,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
 					className="h-8 w-[150px] lg:w-[250px]"
 				/>
 				{isFiltered && (
-					<Button
-						type="button"
-						variant="ghost"
-						onClick={() => table.resetColumnFilters()}
-						className="h-8 px-2 lg:px-3"
-					>
+					<Button type="button" variant="ghost" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
 						Limpiar
 						<X className="ml-2 h-4 w-4" />
 					</Button>

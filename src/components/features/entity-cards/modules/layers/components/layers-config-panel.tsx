@@ -20,7 +20,7 @@ const DEFAULT_LAYER_SYSTEM: LayerSystemConfig = {
 	explodeView: false,
 	explodeDistance: 10,
 	layerBlending: 'normal',
-	layerSpacing: 2
+	layerSpacing: 2,
 };
 
 interface LayersConfigPanelProps {
@@ -33,12 +33,7 @@ interface LayersConfigPanelProps {
 /**
  * Panel de configuración general del sistema de capas
  */
-export function LayersConfigPanel({
-	cardOptions,
-	onCardOptionsChange,
-	entityType,
-	entityId,
-}: LayersConfigPanelProps) {
+export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType, entityId }: LayersConfigPanelProps) {
 	// Obtener la configuración del sistema de capas o usar valores predeterminados
 	const getConfigWithDefaults = (): LayerSystemConfig => {
 		const config = cardOptions.layerSystem || {};
@@ -47,7 +42,7 @@ export function LayersConfigPanel({
 			explodeView: config.explodeView ?? DEFAULT_LAYER_SYSTEM.explodeView,
 			explodeDistance: config.explodeDistance ?? DEFAULT_LAYER_SYSTEM.explodeDistance,
 			layerBlending: config.layerBlending || DEFAULT_LAYER_SYSTEM.layerBlending,
-			layerSpacing: config.layerSpacing ?? DEFAULT_LAYER_SYSTEM.layerSpacing
+			layerSpacing: config.layerSpacing ?? DEFAULT_LAYER_SYSTEM.layerSpacing,
 		};
 	};
 

@@ -5,15 +5,8 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
-import type {
-	PlaceBase,
-	CreatePlaceData,
-	UpdatePlaceData
-} from '@/types/entities/place';
-import {
-	mapCreatePlaceDataToPrisma,
-	mapUpdatePlaceDataToPrisma
-} from '@/transformers/place';
+import type { PlaceBase, CreatePlaceData, UpdatePlaceData } from '@/types/entities/place';
+import { mapCreatePlaceDataToPrisma, mapUpdatePlaceDataToPrisma } from '@/transformers/place';
 
 // Configuración y utilidades
 const placeLogger = serverLogger.withContext('PlaceActions');
@@ -27,11 +20,7 @@ enum PlaceErrorCode {
 }
 
 // Función creadora de errores (enfoque funcional)
-const createPlaceError = (
-	message: string,
-	code: PlaceErrorCode = PlaceErrorCode.OPERATION_FAILED,
-	cause?: unknown
-) => {
+const createPlaceError = (message: string, code: PlaceErrorCode = PlaceErrorCode.OPERATION_FAILED, cause?: unknown) => {
 	const error = new Error(message);
 	error.name = 'PlaceError';
 	Object.assign(error, { code, cause });

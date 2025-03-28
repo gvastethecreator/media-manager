@@ -9,16 +9,16 @@ const serializersLogger = serverLogger.withContext('ConceptSerializers');
  * @returns Array de strings con los tags
  */
 export function serializeTags(tagsString?: string | null): string[] {
-  if (!tagsString) return [];
+	if (!tagsString) return [];
 
-  try {
-    if (tagsString === 'empty_array') return [];
-    const parsed = JSON.parse(tagsString);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    serializersLogger.error('❌ Error al serializar tags:', error);
-    return [];
-  }
+	try {
+		if (tagsString === 'empty_array') return [];
+		const parsed = JSON.parse(tagsString);
+		return Array.isArray(parsed) ? parsed : [];
+	} catch (error) {
+		serializersLogger.error('❌ Error al serializar tags:', error);
+		return [];
+	}
 }
 
 /**
@@ -27,12 +27,12 @@ export function serializeTags(tagsString?: string | null): string[] {
  * @returns String JSON con los tags
  */
 export function deserializeTags(tags: string[]): string {
-  try {
-    return tags && tags.length > 0 ? JSON.stringify(tags) : 'empty_array';
-  } catch (error) {
-    serializersLogger.error('❌ Error al deserializar tags:', error);
-    return 'empty_array';
-  }
+	try {
+		return tags && tags.length > 0 ? JSON.stringify(tags) : 'empty_array';
+	} catch (error) {
+		serializersLogger.error('❌ Error al deserializar tags:', error);
+		return 'empty_array';
+	}
 }
 
 /**
@@ -41,12 +41,12 @@ export function deserializeTags(tags: string[]): string {
  * @returns Concepto extendido
  */
 export function toExtendedConcept(concept: ConceptBase): ConceptExtended {
-  return {
-    ...concept,
-    parsedTags: serializeTags(concept.tags),
-    previewContent: concept.content ? getPreviewContent(concept.content) : undefined,
-    lastUpdated: concept.updatedAt instanceof Date ? concept.updatedAt : new Date(concept.updatedAt),
-  };
+	return {
+		...concept,
+		parsedTags: serializeTags(concept.tags),
+		previewContent: concept.content ? getPreviewContent(concept.content) : undefined,
+		lastUpdated: concept.updatedAt instanceof Date ? concept.updatedAt : new Date(concept.updatedAt),
+	};
 }
 
 /**
@@ -56,8 +56,8 @@ export function toExtendedConcept(concept: ConceptBase): ConceptExtended {
  * @returns Preview del contenido
  */
 function getPreviewContent(content: string, maxLength = 150): string {
-  if (!content) return '';
-  if (content.length <= maxLength) return content;
+	if (!content) return '';
+	if (content.length <= maxLength) return content;
 
-  return `${content.substring(0, maxLength)}...`;
+	return `${content.substring(0, maxLength)}...`;
 }

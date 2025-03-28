@@ -33,7 +33,7 @@ interface CardControlContextType {
 // Crear contexto con valores por defecto
 const CardControlContext = createContext<CardControlContextType>({
 	state: defaultControlState,
-	setState: () => { },
+	setState: () => {},
 });
 
 // Hook para usar el contexto
@@ -120,9 +120,5 @@ export function CardControlProvider({ children }: { children: React.ReactNode })
 		setState,
 	};
 
-	return (
-		<CardControlContext.Provider value={contextValue}>
-			{children}
-		</CardControlContext.Provider>
-	);
+	return <CardControlContext.Provider value={contextValue}>{children}</CardControlContext.Provider>;
 }

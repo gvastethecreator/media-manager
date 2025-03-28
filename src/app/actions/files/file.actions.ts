@@ -3,23 +3,23 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import {
-    determineFileType,
-    determineMimeType,
-    generateFileId,
-    mapStatsToFileInfo,
-    serializeDirectoryContents,
-    serializeFileOperationResult
+	determineFileType,
+	determineMimeType,
+	generateFileId,
+	mapStatsToFileInfo,
+	serializeDirectoryContents,
+	serializeFileOperationResult,
 } from '@/transformers/file';
 import {
-    type DirectoryReadResult,
-    type FileBase,
-    type FileCopyMoveResult,
-    FileErrorCode,
-    FileEventType,
-    type FileInfo,
-    type FileOperationOptions,
-    type FileOperationResult,
-    FileType
+	type DirectoryReadResult,
+	type FileBase,
+	type FileCopyMoveResult,
+	FileErrorCode,
+	FileEventType,
+	type FileInfo,
+	type FileOperationOptions,
+	type FileOperationResult,
+	FileType,
 } from '@/types/entities/file';
 import fs, { stat } from 'fs/promises';
 import { revalidatePath } from 'next/cache';
@@ -38,11 +38,7 @@ const revalidateAllPaths = async () => {
 };
 
 // Función creadora de errores (enfoque funcional)
-const createFileError = (
-		message: string,
-	code: FileErrorCode = FileErrorCode.OPERATION_FAILED,
-	cause?: unknown
-) => {
+const createFileError = (message: string, code: FileErrorCode = FileErrorCode.OPERATION_FAILED, cause?: unknown) => {
 	const error = new Error(message);
 	error.name = 'FileError';
 	Object.assign(error, { code, cause });
@@ -90,11 +86,7 @@ export async function getFileInfo(filePath: string): Promise<FileInfo> {
 			throw error;
 		}
 		fileLogger.error('❌ Error al obtener información del archivo:', error);
-		throw createFileError(
-			'No se pudo obtener información del archivo',
-			FileErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createFileError('No se pudo obtener información del archivo', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -292,15 +284,14 @@ export async function createDirectory(dirPath: string, options?: FileOperationOp
 			}
 		} catch (error) {
 			// Si el error es que no existe, continuamos con la creación
-			if (!(error instanceof Error && error.name === 'FileError') &&
-				!('code' in error && error.code === 'ENOENT')) {
+			if (!(error instanceof Error && error.name === 'FileError') && !('code' in error && error.code === 'ENOENT')) {
 				throw error;
 			}
 		}
 
 		// Crear directorio
 		await fs.mkdir(normalizedPath, {
-			recursive: options?.recursive ?? false
+			recursive: options?.recursive ?? false,
 		});
 
 		// Emitir evento
@@ -328,7 +319,11 @@ export async function createDirectory(dirPath: string, options?: FileOperationOp
  * @param newPath Nueva ruta
  * @param options Opciones adicionales
  */
-export async function renameFile(oldPath: string, newPath: string, options?: FileOperationOptions): Promise<FileOperationResult> {
+export async function renameFile(
+	oldPath: string,
+	newPath: string,
+	options?: FileOperationOptions
+): Promise<FileOperationResult> {
 	try {
 		fileLogger.info('✏️ Renombrando:', { oldPath, newPath });
 
@@ -390,7 +385,11 @@ export async function renameFile(oldPath: string, newPath: string, options?: Fil
  * @param destPath Ruta de destino
  * @param options Opciones adicionales
  */
-export async function copyFile(sourcePath: string, destPath: string, options?: FileOperationOptions): Promise<FileCopyMoveResult> {
+export async function copyFile(
+	sourcePath: string,
+	destPath: string,
+	options?: FileOperationOptions
+): Promise<FileCopyMoveResult> {
 	try {
 		fileLogger.info('📋 Copiando archivo:', { sourcePath, destPath });
 
@@ -447,7 +446,7 @@ export async function copyFile(sourcePath: string, destPath: string, options?: F
 			data: {
 				sourcePath: normalizedSourcePath,
 				destinationPath: normalizedDestPath,
-				overwritten
+				overwritten,
 			},
 		});
 
@@ -459,7 +458,7 @@ export async function copyFile(sourcePath: string, destPath: string, options?: F
 			sourcePath: normalizedSourcePath,
 			destinationPath: normalizedDestPath,
 			overwritten,
-			timestamp: new Date()
+			timestamp: new Date(),
 		};
 	} catch (error) {
 		if (error instanceof Error && error.name === 'FileError') {
@@ -476,7 +475,11 @@ export async function copyFile(sourcePath: string, destPath: string, options?: F
  * @param destPath Ruta de destino
  * @param options Opciones adicionales
  */
-export async function moveFile(sourcePath: string, destPath: string, options?: FileOperationOptions): Promise<FileCopyMoveResult> {
+export async function moveFile(
+	sourcePath: string,
+	destPath: string,
+	options?: FileOperationOptions
+): Promise<FileCopyMoveResult> {
 	try {
 		fileLogger.info('🚚 Moviendo archivo o directorio:', { sourcePath, destPath });
 
@@ -527,7 +530,7 @@ export async function moveFile(sourcePath: string, destPath: string, options?: F
 			data: {
 				sourcePath: normalizedSourcePath,
 				destinationPath: normalizedDestPath,
-				overwritten
+				overwritten,
 			},
 		});
 
@@ -539,7 +542,7 @@ export async function moveFile(sourcePath: string, destPath: string, options?: F
 			sourcePath: normalizedSourcePath,
 			destinationPath: normalizedDestPath,
 			overwritten,
-			timestamp: new Date()
+			timestamp: new Date(),
 		};
 	} catch (error) {
 		if (error instanceof Error && error.name === 'FileError') {

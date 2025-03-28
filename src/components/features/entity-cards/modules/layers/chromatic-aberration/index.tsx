@@ -25,7 +25,7 @@ const defaultConfig: ChromaticAberrationConfig = {
 	visibleOnHover: true,
 	quality: 'medium',
 	mode: 'simple',
-	layerIndex: 4
+	layerIndex: 4,
 };
 
 // Función auxiliar para transformar los layers en modo explotado
@@ -68,7 +68,7 @@ export const chromaticAberrationLayerImplementation: LayerImplementation = {
 
 		const effectConfig = {
 			...defaultConfig,
-			...config
+			...config,
 		} as ChromaticAberrationConfig;
 
 		// Pasar la configuración al componente de efecto
@@ -99,7 +99,7 @@ export const chromaticAberrationLayerImplementation: LayerImplementation = {
 				onConfigUpdate={(newConfig) => onChange(newConfig as unknown as Record<string, unknown>)}
 			/>
 		);
-	}
+	},
 };
 
 /**

@@ -46,11 +46,7 @@ export function initializeShader(gl: WebGLRenderingContext, type: string): WebGL
 /**
  * Actualiza los uniformes del shader
  */
-export function updateShaderUniforms(
-	gl: WebGLRenderingContext,
-	program: WebGLProgram,
-	config: ShaderConfig
-): void {
+export function updateShaderUniforms(gl: WebGLRenderingContext, program: WebGLProgram, config: ShaderConfig): void {
 	gl.useProgram(program);
 
 	// Uniforms comunes
@@ -227,11 +223,7 @@ function getShaderSources(type: string): { vertexShader: string; fragmentShader:
 /**
  * Compila un shader
  */
-function compileShader(
-	gl: WebGLRenderingContext,
-	type: number,
-	source: string
-): WebGLShader | null {
+function compileShader(gl: WebGLRenderingContext, type: number, source: string): WebGLShader | null {
 	const shader = gl.createShader(type);
 	if (!shader) {
 		console.error('No se pudo crear el shader');
@@ -242,12 +234,7 @@ function compileShader(
 	gl.compileShader(shader);
 
 	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-		console.error(
-			'Error al compilar el shader:',
-			gl.getShaderInfoLog(shader),
-			'\nCódigo fuente:',
-			source
-		);
+		console.error('Error al compilar el shader:', gl.getShaderInfoLog(shader), '\nCódigo fuente:', source);
 		gl.deleteShader(shader);
 		return null;
 	}

@@ -4,10 +4,88 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProfileContext } from '@/lib/contexts';
-import { Bug, ChevronLeft, ChevronRight, Home, IdCard, Moon, Settings2, Sun } from 'lucide-react';
+import { Briefcase, Bug, ChevronLeft, ChevronRight, CircleDot, Citrus, Coffee, Home, IdCard, Leaf, Moon, Palette, Settings2, Sun, Sunset, TreePine, Waves } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from 'next-themes';
 import { memo, useCallback, useMemo } from 'react';
+
+// Constante con los temas disponibles
+const THEMES = ['light', 'dark', 'cafe', 'violeta', 'madera', 'nocturno', 'verde', 'atardecer', 'corporativo', 'carbon', 'teal', 'citrico'];
+
+// Función para obtener el siguiente tema
+function getNextTheme(currentTheme: string | undefined): string {
+	if (!currentTheme || !THEMES.includes(currentTheme)) {
+		return 'light';
+	}
+
+	const currentIndex = THEMES.indexOf(currentTheme);
+	const nextIndex = (currentIndex + 1) % THEMES.length;
+	return THEMES[nextIndex];
+}
+
+// Función para obtener el icono del tema
+function getThemeIcon(theme: string | undefined) {
+	switch (theme) {
+		case 'light':
+			return <Sun className="h-3.5 w-3.5" />;
+		case 'dark':
+			return <Moon className="h-3.5 w-3.5" />;
+		case 'cafe':
+			return <Coffee className="h-3.5 w-3.5" />;
+		case 'violeta':
+			return <Palette className="h-3.5 w-3.5" />;
+		case 'madera':
+			return <TreePine className="h-3.5 w-3.5" />;
+		case 'nocturno':
+			return <Moon className="h-3.5 w-3.5 text-blue-400" />;
+		case 'verde':
+			return <Leaf className="h-3.5 w-3.5" />;
+		case 'atardecer':
+			return <Sunset className="h-3.5 w-3.5" />;
+		case 'corporativo':
+			return <Briefcase className="h-3.5 w-3.5" />;
+		case 'carbon':
+			return <CircleDot className="h-3.5 w-3.5" />;
+		case 'teal':
+			return <Waves className="h-3.5 w-3.5" />;
+		case 'citrico':
+			return <Citrus className="h-3.5 w-3.5" />;
+		default:
+			return <Sun className="h-3.5 w-3.5" />;
+	}
+}
+
+// Función para obtener el nombre del tema en español
+function getThemeName(theme: string | undefined): string {
+	switch (theme) {
+		case 'light':
+			return 'Claro';
+		case 'dark':
+			return 'Oscuro';
+		case 'cafe':
+			return 'Café';
+		case 'violeta':
+			return 'Violeta';
+		case 'madera':
+			return 'Madera';
+		case 'nocturno':
+			return 'Nocturno';
+		case 'verde':
+			return 'Verde';
+		case 'atardecer':
+			return 'Atardecer';
+		case 'corporativo':
+			return 'Corporativo';
+		case 'carbon':
+			return 'Carbón';
+		case 'teal':
+			return 'Teal';
+		case 'citrico':
+			return 'Cítrico';
+		default:
+			return 'Claro';
+	}
+}
 
 interface NavPanelHeaderProps {
 	totalImages: number;
@@ -91,20 +169,31 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 	const { profiles = [], activeProfile } = settings;
 
 	const activeProfileData = useMemo(() => {
-		return profiles.find((p) => p.id === activeProfile) ||
-		profiles[0] || {
-			name: 'Default',
-			emoji: '👤',
-			color: '#3b82f6',
-		};
+		return (
+			profiles.find((p) => p.id === activeProfile) ||
+			profiles[0] || {
+				name: 'Default',
+				emoji: '👤',
+				color: '#3b82f6',
+			}
+		);
 	}, [profiles, activeProfile]);
 
 	const { theme, setTheme } = useTheme();
 	const { setCurrentView } = useNavigationStore();
 
-	const handleThemeToggle = useCallback(() => {
-		setTheme(theme === 'light' ? 'dark' : 'light');
-	}, [theme, setTheme]);
+	const handleThemeToggle = () => {
+		const nextTheme = getNextTheme(theme);
+		console.log(`Cambiando tema de ${theme} a ${nextTheme}`);
+
+		// Aplicar el tema directamente al HTML para asegurarnos
+		if (typeof document !== 'undefined') {
+			document.documentElement.setAttribute('data-theme', nextTheme);
+		}
+
+		// Actualizar el estado en next-themes
+		setTheme(nextTheme);
+	};
 
 	const handleHomeClick = useCallback(() => {
 		setCurrentView('folders');
@@ -127,7 +216,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 					<div className="flex flex-col gap-2">
 						<MemoizedHeaderButton
 							icon={<ChevronRight className="h-3.5 w-3.5" />}
-							onClick={onToggleCollapse || (() => {})}
+							onClick={onToggleCollapse || (() => { })}
 							tooltipTitle="Expandir Panel"
 							tooltipContent=""
 							tooltipSide="right"
@@ -159,10 +248,10 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 						/>
 
 						<MemoizedHeaderButton
-							icon={theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+							icon={getThemeIcon(theme)}
 							onClick={handleThemeToggle}
-							tooltipTitle="Cambiar Tema"
-							tooltipContent={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
+							tooltipTitle="Tema"
+							tooltipContent={`Actual: ${getThemeName(theme)}`}
 							tooltipSide="right"
 						/>
 
@@ -201,7 +290,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 					<div className="flex items-center gap-1">
 						<MemoizedHeaderButton
 							icon={<ChevronLeft className="h-3.5 w-3.5" />}
-							onClick={onToggleCollapse || (() => {})}
+							onClick={onToggleCollapse || (() => { })}
 							tooltipTitle="Colapsar Panel"
 							tooltipContent=""
 						/>
@@ -229,10 +318,10 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 						/>
 
 						<MemoizedHeaderButton
-							icon={theme === 'light' ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+							icon={getThemeIcon(theme)}
 							onClick={handleThemeToggle}
-							tooltipTitle="Cambiar Tema"
-							tooltipContent={`Cambiar a modo ${theme === 'light' ? 'oscuro' : 'claro'}`}
+							tooltipTitle="Tema"
+							tooltipContent={`Actual: ${getThemeName(theme)}`}
 						/>
 
 						<MemoizedHeaderButton

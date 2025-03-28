@@ -1,4 +1,5 @@
 import { type VariantProps, cva } from 'class-variance-authority';
+import { AlertCircle } from 'lucide-react';
 import type * as React from 'react';
 
 import { cn } from '@/lib/utils';
@@ -46,4 +47,5 @@ function AlertDescription({ className, ...props }: React.ComponentProps<'div'>) 
 	);
 }
 
-export { Alert, AlertTitle, AlertDescription };
+export { Alert, AlertCircle, AlertDescription, AlertTitle };
+

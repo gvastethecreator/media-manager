@@ -18,14 +18,7 @@ export interface CardHeaderProps {
 	rightContent?: React.ReactNode;
 }
 
-export function CardHeader({
-	title,
-	subtitle,
-	entityType,
-	showIcon = true,
-	className,
-	rightContent,
-}: CardHeaderProps) {
+export function CardHeader({ title, subtitle, entityType, showIcon = true, className, rightContent }: CardHeaderProps) {
 	return (
 		<div className={cn('card-header px-3 py-2 border-b', className)}>
 			<div className="flex items-center justify-between">
@@ -85,9 +78,7 @@ export function CardFooter({
 					<div className="text-muted-foreground">
 						{leftContent}
 						{!leftContent && showDates && createdAt && (
-							<span title={`Creado: ${formatDate(createdAt)}`}>
-								{formatDate(createdAt)}
-							</span>
+							<span title={`Creado: ${formatDate(createdAt)}`}>{formatDate(createdAt)}</span>
 						)}
 					</div>
 					<div className="text-muted-foreground">
@@ -158,11 +149,7 @@ export function CardImageSection({
 			/>
 
 			{/* Contenido de superposición */}
-			{overlayContent && (
-				<div className="absolute inset-0 flex items-center justify-center">
-					{overlayContent}
-				</div>
-			)}
+			{overlayContent && <div className="absolute inset-0 flex items-center justify-center">{overlayContent}</div>}
 		</div>
 	);
 }
@@ -188,10 +175,7 @@ export function CardMetadataSection({ items = [], className }: CardMetadataSecti
 		<div className={cn('card-metadata-section p-2 border-t text-xs', className)}>
 			<ul className="grid grid-cols-2 gap-2">
 				{items.map((item, index) => (
-					<li
-						key={item.id || `${item.label}-${index}`}
-						className="flex items-center gap-1 overflow-hidden"
-					>
+					<li key={item.id || `${item.label}-${index}`} className="flex items-center gap-1 overflow-hidden">
 						{item.icon && <span className="flex-shrink-0">{item.icon}</span>}
 						<span className="font-medium text-muted-foreground">{item.label}:</span>
 						<span className="truncate">{item.value}</span>
@@ -210,11 +194,7 @@ export interface CardDescriptionSectionProps {
 	className?: string;
 }
 
-export function CardDescriptionSection({
-	description,
-	maxLines = 3,
-	className,
-}: CardDescriptionSectionProps) {
+export function CardDescriptionSection({ description, maxLines = 3, className }: CardDescriptionSectionProps) {
 	if (!description) return null;
 
 	// Mapeo de maxLines a clases

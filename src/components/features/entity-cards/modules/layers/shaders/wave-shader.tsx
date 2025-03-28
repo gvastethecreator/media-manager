@@ -52,41 +52,41 @@ const fragmentShader = `
 `;
 
 interface WaveShaderProps {
-    isExploded: boolean;
-    isHovered: boolean;
-    activeLayer: string | null;
-    options?: {
-        visibleOnHover?: boolean;
-        intensity?: number;
-        duration?: number;
-        waveColor?: [number, number, number];
-    };
+	isExploded: boolean;
+	isHovered: boolean;
+	activeLayer: string | null;
+	options?: {
+		visibleOnHover?: boolean;
+		intensity?: number;
+		duration?: number;
+		waveColor?: [number, number, number];
+	};
 }
 
 export function WaveShader(props: WaveShaderProps) {
-    const { intensity = 0.5, waveColor = [0.2, 0.4, 0.8] } = props.options || {};
-    const [time, setTime] = useState(0);
+	const { intensity = 0.5, waveColor = [0.2, 0.4, 0.8] } = props.options || {};
+	const [time, setTime] = useState(0);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setTime((prev) => prev + 0.016); // Aproximadamente 60fps
-        }, 16);
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setTime((prev) => prev + 0.016); // Aproximadamente 60fps
+		}, 16);
 
-        return () => clearInterval(interval);
-    }, []);
+		return () => clearInterval(interval);
+	}, []);
 
-    return (
-        <BaseShader
-            {...props}
-            vertexShader={vertexShader}
-            fragmentShader={fragmentShader}
-            uniforms={{
-                time,
-                intensity,
-                resolution: [window.innerWidth, window.innerHeight],
-                mouse: [0.5, 0.5],
-                waveColor,
-            }}
-        />
-    );
+	return (
+		<BaseShader
+			{...props}
+			vertexShader={vertexShader}
+			fragmentShader={fragmentShader}
+			uniforms={{
+				time,
+				intensity,
+				resolution: [window.innerWidth, window.innerHeight],
+				mouse: [0.5, 0.5],
+				waveColor,
+			}}
+		/>
+	);
 }

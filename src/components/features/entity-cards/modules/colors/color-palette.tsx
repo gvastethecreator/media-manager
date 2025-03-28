@@ -235,18 +235,14 @@ export function ColorPaletteSelector({
 						type="button"
 						className={cn(
 							'flex items-center space-x-2 rounded-md border p-2 text-left text-sm transition-colors',
-							selectedPaletteId === palette.id
-								? 'border-primary bg-primary/5'
-								: 'hover:bg-muted/50'
+							selectedPaletteId === palette.id ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'
 						)}
 						onClick={() => handleSelectPalette(palette)}
 					>
 						<div className="flex flex-1 flex-col">
 							<span className="font-medium">{palette.name}</span>
 							{palette.description && (
-								<span className="text-xs text-muted-foreground line-clamp-1">
-									{palette.description}
-								</span>
+								<span className="text-xs text-muted-foreground line-clamp-1">{palette.description}</span>
 							)}
 						</div>
 						<div className="flex items-center space-x-1">
@@ -258,23 +254,15 @@ export function ColorPaletteSelector({
 								className="h-4 w-4 rounded-full border"
 								style={{ backgroundColor: `rgb(${palette.secondaryColor})` }}
 							/>
-							<div
-								className="h-4 w-4 rounded-full border"
-								style={{ backgroundColor: `rgb(${palette.accentColor})` }}
-							/>
-							{selectedPaletteId === palette.id && (
-								<Check className="h-4 w-4 text-primary ml-1" />
-							)}
+							<div className="h-4 w-4 rounded-full border" style={{ backgroundColor: `rgb(${palette.accentColor})` }} />
+							{selectedPaletteId === palette.id && <Check className="h-4 w-4 text-primary ml-1" />}
 						</div>
 					</button>
 				))}
 			</div>
 
 			{showCustomModal && (
-				<CustomPaletteModal
-					onClose={() => setShowCustomModal(false)}
-					onSave={handleSaveCustomPalette}
-				/>
+				<CustomPaletteModal onClose={() => setShowCustomModal(false)} onSave={handleSaveCustomPalette} />
 			)}
 		</div>
 	);

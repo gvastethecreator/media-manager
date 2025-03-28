@@ -11,7 +11,7 @@ import { useCallback, useState } from 'react';
 interface EntityDetailsPresetSectionProps {
 	entityId: string;
 	entityType: string;
-	displayName: string;  // Nombre para mostrar (ej: "Álbum")
+	displayName: string; // Nombre para mostrar (ej: "Álbum")
 	currentPresetId: string | null;
 	defaultOptions: CardOptions;
 	className?: string;
@@ -35,15 +35,18 @@ export function EntityDetailsPresetSection({
 	const [currentOptions, setCurrentOptions] = useState<CardOptions>(defaultOptions);
 
 	// Manejar cambio de preset
-	const handlePresetChange = useCallback((presetId: string | null, options: CardOptions) => {
-		setSelectedPresetId(presetId);
-		setCurrentOptions(options);
+	const handlePresetChange = useCallback(
+		(presetId: string | null, options: CardOptions) => {
+			setSelectedPresetId(presetId);
+			setCurrentOptions(options);
 
-		// Notificar al componente padre
-		if (onPresetApplied) {
-			onPresetApplied(presetId, options);
-		}
-	}, [onPresetApplied]);
+			// Notificar al componente padre
+			if (onPresetApplied) {
+				onPresetApplied(presetId, options);
+			}
+		},
+		[onPresetApplied]
+	);
 
 	return (
 		<Card className={cn('w-full', className)}>

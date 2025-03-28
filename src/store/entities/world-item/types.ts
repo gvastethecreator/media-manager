@@ -5,10 +5,10 @@
 
 import type { WorldItem as PrismaWorldItem } from '@prisma/client';
 import type {
-    ParsedWorldItemVisualConfig,
-    WorldItem,
-    WorldItemFilters,
-    WorldItemViewMode
+	ParsedWorldItemVisualConfig,
+	WorldItem,
+	WorldItemFilters,
+	WorldItemViewMode,
 } from '../../../types/entities/world-item';
 import type { WorldItemCoreSlice } from './slices/core';
 import type { WorldItemFiltersSlice } from './slices/filters';
@@ -18,28 +18,28 @@ import type { WorldItemUISlice } from './slices/ui';
  * Estado global del store
  */
 export interface WorldItemState {
-  // Datos
-  worldItems: WorldItem[];
-  isLoading: boolean;
-  error: string | null;
+	// Datos
+	worldItems: WorldItem[];
+	isLoading: boolean;
+	error: string | null;
 
-  // UI y configuración
-  visualConfig: ParsedWorldItemVisualConfig | null;
-  viewMode: WorldItemViewMode;
-  sortBy: string;
-  filters: WorldItemFilters;
-  expandedIds: string[];
-  selectedIds: string[];
-  currentItemId: string | null;
-  searchQuery: string;
+	// UI y configuración
+	visualConfig: ParsedWorldItemVisualConfig | null;
+	viewMode: WorldItemViewMode;
+	sortBy: string;
+	filters: WorldItemFilters;
+	expandedIds: string[];
+	selectedIds: string[];
+	currentItemId: string | null;
+	searchQuery: string;
 
-  // Estados UI
-  isCreatingItem: boolean;
-  isEditingItem: boolean;
-  isProcessingAction: boolean;
+	// Estados UI
+	isCreatingItem: boolean;
+	isEditingItem: boolean;
+	isProcessingAction: boolean;
 
-  // Nuevo estado para el store de WorldItem basado en Prisma
-  ui: WorldItemUIState;
+	// Nuevo estado para el store de WorldItem basado en Prisma
+	ui: WorldItemUIState;
 }
 
 /**
@@ -51,85 +51,85 @@ export type WorldItemStore = WorldItemCoreSlice & WorldItemUISlice & WorldItemFi
  * Opciones para el servicio de API para la entidad WorldItem
  */
 export interface WorldItemApiOptions {
-  /**
-   * URL base para la API
-   */
-  baseUrl?: string;
+	/**
+	 * URL base para la API
+	 */
+	baseUrl?: string;
 
-  /**
-   * Objeto de configuración fetch para las solicitudes
-   */
-  fetchOptions?: RequestInit;
+	/**
+	 * Objeto de configuración fetch para las solicitudes
+	 */
+	fetchOptions?: RequestInit;
 
-  /**
-   * Función de transformación personalizada para los datos obtenidos
-   */
-  transform?: (data: any) => WorldItem[];
+	/**
+	 * Función de transformación personalizada para los datos obtenidos
+	 */
+	transform?: (data: any) => WorldItem[];
 
-  /**
-   * Manejador de errores personalizado
-   */
-  errorHandler?: (error: any) => string;
+	/**
+	 * Manejador de errores personalizado
+	 */
+	errorHandler?: (error: any) => string;
 
-  /**
-   * Tiempo de caché en milisegundos
-   */
-  cacheTime?: number;
+	/**
+	 * Tiempo de caché en milisegundos
+	 */
+	cacheTime?: number;
 }
 
 /**
  * Opciones para la exportación de datos de WorldItem
  */
 export interface WorldItemExportOptions {
-  /**
-   * Formato de exportación (json, csv)
-   */
-  format: 'json' | 'csv';
+	/**
+	 * Formato de exportación (json, csv)
+	 */
+	format: 'json' | 'csv';
 
-  /**
-   * IDs específicos para exportar, o todos si no se especifica
-   */
-  ids?: string[];
+	/**
+	 * IDs específicos para exportar, o todos si no se especifica
+	 */
+	ids?: string[];
 
-  /**
-   * Incluir relaciones (imágenes, notas)
-   */
-  includeRelations?: boolean;
+	/**
+	 * Incluir relaciones (imágenes, notas)
+	 */
+	includeRelations?: boolean;
 
-  /**
-   * Incluir metadatos (fechas, ids)
-   */
-  includeMetadata?: boolean;
+	/**
+	 * Incluir metadatos (fechas, ids)
+	 */
+	includeMetadata?: boolean;
 }
 
 /**
  * Resultado del servicio de búsqueda de WorldItem
  */
 export interface WorldItemSearchResult {
-  items: WorldItem[];
-  totalCount: number;
-  hasMore: boolean;
-  nextCursor?: string;
+	items: WorldItem[];
+	totalCount: number;
+	hasMore: boolean;
+	nextCursor?: string;
 }
 
 /**
  * Opciones para las operaciones por lotes en WorldItem
  */
 export interface WorldItemBatchOptions {
-  /**
-   * Operación a realizar
-   */
-  operation: 'delete' | 'update' | 'favorite' | 'unfavorite' | 'changeType' | 'changeCategory';
+	/**
+	 * Operación a realizar
+	 */
+	operation: 'delete' | 'update' | 'favorite' | 'unfavorite' | 'changeType' | 'changeCategory';
 
-  /**
-   * IDs de los elementos a procesar
-   */
-  ids: string[];
+	/**
+	 * IDs de los elementos a procesar
+	 */
+	ids: string[];
 
-  /**
-   * Datos para la operación (solo para update, changeType, changeCategory)
-   */
-  data?: Partial<WorldItem> | { [key: string]: any };
+	/**
+	 * Datos para la operación (solo para update, changeType, changeCategory)
+	 */
+	data?: Partial<WorldItem> | { [key: string]: any };
 }
 
 // 🎯 Estado de UI

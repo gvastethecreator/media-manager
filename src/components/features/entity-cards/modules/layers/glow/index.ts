@@ -17,21 +17,20 @@ export type { GlowConfig };
  * 🌟 Implementación de la capa de resplandor
  */
 const glowLayer: LayerImplementation = {
-  type: 'glow',
-  name: 'Resplandor',
-  description: 'Añade un efecto de resplandor alrededor de la tarjeta',
-  defaultConfig: {
-    enabled: true,
-    layerIndex: 4,
-    color: '#00aaff',
-    size: 10,
-    intensity: 0.5,
-    blendMode: 'screen',
-  },
-  render: () => null, // Stub implementation
-  settings: () => null, // Stub implementation
-  icon: 'sun',
+	type: 'glow',
+	name: 'Resplandor',
+	description: 'Añade un efecto de resplandor alrededor de la tarjeta',
+	defaultConfig: {
+		enabled: true,
+		layerIndex: 4,
+		color: '#00aaff',
+		size: 10,
+		intensity: 0.5,
+		blendMode: 'screen',
+	},
+	render: () => null, // Stub implementation
+	settings: () => null, // Stub implementation
+	icon: 'sun',
 };
 
 export default glowLayer;
-

@@ -23,12 +23,7 @@ export default function NotFound() {
 					<p>Verifica la URL o regresa a la página principal para continuar navegando.</p>
 				</CardContent>
 				<CardFooter className="flex flex-col sm:flex-row gap-2 pt-2">
-					<Button
-						type="button"
-						variant="outline"
-						className="w-full sm:w-auto"
-						onClick={() => router.back()}
-					>
+					<Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => router.back()}>
 						<ArrowLeft className="mr-2 h-4 w-4" />
 						Volver atrás
 					</Button>

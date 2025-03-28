@@ -53,9 +53,7 @@ export const usePlaceStore = create<PlaceStore>()(
 				return [...places].sort((a, b) => {
 					const aValue = a[sortBy];
 					const bValue = b[sortBy];
-					return sortOrder === 'asc' ?
-						aValue.localeCompare(bValue) :
-						bValue.localeCompare(aValue);
+					return sortOrder === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
 				});
 			},
 
@@ -87,9 +85,7 @@ export const usePlaceStore = create<PlaceStore>()(
 
 					const updatedPlace = await response.json();
 					set((state) => ({
-						places: state.places.map((place) =>
-							place.id === placeId ? updatedPlace : place
-						),
+						places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
 					}));
 
 					placeLogger.info('✅ Imagen añadida correctamente al lugar');
@@ -111,9 +107,7 @@ export const usePlaceStore = create<PlaceStore>()(
 
 					const updatedPlace = await response.json();
 					set((state) => ({
-						places: state.places.map((place) =>
-							place.id === placeId ? updatedPlace : place
-						),
+						places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
 					}));
 
 					placeLogger.info('✅ Imagen eliminada correctamente del lugar');

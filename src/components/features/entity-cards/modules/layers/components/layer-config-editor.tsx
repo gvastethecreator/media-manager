@@ -67,10 +67,7 @@ export function LayerConfigEditor({
 			<CardContent className="space-y-4">
 				<div className="flex items-center justify-between">
 					<span className="font-medium">Habilitada</span>
-					<Switch
-						checked={config.enabled}
-						onCheckedChange={(checked) => handlePropertyChange('enabled', checked)}
-					/>
+					<Switch checked={config.enabled} onCheckedChange={(checked) => handlePropertyChange('enabled', checked)} />
 				</div>
 
 				<Separator />
@@ -93,9 +90,7 @@ export function LayerConfigEditor({
 					<Button variant="outline" onClick={onCancel}>
 						Cancelar
 					</Button>
-					<Button onClick={handleSave}>
-						Guardar
-					</Button>
+					<Button onClick={handleSave}>Guardar</Button>
 				</div>
 			</CardContent>
 		</Card>

@@ -142,11 +142,11 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 						<Button
 							variant="ghost"
 							size="sm"
-							className="p-0 h-8 text-primary hover:text-primary/80 font-medium cursor-pointer flex items-center gap-1"
+							className="p-0 h-6 text-primary hover:text-primary/80 font-medium cursor-pointer flex items-center gap-1"
 							onClick={navigateToHome}
 						>
-							<Home className="w-4 h-4" />
-							<span>Inicio</span>
+							<Home className="w-3 h-3" />
+							<span className="text-xs">Inicio</span>
 						</Button>
 					</BreadcrumbItem>
 				</BreadcrumbList>
@@ -162,29 +162,29 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 			className="flex items-center"
 		>
 			<Breadcrumb>
-				<BreadcrumbList className="flex items-center gap-1">
+				<BreadcrumbList className="flex items-center gap-0.5">
 					<BreadcrumbItem>
 						<Button
 							variant="ghost"
 							size="sm"
-							className="p-0 h-8 text-primary hover:text-primary/80 font-medium cursor-pointer flex items-center gap-1"
+							className="p-0 h-6 text-primary hover:text-primary/80 font-medium cursor-pointer flex items-center gap-0.5"
 							onClick={navigateToHome}
 						>
-							<Home className="w-4 h-4" />
-							<span>Inicio</span>
+							<Home className="w-3 h-3" />
+							<span className="text-xs">Inicio</span>
 						</Button>
 					</BreadcrumbItem>
 
 					{isContentView && (
 						<>
 							<BreadcrumbSeparator>
-								<ChevronRight className="h-4 w-4 text-muted-foreground" />
+								<ChevronRight className="h-3 w-3 text-muted-foreground" />
 							</BreadcrumbSeparator>
 							<BreadcrumbItem>
 								<Button
 									variant="ghost"
 									size="sm"
-									className="p-0 h-8 text-primary hover:text-primary/80 font-medium cursor-pointer"
+									className="p-0 h-6 text-primary hover:text-primary/80 font-medium cursor-pointer text-xs"
 									onClick={navigateToMainFromContent}
 								>
 									{config.label}
@@ -196,19 +196,19 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 					{isContentView && currentItem?.name && (
 						<>
 							<BreadcrumbSeparator>
-								<ChevronRight className="h-4 w-4 text-muted-foreground" />
+								<ChevronRight className="h-3 w-3 text-muted-foreground" />
 							</BreadcrumbSeparator>
 							<BreadcrumbItem>
-								<div className="flex flex-col gap-1">
+								<div className="flex flex-col gap-0.5">
 									<div className="flex items-center min-w-0 overflow-hidden">
-										<CornerDownRight className="h-2 w-2 text-muted mr-1 shrink-0" />
-										{currentItem.emoji && <span className="text-xs shrink-0 mr-1">{currentItem.emoji}</span>}
-										<span className="truncate font-medium">{currentItem.name}</span>
+										<CornerDownRight className="h-2 w-2 text-muted mr-0.5 shrink-0" />
+										{currentItem.emoji && <span className="text-xs shrink-0 mr-0.5">{currentItem.emoji}</span>}
+										<span className="truncate text-xs font-medium">{currentItem.name}</span>
 									</div>
 									{currentItem.description && (
-										<p className="text-xs text-muted-foreground line-clamp-1 pl-3">{currentItem.description}</p>
+										<p className="text-[10px] text-muted-foreground line-clamp-1 pl-2.5">{currentItem.description}</p>
 									)}
-									<div className="flex items-center gap-2 text-xs text-muted-foreground pl-3">
+									<div className="flex items-center gap-1.5 text-[10px] text-muted-foreground pl-2.5">
 										{currentItem._count?.images !== undefined && (
 											<span className="inline-flex items-center space-x-0.5 px-1 rounded-sm bg-secondary/30">
 												{currentItem._count.images} imágenes
@@ -228,10 +228,10 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 					{!isContentView && (
 						<>
 							<BreadcrumbSeparator>
-								<ChevronRight className="h-4 w-4 text-muted-foreground" />
+								<ChevronRight className="h-3 w-3 text-muted-foreground" />
 							</BreadcrumbSeparator>
 							<BreadcrumbItem>
-								<BreadcrumbPage className="text-sm font-medium text-muted-foreground">{config.label}</BreadcrumbPage>
+								<BreadcrumbPage className="text-xs font-medium text-muted-foreground">{config.label}</BreadcrumbPage>
 							</BreadcrumbItem>
 						</>
 					)}

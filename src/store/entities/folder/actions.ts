@@ -8,7 +8,7 @@ import {
 	deleteFolder as deleteFolderAction,
 	getFolder as getFolderAction,
 	getFolders as getFoldersAction,
-	updateFolder as updateFolderAction
+	updateFolder as updateFolderAction,
 } from '@/app/actions/folders/folder-crud.actions';
 
 import {
@@ -16,7 +16,7 @@ import {
 	adaptFolderResponse,
 	adaptFoldersArray,
 	adaptUpdateFolderData,
-	handleFolderActionError
+	handleFolderActionError,
 } from '@/adapters/folder';
 
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -29,13 +29,13 @@ const actionsLogger = clientLogger.withContext('FolderStoreActions');
  * @returns Promise con el resultado de la operación
  */
 export async function fetchFolders() {
-  try {
-    actionsLogger.info('🔍 Obteniendo todas las carpetas');
-    const foldersData = await getFoldersAction();
-    return adaptFoldersArray(foldersData);
-  } catch (error) {
-    return handleFolderActionError(error);
-  }
+	try {
+		actionsLogger.info('🔍 Obteniendo todas las carpetas');
+		const foldersData = await getFoldersAction();
+		return adaptFoldersArray(foldersData);
+	} catch (error) {
+		return handleFolderActionError(error);
+	}
 }
 
 /**
@@ -44,13 +44,13 @@ export async function fetchFolders() {
  * @returns Promise con el resultado de la operación
  */
 export async function fetchFolderById(id: string) {
-  try {
-    actionsLogger.info(`🔍 Obteniendo carpeta con ID: ${id}`);
-    const folderData = await getFolderAction(id);
-    return adaptFolderResponse(folderData);
-  } catch (error) {
-    return handleFolderActionError(error);
-  }
+	try {
+		actionsLogger.info(`🔍 Obteniendo carpeta con ID: ${id}`);
+		const folderData = await getFolderAction(id);
+		return adaptFolderResponse(folderData);
+	} catch (error) {
+		return handleFolderActionError(error);
+	}
 }
 
 /**
@@ -59,14 +59,14 @@ export async function fetchFolderById(id: string) {
  * @returns Promise con el resultado de la operación
  */
 export async function createFolder(data: CreateFolderData) {
-  try {
-    actionsLogger.info('➕ Creando nueva carpeta');
-    const adaptedData = adaptCreateFolderData(data);
-    const result = await createFolderAction(adaptedData);
-    return adaptFolderResponse(result);
-  } catch (error) {
-    return handleFolderActionError(error);
-  }
+	try {
+		actionsLogger.info('➕ Creando nueva carpeta');
+		const adaptedData = adaptCreateFolderData(data);
+		const result = await createFolderAction(adaptedData);
+		return adaptFolderResponse(result);
+	} catch (error) {
+		return handleFolderActionError(error);
+	}
 }
 
 /**
@@ -76,14 +76,14 @@ export async function createFolder(data: CreateFolderData) {
  * @returns Promise con el resultado de la operación
  */
 export async function updateFolder(id: string, data: UpdateFolderData) {
-  try {
-    actionsLogger.info(`✏️ Actualizando carpeta con ID: ${id}`);
-    const { id: folderId, data: updateData } = adaptUpdateFolderData(id, data);
-    const result = await updateFolderAction(folderId, updateData);
-    return adaptFolderResponse(result);
-  } catch (error) {
-    return handleFolderActionError(error);
-  }
+	try {
+		actionsLogger.info(`✏️ Actualizando carpeta con ID: ${id}`);
+		const { id: folderId, data: updateData } = adaptUpdateFolderData(id, data);
+		const result = await updateFolderAction(folderId, updateData);
+		return adaptFolderResponse(result);
+	} catch (error) {
+		return handleFolderActionError(error);
+	}
 }
 
 /**
@@ -92,23 +92,23 @@ export async function updateFolder(id: string, data: UpdateFolderData) {
  * @returns Promise con el resultado de la operación
  */
 export async function deleteFolder(id: string) {
-  try {
-    actionsLogger.info(`🗑️ Eliminando carpeta con ID: ${id}`);
-    await deleteFolderAction(id);
-    return {
-      success: true,
-      message: 'Carpeta eliminada correctamente'
-    };
-  } catch (error) {
-    return handleFolderActionError(error);
-  }
+	try {
+		actionsLogger.info(`🗑️ Eliminando carpeta con ID: ${id}`);
+		await deleteFolderAction(id);
+		return {
+			success: true,
+			message: 'Carpeta eliminada correctamente',
+		};
+	} catch (error) {
+		return handleFolderActionError(error);
+	}
 }
 
 // Exportar todas las acciones integradas
 export const folderActions = {
-  fetchFolders,
-  fetchFolderById,
-  createFolder,
-  updateFolder,
-  deleteFolder
+	fetchFolders,
+	fetchFolderById,
+	createFolder,
+	updateFolder,
+	deleteFolder,
 };

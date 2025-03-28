@@ -1,44 +1,25 @@
 'use server';
 
+import { CharacterError, EntityErrorCode, createEntityErrorObject, type SerializableError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { mapCreateCharacterDataToPrisma, mapUpdateCharacterDataToPrisma } from '@/transformers/character';
+import type { CharacterBase, CreateCharacterData, UpdateCharacterData } from '@/types/entities/character';
 import { revalidatePath } from 'next/cache';
-import {
-	type CharacterBase,
-	type CreateCharacterData,
-	type UpdateCharacterData,
-	CharacterFilter
-} from '@/types/entities/character';
-import {
-	mapCreateCharacterDataToPrisma,
-	mapUpdateCharacterDataToPrisma,
-	toCharacterListItem,
-	toCharacterCard
-} from '@/transformers/character';
 
 // Configuración y utilidades
 const characterLogger = serverLogger.withContext('CharacterActions');
 const REVALIDATE_PATHS = ['/settings', '/characters', '/characters/[id]'] as const;
 
-// Códigos de error
-enum CharacterErrorCode {
-	NOT_FOUND = 'NOT_FOUND',
-	VALIDATION_ERROR = 'VALIDATION_ERROR',
-	OPERATION_FAILED = 'OPERATION_FAILED',
-}
-
 // Función creadora de errores (enfoque funcional)
 const createCharacterError = (
 	message: string,
-	code: CharacterErrorCode = CharacterErrorCode.OPERATION_FAILED,
+	code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED,
 	cause?: unknown
-) => {
-	const error = new Error(message);
-	error.name = 'CharacterError';
-	Object.assign(error, { code, cause });
-	return error;
+): SerializableError => {
+	return createEntityErrorObject('CharacterError', message, code, cause);
 };
 
 /**
@@ -54,7 +35,10 @@ const revalidateAllPaths = async () => {
 /**
  * Notifica cambios en un personaje a través del sistema de eventos
  */
-const notifyCharacterChange = async (action: 'create' | 'update' | 'delete', character: CharacterBase | { id: string }) => {
+const notifyCharacterChange = async (
+	action: 'create' | 'update' | 'delete',
+	character: CharacterBase | { id: string }
+) => {
 	// Emitir eventos usando el sistema de servidor
 	await emit({
 		type: 'characters:modified',
@@ -146,7 +130,7 @@ export async function getCharacters(): Promise<CharacterWithStats[]> {
 		return charactersWithStats;
 	} catch (error) {
 		characterLogger.error('❌ Error al obtener personajes', error);
-		throw createCharacterError('No se pudieron obtener los personajes', CharacterErrorCode.OPERATION_FAILED, error);
+		throw createCharacterError('No se pudieron obtener los personajes', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -168,7 +152,7 @@ export async function getCharacter(id: string): Promise<CharacterWithStats> {
 		});
 
 		if (!character) {
-			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+			throw createCharacterError('Personaje no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		const totalSize = await prisma.image.aggregate({
@@ -196,7 +180,9 @@ export async function getCharacter(id: string): Promise<CharacterWithStats> {
 		characterLogger.error('❌ Error al obtener personaje', { id, error });
 		throw createCharacterError(
 			'No se pudo obtener el personaje',
-			error instanceof Error && 'code' in error ? (error.code as CharacterErrorCode) : CharacterErrorCode.OPERATION_FAILED,
+			error instanceof Error && 'code' in error
+				? (error.code as EntityErrorCode)
+				: EntityErrorCode.OPERATION_FAILED,
 			error
 		);
 	}
@@ -223,7 +209,7 @@ export async function createCharacter(data: CreateCharacterData): Promise<Charac
 		return character;
 	} catch (error) {
 		characterLogger.error('❌ Error al crear personaje', { error, data });
-		throw createCharacterError('No se pudo crear el personaje', CharacterErrorCode.OPERATION_FAILED, error);
+		throw createCharacterError('No se pudo crear el personaje', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -240,7 +226,7 @@ export async function updateCharacter(id: string, data: UpdateCharacterData): Pr
 		});
 
 		if (!existingCharacter) {
-			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+			throw createCharacterError('Personaje no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Utilizar el transformer para mapear datos de actualización
@@ -260,7 +246,9 @@ export async function updateCharacter(id: string, data: UpdateCharacterData): Pr
 		characterLogger.error('❌ Error al actualizar personaje', { id, error });
 		throw createCharacterError(
 			'No se pudo actualizar el personaje',
-			error instanceof Error && 'code' in error ? (error.code as CharacterErrorCode) : CharacterErrorCode.OPERATION_FAILED,
+			error instanceof Error && 'code' in error
+				? (error.code as EntityErrorCode)
+				: EntityErrorCode.OPERATION_FAILED,
 			error
 		);
 	}
@@ -279,7 +267,7 @@ export async function deleteCharacter(id: string): Promise<{ id: string }> {
 		});
 
 		if (!character) {
-			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+			throw createCharacterError('Personaje no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		await prisma.character.delete({
@@ -295,7 +283,9 @@ export async function deleteCharacter(id: string): Promise<{ id: string }> {
 		characterLogger.error('❌ Error al eliminar personaje', { id, error });
 		throw createCharacterError(
 			'No se pudo eliminar el personaje',
-			error instanceof Error && 'code' in error ? (error.code as CharacterErrorCode) : CharacterErrorCode.OPERATION_FAILED,
+			error instanceof Error && 'code' in error
+				? (error.code as EntityErrorCode)
+				: EntityErrorCode.OPERATION_FAILED,
 			error
 		);
 	}
@@ -314,7 +304,7 @@ export async function getCharacterImages(id: string) {
 		});
 
 		if (!character) {
-			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+			throw createCharacterError('Personaje no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		const characterWithImages = await prisma.character.findUnique({
@@ -346,7 +336,7 @@ export async function getCharacterImages(id: string) {
 		});
 
 		if (!characterWithImages) {
-			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+			throw createCharacterError('Personaje no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		const images = characterWithImages.images.map((image) => {
@@ -365,7 +355,11 @@ export async function getCharacterImages(id: string) {
 		return images;
 	} catch (error) {
 		characterLogger.error('❌ Error al obtener imágenes del personaje', { id, error });
-		throw createCharacterError('No se pudieron obtener las imágenes del personaje', CharacterErrorCode.OPERATION_FAILED, error);
+		throw createCharacterError(
+			'No se pudieron obtener las imágenes del personaje',
+			EntityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -382,7 +376,7 @@ export async function addImageToCharacter(characterId: string, imageId: string) 
 		});
 
 		if (!character) {
-			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+			throw createCharacterError('Personaje no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Comprobar que la imagen existe
@@ -391,7 +385,7 @@ export async function addImageToCharacter(characterId: string, imageId: string) 
 		});
 
 		if (!image) {
-			throw createCharacterError('Imagen no encontrada', CharacterErrorCode.NOT_FOUND);
+			throw createCharacterError('Imagen no encontrada', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Añadir relación
@@ -409,7 +403,7 @@ export async function addImageToCharacter(characterId: string, imageId: string) 
 		return { success: true };
 	} catch (error) {
 		characterLogger.error('❌ Error al añadir imagen a personaje', { characterId, imageId, error });
-		throw createCharacterError('No se pudo añadir la imagen al personaje', CharacterErrorCode.OPERATION_FAILED, error);
+		throw createCharacterError('No se pudo añadir la imagen al personaje', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -426,7 +420,7 @@ export async function removeImageFromCharacter(characterId: string, imageId: str
 		});
 
 		if (!character) {
-			throw createCharacterError('Personaje no encontrado', CharacterErrorCode.NOT_FOUND);
+			throw createCharacterError('Personaje no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Comprobar que la imagen existe
@@ -435,7 +429,7 @@ export async function removeImageFromCharacter(characterId: string, imageId: str
 		});
 
 		if (!image) {
-			throw createCharacterError('Imagen no encontrada', CharacterErrorCode.NOT_FOUND);
+			throw createCharacterError('Imagen no encontrada', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Eliminar relación
@@ -453,6 +447,10 @@ export async function removeImageFromCharacter(characterId: string, imageId: str
 		return { success: true };
 	} catch (error) {
 		characterLogger.error('❌ Error al eliminar imagen de personaje', { characterId, imageId, error });
-		throw createCharacterError('No se pudo eliminar la imagen del personaje', CharacterErrorCode.OPERATION_FAILED, error);
+		throw createCharacterError(
+			'No se pudo eliminar la imagen del personaje',
+			EntityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }

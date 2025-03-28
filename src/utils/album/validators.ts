@@ -4,10 +4,7 @@
  */
 
 import { z } from 'zod';
-import {
-    AlbumPrivacyLevel,
-    AlbumType
-} from '../../types/entities/album';
+import { AlbumPrivacyLevel, AlbumType } from '../../types/entities/album';
 
 /**
  * Determina si un tipo de álbum es válido
@@ -15,7 +12,7 @@ import {
  * @returns true si el tipo es válido, false en caso contrario
  */
 export function isValidAlbumType(type: string): boolean {
-  return Object.values(AlbumType).includes(type as AlbumType);
+	return Object.values(AlbumType).includes(type as AlbumType);
 }
 
 /**
@@ -24,97 +21,103 @@ export function isValidAlbumType(type: string): boolean {
  * @returns true si el nivel es válido, false en caso contrario
  */
 export function isValidPrivacyLevel(privacyLevel: string): boolean {
-  return Object.values(AlbumPrivacyLevel).includes(privacyLevel as AlbumPrivacyLevel);
+	return Object.values(AlbumPrivacyLevel).includes(privacyLevel as AlbumPrivacyLevel);
 }
 
 /**
  * Schema Zod para metadatos de álbum
  */
 export const albumMetadataSchema = z.object({
-  itemCount: z.number().int().min(0),
-  imageCount: z.number().int().min(0).optional(),
-  videoCount: z.number().int().min(0).optional(),
-  totalSize: z.number().int().min(0).optional(),
-  dateRange: z.object({
-    from: z.string().or(z.date()).nullable(),
-    to: z.string().or(z.date()).nullable()
-  }).optional(),
-  locations: z.array(
-    z.object({
-      name: z.string(),
-      latitude: z.number(),
-      longitude: z.number(),
-      count: z.number().int().min(1)
-    })
-  ).optional(),
-  customFields: z.record(z.any()).optional(),
-  coverImageUrl: z.string().url().optional(),
-  thumbnailUrls: z.array(z.string().url()).optional(),
-  lastModified: z.string().or(z.date()).optional(),
+	itemCount: z.number().int().min(0),
+	imageCount: z.number().int().min(0).optional(),
+	videoCount: z.number().int().min(0).optional(),
+	totalSize: z.number().int().min(0).optional(),
+	dateRange: z
+		.object({
+			from: z.string().or(z.date()).nullable(),
+			to: z.string().or(z.date()).nullable(),
+		})
+		.optional(),
+	locations: z
+		.array(
+			z.object({
+				name: z.string(),
+				latitude: z.number(),
+				longitude: z.number(),
+				count: z.number().int().min(1),
+			})
+		)
+		.optional(),
+	customFields: z.record(z.any()).optional(),
+	coverImageUrl: z.string().url().optional(),
+	thumbnailUrls: z.array(z.string().url()).optional(),
+	lastModified: z.string().or(z.date()).optional(),
 });
 
 /**
  * Schema Zod para configuración de visualización de álbum
  */
 export const albumViewConfigSchema = z.object({
-  theme: z.string().optional(),
-  layout: z.string().optional(),
-  showDates: z.boolean().optional(),
-  showLocations: z.boolean().optional(),
-  showDescriptions: z.boolean().optional(),
-  thumbnailSize: z.enum(['small', 'medium', 'large']).optional(),
-  enableTransitions: z.boolean().optional(),
-  coverImageFit: z.enum(['contain', 'cover']).optional(),
-  backgroundColor: z.string().optional(),
-  customCss: z.string().optional(),
+	theme: z.string().optional(),
+	layout: z.string().optional(),
+	showDates: z.boolean().optional(),
+	showLocations: z.boolean().optional(),
+	showDescriptions: z.boolean().optional(),
+	thumbnailSize: z.enum(['small', 'medium', 'large']).optional(),
+	enableTransitions: z.boolean().optional(),
+	coverImageFit: z.enum(['contain', 'cover']).optional(),
+	backgroundColor: z.string().optional(),
+	customCss: z.string().optional(),
 });
 
 /**
  * Schema Zod para datos de creación de álbum
  */
 export const createAlbumSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
-  description: z.string().optional(),
-  coverImageId: z.string().optional(),
-  type: z.nativeEnum(AlbumType).optional(),
-  parentId: z.string().nullable().optional(),
-  privacyLevel: z.nativeEnum(AlbumPrivacyLevel).optional(),
-  items: z.array(
-    z.object({
-      itemId: z.string(),
-      itemType: z.enum(['image', 'video'])
-    })
-  ).optional(),
-  viewConfig: albumViewConfigSchema.partial().optional(),
+	name: z.string().min(1, 'El nombre es requerido'),
+	description: z.string().optional(),
+	coverImageId: z.string().optional(),
+	type: z.nativeEnum(AlbumType).optional(),
+	parentId: z.string().nullable().optional(),
+	privacyLevel: z.nativeEnum(AlbumPrivacyLevel).optional(),
+	items: z
+		.array(
+			z.object({
+				itemId: z.string(),
+				itemType: z.enum(['image', 'video']),
+			})
+		)
+		.optional(),
+	viewConfig: albumViewConfigSchema.partial().optional(),
 });
 
 /**
  * Schema Zod para datos de actualización de álbum
  */
 export const updateAlbumSchema = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
-  coverImageId: z.string().nullable().optional(),
-  type: z.nativeEnum(AlbumType).optional(),
-  parentId: z.string().nullable().optional(),
-  privacyLevel: z.nativeEnum(AlbumPrivacyLevel).optional(),
-  isArchived: z.boolean().optional(),
-  viewConfig: albumViewConfigSchema.partial().optional(),
+	name: z.string().optional(),
+	description: z.string().optional(),
+	coverImageId: z.string().nullable().optional(),
+	type: z.nativeEnum(AlbumType).optional(),
+	parentId: z.string().nullable().optional(),
+	privacyLevel: z.nativeEnum(AlbumPrivacyLevel).optional(),
+	isArchived: z.boolean().optional(),
+	viewConfig: albumViewConfigSchema.partial().optional(),
 });
 
 /**
  * Schema Zod para datos de actualización de elementos de álbum
  */
 export const updateAlbumItemsSchema = z.object({
-  items: z.array(
-    z.object({
-      itemId: z.string(),
-      itemType: z.enum(['image', 'video']),
-      sortOrder: z.number().optional(),
-      coverForAlbum: z.boolean().optional(),
-    })
-  ),
-  replaceExisting: z.boolean().optional(),
+	items: z.array(
+		z.object({
+			itemId: z.string(),
+			itemType: z.enum(['image', 'video']),
+			sortOrder: z.number().optional(),
+			coverForAlbum: z.boolean().optional(),
+		})
+	),
+	replaceExisting: z.boolean().optional(),
 });
 
 /**
@@ -123,8 +126,8 @@ export const updateAlbumItemsSchema = z.object({
  * @returns true si los metadatos son válidos, false en caso contrario
  */
 export function validateAlbumMetadata(metadata: unknown): boolean {
-  const result = albumMetadataSchema.safeParse(metadata);
-  return result.success;
+	const result = albumMetadataSchema.safeParse(metadata);
+	return result.success;
 }
 
 /**
@@ -133,7 +136,7 @@ export function validateAlbumMetadata(metadata: unknown): boolean {
  * @returns Los datos validados o un error si no son válidos
  */
 export function validateCreateAlbumData(data: unknown) {
-  return createAlbumSchema.parse(data);
+	return createAlbumSchema.parse(data);
 }
 
 /**
@@ -142,7 +145,7 @@ export function validateCreateAlbumData(data: unknown) {
  * @returns Los datos validados o un error si no son válidos
  */
 export function validateUpdateAlbumData(data: unknown) {
-  return updateAlbumSchema.parse(data);
+	return updateAlbumSchema.parse(data);
 }
 
 /**
@@ -151,9 +154,9 @@ export function validateUpdateAlbumData(data: unknown) {
  * @returns true si el slug es válido, false en caso contrario
  */
 export function isValidAlbumSlug(slug: string): boolean {
-  // Un slug válido contiene solo letras minúsculas, números, guiones y tiene al menos 3 caracteres
-  const slugRegex = /^[a-z0-9][a-z0-9\-]{2,}[a-z0-9]$/;
-  return slugRegex.test(slug);
+	// Un slug válido contiene solo letras minúsculas, números, guiones y tiene al menos 3 caracteres
+	const slugRegex = /^[a-z0-9][a-z0-9\-]{2,}[a-z0-9]$/;
+	return slugRegex.test(slug);
 }
 
 /**
@@ -162,7 +165,7 @@ export function isValidAlbumSlug(slug: string): boolean {
  * @returns true si el nombre es válido, false en caso contrario
  */
 export function isValidAlbumName(name: string): boolean {
-  return name.trim().length >= 1 && name.trim().length <= 100;
+	return name.trim().length >= 1 && name.trim().length <= 100;
 }
 
 /**
@@ -172,23 +175,19 @@ export function isValidAlbumName(name: string): boolean {
  * @param allAlbums Todos los álbumes disponibles
  * @returns true si la operación es válida (no crea ciclos), false en caso contrario
  */
-export function isValidAlbumHierarchy(
-  albumId: string,
-  newParentId: string,
-  allAlbums: Record<string, Album>
-): boolean {
-  // No se puede mover un álbum a sí mismo
-  if (albumId === newParentId) return false;
+export function isValidAlbumHierarchy(albumId: string, newParentId: string, allAlbums: Record<string, Album>): boolean {
+	// No se puede mover un álbum a sí mismo
+	if (albumId === newParentId) return false;
 
-  // Función recursiva para detectar ciclos
-  function wouldCreateCycle(currentParentId: string, targetId: string): boolean {
-    if (currentParentId === targetId) return true;
+	// Función recursiva para detectar ciclos
+	function wouldCreateCycle(currentParentId: string, targetId: string): boolean {
+		if (currentParentId === targetId) return true;
 
-    const parent = allAlbums[currentParentId];
-    if (!parent || !parent.parentId) return false;
+		const parent = allAlbums[currentParentId];
+		if (!parent || !parent.parentId) return false;
 
-    return wouldCreateCycle(parent.parentId, targetId);
-  }
+		return wouldCreateCycle(parent.parentId, targetId);
+	}
 
-  return !wouldCreateCycle(newParentId, albumId);
+	return !wouldCreateCycle(newParentId, albumId);
 }

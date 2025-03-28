@@ -129,7 +129,7 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 
 	return (
 		<div className={cn('h-full flex flex-col')}>
-			<CardDebugToolbar />
+			
 
 			<AnimatePresence initial={false} custom={navigationDirection}>
 				<motion.div

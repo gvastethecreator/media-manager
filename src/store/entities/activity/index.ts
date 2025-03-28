@@ -16,57 +16,57 @@ export type ActivityStore = ActivityCoreSlice & ActivityUISlice & ActivityFilter
 
 // Estado inicial
 const initialState: ActivityState = {
-  core: {
-    activities: {},
-    isLoading: false,
-    error: null,
-    lastUpdated: null,
-  },
-  ui: {
-    selectedIds: [],
-    expandedIds: [],
-    highlightedId: null,
-    detailActivityId: null,
-    isDetailModalOpen: false,
-    groupByDate: true,
-  },
-  filters: {
-    sortBy: ActivitySortCriteria.DATE_DESC,
-    searchQuery: '',
-    selectedCategories: [],
-    onlyAlerts: false,
-    dateRange: {
-      from: null,
-      to: null,
-    },
-    filterByImageId: null,
-  },
+	core: {
+		activities: {},
+		isLoading: false,
+		error: null,
+		lastUpdated: null,
+	},
+	ui: {
+		selectedIds: [],
+		expandedIds: [],
+		highlightedId: null,
+		detailActivityId: null,
+		isDetailModalOpen: false,
+		groupByDate: true,
+	},
+	filters: {
+		sortBy: ActivitySortCriteria.DATE_DESC,
+		searchQuery: '',
+		selectedCategories: [],
+		onlyAlerts: false,
+		dateRange: {
+			from: null,
+			to: null,
+		},
+		filterByImageId: null,
+	},
 };
 
 // Crear store combinando slices
 export const useActivityStore = create<ActivityStore>()(
-  devtools(
-    persist(
-      (...a) => ({
-        ...createActivityCoreSlice(...a),
-        ...createActivityUISlice(...a),
-        ...createActivityFiltersSlice(...a),
-      }),
-      {
-        name: 'activity-store',
-        partialize: (state) => ({
-          ui: {
-            groupByDate: state.ui.groupByDate,
-          },
-          filters: {
-            sortBy: state.filters.sortBy,
-            onlyAlerts: state.filters.onlyAlerts,
-          },
-        }),
-      }
-    ),
-    { name: 'ActivityStore' }
-  )
+	devtools(
+		persist(
+			(...a) => ({
+				...createActivityCoreSlice(...a),
+				...createActivityUISlice(...a),
+				...createActivityFiltersSlice(...a),
+			}),
+			{
+				name: 'activity-store',
+				partialize: (state) => ({
+					ui: {
+						groupByDate: state.ui.groupByDate,
+					},
+					filters: {
+						sortBy: state.filters.sortBy,
+						onlyAlerts: state.filters.onlyAlerts,
+					},
+				}),
+			}
+		),
+		{ name: 'ActivityStore' }
+	)
 );
 
 // Exportar todo desde types

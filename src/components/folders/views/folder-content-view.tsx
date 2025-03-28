@@ -17,13 +17,7 @@ export function FolderContentView() {
 	const setItems = useFileManager((state: FileManagerState) => state.setItems);
 
 	// Usar el hook personalizado para obtener las imágenes
-	const {
-		data: images,
-		isLoading,
-		isError,
-		error,
-		refetch
-	} = useFolderImages(currentFolderId);
+	const { data: images, isLoading, isError, error, refetch } = useFolderImages(currentFolderId);
 
 	// Actualizar el store cuando cambian las imágenes
 	useEffect(() => {
@@ -61,7 +55,7 @@ export function FolderContentView() {
 				error={{
 					code: 'LOAD_ERROR',
 					message: 'Error al cargar las imágenes',
-					details: error instanceof Error ? error.message : String(error)
+					details: error instanceof Error ? error.message : String(error),
 				}}
 				onRetry={refetch}
 			/>

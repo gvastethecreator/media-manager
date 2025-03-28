@@ -48,6 +48,6 @@ export function useProfileTheme() {
 		styles,
 		isLoading,
 		setTheme,
-		toggleTheme
+		toggleTheme,
 	};
 }

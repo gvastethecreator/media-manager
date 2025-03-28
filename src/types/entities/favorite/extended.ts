@@ -10,53 +10,53 @@ import type { FavoriteBase } from './base';
  * Interfaz para un favorito con la imagen asociada
  */
 export interface FavoriteWithImage extends FavoriteBase {
-    image: FileItem;
+	image: FileItem;
 }
 
 /**
  * Interfaz para un favorito con la entidad asociada (genérico)
  */
 export interface FavoriteWithEntity<T> extends FavoriteBase {
-    entity: T;
+	entity: T;
 }
 
 /**
  * Interfaz para un favorito con entidad y propiedades adicionales para UI
  */
 export interface FavoriteExtended extends FavoriteBase {
-    // UI properties
-    entityName?: string;
-    entityPreview?: string;
-    entityIcon?: string;
-    entityColor?: string;
+	// UI properties
+	entityName?: string;
+	entityPreview?: string;
+	entityIcon?: string;
+	entityColor?: string;
 
-    // Tracking
-    isSelected?: boolean;
-    isHovered?: boolean;
+	// Tracking
+	isSelected?: boolean;
+	isHovered?: boolean;
 
-    // Relations count
-    _count?: {
-        relatedEntities?: number;
-    };
+	// Relations count
+	_count?: {
+		relatedEntities?: number;
+	};
 }
 
 /**
  * Interfaz para favoritos agrupados por tipo
  */
 export interface FavoritesByType {
-    type: string;
-    displayName: string;
-    icon: string;
-    color: string;
-    count: number;
-    items: FavoriteExtended[];
+	type: string;
+	displayName: string;
+	icon: string;
+	color: string;
+	count: number;
+	items: FavoriteExtended[];
 }
 
 /**
  * Estadísticas de favoritos
  */
 export interface FavoriteStats {
-    totalCount: number;
-    byType: Record<string, number>;
-    recentlyAdded: FavoriteExtended[];
+	totalCount: number;
+	byType: Record<string, number>;
+	recentlyAdded: FavoriteExtended[];
 }

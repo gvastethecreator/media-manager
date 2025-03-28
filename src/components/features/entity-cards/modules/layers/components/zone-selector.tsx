@@ -53,10 +53,7 @@ export function ZoneSelector({ zone, onChange }: ZoneSelectorProps) {
 					{/* Tipo de zona */}
 					<div className="space-y-2">
 						<Label>Tipo de zona</Label>
-						<Select
-							value={zone.type || 'circle'}
-							onValueChange={(value) => handleChange('type', value)}
-						>
+						<Select value={zone.type || 'circle'} onValueChange={(value) => handleChange('type', value)}>
 							<SelectTrigger>
 								<SelectValue placeholder="Seleccionar tipo" />
 							</SelectTrigger>

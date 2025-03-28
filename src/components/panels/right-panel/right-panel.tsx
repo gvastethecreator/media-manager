@@ -11,13 +11,10 @@ import dynamic from 'next/dynamic';
 import { memo, Suspense, useCallback, useEffect, useState } from 'react';
 
 // Lazy load del StatsPanel para reducir carga inicial
-const StatsPanel = dynamic(
-	() => import('../stats/stats-panel'),
-	{
-		ssr: false,
-		loading: () => <div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>
-	}
-);
+const StatsPanel = dynamic(() => import('../stats/stats-panel'), {
+	ssr: false,
+	loading: () => <div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>,
+});
 
 // Componente para manejar la carga perezosa del StatsPanel
 const LazyStatsPanel = memo(function LazyStatsPanel() {
@@ -34,9 +31,11 @@ const LazyStatsPanel = memo(function LazyStatsPanel() {
 	}, []);
 
 	if (!shouldRender) {
-		return <div className="flex items-center justify-center w-full h-full">
-			<div className="animate-pulse p-4 text-muted-foreground text-sm">Inicializando estadísticas...</div>
-		</div>;
+		return (
+			<div className="flex items-center justify-center w-full h-full">
+				<div className="animate-pulse p-4 text-muted-foreground text-sm">Inicializando estadísticas...</div>
+			</div>
+		);
 	}
 
 	return (
@@ -105,21 +104,11 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 				<h3 className="text-sm font-medium">{panelTitle}</h3>
 				<div className="flex items-center gap-1">
 					{onToggleCollapse && (
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8 cursor-pointer"
-							onClick={onToggleCollapse}
-						>
+						<Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" onClick={onToggleCollapse}>
 							<PanelRightClose className="h-4 w-4" />
 						</Button>
 					)}
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-8 w-8 cursor-pointer"
-						onClick={handleClose}
-					>
+					<Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer" onClick={handleClose}>
 						<X className="h-4 w-4" />
 					</Button>
 				</div>
@@ -133,8 +122,8 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 								<DetailsPanel selectedItems={selectedItems as ImageItem[]} />
 							</div>
 						</ScrollArea>
-					) : shouldShowStats && (
-						<LazyStatsPanel />
+					) : (
+						shouldShowStats && <LazyStatsPanel />
 					)}
 				</>
 			)}

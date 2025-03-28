@@ -45,9 +45,7 @@ export function EntityCardsView() {
 						{['Básico', 'Moderno', 'Retro', 'Glitch', 'Minimalista', 'Colorido'].map((preset) => (
 							<Card key={preset} className="p-4 hover:bg-accent/20 cursor-pointer transition-colors">
 								<h3 className="font-medium mb-2">{preset}</h3>
-								<p className="text-sm text-muted-foreground">
-									Estilo {preset.toLowerCase()} para tarjetas
-								</p>
+								<p className="text-sm text-muted-foreground">Estilo {preset.toLowerCase()} para tarjetas</p>
 							</Card>
 						))}
 					</div>
@@ -55,18 +53,14 @@ export function EntityCardsView() {
 
 				<TabsContent value="design" className="space-y-4">
 					<div className="text-center my-12">
-						<p className="text-muted-foreground mb-4">
-							El editor de diseño de tarjetas está en desarrollo
-						</p>
+						<p className="text-muted-foreground mb-4">El editor de diseño de tarjetas está en desarrollo</p>
 						<Button variant="outline">Ver vista previa</Button>
 					</div>
 				</TabsContent>
 
 				<TabsContent value="settings" className="space-y-4">
 					<div className="text-center my-12">
-						<p className="text-muted-foreground mb-4">
-							La configuración avanzada está en desarrollo
-						</p>
+						<p className="text-muted-foreground mb-4">La configuración avanzada está en desarrollo</p>
 						<Button variant="outline">Configurar opciones</Button>
 					</div>
 				</TabsContent>

@@ -3,16 +3,14 @@
 import { updateImageStats } from '@/app/actions/images';
 import { parseMetadata } from '@/app/actions/metadata';
 import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import type { FileMetadata } from '@/types/metadata.types';
 import { Bug, FileImage, Loader2 } from 'lucide-react';
 import * as React from 'react';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AIGenerationInfo } from './details-panel-ai-generation-info';
 import { BasicInfo } from './details-panel-basic-info';
 import { ImagePreview } from './details-panel-image-preview';
@@ -35,6 +33,17 @@ function RelatedEntities() {
 		</div>
 	);
 }
+
+// Componentes memoizados para reducir renderizados
+const MemoizedImagePreview = React.memo(ImagePreview);
+const MemoizedBasicInfo = React.memo(BasicInfo);
+const MemoizedTechnicalInfo = React.memo(TechnicalInfo);
+const MemoizedAIGenerationInfo = React.memo(AIGenerationInfo);
+const MemoizedRelatedEntities = React.memo(RelatedEntities);
+
+// Cache para evitar múltiples llamadas a parseMetadata
+const metadataRequestCache = new Map<string, Promise<FileMetadata | null>>();
+const METADATA_CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
 /**
  * Analiza un objeto de metadatos para extraer información útil
@@ -112,19 +121,202 @@ async function parseMetadataDirectly(rawMetadata: string | null): Promise<FileMe
 	}
 }
 
+// Componente para mostrar múltiples imágenes seleccionadas
+const MultipleSelectionInfo = React.memo(({ items }: { items: ImageItem[] }) => {
+	return (
+		<div className="p-4 space-y-2">
+			<div className="flex items-center justify-between">
+				<span className="text-sm font-medium">{items.length} imágenes seleccionadas</span>
+			</div>
+			<div className="grid grid-cols-2 gap-2">
+				{items.map((item) => (
+					<div key={item.id} className="relative aspect-square">
+						<img
+							src={item.url || item.src}
+							alt={item.name}
+							className="w-full h-full object-cover rounded-md"
+						/>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+});
+
+MultipleSelectionInfo.displayName = 'MultipleSelectionInfo';
+
 /**
  * Panel de detalles para mostrar información de imágenes seleccionadas
  */
 export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
-	// Solo mostramos información de un ítem a la vez
-	const item = selectedItems?.[0] || null;
+	// Estados y refs
 	const [metadata, setMetadata] = useState<FileMetadata | null>(null);
 	const [isProcessing, setIsProcessing] = useState(false);
-	const [activeTab, setActiveTab] = useState('info');
 	const { toast } = useToast();
+	const prevItemRef = useRef<string | null>(null);
+	const metadataTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-	// Callback para depuración - muestra información detallada en consola
-	const handleDebug = () => {
+	// Determinar si hay múltiples items seleccionados
+	const hasMultipleSelection = selectedItems.length > 1;
+	const item = selectedItems[0] || null;
+
+	// Función memoizada para obtener metadata
+	const fetchMetadata = useCallback(async (itemId: string, itemMetadata: string | null) => {
+		try {
+			// Si ya tenemos metadata parseada en el item, usarla directamente
+			if (itemMetadata && typeof itemMetadata === 'object') {
+				detailsLogger.info('Usando metadata pre-parseada del item');
+				return itemMetadata as FileMetadata;
+			}
+
+			// Generar clave de caché única
+			const cacheKey = `${itemId}-${itemMetadata ? btoa(itemMetadata).slice(0, 10) : 'no-metadata'}`;
+
+			// Primero intentar usar la metadata local si está disponible
+			if (itemMetadata) {
+				const localMetadata = getMetadata(itemMetadata);
+				if (localMetadata) {
+					detailsLogger.info('Usando metadata local parseada');
+					return localMetadata;
+				}
+			}
+
+			// Verificar caché
+			const cachedRequest = metadataRequestCache.get(cacheKey);
+			if (cachedRequest) {
+				detailsLogger.info('Usando metadata desde caché');
+				return await cachedRequest;
+			}
+
+			// Crear nueva promesa para la petición
+			detailsLogger.info('Solicitando metadata del servidor');
+			const metadataPromise = parseMetadata(itemId).then(result => {
+				// Si no hay resultado del servidor pero tenemos metadata local, intentar parsearla directamente
+				if (!result && itemMetadata) {
+					detailsLogger.info('Intentando parsear metadata local directamente');
+					return parseMetadataDirectly(itemMetadata);
+				}
+				return result;
+			});
+
+			// Guardar en caché con tiempo de expiración
+			metadataRequestCache.set(cacheKey, metadataPromise);
+			setTimeout(() => {
+				if (metadataRequestCache.has(cacheKey)) {
+					detailsLogger.info('Limpiando entrada de caché expirada', { cacheKey });
+					metadataRequestCache.delete(cacheKey);
+				}
+			}, METADATA_CACHE_DURATION);
+
+			return await metadataPromise;
+		} catch (error) {
+			detailsLogger.error('Error obteniendo metadata:', error);
+			return null;
+		}
+	}, []);
+
+	// Efecto para limpiar el caché periódicamente
+	useEffect(() => {
+		const cleanupInterval = setInterval(() => {
+			const now = Date.now();
+			let entriesRemoved = 0;
+
+			for (const [key, promise] of metadataRequestCache.entries()) {
+				promise.then(() => {
+					metadataRequestCache.delete(key);
+					entriesRemoved++;
+				});
+			}
+
+			if (entriesRemoved > 0) {
+				detailsLogger.info(`Limpieza de caché: ${entriesRemoved} entradas eliminadas`);
+			}
+		}, METADATA_CACHE_DURATION);
+
+		return () => clearInterval(cleanupInterval);
+	}, []);
+
+	// Efecto para cargar metadata cuando cambia el ítem seleccionado
+	useEffect(() => {
+		if (!item || hasMultipleSelection) {
+			setMetadata(null);
+			prevItemRef.current = null;
+			return;
+		}
+
+		// Evitar recargar si es el mismo ítem
+		if (prevItemRef.current === item.id) {
+			return;
+		}
+
+		prevItemRef.current = item.id;
+		let isMounted = true;
+		let timeoutId: NodeJS.Timeout | null = null;
+
+		const loadMetadata = async () => {
+			if (!isMounted) return;
+
+			setIsProcessing(true);
+
+			try {
+				// Intentar usar metadata pre-parseada si existe
+				if (item.parsedMetadata) {
+					setMetadata(item.parsedMetadata as FileMetadata);
+					setIsProcessing(false);
+					return;
+				}
+
+				const result = await fetchMetadata(item.id, item.metadata);
+
+				if (!isMounted) return;
+
+				if (result) {
+					setMetadata(result);
+
+					// Actualizar estadísticas con debounce
+					if (metadataTimeoutRef.current) {
+						clearTimeout(metadataTimeoutRef.current);
+					}
+
+					timeoutId = setTimeout(() => {
+						if (isMounted) {
+							updateImageStats(item.id, 'view').catch((err: Error) =>
+								detailsLogger.error('Error actualizando estadísticas:', err)
+							);
+						}
+					}, 1000);
+
+					metadataTimeoutRef.current = timeoutId;
+				} else {
+					setMetadata(null);
+				}
+			} catch (error) {
+				if (isMounted) {
+					detailsLogger.error('Error cargando metadata:', error);
+					setMetadata(null);
+				}
+			} finally {
+				if (isMounted) {
+					setIsProcessing(false);
+				}
+			}
+		};
+
+		loadMetadata();
+
+		return () => {
+			isMounted = false;
+			if (timeoutId) {
+				clearTimeout(timeoutId);
+			}
+			if (metadataTimeoutRef.current) {
+				clearTimeout(metadataTimeoutRef.current);
+			}
+		};
+	}, [item, hasMultipleSelection, fetchMetadata]);
+
+	// Función memoizada para depuración
+	const handleDebug = useCallback(() => {
 		console.group('🔍 Depuración de Metadata');
 		if (item?.metadata) {
 			try {
@@ -140,10 +332,10 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 			title: 'Depuración',
 			description: 'Información impresa en la consola del navegador (F12)',
 		});
-	};
+	}, [item, toast]);
 
-	// Determina el tipo de generador de IA a partir de los metadatos
-	const getGeneratorType = React.useCallback((generation: unknown) => {
+	// Determina el tipo de generador de IA a partir de los metadatos - memoizado
+	const getGeneratorType = useCallback((generation: unknown) => {
 		const gen = generation as Record<string, unknown>;
 		if (!gen || !gen.type) {
 			return 'unknown';
@@ -173,244 +365,108 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 		return String(gen.type) || 'Desconocido';
 	}, []);
 
-	// Efecto para cargar metadata cuando cambia el ítem seleccionado
-	React.useEffect(() => {
-		if (!item) {
-			setMetadata(null);
-			return;
+	// Determinar si hay información de generación AI - memoizado
+	const hasAIGeneration = useMemo(() => metadata?.generation !== undefined, [metadata]);
+
+	// Contenido del panel memoizado
+	const renderPanelContent = useMemo(() => {
+		if (!item && !hasMultipleSelection) {
+			return (
+				<div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground">
+					<FileImage className="h-12 w-12 mb-4 opacity-20" />
+					<p className="text-sm">Selecciona una imagen para ver sus detalles</p>
+				</div>
+			);
 		}
 
-		let mounted = true;
-		setIsProcessing(true);
+		if (hasMultipleSelection) {
+			return <MultipleSelectionInfo items={selectedItems} />;
+		}
 
-		// Función asíncrona para cargar metadatos
-		const fetchMetadata = async () => {
-			try {
-				detailsLogger.info(`Cargando metadata para item: ${item.id}`, {
-					name: item.name,
-					hasMetadata: !!item.metadata,
-					metadataPreview: item.metadata ? `${item.metadata.substring(0, 100)}...` : 'null',
-				});
-
-				// Si ya tenemos metadata en el ítem, primero intentamos usarla directamente
-				if (item.metadata) {
-					try {
-						// Primer intento: usar getMetadata normal
-						const parsedMetadata = getMetadata(item.metadata);
-						if (parsedMetadata) {
-							detailsLogger.info('Metadata parseada correctamente desde el item', {
-								hasGeneration: !!parsedMetadata.generation,
-								generationType: parsedMetadata.generation?.type,
-							});
-
-							if (mounted) {
-								setMetadata(parsedMetadata);
-								setIsProcessing(false);
-							}
-
-							// Actualizamos estadísticas de vistas en segundo plano
-							updateImageStats(item.id, 'view').catch((err: Error) =>
-								detailsLogger.error('Error actualizando estadísticas:', err)
-							);
-							return;
-						}
-
-						// Segundo intento: usar método alternativo de parseo con parsers especializados
-						detailsLogger.info('Intentando método alternativo de parseo con parsers de IA');
-						const alternativeMetadata = await parseMetadataDirectly(item.metadata);
-						if (alternativeMetadata && mounted) {
-							detailsLogger.info('Metadata parseada correctamente con método alternativo', {
-								hasGeneration: !!alternativeMetadata.generation,
-								generationType: alternativeMetadata.generation?.type,
-								generatorInfo: alternativeMetadata.generation
-									? getGeneratorType(alternativeMetadata.generation as unknown)
-									: 'No detectado',
-							});
-
-							setMetadata(alternativeMetadata);
-							setIsProcessing(false);
-
-							// Actualizamos estadísticas de vistas en segundo plano
-							updateImageStats(item.id, 'view').catch((err: Error) =>
-								detailsLogger.error('Error actualizando estadísticas:', err)
-							);
-							return;
-						}
-					} catch (error) {
-						detailsLogger.error('Error parseando metadata local:', error);
-					}
-				}
-
-				// Añadir un timeout para la petición de metadata
-				const metadataPromise = parseMetadata(item.id);
-				const timeoutPromise = new Promise<null>((_, reject) => {
-					setTimeout(() => {
-						reject(new Error('Timeout al obtener metadata'));
-					}, 10000); // 10 segundos de timeout
-				});
-
-				// Intentamos obtener metadata fresca del servidor con timeout
-				const result = await Promise.race([metadataPromise, timeoutPromise]);
-
-				if (mounted) {
-					if (result) {
-						detailsLogger.info('Metadata obtenida correctamente desde API', {
-							hasGeneration: !!result.generation,
-							generationType: result.generation?.type,
-							generatorInfo: result.generation ? getGeneratorType(result.generation as unknown) : 'No detectado',
-						});
-						setMetadata(result);
-
-						// Actualizamos estadísticas de vistas en segundo plano
-						updateImageStats(item.id, 'view').catch((err: Error) =>
-							detailsLogger.error('Error actualizando estadísticas:', err)
-						);
-					} else {
-						detailsLogger.warn('No se encontró metadata para el ítem');
-						setMetadata(null);
-					}
-					setIsProcessing(false);
-				}
-			} catch (error) {
-				if (mounted) {
-					detailsLogger.error('Error cargando metadata:', error);
-					setMetadata(null);
-					setIsProcessing(false);
-				}
-			}
-		};
-
-		// Ejecutar la función asíncrona
-		fetchMetadata();
-
-		// Limpieza cuando el componente se desmonta o el ítem cambia
-		return () => {
-			mounted = false;
-		};
-	}, [item, getGeneratorType]);
-
-	// Si no hay ítem seleccionado, mostrar mensaje
-	if (!item) {
-		return (
-			<div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground">
-				<FileImage className="h-12 w-12 mb-4 opacity-20" />
-				<p className="text-sm">Selecciona una imagen para ver sus detalles</p>
-			</div>
-		);
-	}
-
-	// Determinar si hay información de generación AI
-	const hasAIGeneration = metadata?.generation !== undefined;
-
-	// Determinar si hay información de ubicación GPS
-	const hasGPS = metadata?.exif?.gps !== undefined;
-
-	return (
-		<Card className="h-full flex flex-col border-border/30 rounded-md">
-			{/* Header del panel */}
-			<CardHeader className="p-3 pb-2 border-b border-border/10 space-y-1">
-				<CardTitle className="flex justify-between items-center">
-					<span className="text-sm font-medium">Detalles</span>
-					{item && (
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-6 w-6 rounded-md hover:bg-secondary/50"
-							onClick={handleDebug}
-						>
-							<Bug className="h-3.5 w-3.5 text-muted-foreground" />
-						</Button>
-					)}
-				</CardTitle>
-			</CardHeader>
-
-			{/* Contenido condicional */}
-			{!item ? (
-				// Mensaje cuando no hay ítem seleccionado
-				<div className="flex-1 flex items-center justify-center p-4">
-					<div className="text-center">
-						<FileImage className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
-						<h3 className="text-sm font-medium mb-1">Sin selección</h3>
-						<p className="text-xs text-muted-foreground">Selecciona un archivo para ver sus detalles</p>
-					</div>
-				</div>
-			) : isProcessing ? (
-				// Estado de carga
+		if (isProcessing) {
+			return (
 				<div className="flex-1 flex items-center justify-center p-4">
 					<div className="text-center">
 						<Loader2 className="h-6 w-6 animate-spin text-muted-foreground mx-auto mb-2" />
 						<p className="text-xs text-muted-foreground">Cargando información...</p>
 					</div>
 				</div>
-			) : (
-				// Panel de detalles para el ítem seleccionado
-				<div className="flex-1 flex flex-col overflow-hidden">
-					{/* Tabs de navegación */}
-					<div className="px-3 pt-1">
-						<Tabs
-							value={activeTab}
-							onValueChange={setActiveTab}
-							className="w-full"
-						>
-							<TabsList className="h-7 p-0.5 bg-muted/50 w-full grid grid-cols-4">
-								<TabsTrigger
-									value="info"
-									className="h-6 px-2 text-[10px] data-[state=active]:bg-background"
-								>
-									General
-								</TabsTrigger>
-								<TabsTrigger
-									value="exif"
-									className="h-6 px-2 text-[10px] data-[state=active]:bg-background"
-								>
-									Técnica
-								</TabsTrigger>
-								<TabsTrigger
-									value="generation"
-									className="h-6 px-2 text-[10px] data-[state=active]:bg-background"
-									disabled={!metadata?.generation}
-								>
-									<div className="flex items-center gap-1">
-										IA
-										{metadata?.generation && (
-											<Badge
-												variant="outline"
-												className="h-3 px-1 text-[8px] bg-primary/5 hover:bg-primary/5 text-primary"
-											>
-												{getGeneratorType(metadata.generation)}
-											</Badge>
-										)}
-									</div>
-								</TabsTrigger>
-								<TabsTrigger
-									value="related"
-									className="h-6 px-2 text-[10px] data-[state=active]:bg-background"
-								>
-									Relacionados
-								</TabsTrigger>
-							</TabsList>
-						</Tabs>
-					</div>
+			);
+		}
 
-					{/* Contenedor de scroll para el contenido */}
-					<ScrollArea className="flex-1 overflow-auto">
-						<div className="p-3 pb-6 space-y-3">
-							{/* Vista previa de imagen - usar el componente importado */}
-							<div className="w-full aspect-square sm:aspect-video bg-muted/30 rounded-md overflow-hidden">
-								<ImagePreview item={item} />
-							</div>
-
-							{/* Contenido según la pestaña activa */}
-							{activeTab === 'info' && <BasicInfo item={item} metadata={metadata} />}
-							{activeTab === 'exif' && <TechnicalInfo metadata={metadata} />}
-							{activeTab === 'generation' && metadata?.generation && (
-								<AIGenerationInfo generation={metadata.generation} />
-							)}
-							{activeTab === 'related' && <RelatedEntities />}
+		return (
+			<div className="flex-1 flex flex-col overflow-hidden">
+				<ScrollArea className="flex-1 overflow-auto">
+					<div className="p-3 pb-6 space-y-4">
+						{/* Vista previa de imagen */}
+						<div className="w-full aspect-square sm:aspect-video bg-muted/30 rounded-md overflow-hidden">
+							<MemoizedImagePreview item={item} />
 						</div>
-					</ScrollArea>
-				</div>
-			)}
+
+						{/* Sección: Información general */}
+						<div className="space-y-2">
+							<h3 className="text-xs font-medium text-muted-foreground border-b border-border/10 pb-1 mb-1">
+								Información general
+							</h3>
+							<MemoizedBasicInfo item={item} metadata={metadata} />
+						</div>
+
+						{/* Sección: Información técnica */}
+						<div className="space-y-2">
+							<h3 className="text-xs font-medium text-muted-foreground border-b border-border/10 pb-1 mb-1">
+								Información técnica
+							</h3>
+							<MemoizedTechnicalInfo metadata={metadata} />
+						</div>
+
+						{/* Sección: Información de generación AI (condicional) */}
+						{hasAIGeneration && metadata?.generation && (
+							<div className="space-y-2">
+								<h3 className="text-xs font-medium text-muted-foreground border-b border-border/10 pb-1 mb-1">
+									Generación por IA
+								</h3>
+								<MemoizedAIGenerationInfo generation={metadata.generation} />
+							</div>
+						)}
+
+						{/* Sección: Entidades relacionadas */}
+						<div className="space-y-2">
+							<h3 className="text-xs font-medium text-muted-foreground border-b border-border/10 pb-1 mb-1">
+								Elementos relacionados
+							</h3>
+							<MemoizedRelatedEntities />
+						</div>
+					</div>
+				</ScrollArea>
+			</div>
+		);
+	}, [item, hasMultipleSelection, isProcessing, metadata, hasAIGeneration, selectedItems]);
+
+	// Estado memoizado para el header del panel
+	const renderPanelHeader = useMemo(() => (
+		<CardHeader className="p-3 pb-2 border-b border-border/10 space-y-1">
+			<CardTitle className="flex justify-between items-center">
+				<span className="text-sm font-medium">
+					{hasMultipleSelection ? `${selectedItems.length} imágenes seleccionadas` : 'Detalles'}
+				</span>
+				{item && !hasMultipleSelection && (
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-6 w-6 rounded-md hover:bg-secondary/50"
+						onClick={handleDebug}
+					>
+						<Bug className="h-3.5 w-3.5 text-muted-foreground" />
+					</Button>
+				)}
+			</CardTitle>
+		</CardHeader>
+	), [item, hasMultipleSelection, selectedItems.length, handleDebug]);
+
+	return (
+		<Card className="h-full flex flex-col border-border/30 rounded-md">
+			{renderPanelHeader}
+			{renderPanelContent}
 		</Card>
 	);
 }

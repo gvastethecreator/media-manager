@@ -3,17 +3,11 @@
  * @module transformers/video/serializers
  */
 
-import type {
-    Video,
-    VideoBase,
-    VideoMetadata,
-    VideoPrivacyLevel,
-    VideoVisualConfig
-} from '../../types/entities/video';
+import type { Video, VideoBase, VideoMetadata, VideoPrivacyLevel, VideoVisualConfig } from '../../types/entities/video';
 
 // Define interfaces adicionales para extender VideoBase
 interface VideoData {
-  metadata?: string | VideoMetadata;
+	metadata?: string | VideoMetadata;
 }
 
 /**
@@ -22,14 +16,14 @@ interface VideoData {
  * @returns Objeto Video completo
  */
 export function extendVideo(video: VideoBase & VideoData): Video {
-  // Asegurarse de que todas las propiedades requeridas por Video están presentes
-  return {
-    ...video,
-    metadata: parseVideoMetadata(video),
-    tags: [], // Propiedad requerida por Video, inicializada como array vacío
-    privacyLevel: 'PRIVATE' as VideoPrivacyLevel, // Valor por defecto para privacyLevel
-    isFavorite: false, // Valor por defecto para isFavorite
-  };
+	// Asegurarse de que todas las propiedades requeridas por Video están presentes
+	return {
+		...video,
+		metadata: parseVideoMetadata(video),
+		tags: [], // Propiedad requerida por Video, inicializada como array vacío
+		privacyLevel: 'PRIVATE' as VideoPrivacyLevel, // Valor por defecto para privacyLevel
+		isFavorite: false, // Valor por defecto para isFavorite
+	};
 }
 
 /**
@@ -38,7 +32,7 @@ export function extendVideo(video: VideoBase & VideoData): Video {
  * @returns Array de objetos Video completos
  */
 export function extendVideos(videos: (VideoBase & VideoData)[]): Video[] {
-  return videos.map(extendVideo);
+	return videos.map(extendVideo);
 }
 
 /**
@@ -47,18 +41,18 @@ export function extendVideos(videos: (VideoBase & VideoData)[]): Video[] {
  * @returns Metadatos parseados o undefined
  */
 export function parseVideoMetadata(video: VideoData): VideoMetadata | undefined {
-  if (!video.metadata) return undefined;
+	if (!video.metadata) return undefined;
 
-  if (typeof video.metadata === 'string') {
-    try {
-      return JSON.parse(video.metadata) as VideoMetadata;
-    } catch (error) {
-      console.error('Error parsing video metadata', error);
-      return undefined;
-    }
-  }
+	if (typeof video.metadata === 'string') {
+		try {
+			return JSON.parse(video.metadata) as VideoMetadata;
+		} catch (error) {
+			console.error('Error parsing video metadata', error);
+			return undefined;
+		}
+	}
 
-  return video.metadata as VideoMetadata;
+	return video.metadata as VideoMetadata;
 }
 
 /**
@@ -67,14 +61,14 @@ export function parseVideoMetadata(video: VideoData): VideoMetadata | undefined 
  * @returns String serializado o undefined
  */
 export function serializeVideoMetadata(metadata?: VideoMetadata): string | undefined {
-  if (!metadata) return undefined;
+	if (!metadata) return undefined;
 
-  try {
-    return JSON.stringify(metadata);
-  } catch (error) {
-    console.error('Error serializing video metadata', error);
-    return undefined;
-  }
+	try {
+		return JSON.stringify(metadata);
+	} catch (error) {
+		console.error('Error serializing video metadata', error);
+		return undefined;
+	}
 }
 
 /**
@@ -83,51 +77,51 @@ export function serializeVideoMetadata(metadata?: VideoMetadata): string | undef
  * @returns Configuración visual extendida con propiedades adicionales
  */
 export function serializeVideoVisualConfig(
-  visualConfig: VideoVisualConfig | null | undefined
+	visualConfig: VideoVisualConfig | null | undefined
 ): VideoVisualConfig | undefined {
-  if (!visualConfig) return undefined;
+	if (!visualConfig) return undefined;
 
-  // Crear copia para evitar mutar el objeto original
-  const extendedConfig: VideoVisualConfig = {
-    ...visualConfig,
-  };
+	// Crear copia para evitar mutar el objeto original
+	const extendedConfig: VideoVisualConfig = {
+		...visualConfig,
+	};
 
-  // Procesar campos de tipo string JSON
-  if (visualConfig.layerSystem) {
-    try {
-      // Añadir propiedad extendida layersConfig
-      (extendedConfig as any).layersConfig = JSON.parse(visualConfig.layerSystem);
-    } catch (error) {
-      console.error('Error al serializar layerSystem:', error);
-    }
-  }
+	// Procesar campos de tipo string JSON
+	if (visualConfig.layerSystem) {
+		try {
+			// Añadir propiedad extendida layersConfig
+			(extendedConfig as any).layersConfig = JSON.parse(visualConfig.layerSystem);
+		} catch (error) {
+			console.error('Error al serializar layerSystem:', error);
+		}
+	}
 
-  if (visualConfig.effects) {
-    try {
-      // Añadir propiedad extendida effectsConfig
-      (extendedConfig as any).effectsConfig = JSON.parse(visualConfig.effects);
-    } catch (error) {
-      console.error('Error al serializar effects:', error);
-    }
-  }
+	if (visualConfig.effects) {
+		try {
+			// Añadir propiedad extendida effectsConfig
+			(extendedConfig as any).effectsConfig = JSON.parse(visualConfig.effects);
+		} catch (error) {
+			console.error('Error al serializar effects:', error);
+		}
+	}
 
-  if (visualConfig.performance) {
-    try {
-      // Añadir propiedad extendida performanceConfig
-      (extendedConfig as any).performanceConfig = JSON.parse(visualConfig.performance);
-    } catch (error) {
-      console.error('Error al serializar performance:', error);
-    }
-  }
+	if (visualConfig.performance) {
+		try {
+			// Añadir propiedad extendida performanceConfig
+			(extendedConfig as any).performanceConfig = JSON.parse(visualConfig.performance);
+		} catch (error) {
+			console.error('Error al serializar performance:', error);
+		}
+	}
 
-  if (visualConfig.states) {
-    try {
-      // Añadir propiedad extendida statesConfig
-      (extendedConfig as any).statesConfig = JSON.parse(visualConfig.states);
-    } catch (error) {
-      console.error('Error al serializar states:', error);
-    }
-  }
+	if (visualConfig.states) {
+		try {
+			// Añadir propiedad extendida statesConfig
+			(extendedConfig as any).statesConfig = JSON.parse(visualConfig.states);
+		} catch (error) {
+			console.error('Error al serializar states:', error);
+		}
+	}
 
-  return extendedConfig;
+	return extendedConfig;
 }

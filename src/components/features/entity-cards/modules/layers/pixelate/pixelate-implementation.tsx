@@ -50,7 +50,7 @@ export const pixelateImplementation: LayerImplementation<PixelateConfig> = {
 			},
 			blendMode: 'screen',
 		},
-		'Cyberpunk': {
+		Cyberpunk: {
 			pixelSize: 6,
 			algorithm: 'adaptive',
 			colorReduction: true,
@@ -69,7 +69,7 @@ export const pixelateImplementation: LayerImplementation<PixelateConfig> = {
 			},
 			blendMode: 'overlay',
 		},
-		'Matrix': {
+		Matrix: {
 			pixelSize: 3,
 			algorithm: 'simple',
 			colorReduction: true,
@@ -83,7 +83,7 @@ export const pixelateImplementation: LayerImplementation<PixelateConfig> = {
 			},
 			blendMode: 'multiply',
 		},
-		'Glitch': {
+		Glitch: {
 			pixelSize: 8,
 			algorithm: 'adaptive',
 			colorReduction: true,

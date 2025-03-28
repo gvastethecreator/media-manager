@@ -13,7 +13,7 @@ export function FloatingDisplayMenu() {
 
 	// Controlar el colapso del menú
 	const toggleCollapse = () => {
-		setIsCollapsed(prev => !prev);
+		setIsCollapsed((prev) => !prev);
 	};
 
 	// Si el menú no es visible, no renderizar nada
@@ -32,24 +32,12 @@ export function FloatingDisplayMenu() {
 		>
 			{/* Cabecera del menú */}
 			<div className="flex items-center justify-between p-2 border-b border-border">
-				{!isCollapsed && (
-					<h3 className="text-sm font-medium">Modo de visualización</h3>
-				)}
+				{!isCollapsed && <h3 className="text-sm font-medium">Modo de visualización</h3>}
 				<div className="flex space-x-1 ml-auto">
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-6 w-6"
-						onClick={toggleCollapse}
-					>
+					<Button variant="ghost" size="icon" className="h-6 w-6" onClick={toggleCollapse}>
 						{isCollapsed ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
 					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-6 w-6"
-						onClick={toggleMenu}
-					>
+					<Button variant="ghost" size="icon" className="h-6 w-6" onClick={toggleMenu}>
 						<X className="h-4 w-4" />
 					</Button>
 				</div>
@@ -58,9 +46,7 @@ export function FloatingDisplayMenu() {
 			{/* Contenido del menú */}
 			{!isCollapsed && (
 				<div className="p-3 space-y-2">
-					<div className="text-xs text-muted-foreground mb-2">
-						Selecciona cómo mostrar las tarjetas de entidades:
-					</div>
+					<div className="text-xs text-muted-foreground mb-2">Selecciona cómo mostrar las tarjetas de entidades:</div>
 
 					<Button
 						variant={displayMode === 'simple' ? 'default' : 'outline'}

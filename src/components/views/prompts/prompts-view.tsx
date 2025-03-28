@@ -2,12 +2,12 @@
 
 import type { PromptWithStats } from '@/app/actions/prompts/prompt.actions';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
+import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
-import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Alert, AlertCircle, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Spinner } from '@/components/ui/spinner';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/files/file-manager.store';
@@ -19,12 +19,6 @@ import type { ViewProps } from '../types';
 
 const viewLogger = serverLogger.withContext('PromptsView');
 
-// Configuración visual simplificada para prompts
-const DEFAULT_PROMPT_OPTIONS: CardOptions = {
-	primaryColor: '#10b981',
-	secondaryColor: '#059669',
-};
-
 export function PromptsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentPrompt } = useFileManager();
@@ -32,7 +26,6 @@ export function PromptsView(_props: ViewProps) {
 	const [prompts, setPrompts] = useState<PromptWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_PROMPT_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticPrompts, _addEvent] = clientEvents.useEvents<PromptWithStats[]>(prompts);
@@ -53,29 +46,10 @@ export function PromptsView(_props: ViewProps) {
 		}
 	}, []);
 
-	// Cargar la configuración visual desde el servidor
-	const loadVisualConfig = useCallback(async () => {
-		try {
-			viewLogger.info('🔄 Cargando configuración visual para prompts...');
-			const response = await fetch('/api/entities/prompts/visual-config');
-			if (!response.ok) {
-				throw new Error(`Error ${response.status}: ${response.statusText}`);
-			}
-			const config = await response.json();
-			setVisualConfig({ ...DEFAULT_PROMPT_OPTIONS, ...config });
-			viewLogger.info('✅ Configuración visual cargada');
-		} catch (err) {
-			viewLogger.error('❌ Error cargando configuración visual:', err);
-			// Mantener la configuración predeterminada en caso de error
-		}
-	}, []);
-
 	useEffect(() => {
 		// Cargar prompts inicialmente
 		fetchPrompts();
-		// Cargar configuración visual
-		loadVisualConfig();
-	}, [fetchPrompts, loadVisualConfig]);
+	}, [fetchPrompts]);
 
 	const handlePromptClick = useCallback(
 		(prompt: PromptWithStats) => {
@@ -86,7 +60,7 @@ export function PromptsView(_props: ViewProps) {
 		[setCurrentView, setCurrentPrompt]
 	);
 
-	const handleEditPrompt = useCallback(
+	const handlePromptEdit = useCallback(
 		(id: string) => {
 			viewLogger.info('⚙️ Editando prompt:', id);
 			router.push(`/settings/prompts?id=${id}`);
@@ -94,56 +68,49 @@ export function PromptsView(_props: ViewProps) {
 		[router]
 	);
 
-	const handleDeletePrompt = useCallback((id: string) => {
+	const handlePromptDelete = useCallback((id: string) => {
 		viewLogger.info('🗑️ Eliminando prompt:', id);
 		// Implementar lógica de eliminación
 	}, []);
 
-	if (error) {
-		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
-			</div>
-		);
-	}
-
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
-
-	if (!optimisticPrompts || optimisticPrompts.length === 0) {
-		return (
-			<EmptyState
-				icon={MessageSquare}
-				title="No hay prompts"
-				description="Los prompts te ayudan a generar contenido con IA. Crea un nuevo prompt desde el panel de configuración."
-			/>
-		);
-	}
-
+	// Renderizar el contenido según el estado
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticPrompts.map((prompt, index) => (
-						<motion.div
-							key={prompt.id}
-							initial={{ opacity: 0, y: 20 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ delay: index * 0.1 }}
-							className="cursor-pointer"
-						>
-							<EntityCardAdapter
-								entityType="prompt"
-								entity={prompt}
+		<motion.div
+			className="container mx-auto p-4"
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			transition={{ duration: 0.5 }}
+		>
+			<ScrollArea className="h-[calc(100vh-120px)]">
+				{isLoading ? (
+					<div className="flex justify-center items-center h-64">
+						<Spinner size="lg" />
+					</div>
+				) : error ? (
+					<Alert variant="destructive" className="mb-4">
+						<AlertCircle className="h-4 w-4" />
+						<AlertTitle>Error</AlertTitle>
+						<AlertDescription>{error}</AlertDescription>
+					</Alert>
+				) : optimisticPrompts.length === 0 ? (
+					<EmptyState
+						icon={MessageSquare}
+						title="No hay prompts disponibles"
+						description="Crea un nuevo prompt para empezar"
+					/>
+				) : (
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						{optimisticPrompts.map((prompt) => (
+							<MemoizedPromptCard
+								key={prompt.id}
+								prompt={prompt}
 								onClick={() => handlePromptClick(prompt)}
-								options={visualConfig}
 								className="h-full"
 							/>
-						</motion.div>
-					))}
-				</div>
-			</div>
-		</ScrollArea>
+						))}
+					</div>
+				)}
+			</ScrollArea>
+		</motion.div>
 	);
 }

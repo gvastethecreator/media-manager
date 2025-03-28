@@ -6,9 +6,9 @@
 import type { CollectionExtended, CollectionViewConfig } from '@/types/entities/collection';
 
 export interface CollectionState {
-  collections: CollectionExtended[];
-  viewConfig: CollectionViewConfig;
-  selectedCollectionId: string | null;
-  isLoading: boolean;
-  error: string | null;
+	collections: CollectionExtended[];
+	viewConfig: CollectionViewConfig;
+	selectedCollectionId: string | null;
+	isLoading: boolean;
+	error: string | null;
 }

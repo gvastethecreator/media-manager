@@ -85,12 +85,7 @@ export function RarityEditor({ rarity, onUpdate, onClose }: RarityEditorProps) {
 		<Card className="w-full max-w-xl shadow-lg border-2 border-primary/10">
 			<div className="flex items-center justify-between border-b p-4">
 				<h3 className="text-lg font-semibold">Editar Rareza: {rarity.name}</h3>
-				<Button
-					type="button"
-					variant="ghost"
-					size="icon"
-					onClick={onClose}
-				>
+				<Button type="button" variant="ghost" size="icon" onClick={onClose}>
 					<X className="h-4 w-4" />
 				</Button>
 			</div>
@@ -295,11 +290,7 @@ export function RarityEditor({ rarity, onUpdate, onClose }: RarityEditorProps) {
 			</Tabs>
 
 			<div className="flex justify-end gap-2 p-4 border-t">
-				<Button
-					type="button"
-					variant="outline"
-					onClick={onClose}
-				>
+				<Button type="button" variant="outline" onClick={onClose}>
 					Cancelar
 				</Button>
 				<Button>Guardar Cambios</Button>

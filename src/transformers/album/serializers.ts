@@ -4,11 +4,11 @@
  */
 
 import {
-    type Album,
-    type AlbumBase,
-    type AlbumMetadata,
-    type AlbumViewConfig,
-    AlbumPrivacyLevel
+	type Album,
+	type AlbumBase,
+	type AlbumMetadata,
+	type AlbumViewConfig,
+	AlbumPrivacyLevel,
 } from '../../types/entities/album/index';
 
 /**
@@ -17,12 +17,12 @@ import {
  * @returns Objeto Album completo
  */
 export function extendAlbum(album: AlbumBase): Album {
-  return {
-    ...album,
-    privacyLevel: AlbumPrivacyLevel.PRIVATE, // valor por defecto
-    isExpanded: false,
-    isSelected: false,
-  };
+	return {
+		...album,
+		privacyLevel: AlbumPrivacyLevel.PRIVATE, // valor por defecto
+		isExpanded: false,
+		isSelected: false,
+	};
 }
 
 /**
@@ -31,7 +31,7 @@ export function extendAlbum(album: AlbumBase): Album {
  * @returns Array de objetos Album completos
  */
 export function extendAlbums(albums: AlbumBase[]): Album[] {
-  return albums.map(extendAlbum);
+	return albums.map(extendAlbum);
 }
 
 /**
@@ -39,19 +39,19 @@ export function extendAlbums(albums: AlbumBase[]): Album[] {
  * @param album Objeto de ?lbum con propiedad metadata
  * @returns Metadatos parseados o undefined
  */
-export function parseAlbumMetadata(album: {metadata?: string | AlbumMetadata}): AlbumMetadata | undefined {
-  if (!album.metadata) return undefined;
+export function parseAlbumMetadata(album: { metadata?: string | AlbumMetadata }): AlbumMetadata | undefined {
+	if (!album.metadata) return undefined;
 
-  if (typeof album.metadata === 'string') {
-    try {
-      return JSON.parse(album.metadata) as AlbumMetadata;
-    } catch (error) {
-      console.error('Error parsing album metadata', error);
-      return undefined;
-    }
-  }
+	if (typeof album.metadata === 'string') {
+		try {
+			return JSON.parse(album.metadata) as AlbumMetadata;
+		} catch (error) {
+			console.error('Error parsing album metadata', error);
+			return undefined;
+		}
+	}
 
-  return album.metadata as AlbumMetadata;
+	return album.metadata as AlbumMetadata;
 }
 
 /**
@@ -60,14 +60,14 @@ export function parseAlbumMetadata(album: {metadata?: string | AlbumMetadata}): 
  * @returns String serializado o undefined
  */
 export function serializeAlbumMetadata(metadata?: AlbumMetadata): string | undefined {
-  if (!metadata) return undefined;
+	if (!metadata) return undefined;
 
-  try {
-    return JSON.stringify(metadata);
-  } catch (error) {
-    console.error('Error serializing album metadata', error);
-    return undefined;
-  }
+	try {
+		return JSON.stringify(metadata);
+	} catch (error) {
+		console.error('Error serializing album metadata', error);
+		return undefined;
+	}
 }
 
 /**
@@ -75,19 +75,19 @@ export function serializeAlbumMetadata(metadata?: AlbumMetadata): string | undef
  * @param album Objeto de ?lbum con propiedad viewConfig
  * @returns Configuraci?n parseada o undefined
  */
-export function parseAlbumViewConfig(album: {viewConfig?: string | AlbumViewConfig}): AlbumViewConfig | undefined {
-  if (!album.viewConfig) return undefined;
+export function parseAlbumViewConfig(album: { viewConfig?: string | AlbumViewConfig }): AlbumViewConfig | undefined {
+	if (!album.viewConfig) return undefined;
 
-  if (typeof album.viewConfig === 'string') {
-    try {
-      return JSON.parse(album.viewConfig) as AlbumViewConfig;
-    } catch (error) {
-      console.error('Error parsing album view config', error);
-      return undefined;
-    }
-  }
+	if (typeof album.viewConfig === 'string') {
+		try {
+			return JSON.parse(album.viewConfig) as AlbumViewConfig;
+		} catch (error) {
+			console.error('Error parsing album view config', error);
+			return undefined;
+		}
+	}
 
-  return album.viewConfig as AlbumViewConfig;
+	return album.viewConfig as AlbumViewConfig;
 }
 
 /**
@@ -96,14 +96,14 @@ export function parseAlbumViewConfig(album: {viewConfig?: string | AlbumViewConf
  * @returns String serializado o undefined
  */
 export function serializeAlbumViewConfig(viewConfig?: AlbumViewConfig): string | undefined {
-  if (!viewConfig) return undefined;
+	if (!viewConfig) return undefined;
 
-  try {
-    return JSON.stringify(viewConfig);
-  } catch (error) {
-    console.error('Error serializing album view config', error);
-    return undefined;
-  }
+	try {
+		return JSON.stringify(viewConfig);
+	} catch (error) {
+		console.error('Error serializing album view config', error);
+		return undefined;
+	}
 }
 
 /**
@@ -113,19 +113,19 @@ export function serializeAlbumViewConfig(viewConfig?: AlbumViewConfig): string |
  * @returns Slug generado
  */
 export function generateAlbumSlug(name: string, id?: string): string {
-  // Convertir a min?sculas y reemplazar espacios y caracteres especiales
-  const baseSlug = name
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+	// Convertir a min?sculas y reemplazar espacios y caracteres especiales
+	const baseSlug = name
+		.toLowerCase()
+		.trim()
+		.replace(/[^\w\s-]/g, '')
+		.replace(/[\s_-]+/g, '-')
+		.replace(/^-+|-+$/g, '');
 
-  // Si se proporciona ID, a?adir un fragmento al final para garantizar unicidad
-  if (id) {
-    const shortId = id.substring(0, 8);
-    return `${baseSlug}-${shortId}`;
-  }
+	// Si se proporciona ID, a?adir un fragmento al final para garantizar unicidad
+	if (id) {
+		const shortId = id.substring(0, 8);
+		return `${baseSlug}-${shortId}`;
+	}
 
-  return baseSlug;
+	return baseSlug;
 }

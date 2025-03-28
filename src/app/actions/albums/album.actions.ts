@@ -8,17 +8,14 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
 // Importaciones actualizadas usando nuevos tipos y transformers
 import type { ServerImage } from '@/services/image-converter.service';
-import {
-	mapCreateAlbumDataToPrisma,
-	mapUpdateAlbumDataToPrisma
-} from '@/transformers/album';
+import { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from '@/transformers/album';
 import {
 	type Album,
 	type AlbumBase,
 	AlbumPrivacyLevel,
 	AlbumType,
 	type CreateAlbumData,
-	type UpdateAlbumData
+	type UpdateAlbumData,
 } from '@/types/entities/album';
 import type { FileItem } from '@/types/file-item';
 
@@ -195,11 +192,11 @@ export async function getAlbum(id: string): Promise<Album> {
 
 		// Convertir el resultado de Prisma al tipo Album
 		const albumData: Album = {
-			...album as unknown as AlbumBase,
+			...(album as unknown as AlbumBase),
 			privacyLevel: (album as any).privacyLevel || AlbumPrivacyLevel.PRIVATE,
 			type: (album as any).type || AlbumType.STANDARD,
 			ownerId: (album as any).ownerId || '',
-			isArchived: (album as any).isArchived || false
+			isArchived: (album as any).isArchived || false,
 		};
 
 		return albumData;
@@ -232,11 +229,11 @@ export async function createAlbum(data: CreateAlbumData): Promise<Album> {
 
 		// Convertir el resultado de Prisma al tipo Album
 		const albumData: Album = {
-			...album as unknown as AlbumBase,
+			...(album as unknown as AlbumBase),
 			privacyLevel: prismaData.privacyLevel || AlbumPrivacyLevel.PRIVATE,
 			type: prismaData.type || AlbumType.STANDARD,
 			ownerId: (album as any).ownerId || '',
-			isArchived: (album as any).isArchived || false
+			isArchived: (album as any).isArchived || false,
 		};
 
 		return albumData;
@@ -276,11 +273,14 @@ export async function updateAlbum(id: string, data: UpdateAlbumData): Promise<Al
 
 		// Convertir el resultado de Prisma al tipo Album
 		const albumData: Album = {
-			...album as unknown as AlbumBase,
+			...(album as unknown as AlbumBase),
 			privacyLevel: (album as any).privacyLevel || (existingAlbum as any).privacyLevel || AlbumPrivacyLevel.PRIVATE,
 			type: (album as any).type || (existingAlbum as any).type || AlbumType.STANDARD,
 			ownerId: (album as any).ownerId || (existingAlbum as any).ownerId || '',
-			isArchived: (album as any).isArchived !== undefined ? (album as any).isArchived : ((existingAlbum as any).isArchived || false)
+			isArchived:
+				(album as any).isArchived !== undefined
+					? (album as any).isArchived
+					: (existingAlbum as any).isArchived || false,
 		};
 
 		return albumData;

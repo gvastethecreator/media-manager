@@ -1,10 +1,9 @@
 'use client';
 
 import { getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
+import { MemoizedPlaceCard } from '@/components/cards/place-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
-import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
@@ -44,7 +43,7 @@ export function PlacesView(_props: ViewProps) {
 				...place,
 				totalSize: 0, // Valor por defecto
 				lastUpdated: place.updatedAt,
-				recentImages: [] // No tenemos imágenes recientes por ahora
+				recentImages: [], // No tenemos imágenes recientes por ahora
 			}));
 			setPlaces(placesWithStats);
 			viewLogger.info(`✅ ${data.length} lugares cargados`);
@@ -72,7 +71,7 @@ export function PlacesView(_props: ViewProps) {
 				// Combinar la configuración del servidor con las opciones predeterminadas
 				setVisualConfig({
 					...DEFAULT_PLACE_OPTIONS,
-					...config
+					...config,
 				});
 			} catch (error) {
 				console.error('Error al cargar la configuración visual:', error);
@@ -93,8 +92,8 @@ export function PlacesView(_props: ViewProps) {
 				currentPlace: {
 					id: place.id,
 					name: place.name,
-					emoji: place.emoji || '🏔️',
-					count: place._count?.images || 0
+					emoji: place.emoji || '📍',
+					count: place._count?.images || 0,
 				},
 			});
 		},
@@ -134,11 +133,22 @@ export function PlacesView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<EntityCardAdapter
-								entityType="place"
-								entity={place}
+							<MemoizedPlaceCard
+								id={place.id}
+								name={place.name}
+								emoji={place.emoji}
+								color={place.color}
+								description={place.description}
+								region={place.region}
+								type={place.type}
+								climate={place.climate}
+								population={place.population}
+								government={place.government}
+								createdAt={place.createdAt}
+								updatedAt={place.updatedAt}
+								imagesCount={place._count?.images}
+								isFavorite={place.isFavorite}
 								onClick={() => handlePlaceClick(place)}
-								options={visualConfig}
 								className="h-full"
 							/>
 						</motion.div>

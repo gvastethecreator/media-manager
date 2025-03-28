@@ -1,9 +1,6 @@
 'use client';
 
-import {
-	EntityCardLayersProvider,
-	RegisterAllLayers
-} from '@/components/features/entity-cards/modules/layers';
+import { EntityCardLayersProvider, RegisterAllLayers } from '@/components/features/entity-cards/modules/layers';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -35,13 +32,16 @@ const EntityCard = (props: any) => (
 );
 
 // Componente simplificado de LayersPanel para la demostración
-const LayersPanel = ({ onLayerSelect, activeLayer }: { onLayerSelect: (layer: string | null) => void, activeLayer: string | null }) => (
+const LayersPanel = ({
+	onLayerSelect,
+	activeLayer,
+}: { onLayerSelect: (layer: string | null) => void; activeLayer: string | null }) => (
 	<div className="space-y-4">
 		<div className="grid grid-cols-2 gap-2">
-			{['image', 'metadata', 'border', 'glow', 'scanlines', 'texture'].map(layer => (
+			{['image', 'metadata', 'border', 'glow', 'scanlines', 'texture'].map((layer) => (
 				<Button
 					key={layer}
-					variant={activeLayer === layer ? "default" : "outline"}
+					variant={activeLayer === layer ? 'default' : 'outline'}
 					onClick={() => onLayerSelect(layer)}
 					className="justify-start text-left"
 				>
@@ -57,8 +57,8 @@ const LayersConfigPanel = ({ options, onOptionsChange, entityType, entityId, act
 	<div className="p-4 border rounded-md">
 		<h3 className="font-medium mb-2">Configuración de la capa: {activeLayer}</h3>
 		<p className="text-sm text-muted-foreground">
-			Este es un componente de configuración simplificado para la demostración.
-			En una implementación real, aquí se mostrarían los controles específicos para cada capa.
+			Este es un componente de configuración simplificado para la demostración. En una implementación real, aquí se
+			mostrarían los controles específicos para cada capa.
 		</p>
 	</div>
 );
@@ -77,9 +77,9 @@ export function IntegratedLayersExample() {
 			description: 'Una tarjeta con capas básicas y efectos visuales.',
 			image: 'https://picsum.photos/id/237/300/400',
 			metadata: {
-				'Tipo': 'Básica',
-				'Capas': '3'
-			}
+				Tipo: 'Básica',
+				Capas: '3',
+			},
 		},
 		{
 			id: 'card-2',
@@ -87,9 +87,9 @@ export function IntegratedLayersExample() {
 			description: 'Incluye capas de efectos visuales avanzados con animaciones.',
 			image: 'https://picsum.photos/id/1015/300/400',
 			metadata: {
-				'Tipo': 'Avanzada',
-				'Capas': '5+'
-			}
+				Tipo: 'Avanzada',
+				Capas: '5+',
+			},
 		},
 		{
 			id: 'card-3',
@@ -97,10 +97,10 @@ export function IntegratedLayersExample() {
 			description: 'Efectos holográficos, distorsiones y capas animadas complejas.',
 			image: 'https://picsum.photos/id/1025/300/400',
 			metadata: {
-				'Tipo': 'Premium',
-				'Capas': '8+'
-			}
-		}
+				Tipo: 'Premium',
+				Capas: '8+',
+			},
+		},
 	];
 
 	return (
@@ -112,8 +112,8 @@ export function IntegratedLayersExample() {
 					<Card className="p-6">
 						<h2 className="text-2xl font-bold mb-4">Sistema de Capas Integrado</h2>
 						<p className="text-muted-foreground mb-6">
-							Este ejemplo muestra la integración completa del sistema de capas con EntityCard,
-							permitiendo visualizar, configurar y personalizar las capas de las tarjetas.
+							Este ejemplo muestra la integración completa del sistema de capas con EntityCard, permitiendo visualizar,
+							configurar y personalizar las capas de las tarjetas.
 						</p>
 
 						<div className="mb-6">
@@ -129,11 +129,7 @@ export function IntegratedLayersExample() {
 									</div>
 									<div className="flex items-center gap-2">
 										<span className="text-sm">Vista Explotada</span>
-										<Switch
-											checked={explodeLayers}
-											onCheckedChange={setExplodeLayers}
-											disabled={!enableLayers}
-										/>
+										<Switch checked={explodeLayers} onCheckedChange={setExplodeLayers} disabled={!enableLayers} />
 									</div>
 								</div>
 							</div>
@@ -150,7 +146,7 @@ export function IntegratedLayersExample() {
 
 							<TabsContent value="preview" className="p-4">
 								<div className="flex flex-wrap justify-center gap-8">
-									{exampleCards.map(card => (
+									{exampleCards.map((card) => (
 										<EntityCard
 											key={card.id}
 											{...card}
@@ -160,8 +156,8 @@ export function IntegratedLayersExample() {
 												activeLayer,
 												layerSystem: {
 													explodeView: explodeLayers,
-													order: ['image', 'content', 'border', 'glow']
-												}
+													order: ['image', 'content', 'border', 'glow'],
+												},
 											}}
 										/>
 									))}
@@ -175,7 +171,7 @@ export function IntegratedLayersExample() {
 											<h3 className="text-lg font-medium mb-4">Configuración de Capa: {activeLayer}</h3>
 											<LayersConfigPanel
 												options={{}}
-												onOptionsChange={() => { }}
+												onOptionsChange={() => {}}
 												entityType="entity-card"
 												entityId={exampleCards[0].id}
 												activeLayer={activeLayer}
@@ -185,10 +181,7 @@ export function IntegratedLayersExample() {
 										<div className="text-center py-8">
 											<p className="text-muted-foreground">Selecciona una capa para configurarla</p>
 											<div className="mt-4">
-												<Button
-													variant="outline"
-													onClick={() => setActiveLayer('image')}
-												>
+												<Button variant="outline" onClick={() => setActiveLayer('image')}>
 													Configurar Capa de Imagen
 												</Button>
 											</div>
@@ -200,10 +193,7 @@ export function IntegratedLayersExample() {
 							<TabsContent value="layers" className="p-4">
 								<div className="bg-card border rounded-lg p-4">
 									<h3 className="text-lg font-medium mb-4">Capas Disponibles</h3>
-									<LayersPanel
-										onLayerSelect={setActiveLayer}
-										activeLayer={activeLayer}
-									/>
+									<LayersPanel onLayerSelect={setActiveLayer} activeLayer={activeLayer} />
 								</div>
 							</TabsContent>
 						</Tabs>

@@ -95,13 +95,7 @@ export function CardErrorDisplay({
 				</div>
 			)}
 			{onRetry && (
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					onClick={onRetry}
-					className="mt-2"
-				>
+				<Button type="button" variant="outline" size="sm" onClick={onRetry} className="mt-2">
 					<RefreshCw className="h-4 w-4 mr-2" />
 					Reintentar
 				</Button>

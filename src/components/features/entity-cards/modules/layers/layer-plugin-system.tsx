@@ -44,16 +44,14 @@ export function LayerPluginProvider({
 	children: React.ReactNode;
 }): React.ReactElement {
 	// Estado para almacenar las capas registradas
-	const [layers, setLayers] = React.useState<Map<string, LayerRegistration>>(
-		new Map()
-	);
+	const [layers, setLayers] = React.useState<Map<string, LayerRegistration>>(new Map());
 
 	// Estado para la capa activa
 	const [activeLayer, setActiveLayer] = React.useState<string | null>(null);
 
 	// Función para registrar una nueva capa
 	const registerLayer = React.useCallback((layer: LayerRegistration) => {
-		setLayers(current => {
+		setLayers((current) => {
 			const newLayers = new Map(current);
 			newLayers.set(layer.type, layer);
 			return newLayers;
@@ -63,7 +61,7 @@ export function LayerPluginProvider({
 
 	// Función para eliminar una capa
 	const unregisterLayer = React.useCallback((type: string) => {
-		setLayers(current => {
+		setLayers((current) => {
 			const newLayers = new Map(current);
 			newLayers.delete(type);
 			return newLayers;
@@ -72,9 +70,12 @@ export function LayerPluginProvider({
 	}, []);
 
 	// Función para obtener una capa
-	const getLayer = React.useCallback((type: string) => {
-		return layers.get(type);
-	}, [layers]);
+	const getLayer = React.useCallback(
+		(type: string) => {
+			return layers.get(type);
+		},
+		[layers]
+	);
 
 	// Función para obtener todas las capas
 	const getLayers = React.useCallback(() => {
@@ -82,26 +83,29 @@ export function LayerPluginProvider({
 	}, [layers]);
 
 	// Función para obtener capas ordenadas
-	const getOrderedLayers = React.useCallback((order?: string[]) => {
-		const allLayers = Array.from(layers.values());
-		if (!order || order.length === 0) return allLayers;
+	const getOrderedLayers = React.useCallback(
+		(order?: string[]) => {
+			const allLayers = Array.from(layers.values());
+			if (!order || order.length === 0) return allLayers;
 
-		const orderedLayers: LayerRegistration[] = [];
-		// Primero agregamos las capas en el orden especificado
-		order.forEach(type => {
-			const layer = layers.get(type);
-			if (layer) orderedLayers.push(layer);
-		});
+			const orderedLayers: LayerRegistration[] = [];
+			// Primero agregamos las capas en el orden especificado
+			order.forEach((type) => {
+				const layer = layers.get(type);
+				if (layer) orderedLayers.push(layer);
+			});
 
-		// Luego agregamos las capas restantes que no estaban en el orden
-		allLayers.forEach(layer => {
-			if (!order.includes(layer.type)) {
-				orderedLayers.push(layer);
-			}
-		});
+			// Luego agregamos las capas restantes que no estaban en el orden
+			allLayers.forEach((layer) => {
+				if (!order.includes(layer.type)) {
+					orderedLayers.push(layer);
+				}
+			});
 
-		return orderedLayers;
-	}, [layers]);
+			return orderedLayers;
+		},
+		[layers]
+	);
 
 	// Crear el valor del contexto
 	const contextValue = React.useMemo(
@@ -115,23 +119,10 @@ export function LayerPluginProvider({
 			getLayers,
 			getOrderedLayers,
 		}),
-		[
-			layers,
-			registerLayer,
-			unregisterLayer,
-			getLayer,
-			activeLayer,
-			setActiveLayer,
-			getLayers,
-			getOrderedLayers,
-		]
+		[layers, registerLayer, unregisterLayer, getLayer, activeLayer, setActiveLayer, getLayers, getOrderedLayers]
 	);
 
-	return (
-		<LayerPluginContext.Provider value={contextValue}>
-			{children}
-		</LayerPluginContext.Provider>
-	);
+	return <LayerPluginContext.Provider value={contextValue}>{children}</LayerPluginContext.Provider>;
 }
 
 /**
@@ -166,13 +157,7 @@ export function SingleLayerRenderer<T extends BaseLayerConfig>({
 
 	const { component: Component, defaultConfig } = layer;
 
-	return (
-		<Component
-			{...props}
-			config={config}
-			defaultConfig={defaultConfig}
-		/>
-	);
+	return <Component {...props} config={config} defaultConfig={defaultConfig} />;
 }
 
 /**
@@ -196,12 +181,7 @@ export function LayerSettings<T extends BaseLayerConfig>({
 
 	const Settings = layer.settings;
 
-	return (
-		<Settings
-			config={config}
-			onConfigChange={onConfigChange as (config: Partial<BaseLayerConfig>) => void}
-		/>
-	);
+	return <Settings config={config} onConfigChange={onConfigChange as (config: Partial<BaseLayerConfig>) => void} />;
 }
 
 /**
@@ -222,10 +202,9 @@ export function LayerList({
 				<button
 					key={layer.type}
 					onClick={() => onSelect(layer.type)}
-					className={`flex items-center gap-2 p-2 w-full rounded ${selectedType === layer.type
-						? 'bg-primary text-primary-foreground'
-						: 'hover:bg-accent'
-						}`}
+					className={`flex items-center gap-2 p-2 w-full rounded ${
+						selectedType === layer.type ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+					}`}
 				>
 					{layer.icon && <span>{layer.icon}</span>}
 					<span>{layer.name}</span>

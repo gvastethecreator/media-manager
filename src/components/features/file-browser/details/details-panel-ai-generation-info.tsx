@@ -3,10 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import {
-	type AIGenerationInfo as AIGenerationInfoType,
-	determineGeneratorType,
-} from '@/lib/parsers';
+import { type AIGenerationInfo as AIGenerationInfoType, determineGeneratorType } from '@/lib/parsers';
 import { cn } from '@/lib/utils';
 import { Bug, Calendar, Code2, FileDigit, FileImage, HardDrive, Palette, Settings2 } from 'lucide-react';
 import * as React from 'react';
@@ -49,8 +46,8 @@ export function AIGenerationInfo({ generation }: AIGenerationInfoProps) {
 	// Extraer extra_params como un objeto con tipado seguro
 	const extraParams =
 		typeof generation.extra_params === 'object' && generation.extra_params
-		? (generation.extra_params as Record<string, unknown>)
-		: null;
+			? (generation.extra_params as Record<string, unknown>)
+			: null;
 
 	// Extraer strength value si existe
 	const strengthValue = extraParams ? getStrengthParam(extraParams) : null;
@@ -68,8 +65,8 @@ export function AIGenerationInfo({ generation }: AIGenerationInfoProps) {
 					onClick={() => {
 						console.log('Datos de generación:', generation);
 						toast({
-							title: "Debug",
-							description: "Datos impresos en consola",
+							title: 'Debug',
+							description: 'Datos impresos en consola',
 						});
 					}}
 				>
@@ -122,11 +119,7 @@ export function AIGenerationInfo({ generation }: AIGenerationInfoProps) {
 					)}
 
 					{strengthValue && (
-						<InfoItem
-							icon={<Settings2 className="h-3 w-3 text-purple-400" />}
-							label="Strength"
-							value={strengthValue}
-						/>
+						<InfoItem icon={<Settings2 className="h-3 w-3 text-purple-400" />} label="Strength" value={strengthValue} />
 					)}
 
 					{generation.created_at && (
@@ -155,7 +148,12 @@ export function AIGenerationInfo({ generation }: AIGenerationInfoProps) {
 								<span className="text-[9px]">{isPromptExpanded ? 'Colapsar' : 'Expandir'}</span>
 							</Button>
 						</div>
-						<div className={cn('text-[10px] bg-muted/30 p-1.5 rounded-sm', !isPromptExpanded && 'max-h-16 overflow-hidden')}>
+						<div
+							className={cn(
+								'text-[10px] bg-muted/30 p-1.5 rounded-sm',
+								!isPromptExpanded && 'max-h-16 overflow-hidden'
+							)}
+						>
 							<p className="whitespace-pre-wrap break-words">
 								{isPromptExpanded ? safeStr(generation.prompt) : truncateText(safeStr(generation.prompt), 150)}
 							</p>
@@ -219,9 +217,7 @@ export function AIGenerationInfo({ generation }: AIGenerationInfoProps) {
 							)}
 						>
 							<pre className="whitespace-pre-wrap break-words">
-								{isWorkflowExpanded
-									? safeStr(generation.workflow)
-									: truncateText(safeStr(generation.workflow), 100)}
+								{isWorkflowExpanded ? safeStr(generation.workflow) : truncateText(safeStr(generation.workflow), 100)}
 							</pre>
 						</div>
 					</div>

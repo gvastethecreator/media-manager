@@ -10,7 +10,7 @@ import {
 	MousePointerClick,
 	RefreshCwIcon,
 	TimerReset,
-	ZoomIn
+	ZoomIn,
 } from 'lucide-react';
 import { useState } from 'react';
 import {
@@ -320,14 +320,7 @@ export function PerformancePanel({
 			icon={<Cpu className="h-4 w-4" />}
 			variant="colored"
 			trailing={
-				<Button
-					type="button"
-					onClick={resetOptions}
-					variant="outline"
-					size="sm"
-					disabled={disabled}
-					className="mt-1"
-				>
+				<Button type="button" onClick={resetOptions} variant="outline" size="sm" disabled={disabled} className="mt-1">
 					<RefreshCwIcon className="mr-1 h-3 w-3" />
 					Restablecer
 				</Button>

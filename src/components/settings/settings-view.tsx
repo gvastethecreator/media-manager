@@ -14,10 +14,9 @@ import {
 	StickyNoteIcon,
 	TagIcon,
 	UploadCloud,
-	UserIcon
+	UserIcon,
 } from 'lucide-react';
 import * as React from 'react';
-
 
 import { cn } from '@/lib/utils';
 import { EntitiesCardsSection } from '../features/entity-cards/settings-old/entities-cards-settings';
@@ -184,8 +183,6 @@ export function SettingsView() {
 
 				{/* Contenido de los tabs */}
 				<div className="flex-1 overflow-hidden">
-				
-
 					<TabsContent value="system" className="gap-0 px-1 h-full overflow-auto">
 						<div className="grid grid-cols-2 gap-1 w-full">
 							<FoldersSettings />

@@ -37,21 +37,13 @@ export const DistortionConfig = () => {
 								render={({ field }) => (
 									<FormItem className="flex items-center space-x-2">
 										<FormControl>
-											<Switch
-												checked={field.value}
-												onCheckedChange={field.onChange}
-											/>
+											<Switch checked={field.value} onCheckedChange={field.onChange} />
 										</FormControl>
 										<FormLabel className="!mt-0">Habilitar Distorsión</FormLabel>
 									</FormItem>
 								)}
 							/>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => resetConfig()}
-								className="text-xs"
-							>
+							<Button variant="ghost" size="sm" onClick={() => resetConfig()} className="text-xs">
 								Restablecer
 							</Button>
 						</div>
@@ -84,10 +76,7 @@ export const DistortionConfig = () => {
 										render={({ field }) => (
 											<FormItem className="flex items-center space-x-2">
 												<FormControl>
-													<Checkbox
-														checked={field.value}
-														onCheckedChange={field.onChange}
-													/>
+													<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 												</FormControl>
 												<FormLabel className="!mt-0">Solo visible al pasar el cursor</FormLabel>
 											</FormItem>
@@ -108,10 +97,7 @@ export const DistortionConfig = () => {
 												render={({ field }) => (
 													<FormItem className="flex items-center space-x-2">
 														<FormControl>
-															<Switch
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Switch checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 														<FormLabel className="!mt-0">Habilitar Glitch</FormLabel>
 													</FormItem>
@@ -183,10 +169,7 @@ export const DistortionConfig = () => {
 														render={({ field }) => (
 															<FormItem className="flex items-center space-x-2">
 																<FormControl>
-																	<Checkbox
-																		checked={field.value}
-																		onCheckedChange={field.onChange}
-																	/>
+																	<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 																</FormControl>
 																<FormLabel className="!mt-0">Solo visible al pasar el cursor</FormLabel>
 															</FormItem>
@@ -209,10 +192,7 @@ export const DistortionConfig = () => {
 												render={({ field }) => (
 													<FormItem className="flex items-center space-x-2">
 														<FormControl>
-															<Switch
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Switch checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 														<FormLabel className="!mt-0">Habilitar Aberración Cromática</FormLabel>
 													</FormItem>
@@ -265,10 +245,7 @@ export const DistortionConfig = () => {
 														render={({ field }) => (
 															<FormItem className="flex items-center space-x-2">
 																<FormControl>
-																	<Checkbox
-																		checked={field.value}
-																		onCheckedChange={field.onChange}
-																	/>
+																	<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 																</FormControl>
 																<FormLabel className="!mt-0">Solo visible al pasar el cursor</FormLabel>
 															</FormItem>
@@ -291,10 +268,7 @@ export const DistortionConfig = () => {
 												render={({ field }) => (
 													<FormItem className="flex items-center space-x-2">
 														<FormControl>
-															<Switch
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Switch checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 														<FormLabel className="!mt-0">Habilitar Pixelado</FormLabel>
 													</FormItem>
@@ -347,10 +321,7 @@ export const DistortionConfig = () => {
 														render={({ field }) => (
 															<FormItem className="flex items-center space-x-2">
 																<FormControl>
-																	<Checkbox
-																		checked={field.value}
-																		onCheckedChange={field.onChange}
-																	/>
+																	<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 																</FormControl>
 																<FormLabel className="!mt-0">Solo visible al pasar el cursor</FormLabel>
 															</FormItem>
@@ -378,9 +349,7 @@ export const DistortionConfig = () => {
 														onValueChange={([value]) => field.onChange(value)}
 													/>
 												</FormControl>
-												<FormDescription>
-													Controla el orden de las capas en modo explotado
-												</FormDescription>
+												<FormDescription>Controla el orden de las capas en modo explotado</FormDescription>
 											</FormItem>
 										)}
 									/>

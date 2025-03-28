@@ -21,12 +21,14 @@ const textureConfigSchema = z.object({
 		offsetX: z.number(),
 		offsetY: z.number(),
 		tileMode: z.enum(TILE_MODES),
-		filters: z.object({
-			brightness: z.number().min(0).max(200).optional(),
-			contrast: z.number().min(0).max(200).optional(),
-			saturation: z.number().min(0).max(200).optional(),
-			blur: z.number().min(0).max(20).optional(),
-		}).optional(),
+		filters: z
+			.object({
+				brightness: z.number().min(0).max(200).optional(),
+				contrast: z.number().min(0).max(200).optional(),
+				saturation: z.number().min(0).max(200).optional(),
+				blur: z.number().min(0).max(20).optional(),
+			})
+			.optional(),
 	}),
 });
 
@@ -53,9 +55,7 @@ export async function getTextureConfig(entityType: string, entityId?: string): P
 		}
 
 		const config = await prisma.layerTextureConfig.findFirst({
-			where: entityId
-				? { entityType, entityId }
-				: { entityType, isDefault: true },
+			where: entityId ? { entityType, entityId } : { entityType, isDefault: true },
 		});
 
 		return {

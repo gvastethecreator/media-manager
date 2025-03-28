@@ -3,11 +3,7 @@
  * @module utils/album/helpers
  */
 
-import type {
-    Album,
-    AlbumMetadata,
-    AlbumType
-} from '../../types/entities/album';
+import type { Album, AlbumMetadata, AlbumType } from '../../types/entities/album';
 import { formatImageSize } from '../image/helpers';
 
 /**
@@ -17,21 +13,17 @@ import { formatImageSize } from '../image/helpers';
  * @param height Alto opcional de la miniatura
  * @returns URL para la miniatura
  */
-export function generateAlbumThumbnailUrl(
-  album: Album | string,
-  width?: number,
-  height?: number
-): string {
-  const albumId = typeof album === 'string' ? album : album.id;
-  const url = `/api/albums/${albumId}/thumbnail`;
+export function generateAlbumThumbnailUrl(album: Album | string, width?: number, height?: number): string {
+	const albumId = typeof album === 'string' ? album : album.id;
+	const url = `/api/albums/${albumId}/thumbnail`;
 
-  // Añadir parámetros
-  const params = new URLSearchParams();
-  if (width) params.append('width', width.toString());
-  if (height) params.append('height', height.toString());
+	// Añadir parámetros
+	const params = new URLSearchParams();
+	if (width) params.append('width', width.toString());
+	if (height) params.append('height', height.toString());
 
-  const queryString = params.toString();
-  return queryString ? `${url}?${queryString}` : url;
+	const queryString = params.toString();
+	return queryString ? `${url}?${queryString}` : url;
 }
 
 /**
@@ -40,8 +32,8 @@ export function generateAlbumThumbnailUrl(
  * @returns Tamaño formateado
  */
 export function formatAlbumSize(metadata?: AlbumMetadata): string {
-  if (!metadata || metadata.totalSize === undefined) return 'Desconocido';
-  return formatImageSize(metadata.totalSize);
+	if (!metadata || metadata.totalSize === undefined) return 'Desconocido';
+	return formatImageSize(metadata.totalSize);
 }
 
 /**
@@ -50,22 +42,22 @@ export function formatAlbumSize(metadata?: AlbumMetadata): string {
  * @returns Descripción en español
  */
 export function getAlbumTypeDescription(type: AlbumType): string {
-  switch (type) {
-    case 'standard':
-      return 'Álbum estándar';
-    case 'event':
-      return 'Evento';
-    case 'collection':
-      return 'Colección';
-    case 'project':
-      return 'Proyecto';
-    case 'portfolio':
-      return 'Portafolio';
-    case 'theme':
-      return 'Temático';
-    default:
-      return 'Álbum';
-  }
+	switch (type) {
+		case 'standard':
+			return 'Álbum estándar';
+		case 'event':
+			return 'Evento';
+		case 'collection':
+			return 'Colección';
+		case 'project':
+			return 'Proyecto';
+		case 'portfolio':
+			return 'Portafolio';
+		case 'theme':
+			return 'Temático';
+		default:
+			return 'Álbum';
+	}
 }
 
 /**
@@ -74,7 +66,7 @@ export function getAlbumTypeDescription(type: AlbumType): string {
  * @returns true si el álbum está vacío
  */
 export function isAlbumEmpty(album: Album): boolean {
-  return !album.metadata || album.metadata.itemCount === 0;
+	return !album.metadata || album.metadata.itemCount === 0;
 }
 
 /**
@@ -83,7 +75,7 @@ export function isAlbumEmpty(album: Album): boolean {
  * @returns true si tiene sub-álbumes
  */
 export function hasSubAlbums(album: Album): boolean {
-  return !!album.children && album.children.length > 0;
+	return !!album.children && album.children.length > 0;
 }
 
 /**
@@ -92,23 +84,20 @@ export function hasSubAlbums(album: Album): boolean {
  * @param allAlbums Todos los álbumes disponibles
  * @returns Array con la ruta jerárquica completa
  */
-export function getAlbumPath(
-  album: Album,
-  allAlbums: Record<string, Album>
-): Album[] {
-  const path: Album[] = [album];
-  let currentAlbum = album;
+export function getAlbumPath(album: Album, allAlbums: Record<string, Album>): Album[] {
+	const path: Album[] = [album];
+	let currentAlbum = album;
 
-  // Recorrer hacia arriba en la jerarquía
-  while (currentAlbum.parentId) {
-    const parentAlbum = allAlbums[currentAlbum.parentId];
-    if (!parentAlbum) break;
+	// Recorrer hacia arriba en la jerarquía
+	while (currentAlbum.parentId) {
+		const parentAlbum = allAlbums[currentAlbum.parentId];
+		if (!parentAlbum) break;
 
-    path.unshift(parentAlbum);
-    currentAlbum = parentAlbum;
-  }
+		path.unshift(parentAlbum);
+		currentAlbum = parentAlbum;
+	}
 
-  return path;
+	return path;
 }
 
 /**
@@ -117,7 +106,7 @@ export function getAlbumPath(
  * @returns Texto formateado para la ruta
  */
 export function formatAlbumBreadcrumb(albumPath: Album[]): string {
-  return albumPath.map(album => album.name).join(' / ');
+	return albumPath.map((album) => album.name).join(' / ');
 }
 
 /**
@@ -126,25 +115,22 @@ export function formatAlbumBreadcrumb(albumPath: Album[]): string {
  * @param allAlbums Todos los álbumes disponibles
  * @returns Array con todos los álbumes descendientes
  */
-export function getAllDescendants(
-  albumId: string,
-  allAlbums: Record<string, Album>
-): Album[] {
-  const result: Album[] = [];
-  const albums = Object.values(allAlbums);
+export function getAllDescendants(albumId: string, allAlbums: Record<string, Album>): Album[] {
+	const result: Album[] = [];
+	const albums = Object.values(allAlbums);
 
-  // Función recursiva para encontrar descendientes
-  function findChildren(id: string) {
-    const children = albums.filter(album => album.parentId === id);
+	// Función recursiva para encontrar descendientes
+	function findChildren(id: string) {
+		const children = albums.filter((album) => album.parentId === id);
 
-    for (const child of children) {
-      result.push(child);
-      findChildren(child.id);
-    }
-  }
+		for (const child of children) {
+			result.push(child);
+			findChildren(child.id);
+		}
+	}
 
-  findChildren(albumId);
-  return result;
+	findChildren(albumId);
+	return result;
 }
 
 /**
@@ -153,37 +139,37 @@ export function getAllDescendants(
  * @returns Objeto con estadísticas
  */
 export function calculateAlbumStats(albums: Album[]): {
-  totalAlbums: number;
-  totalItems: number;
-  totalSize: number;
-  rootAlbums: number;
-  emptyAlbums: number;
+	totalAlbums: number;
+	totalItems: number;
+	totalSize: number;
+	rootAlbums: number;
+	emptyAlbums: number;
 } {
-  let totalItems = 0;
-  let totalSize = 0;
-  let rootAlbums = 0;
-  let emptyAlbums = 0;
+	let totalItems = 0;
+	let totalSize = 0;
+	let rootAlbums = 0;
+	let emptyAlbums = 0;
 
-  for (const album of albums) {
-    if (!album.parentId) {
-      rootAlbums++;
-    }
+	for (const album of albums) {
+		if (!album.parentId) {
+			rootAlbums++;
+		}
 
-    if (isAlbumEmpty(album)) {
-      emptyAlbums++;
-    }
+		if (isAlbumEmpty(album)) {
+			emptyAlbums++;
+		}
 
-    if (album.metadata) {
-      totalItems += album.metadata.itemCount || 0;
-      totalSize += album.metadata.totalSize || 0;
-    }
-  }
+		if (album.metadata) {
+			totalItems += album.metadata.itemCount || 0;
+			totalSize += album.metadata.totalSize || 0;
+		}
+	}
 
-  return {
-    totalAlbums: albums.length,
-    totalItems,
-    totalSize,
-    rootAlbums,
-    emptyAlbums
-  };
+	return {
+		totalAlbums: albums.length,
+		totalItems,
+		totalSize,
+		rootAlbums,
+		emptyAlbums,
+	};
 }

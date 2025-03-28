@@ -2,11 +2,11 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from "@/components/ui/card";
+import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import {
 	Bug,
@@ -20,7 +20,7 @@ import {
 	Palette,
 	PictureInPicture,
 	Sparkles,
-	X
+	X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -75,7 +75,7 @@ const defaultControlState: CardControlState = {
 	performance: {
 		renderQuality: 'medium',
 		disableAnimations: false,
-	}
+	},
 };
 
 // Clave para persistir la configuración en localStorage
@@ -94,7 +94,7 @@ interface CardControlPanelProps {
 export function CardControlPanel({
 	onStateChange,
 	className,
-	title = "Control de Componentes"
+	title = 'Control de Componentes',
 }: CardControlPanelProps) {
 	// Estado del panel de control
 	const [controlState, setControlState] = useState<CardControlState>(defaultControlState);
@@ -128,56 +128,56 @@ export function CardControlPanel({
 
 	// Función para cambiar estado de un sistema
 	const toggleSystem = (system: keyof CardControlState['systems']) => {
-		setControlState(prev => ({
+		setControlState((prev) => ({
 			...prev,
 			systems: {
 				...prev.systems,
-				[system]: !prev.systems[system]
-			}
+				[system]: !prev.systems[system],
+			},
 		}));
 	};
 
 	// Función para cambiar estado de un efecto
 	const toggleEffect = (effect: keyof CardControlState['effects']) => {
-		setControlState(prev => ({
+		setControlState((prev) => ({
 			...prev,
 			effects: {
 				...prev.effects,
-				[effect]: !prev.effects[effect]
-			}
+				[effect]: !prev.effects[effect],
+			},
 		}));
 	};
 
 	// Función para cambiar estado de una característica
 	const toggleFeature = (feature: keyof CardControlState['features']) => {
-		setControlState(prev => ({
+		setControlState((prev) => ({
 			...prev,
 			features: {
 				...prev.features,
-				[feature]: !prev.features[feature]
-			}
+				[feature]: !prev.features[feature],
+			},
 		}));
 	};
 
 	// Función para cambiar calidad de renderizado
 	const setRenderQuality = (quality: 'low' | 'medium' | 'high') => {
-		setControlState(prev => ({
+		setControlState((prev) => ({
 			...prev,
 			performance: {
 				...prev.performance,
-				renderQuality: quality
-			}
+				renderQuality: quality,
+			},
 		}));
 	};
 
 	// Función para activar/desactivar animaciones
 	const toggleAnimations = () => {
-		setControlState(prev => ({
+		setControlState((prev) => ({
 			...prev,
 			performance: {
 				...prev.performance,
-				disableAnimations: !prev.performance.disableAnimations
-			}
+				disableAnimations: !prev.performance.disableAnimations,
+			},
 		}));
 	};
 
@@ -196,8 +196,11 @@ export function CardControlPanel({
 						<Button
 							size="icon"
 							variant="ghost"
-							className={cn("fixed bottom-20 right-4 z-50 opacity-60 hover:opacity-100 bg-background/80 backdrop-blur-sm shadow-md", className)}
-							onClick={() => setControlState(prev => ({ ...prev, enabled: true }))}
+							className={cn(
+								'fixed bottom-20 right-4 z-50 opacity-60 hover:opacity-100 bg-background/80 backdrop-blur-sm shadow-md',
+								className
+							)}
+							onClick={() => setControlState((prev) => ({ ...prev, enabled: true }))}
 						>
 							<Component className="h-5 w-5 text-primary" />
 						</Button>
@@ -211,21 +214,16 @@ export function CardControlPanel({
 	}
 
 	return (
-		<Card className={cn(
-			"fixed z-[1000] transition-all duration-300 backdrop-blur-sm shadow-xl",
-			isMinimized
-				? "bottom-20 right-4 w-auto h-auto p-2"
-				: "bottom-20 right-4 w-72 max-h-[80vh] overflow-y-auto",
-			className
-		)}>
+		<Card
+			className={cn(
+				'fixed z-[1000] transition-all duration-300 backdrop-blur-sm shadow-xl',
+				isMinimized ? 'bottom-20 right-4 w-auto h-auto p-2' : 'bottom-20 right-4 w-72 max-h-[80vh] overflow-y-auto',
+				className
+			)}
+		>
 			{isMinimized ? (
 				// Modo minimizado - solo un icono
-				<Button
-					size="icon"
-					variant="ghost"
-					className="p-1"
-					onClick={() => setIsMinimized(false)}
-				>
+				<Button size="icon" variant="ghost" className="p-1" onClick={() => setIsMinimized(false)}>
 					<Component className="h-5 w-5 text-primary" />
 				</Button>
 			) : (
@@ -238,12 +236,7 @@ export function CardControlPanel({
 						</div>
 
 						<div className="flex items-center gap-1">
-							<Button
-								size="icon"
-								variant="ghost"
-								className="h-6 w-6"
-								onClick={() => setIsMinimized(true)}
-							>
+							<Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setIsMinimized(true)}>
 								<PictureInPicture className="h-3 w-3" />
 							</Button>
 
@@ -251,7 +244,7 @@ export function CardControlPanel({
 								size="icon"
 								variant="ghost"
 								className="h-6 w-6 text-destructive"
-								onClick={() => setControlState(prev => ({ ...prev, enabled: false }))}
+								onClick={() => setControlState((prev) => ({ ...prev, enabled: false }))}
 							>
 								<X className="h-3 w-3" />
 							</Button>
@@ -260,16 +253,17 @@ export function CardControlPanel({
 
 					{/* Contenido principal */}
 					<div className="p-3 space-y-3">
-						<Tabs
-							defaultValue="systems"
-							value={activeTab}
-							onValueChange={setActiveTab}
-							className="w-full"
-						>
+						<Tabs defaultValue="systems" value={activeTab} onValueChange={setActiveTab} className="w-full">
 							<TabsList className="grid grid-cols-3 mb-2">
-								<TabsTrigger value="systems" className="text-xs">Sistemas</TabsTrigger>
-								<TabsTrigger value="effects" className="text-xs">Efectos</TabsTrigger>
-								<TabsTrigger value="performance" className="text-xs">Rendimiento</TabsTrigger>
+								<TabsTrigger value="systems" className="text-xs">
+									Sistemas
+								</TabsTrigger>
+								<TabsTrigger value="effects" className="text-xs">
+									Efectos
+								</TabsTrigger>
+								<TabsTrigger value="performance" className="text-xs">
+									Rendimiento
+								</TabsTrigger>
 							</TabsList>
 
 							{/* Sistemas */}
@@ -278,7 +272,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Layers className="h-4 w-4 text-primary" />
-											<label htmlFor="toggleLayerSystem" className="text-sm">Sistema de Capas</label>
+											<label htmlFor="toggleLayerSystem" className="text-sm">
+												Sistema de Capas
+											</label>
 										</div>
 										<Switch
 											id="toggleLayerSystem"
@@ -290,7 +286,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Palette className="h-4 w-4 text-primary" />
-											<label htmlFor="toggleDesignSystem" className="text-sm">Sistema de Diseño</label>
+											<label htmlFor="toggleDesignSystem" className="text-sm">
+												Sistema de Diseño
+											</label>
 										</div>
 										<Switch
 											id="toggleDesignSystem"
@@ -302,7 +300,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Film className="h-4 w-4 text-primary" />
-											<label htmlFor="toggleAnimationSystem" className="text-sm">Sistema de Animación</label>
+											<label htmlFor="toggleAnimationSystem" className="text-sm">
+												Sistema de Animación
+											</label>
 										</div>
 										<Switch
 											id="toggleAnimationSystem"
@@ -316,7 +316,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Circle className="h-4 w-4 text-primary" />
-											<label htmlFor="toggleBackside" className="text-sm">Backside</label>
+											<label htmlFor="toggleBackside" className="text-sm">
+												Backside
+											</label>
 										</div>
 										<Switch
 											id="toggleBackside"
@@ -328,7 +330,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Layers className="h-4 w-4 text-primary" />
-											<label htmlFor="toggleExplodedView" className="text-sm">Modo Exploded View</label>
+											<label htmlFor="toggleExplodedView" className="text-sm">
+												Modo Exploded View
+											</label>
 										</div>
 										<Switch
 											id="toggleExplodedView"
@@ -340,7 +344,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Bug className="h-4 w-4 text-warning" />
-											<label htmlFor="toggleDebugMode" className="text-sm">Modo Debug</label>
+											<label htmlFor="toggleDebugMode" className="text-sm">
+												Modo Debug
+											</label>
 										</div>
 										<Switch
 											id="toggleDebugMode"
@@ -357,7 +363,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Sparkles className="h-4 w-4 text-primary" />
-											<label htmlFor="toggleHolographicEffect" className="text-sm">Efecto Holográfico</label>
+											<label htmlFor="toggleHolographicEffect" className="text-sm">
+												Efecto Holográfico
+											</label>
 										</div>
 										<Switch
 											id="toggleHolographicEffect"
@@ -369,7 +377,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Lightbulb className="h-4 w-4 text-primary" />
-											<label htmlFor="toggleGlowEffect" className="text-sm">Efecto Glow</label>
+											<label htmlFor="toggleGlowEffect" className="text-sm">
+												Efecto Glow
+											</label>
 										</div>
 										<Switch
 											id="toggleGlowEffect"
@@ -381,7 +391,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Circle className="h-4 w-4 text-primary" />
-											<label htmlFor="toggleAnimatedBorders" className="text-sm">Bordes Animados</label>
+											<label htmlFor="toggleAnimatedBorders" className="text-sm">
+												Bordes Animados
+											</label>
 										</div>
 										<Switch
 											id="toggleAnimatedBorders"
@@ -393,7 +405,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Dices className="h-4 w-4 text-primary" />
-											<label htmlFor="pixelate-switch" className="text-sm">Efecto Pixelado</label>
+											<label htmlFor="pixelate-switch" className="text-sm">
+												Efecto Pixelado
+											</label>
 										</div>
 										<Switch
 											id="pixelate-switch"
@@ -405,7 +419,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<span className="text-xs">⦙</span>
-											<label htmlFor="grain-switch" className="text-sm">Efecto Grano</label>
+											<label htmlFor="grain-switch" className="text-sm">
+												Efecto Grano
+											</label>
 										</div>
 										<Switch
 											id="grain-switch"
@@ -417,7 +433,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Film className="h-4 w-4 text-primary" />
-											<label htmlFor="scanlines-switch" className="text-sm">Scanlines</label>
+											<label htmlFor="scanlines-switch" className="text-sm">
+												Scanlines
+											</label>
 										</div>
 										<Switch
 											id="scanlines-switch"
@@ -455,7 +473,9 @@ export function CardControlPanel({
 									<div className="flex items-center justify-between">
 										<div className="flex items-center gap-2">
 											<Film className="h-4 w-4 text-primary" />
-											<label htmlFor="disable-animations-switch" className="text-sm">Deshabilitar Animaciones</label>
+											<label htmlFor="disable-animations-switch" className="text-sm">
+												Deshabilitar Animaciones
+											</label>
 										</div>
 										<Switch
 											id="disable-animations-switch"
@@ -466,12 +486,7 @@ export function CardControlPanel({
 								</div>
 
 								<div className="pt-4 border-t border-border/30">
-									<Button
-										variant="outline"
-										size="sm"
-										className="w-full"
-										onClick={resetConfig}
-									>
+									<Button variant="outline" size="sm" className="w-full" onClick={resetConfig}>
 										Restablecer a valores predeterminados
 									</Button>
 								</div>
@@ -481,10 +496,12 @@ export function CardControlPanel({
 						{/* Indicador de estado */}
 						<div className="flex items-center justify-between border-t pt-2 border-border/30">
 							<Badge variant="outline" className="text-xs">
-								{Object.values(controlState.systems).filter(Boolean).length}/{Object.keys(controlState.systems).length} Sistemas
+								{Object.values(controlState.systems).filter(Boolean).length}/{Object.keys(controlState.systems).length}{' '}
+								Sistemas
 							</Badge>
 							<Badge variant="outline" className="text-xs">
-								{Object.values(controlState.effects).filter(Boolean).length}/{Object.keys(controlState.effects).length} Efectos
+								{Object.values(controlState.effects).filter(Boolean).length}/{Object.keys(controlState.effects).length}{' '}
+								Efectos
 							</Badge>
 						</div>
 
@@ -551,7 +568,7 @@ export const useCardControl = () => {
 		isFeatureEnabled: (feature: keyof CardControlState['features']) => {
 			return controlState.enabled ? controlState.features[feature] : true;
 		},
-		performanceSettings: controlState.performance
+		performanceSettings: controlState.performance,
 	};
 };
 

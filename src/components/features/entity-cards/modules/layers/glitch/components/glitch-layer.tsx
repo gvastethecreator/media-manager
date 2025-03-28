@@ -18,14 +18,7 @@ interface GlitchLayerProps {
 /**
  * 🌟 Componente interno de glitch
  */
-const GlitchLayerComponent = ({
-	processedConfig,
-	style,
-	isVisible,
-	width,
-	height,
-	sourceCanvas,
-}: GlitchLayerProps) => {
+const GlitchLayerComponent = ({ processedConfig, style, isVisible, width, height, sourceCanvas }: GlitchLayerProps) => {
 	// Referencias y estado
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const animationFrameRef = useRef<number>();
@@ -47,11 +40,7 @@ const GlitchLayerComponent = ({
 
 		// Aplicar el efecto de glitch
 		const now = Date.now();
-		const glitchedData = generateGlitch(
-			imageData,
-			processedConfig,
-			processedConfig.animation ? now : 0
-		);
+		const glitchedData = generateGlitch(imageData, processedConfig, processedConfig.animation ? now : 0);
 
 		// Dibujar el resultado
 		ctx.putImageData(glitchedData, 0, 0);
@@ -95,11 +84,14 @@ const GlitchLayerComponent = ({
 	}, [width, height, renderGlitch]);
 
 	// 🎨 Calcular los estilos del canvas
-	const canvasStyle = useMemo(() => ({
-		...style,
-		width: `${width}px`,
-		height: `${height}px`,
-	}), [style, width, height]);
+	const canvasStyle = useMemo(
+		() => ({
+			...style,
+			width: `${width}px`,
+			height: `${height}px`,
+		}),
+		[style, width, height]
+	);
 
 	return (
 		<motion.canvas

@@ -1,7 +1,13 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { createCoreSlice, createExecutionSlice, createFiltersSlice, createRelationsSlice, createUISlice } from './slices';
+import {
+	createCoreSlice,
+	createExecutionSlice,
+	createFiltersSlice,
+	createRelationsSlice,
+	createUISlice,
+} from './slices';
 import type { PromptStore } from './types';
 
 const storeLogger = serverLogger.withContext('PromptStore');
@@ -10,24 +16,24 @@ const storeLogger = serverLogger.withContext('PromptStore');
  * Store para la gestión de prompts combinando todas las slices
  */
 export const usePromptStore = create<PromptStore>()(
-  devtools(
-    (...args) => {
-      storeLogger.info('🏗️ Inicializando PromptStore');
+	devtools(
+		(...args) => {
+			storeLogger.info('🏗️ Inicializando PromptStore');
 
-      // Combinar todas las slices
-      return {
-        ...createCoreSlice(...args),
-        ...createFiltersSlice(...args),
-        ...createUISlice(...args),
-        ...createExecutionSlice(...args),
-        ...createRelationsSlice(...args),
-      };
-    },
-    {
-      name: 'PromptStore',
-      enabled: process.env.NODE_ENV === 'development',
-    }
-  )
+			// Combinar todas las slices
+			return {
+				...createCoreSlice(...args),
+				...createFiltersSlice(...args),
+				...createUISlice(...args),
+				...createExecutionSlice(...args),
+				...createRelationsSlice(...args),
+			};
+		},
+		{
+			name: 'PromptStore',
+			enabled: process.env.NODE_ENV === 'development',
+		}
+	)
 );
 
 // Selectors para acceder a partes específicas del estado

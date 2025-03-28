@@ -37,7 +37,7 @@ export const GlowEffectLayer: React.FC<GlowEffectLayerProps> = ({
 	visible = true,
 	layerIndex = 10,
 	opacity = 1,
-	blendMode = 'normal'
+	blendMode = 'normal',
 }) => {
 	const [time, setTime] = useState(0);
 
@@ -53,7 +53,7 @@ export const GlowEffectLayer: React.FC<GlowEffectLayerProps> = ({
 			const delta = (timestamp - lastTime) / 1000;
 			lastTime = timestamp;
 
-			setTime(prevTime => prevTime + delta * pulseSpeed);
+			setTime((prevTime) => prevTime + delta * pulseSpeed);
 			frameId = requestAnimationFrame(animate);
 		};
 
@@ -110,19 +110,7 @@ export const GlowEffectLayer: React.FC<GlowEffectLayerProps> = ({
 			// Transición para cuando cambie la visibilidad
 			transition: 'opacity 0.3s ease-in-out',
 		};
-	}, [
-		animationType,
-		color,
-		intensity,
-		size,
-		mousePosition,
-		time,
-		visible,
-		opacity,
-		blurAmount,
-		blendMode,
-		layerIndex
-	]);
+	}, [animationType, color, intensity, size, mousePosition, time, visible, opacity, blurAmount, blendMode, layerIndex]);
 
 	// Renderizar el efecto de brillo
 	return (
@@ -132,16 +120,14 @@ export const GlowEffectLayer: React.FC<GlowEffectLayerProps> = ({
 				className="glow-effect absolute inset-0 rounded-inherit pointer-events-none overflow-hidden"
 				style={{
 					opacity: visible ? 1 : 0,
-					...glowStyles as any
+					...(glowStyles as any),
 				}}
 			>
 				<div className="glow-radial-gradient absolute inset-0" />
 			</div>
 
 			{/* Contenido que recibe el brillo */}
-			<div className="glow-content relative z-10">
-				{children}
-			</div>
+			<div className="glow-content relative z-10">{children}</div>
 
 			<style jsx>{`
 				.glow-effect-container {

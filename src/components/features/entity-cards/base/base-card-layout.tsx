@@ -50,16 +50,19 @@ export function BaseCardLayout<T extends BaseEntityCardProps = BaseEntityCardPro
 	children,
 }: BaseCardLayoutProps<T>) {
 	// Opciones por defecto para la tarjeta - Envuelto en useMemo para evitar regeneración
-	const defaultOptions = useMemo(() => ({
-		designSystem: {
-			preset: 'modern',
-			cornerRadius: 8,
-			borderWidth: 1,
-			shadowStyle: 'soft',
-		},
-		enableHover: true,
-		enableClick: !disabled,
-	}), [disabled]); // Solo depende de disabled que puede cambiar
+	const defaultOptions = useMemo(
+		() => ({
+			designSystem: {
+				preset: 'modern',
+				cornerRadius: 8,
+				borderWidth: 1,
+				shadowStyle: 'soft',
+			},
+			enableHover: true,
+			enableClick: !disabled,
+		}),
+		[disabled]
+	); // Solo depende de disabled que puede cambiar
 
 	// Mezclar opciones por defecto con las proporcionadas
 	const mergedOptions = useMemo(() => {
@@ -136,20 +139,12 @@ export function BaseCardLayout<T extends BaseEntityCardProps = BaseEntityCardPro
 					)}
 					{data.imageUrl && (
 						<div className="card-image aspect-video overflow-hidden">
-							<img
-								src={data.thumbnailUrl || data.imageUrl}
-								alt={data.name}
-								className="w-full h-full object-cover"
-							/>
+							<img src={data.thumbnailUrl || data.imageUrl} alt={data.name} className="w-full h-full object-cover" />
 						</div>
 					)}
 					<div className="card-footer p-2 text-xs text-muted-foreground border-t">
 						{data.createdAt && (
-							<span>
-								{typeof data.createdAt === 'string'
-									? data.createdAt
-									: data.createdAt.toLocaleDateString()}
-							</span>
+							<span>{typeof data.createdAt === 'string' ? data.createdAt : data.createdAt.toLocaleDateString()}</span>
 						)}
 					</div>
 				</div>

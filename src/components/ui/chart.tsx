@@ -75,21 +75,19 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 			([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
-					.map(([key, itemConfig]) => {
-						const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-						return color ? `  --color-${key}: ${color};` : null;
-					})
-					.filter(Boolean)
-					.join('\n')}
+	.map(([key, itemConfig]) => {
+		const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+		return color ? `  --color-${key}: ${color};` : null;
+	})
+	.filter(Boolean)
+	.join('\n')}
 }
 `
 		)
 		.join('\n');
 
 	// Crear un elemento estilo con createTextNode que es más seguro
-	return (
-		<style>{cssRules}</style>
-	);
+	return <style>{cssRules}</style>;
 };
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
@@ -290,4 +288,3 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
 }
 
 export { ChartContainer, ChartLegend, ChartLegendContent, ChartStyle, ChartTooltip, ChartTooltipContent };
-

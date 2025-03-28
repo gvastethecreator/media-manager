@@ -33,7 +33,7 @@ export function useLayersSystem({ layers }: { layers?: CardOptions }) {
 
 	// Actualizar la configuración de capas
 	const updateLayersConfig = (newConfig: Partial<LayersConfig>) => {
-		setConfig((current: LayersConfig	) => ({
+		setConfig((current: LayersConfig) => ({
 			...current,
 			...newConfig,
 		}));

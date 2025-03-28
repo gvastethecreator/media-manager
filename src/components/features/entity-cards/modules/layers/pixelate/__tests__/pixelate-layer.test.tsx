@@ -37,13 +37,7 @@ describe('PixelateLayer', () => {
 	});
 
 	it('renderiza correctamente cuando está habilitado', () => {
-		render(
-			<PixelateLayer
-				width={300}
-				height={400}
-				sourceImage="test.jpg"
-			/>
-		);
+		render(<PixelateLayer width={300} height={400} sourceImage="test.jpg" />);
 		const canvas = screen.getAllByRole('presentation');
 		expect(canvas).toHaveLength(2); // Canvas fuente y destino
 		expect(canvas[1]).toHaveStyle({ width: '300px', height: '400px' });
@@ -52,24 +46,12 @@ describe('PixelateLayer', () => {
 	it('no renderiza cuando está deshabilitado', () => {
 		const store = usePixelateStore.getState();
 		store.updateConfig({ enabled: false });
-		render(
-			<PixelateLayer
-				width={300}
-				height={400}
-				sourceImage="test.jpg"
-			/>
-		);
+		render(<PixelateLayer width={300} height={400} sourceImage="test.jpg" />);
 		expect(screen.queryByRole('presentation')).not.toBeInTheDocument();
 	});
 
 	it('carga la imagen correctamente', () => {
-		render(
-			<PixelateLayer
-				width={300}
-				height={400}
-				sourceImage="test.jpg"
-			/>
-		);
+		render(<PixelateLayer width={300} height={400} sourceImage="test.jpg" />);
 		expect(mockImage.crossOrigin).toBe('anonymous');
 		expect(mockImage.src).toBe('test.jpg');
 	});
@@ -77,24 +59,12 @@ describe('PixelateLayer', () => {
 	it('inicia la animación cuando está configurada', () => {
 		const store = usePixelateStore.getState();
 		store.updateConfig({ animated: true });
-		render(
-			<PixelateLayer
-				width={300}
-				height={400}
-				sourceImage="test.jpg"
-			/>
-		);
+		render(<PixelateLayer width={300} height={400} sourceImage="test.jpg" />);
 		expect(global.requestAnimationFrame).toHaveBeenCalled();
 	});
 
 	it('limpia los recursos al desmontar', () => {
-		const { unmount } = render(
-			<PixelateLayer
-				width={300}
-				height={400}
-				sourceImage="test.jpg"
-			/>
-		);
+		const { unmount } = render(<PixelateLayer width={300} height={400} sourceImage="test.jpg" />);
 		unmount();
 		expect(global.cancelAnimationFrame).toHaveBeenCalled();
 	});

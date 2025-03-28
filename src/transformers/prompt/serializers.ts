@@ -9,16 +9,16 @@ const serializersLogger = serverLogger.withContext('PromptSerializers');
  * @returns Array de strings con los tags
  */
 export function serializeTags(tagsString?: string | null): string[] {
-  if (!tagsString) return [];
+	if (!tagsString) return [];
 
-  try {
-    if (tagsString === 'empty_array') return [];
-    const parsed = JSON.parse(tagsString);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    serializersLogger.error('❌ Error al serializar tags:', error);
-    return [];
-  }
+	try {
+		if (tagsString === 'empty_array') return [];
+		const parsed = JSON.parse(tagsString);
+		return Array.isArray(parsed) ? parsed : [];
+	} catch (error) {
+		serializersLogger.error('❌ Error al serializar tags:', error);
+		return [];
+	}
 }
 
 /**
@@ -27,12 +27,12 @@ export function serializeTags(tagsString?: string | null): string[] {
  * @returns String JSON con los tags
  */
 export function deserializeTags(tags: string[]): string {
-  try {
-    return tags && tags.length > 0 ? JSON.stringify(tags) : 'empty_array';
-  } catch (error) {
-    serializersLogger.error('❌ Error al deserializar tags:', error);
-    return 'empty_array';
-  }
+	try {
+		return tags && tags.length > 0 ? JSON.stringify(tags) : 'empty_array';
+	} catch (error) {
+		serializersLogger.error('❌ Error al deserializar tags:', error);
+		return 'empty_array';
+	}
 }
 
 /**
@@ -41,16 +41,16 @@ export function deserializeTags(tags: string[]): string {
  * @returns Objeto con los parámetros
  */
 export function serializeParameters(parametersString?: string | null): Record<string, any> {
-  if (!parametersString) return {};
+	if (!parametersString) return {};
 
-  try {
-    if (parametersString === '{}') return {};
-    const parsed = JSON.parse(parametersString);
-    return typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
-  } catch (error) {
-    serializersLogger.error('❌ Error al serializar parámetros:', error);
-    return {};
-  }
+	try {
+		if (parametersString === '{}') return {};
+		const parsed = JSON.parse(parametersString);
+		return typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+	} catch (error) {
+		serializersLogger.error('❌ Error al serializar parámetros:', error);
+		return {};
+	}
 }
 
 /**
@@ -59,12 +59,12 @@ export function serializeParameters(parametersString?: string | null): Record<st
  * @returns String JSON con los parámetros
  */
 export function deserializeParameters(parameters: Record<string, any>): string {
-  try {
-    return Object.keys(parameters).length > 0 ? JSON.stringify(parameters) : '{}';
-  } catch (error) {
-    serializersLogger.error('❌ Error al deserializar parámetros:', error);
-    return '{}';
-  }
+	try {
+		return Object.keys(parameters).length > 0 ? JSON.stringify(parameters) : '{}';
+	} catch (error) {
+		serializersLogger.error('❌ Error al deserializar parámetros:', error);
+		return '{}';
+	}
 }
 
 /**
@@ -73,13 +73,13 @@ export function deserializeParameters(parameters: Record<string, any>): string {
  * @returns Prompt extendido
  */
 export function toExtendedPrompt(prompt: PromptBase): PromptExtended {
-  return {
-    ...prompt,
-    parsedTags: serializeTags(prompt.tags),
-    parsedParameters: serializeParameters(prompt.parameters),
-    previewContent: prompt.content ? getPreviewContent(prompt.content) : undefined,
-    lastUpdated: prompt.updatedAt instanceof Date ? prompt.updatedAt : new Date(prompt.updatedAt),
-  };
+	return {
+		...prompt,
+		parsedTags: serializeTags(prompt.tags),
+		parsedParameters: serializeParameters(prompt.parameters),
+		previewContent: prompt.content ? getPreviewContent(prompt.content) : undefined,
+		lastUpdated: prompt.updatedAt instanceof Date ? prompt.updatedAt : new Date(prompt.updatedAt),
+	};
 }
 
 /**
@@ -89,8 +89,8 @@ export function toExtendedPrompt(prompt: PromptBase): PromptExtended {
  * @returns Preview del contenido
  */
 function getPreviewContent(content: string, maxLength = 150): string {
-  if (!content) return '';
-  if (content.length <= maxLength) return content;
+	if (!content) return '';
+	if (content.length <= maxLength) return content;
 
-  return `${content.substring(0, maxLength)}...`;
+	return `${content.substring(0, maxLength)}...`;
 }

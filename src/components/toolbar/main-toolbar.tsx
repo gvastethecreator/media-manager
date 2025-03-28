@@ -4,6 +4,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileManager } from '@/store/files/file-manager.store';
 import type { ViewType } from '@/types/file-item';
@@ -50,7 +51,11 @@ export interface ViewToolbarProps {
 	isRightPanelVisible?: boolean;
 }
 
-export function ViewToolbar({ isRightPanelCollapsed, toggleRightPanelCollapse, isRightPanelVisible }: ViewToolbarProps) {
+export function ViewToolbar({
+	isRightPanelCollapsed,
+	toggleRightPanelCollapse,
+	isRightPanelVisible,
+}: ViewToolbarProps) {
 	const { currentView, getCurrentItem } = useNavigationStore();
 	const { viewMode, setViewMode, selectedItems, clearSelection, sortBy, setSortBy, sortOrder, setSortOrder } =
 		useFileManager();
@@ -131,49 +136,61 @@ export function ViewToolbar({ isRightPanelCollapsed, toggleRightPanelCollapse, i
 	);
 
 	const renderSortButtons = () => (
-		<div className="flex items-center gap-1">
+		<div className="flex items-center gap-0.5">
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-8 w-8 hover:bg-accent"
+				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por nombre"
 				onClick={() => handleSort('name')}
 				data-active={sortBy === 'name'}
 			>
-				<FileText className="h-4 w-4" />
+				<FileText className={cn('h-3.5 w-3.5', sortBy === 'name' && 'text-primary')} />
 				{sortBy === 'name' && (
-					<span className="ml-1">
-						{sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+					<span className="ml-0.5">
+						{sortOrder === 'asc' ? (
+							<ArrowUp className="h-2.5 w-2.5 text-primary" />
+						) : (
+							<ArrowDown className="h-2.5 w-2.5 text-primary" />
+						)}
 					</span>
 				)}
 			</Button>
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-8 w-8 hover:bg-accent"
+				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por fecha de modificación"
 				onClick={() => handleSort('updatedAt')}
 				data-active={sortBy === 'updatedAt'}
 			>
-				<Clock className="h-4 w-4" />
+				<Clock className={cn('h-3.5 w-3.5', sortBy === 'updatedAt' && 'text-primary')} />
 				{sortBy === 'updatedAt' && (
-					<span className="ml-1">
-						{sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+					<span className="ml-0.5">
+						{sortOrder === 'asc' ? (
+							<ArrowUp className="h-2.5 w-2.5 text-primary" />
+						) : (
+							<ArrowDown className="h-2.5 w-2.5 text-primary" />
+						)}
 					</span>
 				)}
 			</Button>
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-8 w-8 hover:bg-accent"
+				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por fecha de creación"
 				onClick={() => handleSort('createdAt')}
 				data-active={sortBy === 'createdAt'}
 			>
-				<Calendar className="h-4 w-4" />
+				<Calendar className={cn('h-3.5 w-3.5', sortBy === 'createdAt' && 'text-primary')} />
 				{sortBy === 'createdAt' && (
-					<span className="ml-1">
-						{sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+					<span className="ml-0.5">
+						{sortOrder === 'asc' ? (
+							<ArrowUp className="h-2.5 w-2.5 text-primary" />
+						) : (
+							<ArrowDown className="h-2.5 w-2.5 text-primary" />
+						)}
 					</span>
 				)}
 			</Button>
@@ -181,46 +198,46 @@ export function ViewToolbar({ isRightPanelCollapsed, toggleRightPanelCollapse, i
 	);
 
 	const renderViewButtons = () => (
-		<div className="flex items-center gap-1 bg-accent/10 rounded-md p-1">
+		<div className="flex items-center gap-0.5 bg-accent/10 rounded-md p-0.5">
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-8 w-8 hover:bg-accent"
+				className="h-7 w-7 hover:bg-accent"
 				onClick={() => setViewMode('grid')}
 				title="Vista de cuadrícula"
 				data-active={viewMode === 'grid'}
 			>
-				<Grid className="h-4 w-4" />
+				<Grid className={cn('h-3.5 w-3.5', viewMode === 'grid' && 'text-primary font-bold')} />
 			</Button>
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-8 w-8 hover:bg-accent"
+				className="h-7 w-7 hover:bg-accent"
 				onClick={() => setViewMode('masonry')}
 				title="Vista de mosaico"
 				data-active={viewMode === 'masonry'}
 			>
-				<LayoutGrid className="h-4 w-4" />
+				<LayoutGrid className={cn('h-3.5 w-3.5', viewMode === 'masonry' && 'text-primary font-bold')} />
 			</Button>
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-8 w-8 hover:bg-accent"
+				className="h-7 w-7 hover:bg-accent"
 				onClick={() => setViewMode('cards')}
 				title="Vista de tarjetas"
 				data-active={viewMode === 'cards'}
 			>
-				<GalleryHorizontal className="h-4 w-4" />
+				<GalleryHorizontal className={cn('h-3.5 w-3.5', viewMode === 'cards' && 'text-primary font-bold')} />
 			</Button>
 			<Button
 				variant="ghost"
 				size="icon"
-				className="h-8 w-8 hover:bg-accent"
+				className="h-7 w-7 hover:bg-accent"
 				onClick={() => setViewMode('list')}
 				title="Vista de lista"
 				data-active={viewMode === 'list'}
 			>
-				<List className="h-4 w-4" />
+				<List className={cn('h-3.5 w-3.5', viewMode === 'list' && 'text-primary font-bold')} />
 			</Button>
 		</div>
 	);
@@ -231,87 +248,83 @@ export function ViewToolbar({ isRightPanelCollapsed, toggleRightPanelCollapse, i
 		}
 
 		return (
-			<div className="flex items-center gap-2 bg-accent/10 rounded-md p-1">
-				<Badge variant="secondary" className="gap-1">
+			<div className="flex items-center gap-1.5 bg-accent/10 rounded-md p-0.5">
+				<Badge variant="secondary" className="gap-1 text-xs py-0.5 px-1.5">
 					<span>{selectedItems.length}</span>
 					<span>seleccionado{selectedItems.length !== 1 ? 's' : ''}</span>
 				</Badge>
 
-				<Separator orientation="vertical" className="h-6 w-px bg-border" />
+				<Separator orientation="vertical" className="h-5 w-px bg-border" />
 
-				<div className="flex items-center gap-1">
+				<div className="flex items-center gap-0.5">
 					{showDetailsButton && (
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 hover:bg-accent"
+							className="h-7 w-7 hover:bg-accent"
 							title={isVisible ? 'Ocultar panel de detalles' : 'Mostrar panel de detalles'}
 							onClick={toggleVisibility}
 							data-active={isVisible}
 						>
-							<Info className="h-4 w-4" />
+							<Info className={cn('h-3.5 w-3.5', isVisible && 'text-primary font-bold')} />
 						</Button>
 					)}
 					<Button
 						variant="ghost"
 						size="icon"
-						className="h-8 w-8 hover:bg-accent"
+						className="h-7 w-7 hover:bg-accent"
 						title="Eliminar archivos seleccionados"
 						onClick={handleDeleteSelected}
 					>
-						<Trash2 className="h-4 w-4 text-destructive" />
+						<Trash2 className="h-3.5 w-3.5 text-destructive" />
 					</Button>
 					<Button
 						variant="ghost"
 						size="icon"
-						className="h-8 w-8 hover:bg-accent"
+						className="h-7 w-7 hover:bg-accent"
 						title="Descargar archivos seleccionados"
 						onClick={handleDownloadSelected}
 					>
-						<Download className="h-4 w-4" />
+						<Download className="h-3.5 w-3.5" />
 					</Button>
 					<Button
 						variant="ghost"
 						size="icon"
-						className="h-8 w-8 hover:bg-accent"
+						className="h-7 w-7 hover:bg-accent"
 						title="Comprimir archivos seleccionados"
 						onClick={handleCompressFiles}
 					>
-						<Archive className="h-4 w-4" />
+						<Archive className="h-3.5 w-3.5" />
 					</Button>
 					<Button
 						variant="ghost"
 						size="icon"
-						className="h-8 w-8 hover:bg-accent"
+						className="h-7 w-7 hover:bg-accent"
 						title="Copiar archivo seleccionado"
 						onClick={handleCopySelected}
 						disabled={selectedItems.length !== 1}
 					>
-						<Copy className="h-4 w-4" />
+						<Copy className="h-3.5 w-3.5" />
 					</Button>
 					<Button
 						variant="ghost"
 						size="icon"
-						className="h-8 w-8 hover:bg-accent"
+						className="h-7 w-7 hover:bg-accent"
 						title="Limpiar selección"
 						onClick={clearSelection}
 					>
-						<X className="h-4 w-4" />
+						<X className="h-3.5 w-3.5" />
 					</Button>
 					{/* Botón para colapsar/expandir el panel derecho */}
 					{isVisible && toggleRightPanelCollapse && (
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 hover:bg-accent"
+							className="h-7 w-7 hover:bg-accent"
 							title={isRightPanelCollapsed ? 'Expandir panel de detalles' : 'Colapsar panel de detalles'}
 							onClick={toggleRightPanelCollapse}
 						>
-							{isRightPanelCollapsed ? (
-								<ArrowLeft className="h-4 w-4" />
-							) : (
-								<ArrowRight className="h-4 w-4" />
-							)}
+							{isRightPanelCollapsed ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
 						</Button>
 					)}
 				</div>
@@ -325,12 +338,12 @@ export function ViewToolbar({ isRightPanelCollapsed, toggleRightPanelCollapse, i
 			case 'favorites':
 			case 'search':
 				return (
-					<div className="flex items-center gap-1">
-						<Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent">
-							<Download className="h-4 w-4" />
+					<div className="flex items-center gap-0.5">
+						<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-accent">
+							<Download className="h-3.5 w-3.5" />
 						</Button>
-						<Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent">
-							<Share2 className="h-4 w-4" />
+						<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-accent">
+							<Share2 className="h-3.5 w-3.5" />
 						</Button>
 					</div>
 				);
@@ -342,9 +355,9 @@ export function ViewToolbar({ isRightPanelCollapsed, toggleRightPanelCollapse, i
 			case 'places':
 			case 'world-items':
 				return (
-					<div className="flex items-center gap-1">
-						<Button variant="ghost" size="sm" className="h-8 text-sm">
-							<Plus className="h-4 w-4 mr-1" />
+					<div className="flex items-center gap-0.5">
+						<Button variant="ghost" size="sm" className="h-7 text-xs px-2">
+							<Plus className="h-3.5 w-3.5 mr-1" />
 							Nuevo
 						</Button>
 					</div>
@@ -357,12 +370,12 @@ export function ViewToolbar({ isRightPanelCollapsed, toggleRightPanelCollapse, i
 			case 'place-content':
 			case 'world-item-content':
 				return (
-					<div className="flex items-center gap-1">
-						<Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent">
-							<Edit className="h-4 w-4" />
+					<div className="flex items-center gap-0.5">
+						<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-accent">
+							<Edit className="h-3.5 w-3.5" />
 						</Button>
-						<Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent">
-							<Trash2 className="h-4 w-4 text-destructive" />
+						<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-accent">
+							<Trash2 className="h-3.5 w-3.5 text-destructive" />
 						</Button>
 					</div>
 				);
@@ -374,32 +387,32 @@ export function ViewToolbar({ isRightPanelCollapsed, toggleRightPanelCollapse, i
 	const renderIcon = () => {
 		switch (currentView) {
 			case 'all-images':
-				return <ImageIcon className="h-4 w-4 text-muted-foreground" />;
+				return <ImageIcon className="h-3.5 w-3.5 text-primary" />;
 			case 'favorites':
-				return <Star className="h-4 w-4 text-muted-foreground" />;
+				return <Star className="h-3.5 w-3.5 text-amber-500" />;
 			case 'search':
-				return <Search className="h-4 w-4 text-muted-foreground" />;
+				return <Search className="h-3.5 w-3.5 text-blue-500" />;
 			case 'collections':
 			case 'collection-content':
-				return <BookImage className="h-4 w-4 text-muted-foreground" />;
+				return <BookImage className="h-3.5 w-3.5 text-indigo-500" />;
 			case 'folders':
 			case 'folder-content':
-				return <FolderIcon className="h-4 w-4 text-muted-foreground" />;
+				return <FolderIcon className="h-3.5 w-3.5 text-yellow-500" />;
 			case 'tags':
 			case 'tag-content':
-				return <TagIcon className="h-4 w-4 text-muted-foreground" />;
+				return <TagIcon className="h-3.5 w-3.5 text-green-500" />;
 			case 'albums':
 			case 'album-content':
-				return <Camera className="h-4 w-4 text-muted-foreground" />;
+				return <Camera className="h-3.5 w-3.5 text-purple-500" />;
 			case 'characters':
 			case 'character-content':
-				return <User2 className="h-4 w-4 text-muted-foreground" />;
+				return <User2 className="h-3.5 w-3.5 text-sky-500" />;
 			case 'places':
 			case 'place-content':
-				return <MapPin className="h-4 w-4 text-muted-foreground" />;
+				return <MapPin className="h-3.5 w-3.5 text-rose-500" />;
 			case 'world-items':
 			case 'world-item-content':
-				return <Box className="h-4 w-4 text-muted-foreground" />;
+				return <Box className="h-3.5 w-3.5 text-orange-500" />;
 			default:
 				return null;
 		}
@@ -411,20 +424,20 @@ export function ViewToolbar({ isRightPanelCollapsed, toggleRightPanelCollapse, i
 			animate={{ opacity: 1, y: 0 }}
 			className="flex flex-col bg-background border-b border-border"
 		>
-			<div className="flex w-full items-center justify-between gap-4 p-2">
-				<div className="flex items-center gap-3">
-					<div className="flex items-center justify-center h-9 w-9 rounded-md bg-accent/10">{renderIcon()}</div>
+			<div className="flex w-full items-center justify-between gap-3 py-1 px-2">
+				<div className="flex items-center gap-2">
+					<div className="flex items-center justify-center h-7 w-7 rounded-md bg-accent/10">{renderIcon()}</div>
 					<div className="flex items-center">
 						<ViewBreadcrumbs currentView={currentView as ViewType} currentItem={getCurrentItem() || undefined} />
 						<EntityDetails />
 					</div>
 				</div>
 
-				<div className="flex items-center gap-4">
+				<div className="flex items-center gap-3">
 					{renderSortButtons()}
-					<Separator orientation="vertical" className="h-6 w-px bg-border" />
+					<Separator orientation="vertical" className="h-5 w-px bg-border" />
 					{renderViewButtons()}
-					<Separator orientation="vertical" className="h-6 w-px bg-border" />
+					<Separator orientation="vertical" className="h-5 w-px bg-border" />
 					{renderSelectionActions()}
 					{renderContextActions()}
 				</div>

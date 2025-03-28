@@ -4,14 +4,14 @@
  */
 
 import type {
-    ParsedPlaceVisualConfig,
-    Place,
-    PlaceBase,
-    PlaceDanger,
-    PlaceFilters,
-    PlaceResource,
-    PlaceStats,
-    PlaceVisualConfig
+	ParsedPlaceVisualConfig,
+	Place,
+	PlaceBase,
+	PlaceDanger,
+	PlaceFilters,
+	PlaceResource,
+	PlaceStats,
+	PlaceVisualConfig,
 } from '../../types/entities/place';
 
 /**
@@ -20,12 +20,12 @@ import type {
  * @returns JSON string de peligros
  */
 export function serializePlaceDangers(dangers: PlaceDanger[]): string {
-  try {
-    return JSON.stringify(dangers);
-  } catch (error) {
-    console.error('Error al serializar los peligros del lugar:', error);
-    return JSON.stringify([]);
-  }
+	try {
+		return JSON.stringify(dangers);
+	} catch (error) {
+		console.error('Error al serializar los peligros del lugar:', error);
+		return JSON.stringify([]);
+	}
 }
 
 /**
@@ -34,14 +34,14 @@ export function serializePlaceDangers(dangers: PlaceDanger[]): string {
  * @returns Array de peligros
  */
 export function deserializePlaceDangers(dangersJson: string | null): PlaceDanger[] {
-  if (!dangersJson) return [];
+	if (!dangersJson) return [];
 
-  try {
-    return JSON.parse(dangersJson) as PlaceDanger[];
-  } catch (error) {
-    console.error('Error al deserializar los peligros del lugar:', error);
-    return [];
-  }
+	try {
+		return JSON.parse(dangersJson) as PlaceDanger[];
+	} catch (error) {
+		console.error('Error al deserializar los peligros del lugar:', error);
+		return [];
+	}
 }
 
 /**
@@ -50,12 +50,12 @@ export function deserializePlaceDangers(dangersJson: string | null): PlaceDanger
  * @returns JSON string de recursos
  */
 export function serializePlaceResources(resources: PlaceResource[]): string {
-  try {
-    return JSON.stringify(resources);
-  } catch (error) {
-    console.error('Error al serializar los recursos del lugar:', error);
-    return JSON.stringify([]);
-  }
+	try {
+		return JSON.stringify(resources);
+	} catch (error) {
+		console.error('Error al serializar los recursos del lugar:', error);
+		return JSON.stringify([]);
+	}
 }
 
 /**
@@ -64,14 +64,14 @@ export function serializePlaceResources(resources: PlaceResource[]): string {
  * @returns Array de recursos
  */
 export function deserializePlaceResources(resourcesJson: string | null): PlaceResource[] {
-  if (!resourcesJson) return [];
+	if (!resourcesJson) return [];
 
-  try {
-    return JSON.parse(resourcesJson) as PlaceResource[];
-  } catch (error) {
-    console.error('Error al deserializar los recursos del lugar:', error);
-    return [];
-  }
+	try {
+		return JSON.parse(resourcesJson) as PlaceResource[];
+	} catch (error) {
+		console.error('Error al deserializar los recursos del lugar:', error);
+		return [];
+	}
 }
 
 /**
@@ -80,12 +80,12 @@ export function deserializePlaceResources(resourcesJson: string | null): PlaceRe
  * @returns JSON string de estadísticas
  */
 export function serializePlaceStats(stats: PlaceStats): string {
-  try {
-    return JSON.stringify(stats);
-  } catch (error) {
-    console.error('Error al serializar las estadísticas del lugar:', error);
-    return JSON.stringify({});
-  }
+	try {
+		return JSON.stringify(stats);
+	} catch (error) {
+		console.error('Error al serializar las estadísticas del lugar:', error);
+		return JSON.stringify({});
+	}
 }
 
 /**
@@ -94,14 +94,14 @@ export function serializePlaceStats(stats: PlaceStats): string {
  * @returns Objeto de estadísticas
  */
 export function deserializePlaceStats(statsJson: string | null): PlaceStats {
-  if (!statsJson) return {};
+	if (!statsJson) return {};
 
-  try {
-    return JSON.parse(statsJson) as PlaceStats;
-  } catch (error) {
-    console.error('Error al deserializar las estadísticas del lugar:', error);
-    return {};
-  }
+	try {
+		return JSON.parse(statsJson) as PlaceStats;
+	} catch (error) {
+		console.error('Error al deserializar las estadísticas del lugar:', error);
+		return {};
+	}
 }
 
 /**
@@ -110,12 +110,12 @@ export function deserializePlaceStats(statsJson: string | null): PlaceStats {
  * @returns JSON string de filtros
  */
 export function serializePlaceFilters(filters: PlaceFilters): string {
-  try {
-    return JSON.stringify(filters);
-  } catch (error) {
-    console.error('Error al serializar los filtros del lugar:', error);
-    return JSON.stringify({});
-  }
+	try {
+		return JSON.stringify(filters);
+	} catch (error) {
+		console.error('Error al serializar los filtros del lugar:', error);
+		return JSON.stringify({});
+	}
 }
 
 /**
@@ -124,14 +124,14 @@ export function serializePlaceFilters(filters: PlaceFilters): string {
  * @returns Objeto de filtros
  */
 export function deserializePlaceFilters(filtersJson: string | null): PlaceFilters {
-  if (!filtersJson) return {};
+	if (!filtersJson) return {};
 
-  try {
-    return JSON.parse(filtersJson) as PlaceFilters;
-  } catch (error) {
-    console.error('Error al deserializar los filtros del lugar:', error);
-    return {};
-  }
+	try {
+		return JSON.parse(filtersJson) as PlaceFilters;
+	} catch (error) {
+		console.error('Error al deserializar los filtros del lugar:', error);
+		return {};
+	}
 }
 
 /**
@@ -139,29 +139,31 @@ export function deserializePlaceFilters(filtersJson: string | null): PlaceFilter
  * @param place Objeto base del lugar
  * @returns Lugar con campos JSON parseados
  */
-export function parseJsonFields(place: PlaceBase & { _count?: { images?: number; notes?: number; concepts?: number; prompts?: number } }): Place {
-  return {
-    ...place,
-    dangersArray: deserializePlaceDangers(place.dangers),
-    resourcesArray: deserializePlaceResources(place.resources),
-    statsObject: deserializePlaceStats(place.stats),
-    filtersObject: deserializePlaceFilters(place.filters),
-    // Inicializar propiedades UI
-    isSelected: false,
-    isExpanded: false,
-    isEditing: false,
-    isHighlighted: false,
-    // Inicializar conteos
-    imagesCount: place._count?.images || 0,
-    notesCount: place._count?.notes || 0,
-    conceptsCount: place._count?.concepts || 0,
-    promptsCount: place._count?.prompts || 0,
-    // Datos derivados
-    dangerLevel: getDangerLevel(place.dangers),
-    displayPopulation: formatPopulation(place.population),
-    displaySize: getDisplaySize(place.stats),
-    regionPath: getRegionPath(place.region),
-  };
+export function parseJsonFields(
+	place: PlaceBase & { _count?: { images?: number; notes?: number; concepts?: number; prompts?: number } }
+): Place {
+	return {
+		...place,
+		dangersArray: deserializePlaceDangers(place.dangers),
+		resourcesArray: deserializePlaceResources(place.resources),
+		statsObject: deserializePlaceStats(place.stats),
+		filtersObject: deserializePlaceFilters(place.filters),
+		// Inicializar propiedades UI
+		isSelected: false,
+		isExpanded: false,
+		isEditing: false,
+		isHighlighted: false,
+		// Inicializar conteos
+		imagesCount: place._count?.images || 0,
+		notesCount: place._count?.notes || 0,
+		conceptsCount: place._count?.concepts || 0,
+		promptsCount: place._count?.prompts || 0,
+		// Datos derivados
+		dangerLevel: getDangerLevel(place.dangers),
+		displayPopulation: formatPopulation(place.population),
+		displaySize: getDisplaySize(place.stats),
+		regionPath: getRegionPath(place.region),
+	};
 }
 
 /**
@@ -170,20 +172,20 @@ export function parseJsonFields(place: PlaceBase & { _count?: { images?: number;
  * @returns Nivel de peligro más alto
  */
 function getDangerLevel(dangersJson: string | null): string {
-  const dangers = deserializePlaceDangers(dangersJson);
-  if (!dangers.length) return 'unknown';
+	const dangers = deserializePlaceDangers(dangersJson);
+	if (!dangers.length) return 'unknown';
 
-  // Ordenar por nivel de peligro y tomar el más alto
-  const dangerLevels = ['safe', 'low', 'moderate', 'high', 'extreme', 'deadly', 'unknown'];
-  let highestLevel = 'unknown';
+	// Ordenar por nivel de peligro y tomar el más alto
+	const dangerLevels = ['safe', 'low', 'moderate', 'high', 'extreme', 'deadly', 'unknown'];
+	let highestLevel = 'unknown';
 
-  dangers.forEach(danger => {
-    if (danger.level && dangerLevels.indexOf(danger.level) > dangerLevels.indexOf(highestLevel)) {
-      highestLevel = danger.level;
-    }
-  });
+	dangers.forEach((danger) => {
+		if (danger.level && dangerLevels.indexOf(danger.level) > dangerLevels.indexOf(highestLevel)) {
+			highestLevel = danger.level;
+		}
+	});
 
-  return highestLevel;
+	return highestLevel;
 }
 
 /**
@@ -192,11 +194,11 @@ function getDangerLevel(dangersJson: string | null): string {
  * @returns Población formateada
  */
 function formatPopulation(population: number | null): string {
-  if (population === null) return 'Desconocida';
+	if (population === null) return 'Desconocida';
 
-  if (population < 1000) return String(population);
-  if (population < 1000000) return `${(population / 1000).toFixed(1)}k`;
-  return `${(population / 1000000).toFixed(1)}M`;
+	if (population < 1000) return String(population);
+	if (population < 1000000) return `${(population / 1000).toFixed(1)}k`;
+	return `${(population / 1000000).toFixed(1)}M`;
 }
 
 /**
@@ -205,8 +207,8 @@ function formatPopulation(population: number | null): string {
  * @returns Tamaño formateado
  */
 function getDisplaySize(statsJson: string | null): string {
-  const stats = deserializePlaceStats(statsJson);
-  return stats.size || 'Desconocido';
+	const stats = deserializePlaceStats(statsJson);
+	return stats.size || 'Desconocido';
 }
 
 /**
@@ -215,8 +217,8 @@ function getDisplaySize(statsJson: string | null): string {
  * @returns Array de rutas de región
  */
 function getRegionPath(region: string | null): string[] {
-  if (!region) return [];
-  return region.split('/').filter(Boolean);
+	if (!region) return [];
+	return region.split('/').filter(Boolean);
 }
 
 /**
@@ -225,8 +227,8 @@ function getRegionPath(region: string | null): string[] {
  * @returns Configuración visual parseada
  */
 export function parseVisualConfig(config: PlaceVisualConfig): ParsedPlaceVisualConfig {
-  return {
-    ...config,
-    filtersObject: deserializePlaceFilters(config.filters),
-  };
+	return {
+		...config,
+		filtersObject: deserializePlaceFilters(config.filters),
+	};
 }

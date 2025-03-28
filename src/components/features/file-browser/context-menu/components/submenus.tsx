@@ -20,7 +20,7 @@ import {
 	MapPin,
 	MessageSquare,
 	Tag as TagIcon,
-	User
+	User,
 } from 'lucide-react';
 import React from 'react';
 import type { ContextMenuAction, LoadingStates } from '../types';
@@ -44,12 +44,9 @@ interface EntityWithNameAndId {
 // Componente para el submenú de colecciones
 export function CollectionsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	// Llamar a los hooks directamente a nivel de componente
-	const collectionsFromStore = useCollectionStore(state => state.collections || []);
+	const collectionsFromStore = useCollectionStore((state) => state.collections || []);
 	// Luego podemos memoizar los resultados si es necesario
-	const collections = React.useMemo(() =>
-		collectionsFromStore as EntityWithNameAndId[],
-		[collectionsFromStore]
-	);
+	const collections = React.useMemo(() => collectionsFromStore as EntityWithNameAndId[], [collectionsFromStore]);
 
 	return (
 		<EntitySubMenu<EntityWithNameAndId>
@@ -73,12 +70,9 @@ export function CollectionsSubmenu({ file, onAction, loadingStates }: SubmenuPro
 // Componente para el submenú de etiquetas
 export function TagsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	// Llamar al hook directamente
-	const tagsFromStore = useTagStore(state => state.tags || {});
+	const tagsFromStore = useTagStore((state) => state.tags || {});
 	// Luego memoizar los resultados
-	const tagsList = React.useMemo(() =>
-		Object.values(tagsFromStore) as EntityWithNameAndId[],
-		[tagsFromStore]
-	);
+	const tagsList = React.useMemo(() => Object.values(tagsFromStore) as EntityWithNameAndId[], [tagsFromStore]);
 
 	return (
 		<EntitySubMenu<EntityWithNameAndId>
@@ -107,12 +101,9 @@ export function TagsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 // Componente para el submenú de álbumes
 export function AlbumsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	// Llamar al hook directamente
-	const albumsFromStore = useAlbumStore(state => state.core.albums || {});
+	const albumsFromStore = useAlbumStore((state) => state.core.albums || {});
 	// Luego memoizar los resultados
-	const albumsList = React.useMemo(() =>
-		Object.values(albumsFromStore) as EntityWithNameAndId[],
-		[albumsFromStore]
-	);
+	const albumsList = React.useMemo(() => Object.values(albumsFromStore) as EntityWithNameAndId[], [albumsFromStore]);
 
 	return (
 		<EntitySubMenu<EntityWithNameAndId>
@@ -136,12 +127,9 @@ export function AlbumsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 // Componente para el submenú de personajes
 export function CharactersSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	// Llamar al hook directamente
-	const charactersObj = useCharacterStore(state => state.characters || {});
+	const charactersObj = useCharacterStore((state) => state.characters || {});
 	// Luego memoizar los resultados
-	const characters = React.useMemo(() =>
-		Object.values(charactersObj) as EntityWithNameAndId[],
-		[charactersObj]
-	);
+	const characters = React.useMemo(() => Object.values(charactersObj) as EntityWithNameAndId[], [charactersObj]);
 
 	return (
 		<EntitySubMenu<EntityWithNameAndId>
@@ -165,12 +153,9 @@ export function CharactersSubmenu({ file, onAction, loadingStates }: SubmenuProp
 // Componente para el submenú de lugares
 export function PlacesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	// Llamar al hook directamente
-	const placesFromStore = usePlaceStore(state => state.places);
+	const placesFromStore = usePlaceStore((state) => state.places);
 	// Luego memoizar los resultados
-	const places = React.useMemo(() =>
-		placesFromStore as EntityWithNameAndId[],
-		[placesFromStore]
-	);
+	const places = React.useMemo(() => placesFromStore as EntityWithNameAndId[], [placesFromStore]);
 
 	return (
 		<EntitySubMenu<EntityWithNameAndId>
@@ -194,12 +179,9 @@ export function PlacesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 // Componente para el submenú de objetos del mundo
 export function WorldItemsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	// Llamar al hook directamente
-	const worldItemsObj = useWorldItemStore(state => state.worldItems || {});
+	const worldItemsObj = useWorldItemStore((state) => state.worldItems || {});
 	// Luego memoizar los resultados
-	const worldItems = React.useMemo(() =>
-		Object.values(worldItemsObj) as EntityWithNameAndId[],
-		[worldItemsObj]
-	);
+	const worldItems = React.useMemo(() => Object.values(worldItemsObj) as EntityWithNameAndId[], [worldItemsObj]);
 
 	return (
 		<EntitySubMenu<EntityWithNameAndId>
@@ -223,12 +205,9 @@ export function WorldItemsSubmenu({ file, onAction, loadingStates }: SubmenuProp
 // Componente para el submenú de prompts
 export function PromptsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	// Llamar al hook directamente
-	const promptsObj = usePromptStore(state => state.prompts || {});
+	const promptsObj = usePromptStore((state) => state.prompts || {});
 	// Luego memoizar los resultados
-	const prompts = React.useMemo(() =>
-		Object.values(promptsObj) as EntityWithNameAndId[],
-		[promptsObj]
-	);
+	const prompts = React.useMemo(() => Object.values(promptsObj) as EntityWithNameAndId[], [promptsObj]);
 
 	return (
 		<EntitySubMenu<EntityWithNameAndId>
@@ -252,14 +231,16 @@ export function PromptsSubmenu({ file, onAction, loadingStates }: SubmenuProps) 
 // Componente para el submenú de notas
 export function NotesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	// Llamar al hook directamente
-	const notesFromStore = useNoteStore(state => state.notes || []);
+	const notesFromStore = useNoteStore((state) => state.notes || []);
 	// Luego memoizar los resultados
-	const notesList = React.useMemo(() =>
-		notesFromStore.map(note => ({
-			name: note.title || 'Sin título',
-			...note
-		})) as EntityWithNameAndId[],
-		[notesFromStore]);
+	const notesList = React.useMemo(
+		() =>
+			notesFromStore.map((note) => ({
+				name: note.title || 'Sin título',
+				...note,
+			})) as EntityWithNameAndId[],
+		[notesFromStore]
+	);
 
 	return (
 		<EntitySubMenu<EntityWithNameAndId>
@@ -282,12 +263,9 @@ export function NotesSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 // Componente para el submenú de conceptos
 export function ConceptsSubmenu({ file, onAction, loadingStates }: SubmenuProps) {
 	// Llamar al hook directamente
-	const conceptsObj = useConceptStore(state => state.concepts || {});
+	const conceptsObj = useConceptStore((state) => state.concepts || {});
 	// Luego memoizar los resultados
-	const concepts = React.useMemo(() =>
-		Object.values(conceptsObj) as EntityWithNameAndId[],
-		[conceptsObj]
-	);
+	const concepts = React.useMemo(() => Object.values(conceptsObj) as EntityWithNameAndId[], [conceptsObj]);
 
 	return (
 		<EntitySubMenu<EntityWithNameAndId>

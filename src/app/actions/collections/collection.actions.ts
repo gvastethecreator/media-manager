@@ -8,15 +8,12 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 // Importaciones actualizadas usando nuevos tipos y transformers
-import {
-    mapCreateCollectionDataToPrisma,
-    mapUpdateCollectionDataToPrisma,
-} from '@/transformers/collection';
+import { mapCreateCollectionDataToPrisma, mapUpdateCollectionDataToPrisma } from '@/transformers/collection';
 import type {
-    CollectionBase,
-    CollectionExtended,
-    CreateCollectionData,
-    UpdateCollectionData,
+	CollectionBase,
+	CollectionExtended,
+	CreateCollectionData,
+	UpdateCollectionData,
 } from '@/types/entities/collection';
 
 // Utilidades y logging
@@ -32,7 +29,10 @@ const revalidateAllPaths = async () => {
 };
 
 // Notificar cambios en colecciones
-const notifyCollectionChange = async (action: 'create' | 'update' | 'delete', collection: CollectionBase | { id: string }) => {
+const notifyCollectionChange = async (
+	action: 'create' | 'update' | 'delete',
+	collection: CollectionBase | { id: string }
+) => {
 	// Emitir eventos usando el sistema del servidor
 	await emit({
 		type: 'collections:modified',
@@ -48,7 +48,11 @@ enum CollectionErrorCode {
 	OPERATION_FAILED = 'OPERATION_FAILED',
 }
 
-const createCollectionError = (message: string, code: CollectionErrorCode = CollectionErrorCode.OPERATION_FAILED, cause?: unknown) => {
+const createCollectionError = (
+	message: string,
+	code: CollectionErrorCode = CollectionErrorCode.OPERATION_FAILED,
+	cause?: unknown
+) => {
 	const error = new Error(message);
 	error.name = 'CollectionError';
 	Object.assign(error, { code, cause });
@@ -341,7 +345,11 @@ export async function getCollectionImages(id: string): Promise<FileItem[]> {
 		if (error instanceof Error && error.name === 'CollectionError') {
 			throw error;
 		}
-		throw createCollectionError('No se pudieron obtener las imágenes de la colección', CollectionErrorCode.OPERATION_FAILED, error);
+		throw createCollectionError(
+			'No se pudieron obtener las imágenes de la colección',
+			CollectionErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -383,7 +391,11 @@ export async function addImageToCollection(collectionId: string, imageId: string
 		if (error instanceof Error && error.name === 'CollectionError') {
 			throw error;
 		}
-		throw createCollectionError('No se pudo añadir la imagen a la colección', CollectionErrorCode.OPERATION_FAILED, error);
+		throw createCollectionError(
+			'No se pudo añadir la imagen a la colección',
+			CollectionErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -425,7 +437,11 @@ export async function removeImageFromCollection(collectionId: string, imageId: s
 		if (error instanceof Error && error.name === 'CollectionError') {
 			throw error;
 		}
-		throw createCollectionError('No se pudo eliminar la imagen de la colección', CollectionErrorCode.OPERATION_FAILED, error);
+		throw createCollectionError(
+			'No se pudo eliminar la imagen de la colección',
+			CollectionErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -467,7 +483,11 @@ export async function addCollectionToImage(collectionId: string, imageId: string
 		if (error instanceof Error && error.name === 'CollectionError') {
 			throw error;
 		}
-		throw createCollectionError('No se pudo añadir la colección a la imagen', CollectionErrorCode.OPERATION_FAILED, error);
+		throw createCollectionError(
+			'No se pudo añadir la colección a la imagen',
+			CollectionErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -509,6 +529,10 @@ export async function removeCollectionFromImage(collectionId: string, imageId: s
 		if (error instanceof Error && error.name === 'CollectionError') {
 			throw error;
 		}
-		throw createCollectionError('No se pudo eliminar la colección de la imagen', CollectionErrorCode.OPERATION_FAILED, error);
+		throw createCollectionError(
+			'No se pudo eliminar la colección de la imagen',
+			CollectionErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }

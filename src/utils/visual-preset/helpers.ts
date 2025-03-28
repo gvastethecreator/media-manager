@@ -1,10 +1,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { serializeTags } from '@/transformers/visual-preset';
 import type { VisualPresetCategory, VisualPresetExtended } from '@/types/entities/visual-preset';
-import {
-    createVisualPresetSchema,
-    updateVisualPresetSchema
-} from './validators';
+import { createVisualPresetSchema, updateVisualPresetSchema } from './validators';
 
 const helpersLogger = serverLogger.withContext('VisualPreset:Helpers');
 
@@ -15,10 +12,10 @@ const helpersLogger = serverLogger.withContext('VisualPreset:Helpers');
  * @returns Array filtrado de presets visuales
  */
 export function filterPresetsByCategory(
-  presets: VisualPresetExtended[],
-  category: string | VisualPresetCategory
+	presets: VisualPresetExtended[],
+	category: string | VisualPresetCategory
 ): VisualPresetExtended[] {
-  return presets.filter(preset => preset.category === category);
+	return presets.filter((preset) => preset.category === category);
 }
 
 /**
@@ -27,11 +24,8 @@ export function filterPresetsByCategory(
  * @param isPublic Si se deben incluir solo presets públicos
  * @returns Array filtrado de presets visuales
  */
-export function filterPresetsByVisibility(
-  presets: VisualPresetExtended[],
-  isPublic: boolean
-): VisualPresetExtended[] {
-  return presets.filter(preset => preset.isPublic === isPublic);
+export function filterPresetsByVisibility(presets: VisualPresetExtended[], isPublic: boolean): VisualPresetExtended[] {
+	return presets.filter((preset) => preset.isPublic === isPublic);
 }
 
 /**
@@ -39,10 +33,8 @@ export function filterPresetsByVisibility(
  * @param presets Array de presets visuales extendidos
  * @returns Array filtrado de presets visuales
  */
-export function filterDefaultPresets(
-  presets: VisualPresetExtended[]
-): VisualPresetExtended[] {
-  return presets.filter(preset => preset.isDefault);
+export function filterDefaultPresets(presets: VisualPresetExtended[]): VisualPresetExtended[] {
+	return presets.filter((preset) => preset.isDefault);
 }
 
 /**
@@ -50,10 +42,8 @@ export function filterDefaultPresets(
  * @param presets Array de presets visuales extendidos
  * @returns Array ordenado de presets visuales
  */
-export function sortPresetsByName(
-  presets: VisualPresetExtended[]
-): VisualPresetExtended[] {
-  return [...presets].sort((a, b) => a.name.localeCompare(b.name));
+export function sortPresetsByName(presets: VisualPresetExtended[]): VisualPresetExtended[] {
+	return [...presets].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
@@ -61,12 +51,8 @@ export function sortPresetsByName(
  * @param presets Array de presets visuales extendidos
  * @returns Array ordenado de presets visuales
  */
-export function sortPresetsByDate(
-  presets: VisualPresetExtended[]
-): VisualPresetExtended[] {
-  return [...presets].sort((a, b) =>
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+export function sortPresetsByDate(presets: VisualPresetExtended[]): VisualPresetExtended[] {
+	return [...presets].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
 /**
@@ -75,17 +61,13 @@ export function sortPresetsByDate(
  * @param searchTerm Término de búsqueda
  * @returns Array filtrado de presets visuales
  */
-export function searchPresets(
-  presets: VisualPresetExtended[],
-  searchTerm: string
-): VisualPresetExtended[] {
-  if (!searchTerm) return presets;
+export function searchPresets(presets: VisualPresetExtended[], searchTerm: string): VisualPresetExtended[] {
+	if (!searchTerm) return presets;
 
-  const term = searchTerm.toLowerCase();
-  return presets.filter(preset =>
-    preset.name.toLowerCase().includes(term) ||
-    preset.description?.toLowerCase().includes(term)
-  );
+	const term = searchTerm.toLowerCase();
+	return presets.filter(
+		(preset) => preset.name.toLowerCase().includes(term) || preset.description?.toLowerCase().includes(term)
+	);
 }
 
 /**
@@ -94,15 +76,10 @@ export function searchPresets(
  * @param tags Etiquetas para filtrar
  * @returns Array filtrado de presets visuales
  */
-export function filterPresetsByTags(
-  presets: VisualPresetExtended[],
-  tags: string[]
-): VisualPresetExtended[] {
-  if (!tags.length) return presets;
+export function filterPresetsByTags(presets: VisualPresetExtended[], tags: string[]): VisualPresetExtended[] {
+	if (!tags.length) return presets;
 
-  return presets.filter(preset =>
-    tags.some(tag => preset.parsedTags.includes(tag))
-  );
+	return presets.filter((preset) => tags.some((tag) => preset.parsedTags.includes(tag)));
 }
 
 /**
@@ -112,12 +89,10 @@ export function filterPresetsByTags(
  * @returns Preset visual por defecto o undefined
  */
 export function findDefaultPresetForCategory(
-  presets: VisualPresetExtended[],
-  category: string | VisualPresetCategory
+	presets: VisualPresetExtended[],
+	category: string | VisualPresetCategory
 ): VisualPresetExtended | undefined {
-  return presets.find(preset =>
-    preset.isDefault && preset.category === category
-  );
+	return presets.find((preset) => preset.isDefault && preset.category === category);
 }
 
 /**
@@ -126,36 +101,36 @@ export function findDefaultPresetForCategory(
  * @returns Objeto con resultado de validación
  */
 export function validateCreatePresetData(data: any) {
-  try {
-    // Si tags es un array, lo serializamos
-    if (Array.isArray(data.tags)) {
-      data.tags = serializeTags(data.tags);
-    }
+	try {
+		// Si tags es un array, lo serializamos
+		if (Array.isArray(data.tags)) {
+			data.tags = serializeTags(data.tags);
+		}
 
-    const result = createVisualPresetSchema.safeParse(data);
+		const result = createVisualPresetSchema.safeParse(data);
 
-    if (!result.success) {
-      helpersLogger.error('❌ Error validando datos de creación:', result.error);
-      return {
-        success: false,
-        error: result.error.format(),
-        data: null
-      };
-    }
+		if (!result.success) {
+			helpersLogger.error('❌ Error validando datos de creación:', result.error);
+			return {
+				success: false,
+				error: result.error.format(),
+				data: null,
+			};
+		}
 
-    return {
-      success: true,
-      error: null,
-      data: result.data
-    };
-  } catch (error) {
-    helpersLogger.error('❌ Error en validación de datos de creación:', error);
-    return {
-      success: false,
-      error,
-      data: null
-    };
-  }
+		return {
+			success: true,
+			error: null,
+			data: result.data,
+		};
+	} catch (error) {
+		helpersLogger.error('❌ Error en validación de datos de creación:', error);
+		return {
+			success: false,
+			error,
+			data: null,
+		};
+	}
 }
 
 /**
@@ -164,34 +139,34 @@ export function validateCreatePresetData(data: any) {
  * @returns Objeto con resultado de validación
  */
 export function validateUpdatePresetData(data: any) {
-  try {
-    // Si tags es un array, lo serializamos
-    if (Array.isArray(data.tags)) {
-      data.tags = serializeTags(data.tags);
-    }
+	try {
+		// Si tags es un array, lo serializamos
+		if (Array.isArray(data.tags)) {
+			data.tags = serializeTags(data.tags);
+		}
 
-    const result = updateVisualPresetSchema.safeParse(data);
+		const result = updateVisualPresetSchema.safeParse(data);
 
-    if (!result.success) {
-      helpersLogger.error('❌ Error validando datos de actualización:', result.error);
-      return {
-        success: false,
-        error: result.error.format(),
-        data: null
-      };
-    }
+		if (!result.success) {
+			helpersLogger.error('❌ Error validando datos de actualización:', result.error);
+			return {
+				success: false,
+				error: result.error.format(),
+				data: null,
+			};
+		}
 
-    return {
-      success: true,
-      error: null,
-      data: result.data
-    };
-  } catch (error) {
-    helpersLogger.error('❌ Error en validación de datos de actualización:', error);
-    return {
-      success: false,
-      error,
-      data: null
-    };
-  }
+		return {
+			success: true,
+			error: null,
+			data: result.data,
+		};
+	} catch (error) {
+		helpersLogger.error('❌ Error en validación de datos de actualización:', error);
+		return {
+			success: false,
+			error,
+			data: null,
+		};
+	}
 }

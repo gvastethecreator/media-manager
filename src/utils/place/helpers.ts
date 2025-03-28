@@ -4,12 +4,7 @@
  */
 
 import { deserializePlaceDangers } from '../../transformers/place';
-import {
-    type Place,
-    PLACE_SORT_PROPERTY_MAP,
-    type PlaceFilters,
-    PlaceSortCriteria
-} from '../../types/entities/place';
+import { type Place, PLACE_SORT_PROPERTY_MAP, type PlaceFilters, PlaceSortCriteria } from '../../types/entities/place';
 
 /**
  * Ordena una lista de lugares según el criterio especificado
@@ -18,40 +13,40 @@ import {
  * @returns Lista ordenada
  */
 export function sortPlaces(places: Place[], sortBy: string = PlaceSortCriteria.NAME_ASC): Place[] {
-  const sortedPlaces = [...places];
-  const sortProperty = PLACE_SORT_PROPERTY_MAP[sortBy as PlaceSortCriteria] || 'name';
-  const isDesc = sortBy.endsWith('_desc');
+	const sortedPlaces = [...places];
+	const sortProperty = PLACE_SORT_PROPERTY_MAP[sortBy as PlaceSortCriteria] || 'name';
+	const isDesc = sortBy.endsWith('_desc');
 
-  sortedPlaces.sort((a, b) => {
-    let valueA: any = a[sortProperty as keyof Place];
-    let valueB: any = b[sortProperty as keyof Place];
+	sortedPlaces.sort((a, b) => {
+		let valueA: any = a[sortProperty as keyof Place];
+		let valueB: any = b[sortProperty as keyof Place];
 
-    // Manejar casos especiales para propiedades JSON
-    if (sortProperty === 'dangers') {
-      const dangerLevelA = a.dangerLevel || 'unknown';
-      const dangerLevelB = b.dangerLevel || 'unknown';
+		// Manejar casos especiales para propiedades JSON
+		if (sortProperty === 'dangers') {
+			const dangerLevelA = a.dangerLevel || 'unknown';
+			const dangerLevelB = b.dangerLevel || 'unknown';
 
-      const dangerLevels = ['safe', 'low', 'moderate', 'high', 'extreme', 'deadly', 'unknown'];
-      valueA = dangerLevels.indexOf(dangerLevelA);
-      valueB = dangerLevels.indexOf(dangerLevelB);
-    }
+			const dangerLevels = ['safe', 'low', 'moderate', 'high', 'extreme', 'deadly', 'unknown'];
+			valueA = dangerLevels.indexOf(dangerLevelA);
+			valueB = dangerLevels.indexOf(dangerLevelB);
+		}
 
-    // Manejar valores nulos
-    if (valueA === null || valueA === undefined) return isDesc ? -1 : 1;
-    if (valueB === null || valueB === undefined) return isDesc ? 1 : -1;
+		// Manejar valores nulos
+		if (valueA === null || valueA === undefined) return isDesc ? -1 : 1;
+		if (valueB === null || valueB === undefined) return isDesc ? 1 : -1;
 
-    // Comparar según tipo de valor
-    if (typeof valueA === 'string' && typeof valueB === 'string') {
-      return isDesc
-        ? valueB.localeCompare(valueA, 'es', { sensitivity: 'base' })
-        : valueA.localeCompare(valueB, 'es', { sensitivity: 'base' });
-    }
+		// Comparar según tipo de valor
+		if (typeof valueA === 'string' && typeof valueB === 'string') {
+			return isDesc
+				? valueB.localeCompare(valueA, 'es', { sensitivity: 'base' })
+				: valueA.localeCompare(valueB, 'es', { sensitivity: 'base' });
+		}
 
-    // Comparar numéricamente
-    return isDesc ? valueB - valueA : valueA - valueB;
-  });
+		// Comparar numéricamente
+		return isDesc ? valueB - valueA : valueA - valueB;
+	});
 
-  return sortedPlaces;
+	return sortedPlaces;
 }
 
 /**
@@ -61,99 +56,101 @@ export function sortPlaces(places: Place[], sortBy: string = PlaceSortCriteria.N
  * @returns Lista filtrada
  */
 export function filterPlaces(places: Place[], filters: PlaceFilters): Place[] {
-  if (!filters || Object.keys(filters).length === 0) {
-    return places;
-  }
+	if (!filters || Object.keys(filters).length === 0) {
+		return places;
+	}
 
-  return places.filter(place => {
-    // Filtrar por búsqueda de texto
-    if (filters.searchQuery) {
-      const searchRegex = new RegExp(filters.searchQuery, 'i');
-      const searchableText = [
-        place.name,
-        place.description,
-        place.region,
-        place.type,
-        place.climate,
-        place.government,
-        place.lore,
-        place.history
-      ].filter(Boolean).join(' ');
+	return places.filter((place) => {
+		// Filtrar por búsqueda de texto
+		if (filters.searchQuery) {
+			const searchRegex = new RegExp(filters.searchQuery, 'i');
+			const searchableText = [
+				place.name,
+				place.description,
+				place.region,
+				place.type,
+				place.climate,
+				place.government,
+				place.lore,
+				place.history,
+			]
+				.filter(Boolean)
+				.join(' ');
 
-      if (!searchRegex.test(searchableText)) {
-        return false;
-      }
-    }
+			if (!searchRegex.test(searchableText)) {
+				return false;
+			}
+		}
 
-    // Filtrar por categoría
-    if (filters.categories?.length && place.category) {
-      if (!filters.categories.includes(place.category)) {
-        return false;
-      }
-    }
+		// Filtrar por categoría
+		if (filters.categories?.length && place.category) {
+			if (!filters.categories.includes(place.category)) {
+				return false;
+			}
+		}
 
-    // Filtrar por tipo
-    if (filters.types?.length && place.type) {
-      if (!filters.types.includes(place.type)) {
-        return false;
-      }
-    }
+		// Filtrar por tipo
+		if (filters.types?.length && place.type) {
+			if (!filters.types.includes(place.type)) {
+				return false;
+			}
+		}
 
-    // Filtrar por clima
-    if (filters.climates?.length && place.climate) {
-      if (!filters.climates.includes(place.climate)) {
-        return false;
-      }
-    }
+		// Filtrar por clima
+		if (filters.climates?.length && place.climate) {
+			if (!filters.climates.includes(place.climate)) {
+				return false;
+			}
+		}
 
-    // Filtrar por gobierno
-    if (filters.governments?.length && place.government) {
-      if (!filters.governments.includes(place.government)) {
-        return false;
-      }
-    }
+		// Filtrar por gobierno
+		if (filters.governments?.length && place.government) {
+			if (!filters.governments.includes(place.government)) {
+				return false;
+			}
+		}
 
-    // Filtrar por nivel de peligro
-    if (filters.dangerLevels?.length && place.dangers) {
-      const dangers = deserializePlaceDangers(place.dangers);
-      const placeDangerLevels = dangers.map(d => d.level).filter(Boolean) as string[];
+		// Filtrar por nivel de peligro
+		if (filters.dangerLevels?.length && place.dangers) {
+			const dangers = deserializePlaceDangers(place.dangers);
+			const placeDangerLevels = dangers.map((d) => d.level).filter(Boolean) as string[];
 
-      if (!placeDangerLevels.some(level => filters.dangerLevels?.includes(level))) {
-        return false;
-      }
-    }
+			if (!placeDangerLevels.some((level) => filters.dangerLevels?.includes(level))) {
+				return false;
+			}
+		}
 
-    // Filtrar por rango de población
-    if (place.population !== null) {
-      if (filters.populationMin !== undefined && place.population < filters.populationMin) {
-        return false;
-      }
-      if (filters.populationMax !== undefined && place.population > filters.populationMax) {
-        return false;
-      }
-    }
+		// Filtrar por rango de población
+		if (place.population !== null) {
+			if (filters.populationMin !== undefined && place.population < filters.populationMin) {
+				return false;
+			}
+			if (filters.populationMax !== undefined && place.population > filters.populationMax) {
+				return false;
+			}
+		}
 
-    // Filtrar por favoritos
-    if (filters.onlyFavorites && !place.isFavorite) {
-      return false;
-    }
+		// Filtrar por favoritos
+		if (filters.onlyFavorites && !place.isFavorite) {
+			return false;
+		}
 
-    // Filtrar por presencia de relaciones
-    if (filters.hasImages && (!place.imagesCount || place.imagesCount === 0)) {
-      return false;
-    }
-    if (filters.hasNotes && (!place.notesCount || place.notesCount === 0)) {
-      return false;
-    }
-    if (filters.hasConcepts && (!place.conceptsCount || place.conceptsCount === 0)) {
-      return false;
-    }
-    if (filters.hasPrompts && (!place.promptsCount || place.promptsCount === 0)) {
-      return false;
-    }
+		// Filtrar por presencia de relaciones
+		if (filters.hasImages && (!place.imagesCount || place.imagesCount === 0)) {
+			return false;
+		}
+		if (filters.hasNotes && (!place.notesCount || place.notesCount === 0)) {
+			return false;
+		}
+		if (filters.hasConcepts && (!place.conceptsCount || place.conceptsCount === 0)) {
+			return false;
+		}
+		if (filters.hasPrompts && (!place.promptsCount || place.promptsCount === 0)) {
+			return false;
+		}
 
-    return true;
-  });
+		return true;
+	});
 }
 
 /**
@@ -162,33 +159,33 @@ export function filterPlaces(places: Place[], filters: PlaceFilters): Place[] {
  * @returns Estructura de árbol de lugares
  */
 export function buildPlaceTree(places: Place[]) {
-  const tree: Record<string, any> = {};
-  const rootPlaces: Place[] = [];
+	const tree: Record<string, any> = {};
+	const rootPlaces: Place[] = [];
 
-  // Primero, agregar lugares sin región a la raíz
-  places.forEach(place => {
-    if (!place.region) {
-      rootPlaces.push(place);
-    } else {
-      const path = place.region.split('/').filter(Boolean);
-      let current = tree;
+	// Primero, agregar lugares sin región a la raíz
+	places.forEach((place) => {
+		if (!place.region) {
+			rootPlaces.push(place);
+		} else {
+			const path = place.region.split('/').filter(Boolean);
+			let current = tree;
 
-      // Crear la estructura de árbol para la región
-      path.forEach((segment, index) => {
-        if (!current[segment]) {
-          current[segment] = { places: [], children: {} };
-        }
+			// Crear la estructura de árbol para la región
+			path.forEach((segment, index) => {
+				if (!current[segment]) {
+					current[segment] = { places: [], children: {} };
+				}
 
-        if (index === path.length - 1) {
-          current[segment].places.push(place);
-        }
+				if (index === path.length - 1) {
+					current[segment].places.push(place);
+				}
 
-        current = current[segment].children;
-      });
-    }
-  });
+				current = current[segment].children;
+			});
+		}
+	});
 
-  return { rootPlaces, tree };
+	return { rootPlaces, tree };
 }
 
 /**
@@ -198,7 +195,7 @@ export function buildPlaceTree(places: Place[]) {
  * @returns Lugar encontrado o undefined
  */
 export function findPlaceById(places: Place[], id: string): Place | undefined {
-  return places.find(place => place.id === id);
+	return places.find((place) => place.id === id);
 }
 
 /**
@@ -208,7 +205,7 @@ export function findPlaceById(places: Place[], id: string): Place | undefined {
  * @returns Lista de lugares encontrados
  */
 export function findPlacesByIds(places: Place[], ids: string[]): Place[] {
-  return places.filter(place => ids.includes(place.id));
+	return places.filter((place) => ids.includes(place.id));
 }
 
 /**
@@ -218,7 +215,7 @@ export function findPlacesByIds(places: Place[], ids: string[]): Place[] {
  * @returns Lista de lugares de la categoría
  */
 export function findPlacesByCategory(places: Place[], category: string): Place[] {
-  return places.filter(place => place.category === category);
+	return places.filter((place) => place.category === category);
 }
 
 /**
@@ -228,7 +225,7 @@ export function findPlacesByCategory(places: Place[], category: string): Place[]
  * @returns Lista de lugares del tipo
  */
 export function findPlacesByType(places: Place[], type: string): Place[] {
-  return places.filter(place => place.type === type);
+	return places.filter((place) => place.type === type);
 }
 
 /**
@@ -238,7 +235,7 @@ export function findPlacesByType(places: Place[], type: string): Place[] {
  * @returns Lista de lugares de la región
  */
 export function findPlacesByRegion(places: Place[], region: string): Place[] {
-  return places.filter(place => place.region && place.region.startsWith(region));
+	return places.filter((place) => place.region && place.region.startsWith(region));
 }
 
 /**
@@ -247,32 +244,44 @@ export function findPlacesByRegion(places: Place[], region: string): Place[] {
  * @returns Datos preparados para la petición
  */
 export function preparePlaceRequest(place: Partial<Place>): Record<string, any> {
-  const {
-    dangersArray, resourcesArray, statsObject, filtersObject,
-    isSelected, isExpanded, isEditing, isHighlighted,
-    imagesCount, notesCount, conceptsCount, promptsCount,
-    dangerLevel, displayPopulation, displaySize, regionPath,
-    ...baseData
-  } = place as any;
+	const {
+		dangersArray,
+		resourcesArray,
+		statsObject,
+		filtersObject,
+		isSelected,
+		isExpanded,
+		isEditing,
+		isHighlighted,
+		imagesCount,
+		notesCount,
+		conceptsCount,
+		promptsCount,
+		dangerLevel,
+		displayPopulation,
+		displaySize,
+		regionPath,
+		...baseData
+	} = place as any;
 
-  // Si hay arrays y objetos, convertirlos a JSON
-  const preparedData: Record<string, any> = { ...baseData };
+	// Si hay arrays y objetos, convertirlos a JSON
+	const preparedData: Record<string, any> = { ...baseData };
 
-  // Solo incluir en la petición si han cambiado
-  if (dangersArray) {
-    preparedData.dangers = JSON.stringify(dangersArray);
-  }
-  if (resourcesArray) {
-    preparedData.resources = JSON.stringify(resourcesArray);
-  }
-  if (statsObject) {
-    preparedData.stats = JSON.stringify(statsObject);
-  }
-  if (filtersObject) {
-    preparedData.filters = JSON.stringify(filtersObject);
-  }
+	// Solo incluir en la petición si han cambiado
+	if (dangersArray) {
+		preparedData.dangers = JSON.stringify(dangersArray);
+	}
+	if (resourcesArray) {
+		preparedData.resources = JSON.stringify(resourcesArray);
+	}
+	if (statsObject) {
+		preparedData.stats = JSON.stringify(statsObject);
+	}
+	if (filtersObject) {
+		preparedData.filters = JSON.stringify(filtersObject);
+	}
 
-  return preparedData;
+	return preparedData;
 }
 
 /**
@@ -281,18 +290,18 @@ export function preparePlaceRequest(place: Partial<Place>): Record<string, any> 
  * @returns Estadísticas calculadas
  */
 export function calculatePlaceStats(places: Place[]) {
-  return {
-    total: places.length,
-    byType: countByProperty(places, 'type'),
-    byCategory: countByProperty(places, 'category'),
-    favorites: places.filter(p => p.isFavorite).length,
-    withImages: places.filter(p => p.imagesCount && p.imagesCount > 0).length,
-    withNotes: places.filter(p => p.notesCount && p.notesCount > 0).length,
-    withConcepts: places.filter(p => p.conceptsCount && p.conceptsCount > 0).length,
-    withPrompts: places.filter(p => p.promptsCount && p.promptsCount > 0).length,
-    averagePopulation: calculateAveragePopulation(places),
-    dangerLevelDistribution: countByProperty(places, 'dangerLevel')
-  };
+	return {
+		total: places.length,
+		byType: countByProperty(places, 'type'),
+		byCategory: countByProperty(places, 'category'),
+		favorites: places.filter((p) => p.isFavorite).length,
+		withImages: places.filter((p) => p.imagesCount && p.imagesCount > 0).length,
+		withNotes: places.filter((p) => p.notesCount && p.notesCount > 0).length,
+		withConcepts: places.filter((p) => p.conceptsCount && p.conceptsCount > 0).length,
+		withPrompts: places.filter((p) => p.promptsCount && p.promptsCount > 0).length,
+		averagePopulation: calculateAveragePopulation(places),
+		dangerLevelDistribution: countByProperty(places, 'dangerLevel'),
+	};
 }
 
 /**
@@ -302,14 +311,14 @@ export function calculatePlaceStats(places: Place[]) {
  * @returns Conteo por valor de propiedad
  */
 function countByProperty(places: Place[], property: keyof Place): Record<string, number> {
-  const counts: Record<string, number> = {};
+	const counts: Record<string, number> = {};
 
-  places.forEach(place => {
-    const value = String(place[property] || 'unknown');
-    counts[value] = (counts[value] || 0) + 1;
-  });
+	places.forEach((place) => {
+		const value = String(place[property] || 'unknown');
+		counts[value] = (counts[value] || 0) + 1;
+	});
 
-  return counts;
+	return counts;
 }
 
 /**
@@ -318,9 +327,9 @@ function countByProperty(places: Place[], property: keyof Place): Record<string,
  * @returns Población promedio
  */
 function calculateAveragePopulation(places: Place[]): number {
-  const placesWithPopulation = places.filter(p => p.population !== null);
-  if (placesWithPopulation.length === 0) return 0;
+	const placesWithPopulation = places.filter((p) => p.population !== null);
+	if (placesWithPopulation.length === 0) return 0;
 
-  const total = placesWithPopulation.reduce((sum, place) => sum + (place.population || 0), 0);
-  return Math.round(total / placesWithPopulation.length);
+	const total = placesWithPopulation.reduce((sum, place) => sum + (place.population || 0), 0);
+	return Math.round(total / placesWithPopulation.length);
 }

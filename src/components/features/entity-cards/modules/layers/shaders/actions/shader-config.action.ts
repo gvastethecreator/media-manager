@@ -8,34 +8,34 @@ export type ShaderType = 'distortion' | 'hologram' | 'wave' | 'particle';
 
 // Configuración base para todos los shaders
 interface BaseShaderConfig {
-  enabled: boolean;
-  type: ShaderType;
-  opacity: number;
-  blendMode: string;
+	enabled: boolean;
+	type: ShaderType;
+	opacity: number;
+	blendMode: string;
 }
 
 // Configuraciones específicas por tipo de shader
 interface DistortionConfig extends BaseShaderConfig {
-  type: 'distortion';
-  intensity: number;
+	type: 'distortion';
+	intensity: number;
 }
 
 interface HologramConfig extends BaseShaderConfig {
-  type: 'hologram';
-  color: [number, number, number];
-  scanlineIntensity: number;
+	type: 'hologram';
+	color: [number, number, number];
+	scanlineIntensity: number;
 }
 
 interface WaveConfig extends BaseShaderConfig {
-  type: 'wave';
-  amplitude: number;
-  frequency: number;
+	type: 'wave';
+	amplitude: number;
+	frequency: number;
 }
 
 interface ParticleConfig extends BaseShaderConfig {
-  type: 'particle';
-  particleSize: number;
-  particleDensity: number;
+	type: 'particle';
+	particleSize: number;
+	particleDensity: number;
 }
 
 // Tipo unión para todas las configuraciones posibles
@@ -43,37 +43,37 @@ export type ShaderConfig = DistortionConfig | HologramConfig | WaveConfig | Part
 
 // Configuraciones por defecto
 export const defaultShaders = {
-  distortion: {
-    enabled: true,
-    type: 'distortion' as const,
-    opacity: 0.5,
-    blendMode: 'overlay',
-    intensity: 0.5,
-  },
-  hologram: {
-    enabled: true,
-    type: 'hologram' as const,
-    opacity: 0.7,
-    blendMode: 'screen',
-    color: [0, 0.5, 1] as [number, number, number],
-    scanlineIntensity: 0.5,
-  },
-  wave: {
-    enabled: true,
-    type: 'wave' as const,
-    opacity: 0.6,
-    blendMode: 'normal',
-    amplitude: 0.5,
-    frequency: 0.5,
-  },
-  particle: {
-    enabled: true,
-    type: 'particle' as const,
-    opacity: 0.8,
-    blendMode: 'lighten',
-    particleSize: 0.5,
-    particleDensity: 0.5,
-  },
+	distortion: {
+		enabled: true,
+		type: 'distortion' as const,
+		opacity: 0.5,
+		blendMode: 'overlay',
+		intensity: 0.5,
+	},
+	hologram: {
+		enabled: true,
+		type: 'hologram' as const,
+		opacity: 0.7,
+		blendMode: 'screen',
+		color: [0, 0.5, 1] as [number, number, number],
+		scanlineIntensity: 0.5,
+	},
+	wave: {
+		enabled: true,
+		type: 'wave' as const,
+		opacity: 0.6,
+		blendMode: 'normal',
+		amplitude: 0.5,
+		frequency: 0.5,
+	},
+	particle: {
+		enabled: true,
+		type: 'particle' as const,
+		opacity: 0.8,
+		blendMode: 'lighten',
+		particleSize: 0.5,
+		particleDensity: 0.5,
+	},
 };
 
 // Estado para el store de shaders
@@ -89,15 +89,16 @@ export const useShaderStore = create<ShaderState>((set) => ({
 	activeType: null,
 	configs: {},
 	setActiveType: (type) => set({ activeType: type }),
-	updateConfig: (type, config) => set((state) => ({
-		configs: {
-			...state.configs,
-			[type]: {
-				...state.configs[type],
-				...config,
+	updateConfig: (type, config) =>
+		set((state) => ({
+			configs: {
+				...state.configs,
+				[type]: {
+					...state.configs[type],
+					...config,
+				},
 			},
-		},
-	})),
+		})),
 }));
 
 // Tipos exportados
@@ -136,11 +137,7 @@ export async function getShaderConfig(entityType: string, entityId?: string) {
 /**
  * Actualiza la configuración de shader para una entidad
  */
-export async function updateShaderConfig(
-	config: ShaderConfig,
-	entityType: string,
-	entityId?: string
-) {
+export async function updateShaderConfig(config: ShaderConfig, entityType: string, entityId?: string) {
 	try {
 		// Aquí se implementaría la actualización en la base de datos
 		// Por ahora, retornamos una respuesta simulada para pruebas

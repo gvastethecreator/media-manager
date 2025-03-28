@@ -9,7 +9,7 @@ interface BlurLayerProps extends CommonLayerProps {
 }
 
 // Corregir para que coincida con la interfaz del sistema
-interface BlurSettingsProps extends LayerSettingsProps<BlurConfig> { }
+interface BlurSettingsProps extends LayerSettingsProps<BlurConfig> {}
 
 /**
  * 🌫️ Implementación de la capa de desenfoque

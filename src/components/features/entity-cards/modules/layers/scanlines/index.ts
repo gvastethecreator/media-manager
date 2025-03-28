@@ -4,4 +4,3 @@ export * from './components/scanlines-settings';
 export * from './hooks/use-scanlines';
 export * from './scanlines-config-types';
 export * from './scanlines-implementation';
-

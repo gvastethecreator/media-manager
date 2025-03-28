@@ -1,10 +1,6 @@
 'use client';
 
-import {
-	EntityCard,
-	EntityCardLayersProvider,
-	RegisterAllLayers
-} from '@/components/features/entity-cards';
+import { EntityCard, EntityCardLayersProvider, RegisterAllLayers } from '@/components/features/entity-cards';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -24,10 +20,10 @@ export function EntityCardWithLayersExample() {
 		description: 'Este es un ejemplo de tarjeta con el sistema de capas integrado.',
 		image: 'https://picsum.photos/300/400',
 		metadata: {
-			'Autor': 'Sistema de Capas',
-			'Versión': '1.0.0',
-			'Capas': 'Habilitadas'
-		}
+			Autor: 'Sistema de Capas',
+			Versión: '1.0.0',
+			Capas: 'Habilitadas',
+		},
 	};
 
 	return (
@@ -45,10 +41,7 @@ export function EntityCardWithLayersExample() {
 								<h3 className="font-medium">Habilitar Capas</h3>
 								<p className="text-sm text-muted-foreground">Activa o desactiva el sistema de capas</p>
 							</div>
-							<Switch
-								checked={enableLayers}
-								onCheckedChange={setEnableLayers}
-							/>
+							<Switch checked={enableLayers} onCheckedChange={setEnableLayers} />
 						</div>
 
 						<Separator />
@@ -58,11 +51,7 @@ export function EntityCardWithLayersExample() {
 								<h3 className="font-medium">Vista Explotada</h3>
 								<p className="text-sm text-muted-foreground">Muestra las capas separadas</p>
 							</div>
-							<Switch
-								checked={explodeLayers}
-								onCheckedChange={setExplodeLayers}
-								disabled={!enableLayers}
-							/>
+							<Switch checked={explodeLayers} onCheckedChange={setExplodeLayers} disabled={!enableLayers} />
 						</div>
 
 						<Separator />
@@ -70,7 +59,7 @@ export function EntityCardWithLayersExample() {
 						<div>
 							<h3 className="font-medium mb-2">Capa Activa</h3>
 							<div className="grid grid-cols-2 gap-2">
-								{['image', 'border', 'glow', 'content'].map(layer => (
+								{['image', 'border', 'glow', 'content'].map((layer) => (
 									<Button
 										key={layer}
 										variant={activeLayer === layer ? 'default' : 'outline'}
@@ -109,7 +98,7 @@ export function EntityCardWithLayersExample() {
 							secondaryColor: '#1e40af',
 							enableLayers,
 							explodeLayers,
-							activeLayer
+							activeLayer,
 						}}
 					/>
 				</div>
