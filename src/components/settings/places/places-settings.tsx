@@ -15,12 +15,15 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toast } from '@/services/toast.service';
+import toastService from '@/services/toast.service';
 import { Place } from '@/types/entities/place';
 import { ClimateType, PlaceType } from '@/types/entities/place/enums';
 import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreatePlaceForm } from './create-place-form';
+
+// Agregar type para manejar el onClick
+type ReactEventHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 export function PlacesSettings() {
 	const [places, setPlaces] = useState<PlaceWithStats[]>([]);
@@ -46,7 +49,7 @@ export function PlacesSettings() {
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
-				toast.error('Error al cargar los lugares', {
+				toastService.error('Error al cargar los lugares', {
 					description: errorMessage,
 				});
 			} finally {
@@ -73,7 +76,7 @@ export function PlacesSettings() {
 		// Filtrar por búsqueda
 		if (searchQuery) {
 			const normalizedQuery = searchQuery.toLowerCase();
-			matches = matches && (
+			matches = matches && Boolean(
 				place.name.toLowerCase().includes(normalizedQuery) ||
 				(place.description && place.description.toLowerCase().includes(normalizedQuery)) ||
 				(place.region && place.region.toLowerCase().includes(normalizedQuery))
@@ -105,10 +108,10 @@ export function PlacesSettings() {
 			setPlaces(prev => prev.filter(place => place.id !== id));
 			setSelectedPlace(null);
 			setIsEditing(false);
-			toast.success('Lugar eliminado');
+			toastService.success('Lugar eliminado');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toast.error('Error al eliminar el lugar', {
+			toastService.error('Error al eliminar el lugar', {
 				description: errorMessage,
 			});
 		}
@@ -123,7 +126,7 @@ export function PlacesSettings() {
 	// Manejar creación exitosa
 	const handlePlaceCreated = useCallback((newPlace: Place) => {
 		setPlaces(prev => [...prev, newPlace as unknown as PlaceWithStats]);
-		toast.success('Lugar creado');
+		toastService.success('Lugar creado');
 	}, []);
 
 	// Manejar actualización exitosa
@@ -135,7 +138,7 @@ export function PlacesSettings() {
 					: place
 			)
 		);
-		toast.success('Lugar actualizado');
+		toastService.success('Lugar actualizado');
 	}, []);
 
 	// Resetear formulario
@@ -359,7 +362,7 @@ export function PlacesSettings() {
 										>
 											<div
 												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
-												style={{ backgroundColor: place.color }}
+												style={{ backgroundColor: (place.color || '#808080') as string }}
 											>
 												{place.emoji}
 											</div>
@@ -383,17 +386,15 @@ export function PlacesSettings() {
 													)}
 												</div>
 											</div>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
+											<div
+												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100 cursor-pointer flex items-center justify-center"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeletePlace(place.id);
 												}}
 											>
-												<Trash className="h-3 w-3" />
-											</Button>
+												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
+											</div>
 										</div>
 									))}
 								</div>
@@ -539,33 +540,27 @@ function generateTypeColor(placeType: PlaceType): string {
 		case PlaceType.CITY:
 			return 'bg-blue-500';
 		case PlaceType.TOWN:
-			return 'bg-green-500';
+			return 'bg-indigo-500';
 		case PlaceType.VILLAGE:
-			return 'bg-yellow-500';
+			return 'bg-teal-500';
 		case PlaceType.FOREST:
-			return 'bg-emerald-500';
+			return 'bg-green-500';
 		case PlaceType.MOUNTAIN:
-			return 'bg-slate-500';
-		case PlaceType.LAKE:
-			return 'bg-cyan-500';
-		case PlaceType.OCEAN:
-			return 'bg-blue-700';
-		case PlaceType.RIVER:
-			return 'bg-sky-500';
+			return 'bg-gray-500';
 		case PlaceType.DESERT:
-			return 'bg-amber-500';
-		case PlaceType.CAVE:
-			return 'bg-stone-500';
-		case PlaceType.DUNGEON:
-			return 'bg-red-500';
+			return 'bg-yellow-500';
 		case PlaceType.CASTLE:
 			return 'bg-purple-500';
-		case PlaceType.TEMPLE:
-			return 'bg-orange-500';
-		case PlaceType.RUINS:
+		case PlaceType.RUIN:
 			return 'bg-zinc-500';
-		case PlaceType.CUSTOM:
-			return 'bg-pink-500';
+		case PlaceType.DUNGEON:
+			return 'bg-red-500';
+		case PlaceType.CAVE:
+			return 'bg-amber-500';
+		case PlaceType.FORTRESS:
+			return 'bg-slate-500';
+		case PlaceType.OTHER:
+			return 'bg-gray-500';
 		default:
 			return 'bg-gray-500';
 	}

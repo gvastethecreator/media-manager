@@ -12,13 +12,22 @@ import {
 } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/services/toast.service';
+import toastService from '@/services/toast.service';
 import { Album } from '@/types/entities/album';
 import { AlbumWithStats } from '@/types/entities/album/extended';
 import { formatBytes } from '@/utils/file/helpers';
 import { Album as AlbumIcon, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreateAlbumForm } from './create-album-form';
+
+// Extender el tipo Album para añadir las propiedades que faltan
+interface AlbumWithUI extends Album {
+	emoji: string;
+	color: string;
+}
+
+// Agregar tipo para manejar el onClick
+type ReactEventHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 export function AlbumsSettings() {
 	const [albums, setAlbums] = useState<AlbumWithStats[]>([]);
@@ -34,11 +43,12 @@ export function AlbumsSettings() {
 			try {
 				setIsLoading(true);
 				const data = await getAlbums();
-				setAlbums(data);
+				// Añadir type assertion para evitar error
+				setAlbums(data as unknown as AlbumWithStats[]);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
-				toast.error('Error al cargar los álbumes', {
+				toastService.error('Error al cargar los álbumes', {
 					description: errorMessage,
 				});
 			} finally {
@@ -64,10 +74,10 @@ export function AlbumsSettings() {
 			setAlbums(prev => prev.filter(album => album.id !== id));
 			setSelectedAlbum(null);
 			setIsEditing(false);
-			toast.success('Álbum eliminado');
+			toastService.success('Álbum eliminado');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toast.error('Error al eliminar el álbum', {
+			toastService.error('Error al eliminar el álbum', {
 				description: errorMessage,
 			});
 		}
@@ -79,10 +89,16 @@ export function AlbumsSettings() {
 		setIsEditing(true);
 	}, []);
 
+	// Manejar la eliminación desde el botón con detención de propagación de eventos
+	const handleDeleteButtonClick = useCallback((e: React.MouseEvent<HTMLButtonElement>, id: string) => {
+		e.stopPropagation();
+		handleDeleteAlbum(id);
+	}, [handleDeleteAlbum]);
+
 	// Manejar creación exitosa
 	const handleAlbumCreated = useCallback((newAlbum: Album) => {
 		setAlbums(prev => [...prev, newAlbum as unknown as AlbumWithStats]);
-		toast.success('Álbum creado');
+		toastService.success('Álbum creado');
 	}, []);
 
 	// Manejar actualización exitosa
@@ -94,7 +110,7 @@ export function AlbumsSettings() {
 					: album
 			)
 		);
-		toast.success('Álbum actualizado');
+		toastService.success('Álbum actualizado');
 	}, []);
 
 	// Resetear formulario
@@ -197,9 +213,12 @@ export function AlbumsSettings() {
 											<Button
 												variant="ghost"
 												size="icon"
+												type="button"
 												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												onClick={(e) => {
-													e.stopPropagation();
+												onClick={() => {
+													// Capturar el evento de clic en línea
+													const e = window.event as MouseEvent;
+													if (e) e.stopPropagation();
 													handleDeleteAlbum(album.id);
 												}}
 											>
@@ -294,7 +313,7 @@ export function AlbumsSettings() {
 												}}
 											/>
 										) : selectedAlbum ? (
-											<AlbumCard album={selectedAlbum} />
+											<AlbumCard album={selectedAlbum as unknown as AlbumWithUI} />
 										) : (
 											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
 												<AlbumIcon className="h-7 w-7 text-muted-foreground/50" />

@@ -17,9 +17,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/services/toast.service';
-import { Note } from '@/types/entities/note/base';
+import toastService from '@/services/toast.service';
 import { NoteCategory } from '@/types/entities/note/enums';
+import { Note } from '@/types/entities/notes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -39,8 +39,15 @@ const noteSchema = z.object({
 
 type NoteForm = z.infer<typeof noteSchema>;
 
+// Definir una interfaz extendida para tener las propiedades adicionales
+interface ExtendedNote extends Note {
+	summary?: string;
+	color?: string;
+	emoji?: string;
+}
+
 interface CreateNoteFormProps {
-	note?: Note | null;
+	note?: ExtendedNote | null;
 	isEditing?: boolean;
 	onCreated?: (note: Note) => void;
 	onUpdated?: (note: Note) => void;
@@ -88,10 +95,10 @@ export function CreateNoteForm({
 		if (note && isEditing) {
 			form.reset({
 				title: note.title,
-				summary: note.summary || '',
+				summary: (note as ExtendedNote).summary || '',
 				content: note.content || '',
-				color: note.color || '#3b82f6',
-				emoji: note.emoji || '📝',
+				color: (note as ExtendedNote).color || '#3b82f6',
+				emoji: (note as ExtendedNote).emoji || '📝',
 				category: note.category as NoteCategory | undefined,
 				tags: note.tags || '[]',
 				isFavorite: note.isFavorite || false
@@ -105,12 +112,15 @@ export function CreateNoteForm({
 			setIsSubmitting(true);
 
 			if (isEditing && note) {
-				// Actualizar nota existente
-				const updatedNote = await updateNote(note.id, data);
+				// Actualizar nota existente - incluir ID como parte de la actualización
+				const updatedNote = await updateNote(note.id, {
+					...data,
+					id: note.id
+				});
 				if (onUpdated) {
 					onUpdated(updatedNote);
 				}
-				toast.success('Nota actualizada correctamente');
+				toastService.success('Nota actualizada correctamente');
 			} else {
 				// Crear nueva nota
 				const newNote = await createNote(data);
@@ -118,11 +128,11 @@ export function CreateNoteForm({
 					onCreated(newNote);
 				}
 				form.reset(); // Limpiar formulario después de crear
-				toast.success('Nota creada correctamente');
+				toastService.success('Nota creada correctamente');
 			}
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toast.error(isEditing ? 'Error al actualizar la nota' : 'Error al crear la nota', {
+			toastService.error(isEditing ? 'Error al actualizar la nota' : 'Error al crear la nota', {
 				description: errorMessage
 			});
 		} finally {
@@ -239,6 +249,7 @@ export function CreateNoteForm({
 									<EmojiPicker
 										value={field.value}
 										onChange={field.onChange}
+										onEmojiSelect={field.onChange}
 									/>
 								</FormControl>
 								<FormDescription>
@@ -279,7 +290,7 @@ export function CreateNoteForm({
 							<FormControl>
 								<Input
 									placeholder="Ej: importante, investigación, idea"
-									value={field.value !== '[]' ? JSON.parse(field.value).join(', ') : ''}
+									value={field.value !== '[]' ? JSON.parse(field.value || '[]').join(', ') : ''}
 									onChange={(e) => {
 										// Convertir texto separado por comas a formato JSON
 										const tagsArray = e.target.value.split(',').map(tag => tag.trim()).filter(Boolean);

@@ -9,7 +9,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/services/toast.service';
+import toastService from '@/services/toast.service';
 import { generateTagColor, generateTagEmoji } from '@/transformers/tag/serializers';
 import { Tag } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag/enums';
@@ -125,7 +125,7 @@ export function CreateTagForm({
 
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toast.error(`Error al ${isEditing ? 'actualizar' : 'crear'} la etiqueta`, {
+			toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} la etiqueta`, {
 				description: errorMessage,
 			});
 		} finally {

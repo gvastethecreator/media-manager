@@ -19,12 +19,29 @@ import {
 	PopoverContent,
 	PopoverTrigger
 } from '@/components/ui/popover';
-import { toast } from '@/services/toast.service';
-import { Concept, ConceptWithStats } from '@/types/entities/concept/base';
+import toastService from '@/services/toast.service';
+import { ConceptWithStats } from '@/types/entities/concept/base';
 import { calculateConceptsStats } from '@/utils/concept/helpers';
 import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateConceptForm } from './create-concept-form';
+
+// Definir tipo para Concept
+type Concept = {
+	id: string;
+	name: string;
+	description?: string | null;
+	content?: string;
+	emoji: string;
+	color: string;
+	category: string;
+	tags: string;
+	isFavorite?: boolean;
+	featuredImage?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	presetId?: string | null;
+};
 
 export function ConceptsSettings() {
 	const [concepts, setConcepts] = useState<ConceptWithStats[]>([]);
@@ -49,7 +66,7 @@ export function ConceptsSettings() {
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
-				toast.error('Error al cargar los conceptos', {
+				toastService.error('Error al cargar los conceptos', {
 					description: errorMessage,
 				});
 			} finally {
@@ -71,7 +88,7 @@ export function ConceptsSettings() {
 			// Filtrar por búsqueda
 			if (searchQuery) {
 				const normalizedQuery = searchQuery.toLowerCase();
-				matches = matches && (
+				matches = matches && Boolean(
 					concept.name.toLowerCase().includes(normalizedQuery) ||
 					(concept.description && concept.description.toLowerCase().includes(normalizedQuery)) ||
 					(concept.content && concept.content.toLowerCase().includes(normalizedQuery))
@@ -102,20 +119,26 @@ export function ConceptsSettings() {
 			setConcepts(prev => prev.filter(concept => concept.id !== id));
 			setSelectedConcept(null);
 			setIsEditing(false);
-			toast.success('Concepto eliminado');
+			toastService.success('Concepto eliminado');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toast.error('Error al eliminar el concepto', {
+			toastService.error('Error al eliminar el concepto', {
 				description: errorMessage,
 			});
 		}
 	}, []);
 
 	// Manejar edición de concepto
-	const handleEditConcept = useCallback((concept: Concept) => {
-		setSelectedConcept(concept);
+	const handleEditConcept = useCallback((concept: ConceptWithStats) => {
+		setSelectedConcept(concept as unknown as Concept);
 		setIsEditing(true);
 	}, []);
+
+	// Manejar la eliminación desde el botón con detención de propagación de eventos
+	const handleDeleteButtonClick = useCallback((e: React.MouseEvent<HTMLButtonElement>, id: string) => {
+		e.stopPropagation();
+		handleDeleteConcept(id);
+	}, [handleDeleteConcept]);
 
 	// Manejar creación exitosa
 	const handleConceptCreated = useCallback((newConcept: Concept) => {
@@ -133,7 +156,7 @@ export function ConceptsSettings() {
 			} as ConceptWithStats,
 			...prev
 		]);
-		toast.success('Concepto creado');
+		toastService.success('Concepto creado');
 	}, []);
 
 	// Manejar actualización exitosa
@@ -145,7 +168,7 @@ export function ConceptsSettings() {
 					: concept
 			)
 		);
-		toast.success('Concepto actualizado');
+		toastService.success('Concepto actualizado');
 	}, []);
 
 	// Resetear formulario
@@ -330,7 +353,7 @@ export function ConceptsSettings() {
 										<div
 											key={concept.id}
 											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedConcept?.id === concept.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditConcept(concept as unknown as Concept)}
+											onClick={() => handleEditConcept(concept)}
 										>
 											<span className="text-base">{concept.emoji}</span>
 											<div className="flex-1 min-w-0">
@@ -356,9 +379,12 @@ export function ConceptsSettings() {
 											<Button
 												variant="ghost"
 												size="icon"
+												type="button"
 												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												onClick={(e) => {
-													e.stopPropagation();
+												onClick={() => {
+													// Capturar el evento de clic en línea
+													const e = window.event as MouseEvent;
+													if (e) e.stopPropagation();
 													handleDeleteConcept(concept.id);
 												}}
 											>

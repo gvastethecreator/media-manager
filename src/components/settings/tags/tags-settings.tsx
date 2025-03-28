@@ -15,7 +15,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toast } from '@/services/toast.service';
+import toastService from '@/services/toast.service';
 import { Tag } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag/enums';
 import { Filter, Info, Loader2, PlusCircle, Save, Tag as TagIcon, Trash } from 'lucide-react';
@@ -45,7 +45,7 @@ export function TagsSettings() {
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
-				toast.error('Error al cargar las etiquetas', {
+				toastService.error('Error al cargar las etiquetas', {
 					description: errorMessage,
 				});
 			} finally {
@@ -98,10 +98,10 @@ export function TagsSettings() {
 			setTags(prev => prev.filter(tag => tag.id !== id));
 			setSelectedTag(null);
 			setIsEditing(false);
-			toast.success('Etiqueta eliminada');
+			toastService.success('Etiqueta eliminada');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toast.error('Error al eliminar la etiqueta', {
+			toastService.error('Error al eliminar la etiqueta', {
 				description: errorMessage,
 			});
 		}
@@ -116,7 +116,7 @@ export function TagsSettings() {
 	// Manejar creación exitosa
 	const handleTagCreated = useCallback((newTag: Tag) => {
 		setTags(prev => [...prev, newTag as unknown as TagWithStats]);
-		toast.success('Etiqueta creada');
+		toastService.success('Etiqueta creada');
 	}, []);
 
 	// Manejar actualización exitosa
@@ -128,7 +128,7 @@ export function TagsSettings() {
 					: tag
 			)
 		);
-		toast.success('Etiqueta actualizada');
+		toastService.success('Etiqueta actualizada');
 	}, []);
 
 	// Resetear formulario

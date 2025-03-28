@@ -23,7 +23,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { toast } from '@/services/toast.service';
+import toastService from '@/services/toast.service';
 import { WorldItem } from '@/types/entities/world-item';
 import { RarityLevel, WorldItemCategory, WorldItemType } from '@/types/entities/world-item/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -131,7 +131,7 @@ export function CreateWorldItemForm({
 			}
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toast.error(isEditing ? 'Error al actualizar el objeto' : 'Error al crear el objeto', {
+			toastService.error(isEditing ? 'Error al actualizar el objeto' : 'Error al crear el objeto', {
 				description: errorMessage
 			});
 		} finally {

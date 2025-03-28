@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/services/toast.service';
+import toastService from '@/services/toast.service';
 import { Album } from '@/types/entities/album';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Bookmark, ClipboardList, Gem, Loader2, PaintBucket, Pencil, Save, TextCursor } from 'lucide-react';
@@ -87,13 +87,13 @@ export function CreateAlbumForm({
 			form.reset({
 				name: album.name,
 				description: album.description || '',
-				emoji: album.emoji || '📔',
-				color: album.color || '#3b82f6',
-				sortBy: album.sortBy || 'name',
-				filters: album.filters || 'empty_array',
-				category: album.category || null,
-				rarity: album.rarity || 'common',
-				texture: album.texture || null,
+				emoji: (album as any).emoji || '📔',
+				color: (album as any).color || '#3b82f6',
+				sortBy: (album as any).sortBy || 'name',
+				filters: (album as any).filters || 'empty_array',
+				category: (album as any).category || null,
+				rarity: (album as any).rarity || 'common',
+				texture: (album as any).texture || null,
 			});
 		}
 	}, [album, isEditing, form]);
@@ -130,7 +130,7 @@ export function CreateAlbumForm({
 				}
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				toast.error(`Error al ${isEditing ? 'actualizar' : 'crear'} el álbum`, {
+				toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} el álbum`, {
 					description: errorMessage,
 				});
 			} finally {
