@@ -1,17 +1,489 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { deleteConcept, getConcepts } from '@/app/actions/concepts/concept.actions';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle
+} from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger
+} from '@/components/ui/popover';
+import { toast } from '@/services/toast.service';
+import { Concept, ConceptWithStats } from '@/types/entities/concept/base';
+import { calculateConceptsStats } from '@/utils/concept/helpers';
+import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CreateConceptForm } from './create-concept-form';
 
 export function ConceptsSettings() {
+	const [concepts, setConcepts] = useState<ConceptWithStats[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [selectedConcept, setSelectedConcept] = useState<Concept | null>(null);
+	const [isEditing, setIsEditing] = useState(false);
+	const [previewData, setPreviewData] = useState<any>(null);
+
+	// Filtros
+	const [searchQuery, setSearchQuery] = useState('');
+	const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+	const [onlyFavorites, setOnlyFavorites] = useState(false);
+
+	// Cargar conceptos al montar el componente
+	useEffect(() => {
+		const loadConcepts = async () => {
+			try {
+				setIsLoading(true);
+				const data = await getConcepts();
+				setConcepts(data);
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				setError(errorMessage);
+				toast.error('Error al cargar los conceptos', {
+					description: errorMessage,
+				});
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		loadConcepts();
+	}, []);
+
+	// Calcular estadísticas generales
+	const stats = calculateConceptsStats(concepts);
+
+	// Filtrar conceptos basados en los criterios seleccionados
+	const getFilteredConcepts = useCallback(() => {
+		return concepts.filter(concept => {
+			let matches = true;
+
+			// Filtrar por búsqueda
+			if (searchQuery) {
+				const normalizedQuery = searchQuery.toLowerCase();
+				matches = matches && (
+					concept.name.toLowerCase().includes(normalizedQuery) ||
+					(concept.description && concept.description.toLowerCase().includes(normalizedQuery)) ||
+					(concept.content && concept.content.toLowerCase().includes(normalizedQuery))
+				);
+			}
+
+			// Filtrar por categoría
+			if (selectedCategory) {
+				matches = matches && concept.category === selectedCategory;
+			}
+
+			// Filtrar por favoritos
+			if (onlyFavorites) {
+				matches = matches && !!concept.isFavorite;
+			}
+
+			return matches;
+		});
+	}, [concepts, searchQuery, selectedCategory, onlyFavorites]);
+
+	// Memoizar los resultados filtrados para evitar cálculos repetidos
+	const filteredConcepts = useMemo(() => getFilteredConcepts(), [getFilteredConcepts]);
+
+	// Manejar eliminación de concepto
+	const handleDeleteConcept = useCallback(async (id: string) => {
+		try {
+			await deleteConcept(id);
+			setConcepts(prev => prev.filter(concept => concept.id !== id));
+			setSelectedConcept(null);
+			setIsEditing(false);
+			toast.success('Concepto eliminado');
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+			toast.error('Error al eliminar el concepto', {
+				description: errorMessage,
+			});
+		}
+	}, []);
+
+	// Manejar edición de concepto
+	const handleEditConcept = useCallback((concept: Concept) => {
+		setSelectedConcept(concept);
+		setIsEditing(true);
+	}, []);
+
+	// Manejar creación exitosa
+	const handleConceptCreated = useCallback((newConcept: Concept) => {
+		setConcepts(prev => [
+			{
+				...newConcept,
+				_count: {
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					notes: 0,
+					prompts: 0,
+					images: 0
+				}
+			} as ConceptWithStats,
+			...prev
+		]);
+		toast.success('Concepto creado');
+	}, []);
+
+	// Manejar actualización exitosa
+	const handleConceptUpdated = useCallback((updatedConcept: Concept) => {
+		setConcepts(prev =>
+			prev.map(concept =>
+				concept.id === updatedConcept.id
+					? { ...concept, ...updatedConcept } as ConceptWithStats
+					: concept
+			)
+		);
+		toast.success('Concepto actualizado');
+	}, []);
+
+	// Resetear formulario
+	const handleReset = useCallback(() => {
+		setIsEditing(false);
+		setSelectedConcept(null);
+	}, []);
+
+	// Manejar la previsualización en tiempo real
+	const handlePreview = useCallback((data: any) => {
+		setPreviewData(data);
+	}, []);
+
+	// Limpiar filtros
+	const clearFilters = useCallback(() => {
+		setSearchQuery('');
+		setSelectedCategory(null);
+		setOnlyFavorites(false);
+	}, []);
+
+	// Extraer categorías únicas de los conceptos
+	const uniqueCategories = Array.from(new Set(concepts.map(concept => concept.category))).filter(Boolean) as string[];
+
+	// Contenido condicional basado en estado de carga
+	if (isLoading) {
+		return (
+			<Card className="rounded-sm bg-muted/30 border-none">
+				<CardContent>
+					<div className="flex items-center justify-center gap-2 p-3">
+						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+						<p className="text-sm text-muted-foreground">Cargando conceptos...</p>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	if (error) {
+		return (
+			<Card className="rounded-sm bg-muted/30 border-none">
+				<CardContent>
+					<EmptyState
+						icon={Info}
+						title="Error al cargar conceptos"
+						description={error}
+						actions={
+							<Button onClick={() => window.location.reload()}>
+								Intentar de nuevo
+							</Button>
+						}
+					/>
+				</CardContent>
+			</Card>
+		);
+	}
+
 	return (
-		<Card className="rounded-sm bg-muted/30 border-none">
-			<CardContent>
-				<div className="flex flex-col items-center justify-center gap-2 p-8">
-					<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-					<p className="text-sm text-muted-foreground text-center">Sección en construcción</p>
-				</div>
-			</CardContent>
-		</Card>
+		<div className="grid grid-cols-12 gap-3">
+			{/* Panel izquierdo: Lista de conceptos */}
+			<div className="col-span-12 md:col-span-5 lg:col-span-4">
+				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
+					<CardHeader className="space-y-1 py-2 px-3">
+						<div className="flex items-center justify-between">
+							<CardTitle className="text-sm flex items-center">
+								Conceptos ({filteredConcepts.length})
+								{filteredConcepts.length !== concepts.length && (
+									<Badge variant="outline" className="ml-2 text-[10px]">
+										Filtrados
+									</Badge>
+								)}
+							</CardTitle>
+							<div className="flex items-center gap-1">
+								<Popover>
+									<PopoverTrigger asChild>
+										<Button
+											size="sm"
+											variant="ghost"
+											className="h-6 w-6 p-0"
+										>
+											<Filter className="h-3.5 w-3.5" />
+										</Button>
+									</PopoverTrigger>
+									<PopoverContent className="w-72" align="end">
+										<div className="space-y-4">
+											<h4 className="font-medium text-sm">Filtrar Conceptos</h4>
+
+											<div className="space-y-2">
+												<Label htmlFor="search">Buscar</Label>
+												<Input
+													id="search"
+													placeholder="Buscar conceptos..."
+													value={searchQuery}
+													onChange={(e) => setSearchQuery(e.target.value)}
+													className="h-8 text-xs"
+												/>
+											</div>
+
+											<div className="space-y-2">
+												<Label htmlFor="category">Categoría</Label>
+												<select
+													id="category"
+													value={selectedCategory || ''}
+													onChange={(e) => setSelectedCategory(e.target.value || null)}
+													className="w-full h-8 text-xs rounded-md border border-input px-3"
+												>
+													<option value="">Todas las categorías</option>
+													{uniqueCategories.map(category => (
+														<option key={category} value={category}>{category}</option>
+													))}
+												</select>
+											</div>
+
+											<div className="flex items-center space-x-2">
+												<Checkbox
+													id="favorites"
+													checked={onlyFavorites}
+													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
+												/>
+												<Label htmlFor="favorites" className="text-xs">Solo favoritos</Label>
+											</div>
+
+											<div className="flex justify-between">
+												<Button size="sm" variant="outline" onClick={clearFilters} className="h-8 text-xs">
+													Limpiar filtros
+												</Button>
+												<Button size="sm" className="h-8 text-xs">
+													Aplicar
+												</Button>
+											</div>
+										</div>
+									</PopoverContent>
+								</Popover>
+								<Button
+									onClick={() => { setSelectedConcept(null); setIsEditing(false); }}
+									size="sm"
+									variant="ghost"
+									className="h-6 w-6 p-0"
+								>
+									<PlusCircle className="h-3.5 w-3.5" />
+								</Button>
+							</div>
+						</div>
+						<div className="flex gap-2 text-xs text-muted-foreground">
+							<span>{stats.total} conceptos</span>
+							{stats.favorites > 0 && (
+								<>
+									<span>•</span>
+									<span>{stats.favorites} favoritos</span>
+								</>
+							)}
+							{stats.withRelations > 0 && (
+								<>
+									<span>•</span>
+									<span>{stats.withRelations} con relaciones</span>
+								</>
+							)}
+						</div>
+					</CardHeader>
+					<CardContent className="flex-1 p-0">
+						<div className="h-full px-3 pb-3 overflow-auto">
+							{filteredConcepts.length === 0 ? (
+								<EmptyState
+									icon={LightbulbIcon}
+									title="No hay conceptos"
+									description={
+										concepts.length > 0
+											? "No se encontraron conceptos con los filtros aplicados"
+											: "Crea tu primer concepto"
+									}
+									className="py-6"
+									actions={
+										concepts.length > 0 && (
+											<Button size="sm" variant="outline" onClick={clearFilters}>
+												Limpiar filtros
+											</Button>
+										)
+									}
+								/>
+							) : (
+								<div className="space-y-1">
+									{filteredConcepts.map((concept) => (
+										<div
+											key={concept.id}
+											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedConcept?.id === concept.id ? 'bg-muted' : ''}`}
+											onClick={() => handleEditConcept(concept as unknown as Concept)}
+										>
+											<span className="text-base">{concept.emoji}</span>
+											<div className="flex-1 min-w-0">
+												<h4 className="text-xs font-medium truncate">{concept.name}</h4>
+												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+													{concept.category && (
+														<span>{concept.category}</span>
+													)}
+													{(concept._count?.images || 0) > 0 && (
+														<>
+															{concept.category && <span>•</span>}
+															<span>{concept._count?.images || 0} imágenes</span>
+														</>
+													)}
+													{concept.isFavorite && (
+														<>
+															<span>•</span>
+															<span className="text-yellow-500">★</span>
+														</>
+													)}
+												</div>
+											</div>
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
+												onClick={(e) => {
+													e.stopPropagation();
+													handleDeleteConcept(concept.id);
+												}}
+											>
+												<Trash className="h-3 w-3" />
+											</Button>
+										</div>
+									))}
+								</div>
+							)}
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Panel derecho: Formulario y Preview */}
+			<div className="col-span-12 md:col-span-7 lg:col-span-8">
+				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
+					<CardHeader className="py-2 px-3">
+						<div className="flex items-center justify-between">
+							<div>
+								<CardTitle className="text-sm">
+									{isEditing ? 'Editar Concepto' : 'Nuevo Concepto'}
+								</CardTitle>
+								<CardDescription className="text-xs">
+									{isEditing
+										? 'Modifica los detalles del concepto seleccionado'
+										: 'Completa el formulario para crear un nuevo concepto'}
+								</CardDescription>
+							</div>
+							<div className="flex gap-1">
+								{isEditing && selectedConcept && (
+									<>
+										<Button
+											variant="outline"
+											size="sm"
+											className="h-7 text-xs"
+											onClick={handleReset}
+										>
+											Cancelar
+										</Button>
+										<Button
+											variant="destructive"
+											size="sm"
+											className="h-7 text-xs"
+											onClick={() => handleDeleteConcept(selectedConcept.id)}
+										>
+											<Trash className="h-3 w-3 mr-1" />
+											Eliminar
+										</Button>
+									</>
+								)}
+								<Button
+									type="submit"
+									size="sm"
+									className="h-7 text-xs"
+									form="concept-form"
+								>
+									<Save className="h-3 w-3 mr-1" />
+									{isEditing ? 'Guardar' : 'Crear'}
+								</Button>
+							</div>
+						</div>
+					</CardHeader>
+					<CardContent className="p-3 flex-1 overflow-hidden">
+						<div className="h-full pr-3 overflow-auto">
+							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+								<div className="space-y-3">
+									<CreateConceptForm
+										key={selectedConcept?.id || 'new-concept'}
+										concept={selectedConcept}
+										isEditing={isEditing}
+										onCreated={handleConceptCreated}
+										onUpdated={handleConceptUpdated}
+										onCancel={handleReset}
+										onPreview={handlePreview}
+									/>
+								</div>
+								<div className="hidden lg:flex flex-col items-center justify-start">
+									<h3 className="text-xs font-medium mb-2">Vista Previa</h3>
+									<div className="w-[180px] transition-all duration-300">
+										{previewData || selectedConcept ? (
+											<div className="flex flex-col items-center p-4 border rounded-lg bg-background">
+												<div className="w-12 h-12 mb-3 rounded-full flex items-center justify-center text-2xl"
+													style={{ backgroundColor: (previewData?.color || selectedConcept?.color || '#3b82f6') }}>
+													{previewData?.emoji || selectedConcept?.emoji || '💡'}
+												</div>
+												<h3 className="text-lg font-medium">
+													{previewData?.name || selectedConcept?.name || 'Nuevo Concepto'}
+												</h3>
+												<p className="text-center text-muted-foreground mt-2 text-sm">
+													{previewData?.description || selectedConcept?.description || 'Sin descripción'}
+												</p>
+
+												<div className="flex flex-wrap gap-2 mt-3 justify-center">
+													<Badge variant="secondary" className="text-xs">
+														{previewData?.category || selectedConcept?.category || 'general'}
+													</Badge>
+													{(previewData?.isFavorite || selectedConcept?.isFavorite) && (
+														<Badge variant="outline" className="text-xs">Favorito</Badge>
+													)}
+												</div>
+
+												{(previewData?.content || selectedConcept?.content) && (
+													<div className="mt-4 p-2 text-xs bg-muted rounded w-full">
+														<p className="line-clamp-3">
+															{previewData?.content || selectedConcept?.content}
+														</p>
+													</div>
+												)}
+											</div>
+										) : (
+											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
+												<LightbulbIcon className="h-7 w-7 text-muted-foreground/50" />
+												<p className="text-[10px] text-muted-foreground mt-2">
+													Vista previa
+												</p>
+											</div>
+										)}
+									</div>
+								</div>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+		</div>
 	);
 }
