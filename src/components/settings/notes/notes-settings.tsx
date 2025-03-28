@@ -16,17 +16,32 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/services/toast.service';
-import { Note, NoteWithStats } from '@/types/entities/note/base';
+import toastService from '@/services/toast.service';
+import { Note } from '@/types/entities/notes';
 import { FileText, Filter, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateNoteForm } from './create-note-form';
 
+// Actualizar el tipo Note para incluir propiedades auxiliares
+interface ExtendedNote extends Note {
+	color?: string;
+	emoji?: string;
+	summary?: string;
+	_count?: {
+		images?: number;
+		concepts?: number;
+		prompts?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+	};
+}
+
 export function NotesSettings() {
-	const [notes, setNotes] = useState<NoteWithStats[]>([]);
+	const [notes, setNotes] = useState<ExtendedNote[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+	const [selectedNote, setSelectedNote] = useState<ExtendedNote | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -45,7 +60,7 @@ export function NotesSettings() {
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
-				toast.error('Error al cargar las notas', {
+				toastService.error('Error al cargar las notas', {
 					description: errorMessage,
 				});
 			} finally {
@@ -75,7 +90,7 @@ export function NotesSettings() {
 			// Filtrar por búsqueda
 			if (searchQuery) {
 				const normalizedQuery = searchQuery.toLowerCase();
-				matches = matches && (
+				matches = matches && Boolean(
 					note.title.toLowerCase().includes(normalizedQuery) ||
 					(note.content && note.content.toLowerCase().includes(normalizedQuery))
 				);
@@ -105,23 +120,23 @@ export function NotesSettings() {
 			setNotes(prev => prev.filter(note => note.id !== id));
 			setSelectedNote(null);
 			setIsEditing(false);
-			toast.success('Nota eliminada');
+			toastService.success('Nota eliminada');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toast.error('Error al eliminar la nota', {
+			toastService.error('Error al eliminar la nota', {
 				description: errorMessage,
 			});
 		}
 	}, []);
 
 	// Manejar edición de nota
-	const handleEditNote = useCallback((note: Note) => {
+	const handleEditNote = useCallback((note: ExtendedNote) => {
 		setSelectedNote(note);
 		setIsEditing(true);
 	}, []);
 
 	// Manejar creación exitosa
-	const handleNoteCreated = useCallback((newNote: Note) => {
+	const handleNoteCreated = useCallback((newNote: ExtendedNote) => {
 		setNotes(prev => [
 			{
 				...newNote,
@@ -133,22 +148,22 @@ export function NotesSettings() {
 					places: 0,
 					worldItems: 0
 				}
-			} as NoteWithStats,
+			} as ExtendedNote,
 			...prev
 		]);
-		toast.success('Nota creada');
+		toastService.success('Nota creada');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleNoteUpdated = useCallback((updatedNote: Note) => {
+	const handleNoteUpdated = useCallback((updatedNote: ExtendedNote) => {
 		setNotes(prev =>
 			prev.map(note =>
 				note.id === updatedNote.id
-					? { ...note, ...updatedNote } as NoteWithStats
+					? { ...note, ...updatedNote } as ExtendedNote
 					: note
 			)
 		);
-		toast.success('Nota actualizada');
+		toastService.success('Nota actualizada');
 	}, []);
 
 	// Resetear formulario
@@ -173,6 +188,21 @@ export function NotesSettings() {
 	const uniqueCategories = useMemo(() =>
 		Array.from(new Set(notes.map(note => note.category).filter(Boolean))) as string[],
 		[notes]);
+
+	// Componente de botón de eliminación
+	const DeleteButton = ({ noteId }: { noteId: string }) => {
+		return (
+			<div
+				className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100 cursor-pointer flex items-center justify-center"
+				onClick={(e) => {
+					e.stopPropagation();
+					handleDeleteNote(noteId);
+				}}
+			>
+				<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
+			</div>
+		);
+	};
 
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
@@ -335,13 +365,13 @@ export function NotesSettings() {
 										<div
 											key={note.id}
 											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedNote?.id === note.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditNote(note as unknown as Note)}
+											onClick={() => handleEditNote(note as ExtendedNote)}
 										>
 											<div
 												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
-												style={{ backgroundColor: note.color || '#3b82f6' }}
+												style={{ backgroundColor: (note as ExtendedNote).color || '#3b82f6' }}
 											>
-												{note.emoji || '📝'}
+												{(note as ExtendedNote).emoji || '📝'}
 											</div>
 											<div className="flex-1 min-w-0">
 												<h4 className="text-xs font-medium truncate">{note.title}</h4>
@@ -349,7 +379,7 @@ export function NotesSettings() {
 													{note.category && (
 														<span>{note.category}</span>
 													)}
-													{(note._count?.concepts || 0) > 0 && (
+													{(note._count?.concepts && note._count.concepts > 0) && (
 														<>
 															<span>•</span>
 															<span>{note._count.concepts} conceptos</span>
@@ -363,17 +393,7 @@ export function NotesSettings() {
 													)}
 												</div>
 											</div>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												onClick={(e) => {
-													e.stopPropagation();
-													handleDeleteNote(note.id);
-												}}
-											>
-												<Trash className="h-3 w-3" />
-											</Button>
+											<DeleteButton noteId={note.id} />
 										</div>
 									))}
 								</div>
@@ -453,8 +473,8 @@ export function NotesSettings() {
 											<div className="flex flex-col p-4 border rounded-lg bg-background">
 												<div className="flex items-center mb-3 gap-2">
 													<div className="w-10 h-10 rounded-md flex items-center justify-center text-xl"
-														style={{ backgroundColor: (previewData?.color || selectedNote?.color || '#3b82f6') }}>
-														{previewData?.emoji || selectedNote?.emoji || '📝'}
+														style={{ backgroundColor: (previewData?.color || (selectedNote as ExtendedNote)?.color || '#3b82f6') }}>
+														{previewData?.emoji || (selectedNote as ExtendedNote)?.emoji || '📝'}
 													</div>
 													<div className="flex-1">
 														<h3 className="text-md font-medium">
@@ -468,9 +488,9 @@ export function NotesSettings() {
 													</div>
 												</div>
 
-												{(previewData?.summary || selectedNote?.summary) && (
+												{(previewData?.summary || (selectedNote as ExtendedNote)?.summary) && (
 													<p className="text-muted-foreground text-sm mb-3">
-														{previewData?.summary || selectedNote?.summary}
+														{previewData?.summary || (selectedNote as ExtendedNote)?.summary}
 													</p>
 												)}
 
