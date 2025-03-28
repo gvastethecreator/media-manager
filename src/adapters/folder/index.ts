@@ -5,14 +5,8 @@
 
 import type { FolderResponse, ProcessStatus } from '@/app/actions/folders/folder-types';
 import { serverLogger } from '@/lib/logger/server-logger';
-import {
-    deserializeFolderResponse
-} from '@/transformers/folder';
-import type {
-    CreateFolderData,
-    FolderExtended,
-    UpdateFolderData
-} from '@/types/entities/folder';
+import { deserializeFolderResponse } from '@/transformers/folder';
+import type { CreateFolderData, FolderExtended, UpdateFolderData } from '@/types/entities/folder';
 
 const adapterLogger = serverLogger.withContext('FolderAdapter');
 
@@ -20,10 +14,10 @@ const adapterLogger = serverLogger.withContext('FolderAdapter');
  * Tipo para respuesta estandarizada de server actions
  */
 export interface ActionResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T;
-  errors?: any;
+	success: boolean;
+	message: string;
+	data?: T;
+	errors?: any;
 }
 
 /**
@@ -32,30 +26,30 @@ export interface ActionResponse<T = any> {
  * @returns Respuesta en el nuevo formato
  */
 export function adaptFolderResponse(folderResponse: FolderResponse | null): ActionResponse<FolderExtended> {
-  if (!folderResponse) {
-    return {
-      success: false,
-      message: 'No se encontró la carpeta'
-    };
-  }
+	if (!folderResponse) {
+		return {
+			success: false,
+			message: 'No se encontró la carpeta',
+		};
+	}
 
-  try {
-    // Usar el transformador para convertir al nuevo formato
-    const transformedFolder = deserializeFolderResponse(folderResponse);
+	try {
+		// Usar el transformador para convertir al nuevo formato
+		const transformedFolder = deserializeFolderResponse(folderResponse);
 
-    return {
-      success: true,
-      message: 'Carpeta obtenida correctamente',
-      data: transformedFolder
-    };
-  } catch (error) {
-    adapterLogger.error('❌ Error adaptando respuesta de carpeta:', error);
-    return {
-      success: false,
-      message: 'Error al procesar datos de carpeta',
-      errors: error instanceof Error ? error.message : String(error)
-    };
-  }
+		return {
+			success: true,
+			message: 'Carpeta obtenida correctamente',
+			data: transformedFolder,
+		};
+	} catch (error) {
+		adapterLogger.error('❌ Error adaptando respuesta de carpeta:', error);
+		return {
+			success: false,
+			message: 'Error al procesar datos de carpeta',
+			errors: error instanceof Error ? error.message : String(error),
+		};
+	}
 }
 
 /**
@@ -64,22 +58,22 @@ export function adaptFolderResponse(folderResponse: FolderResponse | null): Acti
  * @returns Respuesta en formato estándar
  */
 export function adaptFoldersArray(foldersResponse: FolderResponse[]): ActionResponse<FolderExtended[]> {
-  try {
-    const transformedFolders = foldersResponse.map(deserializeFolderResponse);
+	try {
+		const transformedFolders = foldersResponse.map(deserializeFolderResponse);
 
-    return {
-      success: true,
-      message: 'Carpetas obtenidas correctamente',
-      data: transformedFolders
-    };
-  } catch (error) {
-    adapterLogger.error('❌ Error adaptando respuesta de carpetas:', error);
-    return {
-      success: false,
-      message: 'Error al procesar datos de carpetas',
-      errors: error instanceof Error ? error.message : String(error)
-    };
-  }
+		return {
+			success: true,
+			message: 'Carpetas obtenidas correctamente',
+			data: transformedFolders,
+		};
+	} catch (error) {
+		adapterLogger.error('❌ Error adaptando respuesta de carpetas:', error);
+		return {
+			success: false,
+			message: 'Error al procesar datos de carpetas',
+			errors: error instanceof Error ? error.message : String(error),
+		};
+	}
 }
 
 /**
@@ -88,8 +82,8 @@ export function adaptFoldersArray(foldersResponse: FolderResponse[]): ActionResp
  * @returns Datos en formato esperado por el server action
  */
 export function adaptCreateFolderData(createData: CreateFolderData): string {
-  // El server action actual solo requiere la ruta como parámetro
-  return createData.path;
+	// El server action actual solo requiere la ruta como parámetro
+	return createData.path;
 }
 
 /**
@@ -98,20 +92,20 @@ export function adaptCreateFolderData(createData: CreateFolderData): string {
  * @param updateData Datos para actualizar en el nuevo formato
  * @returns Datos en formato esperado por el server action
  */
-export function adaptUpdateFolderData(id: string, updateData: UpdateFolderData): {id: string, data: any} {
-  // Adaptar al formato actual del server action
-  return {
-    id,
-    data: {
-      name: updateData.name,
-      description: updateData.description,
-      emoji: updateData.emoji,
-      color: updateData.color,
-      isFavorite: updateData.isFavorite,
-      autoReindex: updateData.autoReindex,
-      // Otros campos según sea necesario
-    }
-  };
+export function adaptUpdateFolderData(id: string, updateData: UpdateFolderData): { id: string; data: any } {
+	// Adaptar al formato actual del server action
+	return {
+		id,
+		data: {
+			name: updateData.name,
+			description: updateData.description,
+			emoji: updateData.emoji,
+			color: updateData.color,
+			isFavorite: updateData.isFavorite,
+			autoReindex: updateData.autoReindex,
+			// Otros campos según sea necesario
+		},
+	};
 }
 
 /**
@@ -120,19 +114,19 @@ export function adaptUpdateFolderData(id: string, updateData: UpdateFolderData):
  * @returns Estado en formato estandarizado
  */
 export function adaptProcessStatus(status: ProcessStatus): any {
-  return {
-    status: status.status || 'unknown',
-    progress: status.progress || 0,
-    currentFile: status.currentFile,
-    phase: status.phase || 'unknown',
-    filesProcessed: status.filesProcessed || 0,
-    totalFiles: status.totalFiles || 0,
-    startTime: status.startTime,
-    endTime: status.endTime,
-    processingSpeed: status.processingSpeed,
-    estimatedTimeRemaining: status.estimatedTimeRemaining,
-    errors: status.errors || []
-  };
+	return {
+		status: status.status || 'unknown',
+		progress: status.progress || 0,
+		currentFile: status.currentFile,
+		phase: status.phase || 'unknown',
+		filesProcessed: status.filesProcessed || 0,
+		totalFiles: status.totalFiles || 0,
+		startTime: status.startTime,
+		endTime: status.endTime,
+		processingSpeed: status.processingSpeed,
+		estimatedTimeRemaining: status.estimatedTimeRemaining,
+		errors: status.errors || [],
+	};
 }
 
 /**
@@ -141,35 +135,35 @@ export function adaptProcessStatus(status: ProcessStatus): any {
  * @returns Respuesta de error estandarizada
  */
 export function handleFolderActionError(error: unknown): ActionResponse {
-  adapterLogger.error('❌ Error en acción de carpeta:', error);
+	adapterLogger.error('❌ Error en acción de carpeta:', error);
 
-  let message = 'Error desconocido al procesar la carpeta';
+	let message = 'Error desconocido al procesar la carpeta';
 
-  if (error instanceof Error) {
-    message = error.message;
+	if (error instanceof Error) {
+		message = error.message;
 
-    // Manejo específico según el tipo de error
-    if (error.name === 'FolderError') {
-      switch (message) {
-        case 'PATH_REQUIRED':
-          message = 'Se requiere una ruta para la carpeta';
-          break;
-        case 'PATH_NOT_FOUND':
-          message = 'La ruta especificada no existe';
-          break;
-        case 'FOLDER_EXISTS':
-          message = 'La carpeta ya está registrada en el sistema';
-          break;
-        default:
-          // Mantener el mensaje original
-          break;
-      }
-    }
-  }
+		// Manejo específico según el tipo de error
+		if (error.name === 'FolderError') {
+			switch (message) {
+				case 'PATH_REQUIRED':
+					message = 'Se requiere una ruta para la carpeta';
+					break;
+				case 'PATH_NOT_FOUND':
+					message = 'La ruta especificada no existe';
+					break;
+				case 'FOLDER_EXISTS':
+					message = 'La carpeta ya está registrada en el sistema';
+					break;
+				default:
+					// Mantener el mensaje original
+					break;
+			}
+		}
+	}
 
-  return {
-    success: false,
-    message,
-    errors: error
-  };
+	return {
+		success: false,
+		message,
+		errors: error,
+	};
 }

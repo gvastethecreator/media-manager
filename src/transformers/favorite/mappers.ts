@@ -5,16 +5,16 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    FavoriteBase,
-    FavoriteCreateInput,
-    FavoriteExtended,
-    FavoriteFilters,
-    FavoriteUpdateInput
+	FavoriteBase,
+	FavoriteCreateInput,
+	FavoriteExtended,
+	FavoriteFilters,
+	FavoriteUpdateInput,
 } from '@/types/entities/favorite';
 import {
-    FAVORITE_ENTITY_COLORS,
-    FAVORITE_ENTITY_DISPLAY_NAMES,
-    FAVORITE_ENTITY_EMOJIS
+	FAVORITE_ENTITY_COLORS,
+	FAVORITE_ENTITY_DISPLAY_NAMES,
+	FAVORITE_ENTITY_EMOJIS,
 } from '@/types/entities/favorite';
 
 const mappersLogger = serverLogger.withContext('Favorite:Mappers');
@@ -25,18 +25,18 @@ const mappersLogger = serverLogger.withContext('Favorite:Mappers');
  * @returns Favorito extendido con propiedades para UI
  */
 export function toFavoriteExtended(favorite: FavoriteBase): FavoriteExtended {
-    try {
-        const entityType = favorite.entityType.toLowerCase();
+	try {
+		const entityType = favorite.entityType.toLowerCase();
 
-        return {
-            ...favorite,
-            entityIcon: FAVORITE_ENTITY_EMOJIS[entityType] || FAVORITE_ENTITY_EMOJIS.default,
-            entityColor: FAVORITE_ENTITY_COLORS[entityType] || FAVORITE_ENTITY_COLORS.default,
-        };
-    } catch (error) {
-        mappersLogger.error('Error convirtiendo a favorito extendido:', error);
-        return favorite as FavoriteExtended;
-    }
+		return {
+			...favorite,
+			entityIcon: FAVORITE_ENTITY_EMOJIS[entityType] || FAVORITE_ENTITY_EMOJIS.default,
+			entityColor: FAVORITE_ENTITY_COLORS[entityType] || FAVORITE_ENTITY_COLORS.default,
+		};
+	} catch (error) {
+		mappersLogger.error('Error convirtiendo a favorito extendido:', error);
+		return favorite as FavoriteExtended;
+	}
 }
 
 /**
@@ -45,7 +45,7 @@ export function toFavoriteExtended(favorite: FavoriteBase): FavoriteExtended {
  * @returns Lista de favoritos extendidos
  */
 export function toFavoritesExtended(favorites: FavoriteBase[]): FavoriteExtended[] {
-    return favorites.map(toFavoriteExtended);
+	return favorites.map(toFavoriteExtended);
 }
 
 /**
@@ -54,24 +54,24 @@ export function toFavoritesExtended(favorites: FavoriteBase[]): FavoriteExtended
  * @returns Objeto de consulta para Prisma
  */
 export function mapFavoriteFiltersToPrisma(filters: FavoriteFilters): any {
-    const prismaQuery: any = {
-        where: {},
-        take: filters.limit || 20,
-        skip: filters.offset || 0,
-        orderBy: {
-            [filters.sort || 'createdAt']: filters.order || 'desc'
-        }
-    };
+	const prismaQuery: any = {
+		where: {},
+		take: filters.limit || 20,
+		skip: filters.offset || 0,
+		orderBy: {
+			[filters.sort || 'createdAt']: filters.order || 'desc',
+		},
+	};
 
-    if (filters.entityType) {
-        prismaQuery.where.entityType = filters.entityType;
-    }
+	if (filters.entityType) {
+		prismaQuery.where.entityType = filters.entityType;
+	}
 
-    if (filters.userId) {
-        prismaQuery.where.userId = filters.userId;
-    }
+	if (filters.userId) {
+		prismaQuery.where.userId = filters.userId;
+	}
 
-    return prismaQuery;
+	return prismaQuery;
 }
 
 /**
@@ -80,11 +80,11 @@ export function mapFavoriteFiltersToPrisma(filters: FavoriteFilters): any {
  * @returns Datos formateados para Prisma
  */
 export function mapCreateFavoriteDataToPrisma(data: FavoriteCreateInput): any {
-    return {
-        entityId: data.entityId,
-        entityType: data.entityType,
-        userId: data.userId
-    };
+	return {
+		entityId: data.entityId,
+		entityType: data.entityType,
+		userId: data.userId,
+	};
 }
 
 /**
@@ -93,8 +93,8 @@ export function mapCreateFavoriteDataToPrisma(data: FavoriteCreateInput): any {
  * @returns Datos formateados para Prisma
  */
 export function mapUpdateFavoriteDataToPrisma(data: FavoriteUpdateInput): any {
-    const { id, ...updateData } = data;
-    return updateData;
+	const { id, ...updateData } = data;
+	return updateData;
 }
 
 /**
@@ -103,24 +103,24 @@ export function mapUpdateFavoriteDataToPrisma(data: FavoriteUpdateInput): any {
  * @returns Objeto agrupado por tipo con metadatos
  */
 export function groupFavoritesByType(favorites: FavoriteExtended[]) {
-    const groupedByType: Record<string, FavoriteExtended[]> = {};
+	const groupedByType: Record<string, FavoriteExtended[]> = {};
 
-    // Agrupar por tipo de entidad
-    favorites.forEach(favorite => {
-        const type = favorite.entityType.toLowerCase();
-        if (!groupedByType[type]) {
-            groupedByType[type] = [];
-        }
-        groupedByType[type].push(favorite);
-    });
+	// Agrupar por tipo de entidad
+	favorites.forEach((favorite) => {
+		const type = favorite.entityType.toLowerCase();
+		if (!groupedByType[type]) {
+			groupedByType[type] = [];
+		}
+		groupedByType[type].push(favorite);
+	});
 
-    // Convertir a formato para UI
-    return Object.entries(groupedByType).map(([type, items]) => ({
-        type,
-        displayName: FAVORITE_ENTITY_DISPLAY_NAMES[type] || FAVORITE_ENTITY_DISPLAY_NAMES.default,
-        icon: FAVORITE_ENTITY_EMOJIS[type] || FAVORITE_ENTITY_EMOJIS.default,
-        color: FAVORITE_ENTITY_COLORS[type] || FAVORITE_ENTITY_COLORS.default,
-        count: items.length,
-        items
-    }));
+	// Convertir a formato para UI
+	return Object.entries(groupedByType).map(([type, items]) => ({
+		type,
+		displayName: FAVORITE_ENTITY_DISPLAY_NAMES[type] || FAVORITE_ENTITY_DISPLAY_NAMES.default,
+		icon: FAVORITE_ENTITY_EMOJIS[type] || FAVORITE_ENTITY_EMOJIS.default,
+		color: FAVORITE_ENTITY_COLORS[type] || FAVORITE_ENTITY_COLORS.default,
+		count: items.length,
+		items,
+	}));
 }

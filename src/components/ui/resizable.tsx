@@ -35,55 +35,57 @@ interface ResizablePanelProps extends React.ComponentProps<typeof ResizablePrimi
 	toggleButtonClassName?: string;
 }
 
-const ResizablePanel = memo(React.forwardRef<React.ElementRef<typeof ResizablePrimitive.Panel>, ResizablePanelProps>(
-	(
-		{
-			className,
-			isCollapsed,
-			onCollapse,
-			onExpand,
-			showToggleButton,
-			toggleButtonPosition = 'end',
-			toggleButtonClassName,
-			...props
-		},
-		ref
-	) => {
-		return (
-			<ResizablePrimitive.Panel
-				ref={ref}
-				data-slot="resizable-panel"
-				data-collapsed={isCollapsed ? 'true' : 'false'}
-				className={cn('relative transition-all duration-300 ease-in-out', className)}
-				onCollapse={onCollapse}
-				onExpand={onExpand}
-				{...props}
-			>
-				{showToggleButton && (
-					<button
-						type="button"
-						onClick={() => {
-							if (isCollapsed) {
-								onExpand?.();
-							} else {
-								onCollapse?.();
-							}
-						}}
-						className={cn(
-							'absolute z-10 p-1.5 rounded-md bg-background border shadow-sm hover:bg-accent',
-							toggleButtonPosition === 'start' ? 'left-3 top-3' : 'right-3 top-3',
-							toggleButtonClassName
-						)}
-						aria-label={isCollapsed ? 'Expandir panel' : 'Colapsar panel'}
-					>
-						{isCollapsed ? <PanelLeftOpenIcon className="h-4 w-4" /> : <PanelLeftCloseIcon className="h-4 w-4" />}
-					</button>
-				)}
-				{props.children}
-			</ResizablePrimitive.Panel>
-		);
-	}
-));
+const ResizablePanel = memo(
+	React.forwardRef<React.ElementRef<typeof ResizablePrimitive.Panel>, ResizablePanelProps>(
+		(
+			{
+				className,
+				isCollapsed,
+				onCollapse,
+				onExpand,
+				showToggleButton,
+				toggleButtonPosition = 'end',
+				toggleButtonClassName,
+				...props
+			},
+			ref
+		) => {
+			return (
+				<ResizablePrimitive.Panel
+					ref={ref}
+					data-slot="resizable-panel"
+					data-collapsed={isCollapsed ? 'true' : 'false'}
+					className={cn('relative transition-all duration-300 ease-in-out', className)}
+					onCollapse={onCollapse}
+					onExpand={onExpand}
+					{...props}
+				>
+					{showToggleButton && (
+						<button
+							type="button"
+							onClick={() => {
+								if (isCollapsed) {
+									onExpand?.();
+								} else {
+									onCollapse?.();
+								}
+							}}
+							className={cn(
+								'absolute z-10 p-1.5 rounded-md bg-background border shadow-sm hover:bg-accent',
+								toggleButtonPosition === 'start' ? 'left-3 top-3' : 'right-3 top-3',
+								toggleButtonClassName
+							)}
+							aria-label={isCollapsed ? 'Expandir panel' : 'Colapsar panel'}
+						>
+							{isCollapsed ? <PanelLeftOpenIcon className="h-4 w-4" /> : <PanelLeftCloseIcon className="h-4 w-4" />}
+						</button>
+					)}
+					{props.children}
+				</ResizablePrimitive.Panel>
+			);
+		}
+	)
+);
 ResizablePanel.displayName = 'ResizablePanel';
 
 const ResizableHandle = memo(function ResizableHandle({
@@ -113,4 +115,3 @@ const ResizableHandle = memo(function ResizableHandle({
 ResizableHandle.displayName = 'ResizableHandle';
 
 export { ResizableHandle, ResizablePanel, ResizablePanelGroup };
-

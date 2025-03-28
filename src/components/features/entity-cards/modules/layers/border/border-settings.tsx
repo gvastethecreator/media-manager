@@ -29,11 +29,7 @@ export function BorderSettings({ config, onChange }: BorderSettingsProps) {
 			{/* Activación del borde */}
 			<div className="flex items-center justify-between">
 				<Label htmlFor="enabled">Activar Borde</Label>
-				<Switch
-					id="enabled"
-					checked={config.enabled}
-					onCheckedChange={(checked) => handleChange('enabled', checked)}
-				/>
+				<Switch id="enabled" checked={config.enabled} onCheckedChange={(checked) => handleChange('enabled', checked)} />
 			</div>
 
 			{/* Control de ancho */}
@@ -52,10 +48,7 @@ export function BorderSettings({ config, onChange }: BorderSettingsProps) {
 			{/* Estilo del borde */}
 			<div className="space-y-2">
 				<Label>Estilo del borde</Label>
-				<Select
-					value={config.style}
-					onValueChange={(value) => handleChange('style', value)}
-				>
+				<Select value={config.style} onValueChange={(value) => handleChange('style', value)}>
 					<SelectTrigger>
 						<SelectValue placeholder="Seleccionar estilo" />
 					</SelectTrigger>

@@ -38,21 +38,13 @@ export const GlitchConfig = () => {
 								render={({ field }) => (
 									<FormItem className="flex items-center space-x-2">
 										<FormControl>
-											<Switch
-												checked={field.value}
-												onCheckedChange={field.onChange}
-											/>
+											<Switch checked={field.value} onCheckedChange={field.onChange} />
 										</FormControl>
 										<FormLabel className="!mt-0">Habilitar Glitch</FormLabel>
 									</FormItem>
 								)}
 							/>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => resetConfig()}
-								className="text-xs"
-							>
+							<Button variant="ghost" size="sm" onClick={() => resetConfig()} className="text-xs">
 								Restablecer
 							</Button>
 						</div>
@@ -104,10 +96,7 @@ export const GlitchConfig = () => {
 										render={({ field }) => (
 											<FormItem className="flex items-center space-x-2">
 												<FormControl>
-													<Checkbox
-														checked={field.value}
-														onCheckedChange={field.onChange}
-													/>
+													<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 												</FormControl>
 												<FormLabel className="!mt-0">Animar</FormLabel>
 											</FormItem>
@@ -149,10 +138,7 @@ export const GlitchConfig = () => {
 												render={({ field }) => (
 													<FormItem className="flex items-center space-x-2">
 														<FormControl>
-															<Checkbox
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 														<FormLabel className="!mt-0">Desplazamiento de Color</FormLabel>
 													</FormItem>
@@ -186,10 +172,7 @@ export const GlitchConfig = () => {
 												render={({ field }) => (
 													<FormItem className="flex items-center space-x-2">
 														<FormControl>
-															<Checkbox
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 														<FormLabel className="!mt-0">Líneas de Escaneo</FormLabel>
 													</FormItem>
@@ -244,10 +227,7 @@ export const GlitchConfig = () => {
 												render={({ field }) => (
 													<FormItem className="flex items-center space-x-2">
 														<FormControl>
-															<Checkbox
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 														<FormLabel className="!mt-0">Ruido</FormLabel>
 													</FormItem>
@@ -281,10 +261,7 @@ export const GlitchConfig = () => {
 												render={({ field }) => (
 													<FormItem className="flex items-center space-x-2">
 														<FormControl>
-															<Checkbox
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 														<FormLabel className="!mt-0">Distorsión</FormLabel>
 													</FormItem>
@@ -318,10 +295,7 @@ export const GlitchConfig = () => {
 												render={({ field }) => (
 													<FormItem className="flex items-center space-x-2">
 														<FormControl>
-															<Checkbox
-																checked={field.value}
-																onCheckedChange={field.onChange}
-															/>
+															<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 														</FormControl>
 														<FormLabel className="!mt-0">Aberración Cromática</FormLabel>
 													</FormItem>
@@ -359,10 +333,7 @@ export const GlitchConfig = () => {
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>Modo de Mezcla</FormLabel>
-												<Select
-													value={field.value}
-													onValueChange={field.onChange}
-												>
+												<Select value={field.value} onValueChange={field.onChange}>
 													<FormControl>
 														<SelectTrigger>
 															<SelectValue />
@@ -395,9 +366,7 @@ export const GlitchConfig = () => {
 														onValueChange={([value]) => field.onChange(value)}
 													/>
 												</FormControl>
-												<FormDescription>
-													Controla el orden de las capas en modo explotado
-												</FormDescription>
+												<FormDescription>Controla el orden de las capas en modo explotado</FormDescription>
 											</FormItem>
 										)}
 									/>

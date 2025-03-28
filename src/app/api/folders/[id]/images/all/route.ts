@@ -6,7 +6,7 @@ import type {
 	RelatedCollection,
 	RelatedPlace,
 	RelatedTag,
-	RelatedWorldItem
+	RelatedWorldItem,
 } from '@/types/file-item';
 import { type NextRequest, NextResponse } from 'next/server';
 import path from 'path';

@@ -82,11 +82,7 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 				)}
 
 				{metadata?.colorSpace && (
-					<InfoItem
-						icon={<FileImage className="h-3 w-3 text-rose-400" />}
-						label="Color"
-						value={metadata.colorSpace}
-					/>
+					<InfoItem icon={<FileImage className="h-3 w-3 text-rose-400" />} label="Color" value={metadata.colorSpace} />
 				)}
 			</div>
 

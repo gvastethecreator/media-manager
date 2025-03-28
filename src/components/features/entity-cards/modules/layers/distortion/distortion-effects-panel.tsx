@@ -1,6 +1,13 @@
 'use client';
 
-import { FormGroup, FormLayout, FormRow, FormSection, FormSlider, FormToggle } from '@/components/features/entity-cards/settings-old/panels/shared';
+import {
+	FormGroup,
+	FormLayout,
+	FormRow,
+	FormSection,
+	FormSlider,
+	FormToggle,
+} from '@/components/features/entity-cards/settings-old/panels/shared';
 import { Scale, Slice, Wand2, Zap } from 'lucide-react';
 import type { DistortionEffectsSystem } from './types';
 

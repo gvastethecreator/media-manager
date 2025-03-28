@@ -12,7 +12,20 @@ import type { BorderConfig } from '../actions/border-config.action';
 
 // Constantes para opciones de selección
 const BORDER_STYLES = ['solid', 'dashed', 'dotted', 'double'];
-const BLEND_MODES = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light', 'difference', 'exclusion'];
+const BLEND_MODES = [
+	'normal',
+	'multiply',
+	'screen',
+	'overlay',
+	'darken',
+	'lighten',
+	'color-dodge',
+	'color-burn',
+	'hard-light',
+	'soft-light',
+	'difference',
+	'exclusion',
+];
 
 // Extender la interfaz BorderConfig para incluir propiedades adicionales
 interface ExtendedBorderConfig extends BorderConfig {
@@ -78,9 +91,15 @@ export function BorderSettings({ config, onConfigChange }: BorderSettingsProps) 
 			{/* Pestañas de configuración */}
 			<Tabs defaultValue="style" className="w-full">
 				<TabsList className="w-full">
-					<TabsTrigger value="style" className="flex-1">Estilo</TabsTrigger>
-					<TabsTrigger value="effects" className="flex-1">Efectos</TabsTrigger>
-					<TabsTrigger value="advanced" className="flex-1">Avanzado</TabsTrigger>
+					<TabsTrigger value="style" className="flex-1">
+						Estilo
+					</TabsTrigger>
+					<TabsTrigger value="effects" className="flex-1">
+						Efectos
+					</TabsTrigger>
+					<TabsTrigger value="advanced" className="flex-1">
+						Avanzado
+					</TabsTrigger>
 				</TabsList>
 
 				{/* Configuración de Estilo */}
@@ -88,10 +107,7 @@ export function BorderSettings({ config, onConfigChange }: BorderSettingsProps) 
 					<div className="space-y-4">
 						<div className="space-y-2">
 							<Label>Estilo de Borde</Label>
-							<Select
-								value={config.style || 'solid'}
-								onValueChange={(value) => handleChange('style', value)}
-							>
+							<Select value={config.style || 'solid'} onValueChange={(value) => handleChange('style', value)}>
 								<SelectTrigger>
 									<SelectValue />
 								</SelectTrigger>
@@ -234,10 +250,7 @@ export function BorderSettings({ config, onConfigChange }: BorderSettingsProps) 
 
 						<div className="space-y-2">
 							<Label>Modo de Mezcla</Label>
-							<Select
-								value={config.blendMode || 'normal'}
-								onValueChange={(value) => handleChange('blendMode', value)}
-							>
+							<Select value={config.blendMode || 'normal'} onValueChange={(value) => handleChange('blendMode', value)}>
 								<SelectTrigger>
 									<SelectValue />
 								</SelectTrigger>

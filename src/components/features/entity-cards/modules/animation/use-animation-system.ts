@@ -93,13 +93,7 @@ export function useAnimationSystem(options: AnimationOptions = {}): AnimationSys
 		}
 
 		return styles;
-	}, [
-		disableAnimations,
-		enabled,
-		entranceAnimation,
-		transitionDuration,
-		timingFunction,
-	]);
+	}, [disableAnimations, enabled, entranceAnimation, transitionDuration, timingFunction]);
 
 	/**
 	 * Generar estilos de hover

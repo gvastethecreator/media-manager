@@ -51,11 +51,7 @@ export async function getShaderConfig(entityType: string, entityId?: string) {
 /**
  * Actualiza la configuración de shader para una entidad
  */
-export async function updateShaderConfig(
-	config: ShaderConfig,
-	entityType: string,
-	entityId?: string
-) {
+export async function updateShaderConfig(config: ShaderConfig, entityType: string, entityId?: string) {
 	try {
 		// Validar y guardar en la base de datos
 		await prisma.layerConfig.upsert({

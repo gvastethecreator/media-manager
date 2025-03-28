@@ -4,11 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 // Importar tipos y configuraciones del archivo de cliente
-import {
-	defaultGrainConfig,
-	grainConfigSchema,
-	type GrainConfig
-} from './grain-config.action';
+import { defaultGrainConfig, grainConfigSchema, type GrainConfig } from './grain-config.action';
 
 interface GrainConfigResponse {
 	success: boolean;

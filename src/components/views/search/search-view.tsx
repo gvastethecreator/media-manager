@@ -92,10 +92,7 @@ export function SearchView(_props: ViewProps) {
 									}
 								}}
 							/>
-							<Button
-								type="button"
-								onClick={handleSearch}
-							>
+							<Button type="button" onClick={handleSearch}>
 								Buscar
 							</Button>
 						</div>

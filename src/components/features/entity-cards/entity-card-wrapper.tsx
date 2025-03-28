@@ -27,17 +27,7 @@ export interface EntityCardWrapperProps {
  */
 export function EntityCardWrapper(props: EntityCardWrapperProps) {
 	// Extraer propiedades
-	const {
-		entityType,
-		entityId,
-		title,
-		description,
-		image,
-		options,
-		className,
-		onClick,
-		entity,
-	} = props;
+	const { entityType, entityId, title, description, image, options, className, onClick, entity } = props;
 
 	// Preparar la entidad para el adaptador
 	const adaptedEntity = entity || {

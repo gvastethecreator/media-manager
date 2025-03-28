@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 import type { ViewType } from '@/types/file-item';
 import { CornerDownRight, Lightbulb, MessageSquare, StickyNote } from 'lucide-react';
-import { forwardRef, memo, useCallback, useImperativeHandle, useState } from 'react';
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 
 export type CategoryChild = {
 	id: string;
@@ -35,46 +35,41 @@ interface NavCategoryChildrenProps {
 }
 
 // Componente memoizado para renderizar un ítem con tooltip
-const ItemWithTooltip = memo(function ItemWithTooltip({
-	item,
-	isSelected,
-	onClick,
-	viewMode,
-	renderInside,
-	tooltipContent,
-	buttonClassName,
-	listIcon,
-}: {
-	item: CategoryChild;
-	isSelected: boolean;
-	onClick: () => void;
-	viewMode: ViewMode;
-	renderInside: React.ReactNode;
-	tooltipContent: React.ReactNode;
-	buttonClassName?: string;
-	listIcon?: boolean;
-}) {
-	// Optimización para mostrar tooltip solo cuando sea necesario (hover)
-	const [showTooltip, setShowTooltip] = useState(false);
+const ItemWithTooltip = memo(
+	function ItemWithTooltip({
+		item,
+		isSelected,
+		onClick,
+		viewMode,
+		renderInside,
+		tooltipContent,
+		buttonClassName,
+		listIcon,
+	}: {
+		item: CategoryChild;
+		isSelected: boolean;
+		onClick: () => void;
+		viewMode: ViewMode;
+		renderInside: React.ReactNode;
+		tooltipContent: React.ReactNode;
+		buttonClassName?: string;
+		listIcon?: boolean;
+	}) {
+		// Optimización para mostrar tooltip solo cuando sea necesario (hover)
+		const [showTooltip, setShowTooltip] = useState(false);
 
-	const handleMouseEnter = useCallback(() => {
-		setShowTooltip(true);
-	}, []);
+		const handleMouseEnter = useCallback(() => {
+			setShowTooltip(true);
+		}, []);
 
-	const handleMouseLeave = useCallback(() => {
-		setShowTooltip(false);
-	}, []);
+		const handleMouseLeave = useCallback(() => {
+			setShowTooltip(false);
+		}, []);
 
-	return (
-		<div
-			onMouseEnter={handleMouseEnter}
-			onMouseLeave={handleMouseLeave}
-			className="relative"
-		>
-			<Button
-				variant="ghost"
-				size="sm"
-				className={cn(
+		// Memoizamos las clases para evitar recálculos constantes
+		const buttonClasses = useMemo(
+			() =>
+				cn(
 					'group relative font-normal transition-all cursor-pointer overflow-hidden',
 					viewMode === 'grid'
 						? 'h-6 px-2 py-0 text-xs rounded-md m-0.5 max-w-fit'
@@ -82,220 +77,238 @@ const ItemWithTooltip = memo(function ItemWithTooltip({
 					isSelected && 'bg-gray-100/5 font-medium text-foreground',
 					viewMode === 'list' && 'nav-item-button',
 					buttonClassName
-				)}
-				onClick={onClick}
-			>
-				<div className={cn(
-					'flex items-center',
-					viewMode === 'grid' ? 'gap-1' : 'w-full min-w-0'
-				)}>
-					{viewMode === 'list' && listIcon && <CornerDownRight className="h-2 w-2 text-muted mr-1 shrink-0" />}
-					{renderInside}
-				</div>
-			</Button>
+				),
+			[viewMode, isSelected, buttonClassName]
+		);
 
-			{/* Renderizar tooltip solo cuando se hace hover */}
-			{showTooltip && (
-				<TooltipProvider delayDuration={200}>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<div className="absolute inset-0 pointer-events-none" />
-						</TooltipTrigger>
-						<TooltipContent side="right" className="text-xs tooltip-with-info">
-							{tooltipContent}
-						</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			)}
-		</div>
-	);
-});
+		const containerClasses = useMemo(
+			() => cn('flex items-center', viewMode === 'grid' ? 'gap-1' : 'w-full min-w-0'),
+			[viewMode]
+		);
+
+		// Eliminar las referencias a estados/props dentro del useEffect
+		useEffect(() => {
+			// Limpieza del tooltip al desmontar
+			return () => {
+				setShowTooltip(false);
+			};
+		}, []);
+
+		return (
+			<div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative">
+				<Button variant="ghost" size="sm" className={buttonClasses} onClick={onClick}>
+					<div className={containerClasses}>
+						{viewMode === 'list' && listIcon && <CornerDownRight className="h-2 w-2 text-muted mr-1 shrink-0" />}
+						{renderInside}
+					</div>
+				</Button>
+
+				{/* Renderizar tooltip solo cuando se hace hover - usando portales para evitar manipulaciones DOM complejas */}
+				{showTooltip && (
+					<TooltipProvider delayDuration={200}>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<div className="absolute inset-0 pointer-events-none" />
+							</TooltipTrigger>
+							<TooltipContent side="right" className="text-xs tooltip-with-info" sideOffset={5}>
+								{tooltipContent}
+							</TooltipContent>
+						</Tooltip>
+					</TooltipProvider>
+				)}
+			</div>
+		);
+	},
+	(prevProps, nextProps) => {
+		// Comparación personalizada para evitar re-renders innecesarios
+		if (prevProps.isSelected !== nextProps.isSelected) return false;
+		if (prevProps.viewMode !== nextProps.viewMode) return false;
+		if (prevProps.onClick !== nextProps.onClick) return false;
+
+		// Para item, solo comparamos los campos relevantes que afectan el renderizado
+		if (prevProps.item.id !== nextProps.item.id) return false;
+		if (prevProps.item.name !== nextProps.item.name) return false;
+		if (prevProps.item.emoji !== nextProps.item.emoji) return false;
+		if (prevProps.item._count?.images !== nextProps.item._count?.images) return false;
+
+		// Si llegamos aquí, consideramos que no necesitamos re-renderizar
+		return true;
+	}
+);
 
 // Componente memoizado para renderizar la lista de ítems
-const CategoryItems = memo(function CategoryItems({
-	items,
-	categoryId,
-	viewMode,
-	currentView,
-	selectedChildId,
-	onItemClick,
-}: {
-	items: CategoryChild[];
-	categoryId: ViewType;
-	viewMode: ViewMode;
-	currentView: string;
-	selectedChildId: string | null;
-	onItemClick: (id: string) => void;
-}) {
-	// Memorizar los handlers para cada ítem para evitar recreaciones
-	const getItemClickHandler = useCallback((itemId: string) => {
-		return () => onItemClick(itemId);
-	}, [onItemClick]);
+const CategoryItems = memo(
+	function CategoryItems({
+		items,
+		categoryId,
+		viewMode,
+		currentView,
+		selectedChildId,
+		onItemClick,
+	}: {
+		items: CategoryChild[];
+		categoryId: ViewType;
+		viewMode: ViewMode;
+		currentView: string;
+		selectedChildId: string | null;
+		onItemClick: (id: string) => void;
+	}) {
+		// Creamos una función de click estable por categoría
+		const stableOnItemClick = useCallback(onItemClick, []);
 
-	if (items.length === 0) {
-		return <div className="px-0 py-1 text-[10px] text-muted-foreground italic">No hay elementos</div>;
-	}
+		// Memoizamos los handlers para cada ítem para evitar recreaciones
+		const getItemClickHandler = useCallback(
+			(itemId: string) => {
+				return () => stableOnItemClick(itemId);
+			},
+			[stableOnItemClick]
+		);
 
-	// Renderizar elementos especiales para etiquetas
-	if (categoryId === 'tags') {
-		return (
-			<div className={cn(
-				'ml-1 mb-1 max-w-full',
-				viewMode === 'grid' ? 'flex flex-wrap gap-1' : 'flex flex-col space-y-1'
-			)}>
-				{items.map((tag) => (
-					<Button
-						key={tag.id}
-						variant="ghost"
-						className={cn(
+		// Memoizamos la validación de selección
+		const isItemSelected = useCallback(
+			(itemId: string, categoryType: string) => {
+				return selectedChildId === itemId && currentView === `${categoryType}-content`;
+			},
+			[selectedChildId, currentView]
+		);
+
+		// Memoizamos las clases CSS para los contenedores
+		const containerClassName = useMemo(
+			() => cn('transition-all duration-200', viewMode === 'grid' ? 'flex flex-wrap gap-1 px-1' : 'space-y-0.5'),
+			[viewMode]
+		);
+
+		const tagsContainerClassName = useMemo(
+			() => cn('ml-1 mb-1 max-w-full', viewMode === 'grid' ? 'flex flex-wrap gap-1' : 'flex flex-col space-y-1'),
+			[viewMode]
+		);
+
+		// Creamos un mapa para los handlers de click para tags
+		const tagClickHandlers = useMemo(() => {
+			if (categoryId !== 'tags') return {};
+
+			const handlers: Record<string, () => void> = {};
+			items.forEach((tag) => {
+				handlers[tag.name] = () => stableOnItemClick(tag.name);
+			});
+			return handlers;
+		}, [items, categoryId, stableOnItemClick]);
+
+		// Creamos un mapa para los handlers de click para otros items
+		const itemClickHandlers = useMemo(() => {
+			if (categoryId === 'tags') return {};
+
+			const handlers: Record<string, () => void> = {};
+			items.forEach((item) => {
+				handlers[item.id] = () => stableOnItemClick(item.id);
+			});
+			return handlers;
+		}, [items, categoryId, stableOnItemClick]);
+
+		if (items.length === 0) {
+			return <div className="px-0 py-1 text-[10px] text-muted-foreground italic">No hay elementos</div>;
+		}
+
+		// Renderizar elementos especiales para etiquetas
+		if (categoryId === 'tags') {
+			return (
+				<div className={tagsContainerClassName}>
+					{items.map((tag) => {
+						// Usar el handler precomputado
+						const handleClick = tagClickHandlers[tag.name];
+
+						const isSelected = currentView === 'tag-content' && selectedChildId === tag.name;
+
+						const tagClassName = cn(
 							'transition-all duration-150 text-foreground font-medium nav-tag cursor-pointer relative',
-							currentView === 'tag-content' && selectedChildId === tag.name && 'ring-1 ring-primary/30',
+							isSelected && 'ring-1 ring-primary/30',
 							'hover:brightness-110 flex items-center gap-1',
 							viewMode === 'grid'
 								? 'h-5 px-2 text-[10px] rounded-none max-w-fit'
 								: 'h-6 px-2 text-xs justify-start rounded-sm w-full'
-						)}
-						style={{ backgroundColor: tag.color || '#888' }}
-						onClick={() => onItemClick(tag.name)}
-						title={`${tag._count?.images || 0} imágenes${tag.description ? ` - ${tag.description}` : ''}`}
-					>
-						<span className="truncate">{tag.name}</span>
-						{tag._count && tag._count.images > 0 && (
-							<span className={cn(
-								'px-1 py-0 bg-black/30 rounded-sm whitespace-nowrap',
-								viewMode === 'grid' ? 'ml-1 text-[8px]' : 'ml-auto text-[9px]'
-							)}>
-								{tag._count.images}
-							</span>
-						)}
-					</Button>
-				))}
-			</div>
-		);
-	}
+						);
 
-	// Renderizar elementos para notas
-	if (categoryId === 'notes') {
-		return (
-			<div className={cn(
-				'transition-all duration-200',
-				viewMode === 'grid' ? 'flex flex-wrap gap-1 px-1' : 'space-y-0.5'
-			)}>
-				{items.map((note) => {
-					const isSelected = selectedChildId === note.id && currentView === 'note-content';
-					const displayName = note.title || note.name;
+						const countClassName = cn(
+							'px-1 py-0 bg-black/30 rounded-sm whitespace-nowrap',
+							viewMode === 'grid' ? 'ml-1 text-[8px]' : 'ml-auto text-[9px]'
+						);
 
-					return (
-						<ItemWithTooltip
-							key={note.id}
-							item={note}
-							isSelected={isSelected}
-							viewMode={viewMode}
-							onClick={getItemClickHandler(note.id)}
-							listIcon={true}
-							renderInside={
-								<>
-									{viewMode === 'list' && <CornerDownRight className="h-2 w-2 text-muted mr-1 shrink-0" />}
-									<StickyNote className="h-3 w-3 text-purple-400 mr-1 shrink-0" />
-									<span className="truncate">{displayName}</span>
-								</>
-							}
-							tooltipContent={
-								<>
-									<p>{displayName}</p>
-									{note.description && <p>{note.description}</p>}
-								</>
-							}
-						/>
-					);
-				})}
-			</div>
-		);
-	}
+						return (
+							<Button
+								key={tag.id}
+								variant="ghost"
+								className={tagClassName}
+								style={{ backgroundColor: tag.color || '#888' }}
+								onClick={handleClick}
+								title={`${tag._count?.images || 0} imágenes${tag.description ? ` - ${tag.description}` : ''}`}
+							>
+								<span className="truncate">{tag.name}</span>
+								{tag._count && tag._count.images > 0 && <span className={countClassName}>{tag._count.images}</span>}
+							</Button>
+						);
+					})}
+				</div>
+			);
+		}
 
-	// Renderizar elementos para conceptos
-	if (categoryId === 'concepts') {
-		return (
-			<div className={cn(
-				'transition-all duration-200',
-				viewMode === 'grid' ? 'flex flex-wrap gap-1 px-1' : 'space-y-0.5'
-			)}>
-				{items.map((concept) => {
-					const isSelected = selectedChildId === concept.id && currentView === 'concept-content';
+		// Para el resto de las categorías usamos un enfoque similar
+		const renderItems = () => {
+			// Memoizar los elementos renderizados para cada tipo
+			return items.map((item) => {
+				// Usar el handler precomputado
+				const handleClick = itemClickHandlers[item.id];
 
-					return (
-						<ItemWithTooltip
-							key={concept.id}
-							item={concept}
-							isSelected={isSelected}
-							viewMode={viewMode}
-							onClick={getItemClickHandler(concept.id)}
-							listIcon={true}
-							renderInside={
-								<>
-									<Lightbulb className="h-3 w-3 text-blue-400 mr-1 shrink-0" />
-									<span className="truncate">{concept.name}</span>
-								</>
-							}
-							tooltipContent={
-								<>
-									<p>{concept.name}</p>
-									{concept.description && <p>{concept.description}</p>}
-								</>
-							}
-						/>
-					);
-				})}
-			</div>
-		);
-	}
+				let isSelected = false;
+				let icon = null;
 
-	// Renderizar elementos para prompts
-	if (categoryId === 'prompts') {
-		return (
-			<div className={cn(
-				'transition-all duration-200',
-				viewMode === 'grid' ? 'flex flex-wrap gap-1 px-1' : 'space-y-0.5'
-			)}>
-				{items.map((prompt) => {
-					const isSelected = selectedChildId === prompt.id && currentView === 'prompt-content';
+				// Configurar según el tipo
+				if (categoryId === 'notes') {
+					isSelected = isItemSelected(item.id, 'note');
+					icon = <StickyNote className="h-3 w-3 text-purple-400 mr-1 shrink-0" />;
+				} else if (categoryId === 'concepts') {
+					isSelected = isItemSelected(item.id, 'concept');
+					icon = <Lightbulb className="h-3 w-3 text-blue-400 mr-1 shrink-0" />;
+				} else if (categoryId === 'prompts') {
+					isSelected = isItemSelected(item.id, 'prompt');
+					icon = <MessageSquare className="h-3 w-3 text-green-400 mr-1 shrink-0" />;
+				} else {
+					isSelected = isItemSelected(item.id, categoryId.replace(/s$/, ''));
+					icon = null;
+				}
 
-					return (
-						<ItemWithTooltip
-							key={prompt.id}
-							item={prompt}
-							isSelected={isSelected}
-							viewMode={viewMode}
-							onClick={getItemClickHandler(prompt.id)}
-							listIcon={true}
-							renderInside={
-								<>
-									<MessageSquare className="h-3 w-3 text-green-400 mr-1 shrink-0" />
-									<span className="truncate">{prompt.name}</span>
-								</>
-							}
-							tooltipContent={
-								<>
-									<p>{prompt.name}</p>
-									{prompt.description && <p>{prompt.description}</p>}
-								</>
-							}
-						/>
-					);
-				})}
-			</div>
-		);
-	}
-
-	// Renderizar elementos normales para otras categorías
-	return (
-		<div className={cn(
-			'transition-all duration-200',
-			viewMode === 'grid' ? 'flex flex-wrap gap-1 px-1' : 'space-y-0.5'
-		)}>
-			{items.map((item) => {
-				const isSelected = selectedChildId === item.id && currentView === `${categoryId.replace(/s$/, '')}-content`;
+				// Configurar contenido personalizado
+				const displayName = 'title' in item && item.title ? item.title : item.name;
 				const imageCount = item._count?.images || 0;
+
+				// Crear renderInside estable
+				const renderInside = (
+					<>
+						{icon}
+						{item.emoji && <span className="text-xs shrink-0 mr-1">{item.emoji}</span>}
+						<span className="truncate">{displayName}</span>
+						{categoryId !== 'notes' && categoryId !== 'concepts' && categoryId !== 'prompts' && (
+							<div
+								className={cn(
+									'shrink-0 inline-flex items-center space-x-0.5 px-1 rounded-sm text-muted-foreground text-[9px] bg-secondary/30 nav-count-badge',
+									imageCount > 0 ? 'opacity-100' : 'opacity-60',
+									viewMode === 'grid' ? 'ml-1' : 'ml-auto'
+								)}
+							>
+								<span>{imageCount}</span>
+							</div>
+						)}
+					</>
+				);
+
+				// Crear tooltipContent estable
+				const tooltipContent = (
+					<>
+						<p>{displayName}</p>
+						{item.path && <p className="text-muted-foreground text-[10px]">{item.path}</p>}
+						{item.description && <p>{item.description}</p>}
+						{imageCount > 0 && <p>{imageCount} imágenes</p>}
+					</>
+				);
 
 				return (
 					<ItemWithTooltip
@@ -303,86 +316,98 @@ const CategoryItems = memo(function CategoryItems({
 						item={item}
 						isSelected={isSelected}
 						viewMode={viewMode}
-						onClick={getItemClickHandler(item.id)}
+						onClick={handleClick}
 						listIcon={true}
-						renderInside={
-							<>
-								{item.emoji && <span className="text-xs shrink-0 mr-1">{item.emoji}</span>}
-								<span className="truncate">{item.name}</span>
-								<div
-									className={cn(
-										'shrink-0 inline-flex items-center space-x-0.5 px-1 rounded-sm text-muted-foreground text-[9px] bg-secondary/30 nav-count-badge',
-										imageCount > 0 ? 'opacity-100' : 'opacity-60',
-										viewMode === 'grid' ? 'ml-1' : 'ml-auto'
-									)}
-								>
-									<span>{imageCount}</span>
-								</div>
-							</>
-						}
-						tooltipContent={
-							<>
-								{item.path && <p className="text-muted-foreground text-[10px]">{item.path}</p>}
-								{item.description && <p>{item.description}</p>}
-								<p>{imageCount} imágenes</p>
-							</>
-						}
+						renderInside={renderInside}
+						tooltipContent={tooltipContent}
 					/>
 				);
-			})}
-		</div>
-	);
-});
+			});
+		};
+
+		// Memoizamos los items renderizados
+		const renderedItems = useMemo(
+			() => renderItems(),
+			[items, categoryId, viewMode, currentView, selectedChildId, itemClickHandlers]
+		);
+
+		return <div className={containerClassName}>{renderedItems}</div>;
+	},
+	(prevProps, nextProps) => {
+		// Comparación profunda personalizada para evitar re-renders innecesarios
+		if (prevProps.viewMode !== nextProps.viewMode) return false;
+		if (prevProps.currentView !== nextProps.currentView) return false;
+		if (prevProps.selectedChildId !== nextProps.selectedChildId) return false;
+		if (prevProps.categoryId !== nextProps.categoryId) return false;
+
+		// Comparación rápida de arrays por longitud y luego elementos
+		if (prevProps.items.length !== nextProps.items.length) return false;
+
+		// Si tienen la misma longitud, verificamos si los IDs siguen siendo los mismos
+		const prevIds = prevProps.items.map((item) => item.id).join(',');
+		const nextIds = nextProps.items.map((item) => item.id).join(',');
+		if (prevIds !== nextIds) return false;
+
+		// Verificamos si la función de callback cambió
+		if (prevProps.onItemClick !== nextProps.onItemClick) return false;
+
+		// Si llegamos aquí, consideramos que no necesitamos re-renderizar
+		return true;
+	}
+);
 
 // Componente principal
-export const NavCategoryChildren = memo(forwardRef<CategoryChildrenRef, NavCategoryChildrenProps>(({
-	categoryId,
-	isCollapsed,
-	selectedChildId,
-	currentView,
-	items,
-	onItemClick,
-	onToggleViewMode
-}, ref) => {
-	// Estado local para el modo de vista
-	const [viewMode, setViewMode] = useState<ViewMode>('list');
+export const NavCategoryChildren = memo(
+	forwardRef<CategoryChildrenRef, NavCategoryChildrenProps>(
+		({ categoryId, isCollapsed, selectedChildId, currentView, items, onItemClick, onToggleViewMode }, ref) => {
+			// Estado local para el modo de vista
+			const [viewMode, setViewMode] = useState<ViewMode>('list');
 
-	// Exponer métodos al componente padre
-	useImperativeHandle(ref, () => ({
-		toggleViewMode: () => {
-			const newMode = viewMode === 'list' ? 'grid' : 'list';
-			setViewMode(newMode);
-			onToggleViewMode?.(newMode);
-		},
-		getViewMode: () => viewMode
-	}), [viewMode, onToggleViewMode]);
+			// Exponer métodos al componente padre
+			useImperativeHandle(
+				ref,
+				() => ({
+					toggleViewMode: () => {
+						const newMode = viewMode === 'list' ? 'grid' : 'list';
+						setViewMode(newMode);
+						onToggleViewMode?.(newMode);
+					},
+					getViewMode: () => viewMode,
+				}),
+				[viewMode, onToggleViewMode]
+			);
 
-	// Si está colapsado, no mostrar nada
-	if (isCollapsed) {
-		return null;
-	}
+			// Si está colapsado, no mostrar nada
+			if (isCollapsed) {
+				return null;
+			}
 
-	return (
-		<>
-			<div className="flex items-center justify-between mb-1 px-1">
-				<span className="text-[10px] text-muted-foreground">
-					{items.length} elemento{items.length !== 1 ? 's' : ''}{' '}
-					{categoryId === 'tags' && 'etiqueta'}{categoryId === 'tags' && items.length !== 1 && 's'}
-					{categoryId === 'notes' && 'nota'}{categoryId === 'notes' && items.length !== 1 && 's'}
-					{categoryId === 'concepts' && 'concepto'}{categoryId === 'concepts' && items.length !== 1 && 's'}
-					{categoryId === 'prompts' && 'prompt'}{categoryId === 'prompts' && items.length !== 1 && 's'}
-				</span>
-			</div>
+			return (
+				<>
+					<div className="flex items-center justify-between mb-1 px-1">
+						<span className="text-[10px] text-muted-foreground">
+							{items.length} elemento{items.length !== 1 ? 's' : ''} {categoryId === 'tags' && 'etiqueta'}
+							{categoryId === 'tags' && items.length !== 1 && 's'}
+							{categoryId === 'notes' && 'nota'}
+							{categoryId === 'notes' && items.length !== 1 && 's'}
+							{categoryId === 'concepts' && 'concepto'}
+							{categoryId === 'concepts' && items.length !== 1 && 's'}
+							{categoryId === 'prompts' && 'prompt'}
+							{categoryId === 'prompts' && items.length !== 1 && 's'}
+						</span>
+					</div>
 
-			{/* Renderizado condicional de los ítems */}
-			<CategoryItems
-				items={items}
-				categoryId={categoryId}
-				viewMode={viewMode}
-				currentView={currentView}
-				selectedChildId={selectedChildId}
-				onItemClick={onItemClick}
-			/>
-		</>
-	);
-}));
+					{/* Renderizado condicional de los ítems */}
+					<CategoryItems
+						items={items}
+						categoryId={categoryId}
+						viewMode={viewMode}
+						currentView={currentView}
+						selectedChildId={selectedChildId}
+						onItemClick={onItemClick}
+					/>
+				</>
+			);
+		}
+	)
+);

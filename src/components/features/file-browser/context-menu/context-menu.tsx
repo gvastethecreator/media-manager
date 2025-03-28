@@ -4,13 +4,14 @@ import {
 	ContextMenu,
 	ContextMenuContent,
 	ContextMenuItem,
+	ContextMenuPortal,
 	ContextMenuSeparator,
 	ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { useFavoriteStore } from '@/store/entities/favorite';
 import { useFileManager } from '@/store/files/file-manager.store';
 import { Copy, Download, Flag, FolderOpen, Heart, HeartOff, ImageIcon, Info, Share2, Trash2 } from 'lucide-react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 
 import {
 	AlbumsSubmenu,
@@ -26,11 +27,155 @@ import {
 import { useEntityLoader } from './hooks/use-entity-loader';
 import type { FileContextMenuProps } from './types';
 
+// Componentes memoizados para evitar re-renderizados
+const MemoizedContextMenuTrigger = memo(ContextMenuTrigger);
+const MemoizedContextMenuContent = memo(ContextMenuContent);
+const MemoizedContextMenuItem = memo(ContextMenuItem);
+const MemoizedContextMenuSeparator = memo(ContextMenuSeparator);
+const MemoizedContextMenuPortal = memo(ContextMenuPortal);
+
+// Componente de botón de favorito memoizado
+const FavoriteButton = memo(function FavoriteButton({
+	isFavorited,
+	onClick
+}: {
+	isFavorited: boolean;
+	onClick: () => void;
+}) {
+	return (
+		<MemoizedContextMenuItem onClick={onClick}>
+			{isFavorited ? (
+				<>
+					<HeartOff className="mr-2 h-4 w-4" />
+					Quitar de favoritos
+				</>
+			) : (
+				<>
+					<Heart className="mr-2 h-4 w-4" />
+					Añadir a favoritos
+				</>
+			)}
+		</MemoizedContextMenuItem>
+	);
+});
+
+// Componente de botón de marcar memoizado
+const MarkButton = memo(function MarkButton({
+	markText,
+	onClick
+}: {
+	markText: string;
+	onClick: () => void;
+}) {
+	return (
+		<MemoizedContextMenuItem onClick={onClick}>
+			<Flag className="mr-2 h-4 w-4" />
+			{markText}
+		</MemoizedContextMenuItem>
+	);
+});
+
+// Componente del contenido del menú contextual memoizado
+const ContextMenuItems = memo(function ContextMenuItems({
+	file,
+	onAction,
+	markToggleText,
+	isFileFavorited,
+	submenuProps,
+	handleFavoriteToggle,
+	handleMarkToggle,
+	handlePreview,
+	handleOpenLocation,
+	handleDownload,
+	handleCopy,
+	handleCopyPath,
+	handleShowProperties,
+	handleDelete
+}: {
+	file: FileContextMenuProps['file'];
+	onAction: FileContextMenuProps['onAction'];
+	markToggleText: string;
+	isFileFavorited: boolean;
+	submenuProps: any;
+	handleFavoriteToggle: () => void;
+	handleMarkToggle: () => void;
+	handlePreview: () => void;
+	handleOpenLocation: () => void;
+	handleDownload: () => void;
+	handleCopy: () => void;
+	handleCopyPath: () => void;
+	handleShowProperties: () => void;
+	handleDelete: () => void;
+}) {
+	return (
+		<MemoizedContextMenuContent className="w-64" style={{ zIndex: 9999 }}>
+			{/* Acciones principales */}
+			<MemoizedContextMenuItem onClick={handlePreview}>
+				<ImageIcon className="mr-2 h-4 w-4" />
+				Ver imagen
+			</MemoizedContextMenuItem>
+
+			<MarkButton markText={markToggleText} onClick={handleMarkToggle} />
+			<FavoriteButton isFavorited={isFileFavorited} onClick={handleFavoriteToggle} />
+
+			<MemoizedContextMenuSeparator />
+
+			{/* Submenús para entidades */}
+			<CollectionsSubmenu {...submenuProps} />
+			<TagsSubmenu {...submenuProps} />
+			<AlbumsSubmenu {...submenuProps} />
+			<CharactersSubmenu {...submenuProps} />
+			<PlacesSubmenu {...submenuProps} />
+			<WorldItemsSubmenu {...submenuProps} />
+			<PromptsSubmenu {...submenuProps} />
+			<NotesSubmenu {...submenuProps} />
+			<ConceptsSubmenu {...submenuProps} />
+
+			<MemoizedContextMenuSeparator />
+
+			{/* Acciones de archivo */}
+			<MemoizedContextMenuItem onClick={handleOpenLocation}>
+				<FolderOpen className="mr-2 h-4 w-4" />
+				Abrir ubicación
+			</MemoizedContextMenuItem>
+
+			<MemoizedContextMenuItem onClick={handleDownload}>
+				<Download className="mr-2 h-4 w-4" />
+				Descargar
+			</MemoizedContextMenuItem>
+
+			<MemoizedContextMenuItem onClick={handleCopy}>
+				<Copy className="mr-2 h-4 w-4" />
+				Copiar al portapapeles
+			</MemoizedContextMenuItem>
+
+			<MemoizedContextMenuItem onClick={handleCopyPath}>
+				<Share2 className="mr-2 h-4 w-4" />
+				Copiar ruta
+			</MemoizedContextMenuItem>
+
+			<MemoizedContextMenuSeparator />
+
+			{/* Información y acciones de borrado */}
+			<MemoizedContextMenuItem onClick={handleShowProperties}>
+				<Info className="mr-2 h-4 w-4" />
+				Propiedades
+			</MemoizedContextMenuItem>
+
+			<MemoizedContextMenuItem className="text-red-500" onClick={handleDelete}>
+				<Trash2 className="mr-2 h-4 w-4" />
+				Eliminar
+			</MemoizedContextMenuItem>
+		</MemoizedContextMenuContent>
+	);
+});
+
 // Memoizamos el componente FileContextMenu para evitar renderizaciones innecesarias
 export const FileContextMenu = memo(function FileContextMenu({ file, children, onAction }: FileContextMenuProps) {
 	const { toggleFavorite, isFavorited } = useFavoriteStore();
 	const { loadingStates, handleOpenChange } = useEntityLoader();
 	const { selectedItems } = useFileManager();
+	const [isOpen, setIsOpen] = useState(false);
 
 	// Memoizamos la función handleFavoriteToggle
 	const handleFavoriteToggle = useCallback(() => {
@@ -44,124 +189,105 @@ export const FileContextMenu = memo(function FileContextMenu({ file, children, o
 		return isSelected ? 'Desmarcar' : 'Marcar';
 	}, [selectedItems, file.id]);
 
+	// Memoizamos los handlers para acciones comunes
+	const handlePreview = useCallback(() => {
+		onAction('preview', file);
+	}, [onAction, file]);
+
+	const handleMarkToggle = useCallback(() => {
+		onAction('mark-toggle', file);
+	}, [onAction, file]);
+
+	const handleOpenLocation = useCallback(() => {
+		onAction('open', file);
+	}, [onAction, file]);
+
+	const handleDownload = useCallback(() => {
+		onAction('download', file);
+	}, [onAction, file]);
+
+	const handleCopy = useCallback(() => {
+		onAction('copy', file);
+	}, [onAction, file]);
+
+	const handleCopyPath = useCallback(() => {
+		onAction('copy-path', file);
+	}, [onAction, file]);
+
+	const handleDelete = useCallback(() => {
+		onAction('delete', file);
+	}, [onAction, file]);
+
+	const handleShowProperties = useCallback(() => {
+		window.dispatchEvent(
+			new CustomEvent('show-file-details', {
+				detail: { fileId: file.id },
+			})
+		);
+	}, [file.id]);
+
+	// Memoizamos el estado de favorito
+	const isFileFavorited = useMemo(() => isFavorited(file.id), [isFavorited, file.id]);
+
+	// Memoizamos las props para submenús comunes
+	const submenuProps = useMemo(() => ({
+		file,
+		onAction,
+		loadingStates,
+		onOpenChange: handleOpenChange
+	}), [file, onAction, loadingStates, handleOpenChange]);
+
+	// Controlamos cuando renderizar el contenido del menú
+	const handleMenuOpenChange = useCallback((open: boolean) => {
+		setIsOpen(open);
+	}, []);
+
+	// Memoizamos los items del menú para solo renderizarlos cuando sea necesario
+	const menuItems = useMemo(() => {
+		if (!isOpen) return null;
+
+		return (
+			<ContextMenuItems
+				file={file}
+				onAction={onAction}
+				markToggleText={markToggleText}
+				isFileFavorited={isFileFavorited}
+				submenuProps={submenuProps}
+				handleFavoriteToggle={handleFavoriteToggle}
+				handleMarkToggle={handleMarkToggle}
+				handlePreview={handlePreview}
+				handleOpenLocation={handleOpenLocation}
+				handleDownload={handleDownload}
+				handleCopy={handleCopy}
+				handleCopyPath={handleCopyPath}
+				handleShowProperties={handleShowProperties}
+				handleDelete={handleDelete}
+			/>
+		);
+	}, [
+		isOpen,
+		file,
+		onAction,
+		markToggleText,
+		isFileFavorited,
+		submenuProps,
+		handleFavoriteToggle,
+		handleMarkToggle,
+		handlePreview,
+		handleOpenLocation,
+		handleDownload,
+		handleCopy,
+		handleCopyPath,
+		handleShowProperties,
+		handleDelete
+	]);
+
 	return (
-		<ContextMenu>
-			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-			<ContextMenuContent className="w-64">
-				{/* Acciones principales */}
-				<ContextMenuItem
-					onClick={() => {
-						onAction('preview', file);
-					}}
-				>
-					<ImageIcon className="mr-2 h-4 w-4" />
-					Ver imagen
-				</ContextMenuItem>
-
-				<ContextMenuItem onClick={() => onAction('mark-toggle', file)}>
-					<Flag className="mr-2 h-4 w-4" />
-					{markToggleText}
-				</ContextMenuItem>
-
-				<ContextMenuItem onClick={handleFavoriteToggle}>
-					{isFavorited(file.id) ? (
-						<>
-							<HeartOff className="mr-2 h-4 w-4" />
-							Quitar de favoritos
-						</>
-					) : (
-						<>
-							<Heart className="mr-2 h-4 w-4" />
-							Añadir a favoritos
-						</>
-					)}
-				</ContextMenuItem>
-
-				<ContextMenuSeparator />
-
-				{/* Submenús para entidades */}
-				<CollectionsSubmenu
-					file={file}
-					onAction={onAction}
-					loadingStates={loadingStates}
-					onOpenChange={handleOpenChange}
-				/>
-
-				<TagsSubmenu file={file} onAction={onAction} loadingStates={loadingStates} onOpenChange={handleOpenChange} />
-
-				<AlbumsSubmenu file={file} onAction={onAction} loadingStates={loadingStates} onOpenChange={handleOpenChange} />
-
-				<CharactersSubmenu
-					file={file}
-					onAction={onAction}
-					loadingStates={loadingStates}
-					onOpenChange={handleOpenChange}
-				/>
-
-				<PlacesSubmenu file={file} onAction={onAction} loadingStates={loadingStates} onOpenChange={handleOpenChange} />
-
-				<WorldItemsSubmenu
-					file={file}
-					onAction={onAction}
-					loadingStates={loadingStates}
-					onOpenChange={handleOpenChange}
-				/>
-
-				<PromptsSubmenu file={file} onAction={onAction} loadingStates={loadingStates} onOpenChange={handleOpenChange} />
-
-				<NotesSubmenu file={file} onAction={onAction} loadingStates={loadingStates} onOpenChange={handleOpenChange} />
-
-				<ConceptsSubmenu
-					file={file}
-					onAction={onAction}
-					loadingStates={loadingStates}
-					onOpenChange={handleOpenChange}
-				/>
-
-				<ContextMenuSeparator />
-
-				{/* Acciones de archivo */}
-				<ContextMenuItem onClick={() => onAction('open', file)}>
-					<FolderOpen className="mr-2 h-4 w-4" />
-					Abrir ubicación
-				</ContextMenuItem>
-
-				<ContextMenuItem onClick={() => onAction('download', file)}>
-					<Download className="mr-2 h-4 w-4" />
-					Descargar
-				</ContextMenuItem>
-
-				<ContextMenuItem onClick={() => onAction('copy', file)}>
-					<Copy className="mr-2 h-4 w-4" />
-					Copiar al portapapeles
-				</ContextMenuItem>
-
-				<ContextMenuItem onClick={() => onAction('copy-path', file)}>
-					<Share2 className="mr-2 h-4 w-4" />
-					Copiar ruta
-				</ContextMenuItem>
-
-				<ContextMenuSeparator />
-
-				{/* Información y acciones de borrado */}
-				<ContextMenuItem
-					onClick={() =>
-						window.dispatchEvent(
-							new CustomEvent('show-file-details', {
-								detail: { fileId: file.id },
-							})
-						)
-					}
-				>
-					<Info className="mr-2 h-4 w-4" />
-					Propiedades
-				</ContextMenuItem>
-
-				<ContextMenuItem className="text-red-500" onClick={() => onAction('delete', file)}>
-					<Trash2 className="mr-2 h-4 w-4" />
-					Eliminar
-				</ContextMenuItem>
-			</ContextMenuContent>
+		<ContextMenu onOpenChange={handleMenuOpenChange}>
+			<MemoizedContextMenuTrigger asChild>{children}</MemoizedContextMenuTrigger>
+			<MemoizedContextMenuPortal>
+				{menuItems}
+			</MemoizedContextMenuPortal>
 		</ContextMenu>
 	);
 });

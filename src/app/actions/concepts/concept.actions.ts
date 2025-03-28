@@ -1,5 +1,6 @@
 'use server';
 
+import { EntityErrorCode, createEntityErrorObject, type SerializableError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { EventType } from '@/lib/server/events.server';
@@ -9,38 +10,26 @@ import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers actualizados
-import {
-    toConceptWithStats
-} from '@/transformers/concept';
+import { toConceptWithStats } from '@/transformers/concept';
 import type {
     ConceptBase,
     ConceptCreateInput,
     ConceptExtended,
     ConceptUpdateInput,
-    ConceptWithStats
+    ConceptWithStats,
 } from '@/types/entities/concept';
 
 // Configuración y utilidades
 const conceptLogger = serverLogger.withContext('ConceptActions');
 const REVALIDATE_PATHS = ['/settings', '/concepts', '/concepts/[id]'] as const;
 
-// Códigos de error
-enum ConceptErrorCode {
-	NOT_FOUND = 'NOT_FOUND',
-	VALIDATION_ERROR = 'VALIDATION_ERROR',
-	OPERATION_FAILED = 'OPERATION_FAILED',
-}
-
 // Función creadora de errores (enfoque funcional)
 const createConceptError = (
 	message: string,
-	code: ConceptErrorCode = ConceptErrorCode.OPERATION_FAILED,
+	code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED,
 	cause?: unknown
-) => {
-	const error = new Error(message);
-	error.name = 'ConceptError';
-	Object.assign(error, { code, cause });
-	return error;
+): SerializableError => {
+	return createEntityErrorObject('ConceptError', message, code, cause);
 };
 
 // Interfaces adicionales para compatibilidad
@@ -101,7 +90,7 @@ export async function getConcepts(): Promise<ConceptWithStats[]> {
 						characters: true,
 						places: true,
 						worldItems: true,
-						images: true
+						images: true,
 					},
 				},
 			},
@@ -113,7 +102,7 @@ export async function getConcepts(): Promise<ConceptWithStats[]> {
 		return concepts.map(toConceptWithStats);
 	} catch (error) {
 		conceptLogger.error('Error al obtener conceptos:', error);
-		throw createConceptError('Error al obtener conceptos', ConceptErrorCode.OPERATION_FAILED, error);
+		throw createConceptError('Error al obtener conceptos', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -133,14 +122,14 @@ export async function getConcept(id: string): Promise<ConceptExtended> {
 						characters: true,
 						places: true,
 						worldItems: true,
-						images: true
+						images: true,
 					},
 				},
 			},
 		});
 
 		if (!concept) {
-			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
+			throw createConceptError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		conceptLogger.info('✅ Concepto obtenido:', concept.name);
@@ -151,7 +140,7 @@ export async function getConcept(id: string): Promise<ConceptExtended> {
 		if (error instanceof Error && error.name === 'ConceptError') {
 			throw error;
 		}
-		throw createConceptError('No se pudo obtener el concepto', ConceptErrorCode.OPERATION_FAILED, error);
+		throw createConceptError('No se pudo obtener el concepto', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -171,7 +160,7 @@ export async function getConceptWithRelations(id: string): Promise<ConceptExtend
 						characters: true,
 						places: true,
 						worldItems: true,
-						images: true
+						images: true,
 					},
 				},
 				prompts: {
@@ -208,7 +197,7 @@ export async function getConceptWithRelations(id: string): Promise<ConceptExtend
 		});
 
 		if (!concept) {
-			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
+			throw createConceptError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		conceptLogger.info('✅ Concepto con relaciones obtenido:', concept.name);
@@ -219,7 +208,7 @@ export async function getConceptWithRelations(id: string): Promise<ConceptExtend
 		if (error instanceof Error && error.name === 'ConceptError') {
 			throw error;
 		}
-		throw createConceptError('No se pudo obtener el concepto con relaciones', ConceptErrorCode.OPERATION_FAILED, error);
+		throw createConceptError('No se pudo obtener el concepto con relaciones', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -254,7 +243,7 @@ export async function createConcept(data: ConceptCreateInput): Promise<ConceptBa
 		return concept;
 	} catch (error) {
 		conceptLogger.error('❌ Error al crear concepto:', error);
-		throw createConceptError('No se pudo crear el concepto', ConceptErrorCode.OPERATION_FAILED, error);
+		throw createConceptError('No se pudo crear el concepto', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -281,7 +270,7 @@ export async function updateConcept(id: string, data: ConceptUpdateInput): Promi
 		return concept;
 	} catch (error) {
 		conceptLogger.error('❌ Error al actualizar concepto:', error);
-		throw createConceptError('No se pudo actualizar el concepto', ConceptErrorCode.OPERATION_FAILED, error);
+		throw createConceptError('No se pudo actualizar el concepto', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -297,7 +286,7 @@ export async function deleteConcept(id: string): Promise<{ success: boolean }> {
 		});
 
 		if (!concept) {
-			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
+			throw createConceptError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Primero desconectar todas las relaciones
@@ -330,7 +319,7 @@ export async function deleteConcept(id: string): Promise<{ success: boolean }> {
 		return { success: true };
 	} catch (error) {
 		conceptLogger.error('❌ Error al eliminar concepto:', error);
-		throw createConceptError('No se pudo eliminar el concepto', ConceptErrorCode.OPERATION_FAILED, error);
+		throw createConceptError('No se pudo eliminar el concepto', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -352,7 +341,7 @@ export async function linkEntityToConcept(
 		});
 
 		if (!concept) {
-			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
+			throw createConceptError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Vincular basado en el tipo de entidad
@@ -418,7 +407,7 @@ export async function linkEntityToConcept(
 				});
 				break;
 			default:
-				throw createConceptError(`Tipo de entidad no válido: ${entityType}`, ConceptErrorCode.VALIDATION_ERROR);
+				throw createConceptError(`Tipo de entidad no válido: ${entityType}`, EntityErrorCode.VALIDATION_ERROR);
 		}
 
 		emit({
@@ -436,7 +425,11 @@ export async function linkEntityToConcept(
 		return { success: true };
 	} catch (error) {
 		conceptLogger.error('❌ Error al vincular entidad con concepto:', error);
-		throw createConceptError('No se pudo vincular la entidad con el concepto', ConceptErrorCode.OPERATION_FAILED, error);
+		throw createConceptError(
+			'No se pudo vincular la entidad con el concepto',
+			EntityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -458,7 +451,7 @@ export async function unlinkEntityFromConcept(
 		});
 
 		if (!concept) {
-			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
+			throw createConceptError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Desvincular basado en el tipo de entidad
@@ -524,7 +517,7 @@ export async function unlinkEntityFromConcept(
 				});
 				break;
 			default:
-				throw createConceptError(`Tipo de entidad no válido: ${entityType}`, ConceptErrorCode.VALIDATION_ERROR);
+				throw createConceptError(`Tipo de entidad no válido: ${entityType}`, EntityErrorCode.VALIDATION_ERROR);
 		}
 
 		emit({
@@ -542,7 +535,11 @@ export async function unlinkEntityFromConcept(
 		return { success: true };
 	} catch (error) {
 		conceptLogger.error('❌ Error al desvincular entidad de concepto:', error);
-		throw createConceptError('No se pudo desvincular la entidad del concepto', ConceptErrorCode.OPERATION_FAILED, error);
+		throw createConceptError(
+			'No se pudo desvincular la entidad del concepto',
+			EntityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -560,7 +557,7 @@ export async function getConceptImages(conceptId: string): Promise<{ images: Fil
 		});
 
 		if (!concept) {
-			throw createConceptError('Concepto no encontrado', ConceptErrorCode.NOT_FOUND);
+			throw createConceptError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Adaptar imágenes al formato FileItem
@@ -587,6 +584,10 @@ export async function getConceptImages(conceptId: string): Promise<{ images: Fil
 		return { images };
 	} catch (error) {
 		conceptLogger.error('❌ Error al obtener imágenes para concepto:', error);
-		throw createConceptError('No se pudieron obtener las imágenes para el concepto', ConceptErrorCode.OPERATION_FAILED, error);
+		throw createConceptError(
+			'No se pudieron obtener las imágenes para el concepto',
+			EntityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }

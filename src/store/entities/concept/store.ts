@@ -10,23 +10,23 @@ const storeLogger = serverLogger.withContext('ConceptStore');
  * Store para la gestión de conceptos combinando todas las slices
  */
 export const useConceptStore = create<ConceptStore>()(
-  devtools(
-    (...args) => {
-      storeLogger.info('🏗️ Inicializando ConceptStore');
+	devtools(
+		(...args) => {
+			storeLogger.info('🏗️ Inicializando ConceptStore');
 
-      // Combinar todas las slices
-      return {
-        ...createCoreSlice(...args),
-        ...createFiltersSlice(...args),
-        ...createUISlice(...args),
-        ...createRelationsSlice(...args),
-      };
-    },
-    {
-      name: 'ConceptStore',
-      enabled: process.env.NODE_ENV === 'development',
-    }
-  )
+			// Combinar todas las slices
+			return {
+				...createCoreSlice(...args),
+				...createFiltersSlice(...args),
+				...createUISlice(...args),
+				...createRelationsSlice(...args),
+			};
+		},
+		{
+			name: 'ConceptStore',
+			enabled: process.env.NODE_ENV === 'development',
+		}
+	)
 );
 
 // Selectors para acceder a partes específicas del estado

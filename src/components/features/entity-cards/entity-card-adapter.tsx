@@ -19,21 +19,16 @@ export interface EntityCardAdapterProps {
  * IMPORTANTE: Este componente mantiene la misma API que antes pero ahora utiliza
  * internamente EntityCardDev, lo que simplifica el renderizado
  */
-export function EntityCardAdapter({
-	entityType,
-	entity,
-	options = {},
-	className,
-	onClick,
-}: EntityCardAdapterProps) {
+export function EntityCardAdapter({ entityType, entity, options = {}, className, onClick }: EntityCardAdapterProps) {
 	// Extraer información básica de la entidad según su tipo
 	const extractEntityInfo = (): EntityBasicInfo => {
-		if (!entity) return {
-			id: 'unknown',
-			title: 'Entidad desconocida',
-			description: '',
-			metadata: {}
-		};
+		if (!entity)
+			return {
+				id: 'unknown',
+				title: 'Entidad desconocida',
+				description: '',
+				metadata: {},
+			};
 
 		// Datos comunes para todos los tipos
 		const baseInfo = {
@@ -106,7 +101,7 @@ export function EntityCardAdapter({
 		const k = 1024;
 		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return `${Number.parseFloat((bytes / (k ** i)).toFixed(decimals))} ${sizes[i]}`;
+		return `${Number.parseFloat((bytes / k ** i).toFixed(decimals))} ${sizes[i]}`;
 	}
 
 	// Función auxiliar para formatear fechas

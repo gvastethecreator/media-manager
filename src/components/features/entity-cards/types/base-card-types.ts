@@ -1,5 +1,5 @@
 import type * as React from 'react';
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 /**
  * Re-exportar los tipos desde unified-card-types.ts para mantener la compatibilidad con código existente

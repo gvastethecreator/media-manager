@@ -3,7 +3,13 @@
  * @module store/entities/place/transformers
  */
 
-import type { CreatePlaceData, ParsedPlaceVisualConfig, Place, PlaceFilters, UpdatePlaceData } from '../../../types/entities/place';
+import type {
+	CreatePlaceData,
+	ParsedPlaceVisualConfig,
+	Place,
+	PlaceFilters,
+	UpdatePlaceData,
+} from '../../../types/entities/place';
 import { PLACE_TYPE_EMOJIS } from './constants';
 import { generatePlaceId, parsePlaceStats } from './utils';
 
@@ -13,37 +19,37 @@ import { generatePlaceId, parsePlaceStats } from './utils';
  * @returns Entidad de lugar
  */
 export const createPlaceFromData = (data: CreatePlaceData): Place => {
-  const now = new Date();
-  const placeType = data.type?.toLowerCase() || 'other';
+	const now = new Date();
+	const placeType = data.type?.toLowerCase() || 'other';
 
-  // Obtener emoji recomendado según el tipo
-  const defaultEmoji = PLACE_TYPE_EMOJIS[placeType] || '📍';
+	// Obtener emoji recomendado según el tipo
+	const defaultEmoji = PLACE_TYPE_EMOJIS[placeType] || '📍';
 
-  return {
-    id: generatePlaceId(),
-    name: data.name,
-    emoji: data.emoji || defaultEmoji,
-    color: data.color || '#6B7280',
-    description: data.description || null,
-    shortcut: data.shortcut || null,
-    region: data.region || null,
-    type: data.type || null,
-    climate: data.climate || null,
-    population: data.population || null,
-    government: data.government || null,
-    dangers: data.dangers || '{}',
-    resources: data.resources || '{}',
-    lore: data.lore || null,
-    history: data.history || null,
-    stats: data.stats || '{}',
-    sortBy: data.sortBy || 'name_asc',
-    filters: data.filters || '{}',
-    featuredImage: data.featuredImage || null,
-    isFavorite: data.isFavorite || false,
-    category: data.category || null,
-    createdAt: now,
-    updatedAt: now
-  };
+	return {
+		id: generatePlaceId(),
+		name: data.name,
+		emoji: data.emoji || defaultEmoji,
+		color: data.color || '#6B7280',
+		description: data.description || null,
+		shortcut: data.shortcut || null,
+		region: data.region || null,
+		type: data.type || null,
+		climate: data.climate || null,
+		population: data.population || null,
+		government: data.government || null,
+		dangers: data.dangers || '{}',
+		resources: data.resources || '{}',
+		lore: data.lore || null,
+		history: data.history || null,
+		stats: data.stats || '{}',
+		sortBy: data.sortBy || 'name_asc',
+		filters: data.filters || '{}',
+		featuredImage: data.featuredImage || null,
+		isFavorite: data.isFavorite || false,
+		category: data.category || null,
+		createdAt: now,
+		updatedAt: now,
+	};
 };
 
 /**
@@ -53,11 +59,11 @@ export const createPlaceFromData = (data: CreatePlaceData): Place => {
  * @returns Lugar actualizado
  */
 export const updatePlace = (place: Place, updates: Partial<Place> | UpdatePlaceData): Place => {
-  return {
-    ...place,
-    ...updates,
-    updatedAt: new Date()
-  };
+	return {
+		...place,
+		...updates,
+		updatedAt: new Date(),
+	};
 };
 
 /**
@@ -66,27 +72,27 @@ export const updatePlace = (place: Place, updates: Partial<Place> | UpdatePlaceD
  * @returns Configuración analizada
  */
 export const parseVisualConfig = (configJson: string): ParsedPlaceVisualConfig => {
-  try {
-    const parsed = JSON.parse(configJson);
+	try {
+		const parsed = JSON.parse(configJson);
 
-    return {
-      view: parsed.view || 'grid',
-      sortBy: parsed.sortBy || 'name_asc',
-      filters: parsed.filters || {},
-      lastViewedPlaceId: parsed.lastViewedPlaceId || null,
-      expandedPlaceIds: parsed.expandedPlaceIds || [],
-      selectedPlaceIds: parsed.selectedPlaceIds || []
-    };
-  } catch (error) {
-    return {
-      view: 'grid',
-      sortBy: 'name_asc',
-      filters: {},
-      lastViewedPlaceId: null,
-      expandedPlaceIds: [],
-      selectedPlaceIds: []
-    };
-  }
+		return {
+			view: parsed.view || 'grid',
+			sortBy: parsed.sortBy || 'name_asc',
+			filters: parsed.filters || {},
+			lastViewedPlaceId: parsed.lastViewedPlaceId || null,
+			expandedPlaceIds: parsed.expandedPlaceIds || [],
+			selectedPlaceIds: parsed.selectedPlaceIds || [],
+		};
+	} catch (error) {
+		return {
+			view: 'grid',
+			sortBy: 'name_asc',
+			filters: {},
+			lastViewedPlaceId: null,
+			expandedPlaceIds: [],
+			selectedPlaceIds: [],
+		};
+	}
 };
 
 /**
@@ -95,11 +101,11 @@ export const parseVisualConfig = (configJson: string): ParsedPlaceVisualConfig =
  * @returns Configuración en formato JSON
  */
 export const stringifyVisualConfig = (config: ParsedPlaceVisualConfig): string => {
-  try {
-    return JSON.stringify(config);
-  } catch (error) {
-    return '{}';
-  }
+	try {
+		return JSON.stringify(config);
+	} catch (error) {
+		return '{}';
+	}
 };
 
 /**
@@ -108,27 +114,23 @@ export const stringifyVisualConfig = (config: ParsedPlaceVisualConfig): string =
  * @returns Lugar procesado
  */
 export const processPlace = (place: Place): Place => {
-  const stats = parsePlaceStats(place.stats);
+	const stats = parsePlaceStats(place.stats);
 
-  // Formatear población para visualización
-  const displayPopulation = place.population
-    ? place.population.toLocaleString()
-    : 'Desconocida';
+	// Formatear población para visualización
+	const displayPopulation = place.population ? place.population.toLocaleString() : 'Desconocida';
 
-  // Formatear tipo para visualización
-  const displayType = place.type
-    ? place.type.charAt(0).toUpperCase() + place.type.slice(1)
-    : '';
+	// Formatear tipo para visualización
+	const displayType = place.type ? place.type.charAt(0).toUpperCase() + place.type.slice(1) : '';
 
-  // Clases CSS según tipo
-  const typeClass = place.type ? `place-type-${place.type.toLowerCase()}` : '';
+	// Clases CSS según tipo
+	const typeClass = place.type ? `place-type-${place.type.toLowerCase()}` : '';
 
-  return {
-    ...place,
-    displayPopulation,
-    displayType,
-    typeClass
-  };
+	return {
+		...place,
+		displayPopulation,
+		displayType,
+		typeClass,
+	};
 };
 
 /**
@@ -137,7 +139,7 @@ export const processPlace = (place: Place): Place => {
  * @returns Lista procesada
  */
 export const processPlaces = (places: Place[]): Place[] => {
-  return places.map(processPlace);
+	return places.map(processPlace);
 };
 
 /**
@@ -146,50 +148,50 @@ export const processPlaces = (places: Place[]): Place[] => {
  * @returns Filtros para API
  */
 export const convertFiltersToApiParams = (filters: PlaceFilters): Record<string, string> => {
-  const params: Record<string, string> = {};
+	const params: Record<string, string> = {};
 
-  // Convertir arrays a strings separados por comas
-  if (filters.types && filters.types.length > 0) {
-    params.types = filters.types.join(',');
-  }
+	// Convertir arrays a strings separados por comas
+	if (filters.types && filters.types.length > 0) {
+		params.types = filters.types.join(',');
+	}
 
-  if (filters.categories && filters.categories.length > 0) {
-    params.categories = filters.categories.join(',');
-  }
+	if (filters.categories && filters.categories.length > 0) {
+		params.categories = filters.categories.join(',');
+	}
 
-  if (filters.regions && filters.regions.length > 0) {
-    params.regions = filters.regions.join(',');
-  }
+	if (filters.regions && filters.regions.length > 0) {
+		params.regions = filters.regions.join(',');
+	}
 
-  // Convertir booleanos y números
-  if (filters.onlyFavorites) {
-    params.isFavorite = 'true';
-  }
+	// Convertir booleanos y números
+	if (filters.onlyFavorites) {
+		params.isFavorite = 'true';
+	}
 
-  if (typeof filters.minPopulation === 'number') {
-    params.minPopulation = filters.minPopulation.toString();
-  }
+	if (typeof filters.minPopulation === 'number') {
+		params.minPopulation = filters.minPopulation.toString();
+	}
 
-  if (typeof filters.maxPopulation === 'number') {
-    params.maxPopulation = filters.maxPopulation.toString();
-  }
+	if (typeof filters.maxPopulation === 'number') {
+		params.maxPopulation = filters.maxPopulation.toString();
+	}
 
-  // Filtros de relaciones
-  if (filters.hasImages) {
-    params.hasImages = 'true';
-  }
+	// Filtros de relaciones
+	if (filters.hasImages) {
+		params.hasImages = 'true';
+	}
 
-  if (filters.hasNotes) {
-    params.hasNotes = 'true';
-  }
+	if (filters.hasNotes) {
+		params.hasNotes = 'true';
+	}
 
-  if (filters.hasConcepts) {
-    params.hasConcepts = 'true';
-  }
+	if (filters.hasConcepts) {
+		params.hasConcepts = 'true';
+	}
 
-  if (filters.hasPrompts) {
-    params.hasPrompts = 'true';
-  }
+	if (filters.hasPrompts) {
+		params.hasPrompts = 'true';
+	}
 
-  return params;
+	return params;
 };

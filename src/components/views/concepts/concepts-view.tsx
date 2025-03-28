@@ -2,10 +2,9 @@
 
 import type { ConceptWithStats } from '@/app/actions/concepts/concept.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
+import { MemoizedConceptCard } from '@/components/cards/concept-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
-import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
@@ -19,12 +18,6 @@ import type { ViewProps } from '../types';
 
 const viewLogger = serverLogger.withContext('ConceptsView');
 
-// Configuración visual simplificada para conceptos
-const DEFAULT_CONCEPT_OPTIONS: CardOptions = {
-	primaryColor: '#a855f7',
-	secondaryColor: '#8b5cf6',
-};
-
 export function ConceptsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentConcept } = useFileManager();
@@ -32,7 +25,6 @@ export function ConceptsView(_props: ViewProps) {
 	const [concepts, setConcepts] = useState<ConceptWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_CONCEPT_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticConcepts, _addEvent] = clientEvents.useEvents<ConceptWithStats[]>(concepts);
@@ -53,29 +45,10 @@ export function ConceptsView(_props: ViewProps) {
 		}
 	}, []);
 
-	// Cargar la configuración visual desde el servidor
-	const loadVisualConfig = useCallback(async () => {
-		try {
-			viewLogger.info('🔄 Cargando configuración visual para conceptos...');
-			const response = await fetch('/api/entities/concepts/visual-config');
-			if (!response.ok) {
-				throw new Error(`Error ${response.status}: ${response.statusText}`);
-			}
-			const config = await response.json();
-			setVisualConfig({ ...DEFAULT_CONCEPT_OPTIONS, ...config });
-			viewLogger.info('✅ Configuración visual cargada');
-		} catch (err) {
-			viewLogger.error('❌ Error cargando configuración visual:', err);
-			// Mantener la configuración predeterminada en caso de error
-		}
-	}, []);
-
 	useEffect(() => {
 		// Cargar conceptos inicialmente
 		fetchConcepts();
-		// Cargar configuración visual
-		loadVisualConfig();
-	}, [fetchConcepts, loadVisualConfig]);
+	}, [fetchConcepts]);
 
 	const handleConceptClick = useCallback(
 		(concept: ConceptWithStats) => {
@@ -133,11 +106,9 @@ export function ConceptsView(_props: ViewProps) {
 							transition={{ delay: index * 0.1 }}
 							className="cursor-pointer"
 						>
-							<EntityCardAdapter
-								entityType="concept"
-								entity={concept}
+							<MemoizedConceptCard
+								concept={concept}
 								onClick={() => handleConceptClick(concept)}
-								options={visualConfig}
 								className="h-full"
 							/>
 						</motion.div>

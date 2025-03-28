@@ -10,9 +10,7 @@ const MockLayer = {
 	id: 'mock-layer',
 	name: 'Mock Layer',
 	type: 'visual',
-	Component: ({ enabled, config }) => (
-		enabled ? <div data-testid="mock-layer">{config?.text || 'Mock'}</div> : null
-	)
+	Component: ({ enabled, config }) => (enabled ? <div data-testid="mock-layer">{config?.text || 'Mock'}</div> : null),
 };
 
 // 🎭 Mock de un preset para pruebas
@@ -23,10 +21,10 @@ const mockPreset = definePreset({
 		'mock-layer': {
 			enabled: true,
 			config: {
-				text: 'Preset Text'
-			}
-		}
-	}
+				text: 'Preset Text',
+			},
+		},
+	},
 });
 
 // 🧪 Componente de prueba que usa el hook useLayerPlugin
@@ -34,11 +32,7 @@ function TestComponent() {
 	const { layers, updateLayer } = useLayerPlugin();
 	return (
 		<div>
-			<button
-				type="button"
-				onClick={() => updateLayer('mock-layer', { enabled: true })}
-				data-testid="enable-button"
-			>
+			<button type="button" onClick={() => updateLayer('mock-layer', { enabled: true })} data-testid="enable-button">
 				Enable Layer
 			</button>
 			<pre data-testid="layers-state">{JSON.stringify(layers)}</pre>
@@ -133,8 +127,8 @@ describe('Layer System', () => {
 						layers={{
 							'mock-layer': {
 								enabled: true,
-								config: { text: 'Test Text' }
-							}
+								config: { text: 'Test Text' },
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -152,8 +146,8 @@ describe('Layer System', () => {
 						entityType="test"
 						layers={{
 							'mock-layer': {
-								enabled: false
-							}
+								enabled: false,
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -169,11 +163,7 @@ describe('Layer System', () => {
 			render(
 				<EntityCardProvider>
 					<RegisterLayers initialLayers={[MockLayer]} />
-					<EntityCard
-						entityId="test"
-						entityType="test"
-						preset={mockPreset}
-					/>
+					<EntityCard entityId="test" entityType="test" preset={mockPreset} />
 				</EntityCardProvider>
 			);
 
@@ -191,8 +181,8 @@ describe('Layer System', () => {
 						layers={{
 							'mock-layer': {
 								enabled: true,
-								config: { text: 'Override Text' }
-							}
+								config: { text: 'Override Text' },
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -214,8 +204,8 @@ describe('Layer System', () => {
 						layers={{
 							'mock-layer': {
 								enabled: true,
-								config: { text: 'Initial Text' }
-							}
+								config: { text: 'Initial Text' },
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -233,8 +223,8 @@ describe('Layer System', () => {
 						layers={{
 							'mock-layer': {
 								enabled: true,
-								config: { text: 'Updated Text' }
-							}
+								config: { text: 'Updated Text' },
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -249,34 +239,32 @@ describe('Layer System', () => {
 		const StructuralLayer = {
 			...MockLayer,
 			id: 'structural-layer',
-			type: 'structural'
+			type: 'structural',
 		};
 
 		const VisualLayer = {
 			...MockLayer,
 			id: 'visual-layer',
-			type: 'visual'
+			type: 'visual',
 		};
 
 		const InteractiveLayer = {
 			...MockLayer,
 			id: 'interactive-layer',
-			type: 'interactive'
+			type: 'interactive',
 		};
 
 		it('should handle different layer types correctly', () => {
 			render(
 				<EntityCardProvider>
-					<RegisterLayers
-						initialLayers={[StructuralLayer, VisualLayer, InteractiveLayer]}
-					/>
+					<RegisterLayers initialLayers={[StructuralLayer, VisualLayer, InteractiveLayer]} />
 					<EntityCard
 						entityId="test"
 						entityType="test"
 						layers={{
 							'structural-layer': { enabled: true },
 							'visual-layer': { enabled: true },
-							'interactive-layer': { enabled: true }
+							'interactive-layer': { enabled: true },
 						}}
 					/>
 				</EntityCardProvider>
@@ -289,7 +277,7 @@ describe('Layer System', () => {
 	// 🔒 Pruebas de validación
 	describe('Validation', () => {
 		it('should handle invalid layer configurations gracefully', () => {
-			const consoleError = jest.spyOn(console, 'error').mockImplementation(() => { });
+			const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 			render(
 				<EntityCardProvider>
@@ -300,8 +288,8 @@ describe('Layer System', () => {
 						layers={{
 							'mock-layer': {
 								enabled: true,
-								config: { invalidProp: 'Invalid' }
-							}
+								config: { invalidProp: 'Invalid' },
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -314,7 +302,7 @@ describe('Layer System', () => {
 		});
 
 		it('should handle non-existent layers gracefully', () => {
-			const consoleError = jest.spyOn(console, 'error').mockImplementation(() => { });
+			const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 			render(
 				<EntityCardProvider>
@@ -324,8 +312,8 @@ describe('Layer System', () => {
 						entityType="test"
 						layers={{
 							'non-existent-layer': {
-								enabled: true
-							}
+								enabled: true,
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -342,17 +330,12 @@ describe('Layer System', () => {
 		const InteractiveLayer = {
 			...MockLayer,
 			id: 'interactive-layer',
-			Component: ({ enabled, config, onInteraction }) => (
+			Component: ({ enabled, config, onInteraction }) =>
 				enabled ? (
-					<button
-						type="button"
-						data-testid="interactive-layer"
-						onClick={() => onInteraction?.('click')}
-					>
+					<button type="button" data-testid="interactive-layer" onClick={() => onInteraction?.('click')}>
 						{config?.text || 'Interactive'}
 					</button>
-				) : null
-			)
+				) : null,
 		};
 
 		it('should handle layer interactions correctly', () => {
@@ -367,8 +350,8 @@ describe('Layer System', () => {
 						layers={{
 							'interactive-layer': {
 								enabled: true,
-								onInteraction
-							}
+								onInteraction,
+							},
 						}}
 					/>
 				</EntityCardProvider>

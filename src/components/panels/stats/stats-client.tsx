@@ -9,9 +9,7 @@ export default function StatsClientWrapper({ children }: { children: React.React
 	return (
 		<StatsContainer>
 			<Suspense fallback={<StatsLoading />}>
-				<Card className="border-none rounded-none">
-					{children}
-				</Card>
+				<Card className="border-none rounded-none shadow-none">{children}</Card>
 			</Suspense>
 		</StatsContainer>
 	);

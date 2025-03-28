@@ -4,21 +4,10 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import {
-	processNoteFields,
-	serializeTags
-} from '@/transformers/note';
-import type {
-	NoteBase,
-	NoteCreateInput,
-	NoteUpdateInput,
-	NoteWithStats
-} from '@/types/entities/note';
+import { processNoteFields, serializeTags } from '@/transformers/note';
+import type { NoteBase, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import type { FileItem } from '@/types/file-item';
-import {
-	createNoteSchema,
-	updateNoteSchema
-} from '@/utils/note/validators';
+import { createNoteSchema, updateNoteSchema } from '@/utils/note/validators';
 import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
@@ -79,7 +68,7 @@ export async function getNotes(): Promise<NoteWithStats[]> {
 			...note,
 			_count: {
 				...note._count,
-				images: 0 // Añadimos este campo para cumplir con NoteStats
+				images: 0, // Añadimos este campo para cumplir con NoteStats
 			},
 			// Mantenemos lastUpdated para compatibilidad
 			lastUpdated: note.updatedAt,
@@ -119,7 +108,7 @@ export async function createNote(data: NoteCreateInput): Promise<NoteBase> {
 		// Validar datos de entrada
 		const validationResult = createNoteSchema.safeParse(data);
 		if (!validationResult.success) {
-			const errorMessage = validationResult.error.errors.map(e => e.message).join(', ');
+			const errorMessage = validationResult.error.errors.map((e) => e.message).join(', ');
 			throw createNoteError(errorMessage, NoteErrorCode.VALIDATION_ERROR);
 		}
 
@@ -127,7 +116,9 @@ export async function createNote(data: NoteCreateInput): Promise<NoteBase> {
 		const { tags, ...otherData } = data;
 		const serializedTags = Array.isArray(tags)
 			? serializeTags(tags)
-			: (typeof tags === 'string' ? tags : serializeTags([]));
+			: typeof tags === 'string'
+				? tags
+				: serializeTags([]);
 
 		// Crear la nota
 		const note = await prisma.note.create({
@@ -165,7 +156,7 @@ export async function updateNote(id: string, data: NoteUpdateInput): Promise<Not
 		const validationData = { ...data, id };
 		const validationResult = updateNoteSchema.safeParse(validationData);
 		if (!validationResult.success) {
-			const errorMessage = validationResult.error.errors.map(e => e.message).join(', ');
+			const errorMessage = validationResult.error.errors.map((e) => e.message).join(', ');
 			throw createNoteError(errorMessage, NoteErrorCode.VALIDATION_ERROR);
 		}
 
@@ -175,9 +166,7 @@ export async function updateNote(id: string, data: NoteUpdateInput): Promise<Not
 		// Manejar tags especialmente
 		if ('tags' in data && data.tags !== undefined) {
 			const tags = data.tags;
-			updateData.tags = Array.isArray(tags)
-				? serializeTags(tags)
-				: (typeof tags === 'string' ? tags : serializeTags([]));
+			updateData.tags = Array.isArray(tags) ? serializeTags(tags) : typeof tags === 'string' ? tags : serializeTags([]);
 		}
 
 		const note = await prisma.note.update({
@@ -236,7 +225,7 @@ export async function getNoteWithProcessedFields(id: string): Promise<NoteBase &
  */
 export async function getNotesWithProcessedFields(): Promise<Array<NoteBase & { parsedTags: string[] }>> {
 	const notes = await getNotes();
-	return notes.map(note => processNoteFields(note));
+	return notes.map((note) => processNoteFields(note));
 }
 
 /**

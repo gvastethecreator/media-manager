@@ -1,10 +1,10 @@
 import type {
-    NoteBase,
-    NoteCreateInput,
-    NoteExtended,
-    NoteStats,
-    NoteUpdateInput,
-    NoteWithStats
+	NoteBase,
+	NoteCreateInput,
+	NoteExtended,
+	NoteStats,
+	NoteUpdateInput,
+	NoteWithStats,
 } from '@/types/entities/note';
 import { format } from 'date-fns';
 import { processNoteFields, serializeTags } from './serializers';
@@ -15,35 +15,28 @@ import { processNoteFields, serializeTags } from './serializers';
  * @returns Nota extendida con propiedades adicionales para UI
  */
 export function toNoteExtended(note: NoteBase): NoteExtended {
-  const processedNote = processNoteFields(note);
+	const processedNote = processNoteFields(note);
 
-  // Calcular excerpt del contenido
-  const contentText = processedNote.content || '';
-  const excerpt = contentText.length > 150
-    ? `${contentText.substring(0, 150)}...`
-    : contentText;
+	// Calcular excerpt del contenido
+	const contentText = processedNote.content || '';
+	const excerpt = contentText.length > 150 ? `${contentText.substring(0, 150)}...` : contentText;
 
-  // Calcular conteo de palabras
-  const wordCount = contentText
-    ? contentText.split(/\s+/).filter(Boolean).length
-    : 0;
+	// Calcular conteo de palabras
+	const wordCount = contentText ? contentText.split(/\s+/).filter(Boolean).length : 0;
 
-  return {
-    ...processedNote,
-    isSelected: false,
-    isEditing: false,
-    isNew: false,
-    isExpanded: false,
-    isHovered: false,
-    formattedDate: format(
-      new Date(processedNote.updatedAt),
-      'dd/MM/yyyy HH:mm'
-    ),
-    excerpt,
-    wordCount,
-    // Propiedades calculadas adicionales
-    relationsCount: 0
-  };
+	return {
+		...processedNote,
+		isSelected: false,
+		isEditing: false,
+		isNew: false,
+		isExpanded: false,
+		isHovered: false,
+		formattedDate: format(new Date(processedNote.updatedAt), 'dd/MM/yyyy HH:mm'),
+		excerpt,
+		wordCount,
+		// Propiedades calculadas adicionales
+		relationsCount: 0,
+	};
 }
 
 /**
@@ -52,7 +45,7 @@ export function toNoteExtended(note: NoteBase): NoteExtended {
  * @returns Array de notas extendidas
  */
 export function toNotesExtended(notes: NoteBase[]): NoteExtended[] {
-  return notes.map(toNoteExtended);
+	return notes.map(toNoteExtended);
 }
 
 /**
@@ -61,22 +54,22 @@ export function toNotesExtended(notes: NoteBase[]): NoteExtended[] {
  * @returns Nota extendida con estadísticas
  */
 export function toNoteWithStats(note: NoteBase, stats?: Partial<NoteStats>): NoteWithStats {
-  const defaultStats: NoteStats = {
-    characters: 0,
-    places: 0,
-    worldItems: 0,
-    concepts: 0,
-    prompts: 0,
-    images: 0
-  };
+	const defaultStats: NoteStats = {
+		characters: 0,
+		places: 0,
+		worldItems: 0,
+		concepts: 0,
+		prompts: 0,
+		images: 0,
+	};
 
-  return {
-    ...note,
-    _count: {
-      ...defaultStats,
-      ...stats
-    }
-  };
+	return {
+		...note,
+		_count: {
+			...defaultStats,
+			...stats,
+		},
+	};
 }
 
 /**
@@ -85,12 +78,12 @@ export function toNoteWithStats(note: NoteBase, stats?: Partial<NoteStats>): Not
  * @returns Objeto preparado para crear nota
  */
 export function prepareNoteForCreate(note: NoteCreateInput): NoteCreateInput {
-  return {
-    ...note,
-    tags: note.tags
-      ? serializeTags(typeof note.tags === 'string' ? [note.tags] : note.tags as unknown as string[])
-      : 'empty_array'
-  };
+	return {
+		...note,
+		tags: note.tags
+			? serializeTags(typeof note.tags === 'string' ? [note.tags] : (note.tags as unknown as string[]))
+			: 'empty_array',
+	};
 }
 
 /**
@@ -99,14 +92,12 @@ export function prepareNoteForCreate(note: NoteCreateInput): NoteCreateInput {
  * @returns Objeto preparado para actualizar nota
  */
 export function prepareNoteForUpdate(note: NoteUpdateInput): NoteUpdateInput {
-  const prepared: NoteUpdateInput = { ...note };
+	const prepared: NoteUpdateInput = { ...note };
 
-  // Solo serializar tags si está presente en el input
-  if (note.tags !== undefined) {
-    prepared.tags = serializeTags(
-      typeof note.tags === 'string' ? [note.tags] : note.tags as unknown as string[]
-    );
-  }
+	// Solo serializar tags si está presente en el input
+	if (note.tags !== undefined) {
+		prepared.tags = serializeTags(typeof note.tags === 'string' ? [note.tags] : (note.tags as unknown as string[]));
+	}
 
-  return prepared;
+	return prepared;
 }

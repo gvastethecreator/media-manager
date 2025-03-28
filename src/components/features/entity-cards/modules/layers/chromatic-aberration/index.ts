@@ -25,7 +25,7 @@ const defaultConfig: ChromaticAberrationConfig = {
 	visibleOnHover: true,
 	quality: 'medium',
 	mode: 'simple',
-	layerIndex: 4
+	layerIndex: 4,
 };
 
 // Función auxiliar para transformar los layers en modo explotado
@@ -68,7 +68,7 @@ export const chromaticAberrationLayerImplementation: LayerImplementation = {
 
 		const effectConfig = {
 			...defaultConfig,
-			...config
+			...config,
 		} as ChromaticAberrationConfig;
 
 		// Pasar la configuración al componente de efecto como una función en lugar de JSX
@@ -80,7 +80,7 @@ export const chromaticAberrationLayerImplementation: LayerImplementation = {
 			entityType,
 			entityId,
 			mousePosition: mousePosition || { x: 0, y: 0 },
-			getExplodeLayerTransform: getExplodeTransform
+			getExplodeLayerTransform: getExplodeTransform,
 		});
 	},
 
@@ -94,9 +94,9 @@ export const chromaticAberrationLayerImplementation: LayerImplementation = {
 			entityType,
 			entityId,
 			initialConfig: typedConfig,
-			onConfigUpdate: (newConfig) => onChange(newConfig as unknown as Record<string, unknown>)
+			onConfigUpdate: (newConfig) => onChange(newConfig as unknown as Record<string, unknown>),
 		});
-	}
+	},
 };
 
 // Exportar componentes individuales para uso directo si es necesario

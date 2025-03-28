@@ -61,9 +61,7 @@ export const useFavoriteStore = create<FavoriteStore>()(
 					}));
 
 					favoriteLogger.info('✅ Estado de favorito actualizado correctamente');
-					toastService.system.success(
-						isFavorited ? 'Eliminado de favoritos' : 'Añadido a favoritos'
-					);
+					toastService.system.success(isFavorited ? 'Eliminado de favoritos' : 'Añadido a favoritos');
 				} catch (error) {
 					favoriteLogger.error('❌ Error al actualizar favorito:', error);
 					toastService.system.error('Error al actualizar favoritos');

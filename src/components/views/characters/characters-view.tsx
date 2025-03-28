@@ -1,10 +1,9 @@
 'use client';
 
 import { type CharacterWithStats, getCharacters } from '@/app/actions/characters/character.actions';
+import { CharacterCard } from '@/components/cards/character-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
-import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
@@ -65,7 +64,7 @@ export function CharactersView(_props: ViewProps) {
 				// Combinar la configuración del servidor con las opciones predeterminadas
 				setVisualConfig({
 					...DEFAULT_CHARACTER_OPTIONS,
-					...config
+					...config,
 				});
 			} catch (error) {
 				console.error('Error al cargar la configuración visual:', error);
@@ -87,7 +86,7 @@ export function CharactersView(_props: ViewProps) {
 					id: character.id,
 					name: character.name,
 					emoji: character.emoji || '👤',
-					count: character._count?.images || 0
+					count: character._count?.images || 0,
 				},
 			});
 		},
@@ -127,11 +126,9 @@ export function CharactersView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<EntityCardAdapter
-								entityType="character"
-								entity={character}
+							<CharacterCard
+								character={character}
 								onClick={() => handleCharacterClick(character)}
-								options={visualConfig}
 								className="h-full"
 							/>
 						</motion.div>

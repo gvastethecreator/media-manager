@@ -13,7 +13,7 @@ export const DISPLAY_MODE_INFO = {
 		components: ['EntityCard', 'BaseCard'],
 		performance: 'Alto rendimiento (5-10ms por tarjeta)',
 		riskLevel: 'Bajo',
-		color: 'blue'
+		color: 'blue',
 	},
 	complex: {
 		name: 'Complejo',
@@ -21,7 +21,7 @@ export const DISPLAY_MODE_INFO = {
 		components: ['EntityCardAdapter', 'EffectsSystem', 'LayersSystem', '3DSystem'],
 		performance: 'Rendimiento bajo (20-50ms por tarjeta)',
 		riskLevel: 'Alto - Puede causar problemas en dispositivos de gama baja',
-		color: 'purple'
+		color: 'purple',
 	},
 	skeleton: {
 		name: 'Esqueleto',
@@ -29,7 +29,7 @@ export const DISPLAY_MODE_INFO = {
 		components: ['EntityCardAdapter', 'LayersSystem'],
 		performance: 'Rendimiento medio (10-20ms por tarjeta)',
 		riskLevel: 'Medio',
-		color: 'amber'
+		color: 'amber',
 	},
 	json: {
 		name: 'JSON',
@@ -37,8 +37,8 @@ export const DISPLAY_MODE_INFO = {
 		components: ['JsonEntityCard'],
 		performance: 'Rendimiento variable (depende del tamaño de los datos)',
 		riskLevel: 'Bajo',
-		color: 'teal'
-	}
+		color: 'teal',
+	},
 };
 
 // Modo predeterminado SIEMPRE debe ser 'simple'
@@ -63,10 +63,10 @@ const defaultContext: CardDisplayContextType = {
 	displayMode: DEFAULT_DISPLAY_MODE,
 	isMenuVisible: false,
 	displayModeInfo: DISPLAY_MODE_INFO,
-	setDisplayMode: () => { },
-	toggleMenu: () => { },
-	showMenu: () => { },
-	hideMenu: () => { },
+	setDisplayMode: () => {},
+	toggleMenu: () => {},
+	showMenu: () => {},
+	hideMenu: () => {},
 };
 
 // Crear contexto
@@ -89,11 +89,16 @@ export function CardDisplayProvider({ children }: { children: React.ReactNode })
 		try {
 			const savedMode = localStorage.getItem('cardDisplayMode');
 			// Verificar si hay un modo guardado y es válido
-			if (savedMode && (savedMode === 'simple' || savedMode === 'complex' || savedMode === 'json' || savedMode === 'skeleton')) {
+			if (
+				savedMode &&
+				(savedMode === 'simple' || savedMode === 'complex' || savedMode === 'json' || savedMode === 'skeleton')
+			) {
 				// Si el modo guardado es 'complex', mostrar advertencia pero usar modo simple
 				if (savedMode === 'complex') {
 					if (process.env.NODE_ENV === 'development') {
-						console.warn('⚠️ Se encontró el modo complejo guardado pero se ha establecido simple por defecto para evitar problemas');
+						console.warn(
+							'⚠️ Se encontró el modo complejo guardado pero se ha establecido simple por defecto para evitar problemas'
+						);
 					}
 					// Restaurar a modo simple para evitar problemas
 					localStorage.setItem('cardDisplayMode', DEFAULT_DISPLAY_MODE);
@@ -126,7 +131,7 @@ export function CardDisplayProvider({ children }: { children: React.ReactNode })
 					description: info.description,
 					capacidades: info.features,
 					rendimiento: info.performance,
-					complejidad: info.complexity
+					complejidad: info.complexity,
 				});
 			}
 
@@ -176,7 +181,7 @@ export function CardDisplayProvider({ children }: { children: React.ReactNode })
 
 	// Funciones para controlar la visibilidad del menú
 	const toggleMenu = () => {
-		setIsMenuVisible(prev => !prev);
+		setIsMenuVisible((prev) => !prev);
 		if (process.env.NODE_ENV === 'development') {
 			console.info(`🔄 Menú de visualización ${isMenuVisible ? 'ocultado' : 'mostrado'}`);
 		}
@@ -207,9 +212,5 @@ export function CardDisplayProvider({ children }: { children: React.ReactNode })
 		hideMenu,
 	};
 
-	return (
-		<CardDisplayContext.Provider value={contextValue}>
-			{children}
-		</CardDisplayContext.Provider>
-	);
+	return <CardDisplayContext.Provider value={contextValue}>{children}</CardDisplayContext.Provider>;
 }

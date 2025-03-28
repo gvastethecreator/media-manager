@@ -1,45 +1,24 @@
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { cn } from "@/lib/utils";
-import { useGrainStore, type GrainConfig as GrainConfigType } from "../actions/grain-config.action";
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { cn } from '@/lib/utils';
+import { useGrainStore, type GrainConfig as GrainConfigType } from '../actions/grain-config.action';
 
 interface GrainConfigProps {
 	className?: string;
 }
 
-const blendModes = [
-	"normal",
-	"multiply",
-	"screen",
-	"overlay",
-] as const;
+const blendModes = ['normal', 'multiply', 'screen', 'overlay'] as const;
 
-const patterns = [
-	"perlin",
-	"simplex",
-	"worley",
-] as const;
+const patterns = ['perlin', 'simplex', 'worley'] as const;
 
-const distributions = [
-	"uniform",
-	"gaussian",
-] as const;
+const distributions = ['uniform', 'gaussian'] as const;
 
-const colorModes = [
-	"monochrome",
-	"color",
-] as const;
+const colorModes = ['monochrome', 'color'] as const;
 
 export function GrainConfig({ className }: GrainConfigProps) {
-	const {
-		config,
-		toggleEnabled,
-		toggleAnimated,
-		toggleFractalNoise,
-		updateConfig,
-	} = useGrainStore();
+	const { config, toggleEnabled, toggleAnimated, toggleFractalNoise, updateConfig } = useGrainStore();
 
 	// Extraer valores del config para facilitar su uso
 	const {
@@ -55,19 +34,15 @@ export function GrainConfig({ className }: GrainConfigProps) {
 		distribution,
 		colorMode,
 		blend,
-		seed
+		seed,
 	} = config;
 
 	return (
-		<div className={cn("space-y-4", className)}>
+		<div className={cn('space-y-4', className)}>
 			{/* Controles básicos */}
 			<div className="flex items-center justify-between">
 				<Label htmlFor="enabled">Habilitar efecto grain</Label>
-				<Switch
-					id="enabled"
-					checked={enabled}
-					onCheckedChange={toggleEnabled}
-				/>
+				<Switch id="enabled" checked={enabled} onCheckedChange={toggleEnabled} />
 			</div>
 
 			{enabled && (
@@ -112,11 +87,7 @@ export function GrainConfig({ className }: GrainConfigProps) {
 					<div className="space-y-4">
 						<div className="flex items-center justify-between">
 							<Label htmlFor="animated">Animación</Label>
-							<Switch
-								id="animated"
-								checked={animated}
-								onCheckedChange={toggleAnimated}
-							/>
+							<Switch id="animated" checked={animated} onCheckedChange={toggleAnimated} />
 						</div>
 
 						{animated && (
@@ -156,11 +127,7 @@ export function GrainConfig({ className }: GrainConfigProps) {
 
 						<div className="flex items-center justify-between">
 							<Label htmlFor="fractalNoise">Ruido fractal</Label>
-							<Switch
-								id="fractalNoise"
-								checked={fractalNoise}
-								onCheckedChange={toggleFractalNoise}
-							/>
+							<Switch id="fractalNoise" checked={fractalNoise} onCheckedChange={toggleFractalNoise} />
 						</div>
 
 						{fractalNoise && (

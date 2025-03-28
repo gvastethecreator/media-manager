@@ -21,12 +21,7 @@ interface PatternLayerProps {
  * 🔲 Componente que renderiza una capa de patrones geométricos
  * @component PatternLayer
  */
-export function PatternLayer({
-	isExploded,
-	isHovered,
-	activeLayer,
-	config,
-}: PatternLayerProps) {
+export function PatternLayer({ isExploded, isHovered, activeLayer, config }: PatternLayerProps) {
 	const [shouldRender, setShouldRender] = useState(true);
 
 	// Extraer configuración con valores por defecto
@@ -52,7 +47,6 @@ export function PatternLayer({
 	return (
 		<motion.div
 			className={cn('absolute inset-0 pointer-events-none', isExploded ? 'exploded-layer' : '')}
-
 			initial={{ opacity: 0 }}
 			animate={{
 				opacity: 1,

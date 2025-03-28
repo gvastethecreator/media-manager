@@ -152,12 +152,12 @@ export function ClientGeneralStats() {
 	return (
 		<>
 			<CardHeader className="p-0 py-2">
-				<CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-					<BarChart className="h-4 w-4 text-primary" />
+				<CardTitle className="text-xs font-medium flex items-center gap-1.5 text-muted-foreground">
+					<BarChart className="h-3.5 w-3.5 text-primary" />
 					Estadísticas generales
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="grid grid-cols-2 p-0 gap-2">
+			<CardContent className="grid grid-cols-1 p-0 gap-1.5">
 				{mainStats.map((stat) => (
 					<StatCard key={`main-stat-${stat.title}`} {...stat} />
 				))}
@@ -222,13 +222,13 @@ export function ClientTopTags() {
 
 	return (
 		<>
-			<CardHeader className="px-0 py-2 mt-2">
-				<CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-					<Tag className="h-4 w-4 text-primary" />
+			<CardHeader className="px-0 py-2 mt-1.5">
+				<CardTitle className="text-xs font-medium flex items-center gap-1.5 text-muted-foreground">
+					<Tag className="h-3.5 w-3.5 text-primary" />
 					Etiquetas Más Usadas
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="p-0 space-y-1 w-full gap-2">
+			<CardContent className="p-0 space-y-0.5 w-full">
 				{stats.topTags.map((tag) => (
 					<TagUsage key={tag.id} tag={tag} />
 				))}
@@ -290,13 +290,13 @@ export function ClientRecentActivity() {
 
 	return (
 		<>
-			<CardHeader className="p-0 pb-2">
-				<CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-					<Clock className="h-4 w-4 text-primary" />
+			<CardHeader className="px-0 py-2 mt-1.5">
+				<CardTitle className="text-xs font-medium flex items-center gap-1.5 text-muted-foreground">
+					<Clock className="h-3.5 w-3.5 text-primary" />
 					Actividad Reciente
 				</CardTitle>
 			</CardHeader>
-			<CardContent className="p-2 space-y-1">
+			<CardContent className="p-0 w-full space-y-0">
 				{stats.recentActivity.map((activity) => (
 					<Activity key={activity.id} activity={activity} />
 				))}

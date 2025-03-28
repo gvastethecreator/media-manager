@@ -30,14 +30,7 @@ interface BlurLayerInternalProps {
 /**
  * 🌫️ Componente interno de desenfoque
  */
-const BlurLayerInternal = ({
-	config,
-	style,
-	isVisible,
-	width,
-	height,
-	sourceCanvas,
-}: BlurLayerInternalProps) => {
+const BlurLayerInternal = ({ config, style, isVisible, width, height, sourceCanvas }: BlurLayerInternalProps) => {
 	// Referencias y estado
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const animationFrameRef = useRef<number | null>(null);
@@ -71,7 +64,7 @@ const BlurLayerInternal = ({
 			enabled: config.enabled,
 			layerIndex: config.layerIndex,
 			opacity: config.opacity || 1,
-			animated: config.animated
+			animated: config.animated,
 		};
 
 		// Aplicar el efecto de desenfoque
@@ -112,11 +105,14 @@ const BlurLayerInternal = ({
 	}, [width, height, renderBlur]);
 
 	// 🎨 Calcular los estilos del canvas
-	const canvasStyle = useMemo(() => ({
-		...style,
-		width: `${width}px`,
-		height: `${height}px`,
-	}), [style, width, height]);
+	const canvasStyle = useMemo(
+		() => ({
+			...style,
+			width: `${width}px`,
+			height: `${height}px`,
+		}),
+		[style, width, height]
+	);
 
 	return (
 		<motion.canvas

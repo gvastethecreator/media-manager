@@ -212,16 +212,18 @@ export function adaptPresetToCardOptions(preset: VisualPreset | null, entityType
 			},
 
 			// Configuración de colores
-			colors: typeof defaultOptions.colors === 'string'
-				? defaultOptions.colors
-				: {
-					primary: frameColor,
-					secondary: typeof defaultOptions.colors === 'object' ? defaultOptions.colors.secondary || '#1d4ed8' : '#1d4ed8',
-					accent: colorConfig.accent || '#4f46e5',
-					background: colorConfig.background || '#ffffff',
-					text: colorConfig.text || '#111827',
-					border: colorConfig.border || '#e5e7eb',
-				},
+			colors:
+				typeof defaultOptions.colors === 'string'
+					? defaultOptions.colors
+					: {
+							primary: frameColor,
+							secondary:
+								typeof defaultOptions.colors === 'object' ? defaultOptions.colors.secondary || '#1d4ed8' : '#1d4ed8',
+							accent: colorConfig.accent || '#4f46e5',
+							background: colorConfig.background || '#ffffff',
+							text: colorConfig.text || '#111827',
+							border: colorConfig.border || '#e5e7eb',
+						},
 
 			// Configuración del grid de imágenes
 			imageGrid: {

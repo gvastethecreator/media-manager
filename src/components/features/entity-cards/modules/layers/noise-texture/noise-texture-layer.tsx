@@ -84,52 +84,55 @@ export function NoiseTextureLayer({
 	}, []);
 
 	// Renderizar el ruido
-	const renderNoise = useCallback((time = 0) => {
-		const ctx = contextRef.current;
-		const canvas = canvasRef.current;
+	const renderNoise = useCallback(
+		(time = 0) => {
+			const ctx = contextRef.current;
+			const canvas = canvasRef.current;
 
-		if (!ctx || !canvas) {
-			setError('Contexto o canvas no disponible');
-			return;
-		}
+			if (!ctx || !canvas) {
+				setError('Contexto o canvas no disponible');
+				return;
+			}
 
-		try {
-			// Tamaño optimizado del mapa de ruido
-			const mapWidth = Math.ceil(canvas.width / 4);
-			const mapHeight = Math.ceil(canvas.height / 4);
+			try {
+				// Tamaño optimizado del mapa de ruido
+				const mapWidth = Math.ceil(canvas.width / 4);
+				const mapHeight = Math.ceil(canvas.height / 4);
 
-			// Semilla animada si está activado
-			const animatedSeed = animated ? seed + time * animationSpeed * 0.001 : seed;
+				// Semilla animada si está activado
+				const animatedSeed = animated ? seed + time * animationSpeed * 0.001 : seed;
 
-			// Generar o recuperar mapa de ruido
-			const noiseMap = noiseCache.get(mapWidth, mapHeight, pattern as 'perlin' | 'simplex' | 'fractalNoise', {
-				seed: animatedSeed,
-				scale,
-				octaves,
-				persistence: density,
-			});
-
-			// Convertir a ImageData y renderizar
-			const imageData = noiseMapToImageData(noiseMap, color, intensity);
-			createImageBitmap(imageData)
-				.then((bitmap) => {
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-					ctx.globalAlpha = opacity;
-					ctx.globalCompositeOperation = blendMode as GlobalCompositeOperation;
-					ctx.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height, 0, 0, canvas.width, canvas.height);
-					bitmap.close();
-
-					if (animated) {
-						animationRef.current = requestAnimationFrame(renderNoise);
-					}
-				})
-				.catch((err) => {
-					setError(`Error al crear bitmap: ${err.message}`);
+				// Generar o recuperar mapa de ruido
+				const noiseMap = noiseCache.get(mapWidth, mapHeight, pattern as 'perlin' | 'simplex' | 'fractalNoise', {
+					seed: animatedSeed,
+					scale,
+					octaves,
+					persistence: density,
 				});
-		} catch (err) {
-			setError(`Error al generar ruido: ${err instanceof Error ? err.message : 'Error desconocido'}`);
-		}
-	}, [animated, animationSpeed, blendMode, color, density, intensity, opacity, pattern, scale, octaves, seed]);
+
+				// Convertir a ImageData y renderizar
+				const imageData = noiseMapToImageData(noiseMap, color, intensity);
+				createImageBitmap(imageData)
+					.then((bitmap) => {
+						ctx.clearRect(0, 0, canvas.width, canvas.height);
+						ctx.globalAlpha = opacity;
+						ctx.globalCompositeOperation = blendMode as GlobalCompositeOperation;
+						ctx.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height, 0, 0, canvas.width, canvas.height);
+						bitmap.close();
+
+						if (animated) {
+							animationRef.current = requestAnimationFrame(renderNoise);
+						}
+					})
+					.catch((err) => {
+						setError(`Error al crear bitmap: ${err.message}`);
+					});
+			} catch (err) {
+				setError(`Error al generar ruido: ${err instanceof Error ? err.message : 'Error desconocido'}`);
+			}
+		},
+		[animated, animationSpeed, blendMode, color, density, intensity, opacity, pattern, scale, octaves, seed]
+	);
 
 	// Efecto principal de renderizado
 	useEffect(() => {

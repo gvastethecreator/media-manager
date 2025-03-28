@@ -10,11 +10,7 @@ import { getStats } from '@/app/actions/stats/stats.actions';
 import { getTagImages } from '@/app/actions/tags/tag.actions';
 import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    FileItem,
-    ImageStats,
-    ViewType
-} from '@/types/file-item';
+import type { FileItem, ImageStats, ViewType } from '@/types/file-item';
 import type { ViewMode } from '@/types/settings';
 import { create } from 'zustand';
 
@@ -593,6 +589,32 @@ const convertToFileItem = (image: Partial<FileItem> | Record<string, unknown>): 
 	}
 };
 
+// Función auxiliar para manejar errores de manera consistente
+const handleActionError = (error: unknown, context: string) => {
+	fileManagerLogger.error(`❌ Error en ${context}:`, error);
+
+	// Determinar el mensaje de error según el tipo
+	let errorMessage = 'Error desconocido';
+
+	if (error instanceof Error) {
+		// Error estándar
+		errorMessage = error.message;
+	} else if (typeof error === 'object' && error !== null) {
+		// Posible SerializableError u otro objeto
+		const errObj = error as Record<string, unknown>;
+		if (errObj.message && typeof errObj.message === 'string') {
+			errorMessage = errObj.message;
+		} else if (errObj.error && typeof errObj.error === 'string') {
+			errorMessage = errObj.error;
+		}
+	} else if (typeof error === 'string') {
+		// Error como string
+		errorMessage = error;
+	}
+
+	return errorMessage;
+};
+
 export const useFileManager = create<FileManagerState & FileManagerActions>((set, get) => ({
 	...initialState,
 
@@ -802,8 +824,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			fileManagerLogger.info(`✅ Carpeta cargada con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar carpeta:', error);
-			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+			const errorMessage = handleActionError(error, 'cargar carpeta');
+			set({ error: errorMessage, isLoading: false });
 		}
 	},
 
@@ -869,8 +891,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			fileManagerLogger.info(`✅ Colección cargada con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar colección:', error);
-			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+			const errorMessage = handleActionError(error, 'cargar colección');
+			set({ error: errorMessage, isLoading: false });
 		}
 	},
 
@@ -936,8 +958,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			fileManagerLogger.info(`✅ Tag cargado con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar tag:', error);
-			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+			const errorMessage = handleActionError(error, 'cargar etiqueta');
+			set({ error: errorMessage, isLoading: false });
 		}
 	},
 
@@ -1003,13 +1025,18 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			fileManagerLogger.info(`✅ Álbum cargado con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar álbum:', error);
-			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+			const errorMessage = handleActionError(error, 'cargar álbum');
+			set({ error: errorMessage, isLoading: false });
 		}
 	},
 
 	setCurrentCharacter: async (id: string) => {
 		try {
+			if (!id) {
+				fileManagerLogger.info('⚠️ ID de personaje no proporcionado, ignorando');
+				return;
+			}
+
 			fileManagerLogger.info('👤 Cambiando a personaje:', id);
 			const state = get();
 			const character = state.characters.find((c) => c.id === id) || null;
@@ -1039,8 +1066,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			fileManagerLogger.info(`✅ Personaje cargado con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar personaje:', error);
-			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+			const errorMessage = handleActionError(error, 'cargar personaje');
+			set({ error: errorMessage, isLoading: false });
 		}
 	},
 
@@ -1109,8 +1136,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			fileManagerLogger.info(`✅ Lugar cargado con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar lugar:', error);
-			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+			const errorMessage = handleActionError(error, 'cargar lugar');
+			set({ error: errorMessage, isLoading: false });
 		}
 	},
 
@@ -1121,7 +1148,7 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 				return;
 			}
 
-			fileManagerLogger.info('🧩 Cambiando a objeto:', id);
+			fileManagerLogger.info('🌍 Cambiando a objeto:', id);
 			const state = get();
 			const worldItem = state.worldItems.find((w) => w.id === id);
 
@@ -1179,13 +1206,18 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			fileManagerLogger.info(`✅ Objeto cargado con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar objeto:', error);
-			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+			const errorMessage = handleActionError(error, 'cargar objeto');
+			set({ error: errorMessage, isLoading: false });
 		}
 	},
 
 	setCurrentConcept: async (id: string) => {
 		try {
+			if (!id) {
+				fileManagerLogger.info('⚠️ ID de concepto no proporcionado, ignorando');
+				return;
+			}
+
 			fileManagerLogger.info('💡 Cambiando a concepto:', id);
 			const state = get();
 			const concept = state.concepts.find((c) => c.id === id) || null;
@@ -1228,13 +1260,18 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			fileManagerLogger.info(`✅ Concepto cargado con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar concepto:', error);
-			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+			const errorMessage = handleActionError(error, 'cargar concepto');
+			set({ error: errorMessage, isLoading: false });
 		}
 	},
 
 	setCurrentPrompt: async (id: string) => {
 		try {
+			if (!id) {
+				fileManagerLogger.info('⚠️ ID de prompt no proporcionado, ignorando');
+				return;
+			}
+
 			fileManagerLogger.info('💬 Cambiando a prompt:', id);
 			const state = get();
 			const prompt = state.prompts.find((p) => p.id === id) || null;
@@ -1277,8 +1314,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			fileManagerLogger.info(`✅ Prompt cargado con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar prompt:', error);
-			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+			const errorMessage = handleActionError(error, 'cargar prompt');
+			set({ error: errorMessage, isLoading: false });
 		}
 	},
 
@@ -1326,8 +1363,8 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 			fileManagerLogger.info(`✅ Nota cargada con ${images.length} imágenes`);
 		} catch (error) {
-			fileManagerLogger.error('❌ Error al cargar nota:', error);
-			set({ error: error instanceof Error ? error.message : 'Error desconocido', isLoading: false });
+			const errorMessage = handleActionError(error, 'cargar nota');
+			set({ error: errorMessage, isLoading: false });
 		}
 	},
 

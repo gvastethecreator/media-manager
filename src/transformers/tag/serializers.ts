@@ -3,13 +3,7 @@
  * @module transformers/tag/serializers
  */
 
-import {
-    type Tag,
-    type TagBase,
-    type TagWithStats,
-    TagCategory,
-    TagRarity
-} from '../../types/entities/tag/index';
+import { type Tag, type TagBase, type TagWithStats, TagCategory, TagRarity } from '../../types/entities/tag/index';
 
 /**
  * Convierte una etiqueta básica en una etiqueta extendida
@@ -17,15 +11,15 @@ import {
  * @returns Etiqueta con información adicional
  */
 export function extendTag(tag: TagBase): Tag {
-  const extended: Tag = {
-    ...tag,
-    isSelected: false,
-    isExpanded: false,
-    isEditing: false,
-    isHighlighted: false
-  };
+	const extended: Tag = {
+		...tag,
+		isSelected: false,
+		isExpanded: false,
+		isEditing: false,
+		isHighlighted: false,
+	};
 
-  return extended;
+	return extended;
 }
 
 /**
@@ -34,7 +28,7 @@ export function extendTag(tag: TagBase): Tag {
  * @returns Lista de etiquetas extendidas
  */
 export function extendTags(tags: TagBase[]): Tag[] {
-  return tags.map(extendTag);
+	return tags.map(extendTag);
 }
 
 /**
@@ -44,16 +38,12 @@ export function extendTags(tags: TagBase[]): Tag[] {
  * @param totalSize Tamaño total en bytes
  * @returns Etiqueta con estadísticas
  */
-export function tagToTagWithStats(
-  tag: TagBase,
-  imageCount = 0,
-  totalSize = 0
-): TagWithStats {
-  return {
-    ...tag,
-    count: imageCount,
-    size: formatSize(totalSize)
-  };
+export function tagToTagWithStats(tag: TagBase, imageCount = 0, totalSize = 0): TagWithStats {
+	return {
+		...tag,
+		count: imageCount,
+		size: formatSize(totalSize),
+	};
 }
 
 /**
@@ -62,13 +52,13 @@ export function tagToTagWithStats(
  * @returns Tamaño formateado (ej: "1.23 MB")
  */
 export function formatSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
+	if (bytes === 0) return '0 Bytes';
 
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+	const k = 1024;
+	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+	return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
 /**
@@ -77,17 +67,17 @@ export function formatSize(bytes: number): string {
  * @returns Categoría normalizada
  */
 export function normalizeTagCategory(category?: string | null): TagCategory {
-  if (!category) return TagCategory.OTHER;
+	if (!category) return TagCategory.OTHER;
 
-  // Intentar mapear a una categoría existente
-  const lowerCategory = category.toLowerCase();
-  for (const [key, value] of Object.entries(TagCategory)) {
-    if (value.toLowerCase() === lowerCategory) {
-      return value as TagCategory;
-    }
-  }
+	// Intentar mapear a una categoría existente
+	const lowerCategory = category.toLowerCase();
+	for (const [key, value] of Object.entries(TagCategory)) {
+		if (value.toLowerCase() === lowerCategory) {
+			return value as TagCategory;
+		}
+	}
 
-  return TagCategory.CUSTOM;
+	return TagCategory.CUSTOM;
 }
 
 /**
@@ -96,17 +86,17 @@ export function normalizeTagCategory(category?: string | null): TagCategory {
  * @returns Rareza normalizada
  */
 export function normalizeTagRarity(rarity?: string | null): TagRarity {
-  if (!rarity) return TagRarity.COMMON;
+	if (!rarity) return TagRarity.COMMON;
 
-  // Intentar mapear a una rareza existente
-  const lowerRarity = rarity.toLowerCase();
-  for (const [key, value] of Object.entries(TagRarity)) {
-    if (value.toLowerCase() === lowerRarity) {
-      return value as TagRarity;
-    }
-  }
+	// Intentar mapear a una rareza existente
+	const lowerRarity = rarity.toLowerCase();
+	for (const [key, value] of Object.entries(TagRarity)) {
+		if (value.toLowerCase() === lowerRarity) {
+			return value as TagRarity;
+		}
+	}
 
-  return TagRarity.COMMON;
+	return TagRarity.COMMON;
 }
 
 /**
@@ -115,22 +105,22 @@ export function normalizeTagRarity(rarity?: string | null): TagRarity {
  * @returns Color en formato hexadecimal
  */
 export function generateTagColor(name: string): string {
-  if (!name) return '#3b82f6'; // Azul por defecto
+	if (!name) return '#3b82f6'; // Azul por defecto
 
-  // Generar un hash del nombre
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
+	// Generar un hash del nombre
+	let hash = 0;
+	for (let i = 0; i < name.length; i++) {
+		hash = name.charCodeAt(i) + ((hash << 5) - hash);
+	}
 
-  // Convertir a color hexadecimal
-  let color = '#';
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 8)) & 0xFF;
-    color += ('00' + value.toString(16)).substr(-2);
-  }
+	// Convertir a color hexadecimal
+	let color = '#';
+	for (let i = 0; i < 3; i++) {
+		const value = (hash >> (i * 8)) & 0xff;
+		color += ('00' + value.toString(16)).substr(-2);
+	}
 
-  return color;
+	return color;
 }
 
 /**
@@ -140,37 +130,37 @@ export function generateTagColor(name: string): string {
  * @returns Emoji representativo
  */
 export function generateTagEmoji(name: string, category?: string): string {
-  // Mapeo de categorías a emojis
-  const categoryEmojis: Record<string, string> = {
-    [TagCategory.CHARACTER]: '👤',
-    [TagCategory.LOCATION]: '📍',
-    [TagCategory.OBJECT]: '🔮',
-    [TagCategory.CONCEPT]: '💭',
-    [TagCategory.EVENT]: '🎉',
-    [TagCategory.COLOR]: '🎨',
-    [TagCategory.STYLE]: '✨',
-    [TagCategory.EMOTION]: '😊',
-    [TagCategory.CUSTOM]: '🏷️',
-    [TagCategory.OTHER]: '📌'
-  };
+	// Mapeo de categorías a emojis
+	const categoryEmojis: Record<string, string> = {
+		[TagCategory.CHARACTER]: '👤',
+		[TagCategory.LOCATION]: '📍',
+		[TagCategory.OBJECT]: '🔮',
+		[TagCategory.CONCEPT]: '💭',
+		[TagCategory.EVENT]: '🎉',
+		[TagCategory.COLOR]: '🎨',
+		[TagCategory.STYLE]: '✨',
+		[TagCategory.EMOTION]: '😊',
+		[TagCategory.CUSTOM]: '🏷️',
+		[TagCategory.OTHER]: '📌',
+	};
 
-  // Si hay categoría y está en el mapeo, usar ese emoji
-  if (category && categoryEmojis[category]) {
-    return categoryEmojis[category];
-  }
+	// Si hay categoría y está en el mapeo, usar ese emoji
+	if (category && categoryEmojis[category]) {
+		return categoryEmojis[category];
+	}
 
-  // Análisis básico del nombre para decidir un emoji
-  const lowerName = name.toLowerCase();
+	// Análisis básico del nombre para decidir un emoji
+	const lowerName = name.toLowerCase();
 
-  if (lowerName.includes('person') || lowerName.includes('character')) return '👤';
-  if (lowerName.includes('place') || lowerName.includes('location')) return '📍';
-  if (lowerName.includes('object') || lowerName.includes('item')) return '🔮';
-  if (lowerName.includes('concept') || lowerName.includes('idea')) return '💭';
-  if (lowerName.includes('event') || lowerName.includes('celebration')) return '🎉';
-  if (lowerName.includes('color') || lowerName.includes('colour')) return '🎨';
-  if (lowerName.includes('style') || lowerName.includes('design')) return '✨';
-  if (lowerName.includes('emotion') || lowerName.includes('feeling')) return '😊';
+	if (lowerName.includes('person') || lowerName.includes('character')) return '👤';
+	if (lowerName.includes('place') || lowerName.includes('location')) return '📍';
+	if (lowerName.includes('object') || lowerName.includes('item')) return '🔮';
+	if (lowerName.includes('concept') || lowerName.includes('idea')) return '💭';
+	if (lowerName.includes('event') || lowerName.includes('celebration')) return '🎉';
+	if (lowerName.includes('color') || lowerName.includes('colour')) return '🎨';
+	if (lowerName.includes('style') || lowerName.includes('design')) return '✨';
+	if (lowerName.includes('emotion') || lowerName.includes('feeling')) return '😊';
 
-  // Emoji por defecto
-  return '🏷️';
+	// Emoji por defecto
+	return '🏷️';
 }

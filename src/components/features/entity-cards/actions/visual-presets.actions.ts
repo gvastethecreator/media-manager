@@ -8,16 +8,16 @@ import { revalidatePath } from 'next/cache';
 
 // Importar nuevos tipos y transformers
 import {
-    toExtendedVisualPreset,
-    toExtendedVisualPresets,
-    toPrismaCreateInput,
-    toPrismaUpdateInput
+	toExtendedVisualPreset,
+	toExtendedVisualPresets,
+	toPrismaCreateInput,
+	toPrismaUpdateInput,
 } from '@/transformers/visual-preset';
 import type {
-    VisualPresetBase,
-    VisualPresetCreateInput,
-    VisualPresetExtended,
-    VisualPresetUpdateInput
+	VisualPresetBase,
+	VisualPresetCreateInput,
+	VisualPresetExtended,
+	VisualPresetUpdateInput,
 } from '@/types/entities/visual-preset';
 
 const logger = serverLogger.withContext('VisualPresetsActions');
@@ -81,7 +81,7 @@ function getDefaultConfig(configType: string): Record<string, unknown> {
 			return {
 				enabled: true,
 				version: '1.0.0',
-				mode: 'standard'
+				mode: 'standard',
 			};
 		case 'design':
 			return {
@@ -91,56 +91,56 @@ function getDefaultConfig(configType: string): Record<string, unknown> {
 				cornerStyle: 'rounded',
 				cornerRadius: 12,
 				elevation: 2,
-				shadowStyle: 'soft'
+				shadowStyle: 'soft',
 			};
 		case 'animation':
 			return {
 				enabled: true,
 				duration: 300,
-				easing: 'ease-in-out'
+				easing: 'ease-in-out',
 			};
 		case 'layer':
 			return {
 				order: ['background', 'content', 'effects', 'holographic', 'border', 'filter'],
-				spacing: 2
+				spacing: 2,
 			};
 		case 'backside':
 			return {
 				enabled: true,
-				style: 'standard'
+				style: 'standard',
 			};
 		case 'effects':
 			return {
 				glow: true,
 				shadow: true,
-				reflection: false
+				reflection: false,
 			};
 		case 'performance':
 			return {
 				quality: 'high',
-				optimizeRendering: true
+				optimizeRendering: true,
 			};
 		case 'ra':
 		case 'rarity':
 			return {
 				enabled: true,
-				system: 'standard'
+				system: 'standard',
 			};
 		case 'la':
 		case 'layout':
 			return {
 				type: 'standard',
-				padding: 16
+				padding: 16,
 			};
 		case 'pe':
 			return {
 				quality: 'high',
-				optimizeRendering: true
+				optimizeRendering: true,
 			};
 		case 'ba':
 			return {
 				enabled: true,
-				style: 'standard'
+				style: 'standard',
 			};
 		default:
 			return {};
@@ -164,7 +164,11 @@ export async function getVisualPresets(category?: string): Promise<VisualPresetE
 		return toExtendedVisualPresets(presets);
 	} catch (error) {
 		logger.error('❌ Error al obtener presets visuales:', error);
-		throw createVisualPresetError('No se pudieron obtener los presets visuales', VisualPresetErrorCode.OPERATION_FAILED, error);
+		throw createVisualPresetError(
+			'No se pudieron obtener los presets visuales',
+			VisualPresetErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -205,10 +209,7 @@ export async function getVisualPresetsByEntityType(entityType: string): Promise<
 		// o presets generales que sean compatibles con todos los tipos
 		const presets = await prisma.visualPreset.findMany({
 			where: {
-				OR: [
-					{ [configField]: { not: null } },
-					{ category: 'general' }
-				]
+				OR: [{ [configField]: { not: null } }, { category: 'general' }],
 			},
 			orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
 		});
@@ -228,14 +229,16 @@ export async function getVisualPresetsByEntityType(entityType: string): Promise<
 /**
  * Guarda un preset visual (crea nuevo o actualiza existente)
  */
-export async function saveVisualPreset(preset: VisualPresetCreateInput | VisualPresetUpdateInput): Promise<VisualPresetBase> {
+export async function saveVisualPreset(
+	preset: VisualPresetCreateInput | VisualPresetUpdateInput
+): Promise<VisualPresetBase> {
 	try {
 		if ('id' in preset) {
 			// Es una actualización
 			const updateData = toPrismaUpdateInput(preset as VisualPresetUpdateInput);
 
 			const existingPreset = await prisma.visualPreset.findUnique({
-				where: { id: preset.id }
+				where: { id: preset.id },
 			});
 
 			if (!existingPreset) {
@@ -244,13 +247,13 @@ export async function saveVisualPreset(preset: VisualPresetCreateInput | VisualP
 
 			const updatedPreset = await prisma.visualPreset.update({
 				where: { id: preset.id },
-				data: updateData
+				data: updateData,
 			});
 
 			// Emitir evento de actualización
 			await emit({
 				type: 'visualPresets:modified',
-				data: { action: 'update', preset: updatedPreset }
+				data: { action: 'update', preset: updatedPreset },
 			});
 
 			await revalidateAllPaths();
@@ -261,13 +264,13 @@ export async function saveVisualPreset(preset: VisualPresetCreateInput | VisualP
 		const createData = toPrismaCreateInput(preset as VisualPresetCreateInput);
 
 		const newPreset = await prisma.visualPreset.create({
-			data: createData
+			data: createData,
 		});
 
 		// Emitir evento de creación
 		await emit({
 			type: 'visualPresets:modified',
-			data: { action: 'create', preset: newPreset }
+			data: { action: 'create', preset: newPreset },
 		});
 
 		await revalidateAllPaths();
@@ -288,7 +291,7 @@ export async function deleteVisualPreset(id: string): Promise<{ success: boolean
 	try {
 		// Verificar que existe
 		const preset = await prisma.visualPreset.findUnique({
-			where: { id }
+			where: { id },
 		});
 
 		if (!preset) {
@@ -305,13 +308,13 @@ export async function deleteVisualPreset(id: string): Promise<{ success: boolean
 
 		// Eliminar el preset
 		await prisma.visualPreset.delete({
-			where: { id }
+			where: { id },
 		});
 
 		// Emitir evento de eliminación
 		await emit({
 			type: 'visualPresets:modified',
-			data: { action: 'delete', presetId: id }
+			data: { action: 'delete', presetId: id },
 		});
 
 		await revalidateAllPaths();
@@ -321,7 +324,11 @@ export async function deleteVisualPreset(id: string): Promise<{ success: boolean
 		if (error instanceof Error && error.name === 'VisualPresetError') {
 			throw error;
 		}
-		throw createVisualPresetError('No se pudo eliminar el preset visual', VisualPresetErrorCode.OPERATION_FAILED, error);
+		throw createVisualPresetError(
+			'No se pudo eliminar el preset visual',
+			VisualPresetErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -336,17 +343,28 @@ export async function applyVisualPresetToEntity(
 	try {
 		// Validar tipos de entidades soportados
 		const supportedEntityTypes = [
-			'folder', 'folders',
-			'image', 'images',
-			'album', 'albums',
-			'collection', 'collections',
-			'tag', 'tags',
-			'character', 'characters',
-			'place', 'places',
-			'worldItem', 'worldItems',
-			'concept', 'concepts',
-			'note', 'notes',
-			'prompt', 'prompts'
+			'folder',
+			'folders',
+			'image',
+			'images',
+			'album',
+			'albums',
+			'collection',
+			'collections',
+			'tag',
+			'tags',
+			'character',
+			'characters',
+			'place',
+			'places',
+			'worldItem',
+			'worldItems',
+			'concept',
+			'concepts',
+			'note',
+			'notes',
+			'prompt',
+			'prompts',
 		];
 
 		const normalizedType = entityType.endsWith('s') ? entityType : `${entityType}s`;
@@ -372,7 +390,7 @@ export async function applyVisualPresetToEntity(
 		}
 
 		const entity = await (entityModel as any).findUnique({
-			where: { id: entityId }
+			where: { id: entityId },
 		});
 
 		if (!entity) {
@@ -385,14 +403,14 @@ export async function applyVisualPresetToEntity(
 			await (entityModel as any).update({
 				where: { id: entityId },
 				data: {
-					metadata: JSON.stringify({ visualPresetId: null })
-				}
+					metadata: JSON.stringify({ visualPresetId: null }),
+				},
 			});
 
 			// Emitir evento de actualización
 			await emit({
 				type: `${normalizedType.toLowerCase()}:modified`,
-				data: { action: 'update', entity, visualPresetId: null }
+				data: { action: 'update', entity, visualPresetId: null },
 			});
 
 			await revalidateAllPaths();
@@ -401,7 +419,7 @@ export async function applyVisualPresetToEntity(
 
 		// Verificar que el preset existe
 		const preset = await prisma.visualPreset.findUnique({
-			where: { id: presetId }
+			where: { id: presetId },
 		});
 
 		if (!preset) {
@@ -412,14 +430,14 @@ export async function applyVisualPresetToEntity(
 		await (entityModel as any).update({
 			where: { id: entityId },
 			data: {
-				metadata: JSON.stringify({ visualPresetId: presetId })
-			}
+				metadata: JSON.stringify({ visualPresetId: presetId }),
+			},
 		});
 
 		// Emitir evento de actualización
 		await emit({
 			type: `${normalizedType.toLowerCase()}:modified`,
-			data: { action: 'update', entity, visualPresetId: presetId }
+			data: { action: 'update', entity, visualPresetId: presetId },
 		});
 
 		await revalidateAllPaths();
@@ -429,7 +447,11 @@ export async function applyVisualPresetToEntity(
 		if (error instanceof Error && error.name === 'VisualPresetError') {
 			throw error;
 		}
-		throw createVisualPresetError('No se pudo aplicar el preset visual a la entidad', VisualPresetErrorCode.OPERATION_FAILED, error);
+		throw createVisualPresetError(
+			'No se pudo aplicar el preset visual a la entidad',
+			VisualPresetErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -464,7 +486,7 @@ export async function createPresetFromCardOptions(
 			layerConfig: JSON.stringify(options.layers || {}),
 			backsideConfig: JSON.stringify(options.backside || {}),
 			effectsConfig: JSON.stringify(options.effects || {}),
-			[configField]: JSON.stringify(options.entity || {})
+			[configField]: JSON.stringify(options.entity || {}),
 		};
 
 		// Usar el transformer para preparar los datos
@@ -472,13 +494,13 @@ export async function createPresetFromCardOptions(
 
 		// Crear el nuevo preset
 		const newPreset = await prisma.visualPreset.create({
-			data: createData
+			data: createData,
 		});
 
 		// Emitir evento de creación
 		await emit({
 			type: 'visualPresets:modified',
-			data: { action: 'create', preset: newPreset }
+			data: { action: 'create', preset: newPreset },
 		});
 
 		await revalidateAllPaths();
@@ -492,13 +514,10 @@ export async function createPresetFromCardOptions(
 /**
  * Obtiene las opciones de tarjeta desde un preset visual
  */
-export async function getCardOptionsFromPreset(
-	presetId: string,
-	entityType: string
-): Promise<CardOptions> {
+export async function getCardOptionsFromPreset(presetId: string, entityType: string): Promise<CardOptions> {
 	try {
 		const preset = await prisma.visualPreset.findUnique({
-			where: { id: presetId }
+			where: { id: presetId },
 		});
 
 		if (!preset) {
@@ -512,7 +531,11 @@ export async function getCardOptionsFromPreset(
 		if (error instanceof Error && error.name === 'VisualPresetError') {
 			throw error;
 		}
-		throw createVisualPresetError('No se pudieron obtener las opciones de tarjeta', VisualPresetErrorCode.OPERATION_FAILED, error);
+		throw createVisualPresetError(
+			'No se pudieron obtener las opciones de tarjeta',
+			VisualPresetErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -548,6 +571,6 @@ function convertPresetToCardOptions(preset: VisualPresetBase, entityType: string
 			name: preset.name,
 			category: preset.category,
 			isDefault: preset.isDefault,
-		}
+		},
 	};
 }

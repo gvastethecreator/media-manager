@@ -1,168 +1,137 @@
-# Refactorización de Tipos y Server Actions
+# Plan de migración de Entity Cards a componentes específicos por entidad
 
-## Plan de trabajo
+## Contexto
+Actualmente estamos utilizando componentes genéricos de entity-card para mostrar diferentes entidades. Necesitamos migrar a componentes específicos para cada tipo de entidad con un diseño inspirado en cartas Magic.
 
-- [x] Crear tipos base para entities (derivados de Prisma)
-- [x] Crear tipos extendidos para UI
-- [x] Crear transformers para mapeo entre tipos
-- [x] Integrar tipos y transformers en server actions (parcialmente completado)
-- [x] Actualizar componentes para utilizar nuevos tipos
-- [ ] Pruebas e2e
+## Tareas generales
 
-## Estado actual del proyecto
+1. ✅ Crear estructura para el nuevo sistema de componentes
+   - ✅ Crear carpeta para componentes de tarjetas específicas por entidad
 
-El proyecto sigue una estructura bien definida:
+2. ✅ Implementar FolderCard como primer componente
+   - ✅ Diseñar e implementar componente inspirado en cartas Magic para carpetas
+   - ✅ Incluir los últimos 6 thumbnails de imágenes de la carpeta
+   - ✅ Mostrar toda la información relevante de la entidad Folder
+   - ✅ Mejorar con iconos de Lucide y optimizar UI
+
+3. ✅ Actualizar vistas para usar nuevos componentes
+   - ✅ Actualizar folders-view para usar el nuevo FolderCard
+   - ✅ Eliminar referencias a EntityCard/EntityCardDev
+
+4. ✅ Extender a otras entidades principales
+   - ✅ Implementar AlbumCard y actualizar albums-view
+   - ✅ Implementar CollectionCard y actualizar collections-view
+   - ✅ Implementar TagCard y actualizar tags-view
+   - ✅ Mejorar consistencia con iconos de Lucide en todos los componentes
+   - ✅ Corregir problemas con thumbnails en server actions
+   - ✅ Implementar CharacterCard y actualizar characters-view
+   - ✅ Implementar PlaceCard y actualizar places-view
+   - ✅ Crear componentes auxiliares para tarjetas (CardContainer, CardHeader)
+   - ✅ Implementar WorldItemCard
+   - ✅ Implementar ConceptCard
+   - ✅ Implementar PromptCard
+   - ✅ Implementar NoteCard
+
+5. ✅ Tareas finales
+   - ✅ Verificar que todas las vistas estén usando los nuevos componentes
+   - ✅ Pruebas de rendimiento y optimización
+   - ✅ Documentación de los nuevos componentes
+
+## Estructura de componentes
 
 ```
-/src
-├── /app
-│   ├── /actions     # Server actions para cada entidad (NextJS App Router)
-│   └── /api         # API routes para endpoints públicos
-├── /components   # Componentes reutilizables
-├── /hooks        # Hooks personalizados
-├── /lib          # Utilidades y configuraciones
-├── /server       # Lógica del servidor
-├── /services     # Servicios externos
-├── /store        # Estado global con Zustand
-├── /transformers # Funciones de transformación entre tipos
-│   ├── /{entity}/mappers.ts    # Mapeo a formatos específicos
-│   ├── /{entity}/serializers.ts # Serialización/deserialización
-│   └── /{entity}/index.ts      # Re-exportaciones
-└── /types        # Definición de tipos TypeScript
-    └── /entities # Tipos para las entidades del dominio
-        ├── /{entity}/base.ts     # Tipos base derivados de Prisma
-        ├── /{entity}/enums.ts    # Enumeraciones y constantes
-        ├── /{entity}/extended.ts # Tipos extendidos para UI
-        └── /{entity}/index.ts    # Re-exportaciones
+/components
+  /cards
+    /folder-card ✅
+      index.ts ✅
+      folder-card.tsx ✅
+      folder-card-content.tsx ✅
+      folder-card-header.tsx ✅
+      folder-card-footer.tsx ✅ (mejorado con iconos Lucide)
+      folder-card-images.tsx ✅
+    /album-card ✅
+      index.ts ✅
+      album-card.tsx ✅
+      album-card-content.tsx ✅
+      album-card-header.tsx ✅ (mejorado con iconos Lucide)
+      album-card-footer.tsx ✅ (mejorado con iconos Lucide)
+      album-card-images.tsx ✅
+    /collection-card ✅
+      index.ts ✅
+      collection-card.tsx ✅
+      collection-card-content.tsx ✅
+      collection-card-header.tsx ✅
+      collection-card-footer.tsx ✅
+      collection-card-images.tsx ✅
+      collection-server-actions.ts ✅
+    /tag-card ✅
+      index.ts ✅
+      tag-card.tsx ✅
+      tag-card-content.tsx ✅
+      tag-card-header.tsx ✅
+      tag-card-footer.tsx ✅
+      tag-card-images.tsx ✅
+      tag-server-actions.ts ✅
+    /character-card ✅
+      index.ts ✅
+      character-card.tsx ✅
+      character-card-content.tsx ✅
+      character-card-header.tsx ✅
+      character-card-footer.tsx ✅
+      character-card-images.tsx ✅
+      character-server-actions.ts ✅
+    /place-card ✅
+      index.ts ✅
+      place-card.tsx ✅
+      place-card-content.tsx ✅
+      place-card-header.tsx ✅
+      place-card-footer.tsx ✅
+      place-card-images.tsx ✅
+      place-server-actions.ts ✅
+    /note-card ✅
+      index.ts ✅
+      note-card.tsx ✅
+      note-card-content.tsx ✅
+      note-card-footer.tsx ✅
+      note-card-images.tsx ✅
+      note-server-actions.ts ✅
+      README.md ✅
+    card-container.tsx ✅ (componente auxiliar compartido)
+    card-header.tsx ✅ (componente auxiliar compartido)
+    ... (otros componentes de tarjeta)
+
 ```
-
-## Entidades implementadas
-
-### Completamente implementadas (tipos, transformers y actions)
-- [x] Image
-- [x] Folder
-- [x] Album
-- [x] Tag
-- [x] Collection
-- [x] Character
-- [x] Place
-- [x] Note
-- [x] QueueJob
-- [x] Profile
-- [x] WorldItem
-- [x] Concept
-- [x] Prompt
-- [x] Activity
-- [x] VisualPreset
-- [x] Favorite
-- [x] File
-
-### Parcialmente implementadas
-- [ ] Metadata (falta implementar tipos, transformers y migrar server actions)
-- [ ] Stats (falta implementar tipos, transformers y migrar server actions)
-- [ ] System (falta implementar tipos, transformers y migrar server actions)
-- [ ] Thumbnails (falta implementar tipos, transformers y migrar server actions)
-- [ ] UploadedImages (falta implementar tipos, transformers y migrar server actions)
-
-## Integración de server actions con nuevos tipos y transformers
-
-Se ha completado parcialmente la integración de server actions con los nuevos tipos y transformers. Esto ha implicado:
-
-1. **Estructura uniforme de tipos**: Cada entidad tiene su carpeta con tipos base, extendidos, enums y re-exportaciones.
-
-2. **Transformers estandarizados**: Cada entidad tiene transformers para:
-   - Mapeo de datos de entrada → Formato Prisma (`mapCreateEntityDataToPrisma`, `mapUpdateEntityDataToPrisma`)
-   - Transformación de entidades Prisma → Tipos extendidos para UI (`extendEntity`, `toEntityCard`, `toEntityListItem`)
-   - Serialización/deserialización de datos complejos
-
-3. **Server Actions consistentes**: Implementación uniforme con:
-   - Códigos de error tipados
-   - Función creadora de errores
-   - Sistema de notificación de cambios vía eventos
-   - Revalidación de rutas centralizada
-
-## Progreso actual
-
-### Migraciones completadas:
-- WorldItem: Migrado completamente para usar nuevos tipos y transformers
-- Concept: Implementada migración completa con transformers y tipos específicos
-- Prompt: Actualizado para usar nuevos tipos, con mejoras en relaciones entre entidades
-- Activity: Migrado con funcionalidad extendida para filtrado y limpieza
-- VisualPreset: Actualizado server actions para usar tipos y transformers, mejorado el manejo de errores y emisión de eventos
-- Album: Corregidos los errores de tipado en server actions
-- Favorite: Migrado para utilizar tipos, enums y transformers específicos
-- File: Implementados tipos, transformers y migradas server actions con funcionalidad ampliada
 
 ## Próximos pasos
 
-### Fase 1: Completar migración de server actions
-- [ ] Implementar tipos, transformers y migrar Metadata actions
-- [ ] Implementar tipos, transformers y migrar Stats actions
-- [ ] Implementar tipos, transformers y migrar System actions
-- [ ] Implementar tipos, transformers y migrar Thumbnails actions
-- [ ] Implementar tipos, transformers y migrar UploadedImages actions
+1. ✅ Implementar AlbumCard
+   - ✅ Crear estructura similar a FolderCard pero adaptada para álbumes
+   - ✅ Actualizar albums-view para usar AlbumCard
+   - ✅ Mejorar UX con iconos consistentes de Lucide
 
-### Fase 2: Optimización
-- [ ] Revisar y mejorar el rendimiento de consultas a la base de datos
-  - [ ] Optimizar inclusión de relaciones
-  - [ ] Implementar paginación y filtrado eficiente
-  - [ ] Ajustar índices de base de datos
+2. 🔄 Continuar con el resto de entidades siguiendo el mismo patrón
+   - ✅ Implementar CollectionCard y actualizar collections-view
+   - ✅ Implementar TagCard y actualizar tags-view
+   - ✅ Implementar CharacterCard y actualizar characters-view
+   - ✅ Implementar PlaceCard y actualizar places-view
+   - ✅ Implementar WorldItemCard (siguiente en la lista)
+   - ✅ Implementar ConceptCard (siguiente en la lista)
+   - ✅ Implementar PromptCard (siguiente en la lista)
+   - ✅ Implementar NoteCard (siguiente en la lista)
+   - ✅ Asegurar consistencia usando iconos de Lucide React en lugar de Radix
 
-- [ ] Implementar caching estratégico
-  - [ ] Identificar datos frecuentemente accedidos
-  - [ ] Configurar estrategias de caché (React Query, SWR)
-  - [ ] Implementar invalidación inteligente de caché
+3. ✅ Eliminar completamente los componentes genéricos EntityCard cuando todas las vistas estén migradas
 
-- [ ] Auditar y optimizar operaciones de revalidación
-  - [ ] Minimizar revalidaciones innecesarias
-  - [ ] Implementar revalidación selectiva
+## Estándares de diseño
+- ✅ Usar iconos de Lucide React para mantener consistencia
+- ✅ Seguir patrón de diseño inspirado en cartas Magic con encabezado, imágenes, contenido y pie de carta
+- ✅ Implementar animaciones sutiles para interacción
+- ✅ Mantener accesibilidad con roles apropiados y soporte de teclado
 
-### Fase 3: Interoperabilidad
-- [ ] Mejorar interoperabilidad entre entidades
-  - [ ] Crear transformers para conversiones entre entidades relacionadas
-  - [ ] Estandarizar interfaz de asociación entre entidades
-  - [ ] Implementar acciones batch para operaciones masivas
-
-- [ ] Implementar acciones compuestas
-  - [ ] Crear acciones que operen en múltiples entidades
-  - [ ] Mejorar manejo transaccional
-  - [ ] Implementar rollback en caso de errores
-
-### Fase 4: Documentación
-- [ ] Documentar estructura de tipos
-  - [ ] Crear diagramas de relaciones entre entidades
-  - [ ] Añadir ejemplos de uso para cada tipo
-
-- [ ] Documentar patrones de transformación
-  - [ ] Explicar flujo de transformación de datos
-  - [ ] Documentar mejores prácticas
-
-- [ ] Mejorar documentación en código
-  - [ ] Añadir JSDoc completo para todas las funciones públicas
-  - [ ] Crear ejemplos en comentarios
-
-### Fase 5: Testing
-- [ ] Pruebas unitarias para transformers
-  - [ ] Crear casos de prueba para cada transformador
-  - [ ] Verificar manejos de casos borde
-
-- [ ] Pruebas de integración para server actions
-  - [ ] Simular flujos completos con mocking de DB
-  - [ ] Verificar manejo de errores
-
-- [ ] Pruebas e2e para flujos completos
-  - [ ] Automatizar flujos principales de usuario
-  - [ ] Verificar performance bajo carga
-
-### Fase 6: Migración a Drizzle
-- [ ] Preparar tipos base para Drizzle
-  - [ ] Crear adaptadores de tipos Prisma → Drizzle
-  - [ ] Ajustar transformers para trabajar con esquemas Drizzle
-
-- [ ] Adaptar server actions para usar Drizzle
-  - [ ] Reemplazar consultas Prisma con equivalentes Drizzle
-  - [ ] Mantener compatibilidad con tipos existentes
-
-- [ ] Migración gradual por entidad
-  - [ ] Priorizar entidades menos complejas
-  - [ ] Implementar pruebas A/B
+## Correcciones y mejoras
+- ✅ Corregir el problema con la carga de thumbnails en los componentes
+  - ✅ Implementar server actions robustas para manejar diferentes casos
+  - ✅ Crear interfaz común ThumbnailImage para estandarizar el manejo de miniaturas
+  - ✅ Usar una estrategia de fallback para mostrar placeholders cuando no hay miniaturas
+- ✅ Corregir errores de importación en WorldItemCard
+  - ✅ Crear componentes auxiliares CardContainer y CardHeader para compartir funcionalidad

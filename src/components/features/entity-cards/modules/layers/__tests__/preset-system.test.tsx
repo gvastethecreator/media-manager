@@ -10,18 +10,16 @@ const MockVisualLayer = {
 	id: 'visual-layer',
 	name: 'Visual Layer',
 	type: 'visual',
-	Component: ({ enabled, config }) => (
-		enabled ? <div data-testid="visual-layer">{config?.style || 'Default'}</div> : null
-	)
+	Component: ({ enabled, config }) =>
+		enabled ? <div data-testid="visual-layer">{config?.style || 'Default'}</div> : null,
 };
 
 const MockEffectLayer = {
 	id: 'effect-layer',
 	name: 'Effect Layer',
 	type: 'effect',
-	Component: ({ enabled, config }) => (
-		enabled ? <div data-testid="effect-layer">{config?.intensity || '0'}</div> : null
-	)
+	Component: ({ enabled, config }) =>
+		enabled ? <div data-testid="effect-layer">{config?.intensity || '0'}</div> : null,
 };
 
 // 🎭 Presets de prueba
@@ -31,13 +29,13 @@ const legendaryPreset = definePreset({
 	layers: {
 		'visual-layer': {
 			enabled: true,
-			config: { style: 'Legendary' }
+			config: { style: 'Legendary' },
 		},
 		'effect-layer': {
 			enabled: true,
-			config: { intensity: '100' }
-		}
-	}
+			config: { intensity: '100' },
+		},
+	},
 });
 
 const rarePreset = definePreset({
@@ -46,13 +44,13 @@ const rarePreset = definePreset({
 	layers: {
 		'visual-layer': {
 			enabled: true,
-			config: { style: 'Rare' }
+			config: { style: 'Rare' },
 		},
 		'effect-layer': {
 			enabled: true,
-			config: { intensity: '50' }
-		}
-	}
+			config: { intensity: '50' },
+		},
+	},
 });
 
 // 🧪 Componente de prueba para el hook usePresetSystem
@@ -61,30 +59,16 @@ function TestPresetComponent() {
 
 	return (
 		<div>
-			<button
-				type="button"
-				onClick={() => applyPreset(legendaryPreset)}
-				data-testid="apply-legendary"
-			>
+			<button type="button" onClick={() => applyPreset(legendaryPreset)} data-testid="apply-legendary">
 				Apply Legendary
 			</button>
-			<button
-				type="button"
-				onClick={() => applyPreset(rarePreset)}
-				data-testid="apply-rare"
-			>
+			<button type="button" onClick={() => applyPreset(rarePreset)} data-testid="apply-rare">
 				Apply Rare
 			</button>
-			<button
-				type="button"
-				onClick={() => removePreset()}
-				data-testid="remove-preset"
-			>
+			<button type="button" onClick={() => removePreset()} data-testid="remove-preset">
 				Remove Preset
 			</button>
-			<pre data-testid="active-preset">
-				{JSON.stringify(activePreset)}
-			</pre>
+			<pre data-testid="active-preset">{JSON.stringify(activePreset)}</pre>
 		</div>
 	);
 }
@@ -97,11 +81,7 @@ describe('Preset System', () => {
 			render(
 				<EntityCardProvider>
 					<RegisterLayers initialLayers={[MockVisualLayer, MockEffectLayer]} />
-					<EntityCard
-						entityId="test"
-						entityType="test"
-						preset={legendaryPreset}
-					/>
+					<EntityCard entityId="test" entityType="test" preset={legendaryPreset} />
 				</EntityCardProvider>
 			);
 
@@ -113,11 +93,7 @@ describe('Preset System', () => {
 			const { rerender } = render(
 				<EntityCardProvider>
 					<RegisterLayers initialLayers={[MockVisualLayer, MockEffectLayer]} />
-					<EntityCard
-						entityId="test"
-						entityType="test"
-						preset={legendaryPreset}
-					/>
+					<EntityCard entityId="test" entityType="test" preset={legendaryPreset} />
 				</EntityCardProvider>
 			);
 
@@ -126,11 +102,7 @@ describe('Preset System', () => {
 			rerender(
 				<EntityCardProvider>
 					<RegisterLayers initialLayers={[MockVisualLayer, MockEffectLayer]} />
-					<EntityCard
-						entityId="test"
-						entityType="test"
-						preset={rarePreset}
-					/>
+					<EntityCard entityId="test" entityType="test" preset={rarePreset} />
 				</EntityCardProvider>
 			);
 
@@ -172,8 +144,8 @@ describe('Preset System', () => {
 						layers={{
 							'visual-layer': {
 								enabled: true,
-								config: { style: 'Custom' }
-							}
+								config: { style: 'Custom' },
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -193,8 +165,8 @@ describe('Preset System', () => {
 						preset={legendaryPreset}
 						layers={{
 							'effect-layer': {
-								enabled: false
-							}
+								enabled: false,
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -213,21 +185,17 @@ describe('Preset System', () => {
 				name: 'Invalid',
 				layers: {
 					'non-existent-layer': {
-						enabled: true
-					}
-				}
+						enabled: true,
+					},
+				},
 			});
 
-			const consoleError = jest.spyOn(console, 'error').mockImplementation(() => { });
+			const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
 			render(
 				<EntityCardProvider>
 					<RegisterLayers initialLayers={[MockVisualLayer, MockEffectLayer]} />
-					<EntityCard
-						entityId="test"
-						entityType="test"
-						preset={invalidPreset}
-					/>
+					<EntityCard entityId="test" entityType="test" preset={invalidPreset} />
 				</EntityCardProvider>
 			);
 
@@ -242,7 +210,7 @@ describe('Preset System', () => {
 			id: 'interactive-layer',
 			name: 'Interactive Layer',
 			type: 'interactive',
-			Component: ({ enabled, config, onInteraction }) => (
+			Component: ({ enabled, config, onInteraction }) =>
 				enabled ? (
 					<button
 						type="button"
@@ -251,8 +219,7 @@ describe('Preset System', () => {
 					>
 						Interactive
 					</button>
-				) : null
-			)
+				) : null,
 		};
 
 		const interactivePreset = definePreset({
@@ -261,9 +228,9 @@ describe('Preset System', () => {
 			layers: {
 				'interactive-layer': {
 					enabled: true,
-					config: { action: 'custom' }
-				}
-			}
+					config: { action: 'custom' },
+				},
+			},
 		});
 
 		it('should handle preset interactions correctly', () => {
@@ -278,8 +245,8 @@ describe('Preset System', () => {
 						preset={interactivePreset}
 						layers={{
 							'interactive-layer': {
-								onInteraction
-							}
+								onInteraction,
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -325,9 +292,9 @@ describe('Preset System', () => {
 			layers: {
 				'visual-layer': {
 					enabled: true,
-					config: { style: 'Base' }
-				}
-			}
+					config: { style: 'Base' },
+				},
+			},
 		});
 
 		const extendedPreset = definePreset({
@@ -337,20 +304,16 @@ describe('Preset System', () => {
 			layers: {
 				'effect-layer': {
 					enabled: true,
-					config: { intensity: '75' }
-				}
-			}
+					config: { intensity: '75' },
+				},
+			},
 		});
 
 		it('should handle preset inheritance correctly', () => {
 			render(
 				<EntityCardProvider>
 					<RegisterLayers initialLayers={[MockVisualLayer, MockEffectLayer]} />
-					<EntityCard
-						entityId="test"
-						entityType="test"
-						preset={extendedPreset}
-					/>
+					<EntityCard entityId="test" entityType="test" preset={extendedPreset} />
 				</EntityCardProvider>
 			);
 

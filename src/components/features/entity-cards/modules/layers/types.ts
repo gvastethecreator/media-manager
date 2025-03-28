@@ -5,7 +5,7 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { BaseLayerProps } from '../../types/base-card-types';
-import type { BaseLayerConfig, BaseLayerResponse } from "./layer-config-base";
+import type { BaseLayerConfig, BaseLayerResponse } from './layer-config-base';
 
 /**
  * Propiedades base para todas las capas
@@ -80,7 +80,19 @@ export interface LayerImplementation<T extends BaseLayerConfig = BaseLayerConfig
 /**
  * 🎨 Tipos de efectos visuales comunes
  */
-export type BlendMode = 'normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'color-dodge' | 'color-burn' | 'hard-light' | 'soft-light' | 'difference' | 'exclusion';
+export type BlendMode =
+	| 'normal'
+	| 'multiply'
+	| 'screen'
+	| 'overlay'
+	| 'darken'
+	| 'lighten'
+	| 'color-dodge'
+	| 'color-burn'
+	| 'hard-light'
+	| 'soft-light'
+	| 'difference'
+	| 'exclusion';
 
 /**
  * 🎨 Tipos de filtros visuales

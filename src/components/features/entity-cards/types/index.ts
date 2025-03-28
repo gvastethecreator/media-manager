@@ -31,28 +31,32 @@ export const adaptCardOptions = <T = any>(options: any): T => {
 
 // Re-exportar interfaces comunes para facilitar su uso
 export type {
-    AnimationSystem,
-    BacksideOptions,
-    BorderOptions,
-    CardInteractivity,
-    CardOptions,
-    CardPreset,
-    CardStates,
-    CardVariant,
-    ColorPalette,
-    CornerStyle,
-    DesignSystem,
-    GlowOptions,
-    GrainOptions,
-    HolographicOptions,
-    LayersConfig,
-    PerformanceOptions,
-    ScanlinesOptions,
-    ShadowStyle
+	AnimationSystem,
+	BacksideOptions,
+	BorderOptions,
+	CardInteractivity,
+	CardOptions,
+	CardPreset,
+	CardStates,
+	CardVariant,
+	ColorPalette,
+	CornerStyle,
+	DesignSystem,
+	GlowOptions,
+	GrainOptions,
+	HolographicOptions,
+	LayersConfig,
+	PerformanceOptions,
+	ScanlinesOptions,
+	ShadowStyle,
 } from './unified-card-types';
 
 // Re-exportar tipos de capas
-export type { BaseLayerConfig, LayerComponentProps, LayerSettingsProps } from '../modules/layer-system/layers/layer-plugin-system';
+export type {
+	BaseLayerConfig,
+	LayerComponentProps,
+	LayerSettingsProps,
+} from '../modules/layer-system/layers/layer-plugin-system';
 
 // Re-exportar tipos de módulos
 export type { AnimationSystem as AnimationSystemType } from '../modules/animation/types';
