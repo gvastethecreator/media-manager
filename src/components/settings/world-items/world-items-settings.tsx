@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { toast } from '@/services/toast.service';
+import toastService from '@/services/toast.service';
 import { WorldItem } from '@/types/entities/world-item';
 import { formatBytes } from '@/utils/file/helpers';
 import { Filter, Info, Loader2, Package, PlusCircle, Trash, X } from 'lucide-react';
@@ -47,7 +47,7 @@ export function WorldItemsSettings() {
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
-				toast.error('Error al cargar los objetos', {
+				toastService.error('Error al cargar los objetos', {
 					description: errorMessage,
 				});
 			} finally {
@@ -130,7 +130,7 @@ export function WorldItemsSettings() {
 		try {
 			await deleteWorldItem(id);
 			setWorldItems(prev => prev.filter(item => item.id !== id));
-			toast.success('Objeto eliminado');
+			toastService.worldItem.deleted();
 
 			// Reset selection if deleted item was selected
 			if (selectedItem?.id === id) {
@@ -140,7 +140,7 @@ export function WorldItemsSettings() {
 			}
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toast.error('Error al eliminar el objeto', {
+			toastService.error('Error al eliminar el objeto', {
 				description: errorMessage,
 			});
 		}
@@ -156,7 +156,7 @@ export function WorldItemsSettings() {
 	// Manejar creación exitosa
 	const handleItemCreated = useCallback((newItem: WorldItem) => {
 		setWorldItems(prev => [...prev, newItem as unknown as WorldItemWithStats]);
-		toast.success('Objeto creado');
+		toastService.worldItem.created();
 		setPreviewData(null);
 	}, []);
 
@@ -172,7 +172,7 @@ export function WorldItemsSettings() {
 		setIsEditing(false);
 		setSelectedItem(null);
 		setPreviewData(null);
-		toast.success('Objeto actualizado');
+		toastService.worldItem.updated();
 	}, []);
 
 	// Resetear formulario
@@ -462,17 +462,22 @@ export function WorldItemsSettings() {
 													)}
 												</div>
 											</div>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-6 w-6 opacity-0 group-hover:opacity-100"
+											<div
+												className="opacity-0 group-hover:opacity-100"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeleteItem(item.id);
 												}}
 											>
-												<Trash className="h-3 w-3" />
-											</Button>
+												<Button
+													variant="ghost"
+													size="icon"
+													className="h-6 w-6"
+													type="button"
+												>
+													<Trash className="h-3 w-3" />
+												</Button>
+											</div>
 										</div>
 									))}
 								</div>

@@ -23,8 +23,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { toast } from '@/services/toast.service';
-import { Concept } from '@/types/entities/concept/base';
+import toastService from '@/services/toast.service';
 import { ConceptCategory } from '@/types/entities/concept/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -43,6 +42,22 @@ const conceptSchema = z.object({
 	tags: z.string().optional(),
 	isFavorite: z.boolean().default(false),
 });
+
+type Concept = {
+	id: string;
+	name: string;
+	description?: string | null;
+	content?: string;
+	emoji: string;
+	color: string;
+	category: string;
+	tags: string;
+	isFavorite?: boolean;
+	featuredImage?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	presetId?: string | null;
+};
 
 type ConceptForm = z.infer<typeof conceptSchema>;
 
@@ -112,12 +127,15 @@ export function CreateConceptForm({
 			setIsSubmitting(true);
 
 			if (isEditing && concept) {
-				// Actualizar concepto existente
-				const updatedConcept = await updateConcept(concept.id, data);
+				// Actualizar concepto existente con el ID
+				const updatedConcept = await updateConcept({
+					id: concept.id,
+					...data
+				});
 				if (onUpdated) {
 					onUpdated(updatedConcept);
 				}
-				toast.success('Concepto actualizado correctamente');
+				toastService.success('Concepto actualizado correctamente');
 			} else {
 				// Crear nuevo concepto
 				const newConcept = await createConcept(data);
@@ -125,11 +143,11 @@ export function CreateConceptForm({
 					onCreated(newConcept);
 				}
 				form.reset(); // Limpiar formulario después de crear
-				toast.success('Concepto creado correctamente');
+				toastService.success('Concepto creado correctamente');
 			}
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toast.error(isEditing ? 'Error al actualizar el concepto' : 'Error al crear el concepto', {
+			toastService.error(isEditing ? 'Error al actualizar el concepto' : 'Error al crear el concepto', {
 				description: errorMessage
 			});
 		} finally {
@@ -307,7 +325,7 @@ export function CreateConceptForm({
 							<FormControl>
 								<Input
 									placeholder="Ej: teoría, personaje, mundo"
-									value={field.value !== '[]' ? JSON.parse(field.value).join(', ') : ''}
+									value={field.value !== '[]' && field.value ? JSON.parse(field.value).join(', ') : ''}
 									onChange={(e) => {
 										// Convertir texto separado por comas a formato JSON
 										const tagsArray = e.target.value.split(',').map(tag => tag.trim()).filter(Boolean);

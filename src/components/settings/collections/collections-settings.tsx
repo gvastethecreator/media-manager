@@ -15,18 +15,28 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toast } from '@/services/toast.service';
-import { Collection } from '@/types/entities/collection';
+import toastService from '@/services/toast.service';
+import { CollectionBase as Collection } from '@/types/entities/collection/base';
 import { CollectionCategory } from '@/types/entities/collection/enums';
 import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreateCollectionForm } from './create-collection-form';
 
+// Tipo ampliado para Collection que incluye _count
+interface CollectionWithUI extends Collection {
+	_count?: {
+		images: number;
+	};
+}
+
+// Definir tipo para el event handler
+type ButtonClickHandler = React.MouseEventHandler<HTMLButtonElement>;
+
 export function CollectionsSettings() {
 	const [collections, setCollections] = useState<CollectionWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
+	const [selectedCollection, setSelectedCollection] = useState<CollectionWithUI | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -46,7 +56,7 @@ export function CollectionsSettings() {
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
-				toast.error('Error al cargar las colecciones', {
+				toastService.error('Error al cargar las colecciones', {
 					description: errorMessage,
 				});
 			} finally {
@@ -73,7 +83,7 @@ export function CollectionsSettings() {
 		// Filtrar por búsqueda
 		if (searchQuery) {
 			const normalizedQuery = searchQuery.toLowerCase();
-			matches = matches && (
+			matches = matches && Boolean(
 				collection.name.toLowerCase().includes(normalizedQuery) ||
 				(collection.description && collection.description.toLowerCase().includes(normalizedQuery))
 			);
@@ -104,25 +114,25 @@ export function CollectionsSettings() {
 			setCollections(prev => prev.filter(collection => collection.id !== id));
 			setSelectedCollection(null);
 			setIsEditing(false);
-			toast.success('Colección eliminada');
+			toastService.success('Colección eliminada');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toast.error('Error al eliminar la colección', {
+			toastService.error('Error al eliminar la colección', {
 				description: errorMessage,
 			});
 		}
 	}, []);
 
 	// Manejar edición de colección
-	const handleEditCollection = useCallback((collection: Collection) => {
-		setSelectedCollection(collection);
+	const handleEditCollection = useCallback((collection: CollectionWithStats) => {
+		setSelectedCollection(collection as unknown as CollectionWithUI);
 		setIsEditing(true);
 	}, []);
 
 	// Manejar creación exitosa
 	const handleCollectionCreated = useCallback((newCollection: Collection) => {
 		setCollections(prev => [...prev, newCollection as unknown as CollectionWithStats]);
-		toast.success('Colección creada');
+		toastService.success('Colección creada');
 	}, []);
 
 	// Manejar actualización exitosa
@@ -134,7 +144,7 @@ export function CollectionsSettings() {
 					: collection
 			)
 		);
-		toast.success('Colección actualizada');
+		toastService.success('Colección actualizada');
 	}, []);
 
 	// Resetear formulario
@@ -159,6 +169,15 @@ export function CollectionsSettings() {
 	// Extraer categorías y plataformas únicas de las colecciones
 	const uniqueCategories = Array.from(new Set(collections.map(collection => collection.category).filter(Boolean))) as string[];
 	const uniquePlatforms = Array.from(new Set(collections.map(collection => collection.platform).filter(Boolean))) as string[];
+
+	// Manejar la eliminación desde el botón con detención de propagación de eventos
+	const handleDeleteButtonClick = useCallback<ButtonClickHandler>((e) => {
+		const id = (e.currentTarget as HTMLButtonElement).dataset.id;
+		if (id) {
+			e.stopPropagation();
+			handleDeleteCollection(id);
+		}
+	}, [handleDeleteCollection]);
 
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
@@ -354,7 +373,7 @@ export function CollectionsSettings() {
 										<div
 											key={collection.id}
 											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedCollection?.id === collection.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditCollection(collection as unknown as Collection)}
+											onClick={() => handleEditCollection(collection)}
 										>
 											<div
 												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
@@ -391,9 +410,12 @@ export function CollectionsSettings() {
 											<Button
 												variant="ghost"
 												size="icon"
+												type="button"
 												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												onClick={(e) => {
-													e.stopPropagation();
+												onClick={() => {
+													// Capturar el evento de clic en línea
+													const e = window.event as MouseEvent;
+													if (e) e.stopPropagation();
 													handleDeleteCollection(collection.id);
 												}}
 											>
@@ -503,9 +525,9 @@ export function CollectionsSettings() {
 													)}
 												</div>
 
-												{(previewData?._count?.images || selectedCollection?._count?.images) && (
+												{selectedCollection && selectedCollection._count && selectedCollection._count.images > 0 && (
 													<p className="mt-4 text-xs text-muted-foreground">
-														{previewData?._count?.images || selectedCollection?._count?.images} imágenes asociadas
+														{selectedCollection._count.images} imágenes asociadas
 													</p>
 												)}
 											</div>
@@ -524,7 +546,7 @@ export function CollectionsSettings() {
 					</CardContent>
 				</Card>
 			</div>
-		</div>
+		</div >
 	);
 }
 
@@ -533,21 +555,21 @@ function generateCategoryColor(category: CollectionCategory): string {
 	switch (category) {
 		case CollectionCategory.ART:
 			return 'bg-blue-500';
-		case CollectionCategory.PHOTO:
+		case CollectionCategory.PHOTOGRAPHY:
 			return 'bg-green-500';
-		case CollectionCategory.DESIGN:
+		case CollectionCategory.DIGITAL:
 			return 'bg-yellow-500';
-		case CollectionCategory.ILLUSTRATION:
+		case CollectionCategory.NFT:
 			return 'bg-purple-500';
-		case CollectionCategory.CONCEPTART:
+		case CollectionCategory.GAME:
 			return 'bg-red-500';
-		case CollectionCategory.SKETCH:
+		case CollectionCategory.COMIC:
 			return 'bg-indigo-500';
-		case CollectionCategory.REFERENCE:
+		case CollectionCategory.MUSIC:
 			return 'bg-pink-500';
-		case CollectionCategory.MOODBOARD:
+		case CollectionCategory.MOVIE:
 			return 'bg-orange-500';
-		case CollectionCategory.CUSTOM:
+		case CollectionCategory.OTHER:
 			return 'bg-cyan-500';
 		default:
 			return 'bg-gray-500';

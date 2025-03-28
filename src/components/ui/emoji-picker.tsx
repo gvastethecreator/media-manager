@@ -11,11 +11,12 @@ import { Input } from './input';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
 interface EmojiPickerProps {
-	onEmojiSelect: (emoji: string) => void;
+	onEmojiSelect?: (emoji: string) => void;
 	value?: string;
 	className?: string;
 	compact?: boolean;
 	showLabel?: boolean;
+	onChange?: (emoji: string) => void;
 }
 
 const commonEmojis = [
@@ -24,7 +25,7 @@ const commonEmojis = [
 	'🍄', '🌿', '🔥', '💧', '⚡', '🌪️', '❄️', '🪄', '🧠', '💀'
 ];
 
-export function EmojiPicker({ onEmojiSelect, value, className, compact = false, showLabel = true }: EmojiPickerProps) {
+export function EmojiPicker({ onEmojiSelect, value, className, compact = false, showLabel = true, onChange }: EmojiPickerProps) {
 	const { theme } = useTheme();
 	const [searchTerm, setSearchTerm] = useState('');
 	const [selectedEmoji, setSelectedEmoji] = useState(value || '');
@@ -39,15 +40,17 @@ export function EmojiPicker({ onEmojiSelect, value, className, compact = false, 
 
 	const handleEmojiSelect = useCallback((emoji: any) => {
 		setSelectedEmoji(emoji.native);
-		onEmojiSelect(emoji.native);
+		if (onEmojiSelect) onEmojiSelect(emoji.native);
+		if (onChange) onChange(emoji.native);
 		if (compact) setOpen(false);
-	}, [onEmojiSelect, compact]);
+	}, [onEmojiSelect, compact, onChange]);
 
 	const handleQuickSelect = useCallback((emoji: string) => {
 		setSelectedEmoji(emoji);
-		onEmojiSelect(emoji);
+		if (onEmojiSelect) onEmojiSelect(emoji);
+		if (onChange) onChange(emoji);
 		if (compact) setOpen(false);
-	}, [onEmojiSelect, compact]);
+	}, [onEmojiSelect, compact, onChange]);
 
 	const handleSearchFocus = useCallback(() => {
 		if (inputRef.current) {

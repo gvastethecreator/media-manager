@@ -9,9 +9,8 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/services/toast.service';
-import { Collection } from '@/types/entities/collection';
-import { CreateCollectionData } from '@/types/entities/collection/base';
+import toastService from '@/services/toast.service';
+import { CollectionBase as Collection, CreateCollectionData } from '@/types/entities/collection/base';
 import { COLLECTION_CATEGORY_COLORS, COLLECTION_CATEGORY_EMOJIS, CollectionCategory, CollectionPlatform, CollectionRarity } from '@/types/entities/collection/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
@@ -51,6 +50,7 @@ interface CreateCollectionFormProps {
 	onCreated?: (collection: Collection) => void;
 	onUpdated?: (collection: Collection) => void;
 	onCancel?: () => void;
+	onPreview?: (data: any) => void;
 }
 
 export function CreateCollectionForm({
@@ -187,7 +187,7 @@ export function CreateCollectionForm({
 
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toast.error(`Error al ${isEditing ? 'actualizar' : 'crear'} la colección`, {
+			toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} la colección`, {
 				description: errorMessage,
 			});
 		} finally {
@@ -261,7 +261,7 @@ export function CreateCollectionForm({
 								<FormControl>
 									<EmojiPicker
 										value={field.value}
-										onChange={(emoji) => field.onChange(emoji)}
+										onEmojiSelect={(emoji) => field.onChange(emoji)}
 									/>
 								</FormControl>
 								<FormDescription>

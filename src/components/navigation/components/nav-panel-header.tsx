@@ -10,7 +10,7 @@ import { useTheme } from 'next-themes';
 import { memo, useCallback, useMemo } from 'react';
 
 // Constante con los temas disponibles
-const THEMES = ['light', 'dark', 'cafe', 'violeta', 'madera', 'nocturno', 'verde', 'atardecer', 'corporativo', 'carbon', 'teal', 'citrico'];
+const THEMES = ['light', 'dark', 'cafe', 'violeta', 'madera', 'nocturno', 'verde', 'atardecer', 'corporativo', 'carbon', 'teal', 'citrico', 'aurora', 'neon'];
 
 // Función para obtener el siguiente tema
 function getNextTheme(currentTheme: string | undefined): string {
@@ -21,6 +21,14 @@ function getNextTheme(currentTheme: string | undefined): string {
 	const currentIndex = THEMES.indexOf(currentTheme);
 	const nextIndex = (currentIndex + 1) % THEMES.length;
 	return THEMES[nextIndex];
+}
+
+// Función para aplicar el tema sin transiciones
+function applyTheme(nextTheme: string) {
+	if (typeof document !== 'undefined') {
+		// Aplicar el tema directamente al HTML
+		document.documentElement.setAttribute('data-theme', nextTheme);
+	}
 }
 
 // Función para obtener el icono del tema
@@ -50,6 +58,10 @@ function getThemeIcon(theme: string | undefined) {
 			return <Waves className="h-3.5 w-3.5" />;
 		case 'citrico':
 			return <Citrus className="h-3.5 w-3.5" />;
+		case 'aurora':
+			return <Waves className="h-3.5 w-3.5 text-purple-400" />;
+		case 'neon':
+			return <CircleDot className="h-3.5 w-3.5 text-pink-500" />;
 		default:
 			return <Sun className="h-3.5 w-3.5" />;
 	}
@@ -82,6 +94,10 @@ function getThemeName(theme: string | undefined): string {
 			return 'Teal';
 		case 'citrico':
 			return 'Cítrico';
+		case 'aurora':
+			return 'Aurora';
+		case 'neon':
+			return 'Neón';
 		default:
 			return 'Claro';
 	}
@@ -186,10 +202,8 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 		const nextTheme = getNextTheme(theme);
 		console.log(`Cambiando tema de ${theme} a ${nextTheme}`);
 
-		// Aplicar el tema directamente al HTML para asegurarnos
-		if (typeof document !== 'undefined') {
-			document.documentElement.setAttribute('data-theme', nextTheme);
-		}
+		// Aplicar el tema directamente sin transiciones
+		applyTheme(nextTheme);
 
 		// Actualizar el estado en next-themes
 		setTheme(nextTheme);

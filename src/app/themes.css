@@ -430,3 +430,133 @@ html[data-theme="citrico"] {
 	--chart-4: oklch(0.65 0.13 50);
 	--chart-5: oklch(0.45 0.12 130);
 }
+
+/*
+ * NUEVO TEMA: Aurora - Inspirado en las auroras boreales
+ * Una combinación de azules, púrpuras y verdes con un toque mágico
+ */
+html[data-theme="aurora"] {
+	/* Tipografía específica para tema aurora */
+	--font-theme: var(--font-sans);
+
+	/* Variables base */
+	--font-scale: 0.95;
+	--radius: 0.75rem;
+
+	/* Paleta de colores principal inspirada en auroras boreales */
+	--background: oklch(0.15 0.03 250);
+	--foreground: oklch(0.95 0.01 260);
+	--card: oklch(0.2 0.05 260);
+	--card-foreground: oklch(0.95 0.01 260);
+	--popover: oklch(0.2 0.05 260);
+	--popover-foreground: oklch(0.95 0.01 260);
+	--primary: oklch(0.65 0.2 190);
+	--primary-foreground: oklch(0.1 0.01 260);
+	--secondary: oklch(0.25 0.08 260);
+	--secondary-foreground: oklch(0.95 0.01 260);
+	--muted: oklch(0.25 0.06 260);
+	--muted-foreground: oklch(0.75 0.03 260);
+	--accent: oklch(0.55 0.22 150);
+	--accent-foreground: oklch(0.1 0.01 260);
+	--destructive: oklch(0.6 0.22 20);
+	--destructive-foreground: oklch(0.95 0.01 260);
+
+	/* Bordes y elementos de UI */
+	--border: oklch(0.3 0.1 250);
+	--input: oklch(0.3 0.1 250);
+	--ring: oklch(0.55 0.2 190);
+
+	/* Sombras con brillo tipo aurora con mayor notoriedad */
+	--shadow-color: oklch(0.5 0.2 190 / 0.35);
+	--shadow-xs: 0 2px 4px var(--shadow-color);
+	--shadow-sm: 0 3px 6px var(--shadow-color), 0 2px 4px var(--shadow-color);
+	--shadow-md: 0 8px 15px var(--shadow-color), 0 3px 8px var(--shadow-color);
+	--shadow-lg: 0 15px 30px var(--shadow-color), 0 5px 15px var(--shadow-color);
+	--shadow-xl: 0 25px 45px var(--shadow-color), 0 10px 25px var(--shadow-color);
+
+	/* Sidebar personalizada */
+	--sidebar-background: oklch(0.12 0.03 250);
+	--sidebar-foreground: oklch(0.95 0.01 260);
+	--sidebar-primary: oklch(0.65 0.2 190);
+	--sidebar-primary-foreground: oklch(0.1 0.01 260);
+	--sidebar-accent: oklch(0.3 0.1 150);
+	--sidebar-accent-foreground: oklch(0.95 0.01 260);
+	--sidebar-border: oklch(0.3 0.12 250);
+	--sidebar-ring: oklch(0.55 0.2 190);
+
+	/* Gráficos */
+	--chart-1: oklch(0.65 0.2 190);
+	--chart-2: oklch(0.5 0.2 150);
+	--chart-3: oklch(0.6 0.18 220);
+	--chart-4: oklch(0.5 0.15 100);
+	--chart-5: oklch(0.7 0.15 260);
+}
+
+/*
+ * NUEVO TEMA: Neón - Inspirado en luces de neón urbanas
+ * Colores brillantes contrastantes sobre fondo oscuro
+ */
+html[data-theme="neon"] {
+	/* Tipografía específica para tema neón */
+	--font-theme: var(--font-mono);
+
+	/* Variables base */
+	--font-scale: 0.95;
+	--radius: 0.5rem;
+
+	/* Paleta de colores estilo cyberpunk/neón */
+	--background: oklch(0.08 0.02 280);
+	--foreground: oklch(0.95 0.01 280);
+	--card: oklch(0.12 0.03 280);
+	--card-foreground: oklch(0.95 0.01 280);
+	--popover: oklch(0.12 0.03 280);
+	--popover-foreground: oklch(0.95 0.01 280);
+	--primary: oklch(0.7 0.25 350);
+	/* Rosa neón */
+	--primary-foreground: oklch(0.08 0.02 280);
+	--secondary: oklch(0.18 0.05 280);
+	--secondary-foreground: oklch(0.95 0.01 280);
+	--muted: oklch(0.18 0.04 280);
+	--muted-foreground: oklch(0.7 0.03 280);
+	--accent: oklch(0.7 0.3 130);
+	/* Verde neón */
+	--accent-foreground: oklch(0.08 0.02 280);
+	--destructive: oklch(0.6 0.3 40);
+	/* Naranja neón */
+	--destructive-foreground: oklch(0.08 0.02 280);
+
+	/* Bordes y elementos de UI con brillo neón */
+	--border: oklch(0.3 0.15 280);
+	--input: oklch(0.3 0.15 280);
+	--ring: oklch(0.7 0.25 350);
+
+	/* Sombras con brillo tipo neón con mayor notoriedad */
+	--shadow-color: oklch(0.7 0.25 350 / 0.35);
+	--shadow-xs: 0 2px 4px var(--shadow-color);
+	--shadow-sm: 0 3px 6px var(--shadow-color), 0 2px 4px var(--shadow-color);
+	--shadow-md: 0 8px 15px var(--shadow-color), 0 3px 8px var(--shadow-color);
+	--shadow-lg: 0 15px 30px var(--shadow-color), 0 5px 15px var(--shadow-color);
+	--shadow-xl: 0 30px 60px var(--shadow-color), 0 10px 30px var(--shadow-color);
+
+	/* Sidebar personalizada */
+	--sidebar-background: oklch(0.06 0.02 280);
+	--sidebar-foreground: oklch(0.95 0.01 280);
+	--sidebar-primary: oklch(0.7 0.25 350);
+	--sidebar-primary-foreground: oklch(0.08 0.02 280);
+	--sidebar-accent: oklch(0.18 0.05 280);
+	--sidebar-accent-foreground: oklch(0.95 0.01 280);
+	--sidebar-border: oklch(0.3 0.15 280);
+	--sidebar-ring: oklch(0.7 0.25 350);
+
+	/* Gráficos */
+	--chart-1: oklch(0.7 0.25 350);
+	/* Rosa neón */
+	--chart-2: oklch(0.7 0.3 130);
+	/* Verde neón */
+	--chart-3: oklch(0.7 0.27 60);
+	/* Naranja neón */
+	--chart-4: oklch(0.65 0.27 250);
+	/* Azul neón */
+	--chart-5: oklch(0.7 0.28 190);
+	/* Cian neón */
+}

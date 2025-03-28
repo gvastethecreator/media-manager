@@ -27,9 +27,8 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { toastService } from '@/services/toast.service';
 import { cn } from '@/lib/utils';
-import type { UploadedImageType } from '@/types/entities/entities';
+import toastService from '@/services/toast.service';
 import type { UploadedImageStats } from '@/types/uploaded-images';
 import {
 	FileSpreadsheet,
@@ -46,8 +45,8 @@ import {
 	X,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import type * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const sectionLogger = serverLogger.withContext('UploadedImagesSettings');
 

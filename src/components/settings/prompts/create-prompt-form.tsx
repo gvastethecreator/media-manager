@@ -18,8 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/services/toast.service';
-import { Prompt } from '@/types/entities/prompt/base';
+import toastService from '@/services/toast.service';
+import { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -50,10 +50,10 @@ const promptSchema = z.object({
 type PromptForm = z.infer<typeof promptSchema>;
 
 interface CreatePromptFormProps {
-	prompt?: Prompt | null;
+	prompt?: PromptBase | null;
 	isEditing?: boolean;
-	onCreated?: (prompt: Prompt) => void;
-	onUpdated?: (prompt: Prompt) => void;
+	onCreated?: (prompt: PromptBase) => void;
+	onUpdated?: (prompt: PromptBase) => void;
 	onCancel?: () => void;
 	onPreview?: (data: any) => void;
 }
@@ -118,11 +118,14 @@ export function CreatePromptForm({
 
 			if (isEditing && prompt) {
 				// Actualizar prompt existente
-				const updatedPrompt = await updatePrompt(prompt.id, data);
+				const updatedPrompt = await updatePrompt(prompt.id, {
+					id: prompt.id,
+					...data
+				});
 				if (onUpdated) {
 					onUpdated(updatedPrompt);
 				}
-				toast.success('Prompt actualizado correctamente');
+				toastService.success('Prompt actualizado correctamente');
 			} else {
 				// Crear nuevo prompt
 				const newPrompt = await createPrompt(data);
@@ -130,11 +133,11 @@ export function CreatePromptForm({
 					onCreated(newPrompt);
 				}
 				form.reset(); // Limpiar formulario después de crear
-				toast.success('Prompt creado correctamente');
+				toastService.success('Prompt creado correctamente');
 			}
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toast.error(isEditing ? 'Error al actualizar el prompt' : 'Error al crear el prompt', {
+			toastService.error(isEditing ? 'Error al actualizar el prompt' : 'Error al crear el prompt', {
 				description: errorMessage
 			});
 		} finally {
@@ -253,7 +256,7 @@ export function CreatePromptForm({
 								<FormControl>
 									<EmojiPicker
 										value={field.value}
-										onChange={field.onChange}
+										onEmojiSelect={field.onChange}
 									/>
 								</FormControl>
 								<FormDescription>

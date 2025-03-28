@@ -24,10 +24,9 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/services/toast.service';
+import toastService from '@/services/toast.service';
 import { Place } from '@/types/entities/place';
 import { ClimateType, GovernmentType, PlaceCategory, PlaceType } from '@/types/entities/place/enums';
-import { generateTagColor, generateTagEmoji } from '@/utils/tag/helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckIcon, MapPin, SparklesIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -78,12 +77,21 @@ const defaultValues: Partial<CreatePlaceFormValues> = {
 	isFavorite: false
 };
 
+// Definir una interfaz extendida para place con las propiedades adicionales
+interface ExtendedPlace extends Place {
+	economy?: string | null;
+	culture?: string | null;
+	notableLocations?: string | null;
+	notablePersons?: string | null;
+}
+
 interface CreatePlaceFormProps {
-	place?: Place | null;
+	place?: ExtendedPlace | null;
 	isEditing?: boolean;
 	onCreated?: (place: Place) => void;
 	onUpdated?: (place: Place) => void;
 	onCancel?: () => void;
+	onPreview?: (data: any) => void;
 }
 
 export function CreatePlaceForm({
@@ -116,11 +124,11 @@ export function CreatePlaceForm({
 				population: place.population || null,
 				government: place.government || null,
 				dangerLevel: place.dangerLevel || null,
-				economy: place.economy || null,
-				culture: place.culture || null,
+				economy: (place as ExtendedPlace).economy || null,
+				culture: (place as ExtendedPlace).culture || null,
 				history: place.history || null,
-				notableLocations: place.notableLocations || null,
-				notablePersons: place.notablePersons || null,
+				notableLocations: (place as ExtendedPlace).notableLocations || null,
+				notablePersons: (place as ExtendedPlace).notablePersons || null,
 				category: place.category || null,
 				isFavorite: place.isFavorite || false
 			};
@@ -128,6 +136,65 @@ export function CreatePlaceForm({
 			form.reset(formValues);
 		}
 	}, [form, isEditing, place]);
+
+	// Función para generar color basado en el nombre
+	function generateTagColor(text: string): string {
+		if (!text) return '#6b7280';
+
+		// Generar un hash del texto
+		let hash = 0;
+		for (let i = 0; i < text.length; i++) {
+			hash = text.charCodeAt(i) + ((hash << 5) - hash);
+		}
+
+		// Convertir a color hexadecimal
+		let color = '#';
+		for (let i = 0; i < 3; i++) {
+			const value = (hash >> (i * 8)) & 0xff;
+			color += ('00' + value.toString(16)).substr(-2);
+		}
+
+		return color;
+	}
+
+	// Función para generar emoji basado en el texto
+	function generateTagEmoji(name: string, category?: string): string {
+		// Mapeo básico de categorías a emojis
+		const categoryEmojis: Record<string, string> = {
+			'Ciudad': '🏙️',
+			'Pueblo': '🏘️',
+			'Aldea': '🏡',
+			'Bosque': '🌲',
+			'Montaña': '⛰️',
+			'Desierto': '🏜️',
+			'Castillo': '🏰',
+			'Ruina': '🏚️',
+			'Mazmorra': '🧱',
+			'Cueva': '🕳️',
+			'Fortaleza': '🏯',
+		};
+
+		// Si hay categoría y está en el mapeo, usar ese emoji
+		if (category && categoryEmojis[category]) {
+			return categoryEmojis[category];
+		}
+
+		// Análisis básico del nombre para decidir un emoji
+		const lowerName = name.toLowerCase();
+
+		if (lowerName.includes('ciudad')) return '🏙️';
+		if (lowerName.includes('pueblo')) return '🏘️';
+		if (lowerName.includes('aldea')) return '🏡';
+		if (lowerName.includes('bosque')) return '🌲';
+		if (lowerName.includes('montaña')) return '⛰️';
+		if (lowerName.includes('desierto')) return '🏜️';
+		if (lowerName.includes('castillo')) return '🏰';
+		if (lowerName.includes('ruina')) return '🏚️';
+		if (lowerName.includes('cueva')) return '🕳️';
+
+		// Emoji por defecto
+		return '📍';
+	}
 
 	// Generar sugerencias de color y emoji basados en el tipo o nombre
 	const generateSuggestions = () => {
@@ -139,17 +206,17 @@ export function CreatePlaceForm({
 		const baseText = type || category || name;
 
 		if (!baseText) {
-			toast.error('Introduce al menos un nombre para generar sugerencias');
+			toastService.error('Introduce al menos un nombre para generar sugerencias');
 			return;
 		}
 
 		const newColor = generateTagColor(baseText);
-		const newEmoji = generateTagEmoji(baseText, category || type);
+		const newEmoji = generateTagEmoji(baseText, (category || type) || undefined);
 
 		form.setValue('color', newColor);
 		form.setValue('emoji', newEmoji);
 
-		toast.success('Sugerencias generadas', {
+		toastService.success('Sugerencias generadas', {
 			description: 'Se han generado nuevas sugerencias de color y emoji.'
 		});
 	};
@@ -163,22 +230,22 @@ export function CreatePlaceForm({
 				const updatedPlace = await updatePlace(place.id, values);
 
 				if (onUpdated) {
-					onUpdated(updatedPlace);
+					onUpdated(updatedPlace as unknown as Place);
 				}
 
-				toast.success('Lugar actualizado', {
+				toastService.success('Lugar actualizado', {
 					description: 'El lugar ha sido actualizado correctamente.'
 				});
 			} else {
 				const newPlace = await createPlace(values);
 
 				if (onCreated) {
-					onCreated(newPlace);
+					onCreated(newPlace as unknown as Place);
 				}
 
 				form.reset(defaultValues);
 
-				toast.success('Lugar creado', {
+				toastService.success('Lugar creado', {
 					description: 'El lugar ha sido creado correctamente.'
 				});
 			}
@@ -187,7 +254,7 @@ export function CreatePlaceForm({
 				? error.message
 				: 'Ocurrió un error al procesar el lugar';
 
-			toast.error('Error', {
+			toastService.error('Error', {
 				description: errorMessage
 			});
 		} finally {
@@ -254,6 +321,7 @@ export function CreatePlaceForm({
 										<EmojiPicker
 											value={field.value}
 											onChange={field.onChange}
+											onEmojiSelect={field.onChange}
 										/>
 									</FormControl>
 									<FormDescription>
