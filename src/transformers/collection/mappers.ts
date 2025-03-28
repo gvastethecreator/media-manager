@@ -4,7 +4,12 @@
  */
 
 import type { CollectionExtended, CollectionSummary } from '@/types/entities/collection';
-import { COLLECTION_CATEGORY_COLORS, COLLECTION_CATEGORY_EMOJIS, type CollectionCategory, CollectionRarity } from '@/types/entities/collection';
+import {
+	COLLECTION_CATEGORY_COLORS,
+	COLLECTION_CATEGORY_EMOJIS,
+	type CollectionCategory,
+	CollectionRarity,
+} from '@/types/entities/collection';
 import type { Image, Collection as PrismaCollection } from '@prisma/client';
 import { parseCollectionFilters } from './serializers';
 
@@ -15,10 +20,10 @@ import { parseCollectionFilters } from './serializers';
  * @returns Array de CollectionExtended
  */
 export function mapCollectionsFromPrisma(
-  collections: PrismaCollection[],
-  imageCountMap?: Record<string, number>
+	collections: PrismaCollection[],
+	imageCountMap?: Record<string, number>
 ): CollectionExtended[] {
-  return collections.map(collection => mapCollectionFromPrisma(collection, imageCountMap?.[collection.id]));
+	return collections.map((collection) => mapCollectionFromPrisma(collection, imageCountMap?.[collection.id]));
 }
 
 /**
@@ -27,25 +32,22 @@ export function mapCollectionsFromPrisma(
  * @param imageCount Contador opcional de imágenes
  * @returns CollectionExtended
  */
-export function mapCollectionFromPrisma(
-  collection: PrismaCollection,
-  imageCount?: number
-): CollectionExtended {
-  const parsedFilters = collection.filters ? parseCollectionFilters(collection.filters) : [];
+export function mapCollectionFromPrisma(collection: PrismaCollection, imageCount?: number): CollectionExtended {
+	const parsedFilters = collection.filters ? parseCollectionFilters(collection.filters) : [];
 
-  return {
-    ...collection,
-    // Propiedades adicionales de UI
-    isSelected: false,
-    isHovered: false,
-    isOpen: false,
-    isLoading: false,
-    hasError: false,
-    // Datos calculados
-    parsedFilters,
-    imageCount: imageCount || 0,
-    totalValue: collection.price || 0,
-  };
+	return {
+		...collection,
+		// Propiedades adicionales de UI
+		isSelected: false,
+		isHovered: false,
+		isOpen: false,
+		isLoading: false,
+		hasError: false,
+		// Datos calculados
+		parsedFilters,
+		imageCount: imageCount || 0,
+		totalValue: collection.price || 0,
+	};
 }
 
 /**
@@ -54,15 +56,15 @@ export function mapCollectionFromPrisma(
  * @returns Array de CollectionSummary
  */
 export function mapCollectionsToSummary(collections: CollectionExtended[]): CollectionSummary[] {
-  return collections.map(collection => ({
-    id: collection.id,
-    name: collection.name,
-    emoji: collection.emoji || '🌟',
-    color: collection.color || '#3b82f6',
-    imageCount: collection.imageCount || 0,
-    category: collection.category || undefined,
-    rarity: collection.rarity || undefined,
-  }));
+	return collections.map((collection) => ({
+		id: collection.id,
+		name: collection.name,
+		emoji: collection.emoji || '🌟',
+		color: collection.color || '#3b82f6',
+		imageCount: collection.imageCount || 0,
+		category: collection.category || undefined,
+		rarity: collection.rarity || undefined,
+	}));
 }
 
 /**
@@ -71,21 +73,21 @@ export function mapCollectionsToSummary(collections: CollectionExtended[]): Coll
  * @returns Datos parciales de Collection
  */
 export function mapFormToCollection(formData: Record<string, any>): Partial<PrismaCollection> {
-  return {
-    name: formData.name,
-    description: formData.description || '',
-    emoji: formData.emoji || '🌟',
-    color: formData.color || '#3b82f6',
-    category: formData.category || null,
-    rarity: formData.rarity || CollectionRarity.COMMON,
-    url: formData.url || null,
-    alternativeUrl: formData.alternativeUrl || null,
-    platform: formData.platform || null,
-    price: formData.price ? Number.parseFloat(formData.price) : null,
-    isFavorite: Boolean(formData.isFavorite),
-    presetId: formData.presetId || null,
-    texture: formData.texture || null,
-  };
+	return {
+		name: formData.name,
+		description: formData.description || '',
+		emoji: formData.emoji || '🌟',
+		color: formData.color || '#3b82f6',
+		category: formData.category || null,
+		rarity: formData.rarity || CollectionRarity.COMMON,
+		url: formData.url || null,
+		alternativeUrl: formData.alternativeUrl || null,
+		platform: formData.platform || null,
+		price: formData.price ? Number.parseFloat(formData.price) : null,
+		isFavorite: Boolean(formData.isFavorite),
+		presetId: formData.presetId || null,
+		texture: formData.texture || null,
+	};
 }
 
 /**
@@ -93,20 +95,18 @@ export function mapFormToCollection(formData: Record<string, any>): Partial<Pris
  * @param collection Colección a procesar
  * @returns Colección con color y emoji asignados
  */
-export function applyDefaultStyleByCategory(
-  collection: Partial<CollectionExtended>
-): Partial<CollectionExtended> {
-  if (!collection.category) {
-    return collection;
-  }
+export function applyDefaultStyleByCategory(collection: Partial<CollectionExtended>): Partial<CollectionExtended> {
+	if (!collection.category) {
+		return collection;
+	}
 
-  const category = collection.category as CollectionCategory;
+	const category = collection.category as CollectionCategory;
 
-  return {
-    ...collection,
-    color: collection.color || COLLECTION_CATEGORY_COLORS[category] || '#3b82f6',
-    emoji: collection.emoji || COLLECTION_CATEGORY_EMOJIS[category] || '🌟',
-  };
+	return {
+		...collection,
+		color: collection.color || COLLECTION_CATEGORY_COLORS[category] || '#3b82f6',
+		emoji: collection.emoji || COLLECTION_CATEGORY_EMOJIS[category] || '🌟',
+	};
 }
 
 /**
@@ -115,27 +115,24 @@ export function applyDefaultStyleByCategory(
  * @param maxImages Número máximo de imágenes a extraer
  * @returns URLs de imágenes destacadas
  */
-export function extractFeaturedImages(
-  collection: CollectionExtended & { images?: Image[] },
-  maxImages = 3
-): string[] {
-  if (!collection.images || collection.images.length === 0) {
-    return [];
-  }
+export function extractFeaturedImages(collection: CollectionExtended & { images?: Image[] }, maxImages = 3): string[] {
+	if (!collection.images || collection.images.length === 0) {
+		return [];
+	}
 
-  // Priorizar la imagen destacada si existe
-  const featuredImages: string[] = [];
+	// Priorizar la imagen destacada si existe
+	const featuredImages: string[] = [];
 
-  if (collection.featuredImage) {
-    featuredImages.push(collection.featuredImage);
-  }
+	if (collection.featuredImage) {
+		featuredImages.push(collection.featuredImage);
+	}
 
-  // Agregar hasta maxImages imágenes de la colección
-  const remainingImages = collection.images
-    .filter(img => img.path !== collection.featuredImage)
-    .slice(0, maxImages - featuredImages.length);
+	// Agregar hasta maxImages imágenes de la colección
+	const remainingImages = collection.images
+		.filter((img) => img.path !== collection.featuredImage)
+		.slice(0, maxImages - featuredImages.length);
 
-  return [...featuredImages, ...remainingImages.map(img => img.path)];
+	return [...featuredImages, ...remainingImages.map((img) => img.path)];
 }
 
 /**
@@ -144,17 +141,17 @@ export function extractFeaturedImages(
  * @returns Objeto con formato para Prisma
  */
 export function mapCreateCollectionDataToPrisma(data: any): any {
-    return {
-        name: data.name,
-        emoji: data.emoji || null,
-        color: data.color || null,
-        description: data.description || null,
-        isPrivate: data.isPrivate || false,
-        isFavorite: data.isFavorite || false,
-        featuredImageId: data.featuredImage || null,
-        parentId: data.parentId || null,
-        settings: typeof data.settings === 'object' ? JSON.stringify(data.settings) : data.settings,
-    };
+	return {
+		name: data.name,
+		emoji: data.emoji || null,
+		color: data.color || null,
+		description: data.description || null,
+		isPrivate: data.isPrivate || false,
+		isFavorite: data.isFavorite || false,
+		featuredImageId: data.featuredImage || null,
+		parentId: data.parentId || null,
+		settings: typeof data.settings === 'object' ? JSON.stringify(data.settings) : data.settings,
+	};
 }
 
 /**
@@ -163,24 +160,22 @@ export function mapCreateCollectionDataToPrisma(data: any): any {
  * @returns Objeto con formato para Prisma
  */
 export function mapUpdateCollectionDataToPrisma(data: any): any {
-    const updateData: any = {};
+	const updateData: any = {};
 
-    // Solo incluir campos que estén presentes en los datos
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.emoji !== undefined) updateData.emoji = data.emoji;
-    if (data.color !== undefined) updateData.color = data.color;
-    if (data.description !== undefined) updateData.description = data.description;
-    if (data.isPrivate !== undefined) updateData.isPrivate = data.isPrivate;
-    if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-    if (data.featuredImage !== undefined) updateData.featuredImageId = data.featuredImage;
-    if (data.parentId !== undefined) updateData.parentId = data.parentId;
+	// Solo incluir campos que estén presentes en los datos
+	if (data.name !== undefined) updateData.name = data.name;
+	if (data.emoji !== undefined) updateData.emoji = data.emoji;
+	if (data.color !== undefined) updateData.color = data.color;
+	if (data.description !== undefined) updateData.description = data.description;
+	if (data.isPrivate !== undefined) updateData.isPrivate = data.isPrivate;
+	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+	if (data.featuredImage !== undefined) updateData.featuredImageId = data.featuredImage;
+	if (data.parentId !== undefined) updateData.parentId = data.parentId;
 
-    // Convertir settings a string si es un objeto
-    if (data.settings !== undefined) {
-        updateData.settings = typeof data.settings === 'object'
-            ? JSON.stringify(data.settings)
-            : data.settings;
-    }
+	// Convertir settings a string si es un objeto
+	if (data.settings !== undefined) {
+		updateData.settings = typeof data.settings === 'object' ? JSON.stringify(data.settings) : data.settings;
+	}
 
-    return updateData;
+	return updateData;
 }

@@ -17,17 +17,17 @@ import { CharacterCard } from '../modules/layouts/character-card-layout';
 import { CollectionCard } from '../modules/layouts/collection-card-layout';
 import { ConceptCard } from '../modules/layouts/concept-card-layout';
 import { FolderCard } from '../modules/layouts/folder-card-layout';
-import { NoteCard } from '../modules/layouts/note-card-layout';
 import { PlaceCard } from '../modules/layouts/place-card-layout';
 import { PromptCard } from '../modules/layouts/prompt-card-layout';
 import { TagsCard } from '../modules/layouts/tags-card-layout';
 import { WorldItemAdapter } from './world-item-adapter';
+// Importamos el nuevo componente NoteCard
+import { MemoizedNoteCard } from '@/components/cards/note-card';
 
 import React, { useEffect, useRef, useState } from 'react';
 import type { CardData } from '../modules/layouts/album-card-layout';
 import type { CharacterCardProps } from '../modules/layouts/character-card-layout';
 import type { ConceptCardProps } from '../modules/layouts/concept-card-layout';
-import type { NoteCardProps } from '../modules/layouts/note-card-layout';
 import type { PromptCardProps } from '../modules/layouts/prompt-card-layout';
 import type { CardOptions } from '../types/unified-card-types';
 
@@ -42,7 +42,6 @@ const debug = createDebugger('EntityCardAdapter', process.env.NODE_ENV === 'deve
 interface EntityBase {
 	presetId?: string;
 }
-
 
 // Estructura para las estadísticas de personajes como record para evitar errores de tipo
 export interface CharacterStats {
@@ -218,14 +217,7 @@ export function simplifiedEntityCardAdapter({
 	const normalizedEntity = normalizeEntityData(entity, entityType);
 
 	// Extraer propiedades básicas
-	const {
-		name: title,
-		description,
-		image,
-		featuredImage,
-		thumbnailUrl,
-		coverImage,
-	} = normalizedEntity;
+	const { name: title, description, image, featuredImage, thumbnailUrl, coverImage } = normalizedEntity;
 
 	// Determinar la imagen a mostrar usando cualquier propiedad de imagen disponible
 	const displayImage =
@@ -303,18 +295,18 @@ export function simplifiedEntityCardAdapter({
 			case 'folder':
 				console.info('📁 Estadísticas de carpeta:', {
 					imágenes: normalizedEntity._count?.images || 0,
-					tamaño: normalizedEntity.totalSize || 'desconocido'
+					tamaño: normalizedEntity.totalSize || 'desconocido',
 				});
 				break;
 			case 'album':
 				console.info('📚 Estadísticas de álbum:', {
-					imágenes: normalizedEntity._count?.images || 0
+					imágenes: normalizedEntity._count?.images || 0,
 				});
 				break;
 			case 'character':
 				console.info('👤 Información de personaje:', {
 					stats: normalizedEntity.stats || 'no disponible',
-					relationships: normalizedEntity.relationships?.length || 0
+					relationships: normalizedEntity.relationships?.length || 0,
 				});
 				break;
 			// Más casos según sea necesario
@@ -390,12 +382,12 @@ export const EntityCardAdapter = React.memo(
 
 				// Cargar el preset usando una función estable
 				loadEntityPresetConfig(entityRef.current, entityType, defaultOptions)
-					.then(presetOptions => {
+					.then((presetOptions) => {
 						debug.logState('cardOptions', presetOptions);
 						// Actualizar las opciones con las del preset
 						setCardOptions(presetOptions);
 					})
-					.catch(error => {
+					.catch((error) => {
 						console.error('Error cargando preset para tarjeta de entidad:', error);
 						// En caso de error, usar las opciones proporcionadas
 						setCardOptions(defaultOptions);
@@ -460,9 +452,10 @@ export const EntityCardAdapter = React.memo(
 				const albumData = {
 					...normalizedEntity,
 					// Asegurar que createdAt es una fecha
-					createdAt: normalizedEntity.createdAt instanceof Date
-						? normalizedEntity.createdAt
-						: new Date(normalizedEntity.createdAt || Date.now()),
+					createdAt:
+						normalizedEntity.createdAt instanceof Date
+							? normalizedEntity.createdAt
+							: new Date(normalizedEntity.createdAt || Date.now()),
 					// Asegurar que _count existe
 					_count: normalizedEntity._count || { images: normalizedEntity.imageCount || 0 },
 				};
@@ -495,7 +488,7 @@ export const EntityCardAdapter = React.memo(
 			}
 
 			case 'note': {
-				return <NoteCard note={normalizedEntity as NoteCardProps['note']} {...commonProps} />;
+				return <MemoizedNoteCard note={normalizedEntity as Note} {...commonProps} />;
 			}
 
 			default:
@@ -530,7 +523,7 @@ export const EntityCardAdapter = React.memo(
 			debug.logRender({
 				message: 'Re-renderizado por cambio de entidad',
 				prevId: prevProps.entity.id,
-				nextId: nextProps.entity.id
+				nextId: nextProps.entity.id,
 			});
 		}
 

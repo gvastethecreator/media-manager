@@ -17,24 +17,21 @@ interface FilterLayerProps {
 /**
  * 🎨 Componente interno de la capa de filtros
  */
-const FilterLayerComponent = ({
-	processedConfig,
-	style,
-	isVisible,
-	width,
-	height,
-}: FilterLayerProps) => {
+const FilterLayerComponent = ({ processedConfig, style, isVisible, width, height }: FilterLayerProps) => {
 	// Referencias y estado
 	const containerRef = useRef<HTMLDivElement>(null);
 	const animationFrameRef = useRef<number>();
 
 	// 🎨 Generar estilos de filtro
-	const filterStyle = useMemo(() => ({
-		...style,
-		...generateFilterStyles(processedConfig),
-		width: `${width}px`,
-		height: `${height}px`,
-	}), [processedConfig, style, width, height]);
+	const filterStyle = useMemo(
+		() => ({
+			...style,
+			...generateFilterStyles(processedConfig),
+			width: `${width}px`,
+			height: `${height}px`,
+		}),
+		[processedConfig, style, width, height]
+	);
 
 	// ⚡ Manejar animación de distorsión
 	const animate = useCallback(() => {
@@ -44,7 +41,7 @@ const FilterLayerComponent = ({
 		if (!container) return;
 
 		// Actualizar transformación
-		container.style.transform = `scale(${1 + Math.sin(Date.now() * (processedConfig.distortion.speed || 1) / 1000) * 0.02})`;
+		container.style.transform = `scale(${1 + Math.sin((Date.now() * (processedConfig.distortion.speed || 1)) / 1000) * 0.02})`;
 
 		// Continuar animación
 		animationFrameRef.current = requestAnimationFrame(animate);

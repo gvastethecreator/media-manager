@@ -9,12 +9,18 @@ export type { BaseCardLayoutProps, BaseEntityCardProps } from './base-card-layou
 
 // Exportar componentes de secciones
 export {
-    CardDescriptionSection, CardFooter, CardHeader, CardImageSection,
-    CardMetadataSection
+	CardDescriptionSection,
+	CardFooter,
+	CardHeader,
+	CardImageSection,
+	CardMetadataSection,
 } from './card-sections';
 
 export type {
-    CardDescriptionSectionProps, CardFooterProps, CardHeaderProps, CardImageSectionProps,
-    CardMetadataSectionProps, MetadataItem
+	CardDescriptionSectionProps,
+	CardFooterProps,
+	CardHeaderProps,
+	CardImageSectionProps,
+	CardMetadataSectionProps,
+	MetadataItem,
 } from './card-sections';
-

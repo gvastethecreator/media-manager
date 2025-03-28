@@ -5,89 +5,89 @@
 
 import { z } from 'zod';
 import {
-    type PlaceDanger,
-    type PlaceFilters,
-    type PlaceResource,
-    type PlaceStats,
-    ClimateType,
-    DangerLevel,
-    GovernmentType,
-    PlaceCategory,
-    PlaceType
+	type PlaceDanger,
+	type PlaceFilters,
+	type PlaceResource,
+	type PlaceStats,
+	ClimateType,
+	DangerLevel,
+	GovernmentType,
+	PlaceCategory,
+	PlaceType,
 } from '../../types/entities/place';
 
 /**
  * Esquema para validar un lugar
  */
 export const placeSchema = z.object({
-  name: z.string().min(1, 'El nombre es obligatorio').max(100, 'El nombre es demasiado largo'),
-  emoji: z.string().nullable().optional(),
-  color: z.string().nullable().optional(),
-  description: z.string().nullable().optional(),
-  shortcut: z.string().nullable().optional(),
-  region: z.string().nullable().optional(),
-  type: z.nativeEnum(PlaceType).nullable().optional(),
-  climate: z.nativeEnum(ClimateType).nullable().optional(),
-  population: z.number().int().positive().nullable().optional(),
-  government: z.nativeEnum(GovernmentType).nullable().optional(),
-  category: z.nativeEnum(PlaceCategory).nullable().optional(),
-  lore: z.string().nullable().optional(),
-  history: z.string().nullable().optional(),
-  isFavorite: z.boolean().optional().default(false)
+	name: z.string().min(1, 'El nombre es obligatorio').max(100, 'El nombre es demasiado largo'),
+	emoji: z.string().nullable().optional(),
+	color: z.string().nullable().optional(),
+	description: z.string().nullable().optional(),
+	shortcut: z.string().nullable().optional(),
+	region: z.string().nullable().optional(),
+	type: z.nativeEnum(PlaceType).nullable().optional(),
+	climate: z.nativeEnum(ClimateType).nullable().optional(),
+	population: z.number().int().positive().nullable().optional(),
+	government: z.nativeEnum(GovernmentType).nullable().optional(),
+	category: z.nativeEnum(PlaceCategory).nullable().optional(),
+	lore: z.string().nullable().optional(),
+	history: z.string().nullable().optional(),
+	isFavorite: z.boolean().optional().default(false),
 });
 
 /**
  * Esquema para validar un peligro de lugar
  */
 export const placeDangerSchema = z.object({
-  name: z.string().min(1, 'El nombre del peligro es obligatorio'),
-  description: z.string().optional(),
-  level: z.nativeEnum(DangerLevel).optional(),
-  location: z.string().optional()
+	name: z.string().min(1, 'El nombre del peligro es obligatorio'),
+	description: z.string().optional(),
+	level: z.nativeEnum(DangerLevel).optional(),
+	location: z.string().optional(),
 });
 
 /**
  * Esquema para validar un recurso de lugar
  */
 export const placeResourceSchema = z.object({
-  name: z.string().min(1, 'El nombre del recurso es obligatorio'),
-  description: z.string().optional(),
-  rarity: z.string().optional(),
-  amount: z.string().optional()
+	name: z.string().min(1, 'El nombre del recurso es obligatorio'),
+	description: z.string().optional(),
+	rarity: z.string().optional(),
+	amount: z.string().optional(),
 });
 
 /**
  * Esquema para validar estadísticas de lugar
  */
 export const placeStatsSchema = z.object({
-  population: z.number().int().positive().optional(),
-  size: z.string().optional(),
-  wealth: z.string().optional(),
-  militaryPower: z.string().optional(),
-  magicalInfluence: z.string().optional(),
-  stability: z.string().optional(),
-  reputation: z.string().optional(),
-  technologicalLevel: z.string().optional(),
-  customStats: z.record(z.string(), z.union([z.string(), z.number()])).optional()
+	population: z.number().int().positive().optional(),
+	size: z.string().optional(),
+	wealth: z.string().optional(),
+	militaryPower: z.string().optional(),
+	magicalInfluence: z.string().optional(),
+	stability: z.string().optional(),
+	reputation: z.string().optional(),
+	technologicalLevel: z.string().optional(),
+	customStats: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
 });
 
 /**
  * Esquema para validar filtros de lugar
  */
 export const placeFiltersSchema = z.object({
-  searchQuery: z.string().optional(),
-  categories: z.array(z.string()).optional(),
-  types: z.array(z.string()).optional(),
-  climates: z.array(z.string()).optional(),
-  governments: z.array(z.string()).optional(),
-  dangerLevels: z.array(z.string()).optional(),
-  populationMin: z.number().int().optional(),
-  populationMax: z.number().int().optional(),
-  onlyFavorites: z.boolean().optional(),
-  hasImages: z.boolean().optional(),
-  hasNotes: z.boolean().optional(),
-  hasConcepts: z.boolean().optional(),
-  hasPrompts: z.boolean().optional()
+	searchQuery: z.string().optional(),
+	categories: z.array(z.string()).optional(),
+	types: z.array(z.string()).optional(),
+	climates: z.array(z.string()).optional(),
+	governments: z.array(z.string()).optional(),
+	dangerLevels: z.array(z.string()).optional(),
+	populationMin: z.number().int().optional(),
+	populationMax: z.number().int().optional(),
+	onlyFavorites: z.boolean().optional(),
+	hasImages: z.boolean().optional(),
+	hasNotes: z.boolean().optional(),
+	hasConcepts: z.boolean().optional(),
+	hasPrompts: z.boolean().optional(),
 });
 
 /**
@@ -96,7 +96,7 @@ export const placeFiltersSchema = z.object({
  * @returns Objeto de resultado de validación
  */
 export function validatePlace(place: unknown) {
-  return placeSchema.safeParse(place);
+	return placeSchema.safeParse(place);
 }
 
 /**
@@ -105,7 +105,7 @@ export function validatePlace(place: unknown) {
  * @returns Objeto de resultado de validación
  */
 export function validatePlaceDangers(dangers: unknown) {
-  return z.array(placeDangerSchema).safeParse(dangers);
+	return z.array(placeDangerSchema).safeParse(dangers);
 }
 
 /**
@@ -114,7 +114,7 @@ export function validatePlaceDangers(dangers: unknown) {
  * @returns Objeto de resultado de validación
  */
 export function validatePlaceResources(resources: unknown) {
-  return z.array(placeResourceSchema).safeParse(resources);
+	return z.array(placeResourceSchema).safeParse(resources);
 }
 
 /**
@@ -123,7 +123,7 @@ export function validatePlaceResources(resources: unknown) {
  * @returns Objeto de resultado de validación
  */
 export function validatePlaceStats(stats: unknown) {
-  return placeStatsSchema.safeParse(stats);
+	return placeStatsSchema.safeParse(stats);
 }
 
 /**
@@ -132,7 +132,7 @@ export function validatePlaceStats(stats: unknown) {
  * @returns Objeto de resultado de validación
  */
 export function validatePlaceFilters(filters: unknown) {
-  return placeFiltersSchema.safeParse(filters);
+	return placeFiltersSchema.safeParse(filters);
 }
 
 /**
@@ -141,22 +141,22 @@ export function validatePlaceFilters(filters: unknown) {
  * @returns Peligros validados o null si es inválido
  */
 export function parseAndValidateDangers(dangersJson: string | null): PlaceDanger[] | null {
-  if (!dangersJson) return [];
+	if (!dangersJson) return [];
 
-  try {
-    const dangers = JSON.parse(dangersJson);
-    const validationResult = validatePlaceDangers(dangers);
+	try {
+		const dangers = JSON.parse(dangersJson);
+		const validationResult = validatePlaceDangers(dangers);
 
-    if (validationResult.success) {
-      return validationResult.data;
-    } else {
-      console.error('Validación de peligros fallida:', validationResult.error);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error al parsear peligros:', error);
-    return null;
-  }
+		if (validationResult.success) {
+			return validationResult.data;
+		} else {
+			console.error('Validación de peligros fallida:', validationResult.error);
+			return null;
+		}
+	} catch (error) {
+		console.error('Error al parsear peligros:', error);
+		return null;
+	}
 }
 
 /**
@@ -165,22 +165,22 @@ export function parseAndValidateDangers(dangersJson: string | null): PlaceDanger
  * @returns Recursos validados o null si es inválido
  */
 export function parseAndValidateResources(resourcesJson: string | null): PlaceResource[] | null {
-  if (!resourcesJson) return [];
+	if (!resourcesJson) return [];
 
-  try {
-    const resources = JSON.parse(resourcesJson);
-    const validationResult = validatePlaceResources(resources);
+	try {
+		const resources = JSON.parse(resourcesJson);
+		const validationResult = validatePlaceResources(resources);
 
-    if (validationResult.success) {
-      return validationResult.data;
-    } else {
-      console.error('Validación de recursos fallida:', validationResult.error);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error al parsear recursos:', error);
-    return null;
-  }
+		if (validationResult.success) {
+			return validationResult.data;
+		} else {
+			console.error('Validación de recursos fallida:', validationResult.error);
+			return null;
+		}
+	} catch (error) {
+		console.error('Error al parsear recursos:', error);
+		return null;
+	}
 }
 
 /**
@@ -189,22 +189,22 @@ export function parseAndValidateResources(resourcesJson: string | null): PlaceRe
  * @returns Estadísticas validadas o null si es inválido
  */
 export function parseAndValidateStats(statsJson: string | null): PlaceStats | null {
-  if (!statsJson) return {};
+	if (!statsJson) return {};
 
-  try {
-    const stats = JSON.parse(statsJson);
-    const validationResult = validatePlaceStats(stats);
+	try {
+		const stats = JSON.parse(statsJson);
+		const validationResult = validatePlaceStats(stats);
 
-    if (validationResult.success) {
-      return validationResult.data;
-    } else {
-      console.error('Validación de estadísticas fallida:', validationResult.error);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error al parsear estadísticas:', error);
-    return null;
-  }
+		if (validationResult.success) {
+			return validationResult.data;
+		} else {
+			console.error('Validación de estadísticas fallida:', validationResult.error);
+			return null;
+		}
+	} catch (error) {
+		console.error('Error al parsear estadísticas:', error);
+		return null;
+	}
 }
 
 /**
@@ -213,20 +213,20 @@ export function parseAndValidateStats(statsJson: string | null): PlaceStats | nu
  * @returns Filtros validados o null si es inválido
  */
 export function parseAndValidateFilters(filtersJson: string | null): PlaceFilters | null {
-  if (!filtersJson) return {};
+	if (!filtersJson) return {};
 
-  try {
-    const filters = JSON.parse(filtersJson);
-    const validationResult = validatePlaceFilters(filters);
+	try {
+		const filters = JSON.parse(filtersJson);
+		const validationResult = validatePlaceFilters(filters);
 
-    if (validationResult.success) {
-      return validationResult.data;
-    } else {
-      console.error('Validación de filtros fallida:', validationResult.error);
-      return null;
-    }
-  } catch (error) {
-    console.error('Error al parsear filtros:', error);
-    return null;
-  }
+		if (validationResult.success) {
+			return validationResult.data;
+		} else {
+			console.error('Validación de filtros fallida:', validationResult.error);
+			return null;
+		}
+	} catch (error) {
+		console.error('Error al parsear filtros:', error);
+		return null;
+	}
 }

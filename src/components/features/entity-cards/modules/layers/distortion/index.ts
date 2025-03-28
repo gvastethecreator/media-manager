@@ -8,7 +8,10 @@
  */
 
 // Exportar la implementación principal
-export { distortionLayerImplementation as default, distortionLayerImplementation } from './distortion-layer-implementation';
+export {
+	distortionLayerImplementation as default,
+	distortionLayerImplementation,
+} from './distortion-layer-implementation';
 
 // Exportar componentes individuales para uso directo
 export * from './distortion-effects-module';
@@ -19,4 +22,3 @@ export * from './use-distortion-effects';
 export { useDistortionStore } from './actions/distortion-config.action';
 export { DistortionConfig } from './components/distortion-config';
 export { DistortionLayer } from './components/distortion-layer';
-

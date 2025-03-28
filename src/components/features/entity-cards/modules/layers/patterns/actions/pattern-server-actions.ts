@@ -4,11 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
 // Importar tipos y configuraciones del archivo de cliente
-import {
-	defaultPatternConfig,
-	patternConfigSchema,
-	type PatternConfig
-} from './pattern-config.action';
+import { defaultPatternConfig, patternConfigSchema, type PatternConfig } from './pattern-config.action';
 
 interface PatternConfigResponse {
 	success: boolean;

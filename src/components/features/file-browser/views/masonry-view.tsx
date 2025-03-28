@@ -83,7 +83,7 @@ export const MasonryView = memo(function MasonryView({
 	};
 
 	return (
-		<FileContextMenu file={item} onAction={onContextAction || (() => { })}>
+		<FileContextMenu file={item} onAction={onContextAction || (() => {})}>
 			<button
 				ref={buttonRef}
 				type="button"

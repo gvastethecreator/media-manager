@@ -9,16 +9,8 @@ import type { FilterConfig, FilterType } from '../filter-schema';
 // Componente ColorPicker simplificado para reemplazar la importación que falta
 const ColorPicker = ({ color, onChange }: { color: string; onChange: (color: string) => void }) => (
 	<div className="flex items-center gap-2">
-		<div
-			className="w-8 h-8 rounded-md border"
-			style={{ backgroundColor: color }}
-		/>
-		<input
-			type="color"
-			value={color}
-			onChange={(e) => onChange(e.target.value)}
-			className="w-12 h-8"
-		/>
+		<div className="w-8 h-8 rounded-md border" style={{ backgroundColor: color }} />
+		<input type="color" value={color} onChange={(e) => onChange(e.target.value)} className="w-12 h-8" />
 		<input
 			type="text"
 			value={color}
@@ -31,10 +23,10 @@ const ColorPicker = ({ color, onChange }: { color: string; onChange: (color: str
 // Componente SettingsSection simplificado para reemplazar la importación que falta
 const SettingsSection = ({
 	title,
-	children
+	children,
 }: {
 	title: string;
-	children: React.ReactNode
+	children: React.ReactNode;
 }) => (
 	<div className="space-y-3 py-2">
 		<h3 className="text-sm font-medium">{title}</h3>
@@ -135,9 +127,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 				<Label>Activar Resplandor</Label>
 				<Switch
 					checked={config.glow?.enabled ?? false}
-					onCheckedChange={(enabled) => onChange({
-						glow: { ...config.glow, enabled },
-					})}
+					onCheckedChange={(enabled) =>
+						onChange({
+							glow: { ...config.glow, enabled },
+						})
+					}
 				/>
 			</div>
 			{config.glow?.enabled && (
@@ -146,18 +140,22 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 						<Label>Color</Label>
 						<ColorPicker
 							color={config.glow.color}
-							onChange={(color) => onChange({
-								glow: { ...config.glow, color },
-							})}
+							onChange={(color) =>
+								onChange({
+									glow: { ...config.glow, color },
+								})
+							}
 						/>
 					</div>
 					<div className="space-y-2">
 						<Label>Radio</Label>
 						<Slider
 							value={[config.glow.radius]}
-							onValueChange={([radius]) => onChange({
-								glow: { ...config.glow, radius },
-							})}
+							onValueChange={([radius]) =>
+								onChange({
+									glow: { ...config.glow, radius },
+								})
+							}
 							min={0}
 							max={100}
 							step={1}
@@ -168,9 +166,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 						<Label>Intensidad</Label>
 						<Slider
 							value={[config.glow.intensity]}
-							onValueChange={([intensity]) => onChange({
-								glow: { ...config.glow, intensity },
-							})}
+							onValueChange={([intensity]) =>
+								onChange({
+									glow: { ...config.glow, intensity },
+								})
+							}
 							min={0}
 							max={1}
 							step={0.01}
@@ -181,9 +181,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 						<Label>Dispersión</Label>
 						<Slider
 							value={[config.glow.spread]}
-							onValueChange={([spread]) => onChange({
-								glow: { ...config.glow, spread },
-							})}
+							onValueChange={([spread]) =>
+								onChange({
+									glow: { ...config.glow, spread },
+								})
+							}
 							min={0}
 							max={100}
 							step={1}
@@ -202,9 +204,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 				<Label>Activar Sombra</Label>
 				<Switch
 					checked={config.shadow?.enabled ?? false}
-					onCheckedChange={(enabled) => onChange({
-						shadow: { ...config.shadow, enabled },
-					})}
+					onCheckedChange={(enabled) =>
+						onChange({
+							shadow: { ...config.shadow, enabled },
+						})
+					}
 				/>
 			</div>
 			{config.shadow?.enabled && (
@@ -213,18 +217,22 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 						<Label>Color</Label>
 						<ColorPicker
 							color={config.shadow.color}
-							onChange={(color) => onChange({
-								shadow: { ...config.shadow, color },
-							})}
+							onChange={(color) =>
+								onChange({
+									shadow: { ...config.shadow, color },
+								})
+							}
 						/>
 					</div>
 					<div className="space-y-2">
 						<Label>Desenfoque</Label>
 						<Slider
 							value={[config.shadow.blur]}
-							onValueChange={([blur]) => onChange({
-								shadow: { ...config.shadow, blur },
-							})}
+							onValueChange={([blur]) =>
+								onChange({
+									shadow: { ...config.shadow, blur },
+								})
+							}
 							min={0}
 							max={100}
 							step={1}
@@ -235,9 +243,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 						<Label>Desplazamiento X</Label>
 						<Slider
 							value={[config.shadow.offsetX]}
-							onValueChange={([offsetX]) => onChange({
-								shadow: { ...config.shadow, offsetX },
-							})}
+							onValueChange={([offsetX]) =>
+								onChange({
+									shadow: { ...config.shadow, offsetX },
+								})
+							}
 							min={-100}
 							max={100}
 							step={1}
@@ -248,9 +258,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 						<Label>Desplazamiento Y</Label>
 						<Slider
 							value={[config.shadow.offsetY]}
-							onValueChange={([offsetY]) => onChange({
-								shadow: { ...config.shadow, offsetY },
-							})}
+							onValueChange={([offsetY]) =>
+								onChange({
+									shadow: { ...config.shadow, offsetY },
+								})
+							}
 							min={-100}
 							max={100}
 							step={1}
@@ -261,9 +273,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 						<Label>Sombra Interior</Label>
 						<Switch
 							checked={config.shadow.inset}
-							onCheckedChange={(inset) => onChange({
-								shadow: { ...config.shadow, inset },
-							})}
+							onCheckedChange={(inset) =>
+								onChange({
+									shadow: { ...config.shadow, inset },
+								})
+							}
 						/>
 					</div>
 				</>
@@ -278,9 +292,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 				<Label>Activar Distorsión</Label>
 				<Switch
 					checked={config.distortion?.enabled ?? false}
-					onCheckedChange={(enabled) => onChange({
-						distortion: { ...config.distortion, enabled },
-					})}
+					onCheckedChange={(enabled) =>
+						onChange({
+							distortion: { ...config.distortion, enabled },
+						})
+					}
 				/>
 			</div>
 			{config.distortion?.enabled && (
@@ -289,9 +305,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 						<Label>Tipo</Label>
 						<Select
 							value={config.distortion.type}
-							onValueChange={(type) => onChange({
-								distortion: { ...config.distortion, type: type as any },
-							})}
+							onValueChange={(type) =>
+								onChange({
+									distortion: { ...config.distortion, type: type as any },
+								})
+							}
 						>
 							<SelectTrigger>
 								<SelectValue placeholder="Seleccionar tipo" />
@@ -308,9 +326,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 						<Label>Cantidad</Label>
 						<Slider
 							value={[config.distortion.amount]}
-							onValueChange={([amount]) => onChange({
-								distortion: { ...config.distortion, amount },
-							})}
+							onValueChange={([amount]) =>
+								onChange({
+									distortion: { ...config.distortion, amount },
+								})
+							}
 							min={0}
 							max={100}
 							step={1}
@@ -321,9 +341,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 						<Label>Animación</Label>
 						<Switch
 							checked={config.distortion.animated}
-							onCheckedChange={(animated) => onChange({
-								distortion: { ...config.distortion, animated },
-							})}
+							onCheckedChange={(animated) =>
+								onChange({
+									distortion: { ...config.distortion, animated },
+								})
+							}
 						/>
 					</div>
 					{config.distortion.animated && (
@@ -331,9 +353,11 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 							<Label>Velocidad</Label>
 							<Slider
 								value={[config.distortion.speed]}
-								onValueChange={([speed]) => onChange({
-									distortion: { ...config.distortion, speed },
-								})}
+								onValueChange={([speed]) =>
+									onChange({
+										distortion: { ...config.distortion, speed },
+									})
+								}
 								min={0}
 								max={10}
 								step={0.1}
@@ -350,10 +374,7 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 		<div className="space-y-6">
 			{/* 🎨 Tipo de filtro */}
 			<SettingsSection title="Tipo de Filtro">
-				<Select
-					value={config.filterType}
-					onValueChange={(value) => handleFilterTypeChange(value as FilterType)}
-				>
+				<Select value={config.filterType} onValueChange={(value) => handleFilterTypeChange(value as FilterType)}>
 					<SelectTrigger>
 						<SelectValue placeholder="Seleccionar tipo" />
 					</SelectTrigger>
@@ -368,10 +389,7 @@ export const FilterSettings = ({ config, onChange }: FilterSettingsProps) => {
 
 			{/* 🎭 Modo de fusión */}
 			<SettingsSection title="Modo de Fusión">
-				<Select
-					value={config.blendMode}
-					onValueChange={(blendMode) => onChange({ blendMode: blendMode as any })}
-				>
+				<Select value={config.blendMode} onValueChange={(blendMode) => onChange({ blendMode: blendMode as any })}>
 					<SelectTrigger>
 						<SelectValue placeholder="Seleccionar modo" />
 					</SelectTrigger>

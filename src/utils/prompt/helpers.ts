@@ -10,41 +10,41 @@ const helpersLogger = serverLogger.withContext('PromptHelpers');
  * @returns Contenido de ejemplo
  */
 export function generateExampleContent(params: Record<string, any>): string {
-  try {
-    // Template básico para un prompt de prueba
-    const paramEntries = Object.entries(params);
-    if (paramEntries.length === 0) {
-      return "Escribe aquí tu prompt...";
-    }
+	try {
+		// Template básico para un prompt de prueba
+		const paramEntries = Object.entries(params);
+		if (paramEntries.length === 0) {
+			return 'Escribe aquí tu prompt...';
+		}
 
-    // Crear un ejemplo con placeholders para los parámetros
-    let template = "Escribe un prompt que utilice los siguientes parámetros:\n\n";
+		// Crear un ejemplo con placeholders para los parámetros
+		let template = 'Escribe un prompt que utilice los siguientes parámetros:\n\n';
 
-    paramEntries.forEach(([key, value]) => {
-      // Mostrar el tipo esperado de valor
-      let valueType = typeof value === 'object' ? 'objeto' : typeof value;
-      if (Array.isArray(value)) valueType = 'array';
+		paramEntries.forEach(([key, value]) => {
+			// Mostrar el tipo esperado de valor
+			let valueType = typeof value === 'object' ? 'objeto' : typeof value;
+			if (Array.isArray(value)) valueType = 'array';
 
-      template += `- {{${key}}}: ${valueType}\n`;
-    });
+			template += `- {{${key}}}: ${valueType}\n`;
+		});
 
-    template += "\nEjemplo de uso:\n";
-    template += "Mi prompt con ";
+		template += '\nEjemplo de uso:\n';
+		template += 'Mi prompt con ';
 
-    // Incluir algunos parámetros de ejemplo en el texto
-    const exampleParams = paramEntries.slice(0, 3);
-    exampleParams.forEach(([key], index) => {
-      template += `{{${key}}}`;
-      if (index < exampleParams.length - 1) {
-        template += index === exampleParams.length - 2 ? " y " : ", ";
-      }
-    });
+		// Incluir algunos parámetros de ejemplo en el texto
+		const exampleParams = paramEntries.slice(0, 3);
+		exampleParams.forEach(([key], index) => {
+			template += `{{${key}}}`;
+			if (index < exampleParams.length - 1) {
+				template += index === exampleParams.length - 2 ? ' y ' : ', ';
+			}
+		});
 
-    return template;
-  } catch (error) {
-    helpersLogger.error('❌ Error al generar contenido de ejemplo:', error);
-    return "Escribe aquí tu prompt...";
-  }
+		return template;
+	} catch (error) {
+		helpersLogger.error('❌ Error al generar contenido de ejemplo:', error);
+		return 'Escribe aquí tu prompt...';
+	}
 }
 
 /**
@@ -53,20 +53,20 @@ export function generateExampleContent(params: Record<string, any>): string {
  * @returns Array con las variables encontradas
  */
 export function extractVariablesFromContent(content: string): string[] {
-  try {
-    // Buscar patrones como {{variable}}
-    const matches = content.match(/\{\{([^}]+)\}\}/g) || [];
+	try {
+		// Buscar patrones como {{variable}}
+		const matches = content.match(/\{\{([^}]+)\}\}/g) || [];
 
-    // Extraer solo los nombres de las variables y eliminar duplicados
-    const variables = matches
-      .map(match => match.replace(/\{\{|\}\}/g, '').trim())
-      .filter((value, index, self) => self.indexOf(value) === index);
+		// Extraer solo los nombres de las variables y eliminar duplicados
+		const variables = matches
+			.map((match) => match.replace(/\{\{|\}\}/g, '').trim())
+			.filter((value, index, self) => self.indexOf(value) === index);
 
-    return variables;
-  } catch (error) {
-    helpersLogger.error('❌ Error al extraer variables del contenido:', error);
-    return [];
-  }
+		return variables;
+	} catch (error) {
+		helpersLogger.error('❌ Error al extraer variables del contenido:', error);
+		return [];
+	}
 }
 
 /**
@@ -76,20 +76,20 @@ export function extractVariablesFromContent(content: string): string[] {
  * @returns Contenido con variables reemplazadas
  */
 export function replaceVariablesInContent(content: string, variables: Record<string, any>): string {
-  try {
-    let result = content;
+	try {
+		let result = content;
 
-    // Reemplazar cada variable por su valor
-    Object.entries(variables).forEach(([key, value]) => {
-      const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
-      result = result.replace(regex, String(value));
-    });
+		// Reemplazar cada variable por su valor
+		Object.entries(variables).forEach(([key, value]) => {
+			const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+			result = result.replace(regex, String(value));
+		});
 
-    return result;
-  } catch (error) {
-    helpersLogger.error('❌ Error al reemplazar variables en contenido:', error);
-    return content;
-  }
+		return result;
+	} catch (error) {
+		helpersLogger.error('❌ Error al reemplazar variables en contenido:', error);
+		return content;
+	}
 }
 
 /**
@@ -98,16 +98,16 @@ export function replaceVariablesInContent(content: string, variables: Record<str
  * @returns Prompt extendido
  */
 export function preparePromptForDisplay(prompt: PromptBase): PromptExtended {
-  try {
-    return {
-      ...prompt,
-      parsedTags: serializeTags(prompt.tags),
-      parsedParameters: serializeParameters(prompt.parameters),
-    };
-  } catch (error) {
-    helpersLogger.error('❌ Error al preparar prompt para mostrar:', error);
-    return prompt as PromptExtended;
-  }
+	try {
+		return {
+			...prompt,
+			parsedTags: serializeTags(prompt.tags),
+			parsedParameters: serializeParameters(prompt.parameters),
+		};
+	} catch (error) {
+		helpersLogger.error('❌ Error al preparar prompt para mostrar:', error);
+		return prompt as PromptExtended;
+	}
 }
 
 /**
@@ -116,18 +116,18 @@ export function preparePromptForDisplay(prompt: PromptBase): PromptExtended {
  * @returns Prompt básico para guardar
  */
 export function preparePromptForSaving(prompt: PromptExtended): PromptBase {
-  try {
-    // Extraer propiedades extendidas
-    const { parsedTags, parsedParameters, previewContent, lastUpdated, stats, ...basePrompt } = prompt;
+	try {
+		// Extraer propiedades extendidas
+		const { parsedTags, parsedParameters, previewContent, lastUpdated, stats, ...basePrompt } = prompt;
 
-    // Serializar arrays y objetos a strings JSON
-    return {
-      ...basePrompt,
-      tags: parsedTags ? deserializeTags(parsedTags) : 'empty_array',
-      parameters: parsedParameters ? deserializeParameters(parsedParameters) : '{}',
-    };
-  } catch (error) {
-    helpersLogger.error('❌ Error al preparar prompt para guardar:', error);
-    return prompt as unknown as PromptBase;
-  }
+		// Serializar arrays y objetos a strings JSON
+		return {
+			...basePrompt,
+			tags: parsedTags ? deserializeTags(parsedTags) : 'empty_array',
+			parameters: parsedParameters ? deserializeParameters(parsedParameters) : '{}',
+		};
+	} catch (error) {
+		helpersLogger.error('❌ Error al preparar prompt para guardar:', error);
+		return prompt as unknown as PromptBase;
+	}
 }

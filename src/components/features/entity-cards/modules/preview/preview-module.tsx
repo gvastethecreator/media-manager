@@ -31,7 +31,7 @@ function CardPreview({
 	activeLayerId,
 	isExploded,
 	onLayerSelect,
-	className
+	className,
 }: {
 	entityType?: string;
 	entityId?: string;
@@ -67,9 +67,9 @@ function CardPreview({
 	return (
 		<div
 			className={cn(
-				"relative aspect-[3/4] w-full max-w-[300px] mx-auto",
-				"border rounded-lg overflow-hidden bg-background/5",
-				"transition-all duration-300 ease-in-out",
+				'relative aspect-[3/4] w-full max-w-[300px] mx-auto',
+				'border rounded-lg overflow-hidden bg-background/5',
+				'transition-all duration-300 ease-in-out',
 				className
 			)}
 			onMouseMove={handleMouseMove}
@@ -112,14 +112,12 @@ function CardPreview({
 				<div className="absolute bottom-2 right-2 bg-background/80 rounded-md p-2 text-xs">
 					<div className="font-medium mb-1">Capas activas ({layers.length})</div>
 					<div className="flex flex-wrap gap-1">
-						{layers.map(layer => (
+						{layers.map((layer) => (
 							<div
 								key={layer.type}
 								className={cn(
-									"px-1.5 py-0.5 rounded text-[10px]",
-									activeLayerId === layer.type
-										? "bg-primary text-primary-foreground"
-										: "bg-muted text-muted-foreground"
+									'px-1.5 py-0.5 rounded text-[10px]',
+									activeLayerId === layer.type ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
 								)}
 							>
 								{layer.type}
@@ -138,7 +136,7 @@ function CardPreview({
 function LayerSelectionPanel({
 	activeLayerId,
 	onLayerSelect,
-	className
+	className,
 }: {
 	activeLayerId?: string | null;
 	onLayerSelect?: (layerId: string | null) => void;
@@ -150,14 +148,14 @@ function LayerSelectionPanel({
 	if (layers.length === 0) return null;
 
 	return (
-		<div className={cn("space-y-2", className)}>
+		<div className={cn('space-y-2', className)}>
 			<div className="text-sm font-medium">Capas disponibles</div>
 			<div className="flex flex-wrap gap-2">
-				{layers.map(layer => (
+				{layers.map((layer) => (
 					<Button
 						key={layer.type}
 						size="sm"
-						variant={activeLayerId === layer.type ? "secondary" : "outline"}
+						variant={activeLayerId === layer.type ? 'secondary' : 'outline'}
 						onClick={() => onLayerSelect?.(layer.type === activeLayerId ? null : layer.type)}
 						className="text-xs"
 					>
@@ -183,7 +181,7 @@ export function PreviewModule({
 	activeLayerId,
 	isExploded,
 	onExplodedChange,
-	onActiveLayerChange
+	onActiveLayerChange,
 }: PreviewModuleProps) {
 	// Utilizamos el hook para gestionar la previsualización
 	const { options, sizeOptions, updateOption } = usePreview({
@@ -243,10 +241,7 @@ export function PreviewModule({
 
 					{/* Panel de selección de capas */}
 					<div className="px-4 py-2">
-						<LayerSelectionPanel
-							activeLayerId={effectiveActiveLayerId}
-							onLayerSelect={handleLayerSelect}
-						/>
+						<LayerSelectionPanel activeLayerId={effectiveActiveLayerId} onLayerSelect={handleLayerSelect} />
 					</div>
 
 					<Separator className="my-2" />
@@ -267,9 +262,7 @@ export function PreviewModule({
 											<div className="flex flex-col space-y-1.5 w-full">
 												<div className="text-sm font-medium">Rareza</div>
 												<div className="text-xs text-muted-foreground">
-													{(rarity as any)?.name ||
-														(rarity as any)?.label ||
-														'No especificada'}
+													{(rarity as any)?.name || (rarity as any)?.label || 'No especificada'}
 												</div>
 											</div>
 										</FormRow>
@@ -279,9 +272,7 @@ export function PreviewModule({
 											<div className="flex flex-col space-y-1.5 w-full">
 												<div className="text-sm font-medium">Textura</div>
 												<div className="text-xs text-muted-foreground">
-													{(texture as any)?.name ||
-														(texture as any)?.label ||
-														'No especificada'}
+													{(texture as any)?.name || (texture as any)?.label || 'No especificada'}
 												</div>
 											</div>
 										</FormRow>

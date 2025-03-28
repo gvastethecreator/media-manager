@@ -13,20 +13,27 @@ import type { ReactNode } from 'react';
 
 export function AppProvider({ children }: { children: ReactNode }) {
 	return (
-		<ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+		<ThemeProvider
+			attribute="data-theme"
+			defaultTheme="light"
+			enableSystem={false}
+			themes={['light', 'dark', 'cafe', 'violeta', 'madera', 'nocturno', 'verde', 'atardecer', 'corporativo', 'carbon', 'teal', 'citrico']}
+			enableColorScheme
+			disableTransitionOnChange
+		>
 			<SettingsProvider>
 				<QueryProvider>
 					<CacheProvider>
 						<FileProvider>
-							<CardDebugProvider>
+							<CardDisplayProvider>
 								<CardControlProvider>
-									<CardDisplayProvider>
+									<CardDebugProvider>
 										<Toaster position="bottom-right" richColors closeButton />
 										{children}
 										<UnifiedDebugMenu />
-									</CardDisplayProvider>
+									</CardDebugProvider>
 								</CardControlProvider>
-							</CardDebugProvider>
+							</CardDisplayProvider>
 						</FileProvider>
 					</CacheProvider>
 				</QueryProvider>

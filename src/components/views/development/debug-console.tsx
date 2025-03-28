@@ -89,32 +89,16 @@ export function DebugConsole() {
 				</CardHeader>
 				<CardContent>
 					<div className="flex flex-wrap gap-2 mb-4">
-						<Button
-							type="button"
-							onClick={generateExampleLogs}
-							variant="default"
-						>
+						<Button type="button" onClick={generateExampleLogs} variant="default">
 							Generar logs de ejemplo
 						</Button>
-						<Button
-							type="button"
-							onClick={generateGroupedLogs}
-							variant="outline"
-						>
+						<Button type="button" onClick={generateGroupedLogs} variant="outline">
 							Generar logs agrupados
 						</Button>
-						<Button
-							type="button"
-							onClick={measurePerformance}
-							variant="outline"
-						>
+						<Button type="button" onClick={measurePerformance} variant="outline">
 							Medir rendimiento
 						</Button>
-						<Button
-							type="button"
-							onClick={clearLogs}
-							variant="destructive"
-						>
+						<Button type="button" onClick={clearLogs} variant="destructive">
 							Limpiar logs
 						</Button>
 						<Button

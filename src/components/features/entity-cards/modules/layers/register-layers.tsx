@@ -67,16 +67,16 @@ const adaptLayerImplementation = (implementation: any): LayerImplementation => {
 const VERIFIED_LAYERS: Record<string, LayerImplementation> = {
 	// Capas básicas
 	'animated-border': adaptLayerImplementation(animatedBorderImplementation),
-	'border': adaptLayerImplementation(borderImplementation),
-	'blur': adaptLayerImplementation(blurImplementation),
-	'grid': adaptLayerImplementation(gridImplementation),
+	border: adaptLayerImplementation(borderImplementation),
+	blur: adaptLayerImplementation(blurImplementation),
+	grid: adaptLayerImplementation(gridImplementation),
 
 	// Capas de efectos visuales
-	'glow': adaptLayerImplementation(glowLayer),
-	'scanlines': adaptLayerImplementation(scanlinesImplementation),
-	'texture': adaptLayerImplementation(textureImplementation),
-	'pattern': adaptLayerImplementation(patternImplementation),
-	'filter': adaptLayerImplementation(filterImplementation),
+	glow: adaptLayerImplementation(glowLayer),
+	scanlines: adaptLayerImplementation(scanlinesImplementation),
+	texture: adaptLayerImplementation(textureImplementation),
+	pattern: adaptLayerImplementation(patternImplementation),
+	filter: adaptLayerImplementation(filterImplementation),
 };
 
 /**

@@ -17,13 +17,14 @@ export { shaderImplementation } from './shader-implementation';
 
 // Acciones del servidor
 export {
-    deleteShaderConfig, getShaderConfig,
-    updateShaderConfig, useShaderStore
+	deleteShaderConfig,
+	getShaderConfig,
+	updateShaderConfig,
+	useShaderStore,
 } from './actions/shader-config.action';
 
 // Utilidades
 export {
-    initializeShader,
-    updateShaderUniforms
+	initializeShader,
+	updateShaderUniforms,
 } from './utils/shader-utils';
-

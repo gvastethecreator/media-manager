@@ -4,12 +4,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import type {
-    CreateFolderData,
-    FolderBase,
-    FolderExtended,
-    UpdateFolderData
-} from '@/types/entities/folder';
+import type { CreateFolderData, FolderBase, FolderExtended, UpdateFolderData } from '@/types/entities/folder';
 import { existsSync } from 'fs';
 import { revalidateAllPaths } from './folder-utils.actions';
 
@@ -17,7 +12,7 @@ const folderLogger = serverLogger.withContext('FolderCRUD');
 
 // Clase de error para carpetas
 class FolderError extends Error {
-	constructor(message: string | { message: string, code: string }, context?: unknown) {
+	constructor(message: string | { message: string; code: string }, context?: unknown) {
 		const msg = typeof message === 'string' ? message : message.message;
 		const code = typeof message === 'string' ? 'FOLDER_ERROR' : message.code;
 
@@ -264,8 +259,24 @@ export async function getFolderImages(id: string) {
 			orderBy: { name: 'asc' },
 		});
 
-		folderLogger.info('✅ Imágenes obtenidas:', images.length);
-		return images;
+		// Para depuración
+		folderLogger.info(`✅ Obtenidas ${images.length} imágenes para carpeta ${id}`);
+
+		// Optimización: Procesar thumbnails directamente antes de enviarlos
+		// Esto evita tener que procesarlos en el cliente
+		const processedImages = images.map(image => {
+			// Si el thumbnail es muy grande, no lo enviamos para optimizar
+			if (image.thumbnail && image.thumbnailSize && image.thumbnailSize > 200000) {
+				folderLogger.warn(`Thumbnail demasiado grande para ${image.id}: ${image.thumbnailSize} bytes, eliminando...`);
+				return {
+					...image,
+					thumbnail: null
+				};
+			}
+			return image;
+		});
+
+		return processedImages;
 	} catch (error) {
 		folderLogger.error('❌ Error al obtener imágenes de carpeta:', error);
 		throw new FolderError('No se pudieron obtener las imágenes de la carpeta', error);
@@ -303,4 +314,3 @@ export async function updateFolderAutoReindex(id: string, autoReindex: boolean):
 		throw new FolderError('No se pudo actualizar la configuración', error);
 	}
 }
-

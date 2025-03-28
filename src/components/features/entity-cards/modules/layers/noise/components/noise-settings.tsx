@@ -101,10 +101,7 @@ export const NoiseSettings = ({ config, onChange }: NoiseSettingsProps) => {
 
 			{/* 🎯 Zona de efecto */}
 			<SettingsSection title="Zona de Efecto">
-				<ZoneSelector
-					zone={config.zone}
-					onChange={(zone) => onChange({ zone })}
-				/>
+				<ZoneSelector zone={config.zone} onChange={(zone) => onChange({ zone })} />
 			</SettingsSection>
 
 			{/* 📊 Configuración fractal */}
@@ -115,9 +112,11 @@ export const NoiseSettings = ({ config, onChange }: NoiseSettingsProps) => {
 							<Label>Octavas</Label>
 							<Slider
 								value={[config.fractalConfig?.octaves || 1]}
-								onValueChange={([octaves]) => onChange({
-									fractalConfig: { ...config.fractalConfig, octaves }
-								})}
+								onValueChange={([octaves]) =>
+									onChange({
+										fractalConfig: { ...config.fractalConfig, octaves },
+									})
+								}
 								min={1}
 								max={8}
 								step={1}
@@ -128,9 +127,11 @@ export const NoiseSettings = ({ config, onChange }: NoiseSettingsProps) => {
 							<Label>Persistencia</Label>
 							<Slider
 								value={[config.fractalConfig?.persistence || 0.5]}
-								onValueChange={([persistence]) => onChange({
-									fractalConfig: { ...config.fractalConfig, persistence }
-								})}
+								onValueChange={([persistence]) =>
+									onChange({
+										fractalConfig: { ...config.fractalConfig, persistence },
+									})
+								}
 								min={0}
 								max={1}
 								step={0.01}
@@ -141,9 +142,11 @@ export const NoiseSettings = ({ config, onChange }: NoiseSettingsProps) => {
 							<Label>Lacunaridad</Label>
 							<Slider
 								value={[config.fractalConfig?.lacunarity || 2]}
-								onValueChange={([lacunarity]) => onChange({
-									fractalConfig: { ...config.fractalConfig, lacunarity }
-								})}
+								onValueChange={([lacunarity]) =>
+									onChange({
+										fractalConfig: { ...config.fractalConfig, lacunarity },
+									})
+								}
 								min={1}
 								max={4}
 								step={0.1}
@@ -159,11 +162,7 @@ export const NoiseSettings = ({ config, onChange }: NoiseSettingsProps) => {
 				<div className="space-y-4">
 					<div className="flex items-center justify-between">
 						<Label htmlFor="animated">Activar Animación</Label>
-						<Switch
-							id="animated"
-							checked={config.animated}
-							onCheckedChange={(animated) => onChange({ animated })}
-						/>
+						<Switch id="animated" checked={config.animated} onCheckedChange={(animated) => onChange({ animated })} />
 					</div>
 					{config.animated && (
 						<Slider

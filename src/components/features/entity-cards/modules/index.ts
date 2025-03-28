@@ -9,7 +9,6 @@ export * from './core';
 // Módulos de Raridades
 export * from './rarities';
 
-
 // Módulos de Efectos
 export * from './effects';
 

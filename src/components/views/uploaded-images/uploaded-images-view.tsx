@@ -5,6 +5,13 @@ import {
 	getUploadedImages,
 	uploadImages,
 } from '@/app/actions/uploaded-images/uploaded-images.actions';
+import { MemoizedImageCard } from '@/components/cards/image-card';
+import {
+	Alert,
+	AlertCircle,
+	AlertDescription,
+	AlertTitle,
+} from '@/components/ui/alert';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -25,19 +32,18 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { BaseContentProps } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { toastService } from '@/services/toast.service';
 import { cn } from '@/lib/utils';
+import { toastService } from '@/services/toast.service';
 import type { UploadedImageType } from '@/types/entities/entities';
 import type { FileItem } from '@/types/file-item';
 import type { UploadedImageFilters, UploadedImageResult } from '@/types/uploaded-images';
-import { Filter, ImageIcon, Plus, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
+import { Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const viewLogger = serverLogger.withContext('UploadedImagesView');
 
@@ -51,6 +57,7 @@ export function UploadedImagesView() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalItems, setTotalItems] = useState(0);
+	const [error, setError] = useState<string | null>(null);
 
 	// Función para cargar las imágenes subidas
 	const loadImages = useCallback(async () => {
@@ -427,9 +434,40 @@ export function UploadedImagesView() {
 
 			{/* Contenido principal con soporte para arrastrar y soltar */}
 			<div className="flex-1 relative">
-				<ContentViewProvider {...contentProps}>
-					<BaseContentView />
-				</ContentViewProvider>
+				{isLoading ? (
+					<div className="flex justify-center items-center h-64">
+						<RefreshCw className="h-10 w-10 animate-spin text-primary" />
+					</div>
+				) : error ? (
+					<Alert variant="destructive" className="m-4">
+						<AlertCircle className="h-4 w-4" />
+						<AlertTitle>Error</AlertTitle>
+						<AlertDescription>{error}</AlertDescription>
+					</Alert>
+				) : optimisticItems.length === 0 ? (
+					<div className="flex flex-col items-center justify-center h-64 p-4">
+						<ImageIcon className="h-16 w-16 text-muted-foreground mb-4" />
+						<h3 className="text-lg font-medium mb-2">No hay imágenes subidas</h3>
+						<p className="text-sm text-muted-foreground text-center max-w-md">
+							No se encontraron imágenes subidas. Sube imágenes haciendo clic en el botón de arriba o arrastra y suelta archivos aquí.
+						</p>
+					</div>
+				) : (
+					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
+						{optimisticItems.map((image) => (
+							<MemoizedImageCard
+								key={image.id}
+								imageId={image.id}
+								aspectRatio="square"
+								showTags={true}
+								onClick={() => handleSelectItem(image)}
+								className={cn(
+									selectedImage === image.id && "ring-2 ring-primary"
+								)}
+							/>
+						))}
+					</div>
+				)}
 
 				{/* Overlay para arrastrar y soltar archivos */}
 				{isUploading && (

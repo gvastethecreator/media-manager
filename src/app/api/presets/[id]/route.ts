@@ -25,25 +25,16 @@ export async function GET(request: Request, { params }: { params: { id: string }
 		});
 
 		if (!preset) {
-			return NextResponse.json(
-				{ error: 'Preset no encontrado' },
-				{ status: 404 }
-			);
+			return NextResponse.json({ error: 'Preset no encontrado' }, { status: 404 });
 		}
 
 		return NextResponse.json(preset);
 	} catch (error) {
 		console.error('Error al obtener preset:', error);
 		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'ID de preset inválido' },
-				{ status: 400 }
-			);
+			return NextResponse.json({ error: 'ID de preset inválido' }, { status: 400 });
 		}
-		return NextResponse.json(
-			{ error: 'Error interno del servidor' },
-			{ status: 500 }
-		);
+		return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
 	}
 }
 
@@ -71,14 +62,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 	} catch (error) {
 		console.error('Error al actualizar el preset:', error);
 		if (error instanceof z.ZodError) {
-			return NextResponse.json(
-				{ error: 'ID de preset inválido' },
-				{ status: 400 }
-			);
+			return NextResponse.json({ error: 'ID de preset inválido' }, { status: 400 });
 		}
-		return NextResponse.json(
-			{ error: 'Error al actualizar el preset' },
-			{ status: 500 }
-		);
+		return NextResponse.json({ error: 'Error al actualizar el preset' }, { status: 500 });
 	}
 }

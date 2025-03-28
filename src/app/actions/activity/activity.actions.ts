@@ -7,19 +7,19 @@ import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers actualizados
 import {
-    extendActivities,
-    extendActivity,
-    generateActivityDescription,
-    mapActivityFiltersToPrisma,
-    mapCreateActivityDataToPrisma
+	extendActivities,
+	extendActivity,
+	generateActivityDescription,
+	mapActivityFiltersToPrisma,
+	mapCreateActivityDataToPrisma,
 } from '@/transformers/activity';
 import {
-    type Activity,
-    ActivityEventType,
-    type ActivityFilters,
-    type ActivityListResponse,
-    type ActivityType,
-    type CreateActivityData
+	type Activity,
+	ActivityEventType,
+	type ActivityFilters,
+	type ActivityListResponse,
+	type ActivityType,
+	type CreateActivityData,
 } from '@/types/entities/activity';
 
 const activityLogger = serverLogger.withContext('ActivityActions');
@@ -124,7 +124,11 @@ export async function getRecentActivities(limit = 10): Promise<Activity[]> {
 		return extendActivities(activities);
 	} catch (error) {
 		activityLogger.error('❌ Error al obtener actividades recientes:', error);
-		throw createActivityError('No se pudieron obtener las actividades recientes', ActivityErrorCode.OPERATION_FAILED, error);
+		throw createActivityError(
+			'No se pudieron obtener las actividades recientes',
+			ActivityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -151,7 +155,11 @@ export async function getActivitiesByType(type: ActivityType | string, limit = 1
 		return extendActivities(activities);
 	} catch (error) {
 		activityLogger.error('❌ Error al obtener actividades por tipo:', { type, error });
-		throw createActivityError('No se pudieron obtener las actividades por tipo', ActivityErrorCode.OPERATION_FAILED, error);
+		throw createActivityError(
+			'No se pudieron obtener las actividades por tipo',
+			ActivityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -178,7 +186,11 @@ export async function getActivitiesByImage(imageId: string, limit = 10): Promise
 		return extendActivities(activities);
 	} catch (error) {
 		activityLogger.error('❌ Error al obtener actividades por imagen:', { imageId, error });
-		throw createActivityError('No se pudieron obtener las actividades por imagen', ActivityErrorCode.OPERATION_FAILED, error);
+		throw createActivityError(
+			'No se pudieron obtener las actividades por imagen',
+			ActivityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -197,7 +209,7 @@ export async function getFilteredActivities(filters: ActivityFilters): Promise<A
 
 		// Obtener conteo total para paginación
 		const totalCount = await prisma.activity.count({
-			where: query.where
+			where: query.where,
 		});
 
 		// Determinar si hay más resultados disponibles
@@ -209,24 +221,31 @@ export async function getFilteredActivities(filters: ActivityFilters): Promise<A
 		activityLogger.info('✅ Actividades filtradas obtenidas:', {
 			count: activities.length,
 			total: totalCount,
-			hasMore
+			hasMore,
 		});
 
 		return {
 			activities: extendedActivities,
 			totalCount,
-			hasMore
+			hasMore,
 		};
 	} catch (error) {
 		activityLogger.error('❌ Error al obtener actividades filtradas:', { filters, error });
-		throw createActivityError('No se pudieron obtener las actividades filtradas', ActivityErrorCode.OPERATION_FAILED, error);
+		throw createActivityError(
+			'No se pudieron obtener las actividades filtradas',
+			ActivityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
 /**
  * Elimina actividades antiguas basadas en criterios
  */
-export async function cleanupOldActivities(olderThanDays = 30, types?: ActivityType[] | string[]): Promise<{ deleted: number }> {
+export async function cleanupOldActivities(
+	olderThanDays = 30,
+	types?: ActivityType[] | string[]
+): Promise<{ deleted: number }> {
 	try {
 		activityLogger.info('🧹 Limpiando actividades antiguas', { olderThanDays, types });
 
@@ -236,8 +255,8 @@ export async function cleanupOldActivities(olderThanDays = 30, types?: ActivityT
 		// Construir condiciones WHERE
 		const where: any = {
 			createdAt: {
-				lt: cutoffDate
-			}
+				lt: cutoffDate,
+			},
 		};
 
 		// Añadir filtro por tipos si se especifica
@@ -247,7 +266,7 @@ export async function cleanupOldActivities(olderThanDays = 30, types?: ActivityT
 
 		// Ejecutar eliminación
 		const result = await prisma.activity.deleteMany({
-			where
+			where,
 		});
 
 		activityLogger.info('✅ Actividades antiguas eliminadas', { count: result.count });
@@ -258,7 +277,11 @@ export async function cleanupOldActivities(olderThanDays = 30, types?: ActivityT
 		return { deleted: result.count };
 	} catch (error) {
 		activityLogger.error('❌ Error al limpiar actividades antiguas:', error);
-		throw createActivityError('No se pudieron limpiar las actividades antiguas', ActivityErrorCode.OPERATION_FAILED, error);
+		throw createActivityError(
+			'No se pudieron limpiar las actividades antiguas',
+			ActivityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -281,7 +304,7 @@ export async function createActivity(
 		const activityData: CreateActivityData = {
 			type,
 			description,
-			imageId
+			imageId,
 		};
 
 		// Registrar la actividad

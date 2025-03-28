@@ -19,7 +19,7 @@ const CardContent = memo(function CardContent({
 	description,
 	image,
 	metadata,
-	children
+	children,
 }: {
 	title: string;
 	description?: string;
@@ -34,12 +34,7 @@ const CardContent = memo(function CardContent({
 				{/* Imagen */}
 				<div className="relative w-full aspect-[3/4]">
 					{image ? (
-						<img
-							src={image}
-							alt={title}
-							className="object-cover w-full h-full rounded-t-lg"
-							loading="lazy"
-						/>
+						<img src={image} alt={title} className="object-cover w-full h-full rounded-t-lg" loading="lazy" />
 					) : (
 						<div className="w-full h-full bg-muted/30 rounded-t-lg flex items-center justify-center">
 							<span className="text-muted-foreground text-sm">Sin imagen</span>
@@ -51,11 +46,7 @@ const CardContent = memo(function CardContent({
 				<div className="p-3 flex flex-col flex-grow">
 					<h3 className="text-base font-medium truncate">{title}</h3>
 
-					{description && (
-						<p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-							{description}
-						</p>
-					)}
+					{description && <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{description}</p>}
 
 					{/* Metadata */}
 					{metadata && Object.keys(metadata).length > 0 && (
@@ -93,20 +84,23 @@ export const EntityCardDev = memo(function EntityCardDev({
 	options = {},
 }: EntityCardDevProps) {
 	// Manejo de eventos de teclado para accesibilidad
-	const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
-		if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-			e.preventDefault();
-			// Creamos un evento sintético que contenga la información relevante
-			const syntheticEvent = {
-				currentTarget: e.currentTarget,
-				target: e.target,
-				preventDefault: () => { },
-				stopPropagation: () => { },
-			} as React.MouseEvent<HTMLButtonElement>;
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLButtonElement>) => {
+			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+				e.preventDefault();
+				// Creamos un evento sintético que contenga la información relevante
+				const syntheticEvent = {
+					currentTarget: e.currentTarget,
+					target: e.target,
+					preventDefault: () => {},
+					stopPropagation: () => {},
+				} as React.MouseEvent<HTMLButtonElement>;
 
-			onClick(syntheticEvent);
-		}
-	}, [onClick]);
+				onClick(syntheticEvent);
+			}
+		},
+		[onClick]
+	);
 
 	// Estilos personalizados
 	const customStyle = useMemo(() => {
@@ -131,7 +125,7 @@ export const EntityCardDev = memo(function EntityCardDev({
 				// Hover
 				'hover:shadow-md hover:scale-[1.02]',
 				// Clase personalizada
-				className,
+				className
 			)}
 			onClick={onClick}
 			onKeyDown={handleKeyDown}
@@ -141,13 +135,7 @@ export const EntityCardDev = memo(function EntityCardDev({
 			data-entity-id={id}
 			data-entity-type="basic-card"
 		>
-			<CardContent
-				title={title}
-				description={description}
-				image={image}
-				metadata={metadata}
-				children={children}
-			/>
+			<CardContent title={title} description={description} image={image} metadata={metadata} children={children} />
 		</button>
 	);
 });

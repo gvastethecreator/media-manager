@@ -6,15 +6,15 @@
  */
 
 import {
-    CONSOLE_COLORS,
-    type LogType,
-    createConsoleTable,
-    createElapsedTime,
-    createProgressBar,
-    createSeparator,
-    createSeparatorEnd,
-    createTextBlock,
-    formatConsoleMessage,
+	CONSOLE_COLORS,
+	type LogType,
+	createConsoleTable,
+	createElapsedTime,
+	createProgressBar,
+	createSeparator,
+	createSeparatorEnd,
+	createTextBlock,
+	formatConsoleMessage,
 } from './console-formatter';
 import { type LogLevel, loggerConfig } from './logger.config';
 

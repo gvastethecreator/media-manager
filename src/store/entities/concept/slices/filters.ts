@@ -7,110 +7,105 @@ import type { ConceptStore } from '../types';
 const filtersLogger = serverLogger.withContext('ConceptStore:Filters');
 
 export interface FiltersSlice {
-  // Estado
-  filters: ConceptFilters;
-  sortBy: ConceptSortOption;
-  page: number;
-  pageSize: number;
+	// Estado
+	filters: ConceptFilters;
+	sortBy: ConceptSortOption;
+	page: number;
+	pageSize: number;
 
-  // Acciones
-  setFilters: (filters: Partial<ConceptFilters>) => void;
-  setSortBy: (sortBy: ConceptSortOption) => void;
-  setPage: (page: number) => void;
-  setPageSize: (pageSize: number) => void;
-  setCategoryFilter: (category: string | null) => void;
-  setSearchFilter: (search: string) => void;
-  setTagsFilter: (tags: string[]) => void;
-  setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
-  clearFilters: () => void;
+	// Acciones
+	setFilters: (filters: Partial<ConceptFilters>) => void;
+	setSortBy: (sortBy: ConceptSortOption) => void;
+	setPage: (page: number) => void;
+	setPageSize: (pageSize: number) => void;
+	setCategoryFilter: (category: string | null) => void;
+	setSearchFilter: (search: string) => void;
+	setTagsFilter: (tags: string[]) => void;
+	setOnlyFavoritesFilter: (onlyFavorites: boolean) => void;
+	clearFilters: () => void;
 }
 
-export const createFiltersSlice: StateCreator<
-  ConceptStore,
-  [],
-  [],
-  FiltersSlice
-> = (set) => ({
-  // Estado inicial
-  filters: {
-    search: '',
-    category: undefined,
-    tags: [],
-    onlyFavorites: false,
-  },
-  sortBy: 'name_asc',
-  page: 1,
-  pageSize: 20,
+export const createFiltersSlice: StateCreator<ConceptStore, [], [], FiltersSlice> = (set) => ({
+	// Estado inicial
+	filters: {
+		search: '',
+		category: undefined,
+		tags: [],
+		onlyFavorites: false,
+	},
+	sortBy: 'name_asc',
+	page: 1,
+	pageSize: 20,
 
-  // Acciones
-  setFilters: (newFilters) => {
-    filtersLogger.info('📊 Actualizando filtros:', newFilters);
-    set((state: ConceptStore) => ({
-      filters: { ...state.filters, ...newFilters },
-      // Resetear página al cambiar filtros
-      page: 1,
-    }));
-  },
+	// Acciones
+	setFilters: (newFilters) => {
+		filtersLogger.info('📊 Actualizando filtros:', newFilters);
+		set((state: ConceptStore) => ({
+			filters: { ...state.filters, ...newFilters },
+			// Resetear página al cambiar filtros
+			page: 1,
+		}));
+	},
 
-  setSortBy: (sortBy) => {
-    filtersLogger.info('🔄 Cambiando ordenación:', sortBy);
-    set({ sortBy });
-  },
+	setSortBy: (sortBy) => {
+		filtersLogger.info('🔄 Cambiando ordenación:', sortBy);
+		set({ sortBy });
+	},
 
-  setPage: (page) => {
-    set({ page });
-  },
+	setPage: (page) => {
+		set({ page });
+	},
 
-  setPageSize: (pageSize) => {
-    filtersLogger.info('📏 Cambiando tamaño de página:', pageSize);
-    set({ pageSize, page: 1 });
-  },
+	setPageSize: (pageSize) => {
+		filtersLogger.info('📏 Cambiando tamaño de página:', pageSize);
+		set({ pageSize, page: 1 });
+	},
 
-  setCategoryFilter: (category) => {
-    filtersLogger.info('🏷️ Filtrando por categoría:', category);
-    set((state: ConceptStore) => ({
-      filters: {
-        ...state.filters,
-        category: category ?? undefined,
-      },
-      page: 1,
-    }));
-  },
+	setCategoryFilter: (category) => {
+		filtersLogger.info('🏷️ Filtrando por categoría:', category);
+		set((state: ConceptStore) => ({
+			filters: {
+				...state.filters,
+				category: category ?? undefined,
+			},
+			page: 1,
+		}));
+	},
 
-  setSearchFilter: (search) => {
-    filtersLogger.info('🔍 Filtrando por búsqueda:', search);
-    set((state: ConceptStore) => ({
-      filters: { ...state.filters, search },
-      page: 1,
-    }));
-  },
+	setSearchFilter: (search) => {
+		filtersLogger.info('🔍 Filtrando por búsqueda:', search);
+		set((state: ConceptStore) => ({
+			filters: { ...state.filters, search },
+			page: 1,
+		}));
+	},
 
-  setTagsFilter: (tags) => {
-    filtersLogger.info('🏷️ Filtrando por tags:', tags);
-    set((state: ConceptStore) => ({
-      filters: { ...state.filters, tags },
-      page: 1,
-    }));
-  },
+	setTagsFilter: (tags) => {
+		filtersLogger.info('🏷️ Filtrando por tags:', tags);
+		set((state: ConceptStore) => ({
+			filters: { ...state.filters, tags },
+			page: 1,
+		}));
+	},
 
-  setOnlyFavoritesFilter: (onlyFavorites) => {
-    filtersLogger.info('⭐ Filtrando favoritos:', onlyFavorites);
-    set((state: ConceptStore) => ({
-      filters: { ...state.filters, onlyFavorites },
-      page: 1,
-    }));
-  },
+	setOnlyFavoritesFilter: (onlyFavorites) => {
+		filtersLogger.info('⭐ Filtrando favoritos:', onlyFavorites);
+		set((state: ConceptStore) => ({
+			filters: { ...state.filters, onlyFavorites },
+			page: 1,
+		}));
+	},
 
-  clearFilters: () => {
-    filtersLogger.info('🧹 Limpiando todos los filtros');
-    set({
-      filters: {
-        search: '',
-        category: undefined,
-        tags: [],
-        onlyFavorites: false,
-      },
-      page: 1,
-    });
-  },
+	clearFilters: () => {
+		filtersLogger.info('🧹 Limpiando todos los filtros');
+		set({
+			filters: {
+				search: '',
+				category: undefined,
+				tags: [],
+				onlyFavorites: false,
+			},
+			page: 1,
+		});
+	},
 });

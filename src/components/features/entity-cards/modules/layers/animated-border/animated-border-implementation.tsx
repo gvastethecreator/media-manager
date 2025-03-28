@@ -1,4 +1,4 @@
-import { Square	 } from 'lucide-react';
+import { Square } from 'lucide-react';
 import { AnimatedBorderLayer } from './components/animated-border-layer';
 import { AnimatedBorderSettings } from './components/animated-border-settings';
 

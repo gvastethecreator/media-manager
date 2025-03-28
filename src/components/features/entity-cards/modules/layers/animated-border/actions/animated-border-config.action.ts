@@ -146,8 +146,8 @@ export async function updateAnimatedBorderConfig(
 				message: 'Configuración actualizada (solo cliente)',
 				data: {
 					...(await createDefaultAnimatedBorderConfig()),
-					...validatedConfig
-				} as AnimatedBorderConfig
+					...validatedConfig,
+				} as AnimatedBorderConfig,
 			};
 		}
 
@@ -167,8 +167,8 @@ export async function updateAnimatedBorderConfig(
 				data: {
 					config: {
 						...existingConfig.config,
-						...validatedConfig
-					} as any
+						...validatedConfig,
+					} as any,
 				},
 			});
 		} else {
@@ -179,7 +179,7 @@ export async function updateAnimatedBorderConfig(
 					layerType: 'animatedBorder',
 					config: {
 						...(await createDefaultAnimatedBorderConfig()),
-						...validatedConfig
+						...validatedConfig,
 					} as any,
 				},
 			});
@@ -193,14 +193,14 @@ export async function updateAnimatedBorderConfig(
 			message: 'Configuración actualizada correctamente',
 			data: {
 				...(await createDefaultAnimatedBorderConfig()),
-				...validatedConfig
-			} as AnimatedBorderConfig
+				...validatedConfig,
+			} as AnimatedBorderConfig,
 		};
 	} catch (error) {
 		console.error('Error al actualizar la configuración del borde animado:', error);
 		return {
 			success: false,
-			message: 'Error al guardar la configuración'
+			message: 'Error al guardar la configuración',
 		};
 	}
 }
@@ -217,7 +217,7 @@ export async function deleteAnimatedBorderConfig(
 		if (!entityId) {
 			return {
 				success: true,
-				message: 'Configuración eliminada (solo cliente)'
+				message: 'Configuración eliminada (solo cliente)',
 			};
 		}
 
@@ -235,13 +235,13 @@ export async function deleteAnimatedBorderConfig(
 
 		return {
 			success: true,
-			message: 'Configuración eliminada correctamente'
+			message: 'Configuración eliminada correctamente',
 		};
 	} catch (error) {
 		console.error('Error al eliminar la configuración del borde animado:', error);
 		return {
 			success: false,
-			message: 'Error al eliminar la configuración'
+			message: 'Error al eliminar la configuración',
 		};
 	}
 }

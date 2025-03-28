@@ -1,13 +1,13 @@
 import type { RaritySystem } from '@/app/actions/entities-cards/entities-cards.actions';
 import type {
-    BorderOptions,
-    GlowEffectOptions,
-    GrainEffectOptions,
-    HolographicEffectOptions,
-    RarityConfig,
-    ScanlinesOptions,
-    TextureConfig,
-    TextureSystem,
+	BorderOptions,
+	GlowEffectOptions,
+	GrainEffectOptions,
+	HolographicEffectOptions,
+	RarityConfig,
+	ScanlinesOptions,
+	TextureConfig,
+	TextureSystem,
 } from '@/components/features/entity-cards/types/base-card-types';
 import type * as React from 'react';
 import type { AnimationSystem } from '../modules/animation';

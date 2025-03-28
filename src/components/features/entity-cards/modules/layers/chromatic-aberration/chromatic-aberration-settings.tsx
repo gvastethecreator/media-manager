@@ -53,7 +53,7 @@ export function ChromaticAberrationSettings({
 	entityId,
 	className,
 	initialConfig,
-	onConfigUpdate
+	onConfigUpdate,
 }: ChromaticAberrationSettingsProps) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [previewStyle, setPreviewStyle] = useState<Record<string, string>>({});
@@ -77,7 +77,7 @@ export function ChromaticAberrationSettings({
 			blurAmount: 0.5,
 			quality: 'medium',
 			colorMode: 'rgb',
-		}
+		},
 	});
 
 	// Cargar la configuración al montar el componente

@@ -58,8 +58,9 @@ export function NoteContentView() {
 		emptyState: {
 			icon: ScrollText,
 			title: 'Nota vacía',
-			description: `No se encontraron imágenes en ${currentNote?.title ?? currentNote?.name ?? 'esta nota'
-				}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${
+				currentNote?.title ?? currentNote?.name ?? 'esta nota'
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadNoteImages,
 	};

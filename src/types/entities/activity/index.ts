@@ -11,9 +11,11 @@ export { ActivityCategory, ActivitySortCriteria, ActivityType } from './enums';
 
 // Reexportar tipos explícitamente
 export type {
-    Activity,
-    ActivityBase, ActivityFilters,
-    ActivityListResponse,
-    ActivityMetadata, ActivityWithImage,
-    CreateActivityData
+	Activity,
+	ActivityBase,
+	ActivityFilters,
+	ActivityListResponse,
+	ActivityMetadata,
+	ActivityWithImage,
+	CreateActivityData,
 } from './types';

@@ -44,13 +44,7 @@ interface LayerSelectorProps {
 /**
  * Componente que renderiza el panel de configuración apropiado para una capa
  */
-export function LayerSelector({
-	layerId,
-	config,
-	onChange,
-	entityType,
-	entityId,
-}: LayerSelectorProps) {
+export function LayerSelector({ layerId, config, onChange, entityType, entityId }: LayerSelectorProps) {
 	// Obtenemos información sobre la capa registrada
 	const { getLayer } = useLayerPlugin();
 	const layerPlugin = useMemo(() => getLayer(layerId), [getLayer, layerId]);
@@ -60,9 +54,7 @@ export function LayerSelector({
 		return (
 			<Alert variant="destructive" className="my-2">
 				<AlertCircle className="h-4 w-4" />
-				<AlertDescription className="text-[11px]">
-					No se encontró un plugin para la capa "{layerId}".
-				</AlertDescription>
+				<AlertDescription className="text-[11px]">No se encontró un plugin para la capa "{layerId}".</AlertDescription>
 			</Alert>
 		);
 	}
@@ -82,9 +74,7 @@ export function LayerSelector({
 	// Si no hay componente de configuración
 	return (
 		<div className="p-2 bg-muted/40 rounded-md">
-			<p className="text-[11px] text-muted-foreground">
-				No hay panel de configuración disponible para esta capa.
-			</p>
+			<p className="text-[11px] text-muted-foreground">No hay panel de configuración disponible para esta capa.</p>
 		</div>
 	);
 }

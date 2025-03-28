@@ -55,9 +55,12 @@ const CategoryWithChildren = memo(function CategoryWithChildren({
 	childrenRefs: React.MutableRefObject<Record<string, CategoryChildrenRef | null>>;
 }) {
 	// Memoizamos los handlers para evitar re-renders innecesarios
-	const handleViewModeToggle = useCallback((mode: 'list' | 'grid') => {
-		onToggleViewMode(mode);
-	}, [onToggleViewMode]);
+	const handleViewModeToggle = useCallback(
+		(mode: 'list' | 'grid') => {
+			onToggleViewMode(mode);
+		},
+		[onToggleViewMode]
+	);
 
 	return (
 		<div key={id}>
@@ -79,7 +82,9 @@ const CategoryWithChildren = memo(function CategoryWithChildren({
 
 			<MemoizedNavCategoryChildren
 				key={`${id}-children`}
-				ref={(instance) => { childrenRefs.current[id] = instance; }}
+				ref={(instance) => {
+					childrenRefs.current[id] = instance;
+				}}
 				categoryId={id}
 				isCollapsed={isNavCollapsed || isCollapsed}
 				selectedChildId={getSelectedChildId(id)}
@@ -117,17 +122,23 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 
 	// Memoizar la función para cambiar el modo de vista
 	const handleCategoryToggleViewMode = useCallback((categoryId: string, mode: 'list' | 'grid') => {
-		setCategoryViewModes(prev => ({ ...prev, [categoryId]: mode }));
+		setCategoryViewModes((prev) => ({ ...prev, [categoryId]: mode }));
 	}, []);
 
 	// Memoizar los handlers para cada categoría
-	const getCategoryClickHandler = useCallback((id: string) => {
-		return () => handleCategoryClick(id);
-	}, [handleCategoryClick]);
+	const getCategoryClickHandler = useCallback(
+		(id: string) => {
+			return () => handleCategoryClick(id);
+		},
+		[handleCategoryClick]
+	);
 
-	const getCollapseToggleHandler = useCallback((id: string) => {
-		return (e: React.MouseEvent) => handleCollapseToggle(id, e);
-	}, [handleCollapseToggle]);
+	const getCollapseToggleHandler = useCallback(
+		(id: string) => {
+			return (e: React.MouseEvent) => handleCollapseToggle(id, e);
+		},
+		[handleCollapseToggle]
+	);
 
 	// Memoizar las categorías para evitar re-renderizados
 	const categoriesContent = useMemo(() => {
@@ -158,23 +169,42 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 				/>
 			);
 		});
-	}, [categoryViewModes, currentView, getCategoryItemCount, getCategoryItems, getImagesForCategory, getItemClickHandler, getSelectedChildId, handleCategoryToggleViewMode, isCollapsed, isCategoryCollapsed, getCollapseToggleHandler, getCategoryClickHandler]);
+	}, [
+		categoryViewModes,
+		currentView,
+		getCategoryItemCount,
+		getCategoryItems,
+		getImagesForCategory,
+		getItemClickHandler,
+		getSelectedChildId,
+		handleCategoryToggleViewMode,
+		isCollapsed,
+		isCategoryCollapsed,
+		getCollapseToggleHandler,
+		getCategoryClickHandler,
+	]);
 
 	// Memoizar las props del header para evitar re-renderizados
-	const headerProps = useMemo(() => ({
-		totalImages: stats.totalImages,
-		onOpenSettings: handleOpenSettings,
-		onOpenDevelopment: handleOpenDevelopment,
-		onOpenEntityCards: handleOpenEntityCards,
-		isCollapsed,
-		onToggleCollapse
-	}), [stats.totalImages, handleOpenSettings, handleOpenDevelopment, handleOpenEntityCards, isCollapsed, onToggleCollapse]);
+	const headerProps = useMemo(
+		() => ({
+			totalImages: stats.totalImages,
+			onOpenSettings: handleOpenSettings,
+			onOpenDevelopment: handleOpenDevelopment,
+			onOpenEntityCards: handleOpenEntityCards,
+			isCollapsed,
+			onToggleCollapse,
+		}),
+		[stats.totalImages, handleOpenSettings, handleOpenDevelopment, handleOpenEntityCards, isCollapsed, onToggleCollapse]
+	);
 
 	// Memoizar las props de la navegación principal
-	const mainNavProps = useMemo(() => ({
-		onNavigate: handleMainNavigate,
-		isCollapsed
-	}), [handleMainNavigate, isCollapsed]);
+	const mainNavProps = useMemo(
+		() => ({
+			onNavigate: handleMainNavigate,
+			isCollapsed,
+		}),
+		[handleMainNavigate, isCollapsed]
+	);
 
 	return (
 		<div
@@ -189,9 +219,7 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 				<div className="flex flex-col p-1.5">
 					<NavMainNavigation {...mainNavProps} />
 
-					<div className="mt-2 flex flex-col gap-px">
-						{categoriesContent}
-					</div>
+					<div className="mt-2 flex flex-col gap-px">{categoriesContent}</div>
 				</div>
 			</ScrollArea>
 		</div>

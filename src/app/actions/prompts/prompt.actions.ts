@@ -1,5 +1,6 @@
 'use server';
 
+import { EntityErrorCode, PromptError, createEntityErrorObject, type SerializableError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
@@ -8,16 +9,13 @@ import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers actualizados
-import {
-    toExtendedPrompt,
-    toPromptWithStats
-} from '@/transformers/prompt';
+import { toExtendedPrompt, toPromptWithStats } from '@/transformers/prompt';
 import type {
     PromptBase,
     PromptCreateInput,
     PromptExtended,
     PromptUpdateInput,
-    PromptWithStats
+    PromptWithStats,
 } from '@/types/entities/prompt';
 
 const promptLogger = serverLogger.withContext('PromptActions');
@@ -31,21 +29,13 @@ const revalidateAllPaths = async () => {
 	promptLogger.info('🔄 Rutas revalidadas');
 };
 
-enum PromptErrorCode {
-	NOT_FOUND = 'NOT_FOUND',
-	VALIDATION_ERROR = 'VALIDATION_ERROR',
-	OPERATION_FAILED = 'OPERATION_FAILED',
-}
-
+// Función creadora de errores (enfoque funcional)
 const createPromptError = (
 	message: string,
-	code: PromptErrorCode = PromptErrorCode.OPERATION_FAILED,
+	code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED,
 	cause?: unknown
-) => {
-	const error = new Error(message);
-	error.name = 'PromptError';
-	Object.assign(error, { code, cause });
-	return error;
+): SerializableError => {
+	return createEntityErrorObject('PromptError', message, code, cause);
 };
 
 // Interfaces adicionales para compatibilidad
@@ -67,7 +57,7 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 						characters: true,
 						places: true,
 						worldItems: true,
-						images: true
+						images: true,
 					},
 				},
 			},
@@ -79,7 +69,7 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 		return prompts.map(toPromptWithStats);
 	} catch (error) {
 		promptLogger.error('Error al obtener prompts:', error);
-		throw createPromptError('Error al obtener prompts', PromptErrorCode.OPERATION_FAILED, error);
+		throw createPromptError('Error al obtener prompts', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -99,24 +89,24 @@ export async function getPrompt(id: string): Promise<PromptExtended> {
 						characters: true,
 						places: true,
 						worldItems: true,
-						images: true
+						images: true,
 					},
 				},
 			},
 		});
 
 		if (!prompt) {
-			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+			throw createPromptError('Prompt no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		promptLogger.info('✅ Prompt obtenido:', prompt.name);
 		return toExtendedPrompt(prompt);
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener prompt:', error);
-		if (error instanceof Error && error.name === 'PromptError') {
+		if (error instanceof PromptError) {
 			throw error;
 		}
-		throw createPromptError('No se pudo obtener el prompt', PromptErrorCode.OPERATION_FAILED, error);
+		throw createPromptError('No se pudo obtener el prompt', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -136,7 +126,7 @@ export async function getPromptWithRelations(id: string): Promise<PromptExtended
 						characters: true,
 						places: true,
 						worldItems: true,
-						images: true
+						images: true,
 					},
 				},
 				concepts: {
@@ -173,17 +163,17 @@ export async function getPromptWithRelations(id: string): Promise<PromptExtended
 		});
 
 		if (!prompt) {
-			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+			throw createPromptError('Prompt no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		promptLogger.info('✅ Prompt con relaciones obtenido:', prompt.name);
 		return toExtendedPrompt(prompt);
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener prompt con relaciones:', error);
-		if (error instanceof Error && error.name === 'PromptError') {
+		if (error instanceof PromptError) {
 			throw error;
 		}
-		throw createPromptError('No se pudo obtener el prompt con relaciones', PromptErrorCode.OPERATION_FAILED, error);
+		throw createPromptError('No se pudo obtener el prompt con relaciones', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -219,7 +209,7 @@ export async function createPrompt(data: PromptCreateInput): Promise<PromptBase>
 		return prompt;
 	} catch (error) {
 		promptLogger.error('❌ Error al crear prompt:', error);
-		throw createPromptError('No se pudo crear el prompt', PromptErrorCode.OPERATION_FAILED, error);
+		throw createPromptError('No se pudo crear el prompt', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -246,7 +236,7 @@ export async function updatePrompt(id: string, data: PromptUpdateInput): Promise
 		return prompt;
 	} catch (error) {
 		promptLogger.error('❌ Error al actualizar prompt:', error);
-		throw createPromptError('No se pudo actualizar el prompt', PromptErrorCode.OPERATION_FAILED, error);
+		throw createPromptError('No se pudo actualizar el prompt', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -262,7 +252,7 @@ export async function deletePrompt(id: string): Promise<{ success: boolean }> {
 		});
 
 		if (!prompt) {
-			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+			throw createPromptError('Prompt no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Primero desconectar todas las relaciones
@@ -295,7 +285,7 @@ export async function deletePrompt(id: string): Promise<{ success: boolean }> {
 		return { success: true };
 	} catch (error) {
 		promptLogger.error('❌ Error al eliminar prompt:', error);
-		throw createPromptError('No se pudo eliminar el prompt', PromptErrorCode.OPERATION_FAILED, error);
+		throw createPromptError('No se pudo eliminar el prompt', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -317,7 +307,7 @@ export async function linkEntityToPrompt(
 		});
 
 		if (!prompt) {
-			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+			throw createPromptError('Prompt no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Vincular basado en el tipo de entidad
@@ -383,7 +373,7 @@ export async function linkEntityToPrompt(
 				});
 				break;
 			default:
-				throw createPromptError(`Tipo de entidad no válido: ${entityType}`, PromptErrorCode.VALIDATION_ERROR);
+				throw createPromptError(`Tipo de entidad no válido: ${entityType}`, EntityErrorCode.VALIDATION_ERROR);
 		}
 
 		emit({
@@ -401,7 +391,7 @@ export async function linkEntityToPrompt(
 		return { success: true };
 	} catch (error) {
 		promptLogger.error('❌ Error al vincular entidad con prompt:', error);
-		throw createPromptError('No se pudo vincular la entidad con el prompt', PromptErrorCode.OPERATION_FAILED, error);
+		throw createPromptError('No se pudo vincular la entidad con el prompt', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -423,7 +413,7 @@ export async function unlinkEntityFromPrompt(
 		});
 
 		if (!prompt) {
-			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+			throw createPromptError('Prompt no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Desvincular basado en el tipo de entidad
@@ -489,7 +479,7 @@ export async function unlinkEntityFromPrompt(
 				});
 				break;
 			default:
-				throw createPromptError(`Tipo de entidad no válido: ${entityType}`, PromptErrorCode.VALIDATION_ERROR);
+				throw createPromptError(`Tipo de entidad no válido: ${entityType}`, EntityErrorCode.VALIDATION_ERROR);
 		}
 
 		emit({
@@ -507,7 +497,7 @@ export async function unlinkEntityFromPrompt(
 		return { success: true };
 	} catch (error) {
 		promptLogger.error('❌ Error al desvincular entidad de prompt:', error);
-		throw createPromptError('No se pudo desvincular la entidad del prompt', PromptErrorCode.OPERATION_FAILED, error);
+		throw createPromptError('No se pudo desvincular la entidad del prompt', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -525,7 +515,7 @@ export async function getPromptImages(promptId: string): Promise<{ images: FileI
 		});
 
 		if (!prompt) {
-			throw createPromptError('Prompt no encontrado', PromptErrorCode.NOT_FOUND);
+			throw createPromptError('Prompt no encontrado', EntityErrorCode.NOT_FOUND);
 		}
 
 		// Adaptar imágenes al formato FileItem
@@ -552,6 +542,10 @@ export async function getPromptImages(promptId: string): Promise<{ images: FileI
 		return { images };
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener imágenes para prompt:', error);
-		throw createPromptError('No se pudieron obtener las imágenes para el prompt', PromptErrorCode.OPERATION_FAILED, error);
+		throw createPromptError(
+			'No se pudieron obtener las imágenes para el prompt',
+			EntityErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }

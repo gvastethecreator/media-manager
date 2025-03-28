@@ -8,8 +8,8 @@
  * @returns String en formato HEX (ej: "#3b82f6")
  */
 export function rgbStringToHex(rgbString: string): string {
-  const [r, g, b] = rgbString.split(',').map(num => Number.parseInt(num.trim(), 10));
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+	const [r, g, b] = rgbString.split(',').map((num) => Number.parseInt(num.trim(), 10));
+	return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
 }
 
 /**
@@ -18,14 +18,14 @@ export function rgbStringToHex(rgbString: string): string {
  * @returns String en formato "r, g, b" (ej: "59, 130, 246")
  */
 export function hexToRgbString(hex: string): string {
-  // Eliminar el # si existe
-  const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
-  
-  const r = Number.parseInt(cleanHex.slice(0, 2), 16);
-  const g = Number.parseInt(cleanHex.slice(2, 4), 16);
-  const b = Number.parseInt(cleanHex.slice(4, 6), 16);
-  
-  return `${r}, ${g}, ${b}`;
+	// Eliminar el # si existe
+	const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
+
+	const r = Number.parseInt(cleanHex.slice(0, 2), 16);
+	const g = Number.parseInt(cleanHex.slice(2, 4), 16);
+	const b = Number.parseInt(cleanHex.slice(4, 6), 16);
+
+	return `${r}, ${g}, ${b}`;
 }
 
 /**
@@ -34,8 +34,8 @@ export function hexToRgbString(hex: string): string {
  * @returns Objeto con propiedades r, g, b
  */
 export function rgbStringToObject(rgbString: string): { r: number; g: number; b: number } {
-  const [r, g, b] = rgbString.split(',').map(num => Number.parseInt(num.trim(), 10));
-  return { r, g, b };
+	const [r, g, b] = rgbString.split(',').map((num) => Number.parseInt(num.trim(), 10));
+	return { r, g, b };
 }
 
 /**
@@ -44,7 +44,7 @@ export function rgbStringToObject(rgbString: string): { r: number; g: number; b:
  * @returns String en formato "r, g, b" (ej: "59, 130, 246")
  */
 export function rgbObjectToString(rgb: { r: number; g: number; b: number }): string {
-  return `${rgb.r}, ${rgb.g}, ${rgb.b}`;
+	return `${rgb.r}, ${rgb.g}, ${rgb.b}`;
 }
 
 /**
@@ -53,7 +53,7 @@ export function rgbObjectToString(rgb: { r: number; g: number; b: number }): str
  * @returns String CSS para color (ej: "rgb(59, 130, 246)")
  */
 export function rgbStringToCssColor(rgbString: string): string {
-  return `rgb(${rgbString.replace(/\s/g, '')})`;
+	return `rgb(${rgbString.replace(/\s/g, '')})`;
 }
 
 /**
@@ -62,10 +62,10 @@ export function rgbStringToCssColor(rgbString: string): string {
  * @returns true si el color es claro, false si es oscuro
  */
 export function isLightColor(rgbString: string): boolean {
-  const { r, g, b } = rgbStringToObject(rgbString);
-  // Fórmula para calcular la luminosidad percibida
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5;
+	const { r, g, b } = rgbStringToObject(rgbString);
+	// Fórmula para calcular la luminosidad percibida
+	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+	return luminance > 0.5;
 }
 
 /**
@@ -74,5 +74,5 @@ export function isLightColor(rgbString: string): boolean {
  * @returns "255, 255, 255" para fondos oscuros o "0, 0, 0" para fondos claros
  */
 export function getContrastTextColor(rgbString: string): string {
-  return isLightColor(rgbString) ? "0, 0, 0" : "255, 255, 255";
+	return isLightColor(rgbString) ? '0, 0, 0' : '255, 255, 255';
 }
