@@ -17,6 +17,27 @@ export enum PromptCategory {
 }
 
 /**
+ * Modelos de IA disponibles para prompts
+ */
+export enum PromptModel {
+	GPT_3_5 = 'gpt-3.5-turbo',
+	GPT_4 = 'gpt-4',
+	GPT4_VISION = 'gpt-4-vision',
+	GPT_4_TURBO = 'gpt-4-turbo',
+	CLAUDE_INSTANT = 'claude-instant',
+	CLAUDE_2 = 'claude-2',
+	CLAUDE_3_OPUS = 'claude-3-opus',
+	CLAUDE_3_SONNET = 'claude-3-sonnet',
+	CLAUDE_3_HAIKU = 'claude-3-haiku',
+	LLAMA_3_8B = 'llama-3-8b',
+	LLAMA_3_70B = 'llama-3-70b',
+	GEMINI_PRO = 'gemini-pro',
+	GEMINI_FLASH = 'gemini-flash',
+	MISTRAL_7B = 'mistral-7b',
+	CUSTOM = 'custom',
+}
+
+/**
  * Estado de un prompt
  */
 export enum PromptStatus {

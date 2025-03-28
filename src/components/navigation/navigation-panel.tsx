@@ -3,7 +3,7 @@
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { memo, useCallback, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NavCategoryChildren, type CategoryChildrenRef } from './components/nav-category-children';
 import { NavCategoryItem } from './components/nav-category-item';
 import { NavMainNavigation } from './components/nav-main-navigation';
@@ -109,8 +109,8 @@ const CategoryWithChildren = memo(function CategoryWithChildren({
  */
 export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = false, onToggleCollapse }: NavPanelProps) {
 	// Hooks para manejar la lógica del panel
-	const { isCategoryCollapsed, handleCollapseToggle } = useCategoryCollapse();
-	const { currentView, handleCategoryClick, getItemClickHandler, getSelectedChildId } = useCategoryHandlers();
+	const { isCategoryCollapsed, handleCollapseToggle, expandCategory } = useCategoryCollapse();
+	const { currentView, handleCategoryClick, getItemClickHandler, getSelectedChildId, hasCategoryChildSelected } = useCategoryHandlers();
 	const { getCategoryItemCount, getImagesForCategory, getCategoryItems, stats } = useCategoryStats(initialData);
 	const { handleOpenSettings, handleOpenDevelopment, handleOpenEntityCards, handleMainNavigate } = useMainNavigation();
 
@@ -120,6 +120,36 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 	// Guardar referencias a los componentes hijos
 	const childrenRefs = useRef<Record<string, CategoryChildrenRef | null>>({});
 
+	// Efecto para expandir la categoría correspondiente cuando cambia la vista actual
+	// Este efecto solo se ejecutará cuando cambie la vista actual (currentView)
+	useEffect(() => {
+		if (currentView) {
+			// Si la vista actual es una categoría principal, la expandimos directamente
+			const isMainCategory = NAVIGATION_CATEGORIES.some(cat => cat.id === currentView);
+			if (isMainCategory) {
+				expandCategory(currentView);
+				return;
+			}
+
+			// Buscar la categoría padre a la que pertenece la vista actual de contenido
+			const parentCategory = NAVIGATION_CATEGORIES.find(cat => {
+				// Si la vista actual es de contenido (ej: folder-content), buscar la categoría padre (folders)
+				if (currentView.endsWith('-content')) {
+					return hasCategoryChildSelected(cat.id);
+				}
+
+				// De lo contrario, verificar si algún item de la categoría coincide con la vista actual
+				const items = getCategoryItems(cat.id);
+				return items.some(item => item.id === currentView);
+			});
+
+			if (parentCategory) {
+				// Expandir la categoría padre
+				expandCategory(parentCategory.id);
+			}
+		}
+	}, [currentView, getCategoryItems, expandCategory, hasCategoryChildSelected]);
+
 	// Memoizar la función para cambiar el modo de vista
 	const handleCategoryToggleViewMode = useCallback((categoryId: string, mode: 'list' | 'grid') => {
 		setCategoryViewModes((prev) => ({ ...prev, [categoryId]: mode }));
@@ -128,9 +158,13 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 	// Memoizar los handlers para cada categoría
 	const getCategoryClickHandler = useCallback(
 		(id: string) => {
-			return () => handleCategoryClick(id);
+			return () => {
+				// Expandir la categoría al hacer click en ella
+				expandCategory(id);
+				handleCategoryClick(id);
+			};
 		},
-		[handleCategoryClick]
+		[handleCategoryClick, expandCategory]
 	);
 
 	const getCollapseToggleHandler = useCallback(

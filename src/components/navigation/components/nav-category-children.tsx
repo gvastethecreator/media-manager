@@ -384,18 +384,6 @@ export const NavCategoryChildren = memo(
 
 			return (
 				<>
-					<div className="flex items-center justify-between mb-1 px-1">
-						<span className="text-[10px] text-muted-foreground">
-							{items.length} elemento{items.length !== 1 ? 's' : ''} {categoryId === 'tags' && 'etiqueta'}
-							{categoryId === 'tags' && items.length !== 1 && 's'}
-							{categoryId === 'notes' && 'nota'}
-							{categoryId === 'notes' && items.length !== 1 && 's'}
-							{categoryId === 'concepts' && 'concepto'}
-							{categoryId === 'concepts' && items.length !== 1 && 's'}
-							{categoryId === 'prompts' && 'prompt'}
-							{categoryId === 'prompts' && items.length !== 1 && 's'}
-						</span>
-					</div>
 
 					{/* Renderizado condicional de los ítems */}
 					<CategoryItems

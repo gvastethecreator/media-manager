@@ -13,9 +13,11 @@ import { memo, useCallback, useMemo } from 'react';
 const CollapseIndicator = memo(function CollapseIndicator({
 	isCollapsed,
 	onToggleCollapse,
+	color = '#888888'
 }: {
 	isCollapsed: boolean;
 	onToggleCollapse: (e: React.MouseEvent | React.KeyboardEvent) => void;
+	color?: string;
 }) {
 	// Usamos memoización para la configuración de la animación
 	const animateConfig = useMemo(
@@ -53,7 +55,7 @@ const CollapseIndicator = memo(function CollapseIndicator({
 			aria-label={isCollapsed ? 'Expandir categoría' : 'Colapsar categoría'}
 		>
 			<motion.div initial={false} animate={animateConfig} transition={transitionConfig}>
-				<ChevronRight className="h-3 w-3 text-foreground/60" />
+				<ChevronRight className="h-3 w-3" style={{ color }} />
 			</motion.div>
 		</div>
 	);
@@ -184,7 +186,7 @@ export const NavCategoryItem = memo(function NavCategoryItem({
 			}}
 		>
 			{/* Botón específico para colapsar/expandir - solo visible cuando se muestran las etiquetas */}
-			{showLabel && <CollapseIndicator isCollapsed={isCollapsed} onToggleCollapse={onToggleCollapse} />}
+			{showLabel && <CollapseIndicator isCollapsed={isCollapsed} onToggleCollapse={onToggleCollapse} color={color} />}
 
 			{/* Botón de categoría */}
 			<Button
