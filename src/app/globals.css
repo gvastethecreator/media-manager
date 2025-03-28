@@ -216,6 +216,7 @@ html[data-theme="dark"] {
 @layer base {
 	html {
 		font-size: calc(100% * var(--font-scale));
+		font-family: var(--font-theme, var(--font-sans));
 	}
 
 	* {

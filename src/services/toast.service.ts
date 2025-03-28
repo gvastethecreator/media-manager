@@ -1,5 +1,5 @@
 import type * as React from 'react';
-import { type ExternalToast, type ToastT, toast } from 'sonner';
+import { type ExternalToast, toast } from 'sonner';
 
 // Tipos de notificaciones
 export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'default';
@@ -41,6 +41,12 @@ const TOAST_TYPES = {
 		update: '📁 Carpeta actualizada',
 		scan: '🔍 Escaneando carpeta',
 		error: '❌ Error en la carpeta',
+	},
+	worldItem: {
+		add: '📦 Objeto creado',
+		delete: '🗑️ Objeto eliminado',
+		update: '📝 Objeto actualizado',
+		error: '❌ Error con el objeto',
 	},
 	system: {
 		error: '❌ Error del sistema',
@@ -183,6 +189,38 @@ export const toastService = {
 				'info'
 			),
 	},
+	worldItem: {
+		created: (name?: string) =>
+			showToast(
+				TOAST_TYPES.worldItem.add,
+				{
+					description: name ? `Objeto "${name}" creado` : 'Nuevo objeto creado',
+				},
+				'success'
+			),
+		deleted: (name?: string) =>
+			showToast(
+				TOAST_TYPES.worldItem.delete,
+				{
+					description: name ? `Objeto "${name}" eliminado` : 'Objeto eliminado',
+				},
+				'info'
+			),
+		updated: (name?: string) =>
+			showToast(
+				TOAST_TYPES.worldItem.update,
+				{
+					description: name ? `Objeto "${name}" actualizado` : 'Objeto actualizado',
+				},
+				'success'
+			),
+		error: (title: string, options?: ToastOptions) =>
+			showToast(
+				title,
+				options,
+				'error'
+			),
+	},
 	favorite: {
 		added: () =>
 			showToast(
@@ -236,11 +274,12 @@ export const toastService = {
 			),
 	},
 	system: {
-		error: (message: string) =>
+		error: (message: string, options?: ToastOptions) =>
 			showToast(
 				TOAST_TYPES.system.error,
 				{
 					description: message,
+					...options
 				},
 				'error'
 			),

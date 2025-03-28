@@ -15,12 +15,16 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { toast } from '@/services/toast.service';
-import { Character } from '@/types/entities/character';
+import toastService from '@/services/toast.service';
+import { CharacterBase as Character } from '@/types/entities/character/base';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
 import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreateCharacterForm } from './create-character-form';
+
+// Eliminar la referencia a avatar (ya arreglado) y actualizar la sección traits
+// Agregar una declaración de tipo seguro para el manejador de eventos
+type ReactEventHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 export function CharactersSettings() {
 	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
@@ -46,7 +50,7 @@ export function CharactersSettings() {
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
-				toast.error('Error al cargar los personajes', {
+				toastService.error('Error al cargar los personajes', {
 					description: errorMessage,
 				});
 			} finally {
@@ -73,7 +77,7 @@ export function CharactersSettings() {
 		// Filtrar por búsqueda
 		if (searchQuery) {
 			const normalizedQuery = searchQuery.toLowerCase();
-			matches = matches && (
+			matches = matches && Boolean(
 				character.name.toLowerCase().includes(normalizedQuery) ||
 				(character.description && character.description.toLowerCase().includes(normalizedQuery))
 			);
@@ -104,10 +108,10 @@ export function CharactersSettings() {
 			setCharacters(prev => prev.filter(character => character.id !== id));
 			setSelectedCharacter(null);
 			setIsEditing(false);
-			toast.success('Personaje eliminado');
+			toastService.success('Personaje eliminado');
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toast.error('Error al eliminar el personaje', {
+			toastService.error('Error al eliminar el personaje', {
 				description: errorMessage,
 			});
 		}
@@ -119,10 +123,16 @@ export function CharactersSettings() {
 		setIsEditing(true);
 	}, []);
 
+	// Manejar la eliminación desde el botón con detención de propagación de eventos
+	const handleDeleteButtonClick = useCallback((e: React.MouseEvent<HTMLButtonElement>, id: string) => {
+		e.stopPropagation();
+		handleDeleteCharacter(id);
+	}, [handleDeleteCharacter]);
+
 	// Manejar creación exitosa
 	const handleCharacterCreated = useCallback((newCharacter: Character) => {
 		setCharacters(prev => [...prev, newCharacter as unknown as CharacterWithStats]);
-		toast.success('Personaje creado');
+		toastService.success('Personaje creado');
 	}, []);
 
 	// Manejar actualización exitosa
@@ -134,7 +144,7 @@ export function CharactersSettings() {
 					: character
 			)
 		);
-		toast.success('Personaje actualizado');
+		toastService.success('Personaje actualizado');
 	}, []);
 
 	// Resetear formulario
@@ -360,15 +370,7 @@ export function CharactersSettings() {
 												className="w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center text-white"
 												style={{ backgroundColor: character.color }}
 											>
-												{character.avatar ? (
-													<img
-														src={character.avatar}
-														alt={character.name}
-														className="w-full h-full rounded-full object-cover"
-													/>
-												) : (
-													<span className="text-xs">{character.name.charAt(0).toUpperCase()}</span>
-												)}
+												<span className="text-xs">{character.emoji || character.name.charAt(0).toUpperCase()}</span>
 											</div>
 											<div className="flex-1 min-w-0">
 												<h4 className="text-xs font-medium truncate">{character.name}</h4>
@@ -393,9 +395,12 @@ export function CharactersSettings() {
 											<Button
 												variant="ghost"
 												size="icon"
+												type="button"
 												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												onClick={(e) => {
-													e.stopPropagation();
+												onClick={() => {
+													// Capturar el evento de clic en línea
+													const e = window.event as MouseEvent;
+													if (e) e.stopPropagation();
 													handleDeleteCharacter(character.id);
 												}}
 											>
@@ -481,17 +486,9 @@ export function CharactersSettings() {
 													className="w-16 h-16 mb-3 rounded-full flex items-center justify-center text-white"
 													style={{ backgroundColor: (previewData?.color || selectedCharacter?.color || '#3b82f6') }}
 												>
-													{(previewData?.avatar || selectedCharacter?.avatar) ? (
-														<img
-															src={previewData?.avatar || selectedCharacter?.avatar}
-															alt={previewData?.name || selectedCharacter?.name}
-															className="w-full h-full rounded-full object-cover"
-														/>
-													) : (
-														<span className="text-xl">
-															{(previewData?.name || selectedCharacter?.name || 'A').charAt(0).toUpperCase()}
-														</span>
-													)}
+													<span className="text-xl">
+														{(previewData?.emoji || selectedCharacter?.emoji || '👤')}
+													</span>
 												</div>
 												<h3 className="text-lg font-medium text-center">
 													{previewData?.name || selectedCharacter?.name || 'Nuevo Personaje'}
@@ -513,17 +510,6 @@ export function CharactersSettings() {
 												<p className="text-center text-muted-foreground mt-3 text-sm">
 													{previewData?.description || selectedCharacter?.description || 'Sin descripción'}
 												</p>
-
-												{(previewData?.traits?.length > 0 || selectedCharacter?.traits?.length > 0) && (
-													<div className="w-full mt-3">
-														<h4 className="text-xs font-medium mb-1">Rasgos</h4>
-														<div className="flex flex-wrap gap-1">
-															{(previewData?.traits || selectedCharacter?.traits || []).map((trait: string, index: number) => (
-																<Badge key={index} variant="outline" className="text-[10px]">{trait}</Badge>
-															))}
-														</div>
-													</div>
-												)}
 
 												{(previewData?.category || selectedCharacter?.category) && (
 													<p className="mt-3 text-xs text-muted-foreground">
@@ -554,31 +540,39 @@ export function CharactersSettings() {
 	);
 }
 
-// Función auxiliar para generar colores basados en categoría
+// Corregir función para generar colores de categoría
 function generateCategoryColor(category: CharacterCategory): string {
 	switch (category) {
 		case CharacterCategory.PROTAGONIST:
 			return 'bg-blue-500';
 		case CharacterCategory.ANTAGONIST:
 			return 'bg-red-500';
+		case CharacterCategory.ALLY:
+			return 'bg-green-500';
+		case CharacterCategory.VILLAIN:
+			return 'bg-purple-700';
 		case CharacterCategory.SUPPORTING:
 			return 'bg-green-500';
-		case CharacterCategory.SECONDARY:
-			return 'bg-yellow-500';
-		case CharacterCategory.MINOR:
-			return 'bg-purple-500';
-		case CharacterCategory.NPC:
-			return 'bg-gray-500';
+		case CharacterCategory.MENTOR:
+			return 'bg-amber-500';
+		case CharacterCategory.SIDEKICK:
+			return 'bg-teal-500';
+		case CharacterCategory.ANTIHERO:
+			return 'bg-indigo-500';
 		case CharacterCategory.HISTORICAL:
 			return 'bg-orange-500';
+		case CharacterCategory.MYTHOLOGICAL:
+			return 'bg-violet-500';
 		case CharacterCategory.FICTIONAL:
-			return 'bg-cyan-500';
+			return 'bg-sky-500';
+		case CharacterCategory.OTHER:
+			return 'bg-gray-500';
 		default:
 			return 'bg-gray-500';
 	}
 }
 
-// Función auxiliar para generar colores basados en clase
+// Corregir función para generar colores de clase
 function generateClassColor(characterClass: CharacterClass): string {
 	switch (characterClass) {
 		case CharacterClass.WARRIOR:
@@ -586,26 +580,28 @@ function generateClassColor(characterClass: CharacterClass): string {
 		case CharacterClass.MAGE:
 			return 'bg-blue-600';
 		case CharacterClass.ROGUE:
-			return 'bg-yellow-600';
-		case CharacterClass.CLERIC:
 			return 'bg-green-600';
+		case CharacterClass.CLERIC:
+			return 'bg-yellow-600';
 		case CharacterClass.RANGER:
-			return 'bg-emerald-600';
+			return 'bg-teal-600';
+		case CharacterClass.BARD:
+			return 'bg-purple-600';
 		case CharacterClass.PALADIN:
 			return 'bg-amber-600';
 		case CharacterClass.DRUID:
-			return 'bg-lime-600';
-		case CharacterClass.BARD:
-			return 'bg-purple-600';
+			return 'bg-emerald-600';
 		case CharacterClass.MONK:
 			return 'bg-orange-600';
-		case CharacterClass.BARBARIAN:
-			return 'bg-rose-600';
 		case CharacterClass.WARLOCK:
 			return 'bg-violet-600';
-		case CharacterClass.NECROMANCER:
+		case CharacterClass.SORCERER:
 			return 'bg-indigo-600';
-		case CharacterClass.CUSTOM:
+		case CharacterClass.BARBARIAN:
+			return 'bg-rose-600';
+		case CharacterClass.ARTIFICER:
+			return 'bg-cyan-600';
+		case CharacterClass.UNKNOWN:
 			return 'bg-slate-600';
 		default:
 			return 'bg-gray-600';

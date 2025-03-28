@@ -9,9 +9,8 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from '@/services/toast.service';
-import { Character } from '@/types/entities/character';
-import { CreateCharacterData } from '@/types/entities/character/base';
+import toastService from '@/services/toast.service';
+import { CharacterBase as Character, CreateCharacterData } from '@/types/entities/character/base';
 import { CHARACTER_CLASS_COLORS, CHARACTER_CLASS_EMOJIS, CharacterAlignment, CharacterCategory, CharacterClass, CharacterRace } from '@/types/entities/character/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
@@ -53,6 +52,7 @@ interface CreateCharacterFormProps {
 	onCreated?: (character: Character) => void;
 	onUpdated?: (character: Character) => void;
 	onCancel?: () => void;
+	onPreview?: (data: any) => void;
 }
 
 export function CreateCharacterForm({
@@ -199,7 +199,7 @@ export function CreateCharacterForm({
 
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			toast.error(`Error al ${isEditing ? 'actualizar' : 'crear'} el personaje`, {
+			toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} el personaje`, {
 				description: errorMessage,
 			});
 		} finally {
@@ -268,7 +268,7 @@ export function CreateCharacterForm({
 								<FormControl>
 									<EmojiPicker
 										value={field.value}
-										onChange={(emoji) => field.onChange(emoji)}
+										onEmojiSelect={(emoji) => field.onChange(emoji)}
 									/>
 								</FormControl>
 								<FormDescription>
