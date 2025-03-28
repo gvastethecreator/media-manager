@@ -19,7 +19,6 @@ import {
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
-import { EntitiesCardsSection } from '../features/entity-cards/settings-old/entities-cards-settings';
 import { AlbumsSettings } from './albums/albums-settings';
 import { CharactersSettings } from './characters/characters-settings';
 import { CollectionsSettings } from './collections/collections-settings';
@@ -28,13 +27,13 @@ import { FoldersSettings } from './folders/folders-settings';
 import { NotesSettings } from './notes/notes-settings';
 import { PlacesSettings } from './places/places-settings';
 import { ProfilesSettings } from './profiles/profiles-settings';
-import { PromptsSettings } from './prompts/prompts-settings';
 import { ShortcutsSettings } from './shortcuts/shortcuts-settings';
 import { SystemSettings } from './system/system-settings';
 import { TagsSettings } from './tags/tags-settings';
 import { ThumbnailsSettings } from './thumbnails/thumbnails-settings';
 import { UploadedImagesSettings } from './uploaded-images/uploaded-images-settings';
 import { WorldItemsSettings } from './world-items/world-items-settings';
+import { PromptSettings } from './prompts/prompts-settings';
 
 // Definición de tipos para estructurar los tabs
 interface TabItem {
@@ -220,7 +219,7 @@ export function SettingsView() {
 					</TabsContent>
 
 					<TabsContent value="prompts" className="px-1 h-full overflow-auto">
-						<PromptsSettings />
+						<PromptSettings />
 					</TabsContent>
 
 					<TabsContent value="notes" className="px-1 h-full overflow-auto">

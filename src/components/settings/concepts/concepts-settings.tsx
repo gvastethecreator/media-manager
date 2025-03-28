@@ -20,34 +20,18 @@ import {
 	PopoverTrigger
 } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
+import { ConceptExtended } from '@/types/entities/concept';
 import { ConceptWithStats } from '@/types/entities/concept/base';
 import { calculateConceptsStats } from '@/utils/concept/helpers';
 import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateConceptForm } from './create-concept-form';
 
-// Definir tipo para Concept
-type Concept = {
-	id: string;
-	name: string;
-	description?: string | null;
-	content?: string;
-	emoji: string;
-	color: string;
-	category: string;
-	tags: string;
-	isFavorite?: boolean;
-	featuredImage?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-	presetId?: string | null;
-};
-
 export function ConceptsSettings() {
 	const [concepts, setConcepts] = useState<ConceptWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedConcept, setSelectedConcept] = useState<Concept | null>(null);
+	const [selectedConcept, setSelectedConcept] = useState<ConceptExtended | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -130,7 +114,7 @@ export function ConceptsSettings() {
 
 	// Manejar edición de concepto
 	const handleEditConcept = useCallback((concept: ConceptWithStats) => {
-		setSelectedConcept(concept as unknown as Concept);
+		setSelectedConcept(concept as unknown as ConceptExtended);
 		setIsEditing(true);
 	}, []);
 
@@ -141,7 +125,7 @@ export function ConceptsSettings() {
 	}, [handleDeleteConcept]);
 
 	// Manejar creación exitosa
-	const handleConceptCreated = useCallback((newConcept: Concept) => {
+	const handleConceptCreated = useCallback((newConcept: ConceptExtended) => {
 		setConcepts(prev => [
 			{
 				...newConcept,
@@ -160,7 +144,7 @@ export function ConceptsSettings() {
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleConceptUpdated = useCallback((updatedConcept: Concept) => {
+	const handleConceptUpdated = useCallback((updatedConcept: ConceptExtended) => {
 		setConcepts(prev =>
 			prev.map(concept =>
 				concept.id === updatedConcept.id

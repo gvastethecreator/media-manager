@@ -104,7 +104,6 @@ export function CreatePromptForm({
 				color: prompt.color || '#3b82f6',
 				emoji: prompt.emoji || '💬',
 				category: prompt.category as PromptCategory | undefined,
-				model: prompt.model as PromptModel | undefined,
 				parameters: prompt.parameters || '{}',
 				isFavorite: prompt.isFavorite || false
 			});
