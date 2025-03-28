@@ -1,137 +1,145 @@
-# Plan de migración de Entity Cards a componentes específicos por entidad
+# Desarrollo de Pantallas de Configuración para Entidades
 
-## Contexto
-Actualmente estamos utilizando componentes genéricos de entity-card para mostrar diferentes entidades. Necesitamos migrar a componentes específicos para cada tipo de entidad con un diseño inspirado en cartas Magic.
+## Estado Actual
+- [x] Iniciar tarea
+- [x] Configuración de Albums
+  - [x] Listar albums existentes
+  - [x] Estadísticas de albums
+  - [x] Formulario de creación/edición
+  - [x] Previsualización con album-card
+  - [x] Diseño compacto de tres paneles en una vista
+- [x] Configuración de Tags
+  - [x] Listar tags con estadísticas
+  - [x] Formulario para crear/editar tags
+  - [x] Previsualización de tag
+  - [x] Filtrado por categoría/uso
+- [x] Configuración de Collections
+  - [x] Listar collections con estadísticas
+  - [x] Formulario para crear/editar collections
+  - [x] Previsualización de collection
+  - [x] Filtrado por categoría/favoritos
+- [x] Configuración de Characters
+  - [x] Listar characters con estadísticas
+  - [x] Formulario para crear/editar characters
+  - [x] Previsualización de character
+  - [x] Filtrado por clase/categoría/favoritos
+- [x] Configuración de Places
+  - [x] Listar places con estadísticas
+  - [x] Formulario para crear/editar places
+  - [x] Previsualización de place
+  - [x] Filtrado por tipo/región/favoritos
+- [x] Configuración de World Items
+  - [x] Listar world items con estadísticas
+  - [x] Formulario para crear/editar world items
+  - [x] Previsualización de world item
+  - [x] Filtrado por tipo/rareza/favoritos
+- [x] Configuración de Concepts
+  - [x] Listar concepts con estadísticas
+  - [x] Formulario para crear/editar concepts
+  - [x] Previsualización de concept
+  - [x] Filtrado por categoría/favoritos
+- [ ] Configuración de Prompts
+- [ ] Configuración de Notes
+- [ ] Configuración de Folders
+- [ ] Configuración de Visual Presets
 
-## Tareas generales
+## Progreso
 
-1. ✅ Crear estructura para el nuevo sistema de componentes
-   - ✅ Crear carpeta para componentes de tarjetas específicas por entidad
+### Albums
+- ✅ Implementado listado de albums con estadísticas y funcionalidades CRUD
+- ✅ Agregado formulario con validación para crear/editar albums
+- ✅ Integración con AlbumCard para previsualización
+- ✅ Creados componentes reutilizables: ColorPicker y EmojiPicker
+- ✅ Rediseñado con layout compacto de dos paneles en una sola vista
+- ✅ Optimizado espaciado, tamaños y controles
+- ✅ Implementado scrolling en ambos paneles para mejor uso del espacio
 
-2. ✅ Implementar FolderCard como primer componente
-   - ✅ Diseñar e implementar componente inspirado en cartas Magic para carpetas
-   - ✅ Incluir los últimos 6 thumbnails de imágenes de la carpeta
-   - ✅ Mostrar toda la información relevante de la entidad Folder
-   - ✅ Mejorar con iconos de Lucide y optimizar UI
+### World Items
+- ✅ Implementado listado con diseño compacto
+- ✅ Agregado sistema de filtros en popover
+- ✅ Diseño de previsualización en tiempo real
+- ✅ Vista integrada con lista, formulario y preview simultáneos
 
-3. ✅ Actualizar vistas para usar nuevos componentes
-   - ✅ Actualizar folders-view para usar el nuevo FolderCard
-   - ✅ Eliminar referencias a EntityCard/EntityCardDev
+### Tags
+- ✅ Implementado listado de tags con estadísticas
+- ✅ Implementado formulario para crear/editar tags
+- ✅ Implementado previsualización de tags
+- ✅ Implementado filtrado por categoría y uso
+- ✅ Implementado sugerencias automáticas de emoji y color
 
-4. ✅ Extender a otras entidades principales
-   - ✅ Implementar AlbumCard y actualizar albums-view
-   - ✅ Implementar CollectionCard y actualizar collections-view
-   - ✅ Implementar TagCard y actualizar tags-view
-   - ✅ Mejorar consistencia con iconos de Lucide en todos los componentes
-   - ✅ Corregir problemas con thumbnails en server actions
-   - ✅ Implementar CharacterCard y actualizar characters-view
-   - ✅ Implementar PlaceCard y actualizar places-view
-   - ✅ Crear componentes auxiliares para tarjetas (CardContainer, CardHeader)
-   - ✅ Implementar WorldItemCard
-   - ✅ Implementar ConceptCard
-   - ✅ Implementar PromptCard
-   - ✅ Implementar NoteCard
+### Collections
+- ✅ Implementado listado de colecciones con estadísticas completas
+- ✅ Implementado formulario para crear/editar colecciones con campos específicos
+- ✅ Implementado previsualización de colecciones
+- ✅ Implementado filtrado por categoría y favoritos
+- ✅ Implementado sugerencias basadas en categoría o nombre
 
-5. ✅ Tareas finales
-   - ✅ Verificar que todas las vistas estén usando los nuevos componentes
-   - ✅ Pruebas de rendimiento y optimización
-   - ✅ Documentación de los nuevos componentes
+### Characters
+- ✅ Implementado listado completo de personajes con estadísticas detalladas
+- ✅ Creado formulario avanzado para personajes con validación Zod
+- ✅ Implementada previsualización de personajes con sus atributos principales
+- ✅ Añadido filtrado múltiple por clase, categoría y favoritos
+- ✅ Implementadas estadísticas detalladas con distribución por clases y razas
+- ✅ Agregada funcionalidad de sugerencias basadas en clase o nombre
 
-## Estructura de componentes
+### Places
+- ✅ Implementado listado completo de lugares con estadísticas y contadores
+- ✅ Creado formulario completo para lugares con todos los campos específicos
+- ✅ Implementada visualización previa que muestra el lugar con su color y emoji
+- ✅ Añadido sistema de filtrado por tipos, regiones y favoritos
+- ✅ Implementadas estadísticas detalladas incluyendo distribución por tipos y regiones
+- ✅ Agregada funcionalidad para sugerir colores y emojis basados en el tipo o nombre
 
-```
-/components
-  /cards
-    /folder-card ✅
-      index.ts ✅
-      folder-card.tsx ✅
-      folder-card-content.tsx ✅
-      folder-card-header.tsx ✅
-      folder-card-footer.tsx ✅ (mejorado con iconos Lucide)
-      folder-card-images.tsx ✅
-    /album-card ✅
-      index.ts ✅
-      album-card.tsx ✅
-      album-card-content.tsx ✅
-      album-card-header.tsx ✅ (mejorado con iconos Lucide)
-      album-card-footer.tsx ✅ (mejorado con iconos Lucide)
-      album-card-images.tsx ✅
-    /collection-card ✅
-      index.ts ✅
-      collection-card.tsx ✅
-      collection-card-content.tsx ✅
-      collection-card-header.tsx ✅
-      collection-card-footer.tsx ✅
-      collection-card-images.tsx ✅
-      collection-server-actions.ts ✅
-    /tag-card ✅
-      index.ts ✅
-      tag-card.tsx ✅
-      tag-card-content.tsx ✅
-      tag-card-header.tsx ✅
-      tag-card-footer.tsx ✅
-      tag-card-images.tsx ✅
-      tag-server-actions.ts ✅
-    /character-card ✅
-      index.ts ✅
-      character-card.tsx ✅
-      character-card-content.tsx ✅
-      character-card-header.tsx ✅
-      character-card-footer.tsx ✅
-      character-card-images.tsx ✅
-      character-server-actions.ts ✅
-    /place-card ✅
-      index.ts ✅
-      place-card.tsx ✅
-      place-card-content.tsx ✅
-      place-card-header.tsx ✅
-      place-card-footer.tsx ✅
-      place-card-images.tsx ✅
-      place-server-actions.ts ✅
-    /note-card ✅
-      index.ts ✅
-      note-card.tsx ✅
-      note-card-content.tsx ✅
-      note-card-footer.tsx ✅
-      note-card-images.tsx ✅
-      note-server-actions.ts ✅
-      README.md ✅
-    card-container.tsx ✅ (componente auxiliar compartido)
-    card-header.tsx ✅ (componente auxiliar compartido)
-    ... (otros componentes de tarjeta)
+### Concepts
+- ✅ Implementado listado completo de conceptos con estadísticas detalladas
+- ✅ Creado formulario para conceptos con validación Zod incluyendo contenido extenso
+- ✅ Implementada previsualización de conceptos que muestra color, emoji y categoría
+- ✅ Añadido sistema de filtrado por categoría, texto y favoritos
+- ✅ Integrado sistema para parsear y mostrar etiquetas en formato JSON
+- ✅ Implementada actualización en tiempo real de la vista previa
 
-```
+## Lineamientos de Diseño Actualizados
 
-## Próximos pasos
+### Estructura Común para Configuración de Entidades
+1. **Layout de Dos Paneles**:
+   - Panel izquierdo: Lista compacta de entidades (1/3 del ancho)
+   - Panel derecho: Formulario y previsualización (2/3 del ancho)
 
-1. ✅ Implementar AlbumCard
-   - ✅ Crear estructura similar a FolderCard pero adaptada para álbumes
-   - ✅ Actualizar albums-view para usar AlbumCard
-   - ✅ Mejorar UX con iconos consistentes de Lucide
+2. **Optimizaciones de Espacio**:
+   - Reducción de padding (py-2, px-3)
+   - Espaciado entre elementos (space-y-1)
+   - Tamaños de fuente más pequeños (text-xs, text-[10px])
+   - Altura fija con scroll en ambos paneles h-[calc(100vh-8rem)]
 
-2. 🔄 Continuar con el resto de entidades siguiendo el mismo patrón
-   - ✅ Implementar CollectionCard y actualizar collections-view
-   - ✅ Implementar TagCard y actualizar tags-view
-   - ✅ Implementar CharacterCard y actualizar characters-view
-   - ✅ Implementar PlaceCard y actualizar places-view
-   - ✅ Implementar WorldItemCard (siguiente en la lista)
-   - ✅ Implementar ConceptCard (siguiente en la lista)
-   - ✅ Implementar PromptCard (siguiente en la lista)
-   - ✅ Implementar NoteCard (siguiente en la lista)
-   - ✅ Asegurar consistencia usando iconos de Lucide React en lugar de Radix
+3. **Controles de Formulario**:
+   - Botones pequeños (size="sm", h-6, h-7)
+   - Iconos reducidos (h-3.5 w-3.5)
+   - Botones de acción en el encabezado del panel derecho
 
-3. ✅ Eliminar completamente los componentes genéricos EntityCard cuando todas las vistas estén migradas
+4. **Vista Previa**:
+   - Tamaño reducido (w-[180px])
+   - Actualización en tiempo real al editar
+   - Vista previa por defecto con bordes punteados
 
-## Estándares de diseño
-- ✅ Usar iconos de Lucide React para mantener consistencia
-- ✅ Seguir patrón de diseño inspirado en cartas Magic con encabezado, imágenes, contenido y pie de carta
-- ✅ Implementar animaciones sutiles para interacción
-- ✅ Mantener accesibilidad con roles apropiados y soporte de teclado
+5. **Estilos Consistentes**:
+   - Usar las mismas clases de espaciado y tamaño en todos los componentes
+   - Mantener proporciones similares entre paneles
+   - Usar colores muted para fondos y bordes
 
-## Correcciones y mejoras
-- ✅ Corregir el problema con la carga de thumbnails en los componentes
-  - ✅ Implementar server actions robustas para manejar diferentes casos
-  - ✅ Crear interfaz común ThumbnailImage para estandarizar el manejo de miniaturas
-  - ✅ Usar una estrategia de fallback para mostrar placeholders cuando no hay miniaturas
-- ✅ Corregir errores de importación en WorldItemCard
-  - ✅ Crear componentes auxiliares CardContainer y CardHeader para compartir funcionalidad
+### Próximos Pasos: Prompts
+Para la implementación de Prompts, seguir estos pasos:
+
+1. Analizar la estructura actual de Prompts en el esquema de Prisma
+2. Implementar `prompts-settings.tsx` siguiendo el patrón establecido
+3. Crear formulario con validación para prompts
+4. Agregar visualización previa según el diseño actual
+5. Implementar filtrado por categoría/tipo
+
+### Mejoras Generales a Implementar
+- [x] Reducir el padding general en los componentes
+- [x] Optimizar el espacio con ScrollArea en ambos paneles
+- [x] Agregar botones de acción en el encabezado
+- [x] Mejorar la organización del formulario
+- [ ] Implementar confirmación antes de eliminar elementos
+- [ ] Optimizar rendimiento para colecciones grandes
+- [ ] Añadir animaciones sutiles para mejorar la experiencia de usuario
