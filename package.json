@@ -30,6 +30,8 @@
   "dependencies": {
     "@bull-board/api": "^6.7.10",
     "@bull-board/express": "^6.7.10",
+    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@libsql/client": "^0.15.1",
     "@prisma/client": "^6.5.0",
@@ -107,6 +109,7 @@
     "promises": "^0.2.5",
     "react": "^19.0.0",
     "react-color": "^2.19.3",
+    "react-colorful": "^5.6.1",
     "react-day-picker": "^9.6.3",
     "react-dom": "^19.0.0",
     "react-error-boundary": "^5.0.0",
