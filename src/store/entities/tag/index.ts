@@ -129,8 +129,7 @@ export const useTagStore = create<TagStore>()(
 			setViewMode: (mode) => set((state) => ({ ui: { ...state.ui, viewMode: mode } })),
 
 			// 🔍 Filtros
-			updateFilters: (filters) =>
-				set((state) => ({ filters: { ...state.filters, ...filters } })),
+			updateFilters: (filters) => set((state) => ({ filters: { ...state.filters, ...filters } })),
 			clearFilters: () =>
 				set({
 					filters: {
@@ -138,7 +137,7 @@ export const useTagStore = create<TagStore>()(
 						searchTerm: '',
 						category: null,
 						rarity: null,
-					} as TagFilters
+					} as TagFilters,
 				}),
 
 			// 🎯 Selectores
@@ -148,15 +147,9 @@ export const useTagStore = create<TagStore>()(
 				const { searchTerm, category, rarity } = filters;
 
 				return tags.filter((tag) => {
-					const matchesSearch = searchTerm
-						? tag.name.toLowerCase().includes(searchTerm.toLowerCase())
-						: true;
-					const matchesCategory = category
-						? (tag as any).category === category
-						: true;
-					const matchesRarity = rarity
-						? (tag as any).rarity === rarity
-						: true;
+					const matchesSearch = searchTerm ? tag.name.toLowerCase().includes(searchTerm.toLowerCase()) : true;
+					const matchesCategory = category ? (tag as any).category === category : true;
+					const matchesRarity = rarity ? (tag as any).rarity === rarity : true;
 
 					return matchesSearch && matchesCategory && matchesRarity;
 				});
@@ -201,4 +194,3 @@ export const useTagStore = create<TagStore>()(
 
 // Re-exportar tipos
 export * from './types';
-

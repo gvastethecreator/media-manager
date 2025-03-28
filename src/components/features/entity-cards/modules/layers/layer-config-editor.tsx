@@ -14,7 +14,7 @@ import type { LayerServerActions } from './types';
 // Servicio de toast simplificado para evitar dependencias externas
 const toastService = {
 	success: (message: string) => console.log(`✅ ${message}`),
-	error: (message: string) => console.error(`❌ ${message}`)
+	error: (message: string) => console.error(`❌ ${message}`),
 };
 
 interface LayerConfigEditorProps {
@@ -54,7 +54,7 @@ export function LayerConfigEditor({
 			// Usar la configuración predeterminada de la capa y asegurar que layerIndex esté definido
 			setConfig({
 				...layer.defaultConfig,
-				layerIndex: layer.defaultConfig.layerIndex || 0
+				layerIndex: layer.defaultConfig.layerIndex || 0,
 			});
 		}
 	}, [layer, layerType, initialConfig]);
@@ -77,7 +77,7 @@ export function LayerConfigEditor({
 				if (response.success && response.data) {
 					setConfig({
 						...response.data,
-						layerIndex: response.data.layerIndex || 0
+						layerIndex: response.data.layerIndex || 0,
 					});
 				} else if (response.error) {
 					console.warn(`Sin configuración guardada para ${layerType}, usando predeterminada`);

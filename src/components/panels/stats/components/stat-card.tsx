@@ -10,7 +10,6 @@ import {
 	Folder,
 	HardDrive,
 	Image,
-	type LucideIcon,
 	MapPin,
 	Star,
 	Tag,
@@ -45,12 +44,12 @@ export const StatCard = memo(function StatCard({ title, value, icon, color }: St
 	const Icon = ICONS[icon];
 
 	return (
-		<div className="flex items-center justify-between p-2 rounded-lg border bg-card text-card-foreground shadow-xs">
-			<div className="flex items-center gap-2">
-				<Icon className={`h-4 w-4 ${color}`} />
-				<span className="text-sm font-medium">{title}</span>
+		<div className="flex items-center justify-between py-1.5 px-2 rounded-md border bg-card/50 text-card-foreground">
+			<div className="flex items-center gap-1.5">
+				<Icon className={`h-3 w-3 ${color}`} />
+				<span className="text-xs">{title}</span>
 			</div>
-			<span className="text-sm font-medium">{value}</span>
+			<span className="text-xs font-medium ml-1">{value}</span>
 		</div>
 	);
 });

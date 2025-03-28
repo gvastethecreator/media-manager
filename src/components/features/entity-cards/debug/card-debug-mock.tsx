@@ -15,7 +15,7 @@ interface CardDebugContextType {
 // Valor por defecto para el contexto de depuración
 const defaultDebugContext: CardDebugContextType = {
 	activeDebugTools: [],
-	toggleDebugTool: () => { },
+	toggleDebugTool: () => {},
 	isDebugToolActive: () => false,
 };
 
@@ -31,11 +31,7 @@ export function CardDebugProvider({ children }: { children: React.ReactNode }) {
 
 	// Función para activar/desactivar una herramienta de depuración
 	const toggleDebugTool = (tool: DebugTool) => {
-		setActiveDebugTools(prev =>
-			prev.includes(tool)
-				? prev.filter(t => t !== tool)
-				: [...prev, tool]
-		);
+		setActiveDebugTools((prev) => (prev.includes(tool) ? prev.filter((t) => t !== tool) : [...prev, tool]));
 	};
 
 	// Función para verificar si una herramienta está activa
@@ -49,9 +45,5 @@ export function CardDebugProvider({ children }: { children: React.ReactNode }) {
 		isDebugToolActive,
 	};
 
-	return (
-		<CardDebugContext.Provider value={contextValue}>
-			{children}
-		</CardDebugContext.Provider>
-	);
+	return <CardDebugContext.Provider value={contextValue}>{children}</CardDebugContext.Provider>;
 }

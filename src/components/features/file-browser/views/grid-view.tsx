@@ -34,9 +34,6 @@ export const GridView = memo(function GridView({
 	onContextAction,
 	style,
 }: GridViewProps) {
-	// Eliminamos el estado que no es necesario
-	// const [_mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
 	// Usamos un ref para capturar el botón
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -70,11 +67,55 @@ export const GridView = memo(function GridView({
 		);
 	}, [isSelected, isScrolling]);
 
-	// Calculamos si debemos mostrar el contenido real
-	const shouldShowContent = shouldLoad && thumbnail;
+	// Memoizamos el elemento interno para evitar renderizados innecesarios
+	const ButtonContent = useMemo(() => {
+		// Calculamos si debemos mostrar el contenido real
+		const shouldShowContent = shouldLoad && thumbnail;
+
+		return (
+			<div className="w-full h-full bg-muted/30 cursor-pointer">
+				{shouldShowContent ? (
+					<div className="relative w-full h-full p-2">
+						<div
+							className="absolute inset-0 bg-cover bg-center blur-lg opacity-80 brightness-20"
+							style={{
+								backgroundImage: `url(${thumbnail})`,
+							}}
+						/>
+						<div className="absolute inset-0 scale-80 w-auto h-auto group-hover:scale-90 transition-all duration-100 ease-out">
+							<ImageRenderer
+								src={thumbnail}
+								alt={item.name}
+								objectFit="contain"
+								className="h-full w-full rounded-sm transition-all duration-200 ease-out"
+							/>
+						</div>
+					</div>
+				) : (
+					<div className="flex items-center justify-center h-full">
+						<Meh className="h-12 w-12 text-muted-foreground/50 animate-spin" />
+					</div>
+				)}
+
+				{item.isFavorite && (
+					<div className="absolute top-2 right-2">
+						<Star className="h-4 w-4 text-yellow-500 fill-current drop-shadow-lg shadow-black" />
+					</div>
+				)}
+			</div>
+		);
+	}, [shouldLoad, thumbnail, item.name, item.isFavorite]);
+
+	// Optimizamos la acción del menú contextual para evitar recreaciones
+	const handleContextAction = useCallback(
+		(action: ContextMenuAction, data?: Record<string, unknown>) => {
+			onContextAction?.(action, item, data);
+		},
+		[onContextAction, item]
+	);
 
 	return (
-		<FileContextMenu file={item} onAction={onContextAction || (() => { })}>
+		<FileContextMenu file={item} onAction={handleContextAction}>
 			<button
 				ref={buttonRef}
 				type="button"
@@ -85,35 +126,7 @@ export const GridView = memo(function GridView({
 				onKeyDown={handleKeyDown}
 				aria-pressed={isSelected}
 			>
-				<div className="w-full h-full bg-muted/30 cursor-pointer">
-					{shouldShowContent ? (
-						<div className="relative w-full h-full p-2">
-							<div
-								className="absolute inset-0 bg-cover bg-center blur-lg opacity-80 brightness-20"
-								style={{
-									backgroundImage: `url(${thumbnail})`,
-								}}
-							/>
-							<div className="absolute inset-0 scale-80 w-auto h-auto group-hover:scale-90 transition-all duration-100 ease-out">
-								<ImageRenderer
-									src={thumbnail}
-									alt={item.name}
-									objectFit="contain"
-									className="h-full w-full rounded-sm transition-all duration-200 ease-out"
-								/>
-							</div>
-						</div>
-					) : (
-						<div className="flex items-center justify-center h-full">
-							<Meh className="h-12 w-12 text-muted-foreground/50 animate-spin" />
-						</div>
-					)}
-				</div>
-				{item.isFavorite && (
-					<div className="absolute top-2 right-2">
-						<Star className="h-4 w-4 text-yellow-500 fill-current drop-shadow-lg shadow-black" />
-					</div>
-				)}
+				{ButtonContent}
 			</button>
 		</FileContextMenu>
 	);

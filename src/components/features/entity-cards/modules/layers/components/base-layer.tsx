@@ -55,13 +55,7 @@ export function BaseLayer<T extends BaseLayerConfig>({
 	onMouseMove,
 }: BaseLayerProps<T>): React.ReactElement {
 	// Usar el hook base para la lógica común
-	const {
-		processedConfig,
-		isVisible,
-		safeMousePosition,
-		getTransform,
-		isActive,
-	} = useBaseLayer({
+	const { processedConfig, isVisible, safeMousePosition, getTransform, isActive } = useBaseLayer({
 		config,
 		defaultConfig,
 		isHovered,
@@ -72,17 +66,20 @@ export function BaseLayer<T extends BaseLayerConfig>({
 	});
 
 	// Calcular estilos base
-	const baseStyle: React.CSSProperties = React.useMemo(() => ({
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		width: '100%',
-		height: '100%',
-		pointerEvents: isVisible ? 'auto' : 'none',
-		opacity: isVisible ? 1 : 0,
-		...getTransform(processedConfig.layerIndex),
-		...style,
-	}), [isVisible, processedConfig.layerIndex, style, getTransform]);
+	const baseStyle: React.CSSProperties = React.useMemo(
+		() => ({
+			position: 'absolute',
+			top: 0,
+			left: 0,
+			width: '100%',
+			height: '100%',
+			pointerEvents: isVisible ? 'auto' : 'none',
+			opacity: isVisible ? 1 : 0,
+			...getTransform(processedConfig.layerIndex),
+			...style,
+		}),
+		[isVisible, processedConfig.layerIndex, style, getTransform]
+	);
 
 	// Configurar animaciones con Framer Motion
 	const variants = {
@@ -91,20 +88,20 @@ export function BaseLayer<T extends BaseLayerConfig>({
 			opacity: 1,
 			scale: 1,
 			transition: {
-				type: "spring",
+				type: 'spring',
 				stiffness: 300,
-				damping: 30
-			}
+				damping: 30,
+			},
 		},
 		active: {
 			scale: 1.05,
-			boxShadow: "0 0 20px rgba(0,0,0,0.2)",
+			boxShadow: '0 0 20px rgba(0,0,0,0.2)',
 			transition: {
-				type: "spring",
+				type: 'spring',
 				stiffness: 400,
-				damping: 40
-			}
-		}
+				damping: 40,
+			},
+		},
 	};
 
 	return (
@@ -112,7 +109,7 @@ export function BaseLayer<T extends BaseLayerConfig>({
 			className={className}
 			style={baseStyle}
 			initial="hidden"
-			animate={isActive ? "active" : isVisible ? "visible" : "hidden"}
+			animate={isActive ? 'active' : isVisible ? 'visible' : 'hidden'}
 			variants={variants}
 			onMouseEnter={onMouseEnter}
 			onMouseLeave={onMouseLeave}
@@ -211,11 +208,7 @@ export function withBaseLayer<T extends BaseLayerConfig>(
 				data-layer-type={(processedConfig as any).type}
 				data-layer-index={processedConfig.layerIndex}
 			>
-				<Component
-					processedConfig={processedConfig}
-					style={layerStyle}
-					isVisible={shouldBeVisible}
-				/>
+				<Component processedConfig={processedConfig} style={layerStyle} isVisible={shouldBeVisible} />
 			</div>
 		);
 	};

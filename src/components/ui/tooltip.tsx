@@ -7,7 +7,10 @@ import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 // Optimizado para evitar re-renderizaciones con referencia estable
-const TooltipProvider = memo(function TooltipProvider({ delayDuration = 0, ...props }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
+const TooltipProvider = memo(function TooltipProvider({
+	delayDuration = 0,
+	...props
+}: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
 	return <TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />;
 });
 TooltipProvider.displayName = 'TooltipProvider';
@@ -25,83 +28,67 @@ const Tooltip = memo(function Tooltip({ ...props }: React.ComponentProps<typeof 
 Tooltip.displayName = 'Tooltip';
 
 // Trigger optimizado con callbacks estables
-const TooltipTrigger = memo(function TooltipTrigger(props: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-	// Extraemos los event handlers para crear callbacks estables
-	const {
-		onPointerMove,
-		onPointerLeave,
-		onPointerDown,
-		onFocus,
-		onBlur,
-		onClick,
-		...restProps
-	} = props;
+const TooltipTrigger = memo(
+	function TooltipTrigger(props: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
+		// Extraemos los event handlers para crear callbacks estables
+		const { onPointerMove, onPointerLeave, onPointerDown, onFocus, onBlur, onClick, ...restProps } = props;
 
-	// Creamos callbacks estables para cada evento, solo si están definidos
-	const stableOnPointerMove = useCallback(
-		onPointerMove ? (e: React.PointerEvent) => onPointerMove(e) : undefined,
-		[onPointerMove]
-	);
+		// Creamos callbacks estables para cada evento, solo si están definidos
+		const stableOnPointerMove = useCallback(onPointerMove ? (e: React.PointerEvent) => onPointerMove(e) : undefined, [
+			onPointerMove,
+		]);
 
-	const stableOnPointerLeave = useCallback(
-		onPointerLeave ? (e: React.PointerEvent) => onPointerLeave(e) : undefined,
-		[onPointerLeave]
-	);
+		const stableOnPointerLeave = useCallback(
+			onPointerLeave ? (e: React.PointerEvent) => onPointerLeave(e) : undefined,
+			[onPointerLeave]
+		);
 
-	const stableOnPointerDown = useCallback(
-		onPointerDown ? (e: React.PointerEvent) => onPointerDown(e) : undefined,
-		[onPointerDown]
-	);
+		const stableOnPointerDown = useCallback(onPointerDown ? (e: React.PointerEvent) => onPointerDown(e) : undefined, [
+			onPointerDown,
+		]);
 
-	const stableOnFocus = useCallback(
-		onFocus ? (e: React.FocusEvent) => onFocus(e) : undefined,
-		[onFocus]
-	);
+		const stableOnFocus = useCallback(onFocus ? (e: React.FocusEvent) => onFocus(e) : undefined, [onFocus]);
 
-	const stableOnBlur = useCallback(
-		onBlur ? (e: React.FocusEvent) => onBlur(e) : undefined,
-		[onBlur]
-	);
+		const stableOnBlur = useCallback(onBlur ? (e: React.FocusEvent) => onBlur(e) : undefined, [onBlur]);
 
-	const stableOnClick = useCallback(
-		onClick ? (e: React.MouseEvent) => onClick(e) : undefined,
-		[onClick]
-	);
+		const stableOnClick = useCallback(onClick ? (e: React.MouseEvent) => onClick(e) : undefined, [onClick]);
 
-	return (
-		<TooltipPrimitive.Trigger
-			data-slot="tooltip-trigger"
-			{...restProps}
-			onPointerMove={stableOnPointerMove}
-			onPointerLeave={stableOnPointerLeave}
-			onPointerDown={stableOnPointerDown}
-			onFocus={stableOnFocus}
-			onBlur={stableOnBlur}
-			onClick={stableOnClick}
-		/>
-	);
-}, (prevProps, nextProps) => {
-	// Implementar una comparación personalizada para evitar re-renders innecesarios
-	// Solo re-renderizar si las props importantes han cambiado
+		return (
+			<TooltipPrimitive.Trigger
+				data-slot="tooltip-trigger"
+				{...restProps}
+				onPointerMove={stableOnPointerMove}
+				onPointerLeave={stableOnPointerLeave}
+				onPointerDown={stableOnPointerDown}
+				onFocus={stableOnFocus}
+				onBlur={stableOnBlur}
+				onClick={stableOnClick}
+			/>
+		);
+	},
+	(prevProps, nextProps) => {
+		// Implementar una comparación personalizada para evitar re-renders innecesarios
+		// Solo re-renderizar si las props importantes han cambiado
 
-	// Si asChild o className cambian, debemos re-renderizar
-	if (prevProps.asChild !== nextProps.asChild || prevProps.className !== nextProps.className) {
-		return false;
+		// Si asChild o className cambian, debemos re-renderizar
+		if (prevProps.asChild !== nextProps.asChild || prevProps.className !== nextProps.className) {
+			return false;
+		}
+
+		// Si los hijos cambian, debemos re-renderizar
+		if (prevProps.children !== nextProps.children) {
+			return false;
+		}
+
+		// Si los refs cambian, debemos re-renderizar
+		if (prevProps.ref !== nextProps.ref) {
+			return false;
+		}
+
+		// Si llegamos aquí, consideramos que las props son iguales y no necesitamos re-renderizar
+		return true;
 	}
-
-	// Si los hijos cambian, debemos re-renderizar
-	if (prevProps.children !== nextProps.children) {
-		return false;
-	}
-
-	// Si los refs cambian, debemos re-renderizar
-	if (prevProps.ref !== nextProps.ref) {
-		return false;
-	}
-
-	// Si llegamos aquí, consideramos que las props son iguales y no necesitamos re-renderizar
-	return true;
-});
+);
 TooltipTrigger.displayName = 'TooltipTrigger';
 
 // Contenido optimizado
@@ -112,12 +99,14 @@ const TooltipContent = memo(function TooltipContent({
 	...props
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
 	// Memoizamos las clases para evitar recálculos constantes
-	const combinedClassName = useMemo(() =>
-		cn(
-			'bg-primary text-primary-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit rounded-md px-3 py-1.5 text-xs text-balance',
-			className
-		),
-		[className]);
+	const combinedClassName = useMemo(
+		() =>
+			cn(
+				'bg-primary text-primary-foreground animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 w-fit rounded-md px-3 py-1.5 text-xs text-balance',
+				className
+			),
+		[className]
+	);
 
 	return (
 		<TooltipPrimitive.Portal>
@@ -136,4 +125,3 @@ const TooltipContent = memo(function TooltipContent({
 TooltipContent.displayName = 'TooltipContent';
 
 export { GlobalTooltipProvider, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };
-

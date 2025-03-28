@@ -11,14 +11,7 @@ import { useCallback } from 'react';
 import type { AnimatedBorderConfig } from '../actions/animated-border-config.action';
 
 // Definir los modos de mezcla disponibles
-const BLEND_MODES = [
-	'normal',
-	'multiply',
-	'screen',
-	'overlay',
-	'darken',
-	'lighten',
-];
+const BLEND_MODES = ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten'];
 
 interface AnimatedBorderSettingsProps {
 	config: AnimatedBorderConfig;
@@ -71,9 +64,15 @@ export function AnimatedBorderSettings({ config, onConfigChange }: AnimatedBorde
 			{/* Pestañas de configuración */}
 			<Tabs defaultValue="animation" className="w-full">
 				<TabsList className="w-full">
-					<TabsTrigger value="animation" className="flex-1">Animación</TabsTrigger>
-					<TabsTrigger value="appearance" className="flex-1">Apariencia</TabsTrigger>
-					<TabsTrigger value="advanced" className="flex-1">Avanzado</TabsTrigger>
+					<TabsTrigger value="animation" className="flex-1">
+						Animación
+					</TabsTrigger>
+					<TabsTrigger value="appearance" className="flex-1">
+						Apariencia
+					</TabsTrigger>
+					<TabsTrigger value="advanced" className="flex-1">
+						Avanzado
+					</TabsTrigger>
 				</TabsList>
 
 				{/* Configuración de Animación */}
@@ -144,10 +143,7 @@ export function AnimatedBorderSettings({ config, onConfigChange }: AnimatedBorde
 					<div className="space-y-4">
 						<div className="space-y-2">
 							<Label>Modo de Mezcla</Label>
-							<Select
-								value={config.blendMode || 'normal'}
-								onValueChange={(value) => handleChange('blendMode', value)}
-							>
+							<Select value={config.blendMode || 'normal'} onValueChange={(value) => handleChange('blendMode', value)}>
 								<SelectTrigger>
 									<SelectValue />
 								</SelectTrigger>

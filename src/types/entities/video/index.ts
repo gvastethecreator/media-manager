@@ -11,8 +11,11 @@ export { VideoFormat, VideoPrivacyLevel, VideoQuality, VideoType } from './enums
 
 // Reexportar tipos explícitamente
 export type {
-    CreateVideoData, Video,
-    VideoBase, VideoChapter, VideoMetadata,
-    VideoPlayState, VideoVisualConfig
+	CreateVideoData,
+	Video,
+	VideoBase,
+	VideoChapter,
+	VideoMetadata,
+	VideoPlayState,
+	VideoVisualConfig,
 } from './types';
-

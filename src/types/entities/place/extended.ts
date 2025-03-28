@@ -4,39 +4,35 @@
  */
 
 import type { PlaceBase, PlaceWithRelations } from './base';
-import type {
-    PlaceDanger,
-    PlaceResource,
-    PlaceStats
-} from './enums';
+import type { PlaceDanger, PlaceResource, PlaceStats } from './enums';
 
 /**
  * Filtros para la búsqueda de lugares
  */
 export interface PlaceFilters {
-  searchQuery?: string;
-  categories?: string[];
-  types?: string[];
-  climates?: string[];
-  governments?: string[];
-  dangerLevels?: string[];
-  populationMin?: number;
-  populationMax?: number;
-  onlyFavorites?: boolean;
-  hasImages?: boolean;
-  hasNotes?: boolean;
-  hasConcepts?: boolean;
-  hasPrompts?: boolean;
+	searchQuery?: string;
+	categories?: string[];
+	types?: string[];
+	climates?: string[];
+	governments?: string[];
+	dangerLevels?: string[];
+	populationMin?: number;
+	populationMax?: number;
+	onlyFavorites?: boolean;
+	hasImages?: boolean;
+	hasNotes?: boolean;
+	hasConcepts?: boolean;
+	hasPrompts?: boolean;
 }
 
 /**
  * Datos de lugar con campos parseados
  */
 export interface ParsedPlace extends PlaceBase {
-  dangersArray: PlaceDanger[];
-  resourcesArray: PlaceResource[];
-  statsObject: PlaceStats;
-  filtersObject: PlaceFilters;
+	dangersArray: PlaceDanger[];
+	resourcesArray: PlaceResource[];
+	statsObject: PlaceStats;
+	filtersObject: PlaceFilters;
 }
 
 /**
@@ -48,56 +44,56 @@ export interface ParsedPlaceWithRelations extends PlaceWithRelations, ParsedPlac
  * Entidad Place extendida con propiedades de UI
  */
 export interface Place extends ParsedPlaceWithRelations {
-  // Propiedades de UI
-  isSelected?: boolean;
-  isExpanded?: boolean;
-  isEditing?: boolean;
-  isHighlighted?: boolean;
+	// Propiedades de UI
+	isSelected?: boolean;
+	isExpanded?: boolean;
+	isEditing?: boolean;
+	isHighlighted?: boolean;
 
-  // Cache de relaciones
-  imagesCount?: number;
-  notesCount?: number;
-  conceptsCount?: number;
-  promptsCount?: number;
+	// Cache de relaciones
+	imagesCount?: number;
+	notesCount?: number;
+	conceptsCount?: number;
+	promptsCount?: number;
 
-  // Datos derivados
-  dangerLevel?: string;
-  displayPopulation?: string;
-  displaySize?: string;
-  regionPath?: string[];
+	// Datos derivados
+	dangerLevel?: string;
+	displayPopulation?: string;
+	displaySize?: string;
+	regionPath?: string[];
 }
 
 /**
  * Datos para actualizar configuración visual del lugar
  */
 export interface PlaceVisualConfigUpdateData {
-  view?: string;
-  sortBy?: string;
-  filters?: PlaceFilters;
-  lastViewedPlaceId?: string | null;
-  expandedPlaceIds?: string[];
-  selectedPlaceIds?: string[];
+	view?: string;
+	sortBy?: string;
+	filters?: PlaceFilters;
+	lastViewedPlaceId?: string | null;
+	expandedPlaceIds?: string[];
+	selectedPlaceIds?: string[];
 }
 
 /**
  * Configuración visual para la entidad Place
  */
 export interface PlaceVisualConfig {
-  id: string;
-  userId: string;
-  view: string;
-  sortBy: string;
-  filters: string;
-  lastViewedPlaceId: string | null;
-  expandedPlaceIds: string[];
-  selectedPlaceIds: string[];
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	userId: string;
+	view: string;
+	sortBy: string;
+	filters: string;
+	lastViewedPlaceId: string | null;
+	expandedPlaceIds: string[];
+	selectedPlaceIds: string[];
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
  * Configuración visual parseada para la entidad Place
  */
 export interface ParsedPlaceVisualConfig extends Omit<PlaceVisualConfig, 'filters'> {
-  filtersObject: PlaceFilters;
+	filtersObject: PlaceFilters;
 }

@@ -107,9 +107,7 @@ export const PixelateConfig: React.FC<PixelateConfigProps> = ({ className }) => 
 							<Label>Patrón de animación</Label>
 							<Select
 								value={config.animationPattern}
-								onValueChange={(value: typeof ANIMATION_PATTERNS[number]) =>
-									setAnimationPattern(value)
-								}
+								onValueChange={(value: (typeof ANIMATION_PATTERNS)[number]) => setAnimationPattern(value)}
 							>
 								<SelectTrigger className="w-[180px]">
 									<SelectValue placeholder="Seleccionar patrón" />

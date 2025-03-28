@@ -56,20 +56,17 @@ export function LayerRenderer({
 	};
 
 	// Obtener todas las capas ordenadas por layerIndex
-	const sortedLayers = Array.from(layers.values())
-		.sort((a, b) => {
-			const indexA = a.defaultConfig.layerIndex || 0;
-			const indexB = b.defaultConfig.layerIndex || 0;
-			return indexA - indexB;
-		});
+	const sortedLayers = Array.from(layers.values()).sort((a, b) => {
+		const indexA = a.defaultConfig.layerIndex || 0;
+		const indexB = b.defaultConfig.layerIndex || 0;
+		return indexA - indexB;
+	});
 
 	return (
-		<div className={cn("relative w-full h-full", className)}>
+		<div className={cn('relative w-full h-full', className)}>
 			{sortedLayers.map((layer, index) => {
 				// Verificar si la capa debe mostrarse
-				const shouldRender =
-					layer.defaultConfig.enabled &&
-					(!layer.defaultConfig.visibleOnHover || isHovered);
+				const shouldRender = layer.defaultConfig.enabled && (!layer.defaultConfig.visibleOnHover || isHovered);
 
 				if (!shouldRender) return null;
 
@@ -90,10 +87,7 @@ export function LayerRenderer({
 				return (
 					<div
 						key={layer.type}
-						className={cn(
-							"absolute inset-0 transition-all duration-300",
-							isActive && "ring-2 ring-primary"
-						)}
+						className={cn('absolute inset-0 transition-all duration-300', isActive && 'ring-2 ring-primary')}
 						style={style}
 						onClick={onClick ? () => onClick(layer.type) : undefined}
 						data-layer-id={layer.type}
@@ -144,10 +138,7 @@ export function EntityCardLayers({
 
 	return (
 		<div
-			className={cn(
-				"relative w-full h-full",
-				className
-			)}
+			className={cn('relative w-full h-full', className)}
 			onMouseMove={handleMouseMove}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}

@@ -58,8 +58,9 @@ export function PromptContentView() {
 		emptyState: {
 			icon: Terminal,
 			title: 'Prompt vacío',
-			description: `No se encontraron imágenes en ${currentPrompt?.name || 'este prompt'
-				}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${
+				currentPrompt?.name || 'este prompt'
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadPromptImages,
 	};

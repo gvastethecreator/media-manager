@@ -9,19 +9,18 @@ const createMockPlugin = (id: string) => ({
 	id,
 	name: `Mock Plugin ${id}`,
 	type: 'visual',
-	Component: ({ enabled, config }) => (
+	Component: ({ enabled, config }) =>
 		enabled ? (
 			<div
 				data-testid={`mock-plugin-${id}`}
 				style={{
 					backgroundColor: config?.color || 'transparent',
-					opacity: config?.opacity || 1
+					opacity: config?.opacity || 1,
 				}}
 			>
 				{config?.content}
 			</div>
-		) : null
-	)
+		) : null,
 });
 
 // 🎨 Plugin de Capa con Efectos
@@ -31,16 +30,16 @@ const EffectPlugin = {
 	type: 'visual',
 	effects: {
 		glow: (intensity: number) => ({
-			boxShadow: `0 0 ${intensity}px rgba(255, 255, 255, 0.8)`
+			boxShadow: `0 0 ${intensity}px rgba(255, 255, 255, 0.8)`,
 		}),
 		blur: (amount: number) => ({
-			filter: `blur(${amount}px)`
-		})
+			filter: `blur(${amount}px)`,
+		}),
 	},
 	Component: ({ enabled, config }) => {
 		const styles = {
 			...(config?.effects?.glow && EffectPlugin.effects.glow(config.effects.glow)),
-			...(config?.effects?.blur && EffectPlugin.effects.blur(config.effects.blur))
+			...(config?.effects?.blur && EffectPlugin.effects.blur(config.effects.blur)),
 		};
 
 		return enabled ? (
@@ -48,7 +47,7 @@ const EffectPlugin = {
 				{config?.content}
 			</div>
 		) : null;
-	}
+	},
 };
 
 // 🔄 Plugin de Capa con Estado
@@ -58,14 +57,14 @@ const StatefulPlugin = {
 	type: 'interactive',
 	initialState: {
 		clicks: 0,
-		isActive: false
+		isActive: false,
 	},
 	Component: ({ enabled, config, state, setState }) => {
 		const handleClick = () => {
-			setState(prev => ({
+			setState((prev) => ({
 				...prev,
 				clicks: prev.clicks + 1,
-				isActive: !prev.isActive
+				isActive: !prev.isActive,
 			}));
 		};
 
@@ -83,13 +82,13 @@ const StatefulPlugin = {
 				aria-label="Stateful plugin button"
 				style={{
 					backgroundColor: state?.isActive ? 'green' : 'red',
-					cursor: 'pointer'
+					cursor: 'pointer',
 				}}
 			>
 				Clicks: {state?.clicks}
 			</div>
 		) : null;
-	}
+	},
 };
 
 // 📚 Suite de Pruebas Principal
@@ -108,7 +107,7 @@ describe('Plugin System', () => {
 						entityType="test"
 						layers={{
 							'1': { enabled: true },
-							'2': { enabled: true }
+							'2': { enabled: true },
 						}}
 					/>
 				</EntityCardProvider>
@@ -122,7 +121,7 @@ describe('Plugin System', () => {
 			const basePlugin = createMockPlugin('base');
 			const dependentPlugin = {
 				...createMockPlugin('dependent'),
-				dependencies: ['base']
+				dependencies: ['base'],
 			};
 
 			render(
@@ -132,8 +131,8 @@ describe('Plugin System', () => {
 						entityId="test"
 						entityType="test"
 						layers={{
-							'base': { enabled: true },
-							'dependent': { enabled: true }
+							base: { enabled: true },
+							dependent: { enabled: true },
 						}}
 					/>
 				</EntityCardProvider>
@@ -159,10 +158,10 @@ describe('Plugin System', () => {
 								config: {
 									effects: {
 										glow: 10,
-										blur: 2
-									}
-								}
-							}
+										blur: 2,
+									},
+								},
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -171,7 +170,7 @@ describe('Plugin System', () => {
 			const effectElement = screen.getByTestId('effect-plugin');
 			expect(effectElement).toHaveStyle({
 				boxShadow: '0 0 10px rgba(255, 255, 255, 0.8)',
-				filter: 'blur(2px)'
+				filter: 'blur(2px)',
 			});
 		});
 	});
@@ -187,8 +186,8 @@ describe('Plugin System', () => {
 						entityType="test"
 						layers={{
 							'stateful-plugin': {
-								enabled: true
-							}
+								enabled: true,
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -222,9 +221,7 @@ describe('Plugin System', () => {
 				onUnmount: () => {
 					lifecycleEvents.push('unmounted');
 				},
-				Component: ({ enabled }) => (
-					enabled ? <div data-testid="lifecycle-plugin" /> : null
-				)
+				Component: ({ enabled }) => (enabled ? <div data-testid="lifecycle-plugin" /> : null),
 			};
 
 			const { unmount } = render(
@@ -234,7 +231,7 @@ describe('Plugin System', () => {
 						entityId="test"
 						entityType="test"
 						layers={{
-							'lifecycle': { enabled: true }
+							lifecycle: { enabled: true },
 						}}
 					/>
 				</EntityCardProvider>
@@ -255,14 +252,8 @@ describe('Plugin System', () => {
 				id: 'dynamic',
 				name: 'Dynamic Plugin',
 				type: 'visual',
-				Component: ({ enabled, config }) => (
-					enabled ? (
-						<div
-							data-testid="dynamic-plugin"
-							style={{ transform: `scale(${config?.scale || 1})` }}
-						/>
-					) : null
-				)
+				Component: ({ enabled, config }) =>
+					enabled ? <div data-testid="dynamic-plugin" style={{ transform: `scale(${config?.scale || 1})` }} /> : null,
 			};
 
 			const { rerender } = render(
@@ -272,10 +263,10 @@ describe('Plugin System', () => {
 						entityId="test"
 						entityType="test"
 						layers={{
-							'dynamic': {
+							dynamic: {
 								enabled: true,
-								config: { scale: 1 }
-							}
+								config: { scale: 1 },
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -291,10 +282,10 @@ describe('Plugin System', () => {
 						entityId="test"
 						entityType="test"
 						layers={{
-							'dynamic': {
+							dynamic: {
 								enabled: true,
-								config: { scale: 2 }
-							}
+								config: { scale: 2 },
+							},
 						}}
 					/>
 				</EntityCardProvider>
@@ -320,11 +311,7 @@ describe('Plugin System', () => {
 			return (
 				<div>
 					{plugin && <div data-testid="plugin-registered" />}
-					<button
-						type="button"
-						onClick={() => unregisterPlugin('test')}
-						data-testid="unregister-button"
-					>
+					<button type="button" onClick={() => unregisterPlugin('test')} data-testid="unregister-button">
 						Unregister
 					</button>
 				</div>

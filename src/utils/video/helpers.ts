@@ -3,11 +3,7 @@
  * @module utils/video/helpers
  */
 
-import {
-	type Video,
-	VideoFormat,
-	type VideoMetadata
-} from '../../types/entities/video';
+import { type Video, VideoFormat, type VideoMetadata } from '../../types/entities/video';
 import { formatImageSize } from '../image/helpers';
 
 /**
@@ -219,10 +215,7 @@ export function generateVideoStreamUrl(
  * @param filename Nombre opcional para el archivo
  * @returns URL para descarga
  */
-export function generateVideoDownloadUrl(
-	video: Video | string,
-	filename?: string
-): string {
+export function generateVideoDownloadUrl(video: Video | string, filename?: string): string {
 	const videoId = typeof video === 'string' ? video : video.id;
 	let url = `/api/videos/${videoId}/download`;
 
@@ -274,7 +267,7 @@ export function hasVisualConfigChanged(
 		'layerSystem',
 		'effects',
 		'performance',
-		'states'
+		'states',
 	];
 
 	for (const key of keysToCompare) {

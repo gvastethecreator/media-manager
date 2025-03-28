@@ -15,14 +15,14 @@ import {
 	extendWorldItem,
 	extendWorldItems,
 	prepareCreateWorldItemData,
-	prepareUpdateWorldItemData
+	prepareUpdateWorldItemData,
 } from '@/transformers/world-item';
 import {
 	type CreateWorldItemData,
 	type UpdateWorldItemData,
 	type WorldItem,
 	type WorldItemBase,
-	WorldItemWithRelations
+	WorldItemWithRelations,
 } from '@/types/entities/world-item';
 
 // Configuración y utilidades
@@ -118,7 +118,7 @@ export async function getWorldItems(): Promise<WorldItemWithStats[]> {
 		totalSize: 0, // Valor por defecto, reemplazar si es necesario
 		lastUpdated: new Date(worldItem.updatedAt || worldItem.createdAt), // Usamos updatedAt si existe
 		recentImages: [], // Valor por defecto
-		_count: worldItem._count
+		_count: worldItem._count,
 	});
 
 	const cached = await worldItemsCache.get('all');
@@ -136,13 +136,13 @@ export async function getWorldItems(): Promise<WorldItemWithStats[]> {
 
 	try {
 		worldItemLogger.info('🔍 Obteniendo objetos del mundo');
-	const worldItems = await prisma.worldItem.findMany({
-		include: {
-			_count: {
-				select: {
-					images: true,
+		const worldItems = await prisma.worldItem.findMany({
+			include: {
+				_count: {
+					select: {
+						images: true,
+					},
 				},
-			},
 				images: {
 					take: 5,
 					orderBy: { createdAt: 'desc' },
@@ -172,8 +172,8 @@ export async function getWorldItems(): Promise<WorldItemWithStats[]> {
 					},
 					_sum: {
 						size: true,
-		},
-	});
+					},
+				});
 
 				// Convertir thumbnails a formatos legibles
 				const recentImages = worldItem.images
@@ -204,7 +204,7 @@ export async function getWorldItems(): Promise<WorldItemWithStats[]> {
 			'all',
 			worldItemsWithStats.map((item) => ({
 				...item,
-		imageCount: item._count.images,
+				imageCount: item._count.images,
 				_count: undefined,
 			}))
 		);
@@ -213,7 +213,11 @@ export async function getWorldItems(): Promise<WorldItemWithStats[]> {
 		return worldItemsWithStats;
 	} catch (error) {
 		worldItemLogger.error('❌ Error al obtener objetos del mundo', error);
-		throw createWorldItemError('No se pudieron obtener los objetos del mundo', WorldItemErrorCode.OPERATION_FAILED, error);
+		throw createWorldItemError(
+			'No se pudieron obtener los objetos del mundo',
+			WorldItemErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -352,7 +356,7 @@ export async function deleteWorldItem(id: string): Promise<{ success: boolean }>
 				},
 			}),
 			prisma.worldItem.delete({
-			where: { id },
+				where: { id },
 			}),
 		]);
 
@@ -438,7 +442,11 @@ export async function addImageToWorldItem(worldItemId: string, imageId: string):
 		return { success: true };
 	} catch (error) {
 		worldItemLogger.error('❌ Error al agregar imagen a objeto del mundo', { worldItemId, imageId, error });
-		throw createWorldItemError('No se pudo agregar la imagen al objeto del mundo', WorldItemErrorCode.OPERATION_FAILED, error);
+		throw createWorldItemError(
+			'No se pudo agregar la imagen al objeto del mundo',
+			WorldItemErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -466,6 +474,10 @@ export async function removeImageFromWorldItem(worldItemId: string, imageId: str
 		return { success: true };
 	} catch (error) {
 		worldItemLogger.error('❌ Error al eliminar imagen de objeto del mundo', { worldItemId, imageId, error });
-		throw createWorldItemError('No se pudo eliminar la imagen del objeto del mundo', WorldItemErrorCode.OPERATION_FAILED, error);
+		throw createWorldItemError(
+			'No se pudo eliminar la imagen del objeto del mundo',
+			WorldItemErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }

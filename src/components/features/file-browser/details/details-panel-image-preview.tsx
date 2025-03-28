@@ -17,12 +17,10 @@ export function ImagePreview({ item }: ItemComponentProps) {
 	const [error, setError] = React.useState<string | null>(null);
 	const [isLoading, setIsLoading] = React.useState(true);
 	const loadAttemptRef = React.useRef(0);
+	const hasLoadedRef = React.useRef(false);
+	const previousItemIdRef = React.useRef<string | null>(null);
+	const isMountedRef = React.useRef(true);
 	const MAX_ATTEMPTS = 3;
-
-	// Añadir logging para depuración
-	React.useEffect(() => {
-		console.log('ImagePreview renderizado para:', item.id, 'URL actual:', imageUrl, 'Thumbnail inicial:', item.url);
-	}, [item, imageUrl]);
 
 	// Verificar si hay una URL válida en el item
 	const hasThumbnail = React.useMemo(() => !!item.url && typeof item.url === 'string', [item.url]);
@@ -30,8 +28,10 @@ export function ImagePreview({ item }: ItemComponentProps) {
 	// Usar useCallback para la función de carga para evitar recreaciones innecesarias
 	const loadImage = React.useCallback(
 		async (attemptOverride?: number) => {
-			let mounted = true;
-			const abortController = new AbortController();
+			// Si ya hemos cargado la imagen para este item, no intentamos cargarla de nuevo
+			if (hasLoadedRef.current && imageUrl && previousItemIdRef.current === item.id) {
+				return;
+			}
 
 			try {
 				setIsLoading(true);
@@ -39,8 +39,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 
 				// Si ya tenemos un thumbnail, usarlo como fallback mientras cargamos
 				if (hasThumbnail && !imageUrl) {
-					console.log('Usando thumbnail existente como fallback mientras carga la imagen completa:', item.url);
-					// No cambiamos isLoading aquí para seguir mostrando el indicador
+					// Usar el thumbnail disponible como fallback
 				}
 
 				// Incrementar contador de intentos
@@ -49,35 +48,32 @@ export function ImagePreview({ item }: ItemComponentProps) {
 
 				// Si excedimos los intentos, no seguimos intentando
 				if (currentAttempt > MAX_ATTEMPTS) {
-					console.error(`❌ Máximo de intentos alcanzado (${MAX_ATTEMPTS}) para imagen:`, item.id);
 					setError(`No se pudo cargar la imagen después de ${MAX_ATTEMPTS} intentos`);
 					setIsLoading(false);
 					return;
 				}
 
-				// Intentar obtener la URL sin timeout
+				// Intentar obtener la URL
 				try {
-					console.log(`⏳ Intentando cargar imagen (intento ${currentAttempt}/${MAX_ATTEMPTS}):`, item.id);
-					const url = await getImageUrl(item.id, { signal: abortController.signal });
+					const url = await getImageUrl(item.id);
 
-					if (!mounted) {
+					if (!isMountedRef.current) {
 						return;
 					}
 
 					if (url) {
-						console.log('✅ URL obtenida:', url);
 						// Verificar si la URL es válida haciendo una precarga
 						const img = new window.Image(); // Usar el constructor nativo del navegador
 						img.onload = () => {
-							if (mounted) {
-								console.log('✅ Imagen precargada correctamente');
+							if (isMountedRef.current) {
 								setImageUrl(url);
 								setIsLoading(false);
+								hasLoadedRef.current = true;
+								previousItemIdRef.current = item.id; // Guardar el ID del item
 							}
 						};
 						img.onerror = () => {
-							if (mounted) {
-								console.error('❌ URL obtenida pero imagen no cargable:', url);
+							if (isMountedRef.current) {
 								setError('La imagen no se puede cargar correctamente');
 								setIsLoading(false);
 							}
@@ -87,46 +83,55 @@ export function ImagePreview({ item }: ItemComponentProps) {
 						throw new Error('No se pudo obtener la URL de la imagen');
 					}
 				} catch (error) {
-					if (!mounted) {
+					if (!isMountedRef.current) {
 						return;
 					}
 					throw error; // Propagar el error para ser manejado en el bloque catch principal
 				}
 			} catch (error) {
-				if (!mounted) {
+				if (!isMountedRef.current) {
 					return;
 				}
 
 				const errorMessage = error instanceof Error ? error.message : 'Error al cargar la imagen';
-				console.error(`❌ Error cargando imagen (intento ${loadAttemptRef.current}/${MAX_ATTEMPTS}):`, errorMessage);
-
 				setError(errorMessage);
 				setIsLoading(false);
 
 				// Intentar cargar de nuevo después de un breve retraso
 				if (loadAttemptRef.current < MAX_ATTEMPTS) {
 					setTimeout(() => {
-						if (mounted) {
+						if (isMountedRef.current) {
 							loadImage();
 						}
 					}, 1000 * loadAttemptRef.current); // Backoff exponencial simple
 				}
 			}
-
-			return () => {
-				mounted = false;
-				abortController.abort();
-			};
 		},
 		[item.id, imageUrl, hasThumbnail]
 	);
 
+	// Efecto para actualizar el estado de montaje del componente
+	React.useEffect(() => {
+		isMountedRef.current = true;
+		return () => {
+			isMountedRef.current = false;
+		};
+	}, []);
+
 	// Efecto para cargar la imagen cuando cambia el ID
 	React.useEffect(() => {
+		// Verificar si ya tenemos cargada la imagen para este item
+		if (previousItemIdRef.current === item.id && hasLoadedRef.current && imageUrl) {
+			// Ya está cargada, no hacer nada
+			return;
+		}
+
+		// Restablecer estado para nueva imagen
 		setImageUrl(null);
 		setError(null);
 		setIsLoading(true);
 		loadAttemptRef.current = 0;
+		hasLoadedRef.current = false;
 
 		// Si hay un thumbnail en el item, establecerlo como URL inicial
 		if (hasThumbnail) {
@@ -135,28 +140,16 @@ export function ImagePreview({ item }: ItemComponentProps) {
 		}
 
 		// Iniciar carga directamente desde aquí
-		let cleanupFn: (() => void) | undefined;
-
-		const startLoading = async () => {
-			try {
-				cleanupFn = await loadImage(1);
-			} catch (err) {
-				console.error('Error iniciando carga de imagen:', err);
+		loadImage(1).catch((err) => {
+			if (isMountedRef.current) {
+				setError('Error iniciando carga de imagen');
+				setIsLoading(false);
 			}
-		};
-
-		startLoading();
-
-		return () => {
-			if (cleanupFn) {
-				cleanupFn();
-			}
-		};
-	}, [loadImage, item.url, hasThumbnail]);
+		});
+	}, [item.id, loadImage, hasThumbnail, item.url, imageUrl]); // Incluir todas las dependencias necesarias
 
 	const handleClick = React.useCallback(() => {
 		if (imageUrl) {
-			console.log('Click en ImagePreview, abriendo visor para:', item.id);
 			openViewer([item], 0);
 		}
 	}, [item, openViewer, imageUrl]);
@@ -212,11 +205,9 @@ export function ImagePreview({ item }: ItemComponentProps) {
 						)}
 						onClick={handleClick}
 						onLoad={() => {
-							console.log('Imagen cargada en el DOM');
 							setIsLoading(false);
 						}}
 						onError={() => {
-							console.error('❌ Error al renderizar imagen en el DOM:', imageUrl);
 							setIsLoading(false);
 							setError('Error al mostrar la imagen');
 						}}

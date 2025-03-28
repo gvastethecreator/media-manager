@@ -38,31 +38,24 @@ export function BorderEffectLayer({ config, children }: LayerComponentProps<Bord
 		return {
 			border: `${config.width}px ${config.style} ${config.color}`,
 			borderRadius: config.radius ? `${config.radius}px` : '0',
-			boxShadow: config.glowAmount
-				? `0 0 ${config.glowAmount}px ${config.color}`
-				: 'none',
+			boxShadow: config.glowAmount ? `0 0 ${config.glowAmount}px ${config.color}` : 'none',
 			opacity: config.opacity ?? 1,
 			overflow: 'hidden',
 			transition: 'all 0.2s ease',
 			position: 'relative' as const,
 			zIndex: config.layerIndex ?? 1,
-			animation: config.animated && config.animationType !== 'none'
-				? `${config.animationType}-animation ${config.animationSpeed || 1}s infinite`
-				: 'none',
+			animation:
+				config.animated && config.animationType !== 'none'
+					? `${config.animationType}-animation ${config.animationSpeed || 1}s infinite`
+					: 'none',
 		};
 	}, [config]);
 
 	// Detectar si es visible solo en hover
-	const className = config.visibleOnHover
-		? 'transition-opacity opacity-0 group-hover:opacity-100'
-		: '';
+	const className = config.visibleOnHover ? 'transition-opacity opacity-0 group-hover:opacity-100' : '';
 
 	return (
-		<div
-			className={`border-effect-layer relative ${className}`}
-			style={borderStyle}
-			data-layer-type="border"
-		>
+		<div className={`border-effect-layer relative ${className}`} style={borderStyle} data-layer-type="border">
 			{children}
 		</div>
 	);

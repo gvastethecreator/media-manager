@@ -21,7 +21,7 @@ const toast = {
 	},
 	error: (params: { title: string; description: string; variant?: string }) => {
 		console.error(`❌ ${params.title}: ${params.description}`);
-	}
+	},
 };
 
 // Mock para las acciones del servidor
@@ -41,13 +41,13 @@ const mockServerActions = {
 				visibleOnHover: false,
 				layerIndex: 2,
 			},
-			message: 'Configuración cargada exitosamente'
+			message: 'Configuración cargada exitosamente',
 		};
 	},
 	updateGlowConfig: async (entityType: string, entityId: string, config: any) => {
 		// Simula una actualización exitosa
 		return { success: true };
-	}
+	},
 };
 
 const glowFormSchema = z.object({
@@ -102,15 +102,15 @@ export function GlowSettings({ config, onConfigChange, className }: GlowSettings
 			// Llamar a la función onConfigChange para actualizar la configuración
 			onConfigChange(values);
 			toast.success({
-				title: "Configuración actualizada",
-				description: "La configuración de brillo ha sido actualizada.",
+				title: 'Configuración actualizada',
+				description: 'La configuración de brillo ha sido actualizada.',
 			});
 		} catch (error) {
-			console.error("Error al actualizar la configuración:", error);
+			console.error('Error al actualizar la configuración:', error);
 			toast.error({
-				title: "Error",
-				description: "Ha ocurrido un error al actualizar la configuración.",
-				variant: "destructive",
+				title: 'Error',
+				description: 'Ha ocurrido un error al actualizar la configuración.',
+				variant: 'destructive',
 			});
 		} finally {
 			setIsLoading(false);
@@ -153,10 +153,7 @@ export function GlowSettings({ config, onConfigChange, className }: GlowSettings
 										<FormItem>
 											<FormLabel>Color del Glow</FormLabel>
 											<FormControl>
-												<ColorPicker
-													value={field.value}
-													onChange={field.onChange}
-												/>
+												<ColorPicker value={field.value} onChange={field.onChange} />
 											</FormControl>
 											<FormDescription>Selecciona el color del efecto glow.</FormDescription>
 										</FormItem>

@@ -28,7 +28,7 @@ export function RenderDebug<T = unknown>({
 	enabled = true,
 	maxRenders = 50,
 	onMaxRenders,
-	compareKeys = []
+	compareKeys = [],
 }: RenderDebugProps<T>) {
 	const renderCount = useRef(0);
 	const prevDataRef = useRef<T | null>(null);
@@ -127,8 +127,10 @@ export function RenderDebug<T = unknown>({
 			if (prevDataStr !== currentData) {
 				console.log(
 					`🔄 [${componentName}] Renderizado #${renderCount.current} (${timeSinceStart.toFixed(2)}ms)`,
-					'\nDatos anteriores:', prevData,
-					'\nDatos nuevos:', data
+					'\nDatos anteriores:',
+					prevData,
+					'\nDatos nuevos:',
+					data
 				);
 			} else {
 				console.log(
@@ -163,11 +165,7 @@ export function withRenderDebug<P>(
 
 		return (
 			<>
-				<RenderDebug
-					componentName={componentName}
-					data={selectedData}
-					{...otherOptions}
-				/>
+				<RenderDebug componentName={componentName} data={selectedData} {...otherOptions} />
 				<Component {...props} />
 			</>
 		);
@@ -195,6 +193,6 @@ export const createDebugger = (componentName: string, enabled = true) => {
 		logState: (stateName: string, value: unknown) => {
 			if (!enabled) return;
 			console.log(`🔄 [${componentName}] Estado "${stateName}"`, value);
-		}
+		},
 	};
 };

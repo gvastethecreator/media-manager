@@ -6,4 +6,3 @@
 import type { CollectionFormData } from '../modules/layouts/forms/entity-types';
 
 export type { CollectionFormData };
-

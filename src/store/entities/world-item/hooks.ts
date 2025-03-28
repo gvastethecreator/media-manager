@@ -13,23 +13,23 @@ import { useWorldItemStore } from './index';
  * @returns Lista filtrada y ordenada de objetos del mundo
  */
 export const useWorldItems = () => {
-  const store = useWorldItemStore();
+	const store = useWorldItemStore();
 
-  return {
-    // Datos
-    worldItems: store.worldItems,
-    filteredItems: store.getFilteredWorldItems(),
-    sortedItems: store.getSortedWorldItems(),
+	return {
+		// Datos
+		worldItems: store.worldItems,
+		filteredItems: store.getFilteredWorldItems(),
+		sortedItems: store.getSortedWorldItems(),
 
-    // Estado
-    isLoading: store.isLoading,
-    error: store.error,
+		// Estado
+		isLoading: store.isLoading,
+		error: store.error,
 
-    // Acciones
-    setWorldItems: store.setWorldItems,
-    resetStore: store.resetStore,
-    sortItems: store.setSortBy
-  };
+		// Acciones
+		setWorldItems: store.setWorldItems,
+		resetStore: store.resetStore,
+		sortItems: store.setSortBy,
+	};
 };
 
 /**
@@ -37,27 +37,27 @@ export const useWorldItems = () => {
  * @returns Estado y acciones para filtrado
  */
 export const useWorldItemFilters = () => {
-  const store = useWorldItemStore();
+	const store = useWorldItemStore();
 
-  const filters = useMemo(() => store.filters, [store.filters]);
-  const searchQuery = store.searchQuery;
+	const filters = useMemo(() => store.filters, [store.filters]);
+	const searchQuery = store.searchQuery;
 
-  return {
-    // Estado
-    filters,
-    searchQuery,
-    sortBy: store.sortBy,
-    sortOptions: WORLD_ITEM_SORT_OPTIONS,
+	return {
+		// Estado
+		filters,
+		searchQuery,
+		sortBy: store.sortBy,
+		sortOptions: WORLD_ITEM_SORT_OPTIONS,
 
-    // Acciones
-    setFilters: store.setFilters,
-    resetFilters: store.resetFilters,
-    setSortBy: store.setSortBy,
-    setSearchQuery: store.setSearchQuery,
+		// Acciones
+		setFilters: store.setFilters,
+		resetFilters: store.resetFilters,
+		setSortBy: store.setSortBy,
+		setSearchQuery: store.setSearchQuery,
 
-    // Selectors
-    getFilteredItems: store.getFilteredWorldItems
-  };
+		// Selectors
+		getFilteredItems: store.getFilteredWorldItems,
+	};
 };
 
 /**
@@ -65,31 +65,29 @@ export const useWorldItemFilters = () => {
  * @returns Estado y acciones para la visualización
  */
 export const useWorldItemView = () => {
-  const store = useWorldItemStore();
+	const store = useWorldItemStore();
 
-  const viewState = useMemo(() => ({
-    viewMode: store.viewMode,
-    isCreatingItem: store.isCreatingItem,
-    isEditingItem: store.isEditingItem,
-    isProcessingAction: store.isProcessingAction
-  }), [
-    store.viewMode,
-    store.isCreatingItem,
-    store.isEditingItem,
-    store.isProcessingAction
-  ]);
+	const viewState = useMemo(
+		() => ({
+			viewMode: store.viewMode,
+			isCreatingItem: store.isCreatingItem,
+			isEditingItem: store.isEditingItem,
+			isProcessingAction: store.isProcessingAction,
+		}),
+		[store.viewMode, store.isCreatingItem, store.isEditingItem, store.isProcessingAction]
+	);
 
-  return {
-    // Estado
-    ...viewState,
+	return {
+		// Estado
+		...viewState,
 
-    // Acciones
-    setViewMode: store.setViewMode,
-    setIsCreatingItem: store.setIsCreatingItem,
-    setIsEditingItem: store.setIsEditingItem,
-    setIsProcessingAction: store.setIsProcessingAction,
-    toggleExpanded: store.toggleExpanded
-  };
+		// Acciones
+		setViewMode: store.setViewMode,
+		setIsCreatingItem: store.setIsCreatingItem,
+		setIsEditingItem: store.setIsEditingItem,
+		setIsProcessingAction: store.setIsProcessingAction,
+		toggleExpanded: store.toggleExpanded,
+	};
 };
 
 /**
@@ -97,34 +95,34 @@ export const useWorldItemView = () => {
  * @returns Estado y acciones para la selección
  */
 export const useWorldItemSelection = () => {
-  const selectedIds = useWorldItemStore((state) => state.selectedIds);
-  const currentItemId = useWorldItemStore((state) => state.currentItemId);
-  const expandedIds = useWorldItemStore((state) => state.expandedIds);
-  const { toggleSelected, clearSelection, selectItems, toggleExpanded, setCurrentItemId } = useWorldItemStore();
+	const selectedIds = useWorldItemStore((state) => state.selectedIds);
+	const currentItemId = useWorldItemStore((state) => state.currentItemId);
+	const expandedIds = useWorldItemStore((state) => state.expandedIds);
+	const { toggleSelected, clearSelection, selectItems, toggleExpanded, setCurrentItemId } = useWorldItemStore();
 
-  const selectedItems = useMemo(() => {
-    const items = useWorldItemStore.getState().worldItems;
-    return items.filter(item => selectedIds.includes(item.id));
-  }, [selectedIds]);
+	const selectedItems = useMemo(() => {
+		const items = useWorldItemStore.getState().worldItems;
+		return items.filter((item) => selectedIds.includes(item.id));
+	}, [selectedIds]);
 
-  return {
-    // Estado de selección
-    selectedIds,
-    selectedItems,
-    currentItemId,
-    expandedIds,
+	return {
+		// Estado de selección
+		selectedIds,
+		selectedItems,
+		currentItemId,
+		expandedIds,
 
-    // Acciones
-    toggleSelected,
-    clearSelection,
-    selectItems,
-    toggleExpanded,
-    setCurrentItemId,
+		// Acciones
+		toggleSelected,
+		clearSelection,
+		selectItems,
+		toggleExpanded,
+		setCurrentItemId,
 
-    // Métodos derivados
-    isSelected: useCallback((id: string) => selectedIds.includes(id), [selectedIds]),
-    isExpanded: useCallback((id: string) => expandedIds.includes(id), [expandedIds])
-  };
+		// Métodos derivados
+		isSelected: useCallback((id: string) => selectedIds.includes(id), [selectedIds]),
+		isExpanded: useCallback((id: string) => expandedIds.includes(id), [expandedIds]),
+	};
 };
 
 /**
@@ -133,21 +131,22 @@ export const useWorldItemSelection = () => {
  * @returns Objeto y acciones específicas para ese objeto
  */
 export const useWorldItem = (id: string | null) => {
-  const item = useWorldItemStore(state =>
-    id ? state.getWorldItemById(id) : null
-  );
+	const item = useWorldItemStore((state) => (id ? state.getWorldItemById(id) : null));
 
-  const { updateWorldItem, removeWorldItem } = useWorldItemStore();
+	const { updateWorldItem, removeWorldItem } = useWorldItemStore();
 
-  return {
-    item,
-    update: useCallback((data: Partial<WorldItem>) => {
-      if (id) updateWorldItem(id, data);
-    }, [id, updateWorldItem]),
-    remove: useCallback(() => {
-      if (id) removeWorldItem(id);
-    }, [id, removeWorldItem])
-  };
+	return {
+		item,
+		update: useCallback(
+			(data: Partial<WorldItem>) => {
+				if (id) updateWorldItem(id, data);
+			},
+			[id, updateWorldItem]
+		),
+		remove: useCallback(() => {
+			if (id) removeWorldItem(id);
+		}, [id, removeWorldItem]),
+	};
 };
 
 /**
@@ -155,29 +154,38 @@ export const useWorldItem = (id: string | null) => {
  * @returns Acciones para gestionar objetos del mundo
  */
 export const useWorldItemActions = () => {
-  const store = useWorldItemStore();
+	const store = useWorldItemStore();
 
-  return {
-    // Acciones CRUD
-    addWorldItem: store.addWorldItem,
-    updateWorldItem: store.updateWorldItem,
-    removeWorldItem: store.removeWorldItem,
+	return {
+		// Acciones CRUD
+		addWorldItem: store.addWorldItem,
+		updateWorldItem: store.updateWorldItem,
+		removeWorldItem: store.removeWorldItem,
 
-    // Acciones por lotes
-    updateMultiple: useCallback((ids: string[], data: Partial<WorldItem>) => {
-      ids.forEach(id => store.updateWorldItem(id, data));
-    }, [store]),
+		// Acciones por lotes
+		updateMultiple: useCallback(
+			(ids: string[], data: Partial<WorldItem>) => {
+				ids.forEach((id) => store.updateWorldItem(id, data));
+			},
+			[store]
+		),
 
-    removeMultiple: useCallback((ids: string[]) => {
-      ids.forEach(id => store.removeWorldItem(id));
-    }, [store]),
+		removeMultiple: useCallback(
+			(ids: string[]) => {
+				ids.forEach((id) => store.removeWorldItem(id));
+			},
+			[store]
+		),
 
-    // Acciones comunes
-    toggleFavorite: useCallback((id: string) => {
-      const item = store.getWorldItemById(id);
-      if (item) {
-        store.updateWorldItem(id, { isFavorite: !item.isFavorite });
-      }
-    }, [store])
-  };
+		// Acciones comunes
+		toggleFavorite: useCallback(
+			(id: string) => {
+				const item = store.getWorldItemById(id);
+				if (item) {
+					store.updateWorldItem(id, { isFavorite: !item.isFavorite });
+				}
+			},
+			[store]
+		),
+	};
 };

@@ -5,7 +5,6 @@ import { useFileManager } from '@/store/files/file-manager.store';
 import type { FileItem } from '@/types/file-item';
 import { useCallback } from 'react';
 
-
 /**
  * 🏷️ Vista de contenido de etiquetas
  *
@@ -23,18 +22,12 @@ export function TagContentView() {
 	// Renderizar el componente adecuadamente
 	return (
 		<div className="flex flex-col h-full w-full p-4">
-			<h1 className="text-2xl font-bold mb-4">
-				Imágenes con etiqueta: {currentTag?.name || 'Cargando...'}
-			</h1>
+			<h1 className="text-2xl font-bold mb-4">Imágenes con etiqueta: {currentTag?.name || 'Cargando...'}</h1>
 
-			<p className="text-muted-foreground mb-6">
-				{currentTag?.count || 0} imágenes con esta etiqueta
-			</p>
+			<p className="text-muted-foreground mb-6">{currentTag?.count || 0} imágenes con esta etiqueta</p>
 
 			<div className="text-center mt-8">
-				<p className="text-muted-foreground">
-					Componente TagContentView en desarrollo. Próximamente disponible.
-				</p>
+				<p className="text-muted-foreground">Componente TagContentView en desarrollo. Próximamente disponible.</p>
 			</div>
 		</div>
 	);

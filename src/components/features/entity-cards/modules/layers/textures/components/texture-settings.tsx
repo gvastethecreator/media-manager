@@ -12,14 +12,14 @@ import { useCallback } from 'react';
 import type { LayerSettingsProps } from '../../types';
 import { BLEND_MODES, TEXTURE_PRESETS, TILE_MODES, type TextureConfig } from '../texture-config-types';
 
-export const TextureSettings: React.FC<LayerSettingsProps<TextureConfig>> = ({
-	config,
-	onConfigChange,
-}) => {
+export const TextureSettings: React.FC<LayerSettingsProps<TextureConfig>> = ({ config, onConfigChange }) => {
 	// 🔄 Manejador genérico de cambios
-	const handleChange = useCallback((changes: Partial<TextureConfig>) => {
-		onConfigChange({ ...config, ...changes });
-	}, [config, onConfigChange]);
+	const handleChange = useCallback(
+		(changes: Partial<TextureConfig>) => {
+			onConfigChange({ ...config, ...changes });
+		},
+		[config, onConfigChange]
+	);
 
 	// 🎨 Renderizar los controles
 	return (
@@ -59,19 +59,22 @@ export const TextureSettings: React.FC<LayerSettingsProps<TextureConfig>> = ({
 			{/* 📑 Pestañas de configuración */}
 			<Tabs defaultValue="texture" className="w-full">
 				<TabsList className="w-full">
-					<TabsTrigger value="texture" className="flex-1">Textura</TabsTrigger>
-					<TabsTrigger value="transform" className="flex-1">Transformación</TabsTrigger>
-					<TabsTrigger value="filters" className="flex-1">Filtros</TabsTrigger>
+					<TabsTrigger value="texture" className="flex-1">
+						Textura
+					</TabsTrigger>
+					<TabsTrigger value="transform" className="flex-1">
+						Transformación
+					</TabsTrigger>
+					<TabsTrigger value="filters" className="flex-1">
+						Filtros
+					</TabsTrigger>
 				</TabsList>
 
 				{/* 🖼️ Configuración de textura */}
 				<TabsContent value="texture" className="space-y-4">
 					<div className="space-y-2">
 						<Label>Textura predefinida</Label>
-						<Select
-							value={config.textureUrl}
-							onValueChange={(value) => handleChange({ textureUrl: value })}
-						>
+						<Select value={config.textureUrl} onValueChange={(value) => handleChange({ textureUrl: value })}>
 							<SelectTrigger>
 								<SelectValue placeholder="Seleccionar textura" />
 							</SelectTrigger>
@@ -106,10 +109,7 @@ export const TextureSettings: React.FC<LayerSettingsProps<TextureConfig>> = ({
 
 					<div className="space-y-2">
 						<Label>Modo de fusión</Label>
-						<Select
-							value={config.blendMode}
-							onValueChange={(value) => handleChange({ blendMode: value })}
-						>
+						<Select value={config.blendMode} onValueChange={(value) => handleChange({ blendMode: value })}>
 							<SelectTrigger>
 								<SelectValue placeholder="Seleccionar modo" />
 							</SelectTrigger>
@@ -185,9 +185,11 @@ export const TextureSettings: React.FC<LayerSettingsProps<TextureConfig>> = ({
 						<Label>Brillo</Label>
 						<Slider
 							value={[config.filters?.brightness ?? 100]}
-							onValueChange={([value]) => handleChange({
-								filters: { ...config.filters, brightness: value }
-							})}
+							onValueChange={([value]) =>
+								handleChange({
+									filters: { ...config.filters, brightness: value },
+								})
+							}
 							min={0}
 							max={200}
 							step={1}
@@ -198,9 +200,11 @@ export const TextureSettings: React.FC<LayerSettingsProps<TextureConfig>> = ({
 						<Label>Contraste</Label>
 						<Slider
 							value={[config.filters?.contrast ?? 100]}
-							onValueChange={([value]) => handleChange({
-								filters: { ...config.filters, contrast: value }
-							})}
+							onValueChange={([value]) =>
+								handleChange({
+									filters: { ...config.filters, contrast: value },
+								})
+							}
 							min={0}
 							max={200}
 							step={1}
@@ -211,9 +215,11 @@ export const TextureSettings: React.FC<LayerSettingsProps<TextureConfig>> = ({
 						<Label>Saturación</Label>
 						<Slider
 							value={[config.filters?.saturation ?? 100]}
-							onValueChange={([value]) => handleChange({
-								filters: { ...config.filters, saturation: value }
-							})}
+							onValueChange={([value]) =>
+								handleChange({
+									filters: { ...config.filters, saturation: value },
+								})
+							}
 							min={0}
 							max={200}
 							step={1}
@@ -224,20 +230,18 @@ export const TextureSettings: React.FC<LayerSettingsProps<TextureConfig>> = ({
 						<Label>Desenfoque</Label>
 						<Slider
 							value={[config.filters?.blur ?? 0]}
-							onValueChange={([value]) => handleChange({
-								filters: { ...config.filters, blur: value }
-							})}
+							onValueChange={([value]) =>
+								handleChange({
+									filters: { ...config.filters, blur: value },
+								})
+							}
 							min={0}
 							max={20}
 							step={0.1}
 						/>
 					</div>
 
-					<Button
-						variant="outline"
-						onClick={() => handleChange({ filters: undefined })}
-						className="w-full"
-					>
+					<Button variant="outline" onClick={() => handleChange({ filters: undefined })} className="w-full">
 						Restablecer filtros
 					</Button>
 				</TabsContent>

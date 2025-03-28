@@ -16,58 +16,58 @@ export type ImageStore = ImageCoreSlice & ImageUISlice & ImageFiltersSlice;
 
 // Estado inicial
 const initialState: ImageState = {
-  core: {
-    images: {},
-    isLoading: false,
-    error: null,
-    lastUpdated: null,
-  },
-  ui: {
-    selectedIds: [],
-    viewMode: ImageViewMode.GRID,
-    isViewerOpen: false,
-    currentImageId: null,
-    highlightedId: null,
-    expandedIds: [],
-  },
-  filters: {
-    sortBy: ImageSortCriteria.DATE_DESC,
-    searchQuery: '',
-    filterByTag: [],
-    filterByAlbum: [],
-    filterByFolderId: null,
-    filterFavorites: false,
-    filterPublic: false,
-    dateRange: {
-      from: null,
-      to: null,
-    },
-  },
+	core: {
+		images: {},
+		isLoading: false,
+		error: null,
+		lastUpdated: null,
+	},
+	ui: {
+		selectedIds: [],
+		viewMode: ImageViewMode.GRID,
+		isViewerOpen: false,
+		currentImageId: null,
+		highlightedId: null,
+		expandedIds: [],
+	},
+	filters: {
+		sortBy: ImageSortCriteria.DATE_DESC,
+		searchQuery: '',
+		filterByTag: [],
+		filterByAlbum: [],
+		filterByFolderId: null,
+		filterFavorites: false,
+		filterPublic: false,
+		dateRange: {
+			from: null,
+			to: null,
+		},
+	},
 };
 
 // Crear store combinando slices
 export const useImageStore = create<ImageStore>()(
-  devtools(
-    persist(
-      (...a) => ({
-        ...createImageCoreSlice(...a),
-        ...createImageUISlice(...a),
-        ...createImageFiltersSlice(...a),
-      }),
-      {
-        name: 'image-store',
-        partialize: (state) => ({
-          ui: {
-            viewMode: state.ui.viewMode,
-          },
-          filters: {
-            sortBy: state.filters.sortBy,
-          },
-        }),
-      }
-    ),
-    { name: 'ImageStore' }
-  )
+	devtools(
+		persist(
+			(...a) => ({
+				...createImageCoreSlice(...a),
+				...createImageUISlice(...a),
+				...createImageFiltersSlice(...a),
+			}),
+			{
+				name: 'image-store',
+				partialize: (state) => ({
+					ui: {
+						viewMode: state.ui.viewMode,
+					},
+					filters: {
+						sortBy: state.filters.sortBy,
+					},
+				}),
+			}
+		),
+		{ name: 'ImageStore' }
+	)
 );
 
 // Exportar todo desde types

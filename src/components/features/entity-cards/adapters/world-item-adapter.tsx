@@ -59,10 +59,13 @@ export function WorldItemAdapter({
 		image: worldItem.featuredImage || worldItem.image,
 		isArtifact: worldItem.rarity === 'artifact' || worldItem.type === 'artifact',
 		isUnique: worldItem.isUnique || worldItem.rarity === 'legendary' || worldItem.unique === true,
-		properties: Array.isArray(worldItem.properties) ? worldItem.properties :
-			typeof worldItem.properties === 'string' ?
-				(worldItem.properties ? JSON.parse(worldItem.properties) : []) :
-				[]
+		properties: Array.isArray(worldItem.properties)
+			? worldItem.properties
+			: typeof worldItem.properties === 'string'
+				? worldItem.properties
+					? JSON.parse(worldItem.properties)
+					: []
+				: [],
 	};
 
 	// Pasamos las propiedades comunes y transformadas al componente

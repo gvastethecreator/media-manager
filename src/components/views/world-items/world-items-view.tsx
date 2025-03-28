@@ -2,10 +2,9 @@
 
 import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
+import { WorldItemCard } from '@/components/cards/world-item-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { EntityCardAdapter } from '@/components/features/entity-cards/entity-card-adapter';
-import type { CardOptions } from '@/components/features/entity-cards/types/unified-card-types';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
@@ -126,13 +125,10 @@ export function WorldItemsView(_props: ViewProps) {
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
-							className="cursor-pointer"
 						>
-							<EntityCardAdapter
-								entityType="worldItem"
-								entity={worldItem}
-								onClick={() => handleWorldItemClick(worldItem)}
-								options={visualConfig}
+							<WorldItemCard
+								worldItem={worldItem}
+								onClick={handleWorldItemClick}
 								className="h-full"
 							/>
 						</motion.div>

@@ -18,14 +18,7 @@ interface NoiseLayerProps {
 /**
  * 🌊 Componente interno de ruido
  */
-const NoiseLayerComponent = ({
-	processedConfig,
-	style,
-	isVisible,
-	width,
-	height,
-	sourceCanvas,
-}: NoiseLayerProps) => {
+const NoiseLayerComponent = ({ processedConfig, style, isVisible, width, height, sourceCanvas }: NoiseLayerProps) => {
 	// Referencias y estado
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const animationFrameRef = useRef<number>();
@@ -82,11 +75,14 @@ const NoiseLayerComponent = ({
 	}, [width, height, renderNoise]);
 
 	// 🎨 Calcular los estilos del canvas
-	const canvasStyle = useMemo(() => ({
-		...style,
-		width: `${width}px`,
-		height: `${height}px`,
-	}), [style, width, height]);
+	const canvasStyle = useMemo(
+		() => ({
+			...style,
+			width: `${width}px`,
+			height: `${height}px`,
+		}),
+		[style, width, height]
+	);
 
 	return (
 		<motion.canvas

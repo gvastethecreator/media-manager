@@ -20,41 +20,41 @@ export type CollectionStore = CollectionState & CollectionCoreSlice & Collection
  * Estado inicial del store
  */
 const initialState: CollectionState = {
-  collections: [],
-  viewConfig: {
-    viewType: 'grid',
-    sortBy: 'name',
-    sortDirection: 'asc',
-    showImages: true,
-    imageCount: 3,
-    enableAnimations: true,
-    groupBy: null
-  },
-  selectedCollectionId: null,
-  isLoading: false,
-  error: null
+	collections: [],
+	viewConfig: {
+		viewType: 'grid',
+		sortBy: 'name',
+		sortDirection: 'asc',
+		showImages: true,
+		imageCount: 3,
+		enableAnimations: true,
+		groupBy: null,
+	},
+	selectedCollectionId: null,
+	isLoading: false,
+	error: null,
 };
 
 /**
  * Store de Zustand para Collections
  */
 export const useCollectionStore = create<CollectionStore>()(
-  persist(
-    (...a) => ({
-      ...initialState,
-      ...createCollectionCoreSlice(...a),
-      ...createCollectionUISlice(...a),
-      ...createCollectionFiltersSlice(...a)
-    }),
-    {
-      name: 'collection-store',
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        viewConfig: state.viewConfig,
-        selectedCollectionId: state.selectedCollectionId
-      })
-    }
-  )
+	persist(
+		(...a) => ({
+			...initialState,
+			...createCollectionCoreSlice(...a),
+			...createCollectionUISlice(...a),
+			...createCollectionFiltersSlice(...a),
+		}),
+		{
+			name: 'collection-store',
+			storage: createJSONStorage(() => localStorage),
+			partialize: (state) => ({
+				viewConfig: state.viewConfig,
+				selectedCollectionId: state.selectedCollectionId,
+			}),
+		}
+	)
 );
 
 /**
@@ -67,34 +67,34 @@ export const useCollectionStore = create<CollectionStore>()(
  * @returns Función selectora para obtener la colección
  */
 export const selectCollectionById = (id: string) => (state: CollectionStore) =>
-  state.collections.find(collection => collection.id === id);
+	state.collections.find((collection) => collection.id === id);
 
 /**
  * Obtiene todas las colecciones ordenadas según la configuración actual
  */
 export const selectSortedCollections = (state: CollectionStore) => {
-  const { sortBy, sortDirection } = state.viewConfig;
-  const option = `${sortBy}_${sortDirection}`;
-  return state.getSortedCollections(option);
+	const { sortBy, sortDirection } = state.viewConfig;
+	const option = `${sortBy}_${sortDirection}`;
+	return state.getSortedCollections(option);
 };
 
 /**
  * Obtiene las colecciones agrupadas según la configuración actual
  */
 export const selectGroupedCollections = (state: CollectionStore) => {
-  return state.getGroupedCollections();
+	return state.getGroupedCollections();
 };
 
 /**
  * Obtiene las colecciones favoritas
  */
 export const selectFavoriteCollections = (state: CollectionStore) => {
-  return state.collections.filter(collection => collection.isFavorite);
+	return state.collections.filter((collection) => collection.isFavorite);
 };
 
 /**
  * Obtiene la colección seleccionada actualmente
  */
 export const selectCurrentCollection = (state: CollectionStore) => {
-  return state.getSelectedCollection();
+	return state.getSelectedCollection();
 };

@@ -243,13 +243,13 @@ export const RaritySystem: React.FC<RaritySystemProps> = ({
 	// Estado para la distribución de rareza
 	const [distribution, setDistribution] = useState<Record<string, number>>(
 		initialDistribution ||
-		rarities.reduce(
-			(acc, rarity) => {
-				acc[rarity.id] = rarity.chance || 0;
-				return acc;
-			},
-			{} as Record<string, number>
-		)
+			rarities.reduce(
+				(acc, rarity) => {
+					acc[rarity.id] = rarity.chance || 0;
+					return acc;
+				},
+				{} as Record<string, number>
+			)
 	);
 
 	// Manejar cambios en la distribución
@@ -310,12 +310,12 @@ export function calculateRandomRarity(
 	const normalizedDistribution =
 		totalChance !== 100
 			? Object.entries(distribution).reduce(
-				(acc, [id, chance]) => {
-					acc[id] = (chance / totalChance) * 100;
-					return acc;
-				},
-				{} as Record<string, number>
-			)
+					(acc, [id, chance]) => {
+						acc[id] = (chance / totalChance) * 100;
+						return acc;
+					},
+					{} as Record<string, number>
+				)
 			: distribution;
 
 	// Generar un número aleatorio entre 0 y 100

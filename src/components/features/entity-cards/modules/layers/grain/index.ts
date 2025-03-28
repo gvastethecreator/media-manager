@@ -14,4 +14,3 @@ export { grainImplementation, GrainLayer };
 export type { GrainConfig };
 
 export default grainImplementation;
-

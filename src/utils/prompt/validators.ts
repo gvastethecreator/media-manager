@@ -10,13 +10,13 @@ const validatorsLogger = serverLogger.withContext('PromptValidators');
  * @returns Booleano indicando si es válido
  */
 export function isValidPromptTitle(title: string): boolean {
-  try {
-    // El título debe tener entre 3 y 100 caracteres
-    return title.trim().length >= 3 && title.trim().length <= 100;
-  } catch (error) {
-    validatorsLogger.error('❌ Error al validar título de prompt:', error);
-    return false;
-  }
+	try {
+		// El título debe tener entre 3 y 100 caracteres
+		return title.trim().length >= 3 && title.trim().length <= 100;
+	} catch (error) {
+		validatorsLogger.error('❌ Error al validar título de prompt:', error);
+		return false;
+	}
 }
 
 /**
@@ -25,13 +25,13 @@ export function isValidPromptTitle(title: string): boolean {
  * @returns Booleano indicando si es válido
  */
 export function isValidPromptContent(content: string): boolean {
-  try {
-    // El contenido debe tener al menos 5 caracteres
-    return content.trim().length >= 5;
-  } catch (error) {
-    validatorsLogger.error('❌ Error al validar contenido de prompt:', error);
-    return false;
-  }
+	try {
+		// El contenido debe tener al menos 5 caracteres
+		return content.trim().length >= 5;
+	} catch (error) {
+		validatorsLogger.error('❌ Error al validar contenido de prompt:', error);
+		return false;
+	}
 }
 
 /**
@@ -40,13 +40,13 @@ export function isValidPromptContent(content: string): boolean {
  * @returns Booleano indicando si es válida
  */
 export function isValidPromptCategory(category: string): boolean {
-  try {
-    // Verificar que sea una de las categorías válidas
-    return Object.values(PromptCategory).includes(category as PromptCategory);
-  } catch (error) {
-    validatorsLogger.error('❌ Error al validar categoría de prompt:', error);
-    return false;
-  }
+	try {
+		// Verificar que sea una de las categorías válidas
+		return Object.values(PromptCategory).includes(category as PromptCategory);
+	} catch (error) {
+		validatorsLogger.error('❌ Error al validar categoría de prompt:', error);
+		return false;
+	}
 }
 
 /**
@@ -55,13 +55,13 @@ export function isValidPromptCategory(category: string): boolean {
  * @returns Booleano indicando si es válido
  */
 export function isValidPromptModel(model: string): boolean {
-  try {
-    // Verificar que sea uno de los modelos válidos
-    return Object.values(PromptModel).includes(model as PromptModel);
-  } catch (error) {
-    validatorsLogger.error('❌ Error al validar modelo de prompt:', error);
-    return false;
-  }
+	try {
+		// Verificar que sea uno de los modelos válidos
+		return Object.values(PromptModel).includes(model as PromptModel);
+	} catch (error) {
+		validatorsLogger.error('❌ Error al validar modelo de prompt:', error);
+		return false;
+	}
 }
 
 /**
@@ -70,23 +70,26 @@ export function isValidPromptModel(model: string): boolean {
  * @returns Booleano indicando si son válidos
  */
 export function isValidPromptParameters(parameters: string | Record<string, any>): boolean {
-  try {
-    // Si es string, intentar parsearlo
-    const paramsObject = typeof parameters === 'string'
-      ? (parameters === '{}' || parameters === 'empty_object' ? {} : JSON.parse(parameters))
-      : parameters;
+	try {
+		// Si es string, intentar parsearlo
+		const paramsObject =
+			typeof parameters === 'string'
+				? parameters === '{}' || parameters === 'empty_object'
+					? {}
+					: JSON.parse(parameters)
+				: parameters;
 
-    // Verificar que sea un objeto
-    if (typeof paramsObject !== 'object' || paramsObject === null) {
-      return false;
-    }
+		// Verificar que sea un objeto
+		if (typeof paramsObject !== 'object' || paramsObject === null) {
+			return false;
+		}
 
-    // Verificación adicional para cada parámetro si es necesario
-    return true;
-  } catch (error) {
-    validatorsLogger.error('❌ Error al validar parámetros de prompt:', error);
-    return false;
-  }
+		// Verificación adicional para cada parámetro si es necesario
+		return true;
+	} catch (error) {
+		validatorsLogger.error('❌ Error al validar parámetros de prompt:', error);
+		return false;
+	}
 }
 
 /**
@@ -95,23 +98,22 @@ export function isValidPromptParameters(parameters: string | Record<string, any>
  * @returns Booleano indicando si son válidos
  */
 export function isValidPromptTags(tags: string | string[]): boolean {
-  try {
-    // Si es string, intentar parsearlo
-    const tagsArray = typeof tags === 'string'
-      ? (tags === '[]' || tags === 'empty_array' ? [] : JSON.parse(tags))
-      : tags;
+	try {
+		// Si es string, intentar parsearlo
+		const tagsArray =
+			typeof tags === 'string' ? (tags === '[]' || tags === 'empty_array' ? [] : JSON.parse(tags)) : tags;
 
-    // Verificar que sea un array
-    if (!Array.isArray(tagsArray)) {
-      return false;
-    }
+		// Verificar que sea un array
+		if (!Array.isArray(tagsArray)) {
+			return false;
+		}
 
-    // Verificar que cada tag sea un string no vacío
-    return tagsArray.every(tag => typeof tag === 'string' && tag.trim().length > 0);
-  } catch (error) {
-    validatorsLogger.error('❌ Error al validar tags de prompt:', error);
-    return false;
-  }
+		// Verificar que cada tag sea un string no vacío
+		return tagsArray.every((tag) => typeof tag === 'string' && tag.trim().length > 0);
+	} catch (error) {
+		validatorsLogger.error('❌ Error al validar tags de prompt:', error);
+		return false;
+	}
 }
 
 /**
@@ -120,61 +122,57 @@ export function isValidPromptTags(tags: string | string[]): boolean {
  * @returns Objeto con resultado de validación y errores
  */
 export function validatePrompt(prompt: PromptBase | PromptExtended): {
-  isValid: boolean;
-  errors: Record<string, string>;
+	isValid: boolean;
+	errors: Record<string, string>;
 } {
-  try {
-    const errors: Record<string, string> = {};
+	try {
+		const errors: Record<string, string> = {};
 
-    // Validar título
-    if (!isValidPromptTitle(prompt.title)) {
-      errors.title = 'El título debe tener entre 3 y 100 caracteres';
-    }
+		// Validar título
+		if (!isValidPromptTitle(prompt.title)) {
+			errors.title = 'El título debe tener entre 3 y 100 caracteres';
+		}
 
-    // Validar contenido
-    if (!isValidPromptContent(prompt.content)) {
-      errors.content = 'El contenido debe tener al menos 5 caracteres';
-    }
+		// Validar contenido
+		if (!isValidPromptContent(prompt.content)) {
+			errors.content = 'El contenido debe tener al menos 5 caracteres';
+		}
 
-    // Validar categoría
-    if (!isValidPromptCategory(prompt.category)) {
-      errors.category = 'La categoría seleccionada no es válida';
-    }
+		// Validar categoría
+		if (!isValidPromptCategory(prompt.category)) {
+			errors.category = 'La categoría seleccionada no es válida';
+		}
 
-    // Validar modelo
-    if (!isValidPromptModel(prompt.model)) {
-      errors.model = 'El modelo seleccionado no es válido';
-    }
+		// Validar modelo
+		if (!isValidPromptModel(prompt.model)) {
+			errors.model = 'El modelo seleccionado no es válido';
+		}
 
-    // Validar parámetros
-    const params = 'parsedParameters' in prompt
-      ? prompt.parsedParameters
-      : prompt.parameters;
+		// Validar parámetros
+		const params = 'parsedParameters' in prompt ? prompt.parsedParameters : prompt.parameters;
 
-    if (!isValidPromptParameters(params)) {
-      errors.parameters = 'Los parámetros tienen un formato inválido';
-    }
+		if (!isValidPromptParameters(params)) {
+			errors.parameters = 'Los parámetros tienen un formato inválido';
+		}
 
-    // Validar tags
-    const tags = 'parsedTags' in prompt
-      ? prompt.parsedTags
-      : prompt.tags;
+		// Validar tags
+		const tags = 'parsedTags' in prompt ? prompt.parsedTags : prompt.tags;
 
-    if (!isValidPromptTags(tags)) {
-      errors.tags = 'Los tags tienen un formato inválido';
-    }
+		if (!isValidPromptTags(tags)) {
+			errors.tags = 'Los tags tienen un formato inválido';
+		}
 
-    return {
-      isValid: Object.keys(errors).length === 0,
-      errors
-    };
-  } catch (error) {
-    validatorsLogger.error('❌ Error al validar prompt completo:', error);
-    return {
-      isValid: false,
-      errors: {
-        general: 'Error al validar el prompt'
-      }
-    };
-  }
+		return {
+			isValid: Object.keys(errors).length === 0,
+			errors,
+		};
+	} catch (error) {
+		validatorsLogger.error('❌ Error al validar prompt completo:', error);
+		return {
+			isValid: false,
+			errors: {
+				general: 'Error al validar el prompt',
+			},
+		};
+	}
 }

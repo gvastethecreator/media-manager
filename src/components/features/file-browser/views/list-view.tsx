@@ -95,7 +95,7 @@ export const ListView = memo(function ListView({
 	};
 
 	return (
-		<FileContextMenu file={item} onAction={onContextAction || (() => { })}>
+		<FileContextMenu file={item} onAction={onContextAction || (() => {})}>
 			<button
 				ref={buttonRef}
 				type="button"

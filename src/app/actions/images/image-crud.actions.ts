@@ -7,16 +7,11 @@ import { revalidatePath } from 'next/cache';
 
 // Importamos los nuevos tipos y transformers
 import {
-    getDerivedImageProperties,
-    mapCreateImageDataToPrisma,
-    mapUpdateImageDataToPrisma
+	getDerivedImageProperties,
+	mapCreateImageDataToPrisma,
+	mapUpdateImageDataToPrisma,
 } from '@/transformers/image';
-import type {
-    CreateImageData,
-    ImageBase,
-    ImageExtended,
-    UpdateImageData
-} from '@/types/entities/image';
+import type { CreateImageData, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image';
 
 import type { GetImagesOptions, GetImagesResult, ImageResult } from './image-types.actions';
 
@@ -63,8 +58,8 @@ export async function getImage(id: string): Promise<ImageExtended | null> {
 		// Añadir propiedades derivadas
 		const derivedProperties = getDerivedImageProperties(image);
 		const result: ImageExtended = {
-			...image as unknown as ImageBase,
-			...derivedProperties
+			...(image as unknown as ImageBase),
+			...derivedProperties,
 		};
 
 		return result;
@@ -85,9 +80,11 @@ export async function createImage(data: CreateImageData): Promise<ImageBase> {
 		const image = await prisma.image.create({
 			data: {
 				...prismaData,
-				folder: data.folderId ? {
-					connect: { id: data.folderId },
-				} : undefined,
+				folder: data.folderId
+					? {
+							connect: { id: data.folderId },
+						}
+					: undefined,
 			},
 			include: {
 				tags: true,
@@ -185,11 +182,11 @@ export async function getFavoriteImages(): Promise<ImageExtended[]> {
 		});
 
 		// Añadir propiedades derivadas a cada imagen
-		return favorites.map(img => {
+		return favorites.map((img) => {
 			const derivedProps = getDerivedImageProperties(img);
 			return {
 				...img,
-				...derivedProps
+				...derivedProps,
 			} as ImageExtended;
 		});
 	} catch (error) {
@@ -294,11 +291,11 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 		});
 
 		// Transformar imágenes y añadir propiedades derivadas
-		const processedImages = images.map(img => {
+		const processedImages = images.map((img) => {
 			const derivedProps = getDerivedImageProperties(img);
 			return {
 				...img,
-				...derivedProps
+				...derivedProps,
 			} as ImageExtended;
 		});
 

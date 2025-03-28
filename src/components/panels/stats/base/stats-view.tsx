@@ -36,9 +36,9 @@ export function StatsView({ icon, title, subtitle, children, className }: StatsV
 export function StatsContainer({ children }: { children: React.ReactNode }) {
 	return (
 		<ScrollArea className="h-full w-full p-0">
-			<div className="p-0 w-full h-full">
+			<div className="p-1 w-full h-full">
 				<Card className="border-none rounded-none">
-					<CardContent className="p-0">{children}</CardContent>
+					<CardContent className="p-1 space-y-2">{children}</CardContent>
 				</Card>
 			</div>
 		</ScrollArea>

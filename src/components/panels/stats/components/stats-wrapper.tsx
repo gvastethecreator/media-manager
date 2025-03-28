@@ -1,11 +1,7 @@
 'use client';
 
 import { memo } from 'react';
-import {
-	ClientGeneralStats,
-	ClientRecentActivity,
-	ClientTopTags
-} from '../stats-client-components';
+import { ClientGeneralStats, ClientRecentActivity, ClientTopTags } from '../stats-client-components';
 
 // Usamos React.memo para evitar renderizados innecesarios
 const StatsWrapper = memo(function StatsWrapper() {

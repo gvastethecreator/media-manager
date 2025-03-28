@@ -58,15 +58,15 @@ export function AlbumContentView() {
 		currentContainerId: currentAlbumId ?? null,
 		emptyState: !currentAlbumId
 			? {
-				icon: Album,
-				title: 'No hay álbum seleccionado',
-				description: 'Selecciona un álbum para ver su contenido.',
-			}
+					icon: Album,
+					title: 'No hay álbum seleccionado',
+					description: 'Selecciona un álbum para ver su contenido.',
+				}
 			: {
-				icon: Album,
-				title: 'Álbum sin imágenes',
-				description: 'Este álbum no tiene imágenes asociadas.',
-			},
+					icon: Album,
+					title: 'Álbum sin imágenes',
+					description: 'Este álbum no tiene imágenes asociadas.',
+				},
 	};
 
 	return (

@@ -6,18 +6,20 @@ import { z } from 'zod';
 
 // Caché simple para almacenar configuraciones y reducir llamadas a la base de datos
 // Estructura: entityType_entityId -> config
-const configCache = new Map<string, {
-	data: any;
-	timestamp: number;
-	ttl: number;
-}>();
+const configCache = new Map<
+	string,
+	{
+		data: any;
+		timestamp: number;
+		ttl: number;
+	}
+>();
 
 // Tiempo de vida de la caché en ms (5 minutos)
 const CACHE_TTL = 5 * 60 * 1000;
 
 // Función auxiliar para obtener clave de caché
-const getCacheKey = (entityType: string, entityId?: string) =>
-	`glow_${entityType}_${entityId || 'default'}`;
+const getCacheKey = (entityType: string, entityId?: string) => `glow_${entityType}_${entityId || 'default'}`;
 
 // Función para obtener datos de caché
 const getFromCache = (key: string) => {
@@ -38,7 +40,7 @@ const saveToCache = (key: string, data: any, ttl = CACHE_TTL) => {
 	configCache.set(key, {
 		data,
 		timestamp: Date.now(),
-		ttl
+		ttl,
 	});
 };
 
@@ -86,7 +88,7 @@ export async function getGlowConfig(entityType: string, entityId?: string): Prom
 			return {
 				success: false,
 				message: 'Parámetros inválidos',
-				error: validation.error.message
+				error: validation.error.message,
 			};
 		}
 
@@ -161,7 +163,7 @@ export async function getGlowConfig(entityType: string, entityId?: string): Prom
 		return {
 			success: false,
 			message: 'Error al obtener la configuración de glow',
-			error: error instanceof Error ? error.message : String(error)
+			error: error instanceof Error ? error.message : String(error),
 		};
 	}
 }
@@ -186,7 +188,7 @@ export async function updateGlowConfig(
 			return {
 				success: false,
 				message: 'Parámetros inválidos',
-				error: validation.error.message
+				error: validation.error.message,
 			};
 		}
 
@@ -231,7 +233,7 @@ export async function updateGlowConfig(
 		return {
 			success: false,
 			message: 'Error al actualizar la configuración de glow',
-			error: error instanceof Error ? error.message : String(error)
+			error: error instanceof Error ? error.message : String(error),
 		};
 	}
 }
@@ -252,7 +254,7 @@ export async function deleteGlowConfig(entityType: string, entityId?: string): P
 			return {
 				success: false,
 				message: 'Parámetros inválidos',
-				error: validation.error.message
+				error: validation.error.message,
 			};
 		}
 
@@ -286,7 +288,7 @@ export async function deleteGlowConfig(entityType: string, entityId?: string): P
 		return {
 			success: false,
 			message: 'Error al eliminar la configuración de glow',
-			error: error instanceof Error ? error.message : String(error)
+			error: error instanceof Error ? error.message : String(error),
 		};
 	}
 }

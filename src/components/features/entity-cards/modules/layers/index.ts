@@ -37,9 +37,9 @@ export { RegisterLayers } from './register-layers';
 
 // Componentes de integración con EntityCard
 export {
-    EntityCardLayers,
-    EntityCardLayersProvider,
-    LayerRenderer
+	EntityCardLayers,
+	EntityCardLayersProvider,
+	LayerRenderer,
 } from './entity-card-layers';
 
 // Componentes de utilidad y configuración
@@ -62,16 +62,15 @@ export { textureImplementation } from './textures';
 
 // Crear un RegisterAllLayers provisional hasta que se implemente completamente
 export function RegisterAllLayers(): React.ReactElement {
-    return React.createElement(RegisterLayers);
+	return React.createElement(RegisterLayers);
 }
 
 // Alias para registro de capas por tipo de entidad
 export function RegisterLayersByEntityType(): React.ReactElement {
-    return React.createElement(RegisterLayers);
+	return React.createElement(RegisterLayers);
 }
 
 // Estos módulos serán implementados en futuras iteraciones:
 // - LayersProvider y useLayers de '../use-layers'
 // - adaptEntityCardToLayerSystem y adaptLayerSystemToEntityCard de '../entity-card-layer-adapter'
 // - adaptCardOptionsToLayersConfig de '../use-layers'
-

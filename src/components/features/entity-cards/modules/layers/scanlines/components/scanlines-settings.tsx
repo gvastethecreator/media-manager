@@ -17,14 +17,14 @@ import { BLEND_MODES, LINE_DIRECTIONS, PRESET_COLORS, type ScanlinesConfig } fro
  * @param config - Configuración actual
  * @param onConfigChange - Función para actualizar la configuración
  */
-export const ScanlinesSettings: React.FC<LayerSettingsProps<ScanlinesConfig>> = ({
-	config,
-	onConfigChange,
-}) => {
+export const ScanlinesSettings: React.FC<LayerSettingsProps<ScanlinesConfig>> = ({ config, onConfigChange }) => {
 	// 🔄 Manejador genérico de cambios
-	const handleChange = useCallback((changes: Partial<ScanlinesConfig>) => {
-		onConfigChange({ ...config, ...changes });
-	}, [config, onConfigChange]);
+	const handleChange = useCallback(
+		(changes: Partial<ScanlinesConfig>) => {
+			onConfigChange({ ...config, ...changes });
+		},
+		[config, onConfigChange]
+	);
 
 	// 🎨 Renderizar los controles
 	return (
@@ -35,7 +35,9 @@ export const ScanlinesSettings: React.FC<LayerSettingsProps<ScanlinesConfig>> = 
 					<div className="flex items-center justify-between">
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Label htmlFor="enabled" className="cursor-help">Activar capa</Label>
+								<Label htmlFor="enabled" className="cursor-help">
+									Activar capa
+								</Label>
 							</TooltipTrigger>
 							<TooltipContent>
 								<p>Activa o desactiva el efecto de líneas de escaneo</p>
@@ -52,7 +54,9 @@ export const ScanlinesSettings: React.FC<LayerSettingsProps<ScanlinesConfig>> = 
 					<div className="flex items-center justify-between">
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Label htmlFor="visibleOnHover" className="cursor-help">Visible en hover</Label>
+								<Label htmlFor="visibleOnHover" className="cursor-help">
+									Visible en hover
+								</Label>
 							</TooltipTrigger>
 							<TooltipContent>
 								<p>Muestra el efecto solo al pasar el cursor sobre la tarjeta</p>
@@ -69,7 +73,9 @@ export const ScanlinesSettings: React.FC<LayerSettingsProps<ScanlinesConfig>> = 
 					<div className="space-y-2">
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Label htmlFor="layerIndex" className="cursor-help">Orden de capa</Label>
+								<Label htmlFor="layerIndex" className="cursor-help">
+									Orden de capa
+								</Label>
 							</TooltipTrigger>
 							<TooltipContent>
 								<p>Determina la posición de la capa en el stack visual</p>
@@ -89,9 +95,15 @@ export const ScanlinesSettings: React.FC<LayerSettingsProps<ScanlinesConfig>> = 
 				{/* 📑 Pestañas de configuración */}
 				<Tabs defaultValue="lines" className="w-full">
 					<TabsList className="w-full" aria-label="Opciones de configuración">
-						<TabsTrigger value="lines" className="flex-1">Líneas</TabsTrigger>
-						<TabsTrigger value="appearance" className="flex-1">Apariencia</TabsTrigger>
-						<TabsTrigger value="animation" className="flex-1">Animación</TabsTrigger>
+						<TabsTrigger value="lines" className="flex-1">
+							Líneas
+						</TabsTrigger>
+						<TabsTrigger value="appearance" className="flex-1">
+							Apariencia
+						</TabsTrigger>
+						<TabsTrigger value="animation" className="flex-1">
+							Animación
+						</TabsTrigger>
 					</TabsList>
 
 					{/* 📏 Configuración de líneas */}
@@ -262,7 +274,9 @@ export const ScanlinesSettings: React.FC<LayerSettingsProps<ScanlinesConfig>> = 
 						<div className="flex items-center justify-between">
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Label htmlFor="animated" className="cursor-help">Animación</Label>
+									<Label htmlFor="animated" className="cursor-help">
+										Animación
+									</Label>
 								</TooltipTrigger>
 								<TooltipContent>
 									<p>Activa el movimiento de las líneas</p>

@@ -58,8 +58,9 @@ export function ConceptContentView() {
 		emptyState: {
 			icon: Lightbulb,
 			title: 'Concepto vacío',
-			description: `No se encontraron imágenes en ${currentConcept?.name || 'este concepto'
-				}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${
+				currentConcept?.name || 'este concepto'
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadConceptImages,
 	};

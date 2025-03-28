@@ -12,33 +12,30 @@ import { ActivityType } from '../../types/entities/activity';
  * @returns true si el tipo es válido
  */
 export function isValidActivityType(type: string): boolean {
-  return Object.values(ActivityType).includes(type as ActivityType);
+	return Object.values(ActivityType).includes(type as ActivityType);
 }
 
 /**
  * Esquema Zod para validación de creación de actividad
  */
 export const createActivitySchema = z.object({
-  type: z.string().refine(
-    type => isValidActivityType(type),
-    { message: 'Tipo de actividad no válido' }
-  ),
-  description: z.string().min(1, 'La descripción es obligatoria'),
-  imageId: z.string().optional(),
-  metadata: z.union([z.string(), z.record(z.any())]).optional(),
+	type: z.string().refine((type) => isValidActivityType(type), { message: 'Tipo de actividad no válido' }),
+	description: z.string().min(1, 'La descripción es obligatoria'),
+	imageId: z.string().optional(),
+	metadata: z.union([z.string(), z.record(z.any())]).optional(),
 });
 
 /**
  * Esquema Zod para validación de filtros de actividad
  */
 export const activityFiltersSchema = z.object({
-  types: z.array(z.string()).optional(),
-  startDate: z.union([z.string(), z.date()]).optional(),
-  endDate: z.union([z.string(), z.date()]).optional(),
-  imageId: z.string().optional(),
-  searchQuery: z.string().optional(),
-  limit: z.number().int().positive().optional().default(20),
-  offset: z.number().int().nonnegative().optional().default(0),
+	types: z.array(z.string()).optional(),
+	startDate: z.union([z.string(), z.date()]).optional(),
+	endDate: z.union([z.string(), z.date()]).optional(),
+	imageId: z.string().optional(),
+	searchQuery: z.string().optional(),
+	limit: z.number().int().positive().optional().default(20),
+	offset: z.number().int().nonnegative().optional().default(0),
 });
 
 /**
@@ -47,17 +44,17 @@ export const activityFiltersSchema = z.object({
  * @returns Resultado de validación (éxito/error)
  */
 export function validateCreateActivityData(data: unknown) {
-  try {
-    return {
-      success: true,
-      data: createActivitySchema.parse(data)
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error
-    };
-  }
+	try {
+		return {
+			success: true,
+			data: createActivitySchema.parse(data),
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error,
+		};
+	}
 }
 
 /**
@@ -66,27 +63,24 @@ export function validateCreateActivityData(data: unknown) {
  * @returns Resultado de validación (éxito/error)
  */
 export function validateActivityFilters(filters: unknown) {
-  try {
-    return {
-      success: true,
-      data: activityFiltersSchema.parse(filters)
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error
-    };
-  }
+	try {
+		return {
+			success: true,
+			data: activityFiltersSchema.parse(filters),
+		};
+	} catch (error) {
+		return {
+			success: false,
+			error,
+		};
+	}
 }
 
 /**
  * Esquema Zod para validación de una lista de tipos de actividad
  */
 export const activityTypesSchema = z.array(
-  z.string().refine(
-    type => isValidActivityType(type),
-    { message: 'Tipo de actividad no válido' }
-  )
+	z.string().refine((type) => isValidActivityType(type), { message: 'Tipo de actividad no válido' })
 );
 
 /**
@@ -95,10 +89,10 @@ export const activityTypesSchema = z.array(
  * @returns true si todos los tipos son válidos
  */
 export function validateActivityTypes(types: string[]): boolean {
-  try {
-    activityTypesSchema.parse(types);
-    return true;
-  } catch (error) {
-    return false;
-  }
+	try {
+		activityTypesSchema.parse(types);
+		return true;
+	} catch (error) {
+		return false;
+	}
 }

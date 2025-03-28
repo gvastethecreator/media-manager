@@ -1,8 +1,8 @@
 'use client';
 
-import { blurImplementation as blurLayerImplementation } from "./blur-implementation";
-import { type BlurConfig, defaultBlurConfig } from "./blur-schema";
-import { BlurLayer as BlurEffectLayer } from "./components/blur-layer";
+import { blurImplementation as blurLayerImplementation } from './blur-implementation';
+import { type BlurConfig, defaultBlurConfig } from './blur-schema';
+import { BlurLayer as BlurEffectLayer } from './components/blur-layer';
 
 /**
  * 🌫️ Módulo de capa de desenfoque para tarjetas de entidades

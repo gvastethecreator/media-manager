@@ -8,15 +8,8 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 // Importaciones actualizadas usando nuevos tipos y transformers
-import {
-	mapCreateTagDataToPrisma,
-	mapUpdateTagDataToPrisma
-} from '@/transformers/tag';
-import type {
-	TagCreate as CreateTagData,
-	Tag,
-	TagUpdate as UpdateTagData
-} from '@/types/entities/tag';
+import { mapCreateTagDataToPrisma, mapUpdateTagDataToPrisma } from '@/transformers/tag';
+import type { TagCreate as CreateTagData, Tag, TagUpdate as UpdateTagData } from '@/types/entities/tag';
 import type { TagBase } from '@/types/entities/tag/types';
 
 // Utilidades y logging
@@ -57,14 +50,14 @@ const createTagError = (message: string, code: TagErrorCode = TagErrorCode.OPERA
 
 // Interfaces para compatibilidad
 export interface TagWithStats {
-    id: string;
-    name: string;
-    color: string;
-    emoji: string | null;
-    description: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-    shortcut: string | null;
+	id: string;
+	name: string;
+	color: string;
+	emoji: string | null;
+	description: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	shortcut: string | null;
 	_count: {
 		images: number;
 	};

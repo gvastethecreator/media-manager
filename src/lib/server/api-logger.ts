@@ -33,10 +33,7 @@ export const apiLogger = {
 		const logger = serverLogger.withContext(`API:${routeName}`);
 
 		// Función para filtrar campos sensibles
-		const filterSensitiveData = (
-			obj: Record<string, unknown>,
-			sensitiveFields: string[]
-		): Record<string, unknown> => {
+		const filterSensitiveData = (obj: Record<string, unknown>, sensitiveFields: string[]): Record<string, unknown> => {
 			if (!obj || typeof obj !== 'object') return obj;
 
 			const result = { ...obj };

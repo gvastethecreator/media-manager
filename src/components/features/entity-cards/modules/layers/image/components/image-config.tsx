@@ -46,21 +46,13 @@ export function ImageConfig() {
 								render={({ field }) => (
 									<FormItem className="flex items-center space-x-2">
 										<FormControl>
-											<Switch
-												checked={field.value}
-												onCheckedChange={field.onChange}
-											/>
+											<Switch checked={field.value} onCheckedChange={field.onChange} />
 										</FormControl>
 										<FormLabel className="!mt-0">Habilitar Imagen</FormLabel>
 									</FormItem>
 								)}
 							/>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => resetConfig()}
-								className="text-xs"
-							>
+							<Button variant="ghost" size="sm" onClick={() => resetConfig()} className="text-xs">
 								Restablecer
 							</Button>
 						</div>
@@ -75,10 +67,7 @@ export function ImageConfig() {
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>Ajuste de imagen</FormLabel>
-												<Select
-													value={field.value}
-													onValueChange={field.onChange}
-												>
+												<Select value={field.value} onValueChange={field.onChange}>
 													<FormControl>
 														<SelectTrigger>
 															<SelectValue placeholder="Seleccionar ajuste" />
@@ -101,10 +90,7 @@ export function ImageConfig() {
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>Relación de aspecto</FormLabel>
-												<Select
-													value={field.value}
-													onValueChange={field.onChange}
-												>
+												<Select value={field.value} onValueChange={field.onChange}>
 													<FormControl>
 														<SelectTrigger>
 															<SelectValue placeholder="Seleccionar relación" />
@@ -128,10 +114,7 @@ export function ImageConfig() {
 										render={({ field }) => (
 											<FormItem>
 												<FormLabel>Bordes redondeados</FormLabel>
-												<Select
-													value={field.value}
-													onValueChange={field.onChange}
-												>
+												<Select value={field.value} onValueChange={field.onChange}>
 													<FormControl>
 														<SelectTrigger>
 															<SelectValue placeholder="Seleccionar radio" />
@@ -270,10 +253,7 @@ export function ImageConfig() {
 												render={({ field }) => (
 													<FormItem>
 														<FormLabel>Estrategia de carga</FormLabel>
-														<Select
-															value={field.value}
-															onValueChange={field.onChange}
-														>
+														<Select value={field.value} onValueChange={field.onChange}>
 															<FormControl>
 																<SelectTrigger>
 																	<SelectValue placeholder="Seleccionar estrategia" />
@@ -294,10 +274,7 @@ export function ImageConfig() {
 												render={({ field }) => (
 													<FormItem>
 														<FormLabel>Placeholder</FormLabel>
-														<Select
-															value={field.value}
-															onValueChange={field.onChange}
-														>
+														<Select value={field.value} onValueChange={field.onChange}>
 															<FormControl>
 																<SelectTrigger>
 																	<SelectValue placeholder="Seleccionar placeholder" />
@@ -331,15 +308,9 @@ export function ImageConfig() {
 													<FormItem>
 														<FormLabel>Texto alternativo</FormLabel>
 														<FormControl>
-															<input
-																type="text"
-																className="w-full px-3 py-2 border rounded-md"
-																{...field}
-															/>
+															<input type="text" className="w-full px-3 py-2 border rounded-md" {...field} />
 														</FormControl>
-														<FormDescription>
-															Descripción corta para lectores de pantalla
-														</FormDescription>
+														<FormDescription>Descripción corta para lectores de pantalla</FormDescription>
 													</FormItem>
 												)}
 											/>
@@ -351,15 +322,9 @@ export function ImageConfig() {
 													<FormItem>
 														<FormLabel>Descripción larga</FormLabel>
 														<FormControl>
-															<textarea
-																className="w-full px-3 py-2 border rounded-md"
-																rows={3}
-																{...field}
-															/>
+															<textarea className="w-full px-3 py-2 border rounded-md" rows={3} {...field} />
 														</FormControl>
-														<FormDescription>
-															Descripción detallada de la imagen
-														</FormDescription>
+														<FormDescription>Descripción detallada de la imagen</FormDescription>
 													</FormItem>
 												)}
 											/>
@@ -384,9 +349,7 @@ export function ImageConfig() {
 														onValueChange={([value]) => field.onChange(value)}
 													/>
 												</FormControl>
-												<FormDescription>
-													Controla el orden de las capas en modo explotado
-												</FormDescription>
+												<FormDescription>Controla el orden de las capas en modo explotado</FormDescription>
 											</FormItem>
 										)}
 									/>
@@ -397,10 +360,7 @@ export function ImageConfig() {
 										render={({ field }) => (
 											<FormItem className="flex items-center space-x-2">
 												<FormControl>
-													<Checkbox
-														checked={field.value}
-														onCheckedChange={field.onChange}
-													/>
+													<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 												</FormControl>
 												<FormLabel className="!mt-0">Solo visible al pasar el cursor</FormLabel>
 											</FormItem>

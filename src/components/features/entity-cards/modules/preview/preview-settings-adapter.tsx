@@ -43,7 +43,7 @@ export function PreviewSettings(props: PreviewSettingsProps) {
 		const { options, onChange, disabled = false } = props;
 
 		// Extraer las opciones de preview o crear un objeto vacío si no existen
-		const preview = options.preview || {} as Partial<PreviewOptions>;
+		const preview = options.preview || ({} as Partial<PreviewOptions>);
 
 		// Convertir a formato PreviewOptions
 		const previewOptions: PreviewOptions = {
@@ -65,7 +65,7 @@ export function PreviewSettings(props: PreviewSettingsProps) {
 			const newOptions = {
 				...options,
 				preview: {
-					...options.preview as Partial<PreviewOptions>,
+					...(options.preview as Partial<PreviewOptions>),
 					...updatedOptions,
 				},
 			};
@@ -75,41 +75,42 @@ export function PreviewSettings(props: PreviewSettingsProps) {
 		// Renderizamos el nuevo módulo
 		return <PreviewModule initialOptions={previewOptions} onChange={handlePreviewChange} disabled={disabled} />;
 	}
-		// Caso 2: Formato extendido con cardOptions, rarity, texture, etc.
-		const { cardOptions, rarity, texture, entityType, activeLayerId, isExploded, onExplodedChange, onActiveLayerChange } = props;
+	// Caso 2: Formato extendido con cardOptions, rarity, texture, etc.
+	const { cardOptions, rarity, texture, entityType, activeLayerId, isExploded, onExplodedChange, onActiveLayerChange } =
+		props;
 
-		// Extraer las opciones de preview o crear un objeto vacío si no existen
-		const preview = cardOptions.preview || {} as Partial<PreviewOptions>;
+	// Extraer las opciones de preview o crear un objeto vacío si no existen
+	const preview = cardOptions.preview || ({} as Partial<PreviewOptions>);
 
-		// Convertir a formato PreviewOptions
-		const previewOptions: PreviewOptions = {
-			size: preview.size || 'medium',
-			customWidth: preview.customWidth || 300,
-			customHeight: preview.customHeight || 400,
-			showControls: preview.showControls ?? true,
-			showInfo: preview.showInfo ?? true,
-			showBorder: preview.showBorder ?? true,
-			backgroundColor: preview.backgroundColor || 'transparent',
-			enableInteraction: preview.enableInteraction ?? true,
-			autoRotate: preview.autoRotate ?? false,
-			rotationSpeed: preview.rotationSpeed || 1,
-			zoomLevel: preview.zoomLevel || 1,
-		};
+	// Convertir a formato PreviewOptions
+	const previewOptions: PreviewOptions = {
+		size: preview.size || 'medium',
+		customWidth: preview.customWidth || 300,
+		customHeight: preview.customHeight || 400,
+		showControls: preview.showControls ?? true,
+		showInfo: preview.showInfo ?? true,
+		showBorder: preview.showBorder ?? true,
+		backgroundColor: preview.backgroundColor || 'transparent',
+		enableInteraction: preview.enableInteraction ?? true,
+		autoRotate: preview.autoRotate ?? false,
+		rotationSpeed: preview.rotationSpeed || 1,
+		zoomLevel: preview.zoomLevel || 1,
+	};
 
-		// Renderizamos el módulo con parámetros extendidos
-		// Nota: aquí simplemente pasamos las opciones sin manejador de cambios
-		// ya que en este caso el componente se usa solo para visualización
-		return (
-			<PreviewModule
-				initialOptions={previewOptions}
-				disabled={false}
-				rarity={rarity}
-				texture={texture}
-				entityType={entityType}
-				activeLayerId={activeLayerId}
-				isExploded={isExploded}
-				onExplodedChange={onExplodedChange}
-				onActiveLayerChange={onActiveLayerChange}
-			/>
-		);
+	// Renderizamos el módulo con parámetros extendidos
+	// Nota: aquí simplemente pasamos las opciones sin manejador de cambios
+	// ya que en este caso el componente se usa solo para visualización
+	return (
+		<PreviewModule
+			initialOptions={previewOptions}
+			disabled={false}
+			rarity={rarity}
+			texture={texture}
+			entityType={entityType}
+			activeLayerId={activeLayerId}
+			isExploded={isExploded}
+			onExplodedChange={onExplodedChange}
+			onActiveLayerChange={onActiveLayerChange}
+		/>
+	);
 }

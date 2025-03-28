@@ -7,55 +7,54 @@ import type { GridConfig } from '../grid-config-types';
 import { useGrid } from '../hooks/use-grid';
 
 interface GridLayerComponentProps {
-    processedConfig: GridConfig;
-    style: React.CSSProperties;
-    isVisible: boolean;
+	processedConfig: GridConfig;
+	style: React.CSSProperties;
+	isVisible: boolean;
 }
 
 /**
  * 📏 Componente interno de grid
  */
-const GridLayerComponent = ({
-    processedConfig,
-    style,
-    isVisible,
-}: GridLayerComponentProps) => {
-    // 🎨 Usar el hook de grid
-    const { canvasRef, error, initializeCanvas, renderGrid } = useGrid({
-        config: processedConfig,
-        shouldRender: isVisible,
-    });
+const GridLayerComponent = ({ processedConfig, style, isVisible }: GridLayerComponentProps) => {
+	// 🎨 Usar el hook de grid
+	const { canvasRef, error, initializeCanvas, renderGrid } = useGrid({
+		config: processedConfig,
+		shouldRender: isVisible,
+	});
 
-    // 🔄 Inicializar el canvas cuando el componente se monta
-    useEffect(() => {
-        if (isVisible) {
-            initializeCanvas();
-        }
-    }, [isVisible, initializeCanvas]);
+	// 🔄 Inicializar el canvas cuando el componente se monta
+	useEffect(() => {
+		if (isVisible) {
+			initializeCanvas();
+		}
+	}, [isVisible, initializeCanvas]);
 
-    // ❌ Si hay un error, no renderizar nada
-    if (error) {
-        console.error('Error en GridLayer:', error);
-        return null;
-    }
+	// ❌ Si hay un error, no renderizar nada
+	if (error) {
+		console.error('Error en GridLayer:', error);
+		return null;
+	}
 
-    // 🎨 Calcular los estilos del canvas
-    const canvasStyle = useMemo(() => ({
-        ...style,
-        mixBlendMode: processedConfig.blendMode as React.CSSProperties['mixBlendMode'],
-    }), [processedConfig.blendMode, style]);
+	// 🎨 Calcular los estilos del canvas
+	const canvasStyle = useMemo(
+		() => ({
+			...style,
+			mixBlendMode: processedConfig.blendMode as React.CSSProperties['mixBlendMode'],
+		}),
+		[processedConfig.blendMode, style]
+	);
 
-    return (
-        <motion.canvas
-            ref={canvasRef}
-            style={canvasStyle}
-            aria-hidden="true"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-        />
-    );
+	return (
+		<motion.canvas
+			ref={canvasRef}
+			style={canvasStyle}
+			aria-hidden="true"
+			initial={{ opacity: 0 }}
+			animate={{ opacity: 1 }}
+			exit={{ opacity: 0 }}
+			transition={{ duration: 0.3 }}
+		/>
+	);
 };
 
 /**

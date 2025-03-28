@@ -136,7 +136,7 @@ function formatBytes(bytes: number, decimals = 2): string {
 	const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	return `${Number.parseFloat((bytes / (k ** i)).toFixed(decimals))} ${sizes[i]}`;
+	return `${Number.parseFloat((bytes / k ** i).toFixed(decimals))} ${sizes[i]}`;
 }
 
 /**
@@ -285,6 +285,6 @@ export async function getSystemMonitorHelpers() {
 		getSystemStats,
 		formatBytes,
 		formatUptime,
-		logSystemStats
+		logSystemStats,
 	};
 }

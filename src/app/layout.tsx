@@ -19,18 +19,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="es" suppressHydrationWarning className="dark">
+		<html lang="es" suppressHydrationWarning>
 			<head>
 				<link rel="icon" href="/favicon.ico" />
 				<link rel="apple-touch-icon" href="/app-logo.png" />
-				<style>{`
-          :root {
-            color-scheme: dark;
-          }
-          body {
-            background-color: rgb(9, 9, 11);
-          }
-        `}</style>
 			</head>
 			<body
 				className={cn(

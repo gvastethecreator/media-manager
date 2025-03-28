@@ -153,10 +153,7 @@ export async function getEntityCardConfig(entityType: string): Promise<ActionRes
 /**
  * Guarda la configuración de tarjeta para una entidad específica
  */
-export async function saveEntityCardConfig(
-	entityType: string,
-	config: CardConfigurationDto
-): Promise<ActionResponse> {
+export async function saveEntityCardConfig(entityType: string, config: CardConfigurationDto): Promise<ActionResponse> {
 	try {
 		// Actualizar o crear la configuración
 		const updatedConfig = await prisma.cardConfiguration.upsert({
@@ -1037,9 +1034,7 @@ export async function applyPresetToEntity(
 
 		return {
 			success: true,
-			message: presetId
-				? 'Preset aplicado correctamente a ' + entityType
-				: 'Preset removido de ' + entityType,
+			message: presetId ? 'Preset aplicado correctamente a ' + entityType : 'Preset removido de ' + entityType,
 			data: updatedEntity,
 		};
 	} catch (error) {

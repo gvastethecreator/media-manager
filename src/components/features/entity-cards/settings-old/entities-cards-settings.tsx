@@ -11,7 +11,7 @@ import {
 	LayerPluginProvider,
 	LayersPanel,
 	EntityCardLayersProvider as LayersProvider,
-	RegisterAllLayers
+	RegisterAllLayers,
 } from '@/components/features/entity-cards/modules/layers';
 import { PreviewSettings } from '@/components/features/entity-cards/modules/preview/preview-settings-adapter';
 import { PresetsPanel } from '@/components/features/entity-cards/settings-old/panels/presets-panel';
@@ -77,7 +77,7 @@ const DEFAULT_CARD_SETTINGS = {
 	effects: {
 		glitchEffect: { enabled: false, intensity: 0.5 },
 		chromaticAberration: { enabled: false, intensity: 0.5 },
-		pixelate: { enabled: false, intensity: 0.5 }
+		pixelate: { enabled: false, intensity: 0.5 },
 	},
 	designSystem: {
 		// Configuración general
@@ -119,7 +119,7 @@ const DEFAULT_CARD_SETTINGS = {
 		glassEffect: false,
 		accentColor: '#3b82f6',
 		textColor: '#000000',
-	}
+	},
 } as const;
 
 // Función para adaptar opciones entre diferentes estructuras de tipo
@@ -663,9 +663,26 @@ async function saveGeneralSettings(
 }
 
 // Modificar el tipo PanelType para que incluya todos los paneles posibles
-type PanelType = 'presets' | 'design' | 'effects' | 'layers' | 'system' | 'preview' | 'performance' |
-	'visual' | 'distortion' | 'advanced' | 'images' | 'states' | 'interaction' |
-	'folders' | 'shadows' | 'colorPalette' | 'rarity' | 'backside' | 'core';
+type PanelType =
+	| 'presets'
+	| 'design'
+	| 'effects'
+	| 'layers'
+	| 'system'
+	| 'preview'
+	| 'performance'
+	| 'visual'
+	| 'distortion'
+	| 'advanced'
+	| 'images'
+	| 'states'
+	| 'interaction'
+	| 'folders'
+	| 'shadows'
+	| 'colorPalette'
+	| 'rarity'
+	| 'backside'
+	| 'core';
 
 // Simple adapter for card options to layer system config
 const adaptCardOptionsToLayersConfig = (options: CardOptions) => {
@@ -697,7 +714,7 @@ const adaptEntityCardToLayerSystem = (options: CardOptions) => {
 };
 
 // Mock LayerManagementDialog component
-const LayerManagementDialog = ({ children, entityType }: { children: React.ReactNode, entityType: string }) => {
+const LayerManagementDialog = ({ children, entityType }: { children: React.ReactNode; entityType: string }) => {
 	return <>{children}</>;
 };
 
@@ -819,8 +836,8 @@ export function EntitiesCardsSection() {
 			maxRotation: (cardOptions.maxRotation as number) || 15,
 			primaryColor: (cardOptions.primaryColor as string) || '0, 153, 255',
 			secondaryColor: (cardOptions.secondaryColor as string) || '128, 0, 255',
-			imageGridGap: (cardOptions.imageGridGap as number),
-			imageGridAspectRatio: (cardOptions.imageGridAspectRatio as string),
+			imageGridGap: cardOptions.imageGridGap as number,
+			imageGridAspectRatio: cardOptions.imageGridAspectRatio as string,
 		};
 	};
 
@@ -1156,9 +1173,7 @@ export function EntitiesCardsSection() {
 									</Button>
 
 									{/* Botón para gestionar capas */}
-									<LayerManagementDialog
-										entityType={convertEntityId.toApiFormat(activeEntityType)}
-									>
+									<LayerManagementDialog entityType={convertEntityId.toApiFormat(activeEntityType)}>
 										<Button variant="outline" size="lg" className="w-fit self-center text-[11px]">
 											<LayersIcon className="h-4 w-4 mr-2" />
 											Gestionar Capas
@@ -1185,31 +1200,29 @@ export function EntitiesCardsSection() {
 									)}
 									{activePanel === 'design' && (
 										<DesignPanel
-											designSystem={{
-												preset: cardOptions.designSystem?.preset || 'default',
-												variant: cardOptions.designSystem?.variant || 'default',
-												aspectRatio: cardOptions.designSystem?.aspectRatio || '7/10',
-												cornerStyle: cardOptions.designSystem?.cornerStyle || 'rounded',
-												cornerRadius: cardOptions.designSystem?.cornerRadius || 12,
-												elevation: cardOptions.designSystem?.elevation || 3,
-												shadowStyle: cardOptions.designSystem?.shadowStyle || 'soft',
-											} as any}
+											designSystem={
+												{
+													preset: cardOptions.designSystem?.preset || 'default',
+													variant: cardOptions.designSystem?.variant || 'default',
+													aspectRatio: cardOptions.designSystem?.aspectRatio || '7/10',
+													cornerStyle: cardOptions.designSystem?.cornerStyle || 'rounded',
+													cornerRadius: cardOptions.designSystem?.cornerRadius || 12,
+													elevation: cardOptions.designSystem?.elevation || 3,
+													shadowStyle: cardOptions.designSystem?.shadowStyle || 'soft',
+												} as any
+											}
 											onChange={(designSystem: any) => {
 												// Adaptador para convertir el cambio de designSystem a un cambio de CardOptions
 												handleCardOptionsChange({
 													...cardOptions,
-													designSystem: designSystem
+													designSystem: designSystem,
 												});
 											}}
 										/>
 									)}
 									{/* Panel de vista previa */}
 									{activePanel === 'preview' && (
-										<PreviewSettings
-											options={cardOptions}
-											onChange={handleCardOptionsChange}
-											disabled={false}
-										/>
+										<PreviewSettings options={cardOptions} onChange={handleCardOptionsChange} disabled={false} />
 									)}
 									{/* Panel de capas */}
 									{activePanel === 'layers' && (
@@ -1217,10 +1230,7 @@ export function EntitiesCardsSection() {
 											<LayerPluginProvider>
 												<RegisterAllLayers />
 												{/* Usar props según la definición que vimos en LayersPanel */}
-												<LayersPanel
-													entityType={convertEntityId.toApiFormat(activeEntityType)}
-													entityId={entityId}
-												/>
+												<LayersPanel entityType={convertEntityId.toApiFormat(activeEntityType)} entityId={entityId} />
 											</LayerPluginProvider>
 										</LayersProvider>
 									)}

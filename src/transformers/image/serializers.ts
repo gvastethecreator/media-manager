@@ -4,11 +4,11 @@
  */
 
 import type {
-    ImageBase,
-    ImageExtended,
-    ImageMetadata,
-    ImageVisualConfigBase,
-    ImageVisualConfigExtended
+	ImageBase,
+	ImageExtended,
+	ImageMetadata,
+	ImageVisualConfigBase,
+	ImageVisualConfigExtended,
 } from '../../types/entities/image';
 
 /**
@@ -17,15 +17,15 @@ import type {
  * @returns Objeto tipado de metadatos o undefined si no es válido
  */
 export function serializeImageMetadata(metadata: string | null | undefined): ImageMetadata | undefined {
-  if (!metadata) return undefined;
+	if (!metadata) return undefined;
 
-  try {
-    const parsed = JSON.parse(metadata);
-    return parsed as ImageMetadata;
-  } catch (error) {
-    console.error('Error al serializar metadatos de imagen:', error);
-    return undefined;
-  }
+	try {
+		const parsed = JSON.parse(metadata);
+		return parsed as ImageMetadata;
+	} catch (error) {
+		console.error('Error al serializar metadatos de imagen:', error);
+		return undefined;
+	}
 }
 
 /**
@@ -34,14 +34,14 @@ export function serializeImageMetadata(metadata: string | null | undefined): Ima
  * @returns String JSON para almacenamiento en BD
  */
 export function deserializeImageMetadata(metadata: ImageMetadata | undefined | null): string | undefined {
-  if (!metadata) return undefined;
+	if (!metadata) return undefined;
 
-  try {
-    return JSON.stringify(metadata);
-  } catch (error) {
-    console.error('Error al deserializar metadatos de imagen:', error);
-    return undefined;
-  }
+	try {
+		return JSON.stringify(metadata);
+	} catch (error) {
+		console.error('Error al deserializar metadatos de imagen:', error);
+		return undefined;
+	}
 }
 
 /**
@@ -50,28 +50,28 @@ export function deserializeImageMetadata(metadata: ImageMetadata | undefined | n
  * @returns Objeto tipado de configuración o undefined si no es válido
  */
 export function serializeImageVisualConfig(
-  visualConfig: ImageVisualConfigBase | null | undefined
+	visualConfig: ImageVisualConfigBase | null | undefined
 ): ImageVisualConfigExtended | undefined {
-  if (!visualConfig) return undefined;
+	if (!visualConfig) return undefined;
 
-  // Transformar la config básica en extendida
-  const extendedConfig: ImageVisualConfigExtended = {
-    ...visualConfig,
-    effectsEnabled: true, // valor por defecto
-  };
+	// Transformar la config básica en extendida
+	const extendedConfig: ImageVisualConfigExtended = {
+		...visualConfig,
+		effectsEnabled: true, // valor por defecto
+	};
 
-  // Procesar campos de tipo string JSON
-  if (visualConfig.layerSystem) {
-    try {
-      extendedConfig.layersConfig = JSON.parse(visualConfig.layerSystem);
-    } catch (error) {
-      console.error('Error al serializar layerSystem:', error);
-    }
-  }
+	// Procesar campos de tipo string JSON
+	if (visualConfig.layerSystem) {
+		try {
+			extendedConfig.layersConfig = JSON.parse(visualConfig.layerSystem);
+		} catch (error) {
+			console.error('Error al serializar layerSystem:', error);
+		}
+	}
 
-  // Procesar campos adicionales si es necesario
+	// Procesar campos adicionales si es necesario
 
-  return extendedConfig;
+	return extendedConfig;
 }
 
 /**
@@ -80,30 +80,30 @@ export function serializeImageVisualConfig(
  * @returns Imagen extendida con propiedades adicionales
  */
 export function extendImage(image: ImageBase): ImageExtended {
-  // Crear una copia de la imagen base para modificarla
-  const { metadata: rawMetadata, ...rest } = image;
+	// Crear una copia de la imagen base para modificarla
+	const { metadata: rawMetadata, ...rest } = image;
 
-  // Base para la imagen extendida
-  const extended: Omit<ImageExtended, 'metadata'> & { metadata?: ImageMetadata } = {
-    ...rest,
-    hasMetadata: !!rawMetadata,
-    hasThumbnail: !!image.thumbnail,
-    hasError: !!image.thumbnailError,
-    aspectRatio: image.width / image.height,
-    // Inicialmente sin metadatos procesados
-    metadata: undefined
-  };
+	// Base para la imagen extendida
+	const extended: Omit<ImageExtended, 'metadata'> & { metadata?: ImageMetadata } = {
+		...rest,
+		hasMetadata: !!rawMetadata,
+		hasThumbnail: !!image.thumbnail,
+		hasError: !!image.thumbnailError,
+		aspectRatio: image.width / image.height,
+		// Inicialmente sin metadatos procesados
+		metadata: undefined,
+	};
 
-  // Procesar metadatos si existen
-  if (rawMetadata) {
-    extended.metadata = serializeImageMetadata(rawMetadata);
-  }
+	// Procesar metadatos si existen
+	if (rawMetadata) {
+		extended.metadata = serializeImageMetadata(rawMetadata);
+	}
 
-  // Generar URLs para acceso a recursos
-  extended.thumbnailUrl = `/api/images/${image.id}/thumbnail`;
-  extended.fullUrl = `/api/images/${image.id}/full`;
+	// Generar URLs para acceso a recursos
+	extended.thumbnailUrl = `/api/images/${image.id}/thumbnail`;
+	extended.fullUrl = `/api/images/${image.id}/full`;
 
-  return extended as ImageExtended;
+	return extended as ImageExtended;
 }
 
 /**
@@ -112,5 +112,5 @@ export function extendImage(image: ImageBase): ImageExtended {
  * @returns Array de imágenes extendidas
  */
 export function extendImages(images: ImageBase[]): ImageExtended[] {
-  return images.map(extendImage);
+	return images.map(extendImage);
 }

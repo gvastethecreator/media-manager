@@ -250,11 +250,13 @@ function logAppStats(): void {
  * @param options Opciones de configuración
  * @returns Función para detener el monitor
  */
-export async function start(options: {
-	interval?: number;
-	includeSystemStats?: boolean;
-	systemStatsInterval?: number;
-} = {}): Promise<() => void> {
+export async function start(
+	options: {
+		interval?: number;
+		includeSystemStats?: boolean;
+		systemStatsInterval?: number;
+	} = {}
+): Promise<() => void> {
 	const { interval = 60000, includeSystemStats = true, systemStatsInterval = 300000 } = options;
 
 	// Mostrar estadísticas iniciales

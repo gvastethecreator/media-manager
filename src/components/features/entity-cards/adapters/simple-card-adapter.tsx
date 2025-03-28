@@ -48,13 +48,7 @@ export interface SimpleCardAdapterProps {
  * Adaptador simplificado para entidades
  * Esta versión soporta los diferentes modos de visualización
  */
-export function SimpleCardAdapter({
-	entityType,
-	entity,
-	options = {},
-	onClick,
-	className,
-}: SimpleCardAdapterProps) {
+export function SimpleCardAdapter({ entityType, entity, options = {}, onClick, className }: SimpleCardAdapterProps) {
 	// Acceder al contexto de modo de visualización
 	const { displayMode } = useCardDisplay();
 
@@ -73,14 +67,7 @@ export function SimpleCardAdapter({
 	const normalizedEntity = normalizeEntityData(entity, entityType);
 
 	// Extraer propiedades básicas
-	const {
-		name: title,
-		description,
-		image,
-		featuredImage,
-		thumbnailUrl,
-		coverImage,
-	} = normalizedEntity;
+	const { name: title, description, image, featuredImage, thumbnailUrl, coverImage } = normalizedEntity;
 
 	// Determinar la imagen a mostrar usando cualquier propiedad de imagen disponible
 	const displayImage =
@@ -95,7 +82,7 @@ export function SimpleCardAdapter({
 		debug.logRender({
 			message: `Renderizando SimpleCardAdapter en modo: ${displayMode}`,
 			entityType,
-			entityId: normalizedEntity.id
+			entityId: normalizedEntity.id,
 		});
 	}
 

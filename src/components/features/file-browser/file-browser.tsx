@@ -8,7 +8,7 @@ import { useFileManager } from '@/store/files/file-manager.store';
 import { useImageResources } from '@/store/image-resources.store';
 import type { FileItem } from '@/types/file-item';
 import type * as React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GRID_CONFIG } from './config/grid-config';
 import { handleContextAction } from './context-menu/context-action-handler';
 import type { ContextMenuAction } from './context-menu/context-menu';
@@ -20,7 +20,6 @@ import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
 
 // Para propósitos de depuración - mantenemos esta variable aunque esté sin usar en la mayoría de los casos
-
 const gridLogger = serverLogger.withContext('FileGrid');
 
 /**
@@ -40,6 +39,34 @@ export interface FileBrowserProps {
 	loadMoreItems?: () => void;
 }
 
+// Memoizamos los componentes de vista para evitar renderizaciones innecesarias
+const MemoizedGridView = memo(GridView);
+const MemoizedMasonryView = memo(MasonryView);
+const MemoizedCardsView = memo(CardsView);
+const MemoizedListView = memo(ListView);
+
+// Mapeo memoizado de componentes de vista
+const VIEW_COMPONENT_MAP = {
+	grid: MemoizedGridView,
+	masonry: MemoizedMasonryView,
+	cards: MemoizedCardsView,
+	list: MemoizedListView,
+};
+
+// Memoizamos el estado del panel colapsado para evitar lecturas frecuentes del localStorage
+const useRightPanelState = () => {
+	const [isCollapsed, setIsCollapsed] = useState(() =>
+		localStorage.getItem('right-panel-collapsed') === 'true'
+	);
+
+	const updateCollapsedState = useCallback((newState: boolean) => {
+		localStorage.setItem('right-panel-collapsed', String(newState));
+		setIsCollapsed(newState);
+	}, []);
+
+	return { isCollapsed, updateCollapsedState };
+};
+
 /**
  * Componente principal para la visualización y navegación de archivos
  *
@@ -51,11 +78,14 @@ export interface FileBrowserProps {
  * - Selección múltiple de archivos
  * - Integración con sistema de menú contextual
  */
-export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick, loadMoreItems }: FileBrowserProps) {
+const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClick, loadMoreItems }: FileBrowserProps) => {
 	const { selectedItems, viewMode, toggleItemSelection } = useFileManager();
 	const imageResources = useImageResources();
 	const { setVisible, setSelectedItems } = useDetailsPanel();
+	const { isCollapsed, updateCollapsedState } = useRightPanelState();
 	const constraintsRef = useRef<HTMLDivElement>(null);
+	const prevSelectedItemIdsRef = useRef<string>('');
+	const prevSelectedItemRef = useRef<FileItem | null>(null);
 
 	// Estados para el visor de imágenes
 	const [isViewerOpen, setIsViewerOpen] = useState(false);
@@ -89,84 +119,90 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 		}
 	}, [virtualizer]);
 
-	// Mantener el panel de detalles actualizado con los elementos seleccionados
-	useEffect(() => {
-		// Convertir FileItem[] a ImageItem[] para el panel de detalles
-		const mappedItems = selectedItems.map((item) => ({
-			id: item.id,
-			name: item.name,
-			path: item.path,
-			url: item.thumbnail || undefined,
-			metadata: item.metadata === null ? undefined : item.metadata,
-			fileSize: item.size,
-			width: item.width,
-			height: item.height,
-			tags: item.tags?.map((tag) => tag.name),
-			createdAt: item.createdAt,
-			updatedAt: item.updatedAt,
-		}));
+	// Función memoizada para mapear FileItem a ImageItem
+	const mapFileItemToImageItem = useCallback((fileItem: FileItem): ImageItem => ({
+		id: fileItem.id,
+		name: fileItem.name,
+		type: fileItem.type,
+		path: fileItem.path,
+		size: fileItem.size,
+		width: fileItem.width || null,
+		height: fileItem.height || null,
+		url: fileItem.thumbnail || undefined,
+		thumbnail: fileItem.thumbnail,
+		src: fileItem.thumbnail || undefined,
+		alt: fileItem.name,
+		mimeType: undefined,
+		metadata: fileItem.metadata,
+		parsedMetadata: undefined
+	}), []);
 
-		// Actualizar el store de detalles con los items mapeados
-		setSelectedItems(mappedItems);
-	}, [selectedItems, setSelectedItems]);
+	// Función memoizada para mapear FileItem a ImageItem para el panel de detalles
+	const mapToDetailsImageItem = useCallback((item: FileItem): ImageItem => ({
+		id: item.id,
+		name: item.name,
+		path: item.path,
+		url: item.thumbnail || undefined,
+		src: item.thumbnail || '',
+		alt: item.name,
+		metadata: item.metadata,
+		fileSize: item.size,
+		width: item.width,
+		height: item.height,
+		tags: item.tags?.map((tag) => tag.name),
+		createdAt: item.createdAt,
+		updatedAt: item.updatedAt,
+		mimeType: item.type === 'image' ? 'image/jpeg' : undefined, // Ajustar según el tipo real
+		parsedMetadata: item.metadata ? JSON.parse(item.metadata) : undefined,
+	}), []);
 
-	// Manejador personalizado para el clic en ítems
+	// Manejador personalizado para el clic en ítems - optimizado
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
-			// Seleccionar el ítem (reemplaza la selección actual sin multi-selección)
+			// Evitar procesamiento si es el mismo ítem y ya está seleccionado
+			if (prevSelectedItemRef.current?.id === item.id &&
+				selectedItems.length === 1 &&
+				selectedItems[0].id === item.id) {
+				return;
+			}
+
+			prevSelectedItemRef.current = item;
+
+			// Actualizar selección
 			toggleItemSelection(item, false);
 
-			// Mostrar el panel de detalles con el ítem seleccionado
+			// Mostrar y expandir panel de detalles si está colapsado
+			if (isCollapsed) {
+				updateCollapsedState(false);
+			}
 			setVisible(true);
 
-			// Asegurarnos de que el panel no esté colapsado
-			const isRightPanelCollapsed = localStorage.getItem('right-panel-collapsed') === 'true';
-			if (isRightPanelCollapsed) {
-				localStorage.setItem('right-panel-collapsed', 'false');
-				// Provocar un refresco de la UI para expandir el panel
-				window.dispatchEvent(new Event('storage'));
-			}
+			// Actualizar el panel de detalles inmediatamente con el item seleccionado
+			const mappedItem = mapToDetailsImageItem(item);
+			setSelectedItems([mappedItem]);
 
 			// Llamar al callback onItemClick si existe
 			if (onItemClick) {
 				onItemClick(item);
 			}
 		},
-		[toggleItemSelection, setVisible, onItemClick]
+		[toggleItemSelection, setVisible, onItemClick, selectedItems, isCollapsed, updateCollapsedState, mapToDetailsImageItem, setSelectedItems]
 	);
 
 	// Manejador personalizado para el doble clic en ítems
 	const handleItemDoubleClick = useCallback(
 		(item: FileItem) => {
-			console.log('Double click en item:', item.id, item.name, item.type);
-
 			// Verificar que sea una imagen
 			if (item && item.type === 'image') {
 				// Convertir FileItem a ImageItem (según la interfaz de FileViewer.tsx)
 				const imageItems = items
 					.filter(fileItem => fileItem.type === 'image')
-					.map(fileItem => ({
-						id: fileItem.id,
-						name: fileItem.name,
-						type: fileItem.type,
-						path: fileItem.path,
-						size: fileItem.size,
-						width: fileItem.width || null,
-						height: fileItem.height || null,
-						url: fileItem.thumbnail || undefined,
-						thumbnail: fileItem.thumbnail,
-						src: fileItem.thumbnail || undefined,
-						alt: fileItem.name,
-						mimeType: undefined,
-						metadata: fileItem.metadata,
-						parsedMetadata: undefined
-					}));
+					.map(mapFileItemToImageItem);
 
 				// Encontrar el índice del elemento seleccionado
 				const initialIndex = imageItems.findIndex(img => img.id === item.id);
 
 				if (initialIndex !== -1) {
-					console.log('Abriendo visor con', imageItems.length, 'imágenes, índice inicial:', initialIndex);
 					// Establecer los datos del visor
 					setViewerImages(imageItems);
 					setViewerInitialIndex(initialIndex);
@@ -180,34 +216,83 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 				onItemDoubleClick(item);
 			}
 		},
-		[items, onItemDoubleClick]
+		[items, onItemDoubleClick, mapFileItemToImageItem]
 	);
 
-	// Manejador de acciones contextuales
+	// Función wrapper memoizada para toggleItemSelection
+	const toggleItemSelectionWrapper = useCallback(
+		(fileItem: FileItem, isMultiSelect = false) => {
+			toggleItemSelection(fileItem, isMultiSelect);
+		},
+		[toggleItemSelection]
+	);
+
+	// Manejador de acciones contextuales - memoizado
 	const handleContextMenuAction = useCallback(
 		(action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
-			// Crear una función wrapper para toggleItemSelection que proporcione un valor por defecto
-			const toggleItemSelectionWrapper = (fileItem: FileItem, isMultiSelect = false) => {
-				toggleItemSelection(fileItem, isMultiSelect);
-			};
-
 			handleContextAction(action, item, data, handleItemDoubleClick, toggleItemSelectionWrapper);
 		},
-		[handleItemDoubleClick, toggleItemSelection]
+		[handleItemDoubleClick, toggleItemSelectionWrapper]
 	);
 
 	// Efecto para cargar thumbnails visibles cuando cambia la lista
 	useEffect(() => {
-		if (virtualizer && items.length > 0 && !isTransitioning) {
+		if (!virtualizer || items.length === 0 || isTransitioning) {
+			return;
+		}
+
+		// Usamos un ID de efecto para controlar los montajes/desmontajes
+		const effectId = Math.random().toString(36);
+		let isEffectActive = true;
+
+		// Función para cargar thumbnails con debounce interno
+		const loadThumbnailsForVisibleItems = () => {
+			if (!isEffectActive) return;
+
 			const visibleItems = virtualizer
 				.getVirtualItems()
 				.map((virtualItem) => items[virtualItem.index])
 				.filter((item): item is FileItem => !!item && !!item.id);
 
+			// Solo procesar si hay elementos visibles
+			if (visibleItems.length === 0) return;
+
 			// Usar el debounce para cargar los thumbnails
 			debouncedLoadThumbnails(visibleItems);
-		}
+		};
+
+		// Cargar inicialmente
+		loadThumbnailsForVisibleItems();
+
+		// Limpiar cuando cambia la dependencia
+		return () => {
+			isEffectActive = false;
+		};
 	}, [virtualizer, items, isTransitioning, debouncedLoadThumbnails]);
+
+	// Efecto para manejar la actualización del panel de detalles de forma optimizada
+	useEffect(() => {
+		if (selectedItems.length === 0) {
+			setSelectedItems([]);
+			return;
+		}
+
+		const selectedItemIds = selectedItems.map(item => item.id).sort().join(',');
+		if (selectedItemIds === prevSelectedItemIdsRef.current) {
+			return;
+		}
+
+		prevSelectedItemIdsRef.current = selectedItemIds;
+
+		// Mapear todos los items seleccionados
+		const mappedItems = selectedItems.map(mapToDetailsImageItem);
+		setSelectedItems(mappedItems);
+
+		// Asegurar que el panel de detalles esté visible si hay items seleccionados
+		if (mappedItems.length > 0 && !isCollapsed) {
+			updateCollapsedState(true);
+		}
+	}, [selectedItems, setSelectedItems, mapToDetailsImageItem, updateCollapsedState, isCollapsed]);
 
 	// Sincronizar nuestra ref local con la ref del hook
 	useEffect(() => {
@@ -216,129 +301,170 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 		}
 	}, [parentRef]);
 
+	// Memoizamos los elementos virtualizados para evitar recálculos innecesarios
+	const virtualItems = useMemo(() => {
+		if (isTransitioning || !virtualizer) return [];
+		return virtualizer.getVirtualItems();
+	}, [virtualizer, isTransitioning]);
+
+	// Estilo general del contenedor - memoizado para evitar recreaciones
+	const containerStyle = useMemo(() => ({
+		height: virtualizer ? virtualizer.getTotalSize() : 0,
+		width: '100%',
+		position: 'relative' as const,
+		contain: 'strict' as const,
+	}), [virtualizer]);
+
+	// Estilo del contenedor principal de la grilla - memoizado
+	const gridContainerStyle = useMemo(() => ({
+		height: '100%',
+		width: '100%',
+		position: 'relative' as const,
+		contain: 'strict' as const,
+		willChange: 'transform',
+		padding: GRID_CONFIG[viewMode].padding,
+	}), [viewMode]);
+
+	// Clase del contenedor de la grilla - memoizada
+	const gridContainerClassName = useMemo(() =>
+		cn(
+			'h-full w-full overflow-auto relative transition-all duration-200',
+			viewMode === 'list' && 'px-2 py-1',
+			isTransitioning && 'opacity-0 transition-opacity duration-50'
+		),
+		[viewMode, isTransitioning]);
+
+	// Función para procesar/extraer item si es una promesa
+	const processItem = useCallback((item: FileItem): FileItem => {
+		let processedItem = item;
+
+		// Verificar si estamos lidiando con un ReactPromise o un objeto Promise
+		if (
+			item &&
+			// ReactPromise tiene 'value', 'status', etc.
+			((typeof item === 'object' && 'value' in item && 'status' in item) ||
+				// Promise regular
+				item instanceof Promise ||
+				// Promesas serializadas como objetos
+				(typeof item === 'object' && item !== null && 'then' in item && typeof item.then === 'function'))
+		) {
+			try {
+				gridLogger.warn('Detectado ReactPromise como item, intentando extraer el valor:', item);
+
+				// Para ReactPromise podemos intentar obtener el valor directamente
+				if ('value' in item && typeof item.value === 'string') {
+					try {
+						// Intentar parsear el valor como JSON
+						const parsedItem = JSON.parse(item.value);
+						if (parsedItem && typeof parsedItem === 'object' && 'id' in parsedItem) {
+							processedItem = parsedItem;
+						}
+					} catch (parseError) {
+						gridLogger.error('Error al parsear el valor del ReactPromise:', parseError);
+					}
+				}
+			} catch (promiseError) {
+				gridLogger.error('Error al procesar Promise/ReactPromise:', promiseError);
+			}
+		}
+
+		return processedItem;
+	}, []);
+
+	// Renderizado de cada elemento virtual - memoizado
+	const renderVirtualItem = useCallback((virtualItem: any) => {
+		const item = items[virtualItem.index];
+		if (!item) {
+			return null;
+		}
+
+		// Procesar el item (manejar casos de ReactPromise)
+		const processedItem = processItem(item);
+
+		// Verificar que el item tenga un ID válido
+		if (!processedItem.id || typeof processedItem.id !== 'string' || processedItem.id.trim() === '') {
+			gridLogger.warn('Intentando renderizar item con ID inválido:', processedItem);
+			return null;
+		}
+
+		const style: React.CSSProperties = {
+			position: 'absolute',
+			top: 0,
+			left: 0,
+			transform: `translate3d(${viewMode === 'list' ? 0 : virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
+				}px, ${virtualItem.start}px, 0)`,
+			width: viewMode === 'list' ? '100%' : itemSize,
+			height:
+				viewMode === 'masonry'
+					? calculateMasonryHeight(processedItem, itemSize)
+					: virtualItem.size - GRID_CONFIG.gap[viewMode],
+			padding: 0,
+			willChange: 'transform',
+		};
+
+		const ViewComponent = VIEW_COMPONENT_MAP[viewMode];
+
+		// Ahora que sabemos que item.id es válido, podemos acceder al recurso
+		const resource = imageResources.resources.get(processedItem.id);
+		const thumbnail = resource?.thumbnail || null;
+
+		// Verificar si el item está seleccionado
+		const isSelected = selectedItems.some((selected) => selected.id === processedItem.id);
+
+		// Propiedades de estilo del item
+		const itemStyle = {
+			width: '100%',
+			height: '100%',
+		};
+
+		return (
+			<div
+				key={`${viewMode}-${virtualItem.key}`}
+				data-index={virtualItem.index}
+				className="absolute"
+				style={style}
+			>
+				<ViewComponent
+					item={processedItem}
+					onClick={handleItemClick}
+					onDoubleClick={handleItemDoubleClick}
+					onContextAction={handleContextMenuAction}
+					shouldLoad={true}
+					isSelected={isSelected}
+					itemSize={itemSize}
+					thumbnail={thumbnail}
+					style={itemStyle}
+				/>
+			</div>
+		);
+	}, [
+		items,
+		viewMode,
+		itemSize,
+		calculateMasonryHeight,
+		imageResources,
+		selectedItems,
+		handleItemClick,
+		handleItemDoubleClick,
+		handleContextMenuAction,
+		processItem
+	]);
+
+	// Función para cerrar el visor - memoizada
+	const handleCloseViewer = useCallback(() => {
+		setIsViewerOpen(false);
+	}, []);
+
 	return (
 		<div ref={constraintsRef} className="relative h-full w-full">
 			<div
 				ref={gridParentRef}
-				className={cn(
-					'h-full w-full overflow-auto relative transition-all duration-200',
-					viewMode === 'list' && 'px-2 py-1',
-					isTransitioning && 'opacity-0 transition-opacity duration-50'
-				)}
+				className={gridContainerClassName}
 				onScroll={handleScroll}
-				style={{
-					height: '100%',
-					width: '100%',
-					position: 'relative',
-					contain: 'strict',
-					willChange: 'transform',
-					padding: GRID_CONFIG[viewMode].padding,
-				}}
+				style={gridContainerStyle}
 			>
-				<div
-					style={{
-						height: virtualizer.getTotalSize(),
-						width: '100%',
-						position: 'relative',
-						contain: 'strict',
-					}}
-				>
-					{!isTransitioning &&
-						virtualizer.getVirtualItems().map((virtualItem) => {
-							const item = items[virtualItem.index];
-							if (!item) {
-								return null;
-							}
-
-							// Manejar el caso especial de ReactPromise
-							let processedItem = item;
-
-							// Verificar si estamos lidiando con un ReactPromise o un objeto Promise
-							if (
-								item &&
-								// ReactPromise tiene 'value', 'status', etc.
-								((typeof item === 'object' && 'value' in item && 'status' in item) ||
-									// Promise regular
-									item instanceof Promise ||
-									// Promesas serializadas como objetos
-									(typeof item === 'object' && item !== null && 'then' in item && typeof item.then === 'function'))
-							) {
-								try {
-									gridLogger.warn('Detectado ReactPromise como item, intentando extraer el valor:', item);
-
-									// Para ReactPromise podemos intentar obtener el valor directamente
-									if ('value' in item && typeof item.value === 'string') {
-										try {
-											// Intentar parsear el valor como JSON
-											const parsedItem = JSON.parse(item.value);
-											if (parsedItem && typeof parsedItem === 'object' && 'id' in parsedItem) {
-												processedItem = parsedItem;
-											}
-										} catch (parseError) {
-											gridLogger.error('Error al parsear el valor del ReactPromise:', parseError);
-										}
-									}
-								} catch (promiseError) {
-									gridLogger.error('Error al procesar Promise/ReactPromise:', promiseError);
-								}
-							}
-
-							// Verificar que el item (ahora posiblemente extraído de una promesa) tenga un ID válido
-							if (!processedItem.id || typeof processedItem.id !== 'string' || processedItem.id.trim() === '') {
-								gridLogger.warn('Intentando renderizar item con ID inválido:', processedItem);
-								return null;
-							}
-
-							const style: React.CSSProperties = {
-								position: 'absolute',
-								top: 0,
-								left: 0,
-								transform: `translate3d(${viewMode === 'list' ? 0 : virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
-									}px, ${virtualItem.start}px, 0)`,
-								width: viewMode === 'list' ? '100%' : itemSize,
-								height:
-									viewMode === 'masonry'
-										? calculateMasonryHeight(processedItem, itemSize)
-										: virtualItem.size - GRID_CONFIG.gap[viewMode],
-								padding: 0,
-								willChange: 'transform',
-							};
-
-							const ViewComponent = {
-								grid: GridView,
-								masonry: MasonryView,
-								cards: CardsView,
-								list: ListView,
-							}[viewMode];
-
-							// Ahora que sabemos que item.id es válido, podemos acceder al recurso
-							const resource = imageResources.resources.get(processedItem.id);
-							const thumbnail = resource?.thumbnail || null;
-
-							return (
-								<div
-									key={`${viewMode}-${virtualItem.key}`}
-									data-index={virtualItem.index}
-									className={cn('absolute')}
-									style={style}
-								>
-									<ViewComponent
-										item={processedItem}
-										onClick={handleItemClick}
-										onDoubleClick={handleItemDoubleClick}
-										onContextAction={handleContextMenuAction}
-										shouldLoad={true}
-										isSelected={selectedItems.some((selected) => selected.id === processedItem.id)}
-										itemSize={itemSize}
-										thumbnail={thumbnail}
-										style={{
-											width: '100%',
-											height: '100%',
-										}}
-									/>
-								</div>
-							);
-						})}
+				<div style={containerStyle}>
+					{!isTransitioning && virtualItems.map(renderVirtualItem)}
 				</div>
 				<div ref={loadMoreRef} className="h-px w-full" />
 			</div>
@@ -348,8 +474,11 @@ export function FileBrowser({ items, isResizing, onItemClick, onItemDoubleClick,
 				images={viewerImages}
 				initialIndex={viewerInitialIndex}
 				isOpen={isViewerOpen}
-				onClose={() => setIsViewerOpen(false)}
+				onClose={handleCloseViewer}
 			/>
 		</div>
 	);
-}
+};
+
+// Exportar versión memoizada del componente
+export const FileBrowser = memo(FileBrowserComponent);

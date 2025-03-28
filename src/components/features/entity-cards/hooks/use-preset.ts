@@ -230,10 +230,7 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 		};
 
 		// Combinar los objetos de manera segura
-		const combinedOptions = deepMerge(
-			deepMerge(safeTypeDefaults, safePresetOptions),
-			safeBaseOptions
-		);
+		const combinedOptions = deepMerge(deepMerge(safeTypeDefaults, safePresetOptions), safeBaseOptions);
 
 		// Manejar capas de manera especial
 		if (safePresetOptions.layers?.items || safeBaseOptions.layers?.items) {
@@ -277,6 +274,6 @@ export function usePreset({ entityType, entityId, presetId, baseOptions = {} }: 
 		cardOptions,
 		preset,
 		isLoading,
-		error
+		error,
 	};
 }

@@ -10,168 +10,163 @@ import type { StateCreator } from 'zustand';
  * Estado base del store
  */
 export interface FolderStore {
-  coreState: FolderCoreState;
-  coreActions: FolderCoreActions;
-  uiState: FolderUIState;
-  uiActions: FolderUIActions;
-  filtersState: FolderFiltersState;
-  filtersActions: FolderFiltersActions;
+	coreState: FolderCoreState;
+	coreActions: FolderCoreActions;
+	uiState: FolderUIState;
+	uiActions: FolderUIActions;
+	filtersState: FolderFiltersState;
+	filtersActions: FolderFiltersActions;
 }
 
 /**
  * Estado principal para el manejo de carpetas
  */
 export interface FolderCoreState {
-  /** Listado de carpetas disponibles */
-  folders: FolderExtended[];
-  /** ID de la carpeta actual seleccionada */
-  currentFolderId: string | null;
-  /** Objeto de la carpeta actual seleccionada */
-  currentFolder: FolderExtended | null;
-  /** Indicador de carga general */
-  loading: boolean;
-  /** Error actual si existe */
-  error: string | null;
-  /** Indicador de creación en proceso */
-  isCreating: boolean;
-  /** Indicador de actualización en proceso */
-  isUpdating: boolean;
-  /** Indicador de eliminación en proceso */
-  isDeleting: boolean;
+	/** Listado de carpetas disponibles */
+	folders: FolderExtended[];
+	/** ID de la carpeta actual seleccionada */
+	currentFolderId: string | null;
+	/** Objeto de la carpeta actual seleccionada */
+	currentFolder: FolderExtended | null;
+	/** Indicador de carga general */
+	loading: boolean;
+	/** Error actual si existe */
+	error: string | null;
+	/** Indicador de creación en proceso */
+	isCreating: boolean;
+	/** Indicador de actualización en proceso */
+	isUpdating: boolean;
+	/** Indicador de eliminación en proceso */
+	isDeleting: boolean;
 }
 
 /**
  * Acciones para el manejo del estado principal
  */
 export interface FolderCoreActions {
-  /** Obtiene todas las carpetas */
-  fetchFolders: () => Promise<void>;
-  /** Obtiene una carpeta por su ID */
-  fetchFolderById: (id: string) => Promise<FolderExtended | null>;
-  /** Crea una nueva carpeta */
-  createFolder: (data: CreateFolderData) => Promise<FolderExtended | null>;
-  /** Actualiza una carpeta existente */
-  updateFolder: (id: string, data: UpdateFolderData) => Promise<FolderExtended | null>;
-  /** Elimina una carpeta */
-  deleteFolder: (id: string) => Promise<boolean>;
-  /** Establece la carpeta actual por ID */
-  setCurrentFolderId: (id: string | null) => void;
-  /** Establece la carpeta actual directamente */
-  setCurrentFolder: (folder: FolderExtended | null) => void;
-  /** Reinicia el estado de error */
-  resetError: () => void;
+	/** Obtiene todas las carpetas */
+	fetchFolders: () => Promise<void>;
+	/** Obtiene una carpeta por su ID */
+	fetchFolderById: (id: string) => Promise<FolderExtended | null>;
+	/** Crea una nueva carpeta */
+	createFolder: (data: CreateFolderData) => Promise<FolderExtended | null>;
+	/** Actualiza una carpeta existente */
+	updateFolder: (id: string, data: UpdateFolderData) => Promise<FolderExtended | null>;
+	/** Elimina una carpeta */
+	deleteFolder: (id: string) => Promise<boolean>;
+	/** Establece la carpeta actual por ID */
+	setCurrentFolderId: (id: string | null) => void;
+	/** Establece la carpeta actual directamente */
+	setCurrentFolder: (folder: FolderExtended | null) => void;
+	/** Reinicia el estado de error */
+	resetError: () => void;
 }
 
 /**
  * Estado de UI para carpetas
  */
 export interface FolderUIState {
-  /** Modo de visualización (grid, list, etc) */
-  viewMode: 'grid' | 'list' | 'tree';
-  /** Tamaño de los elementos en la vista */
-  itemSize: 'small' | 'medium' | 'large';
-  /** Estado del sidebar */
-  sidebarExpanded: boolean;
-  /** Carpetas expandidas en vista de árbol */
-  expandedFolders: string[];
-  /** Modal de creación abierto */
-  showCreateModal: boolean;
-  /** Modal de edición abierto */
-  showEditModal: boolean;
-  /** Modal de confirmación de eliminación abierto */
-  showDeleteModal: boolean;
+	/** Modo de visualización (grid, list, etc) */
+	viewMode: 'grid' | 'list' | 'tree';
+	/** Tamaño de los elementos en la vista */
+	itemSize: 'small' | 'medium' | 'large';
+	/** Estado del sidebar */
+	sidebarExpanded: boolean;
+	/** Carpetas expandidas en vista de árbol */
+	expandedFolders: string[];
+	/** Modal de creación abierto */
+	showCreateModal: boolean;
+	/** Modal de edición abierto */
+	showEditModal: boolean;
+	/** Modal de confirmación de eliminación abierto */
+	showDeleteModal: boolean;
 }
 
 /**
  * Acciones para el manejo del estado de UI
  */
 export interface FolderUIActions {
-  /** Cambia el modo de visualización */
-  setViewMode: (mode: FolderUIState['viewMode']) => void;
-  /** Cambia el tamaño de los elementos */
-  setItemSize: (size: FolderUIState['itemSize']) => void;
-  /** Alterna el estado del sidebar */
-  toggleSidebar: () => void;
-  /** Expande o colapsa una carpeta en vista de árbol */
-  toggleFolderExpanded: (id: string) => void;
-  /** Abre el modal de creación */
-  openCreateModal: () => void;
-  /** Cierra el modal de creación */
-  closeCreateModal: () => void;
-  /** Abre el modal de edición */
-  openEditModal: () => void;
-  /** Cierra el modal de edición */
-  closeEditModal: () => void;
-  /** Abre el modal de confirmación de eliminación */
-  openDeleteModal: () => void;
-  /** Cierra el modal de confirmación de eliminación */
-  closeDeleteModal: () => void;
+	/** Cambia el modo de visualización */
+	setViewMode: (mode: FolderUIState['viewMode']) => void;
+	/** Cambia el tamaño de los elementos */
+	setItemSize: (size: FolderUIState['itemSize']) => void;
+	/** Alterna el estado del sidebar */
+	toggleSidebar: () => void;
+	/** Expande o colapsa una carpeta en vista de árbol */
+	toggleFolderExpanded: (id: string) => void;
+	/** Abre el modal de creación */
+	openCreateModal: () => void;
+	/** Cierra el modal de creación */
+	closeCreateModal: () => void;
+	/** Abre el modal de edición */
+	openEditModal: () => void;
+	/** Cierra el modal de edición */
+	closeEditModal: () => void;
+	/** Abre el modal de confirmación de eliminación */
+	openDeleteModal: () => void;
+	/** Cierra el modal de confirmación de eliminación */
+	closeDeleteModal: () => void;
 }
 
 /**
  * Estado de filtros para carpetas
  */
 export interface FolderFiltersState {
-  /** Término de búsqueda */
-  searchTerm: string;
-  /** Criterio de ordenación */
-  sortBy: 'name' | 'createdAt' | 'updatedAt' | 'size';
-  /** Dirección de ordenación */
-  sortDirection: 'asc' | 'desc';
-  /** Filtro por favoritos */
-  showFavorites: boolean;
-  /** Filtro por carpetas activas/inactivas */
-  activeOnly: boolean;
-  /** Filtro por categoría */
-  categoryFilter: string | null;
+	/** Término de búsqueda */
+	searchTerm: string;
+	/** Criterio de ordenación */
+	sortBy: 'name' | 'createdAt' | 'updatedAt' | 'size';
+	/** Dirección de ordenación */
+	sortDirection: 'asc' | 'desc';
+	/** Filtro por favoritos */
+	showFavorites: boolean;
+	/** Filtro por carpetas activas/inactivas */
+	activeOnly: boolean;
+	/** Filtro por categoría */
+	categoryFilter: string | null;
 }
 
 /**
  * Acciones para el manejo de filtros
  */
 export interface FolderFiltersActions {
-  /** Establece el término de búsqueda */
-  setSearchTerm: (term: string) => void;
-  /** Establece el criterio de ordenación */
-  setSortBy: (sortBy: FolderFiltersState['sortBy']) => void;
-  /** Establece la dirección de ordenación */
-  setSortDirection: (direction: FolderFiltersState['sortDirection']) => void;
-  /** Alterna el filtro de favoritos */
-  toggleFavorites: () => void;
-  /** Alterna el filtro de activos/inactivos */
-  toggleActiveOnly: () => void;
-  /** Establece el filtro de categoría */
-  setCategoryFilter: (category: string | null) => void;
-  /** Reinicia todos los filtros */
-  resetFilters: () => void;
+	/** Establece el término de búsqueda */
+	setSearchTerm: (term: string) => void;
+	/** Establece el criterio de ordenación */
+	setSortBy: (sortBy: FolderFiltersState['sortBy']) => void;
+	/** Establece la dirección de ordenación */
+	setSortDirection: (direction: FolderFiltersState['sortDirection']) => void;
+	/** Alterna el filtro de favoritos */
+	toggleFavorites: () => void;
+	/** Alterna el filtro de activos/inactivos */
+	toggleActiveOnly: () => void;
+	/** Establece el filtro de categoría */
+	setCategoryFilter: (category: string | null) => void;
+	/** Reinicia todos los filtros */
+	resetFilters: () => void;
 }
 
 /**
  * Tipo para slice de core
  */
 export type FolderCoreSlice = StateCreator<
-  FolderStore,
-  [],
-  [],
-  { coreState: FolderCoreState; coreActions: FolderCoreActions }
+	FolderStore,
+	[],
+	[],
+	{ coreState: FolderCoreState; coreActions: FolderCoreActions }
 >;
 
 /**
  * Tipo para slice de UI
  */
-export type FolderUISlice = StateCreator<
-  FolderStore,
-  [],
-  [],
-  { uiState: FolderUIState; uiActions: FolderUIActions }
->;
+export type FolderUISlice = StateCreator<FolderStore, [], [], { uiState: FolderUIState; uiActions: FolderUIActions }>;
 
 /**
  * Tipo para slice de filtros
  */
 export type FolderFiltersSlice = StateCreator<
-  FolderStore,
-  [],
-  [],
-  { filtersState: FolderFiltersState; filtersActions: FolderFiltersActions }
+	FolderStore,
+	[],
+	[],
+	{ filtersState: FolderFiltersState; filtersActions: FolderFiltersActions }
 >;

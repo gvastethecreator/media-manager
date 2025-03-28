@@ -1,21 +1,9 @@
 'use client';
 
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-} from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -27,12 +15,7 @@ import { toast } from 'sonner';
 import type { LayerSettingsProps } from '../../types';
 import { defaultShaderConfig, shaderConfigSchema, type ShaderConfig } from '../shader-config-schema';
 
-export function ShaderSettings({
-	config,
-	onChange,
-	entityType,
-	entityId,
-}: LayerSettingsProps<ShaderConfig>) {
+export function ShaderSettings({ config, onChange, entityType, entityId }: LayerSettingsProps<ShaderConfig>) {
 	// Inicializar formulario con configuración actual o valores por defecto
 	const form = useForm<ShaderConfig>({
 		resolver: zodResolver(shaderConfigSchema),
@@ -70,9 +53,7 @@ export function ShaderSettings({
 									</FormControl>
 									<div className="space-y-0.5">
 										<FormLabel className="text-base">Activar efecto shader</FormLabel>
-										<FormDescription>
-											Habilita o deshabilita completamente el efecto de shader
-										</FormDescription>
+										<FormDescription>Habilita o deshabilita completamente el efecto de shader</FormDescription>
 									</div>
 								</FormItem>
 							)}
@@ -85,10 +66,7 @@ export function ShaderSettings({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Tipo de shader</FormLabel>
-									<Select
-										value={field.value}
-										onValueChange={field.onChange}
-									>
+									<Select value={field.value} onValueChange={field.onChange}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Selecciona un tipo de shader" />
@@ -102,9 +80,7 @@ export function ShaderSettings({
 											<SelectItem value="particle">Partículas</SelectItem>
 										</SelectContent>
 									</Select>
-									<FormDescription>
-										Selecciona el efecto de shader que deseas aplicar
-									</FormDescription>
+									<FormDescription>Selecciona el efecto de shader que deseas aplicar</FormDescription>
 								</FormItem>
 							)}
 						/>
@@ -125,9 +101,7 @@ export function ShaderSettings({
 											onValueChange={(vals) => field.onChange(vals[0])}
 										/>
 									</FormControl>
-									<FormDescription>
-										Ajusta la intensidad del efecto de shader
-									</FormDescription>
+									<FormDescription>Ajusta la intensidad del efecto de shader</FormDescription>
 								</FormItem>
 							)}
 						/>
@@ -148,9 +122,7 @@ export function ShaderSettings({
 											onValueChange={(vals) => field.onChange(vals[0])}
 										/>
 									</FormControl>
-									<FormDescription>
-										Controla la velocidad de las animaciones del shader
-									</FormDescription>
+									<FormDescription>Controla la velocidad de las animaciones del shader</FormDescription>
 								</FormItem>
 							)}
 						/>
@@ -166,9 +138,7 @@ export function ShaderSettings({
 									</FormControl>
 									<div className="space-y-0.5">
 										<FormLabel className="text-base">Animación</FormLabel>
-										<FormDescription>
-											Activa las animaciones del shader
-										</FormDescription>
+										<FormDescription>Activa las animaciones del shader</FormDescription>
 									</div>
 								</FormItem>
 							)}
@@ -185,9 +155,7 @@ export function ShaderSettings({
 									</FormControl>
 									<div className="space-y-0.5">
 										<FormLabel className="text-base">Solo visible al hover</FormLabel>
-										<FormDescription>
-											El efecto solo se muestra al pasar el ratón
-										</FormDescription>
+										<FormDescription>El efecto solo se muestra al pasar el ratón</FormDescription>
 									</div>
 								</FormItem>
 							)}
@@ -200,10 +168,7 @@ export function ShaderSettings({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Modo de mezcla</FormLabel>
-									<Select
-										value={field.value}
-										onValueChange={field.onChange}
-									>
+									<Select value={field.value} onValueChange={field.onChange}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Selecciona un modo de mezcla" />
@@ -218,9 +183,7 @@ export function ShaderSettings({
 											<SelectItem value="lighten">Aclarar</SelectItem>
 										</SelectContent>
 									</Select>
-									<FormDescription>
-										Define cómo se mezcla el shader con las capas inferiores
-									</FormDescription>
+									<FormDescription>Define cómo se mezcla el shader con las capas inferiores</FormDescription>
 								</FormItem>
 							)}
 						/>
@@ -231,7 +194,7 @@ export function ShaderSettings({
 							name="opacity"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Opacidad: {field.value?.toFixed(2) || "1.00"}</FormLabel>
+									<FormLabel>Opacidad: {field.value?.toFixed(2) || '1.00'}</FormLabel>
 									<FormControl>
 										<Slider
 											value={[field.value || 1]}
@@ -272,9 +235,7 @@ void main() {
 }`}
 													/>
 												</FormControl>
-												<FormDescription>
-													Personaliza el vertex shader con código GLSL
-												</FormDescription>
+												<FormDescription>Personaliza el vertex shader con código GLSL</FormDescription>
 											</FormItem>
 										)}
 									/>
@@ -308,9 +269,7 @@ void main() {
 }`}
 													/>
 												</FormControl>
-												<FormDescription>
-													Personaliza el fragment shader con código GLSL
-												</FormDescription>
+												<FormDescription>Personaliza el fragment shader con código GLSL</FormDescription>
 											</FormItem>
 										)}
 									/>
@@ -324,7 +283,7 @@ void main() {
 				<div className="flex justify-end">
 					<Button
 						type="submit"
-						className={cn("gap-1", form.formState.isSubmitting && "opacity-70 pointer-events-none")}
+						className={cn('gap-1', form.formState.isSubmitting && 'opacity-70 pointer-events-none')}
 						disabled={form.formState.isSubmitting}
 					>
 						Guardar cambios

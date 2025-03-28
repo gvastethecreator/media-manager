@@ -8,17 +8,17 @@ const validatorsLogger = serverLogger.withContext('ConceptValidators');
  * Esquema para validar la creación de un concepto
  */
 export const conceptCreateSchema = z.object({
-  name: z.string().min(1, { message: 'El nombre es obligatorio' }).max(100, {
-    message: 'El nombre no puede exceder 100 caracteres',
-  }),
-  emoji: z.string().optional().default('💡'),
-  color: z.string().optional().default('#3b82f6'),
-  description: z.string().optional().nullable(),
-  content: z.string().optional().default(''),
-  category: z.nativeEnum(ConceptCategory).optional().default(ConceptCategory.GENERAL),
-  tags: z.string().optional().default('empty_array'),
-  featuredImage: z.string().optional().nullable(),
-  isFavorite: z.boolean().optional().default(false),
+	name: z.string().min(1, { message: 'El nombre es obligatorio' }).max(100, {
+		message: 'El nombre no puede exceder 100 caracteres',
+	}),
+	emoji: z.string().optional().default('💡'),
+	color: z.string().optional().default('#3b82f6'),
+	description: z.string().optional().nullable(),
+	content: z.string().optional().default(''),
+	category: z.nativeEnum(ConceptCategory).optional().default(ConceptCategory.GENERAL),
+	tags: z.string().optional().default('empty_array'),
+	featuredImage: z.string().optional().nullable(),
+	isFavorite: z.boolean().optional().default(false),
 });
 
 /**
@@ -30,18 +30,22 @@ export type ConceptCreateSchema = z.infer<typeof conceptCreateSchema>;
  * Esquema para validar la actualización de un concepto
  */
 export const conceptUpdateSchema = z.object({
-  id: z.string().min(1, { message: 'El ID es obligatorio' }),
-  name: z.string().min(1, { message: 'El nombre es obligatorio' }).max(100, {
-    message: 'El nombre no puede exceder 100 caracteres',
-  }).optional(),
-  emoji: z.string().optional(),
-  color: z.string().optional(),
-  description: z.string().optional().nullable(),
-  content: z.string().optional(),
-  category: z.nativeEnum(ConceptCategory).optional(),
-  tags: z.string().optional(),
-  featuredImage: z.string().optional().nullable(),
-  isFavorite: z.boolean().optional(),
+	id: z.string().min(1, { message: 'El ID es obligatorio' }),
+	name: z
+		.string()
+		.min(1, { message: 'El nombre es obligatorio' })
+		.max(100, {
+			message: 'El nombre no puede exceder 100 caracteres',
+		})
+		.optional(),
+	emoji: z.string().optional(),
+	color: z.string().optional(),
+	description: z.string().optional().nullable(),
+	content: z.string().optional(),
+	category: z.nativeEnum(ConceptCategory).optional(),
+	tags: z.string().optional(),
+	featuredImage: z.string().optional().nullable(),
+	isFavorite: z.boolean().optional(),
 });
 
 /**
@@ -53,12 +57,12 @@ export type ConceptUpdateSchema = z.infer<typeof conceptUpdateSchema>;
  * Esquema para validar los filtros de búsqueda de conceptos
  */
 export const conceptFiltersSchema = z.object({
-  search: z.string().optional(),
-  category: z.nativeEnum(ConceptCategory).optional(),
-  tags: z.array(z.string()).optional(),
-  onlyFavorites: z.boolean().optional(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional(),
+	search: z.string().optional(),
+	category: z.nativeEnum(ConceptCategory).optional(),
+	tags: z.array(z.string()).optional(),
+	onlyFavorites: z.boolean().optional(),
+	startDate: z.date().optional(),
+	endDate: z.date().optional(),
 });
 
 /**
@@ -72,12 +76,12 @@ export type ConceptFiltersSchema = z.infer<typeof conceptFiltersSchema>;
  * @returns Datos validados y transformados
  */
 export function validateConceptCreate(data: unknown): ConceptCreateSchema {
-  try {
-    return conceptCreateSchema.parse(data);
-  } catch (error) {
-    validatorsLogger.error('❌ Error de validación en creación de concepto:', error);
-    throw error;
-  }
+	try {
+		return conceptCreateSchema.parse(data);
+	} catch (error) {
+		validatorsLogger.error('❌ Error de validación en creación de concepto:', error);
+		throw error;
+	}
 }
 
 /**
@@ -86,12 +90,12 @@ export function validateConceptCreate(data: unknown): ConceptCreateSchema {
  * @returns Datos validados y transformados
  */
 export function validateConceptUpdate(data: unknown): ConceptUpdateSchema {
-  try {
-    return conceptUpdateSchema.parse(data);
-  } catch (error) {
-    validatorsLogger.error('❌ Error de validación en actualización de concepto:', error);
-    throw error;
-  }
+	try {
+		return conceptUpdateSchema.parse(data);
+	} catch (error) {
+		validatorsLogger.error('❌ Error de validación en actualización de concepto:', error);
+		throw error;
+	}
 }
 
 /**
@@ -100,10 +104,10 @@ export function validateConceptUpdate(data: unknown): ConceptUpdateSchema {
  * @returns Filtros validados y transformados
  */
 export function validateConceptFilters(filters: unknown): ConceptFiltersSchema {
-  try {
-    return conceptFiltersSchema.parse(filters);
-  } catch (error) {
-    validatorsLogger.error('❌ Error de validación en filtros de concepto:', error);
-    throw error;
-  }
+	try {
+		return conceptFiltersSchema.parse(filters);
+	} catch (error) {
+		validatorsLogger.error('❌ Error de validación en filtros de concepto:', error);
+		throw error;
+	}
 }

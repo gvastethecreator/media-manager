@@ -9,10 +9,10 @@ import type { GlitchConfig } from '../glitch-schema';
 // Componente de sección de configuración simplificado
 const SettingsSection = ({
 	title,
-	children
+	children,
 }: {
 	title: string;
-	children: React.ReactNode
+	children: React.ReactNode;
 }) => (
 	<div className="space-y-3 py-2 border-b border-border pb-4 last:border-b-0 last:pb-0">
 		<h3 className="text-sm font-medium">{title}</h3>
@@ -23,19 +23,16 @@ const SettingsSection = ({
 // Componente selector de zona simplificado
 const ZoneSelector = ({
 	zone,
-	onChange
+	onChange,
 }: {
 	zone: any;
-	onChange: (zone: any) => void
+	onChange: (zone: any) => void;
 }) => {
 	return (
 		<div className="space-y-4">
 			<div className="space-y-2">
 				<Label>Tipo de Zona</Label>
-				<Select
-					value={zone?.type || "fullscreen"}
-					onValueChange={(type) => onChange({ ...zone, type })}
-				>
+				<Select value={zone?.type || 'fullscreen'} onValueChange={(type) => onChange({ ...zone, type })}>
 					<SelectTrigger>
 						<SelectValue />
 					</SelectTrigger>
@@ -64,13 +61,15 @@ const ZoneSelector = ({
 							<Label>Posición X</Label>
 							<Slider
 								value={[(zone.center?.x || 0.5) * 100]}
-								onValueChange={([x]) => onChange({
-									...zone,
-									center: {
-										...zone.center,
-										x: x / 100
-									}
-								})}
+								onValueChange={([x]) =>
+									onChange({
+										...zone,
+										center: {
+											...zone.center,
+											x: x / 100,
+										},
+									})
+								}
 								min={0}
 								max={100}
 								step={1}
@@ -80,13 +79,15 @@ const ZoneSelector = ({
 							<Label>Posición Y</Label>
 							<Slider
 								value={[(zone.center?.y || 0.5) * 100]}
-								onValueChange={([y]) => onChange({
-									...zone,
-									center: {
-										...zone.center,
-										y: y / 100
-									}
-								})}
+								onValueChange={([y]) =>
+									onChange({
+										...zone,
+										center: {
+											...zone.center,
+											y: y / 100,
+										},
+									})
+								}
 								min={0}
 								max={100}
 								step={1}
@@ -103,13 +104,15 @@ const ZoneSelector = ({
 							<Label>Ancho</Label>
 							<Slider
 								value={[zone.size?.width || 0.5]}
-								onValueChange={([width]) => onChange({
-									...zone,
-									size: {
-										...zone.size,
-										width
-									}
-								})}
+								onValueChange={([width]) =>
+									onChange({
+										...zone,
+										size: {
+											...zone.size,
+											width,
+										},
+									})
+								}
 								min={0}
 								max={1}
 								step={0.01}
@@ -119,13 +122,15 @@ const ZoneSelector = ({
 							<Label>Alto</Label>
 							<Slider
 								value={[zone.size?.height || 0.5]}
-								onValueChange={([height]) => onChange({
-									...zone,
-									size: {
-										...zone.size,
-										height
-									}
-								})}
+								onValueChange={([height]) =>
+									onChange({
+										...zone,
+										size: {
+											...zone.size,
+											height,
+										},
+									})
+								}
 								min={0}
 								max={1}
 								step={0.01}
@@ -213,10 +218,7 @@ export const GlitchSettings = ({ config, onChange }: GlitchSettingsProps) => {
 
 			{/* 🎯 Zona de efecto */}
 			<SettingsSection title="Zona de Efecto">
-				<ZoneSelector
-					zone={config.zone}
-					onChange={(zone) => onChange({ zone })}
-				/>
+				<ZoneSelector zone={config.zone} onChange={(zone) => onChange({ zone })} />
 			</SettingsSection>
 
 			{/* 🌈 Canales de color */}
@@ -230,19 +232,21 @@ export const GlitchSettings = ({ config, onChange }: GlitchSettingsProps) => {
 									<Label>Desplazamiento X</Label>
 									<Slider
 										value={[config.colorChannels?.[channel]?.offset?.x || 0]}
-										onValueChange={([x]) => onChange({
-											colorChannels: {
-												...config.colorChannels,
-												[channel]: {
-													...config.colorChannels?.[channel],
-													offset: {
-														x,
-														y: config.colorChannels?.[channel]?.offset?.y || 0,
+										onValueChange={([x]) =>
+											onChange({
+												colorChannels: {
+													...config.colorChannels,
+													[channel]: {
+														...config.colorChannels?.[channel],
+														offset: {
+															x,
+															y: config.colorChannels?.[channel]?.offset?.y || 0,
+														},
+														intensity: config.colorChannels?.[channel]?.intensity || 0,
 													},
-													intensity: config.colorChannels?.[channel]?.intensity || 0,
 												},
-											},
-										})}
+											})
+										}
 										min={-1}
 										max={1}
 										step={0.01}
@@ -253,19 +257,21 @@ export const GlitchSettings = ({ config, onChange }: GlitchSettingsProps) => {
 									<Label>Desplazamiento Y</Label>
 									<Slider
 										value={[config.colorChannels?.[channel]?.offset?.y || 0]}
-										onValueChange={([y]) => onChange({
-											colorChannels: {
-												...config.colorChannels,
-												[channel]: {
-													...config.colorChannels?.[channel],
-													offset: {
-														x: config.colorChannels?.[channel]?.offset?.x || 0,
-														y,
+										onValueChange={([y]) =>
+											onChange({
+												colorChannels: {
+													...config.colorChannels,
+													[channel]: {
+														...config.colorChannels?.[channel],
+														offset: {
+															x: config.colorChannels?.[channel]?.offset?.x || 0,
+															y,
+														},
+														intensity: config.colorChannels?.[channel]?.intensity || 0,
 													},
-													intensity: config.colorChannels?.[channel]?.intensity || 0,
 												},
-											},
-										})}
+											})
+										}
 										min={-1}
 										max={1}
 										step={0.01}
@@ -277,19 +283,21 @@ export const GlitchSettings = ({ config, onChange }: GlitchSettingsProps) => {
 								<Label>Intensidad</Label>
 								<Slider
 									value={[config.colorChannels?.[channel]?.intensity || 0]}
-									onValueChange={([intensity]) => onChange({
-										colorChannels: {
-											...config.colorChannels,
-											[channel]: {
-												...config.colorChannels?.[channel],
-												offset: {
-													x: config.colorChannels?.[channel]?.offset?.x || 0,
-													y: config.colorChannels?.[channel]?.offset?.y || 0,
+									onValueChange={([intensity]) =>
+										onChange({
+											colorChannels: {
+												...config.colorChannels,
+												[channel]: {
+													...config.colorChannels?.[channel],
+													offset: {
+														x: config.colorChannels?.[channel]?.offset?.x || 0,
+														y: config.colorChannels?.[channel]?.offset?.y || 0,
+													},
+													intensity,
 												},
-												intensity,
 											},
-										},
-									})}
+										})
+									}
 									min={0}
 									max={1}
 									step={0.01}
@@ -308,13 +316,17 @@ export const GlitchSettings = ({ config, onChange }: GlitchSettingsProps) => {
 						<Label>Activar Animación</Label>
 						<Switch
 							checked={!!config.animation}
-							onCheckedChange={(checked) => onChange({
-								animation: checked ? {
-									frequency: 2,
-									duration: 100,
-									randomness: 0.5,
-								} : undefined,
-							})}
+							onCheckedChange={(checked) =>
+								onChange({
+									animation: checked
+										? {
+												frequency: 2,
+												duration: 100,
+												randomness: 0.5,
+											}
+										: undefined,
+								})
+							}
 						/>
 					</div>
 					{config.animation && (
@@ -323,12 +335,14 @@ export const GlitchSettings = ({ config, onChange }: GlitchSettingsProps) => {
 								<Label>Frecuencia</Label>
 								<Slider
 									value={[config.animation.frequency]}
-									onValueChange={([frequency]) => onChange({
-										animation: {
-											...config.animation,
-											frequency,
-										},
-									})}
+									onValueChange={([frequency]) =>
+										onChange({
+											animation: {
+												...config.animation,
+												frequency,
+											},
+										})
+									}
 									min={0}
 									max={10}
 									step={0.1}
@@ -339,12 +353,14 @@ export const GlitchSettings = ({ config, onChange }: GlitchSettingsProps) => {
 								<Label>Duración</Label>
 								<Slider
 									value={[config.animation.duration]}
-									onValueChange={([duration]) => onChange({
-										animation: {
-											...config.animation,
-											duration,
-										},
-									})}
+									onValueChange={([duration]) =>
+										onChange({
+											animation: {
+												...config.animation,
+												duration,
+											},
+										})
+									}
 									min={0}
 									max={1000}
 									step={10}
@@ -355,12 +371,14 @@ export const GlitchSettings = ({ config, onChange }: GlitchSettingsProps) => {
 								<Label>Aleatoriedad</Label>
 								<Slider
 									value={[config.animation.randomness]}
-									onValueChange={([randomness]) => onChange({
-										animation: {
-											...config.animation,
-											randomness,
-										},
-									})}
+									onValueChange={([randomness]) =>
+										onChange({
+											animation: {
+												...config.animation,
+												randomness,
+											},
+										})
+									}
 									min={0}
 									max={1}
 									step={0.01}
@@ -378,10 +396,7 @@ export const GlitchSettings = ({ config, onChange }: GlitchSettingsProps) => {
 					<div className="space-y-2">
 						<div className="flex items-center justify-between">
 							<Label>Líneas de Escaneo</Label>
-							<Switch
-								checked={config.scanlines}
-								onCheckedChange={(scanlines) => onChange({ scanlines })}
-							/>
+							<Switch checked={config.scanlines} onCheckedChange={(scanlines) => onChange({ scanlines })} />
 						</div>
 					</div>
 					<div className="space-y-2">

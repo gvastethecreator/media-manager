@@ -26,4 +26,3 @@ export type { FilterPreset } from './filter-presets';
 // Exportar acciones y tipos relacionados
 export { deleteFilterConfig, getFilterConfig, updateFilterConfig } from './actions/filter-config.action';
 export type { FilterConfig } from './actions/filter-config.action';
-

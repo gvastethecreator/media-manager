@@ -26,7 +26,7 @@ export const BlurSettings = ({ config, onChange }: BlurSettingsProps) => {
 			centerY: blurZone.position.y,
 			radius: blurZone.size.width / 2,
 			feather: blurZone.feather,
-			type: blurZone.type === 'circle' ? 'circle' : 'rectangle'
+			type: blurZone.type === 'circle' ? 'circle' : 'rectangle',
 		};
 	};
 
@@ -36,15 +36,15 @@ export const BlurSettings = ({ config, onChange }: BlurSettingsProps) => {
 			type: zoneProps.type as 'circle' | 'rectangle' | 'ellipse' | 'custom',
 			position: {
 				x: zoneProps.centerX || 0.5,
-				y: zoneProps.centerY || 0.5
+				y: zoneProps.centerY || 0.5,
 			},
 			size: {
 				width: (zoneProps.radius || 0.5) * 2,
-				height: (zoneProps.radius || 0.5) * 2
+				height: (zoneProps.radius || 0.5) * 2,
 			},
 			rotation: 0,
 			feather: zoneProps.feather || 0.1,
-			invert: false
+			invert: false,
 		};
 	};
 
@@ -83,10 +83,7 @@ export const BlurSettings = ({ config, onChange }: BlurSettingsProps) => {
 
 			{/* 📊 Calidad del desenfoque */}
 			<SettingsSection title="Calidad">
-				<Select
-					value={String(config.quality)}
-					onValueChange={(quality) => onChange({ quality: Number(quality) })}
-				>
+				<Select value={String(config.quality)} onValueChange={(quality) => onChange({ quality: Number(quality) })}>
 					<SelectTrigger>
 						<SelectValue placeholder="Seleccionar calidad" />
 					</SelectTrigger>
@@ -109,10 +106,7 @@ export const BlurSettings = ({ config, onChange }: BlurSettingsProps) => {
 			{/* 🏃‍♂️ Controles de movimiento */}
 			{config.algorithm === 'motion' && (
 				<SettingsSection title="Configuración de Movimiento">
-					<MotionControls
-						motion={config.motion as any}
-						onChange={(motion) => onChange({ motion: motion as Motion })}
-					/>
+					<MotionControls motion={config.motion as any} onChange={(motion) => onChange({ motion: motion as Motion })} />
 				</SettingsSection>
 			)}
 
@@ -143,11 +137,7 @@ export const BlurSettings = ({ config, onChange }: BlurSettingsProps) => {
 				<div className="space-y-4">
 					<div className="flex items-center justify-between">
 						<Label htmlFor="animated">Activar Animación</Label>
-						<Switch
-							id="animated"
-							checked={config.animated}
-							onCheckedChange={(animated) => onChange({ animated })}
-						/>
+						<Switch id="animated" checked={config.animated} onCheckedChange={(animated) => onChange({ animated })} />
 					</div>
 					{config.animated && (
 						<Slider

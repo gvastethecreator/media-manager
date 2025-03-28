@@ -28,7 +28,7 @@ const DEFAULT_LAYER_SYSTEM: LayerSystemConfig = {
 	explodeView: false,
 	explodeDistance: 10,
 	layerBlending: 'normal',
-	layerSpacing: 2
+	layerSpacing: 2,
 };
 
 // Función para asegurar que se tengan valores predeterminados
@@ -38,7 +38,7 @@ const getLayerSystemWithDefaults = (config: Partial<LayerSystemConfig> = {}): La
 		explodeView: config.explodeView ?? DEFAULT_LAYER_SYSTEM.explodeView,
 		explodeDistance: config.explodeDistance ?? DEFAULT_LAYER_SYSTEM.explodeDistance,
 		layerBlending: config.layerBlending || DEFAULT_LAYER_SYSTEM.layerBlending,
-		layerSpacing: config.layerSpacing ?? DEFAULT_LAYER_SYSTEM.layerSpacing
+		layerSpacing: config.layerSpacing ?? DEFAULT_LAYER_SYSTEM.layerSpacing,
 	};
 };
 
@@ -59,9 +59,7 @@ const FormSection = ({ title, description, colorScheme, children }: any) => (
 	</div>
 );
 
-const FormGroup = ({ children }: any) => (
-	<div className="space-y-2">{children}</div>
-);
+const FormGroup = ({ children }: any) => <div className="space-y-2">{children}</div>;
 
 // Interfaces para los props
 interface CardOptions {
@@ -88,7 +86,13 @@ interface ExtendedLayersSettingsPanelProps extends LayersSettingsPanelProps {
  * Permite gestionar todas las capas disponibles y su configuración
  * incluyendo habilitación/deshabilitación, orden y propiedades específicas.
  */
-export function LayersPanel({ options, onChange, entityType, entityId, disabled = false }: ExtendedLayersSettingsPanelProps) {
+export function LayersPanel({
+	options,
+	onChange,
+	entityType,
+	entityId,
+	disabled = false,
+}: ExtendedLayersSettingsPanelProps) {
 	// Estado para la pestaña activa
 	const [activeTab, setActiveTab] = useState('general');
 
@@ -118,7 +122,7 @@ export function LayersPanel({ options, onChange, entityType, entityId, disabled 
 		onChange({
 			...options,
 			layerConfigs: {
-				...(options.layerConfigs as Record<string, unknown> || {}),
+				...((options.layerConfigs as Record<string, unknown>) || {}),
 				[layerType]: config,
 			},
 		});
@@ -179,8 +183,9 @@ export function LayersPanel({ options, onChange, entityType, entityId, disabled 
 							return (
 								<div
 									key={layer.type}
-									className={`flex items-center justify-between p-3 rounded-md border ${isEnabled ? 'border-border/50 bg-card/80' : 'border-border/30 bg-muted/30'
-										}`}
+									className={`flex items-center justify-between p-3 rounded-md border ${
+										isEnabled ? 'border-border/50 bg-card/80' : 'border-border/30 bg-muted/30'
+									}`}
 								>
 									<div className="flex items-center gap-2">
 										<Switch

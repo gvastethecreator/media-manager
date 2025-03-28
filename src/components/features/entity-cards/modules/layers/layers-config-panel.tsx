@@ -31,7 +31,7 @@ const DEFAULT_LAYER_SYSTEM: LayerSystemConfig = {
 	explodeView: false,
 	explodeDistance: 10,
 	layerBlending: 'normal',
-	layerSpacing: 2
+	layerSpacing: 2,
 };
 
 // Función para asegurar que se tengan valores predeterminados
@@ -41,7 +41,7 @@ const getLayerSystemWithDefaults = (config: Partial<LayerSystemConfig> = {}): La
 		explodeView: config.explodeView ?? DEFAULT_LAYER_SYSTEM.explodeView,
 		explodeDistance: config.explodeDistance ?? DEFAULT_LAYER_SYSTEM.explodeDistance,
 		layerBlending: config.layerBlending || DEFAULT_LAYER_SYSTEM.layerBlending,
-		layerSpacing: config.layerSpacing ?? DEFAULT_LAYER_SYSTEM.layerSpacing
+		layerSpacing: config.layerSpacing ?? DEFAULT_LAYER_SYSTEM.layerSpacing,
 	};
 };
 
@@ -89,7 +89,7 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 		onCardOptionsChange({
 			...cardOptions,
 			layerSystem: {
-				...(cardOptions.layerSystem as Record<string, unknown> || {}),
+				...((cardOptions.layerSystem as Record<string, unknown>) || {}),
 				[key]: value,
 			},
 		});
@@ -118,7 +118,7 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 		onCardOptionsChange({
 			...cardOptions,
 			layerSystem: {
-				...(cardOptions.layerSystem as Record<string, unknown> || {}),
+				...((cardOptions.layerSystem as Record<string, unknown>) || {}),
 				order: currentOrder,
 			},
 		});
@@ -126,7 +126,9 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 
 	// Handler para habilitar/deshabilitar todas las capas
 	const handleEnableAll = () => {
-		const newLayerConfigs: Record<string, Record<string, unknown>> = { ...(cardOptions.layerConfigs as Record<string, Record<string, unknown>> || {}) };
+		const newLayerConfigs: Record<string, Record<string, unknown>> = {
+			...((cardOptions.layerConfigs as Record<string, Record<string, unknown>>) || {}),
+		};
 
 		for (const layer of availableLayers) {
 			const currentConfig = newLayerConfigs[layer.type] || { ...layer.defaultConfig };
@@ -274,7 +276,8 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 													return null;
 												}
 
-												const layerConfig = (cardOptions.layerConfigs as Record<string, any>)?.[layerId] || layer.defaultConfig;
+												const layerConfig =
+													(cardOptions.layerConfigs as Record<string, any>)?.[layerId] || layer.defaultConfig;
 												const isEnabled = layerConfig.enabled;
 
 												return (
@@ -337,7 +340,8 @@ export function LayersConfigPanel({ cardOptions, onCardOptionsChange, entityType
 										</TableHeader>
 										<TableBody>
 											{availableLayers.map((layer: Layer) => {
-												const layerConfig = (cardOptions.layerConfigs as Record<string, any>)?.[layer.type] || layer.defaultConfig;
+												const layerConfig =
+													(cardOptions.layerConfigs as Record<string, any>)?.[layer.type] || layer.defaultConfig;
 												return (
 													<TableRow key={layer.type}>
 														<TableCell>

@@ -15,59 +15,59 @@ const storeLogger = serverLogger.withContext('NoteStore');
 
 // Combinamos todos los slices para crear el store completo
 export const useNoteStore = create<NoteStore>()(
-  devtools(
-    persist(
-      (...a) => ({
-        ...createCoreSlice(...a),
-        ...createFiltersSlice(...a),
-        ...createSelectionSlice(...a),
-        ...createUISlice(...a),
-        ...createRelationsSlice(...a),
-      }),
-      {
-        name: 'note-store',
-        partialize: (state) => {
-          // Solo persistimos el estado relevante
-          // Las notas no las persistimos porque pueden cambiar en el servidor
-          const {
-            // Excluir de la persistencia
-            notes,
-            loading,
-            error,
-            // El resto se persiste
-            ...rest
-          } = state;
+	devtools(
+		persist(
+			(...a) => ({
+				...createCoreSlice(...a),
+				...createFiltersSlice(...a),
+				...createSelectionSlice(...a),
+				...createUISlice(...a),
+				...createRelationsSlice(...a),
+			}),
+			{
+				name: 'note-store',
+				partialize: (state) => {
+					// Solo persistimos el estado relevante
+					// Las notas no las persistimos porque pueden cambiar en el servidor
+					const {
+						// Excluir de la persistencia
+						notes,
+						loading,
+						error,
+						// El resto se persiste
+						...rest
+					} = state;
 
-          storeLogger.debug('🔄 Persistiendo estado del store', { persistedKeys: Object.keys(rest) });
+					storeLogger.debug('🔄 Persistiendo estado del store', { persistedKeys: Object.keys(rest) });
 
-          return {
-            ...rest,
-            // Añadir versión para control de migraciones
-            version: VERSIONING.CURRENT_STORE_VERSION
-          };
-        },
-        onRehydrateStorage: () => (state) => {
-          // Verificar versión y realizar migraciones si es necesario
-          if (state) {
-            const version = state.version || 0;
-            storeLogger.info('♻️ Rehidratando store', { version });
+					return {
+						...rest,
+						// Añadir versión para control de migraciones
+						version: VERSIONING.CURRENT_STORE_VERSION,
+					};
+				},
+				onRehydrateStorage: () => (state) => {
+					// Verificar versión y realizar migraciones si es necesario
+					if (state) {
+						const version = state.version || 0;
+						storeLogger.info('♻️ Rehidratando store', { version });
 
-            // Añadir migración si se necesita en el futuro
-            if (version < VERSIONING.CURRENT_STORE_VERSION) {
-              storeLogger.warn('⚠️ Versión de store obsoleta, puede requerir migración', {
-                storeVersion: version,
-                currentVersion: VERSIONING.CURRENT_STORE_VERSION
-              });
-            }
-          }
-        }
-      }
-    ),
-    {
-      name: 'NoteStore',
-      enabled: process.env.NODE_ENV === 'development'
-    }
-  )
+						// Añadir migración si se necesita en el futuro
+						if (version < VERSIONING.CURRENT_STORE_VERSION) {
+							storeLogger.warn('⚠️ Versión de store obsoleta, puede requerir migración', {
+								storeVersion: version,
+								currentVersion: VERSIONING.CURRENT_STORE_VERSION,
+							});
+						}
+					}
+				},
+			}
+		),
+		{
+			name: 'NoteStore',
+			enabled: process.env.NODE_ENV === 'development',
+		}
+	)
 );
 
 // Re-exportar todo para facilitar importaciones
@@ -77,4 +77,3 @@ export * from './slices/relations';
 export * from './slices/selection';
 export * from './slices/ui';
 export * from './types';
-

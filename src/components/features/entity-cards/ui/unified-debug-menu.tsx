@@ -23,7 +23,7 @@ import {
 	Palette,
 	Sliders,
 	Sparkles,
-	X
+	X,
 } from 'lucide-react';
 import { motion, useDragControls } from 'motion/react';
 import { useState } from 'react';
@@ -42,7 +42,7 @@ export function UnifiedDebugMenu() {
 
 	// Controlar el colapso del menú
 	const toggleCollapse = () => {
-		setIsCollapsed(prev => !prev);
+		setIsCollapsed((prev) => !prev);
 	};
 
 	// Si el menú no es visible, no renderizar nada
@@ -73,15 +73,15 @@ export function UnifiedDebugMenu() {
 			enableScanlines: true,
 			enableAnimatedBorder: true,
 			enableGrainEffect: true,
-			showImages: true
+			showImages: true,
 		});
 
 		// Si estamos en modo simple, sugerir cambiar al modo complex
 		if (displayMode === 'simple' && typeof window !== 'undefined') {
 			const shouldChangeMode = window.confirm(
 				'Has activado todos los efectos, pero el modo actual (simple) no los mostrará.\n\n' +
-				'¿Quieres cambiar al modo complex para ver los efectos?\n' +
-				'(Esto puede afectar al rendimiento)'
+					'¿Quieres cambiar al modo complex para ver los efectos?\n' +
+					'(Esto puede afectar al rendimiento)'
 			);
 
 			if (shouldChangeMode) {
@@ -104,7 +104,7 @@ export function UnifiedDebugMenu() {
 			enableScanlines: false,
 			enableAnimatedBorder: false,
 			enableGrainEffect: false,
-			showImages: true // Mantener imágenes visibles
+			showImages: true, // Mantener imágenes visibles
 		});
 	};
 
@@ -131,25 +131,13 @@ export function UnifiedDebugMenu() {
 			>
 				<div className="flex items-center">
 					<Move className="h-3.5 w-3.5 text-muted-foreground mr-2" />
-					{!isCollapsed && (
-						<h3 className="text-xs font-medium">Control de Tarjetas</h3>
-					)}
+					{!isCollapsed && <h3 className="text-xs font-medium">Control de Tarjetas</h3>}
 				</div>
 				<div className="flex space-x-1 ml-auto">
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-5 w-5"
-						onClick={toggleCollapse}
-					>
+					<Button variant="ghost" size="icon" className="h-5 w-5" onClick={toggleCollapse}>
 						{isCollapsed ? <Maximize2 className="h-3.5 w-3.5" /> : <Minimize2 className="h-3.5 w-3.5" />}
 					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-5 w-5"
-						onClick={toggleMenu}
-					>
+					<Button variant="ghost" size="icon" className="h-5 w-5" onClick={toggleMenu}>
 						<X className="h-3.5 w-3.5" />
 					</Button>
 				</div>
@@ -158,16 +146,17 @@ export function UnifiedDebugMenu() {
 			{/* Contenido del menú */}
 			{!isCollapsed && (
 				<div className="p-3 max-h-[calc(100vh-120px)] overflow-y-auto">
-					<Tabs
-						defaultValue="modes"
-						value={activeTab}
-						onValueChange={setActiveTab}
-						className="w-full"
-					>
+					<Tabs defaultValue="modes" value={activeTab} onValueChange={setActiveTab} className="w-full">
 						<TabsList className="grid grid-cols-3 mb-3 h-7">
-							<TabsTrigger value="modes" className="text-xs">Modos</TabsTrigger>
-							<TabsTrigger value="features" className="text-xs">Características</TabsTrigger>
-							<TabsTrigger value="debug" className="text-xs">Debug</TabsTrigger>
+							<TabsTrigger value="modes" className="text-xs">
+								Modos
+							</TabsTrigger>
+							<TabsTrigger value="features" className="text-xs">
+								Características
+							</TabsTrigger>
+							<TabsTrigger value="debug" className="text-xs">
+								Debug
+							</TabsTrigger>
 						</TabsList>
 
 						{/* Pestaña de Modos */}
@@ -187,7 +176,7 @@ export function UnifiedDebugMenu() {
 										variant={displayMode === mode ? 'default' : 'outline'}
 										size="sm"
 										className={cn(
-											"justify-start h-8 text-xs",
+											'justify-start h-8 text-xs',
 											displayMode === mode && `bg-${info.color}-500 hover:bg-${info.color}-600`
 										)}
 										onClick={() => setDisplayMode(mode as CardDisplayMode)}
@@ -205,39 +194,35 @@ export function UnifiedDebugMenu() {
 							<div className="text-xs text-muted-foreground mt-2 border-t pt-2">
 								<p className="font-medium mb-1">Información del modo:</p>
 								<div className="space-y-1">
-									<p className="line-clamp-2">
-										{displayModeInfo[displayMode].description}
-									</p>
+									<p className="line-clamp-2">{displayModeInfo[displayMode].description}</p>
 									<p>
 										<span className="font-medium">Componentes:</span>{' '}
-										<span className="text-[10px]">
-											{displayModeInfo[displayMode].components.join(', ')}
-										</span>
+										<span className="text-[10px]">{displayModeInfo[displayMode].components.join(', ')}</span>
 									</p>
 									<p>
 										<span className="font-medium">Rendimiento:</span>{' '}
-										<span className={cn(
-											"text-[10px]",
-											displayMode === 'simple' && "text-green-500",
-											displayMode === 'complex' && "text-red-500",
-											displayMode === 'skeleton' && "text-amber-500",
-											displayMode === 'json' && "text-blue-500",
-										)}>
+										<span
+											className={cn(
+												'text-[10px]',
+												displayMode === 'simple' && 'text-green-500',
+												displayMode === 'complex' && 'text-red-500',
+												displayMode === 'skeleton' && 'text-amber-500',
+												displayMode === 'json' && 'text-blue-500'
+											)}
+										>
 											{displayModeInfo[displayMode].performance}
 										</span>
 									</p>
 									<p>
 										<span className="font-medium">Nivel de riesgo:</span>{' '}
-										<span className={cn(
-											"text-[10px]",
-											displayMode === 'complex' && "text-red-500 font-medium",
-										)}>
+										<span className={cn('text-[10px]', displayMode === 'complex' && 'text-red-500 font-medium')}>
 											{displayModeInfo[displayMode].riskLevel}
 										</span>
 									</p>
 									{displayMode === 'complex' && (
 										<p className="text-[10px] text-yellow-500 mt-1 border-t border-yellow-500/20 pt-1">
-											⚠️ El modo complejo puede causar problemas en dispositivos de gama baja o cuando hay muchas tarjetas.
+											⚠️ El modo complejo puede causar problemas en dispositivos de gama baja o cuando hay muchas
+											tarjetas.
 										</p>
 									)}
 								</div>
@@ -246,15 +231,15 @@ export function UnifiedDebugMenu() {
 
 						{/* Pestaña de Características */}
 						<TabsContent value="features" className="space-y-2">
-							<div className="text-xs text-muted-foreground mb-2">
-								Activar/desactivar características:
-							</div>
+							<div className="text-xs text-muted-foreground mb-2">Activar/desactivar características:</div>
 
 							<div className="space-y-2">
 								<div className="flex items-center justify-between">
 									<div className="flex items-center space-x-2">
 										<Sparkles className="h-3 w-3 text-muted-foreground" />
-										<Label htmlFor="3d-effect" className="text-xs">Efecto 3D</Label>
+										<Label htmlFor="3d-effect" className="text-xs">
+											Efecto 3D
+										</Label>
 									</div>
 									<Switch
 										id="3d-effect"
@@ -267,12 +252,16 @@ export function UnifiedDebugMenu() {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center space-x-2">
 										<Palette className="h-3 w-3 text-muted-foreground" />
-										<Label htmlFor="holographic" className="text-xs">Efecto holográfico</Label>
+										<Label htmlFor="holographic" className="text-xs">
+											Efecto holográfico
+										</Label>
 									</div>
 									<Switch
 										id="holographic"
 										checked={controlState.enableHolographicEffect}
-										onCheckedChange={(checked) => setControlState({ ...controlState, enableHolographicEffect: checked })}
+										onCheckedChange={(checked) =>
+											setControlState({ ...controlState, enableHolographicEffect: checked })
+										}
 										size="sm"
 									/>
 								</div>
@@ -280,7 +269,9 @@ export function UnifiedDebugMenu() {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center space-x-2">
 										<Lightbulb className="h-3 w-3 text-muted-foreground" />
-										<Label htmlFor="glow-effect" className="text-xs">Efecto de brillo</Label>
+										<Label htmlFor="glow-effect" className="text-xs">
+											Efecto de brillo
+										</Label>
 									</div>
 									<Switch
 										id="glow-effect"
@@ -293,7 +284,9 @@ export function UnifiedDebugMenu() {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center space-x-2">
 										<Droplet className="h-3 w-3 text-muted-foreground" />
-										<Label htmlFor="scanlines" className="text-xs">Scanlines</Label>
+										<Label htmlFor="scanlines" className="text-xs">
+											Scanlines
+										</Label>
 									</div>
 									<Switch
 										id="scanlines"
@@ -306,7 +299,9 @@ export function UnifiedDebugMenu() {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center space-x-2">
 										<Gauge className="h-3 w-3 text-muted-foreground" />
-										<Label htmlFor="animated-border" className="text-xs">Borde animado</Label>
+										<Label htmlFor="animated-border" className="text-xs">
+											Borde animado
+										</Label>
 									</div>
 									<Switch
 										id="animated-border"
@@ -319,7 +314,9 @@ export function UnifiedDebugMenu() {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center space-x-2">
 										<Image className="h-3 w-3 text-muted-foreground" />
-										<Label htmlFor="show-images" className="text-xs">Mostrar imágenes</Label>
+										<Label htmlFor="show-images" className="text-xs">
+											Mostrar imágenes
+										</Label>
 									</div>
 									<Switch
 										id="show-images"
@@ -332,22 +329,12 @@ export function UnifiedDebugMenu() {
 
 							<div className="pt-2 mt-2 border-t">
 								<div className="flex justify-between">
-									<Button
-										variant="outline"
-										size="sm"
-										className="h-7 text-xs"
-										onClick={enableAllFeatures}
-									>
+									<Button variant="outline" size="sm" className="h-7 text-xs" onClick={enableAllFeatures}>
 										<Eye className="h-3 w-3 mr-1.5" />
 										Activar todo
 									</Button>
 
-									<Button
-										variant="outline"
-										size="sm"
-										className="h-7 text-xs"
-										onClick={disableAllFeatures}
-									>
+									<Button variant="outline" size="sm" className="h-7 text-xs" onClick={disableAllFeatures}>
 										<EyeOff className="h-3 w-3 mr-1.5" />
 										Desactivar todo
 									</Button>
@@ -368,7 +355,9 @@ export function UnifiedDebugMenu() {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center space-x-2">
 										<Cpu className="h-3 w-3 text-muted-foreground" />
-										<Label htmlFor="show-renders" className="text-xs">Mostrar renderizados</Label>
+										<Label htmlFor="show-renders" className="text-xs">
+											Mostrar renderizados
+										</Label>
 									</div>
 									<Switch
 										id="show-renders"
@@ -381,7 +370,9 @@ export function UnifiedDebugMenu() {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center space-x-2">
 										<Sliders className="h-3 w-3 text-muted-foreground" />
-										<Label htmlFor="show-props" className="text-xs">Mostrar props</Label>
+										<Label htmlFor="show-props" className="text-xs">
+											Mostrar props
+										</Label>
 									</div>
 									<Switch
 										id="show-props"
@@ -394,7 +385,9 @@ export function UnifiedDebugMenu() {
 								<div className="flex items-center justify-between">
 									<div className="flex items-center space-x-2">
 										<BookOpenCheck className="h-3 w-3 text-muted-foreground" />
-										<Label htmlFor="log-events" className="text-xs">Registrar eventos</Label>
+										<Label htmlFor="log-events" className="text-xs">
+											Registrar eventos
+										</Label>
 									</div>
 									<Switch
 										id="log-events"
@@ -410,12 +403,14 @@ export function UnifiedDebugMenu() {
 									<div className="p-2 bg-black/10 rounded-sm text-[10px] space-y-1">
 										<p>
 											<span className="font-medium">Modo:</span>{' '}
-											<span className={cn(
-												displayMode === 'simple' && "text-blue-500",
-												displayMode === 'complex' && "text-purple-500",
-												displayMode === 'skeleton' && "text-amber-500",
-												displayMode === 'json' && "text-teal-500",
-											)}>
+											<span
+												className={cn(
+													displayMode === 'simple' && 'text-blue-500',
+													displayMode === 'complex' && 'text-purple-500',
+													displayMode === 'skeleton' && 'text-amber-500',
+													displayMode === 'json' && 'text-teal-500'
+												)}
+											>
 												{displayModeInfo[displayMode].name}
 											</span>
 										</p>

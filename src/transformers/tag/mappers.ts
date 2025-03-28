@@ -3,11 +3,7 @@
  * @module transformers/tag/mappers
  */
 
-import type {
-    CreateTagData,
-    TagFilters,
-    UpdateTagData
-} from '../../types/entities/tag/index';
+import type { CreateTagData, TagFilters, UpdateTagData } from '../../types/entities/tag/index';
 import { generateTagColor, generateTagEmoji } from './serializers';
 
 /**
@@ -16,21 +12,21 @@ import { generateTagColor, generateTagEmoji } from './serializers';
  * @returns Objeto formateado para Prisma
  */
 export function mapCreateTagDataToPrisma(data: CreateTagData) {
-  // Generar color y emoji si no se proporcionan
-  const color = data.color || generateTagColor(data.name);
-  const emoji = data.emoji || generateTagEmoji(data.name, data.category || undefined);
+	// Generar color y emoji si no se proporcionan
+	const color = data.color || generateTagColor(data.name);
+	const emoji = data.emoji || generateTagEmoji(data.name, data.category || undefined);
 
-  return {
-    name: data.name,
-    emoji,
-    color,
-    description: data.description || null,
-    shortcut: data.shortcut || null,
-    category: data.category || null,
-    rarity: data.rarity || null,
-    texture: data.texture || null,
-    isFavorite: data.isFavorite || false
-  };
+	return {
+		name: data.name,
+		emoji,
+		color,
+		description: data.description || null,
+		shortcut: data.shortcut || null,
+		category: data.category || null,
+		rarity: data.rarity || null,
+		texture: data.texture || null,
+		isFavorite: data.isFavorite || false,
+	};
 }
 
 /**
@@ -39,21 +35,21 @@ export function mapCreateTagDataToPrisma(data: CreateTagData) {
  * @returns Objeto formateado para Prisma
  */
 export function mapUpdateTagDataToPrisma(data: UpdateTagData) {
-  // Crear objeto con solo las propiedades definidas
-  const prismaData: Record<string, any> = {};
+	// Crear objeto con solo las propiedades definidas
+	const prismaData: Record<string, any> = {};
 
-  if (data.name !== undefined) prismaData.name = data.name;
-  if (data.emoji !== undefined) prismaData.emoji = data.emoji;
-  if (data.color !== undefined) prismaData.color = data.color;
-  if (data.description !== undefined) prismaData.description = data.description;
-  if (data.shortcut !== undefined) prismaData.shortcut = data.shortcut;
-  if (data.featuredImage !== undefined) prismaData.featuredImage = data.featuredImage;
-  if (data.isFavorite !== undefined) prismaData.isFavorite = data.isFavorite;
-  if (data.category !== undefined) prismaData.category = data.category;
-  if (data.rarity !== undefined) prismaData.rarity = data.rarity;
-  if (data.texture !== undefined) prismaData.texture = data.texture;
+	if (data.name !== undefined) prismaData.name = data.name;
+	if (data.emoji !== undefined) prismaData.emoji = data.emoji;
+	if (data.color !== undefined) prismaData.color = data.color;
+	if (data.description !== undefined) prismaData.description = data.description;
+	if (data.shortcut !== undefined) prismaData.shortcut = data.shortcut;
+	if (data.featuredImage !== undefined) prismaData.featuredImage = data.featuredImage;
+	if (data.isFavorite !== undefined) prismaData.isFavorite = data.isFavorite;
+	if (data.category !== undefined) prismaData.category = data.category;
+	if (data.rarity !== undefined) prismaData.rarity = data.rarity;
+	if (data.texture !== undefined) prismaData.texture = data.texture;
 
-  return prismaData;
+	return prismaData;
 }
 
 /**
@@ -62,35 +58,35 @@ export function mapUpdateTagDataToPrisma(data: UpdateTagData) {
  * @returns Objeto de condiciones para Prisma
  */
 export function mapTagFiltersToPrisma(filters: TagFilters) {
-  const where: Record<string, any> = {};
+	const where: Record<string, any> = {};
 
-  // Filtrar por término de búsqueda
-  if (filters.searchQuery) {
-    where.OR = [
-      { name: { contains: filters.searchQuery, mode: 'insensitive' } },
-      { description: { contains: filters.searchQuery, mode: 'insensitive' } },
-    ];
-  }
+	// Filtrar por término de búsqueda
+	if (filters.searchQuery) {
+		where.OR = [
+			{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
+			{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
+		];
+	}
 
-  // Filtrar por categorías
-  if (filters.categories && filters.categories.length > 0) {
-    where.category = { in: filters.categories };
-  }
+	// Filtrar por categorías
+	if (filters.categories && filters.categories.length > 0) {
+		where.category = { in: filters.categories };
+	}
 
-  // Filtrar por rarezas
-  if (filters.rarities && filters.rarities.length > 0) {
-    where.rarity = { in: filters.rarities };
-  }
+	// Filtrar por rarezas
+	if (filters.rarities && filters.rarities.length > 0) {
+		where.rarity = { in: filters.rarities };
+	}
 
-  // Filtrar favoritos
-  if (filters.onlyFavorites) {
-    where.isFavorite = true;
-  }
+	// Filtrar favoritos
+	if (filters.onlyFavorites) {
+		where.isFavorite = true;
+	}
 
-  // No podemos filtrar directamente por count en Prisma,
-  // esto tendría que hacerse post-procesando los resultados
+	// No podemos filtrar directamente por count en Prisma,
+	// esto tendría que hacerse post-procesando los resultados
 
-  return { where };
+	return { where };
 }
 
 /**
@@ -99,11 +95,11 @@ export function mapTagFiltersToPrisma(filters: TagFilters) {
  * @returns Etiqueta simplificada
  */
 export function mapTagToRelatedTag(tag: any) {
-  return {
-    id: tag.id,
-    name: tag.name,
-    color: tag.color,
-    emoji: tag.emoji,
-    count: tag._count?.images || 0
-  };
+	return {
+		id: tag.id,
+		name: tag.name,
+		color: tag.color,
+		emoji: tag.emoji,
+		count: tag._count?.images || 0,
+	};
 }

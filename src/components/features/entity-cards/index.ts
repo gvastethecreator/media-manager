@@ -23,13 +23,13 @@ export {
 	EntityCardLayersProvider,
 	LayerRenderer,
 	RegisterAllLayers,
-	RegisterLayersByEntityType
+	RegisterLayersByEntityType,
 } from './modules/layers';
 
 // Tipos de capas
 export type {
 	CommonLayerProps,
-	LayerImplementation
+	LayerImplementation,
 } from './modules/layers/types';
 export type { BaseLayerConfig } from './modules/layers/layer-config-base';
 
@@ -46,4 +46,3 @@ export { EntityCardWrapper } from './entity-card-wrapper';
 if (process.env.NODE_ENV === 'development') {
 	console.info('🔄 Sistema de tarjetas de entidad - Versión simplificada');
 }
-

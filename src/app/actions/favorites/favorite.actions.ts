@@ -4,20 +4,16 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import {
-    groupFavoritesByType,
-    mapCreateFavoriteDataToPrisma,
-    toFavoriteExtended
-} from '@/transformers/favorite';
+import { groupFavoritesByType, mapCreateFavoriteDataToPrisma, toFavoriteExtended } from '@/transformers/favorite';
 import { transformImageToFileItem } from '@/transformers/favorite/serializers';
 import {
-    FavoriteAction,
-    type FavoriteBase,
-    type FavoriteCreateInput,
-    FavoriteEntityType,
-    FavoriteErrorCode,
-    FavoriteEventType,
-    type FavoriteWithImage
+	FavoriteAction,
+	type FavoriteBase,
+	type FavoriteCreateInput,
+	FavoriteEntityType,
+	FavoriteErrorCode,
+	FavoriteEventType,
+	type FavoriteWithImage,
 } from '@/types/entities/favorite';
 import { revalidatePath } from 'next/cache';
 
@@ -48,11 +44,7 @@ const createFavoriteError = (
 /**
  * Notifica sobre cambios en los favoritos
  */
-const notifyFavoriteChange = async (
-	entityId: string,
-	entityType: string,
-	action: FavoriteAction
-): Promise<void> => {
+const notifyFavoriteChange = async (entityId: string, entityType: string, action: FavoriteAction): Promise<void> => {
 	try {
 		// Emitir eventos usando el sistema del servidor
 		await emit({
@@ -85,10 +77,7 @@ export async function addToFavorites(entityId: string, entityType: string): Prom
 			});
 
 			if (!image) {
-				throw createFavoriteError(
-					'No se encontró la imagen',
-					FavoriteErrorCode.ENTITY_NOT_FOUND
-				);
+				throw createFavoriteError('No se encontró la imagen', FavoriteErrorCode.ENTITY_NOT_FOUND);
 			}
 
 			// Actualizar el campo isFavorite de la imagen
@@ -104,7 +93,7 @@ export async function addToFavorites(entityId: string, entityType: string): Prom
 			// Crear datos de favorito usando el transformer
 			const favoriteData: FavoriteCreateInput = {
 				entityId: updatedImage.id,
-				entityType: FavoriteEntityType.IMAGE
+				entityType: FavoriteEntityType.IMAGE,
 			};
 
 			// Mapear datos usando el transformer
@@ -117,7 +106,7 @@ export async function addToFavorites(entityId: string, entityType: string): Prom
 				entityType: favoriteInputData.entityType,
 				userId: null, // Añadir usuario cuando se implemente autenticación
 				createdAt: updatedImage.createdAt,
-				updatedAt: updatedImage.updatedAt
+				updatedAt: updatedImage.updatedAt,
 			};
 
 			await notifyFavoriteChange(entityId, entityType, FavoriteAction.ADD);
@@ -125,14 +114,11 @@ export async function addToFavorites(entityId: string, entityType: string): Prom
 			// Transformar el favorito con la imagen usando el serializer
 			return {
 				...favorite,
-				image: transformImageToFileItem(updatedImage)
+				image: transformImageToFileItem(updatedImage),
 			};
 		}
 
-		throw createFavoriteError(
-			`Tipo de entidad no soportada: ${entityType}`,
-			FavoriteErrorCode.INVALID_ENTITY_TYPE
-		);
+		throw createFavoriteError(`Tipo de entidad no soportada: ${entityType}`, FavoriteErrorCode.INVALID_ENTITY_TYPE);
 	} catch (error) {
 		favoriteLogger.error('❌ Error al agregar a favoritos:', { entityId, entityType, error });
 
@@ -140,11 +126,7 @@ export async function addToFavorites(entityId: string, entityType: string): Prom
 			throw error;
 		}
 
-		throw createFavoriteError(
-			'No se pudo agregar a favoritos',
-			FavoriteErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createFavoriteError('No se pudo agregar a favoritos', FavoriteErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -166,10 +148,7 @@ export async function removeFromFavorites(entityId: string, entityType: string):
 			return;
 		}
 
-		throw createFavoriteError(
-			`Tipo de entidad no soportada: ${entityType}`,
-			FavoriteErrorCode.INVALID_ENTITY_TYPE
-		);
+		throw createFavoriteError(`Tipo de entidad no soportada: ${entityType}`, FavoriteErrorCode.INVALID_ENTITY_TYPE);
 	} catch (error) {
 		favoriteLogger.error('❌ Error al eliminar de favoritos:', { entityId, entityType, error });
 
@@ -177,11 +156,7 @@ export async function removeFromFavorites(entityId: string, entityType: string):
 			throw error;
 		}
 
-		throw createFavoriteError(
-			'No se pudo eliminar de favoritos',
-			FavoriteErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createFavoriteError('No se pudo eliminar de favoritos', FavoriteErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -205,21 +180,21 @@ export async function getFavorites(): Promise<FavoriteWithImage[]> {
 		});
 
 		// Convertir las imágenes a favoritos con imagen usando los transformers
-		const favorites: FavoriteBase[] = favoriteImages.map(image => ({
+		const favorites: FavoriteBase[] = favoriteImages.map((image) => ({
 			id: image.id,
 			entityId: image.id,
 			entityType: FavoriteEntityType.IMAGE,
 			userId: null,
 			createdAt: image.createdAt,
-			updatedAt: image.updatedAt
+			updatedAt: image.updatedAt,
 		}));
 
 		// Transformar a FavoriteWithImage usando el serializer
-		const transformedFavorites = favorites.map(favorite => {
-			const imageData = favoriteImages.find(img => img.id === favorite.entityId);
+		const transformedFavorites = favorites.map((favorite) => {
+			const imageData = favoriteImages.find((img) => img.id === favorite.entityId);
 			return {
 				...favorite,
-				image: transformImageToFileItem(imageData || {})
+				image: transformImageToFileItem(imageData || {}),
 			} as FavoriteWithImage;
 		});
 
@@ -227,11 +202,7 @@ export async function getFavorites(): Promise<FavoriteWithImage[]> {
 		return transformedFavorites;
 	} catch (error) {
 		favoriteLogger.error('❌ Error al obtener favoritos:', error);
-		throw createFavoriteError(
-			'No se pudieron obtener los favoritos',
-			FavoriteErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createFavoriteError('No se pudieron obtener los favoritos', FavoriteErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -275,10 +246,7 @@ export async function toggleFavorite(entityId: string, entityType: string): Prom
 			});
 
 			if (!image) {
-				throw createFavoriteError(
-					'No se encontró la imagen',
-					FavoriteErrorCode.ENTITY_NOT_FOUND
-				);
+				throw createFavoriteError('No se encontró la imagen', FavoriteErrorCode.ENTITY_NOT_FOUND);
 			}
 
 			// Invertir el estado
@@ -291,19 +259,12 @@ export async function toggleFavorite(entityId: string, entityType: string): Prom
 			});
 
 			// Notificar cambio
-			await notifyFavoriteChange(
-				entityId,
-				entityType,
-				newState ? FavoriteAction.ADD : FavoriteAction.REMOVE
-			);
+			await notifyFavoriteChange(entityId, entityType, newState ? FavoriteAction.ADD : FavoriteAction.REMOVE);
 
 			return newState;
 		}
 
-		throw createFavoriteError(
-			`Tipo de entidad no soportada: ${entityType}`,
-			FavoriteErrorCode.INVALID_ENTITY_TYPE
-		);
+		throw createFavoriteError(`Tipo de entidad no soportada: ${entityType}`, FavoriteErrorCode.INVALID_ENTITY_TYPE);
 	} catch (error) {
 		favoriteLogger.error('❌ Error al alternar favorito:', { entityId, entityType, error });
 
@@ -311,11 +272,7 @@ export async function toggleFavorite(entityId: string, entityType: string): Prom
 			throw error;
 		}
 
-		throw createFavoriteError(
-			'No se pudo alternar el estado de favorito',
-			FavoriteErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createFavoriteError('No se pudo alternar el estado de favorito', FavoriteErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -330,14 +287,16 @@ export async function getFavoriteStats() {
 		const favorites = await getFavorites();
 
 		// Convertir a tipo extendido usando transformers
-		const extendedFavorites = favorites.map(fav => toFavoriteExtended({
-			id: fav.id,
-			entityId: fav.entityId,
-			entityType: fav.entityType,
-			userId: fav.userId,
-			createdAt: fav.createdAt,
-			updatedAt: fav.updatedAt
-		}));
+		const extendedFavorites = favorites.map((fav) =>
+			toFavoriteExtended({
+				id: fav.id,
+				entityId: fav.entityId,
+				entityType: fav.entityType,
+				userId: fav.userId,
+				createdAt: fav.createdAt,
+				updatedAt: fav.updatedAt,
+			})
+		);
 
 		// Agrupar por tipo usando transformer
 		const groupedFavorites = groupFavoritesByType(extendedFavorites);
@@ -345,13 +304,9 @@ export async function getFavoriteStats() {
 		// Crear objeto de estadísticas
 		const stats = {
 			totalCount: favorites.length,
-			byType: Object.fromEntries(
-				groupedFavorites.map(group => [group.type, group.count])
-			),
+			byType: Object.fromEntries(groupedFavorites.map((group) => [group.type, group.count])),
 			byGroups: groupedFavorites,
-			recentlyAdded: extendedFavorites
-				.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-				.slice(0, 5)
+			recentlyAdded: extendedFavorites.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).slice(0, 5),
 		};
 
 		favoriteLogger.info('✅ Estadísticas de favoritos obtenidas');

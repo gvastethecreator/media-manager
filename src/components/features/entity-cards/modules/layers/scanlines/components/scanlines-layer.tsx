@@ -38,10 +38,13 @@ const ScanlinesLayerComponent = ({
 	}
 
 	// 🎨 Calcular los estilos del canvas
-	const canvasStyle = useMemo(() => ({
-		...style,
-		mixBlendMode: processedConfig.blendMode as React.CSSProperties['mixBlendMode'],
-	}), [processedConfig.blendMode, style]);
+	const canvasStyle = useMemo(
+		() => ({
+			...style,
+			mixBlendMode: processedConfig.blendMode as React.CSSProperties['mixBlendMode'],
+		}),
+		[processedConfig.blendMode, style]
+	);
 
 	return (
 		<motion.canvas

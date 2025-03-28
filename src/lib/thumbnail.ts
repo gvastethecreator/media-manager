@@ -177,11 +177,13 @@ export async function generateThumbnail(
 	try {
 		// Validar archivo
 		if (!existsSync(filePath)) {
+			thumbLogger.error(`Archivo no encontrado: ${filePath}`);
 			throw new Error(`Archivo no encontrado: ${filePath}`);
 		}
 
 		const ext = extname(filePath).toLowerCase();
 		if (!SUPPORTED_FORMATS.has(ext)) {
+			thumbLogger.error(`Formato no soportado: ${ext}`);
 			throw new Error(`Formato no soportado: ${ext}`);
 		}
 
@@ -189,6 +191,7 @@ export async function generateThumbnail(
 		const finalOptions = { ...DEFAULT_OPTIONS, ...options };
 		const config = THUMBNAIL_QUALITY_CONFIG[finalOptions.quality as ThumbnailQuality];
 		if (!config) {
+			thumbLogger.error(`Calidad inválida: ${finalOptions.quality}`);
 			throw new Error(`Calidad inválida: ${finalOptions.quality}`);
 		}
 
@@ -210,6 +213,9 @@ export async function generateThumbnail(
 			options: finalOptions,
 			config,
 		});
+
+		// Para depuración
+		console.log(`Generando thumbnail para: ${filePath}`);
 
 		// Inicializar sharp
 		const image = sharp(filePath, {
@@ -248,40 +254,50 @@ export async function generateThumbnail(
 		let processor = image.resize(validDimensions.width, validDimensions.height, {
 			fit: 'inside',
 			withoutEnlargement: true,
-			background: finalOptions.background,
 		});
 
-		if (finalOptions.preserveMetadata) {
-			processor = processor.withMetadata();
-		}
-
-		// Aplicar formato y optimizaciones
+		// Configurar opciones de salida según el formato deseado
+		let outputOptions: any = {};
 		const format = finalOptions.format || 'webp';
+
+		// Crear configuración específica del formato
 		switch (format) {
 			case 'webp':
-				processor = processor.webp({
+				outputOptions = {
 					quality: config.quality,
-					effort: 4,
-					nearLossless: config.quality >= 90,
+					effort: config.effort || 4,
 					smartSubsample: true,
-				});
+					reductionEffort: 4,
+				};
+				processor = processor.webp(outputOptions);
 				break;
+
 			case 'jpeg':
-				processor = processor.jpeg({
+			case 'jpg':
+				outputOptions = {
 					quality: config.quality,
 					progressive: finalOptions.progressive,
-					optimizeCoding: true,
-					trellisQuantisation: true,
-				});
+					mozjpeg: true,
+				};
+				processor = processor.jpeg(outputOptions);
 				break;
+
+			case 'avif':
+				outputOptions = {
+					quality: config.quality,
+					effort: config.effort || 4,
+				};
+				processor = processor.avif(outputOptions);
+				break;
+
 			case 'png':
-				processor = processor.png({
-					quality: config.quality,
-					progressive: finalOptions.progressive,
+				outputOptions = {
 					compressionLevel: 9,
-					adaptiveFiltering: true,
-				});
+					progressive: finalOptions.progressive,
+				};
+				processor = processor.png(outputOptions);
 				break;
+
 			default:
 				processor = processor.webp({
 					quality: config.quality,
@@ -289,39 +305,32 @@ export async function generateThumbnail(
 				});
 		}
 
-		// Generar buffer
-		const buffer = await processor.toBuffer();
-		if (!buffer || buffer.length === 0) {
-			throw new Error('Error generando buffer del thumbnail');
+		// Generar thumbnail
+		try {
+			const { data, info } = await processor.toBuffer({ resolveWithObject: true });
+
+			// Guardar en caché para futuros usos
+			await saveToCache(cacheKey, data);
+
+			// Para depuración
+			console.log(`Thumbnail generado - Dimensiones: ${info.width}x${info.height}, Tamaño: ${data.length} bytes`);
+
+			// Devolver resultado
+			return {
+				buffer: data,
+				width: info.width,
+				height: info.height,
+				format: format as ImageFormat,
+				size: data.length,
+				originalSize: metadata.size,
+			};
+		} catch (processingError) {
+			thumbLogger.error('Error procesando imagen:', processingError);
+			throw new Error(`Error procesando imagen: ${processingError instanceof Error ? processingError.message : String(processingError)}`);
 		}
-
-		const result: ThumbnailResult = {
-			buffer,
-			width: validDimensions.width,
-			height: validDimensions.height,
-			format,
-			size: buffer.length,
-			originalSize: metadata.size,
-		};
-
-		// Guardar en caché
-		await saveToCache(cacheKey, buffer);
-
-		thumbLogger.debug('Thumbnail generado:', {
-			path: filePath,
-			dimensions: `${result.width}x${result.height}`,
-			originalSize: formatBytes(metadata.size || 0),
-			newSize: formatBytes(result.size),
-			reduction: metadata.size ? `${((1 - result.size / metadata.size) * 100).toFixed(1)}%` : 'N/A',
-		});
-
-		return result;
 	} catch (error) {
-		thumbLogger.error('Error generando thumbnail:', {
-			path: filePath,
-			error: error instanceof Error ? error.message : error,
-		});
-		throw error instanceof Error ? error : new Error('Error generando thumbnail');
+		thumbLogger.error('Error generando thumbnail:', error);
+		throw error;
 	}
 }
 

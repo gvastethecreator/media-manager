@@ -140,8 +140,7 @@ export const useWorldItemStore = create<WorldItemStore>()(
 			setViewMode: (mode) => set((state) => ({ ui: { ...state.ui, viewMode: mode } })),
 
 			// 🔍 Filtros
-			updateFilters: (filters) =>
-				set((state) => ({ filters: { ...state.filters, ...filters } })),
+			updateFilters: (filters) => set((state) => ({ filters: { ...state.filters, ...filters } })),
 			clearFilters: () =>
 				set((state) => ({
 					filters: {
@@ -160,9 +159,7 @@ export const useWorldItemStore = create<WorldItemStore>()(
 				const { searchTerm, category, rarity, type } = filters;
 
 				return worldItems.filter((item) => {
-					const matchesSearch = searchTerm
-						? item.name.toLowerCase().includes(searchTerm.toLowerCase())
-						: true;
+					const matchesSearch = searchTerm ? item.name.toLowerCase().includes(searchTerm.toLowerCase()) : true;
 					const matchesCategory = category ? item.category === category : true;
 					const matchesRarity = rarity ? item.rarity === rarity : true;
 					const matchesType = type ? item.type === type : true;
@@ -229,5 +226,5 @@ export const worldItemApi = {
 	getWorldItemById: (id: string) => useWorldItemStore.getState().getWorldItemById(id),
 	getFilteredWorldItems: () => useWorldItemStore.getState().getFilteredWorldItems(),
 	getSortedWorldItems: () => useWorldItemStore.getState().getSortedWorldItems(),
-	setError: (error: string | null) => useWorldItemStore.getState().setError(error)
+	setError: (error: string | null) => useWorldItemStore.getState().setError(error),
 };

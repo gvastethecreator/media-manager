@@ -4,10 +4,10 @@
  */
 
 import type {
-    FolderExtended,
-    FolderSummary,
-    FolderTreeItem,
-    FolderVisualConfigExtended
+	FolderExtended,
+	FolderSummary,
+	FolderTreeItem,
+	FolderVisualConfigExtended,
 } from '@/types/entities/folder';
 import type { Folder as PrismaFolder, FolderVisualConfig as PrismaFolderVisualConfig } from '@prisma/client';
 
@@ -17,16 +17,16 @@ import type { Folder as PrismaFolder, FolderVisualConfig as PrismaFolderVisualCo
  * @returns FolderExtended con propiedades adicionales
  */
 export function toFolderExtended(folder: PrismaFolder): FolderExtended {
-  return {
-    ...folder,
-    lastIndexed: folder.lastIndexed || undefined,
-    // Propiedades adicionales de UI que no existen en la BD
-    isSelected: false,
-    isOpen: false,
-    level: 0,
-    isLoading: false,
-    hasError: false,
-  };
+	return {
+		...folder,
+		lastIndexed: folder.lastIndexed || undefined,
+		// Propiedades adicionales de UI que no existen en la BD
+		isSelected: false,
+		isOpen: false,
+		level: 0,
+		isLoading: false,
+		hasError: false,
+	};
 }
 
 /**
@@ -35,13 +35,13 @@ export function toFolderExtended(folder: PrismaFolder): FolderExtended {
  * @returns FolderVisualConfigExtended con propiedades adicionales
  */
 export function toFolderVisualConfigExtended(config: PrismaFolderVisualConfig): FolderVisualConfigExtended {
-  return {
-    ...config,
-    // Propiedades adicionales de UI
-    previewMode: 'default',
-    isActive: false,
-    effectsEnabled: true,
-  };
+	return {
+		...config,
+		// Propiedades adicionales de UI
+		previewMode: 'default',
+		isActive: false,
+		effectsEnabled: true,
+	};
 }
 
 /**
@@ -53,24 +53,24 @@ export function toFolderVisualConfigExtended(config: PrismaFolderVisualConfig): 
  * @returns FolderTreeItem para usar en navegación
  */
 export function toFolderTreeItem(
-  folder: PrismaFolder | FolderExtended,
-  level = 0,
-  isSelected = false,
-  isOpen = false
+	folder: PrismaFolder | FolderExtended,
+	level = 0,
+	isSelected = false,
+	isOpen = false
 ): FolderTreeItem {
-  return {
-    id: folder.id,
-    name: folder.name,
-    path: folder.path,
-    parentId: folder.parentId,
-    emoji: folder.emoji || '📁',
-    color: folder.color || '#3b82f6',
-    children: [],
-    level,
-    isOpen,
-    isSelected,
-    hasChildren: false,
-  };
+	return {
+		id: folder.id,
+		name: folder.name,
+		path: folder.path,
+		parentId: folder.parentId,
+		emoji: folder.emoji || '📁',
+		color: folder.color || '#3b82f6',
+		children: [],
+		level,
+		isOpen,
+		isSelected,
+		hasChildren: false,
+	};
 }
 
 /**
@@ -79,14 +79,14 @@ export function toFolderTreeItem(
  * @returns FolderSummary con datos básicos
  */
 export function toFolderSummary(folder: PrismaFolder | FolderExtended): FolderSummary {
-  return {
-    id: folder.id,
-    name: folder.name,
-    path: folder.path,
-    imageCount: folder.totalFiles || 0,
-    totalSize: folder.totalSize || 0,
-    lastIndexed: folder.lastIndexed instanceof Date ? folder.lastIndexed : null,
-  };
+	return {
+		id: folder.id,
+		name: folder.name,
+		path: folder.path,
+		imageCount: folder.totalFiles || 0,
+		totalSize: folder.totalSize || 0,
+		lastIndexed: folder.lastIndexed instanceof Date ? folder.lastIndexed : null,
+	};
 }
 
 /**
@@ -96,44 +96,44 @@ export function toFolderSummary(folder: PrismaFolder | FolderExtended): FolderSu
  * @returns Datos limpios para guardar en BD
  */
 export function toPrismaFolder(folder: Partial<FolderExtended>): Partial<PrismaFolder> {
-  // Extraer solo las propiedades que existen en PrismaFolder
-  const {
-    id,
-    name,
-    description,
-    path,
-    parentId,
-    createdAt,
-    updatedAt,
-    visualConfigId,
-    totalFiles,
-    totalSize,
-    lastIndexed,
-    autoReindex,
-    featuredImage,
-    isFavorite,
-    emoji,
-    color,
-    presetId,
-  } = folder;
+	// Extraer solo las propiedades que existen en PrismaFolder
+	const {
+		id,
+		name,
+		description,
+		path,
+		parentId,
+		createdAt,
+		updatedAt,
+		visualConfigId,
+		totalFiles,
+		totalSize,
+		lastIndexed,
+		autoReindex,
+		featuredImage,
+		isFavorite,
+		emoji,
+		color,
+		presetId,
+	} = folder;
 
-  return {
-    id,
-    name,
-    description,
-    path,
-    parentId,
-    createdAt,
-    updatedAt,
-    visualConfigId,
-    totalFiles,
-    totalSize,
-    lastIndexed: lastIndexed instanceof Date ? lastIndexed : undefined,
-    autoReindex,
-    featuredImage,
-    isFavorite,
-    emoji,
-    color,
-    presetId,
-  };
+	return {
+		id,
+		name,
+		description,
+		path,
+		parentId,
+		createdAt,
+		updatedAt,
+		visualConfigId,
+		totalFiles,
+		totalSize,
+		lastIndexed: lastIndexed instanceof Date ? lastIndexed : undefined,
+		autoReindex,
+		featuredImage,
+		isFavorite,
+		emoji,
+		color,
+		presetId,
+	};
 }

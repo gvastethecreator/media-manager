@@ -108,7 +108,7 @@ const DEFAULT_PRESETS = [
 					stars: 1,
 					textureType: 'noise',
 					glowIntensity: 0.4,
-					textureOpacity: 0.15
+					textureOpacity: 0.15,
 				},
 				uncommon: {
 					color: '#22c55e',
@@ -118,7 +118,7 @@ const DEFAULT_PRESETS = [
 					stars: 2,
 					textureType: 'dots',
 					glowIntensity: 0.5,
-					textureOpacity: 0.2
+					textureOpacity: 0.2,
 				},
 				rare: {
 					color: '#3b82f6',
@@ -129,7 +129,7 @@ const DEFAULT_PRESETS = [
 					textureType: 'grid',
 					glowIntensity: 0.65,
 					textureOpacity: 0.25,
-					borderAnimation: 'pulse'
+					borderAnimation: 'pulse',
 				},
 				legendary: {
 					color: '#eab308',
@@ -141,7 +141,7 @@ const DEFAULT_PRESETS = [
 					textureType: 'sparkle',
 					glowIntensity: 0.8,
 					textureOpacity: 0.3,
-					borderAnimation: 'flow'
+					borderAnimation: 'flow',
 				},
 				mythic: {
 					color: '#d946ef',
@@ -153,9 +153,9 @@ const DEFAULT_PRESETS = [
 					textureType: 'rainbow',
 					glowIntensity: 1,
 					textureOpacity: 0.35,
-					borderAnimation: 'rainbow'
-				}
-			}
+					borderAnimation: 'rainbow',
+				},
+			},
 		}),
 		folderConfig: JSON.stringify({
 			layout: 'tcg',

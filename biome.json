@@ -14,7 +14,6 @@
       "correctness": {
         "useExhaustiveDependencies": "warn",
         "noNodejsModules": "off"
-
       },
       "suspicious": {
         "noConsoleLog": "off",
@@ -32,7 +31,6 @@
       "performance": {
         "noDelete": "error"
       }
-
     }
   },
   "formatter": {

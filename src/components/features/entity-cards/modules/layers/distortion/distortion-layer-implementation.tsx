@@ -41,7 +41,7 @@ const defaultConfig: DistortionEffectsSystem & { layerIndex: number } = {
 		intensity: 0.5,
 		blockSize: 8,
 	},
-	layerIndex: 5
+	layerIndex: 5,
 };
 
 /**
@@ -52,7 +52,7 @@ function DistortionEffectLayer({
 	isHovered,
 	isExploded,
 	getExplodeLayerTransform,
-	activeLayer
+	activeLayer,
 }: {
 	config: DistortionEffectsSystem & { layerIndex: number };
 	isHovered: boolean;
@@ -121,7 +121,7 @@ export const distortionLayerImplementation: LayerImplementation = {
 
 		const effectConfig = {
 			...defaultConfig,
-			...config
+			...config,
 		} as DistortionEffectsSystem & { layerIndex: number };
 
 		// Función para calcular el estilo de transformación para capas explotadas
@@ -150,15 +150,15 @@ export const distortionLayerImplementation: LayerImplementation = {
 		const { config, onChange, entityType, entityId } = props;
 		const [effectsSystem, setEffectsSystem] = useState<DistortionEffectsSystem & { layerIndex: number }>({
 			...defaultConfig,
-			...(config as unknown as DistortionEffectsSystem)
+			...(config as unknown as DistortionEffectsSystem),
 		});
 
 		// Actualizar el estado cuando cambien las props
 		useEffect(() => {
 			if (config) {
-				setEffectsSystem(prevState => ({
+				setEffectsSystem((prevState) => ({
 					...prevState,
-					...config
+					...config,
 				}));
 			}
 		}, [config]);
@@ -167,22 +167,16 @@ export const distortionLayerImplementation: LayerImplementation = {
 		const handleChange = (updatedSystem: DistortionEffectsSystem) => {
 			setEffectsSystem({
 				...updatedSystem,
-				layerIndex: effectsSystem.layerIndex
+				layerIndex: effectsSystem.layerIndex,
 			} as DistortionEffectsSystem & { layerIndex: number });
 			onChange({
 				...updatedSystem,
-				layerIndex: effectsSystem.layerIndex
+				layerIndex: effectsSystem.layerIndex,
 			} as unknown as Record<string, unknown>);
 		};
 
-		return (
-			<DistortionEffectsModule
-				initialEffectsSystem={effectsSystem}
-				onChange={handleChange}
-				className="mt-4"
-			/>
-		);
-	}
+		return <DistortionEffectsModule initialEffectsSystem={effectsSystem} onChange={handleChange} className="mt-4" />;
+	},
 };
 
 /**
