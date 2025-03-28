@@ -24,6 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
+import { ConceptBase, ConceptExtended } from '@/types/entities/concept';
 import { ConceptCategory } from '@/types/entities/concept/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -43,29 +44,13 @@ const conceptSchema = z.object({
 	isFavorite: z.boolean().default(false),
 });
 
-type Concept = {
-	id: string;
-	name: string;
-	description?: string | null;
-	content?: string;
-	emoji: string;
-	color: string;
-	category: string;
-	tags: string;
-	isFavorite?: boolean;
-	featuredImage?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-	presetId?: string | null;
-};
-
 type ConceptForm = z.infer<typeof conceptSchema>;
 
 interface CreateConceptFormProps {
-	concept?: Concept | null;
+	concept?: ConceptExtended | null;
 	isEditing?: boolean;
-	onCreated?: (concept: Concept) => void;
-	onUpdated?: (concept: Concept) => void;
+	onCreated?: (concept: ConceptBase) => void;
+	onUpdated?: (concept: ConceptBase) => void;
 	onCancel?: () => void;
 	onPreview?: (data: any) => void;
 }
@@ -128,7 +113,7 @@ export function CreateConceptForm({
 
 			if (isEditing && concept) {
 				// Actualizar concepto existente con el ID
-				const updatedConcept = await updateConcept({
+				const updatedConcept = await updateConcept(concept.id, {
 					id: concept.id,
 					...data
 				});

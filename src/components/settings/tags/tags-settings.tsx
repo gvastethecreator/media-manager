@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteTag, getTags, TagWithStats } from '@/app/actions/tags/tag.actions';
+import { deleteTag, getTags, TagWithStats as ServerTagWithStats } from '@/app/actions/tags/tag.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,11 +16,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import { Tag } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag/enums';
+import { Tag } from '@/types/entities/tag/types';
 import { Filter, Info, Loader2, PlusCircle, Save, Tag as TagIcon, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreateTagForm } from './create-tag-form';
+
+// Definir tipo para el manejador de eventos del botón
+type ButtonClickHandler = React.MouseEventHandler<HTMLButtonElement>;
+
+// Extender la interfaz TagWithStats para incluir los campos que necesitamos
+interface TagWithStats extends Omit<ServerTagWithStats, 'emoji' | 'lastUpdated' | 'createdAt' | 'updatedAt' | 'description' | 'shortcut'> {
+	emoji: string | null;
+	category?: string | null;
+	isFavorite?: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	lastUpdated: Date;
+	description: string | null;
+	shortcut: string | null;
+}
 
 export function TagsSettings() {
 	const [tags, setTags] = useState<TagWithStats[]>([]);
@@ -41,7 +56,16 @@ export function TagsSettings() {
 			try {
 				setIsLoading(true);
 				const data = await getTags();
-				setTags(data);
+				// Convertir los datos para que coincidan con nuestra interfaz
+				const formattedTags = data.map(tag => ({
+					...tag,
+					emoji: tag.emoji || null,
+					createdAt: new Date(tag.createdAt),
+					updatedAt: new Date(tag.updatedAt),
+					lastUpdated: new Date(tag.lastUpdated)
+				})) as TagWithStats[];
+
+				setTags(formattedTags);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
@@ -72,10 +96,9 @@ export function TagsSettings() {
 		// Filtrar por búsqueda
 		if (searchQuery) {
 			const normalizedQuery = searchQuery.toLowerCase();
-			matches = matches && (
-				tag.name.toLowerCase().includes(normalizedQuery) ||
-				(tag.description && tag.description.toLowerCase().includes(normalizedQuery))
-			);
+			const nameMatch = tag.name.toLowerCase().includes(normalizedQuery);
+			const descriptionMatch = tag.description && tag.description.toLowerCase().includes(normalizedQuery);
+			matches = matches && (nameMatch || Boolean(descriptionMatch));
 		}
 
 		// Filtrar por categorías
@@ -107,15 +130,54 @@ export function TagsSettings() {
 		}
 	}, []);
 
+	// Manejar la eliminación desde el botón con detención de propagación de eventos
+	const handleDeleteButtonClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
+		const id = (e.currentTarget as HTMLButtonElement).getAttribute('data-id');
+		if (id) {
+			handleDeleteTag(id);
+		}
+	}, [handleDeleteTag]);
+
 	// Manejar edición de etiqueta
-	const handleEditTag = useCallback((tag: Tag) => {
-		setSelectedTag(tag);
+	const handleEditTag = useCallback((tag: TagWithStats) => {
+		// Convertir TagWithStats a Tag (UI) para edición
+		const uiTag: Tag = {
+			id: tag.id,
+			name: tag.name,
+			description: tag.description,
+			color: tag.color,
+			emoji: tag.emoji || '🏷️',
+			category: tag.category || undefined,
+			isFavorite: tag.isFavorite || false,
+			createdAt: tag.createdAt,
+			updatedAt: tag.updatedAt,
+			_count: tag._count,
+		};
+		setSelectedTag(uiTag);
 		setIsEditing(true);
 	}, []);
 
 	// Manejar creación exitosa
 	const handleTagCreated = useCallback((newTag: Tag) => {
-		setTags(prev => [...prev, newTag as unknown as TagWithStats]);
+		// Convertir Tag (UI) a TagWithStats para la lista
+		const statsTag: TagWithStats = {
+			id: newTag.id,
+			name: newTag.name,
+			color: newTag.color,
+			description: newTag.description || null,
+			createdAt: new Date(newTag.createdAt),
+			updatedAt: new Date(newTag.updatedAt),
+			emoji: newTag.emoji || "🏷️",
+			_count: { images: 0 },
+			totalSize: 0,
+			lastUpdated: new Date(),
+			category: newTag.category || null,
+			isFavorite: newTag.isFavorite || false,
+			shortcut: newTag.shortcut || null
+		};
+
+		setTags(prev => [...prev, statsTag]);
 		toastService.success('Etiqueta creada');
 	}, []);
 
@@ -124,7 +186,15 @@ export function TagsSettings() {
 		setTags(prev =>
 			prev.map(tag =>
 				tag.id === updatedTag.id
-					? { ...tag, ...updatedTag } as TagWithStats
+					? {
+						...tag,
+						name: updatedTag.name,
+						description: updatedTag.description,
+						color: updatedTag.color,
+						emoji: updatedTag.emoji || tag.emoji,
+						category: updatedTag.category,
+						isFavorite: updatedTag.isFavorite,
+					} as TagWithStats
 					: tag
 			)
 		);
@@ -150,7 +220,9 @@ export function TagsSettings() {
 	}, []);
 
 	// Extraer categorías únicas de los tags
-	const uniqueCategories = Array.from(new Set(tags.map(tag => tag.category).filter(Boolean))) as string[];
+	const uniqueCategories = Array.from(
+		new Set(tags.map(tag => tag.category).filter(Boolean))
+	) as string[];
 
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
@@ -320,7 +392,7 @@ export function TagsSettings() {
 										<div
 											key={tag.id}
 											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedTag?.id === tag.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditTag(tag as unknown as Tag)}
+											onClick={() => handleEditTag(tag)}
 										>
 											<span className="text-base">{tag.emoji}</span>
 											<div className="flex-1 min-w-0">
@@ -347,10 +419,8 @@ export function TagsSettings() {
 												variant="ghost"
 												size="icon"
 												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												onClick={(e) => {
-													e.stopPropagation();
-													handleDeleteTag(tag.id);
-												}}
+												data-id={tag.id}
+												onClick={handleDeleteButtonClick as unknown as () => void}
 											>
 												<Trash className="h-3 w-3" />
 											</Button>
