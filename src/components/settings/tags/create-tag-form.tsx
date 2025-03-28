@@ -11,9 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
 import { generateTagColor, generateTagEmoji } from '@/transformers/tag/serializers';
-import { Tag } from '@/types/entities/tag';
+import { TagUpdate } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag/enums';
-import { CreateTagData } from '@/types/entities/tag/types';
+import { Tag as UITag } from '@/types/entities/tag/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -42,11 +42,12 @@ const createTagSchema = z.object({
 type FormValues = z.infer<typeof createTagSchema>;
 
 interface CreateTagFormProps {
-	tag?: Tag | null;
+	tag?: UITag | null;
 	isEditing?: boolean;
-	onCreated?: (tag: Tag) => void;
-	onUpdated?: (tag: Tag) => void;
+	onCreated?: (tag: UITag) => void;
+	onUpdated?: (tag: UITag) => void;
 	onCancel?: () => void;
+	onPreview?: (data: any) => void;
 }
 
 export function CreateTagForm({
@@ -54,7 +55,8 @@ export function CreateTagForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel
+	onCancel,
+	onPreview
 }: CreateTagFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -78,7 +80,7 @@ export function CreateTagForm({
 				name: tag.name,
 				description: tag.description || '',
 				color: tag.color,
-				emoji: tag.emoji,
+				emoji: tag.emoji || '🏷️',
 				category: tag.category as TagCategory | undefined,
 				isFavorite: tag.isFavorite || false,
 			});
@@ -104,22 +106,46 @@ export function CreateTagForm({
 		try {
 			setIsSubmitting(true);
 
-			const tagData: CreateTagData = {
+			// Crear datos comunes
+			const tagData = {
 				name: data.name,
 				description: data.description,
 				color: data.color,
 				emoji: data.emoji,
-				category: data.category,
-				isFavorite: data.isFavorite,
+				shortcut: undefined,
 			};
 
 			// Crear o actualizar etiqueta
 			if (isEditing && tag) {
-				const updated = await updateTag(tag.id, tagData);
-				onUpdated?.(updated);
+				// Añadir el id para actualizar
+				const updateData: TagUpdate = {
+					id: tag.id,
+					...tagData,
+				};
+
+				const updated = await updateTag(tag.id, updateData);
+				// Convertir el tipo de retorno a UITag para la interfaz
+				const uiUpdated = {
+					...updated,
+					emoji: data.emoji,
+					category: data.category,
+					isFavorite: data.isFavorite
+				} as unknown as UITag;
+
+				onUpdated?.(uiUpdated);
+				onPreview?.(uiUpdated);
 			} else {
 				const created = await createTag(tagData);
-				onCreated?.(created);
+				// Convertir el tipo de retorno a UITag para la interfaz
+				const uiCreated = {
+					...created,
+					emoji: data.emoji,
+					category: data.category,
+					isFavorite: data.isFavorite
+				} as unknown as UITag;
+
+				onCreated?.(uiCreated);
+				onPreview?.(uiCreated);
 				form.reset();
 			}
 
@@ -132,6 +158,16 @@ export function CreateTagForm({
 			setIsSubmitting(false);
 		}
 	};
+
+	// Actualizar la vista previa cuando cambian los valores del formulario
+	useEffect(() => {
+		const subscription = form.watch((value) => {
+			if (onPreview) {
+				onPreview(value);
+			}
+		});
+		return () => subscription.unsubscribe();
+	}, [form, onPreview]);
 
 	return (
 		<Form {...form}>

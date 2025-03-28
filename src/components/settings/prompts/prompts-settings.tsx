@@ -34,20 +34,64 @@ import { Check, Delete, Edit, Plus, Search, Star, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CreatePromptForm } from './create-prompt-form';
 
+// Interfaz para PropntWithNullable que funciona como adaptador para el componente CreatePromptForm
+interface PromptWithNullable {
+	id: string;
+	name: string;
+	emoji: string | null;
+	color: string;
+	description: string | null;
+	content: string;
+	category: string | null;
+	parameters: string;
+	tags: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	presetId: string | null;
+}
+
+// Interfaz para el tipo que espera el componente CreatePromptForm
+interface CreatePromptFormPrompt {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	content: string;
+	category: string;
+	parameters: string;
+	tags: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	presetId: string | null;
+}
+
 export const PromptSettings = () => {
 	const [loading, setLoading] = useState(true);
-	const [prompts, setPrompts] = useState<PromptBase[]>([]);
+	const [prompts, setPrompts] = useState<PromptWithNullable[]>([]);
 	const [searchTerm, setSearchTerm] = useState('');
-	const [categoryFilter, setCategoryFilter] = useState<string | undefined>();
+	const [categoryFilter, setCategoryFilter] = useState<string>('');
 	const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
-	const [editingPrompt, setEditingPrompt] = useState<PromptBase | null>(null);
+	const [editingPrompt, setEditingPrompt] = useState<CreatePromptFormPrompt | null>(null);
 
 	const loadPrompts = async () => {
 		try {
 			setLoading(true);
 			const loadedPrompts = await getPrompts();
-			setPrompts(loadedPrompts);
+			// Convertir los datos para que coincidan con nuestra interfaz
+			const formattedPrompts = loadedPrompts.map(prompt => ({
+				...prompt,
+				emoji: prompt.emoji || null,
+				description: prompt.description || null,
+				category: prompt.category || null,
+				isFavorite: prompt.isFavorite || false
+			})) as PromptWithNullable[];
+			setPrompts(formattedPrompts);
 		} catch (error) {
 			toastService.error('Error al cargar prompts', {
 				description: error instanceof Error ? error.message : 'Error desconocido'
@@ -73,19 +117,47 @@ export const PromptSettings = () => {
 		}
 	};
 
-	const handleEdit = (prompt: PromptBase) => {
-		setEditingPrompt(prompt);
+	const handleDeleteButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
+		const target = e.currentTarget as HTMLButtonElement;
+		const id = target.getAttribute('data-id');
+		if (id) {
+			handleDelete(id);
+		}
+	};
+
+	const handleEdit = (prompt: PromptWithNullable) => {
+		// Convertir PromptWithNullable a CreatePromptFormPrompt
+		setEditingPrompt({
+			...prompt,
+			emoji: prompt.emoji || '📝',
+			category: prompt.category || '',
+		});
 		setShowCreateDialog(true);
 	};
 
 	const handlePromptCreated = (newPrompt: PromptBase) => {
-		setPrompts([newPrompt, ...prompts]);
+		const formattedPrompt: PromptWithNullable = {
+			...newPrompt,
+			emoji: newPrompt.emoji || null,
+			description: newPrompt.description || null,
+			category: newPrompt.category || null,
+			isFavorite: newPrompt.isFavorite || false
+		};
+		setPrompts([formattedPrompt, ...prompts]);
 		setShowCreateDialog(false);
 		toastService.success('Prompt creado correctamente');
 	};
 
 	const handlePromptUpdated = (updatedPrompt: PromptBase) => {
-		setPrompts(prompts.map(p => p.id === updatedPrompt.id ? updatedPrompt : p));
+		const formattedPrompt: PromptWithNullable = {
+			...updatedPrompt,
+			emoji: updatedPrompt.emoji || null,
+			description: updatedPrompt.description || null,
+			category: updatedPrompt.category || null,
+			isFavorite: updatedPrompt.isFavorite || false
+		};
+		setPrompts(prompts.map(p => p.id === updatedPrompt.id ? formattedPrompt : p));
 		setShowCreateDialog(false);
 		setEditingPrompt(null);
 		toastService.success('Prompt actualizado correctamente');
@@ -159,7 +231,7 @@ export const PromptSettings = () => {
 							<SelectValue placeholder="Todas las categorías" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value={undefined}>Todas las categorías</SelectItem>
+							<SelectItem value="">Todas las categorías</SelectItem>
 							{Object.values(PromptCategory).map(category => (
 								<SelectItem key={category} value={category}>{category}</SelectItem>
 							))}
@@ -222,7 +294,8 @@ export const PromptSettings = () => {
 										<Button
 											variant="ghost"
 											size="sm"
-											onClick={() => handleDelete(prompt.id)}
+											data-id={prompt.id}
+											onClick={handleDeleteButtonClick as unknown as () => void}
 											className="text-destructive"
 										>
 											<Delete className="h-4 w-4" />
@@ -276,7 +349,8 @@ export const PromptSettings = () => {
 													<Button
 														variant="outline"
 														size="sm"
-														onClick={() => handleDelete(prompt.id)}
+														data-id={prompt.id}
+														onClick={handleDeleteButtonClick as unknown as () => void}
 														className="text-destructive"
 													>
 														<Delete className="h-4 w-4" />
