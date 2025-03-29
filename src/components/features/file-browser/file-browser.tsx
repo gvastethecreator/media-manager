@@ -1,6 +1,7 @@
 'use client';
 
 import { FileViewer, type ImageItem } from '@/components/features/file-viewer/file-viewer';
+import { ALL_ENTITIES } from '@/constants/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
@@ -12,6 +13,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GRID_CONFIG } from './config/grid-config';
 import { handleContextAction } from './context-menu/context-action-handler';
 import type { ContextMenuAction } from './context-menu/context-menu';
+import { useEntityLoader } from './context-menu/hooks/use-entity-loader';
 import { useGridView } from './hooks/use-grid-view';
 import { useGridVirtualizer } from './hooks/use-grid-virtualizer';
 import { CardsView } from './views/cards-view';
@@ -86,11 +88,18 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 	const constraintsRef = useRef<HTMLDivElement>(null);
 	const prevSelectedItemIdsRef = useRef<string>('');
 	const prevSelectedItemRef = useRef<FileItem | null>(null);
+	const { loadEntityData } = useEntityLoader();
+
+	// Referencia para trackear los IDs de los items ya cargados - movida fuera del useEffect
+	const loadedItemIdsRef = useRef<Set<string>>(new Set());
 
 	// Estados para el visor de imágenes
 	const [isViewerOpen, setIsViewerOpen] = useState(false);
 	const [viewerImages, setViewerImages] = useState<ImageItem[]>([]);
 	const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
+
+	// Referencia para controlar si ya se realizó la precarga de entidades
+	const entitiesPreloadedRef = useRef<boolean>(false);
 
 	// Crear una referencia local para el div parent
 	const gridParentRef = useRef<HTMLDivElement>(null);
@@ -118,6 +127,80 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 			virtualizer.scrollToIndex(0);
 		}
 	}, [virtualizer]);
+
+	// Efecto para precargar todas las entidades necesarias al montar el componente
+	useEffect(() => {
+		// Verificar si ya se hizo la precarga a nivel global o en esta instancia
+		if (typeof window !== 'undefined' && window.entityPreloadComplete) {
+			gridLogger.info('✅ Entidades ya precargadas globalmente desde layout, omitiendo precarga desde FileBrowser');
+			return;
+		}
+
+		// Verificar si hay una precarga en progreso en otro componente
+		if (typeof window !== 'undefined' && window.entityPreloadInProgress) {
+			gridLogger.info('⏳ Hay una precarga en progreso en otro componente, omitiendo precarga desde FileBrowser');
+			return;
+		}
+
+		// Evitar precargar múltiples veces en la misma instancia
+		if (entitiesPreloadedRef.current) {
+			return;
+		}
+
+		entitiesPreloadedRef.current = true;
+		gridLogger.info('🚀 Iniciando precarga de entidades de respaldo desde FileBrowser...');
+
+		// Marcar que una precarga está en progreso
+		if (typeof window !== 'undefined') {
+			window.entityPreloadInProgress = true;
+		}
+
+		// Lista completa de entidades a precargar proactivamente (usando las constantes centralizadas)
+		const allEntities = [...ALL_ENTITIES];
+
+		// Precargar todas las entidades en paralelo
+		const preloadAllEntities = async () => {
+			try {
+				const results = await Promise.allSettled(
+					allEntities.map(entity =>
+						loadEntityData(entity as any)
+							.catch(err => {
+								gridLogger.warn(`⚠️ Error al precargar ${entity}:`, err);
+								return [];
+							})
+					)
+				);
+
+				// Informar sobre el resultado de la precarga
+				const succeeded = results.filter(r => r.status === 'fulfilled').length;
+				const failed = results.filter(r => r.status === 'rejected').length;
+
+				gridLogger.info(`✅ Precarga de respaldo completada desde FileBrowser: ${succeeded} exitosas, ${failed} fallidas`);
+
+				// Marcar globalmente que la precarga está completa
+				if (typeof window !== 'undefined') {
+					window.entityPreloadComplete = true;
+					window.entityPreloadInProgress = false;
+				}
+			} catch (error) {
+				gridLogger.error('❌ Error durante precarga de entidades:', error);
+
+				// Limpiar el estado de precarga en progreso en caso de error
+				if (typeof window !== 'undefined') {
+					window.entityPreloadInProgress = false;
+				}
+			}
+		};
+
+		preloadAllEntities();
+
+		// Limpiar estados si el componente se desmonta durante la precarga
+		return () => {
+			if (typeof window !== 'undefined' && !window.entityPreloadComplete) {
+				window.entityPreloadInProgress = false;
+			}
+		};
+	}, [loadEntityData]);
 
 	// Función memoizada para mapear FileItem a ImageItem
 	const mapFileItemToImageItem = useCallback((fileItem: FileItem): ImageItem => ({
@@ -257,8 +340,21 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 			// Solo procesar si hay elementos visibles
 			if (visibleItems.length === 0) return;
 
+			// Filtrar solo los items que aún no han sido procesados
+			const newVisibleItems = visibleItems.filter(item => {
+				// Si ya lo hemos procesado, omitirlo
+				if (loadedItemIdsRef.current.has(item.id)) return false;
+
+				// Marcar como procesado para no volver a procesarlo
+				loadedItemIdsRef.current.add(item.id);
+				return true;
+			});
+
+			// Si no hay nuevos elementos para cargar, salir
+			if (newVisibleItems.length === 0) return;
+
 			// Usar el debounce para cargar los thumbnails
-			debouncedLoadThumbnails(visibleItems);
+			debouncedLoadThumbnails(newVisibleItems);
 		};
 
 		// Cargar inicialmente

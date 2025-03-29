@@ -3,7 +3,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useImageResources } from '@/store/image-resources.store';
 import type * as React from 'react';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 const thumbnailLogger = serverLogger.withContext('ThumbnailLoader');
 
@@ -35,12 +35,22 @@ export function useThumbnailLoader(): UseThumbnailLoaderResult {
 	const retryCountRef = useRef<Map<string, number>>(new Map());
 	const MAX_RETRIES = 3;
 
+	// Resetea errores anteriores al montar el componente
+	useEffect(() => {
+		// Limpiar colas al montar para evitar estados obsoletos
+		loadQueueRef.current.clear();
+		return () => {
+			// Limpiar al desmontar para evitar memory leaks
+			loadQueueRef.current.clear();
+		};
+	}, []);
+
 	// Función mejorada para cargar thumbnails con reintentos
 	const loadThumbnail = useCallback(
 		async (itemId: string) => {
 			// Validar que el ID sea válido
 			if (!itemId || typeof itemId !== 'string' || itemId.trim() === '') {
-				console.error(`Intento de cargar thumbnail con ID inválido: "${itemId}"`);
+				thumbnailLogger.error(`Intento de cargar thumbnail con ID inválido: "${itemId}"`);
 				return null;
 			}
 
@@ -63,12 +73,25 @@ export function useThumbnailLoader(): UseThumbnailLoaderResult {
 
 			try {
 				loadQueueRef.current.add(itemId);
+
 				// Minimizamos logs innecesarios que pueden afectar el rendimiento
 				if (process.env.NODE_ENV === 'development') {
 					thumbnailLogger.debug(`Cargando thumbnail: ${itemId}`);
 				}
 
-				const thumbnail = await imageResources.getThumbnail(itemId);
+				let thumbnail: string | undefined;
+				try {
+					thumbnail = await imageResources.getThumbnail(itemId);
+				} catch (fetchError) {
+					thumbnailLogger.error(`Error al obtener thumbnail desde el store para ${itemId}:`, fetchError);
+					thumbnail = undefined;
+				}
+
+				// Asegurarnos de que la referencia siga siendo válida
+				if (!loadQueueRef.current) {
+					return null; // El componente se ha desmontado
+				}
+
 				loadQueueRef.current.delete(itemId);
 
 				if (thumbnail) {
@@ -90,7 +113,11 @@ export function useThumbnailLoader(): UseThumbnailLoaderResult {
 			} catch (err) {
 				const error = err instanceof Error ? err.message : 'Error desconocido';
 				thumbnailLogger.error(`Error cargando thumbnail para ${itemId}:`, error);
-				loadQueueRef.current.delete(itemId);
+
+				// Asegurarnos de que la referencia siga siendo válida
+				if (loadQueueRef.current) {
+					loadQueueRef.current.delete(itemId);
+				}
 
 				const newRetryCount = retryCount + 1;
 				retryCountRef.current.set(itemId, newRetryCount);

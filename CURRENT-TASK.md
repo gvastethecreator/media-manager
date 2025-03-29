@@ -1,145 +1,118 @@
-# Desarrollo de Pantallas de Configuración para Entidades
+# Optimización de la integración de EntityPreloader en vistas
 
-## Estado Actual
-- [x] Iniciar tarea
-- [x] Configuración de Albums
-  - [x] Listar albums existentes
-  - [x] Estadísticas de albums
-  - [x] Formulario de creación/edición
-  - [x] Previsualización con album-card
-  - [x] Diseño compacto de tres paneles en una vista
-- [x] Configuración de Tags
-  - [x] Listar tags con estadísticas
-  - [x] Formulario para crear/editar tags
-  - [x] Previsualización de tag
-  - [x] Filtrado por categoría/uso
-- [x] Configuración de Collections
-  - [x] Listar collections con estadísticas
-  - [x] Formulario para crear/editar collections
-  - [x] Previsualización de collection
-  - [x] Filtrado por categoría/favoritos
-- [x] Configuración de Characters
-  - [x] Listar characters con estadísticas
-  - [x] Formulario para crear/editar characters
-  - [x] Previsualización de character
-  - [x] Filtrado por clase/categoría/favoritos
-- [x] Configuración de Places
-  - [x] Listar places con estadísticas
-  - [x] Formulario para crear/editar places
-  - [x] Previsualización de place
-  - [x] Filtrado por tipo/región/favoritos
-- [x] Configuración de World Items
-  - [x] Listar world items con estadísticas
-  - [x] Formulario para crear/editar world items
-  - [x] Previsualización de world item
-  - [x] Filtrado por tipo/rareza/favoritos
-- [x] Configuración de Concepts
-  - [x] Listar concepts con estadísticas
-  - [x] Formulario para crear/editar concepts
-  - [x] Previsualización de concept
-  - [x] Filtrado por categoría/favoritos
-- [ ] Configuración de Prompts
-- [ ] Configuración de Notes
-- [ ] Configuración de Folders
-- [ ] Configuración de Visual Presets
+## Problemas Detectados
 
-## Progreso
+- [x] Algunos componentes intentan cargar entidades antes de la precarga global
+- [x] Hay redundancia en llamadas a la API cuando varias vistas montan `<EntityPreloader>` simultáneamente
+- [x] Algunas entidades no se precargaban correctamente debido a URLs de API incorrectas
+- [x] Los tiempos de carga eran extremadamente largos en algunas vistas
+- [x] Se utilizaban APIs RESTful innecesariamente cuando ya existen server actions
 
-### Albums
-- ✅ Implementado listado de albums con estadísticas y funcionalidades CRUD
-- ✅ Agregado formulario con validación para crear/editar albums
-- ✅ Integración con AlbumCard para previsualización
-- ✅ Creados componentes reutilizables: ColorPicker y EmojiPicker
-- ✅ Rediseñado con layout compacto de dos paneles en una sola vista
-- ✅ Optimizado espaciado, tamaños y controles
-- ✅ Implementado scrolling en ambos paneles para mejor uso del espacio
+## Análisis
 
-### World Items
-- ✅ Implementado listado con diseño compacto
-- ✅ Agregado sistema de filtros en popover
-- ✅ Diseño de previsualización en tiempo real
-- ✅ Vista integrada con lista, formulario y preview simultáneos
+- [x] Revisar todas las ubicaciones que utilizan `<EntityPreloader>`
+- [x] Identificar patrones de uso y potenciales mejoras
+- [x] Analizar el impacto de renderizado y problemas de rendimiento
+- [x] Revisar el flujo del hook `useEntityLoader`
+- [x] Detectar server actions disponibles para cada entidad
 
-### Tags
-- ✅ Implementado listado de tags con estadísticas
-- ✅ Implementado formulario para crear/editar tags
-- ✅ Implementado previsualización de tags
-- ✅ Implementado filtrado por categoría y uso
-- ✅ Implementado sugerencias automáticas de emoji y color
+## Estrategias de Optimización
 
-### Collections
-- ✅ Implementado listado de colecciones con estadísticas completas
-- ✅ Implementado formulario para crear/editar colecciones con campos específicos
-- ✅ Implementado previsualización de colecciones
-- ✅ Implementado filtrado por categoría y favoritos
-- ✅ Implementado sugerencias basadas en categoría o nombre
+- [x] Centralizar la precarga de entidades en componentes principales
+- [x] Evitar múltiples instancias de `<EntityPreloader>` cargando las mismas entidades
+- [x] Implementar un mecanismo de coordinación entre componentes
+- [x] Crear un mecanismo de backup en caso de fallo de precarga global
+- [x] Implementar timeouts para evitar bloqueos indefinidos
+- [x] Priorizar server actions sobre APIs RESTful para mejor rendimiento y seguridad
 
-### Characters
-- ✅ Implementado listado completo de personajes con estadísticas detalladas
-- ✅ Creado formulario avanzado para personajes con validación Zod
-- ✅ Implementada previsualización de personajes con sus atributos principales
-- ✅ Añadido filtrado múltiple por clase, categoría y favoritos
-- ✅ Implementadas estadísticas detalladas con distribución por clases y razas
-- ✅ Agregada funcionalidad de sugerencias basadas en clase o nombre
+## Implementación
 
-### Places
-- ✅ Implementado listado completo de lugares con estadísticas y contadores
-- ✅ Creado formulario completo para lugares con todos los campos específicos
-- ✅ Implementada visualización previa que muestra el lugar con su color y emoji
-- ✅ Añadido sistema de filtrado por tipos, regiones y favoritos
-- ✅ Implementadas estadísticas detalladas incluyendo distribución por tipos y regiones
-- ✅ Agregada funcionalidad para sugerir colores y emojis basados en el tipo o nombre
+- [x] Modificar `useEntityLoader` para detectar datos ya cargados
+- [x] Mejorar el sistema de comprobación de precarga en progreso
+- [x] Implementar timeouts para resolver intentos de carga bloqueados
+- [x] Corregir rutas de API para todas las entidades usando el formato `/api/entities/[entityType]`
+- [x] Crear endpoints temporales con datos de prueba para entidades faltantes
+- [x] Refactorizar `useEntityLoader` para usar server actions como fuente primaria de datos:
+  - [x] Implementar carga con server actions para `tags`
+  - [x] Implementar carga con server actions para `collections`
+  - [x] Implementar carga con server actions para `worldItems`
+  - [x] Implementar carga con server actions para `places`
+  - [x] Implementar carga con server actions para `characters`
+  - [x] Implementar carga con server actions para `concepts`
+  - [x] Implementar carga con server actions para `prompts`
+  - [x] Implementar carga con server actions para `notes`
+  - [x] Implementar carga con server actions para `albums`
+- [x] Integrar server actions en stores de entidades (comenzando con `tagStore`)
 
-### Concepts
-- ✅ Implementado listado completo de conceptos con estadísticas detalladas
-- ✅ Creado formulario para conceptos con validación Zod incluyendo contenido extenso
-- ✅ Implementada previsualización de conceptos que muestra color, emoji y categoría
-- ✅ Añadido sistema de filtrado por categoría, texto y favoritos
-- ✅ Integrado sistema para parsear y mostrar etiquetas en formato JSON
-- ✅ Implementada actualización en tiempo real de la vista previa
+## Pruebas y Validación
 
-## Lineamientos de Diseño Actualizados
+- [x] Verificar que la precarga funcione en todas las vistas
+- [x] Comprobar que no haya duplicación de solicitudes a la API
+- [x] Validar que los tiempos de carga se hayan reducido
+- [x] Verificar que el sistema de backup funcione correctamente
+- [x] Confirmar que los server actions se utilizan correctamente
 
-### Estructura Común para Configuración de Entidades
-1. **Layout de Dos Paneles**:
-   - Panel izquierdo: Lista compacta de entidades (1/3 del ancho)
-   - Panel derecho: Formulario y previsualización (2/3 del ancho)
+## Documentación
 
-2. **Optimizaciones de Espacio**:
-   - Reducción de padding (py-2, px-3)
-   - Espaciado entre elementos (space-y-1)
-   - Tamaños de fuente más pequeños (text-xs, text-[10px])
-   - Altura fija con scroll en ambos paneles h-[calc(100vh-8rem)]
+- [x] Actualizar documentación sobre el funcionamiento del nuevo sistema
+- [x] Crear guía sobre cómo integrar correctamente el preloader en nuevos componentes
+- [x] Documentar la estrategia de carga priorizada (server actions → stores → APIs)
 
-3. **Controles de Formulario**:
-   - Botones pequeños (size="sm", h-6, h-7)
-   - Iconos reducidos (h-3.5 w-3.5)
-   - Botones de acción en el encabezado del panel derecho
+## Flowchart de la implementación actualizada
 
-4. **Vista Previa**:
-   - Tamaño reducido (w-[180px])
-   - Actualización en tiempo real al editar
-   - Vista previa por defecto con bordes punteados
+```mermaid
+flowchart TB
+    A[Iniciar App] --> B{¿Precarga global completada?}
+    B -->|No| C[EntityPreloader Principal]
+    B -->|Sí| D[Usar datos precargados]
 
-5. **Estilos Consistentes**:
-   - Usar las mismas clases de espaciado y tamaño en todos los componentes
-   - Mantener proporciones similares entre paneles
-   - Usar colores muted para fondos y bordes
+    C --> E[Cargar entidades críticas]
+    E --> SA{¿Server Action disponible?}
+    SA -->|Sí| SL[Cargar con Server Action]
+    SA -->|No| ST{¿Store disponible?}
 
-### Próximos Pasos: Prompts
-Para la implementación de Prompts, seguir estos pasos:
+    ST -->|Sí| STO[Cargar con Store]
+    ST -->|No| API[Cargar con API REST]
 
-1. Analizar la estructura actual de Prompts en el esquema de Prisma
-2. Implementar `prompts-settings.tsx` siguiendo el patrón establecido
-3. Crear formulario con validación para prompts
-4. Agregar visualización previa según el diseño actual
-5. Implementar filtrado por categoría/tipo
+    SL & STO & API --> F[Siguiente entidad]
+    F --> G{¿Todas completas?}
 
-### Mejoras Generales a Implementar
-- [x] Reducir el padding general en los componentes
-- [x] Optimizar el espacio con ScrollArea en ambos paneles
-- [x] Agregar botones de acción en el encabezado
-- [x] Mejorar la organización del formulario
-- [ ] Implementar confirmación antes de eliminar elementos
-- [ ] Optimizar rendimiento para colecciones grandes
-- [ ] Añadir animaciones sutiles para mejorar la experiencia de usuario
+    G -->|Sí| H[Marcar precarga global como completada]
+    G -->|No| I[Intentar cargar entidades fallidas individualmente]
+    I --> J[Marcar precarga como completada a pesar de errores]
+
+    H & J --> K[Componentes pueden acceder a datos]
+    D --> K
+
+    K --> L{¿Se necesita más datos?}
+    L -->|Sí| M[Solicitud bajo demanda]
+    L -->|No| N[Render con datos existentes]
+
+    M --> O{¿Timeout excedido?}
+    O -->|Sí| P[Mostrar mensaje de error o usar datos parciales]
+    O -->|No| Q[Esperar datos]
+    Q --> N
+    P --> N
+```
+
+## Mejoras Implementadas
+
+1. ✅ **Centralización de preloading**: Un componente principal gestiona la precarga global
+2. ✅ **Sistema de coordinación**: Los preloaders respetan el estado global de precarga
+3. ✅ **Mecanismo de backup**: Componentes individuales pueden cargar datos si la precarga falla
+4. ✅ **Timeouts de seguridad**: Evita bloqueos indefinidos durante la carga
+5. ✅ **APIs estandarizadas**: Todas las entidades ahora utilizan el mismo patrón de rutas
+6. ✅ **Datos de prueba**: Endpoints temporales para simular carga de datos y facilitar pruebas
+7. ✅ **Mejor logging**: Facilita depuración de problemas de carga
+8. ✅ **Uso de server actions**: Priorización de server actions para mejor rendimiento y seguridad
+9. ✅ **Estrategia de fallback**: Sistema en cascada server action → store → API REST
+
+## Próximos pasos
+
+1. Optimizar el sistema de timeout para cargas de respaldo
+2. Considerar reducir la verbosidad de logs en producción
+3. Implementar una solución centralizada para el manejo de errores de API
+4. Completar la migración de stores restantes para usar server actions como método principal de carga
+5. Eliminar APIs RESTful redundantes una vez se confirme que los server actions funcionan correctamente
+
+*Esta tarea se considera completada con las mejoras actuales. Cualquier refinamiento adicional se registrará como nuevas tareas.*

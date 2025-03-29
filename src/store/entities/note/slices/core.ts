@@ -15,6 +15,7 @@ export interface CoreSlice {
 
 	// Acciones
 	loadNotes: () => Promise<void>;
+	setNotes: (notes: NoteWithStats[]) => void;
 	createNote: (note: NoteCreateInput) => Promise<void>;
 	updateNote: (id: string, note: NoteUpdateInput) => Promise<void>;
 	deleteNote: (id: string) => Promise<void>;
@@ -88,6 +89,11 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			coreLogger.error('❌ Error al cargar notas:', error);
 			set({ error: message, isLoading: false });
 		}
+	},
+
+	setNotes: (notes) => {
+		coreLogger.info('📥 Estableciendo notas manualmente:', { count: notes.length });
+		set({ notes, isLoading: false });
 	},
 
 	createNote: async (note) => {

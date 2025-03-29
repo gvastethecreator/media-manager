@@ -31,7 +31,7 @@ export const usePlaceStore = create<PlaceStore>()(
 					set({ isLoading: true, error: null });
 					placeLogger.info('🔄 Cargando lugares...');
 
-					const response = await fetch('/api/places');
+					const response = await fetch('/api/entities/places');
 					if (!response.ok) throw new Error('Error al cargar lugares');
 
 					const places = await response.json();
@@ -129,3 +129,4 @@ export const usePlaceStore = create<PlaceStore>()(
 export * from './constants';
 export * from './transformers';
 export * from './types';
+
