@@ -3,22 +3,44 @@
  * @module types/entities/video/types
  */
 
-import type { VideoFormat, VideoPrivacyLevel, VideoType } from './enums';
+import type { Album } from '../album/types';
+import type { Character } from '../character/character-types';
+import type { Collection } from '../collection/collection-types';
+import type { Concept } from '../concept/concept-types';
+import type { Folder } from '../folder/base';
+import type { Group } from '../group/group-types';
+import type { Note } from '../note/note-types';
+import type { Place } from '../place/place-types';
+import type { Prompt } from '../prompt/prompt-types';
+import type { Property } from '../property/property-types';
+import type { Tag } from '../tag/tag-types';
+import type { Wildcard } from '../wildcard/wildcard-types';
+import type { WorldItem } from '../world-item/world-item-types';
+import type { VideoFormat, VideoPrivacyLevel } from './enums';
 
 /**
  * Interfaz base para video
  */
 export interface VideoBase {
 	id: string;
-	title: string;
-	description?: string;
+	name: string;
+	description: string | null;
 	path: string;
-	thumbnailPath?: string;
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	ownerId: string;
-	isArchived: boolean;
-	type: VideoType;
+	hash: string;
+	size: number;
+	duration: number;
+	width: number | null;
+	height: number | null;
+	metadata: string | null;
+	thumbnail: Buffer | null;
+	thumbnailSize: number | null;
+	thumbnailWidth: number | null;
+	thumbnailHeight: number | null;
+	isPublic: boolean;
+	isFavorite: boolean;
+	folderId: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
@@ -80,16 +102,47 @@ export interface VideoMetadata {
  * Interfaz extendida para video con todas las propiedades
  */
 export interface Video extends VideoBase {
+	// Relaciones cargadas
+	folder?: Folder;
+
+	// Relaciones con entidades principales
+	albums?: Album[];
+	collections?: Collection[];
+	tags?: Tag[];
+	characters?: Character[];
+	places?: Place[];
+	worldItems?: WorldItem[];
+	concepts?: Concept[];
+	prompts?: Prompt[];
+	notes?: Note[];
+	wildcards?: Wildcard[];
+	properties?: Property[];
+	groups?: Group[];
+
+	// UI y metadatos adicionales
 	metadata?: VideoMetadata;
 	thumbnailUrl?: string;
 	playState?: VideoPlayState;
 	chapters?: VideoChapter[];
-	tags: string[];
-	albums?: Array<{ id: string; name: string }>;
-	privacyLevel: VideoPrivacyLevel;
+	privacyLevel?: VideoPrivacyLevel;
 	sharedWith?: string[];
 	isSelected?: boolean;
-	isFavorite: boolean;
+
+	// Contadores
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }
 
 /**
@@ -102,6 +155,11 @@ export interface CreateVideoData {
 	folderId: string;
 	metadata?: VideoMetadata | string;
 	presetId?: string;
+	hash: string;
+	size: number;
+	duration: number;
+	width?: number;
+	height?: number;
 }
 
 /**

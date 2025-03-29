@@ -57,7 +57,7 @@
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "workbench.preferredDarkColorTheme": "Bearded Theme feat. Will",
+  "workbench.preferredDarkColorTheme": "Cursor Dark",
   "git.enableSmartCommit": true,
   "workbench.activityBar.location": "top",
   "powermode.enabled": true,
@@ -87,7 +87,7 @@
   "workbench.commandPalette.experimental.suggestCommands": true,
   "workbench.panel.defaultLocation": "right",
   "workbench.startupEditor": "none",
-  "workbench.iconTheme": "material-icon-theme",
+  "workbench.iconTheme": "vs-seti",
   "workbench.view.showQuietly": {
     "workbench.panel.output": true
   },
