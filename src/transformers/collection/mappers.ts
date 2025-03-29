@@ -5,10 +5,11 @@
 
 import type { CollectionExtended, CollectionSummary } from '@/types/entities/collection';
 import {
-	COLLECTION_CATEGORY_COLORS,
-	COLLECTION_CATEGORY_EMOJIS,
-	type CollectionCategory,
-	CollectionRarity,
+    COLLECTION_CATEGORY_COLORS,
+    COLLECTION_CATEGORY_EMOJIS,
+    type CollectionCategory,
+    CollectionRarity,
+    type CreateCollectionData, type UpdateCollectionData,
 } from '@/types/entities/collection';
 import type { Image, Collection as PrismaCollection } from '@prisma/client';
 import { parseCollectionFilters } from './serializers';
@@ -136,45 +137,92 @@ export function extractFeaturedImages(collection: CollectionExtended & { images?
 }
 
 /**
- * Mapea datos de creación de colección a formato Prisma
- * @param data Datos para crear una colección
- * @returns Objeto con formato para Prisma
+ * Mapea datos de creación de colección a formato compatible con Prisma
+ * @param data Datos de creación de colección
+ * @returns Objeto formateado para Prisma
  */
-export function mapCreateCollectionDataToPrisma(data: any): any {
+export function mapCreateCollectionDataToPrisma(data: CreateCollectionData) {
 	return {
 		name: data.name,
-		emoji: data.emoji || null,
-		color: data.color || null,
 		description: data.description || null,
-		isPrivate: data.isPrivate || false,
-		isFavorite: data.isFavorite || false,
-		featuredImageId: data.featuredImage || null,
-		parentId: data.parentId || null,
-		settings: typeof data.settings === 'object' ? JSON.stringify(data.settings) : data.settings,
+		emoji: data.emoji || '🌟',
+		color: data.color || '#3b82f6',
+		category: data.category || 'general',
+		shortcut: data.shortcut || null,
+		platform: data.platform || null,
+		url: data.url || null,
+		alternativeUrl: data.alternativeUrl || null,
+		price: data.price || null,
+		network: data.network || null,
+		tokenId: data.tokenId || null,
+		tokenAddress: data.tokenAddress || null,
+		contractAddress: data.contractAddress || null,
+		contractType: data.contractType || null,
+		editions: data.editions ? JSON.stringify(data.editions) : 'empty_array',
+		featuredImage: data.featuredImage || null,
+		// Conexión con grupos si existen
+		groups: data.groupIds ? {
+			connect: data.groupIds.map((id) => ({ id })),
+		} : undefined,
+		// Conexión con propiedades si existen
+		properties: data.propertyIds ? {
+			connect: data.propertyIds.map((id) => ({ id })),
+		} : undefined,
+		// Conexión con comodines si existen
+		wildcards: data.wildcardIds ? {
+			connect: data.wildcardIds.map((id) => ({ id })),
+		} : undefined,
 	};
 }
 
 /**
- * Mapea datos de actualización de colección a formato Prisma
- * @param data Datos para actualizar una colección
- * @returns Objeto con formato para Prisma
+ * Mapea datos de actualización de colección a formato compatible con Prisma
+ * @param data Datos de actualización de colección
+ * @returns Objeto formateado para Prisma
  */
-export function mapUpdateCollectionDataToPrisma(data: any): any {
-	const updateData: any = {};
+export function mapUpdateCollectionDataToPrisma(data: UpdateCollectionData) {
+	const updateData: Record<string, any> = {};
 
-	// Solo incluir campos que estén presentes en los datos
+	// Actualizar propiedades básicas si están presentes
 	if (data.name !== undefined) updateData.name = data.name;
+	if (data.description !== undefined) updateData.description = data.description;
 	if (data.emoji !== undefined) updateData.emoji = data.emoji;
 	if (data.color !== undefined) updateData.color = data.color;
-	if (data.description !== undefined) updateData.description = data.description;
-	if (data.isPrivate !== undefined) updateData.isPrivate = data.isPrivate;
-	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-	if (data.featuredImage !== undefined) updateData.featuredImageId = data.featuredImage;
-	if (data.parentId !== undefined) updateData.parentId = data.parentId;
+	if (data.category !== undefined) updateData.category = data.category;
+	if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
+	if (data.platform !== undefined) updateData.platform = data.platform;
+	if (data.url !== undefined) updateData.url = data.url;
+	if (data.alternativeUrl !== undefined) updateData.alternativeUrl = data.alternativeUrl;
+	if (data.price !== undefined) updateData.price = data.price;
+	if (data.network !== undefined) updateData.network = data.network;
+	if (data.tokenId !== undefined) updateData.tokenId = data.tokenId;
+	if (data.tokenAddress !== undefined) updateData.tokenAddress = data.tokenAddress;
+	if (data.contractAddress !== undefined) updateData.contractAddress = data.contractAddress;
+	if (data.contractType !== undefined) updateData.contractType = data.contractType;
+	if (data.editions !== undefined) {
+		updateData.editions = data.editions ? JSON.stringify(data.editions) : 'empty_array';
+	}
+	if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
 
-	// Convertir settings a string si es un objeto
-	if (data.settings !== undefined) {
-		updateData.settings = typeof data.settings === 'object' ? JSON.stringify(data.settings) : data.settings;
+	// Gestionar relaciones con grupos
+	if (data.groupIds !== undefined) {
+		updateData.groups = {
+			set: data.groupIds.map((id) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con propiedades
+	if (data.propertyIds !== undefined) {
+		updateData.properties = {
+			set: data.propertyIds.map((id) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con comodines
+	if (data.wildcardIds !== undefined) {
+		updateData.wildcards = {
+			set: data.wildcardIds.map((id) => ({ id })),
+		};
 	}
 
 	return updateData;

@@ -1,4 +1,3 @@
-
 /**
  * Interfaz básica para las propiedades de los componentes de vista
  *
@@ -46,5 +45,11 @@ export type ViewType =
 	| 'prompt-content'
 	| 'notes'
 	| 'note-content'
+	| 'groups'
+	| 'group-content'
+	| 'properties'
+	| 'property-content'
+	| 'wildcards'
+	| 'wildcard-content'
 	| 'entity-cards'
 	| 'development';

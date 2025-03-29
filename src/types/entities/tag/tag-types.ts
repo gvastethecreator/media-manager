@@ -85,6 +85,9 @@ export interface CreateTagData {
   category?: string | null;
   featuredImage?: string | null;
   isFavorite?: boolean;
+  groupIds?: string[];
+  propertyIds?: string[];
+  wildcardIds?: string[];
 }
 
 /**
@@ -99,6 +102,9 @@ export interface UpdateTagData {
   category?: string | null;
   featuredImage?: string | null;
   isFavorite?: boolean;
+  groupIds?: string[];
+  propertyIds?: string[];
+  wildcardIds?: string[];
 }
 
 /**
