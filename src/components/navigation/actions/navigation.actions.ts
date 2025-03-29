@@ -5,11 +5,14 @@ import { getCharacters } from '@/app/actions/characters/character.actions';
 import { getCollections } from '@/app/actions/collections/collection.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
 import { getFolders } from '@/app/actions/folders/';
+import { getGroups } from '@/app/actions/groups/group.actions';
 import { getNotes } from '@/app/actions/notes/note.actions';
 import { getPlaces } from '@/app/actions/places/place.actions';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
+import { getProperties } from '@/app/actions/properties/property.actions';
 import { getSystemStats } from '@/app/actions/stats/stats.actions';
 import { getTags } from '@/app/actions/tags/tag.actions';
+import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from 'next/cache';
@@ -25,6 +28,9 @@ type SystemStats = {
 	totalCharacters: number;
 	totalPlaces: number;
 	totalObjects: number;
+	totalGroups: number;
+	totalProperties: number;
+	totalWildcards: number;
 	totalFavorites: number;
 	totalActivities: number;
 	totalSize: number;
@@ -59,6 +65,9 @@ const REVALIDATE_PATHS = [
 	'/characters',
 	'/places',
 	'/world-items',
+	'/groups',
+	'/properties',
+	'/wildcards',
 ] as const;
 
 export async function revalidateNavigation() {
@@ -89,6 +98,9 @@ export interface NavigationData {
 	concepts: Awaited<ReturnType<typeof getConcepts>>;
 	prompts: Awaited<ReturnType<typeof getPrompts>>;
 	notes: Awaited<ReturnType<typeof getNotes>>;
+	groups: Awaited<ReturnType<typeof getGroups>>;
+	properties: Awaited<ReturnType<typeof getProperties>>;
+	wildcards: Awaited<ReturnType<typeof getWildcards>>;
 	stats: SystemStats;
 }
 
@@ -96,7 +108,7 @@ export async function getNavigationData(): Promise<NavigationData> {
 	try {
 		navLogger.info('🧭 Obteniendo datos de navegación');
 
-		const [folders, collections, tags, albums, characters, places, worldItems, concepts, prompts, notes, stats] =
+		const [folders, collections, tags, albums, characters, places, worldItems, concepts, prompts, notes, groups, properties, wildcards, stats] =
 			await Promise.allSettled([
 				getFolders(),
 				getCollections(),
@@ -108,6 +120,9 @@ export async function getNavigationData(): Promise<NavigationData> {
 				getConcepts(),
 				getPrompts(),
 				getNotes(),
+				getGroups(),
+				getProperties(),
+				getWildcards(),
 				getSystemStats(),
 			]);
 
@@ -122,6 +137,9 @@ export async function getNavigationData(): Promise<NavigationData> {
 			totalCharacters: 0,
 			totalPlaces: 0,
 			totalObjects: 0,
+			totalGroups: 0,
+			totalProperties: 0,
+			totalWildcards: 0,
 			totalViews: 0,
 			totalDownloads: 0,
 			totalFavorites: 0,
@@ -142,6 +160,9 @@ export async function getNavigationData(): Promise<NavigationData> {
 			concepts: concepts.status === 'fulfilled' ? concepts.value : [],
 			prompts: prompts.status === 'fulfilled' ? prompts.value : [],
 			notes: notes.status === 'fulfilled' ? notes.value : [],
+			groups: groups.status === 'fulfilled' ? groups.value : [],
+			properties: properties.status === 'fulfilled' ? properties.value : [],
+			wildcards: wildcards.status === 'fulfilled' ? wildcards.value : [],
 			stats:
 				stats.status === 'fulfilled' && stats.value
 					? {
@@ -153,6 +174,9 @@ export async function getNavigationData(): Promise<NavigationData> {
 							totalCharacters: stats.value.totalCharacters,
 							totalPlaces: stats.value.totalPlaces,
 							totalObjects: stats.value.totalWorldItems,
+							totalGroups: stats.value.totalGroups || 0,
+							totalProperties: stats.value.totalProperties || 0,
+							totalWildcards: stats.value.totalWildcards || 0,
 							totalFavorites: stats.value.totalFavorites,
 							totalActivities: stats.value.totalActivities,
 							totalSize: stats.value.totalSize,

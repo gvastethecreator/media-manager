@@ -7,9 +7,9 @@ import { revalidatePath } from 'next/cache';
 
 // Importamos los nuevos tipos y transformers
 import {
-	getDerivedImageProperties,
-	mapCreateImageDataToPrisma,
-	mapUpdateImageDataToPrisma,
+    getDerivedImageProperties,
+    mapCreateImageDataToPrisma,
+    mapUpdateImageDataToPrisma,
 } from '@/transformers/image';
 import type { CreateImageData, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image';
 
@@ -42,6 +42,24 @@ export async function getImage(id: string): Promise<ImageExtended | null> {
 				},
 				worldItems: {
 					select: { id: true, name: true, emoji: true },
+				},
+				concepts: {
+					select: { id: true, name: true, emoji: true },
+				},
+				prompts: {
+					select: { id: true, name: true, emoji: true },
+				},
+				notes: {
+					select: { id: true, name: true, emoji: true },
+				},
+				wildcards: {
+					select: { id: true, name: true, emoji: true, color: true },
+				},
+				properties: {
+					select: { id: true, name: true, emoji: true, color: true },
+				},
+				groups: {
+					select: { id: true, name: true, emoji: true, color: true },
 				},
 				stats: true,
 				folder: {
@@ -175,6 +193,36 @@ export async function getFavoriteImages(): Promise<ImageExtended[]> {
 				},
 				collections: {
 					select: { id: true, name: true, color: true, emoji: true },
+				},
+				albums: {
+					select: { id: true, name: true, emoji: true },
+				},
+				characters: {
+					select: { id: true, name: true, emoji: true },
+				},
+				places: {
+					select: { id: true, name: true, emoji: true },
+				},
+				worldItems: {
+					select: { id: true, name: true, emoji: true },
+				},
+				concepts: {
+					select: { id: true, name: true, emoji: true },
+				},
+				prompts: {
+					select: { id: true, name: true, emoji: true },
+				},
+				notes: {
+					select: { id: true, name: true, emoji: true },
+				},
+				wildcards: {
+					select: { id: true, name: true, emoji: true, color: true },
+				},
+				properties: {
+					select: { id: true, name: true, emoji: true, color: true },
+				},
+				groups: {
+					select: { id: true, name: true, emoji: true, color: true },
 				},
 				stats: true,
 				visualConfig: true,

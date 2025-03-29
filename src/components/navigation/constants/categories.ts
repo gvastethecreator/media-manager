@@ -1,16 +1,19 @@
 import type { CategoryItem } from '@/components/navigation/types';
 import type { ViewType } from '@/types/file-item';
 import {
-	BookImage,
-	Box,
-	Camera,
-	FolderIcon,
-	Lightbulb,
-	MapPin,
-	StickyNote,
-	TagIcon,
-	Terminal,
-	User2,
+    BookImage,
+    Box,
+    Camera,
+    Database,
+    FolderIcon,
+    FolderKanban,
+    Lightbulb,
+    MapPin,
+    StickyNote,
+    TagIcon,
+    Terminal,
+    User2,
+    WandSparkles,
 } from 'lucide-react';
 
 /**
@@ -77,5 +80,23 @@ export const NAVIGATION_CATEGORIES: CategoryItem[] = [
 		icon: TagIcon,
 		label: 'Etiquetas',
 		color: '#f59e0b',
+	},
+	{
+		id: 'groups' as ViewType,
+		icon: FolderKanban,
+		label: 'Grupos',
+		color: '#60a5fa',
+	},
+	{
+		id: 'properties' as ViewType,
+		icon: Database,
+		label: 'Propiedades',
+		color: '#3b82f6',
+	},
+	{
+		id: 'wildcards' as ViewType,
+		icon: WandSparkles,
+		label: 'Comodines',
+		color: '#a855f7',
 	},
 ];

@@ -26,6 +26,12 @@ export type ViewType =
 	| 'prompt-content'
 	| 'notes'
 	| 'note-content'
+	| 'groups'
+	| 'group-content'
+	| 'properties'
+	| 'property-content'
+	| 'wildcards'
+	| 'wildcard-content'
 	| 'entity-cards'
 	| 'canvas'
 	| 'chat';
@@ -161,6 +167,9 @@ export interface FileItem {
 	concepts: RelatedConcept[];
 	prompts: RelatedPrompt[];
 	notes: RelatedNote[];
+	groups?: RelatedGroup[];
+	properties?: RelatedProperty[];
+	wildcards?: RelatedWildcard[];
 	stats?: ImageStats | null;
 }
 
@@ -218,6 +227,27 @@ export interface RelatedPrompt {
 export interface RelatedNote {
 	id: string;
 	title: string;
+}
+
+export interface RelatedGroup {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+}
+
+export interface RelatedProperty {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+}
+
+export interface RelatedWildcard {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
 }
 
 export interface ImageItem extends FileItem {

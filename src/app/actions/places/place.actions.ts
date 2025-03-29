@@ -4,9 +4,9 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { revalidatePath } from 'next/cache';
-import type { PlaceBase, CreatePlaceData, UpdatePlaceData } from '@/types/entities/place';
 import { mapCreatePlaceDataToPrisma, mapUpdatePlaceDataToPrisma } from '@/transformers/place';
+import type { CreatePlaceData, PlaceBase, UpdatePlaceData } from '@/types/entities/place';
+import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
 const placeLogger = serverLogger.withContext('PlaceActions');
@@ -53,6 +53,9 @@ const notifyPlaceChange = async (action: 'create' | 'update' | 'delete', place: 
 export interface PlaceWithStats extends PlaceBase {
 	_count: {
 		images: number;
+		groups: number;
+		properties: number;
+		wildcards: number;
 	};
 	totalSize: number;
 	imageCount?: number;
@@ -79,7 +82,12 @@ export async function getPlaces(): Promise<PlaceWithStats[]> {
 		const places = await prisma.place.findMany({
 			include: {
 				_count: {
-					select: { images: true },
+					select: {
+						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true
+					},
 				},
 				images: {
 					take: 9,
@@ -148,6 +156,9 @@ export async function getPlace(id: string): Promise<PlaceWithStats> {
 				_count: {
 					select: {
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true
 					},
 				},
 			},

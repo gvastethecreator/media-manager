@@ -105,6 +105,9 @@ export interface CreateAlbumData {
 		itemType: 'image' | 'video';
 	}>;
 	viewConfig?: Partial<AlbumViewConfig>;
+	groupIds?: string[];
+	propertyIds?: string[];
+	wildcardIds?: string[];
 }
 
 /**
@@ -119,6 +122,9 @@ export interface UpdateAlbumData {
 	privacyLevel?: AlbumPrivacyLevel;
 	isArchived?: boolean;
 	viewConfig?: Partial<AlbumViewConfig>;
+	groupIds?: string[];
+	propertyIds?: string[];
+	wildcardIds?: string[];
 }
 
 /**

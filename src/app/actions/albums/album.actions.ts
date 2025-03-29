@@ -4,20 +4,20 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { convertServerImageToFileItem } from '@/services/image-converter.service';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { revalidatePath } from 'next/cache';
 // Importaciones actualizadas usando nuevos tipos y transformers
 import type { ServerImage } from '@/services/image-converter.service';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from '@/transformers/album';
 import {
-	type Album,
-	type AlbumBase,
-	AlbumPrivacyLevel,
-	AlbumType,
-	type CreateAlbumData,
-	type UpdateAlbumData,
+    type Album,
+    type AlbumBase,
+    AlbumPrivacyLevel,
+    AlbumType,
+    type CreateAlbumData,
+    type UpdateAlbumData,
 } from '@/types/entities/album';
 import type { FileItem } from '@/types/file-item';
+import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
 const albumLogger = serverLogger.withContext('AlbumActions');
@@ -42,6 +42,9 @@ const createAlbumError = (message: string, code: AlbumErrorCode = AlbumErrorCode
 export interface AlbumWithStats extends AlbumBase {
 	_count: {
 		images: number;
+		groups: number;
+		properties: number;
+		wildcards: number;
 	};
 	totalSize: number;
 	lastUpdated: Date;
@@ -78,7 +81,12 @@ export async function getAlbums(): Promise<AlbumWithStats[]> {
 		const albums = await prisma.album.findMany({
 			include: {
 				_count: {
-					select: { images: true },
+					select: {
+						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true
+					},
 				},
 				images: {
 					select: {
@@ -179,6 +187,9 @@ export async function getAlbum(id: string): Promise<Album> {
 				_count: {
 					select: {
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true
 					},
 				},
 			},

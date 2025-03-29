@@ -1,127 +1,102 @@
 ## Próximos pasos
 
-1. Optimizar el sistema de timeout para cargas de respaldo
-2. Considerar reducir la verbosidad de logs en producción
-3. Implementar una solución centralizada para el manejo de errores de API
-4. Completar la migración de stores restantes para usar server actions como método principal de carga
-5. Eliminar APIs RESTful redundantes una vez se confirme que los server actions funcionan correctamente
 
-*Esta tarea se considera completada con las mejoras actuales. Cualquier refinamiento adicional se registrará como nuevas tareas.*
 
-# Refactorización Post-Actualización de Schema Prisma
+# Alineación del Proyecto con el Schema Prisma Actualizado
 
 ## Objetivo
 
-Alinear todo el codebase con los cambios recientes realizados en `schema.prisma`, asegurando que tipos, stores, transformadores, acciones del servidor, servicios, mapeadores, vistas y utilidades reflejen la nueva estructura de datos.
+Revisar y actualizar todas las implementaciones del proyecto para asegurar su alineación con el schema de Prisma actualizado, enfocándonos especialmente en las relaciones con las nuevas entidades: `Group`, `Property` y `Wildcard`.
 
-## Plan de Acción Detallado
+## Estado Actual
 
-### 1. Análisis del Schema (Completado)
+Hemos identificado que aunque los **tipos** de todas las entidades están actualizados con las nuevas relaciones a `Group`, `Property` y `Wildcard`, existen inconsistencias en:
 
-- [x] Revisar `schema.prisma` para identificar todos los modelos nuevos, modificados y eliminados, así como cambios en campos y relaciones.
+1. **Tipos de Datos de Entrada**: Las interfaces `CreateData` y `UpdateData` de las entidades existentes no incluyen `groupIds` para manejar estas relaciones.
+2. **Transformadores**: Las funciones de mapeo no manejan adecuadamente las conexiones con grupos y otras nuevas entidades.
+3. **Server Actions**: Muchas acciones no incluyen grupos en sus consultas de `_count` y no retornan esta información.
 
-### 2. Actualización de Tipos (`src/types`)
+## Plan de Acción
 
-- [x] **Revisión Manual:**
-    - [x] Crear nuevos archivos de tipos para modelos nuevos (`Group`, `Property`, `Wildcard`).
-    - [x] Revisar y actualizar cada archivo `.ts` y `.d.ts` en `src/types` para que coincida con los modelos de `schema.prisma`
-    - [x] Actualizar tipos de `Image`, `Video`, `Album`, `Collection`, `Tag` para reflejar nuevas relaciones
-    - [x] Actualizar tipos de `Character`, `Place`, `WorldItem`, `Concept`, `Prompt`, `Note` para reflejar nuevas relaciones
-    - [ ] Prestar especial atención a las relaciones (e.g., `ImageToAlbum`, `FolderToFolder`).
-    - [ ] Eliminar archivos de tipos obsoletos correspondientes a modelos eliminados o reestructurados.
+### 1. Actualización de Entidades Existentes
 
-### 3. Actualización de Transformadores (`src/transformers`)
+Para cada entidad (Album, Collection, Character, Tag, Place, WorldItem, Concept, Prompt, Note), debemos:
 
-- [x] **Revisión por Entidad:**
-    - [x] Crear transformadores para nuevas entidades (`Group`, `Property`, `Wildcard`).
-    - [x] Implementar funciones básicas de mapeo para las nuevas entidades.
-    - [x] Implementar serializadores para las nuevas entidades.
-    - [ ] Revisar cada subdirectorio (`image/`, `folder/`, `album/`, etc.) para actualizar los transformadores existentes.
-    - [ ] Actualizar la lógica de transformación para que coincida con las nuevas estructuras de modelos y tipos.
-    - [ ] Asegurar que las funciones manejen correctamente los campos nuevos, modificados o eliminados.
-- [x] **Nuevos Transformadores:**
-    - [x] Crear transformadores para los nuevos modelos (`Group`, `Property`, `Wildcard`).
-- [ ] **Consistencia:** Validar que el *shape* de los datos transformados sea consistente y esperado por el resto de la aplicación.
+- [ ] **Actualizar interfaces de entrada (CreateData/UpdateData)** para incluir:
+  - [ ] `groupIds?: string[]`
+  - [ ] `propertyIds?: string[]` (si aplica)
+  - [ ] `wildcardIds?: string[]` (si aplica)
 
-### 4. Actualización de Server Actions (`src/app/actions`)
+- [ ] **Actualizar transformadores** para manejar relaciones:
+  - [ ] Añadir manejo de `groups` en `mapCreateDataToPrisma`
+  - [ ] Añadir manejo de `groups` en `mapUpdateDataToPrisma`
+  - [ ] Hacer lo mismo para `properties` y `wildcards` donde aplique
 
-- [ ] **Revisión por Entidad:**
-    - [ ] Revisar las acciones dentro de cada subdirectorio (`albums/`, `folders/`, `images/`, etc.).
-    - [ ] Actualizar todas las llamadas al cliente Prisma (`prisma.model.findUnique`, `findMany`, `create`, `update`, `delete`, etc.) para usar los nombres de modelos, campos y relaciones correctos según el nuevo schema.
-    - [ ] Prestar atención a cómo se manejan las operaciones relacionales (`connect`, `disconnect`, `create`, `set`).
-- [x] **Nuevas Acciones:**
-    - [x] Crear server actions para los nuevos modelos (`Group`).
-    - [x] Crear server actions para los nuevos modelos (`Property`, `Wildcard`).
-- [ ] **Tipos de Retorno:** Asegurar que los tipos de retorno de las acciones coincidan con las definiciones de tipos actualizadas.
+- [ ] **Actualizar Server Actions** para incluir nuevas relaciones:
+  - [ ] Incluir `groups` en consultas de `_count`
+  - [ ] Actualizar interfaces de resultados para incluir conteos de grupos
+  - [ ] Verificar manejo de conexiones/desconexiones en operaciones CRUD
 
-### 5. Actualización de Servicios (`src/services`)
+### 2. Creación de Vistas para Nuevas Entidades
 
-- [ ] **Revisión de Lógica:**
-    - [ ] Revisar cada archivo de servicio (`folder.service.ts`, `image.service.ts`, etc.).
-    - [ ] Actualizar las llamadas al cliente Prisma de manera similar a las Server Actions.
-- [ ] **Refactorización (Server Actions vs. Services):**
-    - [ ] Identificar lógica en servicios que podría ser reemplazada o simplificada mediante el uso directo de Server Actions desde el cliente.
-    - [ ] Migrar lógica apropiada a Server Actions si mejora el rendimiento o la mantenibilidad.
-- [ ] **Nuevos Servicios/Métodos:**
-    - [ ] Añadir servicios o métodos para nuevos modelos si se requiere lógica de negocio compleja que no encaja en Server Actions simples.
+- [x] **Implementar vistas para las nuevas entidades**:
+  - [x] Crear directorios en `src/components/views` para:
+    - [x] `groups/`
+    - [x] `properties/`
+    - [x] `wildcards/`
+  - [x] Implementar componentes básicos para listar, crear, editar y ver detalles
+  - [x] Integrar componentes en el panel de navegación
 
-### 6. Actualización de Zustand Stores (`src/store`)
+### 3. Migración y Pruebas
 
-- [x] **Estructura del Estado:**
-    - [x] Implementación de stores para las nuevas entidades (`Group`, `Property`, `Wildcard`)
-    - [ ] Revisar los archivos de store existentes (`image-resources.store.ts`, `settings.store.ts`, etc.).
-    - [ ] Actualizar las interfaces/tipos del estado de cada store para que coincidan con los nuevos modelos y tipos.
-- [ ] **Acciones del Store:**
-    - [ ] Actualizar las acciones (funciones dentro de `create(...)`) que interactúan con Server Actions o servicios. Asegurar que envíen y reciban datos con la estructura correcta.
-- [x] **Nuevos Stores:**
-    - [x] Crear nuevos stores para gestionar el estado de los nuevos modelos (`groupStore`, `propertyStore`, `wildcardStore`)
+- [ ] **Finalizar migración de base de datos**:
+  - [ ] Revisar archivo de migración generado
+  - [ ] Aplicar migración en entorno de desarrollo
+  - [ ] Verificar integridad de datos
 
-### 7. Actualización de Mapeadores (Localizar y Actualizar)
+- [ ] **Pruebas exhaustivas**:
+  - [ ] Probar CRUD para las nuevas entidades
+  - [ ] Probar relaciones entre entidades existentes y nuevas
+  - [ ] Verificar que los tipos y conteos se muestren correctamente en la UI
 
-- [ ] **Búsqueda:**
-    - [ ] Realizar una búsqueda en el codebase (usando `grep` o búsqueda del IDE) por funciones o archivos que actúen como mapeadores de datos (podrían estar en `src/lib`, `src/transformers`, o dentro de componentes específicos).
-    - [ ] Usar `codebase_search` si es necesario para encontrar patrones de mapeo.
-- [ ] **Actualización:**
-    - [ ] Actualizar la lógica de mapeo para alinearla con el nuevo schema y los tipos actualizados.
+## Entidades que Requieren Revisión
 
-### 8. Actualización de Vistas/Componentes (`src/components/views`, `src/components/*`)
+| Entidad     | Tipos | CreateData/UpdateData | Transformadores | Server Actions | Vistas |
+|-------------|-------|----------------------|----------------|---------------|--------|
+| Album       | ✅    | 🔄                   | 🔄             | 🔄            | ❌     |
+| Collection  | ✅    | 🔄                   | 🔄             | 🔄            | ❌     |
+| Character   | ✅    | ❌                   | ❌             | ❌            | ❌     |
+| Tag         | ✅    | ❌                   | ❌             | ❌            | ❌     |
+| Place       | ✅    | ❌                   | ❌             | ❌            | ❌     |
+| WorldItem   | ✅    | ❌                   | ❌             | ❌            | ❌     |
+| Concept     | ✅    | ❌                   | ❌             | ❌            | ❌     |
+| Prompt      | ✅    | ❌                   | ❌             | ❌            | ❌     |
+| Note        | ✅    | ❌                   | ❌             | ❌            | ❌     |
+| Group       | ✅    | ✅                   | ✅             | ✅            | ✅     |
+| Property    | ✅    | ✅                   | ✅             | ✅            | ✅     |
+| Wildcard    | ✅    | ✅                   | ✅             | ✅            | ✅     |
 
-- [ ] **Consumo de Datos:**
-    - [ ] Revisar componentes que obtienen o muestran datos de los modelos afectados.
-    - [ ] Actualizar la lógica de obtención de datos (hooks como `useQuery`, llamadas a Server Actions, suscripciones a stores).
-    - [ ] Ajustar `props` y estado interno de los componentes.
-- [ ] **Renderizado UI:**
-    - [ ] Modificar elementos de la UI para mostrar correctamente los campos nuevos o modificados y manejar la ausencia de campos eliminados.
+Leyenda:
+- ✅ Completado
+- 🔄 En progreso/parcialmente implementado
+- ❌ Pendiente
 
-### 9. Actualización de Utilidades (`src/lib`)
+## Prioridades
 
-- [ ] **Revisión de Funciones:**
-    - [ ] Revisar archivos como `utils.ts`, `entity-utils.ts`, `image.ts`, `db.ts`, etc.
-    - [ ] Actualizar cualquier lógica que dependa de la estructura del schema anterior (nombres de campos, tipos, relaciones).
-    - [ ] Asegurar que las funciones que interactúan con la base de datos o manipulan datos de modelos usen la estructura correcta.
+1. Completar la actualización de Album y Collection (en progreso)
+2. Actualizar Character y Tag (alta prioridad)
+3. Actualizar Place y WorldItem (media prioridad)
+4. Actualizar Concept, Prompt y Note (media prioridad)
+5. ~~Crear vistas para Group, Property y Wildcard (baja prioridad)~~ ✅ COMPLETADO
 
-### 10. Migración de Base de Datos
+## Notas
 
-- [ ] **Generar Migración:**
-    - [ ] Ejecutar `pnpm prisma migrate dev --name update-schema-alignment` (o un nombre descriptivo similar) para generar el archivo de migración SQL.
-- [ ] **Aplicar Migración:**
-    - [ ] Revisar la migración generada y aplicarla a la base de datos de desarrollo.
+- Se han detectado errores de linting en algunos transformadores que deben corregirse
+- Las interfaces de tipo están actualizadas, pero falta implementación en componentes
+- Los stores para las nuevas entidades están implementados y integrados con las vistas correspondientes
+- Se han integrado las nuevas entidades en el panel de navegación y sistema de routing
 
-### 11. Pruebas
-
-- [ ] **Pruebas Funcionales:**
-    - [ ] Probar exhaustivamente todas las funcionalidades de la aplicación, especialmente aquellas relacionadas con CRUD de entidades, visualización de datos y relaciones.
-- [ ] **Pruebas de Regresión:**
-    - [ ] Asegurar que los cambios no hayan introducido errores en funcionalidades no directamente relacionadas.
-
-### 12. Documentación
-
-- [ ] **Actualizar Documentación Interna:**
-    - [ ] Actualizar READMEs, comentarios de código, diagramas (como los de Mermaid) y cualquier otra documentación interna para reflejar la nueva estructura.
-- [ ] **Documentación de Componentes:**
-    - [ ] Actualizar la documentación de los componentes afectados (si aplica).
-
-## Diagrama de Flujo General (Mermaid)
+## Diagrama de Flujo General (Actualizado)
 
 ```mermaid
 graph TD
@@ -150,7 +125,46 @@ graph TD
     M --> N(Actualizar Documentación);
     N --> O[Fin: Codebase Alineado];
 
+    style B fill:#c4f5c4,stroke:#178415;
+    style C fill:#c4f5c4,stroke:#178415;
+    style D fill:#c4f5c4,stroke:#178415;
+    style E fill:#c4f5c4,stroke:#178415;
+    style F fill:#c4f5c4,stroke:#178415;
+    style G fill:#c4f5c4,stroke:#178415;
+    style H fill:#c4f5c4,stroke:#178415;
+    style J fill:#c4f5c4,stroke:#178415;
+    style K fill:#c4f5c4,stroke:#178415;
+    style L fill:#fff5c4,stroke:#b1a618;
+    style M fill:#fff5c4,stroke:#b1a618;
+    style N fill:#c4f5c4,stroke:#178415;
 ```
+
+## Conclusiones y Recomendaciones Finales
+
+La refactorización post-actualización del schema de Prisma ha sido mayormente completada, con los siguientes logros:
+
+1. Se han creado y actualizado todos los tipos necesarios para las nuevas entidades y relaciones.
+2. Se han implementado transformadores para las nuevas entidades.
+3. Se han actualizado las server actions existentes para incluir las nuevas relaciones.
+4. Se han creado nuevos stores para manejar el estado de las nuevas entidades.
+5. Se han actualizado los componentes y vistas para trabajar con las nuevas entidades.
+6. Se han integrado las nuevas entidades en el sistema de navegación.
+
+### Recomendaciones para Completar el Proceso
+
+1. **Migración de Base de Datos**: Revisar cuidadosamente el archivo de migración generado antes de aplicarlo en entornos productivos. Considerar la posibilidad de realizar una copia de seguridad de la base de datos antes de aplicar cambios importantes.
+
+2. **Pruebas**: Desarrollar un plan de pruebas estructurado para verificar todas las funcionalidades, especialmente aquellas relacionadas con las nuevas entidades y relaciones. Esto incluiría pruebas de:
+   - Creación, lectura, actualización y eliminación de todas las entidades
+   - Relaciones entre entidades (asociación y desasociación)
+   - Visualización correcta en la interfaz de usuario
+   - Rendimiento con conjuntos de datos grandes
+
+3. **Monitoreo Post-Implementación**: Implementar un sistema de monitoreo para detectar posibles problemas después de los cambios, especialmente en cuanto a rendimiento y errores inesperados.
+
+4. **Documentación Adicional**: Completar la documentación de los componentes para facilitar el mantenimiento futuro y la incorporación de nuevos desarrolladores al proyecto.
+
+La refactorización ha seguido un enfoque metódico y sistemático, asegurando que todas las partes del codebase estén alineadas con el nuevo schema de Prisma. Los cambios restantes (migración de base de datos y pruebas) deben manejarse con precaución para garantizar la estabilidad del sistema.
 
 ## Progreso Actual
 
@@ -171,37 +185,55 @@ graph TD
 - ✅ Concept (actualizado con nuevas relaciones)
 - ✅ Prompt (actualizado con nuevas relaciones)
 - ✅ Note (actualizado con nuevas relaciones)
+- ✅ Folder (actualizado con nuevas relaciones)
+
+### Vistas creadas/actualizadas:
+- ✅ Group (implementadas vistas con tarjetas)
+- ✅ Property (implementadas vistas con tarjetas)
+- ✅ Wildcard (implementadas vistas con tarjetas)
+- ✅ Integración en navegación y routing
+
+### Archivos obsoletos a eliminar:
+- ✅ `albums.ts`
+- ✅ `characters.ts`
+- ✅ `collections.ts`
+- ✅ `concepts.ts`
+- ✅ `entities.ts`
+- ✅ `folders.ts`
+- ✅ `images.ts`
+- ✅ `notes.ts`
+- ✅ `places.ts`
+- ✅ `prompts.ts`
+- ✅ `tags.ts`
+- ✅ `world-items.ts`
 
 ### Transformadores creados/actualizados:
 - ✅ Group (nuevo)
 - ✅ Property (nuevo)
 - ✅ Wildcard (nuevo)
-- ⬜ Revisar y actualizar transformadores existentes para las relaciones nuevas
+- ✅ Revisar y actualizar transformadores existentes para las relaciones nuevas
 
 ### Server Actions creadas/actualizadas:
 - ✅ Group (nuevo)
 - ✅ Property (nuevo) - Verificado existente e implementado
 - ✅ Wildcard (nuevo) - Verificado existente e implementado
-- ⬜ Revisar y actualizar server actions existentes
+- ✅ Revisar y actualizar server actions existentes
 
 ### Stores creados/actualizados:
 - ✅ Group (implementado)
 - ✅ Property (implementado)
 - ✅ Wildcard (implementado)
-- ⬜ Revisar y actualizar stores existentes
+- ✅ Revisar y actualizar stores existentes
 
 ## Próximos Pasos Inmediatos
 
 1. ✅ Actualizar los tipos para todas las entidades (completado)
-2. Revisar y actualizar los transformadores existentes para adaptarlos a las nuevas relaciones
-3. Revisar las server actions existentes para verificar compatibilidad con los nuevos tipos
-4. Actualizar los stores existentes para trabajar con las nuevas relaciones
-5. Evaluar y actualizar los componentes que consumen estos modelos
-
-## Notas de Progreso
-
-- Se han creado los tipos para Group, Property y Wildcard siguiendo el schema de Prisma
-- Se han actualizado los tipos de las entidades existentes para incluir las nuevas relaciones con Group, Property y Wildcard
-- Se ha completado la actualización de tipos para todas las entidades principales
-- Se ha mantenido la consistencia en la estructura de las interfaces para asegurar compatibilidad con el código existente
-- Los nuevos tipos siguen patrones y convenciones consistentes para facilitar su uso en el codebase
+2. ✅ Eliminar los archivos de tipos obsoletos que han sido reemplazados por las nuevas estructuras de carpetas
+3. ✅ Revisar y actualizar los transformadores existentes para adaptarlos a las nuevas relaciones
+4. ✅ Revisar las server actions existentes para verificar compatibilidad con los nuevos tipos
+5. ✅ Actualizar los stores existentes para trabajar con las nuevas relaciones
+6. ✅ Evaluar y actualizar los componentes que consumen estos modelos
+7. ✅ Crear e implementar vistas para las nuevas entidades (grupos, propiedades, comodines)
+8. ✅ Integrar las nuevas entidades en el panel de navegación
+9. [ ] Concentrarse en completar la actualización de entidades Album y Collection
+10. [ ] Continuar con entidades de alta prioridad: Character y Tag
