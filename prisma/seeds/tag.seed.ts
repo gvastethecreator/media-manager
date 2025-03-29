@@ -20,6 +20,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Contenido seleccionado como favorito',
 					shortcut: 'fav',
 					category: 'estado',
+					featuredImage: null,
+					isFavorite: true,
 				},
 				{
 					name: 'Importante',
@@ -28,6 +30,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Contenido importante que requiere atención',
 					shortcut: 'imp',
 					category: 'estado',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Referencia',
@@ -36,6 +40,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Material de referencia para consulta',
 					shortcut: 'ref',
 					category: 'propósito',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Inspiración',
@@ -44,6 +50,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Contenido que sirve como inspiración',
 					shortcut: 'ins',
 					category: 'propósito',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Pendiente',
@@ -52,6 +60,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Contenido pendiente de procesar',
 					shortcut: 'pen',
 					category: 'estado',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Fantasía',
@@ -60,6 +70,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Contenido relacionado con el género de fantasía',
 					shortcut: 'fan',
 					category: 'género',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Sci-Fi',
@@ -68,6 +80,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Contenido relacionado con ciencia ficción',
 					shortcut: 'sci',
 					category: 'género',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Terror',
@@ -76,6 +90,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Contenido relacionado con horror y terror',
 					shortcut: 'ter',
 					category: 'género',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Paisaje',
@@ -84,6 +100,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Vistas y escenarios naturales',
 					shortcut: 'pai',
 					category: 'contenido',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Retrato',
@@ -92,6 +110,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Retratos de personajes o personas',
 					shortcut: 'ret',
 					category: 'contenido',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Concept Art',
@@ -100,6 +120,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Arte conceptual para proyectos',
 					shortcut: 'con',
 					category: 'estilo',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Pixel Art',
@@ -108,6 +130,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Arte pixel y estilo retro',
 					shortcut: 'pix',
 					category: 'estilo',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Realista',
@@ -116,6 +140,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Estilo artístico realista o fotorrealista',
 					shortcut: 'rea',
 					category: 'estilo',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Cartoon',
@@ -124,6 +150,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Estilo caricatura o animado',
 					shortcut: 'car',
 					category: 'estilo',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Abstracto',
@@ -132,6 +160,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Arte abstracto y experimental',
 					shortcut: 'abs',
 					category: 'estilo',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Alta Calidad',
@@ -140,6 +170,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Contenido de alta resolución o calidad',
 					shortcut: 'hq',
 					category: 'calidad',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'WIP',
@@ -148,6 +180,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Trabajo en progreso',
 					shortcut: 'wip',
 					category: 'estado',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Finalizado',
@@ -156,6 +190,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Proyectos o contenido completado',
 					shortcut: 'fin',
 					category: 'estado',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Revisión',
@@ -164,6 +200,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Necesita revisión o feedback',
 					shortcut: 'rev',
 					category: 'estado',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Meme',
@@ -172,6 +210,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Contenido humorístico o memes',
 					shortcut: 'mem',
 					category: 'contenido',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Wallpaper',
@@ -180,6 +220,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Imágenes para fondos de pantalla',
 					shortcut: 'wal',
 					category: 'propósito',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Videojuego',
@@ -188,6 +230,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Contenido relacionado con videojuegos',
 					shortcut: 'game',
 					category: 'tema',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Animación',
@@ -196,6 +240,8 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Material para animación o animado',
 					shortcut: 'ani',
 					category: 'tipo',
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
 					name: 'Ilustración',
@@ -204,7 +250,59 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					description: 'Trabajo de ilustración artística',
 					shortcut: 'ilu',
 					category: 'tipo',
-				}
+					featuredImage: null,
+					isFavorite: false,
+				},
+				{
+					name: 'IA Generada',
+					emoji: '🤖',
+					color: '#0ea5e9',
+					description: 'Contenido creado mediante inteligencia artificial',
+					shortcut: 'ai',
+					category: 'origen',
+					featuredImage: null,
+					isFavorite: false,
+				},
+				{
+					name: 'Diseño UI',
+					emoji: '📱',
+					color: '#8b5cf6',
+					description: 'Interfaces de usuario y diseño de UI',
+					shortcut: 'ui',
+					category: 'diseño',
+					featuredImage: null,
+					isFavorite: false,
+				},
+				{
+					name: 'Referencia Anatómica',
+					emoji: '🦴',
+					color: '#ef4444',
+					description: 'Referencias para estudio anatómico',
+					shortcut: 'anat',
+					category: 'referencia',
+					featuredImage: null,
+					isFavorite: false,
+				},
+				{
+					name: 'Tipografía',
+					emoji: '🔤',
+					color: '#0ea5e9',
+					description: 'Diseños tipográficos y fuentes',
+					shortcut: 'typo',
+					category: 'diseño',
+					featuredImage: null,
+					isFavorite: false,
+				},
+				{
+					name: 'Texturas',
+					emoji: '🧩',
+					color: '#f59e0b',
+					description: 'Texturas y patrones para diseño',
+					shortcut: 'tex',
+					category: 'recursos',
+					featuredImage: null,
+					isFavorite: false,
+				},
 			],
 		});
 

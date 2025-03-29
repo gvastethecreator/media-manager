@@ -8,20 +8,57 @@ import { seedLogger, tableExists } from './utils.seed';
 export async function seedProfiles(prisma: PrismaClient): Promise<void> {
 	seedLogger.info('👤 Creando perfil default...');
 
-	// Verificar si la tabla Profile existe
-	if (await tableExists(prisma, 'Profile')) {
-		// Crear perfil por defecto
-		await prisma.profile.create({
-			data: {
-				name: 'Default',
-				emoji: '🐸',
-				color: '#AE3F94FF',
-				description: 'Perfil por defecto',
-			},
-		});
+	try {
+		// Verificar si la tabla Profile existe
+		if (await tableExists(prisma, 'Profile')) {
+			// Verificar si ya existe un perfil por defecto
+			const existingProfile = await prisma.profile.findFirst({
+				where: { name: 'Default' }
+			});
 
-		seedLogger.info('✅ Perfil por defecto creado');
-	} else {
-		seedLogger.warn('⚠️ La tabla Profile no existe, saltando creación de perfil');
+			if (!existingProfile) {
+				// Crear perfil por defecto sin settings inicialmente
+				await prisma.profile.create({
+					data: {
+						id: 'default-profile-id',
+						name: 'Default',
+						emoji: '🐸',
+						color: '#AE3F94FF',
+						description: 'Perfil por defecto',
+						isActive: true
+					},
+				});
+
+				// Ahora crear settings y vincularlo al perfil
+				await prisma.settings.create({
+					data: {
+						theme: 'system',
+						language: 'es',
+						profileId: 'default-profile-id'
+					}
+				});
+
+				// Actualizar el perfil con el ID de settings
+				const settings = await prisma.settings.findFirst({
+					where: { profileId: 'default-profile-id' }
+				});
+
+				if (settings) {
+					await prisma.profile.update({
+						where: { id: 'default-profile-id' },
+						data: { settingsId: settings.id }
+					});
+				}
+
+				seedLogger.info('✅ Perfil por defecto creado con sus settings');
+			} else {
+				seedLogger.info('ℹ️ Ya existe un perfil por defecto');
+			}
+		} else {
+			seedLogger.warn('⚠️ La tabla Profile no existe, saltando creación de perfil');
+		}
+	} catch (error) {
+		seedLogger.error('❌ Error creando perfil:', error);
+		throw error;
 	}
 }
