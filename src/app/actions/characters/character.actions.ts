@@ -1,6 +1,6 @@
 'use server';
 
-import { CharacterError, EntityErrorCode, createEntityErrorObject, type SerializableError } from '@/lib/errors';
+import { EntityErrorCode, type SerializableError, createEntityErrorObject } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
@@ -51,6 +51,9 @@ const notifyCharacterChange = async (
 export interface CharacterWithStats extends CharacterBase {
 	_count: {
 		images: number;
+		groups: number;
+		properties: number;
+		wildcards: number;
 	};
 	totalSize: number;
 	imageCount?: number;
@@ -77,7 +80,12 @@ export async function getCharacters(): Promise<CharacterWithStats[]> {
 		const characters = await prisma.character.findMany({
 			include: {
 				_count: {
-					select: { images: true },
+					select: {
+						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true
+					},
 				},
 				images: {
 					take: 9,
@@ -146,6 +154,9 @@ export async function getCharacter(id: string): Promise<CharacterWithStats> {
 				_count: {
 					select: {
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true
 					},
 				},
 			},

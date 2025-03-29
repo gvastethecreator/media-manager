@@ -5,12 +5,12 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import type { FileItem } from '@/types/file-item';
-import { revalidatePath } from 'next/cache';
 // Importaciones actualizadas usando nuevos tipos y transformers
 import { mapCreateTagDataToPrisma, mapUpdateTagDataToPrisma } from '@/transformers/tag';
 import type { TagCreate as CreateTagData, Tag, TagUpdate as UpdateTagData } from '@/types/entities/tag';
 import type { TagBase } from '@/types/entities/tag/types';
+import type { FileItem } from '@/types/file-item';
+import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
 const tagLogger = serverLogger.withContext('TagActions');
@@ -60,6 +60,9 @@ export interface TagWithStats {
 	shortcut: string | null;
 	_count: {
 		images: number;
+		groups: number;
+		properties: number;
+		wildcards: number;
 	};
 	totalSize: number;
 	lastUpdated: Date;
@@ -103,7 +106,12 @@ export async function getTags(): Promise<TagWithStats[]> {
 		const tags = await prisma.tag.findMany({
 			include: {
 				_count: {
-					select: { images: true },
+					select: {
+						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true
+					},
 				},
 				images: {
 					select: {
@@ -204,6 +212,9 @@ export async function getTag(id: string): Promise<Tag> {
 				_count: {
 					select: {
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true
 					},
 				},
 			},

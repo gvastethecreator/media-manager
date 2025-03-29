@@ -138,6 +138,9 @@ export interface CreateCharacterData {
   isFavorite?: boolean;
   sortBy?: string;
   filters?: string;
+  groupIds?: string[];
+  propertyIds?: string[];
+  wildcardIds?: string[];
 }
 
 /**
@@ -170,6 +173,9 @@ export interface UpdateCharacterData {
   isFavorite?: boolean;
   sortBy?: string;
   filters?: string;
+  groupIds?: string[];
+  propertyIds?: string[];
+  wildcardIds?: string[];
 }
 
 /**

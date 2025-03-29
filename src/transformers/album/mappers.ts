@@ -4,11 +4,11 @@
  */
 
 import {
-	type AlbumMetadata,
-	type CreateAlbumData,
-	type UpdateAlbumData,
-	AlbumPrivacyLevel,
-	AlbumType,
+    type AlbumMetadata,
+    AlbumPrivacyLevel,
+    AlbumType,
+    type CreateAlbumData,
+    type UpdateAlbumData,
 } from '../../types/entities/album';
 import { generateAlbumSlug, serializeAlbumViewConfig } from './serializers';
 
@@ -34,6 +34,18 @@ export function mapCreateAlbumDataToPrisma(data: CreateAlbumData) {
 		isArchived: false,
 		privacyLevel: data.privacyLevel || AlbumPrivacyLevel.PRIVATE,
 		viewConfig,
+		// Conexión con grupos si existen
+		groups: data.groupIds ? {
+			connect: data.groupIds.map((id) => ({ id })),
+		} : undefined,
+		// Conexión con propiedades si existen
+		properties: data.propertyIds ? {
+			connect: data.propertyIds.map((id) => ({ id })),
+		} : undefined,
+		// Conexión con comodines si existen
+		wildcards: data.wildcardIds ? {
+			connect: data.wildcardIds.map((id) => ({ id })),
+		} : undefined,
 	};
 }
 
@@ -63,6 +75,27 @@ export function mapUpdateAlbumDataToPrisma(data: UpdateAlbumData) {
 	// Serializar configuración de visualización si existe
 	if (data.viewConfig) {
 		updateData.viewConfig = serializeAlbumViewConfig(data.viewConfig);
+	}
+
+	// Gestionar relaciones con grupos
+	if (data.groupIds !== undefined) {
+		updateData.groups = {
+			set: data.groupIds.map((id) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con propiedades
+	if (data.propertyIds !== undefined) {
+		updateData.properties = {
+			set: data.propertyIds.map((id) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con comodines
+	if (data.wildcardIds !== undefined) {
+		updateData.wildcards = {
+			set: data.wildcardIds.map((id) => ({ id })),
+		};
 	}
 
 	return updateData;

@@ -18,6 +18,9 @@ export function useCategoryStats(initialData: NavigationData) {
 			totalCharacters: 0,
 			totalPlaces: 0,
 			totalObjects: 0,
+			totalGroups: 0,
+			totalProperties: 0,
+			totalWildcards: 0,
 			totalViews: 0,
 			totalDownloads: 0,
 			totalFavorites: 0,
@@ -37,6 +40,9 @@ export function useCategoryStats(initialData: NavigationData) {
 		concepts = [],
 		prompts = [],
 		notes = [],
+		groups = [],
+		properties = [],
+		wildcards = [],
 	} = initialData || {};
 
 	// Función auxiliar para obtener la cantidad de ítems para cada categoría
@@ -63,11 +69,17 @@ export function useCategoryStats(initialData: NavigationData) {
 					return prompts.length || 0;
 				case 'notes':
 					return notes.length || 0;
+				case 'groups':
+					return stats?.totalGroups || groups.length || 0;
+				case 'properties':
+					return stats?.totalProperties || properties.length || 0;
+				case 'wildcards':
+					return stats?.totalWildcards || wildcards.length || 0;
 				default:
 					return 0;
 			}
 		},
-		[albums, characters, collections, concepts, folders, notes, places, prompts, stats, tags, worldItems]
+		[albums, characters, collections, concepts, folders, notes, places, prompts, stats, tags, worldItems, groups, properties, wildcards]
 	);
 
 	// Calcula y devuelve el número de imágenes para una categoría
@@ -121,11 +133,26 @@ export function useCategoryStats(initialData: NavigationData) {
 						(sum: number, note: { _count?: { images: number } }) => sum + (note._count?.images || 0),
 						0
 					);
+				case 'groups':
+					return groups.reduce(
+						(sum: number, group: { _count?: { images: number } }) => sum + (group._count?.images || 0),
+						0
+					);
+				case 'properties':
+					return properties.reduce(
+						(sum: number, property: { _count?: { images: number } }) => sum + (property._count?.images || 0),
+						0
+					);
+				case 'wildcards':
+					return wildcards.reduce(
+						(sum: number, wildcard: { _count?: { images: number } }) => sum + (wildcard._count?.images || 0),
+						0
+					);
 				default:
 					return 0;
 			}
 		},
-		[albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems]
+		[albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems, groups, properties, wildcards]
 	);
 
 	// Función para obtener los elementos hijos de cada categoría con corrección de tipos
@@ -152,11 +179,17 @@ export function useCategoryStats(initialData: NavigationData) {
 					return prompts as unknown as CategoryChild[];
 				case 'notes':
 					return notes as unknown as CategoryChild[];
+				case 'groups':
+					return groups as unknown as CategoryChild[];
+				case 'properties':
+					return properties as unknown as CategoryChild[];
+				case 'wildcards':
+					return wildcards as unknown as CategoryChild[];
 				default:
 					return [] as CategoryChild[];
 			}
 		},
-		[albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems]
+		[albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems, groups, properties, wildcards]
 	);
 
 	return {

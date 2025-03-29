@@ -4,17 +4,17 @@
  */
 
 import type {
-	CharacterAttribute,
-	CharacterCard,
-	CharacterCategory,
-	CharacterClass,
-	CharacterExtended,
-	CharacterInventoryItem,
-	CharacterListItem,
+    CharacterAttribute,
+    CharacterCard,
+    CharacterCategory,
+    CharacterClass,
+    CharacterExtended,
+    CharacterInventoryItem,
+    CharacterListItem,
 } from '@/types/entities/character';
 import {
-	CHARACTER_CLASS_COLORS as SUGGESTED_COLORS,
-	CHARACTER_CLASS_EMOJIS as SUGGESTED_EMOJIS,
+    CHARACTER_CLASS_COLORS as SUGGESTED_COLORS,
+    CHARACTER_CLASS_EMOJIS as SUGGESTED_EMOJIS,
 } from '@/types/entities/character/enums';
 import type { Character as PrismaCharacter } from '@prisma/client';
 import { toCharacterExtended, toCharacterSummary } from './serializers';
@@ -279,28 +279,49 @@ export function charactersToCards(characters: (PrismaCharacter | CharacterExtend
  * @returns Objeto con formato para Prisma
  */
 export function mapCreateCharacterDataToPrisma(data: any): any {
-	// Asegurarse de que stats sea string si viene como objeto
-	const stats = typeof data.stats === 'object' ? JSON.stringify(data.stats) : data.stats;
-
-	return {
+	// Procesar atributos complejos
+	const processedData = {
 		name: data.name,
-		emoji: data.emoji || null,
-		color: data.color || null,
-		description: data.description || null,
+		emoji: data.emoji || '👤',
+		color: data.color || '#3b82f6',
+		description: data.description || '',
 		shortcut: data.shortcut || null,
+		category: data.category || 'general',
 		level: data.level || 1,
-		class: data.class || null,
-		race: data.race || null,
-		alignment: data.alignment || null,
-		backstory: data.backstory || null,
-		stats: stats || null,
-		psychologicalProfile: data.psychologicalProfile || null,
-		socialProfile: data.socialProfile || null,
-		featuredImageId: data.featuredImage || null,
+		class: data.class || 'warrior',
+		race: data.race || 'human',
+		type: data.type || null,
+		alignment: data.alignment || 'true neutral',
+		backstory: data.backstory || '',
+		stats: data.stats || '{}',
+		psychologicalProfile: data.psychologicalProfile || '',
+		socialProfile: data.socialProfile || '',
+		relationships: data.relationships || '{}',
+		goals: data.goals || '[]',
+		fears: data.fears || '[]',
+		beliefs: data.beliefs || '[]',
+		personality: data.personality || '[]',
+		skills: data.skills || '[]',
+		abilities: data.abilities || '[]',
+		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
-		category: data.category || null,
-		presetId: data.presetId || null,
+		sortBy: data.sortBy || 'name',
+		filters: data.filters || '[]',
+		// Conexión con grupos si existen
+		groups: data.groupIds ? {
+			connect: data.groupIds.map((id: string) => ({ id })),
+		} : undefined,
+		// Conexión con propiedades si existen
+		properties: data.propertyIds ? {
+			connect: data.propertyIds.map((id: string) => ({ id })),
+		} : undefined,
+		// Conexión con comodines si existen
+		wildcards: data.wildcardIds ? {
+			connect: data.wildcardIds.map((id: string) => ({ id })),
+		} : undefined,
 	};
+
+	return processedData;
 }
 
 /**
@@ -309,31 +330,57 @@ export function mapCreateCharacterDataToPrisma(data: any): any {
  * @returns Objeto con formato para Prisma
  */
 export function mapUpdateCharacterDataToPrisma(data: any): any {
-	const updateData: any = {};
+	// Procesar atributos complejos
+	const updateData: Record<string, any> = {};
 
-	// Solo incluir campos que estén presentes en los datos
+	// Actualizar propiedades si están presentes
 	if (data.name !== undefined) updateData.name = data.name;
 	if (data.emoji !== undefined) updateData.emoji = data.emoji;
 	if (data.color !== undefined) updateData.color = data.color;
 	if (data.description !== undefined) updateData.description = data.description;
 	if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
+	if (data.category !== undefined) updateData.category = data.category;
 	if (data.level !== undefined) updateData.level = data.level;
 	if (data.class !== undefined) updateData.class = data.class;
 	if (data.race !== undefined) updateData.race = data.race;
+	if (data.type !== undefined) updateData.type = data.type;
 	if (data.alignment !== undefined) updateData.alignment = data.alignment;
 	if (data.backstory !== undefined) updateData.backstory = data.backstory;
-
-	// Convertir stats a string si es un objeto
-	if (data.stats !== undefined) {
-		updateData.stats = typeof data.stats === 'object' ? JSON.stringify(data.stats) : data.stats;
-	}
-
+	if (data.stats !== undefined) updateData.stats = data.stats;
 	if (data.psychologicalProfile !== undefined) updateData.psychologicalProfile = data.psychologicalProfile;
 	if (data.socialProfile !== undefined) updateData.socialProfile = data.socialProfile;
-	if (data.featuredImage !== undefined) updateData.featuredImageId = data.featuredImage;
+	if (data.relationships !== undefined) updateData.relationships = data.relationships;
+	if (data.goals !== undefined) updateData.goals = data.goals;
+	if (data.fears !== undefined) updateData.fears = data.fears;
+	if (data.beliefs !== undefined) updateData.beliefs = data.beliefs;
+	if (data.personality !== undefined) updateData.personality = data.personality;
+	if (data.skills !== undefined) updateData.skills = data.skills;
+	if (data.abilities !== undefined) updateData.abilities = data.abilities;
+	if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
 	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-	if (data.category !== undefined) updateData.category = data.category;
-	if (data.presetId !== undefined) updateData.presetId = data.presetId;
+	if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
+	if (data.filters !== undefined) updateData.filters = data.filters;
+
+	// Gestionar relaciones con grupos
+	if (data.groupIds !== undefined) {
+		updateData.groups = {
+			set: data.groupIds.map((id: string) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con propiedades
+	if (data.propertyIds !== undefined) {
+		updateData.properties = {
+			set: data.propertyIds.map((id: string) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con comodines
+	if (data.wildcardIds !== undefined) {
+		updateData.wildcards = {
+			set: data.wildcardIds.map((id: string) => ({ id })),
+		};
+	}
 
 	return updateData;
 }

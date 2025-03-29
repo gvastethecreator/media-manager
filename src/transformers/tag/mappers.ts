@@ -26,6 +26,19 @@ export function mapCreateTagDataToPrisma(data: CreateTagData) {
 		rarity: data.rarity || null,
 		texture: data.texture || null,
 		isFavorite: data.isFavorite || false,
+		featuredImage: data.featuredImage || null,
+		// Conexión con grupos si existen
+		groups: data.groupIds ? {
+			connect: data.groupIds.map((id) => ({ id })),
+		} : undefined,
+		// Conexión con propiedades si existen
+		properties: data.propertyIds ? {
+			connect: data.propertyIds.map((id) => ({ id })),
+		} : undefined,
+		// Conexión con comodines si existen
+		wildcards: data.wildcardIds ? {
+			connect: data.wildcardIds.map((id) => ({ id })),
+		} : undefined,
 	};
 }
 
@@ -48,6 +61,27 @@ export function mapUpdateTagDataToPrisma(data: UpdateTagData) {
 	if (data.category !== undefined) prismaData.category = data.category;
 	if (data.rarity !== undefined) prismaData.rarity = data.rarity;
 	if (data.texture !== undefined) prismaData.texture = data.texture;
+
+	// Gestionar relaciones con grupos
+	if (data.groupIds !== undefined) {
+		prismaData.groups = {
+			set: data.groupIds.map((id) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con propiedades
+	if (data.propertyIds !== undefined) {
+		prismaData.properties = {
+			set: data.propertyIds.map((id) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con comodines
+	if (data.wildcardIds !== undefined) {
+		prismaData.wildcards = {
+			set: data.wildcardIds.map((id) => ({ id })),
+		};
+	}
 
 	return prismaData;
 }

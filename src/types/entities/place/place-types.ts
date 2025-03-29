@@ -117,6 +117,9 @@ export interface CreatePlaceData {
   isFavorite?: boolean;
   sortBy?: string;
   filters?: string;
+  groupIds?: string[];
+  propertyIds?: string[];
+  wildcardIds?: string[];
 }
 
 /**
@@ -143,6 +146,9 @@ export interface UpdatePlaceData {
   isFavorite?: boolean;
   sortBy?: string;
   filters?: string;
+  groupIds?: string[];
+  propertyIds?: string[];
+  wildcardIds?: string[];
 }
 
 /**

@@ -117,6 +117,9 @@ export interface CreateCollectionData {
   isFavorite?: boolean;
   sortBy?: string;
   filters?: string;
+  groupIds?: string[];
+  propertyIds?: string[];
+  wildcardIds?: string[];
 }
 
 /**
@@ -144,6 +147,9 @@ export interface UpdateCollectionData {
   isFavorite?: boolean;
   sortBy?: string;
   filters?: string;
+  groupIds?: string[];
+  propertyIds?: string[];
+  wildcardIds?: string[];
 }
 
 /**
