@@ -12,17 +12,20 @@ import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers
 import {
-	extendWorldItem,
-	extendWorldItems,
-	prepareCreateWorldItemData,
-	prepareUpdateWorldItemData,
+  createWorldItemFilter,
+  createWorldItemOrderBy,
+  mapCreateWorldItemDataToPrisma,
+  mapUpdateWorldItemDataToPrisma,
+  toExtendedWorldItem
 } from '@/transformers/world-item';
-import {
-	type CreateWorldItemData,
-	type UpdateWorldItemData,
-	type WorldItem,
-	type WorldItemBase,
-	WorldItemWithRelations,
+import type {
+  CreateWorldItemData,
+  UpdateWorldItemData,
+  WorldItem,
+  WorldItemBase,
+  WorldItemExtended,
+  WorldItemFilters,
+  WorldItemSortCriteria
 } from '@/types/entities/world-item';
 
 // Configuración y utilidades
@@ -52,6 +55,9 @@ const createWorldItemError = (
 export interface WorldItemWithStats extends WorldItemBase {
 	_count: {
 		images: number;
+		groups: number;
+		properties: number;
+		wildcards: number;
 	};
 	totalSize: number;
 	lastUpdated: Date;
@@ -111,36 +117,63 @@ const notifyWorldItemChange = async (
 // Acciones del servidor
 /**
  * Obtiene todos los objetos del mundo
+ * @param filters Filtros opcionales para la búsqueda
+ * @param sortBy Criterio de ordenación opcional
+ * @returns Lista de objetos del mundo con estadísticas
  */
-export async function getWorldItems(): Promise<WorldItemWithStats[]> {
-	const transformWorldItem = (worldItem: WorldItemBase & { _count: { images: number } }): WorldItemWithStats => ({
-		...worldItem,
-		totalSize: 0, // Valor por defecto, reemplazar si es necesario
-		lastUpdated: new Date(worldItem.updatedAt || worldItem.createdAt), // Usamos updatedAt si existe
-		recentImages: [], // Valor por defecto
-		_count: worldItem._count,
-	});
+export async function getWorldItems(
+	filters?: WorldItemFilters,
+	sortBy?: WorldItemSortCriteria
+): Promise<(WorldItemExtended & {
+	totalSize: number;
+	imageCount?: number;
+	recentImages?: string[]
+})[]> {
+	// Si hay filtros activos o un criterio de ordenación específico,
+	// saltamos la caché para obtener datos frescos
+	const useCache = !filters && !sortBy;
 
-	const cached = await worldItemsCache.get('all');
-	if (cached) {
-		worldItemLogger.info('✅ Objetos del mundo obtenidos de caché');
-		// Convertir los datos del caché al formato esperado
-		const items = cached.map((item) => ({
-			...item,
-			createdAt: new Date(item.createdAt as string),
-			updatedAt: new Date(item.updatedAt as string),
-			_count: { images: (item.imageCount as number) || 0 },
-		})) as Array<WorldItemBase & { _count: { images: number } }>;
-		return items.map(transformWorldItem);
+	if (useCache) {
+		const cached = await worldItemsCache.get('all');
+		if (cached) {
+			worldItemLogger.info('✅ Objetos del mundo obtenidos de caché');
+
+			// Convertir los datos del caché al formato esperado
+			return cached.map((item) => ({
+				...item,
+				createdAt: new Date(item.createdAt as string),
+				updatedAt: new Date(item.updatedAt as string),
+				// Asegurar que los campos JSON estén correctamente deserializados
+				attributes: Array.isArray(item.attributes) ? item.attributes : [],
+				effects: Array.isArray(item.effects) ? item.effects : [],
+				requirements: typeof item.requirements === 'object' ? item.requirements : {},
+				stats: typeof item.stats === 'object' ? item.stats : {},
+				tags: Array.isArray(item.tags) ? item.tags : [],
+				filters: typeof item.filters === 'object' ? item.filters : {},
+			}));
+		}
 	}
 
 	try {
 		worldItemLogger.info('🔍 Obteniendo objetos del mundo');
+
+		// Crear el filtro y el ordenamiento con los nuevos transformadores
+		const whereCondition = createWorldItemFilter(filters);
+		const orderByCondition = sortBy ? createWorldItemOrderBy(sortBy) : { updatedAt: 'desc' };
+
 		const worldItems = await prisma.worldItem.findMany({
+			where: whereCondition,
 			include: {
 				_count: {
 					select: {
 						images: true,
+						notes: true,
+						concepts: true,
+						prompts: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
+						tagEntities: true,
 					},
 				},
 				images: {
@@ -154,12 +187,36 @@ export async function getWorldItems(): Promise<WorldItemWithStats[]> {
 						thumbnailSize: true,
 					},
 				},
+				groups: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				properties: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				wildcards: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				tagEntities: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
 			},
-			orderBy: { updatedAt: 'desc' },
+			orderBy: orderByCondition,
 		});
 
-		// Obtener datos estadísticos
-		const worldItemsWithStats = await Promise.all(
+		// Obtener datos estadísticos y transformar
+		const processedItems = await Promise.all(
 			worldItems.map(async (worldItem) => {
 				// Calcular tamaño total
 				const totalSize = await prisma.image.aggregate({
@@ -186,31 +243,32 @@ export async function getWorldItems(): Promise<WorldItemWithStats[]> {
 					})
 					.filter(Boolean);
 
-				// Transformar el objeto
-				const result = transformWorldItem({
-					...worldItem,
-					_count: worldItem._count,
-				});
+				// Usar el nuevo transformador para convertir a formato extendido
+				const extendedItem = toExtendedWorldItem(worldItem);
 
-				result.totalSize = totalSize._sum.size || 0;
-				result.recentImages = recentImages;
-
-				return result;
+				// Agregar datos estadísticos
+				return {
+					...extendedItem,
+					totalSize: totalSize._sum.size || 0,
+					imageCount: worldItem._count.images,
+					recentImages,
+					// Mantener vacíos los arrays de relaciones para evitar duplicación
+					// ya que ya están incluidos en los campos deserializados
+					groups: [],
+					properties: [],
+					wildcards: [],
+					tagEntities: [],
+				};
 			})
 		);
 
-		// Guardar en caché
-		await worldItemsCache.set(
-			'all',
-			worldItemsWithStats.map((item) => ({
-				...item,
-				imageCount: item._count.images,
-				_count: undefined,
-			}))
-		);
+		// Guardar en caché solo si no se usaron filtros
+		if (useCache) {
+			await worldItemsCache.set('all', processedItems);
+		}
 
-		worldItemLogger.info('✅ Objetos del mundo obtenidos', { count: worldItemsWithStats.length });
-		return worldItemsWithStats;
+		worldItemLogger.info('✅ Objetos del mundo obtenidos', { count: processedItems.length });
+		return processedItems;
 	} catch (error) {
 		worldItemLogger.error('❌ Error al obtener objetos del mundo', error);
 		throw createWorldItemError(
@@ -223,8 +281,10 @@ export async function getWorldItems(): Promise<WorldItemWithStats[]> {
 
 /**
  * Obtiene un objeto del mundo por su ID
+ * @param id ID del objeto del mundo
+ * @returns Objeto del mundo extendido con datos deserializados
  */
-export async function getWorldItemById(id: string): Promise<WorldItem> {
+export async function getWorldItemById(id: string): Promise<WorldItemExtended> {
 	try {
 		worldItemLogger.info('🔍 Obteniendo objeto del mundo:', id);
 		const worldItem = await prisma.worldItem.findUnique({
@@ -236,6 +296,38 @@ export async function getWorldItemById(id: string): Promise<WorldItem> {
 						notes: true,
 						concepts: true,
 						prompts: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
+						tagEntities: true,
+					},
+				},
+				images: {
+					take: 5,
+					orderBy: { createdAt: 'desc' },
+				},
+				groups: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				properties: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				wildcards: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				tagEntities: {
+					select: {
+						id: true,
+						name: true,
 					},
 				},
 			},
@@ -247,8 +339,8 @@ export async function getWorldItemById(id: string): Promise<WorldItem> {
 
 		worldItemLogger.info('✅ Objeto del mundo obtenido:', worldItem.name);
 
-		// Transformar con los nuevos transformers
-		return extendWorldItem(worldItem);
+		// Transformar con los nuevos transformadores para deserializar correctamente los campos JSON
+		return toExtendedWorldItem(worldItem);
 	} catch (error) {
 		worldItemLogger.error('❌ Error al obtener objeto del mundo', { id, error });
 		// Preservar el código de error si ya es un WorldItemError
@@ -261,16 +353,36 @@ export async function getWorldItemById(id: string): Promise<WorldItem> {
 
 /**
  * Crea un nuevo objeto del mundo
+ * @param data Datos para crear el objeto del mundo
+ * @returns Objeto del mundo extendido con datos deserializados
  */
-export async function createWorldItem(data: CreateWorldItemData): Promise<WorldItem> {
+export async function createWorldItem(data: CreateWorldItemData): Promise<WorldItemExtended> {
 	try {
 		worldItemLogger.info('📝 Creando objeto del mundo:', data.name);
 
 		// Usar el transformer para preparar los datos
-		const preparedData = prepareCreateWorldItemData(data);
+		const createData = mapCreateWorldItemDataToPrisma(data);
 
 		const worldItem = await prisma.worldItem.create({
-			data: preparedData,
+			data: createData,
+			include: {
+				_count: {
+					select: {
+						images: true,
+						notes: true,
+						concepts: true,
+						prompts: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
+						tagEntities: true,
+					},
+				},
+				groups: true,
+				properties: true,
+				wildcards: true,
+				tagEntities: true,
+			},
 		});
 
 		await notifyWorldItemChange('create', worldItem.id, worldItem);
@@ -278,8 +390,8 @@ export async function createWorldItem(data: CreateWorldItemData): Promise<WorldI
 
 		worldItemLogger.info('✅ Objeto del mundo creado:', worldItem.name);
 
-		// Transformar con los nuevos transformers
-		return extendWorldItem(worldItem);
+		// Transformar con los nuevos transformadores
+		return toExtendedWorldItem(worldItem);
 	} catch (error) {
 		worldItemLogger.error('❌ Error al crear objeto del mundo', error);
 		throw createWorldItemError('No se pudo crear el objeto del mundo', WorldItemErrorCode.OPERATION_FAILED, error);
@@ -288,8 +400,11 @@ export async function createWorldItem(data: CreateWorldItemData): Promise<WorldI
 
 /**
  * Actualiza un objeto del mundo existente
+ * @param id ID del objeto del mundo a actualizar
+ * @param data Datos para actualizar el objeto del mundo
+ * @returns Objeto del mundo extendido con datos deserializados
  */
-export async function updateWorldItem(id: string, data: UpdateWorldItemData): Promise<WorldItem> {
+export async function updateWorldItem(id: string, data: UpdateWorldItemData): Promise<WorldItemExtended> {
 	try {
 		worldItemLogger.info('📝 Actualizando objeto del mundo:', id);
 
@@ -303,12 +418,30 @@ export async function updateWorldItem(id: string, data: UpdateWorldItemData): Pr
 		}
 
 		// Usar el transformer para preparar los datos
-		const preparedData = prepareUpdateWorldItemData(data);
+		const updateData = mapUpdateWorldItemDataToPrisma(data);
 
 		// Actualizar el objeto
 		const updated = await prisma.worldItem.update({
 			where: { id },
-			data: preparedData,
+			data: updateData,
+			include: {
+				_count: {
+					select: {
+						images: true,
+						notes: true,
+						concepts: true,
+						prompts: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
+						tagEntities: true,
+					},
+				},
+				groups: true,
+				properties: true,
+				wildcards: true,
+				tagEntities: true,
+			},
 		});
 
 		await notifyWorldItemChange('update', id, updated);
@@ -316,8 +449,8 @@ export async function updateWorldItem(id: string, data: UpdateWorldItemData): Pr
 
 		worldItemLogger.info('✅ Objeto del mundo actualizado:', updated.name);
 
-		// Transformar con los nuevos transformers
-		return extendWorldItem(updated);
+		// Transformar con los nuevos transformadores
+		return toExtendedWorldItem(updated);
 	} catch (error) {
 		worldItemLogger.error('❌ Error al actualizar objeto del mundo', { id, error });
 		// Preservar el código de error si ya es un WorldItemError

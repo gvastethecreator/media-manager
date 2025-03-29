@@ -30,10 +30,6 @@ export * from './utility/prompt';
 export * from './utility/property';
 export * from './utility/wildcard';
 
-// Interfaces para tipos inferidos
-export type {
-	Album, Character, Collection, Concept, Folder,
-	FolderVisualConfig, Group, Image,
-	ImageStats, Note, Place, Profile, Prompt, Property, Queue, Settings, Tag, UploadedImage,
-	Video, Wildcard, WorldItem
-} from './types';
+// Types
+export * from './types';
+

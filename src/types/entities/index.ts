@@ -29,7 +29,6 @@ export * from './wildcard';
 
 // Utilidades y tipos comunes
 export * from './queueJob';
-export * from './visual-preset';
 
 // Alias de compatibilidad (mantener para retrocompatibilidad)
 // Se recomienda usar las importaciones directas de los módulos respectivos

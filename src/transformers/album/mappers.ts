@@ -4,13 +4,18 @@
  */
 
 import {
-    type AlbumMetadata,
-    AlbumPrivacyLevel,
-    AlbumType,
-    type CreateAlbumData,
-    type UpdateAlbumData,
+  type AlbumMetadata,
+  AlbumPrivacyLevel,
+  AlbumType,
+  type CreateAlbumData,
+  type UpdateAlbumData,
 } from '../../types/entities/album';
-import { generateAlbumSlug, serializeAlbumViewConfig } from './serializers';
+import {
+  generateAlbumSlug,
+  serializeAlbumFilters,
+  serializeAlbumSortBy,
+  serializeAlbumViewConfig
+} from './serializers';
 
 /**
  * Mapea datos de creación de álbum a formato compatible con Prisma
@@ -24,6 +29,10 @@ export function mapCreateAlbumDataToPrisma(data: CreateAlbumData) {
 	// Serializar configuración de visualización si existe
 	const viewConfig = data.viewConfig ? serializeAlbumViewConfig(data.viewConfig) : undefined;
 
+	// Serializar sortBy y filters si existen
+	const sortBy = data.sortBy ? serializeAlbumSortBy(data.sortBy) : 'name';
+	const filters = data.filters ? serializeAlbumFilters(data.filters) : 'empty_array';
+
 	return {
 		name: data.name,
 		description: data.description || '',
@@ -34,6 +43,8 @@ export function mapCreateAlbumDataToPrisma(data: CreateAlbumData) {
 		isArchived: false,
 		privacyLevel: data.privacyLevel || AlbumPrivacyLevel.PRIVATE,
 		viewConfig,
+		sortBy,
+		filters,
 		// Conexión con grupos si existen
 		groups: data.groupIds ? {
 			connect: data.groupIds.map((id) => ({ id })),
@@ -71,6 +82,16 @@ export function mapUpdateAlbumDataToPrisma(data: UpdateAlbumData) {
 	if (data.parentId !== undefined) updateData.parentId = data.parentId;
 	if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
 	if (data.privacyLevel !== undefined) updateData.privacyLevel = data.privacyLevel;
+
+	// Serializar sortBy si existe
+	if (data.sortBy !== undefined) {
+		updateData.sortBy = serializeAlbumSortBy(data.sortBy);
+	}
+
+	// Serializar filters si existe
+	if (data.filters !== undefined) {
+		updateData.filters = serializeAlbumFilters(data.filters);
+	}
 
 	// Serializar configuración de visualización si existe
 	if (data.viewConfig) {
@@ -231,4 +252,87 @@ export function formatAlbumDateRange(metadata?: AlbumMetadata): string {
 
 	// Distinto año
 	return `${fromDate.toLocaleDateString()} - ${toDate.toLocaleDateString()}`;
+}
+
+/**
+ * Crea un filtro para álbumes basado en criterios de búsqueda
+ * @param query Términos de búsqueda (opcional)
+ * @param category Categoría de álbum (opcional)
+ * @param isFavorite Flag para filtrar por favoritos (opcional)
+ * @returns Objeto de filtro para Prisma
+ */
+export function createAlbumFilter(query?: string, category?: string, isFavorite?: boolean) {
+    const filter: Record<string, any> = {};
+
+    // Criterios AND que deben cumplirse todos
+    const andConditions = [];
+
+    // Filtrar por categoría si se especifica
+    if (category) {
+        andConditions.push({ category });
+    }
+
+    // Filtrar por favoritos si se especifica
+    if (isFavorite !== undefined) {
+        andConditions.push({ isFavorite });
+    }
+
+    // Filtrar por términos de búsqueda si se especifican
+    if (query && query.trim() !== '') {
+        const searchTerm = query.trim();
+        andConditions.push({
+            OR: [
+                { name: { contains: searchTerm, mode: 'insensitive' as const } },
+                { description: { contains: searchTerm, mode: 'insensitive' as const } },
+            ],
+        });
+    }
+
+    // Si hay condiciones AND, agregarlas al filtro
+    if (andConditions.length > 0) {
+        filter.AND = andConditions;
+    }
+
+    return filter;
+}
+
+/**
+ * Crea una configuración de ordenación para álbumes
+ * @param sortBy Criterio de ordenación
+ * @returns Objeto de ordenación para Prisma
+ */
+export function createAlbumOrderBy(sortBy?: string) {
+    // Orden por defecto
+    if (!sortBy || sortBy === 'name') {
+        return [{ name: 'asc' as const }];
+    }
+
+    // Otros criterios de ordenación
+    switch (sortBy) {
+        case 'name_asc':
+            return [{ name: 'asc' as const }];
+        case 'name_desc':
+            return [{ name: 'desc' as const }];
+        case 'date_created_asc':
+            return [{ createdAt: 'asc' as const }];
+        case 'date_created_desc':
+            return [{ createdAt: 'desc' as const }];
+        case 'date_updated_asc':
+            return [{ updatedAt: 'asc' as const }];
+        case 'date_updated_desc':
+            return [{ updatedAt: 'desc' as const }];
+        case 'item_count_asc':
+            return [
+                { images: { _count: 'asc' as const } },
+                { name: 'asc' as const }
+            ];
+        case 'item_count_desc':
+            return [
+                { images: { _count: 'desc' as const } },
+                { name: 'asc' as const }
+            ];
+        default:
+            // Si es un criterio desconocido, usar orden por defecto
+            return [{ name: 'asc' as const }];
+    }
 }

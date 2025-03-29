@@ -165,5 +165,13 @@
       "args": ["-NoProfile"],
       "icon": "terminal-powershell"
     }
-  }
+  },
+  "github.copilot.chat.localeOverride": "es",
+  "github.copilot.chat.followUps": "always",
+  "github.copilot.chat.codesearch.enabled": true,
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "github.copilot.chat.editor.temporalContext.enabled": false,
+  "github.copilot.chat.edits.temporalContext.enabled": true,
+  "github.copilot.chat.languageContext.typescript.enabled": true,
+  "github.copilot.chat.generateTests.codeLens": true
 }

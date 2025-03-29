@@ -7,14 +7,18 @@ import { convertServerImageToFileItem } from '@/services/image-converter.service
 // Importaciones actualizadas usando nuevos tipos y transformers
 import type { ServerImage } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from '@/transformers/album';
 import {
-    type Album,
-    type AlbumBase,
-    AlbumPrivacyLevel,
-    AlbumType,
-    type CreateAlbumData,
-    type UpdateAlbumData,
+  mapCreateAlbumDataToPrisma,
+  mapUpdateAlbumDataToPrisma
+} from '@/transformers/album/mappers';
+import {
+  toExtendedAlbum
+} from '@/transformers/album/serializers';
+import {
+  type Album,
+  type AlbumBase,
+  type CreateAlbumData,
+  type UpdateAlbumData
 } from '@/types/entities/album';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
@@ -114,6 +118,9 @@ export async function getAlbums(): Promise<AlbumWithStats[]> {
 		// Calcular estadísticas adicionales
 		const albumsWithStats = await Promise.all(
 			albums.map(async (album: any) => {
+				// Deserializar campos JSON utilizando el nuevo transformador
+				const extendedAlbum = toExtendedAlbum(album as AlbumBase);
+
 				// Calcular tamaño total
 				const totalSize = await prisma.image.aggregate({
 					where: {
@@ -158,7 +165,7 @@ export async function getAlbums(): Promise<AlbumWithStats[]> {
 				});
 
 				return {
-					...album,
+					...extendedAlbum,
 					_count: album._count,
 					totalSize: totalSize._sum.size || 0,
 					lastUpdated: album.images?.[0]?.updatedAt || album.updatedAt,
@@ -201,14 +208,8 @@ export async function getAlbum(id: string): Promise<Album> {
 
 		albumLogger.info('✅ Álbum obtenido:', album.name);
 
-		// Convertir el resultado de Prisma al tipo Album
-		const albumData: Album = {
-			...(album as unknown as AlbumBase),
-			privacyLevel: (album as any).privacyLevel || AlbumPrivacyLevel.PRIVATE,
-			type: (album as any).type || AlbumType.STANDARD,
-			ownerId: (album as any).ownerId || '',
-			isArchived: (album as any).isArchived || false,
-		};
+		// Convertir el resultado de Prisma al tipo Album usando el nuevo transformador
+		const albumData = toExtendedAlbum(album as unknown as AlbumBase);
 
 		return albumData;
 	} catch (error) {
@@ -238,14 +239,8 @@ export async function createAlbum(data: CreateAlbumData): Promise<Album> {
 
 		albumLogger.info('✅ Álbum creado:', album.name);
 
-		// Convertir el resultado de Prisma al tipo Album
-		const albumData: Album = {
-			...(album as unknown as AlbumBase),
-			privacyLevel: prismaData.privacyLevel || AlbumPrivacyLevel.PRIVATE,
-			type: prismaData.type || AlbumType.STANDARD,
-			ownerId: (album as any).ownerId || '',
-			isArchived: (album as any).isArchived || false,
-		};
+		// Convertir el resultado de Prisma al tipo Album usando el nuevo transformador
+		const albumData = toExtendedAlbum(album as unknown as AlbumBase);
 
 		return albumData;
 	} catch (error) {
@@ -256,9 +251,9 @@ export async function createAlbum(data: CreateAlbumData): Promise<Album> {
 
 export async function updateAlbum(id: string, data: UpdateAlbumData): Promise<Album> {
 	try {
-		albumLogger.info('📝 Actualizando álbum:', { id, ...data });
+		albumLogger.info('🔄 Actualizando álbum:', id);
 
-		// Verificar si el álbum existe
+		// Verificar que el álbum exista
 		const existingAlbum = await prisma.album.findUnique({
 			where: { id },
 		});
@@ -271,28 +266,19 @@ export async function updateAlbum(id: string, data: UpdateAlbumData): Promise<Al
 		const prismaData = mapUpdateAlbumDataToPrisma(data);
 
 		// Actualizar el álbum
-		const album = await prisma.album.update({
+		const updatedAlbum = await prisma.album.update({
 			where: { id },
 			data: prismaData,
 		});
 
 		// Notificar cambio
-		await notifyAlbumChange('update', album);
+		await notifyAlbumChange('update', updatedAlbum);
 		await revalidateAllPaths();
 
-		albumLogger.info('✅ Álbum actualizado:', album.name);
+		albumLogger.info('✅ Álbum actualizado:', updatedAlbum.name);
 
-		// Convertir el resultado de Prisma al tipo Album
-		const albumData: Album = {
-			...(album as unknown as AlbumBase),
-			privacyLevel: (album as any).privacyLevel || (existingAlbum as any).privacyLevel || AlbumPrivacyLevel.PRIVATE,
-			type: (album as any).type || (existingAlbum as any).type || AlbumType.STANDARD,
-			ownerId: (album as any).ownerId || (existingAlbum as any).ownerId || '',
-			isArchived:
-				(album as any).isArchived !== undefined
-					? (album as any).isArchived
-					: (existingAlbum as any).isArchived || false,
-		};
+		// Convertir el resultado de Prisma al tipo Album usando el nuevo transformador
+		const albumData = toExtendedAlbum(updatedAlbum as unknown as AlbumBase);
 
 		return albumData;
 	} catch (error) {

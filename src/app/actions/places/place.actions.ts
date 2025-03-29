@@ -4,8 +4,17 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { mapCreatePlaceDataToPrisma, mapUpdatePlaceDataToPrisma } from '@/transformers/place';
-import type { CreatePlaceData, PlaceBase, UpdatePlaceData } from '@/types/entities/place';
+import {
+  extendPlace,
+  mapCreatePlaceDataToPrisma,
+  mapUpdatePlaceDataToPrisma
+} from '@/transformers/place';
+import type {
+  CreatePlaceData,
+  PlaceBase,
+  PlaceExtendedComplete,
+  UpdatePlaceData
+} from '@/types/entities/place';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
@@ -20,7 +29,7 @@ enum PlaceErrorCode {
 }
 
 // Función creadora de errores (enfoque funcional)
-const createPlaceError = (message: string, code: PlaceErrorCode = PlaceErrorCode.OPERATION_FAILED, cause?: unknown) => {
+const createPlaceError = async (message: string, code: PlaceErrorCode = PlaceErrorCode.OPERATION_FAILED, cause?: unknown) => {
 	const error = new Error(message);
 	error.name = 'PlaceError';
 	Object.assign(error, { code, cause });
@@ -76,7 +85,7 @@ export interface PlaceWithImages extends PlaceBase {
 /**
  * Obtiene todos los lugares con estadísticas
  */
-export async function getPlaces(): Promise<PlaceWithStats[]> {
+export async function getPlaces(): Promise<PlaceExtendedComplete[]> {
 	try {
 		placeLogger.info('🏙️ Obteniendo lugares');
 		const places = await prisma.place.findMany({
@@ -104,6 +113,18 @@ export async function getPlaces(): Promise<PlaceWithStats[]> {
 			orderBy: { name: 'asc' },
 		});
 
+		const countsMap = new Map(
+			places.map(place => [
+				place.id,
+				{
+					images: place._count.images,
+					groups: place._count.groups,
+					properties: place._count.properties,
+					wildcards: place._count.wildcards
+				}
+			])
+		);
+
 		const placesWithStats = await Promise.all(
 			places.map(async (place) => {
 				const totalSize = await prisma.image.aggregate({
@@ -119,10 +140,14 @@ export async function getPlaces(): Promise<PlaceWithStats[]> {
 					},
 				});
 
+				const placeExtended = extendPlace(place, {
+					...countsMap.get(place.id),
+					totalSize: totalSize._sum.size || 0
+				});
+
+				// Agregar imágenes recientes
 				return {
-					...place,
-					totalSize: totalSize._sum.size || 0,
-					imageCount: place._count.images,
+					...placeExtended,
 					recentImages: place.images
 						.filter((img) => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
 						.map((img) => {
@@ -147,7 +172,7 @@ export async function getPlaces(): Promise<PlaceWithStats[]> {
 /**
  * Obtiene un lugar específico por su ID
  */
-export async function getPlace(id: string): Promise<PlaceWithStats> {
+export async function getPlace(id: string): Promise<PlaceExtendedComplete> {
 	try {
 		placeLogger.info('🔍 Obteniendo lugar:', id);
 		const place = await prisma.place.findUnique({
@@ -181,14 +206,16 @@ export async function getPlace(id: string): Promise<PlaceWithStats> {
 			},
 		});
 
-		const result = {
-			...place,
-			totalSize: totalSize._sum.size || 0,
-			imageCount: place._count.images,
-		};
+		const placeExtended = extendPlace(place, {
+			images: place._count.images,
+			groups: place._count.groups,
+			properties: place._count.properties,
+			wildcards: place._count.wildcards,
+			totalSize: totalSize._sum.size || 0
+		});
 
 		placeLogger.info('✅ Lugar obtenido:', id);
-		return result;
+		return placeExtended;
 	} catch (error) {
 		placeLogger.error('❌ Error al obtener lugar', { id, error });
 		throw createPlaceError(
@@ -202,7 +229,7 @@ export async function getPlace(id: string): Promise<PlaceWithStats> {
 /**
  * Crea un nuevo lugar
  */
-export async function createPlace(data: CreatePlaceData): Promise<PlaceBase> {
+export async function createPlace(data: CreatePlaceData): Promise<PlaceExtendedComplete> {
 	try {
 		placeLogger.info('➕ Creando lugar', { name: data.name });
 
@@ -213,11 +240,14 @@ export async function createPlace(data: CreatePlaceData): Promise<PlaceBase> {
 			data: createData,
 		});
 
+		// Transformar a tipo completo
+		const placeExtended = extendPlace(place);
+
 		await revalidateAllPaths();
 		await notifyPlaceChange('create', place);
 
 		placeLogger.info('✅ Lugar creado', { id: place.id, name: place.name });
-		return place;
+		return placeExtended;
 	} catch (error) {
 		placeLogger.error('❌ Error al crear lugar', { error, data });
 		throw createPlaceError('No se pudo crear el lugar', PlaceErrorCode.OPERATION_FAILED, error);
@@ -227,7 +257,7 @@ export async function createPlace(data: CreatePlaceData): Promise<PlaceBase> {
 /**
  * Actualiza un lugar existente
  */
-export async function updatePlace(id: string, data: UpdatePlaceData): Promise<PlaceBase> {
+export async function updatePlace(id: string, data: UpdatePlaceData): Promise<PlaceExtendedComplete> {
 	try {
 		placeLogger.info('🔄 Actualizando lugar', { id });
 
@@ -240,7 +270,7 @@ export async function updatePlace(id: string, data: UpdatePlaceData): Promise<Pl
 			throw createPlaceError('Lugar no encontrado', PlaceErrorCode.NOT_FOUND);
 		}
 
-		// Utilizar el transformer para mapear datos de actualización
+		// Si se proporcionan campos JSON, asegurarse de que estén serializados
 		const updateData = mapUpdatePlaceDataToPrisma(data);
 
 		const updatedPlace = await prisma.place.update({
@@ -248,11 +278,14 @@ export async function updatePlace(id: string, data: UpdatePlaceData): Promise<Pl
 			data: updateData,
 		});
 
+		// Transformar a tipo completo
+		const placeExtended = extendPlace(updatedPlace);
+
 		await revalidateAllPaths();
 		await notifyPlaceChange('update', updatedPlace);
 
 		placeLogger.info('✅ Lugar actualizado', { id });
-		return updatedPlace;
+		return placeExtended;
 	} catch (error) {
 		placeLogger.error('❌ Error al actualizar lugar', { id, error });
 		throw createPlaceError(
@@ -264,21 +297,22 @@ export async function updatePlace(id: string, data: UpdatePlaceData): Promise<Pl
 }
 
 /**
- * Elimina un lugar por su ID
+ * Elimina un lugar existente
  */
 export async function deletePlace(id: string): Promise<{ id: string }> {
 	try {
 		placeLogger.info('🗑️ Eliminando lugar', { id });
 
 		// Comprobar que el lugar existe
-		const place = await prisma.place.findUnique({
+		const existingPlace = await prisma.place.findUnique({
 			where: { id },
 		});
 
-		if (!place) {
+		if (!existingPlace) {
 			throw createPlaceError('Lugar no encontrado', PlaceErrorCode.NOT_FOUND);
 		}
 
+		// Eliminar lugar
 		await prisma.place.delete({
 			where: { id },
 		});
@@ -303,53 +337,49 @@ export async function deletePlace(id: string): Promise<{ id: string }> {
  */
 export async function getPlaceImages(id: string) {
 	try {
-		placeLogger.info('🖼️ Obteniendo imágenes del lugar', { id });
+		placeLogger.info('🖼️ Obteniendo imágenes de lugar', { id });
 
-		// Comprobar que el lugar existe
-		const place = await prisma.place.findUnique({
+		// Verificar que el lugar existe
+		const existingPlace = await prisma.place.findUnique({
 			where: { id },
+			select: { id: true, name: true },
 		});
 
-		if (!place) {
+		if (!existingPlace) {
 			throw createPlaceError('Lugar no encontrado', PlaceErrorCode.NOT_FOUND);
 		}
 
-		const placeWithImages = await prisma.place.findUnique({
-			where: { id },
-			include: {
-				images: {
-					orderBy: { createdAt: 'desc' },
-					select: {
-						id: true,
-						name: true,
-						description: true,
-						width: true,
-						height: true,
-						size: true,
-						aspectRatio: true,
-						blurhash: true,
-						palette: true,
-						format: true,
-						focalPoint: true,
-						thumbnail: true,
-						thumbnailWidth: true,
-						thumbnailHeight: true,
-						thumbnailSize: true,
-						createdAt: true,
-						updatedAt: true,
+		// Obtener imágenes
+		const images = await prisma.image.findMany({
+			where: {
+				places: {
+					some: {
+						id,
 					},
 				},
 			},
+			select: {
+				id: true,
+				name: true,
+				originalFilename: true,
+				width: true,
+				height: true,
+				thumbnail: true,
+				thumbnailWidth: true,
+				thumbnailHeight: true,
+				createdAt: true,
+			},
+			orderBy: {
+				createdAt: 'desc',
+			},
 		});
 
-		if (!placeWithImages) {
-			throw createPlaceError('Lugar no encontrado', PlaceErrorCode.NOT_FOUND);
-		}
-
-		const images = placeWithImages.images.map((image) => {
-			const thumbnailUrl = image.thumbnail
-				? `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`
-				: null;
+		// Transformar miniaturas
+		const imagesWithThumbnails = images.map((image) => {
+			let thumbnailUrl = null;
+			if (image.thumbnail) {
+				thumbnailUrl = `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`;
+			}
 
 			return {
 				...image,
@@ -358,11 +388,15 @@ export async function getPlaceImages(id: string) {
 			};
 		});
 
-		placeLogger.info('✅ Imágenes del lugar obtenidas', { id, count: images.length });
-		return images;
+		placeLogger.info('✅ Imágenes de lugar obtenidas', { id, count: images.length });
+		return imagesWithThumbnails;
 	} catch (error) {
-		placeLogger.error('❌ Error al obtener imágenes del lugar', { id, error });
-		throw createPlaceError('No se pudieron obtener las imágenes del lugar', PlaceErrorCode.OPERATION_FAILED, error);
+		placeLogger.error('❌ Error al obtener imágenes de lugar', { id, error });
+		throw createPlaceError(
+			'No se pudieron obtener las imágenes del lugar',
+			error instanceof Error && 'code' in error ? (error.code as PlaceErrorCode) : PlaceErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -371,85 +405,101 @@ export async function getPlaceImages(id: string) {
  */
 export async function addImageToPlace(placeId: string, imageId: string) {
 	try {
-		placeLogger.info('🔗 Añadiendo imagen a lugar', { placeId, imageId });
+		placeLogger.info('🔗 Asociando imagen a lugar', { placeId, imageId });
 
-		// Comprobar que el lugar existe
-		const place = await prisma.place.findUnique({
+		// Verificar que el lugar existe
+		const existingPlace = await prisma.place.findUnique({
 			where: { id: placeId },
+			select: { id: true },
 		});
 
-		if (!place) {
+		if (!existingPlace) {
 			throw createPlaceError('Lugar no encontrado', PlaceErrorCode.NOT_FOUND);
 		}
 
-		// Comprobar que la imagen existe
-		const image = await prisma.image.findUnique({
+		// Verificar que la imagen existe
+		const existingImage = await prisma.image.findUnique({
 			where: { id: imageId },
+			select: { id: true },
 		});
 
-		if (!image) {
+		if (!existingImage) {
 			throw createPlaceError('Imagen no encontrada', PlaceErrorCode.NOT_FOUND);
 		}
 
-		// Añadir relación
+		// Asociar imagen a lugar
 		await prisma.place.update({
 			where: { id: placeId },
 			data: {
 				images: {
-					connect: { id: imageId },
+					connect: {
+						id: imageId,
+					},
 				},
 			},
 		});
 
 		await revalidateAllPaths();
-		placeLogger.info('✅ Imagen añadida a lugar', { placeId, imageId });
+		placeLogger.info('✅ Imagen asociada a lugar', { placeId, imageId });
 		return { success: true };
 	} catch (error) {
-		placeLogger.error('❌ Error al añadir imagen a lugar', { placeId, imageId, error });
-		throw createPlaceError('No se pudo añadir la imagen al lugar', PlaceErrorCode.OPERATION_FAILED, error);
+		placeLogger.error('❌ Error al asociar imagen a lugar', { placeId, imageId, error });
+		throw createPlaceError(
+			'No se pudo asociar la imagen al lugar',
+			error instanceof Error && 'code' in error ? (error.code as PlaceErrorCode) : PlaceErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
 /**
- * Elimina la asociación entre una imagen y un lugar
+ * Desasocia una imagen de un lugar
  */
 export async function removeImageFromPlace(placeId: string, imageId: string) {
 	try {
-		placeLogger.info('🔗 Eliminando imagen de lugar', { placeId, imageId });
+		placeLogger.info('🔗 Desasociando imagen de lugar', { placeId, imageId });
 
-		// Comprobar que el lugar existe
-		const place = await prisma.place.findUnique({
+		// Verificar que el lugar existe
+		const existingPlace = await prisma.place.findUnique({
 			where: { id: placeId },
+			select: { id: true },
 		});
 
-		if (!place) {
+		if (!existingPlace) {
 			throw createPlaceError('Lugar no encontrado', PlaceErrorCode.NOT_FOUND);
 		}
 
-		// Comprobar que la imagen existe
-		const image = await prisma.image.findUnique({
+		// Verificar que la imagen existe
+		const existingImage = await prisma.image.findUnique({
 			where: { id: imageId },
+			select: { id: true },
 		});
 
-		if (!image) {
+		if (!existingImage) {
 			throw createPlaceError('Imagen no encontrada', PlaceErrorCode.NOT_FOUND);
 		}
 
-		// Eliminar relación
+		// Desasociar imagen de lugar
 		await prisma.place.update({
 			where: { id: placeId },
 			data: {
 				images: {
-					disconnect: { id: imageId },
+					disconnect: {
+						id: imageId,
+					},
 				},
 			},
 		});
 
 		await revalidateAllPaths();
-		placeLogger.info('✅ Imagen eliminada de lugar', { placeId, imageId });
+		placeLogger.info('✅ Imagen desasociada de lugar', { placeId, imageId });
 		return { success: true };
 	} catch (error) {
-		placeLogger.error('❌ Error al eliminar imagen de lugar', { placeId, imageId, error });
-		throw createPlaceError('No se pudo eliminar la imagen del lugar', PlaceErrorCode.OPERATION_FAILED, error);
+		placeLogger.error('❌ Error al desasociar imagen de lugar', { placeId, imageId, error });
+		throw createPlaceError(
+			'No se pudo desasociar la imagen del lugar',
+			error instanceof Error && 'code' in error ? (error.code as PlaceErrorCode) : PlaceErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }

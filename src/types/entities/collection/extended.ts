@@ -4,7 +4,8 @@
  */
 
 import type { Image } from '@prisma/client';
-import type { CollectionBase, CollectionFilter } from './base';
+import type { CollectionBase } from './base';
+import type { CollectionFilter } from './types';
 
 /**
  * Tipo extendido para Collection con propiedades adicionales de UI

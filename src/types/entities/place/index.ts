@@ -1,41 +1,27 @@
 /**
- * @file Exportaciones principales de tipos para la entidad Place
+ * @file Índice de tipos para la entidad Place
  * @module types/entities/place
  */
 
-export * from './base';
-export * from './enums';
-export * from './extended';
-export * from './place-types';
+// Exportar desde archivo base
+export type {
+  CreatePlaceData,
+  PlaceBase,
+  PlaceComplete, PlaceDanger, PlaceExtended,
+  PlaceExtendedComplete, PlaceFilters, PlaceResource,
+  PlaceStat,
+  PlaceStats, PlaceWithRelations,
+  UpdatePlaceData
+} from './types';
 
-// Alias común para el tipo principal
-export type { PlaceWithRelations as Place } from './place-types';
-
-// Reexportar enums explícitamente para evitar problemas de importación
+// Exportar desde enumeraciones
 export {
-    ClimateType,
-    DangerLevel,
-    GovernmentType,
-    PlaceCategory,
-    PlaceSortCriteria,
-    PlaceType,
-    PlaceViewMode
-} from './enums';
+  PLACE_SORT_PROPERTY_MAP, PlaceCategory,
+  PlaceClimate,
+  PlaceSortCriteria,
+  PlaceType
+} from './types';
 
-// Reexportar tipos explícitamente
-export type {
-    CreatePlaceData,
-    PlaceBase,
-    PlaceWithRelations,
-    UpdatePlaceData
-} from './base';
-
-export type {
-    ParsedPlace,
-    ParsedPlaceVisualConfig,
-    ParsedPlaceWithRelations,
-    PlaceFilters,
-    PlaceVisualConfig,
-    PlaceVisualConfigUpdateData
-} from './extended';
+// Exportar tipo principal
+export type { PlaceExtendedComplete as Place } from './types';
 

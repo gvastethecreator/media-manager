@@ -1,17 +1,19 @@
 /**
- * @file Tipos para la entidad Image y sus relacionados
+ * @file Exportaciones principales de tipos para la entidad Image
  * @module types/entities/image
  */
 
-// Exportar todos los tipos base
+// Exportar tipos base
 export * from './base';
 
-// Exportar todos los tipos extendidos
+// Exportar tipos extendidos para UI y visualización
 export * from './extended';
+
+// Exportar tipos completos (con campos JSON deserializados)
+export * from './complete';
 
 // Exportar todos los enums y constantes
 export * from './enums';
 
-// Alias común para el tipo principal (usado frecuentemente)
-import type { ImageExtended } from './extended';
-export type Image = ImageExtended;
+// Alias común para el tipo principal - usando el tipo extendido para mantener consistencia
+export type { ImageWithRelationsExtendedComplete as Image } from './complete';

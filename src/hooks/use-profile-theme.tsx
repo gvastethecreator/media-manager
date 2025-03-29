@@ -3,7 +3,7 @@
 import { useProfile } from '@/providers/profile-provider';
 import { selectProfileColor, useProfileStore } from '@/store/entities/profile/profile-store';
 import { getColorStyles, getContrastColor, getThemeClass } from '@/transformers/profile/profile-transformers';
-import { ThemeMode } from '@/types/entities/profile/profile-types';
+import { ThemeMode } from '@/types/entities/profile/types';
 import { useMemo } from 'react';
 
 export function useProfileTheme() {

@@ -5,7 +5,7 @@
 
 import type { StateCreator } from 'zustand';
 import { extendWorldItem, extendWorldItems } from '../../../../transformers/world-item';
-import type { ParsedWorldItemVisualConfig, WorldItem } from '../../../../types/entities/world-item';
+import type { WorldItem } from '../../../../types/entities/world-item';
 import type { WorldItemStore } from '../index';
 
 export interface WorldItemCoreSlice {
@@ -14,9 +14,6 @@ export interface WorldItemCoreSlice {
 	isLoading: boolean;
 	error: string | null;
 
-	// Configuración visual
-	visualConfig: ParsedWorldItemVisualConfig | null;
-
 	// Acciones
 	setWorldItems: (worldItems: WorldItem[]) => void;
 	addWorldItem: (worldItem: WorldItem) => void;
@@ -24,7 +21,6 @@ export interface WorldItemCoreSlice {
 	removeWorldItem: (id: string) => void;
 	setLoading: (isLoading: boolean) => void;
 	setError: (error: string | null) => void;
-	setVisualConfig: (config: ParsedWorldItemVisualConfig | null) => void;
 	resetStore: () => void;
 
 	// Selectors
@@ -41,7 +37,6 @@ export const createWorldItemCoreSlice: StateCreator<WorldItemStore, [], [], Worl
 	worldItems: [],
 	isLoading: false,
 	error: null,
-	visualConfig: null,
 
 	// Acciones
 	setWorldItems: (worldItems) => {
@@ -74,16 +69,11 @@ export const createWorldItemCoreSlice: StateCreator<WorldItemStore, [], [], Worl
 		set({ error });
 	},
 
-	setVisualConfig: (config) => {
-		set({ visualConfig: config });
-	},
-
 	resetStore: () => {
 		set({
 			worldItems: [],
 			isLoading: false,
 			error: null,
-			visualConfig: null,
 		});
 	},
 

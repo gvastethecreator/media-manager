@@ -1,5 +1,18 @@
 import { index, integer, primaryKey, relations, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { baseFields, contentFields, visualFields } from '../base/common';
+import { createRelationTable } from '../base/relations';
+import { albums } from '../organization/album';
+import { collections } from '../organization/collection';
+import { groups } from '../organization/group';
+import { tags } from '../organization/tag';
+import { concepts } from '../utility/concept';
+import { notes } from '../utility/note';
+import { prompts } from '../utility/prompt';
+import { properties } from '../utility/property';
+import { wildcards } from '../utility/wildcard';
+import { characters } from '../world/character';
+import { places } from '../world/place';
+import { worldItems } from '../world/worldItem';
 import { folders } from './folder';
 
 export const images = sqliteTable(
@@ -56,8 +69,22 @@ export const uploadedImages = sqliteTable('UploadedImage', {
     uploadedAt: integer('uploadedAt', { mode: 'timestamp_ms' }).notNull().default(() => new Date().getTime()),
 });
 
+// Tablas de relación para imágenes
+export const imagesToAlbums = createRelationTable('ImageToAlbum', 'Image', 'Album');
+export const imagesToCollections = createRelationTable('ImageToCollection', 'Image', 'Collection');
+export const imagesToTags = createRelationTable('ImageToTag', 'Image', 'Tag');
+export const imagesToCharacters = createRelationTable('ImageToCharacter', 'Image', 'Character');
+export const imagesToPlaces = createRelationTable('ImageToPlace', 'Image', 'Place');
+export const imagesToWorldItems = createRelationTable('ImageToWorldItem', 'Image', 'WorldItem');
+export const imagesToConcepts = createRelationTable('ImageToConcept', 'Image', 'Concept');
+export const imagesToPrompts = createRelationTable('ImageToPrompt', 'Image', 'Prompt');
+export const imagesToNotes = createRelationTable('ImageToNote', 'Image', 'Note');
+export const imagesToWildcards = createRelationTable('ImageToWildcard', 'Image', 'Wildcard');
+export const imagesToProperties = createRelationTable('ImageToProperty', 'Image', 'Property');
+export const imagesToGroups = createRelationTable('ImageToGroup', 'Image', 'Group');
+
 // Relaciones para imágenes
-export const imagesRelations = relations(images, ({ one }) => ({
+export const imagesRelations = relations(images, ({ one, many }) => ({
     folder: one(folders, {
         fields: [images.folderId],
         references: [folders.id],
@@ -66,6 +93,18 @@ export const imagesRelations = relations(images, ({ one }) => ({
         fields: [images.id],
         references: [imageStats.imageId],
     }),
+    albums: many(albums, { through: imagesToAlbums }),
+    collections: many(collections, { through: imagesToCollections }),
+    tags: many(tags, { through: imagesToTags }),
+    characters: many(characters, { through: imagesToCharacters }),
+    places: many(places, { through: imagesToPlaces }),
+    worldItems: many(worldItems, { through: imagesToWorldItems }),
+    concepts: many(concepts, { through: imagesToConcepts }),
+    prompts: many(prompts, { through: imagesToPrompts }),
+    notes: many(notes, { through: imagesToNotes }),
+    wildcards: many(wildcards, { through: imagesToWildcards }),
+    properties: many(properties, { through: imagesToProperties }),
+    groups: many(groups, { through: imagesToGroups }),
 }));
 
 export const imageStatsRelations = relations(imageStats, ({ one }) => ({

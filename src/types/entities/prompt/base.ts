@@ -20,6 +20,9 @@ export interface PromptCreateInput {
 	tags?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	groupIds?: string[];
+	propertyIds?: string[];
+	wildcardIds?: string[];
 }
 
 /**
@@ -37,6 +40,9 @@ export interface PromptUpdateInput {
 	tags?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	groupIds?: string[];
+	propertyIds?: string[];
+	wildcardIds?: string[];
 }
 
 /**
@@ -58,6 +64,9 @@ export interface PromptStats {
 	notes: number;
 	concepts: number;
 	images: number;
+	groups: number;
+	properties: number;
+	wildcards: number;
 }
 
 /**

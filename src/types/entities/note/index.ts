@@ -6,8 +6,8 @@
 export * from './base';
 export * from './enums';
 export * from './extended';
-export * from './note-types';
+export * from './types';
 
 // Alias común para el tipo principal
-export type { NoteWithRelations as Note } from './note-types';
+export type { NoteWithRelations as Note } from './types';
 

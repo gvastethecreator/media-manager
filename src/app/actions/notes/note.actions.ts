@@ -84,6 +84,23 @@ export async function getNote(id: string): Promise<NoteBase> {
 		noteLogger.info('🔍 Obteniendo nota:', id);
 		const note = await prisma.note.findUnique({
 			where: { id },
+			include: {
+				_count: {
+					select: {
+						images: true,
+						albums: true,
+						collections: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
+					},
+				},
+			},
 		});
 
 		if (!note) {
@@ -193,9 +210,38 @@ export async function updateNote(id: string, data: NoteUpdateInput): Promise<Not
 export async function deleteNote(id: string): Promise<void> {
 	try {
 		noteLogger.info('🗑️ Eliminando nota:', id);
-		await prisma.note.delete({
+
+		// Verificar si la nota existe
+		const note = await prisma.note.findUnique({
 			where: { id },
 		});
+
+		if (!note) {
+			throw createNoteError('Nota no encontrada', NoteErrorCode.NOT_FOUND);
+		}
+
+		// Primero desconectar todas las relaciones
+		await prisma.$transaction([
+			prisma.note.update({
+				where: { id },
+				data: {
+					images: { set: [] },
+					albums: { set: [] },
+					collections: { set: [] },
+					characters: { set: [] },
+					places: { set: [] },
+					worldItems: { set: [] },
+					concepts: { set: [] },
+					prompts: { set: [] },
+					groups: { set: [] },
+					properties: { set: [] },
+					wildcards: { set: [] },
+				},
+			}),
+			prisma.note.delete({
+				where: { id },
+			}),
+		]);
 
 		await emit({
 			type: 'notes:modified',

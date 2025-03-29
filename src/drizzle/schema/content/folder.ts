@@ -3,20 +3,7 @@ import { relations } from 'drizzle-orm'; // Corrige la importación de 'relation
 import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { baseFields, contentFields, presentationFields, visualFields } from '../base/common';
 
-export const folderVisualConfigs = sqliteTable('FolderVisualConfig', {
-    ...baseFields,
-    enable3DEffect: integer('enable3DEffect', { mode: 'boolean' }).notNull().default(true),
-    designSystem: text('designSystem').default('default_design_system'),
-    enableHolographicEffect: integer('enableHolographicEffect', { mode: 'boolean' }).notNull().default(true),
-    enableGlowEffect: integer('enableGlowEffect', { mode: 'boolean' }).notNull().default(true),
-    enableAnimatedBorder: integer('enableAnimatedBorder', { mode: 'boolean' }).notNull().default(true),
-    enableLightHalo: integer('enableLightHalo', { mode: 'boolean' }).notNull().default(true),
-    layerSystem: text('layerSystem').default('default_layer_system'),
-    effects: text('effects').default('default_effects'),
-    performance: text('performance').default('default_performance'),
-    states: text('states').default('default_states'),
-});
-
+// Definimos la tabla sin referencias circulares
 export const folders = sqliteTable(
     'Folder',
     {
@@ -25,13 +12,11 @@ export const folders = sqliteTable(
         ...presentationFields,
         ...visualFields,
         path: text('path').notNull().unique(),
-        parentId: text('parentId').references<string>(() => folders.id, { onDelete: 'cascade' }),
-        visualConfigId: text('visualConfigId')
-            .references(() => folderVisualConfigs.id)
-            .unique(),
+        // Usamos parentId sin referencia, la manejaremos a través de relaciones
+        parentId: text('parentId'),
         totalFiles: integer('totalFiles').notNull().default(0),
         totalSize: integer('totalSize').notNull().default(0),
-        lastIndexed: integer('lastIndexed', { mode: 'timestamp_ms' }).default(new Date()), // Corrige el tipo de valor
+        lastIndexed: integer('lastIndexed', { mode: 'timestamp_ms' }).default(new Date()),
         autoReindex: integer('autoReindex', { mode: 'boolean' }).notNull().default(false),
         presetId: text('presetId'),
     },
@@ -43,23 +28,16 @@ export const folders = sqliteTable(
     })
 );
 
-export type Folder = InferModel<typeof folders>; // Define explícitamente el tipo Folder
+export type Folder = InferModel<typeof folders>;
 
+// Definimos las relaciones explícitamente para manejar la autorreferencia
 export const foldersRelations = relations(folders, ({ one, many }) => ({
     parent: one(folders, {
         fields: [folders.parentId],
         references: [folders.id],
+        relationName: 'folder_parent_child',
     }),
-    children: many(folders),
-    visualConfig: one(folderVisualConfigs, {
-        fields: [folders.visualConfigId],
-        references: [folderVisualConfigs.id],
-    }),
-}));
-
-export const folderVisualConfigsRelations = relations(folderVisualConfigs, ({ one }) => ({
-    folder: one(folders, {
-        fields: [folderVisualConfigs.id],
-        references: [folders.visualConfigId],
+    children: many(folders, {
+        relationName: 'folder_parent_child',
     }),
 }));

@@ -28,48 +28,57 @@ export const folderBaseSchema = z.object({
 /**
  * Esquema para validar datos de creación de carpetas
  */
-export const createFolderSchema = folderBaseSchema.pick({
-	name: true,
-	path: true,
-	description: true,
-	parentId: true,
-	emoji: true,
-	color: true,
-	presetId: true,
+export const createFolderSchema = z.object({
+	name: z.string().min(1, 'El nombre es obligatorio').max(255, 'El nombre es demasiado largo'),
+	description: z.string().max(1000, 'La descripción es demasiado larga').nullish(),
+	path: z.string().min(1, 'La ruta es obligatoria'),
+	emoji: z.string().nullish(),
+	color: z.string().nullish(),
+	featuredImage: z.string().nullish(),
+	isFavorite: z.boolean().default(false),
+	autoReindex: z.boolean().default(false),
+	parentId: z.string().nullish(),
+	presetId: z.string().nullish(),
 });
 
 /**
  * Esquema para validar datos de actualización de carpetas
  */
-export const updateFolderSchema = folderBaseSchema
-	.pick({
+export const updateFolderSchema = createFolderSchema
+	.extend({
+		totalFiles: z.number().int().positive().optional(),
+		totalSize: z.number().int().positive().optional(),
+	})
+	.partial()
+	.refine(
+		(data) => {
+			return Object.keys(data).length > 0;
+		},
+		{
+			message: 'Al menos un campo debe ser actualizado',
+			path: ['_errors'],
+		}
+	);
+
+/**
+ * Esquema para validar campos específicos en actualización de carpetas
+ */
+export const updateFolderFieldsSchema = z
+	.object({
 		name: true,
 		description: true,
+		path: true,
 		emoji: true,
 		color: true,
+		featuredImage: true,
+		totalFiles: true,
+		totalSize: true,
+		lastIndexed: true,
 		isFavorite: true,
 		autoReindex: true,
 		presetId: true,
 	})
 	.partial();
-
-/**
- * Esquema para validar configuración visual de carpetas
- */
-export const folderVisualConfigSchema = z.object({
-	id: z.string().cuid().optional(),
-	enable3DEffect: z.boolean().default(true),
-	enableHolographicEffect: z.boolean().default(true),
-	enableGlowEffect: z.boolean().default(true),
-	enableAnimatedBorder: z.boolean().default(true),
-	enableLightHalo: z.boolean().default(true),
-	designSystem: z.string().nullish(),
-	layerSystem: z.string().nullish(),
-	effects: z.string().nullish(),
-	performance: z.string().nullish(),
-	states: z.string().nullish(),
-	presetId: z.string().nullish(),
-});
 
 /**
  * Tipo inferido para datos de creación de carpetas
@@ -80,8 +89,3 @@ export type CreateFolderInput = z.infer<typeof createFolderSchema>;
  * Tipo inferido para datos de actualización de carpetas
  */
 export type UpdateFolderInput = z.infer<typeof updateFolderSchema>;
-
-/**
- * Tipo inferido para configuración visual de carpetas
- */
-export type FolderVisualConfigInput = z.infer<typeof folderVisualConfigSchema>;

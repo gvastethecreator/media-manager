@@ -3,4 +3,5 @@
  * @module types/entities/queueJob
  */
 
-export * from './queueJob-types';
+export * from './types';
+
