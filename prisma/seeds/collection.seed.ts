@@ -8,72 +8,237 @@ import { seedLogger, tableExists } from './utils.seed';
 export async function seedCollections(prisma: PrismaClient): Promise<void> {
 	seedLogger.info('📚 Creando colecciones por defecto...');
 
-	// Verificar si la tabla Collection existe
-	if (await tableExists(prisma, 'Collection')) {
-		// Crear colecciones por defecto
-		await prisma.collection.createMany({
-			data: [
+	try {
+		if (await tableExists(prisma, 'Collection')) {
+			const collections = [
 				{
-					name: 'Pepe Archives',
-					emoji: '🐸',
+					name: 'Grimorio Arcano',
+					description: 'Antigua compilación de conocimientos mágicos, teorías arcanas y rituales prohibidos.',
+					emoji: '✨',
 					color: '#8b5cf6',
-					description: 'Archivos de Pepe',
-					shortcut: 'pepe',
+					category: 'magic',
+					content: JSON.stringify({
+						sections: [
+							{
+								title: 'Teorías Elementales',
+								description: 'Estudios sobre la naturaleza de los elementos mágicos'
+							},
+							{
+								title: 'Rituales Prohibidos',
+								description: 'Documentación sobre prácticas mágicas peligrosas'
+							},
+							{
+								title: 'Artefactos Legendarios',
+								description: 'Catálogo de objetos mágicos poderosos'
+							}
+						],
+						tags: ['magia', 'rituales', 'elementos']
+					}),
+					featuredImage: null,
+					isFavorite: true,
 				},
 				{
-					name: 'Life after Moklos',
-					emoji: '🏠',
+					name: 'Crónicas de Guerra',
+					description: 'Registros detallados de las grandes batallas y conflictos del reino.',
+					emoji: '⚔️',
+					color: '#ef4444',
+					category: 'history',
+					content: JSON.stringify({
+						sections: [
+							{
+								title: 'Guerras del Norte',
+								description: 'Conflictos con los clanes guerreros del norte'
+							},
+							{
+								title: 'Batallas Legendarias',
+								description: 'Encuentros históricos que cambiaron el reino'
+							},
+							{
+								title: 'Tácticas Militares',
+								description: 'Estrategias y formaciones de combate'
+							}
+						],
+						tags: ['guerra', 'batallas', 'historia']
+					}),
+					featuredImage: null,
+					isFavorite: false,
+				},
+				{
+					name: 'Compendio del Reino',
+					description: 'Documentos oficiales, tratados y registros de la administración del reino.',
+					emoji: '👑',
+					color: '#f59e0b',
+					category: 'politics',
+					content: JSON.stringify({
+						sections: [
+							{
+								title: 'Leyes Reales',
+								description: 'Edictos y decretos del monarca'
+							},
+							{
+								title: 'Tratados Comerciales',
+								description: 'Acuerdos con otros reinos y gremios'
+							},
+							{
+								title: 'Registros Nobiliarios',
+								description: 'Linajes y títulos de la nobleza'
+							}
+						],
+						tags: ['política', 'leyes', 'nobleza']
+					}),
+					featuredImage: null,
+					isFavorite: false,
+				},
+				{
+					name: 'Leyendas del Norte',
+					description: 'Recopilación de historias, mitos y tradiciones de las tierras heladas.',
+					emoji: '❄️',
+					color: '#3b82f6',
+					category: 'culture',
+					content: JSON.stringify({
+						sections: [
+							{
+								title: 'Sagas Ancestrales',
+								description: 'Historias transmitidas por generaciones'
+							},
+							{
+								title: 'Ritos del Hielo',
+								description: 'Tradiciones y ceremonias del norte'
+							},
+							{
+								title: 'Profecías Invernales',
+								description: 'Predicciones de los videntes del hielo'
+							}
+						],
+						tags: ['norte', 'tradiciones', 'leyendas']
+					}),
+					featuredImage: null,
+					isFavorite: false,
+				},
+				{
+					name: 'Secretos del Abismo',
+					description: 'Investigaciones y descubrimientos sobre la naturaleza del Abismo y sus efectos.',
+					emoji: '🕳️',
+					color: '#1e293b',
+					category: 'research',
+					content: JSON.stringify({
+						sections: [
+							{
+								title: 'Manifestaciones Abismales',
+								description: 'Documentación de fenómenos del Abismo'
+							},
+							{
+								title: 'Estudios de Corrupción',
+								description: 'Efectos del Abismo en seres vivos'
+							},
+							{
+								title: 'Teorías Dimensionales',
+								description: 'Hipótesis sobre la naturaleza del Abismo'
+							}
+						],
+						tags: ['abismo', 'investigación', 'dimensional']
+					}),
+					featuredImage: null,
+					isFavorite: false,
+				},
+				{
+					name: 'Tomo de las Órdenes',
+					description: 'Historia y documentación de las principales órdenes y organizaciones.',
+					emoji: '🛡️',
+					color: '#e5e7eb',
+					category: 'organizations',
+					content: JSON.stringify({
+						sections: [
+							{
+								title: 'Orden de la Luz Eterna',
+								description: 'Historia y principios de los paladines'
+							},
+							{
+								title: 'Círculo del Equilibrio',
+								description: 'Tradiciones de los druidas'
+							},
+							{
+								title: 'Hermandad de las Sombras',
+								description: 'Secretos de los asesinos'
+							}
+						],
+						tags: ['órdenes', 'organizaciones', 'hermandades']
+					}),
+					featuredImage: null,
+					isFavorite: false,
+				},
+				{
+					name: 'Códice de Criaturas',
+					description: 'Bestiario detallado de las criaturas y seres del reino.',
+					emoji: '🐉',
 					color: '#10b981',
-					description: 'Vida después de Moklos',
-					shortcut: 'lalm',
+					category: 'bestiary',
+					content: JSON.stringify({
+						sections: [
+							{
+								title: 'Bestias Mágicas',
+								description: 'Catálogo de criaturas mágicas'
+							},
+							{
+								title: 'Aberraciones Abismales',
+								description: 'Seres corrompidos por el Abismo'
+							},
+							{
+								title: 'Espíritus y Apariciones',
+								description: 'Entidades sobrenaturales'
+							}
+						],
+						tags: ['criaturas', 'bestias', 'monstruos']
+					}),
+					featuredImage: null,
+					isFavorite: false,
 				},
 				{
-					name: 'Moklos',
-					emoji: '🏠',
-					color: '#C63AC4FF',
-					description: 'Vida antes de Moklos',
-					shortcut: 'mok',
-				},
-				{
-					name: 'Retro',
-					emoji: '🎥',
-					color: '#B9A847FF',
-					description: 'Retro',
-					shortcut: 'ret',
-				},
-				{
-					name: 'Bootlegs',
-					emoji: '🎥',
-					color: '#3AC651FF',
-					description: 'Bootlegs',
-					shortcut: 'bl',
-				},
-				{
-					name: '3D',
-					emoji: '🎥',
-					color: '#35556EFF',
-					description: '3D',
-					shortcut: '3d',
-				},
-				{
-					name: 'Anime',
-					emoji: '🎬',
-					color: '#8b5cf6',
-					description: 'Anime',
-					shortcut: 'ani',
-				},
-				{
-					name: 'Manga',
-					emoji: '📚',
-					color: '#f1c40f',
-					description: 'Manga',
-					shortcut: 'manga',
-				},
-			],
-		});
+					name: 'Atlas del Reino',
+					description: 'Mapas y descripciones de las tierras conocidas y sus secretos.',
+					emoji: '🗺️',
+					color: '#6b7280',
+					category: 'geography',
+					content: JSON.stringify({
+						sections: [
+							{
+								title: 'Tierras del Norte',
+								description: 'Geografía de las regiones heladas'
+							},
+							{
+								title: 'Rutas Comerciales',
+								description: 'Caminos y pasos importantes'
+							},
+							{
+								title: 'Lugares Místicos',
+								description: 'Ubicaciones de poder mágico'
+							}
+						],
+						tags: ['mapas', 'geografía', 'lugares']
+					}),
+					featuredImage: null,
+					isFavorite: false,
+				}
+			];
 
-		seedLogger.info('✅ Colecciones por defecto creadas');
-	} else {
-		seedLogger.warn('⚠️ La tabla Collection no existe, saltando creación de colecciones');
+			for (const collection of collections) {
+				const existingCollection = await prisma.collection.findFirst({
+					where: { name: collection.name }
+				});
+
+				if (!existingCollection) {
+					await prisma.collection.create({
+						data: collection
+					});
+				}
+			}
+
+			seedLogger.info('✅ Colecciones creadas correctamente');
+		} else {
+			seedLogger.warn('⚠️ La tabla Collection no existe, omitiendo...');
+		}
+	} catch (error) {
+		seedLogger.error('❌ Error creando colecciones:', error);
+		throw error;
 	}
 }

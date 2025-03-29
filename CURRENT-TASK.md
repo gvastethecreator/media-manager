@@ -1,111 +1,4 @@
-# Optimización de la integración de EntityPreloader en vistas
 
-## Problemas Detectados
-
-- [x] Algunos componentes intentan cargar entidades antes de la precarga global
-- [x] Hay redundancia en llamadas a la API cuando varias vistas montan `<EntityPreloader>` simultáneamente
-- [x] Algunas entidades no se precargaban correctamente debido a URLs de API incorrectas
-- [x] Los tiempos de carga eran extremadamente largos en algunas vistas
-- [x] Se utilizaban APIs RESTful innecesariamente cuando ya existen server actions
-
-## Análisis
-
-- [x] Revisar todas las ubicaciones que utilizan `<EntityPreloader>`
-- [x] Identificar patrones de uso y potenciales mejoras
-- [x] Analizar el impacto de renderizado y problemas de rendimiento
-- [x] Revisar el flujo del hook `useEntityLoader`
-- [x] Detectar server actions disponibles para cada entidad
-
-## Estrategias de Optimización
-
-- [x] Centralizar la precarga de entidades en componentes principales
-- [x] Evitar múltiples instancias de `<EntityPreloader>` cargando las mismas entidades
-- [x] Implementar un mecanismo de coordinación entre componentes
-- [x] Crear un mecanismo de backup en caso de fallo de precarga global
-- [x] Implementar timeouts para evitar bloqueos indefinidos
-- [x] Priorizar server actions sobre APIs RESTful para mejor rendimiento y seguridad
-
-## Implementación
-
-- [x] Modificar `useEntityLoader` para detectar datos ya cargados
-- [x] Mejorar el sistema de comprobación de precarga en progreso
-- [x] Implementar timeouts para resolver intentos de carga bloqueados
-- [x] Corregir rutas de API para todas las entidades usando el formato `/api/entities/[entityType]`
-- [x] Crear endpoints temporales con datos de prueba para entidades faltantes
-- [x] Refactorizar `useEntityLoader` para usar server actions como fuente primaria de datos:
-  - [x] Implementar carga con server actions para `tags`
-  - [x] Implementar carga con server actions para `collections`
-  - [x] Implementar carga con server actions para `worldItems`
-  - [x] Implementar carga con server actions para `places`
-  - [x] Implementar carga con server actions para `characters`
-  - [x] Implementar carga con server actions para `concepts`
-  - [x] Implementar carga con server actions para `prompts`
-  - [x] Implementar carga con server actions para `notes`
-  - [x] Implementar carga con server actions para `albums`
-- [x] Integrar server actions en stores de entidades (comenzando con `tagStore`)
-
-## Pruebas y Validación
-
-- [x] Verificar que la precarga funcione en todas las vistas
-- [x] Comprobar que no haya duplicación de solicitudes a la API
-- [x] Validar que los tiempos de carga se hayan reducido
-- [x] Verificar que el sistema de backup funcione correctamente
-- [x] Confirmar que los server actions se utilizan correctamente
-
-## Documentación
-
-- [x] Actualizar documentación sobre el funcionamiento del nuevo sistema
-- [x] Crear guía sobre cómo integrar correctamente el preloader en nuevos componentes
-- [x] Documentar la estrategia de carga priorizada (server actions → stores → APIs)
-
-## Flowchart de la implementación actualizada
-
-```mermaid
-flowchart TB
-    A[Iniciar App] --> B{¿Precarga global completada?}
-    B -->|No| C[EntityPreloader Principal]
-    B -->|Sí| D[Usar datos precargados]
-
-    C --> E[Cargar entidades críticas]
-    E --> SA{¿Server Action disponible?}
-    SA -->|Sí| SL[Cargar con Server Action]
-    SA -->|No| ST{¿Store disponible?}
-
-    ST -->|Sí| STO[Cargar con Store]
-    ST -->|No| API[Cargar con API REST]
-
-    SL & STO & API --> F[Siguiente entidad]
-    F --> G{¿Todas completas?}
-
-    G -->|Sí| H[Marcar precarga global como completada]
-    G -->|No| I[Intentar cargar entidades fallidas individualmente]
-    I --> J[Marcar precarga como completada a pesar de errores]
-
-    H & J --> K[Componentes pueden acceder a datos]
-    D --> K
-
-    K --> L{¿Se necesita más datos?}
-    L -->|Sí| M[Solicitud bajo demanda]
-    L -->|No| N[Render con datos existentes]
-
-    M --> O{¿Timeout excedido?}
-    O -->|Sí| P[Mostrar mensaje de error o usar datos parciales]
-    O -->|No| Q[Esperar datos]
-    Q --> N
-    P --> N
-```
-
-## Mejoras Implementadas
-
-1. ✅ **Centralización de preloading**: Un componente principal gestiona la precarga global
-2. ✅ **Sistema de coordinación**: Los preloaders respetan el estado global de precarga
-3. ✅ **Mecanismo de backup**: Componentes individuales pueden cargar datos si la precarga falla
-4. ✅ **Timeouts de seguridad**: Evita bloqueos indefinidos durante la carga
-5. ✅ **APIs estandarizadas**: Todas las entidades ahora utilizan el mismo patrón de rutas
-6. ✅ **Datos de prueba**: Endpoints temporales para simular carga de datos y facilitar pruebas
-7. ✅ **Mejor logging**: Facilita depuración de problemas de carga
-8. ✅ **Uso de server actions**: Priorización de server actions para mejor rendimiento y seguridad
-9. ✅ **Estrategia de fallback**: Sistema en cascada server action → store → API REST
 
 ## Próximos pasos
 
@@ -116,3 +9,178 @@ flowchart TB
 5. Eliminar APIs RESTful redundantes una vez se confirme que los server actions funcionan correctamente
 
 *Esta tarea se considera completada con las mejoras actuales. Cualquier refinamiento adicional se registrará como nuevas tareas.*
+
+# Refactorización Post-Actualización de Schema Prisma
+
+## Objetivo
+
+Alinear todo el codebase con los cambios recientes realizados en `schema.prisma`, asegurando que tipos, stores, transformadores, acciones del servidor, servicios, mapeadores, vistas y utilidades reflejen la nueva estructura de datos.
+
+## Plan de Acción Detallado
+
+### 1. Análisis del Schema (Completado)
+
+- [x] Revisar `schema.prisma` para identificar todos los modelos nuevos, modificados y eliminados, así como cambios en campos y relaciones.
+
+### 2. Actualización de Tipos (`src/types`)
+
+- [x] **Revisión Manual:**
+    - [x] Crear nuevos archivos de tipos para modelos nuevos (`Group`, `Property`, `Wildcard`).
+    - [ ] Revisar y actualizar cada archivo `.ts` y `.d.ts` en `src/types` para que coincida con los modelos de `schema.prisma` (`Profile`, `Settings`, `Folder`, `Image`, `Video`, `UploadedImage`, `ImageStats`, `Activity`, `Group`, `Album`, `Collection`, `Tag`, `Property`, `Wildcard`, `Character`, `Place`, `WorldItem`, `Concept`, `Prompt`, `Note`, `QueueJob`).
+    - [ ] Prestar especial atención a las relaciones (e.g., `ImageToAlbum`, `FolderToFolder`).
+    - [ ] Eliminar archivos de tipos obsoletos correspondientes a modelos eliminados o reestructurados.
+
+### 3. Actualización de Transformadores (`src/transformers`)
+
+- [x] **Revisión por Entidad:**
+    - [x] Crear transformadores para nuevas entidades (`Group`, `Property`, `Wildcard`).
+    - [x] Implementar funciones básicas de mapeo para las nuevas entidades.
+    - [x] Implementar serializadores para las nuevas entidades.
+    - [ ] Revisar cada subdirectorio (`image/`, `folder/`, `album/`, etc.) para actualizar los transformadores existentes.
+    - [ ] Actualizar la lógica de transformación para que coincida con las nuevas estructuras de modelos y tipos.
+    - [ ] Asegurar que las funciones manejen correctamente los campos nuevos, modificados o eliminados.
+- [x] **Nuevos Transformadores:**
+    - [x] Crear transformadores para los nuevos modelos (`Group`, `Property`, `Wildcard`).
+- [ ] **Consistencia:** Validar que el *shape* de los datos transformados sea consistente y esperado por el resto de la aplicación.
+
+### 4. Actualización de Server Actions (`src/app/actions`)
+
+- [ ] **Revisión por Entidad:**
+    - [ ] Revisar las acciones dentro de cada subdirectorio (`albums/`, `folders/`, `images/`, etc.).
+    - [ ] Actualizar todas las llamadas al cliente Prisma (`prisma.model.findUnique`, `findMany`, `create`, `update`, `delete`, etc.) para usar los nombres de modelos, campos y relaciones correctos según el nuevo schema.
+    - [ ] Prestar atención a cómo se manejan las operaciones relacionales (`connect`, `disconnect`, `create`, `set`).
+- [x] **Nuevas Acciones:**
+    - [x] Crear server actions para los nuevos modelos (`Group`).
+    - [x] Crear server actions para los nuevos modelos (`Property`, `Wildcard`).
+- [ ] **Tipos de Retorno:** Asegurar que los tipos de retorno de las acciones coincidan con las definiciones de tipos actualizadas.
+
+### 5. Actualización de Servicios (`src/services`)
+
+- [ ] **Revisión de Lógica:**
+    - [ ] Revisar cada archivo de servicio (`folder.service.ts`, `image.service.ts`, etc.).
+    - [ ] Actualizar las llamadas al cliente Prisma de manera similar a las Server Actions.
+- [ ] **Refactorización (Server Actions vs. Services):**
+    - [ ] Identificar lógica en servicios que podría ser reemplazada o simplificada mediante el uso directo de Server Actions desde el cliente.
+    - [ ] Migrar lógica apropiada a Server Actions si mejora el rendimiento o la mantenibilidad.
+- [ ] **Nuevos Servicios/Métodos:**
+    - [ ] Añadir servicios o métodos para nuevos modelos si se requiere lógica de negocio compleja que no encaja en Server Actions simples.
+
+### 6. Actualización de Zustand Stores (`src/store`)
+
+- [ ] **Estructura del Estado:**
+    - [ ] Revisar los archivos de store (`image-resources.store.ts`, `settings.store.ts`, etc.).
+    - [ ] Actualizar las interfaces/tipos del estado de cada store para que coincidan con los nuevos modelos y tipos.
+- [ ] **Acciones del Store:**
+    - [ ] Actualizar las acciones (funciones dentro de `create(...)`) que interactúan con Server Actions o servicios. Asegurar que envíen y reciban datos con la estructura correcta.
+- [ ] **Nuevos Stores:**
+    - [ ] Crear nuevos stores para gestionar el estado de los nuevos modelos (`groupStore`, `propertyStore`, etc.) o integrar su estado en stores existentes si tiene sentido.
+
+### 7. Actualización de Mapeadores (Localizar y Actualizar)
+
+- [ ] **Búsqueda:**
+    - [ ] Realizar una búsqueda en el codebase (usando `grep` o búsqueda del IDE) por funciones o archivos que actúen como mapeadores de datos (podrían estar en `src/lib`, `src/transformers`, o dentro de componentes específicos).
+    - [ ] Usar `codebase_search` si es necesario para encontrar patrones de mapeo.
+- [ ] **Actualización:**
+    - [ ] Actualizar la lógica de mapeo para alinearla con el nuevo schema y los tipos actualizados.
+
+### 8. Actualización de Vistas/Componentes (`src/components/views`, `src/components/*`)
+
+- [ ] **Consumo de Datos:**
+    - [ ] Revisar componentes que obtienen o muestran datos de los modelos afectados.
+    - [ ] Actualizar la lógica de obtención de datos (hooks como `useQuery`, llamadas a Server Actions, suscripciones a stores).
+    - [ ] Ajustar `props` y estado interno de los componentes.
+- [ ] **Renderizado UI:**
+    - [ ] Modificar elementos de la UI para mostrar correctamente los campos nuevos o modificados y manejar la ausencia de campos eliminados.
+
+### 9. Actualización de Utilidades (`src/lib`)
+
+- [ ] **Revisión de Funciones:**
+    - [ ] Revisar archivos como `utils.ts`, `entity-utils.ts`, `image.ts`, `db.ts`, etc.
+    - [ ] Actualizar cualquier lógica que dependa de la estructura del schema anterior (nombres de campos, tipos, relaciones).
+    - [ ] Asegurar que las funciones que interactúan con la base de datos o manipulan datos de modelos usen la estructura correcta.
+
+### 10. Migración de Base de Datos
+
+- [ ] **Generar Migración:**
+    - [ ] Ejecutar `pnpm prisma migrate dev --name update-schema-alignment` (o un nombre descriptivo similar) para generar el archivo de migración SQL.
+- [ ] **Aplicar Migración:**
+    - [ ] Revisar la migración generada y aplicarla a la base de datos de desarrollo.
+
+### 11. Pruebas
+
+- [ ] **Pruebas Funcionales:**
+    - [ ] Probar exhaustivamente todas las funcionalidades de la aplicación, especialmente aquellas relacionadas con CRUD de entidades, visualización de datos y relaciones.
+- [ ] **Pruebas de Regresión:**
+    - [ ] Asegurar que los cambios no hayan introducido errores en funcionalidades no directamente relacionadas.
+
+### 12. Documentación
+
+- [ ] **Actualizar Documentación Interna:**
+    - [ ] Actualizar READMEs, comentarios de código, diagramas (como los de Mermaid) y cualquier otra documentación interna para reflejar la nueva estructura.
+- [ ] **Documentación de Componentes:**
+    - [ ] Actualizar la documentación de los componentes afectados (si aplica).
+
+## Diagrama de Flujo General (Mermaid)
+
+```mermaid
+graph TD
+    A[Inicio: Schema Actualizado] --> B(Actualizar Tipos @types);
+    B --> C(Actualizar Transformadores @transformers);
+    B --> D(Actualizar Server Actions @actions);
+    B --> E(Actualizar Servicios @services);
+    B --> F(Actualizar Stores @store);
+    B --> G(Actualizar Utils @lib);
+    B --> H(Actualizar Mappers);
+
+    C --> I{Dependencias en Vistas/Componentes?};
+    D --> I;
+    E --> I;
+    F --> I;
+    G --> I;
+    H --> I;
+
+    I -- Sí --> J(Actualizar Vistas/Componentes @views);
+    I -- No --> K(Preparar Migración BD);
+
+    J --> K;
+
+    K --> L(Generar y Aplicar Migración Prisma);
+    L --> M(Pruebas Exhaustivas);
+    M --> N(Actualizar Documentación);
+    N --> O[Fin: Codebase Alineado];
+
+```
+
+## Progreso Actual
+
+### Tipos creados/actualizados:
+- ✅ Estructura de carpetas para tipos
+- ✅ QueueJob (ya existía)
+- ✅ Group (nuevo)
+- ✅ Property (nuevo)
+- ✅ Wildcard (nuevo)
+- ⬜ Revisar tipos y relaciones de modelos existentes
+
+### Transformadores creados/actualizados:
+- ✅ Group (nuevo)
+- ✅ Property (nuevo)
+- ✅ Wildcard (nuevo)
+- ⬜ Revisar y actualizar transformadores existentes
+
+### Server Actions creadas/actualizadas:
+- ✅ Group (nuevo)
+- ✅ Property (nuevo) - Verificado existente e implementado
+- ✅ Wildcard (nuevo) - Verificado existente e implementado
+- ⬜ Revisar y actualizar server actions existentes
+
+### Stores creados/actualizados:
+- ✅ Group (implementado)
+- ✅ Property (implementado)
+- ✅ Wildcard (implementado)
+- ⬜ Revisar y actualizar stores existentes
+
+## Próximos Pasos Inmediatos
+
+1. Revisar y actualizar los tipos y transformadores existentes para alinearlos con el schema actualizado.
+2. Verificar las relaciones entre los modelos y sus dependencias.
+3. Actualizar otros stores existentes según sea necesario.

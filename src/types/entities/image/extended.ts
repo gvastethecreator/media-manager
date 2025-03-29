@@ -3,8 +3,13 @@ import type { Character } from '../characters';
 import type { Collection } from '../collections';
 import type { Concept } from '../concepts';
 import type { FolderExtended } from '../folder/extended';
+import type { Group } from '../group/group-types';
+import type { Note } from '../note/note-types';
 import type { Place } from '../places';
+import type { Prompt } from '../prompt/prompt-types';
+import type { Property } from '../property/property-types';
 import type { Tag } from '../tag';
+import type { Wildcard } from '../wildcard/wildcard-types';
 import type { WorldItem } from '../world-items';
 import type { ImageBase, ImageMetadata, ImageStatsBase, ImageVisualConfigBase } from './base';
 
@@ -16,6 +21,12 @@ export interface ImageExtended extends ImageBase {
 	folder?: FolderExtended;
 	visualConfig?: ImageVisualConfigExtended | null;
 	stats?: ImageStatsExtended | null;
+
+	// Relaciones básicas
+	uploadedImages?: any[];
+	activities?: any[];
+
+	// Relaciones con entidades principales
 	tags?: Tag[];
 	albums?: Album[];
 	collections?: Collection[];
@@ -23,6 +34,11 @@ export interface ImageExtended extends ImageBase {
 	places?: Place[];
 	worldItems?: WorldItem[];
 	concepts?: Concept[];
+	prompts?: Prompt[];
+	notes?: Note[];
+	wildcards?: Wildcard[];
+	properties?: Property[];
+	groups?: Group[];
 
 	// Propiedades adicionales de UI
 	metadata?: ImageMetadata;
