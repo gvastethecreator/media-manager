@@ -3,4 +3,8 @@
  * @module types/entities/wildcard
  */
 
-export * from './wildcard-types';
+export * from './types';
+
+// Alias común para el tipo principal
+export type { WildcardWithRelations as Wildcard } from './types';
+

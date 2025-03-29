@@ -4,10 +4,10 @@
  */
 
 export * from './base';
-export * from './concept-types';
 export * from './enums';
 export * from './extended';
+export * from './types';
 
 // Alias común para el tipo principal
-export type { ConceptWithRelations as Concept } from './concept-types';
+export type { ConceptWithRelations as Concept } from './types';
 

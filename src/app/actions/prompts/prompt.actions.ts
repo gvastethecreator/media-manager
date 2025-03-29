@@ -1,6 +1,6 @@
 'use server';
 
-import { EntityErrorCode, PromptError, createEntityErrorObject, type SerializableError } from '@/lib/errors';
+import { EntityErrorCode, PromptError, type SerializableError, createEntityErrorObject } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
@@ -9,7 +9,7 @@ import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers actualizados
-import { toExtendedPrompt, toPromptWithStats } from '@/transformers/prompt';
+import { mapCreatePromptDataToPrisma, mapUpdatePromptDataToPrisma, toExtendedPrompt, toPromptWithStats } from '@/transformers/prompt';
 import type {
     PromptBase,
     PromptCreateInput,
@@ -58,6 +58,9 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 						places: true,
 						worldItems: true,
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
 					},
 				},
 			},
@@ -90,6 +93,9 @@ export async function getPrompt(id: string): Promise<PromptExtended> {
 						places: true,
 						worldItems: true,
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
 					},
 				},
 			},
@@ -127,6 +133,9 @@ export async function getPromptWithRelations(id: string): Promise<PromptExtended
 						places: true,
 						worldItems: true,
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
 					},
 				},
 				concepts: {
@@ -159,6 +168,24 @@ export async function getPromptWithRelations(id: string): Promise<PromptExtended
 						name: true,
 					},
 				},
+				groups: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				properties: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				wildcards: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
 			},
 		});
 
@@ -183,19 +210,12 @@ export async function getPromptWithRelations(id: string): Promise<PromptExtended
 export async function createPrompt(data: PromptCreateInput): Promise<PromptBase> {
 	try {
 		promptLogger.info('📝 Creando prompt:', data.name);
+
+		// Usar el mapper para preparar los datos
+		const createData = mapCreatePromptDataToPrisma(data);
+
 		const prompt = await prisma.prompt.create({
-			data: {
-				name: data.name,
-				emoji: data.emoji || '🎯',
-				description: data.description || null,
-				color: data.color || '#3b82f6',
-				content: data.content || '',
-				category: data.category || 'general',
-				parameters: data.parameters || '{}',
-				tags: data.tags || '[]',
-				featuredImage: data.featuredImage || null,
-				isFavorite: data.isFavorite || false,
-			},
+			data: createData,
 		});
 
 		await emit({
@@ -219,9 +239,13 @@ export async function createPrompt(data: PromptCreateInput): Promise<PromptBase>
 export async function updatePrompt(id: string, data: PromptUpdateInput): Promise<PromptBase> {
 	try {
 		promptLogger.info('📝 Actualizando prompt:', id);
+
+		// Usar el mapper para preparar los datos
+		const updateData = mapUpdatePromptDataToPrisma(data);
+
 		const prompt = await prisma.prompt.update({
 			where: { id },
-			data,
+			data: updateData,
 		});
 
 		await emit({
@@ -266,6 +290,9 @@ export async function deletePrompt(id: string): Promise<{ success: boolean }> {
 					places: { set: [] },
 					worldItems: { set: [] },
 					images: { set: [] },
+					groups: { set: [] },
+					properties: { set: [] },
+					wildcards: { set: [] },
 				},
 			}),
 			prisma.prompt.delete({

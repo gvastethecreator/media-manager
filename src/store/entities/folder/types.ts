@@ -3,7 +3,7 @@
  * @module store/entities/folder/types
  */
 
-import type { CreateFolderData, FolderExtended, UpdateFolderData } from '@/types/entities/folder';
+import type { CreateFolderData, FolderWithRelations, UpdateFolderData } from '@/types/entities/folder/types';
 import type { StateCreator } from 'zustand';
 
 /**
@@ -23,11 +23,11 @@ export interface FolderStore {
  */
 export interface FolderCoreState {
 	/** Listado de carpetas disponibles */
-	folders: FolderExtended[];
+	folders: FolderWithRelations[];
 	/** ID de la carpeta actual seleccionada */
 	currentFolderId: string | null;
 	/** Objeto de la carpeta actual seleccionada */
-	currentFolder: FolderExtended | null;
+	currentFolder: FolderWithRelations | null;
 	/** Indicador de carga general */
 	loading: boolean;
 	/** Error actual si existe */
@@ -47,17 +47,17 @@ export interface FolderCoreActions {
 	/** Obtiene todas las carpetas */
 	fetchFolders: () => Promise<void>;
 	/** Obtiene una carpeta por su ID */
-	fetchFolderById: (id: string) => Promise<FolderExtended | null>;
+	fetchFolderById: (id: string) => Promise<FolderWithRelations | null>;
 	/** Crea una nueva carpeta */
-	createFolder: (data: CreateFolderData) => Promise<FolderExtended | null>;
+	createFolder: (data: CreateFolderData) => Promise<FolderWithRelations | null>;
 	/** Actualiza una carpeta existente */
-	updateFolder: (id: string, data: UpdateFolderData) => Promise<FolderExtended | null>;
+	updateFolder: (id: string, data: UpdateFolderData) => Promise<FolderWithRelations | null>;
 	/** Elimina una carpeta */
 	deleteFolder: (id: string) => Promise<boolean>;
 	/** Establece la carpeta actual por ID */
 	setCurrentFolderId: (id: string | null) => void;
 	/** Establece la carpeta actual directamente */
-	setCurrentFolder: (folder: FolderExtended | null) => void;
+	setCurrentFolder: (folder: FolderWithRelations | null) => void;
 	/** Reinicia el estado de error */
 	resetError: () => void;
 }

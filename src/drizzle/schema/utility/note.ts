@@ -1,42 +1,73 @@
-import { integer, relations, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { createCommonIndexes, organizationFields } from '../base/common';
-import { createRelationTable } from '../base/relations';
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { organizationFields } from '../base/common';
+import { createIndexes, createManyToManyRelations, createRelationTable, relations } from '../base/relations';
 import { images } from '../content/image';
 import { videos } from '../content/video';
+import { albums } from '../organization/album';
+import { collections } from '../organization/collection';
+import { groups } from '../organization/group';
+import { tags } from '../organization/tag';
+import { characters } from '../world/character';
+import { places } from '../world/place';
+import { worldItems } from '../world/worldItem';
+import { concepts } from './concept';
+import { prompts } from './prompt';
+import { properties } from './property';
+import { wildcards } from './wildcard';
 
+// Definición de la tabla
 export const notes = sqliteTable(
     'Note',
     {
         ...organizationFields,
-        content: text('content').notNull(),
-        format: text('format').default('markdown'),
-        type: text('type').default('note'),
-        status: text('status').default('draft'),
+        title: text('title').notNull(),
+        content: text('content').default(''),
+        category: text('category').default('general'),
         priority: integer('priority').default(0),
-        dueDate: integer('dueDate', { mode: 'timestamp_ms' }),
-        completedAt: integer('completedAt', { mode: 'timestamp_ms' }),
-        parentId: text('parentId').references(() => notes.id),
-        tags: text('tags').default('empty_array'),
-        references: text('references').default('empty_array'),
-        attachments: text('attachments').default('empty_array'),
-        metadata: text('metadata').default('empty_object'),
+        status: text('status').default('active'),
+        presetId: text('presetId'),
     },
-    (table) => ({
-        ...createCommonIndexes(table),
-    })
+    (table) => {
+        const indexes = createIndexes('note');
+        return {
+            nameIdx: indexes.nameIdx.on(table.name),
+            categoryIdx: indexes.categoryIdx.on(table.category),
+            createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
+        };
+    }
 );
 
 // Tablas de relación
 export const notesToImages = createRelationTable('NoteToImage', 'Note', 'Image');
 export const notesToVideos = createRelationTable('NoteToVideo', 'Note', 'Video');
+export const notesToAlbums = createRelationTable('NoteToAlbum', 'Note', 'Album');
+export const notesToCollections = createRelationTable('NoteToCollection', 'Note', 'Collection');
+export const notesToTags = createRelationTable('NoteToTag', 'Note', 'Tag');
+export const notesToCharacters = createRelationTable('NoteToCharacter', 'Note', 'Character');
+export const notesToPlaces = createRelationTable('NoteToPlace', 'Note', 'Place');
+export const notesToWorldItems = createRelationTable('NoteToWorldItem', 'Note', 'WorldItem');
+export const notesToConcepts = createRelationTable('NoteToConcept', 'Note', 'Concept');
+export const notesToPrompts = createRelationTable('NoteToPrompt', 'Note', 'Prompt');
+export const notesToWildcards = createRelationTable('NoteToWildcard', 'Note', 'Wildcard');
+export const notesToProperties = createRelationTable('NoteToProperty', 'Note', 'Property');
+export const notesToGroups = createRelationTable('NoteToGroup', 'Note', 'Group');
+
+// Definición de relaciones
+const relatedEntities = {
+    images,
+    videos,
+    albums,
+    collections,
+    tags,
+    characters,
+    places,
+    worldItems,
+    concepts,
+    prompts,
+    wildcards,
+    properties,
+    groups
+};
 
 // Relaciones
-export const notesRelations = relations(notes, ({ one, many }) => ({
-    parent: one(notes, {
-        fields: [notes.parentId],
-        references: [notes.id],
-    }),
-    children: many(notes),
-    images: many(images, { through: notesToImages }),
-    videos: many(videos, { through: notesToVideos }),
-}));
+export const notesRelations = relations(notes, createManyToManyRelations(relatedEntities));

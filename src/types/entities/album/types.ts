@@ -3,19 +3,19 @@
  * @module types/entities/album/types
  */
 
-import type { Character } from '../character/character-types';
-import type { Collection } from '../collection/collection-types';
-import type { Concept } from '../concept/concept-types';
-import type { Group } from '../group/group-types';
+import type { Character } from '../character/types';
+import type { Collection } from '../collection/types';
+import type { Concept } from '../concept/types';
+import type { Group } from '../group/types';
 import type { Image } from '../image/index';
-import type { Note } from '../note/note-types';
-import type { Place } from '../place/place-types';
-import type { Prompt } from '../prompt/prompt-types';
-import type { Property } from '../property/property-types';
-import type { Tag } from '../tag/tag-types';
+import type { Note } from '../note/types';
+import type { Place } from '../place/types';
+import type { Prompt } from '../prompt/types';
+import type { Property } from '../property/types';
+import type { Tag } from '../tag/types';
 import type { Video } from '../video/types';
-import type { Wildcard } from '../wildcard/wildcard-types';
-import type { WorldItem } from '../world-item/world-item-types';
+import type { Wildcard } from '../wildcard/types';
+import type { WorldItem } from '../world-item/types';
 import type { AlbumPrivacyLevel, AlbumType } from './enums';
 
 /**
@@ -29,7 +29,15 @@ export interface AlbumBase {
 	description: string | null;
 	shortcut: string | null;
 	category: string | null;
+	/**
+	 * Criterio de ordenación serializado como string JSON
+	 * @remarks En la base de datos se almacena como string, pero en la aplicación se usa como objeto
+	 */
 	sortBy: string;
+	/**
+	 * Filtros serializados como string JSON
+	 * @remarks En la base de datos se almacena como string, pero en la aplicación se usa como array
+	 */
 	filters: string;
 	featuredImage: string | null;
 	isFavorite: boolean;
@@ -100,6 +108,14 @@ export interface CreateAlbumData {
 	type?: AlbumType;
 	parentId?: string | null;
 	privacyLevel?: AlbumPrivacyLevel;
+	/**
+	 * Criterio de ordenación (será serializado a string JSON)
+	 */
+	sortBy?: string | any;
+	/**
+	 * Filtros (serán serializados a string JSON)
+	 */
+	filters?: string | any[];
 	items?: Array<{
 		itemId: string;
 		itemType: 'image' | 'video';
@@ -121,6 +137,14 @@ export interface UpdateAlbumData {
 	parentId?: string | null;
 	privacyLevel?: AlbumPrivacyLevel;
 	isArchived?: boolean;
+	/**
+	 * Criterio de ordenación (será serializado a string JSON)
+	 */
+	sortBy?: string | any;
+	/**
+	 * Filtros (serán serializados a string JSON)
+	 */
+	filters?: string | any[];
 	viewConfig?: Partial<AlbumViewConfig>;
 	groupIds?: string[];
 	propertyIds?: string[];
@@ -150,6 +174,10 @@ export interface Album extends AlbumBase {
 
 	// Relaciones con entidades principales
 	collections?: Collection[];
+	/**
+	 * Relación con etiquetas
+	 * @remarks Renombrar a tagEntities si se añade un campo tags como string JSON
+	 */
 	tags?: Tag[];
 	characters?: Character[];
 	places?: Place[];

@@ -1,9 +1,9 @@
 import {
-	Language,
-	type ProfileExtended,
-	type ProfilePreferences,
-	ThemeMode,
-} from '@/types/entities/profile/profile-types';
+  Language,
+  type ProfileExtended,
+  type ProfilePreferences,
+  ThemeMode,
+} from '@/types/entities/profile/types';
 import type { Profile } from '@prisma/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';

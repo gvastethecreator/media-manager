@@ -3,8 +3,18 @@
  * @module transformers/video/mappers
  */
 
-import type { CreateVideoData, VideoMetadata, VideoVisualConfig } from '../../types/entities/video';
-import { serializeVideoMetadata } from './serializers';
+import type {
+  CreateVideoData,
+  VideoComplete,
+  VideoMetadata,
+  VideoVisualConfig,
+  VideoVisualConfigComplete
+} from '../../types/entities/video';
+import {
+  fromVideoComplete,
+  fromVideoVisualConfigComplete,
+  serializeVideoMetadata
+} from './serializers';
 
 /**
  * Mapea datos de creación de video a formato compatible con Prisma
@@ -83,6 +93,7 @@ export function getVideoFrameTimestamp(totalDuration: number, percentage: number
  * Mapea datos de configuración visual para la creación
  * @param config Configuración visual
  * @returns Objeto formateado para Prisma
+ * @deprecated Use mapVideoVisualConfigCompleteToPrisma instead
  */
 export function mapVideoVisualConfigToPrisma(config: Partial<VideoVisualConfig>) {
 	// Serializar campos como JSON si es necesario
@@ -111,9 +122,35 @@ export function mapVideoVisualConfigToPrisma(config: Partial<VideoVisualConfig>)
 }
 
 /**
+ * Mapea datos de configuración visual completa para la creación
+ * @param config Configuración visual completa
+ * @returns Objeto formateado para Prisma
+ */
+export function mapVideoVisualConfigCompleteToPrisma(config: Partial<VideoVisualConfigComplete>) {
+	// Convertir a configuración base con campos serializados
+	const baseConfig = fromVideoVisualConfigComplete(config as VideoVisualConfigComplete);
+
+	return {
+		videoId: config.videoId,
+		enable3DEffect: config.enable3DEffect ?? true,
+		designSystem: config.designSystem,
+		enableHolographicEffect: config.enableHolographicEffect ?? true,
+		enableGlowEffect: config.enableGlowEffect ?? true,
+		enableAnimatedBorder: config.enableAnimatedBorder ?? true,
+		enableLightHalo: config.enableLightHalo ?? true,
+		layerSystem: baseConfig.layerSystem,
+		effects: baseConfig.effects,
+		performance: baseConfig.performance,
+		states: baseConfig.states,
+		presetId: config.presetId,
+	};
+}
+
+/**
  * Mapea un objeto de VideoVisualConfig a un formato para actualización
  * @param config Configuración visual
  * @returns Objeto formateado para Prisma
+ * @deprecated Use mapVideoVisualConfigCompleteUpdateToPrisma instead
  */
 export function mapVideoVisualConfigUpdateToPrisma(config: Partial<VideoVisualConfig>) {
 	const result: Record<string, any> = {};
@@ -147,4 +184,58 @@ export function mapVideoVisualConfigUpdateToPrisma(config: Partial<VideoVisualCo
 	}
 
 	return result;
+}
+
+/**
+ * Mapea un objeto de VideoVisualConfigComplete a un formato para actualización
+ * @param config Configuración visual completa
+ * @returns Objeto formateado para Prisma
+ */
+export function mapVideoVisualConfigCompleteUpdateToPrisma(config: Partial<VideoVisualConfigComplete>) {
+	const result: Record<string, any> = {};
+
+	// Solo incluir campos que están definidos
+	if (config.enable3DEffect !== undefined) result.enable3DEffect = config.enable3DEffect;
+	if (config.designSystem !== undefined) result.designSystem = config.designSystem;
+	if (config.enableHolographicEffect !== undefined) result.enableHolographicEffect = config.enableHolographicEffect;
+	if (config.enableGlowEffect !== undefined) result.enableGlowEffect = config.enableGlowEffect;
+	if (config.enableAnimatedBorder !== undefined) result.enableAnimatedBorder = config.enableAnimatedBorder;
+	if (config.enableLightHalo !== undefined) result.enableLightHalo = config.enableLightHalo;
+	if (config.presetId !== undefined) result.presetId = config.presetId;
+
+	// Convertir configuración completa a formato base
+	const baseConfig = fromVideoVisualConfigComplete(config as VideoVisualConfigComplete);
+
+	// Agregar campos serializados si están definidos
+	if (config.layerSystem !== undefined || config.layersConfig !== undefined) {
+		result.layerSystem = baseConfig.layerSystem;
+	}
+
+	if (config.effects !== undefined || config.effectsConfig !== undefined) {
+		result.effects = baseConfig.effects;
+	}
+
+	if (config.performance !== undefined || config.performanceConfig !== undefined) {
+		result.performance = baseConfig.performance;
+	}
+
+	if (config.states !== undefined || config.statesConfig !== undefined) {
+		result.states = baseConfig.states;
+	}
+
+	return result;
+}
+
+/**
+ * Mapea un video completo para actualización en Prisma
+ * @param video Video con metadatos deserializados
+ * @returns Objeto formateado para Prisma
+ */
+export function mapVideoCompleteToPrisma(video: VideoComplete) {
+	const prismaData = fromVideoComplete(video);
+
+	return {
+		...prismaData,
+		// Agregar cualquier transformación adicional aquí si es necesario
+	};
 }

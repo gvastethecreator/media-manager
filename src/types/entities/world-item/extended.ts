@@ -3,8 +3,8 @@
  * @module types/entities/world-item/extended
  */
 
-import type { WorldItemBase, WorldItemWithRelations } from './base';
 import type { WorldItemProperty, WorldItemRequirement, WorldItemStats } from './enums';
+import type { WorldItemBase, WorldItemWithRelations } from './types';
 
 /**
  * Filtros para la búsqueda de objetos del mundo
@@ -33,6 +33,8 @@ export interface ParsedWorldItem extends WorldItemBase {
 	requirementsObject: Record<string, WorldItemRequirement>;
 	statsObject: WorldItemStats;
 	filtersObject: WorldItemFilters;
+	attributesArray: string[];
+	effectsArray: string[];
 }
 
 /**
@@ -41,9 +43,54 @@ export interface ParsedWorldItem extends WorldItemBase {
 export interface ParsedWorldItemWithRelations extends WorldItemWithRelations, ParsedWorldItem {}
 
 /**
- * Entidad WorldItem extendida con propiedades de UI
+ * Interfaz extendida con campos deserializados para WorldItem
+ * Convierte los campos JSON string a sus respectivos objetos/arrays
  */
-export interface WorldItem extends ParsedWorldItemWithRelations {
+export interface WorldItemExtended extends Omit<
+	WorldItemWithRelations,
+	| 'attributes'
+	| 'effects'
+	| 'requirements'
+	| 'stats'
+	| 'filters'
+	| 'tags'
+> {
+	/**
+	 * Atributos del objeto como array de strings
+	 * En la base de datos es almacenado como string JSON
+	 */
+	attributes: string[];
+
+	/**
+	 * Efectos del objeto como array de strings
+	 * En la base de datos es almacenado como string JSON
+	 */
+	effects: string[];
+
+	/**
+	 * Requisitos del objeto como objeto
+	 * En la base de datos es almacenado como string JSON
+	 */
+	requirements: Record<string, WorldItemRequirement>;
+
+	/**
+	 * Estadísticas del objeto como objeto tipado
+	 * En la base de datos es almacenado como string JSON
+	 */
+	stats: WorldItemStats;
+
+	/**
+	 * Configuración de filtros como objeto
+	 * En la base de datos es almacenado como string JSON
+	 */
+	filters: Record<string, any>;
+
+	/**
+	 * Tags como array de strings
+	 * En la base de datos es almacenado como string JSON opcional
+	 */
+	tags: string[];
+
 	// Propiedades de UI
 	isSelected?: boolean;
 	isExpanded?: boolean;
@@ -64,36 +111,72 @@ export interface WorldItem extends ParsedWorldItemWithRelations {
 }
 
 /**
- * Datos para actualizar configuración visual del objeto del mundo
+ * Tipo para configuración visual de objetos del mundo
  */
-export interface WorldItemVisualConfigUpdateData {
+export interface WorldItemVisualConfig {
 	view?: string;
 	sortBy?: string;
-	filters?: WorldItemFilters;
+	filters?: string;
 	lastViewedWorldItemId?: string | null;
 	expandedWorldItemIds?: string[];
 	selectedWorldItemIds?: string[];
 }
 
 /**
- * Configuración visual para la entidad WorldItem
+ * Tipo para configuración visual parseada de objetos del mundo
  */
-export interface WorldItemVisualConfig {
-	id: string;
-	userId: string;
+export interface ParsedWorldItemVisualConfig {
 	view: string;
 	sortBy: string;
-	filters: string;
+	filters: Record<string, any>;
 	lastViewedWorldItemId: string | null;
 	expandedWorldItemIds: string[];
 	selectedWorldItemIds: string[];
-	createdAt: Date;
-	updatedAt: Date;
 }
 
 /**
- * Configuración visual parseada para la entidad WorldItem
+ * Tipo para actualización de configuración visual
  */
-export interface ParsedWorldItemVisualConfig extends Omit<WorldItemVisualConfig, 'filters'> {
-	filtersObject: WorldItemFilters;
+export interface WorldItemVisualConfigUpdateData {
+	view?: string;
+	sortBy?: string;
+	filters?: Record<string, any>;
+	lastViewedWorldItemId?: string | null;
+	expandedWorldItemIds?: string[];
+	selectedWorldItemIds?: string[];
+}
+
+/**
+ * Interfaz para resumen de objeto del mundo (vista previa)
+ */
+export interface WorldItemSummary {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	type: string;
+	rarity: string;
+	size: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tagEntities?: number;
+		characters?: number;
+		places?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }

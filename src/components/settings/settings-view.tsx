@@ -5,7 +5,9 @@ import {
 	AlbumIcon,
 	BookIcon,
 	BoxIcon,
+	FolderIcon,
 	Grid2X2Icon,
+	ImageIcon,
 	KeyboardIcon,
 	ListIcon,
 	MapPinIcon,
@@ -15,6 +17,7 @@ import {
 	TagIcon,
 	UploadCloud,
 	UserIcon,
+	WandIcon,
 } from 'lucide-react';
 import * as React from 'react';
 
@@ -24,15 +27,18 @@ import { CharactersSettings } from './characters/characters-settings';
 import { CollectionsSettings } from './collections/collections-settings';
 import { ConceptsSettings } from './concepts/concepts-settings';
 import { FoldersSettings } from './folders/folders-settings';
+import { GroupsSettings } from './groups/groups-settings';
 import { NotesSettings } from './notes/notes-settings';
 import { PlacesSettings } from './places/places-settings';
 import { ProfilesSettings } from './profiles/profiles-settings';
 import { PromptSettings } from './prompts/prompts-settings';
+import { PropertiesSettings } from './properties/properties-settings';
 import { ShortcutsSettings } from './shortcuts/shortcuts-settings';
 import { SystemSettings } from './system/system-settings';
 import { TagsSettings } from './tags/tags-settings';
 import { ThumbnailsSettings } from './thumbnails/thumbnails-settings';
 import { UploadedImagesSettings } from './uploaded-images/uploaded-images-settings';
+import { WildcardsSettings } from './wildcards/wildcards-settings';
 import { WorldItemsSettings } from './world-items/world-items-settings';
 
 // Definición de tipos para estructurar los tabs
@@ -60,6 +66,9 @@ const tabColors = {
 	shortcuts: '#475569', // Slate
 	'entities-cards': '#6366f1', // Indigo
 	profiles: '#6366f1', // Indigo
+	properties: '#f472b6', // Pink
+	groups: '#a855f7', // Purple
+	wildcards: '#ec4899', // Pink
 };
 
 // Definición de todos los tabs para evitar la duplicación de código
@@ -147,6 +156,30 @@ const tabsData: TabItem[] = [
 		label: 'Perfiles',
 		icon: <UserIcon className="h-4 w-4 transition-transform duration-150 group-hover:scale-105" />,
 		color: tabColors.profiles,
+	},
+	{
+		id: 'properties',
+		label: 'Propiedades',
+		icon: <TagIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.properties,
+	},
+	{
+		id: 'groups',
+		label: 'Grupos',
+		icon: <FolderIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.groups,
+	},
+	{
+		id: 'wildcards',
+		label: 'Comodines',
+		icon: <WandIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.wildcards,
+	},
+	{
+		id: 'thumbnails',
+		label: 'Miniaturas',
+		icon: <ImageIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.thumbnails,
 	},
 ];
 
@@ -256,6 +289,18 @@ export function SettingsView() {
 
 					<TabsContent value="profiles" className="px-1 h-full overflow-auto">
 						<ProfilesSettings />
+					</TabsContent>
+
+					<TabsContent value="properties" className="px-1 h-full overflow-auto">
+						<PropertiesSettings />
+					</TabsContent>
+
+					<TabsContent value="groups" className="px-1 h-full overflow-auto">
+						<GroupsSettings />
+					</TabsContent>
+
+					<TabsContent value="wildcards" className="px-1 h-full overflow-auto">
+						<WildcardsSettings />
 					</TabsContent>
 				</div>
 			</Tabs>

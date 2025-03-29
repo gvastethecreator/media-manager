@@ -3,4 +3,10 @@
  * @module types/entities/group
  */
 
-export * from './group-types';
+// Exportar todo el módulo de tipos
+export * from './base';
+export * from './types';
+
+// Alias común para el tipo principal
+export type { GroupWithRelations as Group } from './types';
+

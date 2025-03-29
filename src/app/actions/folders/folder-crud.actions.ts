@@ -4,7 +4,15 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import type { CreateFolderData, FolderBase, FolderExtended, UpdateFolderData } from '@/types/entities/folder';
+import {
+  mapFolderExtendedFromComplete,
+  toFolderComplete
+} from '@/transformers/folder';
+import type {
+  CreateFolderData,
+  FolderExtendedComplete,
+  UpdateFolderData
+} from '@/types/entities/folder';
 import { existsSync } from 'fs';
 import { revalidateAllPaths } from './folder-utils.actions';
 
@@ -29,13 +37,17 @@ class FolderError extends Error {
 /**
  * Obtiene todas las carpetas registradas
  */
-export async function getFolders(): Promise<FolderExtended[]> {
+export async function getFolders(): Promise<FolderExtendedComplete[]> {
 	try {
 		folderLogger.info('📁 Iniciando obtención de carpetas');
 		const folders = await prisma.folder.findMany({
 			include: {
 				_count: {
-					select: { images: true },
+					select: {
+						images: true,
+						videos: true,
+						children: true
+					},
 				},
 				images: {
 					take: 9,
@@ -59,30 +71,40 @@ export async function getFolders(): Promise<FolderExtended[]> {
 						updatedAt: true,
 					},
 				},
-				visualConfig: true,
 			},
 			orderBy: { name: 'asc' },
 		});
 
-		folderLogger.info('✅ Carpetas obtenidas', { count: folders.length });
-		return folders.map((folder: any) => ({
-			...folder,
-			recentImages: Array(9)
-				.fill(null)
-				.map((_, index: number) => {
-					const img = folder.images[index];
-					if (img?.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000) {
-						try {
-							return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
-						} catch (error) {
-							folderLogger.error('❌ Error convirtiendo thumbnail a base64:', error);
-							return null;
+		// Transformar usando los nuevos serializadores
+		const processedFolders = folders.map((folder: any) => {
+			// Primero deserializamos
+			const folderComplete = toFolderComplete(folder);
+			// Luego mapeamos a formato extendido
+			const folderExtended = mapFolderExtendedFromComplete(folderComplete);
+
+			// Agregar imágenes recientes como base64 thumbnails
+			return {
+				...folderExtended,
+				recentImages: Array(9)
+					.fill(null)
+					.map((_, index: number) => {
+						const img = folder.images[index];
+						if (img?.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000) {
+							try {
+								return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+							} catch (error) {
+								folderLogger.error('❌ Error convirtiendo thumbnail a base64:', error);
+								return null;
+							}
 						}
-					}
-					return null;
-				}),
-			images: undefined, // Removemos las imágenes completas para no enviar datos innecesarios
-		}));
+						return null;
+					}),
+				images: undefined, // Removemos las imágenes completas para no enviar datos innecesarios
+			};
+		});
+
+		folderLogger.info('✅ Carpetas obtenidas', { count: folders.length });
+		return processedFolders;
 	} catch (error) {
 		folderLogger.error('❌ Error al obtener carpetas', error);
 		throw new FolderError('No se pudieron obtener las carpetas', error);
@@ -92,7 +114,7 @@ export async function getFolders(): Promise<FolderExtended[]> {
 /**
  * Obtiene una carpeta específica por su ID
  */
-export async function getFolder(id: string): Promise<FolderExtended | null> {
+export async function getFolder(id: string): Promise<FolderExtendedComplete | null> {
 	try {
 		folderLogger.info('🔍 Obteniendo carpeta:', id);
 		const folder = await prisma.folder.findUnique({
@@ -101,9 +123,10 @@ export async function getFolder(id: string): Promise<FolderExtended | null> {
 				_count: {
 					select: {
 						images: true,
+						videos: true,
+						children: true,
 					},
 				},
-				visualConfig: true,
 			},
 		});
 
@@ -112,8 +135,12 @@ export async function getFolder(id: string): Promise<FolderExtended | null> {
 			return null;
 		}
 
+		// Transformar usando los nuevos serializadores
+		const folderComplete = toFolderComplete(folder);
+		const folderExtended = mapFolderExtendedFromComplete(folderComplete);
+
 		folderLogger.info('✅ Carpeta obtenida:', folder.name);
-		return folder as FolderExtended;
+		return folderExtended;
 	} catch (error) {
 		folderLogger.error('❌ Error al obtener carpeta:', error);
 		if (error instanceof FolderError) {
@@ -126,7 +153,7 @@ export async function getFolder(id: string): Promise<FolderExtended | null> {
 /**
  * Crea una nueva carpeta
  */
-export async function createFolder(path: string): Promise<FolderBase> {
+export async function createFolder(path: string): Promise<FolderExtendedComplete> {
 	try {
 		folderLogger.info('📁 Agregando nueva carpeta:', path);
 
@@ -162,19 +189,32 @@ export async function createFolder(path: string): Promise<FolderBase> {
 				...folderData,
 				lastIndexed: new Date(),
 			},
+			include: {
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						children: true,
+					},
+				},
+			},
 		});
+
+		// Transformar usando los nuevos serializadores
+		const folderComplete = toFolderComplete(folder);
+		const folderExtended = mapFolderExtendedFromComplete(folderComplete);
 
 		folderLogger.info('✅ Carpeta creada:', folder);
 
 		// Emitir eventos usando el nuevo sistema del servidor
 		await emit({
 			type: 'folders:modified',
-			data: { action: 'create', folder },
+			data: { action: 'create', folder: folderExtended },
 		});
 
 		await revalidateAllPaths();
 
-		return folder;
+		return folderExtended;
 	} catch (error) {
 		folderLogger.error('❌ Error al crear carpeta:', error);
 		if (error instanceof FolderError) {
@@ -187,26 +227,39 @@ export async function createFolder(path: string): Promise<FolderBase> {
 /**
  * Actualiza una carpeta existente
  */
-export async function updateFolder(id: string, data: UpdateFolderData): Promise<FolderBase> {
+export async function updateFolder(id: string, data: UpdateFolderData): Promise<FolderExtendedComplete> {
 	try {
 		folderLogger.info('📝 Actualizando carpeta:', { id, data });
 
 		const folder = await prisma.folder.update({
 			where: { id },
 			data,
+			include: {
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						children: true,
+					},
+				},
+			},
 		});
+
+		// Transformar usando los nuevos serializadores
+		const folderComplete = toFolderComplete(folder);
+		const folderExtended = mapFolderExtendedFromComplete(folderComplete);
 
 		folderLogger.info('✅ Carpeta actualizada:', folder);
 
 		// Emitir eventos usando el nuevo sistema del servidor
 		await emit({
 			type: 'folders:modified',
-			data: { action: 'update', folder },
+			data: { action: 'update', folder: folderExtended },
 		});
 
 		await revalidateAllPaths();
 
-		return folder;
+		return folderExtended;
 	} catch (error) {
 		folderLogger.error('❌ Error al actualizar carpeta:', error);
 		throw new FolderError('No se pudo actualizar la carpeta', error);
@@ -286,7 +339,7 @@ export async function getFolderImages(id: string) {
 /**
  * Actualiza la configuración de reindexación automática
  */
-export async function updateFolderAutoReindex(id: string, autoReindex: boolean): Promise<FolderBase> {
+export async function updateFolderAutoReindex(id: string, autoReindex: boolean): Promise<FolderExtendedComplete> {
 	try {
 		folderLogger.info('⚙️ Actualizando configuración de reindexación automática:', {
 			id,
@@ -296,19 +349,32 @@ export async function updateFolderAutoReindex(id: string, autoReindex: boolean):
 		const folder = await prisma.folder.update({
 			where: { id },
 			data: { autoReindex },
+			include: {
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						children: true,
+					},
+				},
+			},
 		});
+
+		// Transformar usando los nuevos serializadores
+		const folderComplete = toFolderComplete(folder);
+		const folderExtended = mapFolderExtendedFromComplete(folderComplete);
 
 		folderLogger.info('✅ Configuración actualizada');
 
 		// Emitir eventos usando el nuevo sistema del servidor
 		await emit({
 			type: 'folders:modified',
-			data: { action: 'update', folder },
+			data: { action: 'update', folder: folderExtended },
 		});
 
 		await revalidateAllPaths();
 
-		return folder;
+		return folderExtended;
 	} catch (error) {
 		folderLogger.error('❌ Error al actualizar configuración:', error);
 		throw new FolderError('No se pudo actualizar la configuración', error);
