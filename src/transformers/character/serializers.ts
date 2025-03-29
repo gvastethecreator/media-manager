@@ -4,18 +4,22 @@
  */
 
 import type {
-	CharacterExtended,
-	CharacterFilter,
-	CharacterRelationship,
-	CharacterStats,
-	CharacterSummary,
+  CharacterExtended,
+  CharacterFilter,
+  CharacterRelationship,
+  CharacterStats,
+  CharacterSummary,
 } from '@/types/entities/character';
+import type { CharacterBase, CharacterWithRelations } from '@/types/entities/character/types';
 import type { Character as PrismaCharacter } from '@prisma/client';
 
 /**
  * Transforma un objeto Character de Prisma a un objeto CharacterExtended
+ * Los campos JSON almacenados como strings en la BD (stats, relationships, goals, etc.)
+ * son deserializados a sus correspondientes tipos de datos (objetos/arrays)
+ *
  * @param character Character de Prisma
- * @returns CharacterExtended con propiedades adicionales
+ * @returns CharacterExtended con propiedades adicionales y campos JSON deserializados
  */
 export function toCharacterExtended(character: PrismaCharacter): CharacterExtended {
 	return {
@@ -26,7 +30,7 @@ export function toCharacterExtended(character: PrismaCharacter): CharacterExtend
 		isOpen: false,
 		isLoading: false,
 		hasError: false,
-		// Calculados/runtime
+		// Calculados/runtime - deserialización de campos JSON almacenados como strings
 		parsedFilters: character.filters ? parseCharacterFilters(character.filters) : [],
 		parsedStats: character.stats ? parseCharacterStats(character.stats) : {},
 		parsedRelationships: character.relationships ? parseCharacterRelationships(character.relationships) : [],
@@ -63,9 +67,10 @@ export function toCharacterSummary(
 
 /**
  * Prepara los datos de un personaje para guardar en la base de datos
- * Elimina propiedades que no son parte del modelo Prisma
+ * Serializa campos complejos (objetos/arrays) a strings JSON para almacenamiento
+ *
  * @param character Character con datos extendidos
- * @returns Datos limpios para guardar en BD
+ * @returns Datos limpios para guardar en BD con campos complejos serializados a JSON
  */
 export function toPrismaCharacter(character: Partial<CharacterExtended>): Partial<PrismaCharacter> {
 	// Extraer solo las propiedades que existen en PrismaCharacter
@@ -100,6 +105,7 @@ export function toPrismaCharacter(character: Partial<CharacterExtended>): Partia
 	} = character;
 
 	// Serializar datos complejos si es necesario
+	// Convierte arrays/objetos de la aplicación a strings JSON para BD
 	const serializedFilters = character.parsedFilters ? JSON.stringify(character.parsedFilters) : filters;
 
 	const serializedStats = character.parsedStats ? JSON.stringify(character.parsedStats) : stats;
@@ -149,8 +155,10 @@ export function toPrismaCharacter(character: Partial<CharacterExtended>): Partia
 
 /**
  * Parsea una cadena de filtros a un array de objetos CharacterFilter
- * @param filtersStr Cadena serializada de filtros
- * @returns Array de objetos CharacterFilter
+ * En la base de datos, los filtros se almacenan como string JSON o "empty_array"
+ *
+ * @param filtersStr Cadena serializada de filtros (JSON o "empty_array")
+ * @returns Array de objetos CharacterFilter correctamente tipados
  */
 export function parseCharacterFilters(filtersStr: string): CharacterFilter[] {
 	try {
@@ -176,8 +184,10 @@ export function parseCharacterFilters(filtersStr: string): CharacterFilter[] {
 
 /**
  * Parsea una cadena de estadísticas a un objeto CharacterStats
- * @param statsStr Cadena serializada de estadísticas
- * @returns Objeto CharacterStats
+ * En la base de datos, las estadísticas se almacenan como string JSON o "{}"
+ *
+ * @param statsStr Cadena serializada de estadísticas (JSON o "{}")
+ * @returns Objeto CharacterStats correctamente tipado
  */
 export function parseCharacterStats(statsStr: string): CharacterStats {
 	try {
@@ -203,8 +213,10 @@ export function parseCharacterStats(statsStr: string): CharacterStats {
 
 /**
  * Parsea una cadena de relaciones a un array de objetos CharacterRelationship
- * @param relationshipsStr Cadena serializada de relaciones
- * @returns Array de objetos CharacterRelationship
+ * En la base de datos, las relaciones se almacenan como string JSON o "empty_array"
+ *
+ * @param relationshipsStr Cadena serializada de relaciones (JSON o "empty_array")
+ * @returns Array de objetos CharacterRelationship correctamente tipados
  */
 export function parseCharacterRelationships(relationshipsStr: string): CharacterRelationship[] {
 	try {
@@ -230,8 +242,10 @@ export function parseCharacterRelationships(relationshipsStr: string): Character
 
 /**
  * Parsea una cadena que representa un array a un array de strings
- * @param str Cadena serializada que representa un array
- * @returns Array de strings
+ * En la base de datos, estos arrays se almacenan como string JSON o "empty_array"
+ *
+ * @param str Cadena serializada que representa un array (JSON o "empty_array")
+ * @returns Array de strings correctamente tipado
  */
 export function parseStringArray(str: string): string[] {
 	try {
@@ -249,44 +263,240 @@ export function parseStringArray(str: string): string[] {
 		}
 
 		return parsedArray;
-	} catch (error) {
+	}
+	catch (error) {
 		console.error('Error al parsear array de strings:', error);
 		return [];
 	}
 }
 
 /**
- * Serializa un array a formato JSON string
- * @param array Array a serializar
- * @returns String serializado
+ * Serializa un array de tags en formato string
+ * @param tags - Array de tags
+ * @returns String de tags
  */
-export function serializeArray(array: any[]): string {
-	try {
-		if (!array || array.length === 0) {
-			return 'empty_array';
-		}
+export function serializeTags(tags: string[]): string {
+	if (!tags || !tags.length) {
+		return '';
+	}
+	return tags.join(',');
+}
 
-		return JSON.stringify(array);
+/**
+ * Deserializa tags desde string a array
+ * @param tags - String de tags
+ * @returns Array de tags
+ */
+export function deserializeTags(tags: string): string[] {
+	if (!tags) {
+		return [];
+	}
+	return tags.split(',').filter(Boolean);
+}
+
+/**
+ * Serializa relaciones en formato JSON string
+ * @param relationships - Array o string JSON de relaciones
+ * @returns String JSON
+ */
+export function serializeRelationships(relationships: any[] | string): string {
+	if (typeof relationships === 'string') {
+		return relationships;
+	}
+	return JSON.stringify(relationships || []);
+}
+
+/**
+ * Deserializa relaciones desde string JSON a array
+ * @param relationships - String JSON de relaciones
+ * @returns Array de relaciones
+ */
+export function deserializeRelationships(relationships: string): any[] {
+	try {
+		return relationships ? JSON.parse(relationships) : [];
 	} catch (error) {
-		console.error('Error al serializar array:', error);
-		return 'empty_array';
+		console.error('Error deserializing relationships:', error);
+		return [];
 	}
 }
 
 /**
- * Serializa un objeto a formato JSON string
- * @param obj Objeto a serializar
- * @returns String serializado
+ * Serializa estadísticas en formato JSON string
+ * @param stats - Objeto o string JSON de estadísticas
+ * @returns String JSON
  */
-export function serializeObject(obj: Record<string, any>): string {
-	try {
-		if (!obj || Object.keys(obj).length === 0) {
-			return '{}';
-		}
-
-		return JSON.stringify(obj);
-	} catch (error) {
-		console.error('Error al serializar objeto:', error);
-		return '{}';
+export function serializeStats(stats: Record<string, any> | string): string {
+	if (typeof stats === 'string') {
+		return stats;
 	}
+	return JSON.stringify(stats || {});
+}
+
+/**
+ * Deserializa estadísticas desde string JSON a objeto
+ * @param stats - String JSON de estadísticas
+ * @returns Objeto de estadísticas
+ */
+export function deserializeStats(stats: string): Record<string, any> {
+	try {
+		return stats ? JSON.parse(stats) : {};
+	} catch (error) {
+		console.error('Error deserializing stats:', error);
+		return {};
+	}
+}
+
+/**
+ * Serializa array simple en formato JSON string
+ * @param array - Array o string JSON
+ * @returns String JSON
+ */
+export function serializeJsonArray(array: string[] | string): string {
+	if (typeof array === 'string') {
+		return array;
+	}
+	return JSON.stringify(array || []);
+}
+
+/**
+ * Deserializa array simple desde string JSON
+ * @param jsonString - String JSON de array
+ * @returns Array de strings
+ */
+export function deserializeArray(jsonString: string): string[] {
+	try {
+		return jsonString ? JSON.parse(jsonString) : [];
+	} catch (error) {
+		console.error('Error deserializing array:', error);
+		return [];
+	}
+}
+
+/**
+ * Serializa filtros en formato JSON string
+ * @param filters - Objeto o string JSON de filtros
+ * @returns String JSON
+ */
+export function serializeFilters(filters: Record<string, any> | string): string {
+	if (typeof filters === 'string') {
+		return filters;
+	}
+	return JSON.stringify(filters || {});
+}
+
+/**
+ * Deserializa filtros desde string JSON a objeto
+ * @param filters - String JSON de filtros
+ * @returns Objeto de filtros
+ */
+export function deserializeFilters(filters: string): Record<string, any> {
+	try {
+		return filters ? JSON.parse(filters) : {};
+	} catch (error) {
+		console.error('Error deserializing filters:', error);
+		return {};
+	}
+}
+
+/**
+ * Transforma un personaje básico a formato extendido
+ * @param character - Personaje con relaciones
+ * @returns Personaje en formato extendido con campos transformados
+ */
+export function toExtendedCharacter(character: CharacterWithRelations): CharacterExtended {
+	const {
+		stats,
+		relationships,
+		goals,
+		fears,
+		beliefs,
+		personality,
+		skills,
+		abilities,
+		filters,
+		...rest
+	} = character;
+
+	return {
+		...rest,
+		// Transformar campos JSON
+		stats: deserializeStats(stats),
+		relationships: deserializeRelationships(relationships),
+		goals: deserializeArray(goals),
+		fears: deserializeArray(fears),
+		beliefs: deserializeArray(beliefs),
+		personality: deserializeArray(personality),
+		skills: deserializeArray(skills),
+		abilities: deserializeArray(abilities),
+		filters: deserializeFilters(filters),
+		// Mantener relaciones
+		images: character.images || [],
+		videos: character.videos || [],
+		relatedCharacters: character.relatedCharacters || [],
+		relatedTo: character.relatedTo || [],
+		albums: character.albums || [],
+		collections: character.collections || [],
+		tags: character.tags || [],
+		places: character.places || [],
+		worldItems: character.worldItems || [],
+		concepts: character.concepts || [],
+		prompts: character.prompts || [],
+		notes: character.notes || [],
+		wildcards: character.wildcards || [],
+		properties: character.properties || [],
+		groups: character.groups || [],
+		// Contadores
+		_count: character._count || {},
+	};
+}
+
+/**
+ * Transforma un personaje extendido de vuelta a formato básico
+ * @param extendedCharacter - Personaje en formato extendido
+ * @returns Personaje con campos serializados
+ */
+export function fromExtendedCharacter(extendedCharacter: Partial<CharacterExtended>): Partial<CharacterBase> {
+	const {
+		stats,
+		relationships,
+		goals,
+		fears,
+		beliefs,
+		personality,
+		skills,
+		abilities,
+		filters,
+		// Excluir relaciones y contadores
+		images,
+		videos,
+		relatedCharacters,
+		relatedTo,
+		albums,
+		collections,
+		tags,
+		places,
+		worldItems,
+		concepts,
+		prompts,
+		notes,
+		wildcards,
+		properties,
+		groups,
+		_count,
+		...rest
+	} = extendedCharacter;
+
+	return {
+		...rest,
+		// Serializar campos de vuelta a JSON
+		...(stats !== undefined && { stats: serializeStats(stats as Record<string, any>) }),
+		...(relationships !== undefined && { relationships: serializeRelationships(relationships as any[]) }),
+		...(goals !== undefined && { goals: serializeJsonArray(goals as string[]) }),
+		...(fears !== undefined && { fears: serializeJsonArray(fears as string[]) }),
+		...(beliefs !== undefined && { beliefs: serializeJsonArray(beliefs as string[]) }),
+		...(personality !== undefined && { personality: serializeJsonArray(personality as string[]) }),
+		...(skills !== undefined && { skills: serializeJsonArray(skills as string[]) }),
+		...(abilities !== undefined && { abilities: serializeJsonArray(abilities as string[]) }),
+		...(filters !== undefined && { filters: serializeFilters(filters as Record<string, any>) }),
+	};
 }

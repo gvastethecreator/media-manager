@@ -3,16 +3,22 @@
  * @module transformers/collection/mappers
  */
 
-import type { CollectionExtended, CollectionSummary } from '@/types/entities/collection';
+import type { CollectionComplete, CollectionExtended, CollectionFilter, CollectionSummary } from '@/types/entities/collection';
 import {
-    COLLECTION_CATEGORY_COLORS,
-    COLLECTION_CATEGORY_EMOJIS,
-    type CollectionCategory,
-    CollectionRarity,
-    type CreateCollectionData, type UpdateCollectionData,
+  COLLECTION_CATEGORY_COLORS,
+  COLLECTION_CATEGORY_EMOJIS,
+  type CollectionCategory,
+  type CreateCollectionData,
+  type UpdateCollectionData,
 } from '@/types/entities/collection';
 import type { Image, Collection as PrismaCollection } from '@prisma/client';
-import { parseCollectionFilters } from './serializers';
+import {
+  serializeCollectionFilters,
+  serializeEditions,
+  serializeSortBy,
+  toCollectionComplete,
+  toCollectionExtended
+} from './serializers';
 
 /**
  * Mapeador para obtener una lista de colecciones a partir de datos de Prisma
@@ -24,31 +30,47 @@ export function mapCollectionsFromPrisma(
 	collections: PrismaCollection[],
 	imageCountMap?: Record<string, number>
 ): CollectionExtended[] {
-	return collections.map((collection) => mapCollectionFromPrisma(collection, imageCountMap?.[collection.id]));
+	return collections.map((collection) => {
+        const extended = toCollectionExtended(collection);
+        return {
+            ...extended,
+            imageCount: imageCountMap?.[collection.id] || 0
+        };
+    });
 }
 
 /**
- * Mapeador para obtener una colección extendida a partir de datos de Prisma
+ * Mapeador para obtener un objeto CollectionComplete a partir de datos de Prisma
  * @param collection Datos de colección desde Prisma
- * @param imageCount Contador opcional de imágenes
- * @returns CollectionExtended
+ * @returns CollectionComplete con campos JSON deserializados
  */
-export function mapCollectionFromPrisma(collection: PrismaCollection, imageCount?: number): CollectionExtended {
-	const parsedFilters = collection.filters ? parseCollectionFilters(collection.filters) : [];
+export function mapCollectionCompletFromPrisma(collection: PrismaCollection): CollectionComplete {
+    return toCollectionComplete(collection);
+}
 
-	return {
-		...collection,
-		// Propiedades adicionales de UI
-		isSelected: false,
-		isHovered: false,
-		isOpen: false,
-		isLoading: false,
-		hasError: false,
-		// Datos calculados
-		parsedFilters,
-		imageCount: imageCount || 0,
-		totalValue: collection.price || 0,
-	};
+/**
+ * Mapeador para obtener un objeto CollectionExtended desde CollectionComplete
+ * @param collection CollectionComplete
+ * @param imageCount Contador opcional de imágenes
+ * @returns CollectionExtended con propiedades adicionales
+ */
+export function mapCollectionExtendedFromComplete(
+    collection: CollectionComplete,
+    imageCount?: number
+): CollectionExtended {
+    return {
+        ...collection,
+        // Propiedades adicionales de UI
+        isSelected: false,
+        isHovered: false,
+        isOpen: false,
+        isLoading: false,
+        hasError: false,
+        // Datos calculados
+        parsedFilters: collection.filters,
+        imageCount: imageCount || 0,
+        totalValue: collection.price || 0,
+    };
 }
 
 /**
@@ -64,7 +86,6 @@ export function mapCollectionsToSummary(collections: CollectionExtended[]): Coll
 		color: collection.color || '#3b82f6',
 		imageCount: collection.imageCount || 0,
 		category: collection.category || undefined,
-		rarity: collection.rarity || undefined,
 	}));
 }
 
@@ -142,6 +163,19 @@ export function extractFeaturedImages(collection: CollectionExtended & { images?
  * @returns Objeto formateado para Prisma
  */
 export function mapCreateCollectionDataToPrisma(data: CreateCollectionData) {
+    // Serializar los campos JSON si es necesario
+    const serializedEditions = Array.isArray(data.editions)
+        ? serializeEditions(data.editions)
+        : (data.editions || '[]');
+
+    const serializedSortBy = typeof data.sortBy === 'object'
+        ? serializeSortBy(data.sortBy)
+        : (data.sortBy || '{}');
+
+    const serializedFilters = Array.isArray(data.filters)
+        ? serializeCollectionFilters(data.filters)
+        : (data.filters || 'empty_array');
+
 	return {
 		name: data.name,
 		description: data.description || null,
@@ -158,8 +192,11 @@ export function mapCreateCollectionDataToPrisma(data: CreateCollectionData) {
 		tokenAddress: data.tokenAddress || null,
 		contractAddress: data.contractAddress || null,
 		contractType: data.contractType || null,
-		editions: data.editions ? JSON.stringify(data.editions) : 'empty_array',
+		editions: serializedEditions,
+        sortBy: serializedSortBy,
+        filters: serializedFilters,
 		featuredImage: data.featuredImage || null,
+		isFavorite: data.isFavorite || false,
 		// Conexión con grupos si existen
 		groups: data.groupIds ? {
 			connect: data.groupIds.map((id) => ({ id })),
@@ -199,10 +236,27 @@ export function mapUpdateCollectionDataToPrisma(data: UpdateCollectionData) {
 	if (data.tokenAddress !== undefined) updateData.tokenAddress = data.tokenAddress;
 	if (data.contractAddress !== undefined) updateData.contractAddress = data.contractAddress;
 	if (data.contractType !== undefined) updateData.contractType = data.contractType;
+
 	if (data.editions !== undefined) {
-		updateData.editions = data.editions ? JSON.stringify(data.editions) : 'empty_array';
+		updateData.editions = Array.isArray(data.editions)
+            ? serializeEditions(data.editions)
+            : (data.editions || '[]');
 	}
+
+    if (data.sortBy !== undefined) {
+        updateData.sortBy = typeof data.sortBy === 'object'
+            ? serializeSortBy(data.sortBy)
+            : (data.sortBy || '{}');
+    }
+
+    if (data.filters !== undefined) {
+        updateData.filters = Array.isArray(data.filters)
+            ? serializeCollectionFilters(data.filters)
+            : (data.filters || 'empty_array');
+    }
+
 	if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+    if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
 	// Gestionar relaciones con grupos
 	if (data.groupIds !== undefined) {
@@ -226,4 +280,75 @@ export function mapUpdateCollectionDataToPrisma(data: UpdateCollectionData) {
 	}
 
 	return updateData;
+}
+
+/**
+ * Crear filtros para una consulta avanzada de colecciones
+ * @param filters Array de filtros de colección
+ * @returns Objeto de consulta para Prisma
+ */
+export function createCollectionFiltersForQuery(filters: CollectionFilter[]): Record<string, any> {
+    if (!filters || filters.length === 0) {
+        return {};
+    }
+
+    const queryConditions: Record<string, any> = {};
+
+    for (const filter of filters) {
+        const { field, operator, value } = filter;
+
+        // Convertir operador y valor al formato de Prisma
+        switch (operator) {
+            case 'eq':
+                queryConditions[field] = { equals: value };
+                break;
+            case 'neq':
+                queryConditions[field] = { not: value };
+                break;
+            case 'gt':
+                queryConditions[field] = { gt: value };
+                break;
+            case 'gte':
+                queryConditions[field] = { gte: value };
+                break;
+            case 'lt':
+                queryConditions[field] = { lt: value };
+                break;
+            case 'lte':
+                queryConditions[field] = { lte: value };
+                break;
+            case 'contains':
+                queryConditions[field] = { contains: value };
+                break;
+            case 'startsWith':
+                queryConditions[field] = { startsWith: value };
+                break;
+            case 'endsWith':
+                queryConditions[field] = { endsWith: value };
+                break;
+            default:
+                queryConditions[field] = { equals: value };
+        }
+    }
+
+    return { AND: queryConditions };
+}
+
+/**
+ * Crear criterio de ordenación para una consulta de colecciones
+ * @param sortBy Criterio de ordenación
+ * @returns Objeto de ordenación para Prisma
+ */
+export function createCollectionSortByForQuery(sortBy: any): Record<string, 'asc' | 'desc'> {
+    if (!sortBy || Object.keys(sortBy).length === 0) {
+        return { name: 'asc' }; // Ordenación por defecto
+    }
+
+    const { field, direction } = sortBy;
+
+    if (!field) {
+        return { name: 'asc' };
+    }
+
+    return { [field]: direction === 'desc' ? 'desc' : 'asc' };
 }

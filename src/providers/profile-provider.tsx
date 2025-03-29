@@ -1,9 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { useProfileStore, selectIsDarkMode } from '@/store/entities/profile/profile-store';
 import { ensureDefaultProfile } from '@/server/actions/profile-actions';
-import { ThemeMode, type ProfileExtended } from '@/types/entities/profile/profile-types';
+import { selectIsDarkMode, useProfileStore } from '@/store/entities/profile/profile-store';
+import { ThemeMode, type ProfileExtended } from '@/types/entities/profile/types';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 // Contexto para acceso síncrono al perfil
 interface ProfileContextType {
@@ -19,7 +19,7 @@ const ProfileContext = createContext<ProfileContextType>({
 	isLoading: true,
 	profile: null,
 	error: null,
-	applyTheme: () => {},
+	applyTheme: () => { },
 });
 
 export const useProfile = () => useContext(ProfileContext);

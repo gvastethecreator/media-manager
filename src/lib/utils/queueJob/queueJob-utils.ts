@@ -1,11 +1,11 @@
 import { prisma } from '@/lib/prisma';
 import { transformQueueJobs } from '@/transformers/queueJob/queueJob-transformers';
 import {
-	type PaginatedQueueJobs,
-	type QueueJobFilters,
-	type QueueJobPaginationOptions,
-	QueueJobStatus,
-} from '@/types/entities/queueJob/queueJob-types';
+  type PaginatedQueueJobs,
+  type QueueJobFilters,
+  type QueueJobPaginationOptions,
+  QueueJobStatus,
+} from '@/types/entities/queueJob/types';
 import type { QueueJob } from '@prisma/client';
 
 /**

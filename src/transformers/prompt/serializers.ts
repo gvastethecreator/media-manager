@@ -5,8 +5,10 @@ const serializersLogger = serverLogger.withContext('PromptSerializers');
 
 /**
  * Serializa un array de tags desde un string JSON
- * @param tagsString String JSON con tags
- * @returns Array de strings con los tags
+ * En la base de datos, los tags pueden almacenarse como un string JSON que representa un array
+ *
+ * @param tagsString String JSON con tags o "empty_array"
+ * @returns Array de strings con los tags correctamente tipado
  */
 export function serializeTags(tagsString?: string | null): string[] {
 	if (!tagsString) return [];
@@ -22,9 +24,11 @@ export function serializeTags(tagsString?: string | null): string[] {
 }
 
 /**
- * Deserializa un array de tags a string JSON
+ * Deserializa un array de tags a string JSON para almacenamiento en BD
+ * Si el array está vacío, retorna "empty_array" como convención
+ *
  * @param tags Array de tags
- * @returns String JSON con los tags
+ * @returns String JSON o "empty_array" si está vacío
  */
 export function deserializeTags(tags: string[]): string {
 	try {
@@ -36,9 +40,11 @@ export function deserializeTags(tags: string[]): string {
 }
 
 /**
- * Serializa parámetros desde un string JSON
- * @param parametersString String JSON con parámetros
- * @returns Objeto con los parámetros
+ * Serializa parámetros desde un string JSON a un objeto JavaScript
+ * En la base de datos, los parámetros se almacenan como un string JSON que representa un objeto
+ *
+ * @param parametersString String JSON con parámetros o "{}"
+ * @returns Objeto con los parámetros correctamente tipado
  */
 export function serializeParameters(parametersString?: string | null): Record<string, any> {
 	if (!parametersString) return {};
@@ -54,9 +60,11 @@ export function serializeParameters(parametersString?: string | null): Record<st
 }
 
 /**
- * Deserializa un objeto de parámetros a string JSON
+ * Deserializa un objeto de parámetros a string JSON para almacenamiento en BD
+ * Si el objeto está vacío, retorna "{}" como convención
+ *
  * @param parameters Objeto con parámetros
- * @returns String JSON con los parámetros
+ * @returns String JSON o "{}" si está vacío
  */
 export function deserializeParameters(parameters: Record<string, any>): string {
 	try {
@@ -69,8 +77,10 @@ export function deserializeParameters(parameters: Record<string, any>): string {
 
 /**
  * Transforma un prompt base a un prompt extendido con propiedades para UI
+ * Deserializa campos JSON almacenados como strings a sus tipos correspondientes
+ *
  * @param prompt Prompt base
- * @returns Prompt extendido
+ * @returns Prompt extendido con campos parseados y propiedades adicionales
  */
 export function toExtendedPrompt(prompt: PromptBase): PromptExtended {
 	return {

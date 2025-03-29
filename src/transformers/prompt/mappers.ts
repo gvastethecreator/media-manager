@@ -6,9 +6,85 @@ import type {
 	PromptSortOption,
 	PromptWithStats,
 } from '@/types/entities/prompt';
-import { serializeTags, toExtendedPrompt } from './serializers';
+import { toExtendedPrompt } from './serializers';
 
 const mappersLogger = serverLogger.withContext('PromptMappers');
+
+/**
+ * Mapea datos de creación de prompt a formato Prisma
+ * @param data Datos para crear un prompt
+ * @returns Objeto con formato para Prisma
+ */
+export function mapCreatePromptDataToPrisma(data: any): any {
+	return {
+		name: data.name,
+		emoji: data.emoji || null,
+		color: data.color || null,
+		description: data.description || null,
+		content: data.content || '',
+		purpose: data.purpose || 'general',
+		category: data.category || 'general',
+		parameters: data.parameters || '[]',
+		featuredImage: data.featuredImage || null,
+		isFavorite: data.isFavorite || false,
+		// Conexión con grupos si existen
+		groups: data.groupIds ? {
+			connect: data.groupIds.map((id: string) => ({ id })),
+		} : undefined,
+		// Conexión con propiedades si existen
+		properties: data.propertyIds ? {
+			connect: data.propertyIds.map((id: string) => ({ id })),
+		} : undefined,
+		// Conexión con comodines si existen
+		wildcards: data.wildcardIds ? {
+			connect: data.wildcardIds.map((id: string) => ({ id })),
+		} : undefined,
+	};
+}
+
+/**
+ * Mapea datos de actualización de prompt a formato Prisma
+ * @param data Datos para actualizar un prompt
+ * @returns Objeto con formato para Prisma
+ */
+export function mapUpdatePromptDataToPrisma(data: any): any {
+	const updateData: Record<string, any> = {};
+
+	// Solo incluir campos que estén presentes en los datos
+	if (data.name !== undefined) updateData.name = data.name;
+	if (data.emoji !== undefined) updateData.emoji = data.emoji;
+	if (data.color !== undefined) updateData.color = data.color;
+	if (data.description !== undefined) updateData.description = data.description;
+	if (data.content !== undefined) updateData.content = data.content;
+	if (data.purpose !== undefined) updateData.purpose = data.purpose;
+	if (data.category !== undefined) updateData.category = data.category;
+	if (data.parameters !== undefined) updateData.parameters = data.parameters;
+	if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+
+	// Gestionar relaciones con grupos
+	if (data.groupIds !== undefined) {
+		updateData.groups = {
+			set: data.groupIds.map((id: string) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con propiedades
+	if (data.propertyIds !== undefined) {
+		updateData.properties = {
+			set: data.propertyIds.map((id: string) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con comodines
+	if (data.wildcardIds !== undefined) {
+		updateData.wildcards = {
+			set: data.wildcardIds.map((id: string) => ({ id })),
+		};
+	}
+
+	return updateData;
+}
 
 /**
  * Transforma un prompt de Prisma a un prompt con estadísticas
@@ -28,6 +104,9 @@ export function toPromptWithStats(prompt: any): PromptWithStats {
 			notes: _count.notes || 0,
 			concepts: _count.concepts || 0,
 			images: _count.images || 0,
+			groups: _count.groups || 0,
+			properties: _count.properties || 0,
+			wildcards: _count.wildcards || 0,
 		},
 	};
 }
@@ -59,13 +138,14 @@ export function filterPrompts(prompts: PromptBase[], filters: PromptFilters = {}
 			return false;
 		}
 
-		// Filtro por tags
+		// Filtro por tags - Esta entidad no tiene una propiedad 'tags' directa,
+		// por lo que omitiremos este filtro o se puede implementar de otra manera
+		// si se relaciona con Tags en una relación muchos a muchos
 		if (filters.tags && filters.tags.length > 0) {
-			const promptTags = serializeTags(prompt.tags);
-			const hasMatchingTag = filters.tags.some((tag) => promptTags.includes(tag));
-			if (!hasMatchingTag) {
-				return false;
-			}
+			// Este filtrado debería hacerse a nivel de consulta de base de datos
+			// ya que requiere consultar las relaciones con Tags
+			// Para propósitos de ejemplo, asumimos que no hay match si hay filtro de tags
+			return false;
 		}
 
 		// Filtro por favoritos

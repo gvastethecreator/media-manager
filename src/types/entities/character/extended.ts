@@ -1,21 +1,87 @@
 /**
- * @file Tipos extendidos para la entidad Character con propiedades adicionales de UI
+ * @file Tipos extendidos para la entidad Character
  * @module types/entities/character/extended
  */
 
 import type { Concept, Image, Note, Prompt } from '@prisma/client';
-import type { CharacterBase, CharacterFilter, CharacterRelationship, CharacterStats } from './base';
+import type { CharacterFilter, CharacterRelationship, CharacterStats } from './base';
+import type { CharacterComplete, CharacterWithRelations } from './types';
 
 /**
- * Tipo extendido para Character con propiedades adicionales de UI
+ * Interfaz extendida con campos deserializados para Character
+ * Convierte los campos JSON string a sus respectivos objetos/arrays
  */
-export interface CharacterExtended extends CharacterBase {
+export interface CharacterExtended extends Omit<
+	CharacterWithRelations,
+	| 'stats'
+	| 'relationships'
+	| 'goals'
+	| 'fears'
+	| 'beliefs'
+	| 'personality'
+	| 'skills'
+	| 'abilities'
+	| 'filters'
+> {
+	/**
+	 * Estadísticas del personaje como objeto
+	 * En la base de datos es almacenado como string JSON
+	 */
+	stats: Record<string, any>;
+
+	/**
+	 * Relaciones del personaje como array
+	 * En la base de datos es almacenado como string JSON
+	 */
+	relationships: any[];
+
+	/**
+	 * Objetivos del personaje como array de strings
+	 * En la base de datos es almacenado como string JSON
+	 */
+	goals: string[];
+
+	/**
+	 * Miedos del personaje como array de strings
+	 * En la base de datos es almacenado como string JSON
+	 */
+	fears: string[];
+
+	/**
+	 * Creencias del personaje como array de strings
+	 * En la base de datos es almacenado como string JSON
+	 */
+	beliefs: string[];
+
+	/**
+	 * Rasgos de personalidad como array de strings
+	 * En la base de datos es almacenado como string JSON
+	 */
+	personality: string[];
+
+	/**
+	 * Habilidades del personaje como array de strings
+	 * En la base de datos es almacenado como string JSON
+	 */
+	skills: string[];
+
+	/**
+	 * Capacidades del personaje como array de strings
+	 * En la base de datos es almacenado como string JSON
+	 */
+	abilities: string[];
+
+	/**
+	 * Configuración de filtros como objeto
+	 * En la base de datos es almacenado como string JSON
+	 */
+	filters: Record<string, any>;
+
 	// Propiedades de UI
 	isSelected?: boolean;
-	isHovered?: boolean;
-	isOpen?: boolean;
-	isLoading?: boolean;
-	hasError?: boolean;
+	isExpanded?: boolean;
+	isEditing?: boolean;
+	activeTab?: 'info' | 'stats' | 'relationships' | 'background' | 'images';
 
 	// Calculados/runtime
 	parsedFilters?: CharacterFilter[];
@@ -29,8 +95,8 @@ export interface CharacterExtended extends CharacterBase {
 
 	// Relaciones expandidas
 	images?: Image[];
-	relatedCharacters?: CharacterExtended[];
-	relatedTo?: CharacterExtended[];
+	relatedCharacters?: CharacterComplete[];
+	relatedTo?: CharacterComplete[];
 	notes?: Note[];
 	concepts?: Concept[];
 	prompts?: Prompt[];
@@ -106,4 +172,43 @@ export interface CharacterCard {
 	isFlipped: boolean;
 	showDetails: boolean;
 	activeTab?: 'info' | 'stats' | 'relationships' | 'background' | 'images';
+}
+
+/**
+ * Interfaz para resumen de personaje (vista previa)
+ */
+export interface CharacterSummary {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	level: number;
+	class: string;
+	race: string;
+	alignment: string;
+	type: string | null;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	_count?: {
+		images?: number;
+		videos?: number;
+		relatedCharacters?: number;
+		relatedTo?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }

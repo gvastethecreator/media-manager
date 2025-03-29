@@ -1,17 +1,16 @@
+import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
+import { transformProfile } from '@/transformers/profile/profile-transformers';
+import {
+  type PaginatedProfiles,
+  type ProfileExtended,
+  type ProfileFilters,
+  type ProfilePaginationOptions,
+  type ProfilePreferences,
+  ThemeMode,
+} from '@/types/entities/profile/types';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { Profile } from '@prisma/client';
-import {
-	type ProfileExtended,
-	type ProfileFilters,
-	type ProfilePaginationOptions,
-	type PaginatedProfiles,
-	ThemeMode,
-	type ProfilePreferences,
-} from '@/types/entities/profile/profile-types';
-import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
-import { transformProfile } from '@/transformers/profile/profile-transformers';
 
 // Estado inicial
 const initialState = {

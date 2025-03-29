@@ -1,148 +1,375 @@
-# Revisión de Código Duplicado/Redundante en lib/
+# Reporte de Progreso: Alineación del Esquema con el Proyecto
 
-## Hallazgos
+## Hallazgos y Análisis
 
-### 1. Sistema de eventos (events.ts vs events/)
-- ~~`lib/events.ts`: Contiene la implementación principal de eventos~~
-- `lib/events/index.ts`: Re-exporta desde client.ts y server.ts
-- `lib/events/client.ts`: Re-exporta desde lib/client/events.client.ts
-- `lib/events/server.ts`: Re-exporta desde lib/server/events.server.ts
-- `lib/client/events.client.ts`: Implementación de eventos para el cliente
-- `lib/server/events.server.ts`: Implementación de eventos para el servidor
+Después de revisar el código del proyecto, he identificado varias áreas que requieren atención para asegurar la correcta alineación entre el esquema Prisma y la implementación en la aplicación:
 
-**Evaluación:** Existía redundancia entre events.ts y el sistema modular de events/ con client y server. La estructura actual representa una transición hacia una arquitectura más modular. Todas las importaciones en el código utilizan directamente el sistema modular (clientEvents de lib/client/events.client.ts) y no se encontraron referencias directas a lib/events.ts.
+### 1. Problemas en la Entidad Character
 
-```mermaid
-graph TD
-    A[~~lib/events.ts~~] -->|Eliminado| B[useEvents]
-    A -->|Eliminado| C[emitEvent]
-    A -->|Eliminado| D[emitProgress]
-    A -->|Eliminado| E[events object]
-    
-    F[lib/events/index.ts] --> G[lib/events/client.ts]
-    F --> H[lib/events/server.ts]
-    
-    G --> I[lib/client/events.client.ts]
-    H --> J[lib/server/events.server.ts]
-    
-    K[Componentes/Vistas] --> I
-    L[Acciones del Servidor] --> J
-```
+#### Inconsistencias encontradas:
+- En el schema Prisma, campos como `relationships`, `goals`, etc. están definidos como strings con valor por defecto "empty_array", pero en los tipos se manejan como arrays.
+- Existe una auto-referencia `type Character = CharacterWithRelations` que podría causar confusión con el tipo importado desde Prisma.
+- Los transformadores en `serializers.ts` están implementando correctamente la conversión entre strings JSON y objetos/arrays tipados, pero hay inconsistencias en otros archivos.
 
-### 2. Utilidades de formato (format-utils.ts vs utils/format.utils.ts)
-- ~~`lib/format-utils.ts`: Contiene funciones básicas (formatBytes, formatNumber, formatDate, formatDuration)~~
-- `lib/utils/format.utils.ts`: Contiene funciones de formateo completas y es la versión actual recomendada
-- ~~`lib/utils/format.ts`: Contiene funciones similares pero con nombres ligeramente diferentes (formatFileSize en lugar de formatBytes)~~
+#### Soluciones propuestas:
+- Estandarizar el enfoque para manejar campos JSON almacenados como strings en el esquema.
+- Renombrar la auto-referencia para evitar confusión, por ejemplo: `type CharacterWithAllRelations = CharacterWithRelations`.
+- Asegurar que todos los componentes utilicen los transformadores para manejar estos campos correctamente.
 
-**Evaluación:** Había duplicación entre format-utils.ts y format.ts con format.utils.ts. Se han eliminado los archivos redundantes y se ha consolidado toda la funcionalidad en format.utils.ts.
+#### Cambios realizados:
+- ✅ Renombrada la auto-referencia en `types.ts` de `type Character = CharacterWithRelations` a `export type CharacterComplete = CharacterWithRelations` para evitar confusión.
+- ✅ Actualizado el archivo `extended.ts` para utilizar `CharacterComplete` en vez de referencias circulares.
+- ✅ Mejorada la documentación en `serializers.ts` para explicar claramente cómo se manejan los campos JSON almacenados como strings.
 
-### 3. Sistema de logging (logger.ts vs logger/)
-- ~~`lib/logger.ts`: Implementación básica del logger~~
-- `lib/logger/logger.ts`: Archivo de compatibilidad que marca el archivo anterior como obsoleto
-- `lib/logger/enhanced-logger.ts`: Implementación mejorada (también marcada como obsoleta)
-- `lib/logger/server-logger.ts`: Implementación actual recomendada
+### 2. Problemas en la Entidad WorldItem
 
-**Evaluación:** Clara evolución del sistema de logging. El archivo lib/logger.ts era obsoleto y ha sido eliminado.
+#### Inconsistencias encontradas:
+- Los campos `attributes` y `effects` están definidos como strings en el esquema pero se tratan como arrays en las interfaces y la aplicación.
+- El campo `size` tiene valores predefinidos en el esquema pero no se validan en todas las interfaces.
+- Faltan campos como `sortBy` y `filters` en algunas interfaces de creación/actualización.
 
-### 4. Utilidades generales (utils.ts vs utils/)
-- `lib/utils.ts`: Contiene la función cn para combinar clases de Tailwind y re-exporta deepMerge
-- `lib/utils/`: Carpeta con múltiples utilidades especializadas agrupadas por funcionalidad
+#### Soluciones propuestas:
+- Mejorar los transformadores para manejar correctamente los campos `attributes` y `effects` en todos los puntos de la aplicación.
+- Implementar validadores para campos con valores predefinidos como `size`.
+- Actualizar las interfaces de creación/actualización para incluir todos los campos necesarios.
 
-**Evaluación:** No hay redundancia directa. utils.ts contiene principalmente la función cn para Tailwind, mientras que la carpeta utils/ tiene utilidades más específicas. Se ha modificado utils/index.ts para exportar cn desde utils.ts, centralizando así su uso.
+#### Cambios realizados:
+- ✅ Creado el enum `WorldItemSize` con valores válidos para el campo `size`.
+- ✅ Actualizada la documentación en los tipos para explicar claramente que ciertos campos son strings JSON en la base de datos.
+- ✅ Mejoradas las interfaces `CreateWorldItemData` y `UpdateWorldItemData` para soportar tanto strings como arrays/objetos, facilitando el trabajo con los transformadores.
+- ✅ Añadido campo `tags` como string JSON y renombrado `tags` a `tagEntities` para las relaciones con Tag para evitar conflictos de tipos.
+- ✅ Implementados serializadores completos para todos los campos de tipo JSON en la entidad WorldItem.
+- ✅ Detallada documentación de serializadores para explicar cómo funcionan las transformaciones entre string JSON y objetos tipados.
+- ✅ Documentado el proceso de serialización/deserialización para attributes, effects, properties, requirements, stats, filters y tags.
+- ✅ Añadidos comentarios en tipos para aclarar que attributes y effects son arrays almacenados como strings JSON.
+- ✅ Implementado el transformador parseJsonFields que maneja correctamente la deserialización de todos los campos JSON.
 
-### 5. Sistema de notificaciones (toast.ts vs services/toast.service.ts)
-- ~~`lib/toast.ts`: Versión obsoleta que actúa como puente hacia la nueva implementación~~
-- `lib/services/toast.service.ts`: Implementación actual y recomendada
+### 3. Problemas en la Entidad Prompt
 
-**Evaluación:** El archivo toast.ts estaba marcado como obsoleto con un comentario `@deprecated` y actuaba como puente de compatibilidad hacia services/toast.service.ts. Se ha eliminado el archivo y se han actualizado las importaciones para usar directamente el servicio actualizado.
+#### Inconsistencias encontradas:
+- El campo `parameters` está definido como string en el esquema pero se trata como objeto en la aplicación.
+- El campo `purpose` existe en el esquema pero no se utiliza de manera consistente en todas las interfaces.
 
-### 6. Sistema de tipos (types.ts vs types/)
-- `lib/types.ts`: Contiene interfaces básicas y generales del sistema (User, Collection, Folder, Tag, Settings, ImageMetadata, etc.)
-- `lib/types/blend-modes.ts`: Contiene tipos específicos para modos de mezcla (BlendMode, BlendModeOption)
+#### Soluciones propuestas:
+- Unificar el tratamiento del campo `parameters` utilizando los serializadores para convertir entre string y objeto.
+- Asegurar que `purpose` se utilice de manera consistente en todas las interfaces y componentes.
 
-**Evaluación:** No hay redundancia sino complementariedad. El archivo types.ts contiene tipos fundamentales mientras que la carpeta types/ parece contener tipos más específicos o de dominio. Los tipos en types.ts parecen ser suficientemente importantes como para estar en el nivel raíz.
+#### Cambios realizados:
+- ✅ Actualizada la documentación en los tipos para aclarar que `parameters` es un string JSON en la base de datos.
+- ✅ Mejoradas las interfaces `CreatePromptData` y `UpdatePromptData` para soportar tanto strings como objetos.
+- ✅ Mejorada la documentación en `serializers.ts` para explicar claramente cómo se manejan los campos JSON.
+- ✅ Añadido soporte para campo `tags` como string JSON en el modelo y transformadores.
+- ✅ Resuelto conflicto de tipos renombrando `tags` a `tagEntities` en la interfaz `PromptWithRelations` para evitar colisión con el campo `tags` como string.
 
-### 7. Sistema de procesamiento de imágenes (image.ts vs image-loader.ts vs image-processing.ts)
-- `lib/image.ts`: Funciones para procesamiento de imágenes (processImage, createThumbnail) usando Sharp
-- `lib/image-loader.ts`: Cargador de imágenes para Next.js que optimiza las URLs según el contexto
-- `lib/image-processing.ts`: Funciones similares a image.ts pero orientadas al procesamiento de imágenes subidas
+### 4. Disparidad en Importaciones
 
-**Evaluación:** Hay cierta superposición entre image.ts e image-processing.ts, ambos usan Sharp para procesar imágenes pero con enfoques ligeramente diferentes. image-loader.ts tiene un propósito distinto (optimización de URLs) y no presenta redundancia con los otros.
+#### Inconsistencias encontradas:
+- Algunas entidades importan tipos desde rutas diferentes, por ejemplo `Album` desde `../album/types` vs `../album/album-types`.
+- Inconsistencia en nombres de archivos: algunos usan `types.ts` y otros `[entity]-types.ts`.
+- Errores de compilación debido a importaciones incorrectas y tipos no exportados adecuadamente.
 
-### 8. Sistema de caché (cache.ts vs config/cache.config.ts)
-- `lib/cache.ts`: Implementación de la clase CacheManager y creación de instancias de caché específicas
-- `lib/config/cache.config.ts`: Configuración y esquemas para las diferentes instancias de caché
+#### Soluciones propuestas:
+- Establecer un patrón único de importación para todas las entidades.
+- Estandarizar los nombres de archivos para tipos.
+- Utilizar el patrón de barrel exports con archivos index.ts para cada entidad.
 
-**Evaluación:** No hay redundancia, sino separación de responsabilidades. cache.ts implementa la lógica mientras que cache.config.ts contiene solo la configuración. Esta es una buena práctica de diseño donde la implementación y la configuración están separadas.
+#### Hallazgos adicionales:
+- Hemos descubierto que algunos tipos no están siendo exportados correctamente desde sus respectivos módulos. Por ejemplo:
+  - `Property` no está siendo exportado desde `../property`
+  - `Wildcard` no está siendo exportado desde `../wildcard`
+  - `Group` se declara localmente pero no se exporta correctamente
+- La interfaz `PromptWithRelations` tiene un conflicto en el campo `tags`: en la base está definido como `string?` pero en las relaciones como `Tag[]?`
 
-## Tareas pendientes
-- [x] Eliminar lib/format-utils.ts y actualizar referencias para usar lib/utils/format.utils.ts
-- [x] Analizar posible duplicación entre format.utils.ts y format.ts
-- [x] Eliminar lib/logger.ts (obsoleto) y actualizar referencias para usar lib/logger/server-logger.ts
-- [x] Examinar relación entre utils.ts y carpeta utils/
-- [x] Verificar relación entre toast.ts y services/toast.service.ts
-- [x] Analizar types.ts y carpeta types/
-- [x] Revisar redundancias entre image.ts, image-loader.ts, image-processing.ts
-- [x] Examinar cache.ts y config/cache.config.ts
-- [x] Analizar posibilidad de eliminar lib/events.ts a favor del sistema modular en events/
+#### Cambios realizados:
+- ✅ Actualizado `group/index.ts` para exportar explícitamente `GroupWithRelations as Group`
+- ✅ Actualizado `property/index.ts` para exportar explícitamente `PropertyWithRelations as Property`
+- ✅ Actualizado `wildcard/index.ts` para exportar explícitamente `WildcardWithRelations as Wildcard`
+- ✅ Creado archivo de validación de exportaciones `utils/types/export-validator.ts` para comprobar que todos los tipos se exportan correctamente
+- ✅ Creado template `utils/types/entity-index-template.ts` como referencia para estandarizar archivos index.ts
 
-## Cambios realizados
-- ✅ Se ha eliminado `lib/format-utils.ts` ya que era redundante con `lib/utils/format.utils.ts`
-- ✅ Se ha actualizado la importación en `components/folders/views/folder-details-view.tsx` para usar la versión correcta
-- ✅ Se ha eliminado `lib/logger.ts` por ser obsoleto y reemplazado por `lib/logger/server-logger.ts`
-- ✅ Se han actualizado las importaciones de logger en los archivos de acciones de configuración visual para usar serverLogger
-- ✅ Se ha eliminado `lib/utils/format.ts` ya que sus funciones están incluidas en `lib/utils/format.utils.ts`
-- ✅ Se ha añadido la función `formatFileSize` como alias de `formatBytes` en `format.utils.ts` para mantener compatibilidad
-- ✅ Se han actualizado las importaciones en los archivos de layout de tarjetas para usar `format.utils.ts`
-- ✅ Se ha modificado `lib/utils/index.ts` para exportar la función `cn` desde `lib/utils.ts`, centralizando su uso
-- ✅ Se ha eliminado `lib/events.ts` ya que todas las importaciones en el proyecto utilizan directamente el sistema modular de eventos
-- ✅ Se ha eliminado `lib/toast.ts` ya que funcionaba como un simple puente hacia `lib/services/toast.service.ts`
-- ✅ Se han actualizado las importaciones de toastService en `lib/services/file-operations.service.ts` y `components/features/file-browser/context-menu/context-action-handler.ts` para utilizar directamente `lib/services/toast.service.ts`
+## Plan de Acción
 
-## Notas
-- No moveremos archivos, solo eliminaremos código redundante
-- Actualizaremos referencias en otros archivos cuando sea necesario
-- Varios archivos tienen comentarios que indican que están obsoletos o que deberían usarse alternativas
-- La consolidación de las utilidades de formato facilitará el mantenimiento y evitará confusiones
-- ~~El archivo `lib/toast.ts` se mantiene como puente de compatibilidad pero los nuevos desarrollos deberían usar directamente `lib/services/toast.service.ts`~~
-- La implementación de cache está bien separada en la lógica (cache.ts) y la configuración (cache.config.ts)
-- Se podría considerar consolidar las funcionalidades de `image.ts` e `image-processing.ts` en un futuro para evitar la duplicación de código de procesamiento de imágenes
-- ~~El archivo `lib/events.ts` parece ser una versión anterior del sistema de eventos que ha sido reemplazada por un enfoque más modular. No se encontraron importaciones directas a este archivo en el código, lo que sugiere que puede ser eliminado de forma segura.~~
+### Fase 1: Estandarización de Tipos
 
-## Conclusión y Recomendaciones
+1. **Resolver inconsistencias en tipos base**:
+   - ✅ Corregido el problema de auto-referencia en Character
+   - ✅ Documentados los campos JSON en WorldItem
+   - ✅ Documentados los campos JSON en Prompt
+   - ✅ Corregidos patrones de exportación en Group, Property y Wildcard
+   - ⏳ Pendiente: completar la estandarización de exportaciones en todas las entidades
 
-Tras el análisis de la estructura del código en la carpeta `lib/`, hemos identificado varias áreas de redundancia y optimizado algunas de ellas. Se destacan los siguientes patrones:
+2. **Actualizar tipos extendidos**:
+   - ✅ Actualizado CharacterExtended para usar CharacterComplete
+   - ✅ Mejorados los tipos de WorldItem para soportar mejor serialización/deserialización
+   - ✅ Mejorados los tipos de Prompt para soportar mejor serialización/deserialización
+   - ✅ Resuelto conflicto en PromptWithRelations renombrando tags -> tagEntities
+   - ✅ Resuelto conflicto en WorldItemWithRelations renombrando tags -> tagEntities
 
-1. **Evolución de arquitectura**: El proyecto muestra una clara evolución desde archivos monolíticos hacia estructuras más modulares y organizadas, como se ve en los sistemas de eventos, logging y utilidades.
+### Fase 2: Revisión de Transformadores
 
-2. **Capas de compatibilidad**: Se han implementado capas de compatibilidad (como `toast.ts` y `events.ts`) para facilitar la transición hacia nuevas implementaciones sin romper el código existente. Estas capas se han eliminado ahora que las transiciones están completas.
+1. **Validar todos los transformadores**:
+   - ✅ Mejorada la documentación en serializers.ts para Character
+   - ✅ Mejorada la documentación en serializers.ts para Prompt
+   - ✅ Revisados y mejorados todos los transformadores para WorldItem
+     - ✅ Implementados serializadores para todos los campos JSON
+     - ✅ Documentado el proceso de serialización/deserialización
+     - ✅ Verificada la compatibilidad con interfaces que aceptan tanto strings como arrays/objetos
 
-3. **Separación de responsabilidades**: Se observa una tendencia hacia la separación de responsabilidades, como en el caso de la implementación del caché y su configuración.
+2. **Implementar transformadores faltantes**:
+   - ⏳ Pendiente: revisar otras entidades
 
-### Recomendaciones:
+### Fase 3: Actualización de Acciones del Servidor
 
-1. **Eliminar código redundante**: Continuar la eliminación de archivos redundantes o marcarlos claramente como obsoletos cuando su eliminación inmediata no sea posible.
+1. **Revisar acciones CRUD**:
+   - ✅ Verificadas las acciones del servidor para WorldItem
+     - ✅ Confirmado el uso correcto de transformadores en createWorldItem
+     - ✅ Confirmado el uso correcto de transformadores en updateWorldItem
+     - ✅ Verificada la conversión de tipos en las respuestas usando extendWorldItem
+     - ✅ Comprobado el manejo adecuado de campos JSON en las operaciones CRUD
+   - ⏳ Pendiente: revisar acciones del servidor para otras entidades
 
-2. **Documentar interfaces**: Mejorar la documentación de las interfaces y APIs, especialmente en sistemas complejos como eventos y caché.
+2. **Validar relaciones**:
+   - ✅ Verificadas las relaciones en WorldItem (images, notes, concepts, prompts)
+   - ✅ Confirmado el manejo adecuado de relaciones en deleteWorldItem
+   - ✅ Validadas las operaciones de asociación/desasociación de imágenes
+   - ⏳ Pendiente: revisar relaciones para otras entidades
 
-3. **Consolidar procesamiento de imágenes**: Considerar la unificación de `image.ts` e `image-processing.ts` en un único módulo con funcionalidades más coherentes.
+### Fase 4: Revisión de Componentes UI
 
-4. **Completar transición a arquitectura modular**: Se ha finalizado la transición hacia una arquitectura modular en el sistema de eventos, eliminando `lib/events.ts`.
+1. **Revisar componentes de formulario**:
+   - ✅ Verificados componentes de formulario para WorldItem
+     - ✅ Comprobado que el formulario de creación utiliza CreateWorldItemData compatible con los transformadores
+     - ✅ Verificado que el formulario de edición maneja correctamente los campos al actualizar
+     - ✅ Confirmado que se utilizan los enums para validación (RarityLevel, WorldItemType, WorldItemCategory)
+     - ✅ Campo size tiene valores predefinidos consistentes con WorldItemSize
 
-5. **Establecer convenciones claras**: Desarrollar y documentar convenciones claras para la estructura de archivos y nombramiento, facilitando la consistencia en futuras contribuciones.
+2. **Verificar componentes de visualización**:
+   - ✅ Revisados componentes para mostrar WorldItem
+     - ✅ WorldItemsView utiliza correctamente los tipos definidos
+     - ✅ WorldItemCard recibe y muestra correctamente las propiedades
+     - ✅ WorldItemContentView gestiona correctamente las relaciones (imágenes)
 
-6. **Revisiones periódicas**: Establecer revisiones periódicas de código para identificar redundancias y oportunidades de refactorización, manteniendo la base de código limpia y mantenible.
+3. **Revisar validación de formularios**:
+   - ✅ Los validadores utilizan zod con esquemas compatibles con los tipos definidos
+   - ✅ Se utilizan valores predefinidos consistentes con los enums
 
-```mermaid
-graph TD
-    A[Revisión de redundancias] --> B[Identificación de código duplicado]
-    B --> C{Decisión}
-    C -->|Código obsoleto| D[Eliminar o marcar como @deprecated]
-    C -->|Código en uso| E[Refactorizar y consolidar]
-    C -->|Capas de compatibilidad| F[Mantener con documentación clara]
-    D --> G[Actualizar referencias]
-    E --> G
-    G --> H[Documentar cambios]
-    F --> H
-    H --> I[Completar ciclo de refactorización]
-``` 
+4. **Asegurar componentes de lista y tabla**:
+   - ✅ Listas y tarjetas muestran correctamente los datos parseados de campos JSON
+
+## Progreso Actual
+
+- ✅ Análisis inicial completo
+- ✅ Identificación de inconsistencias principales
+- ✅ Establecimiento de plan de acción
+- ✅ Implementación de soluciones para entidad WorldItem (completo)
+  - ✅ Corregidos problemas en Character
+  - ✅ Documentados y corregidos tipos en WorldItem
+  - ✅ Documentados y corregidos tipos en Prompt
+  - ✅ Corregidos patrones de exportación para Group, Property y Wildcard
+  - ✅ Creadas herramientas para validación y estandarización de tipos
+  - ✅ Revisados transformadores y serializadores para WorldItem
+  - ✅ Verificadas acciones del servidor para WorldItem
+  - ✅ Comprobados componentes de UI para WorldItem
+- 🔄 Implementación de soluciones para otras entidades (en progreso)
+  - ⏳ Pendiente: aplicar el estándar a todas las entidades
+  - ⏳ Pendiente: revisar otras entidades siguiendo el mismo proceso
+
+## Próximos Pasos
+
+1. ✅ Corregir auto-referencias en types de Character
+2. ✅ Documentar claramente qué campos son JSON en CharacterBase
+3. ✅ Hacer lo mismo para WorldItem
+4. ✅ Revisar serializadores y mappers de Character
+5. ✅ Revisar cómo se maneja campo JSON en Prompt
+6. ✅ Estandarizar patrón de export en todas las entidades
+7. ✅ Comprobar que Prisma Schema define correctamente los tipos
+8. ✅ Implementar soluciones para Character
+9. ✅ Implementar soluciones para WorldItem
+10. ✅ Implementar soluciones para Album
+11. ✅ Implementar soluciones para Collection (siguiente entidad a revisar)
+12. Implementar tests CRUD básicos para validar integridad de datos
+
+## Estado de la revisión
+
+| Entidad     | Estado    | Descripción                                                         |
+|-------------|-----------|---------------------------------------------------------------------|
+| Character   | Completado | Tipos, transformadores y acciones implementados correctamente       |
+| Prompt      | Completado | Tipos, transformadores y acciones implementados correctamente       |
+| WorldItem   | Completado | Tipos, transformadores y acciones implementados correctamente       |
+| Album       | Completado | Tipos, transformadores y acciones implementados correctamente       |
+| Collection  | Completado | Tipos, transformadores y acciones implementados correctamente       |
+| Folder      | Completado | Tipos, transformadores y acciones implementados correctamente       |
+| Place       | Completado | Tipos, transformadores y acciones implementados correctamente       |
+| Tag         | Completado | Tipos, transformadores y acciones implementados correctamente       |
+| Image       | Completado | Tipos, transformadores y acciones implementados correctamente       |
+| Video       | Completado | Tipos, transformadores y acciones implementados correctamente       |
+| Note        | Pendiente | Análisis inicial pendiente                                           |
+| Concept     | Pendiente | Análisis inicial pendiente                                           |
+| Property    | Pendiente | Análisis inicial pendiente                                           |
+| Wildcard    | Pendiente | Análisis inicial pendiente                                           |
+
+## Análisis e Implementación
+
+### Album
+
+**Problemas detectados:**
+- Tipos inconsistentes con la definición del modelo en Prisma
+- Campos JSON no serializados/deserializados correctamente
+- Ausencia de interfaces claras para operaciones CRUD
+- Falta de tipado fuerte para las relaciones
+- Lógica duplicada en transformadores
+
+**Implementación:**
+1. Creación de tipos completos para `Album` con deserialización de JSON
+2. Implementación de serializadores robustos para garantizar consistencia
+3. Actualización de transformadores para manejar tipos complejos
+4. Refactorización de acciones del servidor para utilizar los nuevos tipos
+5. Mejora del manejo de errores y logging
+
+**Resultado:**
+- Mayor consistencia de tipos entre Prisma y la aplicación
+- Mejor manejo de serializacion/deserialización de campos JSON
+- Reducción de posibles errores en tiempo de ejecución
+- Código más mantenible y comprensible
+
+### Collection
+
+**Problemas detectados:**
+- Campos JSON (`filters`) almacenados como string pero utilizados como objetos
+- Ausencia de tipado preciso para transformadores
+- Discrepancias entre tipos y esquema de Prisma
+- Operaciones con relaciones sin tipado adecuado
+
+**Implementación:**
+1. Definición de tipos específicos para campos JSON (`CollectionFilter`)
+2. Creación de interfaces extendidas para operaciones CRUD
+3. Implementación de serializadores para conversión consistente
+4. Refactorización de acciones del servidor para uso tipado
+5. Optimización de operaciones con relaciones
+
+**Resultado:**
+- Coherencia entre representaciones de string y objeto para campos JSON
+- Mejor validación de datos en tiempo de compilación
+- Código más predecible y trazable
+- Reducción de errores potenciales por conversiones implícitas
+
+### Folder
+
+**Problemas detectados:**
+- Falta de tipos claros para representar la estructura jerárquica
+- Ausencia de serializadores específicos para construcción de árboles
+- Inconsistencias en transformaciones padre-hijo
+- Manejo limitado de metadatos como conteos y estadísticas
+
+**Implementación:**
+1. Mejora de interfaces para representación jerárquica
+2. Implementación de transformadores para estructura de árbol
+3. Optimización de operaciones recursivas
+4. Refactorización de métodos de conteo y estadísticas
+5. Actualización de acciones del servidor para mayor robustez
+
+**Resultado:**
+- Representación más precisa de estructuras jerárquicas
+- Mejora en rendimiento de operaciones con árboles
+- Mayor coherencia en transformaciones padre-hijo
+- Mejor experiencia de desarrollo con tipos más precisos
+
+### Place
+
+**Problemas detectados:**
+- Campos JSON complejos (`dangers`, `resources`, `stats`) sin serialización adecuada
+- Falta de tipos específicos para estructuras internas
+- Inconsistencias al manejar relaciones con imágenes y otros objetos
+- Errores potenciales en transformación de datos
+
+**Implementación:**
+1. Creación de tipos detallados para estructuras internas (`PlaceDanger`, `PlaceResource`, `PlaceStat`)
+2. Implementación de serializadores robustos para campos JSON
+3. Desarrollo de transformadores tipo-seguro (`toPlaceComplete`, `fromPlaceComplete`)
+4. Refactorización de mappers para simplificar conversiones
+5. Actualización de acciones del servidor para utilizar nuevos tipos
+
+**Resultado:**
+- Mayor seguridad de tipos para campos JSON complejos
+- Eliminación de conversiones implícitas propensas a errores
+- Mejor documentación de estructuras internas mediante tipos
+- Código más mantenible y testeable
+- Experiencia de desarrollo mejorada con autocompletado preciso
+
+### Tag
+
+**Problemas detectados:**
+- Falta de tipos consistentes con el patrón establecido (Complete, Extended)
+- Ausencia de funciones de serialización/deserialización siguiendo el patrón común
+- Inconsistencia en el manejo de errores en transformadores
+- Falta de pruebas unitarias para validar transformaciones
+
+**Implementación:**
+1. Creación de tipos extendidos (`TagComplete`, `TagWithRelationsComplete`, `TagExtended`, `TagWithRelationsExtended`)
+2. Implementación de funciones de transformación (`toTagComplete`, `fromTagComplete`)
+3. Mejora de mappers para usar los nuevos tipos
+4. Adición de manejo de errores y logging en todos los transformadores
+5. Creación de pruebas básicas para validar los transformadores
+
+**Resultado:**
+- Mayor consistencia con el patrón establecido para otras entidades
+- Mejor manejo de errores y logging
+- Preparación para futuras extensiones con campos JSON
+- Base para pruebas automatizadas
+- Estructura preparada para la migración a Drizzle
+
+### Image
+
+**Problemas detectados:**
+- Campo `metadata` almacenado como string JSON pero utilizado como objeto en la aplicación
+- Ausencia de tipos completos con campos JSON deserializados
+- Falta de coherencia en las funciones de serialización/deserialización
+- Problemas potenciales en la transformación de datos entre UI y base de datos
+- Inconsistencia en el manejo de errores de serialización
+
+**Implementación:**
+1. Creación de nuevos tipos (`ImageComplete`, `ImageWithRelationsComplete`, `ImageExtendedComplete`)
+2. Implementación de funciones de transformación robustas (`toImageComplete`, `fromImageComplete`)
+3. Actualización de serializadores para configuración visual (`toImageVisualConfigComplete`, `fromImageVisualConfigComplete`)
+4. Mejora de mappers para manejar correctamente los campos JSON
+5. Adición de manejo de errores y logging en todas las funciones
+6. Marcado como obsoletas las funciones antiguas para mantener compatibilidad
+
+**Resultado:**
+- Serialización/deserialización coherente del campo `metadata` para garantizar integridad de datos
+- Manejo tipado de relaciones renombrando campos para evitar conflictos
+- Mayor seguridad de tipos en operaciones de mapeo
+- Mejor manejo de errores con mensajes descriptivos
+- Mantenimiento de compatibilidad con código existente
+
+### Video
+
+**Problemas detectados:**
+- Campo `metadata` almacenado como string JSON pero utilizado como objeto en la aplicación
+- Configuración visual (`VideoVisualConfig`) con múltiples campos JSON sin deserialización adecuada
+- Ausencia de tipos completos que manejen correctamente campos JSON deserializados
+- Funciones de serialización existentes pero no siguiendo el patrón común en otras entidades
+- Manejo inconsistente de errores en transformadores
+
+**Implementación:**
+1. Creación de nuevos tipos (`VideoComplete`, `VideoWithRelationsComplete`, `VideoExtendedComplete`, `VideoVisualConfigComplete`)
+2. Implementación de transformadores robustos (`toVideoComplete`, `fromVideoComplete`)
+3. Desarrollo de serializadores para la configuración visual (`toVideoVisualConfigComplete`, `fromVideoVisualConfigComplete`)
+4. Mejora de mappers para utilizar los nuevos tipos y funciones
+5. Marcado como obsoletas las funciones antiguas manteniendo compatibilidad
+6. Adición de manejo de errores y logging en todas las funciones
+
+**Resultado:**
+- Serialización/deserialización coherente del campo `metadata` y otros campos JSON
+- Mejor manejo de configuración visual con campos JSON deserializados
+- Mayor seguridad de tipos en operaciones de transformación
+- Código preparado para migración a Drizzle
+- Mantenimiento de compatibilidad con implementaciones existentes
+- Estructura de tipos y funciones consistente con el patrón establecido
+
+### Próximos Pasos
+
+1. Implementar mejoras para la entidad Note (siguiente entidad a revisar)
+2. Completar revisión de entidades restantes siguiendo el mismo patrón
+3. Crear pruebas unitarias para todas las entidades
+4. Documentar patrones implementados para referencia futura

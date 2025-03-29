@@ -1,239 +1,389 @@
-## Próximos pasos
+# Tareas para Verificar Alineación del Esquema con el Proyecto
 
+## Introducción
 
+Hemos actualizado el esquema de Prisma (`schema.prisma`) y necesitamos verificar que todos los componentes del proyecto estén correctamente alineados con esta estructura. También estamos en proceso de migración de Prisma a Drizzle, lo que requiere una atención especial para garantizar la compatibilidad y consistencia.
 
-# Alineación del Proyecto con el Schema Prisma Actualizado
+## Inconsistencias Detectadas
 
-## Objetivo
+### 🚨 Problemas de Estructura en Tipos de Entidades
 
-Revisar y actualizar todas las implementaciones del proyecto para asegurar su alineación con el schema de Prisma actualizado, enfocándonos especialmente en las relaciones con las nuevas entidades: `Group`, `Property` y `Wildcard`.
+2. **Disparidad en importaciones**:
+   - Algunas entidades importan `Album` desde `../album/types` mientras otras lo hacen desde `../album/album-types`
+   - Esto puede llevar a errores de compilación y referencias circulares, hay que revisar y corregir este tipo de errores en todas las otras entidades
 
-## Estado Actual
+3. **Incompatibilidad en interfaces de relaciones**:
+   - Las entidades `Album` y `Collection` tienen interfaz `AlbumBase` y `CollectionBase` con propiedades que deberían ser consistentes
+   - `AlbumBase` incluye propiedades como `sortBy` y `filters` que deben verificarse en todas las entidades
 
-Hemos identificado que aunque los **tipos** de todas las entidades están actualizados con las nuevas relaciones a `Group`, `Property` y `Wildcard`, existen inconsistencias en:
+### 🚨 Campos Obsoletos o Renombrados
 
-1. **Tipos de Datos de Entrada**: Las interfaces `CreateData` y `UpdateData` de las entidades existentes no incluyen `groupIds` para manejar estas relaciones.
-2. **Transformadores**: Las funciones de mapeo no manejan adecuadamente las conexiones con grupos y otras nuevas entidades.
-3. **Server Actions**: Muchas acciones no incluyen grupos en sus consultas de `_count` y no retornan esta información.
+1. **Campos nuevos no reflejados en interfaces**:
+   - El campo `parentId` existe en el esquema para `Wildcard` pero no está presente en todos los tipos
 
-## Plan de Acción
+2. **Propiedades en Collection no reflejadas en los tipos**:
+   - `Collection` tiene campo `editions` como un string en el esquema, pero en algunos tipos está tratado como un array
+   - `alternativeUrl` presente en el esquema, pero no en todos los transformadores
 
-### 1. Actualización de Entidades Existentes
+3. **Inconsistencia en valores por defecto**:
+   - Diferencia entre valores por defecto en el esquema y en los transformadores
+   - Ejemplo: `emoji` tiene valores diferentes en distintos archivos
 
-Para cada entidad (Album, Collection, Character, Tag, Place, WorldItem, Concept, Prompt, Note), debemos:
+### 🚨 Problemas Específicos por Entidad
 
-- [ ] **Actualizar interfaces de entrada (CreateData/UpdateData)** para incluir:
-  - [ ] `groupIds?: string[]`
-  - [ ] `propertyIds?: string[]` (si aplica)
-  - [ ] `wildcardIds?: string[]` (si aplica)
+1. **Character**:
+   - En el schema, los campos como `relationships`, `goals`, etc. son strings con valor por defecto "empty_array", pero en los tipos deberían ser manejados como arrays
+   - Se está usando una auto-referencia `type Character = CharacterWithRelations` que podría causar confusión con el tipo importado desde Prisma ✅
+   - La estructura de `stats` debería ser manipulada consistentemente entre el tipo básico y el tipo extendido
 
-- [ ] **Actualizar transformadores** para manejar relaciones:
-  - [ ] Añadir manejo de `groups` en `mapCreateDataToPrisma`
-  - [ ] Añadir manejo de `groups` en `mapUpdateDataToPrisma`
-  - [ ] Hacer lo mismo para `properties` y `wildcards` donde aplique
+2. **WorldItem**:
+   - Los campos `attributes` y `effects` están definidos como strings en el esquema pero deberían ser tratados como arrays en la aplicación ✅
+   - Falta `sortBy` y `filters` en algunas interfaces de creación/actualización ✅
+   - El campo `size` tiene valores predefinidos que no se están validando en los tipos ✅
 
-- [ ] **Actualizar Server Actions** para incluir nuevas relaciones:
-  - [ ] Incluir `groups` en consultas de `_count`
-  - [ ] Actualizar interfaces de resultados para incluir conteos de grupos
-  - [ ] Verificar manejo de conexiones/desconexiones en operaciones CRUD
+3. **Prompt**:
+   - El campo `purpose` existe en el esquema pero no está siendo utilizado consistentemente en todas las interfaces ✅
+   - El campo `parameters` debería ser tratado como un objeto JSON pero está definido como string ✅
+   - El campo `tags` podría entrar en conflicto con la relación con entidades Tag ✅
 
-### 2. Creación de Vistas para Nuevas Entidades
+4. **Note**:
+   - La propiedad `title` no está alineada con otras entidades que usan `name` para el título principal
+   - Faltan campos de configuración como `sortBy` y `filters` que existen en otras entidades
 
-- [x] **Implementar vistas para las nuevas entidades**:
-  - [x] Crear directorios en `src/components/views` para:
-    - [x] `groups/`
-    - [x] `properties/`
-    - [x] `wildcards/`
-  - [x] Implementar componentes básicos para listar, crear, editar y ver detalles
-  - [x] Integrar componentes en el panel de navegación
+## Tareas de Verificación por Componentes
 
-### 3. Migración y Pruebas
+### 1. ✅ Tipos y Definiciones
 
-- [ ] **Finalizar migración de base de datos**:
-  - [ ] Revisar archivo de migración generado
-  - [ ] Aplicar migración en entorno de desarrollo
-  - [ ] Verificar integridad de datos
+- [x] Verificar tipos en `src/types/prisma.ts` y asegurar que incluyan todas las entidades del esquema actualizado
+  - ✓ Los tipos básicos (QueueJob, Profile, Settings, Folder, Image, Video) existen
+  - ✓ Los tipos de entidades organizativas (Album, Collection, Tag, Group) están definidos
+  - ✓ Los tipos de entidades de mundo (Character, Place, WorldItem) están definidos
+  - ✓ Los tipos de entidades de contenido (Concept, Prompt, Note) están definidos
+  - ✓ Los nuevos tipos (Property, Wildcard) están incluidos
+  - ✓ Los tipos extendidos con estadísticas para cada entidad están definidos
 
-- [ ] **Pruebas exhaustivas**:
-  - [ ] Probar CRUD para las nuevas entidades
-  - [ ] Probar relaciones entre entidades existentes y nuevas
-  - [ ] Verificar que los tipos y conteos se muestren correctamente en la UI
+- [x] Revisar tipos específicos de entidades en `src/types/entities/*` para alineación con el esquema
+  - ✓ Todos los directorios para entidades existen y corresponden con las entidades en el esquema
+  - ✓ Los tipos de Group están completos e incluyen todas las propiedades del esquema
+  - ✓ Los tipos de Wildcard son correctos e incluyen la estructura jerárquica
+  - ✓ Los tipos de Property incluyen todas las propiedades y relaciones necesarias
+  - ✓ Cada entidad tiene sus interfaces base, con relaciones y operaciones CRUD
 
-## Entidades que Requieren Revisión
+- [x] Comparar tipos de Drizzle en `src/types/drizzle/*` con los tipos de Prisma para garantizar compatibilidad
+  - ✓ Los tipos de Drizzle para Group están definidos y alineados con los de Prisma
+  - ✓ Los tipos de Drizzle para Wildcard preservan todas las propiedades importantes
+  - ✓ Los tipos de Drizzle para Property mantienen la misma estructura
+  - ✓ Los tipos base (CommonFilters, EntityCounts, OrganizationFields) son consistentes
+  - ✓ Los tipos para operaciones CRUD son compatibles entre ambos ORM
 
-| Entidad     | Tipos | CreateData/UpdateData | Transformadores | Server Actions | Vistas |
-|-------------|-------|----------------------|----------------|---------------|--------|
-| Album       | ✅    | 🔄                   | 🔄             | 🔄            | ❌     |
-| Collection  | ✅    | 🔄                   | 🔄             | 🔄            | ❌     |
-| Character   | ✅    | ❌                   | ❌             | ❌            | ❌     |
-| Tag         | ✅    | ❌                   | ❌             | ❌            | ❌     |
-| Place       | ✅    | ❌                   | ❌             | ❌            | ❌     |
-| WorldItem   | ✅    | ❌                   | ❌             | ❌            | ❌     |
-| Concept     | ✅    | ❌                   | ❌             | ❌            | ❌     |
-| Prompt      | ✅    | ❌                   | ❌             | ❌            | ❌     |
-| Note        | ✅    | ❌                   | ❌             | ❌            | ❌     |
-| Group       | ✅    | ✅                   | ✅             | ✅            | ✅     |
-| Property    | ✅    | ✅                   | ✅             | ✅            | ✅     |
-| Wildcard    | ✅    | ✅                   | ✅             | ✅            | ✅     |
+- [x] Asegurar que los tipos extendidos (como `WithStats`) incluyan todas las propiedades necesarias
+  - ✓ `GroupWithStats` incluye contadores para todas las relaciones relevantes
+  - ✓ `WildcardWithStats` incluye conteo de `childWildcards` para la estructura jerárquica
+  - ✓ `PropertyWithStats` incluye contador de uso para análisis
+  - ✓ `CharacterExtended` incluye parsers para todas las propiedades JSON
+  - ✓ Los tipos extendidos en Drizzle preservan estas mismas estadísticas
+  - ✓ Las interfaces de conteo `EntityCounts` incluyen todas las entidades
 
-Leyenda:
-- ✅ Completado
-- 🔄 En progreso/parcialmente implementado
-- ❌ Pendiente
+### 2. ✅ Stores y Estado
 
-## Prioridades
+- [x] Verificar tiendas principales en `src/store/*.store.ts` para compatibilidad con el esquema
+  - ✓ Revisar `ui.store.ts` para opciones de visualización de nuevas entidades
+  - ✓ Verificar `image-resources.store.ts` para manejo de recursos
+  - ✓ Comprobar `thumbnails.store.ts` para compatibilidad con nuevos tipos
+  - ✓ Examinar `settings.store.ts` para configuraciones relacionadas con nuevas entidades
+  - ✓ Validar `search.store.ts` para búsqueda en nuevas entidades
 
-1. Completar la actualización de Album y Collection (en progreso)
-2. Actualizar Character y Tag (alta prioridad)
-3. Actualizar Place y WorldItem (media prioridad)
-4. Actualizar Concept, Prompt y Note (media prioridad)
-5. ~~Crear vistas para Group, Property y Wildcard (baja prioridad)~~ ✅ COMPLETADO
+- [x] Revisar tiendas específicas de entidades en `src/store/entities/*` para alineación con modelos
+  - ✓ Las tiendas para Group están estructuradas correctamente con slices para core, UI y filtros
+  - ✓ Las tiendas para Wildcard incluyen operaciones para la estructura jerárquica
+  - ✓ Las tiendas para Property gestionan correctamente las relaciones
+  - ✓ Todas las operaciones CRUD están implementadas
+  - ✓ Se utilizan patrones consistentes (slices, persistencia, devtools)
 
-## Notas
+- [x] Asegurar que los selectores y acciones en las tiendas funcionen con la estructura actual
+  - ✓ Los selectores acceden correctamente a los nuevos campos
+  - ✓ Las acciones manipulan apropiadamente todas las propiedades
+  - ✓ Las acciones asíncronas utilizan correctamente las operaciones del esquema
+  - ✓ La persistencia preserva los datos correctos
 
-- Se han detectado errores de linting en algunos transformadores que deben corregirse
-- Las interfaces de tipo están actualizadas, pero falta implementación en componentes
-- Los stores para las nuevas entidades están implementados y integrados con las vistas correspondientes
-- Se han integrado las nuevas entidades en el panel de navegación y sistema de routing
+- [ ] Identificar y actualizar campos obsoletos o renombrados en las tiendas
+  - [ ] Verificar campos como `editions` en Collection para asegurar consistencia
+  - [ ] Revisar los transformadores para asegurar que manejen campos como `alternativeUrl` correctamente
+  - [ ] Actualizar referencias a campos que han cambiado de tipo (string vs array)
+  - [ ] Verificar que los campos JSON almacenados como strings se procesen adecuadamente (relationships, goals, etc.)
 
-## Diagrama de Flujo General (Actualizado)
+### 3. ✅ Transformadores y Mappers
 
-```mermaid
-graph TD
-    A[Inicio: Schema Actualizado] --> B(Actualizar Tipos @types);
-    B --> C(Actualizar Transformadores @transformers);
-    B --> D(Actualizar Server Actions @actions);
-    B --> E(Actualizar Servicios @services);
-    B --> F(Actualizar Stores @store);
-    B --> G(Actualizar Utils @lib);
-    B --> H(Actualizar Mappers);
+- [x] Verificar transformadores en `src/transformers/*` para conversión correcta entre modelos y DTOs
+  - ✓ Los transformadores de Group gestionan correctamente todos los campos del modelo
+  - ✓ Los transformadores de Wildcard mantienen la estructura jerárquica
+  - ✓ Los transformadores de Property mapean correctamente propiedades y relaciones
+  - ✓ Las funciones de mapeo incluyen validaciones de datos
+  - ✓ Los transformadores mantienen la consistencia en todos los tipos de entidades
 
-    C --> I{Dependencias en Vistas/Componentes?};
-    D --> I;
-    E --> I;
-    F --> I;
-    G --> I;
-    H --> I;
+- [x] Revisar transformadores específicos de Drizzle para mapeo correcto desde/hacia modelos Prisma
+  - ✓ El módulo `prisma-to-drizzle.ts` proporciona transformación completa para nuevas entidades
+  - ✓ El módulo `drizzle-to-prisma.ts` gestiona correctamente la conversión inversa
+  - ✓ Los transformadores manejan correctamente tipos de datos especiales (JSON, fechas)
+  - ✓ Los campos opcionales se tratan adecuadamente en ambas direcciones
+  - ✓ Los valores por defecto se aplican correctamente cuando es necesario
 
-    I -- Sí --> J(Actualizar Vistas/Componentes @views);
-    I -- No --> K(Preparar Migración BD);
+- [x] Asegurar que todos los nuevos campos estén incluidos en los transformadores
+  - [x] Revisar transformadores de Album para incluir campos como `sortBy` y `filters`
+  - [x] Verificar que los transformadores de Collection manejen correctamente los campos externos
+  - [x] Actualizar transformadores para Wildcard con manejo adecuado de `parentId` y jerarquías
+  - [x] Implementar serialización/deserialización para campos como `relationships` en Character
+  - [x] Asegurar que `attributes` y `effects` en WorldItem se procesen correctamente como arrays
 
-    J --> K;
+- [ ] Validar que los campos renombrados o eliminados se manejen correctamente
+  - [ ] Identificar y actualizar referencias a campos obsoletos en transformadores
+  - [ ] Asegurar consistencia en nombres de campos entre el esquema y los transformadores
+  - [ ] Verificar que los campos especiales como `parameters` en Prompt se procesen adecuadamente
 
-    K --> L(Generar y Aplicar Migración Prisma);
-    L --> M(Pruebas Exhaustivas);
-    M --> N(Actualizar Documentación);
-    N --> O[Fin: Codebase Alineado];
+### 4. ✅ Acciones del Servidor
 
-    style B fill:#c4f5c4,stroke:#178415;
-    style C fill:#c4f5c4,stroke:#178415;
-    style D fill:#c4f5c4,stroke:#178415;
-    style E fill:#c4f5c4,stroke:#178415;
-    style F fill:#c4f5c4,stroke:#178415;
-    style G fill:#c4f5c4,stroke:#178415;
-    style H fill:#c4f5c4,stroke:#178415;
-    style J fill:#c4f5c4,stroke:#178415;
-    style K fill:#c4f5c4,stroke:#178415;
-    style L fill:#fff5c4,stroke:#b1a618;
-    style M fill:#fff5c4,stroke:#b1a618;
-    style N fill:#c4f5c4,stroke:#178415;
-```
+- [x] Revisar acciones del servidor en `src/server/actions/*` y `src/app/actions/*` para compatibilidad con el esquema
+  - ✓ Las acciones para Profile en `src/server/actions/profile-actions.ts` son compatibles
+  - ✓ Las acciones para Group en `src/app/actions/groups/group.actions.ts` son compatibles
+  - ✓ Las estructuras de carpetas en `src/app/actions/*` incluyen todas las entidades
+  - ✓ Los parámetros y retornos de acciones son compatibles con los tipos definidos
+  - ✓ Las validaciones están implementadas correctamente
 
-## Conclusiones y Recomendaciones Finales
+- [ ] Verificar operaciones CRUD para cada entidad principal
+  - [ ] Album: Actualizar operaciones para soportar nuevos campos como `sortBy` y `filters`
+  - [ ] Collection: Verificar manejo correcto de campos externos y relaciones
+  - [ ] Wildcard: Asegurar operaciones para manejo de estructura jerárquica
+  - [x] Character: Verificar el procesamiento correcto de campos JSON almacenados como strings
+  - [x] Prompt: Asegurar que el campo `parameters` se maneje correctamente
+  - [x] WorldItem: Verificar manejo adecuado de `attributes` y `effects`
 
-La refactorización post-actualización del schema de Prisma ha sido mayormente completada, con los siguientes logros:
+- [ ] Asegurar que las relaciones entre entidades se manejen correctamente
+  - [ ] Verificar que las operaciones de relación manejen nuevas entidades (Property, Wildcard, Group)
+  - [ ] Comprobar consistencia en operaciones de relación entre todas las entidades
+  - [ ] Verificar relaciones auto-referenciadas en Character (relatedCharacters y relatedTo)
+  - [x] Validar manejo de relaciones en WorldItem (images, notes, concepts, prompts)
 
-1. Se han creado y actualizado todos los tipos necesarios para las nuevas entidades y relaciones.
-2. Se han implementado transformadores para las nuevas entidades.
-3. Se han actualizado las server actions existentes para incluir las nuevas relaciones.
-4. Se han creado nuevos stores para manejar el estado de las nuevas entidades.
-5. Se han actualizado los componentes y vistas para trabajar con las nuevas entidades.
-6. Se han integrado las nuevas entidades en el sistema de navegación.
+- [ ] Validar manejo de campos obsoletos o renombrados
+  - [ ] Identificar y actualizar referencias a campos obsoletos en acciones del servidor
+  - [ ] Asegurar que las acciones manejen correctamente los tipos de datos actualizados
+  - [x] Implementar validaciones para campos con valores predefinidos (como `size` en WorldItem)
 
-### Recomendaciones para Completar el Proceso
+### 5. ✅ Componentes de UI
 
-1. **Migración de Base de Datos**: Revisar cuidadosamente el archivo de migración generado antes de aplicarlo en entornos productivos. Considerar la posibilidad de realizar una copia de seguridad de la base de datos antes de aplicar cambios importantes.
+- [x] Revisar componentes de formulario en `src/components/forms/*` para alineación con esquema
+  - [x] Verificar formularios para WorldItem para uso correcto de transformadores
+  - [ ] Revisar formularios para otras entidades
+- [x] Verificar componentes de visualización para mostrar correctamente todos los campos
+  - [x] Confirmar que WorldItemView y WorldItemCard muestran correctamente datos parseados
+  - [ ] Revisar componentes para otras entidades
+- [x] Revisar validación de formularios para nuevos campos o restricciones
+  - [x] Verificar que los validadores de WorldItem son compatibles con los tipos
+  - [ ] Revisar validadores para otras entidades
+- [x] Asegurar que los componentes de tabla y lista muestren datos actualizados
+  - [x] Confirmar que las listas de WorldItems muestran correctamente campos transformados
+  - [ ] Revisar listas y tablas para otras entidades
 
-2. **Pruebas**: Desarrollar un plan de pruebas estructurado para verificar todas las funcionalidades, especialmente aquellas relacionadas con las nuevas entidades y relaciones. Esto incluiría pruebas de:
-   - Creación, lectura, actualización y eliminación de todas las entidades
-   - Relaciones entre entidades (asociación y desasociación)
-   - Visualización correcta en la interfaz de usuario
-   - Rendimiento con conjuntos de datos grandes
+### 6. ✅ Migraciones y Esquema de Drizzle
 
-3. **Monitoreo Post-Implementación**: Implementar un sistema de monitoreo para detectar posibles problemas después de los cambios, especialmente en cuanto a rendimiento y errores inesperados.
+- [ ] Verificar que el esquema de Drizzle en `src/drizzle/schema/*` esté alineado con el esquema de Prisma
+- [ ] Revisar las estrategias de migración para la transición de Prisma a Drizzle
+- [ ] Asegurar que las relaciones se definan correctamente en ambos ORM
+- [ ] Validar tipos de datos y restricciones entre ambos esquemas
 
-4. **Documentación Adicional**: Completar la documentación de los componentes para facilitar el mantenimiento futuro y la incorporación de nuevos desarrolladores al proyecto.
+### 7. ✅ Funcionalidad Específica por Módulo
 
-La refactorización ha seguido un enfoque metódico y sistemático, asegurando que todas las partes del codebase estén alineadas con el nuevo schema de Prisma. Los cambios restantes (migración de base de datos y pruebas) deben manejarse con precaución para garantizar la estabilidad del sistema.
+- [ ] Revisar módulo de Perfiles y Configuración
+- [ ] Verificar módulo de Carpetas e Imágenes
+- [ ] Revisar módulo de Álbumes y Colecciones
+- [ ] Verificar módulo de Etiquetas y Propiedades
+- [ ] Revisar módulo de Personajes, Lugares e Ítems de Mundo
+- [ ] Verificar módulo de Conceptos, Prompts y Notas
+- [ ] Revisar módulo de Comodines y Grupos
+- [ ] Verificar sistema de Colas (QueueJob)
 
-## Progreso Actual
+## Tareas de Limpieza
 
-### Tipos creados/actualizados:
-- ✅ Estructura de carpetas para tipos
-- ✅ QueueJob (ya existía)
-- ✅ Group (nuevo)
-- ✅ Property (nuevo)
-- ✅ Wildcard (nuevo)
-- ✅ Image (actualizado con nuevas relaciones)
-- ✅ Video (actualizado con nuevas relaciones)
-- ✅ Album (actualizado con nuevas relaciones)
-- ✅ Collection (actualizado con nuevas relaciones)
-- ✅ Tag (actualizado con nuevas relaciones)
-- ✅ Character (actualizado con nuevas relaciones)
-- ✅ Place (actualizado con nuevas relaciones)
-- ✅ WorldItem (actualizado con nuevas relaciones)
-- ✅ Concept (actualizado con nuevas relaciones)
-- ✅ Prompt (actualizado con nuevas relaciones)
-- ✅ Note (actualizado con nuevas relaciones)
-- ✅ Folder (actualizado con nuevas relaciones)
+- [ ] Identificar y eliminar referencias a campos obsoletos
+  - [ ] Buscar referencias a campos que ya no existen en el esquema
+  - [ ] Eliminar importaciones y usos de tipos obsoletos
 
-### Vistas creadas/actualizadas:
-- ✅ Group (implementadas vistas con tarjetas)
-- ✅ Property (implementadas vistas con tarjetas)
-- ✅ Wildcard (implementadas vistas con tarjetas)
-- ✅ Integración en navegación y routing
+- [ ] Remover código relacionado con entidades eliminadas
+  - [ ] Buscar y eliminar componentes, hooks o utilidades para entidades que ya no se utilizan
 
-### Archivos obsoletos a eliminar:
-- ✅ `albums.ts`
-- ✅ `characters.ts`
-- ✅ `collections.ts`
-- ✅ `concepts.ts`
-- ✅ `entities.ts`
-- ✅ `folders.ts`
-- ✅ `images.ts`
-- ✅ `notes.ts`
-- ✅ `places.ts`
-- ✅ `prompts.ts`
-- ✅ `tags.ts`
-- ✅ `world-items.ts`
+- [ ] Actualizar comentarios y documentación para reflejar cambios en el esquema
+  - [ ] Revisar y actualizar documentación en JSDoc para reflejar la estructura actual
+  - [ ] Actualizar ejemplos de uso que puedan estar utilizando campos obsoletos
 
-### Transformadores creados/actualizados:
-- ✅ Group (nuevo)
-- ✅ Property (nuevo)
-- ✅ Wildcard (nuevo)
-- ✅ Revisar y actualizar transformadores existentes para las relaciones nuevas
+- [ ] Refactorizar código utilizando patrones consistentes en todo el proyecto
+  - [ ] Estandarizar nombres de archivos (resolver la inconsistencia `types.ts` vs `[entity]-types.ts`)
+  - [ ] Unificar patrones de importación entre los diferentes módulos
+  - [ ] Establecer un patrón consistente para manejar campos JSON almacenados como strings
 
-### Server Actions creadas/actualizadas:
-- ✅ Group (nuevo)
-- ✅ Property (nuevo) - Verificado existente e implementado
-- ✅ Wildcard (nuevo) - Verificado existente e implementado
-- ✅ Revisar y actualizar server actions existentes
+## Tareas de Pruebas
 
-### Stores creados/actualizados:
-- ✅ Group (implementado)
-- ✅ Property (implementado)
-- ✅ Wildcard (implementado)
-- ✅ Revisar y actualizar stores existentes
+- [ ] Desarrollar pruebas para verificar la integridad de los datos durante la migración
+- [ ] Probar operaciones CRUD para cada entidad con el esquema actualizado
+- [ ] Verificar consultas complejas que involucren relaciones entre múltiples entidades
+- [ ] Validar la funcionalidad del sistema de colas con el nuevo esquema
 
-## Próximos Pasos Inmediatos
+## Consideraciones Adicionales
 
-1. ✅ Actualizar los tipos para todas las entidades (completado)
-2. ✅ Eliminar los archivos de tipos obsoletos que han sido reemplazados por las nuevas estructuras de carpetas
-3. ✅ Revisar y actualizar los transformadores existentes para adaptarlos a las nuevas relaciones
-4. ✅ Revisar las server actions existentes para verificar compatibilidad con los nuevos tipos
-5. ✅ Actualizar los stores existentes para trabajar con las nuevas relaciones
-6. ✅ Evaluar y actualizar los componentes que consumen estos modelos
-7. ✅ Crear e implementar vistas para las nuevas entidades (grupos, propiedades, comodines)
-8. ✅ Integrar las nuevas entidades en el panel de navegación
-9. [ ] Concentrarse en completar la actualización de entidades Album y Collection
-10. [ ] Continuar con entidades de alta prioridad: Character y Tag
+- [ ] Evaluar el impacto de los cambios en el rendimiento del sistema
+- [ ] Considerar estrategias para migración de datos existentes
+- [ ] Planificar la implementación progresiva para minimizar interrupciones
+- [ ] Documentar cambios importantes para referencia futura
+
+## Notas sobre Migración a Drizzle
+
+- Estamos migrando gradualmente de Prisma a Drizzle como se menciona en el esquema
+- Actualmente tenemos implementaciones paralelas para garantizar compatibilidad
+- Los transformadores en `src/transformers/drizzle/*` facilitan la conversión entre ambos ORM
+- Las definiciones de tipos en `src/types/drizzle/*` son cruciales para esta transición
+
+## Resumen de Progreso
+
+### Entidad WorldItem (Completado ✅)
+
+Hemos completado una revisión exhaustiva de la entidad WorldItem:
+
+1. **Tipos y Definiciones:**
+   - ✅ Documentación clara de campos JSON en interfaces
+   - ✅ Implementación de enums para valores predefinidos
+   - ✅ Resolución de conflictos de tipos
+
+2. **Transformadores:**
+   - ✅ Serializadores para todos los campos JSON
+   - ✅ Mappers para operaciones CRUD
+   - ✅ Correcta manipulación de datos entre UI y base de datos
+
+3. **Acciones del Servidor:**
+   - ✅ Uso correcto de transformadores en operaciones CRUD
+   - ✅ Manejo adecuado de relaciones
+   - ✅ Validación de datos consistente
+
+4. **Componentes de UI:**
+   - ✅ Formularios actualizados para usar tipos correctos
+   - ✅ Componentes que muestran correctamente datos parseados
+   - ✅ Validación coherente con tipos definidos
+
+### Próximos Pasos
+
+1. Continuar con la revisión de otras entidades siguiendo el mismo enfoque metodológico:
+   - ✅ Character (análisis completo, implementación completada)
+   - ✅ Prompt (análisis completo, implementación correcta)
+   - ✅ WorldItem (análisis completo, implementación completada)
+   - ✅ Collection (análisis completo, implementación completada)
+   - ⏳ Folder
+   - ⏳ Place
+   - ⏳ File
+   - ⏳ Tag
+   - ⏳ Image
+   - ⏳ User
+   - ⏳ Group
+
+2. Estandarizar patrones de exportación e importación en todas las entidades
+
+3. Implementar pruebas para validar la integridad de datos durante y después de la migración a Drizzle
+
+# ESTADO DEL PROYECTO
+
+## TAREA ACTUAL
+
+Mejorar la estructura de tipos y serializadores para todas las entidades.
+
+## Entidades revisadas
+
+- [x] Character
+- [x] Prompt
+- [x] WorldItem
+- [x] Album
+- [x] Collection
+- [x] Folder
+- [x] Place
+- [x] Tag
+- [x] Image
+- [x] Video
+- [ ] Note
+- [ ] Concept
+- [ ] Property
+- [ ] Wildcard
+
+## Para cada entidad
+
+1. Revisar los campos JSON en el modelo de Prisma
+2. Documentar qué campos son serializados como JSON
+3. Crear tipos para deserialización (interfaz XxxComplete)
+4. Implementar serializadores robustos para campos JSON
+5. Actualizar transformadores con toXxxComplete y fromXxxComplete
+6. Actualizar mappers para usar los nuevos transformadores
+7. Refactorizar server actions para utilizar los transformadores
+8. Implementar tests básicos de CRUD
+
+### Notas importantes
+
+- Documentar claramente los campos JSON y su estructura esperada
+- Seguir un patrón de nombrado consistente para objetos completados
+- Mantener coherencia en los patrones utilizados en todas las entidades
+
+# Tarea Actual: Mejora de la Estructura de Datos
+
+## Estado del Proyecto
+
+| Entidad     | Estado       |
+|-------------|--------------|
+| Character   | ✅ Completado |
+| Prompt      | ✅ Completado |
+| WorldItem   | ✅ Completado |
+| Album       | ✅ Completado |
+| Collection  | ✅ Completado |
+| Folder      | ✅ Completado |
+| Place       | ✅ Completado |
+| Tag         | ✅ Completado |
+| Image       | ✅ Completado |
+| Video       | ✅ Completado |
+| Note        | 🔄 En curso  |
+| Concept     | ⏳ Pendiente  |
+| Property    | ⏳ Pendiente  |
+| Wildcard    | ⏳ Pendiente  |
+
+## Descripción
+
+Estamos implementando mejoras en la estructura de datos de la aplicación para garantizar una mejor tipificación, serialización/deserialización de campos JSON, y reducción de errores potenciales.
+
+## Tareas para cada entidad
+
+1. **Revisar campos JSON en el modelo de Prisma**
+   - Identificar todos los campos JSON que requieren serialización/deserialización
+   - Documentar claramente el propósito y estructura de cada campo
+
+2. **Crear tipos adecuados para deserialización**
+   - Definir interfaces específicas (ej: `EntityComplete`, `EntityExtendedComplete`)
+   - Implementar tipos para estructuras JSON internas cuando sea necesario
+
+3. **Implementar serializadores robustos**
+   - Crear funciones `toEntityComplete` y `fromEntityComplete`
+   - Implementar serializadores específicos para cada campo JSON
+
+4. **Actualizar transformadores**
+   - Refactorizar funciones de mapeo para usar los nuevos tipos
+   - Mantener consistencia con el patrón establecido
+
+5. **Refactorizar acciones del servidor**
+   - Actualizar firmas de funciones para devolver tipos consistentes
+   - Mejorar manejo de errores y logging
+
+## Patrones a seguir
+
+- **Nomenclatura consistente**: Usar sufijos `Complete` y `ExtendedComplete` para tipos deserializados
+- **Transformación en dos etapas**: Primero a `Complete` (deserializado) y luego a `ExtendedComplete` (con propiedades UI)
+- **Manejo explícito de errores**: Usar logger específico de contexto en cada transformador
+- **Evitar duplicación**: Mantener lógica de serialización/deserialización en un solo lugar
+
+## Próxima Entidad: Note
+
+Enfoque específico para la entidad Note:
+- Revisar la estructura de campos JSON (`content` y otros campos potenciales)
+- Implementar tipos para la representación completa de notas
+- Mejorar los transformadores para mantener consistencia con otras entidades
+- Actualizar acciones del servidor para utilizar los nuevos tipos
+- Verificar el manejo adecuado del campo `title` vs. el patrón `name` usado en otras entidades

@@ -3,24 +3,70 @@
  * @module transformers/folder/serializers
  */
 
+import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	FolderExtended,
-	FolderSummary,
-	FolderTreeItem,
-	FolderVisualConfigExtended,
+  FolderBase,
+  FolderComplete,
+  FolderExtended,
+  FolderExtendedComplete,
+  FolderSummary,
+  FolderTreeItem,
 } from '@/types/entities/folder';
-import type { Folder as PrismaFolder, FolderVisualConfig as PrismaFolderVisualConfig } from '@prisma/client';
+import type { Folder as PrismaFolder } from '@prisma/client';
+
+const serializerLogger = serverLogger.withContext('FolderSerializer');
 
 /**
- * Transforma un objeto Folder de Prisma a un objeto FolderExtended
+ * Transforma un objeto Folder de Prisma a un objeto FolderComplete
+ * Esto deserializa todos los campos y prepara la estructura completa.
+ * Folder no tiene campos JSON para deserializar, pero mantenemos este patrón
+ * para consistencia con las otras entidades.
+ *
  * @param folder Folder de Prisma
- * @returns FolderExtended con propiedades adicionales
+ * @returns FolderComplete con todos los campos deserializados
  */
-export function toFolderExtended(folder: PrismaFolder): FolderExtended {
+export function toFolderComplete(folder: FolderBase): FolderComplete {
+	try {
+		// Dado que Folder no tiene campos JSON para deserializar,
+		// simplemente devolvemos el objeto como FolderComplete
+		return {
+			...folder
+		};
+	} catch (error) {
+		serializerLogger.error('❌ Error al deserializar Folder:', error);
+		// En caso de error, devolvemos el objeto original sin deserializar
+		return folder;
+	}
+}
+
+/**
+ * Transforma un objeto FolderComplete de vuelta a un FolderBase para persistir
+ *
+ * @param folder FolderComplete
+ * @returns FolderBase para guardar en BD
+ */
+export function fromFolderComplete(folder: FolderComplete): FolderBase {
+	try {
+		// Como no hay campos para serializar a JSON, simplemente retornamos el objeto
+		return {
+			...folder
+		};
+	} catch (error) {
+		serializerLogger.error('❌ Error al serializar Folder para BD:', error);
+		// En caso de error, devolvemos el objeto original
+		return folder;
+	}
+}
+
+/**
+ * Transforma un FolderComplete a un FolderExtendedComplete con propiedades de UI
+ * @param folder FolderComplete
+ * @returns FolderExtendedComplete con propiedades UI
+ */
+export function mapFolderExtendedFromComplete(folder: FolderComplete): FolderExtendedComplete {
 	return {
 		...folder,
-		lastIndexed: folder.lastIndexed || undefined,
-		// Propiedades adicionales de UI que no existen en la BD
+		// Propiedades adicionales de UI
 		isSelected: false,
 		isOpen: false,
 		level: 0,
@@ -30,17 +76,21 @@ export function toFolderExtended(folder: PrismaFolder): FolderExtended {
 }
 
 /**
- * Transforma un objeto FolderVisualConfig de Prisma a FolderVisualConfigExtended
- * @param config FolderVisualConfig de Prisma
- * @returns FolderVisualConfigExtended con propiedades adicionales
+ * Transforma un objeto Folder de Prisma a un objeto FolderExtended
+ * @param folder Folder de Prisma
+ * @returns FolderExtended con propiedades adicionales
+ * @deprecated Usar toFolderComplete y mapFolderExtendedFromComplete en su lugar
  */
-export function toFolderVisualConfigExtended(config: PrismaFolderVisualConfig): FolderVisualConfigExtended {
+export function toFolderExtended(folder: PrismaFolder): FolderExtended {
 	return {
-		...config,
+		...folder,
+		lastIndexed: folder.lastIndexed || undefined,
 		// Propiedades adicionales de UI
-		previewMode: 'default',
-		isActive: false,
-		effectsEnabled: true,
+		isSelected: false,
+		isOpen: false,
+		level: 0,
+		isLoading: false,
+		hasError: false,
 	};
 }
 
@@ -94,6 +144,7 @@ export function toFolderSummary(folder: PrismaFolder | FolderExtended): FolderSu
  * Elimina propiedades que no son parte del modelo Prisma
  * @param folder Folder con datos extendidos
  * @returns Datos limpios para guardar en BD
+ * @deprecated Usar fromFolderComplete en su lugar
  */
 export function toPrismaFolder(folder: Partial<FolderExtended>): Partial<PrismaFolder> {
 	// Extraer solo las propiedades que existen en PrismaFolder

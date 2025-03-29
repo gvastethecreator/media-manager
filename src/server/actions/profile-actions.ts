@@ -2,13 +2,13 @@ import { prisma } from '@/lib/prisma';
 import { validateProfilePreferences } from '@/lib/utils/profile/profile-utils';
 import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
-	type CreateProfileInput,
-	Language,
-	type ProfileFilters,
-	type ProfilePaginationOptions,
-	ThemeMode,
-	type UpdateProfileInput,
-} from '@/types/entities/profile/profile-types';
+  type CreateProfileInput,
+  Language,
+  type ProfileFilters,
+  type ProfilePaginationOptions,
+  ThemeMode,
+  type UpdateProfileInput,
+} from '@/types/entities/profile/types';
 import { revalidatePath } from 'next/cache';
 import 'server-only';
 

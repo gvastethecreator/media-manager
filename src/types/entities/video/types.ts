@@ -4,18 +4,18 @@
  */
 
 import type { Album } from '../album/types';
-import type { Character } from '../character/character-types';
-import type { Collection } from '../collection/collection-types';
-import type { Concept } from '../concept/concept-types';
+import type { Character } from '../character/types';
+import type { Collection } from '../collection/types';
+import type { Concept } from '../concept/types';
 import type { Folder } from '../folder/base';
-import type { Group } from '../group/group-types';
-import type { Note } from '../note/note-types';
-import type { Place } from '../place/place-types';
-import type { Prompt } from '../prompt/prompt-types';
-import type { Property } from '../property/property-types';
-import type { Tag } from '../tag/tag-types';
-import type { Wildcard } from '../wildcard/wildcard-types';
-import type { WorldItem } from '../world-item/world-item-types';
+import type { Group } from '../group/types';
+import type { Note } from '../note/types';
+import type { Place } from '../place/types';
+import type { Prompt } from '../prompt/types';
+import type { Property } from '../property/types';
+import type { Tag } from '../tag/types';
+import type { Wildcard } from '../wildcard/types';
+import type { WorldItem } from '../world-item/types';
 import type { VideoFormat, VideoPrivacyLevel } from './enums';
 
 /**
@@ -163,22 +163,97 @@ export interface CreateVideoData {
 }
 
 /**
- * Configuración visual para videos
+ * Interfaz para opciones del visor de videos
  */
-export interface VideoVisualConfig {
+export interface VideoViewerOptions {
+	autoPlay: boolean;
+	loop: boolean;
+	muted: boolean;
+	controls: boolean;
+	volume: number;
+	playbackRate: number;
+}
+
+/**
+ * Interfaz para la configuración visual deserializada de un video
+ */
+export interface VideoVisualConfigComplete {
 	id: string;
-	videoId?: string;
+	videoId: string;
 	enable3DEffect: boolean;
-	designSystem?: string;
+	designSystem: string;
 	enableHolographicEffect: boolean;
 	enableGlowEffect: boolean;
 	enableAnimatedBorder: boolean;
 	enableLightHalo: boolean;
-	layerSystem?: string;
-	effects?: string;
-	performance?: string;
-	states?: string;
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	presetId?: string;
+	// Campos JSON serializados como string
+	layerSystem: string;
+	effects: string;
+	performance: string;
+	states: string;
+	presetId: string | null;
+	// Campos deserializados
+	layersConfig?: any;
+	effectsConfig?: any;
+	performanceConfig?: any;
+	statesConfig?: any;
+}
+
+/**
+ * Interfaz para video con metadatos deserializados
+ */
+export interface VideoComplete extends VideoBase {
+	// Campo metadata siempre deserializado
+	metadata: VideoMetadata | null;
+}
+
+/**
+ * Interfaz para video con relaciones y metadatos deserializados
+ */
+export interface VideoWithRelationsComplete extends VideoComplete {
+	// Relaciones cargadas
+	folder?: Folder;
+
+	// Relaciones con entidades principales
+	albums?: Album[];
+	collections?: Collection[];
+	tags?: Tag[];
+	characters?: Character[];
+	places?: Place[];
+	worldItems?: WorldItem[];
+	concepts?: Concept[];
+	prompts?: Prompt[];
+	notes?: Note[];
+	wildcards?: Wildcard[];
+	properties?: Property[];
+	groups?: Group[];
+
+	// Contadores
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
+
+/**
+ * Interfaz para video con todas las propiedades extendidas y deserializadas
+ */
+export interface VideoExtendedComplete extends VideoWithRelationsComplete {
+	// UI y metadatos adicionales
+	thumbnailUrl?: string;
+	playState?: VideoPlayState;
+	chapters?: VideoChapter[];
+	privacyLevel?: VideoPrivacyLevel;
+	sharedWith?: string[];
+	isSelected?: boolean;
 }

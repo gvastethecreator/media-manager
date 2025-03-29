@@ -1,20 +1,95 @@
-// Exportar todo lo relacionado con Drizzle
-export * from './db';
-export * from './repository';
+// Exportar cliente de base de datos y repositorio
+export { db, drizzleDb } from './db';
+export { DrizzleRepository } from './repository';
+
+// Exportar esquema completo para uso con Drizzle ORM
 export * from './schema';
 
 // Exportar tipos inferidos
-import type * as schema from './schema';
+import type {
+    Album,
+    AlbumInsert,
+    Character,
+    CharacterInsert,
+    Collection,
+    CollectionInsert,
+    Concept,
+    ConceptInsert,
+    Folder,
+    FolderInsert,
+    Group,
+    GroupInsert,
+    Image,
+    ImageInsert,
+    ImageStats,
+    ImageStatsInsert,
+    Note,
+    NoteInsert,
+    Place,
+    PlaceInsert,
+    Profile,
+    ProfileInsert,
+    Prompt,
+    PromptInsert,
+    Property,
+    PropertyInsert,
+    Queue,
+    QueueInsert,
+    Settings,
+    SettingsInsert,
+    Tag,
+    TagInsert,
+    UploadedImage,
+    UploadedImageInsert,
+    Video,
+    VideoInsert,
+    Wildcard,
+    WildcardInsert,
+    WorldItem,
+    WorldItemInsert,
+} from './schema/types';
 
-// Tipos para las tablas
-export type Profile = typeof schema.profiles.$inferSelect;
-export type ProfileInsert = typeof schema.profiles.$inferInsert;
+// Re-exportar tipos para uso en la aplicación
+export type {
+    Album,
+    AlbumInsert,
+    Character,
+    CharacterInsert,
+    Collection,
+    CollectionInsert,
+    Concept,
+    ConceptInsert,
+    Folder,
+    FolderInsert,
+    Group,
+    GroupInsert,
+    Image,
+    ImageInsert,
+    ImageStats,
+    ImageStatsInsert,
+    Note,
+    NoteInsert,
+    Place,
+    PlaceInsert,
+    Profile,
+    ProfileInsert,
+    Prompt,
+    PromptInsert,
+    Property,
+    PropertyInsert,
+    Queue,
+    QueueInsert,
+    Settings,
+    SettingsInsert,
+    Tag,
+    TagInsert,
+    UploadedImage,
+    UploadedImageInsert,
+    Video,
+    VideoInsert,
+    Wildcard,
+    WildcardInsert,
+    WorldItem,
+    WorldItemInsert
+};
 
-export type Folder = typeof schema.folders.$inferSelect;
-export type FolderInsert = typeof schema.folders.$inferInsert;
-
-export type FolderVisualConfig = typeof schema.folderVisualConfigs.$inferSelect;
-export type FolderVisualConfigInsert = typeof schema.folderVisualConfigs.$inferInsert;
-
-export type QueueJob = typeof schema.queueJobs.$inferSelect;
-export type QueueJobInsert = typeof schema.queueJobs.$inferInsert;

@@ -3,19 +3,30 @@
  * @module transformers/folder/mappers
  */
 
-import type { FolderExtended, FolderTreeItem, FolderWithRelations } from '@/types/entities/folder';
-import type { Folder as PrismaFolder } from '@prisma/client';
-import { toFolderExtended, toFolderTreeItem } from './serializers';
+import type {
+  FolderBase,
+  FolderComplete,
+  FolderExtended,
+  FolderExtendedComplete,
+  FolderTreeItem
+} from '@/types/entities/folder';
+import {
+  mapFolderExtendedFromComplete,
+  toFolderComplete,
+  toFolderTreeItem
+} from './serializers';
 
 /**
  * Construye una estructura jerárquica de carpetas (árbol)
+ * Utiliza los nuevos transformadores para procesar cada carpeta
+ *
  * @param folders Lista plana de carpetas
  * @param parentId ID del padre para el nivel actual (null para raíz)
  * @param level Nivel de profundidad actual
  * @returns Lista jerárquica de carpetas
  */
 export function buildFolderTree(
-	folders: (PrismaFolder | FolderExtended)[],
+	folders: (FolderBase | FolderComplete | FolderExtended | FolderExtendedComplete)[],
 	parentId: string | null = null,
 	level = 0
 ): FolderTreeItem[] {
@@ -66,23 +77,28 @@ export function findFolderInTree(tree: FolderTreeItem[], folderId: string): Fold
 }
 
 /**
- * Construye una estructura con relaciones completas a partir de una lista plana
+ * Construye una estructura con relaciones completas a partir de una lista plana,
+ * utilizando los nuevos serializadores.
+ *
  * @param folders Lista plana de carpetas
  * @returns Carpetas con sus relaciones completas
  */
-export function buildFolderRelations(folders: PrismaFolder[]): FolderWithRelations[] {
-	// Convertir a formato extendido
-	const extendedFolders = folders.map(toFolderExtended);
+export function buildFolderRelations(folders: FolderBase[]): FolderExtendedComplete[] {
+	// Convertir a formato completo y extendido
+	const completeFolders = folders.map(folder => {
+		const complete = toFolderComplete(folder);
+		return mapFolderExtendedFromComplete(complete);
+	});
 
 	// Mapa para acceso rápido por ID
-	const folderMap = new Map<string, FolderExtended>();
-	extendedFolders.forEach((folder) => folderMap.set(folder.id, folder));
+	const folderMap = new Map<string, FolderExtendedComplete>();
+	completeFolders.forEach((folder) => folderMap.set(folder.id, folder));
 
 	// Construir relaciones
-	const foldersWithRelations: FolderWithRelations[] = [];
+	const foldersWithRelations: FolderExtendedComplete[] = [];
 
-	for (const folder of extendedFolders) {
-		const folderWithRel: FolderWithRelations = {
+	for (const folder of completeFolders) {
+		const folderWithRel: FolderExtendedComplete = {
 			...folder,
 			children: [],
 		};
@@ -93,7 +109,7 @@ export function buildFolderRelations(folders: PrismaFolder[]): FolderWithRelatio
 		}
 
 		// Encontrar todos los hijos
-		folderWithRel.children = extendedFolders.filter((f) => f.parentId === folder.id);
+		folderWithRel.children = completeFolders.filter((f) => f.parentId === folder.id);
 
 		foldersWithRelations.push(folderWithRel);
 	}
@@ -108,8 +124,8 @@ export function buildFolderRelations(folders: PrismaFolder[]): FolderWithRelatio
  * @returns Ruta completa con nombres de carpetas
  */
 export function calculateFolderPath(
-	folder: PrismaFolder | FolderExtended,
-	allFolders: (PrismaFolder | FolderExtended)[]
+	folder: FolderBase | FolderComplete | FolderExtended | FolderExtendedComplete,
+	allFolders: (FolderBase | FolderComplete | FolderExtended | FolderExtendedComplete)[]
 ): string {
 	const segments = [folder.name];
 	let currentFolder = folder;

@@ -3,7 +3,7 @@
  * @module types/entities/album/extended
  */
 
-import type { Album } from '../albums';
+import type { Album } from './types';
 
 /**
  * Interfaz para distribución de imágenes por carpeta
@@ -31,4 +31,40 @@ export interface AlbumWithStats extends Album {
 	 * Distribución de imágenes por carpeta
 	 */
 	distribution?: FolderDistribution[];
+
+	/**
+	 * Contadores de items relacionados
+	 * @override
+	 */
+	_count?: {
+		images: number;
+		groups: number;
+		properties: number;
+		wildcards: number;
+		videos?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+	};
+}
+
+/**
+ * Interfaz para álbum completo con todos los campos procesados (deserializados)
+ * Los campos como filters y sortBy están deserializados de sus formatos JSON string
+ */
+export type AlbumComplete = Omit<Album, 'filters' | 'sortBy'> & {
+	/**
+	 * Filtros deserializados de string JSON a array/objeto
+	 */
+	filters: any[];
+
+	/**
+	 * Criterio de ordenación deserializado de string JSON
+	 */
+	sortBy: any;
 }

@@ -1,10 +1,16 @@
 /**
- * @file Exportaciones de transformers para la entidad Folder
+ * @file Índice de exportación para transformadores de Folder
  * @module transformers/folder
  */
 
-// Exportar todos los serializadores
-export * from './serializers';
+// Exportar serializadores
+export {
+  fromFolderComplete,
+  mapFolderExtendedFromComplete, toFolderComplete, toFolderExtended, toFolderSummary, toFolderTreeItem, toPrismaFolder
+} from './serializers';
 
-// Exportar todos los mappers
-export * from './mappers';
+// Exportar mappers
+export {
+  buildFolderRelations, buildFolderTree, calculateFolderPath, findFolderInTree
+} from './mappers';
+
