@@ -1,17 +1,13 @@
 /**
- * @file Tipos para la entidad Folder y sus relacionados
+ * @file Exportaciones principales de tipos para la entidad Folder
  * @module types/entities/folder
  */
 
-// Exportar todos los tipos base
 export * from './base';
-
-// Exportar todos los tipos extendidos
-export * from './extended';
-
-// Exportar todos los enums y constantes
 export * from './enums';
+export * from './extended';
+export * from './folder-types';
 
-// Alias común para el tipo principal (usado frecuentemente)
-import type { FolderExtended } from './extended';
-export type Folder = FolderExtended;
+// Alias común para el tipo principal
+export type { FolderWithRelations as Folder } from './folder-types';
+

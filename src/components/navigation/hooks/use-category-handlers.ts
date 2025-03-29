@@ -1,4 +1,7 @@
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useGroupStore } from '@/store/entities/group';
+import { usePropertyStore } from '@/store/entities/property';
+import { useWildcardStore } from '@/store/entities/wildcard';
 import { useFileManager } from '@/store/files/file-manager.store';
 import type { ViewType } from '@/types/file-item';
 import { useCallback } from 'react';
@@ -32,6 +35,11 @@ export function useCategoryHandlers() {
 		currentNoteId,
 	} = useFileManager();
 
+	// Stores para las nuevas entidades
+	const { getGroup, setCurrentGroupId, currentGroupId } = useGroupStore();
+	const { getProperty, setCurrentPropertyId, currentPropertyId } = usePropertyStore();
+	const { getWildcard, setCurrentWildcardId, currentWildcardId } = useWildcardStore();
+
 	// Función para limpiar todas las selecciones actuales
 	const clearAllSelections = useCallback(() => {
 		// 🧹 Limpiar todas las selecciones para evitar estados huérfanos
@@ -45,6 +53,9 @@ export function useCategoryHandlers() {
 		setCurrentConcept('');
 		setCurrentPrompt('');
 		setCurrentNote('');
+		setCurrentGroupId?.('');
+		setCurrentPropertyId?.('');
+		setCurrentWildcardId?.('');
 	}, [
 		setCurrentCollection,
 		setCurrentFolder,
@@ -56,6 +67,9 @@ export function useCategoryHandlers() {
 		setCurrentConcept,
 		setCurrentPrompt,
 		setCurrentNote,
+		setCurrentGroupId,
+		setCurrentPropertyId,
+		setCurrentWildcardId,
 	]);
 
 	// Función para manejar el clic en una categoría
@@ -185,6 +199,40 @@ export function useCategoryHandlers() {
 		[clearAllSelections, setCurrentView, setCurrentNote]
 	);
 
+	// Handlers para las nuevas entidades
+	const handleGroupClick = useCallback(
+		(groupId: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
+			setCurrentView('group-content');
+			setCurrentGroupId?.(groupId);
+		},
+		[clearAllSelections, setCurrentView, setCurrentGroupId]
+	);
+
+	const handlePropertyClick = useCallback(
+		(propertyId: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
+			setCurrentView('property-content');
+			setCurrentPropertyId?.(propertyId);
+		},
+		[clearAllSelections, setCurrentView, setCurrentPropertyId]
+	);
+
+	const handleWildcardClick = useCallback(
+		(wildcardId: string) => {
+			// Limpiar otras selecciones
+			clearAllSelections();
+
+			setCurrentView('wildcard-content');
+			setCurrentWildcardId?.(wildcardId);
+		},
+		[clearAllSelections, setCurrentView, setCurrentWildcardId]
+	);
+
 	// Función para obtener el manejador de clic adecuado para cada tipo de categoría
 	const getItemClickHandler = useCallback(
 		(categoryId: ViewType) => {
@@ -209,6 +257,12 @@ export function useCategoryHandlers() {
 					return handlePromptClick;
 				case 'notes':
 					return handleNoteClick;
+				case 'groups':
+					return handleGroupClick;
+				case 'properties':
+					return handlePropertyClick;
+				case 'wildcards':
+					return handleWildcardClick;
 				default:
 					return () => {};
 			}
@@ -224,6 +278,9 @@ export function useCategoryHandlers() {
 			handleConceptClick,
 			handlePromptClick,
 			handleNoteClick,
+			handleGroupClick,
+			handlePropertyClick,
+			handleWildcardClick,
 		]
 	);
 
@@ -251,6 +308,12 @@ export function useCategoryHandlers() {
 					return currentView === 'prompt-content';
 				case 'notes':
 					return currentView === 'note-content';
+				case 'groups':
+					return currentView === 'group-content';
+				case 'properties':
+					return currentView === 'property-content';
+				case 'wildcards':
+					return currentView === 'wildcard-content';
 				default:
 					return false;
 			}
@@ -258,30 +321,36 @@ export function useCategoryHandlers() {
 		[currentView]
 	);
 
-	// Función para verificar qué elemento hijo está seleccionado
+	// Función para obtener el ID seleccionado de un hijo de categoría
 	const getSelectedChildId = useCallback(
 		(categoryId: ViewType): string | null => {
 			switch (categoryId) {
 				case 'collections':
-					return currentCollectionId;
+					return currentCollectionId || null;
 				case 'folders':
-					return currentFolderId;
+					return currentFolderId || null;
 				case 'tags':
-					return currentTagId;
+					return currentTagId || null;
 				case 'albums':
-					return currentAlbumId;
+					return currentAlbumId || null;
 				case 'characters':
-					return currentCharacterId;
+					return currentCharacterId || null;
 				case 'places':
-					return currentPlaceId;
+					return currentPlaceId || null;
 				case 'world-items':
-					return currentWorldItemId;
+					return currentWorldItemId || null;
 				case 'concepts':
-					return currentConceptId;
+					return currentConceptId || null;
 				case 'prompts':
-					return currentPromptId;
+					return currentPromptId || null;
 				case 'notes':
-					return currentNoteId;
+					return currentNoteId || null;
+				case 'groups':
+					return currentGroupId || null;
+				case 'properties':
+					return currentPropertyId || null;
+				case 'wildcards':
+					return currentWildcardId || null;
 				default:
 					return null;
 			}
@@ -290,32 +359,24 @@ export function useCategoryHandlers() {
 			currentAlbumId,
 			currentCharacterId,
 			currentCollectionId,
+			currentConceptId,
 			currentFolderId,
+			currentNoteId,
 			currentPlaceId,
+			currentPromptId,
 			currentTagId,
 			currentWorldItemId,
-			currentConceptId,
-			currentPromptId,
-			currentNoteId,
+			currentGroupId,
+			currentPropertyId,
+			currentWildcardId,
 		]
 	);
 
 	return {
 		currentView,
 		handleCategoryClick,
-		handleCollectionClick,
-		handleFolderClick,
-		handleTagClick,
-		handleAlbumClick,
-		handleCharacterClick,
-		handlePlaceClick,
-		handleWorldItemClick,
-		handleConceptClick,
-		handlePromptClick,
-		handleNoteClick,
 		getItemClickHandler,
 		hasCategoryChildSelected,
 		getSelectedChildId,
-		clearAllSelections,
 	};
 }

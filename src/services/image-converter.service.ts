@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { Dimensions, FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/file-item';
 
 const converterLogger = serverLogger.withContext('ImageConverter');
 
@@ -52,6 +52,48 @@ interface RelatedWorldItem {
 	rarity?: string;
 }
 
+interface RelatedConcept {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+}
+
+interface RelatedPrompt {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+}
+
+interface RelatedNote {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+}
+
+interface RelatedGroup {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+}
+
+interface RelatedProperty {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+}
+
+interface RelatedWildcard {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+}
+
 export interface ServerImage {
 	id: string;
 	name: string;
@@ -75,6 +117,12 @@ export interface ServerImage {
 	characters?: RelatedCharacter[];
 	places?: RelatedPlace[];
 	worldItems?: RelatedWorldItem[];
+	concepts?: RelatedConcept[];
+	prompts?: RelatedPrompt[];
+	notes?: RelatedNote[];
+	groups?: RelatedGroup[];
+	properties?: RelatedProperty[];
+	wildcards?: RelatedWildcard[];
 }
 
 export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
@@ -108,9 +156,12 @@ export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
 			characters: image.characters ?? [],
 			places: image.places ?? [],
 			worldItems: image.worldItems ?? [],
-			concepts: [],
-			prompts: [],
-			notes: [],
+			concepts: image.concepts ?? [],
+			prompts: image.prompts ?? [],
+			notes: image.notes ?? [],
+			groups: image.groups ?? [],
+			properties: image.properties ?? [],
+			wildcards: image.wildcards ?? [],
 			hash: '',
 			stats: null,
 		};

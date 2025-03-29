@@ -1,16 +1,16 @@
-import type { Album } from '../albums';
-import type { Character } from '../characters';
-import type { Collection } from '../collections';
-import type { Concept } from '../concepts';
+import type { Album } from '../album/album-types';
+import type { Character } from '../character/character-types';
+import type { Collection } from '../collection/collection-types';
+import type { Concept } from '../concept/concept-types';
 import type { FolderExtended } from '../folder/extended';
 import type { Group } from '../group/group-types';
 import type { Note } from '../note/note-types';
-import type { Place } from '../places';
+import type { Place } from '../place/place-types';
 import type { Prompt } from '../prompt/prompt-types';
 import type { Property } from '../property/property-types';
-import type { Tag } from '../tag';
+import type { Tag } from '../tag/tag-types';
 import type { Wildcard } from '../wildcard/wildcard-types';
-import type { WorldItem } from '../world-items';
+import type { WorldItem } from '../world-item/world-item-types';
 import type { ImageBase, ImageMetadata, ImageStatsBase, ImageVisualConfigBase } from './base';
 
 /**

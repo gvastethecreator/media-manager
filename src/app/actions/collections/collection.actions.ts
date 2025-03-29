@@ -5,16 +5,16 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import type { FileItem } from '@/types/file-item';
-import { revalidatePath } from 'next/cache';
 // Importaciones actualizadas usando nuevos tipos y transformers
 import { mapCreateCollectionDataToPrisma, mapUpdateCollectionDataToPrisma } from '@/transformers/collection';
 import type {
-	CollectionBase,
-	CollectionExtended,
-	CreateCollectionData,
-	UpdateCollectionData,
+    CollectionBase,
+    CollectionExtended,
+    CreateCollectionData,
+    UpdateCollectionData,
 } from '@/types/entities/collection';
+import type { FileItem } from '@/types/file-item';
+import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
 const collectionLogger = serverLogger.withContext('CollectionActions');
@@ -63,6 +63,9 @@ const createCollectionError = (
 export interface CollectionWithStats extends CollectionBase {
 	_count: {
 		images: number;
+		groups: number;
+		properties: number;
+		wildcards: number;
 	};
 	totalSize: number;
 	lastUpdated: Date;
@@ -93,7 +96,12 @@ export async function getCollections(): Promise<CollectionWithStats[]> {
 		const collections = await prisma.collection.findMany({
 			include: {
 				_count: {
-					select: { images: true },
+					select: {
+						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true
+					},
 				},
 				images: {
 					select: {
@@ -194,6 +202,9 @@ export async function getCollection(id: string): Promise<CollectionExtended> {
 				_count: {
 					select: {
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true
 					},
 				},
 			},

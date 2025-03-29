@@ -4,14 +4,14 @@
  */
 
 import {
-	type CreatePlaceData,
-	type Place,
-	type PlaceBase,
-	type PlaceVisualConfig,
-	type PlaceVisualConfigUpdateData,
-	type UpdatePlaceData,
-	PlaceCategory,
-	PlaceType,
+    type CreatePlaceData,
+    type Place,
+    type PlaceBase,
+    PlaceCategory,
+    PlaceType,
+    type PlaceVisualConfig,
+    type PlaceVisualConfigUpdateData,
+    type UpdatePlaceData,
 } from '../../types/entities/place';
 import { parseJsonFields, parseVisualConfig, serializePlaceFilters } from './serializers';
 
@@ -272,14 +272,34 @@ export function mapCreatePlaceDataToPrisma(data: any): any {
 		emoji: data.emoji || null,
 		color: data.color || null,
 		description: data.description || null,
+		shortcut: data.shortcut || null,
+		category: data.category || null,
+		region: data.region || null,
 		type: data.type || null,
-		location: data.location || null,
-		coordinates: data.coordinates || null,
-		tags: Array.isArray(data.tags) ? data.tags.join(',') : data.tags || null,
+		climate: data.climate || null,
+		population: data.population || 0,
+		government: data.government || null,
+		dangers: data.dangers || '[]',
+		resources: data.resources || '[]',
+		lore: data.lore || '',
+		history: data.history || '',
+		stats: data.stats || '{}',
+		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
-		featuredImageId: data.featuredImage || null,
-		parentId: data.parentId || null,
-		details: typeof data.details === 'object' ? JSON.stringify(data.details) : data.details,
+		sortBy: data.sortBy || 'name',
+		filters: data.filters || '[]',
+		// Conexión con grupos si existen
+		groups: data.groupIds ? {
+			connect: data.groupIds.map((id: string) => ({ id })),
+		} : undefined,
+		// Conexión con propiedades si existen
+		properties: data.propertyIds ? {
+			connect: data.propertyIds.map((id: string) => ({ id })),
+		} : undefined,
+		// Conexión con comodines si existen
+		wildcards: data.wildcardIds ? {
+			connect: data.wildcardIds.map((id: string) => ({ id })),
+		} : undefined,
 	};
 }
 
@@ -289,28 +309,49 @@ export function mapCreatePlaceDataToPrisma(data: any): any {
  * @returns Objeto con formato para Prisma
  */
 export function mapUpdatePlaceDataToPrisma(data: any): any {
-	const updateData: any = {};
+	const updateData: Record<string, any> = {};
 
 	// Solo incluir campos que estén presentes en los datos
 	if (data.name !== undefined) updateData.name = data.name;
 	if (data.emoji !== undefined) updateData.emoji = data.emoji;
 	if (data.color !== undefined) updateData.color = data.color;
 	if (data.description !== undefined) updateData.description = data.description;
+	if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
+	if (data.category !== undefined) updateData.category = data.category;
+	if (data.region !== undefined) updateData.region = data.region;
 	if (data.type !== undefined) updateData.type = data.type;
-	if (data.location !== undefined) updateData.location = data.location;
-	if (data.coordinates !== undefined) updateData.coordinates = data.coordinates;
+	if (data.climate !== undefined) updateData.climate = data.climate;
+	if (data.population !== undefined) updateData.population = data.population;
+	if (data.government !== undefined) updateData.government = data.government;
+	if (data.dangers !== undefined) updateData.dangers = data.dangers;
+	if (data.resources !== undefined) updateData.resources = data.resources;
+	if (data.lore !== undefined) updateData.lore = data.lore;
+	if (data.history !== undefined) updateData.history = data.history;
+	if (data.stats !== undefined) updateData.stats = data.stats;
+	if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+	if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
+	if (data.filters !== undefined) updateData.filters = data.filters;
 
-	if (data.tags !== undefined) {
-		updateData.tags = Array.isArray(data.tags) ? data.tags.join(',') : data.tags;
+	// Gestionar relaciones con grupos
+	if (data.groupIds !== undefined) {
+		updateData.groups = {
+			set: data.groupIds.map((id: string) => ({ id })),
+		};
 	}
 
-	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-	if (data.featuredImage !== undefined) updateData.featuredImageId = data.featuredImage;
-	if (data.parentId !== undefined) updateData.parentId = data.parentId;
+	// Gestionar relaciones con propiedades
+	if (data.propertyIds !== undefined) {
+		updateData.properties = {
+			set: data.propertyIds.map((id: string) => ({ id })),
+		};
+	}
 
-	// Convertir details a string si es un objeto
-	if (data.details !== undefined) {
-		updateData.details = typeof data.details === 'object' ? JSON.stringify(data.details) : data.details;
+	// Gestionar relaciones con comodines
+	if (data.wildcardIds !== undefined) {
+		updateData.wildcards = {
+			set: data.wildcardIds.map((id: string) => ({ id })),
+		};
 	}
 
 	return updateData;
