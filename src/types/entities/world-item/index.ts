@@ -1,39 +1,31 @@
 /**
- * @file Exportaciones principales de tipos para la entidad WorldItem
+ * @file Índice de tipos para la entidad WorldItem
  * @module types/entities/world-item
  */
 
-export * from './base';
-export * from './enums';
-export * from './extended';
-export * from './world-item-types';
+// Exportar desde archivo base
+export * from './types';
+export * from './world-item-extended-types';
+export * from './world-item-stats-types';
 
-// Alias común para el tipo principal
-export type { WorldItemWithRelations as WorldItem } from './world-item-types';
-
-// Reexportar enums explícitamente para evitar problemas de importación
+// Exportar desde enumeraciones
 export {
-    RarityLevel,
-    WorldItemCategory,
-    WorldItemSortCriteria,
-    WorldItemType,
-    WorldItemViewMode
+  WorldItemCategory,
+  WorldItemRarity,
+  WorldItemRelationshipType,
+  WorldItemSize,
+  WorldItemSortCriteria,
+  WorldItemType,
+  WorldItemViewMode
 } from './enums';
 
-// Reexportar tipos explícitamente
+// Exportar desde definiciones extendidas
 export type {
-    CreateWorldItemData,
-    UpdateWorldItemData,
-    WorldItemBase,
-    WorldItemWithRelations
-} from './base';
-
-export type {
-    ParsedWorldItem,
-    ParsedWorldItemVisualConfig,
-    ParsedWorldItemWithRelations,
-    WorldItemFilters,
-    WorldItemVisualConfig,
-    WorldItemVisualConfigUpdateData
+  ParsedWorldItem,
+  ParsedWorldItemWithRelations,
+  WorldItemFilters
 } from './extended';
+
+// Exportar tipo principal
+export type { WorldItem } from './extended';
 

@@ -4,10 +4,10 @@
  */
 
 export * from './base';
-export * from './character-types';
 export * from './enums';
 export * from './extended';
+export * from './types';
 
 // Alias común para el tipo principal
-export type { CharacterWithRelations as Character } from './character-types';
+export type { CharacterWithRelations as Character } from './types';
 

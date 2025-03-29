@@ -5,11 +5,17 @@ import {
 	activities,
 	albums,
 	characters,
+	charactersToPlaces,
 	collections,
+	collectionsToImages,
 	folders,
 	imageStats,
 	images,
+	places,
+	placesToImages,
+	placesToVideos,
 	profiles,
+	properties,
 	queueJobs,
 	videos
 } from './schema';
@@ -679,7 +685,215 @@ export const DrizzleRepository = {
         },
     },
 
-    // ... similar operations for other models ...
+    // Operaciones para places
+    places: {
+        getAll: async () => {
+            try {
+                return await db.select().from(places);
+            } catch (error) {
+                serverLogger.error('Error al obtener lugares:', error);
+                throw new Error('Error al obtener lugares');
+            }
+        },
+
+        getById: async (id: string) => {
+            try {
+                const result = await db.select().from(places).where(eq(places.id, id));
+                return result[0] ? {
+                    ...result[0],
+                    landmarks: jsonHelper.parse(result[0].landmarks),
+                    resources: jsonHelper.parse(result[0].resources),
+                    dangers: jsonHelper.parse(result[0].dangers),
+                } : null;
+            } catch (error) {
+                serverLogger.error(`Error al obtener lugar con ID ${id}:`, error);
+                throw new Error(`Error al obtener lugar con ID ${id}`);
+            }
+        },
+
+        create: async (data: Omit<typeof places.$inferInsert, 'id' | 'createdAt' | 'updatedAt'>) => {
+            try {
+                const result = await db.insert(places).values({
+                    ...data,
+                    landmarks: jsonHelper.stringify(data.landmarks),
+                    resources: jsonHelper.stringify(data.resources),
+                    dangers: jsonHelper.stringify(data.dangers),
+                }).returning();
+                return result[0];
+            } catch (error) {
+                serverLogger.error('Error al crear lugar:', error);
+                throw new Error('Error al crear lugar');
+            }
+        },
+
+        update: async (id: string, data: Partial<Omit<typeof places.$inferInsert, 'id' | 'createdAt' | 'updatedAt'>>) => {
+            try {
+                const now = new Date().getTime();
+                const updateData = {
+                    ...data,
+                    updatedAt: now,
+                };
+                if (data.landmarks) {
+                    updateData.landmarks = jsonHelper.stringify(data.landmarks);
+                }
+                if (data.resources) {
+                    updateData.resources = jsonHelper.stringify(data.resources);
+                }
+                if (data.dangers) {
+                    updateData.dangers = jsonHelper.stringify(data.dangers);
+                }
+                const result = await db
+                    .update(places)
+                    .set(updateData)
+                    .where(eq(places.id, id))
+                    .returning();
+                return result[0];
+            } catch (error) {
+                serverLogger.error(`Error al actualizar lugar con ID ${id}:`, error);
+                throw new Error(`Error al actualizar lugar con ID ${id}`);
+            }
+        },
+
+        delete: async (id: string) => {
+            try {
+                await db.delete(places).where(eq(places.id, id));
+                return true;
+            } catch (error) {
+                serverLogger.error(`Error al eliminar lugar con ID ${id}:`, error);
+                throw new Error(`Error al eliminar lugar con ID ${id}`);
+            }
+        },
+
+        // Operaciones de relación
+        addImage: async (placeId: string, imageId: string) => {
+            try {
+                await db.insert(placesToImages).values({ placeId, imageId });
+                return true;
+            } catch (error) {
+                serverLogger.error(`Error al añadir imagen ${imageId} a lugar ${placeId}:`, error);
+                throw new Error(`Error al añadir imagen a lugar`);
+            }
+        },
+
+        removeImage: async (placeId: string, imageId: string) => {
+            try {
+                await db.delete(placesToImages)
+                    .where(eq(placesToImages.placeId, placeId))
+                    .where(eq(placesToImages.imageId, imageId));
+                return true;
+            } catch (error) {
+                serverLogger.error(`Error al remover imagen ${imageId} de lugar ${placeId}:`, error);
+                throw new Error(`Error al remover imagen de lugar`);
+            }
+        },
+
+        addVideo: async (placeId: string, videoId: string) => {
+            try {
+                await db.insert(placesToVideos).values({ placeId, videoId });
+                return true;
+            } catch (error) {
+                serverLogger.error(`Error al añadir video ${videoId} a lugar ${placeId}:`, error);
+                throw new Error(`Error al añadir video a lugar`);
+            }
+        },
+
+        removeVideo: async (placeId: string, videoId: string) => {
+            try {
+                await db.delete(placesToVideos)
+                    .where(eq(placesToVideos.placeId, placeId))
+                    .where(eq(placesToVideos.videoId, videoId));
+                return true;
+            } catch (error) {
+                serverLogger.error(`Error al remover video ${videoId} de lugar ${placeId}:`, error);
+                throw new Error(`Error al remover video de lugar`);
+            }
+        },
+    },
+
+    // Operaciones para properties
+    properties: {
+        getAll: async () => {
+            try {
+                return await db.select().from(properties);
+            } catch (error) {
+                serverLogger.error('Error al obtener propiedades:', error);
+                throw new Error('Error al obtener propiedades');
+            }
+        },
+
+        getById: async (id: string) => {
+            try {
+                const result = await db.select().from(properties).where(eq(properties.id, id));
+                return result[0] ? {
+                    ...result[0],
+                    validation: jsonHelper.parse(result[0].validation),
+                    constraints: jsonHelper.parse(result[0].constraints),
+                    options: jsonHelper.parse(result[0].options),
+                    metadata: jsonHelper.parse(result[0].metadata),
+                } : null;
+            } catch (error) {
+                serverLogger.error(`Error al obtener propiedad con ID ${id}:`, error);
+                throw new Error(`Error al obtener propiedad con ID ${id}`);
+            }
+        },
+
+        create: async (data: Omit<typeof properties.$inferInsert, 'id' | 'createdAt' | 'updatedAt'>) => {
+            try {
+                const result = await db.insert(properties).values({
+                    ...data,
+                    validation: jsonHelper.stringify(data.validation),
+                    constraints: jsonHelper.stringify(data.constraints),
+                    options: jsonHelper.stringify(data.options),
+                    metadata: jsonHelper.stringify(data.metadata),
+                }).returning();
+                return result[0];
+            } catch (error) {
+                serverLogger.error('Error al crear propiedad:', error);
+                throw new Error('Error al crear propiedad');
+            }
+        },
+
+        update: async (id: string, data: Partial<Omit<typeof properties.$inferInsert, 'id' | 'createdAt' | 'updatedAt'>>) => {
+            try {
+                const now = new Date().getTime();
+                const updateData = {
+                    ...data,
+                    updatedAt: now,
+                };
+                if (data.validation) {
+                    updateData.validation = jsonHelper.stringify(data.validation);
+                }
+                if (data.constraints) {
+                    updateData.constraints = jsonHelper.stringify(data.constraints);
+                }
+                if (data.options) {
+                    updateData.options = jsonHelper.stringify(data.options);
+                }
+                if (data.metadata) {
+                    updateData.metadata = jsonHelper.stringify(data.metadata);
+                }
+                const result = await db
+                    .update(properties)
+                    .set(updateData)
+                    .where(eq(properties.id, id))
+                    .returning();
+                return result[0];
+            } catch (error) {
+                serverLogger.error(`Error al actualizar propiedad con ID ${id}:`, error);
+                throw new Error(`Error al actualizar propiedad con ID ${id}`);
+            }
+        },
+
+        delete: async (id: string) => {
+            try {
+                await db.delete(properties).where(eq(properties.id, id));
+                return true;
+            } catch (error) {
+                serverLogger.error(`Error al eliminar propiedad con ID ${id}:`, error);
+                throw new Error(`Error al eliminar propiedad con ID ${id}`);
+            }
+        },
+    },
 
     /**
      * Operaciones en lote

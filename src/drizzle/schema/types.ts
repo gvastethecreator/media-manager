@@ -3,7 +3,6 @@ import {
     characters,
     collections,
     concepts,
-    folderVisualConfigs,
     folders,
     groups,
     imageStats,
@@ -35,9 +34,6 @@ export type SettingsInsert = typeof settings.$inferInsert;
 // Tipos inferidos de contenido
 export type Folder = typeof folders.$inferSelect;
 export type FolderInsert = typeof folders.$inferInsert;
-
-export type FolderVisualConfig = typeof folderVisualConfigs.$inferSelect;
-export type FolderVisualConfigInsert = typeof folderVisualConfigs.$inferInsert;
 
 export type Image = typeof images.$inferSelect;
 export type ImageInsert = typeof images.$inferInsert;

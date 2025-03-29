@@ -5,7 +5,10 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { mapCreateCharacterDataToPrisma, mapUpdateCharacterDataToPrisma } from '@/transformers/character';
+import {
+  mapCreateCharacterDataToPrisma,
+  mapUpdateCharacterDataToPrisma
+} from '@/transformers/character';
 import type { CharacterBase, CreateCharacterData, UpdateCharacterData } from '@/types/entities/character';
 import { revalidatePath } from 'next/cache';
 
@@ -74,7 +77,7 @@ export interface CharacterWithImages extends CharacterBase {
 /**
  * Obtiene todos los personajes con estadísticas
  */
-export async function getCharacters(): Promise<CharacterWithStats[]> {
+export async function getCharacters(): Promise<(CharacterExtended & { totalSize: number; imageCount?: number; recentImages?: (string | null)[] })[]> {
 	try {
 		characterLogger.info('👤 Obteniendo personajes');
 		const characters = await prisma.character.findMany({
@@ -82,9 +85,20 @@ export async function getCharacters(): Promise<CharacterWithStats[]> {
 				_count: {
 					select: {
 						images: true,
-						groups: true,
+						videos: true,
+						relatedCharacters: true,
+						relatedTo: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						notes: true,
+						wildcards: true,
 						properties: true,
-						wildcards: true
+						groups: true,
 					},
 				},
 				images: {
@@ -117,19 +131,43 @@ export async function getCharacters(): Promise<CharacterWithStats[]> {
 					},
 				});
 
-				return {
+				// Extraer las imágenes antes de transformar
+				const images = character.images;
+				const recentImages = images
+					.filter((img) => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
+					.map((img) => {
+						if (img.thumbnail) {
+							return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+						}
+						return null;
+					});
+
+				// Transformar a formato extendido
+				const extendedCharacter = toExtendedCharacter({
 					...character,
+					// Mantener el array de imágenes vacío para evitar duplicación
+					images: [],
+					videos: [],
+					relatedCharacters: [],
+					relatedTo: [],
+					albums: [],
+					collections: [],
+					tags: [],
+					places: [],
+					worldItems: [],
+					concepts: [],
+					prompts: [],
+					notes: [],
+					wildcards: [],
+					properties: [],
+					groups: [],
+				});
+
+				return {
+					...extendedCharacter,
 					totalSize: totalSize._sum.size || 0,
 					imageCount: character._count.images,
-					recentImages: character.images
-						.filter((img) => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
-						.map((img) => {
-							if (img.thumbnail) {
-								return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
-							}
-							return null;
-						}),
-					images: undefined,
+					recentImages,
 				};
 			})
 		);
@@ -145,19 +183,45 @@ export async function getCharacters(): Promise<CharacterWithStats[]> {
 /**
  * Obtiene un personaje específico por su ID
  */
-export async function getCharacter(id: string): Promise<CharacterWithStats> {
+export async function getCharacter(id: string): Promise<CharacterExtended> {
 	try {
 		characterLogger.info('🔍 Obteniendo personaje:', id);
 		const character = await prisma.character.findUnique({
 			where: { id },
 			include: {
+				images: true,
+				videos: true,
+				relatedCharacters: true,
+				relatedTo: true,
+				albums: true,
+				collections: true,
+				tags: true,
+				places: true,
+				worldItems: true,
+				concepts: true,
+				prompts: true,
+				notes: true,
+				wildcards: true,
+				properties: true,
+				groups: true,
 				_count: {
 					select: {
 						images: true,
-						groups: true,
+						videos: true,
+						relatedCharacters: true,
+						relatedTo: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						notes: true,
+						wildcards: true,
 						properties: true,
-						wildcards: true
-					},
+						groups: true,
+					}
 				},
 			},
 		});
@@ -179,8 +243,12 @@ export async function getCharacter(id: string): Promise<CharacterWithStats> {
 			},
 		});
 
+		// Transformar a formato extendido
+		const extendedCharacter = toExtendedCharacter(character);
+
+		// Agregar propiedades adicionales de estadísticas
 		const result = {
-			...character,
+			...extendedCharacter,
 			totalSize: totalSize._sum.size || 0,
 			imageCount: character._count.images,
 		};
@@ -202,7 +270,7 @@ export async function getCharacter(id: string): Promise<CharacterWithStats> {
 /**
  * Crea un nuevo personaje
  */
-export async function createCharacter(data: CreateCharacterData): Promise<CharacterBase> {
+export async function createCharacter(data: CreateCharacterData): Promise<CharacterExtended> {
 	try {
 		characterLogger.info('➕ Creando personaje', { name: data.name });
 
@@ -213,11 +281,32 @@ export async function createCharacter(data: CreateCharacterData): Promise<Charac
 			data: createData,
 		});
 
+		// Transformar a formato extendido
+		const extendedCharacter = toExtendedCharacter({
+			...character,
+			images: [],
+			videos: [],
+			relatedCharacters: [],
+			relatedTo: [],
+			albums: [],
+			collections: [],
+			tags: [],
+			places: [],
+			worldItems: [],
+			concepts: [],
+			prompts: [],
+			notes: [],
+			wildcards: [],
+			properties: [],
+			groups: [],
+			_count: {},
+		});
+
 		await revalidateAllPaths();
 		await notifyCharacterChange('create', character);
 
 		characterLogger.info('✅ Personaje creado', { id: character.id, name: character.name });
-		return character;
+		return extendedCharacter;
 	} catch (error) {
 		characterLogger.error('❌ Error al crear personaje', { error, data });
 		throw createCharacterError('No se pudo crear el personaje', EntityErrorCode.OPERATION_FAILED, error);
@@ -227,13 +316,31 @@ export async function createCharacter(data: CreateCharacterData): Promise<Charac
 /**
  * Actualiza un personaje existente
  */
-export async function updateCharacter(id: string, data: UpdateCharacterData): Promise<CharacterBase> {
+export async function updateCharacter(id: string, data: UpdateCharacterData): Promise<CharacterExtended> {
 	try {
 		characterLogger.info('🔄 Actualizando personaje', { id });
 
 		// Comprobar que el personaje existe
 		const existingCharacter = await prisma.character.findUnique({
 			where: { id },
+			include: {
+				images: true,
+				videos: true,
+				relatedCharacters: true,
+				relatedTo: true,
+				albums: true,
+				collections: true,
+				tags: true,
+				places: true,
+				worldItems: true,
+				concepts: true,
+				prompts: true,
+				notes: true,
+				wildcards: true,
+				properties: true,
+				groups: true,
+				_count: true,
+			}
 		});
 
 		if (!existingCharacter) {
@@ -246,13 +353,34 @@ export async function updateCharacter(id: string, data: UpdateCharacterData): Pr
 		const updatedCharacter = await prisma.character.update({
 			where: { id },
 			data: updateData,
+			include: {
+				images: true,
+				videos: true,
+				relatedCharacters: true,
+				relatedTo: true,
+				albums: true,
+				collections: true,
+				tags: true,
+				places: true,
+				worldItems: true,
+				concepts: true,
+				prompts: true,
+				notes: true,
+				wildcards: true,
+				properties: true,
+				groups: true,
+				_count: true,
+			}
 		});
+
+		// Transformar a formato extendido
+		const extendedCharacter = toExtendedCharacter(updatedCharacter);
 
 		await revalidateAllPaths();
 		await notifyCharacterChange('update', updatedCharacter);
 
 		characterLogger.info('✅ Personaje actualizado', { id });
-		return updatedCharacter;
+		return extendedCharacter;
 	} catch (error) {
 		characterLogger.error('❌ Error al actualizar personaje', { id, error });
 		throw createCharacterError(

@@ -1,14 +1,86 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	ConceptBase,
-	ConceptExtended,
-	ConceptFilters,
-	ConceptSortOption,
-	ConceptWithStats,
+    ConceptBase,
+    ConceptExtended,
+    ConceptFilters,
+    ConceptSortOption,
+    ConceptWithStats,
 } from '@/types/entities/concept';
 import { serializeTags, toExtendedConcept } from './serializers';
 
 const mappersLogger = serverLogger.withContext('ConceptMappers');
+
+/**
+ * Mapea datos de creación de concepto a formato Prisma
+ * @param data Datos para crear un concepto
+ * @returns Objeto con formato para Prisma
+ */
+export function mapCreateConceptDataToPrisma(data: any): any {
+	return {
+		name: data.name,
+		emoji: data.emoji || null,
+		color: data.color || null,
+		description: data.description || null,
+		content: data.content || '',
+		category: data.category || 'general',
+		featuredImage: data.featuredImage || null,
+		isFavorite: data.isFavorite || false,
+		// Conexión con grupos si existen
+		groups: data.groupIds ? {
+			connect: data.groupIds.map((id: string) => ({ id })),
+		} : undefined,
+		// Conexión con propiedades si existen
+		properties: data.propertyIds ? {
+			connect: data.propertyIds.map((id: string) => ({ id })),
+		} : undefined,
+		// Conexión con comodines si existen
+		wildcards: data.wildcardIds ? {
+			connect: data.wildcardIds.map((id: string) => ({ id })),
+		} : undefined,
+	};
+}
+
+/**
+ * Mapea datos de actualización de concepto a formato Prisma
+ * @param data Datos para actualizar un concepto
+ * @returns Objeto con formato para Prisma
+ */
+export function mapUpdateConceptDataToPrisma(data: any): any {
+	const updateData: Record<string, any> = {};
+
+	// Solo incluir campos que estén presentes en los datos
+	if (data.name !== undefined) updateData.name = data.name;
+	if (data.emoji !== undefined) updateData.emoji = data.emoji;
+	if (data.color !== undefined) updateData.color = data.color;
+	if (data.description !== undefined) updateData.description = data.description;
+	if (data.content !== undefined) updateData.content = data.content;
+	if (data.category !== undefined) updateData.category = data.category;
+	if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+
+	// Gestionar relaciones con grupos
+	if (data.groupIds !== undefined) {
+		updateData.groups = {
+			set: data.groupIds.map((id: string) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con propiedades
+	if (data.propertyIds !== undefined) {
+		updateData.properties = {
+			set: data.propertyIds.map((id: string) => ({ id })),
+		};
+	}
+
+	// Gestionar relaciones con comodines
+	if (data.wildcardIds !== undefined) {
+		updateData.wildcards = {
+			set: data.wildcardIds.map((id: string) => ({ id })),
+		};
+	}
+
+	return updateData;
+}
 
 /**
  * Transforma un concepto de Prisma a un concepto con estadísticas
@@ -28,6 +100,9 @@ export function toConceptWithStats(concept: any): ConceptWithStats {
 			notes: _count.notes || 0,
 			prompts: _count.prompts || 0,
 			images: _count.images || 0,
+			groups: _count.groups || 0,
+			properties: _count.properties || 0,
+			wildcards: _count.wildcards || 0,
 		},
 	};
 }

@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { getActiveProfile, validateProfilePreferences } from '@/lib/utils/profile/profile-utils';
 import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
-import { Language, ThemeMode } from '@/types/entities/profile/profile-types';
+import { Language, ThemeMode } from '@/types/entities/profile/types';
 import { NextResponse } from 'next/server';
 
 // GET /api/profile - Obtener todos los perfiles

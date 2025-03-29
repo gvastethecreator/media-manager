@@ -4,20 +4,26 @@
  */
 
 import type {
-    CharacterAttribute,
-    CharacterCard,
-    CharacterCategory,
-    CharacterClass,
-    CharacterExtended,
-    CharacterInventoryItem,
-    CharacterListItem,
+  CharacterAttribute,
+  CharacterCard,
+  CharacterCategory,
+  CharacterClass,
+  CharacterExtended,
+  CharacterInventoryItem,
+  CharacterListItem,
 } from '@/types/entities/character';
 import {
-    CHARACTER_CLASS_COLORS as SUGGESTED_COLORS,
-    CHARACTER_CLASS_EMOJIS as SUGGESTED_EMOJIS,
+  CHARACTER_CLASS_COLORS as SUGGESTED_COLORS,
+  CHARACTER_CLASS_EMOJIS as SUGGESTED_EMOJIS,
 } from '@/types/entities/character/enums';
-import type { Character as PrismaCharacter } from '@prisma/client';
-import { toCharacterExtended, toCharacterSummary } from './serializers';
+import type { CHARACTER_SORT_PROPERTY_MAP, CharacterFilters, CharacterSortCriteria, CreateCharacterData, UpdateCharacterData } from '@/types/entities/character/types';
+import type { Prisma, Character as PrismaCharacter } from '@prisma/client';
+import {
+  serializeFilters,
+  serializeJsonArray,
+  serializeRelationships,
+  serializeStats, toCharacterExtended, toCharacterSummary
+} from './serializers';
 
 /**
  * Mapea un personaje a un formato para mostrar en listas
@@ -274,113 +280,239 @@ export function charactersToCards(characters: (PrismaCharacter | CharacterExtend
 }
 
 /**
- * Mapea datos de creación de personaje a formato Prisma
- * @param data Datos para crear un personaje
- * @returns Objeto con formato para Prisma
+ * Mapea datos de creación de personaje al formato requerido por Prisma
+ * @param data - Datos para crear personaje
+ * @returns Datos mapeados para Prisma
  */
-export function mapCreateCharacterDataToPrisma(data: any): any {
-	// Procesar atributos complejos
-	const processedData = {
-		name: data.name,
-		emoji: data.emoji || '👤',
-		color: data.color || '#3b82f6',
-		description: data.description || '',
-		shortcut: data.shortcut || null,
-		category: data.category || 'general',
-		level: data.level || 1,
-		class: data.class || 'warrior',
-		race: data.race || 'human',
-		type: data.type || null,
-		alignment: data.alignment || 'true neutral',
-		backstory: data.backstory || '',
-		stats: data.stats || '{}',
-		psychologicalProfile: data.psychologicalProfile || '',
-		socialProfile: data.socialProfile || '',
-		relationships: data.relationships || '{}',
-		goals: data.goals || '[]',
-		fears: data.fears || '[]',
-		beliefs: data.beliefs || '[]',
-		personality: data.personality || '[]',
-		skills: data.skills || '[]',
-		abilities: data.abilities || '[]',
-		featuredImage: data.featuredImage || null,
-		isFavorite: data.isFavorite || false,
-		sortBy: data.sortBy || 'name',
-		filters: data.filters || '[]',
-		// Conexión con grupos si existen
-		groups: data.groupIds ? {
-			connect: data.groupIds.map((id: string) => ({ id })),
-		} : undefined,
-		// Conexión con propiedades si existen
-		properties: data.propertyIds ? {
-			connect: data.propertyIds.map((id: string) => ({ id })),
-		} : undefined,
-		// Conexión con comodines si existen
-		wildcards: data.wildcardIds ? {
-			connect: data.wildcardIds.map((id: string) => ({ id })),
-		} : undefined,
-	};
-
-	return processedData;
+export function mapCreateCharacterDataToPrisma(
+  data: CreateCharacterData
+): Prisma.CharacterCreateInput {
+  return {
+    name: data.name,
+    emoji: data.emoji || '👤',
+    color: data.color || '#3b82f6',
+    description: data.description || null,
+    shortcut: data.shortcut || null,
+    category: data.category || null,
+    level: data.level || 1,
+    class: data.class || 'Generic',
+    race: data.race || 'Human',
+    type: data.type || null,
+    alignment: data.alignment || 'Neutral',
+    backstory: data.backstory || '',
+    // Serializar campos JSON
+    stats: serializeStats(data.stats || {}),
+    psychologicalProfile: data.psychologicalProfile || '',
+    socialProfile: data.socialProfile || '',
+    relationships: serializeRelationships(data.relationships || []),
+    goals: serializeJsonArray(data.goals || []),
+    fears: serializeJsonArray(data.fears || []),
+    beliefs: serializeJsonArray(data.beliefs || []),
+    personality: serializeJsonArray(data.personality || []),
+    skills: serializeJsonArray(data.skills || []),
+    abilities: serializeJsonArray(data.abilities || []),
+    featuredImage: data.featuredImage || null,
+    isFavorite: data.isFavorite || false,
+    sortBy: data.sortBy || 'name:asc',
+    filters: serializeFilters(data.filters || {}),
+    // Relaciones
+    ...(data.groupIds?.length && {
+      groups: {
+        connect: data.groupIds.map((id) => ({ id })),
+      },
+    }),
+    ...(data.propertyIds?.length && {
+      properties: {
+        connect: data.propertyIds.map((id) => ({ id })),
+      },
+    }),
+    ...(data.wildcardIds?.length && {
+      wildcards: {
+        connect: data.wildcardIds.map((id) => ({ id })),
+      },
+    }),
+    ...(data.tagIds?.length && {
+      tags: {
+        connect: data.tagIds.map((id) => ({ id })),
+      },
+    }),
+  };
 }
 
 /**
- * Mapea datos de actualización de personaje a formato Prisma
- * @param data Datos para actualizar un personaje
- * @returns Objeto con formato para Prisma
+ * Mapea datos de actualización de personaje al formato requerido por Prisma
+ * @param data - Datos para actualizar personaje
+ * @returns Datos mapeados para Prisma
  */
-export function mapUpdateCharacterDataToPrisma(data: any): any {
-	// Procesar atributos complejos
-	const updateData: Record<string, any> = {};
+export function mapUpdateCharacterDataToPrisma(
+  data: UpdateCharacterData
+): Prisma.CharacterUpdateInput {
+  const mapped: Prisma.CharacterUpdateInput = {};
 
-	// Actualizar propiedades si están presentes
-	if (data.name !== undefined) updateData.name = data.name;
-	if (data.emoji !== undefined) updateData.emoji = data.emoji;
-	if (data.color !== undefined) updateData.color = data.color;
-	if (data.description !== undefined) updateData.description = data.description;
-	if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
-	if (data.category !== undefined) updateData.category = data.category;
-	if (data.level !== undefined) updateData.level = data.level;
-	if (data.class !== undefined) updateData.class = data.class;
-	if (data.race !== undefined) updateData.race = data.race;
-	if (data.type !== undefined) updateData.type = data.type;
-	if (data.alignment !== undefined) updateData.alignment = data.alignment;
-	if (data.backstory !== undefined) updateData.backstory = data.backstory;
-	if (data.stats !== undefined) updateData.stats = data.stats;
-	if (data.psychologicalProfile !== undefined) updateData.psychologicalProfile = data.psychologicalProfile;
-	if (data.socialProfile !== undefined) updateData.socialProfile = data.socialProfile;
-	if (data.relationships !== undefined) updateData.relationships = data.relationships;
-	if (data.goals !== undefined) updateData.goals = data.goals;
-	if (data.fears !== undefined) updateData.fears = data.fears;
-	if (data.beliefs !== undefined) updateData.beliefs = data.beliefs;
-	if (data.personality !== undefined) updateData.personality = data.personality;
-	if (data.skills !== undefined) updateData.skills = data.skills;
-	if (data.abilities !== undefined) updateData.abilities = data.abilities;
-	if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-	if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
-	if (data.filters !== undefined) updateData.filters = data.filters;
+  // Mapear campos simples
+  if (data.name !== undefined) mapped.name = data.name;
+  if (data.emoji !== undefined) mapped.emoji = data.emoji;
+  if (data.color !== undefined) mapped.color = data.color;
+  if (data.description !== undefined) mapped.description = data.description;
+  if (data.shortcut !== undefined) mapped.shortcut = data.shortcut;
+  if (data.category !== undefined) mapped.category = data.category;
+  if (data.level !== undefined) mapped.level = data.level;
+  if (data.class !== undefined) mapped.class = data.class;
+  if (data.race !== undefined) mapped.race = data.race;
+  if (data.type !== undefined) mapped.type = data.type;
+  if (data.alignment !== undefined) mapped.alignment = data.alignment;
+  if (data.backstory !== undefined) mapped.backstory = data.backstory;
+  if (data.psychologicalProfile !== undefined) mapped.psychologicalProfile = data.psychologicalProfile;
+  if (data.socialProfile !== undefined) mapped.socialProfile = data.socialProfile;
+  if (data.featuredImage !== undefined) mapped.featuredImage = data.featuredImage;
+  if (data.isFavorite !== undefined) mapped.isFavorite = data.isFavorite;
+  if (data.sortBy !== undefined) mapped.sortBy = data.sortBy;
 
-	// Gestionar relaciones con grupos
-	if (data.groupIds !== undefined) {
-		updateData.groups = {
-			set: data.groupIds.map((id: string) => ({ id })),
-		};
-	}
+  // Serializar campos JSON si existen
+  if (data.stats !== undefined) mapped.stats = serializeStats(data.stats);
+  if (data.relationships !== undefined) mapped.relationships = serializeRelationships(data.relationships);
+  if (data.goals !== undefined) mapped.goals = serializeJsonArray(data.goals);
+  if (data.fears !== undefined) mapped.fears = serializeJsonArray(data.fears);
+  if (data.beliefs !== undefined) mapped.beliefs = serializeJsonArray(data.beliefs);
+  if (data.personality !== undefined) mapped.personality = serializeJsonArray(data.personality);
+  if (data.skills !== undefined) mapped.skills = serializeJsonArray(data.skills);
+  if (data.abilities !== undefined) mapped.abilities = serializeJsonArray(data.abilities);
+  if (data.filters !== undefined) mapped.filters = serializeFilters(data.filters);
 
-	// Gestionar relaciones con propiedades
-	if (data.propertyIds !== undefined) {
-		updateData.properties = {
-			set: data.propertyIds.map((id: string) => ({ id })),
-		};
-	}
+  // Manejar relaciones
+  if (data.groupIds !== undefined) {
+    mapped.groups = {
+      set: data.groupIds.map((id) => ({ id })),
+    };
+  }
 
-	// Gestionar relaciones con comodines
-	if (data.wildcardIds !== undefined) {
-		updateData.wildcards = {
-			set: data.wildcardIds.map((id: string) => ({ id })),
-		};
-	}
+  if (data.propertyIds !== undefined) {
+    mapped.properties = {
+      set: data.propertyIds.map((id) => ({ id })),
+    };
+  }
 
-	return updateData;
+  if (data.wildcardIds !== undefined) {
+    mapped.wildcards = {
+      set: data.wildcardIds.map((id) => ({ id })),
+    };
+  }
+
+  if (data.tagIds !== undefined) {
+    mapped.tags = {
+      set: data.tagIds.map((id) => ({ id })),
+    };
+  }
+
+  return mapped;
+}
+
+/**
+ * Crea un filtro de búsqueda para Prisma basado en los criterios proporcionados
+ * @param filters - Filtros para la búsqueda
+ * @returns Condiciones para consulta Prisma
+ */
+export function createCharacterFilter(
+  filters?: CharacterFilters
+): Prisma.CharacterWhereInput {
+  if (!filters) return {};
+
+  const conditions: Prisma.CharacterWhereInput = {};
+  const AND: Prisma.CharacterWhereInput[] = [];
+
+  // Búsqueda por texto
+  if (filters.searchQuery) {
+    conditions.OR = [
+      { name: { contains: filters.searchQuery, mode: 'insensitive' } },
+      { description: { contains: filters.searchQuery, mode: 'insensitive' } },
+      { backstory: { contains: filters.searchQuery, mode: 'insensitive' } },
+      { class: { contains: filters.searchQuery, mode: 'insensitive' } },
+      { race: { contains: filters.searchQuery, mode: 'insensitive' } },
+    ];
+  }
+
+  // Filtro por categorías
+  if (filters.categories?.length) {
+    AND.push({
+      category: {
+        in: filters.categories,
+      },
+    });
+  }
+
+  // Filtro por clases
+  if (filters.classes?.length) {
+    AND.push({
+      class: {
+        in: filters.classes,
+      },
+    });
+  }
+
+  // Filtro por razas
+  if (filters.races?.length) {
+    AND.push({
+      race: {
+        in: filters.races,
+      },
+    });
+  }
+
+  // Filtro por rango de nivel
+  if (filters.levelRange) {
+    if (filters.levelRange.min !== undefined) {
+      AND.push({
+        level: {
+          gte: filters.levelRange.min,
+        },
+      });
+    }
+    if (filters.levelRange.max !== undefined) {
+      AND.push({
+        level: {
+          lte: filters.levelRange.max,
+        },
+      });
+    }
+  }
+
+  // Filtro por alineamientos
+  if (filters.alignments?.length) {
+    AND.push({
+      alignment: {
+        in: filters.alignments,
+      },
+    });
+  }
+
+  // Filtro por favoritos
+  if (filters.onlyFavorites) {
+    AND.push({
+      isFavorite: true,
+    });
+  }
+
+  if (AND.length) {
+    conditions.AND = AND;
+  }
+
+  return conditions;
+}
+
+/**
+ * Crea un ordenamiento para Prisma basado en el criterio de ordenación
+ * @param sortCriteria - Criterio de ordenación
+ * @param sortPropertyMap - Mapa de propiedades para ordenación
+ * @returns Ordenamiento para Prisma
+ */
+export function createCharacterOrderBy(
+  sortCriteria: CharacterSortCriteria = CharacterSortCriteria.NAME_ASC,
+  sortPropertyMap: typeof CHARACTER_SORT_PROPERTY_MAP = CHARACTER_SORT_PROPERTY_MAP
+): Prisma.CharacterOrderByWithRelationInput {
+  const [_, direction] = sortCriteria.split(':');
+  const property = sortPropertyMap[sortCriteria];
+
+  return {
+    [property]: direction as Prisma.SortOrder,
+  };
 }

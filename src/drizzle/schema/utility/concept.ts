@@ -1,35 +1,68 @@
-import { relations, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { createCommonIndexes, organizationFields } from '../base/common';
-import { createRelationTable } from '../base/relations';
+import { sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { organizationFields } from '../base/common';
+import { createIndexes, createManyToManyRelations, createRelationTable, relations } from '../base/relations';
 import { images } from '../content/image';
 import { videos } from '../content/video';
+import { albums } from '../organization/album';
+import { collections } from '../organization/collection';
+import { groups } from '../organization/group';
+import { tags } from '../organization/tag';
+import { characters } from '../world/character';
+import { places } from '../world/place';
+import { worldItems } from '../world/worldItem';
+import { notes } from './note';
+import { prompts } from './prompt';
+import { properties } from './property';
+import { wildcards } from './wildcard';
 
+// Definición de la tabla
 export const concepts = sqliteTable(
     'Concept',
     {
         ...organizationFields,
-        type: text('type').default('concept'),
-        keywords: text('keywords').default('empty_array'),
-        variations: text('variations').default('empty_array'),
-        references: text('references').default('empty_array'),
-        examples: text('examples').default('empty_array'),
-        counterexamples: text('counterexamples').default('empty_array'),
-        relatedConcepts: text('relatedConcepts').default('empty_array'),
-        domain: text('domain'),
-        complexity: text('complexity').default('medium'),
-        status: text('status').default('draft'),
+        content: text('content').default(''),
     },
-    (table) => ({
-        ...createCommonIndexes(table),
-    })
+    (table) => {
+        const indexes = createIndexes('concept');
+        return {
+            nameIdx: indexes.nameIdx.on(table.name),
+            categoryIdx: indexes.categoryIdx.on(table.category),
+            createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
+        };
+    }
 );
 
 // Tablas de relación
 export const conceptsToImages = createRelationTable('ConceptToImage', 'Concept', 'Image');
 export const conceptsToVideos = createRelationTable('ConceptToVideo', 'Concept', 'Video');
+export const conceptsToAlbums = createRelationTable('ConceptToAlbum', 'Concept', 'Album');
+export const conceptsToCollections = createRelationTable('ConceptToCollection', 'Concept', 'Collection');
+export const conceptsToTags = createRelationTable('ConceptToTag', 'Concept', 'Tag');
+export const conceptsToCharacters = createRelationTable('ConceptToCharacter', 'Concept', 'Character');
+export const conceptsToPlaces = createRelationTable('ConceptToPlace', 'Concept', 'Place');
+export const conceptsToWorldItems = createRelationTable('ConceptToWorldItem', 'Concept', 'WorldItem');
+export const conceptsToPrompts = createRelationTable('ConceptToPrompt', 'Concept', 'Prompt');
+export const conceptsToNotes = createRelationTable('ConceptToNote', 'Concept', 'Note');
+export const conceptsToWildcards = createRelationTable('ConceptToWildcard', 'Concept', 'Wildcard');
+export const conceptsToProperties = createRelationTable('ConceptToProperty', 'Concept', 'Property');
+export const conceptsToGroups = createRelationTable('ConceptToGroup', 'Concept', 'Group');
+
+// Definición de relaciones
+const relatedEntities = {
+    images,
+    videos,
+    albums,
+    collections,
+    tags,
+    characters,
+    places,
+    worldItems,
+    prompts,
+    notes,
+    wildcards,
+    properties,
+    groups
+};
 
 // Relaciones
-export const conceptsRelations = relations(concepts, ({ many }) => ({
-    images: many(images, { through: conceptsToImages }),
-    videos: many(videos, { through: conceptsToVideos }),
-}));
+export const conceptsRelations = relations(concepts, createManyToManyRelations(relatedEntities));

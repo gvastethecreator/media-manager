@@ -4,15 +4,15 @@
  */
 
 import type {
-	CharacterAlignment,
-	CharacterBase,
-	CharacterCategory,
-	CharacterClass,
-	CharacterExtended,
-	CharacterFilter,
-	CharacterRace,
-	CharacterSortOption,
-	CharacterViewConfig,
+    CharacterAlignment,
+    CharacterBase,
+    CharacterCategory,
+    CharacterClass,
+    CharacterExtended,
+    CharacterFilter,
+    CharacterRace,
+    CharacterSortOption,
+    CharacterViewConfig,
 } from '@/types/entities/character';
 
 /**
@@ -71,6 +71,26 @@ export interface CharacterCoreSlice {
 	// Operaciones avanzadas
 	addRelationship: (characterId: string, targetId: string, targetName: string, type: string, strength: number) => void;
 	removeRelationship: (characterId: string, targetId: string) => void;
+
+	// Gestión de relaciones
+	getCharacterGroups: (characterId: string) => string[];
+	getCharacterProperties: (characterId: string) => string[];
+	getCharacterWildcards: (characterId: string) => string[];
+
+	addGroupToCharacter: (characterId: string, groupId: string) => void;
+	removeGroupFromCharacter: (characterId: string, groupId: string) => void;
+
+	addPropertyToCharacter: (characterId: string, propertyId: string) => void;
+	removePropertyFromCharacter: (characterId: string, propertyId: string) => void;
+
+	addWildcardToCharacter: (characterId: string, wildcardId: string) => void;
+	removeWildcardFromCharacter: (characterId: string, wildcardId: string) => void;
+
+	updateCharacterRelations: (characterId: string, data: {
+		groupIds?: string[],
+		propertyIds?: string[],
+		wildcardIds?: string[]
+	}) => void;
 
 	// Operaciones de restablecimiento
 	resetCharacters: () => void;

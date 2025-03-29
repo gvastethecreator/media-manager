@@ -62,38 +62,3 @@ export interface Place extends ParsedPlaceWithRelations {
 	displaySize?: string;
 	regionPath?: string[];
 }
-
-/**
- * Datos para actualizar configuración visual del lugar
- */
-export interface PlaceVisualConfigUpdateData {
-	view?: string;
-	sortBy?: string;
-	filters?: PlaceFilters;
-	lastViewedPlaceId?: string | null;
-	expandedPlaceIds?: string[];
-	selectedPlaceIds?: string[];
-}
-
-/**
- * Configuración visual para la entidad Place
- */
-export interface PlaceVisualConfig {
-	id: string;
-	userId: string;
-	view: string;
-	sortBy: string;
-	filters: string;
-	lastViewedPlaceId: string | null;
-	expandedPlaceIds: string[];
-	selectedPlaceIds: string[];
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-/**
- * Configuración visual parseada para la entidad Place
- */
-export interface ParsedPlaceVisualConfig extends Omit<PlaceVisualConfig, 'filters'> {
-	filtersObject: PlaceFilters;
-}

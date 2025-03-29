@@ -1,6 +1,6 @@
 'use server';
 
-import { EntityErrorCode, createEntityErrorObject, type SerializableError } from '@/lib/errors';
+import { EntityErrorCode, type SerializableError, createEntityErrorObject } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { EventType } from '@/lib/server/events.server';
@@ -10,7 +10,7 @@ import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers actualizados
-import { toConceptWithStats } from '@/transformers/concept';
+import { mapCreateConceptDataToPrisma, mapUpdateConceptDataToPrisma, toConceptWithStats } from '@/transformers/concept';
 import type {
     ConceptBase,
     ConceptCreateInput,
@@ -91,6 +91,9 @@ export async function getConcepts(): Promise<ConceptWithStats[]> {
 						places: true,
 						worldItems: true,
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
 					},
 				},
 			},
@@ -123,6 +126,9 @@ export async function getConcept(id: string): Promise<ConceptExtended> {
 						places: true,
 						worldItems: true,
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
 					},
 				},
 			},
@@ -161,6 +167,9 @@ export async function getConceptWithRelations(id: string): Promise<ConceptExtend
 						places: true,
 						worldItems: true,
 						images: true,
+						groups: true,
+						properties: true,
+						wildcards: true,
 					},
 				},
 				prompts: {
@@ -193,6 +202,24 @@ export async function getConceptWithRelations(id: string): Promise<ConceptExtend
 						name: true,
 					},
 				},
+				groups: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				properties: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
+				wildcards: {
+					select: {
+						id: true,
+						name: true,
+					},
+				},
 			},
 		});
 
@@ -218,18 +245,12 @@ export async function getConceptWithRelations(id: string): Promise<ConceptExtend
 export async function createConcept(data: ConceptCreateInput): Promise<ConceptBase> {
 	try {
 		conceptLogger.info('📝 Creando concepto:', data.name);
+
+		// Usar el mapper para transformar los datos
+		const createData = mapCreateConceptDataToPrisma(data);
+
 		const concept = await prisma.concept.create({
-			data: {
-				name: data.name,
-				emoji: data.emoji || '💡',
-				description: data.description || null,
-				color: data.color || '#3b82f6',
-				content: data.content || '',
-				category: data.category || 'general',
-				tags: data.tags || '[]',
-				featuredImage: data.featuredImage || null,
-				isFavorite: data.isFavorite || false,
-			},
+			data: createData,
 		});
 
 		await emit({
@@ -253,9 +274,13 @@ export async function createConcept(data: ConceptCreateInput): Promise<ConceptBa
 export async function updateConcept(id: string, data: ConceptUpdateInput): Promise<ConceptBase> {
 	try {
 		conceptLogger.info('📝 Actualizando concepto:', id);
+
+		// Usar el mapper para transformar los datos
+		const updateData = mapUpdateConceptDataToPrisma(data);
+
 		const concept = await prisma.concept.update({
 			where: { id },
-			data,
+			data: updateData,
 		});
 
 		await emit({
@@ -300,6 +325,9 @@ export async function deleteConcept(id: string): Promise<{ success: boolean }> {
 					places: { set: [] },
 					worldItems: { set: [] },
 					images: { set: [] },
+					groups: { set: [] },
+					properties: { set: [] },
+					wildcards: { set: [] },
 				},
 			}),
 			prisma.concept.delete({

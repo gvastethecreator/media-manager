@@ -1,22 +1,72 @@
+/**
+ * @file Extensiones del tipo Image
+ * @module types/entities/image/extended
+ */
+
 import type { Album } from '../album/album-types';
-import type { Character } from '../character/character-types';
-import type { Collection } from '../collection/collection-types';
-import type { Concept } from '../concept/concept-types';
+import type { Character } from '../character/types';
+import type { Collection } from '../collection/types';
+import type { Concept } from '../concept/types';
 import type { FolderExtended } from '../folder/extended';
-import type { Group } from '../group/group-types';
-import type { Note } from '../note/note-types';
-import type { Place } from '../place/place-types';
-import type { Prompt } from '../prompt/prompt-types';
-import type { Property } from '../property/property-types';
-import type { Tag } from '../tag/tag-types';
-import type { Wildcard } from '../wildcard/wildcard-types';
-import type { WorldItem } from '../world-item/world-item-types';
+import type { Group } from '../group/types';
+import type { Note } from '../note/types';
+import type { Place } from '../place/types';
+import type { Prompt } from '../prompt/types';
+import type { Property } from '../property/types';
+import type { Tag } from '../tag/types';
+import type { Wildcard } from '../wildcard/types';
+import type { WorldItem } from '../world-item/types';
 import type { ImageBase, ImageMetadata, ImageStatsBase, ImageVisualConfigBase } from './base';
 
 /**
- * Tipo extendido para Image con relaciones y propiedades de UI
+ * Interfaz para metadatos extendidos de imagen
+ */
+export interface ImageMetadataExtended {
+	width: number;
+	height: number;
+	size: number;
+	format: string;
+	colorSpace?: string;
+	hasAlpha?: boolean;
+	isAnimated?: boolean;
+	framerate?: number;
+	duration?: number;
+	location?: {
+		latitude: number;
+		longitude: number;
+		altitude?: number;
+	};
+	camera?: {
+		make: string;
+		model: string;
+		software?: string;
+	};
+	exif?: Record<string, any>;
+}
+
+/**
+ * Interfaz para opciones del visor de imágenes
+ */
+export interface ImageViewerOptions {
+	enableZoom: boolean;
+	enablePan: boolean;
+	enableRotate: boolean;
+	enableFullscreen: boolean;
+	initialZoom: number;
+}
+
+/**
+ * Tipo extendido para Image con propiedades adicionales
  */
 export interface ImageExtended extends ImageBase {
+	// Propiedades calculadas
+	thumbUrl?: string;
+	fullUrl?: string;
+	displayName?: string;
+	isProcessed?: boolean;
+	parsedMetadata?: ImageMetadataExtended;
+	parsedTags?: string[];
+
 	// Relaciones cargadas
 	folder?: FolderExtended;
 	visualConfig?: ImageVisualConfigExtended | null;
@@ -43,7 +93,6 @@ export interface ImageExtended extends ImageBase {
 	// Propiedades adicionales de UI
 	metadata?: ImageMetadata;
 	thumbnailUrl?: string;
-	fullUrl?: string;
 	selected?: boolean;
 	loading?: boolean;
 	thumbnailLoading?: boolean;
@@ -65,19 +114,6 @@ export interface ImageVisualConfigExtended extends ImageVisualConfigBase {
 	effectsEnabled?: boolean;
 	layersConfig?: Record<string, unknown>;
 	viewerOptions?: ImageViewerOptions;
-}
-
-/**
- * Opciones para el visor de imágenes
- */
-export interface ImageViewerOptions {
-	zoomFactor?: number;
-	rotationAngle?: number;
-	enableFullscreen?: boolean;
-	enableTransitions?: boolean;
-	slideShowInterval?: number;
-	initialFilter?: string;
-	initialEffect?: string;
 }
 
 /**

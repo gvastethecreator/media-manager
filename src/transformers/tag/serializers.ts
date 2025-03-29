@@ -3,16 +3,61 @@
  * @module transformers/tag/serializers
  */
 
-import { type Tag, type TagBase, type TagWithStats, TagCategory, TagRarity } from '../../types/entities/tag/index';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { type TagBase, TagCategory, type TagComplete, type TagExtended, TagRarity, type TagWithStats } from '../../types/entities/tag/index';
+
+// Logger específico para serializadores de Tag
+const serializerLogger = serverLogger.withContext('TagSerializers');
 
 /**
- * Convierte una etiqueta básica en una etiqueta extendida
- * @param tag Etiqueta básica
+ * Convierte un TagBase en un TagComplete deserializando campos JSON si existieran
+ * @param tag Etiqueta base desde Prisma
+ * @returns Etiqueta con campos JSON parseados
+ */
+export function toTagComplete(tag: TagBase): TagComplete {
+	try {
+		// Actualmente Tag no tiene campos JSON, así que simplemente devolvemos el objeto
+		// En un futuro, si se añaden campos JSON, aquí se parsearían
+		return {
+			...tag
+		};
+	} catch (error) {
+		serializerLogger.error('❌ Error al deserializar Tag a TagComplete:', error);
+		// En caso de error, devolvemos el objeto original
+		return tag as TagComplete;
+	}
+}
+
+/**
+ * Convierte TagComplete a su formato para almacenar en base de datos
+ * @param tag Etiqueta con campos parseados
+ * @returns Etiqueta con campos serializados para almacenar
+ */
+export function fromTagComplete(tag: TagComplete): TagBase {
+	try {
+		// Actualmente Tag no tiene campos JSON, así que simplemente devolvemos el objeto
+		// En un futuro, si se añaden campos JSON, aquí se serializarían
+		return {
+			...tag
+		};
+	} catch (error) {
+		serializerLogger.error('❌ Error al serializar TagComplete a TagBase:', error);
+		// En caso de error, devolvemos el objeto original
+		return tag as TagBase;
+	}
+}
+
+/**
+ * Convierte una etiqueta básica en una etiqueta extendida con propiedades UI
+ * @param tag Etiqueta básica o completa
  * @returns Etiqueta con información adicional
  */
-export function extendTag(tag: TagBase): Tag {
-	const extended: Tag = {
-		...tag,
+export function extendTag(tag: TagBase | TagComplete): TagExtended {
+	// Asegurar que tenemos una versión completa
+	const completeTag = 'id' in tag ? toTagComplete(tag) : tag;
+
+	const extended: TagExtended = {
+		...completeTag,
 		isSelected: false,
 		isExpanded: false,
 		isEditing: false,
@@ -27,7 +72,7 @@ export function extendTag(tag: TagBase): Tag {
  * @param tags Lista de etiquetas básicas
  * @returns Lista de etiquetas extendidas
  */
-export function extendTags(tags: TagBase[]): Tag[] {
+export function extendTags(tags: (TagBase | TagComplete)[]): TagExtended[] {
 	return tags.map(extendTag);
 }
 
@@ -38,9 +83,12 @@ export function extendTags(tags: TagBase[]): Tag[] {
  * @param totalSize Tamaño total en bytes
  * @returns Etiqueta con estadísticas
  */
-export function tagToTagWithStats(tag: TagBase, imageCount = 0, totalSize = 0): TagWithStats {
+export function tagToTagWithStats(tag: TagBase | TagComplete, imageCount = 0, totalSize = 0): TagWithStats {
+	// Asegurar que tenemos una versión completa
+	const completeTag = 'id' in tag ? toTagComplete(tag) : tag;
+
 	return {
-		...tag,
+		...completeTag,
 		count: imageCount,
 		size: formatSize(totalSize),
 	};

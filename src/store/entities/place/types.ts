@@ -15,9 +15,6 @@ export interface PlaceState {
 	places: Place[];
 	isLoading: boolean;
 	error: string | null;
-
-	// Config visual
-	visualConfig: string; // JSON serializado
 }
 
 /**

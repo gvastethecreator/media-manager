@@ -186,31 +186,26 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 
 	/**
 	 * Elimina múltiples personajes
-	 * @param characterIds IDs de personajes a eliminar
+	 * @param characterIds IDs de los personajes a eliminar
 	 */
 	bulkRemoveCharacters: (characterIds: string[]) => {
 		set((state) => {
 			const newCharacters = { ...state.characters };
-
 			characterIds.forEach((id) => {
 				delete newCharacters[id];
 			});
-
 			return { characters: newCharacters };
 		});
 	},
 
 	/**
-	 * Alterna el estado favorito de un personaje
+	 * Cambia el estado de favorito de un personaje
 	 * @param characterId ID del personaje
 	 */
 	toggleFavorite: (characterId: string) => {
 		set((state) => {
 			const character = state.characters[characterId];
-
-			if (!character) {
-				return state;
-			}
+			if (!character) return state;
 
 			return {
 				characters: {
@@ -233,10 +228,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	setFeaturedImage: (characterId: string, imageId: string | null) => {
 		set((state) => {
 			const character = state.characters[characterId];
-
-			if (!character) {
-				return state;
-			}
+			if (!character) return state;
 
 			return {
 				characters: {
@@ -258,13 +250,9 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	incrementLevel: (characterId: string) => {
 		set((state) => {
 			const character = state.characters[characterId];
+			if (!character) return state;
 
-			if (!character) {
-				return state;
-			}
-
-			const currentLevel =
-				typeof character.level === 'number' ? character.level : Number.parseInt(character.level || '1', 10) || 1;
+			const currentLevel = typeof character.level === 'number' ? character.level : 1;
 
 			return {
 				characters: {
@@ -280,26 +268,23 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	},
 
 	/**
-	 * Decrementa el nivel de un personaje (mínimo 1)
+	 * Decrementa el nivel de un personaje (min 1)
 	 * @param characterId ID del personaje
 	 */
 	decrementLevel: (characterId: string) => {
 		set((state) => {
 			const character = state.characters[characterId];
+			if (!character) return state;
 
-			if (!character) {
-				return state;
-			}
-
-			const currentLevel =
-				typeof character.level === 'number' ? character.level : Number.parseInt(character.level || '1', 10) || 1;
+			const currentLevel = typeof character.level === 'number' ? character.level : 1;
+			const newLevel = Math.max(1, currentLevel - 1);
 
 			return {
 				characters: {
 					...state.characters,
 					[characterId]: {
 						...character,
-						level: Math.max(1, currentLevel - 1),
+						level: newLevel,
 						updatedAt: new Date(),
 					},
 				},
@@ -308,7 +293,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	},
 
 	/**
-	 * Establece el estado de carga global
+	 * Establece el estado de carga
 	 * @param isLoading Estado de carga
 	 */
 	setLoading: (isLoading: boolean) => {
@@ -316,7 +301,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	},
 
 	/**
-	 * Establece un mensaje de error global
+	 * Establece un mensaje de error
 	 * @param error Mensaje de error o null
 	 */
 	setError: (error: string | null) => {
@@ -324,7 +309,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	},
 
 	/**
-	 * Limpia el mensaje de error global
+	 * Limpia el mensaje de error
 	 */
 	clearError: () => {
 		set({ error: null });
@@ -336,34 +321,47 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	 * @param targetId ID del personaje destino
 	 * @param targetName Nombre del personaje destino
 	 * @param type Tipo de relación
-	 * @param strength Fuerza de la relación (0-100)
+	 * @param strength Fuerza de la relación (1-10)
 	 */
 	addRelationship: (characterId: string, targetId: string, targetName: string, type: string, strength: number) => {
 		set((state) => {
 			const character = state.characters[characterId];
+			if (!character) return state;
 
-			if (!character) {
-				return state;
+			// Extraer relaciones existentes
+			let relationships = [];
+			if (character.relationships) {
+				if (typeof character.relationships === 'string') {
+					try {
+						relationships = JSON.parse(character.relationships);
+					} catch (e) {
+						relationships = [];
+					}
+				} else {
+					relationships = character.relationships;
+				}
 			}
 
-			const newRelationship = {
-				characterId: targetId,
-				name: targetName,
-				type,
-				strength: Math.max(0, Math.min(100, strength)),
-			};
+			// Filtrar relación existente con el mismo destino si existe
+			const filteredRelationships = relationships.filter((rel: any) => rel.targetId !== targetId);
 
-			// Obtener relaciones actuales y agregar la nueva
-			const currentRelationships = character.parsedRelationships || [];
-			const updatedRelationships = [...currentRelationships.filter((r) => r.characterId !== targetId), newRelationship];
+			// Añadir nueva relación
+			const newRelationships = [
+				...filteredRelationships,
+				{
+					targetId,
+					targetName,
+					type,
+					strength: Math.min(10, Math.max(1, strength)),
+				},
+			];
 
 			return {
 				characters: {
 					...state.characters,
 					[characterId]: {
 						...character,
-						parsedRelationships: updatedRelationships,
-						relationships: serializeArray(updatedRelationships),
+						relationships: serializeArray(newRelationships),
 						updatedAt: new Date(),
 					},
 				},
@@ -379,21 +377,31 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	removeRelationship: (characterId: string, targetId: string) => {
 		set((state) => {
 			const character = state.characters[characterId];
+			if (!character) return state;
 
-			if (!character || !character.parsedRelationships) {
-				return state;
+			// Extraer relaciones existentes
+			let relationships = [];
+			if (character.relationships) {
+				if (typeof character.relationships === 'string') {
+					try {
+						relationships = JSON.parse(character.relationships);
+					} catch (e) {
+						relationships = [];
+					}
+				} else {
+					relationships = character.relationships;
+				}
 			}
 
-			// Filtrar la relación a eliminar
-			const updatedRelationships = character.parsedRelationships.filter((r) => r.characterId !== targetId);
+			// Filtrar relación a eliminar
+			const filteredRelationships = relationships.filter((rel: any) => rel.targetId !== targetId);
 
 			return {
 				characters: {
 					...state.characters,
 					[characterId]: {
 						...character,
-						parsedRelationships: updatedRelationships,
-						relationships: serializeArray(updatedRelationships),
+						relationships: serializeArray(filteredRelationships),
 						updatedAt: new Date(),
 					},
 				},
@@ -402,26 +410,240 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	},
 
 	/**
-	 * Restablece la lista de personajes
+	 * Obtiene los grupos asociados a un personaje
+	 * @param characterId ID del personaje
+	 * @returns Array de IDs de grupos
+	 */
+	getCharacterGroups: (characterId: string) => {
+		const character = get().characters[characterId];
+		if (!character || !character.groups) return [];
+		return character.groups.map(group => group.id);
+	},
+
+	/**
+	 * Obtiene las propiedades asociadas a un personaje
+	 * @param characterId ID del personaje
+	 * @returns Array de IDs de propiedades
+	 */
+	getCharacterProperties: (characterId: string) => {
+		const character = get().characters[characterId];
+		if (!character || !character.properties) return [];
+		return character.properties.map(property => property.id);
+	},
+
+	/**
+	 * Obtiene los comodines asociados a un personaje
+	 * @param characterId ID del personaje
+	 * @returns Array de IDs de comodines
+	 */
+	getCharacterWildcards: (characterId: string) => {
+		const character = get().characters[characterId];
+		if (!character || !character.wildcards) return [];
+		return character.wildcards.map(wildcard => wildcard.id);
+	},
+
+	/**
+	 * Añade un grupo a un personaje
+	 * @param characterId ID del personaje
+	 * @param groupId ID del grupo a añadir
+	 */
+	addGroupToCharacter: (characterId: string, groupId: string) => {
+		set((state) => {
+			const character = state.characters[characterId];
+			if (!character) return state;
+
+			const currentGroups = character.groups || [];
+			if (currentGroups.some(g => g.id === groupId)) return state;
+
+			return {
+				characters: {
+					...state.characters,
+					[characterId]: {
+						...character,
+						groups: [...currentGroups, { id: groupId }],
+						updatedAt: new Date(),
+					},
+				},
+			};
+		});
+	},
+
+	/**
+	 * Elimina un grupo de un personaje
+	 * @param characterId ID del personaje
+	 * @param groupId ID del grupo a eliminar
+	 */
+	removeGroupFromCharacter: (characterId: string, groupId: string) => {
+		set((state) => {
+			const character = state.characters[characterId];
+			if (!character || !character.groups) return state;
+
+			return {
+				characters: {
+					...state.characters,
+					[characterId]: {
+						...character,
+						groups: character.groups.filter(g => g.id !== groupId),
+						updatedAt: new Date(),
+					},
+				},
+			};
+		});
+	},
+
+	/**
+	 * Añade una propiedad a un personaje
+	 * @param characterId ID del personaje
+	 * @param propertyId ID de la propiedad a añadir
+	 */
+	addPropertyToCharacter: (characterId: string, propertyId: string) => {
+		set((state) => {
+			const character = state.characters[characterId];
+			if (!character) return state;
+
+			const currentProperties = character.properties || [];
+			if (currentProperties.some(p => p.id === propertyId)) return state;
+
+			return {
+				characters: {
+					...state.characters,
+					[characterId]: {
+						...character,
+						properties: [...currentProperties, { id: propertyId }],
+						updatedAt: new Date(),
+					},
+				},
+			};
+		});
+	},
+
+	/**
+	 * Elimina una propiedad de un personaje
+	 * @param characterId ID del personaje
+	 * @param propertyId ID de la propiedad a eliminar
+	 */
+	removePropertyFromCharacter: (characterId: string, propertyId: string) => {
+		set((state) => {
+			const character = state.characters[characterId];
+			if (!character || !character.properties) return state;
+
+			return {
+				characters: {
+					...state.characters,
+					[characterId]: {
+						...character,
+						properties: character.properties.filter(p => p.id !== propertyId),
+						updatedAt: new Date(),
+					},
+				},
+			};
+		});
+	},
+
+	/**
+	 * Añade un comodín a un personaje
+	 * @param characterId ID del personaje
+	 * @param wildcardId ID del comodín a añadir
+	 */
+	addWildcardToCharacter: (characterId: string, wildcardId: string) => {
+		set((state) => {
+			const character = state.characters[characterId];
+			if (!character) return state;
+
+			const currentWildcards = character.wildcards || [];
+			if (currentWildcards.some(w => w.id === wildcardId)) return state;
+
+			return {
+				characters: {
+					...state.characters,
+					[characterId]: {
+						...character,
+						wildcards: [...currentWildcards, { id: wildcardId }],
+						updatedAt: new Date(),
+					},
+				},
+			};
+		});
+	},
+
+	/**
+	 * Elimina un comodín de un personaje
+	 * @param characterId ID del personaje
+	 * @param wildcardId ID del comodín a eliminar
+	 */
+	removeWildcardFromCharacter: (characterId: string, wildcardId: string) => {
+		set((state) => {
+			const character = state.characters[characterId];
+			if (!character || !character.wildcards) return state;
+
+			return {
+				characters: {
+					...state.characters,
+					[characterId]: {
+						...character,
+						wildcards: character.wildcards.filter(w => w.id !== wildcardId),
+						updatedAt: new Date(),
+					},
+				},
+			};
+		});
+	},
+
+	/**
+	 * Actualiza las relaciones de un personaje de forma masiva
+	 * @param characterId ID del personaje
+	 * @param data Datos de relaciones a actualizar
+	 */
+	updateCharacterRelations: (characterId: string, data: {
+		groupIds?: string[],
+		propertyIds?: string[],
+		wildcardIds?: string[]
+	}) => {
+		set((state) => {
+			const character = state.characters[characterId];
+			if (!character) return state;
+
+			const updates = { ...character };
+
+			if (data.groupIds !== undefined) {
+				updates.groups = data.groupIds.map(id => ({ id }));
+			}
+
+			if (data.propertyIds !== undefined) {
+				updates.properties = data.propertyIds.map(id => ({ id }));
+			}
+
+			if (data.wildcardIds !== undefined) {
+				updates.wildcards = data.wildcardIds.map(id => ({ id }));
+			}
+
+			updates.updatedAt = new Date();
+
+			return {
+				characters: {
+					...state.characters,
+					[characterId]: updates,
+				},
+			};
+		});
+	},
+
+	/**
+	 * Restablece todos los personajes
+	 * Elimina todos los personajes del store
 	 */
 	resetCharacters: () => {
 		set({ characters: {} });
 	},
 
 	/**
-	 * Restablece todo el estado
+	 * Restablece el estado completo del slice
 	 */
 	resetState: () => {
 		set({
 			characters: {},
-			selectedCharacterId: null,
-			hoveredCharacterId: null,
-			expandedCharacterIds: [],
 			isLoading: false,
 			error: null,
-			activeFilters: [],
-			searchTerm: '',
-			currentSortOption: get().defaultSortOption,
 		});
 	},
 });

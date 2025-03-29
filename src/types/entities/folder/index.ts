@@ -1,13 +1,19 @@
 /**
- * @file Exportaciones principales de tipos para la entidad Folder
+ * @file Archivo de índice para exportar tipos de la entidad Folder
  * @module types/entities/folder
  */
 
-export * from './base';
-export * from './enums';
-export * from './extended';
-export * from './folder-types';
+export type {
+  CreateFolderData, FolderBase, FolderComplete, FolderExtended, FolderExtendedComplete, FolderFilters, FolderSummary, FolderTreeItem, UpdateFolderData
+} from './types';
 
-// Alias común para el tipo principal
-export type { FolderWithRelations as Folder } from './folder-types';
+export { FOLDER_SORT_PROPERTY_MAP, FolderSortCriteria } from './types';
+
+// Alias para compatibilidad con código existente
+export type { FolderExtendedComplete as Folder } from './types';
+
+// Ya no exportamos los archivos obsoletos
+// export * from './base';
+// export * from './enums';
+// export * from './extended';
 
