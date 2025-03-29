@@ -15,6 +15,7 @@ export interface CoreSlice {
 
 	// Acciones
 	loadConcepts: () => Promise<void>;
+	setConcepts: (concepts: ConceptWithStats[]) => void;
 	createConcept: (concept: ConceptCreateInput) => Promise<void>;
 	updateConcept: (id: string, concept: ConceptUpdateInput) => Promise<void>;
 	deleteConcept: (id: string) => Promise<void>;
@@ -96,6 +97,11 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.error('❌ Error al cargar conceptos:', error);
 			set({ error: message, isLoading: false });
 		}
+	},
+
+	setConcepts: (concepts) => {
+		coreLogger.info('📥 Estableciendo conceptos manualmente:', { count: concepts.length });
+		set({ concepts, isLoading: false });
 	},
 
 	createConcept: async (concept) => {

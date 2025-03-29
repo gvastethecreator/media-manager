@@ -173,35 +173,82 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 			// Filtrar items válidos
 			const itemsToLoad: FileItem[] = [];
 
+			// Verificar si el componente sigue montado
+			if (!loadQueueRef.current) {
+				return; // El componente se ha desmontado
+			}
+
 			for (const item of visibleItems) {
 				// Verificar ID válido
-				if (item.id && typeof item.id === 'string' && item.id.trim() !== '') {
-					// Verificar si ya está cargado o en proceso
+				if (!item.id || typeof item.id !== 'string' || item.id.trim() === '') {
+					continue; // Saltar items sin ID válido
+				}
+
+				// Acceder directamente al store para verificar si ya existe
 					const resource = imageResources.resources.get(item.id);
+
+				// Solo cargar si:
+				// 1. No tiene thumbnail en el resource
+				// 2. No está ya en la cola de carga
+				// 3. No tiene un error registrado (o si lo queremos reintentar)
 					if (!resource?.thumbnail && !loadQueueRef.current.has(item.id)) {
 						itemsToLoad.push(item);
 					}
 				}
+
+			// Si no hay items para cargar, salir temprano
+			if (itemsToLoad.length === 0) {
+				return;
 			}
 
-			// Precargar recursos para todos los items visibles
-			const visibleIds = visibleItems
+			// Precargar recursos para todos los items válidos a cargar
+			const itemIdsToLoad = itemsToLoad
 				.map((item) => item.id)
 				.filter((id): id is string => typeof id === 'string' && id.trim() !== '');
 
-			if (visibleIds.length > 0) {
-				imageResources.preloadResources(visibleIds);
+			if (itemIdsToLoad.length > 0) {
+				try {
+					imageResources.preloadResources(itemIdsToLoad);
+				} catch (preloadError) {
+					console.warn('Error al precargar recursos:', preloadError);
+					// Continuar con la carga individual a pesar del error
+				}
 			}
 
 			// Cargar thumbnails por lotes para mejorar rendimiento
+			try {
 			for (let i = 0; i < itemsToLoad.length; i += BATCH_SIZE) {
+					// Verificar de nuevo si el componente sigue montado
+					if (!loadQueueRef.current) {
+						return; // Salir si el componente se ha desmontado
+					}
+
 				const batch = itemsToLoad.slice(i, i + BATCH_SIZE);
-				await Promise.all(batch.map((item) => loadThumbnail(item.id)));
+
+					try {
+						// Usar Promise.allSettled para evitar que un error detenga todo el lote
+						const results = await Promise.allSettled(
+							batch.map((item) => loadThumbnail(item.id))
+						);
+
+						// Loggear errores individuales para diagnóstico
+						results.forEach((result, index) => {
+							if (result.status === 'rejected') {
+								console.warn(`Error al cargar thumbnail para ${batch[index].id}:`, result.reason);
+							}
+						});
+					} catch (batchError) {
+						console.warn('Error procesando lote de thumbnails:', batchError);
+						// Continuar con el siguiente lote a pesar del error
+					}
 
 				// Pequeña pausa entre lotes para no bloquear la UI
 				if (i + BATCH_SIZE < itemsToLoad.length) {
 					await new Promise((resolve) => setTimeout(resolve, 10));
 				}
+				}
+			} catch (error) {
+				console.error('Error general cargando thumbnails:', error);
 			}
 		},
 		[imageResources, loadThumbnail, loadQueueRef]
