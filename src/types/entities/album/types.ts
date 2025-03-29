@@ -3,6 +3,19 @@
  * @module types/entities/album/types
  */
 
+import type { Character } from '../character/character-types';
+import type { Collection } from '../collection/collection-types';
+import type { Concept } from '../concept/concept-types';
+import type { Group } from '../group/group-types';
+import type { Image } from '../image/index';
+import type { Note } from '../note/note-types';
+import type { Place } from '../place/place-types';
+import type { Prompt } from '../prompt/prompt-types';
+import type { Property } from '../property/property-types';
+import type { Tag } from '../tag/tag-types';
+import type { Video } from '../video/types';
+import type { Wildcard } from '../wildcard/wildcard-types';
+import type { WorldItem } from '../world-item/world-item-types';
 import type { AlbumPrivacyLevel, AlbumType } from './enums';
 
 /**
@@ -11,16 +24,17 @@ import type { AlbumPrivacyLevel, AlbumType } from './enums';
 export interface AlbumBase {
 	id: string;
 	name: string;
-	description?: string;
-	coverImageId?: string | null;
-	type: AlbumType;
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	ownerId: string;
-	parentId?: string | null;
-	sortOrder?: number;
-	isArchived: boolean;
-	slug?: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	sortBy: string;
+	filters: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
@@ -124,19 +138,22 @@ export interface UpdateAlbumItemsData {
  * Interfaz extendida para álbum con todas las propiedades
  */
 export interface Album extends AlbumBase {
-	// Relaciones
-	parent?: {
-		id: string;
-		name: string;
-	} | null;
+	// Relaciones con contenido
+	images?: Image[];
+	videos?: Video[];
 
-	children?: Album[];
-
-	coverImage?: {
-		id: string;
-		url: string;
-		thumbnailUrl: string;
-	} | null;
+	// Relaciones con entidades principales
+	collections?: Collection[];
+	tags?: Tag[];
+	characters?: Character[];
+	places?: Place[];
+	worldItems?: WorldItem[];
+	concepts?: Concept[];
+	prompts?: Prompt[];
+	notes?: Note[];
+	wildcards?: Wildcard[];
+	properties?: Property[];
+	groups?: Group[];
 
 	// Metadatos
 	metadata?: AlbumMetadata;
@@ -144,11 +161,24 @@ export interface Album extends AlbumBase {
 	// Configuración
 	viewConfig?: AlbumViewConfig;
 
-	// Permisos
-	privacyLevel: AlbumPrivacyLevel;
-	sharedWith?: string[];
-
 	// Para UI
 	isExpanded?: boolean;
 	isSelected?: boolean;
+
+	// Contadores
+	_count?: {
+		images?: number;
+		videos?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }
