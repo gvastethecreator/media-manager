@@ -125,22 +125,39 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 				return undefined;
 			}
 
+			// Verificar si el recurso ya está en caché
 			const resource = state.resources.get(id);
+
+			// Agregar más logging para diagnóstico
+			if (resource) {
+				resourceLogger.debug(`Recurso encontrado en caché para ID: ${id}, tiene thumbnail: ${!!resource.thumbnail}, error: ${resource.error || 'ninguno'}`);
+			} else {
+				resourceLogger.debug(`Recurso no encontrado en caché para ID: ${id}, intentando cargar...`);
+			}
 
 			// Si ya tenemos el thumbnail y no está expirado, retornarlo
 			if (resource?.thumbnail && Date.now() - resource.lastUpdate < CACHE_CONFIG.maxAge) {
+				resourceLogger.debug(`Devolviendo thumbnail en caché para ID: ${id}`);
 				return resource.thumbnail;
 			}
 
 			// Si ya está en cola de carga, esperar
 			if (state.loadingQueue.has(id)) {
+				resourceLogger.debug(`ID ${id} ya está en cola de carga, esperando...`);
 				return new Promise((resolve) => {
 					let attempts = 0;
 					const checkInterval = setInterval(() => {
 						attempts++;
 						const updatedResource = state.resources.get(id);
+						resourceLogger.debug(`Intento ${attempts}/${CACHE_CONFIG.maxRetries} esperando thumbnail para ID ${id}, thumbnail disponible: ${!!updatedResource?.thumbnail}`);
+
 						if (updatedResource?.thumbnail || attempts >= CACHE_CONFIG.maxRetries) {
 							clearInterval(checkInterval);
+							if (updatedResource?.thumbnail) {
+								resourceLogger.debug(`Se ha encontrado el thumbnail para ID ${id} después de esperar`);
+							} else {
+								resourceLogger.warn(`⚠️ Se ha excedido el tiempo de espera para ID ${id}`);
+							}
 							resolve(updatedResource?.thumbnail);
 						}
 					}, CACHE_CONFIG.retryDelay);
@@ -149,11 +166,23 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 			try {
 				state.loadingQueue.add(id);
-				resourceLogger.debug('Solicitando thumbnail:', { id, quality: ThumbnailQuality.MEDIUM });
+				resourceLogger.info('Solicitando thumbnail:', { id, quality: ThumbnailQuality.MEDIUM });
 
 				// Asegurarse de que se use un valor válido de ThumbnailQuality
 				const quality = ThumbnailQuality.MEDIUM;
-				const data = await getThumbnail(id, quality);
+				let data;
+
+				try {
+					data = await getThumbnail(id, quality);
+				} catch (requestError) {
+					resourceLogger.error(`Error en la solicitud de thumbnail para ID ${id}:`, requestError);
+					// Propagar el error para que se maneje en el catch exterior
+					throw requestError;
+				}
+
+				if (!data) {
+					throw new Error(`No se recibieron datos para el thumbnail ${id}`);
+				}
 
 				if (data?.thumbnail) {
 					const thumbnailUrl = `data:${data.mimeType || 'image/webp'};base64,${data.thumbnail}`;
@@ -170,6 +199,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					};
 
 					state.resources.set(id, newResource);
+					resourceLogger.info(`✅ Thumbnail cargado correctamente para ID ${id}`);
 					return thumbnailUrl;
 				}
 
@@ -183,6 +213,9 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 						lastUpdate: Date.now(),
 					};
 					state.resources.set(id, errorResource);
+					throw new Error(data.error);
+				} else {
+					throw new Error(`No se pudo cargar el thumbnail para ID ${id}, sin error específico`);
 				}
 			} catch (error) {
 				resourceLogger.error('Error al cargar thumbnail:', {
@@ -196,11 +229,10 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					lastUpdate: Date.now(),
 				};
 				state.resources.set(id, errorResource);
+				throw error; // Propagamos el error para que el componente pueda manejarlo
 			} finally {
 				state.loadingQueue.delete(id);
 			}
-
-			return undefined;
 		},
 
 		getOriginalUrl: async (id: string) => {

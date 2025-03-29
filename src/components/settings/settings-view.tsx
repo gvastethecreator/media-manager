@@ -27,13 +27,13 @@ import { FoldersSettings } from './folders/folders-settings';
 import { NotesSettings } from './notes/notes-settings';
 import { PlacesSettings } from './places/places-settings';
 import { ProfilesSettings } from './profiles/profiles-settings';
+import { PromptSettings } from './prompts/prompts-settings';
 import { ShortcutsSettings } from './shortcuts/shortcuts-settings';
 import { SystemSettings } from './system/system-settings';
 import { TagsSettings } from './tags/tags-settings';
 import { ThumbnailsSettings } from './thumbnails/thumbnails-settings';
 import { UploadedImagesSettings } from './uploaded-images/uploaded-images-settings';
 import { WorldItemsSettings } from './world-items/world-items-settings';
-import { PromptSettings } from './prompts/prompts-settings';
 
 // Definición de tipos para estructurar los tabs
 interface TabItem {
@@ -153,6 +153,24 @@ const tabsData: TabItem[] = [
 export function SettingsView() {
 	const [activeTab, setActiveTab] = React.useState('system');
 
+	// Escuchar el evento para cambiar la pestaña activa desde otros componentes
+	React.useEffect(() => {
+		const handleSetSettingsTab = (event: CustomEvent<{ tab: string }>) => {
+			const { tab } = event.detail;
+			if (tab && tabsData.some(tabData => tabData.id === tab)) {
+				setActiveTab(tab);
+			}
+		};
+
+		// Añadir el event listener con tipado correcto
+		window.addEventListener('set-settings-tab', handleSetSettingsTab as EventListener);
+
+		// Limpiar al desmontar
+		return () => {
+			window.removeEventListener('set-settings-tab', handleSetSettingsTab as EventListener);
+		};
+	}, []);
+
 	// Estilos base comunes para todos los tabs
 	const tabBaseStyles = cn(
 		'flex items-center justify-center gap-2 px-3 h-9',
@@ -165,6 +183,8 @@ export function SettingsView() {
 
 	return (
 		<div className="p-0 m-0 h-full w-full rounded-none flex flex-col">
+			{/* Eliminamos el EntityPreloader redundante, ya tenemos uno centralizado en ViewContainer */}
+
 			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full rounded-none flex flex-col flex-1">
 				{/* TabsList con posición sticky */}
 				<div className="sticky top-0 z-7 backdrop-blur-sm shadow-sm">

@@ -1,7 +1,50 @@
-import type { ViewType } from '@/types/file-item';
 
-export type { ViewType };
-
+/**
+ * Interfaz básica para las propiedades de los componentes de vista
+ *
+ * Esta interfaz define las propiedades comunes que pueden recibir
+ * los componentes de vista en la aplicación.
+ */
 export interface ViewProps {
-	isResizing?: boolean;
+	/**
+	 * Clase CSS adicional para personalizar la vista
+	 */
+	className?: string;
 }
+
+/**
+ * Enumeración de los tipos de vista disponibles en la aplicación
+ *
+ * Esta enumeración define todos los posibles valores para el estado
+ * currentView en el NavigationStore.
+ */
+export type ViewType =
+	| 'settings'
+	| 'all-images'
+	| 'files'
+	| 'favorites'
+	| 'search'
+	| 'collections'
+	| 'collection-content'
+	| 'folders'
+	| 'folder-content'
+	| 'canvas'
+	| 'chat'
+	| 'tags'
+	| 'tag-content'
+	| 'albums'
+	| 'album-content'
+	| 'characters'
+	| 'character-content'
+	| 'places'
+	| 'place-content'
+	| 'world-items'
+	| 'world-item-content'
+	| 'concepts'
+	| 'concept-content'
+	| 'prompts'
+	| 'prompt-content'
+	| 'notes'
+	| 'note-content'
+	| 'entity-cards'
+	| 'development';

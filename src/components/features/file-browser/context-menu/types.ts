@@ -32,6 +32,13 @@ export type ContextMenuAction =
 	| 'copy-path'
 	| 'delete';
 
+// Tipo para la data adicional en acciones de menú contextual
+export interface ContextMenuActionData {
+	id?: string;
+	name?: string;
+	[key: string]: unknown;
+}
+
 // Props para el componente principal del menú contextual
 export interface FileContextMenuProps {
 	file: FileItem;
@@ -39,37 +46,42 @@ export interface FileContextMenuProps {
 	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
 }
 
-// Interfaces para los estados de carga
-export interface EntityLoadingState {
+// Estado de carga para submenu
+export interface LoadingState {
 	loading: boolean;
 	open: boolean;
 	loaded: boolean;
+	hasError: boolean;
+	loadedCount: number; // Número de elementos cargados correctamente
 }
 
-// Tipo para los estados de carga de todos los tipos de entidades
-export type LoadingStates = {
-	collections: EntityLoadingState;
-	tags: EntityLoadingState;
-	albums: EntityLoadingState;
-	characters: EntityLoadingState;
-	places: EntityLoadingState;
-	objects: EntityLoadingState;
-	worldItems: EntityLoadingState;
-	prompts: EntityLoadingState;
-	notes: EntityLoadingState;
-	concepts: EntityLoadingState;
-};
+// Estados de carga para todos los tipos de entidades
+export interface LoadingStates {
+	collections: LoadingState;
+	tags: LoadingState;
+	albums: LoadingState;
+	characters: LoadingState;
+	places: LoadingState;
+	objects?: LoadingState;
+	worldItems: LoadingState;
+	prompts: LoadingState;
+	notes: LoadingState;
+	concepts: LoadingState;
+}
 
-// Componente de submenú genérico
-export interface SubMenuProps<T> {
-	title: string;
-	icon: React.ReactNode;
+// Propiedades para el submenú de entidades
+export interface SubMenuProps {
+	title?: string;
+	icon?: React.ReactNode;
 	entityName: string;
-	entities: T[];
+	entities: any[];
 	isLoading: boolean;
-	onSelectAction: (entity: T) => void;
+	hasError: boolean;
+	loadedCount?: number;
+	onSelectAction: (entity: any) => void;
 	onCreateAction: () => void;
-	renderItemAction: (entity: T) => React.ReactNode;
+	renderItemAction: (entity: any) => React.ReactNode;
+	onOpenChange?: (open: boolean) => void;
 }
 
 // Función auxiliar para parsear metadata
