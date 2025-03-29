@@ -17,6 +17,16 @@ import type { ViewProps } from '../types';
 
 const viewLogger = serverLogger.withContext('AlbumsView');
 
+// Definir el tipo para álbumes con estadísticas
+interface AlbumWithStats {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+	updatedAt: Date | string;
+	_count?: { images: number };
+}
+
 // Componente memoizado para cada tarjeta de álbum
 const MemoizedAlbumCard = React.memo(
 	({
@@ -26,7 +36,14 @@ const MemoizedAlbumCard = React.memo(
 		album: AlbumWithStats;
 		onAlbumClick: () => void;
 	}) => {
-		return <AlbumCard album={album} onClick={onAlbumClick} className="h-full" />;
+		// Asegurarse de que el álbum tenga todas las propiedades requeridas
+		const completeAlbum = {
+			...album,
+			emoji: album.emoji || '📔',
+			color: album.color || '#10b981',
+		};
+
+		return <AlbumCard album={completeAlbum} onClick={onAlbumClick} className="h-full" />;
 	},
 	(prevProps, nextProps) => {
 		// Memoización personalizada para solo re-renderizar si cambian propiedades importantes

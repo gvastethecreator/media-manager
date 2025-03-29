@@ -591,3 +591,52 @@ export async function getConceptImages(conceptId: string): Promise<{ images: Fil
 		);
 	}
 }
+
+/**
+ * Añade una imagen a un concepto
+ */
+export async function addImageToConcept(conceptId: string, imageId: string): Promise<{ success: boolean }> {
+	try {
+		conceptLogger.info('➕ Añadiendo imagen a concepto:', { conceptId, imageId });
+
+		// Verificar que el concepto existe
+		const concept = await prisma.concept.findUnique({
+			where: { id: conceptId },
+			select: { id: true, name: true }
+		});
+
+		if (!concept) {
+			throw createConceptError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
+		}
+
+		// Verificar que la imagen existe
+		const image = await prisma.image.findUnique({
+			where: { id: imageId },
+			select: { id: true }
+		});
+
+		if (!image) {
+			throw createConceptError('Imagen no encontrada', EntityErrorCode.NOT_FOUND);
+		}
+
+		// Crear relación entre la imagen y el concepto
+		await prisma.concept.update({
+			where: { id: conceptId },
+			data: {
+				images: {
+					connect: { id: imageId }
+				}
+			}
+		});
+
+		// Notificar cambio y revalidar rutas
+		await notifyConceptChange('update', concept, imageId);
+		await revalidateAllPaths();
+
+		conceptLogger.info('✅ Imagen añadida al concepto:', { conceptId, imageId });
+		return { success: true };
+	} catch (error) {
+		conceptLogger.error('❌ Error al añadir imagen a concepto:', error);
+		throw createConceptError('No se pudo añadir la imagen al concepto', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}

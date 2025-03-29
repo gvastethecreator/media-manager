@@ -55,7 +55,7 @@ export const useWorldItemStore = create<WorldItemStore>()(
 					set({ isLoading: true, error: null });
 					worldItemLogger.info('🔄 Cargando objetos del mundo...');
 
-					const response = await fetch('/api/world-items');
+					const response = await fetch('/api/entities/world-items');
 					if (!response.ok) throw new Error('Error al cargar objetos del mundo');
 
 					const worldItems = await response.json();
@@ -72,7 +72,7 @@ export const useWorldItemStore = create<WorldItemStore>()(
 			createWorldItem: async (item) => {
 				try {
 					worldItemLogger.info('➕ Creando objeto del mundo:', item);
-					const response = await fetch('/api/world-items', {
+					const response = await fetch('/api/entities/world-items', {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify(item),

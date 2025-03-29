@@ -46,7 +46,7 @@ export const createTagCoreSlice: StateCreator<TagState & TagCoreSlice, [], [], T
 			setTagsError(null);
 
 			// Realizar solicitud al servidor
-			const response = await fetch('/api/tags');
+			const response = await fetch('/api/entities/tags');
 
 			if (!response.ok) {
 				throw new Error(`Error: ${response.status} - ${response.statusText}`);
@@ -80,7 +80,7 @@ export const createTagCoreSlice: StateCreator<TagState & TagCoreSlice, [], [], T
 			}
 
 			// Realizar solicitud al servidor
-			const response = await fetch(`/api/tags/${id}`);
+			const response = await fetch(`/api/entities/tags/${id}`);
 
 			if (!response.ok) {
 				throw new Error(`Error: ${response.status} - ${response.statusText}`);
@@ -109,7 +109,7 @@ export const createTagCoreSlice: StateCreator<TagState & TagCoreSlice, [], [], T
 			setTagsLoading(true);
 
 			// Realizar solicitud al servidor
-			const response = await fetch('/api/tags', {
+			const response = await fetch('/api/entities/tags', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ export const createTagCoreSlice: StateCreator<TagState & TagCoreSlice, [], [], T
 			setTagsLoading(true);
 
 			// Realizar solicitud al servidor
-			const response = await fetch(`/api/tags/${id}`, {
+			const response = await fetch(`/api/entities/tags/${id}`, {
 				method: 'PATCH',
 				headers: {
 					'Content-Type': 'application/json',
@@ -178,7 +178,7 @@ export const createTagCoreSlice: StateCreator<TagState & TagCoreSlice, [], [], T
 			setTagsLoading(true);
 
 			// Realizar solicitud al servidor
-			const response = await fetch(`/api/tags/${id}`, {
+			const response = await fetch(`/api/entities/tags/${id}`, {
 				method: 'DELETE',
 			});
 

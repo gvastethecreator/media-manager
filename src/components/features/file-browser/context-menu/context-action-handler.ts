@@ -3,14 +3,26 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { toastService } from '@/services/toast.service';
 
+// Importaciones de server actions para entidades
+import { addImageToAlbum } from '@/app/actions/albums/album.actions';
+import { addImageToCharacter } from '@/app/actions/characters/character.actions';
+import { addImageToCollection } from '@/app/actions/collections/collection.actions';
+import { addImageToConcept } from '@/app/actions/concepts/concept.actions';
+import { addImageToNote } from '@/app/actions/notes/note.actions';
+import { addImageToPlace } from '@/app/actions/places/place.actions';
+import { addImageToPrompt } from '@/app/actions/prompts/prompt.actions';
+import { addImageToTag } from '@/app/actions/tags/tag.actions';
+import { addImageToWorldItem } from '@/app/actions/world-items/world-item.actions';
+
 // Importaciones de stores en entidades
 import { useCollectionStore } from '@/store/entities/collection';
 import { useConceptStore } from '@/store/entities/concept';
 import { useNoteStore } from '@/store/entities/note';
-import { usePlaceStore } from '@/store/entities/place';
 import { usePromptStore } from '@/store/entities/prompt';
 import { useTagStore } from '@/store/entities/tag';
-import { useWorldItemStore } from '@/store/entities/world-item';
+
+// Importaciones de actions de archivos
+import { deleteFile as deleteFileAction } from '@/app/actions/files/file.actions';
 
 import type { ContextMenuAction, ContextMenuActionData } from '@/types/context-menu-actions';
 import type { FileItem } from '@/types/file-item';
@@ -37,21 +49,121 @@ function redirectLegacyAction(action: ContextMenuAction): {
 	}
 }
 
-// Definir el servicio de operaciones de archivos si no existe
+// Implementación del servicio de operaciones de archivos
 const customFileOperationsService = {
-	openPath: (path: string) => Promise.resolve(),
-	downloadFile: (path: string) => Promise.resolve(),
-	copyFileToClipboard: (path: string) => Promise.resolve(),
-	deleteFile: (path: string) => Promise.resolve(),
+	// Abre la ubicación del archivo en el explorador del sistema
+	openPath: async (path: string) => {
+		try {
+			// En navegador web, podemos intentar abrir una ventana nueva
+			// con la ruta en formato file:// (esto funciona en algunos navegadores)
+			const url = `file://${path}`;
+			const folderPath = path.substring(0, path.lastIndexOf('/'));
+			const folderUrl = `file://${folderPath}`;
+
+			// Intentamos abrir la carpeta contenedora primero
+			window.open(folderUrl, '_blank');
+			actionLogger.info('✅ Abriendo ubicación del archivo:', folderUrl);
+			return Promise.resolve();
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	},
+
+	// Descarga el archivo al dispositivo del usuario
+	downloadFile: async (path: string) => {
+		try {
+			// Crear un enlace temporal para descargar
+			const filename = path.split('/').pop() || 'download';
+			const a = document.createElement('a');
+
+			// Si es una ruta local, necesitamos convertirla a una URL descargable
+			// Para esto, debemos tener un endpoint que permita acceder al archivo
+			const downloadUrl = `/api/files/download?path=${encodeURIComponent(path)}`;
+
+			a.href = downloadUrl;
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+
+			actionLogger.info('✅ Archivo descargado:', path);
+			return Promise.resolve();
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	},
+
+	// Copia la imagen al portapapeles
+	copyFileToClipboard: async (path: string) => {
+		try {
+			// Para copiar una imagen al portapapeles, primero necesitamos cargarla
+			const imageUrl = `/api/files/view?path=${encodeURIComponent(path)}`;
+
+			// Creamos un elemento de imagen temporal
+			const img = new Image();
+			img.crossOrigin = 'anonymous';
+
+			// Esperamos a que la imagen cargue
+			await new Promise((resolve, reject) => {
+				img.onload = resolve;
+				img.onerror = reject;
+				img.src = imageUrl;
+			});
+
+			// Creamos un canvas para dibujar la imagen
+			const canvas = document.createElement('canvas');
+			canvas.width = img.width;
+			canvas.height = img.height;
+			const ctx = canvas.getContext('2d');
+			if (!ctx) throw new Error('No se pudo crear contexto 2D');
+
+			// Dibujamos la imagen en el canvas
+			ctx.drawImage(img, 0, 0);
+
+			// Copiamos la imagen al portapapeles
+			canvas.toBlob(async (blob) => {
+				if (blob) {
+					try {
+						// Usar la API moderna del portapapeles
+						await navigator.clipboard.write([
+							new ClipboardItem({
+								[blob.type]: blob
+							})
+						]);
+						actionLogger.info('✅ Imagen copiada al portapapeles');
+					} catch (error) {
+						actionLogger.error('❌ Error al copiar imagen al portapapeles:', error);
+						throw error;
+					}
+				}
+			});
+
+			return Promise.resolve();
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	},
+
+	// Elimina el archivo
+	deleteFile: async (path: string) => {
+		try {
+			// Usar la server action para eliminar el archivo
+			await deleteFileAction(path);
+			actionLogger.info('✅ Archivo eliminado:', path);
+			return Promise.resolve();
+		} catch (error) {
+			return Promise.reject(error);
+		}
+	},
 };
 
-export function handleContextAction(
+export async function handleContextAction(
 	originalAction: ContextMenuAction,
 	item: FileItem,
 	data?: ContextMenuActionData,
 	onItemDoubleClick?: (item: FileItem) => void,
 	toggleItemSelection?: ToggleItemSelectionFunction
-): void {
+): Promise<void> {
 	// Redireccionar acciones legacy si es necesario
 	const { newAction, newData } = redirectLegacyAction(originalAction);
 	const action = newAction;
@@ -86,46 +198,50 @@ export function handleContextAction(
 			actionLogger.info('📂 Abriendo ubicación del archivo', item.path);
 			// Abrir ubicación del archivo usando el servicio de operaciones de archivos
 			if (item.path) {
-				customFileOperationsService.openPath(item.path).catch((error: Error) => {
+				try {
+					await customFileOperationsService.openPath(item.path);
+				} catch (error: any) {
 					actionLogger.error('❌ Error al abrir ubicación:', error);
 					toastService.system.error('Error al abrir la ubicación del archivo');
-				});
+				}
 			}
 			break;
 		case 'download':
 			actionLogger.info('⬇️ Descargando archivo', item.path);
 			// Descargar archivo usando el servicio de operaciones de archivos
 			if (item.path) {
-				customFileOperationsService.downloadFile(item.path).catch((error: Error) => {
+				try {
+					await customFileOperationsService.downloadFile(item.path);
+				} catch (error: any) {
 					actionLogger.error('❌ Error al descargar archivo:', error);
 					toastService.system.error('Error al descargar el archivo');
-				});
+				}
 			}
 			break;
 		case 'copy':
 			actionLogger.info('📋 Copiando archivo al portapapeles', item.path);
 			// Copiar al portapapeles usando el servicio de operaciones de archivos
 			if (item.path) {
-				customFileOperationsService.copyFileToClipboard(item.path).catch((error: Error) => {
+				try {
+					await customFileOperationsService.copyFileToClipboard(item.path);
+				} catch (error: any) {
 					actionLogger.error('❌ Error al copiar archivo al portapapeles:', error);
 					toastService.system.error('Error al copiar la imagen al portapapeles');
-				});
+				}
 			}
 			break;
 		case 'copy-path':
 			actionLogger.info('📋 Copiando ruta del archivo al portapapeles', item.path);
 			// Copiar ruta al portapapeles
 			if (item.path) {
-				navigator.clipboard
-					.writeText(item.path)
-					.then(() => {
-						actionLogger.info('✅ Ruta copiada al portapapeles');
-						toastService.system.success('Ruta copiada al portapapeles');
-					})
-					.catch((error) => {
-						actionLogger.error('❌ Error al copiar ruta:', error);
-						toastService.system.error('Error al copiar la ruta');
-					});
+				try {
+					await navigator.clipboard.writeText(item.path);
+					actionLogger.info('✅ Ruta copiada al portapapeles');
+					toastService.system.success('Ruta copiada al portapapeles');
+				} catch (error) {
+					actionLogger.error('❌ Error al copiar ruta:', error);
+					toastService.system.error('Error al copiar la ruta');
+				}
 			}
 			break;
 		case 'delete':
@@ -133,10 +249,13 @@ export function handleContextAction(
 			// Implementar eliminación del archivo con confirmación
 			if (item.path) {
 				if (window.confirm('¿Estás seguro de que deseas eliminar este archivo?')) {
-					customFileOperationsService.deleteFile(item.path).catch((error: Error) => {
+					try {
+						await customFileOperationsService.deleteFile(item.path);
+						toastService.system.success('Archivo eliminado correctamente');
+					} catch (error: any) {
 						actionLogger.error('❌ Error al eliminar archivo:', error);
 						toastService.system.error('Error al eliminar el archivo');
-					});
+					}
 				}
 			}
 			break;
@@ -230,7 +349,8 @@ export function handleContextAction(
 				// Buscar la colección en el store para obtener el nombre
 				const collection = useCollectionStore.getState().collections.find((c) => c.id === collectionId);
 				try {
-					// Utilizamos una función alternativa o una solución temporal
+					// Usar server action para añadir la imagen a la colección
+					await addImageToCollection(collectionId, item.id);
 					toastService.collection.imageAdded(collection?.name);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir imagen a colección:', error);
@@ -244,7 +364,8 @@ export function handleContextAction(
 				const tagId = actionData.id as string;
 				const tag = useTagStore.getState().tags.find((t) => t.id === tagId);
 				try {
-					// Utilizamos una función alternativa o una solución temporal
+					// Usar server action para añadir la etiqueta a la imagen
+					await addImageToTag(tagId, item.id);
 					toastService.tag.imageAdded(tag?.name);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir etiqueta a imagen:', error);
@@ -257,7 +378,8 @@ export function handleContextAction(
 			if (actionData?.id) {
 				const albumId = actionData.id as string;
 				try {
-					// Para evitar errores de tipado, simplificaremos esta sección
+					// Usar server action para añadir la imagen al álbum
+					await addImageToAlbum(albumId, item.id);
 					toastService.system.success('Imagen añadida al álbum');
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir imagen a álbum:', error);
@@ -270,7 +392,8 @@ export function handleContextAction(
 			if (actionData?.id) {
 				const characterId = actionData.id as string;
 				try {
-					// Simplificamos para evitar errores de tipo
+					// Usar server action para añadir la imagen al personaje
+					await addImageToCharacter(characterId, item.id);
 					toastService.system.success('Imagen añadida al personaje');
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir imagen a personaje:', error);
@@ -283,8 +406,8 @@ export function handleContextAction(
 			if (actionData?.id) {
 				const placeId = actionData.id as string;
 				try {
-					// Importar el store correcto y usar un método de la API
-					const placeStore = usePlaceStore.getState();
+					// Usar server action para añadir la imagen al lugar
+					await addImageToPlace(placeId, item.id);
 					toastService.system.success(`Imagen añadida al lugar`);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir imagen a lugar:', error);
@@ -297,8 +420,8 @@ export function handleContextAction(
 			if (actionData?.id) {
 				const worldItemId = actionData.id as string;
 				try {
-					// Importar el store correcto
-					const worldItemStore = useWorldItemStore.getState();
+					// Usar server action para añadir la imagen al objeto
+					await addImageToWorldItem(worldItemId, item.id);
 					toastService.system.success(`Imagen añadida al objeto`);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir imagen a objeto del mundo:', error);
@@ -310,10 +433,11 @@ export function handleContextAction(
 			actionLogger.info('➕ Añadiendo prompt a imagen', actionData);
 			if (actionData?.id) {
 				const promptId = actionData.id as string;
+				const prompt = usePromptStore.getState().prompts.find((p) => p.id === promptId);
 				try {
-					// Importar el store correcto
-					const promptStore = usePromptStore.getState();
-					toastService.system.success(`Prompt añadido a la imagen`);
+					// Usar server action para añadir la imagen al prompt
+					await addImageToPrompt(promptId, item.id);
+					toastService.system.success(`Prompt "${prompt?.name || ''}" añadido a la imagen`);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir prompt a imagen:', error);
 					toastService.system.error('Error al añadir prompt a la imagen');
@@ -326,7 +450,8 @@ export function handleContextAction(
 				const noteId = actionData.id as string;
 				const note = useNoteStore.getState().notes.find((n) => n.id === noteId);
 				try {
-					// Utilizamos una solución temporal
+					// Usar server action para añadir la imagen a la nota
+					await addImageToNote(noteId, item.id);
 					toastService.system.success(`Nota "${note?.title || ''}" añadida a la imagen`);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir nota a imagen:', error);
@@ -340,7 +465,8 @@ export function handleContextAction(
 				const conceptId = actionData.id as string;
 				const concept = useConceptStore.getState().concepts.find((c) => c.id === conceptId);
 				try {
-					// Utilizamos una solución temporal
+					// Usar server action para añadir la imagen al concepto
+					await addImageToConcept(conceptId, item.id);
 					toastService.system.success(`Concepto "${concept?.name || ''}" añadido a la imagen`);
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir concepto a imagen:', error);

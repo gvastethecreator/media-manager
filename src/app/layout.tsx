@@ -32,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 				)}
 			>
 				<ServerInitializer />
+
 				<AppProvider>
 					<ReactScanProvider>
 						<GlobalTooltipProvider>

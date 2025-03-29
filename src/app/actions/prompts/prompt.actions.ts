@@ -549,3 +549,59 @@ export async function getPromptImages(promptId: string): Promise<{ images: FileI
 		);
 	}
 }
+
+/**
+ * Añade una imagen a un prompt
+ */
+export async function addImageToPrompt(promptId: string, imageId: string): Promise<{ success: boolean }> {
+	try {
+		promptLogger.info('➕ Añadiendo imagen a prompt:', { promptId, imageId });
+
+		// Verificar que el prompt existe
+		const prompt = await prisma.prompt.findUnique({
+			where: { id: promptId },
+			select: { id: true, name: true }
+		});
+
+		if (!prompt) {
+			throw createPromptError('Prompt no encontrado', EntityErrorCode.NOT_FOUND);
+		}
+
+		// Verificar que la imagen existe
+		const image = await prisma.image.findUnique({
+			where: { id: imageId },
+			select: { id: true }
+		});
+
+		if (!image) {
+			throw createPromptError('Imagen no encontrada', EntityErrorCode.NOT_FOUND);
+		}
+
+		// Crear relación entre la imagen y el prompt
+		await prisma.prompt.update({
+			where: { id: promptId },
+			data: {
+				images: {
+					connect: { id: imageId }
+				}
+			}
+		});
+
+		// Notificar cambio
+		await emit({
+			type: 'prompts:modified',
+			id: promptId,
+			data: { action: 'addImage', promptId, imageId },
+		});
+		statsEventEmitter.emit(STATS_EVENTS.PROMPT_CHANGE);
+
+		// Revalidar rutas
+		await revalidateAllPaths();
+
+		promptLogger.info('✅ Imagen añadida al prompt:', { promptId, imageId });
+		return { success: true };
+	} catch (error) {
+		promptLogger.error('❌ Error al añadir imagen a prompt:', error);
+		throw createPromptError('No se pudo añadir la imagen al prompt', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}

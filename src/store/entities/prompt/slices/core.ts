@@ -15,6 +15,7 @@ export interface CoreSlice {
 
 	// Acciones
 	loadPrompts: () => Promise<void>;
+	setPrompts: (prompts: PromptWithStats[]) => void;
 	createPrompt: (prompt: PromptCreateInput) => Promise<void>;
 	updatePrompt: (id: string, prompt: PromptUpdateInput) => Promise<void>;
 	deletePrompt: (id: string) => Promise<void>;
@@ -98,6 +99,11 @@ export const createCoreSlice: StateCreator<PromptStore, [], [], CoreSlice> = (se
 			coreLogger.error('❌ Error al cargar prompts:', error);
 			set({ error: message, isLoading: false });
 		}
+	},
+
+	setPrompts: (prompts) => {
+		coreLogger.info('📥 Estableciendo prompts manualmente:', { count: prompts.length });
+		set({ prompts, isLoading: false });
 	},
 
 	createPrompt: async (prompt) => {

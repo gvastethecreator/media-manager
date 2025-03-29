@@ -4,9 +4,9 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { SettingsView } from '@/components/settings/settings-view';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
-import { memo } from 'react';
-import CardDebugToolbar from '../features/entity-cards/debug/card-debug-toolbar';
+import { memo, useRef, useEffect, useState } from 'react';
 import { EntityCardsView } from '../features/entity-cards/views/entity-cards-view';
+import { EntityPreloader } from '../features/file-browser/entity-preloader';
 import { FolderContentView } from '../folders/views/folder-content-view';
 import { FoldersView } from '../folders/views/folders-view';
 import { AlbumContentView } from './albums/album-content-view';
@@ -126,10 +126,45 @@ interface ViewContainerProps {
 
 export function ViewContainer({ isResizing }: ViewContainerProps) {
 	const { currentView, navigationDirection } = useNavigationStore();
+	// Usar un ref para controlar el montaje del preloader y evitar ciclos infinitos
+	const preloaderMountedRef = useRef(false);
+	const [showPreloader, setShowPreloader] = useState(!preloaderMountedRef.current);
+
+	// Efectuar el montaje único del preloader
+	useEffect(() => {
+		// Si ya está marcado como montado, no hacer nada
+		if (preloaderMountedRef.current) {
+			return;
+		}
+
+		// Marcar como montado para evitar futuros montajes
+		preloaderMountedRef.current = true;
+
+		// Después de 5 segundos, forzar a false para garantizar que no quede montado indefinidamente
+		// Este es un mecanismo de seguridad
+		const timer = setTimeout(() => {
+			setShowPreloader(false);
+		}, 5000);
+
+		return () => {
+			clearTimeout(timer);
+		};
+	}, []);
 
 	return (
 		<div className={cn('h-full flex flex-col')}>
-			
+			{/* Solo montar el EntityPreloader una vez al inicio */}
+			{showPreloader && (
+				<EntityPreloader
+					mode="all"
+					respectGlobalState={false}
+					onPreloadComplete={() => {
+						// Una vez completada la precarga, desmontamos el componente
+						setShowPreloader(false);
+						console.log('Todas las entidades precargadas con éxito');
+					}}
+				/>
+			)}
 
 			<AnimatePresence initial={false} custom={navigationDirection}>
 				<motion.div

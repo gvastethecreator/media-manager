@@ -8,6 +8,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { useCollectionStore } from '@/store/entities/collection';
 import { useFileManager } from '@/store/files/file-manager.store';
 import type { Collection } from '@/types/entities/collections';
 import { BookMarked } from 'lucide-react';
@@ -43,6 +44,7 @@ MemoizedCollectionCard.displayName = 'MemoizedCollectionCard';
 export function CollectionsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { setCurrentCollection } = useFileManager();
+	const { collections: storeCollections, isLoading: storeLoading } = useCollectionStore();
 	const [collections, setCollections] = useState<CollectionWithDetails[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -50,10 +52,30 @@ export function CollectionsView(_props: ViewProps) {
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticCollections, _addEvent] = clientEvents.useEvents<CollectionWithDetails[]>(collections);
 
+	// Usar colecciones del store global si están disponibles
+	useEffect(() => {
+		if (storeCollections && storeCollections.length > 0) {
+			viewLogger.info(`✅ Usando ${storeCollections.length} colecciones desde store centralizado`);
+
+			// Transformar las colecciones al formato esperado
+			const transformedData = storeCollections.map(collection => ({
+				...collection,
+				_count: { images: collection.imageCount || 0 },
+				recentImages: collection.recentImages || []
+			}));
+
+			setCollections(transformedData);
+			setIsLoading(false);
+		} else {
+			// Cargar desde el servidor solo si no están en el store
+			loadCollections();
+		}
+	}, [storeCollections]);
+
 	const loadCollections = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			viewLogger.info('🔄 Cargando colecciones...');
+			viewLogger.info('🔄 Cargando colecciones desde servidor (respaldo)...');
 			const data = await getCollections();
 			const transformedData = data.map((collectionData: any) => {
 				// Filtrar valores nulos en recentImages
@@ -93,7 +115,7 @@ export function CollectionsView(_props: ViewProps) {
 			});
 
 			setCollections(transformedData);
-			viewLogger.info(`✅ ${data.length} colecciones cargadas`);
+			viewLogger.info(`✅ ${data.length} colecciones cargadas desde servidor`);
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			viewLogger.error('❌ Error cargando colecciones:', error);
@@ -102,10 +124,6 @@ export function CollectionsView(_props: ViewProps) {
 			setIsLoading(false);
 		}
 	}, []);
-
-	useEffect(() => {
-		loadCollections();
-	}, [loadCollections]);
 
 	const handleCollectionClick = useCallback(
 		(collection: CollectionWithDetails) => {
