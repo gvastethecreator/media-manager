@@ -3,21 +3,198 @@
  * @module transformers/place/serializers
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { PlaceSchema } from '@/types/entities/place/schema';
 import type {
-  PlaceBase,
-  PlaceComplete,
-  PlaceDanger,
-  PlaceExtendedComplete,
-  PlaceFilters,
-  PlaceResource,
-  PlaceStats
-} from '@/types/entities/place';
+    PlaceBase,
+    PlaceComplete,
+    PlaceCreateInput,
+    PlaceDanger,
+    PlaceFilters,
+    PlaceRelations,
+    PlaceResource,
+    PlaceStats,
+    PlaceUpdateInput
+} from '@/types/entities/place/types';
+import { createLogger } from '@/utils/logger';
 
-const serializerLogger = serverLogger.withContext('PlaceSerializer');
+// Logger específico para el transformer de Place
+const log = createLogger('place-transformer');
 
 /**
- * Serializa los peligros de un lugar a formato JSON string
+ * 🎯 Opciones para serializar/deserializar lugares
+ */
+interface PlaceTransformOptions {
+	validateFields?: boolean;
+	deserializeFields?: boolean;
+	includeRelations?: boolean;
+	includeUI?: boolean;
+	includeStats?: boolean;
+}
+
+/**
+ * 🔄 Serializa un lugar completo para Prisma
+ * @param place Objeto PlaceComplete con campos deserializados
+ * @param options Opciones de transformación
+ * @returns Objeto formateado para Prisma
+ */
+export function toPrismaPlace(
+	place: PlaceComplete | PlaceCreateInput | PlaceUpdateInput,
+	options: PlaceTransformOptions = {}
+): Record<string, any> {
+	try {
+		const { validateFields = true, deserializeFields = true } = options;
+
+		// Validar datos de entrada si es requerido
+		if (validateFields) {
+			PlaceSchema.parse(place);
+		}
+
+		// Base de datos para Prisma
+		const prismaData: Record<string, any> = {
+			...(place as Record<string, any>)
+		};
+
+		// Serializar campos JSON si están presentes y son objetos/arrays
+		if (deserializeFields) {
+			// Serializar peligros
+			if (place.dangers && typeof place.dangers !== 'string') {
+				prismaData.dangers = serializePlaceDangers(place.dangers as PlaceDanger[]);
+			}
+
+			// Serializar recursos
+			if (place.resources && typeof place.resources !== 'string') {
+				prismaData.resources = serializePlaceResources(place.resources as PlaceResource[]);
+			}
+
+			// Serializar estadísticas
+			if (place.stats && typeof place.stats !== 'string') {
+				prismaData.stats = serializePlaceStats(place.stats as PlaceStats);
+			}
+
+			// Serializar filtros
+			if (place.filters && typeof place.filters !== 'string') {
+				prismaData.filters = serializePlaceFilters(place.filters as PlaceFilters);
+			}
+		}
+
+		// Eliminar campos que no pertenecen al modelo Prisma
+		delete prismaData.dangersArray;
+		delete prismaData.resourcesArray;
+		delete prismaData.statsObject;
+		delete prismaData.filtersObject;
+
+		// Eliminar propiedades de UI
+		delete prismaData.isSelected;
+		delete prismaData.isExpanded;
+		delete prismaData.isEditing;
+		delete prismaData.isHighlighted;
+		delete prismaData.dangerLevel;
+		delete prismaData.displayPopulation;
+		delete prismaData.displaySize;
+		delete prismaData.regionPath;
+		delete prismaData.recentImages;
+
+		// Eliminar relaciones que se manejan de forma separada
+		delete prismaData.images;
+		delete prismaData.videos;
+		delete prismaData.albums;
+		delete prismaData.collections;
+		delete prismaData.tags;
+		delete prismaData.characters;
+		delete prismaData.worldItems;
+		delete prismaData.concepts;
+		delete prismaData.prompts;
+		delete prismaData.notes;
+		delete prismaData.wildcards;
+		delete prismaData.properties;
+		delete prismaData.groups;
+		delete prismaData._count;
+
+		return prismaData;
+	} catch (error) {
+		log.error('Error transformando place a formato Prisma', { error });
+		throw new Error(`Error transformando place a formato Prisma: ${(error as Error).message}`);
+	}
+}
+
+/**
+ * 🔄 Deserializa un lugar desde Prisma
+ * @param prismaPlace Objeto de lugar desde Prisma
+ * @param options Opciones de transformación
+ * @returns Lugar completo con campos deserializados
+ */
+export function fromPrismaPlace(
+	prismaPlace: PlaceBase & Record<string, any>,
+	options: PlaceTransformOptions = {}
+): PlaceComplete {
+	try {
+		const { deserializeFields = true, includeRelations = false, includeUI = false, includeStats = false } = options;
+
+		// Base del lugar
+		const placeComplete: Record<string, any> = {
+			...prismaPlace
+		};
+
+		// Deserializar campos JSON
+		if (deserializeFields) {
+			// Deserializar peligros
+			placeComplete.dangersArray = deserializePlaceDangers(prismaPlace.dangers);
+
+			// Deserializar recursos
+			placeComplete.resourcesArray = deserializePlaceResources(prismaPlace.resources);
+
+			// Deserializar estadísticas
+			placeComplete.statsObject = deserializePlaceStats(prismaPlace.stats);
+
+			// Deserializar filtros
+			placeComplete.filtersObject = deserializePlaceFilters(prismaPlace.filters);
+		}
+
+		// Incluir relaciones si están presentes y habilitadas
+		if (includeRelations) {
+			// Mantener todas las relaciones que existan en el objeto Prisma
+			const relationsFields: (keyof PlaceRelations)[] = [
+				'images', 'videos', 'albums', 'collections', 'tags', 'characters',
+				'worldItems', 'concepts', 'prompts', 'notes', 'wildcards', 'properties', 'groups'
+			];
+
+			relationsFields.forEach(field => {
+				if (prismaPlace[field]) {
+					placeComplete[field] = prismaPlace[field];
+				}
+			});
+
+			// Incluir contadores si están presentes
+			if (prismaPlace._count) {
+				placeComplete._count = prismaPlace._count;
+			}
+		}
+
+		// Incluir campos UI si se solicita
+		if (includeUI) {
+			placeComplete.dangerLevel = getDangerLevel(prismaPlace.dangers);
+			placeComplete.displayPopulation = formatPopulation(prismaPlace.population);
+			placeComplete.displaySize = getDisplaySize(prismaPlace.stats);
+			placeComplete.regionPath = getRegionPath(prismaPlace.region);
+		}
+
+		// Incluir estadísticas si se solicita
+		if (includeStats && prismaPlace._count) {
+			placeComplete.imagesCount = prismaPlace._count.images || 0;
+			placeComplete.notesCount = prismaPlace._count.notes || 0;
+			placeComplete.conceptsCount = prismaPlace._count.concepts || 0;
+			placeComplete.promptsCount = prismaPlace._count.prompts || 0;
+		}
+
+		return placeComplete as PlaceComplete;
+	} catch (error) {
+		log.error('Error transformando place desde formato Prisma', { error });
+		throw new Error(`Error transformando place desde formato Prisma: ${(error as Error).message}`);
+	}
+}
+
+/**
+ * 💾 Serializa los peligros de un lugar
  * @param dangers Array de peligros
  * @returns JSON string de peligros
  */
@@ -25,13 +202,13 @@ export function serializePlaceDangers(dangers: PlaceDanger[]): string {
 	try {
 		return JSON.stringify(dangers);
 	} catch (error) {
-		serializerLogger.error('❌ Error al serializar los peligros del lugar:', error);
+		log.error('Error serializando los peligros del lugar', { error });
 		return JSON.stringify([]);
 	}
 }
 
 /**
- * Deserializa los peligros de un lugar desde JSON string
+ * 🔍 Deserializa los peligros de un lugar
  * @param dangersJson JSON string de peligros
  * @returns Array de peligros
  */
@@ -41,13 +218,13 @@ export function deserializePlaceDangers(dangersJson: string | null): PlaceDanger
 	try {
 		return JSON.parse(dangersJson) as PlaceDanger[];
 	} catch (error) {
-		serializerLogger.error('❌ Error al deserializar los peligros del lugar:', error);
+		log.error('Error deserializando los peligros del lugar', { error });
 		return [];
 	}
 }
 
 /**
- * Serializa los recursos de un lugar a formato JSON string
+ * 💾 Serializa los recursos de un lugar
  * @param resources Array de recursos
  * @returns JSON string de recursos
  */
@@ -55,13 +232,13 @@ export function serializePlaceResources(resources: PlaceResource[]): string {
 	try {
 		return JSON.stringify(resources);
 	} catch (error) {
-		serializerLogger.error('❌ Error al serializar los recursos del lugar:', error);
+		log.error('Error serializando los recursos del lugar', { error });
 		return JSON.stringify([]);
 	}
 }
 
 /**
- * Deserializa los recursos de un lugar desde JSON string
+ * 🔍 Deserializa los recursos de un lugar
  * @param resourcesJson JSON string de recursos
  * @returns Array de recursos
  */
@@ -71,13 +248,13 @@ export function deserializePlaceResources(resourcesJson: string | null): PlaceRe
 	try {
 		return JSON.parse(resourcesJson) as PlaceResource[];
 	} catch (error) {
-		serializerLogger.error('❌ Error al deserializar los recursos del lugar:', error);
+		log.error('Error deserializando los recursos del lugar', { error });
 		return [];
 	}
 }
 
 /**
- * Serializa las estadísticas de un lugar a formato JSON string
+ * 💾 Serializa las estadísticas de un lugar
  * @param stats Objeto de estadísticas
  * @returns JSON string de estadísticas
  */
@@ -85,13 +262,13 @@ export function serializePlaceStats(stats: PlaceStats): string {
 	try {
 		return JSON.stringify(stats);
 	} catch (error) {
-		serializerLogger.error('❌ Error al serializar las estadísticas del lugar:', error);
+		log.error('Error serializando las estadísticas del lugar', { error });
 		return JSON.stringify({});
 	}
 }
 
 /**
- * Deserializa las estadísticas de un lugar desde JSON string
+ * 🔍 Deserializa las estadísticas de un lugar
  * @param statsJson JSON string de estadísticas
  * @returns Objeto de estadísticas
  */
@@ -101,13 +278,13 @@ export function deserializePlaceStats(statsJson: string | null): PlaceStats {
 	try {
 		return JSON.parse(statsJson) as PlaceStats;
 	} catch (error) {
-		serializerLogger.error('❌ Error al deserializar las estadísticas del lugar:', error);
+		log.error('Error deserializando las estadísticas del lugar', { error });
 		return {};
 	}
 }
 
 /**
- * Serializa los filtros de un lugar a formato JSON string
+ * 💾 Serializa los filtros de un lugar
  * @param filters Objeto de filtros
  * @returns JSON string de filtros
  */
@@ -115,13 +292,13 @@ export function serializePlaceFilters(filters: PlaceFilters): string {
 	try {
 		return JSON.stringify(filters);
 	} catch (error) {
-		serializerLogger.error('❌ Error al serializar los filtros del lugar:', error);
+		log.error('Error serializando los filtros del lugar', { error });
 		return JSON.stringify({});
 	}
 }
 
 /**
- * Deserializa los filtros de un lugar desde JSON string
+ * 🔍 Deserializa los filtros de un lugar
  * @param filtersJson JSON string de filtros
  * @returns Objeto de filtros
  */
@@ -131,154 +308,133 @@ export function deserializePlaceFilters(filtersJson: string | null): PlaceFilter
 	try {
 		return JSON.parse(filtersJson) as PlaceFilters;
 	} catch (error) {
-		serializerLogger.error('❌ Error al deserializar los filtros del lugar:', error);
+		log.error('Error deserializando los filtros del lugar', { error });
 		return {};
 	}
 }
 
 /**
- * Transforma un objeto Place de Prisma a un objeto PlaceComplete
- * Esto deserializa todos los campos JSON y prepara la estructura completa
- * @param place Place de Prisma
- * @returns PlaceComplete con todos los campos deserializados
+ * 🔍 Valida y formatea un lugar para su uso
+ * @param place Datos del lugar a validar
+ * @returns Lugar validado y formateado
  */
-export function toPlaceComplete(place: PlaceBase): PlaceComplete {
+export function validatePlace(place: Record<string, any>): PlaceComplete {
 	try {
-		return {
-			...place,
-			dangersArray: deserializePlaceDangers(place.dangers),
-			resourcesArray: deserializePlaceResources(place.resources),
-			statsObject: deserializePlaceStats(place.stats),
-			filtersObject: deserializePlaceFilters(place.filters)
-		};
+		const validatedData = PlaceSchema.parse(place);
+		return validatedData as unknown as PlaceComplete;
 	} catch (error) {
-		serializerLogger.error('❌ Error al deserializar Place:', error);
-		// En caso de error, devolvemos un objeto con arrays/objetos vacíos
-		return {
-			...place,
-			dangersArray: [],
-			resourcesArray: [],
-			statsObject: {},
-			filtersObject: {}
-		};
+		log.error('Error validando datos de lugar', { error, place });
+		throw new Error(`Error validando datos de lugar: ${(error as Error).message}`);
 	}
 }
 
 /**
- * Transforma un objeto PlaceComplete de vuelta a un PlaceBase para persistir
- * @param place PlaceComplete
- * @returns PlaceBase para guardar en BD
+ * 🎯 Extiende un lugar con campos adicionales
+ * @param place Lugar base a extender
+ * @param options Opciones de extensión
+ * @returns Lugar extendido con campos adicionales
  */
-export function fromPlaceComplete(place: PlaceComplete): PlaceBase {
+export function extendPlace(
+	place: PlaceBase & Record<string, any>,
+	options: PlaceTransformOptions = {}
+): PlaceComplete {
 	try {
-		const { dangersArray, resourcesArray, statsObject, filtersObject, ...basePlace } = place;
+		// Crear el lugar completo
+		const extendedPlace = fromPrismaPlace(place, options);
 
-		return {
-			...basePlace,
-			dangers: serializePlaceDangers(dangersArray),
-			resources: serializePlaceResources(resourcesArray),
-			stats: serializePlaceStats(statsObject),
-			filters: serializePlaceFilters(filtersObject)
-		};
+		return extendedPlace;
 	} catch (error) {
-		serializerLogger.error('❌ Error al serializar Place para BD:', error);
-		// En caso de error, devolvemos el objeto original
-		const { dangersArray, resourcesArray, statsObject, filtersObject, ...basePlace } = place;
-		return basePlace as PlaceBase;
+		log.error('Error extendiendo lugar', { error, place });
+		throw new Error(`Error extendiendo lugar: ${(error as Error).message}`);
 	}
 }
 
 /**
- * Transforma un PlaceComplete a un PlaceExtendedComplete con propiedades de UI
- * @param place PlaceComplete
- * @param countData Datos de conteo opcionales para relaciones
- * @returns PlaceExtendedComplete con propiedades UI
+ * 🔄 Extiende varios lugares con campos adicionales
+ * @param places Lista de lugares a extender
+ * @param options Opciones de extensión
+ * @returns Lista de lugares extendidos
  */
-export function mapPlaceExtendedFromComplete(
-	place: PlaceComplete,
-	countData?: { images?: number; notes?: number; concepts?: number; prompts?: number }
-): PlaceExtendedComplete {
-	return {
-		...place,
-		// Propiedades UI básicas
-		isSelected: false,
-		isExpanded: false,
-		isEditing: false,
-		isHighlighted: false,
-		// Contadores de relaciones
-		imagesCount: countData?.images || 0,
-		notesCount: countData?.notes || 0,
-		conceptsCount: countData?.concepts || 0,
-		promptsCount: countData?.prompts || 0,
-		// Datos derivados
-		dangerLevel: getDangerLevel(place.dangers),
-		displayPopulation: formatPopulation(place.population),
-		displaySize: getDisplaySize(place.stats),
-		regionPath: getRegionPath(place.region),
-	};
+export function extendPlaces(
+	places: (PlaceBase & Record<string, any>)[],
+	options: PlaceTransformOptions = {}
+): PlaceComplete[] {
+	return places.map(place => extendPlace(place, options));
 }
 
 /**
- * Obtiene el nivel de peligro basado en los peligros del lugar
- * @param dangersJson JSON string de peligros
- * @returns Nivel de peligro como string
+ * 🔍 Obtiene el nivel de peligro de un lugar
+ * @param dangersJson String serializado de peligros
+ * @returns Nivel de peligro formateado
  */
 function getDangerLevel(dangersJson: string | null): string {
 	const dangers = deserializePlaceDangers(dangersJson);
-	if (!dangers.length) return 'safe';
 
-	// Lógica para determinar nivel de peligro
-	const hasSevereDangers = dangers.some(d => d.level && d.level > 7);
-	const hasModerateDangers = dangers.some(d => d.level && d.level > 3);
+	if (!dangers || dangers.length === 0) {
+		return 'Seguro';
+	}
 
-	if (hasSevereDangers) return 'high';
-	if (hasModerateDangers) return 'moderate';
-	return 'low';
+	const maxLevel = Math.max(...dangers.map(danger => danger.level || 0));
+
+	if (maxLevel >= 8) return 'Extremo';
+	if (maxLevel >= 6) return 'Alto';
+	if (maxLevel >= 4) return 'Moderado';
+	if (maxLevel >= 2) return 'Bajo';
+	return 'Mínimo';
 }
 
 /**
- * Formatea la población para mostrar
+ * 🔍 Formatea la población de un lugar
  * @param population Número de población
- * @returns Texto formateado de población
+ * @returns Población formateada
  */
 function formatPopulation(population: number | null): string {
-	if (population === null || population === undefined) return 'Unknown';
-	if (population === 0) return 'Uninhabited';
-	if (population < 100) return 'Tiny settlement';
-	if (population < 1000) return 'Small settlement';
-	if (population < 10000) return 'Medium settlement';
-	if (population < 100000) return 'Large settlement';
-	return 'Metropolis';
+	if (!population) return 'Desconocida';
+
+	if (population >= 1000000) {
+		return `${(population / 1000000).toFixed(1)}M`;
+	}
+
+	if (population >= 1000) {
+		return `${(population / 1000).toFixed(1)}K`;
+	}
+
+	return population.toString();
 }
 
 /**
- * Obtiene el tamaño del lugar basado en estadísticas
- * @param statsJson JSON string de estadísticas
- * @returns Texto descriptivo del tamaño
+ * 🔍 Obtiene el tamaño de un lugar desde sus estadísticas
+ * @param statsJson String serializado de estadísticas
+ * @returns Tamaño formateado
  */
 function getDisplaySize(statsJson: string | null): string {
 	const stats = deserializePlaceStats(statsJson);
-	if (!stats || !Object.keys(stats).length) return 'Unknown size';
 
-	// Intentar determinar tamaño basado en estadísticas
-	if (stats.size) {
-		const size = stats.size;
-		if (size < 3) return 'Tiny';
-		if (size < 6) return 'Small';
-		if (size < 12) return 'Medium';
-		if (size < 18) return 'Large';
-		return 'Huge';
+	if (!stats || !stats.size) {
+		return 'Desconocido';
 	}
 
-	return 'Medium size';
+	const size = stats.size;
+
+	if (size >= 1000) {
+		return `${(size / 1000).toFixed(1)}km²`;
+	}
+
+	return `${size}m²`;
 }
 
 /**
- * Convierte una región en un array de path
- * @param region Texto de región
- * @returns Array con segmentos de path
+ * 🔍 Obtiene la ruta de región de un lugar
+ * @param region String de región
+ * @returns Array de jerarquía de regiones
  */
 function getRegionPath(region: string | null): string[] {
 	if (!region) return [];
-	return region.split('/').filter(Boolean);
+
+	// Separar por '/' o '>' para crear la jerarquía
+	return region.split(/[\/|>]/).map(r => r.trim());
 }
+
+// Exportar funciones obsoletas con alias para mantener compatibilidad
+export const toPlaceComplete = fromPrismaPlace;
+export const fromPlaceComplete = toPrismaPlace;

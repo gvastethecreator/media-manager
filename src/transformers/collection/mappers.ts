@@ -3,22 +3,29 @@
  * @module transformers/collection/mappers
  */
 
-import type { CollectionComplete, CollectionExtended, CollectionFilter, CollectionSummary } from '@/types/entities/collection';
+import { Logger } from '@/lib/logger';
+import type { CollectionComplete, CollectionExtended, CollectionSummary } from '@/types/entities/collection';
 import {
-  COLLECTION_CATEGORY_COLORS,
-  COLLECTION_CATEGORY_EMOJIS,
-  type CollectionCategory,
-  type CreateCollectionData,
-  type UpdateCollectionData,
+    COLLECTION_CATEGORY_COLORS,
+    COLLECTION_CATEGORY_EMOJIS,
+    type CollectionCategory
 } from '@/types/entities/collection';
-import type { Image, Collection as PrismaCollection } from '@prisma/client';
 import {
-  serializeCollectionFilters,
-  serializeEditions,
-  serializeSortBy,
-  toCollectionComplete,
-  toCollectionExtended
+    CollectionCreateInput,
+    CollectionFilters,
+    CollectionSearchOptions,
+    CollectionUpdateInput,
+} from '@/types/entities/collection/types';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
+import { handleTransformerError } from '@/utils/transformers/errors';
+import type { Image, Collection as PrismaCollection } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import {
+    toCollectionComplete,
+    toCollectionExtended
 } from './serializers';
+
+const logger = new Logger('CollectionMapper');
 
 /**
  * Mapeador para obtener una lista de colecciones a partir de datos de Prisma
@@ -158,197 +165,220 @@ export function extractFeaturedImages(collection: CollectionExtended & { images?
 }
 
 /**
- * Mapea datos de creación de colección a formato compatible con Prisma
- * @param data Datos de creación de colección
- * @returns Objeto formateado para Prisma
+ * 🔄 Mapea datos de creación de Collection a formato Prisma
  */
-export function mapCreateCollectionDataToPrisma(data: CreateCollectionData) {
-    // Serializar los campos JSON si es necesario
-    const serializedEditions = Array.isArray(data.editions)
-        ? serializeEditions(data.editions)
-        : (data.editions || '[]');
+export function mapCreateCollectionDataToPrisma(data: CollectionCreateInput): Prisma.CollectionCreateInput {
+  try {
+    // Preparar datos base
+    const baseData = {
+      name: data.name,
+      description: data.description,
+      type: data.type,
+      category: data.category,
+      tags: data.tags,
+      isPublic: data.isPublic ?? false,
+      isFavorite: data.isFavorite ?? false,
+      metadata: data.metadata,
+      settings: data.settings,
+    };
 
-    const serializedSortBy = typeof data.sortBy === 'object'
-        ? serializeSortBy(data.sortBy)
-        : (data.sortBy || '{}');
+    // Preparar relaciones
+    const relations = {
+      owner: data.owner ? { connect: { id: data.owner.id } } : undefined,
+      parent: data.parent ? { connect: { id: data.parent.id } } : undefined,
+      children: data.children?.length ? { connect: data.children.map(child => ({ id: child.id })) } : undefined,
+      images: data.images?.length ? { connect: data.images.map(img => ({ id: img.id })) } : undefined,
+      videos: data.videos?.length ? { connect: data.videos.map(video => ({ id: video.id })) } : undefined,
+      albums: data.albums?.length ? { connect: data.albums.map(album => ({ id: album.id })) } : undefined,
+      tags: data.tags?.length ? { connect: data.tags.map(tag => ({ id: tag.id })) } : undefined,
+      groups: data.groups?.length ? { connect: data.groups.map(group => ({ id: group.id })) } : undefined,
+      characters: data.characters?.length ? { connect: data.characters.map(char => ({ id: char.id })) } : undefined,
+      places: data.places?.length ? { connect: data.places.map(place => ({ id: place.id })) } : undefined,
+      items: data.items?.length ? { connect: data.items.map(item => ({ id: item.id })) } : undefined,
+      notes: data.notes?.length ? { connect: data.notes.map(note => ({ id: note.id })) } : undefined,
+      sharedWith: data.sharedWith?.length ? { connect: data.sharedWith.map(user => ({ id: user.id })) } : undefined,
+    };
 
-    const serializedFilters = Array.isArray(data.filters)
-        ? serializeCollectionFilters(data.filters)
-        : (data.filters || 'empty_array');
-
-	return {
-		name: data.name,
-		description: data.description || null,
-		emoji: data.emoji || '🌟',
-		color: data.color || '#3b82f6',
-		category: data.category || 'general',
-		shortcut: data.shortcut || null,
-		platform: data.platform || null,
-		url: data.url || null,
-		alternativeUrl: data.alternativeUrl || null,
-		price: data.price || null,
-		network: data.network || null,
-		tokenId: data.tokenId || null,
-		tokenAddress: data.tokenAddress || null,
-		contractAddress: data.contractAddress || null,
-		contractType: data.contractType || null,
-		editions: serializedEditions,
-        sortBy: serializedSortBy,
-        filters: serializedFilters,
-		featuredImage: data.featuredImage || null,
-		isFavorite: data.isFavorite || false,
-		// Conexión con grupos si existen
-		groups: data.groupIds ? {
-			connect: data.groupIds.map((id) => ({ id })),
-		} : undefined,
-		// Conexión con propiedades si existen
-		properties: data.propertyIds ? {
-			connect: data.propertyIds.map((id) => ({ id })),
-		} : undefined,
-		// Conexión con comodines si existen
-		wildcards: data.wildcardIds ? {
-			connect: data.wildcardIds.map((id) => ({ id })),
-		} : undefined,
-	};
+    return {
+      ...baseData,
+      ...relations,
+    };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
 }
 
 /**
- * Mapea datos de actualización de colección a formato compatible con Prisma
- * @param data Datos de actualización de colección
- * @returns Objeto formateado para Prisma
+ * 🔄 Mapea datos de actualización de Collection a formato Prisma
  */
-export function mapUpdateCollectionDataToPrisma(data: UpdateCollectionData) {
-	const updateData: Record<string, any> = {};
+export function mapUpdateCollectionDataToPrisma(data: CollectionUpdateInput): Prisma.CollectionUpdateInput {
+  try {
+    // Preparar datos base
+    const baseData = {
+      name: data.name,
+      description: data.description,
+      type: data.type,
+      category: data.category,
+      tags: data.tags,
+      isPublic: data.isPublic,
+      isFavorite: data.isFavorite,
+      metadata: data.metadata,
+      settings: data.settings,
+      updatedAt: new Date(),
+    };
 
-	// Actualizar propiedades básicas si están presentes
-	if (data.name !== undefined) updateData.name = data.name;
-	if (data.description !== undefined) updateData.description = data.description;
-	if (data.emoji !== undefined) updateData.emoji = data.emoji;
-	if (data.color !== undefined) updateData.color = data.color;
-	if (data.category !== undefined) updateData.category = data.category;
-	if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
-	if (data.platform !== undefined) updateData.platform = data.platform;
-	if (data.url !== undefined) updateData.url = data.url;
-	if (data.alternativeUrl !== undefined) updateData.alternativeUrl = data.alternativeUrl;
-	if (data.price !== undefined) updateData.price = data.price;
-	if (data.network !== undefined) updateData.network = data.network;
-	if (data.tokenId !== undefined) updateData.tokenId = data.tokenId;
-	if (data.tokenAddress !== undefined) updateData.tokenAddress = data.tokenAddress;
-	if (data.contractAddress !== undefined) updateData.contractAddress = data.contractAddress;
-	if (data.contractType !== undefined) updateData.contractType = data.contractType;
+    // Preparar relaciones
+    const relations = {
+      owner: data.owner ? { connect: { id: data.owner.id } } : undefined,
+      parent: data.parent ? { connect: { id: data.parent.id } } : undefined,
+      children: data.children?.length ? { set: data.children.map(child => ({ id: child.id })) } : undefined,
+      images: data.images?.length ? { set: data.images.map(img => ({ id: img.id })) } : undefined,
+      videos: data.videos?.length ? { set: data.videos.map(video => ({ id: video.id })) } : undefined,
+      albums: data.albums?.length ? { set: data.albums.map(album => ({ id: album.id })) } : undefined,
+      tags: data.tags?.length ? { set: data.tags.map(tag => ({ id: tag.id })) } : undefined,
+      groups: data.groups?.length ? { set: data.groups.map(group => ({ id: group.id })) } : undefined,
+      characters: data.characters?.length ? { set: data.characters.map(char => ({ id: char.id })) } : undefined,
+      places: data.places?.length ? { set: data.places.map(place => ({ id: place.id })) } : undefined,
+      items: data.items?.length ? { set: data.items.map(item => ({ id: item.id })) } : undefined,
+      notes: data.notes?.length ? { set: data.notes.map(note => ({ id: note.id })) } : undefined,
+      sharedWith: data.sharedWith?.length ? { set: data.sharedWith.map(user => ({ id: user.id })) } : undefined,
+    };
 
-	if (data.editions !== undefined) {
-		updateData.editions = Array.isArray(data.editions)
-            ? serializeEditions(data.editions)
-            : (data.editions || '[]');
-	}
-
-    if (data.sortBy !== undefined) {
-        updateData.sortBy = typeof data.sortBy === 'object'
-            ? serializeSortBy(data.sortBy)
-            : (data.sortBy || '{}');
-    }
-
-    if (data.filters !== undefined) {
-        updateData.filters = Array.isArray(data.filters)
-            ? serializeCollectionFilters(data.filters)
-            : (data.filters || 'empty_array');
-    }
-
-	if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-    if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-
-	// Gestionar relaciones con grupos
-	if (data.groupIds !== undefined) {
-		updateData.groups = {
-			set: data.groupIds.map((id) => ({ id })),
-		};
-	}
-
-	// Gestionar relaciones con propiedades
-	if (data.propertyIds !== undefined) {
-		updateData.properties = {
-			set: data.propertyIds.map((id) => ({ id })),
-		};
-	}
-
-	// Gestionar relaciones con comodines
-	if (data.wildcardIds !== undefined) {
-		updateData.wildcards = {
-			set: data.wildcardIds.map((id) => ({ id })),
-		};
-	}
-
-	return updateData;
+    return {
+      ...baseData,
+      ...relations,
+    };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
 }
 
 /**
- * Crear filtros para una consulta avanzada de colecciones
- * @param filters Array de filtros de colección
- * @returns Objeto de consulta para Prisma
+ * 🔄 Mapea opciones de búsqueda de Collection a formato Prisma
  */
-export function createCollectionFiltersForQuery(filters: CollectionFilter[]): Record<string, any> {
-    if (!filters || filters.length === 0) {
-        return {};
-    }
+export function mapCollectionSearchOptionsToPrisma(
+  options: CollectionSearchOptions
+): Prisma.CollectionFindManyArgs {
+  try {
+    const { page = 1, pageSize = DEFAULT_PAGE_SIZE, orderBy, filters = {}, include = {} } = options;
 
-    const queryConditions: Record<string, any> = {};
+    // Validar y ajustar el tamaño de página
+    const validatedPageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+    const skip = (page - 1) * validatedPageSize;
 
-    for (const filter of filters) {
-        const { field, operator, value } = filter;
+    // Mapear ordenamiento
+    const orderByMapped = orderBy ? {
+      [orderBy.field]: orderBy.direction,
+    } : { createdAt: 'desc' };
 
-        // Convertir operador y valor al formato de Prisma
-        switch (operator) {
-            case 'eq':
-                queryConditions[field] = { equals: value };
-                break;
-            case 'neq':
-                queryConditions[field] = { not: value };
-                break;
-            case 'gt':
-                queryConditions[field] = { gt: value };
-                break;
-            case 'gte':
-                queryConditions[field] = { gte: value };
-                break;
-            case 'lt':
-                queryConditions[field] = { lt: value };
-                break;
-            case 'lte':
-                queryConditions[field] = { lte: value };
-                break;
-            case 'contains':
-                queryConditions[field] = { contains: value };
-                break;
-            case 'startsWith':
-                queryConditions[field] = { startsWith: value };
-                break;
-            case 'endsWith':
-                queryConditions[field] = { endsWith: value };
-                break;
-            default:
-                queryConditions[field] = { equals: value };
-        }
-    }
+    // Mapear filtros
+    const where = mapCollectionFiltersToPrisma(filters);
 
-    return { AND: queryConditions };
+    // Mapear inclusiones
+    const includeRelations = {
+      owner: include.owner ?? false,
+      parent: include.parent ?? false,
+      children: include.children ?? false,
+      images: include.images ?? false,
+      videos: include.videos ?? false,
+      albums: include.albums ?? false,
+      tags: include.tags ?? false,
+      groups: include.groups ?? false,
+      characters: include.characters ?? false,
+      places: include.places ?? false,
+      items: include.items ?? false,
+      notes: include.notes ?? false,
+      sharedWith: include.sharedWith ?? false,
+      _count: include.count ?? false,
+    };
+
+    return {
+      skip,
+      take: validatedPageSize,
+      orderBy: orderByMapped,
+      where,
+      include: includeRelations,
+    };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
 }
 
 /**
- * Crear criterio de ordenación para una consulta de colecciones
- * @param sortBy Criterio de ordenación
- * @returns Objeto de ordenación para Prisma
+ * 🔄 Mapea filtros de Collection a formato Prisma
  */
-export function createCollectionSortByForQuery(sortBy: any): Record<string, 'asc' | 'desc'> {
-    if (!sortBy || Object.keys(sortBy).length === 0) {
-        return { name: 'asc' }; // Ordenación por defecto
+export function mapCollectionFiltersToPrisma(filters: CollectionFilters): Prisma.CollectionWhereInput {
+  try {
+    const where: Prisma.CollectionWhereInput = {};
+
+    // Filtros de texto
+    if (filters.search) {
+      where.OR = [
+        { name: { contains: filters.search, mode: 'insensitive' } },
+        { description: { contains: filters.search, mode: 'insensitive' } },
+      ];
     }
 
-    const { field, direction } = sortBy;
-
-    if (!field) {
-        return { name: 'asc' };
+    // Filtros de tipo y categoría
+    if (filters.type?.length) {
+      where.type = { in: filters.type };
+    }
+    if (filters.category?.length) {
+      where.category = { in: filters.category };
+    }
+    if (filters.tags?.length) {
+      where.tags = { some: { name: { in: filters.tags } } };
     }
 
-    return { [field]: direction === 'desc' ? 'desc' : 'asc' };
+    // Filtros de estado
+    if (filters.isPublic !== undefined) {
+      where.isPublic = filters.isPublic;
+    }
+    if (filters.isFavorite !== undefined) {
+      where.isFavorite = filters.isFavorite;
+    }
+
+    // Filtros de relaciones
+    if (filters.hasParent) {
+      where.parent = { isNot: null };
+    }
+    if (filters.hasChildren) {
+      where.children = { some: {} };
+    }
+    if (filters.hasImages) {
+      where.images = { some: {} };
+    }
+    if (filters.hasVideos) {
+      where.videos = { some: {} };
+    }
+    if (filters.hasAlbums) {
+      where.albums = { some: {} };
+    }
+    if (filters.isShared) {
+      where.sharedWith = { some: {} };
+    }
+
+    // Filtros de fecha
+    if (filters.dateRange?.start) {
+      where.createdAt = { ...where.createdAt, gte: filters.dateRange.start };
+    }
+    if (filters.dateRange?.end) {
+      where.createdAt = { ...where.createdAt, lte: filters.dateRange.end };
+    }
+
+    return where;
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔄 Mapea una Collection a su versión relacionada
+ */
+export function mapCollectionToRelatedCollection(collection: CollectionComplete): { id: string } {
+  try {
+    return { id: collection.id };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
 }

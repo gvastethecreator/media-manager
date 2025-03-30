@@ -3,9 +3,46 @@
  * @module transformers/property/serializers
  */
 
+import { createLogger } from '@/lib/logger';
+import { PropertySchema } from '@/types/entities/property/schema';
+import {
+    PropertyBase,
+    PropertyComplete,
+    PropertyDeserialized
+} from '@/types/entities/property/types';
+
+// Logger específico para este módulo
+const logger = createLogger('PropertyTransformer:Serializers');
+
 // Constantes para valores por defecto
 export const DEFAULT_PROPERTY_EMOJI = '🔍';
 export const DEFAULT_PROPERTY_COLOR = '#3b82f6';
+
+/**
+ * Opciones para transformación de propiedades
+ */
+export interface PropertyTransformOptions {
+  validateFields?: boolean;
+  deserializeFields?: boolean;
+  includeRelations?: boolean;
+  includeUI?: boolean;
+  includeStats?: boolean;
+}
+
+/**
+ * Valida un objeto Property contra su esquema
+ * @param property - Objeto Property a validar
+ * @returns El objeto validado o lanza un error
+ */
+export function validateProperty(property: Partial<PropertyBase>): PropertyBase {
+  try {
+    const result = PropertySchema.parse(property);
+    return property as PropertyBase;
+  } catch (error) {
+    logger.error('Error validando Property:', error);
+    throw new Error(`Datos de Property inválidos: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
 
 /**
  * Genera un emoji para la propiedad basado en su nombre y categoría
@@ -104,19 +141,162 @@ export function generatePropertyColor(name: string): string {
 }
 
 /**
- * Extiende una propiedad de Prisma con propiedades calculadas y formateadas para la UI
+ * Serializa una propiedad para Prisma
+ * @param property Propiedad con campos JSON deserializados
+ * @param options Opciones de transformación
+ * @returns Propiedad con campos serializados para Prisma
+ */
+export function toPrismaProperty(
+  property: Partial<PropertyComplete>,
+  options: PropertyTransformOptions = {}
+): any {
+  try {
+    const { validateFields = true } = options;
+
+    // Validar datos si se solicita
+    if (validateFields && Object.keys(property).length > 1) {
+      validateProperty(property as PropertyBase);
+    }
+
+    // Datos base
+    const result: any = { ...property };
+
+    // Eliminar campos que no van a la base de datos
+    delete result._count;
+    delete result._relations;
+    delete result._ui;
+
+    return result;
+  } catch (error) {
+    logger.error('Error serializando property:', error);
+    throw new Error(`Error serializando property: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Deserializa una propiedad desde Prisma
+ * @param property Propiedad con campos serializados de Prisma
+ * @param options Opciones de transformación
+ * @returns Propiedad con campos deserializados
+ */
+export function fromPrismaProperty<T extends PropertyBase>(
+  property: T,
+  options: PropertyTransformOptions = {}
+): T & PropertyDeserialized & Partial<Record<'_relations' | '_count' | '_ui', any>> {
+  try {
+    const {
+      includeRelations = false,
+      includeUI = false,
+      includeStats = false
+    } = options;
+
+    // Crear resultado base
+    const result = {
+      ...property
+    } as T & PropertyDeserialized;
+
+    // Agregar relaciones si están presentes y se solicitan
+    if (includeRelations && (property as any)._relations) {
+      result._relations = (property as any)._relations;
+    }
+
+    // Agregar conteos si están presentes y se solicitan
+    if (includeStats && (property as any)._count) {
+      result._count = (property as any)._count;
+    }
+
+    // Agregar campos UI si se solicitan
+    if (includeUI) {
+      result._ui = {
+        lastUpdated: property.updatedAt instanceof Date
+          ? property.updatedAt
+          : new Date(property.updatedAt)
+      };
+    }
+
+    return result;
+  } catch (error) {
+    logger.error('Error deserializando property:', error);
+    throw new Error(`Error deserializando property: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Extiende una propiedad con campos UI adicionales
  * @param property Propiedad base de la base de datos
  * @returns Propiedad extendida con propiedades calculadas
  */
-export function extendProperty(property: any) {
-  if (!property) return null;
+export function extendProperty<T extends PropertyBase>(property: T): T & {
+  _ui: {
+    lastUpdated: Date;
+    itemCount: number;
+  }
+} {
+  if (!property) return null as any;
 
+  try {
+    return {
+      ...property,
+      _ui: {
+        // Asegurar que las fechas sean instancias de Date
+        lastUpdated: property.updatedAt instanceof Date ? property.updatedAt : new Date(property.updatedAt),
+        // Calcular contadores de elementos relacionados si están disponibles
+        itemCount: (property as any)._count ? (
+          ((property as any)._count.images || 0) +
+          ((property as any)._count.videos || 0) +
+          ((property as any)._count.albums || 0) +
+          ((property as any)._count.collections || 0) +
+          ((property as any)._count.tags || 0) +
+          ((property as any)._count.characters || 0) +
+          ((property as any)._count.places || 0) +
+          ((property as any)._count.worldItems || 0) +
+          ((property as any)._count.concepts || 0) +
+          ((property as any)._count.prompts || 0) +
+          ((property as any)._count.notes || 0) +
+          ((property as any)._count.wildcards || 0) +
+          ((property as any)._count.groups || 0)
+        ) : 0
+      }
+    };
+  } catch (error) {
+    logger.error('Error extendiendo property:', error);
+    return {
+      ...property,
+      _ui: {
+        lastUpdated: new Date(),
+        itemCount: 0
+      }
+    };
+  }
+}
+
+/**
+ * Extiende un array de propiedades con propiedades calculadas
+ * @param properties Array de propiedades de la base de datos
+ * @returns Array de propiedades extendidas
+ */
+export function extendProperties(properties: PropertyBase[]): Array<ReturnType<typeof extendProperty>> {
+  if (!properties || !Array.isArray(properties)) return [];
+  return properties.map(property => extendProperty(property));
+}
+
+/**
+ * Convierte una propiedad completa a formato simple para relaciones
+ * @param property Propiedad completa
+ * @returns Propiedad simplificada para relaciones
+ */
+export function toRelatedProperty(property: PropertyBase & { _count?: any }): {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  itemCount: number;
+} {
   return {
-    ...property,
-    // Asegurar que las fechas sean instancias de Date
-    createdAt: property.createdAt instanceof Date ? property.createdAt : new Date(property.createdAt),
-    updatedAt: property.updatedAt instanceof Date ? property.updatedAt : new Date(property.updatedAt),
-    // Calcular contadores de elementos relacionados si están disponibles
+    id: property.id,
+    name: property.name,
+    emoji: property.emoji,
+    color: property.color,
     itemCount: property._count ? (
       (property._count.images || 0) +
       (property._count.videos || 0) +
@@ -133,14 +313,4 @@ export function extendProperty(property: any) {
       (property._count.groups || 0)
     ) : 0
   };
-}
-
-/**
- * Extiende un array de propiedades con propiedades calculadas
- * @param properties Array de propiedades de la base de datos
- * @returns Array de propiedades extendidas
- */
-export function extendProperties(properties: any[]) {
-  if (!properties || !Array.isArray(properties)) return [];
-  return properties.map(property => extendProperty(property));
 }

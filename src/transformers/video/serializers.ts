@@ -3,211 +3,269 @@
  * @module transformers/video/serializers
  */
 
-import type { Video, VideoBase, VideoComplete, VideoMetadata, VideoPrivacyLevel, VideoVisualConfig, VideoVisualConfigComplete } from '../../types/entities/video';
+import { VideoSchema } from '@/types/entities/video/schema';
+import type {
+    VideoBase,
+    VideoComplete,
+    VideoCreateInput,
+    VideoMetadata,
+    VideoRelations,
+    VideoUpdateInput,
+    VideoVisualConfig,
+    VideoVisualConfigComplete
+} from '@/types/entities/video/types';
+import { createLogger } from '@/utils/logger';
 
-// Define interfaces adicionales para extender VideoBase
-interface VideoData {
-	metadata?: string | VideoMetadata;
+// Logger específico para el transformer de Video
+const log = createLogger('video-transformer');
+
+/**
+ * 🎯 Opciones para serializar/deserializar videos
+ */
+interface VideoTransformOptions {
+	validateFields?: boolean;
+	deserializeMetadata?: boolean;
+	includeRelations?: boolean;
+	includeUI?: boolean;
 }
 
 /**
- * Convierte un objeto VideoBase a Video con propiedades extendidas
- * @param video Objeto básico de video
- * @returns Objeto Video completo
+ * 🔄 Serializa un video completo para Prisma
+ * @param video Objeto VideoComplete con metadatos deserializados
+ * @returns Objeto formateado para Prisma
  */
-export function extendVideo(video: VideoBase & VideoData): Video {
-	// Asegurarse de que todas las propiedades requeridas por Video están presentes
-	return {
-		...video,
-		metadata: parseVideoMetadata(video),
-		tags: [], // Propiedad requerida por Video, inicializada como array vacío
-		privacyLevel: 'PRIVATE' as VideoPrivacyLevel, // Valor por defecto para privacyLevel
-		isFavorite: false, // Valor por defecto para isFavorite
-	};
-}
+export function toPrismaVideo(
+	video: VideoComplete | VideoCreateInput | VideoUpdateInput,
+	options: VideoTransformOptions = {}
+): Record<string, any> {
+	try {
+		const { validateFields = true, deserializeMetadata = true } = options;
 
-/**
- * Convierte un array de objetos VideoBase a array de Video con propiedades extendidas
- * @param videos Array de objetos básicos de video
- * @returns Array de objetos Video completos
- */
-export function extendVideos(videos: (VideoBase & VideoData)[]): Video[] {
-	return videos.map(extendVideo);
-}
-
-/**
- * Parsea los metadatos de un video si están en formato string
- * @param video Objeto de video
- * @returns Metadatos parseados o undefined
- */
-export function parseVideoMetadata(video: VideoData): VideoMetadata | undefined {
-	if (!video.metadata) return undefined;
-
-	if (typeof video.metadata === 'string') {
-		try {
-			return JSON.parse(video.metadata) as VideoMetadata;
-		} catch (error) {
-			console.error('Error parsing video metadata', error);
-			return undefined;
+		// Validar datos de entrada si es requerido
+		if (validateFields) {
+			VideoSchema.parse(video);
 		}
-	}
 
-	return video.metadata as VideoMetadata;
+		// Base de datos para Prisma
+		const prismaData: Record<string, any> = {
+			...(video as Record<string, any>)
+		};
+
+		// Serializar metadatos si está presente y es un objeto
+		if (video.metadata && deserializeMetadata && typeof video.metadata !== 'string') {
+			prismaData.metadata = serializeVideoMetadata(video.metadata as VideoMetadata);
+		}
+
+		// Eliminar campos que no pertenecen al modelo Prisma
+		delete prismaData.thumbnailUrl;
+		delete prismaData.playState;
+		delete prismaData.chapters;
+		delete prismaData.isSelected;
+
+		// Eliminar relaciones que se manejan de forma separada
+		delete prismaData.folder;
+		delete prismaData.albums;
+		delete prismaData.collections;
+		delete prismaData.tags;
+		delete prismaData.characters;
+		delete prismaData.places;
+		delete prismaData.worldItems;
+		delete prismaData.concepts;
+		delete prismaData.prompts;
+		delete prismaData.notes;
+		delete prismaData.wildcards;
+		delete prismaData.properties;
+		delete prismaData.groups;
+		delete prismaData._count;
+
+		return prismaData;
+	} catch (error) {
+		log.error('Error transformando video a formato Prisma', { error });
+		throw new Error(`Error transformando video a formato Prisma: ${(error as Error).message}`);
+	}
 }
 
 /**
- * Serializa los metadatos de un video para guardarlos
- * @param metadata Objeto de metadatos de video
- * @returns String serializado o undefined
+ * 🔄 Deserializa un video desde Prisma
+ * @param prismaVideo Objeto de video desde Prisma
+ * @param options Opciones de transformación
+ * @returns Video completo con metadatos deserializados
  */
-export function serializeVideoMetadata(metadata?: VideoMetadata): string | undefined {
-	if (!metadata) return undefined;
+export function fromPrismaVideo(
+	prismaVideo: VideoBase & Record<string, any>,
+	options: VideoTransformOptions = {}
+): VideoComplete {
+	try {
+		const { deserializeMetadata = true, includeRelations = false, includeUI = false } = options;
+
+		// Base del video
+		const videoComplete: Record<string, any> = {
+			...prismaVideo
+		};
+
+		// Deserializar metadatos si es un string y está habilitada la opción
+		if (deserializeMetadata && prismaVideo.metadata && typeof prismaVideo.metadata === 'string') {
+			videoComplete.metadata = deserializeVideoMetadata(prismaVideo.metadata);
+		}
+
+		// Incluir relaciones si están presentes y habilitadas
+		if (includeRelations) {
+			// Mantener todas las relaciones que existan en el objeto Prisma
+			const relationsFields: (keyof VideoRelations)[] = [
+				'folder', 'albums', 'collections', 'tags', 'characters',
+				'places', 'worldItems', 'concepts', 'prompts', 'notes',
+				'wildcards', 'properties', 'groups'
+			];
+
+			relationsFields.forEach(field => {
+				if (prismaVideo[field]) {
+					videoComplete[field] = prismaVideo[field];
+				}
+			});
+
+			// Incluir contadores si están presentes
+			if (prismaVideo._count) {
+				videoComplete._count = prismaVideo._count;
+			}
+		}
+
+		// Incluir campos UI si se solicita
+		if (includeUI) {
+			// Generar thumbnailUrl si corresponde
+			if (prismaVideo.id) {
+				videoComplete.thumbnailUrl = `/api/videos/${prismaVideo.id}/thumbnail`;
+			}
+		}
+
+		return videoComplete as VideoComplete;
+	} catch (error) {
+		log.error('Error transformando video desde formato Prisma', { error });
+		throw new Error(`Error transformando video desde formato Prisma: ${(error as Error).message}`);
+	}
+}
+
+/**
+ * 🔍 Deserializa los metadatos de un video
+ * @param metadata String serializado de metadatos
+ * @returns Objeto de metadatos deserializado o null
+ */
+export function deserializeVideoMetadata(metadata: string | null): VideoMetadata | null {
+	if (!metadata) return null;
+
+	try {
+		return JSON.parse(metadata) as VideoMetadata;
+	} catch (error) {
+		log.error('Error deserializando metadatos de video', { error, metadata });
+		return null;
+	}
+}
+
+/**
+ * 💾 Serializa los metadatos de un video
+ * @param metadata Objeto de metadatos
+ * @returns String serializado o null
+ */
+export function serializeVideoMetadata(metadata: VideoMetadata | null): string | null {
+	if (!metadata) return null;
 
 	try {
 		return JSON.stringify(metadata);
 	} catch (error) {
-		console.error('Error serializing video metadata', error);
-		return undefined;
+		log.error('Error serializando metadatos de video', { error });
+		return null;
 	}
 }
 
 /**
- * Serializa la configuración visual de un video
- * @param visualConfig Configuración visual básica
- * @returns Configuración visual extendida con propiedades adicionales
+ * 🔄 Serializa la configuración visual de un video
+ * @param config Configuración visual completa
+ * @returns Configuración visual con campos serializados
  */
-export function serializeVideoVisualConfig(
-	visualConfig: VideoVisualConfig | null | undefined
-): VideoVisualConfig | undefined {
-	if (!visualConfig) return undefined;
-
-	// Crear copia para evitar mutar el objeto original
-	const extendedConfig: VideoVisualConfig = {
-		...visualConfig,
+export function fromVideoVisualConfigComplete(
+	config: VideoVisualConfigComplete
+): VideoVisualConfig {
+	const baseConfig: VideoVisualConfig = {
+		...config
 	};
 
-	// Procesar campos de tipo string JSON
-	if (visualConfig.layerSystem) {
+	// Serializar campos JSON
+	if (config.layersConfig) {
 		try {
-			// Añadir propiedad extendida layersConfig
-			(extendedConfig as any).layersConfig = JSON.parse(visualConfig.layerSystem);
+			baseConfig.layerSystem = JSON.stringify(config.layersConfig);
 		} catch (error) {
-			console.error('Error al serializar layerSystem:', error);
+			log.error('Error serializando layersConfig', { error });
 		}
 	}
 
-	if (visualConfig.effects) {
+	if (config.effectsConfig) {
 		try {
-			// Añadir propiedad extendida effectsConfig
-			(extendedConfig as any).effectsConfig = JSON.parse(visualConfig.effects);
+			baseConfig.effects = JSON.stringify(config.effectsConfig);
 		} catch (error) {
-			console.error('Error al serializar effects:', error);
+			log.error('Error serializando effectsConfig', { error });
 		}
 	}
 
-	if (visualConfig.performance) {
+	if (config.performanceConfig) {
 		try {
-			// Añadir propiedad extendida performanceConfig
-			(extendedConfig as any).performanceConfig = JSON.parse(visualConfig.performance);
+			baseConfig.performance = JSON.stringify(config.performanceConfig);
 		} catch (error) {
-			console.error('Error al serializar performance:', error);
+			log.error('Error serializando performanceConfig', { error });
 		}
 	}
 
-	if (visualConfig.states) {
+	if (config.statesConfig) {
 		try {
-			// Añadir propiedad extendida statesConfig
-			(extendedConfig as any).statesConfig = JSON.parse(visualConfig.states);
+			baseConfig.states = JSON.stringify(config.statesConfig);
 		} catch (error) {
-			console.error('Error al serializar states:', error);
+			log.error('Error serializando statesConfig', { error });
 		}
 	}
 
-	return extendedConfig;
+	return baseConfig;
 }
 
 /**
- * Convierte un objeto VideoBase a VideoComplete con metadatos deserializados
- * @param video Objeto VideoBase con metadatos serializados
- * @returns Objeto VideoComplete con metadatos deserializados
- * @deprecated Use toVideoComplete instead
- */
-export function parseVideo(video: VideoBase & VideoData): VideoComplete {
-	return {
-		...video,
-		metadata: parseVideoMetadata(video) || null,
-	};
-}
-
-/**
- * Convierte un objeto VideoBase a VideoComplete con metadatos deserializados
- * @param video Objeto VideoBase con metadatos serializados
- * @returns Objeto VideoComplete con metadatos deserializados
- */
-export function toVideoComplete(video: VideoBase & VideoData): VideoComplete {
-	return {
-		...video,
-		metadata: parseVideoMetadata(video) || null,
-	};
-}
-
-/**
- * Convierte un objeto VideoComplete a VideoBase con metadatos serializados
- * @param video Objeto VideoComplete con metadatos deserializados
- * @returns Objeto VideoBase con metadatos serializados
- */
-export function fromVideoComplete(video: VideoComplete): VideoBase & { metadata: string | null } {
-	return {
-		...video,
-		metadata: video.metadata ? serializeVideoMetadata(video.metadata) || null : null,
-	};
-}
-
-/**
- * Convierte un objeto VideoVisualConfig a VideoVisualConfigComplete con campos JSON deserializados
- * @param visualConfig Configuración visual básica
- * @returns Configuración visual extendida con campos JSON deserializados
+ * 🔄 Deserializa la configuración visual de un video
+ * @param config Configuración visual con campos serializados
+ * @returns Configuración visual completa con campos deserializados
  */
 export function toVideoVisualConfigComplete(
-	visualConfig: VideoVisualConfig | null | undefined
-): VideoVisualConfigComplete | undefined {
-	if (!visualConfig) return undefined;
-
-	// Crear copia para evitar mutar el objeto original
+	config: VideoVisualConfig
+): VideoVisualConfigComplete {
 	const completeConfig: VideoVisualConfigComplete = {
-		...visualConfig,
-	} as VideoVisualConfigComplete;
+		...config
+	};
 
 	// Deserializar campos JSON
-	if (visualConfig.layerSystem) {
+	if (config.layerSystem) {
 		try {
-			completeConfig.layersConfig = JSON.parse(visualConfig.layerSystem);
+			completeConfig.layersConfig = JSON.parse(config.layerSystem);
 		} catch (error) {
-			console.error('Error al deserializar layerSystem:', error);
+			log.error('Error deserializando layerSystem', { error });
 		}
 	}
 
-	if (visualConfig.effects) {
+	if (config.effects) {
 		try {
-			completeConfig.effectsConfig = JSON.parse(visualConfig.effects);
+			completeConfig.effectsConfig = JSON.parse(config.effects);
 		} catch (error) {
-			console.error('Error al deserializar effects:', error);
+			log.error('Error deserializando effects', { error });
 		}
 	}
 
-	if (visualConfig.performance) {
+	if (config.performance) {
 		try {
-			completeConfig.performanceConfig = JSON.parse(visualConfig.performance);
+			completeConfig.performanceConfig = JSON.parse(config.performance);
 		} catch (error) {
-			console.error('Error al deserializar performance:', error);
+			log.error('Error deserializando performance', { error });
 		}
 	}
 
-	if (visualConfig.states) {
+	if (config.states) {
 		try {
-			completeConfig.statesConfig = JSON.parse(visualConfig.states);
+			completeConfig.statesConfig = JSON.parse(config.states);
 		} catch (error) {
-			console.error('Error al deserializar states:', error);
+			log.error('Error deserializando states', { error });
 		}
 	}
 
@@ -215,49 +273,64 @@ export function toVideoVisualConfigComplete(
 }
 
 /**
- * Convierte un objeto VideoVisualConfigComplete a VideoVisualConfig con campos JSON serializados
- * @param completeConfig Configuración visual completa con campos deserializados
- * @returns Configuración visual con campos JSON serializados
+ * 🔍 Valida y formatea un video para su uso
+ * @param video Datos del video a validar
+ * @returns Video validado y formateado
  */
-export function fromVideoVisualConfigComplete(
-	completeConfig: VideoVisualConfigComplete
-): VideoVisualConfig {
-	const baseConfig: VideoVisualConfig = {
-		...completeConfig,
-	};
-
-	// Serializar campos que pueden estar deserializados
-	if (completeConfig.layersConfig) {
-		try {
-			baseConfig.layerSystem = JSON.stringify(completeConfig.layersConfig);
-		} catch (error) {
-			console.error('Error al serializar layersConfig:', error);
-		}
+export function validateVideo(video: Record<string, any>): VideoComplete {
+	try {
+		const validatedData = VideoSchema.parse(video);
+		return validatedData as unknown as VideoComplete;
+	} catch (error) {
+		log.error('Error validando datos de video', { error, video });
+		throw new Error(`Error validando datos de video: ${(error as Error).message}`);
 	}
-
-	if (completeConfig.effectsConfig) {
-		try {
-			baseConfig.effects = JSON.stringify(completeConfig.effectsConfig);
-		} catch (error) {
-			console.error('Error al serializar effectsConfig:', error);
-		}
-	}
-
-	if (completeConfig.performanceConfig) {
-		try {
-			baseConfig.performance = JSON.stringify(completeConfig.performanceConfig);
-		} catch (error) {
-			console.error('Error al serializar performanceConfig:', error);
-		}
-	}
-
-	if (completeConfig.statesConfig) {
-		try {
-			baseConfig.states = JSON.stringify(completeConfig.statesConfig);
-		} catch (error) {
-			console.error('Error al serializar statesConfig:', error);
-		}
-	}
-
-	return baseConfig;
 }
+
+/**
+ * 🎯 Extiende un video con campos adicionales
+ * @param video Video base a extender
+ * @param options Opciones de extensión
+ * @returns Video extendido con campos adicionales
+ */
+export function extendVideo(
+	video: VideoBase & Record<string, any>,
+	options: VideoTransformOptions = {}
+): VideoComplete {
+	try {
+		// Crear el video completo
+		const extendedVideo = fromPrismaVideo(video, options);
+
+		// UI por defecto
+		if (!extendedVideo.thumbnailUrl && video.id) {
+			extendedVideo.thumbnailUrl = `/api/videos/${video.id}/thumbnail`;
+		}
+
+		if (!extendedVideo.privacyLevel) {
+			extendedVideo.privacyLevel = video.isPublic ? 'PUBLIC' : 'PRIVATE';
+		}
+
+		return extendedVideo;
+	} catch (error) {
+		log.error('Error extendiendo video', { error, video });
+		throw new Error(`Error extendiendo video: ${(error as Error).message}`);
+	}
+}
+
+/**
+ * 🔄 Extiende varios videos con campos adicionales
+ * @param videos Lista de videos a extender
+ * @param options Opciones de extensión
+ * @returns Lista de videos extendidos
+ */
+export function extendVideos(
+	videos: (VideoBase & Record<string, any>)[],
+	options: VideoTransformOptions = {}
+): VideoComplete[] {
+	return videos.map(video => extendVideo(video, options));
+}
+
+// Exportar funciones obsoletas con alias para mantener compatibilidad
+export const parseVideo = extendVideo;
+export const toVideoComplete = fromPrismaVideo;
+export const fromVideoComplete = toPrismaVideo;

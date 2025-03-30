@@ -1,112 +1,572 @@
 /**
- * @file Mappers para la entidad Place
+ * @file Funciones de mapeo para la entidad Place
  * @module transformers/place/mappers
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import {
-  type CreatePlaceData,
-  type PlaceBase,
-  PlaceCategory,
-  type PlaceExtendedComplete,
-  PlaceType,
-  type UpdatePlaceData
-} from '@/types/entities/place';
+    PlaceComplete,
+    PlaceCreateInput,
+    PlaceFilters,
+    PlaceSearchOptions,
+    PlaceUpdateInput,
+    RelatedPlace
+} from '@/types/entities/place/types';
+import { createLogger } from '@/utils/logger';
+import { Prisma } from '@prisma/client';
 import {
-  mapPlaceExtendedFromComplete,
-  serializePlaceDangers,
-  serializePlaceFilters,
-  serializePlaceResources,
-  serializePlaceStats,
-  toPlaceComplete
+    toPrismaPlace
 } from './serializers';
 
-const mapperLogger = serverLogger.withContext('PlaceMapper');
+// Logger específico para el transformer de Place
+const log = createLogger('place-mapper');
+
+/**
+ * 🔄 Mapea datos de creación de lugar a formato compatible con Prisma
+ * @param data Datos de creación de lugar
+ * @returns Objeto formateado para Prisma
+ */
+export function mapCreatePlaceDataToPrisma(data: PlaceCreateInput): Prisma.PlaceCreateInput {
+	try {
+		// Convertir a formato Prisma base
+		const prismaData = toPrismaPlace(data) as Record<string, any>;
+
+		// Manejar relaciones si existen
+		const relations: Record<string, any> = {};
+
+		// Relaciones opcionales
+		if (data.images && data.images.length > 0) {
+			relations.images = {
+				connect: data.images.map(img => ({ id: typeof img === 'string' ? img : img.id }))
+			};
+		}
+
+		if (data.videos && data.videos.length > 0) {
+			relations.videos = {
+				connect: data.videos.map(vid => ({ id: typeof vid === 'string' ? vid : vid.id }))
+			};
+		}
+
+		if (data.albums && data.albums.length > 0) {
+			relations.albums = {
+				connect: data.albums.map(album => ({ id: typeof album === 'string' ? album : album.id }))
+			};
+		}
+
+		if (data.collections && data.collections.length > 0) {
+			relations.collections = {
+				connect: data.collections.map(collection => ({ id: typeof collection === 'string' ? collection : collection.id }))
+			};
+		}
+
+		if (data.tags && data.tags.length > 0) {
+			relations.tags = {
+				connect: data.tags.map(tag => ({ id: typeof tag === 'string' ? tag : tag.id }))
+			};
+		}
+
+		if (data.characters && data.characters.length > 0) {
+			relations.characters = {
+				connect: data.characters.map(character => ({ id: typeof character === 'string' ? character : character.id }))
+			};
+		}
+
+		if (data.worldItems && data.worldItems.length > 0) {
+			relations.worldItems = {
+				connect: data.worldItems.map(item => ({ id: typeof item === 'string' ? item : item.id }))
+			};
+		}
+
+		if (data.concepts && data.concepts.length > 0) {
+			relations.concepts = {
+				connect: data.concepts.map(concept => ({ id: typeof concept === 'string' ? concept : concept.id }))
+			};
+		}
+
+		if (data.prompts && data.prompts.length > 0) {
+			relations.prompts = {
+				connect: data.prompts.map(prompt => ({ id: typeof prompt === 'string' ? prompt : prompt.id }))
+			};
+		}
+
+		if (data.notes && data.notes.length > 0) {
+			relations.notes = {
+				connect: data.notes.map(note => ({ id: typeof note === 'string' ? note : note.id }))
+			};
+		}
+
+		if (data.wildcards && data.wildcards.length > 0) {
+			relations.wildcards = {
+				connect: data.wildcards.map(wildcard => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id }))
+			};
+		}
+
+		if (data.properties && data.properties.length > 0) {
+			relations.properties = {
+				connect: data.properties.map(property => ({ id: typeof property === 'string' ? property : property.id }))
+			};
+		}
+
+		if (data.groups && data.groups.length > 0) {
+			relations.groups = {
+				connect: data.groups.map(group => ({ id: typeof group === 'string' ? group : group.id }))
+			};
+		}
+
+		// Combinar datos base con relaciones
+		return {
+			...prismaData,
+			...relations
+		} as Prisma.PlaceCreateInput;
+	} catch (error) {
+		log.error('Error mapeando datos de creación de lugar', { error, data });
+		throw new Error(`Error mapeando datos de creación de lugar: ${(error as Error).message}`);
+	}
+}
+
+/**
+ * 🔄 Mapea datos de actualización de lugar a formato compatible con Prisma
+ * @param placeId ID del lugar a actualizar
+ * @param data Datos de actualización
+ * @returns Objeto formateado para Prisma
+ */
+export function mapUpdatePlaceDataToPrisma(placeId: string, data: PlaceUpdateInput): Prisma.PlaceUpdateArgs {
+	try {
+		// Convertir a formato Prisma base
+		const prismaData = toPrismaPlace(data) as Record<string, any>;
+
+		// Manejar relaciones si existen
+		const relations: Record<string, any> = {};
+
+		// Relaciones opcionales
+		if (data.images) {
+			relations.images = {
+				set: data.images.map(img => ({ id: typeof img === 'string' ? img : img.id }))
+			};
+		}
+
+		if (data.videos) {
+			relations.videos = {
+				set: data.videos.map(vid => ({ id: typeof vid === 'string' ? vid : vid.id }))
+			};
+		}
+
+		if (data.albums) {
+			relations.albums = {
+				set: data.albums.map(album => ({ id: typeof album === 'string' ? album : album.id }))
+			};
+		}
+
+		if (data.collections) {
+			relations.collections = {
+				set: data.collections.map(collection => ({ id: typeof collection === 'string' ? collection : collection.id }))
+			};
+		}
+
+		if (data.tags) {
+			relations.tags = {
+				set: data.tags.map(tag => ({ id: typeof tag === 'string' ? tag : tag.id }))
+			};
+		}
+
+		if (data.characters) {
+			relations.characters = {
+				set: data.characters.map(character => ({ id: typeof character === 'string' ? character : character.id }))
+			};
+		}
+
+		if (data.worldItems) {
+			relations.worldItems = {
+				set: data.worldItems.map(item => ({ id: typeof item === 'string' ? item : item.id }))
+			};
+		}
+
+		if (data.concepts) {
+			relations.concepts = {
+				set: data.concepts.map(concept => ({ id: typeof concept === 'string' ? concept : concept.id }))
+			};
+		}
+
+		if (data.prompts) {
+			relations.prompts = {
+				set: data.prompts.map(prompt => ({ id: typeof prompt === 'string' ? prompt : prompt.id }))
+			};
+		}
+
+		if (data.notes) {
+			relations.notes = {
+				set: data.notes.map(note => ({ id: typeof note === 'string' ? note : note.id }))
+			};
+		}
+
+		if (data.wildcards) {
+			relations.wildcards = {
+				set: data.wildcards.map(wildcard => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id }))
+			};
+		}
+
+		if (data.properties) {
+			relations.properties = {
+				set: data.properties.map(property => ({ id: typeof property === 'string' ? property : property.id }))
+			};
+		}
+
+		if (data.groups) {
+			relations.groups = {
+				set: data.groups.map(group => ({ id: typeof group === 'string' ? group : group.id }))
+			};
+		}
+
+		// Combinar datos base con relaciones
+		return {
+			where: { id: placeId },
+			data: {
+				...prismaData,
+				...relations
+			}
+		};
+	} catch (error) {
+		log.error('Error mapeando datos de actualización de lugar', { error, data });
+		throw new Error(`Error mapeando datos de actualización de lugar: ${(error as Error).message}`);
+	}
+}
+
+/**
+ * 🔄 Mapea opciones de búsqueda a formato compatible con Prisma
+ * @param options Opciones de búsqueda
+ * @returns Objeto formateado para Prisma
+ */
+export function mapPlaceSearchOptionsToPrisma(options: PlaceSearchOptions): Prisma.PlaceFindManyArgs {
+	try {
+		// Construir objeto para Prisma
+		const prismaOptions: Prisma.PlaceFindManyArgs = {};
+
+		// Paginación
+		if (options.skip !== undefined) {
+			prismaOptions.skip = options.skip;
+		}
+
+		if (options.take !== undefined) {
+			prismaOptions.take = options.take;
+		}
+
+		// Ordenamiento
+		if (options.orderBy) {
+			prismaOptions.orderBy = options.orderBy as any;
+		}
+
+		// Filtros
+		if (options.where) {
+			prismaOptions.where = mapPlaceFiltersToPrisma(options.where);
+		}
+
+		// Incluir relaciones
+		if (options.include) {
+			prismaOptions.include = {};
+
+			// Verificar cada relación individual
+			if (options.include.images) {
+				prismaOptions.include.images = true;
+			}
+
+			if (options.include.videos) {
+				prismaOptions.include.videos = true;
+			}
+
+			if (options.include.albums) {
+				prismaOptions.include.albums = true;
+			}
+
+			if (options.include.collections) {
+				prismaOptions.include.collections = true;
+			}
+
+			if (options.include.tags) {
+				prismaOptions.include.tags = true;
+			}
+
+			if (options.include.characters) {
+				prismaOptions.include.characters = true;
+			}
+
+			if (options.include.worldItems) {
+				prismaOptions.include.worldItems = true;
+			}
+
+			if (options.include.concepts) {
+				prismaOptions.include.concepts = true;
+			}
+
+			if (options.include.prompts) {
+				prismaOptions.include.prompts = true;
+			}
+
+			if (options.include.notes) {
+				prismaOptions.include.notes = true;
+			}
+
+			if (options.include.wildcards) {
+				prismaOptions.include.wildcards = true;
+			}
+
+			if (options.include.properties) {
+				prismaOptions.include.properties = true;
+			}
+
+			if (options.include.groups) {
+				prismaOptions.include.groups = true;
+			}
+
+			if (options.include._count) {
+				prismaOptions.include._count = true;
+			}
+		}
+
+		return prismaOptions;
+	} catch (error) {
+		log.error('Error mapeando opciones de búsqueda', { error, options });
+		throw new Error(`Error mapeando opciones de búsqueda: ${(error as Error).message}`);
+	}
+}
+
+/**
+ * 🔄 Mapea filtros de lugar a formato compatible con Prisma
+ * @param filters Filtros de búsqueda
+ * @returns Objeto formateado para Prisma
+ */
+export function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWhereInput {
+	try {
+		const prismaWhere: Prisma.PlaceWhereInput = {};
+		const AND: Prisma.PlaceWhereInput[] = [];
+
+		// Búsqueda por texto
+		if (filters.searchQuery) {
+			AND.push({
+				OR: [
+					{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
+					{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
+					{ region: { contains: filters.searchQuery, mode: 'insensitive' } },
+					{ type: { contains: filters.searchQuery, mode: 'insensitive' } },
+					{ climate: { contains: filters.searchQuery, mode: 'insensitive' } },
+					{ government: { contains: filters.searchQuery, mode: 'insensitive' } },
+					{ lore: { contains: filters.searchQuery, mode: 'insensitive' } },
+					{ history: { contains: filters.searchQuery, mode: 'insensitive' } }
+				]
+			});
+		}
+
+		// Filtrar por categorías
+		if (filters.categories && filters.categories.length > 0) {
+			AND.push({
+				category: { in: filters.categories }
+			});
+		}
+
+		// Filtrar por regiones
+		if (filters.regions && filters.regions.length > 0) {
+			const regionConditions = filters.regions.map(region => ({
+				region: { contains: region }
+			}));
+			AND.push({ OR: regionConditions });
+		}
+
+		// Filtrar por tipos
+		if (filters.types && filters.types.length > 0) {
+			AND.push({
+				type: { in: filters.types }
+			});
+		}
+
+		// Filtrar por climas
+		if (filters.climates && filters.climates.length > 0) {
+			AND.push({
+				climate: { in: filters.climates }
+			});
+		}
+
+		// Filtrar por rango de población
+		if (filters.populationRange) {
+			if (filters.populationRange.min !== undefined) {
+				AND.push({ population: { gte: filters.populationRange.min } });
+			}
+
+			if (filters.populationRange.max !== undefined) {
+				AND.push({ population: { lte: filters.populationRange.max } });
+			}
+		}
+
+		// Filtrar por gobiernos
+		if (filters.governments && filters.governments.length > 0) {
+			const govConditions = filters.governments.map(government => ({
+				government: { contains: government }
+			}));
+			AND.push({ OR: govConditions });
+		}
+
+		// Filtrar por favoritos
+		if (filters.onlyFavorites) {
+			AND.push({ isFavorite: true });
+		}
+
+		// Filtrar por relaciones existentes
+		if (filters.hasImages) {
+			AND.push({
+				images: {
+					some: {}
+				}
+			});
+		}
+
+		if (filters.hasNotes) {
+			AND.push({
+				notes: {
+					some: {}
+				}
+			});
+		}
+
+		if (filters.hasConcepts) {
+			AND.push({
+				concepts: {
+					some: {}
+				}
+			});
+		}
+
+		if (filters.hasPrompts) {
+			AND.push({
+				prompts: {
+					some: {}
+				}
+			});
+		}
+
+		// Combinar todos los filtros con AND
+		if (AND.length > 0) {
+			prismaWhere.AND = AND;
+		}
+
+		return prismaWhere;
+	} catch (error) {
+		log.error('Error mapeando filtros de lugar', { error, filters });
+		throw new Error(`Error mapeando filtros de lugar: ${(error as Error).message}`);
+	}
+}
+
+/**
+ * 🔗 Mapea un lugar a formato para lugar relacionado
+ * @param place Lugar completo a mapear
+ * @param count Conteo de relación
+ * @param strength Fuerza de la relación
+ * @returns Objeto de lugar relacionado
+ */
+export function mapPlaceToRelatedPlace(
+	place: PlaceComplete,
+	count: number = 1,
+	strength: number = 1
+): RelatedPlace {
+	return {
+		id: place.id,
+		name: place.name,
+		emoji: place.emoji,
+		color: place.color,
+		category: place.category || undefined,
+		region: place.region || undefined,
+		type: place.type || undefined,
+		count,
+		strength
+	};
+}
 
 /**
  * Genera un color aleatorio para un lugar basado en su nombre y categoría
  * @param name Nombre del lugar
- * @param category Categoría opcional
- * @returns Color hexadecimal
+ * @param category Categoría del lugar
+ * @returns Color en formato hexadecimal
  */
 export function generatePlaceColor(name: string, category?: string | null): string {
-	// Colores predeterminados por categoría
+	// Paleta de colores para categorías comunes
 	const categoryColors: Record<string, string> = {
-		[PlaceCategory.SETTLEMENT]: '#3b82f6', // Azul
-		[PlaceCategory.LANDSCAPE]: '#10b981', // Verde
-		[PlaceCategory.STRUCTURE]: '#6366f1', // Índigo
-		[PlaceCategory.BIOME]: '#84cc16', // Lima
-		[PlaceCategory.UNDERGROUND]: '#7c3aed', // Violeta
-		[PlaceCategory.MYTHICAL]: '#ec4899', // Rosa
-		[PlaceCategory.HISTORICAL]: '#f59e0b', // Ámbar
-		[PlaceCategory.OTHER]: '#64748b', // Gris azulado
+		settlement: '#4a90e2', // Azul
+		landscape: '#50c878', // Verde esmeralda
+		structure: '#a05a2c', // Marrón
+		biome: '#228b22', // Verde bosque
+		underground: '#654321', // Marrón oscuro
+		mythical: '#9370db', // Violeta
+		historical: '#cd853f', // Marrón claro
+		other: '#708090', // Gris pizarra
 	};
 
-	// Si hay una categoría válida, usar su color
-	if (category && categoryColors[category]) {
-		return categoryColors[category];
+	// Si hay una categoría y existe en nuestra paleta, usar ese color
+	if (category && categoryColors[category.toLowerCase()]) {
+		return categoryColors[category.toLowerCase()];
 	}
 
-	// Si no hay categoría, generar un color basado en el nombre
-	const hash = Array.from(name).reduce((acc, char) => acc + char.charCodeAt(0), 0);
-	const hue = hash % 360;
-	const saturation = 65 + (hash % 20);
-	const lightness = 45 + (hash % 10);
+	// Si no hay categoría o no está en la paleta, generar color basado en el nombre
+	let hash = 0;
+	for (let i = 0; i < name.length; i++) {
+		hash = name.charCodeAt(i) + ((hash << 5) - hash);
+	}
 
-	// Convertir HSL a hexadecimal
-	return hslToHex(hue, saturation, lightness);
+	// Convertir a color hexadecimal
+	let color = '#';
+	for (let i = 0; i < 3; i++) {
+		const value = (hash >> (i * 8)) & 0xff;
+		color += ('00' + value.toString(16)).substr(-2);
+	}
+
+	return color;
 }
 
 /**
- * Genera un emoji para un lugar basado en su tipo y categoría
- * @param type Tipo de lugar
+ * Genera un emoji sugerido para un lugar basado en su tipo/categoría
+ * @param type Tipo del lugar
  * @param category Categoría del lugar
- * @returns Emoji representativo
+ * @returns Emoji sugerido
  */
-export function generatePlaceEmoji(type?: string | null, category?: string | null): string {
-	// Emojis por tipo
+export function suggestPlaceEmoji(type?: string | null, category?: string | null): string {
+	// Emojis por tipo de lugar
 	const typeEmojis: Record<string, string> = {
-		[PlaceType.CITY]: '🏙️',
-		[PlaceType.TOWN]: '🏘️',
-		[PlaceType.VILLAGE]: '🏡',
-		[PlaceType.RUIN]: '🏚️',
-		[PlaceType.CASTLE]: '🏰',
-		[PlaceType.FORTRESS]: '🏯',
-		[PlaceType.DUNGEON]: '🔒',
-		[PlaceType.CAVE]: '🕳️',
-		[PlaceType.FOREST]: '🌲',
-		[PlaceType.MOUNTAIN]: '⛰️',
-		[PlaceType.VALLEY]: '🏞️',
-		[PlaceType.ISLAND]: '🏝️',
-		[PlaceType.LAKE]: '🌊',
-		[PlaceType.RIVER]: '🌊',
-		[PlaceType.OCEAN]: '🌊',
-		[PlaceType.DESERT]: '🏜️',
-		[PlaceType.TUNDRA]: '❄️',
-		[PlaceType.JUNGLE]: '🌴',
-		[PlaceType.SWAMP]: '🦟',
+		city: '🏙️',
+		town: '🏘️',
+		village: '🏡',
+		ruin: '🏚️',
+		castle: '🏰',
+		fortress: '🗿',
+		dungeon: '⚔️',
+		cave: '🕳️',
+		forest: '🌲',
+		mountain: '⛰️',
+		valley: '🏞️',
+		island: '🏝️',
+		lake: '🌊',
+		river: '🌊',
+		ocean: '🌊',
+		desert: '🏜️',
+		tundra: '❄️',
+		jungle: '🌴',
+		swamp: '🐊',
 	};
 
-	// Emojis por categoría (fallback)
+	// Emojis por categoría
 	const categoryEmojis: Record<string, string> = {
-		[PlaceCategory.SETTLEMENT]: '🏙️',
-		[PlaceCategory.LANDSCAPE]: '🏞️',
-		[PlaceCategory.STRUCTURE]: '🏛️',
-		[PlaceCategory.BIOME]: '🌍',
-		[PlaceCategory.UNDERGROUND]: '⛏️',
-		[PlaceCategory.MYTHICAL]: '✨',
-		[PlaceCategory.HISTORICAL]: '🏺',
-		[PlaceCategory.OTHER]: '📍',
+		settlement: '🏠',
+		landscape: '🏞️',
+		structure: '🏛️',
+		biome: '🌿',
+		underground: '⛏️',
+		mythical: '✨',
+		historical: '📜',
+		other: '📍',
 	};
 
-	// Intentar obtener emoji por tipo
-	if (type && typeEmojis[type]) {
-		return typeEmojis[type];
+	// Primero intentar por tipo (más específico)
+	if (type && typeEmojis[type.toLowerCase()]) {
+		return typeEmojis[type.toLowerCase()];
 	}
 
-	// Intentar obtener emoji por categoría
-	if (category && categoryEmojis[category]) {
-		return categoryEmojis[category];
+	// Luego intentar por categoría
+	if (category && categoryEmojis[category.toLowerCase()]) {
+		return categoryEmojis[category.toLowerCase()];
 	}
 
 	// Emoji por defecto
@@ -114,260 +574,16 @@ export function generatePlaceEmoji(type?: string | null, category?: string | nul
 }
 
 /**
- * Convierte componentes HSL a color hexadecimal
- * @param hue Matiz (0-360)
- * @param saturation Saturación (0-100)
- * @param lightness Luminosidad (0-100)
- * @returns Color en formato hexadecimal
+ * Genera un nombre completo para un lugar que incluye su jerarquía
+ * @param name Nombre del lugar
+ * @param region Región del lugar
+ * @returns Nombre completo con jerarquía
  */
-function hslToHex(hue: number, saturation: number, lightness: number): string {
-	const s = saturation / 100;
-	const l = lightness / 100;
+export function getCompleteLocationName(name: string, region?: string | null): string {
+	if (!region) return name;
 
-	const c = (1 - Math.abs(2 * l - 1)) * s;
-	const x = c * (1 - Math.abs(((hue / 60) % 2) - 1));
-	const m = l - c / 2;
+	const regionParts = region.split(/[\/|>]/).map(r => r.trim());
+	const lastRegion = regionParts[regionParts.length - 1];
 
-	let r = 0;
-	let g = 0;
-	let b = 0;
-
-	if (0 <= hue && hue < 60) {
-		r = c; g = x; b = 0;
-	} else if (60 <= hue && hue < 120) {
-		r = x; g = c; b = 0;
-	} else if (120 <= hue && hue < 180) {
-		r = 0; g = c; b = x;
-	} else if (180 <= hue && hue < 240) {
-		r = 0; g = x; b = c;
-	} else if (240 <= hue && hue < 300) {
-		r = x; g = 0; b = c;
-	} else if (300 <= hue && hue < 360) {
-		r = c; g = 0; b = x;
-	}
-
-	const rHex = Math.round((r + m) * 255).toString(16).padStart(2, '0');
-	const gHex = Math.round((g + m) * 255).toString(16).padStart(2, '0');
-	const bHex = Math.round((b + m) * 255).toString(16).padStart(2, '0');
-
-	return `#${rHex}${gHex}${bHex}`;
-}
-
-/**
- * Mapea datos de creación a formato Prisma
- * @param data Datos de creación del lugar
- * @returns Datos formateados para Prisma
- */
-export function mapCreatePlaceDataToPrisma(data: CreatePlaceData): Record<string, any> {
-	try {
-		const createData: Record<string, any> = {
-			name: data.name,
-			emoji: data.emoji || generatePlaceEmoji(data.type, data.category),
-			color: data.color || generatePlaceColor(data.name, data.category),
-			description: data.description || null,
-			shortcut: data.shortcut || null,
-			category: data.category || null,
-			region: data.region || 'unknown',
-			type: data.type || 'unknown',
-			climate: data.climate || 'temperate',
-			population: data.population ?? 0,
-			government: data.government || 'unknown',
-			lore: data.lore || '',
-			history: data.history || '',
-			featuredImage: data.featuredImage || null,
-			isFavorite: data.isFavorite || false,
-			sortBy: data.sortBy || 'name',
-		};
-
-		// Manejar campos JSON
-		if (data.dangers) {
-			if (typeof data.dangers === 'string') {
-				createData.dangers = data.dangers;
-			} else {
-				createData.dangers = serializePlaceDangers(data.dangers);
-			}
-		} else {
-			createData.dangers = '[]';
-		}
-
-		if (data.resources) {
-			if (typeof data.resources === 'string') {
-				createData.resources = data.resources;
-			} else {
-				createData.resources = serializePlaceResources(data.resources);
-			}
-		} else {
-			createData.resources = '[]';
-		}
-
-		if (data.stats) {
-			if (typeof data.stats === 'string') {
-				createData.stats = data.stats;
-			} else {
-				createData.stats = serializePlaceStats(data.stats);
-			}
-		} else {
-			createData.stats = '{}';
-		}
-
-		if (data.filters) {
-			if (typeof data.filters === 'string') {
-				createData.filters = data.filters;
-			} else {
-				createData.filters = serializePlaceFilters(data.filters);
-			}
-		} else {
-			createData.filters = '{}';
-		}
-
-		// Manejar relaciones
-		if (data.groupIds?.length) {
-			createData.groups = {
-				connect: data.groupIds.map(id => ({ id }))
-			};
-		}
-
-		if (data.propertyIds?.length) {
-			createData.properties = {
-				connect: data.propertyIds.map(id => ({ id }))
-			};
-		}
-
-		if (data.wildcardIds?.length) {
-			createData.wildcards = {
-				connect: data.wildcardIds.map(id => ({ id }))
-			};
-		}
-
-		return createData;
-	} catch (error) {
-		mapperLogger.error('❌ Error al mapear datos de creación de Place:', error);
-		throw error;
-	}
-}
-
-/**
- * Mapea datos de actualización a formato Prisma
- * @param data Datos de actualización del lugar
- * @returns Datos formateados para Prisma
- */
-export function mapUpdatePlaceDataToPrisma(data: UpdatePlaceData): Record<string, any> {
-	try {
-		const updateData: Record<string, any> = {};
-
-		// Copiar propiedades simples
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.emoji !== undefined) updateData.emoji = data.emoji;
-		if (data.color !== undefined) updateData.color = data.color;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
-		if (data.category !== undefined) updateData.category = data.category;
-		if (data.region !== undefined) updateData.region = data.region;
-		if (data.type !== undefined) updateData.type = data.type;
-		if (data.climate !== undefined) updateData.climate = data.climate;
-		if (data.population !== undefined) updateData.population = data.population;
-		if (data.government !== undefined) updateData.government = data.government;
-		if (data.lore !== undefined) updateData.lore = data.lore;
-		if (data.history !== undefined) updateData.history = data.history;
-		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-		if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
-
-		// Manejar campos JSON
-		if (data.dangers !== undefined) {
-			if (typeof data.dangers === 'string') {
-				updateData.dangers = data.dangers;
-			} else {
-				updateData.dangers = serializePlaceDangers(data.dangers);
-			}
-		}
-
-		if (data.resources !== undefined) {
-			if (typeof data.resources === 'string') {
-				updateData.resources = data.resources;
-			} else {
-				updateData.resources = serializePlaceResources(data.resources);
-			}
-		}
-
-		if (data.stats !== undefined) {
-			if (typeof data.stats === 'string') {
-				updateData.stats = data.stats;
-			} else {
-				updateData.stats = serializePlaceStats(data.stats);
-			}
-		}
-
-		if (data.filters !== undefined) {
-			if (typeof data.filters === 'string') {
-				updateData.filters = data.filters;
-			} else {
-				updateData.filters = serializePlaceFilters(data.filters);
-			}
-		}
-
-		// Manejar relaciones
-		if (data.groupIds !== undefined) {
-			updateData.groups = {
-				set: data.groupIds?.map(id => ({ id })) || []
-			};
-		}
-
-		if (data.propertyIds !== undefined) {
-			updateData.properties = {
-				set: data.propertyIds?.map(id => ({ id })) || []
-			};
-		}
-
-		if (data.wildcardIds !== undefined) {
-			updateData.wildcards = {
-				set: data.wildcardIds?.map(id => ({ id })) || []
-			};
-		}
-
-		return updateData;
-	} catch (error) {
-		mapperLogger.error('❌ Error al mapear datos de actualización de Place:', error);
-		throw error;
-	}
-}
-
-/**
- * Transforma y extiende un lugar con información adicional
- * @param place Lugar a extender
- * @param counts Conteos opcionales de relaciones
- * @returns Lugar extendido con datos adicionales
- */
-export function extendPlace(
-	place: PlaceBase,
-	counts?: { images?: number; notes?: number; concepts?: number; prompts?: number }
-): PlaceExtendedComplete {
-	try {
-		// Convertir a formato completo
-		const placeComplete = toPlaceComplete(place);
-
-		// Luego a formato extendido
-		return mapPlaceExtendedFromComplete(placeComplete, counts);
-	} catch (error) {
-		mapperLogger.error('❌ Error al extender Place:', error);
-		// Fallback seguro
-		const placeComplete = toPlaceComplete(place);
-		return mapPlaceExtendedFromComplete(placeComplete);
-	}
-}
-
-/**
- * Transforma y extiende una lista de lugares
- * @param places Lista de lugares a extender
- * @param countsMap Mapa opcional de conteos por ID
- * @returns Lista de lugares extendidos
- */
-export function extendPlaces(
-	places: PlaceBase[],
-	countsMap?: Map<string, { images?: number; notes?: number; concepts?: number; prompts?: number }>
-): PlaceExtendedComplete[] {
-	return places.map(place => {
-		const counts = countsMap?.get(place.id);
-		return extendPlace(place, counts);
-	});
+	return `${name}, ${lastRegion}`;
 }

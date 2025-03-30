@@ -3,7 +3,7 @@
  * @module types/entities/property/property-types
  */
 
-import type { Album } from '../album/album-types';
+import type { Album } from '../album/types';
 import type { Character } from '../character/types';
 import type { Collection } from '../collection/types';
 import type { Concept } from '../concept/types';
@@ -35,9 +35,9 @@ export interface PropertyBase {
 }
 
 /**
- * Interfaz extendida que incluye relaciones
+ * Interfaz para relaciones de propiedad
  */
-export interface PropertyWithRelations extends PropertyBase {
+export interface PropertyRelations {
   images?: Image[];
   videos?: Video[];
   albums?: Album[];
@@ -51,21 +51,58 @@ export interface PropertyWithRelations extends PropertyBase {
   notes?: Note[];
   wildcards?: Wildcard[];
   groups?: Group[];
-  _count?: {
-    images?: number;
-    videos?: number;
-    albums?: number;
-    collections?: number;
-    tags?: number;
-    characters?: number;
-    places?: number;
-    worldItems?: number;
-    concepts?: number;
-    prompts?: number;
-    notes?: number;
-    wildcards?: number;
-    groups?: number;
-  };
+}
+
+/**
+ * Interfaz para conteos de relaciones de propiedad
+ */
+export interface PropertyCounts {
+  images?: number;
+  videos?: number;
+  albums?: number;
+  collections?: number;
+  tags?: number;
+  characters?: number;
+  places?: number;
+  worldItems?: number;
+  concepts?: number;
+  prompts?: number;
+  notes?: number;
+  wildcards?: number;
+  groups?: number;
+}
+
+/**
+ * Interfaz para campos UI calculados de propiedad
+ */
+export interface PropertyUI {
+  lastUpdated: Date;
+  itemCount: number;
+}
+
+/**
+ * Interfaz para propiedades deserializadas
+ */
+export interface PropertyDeserialized extends PropertyBase {
+  _relations?: PropertyRelations;
+  _count?: PropertyCounts;
+  _ui?: PropertyUI;
+}
+
+/**
+ * Interfaz extendida que incluye relaciones
+ */
+export interface PropertyWithRelations extends PropertyBase {
+  _relations: PropertyRelations;
+}
+
+/**
+ * Interfaz completa que incluye todos los campos y relaciones
+ */
+export interface PropertyComplete extends PropertyBase {
+  _relations?: PropertyRelations;
+  _count?: PropertyCounts;
+  _ui?: PropertyUI;
 }
 
 /**
@@ -97,12 +134,51 @@ export interface UpdatePropertyData {
 }
 
 /**
+ * Alias para mantener compatibilidad con la API actual
+ */
+export type PropertyUpdateInput = UpdatePropertyData;
+
+/**
  * Interfaz para filtros de búsqueda de propiedades
  */
 export interface PropertyFilters {
   searchQuery?: string;
   categories?: string[];
   onlyFavorites?: boolean;
+}
+
+/**
+ * Interfaz para opciones de búsqueda de propiedades
+ */
+export interface PropertySearchOptions {
+  page?: number;
+  pageSize?: number;
+  sortBy?: PropertySortCriteria;
+  filters?: PropertyFilters;
+  include?: {
+    images?: boolean;
+    videos?: boolean;
+    albums?: boolean;
+    collections?: boolean;
+    tags?: boolean;
+    characters?: boolean;
+    places?: boolean;
+    worldItems?: boolean;
+    concepts?: boolean;
+    prompts?: boolean;
+    notes?: boolean;
+    wildcards?: boolean;
+    groups?: boolean;
+  };
+}
+
+/**
+ * Interfaz para resultados de búsqueda de propiedades
+ */
+export interface PropertySearchResult {
+  items: PropertyComplete[];
+  total: number;
+  totalPages: number;
 }
 
 /**

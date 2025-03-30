@@ -3,16 +3,110 @@
  * @module types/entities/world-item/types
  */
 
-import type { FileItem } from '@/types/file-item';
-import type { Nullable } from '@/utils/types/utility-types';
-import type { Album, Character, Collection, Concept, Group, Image, Note, Place, Prompt, Property, Tag, Video, Wildcard } from '../index';
-import type { WorldItemBase } from './base';
-import { WorldItemCategory, WorldItemRarity, WorldItemType } from './enums';
-import type { WorldItemStats } from './stats-types';
+import { BaseEntity, RelationCount, UIData } from '@/types/common/transformer';
+import { Image } from '../image/types';
+import {
+    WORLD_ITEM_SORT_PROPERTY_MAP,
+    WorldItemCategory,
+    WorldItemRarity,
+    WorldItemRelationshipType,
+    WorldItemSortCriteria,
+    WorldItemType,
+    WorldItemViewMode
+} from './enums';
 
-import { z } from 'zod';
+/**
+ * Interfaz para atributos de objetos del mundo
+ */
+export interface WorldItemAttribute {
+  name: string;
+  value: number;
+  maxValue?: number;
+}
 
-// Filtros
+/**
+ * Interfaz para efectos de objetos del mundo
+ */
+export interface WorldItemEffect {
+  name: string;
+  description: string;
+  duration?: string;
+  cooldown?: string;
+}
+
+/**
+ * Interfaz para requisitos de objetos del mundo
+ */
+export interface WorldItemRequirement {
+  name: string;
+  value: number;
+  description?: string;
+}
+
+/**
+ * Interfaz para estadísticas de objetos del mundo
+ */
+export interface WorldItemStat {
+  name: string;
+  value: number;
+  modifier?: string;
+}
+
+/**
+ * Interfaz para propiedades de objetos del mundo
+ */
+export interface WorldItemProperty {
+  name: string;
+  value: string | number | boolean;
+  description?: string;
+}
+
+/**
+ * Interfaz para filtros de objetos del mundo
+ */
+export interface WorldItemFilter {
+  type: 'tag' | 'character' | 'place' | 'concept' | 'worldItem';
+  operator: 'AND' | 'OR' | 'NOT';
+  value: string | number | boolean;
+  field?: string;
+}
+
+/**
+ * Etiquetas del objeto del mundo
+ */
+export interface WorldItemTags {
+  tags: string[];
+}
+
+/**
+ * Relaciones del objeto del mundo
+ */
+export interface WorldItemRelations {
+  images?: Image[];
+  relatedItems?: WorldItemBase[];
+  relationType?: WorldItemRelationshipType;
+}
+
+/**
+ * Contadores del objeto del mundo
+ */
+export interface WorldItemCounts extends RelationCount {
+  images?: number;
+  relatedItems?: number;
+}
+
+/**
+ * Datos de UI para el objeto del mundo
+ */
+export interface WorldItemUI extends UIData {
+  emoji: string;
+  color: string;
+  viewMode?: WorldItemViewMode;
+}
+
+/**
+ * Filtros para búsqueda de objetos del mundo
+ */
 export interface WorldItemFilters {
   query?: string;
   types?: WorldItemType[];
@@ -27,114 +121,132 @@ export interface WorldItemFilters {
   hasFiles?: boolean;
 }
 
-// Contadores unificados
-export interface WorldItemCount {
-  images: number;
-  videos: number;
-  albums: number;
-  collections: number;
-  tags: number;
-  characters: number;
-  places: number;
-  worldItems: number;
-  concepts: number;
-  prompts: number;
-  notes: number;
-  wildcards: number;
-  properties: number;
-  groups: number;
+/**
+ * Opciones para búsqueda de objetos del mundo
+ */
+export interface WorldItemSearchOptions {
+  filters?: WorldItemFilters;
+  sortBy?: WorldItemSortCriteria;
+  page?: number;
+  pageSize?: number;
+  includeImages?: boolean;
+  includeStats?: boolean;
 }
 
-// Estadísticas extendidas
-export interface WorldItemWithStats extends WorldItemBase {
-  _count: WorldItemCount;
-  totalEntities: number;
-  lastUpdated: Date;
-  totalSize: number;
-  processedStats: WorldItemStats;
-}
-
-// Relaciones
-export interface WorldItemWithRelations extends WorldItemBase {
-  images?: Image[];
-  videos?: Video[];
-  albums?: Album[];
-  collections?: Collection[];
-  tags?: Tag[];
-  characters?: Character[];
-  places?: Place[];
-  concepts?: Concept[];
-  prompts?: Prompt[];
-  notes?: Note[];
-  wildcards?: Wildcard[];
-  properties?: Property[];
-  groups?: Group[];
-  _count?: Partial<WorldItemCount>;
-}
-
-// Archivos
-export interface WorldItemWithFiles extends WorldItemBase {
-  files: FileItem[];
-}
-
-// Datos para crear/actualizar
-export interface CreateWorldItemData {
+/**
+ * Entidad base para WorldItem
+ */
+export interface WorldItemBase extends BaseEntity {
   name: string;
-  description?: Nullable<string>;
-  emoji?: string;
-  color?: string;
+  description: string | null;
+  shortcut: string | null;
+  category: string;
+  type: string;
+  rarity: string;
+  size: string;
+  origin: string;
+  attributes: string;
+  effects: string;
+  requirements: string;
+  stats: string;
+  properties: string;
+  filters: string;
+  featuredImage: string | null;
+  isFavorite: boolean;
+  emoji: string;
+  color: string;
+  sortBy: string;
+}
+
+/**
+ * Campos serializados/deserializados para WorldItem
+ */
+export interface WorldItemDeserializedFields {
+  attributesList: WorldItemAttribute[];
+  effectsList: WorldItemEffect[];
+  requirementsList: WorldItemRequirement[];
+  statsList: WorldItemStat[];
+  propertiesList: WorldItemProperty[];
+  filtersList: WorldItemFilter[];
+  tagsList: string[];
+}
+
+/**
+ * Objeto del mundo con campos deserializados
+ */
+export interface WorldItemDeserialized extends WorldItemBase, WorldItemDeserializedFields {}
+
+/**
+ * Objeto del mundo completo con todas sus relaciones y campos
+ */
+export interface WorldItemComplete extends WorldItemDeserialized {
+  ui: WorldItemUI;
+  relations: WorldItemRelations;
+  counts: WorldItemCounts;
+}
+
+/**
+ * Datos para crear un nuevo objeto del mundo
+ */
+export interface WorldItemCreateInput {
+  name: string;
+  description?: string | null;
+  shortcut?: string | null;
+  category?: string;
   type?: string;
   rarity?: string;
   size?: string;
-  category?: Nullable<string>;
-  shortcut?: Nullable<string>;
-  isFavorite?: boolean;
   origin?: string;
-  attributes?: string;
-  effects?: string;
-  requirements?: string;
-  stats?: string;
-  properties?: string;
+  attributes?: string | WorldItemAttribute[];
+  effects?: string | WorldItemEffect[];
+  requirements?: string | WorldItemRequirement[];
+  stats?: string | WorldItemStat[];
+  properties?: string | WorldItemProperty[];
+  filters?: string | WorldItemFilter[];
+  tags?: string | string[];
+  featuredImage?: string | null;
+  isFavorite?: boolean;
+  emoji?: string;
+  color?: string;
   sortBy?: string;
-  filters?: string;
-  featuredImage?: Nullable<string>;
+  images?: { connect: { id: string }[] };
 }
 
-export interface UpdateWorldItemData extends Partial<CreateWorldItemData> {}
+/**
+ * Datos para actualizar un objeto del mundo existente
+ */
+export interface WorldItemUpdateInput {
+  name?: string;
+  description?: string | null;
+  shortcut?: string | null;
+  category?: string;
+  type?: string;
+  rarity?: string;
+  size?: string;
+  origin?: string;
+  attributes?: string | WorldItemAttribute[];
+  effects?: string | WorldItemEffect[];
+  requirements?: string | WorldItemRequirement[];
+  stats?: string | WorldItemStat[];
+  properties?: string | WorldItemProperty[];
+  filters?: string | WorldItemFilter[];
+  tags?: string | string[];
+  featuredImage?: string | null;
+  isFavorite?: boolean;
+  emoji?: string;
+  color?: string;
+  sortBy?: string;
+  images?: { set: { id: string }[] };
+}
 
-// Validaciones Zod
-export const worldItemFilterSchema = z.object({
-  type: z.enum(['tag', 'character', 'place', 'concept', 'worldItem']),
-  operator: z.enum(['AND', 'OR', 'NOT']),
-  value: z.union([z.string(), z.number(), z.boolean()]),
-  field: z.string().optional()
-});
+/* Exportación de tipos adicionales para retrocompatibilidad */
+export type {
+    WorldItemCreateInput as CreateWorldItemData,
+    WorldItemUpdateInput as UpdateWorldItemData, WorldItemDeserialized as WorldItem, WorldItemAttribute as WorldItemAttributes,
+    WorldItemEffect as WorldItemEffects, WorldItemFilter as WorldItemFilters, WorldItemProperty as WorldItemProperties, WorldItemRequirement as WorldItemRequirements,
+    WorldItemStat as WorldItemStats
+};
 
-// Schema Zod actualizado
-export const worldItemSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1),
-  description: z.string().nullable(),
-  emoji: z.string(),
-  color: z.string(),
-  category: z.string().nullable(),
-  shortcut: z.string().nullable(),
-  type: z.string(),
-  rarity: z.string(),
-  size: z.string(),
-  origin: z.string(),
-  sortBy: z.string(),
-  filters: z.string(),
-  featuredImage: z.string().nullable(),
-  isFavorite: z.boolean(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-  attributes: z.string(),
-  effects: z.string(),
-  requirements: z.string(),
-  stats: z.string(),
-  properties: z.string()
-});
-
-export type WorldItemFilter = z.infer<typeof worldItemFilterSchema>;
-export type WorldItemValidated = z.infer<typeof worldItemSchema>;
+    export {
+        WORLD_ITEM_SORT_PROPERTY_MAP, WorldItemSortCriteria
+    };

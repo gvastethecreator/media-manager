@@ -3,14 +3,38 @@
  * @module transformers/collection/serializers
  */
 
+import { Logger } from '@/lib/logger';
 import type {
-  CollectionComplete,
-  CollectionEdition,
-  CollectionExtended,
-  CollectionFilter,
-  CollectionSummary
+    CollectionComplete,
+    CollectionEdition,
+    CollectionExtended,
+    CollectionFilter,
+    CollectionSummary
 } from '@/types/entities/collection';
+import {
+    CollectionBase,
+    CollectionCreateInput,
+    CollectionSchema,
+    CollectionUpdateInput,
+} from '@/types/entities/collection/types';
+import {
+    deserializeJsonField,
+    serializeJsonField,
+    validateFieldType,
+    validateRequiredFields,
+} from '@/utils/transformers/common';
+import {
+    handleTransformerError
+} from '@/utils/transformers/errors';
+import {
+    getRelationCounts,
+    preparePrismaRelations,
+    validateEntityRelations,
+} from '@/utils/transformers/relations';
 import type { Collection as PrismaCollection } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+
+const logger = new Logger('CollectionSerializer');
 
 /**
  * Transforma un objeto Collection de Prisma a un objeto CollectionExtended
@@ -88,71 +112,220 @@ export function toCollectionSummary(
 }
 
 /**
- * Prepara los datos de una colección para guardar en la base de datos
- * Elimina propiedades que no son parte del modelo Prisma
- * @param collection Collection con datos extendidos
- * @returns Datos limpios para guardar en BD
+ * 🔄 Serializa una Collection para Prisma
  */
-export function toPrismaCollection(collection: Partial<CollectionExtended>): Partial<PrismaCollection> {
-	// Extraer solo las propiedades que existen en PrismaCollection
-	const {
-		id,
-		name,
-		emoji,
-		description,
-		color,
-		shortcut,
-		sortBy,
-		filters,
-		url,
-		alternativeUrl,
-		sourceImage,
-		platform,
-		price,
-		editions,
-		featuredImage,
-		isFavorite,
-		createdAt,
-		updatedAt,
-		category,
-		...restProps
-	} = collection;
+export function toPrismaCollection(data: CollectionCreateInput | CollectionUpdateInput): Prisma.CollectionCreateInput | Prisma.CollectionUpdateInput {
+	try {
+		// Validar campos requeridos para creación
+		if (!('id' in data)) {
+			validateRequiredFields(data, ['name', 'type']);
+		}
 
-	// Serializar los campos JSON
-	const serializedFilters = collection.parsedFilters
-		? serializeCollectionFilters(collection.parsedFilters)
-		: filters;
+		// Validar tipos de datos
+		validateFieldType(data.name, 'string', 'name');
+		validateFieldType(data.type, 'string', 'type');
+		if (data.category) validateFieldType(data.category, 'string', 'category');
+		if (data.tags) validateFieldType(data.tags, 'array', 'tags');
 
-	const serializedEditions = typeof editions === 'string'
-		? editions
-		: serializeEditions(editions as CollectionEdition[]);
+		// Serializar campos JSON
+		const metadata = serializeJsonField(data.metadata, '{}');
+		const settings = serializeJsonField(data.settings, '{}');
 
-	const serializedSortBy = typeof sortBy === 'string'
-		? sortBy
-		: serializeSortBy(sortBy);
+		// Preparar relaciones para Prisma
+		const relations = preparePrismaRelations('Collection', data);
 
-	return {
-		id,
-		name,
-		emoji,
-		description,
-		color,
-		shortcut,
-		sortBy: serializedSortBy,
-		filters: serializedFilters,
-		url,
-		alternativeUrl,
-		sourceImage,
-		platform,
-		price,
-		editions: serializedEditions,
-		featuredImage,
-		isFavorite,
-		createdAt,
-		updatedAt,
-		category,
-		...(restProps as any),  // Resto de propiedades compatibles con PrismaCollection
-	};
+		return {
+			...data,
+			metadata,
+			settings,
+			...relations,
+		};
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Deserializa una Collection desde Prisma
+ */
+export function fromPrismaCollection(
+	prismaCollection: Prisma.CollectionGetPayload<{
+		include: {
+			owner: true;
+			parent: true;
+			children: true;
+			images: true;
+			videos: true;
+			albums: true;
+			tags: true;
+			groups: true;
+			characters: true;
+			places: true;
+			items: true;
+			notes: true;
+			sharedWith: true;
+			_count: true;
+		};
+	}>
+): CollectionComplete {
+	try {
+		// Deserializar campos JSON
+		const metadata = deserializeJsonField(prismaCollection.metadata, {});
+		const settings = deserializeJsonField(prismaCollection.settings, {});
+
+		// Obtener conteos de relaciones
+		const counts = getRelationCounts('Collection', prismaCollection);
+
+		// Construir objeto base
+		const baseCollection: CollectionBase = {
+			id: prismaCollection.id,
+			name: prismaCollection.name,
+			description: prismaCollection.description,
+			type: prismaCollection.type,
+			category: prismaCollection.category,
+			tags: prismaCollection.tags?.map(tag => tag.name),
+			isPublic: prismaCollection.isPublic,
+			isFavorite: prismaCollection.isFavorite,
+			metadata,
+			settings,
+			createdAt: prismaCollection.createdAt,
+			updatedAt: prismaCollection.updatedAt,
+		};
+
+		// Validar objeto base
+		validateBaseEntity(baseCollection);
+		validateMetadataFields(baseCollection);
+
+		// Construir objeto completo con relaciones
+		return {
+			...baseCollection,
+			owner: prismaCollection.owner ? { id: prismaCollection.owner.id } : undefined,
+			parent: prismaCollection.parent ? { id: prismaCollection.parent.id } : undefined,
+			children: prismaCollection.children?.map(child => ({ id: child.id })),
+			images: prismaCollection.images?.map(img => ({ id: img.id })),
+			videos: prismaCollection.videos?.map(video => ({ id: video.id })),
+			albums: prismaCollection.albums?.map(album => ({ id: album.id })),
+			tags: prismaCollection.tags?.map(tag => ({ id: tag.id })),
+			groups: prismaCollection.groups?.map(group => ({ id: group.id })),
+			characters: prismaCollection.characters?.map(char => ({ id: char.id })),
+			places: prismaCollection.places?.map(place => ({ id: place.id })),
+			items: prismaCollection.items?.map(item => ({ id: item.id })),
+			notes: prismaCollection.notes?.map(note => ({ id: note.id })),
+			sharedWith: prismaCollection.sharedWith?.map(user => ({ id: user.id })),
+			_count: counts,
+		};
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔍 Valida una Collection
+ */
+export function validateCollection(data: unknown): CollectionComplete {
+	try {
+		const validated = CollectionSchema.parse(data);
+		validateEntityRelations('Collection', validated);
+		return validated as CollectionComplete;
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Extiende una Collection con datos adicionales
+ */
+export async function extendCollection(
+	collection: CollectionComplete,
+	options: {
+		includeRelations?: boolean;
+		includeCount?: boolean;
+		customFields?: string[];
+	} = {}
+): Promise<CollectionComplete> {
+	try {
+		const extended = { ...collection };
+
+		// Aquí puedes agregar lógica para cargar datos adicionales
+		// basado en las opciones proporcionadas
+
+		return extended;
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔍 Parsea filtros de Collection
+ */
+export function parseCollectionFilters(filters: unknown): Record<string, unknown> {
+	try {
+		if (!filters || typeof filters !== 'object') {
+			return {};
+		}
+
+		const parsed: Record<string, unknown> = {};
+		const typedFilters = filters as Record<string, unknown>;
+
+		// Procesar filtros específicos de Collection
+		if (typedFilters.search) {
+			parsed.OR = [
+				{ name: { contains: typedFilters.search as string, mode: 'insensitive' } },
+				{ description: { contains: typedFilters.search as string, mode: 'insensitive' } },
+			];
+		}
+
+		// Filtros de tipo y categoría
+		if (typedFilters.type?.length) {
+			parsed.type = { in: typedFilters.type };
+		}
+		if (typedFilters.category?.length) {
+			parsed.category = { in: typedFilters.category };
+		}
+		if (typedFilters.tags?.length) {
+			parsed.tags = { some: { name: { in: typedFilters.tags } } };
+		}
+
+		// Filtros de estado
+		if (typedFilters.isPublic !== undefined) {
+			parsed.isPublic = typedFilters.isPublic;
+		}
+		if (typedFilters.isFavorite !== undefined) {
+			parsed.isFavorite = typedFilters.isFavorite;
+		}
+
+		// Filtros de relaciones
+		if (typedFilters.hasParent) {
+			parsed.parent = { isNot: null };
+		}
+		if (typedFilters.hasChildren) {
+			parsed.children = { some: {} };
+		}
+		if (typedFilters.hasImages) {
+			parsed.images = { some: {} };
+		}
+		if (typedFilters.hasVideos) {
+			parsed.videos = { some: {} };
+		}
+		if (typedFilters.hasAlbums) {
+			parsed.albums = { some: {} };
+		}
+		if (typedFilters.isShared) {
+			parsed.sharedWith = { some: {} };
+		}
+
+		// Filtros de fecha
+		if (typedFilters.dateRange?.start) {
+			parsed.createdAt = { ...parsed.createdAt, gte: typedFilters.dateRange.start };
+		}
+		if (typedFilters.dateRange?.end) {
+			parsed.createdAt = { ...parsed.createdAt, lte: typedFilters.dateRange.end };
+		}
+
+		return parsed;
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
 }
 
 /**

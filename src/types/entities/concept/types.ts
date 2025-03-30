@@ -1,64 +1,55 @@
 /**
  * @file Tipos para la entidad Concept
- * @module types/entities/concept/concept-types
+ * @module types/entities/concept/types
  */
 
-import type { Prisma } from '@prisma/client';
-import type { Album } from '../album';
-import type { Character } from '../character';
-import type { Collection } from '../collection';
-import type { Group } from '../group';
-import type { Image } from '../image';
-import type { Note } from '../note';
-import type { Place } from '../place';
-import type { Prompt } from '../prompt';
-import type { Property } from '../property';
-import type { Tag } from '../tag';
-import type { Video } from '../video';
-import type { Wildcard } from '../wildcard';
-import type { WorldItem } from '../world-item';
-
-/**
- * Tipo base para Concept derivado del schema de Prisma
- *
- * Campos JSON:
- * - tags: Almacenado como string en formato JSON, representa un array de etiquetas.
- */
-export type ConceptBase = Prisma.ConceptGetPayload<Record<string, never>>;
+import { z } from 'zod';
+import type { Album } from '../album/types';
+import type { Character } from '../character/types';
+import type { Collection } from '../collection/types';
+import type { Group } from '../group/types';
+import type { Image } from '../image/types';
+import type { Note } from '../note/types';
+import type { Place } from '../place/types';
+import type { Prompt } from '../prompt/types';
+import type { Property } from '../property/types';
+import type { Tag } from '../tag/types';
+import type { Video } from '../video/types';
+import type { Wildcard } from '../wildcard/types';
+import type { WorldItem } from '../world-item/types';
+import { ConceptSchema } from './schema';
 
 /**
- * Interfaz para crear un nuevo concepto
+ * Interfaz base para Concept derivada del schema de Prisma
  */
-export interface CreateConceptData {
+export interface ConceptBase {
+  id: string;
   name: string;
-  emoji?: string;
-  color?: string;
-  description?: string | null;
-  content?: string;
-  category?: string;
-  tags?: string[] | string; // Acepta tanto array como string JSON
-  featuredImage?: string | null;
-  isFavorite?: boolean;
-  // Campos para relaciones
-  groupIds?: string[];
-  propertyIds?: string[];
-  wildcardIds?: string[];
+  emoji: string;
+  color: string;
+  description: string | null;
+  content: string;
+  category: string;
+  tags: string;
+  featuredImage: string | null;
+  isFavorite: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**
- * Interfaz para actualizar un concepto existente
+ * Etiquetas deserializadas de un concepto
  */
-export interface UpdateConceptData extends Partial<CreateConceptData> {}
+export interface ConceptTags {
+  items: string[];
+}
 
 /**
- * Interfaz extendida que incluye relaciones
+ * Relaciones de un concepto con otras entidades
  */
-export interface ConceptWithRelations extends ConceptBase {
-  // Relaciones con contenido
+export interface ConceptRelations {
   images?: Image[];
   videos?: Video[];
-
-  // Relaciones con entidades principales
   albums?: Album[];
   collections?: Collection[];
   tagEntities?: Tag[]; // Renombrado para evitar conflicto con campo tags
@@ -70,29 +61,12 @@ export interface ConceptWithRelations extends ConceptBase {
   wildcards?: Wildcard[];
   properties?: Property[];
   groups?: Group[];
-
-  // Contadores
-  _count?: {
-    images?: number;
-    videos?: number;
-    albums?: number;
-    collections?: number;
-    tags?: number;
-    characters?: number;
-    places?: number;
-    worldItems?: number;
-    prompts?: number;
-    notes?: number;
-    wildcards?: number;
-    properties?: number;
-    groups?: number;
-  };
 }
 
 /**
- * Estadísticas para conceptos
+ * Conteo de entidades relacionadas con un concepto
  */
-export interface ConceptStats {
+export interface ConceptCounts {
   images?: number;
   videos?: number;
   albums?: number;
@@ -109,23 +83,22 @@ export interface ConceptStats {
 }
 
 /**
- * Interfaz para concepto con estadísticas incluidas
+ * Propiedades adicionales para UI
  */
-export interface ConceptWithStats extends ConceptBase {
-  _count: ConceptStats;
+export interface ConceptUI {
+  previewContent?: string;
+  lastUpdated?: Date;
 }
 
 /**
- * Tipo para la relación de concepto con otras entidades
+ * Campos deserializados de un concepto
  */
-export interface ConceptRelation {
-  entityId: string;
-  entityType: string;
-  conceptId: string;
+export interface ConceptDeserialized {
+  tags: string[];
 }
 
 /**
- * Interfaz para filtros de búsqueda de conceptos
+ * Filtros para búsqueda de conceptos
  */
 export interface ConceptFilters {
   searchQuery?: string;
@@ -135,7 +108,74 @@ export interface ConceptFilters {
 }
 
 /**
- * Enumeración para criterios de ordenación
+ * Concepto completo con todos los campos y relaciones
+ */
+export interface ConceptComplete extends ConceptBase, ConceptDeserialized {
+  _count?: ConceptCounts;
+  _relations?: ConceptRelations;
+  _ui?: ConceptUI;
+}
+
+/**
+ * Datos para la creación de un concepto
+ */
+export interface ConceptCreateInput {
+  name: string;
+  emoji?: string;
+  color?: string;
+  description?: string | null;
+  content?: string;
+  category?: string;
+  tags?: string[] | string; // Acepta tanto array como string JSON
+  featuredImage?: string | null;
+  isFavorite?: boolean;
+
+  // Relaciones
+  groupIds?: string[];
+  propertyIds?: string[];
+  wildcardIds?: string[];
+  imageIds?: string[];
+  videoIds?: string[];
+  albumIds?: string[];
+  collectionIds?: string[];
+  tagIds?: string[];
+  characterIds?: string[];
+  placeIds?: string[];
+  worldItemIds?: string[];
+  promptIds?: string[];
+  noteIds?: string[];
+}
+
+/**
+ * Datos para la actualización de un concepto
+ */
+export interface ConceptUpdateInput extends Partial<ConceptCreateInput> {
+  id?: string;
+}
+
+/**
+ * Opciones para buscar conceptos
+ */
+export interface ConceptSearchOptions {
+  filters?: ConceptFilters;
+  sortBy?: ConceptSortCriteria;
+  page?: number;
+  pageSize?: number;
+  includeRelations?: boolean;
+  includeStats?: boolean;
+}
+
+/**
+ * Respuesta de búsqueda de conceptos
+ */
+export interface ConceptSearchResult {
+  items: ConceptComplete[];
+  total: number;
+  totalPages: number;
+}
+
+/**
+ * Criterios de ordenación para conceptos
  */
 export enum ConceptSortCriteria {
   NAME_ASC = 'name:asc',
@@ -157,3 +197,13 @@ export const CONCEPT_SORT_PROPERTY_MAP: Record<ConceptSortCriteria, string> = {
   [ConceptSortCriteria.UPDATED_ASC]: 'updatedAt',
   [ConceptSortCriteria.UPDATED_DESC]: 'updatedAt',
 };
+
+/**
+ * Alias para opciones de ordenación
+ */
+export type ConceptSortOption = keyof typeof CONCEPT_SORT_PROPERTY_MAP | string;
+
+/**
+ * Tipo para validación con Zod
+ */
+export type ConceptValidation = z.infer<typeof ConceptSchema>;

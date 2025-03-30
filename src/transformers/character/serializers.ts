@@ -3,6 +3,7 @@
  * @module transformers/character/serializers
  */
 
+import { Logger } from '@/lib/logger';
 import type {
     CharacterExtended,
     CharacterFilter,
@@ -10,7 +11,35 @@ import type {
     CharacterStats,
     CharacterSummary,
 } from '@/types/entities/character';
+import {
+    CharacterBase,
+    CharacterComplete,
+    CharacterCreateInput,
+    CharacterSchema,
+    CharacterUpdateInput,
+} from '@/types/entities/character/types';
+import {
+    deserializeJsonField,
+    serializeJsonField,
+    validateFieldType,
+    validateRequiredFields,
+} from '@/utils/transformers/common';
+import {
+    handleTransformerError
+} from '@/utils/transformers/errors';
+import {
+    getRelationCounts,
+    preparePrismaRelations,
+    validateEntityRelations,
+} from '@/utils/transformers/relations';
+import {
+    validateBaseEntity,
+    validateMetadataFields
+} from '@/utils/transformers/validation';
 import type { Character as PrismaCharacter } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+
+const logger = new Logger('CharacterSerializer');
 
 /**
  * Transforma un objeto Character de Prisma a un objeto CharacterExtended
@@ -105,91 +134,241 @@ export function toCharacterSummary(
 }
 
 /**
- * Prepara los datos de un personaje para guardar en la base de datos
- * Serializa campos complejos (objetos/arrays) a strings JSON para almacenamiento
- *
- * @param character Character con datos extendidos
- * @returns Datos limpios para guardar en BD con campos complejos serializados a JSON
+ * 🔄 Serializa un Character para Prisma
  */
-export function toPrismaCharacter(character: Partial<CharacterExtended>): Partial<PrismaCharacter> {
-	// Extraer solo las propiedades que existen en PrismaCharacter
-	const {
-		id,
-		name,
-		emoji,
-		color,
-		description,
-		shortcut,
-		level,
-		class: characterClass,
-		race,
-		alignment,
-		backstory,
-		stats,
-		sortBy,
-		filters,
-		psychologicalProfile,
-		socialProfile,
-		relationships,
-		goals,
-		fears,
-		beliefs,
-		personality,
-		featuredImage,
-		isFavorite,
-		createdAt,
-		updatedAt,
-		category,
-		presetId,
-	} = character;
+export function toPrismaCharacter(data: CharacterCreateInput | CharacterUpdateInput): Prisma.CharacterCreateInput | Prisma.CharacterUpdateInput {
+  try {
+    // Validar campos requeridos para creación
+    if (!('id' in data)) {
+      validateRequiredFields(data, ['name', 'level', 'class', 'race', 'alignment', 'background']);
+    }
 
-	// Serializar datos complejos si es necesario
-	// Convierte arrays/objetos de la aplicación a strings JSON para BD
-	const serializedFilters = character.parsedFilters ? JSON.stringify(character.parsedFilters) : filters;
+    // Validar tipos de datos
+    validateFieldType(data.name, 'string', 'name');
+    validateFieldType(data.level, 'number', 'level');
+    validateFieldType(data.experience, 'number', 'experience');
+    validateFieldType(data.class, 'string', 'class');
+    validateFieldType(data.race, 'string', 'race');
+    validateFieldType(data.alignment, 'string', 'alignment');
+    validateFieldType(data.background, 'string', 'background');
 
-	const serializedStats = character.parsedStats ? JSON.stringify(character.parsedStats) : stats;
+    // Serializar campos JSON
+    const stats = serializeJsonField(data.stats, '{}');
+    const skills = serializeJsonField(data.skills, '{}');
+    const inventory = serializeJsonField(data.inventory, '[]');
+    const spells = serializeJsonField(data.spells, '[]');
+    const feats = serializeJsonField(data.feats, '[]');
+    const metadata = serializeJsonField(data.metadata, '{}');
 
-	const serializedRelationships = character.parsedRelationships
-		? JSON.stringify(character.parsedRelationships)
-		: relationships;
+    // Preparar relaciones para Prisma
+    const relations = preparePrismaRelations('Character', data);
 
-	const serializedGoals = character.parsedGoals ? JSON.stringify(character.parsedGoals) : goals;
+    return {
+      ...data,
+      stats,
+      skills,
+      inventory,
+      spells,
+      feats,
+      metadata,
+      ...relations,
+    };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
 
-	const serializedFears = character.parsedFears ? JSON.stringify(character.parsedFears) : fears;
+/**
+ * 🔄 Deserializa un Character desde Prisma
+ */
+export function fromPrismaCharacter(
+  prismaCharacter: Prisma.CharacterGetPayload<{
+    include: {
+      party: true;
+      campaign: true;
+      images: true;
+      items: true;
+      abilities: true;
+      quests: true;
+      locations: true;
+      npcs: true;
+      notes: true;
+      relatedCharacters: true;
+      relatedTo: true;
+      _count: true;
+    };
+  }>
+): CharacterComplete {
+  try {
+    // Deserializar campos JSON
+    const stats = deserializeJsonField(prismaCharacter.stats, {});
+    const skills = deserializeJsonField(prismaCharacter.skills, {});
+    const inventory = deserializeJsonField(prismaCharacter.inventory, []);
+    const spells = deserializeJsonField(prismaCharacter.spells, []);
+    const feats = deserializeJsonField(prismaCharacter.feats, []);
+    const metadata = deserializeJsonField(prismaCharacter.metadata, {});
 
-	const serializedBeliefs = character.parsedBeliefs ? JSON.stringify(character.parsedBeliefs) : beliefs;
+    // Obtener conteos de relaciones
+    const counts = getRelationCounts('Character', prismaCharacter);
 
-	const serializedPersonality = character.parsedPersonality ? JSON.stringify(character.parsedPersonality) : personality;
+    // Construir objeto base
+    const baseCharacter: CharacterBase = {
+      id: prismaCharacter.id,
+      name: prismaCharacter.name,
+      description: prismaCharacter.description,
+      level: prismaCharacter.level,
+      experience: prismaCharacter.experience,
+      class: prismaCharacter.class,
+      race: prismaCharacter.race,
+      alignment: prismaCharacter.alignment,
+      background: prismaCharacter.background,
+      stats,
+      skills,
+      inventory,
+      spells,
+      feats,
+      notes: prismaCharacter.notes,
+      isActive: prismaCharacter.isActive,
+      isFavorite: prismaCharacter.isFavorite,
+      metadata,
+      createdAt: prismaCharacter.createdAt,
+      updatedAt: prismaCharacter.updatedAt,
+    };
 
-	return {
-		id,
-		name,
-		emoji,
-		color,
-		description,
-		shortcut,
-		level,
-		class: characterClass,
-		race,
-		alignment,
-		backstory,
-		stats: serializedStats,
-		sortBy,
-		filters: serializedFilters,
-		psychologicalProfile,
-		socialProfile,
-		relationships: serializedRelationships,
-		goals: serializedGoals,
-		fears: serializedFears,
-		beliefs: serializedBeliefs,
-		personality: serializedPersonality,
-		featuredImage,
-		isFavorite,
-		createdAt,
-		updatedAt,
-		category,
-		presetId,
-	};
+    // Validar objeto base
+    validateBaseEntity(baseCharacter);
+    validateMetadataFields(baseCharacter);
+
+    // Construir objeto completo con relaciones
+    return {
+      ...baseCharacter,
+      party: prismaCharacter.party ? { id: prismaCharacter.party.id } : undefined,
+      campaign: prismaCharacter.campaign ? { id: prismaCharacter.campaign.id } : undefined,
+      images: prismaCharacter.images?.map(img => ({ id: img.id })),
+      items: prismaCharacter.items?.map(item => ({ id: item.id })),
+      abilities: prismaCharacter.abilities?.map(ability => ({ id: ability.id })),
+      quests: prismaCharacter.quests?.map(quest => ({ id: quest.id })),
+      locations: prismaCharacter.locations?.map(location => ({ id: location.id })),
+      npcs: prismaCharacter.npcs?.map(npc => ({ id: npc.id })),
+      notes: prismaCharacter.notes?.map(note => ({ id: note.id })),
+      relatedCharacters: prismaCharacter.relatedCharacters?.map(char => ({ id: char.id })),
+      relatedTo: prismaCharacter.relatedTo?.map(char => ({ id: char.id })),
+      _count: counts,
+    };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔍 Valida un Character
+ */
+export function validateCharacter(data: unknown): CharacterComplete {
+  try {
+    const validated = CharacterSchema.parse(data);
+    validateEntityRelations('Character', validated);
+    return validated as CharacterComplete;
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔄 Extiende un Character con datos adicionales
+ */
+export async function extendCharacter(
+  character: CharacterComplete,
+  options: {
+    includeRelations?: boolean;
+    includeCount?: boolean;
+    customFields?: string[];
+  } = {}
+): Promise<CharacterComplete> {
+  try {
+    const extended = { ...character };
+
+    // Aquí puedes agregar lógica para cargar datos adicionales
+    // basado en las opciones proporcionadas
+
+    return extended;
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔍 Parsea filtros de Character
+ */
+export function parseCharacterFilters(filters: unknown): Record<string, unknown> {
+  try {
+    if (!filters || typeof filters !== 'object') {
+      return {};
+    }
+
+    const parsed: Record<string, unknown> = {};
+    const typedFilters = filters as Record<string, unknown>;
+
+    // Procesar filtros específicos de Character
+    if (typedFilters.search) {
+      parsed.OR = [
+        { name: { contains: typedFilters.search as string, mode: 'insensitive' } },
+        { description: { contains: typedFilters.search as string, mode: 'insensitive' } },
+      ];
+    }
+
+    // Filtros de nivel
+    if (typedFilters.level?.min !== undefined) {
+      parsed.level = { ...parsed.level, gte: typedFilters.level.min };
+    }
+    if (typedFilters.level?.max !== undefined) {
+      parsed.level = { ...parsed.level, lte: typedFilters.level.max };
+    }
+
+    // Filtros de clase, raza y alineamiento
+    if (typedFilters.class?.length) {
+      parsed.class = { in: typedFilters.class };
+    }
+    if (typedFilters.race?.length) {
+      parsed.race = { in: typedFilters.race };
+    }
+    if (typedFilters.alignment?.length) {
+      parsed.alignment = { in: typedFilters.alignment };
+    }
+    if (typedFilters.background?.length) {
+      parsed.background = { in: typedFilters.background };
+    }
+
+    // Filtros de estado
+    if (typedFilters.isActive !== undefined) {
+      parsed.isActive = typedFilters.isActive;
+    }
+    if (typedFilters.isFavorite !== undefined) {
+      parsed.isFavorite = typedFilters.isFavorite;
+    }
+
+    // Filtros de relaciones
+    if (typedFilters.hasParty) {
+      parsed.party = { isNot: null };
+    }
+    if (typedFilters.hasCampaign) {
+      parsed.campaign = { isNot: null };
+    }
+    if (typedFilters.hasImages) {
+      parsed.images = { some: {} };
+    }
+
+    // Filtros de fecha
+    if (typedFilters.dateRange?.start) {
+      parsed.createdAt = { ...parsed.createdAt, gte: typedFilters.dateRange.start };
+    }
+    if (typedFilters.dateRange?.end) {
+      parsed.createdAt = { ...parsed.createdAt, lte: typedFilters.dateRange.end };
+    }
+
+    return parsed;
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
 }
 
 /**
@@ -548,5 +727,21 @@ export function fromExtendedCharacter(extendedCharacter: Partial<CharacterExtend
 		...(skills !== undefined && { skills: serializeArray(skills as string[]) }),
 		...(abilities !== undefined && { abilities: serializeArray(abilities as string[]) }),
 		...(filters !== undefined && { filters: serializeArray(filters as any[]) }),
+	};
+}
+
+/**
+ * Transforma un personaje con datos de relaciones/conteos en una versión con estadísticas
+ * @param character Personaje de la base de datos con _count
+ * @returns Personaje extendido con estadísticas para UI
+ */
+export function toCharacterWithStats(character: PrismaCharacter & { _count?: { images?: number; concepts?: number; notes?: number; worldItems?: number } }) {
+	return {
+		...character,
+		imageCount: character._count?.images || 0,
+		conceptCount: character._count?.concepts || 0,
+		noteCount: character._count?.notes || 0,
+		worldItemCount: character._count?.worldItems || 0,
+		parsedStats: parseCharacterStats(character.stats || '{}'),
 	};
 }

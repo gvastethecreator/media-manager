@@ -3,9 +3,21 @@
  * @module transformers/tag/mappers
  */
 
+import { Logger } from '@/lib/logger';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { CreateTagData, TagBase, TagComplete, TagFilters, UpdateTagData } from '../../types/entities/tag/index';
-import { fromTagComplete, generateTagColor, generateTagEmoji } from './serializers';
+import {
+    TagCreateInput,
+    TagFilters,
+    TagSearchOptions,
+    TagUpdateInput,
+} from '@/types/entities/tag/types';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
+import { handleTransformerError } from '@/utils/transformers/errors';
+import { Prisma } from '@prisma/client';
+import type { TagBase, TagComplete } from '../../types/entities/tag/index';
+import { fromTagComplete } from './serializers';
+
+const logger = new Logger('TagMapper');
 
 // Logger específico para mappers de Tag
 const mapperLogger = serverLogger.withContext('TagMappers');
@@ -13,7 +25,7 @@ const mapperLogger = serverLogger.withContext('TagMappers');
 /**
  * Convierte un TagBase de Prisma a un objeto TagComplete
  * @param tag Objeto TagBase de Prisma
- * @returns Objeto TagComplete con campos deserializados
+ * @returns Objeto TagBase (actualmente sin transformación)
  */
 export function transformTagToPrisma(tag: TagBase): TagBase {
 	try {
@@ -39,215 +51,202 @@ export function transformCompleteTagToPrisma(tag: TagComplete): TagBase {
 }
 
 /**
- * Mapea datos de creación de etiqueta a formato compatible con Prisma
- * @param data Datos de creación de etiqueta
- * @returns Objeto formateado para Prisma
+ * 🔄 Mapea datos de creación de Tag a formato Prisma
  */
-export function mapCreateTagDataToPrisma(data: CreateTagData) {
+export function mapCreateTagDataToPrisma(data: TagCreateInput): Prisma.TagCreateInput {
 	try {
-		// Generar color y emoji si no se proporcionan
-		const emoji = data.emoji || generateTagEmoji(data.category);
-		const color = data.color || generateTagColor(data.category);
-
-		return {
+		// Preparar datos base
+		const baseData = {
 			name: data.name,
-			emoji,
-			color,
-			description: data.description || null,
-			shortcut: data.shortcut || null,
+			emoji: data.emoji || '🏷️',
+			color: data.color || '#3b82f6',
+			description: data.description,
+			shortcut: data.shortcut,
 			category: data.category || 'general',
-			featuredImage: data.featuredImage || null,
+			featuredImage: data.featuredImage,
 			isFavorite: data.isFavorite || false,
-			// Relaciones
-			...(data.imageIds?.length && {
-				images: {
-					connect: data.imageIds.map(id => ({ id }))
-				}
-			}),
-			...(data.videoIds?.length && {
-				videos: {
-					connect: data.videoIds.map(id => ({ id }))
-				}
-			}),
-			...(data.groupIds?.length && {
-				groups: {
-					connect: data.groupIds.map(id => ({ id }))
-				}
-			}),
 		};
-	} catch (error) {
-		mapperLogger.error('❌ Error al mapear datos de creación de etiqueta:', error);
+
+		// Preparar relaciones
+		const relations = {
+			images: data.images?.length ? { connect: data.images.map(img => ({ id: img.id })) } : undefined,
+			videos: data.videos?.length ? { connect: data.videos.map(vid => ({ id: vid.id })) } : undefined,
+			albums: data.albums?.length ? { connect: data.albums.map(alb => ({ id: alb.id })) } : undefined,
+			collections: data.collections?.length ? { connect: data.collections.map(col => ({ id: col.id })) } : undefined,
+			characters: data.characters?.length ? { connect: data.characters.map(char => ({ id: char.id })) } : undefined,
+			places: data.places?.length ? { connect: data.places.map(place => ({ id: place.id })) } : undefined,
+			worldItems: data.worldItems?.length ? { connect: data.worldItems.map(item => ({ id: item.id })) } : undefined,
+			concepts: data.concepts?.length ? { connect: data.concepts.map(con => ({ id: con.id })) } : undefined,
+			prompts: data.prompts?.length ? { connect: data.prompts.map(prompt => ({ id: prompt.id })) } : undefined,
+			notes: data.notes?.length ? { connect: data.notes.map(note => ({ id: note.id })) } : undefined,
+			wildcards: data.wildcards?.length ? { connect: data.wildcards.map(wild => ({ id: wild.id })) } : undefined,
+			properties: data.properties?.length ? { connect: data.properties.map(prop => ({ id: prop.id })) } : undefined,
+			groups: data.groups?.length ? { connect: data.groups.map(group => ({ id: group.id })) } : undefined,
+		};
+
 		return {
-			name: data.name,
-			emoji: '🏷️',
-			color: '#3b82f6',
+			...baseData,
+			...relations,
 		};
-	}
-}
-
-/**
- * Mapea datos de actualización de etiqueta a formato compatible con Prisma
- * @param data Datos de actualización de etiqueta
- * @returns Objeto formateado para Prisma
- */
-export function mapUpdateTagDataToPrisma(data: UpdateTagData) {
-	try {
-		const updateData: any = {};
-
-		// Mapear solo los campos proporcionados
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.emoji !== undefined) updateData.emoji = data.emoji;
-		if (data.color !== undefined) updateData.color = data.color;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
-		if (data.category !== undefined) updateData.category = data.category;
-		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-
-		// Manejar relaciones
-		if (data.imageIds !== undefined) {
-			updateData.images = {
-				set: data.imageIds.map(id => ({ id }))
-			};
-		}
-
-		if (data.videoIds !== undefined) {
-			updateData.videos = {
-				set: data.videoIds.map(id => ({ id }))
-			};
-		}
-
-		if (data.groupIds !== undefined) {
-			updateData.groups = {
-				set: data.groupIds.map(id => ({ id }))
-			};
-		}
-
-		return updateData;
 	} catch (error) {
-		mapperLogger.error('❌ Error al mapear datos de actualización de etiqueta:', error);
-		return {};
+		throw handleTransformerError(error);
 	}
 }
 
 /**
- * Crea filtros para consulta de etiquetas basados en criterios
- * @param filters Objeto con criterios de filtrado
- * @returns Filtro formateado para Prisma
+ * 🔄 Mapea datos de actualización de Tag a formato Prisma
  */
-export function createTagFilter(filters?: TagFilters) {
-	if (!filters) return {};
-
-	const conditions: any = {};
-	const AND: any[] = [];
-
-	// Filtro de búsqueda por texto
-	if (filters.searchQuery) {
-		conditions.OR = [
-			{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
-			{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
-		];
-	}
-
-	// Filtro por categorías
-	if (filters.categories?.length) {
-		AND.push({
-			category: {
-				in: filters.categories
-			}
-		});
-	}
-
-	// Filtro por favoritos
-	if (filters.onlyFavorites) {
-		AND.push({
-			isFavorite: true
-		});
-	}
-
-	if (AND.length) {
-		conditions.AND = AND;
-	}
-
-	return conditions;
-}
-
-/**
- * Crea ordenamiento para consulta de etiquetas
- * @param sortBy Criterio de ordenamiento (ej: 'name:asc', 'createdAt:desc')
- * @returns Ordenamiento formateado para Prisma
- */
-export function createTagOrderBy(sortBy: string = 'name:asc') {
-	const [field, direction] = sortBy.split(':');
-	return {
-		[field]: direction.toLowerCase() === 'desc' ? 'desc' : 'asc'
-	};
-}
-
-/**
- * Mapea filtros de etiqueta a formato compatible con Prisma para consultas
- * @param filters Filtros de etiqueta
- * @returns Objeto de condiciones para Prisma
- */
-export function mapTagFiltersToPrisma(filters: TagFilters) {
+export function mapUpdateTagDataToPrisma(data: TagUpdateInput): Prisma.TagUpdateInput {
 	try {
-		const where: Record<string, any> = {};
+		// Preparar datos base
+		const baseData = {
+			name: data.name,
+			emoji: data.emoji,
+			color: data.color,
+			description: data.description,
+			shortcut: data.shortcut,
+			category: data.category,
+			featuredImage: data.featuredImage,
+			isFavorite: data.isFavorite,
+			updatedAt: new Date(),
+		};
 
-		// Filtrar por término de búsqueda
-		if (filters.searchQuery) {
+		// Preparar relaciones
+		const relations = {
+			images: data.images?.length ? { set: data.images.map(img => ({ id: img.id })) } : undefined,
+			videos: data.videos?.length ? { set: data.videos.map(vid => ({ id: vid.id })) } : undefined,
+			albums: data.albums?.length ? { set: data.albums.map(alb => ({ id: alb.id })) } : undefined,
+			collections: data.collections?.length ? { set: data.collections.map(col => ({ id: col.id })) } : undefined,
+			characters: data.characters?.length ? { set: data.characters.map(char => ({ id: char.id })) } : undefined,
+			places: data.places?.length ? { set: data.places.map(place => ({ id: place.id })) } : undefined,
+			worldItems: data.worldItems?.length ? { set: data.worldItems.map(item => ({ id: item.id })) } : undefined,
+			concepts: data.concepts?.length ? { set: data.concepts.map(con => ({ id: con.id })) } : undefined,
+			prompts: data.prompts?.length ? { set: data.prompts.map(prompt => ({ id: prompt.id })) } : undefined,
+			notes: data.notes?.length ? { set: data.notes.map(note => ({ id: note.id })) } : undefined,
+			wildcards: data.wildcards?.length ? { set: data.wildcards.map(wild => ({ id: wild.id })) } : undefined,
+			properties: data.properties?.length ? { set: data.properties.map(prop => ({ id: prop.id })) } : undefined,
+			groups: data.groups?.length ? { set: data.groups.map(group => ({ id: group.id })) } : undefined,
+		};
+
+		return {
+			...baseData,
+			...relations,
+		};
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Mapea opciones de búsqueda de Tag a formato Prisma
+ */
+export function mapTagSearchOptionsToPrisma(
+	options: TagSearchOptions
+): Prisma.TagFindManyArgs {
+	try {
+		const { skip = 0, take = DEFAULT_PAGE_SIZE, orderBy, filters = {}, include = {} } = options;
+
+		// Validar y ajustar el tamaño de página
+		const validatedPageSize = Math.min(take, MAX_PAGE_SIZE);
+
+		// Mapear ordenamiento
+		const orderByMapped = orderBy ? {
+			[orderBy.field]: orderBy.direction,
+		} : { createdAt: 'desc' };
+
+		// Mapear filtros
+		const where = mapTagFiltersToPrisma(filters);
+
+		// Mapear inclusiones
+		const includeRelations = {
+			images: include.images ?? false,
+			videos: include.videos ?? false,
+			albums: include.albums ?? false,
+			collections: include.collections ?? false,
+			characters: include.characters ?? false,
+			places: include.places ?? false,
+			worldItems: include.worldItems ?? false,
+			concepts: include.concepts ?? false,
+			prompts: include.prompts ?? false,
+			notes: include.notes ?? false,
+			wildcards: include.wildcards ?? false,
+			properties: include.properties ?? false,
+			groups: include.groups ?? false,
+			_count: true,
+		};
+
+		return {
+			skip,
+			take: validatedPageSize,
+			orderBy: orderByMapped,
+			where,
+			include: includeRelations,
+		};
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Mapea filtros de Tag a formato Prisma
+ */
+export function mapTagFiltersToPrisma(filters: TagFilters): Prisma.TagWhereInput {
+	try {
+		const where: Prisma.TagWhereInput = {};
+
+		// Filtros de texto
+		if (filters.search) {
 			where.OR = [
-				{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
-				{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
+				{ name: { contains: filters.search, mode: 'insensitive' } },
+				{ description: { contains: filters.search, mode: 'insensitive' } },
 			];
 		}
 
-		// Filtrar por categorías
-		if (filters.categories && filters.categories.length > 0) {
+		// Filtros de categoría
+		if (filters.categories?.length) {
 			where.category = { in: filters.categories };
 		}
 
-		// Filtrar por rarezas
-		if (filters.rarities && filters.rarities.length > 0) {
-			where.rarity = { in: filters.rarities };
+		// Filtros de estado
+		if (filters.isFavorite !== undefined) {
+			where.isFavorite = filters.isFavorite;
 		}
 
-		// Filtrar favoritos
-		if (filters.onlyFavorites) {
-			where.isFavorite = true;
+		// Filtros de relaciones
+		if (filters.hasImages) {
+			where.images = { some: {} };
+		}
+		if (filters.hasVideos) {
+			where.videos = { some: {} };
+		}
+		if (filters.hasAlbums) {
+			where.albums = { some: {} };
+		}
+		if (filters.hasCollections) {
+			where.collections = { some: {} };
 		}
 
-		// No podemos filtrar directamente por count en Prisma,
-		// esto tendría que hacerse post-procesando los resultados
+		// Filtros de fecha
+		if (filters.dateRange?.start) {
+			where.createdAt = { ...where.createdAt, gte: filters.dateRange.start };
+		}
+		if (filters.dateRange?.end) {
+			where.createdAt = { ...where.createdAt, lte: filters.dateRange.end };
+		}
 
-		return { where };
+		return where;
 	} catch (error) {
-		mapperLogger.error('❌ Error al mapear filtros de Tag a formato Prisma:', error);
-		throw error;
+		throw handleTransformerError(error);
 	}
 }
 
 /**
- * Mapea una etiqueta a su versión simplificada para relaciones
- * @param tag Etiqueta completa
- * @returns Etiqueta simplificada
+ * 🔄 Mapea un Tag a su versión relacionada
  */
-export function mapTagToRelatedTag(tag: any) {
+export function mapTagToRelatedTag(tag: TagComplete): { id: string } {
 	try {
-		return {
-			id: tag.id,
-			name: tag.name,
-			color: tag.color,
-			emoji: tag.emoji,
-			count: tag._count?.images || 0,
-		};
+		return { id: tag.id };
 	} catch (error) {
-		mapperLogger.error('❌ Error al mapear Tag a RelatedTag:', error);
-		return {
-			id: tag.id || 'unknown',
-			name: tag.name || 'Error',
-			color: tag.color || '#ff0000',
-			emoji: tag.emoji || '⚠️',
-			count: 0,
-		};
+		throw handleTransformerError(error);
 	}
 }

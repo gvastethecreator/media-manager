@@ -4,10 +4,23 @@
 export enum EntityType {
 	CONCEPT = 'concept',
 	IMAGE = 'image',
+	VIDEO = 'video',
 	ALBUM = 'album',
 	COLLECTION = 'collection',
 	TAG = 'tag',
 	USER = 'user',
+	NOTE = 'note',
+	PLACE = 'place',
+	CHARACTER = 'character',
+	WORLD_ITEM = 'world_item',
+	PROMPT = 'prompt',
+	PROPERTY = 'property',
+	GROUP = 'group',
+	WILDCARD = 'wildcard',
+	FOLDER = 'folder',
+	QUEUE_JOB = 'queue_job',
+	PROFILE = 'profile',
+	ACTIVITY = 'activity'
 }
 
 /**

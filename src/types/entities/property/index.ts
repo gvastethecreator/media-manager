@@ -1,8 +1,9 @@
 /**
- * @file Índice para tipos de Property
+ * @file Exportación de tipos para la entidad Property
  * @module types/entities/property
  */
 
+export * from './schema';
 export * from './types';
 
 // Alias común para el tipo principal
