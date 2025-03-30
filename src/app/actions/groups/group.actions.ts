@@ -1,16 +1,17 @@
 'use server';
 
-import { db } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { validateName } from '@/lib/validations';
-import { Group } from '@prisma/client';
+import { mapCreateGroupDataToPrisma, mapUpdateGroupDataToPrisma } from '@/transformers/group/mappers';
+import type { CreateGroupData, GroupWithStats, UpdateGroupData } from '@/types/entities/group/types';
 import { revalidatePath } from 'next/cache';
 
 /**
  * Obtiene todos los grupos con sus estadísticas
  */
-export async function getGroups() {
+export async function getGroups(): Promise<GroupWithStats[]> {
 	try {
-		return await db.group.findMany({
+		return await prisma.group.findMany({
 			include: {
 				_count: {
 					select: {
@@ -41,25 +42,66 @@ export async function getGroups() {
 }
 
 /**
+ * Obtiene un grupo específico con sus estadísticas
+ */
+export async function getGroup(id: string): Promise<GroupWithStats | null> {
+	try {
+		return await prisma.group.findUnique({
+			where: { id },
+			include: {
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						notes: true,
+						wildcards: true,
+						properties: true,
+					},
+				},
+			},
+		});
+	} catch (error) {
+		console.error('Error al obtener grupo:', error);
+		throw new Error('No se pudo obtener el grupo');
+	}
+}
+
+/**
  * Crea un nuevo grupo
  */
-export async function createGroup(data: Partial<Group>) {
+export async function createGroup(data: CreateGroupData): Promise<GroupWithStats> {
 	try {
 		// Validar nombre único
 		await validateName('group', data.name);
 
-		const group = await db.group.create({
-			data: {
-				name: data.name!,
-				emoji: data.emoji || '📂',
-				color: data.color || '#3b82f6',
-				description: data.description,
-				shortcut: data.shortcut,
-				category: data.category || 'general',
-				sortBy: data.sortBy || 'name',
-				filters: data.filters || 'empty_array',
-				featuredImage: data.featuredImage,
-				isFavorite: data.isFavorite || false,
+		const group = await prisma.group.create({
+			data: mapCreateGroupDataToPrisma(data),
+			include: {
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						notes: true,
+						wildcards: true,
+						properties: true,
+					},
+				},
 			},
 		});
 
@@ -74,27 +116,35 @@ export async function createGroup(data: Partial<Group>) {
 /**
  * Actualiza un grupo existente
  */
-export async function updateGroup(id: string, data: Partial<Group>) {
+export async function updateGroup(id: string, data: UpdateGroupData): Promise<GroupWithStats> {
 	try {
 		// Si el nombre cambió, validar que sea único
-		const current = await db.group.findUnique({ where: { id } });
+		const current = await prisma.group.findUnique({ where: { id } });
 		if (current && data.name && current.name !== data.name) {
 			await validateName('group', data.name);
 		}
 
-		const group = await db.group.update({
+		const group = await prisma.group.update({
 			where: { id },
-			data: {
-				name: data.name,
-				emoji: data.emoji,
-				color: data.color,
-				description: data.description,
-				shortcut: data.shortcut,
-				category: data.category,
-				sortBy: data.sortBy,
-				filters: data.filters,
-				featuredImage: data.featuredImage,
-				isFavorite: data.isFavorite,
+			data: mapUpdateGroupDataToPrisma(data),
+			include: {
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						notes: true,
+						wildcards: true,
+						properties: true,
+					},
+				},
 			},
 		});
 
@@ -109,9 +159,9 @@ export async function updateGroup(id: string, data: Partial<Group>) {
 /**
  * Elimina un grupo
  */
-export async function deleteGroup(id: string) {
+export async function deleteGroup(id: string): Promise<boolean> {
 	try {
-		await db.group.delete({
+		await prisma.group.delete({
 			where: { id },
 		});
 
@@ -126,20 +176,37 @@ export async function deleteGroup(id: string) {
 /**
  * Actualiza el estado de favorito de un grupo
  */
-export async function toggleGroupFavorite(id: string) {
+export async function toggleGroupFavorite(id: string): Promise<GroupWithStats> {
 	try {
-		const group = await db.group.findUnique({ where: { id } });
-		if (!group) throw new Error('Grupo no encontrado');
+		const current = await prisma.group.findUnique({ where: { id } });
+		if (!current) throw new Error('Grupo no encontrado');
 
-		const updated = await db.group.update({
+		const group = await prisma.group.update({
 			where: { id },
-			data: {
-				isFavorite: !group.isFavorite,
+			data: { isFavorite: !current.isFavorite },
+			include: {
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						notes: true,
+						wildcards: true,
+						properties: true,
+					},
+				},
 			},
 		});
 
 		revalidatePath('/settings');
-		return updated;
+		return group;
 	} catch (error) {
 		console.error('Error al actualizar favorito:', error);
 		throw error;

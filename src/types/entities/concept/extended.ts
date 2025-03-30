@@ -1,7 +1,18 @@
-import type { ConceptBase, ConceptStats } from './base';
+import type { ConceptBase, ConceptComplete, ConceptStats, ConceptWithRelationsComplete } from './index';
+
+/**
+ * Filtros para conceptos
+ */
+export interface ConceptFilters {
+	search?: string;
+	category?: string | null;
+	tags?: string[];
+	onlyFavorites?: boolean;
+}
 
 /**
  * Interfaz extendida para concepto con propiedades adicionales para UI
+ * @deprecated Use ConceptExtendedComplete instead
  */
 export interface ConceptExtended extends ConceptBase {
 	parsedTags?: string[];
@@ -11,15 +22,21 @@ export interface ConceptExtended extends ConceptBase {
 }
 
 /**
- * Interfaz para filtros de conceptos
+ * Interfaz para un concepto con propiedades extendidas y campos JSON deserializados
  */
-export interface ConceptFilters {
-	search?: string;
-	category?: string;
-	tags?: string[];
-	onlyFavorites?: boolean;
-	startDate?: Date;
-	endDate?: Date;
+export interface ConceptExtendedComplete extends ConceptComplete {
+	previewContent?: string;
+	lastUpdated?: Date;
+	stats?: ConceptStats;
+}
+
+/**
+ * Interfaz para un concepto con relaciones, propiedades extendidas y campos JSON deserializados
+ */
+export interface ConceptWithRelationsExtendedComplete extends ConceptWithRelationsComplete {
+	previewContent?: string;
+	lastUpdated?: Date;
+	stats?: ConceptStats;
 }
 
 /**

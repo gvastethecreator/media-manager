@@ -1,169 +1,230 @@
 'use client';
 
-import { MapIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { getRecentPlaceImages } from './place-server-actions';
+import { cn } from '@/lib/utils';
+import { motion } from 'motion/react';
+import Image from 'next/image';
+import { useState } from 'react';
 
 interface PlaceCardImagesProps {
-	placeId: string;
-	primaryColor: string;
-	secondaryColor: string;
-}
-
-interface ThumbnailImage {
-	id: string;
-	name?: string | null;
-	thumbnailUrl: string;
-	url?: string;
+	/** Imágenes a mostrar (rutas) */
+	images?: string[];
+	/** URL de la imagen destacada */
+	mainImage?: string;
+	/** Color primario para estilizado */
+	primaryColor?: string;
+	/** Nivel de rareza (1-10) para determinar efectos */
+	rarityLevel?: number;
+	/** Si está habilitado el efecto holográfico */
+	holographicEffect?: boolean;
+	/** Si está en modo tarjeta TCG */
+	tcgMode?: boolean;
+	/** Si está en modo compacto */
+	compact?: boolean;
 }
 
 /**
- * Componente para mostrar las imágenes recientes asociadas a un lugar
- * Similar a la ilustración de una carta Magic pero con un diseño específico para lugares
+ * Componente para mostrar imágenes en una tarjeta de lugar TCG.
+ * Incluye efectos holográficos y animaciones según el nivel de rareza.
  */
 export function PlaceCardImages({
-	placeId,
-	primaryColor,
-	secondaryColor,
+	images = [],
+	mainImage,
+	primaryColor = '#10b981',
+	rarityLevel = 1,
+	holographicEffect = true,
+	tcgMode = true,
+	compact = false
 }: PlaceCardImagesProps) {
-	// Estado para almacenar las imágenes
-	const [images, setImages] = useState<ThumbnailImage[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	// Estado para el ángulo de visualización (para efecto holográfico)
+	const [viewAngle, setViewAngle] = useState({ x: 0, y: 0 });
 
-	// Cargar imágenes al montar el componente
-	useEffect(() => {
-		async function loadImages() {
-			try {
-				setLoading(true);
-				const fetchedImages = await getRecentPlaceImages(placeId);
-				setImages(fetchedImages);
-				setError(null);
-			} catch (err) {
-				console.error('Error loading place images:', err);
-				setError('No se pudieron cargar las imágenes');
-			} finally {
-				setLoading(false);
-			}
+	// Usar la imagen principal o la primera de la lista
+	const displayImage = mainImage || (images && images.length > 0 ? images[0] : null);
+
+	// Si no hay imagen, mostrar un placeholder
+	const hasImage = Boolean(displayImage);
+
+	// Determinar los efectos holográficos basados en la rareza
+	const getHolographicEffects = () => {
+		if (!tcgMode || !holographicEffect) return {};
+
+		// A mayor rareza, más pronunciados son los efectos
+		if (rarityLevel >= 9) {
+			return {
+				// Efecto iridiscente para lugares míticos
+				filter: 'hue-rotate(45deg) saturate(1.75)',
+				animation: 'var(--animate-iridescent)',
+			};
 		}
 
-		loadImages();
-	}, [placeId]);
+		if (rarityLevel >= 7) {
+			return {
+				// Efecto brillante para lugares legendarios
+				filter: 'brightness(1.1) contrast(1.1)',
+				animation: 'var(--animate-shine-effect)',
+			};
+		}
 
-	// Elemento placeholder para cuando no hay imágenes
-	const renderPlaceholder = () => (
-		<div className="flex flex-col items-center justify-center h-full">
-			<MapIcon
-				className="text-muted-foreground mb-2"
-				style={{ color: `${primaryColor}70` }}
-			/>
-			<p className="text-xs text-muted-foreground text-center" style={{ color: `${primaryColor}90` }}>
-				{error || 'No hay imágenes de este lugar'}
-			</p>
-		</div>
-	);
+		if (rarityLevel >= 5) {
+			return {
+				// Efecto de cambio de gradiente para lugares épicos
+				background: `linear-gradient(45deg, ${primaryColor}40, ${primaryColor}90, ${primaryColor}40)`,
+				backgroundSize: '200% 200%',
+				animation: 'var(--animate-gradient-shift)',
+			};
+		}
 
-	// Renderizar loading
-	if (loading) {
-		return (
-			<div
-				className="h-[140px] flex-shrink-0 flex items-center justify-center bg-black/5"
-				style={{
-					borderBottom: `1px solid ${primaryColor}20`,
-					background: `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
-				}}
-			>
-				<div
-					className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin"
-					style={{ borderColor: `${primaryColor}80 transparent ${primaryColor}30 ${primaryColor}30` }}
-				/>
-			</div>
-		);
-	}
+		// Para lugares comunes, sin efectos especiales
+		return {};
+	};
 
-	// Si no hay imágenes o hay error, mostrar placeholder
-	if (error || images.length === 0) {
-		return (
-			<div
-				className="h-[140px] flex-shrink-0 bg-black/5"
-				style={{
-					borderBottom: `1px solid ${primaryColor}20`,
-					background: `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
-				}}
-			>
-				{renderPlaceholder()}
-			</div>
-		);
-	}
+	// Manejar el efecto holográfico en movimiento
+	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+		if (!tcgMode || !holographicEffect) return;
 
-	// Renderizar mosaico de imágenes - diseño especial para lugares
+		const el = e.currentTarget;
+		const rect = el.getBoundingClientRect();
+		const width = rect.width;
+		const height = rect.height;
+
+		// Calcular la posición relativa del mouse dentro del elemento
+		const x = ((e.clientX - rect.left) / width - 0.5) * 2; // -1 a 1
+		const y = ((e.clientY - rect.top) / height - 0.5) * 2; // -1 a 1
+
+		setViewAngle({ x, y });
+	};
+
+	// Restablecer el ángulo de vista cuando el mouse sale
+	const handleMouseLeave = () => {
+		setViewAngle({ x: 0, y: 0 });
+	};
+
+	// Aplicar los efectos holográficos basados en la rareza
+	const holographicStyle = getHolographicEffects();
+
 	return (
 		<div
-			className="h-[140px] flex-shrink-0 overflow-hidden relative"
-			style={{
-				borderBottom: `1px solid ${primaryColor}20`
-			}}
+			className={cn(
+				"relative overflow-hidden",
+				compact ? "h-24" : "h-48",
+				tcgMode && "border-b border-white/10"
+			)}
+			onMouseMove={handleMouseMove}
+			onMouseLeave={handleMouseLeave}
 		>
-			{/* Fondo estilizado */}
-			<div
-				className="absolute inset-0 -z-10"
-				style={{
-					background: `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
-				}}
-			/>
+			{/* Fondo decorativo para cartas TCG */}
+			{tcgMode && (
+				<div
+					className="absolute inset-0 bg-black/20 z-0"
+					style={{
+						backgroundImage: `radial-gradient(circle at 50% 50%, ${primaryColor}30, transparent 80%)`,
+					}}
+				/>
+			)}
 
-			{/* Grid de imágenes con efecto de panorama para lugares */}
-			<div className="grid grid-cols-4 grid-rows-1 gap-px h-full">
-				{images.slice(0, 4).map((image, index) => (
-					<div
-						key={image.id}
-						className="relative overflow-hidden bg-black/20"
-					>
-						{/* Imagen */}
-						<img
-							src={image.thumbnailUrl}
-							alt={image.name || 'Imagen del lugar'}
-							className="w-full h-full object-cover"
-							loading="lazy"
-							style={{
-								opacity: 0.9,
-								// Efectos específicos de lugar: panorámica con diferentes brillos
-								filter: `brightness(${1 + (index * 0.05)}) contrast(1.05)`
-							}}
-						/>
+			{/* Marco decorativo para lugares raros */}
+			{tcgMode && rarityLevel >= 3 && (
+				<div className="absolute inset-0 z-10 pointer-events-none">
+					{/* Bordes en estilo TCG */}
+					<div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-br-sm opacity-60"
+						style={{ borderColor: primaryColor }} />
+					<div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 rounded-bl-sm opacity-60"
+						style={{ borderColor: primaryColor }} />
+					<div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 rounded-tr-sm opacity-60"
+						style={{ borderColor: primaryColor }} />
+					<div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 rounded-tl-sm opacity-60"
+						style={{ borderColor: primaryColor }} />
+				</div>
+			)}
 
-						{/* Overlay con gradiente para simular paisaje */}
+			{/* Imagen principal con efectos holográficos */}
+			{hasImage ? (
+				<motion.div
+					className="relative w-full h-full z-10"
+					style={{
+						transform: `perspective(1000px) rotateY(${viewAngle.x * 5}deg) rotateX(${-viewAngle.y * 5}deg)`,
+						transformStyle: 'preserve-3d',
+						transition: 'transform 0.1s ease-out'
+					}}
+				>
+					{/* Imagen del lugar */}
+					<Image
+						src={displayImage as string}
+						alt="Place image"
+						fill
+						sizes="(max-width: 640px) 300px, 320px"
+						priority={true}
+						className={cn(
+							"object-cover",
+							rarityLevel >= 5 && tcgMode && holographicEffect && "transition-all duration-500"
+						)}
+						style={{
+							...holographicStyle,
+							transformStyle: 'preserve-3d'
+						}}
+					/>
+
+					{/* Efecto holográfico de brillo */}
+					{tcgMode && holographicEffect && rarityLevel >= 3 && (
 						<div
-							className="absolute inset-0"
+							className="absolute inset-0 z-20 pointer-events-none opacity-30"
 							style={{
-								boxShadow: `inset 0 0 0 1px ${primaryColor}30`,
-								background: `linear-gradient(to bottom, transparent 70%, ${primaryColor}40 100%)`,
-								opacity: 0.7,
+								background: `linear-gradient(
+									${135 + viewAngle.x * 30}deg,
+									transparent,
+									rgba(255, 255, 255, 0.5) ${50 + viewAngle.y * 10}%,
+									transparent
+								)`,
 							}}
 						/>
-					</div>
-				))}
+					)}
 
-				{/* Rellenar los espacios vacíos si hay menos de 4 imágenes */}
-				{images.length < 4 && Array.from({ length: 4 - images.length }).map((_, index) => (
+					{/* Patrón de líneas holográficas para lugares especiales */}
+					{tcgMode && holographicEffect && rarityLevel >= 7 && (
+						<div
+							className="absolute inset-0 z-20 pointer-events-none opacity-10 mix-blend-overlay"
+							style={{
+								backgroundImage: `repeating-linear-gradient(
+									${90 + viewAngle.x * 20}deg,
+									transparent,
+									rgba(255, 255, 255, 0.8) 1px,
+									transparent 2px
+								)`,
+								backgroundSize: '4px 4px',
+							}}
+						/>
+					)}
+				</motion.div>
+			) : (
+				// Placeholder cuando no hay imagen
+				<div
+					className="w-full h-full flex items-center justify-center bg-black/20 text-white/50"
+					style={{
+						background: `radial-gradient(circle, ${primaryColor}30 0%, transparent 70%)`,
+					}}
+				>
+					<span className="text-4xl transform -rotate-12">📍</span>
+				</div>
+			)}
+
+			{/* Capa de arte para cartas TCG (marco y efectos) */}
+			{tcgMode && (
+				<div className="absolute inset-0 pointer-events-none z-30">
+					{/* Marco interno */}
 					<div
-						key={`placeholder-${index}`}
-						className="bg-black/20 flex items-center justify-center"
-					>
-						<MapIcon className="opacity-20 h-6 w-6" />
-					</div>
-				))}
-			</div>
+						className="absolute inset-3 border border-white/10 rounded"
+						style={{
+							boxShadow: rarityLevel >= 5 ? `0 0 10px ${primaryColor}50 inset` : 'none'
+						}}
+					/>
 
-			{/* Overlay principal - efecto de panorama unificado */}
-			<div
-				className="absolute inset-0 pointer-events-none"
-				style={{
-					boxShadow: `inset 0 -4px 8px ${primaryColor}20`,
-					background: `linear-gradient(to bottom, transparent 80%, ${primaryColor}30 100%)`,
-					opacity: 0.6,
-				}}
-			/>
+					{/* Efecto viñeta */}
+					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+
+					{/* Efecto de brillo superior */}
+					<div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-white/10 to-transparent" />
+				</div>
+			)}
 		</div>
 	);
 }

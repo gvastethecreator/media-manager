@@ -4,7 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { WildcardViewMode } from '@/types/entities/wildcard';
+import type { WildcardViewMode } from '@/types/entities/wildcard';
 import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
 

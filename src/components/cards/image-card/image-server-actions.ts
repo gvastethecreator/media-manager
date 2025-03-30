@@ -13,6 +13,19 @@ interface ImageMetadata {
 	format?: string;
 	size?: number;
 	exif?: any;
+	colorSpace?: string;
+	hasAlpha?: boolean;
+	isAnimated?: boolean;
+	location?: {
+		latitude: number;
+		longitude: number;
+		altitude?: number;
+	};
+	camera?: {
+		make?: string;
+		model?: string;
+		software?: string;
+	};
 }
 
 // Interfaz para los datos de imagen
@@ -25,6 +38,24 @@ export interface ImageCardData {
 	height?: number;
 	metadata?: ImageMetadata | null;
 	tags?: { id: string; name: string; color: string }[];
+	albums?: { id: string; name: string; color: string }[];
+	characters?: { id: string; name: string; color: string }[];
+	places?: { id: string; name: string; color: string }[];
+	groups?: { id: string; name: string; color: string }[];
+	hash?: string;
+	folderId?: string;
+	isFavorite?: boolean;
+	createdAt?: Date;
+	updatedAt?: Date;
+	_count?: {
+		tags?: number;
+		albums?: number;
+		collections?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		notes?: number;
+	};
 }
 
 /**
@@ -57,6 +88,11 @@ export async function getImageCardData(imageId: string): Promise<ImageCardData> 
 				height: true,
 				size: true,
 				metadata: true,
+				isFavorite: true,
+				hash: true,
+				folderId: true,
+				createdAt: true,
+				updatedAt: true,
 				tags: {
 					select: {
 						id: true,
@@ -64,6 +100,45 @@ export async function getImageCardData(imageId: string): Promise<ImageCardData> 
 						color: true,
 					},
 				},
+				albums: {
+					select: {
+						id: true,
+						name: true,
+						color: true,
+					},
+				},
+				characters: {
+					select: {
+						id: true,
+						name: true,
+						color: true,
+					},
+				},
+				places: {
+					select: {
+						id: true,
+						name: true,
+						color: true,
+					},
+				},
+				groups: {
+					select: {
+						id: true,
+						name: true,
+						color: true,
+					},
+				},
+				_count: {
+					select: {
+						tags: true,
+						albums: true,
+						collections: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						notes: true,
+					}
+				}
 			},
 		});
 
@@ -96,6 +171,16 @@ export async function getImageCardData(imageId: string): Promise<ImageCardData> 
 			height: image.height,
 			metadata: parsedMetadata,
 			tags: image.tags,
+			albums: image.albums,
+			characters: image.characters,
+			places: image.places,
+			groups: image.groups,
+			hash: image.hash,
+			folderId: image.folderId,
+			isFavorite: image.isFavorite,
+			createdAt: image.createdAt,
+			updatedAt: image.updatedAt,
+			_count: image._count,
 		};
 
 		imageCardLogger.info('✅ Información de imagen obtenida correctamente');

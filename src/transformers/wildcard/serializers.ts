@@ -138,3 +138,50 @@ export function serializeWildcardChildren(children: any[]): string {
     return 'empty_array';
   }
 }
+
+/**
+ * Extiende un comodín de Prisma con propiedades calculadas y formateadas para la UI
+ * @param wildcard Comodín base de la base de datos
+ * @returns Comodín extendido con propiedades calculadas
+ */
+export function extendWildcard(wildcard: any) {
+  if (!wildcard) return null;
+
+  return {
+    ...wildcard,
+    // Asegurar que las fechas sean instancias de Date
+    createdAt: wildcard.createdAt instanceof Date ? wildcard.createdAt : new Date(wildcard.createdAt),
+    updatedAt: wildcard.updatedAt instanceof Date ? wildcard.updatedAt : new Date(wildcard.updatedAt),
+    // Parsea el campo children que está almacenado como JSON string
+    children: parseWildcardChildren(wildcard.children),
+    // Calcular contadores de elementos relacionados si están disponibles
+    itemCount: wildcard._count ? (
+      (wildcard._count.images || 0) +
+      (wildcard._count.videos || 0) +
+      (wildcard._count.albums || 0) +
+      (wildcard._count.collections || 0) +
+      (wildcard._count.tags || 0) +
+      (wildcard._count.characters || 0) +
+      (wildcard._count.places || 0) +
+      (wildcard._count.worldItems || 0) +
+      (wildcard._count.concepts || 0) +
+      (wildcard._count.prompts || 0) +
+      (wildcard._count.notes || 0) +
+      (wildcard._count.properties || 0) +
+      (wildcard._count.groups || 0)
+    ) : 0,
+    // Propiedades calculadas de jerarquía
+    hasParent: !!wildcard.parentId,
+    hasChildren: (wildcard._count?.childWildcards || 0) > 0
+  };
+}
+
+/**
+ * Extiende un array de comodines con propiedades calculadas
+ * @param wildcards Array de comodines de la base de datos
+ * @returns Array de comodines extendidos
+ */
+export function extendWildcards(wildcards: any[]) {
+  if (!wildcards || !Array.isArray(wildcards)) return [];
+  return wildcards.map(wildcard => extendWildcard(wildcard));
+}

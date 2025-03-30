@@ -119,7 +119,7 @@
   },
   "CodeGPT.apiKey": "Ollama",
   "[markdown]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
   },
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"

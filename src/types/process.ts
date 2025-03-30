@@ -1,105 +1,124 @@
-export type ProcessPhase =
-	| 'scanning'
-	| 'indexing'
-	| 'thumbnails'
-	| 'metadata'
-	| 'error'
-	| 'starting'
-	| 'processing'
-	| 'verifying'
-	| 'complete';
+/**
+ * @file Tipos para manejo de procesos y eventos
+ * @module types/process
+ */
 
-export interface ProcessStatus {
-	status?: string;
-	current?: number;
-	total?: number;
-	progress?: number;
-	currentFile?: string;
-	timestamp?: number;
-	folderId?: string;
-	phase?: ProcessPhase;
-	filesProcessed?: number;
-	totalFiles?: number;
-	fileDetails?: {
-		name?: string;
-		path?: string;
-		size?: number;
-		type?: string;
-		dimensions?: {
-			width: number;
-			height: number;
-		};
-	};
-	extendedStats?: {
-		fileTypes: { [key: string]: number };
-		averageSize?: number;
-		processingSpeed?: number;
-		errorsByType: { [key: string]: number };
-		healthScore?: number;
-	};
-	errors?: Array<{
-		file: string;
-		error: string;
-		timestamp?: number;
-	}>;
-	globalProgress?: {
-		current: number;
-		total: number;
-		progress: number;
-		processed?: number;
-	};
-	startTime?: number;
-	endTime?: number;
-	processingSpeed?: number;
-	estimatedTimeRemaining?: number;
-	message?: string;
+import type { JSONString } from '@/utils/types/utility-types';
+import { z } from 'zod';
+
+/**
+ * Estados de proceso
+ */
+export enum ProcessStatus {
+    PENDING = 'pending',
+    RUNNING = 'running',
+    COMPLETED = 'completed',
+    FAILED = 'failed',
+    CANCELLED = 'cancelled'
 }
 
-export interface ExtendedProcessStatus extends ProcessStatus {
-	globalProgress?: {
-		current: number;
-		total: number;
-		progress: number;
-		processed?: number;
-	};
+/**
+ * Tipos de proceso
+ */
+export enum ProcessType {
+    FILE_UPLOAD = 'file-upload',
+    FILE_PROCESSING = 'file-processing',
+    METADATA_EXTRACTION = 'metadata-extraction',
+    THUMBNAIL_GENERATION = 'thumbnail-generation',
+    BATCH_OPERATION = 'batch-operation',
+    IMPORT = 'import',
+    EXPORT = 'export',
+    BACKUP = 'backup',
+    RESTORE = 'restore'
 }
 
-export interface ReindexProgress {
-	isProcessing: boolean;
-	progress: number;
-	currentFolder?: string;
-	processedFolders: number;
-	totalFolders: number;
-	errors: Array<{
-		folderId: string;
-		error: string;
-	}>;
+/**
+ * Niveles de prioridad
+ */
+export enum ProcessPriority {
+    LOW = 'low',
+    NORMAL = 'normal',
+    HIGH = 'high',
+    CRITICAL = 'critical'
 }
 
-export interface ReindexAllProgressData {
-	current: number;
-	total: number;
-	progress: number;
-	currentFolder?: string;
-	phase?: ProcessPhase;
-	status?: string;
-	processedFolders: number;
-	errors?: Array<{ folderId: string; error: string }>;
+/**
+ * Interfaz base para procesos
+ */
+export interface Process {
+    id: string;
+    type: ProcessType;
+    status: ProcessStatus;
+    priority: ProcessPriority;
+    progress: number;
+    message: string;
+    error?: Error;
+    metadata: JSONString<Record<string, unknown>>;
+    startedAt: Date;
+    completedAt?: Date;
+    cancelledAt?: Date;
 }
 
-export interface ReindexAllCompleteData {
-	processedFolders: number;
-	totalFolders: number;
-	errors: Array<{ folderId: string; error: string }>;
-	status?: string;
-	progress?: number;
+/**
+ * Eventos de proceso
+ */
+export interface ProcessEvent {
+    id: string;
+    processId: string;
+    type: string;
+    message: string;
+    metadata: JSONString<Record<string, unknown>>;
+    timestamp: Date;
 }
 
-export interface ErrorResponse {
-	message: string;
-	details?: string;
-	folderId?: string;
-	phase?: string;
-	timestamp: number;
-	type?: string;
+/**
+ * Opciones de proceso
+ */
+export interface ProcessOptions {
+    priority?: ProcessPriority;
+    timeout?: number;
+    retries?: number;
+    onProgress?: (progress: number) => void;
+    onComplete?: () => void;
+    onError?: (error: Error) => void;
+    onCancel?: () => void;
 }
+
+// Validaciones Zod
+export const processStatusSchema = z.nativeEnum(ProcessStatus);
+export const processTypeSchema = z.nativeEnum(ProcessType);
+export const processPrioritySchema = z.nativeEnum(ProcessPriority);
+
+export const processSchema = z.object({
+    id: z.string(),
+    type: processTypeSchema,
+    status: processStatusSchema,
+    priority: processPrioritySchema,
+    progress: z.number().min(0).max(100),
+    message: z.string(),
+    error: z.instanceof(Error).optional(),
+    metadata: z.string(),
+    startedAt: z.date(),
+    completedAt: z.date().optional(),
+    cancelledAt: z.date().optional()
+});
+
+export const processEventSchema = z.object({
+    id: z.string(),
+    processId: z.string(),
+    type: z.string(),
+    message: z.string(),
+    metadata: z.string(),
+    timestamp: z.date()
+});
+
+export const processOptionsSchema = z.object({
+    priority: processPrioritySchema.optional(),
+    timeout: z.number().positive().optional(),
+    retries: z.number().nonnegative().optional()
+});
+
+// Tipos inferidos
+export type ProcessValidated = z.infer<typeof processSchema>;
+export type ProcessEventValidated = z.infer<typeof processEventSchema>;
+export type ProcessOptionsValidated = z.infer<typeof processOptionsSchema>;

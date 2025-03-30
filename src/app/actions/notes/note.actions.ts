@@ -4,8 +4,22 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { processNoteFields, serializeTags } from '@/transformers/note';
-import type { NoteBase, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import {
+	deserializeTags,
+	fromNoteComplete,
+	processNoteFields,
+	toCreateNoteData,
+	toNoteComplete,
+	toUpdateNoteData
+} from '@/transformers/note';
+import type {
+	CreateNoteData,
+	NoteBase,
+	NoteComplete,
+	NoteWithRelations,
+	NoteWithRelationsComplete,
+	NoteWithStats
+} from '@/types/entities/note';
 import type { FileItem } from '@/types/file-item';
 import { createNoteSchema, updateNoteSchema } from '@/utils/note/validators';
 import { revalidatePath } from 'next/cache';
@@ -63,23 +77,28 @@ export async function getNotes(): Promise<NoteWithStats[]> {
 			},
 		});
 
-		// Procesamos los campos serializados
-		return notes.map((note) => ({
-			...note,
-			_count: {
-				...note._count,
-				images: 0, // Añadimos este campo para cumplir con NoteStats
-			},
-			// Mantenemos lastUpdated para compatibilidad
-			lastUpdated: note.updatedAt,
-		}));
+		// Procesamos los campos serializados y transformamos con los nuevos transformadores
+		return notes.map((note) => {
+		    // Transformar con el nuevo transformador
+		    const noteComplete = toNoteComplete(note);
+
+			return {
+				...noteComplete,
+				_count: {
+					...note._count,
+					images: 0, // Añadimos este campo para cumplir con NoteStats
+				},
+				// Mantenemos lastUpdated para compatibilidad
+				lastUpdated: note.updatedAt,
+			};
+		});
 	} catch (error) {
 		noteLogger.error('❌ Error al obtener notas', error);
 		throw createNoteError('No se pudieron obtener las notas', NoteErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function getNote(id: string): Promise<NoteBase> {
+export async function getNote(id: string): Promise<NoteComplete> {
 	try {
 		noteLogger.info('🔍 Obteniendo nota:', id);
 		const note = await prisma.note.findUnique({
@@ -107,8 +126,11 @@ export async function getNote(id: string): Promise<NoteBase> {
 			throw createNoteError('Nota no encontrada', NoteErrorCode.NOT_FOUND);
 		}
 
-		noteLogger.info('✅ Nota obtenida:', note.title);
-		return note;
+		// Transformar con el nuevo transformador
+		const noteComplete = toNoteComplete(note);
+
+		noteLogger.info('✅ Nota obtenida:', noteComplete.title);
+		return noteComplete;
 	} catch (error) {
 		noteLogger.error('❌ Error al obtener nota:', error);
 		if (error instanceof Error && error.name === 'NoteError') {
@@ -118,7 +140,7 @@ export async function getNote(id: string): Promise<NoteBase> {
 	}
 }
 
-export async function createNote(data: NoteCreateInput): Promise<NoteBase> {
+export async function createNote(data: CreateNoteData): Promise<NoteComplete> {
 	try {
 		noteLogger.info('📝 Creando nota:', data.title);
 
@@ -129,43 +151,33 @@ export async function createNote(data: NoteCreateInput): Promise<NoteBase> {
 			throw createNoteError(errorMessage, NoteErrorCode.VALIDATION_ERROR);
 		}
 
-		// Preparar datos y serializar tags si es necesario
-		const { tags, ...otherData } = data;
-		const serializedTags = Array.isArray(tags)
-			? serializeTags(tags)
-			: typeof tags === 'string'
-				? tags
-				: serializeTags([]);
+		// Preparar datos con el nuevo transformador
+		const createData = toCreateNoteData(data);
 
 		// Crear la nota
 		const note = await prisma.note.create({
-			data: {
-				...otherData,
-				tags: serializedTags,
-				content: data.content || '',
-				category: data.category || 'general',
-				priority: data.priority || 0,
-				status: data.status || 'active',
-				featuredImage: data.featuredImage || null,
-			},
+			data: createData
 		});
+
+		// Transformar resultado
+		const noteComplete = toNoteComplete(note);
 
 		await emit({
 			type: 'notes:modified',
-			data: { action: 'create', note },
+			data: { action: 'create', note: noteComplete },
 		});
 		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
-		noteLogger.info('✅ Nota creada:', note.title);
+		noteLogger.info('✅ Nota creada:', noteComplete.title);
 		await revalidateAllPaths();
-		return note;
+		return noteComplete;
 	} catch (error) {
 		noteLogger.error('❌ Error al crear nota:', error);
 		throw createNoteError('No se pudo crear la nota', NoteErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function updateNote(id: string, data: NoteUpdateInput): Promise<NoteBase> {
+export async function updateNote(id: string, data: Partial<CreateNoteData>): Promise<NoteComplete> {
 	try {
 		noteLogger.info('📝 Actualizando nota:', id);
 
@@ -177,30 +189,27 @@ export async function updateNote(id: string, data: NoteUpdateInput): Promise<Not
 			throw createNoteError(errorMessage, NoteErrorCode.VALIDATION_ERROR);
 		}
 
-		// Crear objeto de actualización
-		const updateData: Record<string, any> = { ...data };
-
-		// Manejar tags especialmente
-		if ('tags' in data && data.tags !== undefined) {
-			const tags = data.tags;
-			updateData.tags = Array.isArray(tags) ? serializeTags(tags) : typeof tags === 'string' ? tags : serializeTags([]);
-		}
+		// Preparar datos con el nuevo transformador
+		const updateData = toUpdateNoteData({ ...data, id });
 
 		const note = await prisma.note.update({
 			where: { id },
 			data: updateData,
 		});
 
+		// Transformar resultado
+		const noteComplete = toNoteComplete(note);
+
 		await emit({
 			type: 'notes:modified',
 			id,
-			data: { action: 'update', note },
+			data: { action: 'update', note: noteComplete },
 		});
 		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
-		noteLogger.info('✅ Nota actualizada:', note.title);
+		noteLogger.info('✅ Nota actualizada:', noteComplete.title);
 		await revalidateAllPaths();
-		return note;
+		return noteComplete;
 	} catch (error) {
 		noteLogger.error('❌ Error al actualizar nota:', error);
 		throw createNoteError('No se pudo actualizar la nota', NoteErrorCode.OPERATION_FAILED, error);
@@ -250,7 +259,7 @@ export async function deleteNote(id: string): Promise<void> {
 		});
 		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
-		noteLogger.info('✅ Nota eliminada');
+		noteLogger.info('✅ Nota eliminada:', id);
 		await revalidateAllPaths();
 	} catch (error) {
 		noteLogger.error('❌ Error al eliminar nota:', error);
@@ -259,52 +268,76 @@ export async function deleteNote(id: string): Promise<void> {
 }
 
 /**
- * Obtiene una nota con los campos procesados (tags deserializados)
+ * Obtiene una nota con campos procesados (para compatibilidad)
+ * @param id ID de la nota
+ * @returns Nota con campos procesados
+ * @deprecated Use getNote instead
  */
 export async function getNoteWithProcessedFields(id: string): Promise<NoteBase & { parsedTags: string[] }> {
 	const note = await getNote(id);
-	return processNoteFields(note);
+	return {
+		...note,
+		parsedTags: note.tags,
+	};
 }
 
 /**
- * Obtiene todas las notas con campos procesados
+ * Obtiene todas las notas con campos procesados (para compatibilidad)
+ * @returns Array de notas con campos procesados
+ * @deprecated Use getNotes instead
  */
 export async function getNotesWithProcessedFields(): Promise<Array<NoteBase & { parsedTags: string[] }>> {
 	const notes = await getNotes();
-	return notes.map((note) => processNoteFields(note));
+	return notes.map(note => ({
+		...note,
+		parsedTags: deserializeTags(note.tags),
+	}));
 }
 
-/**
- * Obtiene las imágenes relacionadas con una nota
- */
 export async function getNoteImages(noteId: string): Promise<FileItem[]> {
 	try {
-		noteLogger.info('🖼️ Obteniendo imágenes relacionadas con la nota:', noteId);
+		noteLogger.info('🖼️ Obteniendo imágenes de nota:', noteId);
 
 		const note = await prisma.note.findUnique({
 			where: { id: noteId },
+			include: {
+				images: {
+					select: {
+						id: true,
+						name: true,
+						description: true,
+						url: true,
+						thumbnailUrl: true,
+						createdAt: true,
+						updatedAt: true,
+					},
+				},
+			},
 		});
 
 		if (!note) {
-			noteLogger.warn('ℹ️ Nota no encontrada, retornando array vacío:', noteId);
-			return [];
+			throw createNoteError('Nota no encontrada', NoteErrorCode.NOT_FOUND);
 		}
 
-		// Solución temporal hasta que se implementen las relaciones correctamente
-		noteLogger.info('✅ Esta nota no tiene imágenes definidas aún en el esquema');
-		return [];
+		noteLogger.info('✅ Imágenes obtenidas:', note.images.length);
+		return note.images.map((image) => ({
+			id: image.id,
+			name: image.name || '',
+			description: image.description || '',
+			url: image.url || '',
+			thumbnailUrl: image.thumbnailUrl || '',
+			createdAt: image.createdAt,
+			updatedAt: image.updatedAt,
+		}));
 	} catch (error) {
-		noteLogger.error('❌ Error al obtener imágenes de la nota:', error);
-		if (error instanceof Error && error.name === 'NoteError') {
-			throw error;
-		}
+		noteLogger.error('❌ Error al obtener imágenes de nota:', error);
 		throw createNoteError('No se pudieron obtener las imágenes de la nota', NoteErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 export async function addImageToNote(noteId: string, imageId: string): Promise<void> {
 	try {
-		noteLogger.info('➕ Conectando imagen a nota a través de entidad intermedia');
+		noteLogger.info('🔄 Añadiendo imagen a nota:', { noteId, imageId });
 
 		// Verificar si la nota existe
 		const note = await prisma.note.findUnique({
@@ -324,29 +357,34 @@ export async function addImageToNote(noteId: string, imageId: string): Promise<v
 			throw createNoteError('Imagen no encontrada', NoteErrorCode.NOT_FOUND);
 		}
 
-		// Aquí podríamos implementar una estrategia como crear un "Concept" que vincule
-		// a la imagen y la nota, o alguna otra entidad que cumpla nuestro propósito
-		noteLogger.info('🔄 Se requiere una implementación específica según el modelo de negocio');
+		// Añadir imagen a la nota
+		await prisma.note.update({
+			where: { id: noteId },
+			data: {
+				images: {
+					connect: { id: imageId },
+				},
+			},
+		});
 
 		await emit({
 			type: 'notes:modified',
 			id: noteId,
-			imageId,
-			data: { action: 'addImage' },
+			data: { action: 'addImage', noteId, imageId },
 		});
 		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
-		noteLogger.info('✅ Revisa la implementación según el modelo de negocio');
+		noteLogger.info('✅ Imagen añadida a nota:', { noteId, imageId });
 		await revalidateAllPaths();
 	} catch (error) {
-		noteLogger.error('❌ Error:', error);
-		throw createNoteError('Operación no implementada correctamente', NoteErrorCode.OPERATION_FAILED, error);
+		noteLogger.error('❌ Error al añadir imagen a nota:', error);
+		throw createNoteError('No se pudo añadir la imagen a la nota', NoteErrorCode.OPERATION_FAILED, error);
 	}
 }
 
-export async function removeNoteFromImage(noteId: string, imageId: string): Promise<void> {
+export async function removeImageFromNote(noteId: string, imageId: string): Promise<void> {
 	try {
-		noteLogger.info('➖ Desconectando imagen de nota a través de entidad intermedia');
+		noteLogger.info('🔄 Eliminando imagen de nota:', { noteId, imageId });
 
 		// Verificar si la nota existe
 		const note = await prisma.note.findUnique({
@@ -357,30 +395,27 @@ export async function removeNoteFromImage(noteId: string, imageId: string): Prom
 			throw createNoteError('Nota no encontrada', NoteErrorCode.NOT_FOUND);
 		}
 
-		// Verificar si la imagen existe
-		const image = await prisma.image.findUnique({
-			where: { id: imageId },
+		// Eliminar relación entre nota e imagen
+		await prisma.note.update({
+			where: { id: noteId },
+			data: {
+				images: {
+					disconnect: { id: imageId },
+				},
+			},
 		});
-
-		if (!image) {
-			throw createNoteError('Imagen no encontrada', NoteErrorCode.NOT_FOUND);
-		}
-
-		// Aquí podríamos implementar la eliminación del vínculo a través de la entidad intermedia
-		noteLogger.info('🔄 Se requiere una implementación específica según el modelo de negocio');
 
 		await emit({
 			type: 'notes:modified',
 			id: noteId,
-			imageId,
-			data: { action: 'removeImage' },
+			data: { action: 'removeImage', noteId, imageId },
 		});
 		statsEventEmitter.emit(STATS_EVENTS.NOTE_CHANGE);
 
-		noteLogger.info('✅ Revisa la implementación según el modelo de negocio');
+		noteLogger.info('✅ Imagen eliminada de nota:', { noteId, imageId });
 		await revalidateAllPaths();
 	} catch (error) {
-		noteLogger.error('❌ Error:', error);
-		throw createNoteError('Operación no implementada correctamente', NoteErrorCode.OPERATION_FAILED, error);
+		noteLogger.error('❌ Error al eliminar imagen de nota:', error);
+		throw createNoteError('No se pudo eliminar la imagen de la nota', NoteErrorCode.OPERATION_FAILED, error);
 	}
 }

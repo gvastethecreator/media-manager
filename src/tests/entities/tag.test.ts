@@ -8,7 +8,7 @@ import {
   fromTagComplete,
   toTagComplete
 } from '../../transformers/tag/serializers';
-import { TagBase, TagComplete } from '../../types/entities/tag';
+import type { TagBase, TagComplete } from '../../types/entities/tag';
 
 describe('Tag Serializers', () => {
   const mockTagBase: TagBase = {

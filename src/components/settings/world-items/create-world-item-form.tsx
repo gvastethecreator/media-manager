@@ -24,7 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
-import { WorldItem } from '@/types/entities/world-item';
+import type { WorldItem } from '@/types/entities/world-item';
 import { RarityLevel, WorldItemCategory, WorldItemType } from '@/types/entities/world-item/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';

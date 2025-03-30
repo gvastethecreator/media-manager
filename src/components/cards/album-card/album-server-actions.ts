@@ -1,10 +1,299 @@
 'use server';
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
+import { db } from '@/lib/db';
+import type { Album } from '@/types/entities/album';
 
-// Logger específico para acciones de AlbumCard
-const albumCardLogger = serverLogger.withContext('AlbumCardActions');
+export interface AlbumCardData extends Album {
+	_count: {
+		images: number;
+		videos: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
+	recentImages?: string[];
+	recentVideos?: string[];
+	totalSize?: number; // Tamaño total de los archivos
+	filters?: any[]; // Representación JSON de filters
+	metadata?: {
+		itemCount?: number;
+		imageCount?: number;
+		videoCount?: number;
+		coverImageUrl?: string;
+		thumbnailUrls?: string[];
+		lastModified?: Date | string;
+	};
+	viewConfig?: {
+		theme?: string;
+		layout?: string;
+		thumbnailSize?: 'small' | 'medium' | 'large';
+	};
+}
+
+/**
+ * Obtiene los datos de un álbum para mostrar en una tarjeta
+ */
+export async function getAlbumCardData(
+	albumId: string
+): Promise<AlbumCardData> {
+	const prisma = db.getClient();
+
+	const album = await prisma.album.findUnique({
+		where: {
+			id: albumId,
+		},
+		include: {
+			_count: {
+				select: {
+					images: true,
+					videos: true,
+					collections: true,
+					tags: true,
+					characters: true,
+					places: true,
+					worldItems: true,
+					concepts: true,
+					prompts: true,
+					notes: true,
+					wildcards: true,
+					properties: true,
+					groups: true,
+				},
+			},
+		},
+	});
+
+	if (!album) {
+		throw new Error(`Álbum no encontrado: ${albumId}`);
+	}
+
+	// Obtener imágenes recientes relacionadas con este álbum
+	const recentImages = await prisma.image.findMany({
+		where: {
+			albums: {
+				some: {
+					id: albumId,
+				},
+			},
+		},
+		select: {
+			id: true,
+			path: true,
+			thumbnailWidth: true,
+			thumbnailHeight: true,
+		},
+		orderBy: {
+			updatedAt: 'desc',
+		},
+		take: 6,
+	});
+
+	const recentImagePaths = recentImages.map((img: { id: string }) => {
+		// Convertir la ruta del sistema a una URL para el navegador
+		const imagePath = `/api/thumbnails/${img.id}`;
+		return imagePath;
+	});
+
+	// Obtener videos recientes relacionados con este álbum
+	const recentVideos = await prisma.video.findMany({
+		where: {
+			albums: {
+				some: {
+					id: albumId,
+				},
+			},
+		},
+		select: {
+			id: true,
+			path: true,
+			thumbnailWidth: true,
+			thumbnailHeight: true,
+		},
+		orderBy: {
+			updatedAt: 'desc',
+		},
+		take: 3,
+	});
+
+	const recentVideoPaths = recentVideos.map((video: { id: string }) => {
+		// Convertir la ruta del sistema a una URL para el navegador
+		const videoPath = `/api/video-thumbnails/${video.id}`;
+		return videoPath;
+	});
+
+	// Intentar parsear el campo filters si existe
+	let filters = [];
+	if (typeof album.filters === 'string' && album.filters !== 'empty_array') {
+		try {
+			filters = JSON.parse(album.filters);
+		} catch (e) {
+			console.error('Error parsing album filters:', e);
+		}
+	}
+
+	// Calcular el tamaño total de las imágenes y videos en el álbum
+	const { totalSize, imageCount, videoCount, entitiesCount } = await getAlbumStats(albumId);
+
+	// Crear objeto de metadata
+	const metadata = {
+		itemCount: imageCount + videoCount,
+		imageCount,
+		videoCount,
+		lastModified: album.updatedAt,
+		coverImageUrl: album.featuredImage ? `/api/images/${album.featuredImage}` : null,
+		thumbnailUrls: recentImagePaths.slice(0, 3),
+		entitiesCount
+	};
+
+	// Crear viewConfig básico
+	const viewConfig = {
+		theme: album.theme || 'default',
+		layout: album.layout || 'grid',
+		thumbnailSize: (album.thumbnailSize as 'small' | 'medium' | 'large') || 'medium'
+	};
+
+	return {
+		...album,
+		recentImages: recentImagePaths,
+		recentVideos: recentVideoPaths,
+		totalSize,
+		filters,
+		metadata,
+		viewConfig
+	};
+}
+
+/**
+ * Obtiene una lista de álbumes para mostrar en una galería de tarjetas
+ */
+export async function getAlbumsForCards(options: {
+	limit?: number;
+	category?: string;
+	searchTerm?: string;
+	orderBy?: 'name' | 'updatedAt' | 'createdAt';
+	orderDir?: 'asc' | 'desc';
+	isFavorite?: boolean;
+	includeStats?: boolean;
+}) {
+	const {
+		limit = 20,
+		category,
+		searchTerm,
+		orderBy = 'updatedAt',
+		orderDir = 'desc',
+		isFavorite,
+		includeStats = false,
+	} = options;
+
+	const prisma = db.getClient();
+
+	// Construir la consulta base
+	const albums = await prisma.album.findMany({
+		where: {
+			...(category ? { category } : {}),
+			...(isFavorite !== undefined ? { isFavorite } : {}),
+			...(searchTerm
+				? {
+						OR: [
+							{ name: { contains: searchTerm } },
+							{ description: { contains: searchTerm } },
+						],
+				  }
+				: {}),
+		},
+		include: {
+			_count: {
+				select: {
+					images: true,
+					videos: true,
+					collections: true,
+					tags: true,
+					characters: true,
+					places: true,
+					worldItems: true,
+					concepts: true,
+					prompts: true,
+					notes: true,
+					wildcards: true,
+					properties: true,
+					groups: true,
+				},
+			},
+		},
+		orderBy: {
+			[orderBy]: orderDir,
+		},
+		take: limit,
+	});
+
+	// Si se solicitan estadísticas adicionales, cargarlas para cada álbum
+	if (includeStats) {
+		const albumsWithStats = await Promise.all(
+			albums.map(async (album) => {
+				const { totalSize, imageCount, videoCount, entitiesCount } = await getAlbumStats(album.id);
+
+				// Obtener algunas imágenes y videos recientes para mostrar en la tarjeta
+				const recentMedia = await getRecentAlbumMedia(album.id, 4);
+				const recentImagePaths = recentMedia
+					.filter(media => !media.isVideo)
+					.map(media => media.thumbnailUrl);
+				const recentVideoPaths = recentMedia
+					.filter(media => media.isVideo)
+					.map(media => media.thumbnailUrl);
+
+				// Crear objeto de metadata
+				const metadata = {
+					itemCount: imageCount + videoCount,
+					imageCount,
+					videoCount,
+					entitiesCount,
+					lastModified: album.updatedAt,
+					coverImageUrl: album.featuredImage ? `/api/images/${album.featuredImage}` : null,
+					thumbnailUrls: recentImagePaths.slice(0, 3),
+				};
+
+				// Parsear filtros si es necesario
+				let filters = [];
+				if (typeof album.filters === 'string' && album.filters !== 'empty_array') {
+					try {
+						filters = JSON.parse(album.filters);
+					} catch (e) {
+						console.error('Error parsing album filters for album:', album.id, e);
+					}
+				}
+
+				// Crear viewConfig
+				const viewConfig = {
+					theme: album.theme || 'default',
+					layout: album.layout || 'grid',
+					thumbnailSize: (album.thumbnailSize as 'small' | 'medium' | 'large') || 'medium'
+				};
+
+				return {
+					...album,
+					recentImages: recentImagePaths,
+					recentVideos: recentVideoPaths,
+					totalSize,
+					filters,
+					metadata,
+					viewConfig
+				};
+			})
+		);
+
+		return albumsWithStats;
+	}
+
+	return albums;
+}
 
 // Interfaz para las imágenes thumbnail
 interface ThumbnailImage {
@@ -12,118 +301,293 @@ interface ThumbnailImage {
 	name?: string | null;
 	thumbnailUrl: string;
 	url?: string;
+	isVideo?: boolean;
 }
 
 /**
- * Obtiene las imágenes recientes de un álbum para mostrar en la tarjeta
- * @param albumId ID del álbum
- * @param limit Número máximo de imágenes a obtener (por defecto 6)
- * @returns Array de imágenes con sus thumbnails
+ * Obtiene las imágenes y videos recientes de un álbum para mostrar en la tarjeta
  */
-export async function getRecentAlbumImages(albumId: string, limit = 6): Promise<ThumbnailImage[]> {
-	try {
-		albumCardLogger.info('🖼️ Obteniendo imágenes recientes para AlbumCard:', albumId);
+export async function getRecentAlbumMedia(albumId: string, limit = 6): Promise<ThumbnailImage[]> {
+	const prisma = db.getClient();
 
-		// Verificar que el ID es válido
-		if (!albumId) {
-			throw new Error('ID de álbum no proporcionado');
-		}
-
-		// Obtener imágenes recientes del álbum
-		const images = await prisma.image.findMany({
-			where: {
-				albums: {
-					some: {
-						id: albumId,
-					},
+	// Cargar imágenes recientes
+	const recentImages = await prisma.image.findMany({
+		where: {
+			albums: {
+				some: {
+					id: albumId,
 				},
-				thumbnail: { not: null }, // Solo imágenes con thumbnail
 			},
-			select: {
-				id: true,
-				name: true,
-				thumbnail: true,
-				thumbnailWidth: true,
-				thumbnailHeight: true,
-				thumbnailSize: true,
+		},
+		select: {
+			id: true,
+			name: true,
+			path: true,
+		},
+		orderBy: {
+			updatedAt: 'desc',
+		},
+		take: Math.ceil(limit / 2),
+	});
+
+	// Cargar videos recientes
+	const recentVideos = await prisma.video.findMany({
+		where: {
+			albums: {
+				some: {
+					id: albumId,
+				},
 			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ createdAt: 'desc' },
-			],
-			take: limit,
-		});
+		},
+		select: {
+			id: true,
+			name: true,
+			path: true,
+		},
+		orderBy: {
+			updatedAt: 'desc',
+		},
+		take: Math.floor(limit / 2),
+	});
 
-		// Convertir los thumbnails a URLs de datos
-		const thumbnails: ThumbnailImage[] = images.map(image => {
-			let thumbnailUrl = '';
+	// Combinar y formatear los resultados
+	const imageResults: ThumbnailImage[] = recentImages.map(img => ({
+		id: img.id,
+		name: img.name,
+		thumbnailUrl: `/api/thumbnails/${img.id}`,
+		url: `/api/images/${img.id}`,
+		isVideo: false
+	}));
 
-			// Verificar si tenemos un thumbnail válido
-			if (image.thumbnail && image.thumbnailSize && image.thumbnailSize < 100000) {
-				thumbnailUrl = `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`;
-			}
+	const videoResults: ThumbnailImage[] = recentVideos.map(video => ({
+		id: video.id,
+		name: video.name,
+		thumbnailUrl: `/api/video-thumbnails/${video.id}`,
+		url: `/api/videos/${video.id}`,
+		isVideo: true
+	}));
 
-			return {
-				id: image.id,
-				name: image.name,
-				thumbnailUrl,
-				url: `/image/${image.id}`,
-			};
-		});
-
-		albumCardLogger.info('✅ Imágenes obtenidas para AlbumCard:', thumbnails.length);
-		return thumbnails;
-	} catch (error) {
-		albumCardLogger.error('❌ Error obteniendo imágenes para AlbumCard:', error);
-		throw new Error(`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`);
-	}
+	// Combinar y ordenar por ID (como proxy de fecha)
+	return [...imageResults, ...videoResults]
+		.sort((a, b) => a.id > b.id ? -1 : 1)
+		.slice(0, limit);
 }
 
 /**
- * Obtiene las estadísticas de un álbum
- * @param albumId ID del álbum
- * @returns Estadísticas del álbum
+ * Obtiene estadísticas de un álbum: conteos y tamaño total
  */
-export async function getAlbumStats(albumId: string): Promise<{ imageCount: number; totalSize: number }> {
-	try {
-		albumCardLogger.info('📊 Obteniendo estadísticas para AlbumCard:', albumId);
+export async function getAlbumStats(albumId: string): Promise<{
+	imageCount: number;
+	videoCount: number;
+	totalSize: number;
+	entitiesCount: number;
+}> {
+	const prisma = db.getClient();
 
-		// Verificar que el ID es válido
-		if (!albumId) {
-			throw new Error('ID de álbum no proporcionado');
-		}
-
-		// Contar las imágenes del álbum
-		const imageCount = await prisma.image.count({
-			where: {
-				albums: {
-					some: {
-						id: albumId,
-					},
+	// Obtener conteo de imágenes
+	const imageCountResult = await prisma.image.count({
+		where: {
+			albums: {
+				some: {
+					id: albumId,
 				},
 			},
-		});
+		},
+	});
 
-		// Obtener el tamaño total de las imágenes del álbum
-		const images = await prisma.image.findMany({
-			where: {
-				albums: {
-					some: {
-						id: albumId,
-					},
+	// Obtener conteo de videos
+	const videoCountResult = await prisma.video.count({
+		where: {
+			albums: {
+				some: {
+					id: albumId,
 				},
 			},
-			select: {
-				size: true,
+		},
+	});
+
+	// Obtener tamaño total sumando los tamaños de imágenes y videos
+	const imageSizeResult = await prisma.image.aggregate({
+		where: {
+			albums: {
+				some: {
+					id: albumId,
+				},
 			},
-		});
+		},
+		_sum: {
+			size: true,
+		},
+	});
 
-		const totalSize = images.reduce((total, image) => total + (image.size || 0), 0);
+	const videoSizeResult = await prisma.video.aggregate({
+		where: {
+			albums: {
+				some: {
+					id: albumId,
+				},
+			},
+		},
+		_sum: {
+			size: true,
+		},
+	});
 
-		albumCardLogger.info('✅ Estadísticas obtenidas para AlbumCard');
-		return { imageCount, totalSize };
-	} catch (error) {
-		albumCardLogger.error('❌ Error obteniendo estadísticas para AlbumCard:', error);
-		throw new Error(`No se pudieron obtener las estadísticas: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+	// Calcular el tamaño total
+	const totalImageSize = imageSizeResult._sum.size || 0;
+	const totalVideoSize = videoSizeResult._sum.size || 0;
+	const totalSize = totalImageSize + totalVideoSize;
+
+	// Contar todas las entidades relacionadas
+	const album = await prisma.album.findUnique({
+		where: {
+			id: albumId,
+		},
+		include: {
+			_count: {
+				select: {
+					collections: true,
+					tags: true,
+					characters: true,
+					places: true,
+					worldItems: true,
+					concepts: true,
+					prompts: true,
+					notes: true,
+					wildcards: true,
+					properties: true,
+					groups: true,
+				},
+			},
+		},
+	});
+
+	const entitiesCount = album?._count ? (
+		(album._count.collections || 0) +
+		(album._count.tags || 0) +
+		(album._count.characters || 0) +
+		(album._count.places || 0) +
+		(album._count.worldItems || 0) +
+		(album._count.concepts || 0) +
+		(album._count.prompts || 0) +
+		(album._count.notes || 0) +
+		(album._count.wildcards || 0) +
+		(album._count.properties || 0) +
+		(album._count.groups || 0)
+	) : 0;
+
+	return {
+		imageCount: imageCountResult,
+		videoCount: videoCountResult,
+		totalSize,
+		entitiesCount,
+	};
+}
+
+/**
+ * Busca álbumes con opciones de filtrado avanzadas
+ */
+export async function searchAlbums(options: {
+	searchTerm: string;
+	limit?: number;
+	offset?: number;
+	category?: string;
+	orderBy?: 'name' | 'updatedAt' | 'createdAt';
+	orderDir?: 'asc' | 'desc';
+	includeHidden?: boolean;
+	includeStats?: boolean;
+}) {
+	const {
+		searchTerm,
+		limit = 20,
+		offset = 0,
+		category,
+		orderBy = 'updatedAt',
+		orderDir = 'desc',
+		includeHidden = false,
+		includeStats = false,
+	} = options;
+
+	const prisma = db.getClient();
+
+	// Construir filtros
+	const whereClause: any = {
+		...(category ? { category } : {}),
+		...(includeHidden ? {} : { isHidden: false }),
+		...(searchTerm
+			? {
+					OR: [
+						{ name: { contains: searchTerm } },
+						{ description: { contains: searchTerm } },
+						{ category: { contains: searchTerm } },
+						{ shortcut: { contains: searchTerm } },
+					],
+			  }
+			: {}),
+	};
+
+	// Consulta de álbumes
+	const albums = await prisma.album.findMany({
+		where: whereClause,
+		include: {
+			_count: {
+				select: {
+					images: true,
+					videos: true,
+					collections: true,
+					tags: true,
+					characters: true,
+					places: true,
+					worldItems: true,
+					concepts: true,
+					prompts: true,
+					notes: true,
+					wildcards: true,
+					properties: true,
+					groups: true,
+				},
+			},
+		},
+		orderBy: {
+			[orderBy]: orderDir,
+		},
+		skip: offset,
+		take: limit,
+	});
+
+	// Obtener el conteo total para paginación
+	const totalCount = await prisma.album.count({
+		where: whereClause,
+	});
+
+	// Agregar estadísticas si se solicitan
+	if (includeStats) {
+		const albumsWithStats = await Promise.all(
+			albums.map(async (album) => {
+				const stats = await getAlbumStats(album.id);
+
+				// Obtener algunas imágenes y videos recientes para mostrar en la tarjeta
+				const recentMedia = await getRecentAlbumMedia(album.id, 4);
+
+				// Simplificar respuesta para reducir tamaño
+				return {
+					...album,
+					stats,
+					recentMedia,
+				};
+			})
+		);
+
+		return {
+			albums: albumsWithStats,
+			totalCount,
+			hasMore: offset + albums.length < totalCount,
+		};
 	}
+
+	return {
+		albums,
+		totalCount,
+		hasMore: offset + albums.length < totalCount,
+	};
 }

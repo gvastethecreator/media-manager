@@ -3,11 +3,7 @@
  * @module types/entities/tag
  */
 
-export * from './enums';
-export * from './extended';
-export * from './types';
-
-// Reexportar enums explícitamente para evitar problemas de importación
+// Exportar enums
 export {
   TagCategory,
   TagRarity,
@@ -15,17 +11,21 @@ export {
   TagViewMode
 } from './enums';
 
-// Reexportar tipos explícitamente
+// Exportar tipos base
 export type {
-  CreateTagData,
-  RelatedTag,
-  TagBase,
-  // Nuevos tipos extendidos
-  TagComplete, TagExtended, TagFilters,
-  TagImageRelationResponse, TagWithRelations, TagWithRelationsComplete, TagWithRelationsExtended, TagWithStats,
-  UpdateTagData
+  CreateTagData, RelatedTag, TagBase, TagFilters, TagImageRelationResponse, TagWithRelations, UpdateTagData
 } from './types';
 
-// Alias común para el tipo principal - usando el tipo extendido para mantener consistencia
-export type { TagWithRelationsExtended as Tag } from './extended';
+// Exportar validaciones
+export {
+  tagFilterSchema, tagSchema
+} from './types';
+
+export type {
+  TagFilter,
+  TagValidated
+} from './types';
+
+// Tipo principal recomendado para uso general
+export type { TagWithRelations as Tag } from './types';
 

@@ -1,103 +1,106 @@
-import { formatDistanceToNow } from 'date-fns';
+'use client';
+
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, Clock, Code, Image as ImageIcon, MessageSquare, Star } from 'lucide-react';
+import { Calendar, Image, Tag, Video } from 'lucide-react';
 
 interface PromptCardFooterProps {
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	imagesCount?: number;
-	conceptsCount?: number;
-	isFavorite?: boolean;
-	category?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	imagesCount: number;
+	videosCount: number;
+	tagsCount: number;
 	primaryColor: string;
-	secondaryColor: string;
+	secondaryColor?: string;
+	tcgMode?: boolean;
 }
 
 /**
- * Componente para el pie de una tarjeta de prompt.
- * Similar a la parte inferior de una carta Magic con el tipo, artista y copyright.
+ * Pie de carta para Prompt, con información de fechas y contadores
  */
 export function PromptCardFooter({
 	createdAt,
 	updatedAt,
-	imagesCount = 0,
-	conceptsCount = 0,
-	isFavorite = false,
-	category = 'Prompt',
+	imagesCount,
+	videosCount,
+	tagsCount,
 	primaryColor,
-	secondaryColor
+	secondaryColor,
+	tcgMode = true
 }: PromptCardFooterProps) {
-	// Convertir fechas a objetos Date si son strings
-	const createdAtDate = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
-	const updatedAtDate = typeof updatedAt === 'string' ? new Date(updatedAt) : updatedAt;
+	const formattedDate = format(new Date(updatedAt), 'dd/MM/yyyy', { locale: es });
+	const daysSinceUpdate = Math.floor(
+		(new Date().getTime() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24)
+	);
 
-	// Calcular tiempo relativo
-	const createdTimeAgo = formatDistanceToNow(createdAtDate, {
-		addSuffix: true,
-		locale: es
-	});
-	const updatedTimeAgo = formatDistanceToNow(updatedAtDate, {
-		addSuffix: true,
-		locale: es
-	});
+	const isRecent = daysSinceUpdate < 7;
+
+	// Color estilizado para el footer
+	const borderColor = `${primaryColor}40`;
+	const bgColor = tcgMode
+		? `linear-gradient(to top, ${primaryColor}20, transparent)`
+		: undefined;
 
 	return (
 		<div
-			className="px-3 py-2 text-xs text-white/80"
+			className={cn(
+				'mt-auto py-2 px-3 text-xs flex items-center justify-between text-muted-foreground',
+				tcgMode && 'rounded-b-lg'
+			)}
 			style={{
-				background: `linear-gradient(to top, ${secondaryColor}90, ${secondaryColor}60)`,
-				borderTop: `1px solid ${primaryColor}40`
+				borderTop: `1px solid ${borderColor}`,
+				background: bgColor
 			}}
 		>
-			<div className="flex justify-between items-center mb-1.5">
-				{/* Categoría del prompt */}
-				<div className="flex items-center">
-					<Code size={14} className="mr-1.5 opacity-80" />
-					<span className="uppercase tracking-wide font-medium">
-						{category}
+			{/* Fecha de actualización */}
+			<div className="flex items-center gap-1">
+				<Calendar className="h-3.5 w-3.5" />
+				<span>{formattedDate}</span>
+				{isRecent && (
+					<span
+						className="text-[0.65rem] px-1 rounded-full"
+						style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}
+					>
+						{daysSinceUpdate === 0 ? 'Hoy' : `${daysSinceUpdate}d`}
 					</span>
-				</div>
-
-				{/* Contador de imágenes, conceptos y favorito */}
-				<div className="flex items-center space-x-2">
-					{/* Indicador de favorito */}
-					{isFavorite && (
-						<Star
-							size={14}
-							className="fill-yellow-400 text-yellow-400"
-							aria-label="Favorito"
-						/>
-					)}
-
-					{/* Contador de conceptos relacionados */}
-					<div className="flex items-center">
-						<MessageSquare size={14} className="mr-1 opacity-80" />
-						<span>{conceptsCount}</span>
-					</div>
-
-					{/* Contador de imágenes */}
-					<div className="flex items-center">
-						<ImageIcon size={14} className="mr-1 opacity-80" />
-						<span>{imagesCount}</span>
-					</div>
-				</div>
+				)}
 			</div>
 
-			{/* Fechas de creación y modificación */}
-			<div className="flex justify-between text-[0.65rem] text-white/60">
-				<div className="flex items-center">
-					<Calendar size={12} className="mr-1" />
-					<span title={`Creado: ${createdAtDate.toLocaleString()}`}>
-						{createdTimeAgo}
-					</span>
+			{/* Contadores de contenido */}
+			<div className="flex items-center gap-2">
+				{/* Contador de imágenes */}
+				<div className="flex items-center gap-1">
+					<Image className="h-3.5 w-3.5" />
+					<span>{imagesCount}</span>
 				</div>
-				<div className="flex items-center">
-					<Clock size={12} className="mr-1" />
-					<span title={`Actualizado: ${updatedAtDate.toLocaleString()}`}>
-						{updatedTimeAgo}
-					</span>
-				</div>
+
+				{/* Contador de vídeos */}
+				{videosCount > 0 && (
+					<div className="flex items-center gap-1">
+						<Video className="h-3.5 w-3.5" />
+						<span>{videosCount}</span>
+					</div>
+				)}
+
+				{/* Contador de etiquetas */}
+				{tagsCount > 0 && (
+					<div className="flex items-center gap-1">
+						<Tag className="h-3.5 w-3.5" />
+						<span>{tagsCount}</span>
+					</div>
+				)}
 			</div>
+
+			{/* Sello TCG en la esquina inferior */}
+			{tcgMode && (
+				<div
+					className="absolute bottom-1 right-1 text-[0.6rem] font-mono opacity-60"
+					style={{ color: primaryColor }}
+				>
+					P{String(createdAt.getTime()).slice(-4)}
+				</div>
+			)}
 		</div>
 	);
 }

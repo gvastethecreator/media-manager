@@ -1,110 +1,77 @@
+'use client';
+
 import { cn } from '@/lib/utils';
-import { BookOpen, Star } from 'lucide-react';
+import type { Album } from '@/types/entities/album';
+import { Heart } from 'lucide-react';
 
 interface AlbumCardHeaderProps {
-	name: string;
-	emoji: string;
-	color: string;
-	category?: string | null;
-	rarity?: string | null;
+	album: Album;
+	primaryColor: string;
+	compact?: boolean;
 }
 
 /**
- * Componente para el encabezado de la tarjeta de álbum.
- * Similar a la parte superior de una carta Magic con el nombre y tipo de carta.
+ * Cabecera para la tarjeta de álbum con nombre, emoji y categoría
  */
-export function AlbumCardHeader({
-	name,
-	emoji,
-	color,
-	category,
-	rarity
-}: AlbumCardHeaderProps) {
+export function AlbumCardHeader({ album, primaryColor, compact = false }: AlbumCardHeaderProps) {
+	const { name, emoji, category, isFavorite } = album;
+
 	return (
-		<div className="relative">
-			{/* Fondo del título con gradiente de color */}
-			<div
-				className="h-14 pt-2.5 px-3.5 flex items-center"
-				style={{
-					background: `linear-gradient(90deg, ${color}90, ${color}60)`,
-					borderBottom: `1px solid ${color}`
-				}}
-			>
-				{/* Parte izquierda: Emoji y nombre */}
-				<div className="flex items-center space-x-2 flex-1">
-					{/* Emoji (como símbolo de maná en Magic) */}
-					<span className="text-xl flex-shrink-0 bg-white/20 rounded-full w-8 h-8 flex items-center justify-center">
-						{emoji}
-					</span>
-
-					{/* Nombre del álbum (como título de la carta) */}
-					<h3
-						className={cn(
-							"font-bold text-lg tracking-tight truncate",
-							"text-white drop-shadow-sm"
-						)}
-					>
-						{name}
-					</h3>
+		<header
+			className={cn(
+				"relative px-3 py-2 flex items-center gap-3 z-20",
+				compact ? "pb-1" : "border-b border-white/10"
+			)}
+		>
+			{/* Emoji o imagen del álbum */}
+			{emoji && (
+				<div
+					className={cn(
+						"flex-shrink-0 flex items-center justify-center bg-background/20 rounded-full overflow-hidden",
+						compact ? "w-8 h-8" : "w-10 h-10"
+					)}
+					style={{ backgroundColor: `${primaryColor}40` }}
+				>
+					<span className={cn("text-2xl", compact && "text-xl")}>{emoji}</span>
 				</div>
+			)}
 
-				{/* Parte derecha: Rareza (similar a coste de maná en Magic) */}
-				{rarity && (
-					<div className="flex-shrink-0 flex items-center">
-						<span
-							className="px-2 py-0.5 text-xs uppercase tracking-wide rounded flex items-center gap-1"
-							style={{
-								background: getRarityColor(rarity),
-								boxShadow: `0 0 5px ${getRarityColor(rarity)}`
-							}}
-						>
-							<Star className="w-3 h-3 stroke-[2.5px]" />
-							{rarity}
-						</span>
-					</div>
+			{/* Texto y categoría */}
+			<div className="flex-1 overflow-hidden">
+				<h3
+					className={cn(
+						"font-bold text-foreground truncate",
+						compact ? "text-sm" : "text-base"
+					)}
+				>
+					{name}
+				</h3>
+				{category && !compact && (
+					<p className="text-xs text-muted-foreground truncate">
+						{category}
+					</p>
 				)}
 			</div>
 
-			{/* Tipo de la carta - similar a la línea de tipo en Magic */}
-			<div
-				className="text-xs text-white px-3.5 py-1.5 bg-black/40 border-y border-y-white/20 flex justify-between items-center"
-				style={{
-					borderBottom: `1px solid ${color}50`
-				}}
-			>
-				<span className="font-semibold tracking-wide flex items-center gap-1">
-					ÁLBUM {category && (
-						<>
-							<span className="mx-0.5">•</span>
-							<BookOpen className="w-3 h-3 inline mr-0.5" />
-							{category.toUpperCase()}
-						</>
-					)}
-				</span>
-				<span className="opacity-80 text-xs">ID: {name.substring(0, 5).toUpperCase()}</span>
-			</div>
-		</div>
-	);
-}
+			{/* Indicador de favorito */}
+			{isFavorite && (
+				<div className="flex-shrink-0">
+					<Heart className="h-4 w-4 text-destructive fill-destructive" aria-label="Favorito" />
+				</div>
+			)}
 
-/**
- * Función auxiliar para obtener un color basado en la rareza
- */
-function getRarityColor(rarity: string): string {
-	switch (rarity.toLowerCase()) {
-		case 'common':
-			return 'rgba(169, 169, 169, 0.7)'; // Gris
-		case 'uncommon':
-			return 'rgba(88, 186, 124, 0.7)'; // Verde
-		case 'rare':
-			return 'rgba(71, 119, 194, 0.7)'; // Azul
-		case 'mythic':
-			return 'rgba(207, 111, 36, 0.7)'; // Naranja
-		case 'legendary':
-			return 'rgba(165, 66, 153, 0.7)'; // Púrpura
-		case 'exclusive':
-			return 'rgba(212, 175, 55, 0.7)'; // Dorado
-		default:
-			return 'rgba(169, 169, 169, 0.7)'; // Gris por defecto
-	}
+			{/* Sello de rareza holográfico cuando es favorito */}
+			{isFavorite && (
+				<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
+					<div className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+						style={{
+							background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
+							backgroundSize: '600% 600%',
+							animation: 'shine 3s linear infinite'
+						}}
+					/>
+				</div>
+			)}
+		</header>
+	);
 }

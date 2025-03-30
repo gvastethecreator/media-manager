@@ -11,9 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
 import { generateTagColor, generateTagEmoji } from '@/transformers/tag/serializers';
-import { TagUpdate } from '@/types/entities/tag';
+import type { TagUpdate } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag/enums';
-import { Tag as UITag } from '@/types/entities/tag/types';
+import type { Tag as UITag } from '@/types/entities/tag/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';

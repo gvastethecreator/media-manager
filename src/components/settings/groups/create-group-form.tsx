@@ -1,20 +1,7 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-
-import { CategoryPicker } from '@/components/forms/category-picker';
 import { Button } from '@/components/ui/button';
-import {
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ColorPicker } from '@/components/ui/color-picker';
-import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
 	Form,
 	FormControl,
@@ -24,7 +11,6 @@ import {
 	FormLabel,
 	FormMessage,
 } from '@/components/ui/form';
-import { ImagePicker } from '@/components/ui/image-picker';
 import { Input } from '@/components/ui/input';
 import {
 	Select,
@@ -33,8 +19,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import type { Group } from '@prisma/client';
-import { XIcon } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import type { GroupBase } from '@/types/entities/group/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 // Esquema de validación para el formulario
 const groupFormSchema = z.object({
@@ -55,7 +45,7 @@ const groupFormSchema = z.object({
 type FormData = z.infer<typeof groupFormSchema>;
 
 interface CreateGroupFormProps {
-	group?: Group;
+	group?: GroupBase;
 	onSubmit: (data: FormData) => void;
 	onCancel: () => void;
 }
@@ -89,21 +79,12 @@ export function CreateGroupForm({
 					<CardTitle className="text-xl font-bold">
 						{group ? 'Editar' : 'Nuevo'} Grupo
 					</CardTitle>
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={onCancel}
-						title="Cerrar"
-					>
-						<XIcon className="h-4 w-4" />
-					</Button>
 				</div>
 			</CardHeader>
 
-			<Form {...form}>
-				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-					<CardContent className="space-y-4 px-6">
-						{/* Nombre */}
+			<CardContent className="space-y-6 px-6">
+				<Form {...form}>
+					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField
 							control={form.control}
 							name="name"
@@ -111,14 +92,13 @@ export function CreateGroupForm({
 								<FormItem>
 									<FormLabel>Nombre</FormLabel>
 									<FormControl>
-										<Input {...field} placeholder="Nombre del grupo" />
+										<Input placeholder="Nombre del grupo" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
 
-						{/* Emoji y Color */}
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
 								control={form.control}
@@ -127,11 +107,9 @@ export function CreateGroupForm({
 									<FormItem>
 										<FormLabel>Emoji</FormLabel>
 										<FormControl>
-											<EmojiPicker
-												value={field.value}
-												onChange={field.onChange}
-											/>
+											<Input {...field} />
 										</FormControl>
+										<FormMessage />
 									</FormItem>
 								)}
 							/>
@@ -143,17 +121,17 @@ export function CreateGroupForm({
 									<FormItem>
 										<FormLabel>Color</FormLabel>
 										<FormControl>
-											<ColorPicker
-												value={field.value}
-												onChange={field.onChange}
-											/>
+											<div className="flex gap-2">
+												<Input type="color" {...field} />
+												<Input {...field} />
+											</div>
 										</FormControl>
+										<FormMessage />
 									</FormItem>
 								)}
 							/>
 						</div>
 
-						{/* Descripción */}
 						<FormField
 							control={form.control}
 							name="description"
@@ -161,145 +139,85 @@ export function CreateGroupForm({
 								<FormItem>
 									<FormLabel>Descripción</FormLabel>
 									<FormControl>
-										<Input
+										<Textarea
+											placeholder="Descripción del grupo..."
+											className="resize-none"
 											{...field}
-											placeholder="Descripción del grupo"
 										/>
 									</FormControl>
+									<FormMessage />
 								</FormItem>
 							)}
 						/>
 
-						{/* Atajo */}
-						<FormField
-							control={form.control}
-							name="shortcut"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Atajo</FormLabel>
-									<FormControl>
-										<Input
-											{...field}
-											placeholder="Atajo de teclado (opcional)"
-										/>
-									</FormControl>
-								</FormItem>
-							)}
-						/>
-
-						{/* Categoría */}
-						<FormField
-							control={form.control}
-							name="category"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Categoría</FormLabel>
-									<FormControl>
-										<CategoryPicker
+						<div className="grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control}
+								name="category"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Categoría</FormLabel>
+										<Select
 											value={field.value}
-											onChange={field.onChange}
-										/>
-									</FormControl>
-								</FormItem>
-							)}
-						/>
+											onValueChange={field.onChange}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue placeholder="Seleccionar categoría" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												<SelectItem value="general">General</SelectItem>
+												<SelectItem value="technical">Técnico</SelectItem>
+												<SelectItem value="artistic">Artístico</SelectItem>
+												<SelectItem value="management">Gestión</SelectItem>
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 
-						{/* Ordenar por */}
-						<FormField
-							control={form.control}
-							name="sortBy"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Ordenar por</FormLabel>
-									<Select
-										value={field.value}
-										onValueChange={field.onChange}
-									>
+							<FormField
+								control={form.control}
+								name="shortcut"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Atajo</FormLabel>
 										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Selecciona un campo" />
-											</SelectTrigger>
+											<Input placeholder="Ctrl+G" {...field} />
 										</FormControl>
-										<SelectContent>
-											<SelectItem value="name">Nombre</SelectItem>
-											<SelectItem value="category">Categoría</SelectItem>
-											<SelectItem value="createdAt">Fecha de creación</SelectItem>
-										</SelectContent>
-									</Select>
-								</FormItem>
-							)}
-						/>
+										<FormDescription>
+											Opcional: teclas de atajo
+										</FormDescription>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
 
-						{/* Filtros */}
-						<FormField
-							control={form.control}
-							name="filters"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Filtros</FormLabel>
-									<Select
-										value={field.value}
-										onValueChange={field.onChange}
-									>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Selecciona un filtro" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											<SelectItem value="empty_array">Sin filtros</SelectItem>
-											<SelectItem value="favorites">Solo favoritos</SelectItem>
-											<SelectItem value="recent">Recientes</SelectItem>
-										</SelectContent>
-									</Select>
-								</FormItem>
-							)}
-						/>
-
-						{/* Imagen destacada */}
-						<FormField
-							control={form.control}
-							name="featuredImage"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Imagen destacada</FormLabel>
-									<FormControl>
-										<ImagePicker
-											value={field.value}
-											onChange={field.onChange}
-										/>
-									</FormControl>
-								</FormItem>
-							)}
-						/>
-
-						{/* Favorito */}
 						<FormField
 							control={form.control}
 							name="isFavorite"
 							render={({ field }) => (
-								<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+								<FormItem className="flex items-center justify-between rounded-lg border p-4">
+									<div className="space-y-0.5">
+										<FormLabel>Favorito</FormLabel>
+										<FormDescription>
+											Marcar este grupo como favorito
+										</FormDescription>
+									</div>
 									<FormControl>
-										<Checkbox
+										<Switch
 											checked={field.value}
 											onCheckedChange={field.onChange}
 										/>
 									</FormControl>
-									<div className="space-y-1 leading-none">
-										<FormLabel>
-											Marcar como favorito
-										</FormLabel>
-										<FormDescription>
-											Este grupo aparecerá en la lista de favoritos
-										</FormDescription>
-									</div>
 								</FormItem>
 							)}
 						/>
-					</CardContent>
 
-					<CardFooter className="px-6">
-						<div className="flex justify-end gap-4 w-full">
+						<div className="flex justify-end gap-4">
 							<Button
 								type="button"
 								variant="outline"
@@ -308,12 +226,12 @@ export function CreateGroupForm({
 								Cancelar
 							</Button>
 							<Button type="submit">
-								{group ? 'Guardar' : 'Crear'}
+								{group ? 'Actualizar' : 'Crear'} Grupo
 							</Button>
 						</div>
-					</CardFooter>
-				</form>
-			</Form>
+					</form>
+				</Form>
+			</CardContent>
 		</>
 	);
 }

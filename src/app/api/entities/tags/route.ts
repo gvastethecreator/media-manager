@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 const logger = serverLogger.withContext('TagsAPI');
 

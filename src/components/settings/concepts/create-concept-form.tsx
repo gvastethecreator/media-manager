@@ -24,7 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
-import { ConceptBase, ConceptExtended } from '@/types/entities/concept';
+import type { ConceptBase, ConceptExtended } from '@/types/entities/concept';
 import { ConceptCategory } from '@/types/entities/concept/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';

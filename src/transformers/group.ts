@@ -1,5 +1,5 @@
 import type { CreateGroupData, GroupFilters, UpdateGroupData } from '@/types/entities/group';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 export const mapGroupFiltersToPrisma = (filters: GroupFilters): { where: Prisma.GroupWhereInput } => {
 	const where: Prisma.GroupWhereInput = {};

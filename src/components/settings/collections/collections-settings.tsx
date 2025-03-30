@@ -1,6 +1,6 @@
 'use client';
 
-import { CollectionWithStats, deleteCollection, getCollections } from '@/app/actions/collections/collection.actions';
+import { type CollectionWithStats, deleteCollection, getCollections } from '@/app/actions/collections/collection.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import { CollectionBase as Collection } from '@/types/entities/collection/base';
+import type { CollectionBase as Collection } from '@/types/entities/collection/base';
 import { CollectionCategory } from '@/types/entities/collection/enums';
 import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';

@@ -1,37 +1,75 @@
-export interface EntityCount {
-	images?: number;
-}
+/**
+ * @file Tipos base para el store
+ * @module types/store
+ */
 
+import type { EntityId, JSONString } from './utils/types/utility-types';
+
+/**
+ * Interfaz base para todas las entidades
+ */
 export interface BaseEntity {
-	id: string;
-	name: string;
-	description?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-	_count?: EntityCount;
-	totalSize?: number;
+    id: EntityId;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
-export interface BaseStore<T extends BaseEntity> {
-	items: T[];
-	isLoading: boolean;
-	error: Error | null;
-	loadItems: () => Promise<void>;
-	createItem: (data: Partial<T>) => Promise<T>;
-	updateItem: (id: string, data: Partial<T>) => Promise<T>;
-	deleteItem: (id: string) => Promise<void>;
+/**
+ * Estado base para stores
+ */
+export interface BaseState<T extends BaseEntity = BaseEntity> {
+    items: Record<string, T>;
+    selectedIds: Set<string>;
+    activeId: string | null;
+    isLoading: boolean;
+    error: Error | null;
+    filters: JSONString<Record<string, unknown>>;
+    sortBy: string;
+    viewMode: string;
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+    };
 }
 
-export interface StatsData {
-	totalItems: number;
-	totalImages: number;
-	totalSize: number;
-	distribution: Array<{ name: string; count: number }>;
-	recentItems: Array<{
-		id: string;
-		name: string;
-		emoji?: string;
-		count: number;
-	}>;
-	lastUpdated?: Date;
+/**
+ * Acciones base para stores
+ */
+export interface BaseActions<T extends BaseEntity = BaseEntity> {
+    setItems: (items: T[]) => void;
+    addItem: (item: T) => void;
+    updateItem: (id: string, data: Partial<T>) => void;
+    removeItem: (id: string) => void;
+    selectItem: (id: string) => void;
+    deselectItem: (id: string) => void;
+    clearSelection: () => void;
+    setActiveItem: (id: string | null) => void;
+    setLoading: (isLoading: boolean) => void;
+    setError: (error: Error | null) => void;
+    setFilters: (filters: unknown) => void;
+    setSortBy: (sortBy: string) => void;
+    setViewMode: (mode: string) => void;
+    setPagination: (page: number, limit?: number) => void;
+}
+
+/**
+ * Store completo con estado y acciones
+ */
+export interface Store<T extends BaseEntity = BaseEntity> {
+    state: BaseState<T>;
+    actions: BaseActions<T>;
+}
+
+/**
+ * Opciones de configuración para stores
+ */
+export interface StoreOptions<T extends BaseEntity = BaseEntity> {
+    name: string;
+    initialState?: Partial<BaseState<T>>;
+    validators?: {
+        create?: (data: unknown) => boolean;
+        update?: (data: unknown) => boolean;
+        filters?: (filters: unknown) => boolean;
+    };
 }

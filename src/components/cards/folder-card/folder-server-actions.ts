@@ -1,7 +1,9 @@
 'use server';
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
+import prisma from '@/lib/prisma';
+import type { FolderExtendedComplete } from '@/types/entities/folder';
+import { notFound } from 'next/navigation';
 
 // Logger específico para acciones de FolderCard
 const folderCardLogger = serverLogger.withContext('FolderCardActions');
@@ -15,88 +17,169 @@ interface ThumbnailImage {
 }
 
 /**
- * Obtiene las imágenes recientes de una carpeta para mostrar en la tarjeta
- * @param folderId ID de la carpeta
- * @param limit Número máximo de imágenes a obtener (por defecto 6)
- * @returns Array de imágenes con sus thumbnails
+ * Obtiene las imágenes recientes de una carpeta especificada por su ID.
+ * @param folderId El ID de la carpeta de la que se quieren obtener las imágenes.
+ * @param limit El número máximo de imágenes a devolver.
+ * @returns Un array de objetos que representan las imágenes recientes con sus URL de miniatura.
  */
-export async function getRecentFolderImages(folderId: string, limit = 6): Promise<ThumbnailImage[]> {
+export async function getRecentFolderImages(folderId: string, limit = 4) {
 	try {
-		folderCardLogger.info('🖼️ Obteniendo imágenes recientes para FolderCard:', folderId);
+		// Verificar que la carpeta existe
+		const folder = await prisma.folder.findUnique({
+			where: { id: folderId },
+			select: { id: true }
+		});
 
-		// Verificar que el ID es válido
-		if (!folderId) {
-			throw new Error('ID de carpeta no proporcionado');
+		if (!folder) {
+			throw new Error('Folder not found');
 		}
 
-		// Obtener imágenes recientes de la carpeta
+		// Obtener las imágenes más recientes asociadas a esta carpeta
 		const images = await prisma.image.findMany({
 			where: {
-				folderId: folderId,
-				thumbnail: { not: null }, // Solo imágenes con thumbnail
+				folderId: folderId
 			},
+			orderBy: {
+				updatedAt: 'desc'
+			},
+			take: limit,
 			select: {
 				id: true,
-				name: true,
-				thumbnail: true,
-				thumbnailWidth: true,
-				thumbnailHeight: true,
-				thumbnailSize: true,
-			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ createdAt: 'desc' },
-			],
-			take: limit,
-		});
-
-		// Convertir los thumbnails a URLs de datos
-		const thumbnails: ThumbnailImage[] = images.map(image => {
-			let thumbnailUrl = '';
-
-			// Verificar si tenemos un thumbnail válido
-			if (image.thumbnail && image.thumbnailSize && image.thumbnailSize < 100000) {
-				thumbnailUrl = `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`;
+				thumbnailUrl: true
 			}
-
-			return {
-				id: image.id,
-				name: image.name,
-				thumbnailUrl,
-				url: `/dashboard/images/${image.id}`,
-			};
 		});
 
-		folderCardLogger.info('✅ Imágenes obtenidas para FolderCard:', thumbnails.length);
-		return thumbnails;
+		return images;
 	} catch (error) {
-		folderCardLogger.error('❌ Error obteniendo imágenes para FolderCard:', error);
-		throw new Error(`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		console.error('Error getting recent folder images:', error);
+		return [];
 	}
 }
 
 /**
- * Obtiene las estadísticas de una carpeta
- * @param folderId ID de la carpeta
- * @returns Estadísticas de la carpeta
+ * Obtiene estadísticas detalladas de una carpeta.
+ * @param folderId El ID de la carpeta de la que se quieren obtener las estadísticas.
+ * @returns Un objeto con las estadísticas de la carpeta o null si no se encuentra.
  */
-export async function getFolderStats(folderId: string): Promise<{ totalFiles: number; totalSize: number; subfolders: number }> {
+export async function getFolderStats(folderId: string) {
 	try {
-		folderCardLogger.info('📊 Obteniendo estadísticas para FolderCard:', folderId);
+		// Obtener información básica de la carpeta
+		const folder = await prisma.folder.findUnique({
+			where: { id: folderId },
+			select: {
+				id: true,
+				name: true,
+				description: true,
+				path: true,
+				emoji: true,
+				color: true,
+				featuredImage: true,
+				isFavorite: true,
+				totalFiles: true,
+				totalSize: true,
+				autoReindex: true,
+				lastIndexed: true,
+				createdAt: true,
+				updatedAt: true
+			}
+		});
+
+		if (!folder) {
+			return notFound();
+		}
+
+		// Contar subcarpetas
+		const childrenCount = await prisma.folder.count({
+			where: {
+				path: {
+					startsWith: `${folder.path}/`
+				}
+			}
+		});
+
+		// Obtener URLs de imágenes recientes para mostrar en la tarjeta
+		const recentImages = await prisma.image.findMany({
+			where: {
+				folderId: folderId
+			},
+			orderBy: {
+				updatedAt: 'desc'
+			},
+			take: 4,
+			select: {
+				thumbnailUrl: true
+			}
+		});
+
+		// Extraer solo las URLs de las imágenes
+		const imageUrls = recentImages.map(img => img.thumbnailUrl);
+
+		// Devolver la carpeta con estadísticas adicionales
+		return {
+			...folder,
+			childrenCount,
+			recentImageUrls: imageUrls
+		};
+	} catch (error) {
+		console.error('Error getting folder stats:', error);
+		return null;
+	}
+}
+
+/**
+ * Genera un color secundario basado en el color primario de la carpeta.
+ * Útil para crear gradientes y efectos visuales en las cartas de carpetas.
+ * @param primaryColor El color primario de la carpeta en formato hexadecimal.
+ * @returns Un color secundario derivado del primario.
+ */
+export async function generateSecondaryColor(primaryColor: string): Promise<string> {
+	// Validar el formato del color
+	if (!primaryColor || !/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(primaryColor)) {
+		return '#6366f1'; // Devolver un color predeterminado si el formato no es válido
+	}
+
+	// Convertir el color hexadecimal a componentes RGB
+	let r = Number.parseInt(primaryColor.slice(1, 3), 16);
+	let g = Number.parseInt(primaryColor.slice(3, 5), 16);
+	let b = Number.parseInt(primaryColor.slice(5, 7), 16);
+
+	// Aplicar un ajuste para crear un color secundario
+	// Método: Desplazar los componentes para crear un color complementario suave
+	r = (r + 30) % 255;
+	g = (g + 50) % 255;
+	b = (b + 70) % 255;
+
+	// Convertir de nuevo a formato hexadecimal
+	return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+/**
+ * Obtiene una carpeta completa con todas sus relaciones para la tarjeta
+ * @param folderId ID de la carpeta
+ * @returns Objeto completo de carpeta con relaciones
+ */
+export async function getFolderForCard(folderId: string): Promise<FolderExtendedComplete> {
+	try {
+		folderCardLogger.info('📁 Obteniendo carpeta completa para FolderCard:', folderId);
 
 		// Verificar que el ID es válido
 		if (!folderId) {
 			throw new Error('ID de carpeta no proporcionado');
 		}
 
-		// Obtener la carpeta con sus estadísticas
+		// Obtener la carpeta con todas sus relaciones relevantes
 		const folder = await prisma.folder.findUnique({
 			where: {
 				id: folderId,
 			},
-			select: {
-				totalFiles: true,
-				totalSize: true,
+			include: {
+				_count: {
+					select: {
+						children: true,
+						images: true,
+						videos: true,
+					},
+				},
 			},
 		});
 
@@ -104,21 +187,12 @@ export async function getFolderStats(folderId: string): Promise<{ totalFiles: nu
 			throw new Error(`Carpeta no encontrada: ${folderId}`);
 		}
 
-		// Contar subcarpetas
-		const subfolders = await prisma.folder.count({
-			where: {
-				parentId: folderId,
-			},
-		});
+		folderCardLogger.info('✅ Carpeta obtenida para FolderCard');
 
-		folderCardLogger.info('✅ Estadísticas obtenidas para FolderCard');
-		return {
-			totalFiles: folder.totalFiles,
-			totalSize: folder.totalSize,
-			subfolders,
-		};
+		// Convertir a tipo FolderExtendedComplete
+		return folder as unknown as FolderExtendedComplete;
 	} catch (error) {
-		folderCardLogger.error('❌ Error obteniendo estadísticas para FolderCard:', error);
-		throw new Error(`No se pudieron obtener las estadísticas: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		folderCardLogger.error('❌ Error obteniendo carpeta completa para FolderCard:', error);
+		throw new Error(`No se pudo obtener la carpeta: ${error instanceof Error ? error.message : 'Error desconocido'}`);
 	}
 }

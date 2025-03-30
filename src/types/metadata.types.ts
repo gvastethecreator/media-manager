@@ -1,109 +1,149 @@
-import type { AIGenerationInfo } from '@/lib/parsers';
+/**
+ * @file Tipos unificados para metadatos
+ * @module types/metadata
+ */
 
-export interface Dimensions {
-	width: number;
-	height: number;
+import { z } from 'zod';
+
+/**
+ * Metadatos base que comparten todas las entidades
+ */
+export interface BaseMetadata {
+    totalSize: number;
+    itemCount: number;
+    lastModified: Date;
+    customFields?: Record<string, unknown>;
 }
 
 /**
- * Interfaz para información GPS
+ * Metadatos de localización
  */
-export interface GPSData {
-	latitude?: number;
-	longitude?: number;
-	altitude?: number;
+export interface LocationMetadata {
+    name: string;
+    latitude: number;
+    longitude: number;
+    count: number;
 }
 
 /**
- * Interfaz para datos EXIF
+ * Metadatos específicos de archivos
  */
-export interface ExifData {
-	make?: string;
-	model?: string;
-	software?: string;
-	dateTime?: string | Date;
-	exposureTime?: string | number;
-	fNumber?: number;
-	iso?: number;
-	focalLength?: number;
-	lensModel?: string;
-	lens?: string; // Para compatibilidad
-	gps?: GPSData;
-	copyright?: string;
-	artist?: string;
-	description?: string;
-	// Otros campos EXIF relevantes
+export interface FileMetadata extends BaseMetadata {
+    format: string;
+    width?: number;
+    height?: number;
+    duration?: number;
+    fileSize: number;
+    mimeType: string;
+    encoding?: string;
+    hash?: string;
 }
 
 /**
- * Interfaz para datos IPTC
+ * Metadatos de IA
  */
-export interface IPTCData {
-	creator?: string[];
-	copyright?: string;
-	keywords?: string[];
-	headline?: string;
-	caption?: string;
-	source?: string;
-	// Otros campos IPTC relevantes
+export interface AIMetadata {
+    model?: string;
+    prompt?: string;
+    negativePrompt?: string;
+    seed?: number;
+    samplingSteps?: number;
+    cfgScale?: number;
+    samplingMethod?: string;
+    extraParameters?: Record<string, unknown>;
 }
 
 /**
- * Interfaz para datos XMP
+ * Metadatos EXIF
  */
-export interface XMPData {
-	creator?: string;
-	title?: string;
-	description?: string;
-	rights?: string;
-	subject?: string[];
-	rating?: number;
-	toolkit?: string;
-	rawData?: string | Record<string, unknown>;
+export interface ExifMetadata {
+    make?: string;
+    model?: string;
+    exposureTime?: string | number;
+    fNumber?: number;
+    iso?: number;
+    focalLength?: string | number;
+    lensModel?: string;
+    dateTimeOriginal?: string;
+    gpsLatitude?: number;
+    gpsLongitude?: number;
+    orientation?: number;
 }
 
 /**
- * Tipo para los parámetros de generación por IA
+ * Metadatos completos para imágenes/videos
  */
-export interface AIGenerationParams {
-	prompt?: string;
-	negative_prompt?: string;
-	seed?: number | string;
-	width?: number;
-	height?: number;
-	steps?: number;
-	cfg_scale?: number;
-	sampler?: string;
-	strength?: number;
-	model?: string;
-	[key: string]: string | number | boolean | undefined | null | string[] | number[]; // Para otros parámetros extra que puedan existir
+export interface MediaMetadata extends FileMetadata {
+    exif?: ExifMetadata;
+    iptc?: Record<string, unknown>;
+    xmp?: Record<string, unknown>;
+    icc?: Record<string, unknown>;
+    ai?: AIMetadata;
 }
 
-/**
- * Interfaz para la información de generación por IA
- */
-export interface AIGenerationMetadata {
-	type?: string;
-	model?: string;
-	prompt?: string;
-	negative_prompt?: string;
-	seed?: number | string;
-	extra_params?: AIGenerationParams;
-	raw_info?: string | Record<string, unknown>;
-}
+// Validadores Zod
+export const locationMetadataSchema = z.object({
+    name: z.string(),
+    latitude: z.number(),
+    longitude: z.number(),
+    count: z.number().int().min(1)
+});
 
-/**
- * Interfaz que representa los metadatos extraídos de un archivo
- */
-export interface FileMetadata {
-	dimensions?: Dimensions;
-	mimeType?: string;
-	fileSize?: number;
-	colorSpace?: string;
-	hasAlpha?: boolean;
-	isAnimated?: boolean;
-	exif?: ExifData;
-	iptc?: IPTCData;
-	xmp?: XMPData;
-	generation?: AIGenerationMetadata;
-}
+export const baseMetadataSchema = z.object({
+    totalSize: z.number().min(0),
+    itemCount: z.number().int().min(0),
+    lastModified: z.date(),
+    customFields: z.record(z.unknown()).optional()
+});
+
+export const fileMetadataSchema = baseMetadataSchema.extend({
+    format: z.string(),
+    width: z.number().int().positive().optional(),
+    height: z.number().int().positive().optional(),
+    duration: z.number().positive().optional(),
+    fileSize: z.number().positive(),
+    mimeType: z.string(),
+    encoding: z.string().optional(),
+    hash: z.string().optional()
+});
+
+export const aiMetadataSchema = z.object({
+    model: z.string().optional(),
+    prompt: z.string().optional(),
+    negativePrompt: z.string().optional(),
+    seed: z.number().int().optional(),
+    samplingSteps: z.number().int().positive().optional(),
+    cfgScale: z.number().positive().optional(),
+    samplingMethod: z.string().optional(),
+    extraParameters: z.record(z.unknown()).optional()
+});
+
+export const exifMetadataSchema = z.object({
+    make: z.string().optional(),
+    model: z.string().optional(),
+    exposureTime: z.union([z.string(), z.number()]).optional(),
+    fNumber: z.number().optional(),
+    iso: z.number().int().optional(),
+    focalLength: z.union([z.string(), z.number()]).optional(),
+    lensModel: z.string().optional(),
+    dateTimeOriginal: z.string().optional(),
+    gpsLatitude: z.number().optional(),
+    gpsLongitude: z.number().optional(),
+    orientation: z.number().int().min(1).max(8).optional()
+}).catchall(z.unknown());
+
+export const mediaMetadataSchema = fileMetadataSchema.extend({
+    exif: exifMetadataSchema.optional(),
+    iptc: z.record(z.unknown()).optional(),
+    xmp: z.record(z.unknown()).optional(),
+    icc: z.record(z.unknown()).optional(),
+    ai: aiMetadataSchema.optional()
+});
+
+// Tipos inferidos
+export type LocationMetadataValidated = z.infer<typeof locationMetadataSchema>;
+export type BaseMetadataValidated = z.infer<typeof baseMetadataSchema>;
+export type FileMetadataValidated = z.infer<typeof fileMetadataSchema>;
+export type AIMetadataValidated = z.infer<typeof aiMetadataSchema>;
+export type ExifMetadataValidated = z.infer<typeof exifMetadataSchema>;
+export type MediaMetadataValidated = z.infer<typeof mediaMetadataSchema>;

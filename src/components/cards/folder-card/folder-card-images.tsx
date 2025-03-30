@@ -1,121 +1,182 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { Suspense, useEffect, useState } from 'react';
-import { getRecentFolderImages } from './folder-server-actions';
+import Image from "next/image";
 
-interface FolderCardImagesProps {
-	folderId: string;
+export interface FolderCardImagesProps {
+	featuredImage?: string | null;
+	recentImages?: string[] | null;
 	primaryColor: string;
-	secondaryColor: string;
-}
-
-interface ThumbnailImage {
-	id: string;
-	thumbnailUrl: string;
+	secondaryColor?: string;
+	tcgMode?: boolean;
 }
 
 /**
- * Componente para mostrar las últimas 6 imágenes de una carpeta en la tarjeta.
- * Similar a la ilustración de una carta Magic, pero con un grid de miniaturas.
+ * Componente para mostrar las imágenes destacadas y recientes de una carpeta.
+ * En modo TCG, se muestra con bordes y efectos visuales similares a cartas coleccionables.
  */
-export function FolderCardImages({ folderId, primaryColor, secondaryColor }: FolderCardImagesProps) {
-	const [images, setImages] = useState<ThumbnailImage[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+export function FolderCardImages({
+	featuredImage,
+	recentImages = [],
+	primaryColor,
+	secondaryColor = primaryColor,
+	tcgMode = false
+}: FolderCardImagesProps) {
+	// Si hay una imagen destacada, la mostramos como principal
+	if (featuredImage) {
+		return (
+			<div className={cn(
+				"relative w-full h-40 overflow-hidden",
+				tcgMode ? "border-b border-white/10" : ""
+			)}>
+				{/* Imagen principal */}
+				<Image
+					src={featuredImage}
+					alt="Imagen destacada"
+					fill
+					sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+					className="object-cover"
+					priority
+				/>
 
-	// Cargar las imágenes recientes de la carpeta
-	useEffect(() => {
-		async function loadRecentImages() {
-			try {
-				setIsLoading(true);
-				// Llamada a la acción del servidor para obtener las imágenes
-				const recentImages = await getRecentFolderImages(folderId, 6);
-				setImages(recentImages);
-			} catch (err) {
-				console.error('Error cargando miniaturas:', err);
-				setError('Error al cargar las imágenes');
-			} finally {
-				setIsLoading(false);
-			}
-		}
-
-		loadRecentImages();
-	}, [folderId]);
-
-	return (
-		<div
-			className="relative h-36 bg-card border-b"
-			style={{ borderColor: `${primaryColor}50` }}
-		>
-			{/* Marco de la ilustración */}
-			<div className="absolute inset-0.5 rounded-sm overflow-hidden">
-				{/* Mostrar un placeholder durante la carga o si hay error */}
-				{isLoading || error || images.length === 0 ? (
+				{/* Overlay para TCG mode */}
+				{tcgMode && (
 					<div
-						className="w-full h-full flex items-center justify-center"
-						style={{ background: `radial-gradient(circle, ${primaryColor}30, ${secondaryColor}40)` }}
-					>
-						{isLoading ? (
-							<div className="animate-pulse text-xl">⏳</div>
-						) : error ? (
-							<div className="text-red-500 text-sm text-center px-2">Error al cargar imágenes</div>
-						) : (
-							<div className="text-muted-foreground text-sm text-center px-2">
-								No hay imágenes en esta carpeta
-							</div>
-						)}
-					</div>
-				) : (
-					<Suspense fallback={<div className="animate-pulse text-xl">⏳</div>}>
-						{/* Grid de miniaturas */}
-						<div className="grid grid-cols-3 grid-rows-2 gap-0.5 w-full h-full">
-							{images.map((image, index) => (
-								<div
-									key={image.id}
-									className={cn(
-										"relative overflow-hidden bg-black/30",
-										// Diferentes estilos para cada posición para crear un efecto interesante
-										index === 0 && "col-span-2 row-span-2",
-										index === 1 && "row-span-1",
-										index === 2 && "row-span-1",
-									)}
-								>
-									<img
-										src={image.thumbnailUrl}
-										alt=""
-										className="w-full h-full object-cover"
-										loading="lazy"
-										style={{
-											opacity: 0.85 + (0.15 / (index + 1)),
-											filter: index > 0 ? 'brightness(0.9)' : 'brightness(1)'
-										}}
-									/>
-								</div>
-							))}
+						className="absolute inset-0 mix-blend-overlay"
+						style={{
+							background: `linear-gradient(135deg, ${primaryColor}40, transparent 80%)`,
+							boxShadow: `inset 0 0 30px ${primaryColor}30`
+						}}
+					/>
+				)}
 
-							{/* Rellenar las celdas vacías si hay menos de 6 imágenes */}
-							{Array.from({ length: Math.max(0, 6 - images.length) }).map((_, index) => (
-								<div
-									key={`placeholder-${index}`}
-									className="bg-black/20"
-									style={{
-										background: `linear-gradient(45deg, ${primaryColor}10, ${secondaryColor}20)`
-									}}
-								/>
-							))}
-						</div>
-					</Suspense>
+				{/* Marco decorativo para TCG mode */}
+				{tcgMode && (
+					<>
+						{/* Esquinas decorativas */}
+						<div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-white/30" />
+						<div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-white/30" />
+						<div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-white/30" />
+						<div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-white/30" />
+
+						{/* Insignia de rareza */}
+						<div
+							className="absolute top-2 right-2 w-4 h-4 rounded-full"
+							style={{ background: `radial-gradient(circle, ${primaryColor}, ${secondaryColor})` }}
+						/>
+					</>
 				)}
 			</div>
+		);
+	}
 
-			{/* Borde decorativo alrededor de la ilustración */}
+	// Si no hay imagen destacada pero hay imágenes recientes, mostrar una cuadrícula de 4
+	if (recentImages && recentImages.length > 0) {
+		const images = recentImages.slice(0, 4);
+
+		return (
+			<div className={cn(
+				"relative w-full h-40 grid grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden",
+				tcgMode ? "border-b border-white/10 p-0.5 bg-black/20" : ""
+			)}>
+				{images.map((image, index) => (
+					<div
+						key={`recent-image-${generateImageKey(image, index)}`}
+						className="relative overflow-hidden"
+					>
+						<Image
+							src={image}
+							alt={`Imagen reciente ${index + 1}`}
+							fill
+							sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 15vw"
+							className="object-cover"
+						/>
+
+						{/* Overlay para TCG mode */}
+						{tcgMode && (
+							<div
+								className="absolute inset-0 mix-blend-overlay"
+								style={{
+									background: `linear-gradient(135deg, ${index % 2 === 0 ? primaryColor : secondaryColor}30, transparent 80%)`,
+									boxShadow: `inset 0 0 20px ${primaryColor}20`
+								}}
+							/>
+						)}
+					</div>
+				))}
+
+				{/* Decoraciones para TCG mode */}
+				{tcgMode && (
+					<div className="absolute inset-0 pointer-events-none">
+						{/* Bordes externos decorativos */}
+						<div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-white/30" />
+						<div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white/30" />
+						<div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white/30" />
+						<div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-white/30" />
+
+						{/* Marcador de elementos */}
+						<div
+							className="absolute top-1 right-1 text-xs font-bold px-1 rounded-sm"
+							style={{
+								background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`,
+								color: 'white',
+								textShadow: '0 1px 2px rgba(0,0,0,0.5)'
+							}}
+						>
+							x{images.length}
+						</div>
+					</div>
+				)}
+			</div>
+		);
+	}
+
+	// Si no hay imágenes, mostrar un placeholder
+	return (
+		<div
+			className={cn(
+				"relative w-full h-40 flex items-center justify-center",
+				tcgMode
+					? "bg-gradient-to-br from-gray-900 to-gray-800 border-b border-white/10"
+					: "bg-muted"
+			)}
+			style={tcgMode ? {
+				backgroundImage: `radial-gradient(circle at 70% 30%, ${primaryColor}30 0%, transparent 50%)`
+			} : {}}
+		>
 			<div
-				className="absolute inset-0 pointer-events-none"
-				style={{
-					boxShadow: `inset 0 0 0 1.5px ${primaryColor}90`
-				}}
-			/>
+				className={cn(
+					"text-lg font-medium text-center p-4",
+					tcgMode ? "text-white/70" : "text-muted-foreground"
+				)}
+			>
+				Sin imágenes
+			</div>
+
+			{/* Decoraciones TCG para el placeholder */}
+			{tcgMode && (
+				<>
+					<div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-white/20" />
+					<div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-white/20" />
+					<div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-white/20" />
+					<div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-white/20" />
+
+					<div
+						className="absolute bottom-2 right-2 w-8 h-8 rounded-full opacity-30"
+						style={{
+							background: `conic-gradient(${primaryColor}, ${secondaryColor}, ${primaryColor})`
+						}}
+					/>
+				</>
+			)}
 		</div>
 	);
+}
+
+/**
+ * Genera una clave única para cada imagen basada en la URL y posición
+ */
+function generateImageKey(imageUrl: string, index: number): string {
+	const urlSegment = imageUrl.split('/').pop() || '';
+	return `${urlSegment.substring(0, 8)}-${index}`;
 }

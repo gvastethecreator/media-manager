@@ -34,3 +34,14 @@ export function bufferToBase64Image(buffer: Buffer | null | undefined, mimeType 
 		return null;
 	}
 }
+
+export function formatDate(date: Date | string, options: Intl.DateTimeFormatOptions = {}): string {
+	const defaultOptions: Intl.DateTimeFormatOptions = {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		...options
+	};
+
+	return new Date(date).toLocaleDateString('es-ES', defaultOptions);
+}

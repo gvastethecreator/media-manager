@@ -11,38 +11,33 @@ import {
 import { Dialog } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select } from '@/components/ui/select';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import toastService from '@/services/toast.service';
-import { Group } from '@prisma/client';
+import type { GroupWithStats } from '@/types/entities/group/types';
+import { GroupSortCriteria } from '@/types/entities/group/types';
 import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
 
-interface GroupWithStats extends Group {
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-	};
-}
+const SORT_OPTIONS = [
+	{ label: 'Nombre', value: GroupSortCriteria.NAME_ASC },
+	{ label: 'Categoría', value: GroupSortCriteria.CREATED_ASC },
+	{ label: 'Fecha', value: GroupSortCriteria.CREATED_DESC },
+] as const;
 
 export function GroupsSettings() {
 	const [groups, setGroups] = useState<GroupWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+	const [selectedGroup, setSelectedGroup] = useState<GroupWithStats | null>(null);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 
@@ -50,7 +45,7 @@ export function GroupsSettings() {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
-	const [sortBy, setSortBy] = useState<'name' | 'category' | 'createdAt'>('name');
+	const [sortBy, setSortBy] = useState<GroupSortCriteria>(GroupSortCriteria.NAME_ASC);
 
 	useEffect(() => {
 		loadGroups();
@@ -95,11 +90,11 @@ export function GroupsSettings() {
 	// Ordenar grupos
 	const sortedGroups = [...filteredGroups].sort((a, b) => {
 		switch (sortBy) {
-			case 'name':
+			case GroupSortCriteria.NAME_ASC:
 				return a.name.localeCompare(b.name);
-			case 'category':
+			case GroupSortCriteria.CREATED_ASC:
 				return (a.category || '').localeCompare(b.category || '');
-			case 'createdAt':
+			case GroupSortCriteria.CREATED_DESC:
 				return b.createdAt.getTime() - a.createdAt.getTime();
 			default:
 				return 0;
@@ -195,14 +190,19 @@ export function GroupsSettings() {
 						<div className="flex gap-2">
 							<Select
 								value={sortBy}
-								onValueChange={(value) => setSortBy(value as typeof sortBy)}
-								options={[
-									{ label: 'Nombre', value: 'name' },
-									{ label: 'Categoría', value: 'category' },
-									{ label: 'Fecha', value: 'createdAt' },
-								]}
-								className="h-8"
-							/>
+								onValueChange={(value: GroupSortCriteria) => setSortBy(value)}
+							>
+								<SelectTrigger className="h-8">
+									<SelectValue placeholder="Ordenar por..." />
+								</SelectTrigger>
+								<SelectContent>
+									{SORT_OPTIONS.map(option => (
+										<SelectItem key={option.value} value={option.value}>
+											{option.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 							<Toggle
 								pressed={onlyFavorites}
 								onPressedChange={setOnlyFavorites}
@@ -240,7 +240,7 @@ export function GroupsSettings() {
 											variant="ghost"
 											size="icon"
 											className="absolute right-1 opacity-0 group-hover:opacity-100"
-											onClick={(e) => {
+											onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
 												e.stopPropagation();
 												handleDeleteGroup(group.id);
 											}}
