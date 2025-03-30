@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { WildcardSchema } from '@/types/entities/wildcard/schema';
-import { WildcardBase, WildcardWithRelations } from '@/types/entities/wildcard/types';
+import type { WildcardBase, WildcardWithRelations } from '@/types/entities/wildcard/types';
 
 /**
  * Extiende un comodín con campos deserializados y relaciones
@@ -91,27 +91,36 @@ export function buildWildcardTree(wildcards: WildcardWithRelations[]): WildcardW
     const tree: WildcardWithRelations[] = [];
 
     // Crear un mapa para búsqueda rápida
-    wildcards.forEach(wildcard => {
+    for (const wildcard of wildcards) {
       wildcard.childWildcards = [];
       map.set(wildcard.id, wildcard);
-    });
+    }
 
     // Construir la jerarquía
-    wildcards.forEach(wildcard => {
+    for (const wildcard of wildcards) {
       if (wildcard.parentId) {
+        // Obtener el padre si existe
         const parent = map.get(wildcard.parentId);
         if (parent) {
-          if (!parent.childWildcards) {
-            parent.childWildcards = [];
-          }
+          // Agregar como hijo
           parent.childWildcards.push(wildcard);
+
+          // Si el padre tiene color o emoji y el hijo no, heredar
+          if (!wildcard.color && parent.color) {
+            wildcard.color = parent.color;
+          }
+          if (!wildcard.emoji && parent.emoji) {
+            wildcard.emoji = parent.emoji;
+          }
         } else {
+          // Si no se encuentra el padre, agregar a la raíz
           tree.push(wildcard);
         }
       } else {
+        // Si no tiene padre, es un nodo raíz
         tree.push(wildcard);
       }
-    });
+    }
 
     return tree;
   } catch (error) {

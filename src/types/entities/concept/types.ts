@@ -3,7 +3,7 @@
  * @module types/entities/concept/types
  */
 
-import { z } from 'zod';
+import type { z } from 'zod';
 import type { Album } from '../album/types';
 import type { Character } from '../character/types';
 import type { Collection } from '../collection/types';
@@ -17,7 +17,7 @@ import type { Tag } from '../tag/types';
 import type { Video } from '../video/types';
 import type { Wildcard } from '../wildcard/types';
 import type { WorldItem } from '../world-item/types';
-import { ConceptSchema } from './schema';
+import type { ConceptSchema } from './schema';
 
 /**
  * Interfaz base para Concept derivada del schema de Prisma

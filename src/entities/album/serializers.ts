@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { AlbumSchema, AlbumSettingsSchema } from '@/types/entities/album/schema';
-import { AlbumBase, AlbumComplete } from '@/types/entities/album/types';
+import type { AlbumBase, AlbumComplete } from '@/types/entities/album/types';
 
 /**
  * Extiende un álbum con campos deserializados y relaciones

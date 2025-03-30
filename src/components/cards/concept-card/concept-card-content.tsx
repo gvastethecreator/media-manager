@@ -1,5 +1,7 @@
-import { BookText, Brain, Globe, Image, MessageSquare, Package, Paperclip, Tag, UserSquare, VideoIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { BookText, Globe, Image, MessageSquare, Package, Tag, UserSquare, VideoIcon } from 'lucide-react';
+import { nanoid } from "nanoid";
+import React, { useEffect, useState } from "react";
 import { getConceptCounts } from './concept-server-actions';
 
 interface ConceptCardContentProps {
@@ -27,6 +29,9 @@ export function ConceptCardContent({
 	conceptId,
 	tcgMode = true
 }: ConceptCardContentProps) {
+	// Generar un ID de renderizado único
+	const renderKey = React.useMemo(() => nanoid(), []);
+
 	// Estado para guardar los contadores de relaciones
 	const [relationCounts, setRelationCounts] = useState({
 		// Contenido multimedia
@@ -108,10 +113,13 @@ export function ConceptCardContent({
 			{/* Sección de categoría y rareza (basada en total relaciones) */}
 			<div className="mb-2 flex justify-between items-center">
 				<div
-					className={`text-xs uppercase tracking-wider font-medium ${tcgMode ? 'font-semibold' : ''}`}
+					className={cn(
+						"text-sm font-semibold mb-2",
+						tcgMode && "uppercase tracking-wide"
+					)}
 					style={{ color: primaryColor }}
 				>
-					{tcgMode ? `◇ Concepto ◇` : 'Concepto'}
+					{tcgMode ? '◇ Concepto ◇' : 'Concepto'}
 				</div>
 				{category && (
 					<div className="flex items-center text-xs opacity-70">
@@ -126,7 +134,7 @@ export function ConceptCardContent({
 								}}
 							>
 								{totalRelations > 50 ? 'RARO' :
-								 totalRelations > 20 ? 'POCO COMÚN' : 'COMÚN'}
+									totalRelations > 20 ? 'POCO COMÚN' : 'COMÚN'}
 							</span>
 						)}
 					</div>
@@ -163,7 +171,7 @@ export function ConceptCardContent({
 					<div className="flex flex-wrap gap-1">
 						{parsedTags.slice(0, 5).map((tag: string, index: number) => (
 							<span
-								key={index}
+								key={`tag-${renderKey}-${tag}`}
 								className={`text-xs px-1.5 py-0.5 rounded-sm ${tcgMode ? 'border border-white/10' : 'bg-primary/10'}`}
 								style={{
 									backgroundColor: tcgMode ? `${primaryColor}30` : `${primaryColor}20`,

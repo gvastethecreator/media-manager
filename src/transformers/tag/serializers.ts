@@ -6,9 +6,9 @@
 import { Logger } from '@/lib/logger';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    TagCreateInput,
+    type TagCreateInput,
     TagSchema,
-    TagUpdateInput,
+    type TagUpdateInput,
 } from '@/types/entities/tag/types';
 import {
     validateFieldType,
@@ -25,7 +25,7 @@ import {
     validateMetadataFields,
     validateUIFields,
 } from '@/utils/transformers/validation';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { type TagBase, TagCategory, type TagComplete, type TagExtended, type TagWithStats } from '../../types/entities/tag/index';
 
 // Logger específico para serializadores de Tag

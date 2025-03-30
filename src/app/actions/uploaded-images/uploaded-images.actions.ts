@@ -1,12 +1,12 @@
 'use server';
 
-import { mkdir, writeFile } from 'fs/promises';
-import * as path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { uploadedImagesService } from '@/services/uploaded-images.service';
-import type { UploadedImageType } from '@/types/entities/entities';
+import type { UploadedImageCreateInput, UploadedImageType } from '@/types/entities/uploaded-image';
 import type { UploadedImageFilters } from '@/types/uploaded-images';
+import { mkdir, writeFile } from 'fs/promises';
 import { revalidatePath } from 'next/cache';
+import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 const actionLogger = serverLogger.withContext('ServerAction:UploadedImages');
@@ -67,8 +67,24 @@ export async function uploadImages(formData: FormData) {
 				aspectRatio: 800 / 600,
 			};
 
-			// Creamos el registro en la base de datos
+			// Preparamos los datos de entrada usando los tipos del transformer
+			const imageData: UploadedImageCreateInput = {
+				name: file.name,
+				path: filePath,
+				type,
+				category,
+				size: file.size,
+				width: dimensions.width,
+				height: dimensions.height,
+				metadata: JSON.stringify({
+					originalName: file.name,
+					mimeType: file.type,
+				}),
+				uploadedAt: new Date(),
+			};
+
 			try {
+				// Creamos el registro en la base de datos usando el service
 				const imageRecord = await uploadedImagesService.createImage({
 					name: file.name,
 					type,
@@ -84,6 +100,7 @@ export async function uploadImages(formData: FormData) {
 					},
 				});
 
+				// El service ya usa el transformer, solo agregamos el resultado
 				results.push({
 					id: imageRecord.id,
 					name: imageRecord.name,
@@ -123,6 +140,7 @@ export async function uploadImages(formData: FormData) {
  */
 export async function getUploadedImages(filters?: UploadedImageFilters) {
 	try {
+		// El service ya usa el transformer, solo pasamos los parámetros y devolvemos el resultado
 		const result = await uploadedImagesService.getImages({
 			filters,
 			includeDimensions: true,

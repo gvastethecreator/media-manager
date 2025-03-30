@@ -96,19 +96,19 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
 					}
 
 					// Convertir parámetros numéricos
-					['steps', 'clip_skip'].forEach(key => {
+					for (const key of ['steps', 'clip_skip']) {
 						const value = result.generation[key];
 						if (value && typeof value === 'string') {
 							result.generation[key] = Number.parseInt(value, 10);
 						}
-					});
+					}
 
-					['cfg_scale', 'cfg'].forEach(key => {
+					for (const key of ['cfg_scale', 'cfg']) {
 						const value = result.generation[key];
 						if (value && typeof value === 'string') {
 							result.generation[key] = Number.parseFloat(value);
 						}
-					});
+					}
 				}
 
 				// Guardar en caché
@@ -159,19 +159,19 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
 					}
 
 					// Convertir parámetros numéricos
-					['steps', 'clip_skip'].forEach(key => {
+					for (const key of ['steps', 'clip_skip']) {
 						const value = result.generation[key];
 						if (value && typeof value === 'string') {
 							result.generation[key] = Number.parseInt(value, 10);
 						}
-					});
+					}
 
-					['cfg_scale', 'cfg'].forEach(key => {
+					for (const key of ['cfg_scale', 'cfg']) {
 						const value = result.generation[key];
 						if (value && typeof value === 'string') {
 							result.generation[key] = Number.parseFloat(value);
 						}
-					});
+					}
 				}
 
 				// Guardar en caché

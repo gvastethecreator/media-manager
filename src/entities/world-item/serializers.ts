@@ -4,7 +4,7 @@
  */
 
 import { logger } from '@/lib/logger';
-import { WorldItemBase } from '@/types/entities/world-item/base';
+import type { WorldItemBase } from '@/types/entities/world-item/base';
 import {
     WorldItemAttributesSchema,
     WorldItemEffectsSchema,
@@ -13,8 +13,8 @@ import {
     WorldItemSchema,
     WorldItemStatsSchema
 } from '@/types/entities/world-item/schema';
-import { WorldItemStats } from '@/types/entities/world-item/stats-types';
-import { WorldItemWithRelations, WorldItemWithStats } from '@/types/entities/world-item/types';
+import type { WorldItemStats } from '@/types/entities/world-item/stats-types';
+import type { WorldItemWithRelations, WorldItemWithStats } from '@/types/entities/world-item/types';
 
 /**
  * Serializa los atributos de un objeto del mundo

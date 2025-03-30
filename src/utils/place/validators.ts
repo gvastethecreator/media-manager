@@ -5,15 +5,15 @@
 
 import { z } from 'zod';
 import {
-	type PlaceDanger,
-	type PlaceFilters,
-	type PlaceResource,
-	type PlaceStats,
-	ClimateType,
-	DangerLevel,
-	GovernmentType,
-	PlaceCategory,
-	PlaceType,
+    type PlaceDanger,
+    type PlaceFilters,
+    type PlaceResource,
+    type PlaceStats,
+    ClimateType,
+    DangerLevel,
+    GovernmentType,
+    PlaceCategory,
+    PlaceType,
 } from '../../types/entities/place';
 
 /**
@@ -149,10 +149,9 @@ export function parseAndValidateDangers(dangersJson: string | null): PlaceDanger
 
 		if (validationResult.success) {
 			return validationResult.data;
-		} else {
-			console.error('Validación de peligros fallida:', validationResult.error);
-			return null;
 		}
+		console.error('Validación de peligros fallida:', validationResult.error);
+		return null;
 	} catch (error) {
 		console.error('Error al parsear peligros:', error);
 		return null;
@@ -173,10 +172,9 @@ export function parseAndValidateResources(resourcesJson: string | null): PlaceRe
 
 		if (validationResult.success) {
 			return validationResult.data;
-		} else {
-			console.error('Validación de recursos fallida:', validationResult.error);
-			return null;
 		}
+		console.error('Validación de recursos fallida:', validationResult.error);
+		return null;
 	} catch (error) {
 		console.error('Error al parsear recursos:', error);
 		return null;
@@ -197,10 +195,9 @@ export function parseAndValidateStats(statsJson: string | null): PlaceStats | nu
 
 		if (validationResult.success) {
 			return validationResult.data;
-		} else {
-			console.error('Validación de estadísticas fallida:', validationResult.error);
-			return null;
 		}
+		console.error('Validación de estadísticas fallida:', validationResult.error);
+		return null;
 	} catch (error) {
 		console.error('Error al parsear estadísticas:', error);
 		return null;
@@ -221,10 +218,9 @@ export function parseAndValidateFilters(filtersJson: string | null): PlaceFilter
 
 		if (validationResult.success) {
 			return validationResult.data;
-		} else {
-			console.error('Validación de filtros fallida:', validationResult.error);
-			return null;
 		}
+		console.error('Validación de filtros fallida:', validationResult.error);
+		return null;
 	} catch (error) {
 		console.error('Error al parsear filtros:', error);
 		return null;

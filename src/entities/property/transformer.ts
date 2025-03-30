@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
-import { CreatePropertyData, PropertyBase, PropertyFilters, PropertySortCriteria, PropertyWithRelations, UpdatePropertyData } from '@/types/entities/property/types';
+import type { CreatePropertyData, PropertyBase, PropertyFilters, PropertySortCriteria, PropertyWithRelations, UpdatePropertyData } from '@/types/entities/property/types';
 import { mapCreatePropertyDataToPrisma, mapPropertySearchOptionsToPrisma, mapUpdatePropertyDataToPrisma } from './mappers';
 import { calculatePropertyStats, extendProperty, validateProperty } from './serializers';
 
@@ -190,7 +190,7 @@ export class PropertyTransformer {
    */
   static async findByCategory(
     category: string,
-    limit: number = 10
+    limit = 10
   ): Promise<PropertyWithRelations[]> {
     try {
       const properties = await prisma.property.findMany({
@@ -210,7 +210,7 @@ export class PropertyTransformer {
    * Buscar propiedades favoritas
    */
   static async findFavorites(
-    limit: number = 10
+    limit = 10
   ): Promise<PropertyWithRelations[]> {
     try {
       const properties = await prisma.property.findMany({

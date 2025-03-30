@@ -98,8 +98,8 @@ export function WorldItemsSettings() {
 			const term = searchTerm.toLowerCase().trim();
 			result = result.filter(item =>
 				item.name.toLowerCase().includes(term) ||
-				(item.description && item.description.toLowerCase().includes(term)) ||
-				(item.origin && item.origin.toLowerCase().includes(term))
+				(item.description?.toLowerCase().includes(term)) ||
+				(item.origin?.toLowerCase().includes(term))
 			);
 		}
 
@@ -430,13 +430,15 @@ export function WorldItemsSettings() {
 							) : (
 								<div className="space-y-2 pt-2">
 									{filteredItemsList.map((item) => (
-										<div
+										<button
 											key={item.id}
 											className={cn(
-												"group flex items-center gap-2 p-2 rounded-md transition-colors cursor-pointer hover:bg-muted/50",
+												"group flex items-center gap-2 p-2 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left",
 												selectedItem?.id === item.id ? 'bg-muted' : ''
 											)}
 											onClick={() => handleEditItem(item as unknown as WorldItem)}
+											type="button"
+											aria-pressed={selectedItem?.id === item.id}
 										>
 											<div
 												className="w-5 h-5 rounded-full flex items-center justify-center"
@@ -462,23 +464,20 @@ export function WorldItemsSettings() {
 													)}
 												</div>
 											</div>
-											<div
-												className="opacity-0 group-hover:opacity-100"
+											<Button
+												variant="ghost"
+												size="icon"
+												className="h-6 w-6 opacity-0 group-hover:opacity-100"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeleteItem(item.id);
 												}}
+												type="button"
+												aria-label="Eliminar objeto"
 											>
-												<Button
-													variant="ghost"
-													size="icon"
-													className="h-6 w-6"
-													type="button"
-												>
-													<Trash className="h-3 w-3" />
-												</Button>
-											</div>
-										</div>
+												<Trash className="h-3 w-3" />
+											</Button>
+										</button>
 									))}
 								</div>
 							)}

@@ -3,8 +3,8 @@
  * @module types/entities/note/types
  */
 
-import { z } from 'zod';
-import { NoteSchema } from './schema';
+import type { z } from 'zod';
+import type { NoteSchema } from './schema';
 
 // Importación de tipos para relaciones
 import type { Album } from '../album/types';

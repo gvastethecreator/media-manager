@@ -4,7 +4,7 @@
  */
 
 import { Logger } from '@/lib/logger';
-import {
+import type {
     AlbumCreateInput,
     AlbumFilters,
     AlbumSearchOptions,
@@ -12,7 +12,7 @@ import {
 } from '@/types/entities/album/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 const logger = new Logger('AlbumMapper');
 

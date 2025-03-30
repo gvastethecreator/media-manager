@@ -1,9 +1,15 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
+import type { Transformer } from '@/types/common/transformer';
 import type { FileItem } from '@/types/file-item';
-import { type ServerImage, imageConverterService } from './image-converter.service';
+import {
+    createEntityNotFoundError,
+    toServiceError
+} from '@/utils/errors/service-errors';
+import { imageConverterService, type ServerImage } from './image-converter.service';
 
-const baseLogger = serverLogger.withContext('BaseService');
+const SERVICE_NAME = 'BaseService';
+const baseLogger = serverLogger.withContext(SERVICE_NAME);
 
 export interface BaseStats {
 	_count: {
@@ -24,23 +30,42 @@ interface PrismaModelOperations {
 	aggregate?: (args: Record<string, unknown>) => Promise<unknown>;
 }
 
-export class BaseService {
+/**
+ * Clase base para servicios que proporciona operaciones CRUD básicas
+ * Utiliza transformers para convertir entre registros de BD, entidades de dominio y resultados de API
+ *
+ * @template DBRecord - Tipo de registro de base de datos
+ * @template Entity - Tipo de entidad de dominio
+ * @template Result - Tipo de resultado para API
+ */
+export class BaseService<DBRecord, Entity, Result> {
 	protected logger = baseLogger;
 	protected model: PrismaModelOperations;
 	protected modelName: string;
+	protected serviceName: string;
+	protected transformer?: Transformer<DBRecord, Entity, Result>;
 
-	constructor(model: PrismaModelOperations, modelName: string) {
+	constructor(
+		model: PrismaModelOperations,
+		modelName: string,
+		transformer?: Transformer<DBRecord, Entity, Result>
+	) {
 		this.model = model;
 		this.modelName = modelName;
-		this.logger = serverLogger.withContext(`${modelName}Service`);
+		this.serviceName = `${modelName}Service`;
+		this.logger = serverLogger.withContext(this.serviceName);
+		this.transformer = transformer;
 	}
 
+	/**
+	 * Obtiene una lista de elementos con estadísticas asociadas
+	 */
 	protected async getItemsWithStats<T extends { id: string }>(
 		where: PrismaFilter = {},
 		orderBy: PrismaFilter = { createdAt: 'desc' }
 	): Promise<(T & BaseStats)[]> {
 		try {
-			this.serverLogger.info(`🔍 Obteniendo lista de ${this.modelName}...`);
+			this.logger.info(`Obteniendo lista de ${this.modelName}...`);
 
 			// 1. Obtener items con conteo de imágenes
 			const items = (await this.model.findMany({
@@ -80,20 +105,26 @@ export class BaseService {
 				} as T & BaseStats;
 			});
 
-			this.serverLogger.info(`✅ ${items.length} ${this.modelName} obtenidos`);
+			this.logger.info(`${items.length} ${this.modelName} obtenidos`);
 			return itemsWithStats;
 		} catch (error) {
-			this.serverLogger.error(`❌ Error al obtener ${this.modelName}:`, error);
-			throw error;
+			throw toServiceError(error, {
+				serviceName: this.serviceName,
+				message: `Error al obtener lista de ${this.modelName}`,
+				context: { where, orderBy }
+			});
 		}
 	}
 
+	/**
+	 * Obtiene un elemento por su ID con estadísticas asociadas
+	 */
 	protected async getItemWithStats<T extends { id: string }>(
 		id: string,
 		include: PrismaFilter = {}
 	): Promise<(T & BaseStats) | null> {
 		try {
-			this.serverLogger.info(`🔍 Obteniendo ${this.modelName}:`, id);
+			this.logger.info(`Obteniendo ${this.modelName}:`, id);
 
 			const item = (await this.model.findUnique({
 				where: { id },
@@ -125,11 +156,17 @@ export class BaseService {
 				totalSize: totalSize._sum?.size || 0,
 			};
 		} catch (error) {
-			this.serverLogger.error(`❌ Error al obtener ${this.modelName}:`, error);
-			throw error;
+			throw toServiceError(error, {
+				serviceName: this.serviceName,
+				message: `Error al obtener ${this.modelName}`,
+				context: { id }
+			});
 		}
 	}
 
+	/**
+	 * Obtiene las imágenes asociadas a un elemento por su ID
+	 */
 	protected async getItemImages(id: string): Promise<FileItem[]> {
 		try {
 			const images = await prisma.image.findMany({
@@ -191,8 +228,91 @@ export class BaseService {
 
 			return images.map((image) => imageConverterService.convertServerImageToFileItem(image as ServerImage));
 		} catch (error) {
-			this.serverLogger.error(`❌ Error al obtener imágenes de ${this.modelName}:`, error);
-			throw error;
+			throw toServiceError(error, {
+				serviceName: this.serviceName,
+				message: `Error al obtener imágenes de ${this.modelName}`,
+				context: { id }
+			});
 		}
+	}
+
+	/**
+	 * Transforma un registro de base de datos a una entidad de dominio
+	 */
+	protected fromDB(record: DBRecord): Entity {
+		if (this.transformer) {
+			return this.transformer.fromDB(record);
+		}
+		// Si no hay transformer, devolver registro como entidad (caso básico)
+		return record as unknown as Entity;
+	}
+
+	/**
+	 * Transforma una entidad de dominio a un resultado para API
+	 */
+	protected toClient(entity: Entity, options?: Record<string, unknown>): Result {
+		if (this.transformer) {
+			return this.transformer.toClient(entity, options);
+		}
+		// Si no hay transformer, devolver entidad como resultado (caso básico)
+		return entity as unknown as Result;
+	}
+
+	/**
+	 * Transforma datos del cliente a formato de base de datos para creación/actualización
+	 */
+	protected toDB(input: Partial<Entity>): Partial<DBRecord> {
+		if (this.transformer) {
+			return this.transformer.toDB(input);
+		}
+		// Si no hay transformer, devolver input como registro parcial (caso básico)
+		return input as unknown as Partial<DBRecord>;
+	}
+
+	/**
+	 * Obtiene un elemento por su ID utilizando el transformer
+	 */
+	protected async getItemById(
+		id: string,
+		select?: Record<string, unknown>,
+		include?: Record<string, unknown>
+	): Promise<Result | null> {
+		try {
+			const item = await this.model.findUnique({
+				where: { id },
+				...(select && { select }),
+				...(include && { include }),
+			}) as DBRecord | null;
+
+			if (!item) {
+				return null;
+			}
+
+			const entity = this.fromDB(item);
+			return this.toClient(entity);
+		} catch (error) {
+			throw toServiceError(error, {
+				serviceName: this.serviceName,
+				message: `Error al obtener ${this.modelName}`,
+				context: { id, select, include }
+			});
+		}
+	}
+
+	/**
+	 * Obtiene y verifica la existencia de un elemento, lanzando error si no existe
+	 */
+	protected async getItemByIdOrThrow(
+		id: string,
+		select?: Record<string, unknown>,
+		include?: Record<string, unknown>
+	): Promise<Result> {
+		const item = await this.getItemById(id, select, include);
+
+		if (!item) {
+			throw createEntityNotFoundError(this.modelName, id, this.serviceName);
+		}
+
+		return item;
 	}
 }

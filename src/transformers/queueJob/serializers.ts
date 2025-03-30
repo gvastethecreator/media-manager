@@ -6,12 +6,12 @@
 import { createLogger } from '@/lib/logger';
 import { QueueJobSchema } from '@/types/entities/queueJob/schema';
 import {
-    QueueJobBase,
-    QueueJobData,
-    QueueJobDeserialized,
+    type QueueJobBase,
+    type QueueJobData,
+    type QueueJobDeserialized,
     QueueJobPriority,
     QueueJobStatus,
-    QueueJobUI
+    type QueueJobUI
 } from '@/types/entities/queueJob/types';
 import { differenceInSeconds, format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';

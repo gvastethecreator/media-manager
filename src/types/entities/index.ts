@@ -19,6 +19,7 @@ export * from './place';
 export * from './profile';
 export * from './prompt';
 export * from './tag';
+export * from './uploaded-image';
 export * from './video';
 export * from './world-item';
 

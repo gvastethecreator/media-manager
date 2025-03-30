@@ -188,9 +188,9 @@ const CategoryItems = memo(
 			if (categoryId !== 'tags') return {};
 
 			const handlers: Record<string, () => void> = {};
-			items.forEach((tag) => {
+			for (const tag of items) {
 				handlers[tag.name] = () => stableOnItemClick(tag.name);
-			});
+			}
 			return handlers;
 		}, [items, categoryId, stableOnItemClick]);
 
@@ -199,9 +199,9 @@ const CategoryItems = memo(
 			if (categoryId === 'tags') return {};
 
 			const handlers: Record<string, () => void> = {};
-			items.forEach((item) => {
+			for (const item of items) {
 				handlers[item.id] = () => stableOnItemClick(item.id);
-			});
+			}
 			return handlers;
 		}, [items, categoryId, stableOnItemClick]);
 
@@ -209,50 +209,51 @@ const CategoryItems = memo(
 			return <div className="px-0 py-1 text-[10px] text-muted-foreground italic">No hay elementos</div>;
 		}
 
-		// Renderizar elementos especiales para etiquetas
-		if (categoryId === 'tags') {
-			return (
-				<div className={tagsContainerClassName}>
-					{items.map((tag) => {
-						// Usar el handler precomputado
-						const handleClick = tagClickHandlers[tag.name];
+		// Envolver la función renderItems en useCallback para evitar recreaciones
+		const renderItems = useCallback(() => {
+			// Renderizar elementos especiales para etiquetas
+			if (categoryId === 'tags') {
+				return (
+					<div className={tagsContainerClassName}>
+						{items.map((tag) => {
+							// Usar el handler precomputado
+							const handleClick = tagClickHandlers[tag.name];
 
-						const isSelected = currentView === 'tag-content' && selectedChildId === tag.name;
+							const isSelected = currentView === 'tag-content' && selectedChildId === tag.name;
 
-						const tagClassName = cn(
-							'transition-all duration-150 text-foreground font-medium nav-tag cursor-pointer relative',
-							isSelected && 'ring-1 ring-primary/30',
-							'hover:brightness-110 flex items-center gap-1',
-							viewMode === 'grid'
-								? 'h-5 px-2 text-[10px] rounded-none max-w-fit'
-								: 'h-6 px-2 text-xs justify-start rounded-sm w-full'
-						);
+							const tagClassName = cn(
+								'transition-all duration-150 text-foreground font-medium nav-tag cursor-pointer relative',
+								isSelected && 'ring-1 ring-primary/30',
+								'hover:brightness-110 flex items-center gap-1',
+								viewMode === 'grid'
+									? 'h-5 px-2 text-[10px] rounded-none max-w-fit'
+									: 'h-6 px-2 text-xs justify-start rounded-sm w-full'
+							);
 
-						const countClassName = cn(
-							'px-1 py-0 bg-black/30 rounded-sm whitespace-nowrap',
-							viewMode === 'grid' ? 'ml-1 text-[8px]' : 'ml-auto text-[9px]'
-						);
+							const countClassName = cn(
+								'px-1 py-0 bg-black/30 rounded-sm whitespace-nowrap',
+								viewMode === 'grid' ? 'ml-1 text-[8px]' : 'ml-auto text-[9px]'
+							);
 
-						return (
-							<Button
-								key={tag.id}
-								variant="ghost"
-								className={tagClassName}
-								style={{ backgroundColor: tag.color || '#888' }}
-								onClick={handleClick}
-								title={`${tag._count?.images || 0} imágenes${tag.description ? ` - ${tag.description}` : ''}`}
-							>
-								<span className="truncate">{tag.name}</span>
-								{tag._count && tag._count.images > 0 && <span className={countClassName}>{tag._count.images}</span>}
-							</Button>
-						);
-					})}
-				</div>
-			);
-		}
+							return (
+								<Button
+									key={tag.id}
+									variant="ghost"
+									className={tagClassName}
+									style={{ backgroundColor: tag.color || '#888' }}
+									onClick={handleClick}
+									title={`${tag._count?.images || 0} imágenes${tag.description ? ` - ${tag.description}` : ''}`}
+								>
+									<span className="truncate">{tag.name}</span>
+									{tag._count && tag._count.images > 0 && <span className={countClassName}>{tag._count.images}</span>}
+								</Button>
+							);
+						})}
+					</div>
+				);
+			}
 
-		// Para el resto de las categorías usamos un enfoque similar
-		const renderItems = () => {
+			// Para el resto de las categorías usamos un enfoque similar
 			// Memoizar los elementos renderizados para cada tipo
 			return items.map((item) => {
 				// Usar el handler precomputado
@@ -323,12 +324,22 @@ const CategoryItems = memo(
 					/>
 				);
 			});
-		};
+		}, [
+			categoryId,
+			items,
+			viewMode,
+			currentView,
+			selectedChildId,
+			tagsContainerClassName,
+			tagClickHandlers,
+			itemClickHandlers,
+			isItemSelected
+		]);
 
 		// Memoizamos los items renderizados
 		const renderedItems = useMemo(
 			() => renderItems(),
-			[items, categoryId, viewMode, currentView, selectedChildId, itemClickHandlers]
+			[renderItems]
 		);
 
 		return <div className={containerClassName}>{renderedItems}</div>;

@@ -4,8 +4,8 @@
  */
 
 import { logger } from '@/lib/logger';
-import { CreatePropertyData, PROPERTY_SORT_PROPERTY_MAP, PropertyFilters, PropertySortCriteria, UpdatePropertyData } from '@/types/entities/property/types';
-import { Prisma } from '@prisma/client';
+import { type CreatePropertyData, PROPERTY_SORT_PROPERTY_MAP, type PropertyFilters, type PropertySortCriteria, type UpdatePropertyData } from '@/types/entities/property/types';
+import type { Prisma } from '@prisma/client';
 
 /**
  * Mapea los datos de creación de una propiedad al formato de Prisma

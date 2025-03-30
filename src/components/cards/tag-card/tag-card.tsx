@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { TagCategory, TagRarity } from '@/types/entities/tag/enums';
+import { type TagCategory, TagRarity } from '@/types/entities/tag/enums';
 import type { TagWithRelations } from '@/types/entities/tag/types';
 import { Sparkles, Tag } from 'lucide-react';
 import { motion } from 'motion/react';

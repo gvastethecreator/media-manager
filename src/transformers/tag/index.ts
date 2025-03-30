@@ -5,7 +5,7 @@
 
 import { Logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
-import {
+import type {
     TagComplete,
     TagCreateInput,
     TagSearchOptions,

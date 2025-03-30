@@ -44,3 +44,7 @@ export interface EntityRelation {
 	targetType: EntityType;
 	createdAt: Date;
 }
+
+// Re-export for backwards compatibility
+export type { UploadedImageType } from '@/types/entities/uploaded-image';
+
