@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
 import type { Character } from '@/types/entities/character';
 
 export interface CharacterCardData extends Character {
@@ -50,7 +50,7 @@ export async function getCharacterCardData(
 	characterId: string,
 	includeRelated = false
 ): Promise<CharacterCardData> {
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	const character = await prisma.character.findUnique({
 		where: {
@@ -225,7 +225,7 @@ export async function getCharactersForCards(options: {
 		maxLevel,
 	} = options;
 
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	// Construir la consulta base
 	const characters = await prisma.character.findMany({
@@ -387,7 +387,7 @@ interface ThumbnailImage {
  * Obtiene las imágenes y videos recientes de un personaje para mostrar en la tarjeta
  */
 export async function getRecentCharacterMedia(characterId: string, limit = 6): Promise<ThumbnailImage[]> {
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	// Cargar imágenes recientes
 	const recentImages = await prisma.image.findMany({
@@ -456,7 +456,7 @@ export async function getRecentCharacterMedia(characterId: string, limit = 6): P
  * Obtiene personajes relacionados con el personaje especificado
  */
 export async function getRelatedCharacters(characterId: string, limit = 5): Promise<CharacterCardData[]> {
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	// Obtener personajes directamente relacionados
 	const relatedCharacters = await prisma.character.findMany({

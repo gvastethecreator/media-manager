@@ -37,6 +37,15 @@ export async function FolderCard({
 	interactive = true,
 	tcgMode = false
 }: FolderCardProps) {
+	// Validar que el ID sea válido
+	if (!folderId || folderId.trim() === '') {
+		return (
+			<div className="p-2 text-sm text-red-500 border border-red-200 rounded-md bg-red-50 dark:bg-red-950 dark:border-red-900">
+				Error: ID de carpeta no proporcionado
+			</div>
+		);
+	}
+
 	// Obtener datos de la carpeta y estadísticas
 	const folderData = await getFolderStats(folderId);
 

@@ -127,15 +127,17 @@ export async function getConceptImages(conceptId: string) {
     try {
         conceptImagesLogger.info(`🔍 Obteniendo imágenes del concepto ${conceptId}`);
 
-        const concept = await prisma.concept.findUnique({
+        const result = await prisma.concept.findUnique({
             where: { id: conceptId },
-            select: {
+            include: {
                 images: {
                     select: {
                         id: true,
                         name: true,
-                        url: true,
-                        thumbnailUrl: true,
+                        path: true,
+                        thumbnail: true,
+                        width: true,
+                        height: true,
                         createdAt: true,
                         updatedAt: true,
                     },
@@ -146,12 +148,12 @@ export async function getConceptImages(conceptId: string) {
             }
         });
 
-        if (!concept) {
+        if (!result) {
             throw createConceptImageError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
         }
 
-        conceptImagesLogger.info(`✅ Obtenidas ${concept.images.length} imágenes del concepto ${conceptId}`);
-        return concept.images;
+        conceptImagesLogger.info(`✅ Obtenidas ${result.images?.length || 0} imágenes del concepto ${conceptId}`);
+        return result.images || [];
 
     } catch (error) {
         conceptImagesLogger.error('❌ Error al obtener imágenes del concepto:', error);

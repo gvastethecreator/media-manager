@@ -350,10 +350,13 @@ export function MainLayout() {
 	// Datos de imagen procesados para evitar procesarlos en cada renderizado
 	const processedImages = useMemo(() => {
 		if (!images.length) return [];
-		return images.map((img) => ({
-			...img,
-			parsedMetadata: img.metadata ? JSON.parse(img.metadata) : undefined,
-		}));
+		return images.map((img) => {
+			const metadata = img.metadata ? JSON.parse(img.metadata) : {};
+			return {
+				...img,
+				parsedMetadata: metadata
+			};
+		});
 	}, [images]);
 
 	// Props memoizados para componentes
@@ -491,7 +494,24 @@ export function MainLayout() {
 
 			{isOpen && !isResizing && (
 				<FileViewer
-					images={processedImages}
+					images={processedImages.map(img => ({
+						id: img.id,
+						name: img.name,
+						path: img.path,
+						type: img.type,
+						size: img.size,
+						mimeType: img.mimeType,
+						metadata: img.metadata,
+						processingStatus: img.processingStatus,
+						createdAt: img.createdAt,
+						updatedAt: img.updatedAt,
+						errorMessage: img.errorMessage,
+						src: img.path,
+						alt: img.name,
+						width: img.parsedMetadata?.dimensions?.width || 800,
+						height: img.parsedMetadata?.dimensions?.height || 600,
+						thumbnail: ''
+					}))}
 					initialIndex={currentIndex}
 					isOpen={isOpen}
 					onClose={closeViewer}

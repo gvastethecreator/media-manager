@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
 import type { Group } from '@/types/prisma';
 
 export interface GroupCardData extends Group {
@@ -40,7 +40,7 @@ export interface GroupCardData extends Group {
 export async function getGroupCardData(
   groupId: string
 ): Promise<GroupCardData> {
-  const prisma = db.getClient();
+  const prisma = await getPrismaClient();
 
   const group = await prisma.group.findUnique({
     where: {
@@ -333,7 +333,7 @@ export async function getGroupsForCards(options: {
     orderDir = 'desc',
   } = options;
 
-  const prisma = db.getClient();
+  const prisma = await getPrismaClient();
 
   const groups = await prisma.group.findMany({
     where: {
