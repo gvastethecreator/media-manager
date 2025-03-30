@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { Place } from '@/types/entities/place';
 import type { PlaceDanger, PlaceResource } from '@/types/entities/place/types';
@@ -46,7 +46,7 @@ export interface PlaceCardData extends Place {
 export async function getPlaceCardData(
 	placeId: string
 ): Promise<PlaceCardData> {
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	try {
 		const place = await prisma.place.findUnique({
@@ -248,7 +248,7 @@ interface ThumbnailImage {
  * Obtiene las imágenes recientes de un lugar para mostrar en la tarjeta
  */
 export async function getRecentPlaceImages(placeId: string, limit = 6): Promise<ThumbnailImage[]> {
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	try {
 		// Imágenes recientes

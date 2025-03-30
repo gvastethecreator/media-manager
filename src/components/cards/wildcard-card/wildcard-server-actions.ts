@@ -1,16 +1,28 @@
 'use server';
 
-import { db } from '@/lib/db';
-import type { Wildcard } from '@/types/prisma';
+import { getPrismaClient } from '@/lib/db';
 
-export interface WildcardCardData extends Wildcard {
+export interface WildcardCardData {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  description: string | null;
+  category: string | null;
+  featuredImage: string | null;
+  isFavorite: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  shortcut: string | null;
+  parentId: string | null;
+  // El children puede ser un string en la entidad original pero aquí lo procesamos como array
+  children?: any[];
   _count: {
     images: number;
     videos: number;
     childWildcards: number;
   };
   recentImages?: string[];
-  children?: any[]; // Representación JSON de children
 }
 
 /**
@@ -19,7 +31,7 @@ export interface WildcardCardData extends Wildcard {
 export async function getWildcardCardData(
   wildcardId: string
 ): Promise<WildcardCardData> {
-  const prisma = db.getClient();
+  const prisma = await getPrismaClient();
 
   const wildcard = await prisma.wildcard.findUnique({
     where: {
@@ -104,7 +116,7 @@ export async function getWildcardsForCards(options: {
     orderDir = 'desc',
   } = options;
 
-  const prisma = db.getClient();
+  const prisma = await getPrismaClient();
 
   const wildcards = await prisma.wildcard.findMany({
     where: {

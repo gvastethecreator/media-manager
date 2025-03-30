@@ -1,7 +1,7 @@
 'use server';
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import type { TagWithRelations } from '@/types/entities/tag/types';
 
 // Logger específico para acciones de TagCard
@@ -23,6 +23,7 @@ interface ThumbnailImage {
 export async function getRecentTagImages(tagId: string, limit = 6): Promise<ThumbnailImage[]> {
 	try {
 		tagCardLogger.info('🖼️ Obteniendo imágenes recientes para TagCard:', tagId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!tagId) {
@@ -75,6 +76,7 @@ export async function getRecentTagImages(tagId: string, limit = 6): Promise<Thum
 export async function getTagWithRelations(tagId: string): Promise<TagWithRelations | null> {
 	try {
 		tagCardLogger.info('🏷️ Obteniendo tag con relaciones:', tagId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!tagId) {
@@ -177,6 +179,7 @@ export async function getTagWithRelations(tagId: string): Promise<TagWithRelatio
 export async function searchTags(query = '', limit = 100): Promise<TagWithRelations[]> {
 	try {
 		tagCardLogger.info('🔍 Buscando tags con query:', query);
+		const prisma = await getPrismaClient();
 
 		const tags = await prisma.tag.findMany({
 			where: {

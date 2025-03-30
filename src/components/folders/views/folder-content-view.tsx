@@ -7,6 +7,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useFolderImages } from '@/hooks/use-folder-images';
 import type { FileManagerState } from '@/store/files/file-manager.store';
 import { useFileManager } from '@/store/files/file-manager.store';
+import type { FileItem, FileProcessingStatus, FileType } from '@/types/file-item';
 import { Folder } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 
@@ -21,7 +22,17 @@ export function FolderContentView() {
 	// Actualizar el store cuando cambian las imágenes
 	useEffect(() => {
 		if (images) {
-			setItems(images);
+			// Usar una conversión explícita para evitar problemas de tipo
+			const fileItems = images.map(img => ({
+				...img,
+				id: img.id,
+				type: 'image' as FileType,
+				mimeType: 'image/jpeg',
+				processingStatus: 'completed' as FileProcessingStatus,
+				metadata: img.metadata || '{}'
+			})) as unknown as FileItem[];
+
+			setItems(fileItems);
 		}
 	}, [images, setItems]);
 
@@ -62,7 +73,14 @@ export function FolderContentView() {
 	return (
 		<div className="h-full w-full">
 			<FileBrowser
-				items={images as unknown as FileItem[]}
+				items={images ? images.map(img => ({
+					...img,
+					id: img.id,
+					type: 'image' as FileType,
+					mimeType: 'image/jpeg',
+					processingStatus: 'completed' as FileProcessingStatus,
+					metadata: img.metadata || '{}'
+				})) as unknown as FileItem[] : []}
 				onItemClick={(item) => {
 					// Aquí puedes manejar el clic en un item si es necesario
 				}}

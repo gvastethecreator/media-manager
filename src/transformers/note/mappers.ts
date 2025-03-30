@@ -1,11 +1,11 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-  CreateNoteData,
-  NoteBase,
-  NoteCreateInput,
-  NoteExtended,
-  NoteUpdateInput,
-  UpdateNoteData
+    CreateNoteData,
+    NoteBase,
+    NoteCreateInput,
+    NoteExtended,
+    NoteUpdateInput,
+    UpdateNoteData
 } from '@/types/entities/note';
 import { format } from 'date-fns';
 import { processNoteFields, serializeTags } from './serializers';
@@ -58,85 +58,101 @@ export function toNotesExtended(notes: NoteBase[]): NoteExtended[] {
  * @param data Datos de la nota con posibles campos deserializados
  * @returns Datos de la nota con campos serializados listos para BD
  */
-export function toCreateNoteData(data: CreateNoteData): NoteCreateInput {
+export function toCreateNoteData(data: CreateNoteData): any {
 	try {
-		// Convertir tags a string JSON si es un array
+		// Serializar campos que necesitan conversión
 		const tags = Array.isArray(data.tags)
 			? serializeTags(data.tags)
 			: typeof data.tags === 'string'
-				? data.tags // Ya es un string, posiblemente JSON
-				: 'empty_array';
+				? data.tags
+				: JSON.stringify({ items: [] });
 
 		return {
 			title: data.title,
 			content: data.content || '',
 			category: data.category || 'general',
-			priority: data.priority !== undefined ? data.priority : 0,
-			status: data.status || 'active',
 			tags,
-			featuredImage: data.featuredImage || null,
+			color: data.color || '#f3f4f6',
+			emoji: data.emoji || '📝',
+			isPinned: data.isPinned || false,
+			isArchived: data.isArchived || false,
 			isFavorite: data.isFavorite || false,
+			isPublic: data.isPublic || false,
+			// Campos opcionales
+			parentId: data.parentId || null,
+			folderId: data.folderId || null,
+			// Relaciones
+			images: data.imageIds ? {
+				connect: data.imageIds.map((id) => ({ id })),
+			} : undefined,
 		};
 	} catch (error) {
-		mappersLogger.error('❌ Error en toCreateNoteData:', error);
-
-		// Devolver valores por defecto en caso de error
+		mappersLogger.error('❌ Error convirtiendo datos para creación de nota:', error);
+		// En caso de error, devolver datos mínimos válidos
 		return {
 			title: data.title,
-			content: '',
+			content: data.content || '',
 			category: 'general',
-			priority: 0,
-			status: 'active',
-			tags: 'empty_array',
-			featuredImage: null,
-			isFavorite: false,
+			tags: JSON.stringify({ items: [] }),
 		};
 	}
 }
 
 /**
- * Prepara una nota con datos completos para actualización en base de datos
- * @param data Datos de la nota con posibles campos deserializados
- * @returns Datos de la nota con campos serializados listos para BD
+ * Convierte datos de nota a formato para actualización en Prisma
+ * @param data Datos de nota para actualizar
+ * @returns Datos formateados para Prisma
  */
-export function toUpdateNoteData(data: UpdateNoteData & { id: string }): NoteUpdateInput {
+export function toUpdateNoteData(data: UpdateNoteData): any {
 	try {
 		const updateData: NoteUpdateInput = { id: data.id };
 
-		// Copiar solo campos presentes en el input
+		// Copiar solo campos presentes en los datos de actualización
 		if (data.title !== undefined) updateData.title = data.title;
 		if (data.content !== undefined) updateData.content = data.content;
 		if (data.category !== undefined) updateData.category = data.category;
-		if (data.priority !== undefined) updateData.priority = data.priority;
-		if (data.status !== undefined) updateData.status = data.status;
-		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+		if (data.color !== undefined) updateData.color = data.color;
+		if (data.emoji !== undefined) updateData.emoji = data.emoji;
+		if (data.isPinned !== undefined) updateData.isPinned = data.isPinned;
+		if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
 		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+		if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
+		if (data.parentId !== undefined) updateData.parentId = data.parentId;
+		if (data.folderId !== undefined) updateData.folderId = data.folderId;
 
-		// Convertir tags a string JSON si está presente y es un array
+		// Serializar tags si están presentes
 		if (data.tags !== undefined) {
 			updateData.tags = Array.isArray(data.tags)
 				? serializeTags(data.tags)
 				: typeof data.tags === 'string'
-					? data.tags // Ya es un string, posiblemente JSON
-					: 'empty_array';
+					? data.tags
+					: JSON.stringify({ items: [] });
 		}
 
-		return updateData;
-	} catch (error) {
-		mappersLogger.error('❌ Error en toUpdateNoteData:', error);
+		// Manejar relaciones con imágenes si están presentes
+		if (data.imageIds !== undefined) {
+			updateData.images = {
+				set: data.imageIds.map((id) => ({ id })),
+			};
+		}
 
-		// Devolver solo el ID en caso de error
-		return { id: data.id };
+		// Solo devolvemos los datos sin el id para la actualización
+		const { id, ...dataForUpdate } = updateData;
+		return dataForUpdate;
+	} catch (error) {
+		mappersLogger.error('❌ Error convirtiendo datos para actualización de nota:', error);
+		return {};
 	}
 }
 
 /**
- * Prepara una nota para creación, serializando campos necesarios
- * @param note Datos para crear nota
- * @returns Objeto preparado para crear nota
+ * Prepara una nota con datos completos para creación en base de datos
+ * @param note Nota a procesar
+ * @returns Datos de la nota con campos serializados listos para BD
  * @deprecated Use toCreateNoteData instead
  */
 export function prepareNoteForCreate(note: NoteCreateInput): NoteCreateInput {
+	mappersLogger.warn('⚠️ Usando función obsoleta prepareNoteForCreate. Use toCreateNoteData instead.');
 	return {
 		...note,
 		tags: note.tags
@@ -152,6 +168,7 @@ export function prepareNoteForCreate(note: NoteCreateInput): NoteCreateInput {
  * @deprecated Use toUpdateNoteData instead
  */
 export function prepareNoteForUpdate(note: NoteUpdateInput): NoteUpdateInput {
+	mappersLogger.warn('⚠️ Usando función obsoleta prepareNoteForUpdate. Use toUpdateNoteData instead.');
 	const prepared: NoteUpdateInput = { ...note };
 
 	// Solo serializar tags si está presente en el input

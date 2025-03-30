@@ -5,30 +5,29 @@
 
 // Exportar serializadores
 export {
-  deserializeTags,
-  extendConcept,
-  extendConcepts,
-  fromConceptComplete,
-  serializeTags,
-  toConceptComplete,
-  toConceptExtendedComplete,
-  toConceptWithRelationsComplete,
-  toConceptWithRelationsExtendedComplete,
-  toConceptWithStatsComplete,
-  // Funciones obsoletas, mantenidas por compatibilidad
-  toExtendedConcept
+    // Funciones principales
+    deserializeTags, extendConcept,
+    extendConcepts, fromConceptComplete, serializeTags,
+    toConceptComplete, toConceptExtendedComplete,
+    toConceptWithRelationsComplete, toConceptWithRelationsExtendedComplete, toConceptWithStatsComplete,
+    // Funciones obsoletas, mantenidas por compatibilidad
+    /** @deprecated Use toConceptComplete y extendConcept en su lugar */
+    toExtendedConcept
 } from './serializers';
 
 // Exportar mappers
 export {
-  filterConcepts,
-  mapCreateConceptDataToPrisma,
-  mapUpdateConceptDataToPrisma,
-  paginateConcepts,
-  processConcepts,
-  sortConcepts,
-  toConceptWithStats,
-  toCreateConceptData,
-  toUpdateConceptData
+    // Funciones principales
+    filterConcepts,
+    // Funciones obsoletas, mantenidas por compatibilidad
+    /** @deprecated Use toCreateConceptData en su lugar */
+    mapCreateConceptDataToPrisma,
+    /** @deprecated Use toUpdateConceptData en su lugar */
+    mapUpdateConceptDataToPrisma, paginateConcepts,
+    processConcepts,
+    sortConcepts,
+    toConceptWithStats,
+    toCreateConceptData,
+    toUpdateConceptData
 } from './mappers';
 

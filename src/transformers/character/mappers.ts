@@ -4,25 +4,25 @@
  */
 
 import type {
-  CharacterAttribute,
-  CharacterCard,
-  CharacterCategory,
-  CharacterClass,
-  CharacterExtended,
-  CharacterInventoryItem,
-  CharacterListItem,
+    CharacterAttribute,
+    CharacterCard,
+    CharacterCategory,
+    CharacterClass,
+    CharacterExtended,
+    CharacterInventoryItem,
+    CharacterListItem,
 } from '@/types/entities/character';
 import {
-  CHARACTER_CLASS_COLORS as SUGGESTED_COLORS,
-  CHARACTER_CLASS_EMOJIS as SUGGESTED_EMOJIS,
+    CHARACTER_CLASS_COLORS as SUGGESTED_COLORS,
+    CHARACTER_CLASS_EMOJIS as SUGGESTED_EMOJIS,
 } from '@/types/entities/character/enums';
 import type { CHARACTER_SORT_PROPERTY_MAP, CharacterFilters, CharacterSortCriteria, CreateCharacterData, UpdateCharacterData } from '@/types/entities/character/types';
 import type { Prisma, Character as PrismaCharacter } from '@prisma/client';
 import {
-  serializeFilters,
-  serializeJsonArray,
-  serializeRelationships,
-  serializeStats, toCharacterExtended, toCharacterSummary
+    serializeArray,
+    serializeFilters,
+    serializeRelationships,
+    serializeStats, toCharacterSummary, toExtendedCharacter
 } from './serializers';
 
 /**
@@ -32,7 +32,7 @@ import {
  */
 export function toCharacterListItem(character: PrismaCharacter | CharacterExtended): CharacterListItem {
 	const extended =
-		'isSelected' in character ? (character as CharacterExtended) : toCharacterExtended(character as PrismaCharacter);
+		'isSelected' in character ? (character as CharacterExtended) : toExtendedCharacter(character as PrismaCharacter);
 
 	const summary = toCharacterSummary(extended);
 
@@ -64,7 +64,7 @@ export function toCharacterListItem(character: PrismaCharacter | CharacterExtend
  */
 export function toCharacterCard(character: PrismaCharacter | CharacterExtended): CharacterCard {
 	const extended =
-		'isSelected' in character ? (character as CharacterExtended) : toCharacterExtended(character as PrismaCharacter);
+		'isSelected' in character ? (character as CharacterExtended) : toExtendedCharacter(character as PrismaCharacter);
 
 	return {
 		id: extended.id,
@@ -305,12 +305,12 @@ export function mapCreateCharacterDataToPrisma(
     psychologicalProfile: data.psychologicalProfile || '',
     socialProfile: data.socialProfile || '',
     relationships: serializeRelationships(data.relationships || []),
-    goals: serializeJsonArray(data.goals || []),
-    fears: serializeJsonArray(data.fears || []),
-    beliefs: serializeJsonArray(data.beliefs || []),
-    personality: serializeJsonArray(data.personality || []),
-    skills: serializeJsonArray(data.skills || []),
-    abilities: serializeJsonArray(data.abilities || []),
+    goals: serializeArray(data.goals || []),
+    fears: serializeArray(data.fears || []),
+    beliefs: serializeArray(data.beliefs || []),
+    personality: serializeArray(data.personality || []),
+    skills: serializeArray(data.skills || []),
+    abilities: serializeArray(data.abilities || []),
     featuredImage: data.featuredImage || null,
     isFavorite: data.isFavorite || false,
     sortBy: data.sortBy || 'name:asc',
@@ -371,12 +371,12 @@ export function mapUpdateCharacterDataToPrisma(
   // Serializar campos JSON si existen
   if (data.stats !== undefined) mapped.stats = serializeStats(data.stats);
   if (data.relationships !== undefined) mapped.relationships = serializeRelationships(data.relationships);
-  if (data.goals !== undefined) mapped.goals = serializeJsonArray(data.goals);
-  if (data.fears !== undefined) mapped.fears = serializeJsonArray(data.fears);
-  if (data.beliefs !== undefined) mapped.beliefs = serializeJsonArray(data.beliefs);
-  if (data.personality !== undefined) mapped.personality = serializeJsonArray(data.personality);
-  if (data.skills !== undefined) mapped.skills = serializeJsonArray(data.skills);
-  if (data.abilities !== undefined) mapped.abilities = serializeJsonArray(data.abilities);
+  if (data.goals !== undefined) mapped.goals = serializeArray(data.goals);
+  if (data.fears !== undefined) mapped.fears = serializeArray(data.fears);
+  if (data.beliefs !== undefined) mapped.beliefs = serializeArray(data.beliefs);
+  if (data.personality !== undefined) mapped.personality = serializeArray(data.personality);
+  if (data.skills !== undefined) mapped.skills = serializeArray(data.skills);
+  if (data.abilities !== undefined) mapped.abilities = serializeArray(data.abilities);
   if (data.filters !== undefined) mapped.filters = serializeFilters(data.filters);
 
   // Manejar relaciones

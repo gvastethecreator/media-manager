@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
 import type { Album } from '@/types/entities/album';
 
 export interface AlbumCardData extends Album {
@@ -44,7 +44,7 @@ export interface AlbumCardData extends Album {
 export async function getAlbumCardData(
 	albumId: string
 ): Promise<AlbumCardData> {
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	const album = await prisma.album.findUnique({
 		where: {
@@ -193,7 +193,7 @@ export async function getAlbumsForCards(options: {
 		includeStats = false,
 	} = options;
 
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	// Construir la consulta base
 	const albums = await prisma.album.findMany({
@@ -308,7 +308,7 @@ interface ThumbnailImage {
  * Obtiene las imágenes y videos recientes de un álbum para mostrar en la tarjeta
  */
 export async function getRecentAlbumMedia(albumId: string, limit = 6): Promise<ThumbnailImage[]> {
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	// Cargar imágenes recientes
 	const recentImages = await prisma.image.findMany({
@@ -382,7 +382,7 @@ export async function getAlbumStats(albumId: string): Promise<{
 	totalSize: number;
 	entitiesCount: number;
 }> {
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	// Obtener conteo de imágenes
 	const imageCountResult = await prisma.image.count({
@@ -508,7 +508,7 @@ export async function searchAlbums(options: {
 		includeStats = false,
 	} = options;
 
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	// Construir filtros
 	const whereClause: any = {

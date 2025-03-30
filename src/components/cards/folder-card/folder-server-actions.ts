@@ -1,9 +1,8 @@
 'use server';
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import prisma from '@/lib/prisma';
 import type { FolderExtendedComplete } from '@/types/entities/folder';
-import { notFound } from 'next/navigation';
 
 // Logger específico para acciones de FolderCard
 const folderCardLogger = serverLogger.withContext('FolderCardActions');
@@ -24,6 +23,14 @@ interface ThumbnailImage {
  */
 export async function getRecentFolderImages(folderId: string, limit = 4) {
 	try {
+		// Verificar que el ID es válido
+		if (!folderId || folderId.trim() === '') {
+			folderCardLogger.warn('⚠️ Solicitud de imágenes sin ID de carpeta válido');
+			return [];
+		}
+
+		const prisma = await getPrismaClient();
+
 		// Verificar que la carpeta existe
 		const folder = await prisma.folder.findUnique({
 			where: { id: folderId },
@@ -31,7 +38,8 @@ export async function getRecentFolderImages(folderId: string, limit = 4) {
 		});
 
 		if (!folder) {
-			throw new Error('Folder not found');
+			folderCardLogger.warn(`⚠️ Carpeta no encontrada para imágenes: ${folderId}`);
+			return [];
 		}
 
 		// Obtener las imágenes más recientes asociadas a esta carpeta
@@ -45,13 +53,19 @@ export async function getRecentFolderImages(folderId: string, limit = 4) {
 			take: limit,
 			select: {
 				id: true,
-				thumbnailUrl: true
+				thumbnail: true
 			}
 		});
 
-		return images;
+		// Transformar a formato requerido
+		return images.map(image => ({
+			id: image.id,
+			thumbnailUrl: image.thumbnail
+				? `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`
+				: '',
+		}));
 	} catch (error) {
-		console.error('Error getting recent folder images:', error);
+		folderCardLogger.error('❌ Error obteniendo imágenes recientes de carpeta:', error);
 		return [];
 	}
 }
@@ -61,11 +75,22 @@ export async function getRecentFolderImages(folderId: string, limit = 4) {
  * @param folderId El ID de la carpeta de la que se quieren obtener las estadísticas.
  * @returns Un objeto con las estadísticas de la carpeta o null si no se encuentra.
  */
-export async function getFolderStats(folderId: string) {
+export async function getFolderStats(folderId?: string) {
 	try {
+		// Verificar que el ID es válido (manejo explícito de undefined)
+		if (!folderId || folderId.trim() === '') {
+			folderCardLogger.debug('ℹ️ Solicitud de estadísticas sin ID de carpeta');
+			return null; // Retornar null silenciosamente sin error
+		}
+
+		folderCardLogger.info(`📂 Obteniendo estadísticas de carpeta: ${folderId}`);
+		const prisma = await getPrismaClient();
+
 		// Obtener información básica de la carpeta
 		const folder = await prisma.folder.findUnique({
-			where: { id: folderId },
+			where: {
+				id: folderId
+			},
 			select: {
 				id: true,
 				name: true,
@@ -85,7 +110,8 @@ export async function getFolderStats(folderId: string) {
 		});
 
 		if (!folder) {
-			return notFound();
+			folderCardLogger.warn(`⚠️ Carpeta no encontrada: ${folderId}`);
+			return null; // Usar null en lugar de notFound() para manejo más flexible
 		}
 
 		// Contar subcarpetas
@@ -107,21 +133,26 @@ export async function getFolderStats(folderId: string) {
 			},
 			take: 4,
 			select: {
-				thumbnailUrl: true
+				thumbnail: true
 			}
 		});
 
 		// Extraer solo las URLs de las imágenes
-		const imageUrls = recentImages.map(img => img.thumbnailUrl);
+		const imageUrls = recentImages.map(img =>
+			img.thumbnail
+				? `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`
+				: ''
+		);
 
 		// Devolver la carpeta con estadísticas adicionales
+		folderCardLogger.info('✅ Estadísticas de carpeta obtenidas correctamente');
 		return {
 			...folder,
 			childrenCount,
 			recentImageUrls: imageUrls
 		};
 	} catch (error) {
-		console.error('Error getting folder stats:', error);
+		folderCardLogger.error('❌ Error obteniendo estadísticas de carpeta:', error);
 		return null;
 	}
 }
@@ -158,14 +189,16 @@ export async function generateSecondaryColor(primaryColor: string): Promise<stri
  * @param folderId ID de la carpeta
  * @returns Objeto completo de carpeta con relaciones
  */
-export async function getFolderForCard(folderId: string): Promise<FolderExtendedComplete> {
+export async function getFolderForCard(folderId?: string): Promise<FolderExtendedComplete | null> {
 	try {
-		folderCardLogger.info('📁 Obteniendo carpeta completa para FolderCard:', folderId);
-
-		// Verificar que el ID es válido
-		if (!folderId) {
-			throw new Error('ID de carpeta no proporcionado');
+		// Verificar que el ID es válido (manejo explícito de undefined)
+		if (!folderId || folderId.trim() === '') {
+			folderCardLogger.debug('ℹ️ Solicitud de carpeta sin ID válido');
+			return null;
 		}
+
+		folderCardLogger.info(`📁 Obteniendo carpeta completa para FolderCard: ${folderId}`);
+		const prisma = await getPrismaClient();
 
 		// Obtener la carpeta con todas sus relaciones relevantes
 		const folder = await prisma.folder.findUnique({
@@ -184,7 +217,8 @@ export async function getFolderForCard(folderId: string): Promise<FolderExtended
 		});
 
 		if (!folder) {
-			throw new Error(`Carpeta no encontrada: ${folderId}`);
+			folderCardLogger.warn(`⚠️ Carpeta no encontrada: ${folderId}`);
+			return null;
 		}
 
 		folderCardLogger.info('✅ Carpeta obtenida para FolderCard');
@@ -193,6 +227,6 @@ export async function getFolderForCard(folderId: string): Promise<FolderExtended
 		return folder as unknown as FolderExtendedComplete;
 	} catch (error) {
 		folderCardLogger.error('❌ Error obteniendo carpeta completa para FolderCard:', error);
-		throw new Error(`No se pudo obtener la carpeta: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		return null;
 	}
 }

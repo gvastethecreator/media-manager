@@ -16,7 +16,10 @@ export const ALL_ENTITIES = [
   'worldItems',
   'prompts',
   'notes',
-  'concepts'
+  'concepts',
+  'groups',
+  'properties',
+  'wildcards'
 ] as const;
 
 // Tipo para las entidades (útil para tipado estricto)
@@ -27,6 +30,7 @@ export const PRIORITY_ENTITIES: EntityType[] = [
   'collections',
   'tags',
   'albums',
+  'groups',
   'places'
 ];
 
@@ -40,7 +44,10 @@ export const ENTITY_DISPLAY_NAMES: Record<EntityType, string> = {
   worldItems: 'Objetos del mundo',
   prompts: 'Prompts',
   notes: 'Notas',
-  concepts: 'Conceptos'
+  concepts: 'Conceptos',
+  groups: 'Grupos',
+  properties: 'Propiedades',
+  wildcards: 'Comodines'
 };
 
 // Mapeo de entidades a sus tabs correspondientes en SettingsView
@@ -53,5 +60,8 @@ export const ENTITY_TO_SETTINGS_TAB: Record<EntityType, string> = {
   worldItems: 'world-items',
   prompts: 'prompts',
   notes: 'notes',
-  concepts: 'concepts'
+  concepts: 'concepts',
+  groups: 'groups',
+  properties: 'properties',
+  wildcards: 'wildcards'
 };

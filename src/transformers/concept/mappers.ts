@@ -1,19 +1,24 @@
+/**
+ * @file Funciones de mapeo para la entidad Concept
+ * @module transformers/concept/mappers
+ */
+
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-  ConceptBase,
-  ConceptExtended,
-  ConceptFilters,
-  ConceptSortOption,
-  ConceptWithStats,
-  CreateConceptData,
-  UpdateConceptData
+	ConceptBase,
+	ConceptExtended,
+	ConceptFilters,
+	ConceptSortOption,
+	ConceptWithStats,
+	CreateConceptData,
+	UpdateConceptData
 } from '@/types/entities/concept';
 import {
-  deserializeTags,
-  serializeTags,
-  toConceptComplete,
-  toConceptExtendedComplete,
-  toConceptWithStatsComplete
+	deserializeTags,
+	serializeTags,
+	toConceptComplete,
+	toConceptExtendedComplete,
+	toConceptWithStatsComplete
 } from './serializers';
 
 const mappersLogger = serverLogger.withContext('ConceptMappers');

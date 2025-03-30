@@ -4,24 +4,28 @@ import { getAlbums } from '@/app/actions/albums/album.actions';
 import { getCharacters } from '@/app/actions/characters/character.actions';
 import { getCollections } from '@/app/actions/collections/collection.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
+import { getGroups } from '@/app/actions/groups/group.actions';
 import { getNotes } from '@/app/actions/notes/note.actions';
 import { getPlaces } from '@/app/actions/places/place.actions';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
+import { getProperties } from '@/app/actions/properties/property.actions';
 import { getTags } from '@/app/actions/tags/tag.actions';
+import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
-import { PRIORITY_ENTITIES } from '@/constants/entities';
-import { areEntitiesLoaded, logLoadingStatus } from '@/lib/entity-utils';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useConceptStore } from '@/store/entities/concept';
+import { useGroupStore } from '@/store/entities/group';
 import { useNoteStore } from '@/store/entities/note';
 import { usePlaceStore } from '@/store/entities/place';
 import { usePromptStore } from '@/store/entities/prompt';
+import { usePropertyStore } from '@/store/entities/property';
 import { useTagStore } from '@/store/entities/tag';
+import { useWildcardStore } from '@/store/entities/wildcard';
 import { useWorldItemStore } from '@/store/entities/world-item';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { LoadingStates } from '../types';
 
 // Logger para el componente
@@ -90,6 +94,18 @@ const entityActionMap = {
 	concepts: {
 		action: getConcepts,
 		storeMethod: 'setConcepts'
+	},
+	groups: {
+		action: getGroups,
+		storeMethod: 'setGroups'
+	},
+	properties: {
+		action: getProperties,
+		storeMethod: 'setProperties'
+	},
+	wildcards: {
+		action: getWildcards,
+		storeMethod: 'setWildcards'
 	}
 };
 
@@ -126,7 +142,7 @@ const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityName
 		// @ts-ignore - Ignoramos el error de tipos ya que sabemos que estamos manejando arrays
 		return [];
 	} finally {
-		clearTimeout(timeoutId!);
+		clearTimeout(timeoutId);
 	}
 };
 
@@ -147,6 +163,9 @@ export function useEntityLoader() {
 	const promptStore = usePromptStore();
 	const noteStore = useNoteStore();
 	const conceptStore = useConceptStore();
+	const groupStore = useGroupStore();
+	const propertyStore = usePropertyStore();
+	const wildcardStore = useWildcardStore();
 
 	// Memoizamos todas las stores para evitar recreaciones del objeto
 	const stores = useMemo(
@@ -160,6 +179,9 @@ export function useEntityLoader() {
 			prompts: promptStore,
 			notes: noteStore,
 			concepts: conceptStore,
+			groups: groupStore,
+			properties: propertyStore,
+			wildcards: wildcardStore,
 		}),
 		[
 			collectionStore,
@@ -171,6 +193,9 @@ export function useEntityLoader() {
 			promptStore,
 			noteStore,
 			conceptStore,
+			groupStore,
+			propertyStore,
+			wildcardStore,
 		]
 	);
 
@@ -376,10 +401,12 @@ export function useEntityLoader() {
 				if (entity === 'tags') {
 					// Añadir algunas etiquetas de muestra
 					sampleData.push({ id: 'sample1', name: 'Muestra' });
-				} else if (entity === 'collections') {
+				}
+				if (entity === 'collections') {
 					// Añadir alguna colección de muestra
 					sampleData.push({ id: 'sample1', name: 'Colección de muestra' });
-				} else if (entity === 'albums') {
+				}
+				if (entity === 'albums') {
 					// Añadir algún álbum de muestra
 					sampleData.push({ id: 'sample1', name: 'Álbum de muestra' });
 				}
@@ -422,287 +449,117 @@ export function useEntityLoader() {
 
 			// Verificar si la entidad ya está en proceso de precarga global
 			if (typeof window !== 'undefined' && window.preloadingEntities?.has(entityName)) {
-				entityLoaderLogger.info(`🔄 Carga de ${entityName} omitida porque está en proceso de precarga global`);
-				return [];
-			}
+				entityLoaderLogger.info(`⏳ ${entityName} está siendo cargada por otro componente, esperando...`);
+				// Esperar brevemente y luego verificar si ya están disponibles
+				await new Promise(resolve => setTimeout(resolve, 500));
 
-			// Si ya está cargada, devolver los datos existentes
-			if (loadingStates[entityName]?.loaded) {
-				const storeKey = entityName.toLowerCase() as keyof typeof stores;
-				const store = stores[storeKey];
-
-				// Verificar si el store existe
-				if (store && storeKey in store) {
-					const data = (store as any)[storeKey] || [];
-					entityLoaderLogger.info(`✅ ${entityName} ya cargados previamente (${data.length} elementos)`);
-					return data;
+				// Verificar nuevamente si los datos ya están disponibles
+				if ((store as any)[storeEntityKey] && (store as any)[storeEntityKey].length > 0) {
+					entityLoaderLogger.info(`✅ ${entityName} ya cargados por otro componente (${(store as any)[storeEntityKey].length} elementos).`);
+					return (store as any)[storeEntityKey];
 				}
-				return [];
 			}
 
-			// Actualizar estado a "cargando"
-			setLoadingStates((prev) => {
-				// Asegurarnos que siempre tenemos un estado base válido
-				const currentState = prev[entityName] || initialLoadingStates[entityName];
-				return {
-					...prev,
-					[entityName]: {
-						...currentState,
-						loading: true
-					}
-				};
-			});
-
-			// Marcar que la entidad está en proceso de precarga global
-			if (typeof window !== 'undefined') {
-				if (!window.preloadingEntities) {
-					window.preloadingEntities = new Set<string>();
-				}
-				window.preloadingEntities.add(entityName);
-			}
-
-			// Continuar con la carga de datos...
+			// Si llegamos aquí, necesitamos cargar los datos
 			try {
-				// Intentar obtener los datos con timeout más largo (15 segundos en vez de 10)
-				const data = await withTimeout(
-					fetchStoreData(entityName),
-					15000, // Aumentamos a 15 segundos de timeout
-					entityName as string
-				);
-
-				const dataArray = Array.isArray(data) ? data : [];
-				const dataCount = dataArray.length;
-
-				// Marcar como cargado exitosamente con el conteo
-				setLoadingStates((prev) => {
-					// Asegurarnos que siempre tenemos un estado base válido
-					const currentState = prev[entityName] || initialLoadingStates[entityName];
-					return {
-						...prev,
-						[entityName]: {
-							...currentState,
-							loading: false,
-							loaded: true,
-							hasError: false,
-							loadedCount: dataCount
-						},
-					};
-				});
-				entityLoaderLogger.info(`✅ Carga de ${entityName} completada con ${dataCount} elementos.`);
-				return dataArray;
-			} catch (error) {
-				entityLoaderLogger.warn(`⚠️ Error al cargar ${entityName}, continuando con array vacío:`, error);
-				// Marcar como cargado con error pero mantener el conteo si tenemos datos
-				const storeKey = entityName.toLowerCase() as keyof typeof stores;
-				const store = stores[storeKey];
-
-				let dataCount = 0;
-				if (store) {
-					const storeData = (store as any)[storeKey] || [];
-					dataCount = Array.isArray(storeData) ? storeData.length : 0;
-				}
-
-				setLoadingStates((prev) => {
-					// Asegurarnos que siempre tenemos un estado base válido
-					const currentState = prev[entityName] || initialLoadingStates[entityName];
-					return {
-						...prev,
-						[entityName]: {
-							...currentState,
-							loading: false, // Marcamos como cargado de todos modos
-							loaded: true,
-							hasError: true,
-							loadedCount: dataCount
-						},
-					};
-				});
-
-				// A pesar del error, devolver datos si existen
-				if (store && dataCount > 0) {
-					entityLoaderLogger.warn(`⚠️ Error al cargar ${entityName}, pero se devuelven ${dataCount} elementos existentes`);
-					return (store as any)[storeKey] || [];
-				}
-
-				// Devolver un array vacío en vez de propagar el error
-				return [];
-			} finally {
-				// Eliminar la entidad de la lista de precargas globales
-				if (typeof window !== 'undefined' && window.preloadingEntities) {
-					window.preloadingEntities.delete(entityName);
-				}
-			}
-		},
-		[loadingStates, stores, fetchStoreData]
-	);
-
-
-	// Efectos combinados: Configuración inicial + Precarga
-	useEffect(() => {
-		// Si el hook está en proceso de desmontaje, no hacer nada
-		if (typeof window === 'undefined') {
-			return;
-		}
-
-		// Prevenir ejecuciones redundantes si ya verificamos
-		if (preloadExecutedRef.current) {
-			entityLoaderLogger.info('ℹ️ Precarga ya verificada anteriormente, omitiendo...');
-			return;
-		}
-
-		// Verificar si la precarga global ya está completada
-		if (window.entityPreloadComplete) {
-			entityLoaderLogger.info('✅ Precarga global ya completada, omitiendo cualquier precarga...');
-
-			// Actualizar estados locales para reflejar la carga global
-			const entitiesToCheck: (keyof LoadingStates)[] = ['collections', 'tags', 'albums'];
-
-			// Actualizar estados para reflejar que ya están cargados
-			const newState = {...loadingStates};
-			let stateChanged = false;
-
-			entitiesToCheck.forEach(entity => {
-				const storeKey = entity.toLowerCase() as keyof typeof stores;
-				const store = stores[storeKey];
-				const hasData = store && (store as any)[storeKey] && (store as any)[storeKey].length > 0;
-
-				if (hasData && (!newState[entity]?.loaded || newState[entity]?.hasError)) {
-					stateChanged = true;
-					newState[entity] = {
-						loading: false,
-						loaded: true,
-						open: newState[entity]?.open || false,
-						hasError: false,
-						loadedCount: (store as any)[storeKey].length
-					};
-				}
-			});
-
-			// Solo actualizar el estado si realmente cambió algo
-			if (stateChanged) {
-				setLoadingStates(newState);
-			}
-
-			// Marcar como verificado para no repetir
-			preloadExecutedRef.current = true;
-			return;
-		}
-
-		// Verificar si ya hay una precarga en progreso
-		if (window.entityPreloadInProgress) {
-			entityLoaderLogger.info('⏳ Precarga global en progreso, omitiendo inicio de nueva precarga...');
-
-			// No marcamos como ejecutado aún, porque queremos verificar de nuevo cuando termine
-			return;
-		}
-
-		// Solo iniciar precarga si no está en progreso y no está completa
-		if (!window.entityPreloadComplete && !window.entityPreloadInProgress) {
-			// Marcar como verificado para no volver a entrar aquí
-			preloadExecutedRef.current = true;
-			entityLoaderLogger.info('🚀 Hook useEntityLoader iniciando verificación de precarga...');
-
-			// Verificar estado de carga de las entidades prioritarias
-			const loadingStatus = areEntitiesLoaded(PRIORITY_ENTITIES, stores);
-			logLoadingStatus(loadingStatus);
-
-			// Si todas las entidades prioritarias ya están cargadas, no necesitamos precargar nada
-			if (loadingStatus.allLoaded) {
-				entityLoaderLogger.info('✅ Todas las entidades prioritarias ya están cargadas, omitiendo precarga básica.');
-
-				// Solo actualizar estados si es realmente necesario
-				const newState = { ...loadingStates };
-				let stateChanged = false;
-
-				PRIORITY_ENTITIES.forEach(entity => {
-					if (!newState[entity]?.loaded || newState[entity]?.hasError) {
-						stateChanged = true;
-
-						// Asegurarse de que todos los campos requeridos están presentes
-						newState[entity] = {
-							loading: false,
-							loaded: true,
-							open: newState[entity]?.open || false,
-							hasError: false,
-							loadedCount: (stores[entity.toLowerCase() as keyof typeof stores] as any)[entity.toLowerCase()]?.length || 0
-						};
+				// ESTRATEGIA 1: Server Actions (si están definidas)
+				if (entityName in entityActionMap) {
+					entityLoaderLogger.info(`📡 Intentando cargar ${entityName} con server action...`);
+					try {
+						const serverSuccess = await fetchDataFromServer(entityName);
+						if (serverSuccess) {
+							entityLoaderLogger.info(`✅ Datos de ${entityName} cargados desde servidor`);
+							return (store as any)[entityName.toLowerCase()] || [];
+						}
+					} catch (error) {
+						entityLoaderLogger.warn(`⚠️ Falló carga desde servidor para ${entityName}:`, error);
+						// Continuamos con otras estrategias, no bloqueamos
 					}
-				});
-
-				if (stateChanged) {
-					setLoadingStates(newState);
 				}
 
-				// Verificamos si hay alguna entidad en proceso de carga desde otro componente
-				if (window.preloadingEntities && window.preloadingEntities.size > 0) {
-					entityLoaderLogger.info(`⏳ Precarga en curso desde otro componente para: ${Array.from(window.preloadingEntities).join(', ')}`);
-					// No marcamos como completado porque hay otro proceso en curso
-				} else {
-					// Marcar como completado globalmente si no hay nada en curso
-					window.entityPreloadComplete = true;
-					// Limpiar el estado de progreso
-					window.entityPreloadInProgress = false;
+				// ESTRATEGIA 2: Métodos específicos del Store (loadXXX)
+				const loadMethodName = `load${entityName.charAt(0).toUpperCase() + entityName.slice(1)}`; // loadTags, loadCollections, etc.
+				if (typeof (store as any)[loadMethodName] === 'function') {
+					try {
+						entityLoaderLogger.info(`🔄 Intentando cargar ${entityName} con ${loadMethodName}...`);
+						await (store as any)[loadMethodName]();
+						const data = (store as any)[entityName.toLowerCase()] || [];
+						if (data.length > 0) {
+							entityLoaderLogger.info(`✅ ${entityName} cargados con ${loadMethodName} (${data.length} elementos)`);
+							return data;
+						}
+					} catch (err) {
+						entityLoaderLogger.warn(`⚠️ Error con ${loadMethodName}:`, err);
+						// Continuamos con la siguiente estrategia
+					}
 				}
-				return;
+
+				// ESTRATEGIA 3: Métodos específicos del Store (fetchXXX)
+				const fetchMethodName = `fetch${entityName.charAt(0).toUpperCase() + entityName.slice(1)}`; // fetchCollections, fetchTags, etc.
+				if (typeof (store as any)[fetchMethodName] === 'function') {
+					try {
+						entityLoaderLogger.info(`🔄 Intentando cargar ${entityName} con ${fetchMethodName}...`);
+						await (store as any)[fetchMethodName]();
+						const data = (store as any)[entityName.toLowerCase()] || [];
+						if (data.length > 0) {
+							entityLoaderLogger.info(`✅ ${entityName} cargados con ${fetchMethodName} (${data.length} elementos)`);
+							return data;
+						}
+					} catch (err) {
+						entityLoaderLogger.warn(`⚠️ Error con ${fetchMethodName}:`, err);
+						// Esta fue nuestra última estrategia, pero aún así no lanzamos error
+					}
+				}
+
+				// Si llegamos aquí, no pudimos cargar con ninguna estrategia
+				if (entityName === 'albums' || entityName === 'tags' || entityName === 'collections') {
+					// Para entidades críticas, generamos datos de prueba para evitar errores en la UI
+					entityLoaderLogger.warn(`⚠️ Generando datos de prueba para ${entityName}`);
+
+					// Crear un array vacío o con datos de muestra según la entidad
+					const sampleData = [];
+					if (entityName === 'tags') {
+						// Añadir algunas etiquetas de muestra
+						sampleData.push({ id: 'sample1', name: 'Muestra' });
+					}
+					if (entityName === 'collections') {
+						// Añadir alguna colección de muestra
+						sampleData.push({ id: 'sample1', name: 'Colección de muestra' });
+					}
+					if (entityName === 'albums') {
+						// Añadir algún álbum de muestra
+						sampleData.push({ id: 'sample1', name: 'Álbum de muestra' });
+					}
+
+					// Intentar actualizar el store con estos datos
+					try {
+						const setMethodName = `set${entityName.charAt(0).toUpperCase() + entityName.slice(1)}`; // setTags, setCollections, etc.
+						if (typeof (store as any)[setMethodName] === 'function') {
+							(store as any)[setMethodName](sampleData);
+							entityLoaderLogger.info(`✅ Datos de muestra establecidos para ${entityName}`);
+							return sampleData;
+						}
+					} catch (e) {
+						entityLoaderLogger.warn(`⚠️ No se pudieron establecer datos de muestra para ${entityName}`);
+					}
+				}
+
+				entityLoaderLogger.warn(`⚠️ Todas las estrategias fallaron para cargar ${entityName}, devolviendo array vacío`);
+
+				// Devolver array vacío en lugar de lanzar error
+				return [];
+
+			} catch (error) {
+				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+				entityLoaderLogger.warn(`⚠️ Error final al cargar ${entityName}: ${errorMessage}`);
+				// Devolver array vacío en lugar de propagar el error
+				return [];
 			}
-
-			// No iniciar la precarga aquí, dejar que lo haga EntityPreloader
-			// Solo registramos qué entidades faltan para referencia
-			const needsLoading = loadingStatus.pendingEntities;
-			if (needsLoading.length > 0) {
-				entityLoaderLogger.info(`ℹ️ Entidades pendientes de cargar: ${needsLoading.join(', ')}`);
-			}
-		}
-
-		// Devolver una función de limpieza vacía para mantener la consistencia
-		return () => {
-			// Limpieza al desmontar
-			entityLoaderLogger.info('🧹 Hook useEntityLoader desmontado.');
-		};
-	}, [stores, loadingStates, setLoadingStates]);
-
-
-	// Función para cargar datos cuando se abre un submenú
-	const handleOpenChange = useCallback(
-		(entity: keyof LoadingStates, isOpen: boolean) => {
-			// Asegurarse que el estado para esta entidad existe
-			const currentState = loadingStates[entity] || {
-				loading: false,
-				open: false,
-				loaded: false,
-				hasError: false,
-				loadedCount: 0
-			};
-
-			// Evitamos actualizar el estado si no hay cambio real en 'open'
-			if (currentState.open === isOpen) return;
-
-			entityLoaderLogger.info(`${isOpen ? '📂' : '📁'} Submenú ${entity} ${isOpen ? 'abierto' : 'cerrado'}`);
-
-			setLoadingStates((prev) => ({
-				...prev,
-				[entity]: {
-					...(prev[entity] || initialLoadingStates[entity]),
-					open: isOpen
-				},
-			}));
-
-			// Si se abre y aún no se ha cargado (o tuvo error previo y queremos reintentar), iniciar carga
-			// ✨ Añadimos la condición !currentState.loading para no disparar si ya está en proceso
-			if (isOpen && !currentState.loaded && !currentState.loading) {
-				entityLoaderLogger.info(`▶️ Disparando carga para ${entity} al abrir submenú.`);
-				loadEntityData(entity);
-			} else if (isOpen && currentState.hasError && !currentState.loading) {
-				entityLoaderLogger.info(`🔁 Reintentando carga para ${entity} con error previo al abrir submenú.`);
-				loadEntityData(entity); // Permitir reintento si hubo error
-			}
-		},
-		[loadEntityData, loadingStates]
-	);
-
+		}, [stores, fetchDataFromServer, setLoadingStates]);
 
 	return {
 		loadingStates,
-		handleOpenChange,
-		loadEntityData,
+		fetchStoreData,
+		loadEntityData
 	};
 }

@@ -3,6 +3,12 @@
  * @module transformers/group/serializers
  */
 
+import { serverLogger } from '@/lib/logger/server-logger';
+import type { GroupBase, GroupComplete, GroupExtended } from '@/types/entities/group/types';
+
+// Logger específico para serializadores de Group
+const serializerLogger = serverLogger.withContext('GroupSerializers');
+
 // Constantes para valores por defecto
 export const DEFAULT_GROUP_EMOJI = '📂';
 export const DEFAULT_GROUP_COLOR = '#3b82f6';
@@ -91,7 +97,7 @@ export function parseGroupFilters(filtersJson: string): any[] {
   try {
     return JSON.parse(filtersJson);
   } catch (error) {
-    console.error('Error parsing group filters:', error);
+    serializerLogger.error('❌ Error al parsear filtros de grupo:', error);
     return [];
   }
 }
@@ -109,7 +115,77 @@ export function serializeGroupFilters(filters: any[]): string {
   try {
     return JSON.stringify(filters);
   } catch (error) {
-    console.error('Error serializing group filters:', error);
+    serializerLogger.error('❌ Error al serializar filtros de grupo:', error);
     return 'empty_array';
   }
+}
+
+/**
+ * Convierte un GroupBase con campos en formato de base de datos a un GroupComplete con todos los campos deserializados
+ * @param group Objeto básico de grupo desde la base de datos
+ * @returns Objeto GroupComplete con campos JSON parseados
+ */
+export function toGroupComplete(group: GroupBase): GroupComplete {
+  try {
+    return {
+      ...group,
+      filters: parseGroupFilters(group.filters || 'empty_array')
+    };
+  } catch (error) {
+    serializerLogger.error('❌ Error al convertir GroupBase a GroupComplete:', error);
+    return {
+      ...group,
+      filters: []
+    } as GroupComplete;
+  }
+}
+
+/**
+ * Convierte un GroupComplete con campos deserializados a un GroupBase con formato para la base de datos
+ * @param group Objeto GroupComplete con campos parseados
+ * @returns GroupBase con campos serializados para BD
+ */
+export function fromGroupComplete(group: GroupComplete): GroupBase {
+  try {
+    const { filters, ...rest } = group;
+    return {
+      ...rest,
+      filters: serializeGroupFilters(filters || [])
+    };
+  } catch (error) {
+    serializerLogger.error('❌ Error al convertir GroupComplete a GroupBase:', error);
+    return {
+      ...group,
+      filters: 'empty_array'
+    } as GroupBase;
+  }
+}
+
+/**
+ * Extiende un grupo con propiedades adicionales para UI
+ * @param group Grupo básico o completo
+ * @returns Grupo con propiedades adicionales para UI
+ */
+export function extendGroup(group: GroupBase | GroupComplete): GroupExtended {
+  // Asegurar que tenemos una versión completa
+  const completeGroup = 'id' in group ? toGroupComplete(group) : group;
+
+  return {
+    ...completeGroup,
+    isSelected: false,
+    isExpanded: false,
+    isEditing: false,
+    imageCount: 0, // Estos valores deberían actualizarse después con datos reales
+    videoCount: 0,
+    entityCount: 0
+  };
+}
+
+/**
+ * Extiende múltiples grupos con propiedades adicionales para UI
+ * @param groups Lista de grupos básicos o completos
+ * @returns Lista de grupos extendidos
+ */
+export function extendGroups(groups: (GroupBase | GroupComplete)[]): GroupExtended[] {
+  return groups.map(extendGroup);
 }

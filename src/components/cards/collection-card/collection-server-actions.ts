@@ -1,8 +1,7 @@
 'use server';
 
-import { db } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import type { Collection } from '@/types/entities/collection/base';
 import type { CollectionWithRelations } from '@/types/entities/collection/types';
 
@@ -56,6 +55,7 @@ interface ThumbnailMedia {
 export async function getRecentCollectionImages(collectionId: string): Promise<ThumbnailImage[]> {
 	try {
 		collectionCardLogger.info('🖼️ Obteniendo imágenes recientes para CollectionCard:', collectionId);
+		const prisma = await getPrismaClient();
 
 		// Consultar imágenes de la colección ordenadas por fecha de creación descendente
 		const images = await prisma.image.findMany({
@@ -116,6 +116,7 @@ export async function getRecentCollectionImages(collectionId: string): Promise<T
 export async function getCollectionForCard(collectionId: string): Promise<CollectionWithRelations> {
 	try {
 		collectionCardLogger.info('📁 Obteniendo colección completa para CollectionCard:', collectionId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!collectionId) {
@@ -169,7 +170,7 @@ export async function getCollectionCardData(
 	collectionId: string,
 	includeRelated = false
 ): Promise<CollectionCardData> {
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	const collection = await prisma.collection.findUnique({
 		where: {
@@ -327,7 +328,7 @@ export async function getCollectionsForCards(options: {
 		includeStats = false,
 	} = options;
 
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	// Construir la consulta base
 	const collections = await prisma.collection.findMany({
@@ -424,7 +425,7 @@ export async function getCollectionsForCards(options: {
  * Obtiene las imágenes y videos más recientes de una colección para mostrar en la tarjeta
  */
 export async function getRecentCollectionMedia(collectionId: string, limit = 6): Promise<ThumbnailMedia[]> {
-	const prisma = db.getClient();
+	const prisma = await getPrismaClient();
 
 	// Cargar imágenes recientes
 	const recentImages = await prisma.image.findMany({

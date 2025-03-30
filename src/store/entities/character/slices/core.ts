@@ -3,7 +3,7 @@
  * @module store/entities/character/slices/core
  */
 
-import { serializeArray, serializeObject, toCharacterExtended } from '@/transformers/character';
+import { serializeArray, serializeObject, toExtendedCharacter } from '@/transformers/character';
 import type { CharacterBase, CharacterExtended } from '@/types/entities/character';
 import { generateCharacterId } from '@/utils/character';
 import type { StateCreator } from 'zustand';
@@ -33,7 +33,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 			const characterExtended =
 				'isSelected' in characterWithId
 					? (characterWithId as CharacterExtended)
-					: toCharacterExtended(characterWithId as CharacterBase);
+					: toExtendedCharacter(characterWithId as CharacterBase);
 
 			// Añadir al store
 			return {
@@ -123,7 +123,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 		set((state) => {
 			const newCharacters = { ...state.characters };
 
-			characters.forEach((character) => {
+			for (const character of characters) {
 				// Asegurarse de que el personaje tiene un ID
 				const characterWithId = {
 					...character,
@@ -134,10 +134,10 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 				const characterExtended =
 					'isSelected' in characterWithId
 						? (characterWithId as CharacterExtended)
-						: toCharacterExtended(characterWithId as CharacterBase);
+						: toExtendedCharacter(characterWithId as CharacterBase);
 
 				newCharacters[characterExtended.id] = characterExtended;
-			});
+			}
 
 			return { characters: newCharacters };
 		});
@@ -151,7 +151,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 		set((state) => {
 			const newCharacters = { ...state.characters };
 
-			updates.forEach(({ id, data }) => {
+			for (const { id, data } of updates) {
 				const currentCharacter = newCharacters[id];
 
 				if (currentCharacter) {
@@ -178,7 +178,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 						...processedUpdates,
 					};
 				}
-			});
+			}
 
 			return { characters: newCharacters };
 		});
@@ -191,9 +191,9 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	bulkRemoveCharacters: (characterIds: string[]) => {
 		set((state) => {
 			const newCharacters = { ...state.characters };
-			characterIds.forEach((id) => {
+			for (const id of characterIds) {
 				delete newCharacters[id];
-			});
+			}
 			return { characters: newCharacters };
 		});
 	},
