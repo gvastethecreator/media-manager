@@ -1,145 +1,292 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { memo, useState } from 'react';
+import { motion } from 'motion/react';
+import { useCallback, useMemo, useState } from 'react';
+import { CardContainer } from '../card-container';
 import { PlaceCardContent } from './place-card-content';
 import { PlaceCardFooter } from './place-card-footer';
 import { PlaceCardHeader } from './place-card-header';
 import { PlaceCardImages } from './place-card-images';
+import type { PlaceCardData } from './place-server-actions';
 
 export interface PlaceCardProps {
-	id: string;
-	name: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	featuredImage?: string | null;
-	region?: string;
-	type?: string;
-	climate?: string;
-	population?: number;
-	government?: string;
-	createdAt?: Date;
-	updatedAt?: Date;
-	imagesCount?: number;
-	isFavorite?: boolean;
-	onClick?: () => void;
+	/** Datos del lugar a mostrar */
+	place: PlaceCardData;
+	/** Tamaño compacto con menos información */
+	compact?: boolean;
+	/** Modo TCG con efectos especiales de carta */
+	tcgMode?: boolean;
+	/** Deshabilitar interacciones */
+	disabled?: boolean;
+	/** Clase CSS adicional para la carta */
 	className?: string;
+	/** Función a ejecutar al hacer clic en la tarjeta */
+	onClick?: () => void;
+	/** Si la tarjeta está seleccionada */
+	isSelected?: boolean;
 }
 
 /**
- * Componente de tarjeta de lugar inspirado en cartas Magic
- * Muestra información de un lugar con un diseño similar a una carta Magic
+ * Componente de tarjeta de lugar inspirado en cartas TCG
+ * Muestra información detallada de un lugar con elementos visuales de Trading Card Game
  */
 export function PlaceCard({
-	id,
-	name,
-	emoji = '📍',
-	color = '#10b981', // Verde por defecto para lugares
-	description,
-	featuredImage,
-	region = 'desconocido',
-	type = 'desconocido',
-	climate = 'templado',
-	population = 0,
-	government = 'desconocido',
-	createdAt,
-	updatedAt,
-	imagesCount = 0,
-	isFavorite = false,
-	onClick,
+	place,
+	compact = false,
+	tcgMode = true,
+	disabled = false,
 	className,
+	onClick,
+	isSelected = false,
 }: PlaceCardProps) {
-	// Convertir el color hexadecimal a formato RGB para manipulaciones
-	const hexToRgb = (hex: string) => {
-		const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-		const fullHex = hex.replace(shorthandRegex, (_, r, g, b) => r + r + g + g + b + b);
-		const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(fullHex);
-		return result
-			? {
-				r: Number.parseInt(result[1], 16),
-				g: Number.parseInt(result[2], 16),
-				b: Number.parseInt(result[3], 16),
-			}
-			: { r: 59, g: 130, b: 246 }; // Color azul por defecto
-	};
+	const [isHovered, setIsHovered] = useState(false);
 
-	// Calcular colores primario y secundario
-	const primaryColor = color;
-	const rgbPrimary = hexToRgb(primaryColor);
+	// Extraer datos del lugar
+	const {
+		id,
+		name,
+		emoji = '📍',
+		color = '#10b981',
+		description,
+		region = 'desconocido',
+		type = 'desconocido',
+		climate = 'templado',
+		population = 0,
+		government = 'desconocido',
+		createdAt,
+		updatedAt,
+		isFavorite = false,
+		_count,
+		parsedDangers = [],
+		parsedResources = [],
+		recentImages = [],
+		metadata,
+	} = place;
 
-	// Color secundario: variación del primario
-	const secondaryColor = `rgb(${Math.max(0, rgbPrimary.r - 30)}, ${Math.max(0, rgbPrimary.g - 30)}, ${Math.max(
-		0,
-		rgbPrimary.b - 30
-	)})`;
+	// Preparar los medios para el componente de galería
+	const cardMedia = useMemo(() => {
+		const media = [];
 
-	// Textura de la carta
-	const [texture] = useState('classic'); // Para futuras personalizaciones
-
-	// Manejar clic en la tarjeta
-	const handleClick = () => {
-		if (onClick) {
-			onClick();
+		// Añadir imágenes si están disponibles
+		if (recentImages?.length) {
+			media.push(...recentImages);
 		}
-	};
+
+		// Añadir videos si están disponibles
+		if (place.recentVideos?.length) {
+			media.push(...place.recentVideos);
+		}
+
+		return media;
+	}, [recentImages, place.recentVideos]);
+
+	// Calcular colores para la tarjeta TCG
+	const primaryColor = color || '#10b981';
+	const secondaryColor = useMemo(() => {
+		// Si no hay color definido, usar color predeterminado basado en el tipo
+		if (!color) {
+			return type === 'city' ? '#2563eb' :
+				type === 'forest' ? '#047857' :
+					type === 'mountain' ? '#b91c1c' :
+						type === 'desert' ? '#d97706' : '#064e3b';
+		}
+
+		// Oscurecer el color primario para el secundario
+		try {
+			// Convertir hex a RGB
+			const r = Number.parseInt(color.slice(1, 3), 16);
+			const g = Number.parseInt(color.slice(3, 5), 16);
+			const b = Number.parseInt(color.slice(5, 7), 16);
+
+			// Oscurecer los componentes
+			const darkenFactor = 0.7;
+			const darkerR = Math.floor(r * darkenFactor);
+			const darkerG = Math.floor(g * darkenFactor);
+			const darkerB = Math.floor(b * darkenFactor);
+
+			// Convertir de vuelta a hex
+			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
+		} catch (e) {
+			// Si hay algún error, volver al valor por defecto
+			return '#064e3b';
+		}
+	}, [color, type]);
+
+	// Datos de rareza y poder para el diseño TCG
+	const rarityLevel = metadata?.rarityLevel || 1;
+	const power = metadata?.power || 1;
+	const healthPoints = metadata?.healthPoints || 100;
+	const valueLevel = metadata?.valueLevel || 1;
+	const cardId = metadata?.cardId || `P${id.substring(0, 6)}`;
+
+	// Imágenes y videos para la tarjeta
+	const imagesCount = _count?.images || 0;
+	const videosCount = _count?.videos || 0;
+
+	// Manejar eventos de teclado para accesibilidad
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
+				e.preventDefault();
+				onClick();
+			}
+		},
+		[onClick, disabled]
+	);
 
 	return (
-		<div
+		<motion.div
 			className={cn(
-				'group relative flex flex-col rounded-md overflow-hidden border shadow-md hover:shadow-lg transition-all duration-300',
-				'bg-card text-card-foreground hover:scale-[1.02]',
-				'cursor-pointer select-none h-[420px] max-w-[300px] mx-auto',
+				'w-[300px] md:w-[320px]',
+				tcgMode ? 'h-[470px]' : 'h-[400px]',
+				compact && 'h-[220px]',
+				disabled && 'opacity-70 pointer-events-none',
 				className
 			)}
-			onClick={handleClick}
-			style={{
-				// Borde con el color primario
-				borderColor: `${primaryColor}90`,
-				// Sombra con el color primario
-				boxShadow: `0 4px 6px -1px ${primaryColor}30, 0 2px 4px -2px ${primaryColor}20`,
-			}}
+			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
+			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
+			onClick={disabled ? undefined : onClick}
+			onKeyDown={handleKeyDown}
+			tabIndex={disabled || !onClick ? -1 : 0}
+			role={onClick ? 'button' : 'article'}
+			aria-label={`Lugar: ${name}`}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
 		>
-			{/* Cabecera: nombre, emoji, región y tipo del lugar */}
-			<PlaceCardHeader
-				name={name}
-				emoji={emoji}
-				region={region}
-				type={type}
-				climate={climate}
+			<CardContainer
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
-				isFavorite={isFavorite}
-			/>
+				className={cn(
+					'transition-all duration-300',
+					isHovered && 'scale-[1.02]',
+					isSelected && 'ring-4 ring-primary/60'
+				)}
+			>
+				{/* Efectos holográficos especiales para el modo TCG */}
+				{tcgMode && (
+					<>
+						{/* Efecto holográfico de resplandor que se mueve con hover */}
+						<div
+							className="absolute inset-0 opacity-0 hover:opacity-30 transition-opacity duration-300 pointer-events-none z-1"
+							style={{
+								backgroundImage: `
+									linear-gradient(125deg,
+									transparent 0%,
+									${primaryColor}30 25%,
+									${secondaryColor}30 50%,
+									${primaryColor}30 75%,
+									transparent 100%)
+								`,
+								backgroundSize: '200% 200%',
+								animation: 'gradient-shift 3s ease infinite'
+							}}
+						/>
 
-			{/* Imágenes del lugar como ilustración */}
-			<PlaceCardImages
-				placeId={id}
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
-			/>
+						{/* Efecto holográfico de rareza */}
+						<div className="absolute inset-0 opacity-0 hover:opacity-20 transition-opacity duration-300 pointer-events-none z-1">
+							<div
+								className="absolute inset-0"
+								style={{
+									background: rarityLevel >= 9
+										? `linear-gradient(45deg, transparent, ${primaryColor}70, gold, ${primaryColor}70, transparent)`
+										: rarityLevel >= 7
+											? `linear-gradient(45deg, transparent, ${primaryColor}70, silver, ${primaryColor}70, transparent)`
+											: rarityLevel >= 5
+												? `linear-gradient(45deg, transparent, ${primaryColor}70, ${secondaryColor}70, transparent)`
+												: `linear-gradient(45deg, transparent, ${primaryColor}40, transparent)`,
+									backgroundSize: '300% 300%',
+									animation: 'shine 6s linear infinite'
+								}}
+							/>
+						</div>
 
-			{/* Contenido: descripción y detalles del lugar */}
-			<PlaceCardContent
-				description={description}
-				government={government}
-				population={population}
-				primaryColor={primaryColor}
-			/>
+						{/* Sello de valor estratégico en el modo TCG */}
+						<div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 opacity-10 pointer-events-none z-1">
+							<div className="w-full h-full rounded-full border-2 border-dashed flex items-center justify-center"
+								style={{ borderColor: primaryColor }}>
+								<div className="text-xs font-bold" style={{ color: primaryColor }}>
+									VALOR<br />{valueLevel}
+								</div>
+							</div>
+						</div>
 
-			{/* Pie: información adicional, fecha de creación, conteo de imágenes */}
-			<PlaceCardFooter
-				createdAt={createdAt}
-				updatedAt={updatedAt}
-				imagesCount={imagesCount}
-				climate={climate}
-				texture={texture}
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
-			/>
-		</div>
+						{/* Sello de rareza holográfico cuando es favorito */}
+						{isFavorite && (
+							<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
+								<div className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+									style={{
+										background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
+										backgroundSize: '600% 600%',
+										animation: 'shine 3s linear infinite'
+									}}
+								/>
+							</div>
+						)}
+					</>
+				)}
+
+				{/* Contenedor principal */}
+				<div className="flex flex-col h-full relative z-1">
+					{/* Cabecera con nombre, emoji, región y tipo */}
+					<PlaceCardHeader
+						name={name}
+						emoji={emoji}
+						color={primaryColor}
+						region={region}
+						type={type}
+						climate={climate}
+						isFavorite={isFavorite}
+						tcgMode={tcgMode}
+						compact={compact}
+					/>
+
+					{/* En modo compacto solo mostrar header y footer */}
+					{!compact && (
+						<>
+							{/* Galería de imágenes */}
+							<PlaceCardImages
+								mainImage={cardMedia[0]}
+								images={cardMedia}
+								primaryColor={primaryColor}
+								rarityLevel={rarityLevel}
+								tcgMode={tcgMode}
+								compact={false}
+							/>
+
+							{/* Contenido principal con descripción, recursos y estadísticas */}
+							<PlaceCardContent
+								description={description}
+								region={region}
+								type={type}
+								climate={climate}
+								population={population}
+								government={government}
+								parsedResources={parsedResources}
+								parsedDangers={parsedDangers}
+								parsedStats={place.parsedStats}
+								primaryColor={primaryColor}
+								tcgMode={tcgMode}
+								compact={compact}
+							/>
+
+							{/* Pie de carta con conteos y valores TCG */}
+							<PlaceCardFooter
+								createdAt={createdAt}
+								imagesCount={imagesCount}
+								videosCount={videosCount}
+								primaryColor={primaryColor}
+								secondaryColor={secondaryColor}
+								power={power}
+								healthPoints={healthPoints}
+								cardId={cardId}
+								tcgMode={tcgMode}
+								compact={compact}
+							/>
+						</>
+					)}
+				</div>
+			</CardContainer>
+		</motion.div>
 	);
 }
-
-// Versión memoizada para optimizar renders
-export const MemoizedPlaceCard = memo(PlaceCard);

@@ -3,6 +3,8 @@
  * @module types/entities/tag/tag-types
  */
 
+import type { JSONString, Nullable } from '@/utils/types/utility-types';
+import { z } from 'zod';
 import type { Album } from '../album/types';
 import type { Character } from '../character/types';
 import type { Collection } from '../collection/types';
@@ -16,130 +18,164 @@ import type { Property } from '../property/types';
 import type { Video } from '../video/types';
 import type { Wildcard } from '../wildcard/types';
 import type { WorldItem } from '../world-item/types';
+import { TagCategory, TagRarity, TagSortCriteria, TagViewMode } from './enums';
 
 /**
  * Interfaz base para etiqueta
  */
 export interface TagBase {
-  id: string;
-  name: string;
-  emoji: string;
-  color: string;
-  description: string | null;
-  shortcut: string | null;
-  category: string | null;
-  featuredImage: string | null;
-  isFavorite: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+    id: string;
+    name: string;
+    emoji: string;
+    color: string;
+    description: Nullable<string>;
+    shortcut: Nullable<string>;
+    category: TagCategory;
+    rarity: TagRarity;
+    viewMode: TagViewMode;
+    sortBy: JSONString<TagSortCriteria>;
+    filters: JSONString<TagFilters>;
+    featuredImage: Nullable<string>;
+    isFavorite: boolean;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 /**
  * Interfaz extendida que incluye relaciones
  */
 export interface TagWithRelations extends TagBase {
-  // Relaciones con contenido
-  images?: Image[];
-  videos?: Video[];
+    // Relaciones con contenido
+    images?: Image[];
+    videos?: Video[];
 
-  // Relaciones con entidades principales
-  albums?: Album[];
-  collections?: Collection[];
-  characters?: Character[];
-  places?: Place[];
-  worldItems?: WorldItem[];
-  concepts?: Concept[];
-  prompts?: Prompt[];
-  notes?: Note[];
-  wildcards?: Wildcard[];
-  properties?: Property[];
-  groups?: Group[];
+    // Relaciones con entidades principales
+    albums?: Album[];
+    collections?: Collection[];
+    characters?: Character[];
+    places?: Place[];
+    worldItems?: WorldItem[];
+    concepts?: Concept[];
+    prompts?: Prompt[];
+    notes?: Note[];
+    wildcards?: Wildcard[];
+    properties?: Property[];
+    groups?: Group[];
 
-  // Contadores
-  _count?: {
-    images?: number;
-    videos?: number;
-    albums?: number;
-    collections?: number;
-    characters?: number;
-    places?: number;
-    worldItems?: number;
-    concepts?: number;
-    prompts?: number;
-    notes?: number;
-    wildcards?: number;
-    properties?: number;
-    groups?: number;
-  };
+    // Contadores
+    _count?: {
+        images: number;
+        videos: number;
+        albums: number;
+        collections: number;
+        characters: number;
+        places: number;
+        worldItems: number;
+        concepts: number;
+        prompts: number;
+        notes: number;
+        wildcards: number;
+        properties: number;
+        groups: number;
+    };
 }
 
 /**
  * Interfaz para crear una etiqueta
  */
 export interface CreateTagData {
-  name: string;
-  emoji?: string;
-  color?: string;
-  description?: string | null;
-  shortcut?: string | null;
-  category?: string | null;
-  featuredImage?: string | null;
-  isFavorite?: boolean;
-  groupIds?: string[];
-  propertyIds?: string[];
-  wildcardIds?: string[];
+    name: string;
+    emoji?: string;
+    color?: string;
+    description?: Nullable<string>;
+    shortcut?: Nullable<string>;
+    category?: TagCategory;
+    rarity?: TagRarity;
+    viewMode?: TagViewMode;
+    sortBy?: TagSortCriteria | string;
+    filters?: TagFilters | string;
+    featuredImage?: Nullable<string>;
+    isFavorite?: boolean;
+    groupIds?: string[];
+    propertyIds?: string[];
+    wildcardIds?: string[];
 }
 
 /**
  * Interfaz para actualizar una etiqueta
  */
-export interface UpdateTagData {
-  name?: string;
-  emoji?: string;
-  color?: string;
-  description?: string | null;
-  shortcut?: string | null;
-  category?: string | null;
-  featuredImage?: string | null;
-  isFavorite?: boolean;
-  groupIds?: string[];
-  propertyIds?: string[];
-  wildcardIds?: string[];
-}
+export interface UpdateTagData extends Partial<CreateTagData> {}
 
 /**
  * Interfaz para filtros de búsqueda de etiquetas
  */
 export interface TagFilters {
-  searchQuery?: string;
-  categories?: string[];
-  onlyFavorites?: boolean;
+    searchQuery?: string;
+    categories?: TagCategory[];
+    rarities?: TagRarity[];
+    viewModes?: TagViewMode[];
+    onlyFavorites?: boolean;
+    hasImages?: boolean;
+    hasVideos?: boolean;
+    minRelations?: number;
+    maxRelations?: number;
 }
 
 /**
- * Enumeración para criterios de ordenación
+ * Interfaz para etiquetas relacionadas
  */
-export enum TagSortCriteria {
-  NAME_ASC = 'name:asc',
-  NAME_DESC = 'name:desc',
-  CREATED_ASC = 'created:asc',
-  CREATED_DESC = 'created:desc',
-  UPDATED_ASC = 'updated:asc',
-  UPDATED_DESC = 'updated:desc',
-  USAGE_ASC = 'usage:asc',
-  USAGE_DESC = 'usage:desc',
+export interface RelatedTag extends TagBase {
+    strength: number;
+    lastUsedTogether: Date;
+    usageCount: number;
 }
 
 /**
- * Mapa de propiedades para ordenación
+ * Interfaz para respuesta de relación tag-imagen
  */
-export const TAG_SORT_PROPERTY_MAP: Record<TagSortCriteria, string> = {
-  [TagSortCriteria.NAME_ASC]: 'name',
-  [TagSortCriteria.NAME_DESC]: 'name',
-  [TagSortCriteria.CREATED_ASC]: 'createdAt',
-  [TagSortCriteria.CREATED_DESC]: 'createdAt',
-  [TagSortCriteria.UPDATED_ASC]: 'updatedAt',
-  [TagSortCriteria.UPDATED_DESC]: 'updatedAt',
-  [TagSortCriteria.USAGE_ASC]: 'usage',
-  [TagSortCriteria.USAGE_DESC]: 'usage',
-};
+export interface TagImageRelationResponse {
+    tagId: string;
+    imageId: string;
+    confidence: number;
+    source: string;
+    addedAt: Date;
+}
+
+/**
+ * Validación Zod para filtros
+ */
+export const tagFilterSchema = z.object({
+    searchQuery: z.string().optional(),
+    categories: z.array(z.nativeEnum(TagCategory)).optional(),
+    rarities: z.array(z.nativeEnum(TagRarity)).optional(),
+    viewModes: z.array(z.nativeEnum(TagViewMode)).optional(),
+    onlyFavorites: z.boolean().optional(),
+    hasImages: z.boolean().optional(),
+    hasVideos: z.boolean().optional(),
+    minRelations: z.number().min(0).optional(),
+    maxRelations: z.number().min(0).optional()
+});
+
+/**
+ * Schema Zod para Tag
+ */
+export const tagSchema = z.object({
+    id: z.string(),
+    name: z.string().min(1),
+    emoji: z.string(),
+    color: z.string(),
+    description: z.string().nullable(),
+    shortcut: z.string().nullable(),
+    category: z.nativeEnum(TagCategory),
+    rarity: z.nativeEnum(TagRarity),
+    viewMode: z.nativeEnum(TagViewMode),
+    sortBy: z.string(),
+    filters: z.string(),
+    featuredImage: z.string().nullable(),
+    isFavorite: z.boolean(),
+    createdAt: z.date(),
+    updatedAt: z.date()
+});
+
+export type TagFilter = z.infer<typeof tagFilterSchema>;
+export type TagValidated = z.infer<typeof tagSchema>;

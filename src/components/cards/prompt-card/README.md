@@ -1,91 +1,131 @@
 # PromptCard
 
-Componente para mostrar información de prompts en formato de tarjeta con un diseño inspirado en cartas Magic.
-
-## Estructura
-
-El componente PromptCard está dividido en varios subcomponentes:
-
-- **PromptCard**: Componente principal que integra todos los demás
-- **PromptCardContent**: Muestra la descripción, parámetros, etiquetas y contadores de relaciones
-- **PromptCardFooter**: Muestra información de fechas, categoría y contadores
-- **PromptCardImages**: Muestra las imágenes relacionadas con el prompt
-- **prompt-server-actions.ts**: Contiene las acciones del servidor para obtener datos
-
-## Uso
-
-```tsx
-import { PromptCard } from '@/components/cards/prompt-card';
-
-// En un componente
-function PromptList({ prompts }) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {prompts.map(prompt => (
-        <PromptCard
-          key={prompt.id}
-          prompt={prompt}
-          onClick={() => handlePromptClick(prompt)}
-        />
-      ))}
-    </div>
-  );
-}
-```
-
-## Props
-
-### PromptCard
-
-| Prop | Tipo | Descripción |
-|------|------|-------------|
-| prompt | `Prompt & { _count?: { images: number; concepts: number; }; imageCount?: number; conceptCount?: number; }` | Datos del prompt a mostrar |
-| onClick | `() => void` | Función opcional a ejecutar al hacer clic en la tarjeta |
-| className | `string` | Clases CSS adicionales para personalizar la tarjeta |
-| style | `React.CSSProperties` | Estilos CSS adicionales |
+Componente para mostrar un prompt con diseño inspirado en cartas de TCG (Trading Card Game) como Magic the Gathering, Yu-Gi-Oh o Pokémon.
 
 ## Características
 
-- **Diseño Responsivo**: Se adapta a diferentes tamaños de pantalla
-- **Interacción**: Animaciones sutiles al pasar el cursor y hacer clic
-- **Accesibilidad**: Soporte para navegación por teclado y atributos ARIA
-- **Personalización**: Los colores se derivan del color del prompt
-- **Estadísticas**: Muestra contadores de relaciones con otras entidades
-- **Imágenes**: Muestra las últimas 6 imágenes relacionadas con el prompt
-- **Optimización**: Versión memorizada disponible para mejorar rendimiento en listas
+- Diseño tipo carta TCG con efectos visuales
+- Soporte para parámetros y propósito
+- Visualización de relaciones con otras entidades
+- Contador de etiquetas y elementos relacionados
+- Modo compacto para listas densas
+- Efectos holográficos y visuales al estilo TCG
 
-## Dependencias
+## Estructura del Componente
 
-- motion/react: Para animaciones
-- date-fns: Para formateo de fechas
-- lucide-react: Para iconos
-- tailwindcss: Para estilos
+```
+PromptCard/
+├── prompt-card.tsx (Componente principal)
+├── prompt-card-content.tsx (Contenido central)
+├── prompt-card-footer.tsx (Pie con estadísticas)
+├── prompt-card-images.tsx (Galería de imágenes)
+├── prompt-card-grid.tsx (Grid de tarjetas)
+├── prompt-server-actions.ts (Acciones del servidor)
+└── index.ts (Exportaciones)
+```
 
-## Ejemplo de integración
+## Flujo de Datos
 
-```tsx
-import { MemoizedPromptCard } from '@/components/cards/prompt-card';
-import { useRouter } from 'next/navigation';
-import { getPrompts } from '@/app/actions/prompts/prompt.actions';
+```mermaid
+graph TD
+    A[PromptCard] --> B[PromptCardImages]
+    A --> C[PromptCardContent]
+    A --> D[PromptCardFooter]
+    E[prompt-server-actions.ts] --> A
+    A --> F[CardContainer]
+```
 
-export default async function PromptsPage() {
-  const prompts = await getPrompts();
-  const router = useRouter();
+## Modelo de Datos
 
-  return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6">Prompts</h1>
+El componente PromptCard consume el siguiente modelo de datos:
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {prompts.map(prompt => (
-          <MemoizedPromptCard
-            key={prompt.id}
-            prompt={prompt}
-            onClick={() => router.push(`/prompts/${prompt.id}`)}
-          />
-        ))}
-      </div>
-    </div>
-  );
+```typescript
+interface PromptCardData {
+  id: string;
+  name: string;
+  emoji?: string | null;
+  color?: string | null;
+  description?: string | null;
+  purpose?: string | null;
+  content?: string | null;
+  category?: string | null;
+  parsedParameters?: Record<string, any>;
+  parsedTags?: string[];
+  parameters?: string | null;
+  isFavorite?: boolean;
+  model?: string | null;
+  featuredImage?: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  recentImages?: { id: string; thumbnailUrl: string }[];
+  _count?: {
+    images?: number;
+    videos?: number;
+    albums?: number;
+    collections?: number;
+    tags?: number;
+    concepts?: number;
+    notes?: number;
+    characters?: number;
+    places?: number;
+    worldItems?: number;
+    properties?: number;
+    wildcards?: number;
+    groups?: number;
+  };
 }
 ```
+
+## Ejemplos de Uso
+
+### Uso Básico
+
+```tsx
+import { PromptCard } from '@/components/cards/prompt-card';
+import { getPromptById } from '@/components/cards/prompt-card/prompt-server-actions';
+
+// En un componente o página
+const prompt = await getPromptById('prompt-id');
+
+return (
+  <div>
+    <h2>Ejemplo de Prompt</h2>
+    {prompt && <PromptCard prompt={prompt} />}
+  </div>
+);
+```
+
+### Modo Compacto
+
+```tsx
+<PromptCard prompt={prompt} compact={true} />
+```
+
+### Con Manejador de Clic
+
+```tsx
+<PromptCard
+  prompt={prompt}
+  onClick={() => handleSelectPrompt(prompt.id)}
+  isSelected={selectedPromptId === prompt.id}
+/>
+```
+
+### Sin Efectos TCG
+
+```tsx
+<PromptCard prompt={prompt} tcgMode={false} />
+```
+
+## Propiedades
+
+| Propiedad   | Tipo                 | Descripción                                  |
+|-------------|----------------------|----------------------------------------------|
+| prompt      | PromptCardData       | Datos del prompt a mostrar                   |
+| tcgMode     | boolean              | Habilita efectos visuales de carta TCG       |
+| compact     | boolean              | Mostrar en modo compacto (menos información) |
+| disabled    | boolean              | Deshabilitar interacciones                   |
+| onClick     | () => void           | Función al hacer clic                        |
+| isSelected  | boolean              | Indica si la tarjeta está seleccionada       |
+| className   | string               | Clases CSS adicionales                       |
+| style       | React.CSSProperties  | Estilos CSS adicionales                      |

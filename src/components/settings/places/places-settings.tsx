@@ -1,6 +1,6 @@
 'use client';
 
-import { deletePlace, getPlaces, PlaceWithStats } from '@/app/actions/places/place.actions';
+import { deletePlace, getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import { Place } from '@/types/entities/place';
+import type { Place } from '@/types/entities/place';
 import { ClimateType, PlaceType } from '@/types/entities/place/enums';
 import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';

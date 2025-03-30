@@ -25,7 +25,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
-import { Place } from '@/types/entities/place';
+import type { Place } from '@/types/entities/place';
 import { ClimateType, GovernmentType, PlaceCategory, PlaceType } from '@/types/entities/place/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckIcon, MapPin, SparklesIcon } from 'lucide-react';
@@ -459,7 +459,7 @@ export function CreatePlaceForm({
 											{...field}
 											value={field.value || ''}
 											onChange={(e) => {
-												const value = e.target.value === '' ? null : parseInt(e.target.value);
+												const value = e.target.value === '' ? null : Number.parseInt(e.target.value);
 												field.onChange(value);
 											}}
 										/>

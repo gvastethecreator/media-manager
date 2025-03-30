@@ -1,5 +1,4 @@
-export { MemoizedPlaceCard, PlaceCard } from './place-card';
-export type { PlaceCardProps } from './place-card';
+export * from './place-card';
 export * from './place-card-content';
 export * from './place-card-footer';
 export * from './place-card-header';

@@ -7,7 +7,7 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Wildcard } from '@prisma/client';
+import type { Wildcard } from '@prisma/client';
 import { ChevronRight, EditIcon, StarIcon, Trash } from 'lucide-react';
 
 interface WildcardPreviewProps {

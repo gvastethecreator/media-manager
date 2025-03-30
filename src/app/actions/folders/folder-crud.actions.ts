@@ -40,72 +40,98 @@ class FolderError extends Error {
 export async function getFolders(): Promise<FolderExtendedComplete[]> {
 	try {
 		folderLogger.info('📁 Iniciando obtención de carpetas');
-		const folders = await prisma.folder.findMany({
-			include: {
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						children: true
+
+		// Verificar conexión a la base de datos primero
+		try {
+			// Consulta simple para verificar que la conexión funciona
+			await prisma.$queryRaw`SELECT 1 as test`;
+		} catch (dbError) {
+			folderLogger.error('❌ Error de conexión a la base de datos:', dbError);
+			throw new FolderError('Error de conexión a la base de datos', dbError);
+		}
+
+		// Obtener carpetas con manejo detallado de errores
+		let folders;
+		try {
+			folders = await prisma.folder.findMany({
+				include: {
+					_count: {
+						select: {
+							images: true,
+							videos: true,
+							children: true
+						},
+					},
+					images: {
+						take: 9,
+						orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
+						select: {
+							id: true,
+							name: true,
+							path: true,
+							size: true,
+							width: true,
+							height: true,
+							metadata: true,
+							thumbnail: true,
+							thumbnailWidth: true,
+							thumbnailHeight: true,
+							thumbnailSize: true,
+							isFavorite: true,
+							folderId: true,
+							createdAt: true,
+							updatedAt: true,
+						},
 					},
 				},
-				images: {
-					take: 9,
-					orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
-					select: {
-						id: true,
-						name: true,
-						path: true,
-						size: true,
-						width: true,
-						height: true,
-						metadata: true,
-						thumbnail: true,
-						thumbnailWidth: true,
-						thumbnailHeight: true,
-						thumbnailSize: true,
-						isPublic: true,
-						isFavorite: true,
-						folderId: true,
-						createdAt: true,
-						updatedAt: true,
-					},
-				},
-			},
-			orderBy: { name: 'asc' },
-		});
+				orderBy: { name: 'asc' },
+			});
+		} catch (queryError) {
+			folderLogger.error('❌ Error en la consulta de carpetas:', queryError);
+			throw new FolderError('Error en la consulta de carpetas', queryError);
+		}
 
 		// Transformar usando los nuevos serializadores
-		const processedFolders = folders.map((folder: any) => {
-			// Primero deserializamos
-			const folderComplete = toFolderComplete(folder);
-			// Luego mapeamos a formato extendido
-			const folderExtended = mapFolderExtendedFromComplete(folderComplete);
+		try {
+			const processedFolders = folders.map((folder: any) => {
+				// Primero deserializamos
+				const folderComplete = toFolderComplete(folder);
+				// Luego mapeamos a formato extendido
+				const folderExtended = mapFolderExtendedFromComplete(folderComplete);
 
-			// Agregar imágenes recientes como base64 thumbnails
-			return {
-				...folderExtended,
-				recentImages: Array(9)
-					.fill(null)
-					.map((_, index: number) => {
-						const img = folder.images[index];
-						if (img?.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000) {
-							try {
-								return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
-							} catch (error) {
-								folderLogger.error('❌ Error convirtiendo thumbnail a base64:', error);
-								return null;
+				// Agregar imágenes recientes como base64 thumbnails
+				return {
+					...folderExtended,
+					recentImages: Array(9)
+						.fill(null)
+						.map((_, index: number) => {
+							const img = folder.images[index];
+							if (img?.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000) {
+								try {
+									return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
+								} catch (error) {
+									folderLogger.error('❌ Error convirtiendo thumbnail a base64:', error);
+									return null;
+								}
 							}
-						}
-						return null;
-					}),
-				images: undefined, // Removemos las imágenes completas para no enviar datos innecesarios
-			};
-		});
+							return null;
+						}),
+					images: undefined, // Removemos las imágenes completas para no enviar datos innecesarios
+				};
+			});
 
-		folderLogger.info('✅ Carpetas obtenidas', { count: folders.length });
-		return processedFolders;
+			folderLogger.info('✅ Carpetas obtenidas', { count: folders.length });
+			return processedFolders;
+		} catch (transformError) {
+			folderLogger.error('❌ Error al transformar datos de carpetas:', transformError);
+			throw new FolderError('Error al transformar datos de carpetas', transformError);
+		}
 	} catch (error) {
+		// Mejoramos el mensaje de error
+		if (error instanceof FolderError) {
+			folderLogger.error(`❌ ${error.message}`, error);
+			throw error;
+		}
 		folderLogger.error('❌ Error al obtener carpetas', error);
 		throw new FolderError('No se pudieron obtener las carpetas', error);
 	}

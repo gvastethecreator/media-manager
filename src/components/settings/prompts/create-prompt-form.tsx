@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
-import { PromptBase } from '@/types/entities/prompt/base';
+import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';

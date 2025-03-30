@@ -2,7 +2,6 @@
 
 import { reindexFolder } from '@/app/actions/folders';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { CardErrorDisplay } from '@/components/features/entity-cards/utils/error-handler';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useFolderImages } from '@/hooks/use-folder-images';
@@ -48,20 +47,6 @@ export function FolderContentView() {
 		);
 	}
 
-	// Mostrar error si ocurre
-	if (isError) {
-		return (
-			<CardErrorDisplay
-				error={{
-					code: 'LOAD_ERROR',
-					message: 'Error al cargar las imágenes',
-					details: error instanceof Error ? error.message : String(error),
-				}}
-				onRetry={refetch}
-			/>
-		);
-	}
-
 	// Mostrar estado vacío si no hay imágenes
 	if (!images || images.length === 0) {
 		return (
@@ -77,7 +62,7 @@ export function FolderContentView() {
 	return (
 		<div className="h-full w-full">
 			<FileBrowser
-				items={images}
+				items={images as unknown as FileItem[]}
 				onItemClick={(item) => {
 					// Aquí puedes manejar el clic en un item si es necesario
 				}}

@@ -17,7 +17,7 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 					emoji: '✨',
 					color: '#8b5cf6',
 					category: 'magic',
-					content: JSON.stringify({
+					filters: JSON.stringify({
 						sections: [
 							{
 								title: 'Teorías Elementales',
@@ -43,7 +43,7 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 					emoji: '⚔️',
 					color: '#ef4444',
 					category: 'history',
-					content: JSON.stringify({
+					filters: JSON.stringify({
 						sections: [
 							{
 								title: 'Guerras del Norte',
@@ -69,7 +69,7 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 					emoji: '👑',
 					color: '#f59e0b',
 					category: 'politics',
-					content: JSON.stringify({
+					filters: JSON.stringify({
 						sections: [
 							{
 								title: 'Leyes Reales',
@@ -95,7 +95,7 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 					emoji: '❄️',
 					color: '#3b82f6',
 					category: 'culture',
-					content: JSON.stringify({
+					filters: JSON.stringify({
 						sections: [
 							{
 								title: 'Sagas Ancestrales',
@@ -121,7 +121,7 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 					emoji: '🕳️',
 					color: '#1e293b',
 					category: 'research',
-					content: JSON.stringify({
+					filters: JSON.stringify({
 						sections: [
 							{
 								title: 'Manifestaciones Abismales',
@@ -147,7 +147,7 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 					emoji: '🛡️',
 					color: '#e5e7eb',
 					category: 'organizations',
-					content: JSON.stringify({
+					filters: JSON.stringify({
 						sections: [
 							{
 								title: 'Orden de la Luz Eterna',
@@ -173,7 +173,7 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 					emoji: '🐉',
 					color: '#10b981',
 					category: 'bestiary',
-					content: JSON.stringify({
+					filters: JSON.stringify({
 						sections: [
 							{
 								title: 'Bestias Mágicas',
@@ -199,7 +199,7 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 					emoji: '🗺️',
 					color: '#6b7280',
 					category: 'geography',
-					content: JSON.stringify({
+					filters: JSON.stringify({
 						sections: [
 							{
 								title: 'Tierras del Norte',

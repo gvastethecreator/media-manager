@@ -3,7 +3,8 @@
  * @module types/entities/album/extended
  */
 
-import type { Album } from './types';
+import type { AlbumSortCriteria } from './enums';
+import type { Album, AlbumBase, AlbumFilters } from './types';
 
 /**
  * Interfaz para distribución de imágenes por carpeta
@@ -18,38 +19,46 @@ export interface FolderDistribution {
  */
 export interface AlbumWithStats extends Album {
 	/**
-	 * Tamaño total en bytes de todas las imágenes del álbum
+	 * Tamaño total en bytes de todos los items
 	 */
-	totalSize?: number;
+	totalSize: number;
 
 	/**
-	 * Fecha de última actualización del álbum o sus imágenes
+	 * Última actualización del álbum o sus items
 	 */
-	lastUpdated?: Date | string;
+	lastUpdated: Date;
 
 	/**
-	 * Distribución de imágenes por carpeta
+	 * Número total de items
 	 */
-	distribution?: FolderDistribution[];
+	itemCount: number;
 
 	/**
-	 * Contadores de items relacionados
+	 * Distribución de items por tipo
+	 */
+	itemDistribution: {
+		images: number;
+		videos: number;
+	};
+
+	/**
+	 * Contadores de entidades relacionadas
 	 * @override
 	 */
-	_count?: {
+	_count: {
 		images: number;
-		groups: number;
-		properties: number;
+		videos: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
 		wildcards: number;
-		videos?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
+		properties: number;
+		groups: number;
 	};
 }
 
@@ -57,14 +66,34 @@ export interface AlbumWithStats extends Album {
  * Interfaz para álbum completo con todos los campos procesados (deserializados)
  * Los campos como filters y sortBy están deserializados de sus formatos JSON string
  */
-export type AlbumComplete = Omit<Album, 'filters' | 'sortBy'> & {
+export interface AlbumComplete extends Omit<Album, 'filters' | 'sortBy'> {
 	/**
-	 * Filtros deserializados de string JSON a array/objeto
+	 * Filtros deserializados
 	 */
-	filters: any[];
+	filters: AlbumFilters;
 
 	/**
-	 * Criterio de ordenación deserializado de string JSON
+	 * Criterio de ordenación deserializado
 	 */
-	sortBy: any;
+	sortBy: AlbumSortCriteria;
 }
+
+/**
+ * Datos parseados de un álbum
+ */
+export interface ParsedAlbum extends AlbumBase {
+	/**
+	 * Filtros parseados de JSON
+	 */
+	filtersObject: AlbumFilters;
+
+	/**
+	 * Criterio de ordenación parseado
+	 */
+	sortByObject: AlbumSortCriteria;
+}
+
+/**
+ * Tipo para álbum parseado con relaciones
+ */
+export type ParsedAlbumWithRelations = ParsedAlbum & Album;

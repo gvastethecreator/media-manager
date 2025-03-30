@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteTag, getTags, TagWithStats as ServerTagWithStats } from '@/app/actions/tags/tag.actions';
+import { deleteTag, getTags, type TagWithStats as ServerTagWithStats } from '@/app/actions/tags/tag.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
 import { TagCategory } from '@/types/entities/tag/enums';
-import { Tag } from '@/types/entities/tag/types';
+import type { Tag } from '@/types/entities/tag/types';
 import { Filter, Info, Loader2, PlusCircle, Save, Tag as TagIcon, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreateTagForm } from './create-tag-form';

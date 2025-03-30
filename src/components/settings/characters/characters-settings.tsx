@@ -1,6 +1,6 @@
 'use client';
 
-import { CharacterWithStats, deleteCharacter, getCharacters } from '@/app/actions/characters/character.actions';
+import { type CharacterWithStats, deleteCharacter, getCharacters } from '@/app/actions/characters/character.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import { CharacterBase as Character } from '@/types/entities/character/base';
+import type { CharacterBase as Character } from '@/types/entities/character/base';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
 import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';

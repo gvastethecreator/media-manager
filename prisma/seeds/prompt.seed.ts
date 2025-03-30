@@ -46,48 +46,77 @@ export async function seedPrompts(prisma: PrismaClient): Promise<void> {
             height: 1024,
             steps: 30,
             guidance: 7.5,
-            sampler: 'DPM++ 2M Karras'
+            sampler: 'DPM++ 2M Karras',
+            negativePrompt: 'deformed, anime style, cartoon, blurry, extra fingers, misaligned eyes, bad anatomy, distorted face, mutation, mutated, extra limbs, ugly, poorly drawn hands, missing limbs, floating limbs, disconnected limbs, malformed hands, blurry, out of focus',
+            versions: [
+              {
+                name: 'Female Variant',
+                content: 'A detailed portrait of a heroine, heroic pose...'
+              },
+              {
+                name: 'Battle Ready',
+                content: 'A detailed portrait of a hero in battle stance...'
+              }
+            ]
           }),
-          negativePrompt: 'deformed, anime style, cartoon, blurry, extra fingers, misaligned eyes, bad anatomy, distorted face, mutation, mutated, extra limbs, ugly, poorly drawn hands, missing limbs, floating limbs, disconnected limbs, malformed hands, blurry, out of focus',
-          versions: JSON.stringify([
-            {
-              name: 'Female Variant',
-              content: 'A detailed portrait of a heroine, heroic pose...'
-            },
-            {
-              name: 'Battle Ready',
-              content: 'A detailed portrait of a hero in battle stance...'
-            }
-          ]),
-          tags: ['characters', 'portrait', 'fantasy', 'hero'],
+          tags: ['portrait', 'hero', 'fantasy', 'character'],
           featuredImage: null,
           isFavorite: true,
         },
         {
-          name: 'Fantasy Landscape',
-          emoji: '🏔️',
+          name: 'Mystic Forest',
+          emoji: '🌿',
           color: '#10b981',
-          description: 'Generate epic fantasy landscapes',
-          content: 'Epic fantasy landscape, majestic mountains, ethereal waterfalls, ancient forest, distant castle, dramatic clouds, sun rays, cinematic quality, volumetric lighting, intricate details, immersive scene, deep depth of field, vibrant colors, hyperrealistic style. Style: High-end digital art with atmospheric lighting and epic scale.',
-          category: 'landscapes',
+          description: 'Generate magical forest scenes with fantasy elements',
+          content: 'Enchanted fantasy forest, ethereal atmosphere, ancient trees with glowing magical patterns, mystical fog, otherworldly plant life, luminescent flowers, sunbeams filtering through dense canopy, rich details, vibrant but harmonious colors, fantasy environment, small magical creatures hidden in scene. Style: Detailed fantasy digital painting with atmospheric lighting.',
+          category: 'locations',
           parameters: JSON.stringify({
             width: 1280,
             height: 768,
-            steps: 40,
-            guidance: 8.0,
-            sampler: 'Euler a'
+            steps: 38,
+            guidance: 7.0,
+            sampler: 'Euler a',
+            negativePrompt: 'dead trees, winter, snow, urban elements, human structures, paths, roads, modern elements, cartoonish, flat colors, low quality, blurry, noisy',
+            versions: [
+              {
+                name: 'Night',
+                content: 'Enchanted fantasy forest at night, glowing magical patterns...'
+              },
+              {
+                name: 'Ancient',
+                content: 'Ancient primal forest with massive trees, roots forming natural architecture...'
+              }
+            ]
           }),
-          negativePrompt: 'people, animals, text, watermark, low resolution, blurry, distortion, defocus, oversaturation, noise, grain, artifacts, signature, cropped, frame, border',
-          versions: JSON.stringify([
-            {
-              name: 'Winter',
-              content: 'Snow-covered fantasy landscape, frozen waterfalls...'
-            },
-            {
-              name: 'Dark Fantasy',
-              content: 'Ominous fantasy landscape, dark mountains...'
-            }
-          ]),
+          tags: ['locations', 'forest', 'magic', 'nature'],
+          featuredImage: null,
+          isFavorite: false,
+        },
+        {
+          name: 'Epic Landscape',
+          emoji: '🏔️',
+          color: '#d1d5db',
+          description: 'Generate epic fantasy landscapes',
+          content: 'Epic fantasy landscape, massive scale, towering mountains, magical atmosphere, crystal-clear lake reflecting the sky, distant floating islands, ancient stone structures, dynamic cloud formations, dramatic lighting, extreme depth perception, intricate details, epic wide view. Style: Fantasy digital art with breathtaking cinematic quality.',
+          category: 'locations',
+          parameters: JSON.stringify({
+            width: 1280,
+            height: 768,
+            steps: 45,
+            guidance: 7.2,
+            sampler: 'DPM++ 2M Karras',
+            negativePrompt: 'people, animals, text, watermark, low resolution, blurry, distortion, defocus, oversaturation, noise, grain, artifacts, signature, cropped, frame, border',
+            versions: [
+              {
+                name: 'Winter',
+                content: 'Snow-covered fantasy landscape, frozen waterfalls...'
+              },
+              {
+                name: 'Dark Fantasy',
+                content: 'Ominous fantasy landscape, dark mountains...'
+              }
+            ]
+          }),
           tags: ['landscapes', 'fantasy', 'nature', 'mountains'],
           featuredImage: null,
           isFavorite: false,
@@ -104,19 +133,19 @@ export async function seedPrompts(prisma: PrismaClient): Promise<void> {
             height: 1024,
             steps: 35,
             guidance: 7.8,
-            sampler: 'DPM++ 2M Karras'
+            sampler: 'DPM++ 2M Karras',
+            negativePrompt: 'cartoon, simple skeleton, zombie, excessive gore, exaggerated poses, bright colors, anime style, childish, clean armor, pristine condition, modern elements',
+            versions: [
+              {
+                name: 'Battle',
+                content: 'Undead knight in combat stance, cursed sword glowing with dark energy...'
+              },
+              {
+                name: 'Meditation',
+                content: 'Undead knight kneeling in contemplation before a ruined altar...'
+              }
+            ]
           }),
-          negativePrompt: 'cartoon, simple skeleton, zombie, excessive gore, exaggerated poses, bright colors, anime style, childish, clean armor, pristine condition, modern elements',
-          versions: JSON.stringify([
-            {
-              name: 'Battle',
-              content: 'Undead knight in combat stance, cursed sword glowing with dark energy...'
-            },
-            {
-              name: 'Meditation',
-              content: 'Undead knight kneeling in contemplation before a ruined altar...'
-            }
-          ]),
           tags: ['characters', 'undead', 'knight', 'dark'],
           featuredImage: null,
           isFavorite: false,
@@ -133,19 +162,19 @@ export async function seedPrompts(prisma: PrismaClient): Promise<void> {
             height: 1024,
             steps: 40,
             guidance: 7.5,
-            sampler: 'DPM++ 2M Karras'
+            sampler: 'DPM++ 2M Karras',
+            negativePrompt: 'simple fire effects, basic flames, modern clothing, cartoon style, bad anatomy, deformed, anime, chibi, poorly drawn face, extra limbs, text, watermark, signature, simple background',
+            versions: [
+              {
+                name: 'Fire Ritual',
+                content: 'Pyromancer performing ancient ritual, surrounded by circles of fire...'
+              },
+              {
+                name: 'Combat',
+                content: 'Pyromancer unleashing powerful fire spells in battle...'
+              }
+            ]
           }),
-          negativePrompt: 'simple fire effects, basic flames, modern clothing, cartoon style, bad anatomy, deformed, anime, chibi, poorly drawn face, extra limbs, text, watermark, signature, simple background',
-          versions: JSON.stringify([
-            {
-              name: 'Fire Ritual',
-              content: 'Pyromancer performing ancient ritual, surrounded by circles of fire...'
-            },
-            {
-              name: 'Combat',
-              content: 'Pyromancer unleashing powerful fire spells in battle...'
-            }
-          ]),
           tags: ['characters', 'magic', 'fire', 'fantasy'],
           featuredImage: null,
           isFavorite: false,
@@ -162,19 +191,19 @@ export async function seedPrompts(prisma: PrismaClient): Promise<void> {
             height: 768,
             steps: 45,
             guidance: 8.0,
-            sampler: 'DPM++ SDE Karras'
+            sampler: 'DPM++ SDE Karras',
+            negativePrompt: 'simple hole, normal colors, regular patterns, cartoon style, anime, childish, clean edges, symmetrical, basic shapes, flat colors, lack of depth',
+            versions: [
+              {
+                name: 'Manifestation',
+                content: 'Newly opened abyssal portal, dark energy violently emerging...'
+              },
+              {
+                name: 'Ancient',
+                content: 'Ancient stable abyssal portal, void crystals fully formed...'
+              }
+            ]
           }),
-          negativePrompt: 'simple hole, normal colors, regular patterns, cartoon style, anime, childish, clean edges, symmetrical, basic shapes, flat colors, lack of depth',
-          versions: JSON.stringify([
-            {
-              name: 'Manifestation',
-              content: 'Newly opened abyssal portal, dark energy violently emerging...'
-            },
-            {
-              name: 'Ancient',
-              content: 'Ancient stable abyssal portal, void crystals fully formed...'
-            }
-          ]),
           tags: ['locations', 'abyss', 'portal', 'dark'],
           featuredImage: null,
           isFavorite: false,
@@ -191,19 +220,19 @@ export async function seedPrompts(prisma: PrismaClient): Promise<void> {
             height: 768,
             steps: 40,
             guidance: 7.5,
-            sampler: 'Euler a'
+            sampler: 'Euler a',
+            negativePrompt: 'simple snow, smooth ice, flat sky, modern buildings, urban elements, tropical elements, desert, summer, green vegetation, warm colors',
+            versions: [
+              {
+                name: 'Blizzard',
+                content: 'Northern Lands during a fierce snowstorm, roaring winds...'
+              },
+              {
+                name: 'Dawn',
+                content: 'Northern Lands at dawn, rising sun reflecting on ice...'
+              }
+            ]
           }),
-          negativePrompt: 'simple snow, smooth ice, flat sky, modern buildings, urban elements, tropical elements, desert, summer, green vegetation, warm colors',
-          versions: JSON.stringify([
-            {
-              name: 'Blizzard',
-              content: 'Northern Lands during a fierce snowstorm, roaring winds...'
-            },
-            {
-              name: 'Dawn',
-              content: 'Northern Lands at dawn, rising sun reflecting on ice...'
-            }
-          ]),
           tags: ['locations', 'winter', 'landscape', 'fantasy'],
           featuredImage: null,
           isFavorite: false,

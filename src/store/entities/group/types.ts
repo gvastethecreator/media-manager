@@ -9,7 +9,7 @@ import type {
     GroupSortCriteria,
     GroupType,
     GroupViewMode
-} from '../../../types/entities/group';
+} from '@/types/entities/group/types';
 
 /**
  * Estado del core para el store de grupos

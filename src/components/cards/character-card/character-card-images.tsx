@@ -1,115 +1,237 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { ImageIcon } from 'lucide-react';
-import { Suspense, useEffect, useState } from 'react';
-import { getRecentCharacterImages } from './character-server-actions';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { useState } from 'react';
+
+// Imágenes con thumbnails para el componente de galería
+export interface ThumbnailImage {
+	id: string;
+	thumbnailUrl: string;
+	name?: string;
+	url?: string;
+	isVideo?: boolean;
+}
 
 interface CharacterCardImagesProps {
-	characterId: string;
-	primaryColor: string;
-	secondaryColor: string;
+	/** Imágenes a mostrar (rutas) */
+	images?: string[];
+	/** URL de la imagen destacada */
+	mainImage?: string;
+	/** Color primario para estilizado */
+	primaryColor?: string;
+	/** Nivel de rareza (1-10) para determinar efectos */
+	rarityLevel?: number;
+	/** Si está habilitado el efecto holográfico */
+	holographicEffect?: boolean;
+	/** Si está en modo tarjeta TCG */
+	tcgMode?: boolean;
+	/** Si está en modo compacto */
+	compact?: boolean;
 }
 
 /**
- * Componente para mostrar las imágenes recientes de un personaje en una tarjeta.
- * Similar a la sección de ilustración de una carta Magic.
+ * Componente para mostrar imágenes en una tarjeta de personaje TCG.
+ * Incluye efectos holográficos y animaciones según el nivel de rareza.
  */
-export function CharacterCardImages({ characterId, primaryColor, secondaryColor }: CharacterCardImagesProps) {
-	const [images, setImages] = useState<{ id: string; thumbnailUrl: string }[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+export function CharacterCardImages({
+	images = [],
+	mainImage,
+	primaryColor = '#8e44ad',
+	rarityLevel = 1,
+	holographicEffect = true,
+	tcgMode = true,
+	compact = false
+}: CharacterCardImagesProps) {
+	// Estado para el ángulo de visualización (para efecto holográfico)
+	const [viewAngle, setViewAngle] = useState({ x: 0, y: 0 });
 
-	useEffect(() => {
-		const loadImages = async () => {
-			try {
-				setIsLoading(true);
-				const data = await getRecentCharacterImages(characterId);
-				// Filtrar solo imágenes con thumbnailUrl válida
-				const validImages = data.filter((img) => img.thumbnailUrl);
-				setImages(validImages);
-			} catch (err) {
-				console.error('Error cargando imágenes:', err);
-				setError(err instanceof Error ? err.message : 'Error desconocido');
-			} finally {
-				setIsLoading(false);
-			}
-		};
+	// Usar la imagen principal o la primera de la lista
+	const displayImage = mainImage || (images && images.length > 0 ? images[0] : null);
 
-		loadImages();
-	}, [characterId]);
+	// Si no hay imagen, mostrar un placeholder
+	const hasImage = Boolean(displayImage);
 
-	return (
-		<div className="relative h-[160px] overflow-hidden border-b border-gray-400/30">
-			{/* Contenedor de imágenes con grid */}
-			<div
-				className={cn(
-					'w-full h-full grid gap-0.5',
-					images.length >= 4 ? 'grid-cols-3 grid-rows-2' : 'grid-cols-2 grid-rows-2'
-				)}
-				style={{
-					backgroundImage: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
-					borderBottom: `1px solid ${primaryColor}50`,
-				}}
-			>
-				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} />}>
-					{isLoading ? (
-						// Mostrar placeholders mientras carga
-						<>
-							{[...Array(6)].map((_, i) => (
-								<ImageLoading key={i} backgroundColor={secondaryColor} />
-							))}
-						</>
-					) : error ? (
-						// Mostrar mensaje de error
-						<div className="col-span-full row-span-full flex items-center justify-center text-destructive text-sm">
-							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error}
-						</div>
-					) : images.length === 0 ? (
-						// Mostrar mensaje si no hay imágenes
-						<div className="col-span-full row-span-full flex flex-col items-center justify-center text-center p-4">
-							<ImageIcon className="h-8 w-8 opacity-30 mb-2" />
-							<p className="text-sm opacity-70">No hay imágenes</p>
-						</div>
-					) : (
-						// Mostrar las imágenes disponibles
-						<>
-							{images.map((image, index) => (
-								<div key={image.id} className="relative overflow-hidden w-full h-full">
-									<img
-										src={image.thumbnailUrl}
-										alt={`Imagen ${index + 1}`}
-										className="w-full h-full object-cover"
-										loading="lazy"
-									/>
-								</div>
-							))}
-							{/* Rellena con placeholders si hay menos de 6 imágenes */}
-							{images.length < 6 &&
-								[...Array(6 - images.length)].map((_, i) => (
-									<div
-										key={`placeholder-${i}`}
-										className="bg-black/20 w-full h-full flex items-center justify-center"
-									>
-										<ImageIcon className="w-5 h-5 opacity-20" />
-									</div>
-								))}
-						</>
-					)}
-				</Suspense>
-			</div>
-		</div>
-	);
-}
+	// Determinar los efectos holográficos basados en la rareza
+	const getHolographicEffects = () => {
+		if (!tcgMode || !holographicEffect) return {};
 
-// Componente para mostrar mientras se cargan las imágenes
-function ImageLoading({ backgroundColor }: { backgroundColor: string }) {
+		// A mayor rareza, más pronunciados son los efectos
+		if (rarityLevel >= 9) {
+			return {
+				// Efecto iridiscente para cartas míticas
+				filter: 'hue-rotate(45deg) saturate(1.75)',
+				animation: 'var(--animate-iridescent)',
+			};
+		}
+
+		if (rarityLevel >= 7) {
+			return {
+				// Efecto brillante para cartas legendarias
+				filter: 'brightness(1.1) contrast(1.1)',
+				animation: 'var(--animate-shine-effect)',
+			};
+		}
+
+		if (rarityLevel >= 5) {
+			return {
+				// Efecto de cambio de gradiente para cartas épicas
+				background: `linear-gradient(45deg, ${primaryColor}40, ${primaryColor}90, ${primaryColor}40)`,
+				backgroundSize: '200% 200%',
+				animation: 'var(--animate-gradient-shift)',
+			};
+		}
+
+		// Para cartas comunes, sin efectos especiales
+		return {};
+	};
+
+	// Manejar el efecto holográfico en movimiento
+	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+		if (!tcgMode || !holographicEffect) return;
+
+		const el = e.currentTarget;
+		const rect = el.getBoundingClientRect();
+		const width = rect.width;
+		const height = rect.height;
+
+		// Calcular la posición relativa del mouse dentro del elemento
+		const x = ((e.clientX - rect.left) / width - 0.5) * 2; // -1 a 1
+		const y = ((e.clientY - rect.top) / height - 0.5) * 2; // -1 a 1
+
+		setViewAngle({ x, y });
+	};
+
+	// Restablecer el ángulo de vista cuando el mouse sale
+	const handleMouseLeave = () => {
+		setViewAngle({ x: 0, y: 0 });
+	};
+
+	// Aplicar los efectos holográficos basados en la rareza
+	const holographicStyle = getHolographicEffects();
+
 	return (
 		<div
-			className="animate-pulse relative overflow-hidden w-full h-full flex items-center justify-center"
-			style={{ backgroundColor: `${backgroundColor}30` }}
+			className={cn(
+				"relative overflow-hidden",
+				compact ? "h-24" : "h-48",
+				tcgMode && "border-b border-white/10"
+			)}
+			onMouseMove={handleMouseMove}
+			onMouseLeave={handleMouseLeave}
 		>
-			<ImageIcon className="w-5 h-5 opacity-20" />
+			{/* Fondo decorativo para cartas TCG */}
+			{tcgMode && (
+				<div
+					className="absolute inset-0 bg-black/20 z-0"
+					style={{
+						backgroundImage: `radial-gradient(circle at 50% 50%, ${primaryColor}30, transparent 80%)`,
+					}}
+				/>
+			)}
+
+			{/* Marco decorativo para cartas raras */}
+			{tcgMode && rarityLevel >= 3 && (
+				<div className="absolute inset-0 z-10 pointer-events-none">
+					{/* Bordes en estilo TCG */}
+					<div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-br-sm opacity-60"
+						style={{ borderColor: primaryColor }} />
+					<div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 rounded-bl-sm opacity-60"
+						style={{ borderColor: primaryColor }} />
+					<div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 rounded-tr-sm opacity-60"
+						style={{ borderColor: primaryColor }} />
+					<div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 rounded-tl-sm opacity-60"
+						style={{ borderColor: primaryColor }} />
+				</div>
+			)}
+
+			{/* Imagen principal con efectos holográficos */}
+			{hasImage ? (
+				<motion.div
+					className="relative w-full h-full z-10"
+					style={{
+						transform: `perspective(1000px) rotateY(${viewAngle.x * 5}deg) rotateX(${-viewAngle.y * 5}deg)`,
+						transformStyle: 'preserve-3d',
+						transition: 'transform 0.1s ease-out'
+					}}
+				>
+					{/* Imagen del personaje */}
+					<Image
+						src={displayImage as string}
+						alt="Character image"
+						fill
+						className={cn(
+							"object-cover",
+							rarityLevel >= 5 && tcgMode && holographicEffect && "transition-all duration-500"
+						)}
+						style={{
+							...holographicStyle,
+							transformStyle: 'preserve-3d'
+						}}
+					/>
+
+					{/* Efecto holográfico de brillo */}
+					{tcgMode && holographicEffect && rarityLevel >= 3 && (
+						<div
+							className="absolute inset-0 z-20 pointer-events-none opacity-30"
+							style={{
+								background: `linear-gradient(
+									${135 + viewAngle.x * 30}deg,
+									transparent,
+									rgba(255, 255, 255, 0.5) ${50 + viewAngle.y * 10}%,
+									transparent
+								)`,
+							}}
+						/>
+					)}
+
+					{/* Patrón de líneas holográficas */}
+					{tcgMode && holographicEffect && rarityLevel >= 7 && (
+						<div
+							className="absolute inset-0 z-20 pointer-events-none opacity-10 mix-blend-overlay"
+							style={{
+								backgroundImage: `repeating-linear-gradient(
+									${90 + viewAngle.x * 20}deg,
+									transparent,
+									rgba(255, 255, 255, 0.8) 1px,
+									transparent 2px
+								)`,
+								backgroundSize: '4px 4px',
+							}}
+						/>
+					)}
+				</motion.div>
+			) : (
+				// Placeholder cuando no hay imagen
+				<div
+					className="w-full h-full flex items-center justify-center bg-black/20 text-white/50"
+					style={{
+						background: `radial-gradient(circle, ${primaryColor}30 0%, transparent 70%)`,
+					}}
+				>
+					<span className="text-4xl transform -rotate-12">?</span>
+				</div>
+			)}
+
+			{/* Capa de arte para cartas TCG (marco y efectos) */}
+			{tcgMode && (
+				<div className="absolute inset-0 pointer-events-none z-30">
+					{/* Marco interno */}
+					<div
+						className="absolute inset-3 border border-white/10 rounded"
+						style={{
+							boxShadow: rarityLevel >= 5 ? `0 0 10px ${primaryColor}50 inset` : 'none'
+						}}
+					/>
+
+					{/* Efecto viñeta */}
+					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+
+					{/* Efecto de brillo superior */}
+					<div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-white/10 to-transparent" />
+				</div>
+			)}
 		</div>
 	);
 }
