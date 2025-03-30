@@ -1,165 +1,146 @@
-import type { BaseEntity } from '@/types/store.types';
+/**
+ * @file Tipos para configuración global
+ * @module types/settings
+ */
 
-export type ThemeMode = 'light' | 'dark' | 'system';
-export type Language = 'es' | 'en';
-export type ThumbnailQuality = 'low' | 'medium' | 'high';
-export type SortMode = 'name' | 'date' | 'size' | 'type';
-export type SortDirection = 'asc' | 'desc';
-export type ViewMode = 'grid' | 'list' | 'masonry' | 'cards';
-export type ThumbnailSize = 'sm' | 'md' | 'lg';
+import type { JSONString } from '@/utils/types/utility-types';
+import { z } from 'zod';
+import { ThumbnailQuality } from './thumbnails';
+import { ViewMode } from './ui.types';
 
-export interface Profile {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	theme: ThemeMode;
-	language: Language;
-	isActive: boolean;
+/**
+ * Tema de la aplicación
+ */
+export enum Theme {
+    LIGHT = 'light',
+    DARK = 'dark',
+    SYSTEM = 'system'
 }
 
-export interface BaseEntityWithStats extends BaseEntity {
-	_count?: {
-		images: number;
-	};
-	totalSize?: number;
+/**
+ * Idioma de la aplicación
+ */
+export enum Language {
+    ES = 'es',
+    EN = 'en'
 }
 
-export interface Album extends BaseEntityWithStats {
-	type?: string;
-	properties?: string;
-	requirements?: string;
-	stats?: string;
+/**
+ * Configuración de interfaz
+ */
+export interface UISettings {
+    theme: Theme;
+    language: Language;
+    defaultViewMode: ViewMode;
+    animationsEnabled: boolean;
+    sidebarExpanded: boolean;
+    cardSize: number;
+    gridColumns: number;
+    thumbnailQuality: ThumbnailQuality;
+    showFilenames: boolean;
+    showMetadata: boolean;
+    confirmDeletes: boolean;
 }
 
-export interface Collection extends Omit<BaseEntityWithStats, 'filters'> {
-	sortBy: SortMode;
-	sortDirection: SortDirection;
-	filters: string[];
-	count: number;
+/**
+ * Configuración de importación
+ */
+export interface ImportSettings {
+    importPath: string;
+    watchFolder: boolean;
+    createMissingFolders: boolean;
+    parseMetadata: boolean;
+    generateThumbnails: boolean;
+    organizeByDate: boolean;
+    skipDuplicates: boolean;
 }
 
-export interface WorldItem extends BaseEntityWithStats {
-	type: string;
-	rarity: string;
-	properties: string;
-	requirements: string;
-	origin: string;
-	stats: string;
+/**
+ * Configuración de exportación
+ */
+export interface ExportSettings {
+    exportPath: string;
+    includeMetadata: boolean;
+    includeThumbnails: boolean;
+    formatOutput: boolean;
+    maxConcurrent: number;
 }
 
-export interface Place extends BaseEntityWithStats {
-	type: string;
-	climate: string;
-	population: number;
-	government: string;
-	history: string;
-	stats: string;
+/**
+ * Configuración de cache
+ */
+export interface CacheSettings {
+    enabled: boolean;
+    maxSize: number;
+    ttl: number;
+    cleanupInterval: number;
 }
 
-export interface Tag {
-	id: string;
-	name: string;
-	color: string;
-	count: number;
+/**
+ * Configuración completa
+ */
+export interface Settings {
+    ui: UISettings;
+    import: ImportSettings;
+    export: ExportSettings;
+    cache: CacheSettings;
+    customization: JSONString<Record<string, unknown>>;
 }
 
-export interface Folder {
-	id: string;
-	name: string;
-	path: string;
-	isIndexed: boolean;
-	lastIndexed: string | null;
-	totalFiles: number;
-	totalSize: number;
-}
+// Validaciones Zod
+export const themeSchema = z.nativeEnum(Theme);
+export const languageSchema = z.nativeEnum(Language);
 
-export interface ViewSettings {
-	defaultView: ViewMode;
-	showHiddenFiles: boolean;
-	sortBy: SortMode;
-	sortDirection: SortDirection;
-	thumbnailSize: ThumbnailSize;
-}
+export const uiSettingsSchema = z.object({
+    theme: themeSchema,
+    language: languageSchema,
+    defaultViewMode: z.nativeEnum(ViewMode),
+    animationsEnabled: z.boolean(),
+    sidebarExpanded: z.boolean(),
+    cardSize: z.number().min(50).max(500),
+    gridColumns: z.number().min(1).max(12),
+    thumbnailQuality: z.nativeEnum(ThumbnailQuality),
+    showFilenames: z.boolean(),
+    showMetadata: z.boolean(),
+    confirmDeletes: z.boolean()
+});
 
-export interface ThumbnailSettings {
-	quality: ThumbnailQuality;
-	generateOnUpload: boolean;
-	maxSize: number;
-	cacheSize: number;
-	cachePath: string;
-}
+export const importSettingsSchema = z.object({
+    importPath: z.string(),
+    watchFolder: z.boolean(),
+    createMissingFolders: z.boolean(),
+    parseMetadata: z.boolean(),
+    generateThumbnails: z.boolean(),
+    organizeByDate: z.boolean(),
+    skipDuplicates: z.boolean()
+});
 
-export interface SystemSettings {
-	theme: ThemeMode;
-	language: Language;
-	autoStart: boolean;
-	minimizeToTray: boolean;
-	checkUpdates: boolean;
-	telemetry: boolean;
-	// Métricas del sistema
-	cpuUsage: number;
-	memoryUsage: number;
-	cacheSize: number;
-}
+export const exportSettingsSchema = z.object({
+    exportPath: z.string(),
+    includeMetadata: z.boolean(),
+    includeThumbnails: z.boolean(),
+    formatOutput: z.boolean(),
+    maxConcurrent: z.number().min(1).max(10)
+});
 
-export interface ShortcutSettings {
-	[key: string]: string;
-}
+export const cacheSettingsSchema = z.object({
+    enabled: z.boolean(),
+    maxSize: z.number().min(0),
+    ttl: z.number().min(0),
+    cleanupInterval: z.number().min(0)
+});
 
-export interface AppSettings {
-	profiles: Profile[];
-	activeProfile: string | null;
-	collections: Collection[];
-	tags: Tag[];
-	folders: Folder[];
+export const settingsSchema = z.object({
+    ui: uiSettingsSchema,
+    import: importSettingsSchema,
+    export: exportSettingsSchema,
+    cache: cacheSettingsSchema,
+    customization: z.string()
+});
 
-	view: ViewSettings;
-	thumbnails: ThumbnailSettings;
-	system: SystemSettings;
-	shortcuts: ShortcutSettings;
-
-	version: string;
-	lastUpdate: string;
-}
-
-export const DEFAULT_SETTINGS: AppSettings = {
-	profiles: [],
-	activeProfile: null,
-	collections: [],
-	tags: [],
-	folders: [],
-
-	view: {
-		defaultView: 'grid',
-		showHiddenFiles: false,
-		sortBy: 'name',
-		sortDirection: 'asc',
-		thumbnailSize: 'md',
-	},
-
-	thumbnails: {
-		quality: 'medium',
-		generateOnUpload: true,
-		maxSize: 500,
-		cacheSize: 1000,
-		cachePath: './cache/thumbnails',
-	},
-
-	system: {
-		theme: 'system',
-		language: 'es',
-		autoStart: false,
-		minimizeToTray: true,
-		checkUpdates: true,
-		telemetry: false,
-		cpuUsage: 0,
-		memoryUsage: 0,
-		cacheSize: 0,
-	},
-
-	shortcuts: {},
-
-	version: '1.0.0',
-	lastUpdate: new Date().toISOString(),
-};
+// Tipos inferidos
+export type UISettingsValidated = z.infer<typeof uiSettingsSchema>;
+export type ImportSettingsValidated = z.infer<typeof importSettingsSchema>;
+export type ExportSettingsValidated = z.infer<typeof exportSettingsSchema>;
+export type CacheSettingsValidated = z.infer<typeof cacheSettingsSchema>;
+export type SettingsValidated = z.infer<typeof settingsSchema>;

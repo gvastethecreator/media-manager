@@ -1,188 +1,386 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import type { WorldItem } from '@/types/entities/world-items';
-import { BookType, Box, GemIcon, StoreIcon } from 'lucide-react';
+import { WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
+import type { WorldItemWithRelations } from '@/types/entities/world-item/types';
+import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { CardHeader } from '../card-header';
 import { WorldItemCardContent } from './world-item-card-content';
 import { WorldItemCardFooter } from './world-item-card-footer';
 import { WorldItemCardImages } from './world-item-card-images';
 
-interface WorldItemCardProps {
-	worldItem: WorldItem & {
-		_count?: {
-			images: number;
-		};
-		imageCount?: number;
-	};
+export interface WorldItemCardProps {
+	worldItem: WorldItemWithRelations;
 	onClick?: () => void;
 	className?: string;
 	style?: React.CSSProperties;
+	tcgMode?: boolean;
+	isSelected?: boolean;
+	compact?: boolean;
+	disabled?: boolean;
+	interactive?: boolean;
 }
 
 /**
- * Card para mostrar un objeto del mundo, con un diseño inspirado en cartas de Magic.
+ * Card para mostrar un objeto del mundo, con un diseño inspirado en cartas de TCG.
+ * Muestra propiedades, atributos, descripción y estadísticas en formato
+ * visualmente atractivo.
  */
-export function WorldItemCard({ worldItem, onClick, className, style }: WorldItemCardProps) {
+export function WorldItemCard({
+	worldItem,
+	onClick,
+	className,
+	style,
+	tcgMode = true,
+	isSelected = false,
+	compact = false,
+	disabled = false,
+	interactive = true,
+	...rest
+}: WorldItemCardProps) {
+	const [isHovered, setIsHovered] = useState(false);
+
+	// Extraer propiedades básicas del objeto
+	const {
+		id,
+		name,
+		emoji = '🎯',
+		color,
+		category,
+		description,
+		shortcut,
+		createdAt,
+		updatedAt,
+		isFavorite = false,
+		type = 'misc' as WorldItemType,
+		rarity = 'common' as WorldItemRarity,
+		origin,
+		attributes,
+		effects,
+		requirements,
+		stats,
+		properties,
+		featuredImage
+	} = worldItem;
+
 	// Calcular valores derivados
-	const imagesCount = worldItem._count?.images || worldItem.imageCount || 0;
+	const imagesCount = worldItem._count?.images || 0;
+	const videosCount = worldItem._count?.videos || 0;
+	const albumsCount = worldItem._count?.albums || 0;
+	const collectionsCount = worldItem._count?.collections || 0;
+	const tagsCount = worldItem._count?.tags || 0;
+	const charactersCount = worldItem._count?.characters || 0;
+	const placesCount = worldItem._count?.places || 0;
+	const conceptsCount = worldItem._count?.concepts || 0;
+	const promptsCount = worldItem._count?.prompts || 0;
+	const notesCount = worldItem._count?.notes || 0;
+	const wildcardsCount = worldItem._count?.wildcards || 0;
+	const propertiesCount = worldItem._count?.properties || 0;
+	const groupsCount = worldItem._count?.groups || 0;
 
-	// Colores para el gradiente y el icono - derivados del tipo de objeto
-	const { primaryColor, secondaryColor, icon } = useMemo(() => {
-		const color = worldItem.color || '#4F46E5';
+	// Calcular total de relaciones para efectos visuales
+	const totalRelations =
+		imagesCount + videosCount + albumsCount + collectionsCount +
+		tagsCount + charactersCount + placesCount + conceptsCount +
+		promptsCount + notesCount + wildcardsCount + propertiesCount + groupsCount;
 
-		// Colores según el tipo de objeto o usar el color personalizado
-		switch (worldItem.type?.toUpperCase()) {
-			case 'ARTIFACT':
-				return {
-					primaryColor: worldItem.color || '#ad5389',
-					secondaryColor: darkenColor(worldItem.color) || '#3c1053',
-					icon: <GemIcon className="w-4 h-4" />,
-				};
-			case 'BOOK':
-				return {
-					primaryColor: worldItem.color || '#007991',
-					secondaryColor: darkenColor(worldItem.color) || '#78ffd6',
-					icon: <BookType className="w-4 h-4" />,
-				};
-			case 'CONSUMABLE':
-				return {
-					primaryColor: worldItem.color || '#659999',
-					secondaryColor: darkenColor(worldItem.color) || '#f4791f',
-					icon: <StoreIcon className="w-4 h-4" />,
-				};
+	// Colores para el gradiente y el icono - derivados del tipo y rareza del objeto
+	const { primaryColor, secondaryColor, icon, intensityFactor } = useMemo(() => {
+		// Color base desde la propiedad o predeterminado
+		const baseColor = color || '#4F46E5';
+
+		// Colores según el tipo de objeto
+		let iconComponent: React.ReactNode;
+		let primaryCol: string;
+		let secondaryCol: string | null;
+
+		switch (type?.toLowerCase()) {
+			case 'artifact':
+				iconComponent = <GemIcon className="w-4 h-4" />;
+				primaryCol = baseColor || '#ad5389';
+				secondaryCol = darkenColor(baseColor) || '#3c1053';
+				break;
+			case 'book':
+				iconComponent = <BookOpenText className="w-4 h-4" />;
+				primaryCol = baseColor || '#007991';
+				secondaryCol = darkenColor(baseColor) || '#78ffd6';
+				break;
+			case 'consumable':
+				iconComponent = <Beaker className="w-4 h-4" />;
+				primaryCol = baseColor || '#659999';
+				secondaryCol = darkenColor(baseColor) || '#f4791f';
+				break;
+			case 'weapon':
+				iconComponent = <Sword className="w-4 h-4" />;
+				primaryCol = baseColor || '#8A2387';
+				secondaryCol = darkenColor(baseColor) || '#F27121';
+				break;
+			case 'equipment':
+				iconComponent = <StoreIcon className="w-4 h-4" />;
+				primaryCol = baseColor || '#3A1C71';
+				secondaryCol = darkenColor(baseColor) || '#FFAF7B';
+				break;
 			default:
-				return {
-					primaryColor: worldItem.color || '#0f0c29',
-					secondaryColor: darkenColor(worldItem.color) || '#302b63',
-					icon: <Box className="w-4 h-4" />,
-				};
+				iconComponent = <Box className="w-4 h-4" />;
+				primaryCol = baseColor || '#0f0c29';
+				secondaryCol = darkenColor(baseColor) || '#302b63';
 		}
-	}, [worldItem.color, worldItem.type]);
+
+		// Ajustar intensidad según rareza
+		const rarityFactors: Record<string, number> = {
+			common: 1,
+			uncommon: 1.1,
+			rare: 1.2,
+			epic: 1.3,
+			legendary: 1.5
+		};
+
+		const intensityFactor = rarityFactors[rarity?.toLowerCase() || 'common'] || 1;
+
+		return {
+			primaryColor: primaryCol,
+			secondaryColor: secondaryCol,
+			icon: iconComponent,
+			intensityFactor
+		};
+	}, [color, type, rarity]);
+
+	// Colores basados en rareza para el efecto TCG
+	const rarityColorMap: Record<string, string> = {
+		common: '#6b7280',
+		uncommon: '#22c55e',
+		rare: '#3b82f6',
+		epic: '#8b5cf6',
+		legendary: '#f59e0b'
+	};
+
+	// Color de efecto basado en rareza
+	const rarityColor = rarityColorMap[rarity?.toLowerCase()] || rarityColorMap.common;
+
+	// Nivel de brillo basado en rareza para efectos
+	const rarityGlowMap: Record<string, number> = {
+		common: 0,
+		uncommon: 5,
+		rare: 10,
+		epic: 15,
+		legendary: 20
+	};
+
+	const rarityGlow = rarityGlowMap[rarity?.toLowerCase()] || 0;
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
 				e.preventDefault();
 				onClick();
 			}
 		},
-		[onClick]
+		[onClick, disabled]
 	);
 
-	// Parsear propiedades si es un string
-	const properties = useMemo(() => {
-		if (typeof worldItem.properties === 'string' && worldItem.properties) {
+	// Procesar propiedades si es un string o formato JSON
+	const parsedProperties = useMemo(() => {
+		if (typeof properties === 'string' && properties) {
 			try {
-				return JSON.parse(worldItem.properties);
+				return JSON.parse(properties);
 			} catch (e) {
 				return [];
 			}
 		}
-		return worldItem.properties || [];
-	}, [worldItem.properties]);
+		return properties || [];
+	}, [properties]);
 
-	// Parsear requerimientos si es un string
-	const requirements = useMemo(() => {
-		if (typeof worldItem.requirements === 'string' && worldItem.requirements) {
+	// Procesar requerimientos si es un string o formato JSON
+	const parsedRequirements = useMemo(() => {
+		if (typeof requirements === 'string' && requirements) {
 			try {
-				return JSON.parse(worldItem.requirements);
+				return JSON.parse(requirements);
 			} catch (e) {
 				return {};
 			}
 		}
-		return worldItem.requirements || {};
-	}, [worldItem.requirements]);
+		return requirements || {};
+	}, [requirements]);
 
-	// Definir estilos de la tarjeta
-	const cardStyle = useMemo(
-		() => ({
-			// Borde basado en el color primario
-			borderColor: primaryColor,
-			// Fondo con gradiente sutil basado en el color primario
-			background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)`,
-			...style,
-		}),
-		[primaryColor, style]
-	);
+	// Procesar atributos si es un string o formato JSON
+	const parsedAttributes = useMemo(() => {
+		if (typeof attributes === 'string' && attributes) {
+			try {
+				return JSON.parse(attributes);
+			} catch (e) {
+				return [];
+			}
+		}
+		return attributes || [];
+	}, [attributes]);
+
+	// Procesar efectos si es un string o formato JSON
+	const parsedEffects = useMemo(() => {
+		if (typeof effects === 'string' && effects) {
+			try {
+				return JSON.parse(effects);
+			} catch (e) {
+				return [];
+			}
+		}
+		return effects || [];
+	}, [effects]);
+
+	// Procesar estadísticas si es un string o formato JSON
+	const parsedStats = useMemo(() => {
+		if (typeof stats === 'string' && stats) {
+			try {
+				return JSON.parse(stats);
+			} catch (e) {
+				return {};
+			}
+		}
+		return stats || {};
+	}, [stats]);
+
+	// Procesar la imagen destacada
+	const processedFeaturedImage = featuredImage && typeof featuredImage === 'object'
+		? featuredImage
+		: null;
 
 	// Render del componente
 	return (
-		<motion.div
+		<motion.article
 			className={cn(
-				// Base
-				'relative bg-card',
-				'w-[300px] h-[420px] rounded-[4.75%] overflow-hidden',
-				'border-2 shadow-md',
-				// Interacción
-				'transition-all duration-300 ease-out',
-				'hover:shadow-lg hover:scale-[1.02]',
-				'active:scale-[0.98]',
-				// Cursor
-				onClick ? 'cursor-pointer' : '',
-				// Clase personalizada
+				"flex flex-col overflow-hidden border-border relative z-0",
+				disabled && "opacity-70 pointer-events-none",
+				interactive && !disabled && "cursor-pointer hover:shadow-lg transition-shadow duration-300",
 				className
 			)}
-			whileHover={{ y: -5 }}
-			whileTap={{ scale: 0.98 }}
-			onClick={onClick}
+			style={{
+				background: 'rgba(0, 0, 0, 0.05)',
+				border: tcgMode ? `1px solid ${primaryColor}60` : undefined,
+				borderRadius: tcgMode ? '8px' : undefined,
+				maxWidth: compact ? 300 : undefined,
+				boxShadow: tcgMode ? `0 0 ${rarityGlow}px ${primaryColor}30` : undefined,
+				...style
+			}}
+			whileHover={!disabled && interactive ? { y: -5 } : {}}
+			whileTap={!disabled && interactive && onClick ? { scale: 0.98 } : {}}
+			onClick={disabled || !interactive ? undefined : onClick}
 			onKeyDown={handleKeyDown}
-			tabIndex={onClick ? 0 : -1}
-			role={onClick ? 'button' : 'article'}
-			aria-label={`Objeto: ${worldItem.name}`}
-			data-world-item-id={worldItem.id}
-			style={cardStyle}
+			tabIndex={disabled || !interactive || !onClick ? -1 : 0}
+			role={onClick && interactive ? 'button' : 'article'}
+			aria-label={`Objeto: ${name}`}
+			data-world-item-id={id}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+			{...rest}
 		>
-			{/* Resplandor de borde en hover */}
-			<div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-				<div
-					className="absolute inset-0 rounded-[4.75%] blur-sm -z-10"
-					style={{ boxShadow: `0 0 15px 2px ${primaryColor}` }}
+			{/* Card Container con efecto TCG */}
+			<div
+				className={cn(
+					"rounded-xl h-full w-full overflow-hidden transition-all duration-300 ease-out",
+					tcgMode && "shadow-md",
+					isHovered && tcgMode && "scale-[1.01]"
+				)}
+				style={{
+					background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)`,
+				}}
+			>
+				{/* Efectos TCG */}
+				{tcgMode && (
+					<>
+						{/* Efecto holográfico con gradiente */}
+						<div
+							className="absolute inset-0 opacity-0 hover:opacity-30 transition-opacity duration-300 pointer-events-none"
+							style={{
+								backgroundImage: `
+									linear-gradient(125deg,
+									transparent 0%,
+									${primaryColor}30 25%,
+									${rarityColor}30 50%,
+									${primaryColor}30 75%,
+									transparent 100%)
+								`,
+								backgroundSize: '200% 200%',
+								animation: 'gradient-shift 3s ease infinite'
+							}}
+						/>
+
+						{/* Sello de rareza */}
+						<div
+							className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 opacity-10 pointer-events-none"
+							style={{
+								background: `radial-gradient(circle, ${rarityColor}50 0%, transparent 70%)`,
+							}}
+						>
+							<div className="w-full h-full flex items-center justify-center">
+								{icon}
+							</div>
+						</div>
+
+						{/* Indicador visual de rareza */}
+						{rarity && rarity.toLowerCase() !== 'common' && (
+							<div className="absolute top-2 right-2 z-10">
+								<div
+									className={cn(
+										"rounded-full p-1",
+										rarity.toLowerCase() === "legendary" && "animate-pulse"
+									)}
+									style={{ backgroundColor: `${rarityColor}30` }}
+								>
+									<Sparkles
+										className="h-4 w-4"
+										style={{ color: rarityColor }}
+									/>
+								</div>
+							</div>
+						)}
+					</>
+				)}
+
+				{/* Contenido estructurado de la tarjeta */}
+
+				{/* Encabezado de la tarjeta */}
+				<CardHeader
+					title={name}
+					subtitle={type || 'Objeto'}
+					icon={icon}
+					primaryColor={primaryColor}
+				/>
+
+				{/* Sección de imágenes */}
+				<WorldItemCardImages
+					worldItemId={id}
+					primaryColor={primaryColor}
+					secondaryColor={secondaryColor}
+				/>
+
+				{/* Contenido principal */}
+				<WorldItemCardContent
+					description={description}
+					properties={parsedProperties}
+					requirements={parsedRequirements}
+					attributes={parsedAttributes}
+					effects={parsedEffects}
+					stats={parsedStats}
+					origin={origin}
+					rarity={rarity}
+					primaryColor={primaryColor}
+				/>
+
+				{/* Pie de la tarjeta */}
+				<WorldItemCardFooter
+					createdAt={createdAt}
+					updatedAt={updatedAt}
+					imagesCount={imagesCount}
+					isFavorite={isFavorite}
+					category={category}
+					type={type}
+					primaryColor={primaryColor}
+					secondaryColor={secondaryColor}
 				/>
 			</div>
-
-			{/* Contenido estructurado de la tarjeta */}
-
-			{/* Encabezado de la tarjeta */}
-			<CardHeader
-				title={worldItem.name}
-				subtitle={worldItem.type || 'Objeto'}
-				icon={icon}
-				primaryColor={primaryColor}
-			/>
-
-			{/* Sección de imágenes */}
-			<WorldItemCardImages
-				worldItemId={worldItem.id}
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
-			/>
-
-			{/* Contenido principal */}
-			<WorldItemCardContent
-				description={worldItem.description}
-				properties={worldItem.properties}
-				requirements={worldItem.requirements}
-				origin={worldItem.origin}
-				rarity={worldItem.rarity}
-				primaryColor={primaryColor}
-			/>
-
-			{/* Pie de la tarjeta */}
-			<WorldItemCardFooter
-				createdAt={worldItem.createdAt}
-				updatedAt={worldItem.updatedAt}
-				imagesCount={imagesCount}
-				isFavorite={worldItem.isFavorite}
-				category={worldItem.category}
-				type={worldItem.type}
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
-			/>
-		</motion.div>
+		</motion.article>
 	);
 }
 

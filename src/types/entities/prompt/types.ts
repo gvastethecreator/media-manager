@@ -7,7 +7,6 @@ import type { Album } from '../album';
 import type { Character } from '../character';
 import type { Collection } from '../collection';
 import type { Concept } from '../concept';
-import type { Group } from '../group';
 import type { Image } from '../image';
 import type { Note } from '../note';
 import type { Place } from '../place';
@@ -16,6 +15,7 @@ import type { Tag } from '../tag';
 import type { Video } from '../video';
 import type { Wildcard } from '../wildcard';
 import type { WorldItem } from '../world-item';
+import type { Group } from '../group';
 
 /**
  * Interfaz base para prompt

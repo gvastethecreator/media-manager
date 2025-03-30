@@ -7,7 +7,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { createPropertySchema } from '@/lib/validations/property';
+import type { createPropertySchema } from '@/lib/validations/property';
 import type { z } from 'zod';
 
 type PropertyCategory = z.infer<typeof createPropertySchema>['category'];

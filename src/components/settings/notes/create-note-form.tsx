@@ -19,7 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
 import { NoteCategory } from '@/types/entities/note/enums';
-import { Note } from '@/types/entities/notes';
+import type { Note } from '@/types/entities/notes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';

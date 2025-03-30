@@ -102,3 +102,45 @@ export function generatePropertyColor(name: string): string {
   // Seleccionar un color basado en el hash
   return colors[hashValue % colors.length];
 }
+
+/**
+ * Extiende una propiedad de Prisma con propiedades calculadas y formateadas para la UI
+ * @param property Propiedad base de la base de datos
+ * @returns Propiedad extendida con propiedades calculadas
+ */
+export function extendProperty(property: any) {
+  if (!property) return null;
+
+  return {
+    ...property,
+    // Asegurar que las fechas sean instancias de Date
+    createdAt: property.createdAt instanceof Date ? property.createdAt : new Date(property.createdAt),
+    updatedAt: property.updatedAt instanceof Date ? property.updatedAt : new Date(property.updatedAt),
+    // Calcular contadores de elementos relacionados si están disponibles
+    itemCount: property._count ? (
+      (property._count.images || 0) +
+      (property._count.videos || 0) +
+      (property._count.albums || 0) +
+      (property._count.collections || 0) +
+      (property._count.tags || 0) +
+      (property._count.characters || 0) +
+      (property._count.places || 0) +
+      (property._count.worldItems || 0) +
+      (property._count.concepts || 0) +
+      (property._count.prompts || 0) +
+      (property._count.notes || 0) +
+      (property._count.wildcards || 0) +
+      (property._count.groups || 0)
+    ) : 0
+  };
+}
+
+/**
+ * Extiende un array de propiedades con propiedades calculadas
+ * @param properties Array de propiedades de la base de datos
+ * @returns Array de propiedades extendidas
+ */
+export function extendProperties(properties: any[]) {
+  if (!properties || !Array.isArray(properties)) return [];
+  return properties.map(property => extendProperty(property));
+}

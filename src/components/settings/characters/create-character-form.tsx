@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
-import { CharacterBase as Character, CreateCharacterData } from '@/types/entities/character/base';
+import type { CharacterBase as Character, CreateCharacterData } from '@/types/entities/character/base';
 import { CHARACTER_CLASS_COLORS, CHARACTER_CLASS_EMOJIS, CharacterAlignment, CharacterCategory, CharacterClass, CharacterRace } from '@/types/entities/character/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';

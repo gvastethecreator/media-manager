@@ -134,6 +134,17 @@ export enum WildcardSortCriteria {
 }
 
 /**
+ * Enumeración para modos de visualización
+ */
+export enum WildcardViewMode {
+  GRID = 'grid',
+  LIST = 'list',
+  CARDS = 'cards',
+  TREE = 'tree',
+  DETAILS = 'details',
+}
+
+/**
  * Mapa de propiedades para ordenación
  */
 export const WILDCARD_SORT_PROPERTY_MAP: Record<WildcardSortCriteria, string> = {

@@ -23,25 +23,13 @@ export * from './video';
 export * from './world-item';
 
 // Nuevas entidades
-export * from './group';
+export * from './group/types';
 export * from './property';
 export * from './wildcard';
 
 // Utilidades y tipos comunes
 export * from './queueJob';
 
-// Alias de compatibilidad (mantener para retrocompatibilidad)
-// Se recomienda usar las importaciones directas de los módulos respectivos
-export * from './albums';
-export * from './characters';
-export * from './collections';
-export * from './concepts';
+// Exportación de entidades comunes
 export * from './entities';
-export * from './folders';
-export * from './images';
-export * from './notes';
-export * from './places';
-export * from './prompts';
-export * from './tags';
-export * from './world-items';
 

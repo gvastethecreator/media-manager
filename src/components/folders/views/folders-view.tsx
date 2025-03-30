@@ -10,10 +10,12 @@ import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useFileManager } from '@/store/files/file-manager.store';
 import type { Folder } from '@/types/entities/folders';
-import { FolderIcon } from 'lucide-react';
+import { FolderIcon, XCircle, RefreshCcw, DatabaseIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../../views/types';
+import { Button, buttonVariants } from '@/components/ui/button';
+import Link from 'next/link';
 
 const viewLogger = serverLogger.withContext('FoldersView');
 
@@ -147,8 +149,25 @@ export function FoldersView(_props: ViewProps) {
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
-				<p className="text-destructive">Error: {error}</p>
+			<div className="flex flex-col items-center justify-center h-full p-6">
+				<div className="max-w-md w-full bg-destructive/10 rounded-lg p-6 text-center">
+					<XCircle className="h-12 w-12 mx-auto text-destructive mb-4" />
+					<h3 className="text-xl font-semibold text-destructive mb-2">Error al cargar carpetas</h3>
+					<p className="text-sm mb-4">{error}</p>
+					<p className="text-xs text-muted-foreground mb-4">
+						Este error podría estar relacionado con problemas de conexión a la base de datos o problemas con la estructura de tablas.
+					</p>
+					<div className="flex flex-col gap-2">
+						<Button variant="outline" onClick={loadFolders}>
+							<RefreshCcw className="h-4 w-4 mr-2" />
+							Reintentar
+						</Button>
+						<Link href="/diagnostics/database" className={buttonVariants({ variant: "default" })}>
+							<DatabaseIcon className="h-4 w-4 mr-2" />
+							Ejecutar diagnóstico
+						</Link>
+					</div>
+				</div>
 			</div>
 		);
 	}

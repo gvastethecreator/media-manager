@@ -3,29 +3,56 @@
  * @module types/entities/world-item
  */
 
-// Exportar desde archivo base
+// Exportar desde archivos individuales
+export * from './base';
+export * from './enums';
+export * from './extended';
+export * from './stats-types';
 export * from './types';
-export * from './world-item-extended-types';
-export * from './world-item-stats-types';
 
-// Exportar desde enumeraciones
+// Exportar enumeraciones explícitamente para mejor claridad
 export {
-  WorldItemCategory,
-  WorldItemRarity,
-  WorldItemRelationshipType,
-  WorldItemSize,
-  WorldItemSortCriteria,
-  WorldItemType,
-  WorldItemViewMode
+    WORLD_ITEM_SORT_PROPERTY_MAP,
+    WorldItemCategory,
+    WorldItemRarity,
+    WorldItemRelationshipType,
+    WorldItemSize,
+    WorldItemSortCriteria,
+    WorldItemType,
+    WorldItemViewMode
 } from './enums';
 
-// Exportar desde definiciones extendidas
+// Exportar tipos principales explícitamente
 export type {
-  ParsedWorldItem,
-  ParsedWorldItemWithRelations,
-  WorldItemFilters
-} from './extended';
+    CreateWorldItemData,
+    UpdateWorldItemData,
+    WorldItemBase,
+    WorldItemCount,
+    WorldItemFilter,
+    WorldItemFilters,
+    WorldItemValidated,
+    WorldItemWithFiles,
+    WorldItemWithRelations,
+    WorldItemWithStats
+} from './types';
 
-// Exportar tipo principal
-export type { WorldItem } from './extended';
+// Exportar tipos estadísticos explícitamente
+export type {
+    WorldItemAttributes,
+    WorldItemDistribution,
+    WorldItemEffect,
+    WorldItemProperty,
+    WorldItemRequirement,
+    WorldItemStats,
+    WorldItemStatsOverview
+} from './stats-types';
+
+// Exportar tipos extendidos explícitamente
+export type {
+    ParsedWorldItem,
+    ParsedWorldItemVisualConfig,
+    ParsedWorldItemWithRelations,
+    WorldItemExtended,
+    WorldItemVisualConfig
+} from './extended';
 

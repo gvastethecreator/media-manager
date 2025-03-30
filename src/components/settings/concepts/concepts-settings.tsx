@@ -20,8 +20,8 @@ import {
 	PopoverTrigger
 } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import { ConceptExtended } from '@/types/entities/concept';
-import { ConceptWithStats } from '@/types/entities/concept/base';
+import type { ConceptExtended } from '@/types/entities/concept';
+import type { ConceptWithStats } from '@/types/entities/concept/base';
 import { calculateConceptsStats } from '@/utils/concept/helpers';
 import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';

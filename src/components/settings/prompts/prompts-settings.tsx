@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import toastService from '@/services/toast.service';
-import { PromptBase } from '@/types/entities/prompt/base';
+import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory } from '@/types/entities/prompt/enums';
 import { Check, Delete, Edit, Plus, Search, Star, X } from 'lucide-react';
 import { useEffect, useState } from 'react';

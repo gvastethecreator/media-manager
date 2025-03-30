@@ -69,7 +69,6 @@
     "@types/better-sqlite3": "^7.6.12",
     "@types/mime-types": "^2.1.4",
     "@types/uuid": "^10.0.0",
-    "@wonderwhy-er/desktop-commander": "^0.1.23",
     "better-sqlite3": "^11.9.1",
     "browser-logger": "^1.0.0",
     "bull": "^4.16.5",

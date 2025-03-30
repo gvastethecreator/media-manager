@@ -4,6 +4,7 @@
  */
 
 export * from './base';
+export * from './complete';
 export * from './enums';
 export * from './extended';
 export * from './types';

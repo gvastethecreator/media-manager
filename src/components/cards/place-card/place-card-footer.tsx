@@ -1,102 +1,150 @@
 'use client';
 
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Cloud, ImageIcon } from 'lucide-react';
+import { HeartIcon, ImageIcon, Star, VideoIcon } from 'lucide-react';
 
 interface PlaceCardFooterProps {
 	createdAt?: Date;
-	updatedAt?: Date;
-	imagesCount: number;
-	climate: string;
-	texture?: string;
-	primaryColor: string;
-	secondaryColor: string;
+	imagesCount?: number;
+	videosCount?: number;
+	primaryColor?: string;
+	secondaryColor?: string;
+	power?: number;
+	healthPoints?: number;
+	cardId?: string;
+	tcgMode?: boolean;
+	compact?: boolean;
 }
 
 /**
- * Componente de pie para la tarjeta de lugar
- * Muestra información de fechas, clima y estadísticas
+ * Componente para mostrar el pie de una tarjeta de lugar con estilo TCG
+ * Muestra contadores, fecha de creación y valores TCG como poder y salud
  */
 export function PlaceCardFooter({
 	createdAt,
-	updatedAt,
-	imagesCount,
-	climate,
-	texture,
-	primaryColor,
-	secondaryColor,
+	imagesCount = 0,
+	videosCount = 0,
+	primaryColor = '#10b981',
+	secondaryColor = '#064e3b',
+	power = 1,
+	healthPoints = 100,
+	cardId = '',
+	tcgMode = true,
+	compact = false
 }: PlaceCardFooterProps) {
-	// Formatear fechas
-	const formatDate = (date?: Date) => {
-		if (!date) return 'Desconocido';
-		return format(new Date(date), 'MMM d, yyyy', { locale: es });
-	};
+	// Determinar estrellas de poder a mostrar (escala 1-5)
+	const powerStars = Math.max(1, Math.min(5, Math.ceil(power / 2)));
 
-	// Formatear clima para display
-	const formatClimate = (climate: string) => {
-		if (!climate || climate === 'unknown' || climate === 'desconocido') {
-			return 'Desconocido';
-		}
-		return climate.charAt(0).toUpperCase() + climate.slice(1).toLowerCase();
-	};
-
-	// Crear una versión abreviada para mostrar en la tarjeta
-	const createDateFormatted = formatDate(createdAt);
-	const updateDateFormatted = formatDate(updatedAt);
-	const climateFormatted = formatClimate(climate);
+	// Formatear fecha de creación
+	const formattedDate = createdAt ?
+		format(createdAt, 'MMM yyyy', { locale: es }) : '';
 
 	return (
 		<div
-			className="pt-1 pb-1.5 px-2.5 text-xs border-t flex items-center justify-between"
+			className={cn(
+				"px-3 py-2",
+				tcgMode ? "border-t border-white/10" : ""
+			)}
 			style={{
-				borderColor: `${primaryColor}30`,
-				background: `linear-gradient(0deg, ${primaryColor}15, transparent)`
+				background: tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined
 			}}
 		>
-			{/* Sección izquierda - Clima */}
-			<div className="flex items-center">
-				<Cloud size={14} className="mr-1" />
-				<div
-					className="font-medium truncate max-w-[80px]"
-					style={{ color: primaryColor }}
-				>
-					{climateFormatted}
+			{tcgMode ? (
+				<div className="flex flex-col space-y-1.5">
+					{/* Primera fila: HP y fecha */}
+					<div className="flex justify-between items-center">
+						{/* HP */}
+						<div className="flex items-center">
+							<HeartIcon
+								className="h-3.5 w-3.5 mr-1"
+								style={{ color: primaryColor }}
+							/>
+							<span className="text-xs font-semibold">{healthPoints}</span>
+						</div>
+
+						{/* Fecha de creación */}
+						{createdAt && !compact && (
+							<div className="text-xs opacity-70">
+								{formattedDate}
+							</div>
+						)}
+					</div>
+
+					{/* Segunda fila: contadores de medios */}
+					{(imagesCount > 0 || videosCount > 0) && !compact && (
+						<div className="flex items-center gap-2">
+							{imagesCount > 0 && (
+								<div className="flex items-center text-xs">
+									<ImageIcon className="h-3 w-3 mr-1 opacity-70" />
+									<span>{imagesCount}</span>
+								</div>
+							)}
+							{videosCount > 0 && (
+								<div className="flex items-center text-xs">
+									<VideoIcon className="h-3 w-3 mr-1 opacity-70" />
+									<span>{videosCount}</span>
+								</div>
+							)}
+						</div>
+					)}
+
+					{/* Tercera fila: estrellas de poder e ID de carta */}
+					<div className="flex justify-between items-center">
+						{/* Estrellas de poder */}
+						<div className="flex items-center">
+							{/* Renderizar estrellas sin usar índices como keys */}
+							<div className="flex">
+								{power >= 1 && (
+									<Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />
+								)}
+								{power >= 3 && (
+									<Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />
+								)}
+								{power >= 5 && (
+									<Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />
+								)}
+								{power >= 7 && (
+									<Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />
+								)}
+								{power >= 9 && (
+									<Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />
+								)}
+							</div>
+						</div>
+
+						{/* ID de carta */}
+						<div className="text-[10px] opacity-60 font-mono">
+							{cardId}
+						</div>
+					</div>
 				</div>
-			</div>
+			) : (
+				// Versión no-TCG simplificada
+				<div className="flex justify-between items-center">
+					<div className="flex items-center text-xs text-muted-foreground">
+						{createdAt && (
+							<span>{formattedDate}</span>
+						)}
+					</div>
 
-			{/* Sección central - Contador de imágenes */}
-			<div className="flex items-center">
-				<ImageIcon size={14} className="mr-1" />
-				<span className="text-muted-foreground">
-					{imagesCount} {imagesCount === 1 ? 'imagen' : 'imágenes'}
-				</span>
-			</div>
-
-			{/* Sección derecha - Textura si está disponible */}
-			{texture && (
-				<div
-					className="px-1.5 rounded-sm font-medium"
-					style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}
-				>
-					{texture}
+					<div className="flex items-center space-x-2 text-xs text-muted-foreground">
+						{imagesCount > 0 && (
+							<div className="flex items-center">
+								<ImageIcon className="h-3.5 w-3.5 mr-1 opacity-70" />
+								<span>{imagesCount}</span>
+							</div>
+						)}
+						{videosCount > 0 && (
+							<div className="flex items-center">
+								<VideoIcon className="h-3.5 w-3.5 mr-1 opacity-70" />
+								<span>{videosCount}</span>
+							</div>
+						)}
+					</div>
 				</div>
 			)}
-
-			{/* Línea de información adicional */}
-			<div
-				className="absolute bottom-0 left-0 right-0 px-2.5 py-0.5 text-[10px] flex justify-between text-muted-foreground border-t"
-				style={{ borderColor: `${primaryColor}20` }}
-			>
-				<div>
-					<span>Creado: {createDateFormatted}</span>
-				</div>
-				{updatedAt && updatedAt > createdAt && (
-					<div>
-						<span>Actualizado: {updateDateFormatted}</span>
-					</div>
-				)}
-			</div>
 		</div>
 	);
 }

@@ -50,6 +50,9 @@
 	--animate-border-beam: border-beam calc(var(--duration, 3) * 1s) infinite linear;
 	--animate-meteor: meteor 5s linear infinite;
 	--animate-shiny-text: shiny-text 8s infinite;
+	--animate-gradient-shift: gradient-shift 3s ease infinite;
+	--animate-shine-effect: shine 3s linear infinite;
+	--animate-iridescent: iridescent 8s linear infinite;
 
 	@keyframes accordion-down {
 		from {
@@ -128,6 +131,40 @@
 
 		100% {
 			transform: translateY(8px);
+		}
+	}
+
+	@keyframes gradient-shift {
+		0% {
+			background-position: 0% 50%;
+		}
+
+		50% {
+			background-position: 100% 50%;
+		}
+
+		100% {
+			background-position: 0% 50%;
+		}
+	}
+
+	@keyframes iridescent {
+
+		0%,
+		100% {
+			filter: hue-rotate(0deg) saturate(100%);
+		}
+
+		25% {
+			filter: hue-rotate(90deg) saturate(150%);
+		}
+
+		50% {
+			filter: hue-rotate(180deg) saturate(200%);
+		}
+
+		75% {
+			filter: hue-rotate(270deg) saturate(150%);
 		}
 	}
 }
@@ -652,5 +689,96 @@ html[data-theme="dark"] {
 	to {
 		opacity: 1;
 		transform: translateY(0);
+	}
+}
+
+/* Animaciones para tarjetas TCG */
+@keyframes gradient-shift {
+	0% {
+		background-position: 0% 50%;
+	}
+
+	50% {
+		background-position: 100% 50%;
+	}
+
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+@keyframes shine {
+	0% {
+		background-position: 0% 50%;
+	}
+
+	100% {
+		background-position: 100% 50%;
+	}
+}
+
+@keyframes floating {
+	0% {
+		transform: translateY(0px);
+	}
+
+	50% {
+		transform: translateY(-10px);
+	}
+
+	100% {
+		transform: translateY(0px);
+	}
+}
+
+/* Estilos para el componente CardContainer */
+.card-container {
+	position: relative;
+	height: 100%;
+	width: 100%;
+	border-radius: 4.75%;
+	overflow: hidden;
+	background-color: hsl(var(--card));
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+	transition: all 0.3s ease;
+}
+
+.card-container:hover {
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilo para el borde brillante en hover */
+.card-container::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	border-radius: 4.75%;
+	padding: 2px;
+	background: linear-gradient(135deg,
+			transparent 0%,
+			rgba(255, 255, 255, 0.1) 45%,
+			rgba(255, 255, 255, 0.6) 50%,
+			rgba(255, 255, 255, 0.1) 55%,
+			transparent 100%);
+	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.card-container:hover::before {
+	opacity: 1;
+}
+
+/* Soporte para dispositivos con preferencia a reducción de movimiento */
+@media (prefers-reduced-motion) {
+
+	.card-container,
+	.card-container::before,
+	[class*="animate-"] {
+		animation: none !important;
+		transition: none !important;
 	}
 }

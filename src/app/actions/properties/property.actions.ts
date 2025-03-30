@@ -2,7 +2,8 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import type { Property } from '@prisma/client';
+import { mapCreatePropertyDataToPrisma, mapUpdatePropertyDataToPrisma } from '@/transformers/property';
+import type { CreatePropertyData, UpdatePropertyData } from '@/types/entities/property';
 
 const logger = serverLogger.withContext('PropertyActions');
 
@@ -87,19 +88,12 @@ export async function getProperty(id: string) {
 /**
  * Crea una nueva propiedad
  */
-export async function createProperty(data: Partial<Property>) {
+export async function createProperty(data: CreatePropertyData) {
   try {
+    const prismaData = mapCreatePropertyDataToPrisma(data);
+
     const property = await prisma.property.create({
-      data: {
-        name: data.name!,
-        emoji: data.emoji || '🔍',
-        color: data.color || '#3b82f6',
-        description: data.description,
-        shortcut: data.shortcut,
-        category: data.category || 'general',
-        featuredImage: data.featuredImage,
-        isFavorite: data.isFavorite || false,
-      },
+      data: prismaData,
       include: {
         _count: {
           select: {
@@ -132,20 +126,13 @@ export async function createProperty(data: Partial<Property>) {
 /**
  * Actualiza una propiedad existente
  */
-export async function updateProperty(id: string, data: Partial<Property>) {
+export async function updateProperty(id: string, data: UpdatePropertyData) {
   try {
+    const prismaData = mapUpdatePropertyDataToPrisma(data);
+
     const property = await prisma.property.update({
       where: { id },
-      data: {
-        name: data.name,
-        emoji: data.emoji,
-        color: data.color,
-        description: data.description,
-        shortcut: data.shortcut,
-        category: data.category,
-        featuredImage: data.featuredImage,
-        isFavorite: data.isFavorite,
-      },
+      data: prismaData,
       include: {
         _count: {
           select: {
@@ -176,27 +163,11 @@ export async function updateProperty(id: string, data: Partial<Property>) {
 }
 
 /**
- * Elimina una propiedad
- */
-export async function deleteProperty(id: string) {
-  try {
-    await prisma.property.delete({
-      where: { id },
-    });
-
-    logger.info('✅ Propiedad eliminada:', id);
-    return true;
-  } catch (error) {
-    logger.error('❌ Error al eliminar propiedad:', error);
-    throw error;
-  }
-}
-
-/**
- * Cambia el estado de favorito de una propiedad
+ * Marca o desmarca una propiedad como favorita
  */
 export async function togglePropertyFavorite(id: string) {
   try {
+    // Obtener el estado actual
     const property = await prisma.property.findUnique({
       where: { id },
       select: { isFavorite: true },
@@ -206,11 +177,10 @@ export async function togglePropertyFavorite(id: string) {
       throw new Error(`No se encontró la propiedad con ID ${id}`);
     }
 
+    // Invertir el estado
     const updatedProperty = await prisma.property.update({
       where: { id },
-      data: {
-        isFavorite: !property.isFavorite,
-      },
+      data: { isFavorite: !property.isFavorite },
       include: {
         _count: {
           select: {
@@ -232,10 +202,27 @@ export async function togglePropertyFavorite(id: string) {
       },
     });
 
-    logger.info('✅ Estado favorito actualizado:', !property.isFavorite);
+    logger.info(`✅ Propiedad ${updatedProperty.isFavorite ? 'marcada' : 'desmarcada'} como favorita:`, updatedProperty.name);
     return updatedProperty;
   } catch (error) {
-    logger.error('❌ Error al actualizar estado favorito:', error);
+    logger.error('❌ Error al actualizar favorito:', error);
+    throw error;
+  }
+}
+
+/**
+ * Elimina una propiedad
+ */
+export async function deleteProperty(id: string) {
+  try {
+    await prisma.property.delete({
+      where: { id },
+    });
+
+    logger.info('✅ Propiedad eliminada:', id);
+    return true;
+  } catch (error) {
+    logger.error('❌ Error al eliminar propiedad:', error);
     throw error;
   }
 }

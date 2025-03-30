@@ -1,14 +1,13 @@
 'use server';
 
-import { db } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import { validateName } from '@/lib/validations';
 import { convertServerImageToFileItem } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { mapCreateWildcardDataToPrisma, mapUpdateWildcardDataToPrisma } from '@/transformers/wildcard';
+import type { CreateWildcardData, UpdateWildcardData } from '@/types/entities/wildcard';
 import type { FileItem } from '@/types/file-item';
-import { Wildcard } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
@@ -16,6 +15,7 @@ const wildcardLogger = serverLogger.withContext('WildcardActions');
 
 const REVALIDATE_PATHS = ['/settings', '/wildcards', '/wildcards/[id]'] as const;
 
+// Función para revalidar todas las rutas necesarias
 const revalidateAllPaths = async () => {
   for (const path of REVALIDATE_PATHS) {
     revalidatePath(path);
@@ -32,7 +32,7 @@ const notifyWildcardChange = async (action: 'create' | 'update' | 'delete', wild
   statsEventEmitter.emit(STATS_EVENTS.WILDCARD_CHANGE);
 };
 
-// Manejo de errores
+// Código de errores para operaciones con wildcards
 enum WildcardErrorCode {
   NOT_FOUND = 'NOT_FOUND',
   VALIDATION_ERROR = 'VALIDATION_ERROR',
@@ -40,11 +40,9 @@ enum WildcardErrorCode {
   CIRCULAR_REFERENCE = 'CIRCULAR_REFERENCE',
 }
 
+// Creador de errores para wildcards
 const createWildcardError = (message: string, code: WildcardErrorCode = WildcardErrorCode.OPERATION_FAILED, cause?: unknown) => {
-  const error = new Error(message);
-  error.name = 'WildcardError';
-  Object.assign(error, { code, cause });
-  return error;
+  return Object.assign(new Error(message), { code, cause });
 };
 
 // Interfaces
@@ -84,21 +82,37 @@ export interface WildcardWithStats {
 
 // Función auxiliar para verificar referencias circulares
 async function checkCircularReference(wildcardId: string, newParentId: string): Promise<boolean> {
-  let currentId = newParentId;
-  const visited = new Set<string>();
+  // Verificar si estamos intentando asignar el wildcard como su propio padre
+  if (wildcardId === newParentId) {
+    return true;
+  }
 
-  while (currentId) {
-    if (currentId === wildcardId) return true;
-    if (visited.has(currentId)) return true;
-    visited.add(currentId);
+  // Obtener cadena de padres para verificar circularidad
+  let currentParentId = newParentId;
+  const visitedParents = new Set<string>();
+
+  while (currentParentId) {
+    // Evitar ciclos infinitos
+    if (visitedParents.has(currentParentId)) {
+      return true;
+    }
+    visitedParents.add(currentParentId);
 
     const parent = await prisma.wildcard.findUnique({
-      where: { id: currentId },
+      where: { id: currentParentId },
       select: { parentId: true },
     });
 
-    if (!parent || !parent.parentId) break;
-    currentId = parent.parentId;
+    if (!parent || !parent.parentId) {
+      break;
+    }
+
+    // Si encontramos el ID original en la cadena de padres, es una referencia circular
+    if (parent.parentId === wildcardId) {
+      return true;
+    }
+
+    currentParentId = parent.parentId;
   }
 
   return false;
@@ -184,36 +198,41 @@ export async function getWildcard(id: string): Promise<WildcardWithStats | null>
   }
 }
 
-export async function createWildcard(data: WildcardFormInput): Promise<WildcardWithStats> {
+export async function createWildcard(data: CreateWildcardData): Promise<WildcardWithStats> {
   try {
-    wildcardLogger.info('📝 Creando wildcard:', data.name);
+    wildcardLogger.info('📝 Creando nuevo wildcard:', data.name);
 
-    // Verificar referencia circular si se proporciona parentId
+    // Validar nombre único
+    if (!data.name) {
+      throw createWildcardError('El nombre del wildcard es obligatorio', WildcardErrorCode.VALIDATION_ERROR);
+    }
+
+    const existingWildcard = await prisma.wildcard.findUnique({
+      where: { name: data.name },
+    });
+
+    if (existingWildcard) {
+      throw createWildcardError(`Ya existe un wildcard con el nombre "${data.name}"`, WildcardErrorCode.VALIDATION_ERROR);
+    }
+
+    // Validar que no se cree un ciclo en la jerarquía si se proporciona un padre
     if (data.parentId) {
-      // No necesitamos verificar aquí ya que es una creación nueva
-      // pero podríamos verificar que el padre exista
+      // Verificar que el padre existe
       const parent = await prisma.wildcard.findUnique({
         where: { id: data.parentId },
       });
 
       if (!parent) {
-        throw createWildcardError('El wildcard padre no existe', WildcardErrorCode.NOT_FOUND);
+        throw createWildcardError(`No se encontró el padre con id ${data.parentId}`, WildcardErrorCode.NOT_FOUND);
       }
     }
 
-    // Crear wildcard
-    const wildcard = await prisma.wildcard.create({
-      data: {
-        name: data.name,
-        description: data.description || null,
-        emoji: data.emoji || '🎭',
-        color: data.color || '#3b82f6',
-        category: data.category || null,
-        shortcut: data.shortcut || null,
-        isFavorite: data.isFavorite || false,
-        children: JSON.stringify(data.children || []),
-        parentId: data.parentId || null,
-      },
+    // Crear objeto compatible con Prisma
+    const prismaData = mapCreateWildcardDataToPrisma(data);
+
+    // Crear el wildcard
+    const createdWildcard = await prisma.wildcard.create({
+      data: prismaData,
       include: {
         _count: {
           select: {
@@ -226,61 +245,74 @@ export async function createWildcard(data: WildcardFormInput): Promise<WildcardW
     });
 
     // Notificar cambio
-    await notifyWildcardChange('create', wildcard);
+    await notifyWildcardChange('create', { id: createdWildcard.id });
 
     // Revalidar rutas
     await revalidateAllPaths();
 
-    wildcardLogger.info('✅ Wildcard creado:', wildcard.name);
+    wildcardLogger.info('✅ Wildcard creado:', createdWildcard.name);
     return {
-      ...wildcard,
-      totalEntities: 0,
-      lastUpdated: wildcard.updatedAt,
+      ...createdWildcard,
+      totalEntities: 0, // Nuevo, no tiene entidades
+      lastUpdated: createdWildcard.createdAt,
     };
   } catch (error) {
     wildcardLogger.error('❌ Error al crear wildcard:', error);
-    throw createWildcardError('No se pudo crear el wildcard', WildcardErrorCode.OPERATION_FAILED, error);
+    throw error;
   }
 }
 
-export async function updateWildcard(id: string, data: Partial<WildcardFormInput>): Promise<WildcardWithStats> {
+export async function updateWildcard(id: string, data: UpdateWildcardData): Promise<WildcardWithStats> {
   try {
     wildcardLogger.info('🔄 Actualizando wildcard:', id);
 
-    // Verificar que el wildcard exista
+    // Verificar que el wildcard existe
     const existingWildcard = await prisma.wildcard.findUnique({
       where: { id },
+      include: {
+        _count: {
+          select: {
+            images: true,
+            videos: true,
+            childWildcards: true,
+          },
+        },
+      },
     });
 
     if (!existingWildcard) {
       throw createWildcardError(`Wildcard con id ${id} no encontrado`, WildcardErrorCode.NOT_FOUND);
     }
 
-    // Verificar referencia circular si se está cambiando el parentId
+    // Validar nombre único si se está cambiando
+    if (data.name && data.name !== existingWildcard.name) {
+      const wildcardWithSameName = await prisma.wildcard.findUnique({
+        where: { name: data.name },
+      });
+
+      if (wildcardWithSameName && wildcardWithSameName.id !== id) {
+        throw createWildcardError(`Ya existe un wildcard con el nombre "${data.name}"`, WildcardErrorCode.VALIDATION_ERROR);
+      }
+    }
+
+    // Validar que no se cree un ciclo en la jerarquía
     if (data.parentId && data.parentId !== existingWildcard.parentId) {
-      const hasCircularRef = await checkCircularReference(id, data.parentId);
-      if (hasCircularRef) {
+      const hasCircularReference = await checkCircularReference(id, data.parentId);
+      if (hasCircularReference) {
         throw createWildcardError(
-          'No se puede establecer esta relación padre-hijo porque crearía una referencia circular',
+          'No se puede asignar este padre porque crearía una referencia circular',
           WildcardErrorCode.CIRCULAR_REFERENCE
         );
       }
     }
 
-    // Actualizar wildcard
+    // Crear objeto compatible con Prisma
+    const prismaData = mapUpdateWildcardDataToPrisma(data);
+
+    // Actualizar el wildcard
     const updatedWildcard = await prisma.wildcard.update({
       where: { id },
-      data: {
-        name: data.name,
-        description: data.description,
-        emoji: data.emoji,
-        color: data.color,
-        category: data.category,
-        shortcut: data.shortcut,
-        isFavorite: data.isFavorite,
-        children: data.children ? JSON.stringify(data.children) : undefined,
-        parentId: data.parentId,
-      },
+      data: prismaData,
       include: {
         _count: {
           select: {
@@ -293,12 +325,13 @@ export async function updateWildcard(id: string, data: Partial<WildcardFormInput
     });
 
     // Notificar cambio
-    await notifyWildcardChange('update', updatedWildcard);
+    await notifyWildcardChange('update', { id });
 
     // Revalidar rutas
     await revalidateAllPaths();
 
     wildcardLogger.info('✅ Wildcard actualizado:', updatedWildcard.name);
+
     return {
       ...updatedWildcard,
       totalEntities:
@@ -370,36 +403,30 @@ export async function deleteWildcard(id: string): Promise<void> {
 
 export async function getWildcardImages(id: string): Promise<FileItem[]> {
   try {
-    wildcardLogger.info('🖼️ Obteniendo imágenes del wildcard:', id);
+    wildcardLogger.info('🔍 Obteniendo imágenes del wildcard:', id);
 
-    // Verificar que el wildcard exista
-    const existingWildcard = await prisma.wildcard.findUnique({
+    // Verificar que el wildcard existe
+    const wildcard = await prisma.wildcard.findUnique({
       where: { id },
-    });
-
-    if (!existingWildcard) {
-      throw createWildcardError(`Wildcard con id ${id} no encontrado`, WildcardErrorCode.NOT_FOUND);
-    }
-
-    // Obtener imágenes relacionadas
-    const images = await prisma.image.findMany({
-      where: {
-        wildcards: {
-          some: {
-            id,
+      include: {
+        images: {
+          orderBy: {
+            createdAt: 'desc',
           },
         },
       },
-      include: {
-        folder: true,
-        tags: true,
-      },
     });
 
-    // Convertir a FileItem
-    const fileItems = images.map((image) => convertServerImageToFileItem(image as any));
+    if (!wildcard) {
+      throw createWildcardError(`Wildcard con id ${id} no encontrado`, WildcardErrorCode.NOT_FOUND);
+    }
 
-    wildcardLogger.info('✅ Imágenes del wildcard obtenidas:', fileItems.length);
+    // Convertir imágenes al formato necesario
+    const fileItems = await Promise.all(
+      wildcard.images.map((image) => convertServerImageToFileItem(image))
+    );
+
+    wildcardLogger.info('✅ Imágenes obtenidas:', fileItems.length);
     return fileItems;
   } catch (error) {
     wildcardLogger.error('❌ Error al obtener imágenes del wildcard:', error);
@@ -414,30 +441,45 @@ export async function addImageToWildcard(wildcardId: string, imageId: string): P
   try {
     wildcardLogger.info('➕ Añadiendo imagen al wildcard:', { wildcardId, imageId });
 
-    // Verificar que el wildcard exista
-    const existingWildcard = await prisma.wildcard.findUnique({
-      where: { id: wildcardId },
-    });
+    // Verificar que el wildcard y la imagen existen
+    const [wildcard, image] = await Promise.all([
+      prisma.wildcard.findUnique({ where: { id: wildcardId } }),
+      prisma.image.findUnique({ where: { id: imageId } }),
+    ]);
 
-    if (!existingWildcard) {
+    if (!wildcard) {
       throw createWildcardError(`Wildcard con id ${wildcardId} no encontrado`, WildcardErrorCode.NOT_FOUND);
     }
 
-    // Verificar que la imagen exista
-    const existingImage = await prisma.image.findUnique({
-      where: { id: imageId },
-    });
-
-    if (!existingImage) {
+    if (!image) {
       throw createWildcardError(`Imagen con id ${imageId} no encontrada`, WildcardErrorCode.NOT_FOUND);
     }
 
-    // Conectar imagen con wildcard
+    // Verificar si la imagen ya está asociada al wildcard
+    const existingRelation = await prisma.image.findFirst({
+      where: {
+        id: imageId,
+        wildcards: {
+          some: {
+            id: wildcardId,
+          },
+        },
+      },
+    });
+
+    if (existingRelation) {
+      wildcardLogger.info('⚠️ La imagen ya está asociada al wildcard');
+      return;
+    }
+
+    // Añadir la imagen al wildcard
     await prisma.wildcard.update({
       where: { id: wildcardId },
       data: {
         images: {
-          connect: { id: imageId },
+          connect: {
+            id: imageId,
+          },
         },
       },
     });
@@ -454,7 +496,11 @@ export async function addImageToWildcard(wildcardId: string, imageId: string): P
     if ((error as any).code === WildcardErrorCode.NOT_FOUND) {
       throw error;
     }
-    throw createWildcardError(`No se pudo añadir la imagen ${imageId} al wildcard ${wildcardId}`, WildcardErrorCode.OPERATION_FAILED, error);
+    throw createWildcardError(
+      `No se pudo añadir la imagen ${imageId} al wildcard ${wildcardId}`,
+      WildcardErrorCode.OPERATION_FAILED,
+      error
+    );
   }
 }
 
@@ -462,30 +508,28 @@ export async function removeImageFromWildcard(wildcardId: string, imageId: strin
   try {
     wildcardLogger.info('➖ Quitando imagen del wildcard:', { wildcardId, imageId });
 
-    // Verificar que el wildcard exista
-    const existingWildcard = await prisma.wildcard.findUnique({
-      where: { id: wildcardId },
-    });
+    // Verificar que el wildcard y la imagen existen
+    const [wildcard, image] = await Promise.all([
+      prisma.wildcard.findUnique({ where: { id: wildcardId } }),
+      prisma.image.findUnique({ where: { id: imageId } }),
+    ]);
 
-    if (!existingWildcard) {
+    if (!wildcard) {
       throw createWildcardError(`Wildcard con id ${wildcardId} no encontrado`, WildcardErrorCode.NOT_FOUND);
     }
 
-    // Verificar que la imagen exista
-    const existingImage = await prisma.image.findUnique({
-      where: { id: imageId },
-    });
-
-    if (!existingImage) {
+    if (!image) {
       throw createWildcardError(`Imagen con id ${imageId} no encontrada`, WildcardErrorCode.NOT_FOUND);
     }
 
-    // Desconectar imagen del wildcard
+    // Desconectar la imagen del wildcard
     await prisma.wildcard.update({
       where: { id: wildcardId },
       data: {
         images: {
-          disconnect: { id: imageId },
+          disconnect: {
+            id: imageId,
+          },
         },
       },
     });
@@ -502,7 +546,11 @@ export async function removeImageFromWildcard(wildcardId: string, imageId: strin
     if ((error as any).code === WildcardErrorCode.NOT_FOUND) {
       throw error;
     }
-    throw createWildcardError(`No se pudo quitar la imagen ${imageId} del wildcard ${wildcardId}`, WildcardErrorCode.OPERATION_FAILED, error);
+    throw createWildcardError(
+      `No se pudo quitar la imagen ${imageId} del wildcard ${wildcardId}`,
+      WildcardErrorCode.OPERATION_FAILED,
+      error
+    );
   }
 }
 
@@ -511,7 +559,7 @@ export async function removeImageFromWildcard(wildcardId: string, imageId: strin
  */
 export async function getRootWildcards() {
   try {
-    return await db.wildcard.findMany({
+    return await prisma.wildcard.findMany({
       where: {
         parentId: null,
       },
@@ -520,138 +568,8 @@ export async function getRootWildcards() {
       },
     });
   } catch (error) {
-    console.error('Error al obtener comodines raíz:', error);
+    wildcardLogger.error('❌ Error al obtener comodines raíz:', error);
     throw new Error('No se pudieron obtener los comodines raíz');
-  }
-}
-
-/**
- * Crea un nuevo comodín
- */
-export async function createWildcard(data: Partial<Wildcard>) {
-  try {
-    // Validar nombre único
-    await validateName('wildcard', data.name);
-
-    // Validar que no se cree un ciclo en la jerarquía
-    if (data.parentId) {
-      await validateParentHierarchy(null, data.parentId);
-    }
-
-    const wildcard = await db.wildcard.create({
-      data: {
-        name: data.name!,
-        emoji: data.emoji || '✨',
-        color: data.color || '#ec4899',
-        description: data.description,
-        shortcut: data.shortcut,
-        category: data.category || 'general',
-        parentId: data.parentId || null,
-        children: data.children || 'empty_array',
-        featuredImage: data.featuredImage,
-        isFavorite: data.isFavorite || false,
-      },
-    });
-
-    revalidatePath('/settings');
-    return wildcard;
-  } catch (error) {
-    console.error('Error al crear comodín:', error);
-    throw error;
-  }
-}
-
-/**
- * Actualiza un comodín existente
- */
-export async function updateWildcard(id: string, data: Partial<Wildcard>) {
-  try {
-    // Si el nombre cambió, validar que sea único
-    const current = await db.wildcard.findUnique({ where: { id } });
-    if (!current) throw new Error('Comodín no encontrado');
-
-    if (data.name && current.name !== data.name) {
-      await validateName('wildcard', data.name);
-    }
-
-    // Validar que no se cree un ciclo en la jerarquía
-    if (data.parentId && data.parentId !== current.parentId) {
-      await validateParentHierarchy(id, data.parentId);
-    }
-
-    const wildcard = await db.wildcard.update({
-      where: { id },
-      data: {
-        name: data.name,
-        emoji: data.emoji,
-        color: data.color,
-        description: data.description,
-        shortcut: data.shortcut,
-        category: data.category,
-        parentId: data.parentId,
-        children: data.children,
-        featuredImage: data.featuredImage,
-        isFavorite: data.isFavorite,
-      },
-    });
-
-    revalidatePath('/settings');
-    return wildcard;
-  } catch (error) {
-    console.error('Error al actualizar comodín:', error);
-    throw error;
-  }
-}
-
-/**
- * Elimina un comodín
- */
-export async function deleteWildcard(id: string) {
-  try {
-    // Verificar si tiene hijos y actualizarlos para eliminar su relación
-    const childWildcards = await db.wildcard.findMany({
-      where: { parentId: id },
-    });
-
-    if (childWildcards.length > 0) {
-      await db.wildcard.updateMany({
-        where: { parentId: id },
-        data: { parentId: null },
-      });
-    }
-
-    await db.wildcard.delete({
-      where: { id },
-    });
-
-    revalidatePath('/settings');
-    return true;
-  } catch (error) {
-    console.error('Error al eliminar comodín:', error);
-    throw new Error('No se pudo eliminar el comodín');
-  }
-}
-
-/**
- * Actualiza el estado de favorito de un comodín
- */
-export async function toggleWildcardFavorite(id: string) {
-  try {
-    const wildcard = await db.wildcard.findUnique({ where: { id } });
-    if (!wildcard) throw new Error('Comodín no encontrado');
-
-    const updated = await db.wildcard.update({
-      where: { id },
-      data: {
-        isFavorite: !wildcard.isFavorite,
-      },
-    });
-
-    revalidatePath('/settings');
-    return updated;
-  } catch (error) {
-    console.error('Error al actualizar favorito:', error);
-    throw error;
   }
 }
 
@@ -667,7 +585,7 @@ async function validateParentHierarchy(wildcardId: string | null, parentId: stri
   // Verificar que no se cree un ciclo en la jerarquía
   let currentParent = parentId;
   while (currentParent) {
-    const parent = await db.wildcard.findUnique({
+    const parent = await prisma.wildcard.findUnique({
       where: { id: currentParent },
       select: { id: true, parentId: true },
     });

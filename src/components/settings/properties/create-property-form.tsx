@@ -13,6 +13,7 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { ImagePicker } from '@/components/ui/image-picker';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { createPropertySchema } from '@/lib/validations/property';
 import type { Property } from '@prisma/client';
 
@@ -60,8 +61,11 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 							<FormItem>
 								<FormLabel>Nombre</FormLabel>
 								<FormControl>
-									<Input {...field} placeholder="Nombre de la propiedad" />
+									<Input {...field} placeholder="Nombre único para identificar la propiedad" />
 								</FormControl>
+								<FormDescription>
+									El nombre de la propiedad, visible en listados e imágenes.
+								</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -77,6 +81,9 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 									<FormControl>
 										<EmojiPicker value={field.value} onChange={field.onChange} />
 									</FormControl>
+									<FormDescription>
+										Un emoji representativo para la propiedad
+									</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -91,6 +98,9 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 									<FormControl>
 										<ColorPicker value={field.value} onChange={field.onChange} />
 									</FormControl>
+									<FormDescription>
+										Color para identificar visualmente la propiedad
+									</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -105,6 +115,9 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 									<FormControl>
 										<CategoryPicker value={field.value} onChange={field.onChange} />
 									</FormControl>
+									<FormDescription>
+										Ayuda a organizar las propiedades por grupos
+									</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -116,14 +129,18 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 						name="description"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Descripción</FormLabel>
+								<FormLabel>Descripción (Opcional)</FormLabel>
 								<FormControl>
-									<Input
+									<Textarea
 										{...field}
-										placeholder="Describe la propiedad"
-										className="min-h-[80px]"
+										placeholder="Describe brevemente esta propiedad"
+										value={field.value || ''}
+										rows={3}
 									/>
 								</FormControl>
+								<FormDescription>
+									Una descripción que ayude a entender el propósito de la propiedad
+								</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -134,12 +151,16 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 						name="shortcut"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Atajo</FormLabel>
+								<FormLabel>Atajo (Opcional)</FormLabel>
 								<FormControl>
-									<Input {...field} placeholder="Atajo para esta propiedad" />
+									<Input
+										{...field}
+										placeholder="Ej: Ctrl+P"
+										value={field.value || ''}
+									/>
 								</FormControl>
 								<FormDescription>
-									Un atajo te permite acceder rápidamente a esta propiedad
+									Un atajo de teclado para acceder rápidamente a esta propiedad
 								</FormDescription>
 								<FormMessage />
 							</FormItem>
@@ -151,14 +172,17 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 						name="featuredImage"
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Imagen destacada</FormLabel>
+								<FormLabel>Imagen destacada (Opcional)</FormLabel>
 								<FormControl>
 									<ImagePicker
 										value={field.value}
 										onChange={field.onChange}
-										placeholder="Selecciona una imagen destacada"
+										placeholder="Selecciona una imagen representativa"
 									/>
 								</FormControl>
+								<FormDescription>
+									Una imagen que represente visualmente esta propiedad
+								</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -172,7 +196,7 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 								<div className="space-y-0.5">
 									<FormLabel>Favorito</FormLabel>
 									<FormDescription>
-										Marcar esta propiedad como favorita
+										Las propiedades favoritas aparecerán destacadas y tendrán prioridad en los listados
 									</FormDescription>
 								</div>
 								<FormControl>

@@ -1,64 +1,99 @@
-import type { EntityType } from '@/types/entities/entities';
+/**
+ * @file Tipos para el sistema de favoritos
+ * @module types/favorites
+ */
 
-export interface FavoriteEntity {
-	id: string;
-	entityId: string;
-	entityType: EntityType;
-	createdAt: Date;
+import type { EntityId } from '@/utils/types/utility-types';
+import { z } from 'zod';
+
+/**
+ * Tipo de entidad favorita
+ */
+export enum FavoriteEntityType {
+    IMAGE = 'image',
+    VIDEO = 'video',
+    ALBUM = 'album',
+    COLLECTION = 'collection',
+    CHARACTER = 'character',
+    PLACE = 'place',
+    WORLD_ITEM = 'world-item',
+    CONCEPT = 'concept',
+    PROMPT = 'prompt',
+    NOTE = 'note',
+    TAG = 'tag',
+    GROUP = 'group',
+    PROPERTY = 'property',
+    WILDCARD = 'wildcard'
 }
 
-export interface FavoriteStats {
-	total: number;
-	byType: Record<EntityType, number>;
+/**
+ * Interfaz para elemento favorito
+ */
+export interface Favorite {
+    id: EntityId;
+    entityId: EntityId;
+    entityType: FavoriteEntityType;
+    userId: EntityId;
+    addedAt: Date;
 }
 
+/**
+ * Estado de favoritos
+ */
+export interface FavoritesState {
+    items: Map<EntityId, Favorite>;
+    loading: boolean;
+    error: Error | null;
+}
+
+/**
+ * Filtros de búsqueda de favoritos
+ */
 export interface FavoriteFilters {
-	entityType?: EntityType;
-	sortBy?: 'createdAt' | 'entityType';
-	sortOrder?: 'asc' | 'desc';
-	page?: number;
-	pageSize?: number;
+    entityTypes?: FavoriteEntityType[];
+    fromDate?: Date;
+    toDate?: Date;
+    sortBy?: 'addedAt' | 'entityType';
+    sortOrder?: 'asc' | 'desc';
 }
 
-export interface FavoriteResult<T = unknown> {
-	id: string;
-	entityId: string;
-	entityType: EntityType;
-	createdAt: Date;
-	entity: T | null;
+/**
+ * Resultado de toggle favorito
+ */
+export interface ToggleFavoriteResult {
+    success: boolean;
+    added: boolean;
+    favorite?: Favorite;
+    error?: Error;
 }
 
-export interface FavoriteResults<T = unknown> {
-	items: FavoriteResult<T>[];
-	total: number;
-	page: number;
-	pageSize: number;
-	stats: FavoriteStats;
-}
+// Validaciones Zod
+export const favoriteEntityTypeSchema = z.nativeEnum(FavoriteEntityType);
 
-export interface AddFavoriteParams {
-	entityId: string;
-	entityType: EntityType;
-}
+export const favoriteSchema = z.object({
+    id: z.string(),
+    entityId: z.string(),
+    entityType: favoriteEntityTypeSchema,
+    userId: z.string(),
+    addedAt: z.date()
+});
 
-export interface RemoveFavoriteParams {
-	entityId: string;
-	entityType: EntityType;
-}
+export const favoriteFiltersSchema = z.object({
+    entityTypes: z.array(favoriteEntityTypeSchema).optional(),
+    fromDate: z.date().optional(),
+    toDate: z.date().optional(),
+    sortBy: z.enum(['addedAt', 'entityType']).optional(),
+    sortOrder: z.enum(['asc', 'desc']).optional()
+});
 
-export interface GetFavoritesParams {
-	filters?: FavoriteFilters;
-	includeEntity?: boolean;
-}
+export const toggleFavoriteResultSchema = z.object({
+    success: z.boolean(),
+    added: z.boolean(),
+    favorite: favoriteSchema.optional(),
+    error: z.instanceof(Error).optional()
+});
 
-export interface FavoriteEvents {
-	FAVORITE_ADDED: string;
-	FAVORITE_REMOVED: string;
-	FAVORITES_CHANGED: string;
-}
-
-export const FAVORITE_EVENTS: FavoriteEvents = {
-	FAVORITE_ADDED: 'favorite:added',
-	FAVORITE_REMOVED: 'favorite:removed',
-	FAVORITES_CHANGED: 'favorites:changed',
-};
+// Tipos inferidos
+export type FavoriteValidated = z.infer<typeof favoriteSchema>;
+export type FavoriteFiltersValidated = z.infer<typeof favoriteFiltersSchema>;
+export type ToggleFavoriteResultValidated = z.infer<typeof toggleFavoriteResultSchema>;
