@@ -1,181 +1,173 @@
 /**
  * @file Tipos para la entidad Tag
- * @module types/entities/tag/tag-types
+ * @module types/entities/tag/types
  */
 
-import type { JSONString, Nullable } from '@/utils/types/utility-types';
+import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
-import type { Album } from '../album/types';
-import type { Character } from '../character/types';
-import type { Collection } from '../collection/types';
-import type { Concept } from '../concept/types';
-import type { Group } from '../group/types';
-import type { Image } from '../image/index';
-import type { Note } from '../note/types';
-import type { Place } from '../place/types';
-import type { Prompt } from '../prompt/types';
-import type { Property } from '../property/types';
-import type { Video } from '../video/types';
-import type { Wildcard } from '../wildcard/types';
-import type { WorldItem } from '../world-item/types';
-import { TagCategory, TagRarity, TagSortCriteria, TagViewMode } from './enums';
 
 /**
- * Interfaz base para etiqueta
+ * 🔍 Esquema de validación para Tag
+ */
+export const TagSchema = z.object({
+  ...BaseEntitySchema.shape,
+  ...UIFieldsSchema.shape,
+  ...MetadataFieldsSchema.shape,
+  name: z.string().min(1),
+  description: z.string().nullable(),
+  category: z.string(),
+  shortcut: z.string().nullable(),
+  featuredImage: z.string().nullable(),
+  isFavorite: z.boolean().default(false),
+});
+
+/**
+ * 🔄 Tipo base para Tag
  */
 export interface TagBase {
-    id: string;
-    name: string;
-    emoji: string;
-    color: string;
-    description: Nullable<string>;
-    shortcut: Nullable<string>;
-    category: TagCategory;
-    rarity: TagRarity;
-    viewMode: TagViewMode;
-    sortBy: JSONString<TagSortCriteria>;
-    filters: JSONString<TagFilters>;
-    featuredImage: Nullable<string>;
-    isFavorite: boolean;
-    createdAt: Date;
-    updatedAt: Date;
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  description?: string | null;
+  shortcut?: string | null;
+  category: string;
+  featuredImage?: string | null;
+  isFavorite: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**
- * Interfaz extendida que incluye relaciones
+ * 🔗 Relaciones de Tag
  */
-export interface TagWithRelations extends TagBase {
-    // Relaciones con contenido
-    images?: Image[];
-    videos?: Video[];
-
-    // Relaciones con entidades principales
-    albums?: Album[];
-    collections?: Collection[];
-    characters?: Character[];
-    places?: Place[];
-    worldItems?: WorldItem[];
-    concepts?: Concept[];
-    prompts?: Prompt[];
-    notes?: Note[];
-    wildcards?: Wildcard[];
-    properties?: Property[];
-    groups?: Group[];
-
-    // Contadores
-    _count?: {
-        images: number;
-        videos: number;
-        albums: number;
-        collections: number;
-        characters: number;
-        places: number;
-        worldItems: number;
-        concepts: number;
-        prompts: number;
-        notes: number;
-        wildcards: number;
-        properties: number;
-        groups: number;
-    };
+export interface TagRelations {
+  images?: { id: string }[];
+  videos?: { id: string }[];
+  albums?: { id: string }[];
+  collections?: { id: string }[];
+  characters?: { id: string }[];
+  places?: { id: string }[];
+  worldItems?: { id: string }[];
+  concepts?: { id: string }[];
+  prompts?: { id: string }[];
+  notes?: { id: string }[];
+  wildcards?: { id: string }[];
+  properties?: { id: string }[];
+  groups?: { id: string }[];
 }
 
 /**
- * Interfaz para crear una etiqueta
+ * 📊 Conteos de relaciones de Tag
  */
-export interface CreateTagData {
-    name: string;
-    emoji?: string;
-    color?: string;
-    description?: Nullable<string>;
-    shortcut?: Nullable<string>;
-    category?: TagCategory;
-    rarity?: TagRarity;
-    viewMode?: TagViewMode;
-    sortBy?: TagSortCriteria | string;
-    filters?: TagFilters | string;
-    featuredImage?: Nullable<string>;
-    isFavorite?: boolean;
-    groupIds?: string[];
-    propertyIds?: string[];
-    wildcardIds?: string[];
+export interface TagCounts {
+  _count?: {
+    images?: number;
+    videos?: number;
+    albums?: number;
+    collections?: number;
+    characters?: number;
+    places?: number;
+    worldItems?: number;
+    concepts?: number;
+    prompts?: number;
+    notes?: number;
+    wildcards?: number;
+    properties?: number;
+    groups?: number;
+  };
 }
 
 /**
- * Interfaz para actualizar una etiqueta
- */
-export interface UpdateTagData extends Partial<CreateTagData> {}
-
-/**
- * Interfaz para filtros de búsqueda de etiquetas
+ * 🎯 Filtros específicos para Tag
  */
 export interface TagFilters {
-    searchQuery?: string;
-    categories?: TagCategory[];
-    rarities?: TagRarity[];
-    viewModes?: TagViewMode[];
-    onlyFavorites?: boolean;
-    hasImages?: boolean;
-    hasVideos?: boolean;
-    minRelations?: number;
-    maxRelations?: number;
+  search?: string;
+  categories?: string[];
+  isFavorite?: boolean;
+  hasImages?: boolean;
+  hasVideos?: boolean;
+  hasAlbums?: boolean;
+  hasCollections?: boolean;
+  minRelations?: number;
+  maxRelations?: number;
+  dateRange?: {
+    start?: Date;
+    end?: Date;
+  };
 }
 
 /**
- * Interfaz para etiquetas relacionadas
+ * 🔄 Tag completo con todas las relaciones
  */
-export interface RelatedTag extends TagBase {
-    strength: number;
-    lastUsedTogether: Date;
-    usageCount: number;
+export interface TagComplete extends TagBase, TagRelations, TagCounts {}
+
+/**
+ * 📝 Datos para crear un Tag
+ */
+export type TagCreateInput = Omit<TagBase, 'id' | 'createdAt' | 'updatedAt'> & Partial<TagRelations>;
+
+/**
+ * 📝 Datos para actualizar un Tag
+ */
+export type TagUpdateInput = Partial<Omit<TagBase, 'id'>> & Partial<TagRelations>;
+
+/**
+ * 🔍 Opciones de búsqueda para Tag
+ */
+export interface TagSearchOptions {
+  skip?: number;
+  take?: number;
+  orderBy?: {
+    [key in keyof TagBase]?: 'asc' | 'desc';
+  };
+  where?: TagFilters;
+  include?: {
+    [key in keyof TagRelations]?: boolean;
+  };
 }
 
 /**
- * Interfaz para respuesta de relación tag-imagen
+ * 📊 Resultado de búsqueda de Tags
+ */
+export interface TagSearchResult {
+  items: TagComplete[];
+  total: number;
+  hasMore: boolean;
+}
+
+/**
+ * 🎯 Opciones para el transformer de Tag
+ */
+export interface TagTransformerOptions {
+  includeRelations?: boolean;
+  includeCount?: boolean;
+  validateFields?: boolean;
+  customFields?: (keyof TagComplete)[];
+}
+
+/**
+ * 🔗 Interfaz para etiquetas relacionadas
+ */
+export interface RelatedTag {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  count: number;
+  strength: number;
+}
+
+/**
+ * 📊 Interfaz para respuesta de relación tag-imagen
  */
 export interface TagImageRelationResponse {
-    tagId: string;
-    imageId: string;
-    confidence: number;
-    source: string;
-    addedAt: Date;
+  tagId: string;
+  imageId: string;
+  confidence: number;
+  source: string;
+  addedAt: Date;
 }
 
-/**
- * Validación Zod para filtros
- */
-export const tagFilterSchema = z.object({
-    searchQuery: z.string().optional(),
-    categories: z.array(z.nativeEnum(TagCategory)).optional(),
-    rarities: z.array(z.nativeEnum(TagRarity)).optional(),
-    viewModes: z.array(z.nativeEnum(TagViewMode)).optional(),
-    onlyFavorites: z.boolean().optional(),
-    hasImages: z.boolean().optional(),
-    hasVideos: z.boolean().optional(),
-    minRelations: z.number().min(0).optional(),
-    maxRelations: z.number().min(0).optional()
-});
-
-/**
- * Schema Zod para Tag
- */
-export const tagSchema = z.object({
-    id: z.string(),
-    name: z.string().min(1),
-    emoji: z.string(),
-    color: z.string(),
-    description: z.string().nullable(),
-    shortcut: z.string().nullable(),
-    category: z.nativeEnum(TagCategory),
-    rarity: z.nativeEnum(TagRarity),
-    viewMode: z.nativeEnum(TagViewMode),
-    sortBy: z.string(),
-    filters: z.string(),
-    featuredImage: z.string().nullable(),
-    isFavorite: z.boolean(),
-    createdAt: z.date(),
-    updatedAt: z.date()
-});
-
-export type TagFilter = z.infer<typeof tagFilterSchema>;
-export type TagValidated = z.infer<typeof tagSchema>;
+// Tipos inferidos de Zod
+export type TagValidated = z.infer<typeof TagSchema>;

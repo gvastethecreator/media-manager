@@ -1,6 +1,6 @@
 'use client';
 
-import { getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
+import { type PlaceWithStats, getPlaces } from '@/app/actions/places/place.actions';
 import { MemoizedPlaceCard } from '@/components/cards/place-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -134,20 +134,7 @@ export function PlacesView(_props: ViewProps) {
 							transition={{ delay: index * 0.1 }}
 						>
 							<MemoizedPlaceCard
-								id={place.id}
-								name={place.name}
-								emoji={place.emoji}
-								color={place.color}
-								description={place.description}
-								region={place.region}
-								type={place.type}
-								climate={place.climate}
-								population={place.population}
-								government={place.government}
-								createdAt={place.createdAt}
-								updatedAt={place.updatedAt}
-								imagesCount={place._count?.images}
-								isFavorite={place.isFavorite}
+								place={place}
 								onClick={() => handlePlaceClick(place)}
 								className="h-full"
 							/>

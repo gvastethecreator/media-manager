@@ -1,33 +1,52 @@
 /**
- * @file Exportaciones de transformadores para la entidad Concept
+ * @file Exportaciones para el transformer de Concept
  * @module transformers/concept
  */
 
-// Exportar serializadores
+// Serializadores
 export {
+
+    // Tipos
+    ConceptTransformOptions, deserializeTags, extendConcept,
+    extendConcepts, fromConceptComplete,
     // Funciones principales
-    deserializeTags, extendConcept,
-    extendConcepts, fromConceptComplete, serializeTags,
-    toConceptComplete, toConceptExtendedComplete,
-    toConceptWithRelationsComplete, toConceptWithRelationsExtendedComplete, toConceptWithStatsComplete,
-    // Funciones obsoletas, mantenidas por compatibilidad
-    /** @deprecated Use toConceptComplete y extendConcept en su lugar */
-    toExtendedConcept
+    fromPrismaConcept,
+    // Funciones de deserialización/serialización
+    serializeTags,
+    // Funciones obsoletas
+    toConceptComplete, toConceptExtendedComplete, toConceptWithRelationsComplete, toConceptWithRelationsExtendedComplete,
+    toConceptWithStatsComplete, toExtendedConcept, toPrismaConcept,
+    // Funciones de validación y extensión
+    validateConcept
 } from './serializers';
 
-// Exportar mappers
+// Mappers
 export {
-    // Funciones principales
     filterConcepts,
-    // Funciones obsoletas, mantenidas por compatibilidad
-    /** @deprecated Use toCreateConceptData en su lugar */
+    // Funciones obsoletas
     mapCreateConceptDataToPrisma,
-    /** @deprecated Use toUpdateConceptData en su lugar */
     mapUpdateConceptDataToPrisma, paginateConcepts,
-    processConcepts,
-    sortConcepts,
-    toConceptWithStats,
-    toCreateConceptData,
-    toUpdateConceptData
+    processConcepts, sortConcepts,
+    // Funciones principales
+    toCreateConceptData, toRelatedConcept, toSearchFilters, toSearchOptions, toSearchResult, toUpdateConceptData
 } from './mappers';
+
+// Exportación predeterminada
+export default {
+  // Serializers
+  fromPrismaConcept,
+  toPrismaConcept,
+  serializeTags,
+  deserializeTags,
+  validateConcept,
+  extendConcept,
+
+  // Mappers
+  toCreateConceptData,
+  toUpdateConceptData,
+  toSearchOptions,
+  toSearchFilters,
+  toSearchResult,
+  toRelatedConcept
+};
 

@@ -3,8 +3,8 @@
  * @module types/entities/character/character-types
  */
 
-import type { BaseEntity } from '@/types/store.types';
-import type { JSONString, Nullable } from '@/utils/types/utility-types';
+import { BaseEntitySchema } from '@/types/common/base';
+import { SearchOptionsSchema } from '@/types/common/search';
 import { z } from 'zod';
 import type { Album } from '../album/types';
 import type { Collection } from '../collection/types';
@@ -23,44 +23,178 @@ import type { WorldItem } from '../world-item/types';
 /**
  * Interfaz base para personaje
  */
-export interface CharacterBase extends BaseEntity {
+export interface CharacterBase {
+    id: string;
     name: string;
-    emoji: string;
-    color: string;
-    description: Nullable<string>;
-    shortcut: Nullable<string>;
-    category: Nullable<string>;
-    sortBy: JSONString<CharacterSortCriteria>;
-    filters: JSONString<CharacterFilters>;
-
-    // Atributos del personaje
+    description?: string;
     level: number;
+    experience: number;
     class: string;
     race: string;
-    type: Nullable<string>;
     alignment: string;
-
-    // Características detalladas
-    backstory: string;
-    stats: JSONString<Record<string, any>>;
-    psychologicalProfile: string;
-    socialProfile: string;
-    relationships: JSONString<Array<any>>;
-    goals: JSONString<string[]>;
-    fears: JSONString<string[]>;
-    beliefs: JSONString<string[]>;
-    personality: JSONString<string[]>;
-    skills: JSONString<string[]>;
-    abilities: JSONString<string[]>;
-
-    // Propiedades de visualización
-    featuredImage: Nullable<string>;
+    background: string;
+    stats?: Record<string, number>;
+    skills?: Record<string, number>;
+    inventory?: Array<{
+        id: string;
+        name: string;
+        quantity: number;
+        type: string;
+        rarity?: string;
+        description?: string;
+    }>;
+    spells?: Array<{
+        id: string;
+        name: string;
+        level: number;
+        school: string;
+        description?: string;
+    }>;
+    feats?: Array<{
+        id: string;
+        name: string;
+        description?: string;
+        requirements?: string[];
+    }>;
+    notes?: string;
+    isActive: boolean;
     isFavorite: boolean;
-
-    // Metadata
+    metadata?: Record<string, unknown>;
     createdAt: Date;
     updatedAt: Date;
 }
+
+// Interfaces de relaciones
+export interface CharacterRelations {
+    party?: { id: string };
+    campaign?: { id: string };
+    images?: Array<{ id: string }>;
+    items?: Array<{ id: string }>;
+    abilities?: Array<{ id: string }>;
+    quests?: Array<{ id: string }>;
+    locations?: Array<{ id: string }>;
+    npcs?: Array<{ id: string }>;
+    notes?: Array<{ id: string }>;
+    relatedCharacters?: Array<{ id: string }>;
+    relatedTo?: Array<{ id: string }>;
+}
+
+// Interface de conteos
+export interface CharacterCounts {
+    images: number;
+    items: number;
+    abilities: number;
+    quests: number;
+    locations: number;
+    npcs: number;
+    notes: number;
+    relatedCharacters: number;
+    relatedTo: number;
+}
+
+// Interface completa
+export interface CharacterComplete extends CharacterBase, CharacterRelations {
+    _count: CharacterCounts;
+}
+
+// Interfaces para creación y actualización
+export interface CharacterCreateInput extends Omit<CharacterBase, 'id' | 'createdAt' | 'updatedAt'>, Partial<CharacterRelations> {}
+export interface CharacterUpdateInput extends Partial<Omit<CharacterBase, 'id' | 'createdAt' | 'updatedAt'>>, Partial<CharacterRelations> {}
+
+// Interfaces para búsqueda
+export interface CharacterFilters {
+    search?: string;
+    level?: {
+        min?: number;
+        max?: number;
+    };
+    class?: string[];
+    race?: string[];
+    alignment?: string[];
+    background?: string[];
+    isActive?: boolean;
+    isFavorite?: boolean;
+    hasParty?: boolean;
+    hasCampaign?: boolean;
+    hasImages?: boolean;
+    dateRange?: {
+        start?: Date;
+        end?: Date;
+    };
+}
+
+export interface CharacterIncludes {
+    party?: boolean;
+    campaign?: boolean;
+    images?: boolean;
+    items?: boolean;
+    abilities?: boolean;
+    quests?: boolean;
+    locations?: boolean;
+    npcs?: boolean;
+    notes?: boolean;
+    relatedCharacters?: boolean;
+    relatedTo?: boolean;
+    count?: boolean;
+}
+
+export interface CharacterSearchOptions extends SearchOptionsSchema {
+    filters?: CharacterFilters;
+    include?: CharacterIncludes;
+}
+
+export interface CharacterSearchResult {
+    items: CharacterComplete[];
+    total: number;
+    page: number;
+    pageSize: number;
+}
+
+// Opciones del transformer
+export interface CharacterTransformerOptions {
+    includeRelations?: boolean;
+    includeCount?: boolean;
+    customFields?: string[];
+}
+
+// Esquema base para Character
+export const CharacterSchema = BaseEntitySchema.extend({
+    name: z.string(),
+    description: z.string().optional(),
+    level: z.number().int().min(1).max(100),
+    experience: z.number().int().min(0),
+    class: z.string(),
+    race: z.string(),
+    alignment: z.string(),
+    background: z.string(),
+    stats: z.record(z.string(), z.number()).optional(),
+    skills: z.record(z.string(), z.number()).optional(),
+    inventory: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        quantity: z.number().int().min(1),
+        type: z.string(),
+        rarity: z.string().optional(),
+        description: z.string().optional(),
+    })).optional(),
+    spells: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        level: z.number().int().min(0).max(9),
+        school: z.string(),
+        description: z.string().optional(),
+    })).optional(),
+    feats: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        description: z.string().optional(),
+        requirements: z.array(z.string()).optional(),
+    })).optional(),
+    notes: z.string().optional(),
+    isActive: z.boolean().default(true),
+    isFavorite: z.boolean().default(false),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+});
 
 // Contadores unificados
 export interface CharacterCount {
@@ -183,77 +317,6 @@ export interface UpdateCharacterData {
   wildcardIds?: string[];
   tagIds?: string[];                                    // IDs de tags relacionados
 }
-
-/**
- * Interfaz para filtros de búsqueda de personajes
- */
-export interface CharacterFilters {
-    searchQuery?: string;
-    categories?: string[];
-    classes?: string[];
-    races?: string[];
-    levelRange?: {
-        min?: number;
-        max?: number;
-    };
-    alignments?: string[];
-    onlyFavorites?: boolean;
-    hasImages?: boolean;
-    hasRelations?: boolean;
-}
-
-// Validaciones Zod
-export const characterFilterSchema = z.object({
-    searchQuery: z.string().optional(),
-    categories: z.array(z.string()).optional(),
-    classes: z.array(z.string()).optional(),
-    races: z.array(z.string()).optional(),
-    levelRange: z.object({
-        min: z.number().optional(),
-        max: z.number().optional()
-    }).optional(),
-    alignments: z.array(z.string()).optional(),
-    onlyFavorites: z.boolean().optional(),
-    hasImages: z.boolean().optional(),
-    hasRelations: z.boolean().optional()
-});
-
-export const characterSchema = z.object({
-    id: z.string(),
-    name: z.string().min(1),
-    emoji: z.string(),
-    color: z.string(),
-    description: z.string().nullable(),
-    shortcut: z.string().nullable(),
-    category: z.string().nullable(),
-    level: z.number(),
-    class: z.string(),
-    race: z.string(),
-    type: z.string().nullable(),
-    alignment: z.string(),
-    backstory: z.string(),
-    sortBy: z.string(),
-    filters: z.string(),
-    // JSON fields
-    stats: z.string(),
-    psychologicalProfile: z.string(),
-    socialProfile: z.string(),
-    relationships: z.string(),
-    goals: z.string(),
-    fears: z.string(),
-    beliefs: z.string(),
-    personality: z.string(),
-    skills: z.string(),
-    abilities: z.string(),
-    // Display properties
-    featuredImage: z.string().nullable(),
-    isFavorite: z.boolean(),
-    createdAt: z.date(),
-    updatedAt: z.date()
-});
-
-export type CharacterFilter = z.infer<typeof characterFilterSchema>;
-export type CharacterValidated = z.infer<typeof characterSchema>;
 
 /**
  * Enumeración para criterios de ordenación

@@ -3,11 +3,227 @@
  * @module transformers/tag/serializers
  */
 
+import { Logger } from '@/lib/logger';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { type TagBase, TagCategory, type TagComplete, type TagExtended, TagRarity, type TagWithStats } from '../../types/entities/tag/index';
+import {
+    TagCreateInput,
+    TagSchema,
+    TagUpdateInput,
+} from '@/types/entities/tag/types';
+import {
+    validateFieldType,
+    validateRequiredFields
+} from '@/utils/transformers/common';
+import { handleTransformerError } from '@/utils/transformers/errors';
+import {
+    getRelationCounts,
+    preparePrismaRelations,
+    validateEntityRelations,
+} from '@/utils/transformers/relations';
+import {
+    validateBaseEntity,
+    validateMetadataFields,
+    validateUIFields,
+} from '@/utils/transformers/validation';
+import { Prisma } from '@prisma/client';
+import { type TagBase, TagCategory, type TagComplete, type TagExtended, type TagWithStats } from '../../types/entities/tag/index';
 
 // Logger específico para serializadores de Tag
 const serializerLogger = serverLogger.withContext('TagSerializers');
+
+const logger = new Logger('TagSerializer');
+
+/**
+ * 🔄 Serializa un Tag para Prisma
+ */
+export function toPrismaTag(data: TagCreateInput | TagUpdateInput): Prisma.TagCreateInput | Prisma.TagUpdateInput {
+	try {
+		// Validar campos requeridos para creación
+		if (!('id' in data)) {
+			validateRequiredFields(data, ['name']);
+		}
+
+		// Validar tipos de datos
+		validateFieldType(data.name, 'string', 'name');
+		if (data.emoji) validateFieldType(data.emoji, 'string', 'emoji');
+		if (data.color) validateFieldType(data.color, 'string', 'color');
+		if (data.category) validateFieldType(data.category, 'string', 'category');
+
+		// Preparar relaciones para Prisma
+		const relations = preparePrismaRelations('Tag', data);
+
+		return {
+			...data,
+			...relations,
+		};
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Deserializa un Tag desde Prisma
+ */
+export function fromPrismaTag(
+	prismaTag: Prisma.TagGetPayload<{
+		include: {
+			images: true;
+			videos: true;
+			albums: true;
+			collections: true;
+			characters: true;
+			places: true;
+			worldItems: true;
+			concepts: true;
+			prompts: true;
+			notes: true;
+			wildcards: true;
+			properties: true;
+			groups: true;
+			_count: true;
+		};
+	}>
+): TagComplete {
+	try {
+		// Obtener conteos de relaciones
+		const counts = getRelationCounts('Tag', prismaTag);
+
+		// Construir objeto base
+		const baseTag: TagBase = {
+			id: prismaTag.id,
+			name: prismaTag.name,
+			emoji: prismaTag.emoji,
+			color: prismaTag.color,
+			description: prismaTag.description,
+			shortcut: prismaTag.shortcut,
+			category: prismaTag.category,
+			featuredImage: prismaTag.featuredImage,
+			isFavorite: prismaTag.isFavorite,
+			createdAt: prismaTag.createdAt,
+			updatedAt: prismaTag.updatedAt,
+		};
+
+		// Validar objeto base
+		validateBaseEntity(baseTag);
+		validateUIFields(baseTag);
+		validateMetadataFields(baseTag);
+
+		// Construir objeto completo con relaciones
+		return {
+			...baseTag,
+			images: prismaTag.images?.map(img => ({ id: img.id })),
+			videos: prismaTag.videos?.map(vid => ({ id: vid.id })),
+			albums: prismaTag.albums?.map(alb => ({ id: alb.id })),
+			collections: prismaTag.collections?.map(col => ({ id: col.id })),
+			characters: prismaTag.characters?.map(char => ({ id: char.id })),
+			places: prismaTag.places?.map(place => ({ id: place.id })),
+			worldItems: prismaTag.worldItems?.map(item => ({ id: item.id })),
+			concepts: prismaTag.concepts?.map(con => ({ id: con.id })),
+			prompts: prismaTag.prompts?.map(prompt => ({ id: prompt.id })),
+			notes: prismaTag.notes?.map(note => ({ id: note.id })),
+			wildcards: prismaTag.wildcards?.map(wild => ({ id: wild.id })),
+			properties: prismaTag.properties?.map(prop => ({ id: prop.id })),
+			groups: prismaTag.groups?.map(group => ({ id: group.id })),
+			_count: counts,
+		};
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔍 Valida un Tag
+ */
+export function validateTag(data: unknown): TagComplete {
+	try {
+		const validated = TagSchema.parse(data);
+		validateEntityRelations('Tag', validated);
+		return validated as TagComplete;
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Extiende un Tag con datos adicionales
+ */
+export async function extendTag(
+	tag: TagComplete,
+	options: {
+		includeRelations?: boolean;
+		includeCount?: boolean;
+		customFields?: string[];
+	} = {}
+): Promise<TagComplete> {
+	try {
+		const extended = { ...tag };
+
+		// Aquí puedes agregar lógica para cargar datos adicionales
+		// basado en las opciones proporcionadas
+
+		return extended;
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔍 Parsea filtros de Tag
+ */
+export function parseTagFilters(filters: unknown): Record<string, unknown> {
+	try {
+		if (!filters || typeof filters !== 'object') {
+			return {};
+		}
+
+		const parsed: Record<string, unknown> = {};
+		const typedFilters = filters as Record<string, unknown>;
+
+		// Procesar filtros específicos de Tag
+		if (typedFilters.search) {
+			parsed.OR = [
+				{ name: { contains: typedFilters.search as string, mode: 'insensitive' } },
+				{ description: { contains: typedFilters.search as string, mode: 'insensitive' } },
+			];
+		}
+
+		// Filtros de categoría
+		if (typedFilters.categories?.length) {
+			parsed.category = { in: typedFilters.categories };
+		}
+
+		// Filtros de estado
+		if (typedFilters.isFavorite !== undefined) {
+			parsed.isFavorite = typedFilters.isFavorite;
+		}
+
+		// Filtros de relaciones
+		if (typedFilters.hasImages) {
+			parsed.images = { some: {} };
+		}
+		if (typedFilters.hasVideos) {
+			parsed.videos = { some: {} };
+		}
+		if (typedFilters.hasAlbums) {
+			parsed.albums = { some: {} };
+		}
+		if (typedFilters.hasCollections) {
+			parsed.collections = { some: {} };
+		}
+
+		// Filtros de fecha
+		if (typedFilters.dateRange?.start) {
+			parsed.createdAt = { ...parsed.createdAt, gte: typedFilters.dateRange.start };
+		}
+		if (typedFilters.dateRange?.end) {
+			parsed.createdAt = { ...parsed.createdAt, lte: typedFilters.dateRange.end };
+		}
+
+		return parsed;
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
 
 /**
  * Convierte un TagBase en un TagComplete deserializando campos JSON si existieran
@@ -78,19 +294,18 @@ export function extendTags(tags: (TagBase | TagComplete)[]): TagExtended[] {
 
 /**
  * Convierte una etiqueta en su versión con estadísticas
- * @param tag Etiqueta base
- * @param imageCount Número de imágenes asociadas
- * @param totalSize Tamaño total en bytes
+ * @param tag Etiqueta base con datos de conteo
  * @returns Etiqueta con estadísticas
  */
-export function tagToTagWithStats(tag: TagBase | TagComplete, imageCount = 0, totalSize = 0): TagWithStats {
+export function tagToTagWithStats(tag: TagBase & { _count?: { images?: number } }): TagWithStats {
 	// Asegurar que tenemos una versión completa
 	const completeTag = 'id' in tag ? toTagComplete(tag) : tag;
+	const imageCount = tag._count?.images || 0;
 
 	return {
 		...completeTag,
 		count: imageCount,
-		size: formatSize(totalSize),
+		size: tag.totalSize ? formatSize(tag.totalSize) : `0 B`,
 	};
 }
 
@@ -106,7 +321,7 @@ export function formatSize(bytes: number): string {
 	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 /**
@@ -114,37 +329,19 @@ export function formatSize(bytes: number): string {
  * @param category Categoría a normalizar (o undefined)
  * @returns Categoría normalizada
  */
-export function normalizeTagCategory(category?: string | null): TagCategory {
-	if (!category) return TagCategory.OTHER;
+export function normalizeTagCategory(category?: string | null): string {
+	if (!category) return 'general';
 
-	// Intentar mapear a una categoría existente
+	// Intentar mapear a una categoría existente del enum
 	const lowerCategory = category.toLowerCase();
 	for (const [key, value] of Object.entries(TagCategory)) {
 		if (value.toLowerCase() === lowerCategory) {
-			return value as TagCategory;
+			return value;
 		}
 	}
 
-	return TagCategory.CUSTOM;
-}
-
-/**
- * Normaliza una rareza de etiqueta
- * @param rarity Rareza a normalizar (o undefined)
- * @returns Rareza normalizada
- */
-export function normalizeTagRarity(rarity?: string | null): TagRarity {
-	if (!rarity) return TagRarity.COMMON;
-
-	// Intentar mapear a una rareza existente
-	const lowerRarity = rarity.toLowerCase();
-	for (const [key, value] of Object.entries(TagRarity)) {
-		if (value.toLowerCase() === lowerRarity) {
-			return value as TagRarity;
-		}
-	}
-
-	return TagRarity.COMMON;
+	// Si no coincide con ninguna del enum, devolver la categoría original o 'custom'
+	return category.length > 0 ? category.toLowerCase() : 'custom';
 }
 
 /**
@@ -180,21 +377,24 @@ export function generateTagColor(name: string): string {
 export function generateTagEmoji(name: string, category?: string): string {
 	// Mapeo de categorías a emojis
 	const categoryEmojis: Record<string, string> = {
-		[TagCategory.CHARACTER]: '👤',
-		[TagCategory.LOCATION]: '📍',
-		[TagCategory.OBJECT]: '🔮',
-		[TagCategory.CONCEPT]: '💭',
-		[TagCategory.EVENT]: '🎉',
-		[TagCategory.COLOR]: '🎨',
-		[TagCategory.STYLE]: '✨',
-		[TagCategory.EMOTION]: '😊',
-		[TagCategory.CUSTOM]: '🏷️',
-		[TagCategory.OTHER]: '📌',
+		'general': '🏷️',
+		'subject': '👤',
+		'style': '✨',
+		'color': '🎨',
+		'quality': '⭐',
+		'technique': '🔧',
+		'composition': '📐',
+		'content': '📄',
+		'emotion': '😊',
+		'theme': '🎭',
+		'genre': '📚',
+		'custom': '🔖',
+		'other': '📌',
 	};
 
 	// Si hay categoría y está en el mapeo, usar ese emoji
-	if (category && categoryEmojis[category]) {
-		return categoryEmojis[category];
+	if (category && categoryEmojis[category.toLowerCase()]) {
+		return categoryEmojis[category.toLowerCase()];
 	}
 
 	// Análisis básico del nombre para decidir un emoji
@@ -211,4 +411,42 @@ export function generateTagEmoji(name: string, category?: string): string {
 
 	// Emoji por defecto
 	return '🏷️';
+}
+
+/**
+ * Normaliza una rareza de etiqueta
+ * @param rarity Rareza a normalizar (o undefined)
+ * @returns Rareza normalizada
+ */
+export function normalizeTagRarity(rarity?: string | null): string {
+	if (!rarity) return 'common';
+
+	// Normalizar a lowercase para comparaciones
+	const lowerRarity = rarity.toLowerCase();
+
+	// Mapeo de posibles valores a los estándar
+	const rarityMap: Record<string, string> = {
+		'common': 'common',
+		'uncommon': 'uncommon',
+		'rare': 'rare',
+		'epic': 'epic',
+		'legendary': 'legendary',
+		'mythic': 'mythic',
+		'unique': 'unique'
+	};
+
+	// Verificar si coincide con alguna rareza estándar
+	if (rarityMap[lowerRarity]) {
+		return rarityMap[lowerRarity];
+	}
+
+	// Si no coincide, intentar coincidir parcialmente
+	for (const [key, value] of Object.entries(rarityMap)) {
+		if (lowerRarity.includes(key)) {
+			return value;
+		}
+	}
+
+	// Si no hay coincidencia, devolver 'common'
+	return 'common';
 }

@@ -32,6 +32,18 @@ export enum WorldItemRarity {
 }
 
 /**
+ * Niveles de rareza numéricos
+ */
+export enum RarityLevel {
+  COMMON = 1,
+  UNCOMMON = 3,
+  RARE = 5,
+  EPIC = 7,
+  LEGENDARY = 9,
+  MYTHIC = 10
+}
+
+/**
  * Tamaño de objetos del mundo
  */
 export enum WorldItemSize {
