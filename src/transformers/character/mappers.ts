@@ -18,7 +18,7 @@ import {
     CHARACTER_CLASS_EMOJIS as SUGGESTED_EMOJIS,
 } from '@/types/entities/character/enums';
 import type { CHARACTER_SORT_PROPERTY_MAP, CharacterFilters, CharacterSortCriteria } from '@/types/entities/character/types';
-import { CharacterComplete, CharacterCreateInput, CharacterSearchOptions, CharacterUpdateInput } from '@/types/entities/character/types';
+import type { CharacterComplete, CharacterCreateInput, CharacterSearchOptions, CharacterUpdateInput } from '@/types/entities/character/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import type { Prisma, Character as PrismaCharacter } from '@prisma/client';

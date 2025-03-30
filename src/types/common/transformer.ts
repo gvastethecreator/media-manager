@@ -1,5 +1,5 @@
-import { MetadataFields, UIFields } from '@/utils/transformers/common';
-import { Prisma } from '@prisma/client';
+import type { MetadataFields, UIFields } from '@/utils/transformers/common';
+import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 /**

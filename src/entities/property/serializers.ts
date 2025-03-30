@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { PropertySchema } from '@/types/entities/property/schema';
-import { PropertyBase, PropertyWithRelations } from '@/types/entities/property/types';
+import type { PropertyBase, PropertyWithRelations } from '@/types/entities/property/types';
 
 /**
  * Extiende una propiedad con campos deserializados

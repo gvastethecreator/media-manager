@@ -179,8 +179,9 @@ export function isValidVideoFilename(filename: string): boolean {
 	const hasValidExtension = validExtensions.some((ext) => filename.toLowerCase().endsWith(ext));
 
 	// Verificar caracteres no permitidos
-	const invalidCharsRegex = /[<>:"\/\\|?*\u0000-\u001F]/g;
-	const hasInvalidChars = invalidCharsRegex.test(filename);
+	const invalidCharsRegex = /[<>:"\/\\|?*]/g;
+	const controlCharsPresent = filename.split('').some(char => char.charCodeAt(0) < 32);
+	const hasInvalidChars = invalidCharsRegex.test(filename) || controlCharsPresent;
 
 	// Verificar longitud
 	const isValidLength = filename.length > 0 && filename.length <= 255;

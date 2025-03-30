@@ -4,8 +4,8 @@
  */
 
 import { logger } from '@/lib/logger';
-import { CONCEPT_SORT_PROPERTY_MAP, ConceptFilters, ConceptSortCriteria, CreateConceptData, UpdateConceptData } from '@/types/entities/concept/types';
-import { Prisma } from '@prisma/client';
+import { CONCEPT_SORT_PROPERTY_MAP, type ConceptFilters, type ConceptSortCriteria, type CreateConceptData, type UpdateConceptData } from '@/types/entities/concept/types';
+import type { Prisma } from '@prisma/client';
 import { serializeConceptTags } from './serializers';
 
 /**

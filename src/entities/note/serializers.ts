@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { NoteSchema, NoteTagsSchema } from '@/types/entities/note/schema';
-import { Note, NoteComplete, NoteTags } from '@/types/entities/note/types';
+import type { Note, NoteComplete, NoteTags } from '@/types/entities/note/types';
 
 /**
  * Serializa los tags de una nota

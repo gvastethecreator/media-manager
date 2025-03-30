@@ -195,23 +195,35 @@ export function ImagePreview({ item }: ItemComponentProps) {
 			{/* Imagen completa o thumbnail */}
 			{imageUrl && (
 				<div className="relative w-full h-full">
-					<img
-						src={imageUrl}
-						alt={item.name || 'Vista previa de imagen'}
+					<button
 						className={cn(
-							'w-full h-full object-contain bg-background/50 cursor-pointer transition-all hover:scale-[1.02]',
+							'w-full h-full cursor-pointer transition-all hover:scale-[1.02] border-0 p-0 m-0 bg-transparent',
 							isLoading && !hasThumbnail && 'opacity-0',
 							!isLoading && 'opacity-100'
 						)}
 						onClick={handleClick}
-						onLoad={() => {
-							setIsLoading(false);
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault();
+								handleClick();
+							}
 						}}
-						onError={() => {
-							setIsLoading(false);
-							setError('Error al mostrar la imagen');
-						}}
-					/>
+						type="button"
+						aria-label={`Ver ${item.name || 'imagen'} en tamaño completo`}
+					>
+						<img
+							src={imageUrl}
+							alt={item.name || 'Vista previa de imagen'}
+							className="w-full h-full object-contain bg-background/50"
+							onLoad={() => {
+								setIsLoading(false);
+							}}
+							onError={() => {
+								setIsLoading(false);
+								setError('Error al mostrar la imagen');
+							}}
+						/>
+					</button>
 				</div>
 			)}
 		</div>

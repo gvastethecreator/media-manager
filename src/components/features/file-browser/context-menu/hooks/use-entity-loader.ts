@@ -232,19 +232,19 @@ export function useEntityLoader() {
 				entityLoaderLogger.info(`✅ Actualizando store ${entity} con ${data.length || 0} elementos`);
 				(store as any)[storeMethod](data);
 				return true;
-			} else {
-				entityLoaderLogger.warn(`El método ${storeMethod} no existe en el store ${entity}`);
+			}
 
-				// Intentar métodos alternativos conocidos
-				if (entity === 'collections' && typeof (store as any).addCollections === 'function') {
-					(store as any).addCollections(data);
-					return true;
-				}
+			entityLoaderLogger.warn(`El método ${storeMethod} no existe en el store ${entity}`);
 
-				if (entity === 'tags' && typeof (store as any).addTags === 'function') {
-					(store as any).addTags(data);
-					return true;
-				}
+			// Intentar métodos alternativos conocidos
+			if (entity === 'collections' && typeof (store as any).addCollections === 'function') {
+				(store as any).addCollections(data);
+				return true;
+			}
+
+			if (entity === 'tags' && typeof (store as any).addTags === 'function') {
+				(store as any).addTags(data);
+				return true;
 			}
 
 			return false;
@@ -435,8 +435,7 @@ export function useEntityLoader() {
 			// Devolver array vacío en lugar de propagar el error
 			return [];
 		}
-	}, [stores, fetchDataFromServer, setLoadingStates]);
-
+	}, [stores, fetchDataFromServer]);
 
 	// Modificar también la función loadEntityData para que sea más tolerante a errores
 	const loadEntityData = useCallback(
@@ -555,7 +554,8 @@ export function useEntityLoader() {
 				// Devolver array vacío en lugar de propagar el error
 				return [];
 			}
-		}, [stores, fetchDataFromServer, setLoadingStates]);
+		}, [fetchDataFromServer, loadingStates]
+	);
 
 	return {
 		loadingStates,

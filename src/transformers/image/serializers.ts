@@ -4,12 +4,12 @@
  */
 
 import { Logger } from '@/lib/logger';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import {
 	ImageBase,
-	ImageComplete,
-	ImageCreateInput,
-	ImageUpdateInput,
+	type ImageComplete,
+	type ImageCreateInput,
+	type ImageUpdateInput,
 	ImageSchema,
 } from '@/types/entities/image/types';
 import {

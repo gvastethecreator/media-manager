@@ -3,14 +3,24 @@ import { thumbnailCache } from '@/lib/cache';
 import { imageConfig } from '@/lib/config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
+import { type EventType, emit } from '@/lib/server/events.server';
+import { imageTransformer } from '@/types/entities/image/transformer';
+import type { ImageExtended } from '@/types/entities/image/types';
 import { ThumbnailQuality } from '@/types/thumbnails';
-import type { Image } from '@prisma/client';
+import {
+    createEntityNotFoundError,
+    createFileNotFoundError,
+    createServiceError,
+    ServiceErrorCode,
+    toServiceError
+} from '@/utils/errors/service-errors';
 import { createHash } from 'crypto';
 import { promises as fs } from 'fs';
 import sharp from 'sharp';
 import { statsService } from './stats.service';
 
-const imageLogger = serverLogger.withContext('ImageService');
+const SERVICE_NAME = 'ImageService';
+const imageLogger = serverLogger.withContext(SERVICE_NAME);
 
 export type { ThumbnailQuality };
 export const THUMBNAIL_QUALITY_CONFIG = imageConfig.thumbnail.qualities;
@@ -36,6 +46,31 @@ export type ImageProcessingOptions = {
 	type?: string;
 };
 
+// Definir los eventos de imágenes
+export const IMAGE_EVENTS = {
+	IMAGE_CREATED: 'image:created',
+	IMAGE_UPDATED: 'image:updated',
+	IMAGE_DELETED: 'image:deleted',
+	IMAGES_CHANGED: 'images:changed',
+	THUMBNAIL_GENERATED: 'image:thumbnail:generated',
+	METADATA_UPDATED: 'image:metadata:updated',
+	ERROR: 'image:error',
+} as const;
+
+// Mapeo de eventos internos a EventType
+const EVENT_TYPE_MAPPING: Record<string, EventType> = {
+	// Eventos genéricos
+	error: 'folder:error',
+	// Mapeos específicos
+	[IMAGE_EVENTS.IMAGE_CREATED]: 'images:modified',
+	[IMAGE_EVENTS.IMAGE_UPDATED]: 'images:modified',
+	[IMAGE_EVENTS.IMAGE_DELETED]: 'images:modified',
+	[IMAGE_EVENTS.IMAGES_CHANGED]: 'images:modified',
+	[IMAGE_EVENTS.THUMBNAIL_GENERATED]: 'images:modified',
+	[IMAGE_EVENTS.METADATA_UPDATED]: 'images:modified',
+	[IMAGE_EVENTS.ERROR]: 'folder:error',
+} as const;
+
 class ImageService {
 	private static instance: ImageService;
 	private readonly SUPPORTED_FORMATS = imageConfig.processing.supportedFormats;
@@ -52,11 +87,28 @@ class ImageService {
 		return ImageService.instance;
 	}
 
+	// Método privado para emitir eventos
+	private async emitEvent(event: string, data: unknown): Promise<void> {
+		try {
+			const eventType = EVENT_TYPE_MAPPING[event] || 'images:modified';
+			await emit({
+				type: eventType,
+				data,
+			});
+		} catch (error) {
+			imageLogger.error('Error emitiendo evento:', { event, error });
+		}
+	}
+
 	private async ensureCacheDir() {
 		try {
 			await fs.mkdir(this.CACHE_DIR, { recursive: true });
 		} catch (error) {
-			console.error('Error creating cache directory:', error);
+			throw toServiceError(error, {
+				code: ServiceErrorCode.FILE_WRITE_ERROR,
+				message: 'Error al crear directorio de caché',
+				serviceName: SERVICE_NAME
+			});
 		}
 	}
 
@@ -70,99 +122,137 @@ class ImageService {
 		inputPath: string,
 		options: ImageProcessingOptions = {}
 	): Promise<{ buffer: Buffer; metadata: sharp.OutputInfo }> {
-		let pipeline = sharp(inputPath);
-		const metadata = await pipeline.metadata();
+		try {
+			let pipeline = sharp(inputPath);
+			const metadata = await pipeline.metadata();
 
-		// Verificar que los valores de ancho y alto existen antes de usarlos
-		const width = metadata.width ?? 0;
-		const height = metadata.height ?? 0;
+			// Verificar que los valores de ancho y alto existen antes de usarlos
+			const width = metadata.width ?? 0;
+			const height = metadata.height ?? 0;
 
-		if (options.width || options.height) {
-			const aspectRatio = width > 0 && height > 0 ? width / height : 1;
-			let targetWidth = options.width;
-			let targetHeight = options.height;
+			if (options.width || options.height) {
+				const aspectRatio = width > 0 && height > 0 ? width / height : 1;
+				let targetWidth = options.width;
+				let targetHeight = options.height;
 
-			if (aspectRatio > 1 && targetWidth) {
-				targetHeight = Math.round(targetWidth / aspectRatio);
-			} else if (targetHeight) {
-				targetWidth = Math.round(targetHeight * aspectRatio);
+				if (aspectRatio > 1 && targetWidth) {
+					targetHeight = Math.round(targetWidth / aspectRatio);
+				} else if (targetHeight) {
+					targetWidth = Math.round(targetHeight * aspectRatio);
+				}
+
+				pipeline = pipeline.resize(targetWidth, targetHeight, {
+					fit: options.fit || 'cover',
+					withoutEnlargement: true,
+				});
 			}
 
-			pipeline = pipeline.resize(targetWidth, targetHeight, {
-				fit: options.fit || 'cover',
-				withoutEnlargement: true,
+			if (options.format === 'webp') {
+				pipeline = pipeline.webp({
+					quality: options.quality || 80,
+					effort: 4,
+					nearLossless: true,
+				});
+			} else if (options.format === 'jpeg') {
+				pipeline = pipeline.jpeg({
+					quality: options.quality || 80,
+					progressive: true,
+				});
+			} else if (options.format === 'png') {
+				pipeline = pipeline.png({
+					progressive: true,
+					compressionLevel: 9,
+				});
+			}
+
+			const { data, info } = await pipeline.toBuffer({ resolveWithObject: true });
+			return { buffer: data, metadata: info };
+		} catch (error) {
+			throw toServiceError(error, {
+				code: ServiceErrorCode.FILE_READ_ERROR,
+				message: 'Error al procesar imagen',
+				context: { inputPath, options },
+				serviceName: SERVICE_NAME
 			});
 		}
-
-		if (options.format === 'webp') {
-			pipeline = pipeline.webp({
-				quality: options.quality || 80,
-				effort: 4,
-				nearLossless: true,
-			});
-		} else if (options.format === 'jpeg') {
-			pipeline = pipeline.jpeg({
-				quality: options.quality || 80,
-				progressive: true,
-			});
-		} else if (options.format === 'png') {
-			pipeline = pipeline.png({
-				progressive: true,
-				compressionLevel: 9,
-			});
-		}
-
-		const { data, info } = await pipeline.toBuffer({ resolveWithObject: true });
-		return { buffer: data, metadata: info };
 	}
 
-	async createImage(data: CreateImageInput): Promise<Image> {
-		const image = await prisma.image.create({
-			data: {
-				name: data.name,
-				path: data.path,
-				size: data.size,
-				width: data.width,
-				height: data.height,
-				hash: data.hash,
-				metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-				isPublic: data.isPublic ?? false,
-				folder: {
-					connect: { id: data.folderId },
+	async createImage(data: CreateImageInput): Promise<ImageExtended> {
+		try {
+			// Crear el registro en la base de datos
+			const dbImage = await prisma.image.create({
+				data: {
+					name: data.name,
+					path: data.path,
+					size: data.size,
+					width: data.width,
+					height: data.height,
+					hash: data.hash,
+					metadata: data.metadata ? JSON.stringify(data.metadata) : null,
+					isPublic: data.isPublic ?? false,
+					folder: {
+						connect: { id: data.folderId },
+					},
 				},
-			},
-			include: {
-				tags: true,
-			},
-		});
+				include: {
+					tags: true,
+				},
+			});
 
-		// Generar thumbnail automáticamente
-		await this.generateThumbnail(image.id, ThumbnailQuality.MEDIUM);
+			// Generar thumbnail automáticamente
+			await this.generateThumbnail(dbImage.id, ThumbnailQuality.MEDIUM);
 
-		// Inicializar estadísticas
-		await statsService.getOrCreateImageStats(image.id);
+			// Inicializar estadísticas
+			await statsService.getOrCreateImageStats(dbImage.id);
 
-		return image;
+			// Usar el transformer para convertir a entidad
+			const entity = imageTransformer.fromDB(dbImage);
+			const result = imageTransformer.toClient(entity);
+
+			// Emitir evento de creación
+			await this.emitEvent(IMAGE_EVENTS.IMAGE_CREATED, result);
+			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'create', image: result });
+
+			return result;
+		} catch (error) {
+			throw toServiceError(error, {
+				code: ServiceErrorCode.UNEXPECTED_ERROR,
+				message: 'Error al crear imagen',
+				context: { data },
+				serviceName: SERVICE_NAME
+			});
+		}
 	}
 
 	async generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
-		const image = await prisma.image.findUnique({
-			where: { id: imageId },
-		});
-
-		if (!image) {
-			throw new Error('Imagen no encontrada');
-		}
-
-		const config = THUMBNAIL_QUALITY_CONFIG[quality];
-		if (!config) {
-			throw new Error('Calidad de thumbnail inválida');
-		}
-
-		const cacheKey = this.getCacheKey(image.path, { ...config, type: 'thumbnail' });
-
 		try {
-			const { buffer, metadata } = await this.processImage(image.path, {
+			const image = await prisma.image.findUnique({
+				where: { id: imageId },
+			});
+
+			if (!image) {
+				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
+			}
+
+			const config = THUMBNAIL_QUALITY_CONFIG[quality];
+			if (!config) {
+				throw createServiceError({
+					code: ServiceErrorCode.INVALID_INPUT,
+					message: 'Calidad de thumbnail inválida',
+					context: { quality },
+					serviceName: SERVICE_NAME
+				});
+			}
+
+			// Verificar si el archivo de imagen existe
+			try {
+				await fs.access(image.path);
+			} catch (error) {
+				throw createFileNotFoundError(image.path, SERVICE_NAME);
+			}
+
+			// Procesar la imagen para crear el thumbnail
+			const { buffer } = await this.processImage(image.path, {
 				width: config.width,
 				height: config.height,
 				quality: config.quality,
@@ -170,112 +260,216 @@ class ImageService {
 				fit: 'cover',
 			});
 
-			await prisma.image.update({
-				where: { id: imageId },
-				data: {
-					thumbnail: buffer,
-					thumbnailSize: buffer.length,
-					thumbnailWidth: metadata.width,
-					thumbnailHeight: metadata.height,
-					updatedAt: new Date(),
+			// Guardar el thumbnail en la base de datos
+			await prisma.thumbnail.upsert({
+				where: {
+					imageId_quality: {
+						imageId,
+						quality,
+					},
+				},
+				create: {
+					imageId,
+					quality,
+					data: buffer,
+				},
+				update: {
+					data: buffer,
 				},
 			});
 
-			// Actualizar caché
-			await thumbnailCache.set(cacheKey, buffer);
+			// Invalidar caché si existe
+			const cacheKey = `thumbnail:${imageId}:${quality}`;
+			await thumbnailCache.delete(cacheKey);
+
+			// Emitir evento de thumbnail generado
+			await this.emitEvent(IMAGE_EVENTS.THUMBNAIL_GENERATED, { imageId, quality });
 		} catch (error) {
-			console.error('Error generating thumbnail:', error);
-			throw error;
+			await this.emitEvent(IMAGE_EVENTS.ERROR, {
+				message: 'Error al generar thumbnail',
+				imageId,
+				quality,
+				error: error instanceof Error ? error.message : String(error)
+			});
+			throw toServiceError(error, {
+				code: ServiceErrorCode.FILE_PROCESSING_ERROR,
+				message: 'Error al generar thumbnail',
+				context: { imageId, quality },
+				serviceName: SERVICE_NAME
+			});
 		}
 	}
 
-	async getThumbnail(imageId: string, quality: ThumbnailQuality = ThumbnailQuality.MEDIUM): Promise<string> {
-		const cacheKey = `thumbnail:${imageId}:${quality}`;
+	async getThumbnail(imageId: string, quality: ThumbnailQuality): Promise<Buffer> {
+		try {
+			// Verificar que la imagen existe
+			const image = await prisma.image.findUnique({
+				where: { id: imageId },
+			});
 
-		// Intentar obtener del caché
-		const cached = await thumbnailCache.get(cacheKey);
-		if (cached) {
-			return cached.toString('base64');
+			if (!image) {
+				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
+			}
+
+			// Verificar que la calidad solicitada es válida
+			if (!Object.values(ThumbnailQuality).includes(quality)) {
+				throw createServiceError({
+					code: ServiceErrorCode.INVALID_INPUT,
+					message: 'Calidad de thumbnail inválida',
+					context: { quality },
+					serviceName: SERVICE_NAME
+				});
+			}
+
+			// Intentar recuperar de la caché
+			const cacheKey = `thumbnail:${imageId}:${quality}`;
+			const cachedThumbnail = await thumbnailCache.get(cacheKey);
+			if (cachedThumbnail) {
+				return cachedThumbnail;
+			}
+
+			// Buscar en la base de datos
+			const thumbnail = await prisma.thumbnail.findUnique({
+				where: {
+					imageId_quality: {
+						imageId,
+						quality,
+					},
+				},
+			});
+
+			// Si no existe, generar y retornar
+			if (!thumbnail) {
+				await this.generateThumbnail(imageId, quality);
+				// Buscar nuevamente después de generar
+				const newThumbnail = await prisma.thumbnail.findUnique({
+					where: {
+						imageId_quality: {
+							imageId,
+							quality,
+						},
+					},
+				});
+
+				if (!newThumbnail) {
+					throw createServiceError({
+						code: ServiceErrorCode.FILE_NOT_FOUND,
+						message: 'No se pudo generar el thumbnail',
+						context: { imageId, quality },
+						serviceName: SERVICE_NAME
+					});
+				}
+
+				// Guardar en caché y retornar
+				await thumbnailCache.set(cacheKey, newThumbnail.data);
+				return newThumbnail.data;
+			}
+
+			// Guardar en caché y retornar
+			await thumbnailCache.set(cacheKey, thumbnail.data);
+			return thumbnail.data;
+		} catch (error) {
+			await this.emitEvent(IMAGE_EVENTS.ERROR, {
+				message: 'Error al obtener thumbnail',
+				imageId,
+				quality,
+				error: error instanceof Error ? error.message : String(error)
+			});
+			throw toServiceError(error, {
+				code: ServiceErrorCode.FILE_READ_ERROR,
+				message: 'Error al obtener thumbnail',
+				context: { imageId, quality },
+				serviceName: SERVICE_NAME
+			});
 		}
-
-		// Si no está en caché, generarlo
-		await this.generateThumbnail(imageId, quality);
-
-		// Intentar obtener el nuevo thumbnail
-		const image = await prisma.image.findUnique({
-			where: { id: imageId },
-			select: { thumbnail: true },
-		});
-
-		if (!image?.thumbnail) {
-			throw new Error('Error obteniendo thumbnail');
-		}
-
-		const base64 = (image.thumbnail as Buffer).toString('base64');
-		await thumbnailCache.set(cacheKey, Buffer.from(base64, 'base64'));
-		return base64;
 	}
 
 	async getOriginalImage(imageId: string): Promise<Buffer> {
-		const image = await prisma.image.findUnique({
-			where: { id: imageId },
-			select: { path: true },
-		});
-
-		if (!image) {
-			imageLogger.error('Imagen no encontrada', { imageId });
-			throw new Error('Imagen no encontrada');
-		}
-
 		try {
-			const buffer = await fs.readFile(image.path);
-			return buffer;
+			const image = await prisma.image.findUnique({
+				where: { id: imageId },
+			});
+
+			if (!image) {
+				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
+			}
+
+			try {
+				return await fs.readFile(image.path);
+			} catch (error) {
+				throw createFileNotFoundError(image.path, SERVICE_NAME);
+			}
 		} catch (error) {
-			imageLogger.error('Error leyendo imagen original', { imageId, error });
-			throw new Error('Error al leer la imagen original');
+			await this.emitEvent(IMAGE_EVENTS.ERROR, {
+				message: 'Error al obtener imagen original',
+				imageId,
+				error: error instanceof Error ? error.message : String(error)
+			});
+			throw toServiceError(error, {
+				code: ServiceErrorCode.FILE_READ_ERROR,
+				message: 'Error al obtener imagen original',
+				context: { imageId },
+				serviceName: SERVICE_NAME
+			});
 		}
 	}
 
-	async getImageMetadata(path: string) {
+	async getImageMetadata(imageId: string): Promise<Record<string, unknown>> {
 		try {
-			return await extractMetadata(path);
+			const image = await prisma.image.findUnique({
+				where: { id: imageId },
+			});
+
+			if (!image) {
+				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
+			}
+
+			// Si ya tiene metadatos, retornarlos
+			if (image.metadata) {
+				try {
+					return JSON.parse(image.metadata);
+				} catch (error) {
+					imageLogger.warn('Error al parsear metadatos existentes:', { error, imageId });
+					// Si falla, continuar para extraer nuevos metadatos
+				}
+			}
+
+			// Verificar si el archivo existe
+			try {
+				await fs.access(image.path);
+			} catch (error) {
+				throw createFileNotFoundError(image.path, SERVICE_NAME);
+			}
+
+			// Extraer y guardar metadatos
+			const metadata = await extractMetadata(image.path);
+			if (metadata && Object.keys(metadata).length > 0) {
+				await prisma.image.update({
+					where: { id: imageId },
+					data: {
+						metadata: JSON.stringify(metadata),
+					},
+				});
+
+				// Emitir evento de metadatos actualizados
+				await this.emitEvent(IMAGE_EVENTS.METADATA_UPDATED, { imageId, metadata });
+			}
+
+			return metadata || {};
 		} catch (error) {
-			imageLogger.error('Error getting image metadata:', { path, error });
-			throw error;
+			await this.emitEvent(IMAGE_EVENTS.ERROR, {
+				message: 'Error al obtener metadatos',
+				imageId,
+				error: error instanceof Error ? error.message : String(error)
+			});
+			throw toServiceError(error, {
+				code: ServiceErrorCode.UNEXPECTED_ERROR,
+				message: 'Error al obtener metadatos',
+				context: { imageId },
+				serviceName: SERVICE_NAME
+			});
 		}
 	}
-
-	async createBasicThumbnail(
-		path: string,
-		options: {
-			width?: number;
-			height?: number;
-			quality?: number;
-		} = {}
-	) {
-		const { width = 200, height = 200, quality = 80 } = options;
-
-		try {
-			const imageBuffer = await sharp(path)
-				.resize(width, height, {
-					fit: 'cover',
-					position: 'centre',
-				})
-				.webp({ quality })
-				.toBuffer();
-
-			return {
-				buffer: imageBuffer,
-				size: imageBuffer.length,
-				format: 'webp',
-			};
-		} catch (error) {
-			imageLogger.error('Error creating basic thumbnail:', { path, error });
-			throw error;
-		}
-	}
-
-	// Resto de métodos del servicio original...
 }
 
 export const imageService = ImageService.getInstance();

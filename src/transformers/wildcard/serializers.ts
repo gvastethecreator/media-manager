@@ -5,7 +5,7 @@
 
 import { createLogger } from '@/lib/logger';
 import { WildcardSchema } from '@/types/entities/wildcard/schema';
-import {
+import type {
     WildcardBase,
     WildcardDeserialized,
     WildcardUI

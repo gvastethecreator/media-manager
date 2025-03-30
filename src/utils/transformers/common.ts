@@ -8,7 +8,7 @@ const logger = new Logger('TransformerUtils');
  * @param defaultValue Valor por defecto si el campo es nulo o indefinido
  * @returns String JSON serializado
  */
-export function serializeJsonField<T>(field: T | null | undefined, defaultValue: string = '[]'): string {
+export function serializeJsonField<T>(field: T | null | undefined, defaultValue = '[]'): string {
   if (!field) return defaultValue;
   try {
     return JSON.stringify(field);
@@ -58,7 +58,13 @@ export function validateRequiredFields(data: Record<string, unknown>, requiredFi
 export function validateFieldType(value: unknown, type: string, fieldName: string): void {
   if (type === 'array' && !Array.isArray(value)) {
     throw new Error(`El campo ${fieldName} debe ser un array`);
-  } else if (type !== 'array' && typeof value !== type) {
+  }
+
+  if (type !== 'array' &&
+      (type === 'string' && typeof value !== 'string' ||
+       type === 'number' && typeof value !== 'number' ||
+       type === 'boolean' && typeof value !== 'boolean' ||
+       type === 'object' && (typeof value !== 'object' || value === null || Array.isArray(value)))) {
     throw new Error(`El campo ${fieldName} debe ser de tipo ${type}`);
   }
 }

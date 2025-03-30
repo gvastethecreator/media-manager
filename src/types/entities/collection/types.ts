@@ -4,7 +4,7 @@
  */
 
 import { BaseEntitySchema } from '@/types/common/base';
-import { SearchOptionsSchema } from '@/types/common/search';
+import type { SearchOptionsSchema } from '@/types/common/search';
 import { z } from 'zod';
 import type { Album } from '../album/types';
 import type { Character } from '../character/types';

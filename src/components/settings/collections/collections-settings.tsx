@@ -81,11 +81,11 @@ export function CollectionsSettings() {
 		let matches = true;
 
 		// Filtrar por búsqueda
-		if (searchQuery) {
+		if (searchQuery.trim() !== '') {
 			const normalizedQuery = searchQuery.toLowerCase();
 			matches = matches && Boolean(
 				collection.name.toLowerCase().includes(normalizedQuery) ||
-				(collection.description && collection.description.toLowerCase().includes(normalizedQuery))
+				collection.description?.toLowerCase().includes(normalizedQuery)
 			);
 		}
 
@@ -370,10 +370,13 @@ export function CollectionsSettings() {
 							) : (
 								<div className="space-y-1">
 									{filteredCollections.map((collection) => (
-										<div
+										<button
 											key={collection.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedCollection?.id === collection.id ? 'bg-muted' : ''}`}
+											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedCollection?.id === collection.id ? 'bg-muted' : ''}`}
 											onClick={() => handleEditCollection(collection)}
+											type="button"
+											aria-pressed={selectedCollection?.id === collection.id}
+											aria-label={`Editar colección ${collection.name}`}
 										>
 											<div
 												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
@@ -421,7 +424,7 @@ export function CollectionsSettings() {
 											>
 												<Trash className="h-3 w-3" />
 											</Button>
-										</div>
+										</button>
 									))}
 								</div>
 							)}
@@ -525,7 +528,7 @@ export function CollectionsSettings() {
 													)}
 												</div>
 
-												{selectedCollection && selectedCollection._count && selectedCollection._count.images > 0 && (
+												{selectedCollection?._count && selectedCollection._count.images > 0 && (
 													<p className="mt-4 text-xs text-muted-foreground">
 														{selectedCollection._count.images} imágenes asociadas
 													</p>

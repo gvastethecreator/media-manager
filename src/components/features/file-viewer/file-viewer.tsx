@@ -40,6 +40,7 @@ interface FileViewerProps {
 	initialIndex?: number;
 	isOpen: boolean;
 	onClose: () => void;
+	triggerRef?: React.RefObject<HTMLElement>;
 }
 
 // Constantes memoizadas para animaciones y tamaños
@@ -239,16 +240,49 @@ const ThumbnailNavigation = memo(function ThumbnailNavigation({
 });
 
 // Componente principal del visor de archivos - memoizado
-export const FileViewer = memo(function FileViewer({ images, initialIndex = 0, isOpen, onClose }: FileViewerProps) {
+export const FileViewer = memo(function FileViewer({
+	images,
+	initialIndex = 0,
+	isOpen,
+	onClose,
+	triggerRef
+}: FileViewerProps) {
 	const [currentIndex, setCurrentIndex] = useState(initialIndex);
 	const [urls, setUrls] = useState<Record<string, string>>({});
 	const [isLoading, setIsLoading] = useState(true);
 	const imageContainerRef = useRef<HTMLDivElement>(null);
+	const closeButtonRef = useRef<HTMLButtonElement>(null);
 	const [scale, setScale] = useState(1);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
+	const [isDragging, setIsDragging] = useState(false);
+	const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+	const [announceMessage, setAnnounceMessage] = useState('');
+	const previouslyFocusedElement = useRef<HTMLElement | null>(null);
 
 	// Memoizar la imagen actual
 	const currentImage = useMemo(() => images[currentIndex], [images, currentIndex]);
+
+	// Focus management - store and restore focus
+	useEffect(() => {
+		if (isOpen) {
+			// Store the currently focused element
+			previouslyFocusedElement.current = document.activeElement as HTMLElement;
+
+			// Focus the close button when opening
+			setTimeout(() => {
+				closeButtonRef.current?.focus();
+			}, 50);
+		} else if (previouslyFocusedElement.current || triggerRef?.current) {
+			// When closing, restore focus to the element that was focused before opening
+			// or to the trigger element if provided
+			const elementToFocus = triggerRef?.current || previouslyFocusedElement.current;
+
+			// Short delay to ensure DOM is ready
+			setTimeout(() => {
+				elementToFocus?.focus();
+			}, 50);
+		}
+	}, [isOpen, triggerRef]);
 
 	// Reset state when opening viewer
 	useEffect(() => {
@@ -281,20 +315,18 @@ export const FileViewer = memo(function FileViewer({ images, initialIndex = 0, i
 		}
 	}, []);
 
-	// Cargar solo las URLs necesarias inicialmente
+	// Determinar qué imágenes cargar inicialmente - Mover fuera de la función asíncrona
+	const indicesToLoad = useMemo(() => {
+		const nextIndex = (currentIndex + 1) % images.length;
+		const prevIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+		return [currentIndex, nextIndex, prevIndex];
+	}, [currentIndex, images.length]);
+
+	// Effect para cargar las URLs iniciales
 	useEffect(() => {
-		if (!isOpen || !images.length) {
-			return;
-		}
+		if (!isOpen) return;
 
 		const loadInitialUrls = async () => {
-			// Determinar qué imágenes cargar inicialmente
-			const indicesToLoad = useMemo(() => {
-				const nextIndex = (currentIndex + 1) % images.length;
-				const prevIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
-				return [currentIndex, nextIndex, prevIndex];
-			}, [currentIndex, images.length]);
-
 			const imagesToLoad = indicesToLoad.map(idx => images[idx]).filter(img => img && !urls[img.id]);
 
 			if (!imagesToLoad.length) {
@@ -330,7 +362,7 @@ export const FileViewer = memo(function FileViewer({ images, initialIndex = 0, i
 		};
 
 		loadInitialUrls();
-	}, [isOpen, currentIndex, images, urls, loadImageUrl]);
+	}, [isOpen, images, urls, loadImageUrl, indicesToLoad]);
 
 	// Resetear posición y escala
 	const resetView = useCallback(() => {
@@ -385,10 +417,10 @@ export const FileViewer = memo(function FileViewer({ images, initialIndex = 0, i
 
 	// Función memoizada para descargar la imagen
 	const handleDownload = useCallback(async () => {
-		if (!currentImage) return;
-
 		try {
-			// Si ya tenemos la URL en caché
+			if (!currentImage) return;
+
+			// Revisamos si ya tenemos la URL
 			let url = urls[currentImage.id];
 
 			// Si no, obtenemos la URL
@@ -399,12 +431,22 @@ export const FileViewer = memo(function FileViewer({ images, initialIndex = 0, i
 
 			// Creamos un enlace para la descarga
 			if (url) {
+				// Crear un blob para asegurar un tipo MIME correcto
+				const response = await fetch(url);
+				const blob = await response.blob();
+				const secureUrl = URL.createObjectURL(blob);
+
 				const link = document.createElement('a');
-				link.href = url;
+				link.href = secureUrl;
 				link.download = currentImage.name || 'imagen';
+				link.rel = 'noopener noreferrer';
 				document.body.appendChild(link);
 				link.click();
 				document.body.removeChild(link);
+
+				// Liberar el objeto URL
+				URL.revokeObjectURL(secureUrl);
+
 				toastService.success('Descarga iniciada');
 			}
 		} catch (error) {
@@ -423,29 +465,51 @@ export const FileViewer = memo(function FileViewer({ images, initialIndex = 0, i
 		if (!isOpen) return;
 
 		const handleKeyDown = (e: KeyboardEvent) => {
+			// If Tab is pressed, don't override browser behavior
+			if (e.key === 'Tab') {
+				return;
+			}
+
 			if (e.key === 'Escape') {
 				onClose();
 			} else if (e.key === 'ArrowLeft') {
-				setCurrentIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
+				setCurrentIndex(prev => {
+					const newIndex = prev > 0 ? prev - 1 : images.length - 1;
+					// Anunciar para lectores de pantalla
+					if (images[newIndex]) {
+						setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
+					}
+					return newIndex;
+				});
 			} else if (e.key === 'ArrowRight') {
-				setCurrentIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
+				setCurrentIndex(prev => {
+					const newIndex = prev < images.length - 1 ? prev + 1 : 0;
+					// Anunciar para lectores de pantalla
+					if (images[newIndex]) {
+						setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
+					}
+					return newIndex;
+				});
 			} else if (e.key === '0' || e.key === 'r') {
 				resetView();
+				setAnnounceMessage('Vista restablecida');
 			} else if (e.key === '+') {
 				handleZoom(0.2);
+				setAnnounceMessage('Zoom aumentado');
 			} else if (e.key === '-') {
 				handleZoom(-0.2);
+				setAnnounceMessage('Zoom reducido');
 			}
 		};
 
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
-	}, [isOpen, images.length, onClose, resetView, handleZoom]);
+	}, [isOpen, images, onClose, resetView, handleZoom]);
 
 	// Resetear posición y escala cuando cambia la imagen seleccionada
 	useEffect(() => {
 		resetView();
-	}, [currentIndex, resetView]);
+	}, [resetView]);
 
 	// Memoizar la clase del dialog
 	const dialogClassName = useMemo(() =>
@@ -480,9 +544,37 @@ export const FileViewer = memo(function FileViewer({ images, initialIndex = 0, i
 				ref={imageContainerRef}
 				className="relative w-full h-full flex flex-col items-center justify-center"
 				onClick={(e) => e.stopPropagation()}
+				onKeyDown={(e) => {
+					if (e.key === 'Escape') {
+						onClose();
+					} else if (e.key === 'ArrowLeft') {
+						setCurrentIndex(prev => {
+							const newIndex = prev > 0 ? prev - 1 : images.length - 1;
+							// Announce for screen readers
+							if (images[newIndex]) {
+								setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
+							}
+							return newIndex;
+						});
+					} else if (e.key === 'ArrowRight') {
+						setCurrentIndex(prev => {
+							const newIndex = prev < images.length - 1 ? prev + 1 : 0;
+							// Announce for screen readers
+							if (images[newIndex]) {
+								setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
+							}
+							return newIndex;
+						});
+					} else if (e.key === '0' || e.key === 'r') {
+						resetView();
+						setAnnounceMessage('Vista restablecida');
+					}
+				}}
 				onWheel={handleWheel}
 				onDoubleClick={resetView}
-				role="presentation"
+				onMouseDown={handleDragStart}
+				onTouchStart={handleDragStart}
+				aria-label="Visor de imágenes"
 			>
 				{/* Toolbar */}
 				<ToolbarActions

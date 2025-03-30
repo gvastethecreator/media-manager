@@ -4,8 +4,8 @@
  */
 
 import { logger } from '@/lib/logger';
-import { TagCreateInput, TagFilters, TagSearchOptions, TagUpdateInput } from '@/types/entities/tag/types';
-import { Prisma } from '@prisma/client';
+import type { TagCreateInput, TagFilters, TagSearchOptions, TagUpdateInput } from '@/types/entities/tag/types';
+import type { Prisma } from '@prisma/client';
 
 /**
  * Mapea los datos de creación de un tag al formato de Prisma

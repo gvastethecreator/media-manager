@@ -77,7 +77,12 @@ export function validateDataTypes(data: Record<string, unknown>, typeMap: Record
         if (!Array.isArray(value)) {
           throw new Error(`El campo ${field} debe ser un array`);
         }
-      } else if (typeof value !== expectedType) {
+      } else if (
+        (expectedType === 'string' && typeof value !== 'string') ||
+        (expectedType === 'number' && typeof value !== 'number') ||
+        (expectedType === 'boolean' && typeof value !== 'boolean') ||
+        (expectedType === 'object' && (typeof value !== 'object' || value === null || Array.isArray(value)))
+      ) {
         throw new Error(`El campo ${field} debe ser de tipo ${expectedType}`);
       }
     }

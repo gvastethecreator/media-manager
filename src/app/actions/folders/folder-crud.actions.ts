@@ -5,13 +5,13 @@ import { normalizePath } from '@/lib/path-utils';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import {
-  mapFolderExtendedFromComplete,
-  toFolderComplete
+    mapFolderExtendedFromComplete,
+    toFolderComplete
 } from '@/transformers/folder';
 import type {
-  CreateFolderData,
-  FolderExtendedComplete,
-  UpdateFolderData
+    CreateFolderData,
+    FolderExtendedComplete,
+    UpdateFolderData
 } from '@/types/entities/folder';
 import { existsSync } from 'fs';
 import { revalidateAllPaths } from './folder-utils.actions';
@@ -51,7 +51,36 @@ export async function getFolders(): Promise<FolderExtendedComplete[]> {
 		}
 
 		// Obtener carpetas con manejo detallado de errores
-		let folders;
+		let folders: Prisma.FolderGetPayload<{
+			include: {
+				_count: {
+					select: {
+						images: boolean;
+						videos: boolean;
+						children: boolean;
+					};
+				};
+				images: {
+					select: {
+						id: boolean;
+						name: boolean;
+						path: boolean;
+						size: boolean;
+						width: boolean;
+						height: boolean;
+						metadata: boolean;
+						thumbnail: boolean;
+						thumbnailWidth: boolean;
+						thumbnailHeight: boolean;
+						thumbnailSize: boolean;
+						isFavorite: boolean;
+						folderId: boolean;
+						createdAt: boolean;
+						updatedAt: boolean;
+					};
+				}[];
+			};
+		}>[] = [];
 		try {
 			folders = await prisma.folder.findMany({
 				include: {

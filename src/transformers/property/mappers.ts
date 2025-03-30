@@ -3,16 +3,16 @@
  * @module transformers/property/mappers
  */
 
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import {
-  CreatePropertyData,
-  PropertyBase,
-  PropertyComplete,
-  PropertyFilters,
-  PropertySearchOptions,
-  PropertySearchResult,
+  type CreatePropertyData,
+  type PropertyBase,
+  type PropertyComplete,
+  type PropertyFilters,
+  type PropertySearchOptions,
+  type PropertySearchResult,
   PropertySortCriteria,
-  PropertyUpdateInput,
+  type PropertyUpdateInput,
   PROPERTY_SORT_PROPERTY_MAP
 } from '@/types/entities/property/types';
 import { createLogger } from '@/lib/logger';

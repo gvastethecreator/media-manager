@@ -303,7 +303,7 @@ export function EntityPreloader({
         }
       }
     };
-  }, [mode, customEntities, loadEntityData, onPreloadComplete, shouldSkipPreload]);
+  }, [mode, customEntities, shouldSkipPreload, onPreloadComplete, loadEntityData, isPreloading, respectGlobalState]);
 
   // Este componente no renderiza nada visible
   return null;

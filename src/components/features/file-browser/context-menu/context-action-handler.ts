@@ -74,17 +74,26 @@ const customFileOperationsService = {
 		try {
 			// Crear un enlace temporal para descargar
 			const filename = path.split('/').pop() || 'download';
-			const a = document.createElement('a');
 
 			// Si es una ruta local, necesitamos convertirla a una URL descargable
 			// Para esto, debemos tener un endpoint que permita acceder al archivo
 			const downloadUrl = `/api/files/download?path=${encodeURIComponent(path)}`;
 
-			a.href = downloadUrl;
+			// Usar fetch para obtener el archivo como blob
+			const response = await fetch(downloadUrl);
+			const blob = await response.blob();
+			const secureUrl = URL.createObjectURL(blob);
+
+			const a = document.createElement('a');
+			a.href = secureUrl;
 			a.download = filename;
+			a.rel = 'noopener noreferrer';
 			document.body.appendChild(a);
 			a.click();
 			document.body.removeChild(a);
+
+			// Liberar el objeto URL
+			URL.revokeObjectURL(secureUrl);
 
 			actionLogger.info('✅ Archivo descargado:', path);
 			return Promise.resolve();
@@ -408,7 +417,7 @@ export async function handleContextAction(
 				try {
 					// Usar server action para añadir la imagen al lugar
 					await addImageToPlace(placeId, item.id);
-					toastService.system.success(`Imagen añadida al lugar`);
+					toastService.system.success('Imagen añadida al lugar');
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir imagen a lugar:', error);
 					toastService.system.error('Error al añadir imagen al lugar');
@@ -422,7 +431,7 @@ export async function handleContextAction(
 				try {
 					// Usar server action para añadir la imagen al objeto
 					await addImageToWorldItem(worldItemId, item.id);
-					toastService.system.success(`Imagen añadida al objeto`);
+					toastService.system.success('Imagen añadida al objeto');
 				} catch (error) {
 					actionLogger.error('❌ Error al añadir imagen a objeto del mundo:', error);
 					toastService.system.error('Error al añadir imagen al objeto del mundo');

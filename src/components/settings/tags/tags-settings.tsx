@@ -97,7 +97,7 @@ export function TagsSettings() {
 		if (searchQuery) {
 			const normalizedQuery = searchQuery.toLowerCase();
 			const nameMatch = tag.name.toLowerCase().includes(normalizedQuery);
-			const descriptionMatch = tag.description && tag.description.toLowerCase().includes(normalizedQuery);
+			const descriptionMatch = tag.description?.toLowerCase().includes(normalizedQuery);
 			matches = matches && (nameMatch || Boolean(descriptionMatch));
 		}
 
@@ -389,10 +389,12 @@ export function TagsSettings() {
 							) : (
 								<div className="space-y-1">
 									{filteredTags.map((tag) => (
-										<div
+										<button
 											key={tag.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedTag?.id === tag.id ? 'bg-muted' : ''}`}
+											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedTag?.id === tag.id ? 'bg-muted' : ''}`}
 											onClick={() => handleEditTag(tag)}
+											type="button"
+											aria-pressed={selectedTag?.id === tag.id}
 										>
 											<span className="text-base">{tag.emoji}</span>
 											<div className="flex-1 min-w-0">
@@ -424,7 +426,7 @@ export function TagsSettings() {
 											>
 												<Trash className="h-3 w-3" />
 											</Button>
-										</div>
+										</button>
 									))}
 								</div>
 							)}

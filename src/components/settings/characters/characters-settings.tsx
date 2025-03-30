@@ -79,7 +79,7 @@ export function CharactersSettings() {
 			const normalizedQuery = searchQuery.toLowerCase();
 			matches = matches && Boolean(
 				character.name.toLowerCase().includes(normalizedQuery) ||
-				(character.description && character.description.toLowerCase().includes(normalizedQuery))
+				character.description?.toLowerCase().includes(normalizedQuery)
 			);
 		}
 
@@ -361,10 +361,13 @@ export function CharactersSettings() {
 							) : (
 								<div className="space-y-1">
 									{filteredCharacters.map((character) => (
-										<div
+										<button
 											key={character.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedCharacter?.id === character.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditCharacter(character as unknown as Character)}
+											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedCharacter?.id === character.id ? 'bg-muted' : ''}`}
+											onClick={() => handleEditCharacter(character)}
+											type="button"
+											aria-pressed={selectedCharacter?.id === character.id}
+											aria-label={`Editar personaje ${character.name}`}
 										>
 											<div
 												className="w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center text-white"
@@ -406,7 +409,7 @@ export function CharactersSettings() {
 											>
 												<Trash className="h-3 w-3" />
 											</Button>
-										</div>
+										</button>
 									))}
 								</div>
 							)}

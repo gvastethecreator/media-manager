@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
-import { CreateWildcardData, UpdateWildcardData, WildcardBase, WildcardFilters, WildcardSortCriteria, WildcardWithRelations } from '@/types/entities/wildcard/types';
+import type { CreateWildcardData, UpdateWildcardData, WildcardBase, WildcardFilters, WildcardSortCriteria, WildcardWithRelations } from '@/types/entities/wildcard/types';
 import { mapCreateWildcardDataToPrisma, mapUpdateWildcardDataToPrisma, mapWildcardSearchOptionsToPrisma } from './mappers';
 import { buildWildcardTree, calculateWildcardStats, deserializeWildcardChildren, extendWildcard, validateWildcard } from './serializers';
 
@@ -123,7 +123,7 @@ export class WildcardTransformer {
    */
   static async findByCategory(
     category: string,
-    limit: number = 10
+    limit = 10
   ): Promise<WildcardWithRelations[]> {
     try {
       const wildcards = await prisma.wildcard.findMany({
@@ -143,7 +143,7 @@ export class WildcardTransformer {
    * Busca comodines favoritos
    */
   static async findFavorites(
-    limit: number = 10
+    limit = 10
   ): Promise<WildcardWithRelations[]> {
     try {
       const wildcards = await prisma.wildcard.findMany({
@@ -164,7 +164,7 @@ export class WildcardTransformer {
    */
   static async findChildren(
     parentId: string,
-    limit: number = 100
+    limit = 100
   ): Promise<WildcardWithRelations[]> {
     try {
       const wildcards = await prisma.wildcard.findMany({

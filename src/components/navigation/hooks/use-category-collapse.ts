@@ -32,9 +32,9 @@ export function useCategoryCollapse() {
 
 			if (isCurrentlyCollapsed) {
 				// Si vamos a expandir esta categoría, colapsamos todas las demás
-				Object.keys(newState).forEach((categoryId) => {
+				for (const categoryId of Object.keys(newState)) {
 					newState[categoryId] = true;
-				});
+				}
 				// Expandimos solo la seleccionada
 				newState[id] = false;
 				setLastExpandedCategory(id);
@@ -55,9 +55,9 @@ export function useCategoryCollapse() {
 
 			const newState = { ...prev };
 			// Colapsamos todas las categorías
-			Object.keys(newState).forEach((categoryId) => {
+			for (const categoryId of Object.keys(newState)) {
 				newState[categoryId] = true;
-			});
+			}
 			// Expandimos solo la seleccionada
 			newState[id] = false;
 			setLastExpandedCategory(id);

@@ -10,7 +10,7 @@ import {
     COLLECTION_CATEGORY_EMOJIS,
     type CollectionCategory
 } from '@/types/entities/collection';
-import {
+import type {
     CollectionCreateInput,
     CollectionFilters,
     CollectionSearchOptions,
@@ -19,7 +19,7 @@ import {
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import type { Image, Collection as PrismaCollection } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import {
     toCollectionComplete,
     toCollectionExtended

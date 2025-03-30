@@ -2,7 +2,8 @@
 
 import { cn } from '@/lib/utils';
 import { ImageIcon, Sparkles } from 'lucide-react';
-import { Suspense, useEffect, useState } from 'react';
+import { nanoid } from "nanoid";
+import React, { Suspense, useEffect, useState } from "react";
 import { getRecentConceptImages } from './concept-server-actions';
 
 interface ConceptCardImagesProps {
@@ -25,6 +26,9 @@ export function ConceptCardImages({
 	const [images, setImages] = useState<{ id: string; thumbnailUrl: string }[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+	// Generar un ID de renderizado único
+	const renderKey = React.useMemo(() => nanoid(), []);
 
 	useEffect(() => {
 		const loadImages = async () => {
@@ -93,7 +97,7 @@ export function ConceptCardImages({
 						// Mostrar placeholders mientras carga
 						<>
 							{[...Array(6)].map((_, i) => (
-								<ImageLoading key={`loading-${i}`} backgroundColor={secondaryColor} tcgMode={tcgMode} />
+								<ImageLoading key={`loading-${renderKey}-star-${i + 1}`} backgroundColor={secondaryColor} tcgMode={tcgMode} />
 							))}
 						</>
 					) : error ? (
@@ -155,7 +159,7 @@ export function ConceptCardImages({
 							{images.length < 6 &&
 								[...Array(6 - images.length)].map((_, i) => (
 									<div
-										key={`placeholder-${i}`}
+										key={`placeholder-${renderKey}-position-${i + 1}`}
 										className={cn(
 											"w-full h-full flex items-center justify-center",
 											tcgMode ? "bg-black/40 border border-white/5" : "bg-black/20"

@@ -37,7 +37,7 @@ import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { cn } from '@/lib/utils';
 import { toastService } from '@/services/toast.service';
-import type { UploadedImageType } from '@/types/entities/entities';
+import type { UploadedImageType } from '@/types/entities/uploaded-image';
 import type { FileItem } from '@/types/file-item';
 import type { UploadedImageFilters, UploadedImageResult } from '@/types/uploaded-images';
 import { Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';

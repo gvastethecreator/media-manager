@@ -9,13 +9,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome lint .",
-    "lint:fix": "biome lint --write .",
+    "lint": "biome lint --max-diagnostics=unlimited .",
+    "lint:fix": "biome lint --max-diagnostics=999 --write .",
     "format": "biome format --write .",
     "format:check": "biome format --check .",
-    "check": "biome check .",
-    "check:fix": "biome check --write .",
-    "biome:ci": "biome ci .",
+    "check": "biome check --max-diagnostics=unlimited .",
+    "check:fix": "biome check --max-diagnostics=unlimited --write .",
+    "biome:ci": "biome ci --max-diagnostics=unlimited .",
     "analyze": "node scripts/analyze/index.mjs",
     "db:full-reset": "rimraf prisma/dev.db && prisma migrate dev --name init",
     "drizzle:generate": "drizzle-kit generate",
@@ -25,7 +25,8 @@
     "drizzle:drop": "drizzle-kit drop",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "fix:lint": "biome check --max-diagnostics=999 --apply --verbose --no-errors-on-warn --no-errors-on-unmatched --log-level=debug ."
   },
   "dependencies": {
     "@bull-board/api": "^6.7.10",

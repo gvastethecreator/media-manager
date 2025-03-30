@@ -1,5 +1,5 @@
 import { FolderDiagnostics } from '@/components/folders/diagnostics/folder-diagnostics';
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Diagnóstico de Base de Datos',

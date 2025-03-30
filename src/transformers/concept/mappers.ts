@@ -3,16 +3,16 @@
  * @module transformers/concept/mappers
  */
 
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import {
-	ConceptBase,
-	ConceptComplete,
-	ConceptCreateInput,
-	ConceptFilters,
-	ConceptSearchOptions,
-	ConceptSearchResult,
+	type ConceptBase,
+	type ConceptComplete,
+	type ConceptCreateInput,
+	type ConceptFilters,
+	type ConceptSearchOptions,
+	type ConceptSearchResult,
 	ConceptSortCriteria,
-	ConceptUpdateInput,
+	type ConceptUpdateInput,
 	CONCEPT_SORT_PROPERTY_MAP,
 } from '@/types/entities/concept/types';
 import { createLogger } from '@/utils/logger';

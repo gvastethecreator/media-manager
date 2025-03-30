@@ -3,16 +3,16 @@
  * @module types/entities/world-item/types
  */
 
-import { BaseEntity, RelationCount, UIData } from '@/types/common/transformer';
-import { Image } from '../image/types';
+import type { BaseEntity, RelationCount, UIData } from '@/types/common/transformer';
+import type { Image } from '../image/types';
 import {
     WORLD_ITEM_SORT_PROPERTY_MAP,
-    WorldItemCategory,
-    WorldItemRarity,
-    WorldItemRelationshipType,
+    type WorldItemCategory,
+    type WorldItemRarity,
+    type WorldItemRelationshipType,
     WorldItemSortCriteria,
-    WorldItemType,
-    WorldItemViewMode
+    type WorldItemType,
+    type WorldItemViewMode
 } from './enums';
 
 /**

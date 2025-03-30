@@ -259,9 +259,9 @@ export function convertPromptToTemplate(
 
 		// Crear parámetros básicos
 		const parameters: Record<string, any> = {};
-		variables.forEach((variable) => {
+		for (const variable of variables) {
 			parameters[variable] = `[${variable.replace(/_/g, ' ')}]`;
-		});
+		}
 
 		// Parsear tags
 		let tags: string[] = [];

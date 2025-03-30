@@ -31,7 +31,7 @@ import toastService from '@/services/toast.service';
 import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory } from '@/types/entities/prompt/enums';
 import { Check, Delete, Edit, Plus, Search, Star, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CreatePromptForm } from './create-prompt-form';
 
 // Interfaz para PropntWithNullable que funciona como adaptador para el componente CreatePromptForm
@@ -79,7 +79,7 @@ export const PromptSettings = () => {
 	const [showCreateDialog, setShowCreateDialog] = useState(false);
 	const [editingPrompt, setEditingPrompt] = useState<CreatePromptFormPrompt | null>(null);
 
-	const loadPrompts = async () => {
+	const loadPrompts = useCallback(async () => {
 		try {
 			setLoading(true);
 			const loadedPrompts = await getPrompts();
@@ -99,11 +99,11 @@ export const PromptSettings = () => {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, []);
 
 	useEffect(() => {
 		loadPrompts();
-	}, []);
+	}, [loadPrompts]);
 
 	const handleDelete = async (id: string) => {
 		try {
@@ -166,7 +166,7 @@ export const PromptSettings = () => {
 	const filteredPrompts = prompts.filter(prompt => {
 		const matchesSearch = searchTerm
 			? prompt.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			(prompt.description && prompt.description.toLowerCase().includes(searchTerm.toLowerCase()))
+			(prompt.description?.toLowerCase().includes(searchTerm.toLowerCase()))
 			: true;
 
 		const matchesCategory = categoryFilter

@@ -64,7 +64,6 @@ export function ColorPicker({ value, onChange, className, compact = false, showL
 			<PopoverTrigger asChild>
 				<Button
 					variant="outline"
-					role="combobox"
 					aria-expanded={open}
 					className={cn(
 						compact ? "h-8" : "h-9",
@@ -161,12 +160,13 @@ export function ColorPicker({ value, onChange, className, compact = false, showL
 								<button
 									key={color}
 									className={cn(
-										'rounded-full border flex items-center justify-center',
-										isSelected(color) && 'ring-2 ring-primary ring-offset-1',
-										compact ? "h-6 w-6" : "h-8 w-8"
+										"w-6 h-6 rounded-md border border-muted flex items-center justify-center",
+										isSelected(color) && "ring-1 ring-ring"
 									)}
 									style={{ backgroundColor: color }}
 									onClick={() => applyColor(color)}
+									type="button"
+									aria-label={`Seleccionar color ${color}`}
 								>
 									{isSelected(color) && (
 										<Check className={cn(

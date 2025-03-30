@@ -3,8 +3,13 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image.service';
+import {
+    createEntityNotFoundError,
+    toServiceError,
+} from '@/utils/errors/service-errors';
 
-const imageLogger = serverLogger.withContext('ImageAccess');
+const SERVER_ACTION_NAME = 'ImageAccess';
+const imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
 
 // Caché de URLs para evitar llamadas redundantes
 const urlCache = new Map<string, string>();
@@ -17,7 +22,10 @@ export async function getImageUrl(imageId: string): Promise<string> {
 	try {
 		// Verificar si ya tenemos la URL en caché
 		if (urlCache.has(imageId)) {
-			return urlCache.get(imageId)!;
+			const cachedUrl = urlCache.get(imageId);
+			if (cachedUrl) {
+				return cachedUrl;
+			}
 		}
 
 		const image = await prisma.image.findUnique({
@@ -26,7 +34,7 @@ export async function getImageUrl(imageId: string): Promise<string> {
 		});
 
 		if (!image) {
-			throw new Error('Imagen no encontrada');
+			throw createEntityNotFoundError('Imagen', imageId, SERVER_ACTION_NAME);
 		}
 
 		// Generar URL para el endpoint de imágenes
@@ -37,8 +45,10 @@ export async function getImageUrl(imageId: string): Promise<string> {
 
 		return imageUrl;
 	} catch (error) {
-		imageLogger.error('Error getting image URL:', error);
-		throw new Error('No se pudo obtener la URL de la imagen');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'No se pudo obtener la URL de la imagen',
+		});
 	}
 }
 
@@ -56,18 +66,29 @@ export async function getOriginalImage(imageId: string): Promise<{ buffer: Buffe
 		});
 
 		if (!image) {
-			throw new Error('Imagen no encontrada');
+			throw createEntityNotFoundError('Imagen', imageId, SERVER_ACTION_NAME);
 		}
 
 		const metadata = image.metadata ? JSON.parse(image.metadata as string) : {};
-		const buffer = await imageService.getOriginalImage(imageId);
 
-		return {
-			buffer,
-			mimeType: metadata.mimeType || 'image/jpeg',
-		};
+		try {
+			const buffer = await imageService.getOriginalImage(imageId);
+
+			return {
+				buffer,
+				mimeType: metadata.mimeType || 'image/jpeg',
+			};
+		} catch (serviceError) {
+			// Transformar error del servicio y lanzarlo
+			throw toServiceError(serviceError, {
+				serviceName: SERVER_ACTION_NAME,
+				message: 'Error al procesar la imagen original',
+			});
+		}
 	} catch (error) {
-		imageLogger.error('Error obteniendo imagen original', { imageId, error });
-		throw new Error('Error al obtener la imagen original');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'Error al obtener la imagen original',
+		});
 	}
 }
