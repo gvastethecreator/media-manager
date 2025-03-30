@@ -1,7 +1,7 @@
 'use server';
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import type { WorldItemWithRelations } from '@/types/entities/world-item/types';
 
 // Logger específico para acciones de WorldItemCard
@@ -24,6 +24,7 @@ interface ThumbnailImage {
 export async function getRecentWorldItemImages(worldItemId: string, limit = 6): Promise<ThumbnailImage[]> {
 	try {
 		worldItemCardLogger.info('🖼️ Obteniendo imágenes recientes para WorldItemCard:', worldItemId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!worldItemId) {
@@ -88,6 +89,7 @@ export async function getRecentWorldItemImages(worldItemId: string, limit = 6): 
 export async function getWorldItemWithRelations(worldItemId: string): Promise<WorldItemWithRelations | null> {
 	try {
 		worldItemCardLogger.info('🎯 Obteniendo objeto del mundo con relaciones:', worldItemId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!worldItemId) {
@@ -154,15 +156,17 @@ export async function getWorldItemWithRelations(worldItemId: string): Promise<Wo
 
 		// Procesar la imagen destacada si existe
 		let featuredImageData = null;
-		if (worldItem.images && worldItem.images.length > 0 && worldItem.images[0].thumbnail) {
+		if (worldItem.images && worldItem.images.length > 0) {
 			const image = worldItem.images[0];
-			featuredImageData = {
-				id: image.id,
-				name: image.name,
-				thumbnailUrl: `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`,
-				width: image.thumbnailWidth || 100,
-				height: image.thumbnailHeight || 100,
-			};
+			if (image.thumbnail) {
+				featuredImageData = {
+					id: image.id,
+					name: image.name,
+					thumbnailUrl: `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`,
+					width: image.thumbnailWidth || 100,
+					height: image.thumbnailHeight || 100,
+				};
+			}
 		}
 
 		// Convertir y extender el objeto con datos adicionales
@@ -174,10 +178,6 @@ export async function getWorldItemWithRelations(worldItemId: string): Promise<Wo
 			effects: typeof worldItem.effects === 'string' && worldItem.effects ? JSON.parse(worldItem.effects) : worldItem.effects,
 			requirements: typeof worldItem.requirements === 'string' && worldItem.requirements ? JSON.parse(worldItem.requirements) : worldItem.requirements,
 			stats: typeof worldItem.stats === 'string' && worldItem.stats ? JSON.parse(worldItem.stats) : worldItem.stats,
-			properties: typeof worldItem.properties === 'string' && worldItem.properties ? JSON.parse(worldItem.properties) : worldItem.properties,
-			tags: typeof worldItem.tags === 'string' && worldItem.tags ? JSON.parse(worldItem.tags) : worldItem.tags,
-			filters: typeof worldItem.filters === 'string' && worldItem.filters ? JSON.parse(worldItem.filters) : worldItem.filters,
-			sortBy: typeof worldItem.sortBy === 'string' && worldItem.sortBy ? JSON.parse(worldItem.sortBy) : worldItem.sortBy,
 		} as unknown as WorldItemWithRelations;
 
 		worldItemCardLogger.info('✅ Objeto del mundo obtenido con éxito:', worldItem.name);
@@ -197,14 +197,15 @@ export async function getWorldItemWithRelations(worldItemId: string): Promise<Wo
 export async function searchWorldItems(query = '', limit = 100): Promise<WorldItemWithRelations[]> {
 	try {
 		worldItemCardLogger.info('🔍 Buscando objetos del mundo con query:', query);
+		const prisma = await getPrismaClient();
 
 		const worldItems = await prisma.worldItem.findMany({
 			where: {
 				OR: [
-					{ name: { contains: query, mode: 'insensitive' } },
-					{ description: { contains: query, mode: 'insensitive' } },
-					{ type: { contains: query, mode: 'insensitive' } },
-					{ category: { contains: query, mode: 'insensitive' } },
+					{ name: { contains: query } },
+					{ description: { contains: query } },
+					{ type: { contains: query } },
+					{ category: { contains: query } },
 				]
 			},
 			include: {
@@ -240,10 +241,6 @@ export async function searchWorldItems(query = '', limit = 100): Promise<WorldIt
 			effects: typeof item.effects === 'string' && item.effects ? JSON.parse(item.effects) : item.effects,
 			requirements: typeof item.requirements === 'string' && item.requirements ? JSON.parse(item.requirements) : item.requirements,
 			stats: typeof item.stats === 'string' && item.stats ? JSON.parse(item.stats) : item.stats,
-			properties: typeof item.properties === 'string' && item.properties ? JSON.parse(item.properties) : item.properties,
-			tags: typeof item.tags === 'string' && item.tags ? JSON.parse(item.tags) : item.tags,
-			filters: typeof item.filters === 'string' && item.filters ? JSON.parse(item.filters) : item.filters,
-			sortBy: typeof item.sortBy === 'string' && item.sortBy ? JSON.parse(item.sortBy) : item.sortBy,
 		})) as unknown as WorldItemWithRelations[];
 
 		worldItemCardLogger.info('✅ Objetos del mundo encontrados:', worldItems.length);

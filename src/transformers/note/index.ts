@@ -5,21 +5,23 @@
 
 // Exportar serializadores
 export {
-  deserializeTags,
-  extendNote,
-  extendNotes,
-  fromNoteComplete,
-  // Funciones obsoletas, mantenidas por compatibilidad
-  processNoteFields,
-  serializeTags,
-  toNoteComplete
+    deserializeTags,
+    extendNote,
+    extendNotes,
+    fromNoteComplete,
+    // Funciones obsoletas, mantenidas por compatibilidad
+    processNoteFields,
+    serializeTags,
+    toNoteComplete
 } from './serializers';
 
 // Exportar mappers
 export {
-  // Funciones obsoletas, mantenidas por compatibilidad
-  prepareNoteForCreate,
-  prepareNoteForUpdate, toCreateNoteData, toNoteExtended,
-  toNotesExtended, toUpdateNoteData
+    // Funciones obsoletas, mantenidas por compatibilidad
+    prepareNoteForCreate,
+    prepareNoteForUpdate,
+    // Funciones principales
+    toCreateNoteData, toNoteExtended,
+    toNotesExtended, toUpdateNoteData
 } from './mappers';
 

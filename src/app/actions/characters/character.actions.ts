@@ -6,15 +6,23 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import {
-  mapCreateCharacterDataToPrisma,
-  mapUpdateCharacterDataToPrisma
+    mapCreateCharacterDataToPrisma,
+    mapUpdateCharacterDataToPrisma,
+    toExtendedCharacter
 } from '@/transformers/character';
-import type { CharacterBase, CreateCharacterData, UpdateCharacterData } from '@/types/entities/character';
+import type { CharacterBase, CharacterExtended } from '@/types/entities/character';
+import type { CreateCharacterData, UpdateCharacterData } from '@/types/entities/character/forms';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
 const characterLogger = serverLogger.withContext('CharacterActions');
-const REVALIDATE_PATHS = ['/settings', '/characters', '/characters/[id]'] as const;
+const REVALIDATE_PATHS = [
+	'/characters',
+	'/characters/[id]',
+	'/settings/characters',
+	'/dashboard/characters',
+	'/api/characters',
+] as const;
 
 // Función creadora de errores (enfoque funcional)
 const createCharacterError = (

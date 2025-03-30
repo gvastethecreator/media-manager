@@ -46,8 +46,8 @@ export function transformCompleteTagToPrisma(tag: TagComplete): TagBase {
 export function mapCreateTagDataToPrisma(data: CreateTagData) {
 	try {
 		// Generar color y emoji si no se proporcionan
-		const color = data.color || generateTagColor(data.name);
-		const emoji = data.emoji || generateTagEmoji(data.name, data.category || undefined);
+		const emoji = data.emoji || generateTagEmoji(data.category);
+		const color = data.color || generateTagColor(data.category);
 
 		return {
 			name: data.name,
@@ -55,27 +55,33 @@ export function mapCreateTagDataToPrisma(data: CreateTagData) {
 			color,
 			description: data.description || null,
 			shortcut: data.shortcut || null,
-			category: data.category || null,
-			rarity: data.rarity || null,
-			texture: data.texture || null,
-			isFavorite: data.isFavorite || false,
+			category: data.category || 'general',
 			featuredImage: data.featuredImage || null,
-			// Conexión con grupos si existen
-			groups: data.groupIds ? {
-				connect: data.groupIds.map((id) => ({ id })),
-			} : undefined,
-			// Conexión con propiedades si existen
-			properties: data.propertyIds ? {
-				connect: data.propertyIds.map((id) => ({ id })),
-			} : undefined,
-			// Conexión con comodines si existen
-			wildcards: data.wildcardIds ? {
-				connect: data.wildcardIds.map((id) => ({ id })),
-			} : undefined,
+			isFavorite: data.isFavorite || false,
+			// Relaciones
+			...(data.imageIds?.length && {
+				images: {
+					connect: data.imageIds.map(id => ({ id }))
+				}
+			}),
+			...(data.videoIds?.length && {
+				videos: {
+					connect: data.videoIds.map(id => ({ id }))
+				}
+			}),
+			...(data.groupIds?.length && {
+				groups: {
+					connect: data.groupIds.map(id => ({ id }))
+				}
+			}),
 		};
 	} catch (error) {
-		mapperLogger.error('❌ Error al mapear datos de creación de Tag:', error);
-		throw error;
+		mapperLogger.error('❌ Error al mapear datos de creación de etiqueta:', error);
+		return {
+			name: data.name,
+			emoji: '🏷️',
+			color: '#3b82f6',
+		};
 	}
 }
 
@@ -86,46 +92,96 @@ export function mapCreateTagDataToPrisma(data: CreateTagData) {
  */
 export function mapUpdateTagDataToPrisma(data: UpdateTagData) {
 	try {
-		// Crear objeto con solo las propiedades definidas
-		const prismaData: Record<string, any> = {};
+		const updateData: any = {};
 
-		if (data.name !== undefined) prismaData.name = data.name;
-		if (data.emoji !== undefined) prismaData.emoji = data.emoji;
-		if (data.color !== undefined) prismaData.color = data.color;
-		if (data.description !== undefined) prismaData.description = data.description;
-		if (data.shortcut !== undefined) prismaData.shortcut = data.shortcut;
-		if (data.featuredImage !== undefined) prismaData.featuredImage = data.featuredImage;
-		if (data.isFavorite !== undefined) prismaData.isFavorite = data.isFavorite;
-		if (data.category !== undefined) prismaData.category = data.category;
-		if (data.rarity !== undefined) prismaData.rarity = data.rarity;
-		if (data.texture !== undefined) prismaData.texture = data.texture;
+		// Mapear solo los campos proporcionados
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.emoji !== undefined) updateData.emoji = data.emoji;
+		if (data.color !== undefined) updateData.color = data.color;
+		if (data.description !== undefined) updateData.description = data.description;
+		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
+		if (data.category !== undefined) updateData.category = data.category;
+		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
 
-		// Gestionar relaciones con grupos
+		// Manejar relaciones
+		if (data.imageIds !== undefined) {
+			updateData.images = {
+				set: data.imageIds.map(id => ({ id }))
+			};
+		}
+
+		if (data.videoIds !== undefined) {
+			updateData.videos = {
+				set: data.videoIds.map(id => ({ id }))
+			};
+		}
+
 		if (data.groupIds !== undefined) {
-			prismaData.groups = {
-				set: data.groupIds.map((id) => ({ id })),
+			updateData.groups = {
+				set: data.groupIds.map(id => ({ id }))
 			};
 		}
 
-		// Gestionar relaciones con propiedades
-		if (data.propertyIds !== undefined) {
-			prismaData.properties = {
-				set: data.propertyIds.map((id) => ({ id })),
-			};
-		}
-
-		// Gestionar relaciones con comodines
-		if (data.wildcardIds !== undefined) {
-			prismaData.wildcards = {
-				set: data.wildcardIds.map((id) => ({ id })),
-			};
-		}
-
-		return prismaData;
+		return updateData;
 	} catch (error) {
-		mapperLogger.error('❌ Error al mapear datos de actualización de Tag:', error);
-		throw error;
+		mapperLogger.error('❌ Error al mapear datos de actualización de etiqueta:', error);
+		return {};
 	}
+}
+
+/**
+ * Crea filtros para consulta de etiquetas basados en criterios
+ * @param filters Objeto con criterios de filtrado
+ * @returns Filtro formateado para Prisma
+ */
+export function createTagFilter(filters?: TagFilters) {
+	if (!filters) return {};
+
+	const conditions: any = {};
+	const AND: any[] = [];
+
+	// Filtro de búsqueda por texto
+	if (filters.searchQuery) {
+		conditions.OR = [
+			{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
+			{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
+		];
+	}
+
+	// Filtro por categorías
+	if (filters.categories?.length) {
+		AND.push({
+			category: {
+				in: filters.categories
+			}
+		});
+	}
+
+	// Filtro por favoritos
+	if (filters.onlyFavorites) {
+		AND.push({
+			isFavorite: true
+		});
+	}
+
+	if (AND.length) {
+		conditions.AND = AND;
+	}
+
+	return conditions;
+}
+
+/**
+ * Crea ordenamiento para consulta de etiquetas
+ * @param sortBy Criterio de ordenamiento (ej: 'name:asc', 'createdAt:desc')
+ * @returns Ordenamiento formateado para Prisma
+ */
+export function createTagOrderBy(sortBy: string = 'name:asc') {
+	const [field, direction] = sortBy.split(':');
+	return {
+		[field]: direction.toLowerCase() === 'desc' ? 'desc' : 'asc'
+	};
 }
 
 /**

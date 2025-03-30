@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from '@/lib/db';
+import { getPrismaClient } from '@/lib/db';
 import type { Property } from '@/types/prisma';
 
 export interface PropertyCardData extends Property {
@@ -21,7 +21,7 @@ export interface PropertyCardData extends Property {
 export async function getPropertyCardData(
   propertyId: string
 ): Promise<PropertyCardData> {
-  const prisma = db.getClient();
+  const prisma = await getPrismaClient();
 
   const property = await prisma.property.findUnique({
     where: {
@@ -96,7 +96,7 @@ export async function getPropertiesForCards(options: {
     orderDir = 'desc',
   } = options;
 
-  const prisma = db.getClient();
+  const prisma = await getPrismaClient();
 
   const properties = await prisma.property.findMany({
     where: {

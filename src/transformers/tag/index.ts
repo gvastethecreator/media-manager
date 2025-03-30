@@ -5,15 +5,21 @@
 
 // Exportar serializadores
 export {
-  extendTag,
-  extendTags, formatSize, fromTagComplete, generateTagColor,
-  generateTagEmoji, normalizeTagCategory,
-  normalizeTagRarity, tagToTagWithStats, toTagComplete
+    extendTag,
+    extendTags, formatSize, fromTagComplete, generateTagColor,
+    generateTagEmoji, normalizeTagCategory,
+    normalizeTagRarity, tagToTagWithStats, toTagComplete
 } from './serializers';
 
 // Exportar mappers
 export {
-  mapCreateTagDataToPrisma, mapTagFiltersToPrisma,
-  mapTagToRelatedTag, mapUpdateTagDataToPrisma, transformCompleteTagToPrisma, transformTagToPrisma
+    createTagFilter,
+    createTagOrderBy,
+    mapCreateTagDataToPrisma,
+    mapTagFiltersToPrisma,
+    mapTagToRelatedTag,
+    mapUpdateTagDataToPrisma,
+    transformCompleteTagToPrisma,
+    transformTagToPrisma
 } from './mappers';
 

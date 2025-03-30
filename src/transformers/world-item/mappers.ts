@@ -3,31 +3,32 @@
  * @module transformers/world-item/mappers
  */
 
-import type { Prisma } from '@prisma/client';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
-  type CreateWorldItemData,
-  type UpdateWorldItemData,
-  WORLD_ITEM_SORT_PROPERTY_MAP,
-  type WorldItem,
-  type WorldItemBase,
-  WorldItemCategory,
-  type WorldItemFilters,
-  WorldItemSize,
-  WorldItemSortCriteria,
-  WorldItemType,
-  type WorldItemVisualConfig,
-  type WorldItemVisualConfigUpdateData
+    type CreateWorldItemData,
+    type UpdateWorldItemData,
+    WORLD_ITEM_SORT_PROPERTY_MAP,
+    type WorldItem,
+    type WorldItemBase,
+    WorldItemCategory,
+    type WorldItemFilters,
+    WorldItemSize,
+    WorldItemSortCriteria,
+    WorldItemType,
+    type WorldItemVisualConfig,
+    type WorldItemVisualConfigUpdateData
 } from '../../types/entities/world-item';
 import {
-  parseJsonFields,
-  parseVisualConfig,
-  serializeWorldItemAttributes,
-  serializeWorldItemEffects,
-  serializeWorldItemFilters,
-  serializeWorldItemRequirements,
-  serializeWorldItemStats,
-  serializeWorldItemTags
+    parseJsonFields,
+    parseVisualConfig,
+    serializeWorldItemAttributes,
+    serializeWorldItemEffects,
+    serializeWorldItemFilters,
+    serializeWorldItemRequirements,
+    serializeWorldItemStats
 } from './serializers';
+
+const mappersLogger = serverLogger.withContext('WorldItemMappers');
 
 /**
  * Genera un color aleatorio para un objeto del mundo basado en su nombre y categoría
@@ -174,308 +175,320 @@ export function extendWorldItems(worldItems: WorldItemBase[]): WorldItem[] {
 }
 
 /**
- * Prepara los datos para crear un objeto del mundo
- * @param data Datos de creación
- * @returns Datos preparados para la base de datos
+ * Mapea datos de creación de objeto del mundo a formato compatible con Prisma
+ * @param data Datos de creación del objeto
+ * @returns Objeto formateado para Prisma
  */
-export function prepareCreateWorldItemData(data: CreateWorldItemData): Record<string, any> {
-	// Asignar valores por defecto si no se proporcionan
-	if (!data.emoji) {
-		data.emoji = generateWorldItemEmoji(data.type || 'misc', data.name);
-	}
+export function toCreateWorldItemData(data: CreateWorldItemData): any {
+	try {
+		// Serializar campos JSON si es necesario
+		const attributes = data.attributes ?
+			(typeof data.attributes === 'string' ? data.attributes : serializeWorldItemAttributes(data.attributes)) :
+			'empty_array';
 
-	if (!data.color) {
-		data.color = generateWorldItemColor(data.name, data.category);
-	}
+		const effects = data.effects ?
+			(typeof data.effects === 'string' ? data.effects : serializeWorldItemEffects(data.effects)) :
+			'empty_array';
 
-	// Preparar datos para inserción
-	return {
-		name: data.name,
-		emoji: data.emoji,
-		color: data.color,
-		description: data.description ?? null,
-		shortcut: data.shortcut ?? null,
-		type: data.type ?? 'misc',
-		rarity: data.rarity ?? 'common',
-		properties: data.properties ?? 'empty_array',
-		requirements: data.requirements ?? '{}',
-		origin: data.origin ?? '',
-		stats: data.stats ?? '{}',
-		sortBy: data.sortBy ?? 'name',
-		filters: data.filters ?? 'empty_array',
-		featuredImage: data.featuredImage ?? null,
-		isFavorite: data.isFavorite ?? false,
-		category: data.category ?? null,
-	};
+		const requirements = data.requirements ?
+			(typeof data.requirements === 'string' ? data.requirements : serializeWorldItemRequirements(data.requirements)) :
+			'';
+
+		const stats = data.stats ?
+			(typeof data.stats === 'string' ? data.stats : serializeWorldItemStats(data.stats)) :
+			'';
+
+		const filters = data.filters ?
+			(typeof data.filters === 'string' ? data.filters : serializeWorldItemFilters(data.filters)) :
+			'empty_array';
+
+		return {
+			name: data.name,
+			description: data.description || null,
+			emoji: data.emoji || generateWorldItemEmoji(data.type || 'misc', data.name),
+			color: data.color || generateWorldItemColor(data.name, data.category),
+			type: data.type || WorldItemType.MISC,
+			rarity: data.rarity || 'common',
+			size: data.size || WorldItemSize.MEDIUM,
+			category: data.category || 'general',
+			shortcut: data.shortcut || null,
+			isFavorite: data.isFavorite || false,
+			origin: data.origin || '',
+			attributes,
+			effects,
+			requirements,
+			stats,
+			sortBy: data.sortBy || 'name',
+			filters,
+			featuredImage: data.featuredImage || null,
+		};
+	} catch (error) {
+		mappersLogger.error('❌ Error en toCreateWorldItemData:', error);
+		return {
+			name: data.name,
+			description: null,
+			emoji: '🧰',
+			color: '#64748b',
+			type: WorldItemType.MISC,
+			rarity: 'common',
+			size: WorldItemSize.MEDIUM,
+			category: 'general',
+			attributes: 'empty_array',
+			effects: 'empty_array',
+		};
+	}
 }
 
 /**
- * Prepara los datos para actualizar un objeto del mundo
- * @param data Datos de actualización
- * @returns Datos preparados para la base de datos
+ * Mapea datos de actualización de objeto del mundo a formato compatible con Prisma
+ * @param id ID del objeto a actualizar
+ * @param data Datos para actualizar el objeto
+ * @returns Objeto formateado para Prisma
  */
-export function prepareUpdateWorldItemData(data: UpdateWorldItemData): Record<string, any> {
-	// Filtrar campos nulos o indefinidos para actualización
-	const updateData: Record<string, any> = {};
+export function toUpdateWorldItemData(id: string, data: UpdateWorldItemData): any {
+	try {
+		const updateData: any = {};
 
-	for (const [key, value] of Object.entries(data)) {
-		if (value !== undefined) {
-			updateData[key] = value;
+		// Incluir solo campos presentes en los datos de actualización
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.description !== undefined) updateData.description = data.description;
+		if (data.emoji !== undefined) updateData.emoji = data.emoji;
+		if (data.color !== undefined) updateData.color = data.color;
+		if (data.type !== undefined) updateData.type = data.type;
+		if (data.rarity !== undefined) updateData.rarity = data.rarity;
+		if (data.size !== undefined) updateData.size = data.size;
+		if (data.category !== undefined) updateData.category = data.category;
+		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
+		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+		if (data.origin !== undefined) updateData.origin = data.origin;
+		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+		if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
+
+		// Serializar campos JSON si están presentes
+		if (data.attributes !== undefined) {
+			updateData.attributes = typeof data.attributes === 'string'
+				? data.attributes
+				: serializeWorldItemAttributes(data.attributes);
 		}
-	}
 
-	return updateData;
+		if (data.effects !== undefined) {
+			updateData.effects = typeof data.effects === 'string'
+				? data.effects
+				: serializeWorldItemEffects(data.effects);
+		}
+
+		if (data.requirements !== undefined) {
+			updateData.requirements = typeof data.requirements === 'string'
+				? data.requirements
+				: serializeWorldItemRequirements(data.requirements);
+		}
+
+		if (data.stats !== undefined) {
+			updateData.stats = typeof data.stats === 'string'
+				? data.stats
+				: serializeWorldItemStats(data.stats);
+		}
+
+		if (data.filters !== undefined) {
+			updateData.filters = typeof data.filters === 'string'
+				? data.filters
+				: serializeWorldItemFilters(data.filters);
+		}
+
+		return updateData;
+	} catch (error) {
+		mappersLogger.error('❌ Error en toUpdateWorldItemData:', error);
+		return { id };
+	}
 }
 
 /**
- * Prepara los datos para actualizar configuración visual
- * @param data Datos de actualización de configuración visual
- * @returns Datos preparados para la base de datos
+ * Filtra una lista de objetos del mundo según criterios
+ * @param worldItems Lista de objetos del mundo
+ * @param filters Criterios de filtrado
+ * @returns Lista filtrada de objetos del mundo
  */
-export function prepareVisualConfigUpdateData(data: WorldItemVisualConfigUpdateData): Record<string, any> {
-	const updateData: Record<string, any> = {};
+export function filterWorldItems(worldItems: WorldItemBase[], filters: WorldItemFilters = {}): WorldItemBase[] {
+	mappersLogger.info('🔍 Filtrando objetos del mundo con criterios:', filters);
 
-	if (data.view !== undefined) {
-		updateData.view = data.view;
-	}
+	return worldItems.filter((worldItem) => {
+		// Filtro por búsqueda
+		if (filters.query) {
+			const searchLower = filters.query.toLowerCase();
+			const nameMatch = worldItem.name.toLowerCase().includes(searchLower);
+			const descMatch = worldItem.description?.toLowerCase().includes(searchLower) || false;
 
-	if (data.sortBy !== undefined) {
-		updateData.sortBy = data.sortBy;
-	}
+			if (!nameMatch && !descMatch) {
+				return false;
+			}
+		}
 
-	if (data.filters !== undefined) {
-		updateData.filters = serializeWorldItemFilters(data.filters);
-	}
+		// Filtro por tipo
+		if (filters.types && filters.types.length > 0) {
+			if (!filters.types.includes(worldItem.type as WorldItemType)) {
+				return false;
+			}
+		}
 
-	if (data.lastViewedWorldItemId !== undefined) {
-		updateData.lastViewedWorldItemId = data.lastViewedWorldItemId;
-	}
+		// Filtro por categoría
+		if (filters.categories && filters.categories.length > 0) {
+			if (!worldItem.category || !filters.categories.includes(worldItem.category as WorldItemCategory)) {
+				return false;
+			}
+		}
 
-	if (data.expandedWorldItemIds !== undefined) {
-		updateData.expandedWorldItemIds = data.expandedWorldItemIds;
-	}
+		// Filtro por rareza
+		if (filters.rarities && filters.rarities.length > 0) {
+			if (!filters.rarities.includes(worldItem.rarity as any)) {
+				return false;
+			}
+		}
 
-	if (data.selectedWorldItemIds !== undefined) {
-		updateData.selectedWorldItemIds = data.selectedWorldItemIds;
-	}
+		// Filtro por favoritos
+		if (filters.isFavorite) {
+			if (!worldItem.isFavorite) {
+				return false;
+			}
+		}
 
-	return updateData;
+		return true;
+	});
 }
 
 /**
- * Mapea datos de creación de objeto del mundo a formato Prisma
- * @param data Datos para crear un objeto del mundo
- * @returns Objeto con formato para Prisma
+ * Ordena una lista de objetos del mundo según criterio específico
+ * @param worldItems Lista de objetos del mundo
+ * @param sortBy Criterio de ordenación
+ * @returns Lista ordenada de objetos del mundo
  */
-export function mapCreateWorldItemDataToPrisma(data: CreateWorldItemData): Prisma.WorldItemCreateInput {
+export function sortWorldItems(worldItems: WorldItemBase[], sortBy: WorldItemSortCriteria = WorldItemSortCriteria.NAME_ASC): WorldItemBase[] {
+	mappersLogger.info('🔄 Ordenando objetos del mundo por:', sortBy);
+
+	// Clonar array para no modificar el original
+	const sortedItems = [...worldItems];
+
+	// Obtener la propiedad y dirección para ordenar
+	const propertyPath = WORLD_ITEM_SORT_PROPERTY_MAP[sortBy]?.property || 'name';
+	const direction = WORLD_ITEM_SORT_PROPERTY_MAP[sortBy]?.direction || 'asc';
+	const isAsc = direction === 'asc';
+
+	// Ordenar según criterio
+	return sortedItems.sort((a, b) => {
+		// Extraer valores para comparar
+		let valueA = getNestedProperty(a, propertyPath);
+		let valueB = getNestedProperty(b, propertyPath);
+
+		// Normalizar valores para comparación
+		if (typeof valueA === 'string') valueA = valueA.toLowerCase();
+		if (typeof valueB === 'string') valueB = valueB.toLowerCase();
+
+		// Manejar valores de fecha
+		if (propertyPath === 'createdAt' || propertyPath === 'updatedAt') {
+			valueA = new Date(valueA as string).getTime();
+			valueB = new Date(valueB as string).getTime();
+		}
+
+		// Comparar valores
+		if (valueA < valueB) return isAsc ? -1 : 1;
+		if (valueA > valueB) return isAsc ? 1 : -1;
+		return 0;
+	});
+}
+
+/**
+ * Obtiene una propiedad anidada de un objeto usando una ruta de acceso
+ * @param obj Objeto del que obtener la propiedad
+ * @param path Ruta de acceso (ej: "property.subproperty")
+ * @returns Valor de la propiedad o undefined
+ */
+function getNestedProperty(obj: any, path: string): any {
+	const parts = path.split('.');
+	let value = obj;
+
+	for (const part of parts) {
+		if (value === null || value === undefined) return undefined;
+		value = value[part];
+	}
+
+	return value;
+}
+
+/**
+ * Pagina una lista de objetos del mundo
+ * @param worldItems Lista de objetos del mundo
+ * @param page Número de página
+ * @param pageSize Tamaño de página
+ * @returns Subconjunto paginado de objetos del mundo
+ */
+export function paginateWorldItems(worldItems: WorldItemBase[], page = 1, pageSize = 20): WorldItemBase[] {
+	const startIndex = (page - 1) * pageSize;
+	return worldItems.slice(startIndex, startIndex + pageSize);
+}
+
+/**
+ * Procesa una lista de objetos del mundo aplicando filtros, ordenación y paginación
+ * @param worldItems Lista de objetos del mundo
+ * @param filters Filtros a aplicar
+ * @param sortBy Criterio de ordenación
+ * @param page Número de página
+ * @param pageSize Tamaño de página
+ * @returns Objetos procesados, total y total de páginas
+ */
+export function processWorldItems(
+	worldItems: WorldItemBase[],
+	filters: WorldItemFilters = {},
+	sortBy: WorldItemSortCriteria = WorldItemSortCriteria.NAME_ASC,
+	page = 1,
+	pageSize = 20
+): { items: WorldItem[]; total: number; totalPages: number } {
+	// Aplicar transformaciones en secuencia
+	const filtered = filterWorldItems(worldItems, filters);
+	const sorted = sortWorldItems(filtered, sortBy);
+	const paginated = paginateWorldItems(sorted, page, pageSize);
+
+	// Calcular total y páginas
+	const total = filtered.length;
+	const totalPages = Math.ceil(total / pageSize);
+
+	// Transformar a formato extendido con campos JSON deserializados
+	const items = paginated.map(extendWorldItem);
+
+	return { items, total, totalPages };
+}
+
+/**
+ * Mapea la configuración visual de un objeto del mundo
+ * @param config Datos de configuración visual
+ * @returns Configuración procesada
+ */
+export function mapWorldItemVisualConfig(config: WorldItemVisualConfig): WorldItemVisualConfig {
+	try {
+		return parseVisualConfig(config);
+	} catch (error) {
+		mappersLogger.error('❌ Error al mapear configuración visual:', error);
+		return {
+			showIcon: true,
+			showType: true,
+			showRarity: true,
+			showStats: true,
+			animateIcon: false,
+			theme: 'default',
+		};
+	}
+}
+
+/**
+ * Actualiza la configuración visual de un objeto del mundo
+ * @param current Configuración actual
+ * @param updates Actualizaciones a aplicar
+ * @returns Configuración actualizada
+ */
+export function updateWorldItemVisualConfig(
+	current: WorldItemVisualConfig,
+	updates: WorldItemVisualConfigUpdateData
+): WorldItemVisualConfig {
 	return {
-		name: data.name,
-		emoji: data.emoji || generateWorldItemEmoji(data.type || 'misc', data.name),
-		color: data.color || generateWorldItemColor(data.name, data.category),
-		description: data.description || null,
-		shortcut: data.shortcut || null,
-		category: data.category || null,
-		type: data.type || WorldItemType.MISC,
-		rarity: data.rarity || 'common',
-		attributes: serializeWorldItemAttributes(data.attributes || []),
-		effects: serializeWorldItemEffects(data.effects || []),
-		size: (data.size as string) || WorldItemSize.MEDIUM,
-		requirements: serializeWorldItemRequirements(data.requirements || {}),
-		origin: data.origin || '',
-		stats: serializeWorldItemStats(data.stats || {}),
-		tags: serializeWorldItemTags(data.tags || []),
-		featuredImage: data.featuredImage || null,
-		isFavorite: data.isFavorite || false,
-		sortBy: data.sortBy || 'name:asc',
-		filters: serializeWorldItemFilters(data.filters || {}),
-
-		// Conexiones con relaciones
-		...(data.groupIds?.length && {
-			groups: {
-				connect: data.groupIds.map((id) => ({ id })),
-			},
-		}),
-		...(data.propertyIds?.length && {
-			properties: {
-				connect: data.propertyIds.map((id) => ({ id })),
-			},
-		}),
-		...(data.wildcardIds?.length && {
-			wildcards: {
-				connect: data.wildcardIds.map((id) => ({ id })),
-			},
-		}),
-		...(data.tagIds?.length && {
-			tagEntities: {
-				connect: data.tagIds.map((id) => ({ id })),
-			},
-		}),
+		...current,
+		...updates,
 	};
-}
-
-/**
- * Mapea datos de actualización de objeto del mundo a formato Prisma
- * @param data Datos para actualizar un objeto del mundo
- * @returns Objeto con formato para Prisma
- */
-export function mapUpdateWorldItemDataToPrisma(data: UpdateWorldItemData): Prisma.WorldItemUpdateInput {
-	const updateData: Prisma.WorldItemUpdateInput = {};
-
-	// Campos básicos
-	if (data.name !== undefined) updateData.name = data.name;
-	if (data.emoji !== undefined) updateData.emoji = data.emoji;
-	if (data.color !== undefined) updateData.color = data.color;
-	if (data.description !== undefined) updateData.description = data.description;
-	if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
-	if (data.category !== undefined) updateData.category = data.category;
-	if (data.type !== undefined) updateData.type = data.type;
-	if (data.rarity !== undefined) updateData.rarity = data.rarity;
-	if (data.size !== undefined) updateData.size = data.size as string;
-	if (data.origin !== undefined) updateData.origin = data.origin;
-	if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-	if (data.sortBy !== undefined) updateData.sortBy = data.sortBy;
-
-	// Campos JSON que requieren serialización
-	if (data.attributes !== undefined)
-		updateData.attributes = serializeWorldItemAttributes(data.attributes);
-
-	if (data.effects !== undefined)
-		updateData.effects = serializeWorldItemEffects(data.effects);
-
-	if (data.requirements !== undefined)
-		updateData.requirements = serializeWorldItemRequirements(data.requirements);
-
-	if (data.stats !== undefined)
-		updateData.stats = serializeWorldItemStats(data.stats);
-
-	if (data.tags !== undefined)
-		updateData.tags = serializeWorldItemTags(data.tags);
-
-	if (data.filters !== undefined)
-		updateData.filters = serializeWorldItemFilters(data.filters);
-
-	// Relaciones
-	if (data.groupIds !== undefined) {
-		updateData.groups = {
-			set: data.groupIds.map((id) => ({ id })),
-		};
-	}
-
-	if (data.propertyIds !== undefined) {
-		updateData.properties = {
-			set: data.propertyIds.map((id) => ({ id })),
-		};
-	}
-
-	if (data.wildcardIds !== undefined) {
-		updateData.wildcards = {
-			set: data.wildcardIds.map((id) => ({ id })),
-		};
-	}
-
-	if (data.tagIds !== undefined) {
-		updateData.tagEntities = {
-			set: data.tagIds.map((id) => ({ id })),
-		};
-	}
-
-	return updateData;
-}
-
-/**
- * Mapea la configuración visual a formato para la UI
- * @param config Configuración visual
- * @returns Configuración visual parseada
- */
-export function mapVisualConfig(config: WorldItemVisualConfig) {
-	return parseVisualConfig(config);
-}
-
-/**
- * Crea un filtro de búsqueda para Prisma basado en los criterios proporcionados
- * @param filters - Filtros para la búsqueda
- * @returns Condiciones para consulta Prisma
- */
-export function createWorldItemFilter(filters?: WorldItemFilters): Prisma.WorldItemWhereInput {
-  if (!filters) return {};
-
-  const conditions: Prisma.WorldItemWhereInput = {};
-  const AND: Prisma.WorldItemWhereInput[] = [];
-
-  // Búsqueda por texto
-  if (filters.searchQuery) {
-    conditions.OR = [
-      { name: { contains: filters.searchQuery, mode: 'insensitive' } },
-      { description: { contains: filters.searchQuery, mode: 'insensitive' } },
-      { origin: { contains: filters.searchQuery, mode: 'insensitive' } },
-    ];
-  }
-
-  // Filtro por categorías
-  if (filters.categories?.length) {
-    AND.push({
-      category: {
-        in: filters.categories,
-      },
-    });
-  }
-
-  // Filtro por tipos
-  if (filters.types?.length) {
-    AND.push({
-      type: {
-        in: filters.types,
-      },
-    });
-  }
-
-  // Filtro por rarezas
-  if (filters.rarities?.length) {
-    AND.push({
-      rarity: {
-        in: filters.rarities,
-      },
-    });
-  }
-
-  // Filtro por tamaños
-  if (filters.sizes?.length) {
-    AND.push({
-      size: {
-        in: filters.sizes,
-      },
-    });
-  }
-
-  // Filtro por favoritos
-  if (filters.onlyFavorites) {
-    AND.push({
-      isFavorite: true,
-    });
-  }
-
-  if (AND.length) {
-    conditions.AND = AND;
-  }
-
-  return conditions;
-}
-
-/**
- * Crea un ordenamiento para Prisma basado en el criterio de ordenación
- * @param sortCriteria - Criterio de ordenación
- * @param sortPropertyMap - Mapa de propiedades para ordenación
- * @returns Ordenamiento para Prisma
- */
-export function createWorldItemOrderBy(
-  sortCriteria: WorldItemSortCriteria = WorldItemSortCriteria.NAME_ASC,
-  sortPropertyMap: typeof WORLD_ITEM_SORT_PROPERTY_MAP = WORLD_ITEM_SORT_PROPERTY_MAP
-): Prisma.WorldItemOrderByWithRelationInput {
-  const [_, direction] = sortCriteria.split(':');
-  const property = sortPropertyMap[sortCriteria];
-
-  return {
-    [property]: direction as Prisma.SortOrder,
-  };
 }

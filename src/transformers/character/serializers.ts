@@ -4,13 +4,12 @@
  */
 
 import type {
-  CharacterExtended,
-  CharacterFilter,
-  CharacterRelationship,
-  CharacterStats,
-  CharacterSummary,
+    CharacterExtended,
+    CharacterFilter,
+    CharacterRelationship,
+    CharacterStats,
+    CharacterSummary,
 } from '@/types/entities/character';
-import type { CharacterBase, CharacterWithRelations } from '@/types/entities/character/types';
 import type { Character as PrismaCharacter } from '@prisma/client';
 
 /**
@@ -21,25 +20,65 @@ import type { Character as PrismaCharacter } from '@prisma/client';
  * @param character Character de Prisma
  * @returns CharacterExtended con propiedades adicionales y campos JSON deserializados
  */
-export function toCharacterExtended(character: PrismaCharacter): CharacterExtended {
+export function toExtendedCharacter(character: PrismaCharacter | Partial<PrismaCharacter>): CharacterExtended {
+	// Si no hay character, lanzar error
+	if (!character) {
+		throw new Error('Character is null or undefined');
+	}
+
+	// Parse complex fields (deserialization)
+	const parsedFilters = character.filters ? parseCharacterFilters(character.filters) : [];
+	const parsedStats = character.stats ? parseCharacterStats(character.stats) : {};
+	const parsedRelationships = character.relationships
+		? parseCharacterRelationships(character.relationships)
+		: [];
+	const parsedGoals = character.goals ? parseStringArray(character.goals) : [];
+	const parsedFears = character.fears ? parseStringArray(character.fears) : [];
+	const parsedBeliefs = character.beliefs ? parseStringArray(character.beliefs) : [];
+	const parsedPersonality = character.personality ? parseStringArray(character.personality) : [];
+
+	// Build and return CharacterExtended object
 	return {
 		...character,
+		// Keep original (strings) for future serialization
+		filters: character.filters || 'empty_array',
+		stats: character.stats || '{}',
+		relationships: character.relationships || 'empty_array',
+		goals: character.goals || 'empty_array',
+		fears: character.fears || 'empty_array',
+		beliefs: character.beliefs || 'empty_array',
+		personality: character.personality || 'empty_array',
+		// Add parsed versions for application use
+		parsedFilters,
+		parsedStats,
+		parsedRelationships,
+		parsedGoals,
+		parsedFears,
+		parsedBeliefs,
+		parsedPersonality,
+		// Default values for optional properties
+		shortcut: character.shortcut || '',
+		emoji: character.emoji || '👤',
+		color: character.color || '#3b82f6',
+		level: character.level || 1,
+		class: character.class || 'unknown',
+		race: character.race || 'unknown',
+		alignment: character.alignment || 'neutral',
+		psychologicalProfile: character.psychologicalProfile || '',
+		socialProfile: character.socialProfile || '',
+		description: character.description || '',
+		backstory: character.backstory || '',
+		isFavorite: character.isFavorite || false,
+		sortBy: character.sortBy || 'name',
+		category: character.category || 'character',
 		// Propiedades adicionales de UI
 		isSelected: false,
 		isHovered: false,
 		isOpen: false,
 		isLoading: false,
 		hasError: false,
-		// Calculados/runtime - deserialización de campos JSON almacenados como strings
-		parsedFilters: character.filters ? parseCharacterFilters(character.filters) : [],
-		parsedStats: character.stats ? parseCharacterStats(character.stats) : {},
-		parsedRelationships: character.relationships ? parseCharacterRelationships(character.relationships) : [],
-		parsedGoals: character.goals ? parseStringArray(character.goals) : [],
-		parsedFears: character.fears ? parseStringArray(character.fears) : [],
-		parsedBeliefs: character.beliefs ? parseStringArray(character.beliefs) : [],
-		parsedPersonality: character.personality ? parseStringArray(character.personality) : [],
 		imageCount: 0,
-	};
+	} as CharacterExtended;
 }
 
 /**
@@ -399,55 +438,66 @@ export function deserializeFilters(filters: string): Record<string, any> {
 }
 
 /**
- * Transforma un personaje básico a formato extendido
- * @param character - Personaje con relaciones
- * @returns Personaje en formato extendido con campos transformados
+ * Serializa un objeto para almacenarlo como string JSON en la base de datos
+ * Este helper garantiza que objetos complejos se conviertan a formato serializado
+ *
+ * @param obj El objeto a serializar
+ * @returns String en formato JSON o "empty_object" si es nulo o vacío
  */
-export function toExtendedCharacter(character: CharacterWithRelations): CharacterExtended {
-	const {
-		stats,
-		relationships,
-		goals,
-		fears,
-		beliefs,
-		personality,
-		skills,
-		abilities,
-		filters,
-		...rest
-	} = character;
+export function serializeObject(obj: Record<string, any> | string | null | undefined): string {
+	// Si ya es un string, asumimos que ya está serializado
+	if (typeof obj === 'string') {
+		return obj;
+	}
 
-	return {
-		...rest,
-		// Transformar campos JSON
-		stats: deserializeStats(stats),
-		relationships: deserializeRelationships(relationships),
-		goals: deserializeArray(goals),
-		fears: deserializeArray(fears),
-		beliefs: deserializeArray(beliefs),
-		personality: deserializeArray(personality),
-		skills: deserializeArray(skills),
-		abilities: deserializeArray(abilities),
-		filters: deserializeFilters(filters),
-		// Mantener relaciones
-		images: character.images || [],
-		videos: character.videos || [],
-		relatedCharacters: character.relatedCharacters || [],
-		relatedTo: character.relatedTo || [],
-		albums: character.albums || [],
-		collections: character.collections || [],
-		tags: character.tags || [],
-		places: character.places || [],
-		worldItems: character.worldItems || [],
-		concepts: character.concepts || [],
-		prompts: character.prompts || [],
-		notes: character.notes || [],
-		wildcards: character.wildcards || [],
-		properties: character.properties || [],
-		groups: character.groups || [],
-		// Contadores
-		_count: character._count || {},
-	};
+	// Si es nulo o indefinido, devolver objeto vacío
+	if (obj == null) {
+		return '{}';
+	}
+
+	// Si es un objeto vacío
+	if (Object.keys(obj).length === 0) {
+		return '{}';
+	}
+
+	// Serializar a JSON
+	try {
+		return JSON.stringify(obj);
+	} catch (error) {
+		console.error('Error al serializar objeto:', error);
+		return '{}';
+	}
+}
+
+/**
+ * Serializa un array para almacenarlo como string JSON en la base de datos
+ *
+ * @param arr El array a serializar
+ * @returns String en formato JSON o "empty_array" si es nulo o vacío
+ */
+export function serializeArray(arr: any[] | string | null | undefined): string {
+	// Si ya es un string, asumimos que ya está serializado
+	if (typeof arr === 'string') {
+		return arr;
+	}
+
+	// Si es nulo, indefinido o no es un array, devolver array vacío
+	if (!arr || !Array.isArray(arr)) {
+		return 'empty_array';
+	}
+
+	// Si es un array vacío
+	if (arr.length === 0) {
+		return 'empty_array';
+	}
+
+	// Serializar a JSON
+	try {
+		return JSON.stringify(arr);
+	} catch (error) {
+		console.error('Error al serializar array:', error);
+		return 'empty_array';
+	}
 }
 
 /**
@@ -489,14 +539,14 @@ export function fromExtendedCharacter(extendedCharacter: Partial<CharacterExtend
 	return {
 		...rest,
 		// Serializar campos de vuelta a JSON
-		...(stats !== undefined && { stats: serializeStats(stats as Record<string, any>) }),
-		...(relationships !== undefined && { relationships: serializeRelationships(relationships as any[]) }),
-		...(goals !== undefined && { goals: serializeJsonArray(goals as string[]) }),
-		...(fears !== undefined && { fears: serializeJsonArray(fears as string[]) }),
-		...(beliefs !== undefined && { beliefs: serializeJsonArray(beliefs as string[]) }),
-		...(personality !== undefined && { personality: serializeJsonArray(personality as string[]) }),
-		...(skills !== undefined && { skills: serializeJsonArray(skills as string[]) }),
-		...(abilities !== undefined && { abilities: serializeJsonArray(abilities as string[]) }),
-		...(filters !== undefined && { filters: serializeFilters(filters as Record<string, any>) }),
+		...(stats !== undefined && { stats: serializeObject(stats as Record<string, any>) }),
+		...(relationships !== undefined && { relationships: serializeArray(relationships as any[]) }),
+		...(goals !== undefined && { goals: serializeArray(goals as string[]) }),
+		...(fears !== undefined && { fears: serializeArray(fears as string[]) }),
+		...(beliefs !== undefined && { beliefs: serializeArray(beliefs as string[]) }),
+		...(personality !== undefined && { personality: serializeArray(personality as string[]) }),
+		...(skills !== undefined && { skills: serializeArray(skills as string[]) }),
+		...(abilities !== undefined && { abilities: serializeArray(abilities as string[]) }),
+		...(filters !== undefined && { filters: serializeArray(filters as any[]) }),
 	};
 }

@@ -1,21 +1,26 @@
+/**
+ * @file Funciones de serialización para la entidad Concept
+ * @module transformers/concept/serializers
+ */
+
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-  ConceptBase,
-  ConceptComplete,
-  ConceptCompleteTransform,
-  ConceptExtended,
-  ConceptExtendedComplete,
-  ConceptWithRelations,
-  ConceptWithRelationsComplete,
-  ConceptWithRelationsExtendedComplete,
-  ConceptWithStats
+    ConceptBase,
+    ConceptComplete,
+    ConceptCompleteTransform,
+    ConceptExtended,
+    ConceptExtendedComplete,
+    ConceptWithRelations,
+    ConceptWithRelationsComplete,
+    ConceptWithRelationsExtendedComplete,
+    ConceptWithStats
 } from '@/types/entities/concept';
 
 const serializersLogger = serverLogger.withContext('ConceptSerializers');
 
 /**
  * Serializa un array de tags desde un string JSON
- * @param tagsString String JSON con tags
+ * @param tagsString String JSON con tags o null/undefined
  * @returns Array de strings con los tags
  */
 export function serializeTags(tagsString?: string | null): string[] {
@@ -34,7 +39,7 @@ export function serializeTags(tagsString?: string | null): string[] {
 /**
  * Deserializa un array de tags a string JSON
  * @param tags Array de tags
- * @returns String JSON con los tags
+ * @returns String JSON con los tags o 'empty_array' si está vacío
  */
 export function deserializeTags(tags: string[]): string {
 	try {
@@ -109,9 +114,11 @@ export function fromConceptComplete<T extends ConceptComplete>(concept: T): Omit
  * Transforma un concepto base a un concepto extendido con propiedades para UI
  * @param concept Concepto base
  * @returns Concepto extendido
- * @deprecated Use toConceptComplete and extendConcept instead
+ * @deprecated Use toConceptComplete y extendConcept en su lugar
  */
 export function toExtendedConcept(concept: ConceptBase): ConceptExtended {
+	serializersLogger.warn('⚠️ Usando función obsoleta toExtendedConcept. Use toConceptComplete y extendConcept en su lugar.');
+
 	return {
 		...concept,
 		parsedTags: serializeTags(concept.tags),
@@ -192,10 +199,18 @@ export function toConceptWithRelationsExtendedComplete(concept: ConceptWithRelat
  * @returns Concepto con estadísticas y campos JSON deserializados
  */
 export function toConceptWithStatsComplete(concept: ConceptWithStats): ConceptWithStats & { tags: string[] } {
-	return {
-		...concept,
-		tags: serializeTags(concept.tags),
-	};
+	try {
+		return {
+			...concept,
+			tags: serializeTags(concept.tags),
+		};
+	} catch (error) {
+		serializersLogger.error('❌ Error en toConceptWithStatsComplete:', error);
+		return {
+			...concept,
+			tags: [],
+		};
+	}
 }
 
 /**
@@ -210,12 +225,11 @@ export function extendConcepts<T extends ConceptBase | ConceptComplete>(concepts
 /**
  * Genera un preview del contenido para mostrar en UI
  * @param content Contenido completo
- * @param maxLength Longitud máxima del preview
+ * @param maxLength Longitud máxima del preview (por defecto 150 caracteres)
  * @returns Preview del contenido
  */
 function getPreviewContent(content: string, maxLength = 150): string {
 	if (!content) return '';
 	if (content.length <= maxLength) return content;
-
 	return `${content.substring(0, maxLength)}...`;
 }

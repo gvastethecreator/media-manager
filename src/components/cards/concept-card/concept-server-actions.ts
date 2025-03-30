@@ -1,7 +1,7 @@
 'use server';
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 
 // Logger específico para acciones de ConceptCard
 const conceptCardLogger = serverLogger.withContext('ConceptCardActions');
@@ -23,6 +23,7 @@ interface ThumbnailImage {
 export async function getRecentConceptImages(conceptId: string, limit = 6): Promise<ThumbnailImage[]> {
 	try {
 		conceptCardLogger.info('🖼️ Obteniendo imágenes recientes para ConceptCard:', conceptId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!conceptId) {
@@ -102,6 +103,7 @@ export async function getConceptCounts(conceptId: string): Promise<{
 }> {
 	try {
 		conceptCardLogger.info('🔢 Obteniendo recuentos para ConceptCard:', conceptId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!conceptId) {
@@ -198,6 +200,7 @@ export async function getConceptCounts(conceptId: string): Promise<{
 export async function getConceptWithRelations(conceptId: string) {
 	try {
 		conceptCardLogger.info('📚 Obteniendo concepto con relaciones:', conceptId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!conceptId) {
@@ -235,10 +238,11 @@ export async function getConceptWithRelations(conceptId: string) {
 		// Procesar cualquier campo JSON si es necesario
 		const parsedConcept = {
 			...concept,
-			// Deserializar tags si están almacenados como string JSON
-			tags: typeof concept.tags === 'string' && concept.tags
+			// Solo intentar parsear tags si la propiedad existe y es un string
+			// usando el operador de acceso seguro ? para evitar errores
+			tags: typeof concept?.tags === 'string' && concept.tags
 				? JSON.parse(concept.tags)
-				: concept.tags || []
+				: concept?.tags || []
 		};
 
 		conceptCardLogger.info('✅ Concepto obtenido correctamente');
