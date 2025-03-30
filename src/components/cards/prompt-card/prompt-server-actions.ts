@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { getPrismaClient } from '@/lib/db';
 
 /**
  * Representa los datos de un prompt para la tarjeta
@@ -23,7 +23,7 @@ export interface PromptCardData {
 	/** Categoría del prompt */
 	category?: string | null;
 	/** Parámetros parseados */
-	parsedParameters?: Record<string, any>;
+	parsedParameters?: Record<string, any> | null;
 	/** Etiquetas parseadas */
 	parsedTags?: string[];
 	/** Parámetros en formato JSON */
@@ -66,15 +66,17 @@ export async function searchPrompts(
 	limit = 50
 ): Promise<PromptCardData[]> {
 	try {
+		const prisma = await getPrismaClient();
+
 		const prompts = await prisma.prompt.findMany({
 			where: {
 				OR: [
-					{ name: { contains: query, mode: 'insensitive' } },
-					{ description: { contains: query, mode: 'insensitive' } },
-					{ content: { contains: query, mode: 'insensitive' } },
-					{ purpose: { contains: query, mode: 'insensitive' } },
-					{ parameters: { contains: query, mode: 'insensitive' } },
-					{ category: { contains: query, mode: 'insensitive' } },
+					{ name: { contains: query } },
+					{ description: { contains: query } },
+					{ content: { contains: query } },
+					{ purpose: { contains: query } },
+					{ parameters: { contains: query } },
+					{ category: { contains: query } },
 				],
 			},
 			orderBy: { updatedAt: 'desc' },
@@ -107,16 +109,23 @@ export async function searchPrompts(
 		});
 
 		// Procesar los prompts para la UI
-		return await Promise.all(
+		const processedPrompts = await Promise.all(
 			prompts.map(async (prompt) => {
 				// Obtener imágenes recientes
 				const recentImages = await getRecentPromptImages(prompt.id);
 
 				// Parsear parámetros
-				const parsedParameters = parseJsonField(prompt.parameters);
+				let parsedParameters: Record<string, any> | null = null;
+				try {
+					if (prompt.parameters) {
+						parsedParameters = JSON.parse(prompt.parameters);
+					}
+				} catch (error) {
+					console.error('Error al parsear parámetros:', error);
+				}
 
-				// Extraer nombres de etiquetas
-				const parsedTags = prompt.tags?.map(tag => tag.name) || [];
+				// Extraer nombres de etiquetas si están disponibles
+				const parsedTags = prompt.tags ? prompt.tags.map(tag => tag.name) : [];
 
 				return {
 					...prompt,
@@ -124,9 +133,11 @@ export async function searchPrompts(
 					parsedTags,
 					recentImages,
 					tags: undefined, // Eliminar campo original para no duplicar datos
-				};
+				} as PromptCardData;
 			})
 		);
+
+		return processedPrompts;
 	} catch (error) {
 		console.error('Error buscando prompts:', error);
 		throw new Error('No se pudieron cargar los prompts');
@@ -138,17 +149,31 @@ export async function searchPrompts(
  */
 export async function getRecentPromptImages(promptId: string) {
 	try {
+		const prisma = await getPrismaClient();
+
 		const images = await prisma.image.findMany({
-			where: { promptId },
+			where: {
+				prompts: {
+					some: {
+						id: promptId
+					}
+				}
+			},
 			orderBy: { createdAt: 'desc' },
 			take: 6,
 			select: {
 				id: true,
-				thumbnailUrl: true,
+				thumbnail: true,
 			},
 		});
 
-		return images;
+		// Transformar a formato requerido
+		return images.map(image => ({
+			id: image.id,
+			thumbnailUrl: image.thumbnail
+				? `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`
+				: '',
+		}));
 	} catch (error) {
 		console.error('Error cargando imágenes:', error);
 		return [];
@@ -160,6 +185,8 @@ export async function getRecentPromptImages(promptId: string) {
  */
 export async function getPromptById(id: string): Promise<PromptCardData | null> {
 	try {
+		const prisma = await getPrismaClient();
+
 		const prompt = await prisma.prompt.findUnique({
 			where: { id },
 			include: {
@@ -195,10 +222,17 @@ export async function getPromptById(id: string): Promise<PromptCardData | null> 
 		const recentImages = await getRecentPromptImages(prompt.id);
 
 		// Parsear parámetros
-		const parsedParameters = parseJsonField(prompt.parameters);
+		let parsedParameters: Record<string, any> | null = null;
+		try {
+			if (prompt.parameters) {
+				parsedParameters = JSON.parse(prompt.parameters);
+			}
+		} catch (error) {
+			console.error('Error al parsear parámetros:', error);
+		}
 
 		// Extraer nombres de etiquetas
-		const parsedTags = prompt.tags?.map(tag => tag.name) || [];
+		const parsedTags = prompt.tags ? prompt.tags.map(tag => tag.name) : [];
 
 		return {
 			...prompt,
@@ -206,7 +240,7 @@ export async function getPromptById(id: string): Promise<PromptCardData | null> 
 			parsedTags,
 			recentImages,
 			tags: undefined, // Eliminar campo original para no duplicar datos
-		};
+		} as PromptCardData;
 	} catch (error) {
 		console.error('Error obteniendo prompt:', error);
 		return null;
@@ -216,13 +250,13 @@ export async function getPromptById(id: string): Promise<PromptCardData | null> 
 /**
  * Parsea un campo JSON
  */
-function parseJsonField<T>(jsonString?: string | null): T | undefined {
-	if (!jsonString) return undefined;
+function parseJsonField<T>(jsonString?: string | null): T | null {
+	if (!jsonString) return null;
 
 	try {
 		return JSON.parse(jsonString) as T;
 	} catch (error) {
 		console.error('Error parseando JSON:', error);
-		return undefined;
+		return null;
 	}
 }

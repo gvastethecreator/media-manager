@@ -1,7 +1,7 @@
 'use server';
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { NoteStatus } from '@/types/entities/note/enums';
 
 // Logger específico para acciones de NoteCard
@@ -41,6 +41,7 @@ export interface NoteRelationCounts {
 export async function getRecentNoteImages(noteId: string, limit = 6): Promise<ThumbnailImage[]> {
 	try {
 		noteCardLogger.info('🖼️ Obteniendo imágenes recientes para NoteCard:', noteId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!noteId) {
@@ -105,6 +106,7 @@ export async function getRecentNoteImages(noteId: string, limit = 6): Promise<Th
 export async function getNoteCounts(noteId: string): Promise<NoteRelationCounts> {
 	try {
 		noteCardLogger.info('🔢 Obteniendo recuentos para NoteCard:', noteId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!noteId) {

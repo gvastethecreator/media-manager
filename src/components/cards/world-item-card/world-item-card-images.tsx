@@ -57,7 +57,10 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 						// Mostrar placeholders mientras carga
 						<>
 							{Array.from({ length: 6 }).map((_, i) => (
-								<ImageLoading key={`loading-placeholder-${worldItemId}-${i}`} backgroundColor={secondaryColor} />
+								<ImageLoading
+									key={`loading-placeholder-${worldItemId}-${Math.random().toString(36).substring(2, 9)}`}
+									backgroundColor={secondaryColor}
+								/>
 							))}
 						</>
 					) : error ? (
@@ -88,7 +91,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 							{images.length < 6 &&
 								Array.from({ length: 6 - images.length }).map((_, i) => (
 									<div
-										key={`empty-placeholder-${worldItemId}-${i}`}
+										key={`empty-placeholder-${worldItemId}-${Math.random().toString(36).substring(2, 9)}`}
 										className="bg-black/20 w-full h-full flex items-center justify-center"
 									>
 										<ImageIcon className="w-5 h-5 opacity-20" />

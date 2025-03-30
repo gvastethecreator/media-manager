@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 // Modelo para el sistema de colas
@@ -791,11 +791,11 @@ model WorldItem {
   filters String @default("empty_array")
 
   // Atributos del objeto
-  type   String @default("misc")
-  rarity String @default("common")
+  type       String @default("misc")
+  rarity     String @default("common")
   attributes String @default("empty_array")
   effects    String @default("empty_array")
-  size      String @default("medium")
+  size       String @default("medium")
 
   // Características detalladas
   requirements String @default("")
@@ -892,10 +892,9 @@ model Prompt {
   // Contenido
   description String?
   content     String  @default("")
-  purpose    String  @default("")
+  purpose     String  @default("")
   category    String  @default("general")
   parameters  String  @default("")
-
 
   // Propiedades de visualización
   featuredImage String?

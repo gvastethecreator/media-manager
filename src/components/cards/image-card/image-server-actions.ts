@@ -1,7 +1,7 @@
 'use server';
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 
 // Logger específico para acciones de ImageCard
 const imageCardLogger = serverLogger.withContext('ImageCardActions');
@@ -66,6 +66,7 @@ export interface ImageCardData {
 export async function getImageCardData(imageId: string): Promise<ImageCardData> {
 	try {
 		imageCardLogger.info('🔍 Obteniendo información de imagen para tarjeta:', imageId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!imageId) {

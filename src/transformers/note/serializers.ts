@@ -1,9 +1,9 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-  NoteBase,
-  NoteComplete,
-  NoteCompleteTransform,
-  NoteTags
+	NoteBase,
+	NoteComplete,
+	NoteCompleteTransform,
+	NoteTags
 } from '@/types/entities/note';
 
 const serializersLogger = serverLogger.withContext('Note:Serializers');
@@ -81,52 +81,61 @@ export function fromNoteComplete<T extends NoteComplete>(note: T): Omit<T, 'tags
 }
 
 /**
- * Procesa una nota para asegurar que todos los campos JSON estén deserializados
- * @param note Nota a procesar
- * @returns Nota con campos deserializados
- * @deprecated Use toNoteComplete instead
+ * Procesa los campos de una nota para su uso en UI
+ * @param note Nota con campos serializados
+ * @returns Nota con campos procesados
+ * @deprecated Use toNoteComplete en su lugar
  */
-export function processNoteFields(note: NoteBase): NoteBase & { parsedTags: string[] } {
+export function processNoteFields(note: NoteBase): NoteBase & { tags: string[] } {
+	serializersLogger.warn('⚠️ Usando función obsoleta processNoteFields. Use toNoteComplete en su lugar.');
 	return {
 		...note,
-		parsedTags: deserializeTags(note.tags),
+		tags: deserializeTags(note.tags),
 	};
 }
 
 /**
- * Extiende una nota con información adicional para UI
- * @param note Nota base o completa
- * @returns Nota extendida con campos adicionales para UI
+ * Extiende una nota con propiedades adicionales para UI
+ * @param note Nota completa
+ * @returns Nota extendida con propiedades para UI
  */
-export function extendNote<T extends NoteBase | NoteComplete>(note: T): T & {
-	isSelected?: boolean;
-	isEditing?: boolean;
-	excerpt?: string;
-	formattedDate?: string;
+export function extendNote<T extends NoteComplete>(note: T): T & {
+	excerpt: string;
+	wordCount: number;
+	formattedDate: string;
+	isSelected: boolean;
+	isEditing: boolean;
+	isNew: boolean;
+	isExpanded: boolean;
+	isHovered: boolean;
 } {
-	// Calcular excerpt del contenido
+	// Calcular extracto del contenido
 	const contentText = note.content || '';
 	const excerpt = contentText.length > 150 ? `${contentText.substring(0, 150)}...` : contentText;
 
-	// Formatear fecha si es necesario
-	const formattedDate = note.updatedAt
-		? new Intl.DateTimeFormat('es-ES', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(note.updatedAt))
-		: '';
+	// Calcular conteo de palabras
+	const wordCount = contentText ? contentText.split(/\s+/).filter(Boolean).length : 0;
 
 	return {
 		...note,
+		excerpt,
+		wordCount,
+		formattedDate: note.updatedAt instanceof Date
+			? note.updatedAt.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+			: new Date(note.updatedAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
 		isSelected: false,
 		isEditing: false,
-		excerpt,
-		formattedDate,
+		isNew: false,
+		isExpanded: false,
+		isHovered: false,
 	};
 }
 
 /**
- * Extiende un array de notas con información adicional para UI
- * @param notes Array de notas
+ * Extiende un array de notas para UI
+ * @param notes Array de notas completas
  * @returns Array de notas extendidas
  */
-export function extendNotes<T extends NoteBase | NoteComplete>(notes: T[]): ReturnType<typeof extendNote<T>>[] {
+export function extendNotes<T extends NoteComplete>(notes: T[]): ReturnType<typeof extendNote<T>>[] {
 	return notes.map(extendNote);
 }

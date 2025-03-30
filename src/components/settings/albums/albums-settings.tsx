@@ -17,7 +17,7 @@ import type { Album } from '@/types/entities/album';
 import type { AlbumWithStats } from '@/types/entities/album/extended';
 import { formatBytes } from '@/utils/file/helpers';
 import { Album as AlbumIcon, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { memo, ReactElement, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { CreateAlbumForm } from './create-album-form';
 
 // Extender el tipo Album para añadir las propiedades que faltan
@@ -192,10 +192,11 @@ export function AlbumsSettings() {
 							) : (
 								<div className="space-y-1">
 									{albums.map((album) => (
-										<div
+										<button
 											key={album.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedAlbum?.id === album.id ? 'bg-muted' : ''}`}
+											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedAlbum?.id === album.id ? 'bg-muted' : ''}`}
 											onClick={() => handleEditAlbum(album as unknown as Album)}
+											aria-pressed={selectedAlbum?.id === album.id}
 										>
 											<span className="text-base">{album.emoji}</span>
 											<div className="flex-1 min-w-0">
@@ -215,16 +216,14 @@ export function AlbumsSettings() {
 												size="icon"
 												type="button"
 												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												onClick={() => {
-													// Capturar el evento de clic en línea
-													const e = window.event as MouseEvent;
-													if (e) e.stopPropagation();
+												onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+													e.stopPropagation();
 													handleDeleteAlbum(album.id);
 												}}
 											>
 												<Trash className="h-3 w-3" />
 											</Button>
-										</div>
+										</button>
 									))}
 								</div>
 							)}
@@ -307,13 +306,20 @@ export function AlbumsSettings() {
 													color: previewData.color || '#3b82f6',
 													description: previewData.description || '',
 													category: previewData.category || null,
-													rarity: previewData.rarity || 'common',
 													createdAt: new Date(),
 													updatedAt: new Date(),
+													shortcut: '',
+													type: 'default',
+													privacyLevel: 'private',
+													viewMode: 'grid',
+													filters: 'empty_array',
+													version: 1,
 												}}
 											/>
 										) : selectedAlbum ? (
-											<AlbumCard album={selectedAlbum as unknown as AlbumWithUI} />
+											<AlbumCard
+												album={selectedAlbum as unknown as typeof AlbumCard.prototype.props.album}
+											/>
 										) : (
 											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
 												<AlbumIcon className="h-7 w-7 text-muted-foreground/50" />
