@@ -197,6 +197,7 @@ export function AlbumsSettings() {
 											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedAlbum?.id === album.id ? 'bg-muted' : ''}`}
 											onClick={() => handleEditAlbum(album as unknown as Album)}
 											aria-pressed={selectedAlbum?.id === album.id}
+											type="button"
 										>
 											<span className="text-base">{album.emoji}</span>
 											<div className="flex-1 min-w-0">

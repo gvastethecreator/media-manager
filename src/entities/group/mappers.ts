@@ -4,8 +4,8 @@
  */
 
 import { logger } from '@/lib/logger';
-import { GroupCreateInput, GroupFilters, GroupSortCriteria, GroupUpdateInput } from '@/types/entities/group/types';
-import { Prisma } from '@prisma/client';
+import type { GroupCreateInput, GroupFilters, GroupSortCriteria, GroupUpdateInput } from '@/types/entities/group/types';
+import type { Prisma } from '@prisma/client';
 import { serializeGroupFilters } from './serializers';
 
 /**

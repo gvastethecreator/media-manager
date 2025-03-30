@@ -5,7 +5,7 @@
 
 import { Logger } from '@/lib/logger';
 import { serverLogger } from '@/lib/logger/server-logger';
-import {
+import type {
     TagCreateInput,
     TagFilters,
     TagSearchOptions,
@@ -13,7 +13,7 @@ import {
 } from '@/types/entities/tag/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import type { TagBase, TagComplete } from '../../types/entities/tag/index';
 import { fromTagComplete } from './serializers';
 

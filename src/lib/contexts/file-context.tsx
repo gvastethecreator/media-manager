@@ -303,10 +303,10 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			prev.map((file) =>
 				file.id === fileId
 					? {
-							...file,
-							name: newName,
-							path: file.path.replace(/[^/]+$/, newName),
-						}
+						...file,
+						name: newName,
+						path: file.path.replace(/[^/]+$/, newName),
+					}
 					: file
 			)
 		);
@@ -354,12 +354,23 @@ export function FileProvider({ children }: { children: ReactNode }) {
 				const filesToDownload = files.filter((file) => fileIds.includes(file.id));
 				// Implementar lógica de descarga de archivos
 				for (const file of filesToDownload) {
+					if (!file.thumbnail) continue;
+
+					// Crear un blob con el tipo MIME adecuado
+					const response = await fetch(file.thumbnail);
+					const blob = await response.blob();
+					const url = URL.createObjectURL(blob);
+
 					const link = document.createElement('a');
-					link.href = file.thumbnail || '';
+					link.href = url;
 					link.download = file.name;
+					link.rel = 'noopener noreferrer';
 					document.body.appendChild(link);
 					link.click();
 					document.body.removeChild(link);
+
+					// Liberar el objeto URL
+					URL.revokeObjectURL(url);
 				}
 			} catch (err) {
 				setError('Error downloading files');

@@ -83,34 +83,48 @@ class ThumbnailService {
 
 	// Método para emitir eventos - reemplaza this.emit de EventEmitter
 	private async emitEvent(event: string, ...args: unknown[]): Promise<void> {
+		// Primero notificar a los callbacks locales
 		const callbacks = this.eventCallbacks.get(event);
 		if (callbacks) {
 			for (const callback of callbacks) {
-				callback(...args);
+				try {
+					callback(...args);
+				} catch (error) {
+					thumbLogger.error(`Error al ejecutar callback para evento ${event}:`, error);
+				}
 			}
 		}
 
-		// Emitir eventos al sistema general según corresponda
-		if (event === EVENTS.PROGRESS) {
-			await emit({
-				type: 'folder:progress',
-				data: args[0],
-			});
-		} else if (event === EVENTS.ERROR) {
-			await emit({
-				type: 'folder:error',
-				data: args[0],
-			});
-		} else if (event === EVENTS.COMPLETE) {
-			await emit({
-				type: 'folder:complete',
-				data: args[0],
-			});
-		} else if (event === EVENTS.STATS) {
-			await emit({
-				type: 'folder:stats',
-				data: args[0],
-			});
+		// Mapeo de eventos locales a eventos del sistema central
+		let serverEventType: EventType | null = null;
+		switch (event) {
+			case EVENTS.PROGRESS:
+				serverEventType = 'folder:progress';
+				break;
+			case EVENTS.ERROR:
+				serverEventType = 'folder:error';
+				break;
+			case EVENTS.COMPLETE:
+				serverEventType = 'folder:complete';
+				break;
+			case EVENTS.STATS:
+				serverEventType = 'folder:stats';
+				break;
+			default:
+				serverEventType = null;
+		}
+
+		// Emitir al sistema central si hay mapeo
+		if (serverEventType) {
+			try {
+				await emit({
+					type: serverEventType,
+					data: args[0],
+				});
+				thumbLogger.debug(`Evento ${event} emitido al sistema central como ${serverEventType}`);
+			} catch (emitError) {
+				thumbLogger.error(`Error al emitir evento ${event} al sistema central:`, emitError);
+			}
 		}
 	}
 
@@ -309,37 +323,22 @@ class ThumbnailService {
 		}
 	}
 
+	// Método para optimizar todas las miniaturas
 	async optimizeThumbnails(options: ProcessOptions = {}): Promise<void> {
-		try {
-			thumbLogger.info('Starting thumbnail optimization');
-			await this.handleProcess('api/thumbnails/optimize', options);
-			thumbLogger.info('Thumbnail optimization completed');
-		} catch (error) {
-			thumbLogger.error('Error optimizing thumbnails:', error);
-			throw error;
-		}
+		thumbLogger.info('🔄 Iniciando optimización de miniaturas');
+		return this.handleProcess('/api/thumbnails/optimize', options);
 	}
 
+	// Método para limpiar miniaturas huérfanas
 	async cleanThumbnails(options: ProcessOptions = {}): Promise<void> {
-		try {
-			thumbLogger.info('Starting thumbnail cleanup');
-			await this.handleProcess('api/thumbnails/clean', options);
-			thumbLogger.info('Thumbnail cleanup completed');
-		} catch (error) {
-			thumbLogger.error('Error cleaning thumbnails:', error);
-			throw error;
-		}
+		thumbLogger.info('🧹 Iniciando limpieza de miniaturas huérfanas');
+		return this.handleProcess('/api/thumbnails/clean', options);
 	}
 
+	// Método para reprocesar todas las miniaturas
 	async reprocessAll(options: ProcessOptions = {}): Promise<void> {
-		try {
-			thumbLogger.info('Starting thumbnail reprocessing');
-			await this.handleProcess('api/thumbnails/reprocess', options);
-			thumbLogger.info('Thumbnail reprocessing completed');
-		} catch (error) {
-			thumbLogger.error('Error reprocessing thumbnails:', error);
-			throw error;
-		}
+		thumbLogger.info('🔄 Iniciando reprocesamiento de todas las miniaturas');
+		return this.handleProcess('/api/thumbnails/reprocess', options);
 	}
 
 	async getThumbnail(imageId: string, quality: ThumbnailQuality): Promise<string> {

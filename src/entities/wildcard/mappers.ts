@@ -4,8 +4,8 @@
  */
 
 import { logger } from '@/lib/logger';
-import { CreateWildcardData, UpdateWildcardData, WILDCARD_SORT_PROPERTY_MAP, WildcardFilters, WildcardSortCriteria } from '@/types/entities/wildcard/types';
-import { Prisma } from '@prisma/client';
+import { type CreateWildcardData, type UpdateWildcardData, WILDCARD_SORT_PROPERTY_MAP, type WildcardFilters, type WildcardSortCriteria } from '@/types/entities/wildcard/types';
+import type { Prisma } from '@prisma/client';
 
 /**
  * Mapea los datos de creación de un comodín al formato de Prisma

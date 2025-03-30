@@ -92,7 +92,7 @@ export function ConceptCardFooter({
 					`1px solid ${primaryColor}60` :
 					`1px solid ${primaryColor}40`,
 				boxShadow: isFavorite && tcgMode ?
-					`inset 0 0 10px rgba(255, 215, 0, 0.2)` : undefined
+					'inset 0 0 10px rgba(255, 215, 0, 0.2)' : undefined
 			}}
 		>
 			<div className="flex justify-between items-center mb-1.5">

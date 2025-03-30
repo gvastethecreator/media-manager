@@ -1,6 +1,11 @@
 'use server';
 
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
+import { toServiceError } from '@/utils/errors/service-errors';
+
+const SERVER_ACTION_NAME = 'ImagesRandom';
+const randomImageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
 
 export interface RandomImage {
 	id: string;
@@ -236,16 +241,16 @@ export async function getRandomImagesForEntity(
 		}
 
 		// Transformar los datos para asegurar la compatibilidad con el tipo RandomImage
-		// En este caso necesitamos convertir el thumbnail de Uint8Array a string o null
 		const images: RandomImage[] = imagesData.map((image) => ({
 			id: image.id,
 			path: image.path,
 			// No necesitamos incluir el thumbnail ya que se accede vía API
-			// El componente EntityCardPreview usa /api/thumbnails/{path}
 			thumbnail: null,
 			width: image.width || undefined,
 			height: image.height || undefined,
 		}));
+
+		randomImageLogger.info(`Se encontraron ${images.length} imágenes para ${entityType}`);
 
 		return {
 			success: true,
@@ -253,10 +258,17 @@ export async function getRandomImagesForEntity(
 			message: `Se encontraron ${images.length} imágenes para ${entityType}`,
 		};
 	} catch (error) {
-		console.error(`Error al obtener imágenes aleatorias para ${entityType}:`, error);
+		// Usar el sistema de manejo de errores estandarizado
+		const serviceError = toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: `Error al obtener imágenes aleatorias para ${entityType}`,
+		});
+
+		randomImageLogger.error(`Error al obtener imágenes aleatorias para ${entityType}:`, serviceError);
+
 		return {
 			success: false,
-			message: `Error al obtener imágenes para ${entityType}`,
+			message: serviceError.message,
 		};
 	}
 }

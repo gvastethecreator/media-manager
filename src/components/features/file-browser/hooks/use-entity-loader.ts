@@ -241,7 +241,7 @@ export const useEntityLoader = () => {
         setLoadingStates((prev) => ({ ...prev, [entity]: false }));
       }
     },
-    [loadingStates, fetchStoreData]
+    [loadingStates]
   );
 
   // Efecto para desactivar estados de carga al desmontar

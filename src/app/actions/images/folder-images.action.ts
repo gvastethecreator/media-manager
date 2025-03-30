@@ -1,7 +1,12 @@
 'use server';
 
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { FileItem } from '@/types/file-item';
+import { toServiceError } from '@/utils/errors/service-errors';
+
+const SERVER_ACTION_NAME = 'FolderImages';
+const folderImagesLogger = serverLogger.withContext(SERVER_ACTION_NAME);
 
 /**
  * Obtiene las últimas imágenes de una carpeta específica
@@ -51,16 +56,25 @@ export async function getLatestFolderImages(
 			updatedAt: image.updatedAt,
 		}));
 
+		folderImagesLogger.info(`Se encontraron ${fileItems.length} imágenes para la carpeta ${folderId}`);
+
 		return {
 			success: true,
 			data: fileItems,
 			message: `Se encontraron ${fileItems.length} imágenes para la carpeta ${folderId}`,
 		};
 	} catch (error) {
-		console.error(`Error al obtener imágenes de la carpeta ${folderId}:`, error);
+		// Usar el sistema de manejo de errores estandarizado
+		const serviceError = toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: `Error al obtener imágenes de la carpeta ${folderId}`,
+		});
+
+		folderImagesLogger.error(`Error al obtener imágenes de la carpeta ${folderId}:`, serviceError);
+
 		return {
 			success: false,
-			message: `Error al obtener imágenes de la carpeta ${folderId}`,
+			message: serviceError.message,
 		};
 	}
 }

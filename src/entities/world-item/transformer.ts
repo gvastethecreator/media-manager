@@ -5,8 +5,8 @@
 
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
-import { WorldItemBase } from '@/types/entities/world-item/base';
-import { CreateWorldItemData, UpdateWorldItemData, WorldItemFilters, WorldItemWithRelations, WorldItemWithStats } from '@/types/entities/world-item/types';
+import type { WorldItemBase } from '@/types/entities/world-item/base';
+import type { CreateWorldItemData, UpdateWorldItemData, WorldItemFilters, WorldItemWithRelations, WorldItemWithStats } from '@/types/entities/world-item/types';
 import { mapCreateWorldItemDataToPrisma, mapUpdateWorldItemDataToPrisma, mapWorldItemSearchOptionsToPrisma } from './mappers';
 import { extendWorldItem, extendWorldItemWithStats, validateWorldItem } from './serializers';
 

@@ -12,11 +12,11 @@ import type {
     CharacterSummary,
 } from '@/types/entities/character';
 import {
-    CharacterBase,
-    CharacterComplete,
-    CharacterCreateInput,
+    type CharacterBase,
+    type CharacterComplete,
+    type CharacterCreateInput,
     CharacterSchema,
-    CharacterUpdateInput,
+    type CharacterUpdateInput,
 } from '@/types/entities/character/types';
 import {
     deserializeJsonField,
@@ -37,7 +37,7 @@ import {
     validateMetadataFields
 } from '@/utils/transformers/validation';
 import type { Character as PrismaCharacter } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 const logger = new Logger('CharacterSerializer');
 

@@ -5,17 +5,19 @@ import { prisma } from '@/lib/prisma';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
 
-// Importamos los nuevos tipos y transformers
+// Importamos el transformer y utilities de errores
+import { imageTransformer } from '@/types/entities/image/transformer';
 import {
-    getDerivedImageProperties,
-    mapCreateImageDataToPrisma,
-    mapUpdateImageDataToPrisma,
-} from '@/transformers/image';
-import type { CreateImageData, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image';
+    createEntityNotFoundError,
+    toServiceError
+} from '@/utils/errors/service-errors';
 
+// Importamos tipos necesarios
+import type { CreateImageData, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image';
 import type { GetImagesOptions, GetImagesResult, ImageResult } from './image-types.actions';
 
-const imageLogger = serverLogger.withContext('ImageCRUD');
+const SERVER_ACTION_NAME = 'ImageCRUD';
+const imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
 
 /**
  * Obtiene una imagen por su ID
@@ -73,17 +75,16 @@ export async function getImage(id: string): Promise<ImageExtended | null> {
 			return null;
 		}
 
-		// Añadir propiedades derivadas
-		const derivedProperties = getDerivedImageProperties(image);
-		const result: ImageExtended = {
-			...(image as unknown as ImageBase),
-			...derivedProperties,
-		};
+		// Transformar imagen utilizando el transformer
+		const baseImage = imageTransformer.fromDB(image);
+		const result = imageTransformer.toClient(baseImage, { includes: { folder: image.folder } }) as ImageExtended;
 
 		return result;
 	} catch (error) {
-		imageLogger.error('Error al obtener la imagen:', error);
-		throw new Error('No se pudo obtener la imagen');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'No se pudo obtener la imagen',
+		});
 	}
 }
 
@@ -92,8 +93,8 @@ export async function getImage(id: string): Promise<ImageExtended | null> {
  */
 export async function createImage(data: CreateImageData): Promise<ImageBase> {
 	try {
-		// Usar el mapper para preparar los datos para Prisma
-		const prismaData = mapCreateImageDataToPrisma(data);
+		// Preparar datos para Prisma usando el transformer
+		const prismaData = imageTransformer.toDB(data);
 
 		const image = await prisma.image.create({
 			data: {
@@ -122,10 +123,12 @@ export async function createImage(data: CreateImageData): Promise<ImageBase> {
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 		revalidatePath('/');
 
-		return image;
+		return imageTransformer.fromDB(image);
 	} catch (error) {
-		imageLogger.error('Error al crear la imagen:', error);
-		throw new Error('No se pudo crear la imagen');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'No se pudo crear la imagen',
+		});
 	}
 }
 
@@ -134,8 +137,17 @@ export async function createImage(data: CreateImageData): Promise<ImageBase> {
  */
 export async function updateImage(id: string, data: UpdateImageData): Promise<ImageBase> {
 	try {
-		// Usar el mapper para preparar los datos para Prisma
-		const prismaData = mapUpdateImageDataToPrisma(data);
+		// Primero verificamos que la imagen exista
+		const existingImage = await prisma.image.findUnique({
+			where: { id },
+		});
+
+		if (!existingImage) {
+			throw createEntityNotFoundError('Imagen', id, SERVER_ACTION_NAME);
+		}
+
+		// Preparar datos para Prisma usando el transformer
+		const prismaData = imageTransformer.toDB(data);
 
 		const updated = await prisma.image.update({
 			where: { id },
@@ -146,10 +158,12 @@ export async function updateImage(id: string, data: UpdateImageData): Promise<Im
 		revalidatePath('/');
 		revalidatePath(`/images/${id}`);
 
-		return updated;
+		return imageTransformer.fromDB(updated);
 	} catch (error) {
-		imageLogger.error('Error al actualizar la imagen:', error);
-		throw new Error('No se pudo actualizar la imagen');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'No se pudo actualizar la imagen',
+		});
 	}
 }
 
@@ -161,6 +175,16 @@ export async function updateFavoriteStatus(
 	isFavorite: boolean
 ): Promise<Pick<ImageBase, 'id' | 'name' | 'isFavorite'>> {
 	try {
+		// Verificar que la imagen exista
+		const existingImage = await prisma.image.findUnique({
+			where: { id },
+			select: { id: true },
+		});
+
+		if (!existingImage) {
+			throw createEntityNotFoundError('Imagen', id, SERVER_ACTION_NAME);
+		}
+
 		const updated = await prisma.image.update({
 			where: { id },
 			data: { isFavorite },
@@ -174,8 +198,10 @@ export async function updateFavoriteStatus(
 
 		return updated;
 	} catch (error) {
-		imageLogger.error('Error al actualizar estado de favorito:', error);
-		throw new Error('No se pudo actualizar el estado de favorito de la imagen');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'No se pudo actualizar el estado de favorito de la imagen',
+		});
 	}
 }
 
@@ -229,17 +255,16 @@ export async function getFavoriteImages(): Promise<ImageExtended[]> {
 			},
 		});
 
-		// Añadir propiedades derivadas a cada imagen
+		// Transformar imágenes utilizando el transformer
 		return favorites.map((img) => {
-			const derivedProps = getDerivedImageProperties(img);
-			return {
-				...img,
-				...derivedProps,
-			} as ImageExtended;
+			const baseImage = imageTransformer.fromDB(img);
+			return imageTransformer.toClient(baseImage) as ImageExtended;
 		});
 	} catch (error) {
-		imageLogger.error('Error al obtener imágenes favoritas:', error);
-		throw new Error('No se pudieron obtener las imágenes favoritas');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'No se pudieron obtener las imágenes favoritas',
+		});
 	}
 }
 
@@ -338,24 +363,23 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 			},
 		});
 
-		// Transformar imágenes y añadir propiedades derivadas
+		// Transformar imágenes utilizando el transformer
 		const processedImages = images.map((img) => {
-			const derivedProps = getDerivedImageProperties(img);
-			return {
-				...img,
-				...derivedProps,
-			} as ImageExtended;
+			const baseImage = imageTransformer.fromDB(img);
+			return imageTransformer.toClient(baseImage) as ImageResult;
 		});
 
 		return {
-			images: processedImages as unknown as ImageResult[],
+			images: processedImages,
 			total,
 			page,
 			pageSize,
 		};
 	} catch (error) {
-		imageLogger.error('Error al obtener imágenes:', error);
-		throw new Error('No se pudieron obtener las imágenes');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'No se pudieron obtener las imágenes',
+		});
 	}
 }
 
@@ -364,6 +388,16 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
  */
 export async function deleteImage(id: string): Promise<void> {
 	try {
+		// Verificar que la imagen exista
+		const existingImage = await prisma.image.findUnique({
+			where: { id },
+			select: { id: true },
+		});
+
+		if (!existingImage) {
+			throw createEntityNotFoundError('Imagen', id, SERVER_ACTION_NAME);
+		}
+
 		await prisma.image.delete({
 			where: { id },
 		});
@@ -375,7 +409,9 @@ export async function deleteImage(id: string): Promise<void> {
 		// Emitir eventos
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 	} catch (error) {
-		imageLogger.error('Error al eliminar la imagen:', error);
-		throw new Error('No se pudo eliminar la imagen');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'No se pudo eliminar la imagen',
+		});
 	}
 }

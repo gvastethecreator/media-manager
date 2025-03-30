@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
-import { GroupBase, GroupComplete, GroupCreateInput, GroupFilters, GroupSortCriteria, GroupUpdateInput, GroupWithStats } from '@/types/entities/group/types';
+import type { GroupBase, GroupComplete, GroupCreateInput, GroupFilters, GroupSortCriteria, GroupUpdateInput, GroupWithStats } from '@/types/entities/group/types';
 import { mapCreateGroupDataToPrisma, mapGroupSearchOptionsToPrisma, mapUpdateGroupDataToPrisma } from './mappers';
 import { calculateGroupStats, deserializeGroupFilters, extendGroup, extendGroupWithStats, validateGroup } from './serializers';
 
@@ -134,7 +134,7 @@ export class GroupTransformer {
    */
   static async findByCategory(
     category: string,
-    limit: number = 10
+    limit = 10
   ): Promise<GroupComplete[]> {
     try {
       const groups = await prisma.group.findMany({
@@ -154,7 +154,7 @@ export class GroupTransformer {
    * Busca grupos favoritos
    */
   static async findFavorites(
-    limit: number = 10
+    limit = 10
   ): Promise<GroupComplete[]> {
     try {
       const groups = await prisma.group.findMany({

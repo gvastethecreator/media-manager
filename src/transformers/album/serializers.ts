@@ -5,9 +5,9 @@
 
 import { Logger } from '@/lib/logger';
 import {
-    AlbumCreateInput,
+    type AlbumCreateInput,
     AlbumSchema,
-    AlbumUpdateInput,
+    type AlbumUpdateInput,
 } from '@/types/entities/album/types';
 import {
     validateFieldType,
@@ -24,7 +24,7 @@ import {
     validateMetadataFields,
     validateUIFields,
 } from '@/utils/transformers/validation';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 const logger = new Logger('AlbumSerializer');
 

@@ -74,8 +74,8 @@ export function ConceptsSettings() {
 				const normalizedQuery = searchQuery.toLowerCase();
 				matches = matches && Boolean(
 					concept.name.toLowerCase().includes(normalizedQuery) ||
-					(concept.description && concept.description.toLowerCase().includes(normalizedQuery)) ||
-					(concept.content && concept.content.toLowerCase().includes(normalizedQuery))
+					(concept.description?.toLowerCase().includes(normalizedQuery)) ||
+					(concept.content?.toLowerCase().includes(normalizedQuery))
 				);
 			}
 
@@ -334,28 +334,29 @@ export function ConceptsSettings() {
 							) : (
 								<div className="space-y-1">
 									{filteredConcepts.map((concept) => (
-										<div
+										<button
 											key={concept.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedConcept?.id === concept.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditConcept(concept)}
+											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedConcept?.id === concept.id ? 'bg-muted' : ''}`}
+											onClick={() => handleEditConcept(concept as Concept)}
+											type="button"
+											aria-pressed={selectedConcept?.id === concept.id}
 										>
-											<span className="text-base">{concept.emoji}</span>
+											<div
+												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
+												style={{
+													backgroundColor: concept.color,
+												}}
+											>
+												<span className="text-xs">{concept.emoji}</span>
+											</div>
 											<div className="flex-1 min-w-0">
 												<h4 className="text-xs font-medium truncate">{concept.name}</h4>
 												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+													<span>{concept._count?.images || 0} imágenes</span>
 													{concept.category && (
-														<span>{concept.category}</span>
-													)}
-													{(concept._count?.images || 0) > 0 && (
-														<>
-															{concept.category && <span>•</span>}
-															<span>{concept._count?.images || 0} imágenes</span>
-														</>
-													)}
-													{concept.isFavorite && (
 														<>
 															<span>•</span>
-															<span className="text-yellow-500">★</span>
+															<span>{concept.category}</span>
 														</>
 													)}
 												</div>
@@ -365,16 +366,14 @@ export function ConceptsSettings() {
 												size="icon"
 												type="button"
 												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												onClick={() => {
-													// Capturar el evento de clic en línea
-													const e = window.event as MouseEvent;
-													if (e) e.stopPropagation();
+												onClick={(e) => {
+													e.stopPropagation();
 													handleDeleteConcept(concept.id);
 												}}
 											>
-												<Trash className="h-3 w-3" />
+												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
 											</Button>
-										</div>
+										</button>
 									))}
 								</div>
 							)}

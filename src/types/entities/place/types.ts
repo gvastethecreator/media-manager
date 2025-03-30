@@ -5,8 +5,8 @@
  * para una mejor tipificación en la aplicación
  */
 
-import { z } from 'zod';
-import { PlaceSchema } from './schema';
+import type { z } from 'zod';
+import type { PlaceSchema } from './schema';
 
 // Importación de tipos para relaciones
 import type { Album } from '../album/types';

@@ -51,10 +51,10 @@ export class RelationError extends TransformerError {
 /**
  * 📝 Error de tipo
  */
-export class TypeError extends TransformerError {
+export class TypeMismatchError extends TransformerError {
   constructor(message: string, public expectedType?: string, public receivedType?: string) {
     super(message);
-    this.name = 'TypeError';
+    this.name = 'TypeMismatchError';
   }
 }
 

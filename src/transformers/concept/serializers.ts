@@ -4,7 +4,7 @@
  */
 
 import { ConceptSchema } from '@/types/entities/concept/schema';
-import {
+import type {
     ConceptBase,
     ConceptComplete,
     ConceptCounts,

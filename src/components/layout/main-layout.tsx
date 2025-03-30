@@ -339,13 +339,13 @@ export function MainLayout() {
 		transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
 		minWidth: isNavPanelCollapsed ? '35px' : undefined,
 		maxWidth: isNavPanelCollapsed ? '35px' : undefined,
-	}), navPanelStyleDeps);
+	}), [isResizing, isNavPanelCollapsed, ...navPanelStyleDeps]);
 
 	const rightPanelStyle = useMemo(() => ({
 		transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
 		minWidth: isRightPanelCollapsed ? '35px' : undefined,
 		maxWidth: isRightPanelCollapsed ? '35px' : undefined,
-	}), rightPanelStyleDeps);
+	}), [isResizing, isRightPanelCollapsed, ...rightPanelStyleDeps]);
 
 	// Datos de imagen procesados para evitar procesarlos en cada renderizado
 	const processedImages = useMemo(() => {

@@ -57,7 +57,7 @@
   "[yaml]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "workbench.preferredDarkColorTheme": "Cursor Dark",
+  "workbench.preferredDarkColorTheme": "Cursor Dark High Contrast",
   "git.enableSmartCommit": true,
   "workbench.activityBar.location": "top",
   "powermode.enabled": true,
@@ -173,5 +173,6 @@
   "github.copilot.chat.editor.temporalContext.enabled": false,
   "github.copilot.chat.edits.temporalContext.enabled": true,
   "github.copilot.chat.languageContext.typescript.enabled": true,
-  "github.copilot.chat.generateTests.codeLens": true
+  "github.copilot.chat.generateTests.codeLens": true,
+  "workbench.colorTheme": "Cursor Dark Midnight"
 }

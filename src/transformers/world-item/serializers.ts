@@ -5,7 +5,7 @@
 
 import { createLogger } from '@/lib/logger';
 import { WorldItemSchema } from '@/types/entities/world-item/schema';
-import {
+import type {
     WorldItemAttribute,
     WorldItemBase,
     WorldItemComplete,

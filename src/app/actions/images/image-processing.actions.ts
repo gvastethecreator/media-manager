@@ -2,11 +2,17 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
+import {
+    createEntityNotFoundError,
+    createFileNotFoundError,
+    toServiceError
+} from '@/utils/errors/service-errors';
 import { existsSync } from 'fs';
 import sharp from 'sharp';
 import type { ImageProcessingOptions } from './image-types.actions';
 
-const imageLogger = serverLogger.withContext('ImageProcessing');
+const SERVER_ACTION_NAME = 'ImageProcessing';
+const imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
 
 /**
  * Procesa una imagen según las opciones especificadas
@@ -23,11 +29,11 @@ export async function processImage(imageId: string, options: ImageProcessingOpti
 		});
 
 		if (!image) {
-			throw new Error('Imagen no encontrada');
+			throw createEntityNotFoundError('Imagen', imageId, SERVER_ACTION_NAME);
 		}
 
 		if (!existsSync(image.path)) {
-			throw new Error('El archivo de imagen no existe en el sistema');
+			throw createFileNotFoundError(image.path, { imageId }, SERVER_ACTION_NAME);
 		}
 
 		// Valores por defecto
@@ -72,7 +78,10 @@ export async function processImage(imageId: string, options: ImageProcessingOpti
 
 		return buffer;
 	} catch (error) {
-		imageLogger.error('Error procesando imagen:', { imageId, options, error });
-		throw new Error(`Error al procesar la imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'Error al procesar la imagen',
+			context: { imageId, options },
+		});
 	}
 }

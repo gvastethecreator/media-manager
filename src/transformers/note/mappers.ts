@@ -12,7 +12,7 @@ import type {
     RelatedNote
 } from '@/types/entities/note/types';
 import { createLogger } from '@/utils/logger';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { toPrismaNote } from './serializers';
 
 // Logger específico para el transformer de Note
@@ -428,8 +428,8 @@ export function mapNoteFiltersToPrisma(filters: NoteFilters): Prisma.NoteWhereIn
  */
 export function mapNoteToRelatedNote(
 	note: NoteComplete,
-	count: number = 1,
-	strength: number = 1
+	count = 1,
+	strength = 1
 ): RelatedNote {
 	// Calcular un extracto básico si no existe
 	const excerpt = note.excerpt || (

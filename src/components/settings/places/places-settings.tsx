@@ -78,8 +78,8 @@ export function PlacesSettings() {
 			const normalizedQuery = searchQuery.toLowerCase();
 			matches = matches && Boolean(
 				place.name.toLowerCase().includes(normalizedQuery) ||
-				(place.description && place.description.toLowerCase().includes(normalizedQuery)) ||
-				(place.region && place.region.toLowerCase().includes(normalizedQuery))
+				(place.description?.toLowerCase().includes(normalizedQuery)) ||
+				(place.region?.toLowerCase().includes(normalizedQuery))
 			);
 		}
 
@@ -355,47 +355,46 @@ export function PlacesSettings() {
 							) : (
 								<div className="space-y-1">
 									{filteredPlaces.map((place) => (
-										<div
+										<button
 											key={place.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedPlace?.id === place.id ? 'bg-muted' : ''}`}
+											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedPlace?.id === place.id ? 'bg-muted' : ''}`}
 											onClick={() => handleEditPlace(place as unknown as Place)}
+											type="button"
+											aria-pressed={selectedPlace?.id === place.id}
 										>
 											<div
 												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
-												style={{ backgroundColor: (place.color || '#808080') as string }}
+												style={{
+													backgroundColor: place.color || '#888',
+												}}
 											>
-												{place.emoji}
+												<span className="text-xs">{place.emoji}</span>
 											</div>
 											<div className="flex-1 min-w-0">
 												<h4 className="text-xs font-medium truncate">{place.name}</h4>
 												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													{place.type && (
-														<span>{place.type}</span>
-													)}
+													<span>{place._count?.images || 0} imágenes</span>
 													{place.region && (
 														<>
 															<span>•</span>
 															<span>{place.region}</span>
 														</>
 													)}
-													{place.isFavorite && (
-														<>
-															<span>•</span>
-															<span className="text-yellow-500">★</span>
-														</>
-													)}
 												</div>
 											</div>
-											<div
-												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100 cursor-pointer flex items-center justify-center"
+											<Button
+												variant="ghost"
+												size="icon"
+												type="button"
+												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeletePlace(place.id);
 												}}
 											>
 												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
-											</div>
-										</div>
+											</Button>
+										</button>
 									))}
 								</div>
 							)}

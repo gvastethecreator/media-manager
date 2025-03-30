@@ -1,4 +1,4 @@
-import { BaseEntity, BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
+import { type BaseEntity, BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
 
 /**
