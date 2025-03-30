@@ -46,18 +46,17 @@ const CollapseIndicator = memo(function CollapseIndicator({
 	);
 
 	return (
-		<div
+		<button
 			className="flex h-5 w-5 shrink-0 items-center justify-center hover:bg-gray-100/10 border-0 bg-transparent p-0 transition-colors cursor-pointer"
 			onClick={onToggleCollapse}
 			onKeyDown={handleKeyDown}
-			role="button"
-			tabIndex={0}
+			type="button"
 			aria-label={isCollapsed ? 'Expandir categoría' : 'Colapsar categoría'}
 		>
 			<motion.div initial={false} animate={animateConfig} transition={transitionConfig}>
 				<ChevronRight className="h-3 w-3" style={{ color }} />
 			</motion.div>
-		</div>
+		</button>
 	);
 });
 
@@ -102,9 +101,18 @@ const CategoryCounters = memo(function CategoryCounters({
 					className="h-5 w-5 p-0 bg-background/50 hover:bg-secondary/60 rounded text-muted-foreground hover:text-foreground transition-all ml-1"
 					title={viewMode === 'list' ? 'Cambiar a vista de cuadrícula' : 'Cambiar a vista de lista'}
 				>
-					<div onClick={handleViewModeToggle}>
+					<button
+						onClick={handleViewModeToggle}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault();
+								handleViewModeToggle();
+							}
+						}}
+						type="button"
+					>
 						{viewMode === 'list' ? <Grid className="h-3 w-3" /> : <List className="h-3 w-3" />}
-					</div>
+					</button>
 				</Button>
 			)}
 		</div>

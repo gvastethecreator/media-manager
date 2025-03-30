@@ -245,7 +245,7 @@ function PromptCardComponent({
 								{purpose && (
 									<>
 										<span className="opacity-50">•</span>
-										<span className="truncate">{purpose.length > 15 ? purpose.substring(0, 15) + '...' : purpose}</span>
+										<span className="truncate">{purpose.length > 15 ? `${purpose.substring(0, 15)}...` : purpose}</span>
 									</>
 								)}
 							</div>

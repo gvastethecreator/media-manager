@@ -3,7 +3,7 @@
  * @module transformers/place/mappers
  */
 
-import {
+import type {
     PlaceComplete,
     PlaceCreateInput,
     PlaceFilters,
@@ -12,7 +12,7 @@ import {
     RelatedPlace
 } from '@/types/entities/place/types';
 import { createLogger } from '@/utils/logger';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import {
     toPrismaPlace
 } from './serializers';
@@ -461,8 +461,8 @@ export function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWher
  */
 export function mapPlaceToRelatedPlace(
 	place: PlaceComplete,
-	count: number = 1,
-	strength: number = 1
+	count = 1,
+	strength = 1
 ): RelatedPlace {
 	return {
 		id: place.id,

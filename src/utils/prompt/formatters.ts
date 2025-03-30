@@ -85,7 +85,7 @@ export function truncatePromptContent(content: string, maxLength = 150): string 
 		}
 
 		// Truncar y añadir elipsis
-		return content.substring(0, maxLength).trim() + '...';
+		return `${content.substring(0, maxLength).trim()}...`;
 	} catch (error) {
 		formattersLogger.error('❌ Error al truncar contenido de prompt:', error);
 		return content;
@@ -184,7 +184,7 @@ export function formatParametersForDisplay(parameters: Record<string, any> | str
 
 				// Truncar valores muy largos
 				if (formattedValue.length > 50) {
-					formattedValue = formattedValue.substring(0, 47) + '...';
+					formattedValue = `${formattedValue.substring(0, 47)}...`;
 				}
 
 				return `${key}: ${formattedValue}`;

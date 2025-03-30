@@ -3,7 +3,7 @@
  * @module transformers/video/mappers
  */
 
-import {
+import type {
     RelatedVideo,
     VideoComplete,
     VideoCreateInput,
@@ -14,7 +14,7 @@ import {
     VideoVisualConfigComplete
 } from '@/types/entities/video/types';
 import { createLogger } from '@/utils/logger';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import {
     fromVideoVisualConfigComplete,
     toPrismaVideo
@@ -526,8 +526,8 @@ export function getVideoFrameTimestamp(totalDuration: number, percentage: number
  */
 export function mapVideoToRelatedVideo(
 	video: VideoComplete,
-	count: number = 1,
-	strength: number = 1
+	count = 1,
+	strength = 1
 ): RelatedVideo {
 	return {
 		id: video.id,

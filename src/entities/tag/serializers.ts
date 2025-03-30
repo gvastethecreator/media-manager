@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { TagSchema } from '@/types/entities/tag/schema';
-import { Tag, TagComplete } from '@/types/entities/tag/types';
+import type { Tag, TagComplete } from '@/types/entities/tag/types';
 
 /**
  * Extiende un tag con datos adicionales y relaciones

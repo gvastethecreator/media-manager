@@ -114,7 +114,7 @@ export function PromptCardContent({
 					style={{ color: primaryColor }}
 				>
 					{category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Prompt'}
-					{tcgMode && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor }}></div>}
+					{tcgMode && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor }} />}
 				</div>
 
 				{hasParameters && (

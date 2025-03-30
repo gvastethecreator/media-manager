@@ -1,8 +1,9 @@
-import { BarChart4, BookMarked, BookmarkIcon, CalendarDays, FileText, FolderIcon, FolderOpen, HashIcon, Image, ListChecks, ListFilter, MapPin, Tag, TagIcon, Video, UserSquare } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { getNoteCounts, NoteRelationCounts } from './note-server-actions';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { BarChart4, BookMarked, FileText, FolderOpen, HashIcon, Image, ListChecks, MapPin, Tag, TagIcon, UserSquare, Video } from 'lucide-react';
+import { nanoid } from "nanoid";
+import React, { useEffect, useState } from "react";
+import { getNoteCounts, type NoteRelationCounts } from './note-server-actions';
 
 interface NoteCardContentProps {
 	content?: string | null;
@@ -31,6 +32,9 @@ export function NoteCardContent({
 	noteId,
 	tcgMode = true
 }: NoteCardContentProps) {
+	// Generar un ID de renderizado único
+	const renderKey = React.useMemo(() => nanoid(), []);
+
 	// Estado para guardar los contadores de relaciones
 	const [relationCounts, setRelationCounts] = useState<NoteRelationCounts>({
 		characters: 0,
@@ -108,7 +112,7 @@ export function NoteCardContent({
 				"mb-2 text-muted-foreground",
 				tcgMode ? "p-2 bg-black/20 rounded border border-white/10" : ""
 			)}
-			style={{ fontSize: '0.8rem', lineHeight: '1.25rem' }}>
+				style={{ fontSize: '0.8rem', lineHeight: '1.25rem' }}>
 				{hasContent ? (
 					<div className="overflow-hidden line-clamp-4">
 						{content}
@@ -130,7 +134,7 @@ export function NoteCardContent({
 					<div className="flex flex-wrap gap-1">
 						{tags.slice(0, 5).map((tag: string, index: number) => (
 							<Badge
-								key={index}
+								key={`tag-${renderKey}-${tag}`}
 								variant="outline"
 								className="text-xs px-1.5 py-0.5 rounded-sm"
 								style={{

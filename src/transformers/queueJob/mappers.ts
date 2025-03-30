@@ -5,16 +5,16 @@
 
 import { createLogger } from '@/lib/logger';
 import {
-    CreateQueueJobInput,
-    QueueJobBase,
-    QueueJobComplete,
-    QueueJobFilters,
-    QueueJobSearchOptions,
-    QueueJobSearchResult,
+    type CreateQueueJobInput,
+    type QueueJobBase,
+    type QueueJobComplete,
+    type QueueJobFilters,
+    type QueueJobSearchOptions,
+    type QueueJobSearchResult,
     QueueJobStatus,
-    UpdateQueueJobInput
+    type UpdateQueueJobInput
 } from '@/types/entities/queueJob/types';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { extendQueueJob, stringifyQueueJobData, stringifyQueueJobMetadata } from './serializers';
 
 // Logger específico para este módulo

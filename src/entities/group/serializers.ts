@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { GroupSchema } from '@/types/entities/group/schema';
-import { GroupBase, GroupComplete, GroupWithStats } from '@/types/entities/group/types';
+import type { GroupBase, GroupComplete, GroupWithStats } from '@/types/entities/group/types';
 
 /**
  * Extiende un grupo con campos deserializados y relaciones

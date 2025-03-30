@@ -92,7 +92,7 @@ export function NotesSettings() {
 				const normalizedQuery = searchQuery.toLowerCase();
 				matches = matches && Boolean(
 					note.title.toLowerCase().includes(normalizedQuery) ||
-					(note.content && note.content.toLowerCase().includes(normalizedQuery))
+					(note.content?.toLowerCase().includes(normalizedQuery))
 				);
 			}
 
@@ -192,15 +192,19 @@ export function NotesSettings() {
 	// Componente de botón de eliminación
 	const DeleteButton = ({ noteId }: { noteId: string }) => {
 		return (
-			<div
-				className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100 cursor-pointer flex items-center justify-center"
+			<Button
+				variant="ghost"
+				size="icon"
+				className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
 				onClick={(e) => {
 					e.stopPropagation();
 					handleDeleteNote(noteId);
 				}}
+				type="button"
+				aria-label="Eliminar nota"
 			>
 				<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
-			</div>
+			</Button>
 		);
 	};
 
@@ -362,39 +366,35 @@ export function NotesSettings() {
 							) : (
 								<div className="space-y-1">
 									{filteredNotes.map((note) => (
-										<div
+										<button
 											key={note.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 ${selectedNote?.id === note.id ? 'bg-muted' : ''}`}
+											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedNote?.id === note.id ? 'bg-muted' : ''}`}
 											onClick={() => handleEditNote(note as ExtendedNote)}
+											type="button"
+											aria-pressed={selectedNote?.id === note.id}
 										>
 											<div
 												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
-												style={{ backgroundColor: (note as ExtendedNote).color || '#3b82f6' }}
+												style={{
+													backgroundColor: note.color,
+												}}
 											>
-												{(note as ExtendedNote).emoji || '📝'}
+												<span className="text-xs">{note.emoji}</span>
 											</div>
 											<div className="flex-1 min-w-0">
 												<h4 className="text-xs font-medium truncate">{note.title}</h4>
 												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													{note.category && (
-														<span>{note.category}</span>
-													)}
-													{(note._count?.concepts && note._count.concepts > 0) && (
+													<span>Actualizado {formatDate(note.updatedAt)}</span>
+													{note.tags?.length > 0 && (
 														<>
 															<span>•</span>
-															<span>{note._count.concepts} conceptos</span>
-														</>
-													)}
-													{note.isFavorite && (
-														<>
-															<span>•</span>
-															<span className="text-yellow-500">★</span>
+															<span>{note.tags.length} etiquetas</span>
 														</>
 													)}
 												</div>
 											</div>
 											<DeleteButton noteId={note.id} />
-										</div>
+										</button>
 									))}
 								</div>
 							)}

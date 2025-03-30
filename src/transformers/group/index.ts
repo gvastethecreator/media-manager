@@ -4,7 +4,7 @@
  */
 
 import { Logger } from '@/lib/logger';
-import {
+import type {
     GroupComplete,
     GroupCreateInput,
     GroupSearchOptions,

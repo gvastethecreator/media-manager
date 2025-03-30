@@ -13,11 +13,11 @@ import { type Tag, TagCategory, TagRarity, TagSortCriteria } from '../../types/e
  * @returns Lista de etiquetas filtradas
  */
 export function searchTags(tags: Tag[], searchTerm: string): Tag[] {
-	if (!searchTerm) return tags;
-	const term = searchTerm.toLowerCase();
+	const normalizedTerm = searchTerm.toLowerCase().trim();
+	if (!normalizedTerm) return tags;
 
 	return tags.filter(
-		(tag) => tag.name.toLowerCase().includes(term) || (tag.description && tag.description.toLowerCase().includes(term))
+		(tag) => tag.name.toLowerCase().includes(normalizedTerm) || (tag.description?.toLowerCase().includes(normalizedTerm))
 	);
 }
 
@@ -69,18 +69,18 @@ export function groupTagsByCategory(tags: Tag[]): Record<string, Tag[]> {
 	const groups: Record<string, Tag[]> = {};
 
 	// Inicializar grupos para todas las categorías
-	Object.values(TagCategory).forEach((category) => {
+	for (const category of Object.values(TagCategory)) {
 		groups[category] = [];
-	});
+	}
 
 	// Asignar etiquetas a sus grupos
-	tags.forEach((tag) => {
+	for (const tag of tags) {
 		const category = tag.category || TagCategory.OTHER;
 		if (!groups[category]) {
 			groups[category] = [];
 		}
 		groups[category].push(tag);
-	});
+	}
 
 	return groups;
 }

@@ -12,6 +12,8 @@ import {
 	Video,
 	Wand
 } from 'lucide-react';
+import { nanoid } from "nanoid";
+import React from "react";
 
 interface CharacterCardFooterProps {
 	/** ID o URL del personaje */
@@ -55,6 +57,9 @@ export function CharacterCardFooter({
 	skills = [],
 	tcgMode = true
 }: CharacterCardFooterProps) {
+	// Generar un ID de renderizado único
+	const renderKey = React.useMemo(() => nanoid(), []);
+
 	// Obtener ID del personaje de la URL si es necesario
 	const characterId = getCardIdFromUrl(id);
 
@@ -140,7 +145,7 @@ export function CharacterCardFooter({
 									rarityLevel >= 3 ? 'RARE' : 'COMMON'}
 					</span>
 					{[...Array(rarityStars)].map((_, i) => (
-						<Star key={`rarity-${characterId}-${rarityLevel}-${i}`} className="h-3 w-3 fill-current" />
+						<Star key={`rarity-star-${renderKey}-${i + 1}`} className="h-3 w-3 fill-current" />
 					))}
 				</div>
 			</div>

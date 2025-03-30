@@ -1,17 +1,14 @@
 import type { ErrorResponse, FolderResponse, IndexCallbacks, ProcessStatus } from '@/app/actions/folders';
 import {
-	createFolder as createFolderAction,
-	deleteFolder as deleteFolderAction,
-	getFolders as getFoldersAction,
-	indexFolder as indexFolderAction,
-	reindexFolder as reindexFolderAction,
+    createFolder as createFolderAction,
+    deleteFolder as deleteFolderAction,
+    getFolders as getFoldersAction
 } from '@/app/actions/folders';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type { FolderStats } from '@/types/entities/folders';
-import type { ExtendedProcessStatus } from '@/types/process';
 
 const folderLogger = serverLogger.withContext('FolderService');
 
@@ -137,52 +134,76 @@ class FolderServiceClass {
 		try {
 			// Obtener los callbacks para este evento
 			const callbacks = this.eventCallbacks.get(event);
-			if (!callbacks || callbacks.size === 0) {
-				return;
-			}
-
-			// Invocar cada callback
-			for (const callback of callbacks) {
-				try {
-					if (typeof callback === 'function') {
-						await callback(...args);
+			if (callbacks && callbacks.size > 0) {
+				// Invocar cada callback
+				for (const callback of callbacks) {
+					try {
+						if (typeof callback === 'function') {
+							await callback(...args);
+						}
+					} catch (error) {
+						folderLogger.error(`Error en callback de evento ${event}:`, error);
 					}
-				} catch (error) {
-					console.error(`Error en callback de evento ${event}:`, error);
 				}
 			}
 
-			// Emitir también al sistema de eventos del servidor
-			if (event === FOLDER_EVENTS.PROGRESS) {
+			// Mapeo de eventos locales a eventos del sistema central
+			let serverEventType: EventType | null = null;
+			switch (event) {
+				case FOLDER_EVENTS.PROGRESS:
+					serverEventType = 'folder:progress';
+					break;
+				case FOLDER_EVENTS.ERROR:
+					serverEventType = 'folder:error';
+					break;
+				case FOLDER_EVENTS.COMPLETE:
+					serverEventType = 'folder:complete';
+					break;
+				case FOLDER_EVENTS.STATS:
+					serverEventType = 'folder:stats';
+					break;
+				case FOLDER_EVENTS.FOLDER_ADDED:
+					serverEventType = 'folders:modified';
+					break;
+				case FOLDER_EVENTS.FOLDER_DELETED:
+					serverEventType = 'folders:modified';
+					break;
+				case FOLDER_EVENTS.FOLDER_MODIFIED:
+					serverEventType = 'folders:modified';
+					break;
+				case FOLDER_EVENTS.INDEXING_START:
+					serverEventType = 'folder:progress';
+					break;
+				case FOLDER_EVENTS.INDEXING_COMPLETE:
+					serverEventType = 'folder:complete';
+					break;
+				case FOLDER_EVENTS.REINDEX_ALL_START:
+					serverEventType = 'folder:reindexAll:start';
+					break;
+				case FOLDER_EVENTS.REINDEX_ALL_PROGRESS:
+					serverEventType = 'folder:reindexAll:progress';
+					break;
+				case FOLDER_EVENTS.REINDEX_ALL_COMPLETE:
+					serverEventType = 'folder:reindexAll:complete';
+					break;
+				default:
+					serverEventType = null;
+			}
+
+			// Emitir al sistema central si hay mapeo
+			if (serverEventType) {
 				try {
 					await emit({
-						type: 'folder:progress',
+						type: serverEventType,
 						data: args[0],
 					});
-				} catch (error) {
-					console.error('Error emitiendo evento de progreso al servidor:', error);
-				}
-			} else if (event === FOLDER_EVENTS.ERROR) {
-				try {
-					await emit({
-						type: 'folder:error',
-						data: args[0],
-					});
-				} catch (error) {
-					console.error('Error emitiendo evento de error al servidor:', error);
-				}
-			} else if (event === FOLDER_EVENTS.COMPLETE) {
-				try {
-					await emit({
-						type: 'folder:complete',
-						data: args[0],
-					});
-				} catch (error) {
-					console.error('Error emitiendo evento de finalización al servidor:', error);
+					folderLogger.debug(`Evento ${event} emitido al sistema central como ${serverEventType}`);
+				} catch (emitError) {
+					folderLogger.error(`Error al emitir evento ${event} al sistema central:`, emitError);
 				}
 			}
 		} catch (error) {
-			console.error(`Error emitiendo evento ${event}:`, error);
+			folderLogger.error(`Error emitiendo evento ${event}:`, error);
 		}
 	}
 

@@ -186,7 +186,7 @@ export function WildcardPreview({
 							<div className="grid grid-cols-2 gap-2">
 								{children.map((value: string, index: number) => (
 									<div
-										key={index}
+										key={`value-${wildcard.id}-${value}-${index + 1}`}
 										className={cn(
 											"rounded-md p-2",
 											"bg-muted/30",

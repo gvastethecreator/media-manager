@@ -10,13 +10,13 @@ import {
 } from '@/types/entities/world-item/enums';
 import {
     WORLD_ITEM_SORT_PROPERTY_MAP,
-    WorldItemCreateInput,
-    WorldItemFilters,
-    WorldItemSearchOptions,
-    WorldItemSortCriteria,
-    WorldItemUpdateInput
+    type WorldItemCreateInput,
+    type WorldItemFilters,
+    type WorldItemSearchOptions,
+    type WorldItemSortCriteria,
+    type WorldItemUpdateInput
 } from '@/types/entities/world-item/types';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import {
     serializeAttributes,
     serializeEffects,
@@ -57,7 +57,10 @@ export function generateColor(name: string, category?: string | null): string {
 		}
 
 		// Si no hay categoría, generar un color basado en el nombre
-		const hash = Array.from(name).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+		let hash = 0;
+		for (const char of Array.from(name)) {
+			hash += char.charCodeAt(0);
+		}
 		const hue = hash % 360;
 		const saturation = 65 + (hash % 20);
 		const lightness = 45 + (hash % 10);
@@ -142,7 +145,10 @@ export function generateEmoji(type: string, name?: string): string {
 
 		// Si hay un nombre, generar un emoji basado en él
 		if (name) {
-			const hash = Array.from(name).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+			let hash = 0;
+			for (const char of Array.from(name)) {
+				hash += char.charCodeAt(0);
+			}
 			return genericEmojis[hash % genericEmojis.length];
 		}
 

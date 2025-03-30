@@ -5,6 +5,7 @@
 
 import type { EntityId, JSONString } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { UploadedImageType as EntityUploadedImageType } from './entities/uploaded-image';
 import type { MediaMetadata } from './metadata.types';
 
 /**
@@ -28,6 +29,9 @@ export enum UploadedFileType {
     DOCUMENT = 'document',
     OTHER = 'other'
 }
+
+// Re-export the entity type for backwards compatibility
+export type UploadedImageType = EntityUploadedImageType;
 
 /**
  * Interfaz para archivo subido

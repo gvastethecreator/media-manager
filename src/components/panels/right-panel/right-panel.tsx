@@ -78,7 +78,7 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 	useEffect(() => {
 		// Solo actuamos si el componente está montado
 		if (!mounted) return;
-	}, [isCollapsed, selectedItems, mounted]);
+	}, [mounted]);
 
 	// Manejar el cierre del panel
 	const handleClose = useCallback(() => {
@@ -115,17 +115,15 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 			</div>
 
 			{!isCollapsed && (
-				<>
-					{hasSelectedItems ? (
-						<ScrollArea className="flex-1">
-							<div className="p-2">
-								<DetailsPanel selectedItems={selectedItems as ImageItem[]} />
-							</div>
-						</ScrollArea>
-					) : (
-						shouldShowStats && <LazyStatsPanel />
-					)}
-				</>
+				hasSelectedItems ? (
+					<ScrollArea className="flex-1">
+						<div className="p-2">
+							<DetailsPanel selectedItems={selectedItems as ImageItem[]} />
+						</div>
+					</ScrollArea>
+				) : (
+					shouldShowStats && <LazyStatsPanel />
+				)
 			)}
 		</div>
 	);

@@ -20,25 +20,26 @@ export function generateExampleContent(params: Record<string, any>): string {
 		// Crear un ejemplo con placeholders para los parámetros
 		let template = 'Escribe un prompt que utilice los siguientes parámetros:\n\n';
 
-		paramEntries.forEach(([key, value]) => {
+		for (const [key, value] of paramEntries) {
 			// Mostrar el tipo esperado de valor
 			let valueType = typeof value === 'object' ? 'objeto' : typeof value;
 			if (Array.isArray(value)) valueType = 'array';
 
 			template += `- {{${key}}}: ${valueType}\n`;
-		});
+		}
 
 		template += '\nEjemplo de uso:\n';
 		template += 'Mi prompt con ';
 
 		// Incluir algunos parámetros de ejemplo en el texto
 		const exampleParams = paramEntries.slice(0, 3);
-		exampleParams.forEach(([key], index) => {
+		for (let i = 0; i < exampleParams.length; i++) {
+			const [key] = exampleParams[i];
 			template += `{{${key}}}`;
-			if (index < exampleParams.length - 1) {
-				template += index === exampleParams.length - 2 ? ' y ' : ', ';
+			if (i < exampleParams.length - 1) {
+				template += i === exampleParams.length - 2 ? ' y ' : ', ';
 			}
-		});
+		}
 
 		return template;
 	} catch (error) {
@@ -80,10 +81,10 @@ export function replaceVariablesInContent(content: string, variables: Record<str
 		let result = content;
 
 		// Reemplazar cada variable por su valor
-		Object.entries(variables).forEach(([key, value]) => {
+		for (const [key, value] of Object.entries(variables)) {
 			const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
 			result = result.replace(regex, String(value));
-		});
+		}
 
 		return result;
 	} catch (error) {

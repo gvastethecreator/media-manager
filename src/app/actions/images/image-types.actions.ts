@@ -1,9 +1,19 @@
-import type { CreateImageData, ImageExtended } from '@/types/entities/image';
+/**
+ * @file Definición de tipos para acciones relacionadas con imágenes
+ * @module app/actions/images/image-types
+ */
+
+import type {
+    CreateImageData,
+    ImageBase,
+    ImageExtended
+} from '@/types/entities/image';
+import type { ImageResult } from '@/types/entities/image/transformer';
 
 /**
  * Re-exportamos los tipos principales desde el módulo de tipos
  */
-export type { CreateImageData };
+export type { CreateImageData, ImageBase, ImageExtended, ImageResult };
 
 /**
  * Datos de entrada para crear una imagen
@@ -46,12 +56,6 @@ export type GetImagesOptions = {
 	isPublic?: boolean;
 	search?: string;
 };
-
-/**
- * Resultados de una imagen con sus relaciones
- * Usamos ImageExtended para mantener la compatibilidad con tipos existentes
- */
-export type ImageResult = ImageExtended;
 
 /**
  * Resultado de la operación de obtener imágenes

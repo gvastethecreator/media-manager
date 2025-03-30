@@ -3,9 +3,9 @@
  * @module types/entities/video/types
  */
 
-import { z } from 'zod';
-import { VideoFormat, VideoPrivacyLevel } from './enums';
-import { VideoSchema } from './schema';
+import type { z } from 'zod';
+import type { VideoFormat, VideoPrivacyLevel } from './enums';
+import type { VideoSchema } from './schema';
 
 // Importación de tipos para relaciones
 import type { Album } from '../album/types';

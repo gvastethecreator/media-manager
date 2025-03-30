@@ -13,12 +13,19 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image.service';
 import { ThumbnailQuality } from '@/types/thumbnails';
+import {
+    createEntityNotFoundError,
+    createServiceError,
+    ServiceErrorCode,
+    toServiceError,
+} from '@/utils/errors/service-errors';
 import fs from 'fs/promises';
 import { revalidatePath } from 'next/cache';
 import sharp from 'sharp';
 import type { CleanupThumbnailsResult, ReprocessThumbnailsResult, ThumbnailStatsResult } from './image-types.actions';
 
-const imageLogger = serverLogger.withContext('ImageThumbnails');
+const SERVER_ACTION_NAME = 'ImageThumbnails';
+const imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
 
 /**
  * Obtiene la miniatura de una imagen
@@ -31,8 +38,10 @@ export async function getThumbnail(
 		const thumbnail = await imageService.getThumbnail(imageId, quality);
 		return thumbnail;
 	} catch (error) {
-		imageLogger.error('Error obteniendo thumbnail', { imageId, quality, error });
-		throw new Error('Error al obtener el thumbnail');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'Error al obtener el thumbnail',
+		});
 	}
 }
 
@@ -44,8 +53,10 @@ export async function generateThumbnail(imageId: string, quality: ThumbnailQuali
 		await imageService.generateThumbnail(imageId, quality);
 		revalidatePath(`/api/thumbnails/${imageId}`);
 	} catch (error) {
-		imageLogger.error('Error generando thumbnail', { imageId, quality, error });
-		throw new Error('Error al generar el thumbnail');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'Error al generar el thumbnail',
+		});
 	}
 }
 
@@ -65,8 +76,16 @@ export async function optimizeThumbnail(imageId: string): Promise<void> {
 			},
 		});
 
-		if (!image || !image.thumbnail) {
-			throw new Error('Imagen o thumbnail no encontrado');
+		if (!image) {
+			throw createEntityNotFoundError('Imagen', imageId, SERVER_ACTION_NAME);
+		}
+
+		if (!image.thumbnail) {
+			throw createServiceError({
+				code: ServiceErrorCode.ENTITY_NOT_FOUND,
+				message: 'La imagen no tiene thumbnail que optimizar',
+				serviceName: SERVER_ACTION_NAME,
+			});
 		}
 
 		// Optimizar el thumbnail con Sharp
@@ -93,8 +112,10 @@ export async function optimizeThumbnail(imageId: string): Promise<void> {
 			reduction: `${Math.round(((image.thumbnail.length - optimized.length) / image.thumbnail.length) * 100)}%`,
 		});
 	} catch (error) {
-		imageLogger.error('Error optimizando thumbnail:', { imageId, error });
-		throw new Error('Error al optimizar el thumbnail');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'Error al optimizar el thumbnail',
+		});
 	}
 }
 
@@ -163,8 +184,10 @@ export async function cleanupThumbnails(): Promise<CleanupThumbnailsResult> {
 		imageLogger.info('Limpieza de thumbnails completada', { cleaned, errors, totalSize });
 		return { cleaned, errors, totalSize };
 	} catch (error) {
-		imageLogger.error('Error limpiando thumbnails:', error);
-		throw new Error('Error al limpiar los thumbnails');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'Error al limpiar los thumbnails',
+		});
 	}
 }
 
@@ -212,8 +235,10 @@ export async function getThumbnailStats(): Promise<ThumbnailStatsResult> {
 			averageSize,
 		};
 	} catch (error) {
-		imageLogger.error('Error obteniendo estadísticas de thumbnails:', error);
-		throw new Error('Error al obtener estadísticas de thumbnails');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'Error al obtener estadísticas de thumbnails',
+		});
 	}
 }
 
@@ -277,7 +302,9 @@ export async function reprocessThumbnails(
 
 		return { processed, errors, totalTime };
 	} catch (error) {
-		imageLogger.error('Error en reprocesamiento de thumbnails:', error);
-		throw new Error('Error al reprocesar los thumbnails');
+		throw toServiceError(error, {
+			serviceName: SERVER_ACTION_NAME,
+			message: 'Error al reprocesar los thumbnails',
+		});
 	}
 }

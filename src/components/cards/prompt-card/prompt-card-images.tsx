@@ -117,12 +117,13 @@ export function PromptCardImages({
 								>
 									{displayImages.map((img, idx) => (
 										<button
-											key={`thumb-${idx}`}
+											type="button"
+											key={`thumb-${img.substring(0, 8)}-${idx + 1}`}
 											className={cn(
 												"w-2 h-2 rounded-full transition-all",
 												activeImage === img
 													? "bg-white scale-125 shadow-lg"
-													: `bg-white/50 hover:bg-white/80`,
+													: "bg-white/50 hover:bg-white/80",
 												tcgMode && "outline outline-1 outline-offset-1"
 											)}
 											style={{ outlineColor: activeImage === img ? primaryColor : 'transparent' }}

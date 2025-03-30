@@ -5,14 +5,12 @@
 
 import { Logger } from '@/lib/logger';
 import {
-    Group,
-    GroupBase,
-    GroupComplete,
-    GroupCreateInput,
+    type GroupBase,
+    type GroupComplete,
+    type GroupCreateInput,
     GroupSchema,
-    GroupTransformerOptions,
-    GroupUpdateInput,
-    GroupWithStats,
+    type GroupTransformerOptions,
+    type GroupUpdateInput
 } from '@/types/entities/group/types';
 import {
     deserializeJsonField,
@@ -34,7 +32,7 @@ import {
     validateMetadataFields,
     validateUIFields,
 } from '@/utils/transformers/validation';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 const logger = new Logger('GroupSerializer');
 
@@ -182,7 +180,7 @@ export function extendGroup(
     // Asegurar que las propiedades de UI tengan valores por defecto
     if (!extended.emoji) extended.emoji = DEFAULT_GROUP_EMOJI;
     if (!extended.color) extended.color = DEFAULT_GROUP_COLOR;
-    
+
     // Inicializar relaciones vacías si se incluyen relaciones
     if (options.includeRelations) {
       extended.images = [];

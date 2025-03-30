@@ -133,9 +133,9 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
 			const parameters = displayPrompt.parsedParameters || {};
 			if (Object.keys(parameters).length > 0) {
 				md += '## Parámetros\n\n';
-				Object.entries(parameters).forEach(([key, value]) => {
+				for (const [key, value] of Object.entries(parameters)) {
 					md += `- **${key}:** ${JSON.stringify(value)}\n`;
-				});
+				}
 			}
 		}
 
@@ -260,10 +260,10 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
   <div class="parameters">
     <h2>Parámetros</h2>
     <ul>`;
-				Object.entries(parameters).forEach(([key, value]) => {
+				for (const [key, value] of Object.entries(parameters)) {
 					html += `
       <li><strong>${escapeHtml(key)}:</strong> ${escapeHtml(JSON.stringify(value))}</li>`;
-				});
+				}
 				html += `
     </ul>
   </div>`;
@@ -322,21 +322,22 @@ export function exportPrompt(prompt: PromptBase | PromptExtended, config: Prompt
 				fileExtension = 'html';
 				break;
 
-			case PromptExportFormat.CSV:
+			case PromptExportFormat.CSV: {
 				// Implementación simplificada para CSV (solo una fila)
 				const fields = [
 					prompt.id,
-					prompt.title.replace(/"/g, '""'),
-					prompt.content.replace(/"/g, '""'),
+					prompt.title,
+					prompt.content,
 					prompt.category,
 					prompt.model,
 				];
 				content = includeMetadata
 					? `id,title,content,category,model\n"${fields.join('","')}"`
-					: `"${fields.join('","')}"`;
+					: `"${prompt.title}","${prompt.content}"`;
 				mimeType = 'text/csv';
 				fileExtension = 'csv';
 				break;
+			}
 
 			default:
 				throw new Error(`Formato de exportación no soportado: ${format}`);

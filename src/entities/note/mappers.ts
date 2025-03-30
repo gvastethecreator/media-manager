@@ -4,8 +4,8 @@
  */
 
 import { logger } from '@/lib/logger';
-import { CreateNoteData, NoteSearchOptions, UpdateNoteData } from '@/types/entities/note/types';
-import { Prisma } from '@prisma/client';
+import type { CreateNoteData, NoteSearchOptions, UpdateNoteData } from '@/types/entities/note/types';
+import type { Prisma } from '@prisma/client';
 import { serializeNoteTags } from './serializers';
 
 /**

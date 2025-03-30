@@ -4,8 +4,8 @@
  */
 
 import { logger } from '@/lib/logger';
-import { CreateWorldItemData, UpdateWorldItemData, WorldItemFilters } from '@/types/entities/world-item/types';
-import { Prisma } from '@prisma/client';
+import type { CreateWorldItemData, UpdateWorldItemData, WorldItemFilters } from '@/types/entities/world-item/types';
+import type { Prisma } from '@prisma/client';
 
 /**
  * Mapea los datos de creación de un objeto del mundo al formato de Prisma

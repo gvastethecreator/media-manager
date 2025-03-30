@@ -2,22 +2,28 @@ import { processImage } from '@/lib/image-processing';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
-import type { UploadedImageType } from '@/types/entities/entities';
+import type { UploadedImageType } from '@/types/entities/uploaded-image';
+import { uploadedImageTransformer } from '@/types/entities/uploaded-image/transformers';
 import type {
-	CreateUploadedImageParams,
-	GetUploadedImagesParams,
-	UpdateUploadedImageParams,
-	UploadedImageDimensions,
-	UploadedImageEvents,
-	UploadedImageFilters,
-	UploadedImageMetadata,
-	UploadedImageProcessingOptions,
-	UploadedImageResult,
-	UploadedImageResults,
-	UploadedImageStats,
+    CreateUploadedImageParams,
+    GetUploadedImagesParams,
+    UpdateUploadedImageParams,
+    UploadedImageDimensions,
+    UploadedImageEvents,
+    UploadedImageMetadata,
+    UploadedImageProcessingOptions,
+    UploadedImageResult,
+    UploadedImageResults,
+    UploadedImageStats
 } from '@/types/uploaded-images';
+import {
+    createEntityNotFoundError,
+    ServiceErrorCode,
+    toServiceError
+} from '@/utils/errors/service-errors';
 
-const uploadedImagesLogger = serverLogger.withContext('UploadedImagesService');
+const SERVICE_NAME = 'UploadedImagesService';
+const uploadedImagesLogger = serverLogger.withContext(SERVICE_NAME);
 
 interface WhereClause {
 	type?: UploadedImageType;
@@ -106,29 +112,9 @@ class UploadedImagesService {
 				},
 			});
 
-			// Convertir el registro de la base de datos al formato de respuesta
-			const url = this.getImageUrl(image.path);
-			const thumbnailUrl = this.getThumbnailUrl(image.path);
-
-			// Calcular las dimensiones con proporción de aspecto
-			const calculatedDimensions = this.calculateDimensions(image.width, image.height);
-
-			const result: UploadedImageResult = {
-				id: image.id,
-				name: image.name,
-				path: image.path,
-				type: image.type as UploadedImageType,
-				category: image.category,
-				size: image.size,
-				width: image.width,
-				height: image.height,
-				metadata: image.metadata ? JSON.parse(image.metadata) : null,
-				dimensions: calculatedDimensions,
-				url,
-				thumbnailUrl,
-				createdAt: image.createdAt,
-				updatedAt: image.updatedAt,
-			};
+			// Usar el transformer para convertir el registro a la respuesta
+			const entity = uploadedImageTransformer.fromDB(image);
+			const result = uploadedImageTransformer.toClient(entity);
 
 			// Emitir evento de creación
 			await this.emitEvent(this.EVENTS.IMAGE_CREATED, result);
@@ -136,8 +122,12 @@ class UploadedImagesService {
 
 			return result;
 		} catch (error) {
-			uploadedImagesLogger.error('Error creando imagen:', error);
-			throw error;
+			// Usar el nuevo sistema de manejo de errores
+			throw toServiceError(error, {
+				code: ServiceErrorCode.UNEXPECTED_ERROR,
+				message: 'Error al crear imagen subida',
+				serviceName: SERVICE_NAME
+			});
 		}
 	}
 
@@ -149,7 +139,7 @@ class UploadedImagesService {
 			});
 
 			if (!existingImage) {
-				throw new Error(`Imagen con ID ${id} no encontrada`);
+				throw createEntityNotFoundError('UploadedImage', id, SERVICE_NAME);
 			}
 
 			const { name, type, category, file, dimensions, metadata, processingOptions } = params;
@@ -210,31 +200,9 @@ class UploadedImagesService {
 				},
 			});
 
-			// Convertir el registro de la base de datos al formato de respuesta
-			const url = this.getImageUrl(image.path);
-			const thumbnailUrl = this.getThumbnailUrl(image.path);
-			const calculatedDimensions = this.calculateDimensions(
-				image.width,
-				image.height,
-				dimensions as UploadedImageDimensions
-			);
-
-			const result: UploadedImageResult = {
-				id: image.id,
-				name: image.name,
-				path: image.path,
-				type: image.type as UploadedImageType,
-				category: image.category,
-				size: image.size,
-				width: image.width,
-				height: image.height,
-				metadata: image.metadata ? JSON.parse(image.metadata) : null,
-				dimensions: calculatedDimensions,
-				url,
-				thumbnailUrl,
-				createdAt: image.createdAt,
-				updatedAt: image.updatedAt,
-			};
+			// Usar el transformer para convertir el registro a la respuesta
+			const entity = uploadedImageTransformer.fromDB(image);
+			const result = uploadedImageTransformer.toClient(entity);
 
 			// Emitir evento de actualización
 			await this.emitEvent(this.EVENTS.IMAGE_UPDATED, result);
@@ -242,8 +210,12 @@ class UploadedImagesService {
 
 			return result;
 		} catch (error) {
-			uploadedImagesLogger.error('Error updating uploaded image:', { id, params, error });
-			throw error;
+			throw toServiceError(error, {
+				code: ServiceErrorCode.UNEXPECTED_ERROR,
+				message: 'Error al actualizar imagen subida',
+				context: { id, params },
+				serviceName: SERVICE_NAME
+			});
 		}
 	}
 
@@ -255,7 +227,7 @@ class UploadedImagesService {
 			});
 
 			if (!image) {
-				throw new Error(`Imagen con ID ${id} no encontrada`);
+				throw createEntityNotFoundError('UploadedImage', id, SERVICE_NAME);
 			}
 
 			// Eliminar el archivo físico
@@ -270,8 +242,12 @@ class UploadedImagesService {
 			await this.emitEvent(this.EVENTS.IMAGE_DELETED, { id });
 			await this.emitEvent(this.EVENTS.IMAGES_CHANGED, { action: 'delete', id });
 		} catch (error) {
-			uploadedImagesLogger.error('Error deleting uploaded image:', { id, error });
-			throw error;
+			throw toServiceError(error, {
+				code: ServiceErrorCode.UNEXPECTED_ERROR,
+				message: 'Error al eliminar imagen subida',
+				context: { id },
+				serviceName: SERVICE_NAME
+			});
 		}
 	}
 
@@ -363,38 +339,10 @@ class UploadedImagesService {
 				take: pageSize,
 			});
 
-			// Transformar los resultados
+			// Transformar los resultados usando el transformer
 			const items = rawImages.map((image) => {
-				const url = this.getImageUrl(image.path);
-				const thumbnailUrl = includeThumbnails ? this.getThumbnailUrl(image.path) : undefined;
-
-				let dimensions: UploadedImageDimensions;
-				if (includeDimensions) {
-					dimensions = this.calculateDimensions(image.width, image.height, targetDimensions);
-				} else {
-					dimensions = {
-						width: image.width,
-						height: image.height,
-						aspectRatio: image.width / image.height,
-					};
-				}
-
-				return {
-					id: image.id,
-					name: image.name,
-					path: image.path,
-					type: image.type as UploadedImageType,
-					category: image.category,
-					size: image.size,
-					width: image.width,
-					height: image.height,
-					metadata: image.metadata ? JSON.parse(image.metadata) : null,
-					dimensions,
-					url,
-					thumbnailUrl,
-					createdAt: image.createdAt,
-					updatedAt: image.updatedAt,
-				};
+				const entity = uploadedImageTransformer.fromDB(image);
+				return uploadedImageTransformer.toClient(entity);
 			});
 
 			// Obtener estadísticas si se incluyen en la respuesta
@@ -408,8 +356,12 @@ class UploadedImagesService {
 				stats,
 			};
 		} catch (error) {
-			uploadedImagesLogger.error('Error getting uploaded images:', { params, error });
-			throw error;
+			throw toServiceError(error, {
+				code: ServiceErrorCode.UNEXPECTED_ERROR,
+				message: 'Error al obtener imágenes subidas',
+				context: { params },
+				serviceName: SERVICE_NAME
+			});
 		}
 	}
 
@@ -446,8 +398,11 @@ class UploadedImagesService {
 				averageSize: total > 0 ? totalSize / total : 0,
 			};
 		} catch (error) {
-			uploadedImagesLogger.error('Error getting image stats:', error);
-			throw error;
+			throw toServiceError(error, {
+				code: ServiceErrorCode.UNEXPECTED_ERROR,
+				message: 'Error al obtener estadísticas de imágenes',
+				serviceName: SERVICE_NAME
+			});
 		}
 	}
 
@@ -513,16 +468,34 @@ class UploadedImagesService {
 		try {
 			return await processImage(path, options);
 		} catch (error) {
-			uploadedImagesLogger.error('Error processing image:', { path, options, error });
-			throw error;
+			throw toServiceError(error, {
+				code: ServiceErrorCode.FILE_WRITE_ERROR,
+				message: 'Error al procesar la imagen',
+				context: { path, options },
+				serviceName: SERVICE_NAME
+			});
 		}
 	}
 
 	// Eliminar archivo de imagen
 	private async deleteImageFile(path: string): Promise<void> {
-		// Aquí se implementaría la lógica real para eliminar el archivo
-		// Por ahora, solo simularemos esta operación
-		uploadedImagesLogger.info('Simulando eliminación de archivo:', path);
+		try {
+			// Aquí se implementaría la lógica real para eliminar el archivo
+			// Por ahora, solo simularemos esta operación
+			uploadedImagesLogger.info('Simulando eliminación de archivo:', path);
+
+			// Si necesitáramos verificar que el archivo existe:
+			// if (!fileExists(path)) {
+			//     throw createFileNotFoundError(path, {}, SERVICE_NAME);
+			// }
+		} catch (error) {
+			throw toServiceError(error, {
+				code: ServiceErrorCode.FILE_WRITE_ERROR,
+				message: 'Error al eliminar archivo de imagen',
+				context: { path },
+				serviceName: SERVICE_NAME
+			});
+		}
 	}
 
 	// Obtener URL de imagen

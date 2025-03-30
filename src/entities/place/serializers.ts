@@ -4,7 +4,7 @@
  */
 
 import { PlaceDangerSchema, PlaceFiltersSchema, PlaceResourceSchema, PlaceSchema } from '@/types/entities/place/schema';
-import { PlaceComplete, PlaceDanger, PlaceExtendedComplete, PlaceFilters, PlaceResource, PlaceStats, PlaceWithRelations } from '@/types/entities/place/types';
+import type { PlaceComplete, PlaceDanger, PlaceExtendedComplete, PlaceFilters, PlaceResource, PlaceStats, PlaceWithRelations } from '@/types/entities/place/types';
 import { logger } from '@/utils/logger';
 import { deserializeJsonField, serializeJsonField } from '@/utils/transformers/common';
 

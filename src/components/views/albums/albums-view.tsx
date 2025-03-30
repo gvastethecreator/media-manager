@@ -18,7 +18,7 @@ import type { ViewProps } from '../types';
 const viewLogger = serverLogger.withContext('AlbumsView');
 
 // Definir el tipo para álbumes con estadísticas
-interface AlbumWithStats {
+interface AlbumDetails {
 	id: string;
 	name: string;
 	emoji?: string;

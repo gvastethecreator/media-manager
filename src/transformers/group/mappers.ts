@@ -4,7 +4,7 @@
  */
 
 import { Logger } from '@/lib/logger';
-import {
+import type {
     GroupComplete,
     GroupCreateInput,
     GroupFilters,
@@ -14,7 +14,7 @@ import {
 import { DEFAULT_SEARCH_OPTIONS, DEFAULT_UI_VALUES } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { preparePrismaRelations } from '@/utils/transformers/relations';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 const logger = new Logger('GroupMapper');
 

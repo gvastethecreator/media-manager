@@ -185,18 +185,19 @@ export function groupPromptsByCategory<T extends { category: string | PromptCate
 		const grouped: Record<string, T[]> = {};
 
 		// Inicializar con categorías vacías
-		Object.values(PromptCategory).forEach((category) => {
+		for (const category of Object.values(PromptCategory)) {
 			grouped[category] = [];
-		});
+		}
 
 		// Agrupar prompts
-		prompts.forEach((prompt) => {
+		for (const prompt of prompts) {
 			const category = prompt.category as string;
-			if (!grouped[category]) {
-				grouped[category] = [];
-			}
-			grouped[category].push(prompt);
-		});
+			// Si la categoría no es válida, agrupar en "Sin clasificar"
+			const validCategory = Object.values(PromptCategory).includes(category as PromptCategory)
+				? category
+				: PromptCategory.UNCLASSIFIED;
+			grouped[validCategory].push(prompt);
+		}
 
 		return grouped;
 	} catch (error) {

@@ -2,7 +2,8 @@
 
 import { cn } from '@/lib/utils';
 import { ImageIcon } from 'lucide-react';
-import { Suspense, useEffect, useState } from 'react';
+import { nanoid } from "nanoid";
+import React, { Suspense, useEffect, useState } from "react";
 import { getRecentNoteImages } from './note-server-actions';
 
 interface NoteCardImagesProps {
@@ -20,6 +21,9 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 	const [images, setImages] = useState<{ id: string; thumbnailUrl: string }[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+	// Generar un ID de renderizado único
+	const renderKey = React.useMemo(() => nanoid(), []);
 
 	useEffect(() => {
 		const loadImages = async () => {
@@ -77,7 +81,7 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 						// Mostrar placeholders mientras carga
 						<>
 							{[...Array(6)].map((_, i) => (
-								<ImageLoading key={i} backgroundColor={secondaryColor} />
+								<ImageLoading key={`loading-${renderKey}-position-${i + 1}`} backgroundColor={secondaryColor} />
 							))}
 						</>
 					) : error ? (
@@ -118,7 +122,7 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 							{images.length < 6 &&
 								[...Array(6 - images.length)].map((_, i) => (
 									<div
-										key={`placeholder-${i}`}
+										key={`placeholder-${renderKey}-position-${i + 1}`}
 										className={cn(
 											"bg-black/20 w-full h-full flex items-center justify-center",
 											tcgMode && "border border-white/10"

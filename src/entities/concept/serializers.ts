@@ -5,7 +5,7 @@
 
 import { logger } from '@/lib/logger';
 import { ConceptSchema, ConceptTagsSchema } from '@/types/entities/concept/schema';
-import { Concept, ConceptWithRelations, ConceptWithStats } from '@/types/entities/concept/types';
+import type { Concept, ConceptWithRelations, ConceptWithStats } from '@/types/entities/concept/types';
 
 /**
  * Serializa los tags de un concepto

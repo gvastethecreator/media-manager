@@ -12,10 +12,10 @@ import type {
     CollectionSummary
 } from '@/types/entities/collection';
 import {
-    CollectionBase,
-    CollectionCreateInput,
+    type CollectionBase,
+    type CollectionCreateInput,
     CollectionSchema,
-    CollectionUpdateInput,
+    type CollectionUpdateInput,
 } from '@/types/entities/collection/types';
 import {
     deserializeJsonField,
@@ -32,7 +32,7 @@ import {
     validateEntityRelations,
 } from '@/utils/transformers/relations';
 import type { Collection as PrismaCollection } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 const logger = new Logger('CollectionSerializer');
 

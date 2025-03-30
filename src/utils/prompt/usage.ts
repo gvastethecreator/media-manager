@@ -111,7 +111,7 @@ export function calculatePromptStats(
 		let totalCost = 0;
 		let totalExecutionTime = 0;
 
-		executions.forEach((execution) => {
+		for (const execution of executions) {
 			// Sumar tokens
 			const executionTokens = execution.tokens?.total || 0;
 			totalTokens += executionTokens;
@@ -123,7 +123,7 @@ export function calculatePromptStats(
 
 			// Sumar tiempo de ejecución
 			totalExecutionTime += execution.executionTime || 0;
-		});
+		}
 
 		// Calcular promedios
 		const averageTokensPerExecution = totalExecutions > 0 ? totalTokens / totalExecutions : 0;
@@ -174,7 +174,7 @@ export function generateUsageReport(
 		const promptStats: Record<string, ReturnType<typeof calculatePromptStats>> = {};
 
 		// Calcular estadísticas para cada prompt
-		prompts.forEach((prompt) => {
+		for (const prompt of prompts) {
 			const promptExecutions = executions[prompt.id] || [];
 			const stats = calculatePromptStats(prompt, promptExecutions);
 
@@ -186,7 +186,7 @@ export function generateUsageReport(
 			totalTokens += stats.totalTokens;
 			totalCost += stats.totalCost;
 			totalExecutionTime += stats.totalExecutions * stats.averageExecutionTime;
-		});
+		}
 
 		// Calcular promedio global
 		const averageExecutionTime = totalExecutions > 0 ? totalExecutionTime / totalExecutions : 0;

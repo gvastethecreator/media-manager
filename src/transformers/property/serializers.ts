@@ -5,7 +5,7 @@
 
 import { createLogger } from '@/lib/logger';
 import { PropertySchema } from '@/types/entities/property/schema';
-import {
+import type {
     PropertyBase,
     PropertyComplete,
     PropertyDeserialized

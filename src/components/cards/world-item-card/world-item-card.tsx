@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
+import type { WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
 import type { WorldItemWithRelations } from '@/types/entities/world-item/types';
 import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from 'lucide-react';
 import { motion } from 'motion/react';

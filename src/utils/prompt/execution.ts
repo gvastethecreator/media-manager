@@ -290,11 +290,11 @@ export class PromptExecutionHistory {
 		this.maxHistoryPerPrompt = size;
 
 		// Ajustar los historiales existentes
-		this.executions.forEach((history, promptId) => {
+		for (const [promptId, history] of this.executions.entries()) {
 			if (history.length > size) {
 				this.executions.set(promptId, history.slice(0, size));
 			}
-		});
+		}
 	}
 
 	/**
@@ -309,9 +309,9 @@ export class PromptExecutionHistory {
 	 */
 	public getAllExecutions(): Record<string, PromptExecutionResult[]> {
 		const result: Record<string, PromptExecutionResult[]> = {};
-		this.executions.forEach((history, promptId) => {
+		for (const [promptId, history] of this.executions.entries()) {
 			result[promptId] = [...history];
-		});
+		}
 		return result;
 	}
 }

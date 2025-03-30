@@ -121,7 +121,7 @@ export function CreateCollectionForm({
 				let color = '#';
 				for (let i = 0; i < 3; i++) {
 					const value = (hash >> (i * 8)) & 0xFF;
-					color += ('00' + value.toString(16)).substr(-2);
+					color += `00${value.toString(16)}`.substr(-2);
 				}
 				return color;
 			};
@@ -144,11 +144,11 @@ export function CreateCollectionForm({
 			const lowerName = name.toLowerCase();
 			let chosenEmoji = '📚';
 
-			Object.entries(keywords).forEach(([keyword, emoji]) => {
+			for (const [keyword, emoji] of Object.entries(keywords)) {
 				if (lowerName.includes(keyword)) {
 					chosenEmoji = emoji;
 				}
-			});
+			}
 
 			form.setValue('emoji', chosenEmoji);
 		}
