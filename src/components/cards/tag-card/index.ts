@@ -5,3 +5,8 @@
 
 export * from './tag-card';
 export type { TagCardProps } from './tag-card';
+
+// Componente memorizado para mejorar rendimiento
+import { memo } from 'react';
+import { TagCard } from './tag-card';
+export const MemoizedTagCard = memo(TagCard);

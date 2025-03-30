@@ -5,12 +5,12 @@
 
 // Exportar serializadores
 export {
-  fromFolderComplete,
-  mapFolderExtendedFromComplete, toFolderComplete, toFolderExtended, toFolderSummary, toFolderTreeItem, toPrismaFolder
+    fromFolderComplete,
+    mapFolderExtendedFromComplete, toFolderComplete, toFolderExtended, toFolderSummary, toFolderTreeItem, toFolderWithStats, toPrismaFolder
 } from './serializers';
 
 // Exportar mappers
 export {
-  buildFolderRelations, buildFolderTree, calculateFolderPath, findFolderInTree
+    buildFolderRelations, buildFolderTree, calculateFolderPath, findFolderInTree
 } from './mappers';
 

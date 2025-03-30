@@ -5,28 +5,55 @@
  * para una mejor tipificación en la aplicación
  */
 
-import type { Place as PrismaPlace } from '@prisma/client';
-import type { Album } from '../album';
-import type { Character } from '../character';
-import type { Collection } from '../collection';
-import type { Concept } from '../concept';
-import type { Group } from '../group';
-import type { Image } from '../image';
-import type { Note } from '../note';
-import type { Prompt } from '../prompt';
-import type { Property } from '../property';
-import type { Tag } from '../tag';
-import type { Video } from '../video';
-import type { Wildcard } from '../wildcard';
-import type { WorldItem } from '../world-item';
+import { z } from 'zod';
+import { PlaceSchema } from './schema';
+
+// Importación de tipos para relaciones
+import type { Album } from '../album/types';
+import type { Character } from '../character/types';
+import type { Collection } from '../collection/types';
+import type { Concept } from '../concept/types';
+import type { Group } from '../group/types';
+import type { Image } from '../image/types';
+import type { Note } from '../note/types';
+import type { Prompt } from '../prompt/types';
+import type { Property } from '../property/types';
+import type { Tag } from '../tag/types';
+import type { Video } from '../video/types';
+import type { Wildcard } from '../wildcard/types';
+import type { WorldItem } from '../world-item/types';
 
 /**
- * Tipo base para Place según el esquema de Prisma
+ * 🔄 Tipo base para Place
  */
-export type PlaceBase = PrismaPlace;
+export interface PlaceBase {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  description: string | null;
+  shortcut: string | null;
+  category: string | null;
+  region: string | null;
+  type: string | null;
+  climate: string | null;
+  population: number | null;
+  government: string | null;
+  dangers: string | null;
+  resources: string | null;
+  lore: string | null;
+  history: string | null;
+  stats: string | null;
+  sortBy: string;
+  filters: string | null;
+  featuredImage: string | null;
+  isFavorite: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 /**
- * Interfaz para los peligros de un lugar
+ * 🏰 Interfaz para los peligros de un lugar
  */
 export interface PlaceDanger {
   name: string;
@@ -35,7 +62,7 @@ export interface PlaceDanger {
 }
 
 /**
- * Interfaz para los recursos de un lugar
+ * 🌟 Interfaz para los recursos de un lugar
  */
 export interface PlaceResource {
   name: string;
@@ -44,7 +71,7 @@ export interface PlaceResource {
 }
 
 /**
- * Interfaz para las estadísticas de un lugar
+ * 📊 Interfaz para las estadísticas de un lugar
  */
 export interface PlaceStat {
   name: string;
@@ -53,153 +80,12 @@ export interface PlaceStat {
 }
 
 /**
- * Tipo para el objeto de estadísticas de un lugar
+ * 📊 Tipo para el objeto de estadísticas de un lugar
  */
 export type PlaceStats = Record<string, number>;
 
 /**
- * Interfaz para la entidad Place con todos los campos JSON deserializados
- */
-export interface PlaceComplete extends PlaceBase {
-  // Campos JSON deserializados
-  dangersArray: PlaceDanger[];
-  resourcesArray: PlaceResource[];
-  statsObject: PlaceStats;
-  filtersObject: PlaceFilters;
-}
-
-/**
- * Interfaz extendida que incluye propiedades para UI
- */
-export interface PlaceExtended extends PlaceBase {
-  // Propiedades de UI
-  isSelected?: boolean;
-  isExpanded?: boolean;
-  isEditing?: boolean;
-  isHighlighted?: boolean;
-
-  // Cache de relaciones
-  imagesCount?: number;
-  notesCount?: number;
-  conceptsCount?: number;
-  promptsCount?: number;
-
-  // Datos derivados
-  dangerLevel?: string;
-  displayPopulation?: string;
-  displaySize?: string;
-  regionPath?: string[];
-  recentImages?: (string | null)[];
-}
-
-/**
- * Interfaz completa que combina PlaceComplete y PlaceExtended
- */
-export interface PlaceExtendedComplete extends PlaceComplete, PlaceExtended {}
-
-/**
- * Interfaz que añade relaciones a PlaceExtendedComplete
- */
-export interface PlaceWithRelations extends PlaceExtendedComplete {
-  // Relaciones
-  images?: Image[];
-  videos?: Video[];
-  albums?: Album[];
-  collections?: Collection[];
-  tags?: Tag[];
-  characters?: Character[];
-  worldItems?: WorldItem[];
-  concepts?: Concept[];
-  prompts?: Prompt[];
-  notes?: Note[];
-  wildcards?: Wildcard[];
-  properties?: Property[];
-  groups?: Group[];
-
-  // Contadores de relaciones
-  _count?: {
-    images: number;
-    videos: number;
-    albums: number;
-    collections: number;
-    tags: number;
-    characters: number;
-    worldItems: number;
-    concepts: number;
-    prompts: number;
-    notes: number;
-    wildcards: number;
-    properties: number;
-    groups: number;
-  };
-}
-
-/**
- * Interfaz para crear un lugar
- */
-export interface CreatePlaceData {
-  name: string;
-  emoji?: string;
-  color?: string;
-  description?: string | null;
-  shortcut?: string | null;
-  category?: string | null;
-  region?: string;
-  type?: string;
-  climate?: string;
-  population?: number;
-  government?: string;
-  // Campos JSON - pueden aceptar tanto string como array/objeto para flexibilidad
-  dangers?: string | PlaceDanger[];
-  resources?: string | PlaceResource[];
-  lore?: string;
-  history?: string;
-  stats?: string | PlaceStats;
-  sortBy?: string;
-  filters?: string | PlaceFilters;
-  // UI
-  featuredImage?: string | null;
-  isFavorite?: boolean;
-  // Relaciones
-  groupIds?: string[];
-  propertyIds?: string[];
-  wildcardIds?: string[];
-}
-
-/**
- * Interfaz para actualizar un lugar
- */
-export interface UpdatePlaceData {
-  name?: string;
-  emoji?: string;
-  color?: string;
-  description?: string | null;
-  shortcut?: string | null;
-  category?: string | null;
-  region?: string;
-  type?: string;
-  climate?: string;
-  population?: number;
-  government?: string;
-  // Campos JSON - pueden aceptar tanto string como array/objeto para flexibilidad
-  dangers?: string | PlaceDanger[];
-  resources?: string | PlaceResource[];
-  lore?: string;
-  history?: string;
-  stats?: string | PlaceStats;
-  sortBy?: string;
-  filters?: string | PlaceFilters;
-  // UI
-  featuredImage?: string | null;
-  isFavorite?: boolean;
-  // Relaciones
-  groupIds?: string[];
-  propertyIds?: string[];
-  wildcardIds?: string[];
-}
-
-/**
- * Interfaz para filtros de búsqueda de lugares
+ * 🔍 Interfaz para filtros de búsqueda de lugares
  */
 export interface PlaceFilters {
   searchQuery?: string;
@@ -220,8 +106,229 @@ export interface PlaceFilters {
 }
 
 /**
- * Enumeración para categorías de lugares
+ * 🔗 Relaciones de Place
  */
+export interface PlaceRelations {
+  images?: Image[];
+  videos?: Video[];
+  albums?: Album[];
+  collections?: Collection[];
+  tags?: Tag[];
+  characters?: Character[];
+  worldItems?: WorldItem[];
+  concepts?: Concept[];
+  prompts?: Prompt[];
+  notes?: Note[];
+  wildcards?: Wildcard[];
+  properties?: Property[];
+  groups?: Group[];
+}
+
+/**
+ * 📊 Conteos de relaciones de Place
+ */
+export interface PlaceCounts {
+  _count?: {
+    images?: number;
+    videos?: number;
+    albums?: number;
+    collections?: number;
+    tags?: number;
+    characters?: number;
+    worldItems?: number;
+    concepts?: number;
+    prompts?: number;
+    notes?: number;
+    wildcards?: number;
+    properties?: number;
+    groups?: number;
+  };
+}
+
+/**
+ * 🔄 UI y campos extendidos
+ */
+export interface PlaceUI {
+  // Propiedades de UI
+  isSelected?: boolean;
+  isExpanded?: boolean;
+  isEditing?: boolean;
+  isHighlighted?: boolean;
+
+  // Datos derivados
+  dangerLevel?: string;
+  displayPopulation?: string;
+  displaySize?: string;
+  regionPath?: string[];
+  recentImages?: (string | null)[];
+}
+
+/**
+ * 🔄 Campos deserializados de Place
+ */
+export interface PlaceDeserialized {
+  // Campos JSON deserializados
+  dangersArray?: PlaceDanger[];
+  resourcesArray?: PlaceResource[];
+  statsObject?: PlaceStats;
+  filtersObject?: PlaceFilters;
+}
+
+/**
+ * 🔄 Place completo con todas las relaciones
+ */
+export interface PlaceComplete extends PlaceBase, PlaceRelations, PlaceCounts, PlaceUI, PlaceDeserialized {}
+
+/**
+ * 📝 Datos para crear un Place
+ */
+export interface PlaceCreateInput {
+  name: string;
+  emoji?: string;
+  color?: string;
+  description?: string | null;
+  shortcut?: string | null;
+  category?: string | null;
+  region?: string | null;
+  type?: string | null;
+  climate?: string | null;
+  population?: number | null;
+  government?: string | null;
+  // Campos JSON - pueden aceptar tanto string como array/objeto para flexibilidad
+  dangers?: string | PlaceDanger[];
+  resources?: string | PlaceResource[];
+  lore?: string | null;
+  history?: string | null;
+  stats?: string | PlaceStats;
+  sortBy?: string;
+  filters?: string | PlaceFilters;
+  // UI
+  featuredImage?: string | null;
+  isFavorite?: boolean;
+  // Relaciones
+  images?: string[] | { id: string }[];
+  videos?: string[] | { id: string }[];
+  albums?: string[] | { id: string }[];
+  collections?: string[] | { id: string }[];
+  tags?: string[] | { id: string }[];
+  characters?: string[] | { id: string }[];
+  worldItems?: string[] | { id: string }[];
+  concepts?: string[] | { id: string }[];
+  prompts?: string[] | { id: string }[];
+  notes?: string[] | { id: string }[];
+  wildcards?: string[] | { id: string }[];
+  properties?: string[] | { id: string }[];
+  groups?: string[] | { id: string }[];
+}
+
+/**
+ * 📝 Datos para actualizar un Place
+ */
+export interface PlaceUpdateInput {
+  name?: string;
+  emoji?: string;
+  color?: string;
+  description?: string | null;
+  shortcut?: string | null;
+  category?: string | null;
+  region?: string | null;
+  type?: string | null;
+  climate?: string | null;
+  population?: number | null;
+  government?: string | null;
+  // Campos JSON - pueden aceptar tanto string como array/objeto para flexibilidad
+  dangers?: string | PlaceDanger[];
+  resources?: string | PlaceResource[];
+  lore?: string | null;
+  history?: string | null;
+  stats?: string | PlaceStats;
+  sortBy?: string;
+  filters?: string | PlaceFilters;
+  // UI
+  featuredImage?: string | null;
+  isFavorite?: boolean;
+  // Relaciones
+  images?: string[] | { id: string }[];
+  videos?: string[] | { id: string }[];
+  albums?: string[] | { id: string }[];
+  collections?: string[] | { id: string }[];
+  tags?: string[] | { id: string }[];
+  characters?: string[] | { id: string }[];
+  worldItems?: string[] | { id: string }[];
+  concepts?: string[] | { id: string }[];
+  prompts?: string[] | { id: string }[];
+  notes?: string[] | { id: string }[];
+  wildcards?: string[] | { id: string }[];
+  properties?: string[] | { id: string }[];
+  groups?: string[] | { id: string }[];
+}
+
+/**
+ * 🔍 Opciones de búsqueda para Place
+ */
+export interface PlaceSearchOptions {
+  skip?: number;
+  take?: number;
+  orderBy?: {
+    [key in keyof PlaceBase]?: 'asc' | 'desc';
+  };
+  where?: PlaceFilters;
+  include?: {
+    images?: boolean;
+    videos?: boolean;
+    albums?: boolean;
+    collections?: boolean;
+    tags?: boolean;
+    characters?: boolean;
+    worldItems?: boolean;
+    concepts?: boolean;
+    prompts?: boolean;
+    notes?: boolean;
+    wildcards?: boolean;
+    properties?: boolean;
+    groups?: boolean;
+    _count?: boolean;
+  };
+}
+
+/**
+ * 📊 Resultado de búsqueda de Places
+ */
+export interface PlaceSearchResult {
+  items: PlaceComplete[];
+  total: number;
+  hasMore: boolean;
+}
+
+/**
+ * 🎯 Opciones para el transformer de Place
+ */
+export interface PlaceTransformerOptions {
+  includeRelations?: boolean;
+  includeCount?: boolean;
+  validateFields?: boolean;
+  customFields?: (keyof PlaceComplete)[];
+  deserializeFields?: boolean;
+  includeStats?: boolean;
+  includeUI?: boolean;
+}
+
+/**
+ * 🔗 Interfaz para lugares relacionados
+ */
+export interface RelatedPlace {
+  id: string;
+  name: string;
+  emoji?: string;
+  color?: string;
+  category?: string;
+  region?: string;
+  type?: string;
+  count: number;
+  strength: number;
+}
+
+// Categorías de lugares
 export enum PlaceCategory {
   SETTLEMENT = 'settlement',
   LANDSCAPE = 'landscape',
@@ -233,9 +340,7 @@ export enum PlaceCategory {
   OTHER = 'other',
 }
 
-/**
- * Enumeración para tipos de lugares
- */
+// Tipos de lugares
 export enum PlaceType {
   CITY = 'city',
   TOWN = 'town',
@@ -259,9 +364,7 @@ export enum PlaceType {
   OTHER = 'other',
 }
 
-/**
- * Enumeración para climas de lugares
- */
+// Climas
 export enum PlaceClimate {
   TEMPERATE = 'temperate',
   TROPICAL = 'tropical',
@@ -277,9 +380,7 @@ export enum PlaceClimate {
   OTHER = 'other',
 }
 
-/**
- * Enumeración para criterios de ordenación
- */
+// Criterios de ordenación
 export enum PlaceSortCriteria {
   NAME_ASC = 'name:asc',
   NAME_DESC = 'name:desc',
@@ -295,20 +396,5 @@ export enum PlaceSortCriteria {
   DANGER_DESC = 'danger:desc',
 }
 
-/**
- * Nombres de propiedades para ordenación
- */
-export const PLACE_SORT_PROPERTY_MAP: Record<PlaceSortCriteria, string> = {
-  [PlaceSortCriteria.NAME_ASC]: 'name',
-  [PlaceSortCriteria.NAME_DESC]: 'name',
-  [PlaceSortCriteria.CREATED_ASC]: 'createdAt',
-  [PlaceSortCriteria.CREATED_DESC]: 'createdAt',
-  [PlaceSortCriteria.UPDATED_ASC]: 'updatedAt',
-  [PlaceSortCriteria.UPDATED_DESC]: 'updatedAt',
-  [PlaceSortCriteria.POPULATION_ASC]: 'population',
-  [PlaceSortCriteria.POPULATION_DESC]: 'population',
-  [PlaceSortCriteria.TYPE_ASC]: 'type',
-  [PlaceSortCriteria.TYPE_DESC]: 'type',
-  [PlaceSortCriteria.DANGER_ASC]: 'dangers',
-  [PlaceSortCriteria.DANGER_DESC]: 'dangers',
-};
+// Tipos inferidos de Zod
+export type PlaceValidated = z.infer<typeof PlaceSchema>;

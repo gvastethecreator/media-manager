@@ -3,6 +3,7 @@
  * @module transformers/character/mappers
  */
 
+import { Logger } from '@/lib/logger';
 import type {
     CharacterAttribute,
     CharacterCard,
@@ -16,14 +17,16 @@ import {
     CHARACTER_CLASS_COLORS as SUGGESTED_COLORS,
     CHARACTER_CLASS_EMOJIS as SUGGESTED_EMOJIS,
 } from '@/types/entities/character/enums';
-import type { CHARACTER_SORT_PROPERTY_MAP, CharacterFilters, CharacterSortCriteria, CreateCharacterData, UpdateCharacterData } from '@/types/entities/character/types';
+import type { CHARACTER_SORT_PROPERTY_MAP, CharacterFilters, CharacterSortCriteria } from '@/types/entities/character/types';
+import { CharacterComplete, CharacterCreateInput, CharacterSearchOptions, CharacterUpdateInput } from '@/types/entities/character/types';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
+import { handleTransformerError } from '@/utils/transformers/errors';
 import type { Prisma, Character as PrismaCharacter } from '@prisma/client';
 import {
-    serializeArray,
-    serializeFilters,
-    serializeRelationships,
-    serializeStats, toCharacterSummary, toExtendedCharacter
+    toCharacterSummary, toExtendedCharacter
 } from './serializers';
+
+const logger = new Logger('CharacterMapper');
 
 /**
  * Mapea un personaje a un formato para mostrar en listas
@@ -280,131 +283,234 @@ export function charactersToCards(characters: (PrismaCharacter | CharacterExtend
 }
 
 /**
- * Mapea datos de creación de personaje al formato requerido por Prisma
- * @param data - Datos para crear personaje
- * @returns Datos mapeados para Prisma
+ * 🔄 Mapea datos de creación de Character a formato Prisma
  */
-export function mapCreateCharacterDataToPrisma(
-  data: CreateCharacterData
-): Prisma.CharacterCreateInput {
-  return {
-    name: data.name,
-    emoji: data.emoji || '👤',
-    color: data.color || '#3b82f6',
-    description: data.description || null,
-    shortcut: data.shortcut || null,
-    category: data.category || null,
-    level: data.level || 1,
-    class: data.class || 'Generic',
-    race: data.race || 'Human',
-    type: data.type || null,
-    alignment: data.alignment || 'Neutral',
-    backstory: data.backstory || '',
-    // Serializar campos JSON
-    stats: serializeStats(data.stats || {}),
-    psychologicalProfile: data.psychologicalProfile || '',
-    socialProfile: data.socialProfile || '',
-    relationships: serializeRelationships(data.relationships || []),
-    goals: serializeArray(data.goals || []),
-    fears: serializeArray(data.fears || []),
-    beliefs: serializeArray(data.beliefs || []),
-    personality: serializeArray(data.personality || []),
-    skills: serializeArray(data.skills || []),
-    abilities: serializeArray(data.abilities || []),
-    featuredImage: data.featuredImage || null,
-    isFavorite: data.isFavorite || false,
-    sortBy: data.sortBy || 'name:asc',
-    filters: serializeFilters(data.filters || {}),
-    // Relaciones
-    ...(data.groupIds?.length && {
-      groups: {
-        connect: data.groupIds.map((id) => ({ id })),
-      },
-    }),
-    ...(data.propertyIds?.length && {
-      properties: {
-        connect: data.propertyIds.map((id) => ({ id })),
-      },
-    }),
-    ...(data.wildcardIds?.length && {
-      wildcards: {
-        connect: data.wildcardIds.map((id) => ({ id })),
-      },
-    }),
-    ...(data.tagIds?.length && {
-      tags: {
-        connect: data.tagIds.map((id) => ({ id })),
-      },
-    }),
-  };
+export function mapCreateCharacterDataToPrisma(data: CharacterCreateInput): Prisma.CharacterCreateInput {
+  try {
+    // Preparar datos base
+    const baseData = {
+      name: data.name,
+      description: data.description,
+      level: data.level,
+      experience: data.experience,
+      class: data.class,
+      race: data.race,
+      alignment: data.alignment,
+      background: data.background,
+      stats: data.stats,
+      skills: data.skills,
+      inventory: data.inventory,
+      spells: data.spells,
+      feats: data.feats,
+      notes: data.notes,
+      isActive: data.isActive ?? true,
+      isFavorite: data.isFavorite ?? false,
+      metadata: data.metadata,
+    };
+
+    // Preparar relaciones
+    const relations = {
+      party: data.party ? { connect: { id: data.party.id } } : undefined,
+      campaign: data.campaign ? { connect: { id: data.campaign.id } } : undefined,
+      images: data.images?.length ? { connect: data.images.map(img => ({ id: img.id })) } : undefined,
+      items: data.items?.length ? { connect: data.items.map(item => ({ id: item.id })) } : undefined,
+      abilities: data.abilities?.length ? { connect: data.abilities.map(ability => ({ id: ability.id })) } : undefined,
+      quests: data.quests?.length ? { connect: data.quests.map(quest => ({ id: quest.id })) } : undefined,
+      locations: data.locations?.length ? { connect: data.locations.map(location => ({ id: location.id })) } : undefined,
+      npcs: data.npcs?.length ? { connect: data.npcs.map(npc => ({ id: npc.id })) } : undefined,
+      notes: data.notes?.length ? { connect: data.notes.map(note => ({ id: note.id })) } : undefined,
+      relatedCharacters: data.relatedCharacters?.length ? { connect: data.relatedCharacters.map(char => ({ id: char.id })) } : undefined,
+      relatedTo: data.relatedTo?.length ? { connect: data.relatedTo.map(char => ({ id: char.id })) } : undefined,
+    };
+
+    return {
+      ...baseData,
+      ...relations,
+    };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
 }
 
 /**
- * Mapea datos de actualización de personaje al formato requerido por Prisma
- * @param data - Datos para actualizar personaje
- * @returns Datos mapeados para Prisma
+ * 🔄 Mapea datos de actualización de Character a formato Prisma
  */
-export function mapUpdateCharacterDataToPrisma(
-  data: UpdateCharacterData
-): Prisma.CharacterUpdateInput {
-  const mapped: Prisma.CharacterUpdateInput = {};
-
-  // Mapear campos simples
-  if (data.name !== undefined) mapped.name = data.name;
-  if (data.emoji !== undefined) mapped.emoji = data.emoji;
-  if (data.color !== undefined) mapped.color = data.color;
-  if (data.description !== undefined) mapped.description = data.description;
-  if (data.shortcut !== undefined) mapped.shortcut = data.shortcut;
-  if (data.category !== undefined) mapped.category = data.category;
-  if (data.level !== undefined) mapped.level = data.level;
-  if (data.class !== undefined) mapped.class = data.class;
-  if (data.race !== undefined) mapped.race = data.race;
-  if (data.type !== undefined) mapped.type = data.type;
-  if (data.alignment !== undefined) mapped.alignment = data.alignment;
-  if (data.backstory !== undefined) mapped.backstory = data.backstory;
-  if (data.psychologicalProfile !== undefined) mapped.psychologicalProfile = data.psychologicalProfile;
-  if (data.socialProfile !== undefined) mapped.socialProfile = data.socialProfile;
-  if (data.featuredImage !== undefined) mapped.featuredImage = data.featuredImage;
-  if (data.isFavorite !== undefined) mapped.isFavorite = data.isFavorite;
-  if (data.sortBy !== undefined) mapped.sortBy = data.sortBy;
-
-  // Serializar campos JSON si existen
-  if (data.stats !== undefined) mapped.stats = serializeStats(data.stats);
-  if (data.relationships !== undefined) mapped.relationships = serializeRelationships(data.relationships);
-  if (data.goals !== undefined) mapped.goals = serializeArray(data.goals);
-  if (data.fears !== undefined) mapped.fears = serializeArray(data.fears);
-  if (data.beliefs !== undefined) mapped.beliefs = serializeArray(data.beliefs);
-  if (data.personality !== undefined) mapped.personality = serializeArray(data.personality);
-  if (data.skills !== undefined) mapped.skills = serializeArray(data.skills);
-  if (data.abilities !== undefined) mapped.abilities = serializeArray(data.abilities);
-  if (data.filters !== undefined) mapped.filters = serializeFilters(data.filters);
-
-  // Manejar relaciones
-  if (data.groupIds !== undefined) {
-    mapped.groups = {
-      set: data.groupIds.map((id) => ({ id })),
+export function mapUpdateCharacterDataToPrisma(data: CharacterUpdateInput): Prisma.CharacterUpdateInput {
+  try {
+    // Preparar datos base
+    const baseData = {
+      name: data.name,
+      description: data.description,
+      level: data.level,
+      experience: data.experience,
+      class: data.class,
+      race: data.race,
+      alignment: data.alignment,
+      background: data.background,
+      stats: data.stats,
+      skills: data.skills,
+      inventory: data.inventory,
+      spells: data.spells,
+      feats: data.feats,
+      notes: data.notes,
+      isActive: data.isActive,
+      isFavorite: data.isFavorite,
+      metadata: data.metadata,
+      updatedAt: new Date(),
     };
-  }
 
-  if (data.propertyIds !== undefined) {
-    mapped.properties = {
-      set: data.propertyIds.map((id) => ({ id })),
+    // Preparar relaciones
+    const relations = {
+      party: data.party ? { connect: { id: data.party.id } } : undefined,
+      campaign: data.campaign ? { connect: { id: data.campaign.id } } : undefined,
+      images: data.images?.length ? { set: data.images.map(img => ({ id: img.id })) } : undefined,
+      items: data.items?.length ? { set: data.items.map(item => ({ id: item.id })) } : undefined,
+      abilities: data.abilities?.length ? { set: data.abilities.map(ability => ({ id: ability.id })) } : undefined,
+      quests: data.quests?.length ? { set: data.quests.map(quest => ({ id: quest.id })) } : undefined,
+      locations: data.locations?.length ? { set: data.locations.map(location => ({ id: location.id })) } : undefined,
+      npcs: data.npcs?.length ? { set: data.npcs.map(npc => ({ id: npc.id })) } : undefined,
+      notes: data.notes?.length ? { set: data.notes.map(note => ({ id: note.id })) } : undefined,
+      relatedCharacters: data.relatedCharacters?.length ? { set: data.relatedCharacters.map(char => ({ id: char.id })) } : undefined,
+      relatedTo: data.relatedTo?.length ? { set: data.relatedTo.map(char => ({ id: char.id })) } : undefined,
     };
-  }
 
-  if (data.wildcardIds !== undefined) {
-    mapped.wildcards = {
-      set: data.wildcardIds.map((id) => ({ id })),
+    return {
+      ...baseData,
+      ...relations,
     };
+  } catch (error) {
+    throw handleTransformerError(error);
   }
+}
 
-  if (data.tagIds !== undefined) {
-    mapped.tags = {
-      set: data.tagIds.map((id) => ({ id })),
+/**
+ * 🔄 Mapea opciones de búsqueda de Character a formato Prisma
+ */
+export function mapCharacterSearchOptionsToPrisma(
+  options: CharacterSearchOptions
+): Prisma.CharacterFindManyArgs {
+  try {
+    const { page = 1, pageSize = DEFAULT_PAGE_SIZE, orderBy, filters = {}, include = {} } = options;
+
+    // Validar y ajustar el tamaño de página
+    const validatedPageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+    const skip = (page - 1) * validatedPageSize;
+
+    // Mapear ordenamiento
+    const orderByMapped = orderBy ? {
+      [orderBy.field]: orderBy.direction,
+    } : { createdAt: 'desc' };
+
+    // Mapear filtros
+    const where = mapCharacterFiltersToPrisma(filters);
+
+    // Mapear inclusiones
+    const includeRelations = {
+      party: include.party ?? false,
+      campaign: include.campaign ?? false,
+      images: include.images ?? false,
+      items: include.items ?? false,
+      abilities: include.abilities ?? false,
+      quests: include.quests ?? false,
+      locations: include.locations ?? false,
+      npcs: include.npcs ?? false,
+      notes: include.notes ?? false,
+      relatedCharacters: include.relatedCharacters ?? false,
+      relatedTo: include.relatedTo ?? false,
+      _count: include.count ?? false,
     };
-  }
 
-  return mapped;
+    return {
+      skip,
+      take: validatedPageSize,
+      orderBy: orderByMapped,
+      where,
+      include: includeRelations,
+    };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔄 Mapea filtros de Character a formato Prisma
+ */
+export function mapCharacterFiltersToPrisma(filters: CharacterFilters): Prisma.CharacterWhereInput {
+  try {
+    const where: Prisma.CharacterWhereInput = {};
+
+    // Filtros de texto
+    if (filters.search) {
+      where.OR = [
+        { name: { contains: filters.search, mode: 'insensitive' } },
+        { description: { contains: filters.search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Filtros de nivel
+    if (filters.level?.min !== undefined) {
+      where.level = { ...where.level, gte: filters.level.min };
+    }
+    if (filters.level?.max !== undefined) {
+      where.level = { ...where.level, lte: filters.level.max };
+    }
+
+    // Filtros de clase, raza y alineamiento
+    if (filters.class?.length) {
+      where.class = { in: filters.class };
+    }
+    if (filters.race?.length) {
+      where.race = { in: filters.race };
+    }
+    if (filters.alignment?.length) {
+      where.alignment = { in: filters.alignment };
+    }
+    if (filters.background?.length) {
+      where.background = { in: filters.background };
+    }
+
+    // Filtros de estado
+    if (filters.isActive !== undefined) {
+      where.isActive = filters.isActive;
+    }
+    if (filters.isFavorite !== undefined) {
+      where.isFavorite = filters.isFavorite;
+    }
+
+    // Filtros de relaciones
+    if (filters.hasParty) {
+      where.party = { isNot: null };
+    }
+    if (filters.hasCampaign) {
+      where.campaign = { isNot: null };
+    }
+    if (filters.hasImages) {
+      where.images = { some: {} };
+    }
+
+    // Filtros de fecha
+    if (filters.dateRange?.start) {
+      where.createdAt = { ...where.createdAt, gte: filters.dateRange.start };
+    }
+    if (filters.dateRange?.end) {
+      where.createdAt = { ...where.createdAt, lte: filters.dateRange.end };
+    }
+
+    return where;
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔄 Mapea un Character a su versión relacionada
+ */
+export function mapCharacterToRelatedCharacter(character: CharacterComplete): { id: string } {
+  try {
+    return { id: character.id };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
 }
 
 /**

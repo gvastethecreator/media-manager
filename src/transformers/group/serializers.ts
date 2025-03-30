@@ -3,15 +3,269 @@
  * @module transformers/group/serializers
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { GroupBase, GroupComplete, GroupExtended } from '@/types/entities/group/types';
+import { Logger } from '@/lib/logger';
+import {
+    Group,
+    GroupBase,
+    GroupComplete,
+    GroupCreateInput,
+    GroupSchema,
+    GroupTransformerOptions,
+    GroupUpdateInput,
+    GroupWithStats,
+} from '@/types/entities/group/types';
+import {
+    deserializeJsonField,
+    serializeJsonField,
+    validateFieldType,
+    validateRequiredFields,
+} from '@/utils/transformers/common';
+import { DEFAULT_UI_VALUES } from '@/utils/transformers/constants';
+import {
+    handleTransformerError
+} from '@/utils/transformers/errors';
+import {
+    getRelationCounts,
+    preparePrismaRelations,
+    validateEntityRelations,
+} from '@/utils/transformers/relations';
+import {
+    validateBaseEntity,
+    validateMetadataFields,
+    validateUIFields,
+} from '@/utils/transformers/validation';
+import { Prisma } from '@prisma/client';
+
+const logger = new Logger('GroupSerializer');
 
 // Logger específico para serializadores de Group
-const serializerLogger = serverLogger.withContext('GroupSerializers');
+const serializerLogger = new Logger('GroupSerializers');
 
 // Constantes para valores por defecto
 export const DEFAULT_GROUP_EMOJI = '📂';
 export const DEFAULT_GROUP_COLOR = '#3b82f6';
+
+/**
+ * 🔄 Serializa un Group para Prisma
+ */
+export function toPrismaGroup(data: GroupCreateInput | GroupUpdateInput): Prisma.GroupCreateInput | Prisma.GroupUpdateInput {
+  try {
+    // Validar campos requeridos para creación
+    if (!('id' in data)) {
+      validateRequiredFields(data, ['name', 'emoji', 'color']);
+    }
+
+    // Validar tipos de datos
+    validateFieldType(data.name, 'string', 'name');
+    validateFieldType(data.emoji, 'string', 'emoji');
+    validateFieldType(data.color, 'string', 'color');
+
+    // Serializar campos JSON
+    const filters = serializeJsonField(data.filters, '{}');
+
+    // Preparar relaciones para Prisma
+    const relations = preparePrismaRelations('Group', data);
+
+    return {
+      ...data,
+      filters,
+      ...relations,
+    };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔄 Deserializa un Group desde Prisma
+ */
+export function fromPrismaGroup(
+  prismaGroup: Prisma.GroupGetPayload<{
+    include: {
+      images: true;
+      videos: true;
+      albums: true;
+      collections: true;
+      tags: true;
+      characters: true;
+      places: true;
+      worldItems: true;
+      concepts: true;
+      prompts: true;
+      notes: true;
+      wildcards: true;
+      properties: true;
+      _count: true;
+    };
+  }>
+): GroupComplete {
+  try {
+    // Deserializar campos JSON
+    const filters = deserializeJsonField(prismaGroup.filters, {});
+
+    // Obtener conteos de relaciones
+    const counts = getRelationCounts('Group', prismaGroup);
+
+    // Construir objeto base
+    const baseGroup: GroupBase = {
+      id: prismaGroup.id,
+      name: prismaGroup.name,
+      emoji: prismaGroup.emoji || DEFAULT_UI_VALUES.emoji,
+      color: prismaGroup.color || DEFAULT_UI_VALUES.color,
+      description: prismaGroup.description,
+      shortcut: prismaGroup.shortcut,
+      category: prismaGroup.category,
+      sortBy: prismaGroup.sortBy,
+      filters,
+      featuredImage: prismaGroup.featuredImage,
+      isFavorite: prismaGroup.isFavorite,
+      createdAt: prismaGroup.createdAt,
+      updatedAt: prismaGroup.updatedAt,
+    };
+
+    // Validar objeto base
+    validateBaseEntity(baseGroup);
+    validateUIFields(baseGroup);
+    validateMetadataFields(baseGroup);
+
+    // Construir objeto completo con relaciones
+    return {
+      ...baseGroup,
+      images: prismaGroup.images?.map(img => ({ id: img.id })),
+      videos: prismaGroup.videos?.map(vid => ({ id: vid.id })),
+      albums: prismaGroup.albums?.map(alb => ({ id: alb.id })),
+      collections: prismaGroup.collections?.map(col => ({ id: col.id })),
+      tags: prismaGroup.tags?.map(tag => ({ id: tag.id })),
+      characters: prismaGroup.characters?.map(char => ({ id: char.id })),
+      places: prismaGroup.places?.map(place => ({ id: place.id })),
+      worldItems: prismaGroup.worldItems?.map(item => ({ id: item.id })),
+      concepts: prismaGroup.concepts?.map(con => ({ id: con.id })),
+      prompts: prismaGroup.prompts?.map(prompt => ({ id: prompt.id })),
+      notes: prismaGroup.notes?.map(note => ({ id: note.id })),
+      wildcards: prismaGroup.wildcards?.map(wild => ({ id: wild.id })),
+      properties: prismaGroup.properties?.map(prop => ({ id: prop.id })),
+      _count: counts,
+    };
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔍 Valida un Group
+ */
+export function validateGroup(data: unknown): GroupComplete {
+  try {
+    const validated = GroupSchema.parse(data);
+    validateEntityRelations('Group', validated);
+    return validated as GroupComplete;
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔄 Extiende un Group con datos adicionales
+ */
+export function extendGroup(
+  group: GroupBase,
+  options: GroupTransformerOptions = {}
+): GroupComplete {
+  try {
+    const extended = { ...group } as GroupComplete;
+
+    // Deserializar campos JSON si son strings
+    if (typeof extended.filters === 'string') {
+      extended.filters = deserializeJsonField(extended.filters, '{}');
+    }
+
+    // Asegurar que las propiedades de UI tengan valores por defecto
+    if (!extended.emoji) extended.emoji = DEFAULT_GROUP_EMOJI;
+    if (!extended.color) extended.color = DEFAULT_GROUP_COLOR;
+    
+    // Inicializar relaciones vacías si se incluyen relaciones
+    if (options.includeRelations) {
+      extended.images = [];
+      extended.videos = [];
+      extended.albums = [];
+      extended.collections = [];
+      extended.tags = [];
+      extended.characters = [];
+      extended.places = [];
+      extended.worldItems = [];
+      extended.concepts = [];
+      extended.prompts = [];
+      extended.notes = [];
+      extended.wildcards = [];
+      extended.properties = [];
+    }
+
+    // Inicializar contadores si se incluyen conteos
+    if (options.includeCount) {
+      extended._count = {
+        images: 0,
+        videos: 0,
+        albums: 0,
+        collections: 0,
+        tags: 0,
+        characters: 0,
+        places: 0,
+        worldItems: 0,
+        concepts: 0,
+        prompts: 0,
+        notes: 0,
+        wildcards: 0,
+        properties: 0
+      };
+    }
+
+    return extended;
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔍 Parsea filtros de Group
+ */
+export function parseGroupFilters(filters: unknown): Record<string, unknown> {
+  try {
+    if (!filters || typeof filters !== 'object') {
+      return {};
+    }
+
+    const parsed: Record<string, unknown> = {};
+    const typedFilters = filters as Record<string, unknown>;
+
+    // Procesar filtros específicos de Group
+    if (typedFilters.search) {
+      parsed.OR = [
+        { name: { contains: typedFilters.search as string, mode: 'insensitive' } },
+        { description: { contains: typedFilters.search as string, mode: 'insensitive' } },
+      ];
+    }
+
+    if (typedFilters.categories?.length) {
+      parsed.category = { in: typedFilters.categories };
+    }
+
+    if (typedFilters.isFavorite !== undefined) {
+      parsed.isFavorite = typedFilters.isFavorite;
+    }
+
+    if (typedFilters.hasImages) {
+      parsed.images = { some: {} };
+    }
+
+    if (typedFilters.hasVideos) {
+      parsed.videos = { some: {} };
+    }
+
+    return parsed;
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
 
 /**
  * Genera un emoji para el grupo basado en su nombre y categoría
@@ -85,24 +339,6 @@ export function generateGroupColor(name: string): string {
 }
 
 /**
- * Parsea los filtros serializados de un grupo
- * @param filtersJson String JSON con los filtros
- * @returns Objeto de filtros parseado o array vacío
- */
-export function parseGroupFilters(filtersJson: string): any[] {
-  if (!filtersJson || filtersJson === 'empty_array') {
-    return [];
-  }
-
-  try {
-    return JSON.parse(filtersJson);
-  } catch (error) {
-    serializerLogger.error('❌ Error al parsear filtros de grupo:', error);
-    return [];
-  }
-}
-
-/**
  * Serializa los filtros de un grupo a formato JSON
  * @param filters Filtros a serializar
  * @returns String JSON con los filtros
@@ -162,30 +398,10 @@ export function fromGroupComplete(group: GroupComplete): GroupBase {
 }
 
 /**
- * Extiende un grupo con propiedades adicionales para UI
- * @param group Grupo básico o completo
- * @returns Grupo con propiedades adicionales para UI
- */
-export function extendGroup(group: GroupBase | GroupComplete): GroupExtended {
-  // Asegurar que tenemos una versión completa
-  const completeGroup = 'id' in group ? toGroupComplete(group) : group;
-
-  return {
-    ...completeGroup,
-    isSelected: false,
-    isExpanded: false,
-    isEditing: false,
-    imageCount: 0, // Estos valores deberían actualizarse después con datos reales
-    videoCount: 0,
-    entityCount: 0
-  };
-}
-
-/**
  * Extiende múltiples grupos con propiedades adicionales para UI
  * @param groups Lista de grupos básicos o completos
  * @returns Lista de grupos extendidos
  */
-export function extendGroups(groups: (GroupBase | GroupComplete)[]): GroupExtended[] {
-  return groups.map(extendGroup);
+export function extendGroups(groups: GroupBase[]): GroupComplete[] {
+  return groups.map(group => extendGroup(group));
 }

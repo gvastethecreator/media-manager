@@ -5,12 +5,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-  FolderBase,
-  FolderComplete,
-  FolderExtended,
-  FolderExtendedComplete,
-  FolderSummary,
-  FolderTreeItem,
+    FolderBase,
+    FolderComplete,
+    FolderExtended,
+    FolderExtendedComplete,
+    FolderSummary,
+    FolderTreeItem,
 } from '@/types/entities/folder';
 import type { Folder as PrismaFolder } from '@prisma/client';
 
@@ -186,5 +186,20 @@ export function toPrismaFolder(folder: Partial<FolderExtended>): Partial<PrismaF
 		emoji,
 		color,
 		presetId,
+	};
+}
+
+/**
+ * Transforma un folder con datos de relaciones/conteos en una versión con estadísticas
+ * @param folder Folder de la base de datos con _count
+ * @returns Folder extendido con estadísticas para UI
+ */
+export function toFolderWithStats(folder: FolderBase & { _count?: { images?: number; files?: number } }) {
+	return {
+		...folder,
+		imageCount: folder._count?.images || 0,
+		fileCount: folder._count?.files || 0,
+		totalFiles: folder.totalFiles || 0,
+		totalSize: folder.totalSize || 0,
 	};
 }
