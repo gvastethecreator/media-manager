@@ -1,31 +1,40 @@
+import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, Clock, Lightbulb, Paperclip, Star } from 'lucide-react';
+import { BookOpen, Calendar, Clock, Lightbulb, Star } from 'lucide-react';
 
 interface ConceptCardFooterProps {
 	createdAt: Date | string;
 	updatedAt: Date | string;
 	imagesCount?: number;
-	prompts?: number;
+	videosCount?: number;
+	promptsCount?: number;
+	notesCount?: number;
+	totalRelations?: number;
 	isFavorite?: boolean;
 	category?: string | null;
 	primaryColor: string;
 	secondaryColor: string;
+	tcgMode?: boolean;
 }
 
 /**
  * Componente para el pie de una tarjeta de concepto.
- * Similar a la parte inferior de una carta Magic con el tipo, artista y copyright.
+ * Diseñado para imitar la información de créditos y copyright de una carta TCG.
  */
 export function ConceptCardFooter({
 	createdAt,
 	updatedAt,
 	imagesCount = 0,
-	prompts = 0,
+	videosCount = 0,
+	promptsCount = 0,
+	notesCount = 0,
+	totalRelations = 0,
 	isFavorite = false,
 	category = 'Concepto',
 	primaryColor,
-	secondaryColor
+	secondaryColor,
+	tcgMode = true
 }: ConceptCardFooterProps) {
 	// Convertir fechas a objetos Date si son strings
 	const createdAtDate = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
@@ -41,38 +50,140 @@ export function ConceptCardFooter({
 		locale: es
 	});
 
+	// Calcular rareza basado en relaciones totales
+	const getRarity = () => {
+		if (totalRelations > 50) return 'Mítico';
+		if (totalRelations > 25) return 'Raro';
+		if (totalRelations > 10) return 'Infrecuente';
+		return 'Común';
+	};
+
+	// Calcular "ID" de colección al estilo TCG
+	const getCollectionId = () => {
+		// Usar las fechas para generar un ID único
+		const year = createdAtDate.getFullYear().toString().slice(-2);
+		const month = (createdAtDate.getMonth() + 1).toString().padStart(2, '0');
+		// Usar un hash simple del timestamp para generar número de colección
+		const timeHash = Math.abs(createdAtDate.getTime() % 999).toString().padStart(3, '0');
+
+		return `${year}/${month}-${timeHash}`;
+	};
+
+	const rarity = tcgMode ? getRarity() : null;
+	const collectionId = tcgMode ? getCollectionId() : null;
+
+	// Calcular nivel de "poder" para cartas TCG (mayor valor = carta más poderosa)
+	const powerLevel = tcgMode ?
+		Math.min(99, Math.floor((imagesCount * 2) + (videosCount * 3) +
+			(promptsCount * 2) + (notesCount * 1) + (totalRelations * 0.5))) : 0;
+
 	return (
 		<div
-			className="px-3 py-2 text-xs text-white/80"
+			className={cn(
+				"px-3 py-2 text-xs text-white/80",
+				tcgMode ? "border-t border-white/10" : "",
+				isFavorite && tcgMode ? "bg-gradient-to-t from-amber-950/40 to-amber-900/20" : ""
+			)}
 			style={{
-				background: `linear-gradient(to top, ${secondaryColor}90, ${secondaryColor}60)`,
-				borderTop: `1px solid ${primaryColor}40`
+				background: tcgMode ?
+					`linear-gradient(to top, ${secondaryColor}, ${secondaryColor}90)` :
+					`linear-gradient(to top, ${secondaryColor}90, ${secondaryColor}60)`,
+				borderTop: tcgMode ?
+					`1px solid ${primaryColor}60` :
+					`1px solid ${primaryColor}40`,
+				boxShadow: isFavorite && tcgMode ?
+					`inset 0 0 10px rgba(255, 215, 0, 0.2)` : undefined
 			}}
 		>
 			<div className="flex justify-between items-center mb-1.5">
-				{/* Categoría del concepto */}
+				{/* Información principal */}
 				<div className="flex items-center">
-					<Lightbulb size={14} className="mr-1.5 opacity-80" />
-					<span className="uppercase tracking-wide font-medium">
+					{tcgMode ? (
+						<BookOpen size={14} className="mr-1.5 opacity-80" />
+					) : (
+						<Lightbulb size={14} className="mr-1.5 opacity-80" />
+					)}
+					<span className={cn(
+						"uppercase tracking-wide",
+						tcgMode ? "font-semibold" : "font-medium"
+					)}>
 						{category}
 					</span>
+
+					{/* Nivel de poder (estilo TCG) */}
+					{tcgMode && powerLevel > 0 && (
+						<div className="ml-1.5 flex items-center">
+							<span
+								className="mx-1 text-[0.6rem] opacity-70"
+							>
+								LVL
+							</span>
+							<span
+								className="px-1.5 py-0.5 text-[0.7rem] font-bold rounded-sm"
+								style={{
+									backgroundColor: `${primaryColor}60`,
+									color: 'white',
+									border: `1px solid ${primaryColor}80`,
+									boxShadow: `0 0 3px ${primaryColor}40`
+								}}
+							>
+								{powerLevel}
+							</span>
+						</div>
+					)}
 				</div>
 
-				{/* Contador de prompts y favorito */}
-				<div className="flex items-center space-x-2">
+				<div className="flex items-center gap-2">
+					{/* Rareza solo en modo TCG */}
+					{tcgMode && rarity && (
+						<span
+							className="px-1.5 py-0.5 text-[0.65rem] font-bold rounded-sm"
+							style={{
+								backgroundColor: isFavorite ? '#FFD700' : primaryColor,
+								color: isFavorite ? 'black' : 'white',
+								boxShadow: isFavorite ? '0 0 5px rgba(255, 215, 0, 0.7)' : 'none'
+							}}
+						>
+							{rarity}
+						</span>
+					)}
+
 					{/* Indicador de favorito */}
 					{isFavorite && (
 						<Star
 							size={14}
-							className="fill-yellow-400 text-yellow-400"
+							className={cn(
+								tcgMode ? "text-yellow-300 fill-yellow-300" : "fill-yellow-400 text-yellow-400"
+							)}
 							aria-label="Favorito"
 						/>
 					)}
+				</div>
+			</div>
+
+			{/* Segunda línea - Información adicional */}
+			<div className="flex justify-between items-center mb-1.5 text-[0.65rem]">
+				{/* ID de colección */}
+				{tcgMode && collectionId && (
+					<div className="flex items-center bg-black/30 px-1.5 py-0.5 rounded-sm">
+						<span className="font-mono tracking-wide">
+							{collectionId}
+						</span>
+					</div>
+				)}
+
+				{/* Contador de contenido */}
+				<div className="flex items-center gap-3">
+					{/* Contador de imágenes y videos */}
+					<div className="flex items-center">
+						<span className="opacity-60 mr-1">IMG</span>
+						<span className="font-medium">{imagesCount + videosCount}</span>
+					</div>
 
 					{/* Contador de prompts */}
 					<div className="flex items-center">
-						<Paperclip size={14} className="mr-1 opacity-80" />
-						<span>{prompts}</span>
+						<span className="opacity-60 mr-1">TXT</span>
+						<span className="font-medium">{promptsCount + notesCount}</span>
 					</div>
 				</div>
 			</div>
@@ -92,6 +203,13 @@ export function ConceptCardFooter({
 					</span>
 				</div>
 			</div>
+
+			{/* Sello de copyright al estilo TCG */}
+			{tcgMode && (
+				<div className="mt-1 pt-1 text-[0.6rem] text-center opacity-60 border-t border-white/10">
+					™ & © {new Date().getFullYear()} IdeaVault · {category.toUpperCase()} · #{collectionId}
+				</div>
+			)}
 		</div>
 	);
 }

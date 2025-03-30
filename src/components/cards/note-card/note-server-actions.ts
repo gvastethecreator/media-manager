@@ -2,6 +2,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
+import { NoteStatus } from '@/types/entities/note/enums';
 
 // Logger específico para acciones de NoteCard
 const noteCardLogger = serverLogger.withContext('NoteCardActions');
@@ -12,6 +13,23 @@ interface ThumbnailImage {
 	name?: string | null;
 	thumbnailUrl: string;
 	url?: string;
+}
+
+// Interface para los contadores de relaciones
+export interface NoteRelationCounts {
+	characters: number;
+	places: number;
+	worldItems: number;
+	concepts: number;
+	prompts: number;
+	images: number;
+	videos: number;
+	albums: number;
+	collections: number;
+	tags: number;
+	wildcards: number;
+	properties: number;
+	groups: number;
 }
 
 /**
@@ -67,7 +85,7 @@ export async function getRecentNoteImages(noteId: string, limit = 6): Promise<Th
 				id: image.id,
 				name: image.name,
 				thumbnailUrl,
-				url: `/image/${image.id}`,
+				url: `/images/${image.id}`,
 			};
 		});
 
@@ -81,15 +99,10 @@ export async function getRecentNoteImages(noteId: string, limit = 6): Promise<Th
 
 /**
  * Obtiene el recuento de elementos relacionados con una nota
+ * @param noteId ID de la nota
+ * @returns Objeto con contadores de relaciones
  */
-export async function getNoteCounts(noteId: string): Promise<{
-	characters: number;
-	places: number;
-	worldItems: number;
-	concepts: number;
-	prompts: number;
-	images: number;
-}> {
+export async function getNoteCounts(noteId: string): Promise<NoteRelationCounts> {
 	try {
 		noteCardLogger.info('🔢 Obteniendo recuentos para NoteCard:', noteId);
 
@@ -110,6 +123,13 @@ export async function getNoteCounts(noteId: string): Promise<{
 						concepts: true,
 						prompts: true,
 						images: true,
+						videos: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						wildcards: true,
+						properties: true,
+						groups: true
 					}
 				}
 			}
@@ -119,13 +139,20 @@ export async function getNoteCounts(noteId: string): Promise<{
 			throw new Error('Nota no encontrada');
 		}
 
-		const result = {
+		const result: NoteRelationCounts = {
 			characters: counts._count.characters,
 			places: counts._count.places,
 			worldItems: counts._count.worldItems,
 			concepts: counts._count.concepts,
 			prompts: counts._count.prompts,
 			images: counts._count.images,
+			videos: counts._count.videos,
+			albums: counts._count.albums,
+			collections: counts._count.collections,
+			tags: counts._count.tags,
+			wildcards: counts._count.wildcards,
+			properties: counts._count.properties,
+			groups: counts._count.groups
 		};
 
 		noteCardLogger.info('✅ Recuentos obtenidos para NoteCard');
@@ -139,6 +166,25 @@ export async function getNoteCounts(noteId: string): Promise<{
 			concepts: 0,
 			prompts: 0,
 			images: 0,
+			videos: 0,
+			albums: 0,
+			collections: 0,
+			tags: 0,
+			wildcards: 0,
+			properties: 0,
+			groups: 0
 		};
+	}
+}
+
+/**
+ * Obtiene los estados disponibles para notas desde el enum NoteStatus
+ * @returns Lista de estados disponibles
+ */
+export async function getNoteStatuses(): Promise<string[]> {
+	try {
+		return Object.values(NoteStatus);
+	} catch (error) {
+		return ['active', 'archived', 'completed', 'draft', 'pending'];
 	}
 }

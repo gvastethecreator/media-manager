@@ -5,7 +5,6 @@ import { SettingsView } from '@/components/settings/settings-view';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo, useRef, useEffect, useState } from 'react';
-import { EntityCardsView } from '../features/entity-cards/views/entity-cards-view';
 import { EntityPreloader } from '../features/file-browser/entity-preloader';
 import { FolderContentView } from '../folders/views/folder-content-view';
 import { FoldersView } from '../folders/views/folders-view';
@@ -111,8 +110,6 @@ const MemoizedViewContent = memo(({ view }: { view: ViewType }) => {
 			return <NotesView />;
 		case 'note-content':
 			return <NoteContentView />;
-		case 'entity-cards':
-			return <EntityCardsView />;
 		default:
 			return <DevelopmentView />;
 	}

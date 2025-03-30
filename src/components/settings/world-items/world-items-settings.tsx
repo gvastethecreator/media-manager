@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteWorldItem, getWorldItems, WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
+import { deleteWorldItem, getWorldItems, type WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
-import { WorldItem } from '@/types/entities/world-item';
+import type { WorldItem } from '@/types/entities/world-item';
 import { formatBytes } from '@/utils/file/helpers';
 import { Filter, Info, Loader2, Package, PlusCircle, Trash, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';

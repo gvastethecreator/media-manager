@@ -1,13 +1,16 @@
 /**
- * @file Exportaciones principales de tipos para la entidad Concept
+ * @file Exporta todos los tipos relacionados con la entidad Concept
  * @module types/entities/concept
  */
 
-export * from './base';
+// Tipos base y acciones
+export * from './actions';
+export * from './complete';
 export * from './enums';
 export * from './extended';
 export * from './types';
 
-// Alias común para el tipo principal
-export type { ConceptWithRelations as Concept } from './types';
+// Re-exportar ConceptWithRelations como Concept para consistencia con otras entidades
+import type { ConceptWithRelations } from './types';
+export type Concept = ConceptWithRelations;
 

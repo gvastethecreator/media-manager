@@ -2,7 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm } from 'react-hook-form';
-import type * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -37,7 +36,18 @@ import type { Wildcard } from '@prisma/client';
 import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
 
 // Definir el tipo para el formulario
-type FormValues = z.infer<typeof createWildcardSchema>;
+type FormValues = {
+	name: string;
+	emoji: string;
+	color: string;
+	description?: string;
+	shortcut?: string;
+	category: string;
+	children: string[];
+	parentId?: string | null;
+	featuredImage?: string;
+	isFavorite: boolean;
+};
 
 interface CreateWildcardFormProps {
 	wildcard?: Wildcard;
@@ -83,9 +93,12 @@ export function CreateWildcardForm({
 	});
 
 	// Configurar field array para manejar dinámicamente los valores de children
-	const { fields, append, remove } = useFieldArray({
+	const { fields, append, remove } = useFieldArray<FormValues>({
 		control: form.control,
-		name: "children",
+		name: 'children',
+		rules: {
+			required: false,
+		},
 	});
 
 	// Filtrar los posibles padres para evitar ciclos (no permitir seleccionar a sí mismo o a sus hijos)

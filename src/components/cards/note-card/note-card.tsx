@@ -1,8 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import type { Note } from '@/types/entities/notes';
-import { ScrollText } from 'lucide-react';
+import type { Note } from '@/types/entities/note/types';
+import { BookOpen, ScrollText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
 import { CardHeader } from '../card-header';
@@ -13,31 +13,43 @@ import { NoteCardImages } from './note-card-images';
 export interface NoteCardProps {
 	note: Note & {
 		_count?: {
-			images: number;
-			characters: number;
-			places: number;
-			worldItems: number;
-			concepts: number;
-			prompts: number;
+			images?: number;
+			videos?: number;
+			albums?: number;
+			collections?: number;
+			tags?: number;
+			characters?: number;
+			places?: number;
+			worldItems?: number;
+			concepts?: number;
+			prompts?: number;
+			wildcards?: number;
+			properties?: number;
+			groups?: number;
 		};
 	};
 	onClick?: () => void;
 	className?: string;
 	style?: React.CSSProperties;
+	tcgMode?: boolean;
 }
 
 /**
- * Card para mostrar una nota, con un diseño inspirado en cartas de Magic.
+ * Card para mostrar una nota, con un diseño inspirado en cartas de TCG.
  */
-export function NoteCard({ note, onClick, className, style }: NoteCardProps) {
+export function NoteCard({ note, onClick, className, style, tcgMode = true }: NoteCardProps) {
 	// Calcular valores derivados
 	const imagesCount = note._count?.images || 0;
+	const videosCount = note._count?.videos || 0;
 	const charactersCount = note._count?.characters || 0;
 	const relationsCount =
 		(note._count?.places || 0) +
 		(note._count?.worldItems || 0) +
 		(note._count?.concepts || 0) +
 		(note._count?.prompts || 0) +
+		(note._count?.groups || 0) +
+		(note._count?.properties || 0) +
+		(note._count?.wildcards || 0) +
 		charactersCount;
 
 	// Colores para el gradiente
@@ -94,12 +106,14 @@ export function NoteCard({ note, onClick, className, style }: NoteCardProps) {
 	const cardStyle = useMemo(
 		() => ({
 			// Borde basado en el color primario
-			borderColor: primaryColor,
+			borderColor: tcgMode ? `${primaryColor}70` : primaryColor,
 			// Fondo con gradiente sutil basado en el color primario
-			background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)`,
+			background: tcgMode
+				? `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}10)`
+				: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)`,
 			...style,
 		}),
-		[primaryColor, style]
+		[primaryColor, secondaryColor, style, tcgMode]
 	);
 
 	// Render del componente
@@ -109,7 +123,7 @@ export function NoteCard({ note, onClick, className, style }: NoteCardProps) {
 				// Base
 				'relative bg-card',
 				'w-[300px] h-[420px] rounded-[4.75%] overflow-hidden',
-				'border-2 shadow-md',
+				tcgMode ? 'border-[3px] shadow-xl' : 'border-2 shadow-md',
 				// Interacción
 				'transition-all duration-300 ease-out',
 				'hover:shadow-lg hover:scale-[1.02]',
@@ -145,9 +159,12 @@ export function NoteCard({ note, onClick, className, style }: NoteCardProps) {
 				subtitle={note.category || 'General'}
 				icon={note.emoji ?
 					<span className="text-lg">{note.emoji}</span> :
-					<ScrollText className="w-4 h-4" />
+					tcgMode ?
+						<BookOpen className="w-4 h-4" /> :
+						<ScrollText className="w-4 h-4" />
 				}
 				primaryColor={primaryColor}
+				variant={tcgMode ? 'tcg' : 'default'}
 			/>
 
 			{/* Sección de imágenes */}
@@ -155,6 +172,7 @@ export function NoteCard({ note, onClick, className, style }: NoteCardProps) {
 				noteId={note.id}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
+				tcgMode={tcgMode}
 			/>
 
 			{/* Contenido principal */}
@@ -165,7 +183,9 @@ export function NoteCard({ note, onClick, className, style }: NoteCardProps) {
 				status={note.status}
 				priority={note.priority}
 				primaryColor={primaryColor}
+				secondaryColor={secondaryColor}
 				noteId={note.id}
+				tcgMode={tcgMode}
 			/>
 
 			{/* Pie de la tarjeta */}
@@ -173,12 +193,14 @@ export function NoteCard({ note, onClick, className, style }: NoteCardProps) {
 				createdAt={note.createdAt}
 				updatedAt={note.updatedAt}
 				imagesCount={imagesCount}
+				videosCount={videosCount}
 				relationsCount={relationsCount}
 				isFavorite={note.isFavorite}
 				status={note.status}
 				priority={note.priority}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
+				tcgMode={tcgMode}
 			/>
 		</motion.div>
 	);

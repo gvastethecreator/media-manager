@@ -14,11 +14,11 @@ import {
 import {
   toExtendedAlbum
 } from '@/transformers/album/serializers';
-import {
-  type Album,
-  type AlbumBase,
-  type CreateAlbumData,
-  type UpdateAlbumData
+import type {
+  Album,
+  AlbumBase,
+  CreateAlbumData,
+  UpdateAlbumData
 } from '@/types/entities/album';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';

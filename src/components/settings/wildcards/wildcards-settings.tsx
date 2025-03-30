@@ -41,7 +41,22 @@ const CreateWildcardForm = dynamic(
 	{ ssr: false }
 );
 
-interface WildcardWithRelations extends Wildcard {
+interface WildcardWithRelations extends Omit<Wildcard, 'children'> {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	children: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	parentId: string | null;
+	parent?: Wildcard | null;
+	childWildcards?: WildcardWithRelations[];
 	_count?: {
 		images: number;
 		videos: number;
@@ -57,8 +72,6 @@ interface WildcardWithRelations extends Wildcard {
 		properties: number;
 		childWildcards: number;
 	};
-	parent?: Wildcard | null;
-	childWildcards?: Wildcard[];
 }
 
 export function WildcardsSettings() {
@@ -88,7 +101,26 @@ export function WildcardsSettings() {
 				getWildcards(),
 				getRootWildcards()
 			]);
-			setWildcards(allWildcards as WildcardWithRelations[]);
+
+			// Convertir y extender los wildcards con las propiedades necesarias
+			const extendedWildcards = allWildcards.map(wildcard => ({
+				...wildcard,
+				_count: {
+					...wildcard._count,
+					albums: 0,
+					collections: 0,
+					tags: 0,
+					characters: 0,
+					places: 0,
+					worldItems: 0,
+					concepts: 0,
+					prompts: 0,
+					notes: 0,
+					properties: 0,
+				}
+			})) as WildcardWithRelations[];
+
+			setWildcards(extendedWildcards);
 			setRootWildcards(rootWildcardsList);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -282,13 +314,13 @@ export function WildcardsSettings() {
 	};
 
 	// Función para manejar clics en el botón de expansión
-	const handleExpandClick = (event: React.MouseEvent, wildcardId: string) => {
+	const handleExpandClick = (event: React.MouseEvent<HTMLButtonElement>, wildcardId: string) => {
 		event.stopPropagation();
 		toggleExpand(wildcardId);
 	};
 
 	// Función para manejar clics en el botón de eliminar
-	const handleDeleteClick = (event: React.MouseEvent, wildcardId: string) => {
+	const handleDeleteClick = (event: React.MouseEvent<HTMLButtonElement>, wildcardId: string) => {
 		event.stopPropagation();
 		handleDeleteWildcard(wildcardId);
 	};
@@ -312,7 +344,7 @@ export function WildcardsSettings() {
 									variant="ghost"
 									size="icon"
 									className="h-5 w-5 p-0"
-									onClick={(event) => handleExpandClick(event, wildcard.id)}
+									onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleExpandClick(event, wildcard.id)}
 								>
 									<ChevronRight className={cn(
 										"h-4 w-4 transition-transform",
@@ -339,7 +371,7 @@ export function WildcardsSettings() {
 							variant="ghost"
 							size="icon"
 							className="absolute right-1 opacity-0 group-hover:opacity-100"
-							onClick={(event) => handleDeleteClick(event, wildcard.id)}
+							onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleDeleteClick(event, wildcard.id)}
 						>
 							<Trash className="h-4 w-4" />
 						</Button>

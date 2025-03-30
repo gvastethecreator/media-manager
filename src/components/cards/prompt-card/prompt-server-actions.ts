@@ -1,144 +1,228 @@
 'use server';
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 
-// Logger específico para acciones de PromptCard
-const promptCardLogger = serverLogger.withContext('PromptCardActions');
-
-// Interfaz para las imágenes thumbnail
-interface ThumbnailImage {
+/**
+ * Representa los datos de un prompt para la tarjeta
+ */
+export interface PromptCardData {
+	/** Identificador único */
 	id: string;
-	name?: string | null;
-	thumbnailUrl: string;
-	url?: string;
+	/** Nombre del prompt */
+	name: string;
+	/** Emoji representativo */
+	emoji?: string | null;
+	/** Color principal en formato hex */
+	color?: string | null;
+	/** Descripción corta */
+	description?: string | null;
+	/** Propósito del prompt */
+	purpose?: string | null;
+	/** Contenido completo del prompt */
+	content?: string | null;
+	/** Categoría del prompt */
+	category?: string | null;
+	/** Parámetros parseados */
+	parsedParameters?: Record<string, any>;
+	/** Etiquetas parseadas */
+	parsedTags?: string[];
+	/** Parámetros en formato JSON */
+	parameters?: string | null;
+	/** Si está marcado como favorito */
+	isFavorite?: boolean;
+	/** Modelo de IA con el que fue creado */
+	model?: string | null;
+	/** URL de imagen destacada */
+	featuredImage?: string | null;
+	/** Fecha de creación */
+	createdAt: Date;
+	/** Fecha de última actualización */
+	updatedAt: Date;
+	/** Imágenes recientes generadas con este prompt */
+	recentImages?: { id: string; thumbnailUrl: string }[];
+	/** Contadores de relaciones */
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		concepts?: number;
+		notes?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		properties?: number;
+		wildcards?: number;
+		groups?: number;
+	};
 }
 
 /**
- * Obtiene las imágenes recientes de un prompt para mostrar en la tarjeta
- * @param promptId ID del prompt
- * @param limit Número máximo de imágenes a obtener (por defecto 6)
- * @returns Array de imágenes con sus thumbnails
+ * Busca prompts en la base de datos
  */
-export async function getRecentPromptImages(promptId: string, limit = 6): Promise<ThumbnailImage[]> {
+export async function searchPrompts(
+	query = '',
+	limit = 50
+): Promise<PromptCardData[]> {
 	try {
-		promptCardLogger.info('🖼️ Obteniendo imágenes recientes para PromptCard:', promptId);
-
-		// Verificar que el ID es válido
-		if (!promptId) {
-			throw new Error('ID de prompt no proporcionado');
-		}
-
-		// Obtener imágenes recientes del prompt
-		const images = await prisma.image.findMany({
+		const prompts = await prisma.prompt.findMany({
 			where: {
-				prompts: {
-					some: {
-						id: promptId,
+				OR: [
+					{ name: { contains: query, mode: 'insensitive' } },
+					{ description: { contains: query, mode: 'insensitive' } },
+					{ content: { contains: query, mode: 'insensitive' } },
+					{ purpose: { contains: query, mode: 'insensitive' } },
+					{ parameters: { contains: query, mode: 'insensitive' } },
+					{ category: { contains: query, mode: 'insensitive' } },
+				],
+			},
+			orderBy: { updatedAt: 'desc' },
+			take: limit,
+			include: {
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						concepts: true,
+						notes: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						properties: true,
+						wildcards: true,
+						groups: true,
 					},
 				},
-				thumbnail: { not: null }, // Solo imágenes con thumbnail
+				tags: {
+					take: 10,
+					select: {
+						name: true
+					}
+				}
 			},
-			select: {
-				id: true,
-				name: true,
-				thumbnail: true,
-				thumbnailWidth: true,
-				thumbnailHeight: true,
-				thumbnailSize: true,
-			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ createdAt: 'desc' },
-			],
-			take: limit,
 		});
 
-		// Convertir los thumbnails a URLs de datos
-		const thumbnails: ThumbnailImage[] = images.map(image => {
-			let thumbnailUrl = '';
+		// Procesar los prompts para la UI
+		return await Promise.all(
+			prompts.map(async (prompt) => {
+				// Obtener imágenes recientes
+				const recentImages = await getRecentPromptImages(prompt.id);
 
-			// Verificar si tenemos un thumbnail válido
-			if (image.thumbnail && image.thumbnailSize && image.thumbnailSize < 100000) {
-				thumbnailUrl = `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`;
-			}
+				// Parsear parámetros
+				const parsedParameters = parseJsonField(prompt.parameters);
 
-			return {
-				id: image.id,
-				name: image.name,
-				thumbnailUrl,
-				url: `/image/${image.id}`,
-			};
-		});
+				// Extraer nombres de etiquetas
+				const parsedTags = prompt.tags?.map(tag => tag.name) || [];
 
-		promptCardLogger.info('✅ Imágenes obtenidas para PromptCard:', thumbnails.length);
-		return thumbnails;
+				return {
+					...prompt,
+					parsedParameters,
+					parsedTags,
+					recentImages,
+					tags: undefined, // Eliminar campo original para no duplicar datos
+				};
+			})
+		);
 	} catch (error) {
-		promptCardLogger.error('❌ Error obteniendo imágenes para PromptCard:', error);
-		throw new Error(`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		console.error('Error buscando prompts:', error);
+		throw new Error('No se pudieron cargar los prompts');
 	}
 }
 
 /**
- * Obtiene el recuento de elementos relacionados con un prompt
+ * Obtiene las imágenes recientes generadas con un prompt
  */
-export async function getPromptCounts(promptId: string): Promise<{
-	characters: number;
-	places: number;
-	worldItems: number;
-	concepts: number;
-	notes: number;
-	images: number;
-}> {
+export async function getRecentPromptImages(promptId: string) {
 	try {
-		promptCardLogger.info('🔢 Obteniendo recuentos para PromptCard:', promptId);
-
-		// Verificar que el ID es válido
-		if (!promptId) {
-			throw new Error('ID de prompt no proporcionado');
-		}
-
-		// Obtener recuentos del prompt
-		const counts = await prisma.prompt.findUnique({
-			where: { id: promptId },
+		const images = await prisma.image.findMany({
+			where: { promptId },
+			orderBy: { createdAt: 'desc' },
+			take: 6,
 			select: {
+				id: true,
+				thumbnailUrl: true,
+			},
+		});
+
+		return images;
+	} catch (error) {
+		console.error('Error cargando imágenes:', error);
+		return [];
+	}
+}
+
+/**
+ * Obtiene un prompt específico por su ID
+ */
+export async function getPromptById(id: string): Promise<PromptCardData | null> {
+	try {
+		const prompt = await prisma.prompt.findUnique({
+			where: { id },
+			include: {
 				_count: {
 					select: {
+						images: true,
+						videos: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						concepts: true,
+						notes: true,
 						characters: true,
 						places: true,
 						worldItems: true,
-						concepts: true,
-						notes: true,
-						images: true,
+						properties: true,
+						wildcards: true,
+						groups: true,
+					},
+				},
+				tags: {
+					take: 10,
+					select: {
+						name: true
 					}
 				}
-			}
+			},
 		});
 
-		if (!counts) {
-			throw new Error('Prompt no encontrado');
-		}
+		if (!prompt) return null;
 
-		const result = {
-			characters: counts._count.characters,
-			places: counts._count.places,
-			worldItems: counts._count.worldItems,
-			concepts: counts._count.concepts,
-			notes: counts._count.notes,
-			images: counts._count.images,
-		};
+		// Obtener imágenes recientes
+		const recentImages = await getRecentPromptImages(prompt.id);
 
-		promptCardLogger.info('✅ Recuentos obtenidos para PromptCard');
-		return result;
-	} catch (error) {
-		promptCardLogger.error('❌ Error obteniendo recuentos para PromptCard:', error);
+		// Parsear parámetros
+		const parsedParameters = parseJsonField(prompt.parameters);
+
+		// Extraer nombres de etiquetas
+		const parsedTags = prompt.tags?.map(tag => tag.name) || [];
+
 		return {
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			concepts: 0,
-			notes: 0,
-			images: 0,
+			...prompt,
+			parsedParameters,
+			parsedTags,
+			recentImages,
+			tags: undefined, // Eliminar campo original para no duplicar datos
 		};
+	} catch (error) {
+		console.error('Error obteniendo prompt:', error);
+		return null;
+	}
+}
+
+/**
+ * Parsea un campo JSON
+ */
+function parseJsonField<T>(jsonString?: string | null): T | undefined {
+	if (!jsonString) return undefined;
+
+	try {
+		return JSON.parse(jsonString) as T;
+	} catch (error) {
+		console.error('Error parseando JSON:', error);
+		return undefined;
 	}
 }

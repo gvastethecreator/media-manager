@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
-import { CollectionBase as Collection, CreateCollectionData } from '@/types/entities/collection/base';
+import type { CollectionBase as Collection, CreateCollectionData } from '@/types/entities/collection/base';
 import { COLLECTION_CATEGORY_COLORS, COLLECTION_CATEGORY_EMOJIS, CollectionCategory, CollectionPlatform, CollectionRarity } from '@/types/entities/collection/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
@@ -197,7 +197,7 @@ export function CreateCollectionForm({
 
 	// Formatear valor para precio
 	const formatPrice = (value: string) => {
-		return value !== '' ? parseFloat(value) : undefined;
+		return value !== '' ? Number.parseFloat(value) : undefined;
 	};
 
 	return (

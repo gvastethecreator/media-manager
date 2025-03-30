@@ -4,52 +4,68 @@
  */
 
 /**
- * Categorías predefinidas para etiquetas
+ * Categorías de etiquetas
  */
 export enum TagCategory {
-	CHARACTER = 'character',
-	LOCATION = 'location',
-	OBJECT = 'object',
-	CONCEPT = 'concept',
-	EVENT = 'event',
-	COLOR = 'color',
-	STYLE = 'style',
-	EMOTION = 'emotion',
-	CUSTOM = 'custom',
-	OTHER = 'other',
+  GENERAL = 'general',
+  SUBJECT = 'subject',
+  STYLE = 'style',
+  COLOR = 'color',
+  QUALITY = 'quality',
+  TECHNIQUE = 'technique',
+  COMPOSITION = 'composition',
+  CONTENT = 'content',
+  EMOTION = 'emotion',
+  THEME = 'theme',
+  GENRE = 'genre',
+  CUSTOM = 'custom',
 }
 
 /**
- * Criterios para ordenar etiquetas
- */
-export enum TagSortCriteria {
-	NAME_ASC = 'name_asc',
-	NAME_DESC = 'name_desc',
-	COUNT_ASC = 'count_asc',
-	COUNT_DESC = 'count_desc',
-	CREATED_ASC = 'created_asc',
-	CREATED_DESC = 'created_desc',
-	UPDATED_ASC = 'updated_asc',
-	UPDATED_DESC = 'updated_desc',
-}
-
-/**
- * Niveles de rareza para etiquetas
+ * Rareza de etiquetas
  */
 export enum TagRarity {
-	COMMON = 'common',
-	UNCOMMON = 'uncommon',
-	RARE = 'rare',
-	EPIC = 'epic',
-	LEGENDARY = 'legendary',
+  COMMON = 'common',
+  UNCOMMON = 'uncommon',
+  RARE = 'rare',
+  VERY_RARE = 'very_rare',
+  LEGENDARY = 'legendary',
 }
 
 /**
- * Tipos de visualización de etiquetas
+ * Criterios de ordenación para etiquetas
+ */
+export enum TagSortCriteria {
+  NAME_ASC = 'name:asc',
+  NAME_DESC = 'name:desc',
+  USAGE_ASC = 'usage:asc',
+  USAGE_DESC = 'usage:desc',
+  CREATED_ASC = 'created:asc',
+  CREATED_DESC = 'created:desc',
+  UPDATED_ASC = 'updated:asc',
+  UPDATED_DESC = 'updated:desc',
+}
+
+/**
+ * Modos de visualización para etiquetas
  */
 export enum TagViewMode {
-	LIST = 'list',
-	GRID = 'grid',
-	CLOUD = 'cloud',
-	GROUP = 'group',
+  GRID = 'grid',
+  LIST = 'list',
+  CLOUD = 'cloud',
+  HIERARCHY = 'hierarchy',
 }
+
+/**
+ * Mapa de propiedades para ordenación
+ */
+export const TAG_SORT_PROPERTY_MAP: Record<TagSortCriteria, string> = {
+  [TagSortCriteria.NAME_ASC]: 'name',
+  [TagSortCriteria.NAME_DESC]: 'name',
+  [TagSortCriteria.USAGE_ASC]: 'usage',
+  [TagSortCriteria.USAGE_DESC]: 'usage',
+  [TagSortCriteria.CREATED_ASC]: 'createdAt',
+  [TagSortCriteria.CREATED_DESC]: 'createdAt',
+  [TagSortCriteria.UPDATED_ASC]: 'updatedAt',
+  [TagSortCriteria.UPDATED_DESC]: 'updatedAt',
+};

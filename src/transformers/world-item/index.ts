@@ -3,30 +3,32 @@
  * @module transformers/world-item
  */
 
-export * from './mappers';
-export * from './serializers';
-
-// Reexportar funciones específicas para facilitar el acceso
 export {
+    deserializeWorldItemAttributes,
+    deserializeWorldItemEffects,
     deserializeWorldItemFilters,
-    // Serializadores
     deserializeWorldItemProperties,
     deserializeWorldItemRequirements,
     deserializeWorldItemStats,
+    deserializeWorldItemTags, fromExtendedWorldItem,
     parseJsonFields,
-    parseVisualConfig,
+    parseVisualConfig, serializeWorldItemAttributes,
+    serializeWorldItemEffects,
     serializeWorldItemFilters,
     serializeWorldItemProperties,
     serializeWorldItemRequirements,
-    serializeWorldItemStats
+    serializeWorldItemStats,
+    serializeWorldItemTags, toExtendedWorldItem
 } from './serializers';
 
 export {
-    // Mapeadores
-    extendWorldItem,
-    extendWorldItems,
+    createWorldItemFilter,
+    createWorldItemOrderBy,
     generateWorldItemColor,
-    generateWorldItemEmoji, mapCreateWorldItemDataToPrisma,
-    mapUpdateWorldItemDataToPrisma, mapVisualConfig, prepareVisualConfigUpdateData
+    generateWorldItemEmoji,
+    mapCreateWorldItemDataToPrisma,
+    mapUpdateWorldItemDataToPrisma,
+    mapVisualConfig,
+    prepareVisualConfigUpdateData
 } from './mappers';
 

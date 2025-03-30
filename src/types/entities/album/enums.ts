@@ -30,14 +30,16 @@ export enum AlbumViewMode {
  * Criterios de ordenación para álbumes
  */
 export enum AlbumSortCriteria {
-	NAME_ASC = 'name_asc',
-	NAME_DESC = 'name_desc',
-	DATE_CREATED_ASC = 'date_created_asc',
-	DATE_CREATED_DESC = 'date_created_desc',
-	DATE_UPDATED_ASC = 'date_updated_asc',
-	DATE_UPDATED_DESC = 'date_updated_desc',
-	ITEM_COUNT_ASC = 'item_count_asc',
-	ITEM_COUNT_DESC = 'item_count_desc',
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	DATE_CREATED_ASC = 'created:asc',
+	DATE_CREATED_DESC = 'created:desc',
+	DATE_UPDATED_ASC = 'updated:asc',
+	DATE_UPDATED_DESC = 'updated:desc',
+	ITEM_COUNT_ASC = 'items:asc',
+	ITEM_COUNT_DESC = 'items:desc',
+	SIZE_ASC = 'size:asc',
+	SIZE_DESC = 'size:desc',
 	CUSTOM = 'custom',
 }
 

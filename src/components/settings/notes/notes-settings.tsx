@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import toastService from '@/services/toast.service';
-import { Note } from '@/types/entities/notes';
+import type { Note } from '@/types/entities/notes';
 import { FileText, Filter, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateNoteForm } from './create-note-form';

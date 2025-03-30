@@ -1,82 +1,90 @@
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { Calendar, Clock, Image, Layers } from 'lucide-react';
+'use client';
+
+import { cn } from '@/lib/utils';
+import type { Album } from '@/types/entities/album';
 
 interface AlbumCardFooterProps {
-	createdAt: Date | string;
-	updatedAt: Date | string;
-	imagesCount: number;
-	texture?: string | null;
+	album: Album;
+	totalEntities: number;
+	cardId: string;
+	rarityLevel: string;
+	tcgMode?: boolean;
 	primaryColor: string;
-	secondaryColor: string;
 }
 
 /**
- * Componente para el pie de la tarjeta de álbum.
- * Similar a la parte inferior de una carta Magic con la fuerza/resistencia y el artista.
+ * Pie de la tarjeta de álbum con estadísticas e información adicional
  */
 export function AlbumCardFooter({
-	createdAt,
-	updatedAt,
-	imagesCount,
-	texture,
-	primaryColor,
-	secondaryColor,
+	album,
+	totalEntities,
+	cardId,
+	rarityLevel,
+	tcgMode = false,
+	primaryColor
 }: AlbumCardFooterProps) {
-	// Formatear fechas
-	const formattedCreated = format(new Date(createdAt), 'dd/MM/yy', { locale: es });
-	const formattedUpdated = format(new Date(updatedAt), 'dd/MM/yy', { locale: es });
+	// Formatear el tamaño en MB
+	const formatSize = (bytes?: number): string => {
+		if (!bytes) return '0 MB';
+		const mb = bytes / (1024 * 1024);
+		return `${mb.toFixed(1)} MB`;
+	};
 
 	return (
-		<div className="p-3 border-t" style={{ borderColor: `${primaryColor}30` }}>
-			{/* Pie de la carta */}
-			<div className="flex items-center justify-between">
-				{/* Parte izquierda - Contador de imágenes (como fuerza/resistencia en Magic) */}
+		<footer className="p-2 text-xs border-t border-white/10 relative">
+			{/* Id de carta y contenido tipo TCG */}
+			<div className="flex justify-between items-center">
+				<div className="flex items-center gap-1">
+					<span className="text-muted-foreground">ID:</span>
+					<span className="font-mono">{cardId}</span>
+				</div>
+
+				<div className="flex items-center gap-1">
+					<span className="text-muted-foreground">Tamaño:</span>
+					<span>{formatSize(album.totalSize)}</span>
+				</div>
+			</div>
+
+			{/* Estadísticas adicionales */}
+			<div className="flex justify-between items-center mt-1">
+				<div className="flex items-center gap-1">
+					<span className="text-muted-foreground">Entidades:</span>
+					<span>{totalEntities}</span>
+				</div>
+
+				<div className="flex items-center gap-1">
+					<span className="text-muted-foreground">Actualizado:</span>
+					<span>{new Date(album.updatedAt).toLocaleDateString()}</span>
+				</div>
+			</div>
+
+			{/* Rareza - solo visible en modo TCG */}
+			{tcgMode && (
 				<div
-					className="text-sm font-bold bg-black/20 rounded px-2 py-1 flex items-center gap-1"
-					style={{
-						border: `1px solid ${primaryColor}40`,
-						background: `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}30)`
-					}}
+					className={cn(
+						"absolute bottom-1 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-medium z-20",
+						rarityLevel === 'Mítica' && "bg-gradient-to-r from-amber-400 via-purple-500 to-pink-500 text-white",
+						rarityLevel === 'Rara' && "bg-gradient-to-r from-indigo-500 to-purple-600 text-white",
+						rarityLevel === 'Poco común' && "bg-gradient-to-r from-emerald-500 to-teal-600 text-white",
+						rarityLevel === 'Común' && "bg-gradient-to-r from-gray-400 to-gray-500 text-white"
+					)}
 				>
-					{/* El contador de imágenes como valor de fuerza/resistencia en Magic */}
-					<Image className="w-3.5 h-3.5" />
-					<span className="text-foreground">{imagesCount}</span>
+					{rarityLevel}
 				</div>
+			)}
 
-				{/* Parte derecha - Textura (similar a tipo de expansión en Magic) */}
-				{texture && (
-					<div
-						className="flex items-center gap-1 bg-black/10 px-2 py-1 rounded-sm"
-						style={{ color: `${primaryColor}` }}
-					>
-						<Layers className="w-3.5 h-3.5" />
-						<span className="text-xs font-medium uppercase tracking-wide">{texture}</span>
-					</div>
-				)}
-			</div>
-
-			{/* Información adicional - Similar a la línea de coleccionista en Magic */}
-			<div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-				{/* Fecha de creación */}
-				<div className="flex items-center gap-1">
-					<Calendar className="w-3 h-3" />
-					<span className="opacity-70 mr-1">Creado:</span>
-					<span className="font-medium">{formattedCreated}</span>
+			{/* Sello de rareza holográfico cuando es favorito - solo visible en modo TCG */}
+			{tcgMode && album.isFavorite && (
+				<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
+					<div className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+						style={{
+							background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
+							backgroundSize: '600% 600%',
+							animation: 'shine 3s linear infinite'
+						}}
+					/>
 				</div>
-
-				{/* Fecha de actualización */}
-				<div className="flex items-center gap-1">
-					<Clock className="w-3 h-3" />
-					<span className="opacity-70 mr-1">Act:</span>
-					<span className="font-medium">{formattedUpdated}</span>
-				</div>
-			</div>
-
-			{/* Línea de ilustrador - similar a Magic */}
-			<div className="mt-1 text-xs text-center text-muted-foreground italic" style={{ opacity: 0.7 }}>
-				♦ Colección personal ♦
-			</div>
-		</div>
+			)}
+		</footer>
 	);
 }

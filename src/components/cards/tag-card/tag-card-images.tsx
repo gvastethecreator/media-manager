@@ -1,5 +1,7 @@
 'use client';
 
+import { cn } from '@/lib/utils';
+import { TagRarity } from '@/types/entities/tag/enums';
 import { ImageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getRecentTagImages } from './tag-server-actions';
@@ -8,6 +10,10 @@ interface TagCardImagesProps {
 	tagId: string;
 	primaryColor: string;
 	secondaryColor: string;
+	rarity?: TagRarity;
+	featuredImage?: { id: string; thumbnailUrl: string; url?: string } | null;
+	tcgMode?: boolean;
+	compact?: boolean;
 }
 
 interface ThumbnailImage {
@@ -19,25 +25,47 @@ interface ThumbnailImage {
 
 /**
  * Componente para mostrar las imágenes recientes asociadas a una etiqueta
- * Similar a la ilustración de una carta Magic pero con una disposición especial para etiquetas
+ * Similar a la ilustración de una carta TCG pero con una disposición especial para etiquetas
  */
 export function TagCardImages({
 	tagId,
 	primaryColor,
 	secondaryColor,
+	rarity = TagRarity.COMMON,
+	featuredImage = null,
+	tcgMode = true,
+	compact = false
 }: TagCardImagesProps) {
 	// Estado para almacenar las imágenes
 	const [images, setImages] = useState<ThumbnailImage[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// Conseguir un factor de brillo basado en la rareza para efectos visuales
+	const rarityBrightness = {
+		[TagRarity.COMMON]: 1,
+		[TagRarity.UNCOMMON]: 1.2,
+		[TagRarity.RARE]: 1.5,
+		[TagRarity.EPIC]: 1.8,
+		[TagRarity.LEGENDARY]: 2.2
+	}[rarity as keyof typeof rarityBrightness] || 1;
+
 	// Cargar imágenes al montar el componente
 	useEffect(() => {
 		async function loadImages() {
 			try {
 				setLoading(true);
+				// Si hay una imagen destacada, usarla primero
 				const fetchedImages = await getRecentTagImages(tagId);
-				setImages(fetchedImages);
+
+				// Si hay una imagen destacada, asegurarse de que aparezca primero
+				if (featuredImage && fetchedImages.length > 0) {
+					const filteredImages = fetchedImages.filter(img => img.id !== featuredImage.id);
+					setImages([featuredImage as ThumbnailImage, ...filteredImages]);
+				} else {
+					setImages(fetchedImages);
+				}
+
 				setError(null);
 			} catch (err) {
 				console.error('Error loading tag images:', err);
@@ -48,7 +76,7 @@ export function TagCardImages({
 		}
 
 		loadImages();
-	}, [tagId]);
+	}, [tagId, featuredImage]);
 
 	// Elemento placeholder para cuando no hay imágenes
 	const renderPlaceholder = () => (
@@ -67,10 +95,15 @@ export function TagCardImages({
 	if (loading) {
 		return (
 			<div
-				className="h-[140px] flex-shrink-0 flex items-center justify-center bg-black/5"
+				className={cn(
+					"flex-shrink-0 flex items-center justify-center bg-black/5",
+					compact ? "h-[120px]" : "h-[140px]"
+				)}
 				style={{
 					borderBottom: `1px solid ${primaryColor}20`,
-					background: `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
+					background: tcgMode
+						? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
+						: `${primaryColor}05`
 				}}
 			>
 				<div
@@ -85,10 +118,15 @@ export function TagCardImages({
 	if (error || images.length === 0) {
 		return (
 			<div
-				className="h-[140px] flex-shrink-0 bg-black/5"
+				className={cn(
+					"flex-shrink-0 bg-black/5",
+					compact ? "h-[120px]" : "h-[140px]"
+				)}
 				style={{
 					borderBottom: `1px solid ${primaryColor}20`,
-					background: `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
+					background: tcgMode
+						? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
+						: `${primaryColor}05`
 				}}
 			>
 				{renderPlaceholder()}
@@ -99,7 +137,10 @@ export function TagCardImages({
 	// Renderizar mosaico de imágenes - diseño especial para etiquetas
 	return (
 		<div
-			className="h-[140px] flex-shrink-0 overflow-hidden relative"
+			className={cn(
+				"flex-shrink-0 overflow-hidden relative",
+				compact ? "h-[120px]" : "h-[140px]"
+			)}
 			style={{
 				borderBottom: `1px solid ${primaryColor}20`
 			}}
@@ -108,9 +149,21 @@ export function TagCardImages({
 			<div
 				className="absolute inset-0 -z-10"
 				style={{
-					background: `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
+					background: tcgMode
+						? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
+						: `${primaryColor}05`
 				}}
 			/>
+
+			{/* Esquinas TCG decorativas para imágenes */}
+			{tcgMode && (
+				<div className="absolute inset-0 pointer-events-none z-10">
+					<div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-white/20" />
+					<div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white/20" />
+					<div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white/20" />
+					<div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-white/20" />
+				</div>
+			)}
 
 			{/* Grid de imágenes con efecto de mosaico etiquetado */}
 			<div className="grid grid-cols-3 grid-rows-2 gap-px h-full">
@@ -126,32 +179,64 @@ export function TagCardImages({
 							className="w-full h-full object-cover"
 							loading="lazy"
 							style={{
-								opacity: 0.9,
+								opacity: tcgMode ? 0.9 : 1,
 								// Efectos específicos de etiqueta: borde sutil y tratamiento de imágen
-								filter: `contrast(1.05) ${index % 2 === 0 ? 'saturate(1.1)' : 'saturate(0.9)'}`
+								filter: tcgMode
+									? `contrast(1.05) ${index % 2 === 0 ? 'saturate(1.1)' : 'saturate(0.9)'}`
+									: 'none'
 							}}
 						/>
 
 						{/* Corner tag emblem en cada imagen */}
-						<div
-							className="absolute top-0 left-0 w-[20px] h-[20px] opacity-70"
-							style={{
-								background: primaryColor,
-								clipPath: 'polygon(0 0, 100% 0, 0 100%)'
-							}}
-						/>
+						{tcgMode && (
+							<div
+								className="absolute top-0 left-0 w-[20px] h-[20px] opacity-70"
+								style={{
+									background: primaryColor,
+									clipPath: 'polygon(0 0, 100% 0, 0 100%)'
+								}}
+							/>
+						)}
 
-						{/* Overlay sutil */}
+						{/* Overlay sutil con efecto de brillo basado en rareza */}
 						<div
 							className="absolute inset-0 pointer-events-none"
 							style={{
 								boxShadow: `inset 0 0 0 1px ${primaryColor}30`,
-								background: `linear-gradient(135deg, ${primaryColor}20, transparent)`
+								background: tcgMode
+									? `linear-gradient(135deg, ${primaryColor}20, transparent)`
+									: 'none',
+								filter: tcgMode && rarity !== TagRarity.COMMON ? `brightness(${rarityBrightness})` : 'none'
 							}}
 						/>
+
+						{/* Destacar la primera imagen si es la destacada */}
+						{index === 0 && featuredImage && featuredImage.id === image.id && tcgMode && (
+							<div
+								className="absolute bottom-0 right-0 w-[15px] h-[15px]"
+								style={{
+									background: primaryColor,
+									clipPath: 'polygon(100% 0, 100% 100%, 0 100%)'
+								}}
+							/>
+						)}
 					</div>
 				))}
 			</div>
+
+			{/* Indicador de total */}
+			{tcgMode && images.length > 6 && (
+				<div
+					className="absolute bottom-1 right-1 text-xs px-1.5 py-0.5 rounded-sm backdrop-blur-sm z-10"
+					style={{
+						background: `${primaryColor}80`,
+						color: 'white',
+						boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+					}}
+				>
+					+{images.length - 6}
+				</div>
+			)}
 		</div>
 	);
 }

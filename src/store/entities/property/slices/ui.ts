@@ -4,7 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { PropertyViewMode } from '@/types/entities/property';
+import type { PropertyViewMode } from '@/types/entities/property';
 import type { StateCreator } from 'zustand';
 import type { PropertyState } from '../types';
 

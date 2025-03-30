@@ -1,33 +1,38 @@
+import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { BarChart4, Calendar, Heart, Image, Link, ListChecks } from 'lucide-react';
+import { BarChart4, Calendar, Heart, Image, LinkIcon, ListChecks, RefreshCw, Star, Video } from 'lucide-react';
 
 interface NoteCardFooterProps {
 	createdAt: Date | string;
 	updatedAt: Date | string;
 	imagesCount: number;
+	videosCount: number;
 	relationsCount: number;
 	isFavorite?: boolean;
 	status?: string | null;
 	priority?: number | null;
 	primaryColor: string;
 	secondaryColor: string;
+	tcgMode?: boolean;
 }
 
 /**
  * Componente para el pie de una tarjeta de nota.
- * Similar al cuadro de texto inferior de una carta Magic.
+ * Similar al cuadro de texto inferior de una carta TCG.
  */
 export function NoteCardFooter({
 	createdAt,
 	updatedAt,
 	imagesCount,
+	videosCount,
 	relationsCount,
 	isFavorite = false,
 	status,
 	priority = 0,
 	primaryColor,
 	secondaryColor,
+	tcgMode = true,
 }: NoteCardFooterProps) {
 	// Convertir fecha a objeto Date si es string
 	const createdAtDate = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
@@ -62,13 +67,29 @@ export function NoteCardFooter({
 		}
 	};
 
+	// Estilos para modo TCG o normal
+	const getFooterStyles = () => {
+		if (tcgMode) {
+			return {
+				background: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}45)`,
+				borderTop: `1px solid ${primaryColor}50`,
+				borderImage: `linear-gradient(to right, transparent, ${primaryColor}60, transparent) 1`,
+			};
+		}
+
+		return {
+			background: `linear-gradient(to bottom, ${primaryColor}10, ${secondaryColor}30)`,
+			borderTop: `1px solid ${primaryColor}30`,
+		};
+	};
+
 	return (
 		<div
-			className="px-3 py-2 mt-auto border-t border-gray-400/30 flex flex-col gap-1"
-			style={{
-				background: `linear-gradient(to bottom, ${primaryColor}10, ${secondaryColor}30)`,
-				borderTop: `1px solid ${primaryColor}30`,
-			}}
+			className={cn(
+				"px-3 py-2 mt-auto border-t border-gray-400/30 flex flex-col gap-1",
+				tcgMode && "backdrop-blur-sm rounded-b-[4.75%]"
+			)}
+			style={getFooterStyles()}
 		>
 			{/* Fila superior con estado y prioridad */}
 			{(status || priority !== undefined) && (
@@ -76,7 +97,10 @@ export function NoteCardFooter({
 					{status && (
 						<div className="flex items-center gap-1">
 							<ListChecks className="h-3 w-3" style={{ color: primaryColor }} />
-							<span className="opacity-80">
+							<span className={cn(
+								"opacity-80",
+								tcgMode && "font-medium tracking-wide"
+							)}>
 								{status.charAt(0).toUpperCase() + status.slice(1)}
 							</span>
 						</div>
@@ -88,7 +112,7 @@ export function NoteCardFooter({
 								style={{ color: getPriorityColor() }}
 							/>
 							<span
-								className="opacity-80"
+								className={cn("opacity-80", tcgMode && "font-medium")}
 								style={{ color: getPriorityColor() }}
 							>
 								P{priority}
@@ -107,29 +131,57 @@ export function NoteCardFooter({
 						<span className="opacity-80">{imagesCount}</span>
 					</div>
 
+					{/* Contador de videos */}
+					{(videosCount > 0 || tcgMode) && (
+						<div className="flex items-center gap-1">
+							<Video className="h-3 w-3 text-muted-foreground" />
+							<span className="opacity-80">{videosCount}</span>
+						</div>
+					)}
+
 					{/* Contador de relaciones */}
 					<div className="flex items-center gap-1">
-						<Link className="h-3 w-3 text-muted-foreground" />
+						<LinkIcon className="h-3 w-3 text-muted-foreground" />
 						<span className="opacity-80">{relationsCount}</span>
 					</div>
 
 					{/* Indicador de favorito */}
 					{isFavorite && (
-						<Heart className="h-3 w-3 fill-current text-pink-500" />
+						tcgMode ?
+							<Star className="h-3.5 w-3.5 fill-current text-yellow-500" /> :
+							<Heart className="h-3 w-3 fill-current text-pink-500" />
 					)}
 				</div>
 
 				{/* Fecha */}
 				<div className="flex items-center gap-1">
-					<Calendar className="h-3 w-3 text-muted-foreground" />
-					<span className="opacity-80 text-[0.65rem]">{formattedDate}</span>
+					{wasUpdated ?
+						<RefreshCw className="h-3 w-3 text-muted-foreground" /> :
+						<Calendar className="h-3 w-3 text-muted-foreground" />
+					}
+					<span className={cn(
+						"opacity-80 text-[0.65rem]",
+						tcgMode && "tracking-tight"
+					)}>
+						{wasUpdated ? updatedFormattedDate : formattedDate}
+					</span>
 				</div>
 			</div>
 
-			{/* Fecha de actualización si es diferente */}
-			{wasUpdated && updatedFormattedDate && (
+			{/* Fecha de actualización (solo en modo no-TCG) */}
+			{wasUpdated && updatedFormattedDate && !tcgMode && (
 				<div className="flex justify-end items-center text-[0.65rem] opacity-60 mt-0.5">
 					<span>Actualizado {updatedFormattedDate}</span>
+				</div>
+			)}
+
+			{/* Sello TCG en la parte inferior */}
+			{tcgMode && (
+				<div className="mt-1 pt-1 border-t border-white/10 flex justify-center">
+					<div className="text-[0.65rem] opacity-60 tracking-wide uppercase font-medium"
+						style={{ color: primaryColor }}>
+						Image Manager • Note #{note => note.id?.substring(0, 6)}
+					</div>
 				</div>
 			)}
 		</div>

@@ -118,6 +118,16 @@ export enum PropertySortCriteria {
 }
 
 /**
+ * Enumeración para modos de visualización
+ */
+export enum PropertyViewMode {
+  GRID = 'grid',
+  LIST = 'list',
+  CARDS = 'cards',
+  DETAILS = 'details',
+}
+
+/**
  * Mapa de propiedades para ordenación
  */
 export const PROPERTY_SORT_PROPERTY_MAP: Record<PropertySortCriteria, string> = {

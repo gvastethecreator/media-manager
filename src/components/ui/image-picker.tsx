@@ -12,9 +12,10 @@ export interface ImagePickerProps {
 	onChange?: (value: string | null) => void;
 	className?: string;
 	disabled?: boolean;
+	placeholder?: string;
 }
 
-export function ImagePicker({ value, defaultValue = null, onChange, className, disabled = false }: ImagePickerProps) {
+export function ImagePicker({ value, defaultValue = null, onChange, className, disabled = false, placeholder = "Seleccionar imagen" }: ImagePickerProps) {
 	const [selectedImage, setSelectedImage] = React.useState<string | null>(value || defaultValue);
 	const [isOpen, setIsOpen] = React.useState(false);
 
@@ -49,8 +50,9 @@ export function ImagePicker({ value, defaultValue = null, onChange, className, d
 			) : (
 				<Dialog open={isOpen} onOpenChange={setIsOpen}>
 					<DialogTrigger asChild>
-						<Button variant="outline" className="w-full h-32 border-dashed" disabled={disabled}>
+						<Button variant="outline" className="w-full h-32 border-dashed flex flex-col gap-2 items-center justify-center" disabled={disabled}>
 							<Image className="h-8 w-8 opacity-50" />
+							<span className="text-sm text-muted-foreground">{placeholder}</span>
 						</Button>
 					</DialogTrigger>
 					<DialogContent>

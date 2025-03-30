@@ -16,7 +16,7 @@ import type { Property } from '../property/types';
 import type { Tag } from '../tag/types';
 import type { Wildcard } from '../wildcard/types';
 import type { WorldItem } from '../world-item/types';
-import type { VideoFormat, VideoPrivacyLevel } from './enums';
+import { VideoFormat, VideoPrivacyLevel } from './enums';
 
 /**
  * Interfaz base para video

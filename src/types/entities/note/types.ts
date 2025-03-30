@@ -27,6 +27,11 @@ export interface NoteBase {
   category: string;
   priority: number;
   status: string;
+  /**
+   * Campo que almacena un array de tags como string JSON
+   * Formato: { "items": string[] }
+   */
+  tags?: string;
   featuredImage: string | null;
   isFavorite: boolean;
   presetId: string | null;
@@ -45,7 +50,7 @@ export interface NoteWithRelations extends NoteBase {
   // Relaciones con entidades principales
   albums?: Album[];
   collections?: Collection[];
-  tags?: Tag[];
+  tagEntities?: Tag[]; // Renombrado para evitar conflicto con campo tags
   characters?: Character[];
   places?: Place[];
   worldItems?: WorldItem[];
@@ -82,6 +87,7 @@ export interface CreateNoteData {
   category?: string;
   priority?: number;
   status?: string;
+  tags?: string[] | string; // Puede recibir tanto array como string JSON
   featuredImage?: string | null;
   isFavorite?: boolean;
   presetId?: string | null;
@@ -96,6 +102,7 @@ export interface UpdateNoteData {
   category?: string;
   priority?: number;
   status?: string;
+  tags?: string[] | string; // Puede recibir tanto array como string JSON
   featuredImage?: string | null;
   isFavorite?: boolean;
   presetId?: string | null;

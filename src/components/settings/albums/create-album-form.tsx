@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
-import { Album } from '@/types/entities/album';
+import type { Album } from '@/types/entities/album';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Bookmark, ClipboardList, Gem, Loader2, PaintBucket, Pencil, Save, TextCursor } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';

@@ -1,3 +1,93 @@
+/**
+ * @file Tipos para manejo de archivos
+ * @module types/file-item
+ */
+
+import type { EntityId, JSONString } from '@/utils/types/utility-types';
+import { z } from 'zod';
+import type { MediaMetadata } from './metadata.types';
+
+/**
+ * Estado de procesamiento de archivo
+ */
+export enum FileProcessingStatus {
+    PENDING = 'pending',
+    PROCESSING = 'processing',
+    COMPLETED = 'completed',
+    FAILED = 'failed'
+}
+
+/**
+ * Tipo de archivo
+ */
+export enum FileType {
+    IMAGE = 'image',
+    VIDEO = 'video',
+    AUDIO = 'audio',
+    DOCUMENT = 'document',
+    OTHER = 'other'
+}
+
+/**
+ * Interfaz base para archivos
+ */
+export interface FileItem {
+    id: EntityId;
+    name: string;
+    path: string;
+    type: FileType;
+    size: number;
+    mimeType: string;
+    metadata: JSONString<MediaMetadata>;
+    processingStatus: FileProcessingStatus;
+    errorMessage?: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+/**
+ * Opciones de procesamiento
+ */
+export interface FileProcessingOptions {
+    generateThumbnail?: boolean;
+    extractMetadata?: boolean;
+    optimizeFile?: boolean;
+    maxWidth?: number;
+    maxHeight?: number;
+    quality?: number;
+}
+
+// Validación con Zod
+export const fileProcessingStatusSchema = z.nativeEnum(FileProcessingStatus);
+export const fileTypeSchema = z.nativeEnum(FileType);
+
+export const fileItemSchema = z.object({
+    id: z.string(),
+    name: z.string().min(1),
+    path: z.string().min(1),
+    type: fileTypeSchema,
+    size: z.number().positive(),
+    mimeType: z.string(),
+    metadata: z.string(),
+    processingStatus: fileProcessingStatusSchema,
+    errorMessage: z.string().optional(),
+    createdAt: z.date(),
+    updatedAt: z.date()
+});
+
+export const fileProcessingOptionsSchema = z.object({
+    generateThumbnail: z.boolean().optional(),
+    extractMetadata: z.boolean().optional(),
+    optimizeFile: z.boolean().optional(),
+    maxWidth: z.number().positive().optional(),
+    maxHeight: z.number().positive().optional(),
+    quality: z.number().min(1).max(100).optional()
+});
+
+// Tipos inferidos
+export type FileItemValidated = z.infer<typeof fileItemSchema>;
+export type FileProcessingOptionsValidated = z.infer<typeof fileProcessingOptionsSchema>;
+
 export type ViewType =
 	| 'all-images'
 	| 'favorites'
@@ -134,43 +224,6 @@ export interface FileMetadata {
 		workflow?: string; // Para ComfyUI
 		extra_params?: Record<string, string | number | boolean | null | undefined | string[]>;
 	};
-}
-
-export interface FileItem {
-	id: string;
-	hash: string;
-	name: string;
-	path: string;
-	type: 'file' | 'folder' | 'image';
-	size: number;
-	width: number;
-	height: number;
-	metadata: string | null;
-	thumbnail: string | null;
-	thumbnailSize: number | null;
-	thumbnailWidth: number | null;
-	thumbnailHeight: number | null;
-	thumbnailError: string | null;
-	thumbnailErrorAt: Date | null;
-	thumbnailOptimizedAt: Date | null;
-	isPublic: boolean;
-	isFavorite: boolean;
-	folderId: string;
-	createdAt: Date;
-	updatedAt: Date;
-	collections: RelatedCollection[];
-	tags: RelatedTag[];
-	albums: RelatedAlbum[];
-	characters: RelatedCharacter[];
-	places: RelatedPlace[];
-	worldItems: RelatedWorldItem[];
-	concepts: RelatedConcept[];
-	prompts: RelatedPrompt[];
-	notes: RelatedNote[];
-	groups?: RelatedGroup[];
-	properties?: RelatedProperty[];
-	wildcards?: RelatedWildcard[];
-	stats?: ImageStats | null;
 }
 
 export interface ImageStats {

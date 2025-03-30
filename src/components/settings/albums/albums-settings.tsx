@@ -13,11 +13,11 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import toastService from '@/services/toast.service';
-import { Album } from '@/types/entities/album';
-import { AlbumWithStats } from '@/types/entities/album/extended';
+import type { Album } from '@/types/entities/album';
+import type { AlbumWithStats } from '@/types/entities/album/extended';
 import { formatBytes } from '@/utils/file/helpers';
 import { Album as AlbumIcon, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { memo, ReactElement, useCallback, useEffect, useState } from 'react';
 import { CreateAlbumForm } from './create-album-form';
 
 // Extender el tipo Album para añadir las propiedades que faltan
