@@ -3,6 +3,111 @@
  * @module transformers/image/serializers
  */
 
+import { Logger } from '@/lib/logger';
+import { Prisma } from '@prisma/client';
+import {
+	ImageBase,
+	ImageComplete,
+	ImageCreateInput,
+	ImageUpdateInput,
+	ImageSchema,
+} from '@/types/entities/image/types';
+import {
+	serializeJsonField,
+	deserializeJsonField,
+	validateRequiredFields,
+	validateFieldType,
+} from '@/utils/transformers/common';
+import {
+	validateBaseEntity,
+	validateUIFields,
+	validateMetadataFields,
+} from '@/utils/transformers/validation';
+import {
+	validateEntityRelations,
+	preparePrismaRelations,
+	getRelationCounts,
+} from '@/utils/transformers/relations';
+import {
+	SerializationError,
+	ValidationError,
+	handleTransformerError,
+} from '@/utils/transformers/errors';
+
+const logger = new Logger('ImageSerializer');
+
+/**
+ * 🔄 Serializa una Image para Prisma
+ */
+export function toPrismaImage(data: ImageCreateInput | ImageUpdateInput): Prisma.ImageCreateInput | Prisma.ImageUpdateInput {
+	try {
+		// Validar campos requeridos para creación
+		if (!('id' in data)) {
+			validateRequiredFields(data, ['name', 'path', 'hash', 'size', 'width', 'height', 'folder']);
+		}
+
+		// Validar tipos de datos
+		validateFieldType(data.name, 'string', 'name');
+		validateFieldType(data.path, 'string', 'path');
+		validateFieldType(data.hash, 'string', 'hash');
+		validateFieldType(data.size, 'number', 'size');
+		validateFieldType(data.width, 'number', 'width');
+		validateFieldType(data.height, 'number', 'height');
+
+		// Serializar campos JSON
+		const metadata = serializeJsonField(data.metadata, '{}');
+
+		// Preparar relaciones para Prisma
+		const relations = preparePrismaRelations('Image', data);
+
+		return {
+			...data,
+			metadata,
+			...relations,
+		};
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Deserializa una Image desde Prisma
+ */
+export function fromPrismaImage(
+	prismaImage: Prisma.ImageGetPayload<{
+		include: {
+			folder: true;
+			stats: true;
+			activities: true;
+			uploadedImages: true;
+			profiles: true;
+			albums: true;
+			collections: true;
+			tags: true;
+			characters: true;
+			places: true;
+			worldItems: true;
+			concepts: true;
+			prompts: true;
+			notes: true;
+			wildcards: true;
+			properties: true;
+			groups: true;
+			_count: true;
+		};
+	}>
+): ImageComplete {
+	try {
+		// Deserializar campos JSON
+		const metadata = deserializeJsonField(prismaImage.metadata, {});
+
+		// Obtener conteos de relaciones
+		const counts = getRelationCounts('Image', prismaImage);
+
+		// Construir objeto base
+		const baseImage: ImageBase = {
+			id: prismaImage.id,
+			name: prismaImage.name,
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
   ImageBase,

@@ -1,13 +1,14 @@
 /**
- * @file Índice para tipos de Wildcard
+ * @file Exportación de tipos para la entidad Wildcard
  * @module types/entities/wildcard
  */
 
+export * from './schema';
 export * from './types';
 
 // Alias común para el tipo principal
-export type { WildcardWithRelations as Wildcard } from './types';
+export type { WildcardComplete as Wildcard } from './types';
 
-// Exportar enum específicamente para que se pueda usar como valor
+// Exportar enums específicamente
 export { WildcardSortCriteria, WildcardViewMode } from './types';
 

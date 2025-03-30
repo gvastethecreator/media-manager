@@ -1,257 +1,557 @@
 /**
- * @file Funciones de serialización para la entidad WorldItem
+ * @file Serializadores para la entidad WorldItem
  * @module transformers/world-item/serializers
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    WorldItemAttributes,
+import { createLogger } from '@/lib/logger';
+import { WorldItemSchema } from '@/types/entities/world-item/schema';
+import {
+    WorldItemAttribute,
     WorldItemBase,
-    WorldItemEffects,
+    WorldItemComplete,
+    WorldItemCounts,
+    WorldItemDeserialized,
+    WorldItemEffect,
     WorldItemFilter,
-    WorldItemRequirements,
-    WorldItemStats,
-    WorldItemVisualConfig
-} from '@/types/entities/world-item';
+    WorldItemProperty,
+    WorldItemRelations,
+    WorldItemRequirement,
+    WorldItemStat,
+    WorldItemUI
+} from '@/types/entities/world-item/types';
 
-const serializersLogger = serverLogger.withContext('WorldItemSerializers');
+// Logger específico para este módulo
+const logger = createLogger('WorldItemTransformer:Serializers');
 
 /**
- * Serializa un array de atributos a formato JSON string
- * @param attributes Atributos del objeto del mundo
- * @returns String JSON con los atributos
+ * Valida un objeto WorldItem contra su esquema
+ * @param worldItem - Objeto WorldItem a validar
+ * @returns El objeto validado o lanza un error
  */
-export function serializeWorldItemAttributes(attributes: WorldItemAttributes[] | string): string {
+export function validateWorldItem(worldItem: WorldItemBase): WorldItemBase {
 	try {
-		if (typeof attributes === 'string') return attributes;
-		return attributes && attributes.length > 0 ? JSON.stringify(attributes) : 'empty_array';
+		const result = WorldItemSchema.parse(worldItem);
+		return worldItem;
 	} catch (error) {
-		serializersLogger.error('❌ Error al serializar atributos:', error);
-		return 'empty_array';
+		logger.error('Error validando WorldItem:', error);
+		throw new Error(`Datos de WorldItem inválidos: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
 
 /**
- * Deserializa un string JSON a array de atributos
- * @param attributesString String JSON con atributos
- * @returns Array de atributos del objeto del mundo
+ * Serializa atributos de WorldItem para almacenamiento
+ * @param attributes - Atributos a serializar
+ * @returns String JSON con los atributos serializados
  */
-export function deserializeWorldItemAttributes(attributesString?: string | null): WorldItemAttributes[] {
+export function serializeAttributes(attributes: WorldItemAttribute[] | string): string {
+	try {
+		if (typeof attributes === 'string') return attributes;
+		return attributes && attributes.length > 0 ? JSON.stringify(attributes) : '[]';
+	} catch (error) {
+		logger.error('Error serializando atributos de WorldItem:', error);
+		return '[]';
+	}
+}
+
+/**
+ * Deserializa atributos de WorldItem desde almacenamiento
+ * @param attributesString - String JSON con atributos
+ * @returns Array de atributos deserializados
+ */
+export function deserializeAttributes(attributesString?: string | null): WorldItemAttribute[] {
 	if (!attributesString) return [];
 
 	try {
-		if (attributesString === 'empty_array') return [];
+		if (attributesString === 'empty_array' || attributesString === '[]') return [];
 		const parsed = JSON.parse(attributesString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
-		serializersLogger.error('❌ Error al deserializar atributos:', error);
+		logger.error('Error deserializando atributos de WorldItem:', error);
 		return [];
 	}
 }
 
 /**
- * Serializa un array de efectos a formato JSON string
- * @param effects Efectos del objeto del mundo
- * @returns String JSON con los efectos
+ * Serializa efectos de WorldItem para almacenamiento
+ * @param effects - Efectos a serializar
+ * @returns String JSON con los efectos serializados
  */
-export function serializeWorldItemEffects(effects: WorldItemEffects[] | string): string {
+export function serializeEffects(effects: WorldItemEffect[] | string): string {
 	try {
 		if (typeof effects === 'string') return effects;
-		return effects && effects.length > 0 ? JSON.stringify(effects) : 'empty_array';
+		return effects && effects.length > 0 ? JSON.stringify(effects) : '[]';
 	} catch (error) {
-		serializersLogger.error('❌ Error al serializar efectos:', error);
-		return 'empty_array';
+		logger.error('Error serializando efectos de WorldItem:', error);
+		return '[]';
 	}
 }
 
 /**
- * Deserializa un string JSON a array de efectos
- * @param effectsString String JSON con efectos
- * @returns Array de efectos del objeto del mundo
+ * Deserializa efectos de WorldItem desde almacenamiento
+ * @param effectsString - String JSON con efectos
+ * @returns Array de efectos deserializados
  */
-export function deserializeWorldItemEffects(effectsString?: string | null): WorldItemEffects[] {
+export function deserializeEffects(effectsString?: string | null): WorldItemEffect[] {
 	if (!effectsString) return [];
 
 	try {
-		if (effectsString === 'empty_array') return [];
+		if (effectsString === 'empty_array' || effectsString === '[]') return [];
 		const parsed = JSON.parse(effectsString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
-		serializersLogger.error('❌ Error al deserializar efectos:', error);
+		logger.error('Error deserializando efectos de WorldItem:', error);
 		return [];
 	}
 }
 
 /**
- * Serializa requisitos a formato JSON string
- * @param requirements Requisitos del objeto del mundo
- * @returns String JSON con los requisitos
+ * Serializa requisitos de WorldItem para almacenamiento
+ * @param requirements - Requisitos a serializar
+ * @returns String JSON con los requisitos serializados
  */
-export function serializeWorldItemRequirements(requirements: WorldItemRequirements | string): string {
+export function serializeRequirements(requirements: WorldItemRequirement[] | string): string {
 	try {
 		if (typeof requirements === 'string') return requirements;
-		return requirements ? JSON.stringify(requirements) : '';
+		return requirements && requirements.length > 0 ? JSON.stringify(requirements) : '[]';
 	} catch (error) {
-		serializersLogger.error('❌ Error al serializar requisitos:', error);
-		return '';
+		logger.error('Error serializando requisitos de WorldItem:', error);
+		return '[]';
 	}
 }
 
 /**
- * Deserializa un string JSON a objeto de requisitos
- * @param requirementsString String JSON con requisitos
- * @returns Objeto de requisitos del objeto del mundo
+ * Deserializa requisitos de WorldItem desde almacenamiento
+ * @param requirementsString - String JSON con requisitos
+ * @returns Array de requisitos deserializados
  */
-export function deserializeWorldItemRequirements(requirementsString?: string | null): WorldItemRequirements | null {
-	if (!requirementsString) return null;
+export function deserializeRequirements(requirementsString?: string | null): WorldItemRequirement[] {
+	if (!requirementsString) return [];
 
 	try {
-		return JSON.parse(requirementsString);
+		if (requirementsString === 'empty_array' || requirementsString === '[]') return [];
+		const parsed = JSON.parse(requirementsString);
+		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
-		serializersLogger.error('❌ Error al deserializar requisitos:', error);
-		return null;
+		logger.error('Error deserializando requisitos de WorldItem:', error);
+		return [];
 	}
 }
 
 /**
- * Serializa estadísticas a formato JSON string
- * @param stats Estadísticas del objeto del mundo
- * @returns String JSON con las estadísticas
+ * Serializa estadísticas de WorldItem para almacenamiento
+ * @param stats - Estadísticas a serializar
+ * @returns String JSON con las estadísticas serializadas
  */
-export function serializeWorldItemStats(stats: WorldItemStats | string): string {
+export function serializeStats(stats: WorldItemStat[] | string): string {
 	try {
 		if (typeof stats === 'string') return stats;
-		return stats ? JSON.stringify(stats) : '';
+		return stats && stats.length > 0 ? JSON.stringify(stats) : '[]';
 	} catch (error) {
-		serializersLogger.error('❌ Error al serializar estadísticas:', error);
-		return '';
+		logger.error('Error serializando estadísticas de WorldItem:', error);
+		return '[]';
 	}
 }
 
 /**
- * Deserializa un string JSON a objeto de estadísticas
- * @param statsString String JSON con estadísticas
- * @returns Objeto de estadísticas del objeto del mundo
+ * Deserializa estadísticas de WorldItem desde almacenamiento
+ * @param statsString - String JSON con estadísticas
+ * @returns Array de estadísticas deserializadas
  */
-export function deserializeWorldItemStats(statsString?: string | null): WorldItemStats | null {
-	if (!statsString) return null;
+export function deserializeStats(statsString?: string | null): WorldItemStat[] {
+	if (!statsString) return [];
 
 	try {
-		return JSON.parse(statsString);
+		if (statsString === 'empty_array' || statsString === '[]') return [];
+		const parsed = JSON.parse(statsString);
+		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
-		serializersLogger.error('❌ Error al deserializar estadísticas:', error);
-		return null;
+		logger.error('Error deserializando estadísticas de WorldItem:', error);
+		return [];
 	}
 }
 
 /**
- * Serializa filtros a formato JSON string
- * @param filters Filtros del objeto del mundo
- * @returns String JSON con los filtros
+ * Serializa propiedades de WorldItem para almacenamiento
+ * @param properties - Propiedades a serializar
+ * @returns String JSON con las propiedades serializadas
  */
-export function serializeWorldItemFilters(filters: WorldItemFilter[] | string): string {
+export function serializeProperties(properties: WorldItemProperty[] | string): string {
+	try {
+		if (typeof properties === 'string') return properties;
+		return properties && properties.length > 0 ? JSON.stringify(properties) : '[]';
+	} catch (error) {
+		logger.error('Error serializando propiedades de WorldItem:', error);
+		return '[]';
+	}
+}
+
+/**
+ * Deserializa propiedades de WorldItem desde almacenamiento
+ * @param propertiesString - String JSON con propiedades
+ * @returns Array de propiedades deserializadas
+ */
+export function deserializeProperties(propertiesString?: string | null): WorldItemProperty[] {
+	if (!propertiesString) return [];
+
+	try {
+		if (propertiesString === 'empty_array' || propertiesString === '[]') return [];
+		const parsed = JSON.parse(propertiesString);
+		return Array.isArray(parsed) ? parsed : [];
+	} catch (error) {
+		logger.error('Error deserializando propiedades de WorldItem:', error);
+		return [];
+	}
+}
+
+/**
+ * Serializa filtros de WorldItem para almacenamiento
+ * @param filters - Filtros a serializar
+ * @returns String JSON con los filtros serializados
+ */
+export function serializeFilters(filters: WorldItemFilter[] | string): string {
 	try {
 		if (typeof filters === 'string') return filters;
-		return filters && filters.length > 0 ? JSON.stringify(filters) : 'empty_array';
+		return filters && filters.length > 0 ? JSON.stringify(filters) : '[]';
 	} catch (error) {
-		serializersLogger.error('❌ Error al serializar filtros:', error);
-		return 'empty_array';
+		logger.error('Error serializando filtros de WorldItem:', error);
+		return '[]';
 	}
 }
 
 /**
- * Deserializa un string JSON a array de filtros
- * @param filtersString String JSON con filtros
- * @returns Array de filtros del objeto del mundo
+ * Deserializa filtros de WorldItem desde almacenamiento
+ * @param filtersString - String JSON con filtros
+ * @returns Array de filtros deserializados
  */
-export function deserializeWorldItemFilters(filtersString?: string | null): WorldItemFilter[] {
+export function deserializeFilters(filtersString?: string | null): WorldItemFilter[] {
 	if (!filtersString) return [];
 
 	try {
-		if (filtersString === 'empty_array') return [];
+		if (filtersString === 'empty_array' || filtersString === '[]') return [];
 		const parsed = JSON.parse(filtersString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
-		serializersLogger.error('❌ Error al deserializar filtros:', error);
+		logger.error('Error deserializando filtros de WorldItem:', error);
 		return [];
 	}
 }
 
 /**
- * Serializa etiquetas a formato JSON string
- * @param tags Etiquetas del objeto del mundo
- * @returns String JSON con las etiquetas
+ * Serializa etiquetas de WorldItem para almacenamiento
+ * @param tags - Etiquetas a serializar
+ * @returns String JSON con las etiquetas serializadas
  */
-export function serializeWorldItemTags(tags: string[] | string): string {
+export function serializeTags(tags: string[] | string): string {
 	try {
 		if (typeof tags === 'string') return tags;
-		return tags && tags.length > 0 ? JSON.stringify(tags) : 'empty_array';
+		return tags && tags.length > 0 ? JSON.stringify(tags) : '[]';
 	} catch (error) {
-		serializersLogger.error('❌ Error al serializar etiquetas:', error);
-		return 'empty_array';
+		logger.error('Error serializando etiquetas de WorldItem:', error);
+		return '[]';
 	}
 }
 
 /**
- * Deserializa un string JSON a array de etiquetas
- * @param tagsString String JSON con etiquetas
- * @returns Array de etiquetas del objeto del mundo
+ * Deserializa etiquetas de WorldItem desde almacenamiento
+ * @param tagsString - String JSON con etiquetas
+ * @returns Array de etiquetas deserializadas
  */
-export function deserializeWorldItemTags(tagsString?: string | null): string[] {
+export function deserializeTags(tagsString?: string | null): string[] {
 	if (!tagsString) return [];
 
 	try {
-		if (tagsString === 'empty_array') return [];
+		if (tagsString === 'empty_array' || tagsString === '[]') return [];
 		const parsed = JSON.parse(tagsString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
-		serializersLogger.error('❌ Error al deserializar etiquetas:', error);
+		logger.error('Error deserializando etiquetas de WorldItem:', error);
 		return [];
 	}
 }
 
 /**
- * Parsea todos los campos JSON de un objeto del mundo
- * @param worldItem Objeto del mundo con campos serializados
- * @returns Objeto del mundo con campos deserializados
+ * Convierte un WorldItem de Prisma a un objeto con campos deserializados
+ * @param worldItem - WorldItem de la base de datos
+ * @param options - Opciones de deserialización
+ * @returns WorldItem con campos deserializados
  */
-export function parseJsonFields(worldItem: WorldItemBase): any {
+export function fromPrismaWorldItem(
+	worldItem: WorldItemBase,
+	options: {
+		includeRelations?: boolean;
+		includeUI?: boolean;
+	} = {}
+): WorldItemDeserialized {
 	try {
-		return {
+		if (!worldItem) {
+			throw new Error('WorldItem no proporcionado');
+		}
+
+		// Deserializar todos los campos JSON
+		const result: WorldItemDeserialized = {
 			...worldItem,
-			attributes: deserializeWorldItemAttributes(worldItem.attributes),
-			effects: deserializeWorldItemEffects(worldItem.effects),
-			requirements: deserializeWorldItemRequirements(worldItem.requirements),
-			stats: deserializeWorldItemStats(worldItem.stats),
-			filters: deserializeWorldItemFilters(worldItem.filters),
+			attributesList: deserializeAttributes(worldItem.attributes),
+			effectsList: deserializeEffects(worldItem.effects),
+			requirementsList: deserializeRequirements(worldItem.requirements),
+			statsList: deserializeStats(worldItem.stats),
+			propertiesList: deserializeProperties(worldItem.properties),
+			filtersList: deserializeFilters(worldItem.filters),
+			tagsList: deserializeTags(worldItem.tags)
 		};
+
+		return result;
 	} catch (error) {
-		serializersLogger.error('❌ Error al parsear campos JSON:', error);
-		return worldItem;
+		logger.error('Error en fromPrismaWorldItem:', error);
+		throw new Error(`Error deserializando WorldItem: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
 
 /**
- * Parsea una configuración visual de un objeto del mundo
- * @param config Configuración visual potencialmente serializada
- * @returns Configuración visual deserializada
+ * Convierte un WorldItem deserializado a formato Prisma para almacenamiento
+ * @param worldItem - WorldItem con campos deserializados
+ * @returns WorldItem en formato para Prisma
  */
-export function parseVisualConfig(config: WorldItemVisualConfig | string): WorldItemVisualConfig {
-	if (typeof config !== 'string') {
-		return config;
-	}
-
+export function toPrismaWorldItem(worldItem: Partial<WorldItemDeserialized>): Partial<WorldItemBase> {
 	try {
-		return JSON.parse(config);
+		if (!worldItem) {
+			throw new Error('WorldItem no proporcionado');
+		}
+
+		// Extraer los campos que necesitan ser serializados
+		const {
+			attributesList,
+			effectsList,
+			requirementsList,
+			statsList,
+			propertiesList,
+			filtersList,
+			tagsList,
+			...rest
+		} = worldItem;
+
+		// Serializar campos según sea necesario
+		const result: Partial<WorldItemBase> = {
+			...rest,
+			...(attributesList && { attributes: serializeAttributes(attributesList) }),
+			...(effectsList && { effects: serializeEffects(effectsList) }),
+			...(requirementsList && { requirements: serializeRequirements(requirementsList) }),
+			...(statsList && { stats: serializeStats(statsList) }),
+			...(propertiesList && { properties: serializeProperties(propertiesList) }),
+			...(filtersList && { filters: serializeFilters(filtersList) }),
+			...(tagsList && { tags: serializeTags(tagsList) })
+		};
+
+		return result;
 	} catch (error) {
-		serializersLogger.error('❌ Error al parsear configuración visual:', error);
+		logger.error('Error en toPrismaWorldItem:', error);
+		throw new Error(`Error serializando WorldItem: ${error instanceof Error ? error.message : String(error)}`);
+	}
+}
+
+/**
+ * Extiende un WorldItem con campos UI adicionales
+ * @param worldItem - WorldItem base
+ * @returns WorldItem con campos UI adicionales
+ */
+export function extendWorldItem(worldItem: WorldItemDeserialized): WorldItemComplete {
+	try {
+		// Crear objeto UI
+		const ui: WorldItemUI = {
+			emoji: worldItem.emoji || '🔮',
+			color: worldItem.color || '#6D28D9',
+			formattedDate: new Date(worldItem.updatedAt).toLocaleDateString()
+		};
+
+		// Crear contadores
+		const counts: WorldItemCounts = {
+			images: 0,
+			relatedItems: 0
+		};
+
+		// Crear relaciones vacías
+		const relations: WorldItemRelations = {};
+
 		return {
-			showIcon: true,
-			showType: true,
-			showRarity: true,
-			showStats: true,
-			animateIcon: false,
-			theme: 'default',
+			...worldItem,
+			ui,
+			counts,
+			relations
+		};
+	} catch (error) {
+		logger.error('Error extendiendo WorldItem:', error);
+		return {
+			...worldItem,
+			ui: {
+				emoji: '🔮',
+				color: '#6D28D9',
+				formattedDate: new Date().toLocaleDateString()
+			},
+			counts: {},
+			relations: {}
 		};
 	}
+}
+
+/**
+ * Extiende múltiples WorldItems con campos UI adicionales
+ * @param worldItems - Array de WorldItems
+ * @returns Array de WorldItems extendidos
+ */
+export function extendWorldItems(worldItems: WorldItemDeserialized[]): WorldItemComplete[] {
+	return worldItems.map(extendWorldItem);
+}
+
+// Exportar funciones en desuso con advertencias (para retrocompatibilidad)
+/**
+ * @deprecated Use deserializeAttributes instead
+ */
+export function deserializeWorldItemAttributes(attributesString?: string | null): WorldItemAttribute[] {
+	logger.warn('deserializeWorldItemAttributes está obsoleto. Use deserializeAttributes en su lugar.');
+	return deserializeAttributes(attributesString);
+}
+
+/**
+ * @deprecated Use serializeAttributes instead
+ */
+export function serializeWorldItemAttributes(attributes: WorldItemAttribute[] | string): string {
+	logger.warn('serializeWorldItemAttributes está obsoleto. Use serializeAttributes en su lugar.');
+	return serializeAttributes(attributes);
+}
+
+/**
+ * @deprecated Use deserializeEffects instead
+ */
+export function deserializeWorldItemEffects(effectsString?: string | null): WorldItemEffect[] {
+	logger.warn('deserializeWorldItemEffects está obsoleto. Use deserializeEffects en su lugar.');
+	return deserializeEffects(effectsString);
+}
+
+/**
+ * @deprecated Use serializeEffects instead
+ */
+export function serializeWorldItemEffects(effects: WorldItemEffect[] | string): string {
+	logger.warn('serializeWorldItemEffects está obsoleto. Use serializeEffects en su lugar.');
+	return serializeEffects(effects);
+}
+
+/**
+ * @deprecated Use deserializeFilters instead
+ */
+export function deserializeWorldItemFilters(filtersString?: string | null): WorldItemFilter[] {
+	logger.warn('deserializeWorldItemFilters está obsoleto. Use deserializeFilters en su lugar.');
+	return deserializeFilters(filtersString);
+}
+
+/**
+ * @deprecated Use serializeFilters instead
+ */
+export function serializeWorldItemFilters(filters: WorldItemFilter[] | string): string {
+	logger.warn('serializeWorldItemFilters está obsoleto. Use serializeFilters en su lugar.');
+	return serializeFilters(filters);
+}
+
+/**
+ * @deprecated Use deserializeProperties instead
+ */
+export function deserializeWorldItemProperties(propertiesString?: string | null): WorldItemProperty[] {
+	logger.warn('deserializeWorldItemProperties está obsoleto. Use deserializeProperties en su lugar.');
+	return deserializeProperties(propertiesString);
+}
+
+/**
+ * @deprecated Use serializeProperties instead
+ */
+export function serializeWorldItemProperties(properties: WorldItemProperty[] | string): string {
+	logger.warn('serializeWorldItemProperties está obsoleto. Use serializeProperties en su lugar.');
+	return serializeProperties(properties);
+}
+
+/**
+ * @deprecated Use deserializeRequirements instead
+ */
+export function deserializeWorldItemRequirements(requirementsString?: string | null): WorldItemRequirement[] {
+	logger.warn('deserializeWorldItemRequirements está obsoleto. Use deserializeRequirements en su lugar.');
+	return deserializeRequirements(requirementsString);
+}
+
+/**
+ * @deprecated Use serializeRequirements instead
+ */
+export function serializeWorldItemRequirements(requirements: WorldItemRequirement[] | string): string {
+	logger.warn('serializeWorldItemRequirements está obsoleto. Use serializeRequirements en su lugar.');
+	return serializeRequirements(requirements);
+}
+
+/**
+ * @deprecated Use deserializeStats instead
+ */
+export function deserializeWorldItemStats(statsString?: string | null): WorldItemStat[] {
+	logger.warn('deserializeWorldItemStats está obsoleto. Use deserializeStats en su lugar.');
+	return deserializeStats(statsString);
+}
+
+/**
+ * @deprecated Use serializeStats instead
+ */
+export function serializeWorldItemStats(stats: WorldItemStat[] | string): string {
+	logger.warn('serializeWorldItemStats está obsoleto. Use serializeStats en su lugar.');
+	return serializeStats(stats);
+}
+
+/**
+ * @deprecated Use deserializeTags instead
+ */
+export function deserializeWorldItemTags(tagsString?: string | null): string[] {
+	logger.warn('deserializeWorldItemTags está obsoleto. Use deserializeTags en su lugar.');
+	return deserializeTags(tagsString);
+}
+
+/**
+ * @deprecated Use serializeTags instead
+ */
+export function serializeWorldItemTags(tags: string[] | string): string {
+	logger.warn('serializeWorldItemTags está obsoleto. Use serializeTags en su lugar.');
+	return serializeTags(tags);
+}
+
+/**
+ * @deprecated Use fromPrismaWorldItem instead
+ */
+export function parseJsonFields(worldItem: WorldItemBase): WorldItemDeserialized {
+	logger.warn('parseJsonFields está obsoleto. Use fromPrismaWorldItem en su lugar.');
+	return fromPrismaWorldItem(worldItem);
+}
+
+/**
+ * @deprecated Use extendWorldItem instead
+ */
+export function toExtendedWorldItem(worldItem: WorldItemBase): WorldItemComplete {
+	logger.warn('toExtendedWorldItem está obsoleto. Use extendWorldItem en su lugar.');
+	return extendWorldItem(fromPrismaWorldItem(worldItem));
+}
+
+/**
+ * @deprecated Use fromPrismaWorldItem instead
+ */
+export function fromExtendedWorldItem(worldItem: WorldItemComplete): WorldItemBase {
+	logger.warn('fromExtendedWorldItem está obsoleto. Use toPrismaWorldItem en su lugar.');
+	return toPrismaWorldItem(worldItem) as WorldItemBase;
+}
+
+/**
+ * @deprecated Use extendWorldItem instead with proper counts
+ */
+export function toWorldItemWithStats(worldItem: WorldItemBase & { _count?: { images?: number; relatedItems?: number } }): WorldItemComplete {
+	logger.warn('toWorldItemWithStats está obsoleto. Use extendWorldItem con counts apropiados.');
+	const extendedItem = extendWorldItem(fromPrismaWorldItem(worldItem));
+
+	// Agregar conteos si están disponibles
+	if (worldItem._count) {
+		extendedItem.counts = {
+			...extendedItem.counts,
+			...worldItem._count
+		};
+	}
+
+	return extendedItem;
 }

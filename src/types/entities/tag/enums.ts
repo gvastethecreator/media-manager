@@ -5,6 +5,7 @@
 
 /**
  * Categorías de etiquetas
+ * @description Refleja las posibles categorías que se usan como strings en el esquema
  */
 export enum TagCategory {
   GENERAL = 'general',
@@ -19,10 +20,12 @@ export enum TagCategory {
   THEME = 'theme',
   GENRE = 'genre',
   CUSTOM = 'custom',
+  OTHER = 'other',
 }
 
 /**
- * Rareza de etiquetas
+ * Rareza de etiquetas (no está en el esquema actual)
+ * @description Para posible uso futuro o filtros en memoria
  */
 export enum TagRarity {
   COMMON = 'common',
@@ -40,14 +43,15 @@ export enum TagSortCriteria {
   NAME_DESC = 'name:desc',
   USAGE_ASC = 'usage:asc',
   USAGE_DESC = 'usage:desc',
-  CREATED_ASC = 'created:asc',
-  CREATED_DESC = 'created:desc',
-  UPDATED_ASC = 'updated:asc',
-  UPDATED_DESC = 'updated:desc',
+  CREATED_ASC = 'createdAt:asc',
+  CREATED_DESC = 'createdAt:desc',
+  UPDATED_ASC = 'updatedAt:desc',
+  UPDATED_DESC = 'updatedAt:desc',
 }
 
 /**
  * Modos de visualización para etiquetas
+ * @description Para UI, no afecta el esquema
  */
 export enum TagViewMode {
   GRID = 'grid',

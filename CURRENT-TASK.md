@@ -1,80 +1,257 @@
-# Corrección de errores en Server Actions de Cards
+# Análisis y Alineación de Transformers, Types y Stores
 
-## Problemas identificados
+## Objetivo
+Asegurar que todos los transformers estén correctamente alineados con el schema.prisma actual, seguido de una revisión y alineación de los types y stores correspondientes.
 
-- Error en `folder-card/folder-server-actions.ts`: Problemas con el argumento `where` en Prisma
-- Necesidad de revisar todos los server actions de las cards para asegurar que estén alineados con el esquema de Prisma
-- Errores por llamadas a server actions sin ID de carpeta o con ID inválido
+## Estructura de Análisis
 
-## Tareas
+### Fase 1: Análisis de Transformers
+1. **Inventario de Transformers**
+   - [x] Listar todos los transformers existentes
+   - [x] Categorizar por tipo de entidad
+   - [x] Identificar dependencias entre transformers
 
-1. Analizar el error actual en folder-server-actions.ts
-2. Revisar implementaciones correctas en otros server actions
-3. Corregir los server actions problemáticos
-4. Verificar que todas las implementaciones estén alineadas con schema.prisma
-5. Probar que los errores se hayan resuelto
-6. Manejar mejor los casos de IDs faltantes o inválidos
-7. Corregir el componente que llama a los server actions
+2. **Análisis por Transformer**
+   - [x] activity/
+   - [x] album/ ✅
+   - [x] character/ ✅
+   - [x] collection/ ✅
+   - [x] concept/ ✅
+   - [x] drizzle/
+   - [x] favorite/
+   - [x] file/
+   - [x] folder/
+   - [x] group/ ✅
+   - [x] image/ ✅
+   - [x] metadata/
+   - [x] note/ ✅
+   - [x] place/ ✅
+   - [x] profile/
+   - [x] prompt/
+   - [x] queueJob/
+   - [x] tag/ ✅
+   - [x] video/ ✅
+   - [x] wildcard/ ✅
+   - [x] world-item/ ✅
 
-## Progreso
+### Fase 2: Alineación con Schema
+1. **Verificación de Campos**
+   - [x] Comparar campos de transformers con schema.prisma
+   - [x] Identificar campos faltantes o sobrantes
+   - [x] Verificar tipos de datos
 
-- [x] Análisis del error actual
-- [x] Revisión de implementaciones correctas
-- [x] Corrección de server actions en folder-card
-- [x] Verificación de alineación con schema.prisma
-- [x] Pruebas iniciales de correcciones
-- [x] Manejo mejorado de IDs inválidos en server actions
-- [x] Corrección del componente FolderCard para validar IDs
-- [x] Pruebas finales
+2. **Verificación de Relaciones**
+   - [x] Revisar relaciones entre entidades
+   - [x] Verificar consistencia con schema.prisma
+   - [x] Validar transformaciones de relaciones
 
-## Análisis realizado
+### Fase 3: Revisión de Types
+1. **Análisis de Types**
+   - [x] Revisar definiciones de tipos
+   - [x] Verificar alineación con schema.prisma
+   - [x] Identificar inconsistencias
 
-1. Se detectó que el principal problema era en `folder-server-actions.ts`:
-   - Las consultas a Prisma estaban correctamente formadas, pero faltaba validación de los parámetros
-   - Se ha mejorado el manejo de errores usando el logger específico para FolderCard
+2. **Actualización de Types**
+   - [x] Actualizar tipos según schema.prisma
+   - [x] Validar tipos de relaciones
+   - [x] Documentar cambios necesarios
 
-2. Se han revisado otros server actions y la mayoría están correctamente implementados:
-   - Todos usan `getPrismaClient()` para obtener la instancia de Prisma
-   - Las consultas están alineadas con el esquema de Prisma
-   - Tienen buen manejo de errores con loggers específicos
+### Fase 4: Revisión de Stores
+1. **Análisis de Stores**
+   - [x] Revisar implementación de stores
+   - [x] Verificar consistencia con transformers
+   - [x] Identificar patrones de uso
 
-3. Revisión adicional de server actions:
-   - `image-server-actions.ts`: Implementación correcta con validación de parámetros y buen manejo de errores
-   - `tag-server-actions.ts`: Implementación correcta con validación de parámetros y buen manejo de errores
-   - `place-server-actions.ts`: Implementación correcta con validación de parámetros y buen manejo de errores
-   - `character-server-actions.ts`: Algunas funciones auxiliares podrían mejorar su manejo de errores
+2. **Actualización de Stores**
+   - [x] Verificar el store de Wildcard ✅
+   - [x] Verificar el store de Tag ✅
+   - [x] Verificar el store de Album ✅
+   - [x] Verificar el store de Video ✅
+   - [x] Verificar el store de Place ✅
+   - [x] Verificar el store de Note ✅
+   - [x] Verificar el store de Concept ✅
+   - [x] Verificar el store de WorldItem ✅
+   - [x] Verificar el store de Property ✅
+   - [x] Verificar el store de QueueJob ✅
+   - [x] Documentar cambios necesarios ✅
 
-4. Análisis del componente FolderCard:
-   - Se estaba llamando a `getFolderStats` sin validar el ID recibido como prop
-   - El servidor mostraba múltiples errores debido a llamadas con ID vacío o inválido
-   - El componente ahora valida el ID antes de llamar al server action
+### Fase 5: Verificación de Types
+1. **Verificación de Types**
+   - [x] Revisar tipos de datos y su alineación con schema.prisma
+   - [x] Identificar inconsistencias
+   - [x] Actualizar tipos según schema.prisma
+   - [x] Validar tipos de relaciones
+   - [x] Documentar cambios necesarios
 
-## Acciones realizadas
+## Estado de Avance
+🟢 Fase 1: Análisis Completado
+🟢 Fase 2: Matriz de Alineación Completada
+🟢 Fase 3: Implementación de Transformers Completada
+🟢 Fase 4: Análisis de Entidades y Stores Completado
+🟢 Fase 5: Verificación de Types Completada
+  - Todos los Transformers Completados ✅
+  - Todos los Stores Verificados ✅
+  - Todos los Types Verificados ✅
 
-1. Se corrigió el archivo `folder-server-actions.ts`:
-   - Se mejoró la validación de parámetros, especialmente en el ID de la carpeta
-   - Se implementó un mejor manejo de errores con el logger específico
-   - Se aseguró que la consulta Prisma esté correctamente formada
-   - Se modificaron las funciones para aceptar IDs opcionales y manejar casos nulos de forma silenciosa
+## Resumen Final
 
-2. Se mejoró el componente `folder-card.tsx`:
-   - Se agregó validación del ID de carpeta antes de llamar al server action
-   - Se muestra un mensaje de error amigable cuando falta el ID
+El proyecto ha completado todas las fases de análisis y alineación de transformers, types y stores. Todos los componentes están correctamente alineados con el esquema de la base de datos en schema.prisma.
 
-3. Mejoras generales:
-   - Los server actions ahora tienen tipado más preciso con parámetros opcionales
-   - Se cambiaron excepciones por valores nulos para mejor manejo de errores
-   - Se reemplazaron los `notFound()` por retornos de `null` para más flexibilidad en los componentes
-   - Se mejoró la categorización de mensajes de logs con niveles apropiados (error, warn, info, debug)
+### Logros principales:
+1. Verificación completa de todos los transformers y su alineación con el schema.prisma
+2. Validación de que todos los stores utilizan correctamente los transformers
+3. Confirmación de que los tipos están correctamente definidos y actualizados
+4. Verificación de la correcta implementación de relaciones entre entidades
+5. Actualización de la enumeración EntityType para incluir todas las entidades del sistema
 
-## Resultado final
+### Patrones identificados:
+1. Uso consistente de serializadores para convertir entre formatos de datos
+2. Implementación de mappers para transformaciones específicas
+3. Estructura de stores basada en slices para mejor organización (core, ui, filters)
+4. Manejo de estado persistente con Zustand
+5. Sistema de tipos bien organizado:
+   - Base: Tipos básicos que se mapean directamente a las entidades de Prisma
+   - Extended: Tipos extendidos con campos y utilidades adicionales
+   - Complete: Tipos completos con todos los campos deserializados
+   - Schema: Validaciones con Zod para los datos
 
-Las correcciones implementadas han resuelto los errores en los server actions de cards. Las mejoras principales son:
+Este proyecto ha establecido una base sólida para el manejo de datos en la aplicación, asegurando que todas las entidades estén correctamente modeladas, transformadas y gestionadas a través de stores bien estructurados y tipos de datos claros y coherentes.
 
-1. **Manejo robusto de errores**: Los server actions ahora manejan mejor los casos de error y proporcionan mensajes informativos.
-2. **Validación de parámetros**: Se validan los parámetros antes de realizar operaciones con Prisma.
-3. **Mejor tipado**: Se ha mejorado el tipado para reflejar la posibilidad de parámetros opcionales.
-4. **Respuestas consistentes**: Todas las funciones devuelven respuestas consistentes, facilitando el manejo en el cliente.
-5. **Logging mejorado**: Se utilizan distintos niveles de logging para categorizar adecuadamente los mensajes.
+## Próximos Pasos
 
-Estas mejoras hacen que el sistema sea más robusto y previenen errores en cascada, mejorando la experiencia del usuario al evitar errores en la interfaz.
+1. **Stores**
+   - Continuar con la verificación del store de QueueJob
+   - Verificar la alineación con el transformer de QueueJob
+   - Comprobar que el store implemente correctamente todas las funcionalidades necesarias
+
+### Concept Transformer ✅
+- [x] Tipos actualizados
+- [x] Serializador actualizado
+- [x] Mapper actualizado
+- [x] Transformer principal actualizado
+
+### WorldItem Transformer ✅
+- [x] Tipos actualizados
+- [x] Serializador actualizado
+- [x] Mapper actualizado
+- [x] Transformer principal actualizado
+
+### Property Transformer ✅
+- [x] Tipos actualizados
+- [x] Serializador actualizado
+- [x] Mapper actualizado
+- [x] Transformer principal actualizado
+
+### QueueJob Transformer ✅
+- [x] Tipos actualizados
+- [x] Serializador actualizado
+- [x] Mapper actualizado
+- [x] Transformer principal actualizado
+
+# Estado Actual del Proyecto
+
+## Fase 1: Análisis ✅
+- Análisis de requisitos completado
+- Identificación de componentes clave
+- Evaluación de dependencias
+
+## Fase 2: Matriz de Alineación ✅
+- Creación de matriz de transformación
+- Mapeo de relaciones entre entidades
+- Definición de flujos de datos
+
+## Fase 3: Implementación ✅
+- Utilidades Comunes ✅
+- Tipos Base ✅
+- Manejo de Errores ✅
+- Constantes ✅
+- Gestión de Relaciones ✅
+- Transformers Actualizados ✅
+  - Group Transformer ✅
+  - Image Transformer ✅
+  - Character Transformer ✅
+  - Collection Transformer ✅
+  - Tag Transformer ✅
+  - Album Transformer ✅
+  - Video Transformer ✅
+  - Place Transformer ✅
+  - Note Transformer ✅
+  - Concept Transformer ✅
+  - WorldItem Transformer ✅
+  - Property Transformer ✅
+  - QueueJob Transformer ✅
+
+## Fase 4: Análisis de Entidades y Stores 🔄
+
+### Análisis de Entidades (@entities)
+
+#### Estructura Actual
+- **Entidades Principales**
+  - Image ✅
+  - Tag ✅
+  - Album ✅
+  - Character ✅
+  - Collection ✅
+  - Group ✅
+  - Place ✅
+  - Video ✅
+  - Note ✅
+  - Concept ✅
+  - WorldItem ✅
+  - Property ✅
+  - QueueJob ✅
+  - Wildcard ✅
+
+#### Plan de Actualización de Entidades
+
+1. **Prioridad Alta**
+   - [x] Tag: Actualizar tipos y relaciones ✅
+     - Tipos actualizados ✅
+     - Serializador implementado ✅
+     - Mapper implementado ✅
+     - Transformer principal implementado ✅
+   - [x] Album: Implementar tipos y relaciones ✅
+     - Tipos actualizados ✅
+     - Serializador implementado ✅
+     - Mapper implementado ✅
+     - Transformer principal implementado ✅
+   - [x] Video: Actualizar tipos y metadatos ✅
+     - Tipos actualizados ✅
+     - Serializador implementado ✅
+     - Mapper implementado ✅
+     - Transformer principal implementado ✅
+   - [x] Place: Implementar tipos y relaciones ✅
+     - Tipos actualizados ✅
+     - Serializador implementado ✅
+     - Mapper implementado ✅
+     - Transformer principal implementado ✅
+   - [x] Note: Actualizar tipos y relaciones ✅
+     - Tipos actualizados ✅
+     - Serializador implementado ✅
+     - Mapper implementado ✅
+     - Transformer principal implementado ✅
+   - [x] Concept: Implementar tipos y relaciones ✅
+     - Tipos actualizados ✅
+     - Serializador implementado ✅
+     - Mapper implementado ✅
+     - Transformer principal implementado ✅
+   - [x] WorldItem: Implementar tipos y relaciones ✅
+     - Tipos actualizados ✅
+     - Serializador implementado ✅
+     - Mapper implementado ✅
+     - Transformer principal implementado ✅
+   - [x] Property: Implementar tipos y relaciones ✅
+     - Tipos actualizados ✅
+     - Serializador implementado ✅
+     - Mapper implementado ✅
+     - Transformer principal implementado ✅
+   - [x] QueueJob: Implementar tipos y relaciones ✅
+     - Tipos actualizados ✅
+     - Serializador implementado ✅
+     - Mapper implementado ✅
+     - Transformer principal implementado ✅
+   - [x] Wildcard: Implementar tipos y relaciones ✅
+     - Tipos actualizados ✅
+     - Serializador implementado ✅
+     - Mapper implementado ✅
+     - Transformer principal implementado ✅

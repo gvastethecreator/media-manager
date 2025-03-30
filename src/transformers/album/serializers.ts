@@ -3,259 +3,309 @@
  * @module transformers/album/serializers
  */
 
+import { Logger } from '@/lib/logger';
 import {
-  type Album,
-  type AlbumBase,
-  type AlbumMetadata,
-  AlbumPrivacyLevel,
-  type AlbumViewConfig,
-} from '../../types/entities/album/index';
+    AlbumCreateInput,
+    AlbumSchema,
+    AlbumUpdateInput,
+} from '@/types/entities/album/types';
+import {
+    validateFieldType,
+    validateRequiredFields
+} from '@/utils/transformers/common';
+import { handleTransformerError } from '@/utils/transformers/errors';
+import {
+    getRelationCounts,
+    preparePrismaRelations,
+    validateEntityRelations,
+} from '@/utils/transformers/relations';
+import {
+    validateBaseEntity,
+    validateMetadataFields,
+    validateUIFields,
+} from '@/utils/transformers/validation';
+import { Prisma } from '@prisma/client';
+
+const logger = new Logger('AlbumSerializer');
 
 /**
- * Convierte un objeto AlbumBase a Album con propiedades extendidas
- * @param album Objeto básico de álbum
- * @returns Objeto Album completo
+ * 🔄 Serializa un Album para Prisma
  */
-export function extendAlbum(album: AlbumBase): Album {
-	return {
-		...album,
-		// Deserializar campos JSON
-		filters: deserializeAlbumFilters(album),
-		sortBy: deserializeAlbumSortBy(album),
-		privacyLevel: AlbumPrivacyLevel.PRIVATE, // valor por defecto
-		isExpanded: false,
-		isSelected: false,
-	};
+export function toPrismaAlbum(data: AlbumCreateInput | AlbumUpdateInput): Prisma.AlbumCreateInput | Prisma.AlbumUpdateInput {
+    try {
+        // Validar campos requeridos para creación
+        if (!('id' in data)) {
+            validateRequiredFields(data, ['name']);
+        }
+
+        // Validar tipos de datos
+        validateFieldType(data.name, 'string', 'name');
+        if (data.emoji) validateFieldType(data.emoji, 'string', 'emoji');
+        if (data.color) validateFieldType(data.color, 'string', 'color');
+        if (data.category) validateFieldType(data.category, 'string', 'category');
+        if (data.type) validateFieldType(data.type, 'string', 'type');
+
+        // Preparar relaciones para Prisma
+        const relations = preparePrismaRelations('Album', data);
+
+        return {
+            ...data,
+            ...relations,
+        };
+    } catch (error) {
+        throw handleTransformerError(error);
+    }
 }
 
 /**
- * Convierte un array de objetos AlbumBase a array de Album con propiedades extendidas
- * @param albums Array de objetos básicos de álbum
- * @returns Array de objetos Album completos
+ * 🔄 Deserializa un Album desde Prisma
  */
-export function extendAlbums(albums: AlbumBase[]): Album[] {
-	return albums.map(extendAlbum);
+export function fromPrismaAlbum(
+    prismaAlbum: Prisma.AlbumGetPayload<{
+        include: {
+            images: true;
+            videos: true;
+            collections: true;
+            tags: true;
+            characters: true;
+            places: true;
+            worldItems: true;
+            concepts: true;
+            prompts: true;
+            notes: true;
+            wildcards: true;
+            properties: true;
+            groups: true;
+            _count: true;
+        };
+    }>
+): AlbumComplete {
+    try {
+        // Obtener conteos de relaciones
+        const counts = getRelationCounts('Album', prismaAlbum);
+
+        // Construir objeto base
+        const baseAlbum: AlbumBase = {
+            id: prismaAlbum.id,
+            name: prismaAlbum.name,
+            emoji: prismaAlbum.emoji,
+            color: prismaAlbum.color,
+            description: prismaAlbum.description,
+            shortcut: prismaAlbum.shortcut,
+            category: prismaAlbum.category,
+            type: prismaAlbum.type,
+            sortBy: prismaAlbum.sortBy,
+            filters: prismaAlbum.filters,
+            featuredImage: prismaAlbum.featuredImage,
+            isFavorite: prismaAlbum.isFavorite,
+            isPublic: prismaAlbum.isPublic,
+            settings: prismaAlbum.settings,
+            metadata: prismaAlbum.metadata,
+            createdAt: prismaAlbum.createdAt,
+            updatedAt: prismaAlbum.updatedAt,
+        };
+
+        // Validar objeto base
+        validateBaseEntity(baseAlbum);
+        validateUIFields(baseAlbum);
+        validateMetadataFields(baseAlbum);
+
+        // Construir objeto completo con relaciones
+        return {
+            ...baseAlbum,
+            images: prismaAlbum.images?.map(img => ({ id: img.id })),
+            videos: prismaAlbum.videos?.map(vid => ({ id: vid.id })),
+            collections: prismaAlbum.collections?.map(col => ({ id: col.id })),
+            tags: prismaAlbum.tags?.map(tag => ({ id: tag.id })),
+            characters: prismaAlbum.characters?.map(char => ({ id: char.id })),
+            places: prismaAlbum.places?.map(place => ({ id: place.id })),
+            worldItems: prismaAlbum.worldItems?.map(item => ({ id: item.id })),
+            concepts: prismaAlbum.concepts?.map(con => ({ id: con.id })),
+            prompts: prismaAlbum.prompts?.map(prompt => ({ id: prompt.id })),
+            notes: prismaAlbum.notes?.map(note => ({ id: note.id })),
+            wildcards: prismaAlbum.wildcards?.map(wild => ({ id: wild.id })),
+            properties: prismaAlbum.properties?.map(prop => ({ id: prop.id })),
+            groups: prismaAlbum.groups?.map(group => ({ id: group.id })),
+            _count: counts,
+        };
+    } catch (error) {
+        throw handleTransformerError(error);
+    }
 }
 
 /**
- * Genera un slug a partir del nombre del álbum
+ * 🔍 Valida un Album
+ */
+export function validateAlbum(data: unknown): AlbumComplete {
+    try {
+        const validated = AlbumSchema.parse(data);
+        validateEntityRelations('Album', validated);
+        return validated as AlbumComplete;
+    } catch (error) {
+        throw handleTransformerError(error);
+    }
+}
+
+/**
+ * 🔄 Extiende un Album con datos adicionales
+ */
+export async function extendAlbum(
+    album: AlbumComplete,
+    options: {
+        includeRelations?: boolean;
+        includeCount?: boolean;
+        customFields?: string[];
+    } = {}
+): Promise<AlbumComplete> {
+    try {
+        const extended = { ...album };
+
+        // Aquí puedes agregar lógica para cargar datos adicionales
+        // basado en las opciones proporcionadas
+
+        return extended;
+    } catch (error) {
+        throw handleTransformerError(error);
+    }
+}
+
+/**
+ * 🔍 Parsea filtros de Album
+ */
+export function parseAlbumFilters(filters: unknown): Record<string, unknown> {
+    try {
+        if (!filters || typeof filters !== 'object') {
+            return {};
+        }
+
+        const parsed: Record<string, unknown> = {};
+        const typedFilters = filters as Record<string, unknown>;
+
+        // Procesar filtros específicos de Album
+        if (typedFilters.search) {
+            parsed.OR = [
+                { name: { contains: typedFilters.search as string, mode: 'insensitive' } },
+                { description: { contains: typedFilters.search as string, mode: 'insensitive' } },
+            ];
+        }
+
+        // Filtros de categoría
+        if (typedFilters.categories?.length) {
+            parsed.category = { in: typedFilters.categories };
+        }
+
+        // Filtros de tipo
+        if (typedFilters.types?.length) {
+            parsed.type = { in: typedFilters.types };
+        }
+
+        // Filtros de estado
+        if (typedFilters.isFavorite !== undefined) {
+            parsed.isFavorite = typedFilters.isFavorite;
+        }
+        if (typedFilters.isPublic !== undefined) {
+            parsed.isPublic = typedFilters.isPublic;
+        }
+
+        // Filtros de relaciones
+        if (typedFilters.hasImages) {
+            parsed.images = { some: {} };
+        }
+        if (typedFilters.hasVideos) {
+            parsed.videos = { some: {} };
+        }
+        if (typedFilters.hasCollections) {
+            parsed.collections = { some: {} };
+        }
+
+        // Filtros de cantidad de items
+        if (typedFilters.minItems !== undefined) {
+            parsed._count = {
+                ...parsed._count,
+                images: { gte: typedFilters.minItems },
+            };
+        }
+        if (typedFilters.maxItems !== undefined) {
+            parsed._count = {
+                ...parsed._count,
+                images: { lte: typedFilters.maxItems },
+            };
+        }
+
+        // Filtros de fecha
+        if (typedFilters.dateRange?.start) {
+            parsed.createdAt = { ...parsed.createdAt, gte: typedFilters.dateRange.start };
+        }
+        if (typedFilters.dateRange?.end) {
+            parsed.createdAt = { ...parsed.createdAt, lte: typedFilters.dateRange.end };
+        }
+
+        return parsed;
+    } catch (error) {
+        throw handleTransformerError(error);
+    }
+}
+
+/**
+ * Genera un color por defecto basado en el nombre del álbum
  * @param name Nombre del álbum
- * @returns Slug generado
+ * @returns Color en formato hexadecimal
  */
-export function generateAlbumSlug(name: string): string {
-	return name
-		.toLowerCase()
-		.replace(/[^\w\s-]/g, '')
-		.replace(/\s+/g, '-')
-		.replace(/--+/g, '-')
-		.trim();
+export function generateAlbumColor(name: string): string {
+    if (!name) return '#3b82f6'; // Azul por defecto
+
+    // Generar un hash del nombre
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    // Convertir a color hexadecimal
+    let color = '#';
+    for (let i = 0; i < 3; i++) {
+        const value = (hash >> (i * 8)) & 0xff;
+        color += ('00' + value.toString(16)).substr(-2);
+    }
+
+    return color;
 }
 
 /**
- * Deserializa los filtros de un álbum desde string JSON a array
- * @param album Objeto con filtros como string o array
- * @returns Array de filtros o array vacío si no hay filtros
+ * Genera un emoji basado en el nombre o tipo del álbum
+ * @param name Nombre del álbum
+ * @param type Tipo del álbum
+ * @returns Emoji representativo
  */
-export function deserializeAlbumFilters(album: { filters?: string | any[] }): any[] {
-	if (!album.filters) return [];
+export function generateAlbumEmoji(name: string, type?: string): string {
+    // Mapeo de tipos a emojis
+    const typeEmojis: Record<string, string> = {
+        'gallery': '🖼️',
+        'collection': '📁',
+        'event': '📅',
+        'project': '📋',
+        'portfolio': '💼',
+        'favorites': '⭐',
+        'archive': '📦',
+        'custom': '📎',
+        'other': '📌',
+    };
 
-	if (typeof album.filters === 'string') {
-		try {
-			if (album.filters === 'empty_array') return [];
-			return JSON.parse(album.filters) as any[];
-		} catch (error) {
-			console.error('Error parsing album filters', error);
-			return [];
-		}
-	}
+    // Si hay tipo y está en el mapeo, usar ese emoji
+    if (type && typeEmojis[type.toLowerCase()]) {
+        return typeEmojis[type.toLowerCase()];
+    }
 
-	return album.filters as any[];
-}
+    // Análisis básico del nombre para decidir un emoji
+    const lowerName = name.toLowerCase();
 
-/**
- * Serializa los filtros de un álbum para guardarlo en la base de datos
- * @param filters Array de filtros o undefined
- * @returns String serializado o "empty_array" si no hay filtros
- */
-export function serializeAlbumFilters(filters?: any[] | string): string {
-	if (!filters) return 'empty_array';
+    if (lowerName.includes('gallery') || lowerName.includes('photos')) return '🖼️';
+    if (lowerName.includes('collection') || lowerName.includes('set')) return '📁';
+    if (lowerName.includes('event') || lowerName.includes('party')) return '📅';
+    if (lowerName.includes('project') || lowerName.includes('work')) return '📋';
+    if (lowerName.includes('portfolio') || lowerName.includes('showcase')) return '💼';
+    if (lowerName.includes('favorite') || lowerName.includes('best')) return '⭐';
+    if (lowerName.includes('archive') || lowerName.includes('backup')) return '📦';
 
-	if (typeof filters === 'string') {
-		// Si ya es un string, verificar si es JSON válido
-		try {
-			JSON.parse(filters);
-			return filters;
-		} catch (error) {
-			// Si no es JSON válido, asumimos que es "empty_array" o similar
-			return filters === 'empty_array' ? filters : 'empty_array';
-		}
-	}
-
-	try {
-		return JSON.stringify(filters);
-	} catch (error) {
-		console.error('Error serializing album filters', error);
-		return 'empty_array';
-	}
-}
-
-/**
- * Deserializa el criterio de ordenación de un álbum
- * @param album Objeto con sortBy como string o cualquier otro tipo
- * @returns Valor deserializado o string por defecto "name"
- */
-export function deserializeAlbumSortBy(album: { sortBy?: string | any }): any {
-	if (!album.sortBy) return 'name';
-
-	if (typeof album.sortBy === 'string') {
-		// Si es un string pero parece un objeto JSON, intentar parsearlo
-		if (album.sortBy.startsWith('{') || album.sortBy.startsWith('[')) {
-			try {
-				return JSON.parse(album.sortBy);
-			} catch (error) {
-				console.error('Error parsing album sortBy', error);
-				return album.sortBy;
-			}
-		}
-		// Si es un string normal, devolverlo tal cual
-		return album.sortBy;
-	}
-
-	return album.sortBy;
-}
-
-/**
- * Serializa el criterio de ordenación de un álbum
- * @param sortBy Criterio de ordenación
- * @returns String serializado o valor por defecto "name"
- */
-export function serializeAlbumSortBy(sortBy?: any): string {
-	if (!sortBy) return 'name';
-
-	if (typeof sortBy === 'string') {
-		return sortBy;
-	}
-
-	try {
-		return JSON.stringify(sortBy);
-	} catch (error) {
-		console.error('Error serializing album sortBy', error);
-		return 'name';
-	}
-}
-
-/**
- * Parsea los metadatos de un álbum si están en formato string
- * @param album Objeto de álbum con propiedad metadata
- * @returns Metadatos parseados o undefined
- */
-export function parseAlbumMetadata(album: { metadata?: string | AlbumMetadata }): AlbumMetadata | undefined {
-	if (!album.metadata) return undefined;
-
-	if (typeof album.metadata === 'string') {
-		try {
-			return JSON.parse(album.metadata) as AlbumMetadata;
-		} catch (error) {
-			console.error('Error parsing album metadata', error);
-			return undefined;
-		}
-	}
-
-	return album.metadata as AlbumMetadata;
-}
-
-/**
- * Serializa los metadatos de un álbum para guardarlos
- * @param metadata Objeto de metadatos de álbum
- * @returns String serializado o undefined
- */
-export function serializeAlbumMetadata(metadata?: AlbumMetadata): string | undefined {
-	if (!metadata) return undefined;
-
-	try {
-		return JSON.stringify(metadata);
-	} catch (error) {
-		console.error('Error serializing album metadata', error);
-		return undefined;
-	}
-}
-
-/**
- * Parsea la configuración de visualización de un álbum si está en formato string
- * @param album Objeto de álbum con propiedad viewConfig
- * @returns Configuración parseada o undefined
- */
-export function parseAlbumViewConfig(album: { viewConfig?: string | AlbumViewConfig }): AlbumViewConfig | undefined {
-	if (!album.viewConfig) return undefined;
-
-	if (typeof album.viewConfig === 'string') {
-		try {
-			return JSON.parse(album.viewConfig) as AlbumViewConfig;
-		} catch (error) {
-			console.error('Error parsing album view config', error);
-			return undefined;
-		}
-	}
-
-	return album.viewConfig as AlbumViewConfig;
-}
-
-/**
- * Serializa la configuración de visualización de un álbum para guardarla
- * @param viewConfig Objeto de configuración de visualización
- * @returns String serializado o undefined
- */
-export function serializeAlbumViewConfig(viewConfig?: AlbumViewConfig): string | undefined {
-	if (!viewConfig) return undefined;
-
-	try {
-		return JSON.stringify(viewConfig);
-	} catch (error) {
-		console.error('Error serializing album view config', error);
-		return undefined;
-	}
-}
-
-/**
- * Convierte un objeto AlbumBase con campos en formato de base de datos a un objeto Album con todos los campos deserializados
- * para uso en la interfaz de usuario
- * @param album Objeto básico de álbum desde la base de datos
- * @returns Objeto Album completo con campos parseados
- */
-export function toExtendedAlbum(album: AlbumBase): Album {
-	return {
-		...album,
-		filters: deserializeAlbumFilters(album),
-		sortBy: deserializeAlbumSortBy(album),
-		// Opcionalmente añadir parsing de otros campos serializados como JSON
-		metadata: Object.prototype.hasOwnProperty.call(album, 'metadata') ? parseAlbumMetadata(album as any) : undefined,
-		viewConfig: Object.prototype.hasOwnProperty.call(album, 'viewConfig') ? parseAlbumViewConfig(album as any) : undefined,
-		privacyLevel: (album as any).privacyLevel || AlbumPrivacyLevel.PRIVATE,
-		isExpanded: false,
-		isSelected: false,
-	};
-}
-
-/**
- * Convierte un objeto Album con campos deserializados a un objeto con formato adecuado para la base de datos,
- * serializando los campos necesarios
- * @param album Objeto Album completo
- * @returns Objeto con formato para la base de datos
- */
-export function fromExtendedAlbum(album: Album): Record<string, any> {
-	// Desestructurar para eliminar propiedades que no deben ir a la base de datos
-	const {
-		isExpanded, isSelected, images, videos, collections, tags, characters,
-		places, worldItems, concepts, prompts, notes, wildcards, properties,
-		groups, _count, ...baseProperties
-	} = album;
-
-	// Crear nuevo objeto con propiedades serializadas
-	return {
-		...baseProperties,
-		filters: serializeAlbumFilters(album.filters as any),
-		sortBy: serializeAlbumSortBy(album.sortBy),
-		metadata: album.metadata ? serializeAlbumMetadata(album.metadata) : undefined,
-		viewConfig: album.viewConfig ? serializeAlbumViewConfig(album.viewConfig) : undefined,
-	};
+    // Emoji por defecto
+    return '📁';
 }

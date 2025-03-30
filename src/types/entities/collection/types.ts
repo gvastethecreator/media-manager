@@ -3,6 +3,9 @@
  * @module types/entities/collection/collection-types
  */
 
+import { BaseEntitySchema } from '@/types/common/base';
+import { SearchOptionsSchema } from '@/types/common/search';
+import { z } from 'zod';
 import type { Album } from '../album/types';
 import type { Character } from '../character/types';
 import type { Concept } from '../concept/types';
@@ -18,52 +21,46 @@ import type { Wildcard } from '../wildcard/types';
 import type { WorldItem } from '../world-item/types';
 
 /**
+ * Esquema base para Collection
+ */
+export const CollectionSchema = BaseEntitySchema.extend({
+  name: z.string(),
+  description: z.string().optional(),
+  type: z.string(),
+  category: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  isPublic: z.boolean().default(false),
+  isFavorite: z.boolean().default(false),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  settings: z.object({
+    sortBy: z.string().optional(),
+    viewMode: z.string().optional(),
+    gridSize: z.number().optional(),
+    showThumbnails: z.boolean().optional(),
+    showDetails: z.boolean().optional(),
+  }).optional(),
+});
+
+/**
  * Interfaz base para colección
  */
 export interface CollectionBase {
   id: string;
   name: string;
-  emoji: string;
-  color: string;
-  description: string | null;
-  shortcut: string | null;
-  category: string | null;
-
-  /**
-   * Criterio de ordenación serializado como string JSON
-   * @remarks En la base de datos se almacena como string, pero en la aplicación se usa como objeto
-   */
-  sortBy: string;
-
-  /**
-   * Filtros serializados como string JSON
-   * @remarks En la base de datos se almacena como string, pero en la aplicación se usa como array
-   */
-  filters: string;
-
-  // Propiedades externas
-  url: string | null;
-  alternativeUrl: string | null;
-  sourceImage: string | null;
-  platform: string | null;
-  price: number | null;
-  network: string | null;
-  tokenId: string | null;
-  tokenAddress: string | null;
-  contractAddress: string | null;
-  contractType: string | null;
-
-  /**
-   * Ediciones serializadas como string JSON
-   * @remarks En la base de datos se almacena como string, pero en la aplicación se usa como array de objetos
-   */
-  editions: string;
-
-  // Propiedades de visualización
-  featuredImage: string | null;
+  description?: string;
+  type: string;
+  category?: string;
+  tags?: string[];
+  isPublic: boolean;
   isFavorite: boolean;
-
-  // Metadata
+  metadata?: Record<string, unknown>;
+  settings?: {
+    sortBy?: string;
+    viewMode?: string;
+    gridSize?: number;
+    showThumbnails?: boolean;
+    showDetails?: boolean;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -221,15 +218,22 @@ export interface CollectionWithRelations extends CollectionBase {
  * Interfaz para filtros de búsqueda de colecciones
  */
 export interface CollectionFilters {
-  searchQuery?: string;
-  categories?: string[];
-  platforms?: string[];
-  networks?: string[];
-  priceRange?: {
-    min?: number;
-    max?: number;
+  search?: string;
+  type?: string[];
+  category?: string[];
+  tags?: string[];
+  isPublic?: boolean;
+  isFavorite?: boolean;
+  hasParent?: boolean;
+  hasChildren?: boolean;
+  hasImages?: boolean;
+  hasVideos?: boolean;
+  hasAlbums?: boolean;
+  isShared?: boolean;
+  dateRange?: {
+    start?: Date;
+    end?: Date;
   };
-  onlyFavorites?: boolean;
 }
 
 /**
@@ -259,3 +263,80 @@ export const COLLECTION_SORT_PROPERTY_MAP: Record<CollectionSortCriteria, string
   [CollectionSortCriteria.PRICE_ASC]: 'price',
   [CollectionSortCriteria.PRICE_DESC]: 'price',
 };
+
+// Interfaces de relaciones
+export interface CollectionRelations {
+  owner?: { id: string };
+  parent?: { id: string };
+  children?: Array<{ id: string }>;
+  images?: Array<{ id: string }>;
+  videos?: Array<{ id: string }>;
+  albums?: Array<{ id: string }>;
+  tags?: Array<{ id: string }>;
+  groups?: Array<{ id: string }>;
+  characters?: Array<{ id: string }>;
+  places?: Array<{ id: string }>;
+  items?: Array<{ id: string }>;
+  notes?: Array<{ id: string }>;
+  sharedWith?: Array<{ id: string }>;
+}
+
+// Interface de conteos
+export interface CollectionCounts {
+  children: number;
+  images: number;
+  videos: number;
+  albums: number;
+  tags: number;
+  groups: number;
+  characters: number;
+  places: number;
+  items: number;
+  notes: number;
+  sharedWith: number;
+}
+
+// Interface completa
+export interface CollectionComplete extends CollectionBase, CollectionRelations {
+  _count: CollectionCounts;
+}
+
+// Interfaces para creación y actualización
+export interface CollectionCreateInput extends Omit<CollectionBase, 'id' | 'createdAt' | 'updatedAt'>, Partial<CollectionRelations> {}
+export interface CollectionUpdateInput extends Partial<Omit<CollectionBase, 'id' | 'createdAt' | 'updatedAt'>>, Partial<CollectionRelations> {}
+
+export interface CollectionIncludes {
+  owner?: boolean;
+  parent?: boolean;
+  children?: boolean;
+  images?: boolean;
+  videos?: boolean;
+  albums?: boolean;
+  tags?: boolean;
+  groups?: boolean;
+  characters?: boolean;
+  places?: boolean;
+  items?: boolean;
+  notes?: boolean;
+  sharedWith?: boolean;
+  count?: boolean;
+}
+
+export interface CollectionSearchOptions extends SearchOptionsSchema {
+  filters?: CollectionFilters;
+  include?: CollectionIncludes;
+}
+
+export interface CollectionSearchResult {
+  items: CollectionComplete[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+// Opciones del transformer
+export interface CollectionTransformerOptions {
+  includeRelations?: boolean;
+  includeCount?: boolean;
+  customFields?: string[];
+}

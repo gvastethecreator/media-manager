@@ -39,3 +39,14 @@ export interface TagExtended extends TagComplete {
 export interface TagWithRelationsExtended extends TagExtended, Omit<TagWithRelationsComplete, keyof TagComplete> {
   // Combina TagExtended con las relaciones y campos deserializados
 }
+
+/**
+ * Interfaz para etiquetas con estadísticas de uso
+ * @description Extiende la etiqueta completa con datos estadísticos
+ */
+export interface TagWithStats extends TagComplete {
+  /** Número de elementos asociados a esta etiqueta */
+  count: number;
+  /** Tamaño total de los elementos asociados (formateado) */
+  size: string;
+}

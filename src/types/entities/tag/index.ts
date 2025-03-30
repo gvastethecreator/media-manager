@@ -26,6 +26,15 @@ export type {
   TagValidated
 } from './types';
 
+// Exportar tipos extendidos
+export type {
+  TagComplete,
+  TagExtended,
+  TagWithRelationsComplete,
+  TagWithRelationsExtended,
+  TagWithStats
+} from './extended';
+
 // Tipo principal recomendado para uso general
 export type { TagWithRelations as Tag } from './types';
 

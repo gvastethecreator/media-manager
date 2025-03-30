@@ -3,32 +3,38 @@
  * @module types/entities/group/types
  */
 
-import { CacheExpirationPolicy } from '@/types/cache';
-import type { Image, Video } from '@/types/entities/index';
+import type { CacheExpirationPolicy } from '@/types/cache';
+import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import type { FileItem } from '@/types/file-item';
 import { SearchOperator } from '@/types/search';
 import type { BaseEntity } from '@/types/store.types';
-
-// Definición para campos que pueden ser nulos
-type Nullable<T> = T | null;
-
 import { z } from 'zod';
 
-// Tipos base
+// 🔄 Definición para campos que pueden ser nulos
+type Nullable<T> = T | null;
+
+/**
+ * 🔄 Tipo base para Group - Alineado con el esquema Prisma
+ */
 export interface GroupBase extends BaseEntity {
+  id: string;
   name: string;
   emoji: string;
   color: string;
-  description: string | null;
-  shortcut: string | null;
-  category: string | null;
+  description?: string | null;
+  shortcut?: string | null;
+  category?: string | null;
   sortBy: string;
   filters: string;
-  featuredImage: string | null;
+  featuredImage?: string | null;
   isFavorite: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-// Contadores
+/**
+ * 📊 Conteos de relaciones de Group
+ */
 export interface GroupCount {
   images: number;
   videos: number;
@@ -45,36 +51,62 @@ export interface GroupCount {
   properties: number;
 }
 
-// Estadísticas extendidas
+/**
+ * 📈 Estadísticas extendidas
+ */
 export interface GroupWithStats extends GroupBase {
   _count: GroupCount;
   totalEntities: number;
   lastUpdated: Date;
 }
 
-// Relaciones
-export interface GroupWithRelations extends GroupBase {
-  images?: Image[];
-  videos?: Video[];
-  // ...otras relaciones...
-  _count?: Partial<GroupCount>;
+/**
+ * 🔗 Relaciones de Group - Alineado con el esquema Prisma
+ */
+export interface GroupRelations {
+  images?: { id: string }[];
+  videos?: { id: string }[];
+  albums?: { id: string }[];
+  collections?: { id: string }[];
+  tags?: { id: string }[];
+  characters?: { id: string }[];
+  places?: { id: string }[];
+  worldItems?: { id: string }[];
+  concepts?: { id: string }[];
+  prompts?: { id: string }[];
+  notes?: { id: string }[];
+  wildcards?: { id: string }[];
+  properties?: { id: string }[];
 }
 
-// Archivos
+/**
+ * 📁 Group con archivos
+ */
 export interface GroupWithFiles extends GroupBase {
   files: FileItem[];
 }
 
-// Filtros
+/**
+ * 🎯 Filtros específicos para Group
+ */
 export interface GroupFilters {
-  query?: string;
+  search?: string;
   categories?: string[];
+  tags?: string[];
+  dateRange?: {
+    start?: Date;
+    end?: Date;
+  };
   isFavorite?: boolean;
-  withImages?: boolean;
-  withVideos?: boolean;
+  hasImages?: boolean;
+  hasVideos?: boolean;
+  hasAlbums?: boolean;
+  hasCollections?: boolean;
 }
 
-// Filtros avanzados
+/**
+ * 🔍 Filtros avanzados para Group
+ */
 export interface GroupAdvancedFilter {
   field: string;
   operator: SearchOperator;
@@ -82,7 +114,9 @@ export interface GroupAdvancedFilter {
   isActive: boolean;
 }
 
-// Configuración de caché para grupos
+/**
+ * ⏱️ Configuración de caché para grupos
+ */
 export interface GroupCacheConfig {
   enabled: boolean;
   expirationPolicy: CacheExpirationPolicy;
@@ -90,7 +124,9 @@ export interface GroupCacheConfig {
   maxItems: number;
 }
 
-// Datos para crear/actualizar
+/**
+ * 📝 Datos para crear un Group
+ */
 export interface CreateGroupData {
   name: string;
   description?: Nullable<string>;
@@ -101,17 +137,26 @@ export interface CreateGroupData {
   isFavorite?: boolean;
   sortBy?: string;
   filters?: string;
+  featuredImage?: Nullable<string>;
 }
 
+/**
+ * 📝 Datos para actualizar un Group
+ */
 export interface UpdateGroupData extends Partial<CreateGroupData> {}
 
-// Enums
+/**
+ * 🔢 Modos de visualización para Group
+ */
 export enum GroupViewMode {
   GRID = 'grid',
   LIST = 'list',
   TABLE = 'table'
 }
 
+/**
+ * 🔄 Criterios de ordenación para Group
+ */
 export enum GroupSortCriteria {
   NAME_ASC = 'name:asc',
   NAME_DESC = 'name:desc',
@@ -121,7 +166,9 @@ export enum GroupSortCriteria {
   UPDATED_DESC = 'updated:desc'
 }
 
-// Opciones para el listado de grupos
+/**
+ * 🔍 Opciones para el listado de Group
+ */
 export interface GroupListOptions {
   viewMode: GroupViewMode;
   sortBy: GroupSortCriteria;
@@ -133,7 +180,9 @@ export interface GroupListOptions {
   includeStats: boolean;
 }
 
-// Resultado de búsqueda para grupos
+/**
+ * 🔍 Resultado de búsqueda para Group
+ */
 export interface GroupSearchResult {
   items: GroupWithStats[];
   total: number;
@@ -144,7 +193,9 @@ export interface GroupSearchResult {
   filterBy?: GroupFilters;
 }
 
-// Validaciones Zod
+/**
+ * 🔍 Esquema de validación para Group Filter
+ */
 export const groupFilterSchema = z.object({
   type: z.enum(['tag', 'character', 'place', 'concept', 'worldItem']),
   operator: z.enum(['AND', 'OR', 'NOT']),
@@ -152,6 +203,9 @@ export const groupFilterSchema = z.object({
   field: z.string().optional()
 });
 
+/**
+ * 🔍 Esquema de validación para Group Advanced Filter
+ */
 export const groupAdvancedFilterSchema = z.object({
   field: z.string(),
   operator: z.nativeEnum(SearchOperator),
@@ -159,6 +213,9 @@ export const groupAdvancedFilterSchema = z.object({
   isActive: z.boolean()
 });
 
+/**
+ * 🔍 Esquema de validación para Group - Alineado con el esquema Prisma
+ */
 export const groupSchema = z.object({
   id: z.string(),
   name: z.string().min(1),
@@ -167,7 +224,7 @@ export const groupSchema = z.object({
   color: z.string(),
   category: z.string().nullable(),
   shortcut: z.string().nullable(),
-  sortBy: z.string().nullable(),
+  sortBy: z.string(),
   filters: z.string(),
   isFavorite: z.boolean(),
   featuredImage: z.string().nullable(),
@@ -175,6 +232,9 @@ export const groupSchema = z.object({
   updatedAt: z.date()
 });
 
+/**
+ * 🔍 Esquema de validación para GroupListOptions
+ */
 export const groupListOptionsSchema = z.object({
   viewMode: z.nativeEnum(GroupViewMode),
   sortBy: z.nativeEnum(GroupSortCriteria),
@@ -192,7 +252,61 @@ export const groupListOptionsSchema = z.object({
   includeStats: z.boolean()
 });
 
+/**
+ * 🔍 Tipos inferidos de los esquemas Zod
+ */
 export type GroupFilter = z.infer<typeof groupFilterSchema>;
 export type GroupAdvancedFilterValidated = z.infer<typeof groupAdvancedFilterSchema>;
 export type GroupValidated = z.infer<typeof groupSchema>;
 export type GroupListOptionsValidated = z.infer<typeof groupListOptionsSchema>;
+
+/**
+ * 🔍 Esquema de validación completo para Group
+ */
+export const GroupSchema = z.object({
+  ...BaseEntitySchema.shape,
+  ...UIFieldsSchema.shape,
+  ...MetadataFieldsSchema.shape,
+});
+
+/**
+ * 🔄 Group completo con todas las relaciones - Alineado con Prisma
+ */
+export interface GroupComplete extends GroupBase, GroupRelations {
+  _count?: Partial<GroupCount>;
+}
+
+/**
+ * 📝 Datos para crear un Group completo - Alineado con Prisma
+ */
+export type GroupCreateInput = Omit<GroupBase, 'id' | 'createdAt' | 'updatedAt'> & Partial<GroupRelations>;
+
+/**
+ * 📝 Datos para actualizar un Group completo - Alineado con Prisma
+ */
+export type GroupUpdateInput = Partial<Omit<GroupBase, 'id'>> & Partial<GroupRelations>;
+
+/**
+ * 🔍 Opciones de búsqueda para Group
+ */
+export interface GroupSearchOptions {
+  skip?: number;
+  take?: number;
+  orderBy?: {
+    [key in keyof GroupBase]?: 'asc' | 'desc';
+  };
+  where?: GroupFilters;
+  include?: {
+    [key in keyof GroupRelations]?: boolean;
+  };
+}
+
+/**
+ * 🎯 Opciones para el transformer de Group
+ */
+export interface GroupTransformerOptions {
+  includeRelations?: boolean;
+  includeCount?: boolean;
+  validateFields?: boolean;
+  customFields?: (keyof GroupComplete)[];
+}
