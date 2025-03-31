@@ -40,19 +40,20 @@ El schema.prisma define numerosos modelos con relaciones complejas que deben est
    - Bien estructurados con carpetas por entidad
    - Cada entidad tiene múltiples archivos (base.ts, extended.ts, complete.ts)
    - Estructura jerárquica clara (base -> extended -> complete)
-   - Problema potencial: Posible desalineación con cambios recientes en schema.prisma
+   - ✅ Mejora: Se implementó tipo FolderStats para mejorar la consistencia
 
 2. **Transformers**:
    - Organizados por entidad
    - Funciones para mapeo, serialización y deserialización
    - Cambio gradual de clases a funciones individuales
-   - Problema potencial: No todas las entidades tienen transformers completos
+   - ✅ Mejora: Se mejoró la exportación de transformadores en Folder para facilitar su uso
 
 3. **Stores**:
    - Uso de Zustand con slices para separar preocupaciones
    - Estructura clara con estado core, UI y filtros
    - Implementación del patrón de slices en entidades clave
-   - ✅ Mejora: Estructura consistente con selectores optimizados
+   - ✅ Mejora: Refactorización del store de Folder con slices optimizados y nuevos filtros
+   - ✅ Mejora: Integración de transformadores en los slices
 
 4. **Services**:
    - Implementación inconsistente, algunos como archivos individuales, otros en carpetas
@@ -63,9 +64,9 @@ El schema.prisma define numerosos modelos con relaciones complejas que deben est
    - ✅ Estructura organizada por entidades en `src/app/actions/`
    - ✅ Cobertura completa de entidades principales con archivos index.ts
    - ✅ Separación clara por funcionalidad
-   - ⚠️ Posible mejora: Estandarizar patrones entre acciones
-   - ⚠️ Posible mejora: Mejorar manejo de errores y validaciones
-   - ⚠️ Posible mejora: Implementar logging y monitoreo
+   - ✅ Mejora: Implementación de estadísticas avanzadas para carpetas
+   - ✅ Mejora: Mejorado el manejo de caché con revalidación de tags
+   - ✅ Mejora: Tipado consistente entre acciones y tipos base
 
 ## Problemas Específicos Identificados
 
@@ -90,35 +91,45 @@ El schema.prisma define numerosos modelos con relaciones complejas que deben est
 ### Fase 2: Desarrollo de Tipos Base (En progreso)
 - [x] Auditar y actualizar tipos existentes para alinearlos con schema.prisma
 - [x] Verificar que los tipos de relaciones coincidan con el schema
-- [ ] Implementar tipos faltantes siguiendo la estructura existente
+- [x] Implementar tipos faltantes siguiendo la estructura existente (FolderStats)
 - [ ] Crear herramientas de validación de tipos contra schema
 
 ### Fase 3: Implementación de Transformers (En progreso)
 - [x] Auditar transformers existentes
-- [ ] Implementar transformers faltantes siguiendo el patrón funcional actual
+- [x] Implementar transformers faltantes siguiendo el patrón funcional actual
+- [x] Mejorar la integración de transformadores con las actions (exportación completa)
 - [ ] Asegurar manejo adecuado de relaciones y campos JSON
 
 ### Fase 4: Implementación de Stores (En progreso)
 - [x] Auditar stores existentes
 - [x] Mejorar estructura del store de Activity con selectores optimizados
 - [x] Implementar store completo para QueueJob con slices (core, UI, filtros)
+- [x] Mejorar el store de Folder con nuevos filtros y mejor manejo de UI
+- [x] Integrar transformadores en el store de Folder
 - [ ] Implementar stores faltantes con slices (core, UI, filtros)
 - [ ] Asegurar consistencia en implementación entre entidades
 - [ ] Verificar integración correcta con transformers
 
-### Fase 5: Implementación de Services (Pendiente)
+### Fase 5: Implementación de Services (En progreso)
 - [x] Auditar servicios existentes
-- [ ] Implementar servicios faltantes siguiendo el patrón existente
+- [x] Implementar servicios faltantes para QueueJob
+- [x] Implementar servicios faltantes para Video
+- [x] Revisar servicio de Folder y detectar áreas de mejora
+- [ ] Implementar mejoras en el servicio de Folder
 - [ ] Estandarizar manejo de errores y validaciones
 
 ### Fase 6: Implementación de Actions (En progreso)
 - [x] Auditar acciones existentes para cada entidad
 - [x] Estandarizar estructura de exports con archivos index.ts
+- [x] Implementar acciones para QueueJob
+- [x] Implementar acciones para Video
+- [x] Mejorar actions para Folder (stats.actions.ts)
+- [ ] Continuar mejorando las acciones de Folder
 - [ ] Estandarizar estructura y patrones entre acciones
 - [ ] Implementar validaciones consistentes
 - [ ] Agregar manejo de errores robusto
-- [ ] Implementar logging y monitoreo
-- [ ] Asegurar revalidación correcta de rutas
+- [x] Implementar logging y monitoreo
+- [x] Asegurar revalidación correcta de rutas
 - [ ] Optimizar rendimiento de operaciones costosas
 
 ### Fase 7: Testing e Integración (Pendiente)
@@ -148,9 +159,9 @@ A continuación se presenta un inventario completo de todas las entidades identi
 
 3. **QueueJob**
    - 🟢 **Types**: Completo con enums y tipos adicionales
-   - 🟡 **Transformers**: Básico
+   - 🟢 **Transformers**: Implementado
    - 🟢 **Store**: Completo con patrón de slices
-   - 🟡 **Service**: Básico
+   - 🟢 **Service**: Implementado
    - 🟢 **Actions**: Implementadas en `src/app/actions/queue/`
 
 4. **Activity**
@@ -163,11 +174,11 @@ A continuación se presenta un inventario completo de todas las entidades identi
 ### Entidades de Contenido Base
 
 5. **Folder**
-   - 🟢 **Types**: Completo
-   - 🟡 **Transformers**: Parcial
-   - 🟡 **Store**: Parcial
-   - 🟡 **Service**: Parcial
-   - 🟢 **Actions**: Implementadas en `src/app/actions/folders/`
+   - 🟢 **Types**: Completo y actualizado con FolderStats
+   - 🟢 **Transformers**: Mejorado con exportaciones completas
+   - 🟢 **Store**: Mejorado con slices, filtros avanzados y acción de estadísticas
+   - 🟡 **Service**: Parcial (pendiente mejorar)
+   - 🟢 **Actions**: Implementadas y mejoradas en `src/app/actions/folders/`
 
 6. **Image**
    - 🟢 **Types**: Completo
@@ -177,10 +188,10 @@ A continuación se presenta un inventario completo de todas las entidades identi
    - 🟢 **Actions**: Implementadas en `src/app/actions/images/`
 
 7. **Video**
-   - 🟡 **Types**: Parcial
-   - 🟡 **Transformers**: Parcial
-   - 🔴 **Store**: No implementado
-   - 🟡 **Service**: Parcial
+   - 🟢 **Types**: Completo
+   - 🟢 **Transformers**: Actualizado
+   - 🟡 **Store**: Parcial (por optimizar)
+   - 🟢 **Service**: Implementado
    - 🟢 **Actions**: Implementadas en `src/app/actions/videos/`
 
 8. **UploadedImage**
@@ -330,12 +341,14 @@ Para garantizar una implementación coherente, seguiremos este orden basado en d
 
 1. **Entidades base sin dependencias**:
    - ✅ Profile, Settings
-   - ⏳ QueueJob
+   - ✅ QueueJob
    - ✅ Activity
-   - ⏳ Folder
+   - ✅ Folder (Mejorado) ⭐
+   - ⏳ Revisar servicio de Folder
 
 2. **Entidades con dependencias simples**:
-   - ⏳ Image, Video (dependen de Folder)
+   - ✅ Video (depende de Folder)
+   - ⏳ Image (depende de Folder)
    - ⏳ Tag, Group, Property (entidades organizativas simples)
 
 3. **Entidades organizativas complejas**:
@@ -349,86 +362,76 @@ Para garantizar una implementación coherente, seguiremos este orden basado en d
 
 ## Tareas Inmediatas
 
-1. **Inventario Completo**:
-   - [x] Crear matriz de implementaciones existentes vs. requeridas
-   - [x] Documentar desviaciones entre schema.prisma y tipos actuales
+1. **Servicio de Folder**:
+   - [ ] Revisar implementación actual del servicio
+   - [ ] Alinear con los principios funcionales (evitar clases/OOP)
+   - [ ] Mejorar manejo de errores y tipos
+   - [ ] Optimizar método de indexación de carpetas
 
-2. **Actualización de Tipos para Entidades Base**:
-   - [x] Profile
-   - [x] Settings
-   - [x] Activity
-   - [ ] QueueJob
-   - [ ] Folder
+2. **Mejoras en Tag**:
+   - [ ] Evaluar estado actual
+   - [ ] Implementar transformadores completos
+   - [ ] Implementar o mejorar store con patrón de slices
+   - [ ] Revisar servicio y acciones
 
-3. **Implementación de Transformers Faltantes**:
-   - [x] Identificar transformers incompletos o faltantes
-   - [x] Implementar para entidades base (Activity)
-   - [ ] Continuar con QueueJob
+3. **Mejoras en UploadedImage**:
+   - [ ] Completar tipos faltantes
+   - [ ] Implementar transformadores
+   - [ ] Crear store con patrón de slices
+   - [ ] Mejorar servicio
 
-4. **Desarrollo de Servicios Base**:
-   - [x] Completar servicios para entidades base (Activity)
-   - [ ] Continuar con QueueJob
+4. **Mejoras en ImageStats**:
+   - [ ] Completar tipos
+   - [ ] Implementar transformadores
+   - [ ] Crear store
+   - [ ] Implementar servicio
 
-5. **Implementación de Stores**:
-   - [x] Estructura de store con slices para Activity
-   - [x] Implementar store completo para QueueJob con slices (core, UI, filtros)
+## Implementación de la Entidad Folder (Actualizado)
 
-6. **Estructura de Actions**:
-   - [x] Definir patrón estándar para todas las actions
-   - [x] Implementar exports para todas las entidades
-   - [ ] Completar implementación de actions para QueueJob
+Se ha completado una parte significativa de las mejoras para la entidad Folder:
 
-## Implementación de la Entidad QueueJob
+1. **Mejoras en Types**:
+   - [x] Implementado `FolderStats` para estadísticas avanzadas
+   - [x] Verificada alineación con schema.prisma
 
-Después de haber implementado y mejorado la entidad Activity, hemos completado la implementación del QueueJob siguiendo los mismos patrones.
+2. **Mejoras en Transformers**:
+   - [x] Mejorada la exportación en `index.ts`
+   - [x] Añadido `transformFolder` como punto de entrada principal
 
-### Componentes implementados para QueueJob:
+3. **Mejoras en Store**:
+   - [x] Refactorizado core slice con transformadores
+   - [x] Mejorado UI slice con soporte para modal de estadísticas
+   - [x] Ampliado filters slice con filtros avanzados
 
-1. **Revisión de Types**:
-   - [x] Verificar alineación con schema.prisma
-   - [x] Implementar enums para estados y tipos
-   - [x] Definir tipos para ordenamiento y filtrado
+4. **Mejoras en Actions**:
+   - [x] Implementadas estadísticas avanzadas en `stats.actions.ts`
+   - [x] Mejorado el manejo de caché con tags
+   - [x] Añadida acción para estadísticas específicas de una carpeta
 
-2. **Mejora de Store**:
-   - [x] Aplicar patrón de slices (core, UI, filters)
-   - [x] Desarrollar selectores optimizados
-   - [x] Implementar persistencia para configuraciones de usuario
+## Implementación de Tag (Próxima)
 
-### Estructura implementada para QueueJob Store:
+La entidad Tag será el próximo objetivo para completar su implementación:
 
-```typescript
-// Estructura de slices implementada
-src/store/entities/queue-job/
-  ├── index.ts            // Exportaciones actualizadas
-  ├── queue-job-store.ts  // Store principal con middleware
-  ├── types.ts            // Tipos actualizados con enums
-  └── slices/
-      ├── core.ts         // Estado y acciones core
-      ├── filters.ts      // Filtros y ordenación
-      ├── selectors.ts    // Selectores optimizados
-      └── ui.ts           // Estado de la UI
-```
+1. **Objetivos para Types**:
+   - [ ] Revisar tipos existentes
+   - [ ] Asegurar alineación con schema.prisma
 
-## Próximos pasos
+2. **Objetivos para Transformers**:
+   - [ ] Implementar transformadores completos
+   - [ ] Crear punto de entrada `transformTag`
 
-### Implementación de entidades: Fase 1 (En curso)
-- ✅ `Settings` - Implementación completa
-- ✅ `Profiles` - Implementación completa
-- ✅ `Activity` - Implementación completa
-- ✅ `QueueJob` - Implementación del store completa
-- ⏳ `System` - Implementación parcial
+3. **Objetivos para Store**:
+   - [ ] Implementar store con slices
+   - [ ] Definir selectores optimizados
 
-### Implementación de entidades: Fase 2 (Pendiente)
-- ⏳ `Folder` - Siguiente entidad a implementar
-- ⏳ `Image` - Implementación parcial
-- ⏳ `Video` - Implementación parcial
-- ⏳ `Tag` - Implementación parcial
+4. **Objetivos para Service**:
+   - [ ] Revisar servicio existente
+   - [ ] Migrar a enfoque funcional (sin clases)
 
-## Tareas específicas a realizar
-- Completar la implementación de transformers y servicios para QueueJob
-- Iniciar la implementación de Folder siguiendo el patrón establecido
-- Reorganizar Folder store con el patrón de slices
-- Implementar selectores optimizados para Folder
+5. **Objetivos para Actions**:
+   - [ ] Revisar acciones existentes
+   - [ ] Estandarizar estructura
+   - [ ] Mejorar manejo de errores y validaciones
 
 ## Documentación del Progreso
 
@@ -444,18 +447,24 @@ graph TD
         G[Settings]
         H[Activity]
         I[Estructura Actions]
-        J[QueueJob Store]
+        J[QueueJob]
+        K[Video Service]
+        L[Video Actions]
+        M[Folder Store]
+        N[Folder Types]
+        O[Folder Stats]
     end
 
     subgraph "En Progreso"
-        K[QueueJob Service]
-        L[Folder]
+        P[Folder Service]
+        Q[Tag]
+        R[Image]
     end
 
     subgraph "Pendiente"
-        M[Entidades Organizativas]
-        N[Entidades de Contenido]
-        O[Entidades Utilitarias]
+        S[Entidades Organizativas]
+        T[Entidades de Contenido]
+        U[Entidades Utilitarias]
     end
 
     D --> F
@@ -465,7 +474,21 @@ graph TD
     D --> J
     D --> K
     D --> L
-    D -.-> M
-    D -.-> N
-    D -.-> O
+    D --> M
+    D --> N
+    D --> O
+    D --> P
+    D -.-> Q
+    D -.-> R
+    D -.-> S
+    D -.-> T
+    D -.-> U
 ```
+
+## Próximos pasos
+
+1. Continuar con la revisión y mejora del servicio de Folder.
+2. Implementar la entidad Tag completamente siguiendo el patrón establecido.
+3. Revisar y mejorar la entidad Image, enfocándonos en la integración con Folder.
+
+La mejora continua y la alineación con el schema.prisma son prioridades clave para garantizar la coherencia y la robustez del sistema.

@@ -18,13 +18,15 @@ export const createUISlice: FolderUISlice = (set, get) => ({
 		showCreateModal: false,
 		showEditModal: false,
 		showDeleteModal: false,
+		showStatsModal: false,
+		statsSelectedFolderId: null,
 	},
 
 	uiActions: {
 		// Acciones
 		setViewMode: (mode) => {
 			const { uiState } = get();
-			uiLogger.info(`📊 Cambiando modo de visualización a: ${mode}`);
+			uiLogger.info(`👓 Cambiando modo de visualización a: ${mode}`);
 			set({ uiState: { ...uiState, viewMode: mode } });
 		},
 
@@ -37,54 +39,43 @@ export const createUISlice: FolderUISlice = (set, get) => ({
 		toggleSidebar: () => {
 			const { uiState } = get();
 			const newState = !uiState.sidebarExpanded;
-			uiLogger.info(`🔄 ${newState ? 'Expandiendo' : 'Colapsando'} sidebar`);
+			uiLogger.info(`📑 ${newState ? 'Expandiendo' : 'Colapsando'} sidebar`);
 			set({ uiState: { ...uiState, sidebarExpanded: newState } });
 		},
 
 		toggleFolderExpanded: (id) => {
 			const { uiState } = get();
 			const isExpanded = uiState.expandedFolders.includes(id);
+			uiLogger.info(`📂 ${isExpanded ? 'Colapsando' : 'Expandiendo'} carpeta: ${id}`);
 
-			if (isExpanded) {
-				uiLogger.info(`📂 Colapsando carpeta: ${id}`);
-				set({
-					uiState: {
-						...uiState,
-						expandedFolders: uiState.expandedFolders.filter((folderId) => folderId !== id),
-					},
-				});
-			} else {
-				uiLogger.info(`📂 Expandiendo carpeta: ${id}`);
-				set({
-					uiState: {
-						...uiState,
-						expandedFolders: [...uiState.expandedFolders, id],
-					},
-				});
-			}
+			const newExpandedFolders = isExpanded
+				? uiState.expandedFolders.filter((folderId) => folderId !== id)
+				: [...uiState.expandedFolders, id];
+
+			set({ uiState: { ...uiState, expandedFolders: newExpandedFolders } });
 		},
 
 		openCreateModal: () => {
 			const { uiState } = get();
-			uiLogger.info('🆕 Abriendo modal de creación');
+			uiLogger.info('➕ Abriendo modal de creación de carpeta');
 			set({ uiState: { ...uiState, showCreateModal: true } });
 		},
 
 		closeCreateModal: () => {
 			const { uiState } = get();
-			uiLogger.info('🚪 Cerrando modal de creación');
+			uiLogger.info('✖️ Cerrando modal de creación de carpeta');
 			set({ uiState: { ...uiState, showCreateModal: false } });
 		},
 
 		openEditModal: () => {
 			const { uiState } = get();
-			uiLogger.info('✏️ Abriendo modal de edición');
+			uiLogger.info('✏️ Abriendo modal de edición de carpeta');
 			set({ uiState: { ...uiState, showEditModal: true } });
 		},
 
 		closeEditModal: () => {
 			const { uiState } = get();
-			uiLogger.info('🚪 Cerrando modal de edición');
+			uiLogger.info('✖️ Cerrando modal de edición de carpeta');
 			set({ uiState: { ...uiState, showEditModal: false } });
 		},
 
@@ -96,8 +87,32 @@ export const createUISlice: FolderUISlice = (set, get) => ({
 
 		closeDeleteModal: () => {
 			const { uiState } = get();
-			uiLogger.info('🚪 Cerrando modal de confirmación de eliminación');
+			uiLogger.info('✖️ Cerrando modal de confirmación de eliminación');
 			set({ uiState: { ...uiState, showDeleteModal: false } });
+		},
+
+		openStatsModal: (folderId) => {
+			const { uiState } = get();
+			uiLogger.info(`📊 Abriendo modal de estadísticas para carpeta: ${folderId}`);
+			set({
+				uiState: {
+					...uiState,
+					showStatsModal: true,
+					statsSelectedFolderId: folderId
+				}
+			});
+		},
+
+		closeStatsModal: () => {
+			const { uiState } = get();
+			uiLogger.info('✖️ Cerrando modal de estadísticas');
+			set({
+				uiState: {
+					...uiState,
+					showStatsModal: false,
+					statsSelectedFolderId: null
+				}
+			});
 		},
 	},
 });
