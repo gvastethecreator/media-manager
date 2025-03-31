@@ -35,10 +35,75 @@ const mapperLogger = serverLogger.withContext('ImageMappers');
 
 const logger = new Logger('ImageMapper');
 
+/**
+ * Convierte cualquier objeto de imagen a una versión ImageComplete completa
+ * @param image Objeto image a convertir
+ * @returns Una versión ImageComplete del objeto
+ */
+export function mapImageToComplete(image: any): ImageComplete {
+	try {
+		// Si ya es un ImageComplete o tiene _count, retornar directamente
+		if (Object.prototype.hasOwnProperty.call(image, '_count')) {
+			return image as ImageComplete;
+		}
+
+		// Asegurarse de que tenga ID
+		if (!image.id) {
+			throw new Error('Image must have an ID');
+		}
+
+		// Crear una versión completa de la imagen
+		const imageComplete: ImageComplete = {
+			id: image.id,
+			name: image.name || '',
+			description: image.description || '',
+			path: image.path || '',
+			hash: image.hash || '',
+			size: image.size || 0,
+			width: image.width || 0,
+			height: image.height || 0,
+			thumbnailPath: image.thumbnailPath || null,
+			thumbnailWidth: image.thumbnailWidth || 0,
+			thumbnailHeight: image.thumbnailHeight || 0,
+			metadata: image.metadata || null,
+			isFavorite: image.isFavorite || false,
+			isPublic: image.isPublic || false,
+			folderId: image.folderId || null,
+			createdAt: image.createdAt || new Date(),
+			updatedAt: image.updatedAt || new Date(),
+			addedAt: image.addedAt || new Date(),
+
+			// Relaciones
+			folder: image.folder || null,
+			tags: image.tags || [],
+			albums: image.albums || [],
+			collections: image.collections || [],
+			characters: image.characters || [],
+			places: image.places || [],
+			prompts: image.prompts || [],
+
+			// Contadores
+			_count: image._count || {
+				tags: image.tags?.length || 0,
+				albums: image.albums?.length || 0,
+				collections: image.collections?.length || 0,
+				characters: image.characters?.length || 0,
+				places: image.places?.length || 0,
+				prompts: image.prompts?.length || 0,
+			},
+		};
+
+		return imageComplete;
+	} catch (error) {
+		logger.error('Error convirtiendo a ImageComplete:', error);
+		throw error;
+	}
+}
+
 // Enum para direcciones de ordenamiento
 enum SortDirection {
-    ASC = 'asc',
-    DESC = 'desc'
+	ASC = 'asc',
+	DESC = 'desc'
 }
 
 /**

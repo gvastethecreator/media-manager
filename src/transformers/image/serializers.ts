@@ -216,13 +216,13 @@ export function validateImage(data: unknown): ImageComplete {
 /**
  * Extiende una imagen con datos adicionales
  */
-export async function extendImage(
+export function extendImage(
 	image: ImageComplete,
 	options: {
 		includeStats?: boolean;
 		includeRelations?: boolean;
 	} = {}
-): Promise<ImageComplete> {
+): ImageComplete {
 	try {
 		// Aquí se pueden añadir datos adicionales que no vienen directamente
 		// de la base de datos, como estadísticas calculadas, datos de sistemas externos, etc.

@@ -17,6 +17,14 @@ export const createFiltersSlice: FolderFiltersSlice = (set, get) => ({
 		showFavorites: false,
 		activeOnly: true,
 		categoryFilter: null,
+		minSize: null,
+		maxSize: null,
+		minFiles: null,
+		maxFiles: null,
+		notIndexed: false,
+		autoReindexOnly: false,
+		indexedAfter: null,
+		indexedBefore: null,
 	},
 
 	filtersActions: {
@@ -59,6 +67,56 @@ export const createFiltersSlice: FolderFiltersSlice = (set, get) => ({
 			set({ filtersState: { ...filtersState, categoryFilter: category } });
 		},
 
+		setMinSize: (size) => {
+			const { filtersState } = get();
+			filtersLogger.info(`📊 Estableciendo tamaño mínimo: ${size ? `${size} bytes` : 'sin límite'}`);
+			set({ filtersState: { ...filtersState, minSize: size } });
+		},
+
+		setMaxSize: (size) => {
+			const { filtersState } = get();
+			filtersLogger.info(`📊 Estableciendo tamaño máximo: ${size ? `${size} bytes` : 'sin límite'}`);
+			set({ filtersState: { ...filtersState, maxSize: size } });
+		},
+
+		setMinFiles: (count) => {
+			const { filtersState } = get();
+			filtersLogger.info(`🔢 Estableciendo cantidad mínima de archivos: ${count || 'sin límite'}`);
+			set({ filtersState: { ...filtersState, minFiles: count } });
+		},
+
+		setMaxFiles: (count) => {
+			const { filtersState } = get();
+			filtersLogger.info(`🔢 Estableciendo cantidad máxima de archivos: ${count || 'sin límite'}`);
+			set({ filtersState: { ...filtersState, maxFiles: count } });
+		},
+
+		toggleNotIndexed: () => {
+			const { filtersState } = get();
+			const newState = !filtersState.notIndexed;
+			filtersLogger.info(`🔍 ${newState ? 'Mostrando' : 'Ocultando'} carpetas sin indexar`);
+			set({ filtersState: { ...filtersState, notIndexed: newState } });
+		},
+
+		toggleAutoReindexOnly: () => {
+			const { filtersState } = get();
+			const newState = !filtersState.autoReindexOnly;
+			filtersLogger.info(`🔄 ${newState ? 'Mostrando' : 'Ocultando'} solo carpetas con reindexado automático`);
+			set({ filtersState: { ...filtersState, autoReindexOnly: newState } });
+		},
+
+		setIndexedAfter: (date) => {
+			const { filtersState } = get();
+			filtersLogger.info(`📅 Filtrando carpetas indexadas después de: ${date?.toISOString() || 'sin fecha'}`);
+			set({ filtersState: { ...filtersState, indexedAfter: date } });
+		},
+
+		setIndexedBefore: (date) => {
+			const { filtersState } = get();
+			filtersLogger.info(`📅 Filtrando carpetas indexadas antes de: ${date?.toISOString() || 'sin fecha'}`);
+			set({ filtersState: { ...filtersState, indexedBefore: date } });
+		},
+
 		resetFilters: () => {
 			filtersLogger.info('🔄 Reiniciando todos los filtros');
 			set({
@@ -69,6 +127,14 @@ export const createFiltersSlice: FolderFiltersSlice = (set, get) => ({
 					showFavorites: false,
 					activeOnly: true,
 					categoryFilter: null,
+					minSize: null,
+					maxSize: null,
+					minFiles: null,
+					maxFiles: null,
+					notIndexed: false,
+					autoReindexOnly: false,
+					indexedAfter: null,
+					indexedBefore: null,
 				},
 			});
 		},

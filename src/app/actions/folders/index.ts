@@ -1,28 +1,53 @@
 /**
- * @file Exporta todas las acciones relacionadas con carpetas
+ * @file Acciones principales para la entidad Folder
  * @module app/actions/folders
  */
 
-// Re-exportar todas las funciones por categoría
-export * from './crud.actions';
-export * from './process.actions';
-export * from './query.actions';
-export * from './stats.actions';
-
-// Re-exportar funciones específicas
-export * from './folder-diagnostics';
-export * from './folder-images.actions';
-export * from './folder-types';
-
-// Exportar transformadores para carpetas desde /transformers
+// Re-exportar todas las acciones de transformers
 export {
-	fromFolderComplete,
-	mapFolderExtendedFromComplete,
-	toFolderComplete,
-	toFolderExtended,
-	toFolderSummary,
-	toFolderTreeItem,
-	toFolderWithStats,
-	toPrismaFolder
+    createFolder,
+    deleteFolder,
+    getFolderById,
+    getFolderWithStats,
+    searchFolders,
+    updateFolder
 } from '@/transformers/folder';
 
+// Re-exportar transformadores principales
+export {
+    transformFolder,
+    transformFolderToExtended
+} from '@/transformers/folder';
+
+// Re-exportar serializadores
+export {
+    extendFolder,
+    fromFolderComplete,
+    fromPrismaFolder,
+    generateFolderColor,
+    generateFolderEmoji,
+    normalizeFolderPath,
+    normalizeFolderType,
+    parseFolderFilters,
+    validateFolder,
+    withFolderStats
+} from '@/transformers/folder';
+
+// Re-exportar mappers
+export {
+    createFolderFilter,
+    createFolderOrderBy,
+    mapCreateFolderDataToPrisma,
+    mapFolderFiltersToPrisma,
+    mapFolderSearchOptionsToPrisma,
+    mapUpdateFolderDataToPrisma,
+    transformCompleteFolderToPrisma,
+    transformFolderToPrisma
+} from '@/transformers/folder';
+
+// Re-exportar converters
+export {
+    mapFolderToFolder,
+    toFolderComplete,
+    toPrismaFolder
+} from '@/transformers/folder';

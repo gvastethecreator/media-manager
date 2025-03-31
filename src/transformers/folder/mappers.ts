@@ -1,143 +1,351 @@
 /**
- * @file Funciones de mapeo entre diferentes formatos para Folder
+ * @file Funciones de mapeo para la entidad Folder
  * @module transformers/folder/mappers
  */
 
+import { Logger } from '@/lib/logger';
+import { FolderSortBy } from '@/types/entities/folder/enums';
 import type {
-  FolderBase,
-  FolderComplete,
-  FolderExtended,
-  FolderExtendedComplete,
-  FolderTreeItem
-} from '@/types/entities/folder';
-import {
-  mapFolderExtendedFromComplete,
-  toFolderComplete,
-  toFolderTreeItem
-} from './serializers';
+    Folder,
+    FolderComplete,
+    FolderCreateInput,
+    FolderFilter,
+    FolderSearchOptions,
+    FolderUpdateInput
+} from '@/types/entities/folder/types';
+import { normalizeFolderPath } from './serializers';
+
+const logger = new Logger('FolderMappers');
 
 /**
- * Construye una estructura jerárquica de carpetas (árbol)
- * Utiliza los nuevos transformadores para procesar cada carpeta
+ * 🔍 Crea un objeto de filtro para consultas de Prisma
  *
- * @param folders Lista plana de carpetas
- * @param parentId ID del padre para el nivel actual (null para raíz)
- * @param level Nivel de profundidad actual
- * @returns Lista jerárquica de carpetas
+ * @param filter Filtro de carpeta
+ * @returns Objeto de filtro para Prisma
  */
-export function buildFolderTree(
-	folders: (FolderBase | FolderComplete | FolderExtended | FolderExtendedComplete)[],
-	parentId: string | null = null,
-	level = 0
-): FolderTreeItem[] {
-	const tree: FolderTreeItem[] = [];
+export function createFolderFilter(filter: FolderFilter = {}): any {
+  try {
+    const prismaFilter: any = {};
 
-	// Filtrar carpetas del nivel actual
-	const currentLevelFolders = folders.filter((folder) => folder.parentId === parentId);
+    // Filtrado por ID
+    if (filter.id) {
+      prismaFilter.id = filter.id;
+    }
 
-	// Para cada carpeta de este nivel
-	for (const folder of currentLevelFolders) {
-		// Crear el item del árbol
-		const treeItem = toFolderTreeItem(folder, level);
+    // Filtrado por nombre (insensible a mayúsculas/minúsculas)
+    if (filter.name) {
+      prismaFilter.name = {
+        contains: filter.name,
+        mode: 'insensitive'
+      };
+    }
 
-		// Buscar hijos recursivamente
-		const children = buildFolderTree(folders, folder.id, level + 1);
-		treeItem.hasChildren = children.length > 0;
-		treeItem.children = children;
-		treeItem.totalItems = children.length;
+    // Filtrado por path
+    if (filter.path) {
+      prismaFilter.path = {
+        contains: filter.path
+      };
+    }
 
-		// Añadir al árbol
-		tree.push(treeItem);
-	}
+    // Filtrado por ID de padre
+    if (filter.parentId !== undefined) {
+      prismaFilter.parentId = filter.parentId;
+    }
 
-	return tree;
+    // Filtrado por fecha de creación
+    if (filter.createdAt) {
+      prismaFilter.createdAt = filter.createdAt;
+    }
+
+    // Filtrado por fecha de actualización
+    if (filter.updatedAt) {
+      prismaFilter.updatedAt = filter.updatedAt;
+    }
+
+    return prismaFilter;
+  } catch (error) {
+    logger.error('Error creando filtro de folder para Prisma:', error);
+    return {};
+  }
 }
 
 /**
- * Busca una carpeta por su ID en el árbol de carpetas
- * @param tree Árbol de carpetas
- * @param folderId ID de la carpeta a buscar
- * @returns La carpeta encontrada o undefined
- */
-export function findFolderInTree(tree: FolderTreeItem[], folderId: string): FolderTreeItem | undefined {
-	for (const folder of tree) {
-		if (folder.id === folderId) {
-			return folder;
-		}
-
-		if (folder.children.length > 0) {
-			const found = findFolderInTree(folder.children, folderId);
-			if (found) {
-				return found;
-			}
-		}
-	}
-
-	return undefined;
-}
-
-/**
- * Construye una estructura con relaciones completas a partir de una lista plana,
- * utilizando los nuevos serializadores.
+ * 📊 Crea un objeto de ordenación para consultas de Prisma
  *
- * @param folders Lista plana de carpetas
- * @returns Carpetas con sus relaciones completas
+ * @param sortBy Criterio de ordenación
+ * @returns Objeto de ordenación para Prisma
  */
-export function buildFolderRelations(folders: FolderBase[]): FolderExtendedComplete[] {
-	// Convertir a formato completo y extendido
-	const completeFolders = folders.map(folder => {
-		const complete = toFolderComplete(folder);
-		return mapFolderExtendedFromComplete(complete);
-	});
+export function createFolderOrderBy(sortBy: FolderSortBy = FolderSortBy.NAME_ASC): any {
+  try {
+    switch (sortBy) {
+      case FolderSortBy.NAME_ASC:
+        return { name: 'asc' };
 
-	// Mapa para acceso rápido por ID
-	const folderMap = new Map<string, FolderExtendedComplete>();
-	completeFolders.forEach((folder) => folderMap.set(folder.id, folder));
+      case FolderSortBy.NAME_DESC:
+        return { name: 'desc' };
 
-	// Construir relaciones
-	const foldersWithRelations: FolderExtendedComplete[] = [];
+      case FolderSortBy.CREATED_ASC:
+        return { createdAt: 'asc' };
 
-	for (const folder of completeFolders) {
-		const folderWithRel: FolderExtendedComplete = {
-			...folder,
-			children: [],
-		};
+      case FolderSortBy.CREATED_DESC:
+        return { createdAt: 'desc' };
 
-		// Asignar padre si existe
-		if (folder.parentId) {
-			folderWithRel.parent = folderMap.get(folder.parentId) || null;
-		}
+      case FolderSortBy.UPDATED_ASC:
+        return { updatedAt: 'asc' };
 
-		// Encontrar todos los hijos
-		folderWithRel.children = completeFolders.filter((f) => f.parentId === folder.id);
+      case FolderSortBy.UPDATED_DESC:
+        return { updatedAt: 'desc' };
 
-		foldersWithRelations.push(folderWithRel);
-	}
+      case FolderSortBy.PATH_ASC:
+        return { path: 'asc' };
 
-	return foldersWithRelations;
+      case FolderSortBy.PATH_DESC:
+        return { path: 'desc' };
+
+      default:
+        return { name: 'asc' };
+    }
+  } catch (error) {
+    logger.error('Error creando orden de folder para Prisma:', error);
+    return { name: 'asc' };
+  }
 }
 
 /**
- * Calcula la ruta completa de una carpeta basada en su jerarquía
- * @param folder Carpeta para la que calcular la ruta
- * @param allFolders Todas las carpetas disponibles
- * @returns Ruta completa con nombres de carpetas
+ * 🔄 Mapea opciones de búsqueda a parámetros de Prisma
+ *
+ * @param options Opciones de búsqueda
+ * @returns Opciones de búsqueda para Prisma
  */
-export function calculateFolderPath(
-	folder: FolderBase | FolderComplete | FolderExtended | FolderExtendedComplete,
-	allFolders: (FolderBase | FolderComplete | FolderExtended | FolderExtendedComplete)[]
-): string {
-	const segments = [folder.name];
-	let currentFolder = folder;
+export function mapFolderSearchOptionsToPrisma(options: FolderSearchOptions = {}): any {
+  try {
+    const prismaOptions: any = {};
 
-	// Recorrer la jerarquía hacia arriba
-	while (currentFolder.parentId) {
-		const parent = allFolders.find((f) => f.id === currentFolder.parentId);
-		if (!parent) break;
+    // Mapear filtros
+    if (options.filter) {
+      prismaOptions.where = createFolderFilter(options.filter);
+    }
 
-		segments.unshift(parent.name);
-		currentFolder = parent;
-	}
+    // Mapear ordenación
+    prismaOptions.orderBy = createFolderOrderBy(options.sortBy);
 
-	return segments.join('/');
+    // Mapear paginación
+    if (options.skip !== undefined) {
+      prismaOptions.skip = options.skip;
+    }
+
+    if (options.take !== undefined) {
+      prismaOptions.take = options.take;
+    }
+
+    // Mapear relaciones a incluir
+    if (options.include) {
+      prismaOptions.include = {};
+
+      if (options.include.parent) {
+        prismaOptions.include.parent = true;
+      }
+
+      if (options.include.children) {
+        prismaOptions.include.children = true;
+      }
+
+      if (options.include.images) {
+        prismaOptions.include.images = true;
+      }
+
+      if (options.include.count) {
+        prismaOptions.include._count = {
+          select: {
+            children: true,
+            images: true,
+            uploadedImages: true,
+            tags: true
+          }
+        };
+      }
+    }
+
+    return prismaOptions;
+  } catch (error) {
+    logger.error('Error mapeando opciones de búsqueda de folder para Prisma:', error);
+    return {};
+  }
+}
+
+/**
+ * 🔄 Mapea filtros a parámetros de Prisma
+ *
+ * @param filters Filtros de carpeta
+ * @returns Filtros para Prisma
+ */
+export function mapFolderFiltersToPrisma(filters: Record<string, any> = {}): any {
+  try {
+    const prismaFilters: any = {};
+
+    // Mapear filtros comunes
+    if (filters.id) {
+      prismaFilters.id = filters.id;
+    }
+
+    if (filters.name) {
+      prismaFilters.name = {
+        contains: filters.name,
+        mode: 'insensitive'
+      };
+    }
+
+    if (filters.path) {
+      prismaFilters.path = {
+        contains: filters.path
+      };
+    }
+
+    if (filters.parentId !== undefined) {
+      prismaFilters.parentId = filters.parentId === 'null' ? null : filters.parentId;
+    }
+
+    // Fechas
+    if (filters.createdBefore) {
+      prismaFilters.createdAt = {
+        ...(prismaFilters.createdAt || {}),
+        lt: new Date(filters.createdBefore)
+      };
+    }
+
+    if (filters.createdAfter) {
+      prismaFilters.createdAt = {
+        ...(prismaFilters.createdAt || {}),
+        gt: new Date(filters.createdAfter)
+      };
+    }
+
+    if (filters.updatedBefore) {
+      prismaFilters.updatedAt = {
+        ...(prismaFilters.updatedAt || {}),
+        lt: new Date(filters.updatedBefore)
+      };
+    }
+
+    if (filters.updatedAfter) {
+      prismaFilters.updatedAt = {
+        ...(prismaFilters.updatedAt || {}),
+        gt: new Date(filters.updatedAfter)
+      };
+    }
+
+    return prismaFilters;
+  } catch (error) {
+    logger.error('Error mapeando filtros de folder para Prisma:', error);
+    return {};
+  }
+}
+
+/**
+ * 🔄 Mapea datos para creación a formato Prisma
+ *
+ * @param data Datos para crear carpeta
+ * @returns Datos para Prisma
+ */
+export function mapCreateFolderDataToPrisma(data: FolderCreateInput): any {
+  try {
+    const prismaData: any = { ...data };
+
+    // Normalizar path
+    if (data.path) {
+      prismaData.path = normalizeFolderPath(data.path);
+    }
+
+    // Si no hay path pero hay nombre y parentId, generarlo
+    if (!data.path && data.name && data.parentId) {
+      // En un caso real, buscaríamos el path del padre
+      // y concatenaríamos el nombre
+      prismaData.path = `/parent-path/${data.name}`;
+    }
+
+    // Manejar objetos complejos como metadata
+    if (data.metadata && typeof data.metadata === 'object') {
+      prismaData.metadata = data.metadata;
+    }
+
+    return prismaData;
+  } catch (error) {
+    logger.error('Error mapeando datos de creación de folder para Prisma:', error);
+    return data;
+  }
+}
+
+/**
+ * 🔄 Mapea datos para actualización a formato Prisma
+ *
+ * @param data Datos para actualizar carpeta
+ * @returns Datos para Prisma
+ */
+export function mapUpdateFolderDataToPrisma(data: FolderUpdateInput): any {
+  try {
+    const prismaData: any = { ...data };
+
+    // Normalizar path si existe
+    if (data.path) {
+      prismaData.path = normalizeFolderPath(data.path);
+    }
+
+    // Manejar objetos complejos como metadata
+    if (data.metadata && typeof data.metadata === 'object') {
+      prismaData.metadata = data.metadata;
+    }
+
+    return prismaData;
+  } catch (error) {
+    logger.error('Error mapeando datos de actualización de folder para Prisma:', error);
+    return data;
+  }
+}
+
+/**
+ * 🔄 Transforma un objeto FolderComplete a formato Prisma
+ *
+ * @param folder Objeto FolderComplete
+ * @returns Datos para Prisma
+ */
+export function transformCompleteFolderToPrisma(folder: FolderComplete): any {
+  try {
+    // Extraer propiedades no persistibles
+    const { children, parent, stats, _count, metadata, ...persistableData } = folder;
+
+    // Convertir el objeto a formato Prisma
+    return {
+      ...persistableData,
+      // Normalizar path si existe
+      path: folder.path ? normalizeFolderPath(folder.path) : folder.path,
+      // Convertir metadatos a formato adecuado si existen
+      metadata: metadata || {}
+    };
+  } catch (error) {
+    logger.error('Error transformando folder completo a Prisma:', error);
+    return folder;
+  }
+}
+
+/**
+ * 🔄 Transforma un objeto Folder a formato Prisma
+ *
+ * @param folder Objeto Folder
+ * @returns Datos para Prisma
+ */
+export function transformFolderToPrisma(folder: Folder): any {
+  try {
+    // Extraer la propiedad _count que no es persistible
+    const { _count, ...persistableData } = folder;
+
+    // Convertir el objeto a formato Prisma
+    return {
+      ...persistableData,
+      // Normalizar path si existe
+      path: folder.path ? normalizeFolderPath(folder.path) : folder.path
+    };
+  } catch (error) {
+    logger.error('Error transformando folder a Prisma:', error);
+    return folder;
+  }
 }

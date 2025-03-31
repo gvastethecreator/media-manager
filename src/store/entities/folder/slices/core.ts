@@ -4,6 +4,7 @@
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
+import { transformFolder } from '@/transformers/folder';
 import { createFolder, deleteFolder, fetchFolderById, fetchFolders, updateFolder } from '../actions';
 import type { FolderCoreSlice } from '../types';
 
@@ -42,9 +43,10 @@ export const createCoreSlice: FolderCoreSlice = (set, get) => ({
 						},
 					});
 					coreLogger.info(`✅ ${response.data.length} carpetas obtenidas`);
-				} else {
-					throw new Error(response.message || 'Error obteniendo carpetas');
+					return;
 				}
+
+				throw new Error(response.message || 'Error obteniendo carpetas');
 			} catch (error) {
 				coreLogger.error('❌ Error obteniendo carpetas:', error);
 				const { coreState } = get();
@@ -68,27 +70,30 @@ export const createCoreSlice: FolderCoreSlice = (set, get) => ({
 				const response = await fetchFolderById(id);
 
 				if (response.success && response.data) {
+					// Usar transformador para procesar la respuesta
+					const transformedFolder = transformFolder(response.data);
+
 					set({
 						coreState: {
 							...coreState,
-							currentFolder: response.data,
+							currentFolder: transformedFolder,
 							currentFolderId: id,
 							loading: false,
 						},
 					});
-					coreLogger.info('✅ Carpeta obtenida');
-					return response.data;
-				} else {
-					coreLogger.warn(`⚠️ No se encontró la carpeta con ID: ${id}`);
-					set({
-						coreState: {
-							...coreState,
-							loading: false,
-							error: response.message || 'Carpeta no encontrada',
-						},
-					});
-					return null;
+					coreLogger.info('✅ Carpeta obtenida y transformada');
+					return transformedFolder;
 				}
+
+				coreLogger.warn(`⚠️ No se encontró la carpeta con ID: ${id}`);
+				set({
+					coreState: {
+						...coreState,
+						loading: false,
+						error: response.message || 'Carpeta no encontrada',
+					},
+				});
+				return null;
 			} catch (error) {
 				coreLogger.error(`❌ Error obteniendo carpeta con ID ${id}:`, error);
 				const { coreState } = get();
@@ -124,9 +129,9 @@ export const createCoreSlice: FolderCoreSlice = (set, get) => ({
 
 					coreLogger.info('✅ Carpeta creada con éxito');
 					return response.data;
-				} else {
-					throw new Error(response.message || 'Error creando carpeta');
 				}
+
+				throw new Error(response.message || 'Error creando carpeta');
 			} catch (error) {
 				coreLogger.error('❌ Error creando carpeta:', error);
 				const { coreState } = get();
@@ -182,9 +187,9 @@ export const createCoreSlice: FolderCoreSlice = (set, get) => ({
 
 					coreLogger.info('✅ Carpeta actualizada con éxito');
 					return response.data;
-				} else {
-					throw new Error(response.message || 'Error actualizando carpeta');
 				}
+
+				throw new Error(response.message || 'Error actualizando carpeta');
 			} catch (error) {
 				coreLogger.error(`❌ Error actualizando carpeta con ID ${id}:`, error);
 				const { coreState } = get();
@@ -203,7 +208,7 @@ export const createCoreSlice: FolderCoreSlice = (set, get) => ({
 			try {
 				const { coreState } = get();
 				set({ coreState: { ...coreState, isDeleting: true, error: null } });
-				coreLogger.info(`🔄 Eliminando carpeta con ID: ${id}`);
+				coreLogger.info(`🗑 Eliminando carpeta con ID: ${id}`);
 
 				// Usar acción integrada con server action
 				const response = await deleteFolder(id);
@@ -222,9 +227,9 @@ export const createCoreSlice: FolderCoreSlice = (set, get) => ({
 
 					coreLogger.info('✅ Carpeta eliminada con éxito');
 					return true;
-				} else {
-					throw new Error(response.message || 'Error eliminando carpeta');
 				}
+
+				throw new Error(response.message || 'Error eliminando carpeta');
 			} catch (error) {
 				coreLogger.error(`❌ Error eliminando carpeta con ID ${id}:`, error);
 				const { coreState } = get();

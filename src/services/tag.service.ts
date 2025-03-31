@@ -1,281 +1,400 @@
 /**
- * @file Servicio para la entidad Tag
- * @module services/tag.service
+ * @file Servicio de Tag con enfoque funcional
+ * @module services/tag
+ * @description Implementación funcional del servicio de etiquetas
  */
 
-import { TagTransformer } from '@/transformers/tag';
-import type {
-    TagComplete,
-    TagCreateInput,
-    TagSearchOptions,
-    TagSearchResult,
-    TagUpdateInput
-} from '@/types/entities/tag/types';
-import { PrismaClient } from '@prisma/client';
+import type { ErrorResponse } from '@/app/actions/folders';
+import {
+    createTag as createTagAction,
+    deleteTag as deleteTagAction,
+    getTags as getTagsAction,
+    updateTag as updateTagAction
+} from '@/app/actions/tags';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { emit } from '@/lib/server/events.server';
+import { transformTag } from '@/transformers/tag';
+import type { TagComplete, TagCreateInput, TagUpdateInput } from '@/types/entities/tag/types';
 
-/**
- * Interfaz para el servicio de Tag
- */
-export interface TagService {
-  /**
-   * Busca tags según criterios específicos
-   * @param options Opciones de búsqueda y filtrado
-   * @returns Resultado con tags y metadatos
-   */
-  search(options: TagSearchOptions): Promise<TagSearchResult>;
+// Logger específico para el servicio de etiquetas
+const tagLogger = serverLogger.withContext('TagService');
 
-  /**
-   * Busca un tag por su identificador
-   * @param id Identificador del tag
-   * @returns Tag encontrado o null
-   */
-  findById(id: string): Promise<TagComplete | null>;
-
-  /**
-   * Crea un nuevo tag
-   * @param data Datos para la creación
-   * @returns Tag creado
-   */
-  create(data: TagCreateInput): Promise<TagComplete>;
-
-  /**
-   * Actualiza un tag existente
-   * @param id Identificador del tag
-   * @param data Datos para actualizar
-   * @returns Tag actualizado
-   */
-  update(id: string, data: TagUpdateInput): Promise<TagComplete>;
-
-  /**
-   * Elimina un tag
-   * @param id Identificador del tag
-   * @returns true si se eliminó correctamente
-   */
-  delete(id: string): Promise<boolean>;
-
-  /**
-   * Obtiene tags relacionados a un tag específico
-   * @param id Identificador del tag
-   * @param limit Límite de resultados
-   * @returns Array de tags relacionados
-   */
-  getRelatedTags(id: string, limit?: number): Promise<TagComplete[]>;
-
-  /**
-   * Busca tags por su categoría
-   * @param category Categoría a buscar
-   * @param limit Límite de resultados
-   * @returns Array de tags
-   */
-  findByCategory(category: string, limit?: number): Promise<TagComplete[]>;
+// Eventos que puede emitir el servicio de etiquetas
+export enum TAG_EVENTS {
+  CREATED = 'tag:created',
+  UPDATED = 'tag:updated',
+  DELETED = 'tag:deleted',
+  ERROR = 'tag:error',
+  STATS = 'tag:stats',
 }
 
+// Tipos para los callbacks
+type ErrorCallback = (error: ErrorResponse) => void;
+type TagCallback = (tag: TagComplete) => void;
+type TagsCallback = (tags: TagComplete[]) => void;
+
+// 📊 Estado interno del servicio
+type ServiceState = {
+  operationsInProgress: Map<string, boolean>;
+  eventCallbacks: Map<string, Set<CallableFunction>>;
+};
+
+// Estado inicial
+const state: ServiceState = {
+  operationsInProgress: new Map(),
+  eventCallbacks: new Map(),
+};
+
+// 🛠️ Funciones auxiliares internas
+
 /**
- * Implementación del servicio de Tag
+ * Añade un callback para un evento específico
+ * @param event Nombre del evento
+ * @param callback Función a ejecutar cuando ocurra el evento
  */
-export class TagServiceImpl implements TagService {
-  private prisma: PrismaClient;
-
-  /**
-   * Constructor del servicio
-   * @param prismaClient Cliente Prisma
-   */
-  constructor(prismaClient: PrismaClient) {
-    this.prisma = prismaClient;
+const addCallback = (event: string, callback: CallableFunction): void => {
+  if (!state.eventCallbacks.has(event)) {
+    state.eventCallbacks.set(event, new Set());
   }
+  state.eventCallbacks.get(event)?.add(callback);
+  tagLogger.debug(`🎧 Callback registrado para evento ${event}`);
+};
 
-  /**
-   * Busca tags según criterios específicos
-   * @param options Opciones de búsqueda y filtrado
-   * @returns Resultado con tags y metadatos
-   */
-  async search(options: TagSearchOptions): Promise<TagSearchResult> {
-    return TagTransformer.search(options);
-  }
+/**
+ * Elimina un callback para un evento específico
+ * @param event Nombre del evento
+ * @param callback Función a eliminar
+ */
+const removeCallback = (event: string, callback: CallableFunction): void => {
+  state.eventCallbacks.get(event)?.delete(callback);
+  tagLogger.debug(`🛑 Callback eliminado para evento ${event}`);
+};
 
-  /**
-   * Busca un tag por su identificador
-   * @param id Identificador del tag
-   * @returns Tag encontrado o null
-   */
-  async findById(id: string): Promise<TagComplete | null> {
-    return TagTransformer.getById(id);
-  }
-
-  /**
-   * Crea un nuevo tag
-   * @param data Datos para la creación
-   * @returns Tag creado
-   */
-  async create(data: TagCreateInput): Promise<TagComplete> {
-    return TagTransformer.create(data);
-  }
-
-  /**
-   * Actualiza un tag existente
-   * @param id Identificador del tag
-   * @param data Datos para actualizar
-   * @returns Tag actualizado
-   */
-  async update(id: string, data: TagUpdateInput): Promise<TagComplete> {
-    return TagTransformer.update(id, data);
-  }
-
-  /**
-   * Elimina un tag
-   * @param id Identificador del tag
-   * @returns true si se eliminó correctamente
-   */
-  async delete(id: string): Promise<boolean> {
-    try {
-      await TagTransformer.delete(id);
-      return true;
-    } catch (error) {
-      console.error('Error al eliminar tag:', error);
-      return false;
+/**
+ * Emite un evento a todos los callbacks registrados y al sistema central
+ * @param event Nombre del evento
+ * @param args Argumentos a pasar al callback
+ */
+const emitEvent = async (event: string, ...args: unknown[]): Promise<void> => {
+  try {
+    // Obtener los callbacks para este evento
+    const callbacks = state.eventCallbacks.get(event);
+    if (callbacks && callbacks.size > 0) {
+      // Invocar cada callback
+      for (const callback of callbacks) {
+        try {
+          if (typeof callback === 'function') {
+            await callback(...args);
+          }
+        } catch (error) {
+          tagLogger.error(`Error en callback de evento ${event}:`, error);
+        }
+      }
     }
+
+    // Mapeo de eventos locales a eventos del sistema central
+    let serverEventType: string | null = null;
+    switch (event) {
+      case TAG_EVENTS.CREATED:
+        serverEventType = 'tags:modified';
+        break;
+      case TAG_EVENTS.UPDATED:
+        serverEventType = 'tags:modified';
+        break;
+      case TAG_EVENTS.DELETED:
+        serverEventType = 'tags:modified';
+        break;
+      case TAG_EVENTS.ERROR:
+        serverEventType = 'tag:error';
+        break;
+      case TAG_EVENTS.STATS:
+        serverEventType = 'tag:stats';
+        break;
+      default:
+        serverEventType = null;
+    }
+
+    // Emitir al sistema central si hay mapeo
+    if (serverEventType) {
+      try {
+        await emit({
+          type: serverEventType,
+          data: args[0],
+        });
+        tagLogger.debug(`Evento ${event} emitido al sistema central como ${serverEventType}`);
+      } catch (emitError) {
+        tagLogger.error(`Error al emitir evento ${event} al sistema central:`, emitError);
+      }
+    }
+  } catch (error) {
+    tagLogger.error(`Error emitiendo evento ${event}:`, error);
+  }
+};
+
+/**
+ * Control de concurrencia para operaciones asíncronas
+ * @param operation Identificador único de la operación
+ * @param fn Función a ejecutar
+ * @returns Resultado de la función
+ */
+const withConcurrencyControl = async <T>(operation: string, fn: () => Promise<T>): Promise<T> => {
+  if (state.operationsInProgress.get(operation)) {
+    throw new Error(`Operación ${operation} en progreso`);
   }
 
-  /**
-   * Obtiene tags relacionados a un tag específico
-   * @param id Identificador del tag
-   * @param limit Límite de resultados
-   * @returns Array de tags relacionados
-   */
-  async getRelatedTags(id: string, limit = 10): Promise<TagComplete[]> {
+  state.operationsInProgress.set(operation, true);
+  try {
+    return await fn();
+  } finally {
+    state.operationsInProgress.delete(operation);
+  }
+};
+
+// 🚀 Funciones públicas del servicio
+
+/**
+ * Obtiene todas las etiquetas del sistema
+ * @returns Lista de etiquetas
+ */
+export const getTags = async () => {
+  return withConcurrencyControl('getTags', async () => {
     try {
-      // Obtener el tag principal
-      const tag = await this.findById(id);
-      if (!tag) return [];
+      tagLogger.info('🏷️ Obteniendo lista de etiquetas...');
+      const tags = await getTagsAction();
 
-      // Buscar tags que estén relacionados con las mismas entidades
-      const relatedTagsQuery = {
-        where: {
-          OR: [] as any[],
-          NOT: { id },
-        },
-        take: limit,
-        orderBy: { name: 'asc' as const },
-        include: {
-          _count: true,
-          images: { take: 0, select: { id: true } },
-          albums: { take: 0, select: { id: true } },
-        },
-      };
+      // Transformar los resultados usando el transformador
+      const transformedTags = tags.map(transformTag);
 
-      // Si el tag tiene imágenes, buscar tags que también tengan estas imágenes
-      if (tag.images && tag.images.length > 0) {
-        const imageIds = tag.images.map(img => img.id);
-        relatedTagsQuery.where.OR.push({
-          images: {
-            some: {
-              id: { in: imageIds },
-            },
-          },
-        });
-      }
-
-      // Si el tag tiene álbumes, buscar tags que también estén en estos álbumes
-      if (tag.albums && tag.albums.length > 0) {
-        const albumIds = tag.albums.map(album => album.id);
-        relatedTagsQuery.where.OR.push({
-          albums: {
-            some: {
-              id: { in: albumIds },
-            },
-          },
-        });
-      }
-
-      // Si no hay criterios OR, no habrá tags relacionados
-      if (relatedTagsQuery.where.OR.length === 0) {
-        return [];
-      }
-
-      // Realizar la búsqueda
-      const tags = await this.prisma.tag.findMany(relatedTagsQuery);
-
-      // Transformar los resultados usando el mismo patrón que search
-      const options: TagSearchOptions = {
-        take: limit,
-        include: {
-          images: true,
-          albums: true,
-        },
-      };
-
-      // Usamos un enfoque diferente para transformar los resultados
-      const transformedTags = tags.map(tag => {
-        // Crear una versión básica del tag
-        const baseTag: TagComplete = {
-          id: tag.id,
-          name: tag.name,
-          emoji: tag.emoji || '🏷️',
-          color: tag.color || '#3b82f6',
-          description: tag.description,
-          shortcut: tag.shortcut,
-          category: tag.category || 'general',
-          featuredImage: tag.featuredImage,
-          isFavorite: tag.isFavorite || false,
-          createdAt: tag.createdAt,
-          updatedAt: tag.updatedAt,
-          images: tag.images,
-          albums: tag.albums,
-          _count: tag._count,
-        };
-
-        return baseTag;
-      });
-
+      tagLogger.info(`✅ ${transformedTags.length} etiquetas obtenidas`);
+      await emitEvent(TAG_EVENTS.STATS, { totalTags: transformedTags.length });
       return transformedTags;
     } catch (error) {
-      console.error('Error al obtener tags relacionados:', error);
-      return [];
+      const errorResponse: ErrorResponse = {
+        message: error instanceof Error ? error.message : 'Error obteniendo etiquetas',
+        details: error instanceof Error ? error.stack : String(error),
+        timestamp: Date.now(),
+      };
+      tagLogger.error('❌ Error getting tags:', errorResponse);
+      await emitEvent(TAG_EVENTS.ERROR, errorResponse);
+      throw errorResponse;
     }
-  }
-
-  /**
-   * Busca tags por su categoría
-   * @param category Categoría a buscar
-   * @param limit Límite de resultados
-   * @returns Array de tags
-   */
-  async findByCategory(category: string, limit = 20): Promise<TagComplete[]> {
-    const searchOptions: TagSearchOptions = {
-      where: { categories: [category] },
-      take: limit,
-      orderBy: { name: 'asc' },
-    };
-
-    const result = await this.search(searchOptions);
-    return result.items;
-  }
-}
-
-// Singleton para la instancia del servicio
-let tagServiceInstance: TagService | null = null;
+  });
+};
 
 /**
- * Obtiene una instancia del servicio
- * @param prisma Cliente Prisma opcional
- * @returns Instancia del servicio
+ * Crea una nueva etiqueta
+ * @param data Datos de la etiqueta a crear
+ * @returns Etiqueta creada
  */
-export function getTagService(prisma?: PrismaClient): TagService {
-  if (!tagServiceInstance && prisma) {
-    tagServiceInstance = new TagServiceImpl(prisma);
-  }
+export const createTag = async (data: TagCreateInput) => {
+  return withConcurrencyControl('createTag', async () => {
+    try {
+      tagLogger.info('➕ Creando nueva etiqueta:', data);
 
-  if (!tagServiceInstance) {
-    throw new Error('TagService no ha sido inicializado');
-  }
+      const tag = await createTagAction(data);
 
-  return tagServiceInstance;
-}
+      if (!tag || !tag.id) {
+        throw new Error('Respuesta inválida al crear etiqueta');
+      }
+
+      // Transformar el resultado usando el transformador
+      const transformedTag = transformTag(tag);
+
+      tagLogger.info('✅ Etiqueta creada:', transformedTag);
+      await emitEvent(TAG_EVENTS.CREATED, transformedTag);
+
+      return transformedTag;
+    } catch (error) {
+      const errorResponse: ErrorResponse = {
+        message: error instanceof Error ? error.message : 'Error creando etiqueta',
+        details: error instanceof Error ? error.stack : String(error),
+        timestamp: Date.now(),
+      };
+      tagLogger.error('❌ Error creating tag:', errorResponse);
+      await emitEvent(TAG_EVENTS.ERROR, errorResponse);
+      throw errorResponse;
+    }
+  });
+};
 
 /**
- * Inicializa el servicio con un cliente prisma
- * @param prisma Cliente Prisma
+ * Actualiza una etiqueta existente
+ * @param id ID de la etiqueta a actualizar
+ * @param data Datos a actualizar
+ * @returns Etiqueta actualizada
  */
-export function initTagService(prisma: PrismaClient): void {
-  tagServiceInstance = new TagServiceImpl(prisma);
-}
+export const updateTag = async (id: string, data: TagUpdateInput) => {
+  return withConcurrencyControl(`updateTag:${id}`, async () => {
+    try {
+      tagLogger.info('🔄 Actualizando etiqueta:', { id, data });
+
+      const tag = await updateTagAction(id, data);
+
+      if (!tag || !tag.id) {
+        throw new Error('Respuesta inválida al actualizar etiqueta');
+      }
+
+      // Transformar el resultado usando el transformador
+      const transformedTag = transformTag(tag);
+
+      tagLogger.info('✅ Etiqueta actualizada:', transformedTag);
+      await emitEvent(TAG_EVENTS.UPDATED, transformedTag);
+
+      return transformedTag;
+    } catch (error) {
+      const errorResponse: ErrorResponse = {
+        message: error instanceof Error ? error.message : 'Error actualizando etiqueta',
+        details: error instanceof Error ? error.stack : String(error),
+        timestamp: Date.now(),
+        tagId: id,
+      };
+      tagLogger.error('❌ Error updating tag:', errorResponse);
+      await emitEvent(TAG_EVENTS.ERROR, errorResponse);
+      throw errorResponse;
+    }
+  });
+};
+
+/**
+ * Elimina una etiqueta
+ * @param id ID de la etiqueta a eliminar
+ * @returns Resultado de la operación
+ */
+export const deleteTag = async (id: string) => {
+  return withConcurrencyControl(`deleteTag:${id}`, async () => {
+    try {
+      tagLogger.info('🗑️ Eliminando etiqueta:', id);
+      await deleteTagAction(id);
+
+      tagLogger.info('✅ Etiqueta eliminada correctamente', { tagId: id });
+      await emitEvent(TAG_EVENTS.DELETED, { id });
+
+      return { success: true, id };
+    } catch (error) {
+      const errorResponse: ErrorResponse = {
+        message: error instanceof Error ? error.message : 'Error eliminando etiqueta',
+        details: error instanceof Error ? error.stack : String(error),
+        timestamp: Date.now(),
+        tagId: id,
+      };
+      tagLogger.error('❌ Error deleting tag:', errorResponse);
+      await emitEvent(TAG_EVENTS.ERROR, errorResponse);
+      throw errorResponse;
+    }
+  });
+};
+
+// Funciones de gestión de eventos
+
+/**
+ * Registra un callback para un evento
+ * @param event Nombre del evento
+ * @param callback Función a ejecutar
+ */
+export const on = (event: string, callback: CallableFunction): void => {
+  addCallback(event, callback);
+};
+
+/**
+ * Elimina un callback para un evento
+ * @param event Nombre del evento
+ * @param callback Función a eliminar
+ */
+export const off = (event: string, callback: CallableFunction): void => {
+  removeCallback(event, callback);
+};
+
+/**
+ * Elimina todos los callbacks registrados
+ */
+export const offAll = (): void => {
+  state.eventCallbacks.clear();
+  tagLogger.info('🧹 Limpiados todos los callbacks de eventos');
+};
+
+// Funciones específicas para eventos comunes
+
+/**
+ * Registra un callback para el evento de error
+ * @param callback Función a ejecutar
+ */
+export const onError = (callback: ErrorCallback): void => {
+  addCallback(TAG_EVENTS.ERROR, callback);
+};
+
+/**
+ * Elimina un callback para el evento de error
+ * @param callback Función a eliminar
+ */
+export const offError = (callback: ErrorCallback): void => {
+  removeCallback(TAG_EVENTS.ERROR, callback);
+};
+
+/**
+ * Registra un callback para el evento de etiqueta creada
+ * @param callback Función a ejecutar
+ */
+export const onCreated = (callback: TagCallback): void => {
+  addCallback(TAG_EVENTS.CREATED, callback);
+};
+
+/**
+ * Elimina un callback para el evento de etiqueta creada
+ * @param callback Función a eliminar
+ */
+export const offCreated = (callback: TagCallback): void => {
+  removeCallback(TAG_EVENTS.CREATED, callback);
+};
+
+/**
+ * Registra un callback para el evento de etiqueta actualizada
+ * @param callback Función a ejecutar
+ */
+export const onUpdated = (callback: TagCallback): void => {
+  addCallback(TAG_EVENTS.UPDATED, callback);
+};
+
+/**
+ * Elimina un callback para el evento de etiqueta actualizada
+ * @param callback Función a eliminar
+ */
+export const offUpdated = (callback: TagCallback): void => {
+  removeCallback(TAG_EVENTS.UPDATED, callback);
+};
+
+/**
+ * Registra un callback para el evento de etiqueta eliminada
+ * @param callback Función a ejecutar
+ */
+export const onDeleted = (callback: TagCallback): void => {
+  addCallback(TAG_EVENTS.DELETED, callback);
+};
+
+/**
+ * Elimina un callback para el evento de etiqueta eliminada
+ * @param callback Función a eliminar
+ */
+export const offDeleted = (callback: TagCallback): void => {
+  removeCallback(TAG_EVENTS.DELETED, callback);
+};
+
+// Exportar todo como tagService para tener una API consistente
+export const tagService = {
+  getTags,
+  createTag,
+  updateTag,
+  deleteTag,
+  on,
+  off,
+  offAll,
+  onError,
+  offError,
+  onCreated,
+  offCreated,
+  onUpdated,
+  offUpdated,
+  onDeleted,
+  offDeleted,
+};
+
+export default tagService;

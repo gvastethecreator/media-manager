@@ -32,3 +32,18 @@ export default {
   mapFilters: mapVideoFiltersToPrisma,
   mapToRelated: mapVideoToRelatedVideo
 };
+
+/**
+ * Función principal para transformar videos desde Prisma
+ * Esta función sirve como punto de entrada principal para transformar videos
+ * @param video - Video de Prisma
+ * @returns Video transformado con propiedades extendidas
+ */
+export const transformVideo = fromPrismaVideo;
+
+/**
+ * Función principal para transformar múltiples videos desde Prisma
+ * @param videos - Array de videos de Prisma
+ * @returns Array de videos transformados con propiedades extendidas
+ */
+export const transformVideos = extendVideos;

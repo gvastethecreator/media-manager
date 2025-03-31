@@ -7,12 +7,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { transformFolder } from '@/transformers/folder';
+import { toFolderExtended } from '@/transformers/folder';
 import { type FolderCreate, type FolderExtended, type FolderUpdate } from '@/types/entities/folder';
 import { revalidatePath } from 'next/cache';
 
 // Logger específico para acciones de carpetas
-const folderLogger = serverLogger.withContext('FolderCrudActions');
+const logger = serverLogger.withContext('FolderActions:crud');
 
 // Rutas que deben ser revalidadas cuando cambian las carpetas
 const REVALIDATE_PATHS = ['/folders', '/settings', '/dashboard'] as const;
@@ -24,7 +24,7 @@ const revalidateFolderPaths = async () => {
   for (const path of REVALIDATE_PATHS) {
     revalidatePath(path);
   }
-  folderLogger.info('🔄 Rutas de carpetas revalidadas');
+  logger.info('🔄 Rutas de carpetas revalidadas');
 };
 
 /**
@@ -46,7 +46,7 @@ class FolderError extends Error {
  */
 export async function createFolder(data: FolderCreate): Promise<FolderExtended> {
   try {
-    folderLogger.info('📁 Creando nueva carpeta:', data);
+    logger.info('📁 Creando nueva carpeta:', data);
 
     // Verificar si ya existe una carpeta con la misma ruta
     const existingFolder = await prisma.folder.findFirst({
@@ -77,15 +77,15 @@ export async function createFolder(data: FolderCreate): Promise<FolderExtended> 
     });
 
     // Transformar la carpeta para la respuesta
-    const transformedFolder = transformFolder(folder);
+    const transformedFolder = toFolderExtended(folder);
 
     // Revalidar rutas
     await revalidateFolderPaths();
 
-    folderLogger.info('✅ Carpeta creada:', { id: folder.id, name: folder.name });
+    logger.info('✅ Carpeta creada:', { id: folder.id, name: folder.name });
     return transformedFolder;
   } catch (error) {
-    folderLogger.error('❌ Error al crear carpeta:', error);
+    logger.error('❌ Error al crear carpeta:', error);
     throw new FolderError('No se pudo crear la carpeta', 'CREATE_FAILED', error);
   }
 }
@@ -95,7 +95,7 @@ export async function createFolder(data: FolderCreate): Promise<FolderExtended> 
  */
 export async function updateFolder(data: FolderUpdate): Promise<FolderExtended> {
   try {
-    folderLogger.info('📝 Actualizando carpeta:', data);
+    logger.info('📝 Actualizando carpeta:', data);
 
     // Si se está actualizando la ruta, verificar que no exista otra carpeta con la misma ruta
     if (data.path) {
@@ -135,15 +135,15 @@ export async function updateFolder(data: FolderUpdate): Promise<FolderExtended> 
     });
 
     // Transformar la carpeta para la respuesta
-    const transformedFolder = transformFolder(folder);
+    const transformedFolder = toFolderExtended(folder);
 
     // Revalidar rutas
     await revalidateFolderPaths();
 
-    folderLogger.info('✅ Carpeta actualizada:', { id: folder.id, name: folder.name });
+    logger.info('✅ Carpeta actualizada:', { id: folder.id, name: folder.name });
     return transformedFolder;
   } catch (error) {
-    folderLogger.error('❌ Error al actualizar carpeta:', error);
+    logger.error('❌ Error al actualizar carpeta:', error);
     throw new FolderError('No se pudo actualizar la carpeta', 'UPDATE_FAILED', error);
   }
 }
@@ -153,7 +153,7 @@ export async function updateFolder(data: FolderUpdate): Promise<FolderExtended> 
  */
 export async function deleteFolder(id: string): Promise<boolean> {
   try {
-    folderLogger.info('🗑️ Eliminando carpeta:', id);
+    logger.info('🗑️ Eliminando carpeta:', id);
 
     // Verificar que la carpeta existe
     const folder = await prisma.folder.findUnique({
@@ -187,10 +187,10 @@ export async function deleteFolder(id: string): Promise<boolean> {
     // Revalidar rutas
     await revalidateFolderPaths();
 
-    folderLogger.info('✅ Carpeta eliminada:', { id });
+    logger.info('✅ Carpeta eliminada:', { id });
     return true;
   } catch (error) {
-    folderLogger.error('❌ Error al eliminar carpeta:', error);
+    logger.error('❌ Error al eliminar carpeta:', error);
     throw new FolderError('No se pudo eliminar la carpeta', 'DELETE_FAILED', error);
   }
 }

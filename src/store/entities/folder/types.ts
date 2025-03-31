@@ -80,6 +80,10 @@ export interface FolderUIState {
 	showEditModal: boolean;
 	/** Modal de confirmación de eliminación abierto */
 	showDeleteModal: boolean;
+	/** Modal de visualización de estadísticas abierto */
+	showStatsModal: boolean;
+	/** ID de la carpeta seleccionada para estadísticas */
+	statsSelectedFolderId: string | null;
 }
 
 /**
@@ -106,6 +110,10 @@ export interface FolderUIActions {
 	openDeleteModal: () => void;
 	/** Cierra el modal de confirmación de eliminación */
 	closeDeleteModal: () => void;
+	/** Abre el modal de estadísticas */
+	openStatsModal: (folderId: string) => void;
+	/** Cierra el modal de estadísticas */
+	closeStatsModal: () => void;
 }
 
 /**
@@ -115,7 +123,7 @@ export interface FolderFiltersState {
 	/** Término de búsqueda */
 	searchTerm: string;
 	/** Criterio de ordenación */
-	sortBy: 'name' | 'createdAt' | 'updatedAt' | 'size';
+	sortBy: 'name' | 'createdAt' | 'updatedAt' | 'size' | 'fileCount' | 'lastIndexed';
 	/** Dirección de ordenación */
 	sortDirection: 'asc' | 'desc';
 	/** Filtro por favoritos */
@@ -124,6 +132,22 @@ export interface FolderFiltersState {
 	activeOnly: boolean;
 	/** Filtro por categoría */
 	categoryFilter: string | null;
+	/** Filtro por tamaño mínimo (en bytes) */
+	minSize: number | null;
+	/** Filtro por tamaño máximo (en bytes) */
+	maxSize: number | null;
+	/** Filtro por número mínimo de archivos */
+	minFiles: number | null;
+	/** Filtro por número máximo de archivos */
+	maxFiles: number | null;
+	/** Filtrar sólo carpetas sin indexar */
+	notIndexed: boolean;
+	/** Filtrar sólo carpetas con indexación automática */
+	autoReindexOnly: boolean;
+	/** Filtrar por fecha de última indexación (desde) */
+	indexedAfter: Date | null;
+	/** Filtrar por fecha de última indexación (hasta) */
+	indexedBefore: Date | null;
 }
 
 /**
@@ -142,6 +166,22 @@ export interface FolderFiltersActions {
 	toggleActiveOnly: () => void;
 	/** Establece el filtro de categoría */
 	setCategoryFilter: (category: string | null) => void;
+	/** Establece el filtro de tamaño mínimo */
+	setMinSize: (size: number | null) => void;
+	/** Establece el filtro de tamaño máximo */
+	setMaxSize: (size: number | null) => void;
+	/** Establece el filtro de número mínimo de archivos */
+	setMinFiles: (count: number | null) => void;
+	/** Establece el filtro de número máximo de archivos */
+	setMaxFiles: (count: number | null) => void;
+	/** Alterna el filtro de carpetas sin indexar */
+	toggleNotIndexed: () => void;
+	/** Alterna el filtro de carpetas con indexación automática */
+	toggleAutoReindexOnly: () => void;
+	/** Establece el filtro de fecha de última indexación (desde) */
+	setIndexedAfter: (date: Date | null) => void;
+	/** Establece el filtro de fecha de última indexación (hasta) */
+	setIndexedBefore: (date: Date | null) => void;
 	/** Reinicia todos los filtros */
 	resetFilters: () => void;
 }
