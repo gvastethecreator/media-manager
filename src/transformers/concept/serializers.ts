@@ -3,6 +3,7 @@
  * @module transformers/concept/serializers
  */
 
+import { serverLogger } from '@/lib/logger/server-logger';
 import { ConceptSchema } from '@/types/entities/concept/schema';
 import type {
     ConceptBase,
@@ -12,9 +13,9 @@ import type {
     ConceptRelations,
     ConceptUI
 } from '@/types/entities/concept/types';
-import { createLogger } from '@/utils/logger';
+import type { Prisma } from '@prisma/client';
 
-const logger = createLogger('ConceptSerializer');
+const logger = serverLogger.withContext('ConceptSerializer');
 
 /**
  * Opciones para transformación de concept
@@ -36,7 +37,7 @@ export interface ConceptTransformOptions {
 export function toPrismaConcept(
 	concept: Partial<ConceptComplete>,
 	options: ConceptTransformOptions = {}
-): any {
+): Prisma.ConceptCreateInput | Prisma.ConceptUpdateInput {
 	try {
 		const { validateFields = true } = options;
 
@@ -45,20 +46,21 @@ export function toPrismaConcept(
 			validateConcept(concept);
 		}
 
-		// Datos base
-		const result: any = { ...concept };
+		// Filtrar campos que no van a la base de datos
+		const fieldsToExclude = ['_count', '_relations', '_ui'];
+
+		// Crear objeto limpio sin los campos excluidos
+		const filteredConcept = Object.fromEntries(
+			Object.entries(concept).filter(([key]) => !fieldsToExclude.includes(key))
+		);
 
 		// Serializar tags si están presentes
+		const result: Record<string, any> = { ...filteredConcept };
 		if (Array.isArray(concept.tags)) {
 			result.tags = serializeTags(concept.tags);
 		}
 
-		// Eliminar campos que no van a la base de datos
-		delete result._count;
-		delete result._relations;
-		delete result._ui;
-
-		return result;
+		return result as Prisma.ConceptCreateInput | Prisma.ConceptUpdateInput;
 	} catch (error) {
 		logger.error('Error serializando concept:', error);
 		throw new Error(`Error serializando concept: ${(error as Error).message}`);
@@ -152,7 +154,7 @@ export function deserializeTags(tagsString?: string | null): string[] {
  * @param concept Concepto a validar
  * @throws Error si la validación falla
  */
-export function validateConcept(concept: any): void {
+export function validateConcept(concept: unknown): void {
 	try {
 		ConceptSchema.parse(concept);
 	} catch (error) {
@@ -202,73 +204,79 @@ export function extendConcepts<T extends ConceptBase | ConceptComplete>(
 }
 
 /**
- * Obtiene una vista previa del contenido
+ * Obtiene una versión truncada del contenido para previsualización
  * @param content Contenido completo
- * @param maxLength Longitud máxima
- * @returns Vista previa del contenido
+ * @param maxLength Longitud máxima para la previsualización
+ * @returns Contenido truncado para previsualización
  */
 function getPreviewContent(content: string, maxLength = 150): string {
 	if (!content) return '';
 	return content.length > maxLength
 		? `${content.substring(0, maxLength).trim()}...`
-		: content.trim();
+		: content;
 }
 
-// Funciones obsoletas con advertencias
-
 /**
- * @deprecated Use fromPrismaConcept en su lugar
+ * Convierte un concepto base a concepto completo
  */
 export function toConceptComplete<T extends ConceptBase>(concept: T): T & ConceptDeserialized {
-	logger.warn('Función obsoleta: toConceptComplete. Use fromPrismaConcept en su lugar.');
-	return fromPrismaConcept(concept);
+	return fromPrismaConcept(concept, {
+		deserializeFields: true
+	});
 }
 
 /**
- * @deprecated Use fromPrismaConcept en su lugar
+ * Convierte un concepto a concepto con relaciones completas
  */
-export function toConceptWithRelationsComplete(concept: any): any {
-	logger.warn('Función obsoleta: toConceptWithRelationsComplete. Use fromPrismaConcept con includeRelations=true en su lugar.');
-	return fromPrismaConcept(concept, { includeRelations: true });
+export function toConceptWithRelationsComplete(concept: ConceptBase): ConceptComplete {
+	return fromPrismaConcept(concept, {
+		deserializeFields: true,
+		includeRelations: true
+	}) as ConceptComplete;
 }
 
 /**
- * @deprecated Use toPrismaConcept en su lugar
+ * Convierte un concepto completo a concepto serializado
  */
-export function fromConceptComplete<T extends ConceptComplete>(concept: T): any {
-	logger.warn('Función obsoleta: fromConceptComplete. Use toPrismaConcept en su lugar.');
+export function fromConceptComplete<T extends ConceptComplete>(concept: T): Prisma.ConceptCreateInput | Prisma.ConceptUpdateInput {
 	return toPrismaConcept(concept);
 }
 
 /**
- * @deprecated Use fromPrismaConcept y extendConcept en su lugar
+ * Convierte un concepto base a concepto extendido
  */
-export function toExtendedConcept(concept: ConceptBase): any {
-	logger.warn('Función obsoleta: toExtendedConcept. Use fromPrismaConcept y extendConcept en su lugar.');
-	const deserialized = fromPrismaConcept(concept);
-	return extendConcept(deserialized);
+export function toExtendedConcept(concept: ConceptBase): ConceptBase & {
+	_ui: ConceptUI;
+} {
+	return extendConcept(concept);
 }
 
 /**
- * @deprecated Use fromPrismaConcept con includeUI=true en su lugar
+ * Convierte un concepto a concepto extendido completo
  */
-export function toConceptExtendedComplete(concept: any): any {
-	logger.warn('Función obsoleta: toConceptExtendedComplete. Use fromPrismaConcept con includeUI=true en su lugar.');
-	return fromPrismaConcept(concept, { includeUI: true });
+export function toConceptExtendedComplete(concept: ConceptBase): ConceptBase & ConceptDeserialized & {
+	_ui: ConceptUI;
+} {
+	return extendConcept(toConceptComplete(concept));
 }
 
 /**
- * @deprecated Use fromPrismaConcept con includeRelations=true y includeUI=true en su lugar
+ * Convierte un concepto a concepto con relaciones extendido completo
  */
-export function toConceptWithRelationsExtendedComplete(concept: any): any {
-	logger.warn('Función obsoleta: toConceptWithRelationsExtendedComplete. Use fromPrismaConcept con includeRelations=true y includeUI=true en su lugar.');
-	return fromPrismaConcept(concept, { includeRelations: true, includeUI: true });
+export function toConceptWithRelationsExtendedComplete(concept: ConceptBase): ConceptComplete & {
+	_ui: ConceptUI;
+} {
+	return extendConcept(toConceptWithRelationsComplete(concept)) as ConceptComplete & {
+		_ui: ConceptUI;
+	};
 }
 
 /**
- * @deprecated Use fromPrismaConcept con includeStats=true en su lugar
+ * Convierte un concepto a concepto con estadísticas completo
  */
-export function toConceptWithStatsComplete(concept: any): any {
-	logger.warn('Función obsoleta: toConceptWithStatsComplete. Use fromPrismaConcept con includeStats=true en su lugar.');
-	return fromPrismaConcept(concept, { includeStats: true });
+export function toConceptWithStatsComplete(concept: ConceptBase): ConceptComplete {
+	return fromPrismaConcept(concept, {
+		deserializeFields: true,
+		includeStats: true
+	}) as ConceptComplete;
 }
