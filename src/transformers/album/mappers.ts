@@ -3,63 +3,123 @@
  * @module transformers/album/mappers
  */
 
-import { Logger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type {
+    AlbumComplete,
     AlbumCreateInput,
     AlbumFilters,
     AlbumSearchOptions,
     AlbumUpdateInput,
+    RelatedAlbum
 } from '@/types/entities/album/types';
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 
-const logger = new Logger('AlbumMapper');
+// Definir constantes localmente en lugar de importarlas
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 100;
+
+// Enum para reemplazar SortOrder de Prisma
+enum SortDirection {
+    asc = 'asc',
+    desc = 'desc'
+}
+
+const logger = serverLogger.withContext('AlbumMapper');
 
 /**
  * 🔄 Mapea datos de creación de Album a formato Prisma
  */
 export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): Prisma.AlbumCreateInput {
     try {
-        // Preparar datos base
+        // Preparar datos base - omitiendo propiedades que no existen en Prisma
+        const {
+            name,
+            emoji = '📁',
+            color = '#3b82f6',
+            description,
+            shortcut,
+            category = 'general',
+            sortBy = 'name',
+            filters = '{}',
+            featuredImage,
+            isFavorite = false,
+            ...restData
+        } = data;
+
+        // Datos base sin campos que no existen en Prisma
         const baseData = {
-            name: data.name,
-            emoji: data.emoji || '📁',
-            color: data.color || '#3b82f6',
-            description: data.description,
-            shortcut: data.shortcut,
-            category: data.category || 'general',
-            type: data.type || 'gallery',
-            sortBy: data.sortBy || 'name',
-            filters: data.filters || '{}',
-            featuredImage: data.featuredImage,
-            isFavorite: data.isFavorite || false,
-            isPublic: data.isPublic || false,
-            settings: data.settings || '{}',
-            metadata: data.metadata,
+            name,
+            emoji,
+            color,
+            description,
+            shortcut,
+            category,
+            sortBy,
+            filters,
+            featuredImage,
+            isFavorite
         };
 
-        // Preparar relaciones
-        const relations = {
-            images: data.images?.length ? { connect: data.images.map(img => ({ id: img.id })) } : undefined,
-            videos: data.videos?.length ? { connect: data.videos.map(vid => ({ id: vid.id })) } : undefined,
-            collections: data.collections?.length ? { connect: data.collections.map(col => ({ id: col.id })) } : undefined,
-            tags: data.tags?.length ? { connect: data.tags.map(tag => ({ id: tag.id })) } : undefined,
-            characters: data.characters?.length ? { connect: data.characters.map(char => ({ id: char.id })) } : undefined,
-            places: data.places?.length ? { connect: data.places.map(place => ({ id: place.id })) } : undefined,
-            worldItems: data.worldItems?.length ? { connect: data.worldItems.map(item => ({ id: item.id })) } : undefined,
-            concepts: data.concepts?.length ? { connect: data.concepts.map(con => ({ id: con.id })) } : undefined,
-            prompts: data.prompts?.length ? { connect: data.prompts.map(prompt => ({ id: prompt.id })) } : undefined,
-            notes: data.notes?.length ? { connect: data.notes.map(note => ({ id: note.id })) } : undefined,
-            wildcards: data.wildcards?.length ? { connect: data.wildcards.map(wild => ({ id: wild.id })) } : undefined,
-            properties: data.properties?.length ? { connect: data.properties.map(prop => ({ id: prop.id })) } : undefined,
-            groups: data.groups?.length ? { connect: data.groups.map(group => ({ id: group.id })) } : undefined,
-        };
+        // Crear objeto para relaciones
+        const relations: Record<string, any> = {};
+
+        if (data.images?.length) {
+            relations.images = { connect: data.images.map(img => ({ id: img.id })) };
+        }
+
+        if (data.videos?.length) {
+            relations.videos = { connect: data.videos.map(vid => ({ id: vid.id })) };
+        }
+
+        if (data.collections?.length) {
+            relations.collections = { connect: data.collections.map(col => ({ id: col.id })) };
+        }
+
+        if (data.tags?.length) {
+            relations.tags = { connect: data.tags.map(tag => ({ id: tag.id })) };
+        }
+
+        if (data.characters?.length) {
+            relations.characters = { connect: data.characters.map(char => ({ id: char.id })) };
+        }
+
+        if (data.places?.length) {
+            relations.places = { connect: data.places.map(place => ({ id: place.id })) };
+        }
+
+        if (data.worldItems?.length) {
+            relations.worldItems = { connect: data.worldItems.map(item => ({ id: item.id })) };
+        }
+
+        if (data.concepts?.length) {
+            relations.concepts = { connect: data.concepts.map(con => ({ id: con.id })) };
+        }
+
+        if (data.prompts?.length) {
+            relations.prompts = { connect: data.prompts.map(prompt => ({ id: prompt.id })) };
+        }
+
+        if (data.notes?.length) {
+            relations.notes = { connect: data.notes.map(note => ({ id: note.id })) };
+        }
+
+        if (data.wildcards?.length) {
+            relations.wildcards = { connect: data.wildcards.map(wild => ({ id: wild.id })) };
+        }
+
+        if (data.properties?.length) {
+            relations.properties = { connect: data.properties.map(prop => ({ id: prop.id })) };
+        }
+
+        if (data.groups?.length) {
+            relations.groups = { connect: data.groups.map(group => ({ id: group.id })) };
+        }
 
         return {
             ...baseData,
-            ...relations,
-        };
+            ...relations
+        } as Prisma.AlbumCreateInput;
     } catch (error) {
         throw handleTransformerError(error);
     }
@@ -70,46 +130,97 @@ export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): Prisma.Album
  */
 export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): Prisma.AlbumUpdateInput {
     try {
-        // Preparar datos base
-        const baseData = {
-            name: data.name,
-            emoji: data.emoji,
-            color: data.color,
-            description: data.description,
-            shortcut: data.shortcut,
-            category: data.category,
-            type: data.type,
-            sortBy: data.sortBy,
-            filters: data.filters,
-            featuredImage: data.featuredImage,
-            isFavorite: data.isFavorite,
-            isPublic: data.isPublic,
-            settings: data.settings,
-            metadata: data.metadata,
-            updatedAt: new Date(),
-        };
+        // Extraer solo los campos que existen en Prisma
+        const {
+            name,
+            emoji,
+            color,
+            description,
+            shortcut,
+            category,
+            sortBy,
+            filters,
+            featuredImage,
+            isFavorite,
+            ...restData
+        } = data;
 
-        // Preparar relaciones
-        const relations = {
-            images: data.images?.length ? { set: data.images.map(img => ({ id: img.id })) } : undefined,
-            videos: data.videos?.length ? { set: data.videos.map(vid => ({ id: vid.id })) } : undefined,
-            collections: data.collections?.length ? { set: data.collections.map(col => ({ id: col.id })) } : undefined,
-            tags: data.tags?.length ? { set: data.tags.map(tag => ({ id: tag.id })) } : undefined,
-            characters: data.characters?.length ? { set: data.characters.map(char => ({ id: char.id })) } : undefined,
-            places: data.places?.length ? { set: data.places.map(place => ({ id: place.id })) } : undefined,
-            worldItems: data.worldItems?.length ? { set: data.worldItems.map(item => ({ id: item.id })) } : undefined,
-            concepts: data.concepts?.length ? { set: data.concepts.map(con => ({ id: con.id })) } : undefined,
-            prompts: data.prompts?.length ? { set: data.prompts.map(prompt => ({ id: prompt.id })) } : undefined,
-            notes: data.notes?.length ? { set: data.notes.map(note => ({ id: note.id })) } : undefined,
-            wildcards: data.wildcards?.length ? { set: data.wildcards.map(wild => ({ id: wild.id })) } : undefined,
-            properties: data.properties?.length ? { set: data.properties.map(prop => ({ id: prop.id })) } : undefined,
-            groups: data.groups?.length ? { set: data.groups.map(group => ({ id: group.id })) } : undefined,
-        };
+        // Datos base sin campos que no existen en Prisma
+        const baseData: Record<string, any> = {};
+
+        if (name !== undefined) baseData.name = name;
+        if (emoji !== undefined) baseData.emoji = emoji;
+        if (color !== undefined) baseData.color = color;
+        if (description !== undefined) baseData.description = description;
+        if (shortcut !== undefined) baseData.shortcut = shortcut;
+        if (category !== undefined) baseData.category = category;
+        if (sortBy !== undefined) baseData.sortBy = sortBy;
+        if (filters !== undefined) baseData.filters = filters;
+        if (featuredImage !== undefined) baseData.featuredImage = featuredImage;
+        if (isFavorite !== undefined) baseData.isFavorite = isFavorite;
+
+        // Siempre actualizar la fecha
+        baseData.updatedAt = new Date();
+
+        // Crear objeto para relaciones
+        const relations: Record<string, any> = {};
+
+        if (data.images?.length) {
+            relations.images = { set: data.images.map(img => ({ id: img.id })) };
+        }
+
+        if (data.videos?.length) {
+            relations.videos = { set: data.videos.map(vid => ({ id: vid.id })) };
+        }
+
+        if (data.collections?.length) {
+            relations.collections = { set: data.collections.map(col => ({ id: col.id })) };
+        }
+
+        if (data.tags?.length) {
+            relations.tags = { set: data.tags.map(tag => ({ id: tag.id })) };
+        }
+
+        if (data.characters?.length) {
+            relations.characters = { set: data.characters.map(char => ({ id: char.id })) };
+        }
+
+        if (data.places?.length) {
+            relations.places = { set: data.places.map(place => ({ id: place.id })) };
+        }
+
+        if (data.worldItems?.length) {
+            relations.worldItems = { set: data.worldItems.map(item => ({ id: item.id })) };
+        }
+
+        if (data.concepts?.length) {
+            relations.concepts = { set: data.concepts.map(con => ({ id: con.id })) };
+        }
+
+        if (data.prompts?.length) {
+            relations.prompts = { set: data.prompts.map(prompt => ({ id: prompt.id })) };
+        }
+
+        if (data.notes?.length) {
+            relations.notes = { set: data.notes.map(note => ({ id: note.id })) };
+        }
+
+        if (data.wildcards?.length) {
+            relations.wildcards = { set: data.wildcards.map(wild => ({ id: wild.id })) };
+        }
+
+        if (data.properties?.length) {
+            relations.properties = { set: data.properties.map(prop => ({ id: prop.id })) };
+        }
+
+        if (data.groups?.length) {
+            relations.groups = { set: data.groups.map(group => ({ id: group.id })) };
+        }
 
         return {
             ...baseData,
-            ...relations,
-        };
+            ...relations
+        } as Prisma.AlbumUpdateInput;
     } catch (error) {
         throw handleTransformerError(error);
     }
@@ -127,10 +238,11 @@ export function mapAlbumSearchOptionsToPrisma(
         // Validar y ajustar el tamaño de página
         const validatedPageSize = Math.min(take, MAX_PAGE_SIZE);
 
-        // Mapear ordenamiento
-        const orderByMapped = orderBy ? {
-            [orderBy.field]: orderBy.direction,
-        } : { createdAt: 'desc' };
+        // Mapear ordenamiento usando strings en lugar de enums
+        const orderByField = orderBy ? orderBy.field : 'createdAt';
+        const orderByDirection = orderBy ? orderBy.direction : 'desc';
+
+        const orderByMapped = { [orderByField]: orderByDirection };
 
         // Mapear filtros
         const whereMapped = mapAlbumFiltersToPrisma(where);
@@ -156,7 +268,7 @@ export function mapAlbumSearchOptionsToPrisma(
         return {
             skip,
             take: validatedPageSize,
-            orderBy: orderByMapped,
+            orderBy: orderByMapped as any, // Usamos any para evitar problemas de tipo
             where: whereMapped,
             include: includeRelations,
         };
@@ -170,13 +282,13 @@ export function mapAlbumSearchOptionsToPrisma(
  */
 export function mapAlbumFiltersToPrisma(filters: AlbumFilters): Prisma.AlbumWhereInput {
     try {
-        const where: Prisma.AlbumWhereInput = {};
+        const where: Record<string, any> = {};
 
         // Filtros de texto
         if (filters.search) {
             where.OR = [
-                { name: { contains: filters.search, mode: 'insensitive' } },
-                { description: { contains: filters.search, mode: 'insensitive' } },
+                { name: { contains: filters.search } },
+                { description: { contains: filters.search } },
             ];
         }
 
@@ -185,17 +297,9 @@ export function mapAlbumFiltersToPrisma(filters: AlbumFilters): Prisma.AlbumWher
             where.category = { in: filters.categories };
         }
 
-        // Filtros de tipo
-        if (filters.types?.length) {
-            where.type = { in: filters.types };
-        }
-
         // Filtros de estado
         if (filters.isFavorite !== undefined) {
             where.isFavorite = filters.isFavorite;
-        }
-        if (filters.isPublic !== undefined) {
-            where.isPublic = filters.isPublic;
         }
 
         // Filtros de relaciones
@@ -209,29 +313,16 @@ export function mapAlbumFiltersToPrisma(filters: AlbumFilters): Prisma.AlbumWher
             where.collections = { some: {} };
         }
 
-        // Filtros de cantidad de items
-        if (filters.minItems !== undefined) {
-            where._count = {
-                ...where._count,
-                images: { gte: filters.minItems },
-            };
-        }
-        if (filters.maxItems !== undefined) {
-            where._count = {
-                ...where._count,
-                images: { lte: filters.maxItems },
-            };
-        }
-
         // Filtros de fecha
         if (filters.dateRange?.start) {
-            where.createdAt = { ...where.createdAt, gte: filters.dateRange.start };
-        }
-        if (filters.dateRange?.end) {
-            where.createdAt = { ...where.createdAt, lte: filters.dateRange.end };
+            where.createdAt = filters.dateRange.end
+                ? { gte: filters.dateRange.start, lte: filters.dateRange.end }
+                : { gte: filters.dateRange.start };
+        } else if (filters.dateRange?.end) {
+            where.createdAt = { lte: filters.dateRange.end };
         }
 
-        return where;
+        return where as Prisma.AlbumWhereInput;
     } catch (error) {
         throw handleTransformerError(error);
     }
@@ -240,9 +331,15 @@ export function mapAlbumFiltersToPrisma(filters: AlbumFilters): Prisma.AlbumWher
 /**
  * 🔄 Mapea un Album a su versión relacionada
  */
-export function mapAlbumToRelatedAlbum(album: AlbumComplete): { id: string } {
+export function mapAlbumToRelatedAlbum(album: AlbumComplete): RelatedAlbum {
     try {
-        return { id: album.id };
+        return {
+            id: album.id,
+            name: album.name || '',
+            emoji: album.emoji || '📁',
+            color: album.color || '#3b82f6',
+            count: album._count?.images || 0
+        };
     } catch (error) {
         throw handleTransformerError(error);
     }

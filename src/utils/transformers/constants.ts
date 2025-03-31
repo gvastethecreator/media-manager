@@ -139,3 +139,13 @@ export const VALIDATION_LEVELS = {
   BASIC: 'basic',
   STRICT: 'strict',
 } as const;
+
+/**
+ * 📄 Tamaño de página predeterminado para paginación
+ */
+export const DEFAULT_PAGE_SIZE = 20;
+
+/**
+ * 📚 Tamaño máximo de página para paginación
+ */
+export const MAX_PAGE_SIZE = 100;

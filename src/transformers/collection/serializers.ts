@@ -3,7 +3,7 @@
  * @module transformers/collection/serializers
  */
 
-import { Logger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type {
     CollectionComplete,
     CollectionEdition,
@@ -31,10 +31,13 @@ import {
     preparePrismaRelations,
     validateEntityRelations,
 } from '@/utils/transformers/relations';
-import type { Collection as PrismaCollection } from '@prisma/client';
-import type { Prisma } from '@prisma/client';
+import {
+    validateBaseEntity,
+    validateMetadataFields
+} from '@/utils/transformers/validation';
+import type { Prisma, Collection as PrismaCollection } from '@prisma/client';
 
-const logger = new Logger('CollectionSerializer');
+const logger = serverLogger.withContext('CollectionSerializer');
 
 /**
  * Transforma un objeto Collection de Prisma a un objeto CollectionExtended
@@ -53,7 +56,7 @@ export function toCollectionExtended(collection: PrismaCollection | CollectionCo
 		// Calculados/runtime
 		parsedFilters: 'filters' in collection && Array.isArray(collection.filters)
 			? collection.filters
-			: parseCollectionFilters(collection.filters),
+			: parseCollectionFiltersFromString(collection.filters),
 		imageCount: 0,
 		totalValue: collection.price || 0,
 	};
@@ -68,7 +71,7 @@ export function toCollectionExtended(collection: PrismaCollection | CollectionCo
 export function toCollectionComplete(collection: PrismaCollection): CollectionComplete {
 	return {
 		...collection,
-		filters: parseCollectionFilters(collection.filters),
+		filters: parseCollectionFiltersFromString(collection.filters),
 		sortBy: parseSortBy(collection.sortBy),
 		editions: parseEditions(collection.editions),
 	};
@@ -333,7 +336,7 @@ export function parseCollectionFilters(filters: unknown): Record<string, unknown
  * @param filtersStr Cadena serializada de filtros
  * @returns Array de objetos CollectionFilter
  */
-export function parseCollectionFilters(filtersStr: string): CollectionFilter[] {
+export function parseCollectionFiltersFromString(filtersStr: string): CollectionFilter[] {
 	try {
 		// Si es "empty_array", retornar un array vacío
 		if (!filtersStr || filtersStr === 'empty_array') {

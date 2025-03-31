@@ -3,7 +3,7 @@
  * @module transformers/group/serializers
  */
 
-import { Logger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
     type GroupBase,
     type GroupComplete,
@@ -34,10 +34,7 @@ import {
 } from '@/utils/transformers/validation';
 import type { Prisma } from '@prisma/client';
 
-const logger = new Logger('GroupSerializer');
-
-// Logger específico para serializadores de Group
-const serializerLogger = new Logger('GroupSerializers');
+const logger = serverLogger.withContext('GroupSerializer');
 
 // Constantes para valores por defecto
 export const DEFAULT_GROUP_EMOJI = '📂';
@@ -61,14 +58,23 @@ export function toPrismaGroup(data: GroupCreateInput | GroupUpdateInput): Prisma
     // Serializar campos JSON
     const filters = serializeJsonField(data.filters, '{}');
 
-    // Preparar relaciones para Prisma
-    const relations = preparePrismaRelations('Group', data);
-
-    return {
+    // Preparar resultado
+    const result: Record<string, any> = {
       ...data,
       filters,
-      ...relations,
     };
+
+    // Convertir isFavorite a favorite si está presente
+    if ('isFavorite' in data) {
+      result.favorite = data.isFavorite;
+      result.isFavorite = undefined;
+    }
+
+    // Preparar relaciones para Prisma
+    const relations = preparePrismaRelations('Group', data);
+    Object.assign(result, relations);
+
+    return result as Prisma.GroupCreateInput | Prisma.GroupUpdateInput;
   } catch (error) {
     throw handleTransformerError(error);
   }
@@ -116,7 +122,7 @@ export function fromPrismaGroup(
       sortBy: prismaGroup.sortBy,
       filters,
       featuredImage: prismaGroup.featuredImage,
-      isFavorite: prismaGroup.isFavorite,
+      isFavorite: prismaGroup.favorite || false,
       createdAt: prismaGroup.createdAt,
       updatedAt: prismaGroup.updatedAt,
     };
@@ -248,7 +254,7 @@ export function parseGroupFilters(filters: unknown): Record<string, unknown> {
     }
 
     if (typedFilters.isFavorite !== undefined) {
-      parsed.isFavorite = typedFilters.isFavorite;
+      parsed.favorite = typedFilters.isFavorite;
     }
 
     if (typedFilters.hasImages) {
@@ -349,7 +355,7 @@ export function serializeGroupFilters(filters: any[]): string {
   try {
     return JSON.stringify(filters);
   } catch (error) {
-    serializerLogger.error('❌ Error al serializar filtros de grupo:', error);
+    logger.error('Error al serializar filtros de grupo:', error);
     return 'empty_array';
   }
 }
@@ -366,7 +372,7 @@ export function toGroupComplete(group: GroupBase): GroupComplete {
       filters: parseGroupFilters(group.filters || 'empty_array')
     };
   } catch (error) {
-    serializerLogger.error('❌ Error al convertir GroupBase a GroupComplete:', error);
+    logger.error('Error al convertir GroupBase a GroupComplete:', error);
     return {
       ...group,
       filters: []
@@ -382,12 +388,20 @@ export function toGroupComplete(group: GroupBase): GroupComplete {
 export function fromGroupComplete(group: GroupComplete): GroupBase {
   try {
     const { filters, ...rest } = group;
+
+    // Convertir isFavorite a favorite si existe en el grupo
+    const result: Record<string, any> = { ...rest };
+    if ('isFavorite' in group) {
+      result.favorite = group.isFavorite;
+      result.isFavorite = undefined;
+    }
+
     return {
-      ...rest,
+      ...result,
       filters: serializeGroupFilters(filters || [])
-    };
+    } as GroupBase;
   } catch (error) {
-    serializerLogger.error('❌ Error al convertir GroupComplete a GroupBase:', error);
+    logger.error('Error al convertir GroupComplete a GroupBase:', error);
     return {
       ...group,
       filters: 'empty_array'
@@ -402,4 +416,68 @@ export function fromGroupComplete(group: GroupComplete): GroupBase {
  */
 export function extendGroups(groups: GroupBase[]): GroupComplete[] {
   return groups.map(group => extendGroup(group));
+}
+
+/**
+ * Serializa un objeto a formato JSON
+ * @param obj Objeto o string JSON
+ * @returns String JSON serializado
+ */
+export function serializeObject(obj: Record<string, any> | string | null | undefined): string {
+  try {
+    if (obj === null || obj === undefined) {
+      return '{}';
+    }
+
+    if (typeof obj === 'string') {
+      // Si ya es un string, verificar si es un objeto JSON válido
+      try {
+        const parsed = JSON.parse(obj);
+        if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return obj; // Ya es un string JSON válido
+        }
+        return '{}'; // No es un objeto
+      } catch {
+        return '{}'; // No se pudo parsear, no es un JSON válido
+      }
+    }
+
+    // Serializar el objeto
+    return obj && typeof obj === 'object' && !Array.isArray(obj) ? JSON.stringify(obj) : '{}';
+  } catch (error) {
+    logger.error('Error serializando objeto:', error);
+    return '{}';
+  }
+}
+
+/**
+ * Serializa un array a formato JSON
+ * @param arr Array o string JSON
+ * @returns String JSON serializado
+ */
+export function serializeArray(arr: any[] | string | null | undefined): string {
+  try {
+    if (arr === null || arr === undefined) {
+      return 'empty_array';
+    }
+
+    if (typeof arr === 'string') {
+      // Si ya es un string, verificar si es un array JSON válido
+      try {
+        const parsed = JSON.parse(arr);
+        if (Array.isArray(parsed)) {
+          return arr; // Ya es un string JSON válido
+        }
+        return 'empty_array'; // No es un array
+      } catch {
+        return 'empty_array'; // No se pudo parsear, no es un JSON válido
+      }
+    }
+
+    // Serializar el array
+    return arr && Array.isArray(arr) && arr.length > 0 ? JSON.stringify(arr) : 'empty_array';
+  } catch (error) {
+    logger.error('Error serializando array:', error);
+    return 'empty_array';
+  }
 }

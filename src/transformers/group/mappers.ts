@@ -3,209 +3,333 @@
  * @module transformers/group/mappers
  */
 
-import { Logger } from '@/lib/logger';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/lib/constants';
+import { serverLogger } from '@/lib/logger/server-logger';
+// Importar solo los tipos que se necesitan
 import type {
-    GroupComplete,
-    GroupCreateInput,
-    GroupFilters,
-    GroupSearchOptions,
-    GroupUpdateInput,
-} from '@/types/entities/group/types';
-import { DEFAULT_SEARCH_OPTIONS, DEFAULT_UI_VALUES } from '@/utils/transformers/constants';
-import { handleTransformerError } from '@/utils/transformers/errors';
-import { preparePrismaRelations } from '@/utils/transformers/relations';
-import type { Prisma } from '@prisma/client';
+    GroupCard,
+    GroupListItem,
+    GroupListItemImage
+} from '@/types/entities/group';
+// Definir los tipos que no están disponibles (mock)
+type GroupBaseProps = {
+    id: string;
+    name: string;
+    type: string;
+    subtype?: string;
+    description: string;
+};
+type GroupListProps = {
+    items: GroupListItem[];
+    filters: Record<string, any>;
+    sort: {
+        field: string;
+        direction: string;
+    };
+    pagination: {
+        totalItems: number;
+        page: number;
+        pageSize: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPrevPage: boolean;
+    };
+};
+type GroupSearchParams = {
+    search?: string;
+    type?: string;
+    category?: string;
+    status?: string;
+    favorite?: boolean;
+    active?: boolean;
+    page?: number;
+    pageSize?: number;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+};
+type GroupSortField = 'name' | 'type' | 'category' | 'status' | 'createdAt' | 'updatedAt';
+type GroupSort = {
+    field: GroupSortField;
+    direction: 'asc' | 'desc';
+};
 
-const logger = new Logger('GroupMapper');
+import type { Group } from '@prisma/client';
+
+const logger = serverLogger.withContext('GroupMappers');
 
 /**
- * 🔄 Mapea datos de creación a formato Prisma
+ * Mapear un Group para listado
  */
-export function mapCreateGroupDataToPrisma(data: GroupCreateInput): Prisma.GroupCreateInput {
+export function toGroupListItem(
+  group: Group,
+  options: {
+    imageUrls?: string[],
+    selected?: boolean,
+    memberCount?: number
+  } = {}
+): GroupListItem {
   try {
-    // Preparar datos base
-    const baseData = {
-      name: data.name,
-      emoji: data.emoji || DEFAULT_UI_VALUES.emoji,
-      color: data.color || DEFAULT_UI_VALUES.color,
-      description: data.description,
-      shortcut: data.shortcut,
-      category: data.category,
-      sortBy: data.sortBy || 'name',
-      filters: data.filters || '{}',
-      featuredImage: data.featuredImage,
-      isFavorite: data.isFavorite || false,
-    };
+    // Valores por defecto
+    const { imageUrls = [], selected = false, memberCount = 0 } = options;
 
-    // Preparar relaciones
-    const relations = preparePrismaRelations('Group', data);
+    // Mapear imágenes a formato de listado
+    const mappedImages: GroupListItemImage[] = imageUrls.map(url => ({
+      url
+    }));
 
+    // Construir objeto de listado
     return {
-      ...baseData,
-      ...relations,
+      id: group.id,
+      name: group.name,
+      type: group.type || 'generic',
+      category: group.category || 'group',
+      status: group.status || 'active',
+      isFavorite: group.favorite || false,
+      selected,
+      images: mappedImages,
+      memberCount
     };
   } catch (error) {
-    throw handleTransformerError(error);
-  }
-}
-
-/**
- * 🔄 Mapea datos de actualización a formato Prisma
- */
-export function mapUpdateGroupDataToPrisma(data: GroupUpdateInput): Prisma.GroupUpdateInput {
-  try {
-    // Preparar datos base
-    const baseData: Prisma.GroupUpdateInput = {};
-
-    if (data.name !== undefined) baseData.name = data.name;
-    if (data.emoji !== undefined) baseData.emoji = data.emoji;
-    if (data.color !== undefined) baseData.color = data.color;
-    if (data.description !== undefined) baseData.description = data.description;
-    if (data.shortcut !== undefined) baseData.shortcut = data.shortcut;
-    if (data.category !== undefined) baseData.category = data.category;
-    if (data.sortBy !== undefined) baseData.sortBy = data.sortBy;
-    if (data.filters !== undefined) baseData.filters = data.filters;
-    if (data.featuredImage !== undefined) baseData.featuredImage = data.featuredImage;
-    if (data.isFavorite !== undefined) baseData.isFavorite = data.isFavorite;
-
-    // Preparar relaciones
-    const relations = preparePrismaRelations('Group', data);
-
+    logger.error('Error en toGroupListItem:', error);
+    // Devolver objeto básico en caso de error
     return {
-      ...baseData,
-      ...relations,
+      id: group.id,
+      name: group.name,
+      type: group.type || 'generic',
+      category: group.category || 'group',
+      status: group.status || 'active',
+      isFavorite: false,
+      selected: false,
+      images: [],
+      memberCount: 0
+    };
+  }
+}
+
+/**
+ * Mapear un Group para tarjeta
+ */
+export function toGroupCard(
+  group: Group,
+  options: {
+    imageUrls?: string[],
+    selected?: boolean,
+    memberCount?: number
+  } = {}
+): GroupCard {
+  try {
+    // Valores por defecto
+    const { imageUrls = [], selected = false, memberCount = 0 } = options;
+
+    // Construir objeto de tarjeta
+    return {
+      id: group.id,
+      name: group.name,
+      type: group.type || 'generic',
+      category: group.category || 'group',
+      status: group.status || 'active',
+      isFavorite: group.favorite || false,
+      description: group.description || '',
+      selected,
+      imageUrl: imageUrls[0] || '',
+      memberCount
     };
   } catch (error) {
-    throw handleTransformerError(error);
-  }
-}
-
-/**
- * 🔍 Mapea opciones de búsqueda a formato Prisma
- */
-export function mapGroupSearchOptionsToPrisma(
-  options: GroupSearchOptions = {}
-): Prisma.GroupFindManyArgs {
-  try {
-    const { skip, take, orderBy } = { ...DEFAULT_SEARCH_OPTIONS, ...options };
-
-    const args: Prisma.GroupFindManyArgs = {
-      skip,
-      take,
-      orderBy: orderBy || { createdAt: 'desc' },
+    logger.error('Error en toGroupCard:', error);
+    // Devolver objeto básico en caso de error
+    return {
+      id: group.id,
+      name: group.name,
+      type: group.type || 'generic',
+      category: group.category || 'group',
+      status: group.status || 'active',
+      isFavorite: false,
+      description: '',
+      selected: false,
+      imageUrl: '',
+      memberCount: 0
     };
-
-    // Agregar condiciones de búsqueda
-    if (options.where) {
-      args.where = mapGroupFiltersToPrisma(options.where);
-    }
-
-    // Agregar includes
-    if (options.include) {
-      args.include = {
-        images: options.include.images,
-        videos: options.include.videos,
-        albums: options.include.albums,
-        collections: options.include.collections,
-        tags: options.include.tags,
-        characters: options.include.characters,
-        places: options.include.places,
-        worldItems: options.include.worldItems,
-        concepts: options.include.concepts,
-        prompts: options.include.prompts,
-        notes: options.include.notes,
-        wildcards: options.include.wildcards,
-        properties: options.include.properties,
-        _count: true,
-      };
-    }
-
-    return args;
-  } catch (error) {
-    throw handleTransformerError(error);
   }
 }
 
 /**
- * 🔍 Mapea filtros a formato Prisma
+ * Convierte un grupo a un objeto mapeado para referencias
  */
-export function mapGroupFiltersToPrisma(filters: GroupFilters): Prisma.GroupWhereInput {
-  try {
-    const where: Prisma.GroupWhereInput = {};
-
-    // Búsqueda por texto
-    if (filters.search) {
-      where.OR = [
-        { name: { contains: filters.search, mode: 'insensitive' } },
-        { description: { contains: filters.search, mode: 'insensitive' } },
-      ];
-    }
-
-    // Filtro por categorías
-    if (filters.categories?.length) {
-      where.category = { in: filters.categories };
-    }
-
-    // Filtro por tags
-    if (filters.tags?.length) {
-      where.tags = {
-        some: {
-          id: { in: filters.tags },
-        },
-      };
-    }
-
-    // Filtro por rango de fechas
-    if (filters.dateRange) {
-      where.createdAt = {};
-      if (filters.dateRange.start) {
-        where.createdAt.gte = filters.dateRange.start;
-      }
-      if (filters.dateRange.end) {
-        where.createdAt.lte = filters.dateRange.end;
-      }
-    }
-
-    // Filtro por favoritos
-    if (filters.isFavorite !== undefined) {
-      where.isFavorite = filters.isFavorite;
-    }
-
-    // Filtros de relaciones
-    if (filters.hasImages) {
-      where.images = { some: {} };
-    }
-    if (filters.hasVideos) {
-      where.videos = { some: {} };
-    }
-    if (filters.hasAlbums) {
-      where.albums = { some: {} };
-    }
-    if (filters.hasCollections) {
-      where.collections = { some: {} };
-    }
-
-    return where;
-  } catch (error) {
-    throw handleTransformerError(error);
-  }
-}
-
-/**
- * 🔄 Mapea un grupo a su versión relacionada
- */
-export function mapGroupToRelatedGroup(group: GroupComplete) {
+export function toGroupReference(group: Group): GroupBaseProps {
   try {
     return {
       id: group.id,
       name: group.name,
-      emoji: group.emoji,
-      color: group.color,
-      description: group.description,
-      featuredImage: group.featuredImage,
-      _count: group._count,
+      type: 'group',
+      subtype: group.type || 'generic',
+      description: group.description || '',
     };
   } catch (error) {
-    throw handleTransformerError(error);
+    logger.error('Error en toGroupReference:', error);
+    return {
+      id: group.id,
+      name: group.name || 'Error',
+      type: 'group',
+      subtype: 'generic',
+      description: '',
+    };
+  }
+}
+
+/**
+ * Parsea opciones de búsqueda para Group
+ */
+export function parseGroupSearchParams(
+  params: GroupSearchParams
+): {
+  where: Record<string, any>;
+  orderBy: Record<string, string>[];
+  skip: number;
+  take: number;
+} {
+  try {
+    // Parsear parámetros de paginación
+    const { page = 1, pageSize = DEFAULT_PAGE_SIZE } = params;
+
+    // Calcular skip y take para paginación
+    const skip = (page - 1) * pageSize;
+    const take = Math.min(pageSize, MAX_PAGE_SIZE);
+
+    // Construir condiciones de búsqueda
+    const where: Record<string, any> = {};
+
+    // Filtro de búsqueda por texto
+    if (params.search) {
+      where.OR = [
+        { name: { contains: params.search } },
+        { description: { contains: params.search } }
+      ];
+    }
+
+    // Filtros de igualdad exacta
+    if (params.type) {
+      where.type = params.type;
+    }
+    if (params.category) {
+      where.category = params.category;
+    }
+    if (params.status) {
+      where.status = params.status;
+    }
+
+    // Filtros booleanos
+    if (params.favorite !== undefined) {
+      where.favorite = params.favorite;
+    }
+    if (params.active !== undefined) {
+      where.isActive = params.active;
+    }
+
+    // Ordenación
+    const sortBy = params.sortBy || 'name';
+    const sortDirection = params.sortDirection || 'asc';
+    const orderBy = [{ [sortBy]: sortDirection }];
+
+    return { where, orderBy, skip, take };
+  } catch (error) {
+    logger.error('Error parseando parámetros de búsqueda:', error);
+    // Valores por defecto en caso de error
+    return {
+      where: {},
+      orderBy: [{ name: 'asc' }],
+      skip: 0,
+      take: DEFAULT_PAGE_SIZE
+    };
+  }
+}
+
+/**
+ * Convierte parámetros de búsqueda en filtros para UI
+ */
+export function toGroupSearchFilters(params: GroupSearchParams): Record<string, any> {
+  try {
+    return {
+      search: params.search || '',
+      type: params.type || '',
+      category: params.category || '',
+      status: params.status || '',
+      favorite: params.favorite,
+      active: params.active
+    };
+  } catch (error) {
+    logger.error('Error al convertir a filtros de búsqueda:', error);
+    return {
+      search: '',
+      type: '',
+      category: '',
+      status: ''
+    };
+  }
+}
+
+/**
+ * Prepara datos para la vista de listado
+ */
+export function toGroupListProps(
+  groups: Group[],
+  params: GroupSearchParams,
+  totalCount: number
+): GroupListProps {
+  try {
+    // Construir ordenación
+    const sort: GroupSort = {
+      field: (params.sortBy as GroupSortField) || 'name',
+      direction: params.sortDirection || 'asc'
+    };
+
+    // Construir paginación
+    const page = Number(params.page) || 1;
+    const pageSize = Number(params.pageSize) || DEFAULT_PAGE_SIZE;
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    const pagination = {
+      totalItems: totalCount,
+      page,
+      pageSize,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
+    };
+
+    // Construir filtros
+    const filters = toGroupSearchFilters(params);
+
+    // Mapear grupos a formato de listado
+    const items = groups.map(group => toGroupListItem(group));
+
+    return {
+      items,
+      filters,
+      sort,
+      pagination
+    };
+  } catch (error) {
+    logger.error('Error preparando datos para lista:', error);
+    return {
+      items: [],
+      filters: {
+        search: '',
+        type: '',
+        category: '',
+        status: ''
+      },
+      sort: {
+        field: 'name',
+        direction: 'asc'
+      },
+      pagination: {
+        totalItems: 0,
+        page: 1,
+        pageSize: DEFAULT_PAGE_SIZE,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPrevPage: false
+      }
+    };
   }
 }
