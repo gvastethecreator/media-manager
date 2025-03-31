@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import { serializeTags } from '@/transformers/concept';
+import { deserializeTags } from '@/transformers/concept';
 import type { ConceptBase, ConceptExtended, ConceptStats } from '@/types/entities/concept';
 import { ConceptCategory } from '@/types/entities/concept';
 
@@ -140,7 +140,11 @@ export function findRelatedConcepts(
 		// Si no hay otros conceptos para comparar
 		if (otherConcepts.length === 0) return [];
 
-		const conceptTags = serializeTags(concept.tags);
+		// Obtener las etiquetas del concepto de referencia
+		const conceptTagsArray = Array.isArray(concept.tags)
+			? concept.tags
+			: (typeof concept.tags === 'string' ? deserializeTags(concept.tags) : []);
+
 		const conceptCategory = concept.category || '';
 
 		// Calcular puntuación de relación para cada concepto
@@ -152,9 +156,13 @@ export function findRelatedConcepts(
 				score += 3;
 			}
 
+			// Obtener las etiquetas del concepto a comparar
+			const cTagsArray = Array.isArray(c.tags)
+				? c.tags
+				: (typeof c.tags === 'string' ? deserializeTags(c.tags) : []);
+
 			// Puntos por tags coincidentes
-			const cTags = serializeTags(c.tags);
-			const commonTags = conceptTags.filter((tag) => cTags.includes(tag));
+			const commonTags = conceptTagsArray.filter((tag) => cTagsArray.includes(tag));
 			score += commonTags.length * 2;
 
 			return { concept: c, score };
@@ -177,13 +185,25 @@ export function findRelatedConcepts(
 		}
 
 		// Convertir a conceptos extendidos
-		return bestMatches.map((match) => ({
-			...match.concept,
-			parsedTags: serializeTags(match.concept.tags),
-			previewContent: match.concept.content ? `${match.concept.content.substring(0, 100)}...` : undefined,
-			lastUpdated:
-				match.concept.updatedAt instanceof Date ? match.concept.updatedAt : new Date(match.concept.updatedAt),
-		}));
+		return bestMatches.map((match) => {
+			// Desestructurar el concepto para extraer y manejar sus etiquetas
+			const { tags, ...rest } = match.concept;
+
+			// Parsear las etiquetas correctamente
+			const parsedTags = Array.isArray(tags)
+				? tags
+				: (typeof tags === 'string' ? deserializeTags(tags) : []);
+
+			// Construir el concepto extendido
+			return {
+				...rest,
+				tags,
+				parsedTags,
+				previewContent: match.concept.content ? `${match.concept.content.substring(0, 100)}...` : undefined,
+				lastUpdated:
+					match.concept.updatedAt instanceof Date ? match.concept.updatedAt : new Date(match.concept.updatedAt),
+			};
+		});
 	} catch (error) {
 		helpersLogger.error('❌ Error al encontrar conceptos relacionados:', error);
 		return [];

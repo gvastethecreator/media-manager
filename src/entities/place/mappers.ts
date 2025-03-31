@@ -3,8 +3,8 @@
  * @module entities/place/mappers
  */
 
+import { logger } from '@/lib/logger';
 import type { CreatePlaceData, PlaceComplete, PlaceSearchOptions, PlaceWithRelations } from '@/types/entities/place/types';
-import { logger } from '@/utils/logger';
 import type { Prisma } from '@prisma/client';
 import { serializePlaceDangers, serializePlaceFilters, serializePlaceResources, serializePlaceStats } from './serializers';
 

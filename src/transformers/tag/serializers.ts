@@ -268,7 +268,7 @@ export function fromTagComplete(tag: TagComplete): TagBase {
  * @param tag Etiqueta básica o completa
  * @returns Etiqueta con información adicional
  */
-export function extendTag(tag: TagBase | TagComplete): TagExtended {
+export function createExtendedTag(tag: TagBase | TagComplete): TagExtended {
 	// Asegurar que tenemos una versión completa
 	const completeTag = 'id' in tag ? toTagComplete(tag) : tag;
 
@@ -289,7 +289,7 @@ export function extendTag(tag: TagBase | TagComplete): TagExtended {
  * @returns Lista de etiquetas extendidas
  */
 export function extendTags(tags: (TagBase | TagComplete)[]): TagExtended[] {
-	return tags.map(extendTag);
+	return tags.map(createExtendedTag);
 }
 
 /**
@@ -305,7 +305,7 @@ export function tagToTagWithStats(tag: TagBase & { _count?: { images?: number } 
 	return {
 		...completeTag,
 		count: imageCount,
-		size: tag.totalSize ? formatSize(tag.totalSize) : `0 B`,
+		size: tag.totalSize ? formatSize(tag.totalSize) : "0 B",
 	};
 }
 
@@ -362,7 +362,7 @@ export function generateTagColor(name: string): string {
 	let color = '#';
 	for (let i = 0; i < 3; i++) {
 		const value = (hash >> (i * 8)) & 0xff;
-		color += ('00' + value.toString(16)).substr(-2);
+		color += `00${value.toString(16)}`.substr(-2);
 	}
 
 	return color;

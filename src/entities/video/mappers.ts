@@ -3,8 +3,8 @@
  * @module entities/video/mappers
  */
 
+import { logger } from '@/lib/logger';
 import type { CreateVideoData, VideoComplete, VideoSearchOptions, VideoWithRelationsComplete } from '@/types/entities/video/types';
-import { logger } from '@/utils/logger';
 import type { Prisma } from '@prisma/client';
 import { serializeVideoChapters, serializeVideoMetadata, serializeVideoPlayState } from './serializers';
 

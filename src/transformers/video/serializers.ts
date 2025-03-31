@@ -3,6 +3,7 @@
  * @module transformers/video/serializers
  */
 
+import { createLogger } from '@/lib/logger';
 import { VideoSchema } from '@/types/entities/video/schema';
 import type {
     VideoBase,
@@ -14,7 +15,6 @@ import type {
     VideoVisualConfig,
     VideoVisualConfigComplete
 } from '@/types/entities/video/types';
-import { createLogger } from '@/utils/logger';
 
 // Logger específico para el transformer de Video
 const log = createLogger('video-transformer');
@@ -46,37 +46,33 @@ export function toPrismaVideo(
 			VideoSchema.parse(video);
 		}
 
-		// Base de datos para Prisma
-		const prismaData: Record<string, any> = {
-			...(video as Record<string, any>)
-		};
+		// Extraer campos que no deben ir al modelo Prisma
+		const {
+			thumbnailUrl,
+			playState,
+			chapters,
+			isSelected,
+			folder,
+			albums,
+			collections,
+			tags,
+			characters,
+			places,
+			worldItems,
+			concepts,
+			prompts,
+			notes,
+			wildcards,
+			properties,
+			groups,
+			_count,
+			...prismaData
+		} = video as Record<string, any>;
 
 		// Serializar metadatos si está presente y es un objeto
 		if (video.metadata && deserializeMetadata && typeof video.metadata !== 'string') {
 			prismaData.metadata = serializeVideoMetadata(video.metadata as VideoMetadata);
 		}
-
-		// Eliminar campos que no pertenecen al modelo Prisma
-		delete prismaData.thumbnailUrl;
-		delete prismaData.playState;
-		delete prismaData.chapters;
-		delete prismaData.isSelected;
-
-		// Eliminar relaciones que se manejan de forma separada
-		delete prismaData.folder;
-		delete prismaData.albums;
-		delete prismaData.collections;
-		delete prismaData.tags;
-		delete prismaData.characters;
-		delete prismaData.places;
-		delete prismaData.worldItems;
-		delete prismaData.concepts;
-		delete prismaData.prompts;
-		delete prismaData.notes;
-		delete prismaData.wildcards;
-		delete prismaData.properties;
-		delete prismaData.groups;
-		delete prismaData._count;
 
 		return prismaData;
 	} catch (error) {
@@ -117,11 +113,11 @@ export function fromPrismaVideo(
 				'wildcards', 'properties', 'groups'
 			];
 
-			relationsFields.forEach(field => {
+			for (const field of relationsFields) {
 				if (prismaVideo[field]) {
 					videoComplete[field] = prismaVideo[field];
 				}
-			});
+			}
 
 			// Incluir contadores si están presentes
 			if (prismaVideo._count) {

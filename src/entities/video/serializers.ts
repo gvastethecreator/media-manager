@@ -3,9 +3,9 @@
  * @module entities/video/serializers
  */
 
+import { logger } from '@/lib/logger';
 import { VideoChapterSchema, VideoMetadataSchema, VideoPlayStateSchema, VideoSchema } from '@/types/entities/video/schema';
 import type { VideoChapter, VideoComplete, VideoExtendedComplete, VideoMetadata, VideoPlayState, VideoWithRelationsComplete } from '@/types/entities/video/types';
-import { logger } from '@/utils/logger';
 import { deserializeJsonField, serializeJsonField } from '@/utils/transformers/common';
 
 /**

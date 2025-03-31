@@ -1,6 +1,9 @@
 import type * as React from 'react';
 import { type ExternalToast, toast } from 'sonner';
 
+// Exportar toast directamente para los componentes que lo requieren
+export { toast };
+
 // Tipos de notificaciones
 export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'default';
 
