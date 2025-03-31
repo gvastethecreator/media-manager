@@ -5,34 +5,32 @@
 
 // Exportar enums
 export {
-  TagCategory,
-  TagRarity,
-  TagSortCriteria,
-  TagViewMode
+    TagCategory,
+    TagRarity,
+    TagSortCriteria,
+    TagViewMode
 } from './enums';
 
 // Exportar tipos base
 export type {
-  CreateTagData, RelatedTag, TagBase, TagFilters, TagImageRelationResponse, TagWithRelations, UpdateTagData
+    CreateTagData, RelatedTag, TagBase, TagFilters, TagImageRelationResponse, TagWithRelations, UpdateTagData
 } from './types';
 
 // Exportar validaciones
-export {
-  tagFilterSchema, tagSchema
-} from './types';
+export { TagSchema, tagFilterSchema } from './types';
 
 export type {
-  TagFilter,
-  TagValidated
+    TagFilter,
+    TagValidated
 } from './types';
 
 // Exportar tipos extendidos
 export type {
-  TagComplete,
-  TagExtended,
-  TagWithRelationsComplete,
-  TagWithRelationsExtended,
-  TagWithStats
+    TagComplete,
+    TagExtended,
+    TagWithRelationsComplete,
+    TagWithRelationsExtended,
+    TagWithStats
 } from './extended';
 
 // Tipo principal recomendado para uso general

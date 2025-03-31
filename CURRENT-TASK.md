@@ -97,16 +97,51 @@ Hemos establecido los siguientes pasos para corregir estos problemas:
   - ✅ Mejora de estructura en el método toPrismaCharacter
   - ✅ Mejora de estructura en el método fromExtendedCharacter
   - ✅ Corrección de tipado en toExtendedCharacter
-  - 🔄 Mejora de mappers.ts
+  - ✅ Mejora de mappers.ts
+
+- **Group Transformer**:
+  - ✅ Actualización de importaciones
+  - ✅ Refactorización de la clase a funciones
+  - ✅ Corrección de propiedades isFavorite a favorite
+  - ✅ Mejora del manejo de errores
+  - ✅ Implementación de nuevo objeto de compatibilidad
+  - ✅ Mejora de la documentación
+  - ✅ Reemplazo del archivo principal de exportación
+
+- **Note Transformer**:
+  - ✅ Actualización de importaciones
+  - ✅ Refactorización de mappers.ts
+  - ✅ Refactorización de serializers.ts
+  - ✅ Reemplazo del uso de delete operator por filtrado positivo
+  - ✅ Mejora del manejo de errores con TransformerError
+  - ✅ Corrección de propiedades isFavorite/favorite
+  - ✅ Implementación de nuevo objeto de compatibilidad
+  - ✅ Creación del archivo principal de exportación
+
+- **Place Transformer**:
+  - ✅ Actualización de importaciones
+  - ✅ Reemplazo de Logger por serverLogger
+  - ✅ Importación de instancia singleton de prisma
+  - ✅ Corrección de propiedades isFavorite/favorite
+  - ✅ Reemplazo del uso de delete operator
+  - ✅ Mejora del manejo de errores
+  - ✅ Implementación de nuevo objeto de compatibilidad
+  - ✅ Mejora de la documentación
+
+- **Prompt Transformer**:
+  - ✅ Actualización de importaciones
+  - ✅ Creación de estructura v2
+  - ✅ Corrección de propiedades isFavorite/favorite
+  - ✅ Refactorización de funciones
+  - ✅ Mejora del manejo de errores con TransformerError
+  - ✅ Implementación de nuevo objeto de compatibilidad
+  - ✅ Tipado correcto con Prisma.PromptCreateInput y Prisma.PromptUpdateInput
+  - ✅ Creación del archivo principal de exportación
 
 ### En Progreso 🔄
 
 Transformers pendientes de corregir, siguiendo el mismo patrón:
 
-- Group
-- Note
-- Place
-- Prompt
 - Property
 - Tag
 - Video
@@ -115,7 +150,7 @@ Transformers pendientes de corregir, siguiendo el mismo patrón:
 
 ## Próximos Pasos
 
-1. Continuar con la corrección del siguiente transformer: **Group**
+1. Continuar con la corrección del siguiente transformer: **Property**
    - Seguir el mismo patrón utilizado en los transformers ya corregidos
    - Verificar consistencia en los nombres de campos con schema.prisma
    - Asegurar tipado correcto en todas las funciones
@@ -128,6 +163,6 @@ Transformers pendientes de corregir, siguiendo el mismo patrón:
 
 - La estructura de carpetas actual es adecuada y se mantendrá
 - Las correcciones deben ser no disruptivas para mantener la compatibilidad con el código existente
-- Las nuevas funciones siguen la convención de nombres: verbos en infinitivo (p.ej., `searchCollections`, `getCollectionById`)
+- Las nuevas funciones siguen la convención de nombres: verbos en infinitivo (p.ej., `searchNotes`, `getNoteById`)
 - El objeto de compatibilidad mantiene los nombres originales para facilitar la migración
 - Para funciones duplicadas, se usa un sufijo más descriptivo (p.ej., `parseCollectionFiltersFromString`)

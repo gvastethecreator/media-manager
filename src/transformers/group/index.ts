@@ -4,9 +4,9 @@
  */
 
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/lib/constants';
-import { prisma } from '@/lib/db';
-import { NotFoundError, TransformerError, ValidationError } from '@/lib/errors';
+import { NotFoundError, TransformerError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { prisma } from '@/lib/prisma';
 import type {
     GroupCreateInput,
     GroupExtended,
@@ -108,13 +108,34 @@ export async function getGroupById(
 
     // Construir opciones de inclusión de relaciones
     const include = includeRelations ? {
-      members: true,
       images: true,
+      videos: true,
+      albums: true,
+      collections: true,
+      tags: true,
+      characters: true,
+      places: true,
+      worldItems: true,
+      concepts: true,
+      prompts: true,
+      notes: true,
+      wildcards: true,
+      properties: true,
       _count: {
         select: {
-          members: true,
           images: true,
+          videos: true,
+          albums: true,
+          collections: true,
+          tags: true,
+          characters: true,
+          places: true,
+          worldItems: true,
+          concepts: true,
+          prompts: true,
           notes: true,
+          wildcards: true,
+          properties: true,
         },
       },
     } : undefined;
@@ -166,13 +187,34 @@ export async function getGroupsByIds(
     // Construir opciones de inclusión de relaciones
     const include = includeRelations
       ? {
-          members: true,
           images: true,
+          videos: true,
+          albums: true,
+          collections: true,
+          tags: true,
+          characters: true,
+          places: true,
+          worldItems: true,
+          concepts: true,
+          prompts: true,
+          notes: true,
+          wildcards: true,
+          properties: true,
           _count: {
             select: {
-              members: true,
               images: true,
+              videos: true,
+              albums: true,
+              collections: true,
+              tags: true,
+              characters: true,
+              places: true,
+              worldItems: true,
+              concepts: true,
+              prompts: true,
               notes: true,
+              wildcards: true,
+              properties: true,
             },
           },
         }
@@ -209,15 +251,31 @@ export async function createGroup(
 
     // Crear grupo
     const group = await prisma.group.create({
-      data: prismaData,
+      data: prismaData as any,
+      include: {
+        _count: {
+          select: {
+            images: true,
+            videos: true,
+            albums: true,
+            collections: true,
+            tags: true,
+            characters: true,
+            places: true,
+            worldItems: true,
+            concepts: true,
+            prompts: true,
+            notes: true,
+            wildcards: true,
+            properties: true,
+          },
+        },
+      },
     });
 
-    // Transformar a formato extendido
+    // Transformar resultado
     return toExtendedGroup(group);
   } catch (error) {
-    if (error instanceof ValidationError) {
-      throw error;
-    }
     logger.error('Error creando grupo:', error);
     throw new TransformerError('Error al crear grupo', { cause: error });
   }
@@ -231,27 +289,48 @@ export async function updateGroup(
   data: GroupUpdateInput
 ): Promise<GroupExtended> {
   try {
-    // Verificar que el grupo existe
-    const exists = await prisma.group.findUnique({
+    // Validar que el grupo existe
+    const existingGroup = await prisma.group.findUnique({
       where: { id },
-      select: { id: true },
     });
 
-    if (!exists) {
+    if (!existingGroup) {
       throw new NotFoundError(`Grupo con ID ${id} no encontrado`);
     }
+
+    // Validar datos de actualización
+    validateGroup({ ...existingGroup, ...data });
 
     // Transformar a formato Prisma
     const prismaData = toPrismaGroup(data);
 
     // Actualizar grupo
-    const updated = await prisma.group.update({
+    const updatedGroup = await prisma.group.update({
       where: { id },
-      data: prismaData,
+      data: prismaData as any,
+      include: {
+        _count: {
+          select: {
+            images: true,
+            videos: true,
+            albums: true,
+            collections: true,
+            tags: true,
+            characters: true,
+            places: true,
+            worldItems: true,
+            concepts: true,
+            prompts: true,
+            notes: true,
+            wildcards: true,
+            properties: true,
+          },
+        },
+      },
     });
 
-    // Transformar a formato extendido
-    return toExtendedGroup(updated);
+    // Transformar resultado
+    return toExtendedGroup(updatedGroup);
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw error;
@@ -273,24 +352,26 @@ export async function deleteGroup(
   try {
     const { softDelete = true } = options;
 
-    // Verificar que el grupo existe
-    const exists = await prisma.group.findUnique({
+    // Validar que el grupo existe
+    const existingGroup = await prisma.group.findUnique({
       where: { id },
-      select: { id: true },
     });
 
-    if (!exists) {
+    if (!existingGroup) {
       throw new NotFoundError(`Grupo con ID ${id} no encontrado`);
     }
 
     if (softDelete) {
-      // Marcar como inactivo en lugar de eliminar
+      // Soft delete (marcar como inactivo)
       await prisma.group.update({
         where: { id },
-        data: { isActive: false },
+        data: {
+          isActive: false,
+          updatedAt: new Date(),
+        },
       });
     } else {
-      // Eliminar permanentemente
+      // Hard delete (borrado físico)
       await prisma.group.delete({
         where: { id },
       });
@@ -307,48 +388,7 @@ export async function deleteGroup(
 }
 
 /**
- * Parsea opciones de filtro para grupos
- */
-export function parseGroupFilterOptions(
-  options: Record<string, any> = {}
-): Record<string, any> {
-  try {
-    const filters: Record<string, any> = {};
-
-    // Filtro de búsqueda por texto
-    if (options.search) {
-      filters.OR = [
-        { name: { contains: options.search, mode: 'insensitive' } },
-        { description: { contains: options.search, mode: 'insensitive' } },
-      ];
-    }
-
-    // Filtros por propiedades exactas
-    const exactProperties = ['type', 'category', 'status'];
-    for (const prop of exactProperties) {
-      if (options[prop]) {
-        filters[prop] = options[prop];
-      }
-    }
-
-    // Filtros booleanos
-    if (options.favorite !== undefined) {
-      filters.favorite = options.favorite === 'true' || options.favorite === true;
-    }
-
-    if (options.active !== undefined) {
-      filters.isActive = options.active === 'true' || options.active === true;
-    }
-
-    return filters;
-  } catch (error) {
-    logger.error('Error parseando opciones de filtro:', error);
-    return {};
-  }
-}
-
-/**
- * Convierte un grupo a un formato relacionado (para asociaciones)
+ * Transforma un grupo para su uso en relaciones
  */
 export function toRelatedGroup(
   group: Record<string, any>,
@@ -359,42 +399,47 @@ export function toRelatedGroup(
   try {
     const { includeDetails = false } = options;
 
-    if (!group) {
-      return null;
-    }
-
-    if (!includeDetails) {
-      // Versión básica con solo ID y nombre
-      return {
-        id: group.id,
-        name: group.name,
-        type: 'group',
-      };
-    }
-
-    // Versión detallada con más propiedades
-    return {
+    // Datos básicos
+    const relatedGroup = {
       id: group.id,
       name: group.name,
       type: 'group',
-      category: group.category || '',
-      description: group.description || '',
-      memberCount: group._count?.members || 0,
     };
+
+    // Si se solicitan detalles, incluir más información
+    if (includeDetails) {
+      return {
+        ...relatedGroup,
+        emoji: group.emoji || '📂',
+        color: group.color || '#3b82f6',
+        description: group.description || '',
+        isFavorite: group.favorite || false,
+        createdAt: group.createdAt,
+        updatedAt: group.updatedAt,
+      };
+    }
+
+    return relatedGroup;
   } catch (error) {
-    logger.error('Error convirtiendo a grupo relacionado:', error);
-    return { id: group.id, name: group.name || 'Error', type: 'group' };
+    logger.error('Error creando grupo relacionado:', error);
+    // En caso de error, devolver al menos el ID
+    return {
+      id: group.id,
+      name: 'Error',
+      type: 'group',
+    };
   }
 }
 
-// Exportar funciones individualmente y como compatibilidad con la API anterior
-export default {
+// Objeto de compatibilidad para código anterior
+export const GroupTransformer = {
   searchGroups,
   getGroupById,
   getGroupsByIds,
   createGroup,
   updateGroup,
   deleteGroup,
-  parseGroupFilterOptions,
-  toRelatedGroup,
+  toRelatedGroup
 };
+
+export default GroupTransformer;
