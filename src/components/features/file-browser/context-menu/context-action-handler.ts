@@ -11,7 +11,7 @@ import { addImageToConcept } from '@/app/actions/concepts/concept.actions';
 import { addImageToNote } from '@/app/actions/notes/note.actions';
 import { addImageToPlace } from '@/app/actions/places/place.actions';
 import { addImageToPrompt } from '@/app/actions/prompts/prompt.actions';
-import { addImageToTag } from '@/app/actions/tags/tag.actions';
+import { addImageToTag } from '@/app/actions/tags';
 import { addImageToWorldItem } from '@/app/actions/world-items/world-item.actions';
 
 // Importaciones de stores en entidades

@@ -1,5 +1,19 @@
 'use server';
 
+/**
+ * @file Acciones principales para la entidad Activity
+ * @module app/actions/activity/activity.actions
+ * @description Este archivo reexporta las funciones específicas para compatibilidad
+ */
+
+// Reexportar acciones específicas por categoría
+export * from './delete.actions';
+export * from './log.actions';
+export * from './query.actions';
+
+// Mantener compatibilidad con la implementación anterior
+// Aquí pueden incluirse funciones adicionales que no encajen en las otras categorías
+
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
@@ -7,19 +21,19 @@ import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers actualizados
 import {
-	extendActivities,
-	extendActivity,
-	generateActivityDescription,
-	mapActivityFiltersToPrisma,
-	mapCreateActivityDataToPrisma,
+    extendActivities,
+    extendActivity,
+    generateActivityDescription,
+    mapActivityFiltersToPrisma,
+    mapCreateActivityDataToPrisma,
 } from '@/transformers/activity';
 import {
-	type Activity,
-	ActivityEventType,
-	type ActivityFilters,
-	type ActivityListResponse,
-	type ActivityType,
-	type CreateActivityData,
+    type Activity,
+    ActivityEventType,
+    type ActivityFilters,
+    type ActivityListResponse,
+    type ActivityType,
+    type CreateActivityData,
 } from '@/types/entities/activity';
 
 const activityLogger = serverLogger.withContext('ActivityActions');
@@ -312,5 +326,81 @@ export async function createActivity(
 	} catch (error) {
 		activityLogger.error('❌ Error al crear actividad:', { type, metadata, imageId, error });
 		throw createActivityError('No se pudo crear la actividad', ActivityErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Elimina una actividad específica por ID
+ */
+export async function deleteActivity(id: string): Promise<boolean> {
+	try {
+		activityLogger.info('🗑️ Eliminando actividad por ID:', id);
+
+		// Comprobar que la actividad existe
+		const activity = await prisma.activity.findUnique({
+			where: { id },
+			include: { image: true },
+		});
+
+		if (!activity) {
+			activityLogger.warn('⚠️ Actividad no encontrada para eliminar:', id);
+			throw createActivityError('Actividad no encontrada', ActivityErrorCode.NOT_FOUND);
+		}
+
+		// Eliminar la actividad
+		await prisma.activity.delete({
+			where: { id },
+		});
+
+		activityLogger.info('✅ Actividad eliminada:', {
+			activityId: id,
+			type: activity.type,
+		});
+
+		// Notificar a los clientes
+		await notifyActivityChange('delete', { id, type: activity.type });
+
+		return true;
+	} catch (error) {
+		activityLogger.error('❌ Error al eliminar actividad:', { id, error });
+
+		// Si el error es que no se encontró, devolvemos false en lugar de lanzar una excepción
+		if ((error as any).code === ActivityErrorCode.NOT_FOUND) {
+			return false;
+		}
+
+		throw createActivityError('No se pudo eliminar la actividad', ActivityErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Busca una actividad específica por ID
+ */
+export async function getActivityById(id: string): Promise<Activity | null> {
+	try {
+		activityLogger.info('🔍 Buscando actividad por ID:', id);
+
+		const activity = await prisma.activity.findUnique({
+			where: { id },
+			include: {
+				image: true,
+			},
+		});
+
+		if (!activity) {
+			activityLogger.warn('⚠️ Actividad no encontrada:', id);
+			return null;
+		}
+
+		activityLogger.info('✅ Actividad encontrada:', {
+			activityId: id,
+			type: activity.type,
+		});
+
+		// Extender la actividad con información adicional
+		return extendActivity(activity);
+	} catch (error) {
+		activityLogger.error('❌ Error al buscar actividad por ID:', { id, error });
+		throw createActivityError('No se pudo buscar la actividad', ActivityErrorCode.OPERATION_FAILED, error);
 	}
 }

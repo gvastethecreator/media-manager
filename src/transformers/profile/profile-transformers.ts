@@ -1,8 +1,14 @@
+/**
+ * @file Transformadores para perfiles de usuario
+ * @module transformers/profile
+ */
+
+import { profilePreferencesSchema } from '@/types/entities/profile/schema';
 import {
-  Language,
-  type ProfileExtended,
-  type ProfilePreferences,
-  ThemeMode,
+    Language,
+    type ProfileExtended,
+    type ProfilePreferences,
+    ThemeMode,
 } from '@/types/entities/profile/types';
 import type { Profile } from '@prisma/client';
 import { format } from 'date-fns';
@@ -10,6 +16,8 @@ import { es } from 'date-fns/locale';
 
 /**
  * Obtiene el texto descriptivo para un tema
+ * @param theme - Modo de tema
+ * @returns Texto descriptivo del tema
  */
 export function getThemeModeText(theme: ThemeMode): string {
 	switch (theme) {
@@ -26,6 +34,8 @@ export function getThemeModeText(theme: ThemeMode): string {
 
 /**
  * Obtiene el texto descriptivo para un idioma
+ * @param language - Código de idioma
+ * @returns Texto descriptivo del idioma
  */
 export function getLanguageText(language: Language): string {
 	switch (language) {
@@ -44,40 +54,55 @@ export function getLanguageText(language: Language): string {
 
 /**
  * Formatea la fecha de creación/actualización del perfil
+ * @param date - Fecha a formatear
+ * @returns Fecha formateada
  */
 export function formatProfileDate(date: Date): string {
 	return format(date, 'dd/MM/yyyy HH:mm:ss', { locale: es });
 }
 
 /**
- * Parsea las preferencias del perfil
+ * Parsea y valida las preferencias del perfil
+ * @param profile - Perfil de Prisma
+ * @returns Preferencias validadas y con valores por defecto
+ * @throws Error si la validación falla
  */
 export function parseProfilePreferences(profile: Profile): ProfilePreferences {
-	// Valores por defecto
-	const defaultPreferences: ProfilePreferences = {
-		theme: (profile.theme as ThemeMode) || ThemeMode.SYSTEM,
-		color: profile.color || '#3b82f6',
-		emoji: profile.emoji || '👤',
-		language: (profile.language as Language) || Language.SPANISH,
-		enableAnimations: true,
-		enableSounds: false,
-		enableHaptics: false,
-		enableNotifications: true,
-		defaultView: 'grid',
-		defaultSort: 'name',
-		itemsPerPage: 50,
-		showHiddenFiles: false,
-		highContrast: false,
-		reducedMotion: false,
-		fontSize: 'medium',
-		outlineElements: false,
-	};
+	try {
+		// Crear objeto de preferencias inicial
+		const rawPreferences = {
+			theme: profile.theme as ThemeMode,
+			color: profile.color,
+			emoji: profile.emoji,
+			language: profile.language as Language,
+			// Valores por defecto para el resto de campos
+			enableAnimations: true,
+			enableSounds: false,
+			enableHaptics: false,
+			enableNotifications: true,
+			defaultView: 'grid' as const,
+			defaultSort: 'name' as const,
+			itemsPerPage: 50,
+			showHiddenFiles: false,
+			highContrast: false,
+			reducedMotion: false,
+			fontSize: 'medium' as const,
+			outlineElements: false,
+		};
 
-	return defaultPreferences;
+		// Validar y parsear con Zod
+		return profilePreferencesSchema.parse(rawPreferences);
+	} catch (error) {
+		console.error('Error parsing profile preferences:', error);
+		// Retornar valores por defecto si falla la validación
+		return profilePreferencesSchema.parse({});
+	}
 }
 
 /**
  * Transforma un Profile de Prisma a un objeto extendido para UI
+ * @param profile - Perfil de Prisma
+ * @returns Perfil extendido con datos adicionales para UI
  */
 export function transformProfile(profile: Profile): ProfileExtended {
 	const createdAt = new Date(profile.createdAt);
@@ -93,6 +118,8 @@ export function transformProfile(profile: Profile): ProfileExtended {
 
 /**
  * Transforma una lista de Profiles de Prisma a objetos extendidos
+ * @param profiles - Lista de perfiles de Prisma
+ * @returns Lista de perfiles extendidos
  */
 export function transformProfiles(profiles: Profile[]): ProfileExtended[] {
 	return profiles.map(transformProfile);
@@ -100,6 +127,8 @@ export function transformProfiles(profiles: Profile[]): ProfileExtended[] {
 
 /**
  * Obtiene el CSS para un tema
+ * @param theme - Modo de tema
+ * @returns Clase CSS correspondiente al tema
  */
 export function getThemeClass(theme: ThemeMode): string {
 	switch (theme) {
@@ -116,6 +145,8 @@ export function getThemeClass(theme: ThemeMode): string {
 
 /**
  * Obtiene el objeto de variables CSS para un color personalizado
+ * @param color - Color en formato hexadecimal
+ * @returns Objeto con variables CSS
  */
 export function getColorStyles(color: string): Record<string, string> {
 	return {
@@ -127,15 +158,17 @@ export function getColorStyles(color: string): Record<string, string> {
 
 /**
  * Calcula un color de contraste (blanco o negro) para un color de fondo
+ * @param hexColor - Color de fondo en formato hexadecimal
+ * @returns Color de contraste (#000000 o #ffffff)
  */
 export function getContrastColor(hexColor: string): string {
 	// Eliminar el símbolo # si existe
 	const hex = hexColor.replace(/^#/, '');
 
 	// Convertir a RGB
-	let r = 0,
-		g = 0,
-		b = 0;
+	let r = 0;
+	let g = 0;
+	let b = 0;
 
 	if (hex.length === 3) {
 		r = Number.parseInt(hex.substring(0, 1).repeat(2), 16);

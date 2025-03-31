@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteTag, getTags, type TagWithStats as ServerTagWithStats } from '@/app/actions/tags/tag.actions';
+import { type TagWithStats as ServerTagWithStats, deleteTag, getTags } from '@/app/actions/tags';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {

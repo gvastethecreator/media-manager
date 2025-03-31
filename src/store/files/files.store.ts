@@ -1,7 +1,6 @@
 import { getCollections } from '@/app/actions/collections/collection.actions';
 import { getFolders } from '@/app/actions/folders';
-import { getTagImages } from '@/app/actions/tags/tag.actions';
-import { getTags } from '@/app/actions/tags/tag.actions';
+import { getTagImages, getTags } from '@/app/actions/tags';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FileItem, RelatedTag } from '@/types/file-item';
 import type { Collection } from '@prisma/client';

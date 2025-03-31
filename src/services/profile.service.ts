@@ -1,135 +1,176 @@
-import type { BaseEntity } from '@/store/types';
+/**
+ * @file Servicio para operaciones con perfiles
+ * @module services/profile
+ */
+
+import { prisma } from '@/lib/prisma';
+import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
+import {
+    type CreateProfileInput,
+    type ProfileExtended,
+    type ProfileFilters,
+    type ProfilePaginationOptions,
+    type UpdateProfileInput,
+    createProfileSchema,
+    profileFiltersSchema,
+    profilePaginationSchema,
+    updateProfileSchema,
+} from '@/types/entities/profile';
+import { toServiceError } from '@/utils/errors/service-errors';
 import type { Profile } from '@prisma/client';
+import { BaseService } from './base.service';
 
-export interface ProfileCreate {
-	name: string;
-	emoji?: string;
-	color?: string;
-	theme?: string;
-	language?: string;
-	description?: string;
-	shortcut?: string;
-	syncSettings?: boolean;
-	notifications?: boolean;
-	settings?: Record<string, string | number | boolean | string[] | null | undefined>;
-	isActive?: boolean;
-}
+const SERVICE_NAME = 'ProfileService';
 
-export interface ProfileUpdate extends Partial<ProfileCreate> {
-	id: string;
-	isActive?: boolean;
-}
+/**
+ * Servicio para gestionar perfiles de usuario
+ * Extiende BaseService para operaciones CRUD básicas
+ */
+class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileExtended> {
+	private static instance: ProfileServiceImpl;
 
-export interface ProfileWithStats extends Profile, BaseEntity {
-	_count?: {
-		images: number;
-	};
-	totalSize?: number;
-}
+	private constructor() {
+		super(prisma.profile, 'Profile', {
+			toEntity: transformProfile,
+			toEntities: transformProfiles,
+			toResult: (entity) => entity,
+			toResults: (entities) => entities,
+		});
+	}
 
-export const profileService = {
-	async getProfiles(): Promise<ProfileWithStats[]> {
-		try {
-			const response = await fetch('/api/profiles');
-			if (!response.ok) {
-				throw new Error('Failed to fetch profiles');
-			}
-			return response.json();
-		} catch (error) {
-			console.error('Error fetching profiles:', error);
-			throw error;
+	/**
+	 * Obtiene la instancia única del servicio (Singleton)
+	 */
+	public static getInstance(): ProfileServiceImpl {
+		if (!ProfileServiceImpl.instance) {
+			ProfileServiceImpl.instance = new ProfileServiceImpl();
 		}
-	},
+		return ProfileServiceImpl.instance;
+	}
 
-	async getProfile(id: string): Promise<ProfileWithStats | null> {
+	/**
+	 * Obtiene todos los perfiles con filtros y paginación
+	 */
+	async getProfiles(
+		filters?: ProfileFilters,
+		pagination?: ProfilePaginationOptions
+	): Promise<ProfileExtended[]> {
 		try {
-			const response = await fetch(`/api/profiles/${id}`);
-			if (!response.ok) {
-				if (response.status === 404) {
-					return null;
-				}
-				throw new Error('Failed to fetch profile');
+			// Validar filtros y paginación
+			const validatedFilters = filters ? profileFiltersSchema.parse(filters) : {};
+			const validatedPagination = pagination ? profilePaginationSchema.parse(pagination) : {};
+
+			const { search, isActive, theme, language } = validatedFilters;
+			const { page = 1, limit = 50, sortBy = 'name', sortDirection = 'asc' } = validatedPagination;
+
+			// Construir where clause
+			const where: any = {};
+			if (search) {
+				where.OR = [
+					{ name: { contains: search, mode: 'insensitive' } },
+					{ description: { contains: search, mode: 'insensitive' } },
+				];
 			}
-			return response.json();
-		} catch (error) {
-			console.error('Error fetching profile:', error);
-			throw error;
-		}
-	},
+			if (typeof isActive === 'boolean') where.isActive = isActive;
+			if (theme) where.theme = theme;
+			if (language) where.language = language;
 
-	async createProfile(data: ProfileCreate): Promise<Profile> {
-		try {
-			const response = await fetch('/api/profiles', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
+			const profiles = await this.model.findMany({
+				where,
+				orderBy: { [sortBy]: sortDirection },
+				skip: (page - 1) * limit,
+				take: limit,
 			});
 
-			if (!response.ok) {
-				const error = await response.json();
-				throw new Error(error.message || 'Failed to create profile');
-			}
-
-			return response.json();
+			return this.transformer?.toEntities(profiles) || profiles;
 		} catch (error) {
-			console.error('Error creating profile:', error);
-			throw error;
-		}
-	},
-
-	async updateProfile(id: string, data: ProfileUpdate): Promise<Profile> {
-		try {
-			const response = await fetch(`/api/profiles/${id}`, {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'Error al obtener perfiles',
+				context: { filters, pagination },
 			});
-
-			if (!response.ok) {
-				const error = await response.json();
-				throw new Error(error.message || 'Failed to update profile');
-			}
-
-			return response.json();
-		} catch (error) {
-			console.error('Error updating profile:', error);
-			throw error;
 		}
-	},
+	}
 
-	async deleteProfile(id: string): Promise<void> {
+	/**
+	 * Crea un nuevo perfil
+	 */
+	async createProfile(data: CreateProfileInput): Promise<ProfileExtended> {
 		try {
-			const response = await fetch(`/api/profiles/${id}`, {
-				method: 'DELETE',
-			});
-
-			if (!response.ok) {
-				const error = await response.json();
-				throw new Error(error.message || 'Failed to delete profile');
-			}
+			const validatedData = createProfileSchema.parse(data);
+			const profile = await this.model.create({ data: validatedData });
+			return this.transformer?.toEntity(profile) || profile;
 		} catch (error) {
-			console.error('Error deleting profile:', error);
-			throw error;
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'Error al crear perfil',
+				context: { data },
+			});
 		}
-	},
+	}
 
+	/**
+	 * Actualiza un perfil existente
+	 */
+	async updateProfile(id: string, data: UpdateProfileInput): Promise<ProfileExtended> {
+		try {
+			const validatedData = updateProfileSchema.parse(data);
+			const profile = await this.model.update({
+				where: { id },
+				data: validatedData,
+			});
+			return this.transformer?.toEntity(profile) || profile;
+		} catch (error) {
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'Error al actualizar perfil',
+				context: { id, data },
+			});
+		}
+	}
+
+	/**
+	 * Establece un perfil como activo
+	 */
 	async setActiveProfile(id: string): Promise<void> {
 		try {
-			const response = await fetch(`/api/profiles/${id}/activate`, {
-				method: 'POST',
+			// Desactivar todos los perfiles
+			await this.model.updateMany({
+				where: { isActive: true },
+				data: { isActive: false },
 			});
 
-			if (!response.ok) {
-				const error = await response.json();
-				throw new Error(error.message || 'Failed to set active profile');
-			}
+			// Activar el perfil seleccionado
+			await this.model.update({
+				where: { id },
+				data: { isActive: true },
+			});
 		} catch (error) {
-			console.error('Error setting active profile:', error);
-			throw error;
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'Error al activar perfil',
+				context: { id },
+			});
 		}
-	},
-};
+	}
+
+	/**
+	 * Obtiene el perfil activo actual
+	 */
+	async getActiveProfile(): Promise<ProfileExtended | null> {
+		try {
+			const profile = await this.model.findFirst({
+				where: { isActive: true },
+			});
+			return profile ? (this.transformer?.toEntity(profile) || profile) : null;
+		} catch (error) {
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'Error al obtener perfil activo',
+			});
+		}
+	}
+}
+
+// Exportar instancia única del servicio
+export const profileService = ProfileServiceImpl.getInstance();

@@ -1,27 +1,35 @@
 /**
- * @file Store principal para la entidad Activity
+ * @file Store principal para la entidad Activity (Actividades)
  * @module store/entities/activity
+ * @description Implementación del store de Zustand para la gestión de actividades del sistema
  */
 
+import { serverLogger } from '@/lib/logger/server-logger';
+import { ActivitySortCriteria } from '@/types/entities/activity';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { ActivitySortCriteria } from '../../../types/entities/activity';
 import { type ActivityCoreSlice, createActivityCoreSlice } from './slices/core';
 import { type ActivityFiltersSlice, createActivityFiltersSlice } from './slices/filters';
 import { type ActivityUISlice, createActivityUISlice } from './slices/ui';
 import type { ActivityState } from './types';
 
-// Tipo del store completo
+// Logger para el store
+const storeLogger = serverLogger.withContext('ActivityStore');
+
+// Tipo del store completo que combina todos los slices
 export type ActivityStore = ActivityCoreSlice & ActivityUISlice & ActivityFiltersSlice;
 
-// Estado inicial
+// Estado inicial para cada parte del store
 const initialState: ActivityState = {
+	// Estado core: Datos principales de actividades
 	core: {
 		activities: {},
 		isLoading: false,
 		error: null,
 		lastUpdated: null,
 	},
+
+	// Estado UI: Controla la interfaz de usuario
 	ui: {
 		selectedIds: [],
 		expandedIds: [],
@@ -30,6 +38,8 @@ const initialState: ActivityState = {
 		isDetailModalOpen: false,
 		groupByDate: true,
 	},
+
+	// Estado de filtros: Controla criterios de filtrado y búsqueda
 	filters: {
 		sortBy: ActivitySortCriteria.DATE_DESC,
 		searchQuery: '',
@@ -43,17 +53,28 @@ const initialState: ActivityState = {
 	},
 };
 
-// Crear store combinando slices
+/**
+ * Store de actividades que combina todos los slices en un único store global
+ * Utiliza middleware:
+ * - devtools: Para depuración con Redux DevTools
+ * - persist: Para persistencia de configuraciones de usuario
+ */
 export const useActivityStore = create<ActivityStore>()(
 	devtools(
 		persist(
-			(...a) => ({
-				...createActivityCoreSlice(...a),
-				...createActivityUISlice(...a),
-				...createActivityFiltersSlice(...a),
-			}),
+			(...args) => {
+				storeLogger.info('🏗️ Inicializando ActivityStore');
+
+				// Combinar todos los slices en un solo store
+				return {
+					...createActivityCoreSlice(...args),
+					...createActivityUISlice(...args),
+					...createActivityFiltersSlice(...args),
+				};
+			},
 			{
 				name: 'activity-store',
+				// Solo persistir configuraciones de usuario, no los datos de actividades
 				partialize: (state) => ({
 					ui: {
 						groupByDate: state.ui.groupByDate,
@@ -65,14 +86,21 @@ export const useActivityStore = create<ActivityStore>()(
 				}),
 			}
 		),
-		{ name: 'ActivityStore' }
+		{
+			name: 'ActivityStore',
+			enabled: process.env.NODE_ENV === 'development'
+		}
 	)
 );
 
-// Exportar todo desde types
+// Exportar todo desde types para facilitar el uso
 export * from './types';
 
-// Exportar slices para poder extenderlos
+// Exportar slices para poder extenderlos si es necesario
 export { createActivityCoreSlice } from './slices/core';
 export { createActivityFiltersSlice } from './slices/filters';
 export { createActivityUISlice } from './slices/ui';
+
+// Exportar selectores útiles
+export * from './selectors';
+

@@ -1,6 +1,6 @@
 'use client';
 
-import { createTag, updateTag } from '@/app/actions/tags/tag.actions';
+import { createTag, updateTag } from '@/app/actions/tags';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';

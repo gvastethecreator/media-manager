@@ -4,4 +4,7 @@
  */
 
 export * from './mappers';
+export * from './schema';
 export * from './serializers';
+export * from './validators';
+

@@ -7,7 +7,7 @@ import { getNoteImages } from '@/app/actions/notes/note.actions';
 import { getPlaceImages } from '@/app/actions/places/place.actions';
 import { getPromptImages } from '@/app/actions/prompts/prompt.actions';
 import { getStats } from '@/app/actions/stats/stats.actions';
-import { getTagImages } from '@/app/actions/tags/tag.actions';
+import { getTagImages } from '@/app/actions/tags';
 import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FileItem, ImageStats, ViewType } from '@/types/file-item';
