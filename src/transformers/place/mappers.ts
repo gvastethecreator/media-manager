@@ -3,6 +3,7 @@
  * @module transformers/place/mappers
  */
 
+import { createLogger } from '@/lib/logger';
 import type {
     PlaceComplete,
     PlaceCreateInput,
@@ -11,7 +12,6 @@ import type {
     PlaceUpdateInput,
     RelatedPlace
 } from '@/types/entities/place/types';
-import { createLogger } from '@/utils/logger';
 import type { Prisma } from '@prisma/client';
 import {
     toPrismaPlace
@@ -511,7 +511,7 @@ export function generatePlaceColor(name: string, category?: string | null): stri
 	let color = '#';
 	for (let i = 0; i < 3; i++) {
 		const value = (hash >> (i * 8)) & 0xff;
-		color += ('00' + value.toString(16)).substr(-2);
+		color += `00${value.toString(16)}`.substr(-2);
 	}
 
 	return color;

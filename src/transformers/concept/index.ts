@@ -15,32 +15,82 @@ import type {
 } from '@/types/entities/concept/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 
-// Serializadores
+// Importar directamente las funciones necesarias
+import {
+    ConceptTransformOptions,
+    deserializeTags,
+    extendConcept,
+    extendConcepts,
+    fromConceptComplete,
+    fromPrismaConcept,
+    serializeTags,
+    toConceptComplete,
+    toConceptExtendedComplete,
+    toConceptWithRelationsComplete,
+    toConceptWithRelationsExtendedComplete,
+    toConceptWithStatsComplete,
+    toExtendedConcept,
+    toPrismaConcept,
+    validateConcept
+} from './serializers';
+
+// Exportar serializadores
 export {
     // Tipos
-    ConceptTransformOptions, deserializeTags, extendConcept,
-    extendConcepts, fromConceptComplete,
+    ConceptTransformOptions,
+    deserializeTags,
+    extendConcept,
+    extendConcepts,
+    fromConceptComplete,
     // Funciones principales
     fromPrismaConcept,
     // Funciones de deserialización/serialización
     serializeTags,
     // Funciones obsoletas
-    toConceptComplete, toConceptExtendedComplete, toConceptWithRelationsComplete, toConceptWithRelationsExtendedComplete,
-    toConceptWithStatsComplete, toExtendedConcept, toPrismaConcept,
+    toConceptComplete,
+    toConceptExtendedComplete,
+    toConceptWithRelationsComplete,
+    toConceptWithRelationsExtendedComplete,
+    toConceptWithStatsComplete,
+    toExtendedConcept,
+    toPrismaConcept,
     // Funciones de validación y extensión
     validateConcept
-} from './serializers';
+};
 
-// Mappers
+// Importar mappers
+    import {
+        filterConcepts,
+        mapCreateConceptDataToPrisma,
+        mapUpdateConceptDataToPrisma,
+        paginateConcepts,
+        processConcepts,
+        sortConcepts,
+        toCreateConceptData,
+        toRelatedConcept,
+        toSearchFilters,
+        toSearchOptions,
+        toSearchResult,
+        toUpdateConceptData
+    } from './mappers';
+
+// Exportar mappers
 export {
     filterConcepts,
     // Funciones obsoletas
     mapCreateConceptDataToPrisma,
-    mapUpdateConceptDataToPrisma, paginateConcepts,
-    processConcepts, sortConcepts,
+    mapUpdateConceptDataToPrisma,
+    paginateConcepts,
+    processConcepts,
+    sortConcepts,
     // Funciones principales
-    toCreateConceptData, toRelatedConcept, toSearchFilters, toSearchOptions, toSearchResult, toUpdateConceptData
-} from './mappers';
+    toCreateConceptData,
+    toRelatedConcept,
+    toSearchFilters,
+    toSearchOptions,
+    toSearchResult,
+    toUpdateConceptData
+};
 
 const logger = serverLogger.withContext('ConceptTransformer');
 

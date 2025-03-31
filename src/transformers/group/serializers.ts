@@ -47,7 +47,7 @@ export function toPrismaGroup(data: GroupCreateInput | GroupUpdateInput): Prisma
   try {
     // Validar campos requeridos para creación
     if (!('id' in data)) {
-      validateRequiredFields(data, ['name', 'emoji', 'color']);
+      validateRequiredFields(data, ['name']);
     }
 
     // Validar tipos de datos
@@ -56,18 +56,20 @@ export function toPrismaGroup(data: GroupCreateInput | GroupUpdateInput): Prisma
     validateFieldType(data.color, 'string', 'color');
 
     // Serializar campos JSON
-    const filters = serializeJsonField(data.filters, '{}');
+    const filters = serializeJsonField(data.filters, 'empty_array');
 
-    // Preparar resultado
+    // Preparar resultado con copia para evitar mutar el original
+    const { isFavorite, ...otherProps } = data;
+
+    // Definir el resultado con los valores correctos
     const result: Record<string, any> = {
-      ...data,
+      ...otherProps,
       filters,
     };
 
     // Convertir isFavorite a favorite si está presente
-    if ('isFavorite' in data) {
-      result.favorite = data.isFavorite;
-      result.isFavorite = undefined;
+    if (isFavorite !== undefined) {
+      result.favorite = isFavorite;
     }
 
     // Preparar relaciones para Prisma
@@ -105,7 +107,7 @@ export function fromPrismaGroup(
 ): GroupComplete {
   try {
     // Deserializar campos JSON
-    const filters = deserializeJsonField(prismaGroup.filters, {});
+    const filters = deserializeJsonField(prismaGroup.filters, []);
 
     // Obtener conteos de relaciones
     const counts = getRelationCounts('Group', prismaGroup);
@@ -118,8 +120,8 @@ export function fromPrismaGroup(
       color: prismaGroup.color || DEFAULT_UI_VALUES.color,
       description: prismaGroup.description,
       shortcut: prismaGroup.shortcut,
-      category: prismaGroup.category,
-      sortBy: prismaGroup.sortBy,
+      category: prismaGroup.category || 'general',
+      sortBy: prismaGroup.sortBy || 'name',
       filters,
       featuredImage: prismaGroup.featuredImage,
       isFavorite: prismaGroup.favorite || false,
@@ -135,19 +137,19 @@ export function fromPrismaGroup(
     // Construir objeto completo con relaciones
     return {
       ...baseGroup,
-      images: prismaGroup.images?.map(img => ({ id: img.id })),
-      videos: prismaGroup.videos?.map(vid => ({ id: vid.id })),
-      albums: prismaGroup.albums?.map(alb => ({ id: alb.id })),
-      collections: prismaGroup.collections?.map(col => ({ id: col.id })),
-      tags: prismaGroup.tags?.map(tag => ({ id: tag.id })),
-      characters: prismaGroup.characters?.map(char => ({ id: char.id })),
-      places: prismaGroup.places?.map(place => ({ id: place.id })),
-      worldItems: prismaGroup.worldItems?.map(item => ({ id: item.id })),
-      concepts: prismaGroup.concepts?.map(con => ({ id: con.id })),
-      prompts: prismaGroup.prompts?.map(prompt => ({ id: prompt.id })),
-      notes: prismaGroup.notes?.map(note => ({ id: note.id })),
-      wildcards: prismaGroup.wildcards?.map(wild => ({ id: wild.id })),
-      properties: prismaGroup.properties?.map(prop => ({ id: prop.id })),
+      images: prismaGroup.images?.map(img => ({ id: img.id })) || [],
+      videos: prismaGroup.videos?.map(vid => ({ id: vid.id })) || [],
+      albums: prismaGroup.albums?.map(alb => ({ id: alb.id })) || [],
+      collections: prismaGroup.collections?.map(col => ({ id: col.id })) || [],
+      tags: prismaGroup.tags?.map(tag => ({ id: tag.id })) || [],
+      characters: prismaGroup.characters?.map(char => ({ id: char.id })) || [],
+      places: prismaGroup.places?.map(place => ({ id: place.id })) || [],
+      worldItems: prismaGroup.worldItems?.map(item => ({ id: item.id })) || [],
+      concepts: prismaGroup.concepts?.map(con => ({ id: con.id })) || [],
+      prompts: prismaGroup.prompts?.map(prompt => ({ id: prompt.id })) || [],
+      notes: prismaGroup.notes?.map(note => ({ id: note.id })) || [],
+      wildcards: prismaGroup.wildcards?.map(wild => ({ id: wild.id })) || [],
+      properties: prismaGroup.properties?.map(prop => ({ id: prop.id })) || [],
       _count: counts,
     };
   } catch (error) {
@@ -180,12 +182,14 @@ export function extendGroup(
 
     // Deserializar campos JSON si son strings
     if (typeof extended.filters === 'string') {
-      extended.filters = deserializeJsonField(extended.filters, '{}');
+      extended.filters = deserializeJsonField(extended.filters, []);
     }
 
     // Asegurar que las propiedades de UI tengan valores por defecto
     if (!extended.emoji) extended.emoji = DEFAULT_GROUP_EMOJI;
     if (!extended.color) extended.color = DEFAULT_GROUP_COLOR;
+    if (!extended.category) extended.category = 'general';
+    if (!extended.sortBy) extended.sortBy = 'name';
 
     // Inicializar relaciones vacías si se incluyen relaciones
     if (options.includeRelations) {
@@ -232,252 +236,214 @@ export function extendGroup(
 /**
  * 🔍 Parsea filtros de Group
  */
-export function parseGroupFilters(filters: unknown): Record<string, unknown> {
+export function parseGroupFilterObject(filters: unknown): Prisma.GroupWhereInput {
   try {
     if (!filters || typeof filters !== 'object') {
       return {};
     }
 
-    const parsed: Record<string, unknown> = {};
+    const parsed: Prisma.GroupWhereInput = {};
     const typedFilters = filters as Record<string, unknown>;
 
     // Procesar filtros específicos de Group
     if (typedFilters.search) {
       parsed.OR = [
-        { name: { contains: typedFilters.search as string, mode: 'insensitive' } },
-        { description: { contains: typedFilters.search as string, mode: 'insensitive' } },
+        { name: { contains: String(typedFilters.search), mode: 'insensitive' } },
+        { description: { contains: String(typedFilters.search), mode: 'insensitive' } },
       ];
     }
 
-    if (typedFilters.categories?.length) {
-      parsed.category = { in: typedFilters.categories };
+    // Filtros de igualdad exacta
+    if (typedFilters.category) {
+      parsed.category = String(typedFilters.category);
     }
 
+    // Filtros booleanos
     if (typedFilters.isFavorite !== undefined) {
-      parsed.favorite = typedFilters.isFavorite;
-    }
-
-    if (typedFilters.hasImages) {
-      parsed.images = { some: {} };
-    }
-
-    if (typedFilters.hasVideos) {
-      parsed.videos = { some: {} };
+      parsed.favorite = Boolean(typedFilters.isFavorite);
+    } else if (typedFilters.favorite !== undefined) {
+      parsed.favorite = Boolean(typedFilters.favorite);
     }
 
     return parsed;
   } catch (error) {
+    logger.error('Error parseando filtros de Group:', error);
+    return {};
+  }
+}
+
+/**
+ * 🎨 Genera un emoji para un grupo basado en su nombre y categoría
+ */
+export function generateGroupEmoji(name: string, category?: string): string {
+  try {
+    // Si hay categoría, intentar basarse en ella primero
+    if (category) {
+      const lowerCategory = category.toLowerCase();
+
+      // Mapeo de categorías comunes a emojis
+      const categoryEmojis: Record<string, string> = {
+        general: '📂',
+        arte: '🎨',
+        musica: '🎵',
+        viajes: '✈️',
+        comida: '🍽️',
+        personas: '👥',
+        eventos: '🎉',
+        naturaleza: '🌿',
+        tecnologia: '💻',
+        deportes: '⚽',
+      };
+
+      if (categoryEmojis[lowerCategory]) {
+        return categoryEmojis[lowerCategory];
+      }
+    }
+
+    // Si no hay categoría o no se encontró un emoji para ella,
+    // usar el nombre para generar un emoji simple
+    const lowerName = name.toLowerCase();
+
+    // Algunos emojis basados en palabras clave comunes
+    if (lowerName.includes('foto') || lowerName.includes('imag')) return '📸';
+    if (lowerName.includes('video')) return '🎬';
+    if (lowerName.includes('fav')) return '⭐';
+    if (lowerName.includes('trabajo') || lowerName.includes('job')) return '💼';
+    if (lowerName.includes('viaje')) return '✈️';
+    if (lowerName.includes('familia')) return '👨‍👩‍👧‍👦';
+    if (lowerName.includes('mascota') || lowerName.includes('animal')) return '🐾';
+
+    // Emoji por defecto si no coincide con ninguna palabra clave
+    return DEFAULT_GROUP_EMOJI;
+  } catch (error) {
+    logger.error('Error generando emoji para grupo:', error);
+    return DEFAULT_GROUP_EMOJI;
+  }
+}
+
+/**
+ * 🎨 Genera un color para un grupo basado en su nombre
+ */
+export function generateGroupColor(name: string): string {
+  try {
+    // Lista de colores predefinidos para grupos
+    const colors = [
+      '#3b82f6', // azul
+      '#10b981', // verde
+      '#f59e0b', // amarillo
+      '#ef4444', // rojo
+      '#8b5cf6', // púrpura
+      '#ec4899', // rosa
+      '#06b6d4', // cian
+      '#f97316', // naranja
+      '#6366f1', // indigo
+      '#14b8a6', // verde azulado
+    ];
+
+    // Usar una función hash simple basada en el nombre
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    // Obtener un índice dentro del rango de colores
+    const index = Math.abs(hash) % colors.length;
+
+    return colors[index];
+  } catch (error) {
+    logger.error('Error generando color para grupo:', error);
+    return DEFAULT_GROUP_COLOR;
+  }
+}
+
+/**
+ * 🔄 Transforma un grupo de la base de datos a una versión extendida
+ */
+export function toExtendedGroup(group: any): GroupComplete {
+  try {
+    if (!group) {
+      throw new Error('Se requiere un objeto grupo válido');
+    }
+
+    // Si el grupo ya tiene la propiedad isFavorite, convertirla a favorite
+    let isFavorite = false;
+    if (group.favorite !== undefined) {
+      isFavorite = Boolean(group.favorite);
+    } else if (group.isFavorite !== undefined) {
+      isFavorite = Boolean(group.isFavorite);
+    }
+
+    // Deserializar campos JSON
+    const filters = deserializeJsonField(group.filters, []);
+
+    // Construir objeto base con formato correcto
+    const baseGroup: GroupBase = {
+      id: group.id,
+      name: group.name,
+      emoji: group.emoji || DEFAULT_GROUP_EMOJI,
+      color: group.color || DEFAULT_GROUP_COLOR,
+      description: group.description || '',
+      shortcut: group.shortcut || null,
+      category: group.category || 'general',
+      sortBy: group.sortBy || 'name',
+      filters,
+      featuredImage: group.featuredImage || null,
+      isFavorite,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt,
+    };
+
+    // Si tiene contadores, agregarlos
+    const counts = group._count || {};
+
+    // Construir objeto completo con relaciones
+    return {
+      ...baseGroup,
+      images: Array.isArray(group.images) ? group.images.map((img: any) => ({ id: img.id })) : [],
+      videos: Array.isArray(group.videos) ? group.videos.map((vid: any) => ({ id: vid.id })) : [],
+      albums: Array.isArray(group.albums) ? group.albums.map((alb: any) => ({ id: alb.id })) : [],
+      collections: Array.isArray(group.collections) ? group.collections.map((col: any) => ({ id: col.id })) : [],
+      tags: Array.isArray(group.tags) ? group.tags.map((tag: any) => ({ id: tag.id })) : [],
+      characters: Array.isArray(group.characters) ? group.characters.map((char: any) => ({ id: char.id })) : [],
+      places: Array.isArray(group.places) ? group.places.map((place: any) => ({ id: place.id })) : [],
+      worldItems: Array.isArray(group.worldItems) ? group.worldItems.map((item: any) => ({ id: item.id })) : [],
+      concepts: Array.isArray(group.concepts) ? group.concepts.map((con: any) => ({ id: con.id })) : [],
+      prompts: Array.isArray(group.prompts) ? group.prompts.map((prompt: any) => ({ id: prompt.id })) : [],
+      notes: Array.isArray(group.notes) ? group.notes.map((note: any) => ({ id: note.id })) : [],
+      wildcards: Array.isArray(group.wildcards) ? group.wildcards.map((wild: any) => ({ id: wild.id })) : [],
+      properties: Array.isArray(group.properties) ? group.properties.map((prop: any) => ({ id: prop.id })) : [],
+      _count: {
+        images: counts.images || 0,
+        videos: counts.videos || 0,
+        albums: counts.albums || 0,
+        collections: counts.collections || 0,
+        tags: counts.tags || 0,
+        characters: counts.characters || 0,
+        places: counts.places || 0,
+        worldItems: counts.worldItems || 0,
+        concepts: counts.concepts || 0,
+        prompts: counts.prompts || 0,
+        notes: counts.notes || 0,
+        wildcards: counts.wildcards || 0,
+        properties: counts.properties || 0,
+      },
+    };
+  } catch (error) {
+    logger.error('Error transformando grupo extendido:', error);
     throw handleTransformerError(error);
   }
 }
 
-/**
- * Genera un emoji para el grupo basado en su nombre y categoría
- * @param name Nombre del grupo
- * @param category Categoría del grupo
- * @returns Emoji adecuado para el grupo
- */
-export function generateGroupEmoji(name: string, category?: string): string {
-  // Normalizar nombre y categoría para búsqueda
-  const normalizedName = name.toLowerCase();
-  const normalizedCategory = category?.toLowerCase() || '';
+// Exportación para compatibilidad
+export const GroupSerializer = {
+  toPrismaGroup,
+  fromPrismaGroup,
+  validateGroup,
+  extendGroup,
+  parseGroupFilterObject,
+  generateGroupEmoji,
+  generateGroupColor,
+  toExtendedGroup
+};
 
-  // Mapeo de categorías comunes a emojis
-  if (normalizedCategory === 'favorites' || normalizedName.includes('favorit')) {
-    return '⭐';
-  }
-
-  if (normalizedCategory === 'archive' || normalizedName.includes('archiv')) {
-    return '🗄️';
-  }
-
-  if (normalizedCategory === 'projects' || normalizedName.includes('project')) {
-    return '📊';
-  }
-
-  if (normalizedCategory === 'collections' || normalizedName.includes('collect')) {
-    return '🌟';
-  }
-
-  if (normalizedCategory === 'smart' || normalizedName.includes('smart')) {
-    return '🧠';
-  }
-
-  if (normalizedName.includes('recent')) {
-    return '🕒';
-  }
-
-  // Valor predeterminado
-  return DEFAULT_GROUP_EMOJI;
-}
-
-/**
- * Genera un color para el grupo basado en su nombre
- * @param name Nombre del grupo
- * @returns Color en formato hexadecimal
- */
-export function generateGroupColor(name: string): string {
-  // Lista de colores predefinidos
-  const colors = [
-    '#3b82f6', // blue
-    '#ef4444', // red
-    '#10b981', // green
-    '#f59e0b', // amber
-    '#8b5cf6', // violet
-    '#ec4899', // pink
-    '#06b6d4', // cyan
-    '#84cc16', // lime
-    '#6366f1', // indigo
-    '#14b8a6', // teal
-    '#f97316', // orange
-    '#d946ef', // fuchsia
-  ];
-
-  // Calcular un valor hash simple basado en el nombre
-  const hashValue = name.split('').reduce((acc, char) => {
-    return acc + char.charCodeAt(0);
-  }, 0);
-
-  // Seleccionar un color basado en el hash
-  return colors[hashValue % colors.length];
-}
-
-/**
- * Serializa los filtros de un grupo a formato JSON
- * @param filters Filtros a serializar
- * @returns String JSON con los filtros
- */
-export function serializeGroupFilters(filters: any[]): string {
-  if (!filters || filters.length === 0) {
-    return 'empty_array';
-  }
-
-  try {
-    return JSON.stringify(filters);
-  } catch (error) {
-    logger.error('Error al serializar filtros de grupo:', error);
-    return 'empty_array';
-  }
-}
-
-/**
- * Convierte un GroupBase con campos en formato de base de datos a un GroupComplete con todos los campos deserializados
- * @param group Objeto básico de grupo desde la base de datos
- * @returns Objeto GroupComplete con campos JSON parseados
- */
-export function toGroupComplete(group: GroupBase): GroupComplete {
-  try {
-    return {
-      ...group,
-      filters: parseGroupFilters(group.filters || 'empty_array')
-    };
-  } catch (error) {
-    logger.error('Error al convertir GroupBase a GroupComplete:', error);
-    return {
-      ...group,
-      filters: []
-    } as GroupComplete;
-  }
-}
-
-/**
- * Convierte un GroupComplete con campos deserializados a un GroupBase con formato para la base de datos
- * @param group Objeto GroupComplete con campos parseados
- * @returns GroupBase con campos serializados para BD
- */
-export function fromGroupComplete(group: GroupComplete): GroupBase {
-  try {
-    const { filters, ...rest } = group;
-
-    // Convertir isFavorite a favorite si existe en el grupo
-    const result: Record<string, any> = { ...rest };
-    if ('isFavorite' in group) {
-      result.favorite = group.isFavorite;
-      result.isFavorite = undefined;
-    }
-
-    return {
-      ...result,
-      filters: serializeGroupFilters(filters || [])
-    } as GroupBase;
-  } catch (error) {
-    logger.error('Error al convertir GroupComplete a GroupBase:', error);
-    return {
-      ...group,
-      filters: 'empty_array'
-    } as GroupBase;
-  }
-}
-
-/**
- * Extiende múltiples grupos con propiedades adicionales para UI
- * @param groups Lista de grupos básicos o completos
- * @returns Lista de grupos extendidos
- */
-export function extendGroups(groups: GroupBase[]): GroupComplete[] {
-  return groups.map(group => extendGroup(group));
-}
-
-/**
- * Serializa un objeto a formato JSON
- * @param obj Objeto o string JSON
- * @returns String JSON serializado
- */
-export function serializeObject(obj: Record<string, any> | string | null | undefined): string {
-  try {
-    if (obj === null || obj === undefined) {
-      return '{}';
-    }
-
-    if (typeof obj === 'string') {
-      // Si ya es un string, verificar si es un objeto JSON válido
-      try {
-        const parsed = JSON.parse(obj);
-        if (typeof parsed === 'object' && !Array.isArray(parsed)) {
-          return obj; // Ya es un string JSON válido
-        }
-        return '{}'; // No es un objeto
-      } catch {
-        return '{}'; // No se pudo parsear, no es un JSON válido
-      }
-    }
-
-    // Serializar el objeto
-    return obj && typeof obj === 'object' && !Array.isArray(obj) ? JSON.stringify(obj) : '{}';
-  } catch (error) {
-    logger.error('Error serializando objeto:', error);
-    return '{}';
-  }
-}
-
-/**
- * Serializa un array a formato JSON
- * @param arr Array o string JSON
- * @returns String JSON serializado
- */
-export function serializeArray(arr: any[] | string | null | undefined): string {
-  try {
-    if (arr === null || arr === undefined) {
-      return 'empty_array';
-    }
-
-    if (typeof arr === 'string') {
-      // Si ya es un string, verificar si es un array JSON válido
-      try {
-        const parsed = JSON.parse(arr);
-        if (Array.isArray(parsed)) {
-          return arr; // Ya es un string JSON válido
-        }
-        return 'empty_array'; // No es un array
-      } catch {
-        return 'empty_array'; // No se pudo parsear, no es un JSON válido
-      }
-    }
-
-    // Serializar el array
-    return arr && Array.isArray(arr) && arr.length > 0 ? JSON.stringify(arr) : 'empty_array';
-  } catch (error) {
-    logger.error('Error serializando array:', error);
-    return 'empty_array';
-  }
-}
+export default GroupSerializer;

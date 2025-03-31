@@ -3,9 +3,9 @@
  * @module entities/place/serializers
  */
 
+import { logger } from '@/lib/logger';
 import { PlaceDangerSchema, PlaceFiltersSchema, PlaceResourceSchema, PlaceSchema } from '@/types/entities/place/schema';
 import type { PlaceComplete, PlaceDanger, PlaceExtendedComplete, PlaceFilters, PlaceResource, PlaceStats, PlaceWithRelations } from '@/types/entities/place/types';
-import { logger } from '@/utils/logger';
 import { deserializeJsonField, serializeJsonField } from '@/utils/transformers/common';
 
 /**

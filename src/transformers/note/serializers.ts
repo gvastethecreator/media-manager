@@ -3,6 +3,8 @@
  * @module transformers/note/serializers
  */
 
+import { TransformerError } from '@/lib/errors';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { NoteSchema } from '@/types/entities/note/schema';
 import type {
     NoteBase,
@@ -12,10 +14,9 @@ import type {
     NoteTransformerOptions,
     NoteUpdateInput
 } from '@/types/entities/note/types';
-import { createLogger } from '@/utils/logger';
 
 // Logger específico para el transformer de Note
-const log = createLogger('note-transformer');
+const logger = serverLogger.withContext('NoteSerializer');
 
 /**
  * 🔄 Serializa un note completo para Prisma
@@ -35,49 +36,41 @@ export function toPrismaNote(
             NoteSchema.parse(note);
         }
 
-        // Base de datos para Prisma
-        const prismaData: Record<string, any> = {
-            ...(note as Record<string, any>)
-        };
+        // Base de datos para Prisma - crear una copia para evitar mutar el original
+        const { isFavorite, tagsArray, ...otherProps } = note as Record<string, any>;
 
-        // Serializar tags si es un array
-        if (deserializeFields && Array.isArray(note.tags)) {
-            prismaData.tags = serializeTags(note.tags);
+        // Resultado base
+        const prismaData: Record<string, any> = { ...otherProps };
+
+        // Convertir isFavorite a favorite si está presente
+        if (isFavorite !== undefined) {
+            prismaData.favorite = isFavorite;
         }
 
-        // Eliminar campos que no pertenecen al modelo Prisma
-        delete prismaData.tagsArray;
+        // Serializar tags si es un array
+        if (deserializeFields && Array.isArray(tagsArray)) {
+            prismaData.tags = serializeTags(tagsArray);
+        }
 
-        // Eliminar propiedades de UI
-        delete prismaData.isSelected;
-        delete prismaData.isEditing;
-        delete prismaData.isExpanded;
-        delete prismaData.isHovered;
-        delete prismaData.isNew;
-        delete prismaData.excerpt;
-        delete prismaData.wordCount;
-        delete prismaData.formattedDate;
+        // Filtrar propiedades que no pertenecen al modelo Prisma
+        const filteredData: Record<string, any> = {};
 
-        // Eliminar relaciones que se manejan de forma separada
-        delete prismaData.images;
-        delete prismaData.videos;
-        delete prismaData.albums;
-        delete prismaData.collections;
-        delete prismaData.tagEntities;
-        delete prismaData.characters;
-        delete prismaData.places;
-        delete prismaData.worldItems;
-        delete prismaData.concepts;
-        delete prismaData.prompts;
-        delete prismaData.wildcards;
-        delete prismaData.properties;
-        delete prismaData.groups;
-        delete prismaData._count;
+        // Propiedades básicas que siempre se deben incluir si están presentes
+        const baseProps = [
+            'id', 'title', 'content', 'color', 'emoji', 'tags', 'status',
+            'favorite', 'category', 'createdAt', 'updatedAt', 'isActive'
+        ];
 
-        return prismaData;
+        for (const prop of baseProps) {
+            if (prop in prismaData) {
+                filteredData[prop] = prismaData[prop];
+            }
+        }
+
+        return filteredData;
     } catch (error) {
-        log.error('Error transformando note a formato Prisma', { error });
-        throw new Error(`Error transformando note a formato Prisma: ${(error as Error).message}`);
+        logger.error('Error transformando note a formato Prisma', { error });
+        throw new TransformerError(`Error transformando note a formato Prisma: ${(error as Error).message}`, { cause: error });
     }
 }
 
@@ -94,10 +87,13 @@ export function fromPrismaNote(
     try {
         const { deserializeFields = true, includeRelations = false, includeUI = false } = options;
 
-        // Base de la nota
-        const noteComplete: Record<string, any> = {
-            ...prismaNote
-        };
+        // Base de la nota - crear una copia para evitar mutar el original
+        const noteComplete: Record<string, any> = { ...prismaNote };
+
+        // Convertir favorite a isFavorite para mantener consistencia
+        if ('favorite' in prismaNote) {
+            noteComplete.isFavorite = prismaNote.favorite;
+        }
 
         // Deserializar campos JSON
         if (deserializeFields) {
@@ -113,11 +109,11 @@ export function fromPrismaNote(
                 'wildcards', 'properties', 'groups'
             ];
 
-            relationsFields.forEach(field => {
+            for (const field of relationsFields) {
                 if (prismaNote[field]) {
                     noteComplete[field] = prismaNote[field];
                 }
-            });
+            }
 
             // Incluir contadores si están presentes
             if (prismaNote._count) {
@@ -160,8 +156,8 @@ export function fromPrismaNote(
 
         return noteComplete as NoteComplete;
     } catch (error) {
-        log.error('Error transformando note desde formato Prisma', { error });
-        throw new Error(`Error transformando note desde formato Prisma: ${(error as Error).message}`);
+        logger.error('Error transformando note desde formato Prisma', { error });
+        throw new TransformerError(`Error transformando note desde formato Prisma: ${(error as Error).message}`, { cause: error });
     }
 }
 
@@ -175,7 +171,7 @@ export function serializeTags(tags: string[]): string {
         const tagsObj: NoteTags = { items: tags };
         return JSON.stringify(tagsObj);
     } catch (error) {
-        log.error('Error serializando tags de nota', { error });
+        logger.error('Error serializando tags de nota', { error });
         return JSON.stringify({ items: [] });
     }
 }
@@ -192,62 +188,54 @@ export function deserializeTags(tagsJson: string | null | undefined): string[] {
         const parsed = JSON.parse(tagsJson) as NoteTags;
         return Array.isArray(parsed.items) ? parsed.items : [];
     } catch (error) {
-        log.error('Error deserializando tags de nota', { error });
+        logger.error('Error deserializando tags de nota', { error });
         return [];
     }
 }
 
 /**
- * 🔍 Valida y formatea una nota para su uso
- * @param note Datos de la nota a validar
- * @returns Nota validada y formateada
+ * 🔍 Valida una nota con el schema
+ * @param note Objeto a validar
+ * @returns Nota validada y tipada
  */
 export function validateNote(note: Record<string, any>): NoteComplete {
     try {
-        const validatedData = NoteSchema.parse(note);
-        return validatedData as unknown as NoteComplete;
+        const validated = NoteSchema.parse(note);
+        return validated as NoteComplete;
     } catch (error) {
-        log.error('Error validando datos de nota', { error, note });
-        throw new Error(`Error validando datos de nota: ${(error as Error).message}`);
+        logger.error('Error validando nota', { error });
+        throw new TransformerError(`Error validando nota: ${(error as Error).message}`, { cause: error });
     }
 }
 
 /**
- * 🎯 Extiende una nota con campos adicionales
- * @param note Nota base a extender
- * @param options Opciones de extensión
- * @returns Nota extendida con campos adicionales
+ * 🔄 Extiende una nota con datos adicionales
+ * @param note Nota base
+ * @param options Opciones de transformación
+ * @returns Nota completa con campos extendidos
  */
 export function extendNote(
     note: NoteBase & Record<string, any>,
     options: NoteTransformerOptions = {}
 ): NoteComplete {
     try {
-        // Crear la nota completa
-        const extendedNote = fromPrismaNote(note, {
+        // Usar fromPrismaNote para hacer la transformación completa
+        return fromPrismaNote(note, {
             ...options,
+            deserializeFields: true,
             includeUI: true
         });
-
-        // Establecer valores por defecto para campos de UI
-        extendedNote.isSelected = false;
-        extendedNote.isEditing = false;
-        extendedNote.isNew = false;
-        extendedNote.isExpanded = false;
-        extendedNote.isHovered = false;
-
-        return extendedNote;
     } catch (error) {
-        log.error('Error extendiendo nota', { error, note });
-        throw new Error(`Error extendiendo nota: ${(error as Error).message}`);
+        logger.error('Error extendiendo nota', { error });
+        throw new TransformerError(`Error extendiendo nota: ${(error as Error).message}`, { cause: error });
     }
 }
 
 /**
- * 🔄 Extiende varias notas con campos adicionales
- * @param notes Lista de notas a extender
- * @param options Opciones de extensión
- * @returns Lista de notas extendidas
+ * 🔄 Extiende múltiples notas con datos adicionales
+ * @param notes Array de notas base
+ * @param options Opciones de transformación
+ * @returns Array de notas completas
  */
 export function extendNotes(
     notes: (NoteBase & Record<string, any>)[],
@@ -256,18 +244,19 @@ export function extendNotes(
     return notes.map(note => extendNote(note, options));
 }
 
-// Exportar funciones obsoletas con alias para mantener compatibilidad
-export const processNoteFields = (note: NoteBase): any => {
-    log.warn('Función obsoleta: processNoteFields. Usar fromPrismaNote en su lugar.');
-    return {
-        ...note,
-        tags: deserializeTags(note.tags)
-    };
+/**
+ * @deprecated Usa las funciones específicas en su lugar
+ * Objeto con las funciones de serialización para compatibilidad
+ */
+export const NoteSerializer = {
+    toPrismaNote,
+    fromPrismaNote,
+    serializeTags,
+    deserializeTags,
+    validateNote,
+    extendNote,
+    extendNotes
 };
 
-export const toNoteComplete = fromPrismaNote;
-export const fromNoteComplete = toPrismaNote;
-export const toNoteWithStats = (note: any): any => {
-    log.warn('Función obsoleta: toNoteWithStats. Usar extendNote en su lugar.');
-    return extendNote(note, { includeCount: true });
-};
+// Exportar como default para compatibilidad
+export default NoteSerializer;

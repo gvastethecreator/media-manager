@@ -3,6 +3,7 @@
  * @module transformers/note/mappers
  */
 
+import { serverLogger } from '@/lib/logger/server-logger';
 import type {
     NoteComplete,
     NoteCreateInput,
@@ -11,12 +12,11 @@ import type {
     NoteUpdateInput,
     RelatedNote
 } from '@/types/entities/note/types';
-import { createLogger } from '@/utils/logger';
 import type { Prisma } from '@prisma/client';
 import { toPrismaNote } from './serializers';
 
 // Logger específico para el transformer de Note
-const log = createLogger('note-mapper');
+const logger = serverLogger.withContext('NoteMappers');
 
 /**
  * 🔄 Mapea datos de creación de nota a formato compatible con Prisma
@@ -116,7 +116,7 @@ export function mapCreateNoteDataToPrisma(data: NoteCreateInput): Prisma.NoteCre
 			...relations
 		} as Prisma.NoteCreateInput;
 	} catch (error) {
-		log.error('Error mapeando datos de creación de nota', { error, data });
+		logger.error('Error mapeando datos de creación de nota', { error, data });
 		throw new Error(`Error mapeando datos de creación de nota: ${(error as Error).message}`);
 	}
 }
@@ -136,94 +136,111 @@ export function mapUpdateNoteDataToPrisma(noteId: string, data: NoteUpdateInput)
 		const relations: Record<string, any> = {};
 
 		// Relaciones opcionales - usar set para reemplazar relaciones existentes
-		if (data.images) {
+		if (data.images !== undefined) {
 			relations.images = {
 				set: data.images.map(img => ({ id: typeof img === 'string' ? img : img.id }))
 			};
 		}
 
-		if (data.videos) {
+		if (data.videos !== undefined) {
 			relations.videos = {
 				set: data.videos.map(vid => ({ id: typeof vid === 'string' ? vid : vid.id }))
 			};
 		}
 
-		if (data.albums) {
+		if (data.albums !== undefined) {
 			relations.albums = {
 				set: data.albums.map(album => ({ id: typeof album === 'string' ? album : album.id }))
 			};
 		}
 
-		if (data.collections) {
+		if (data.collections !== undefined) {
 			relations.collections = {
 				set: data.collections.map(collection => ({ id: typeof collection === 'string' ? collection : collection.id }))
 			};
 		}
 
-		if (data.tags) {
+		if (data.tags !== undefined) {
 			relations.tags = {
 				set: data.tags.map(tag => ({ id: typeof tag === 'string' ? tag : tag.id }))
 			};
 		}
 
-		if (data.characters) {
+		if (data.characters !== undefined) {
 			relations.characters = {
 				set: data.characters.map(character => ({ id: typeof character === 'string' ? character : character.id }))
 			};
 		}
 
-		if (data.places) {
+		if (data.places !== undefined) {
 			relations.places = {
 				set: data.places.map(place => ({ id: typeof place === 'string' ? place : place.id }))
 			};
 		}
 
-		if (data.worldItems) {
+		if (data.worldItems !== undefined) {
 			relations.worldItems = {
 				set: data.worldItems.map(item => ({ id: typeof item === 'string' ? item : item.id }))
 			};
 		}
 
-		if (data.concepts) {
+		if (data.concepts !== undefined) {
 			relations.concepts = {
 				set: data.concepts.map(concept => ({ id: typeof concept === 'string' ? concept : concept.id }))
 			};
 		}
 
-		if (data.prompts) {
+		if (data.prompts !== undefined) {
 			relations.prompts = {
 				set: data.prompts.map(prompt => ({ id: typeof prompt === 'string' ? prompt : prompt.id }))
 			};
 		}
 
-		if (data.wildcards) {
+		if (data.wildcards !== undefined) {
 			relations.wildcards = {
 				set: data.wildcards.map(wildcard => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id }))
 			};
 		}
 
-		if (data.properties) {
+		if (data.properties !== undefined) {
 			relations.properties = {
 				set: data.properties.map(property => ({ id: typeof property === 'string' ? property : property.id }))
 			};
 		}
 
-		if (data.groups) {
+		if (data.groups !== undefined) {
 			relations.groups = {
 				set: data.groups.map(group => ({ id: typeof group === 'string' ? group : group.id }))
 			};
 		}
 
-		// Combinar datos base con relaciones
+		// Incluir relaciones en la consulta para devolverlas
+		const include: Record<string, boolean> = {};
+
+		// Usar for...of en lugar de forEach para mejor manejo de errores
+		for (const key of Object.keys(relations)) {
+			include[key] = true;
+		}
+
+		// Configurar opciones para Prisma
 		return {
 			where: { id: noteId },
 			data: {
 				...prismaData,
 				...relations
-			}
+			},
+			include: Object.keys(include).length > 0 ? {
+				...include,
+				_count: {
+					select: Object.keys(include).reduce((acc, key) => {
+						acc[key] = true;
+						return acc;
+					}, {} as Record<string, boolean>)
+				}
+			} : undefined
 		};
 	} catch (error) {
-		log.error('Error mapeando datos de actualización de nota', { error, data });
+		logger.error('Error mapeando datos de actualización de nota', { error, data });
 		throw new Error(`Error mapeando datos de actualización de nota: ${(error as Error).message}`);
 	}
 }
@@ -231,231 +248,258 @@ export function mapUpdateNoteDataToPrisma(noteId: string, data: NoteUpdateInput)
 /**
  * 🔄 Mapea opciones de búsqueda a formato compatible con Prisma
  * @param options Opciones de búsqueda
- * @returns Objeto formateado para Prisma
+ * @returns Argumentos para Prisma.findMany
  */
 export function mapNoteSearchOptionsToPrisma(options: NoteSearchOptions): Prisma.NoteFindManyArgs {
 	try {
-		// Construir objeto para Prisma
-		const prismaOptions: Prisma.NoteFindManyArgs = {};
+		const {
+			page = 1,
+			pageSize = 25,
+			sortBy = 'updatedAt',
+			sortOrder = 'desc',
+			includeRelations = false
+		} = options;
 
-		// Paginación
-		if (options.skip !== undefined) {
-			prismaOptions.skip = options.skip;
-		}
+		// Calcular skip & take para paginación
+		const skip = (page - 1) * pageSize;
+		const take = pageSize;
 
-		if (options.take !== undefined) {
-			prismaOptions.take = options.take;
-		}
+		// Configurar ordenación
+		const orderBy = { [sortBy]: sortOrder };
 
-		// Ordenamiento
-		if (options.orderBy) {
-			prismaOptions.orderBy = options.orderBy as any;
-		}
+		// Configurar inclusión de relaciones
+		const include = includeRelations ? {
+			images: true,
+			videos: true,
+			albums: true,
+			collections: true,
+			tags: true,
+			characters: true,
+			places: true,
+			worldItems: true,
+			concepts: true,
+			prompts: true,
+			wildcards: true,
+			properties: true,
+			groups: true,
+			_count: {
+				select: {
+					images: true,
+					videos: true,
+					albums: true,
+					collections: true,
+					tags: true,
+					characters: true,
+					places: true,
+					worldItems: true,
+					concepts: true,
+					prompts: true,
+					wildcards: true,
+					properties: true,
+					groups: true,
+				},
+			},
+		} : undefined;
 
-		// Filtros
-		if (options.where) {
-			prismaOptions.where = mapNoteFiltersToPrisma(options.where);
-		}
-
-		// Incluir relaciones
-		if (options.include) {
-			prismaOptions.include = {};
-
-			// Verificar cada relación individual
-			if (options.include.images) {
-				prismaOptions.include.images = true;
-			}
-
-			if (options.include.videos) {
-				prismaOptions.include.videos = true;
-			}
-
-			if (options.include.albums) {
-				prismaOptions.include.albums = true;
-			}
-
-			if (options.include.collections) {
-				prismaOptions.include.collections = true;
-			}
-
-			if (options.include.tags) {
-				prismaOptions.include.tags = true;
-			}
-
-			if (options.include.characters) {
-				prismaOptions.include.characters = true;
-			}
-
-			if (options.include.places) {
-				prismaOptions.include.places = true;
-			}
-
-			if (options.include.worldItems) {
-				prismaOptions.include.worldItems = true;
-			}
-
-			if (options.include.concepts) {
-				prismaOptions.include.concepts = true;
-			}
-
-			if (options.include.prompts) {
-				prismaOptions.include.prompts = true;
-			}
-
-			if (options.include.wildcards) {
-				prismaOptions.include.wildcards = true;
-			}
-
-			if (options.include.properties) {
-				prismaOptions.include.properties = true;
-			}
-
-			if (options.include.groups) {
-				prismaOptions.include.groups = true;
-			}
-
-			if (options.include._count) {
-				prismaOptions.include._count = true;
-			}
-		}
-
-		return prismaOptions;
+		// Devolver argumentos de Prisma
+		return {
+			skip,
+			take,
+			orderBy,
+			include
+		};
 	} catch (error) {
-		log.error('Error mapeando opciones de búsqueda', { error, options });
-		throw new Error(`Error mapeando opciones de búsqueda: ${(error as Error).message}`);
+		logger.error('Error mapeando opciones de búsqueda', { error, options });
+		// Valores por defecto en caso de error
+		return {
+			skip: 0,
+			take: 25,
+			orderBy: { updatedAt: 'desc' }
+		};
 	}
 }
 
 /**
- * 🔄 Mapea filtros de nota a formato compatible con Prisma
+ * 🔄 Mapea filtros de búsqueda a condiciones where de Prisma
  * @param filters Filtros de búsqueda
- * @returns Objeto formateado para Prisma
+ * @returns Condiciones where para Prisma
  */
 export function mapNoteFiltersToPrisma(filters: NoteFilters): Prisma.NoteWhereInput {
 	try {
-		const prismaWhere: Prisma.NoteWhereInput = {};
-		const AND: Prisma.NoteWhereInput[] = [];
+		const where: Prisma.NoteWhereInput = {};
 
-		// Búsqueda por texto
-		if (filters.searchQuery) {
-			AND.push({
-				OR: [
-					{ title: { contains: filters.searchQuery, mode: 'insensitive' } },
-					{ content: { contains: filters.searchQuery, mode: 'insensitive' } },
-					{ category: { contains: filters.searchQuery, mode: 'insensitive' } }
-				]
-			});
+		// Filtro por texto (búsqueda global)
+		if (filters.search) {
+			where.OR = [
+				{ title: { contains: filters.search, mode: 'insensitive' } },
+				{ content: { contains: filters.search, mode: 'insensitive' } },
+				{ tags: { contains: filters.search, mode: 'insensitive' } }
+			];
 		}
 
-		// Filtrar por categorías
-		if (filters.categories && filters.categories.length > 0) {
-			AND.push({
-				category: { in: filters.categories }
-			});
+		// Filtro de estado
+		if (filters.status) {
+			where.status = filters.status;
 		}
 
-		// Filtrar por prioridades
-		if (filters.priorities && filters.priorities.length > 0) {
-			AND.push({
-				priority: { in: filters.priorities }
-			});
+		// Filtro por título exacto
+		if (filters.title) {
+			where.title = filters.title;
 		}
 
-		// Filtrar por estados
-		if (filters.statuses && filters.statuses.length > 0) {
-			AND.push({
-				status: { in: filters.statuses }
-			});
+		// Filtro por color
+		if (filters.color) {
+			where.color = filters.color;
 		}
 
-		// Filtrar por contenido específico
-		if (filters.contentContains) {
-			AND.push({
-				content: { contains: filters.contentContains, mode: 'insensitive' }
-			});
+		// Filtro por emoji
+		if (filters.emoji) {
+			where.emoji = filters.emoji;
 		}
 
-		// Filtrar por favoritos
-		if (filters.onlyFavorites) {
-			AND.push({ isFavorite: true });
+		// Filtro por categoría
+		if (filters.category) {
+			where.category = filters.category;
 		}
 
-		// Filtrar por relaciones existentes
-		if (filters.hasTags) {
-			AND.push({
-				tags: {
-					not: {
-						equals: '{"items":[]}'
-					}
-				}
-			});
+		// Filtro por favoritos
+		if (filters.favorite !== undefined) {
+			where.favorite = filters.favorite;
 		}
 
-		if (filters.hasImages) {
-			AND.push({
-				images: {
-					some: {}
-				}
-			});
+		// Filtro por fecha de creación
+		if (filters.createdAfter) {
+			where.createdAt = {
+				...(where.createdAt || {}),
+				gte: new Date(filters.createdAfter)
+			};
 		}
 
-		if (filters.hasVideos) {
-			AND.push({
-				videos: {
-					some: {}
-				}
-			});
+		if (filters.createdBefore) {
+			where.createdAt = {
+				...(where.createdAt || {}),
+				lte: new Date(filters.createdBefore)
+			};
 		}
 
-		// Combinar todos los filtros con AND
-		if (AND.length > 0) {
-			prismaWhere.AND = AND;
+		// Filtro por fecha de actualización
+		if (filters.updatedAfter) {
+			where.updatedAt = {
+				...(where.updatedAt || {}),
+				gte: new Date(filters.updatedAfter)
+			};
 		}
 
-		return prismaWhere;
+		if (filters.updatedBefore) {
+			where.updatedAt = {
+				...(where.updatedAt || {}),
+				lte: new Date(filters.updatedBefore)
+			};
+		}
+
+		// Filtros de relaciones
+		if (filters.groupId) {
+			where.groups = { some: { id: filters.groupId } };
+		}
+
+		if (filters.albumId) {
+			where.albums = { some: { id: filters.albumId } };
+		}
+
+		if (filters.collectionId) {
+			where.collections = { some: { id: filters.collectionId } };
+		}
+
+		if (filters.tagId) {
+			where.tags = { some: { id: filters.tagId } };
+		}
+
+		if (filters.characterId) {
+			where.characters = { some: { id: filters.characterId } };
+		}
+
+		if (filters.placeId) {
+			where.places = { some: { id: filters.placeId } };
+		}
+
+		if (filters.promptId) {
+			where.prompts = { some: { id: filters.promptId } };
+		}
+
+		return where;
 	} catch (error) {
-		log.error('Error mapeando filtros de nota', { error, filters });
-		throw new Error(`Error mapeando filtros de nota: ${(error as Error).message}`);
+		logger.error('Error mapeando filtros a formato Prisma', { error, filters });
+		return {};
 	}
 }
 
 /**
- * 🔗 Mapea una nota a formato para nota relacionada
- * @param note Nota completa a mapear
- * @param count Conteo de relación
+ * 🔄 Mapea una nota a una referencia para uso en relaciones
+ * @param note Nota completa
+ * @param count Contador de asociaciones
  * @param strength Fuerza de la relación
- * @returns Objeto de nota relacionada
+ * @returns Nota en formato para relaciones
  */
 export function mapNoteToRelatedNote(
 	note: NoteComplete,
 	count = 1,
 	strength = 1
 ): RelatedNote {
-	// Calcular un extracto básico si no existe
-	const excerpt = note.excerpt || (
-		note.content && note.content.length > 100
-			? `${note.content.substring(0, 100)}...`
-			: note.content || ''
-	);
-
-	return {
-		id: note.id,
-		title: note.title,
-		excerpt,
-		category: note.category,
-		count,
-		strength
-	};
+	try {
+		return {
+			id: note.id,
+			title: note.title || 'Sin título',
+			color: note.color || '#3b82f6',
+			emoji: note.emoji || '📝',
+			type: 'note',
+			count,
+			strength,
+			updatedAt: note.updatedAt,
+			category: note.category
+		};
+	} catch (error) {
+		logger.error('Error mapeando nota a relacionada', { error, note });
+		return {
+			id: note.id,
+			title: 'Error',
+			color: '#3b82f6',
+			emoji: '📝',
+			type: 'note',
+			count: 0,
+			strength: 0,
+			updatedAt: new Date(),
+			category: 'error'
+		};
+	}
 }
 
-// Exportar funciones obsoletas con alias para mantener compatibilidad
-export const toCreateNoteData = (data: any): any => {
-	log.warn('Función obsoleta: toCreateNoteData. Usar mapCreateNoteDataToPrisma en su lugar.');
+/**
+ * @deprecated Usa mapCreateNoteDataToPrisma en su lugar
+ */
+export function toCreateNoteData(data: NoteCreateInput): Prisma.NoteCreateInput {
 	return mapCreateNoteDataToPrisma(data);
+}
+
+/**
+ * @deprecated Usa mapUpdateNoteDataToPrisma en su lugar
+ */
+export function toUpdateNoteData(id: string, data: NoteUpdateInput): Prisma.NoteUpdateArgs {
+	return mapUpdateNoteDataToPrisma(id, data);
+}
+
+/**
+ * @deprecated Usa las funciones específicas en su lugar
+ * Objeto con las funciones de mapeo para compatibilidad
+ */
+export const NoteMappers = {
+	mapCreateData: mapCreateNoteDataToPrisma,
+	mapUpdateData: mapUpdateNoteDataToPrisma,
+	mapSearchOptions: mapNoteSearchOptionsToPrisma,
+	mapFilters: mapNoteFiltersToPrisma,
+	mapToRelated: mapNoteToRelatedNote,
+	toCreateNoteData,
+	toUpdateNoteData
 };
 
-export const toUpdateNoteData = (data: any): any => {
-	log.warn('Función obsoleta: toUpdateNoteData. Usar mapUpdateNoteDataToPrisma en su lugar.');
-	const { id, ...updateData } = data;
-	return mapUpdateNoteDataToPrisma(id, updateData).data;
-};
+// Exportar como default para compatibilidad
+export default NoteMappers;
