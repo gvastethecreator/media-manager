@@ -5,55 +5,14 @@
 
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/lib/constants';
 import { serverLogger } from '@/lib/logger/server-logger';
-// Importar solo los tipos que se necesitan
 import type {
     GroupCard,
     GroupListItem,
-    GroupListItemImage
+    GroupListItemImage,
+    GroupListProps,
+    GroupSearchParams
 } from '@/types/entities/group';
-// Definir los tipos que no están disponibles (mock)
-type GroupBaseProps = {
-    id: string;
-    name: string;
-    type: string;
-    subtype?: string;
-    description: string;
-};
-type GroupListProps = {
-    items: GroupListItem[];
-    filters: Record<string, any>;
-    sort: {
-        field: string;
-        direction: string;
-    };
-    pagination: {
-        totalItems: number;
-        page: number;
-        pageSize: number;
-        totalPages: number;
-        hasNextPage: boolean;
-        hasPrevPage: boolean;
-    };
-};
-type GroupSearchParams = {
-    search?: string;
-    type?: string;
-    category?: string;
-    status?: string;
-    favorite?: boolean;
-    active?: boolean;
-    page?: number;
-    pageSize?: number;
-    sortBy?: string;
-    sortDirection?: 'asc' | 'desc';
-};
-type GroupSortField = 'name' | 'type' | 'category' | 'status' | 'createdAt' | 'updatedAt';
-type GroupSort = {
-    field: GroupSortField;
-    direction: 'asc' | 'desc';
-};
-
-import type { Group } from '@prisma/client';
+import type { Group, Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('GroupMappers');
 
@@ -65,12 +24,18 @@ export function toGroupListItem(
   options: {
     imageUrls?: string[],
     selected?: boolean,
-    memberCount?: number
+    imageCount?: number,
+    videoCount?: number
   } = {}
 ): GroupListItem {
   try {
     // Valores por defecto
-    const { imageUrls = [], selected = false, memberCount = 0 } = options;
+    const {
+      imageUrls = [],
+      selected = false,
+      imageCount = 0,
+      videoCount = 0
+    } = options;
 
     // Mapear imágenes a formato de listado
     const mappedImages: GroupListItemImage[] = imageUrls.map(url => ({
@@ -81,13 +46,16 @@ export function toGroupListItem(
     return {
       id: group.id,
       name: group.name,
-      type: group.type || 'generic',
-      category: group.category || 'group',
-      status: group.status || 'active',
+      emoji: group.emoji || '📂',
+      color: group.color || '#3b82f6',
+      category: group.category || 'general',
       isFavorite: group.favorite || false,
       selected,
       images: mappedImages,
-      memberCount
+      imageCount,
+      videoCount,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt
     };
   } catch (error) {
     logger.error('Error en toGroupListItem:', error);
@@ -95,13 +63,16 @@ export function toGroupListItem(
     return {
       id: group.id,
       name: group.name,
-      type: group.type || 'generic',
-      category: group.category || 'group',
-      status: group.status || 'active',
+      emoji: '📂',
+      color: '#3b82f6',
+      category: 'general',
       isFavorite: false,
       selected: false,
       images: [],
-      memberCount: 0
+      imageCount: 0,
+      videoCount: 0,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt
     };
   }
 }
@@ -112,27 +83,36 @@ export function toGroupListItem(
 export function toGroupCard(
   group: Group,
   options: {
-    imageUrls?: string[],
+    imageUrl?: string,
     selected?: boolean,
-    memberCount?: number
+    imageCount?: number,
+    videoCount?: number
   } = {}
 ): GroupCard {
   try {
     // Valores por defecto
-    const { imageUrls = [], selected = false, memberCount = 0 } = options;
+    const {
+      imageUrl = '',
+      selected = false,
+      imageCount = 0,
+      videoCount = 0
+    } = options;
 
     // Construir objeto de tarjeta
     return {
       id: group.id,
       name: group.name,
-      type: group.type || 'generic',
-      category: group.category || 'group',
-      status: group.status || 'active',
-      isFavorite: group.favorite || false,
+      emoji: group.emoji || '📂',
+      color: group.color || '#3b82f6',
+      category: group.category || 'general',
       description: group.description || '',
+      isFavorite: group.favorite || false,
       selected,
-      imageUrl: imageUrls[0] || '',
-      memberCount
+      imageUrl,
+      imageCount,
+      videoCount,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt
     };
   } catch (error) {
     logger.error('Error en toGroupCard:', error);
@@ -140,14 +120,17 @@ export function toGroupCard(
     return {
       id: group.id,
       name: group.name,
-      type: group.type || 'generic',
-      category: group.category || 'group',
-      status: group.status || 'active',
-      isFavorite: false,
+      emoji: '📂',
+      color: '#3b82f6',
+      category: 'general',
       description: '',
+      isFavorite: false,
       selected: false,
       imageUrl: '',
-      memberCount: 0
+      imageCount: 0,
+      videoCount: 0,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt
     };
   }
 }
@@ -155,14 +138,20 @@ export function toGroupCard(
 /**
  * Convierte un grupo a un objeto mapeado para referencias
  */
-export function toGroupReference(group: Group): GroupBaseProps {
+export function toGroupReference(group: Group): {
+  id: string;
+  name: string;
+  type: string;
+  emoji: string;
+  color: string;
+} {
   try {
     return {
       id: group.id,
       name: group.name,
       type: 'group',
-      subtype: group.type || 'generic',
-      description: group.description || '',
+      emoji: group.emoji || '📂',
+      color: group.color || '#3b82f6'
     };
   } catch (error) {
     logger.error('Error en toGroupReference:', error);
@@ -170,8 +159,8 @@ export function toGroupReference(group: Group): GroupBaseProps {
       id: group.id,
       name: group.name || 'Error',
       type: 'group',
-      subtype: 'generic',
-      description: '',
+      emoji: '📂',
+      color: '#3b82f6'
     };
   }
 }
@@ -182,8 +171,8 @@ export function toGroupReference(group: Group): GroupBaseProps {
 export function parseGroupSearchParams(
   params: GroupSearchParams
 ): {
-  where: Record<string, any>;
-  orderBy: Record<string, string>[];
+  where: Prisma.GroupWhereInput;
+  orderBy: Prisma.GroupOrderByWithRelationInput;
   skip: number;
   take: number;
 } {
@@ -196,39 +185,30 @@ export function parseGroupSearchParams(
     const take = Math.min(pageSize, MAX_PAGE_SIZE);
 
     // Construir condiciones de búsqueda
-    const where: Record<string, any> = {};
+    const where: Prisma.GroupWhereInput = {};
 
     // Filtro de búsqueda por texto
     if (params.search) {
       where.OR = [
-        { name: { contains: params.search } },
-        { description: { contains: params.search } }
+        { name: { contains: params.search, mode: 'insensitive' } },
+        { description: { contains: params.search, mode: 'insensitive' } }
       ];
     }
 
     // Filtros de igualdad exacta
-    if (params.type) {
-      where.type = params.type;
-    }
     if (params.category) {
       where.category = params.category;
-    }
-    if (params.status) {
-      where.status = params.status;
     }
 
     // Filtros booleanos
     if (params.favorite !== undefined) {
       where.favorite = params.favorite;
     }
-    if (params.active !== undefined) {
-      where.isActive = params.active;
-    }
 
     // Ordenación
     const sortBy = params.sortBy || 'name';
     const sortDirection = params.sortDirection || 'asc';
-    const orderBy = [{ [sortBy]: sortDirection }];
+    const orderBy = { [sortBy]: sortDirection };
 
     return { where, orderBy, skip, take };
   } catch (error) {
@@ -236,7 +216,7 @@ export function parseGroupSearchParams(
     // Valores por defecto en caso de error
     return {
       where: {},
-      orderBy: [{ name: 'asc' }],
+      orderBy: { name: 'asc' },
       skip: 0,
       take: DEFAULT_PAGE_SIZE
     };
@@ -248,27 +228,22 @@ export function parseGroupSearchParams(
  */
 export function toGroupSearchFilters(params: GroupSearchParams): Record<string, any> {
   try {
-    return {
-      search: params.search || '',
-      type: params.type || '',
-      category: params.category || '',
-      status: params.status || '',
-      favorite: params.favorite,
-      active: params.active
-    };
+    const filters: Record<string, any> = {};
+
+    // Filtros aplicados
+    if (params.search) filters.search = params.search;
+    if (params.category) filters.category = params.category;
+    if (params.favorite !== undefined) filters.favorite = params.favorite;
+
+    return filters;
   } catch (error) {
-    logger.error('Error al convertir a filtros de búsqueda:', error);
-    return {
-      search: '',
-      type: '',
-      category: '',
-      status: ''
-    };
+    logger.error('Error convirtiendo parámetros a filtros:', error);
+    return {};
   }
 }
 
 /**
- * Prepara datos para la vista de listado
+ * Genera props para listado de grupos
  */
 export function toGroupListProps(
   groups: Group[],
@@ -276,60 +251,52 @@ export function toGroupListProps(
   totalCount: number
 ): GroupListProps {
   try {
-    // Construir ordenación
-    const sort: GroupSort = {
-      field: (params.sortBy as GroupSortField) || 'name',
-      direction: params.sortDirection || 'asc'
-    };
-
-    // Construir paginación
-    const page = Number(params.page) || 1;
-    const pageSize = Number(params.pageSize) || DEFAULT_PAGE_SIZE;
+    // Calcular metadatos de paginación
+    const { page = 1, pageSize = DEFAULT_PAGE_SIZE } = params;
     const totalPages = Math.ceil(totalCount / pageSize);
+    const hasMore = page < totalPages;
 
-    const pagination = {
-      totalItems: totalCount,
-      page,
-      pageSize,
-      totalPages,
-      hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
-    };
-
-    // Construir filtros
-    const filters = toGroupSearchFilters(params);
-
-    // Mapear grupos a formato de listado
+    // Mapear grupos para listado
     const items = groups.map(group => toGroupListItem(group));
+
+    // Generar filtros aplicados
+    const filters = toGroupSearchFilters(params);
 
     return {
       items,
       filters,
-      sort,
-      pagination
+      pagination: {
+        page,
+        pageSize,
+        totalItems: totalCount,
+        totalPages,
+        hasMore
+      }
     };
   } catch (error) {
-    logger.error('Error preparando datos para lista:', error);
+    logger.error('Error generando props para listado:', error);
     return {
       items: [],
-      filters: {
-        search: '',
-        type: '',
-        category: '',
-        status: ''
-      },
-      sort: {
-        field: 'name',
-        direction: 'asc'
-      },
+      filters: {},
       pagination: {
-        totalItems: 0,
         page: 1,
         pageSize: DEFAULT_PAGE_SIZE,
+        totalItems: 0,
         totalPages: 0,
-        hasNextPage: false,
-        hasPrevPage: false
+        hasMore: false
       }
     };
   }
 }
+
+// Exportación para compatibilidad
+export const GroupMapper = {
+  toGroupListItem,
+  toGroupCard,
+  toGroupReference,
+  parseGroupSearchParams,
+  toGroupSearchFilters,
+  toGroupListProps
+};
+
+export default GroupMapper;

@@ -3,6 +3,7 @@
  * @module transformers/place/serializers
  */
 
+import { createLogger } from '@/lib/logger';
 import { PlaceSchema } from '@/types/entities/place/schema';
 import type {
     PlaceBase,
@@ -15,7 +16,6 @@ import type {
     PlaceStats,
     PlaceUpdateInput
 } from '@/types/entities/place/types';
-import { createLogger } from '@/utils/logger';
 
 // Logger específico para el transformer de Place
 const log = createLogger('place-transformer');
