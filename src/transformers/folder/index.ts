@@ -1,16 +1,27 @@
 /**
- * @file Índice de exportación para transformadores de Folder
+ * @file Punto de entrada para todos los transformadores de Folder
  * @module transformers/folder
  */
 
+// Exportar converters
+export * from './converters';
+
 // Exportar serializadores
-export {
-    fromFolderComplete,
-    mapFolderExtendedFromComplete, toFolderComplete, toFolderExtended, toFolderSummary, toFolderTreeItem, toFolderWithStats, toPrismaFolder
-} from './serializers';
+export * from './serializers';
 
 // Exportar mappers
-export {
-    buildFolderRelations, buildFolderTree, calculateFolderPath, findFolderInTree
-} from './mappers';
+export * from './mappers';
+
+// Exportar servicio
+export * from './service';
+
+// Exportar transformador principal
+export * from './transformer';
+
+/**
+ * Transforma un objeto Folder de Prisma a un objeto FolderExtended
+ * @param folder Carpeta de Prisma
+ * @returns Objeto transformado con propiedades adicionales
+ */
+export const transformFolder = toFolderExtended;
 

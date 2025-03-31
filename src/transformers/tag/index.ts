@@ -26,224 +26,217 @@ import {
     toPrismaTag,
     validateTag,
 } from './serializers';
+// Importar transformador principal y sus funciones asociadas
+import { transformTag as transformTagMain, transformTagToExtended, transformTagToWithStats } from './transformer';
 
 const logger = new Logger('TagTransformer');
 
+// Exportar el transformador principal y sus variantes
+export const transformTag = transformTagMain;
+export { transformTagToExtended, transformTagToWithStats };
+
+// Compatibilidad con código existente:
 /**
- * 🏷️ Transformer para la entidad Tag
+ * 🔍 Busca tags según los criterios especificados
  */
-export class TagTransformer {
-  /**
-   * 🔍 Busca tags según los criterios especificados
-   */
-  static async search(options: TagSearchOptions): Promise<TagSearchResult> {
-    try {
-      // Mapear opciones de búsqueda a formato Prisma
-      const prismaOptions = mapTagSearchOptionsToPrisma(options);
+export async function searchTags(options: TagSearchOptions): Promise<TagSearchResult> {
+  try {
+    // Mapear opciones de búsqueda a formato Prisma
+    const prismaOptions = mapTagSearchOptionsToPrisma(options);
 
-      // Realizar búsqueda
-      const [items, total] = await Promise.all([
-        prisma.tag.findMany(prismaOptions),
-        prisma.tag.count({ where: prismaOptions.where }),
-      ]);
+    // Realizar búsqueda
+    const [items, total] = await Promise.all([
+      prisma.tag.findMany(prismaOptions),
+      prisma.tag.count({ where: prismaOptions.where }),
+    ]);
 
-      // Deserializar resultados
-      const tags = items.map(item => fromPrismaTag(item));
+    // Deserializar resultados
+    const tags = items.map(item => transformTag(item));
 
-      return {
-        items: tags,
-        total,
-        hasMore: total > (options.skip || 0) + items.length,
-      };
-    } catch (error) {
-      throw handleTransformerError(error);
-    }
-  }
-
-  /**
-   * 🔍 Obtiene un tag por su ID
-   */
-  static async getById(id: string): Promise<TagComplete | null> {
-    try {
-      const tag = await prisma.tag.findUnique({
-        where: { id },
-        include: {
-          images: true,
-          videos: true,
-          albums: true,
-          collections: true,
-          characters: true,
-          places: true,
-          worldItems: true,
-          concepts: true,
-          prompts: true,
-          notes: true,
-          wildcards: true,
-          properties: true,
-          groups: true,
-          _count: true,
-        },
-      });
-
-      if (!tag) {
-        return null;
-      }
-
-      return fromPrismaTag(tag);
-    } catch (error) {
-      throw handleTransformerError(error);
-    }
-  }
-
-  /**
-   * ✨ Crea un nuevo tag
-   */
-  static async create(data: TagCreateInput): Promise<TagComplete> {
-    try {
-      // Validar datos de entrada
-      await validateTag(data);
-
-      // Serializar datos para Prisma
-      const prismaData = toPrismaTag(data);
-
-      // Mapear datos a formato Prisma
-      const createData = mapCreateTagDataToPrisma(data);
-
-      // Crear tag
-      const tag = await prisma.tag.create({
-        data: createData,
-        include: {
-          images: true,
-          videos: true,
-          albums: true,
-          collections: true,
-          characters: true,
-          places: true,
-          worldItems: true,
-          concepts: true,
-          prompts: true,
-          notes: true,
-          wildcards: true,
-          properties: true,
-          groups: true,
-          _count: true,
-        },
-      });
-
-      return fromPrismaTag(tag);
-    } catch (error) {
-      throw handleTransformerError(error);
-    }
-  }
-
-  /**
-   * 📝 Actualiza un tag existente
-   */
-  static async update(id: string, data: TagUpdateInput): Promise<TagComplete> {
-    try {
-      // Validar datos de entrada
-      await validateTag(data);
-
-      // Serializar datos para Prisma
-      const prismaData = toPrismaTag(data);
-
-      // Mapear datos a formato Prisma
-      const updateData = mapUpdateTagDataToPrisma(data);
-
-      // Actualizar tag
-      const tag = await prisma.tag.update({
-        where: { id },
-        data: updateData,
-        include: {
-          images: true,
-          videos: true,
-          albums: true,
-          collections: true,
-          characters: true,
-          places: true,
-          worldItems: true,
-          concepts: true,
-          prompts: true,
-          notes: true,
-          wildcards: true,
-          properties: true,
-          groups: true,
-          _count: true,
-        },
-      });
-
-      return fromPrismaTag(tag);
-    } catch (error) {
-      throw handleTransformerError(error);
-    }
-  }
-
-  /**
-   * 🗑️ Elimina un tag
-   */
-  static async delete(id: string): Promise<void> {
-    try {
-      await prisma.tag.delete({
-        where: { id },
-      });
-    } catch (error) {
-      throw handleTransformerError(error);
-    }
-  }
-
-  /**
-   * 🔄 Convierte un tag a su versión relacionada
-   */
-  static toRelated(tag: TagComplete) {
-    try {
-      return mapTagToRelatedTag(tag);
-    } catch (error) {
-      throw handleTransformerError(error);
-    }
-  }
-
-  /**
-   * 🔍 Parsea filtros de tag
-   */
-  static parseFilters(filters: unknown) {
-    try {
-      return parseTagFilters(filters);
-    } catch (error) {
-      throw handleTransformerError(error);
-    }
+    return {
+      items: tags,
+      total,
+      hasMore: total > (options.skip || 0) + items.length,
+    };
+  } catch (error) {
+    throw handleTransformerError(error);
   }
 }
 
-// Exportar funciones individuales para uso directo
+/**
+ * 🔍 Obtiene un tag por su ID
+ */
+export async function getTagById(id: string): Promise<TagComplete | null> {
+  try {
+    const tag = await prisma.tag.findUnique({
+      where: { id },
+      include: {
+        images: true,
+        videos: true,
+        albums: true,
+        collections: true,
+        characters: true,
+        places: true,
+        worldItems: true,
+        concepts: true,
+        prompts: true,
+        notes: true,
+        wildcards: true,
+        properties: true,
+        groups: true,
+        _count: true,
+      },
+    });
+
+    if (!tag) {
+      return null;
+    }
+
+    return transformTag(tag);
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * ✨ Crea un nuevo tag
+ */
+export async function createTag(data: TagCreateInput): Promise<TagComplete> {
+  try {
+    // Validar datos de entrada
+    await validateTag(data);
+
+    // Mapear datos a formato Prisma
+    const createData = mapCreateTagDataToPrisma(data);
+
+    // Crear tag
+    const tag = await prisma.tag.create({
+      data: createData,
+      include: {
+        images: true,
+        videos: true,
+        albums: true,
+        collections: true,
+        characters: true,
+        places: true,
+        worldItems: true,
+        concepts: true,
+        prompts: true,
+        notes: true,
+        wildcards: true,
+        properties: true,
+        groups: true,
+        _count: true,
+      },
+    });
+
+    return transformTag(tag);
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 📝 Actualiza un tag existente
+ */
+export async function updateTag(id: string, data: TagUpdateInput): Promise<TagComplete> {
+  try {
+    // Validar datos de entrada
+    await validateTag(data);
+
+    // Mapear datos a formato Prisma
+    const updateData = mapUpdateTagDataToPrisma(data);
+
+    // Actualizar tag
+    const tag = await prisma.tag.update({
+      where: { id },
+      data: updateData,
+      include: {
+        images: true,
+        videos: true,
+        albums: true,
+        collections: true,
+        characters: true,
+        places: true,
+        worldItems: true,
+        concepts: true,
+        prompts: true,
+        notes: true,
+        wildcards: true,
+        properties: true,
+        groups: true,
+        _count: true,
+      },
+    });
+
+    return transformTag(tag);
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🗑️ Elimina un tag
+ */
+export async function deleteTag(id: string): Promise<void> {
+  try {
+    await prisma.tag.delete({
+      where: { id },
+    });
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+/**
+ * 🔄 Convierte un tag a su versión relacionada
+ */
+export function toRelatedTag(tag: TagComplete) {
+  try {
+    return mapTagToRelatedTag(tag);
+  } catch (error) {
+    throw handleTransformerError(error);
+  }
+}
+
+// Exportar transformadores individuales
 export {
+    // Serializadores
     extendTag,
     fromPrismaTag,
+    // Mappers
     mapCreateTagDataToPrisma,
     mapTagSearchOptionsToPrisma,
     mapTagToRelatedTag,
-    mapUpdateTagDataToPrisma,
-    parseTagFilters,
+    mapUpdateTagDataToPrisma, parseTagFilters,
     toPrismaTag,
     validateTag
 };
 
-// Exportar serializadores
+// Exportar otros serializadores
     export {
-        extendTag,
-        extendTags, formatSize, fromTagComplete, generateTagColor,
-        generateTagEmoji, normalizeTagCategory,
-        normalizeTagRarity, tagToTagWithStats, toTagComplete
+        extendTags,
+        formatSize,
+        fromTagComplete,
+        generateTagColor,
+        generateTagEmoji,
+        normalizeTagCategory,
+        normalizeTagRarity,
+        tagToTagWithStats,
+        toTagComplete
     } from './serializers';
 
-// Exportar mappers
+// Exportar otros mappers
 export {
     createTagFilter,
     createTagOrderBy,
-    mapCreateTagDataToPrisma,
     mapTagFiltersToPrisma,
-    mapTagToRelatedTag,
-    mapUpdateTagDataToPrisma,
     transformCompleteTagToPrisma,
     transformTagToPrisma
 } from './mappers';
+
+// Exportar nuevos converters
+export {
+    mapCompleteToTag, mapTagToComplete, tagToDisplayObject
+} from './v2/converters';
 
