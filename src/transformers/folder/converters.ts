@@ -1,0 +1,111 @@
+/**
+ * @file Funciones de conversión para la entidad Folder
+ * @module transformers/folder/converters
+ */
+
+import { DEFAULT_FOLDER_COLOR, DEFAULT_FOLDER_EMOJI } from '@/lib/constants';
+import { Logger } from '@/lib/logger';
+import type {
+    Folder,
+    FolderComplete,
+    FolderCreateInput,
+    FolderUpdateInput
+} from '@/types/entities/folder/types';
+import { normalizeFolderPath } from './serializers';
+
+const logger = new Logger('FolderConverters');
+
+/**
+ * 📂 Convierte un objeto Folder de Prisma a un objeto FolderComplete
+ * Incluye todas las propiedades necesarias para gestionar una carpeta
+ *
+ * @param folder Carpeta retornada por Prisma
+ * @returns Objeto FolderComplete con propiedades adicionales
+ */
+export function toFolderComplete(folder: any): FolderComplete {
+  try {
+    if (!folder || typeof folder !== 'object') {
+      throw new Error('Invalid folder object');
+    }
+
+    return {
+      id: folder.id,
+      name: folder.name || '',
+      path: folder.path || '',
+      description: folder.description || '',
+      color: folder.color || DEFAULT_FOLDER_COLOR,
+      emoji: folder.emoji || DEFAULT_FOLDER_EMOJI,
+      parentId: folder.parentId || null,
+      createdAt: folder.createdAt || new Date(),
+      updatedAt: folder.updatedAt || new Date(),
+      children: folder.children || [],
+      parent: folder.parent || null,
+      _count: folder._count || {
+        children: 0,
+        images: 0,
+        uploadedImages: 0,
+        tags: 0
+      },
+      stats: folder.stats || null,
+      metadata: folder.metadata || {}
+    };
+  } catch (error) {
+    logger.error('Error converting to FolderComplete:', error);
+    return folder;
+  }
+}
+
+/**
+ * 📁 Convierte datos de entrada para creación a formato Prisma
+ *
+ * @param data Datos para crear un folder
+ * @returns Datos transformados para Prisma
+ */
+export function toPrismaFolder(data: FolderCreateInput | FolderUpdateInput): any {
+  try {
+    const result: any = { ...data };
+
+    // Normalizar el path si existe
+    if (data.path !== undefined) {
+      result.path = normalizeFolderPath(data.path);
+    }
+
+    // Convertir objetos complejos a JSON si existen
+    if (data.metadata && typeof data.metadata === 'object') {
+      result.metadata = data.metadata;
+    }
+
+    return result;
+  } catch (error) {
+    logger.error('Error converting to Prisma format:', error);
+    return data;
+  }
+}
+
+/**
+ * 🔄 Mapea datos de un Folder a otro Folder
+ * Útil para transferir propiedades entre objetos folder
+ *
+ * @param source Folder fuente
+ * @param target Folder destino (opcional)
+ * @returns Nuevo objeto Folder con propiedades combinadas
+ */
+export function mapFolderToFolder(source: Partial<Folder>, target?: Partial<Folder>): Folder {
+  try {
+    const result: any = { ...target, ...source };
+
+    // Asegurar que las fechas sean objetos Date
+    if (result.createdAt && !(result.createdAt instanceof Date)) {
+      result.createdAt = new Date(result.createdAt);
+    }
+
+    if (result.updatedAt && !(result.updatedAt instanceof Date)) {
+      result.updatedAt = new Date(result.updatedAt);
+    }
+
+    return result as Folder;
+  } catch (error) {
+    logger.error('Error mapping folder to folder:', error);
+    return { ...target, ...source } as Folder;
+  }
+}

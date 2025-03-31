@@ -7,12 +7,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { transformFolder } from '@/transformers/folder';
+import { toFolderExtended } from '@/transformers/folder';
 import { type FolderExtended } from '@/types/entities/folder';
 import { unstable_cache } from 'next/cache';
 
 // Logger específico para acciones de consulta
-const folderLogger = serverLogger.withContext('FolderQueryActions');
+const logger = serverLogger.withContext('FolderActions:query');
 
 // Tiempo de caché en segundos
 const CACHE_REVALIDATE_SECONDS = 30;
@@ -36,7 +36,7 @@ class FolderQueryError extends Error {
  */
 export async function getFolder(id: string): Promise<FolderExtended | null> {
   try {
-    folderLogger.info('🔍 Buscando carpeta por ID:', id);
+    logger.info('🔍 Buscando carpeta por ID:', id);
 
     const folder = await prisma.folder.findUnique({
       where: { id },
@@ -51,17 +51,17 @@ export async function getFolder(id: string): Promise<FolderExtended | null> {
     });
 
     if (!folder) {
-      folderLogger.warn('⚠️ Carpeta no encontrada:', id);
+      logger.warn('⚠️ Carpeta no encontrada:', id);
       return null;
     }
 
     // Transformar la carpeta para la respuesta
-    const transformedFolder = transformFolder(folder);
+    const transformedFolder = toFolderExtended(folder);
 
-    folderLogger.info('✅ Carpeta encontrada:', { id });
+    logger.info('✅ Carpeta encontrada:', { id });
     return transformedFolder;
   } catch (error) {
-    folderLogger.error('❌ Error al buscar carpeta:', error);
+    logger.error('❌ Error al buscar carpeta:', error);
     throw new FolderQueryError('No se pudo obtener la carpeta', 'GET_FAILED', error);
   }
 }
@@ -73,7 +73,7 @@ export async function getFolders(): Promise<FolderExtended[]> {
   const getCachedFolders = unstable_cache(
     async () => {
       try {
-        folderLogger.info('📋 Obteniendo lista de carpetas');
+        logger.info('📋 Obteniendo lista de carpetas');
 
         const folders = await prisma.folder.findMany({
           include: {
@@ -90,12 +90,12 @@ export async function getFolders(): Promise<FolderExtended[]> {
         });
 
         // Transformar las carpetas para la respuesta
-        const transformedFolders = folders.map(transformFolder);
+        const transformedFolders = folders.map(toFolderExtended);
 
-        folderLogger.info('✅ Lista de carpetas obtenida:', { count: folders.length });
+        logger.info('✅ Lista de carpetas obtenida:', { count: folders.length });
         return transformedFolders;
       } catch (error) {
-        folderLogger.error('❌ Error al obtener lista de carpetas:', error);
+        logger.error('❌ Error al obtener lista de carpetas:', error);
         throw new FolderQueryError('No se pudo obtener la lista de carpetas', 'LIST_FAILED', error);
       }
     },
@@ -114,7 +114,7 @@ export async function getFolders(): Promise<FolderExtended[]> {
  */
 export async function getFolderByPath(path: string): Promise<FolderExtended | null> {
   try {
-    folderLogger.info('🔍 Buscando carpeta por ruta:', path);
+    logger.info('🔍 Buscando carpeta por ruta:', path);
 
     const folder = await prisma.folder.findFirst({
       where: { path },
@@ -129,17 +129,17 @@ export async function getFolderByPath(path: string): Promise<FolderExtended | nu
     });
 
     if (!folder) {
-      folderLogger.warn('⚠️ Carpeta no encontrada:', path);
+      logger.warn('⚠️ Carpeta no encontrada:', path);
       return null;
     }
 
     // Transformar la carpeta para la respuesta
-    const transformedFolder = transformFolder(folder);
+    const transformedFolder = toFolderExtended(folder);
 
-    folderLogger.info('✅ Carpeta encontrada:', { path });
+    logger.info('✅ Carpeta encontrada:', { path });
     return transformedFolder;
   } catch (error) {
-    folderLogger.error('❌ Error al buscar carpeta por ruta:', error);
+    logger.error('❌ Error al buscar carpeta por ruta:', error);
     throw new FolderQueryError('No se pudo obtener la carpeta', 'GET_BY_PATH_FAILED', error);
   }
 }
@@ -149,7 +149,7 @@ export async function getFolderByPath(path: string): Promise<FolderExtended | nu
  */
 export async function searchFolders(query: string): Promise<FolderExtended[]> {
   try {
-    folderLogger.info('🔍 Buscando carpetas:', query);
+    logger.info('🔍 Buscando carpetas:', query);
 
     const folders = await prisma.folder.findMany({
       where: {
@@ -172,12 +172,12 @@ export async function searchFolders(query: string): Promise<FolderExtended[]> {
     });
 
     // Transformar las carpetas para la respuesta
-    const transformedFolders = folders.map(transformFolder);
+    const transformedFolders = folders.map(toFolderExtended);
 
-    folderLogger.info('✅ Carpetas encontradas:', { count: folders.length, query });
+    logger.info('✅ Carpetas encontradas:', { count: folders.length, query });
     return transformedFolders;
   } catch (error) {
-    folderLogger.error('❌ Error al buscar carpetas:', error);
+    logger.error('❌ Error al buscar carpetas:', error);
     throw new FolderQueryError('No se pudo realizar la búsqueda de carpetas', 'SEARCH_FAILED', error);
   }
 }
@@ -189,7 +189,7 @@ export async function getUnindexedFolders(): Promise<FolderExtended[]> {
   const getCachedUnindexedFolders = unstable_cache(
     async () => {
       try {
-        folderLogger.info('📋 Obteniendo carpetas sin indexar');
+        logger.info('📋 Obteniendo carpetas sin indexar');
 
         const folders = await prisma.folder.findMany({
           where: {
@@ -212,12 +212,12 @@ export async function getUnindexedFolders(): Promise<FolderExtended[]> {
         });
 
         // Transformar las carpetas para la respuesta
-        const transformedFolders = folders.map(transformFolder);
+        const transformedFolders = folders.map(toFolderExtended);
 
-        folderLogger.info('✅ Carpetas sin indexar obtenidas:', { count: folders.length });
+        logger.info('✅ Carpetas sin indexar obtenidas:', { count: folders.length });
         return transformedFolders;
       } catch (error) {
-        folderLogger.error('❌ Error al obtener carpetas sin indexar:', error);
+        logger.error('❌ Error al obtener carpetas sin indexar:', error);
         throw new FolderQueryError('No se pudieron obtener las carpetas sin indexar', 'UNINDEXED_FAILED', error);
       }
     },

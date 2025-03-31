@@ -1,29 +1,16 @@
 /**
- * @file Exportaciones principales de transformers v2 para la entidad Tag
+ * @file Exportaciones de la versión 2 de transformadores para Tag
  * @module transformers/tag/v2
  */
 
+// Exportar todos los converters
+export * from './converters';
+
 // Exportar serializadores
-export {
-    DEFAULT_TAG_COLOR,
-    DEFAULT_TAG_EMOJI,
-    TagTransformOptions,
-    extendTag,
-    extendTags,
-    fromPrismaTag,
-    toPrismaTag,
-    validateTag
-} from './serializers';
+export * from './serializers';
 
 // Exportar mappers
-export {
-    toCreateTagData,
-    toRelatedTag,
-    toSearchFilters,
-    toSearchOptions,
-    toSearchResult,
-    toUpdateTagData
-} from './mappers';
+export * from './mappers';
 
 // Importar las funciones localmente para el objeto de exportación
 import {

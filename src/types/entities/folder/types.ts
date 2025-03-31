@@ -8,6 +8,7 @@
 import type { Folder as PrismaFolder } from '@prisma/client';
 import type { Image } from '../image';
 import type { Video } from '../video';
+import { FolderSortBy, FolderViewMode } from './enums';
 
 /**
  * Tipo base para datos de Folder según el esquema de Drizzle
@@ -52,6 +53,44 @@ export interface FolderExtendedComplete extends FolderComplete, FolderExtended {
     children: number;
     images: number;
     videos: number;
+  };
+}
+
+/**
+ * Interfaz para estadísticas de carpeta
+ */
+export interface FolderStats {
+  // Estadísticas básicas
+  totalFiles: number;
+  totalSize: number;
+  lastIndexed: Date | null;
+
+  // Distribución por tipo de archivo
+  fileDistribution?: {
+    images: number;
+    videos: number;
+    other: number;
+  };
+
+  // Distribución por tamaño
+  sizeDistribution?: {
+    images: number;
+    videos: number;
+    other: number;
+  };
+
+  // Metadata procesada
+  metadataStats?: {
+    processed: number;
+    pending: number;
+    failed: number;
+  };
+
+  // Estadísticas de procesamiento
+  processingStats?: {
+    lastProcessingTime: number;
+    averageProcessingTime: number;
+    processingStatus: 'idle' | 'processing' | 'error';
   };
 }
 
@@ -171,3 +210,253 @@ export const FOLDER_SORT_PROPERTY_MAP: Record<FolderSortCriteria, string> = {
   [FolderSortCriteria.INDEXED_ASC]: 'lastIndexed',
   [FolderSortCriteria.INDEXED_DESC]: 'lastIndexed',
 };
+
+/**
+ * 📋 Propiedades base de un Folder
+ */
+export interface Folder {
+  id: string;
+  name: string;
+  path: string;
+  description: string;
+  color: string;
+  emoji: string;
+  parentId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  _count?: {
+    children: number;
+    images: number;
+    uploadedImages: number;
+    tags: number;
+  };
+}
+
+/**
+ * 📊 Estadísticas de un Folder
+ */
+export interface FolderStats {
+  totalImages: number;
+  totalUploadedImages: number;
+  totalChildren: number;
+  totalTags: number;
+  lastUpdated: Date;
+  createdAt: Date;
+  level: number;
+  isRoot: boolean;
+  isEmpty: boolean;
+  hasChildren: boolean;
+  size: number;
+}
+
+/**
+ * 📁 Folder con estadísticas
+ */
+export interface FolderWithStats extends Folder {
+  stats: FolderStats;
+}
+
+/**
+ * 📂 Propiedades adicionales de UI para un Folder
+ */
+export interface FolderUIProps {
+  isSelected: boolean;
+  isOpen: boolean;
+  isLoading: boolean;
+  hasError: boolean;
+  isDragging: boolean;
+  isDropTarget: boolean;
+  level: number;
+}
+
+/**
+ * 📁 Folder completo con todas las relaciones
+ */
+export interface FolderComplete extends Folder {
+  children: Folder[];
+  parent: Folder | null;
+  stats: FolderStats | null;
+  metadata: Record<string, any>;
+}
+
+/**
+ * 📂 Folder extendido para UI
+ */
+export interface FolderExtended extends FolderComplete, FolderUIProps {}
+
+/**
+ * 📋 Filtros para la búsqueda de Folders
+ */
+export interface FolderFilter {
+  id?: string;
+  name?: string;
+  path?: string;
+  parentId?: string | null;
+  createdAt?: Date | { gte?: Date; lte?: Date };
+  updatedAt?: Date | { gte?: Date; lte?: Date };
+}
+
+/**
+ * 📋 Opciones de inclusión para búsquedas
+ */
+export interface FolderInclude {
+  parent?: boolean;
+  children?: boolean;
+  images?: boolean;
+  count?: boolean;
+}
+
+/**
+ * 📋 Opciones para la búsqueda de Folders
+ */
+export interface FolderSearchOptions {
+  filter?: FolderFilter;
+  sortBy?: FolderSortBy;
+  skip?: number;
+  take?: number;
+  include?: FolderInclude;
+}
+
+/**
+ * 📋 Datos para crear un Folder
+ */
+export interface FolderCreateInput {
+  name: string;
+  path?: string;
+  description?: string;
+  color?: string;
+  emoji?: string;
+  parentId?: string | null;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * 📋 Datos para actualizar un Folder
+ */
+export interface FolderUpdateInput {
+  name?: string;
+  path?: string;
+  description?: string;
+  color?: string;
+  emoji?: string;
+  parentId?: string | null;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * 📂 Estado core de Folder para el store
+ */
+export interface FolderCoreState {
+  items: FolderComplete[];
+  selected: FolderComplete | null;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+/**
+ * 📋 Acciones core para el store de Folder
+ */
+export interface FolderCoreActions {
+  // Carga de datos
+  loadFolders: () => Promise<void>;
+  loadFolder: (id: string) => Promise<FolderComplete | null>;
+
+  // Operaciones CRUD
+  createFolder: (data: FolderCreateInput) => Promise<FolderComplete>;
+  updateFolder: (id: string, data: FolderUpdateInput) => Promise<FolderComplete>;
+  deleteFolder: (id: string) => Promise<void>;
+
+  // Selección
+  setSelected: (folder: FolderComplete | null) => void;
+
+  // Estado
+  setLoading: (isLoading: boolean) => void;
+  setError: (error: Error | null) => void;
+  reset: () => void;
+}
+
+/**
+ * 📋 Filtros para Folder
+ */
+export interface FolderFilters {
+  searchTerm: string;
+  sortBy: FolderSortBy;
+  parentId: string | null;
+  onlyFavorites: boolean;
+}
+
+/**
+ * 📋 Acciones de filtro para el store de Folder
+ */
+export interface FolderFilterActions {
+  updateFilters: (filters: Partial<FolderFilters>) => void;
+  clearFilters: () => void;
+  getFilteredFolders: () => FolderComplete[];
+  getSortedFolders: () => FolderComplete[];
+}
+
+/**
+ * 📋 Estado UI para Folder
+ */
+export interface FolderUIState {
+  viewMode: FolderViewMode;
+  selectedIds: string[];
+  expandedIds: string[];
+  isModalOpen: boolean;
+  currentModalId: string | null;
+  modalMode: 'create' | 'edit' | 'delete' | null;
+}
+
+/**
+ * 📋 Acciones UI para el store de Folder
+ */
+export interface FolderUIActions {
+  setViewMode: (mode: FolderViewMode) => void;
+
+  // Selección
+  selectFolder: (id: string) => void;
+  unselectFolder: (id: string) => void;
+  selectMultipleFolders: (ids: string[]) => void;
+  clearSelection: () => void;
+
+  // Expansión
+  expandFolder: (id: string) => void;
+  collapseFolder: (id: string) => void;
+  toggleFolderExpansion: (id: string) => void;
+
+  // Modales
+  openCreateModal: () => void;
+  openEditModal: (id: string) => void;
+  openDeleteModal: (id: string) => void;
+  closeModal: () => void;
+}
+
+/**
+ * 📋 Store completo de Folder
+ */
+export interface FolderStore
+  extends FolderCoreState,
+    FolderCoreActions {
+  filters: FolderFilters;
+  ui: FolderUIState;
+
+  // Acciones de filtros
+  updateFilters: (filters: Partial<FolderFilters>) => void;
+  clearFilters: () => void;
+  getFilteredFolders: () => FolderComplete[];
+  getSortedFolders: () => FolderComplete[];
+
+  // Acciones de UI
+  setViewMode: (mode: FolderViewMode) => void;
+  selectFolder: (id: string) => void;
+  unselectFolder: (id: string) => void;
+  selectMultipleFolders: (ids: string[]) => void;
+  clearSelection: () => void;
+  expandFolder: (id: string) => void;
+  collapseFolder: (id: string) => void;
+  toggleFolderExpansion: (id: string) => void;
+  openCreateModal: () => void;
+  openEditModal: (id: string) => void;
+  openDeleteModal: (id: string) => void;
+  closeModal: () => void;
+}

@@ -147,3 +147,54 @@ Se ha completado la actualización del componente CharacterCard:
 - Incorporar nuevos campos como `relationships`, `goals`, etc. en la interfaz principal
 
 ⏭️ Siguiente componente: CollectionCard
+
+## Progreso de Implementación
+
+## Mejoras Realizadas
+
+### Servicio de Folder
+- ✅ Implementado enfoque funcional en `folder.service.functional.ts`
+- ✅ Eliminadas las clases y reemplazadas por funciones
+- ✅ Mejor manejo de estado con un objeto de estado centralizado
+- ✅ Simplificada la API manteniendo compatibilidad con código existente
+- ✅ Integración con transformadores para resultados consistentes
+- ✅ Mejor manejo de errores y eventos
+- ✅ Exportación clara desde `folder-service-export.ts`
+
+### Servicio y Transformadores de Tag
+- ✅ Implementado servicio funcional en `tag.service.ts`
+- ✅ Creado transformador principal en `transformer.ts`
+- ✅ Implementadas funciones para convertir entre diferentes formatos (v2/converters.ts)
+- ✅ Exportación clara de funciones y transformadores
+- ✅ Integración con acciones del servidor
+- ✅ Mejor manejo de errores
+- ✅ Integración con eventos del sistema
+
+## Próximos Pasos
+
+### Folder
+- [ ] Pruebas del nuevo servicio funcional
+- [ ] Depreciación del servicio basado en clases
+
+### Tag
+- [ ] Mejorar el store con selectores optimizados
+- [ ] Implementar slice de filtros avanzados
+- [ ] Actualizar acciones para usar el nuevo servicio
+
+### Image
+- [ ] Revisar implementación actual
+- [ ] Migrar a enfoque funcional
+- [ ] Mejorar transformadores
+
+## Objetivos Completados
+
+- [x] Refactorizar servicio de Folder a enfoque funcional
+- [x] Implementar transformador principal para Tag
+- [x] Crear converters v2 para Tag
+- [x] Implementar servicio funcional para Tag
+
+## Pendientes Generales
+
+- [ ] Refactorizar otros servicios siguiendo el mismo patrón
+- [ ] Mejorar tests
+- [ ] Documentar el nuevo enfoque arquitectónico

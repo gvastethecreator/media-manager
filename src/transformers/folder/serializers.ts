@@ -1,205 +1,304 @@
 /**
- * @file Funciones de serialización/deserialización para la entidad Folder
+ * @file Funciones de serialización para la entidad Folder
  * @module transformers/folder/serializers
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { Logger } from '@/lib/logger';
+import { DEFAULT_FOLDER_COLOR, DEFAULT_FOLDER_EMOJI } from '@/lib/constants';
+import { FolderType } from '@/types/entities/folder/enums';
 import type {
-    FolderBase,
-    FolderComplete,
-    FolderExtended,
-    FolderExtendedComplete,
-    FolderSummary,
-    FolderTreeItem,
-} from '@/types/entities/folder';
-import type { Folder as PrismaFolder } from '@prisma/client';
+	Folder,
+	FolderComplete,
+	FolderExtended,
+	FolderStats,
+	FolderWithStats
+} from '@/types/entities/folder/types';
 
-const serializerLogger = serverLogger.withContext('FolderSerializer');
+const logger = new Logger('FolderSerializers');
 
 /**
- * Transforma un objeto Folder de Prisma a un objeto FolderComplete
- * Esto deserializa todos los campos y prepara la estructura completa.
- * Folder no tiene campos JSON para deserializar, pero mantenemos este patrón
- * para consistencia con las otras entidades.
+ * 🎨 Genera un color aleatorio para una carpeta
  *
- * @param folder Folder de Prisma
- * @returns FolderComplete con todos los campos deserializados
+ * @returns Color en formato hexadecimal
  */
-export function toFolderComplete(folder: FolderBase): FolderComplete {
+export function generateFolderColor(): string {
 	try {
-		// Dado que Folder no tiene campos JSON para deserializar,
-		// simplemente devolvemos el objeto como FolderComplete
-		return {
-			...folder
-		};
+		const colors = [
+			'#0EA5E9', // sky
+			'#8B5CF6', // violet
+			'#EC4899', // pink
+			'#F59E0B', // amber
+			'#10B981', // emerald
+			'#6366F1', // indigo
+			'#EF4444', // red
+			'#84CC16', // lime
+			'#8B5CF6', // violet
+			'#64748B', // slate
+		];
+
+		return colors[Math.floor(Math.random() * colors.length)];
 	} catch (error) {
-		serializerLogger.error('❌ Error al deserializar Folder:', error);
-		// En caso de error, devolvemos el objeto original sin deserializar
-		return folder;
+		logger.error('Error generando color para folder:', error);
+		return DEFAULT_FOLDER_COLOR;
 	}
 }
 
 /**
- * Transforma un objeto FolderComplete de vuelta a un FolderBase para persistir
+ * 📂 Genera un emoji aleatorio para una carpeta
  *
- * @param folder FolderComplete
- * @returns FolderBase para guardar en BD
+ * @returns Emoji como string
  */
-export function fromFolderComplete(folder: FolderComplete): FolderBase {
+export function generateFolderEmoji(): string {
 	try {
-		// Como no hay campos para serializar a JSON, simplemente retornamos el objeto
-		return {
-			...folder
-		};
+		const emojis = ['📂', '📁', '🗂️', '📋', '📊', '📈', '📌', '📎', '🔍', '🔖', '📚'];
+		return emojis[Math.floor(Math.random() * emojis.length)];
 	} catch (error) {
-		serializerLogger.error('❌ Error al serializar Folder para BD:', error);
-		// En caso de error, devolvemos el objeto original
-		return folder;
+		logger.error('Error generando emoji para folder:', error);
+		return DEFAULT_FOLDER_EMOJI;
 	}
 }
 
 /**
- * Transforma un FolderComplete a un FolderExtendedComplete con propiedades de UI
- * @param folder FolderComplete
- * @returns FolderExtendedComplete con propiedades UI
+ * 📋 Normaliza un path de carpeta
+ *
+ * @param path Path a normalizar
+ * @returns Path normalizado
  */
-export function mapFolderExtendedFromComplete(folder: FolderComplete): FolderExtendedComplete {
-	return {
-		...folder,
-		// Propiedades adicionales de UI
-		isSelected: false,
-		isOpen: false,
-		level: 0,
-		isLoading: false,
-		hasError: false,
-	};
+export function normalizeFolderPath(path: string): string {
+	try {
+		// Eliminar espacios en blanco
+		let normalizedPath = path.trim();
+
+		// Asegurar que comienza con /
+		if (!normalizedPath.startsWith('/')) {
+			normalizedPath = `/${normalizedPath}`;
+		}
+
+		// Eliminar barras duplicadas
+		normalizedPath = normalizedPath.replace(/\/+/g, '/');
+
+		// Eliminar barra final si existe
+		if (normalizedPath.length > 1 && normalizedPath.endsWith('/')) {
+			normalizedPath = normalizedPath.slice(0, -1);
+		}
+
+		return normalizedPath;
+	} catch (error) {
+		logger.error('Error normalizando path de folder:', error);
+		return path;
+	}
 }
 
 /**
- * Transforma un objeto Folder de Prisma a un objeto FolderExtended
- * @param folder Folder de Prisma
- * @returns FolderExtended con propiedades adicionales
- * @deprecated Usar toFolderComplete y mapFolderExtendedFromComplete en su lugar
+ * 📊 Extiende un folder con estadísticas
+ *
+ * @param folder Objeto folder
+ * @returns Folder con estadísticas
  */
-export function toFolderExtended(folder: PrismaFolder): FolderExtended {
-	return {
-		...folder,
-		lastIndexed: folder.lastIndexed || undefined,
-		// Propiedades adicionales de UI
-		isSelected: false,
-		isOpen: false,
-		level: 0,
-		isLoading: false,
-		hasError: false,
-	};
+export function withFolderStats(folder: Folder): FolderWithStats {
+	try {
+		const stats: FolderStats = {
+			totalImages: folder._count?.images || 0,
+			totalUploadedImages: folder._count?.uploadedImages || 0,
+			totalChildren: folder._count?.children || 0,
+			totalTags: folder._count?.tags || 0,
+			lastUpdated: folder.updatedAt,
+			createdAt: folder.createdAt,
+			level: calculateFolderLevel(folder.path),
+			isRoot: folder.parentId === null,
+			isEmpty: (folder._count?.images || 0) === 0 && (folder._count?.children || 0) === 0,
+			hasChildren: (folder._count?.children || 0) > 0,
+			size: calculateFolderSize(folder)
+		};
+
+		return {
+			...folder,
+			stats
+		};
+	} catch (error) {
+		logger.error('Error añadiendo estadísticas a folder:', error);
+		return folder as FolderWithStats;
+	}
 }
 
 /**
- * Transforma un FolderExtended (o un Folder de Prisma) en un elemento para árbol de navegación
- * @param folder Folder a transformar
- * @param level Nivel de profundidad en el árbol
- * @param isSelected Si está seleccionado
- * @param isOpen Si está expandido
- * @returns FolderTreeItem para usar en navegación
+ * 📐 Calcula el nivel de una carpeta basado en su path
+ *
+ * @param path Path de la carpeta
+ * @returns Nivel de profundidad
  */
-export function toFolderTreeItem(
-	folder: PrismaFolder | FolderExtended,
-	level = 0,
-	isSelected = false,
-	isOpen = false
-): FolderTreeItem {
-	return {
-		id: folder.id,
-		name: folder.name,
-		path: folder.path,
-		parentId: folder.parentId,
-		emoji: folder.emoji || '📁',
-		color: folder.color || '#3b82f6',
-		children: [],
-		level,
-		isOpen,
-		isSelected,
-		hasChildren: false,
-	};
+function calculateFolderLevel(path: string): number {
+	if (!path) return 0;
+	// Contar el número de separadores / excepto el inicial
+	const normalizedPath = normalizeFolderPath(path);
+	return normalizedPath === '/' ? 0 : (normalizedPath.match(/\//g) || []).length;
 }
 
 /**
- * Transforma un Folder en un resumen para listados
- * @param folder Folder a resumir
- * @returns FolderSummary con datos básicos
+ * 📏 Calcula el tamaño aproximado de una carpeta
+ *
+ * @param folder Objeto folder
+ * @returns Tamaño en bytes
  */
-export function toFolderSummary(folder: PrismaFolder | FolderExtended): FolderSummary {
-	return {
-		id: folder.id,
-		name: folder.name,
-		path: folder.path,
-		imageCount: folder.totalFiles || 0,
-		totalSize: folder.totalSize || 0,
-		lastIndexed: folder.lastIndexed instanceof Date ? folder.lastIndexed : null,
-	};
+function calculateFolderSize(folder: Folder): number {
+	// Por ahora devolvemos un valor simulado
+	// En una implementación real, deberíamos sumar los tamaños de todos los archivos
+	const imagesCount = folder._count?.images || 0;
+	const averageImageSize = 2 * 1024 * 1024; // 2MB promedio por imagen
+	return imagesCount * averageImageSize;
 }
 
 /**
- * Prepara los datos de una carpeta para guardar en la base de datos
- * Elimina propiedades que no son parte del modelo Prisma
- * @param folder Folder con datos extendidos
- * @returns Datos limpios para guardar en BD
- * @deprecated Usar fromFolderComplete en su lugar
+ * 🔄 Normaliza el tipo de una carpeta
+ *
+ * @param type Tipo de carpeta
+ * @returns Tipo normalizado
  */
-export function toPrismaFolder(folder: Partial<FolderExtended>): Partial<PrismaFolder> {
-	// Extraer solo las propiedades que existen en PrismaFolder
-	const {
-		id,
-		name,
-		description,
-		path,
-		parentId,
-		createdAt,
-		updatedAt,
-		visualConfigId,
-		totalFiles,
-		totalSize,
-		lastIndexed,
-		autoReindex,
-		featuredImage,
-		isFavorite,
-		emoji,
-		color,
-		presetId,
-	} = folder;
+export function normalizeFolderType(type?: string): FolderType {
+	if (!type) return FolderType.STANDARD;
 
-	return {
-		id,
-		name,
-		description,
-		path,
-		parentId,
-		createdAt,
-		updatedAt,
-		visualConfigId,
-		totalFiles,
-		totalSize,
-		lastIndexed: lastIndexed instanceof Date ? lastIndexed : undefined,
-		autoReindex,
-		featuredImage,
-		isFavorite,
-		emoji,
-		color,
-		presetId,
-	};
+	try {
+		// Convertir a mayúsculas y verificar si existe en el enum
+		const normalizedType = type.toUpperCase();
+		return Object.values(FolderType).includes(normalizedType as FolderType)
+			? normalizedType as FolderType
+			: FolderType.STANDARD;
+	} catch (error) {
+		logger.error('Error normalizando tipo de folder:', error);
+		return FolderType.STANDARD;
+	}
 }
 
 /**
- * Transforma un folder con datos de relaciones/conteos en una versión con estadísticas
- * @param folder Folder de la base de datos con _count
- * @returns Folder extendido con estadísticas para UI
+ * 🔍 Parsea filtros de carpeta desde query params
+ *
+ * @param query Objeto de query
+ * @returns Filtros para la carpeta
  */
-export function toFolderWithStats(folder: FolderBase & { _count?: { images?: number; files?: number } }) {
-	return {
-		...folder,
-		imageCount: folder._count?.images || 0,
-		fileCount: folder._count?.files || 0,
-		totalFiles: folder.totalFiles || 0,
-		totalSize: folder.totalSize || 0,
-	};
+export function parseFolderFilters(query: Record<string, any>): Record<string, any> {
+	try {
+		const filters: Record<string, any> = {};
+
+		// Filtrar por nombre
+		if (query.name) {
+			filters.name = { contains: query.name, mode: 'insensitive' };
+		}
+
+		// Filtrar por path
+		if (query.path) {
+			filters.path = { contains: query.path };
+		}
+
+		// Filtrar por parent
+		if (query.parentId) {
+			filters.parentId = query.parentId === 'null' ? null : query.parentId;
+		}
+
+		return filters;
+	} catch (error) {
+		logger.error('Error parseando filtros de folder:', error);
+		return {};
+	}
+}
+
+/**
+ * ✅ Valida un objeto folder
+ *
+ * @param folder Objeto folder para validar
+ * @returns true si es válido, false si no
+ */
+export function validateFolder(folder: any): boolean {
+	try {
+		// Validaciones básicas
+		if (!folder || typeof folder !== 'object') return false;
+		if (!folder.id) return false;
+		if (!folder.name) return false;
+
+		return true;
+	} catch (error) {
+		logger.error('Error validando folder:', error);
+		return false;
+	}
+}
+
+/**
+ * 🔄 Convierte un FolderComplete a una versión simplificada
+ *
+ * @param folder Objeto FolderComplete
+ * @returns Objeto Folder simplificado
+ */
+export function fromFolderComplete(folder: FolderComplete): Folder {
+	try {
+		const { children, parent, stats, metadata, ...rest } = folder;
+		return rest as Folder;
+	} catch (error) {
+		logger.error('Error convirtiendo de FolderComplete:', error);
+		return folder as unknown as Folder;
+	}
+}
+
+/**
+ * 🔄 Convierte un objeto de Prisma a Folder
+ *
+ * @param prismaFolder Objeto de Prisma
+ * @returns Objeto Folder
+ */
+export function fromPrismaFolder(prismaFolder: any): Folder {
+	try {
+		// Conversión básica
+		return {
+			id: prismaFolder.id,
+			name: prismaFolder.name,
+			path: prismaFolder.path,
+			description: prismaFolder.description || '',
+			color: prismaFolder.color || DEFAULT_FOLDER_COLOR,
+			emoji: prismaFolder.emoji || DEFAULT_FOLDER_EMOJI,
+			parentId: prismaFolder.parentId,
+			createdAt: prismaFolder.createdAt,
+			updatedAt: prismaFolder.updatedAt,
+			_count: prismaFolder._count || {
+				children: 0,
+				images: 0,
+				uploadedImages: 0,
+				tags: 0
+			}
+		};
+	} catch (error) {
+		logger.error('Error convirtiendo de Prisma:', error);
+		return prismaFolder as Folder;
+	}
+}
+
+/**
+ * 📂 Extiende un folder con propiedades adicionales
+ *
+ * @param folder Folder a extender
+ * @returns FolderComplete con propiedades adicionales
+ */
+export function extendFolder(folder: FolderComplete): FolderComplete {
+	try {
+		// Si ya tiene estadísticas, las mantenemos
+		const folderWithStats = folder.stats ? folder : withFolderStats(folder);
+
+		// Valores por defecto para propiedades no definidas
+		return {
+			...folderWithStats,
+			name: folder.name || '',
+			path: folder.path || '/',
+			description: folder.description || '',
+			color: folder.color || DEFAULT_FOLDER_COLOR,
+			emoji: folder.emoji || DEFAULT_FOLDER_EMOJI,
+			metadata: folder.metadata || {},
+			children: folder.children || [],
+			_count: folder._count || {
+				children: 0,
+				images: 0,
+				uploadedImages: 0,
+				tags: 0
+			}
+		};
+	} catch (error) {
+		logger.error('Error extendiendo folder:', error);
+		return folder;
+	}
 }

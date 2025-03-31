@@ -1,13 +1,76 @@
 /**
- * @file Punto de entrada para el store de carpetas
+ * @file Store principal de Folder
  * @module store/entities/folder
  */
 
-// Exportar el store principal y los selectores
-export * from './store';
+import type { FolderStore } from '@/types/entities/folder/types';
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+import { createFolderCoreSlice } from './slices/core.slice';
+import { createFolderFiltersSlice } from './slices/filters.slice';
+import { createFolderUISlice } from './slices/ui.slice';
 
-// Exportar tipos
-export * from './types';
+/**
+ * 📁 Store para gestionar carpetas
+ * Implementa el patrón de slices para separar funcionalidades
+ */
+export const useFolderStore = create<FolderStore>()(
+  devtools(
+    persist(
+      (...a) => ({
+        // Combinar todos los slices
+        ...createFolderCoreSlice(...a),
+        ...createFolderFiltersSlice(...a),
+        ...createFolderUISlice(...a),
+      }),
+      {
+        name: 'folder-store',
+        // Solo persistir algunas partes del estado
+        partialize: (state) => ({
+          // Solo persiste filtros y UI
+          filters: state.filters,
+          ui: {
+            viewMode: state.ui.viewMode,
+            expandedIds: state.ui.expandedIds
+          }
+        }),
+      }
+    ),
+    {
+      name: 'FolderStore',
+      anonymousActionType: 'FolderStore'
+    }
+  )
+);
 
-// Exportar acciones integradas
-export { folderActions } from './actions';
+// Exportaciones
+
+// Store completo
+export default useFolderStore;
+
+// Selectores útiles
+export const useSelectedFolder = () => useFolderStore(state => state.selected);
+export const useFolderItems = () => useFolderStore(state => state.items);
+export const useFolderFilters = () => useFolderStore(state => state.filters);
+export const useFolderLoading = () => useFolderStore(state => state.isLoading);
+export const useFolderError = () => useFolderStore(state => state.error);
+
+// Selectores de UI
+export const useFolderUIState = () => useFolderStore(state => state.ui);
+export const useFolderViewMode = () => useFolderStore(state => state.ui.viewMode);
+export const useFolderSelectedIds = () => useFolderStore(state => state.ui.selectedIds);
+export const useFolderExpandedIds = () => useFolderStore(state => state.ui.expandedIds);
+export const useFolderModal = () => ({
+  isOpen: useFolderStore(state => state.ui.isModalOpen),
+  id: useFolderStore(state => state.ui.currentModalId),
+  mode: useFolderStore(state => state.ui.modalMode)
+});
+
+// Selectores derivados
+export const useFilteredFolders = () => useFolderStore(state => state.getFilteredFolders());
+export const useSortedFolders = () => useFolderStore(state => state.getSortedFolders());
+
+// Selector para carpeta por ID
+export const useFolderById = (id?: string | null) =>
+  useFolderStore(state => id ? state.items.find(item => item.id === id) : null);
+
