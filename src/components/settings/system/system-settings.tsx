@@ -1,6 +1,6 @@
 'use client';
 
-import { getSystemStats, repairSystem, resetDatabase } from '@/app/actions/system/system.actions';
+import { getSystemStats, repairSystem, resetDatabase } from '@/app/actions/system';
 import {
 	AlertDialog,
 	AlertDialogAction,

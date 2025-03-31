@@ -1,4 +1,17 @@
+/**
+ * @file Tipos base para perfiles de usuario
+ * @module types/entities/profile
+ */
+
 import type { Profile } from '@prisma/client';
+import type {
+    CreateProfileSchemaType,
+    ProfileFiltersSchemaType,
+    ProfilePaginationSchemaType,
+    ProfilePreferencesSchemaType,
+    UpdateProfilePreferencesSchemaType,
+    UpdateProfileSchemaType,
+} from './schema';
 
 // Enums para temas
 export enum ThemeMode {
@@ -15,90 +28,41 @@ export enum Language {
 	FRENCH = 'fr',
 }
 
-// Configuración de preferencias de usuario
-export interface ProfilePreferences {
-	// Preferencias de tema e interfaz
-	theme: ThemeMode;
-	color: string;
-	emoji: string;
+// Re-exportar tipos inferidos de Zod
+export type ProfilePreferences = ProfilePreferencesSchemaType;
+export type CreateProfileInput = CreateProfileSchemaType;
+export type UpdateProfileInput = UpdateProfileSchemaType;
+export type UpdateProfilePreferencesInput = UpdateProfilePreferencesSchemaType;
+export type ProfileFilters = ProfileFiltersSchemaType;
+export type ProfilePaginationOptions = ProfilePaginationSchemaType;
 
-	// Preferencias de idioma
-	language: Language;
-
-	// Preferencias de funcionalidad
-	enableAnimations?: boolean;
-	enableSounds?: boolean;
-	enableHaptics?: boolean;
-	enableNotifications?: boolean;
-
-	// Personalización de pantalla
-	defaultView?: 'grid' | 'list' | 'gallery' | 'compact';
-	defaultSort?: 'name' | 'date' | 'size' | 'type';
-	itemsPerPage?: number;
-	showHiddenFiles?: boolean;
-
-	// Accesibilidad
-	highContrast?: boolean;
-	reducedMotion?: boolean;
-	fontSize?: 'small' | 'medium' | 'large';
-	outlineElements?: boolean;
-}
-
-// Interfaz extendida para Profile
+/**
+ * Interfaz extendida para Profile con campos adicionales para UI
+ * @extends Profile - Modelo base de Prisma
+ */
 export interface ProfileExtended extends Profile {
-	// Campos adicionales para UI/cliente que no están en el modelo Prisma
+	/** Preferencias parseadas del perfil */
 	parsedPreferences?: ProfilePreferences;
+	/** Fecha de creación formateada */
 	formattedCreatedAt?: string;
+	/** Fecha de actualización formateada */
 	formattedUpdatedAt?: string;
+	/** Indica si es el perfil actual del usuario */
 	isCurrentProfile?: boolean;
 }
 
-// Tipo para crear un nuevo perfil
-export interface CreateProfileInput {
-	name: string;
-	emoji?: string;
-	color?: string;
-	theme?: ThemeMode;
-	language?: Language;
-	description?: string | null;
-	isActive?: boolean;
-}
-
-// Tipo para actualizar un perfil
-export interface UpdateProfileInput {
-	name?: string;
-	emoji?: string;
-	color?: string;
-	theme?: ThemeMode;
-	language?: Language;
-	description?: string | null;
-	isActive?: boolean;
-}
-
-// Tipo para actualizar preferencias
-export interface UpdateProfilePreferencesInput extends Partial<ProfilePreferences> {}
-
-// Tipo para filtros de búsqueda
-export interface ProfileFilters {
-	search?: string;
-	isActive?: boolean;
-	theme?: ThemeMode;
-	language?: Language;
-}
-
-// Tipo para opciones de paginación
-export interface ProfilePaginationOptions {
-	page?: number;
-	limit?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt';
-	sortDirection?: 'asc' | 'desc';
-}
-
-// Tipo para resultados paginados
+/**
+ * Tipo para resultados paginados de perfiles
+ */
 export interface PaginatedProfiles {
+	/** Lista de perfiles */
 	items: ProfileExtended[];
+	/** Total de perfiles */
 	total: number;
+	/** Página actual */
 	page: number;
+	/** Límite de items por página */
 	limit: number;
+	/** Total de páginas */
 	totalPages: number;
 }

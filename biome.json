@@ -26,7 +26,8 @@
       "style": {
         "useConst": "error",
         "useTemplate": "error",
-        "useNodejsImportProtocol": "off"
+        "useNodejsImportProtocol": "off",
+        "useImportType": "off"
       },
       "performance": {
         "noDelete": "error"

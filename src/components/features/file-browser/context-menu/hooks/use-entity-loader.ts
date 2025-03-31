@@ -9,7 +9,7 @@ import { getNotes } from '@/app/actions/notes/note.actions';
 import { getPlaces } from '@/app/actions/places/place.actions';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
 import { getProperties } from '@/app/actions/properties/property.actions';
-import { getTags } from '@/app/actions/tags/tag.actions';
+import { getTags } from '@/app/actions/tags';
 import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { serverLogger } from '@/lib/logger/server-logger';

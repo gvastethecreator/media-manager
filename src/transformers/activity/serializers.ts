@@ -3,13 +3,16 @@
  * @module transformers/activity/serializers
  */
 
+import { type ActivityListResponse } from '../../types/entities/activity';
 import {
-	type Activity,
-	type ActivityBase,
-	type ActivityMetadata,
-	ActivityCategory,
-	ActivityType,
+    type Activity,
+    type ActivityBase,
+    ActivityCategory,
+    type ActivityMetadata,
+    ActivityType,
 } from '../../types/entities/activity/index';
+import { activityListResponseSchema, activitySchema } from './schema';
+import { normalizeActivityFilters } from './validators';
 
 /**
  * Convierte una actividad básica en una actividad extendida con información adicional
@@ -186,4 +189,178 @@ export function serializeActivityMetadata(metadata?: ActivityMetadata): string |
 		console.error('Error serializing activity metadata', error);
 		return undefined;
 	}
+}
+
+/**
+ * Serializa una actividad para API o almacenamiento
+ * @param activity Actividad a serializar
+ * @returns Objeto serializado
+ */
+export function serializeActivity(activity: Activity): Record<string, any> {
+	try {
+		// Validar primero
+		const validData = activitySchema.parse(activity);
+
+		// Formatear fechas
+		const createdAt = validData.createdAt instanceof Date
+			? validData.createdAt.toISOString()
+			: validData.createdAt;
+
+		// Crear objeto base
+		const serialized: Record<string, any> = {
+			id: validData.id,
+			type: validData.type,
+			description: validData.description,
+			createdAt,
+		};
+
+		// Añadir campos opcionales si existen
+		if (validData.imageId) serialized.imageId = validData.imageId;
+		if (validData.image) serialized.image = validData.image;
+		if (validData.iconEmoji) serialized.iconEmoji = validData.iconEmoji;
+		if (validData.iconColor) serialized.iconColor = validData.iconColor;
+		if (validData.category) serialized.category = validData.category;
+
+		return serialized;
+	} catch (error) {
+		console.error('Error al serializar actividad:', error);
+		// Devolver al menos los campos básicos o un objeto con error
+		return {
+			id: activity.id || 'unknown',
+			type: activity.type || 'unknown',
+			description: activity.description || 'Error de serialización',
+			createdAt: new Date().toISOString(),
+			_error: true,
+		};
+	}
+}
+
+/**
+ * Serializa una lista de actividades para API o almacenamiento
+ * @param response Respuesta de listado a serializar
+ * @returns Objeto serializado
+ */
+export function serializeActivityListResponse(response: ActivityListResponse): Record<string, any> {
+	try {
+		// Validar primero
+		activityListResponseSchema.parse(response);
+
+		// Serializar cada actividad
+		const serializedActivities = response.activities.map(serializeActivity);
+
+		return {
+			activities: serializedActivities,
+			totalCount: response.totalCount,
+			hasMore: response.hasMore,
+		};
+	} catch (error) {
+		console.error('Error al serializar listado de actividades:', error);
+		// Devolver al menos un objeto básico con error
+		return {
+			activities: [],
+			totalCount: 0,
+			hasMore: false,
+			_error: true,
+		};
+	}
+}
+
+/**
+ * Desserializa datos de actividad para uso en la aplicación
+ * @param data Datos serializados
+ * @returns Actividad deserializada o null si hay error
+ */
+export function deserializeActivity(data: Record<string, any>): Activity | null {
+	try {
+		// Intentar parsear con el esquema
+		const parsed = activitySchema.parse(data);
+
+		// Convertir fechas si es necesario
+		const createdAt = typeof parsed.createdAt === 'string'
+			? new Date(parsed.createdAt)
+			: parsed.createdAt;
+
+		// Construir objeto final
+		const activity: Activity = {
+			id: parsed.id,
+			type: parsed.type,
+			description: parsed.description,
+			createdAt,
+			...(parsed.imageId && { imageId: parsed.imageId }),
+			...(parsed.image && { image: parsed.image }),
+			...(parsed.iconEmoji && { iconEmoji: parsed.iconEmoji }),
+			...(parsed.iconColor && { iconColor: parsed.iconColor }),
+			...(parsed.category && { category: parsed.category }),
+		};
+
+		return activity;
+	} catch (error) {
+		console.error('Error al deserializar actividad:', error);
+		return null;
+	}
+}
+
+/**
+ * Desserializa datos de listado de actividades para uso en la aplicación
+ * @param data Datos serializados
+ * @returns Respuesta de listado deserializada o respuesta vacía
+ */
+export function deserializeActivityListResponse(data: Record<string, any>): ActivityListResponse {
+	try {
+		// Intentar parsear con el esquema
+		const parsed = activityListResponseSchema.parse(data);
+
+		// Deserializar cada actividad
+		const activities = parsed.activities
+			.map(deserializeActivity)
+			.filter((a): a is Activity => a !== null);
+
+		return {
+			activities,
+			totalCount: parsed.totalCount,
+			hasMore: parsed.hasMore,
+		};
+	} catch (error) {
+		console.error('Error al deserializar listado de actividades:', error);
+		// Devolver una respuesta vacía
+		return {
+			activities: [],
+			totalCount: 0,
+			hasMore: false,
+		};
+	}
+}
+
+/**
+ * Serializa filtros para uso en consultas de API
+ * @param filters Filtros a serializar
+ * @returns Objeto serializado para API
+ */
+export function serializeActivityFilters(filters: Record<string, any>): Record<string, any> {
+	// Normalizar primero
+	const normalizedFilters = normalizeActivityFilters(filters);
+
+	const serialized: Record<string, any> = {};
+
+	// Añadir campos solo si tienen valor
+	if (normalizedFilters.types?.length) serialized.types = normalizedFilters.types;
+	if (normalizedFilters.searchQuery) serialized.q = normalizedFilters.searchQuery;
+	if (normalizedFilters.limit) serialized.limit = normalizedFilters.limit;
+	if (normalizedFilters.offset) serialized.offset = normalizedFilters.offset;
+	if (normalizedFilters.imageId) serialized.imageId = normalizedFilters.imageId;
+
+	// Formatear fechas para API
+	if (normalizedFilters.startDate) {
+		serialized.from = normalizedFilters.startDate instanceof Date
+			? normalizedFilters.startDate.toISOString()
+			: normalizedFilters.startDate;
+	}
+
+	if (normalizedFilters.endDate) {
+		serialized.to = normalizedFilters.endDate instanceof Date
+			? normalizedFilters.endDate.toISOString()
+			: normalizedFilters.endDate;
+	}
+
+	return serialized;
 }
