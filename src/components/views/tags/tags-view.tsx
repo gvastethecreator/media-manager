@@ -1,6 +1,6 @@
 'use client';
 
-import { getTags, type TagWithStats } from '@/app/actions/tags/tag.actions';
+import { type TagWithStats, getTags } from '@/app/actions/tags';
 import { TagCard } from '@/components/cards/tag-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';

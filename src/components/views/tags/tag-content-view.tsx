@@ -1,6 +1,6 @@
 'use client';
 
-import { getTagImages } from '@/app/actions/tags/tag.actions';
+import { getTagImages } from '@/app/actions/tags';
 import { useFileManager } from '@/store/files/file-manager.store';
 import type { FileItem } from '@/types/file-item';
 import { useCallback } from 'react';

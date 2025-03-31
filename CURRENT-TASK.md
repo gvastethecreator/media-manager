@@ -1,168 +1,471 @@
-# Corrección de Transformers
+# Plan de Acción: Integración y Alineación con Schema Prisma
 
-## Análisis de Errores
+## Análisis Inicial
 
-Tras analizar los transformers, hemos identificado los siguientes problemas:
+El schema.prisma define numerosos modelos con relaciones complejas que deben estar correctamente reflejados en:
+- Types (tipos TypeScript)
+- Transformers (conversión de datos)
+- Stores (gestión de estado con Zustand)
+- Services (lógica de negocio)
+- Actions (acciones del servidor)
 
-1. **Importaciones obsoletas**:
-   - Uso de `import { Logger } from '@/lib/logger'` cuando debemos usar `import { serverLogger } from '@/lib/logger/server-logger'`
-   - Instanciación de `PrismaClient` en cada archivo en lugar de importar la instancia singleton de `@/lib/prisma`
+## Observaciones Preliminares
 
-2. **Estructura de clases estáticas**:
-   - Los transformers están implementados como clases estáticas, lo que dificulta el testing y la modularidad
-   - Este patrón está obsoleto y debe ser reemplazado por funciones independientes con un objeto de compatibilidad
+1. El schema presenta una estructura de datos rica con múltiples entidades relacionadas:
+   - Contenido base: Image, Video, Folder
+   - Entidades organizativas: Album, Collection, Tag, Group
+   - Entidades de worldbuilding: Character, Place, WorldItem, Concept
+   - Entidades de utilidad: Prompt, Note, Wildcard, Property
+   - Entidades de sistema: Profile, Settings, QueueJob, Activity
 
-3. **Desalineación con el schema de Prisma**:
-   - Algunas propiedades en los transformers no coinciden con las definidas en el schema.prisma
-   - Campos como `name` en vez de `title`, `isFavorite` en vez de `favorite`, etc.
+2. Cada entidad requiere:
+   - Tipos TypeScript completos y alineados
+   - Transformers para convertir entre formatos
+   - Stores para gestión de estado
+   - Services para operaciones CRUD
+   - Actions para funcionalidades del servidor
 
-4. **Problemas de tipado**:
-   - Uso incorrecto de tipos en los mappers, especialmente en las relaciones
-   - Falta de tipado adecuado para las funciones de mapeo
+## Análisis del Estado Actual
 
-5. **Manejo de errores ineficiente**:
-   - Captura de errores redundante en algunos métodos
-   - Falta de logging detallado en algunos casos
+### Estructura de Directorios (Actualizada)
+- `src/types/entities/`: Contiene tipos para todas las entidades
+- `src/transformers/`: Transformadores para entidades
+- `src/store/entities/`: Stores Zustand para entidades
+- `src/services/`: Servicios para operaciones CRUD
+- `src/app/actions/`: Server Actions organizadas por entidad (estructura completa)
 
-6. **Funciones duplicadas con nombres idénticos**:
-   - Algunas funciones están definidas dos veces con el mismo nombre pero diferentes firmas
-   - Esto causa errores de linter y confusión en el código
+### Observaciones por Componente (Actualizada)
 
-## Plan de Corrección
+1. **Types**:
+   - Bien estructurados con carpetas por entidad
+   - Cada entidad tiene múltiples archivos (base.ts, extended.ts, complete.ts)
+   - Estructura jerárquica clara (base -> extended -> complete)
+   - Problema potencial: Posible desalineación con cambios recientes en schema.prisma
 
-Hemos establecido los siguientes pasos para corregir estos problemas:
+2. **Transformers**:
+   - Organizados por entidad
+   - Funciones para mapeo, serialización y deserialización
+   - Cambio gradual de clases a funciones individuales
+   - Problema potencial: No todas las entidades tienen transformers completos
 
-1. **Actualizar importaciones**:
-   - Reemplazar `Logger` por `serverLogger`
-   - Importar la instancia de `prisma` desde `@/lib/prisma`
+3. **Stores**:
+   - Uso de Zustand con slices para separar preocupaciones
+   - Estructura clara con estado core, UI y filtros
+   - Implementación del patrón de slices en entidades clave
+   - ✅ Mejora: Estructura consistente con selectores optimizados
 
-2. **Refactorizar estructura**:
-   - Transformar las clases estáticas en funciones individuales exportadas
-   - Crear un objeto de compatibilidad para mantener la API pública actual
-   - Documentar la depreciación de las clases estáticas
+4. **Services**:
+   - Implementación inconsistente, algunos como archivos individuales, otros en carpetas
+   - No todas las entidades tienen servicios implementados
+   - Problema potencial: Falta de servicios para varias entidades del schema
 
-3. **Alinear con el schema de Prisma**:
-   - Verificar y corregir los nombres de campos para que coincidan con schema.prisma
-   - Ajustar los mappers para trabajar con los campos correctos
+5. **Actions** (Actualizado):
+   - ✅ Estructura organizada por entidades en `src/app/actions/`
+   - ✅ Cobertura completa de entidades principales con archivos index.ts
+   - ✅ Separación clara por funcionalidad
+   - ⚠️ Posible mejora: Estandarizar patrones entre acciones
+   - ⚠️ Posible mejora: Mejorar manejo de errores y validaciones
+   - ⚠️ Posible mejora: Implementar logging y monitoreo
 
-4. **Mejorar tipado**:
-   - Definir tipos explícitos para todas las funciones de mapeo
-   - Utilizar `Prisma.XxxCreateInput` y `Prisma.XxxUpdateInput` para los tipos de retorno
+## Problemas Específicos Identificados
 
-5. **Optimizar manejo de errores**:
-   - Implementar logging consistente en todos los transformers
-   - Eliminar captura de errores redundante
+1. **Desalineación de Tipos**: Los tipos actuales pueden no reflejar todos los campos y relaciones del schema.prisma, especialmente para entidades como `Group`, `Property` y `Wildcard` que podrían ser más recientes.
 
-6. **Resolver nombres de funciones duplicados**:
-   - Renombrar funciones duplicadas con nombres más descriptivos
-   - Asegurar que las referencias se actualicen en todo el código
+2. **Transformers Incompletos**: No todas las entidades tienen transformadores implementados o estos no manejan todas las relaciones definidas en el schema.
 
-## Progreso
+3. **Stores Parciales**: Algunas entidades carecen de implementaciones completas de store o tienen implementaciones inconsistentes.
 
-### Completado ✅
+4. **Servicios Faltantes**: Muchas entidades no tienen servicios implementados o están incompletos.
 
-- **Album Transformer**:
-  - ✅ Actualización de importaciones
-  - ✅ Refactorización de clase a funciones
-  - ✅ Creación de objeto de compatibilidad
-  - ✅ Corrección de mappers y serializers
-  - ✅ Mejora de tipado
+5. **Actions Casi Inexistentes**: Las acciones del servidor están muy limitadas, solo se encontró implementación para perfiles.
 
-- **Image Transformer**:
-  - ✅ Actualización de importaciones
-  - ✅ Refactorización de clase a funciones
-  - ✅ Creación de objeto de compatibilidad
-  - ✅ Corrección de mappers y serializers
-  - ✅ Mejora de tipado
+## Fases de Implementación Actualizadas
 
-- **Collection Transformer**:
-  - ✅ Actualización de importaciones
-  - ✅ Refactorización de clase a funciones
-  - ✅ Creación de objeto de compatibilidad
-  - ✅ Corrección de mappers y serializers
-  - ✅ Mejora de tipado
-  - ✅ Resolución de funciones duplicadas
+### Fase 1: Análisis y Auditoría (Completada)
+- [x] Revisar el schema.prisma
+- [x] Analizar la estructura actual de carpetas
+- [x] Crear inventario detallado de implementaciones existentes vs. requeridas
+- [x] Identificar entidades prioritarias basadas en dependencias
 
-- **Concept Transformer**:
-  - ✅ Actualización de importaciones
-  - ✅ Refactorización de mappers.ts
-  - ✅ Refactorización de serializers.ts
-  - ✅ Reemplazo del uso de delete operator
-  - ✅ Mejora de tipado en funciones
-  - ✅ Mejora de documentación
+### Fase 2: Desarrollo de Tipos Base (En progreso)
+- [x] Auditar y actualizar tipos existentes para alinearlos con schema.prisma
+- [x] Verificar que los tipos de relaciones coincidan con el schema
+- [ ] Implementar tipos faltantes siguiendo la estructura existente
+- [ ] Crear herramientas de validación de tipos contra schema
 
-- **Character Transformer**:
-  - ✅ Actualización de importaciones
-  - ✅ Reemplazo del uso de delete operator
-  - ✅ Mejora de estructura en el método toPrismaCharacter
-  - ✅ Mejora de estructura en el método fromExtendedCharacter
-  - ✅ Corrección de tipado en toExtendedCharacter
-  - ✅ Mejora de mappers.ts
+### Fase 3: Implementación de Transformers (En progreso)
+- [x] Auditar transformers existentes
+- [ ] Implementar transformers faltantes siguiendo el patrón funcional actual
+- [ ] Asegurar manejo adecuado de relaciones y campos JSON
 
-- **Group Transformer**:
-  - ✅ Actualización de importaciones
-  - ✅ Refactorización de la clase a funciones
-  - ✅ Corrección de propiedades isFavorite a favorite
-  - ✅ Mejora del manejo de errores
-  - ✅ Implementación de nuevo objeto de compatibilidad
-  - ✅ Mejora de la documentación
-  - ✅ Reemplazo del archivo principal de exportación
+### Fase 4: Implementación de Stores (En progreso)
+- [x] Auditar stores existentes
+- [x] Mejorar estructura del store de Activity con selectores optimizados
+- [x] Implementar store completo para QueueJob con slices (core, UI, filtros)
+- [ ] Implementar stores faltantes con slices (core, UI, filtros)
+- [ ] Asegurar consistencia en implementación entre entidades
+- [ ] Verificar integración correcta con transformers
 
-- **Note Transformer**:
-  - ✅ Actualización de importaciones
-  - ✅ Refactorización de mappers.ts
-  - ✅ Refactorización de serializers.ts
-  - ✅ Reemplazo del uso de delete operator por filtrado positivo
-  - ✅ Mejora del manejo de errores con TransformerError
-  - ✅ Corrección de propiedades isFavorite/favorite
-  - ✅ Implementación de nuevo objeto de compatibilidad
-  - ✅ Creación del archivo principal de exportación
+### Fase 5: Implementación de Services (Pendiente)
+- [x] Auditar servicios existentes
+- [ ] Implementar servicios faltantes siguiendo el patrón existente
+- [ ] Estandarizar manejo de errores y validaciones
 
-- **Place Transformer**:
-  - ✅ Actualización de importaciones
-  - ✅ Reemplazo de Logger por serverLogger
-  - ✅ Importación de instancia singleton de prisma
-  - ✅ Corrección de propiedades isFavorite/favorite
-  - ✅ Reemplazo del uso de delete operator
-  - ✅ Mejora del manejo de errores
-  - ✅ Implementación de nuevo objeto de compatibilidad
-  - ✅ Mejora de la documentación
+### Fase 6: Implementación de Actions (En progreso)
+- [x] Auditar acciones existentes para cada entidad
+- [x] Estandarizar estructura de exports con archivos index.ts
+- [ ] Estandarizar estructura y patrones entre acciones
+- [ ] Implementar validaciones consistentes
+- [ ] Agregar manejo de errores robusto
+- [ ] Implementar logging y monitoreo
+- [ ] Asegurar revalidación correcta de rutas
+- [ ] Optimizar rendimiento de operaciones costosas
 
-- **Prompt Transformer**:
-  - ✅ Actualización de importaciones
-  - ✅ Creación de estructura v2
-  - ✅ Corrección de propiedades isFavorite/favorite
-  - ✅ Refactorización de funciones
-  - ✅ Mejora del manejo de errores con TransformerError
-  - ✅ Implementación de nuevo objeto de compatibilidad
-  - ✅ Tipado correcto con Prisma.PromptCreateInput y Prisma.PromptUpdateInput
-  - ✅ Creación del archivo principal de exportación
+### Fase 7: Testing e Integración (Pendiente)
+- [ ] Desarrollar pruebas para verificar coherencia entre componentes
+- [ ] Validar flujos completos para cada entidad
+- [ ] Verificar manejo de errores y casos límite
 
-### En Progreso 🔄
+## Inventario Completo de Entidades
 
-Transformers pendientes de corregir, siguiendo el mismo patrón:
+A continuación se presenta un inventario completo de todas las entidades identificadas en el schema.prisma y su estado actual de implementación.
 
-- Property
-- Tag
-- Video
-- Wildcard
-- WorldItem
+### Entidades de Sistema
 
-## Próximos Pasos
+1. **Profile**
+   - 🟢 **Types**: Completo
+   - 🟢 **Transformers**: Completo
+   - 🟢 **Store**: Completo con patrón de slices
+   - 🟢 **Service**: Implementado
+   - 🟢 **Actions**: Implementadas en `src/app/actions/profiles/`
 
-1. Continuar con la corrección del siguiente transformer: **Property**
-   - Seguir el mismo patrón utilizado en los transformers ya corregidos
-   - Verificar consistencia en los nombres de campos con schema.prisma
-   - Asegurar tipado correcto en todas las funciones
+2. **Settings**
+   - 🟢 **Types**: Completo
+   - 🟢 **Transformers**: Completo
+   - 🟢 **Store**: Completo
+   - 🟢 **Service**: Implementado
+   - 🟢 **Actions**: Implementadas en `src/app/actions/system/`
 
-2. Después de corregir todos los transformers, crear tests unitarios para verificar el funcionamiento
+3. **QueueJob**
+   - 🟢 **Types**: Completo con enums y tipos adicionales
+   - 🟡 **Transformers**: Básico
+   - 🟢 **Store**: Completo con patrón de slices
+   - 🟡 **Service**: Básico
+   - 🟢 **Actions**: Implementadas en `src/app/actions/queue/`
 
-3. Considerar la creación de un script automatizado para detectar problemas similares en el futuro
+4. **Activity**
+   - 🟢 **Types**: Completo
+   - 🟢 **Transformers**: Completo con validadores
+   - 🟢 **Store**: Completo con selectores optimizados
+   - 🟢 **Service**: Implementado
+   - 🟢 **Actions**: Implementadas en `src/app/actions/activity/`
 
-## Notas Adicionales
+### Entidades de Contenido Base
 
-- La estructura de carpetas actual es adecuada y se mantendrá
-- Las correcciones deben ser no disruptivas para mantener la compatibilidad con el código existente
-- Las nuevas funciones siguen la convención de nombres: verbos en infinitivo (p.ej., `searchNotes`, `getNoteById`)
-- El objeto de compatibilidad mantiene los nombres originales para facilitar la migración
-- Para funciones duplicadas, se usa un sufijo más descriptivo (p.ej., `parseCollectionFiltersFromString`)
+5. **Folder**
+   - 🟢 **Types**: Completo
+   - 🟡 **Transformers**: Parcial
+   - 🟡 **Store**: Parcial
+   - 🟡 **Service**: Parcial
+   - 🟢 **Actions**: Implementadas en `src/app/actions/folders/`
+
+6. **Image**
+   - 🟢 **Types**: Completo
+   - 🟢 **Transformers**: Completo
+   - 🟢 **Store**: Completo
+   - 🟢 **Service**: Completo
+   - 🟢 **Actions**: Implementadas en `src/app/actions/images/`
+
+7. **Video**
+   - 🟡 **Types**: Parcial
+   - 🟡 **Transformers**: Parcial
+   - 🔴 **Store**: No implementado
+   - 🟡 **Service**: Parcial
+   - 🟢 **Actions**: Implementadas en `src/app/actions/videos/`
+
+8. **UploadedImage**
+   - 🟡 **Types**: Parcial
+   - 🟡 **Transformers**: Parcial
+   - 🔴 **Store**: No implementado
+   - 🟡 **Service**: Parcial
+   - 🟢 **Actions**: Implementadas en `src/app/actions/uploaded-images/`
+
+9. **ImageStats**
+   - 🟡 **Types**: Parcial
+   - 🔴 **Transformers**: No implementado
+   - 🔴 **Store**: No implementado
+   - 🔴 **Service**: No implementado
+   - 🟢 **Actions**: Implementadas en `src/app/actions/stats/`
+
+### Entidades Organizativas
+
+10. **Album**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🟡 **Store**: Parcial
+    - 🟡 **Service**: Parcial
+    - 🟢 **Actions**: Implementadas en `src/app/actions/albums/`
+
+11. **Collection**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🟡 **Store**: Parcial
+    - 🟡 **Service**: Parcial
+    - 🟢 **Actions**: Implementadas en `src/app/actions/collections/`
+
+12. **Tag**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🟡 **Store**: Parcial
+    - 🟡 **Service**: Parcial
+    - 🟢 **Actions**: Implementadas en `src/app/actions/tags/`
+
+13. **Group**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/groups/`
+
+### Entidades de Worldbuilding
+
+14. **Character**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/characters/`
+
+15. **Place**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/places/`
+
+16. **WorldItem**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/world-items/`
+
+17. **Concept**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/concepts/`
+
+### Entidades de Utilidad
+
+18. **Prompt**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/prompts/`
+
+19. **Note**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/notes/`
+
+20. **Wildcard**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/wildcards/`
+
+21. **Property**
+    - 🟢 **Types**: Completo
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/properties/`
+
+### Entidades Adicionales (no directamente en schema pero presentes en la estructura)
+
+22. **Thumbnail**
+    - 🟡 **Types**: Parcial
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🟡 **Service**: Parcial
+    - 🟢 **Actions**: Implementadas en `src/app/actions/thumbnails/`
+
+23. **Metadata**
+    - 🟡 **Types**: Parcial
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🟡 **Service**: Parcial
+    - 🟢 **Actions**: Implementadas en `src/app/actions/metadata/`
+
+24. **Files**
+    - 🟡 **Types**: Parcial
+    - 🟡 **Transformers**: Parcial
+    - 🔴 **Store**: No implementado
+    - 🟡 **Service**: Parcial
+    - 🟢 **Actions**: Implementadas en `src/app/actions/files/`
+
+25. **Favorites**
+    - 🟡 **Types**: Parcial
+    - 🔴 **Transformers**: No implementado
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/favorites/`
+
+26. **Tasks**
+    - 🟡 **Types**: Parcial
+    - 🔴 **Transformers**: No implementado
+    - 🔴 **Store**: No implementado
+    - 🔴 **Service**: No implementado
+    - 🟢 **Actions**: Implementadas en `src/app/actions/tasks/`
+
+## Orden de Implementación por Entidades (Actualizado)
+
+Para garantizar una implementación coherente, seguiremos este orden basado en dependencias:
+
+1. **Entidades base sin dependencias**:
+   - ✅ Profile, Settings
+   - ⏳ QueueJob
+   - ✅ Activity
+   - ⏳ Folder
+
+2. **Entidades con dependencias simples**:
+   - ⏳ Image, Video (dependen de Folder)
+   - ⏳ Tag, Group, Property (entidades organizativas simples)
+
+3. **Entidades organizativas complejas**:
+   - ⏳ Album, Collection (dependen de Tag, Image, Video)
+
+4. **Entidades de contenido**:
+   - ⏳ Character, Place, WorldItem, Concept
+
+5. **Entidades utilitarias**:
+   - ⏳ Prompt, Note, Wildcard
+
+## Tareas Inmediatas
+
+1. **Inventario Completo**:
+   - [x] Crear matriz de implementaciones existentes vs. requeridas
+   - [x] Documentar desviaciones entre schema.prisma y tipos actuales
+
+2. **Actualización de Tipos para Entidades Base**:
+   - [x] Profile
+   - [x] Settings
+   - [x] Activity
+   - [ ] QueueJob
+   - [ ] Folder
+
+3. **Implementación de Transformers Faltantes**:
+   - [x] Identificar transformers incompletos o faltantes
+   - [x] Implementar para entidades base (Activity)
+   - [ ] Continuar con QueueJob
+
+4. **Desarrollo de Servicios Base**:
+   - [x] Completar servicios para entidades base (Activity)
+   - [ ] Continuar con QueueJob
+
+5. **Implementación de Stores**:
+   - [x] Estructura de store con slices para Activity
+   - [x] Implementar store completo para QueueJob con slices (core, UI, filtros)
+
+6. **Estructura de Actions**:
+   - [x] Definir patrón estándar para todas las actions
+   - [x] Implementar exports para todas las entidades
+   - [ ] Completar implementación de actions para QueueJob
+
+## Implementación de la Entidad QueueJob
+
+Después de haber implementado y mejorado la entidad Activity, hemos completado la implementación del QueueJob siguiendo los mismos patrones.
+
+### Componentes implementados para QueueJob:
+
+1. **Revisión de Types**:
+   - [x] Verificar alineación con schema.prisma
+   - [x] Implementar enums para estados y tipos
+   - [x] Definir tipos para ordenamiento y filtrado
+
+2. **Mejora de Store**:
+   - [x] Aplicar patrón de slices (core, UI, filters)
+   - [x] Desarrollar selectores optimizados
+   - [x] Implementar persistencia para configuraciones de usuario
+
+### Estructura implementada para QueueJob Store:
+
+```typescript
+// Estructura de slices implementada
+src/store/entities/queue-job/
+  ├── index.ts            // Exportaciones actualizadas
+  ├── queue-job-store.ts  // Store principal con middleware
+  ├── types.ts            // Tipos actualizados con enums
+  └── slices/
+      ├── core.ts         // Estado y acciones core
+      ├── filters.ts      // Filtros y ordenación
+      ├── selectors.ts    // Selectores optimizados
+      └── ui.ts           // Estado de la UI
+```
+
+## Próximos pasos
+
+### Implementación de entidades: Fase 1 (En curso)
+- ✅ `Settings` - Implementación completa
+- ✅ `Profiles` - Implementación completa
+- ✅ `Activity` - Implementación completa
+- ✅ `QueueJob` - Implementación del store completa
+- ⏳ `System` - Implementación parcial
+
+### Implementación de entidades: Fase 2 (Pendiente)
+- ⏳ `Folder` - Siguiente entidad a implementar
+- ⏳ `Image` - Implementación parcial
+- ⏳ `Video` - Implementación parcial
+- ⏳ `Tag` - Implementación parcial
+
+## Tareas específicas a realizar
+- Completar la implementación de transformers y servicios para QueueJob
+- Iniciar la implementación de Folder siguiendo el patrón establecido
+- Reorganizar Folder store con el patrón de slices
+- Implementar selectores optimizados para Folder
+
+## Documentación del Progreso
+
+```mermaid
+graph TD
+    A[Plan Inicial] --> B[Análisis]
+    B --> C[Inventario]
+    C --> D[Implementación]
+    D --> E[Testing]
+
+    subgraph "Completado"
+        F[Profile]
+        G[Settings]
+        H[Activity]
+        I[Estructura Actions]
+        J[QueueJob Store]
+    end
+
+    subgraph "En Progreso"
+        K[QueueJob Service]
+        L[Folder]
+    end
+
+    subgraph "Pendiente"
+        M[Entidades Organizativas]
+        N[Entidades de Contenido]
+        O[Entidades Utilitarias]
+    end
+
+    D --> F
+    D --> G
+    D --> H
+    D --> I
+    D --> J
+    D --> K
+    D --> L
+    D -.-> M
+    D -.-> N
+    D -.-> O
+```
