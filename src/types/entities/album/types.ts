@@ -17,14 +17,10 @@ export const AlbumSchema = z.object({
   description: z.string().nullable(),
   category: z.string(),
   shortcut: z.string().nullable(),
-  type: z.string(),
   sortBy: z.string(),
   filters: z.string(),
   featuredImage: z.string().nullable(),
   isFavorite: z.boolean().default(false),
-  isPublic: z.boolean().default(false),
-  settings: z.string(),
-  metadata: z.string().nullable(),
 });
 
 /**
@@ -38,14 +34,10 @@ export interface AlbumBase {
   description?: string | null;
   shortcut?: string | null;
   category: string;
-  type: string;
   sortBy: string;
   filters: string;
   featuredImage?: string | null;
   isFavorite: boolean;
-  isPublic: boolean;
-  settings: string;
-  metadata?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -96,9 +88,7 @@ export interface AlbumCounts {
 export interface AlbumFilters {
   search?: string;
   categories?: string[];
-  types?: string[];
   isFavorite?: boolean;
-  isPublic?: boolean;
   hasImages?: boolean;
   hasVideos?: boolean;
   hasCollections?: boolean;
@@ -132,7 +122,8 @@ export interface AlbumSearchOptions {
   skip?: number;
   take?: number;
   orderBy?: {
-    [key in keyof AlbumBase]?: 'asc' | 'desc';
+    field: keyof AlbumBase;
+    direction: 'asc' | 'desc';
   };
   where?: AlbumFilters;
   include?: {
@@ -167,9 +158,12 @@ export interface RelatedAlbum {
   name: string;
   emoji: string;
   color: string;
-  type: string;
   count: number;
 }
 
 // Tipos inferidos de Zod
 export type AlbumValidated = z.infer<typeof AlbumSchema>;
+
+// Constantes para paginación
+export const DEFAULT_PAGE_SIZE = 20;
+export const MAX_PAGE_SIZE = 100;

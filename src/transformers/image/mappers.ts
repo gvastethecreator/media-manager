@@ -10,6 +10,7 @@ import type {
     ImageFilters,
     ImageSearchOptions,
     ImageUpdateInput,
+    RelatedImage,
 } from '@/types/entities/image/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
@@ -33,6 +34,12 @@ import {
 const mapperLogger = serverLogger.withContext('ImageMappers');
 
 const logger = new Logger('ImageMapper');
+
+// Enum para direcciones de ordenamiento
+enum SortDirection {
+    ASC = 'asc',
+    DESC = 'desc'
+}
 
 /**
  * Mapea una imagen extendida a un resumen para listados
@@ -87,44 +94,92 @@ export function mapToImageSummaries(images: (ImageBase | ImageComplete | ImageEx
  */
 export function mapCreateImageDataToPrisma(data: ImageCreateInput): Prisma.ImageCreateInput {
 	try {
-		// Preparar datos base
-		const baseData = {
-			name: data.name,
-			description: data.description,
-			path: data.path,
-			hash: data.hash,
-			size: data.size,
-			width: data.width,
-			height: data.height,
-			metadata: data.metadata,
-			isFavorite: data.isFavorite ?? false,
-			addedAt: data.addedAt ?? new Date(),
-		};
+		// Base data sin relaciones
+		const {
+			albums, collections, tags, characters, places, worldItems,
+			concepts, prompts, notes, wildcards, properties, groups,
+			...baseData
+		} = data;
 
-		// Preparar relaciones
-		const relations = {
-			folder: data.folder ? { connect: { id: data.folder.id } } : undefined,
-			stats: data.stats ? { connect: { id: data.stats.id } } : undefined,
-			activities: data.activities?.length ? { connect: data.activities.map(act => ({ id: act.id })) } : undefined,
-			uploadedImages: data.uploadedImages?.length ? { connect: data.uploadedImages.map(img => ({ id: img.id })) } : undefined,
-			profiles: data.profiles?.length ? { connect: data.profiles.map(prof => ({ id: prof.id })) } : undefined,
-			albums: data.albums?.length ? { connect: data.albums.map(alb => ({ id: alb.id })) } : undefined,
-			collections: data.collections?.length ? { connect: data.collections.map(col => ({ id: col.id })) } : undefined,
-			tags: data.tags?.length ? { connect: data.tags.map(tag => ({ id: tag.id })) } : undefined,
-			characters: data.characters?.length ? { connect: data.characters.map(char => ({ id: char.id })) } : undefined,
-			places: data.places?.length ? { connect: data.places.map(place => ({ id: place.id })) } : undefined,
-			worldItems: data.worldItems?.length ? { connect: data.worldItems.map(item => ({ id: item.id })) } : undefined,
-			concepts: data.concepts?.length ? { connect: data.concepts.map(con => ({ id: con.id })) } : undefined,
-			prompts: data.prompts?.length ? { connect: data.prompts.map(prompt => ({ id: prompt.id })) } : undefined,
-			notes: data.notes?.length ? { connect: data.notes.map(note => ({ id: note.id })) } : undefined,
-			wildcards: data.wildcards?.length ? { connect: data.wildcards.map(wild => ({ id: wild.id })) } : undefined,
-			properties: data.properties?.length ? { connect: data.properties.map(prop => ({ id: prop.id })) } : undefined,
-			groups: data.groups?.length ? { connect: data.groups.map(group => ({ id: group.id })) } : undefined,
-		};
+		// Preparar relaciones para creación
+		const createRelations: Prisma.ImageCreateInput = {};
+
+		// Crear connect para cada relación si existe
+		if (albums?.length) {
+			createRelations.albums = {
+				connect: albums.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (collections?.length) {
+			createRelations.collections = {
+				connect: collections.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (tags?.length) {
+			createRelations.tags = {
+				connect: tags.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (characters?.length) {
+			createRelations.characters = {
+				connect: characters.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (places?.length) {
+			createRelations.places = {
+				connect: places.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (worldItems?.length) {
+			createRelations.worldItems = {
+				connect: worldItems.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (concepts?.length) {
+			createRelations.concepts = {
+				connect: concepts.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (prompts?.length) {
+			createRelations.prompts = {
+				connect: prompts.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (notes?.length) {
+			createRelations.notes = {
+				connect: notes.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (wildcards?.length) {
+			createRelations.wildcards = {
+				connect: wildcards.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (properties?.length) {
+			createRelations.properties = {
+				connect: properties.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (groups?.length) {
+			createRelations.groups = {
+				connect: groups.map(item => ({ id: item.id }))
+			};
+		}
 
 		return {
 			...baseData,
-			...relations,
+			...createRelations,
 		};
 	} catch (error) {
 		throw handleTransformerError(error);
@@ -136,44 +191,92 @@ export function mapCreateImageDataToPrisma(data: ImageCreateInput): Prisma.Image
  */
 export function mapUpdateImageDataToPrisma(data: ImageUpdateInput): Prisma.ImageUpdateInput {
 	try {
-		// Preparar datos base
-		const baseData = {
-			name: data.name,
-			description: data.description,
-			path: data.path,
-			hash: data.hash,
-			size: data.size,
-			width: data.width,
-			height: data.height,
-			metadata: data.metadata,
-			isFavorite: data.isFavorite,
-			updatedAt: new Date(),
-		};
+		// Base data sin relaciones
+		const {
+			albums, collections, tags, characters, places, worldItems,
+			concepts, prompts, notes, wildcards, properties, groups,
+			...baseData
+		} = data;
 
-		// Preparar relaciones
-		const relations = {
-			folder: data.folder ? { connect: { id: data.folder.id } } : undefined,
-			stats: data.stats ? { connect: { id: data.stats.id } } : undefined,
-			activities: data.activities?.length ? { set: data.activities.map(act => ({ id: act.id })) } : undefined,
-			uploadedImages: data.uploadedImages?.length ? { set: data.uploadedImages.map(img => ({ id: img.id })) } : undefined,
-			profiles: data.profiles?.length ? { set: data.profiles.map(prof => ({ id: prof.id })) } : undefined,
-			albums: data.albums?.length ? { set: data.albums.map(alb => ({ id: alb.id })) } : undefined,
-			collections: data.collections?.length ? { set: data.collections.map(col => ({ id: col.id })) } : undefined,
-			tags: data.tags?.length ? { set: data.tags.map(tag => ({ id: tag.id })) } : undefined,
-			characters: data.characters?.length ? { set: data.characters.map(char => ({ id: char.id })) } : undefined,
-			places: data.places?.length ? { set: data.places.map(place => ({ id: place.id })) } : undefined,
-			worldItems: data.worldItems?.length ? { set: data.worldItems.map(item => ({ id: item.id })) } : undefined,
-			concepts: data.concepts?.length ? { set: data.concepts.map(con => ({ id: con.id })) } : undefined,
-			prompts: data.prompts?.length ? { set: data.prompts.map(prompt => ({ id: prompt.id })) } : undefined,
-			notes: data.notes?.length ? { set: data.notes.map(note => ({ id: note.id })) } : undefined,
-			wildcards: data.wildcards?.length ? { set: data.wildcards.map(wild => ({ id: wild.id })) } : undefined,
-			properties: data.properties?.length ? { set: data.properties.map(prop => ({ id: prop.id })) } : undefined,
-			groups: data.groups?.length ? { set: data.groups.map(group => ({ id: group.id })) } : undefined,
-		};
+		// Preparar relaciones para actualización
+		const updateRelations: Prisma.ImageUpdateInput = {};
+
+		// Crear set para cada relación si existe
+		if (albums) {
+			updateRelations.albums = {
+				set: albums.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (collections) {
+			updateRelations.collections = {
+				set: collections.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (tags) {
+			updateRelations.tags = {
+				set: tags.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (characters) {
+			updateRelations.characters = {
+				set: characters.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (places) {
+			updateRelations.places = {
+				set: places.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (worldItems) {
+			updateRelations.worldItems = {
+				set: worldItems.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (concepts) {
+			updateRelations.concepts = {
+				set: concepts.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (prompts) {
+			updateRelations.prompts = {
+				set: prompts.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (notes) {
+			updateRelations.notes = {
+				set: notes.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (wildcards) {
+			updateRelations.wildcards = {
+				set: wildcards.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (properties) {
+			updateRelations.properties = {
+				set: properties.map(item => ({ id: item.id }))
+			};
+		}
+
+		if (groups) {
+			updateRelations.groups = {
+				set: groups.map(item => ({ id: item.id }))
+			};
+		}
 
 		return {
 			...baseData,
-			...relations,
+			...updateRelations,
 		};
 	} catch (error) {
 		throw handleTransformerError(error);
@@ -183,56 +286,51 @@ export function mapUpdateImageDataToPrisma(data: ImageUpdateInput): Prisma.Image
 /**
  * 🔄 Mapea opciones de búsqueda de Image a formato Prisma
  */
-export function mapImageSearchOptionsToPrisma(
-	options: ImageSearchOptions
-): Prisma.ImageFindManyArgs {
-	try {
-		const { page = 1, pageSize = DEFAULT_PAGE_SIZE, orderBy, filters = {}, include = {} } = options;
+export function mapImageSearchOptionsToPrisma(options: ImageSearchOptions): Prisma.ImageFindManyArgs {
+	const { page = 1, pageSize = DEFAULT_PAGE_SIZE, orderBy, filters, include } = options;
 
-		// Validar y ajustar el tamaño de página
-		const validatedPageSize = Math.min(pageSize, MAX_PAGE_SIZE);
-		const skip = (page - 1) * validatedPageSize;
+	const take = Math.min(pageSize, MAX_PAGE_SIZE);
+	const skip = (page - 1) * take;
 
-		// Mapear ordenamiento
-		const orderByMapped = orderBy ? {
-			[orderBy.field]: orderBy.direction,
-		} : { createdAt: 'desc' };
+	// Mapeo predeterminado para ordenamiento
+	const defaultOrderBy: Prisma.ImageOrderByWithRelationInput = {
+		createdAt: SortDirection.DESC,
+	};
 
-		// Mapear filtros
-		const where = mapImageFiltersToPrisma(filters);
+	// Construir where input para Prisma basado en filtros
+	const where = filters ? mapImageFiltersToPrisma(filters) : {};
 
-		// Mapear inclusiones
-		const includeRelations = {
-			folder: include.folder ?? false,
-			stats: include.stats ?? false,
-			activities: include.activities ?? false,
-			uploadedImages: include.uploadedImages ?? false,
-			profiles: include.profiles ?? false,
-			albums: include.albums ?? false,
-			collections: include.collections ?? false,
-			tags: include.tags ?? false,
-			characters: include.characters ?? false,
-			places: include.places ?? false,
-			worldItems: include.worldItems ?? false,
-			concepts: include.concepts ?? false,
-			prompts: include.prompts ?? false,
-			notes: include.notes ?? false,
-			wildcards: include.wildcards ?? false,
-			properties: include.properties ?? false,
-			groups: include.groups ?? false,
-			_count: include.count ?? false,
-		};
+	// Construir include para Prisma
+	const includeOptions: Prisma.ImageInclude = {};
 
-		return {
-			skip,
-			take: validatedPageSize,
-			orderBy: orderByMapped,
-			where,
-			include: includeRelations,
-		};
-	} catch (error) {
-		throw handleTransformerError(error);
+	if (include) {
+		if (include.folder) includeOptions.folder = true;
+		if (include.stats) includeOptions.stats = true;
+		if (include.activities) includeOptions.activities = true;
+		if (include.uploadedImages) includeOptions.uploadedImages = true;
+		if (include.profiles) includeOptions.profiles = true;
+		if (include.albums) includeOptions.albums = true;
+		if (include.collections) includeOptions.collections = true;
+		if (include.tags) includeOptions.tags = true;
+		if (include.characters) includeOptions.characters = true;
+		if (include.places) includeOptions.places = true;
+		if (include.worldItems) includeOptions.worldItems = true;
+		if (include.concepts) includeOptions.concepts = true;
+		if (include.prompts) includeOptions.prompts = true;
+		if (include.notes) includeOptions.notes = true;
+		if (include.wildcards) includeOptions.wildcards = true;
+		if (include.properties) includeOptions.properties = true;
+		if (include.groups) includeOptions.groups = true;
+		if (include.counts) includeOptions._count = true;
 	}
+
+	return {
+		where,
+		take,
+		skip,
+		orderBy: orderBy || defaultOrderBy,
+		include: Object.keys(includeOptions).length > 0 ? includeOptions : undefined,
+	};
 }
 
 /**
@@ -242,66 +340,175 @@ export function mapImageFiltersToPrisma(filters: ImageFilters): Prisma.ImageWher
 	try {
 		const where: Prisma.ImageWhereInput = {};
 
-		// Filtros de texto
-		if (filters.search) {
+		// Filtro de texto
+		if (filters.text) {
 			where.OR = [
-				{ name: { contains: filters.search, mode: 'insensitive' } },
-				{ description: { contains: filters.search, mode: 'insensitive' } },
+				{ title: { contains: filters.text, mode: 'insensitive' } },
+				{ description: { contains: filters.text, mode: 'insensitive' } },
+				{ alt: { contains: filters.text, mode: 'insensitive' } },
+				{ prompt: { contains: filters.text, mode: 'insensitive' } },
+				{ negativePrompt: { contains: filters.text, mode: 'insensitive' } },
+				{ params: { contains: filters.text, mode: 'insensitive' } },
 			];
 		}
 
-		// Filtros de relaciones
-		if (filters.folders?.length) {
-			where.folder = { id: { in: filters.folders } };
-		}
-		if (filters.tags?.length) {
-			where.tags = { some: { id: { in: filters.tags } } };
+		// Filtro por categoría
+		if (filters.category) {
+			where.category = filters.category;
 		}
 
-		// Filtros de estado
-		if (filters.isFavorite !== undefined) {
-			where.isFavorite = filters.isFavorite;
+		// Filtro por tipo
+		if (filters.type) {
+			where.type = filters.type;
 		}
 
-		// Filtros de dimensiones
-		if (filters.minWidth !== undefined) {
-			where.width = { ...where.width, gte: filters.minWidth };
-		}
-		if (filters.maxWidth !== undefined) {
-			where.width = { ...where.width, lte: filters.maxWidth };
-		}
-		if (filters.minHeight !== undefined) {
-			where.height = { ...where.height, gte: filters.minHeight };
-		}
-		if (filters.maxHeight !== undefined) {
-			where.height = { ...where.height, lte: filters.maxHeight };
+		// Filtro por estado
+		if (filters.status) {
+			where.status = filters.status;
 		}
 
-		// Filtros de tamaño
-		if (filters.minSize !== undefined) {
-			where.size = { ...where.size, gte: filters.minSize };
-		}
-		if (filters.maxSize !== undefined) {
-			where.size = { ...where.size, lte: filters.maxSize };
+		// Filtro por favorito
+		if (filters.favorite !== undefined) {
+			where.favorite = filters.favorite;
 		}
 
-		// Filtros de metadatos
-		if (filters.hasMetadata) {
-			where.metadata = { not: null };
-		}
-		if (filters.hasThumbnail) {
-			where.thumbnail = { not: null };
-		}
-		if (filters.hasError) {
-			where.thumbnailError = { not: null };
+		// Filtros por campos booleanos
+		if (filters.sensitive !== undefined) {
+			where.sensitive = filters.sensitive;
 		}
 
-		// Filtros de fecha
-		if (filters.dateRange?.start) {
-			where.createdAt = { ...where.createdAt, gte: filters.dateRange.start };
+		if (filters.published !== undefined) {
+			where.published = filters.published;
 		}
-		if (filters.dateRange?.end) {
-			where.createdAt = { ...where.createdAt, lte: filters.dateRange.end };
+
+		// Filtro por fechas
+		if (filters.dateRange) {
+			if (filters.dateRange.from) {
+				where.createdAt = {
+					...(where.createdAt || {}),
+					gte: new Date(filters.dateRange.from),
+				};
+			}
+			if (filters.dateRange.to) {
+				where.createdAt = {
+					...(where.createdAt || {}),
+					lte: new Date(filters.dateRange.to),
+				};
+			}
+		}
+
+		// Filtros por relaciones
+		if (filters.folderId) {
+			where.folderId = filters.folderId;
+		}
+
+		// Filtro por IDs de entidades relacionadas
+		// Álbumes
+		if (filters.albumIds && filters.albumIds.length > 0) {
+			where.albums = {
+				some: {
+					id: { in: filters.albumIds },
+				},
+			};
+		}
+
+		// Colecciones
+		if (filters.collectionIds && filters.collectionIds.length > 0) {
+			where.collections = {
+				some: {
+					id: { in: filters.collectionIds },
+				},
+			};
+		}
+
+		// Tags
+		if (filters.tagIds && filters.tagIds.length > 0) {
+			where.tags = {
+				some: {
+					id: { in: filters.tagIds },
+				},
+			};
+		}
+
+		// Personajes
+		if (filters.characterIds && filters.characterIds.length > 0) {
+			where.characters = {
+				some: {
+					id: { in: filters.characterIds },
+				},
+			};
+		}
+
+		// Lugares
+		if (filters.placeIds && filters.placeIds.length > 0) {
+			where.places = {
+				some: {
+					id: { in: filters.placeIds },
+				},
+			};
+		}
+
+		// Items del mundo
+		if (filters.worldItemIds && filters.worldItemIds.length > 0) {
+			where.worldItems = {
+				some: {
+					id: { in: filters.worldItemIds },
+				},
+			};
+		}
+
+		// Conceptos
+		if (filters.conceptIds && filters.conceptIds.length > 0) {
+			where.concepts = {
+				some: {
+					id: { in: filters.conceptIds },
+				},
+			};
+		}
+
+		// Prompts
+		if (filters.promptIds && filters.promptIds.length > 0) {
+			where.prompts = {
+				some: {
+					id: { in: filters.promptIds },
+				},
+			};
+		}
+
+		// Notas
+		if (filters.noteIds && filters.noteIds.length > 0) {
+			where.notes = {
+				some: {
+					id: { in: filters.noteIds },
+				},
+			};
+		}
+
+		// Wildcards
+		if (filters.wildcardIds && filters.wildcardIds.length > 0) {
+			where.wildcards = {
+				some: {
+					id: { in: filters.wildcardIds },
+				},
+			};
+		}
+
+		// Propiedades
+		if (filters.propertyIds && filters.propertyIds.length > 0) {
+			where.properties = {
+				some: {
+					id: { in: filters.propertyIds },
+				},
+			};
+		}
+
+		// Grupos
+		if (filters.groupIds && filters.groupIds.length > 0) {
+			where.groups = {
+				some: {
+					id: { in: filters.groupIds },
+				},
+			};
 		}
 
 		return where;
@@ -313,12 +520,8 @@ export function mapImageFiltersToPrisma(filters: ImageFilters): Prisma.ImageWher
 /**
  * 🔄 Mapea una Image a su versión relacionada
  */
-export function mapImageToRelatedImage(image: ImageComplete): { id: string } {
-	try {
-		return { id: image.id };
-	} catch (error) {
-		throw handleTransformerError(error);
-	}
+export function mapImageToRelatedImage(image: ImageComplete): RelatedImage {
+	return { id: image.id };
 }
 
 /**

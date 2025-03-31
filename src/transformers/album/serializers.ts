@@ -3,11 +3,12 @@
  * @module transformers/album/serializers
  */
 
-import { Logger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
+    type AlbumComplete,
     type AlbumCreateInput,
     AlbumSchema,
-    type AlbumUpdateInput,
+    type AlbumUpdateInput
 } from '@/types/entities/album/types';
 import {
     validateFieldType,
@@ -26,7 +27,7 @@ import {
 } from '@/utils/transformers/validation';
 import type { Prisma } from '@prisma/client';
 
-const logger = new Logger('AlbumSerializer');
+const logger = serverLogger.withContext('AlbumSerializer');
 
 /**
  * 🔄 Serializa un Album para Prisma
@@ -43,15 +44,25 @@ export function toPrismaAlbum(data: AlbumCreateInput | AlbumUpdateInput): Prisma
         if (data.emoji) validateFieldType(data.emoji, 'string', 'emoji');
         if (data.color) validateFieldType(data.color, 'string', 'color');
         if (data.category) validateFieldType(data.category, 'string', 'category');
-        if (data.type) validateFieldType(data.type, 'string', 'type');
+
+        // Ajustar los campos para alinear con el schema.prisma
+        // Remover los campos que no están en el schema actual
+        const sanitizedData: Record<string, any> = { ...data };
+
+        // Usar la técnica de filtrado sin delete para evitar problemas de rendimiento
+        const fieldsToRemove = ['type', 'isPublic', 'settings', 'metadata'];
+        const sanitizedResult = Object.fromEntries(
+            Object.entries(sanitizedData).filter(([key]) => !fieldsToRemove.includes(key))
+        );
 
         // Preparar relaciones para Prisma
         const relations = preparePrismaRelations('Album', data);
 
+        // Devolver el objeto tipado como se espera
         return {
-            ...data,
+            ...sanitizedResult,
             ...relations,
-        };
+        } as Prisma.AlbumCreateInput | Prisma.AlbumUpdateInput;
     } catch (error) {
         throw handleTransformerError(error);
     }
@@ -84,23 +95,19 @@ export function fromPrismaAlbum(
         // Obtener conteos de relaciones
         const counts = getRelationCounts('Album', prismaAlbum);
 
-        // Construir objeto base
-        const baseAlbum: AlbumBase = {
+        // Construir objeto base alineado con el schema.prisma actual
+        const baseAlbum = {
             id: prismaAlbum.id,
-            name: prismaAlbum.name,
-            emoji: prismaAlbum.emoji,
-            color: prismaAlbum.color,
+            name: prismaAlbum.name || '',
+            emoji: prismaAlbum.emoji || '',
+            color: prismaAlbum.color || '',
             description: prismaAlbum.description,
             shortcut: prismaAlbum.shortcut,
-            category: prismaAlbum.category,
-            type: prismaAlbum.type,
-            sortBy: prismaAlbum.sortBy,
-            filters: prismaAlbum.filters,
+            category: prismaAlbum.category || '',
+            sortBy: prismaAlbum.sortBy || '',
+            filters: prismaAlbum.filters || '',
             featuredImage: prismaAlbum.featuredImage,
-            isFavorite: prismaAlbum.isFavorite,
-            isPublic: prismaAlbum.isPublic,
-            settings: prismaAlbum.settings,
-            metadata: prismaAlbum.metadata,
+            isFavorite: prismaAlbum.isFavorite || false,
             createdAt: prismaAlbum.createdAt,
             updatedAt: prismaAlbum.updatedAt,
         };
@@ -190,57 +197,62 @@ export function parseAlbumFilters(filters: unknown): Record<string, unknown> {
         }
 
         // Filtros de categoría
-        if (typedFilters.categories?.length) {
+        if (typedFilters.categories && Array.isArray(typedFilters.categories) && typedFilters.categories.length) {
             parsed.category = { in: typedFilters.categories };
-        }
-
-        // Filtros de tipo
-        if (typedFilters.types?.length) {
-            parsed.type = { in: typedFilters.types };
         }
 
         // Filtros de estado
         if (typedFilters.isFavorite !== undefined) {
             parsed.isFavorite = typedFilters.isFavorite;
         }
-        if (typedFilters.isPublic !== undefined) {
-            parsed.isPublic = typedFilters.isPublic;
-        }
+
+        // Eliminar filtros que no están en el schema actual
+        const fieldsToRemove = ['isPublic', 'types'];
+        const filteredParsed = Object.fromEntries(
+            Object.entries(parsed).filter(([key]) => !fieldsToRemove.includes(key))
+        );
 
         // Filtros de relaciones
         if (typedFilters.hasImages) {
-            parsed.images = { some: {} };
+            filteredParsed.images = { some: {} };
         }
         if (typedFilters.hasVideos) {
-            parsed.videos = { some: {} };
+            filteredParsed.videos = { some: {} };
         }
         if (typedFilters.hasCollections) {
-            parsed.collections = { some: {} };
+            filteredParsed.collections = { some: {} };
         }
 
         // Filtros de cantidad de items
         if (typedFilters.minItems !== undefined) {
-            parsed._count = {
-                ...parsed._count,
+            filteredParsed._count = {
+                ...(filteredParsed._count as Record<string, unknown> || {}),
                 images: { gte: typedFilters.minItems },
             };
         }
         if (typedFilters.maxItems !== undefined) {
-            parsed._count = {
-                ...parsed._count,
+            filteredParsed._count = {
+                ...(filteredParsed._count as Record<string, unknown> || {}),
                 images: { lte: typedFilters.maxItems },
             };
         }
 
         // Filtros de fecha
-        if (typedFilters.dateRange?.start) {
-            parsed.createdAt = { ...parsed.createdAt, gte: typedFilters.dateRange.start };
+        const dateRange = typedFilters.dateRange as Record<string, unknown> | undefined;
+        if (dateRange?.start) {
+            filteredParsed.createdAt = {
+                ...(filteredParsed.createdAt as Record<string, unknown> || {}),
+                gte: dateRange.start
+            };
         }
-        if (typedFilters.dateRange?.end) {
-            parsed.createdAt = { ...parsed.createdAt, lte: typedFilters.dateRange.end };
+        if (dateRange?.end) {
+            filteredParsed.createdAt = {
+                ...(filteredParsed.createdAt as Record<string, unknown> || {}),
+                lte: dateRange.end
+            };
         }
 
-        return parsed;
+        return filteredParsed;
     } catch (error) {
         throw handleTransformerError(error);
     }
@@ -248,64 +260,76 @@ export function parseAlbumFilters(filters: unknown): Record<string, unknown> {
 
 /**
  * Genera un color por defecto basado en el nombre del álbum
- * @param name Nombre del álbum
- * @returns Color en formato hexadecimal
  */
 export function generateAlbumColor(name: string): string {
-    if (!name) return '#3b82f6'; // Azul por defecto
+    try {
+        if (!name) return '#3b82f6'; // Color por defecto
 
-    // Generar un hash del nombre
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        // Inicializar componentes RGB
+        let r = 0;
+        let g = 0;
+        let b = 0;
+
+        // Generar color basado en el nombre
+        for (let i = 0; i < name.length; i++) {
+            const charCode = name.charCodeAt(i);
+            if (i % 3 === 0) r = (r + charCode) % 200 + 55; // Mantener entre 55-255
+            if (i % 3 === 1) g = (g + charCode) % 200 + 55;
+            if (i % 3 === 2) b = (b + charCode) % 200 + 55;
+        }
+
+        // Convertir a formato hexadecimal
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    } catch (error) {
+        logger.error('Error generando color para álbum', { name, error });
+        return '#3b82f6'; // Color por defecto en caso de error
     }
-
-    // Convertir a color hexadecimal
-    let color = '#';
-    for (let i = 0; i < 3; i++) {
-        const value = (hash >> (i * 8)) & 0xff;
-        color += ('00' + value.toString(16)).substr(-2);
-    }
-
-    return color;
 }
 
 /**
- * Genera un emoji basado en el nombre o tipo del álbum
- * @param name Nombre del álbum
- * @param type Tipo del álbum
- * @returns Emoji representativo
+ * Genera un emoji por defecto basado en el nombre y tipo del álbum
  */
 export function generateAlbumEmoji(name: string, type?: string): string {
-    // Mapeo de tipos a emojis
-    const typeEmojis: Record<string, string> = {
-        'gallery': '🖼️',
-        'collection': '📁',
-        'event': '📅',
-        'project': '📋',
-        'portfolio': '💼',
-        'favorites': '⭐',
-        'archive': '📦',
-        'custom': '📎',
-        'other': '📌',
-    };
+    try {
+        // Emojis por categoría
+        const categoryEmojis: Record<string, string[]> = {
+            default: ['📁', '📂', '📑', '🗃️', '🗄️', '📚', '📒', '📓', '📔', '📕', '📗', '📘', '📙'],
+            art: ['🎨', '🖌️', '🖼️', '🧩', '🪄', '🎭', '🎪'],
+            photo: ['📸', '📷', '🏞️', '📱', '📹', '📽️', '🎬'],
+            media: ['🎵', '🎧', '📺', '🎥', '🎞️', '🎬', '🎮'],
+            nature: ['🌿', '🌳', '🌲', '🌱', '🍀', '🌺', '🌻', '🦋'],
+            travel: ['✈️', '🗺️', '🧳', '🏖️', '🏝️', '🏔️', '🏰'],
+            food: ['🍎', '🍕', '🍰', '🍩', '🍪', '🍷', '🍴'],
+        };
 
-    // Si hay tipo y está en el mapeo, usar ese emoji
-    if (type && typeEmojis[type.toLowerCase()]) {
-        return typeEmojis[type.toLowerCase()];
+        let selectedCategory = 'default';
+
+        // Determinar categoría basada en el tipo o nombre
+        if (type) {
+            const lowerType = type.toLowerCase();
+            for (const [category, _] of Object.entries(categoryEmojis)) {
+                if (lowerType.includes(category)) {
+                    selectedCategory = category;
+                    break;
+                }
+            }
+        } else if (name) {
+            const lowerName = name.toLowerCase();
+            for (const [category, _] of Object.entries(categoryEmojis)) {
+                if (lowerName.includes(category)) {
+                    selectedCategory = category;
+                    break;
+                }
+            }
+        }
+
+        // Seleccionar emoji aleatorio de la categoría
+        const emojis = categoryEmojis[selectedCategory] || categoryEmojis.default;
+        const randomIndex = Math.floor(Math.abs(name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % emojis.length);
+
+        return emojis[randomIndex];
+    } catch (error) {
+        logger.error('Error generando emoji para álbum', { name, type, error });
+        return '📁'; // Emoji por defecto en caso de error
     }
-
-    // Análisis básico del nombre para decidir un emoji
-    const lowerName = name.toLowerCase();
-
-    if (lowerName.includes('gallery') || lowerName.includes('photos')) return '🖼️';
-    if (lowerName.includes('collection') || lowerName.includes('set')) return '📁';
-    if (lowerName.includes('event') || lowerName.includes('party')) return '📅';
-    if (lowerName.includes('project') || lowerName.includes('work')) return '📋';
-    if (lowerName.includes('portfolio') || lowerName.includes('showcase')) return '💼';
-    if (lowerName.includes('favorite') || lowerName.includes('best')) return '⭐';
-    if (lowerName.includes('archive') || lowerName.includes('backup')) return '📦';
-
-    // Emoji por defecto
-    return '📁';
 }

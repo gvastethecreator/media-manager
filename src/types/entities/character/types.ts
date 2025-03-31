@@ -21,6 +21,17 @@ import type { Wildcard } from '../wildcard/types';
 import type { WorldItem } from '../world-item/types';
 
 /**
+ * Interfaz para atributos/estadísticas de un personaje
+ */
+export interface CharacterAttribute {
+  name: string;
+  value: number;
+  type?: string;
+  description?: string;
+  icon?: string;
+}
+
+/**
  * Interfaz base para personaje
  */
 export interface CharacterBase {
@@ -141,6 +152,9 @@ export interface CharacterIncludes {
 export interface CharacterSearchOptions extends SearchOptionsSchema {
     filters?: CharacterFilters;
     include?: CharacterIncludes;
+    page?: number;
+    pageSize?: number;
+    orderBy?: any;
 }
 
 export interface CharacterSearchResult {
