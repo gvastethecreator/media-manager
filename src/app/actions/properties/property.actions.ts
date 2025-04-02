@@ -2,7 +2,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { mapCreatePropertyDataToPrisma, mapUpdatePropertyDataToPrisma } from '@/transformers/property';
+import { toCreatePropertyData, toUpdatePropertyData } from '@/transformers/property';
 import type { CreatePropertyData, UpdatePropertyData } from '@/types/entities/property';
 
 const logger = serverLogger.withContext('PropertyActions');
@@ -90,7 +90,7 @@ export async function getProperty(id: string) {
  */
 export async function createProperty(data: CreatePropertyData) {
   try {
-    const prismaData = mapCreatePropertyDataToPrisma(data);
+    const prismaData = toCreatePropertyData(data);
 
     const property = await prisma.property.create({
       data: prismaData,
@@ -128,7 +128,7 @@ export async function createProperty(data: CreatePropertyData) {
  */
 export async function updateProperty(id: string, data: UpdatePropertyData) {
   try {
-    const prismaData = mapUpdatePropertyDataToPrisma(data);
+    const prismaData = toUpdatePropertyData(data);
 
     const property = await prisma.property.update({
       where: { id },

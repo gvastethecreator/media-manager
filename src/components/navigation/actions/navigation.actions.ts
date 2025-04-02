@@ -1,7 +1,7 @@
 'use server';
 
 import { getAlbums } from '@/app/actions/albums/album.actions';
-import { getCharacters } from '@/app/actions/characters/character.actions';
+import { searchCharacters } from '@/app/actions/characters/character.actions';
 import { getCollections } from '@/app/actions/collections/collection.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
 import { getFolders } from '@/app/actions/folders/';
@@ -11,7 +11,7 @@ import { getPlaces } from '@/app/actions/places/place.actions';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
 import { getProperties } from '@/app/actions/properties/property.actions';
 import { getSystemStats } from '@/app/actions/stats/stats.actions';
-import { getTags } from '@/app/actions/tags';
+import { getTagsAction } from '@/app/actions/tags';
 import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -90,9 +90,9 @@ export async function revalidateNavigation() {
 export interface NavigationData {
 	folders: Awaited<ReturnType<typeof getFolders>>;
 	collections: Awaited<ReturnType<typeof getCollections>>;
-	tags: Awaited<ReturnType<typeof getTags>>;
+	tags: Awaited<ReturnType<typeof getTagsAction>>;
 	albums: Awaited<ReturnType<typeof getAlbums>>;
-	characters: Awaited<ReturnType<typeof getCharacters>>;
+	characters: Awaited<ReturnType<typeof searchCharacters>>;
 	places: Awaited<ReturnType<typeof getPlaces>>;
 	worldItems: Awaited<ReturnType<typeof getWorldItems>>;
 	concepts: Awaited<ReturnType<typeof getConcepts>>;
@@ -112,9 +112,9 @@ export async function getNavigationData(): Promise<NavigationData> {
 			await Promise.allSettled([
 				getFolders(),
 				getCollections(),
-				getTags(),
+				getTagsAction(),
 				getAlbums(),
-				getCharacters(),
+				searchCharacters({}),
 				getPlaces(),
 				getWorldItems(),
 				getConcepts(),
@@ -189,6 +189,8 @@ export async function getNavigationData(): Promise<NavigationData> {
 		};
 	} catch (error) {
 		navLogger.error('❌ Error obteniendo datos de navegación:', error);
-		throw new Error('No se pudieron obtener los datos de navegación');
+		const originalErrorMessage = error instanceof Error ? error.message : String(error);
+		console.error('--- ERROR ORIGINAL ---', error);
+		throw new Error(`No se pudieron obtener los datos de navegación: ${originalErrorMessage}`);
 	}
 }

@@ -4,8 +4,8 @@ import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
-import type { ProcessOptions } from '@/services/thumbnail.service';
-import { thumbnailService } from '@/services/thumbnail.service';
+import type { ProcessOptions } from '@/services/thumbnail-service-export';
+import { thumbnailService } from '@/services/thumbnail-service-export';
 import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
 import { existsSync } from 'fs';
 

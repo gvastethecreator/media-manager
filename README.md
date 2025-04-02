@@ -1,76 +1,219 @@
-# MOKLOS MEDIA MANAGER
+# Sistema de Gestión de Imágenes
 
-Moklos Media Manager esta pensado como un organizador de medios para la vida.
-Podemos organizar nuestras imagenes basandonos en diferentes categorias como carpetas como la principal fuente que luego podremos usar para asignarles albumes, colecciones, tags, personajes, lugares, items, notas, conceptos, etc.
+## Descripción
 
-Estamos en pleno desarrollo y todavía hay muchas funcionalidades que se irán agregando.
+Sistema completo para la gestión y organización de activos digitales, incluyendo imágenes, videos y metadatos asociados. Proporciona una interfaz moderna e intuitiva para administrar, categorizar y buscar todo tipo de contenido multimedia.
 
-## Stack
+## Tecnologías
 
-- Nextjs 15.2
-- Shadcn UI
-- Tailwind CSS 4
-- TypeScript
-- Drizzle ORM (migrado desde Prisma)
+- **Next.js 15.2** - Framework de React con App Router
+- **React 19** - Biblioteca de UI
+- **Prisma** - ORM para acceso a base de datos (futura migración a Drizzle)
+- **Tailwind CSS 4** - Framework de estilos
+- **Shadcn/UI** - Componentes de UI integrados con Tailwind 4
+- **Zustand** - Gestión de estado
+- **Server Actions** - Acciones del servidor para operaciones CRUD
+- **Motion** - Animaciones fluidas
 
-## Features :
+## Características Principales
 
-- Agregar carpetas
-- Visor de imagenes
-- Navegador de archivos (por ahora sin soporte de subcarpetas)
-- Thumbnails
-- Extracción de metadata de las imagenes
-- Sistema de Entity Cards para distintos tipos de entidades
-- Configuración avanzada de tarjetas con sistema modular
-- Sistema de formularios estandarizado para una mejor experiencia de usuario
-- Base de datos SQLite con Drizzle ORM para mejor rendimiento
+- **Gestión completa de activos digitales**: Imágenes, videos, colecciones, álbumes
+- **Sistema de organización avanzado**: Carpetas, etiquetas, grupos, colecciones
+- **Múltiples vistas**: Grid, lista, tabla para todas las entidades
+- **Worldbuilding**: Componentes para personajes, lugares, objetos, conceptos
+- **Búsqueda avanzada**: Búsqueda por metadatos, contenido y relaciones
+- **Filtros y ordenación**: Opciones avanzadas en todas las entidades
+- **Estadísticas detalladas**: Métricas de uso y relaciones para cada entidad
+- **Interfaz responsive**: Diseño adaptable a diferentes dispositivos
 
-## Sistema de Entity Cards
+## Estructura del Proyecto
 
-El proyecto incluye un sistema avanzado de tarjetas para representar diferentes tipos de entidades como álbumes, colecciones, personajes y más. Características principales:
+```
+src/
+├── app/                    # App Router de Next.js
+│   ├── actions/            # Server Actions
+│   └── components/         # Componentes específicos de la aplicación
+├── components/             # Componentes compartidos
+│   ├── ui/                 # Componentes de UI (shadcn)
+│   └── views/              # Vistas principales
+├── docs/                   # Documentación detallada
+│   └── entities/           # Documentación por entidad
+├── examples/               # Componentes de ejemplo
+├── lib/                    # Utilidades y funciones
+├── services/               # Servicios de negocio
+├── store/                  # Stores Zustand
+│   └── entities/           # Stores por entidad
+├── transformers/           # Transformadores de datos
+├── types/                  # Tipos TypeScript
+│   └── entities/           # Tipos por entidad
+└── utils/                  # Utilidades generales
+```
 
-- **Configuración por capas**: Sistema modular con capas configurables
-- **Efectos visuales**: Amplia gama de efectos visuales y avanzados
-- **Backside**: Soporte para cara posterior de tarjetas
-- **Performance optimizado**: Opciones de rendimiento configurables
-- **Formularios estandarizados**: Sistema consistente para configuración de tarjetas
-- **Layouts flexibles**: Estructuras de layouts reutilizables
+## Panel de Desarrollo
 
-### Sistema de Formularios
+El sistema incluye un panel de desarrollo completo accesible en la ruta `/development` que permite probar todas las entidades implementadas:
 
-Hemos implementado un sistema estandarizado para la integración entre formularios y layouts:
+- Dashboard
+- Configuración
+- Carpetas
+- Etiquetas (Tags)
+- Grupos
+- Imágenes
+- Colecciones
+- Álbumes
+- Personajes
+- Lugares
+- Videos
+- Y más...
 
-- **Componentes de layout**: `FormLayout`, `FormSection`, `FormRow`, `FormGroup`
-- **Componentes de campo**: `FormToggle`, `FormSlider`, `FormSelect`, `FormInput`
-- **Características**:
-  - Soporte para esquemas de colores
-  - Animaciones sutiles
-  - Tooltips para información adicional
-  - Mensajes de error
-  - Diseño responsivo
+## Guía de Instalación
 
-### Sistema de Logging Avanzado
+1. Clonar el repositorio:
+```bash
+git clone https://github.com/tu-usuario/image-manager.git
+cd image-manager
+```
 
-La aplicación cuenta con un sistema de logging avanzado que facilita la depuración y el monitoreo:
+2. Instalar dependencias:
+```bash
+pnpm install
+```
 
-- **EnhancedLogger**: Logger mejorado con soporte para colores, iconos y métodos avanzados.
-- **ServerLogger**: Logger optimizado para entornos de servidor con estilos ANSI.
-- **ApiLogger**: Logger específico para rutas API.
-- **ActionLogger**: Wrapper para Server Actions con logging mejorado.
-- **LogViewer**: Componente UI para visualizar logs en la interfaz.
+3. Configurar el archivo .env:
+```
+DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/image_manager"
+```
 
-Para más detalles, consulta la [documentación del sistema de logging](docs/logging-architecture.md).
+4. Ejecutar migraciones de Prisma:
+```bash
+pnpm prisma migrate dev
+```
 
-## Future Plans:
+5. Iniciar el servidor de desarrollo:
+```bash
+pnpm dev
+```
 
-- Agregar soporte para subcarpetas
-- Agregar soporte para videos
-- Agregar soporte para audios
-- Agregar soporte para documentos
-- Agregar soporte para PDFs
-- Chat con IA
-- Crear entidades nuevas
-- Mejores cartas
-- Mapas de relaciones
-- Mapas de entidades
-- Mejores animaciones
+## Entidades del Sistema
+
+El sistema gestiona las siguientes entidades principales:
+
+### Entidades de Contenido Base
+- **Image**: Gestión completa de imágenes
+- **Video**: Soporte para archivos de video
+- **Folder**: Sistema de carpetas jerárquico
+
+### Entidades Organizativas
+- **Tag**: Sistema de etiquetado
+- **Group**: Agrupación flexible de elementos
+- **Collection**: Colecciones temáticas
+- **Album**: Conjuntos ordenados de contenido
+
+### Entidades de Worldbuilding
+- **Character**: Personajes con atributos
+- **Place**: Ubicaciones con detalles
+- **WorldItem**: Objetos del mundo narrativo
+- **Concept**: Ideas y conceptos narrativos
+
+### Entidades de Utilidad
+- **Prompt**: Instrucciones para generación
+- **Note**: Anotaciones y notas
+- **Wildcard**: Elementos aleatorios
+- **Property**: Propiedades personalizables
+
+## Arquitectura
+
+El sistema sigue una arquitectura en capas:
+
+```mermaid
+graph TD
+    A[Cliente/UI] -->|Interactúa con| B[Server Actions]
+    B -->|Utiliza| C[Services]
+    C -->|Gestiona| D[Base de Datos Prisma]
+    C -->|Transforma| E[Transformers]
+    A -->|Estado local| F[Zustand Stores]
+    F -->|Utiliza| E
+    B -->|Actualiza| F
+    E -->|Conforme a| G[Types]
+```
+
+### Componentes Arquitectónicos
+
+1. **Types**: Definen la estructura de datos con interfaces TypeScript
+2. **Transformers**: Convierten datos entre diferentes formatos
+3. **Stores**: Manejan el estado de la aplicación usando Zustand con patrón de slices
+4. **Services**: Implementan la lógica de negocio con manejo de errores
+5. **Server Actions**: Proporcionan endpoints para operaciones CRUD
+
+## Estructura de Documentación
+
+Cada entidad cuenta con documentación detallada en `src/docs/entities/[nombre-entidad]/`:
+
+1. **README.md**: Descripción general y características principales
+2. **entity-structure.md**: Diagramas de estructura y relaciones
+3. **examples.md**: Ejemplos prácticos de uso
+4. **implementation-summary.md**: Resumen de la implementación
+
+## Ejemplos de Uso
+
+### Obtener Grupos
+
+```typescript
+import { getGroups } from '@/app/actions/groups/group.actions';
+
+// En un componente React
+const GroupsList = async () => {
+  const groups = await getGroups();
+
+  return (
+    <div>
+      <h1>Mis Grupos</h1>
+      <ul>
+        {groups.map(group => (
+          <li key={group.id}>{group.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+```
+
+### Usar Store Zustand
+
+```typescript
+import { useGroupStore } from '@/store/entities/group';
+
+// En un componente React
+const GroupsManager = () => {
+  // Obtener datos del store
+  const groups = useGroupStore(state => state.getGroups());
+  const addGroup = useGroupStore(state => state.addGroup);
+
+  // Utilizar el store
+  const handleAddGroup = (newGroup) => {
+    addGroup(newGroup);
+  };
+
+  return (
+    // ... UI del componente
+  );
+};
+```
+
+## Estado del Proyecto
+
+El proyecto ha completado la implementación de todas las entidades principales alineadas con el esquema de Prisma. Cada entidad cuenta con su conjunto completo de tipos, transformadores, stores, servicios y acciones del servidor, así como documentación detallada.
+
+Los próximos pasos incluyen:
+1. Pruebas exhaustivas
+2. Optimización de rendimiento
+3. Internacionalización
+4. Mejoras en UI/UX
+
+## Licencia
+
+Este proyecto está licenciado bajo [MIT License](LICENSE).
+
+## Contacto
+
+Para más información, contáctanos en [tu-email@ejemplo.com](mailto:tu-email@ejemplo.com).

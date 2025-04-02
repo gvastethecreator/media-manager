@@ -1,10 +1,10 @@
-import { serverLogger } from '@/lib/logger/server-logger';
-import { toConceptWithStats } from '@/transformers/concept';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { transformConceptToWithStats } from '@/transformers/concept/transformer';
 import type { ConceptBase, ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept';
 import type { StateCreator } from 'zustand';
 import type { ConceptStore } from '../types';
 
-const coreLogger = serverLogger.withContext('ConceptStore:Core');
+const coreLogger = clientLogger.withContext('ConceptStore:Core');
 
 export interface CoreSlice {
 	// Estado
@@ -87,8 +87,8 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			// Llamar a server action para obtener conceptos
 			const concepts = await mockApi.getConcepts();
 
-			// Transformar resultados si es necesario
-			const transformedConcepts = concepts.map(toConceptWithStats);
+			// Transformar resultados con la función correcta
+			const transformedConcepts = concepts.map(transformConceptToWithStats);
 
 			set({ concepts: transformedConcepts, isLoading: false });
 			coreLogger.info('✅ Conceptos cargados:', { count: transformedConcepts.length });

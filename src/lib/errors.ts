@@ -102,7 +102,31 @@ export class PromptError extends EntityError {
 	}
 }
 
-// Crear errores como objetos planos (para mejor serialización en Server Actions)
+/**
+ * Crear errores como objetos planos (para mejor serialización en Server Actions)
+ *
+ * IMPORTANTE: Al pasar el parámetro 'cause', debe asegurarse de que no cree
+ * una recursión infinita. No pase objetos de error directamente como cause,
+ * en su lugar, extraiga solo la información necesaria.
+ *
+ * Ejemplo correcto:
+ * ```
+ * try {
+ *   // ...
+ * } catch (error) {
+ *   const errorInfo = error instanceof Error
+ *     ? { message: error.message, name: error.name }
+ *     : { message: 'Error desconocido' };
+ *   throw createEntityErrorObject('MyError', 'Mensaje', 'CODE', errorInfo);
+ * }
+ * ```
+ *
+ * @param name Nombre del error
+ * @param message Mensaje descriptivo
+ * @param code Código de error
+ * @param cause Causa del error (evitar objetos complejos o recursivos)
+ * @returns Objeto de error serializable
+ */
 export function createEntityErrorObject(
 	name: string,
 	message: string,

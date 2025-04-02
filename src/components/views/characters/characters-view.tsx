@@ -1,20 +1,20 @@
 'use client';
 
-import { type CharacterWithStats, getCharacters } from '@/app/actions/characters/character.actions';
+import { type CharacterWithStats, searchCharacters } from '@/app/actions/characters/character.actions';
 import { CharacterCard } from '@/components/cards/character-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useFileManager } from '@/store/files/file-manager.store';
 import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
-const viewLogger = serverLogger.withContext('CharactersView');
+const viewLogger = clientLogger.withContext('CharactersView');
 
 // Configuración visual simplificada para personajes
 const DEFAULT_CHARACTER_OPTIONS: CardOptions = {
@@ -37,7 +37,7 @@ export function CharactersView(_props: ViewProps) {
 		try {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando personajes...');
-			const data = await getCharacters();
+			const data = await searchCharacters({});
 			setCharacters(data);
 			viewLogger.info(`✅ ${data.length} personajes cargados`);
 		} catch (error) {

@@ -3,12 +3,11 @@
  * @module store/entities/wildcard/slices/filters
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { WildcardSortCriteria } from '@/types/entities/wildcard';
-import type { StateCreator } from 'zustand';
-import type { WildcardState } from '../types';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { type StateCreator } from 'zustand';
 
-const filtersLogger = serverLogger.withContext('WildcardStore:Filters');
+// Logger específico para este slice
+const filtersLogger = clientLogger.withContext('WildcardStore:Filters');
 
 // Slice para operaciones de filtrado
 export interface WildcardFiltersSlice {

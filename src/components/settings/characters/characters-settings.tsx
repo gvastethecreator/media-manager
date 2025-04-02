@@ -1,6 +1,6 @@
 'use client';
 
-import { type CharacterWithStats, deleteCharacter, getCharacters } from '@/app/actions/characters/character.actions';
+import { type CharacterWithStats, deleteCharacter, searchCharacters } from '@/app/actions/characters/character.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -45,7 +45,7 @@ export function CharactersSettings() {
 		const loadCharacters = async () => {
 			try {
 				setIsLoading(true);
-				const data = await getCharacters();
+				const data = await searchCharacters({});
 				setCharacters(data);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';

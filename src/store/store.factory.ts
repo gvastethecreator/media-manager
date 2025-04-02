@@ -1,10 +1,54 @@
-import { create } from 'zustand';
-import { serverLogger } from '../lib/logger/server-logger';
+import { StateCreator, create } from 'zustand';
+import { DevtoolsOptions, PersistOptions, devtools, persist } from 'zustand/middleware';
+import { clientLogger } from '../lib/logger/client-logger';
 import type { BaseEntity, BaseStore, ExtendedStore, StoreHook } from './types';
+
+export interface StoreOptions<T> {
+	name: string;
+	logger?: typeof clientLogger;
+	persistOptions?: PersistOptions<T, Partial<T>>;
+	devtoolOptions?: DevtoolsOptions;
+}
+
+/**
+ * Factory para crear un store con middleware aplicado de forma consistente
+ *
+ * @template T - El tipo del state
+ * @param create - Función que crea el state
+ * @param options - Opciones de configuración
+ * @returns Una instancia del store
+ */
+export function createStore<T extends object>(
+	createFn: StateCreator<T, [], []>,
+	options: StoreOptions<T>
+) {
+	// Si no se proporciona un nombre, usar 'store' por defecto
+	const storeName = options.name || 'store';
+
+	// Crear logger específico para este store
+	const storeLogger = options.logger?.withContext(options.name) || clientLogger.withContext(options.name);
+
+	storeLogger.info(`🏗️ Creando store: ${storeName}`);
+
+	// Aplicar middleware en orden específico:
+	// 1. persist - para guardar el state en localStorage
+	// 2. devtools - para conectar con Redux DevTools
+	return create<T>()(
+		devtools(
+			options.persistOptions
+				? persist(createFn, options.persistOptions)
+				: createFn,
+			{
+				name: storeName,
+				...options.devtoolOptions,
+			}
+		)
+	);
+}
 
 export interface StoreOptions<T extends BaseEntity> {
 	name: string;
-	logger?: typeof serverLogger;
+	logger?: typeof clientLogger;
 	initialState?: Partial<BaseStore<T>>;
 	actions?: {
 		beforeCreate?: <C = unknown>(data: C) => Promise<C>;
@@ -30,7 +74,7 @@ export function createStoreFactory<
 		deleteItem: (id: string) => Promise<void>;
 	}
 ): StoreHook<T, S, CreateType, UpdateType> {
-	const storeLogger = options.logger?.withContext(options.name) || serverLogger.withContext(options.name);
+	const storeLogger = options.logger?.withContext(options.name) || clientLogger.withContext(options.name);
 
 	return create<ExtendedStore<T, S, CreateType, UpdateType>>((set, get) => {
 		const baseStore: BaseStore<T, CreateType, UpdateType> = {

@@ -3,17 +3,17 @@
  * @module store/entities/world-item
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { VERSIONING } from '@/lib/constants';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { toastService } from '@/services/toast.service';
 
+import { WorldItemSortCriteria, WorldItemViewMode } from '@/types/entities/world-item/enums';
 import type { WorldItemStore } from './types';
-import { WorldItemSortCriteria, WorldItemViewMode } from './types';
 
-const worldItemLogger = serverLogger.withContext('WorldItemStore');
+const worldItemLogger = clientLogger.withContext('WorldItemStore');
 
 // Re-exportar desde otros archivos
 export * from './constants';
@@ -23,9 +23,6 @@ export * from './services';
 export * from './transformers';
 export * from './types';
 export * from './utils';
-
-// Re-exportar tipos del store
-export type WorldItemStore = WorldItemStore;
 
 // 🏗️ Crear el store con persistencia
 export const useWorldItemStore = create<WorldItemStore>()(

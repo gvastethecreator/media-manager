@@ -1,10 +1,10 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { ConceptSortOption } from '@/types/entities/concept/enums';
 import type { ConceptFilters } from '@/types/entities/concept/extended';
 import type { StateCreator } from 'zustand';
 import type { ConceptStore } from '../types';
 
-const filtersLogger = serverLogger.withContext('ConceptStore:Filters');
+const filtersLogger = clientLogger.withContext('ConceptStore:Filters');
 
 export interface FiltersSlice {
 	// Estado

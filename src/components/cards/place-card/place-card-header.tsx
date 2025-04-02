@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { Building2, Cloud, Compass, Droplets, Mountain, Palm, Sparkles, Star, Tree } from 'lucide-react';
+import { Building2, Cloud, Compass, Droplets, Mountain, Palmtree, Sparkles, Sprout, Star, Trees } from 'lucide-react';
 
 interface PlaceCardHeaderProps {
 	/** Nombre del lugar */
@@ -44,19 +44,20 @@ export function PlaceCardHeader({
 	const getTypeIcon = () => {
 		const typeLC = type.toLowerCase();
 		if (typeLC.includes('city') || typeLC.includes('ciudad')) return <Building2 className="w-3.5 h-3.5" />;
-		if (typeLC.includes('forest') || typeLC.includes('bosque')) return <Tree className="w-3.5 h-3.5" />;
+		if (typeLC.includes('forest') || typeLC.includes('bosque')) return <Trees className="w-3.5 h-3.5" />;
 		if (typeLC.includes('mountain') || typeLC.includes('montaña')) return <Mountain className="w-3.5 h-3.5" />;
-		if (typeLC.includes('desert') || typeLC.includes('desierto')) return <Palm className="w-3.5 h-3.5" />;
+		if (typeLC.includes('desert') || typeLC.includes('desierto')) return <Palmtree className="w-3.5 h-3.5" />;
 		return <Compass className="w-3.5 h-3.5" />;
 	};
 
 	// Determinar icono según el clima
 	const getClimateIcon = () => {
 		const climateLC = climate.toLowerCase();
-		if (climateLC.includes('tropical')) return <Palm className="w-3.5 h-3.5" />;
-		if (climateLC.includes('desert') || climateLC.includes('desierto')) return <Palm className="w-3.5 h-3.5" />;
+		if (climateLC.includes('tropical')) return <Palmtree className="w-3.5 h-3.5" />;
+		if (climateLC.includes('desert') || climateLC.includes('desierto')) return <Palmtree className="w-3.5 h-3.5" />;
 		if (climateLC.includes('cold') || climateLC.includes('frío')) return <Cloud className="w-3.5 h-3.5" />;
 		if (climateLC.includes('rain') || climateLC.includes('lluvia')) return <Droplets className="w-3.5 h-3.5" />;
+		if (climateLC.includes('forest') || climateLC.includes('bosque')) return <Sprout className="w-3.5 h-3.5" />;
 		return <Cloud className="w-3.5 h-3.5" />;
 	};
 

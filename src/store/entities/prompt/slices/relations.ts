@@ -1,9 +1,9 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { EntityType } from '@/types/entities/entities';
 import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
-const relationsLogger = serverLogger.withContext('PromptStore:Relations');
+const relationsLogger = clientLogger.withContext('PromptStore:Relations');
 
 export interface RelationsSlice {
 	// Acciones generales

@@ -1,196 +1,394 @@
 'use server';
 
 /**
- * @file Acciones CRUD para carpetas
+ * @file CRUD actions for folders
  * @module app/actions/folders/crud.actions
  */
 
+import { scanFolder } from '@/lib/folder-scanner';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { toFolderExtended } from '@/transformers/folder';
-import { type FolderCreate, type FolderExtended, type FolderUpdate } from '@/types/entities/folder';
+import { transformFolder } from '@/transformers/folder';
+import { type FolderComplete } from '@/types/entities/folder';
 import { revalidatePath } from 'next/cache';
+import { CreateFolderOptions, FOLDER_ERROR_CODES, UpdateFolderOptions } from './folder-types';
 
-// Logger específico para acciones de carpetas
-const logger = serverLogger.withContext('FolderActions:crud');
+// Logger para acciones CRUD
+const crudLogger = serverLogger.withContext('FolderCrudActions');
 
-// Rutas que deben ser revalidadas cuando cambian las carpetas
-const REVALIDATE_PATHS = ['/folders', '/settings', '/dashboard'] as const;
+// Rutas a revalidar después de operaciones CRUD
+const REVALIDATE_PATHS = [
+  '/folders',
+  '/dashboard',
+  '/images',
+  '/api/folders',
+];
 
 /**
- * Revalida todas las rutas relevantes cuando cambian las carpetas
+ * Revalida las rutas relacionadas con carpetas
  */
-const revalidateFolderPaths = async () => {
+async function revalidateFolderPaths() {
+  crudLogger.info('🔄 Revalidando rutas de carpetas');
   for (const path of REVALIDATE_PATHS) {
     revalidatePath(path);
-  }
-  logger.info('🔄 Rutas de carpetas revalidadas');
-};
-
-/**
- * Error personalizado para acciones de carpetas
- */
-class FolderError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'FolderError';
   }
 }
 
 /**
- * Crea una nueva carpeta
+ * Interfaz para errores de operaciones CRUD de carpetas
  */
-export async function createFolder(data: FolderCreate): Promise<FolderExtended> {
-  try {
-    logger.info('📁 Creando nueva carpeta:', data);
+export interface FolderCrudErrorData {
+  name: string;
+  message: string;
+  code: string;
+  cause?: unknown;
+}
 
-    // Verificar si ya existe una carpeta con la misma ruta
+/**
+ * Función para crear errores de operaciones CRUD de carpetas (enfoque funcional)
+ */
+function createFolderCrudError(
+  message: string,
+  code: string = FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
+  cause?: unknown
+): FolderCrudErrorData {
+  return {
+    name: 'FolderCrudError',
+    message,
+    code,
+    cause
+  };
+}
+
+/**
+ * Crea una nueva carpeta en la base de datos
+ * @param path Ruta de la carpeta en el sistema de archivos
+ * @param options Opciones adicionales para la creación
+ * @returns Datos de la carpeta creada
+ */
+export async function createFolder(path: string, options: CreateFolderOptions = {}): Promise<FolderComplete> {
+  try {
+    crudLogger.info('📁 Creando nueva carpeta:', { path, ...options });
+
+    // Validar que la ruta no esté vacía
+    if (!path || path.trim() === '') {
+      throw createFolderCrudError(
+        'La ruta de la carpeta no puede estar vacía',
+        FOLDER_ERROR_CODES.PATH_INVALID
+      );
+    }
+
+    // Verificar que la carpeta exista y sea accesible
+    try {
+      const scanResult = await scanFolder(path, { recursive: false });
+      crudLogger.info('🔍 Carpeta escaneada:', {
+        path,
+        exists: true,
+        totalFiles: scanResult.totalFiles,
+        totalSize: scanResult.totalSize
+      });
+    } catch (error) {
+      throw createFolderCrudError(
+        `La carpeta no existe o no es accesible: ${path}`,
+        FOLDER_ERROR_CODES.PATH_INVALID,
+        error
+      );
+    }
+
+    // Verificar si la carpeta ya existe en la base de datos
     const existingFolder = await prisma.folder.findFirst({
-      where: { path: data.path },
+      where: { path: path },
     });
 
     if (existingFolder) {
-      throw new FolderError('Ya existe una carpeta con esta ruta', 'DUPLICATE_PATH');
+      throw createFolderCrudError(
+        `Ya existe una carpeta con la ruta ${path}`,
+        FOLDER_ERROR_CODES.ALREADY_EXISTS
+      );
     }
+
+    // Extraer nombre de la carpeta de la ruta
+    const folderName = options.name || path.split('/').pop() || path.split('\\').pop() || 'Nueva carpeta';
 
     // Crear la carpeta en la base de datos
     const folder = await prisma.folder.create({
       data: {
-        name: data.name,
-        path: data.path,
-        totalFiles: data.totalFiles || 0,
-        totalSize: data.totalSize || 0,
-        lastIndexed: data.lastIndexed,
+        name: folderName,
+        path: path,
+        description: options.description || '',
+        emoji: options.emoji || '📁',
+        color: options.color || '',
+        autoReindex: options.autoReindex || false,
+        parentId: options.parentId || null,
+        isPublic: options.isPublic || false,
+        status: 'PENDING',
       },
       include: {
-        images: true,
+        parent: true,
         _count: {
           select: {
             images: true,
+            videos: true,
+            children: true,
           },
         },
       },
     });
 
-    // Transformar la carpeta para la respuesta
-    const transformedFolder = toFolderExtended(folder);
-
     // Revalidar rutas
     await revalidateFolderPaths();
 
-    logger.info('✅ Carpeta creada:', { id: folder.id, name: folder.name });
+    // Transformar y devolver resultado
+    const transformedFolder = transformFolder(folder);
+    crudLogger.info('✅ Carpeta creada correctamente:', { id: transformedFolder.id, name: transformedFolder.name });
     return transformedFolder;
   } catch (error) {
-    logger.error('❌ Error al crear carpeta:', error);
-    throw new FolderError('No se pudo crear la carpeta', 'CREATE_FAILED', error);
+    // Manejar errores específicos
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'FolderCrudError') {
+      crudLogger.error(`❌ Error creando carpeta: ${(error as FolderCrudErrorData).code}`, error);
+      throw error;
+    }
+
+    // Manejar otros errores y convertirlos a FolderCrudError
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    crudLogger.error('❌ Error inesperado creando carpeta:', error);
+
+    // Determinar código de error según el mensaje
+    let errorCode = FOLDER_ERROR_CODES.UNEXPECTED_ERROR;
+
+    if (errorMessage.includes('permission') || errorMessage.includes('permiso')) {
+      errorCode = FOLDER_ERROR_CODES.PERMISSION_DENIED;
+    } else if (errorMessage.includes('already exists') || errorMessage.includes('ya existe')) {
+      errorCode = FOLDER_ERROR_CODES.ALREADY_EXISTS;
+    } else if (errorMessage.includes('not found') || errorMessage.includes('no encontrado')) {
+      errorCode = FOLDER_ERROR_CODES.PATH_INVALID;
+    }
+
+    throw createFolderCrudError(`Error al crear carpeta: ${errorMessage}`, errorCode, error);
   }
 }
 
 /**
  * Actualiza una carpeta existente
+ * @param id ID de la carpeta a actualizar
+ * @param data Datos a actualizar
+ * @returns Datos de la carpeta actualizada
  */
-export async function updateFolder(data: FolderUpdate): Promise<FolderExtended> {
+export async function updateFolder(id: string, data: UpdateFolderOptions): Promise<FolderComplete> {
   try {
-    logger.info('📝 Actualizando carpeta:', data);
+    crudLogger.info('📝 Actualizando carpeta:', { id, data });
 
-    // Si se está actualizando la ruta, verificar que no exista otra carpeta con la misma ruta
-    if (data.path) {
+    // Validar que el ID no esté vacío
+    if (!id || id.trim() === '') {
+      throw createFolderCrudError(
+        'El ID de la carpeta no puede estar vacío',
+        FOLDER_ERROR_CODES.NOT_FOUND
+      );
+    }
+
+    // Buscar la carpeta
+    const folder = await prisma.folder.findUnique({
+      where: { id },
+    });
+
+    if (!folder) {
+      throw createFolderCrudError(
+        `No se encontró ninguna carpeta con ID ${id}`,
+        FOLDER_ERROR_CODES.NOT_FOUND
+      );
+    }
+
+    // Si se actualiza la ruta, verificar que la nueva ruta sea válida
+    if (data.path && data.path !== folder.path) {
+      try {
+        const scanResult = await scanFolder(data.path, { recursive: false });
+        crudLogger.info('🔍 Nueva ruta escaneada:', {
+          path: data.path,
+          exists: true,
+          totalFiles: scanResult.totalFiles
+        });
+      } catch (error) {
+        throw createFolderCrudError(
+          `La nueva ruta no existe o no es accesible: ${data.path}`,
+          FOLDER_ERROR_CODES.PATH_INVALID,
+          error
+        );
+      }
+
+      // Verificar si ya existe otra carpeta con esa ruta
       const existingFolder = await prisma.folder.findFirst({
         where: {
           path: data.path,
-          NOT: {
-            id: data.id,
-          },
+          id: { not: id },
         },
       });
 
       if (existingFolder) {
-        throw new FolderError('Ya existe una carpeta con esta ruta', 'DUPLICATE_PATH');
+        throw createFolderCrudError(
+          `Ya existe otra carpeta con la ruta ${data.path}`,
+          FOLDER_ERROR_CODES.ALREADY_EXISTS
+        );
       }
     }
 
+    // Filtrar propiedades nulas o indefinidas para no sobrescribir datos existentes
+    const updateData = Object.fromEntries(
+      Object.entries(data).filter(([_, value]) => value !== undefined && value !== null)
+    );
+
     // Actualizar la carpeta
-    const folder = await prisma.folder.update({
-      where: { id: data.id },
-      data: {
-        name: data.name,
-        path: data.path,
-        totalFiles: data.totalFiles,
-        totalSize: data.totalSize,
-        lastIndexed: data.lastIndexed,
-        autoReindex: data.autoReindex,
-      },
+    const updatedFolder = await prisma.folder.update({
+      where: { id },
+      data: updateData,
       include: {
-        images: true,
+        parent: true,
         _count: {
           select: {
             images: true,
+            videos: true,
+            children: true,
           },
         },
       },
     });
 
-    // Transformar la carpeta para la respuesta
-    const transformedFolder = toFolderExtended(folder);
-
     // Revalidar rutas
     await revalidateFolderPaths();
 
-    logger.info('✅ Carpeta actualizada:', { id: folder.id, name: folder.name });
+    // Transformar y devolver resultado
+    const transformedFolder = transformFolder(updatedFolder);
+    crudLogger.info('✅ Carpeta actualizada correctamente:', { id: transformedFolder.id });
     return transformedFolder;
   } catch (error) {
-    logger.error('❌ Error al actualizar carpeta:', error);
-    throw new FolderError('No se pudo actualizar la carpeta', 'UPDATE_FAILED', error);
+    // Manejar errores específicos
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'FolderCrudError') {
+      crudLogger.error(`❌ Error actualizando carpeta: ${(error as FolderCrudErrorData).code}`, error);
+      throw error;
+    }
+
+    // Manejar otros errores
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    crudLogger.error('❌ Error inesperado actualizando carpeta:', error);
+
+    // Determinar código de error según el mensaje
+    let errorCode = FOLDER_ERROR_CODES.UNEXPECTED_ERROR;
+
+    if (errorMessage.includes('permission') || errorMessage.includes('permiso')) {
+      errorCode = FOLDER_ERROR_CODES.PERMISSION_DENIED;
+    } else if (errorMessage.includes('already exists') || errorMessage.includes('ya existe')) {
+      errorCode = FOLDER_ERROR_CODES.ALREADY_EXISTS;
+    } else if (errorMessage.includes('not found') || errorMessage.includes('no encontrado')) {
+      errorCode = FOLDER_ERROR_CODES.NOT_FOUND;
+    }
+
+    throw createFolderCrudError(`Error al actualizar carpeta: ${errorMessage}`, errorCode, error);
   }
 }
 
 /**
- * Elimina una carpeta
+ * Elimina una carpeta y sus relaciones
+ * @param id ID de la carpeta a eliminar
+ * @returns Indicador de éxito
  */
-export async function deleteFolder(id: string): Promise<boolean> {
+export async function deleteFolder(id: string): Promise<{ success: boolean; id: string }> {
   try {
-    logger.info('🗑️ Eliminando carpeta:', id);
+    crudLogger.info('🗑️ Eliminando carpeta:', { id });
 
-    // Verificar que la carpeta existe
+    // Validar que el ID no esté vacío
+    if (!id || id.trim() === '') {
+      throw new FolderCrudError(
+        'El ID de la carpeta no puede estar vacío',
+        FOLDER_ERROR_CODES.NOT_FOUND
+      );
+    }
+
+    // Verificar si la carpeta existe
     const folder = await prisma.folder.findUnique({
       where: { id },
       include: {
         _count: {
           select: {
             images: true,
+            videos: true,
+            children: true,
           },
         },
       },
     });
 
     if (!folder) {
-      throw new FolderError('Carpeta no encontrada', 'NOT_FOUND');
-    }
-
-    // Verificar si la carpeta tiene imágenes
-    if (folder._count.images > 0) {
-      throw new FolderError(
-        'No se puede eliminar una carpeta que contiene imágenes',
-        'HAS_IMAGES'
+      throw new FolderCrudError(
+        `No se encontró ninguna carpeta con ID ${id}`,
+        FOLDER_ERROR_CODES.NOT_FOUND
       );
     }
 
-    // Eliminar la carpeta
-    await prisma.folder.delete({
-      where: { id },
+    // Iniciar transacción para asegurar consistencia
+    await prisma.$transaction(async (tx) => {
+      // Eliminar imágenes relacionadas
+      if (folder._count.images > 0) {
+        crudLogger.info(`Eliminando ${folder._count.images} imágenes de la carpeta:`, { folderId: id });
+        await tx.image.deleteMany({
+          where: { folderId: id },
+        });
+      }
+
+      // Eliminar videos relacionados
+      if (folder._count.videos > 0) {
+        crudLogger.info(`Eliminando ${folder._count.videos} videos de la carpeta:`, { folderId: id });
+        await tx.video.deleteMany({
+          where: { folderId: id },
+        });
+      }
+
+      // Reasignar carpetas hijas (opcional: actualizar a null o moverlas a otra carpeta)
+      if (folder._count.children > 0) {
+        crudLogger.info(`Actualizando ${folder._count.children} carpetas hijas:`, { parentId: id });
+        await tx.folder.updateMany({
+          where: { parentId: id },
+          data: { parentId: null },
+        });
+      }
+
+      // Eliminar la carpeta
+      await tx.folder.delete({
+        where: { id },
+      });
     });
 
     // Revalidar rutas
     await revalidateFolderPaths();
 
-    logger.info('✅ Carpeta eliminada:', { id });
-    return true;
+    crudLogger.info('✅ Carpeta eliminada correctamente:', { id });
+    return { success: true, id };
   } catch (error) {
-    logger.error('❌ Error al eliminar carpeta:', error);
-    throw new FolderError('No se pudo eliminar la carpeta', 'DELETE_FAILED', error);
+    // Manejar errores específicos
+    if (error instanceof FolderCrudError) {
+      crudLogger.error(`❌ Error eliminando carpeta: ${error.code}`, error);
+      throw error;
+    }
+
+    // Manejar otros errores
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    crudLogger.error('❌ Error inesperado eliminando carpeta:', error);
+
+    // Determinar código de error según el mensaje
+    let errorCode = FOLDER_ERROR_CODES.UNEXPECTED_ERROR;
+
+    if (errorMessage.includes('permission') || errorMessage.includes('permiso')) {
+      errorCode = FOLDER_ERROR_CODES.PERMISSION_DENIED;
+    } else if (errorMessage.includes('not found') || errorMessage.includes('no encontrado')) {
+      errorCode = FOLDER_ERROR_CODES.NOT_FOUND;
+    } else if (errorMessage.includes('foreign key') || errorMessage.includes('constraint')) {
+      errorCode = FOLDER_ERROR_CODES.OPERATION_IN_PROGRESS;
+    }
+
+    throw new FolderCrudError(`Error al eliminar carpeta: ${errorMessage}`, errorCode, error);
   }
 }

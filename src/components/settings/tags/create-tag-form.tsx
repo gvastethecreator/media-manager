@@ -1,6 +1,6 @@
 'use client';
 
-import { createTag, updateTag } from '@/app/actions/tags';
+import { createTagAction, updateTagAction } from '@/app/actions/tags';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
@@ -123,7 +123,7 @@ export function CreateTagForm({
 					...tagData,
 				};
 
-				const updated = await updateTag(tag.id, updateData);
+				const updated = await updateTagAction(tag.id, updateData);
 				// Convertir el tipo de retorno a UITag para la interfaz
 				const uiUpdated = {
 					...updated,
@@ -135,7 +135,7 @@ export function CreateTagForm({
 				onUpdated?.(uiUpdated);
 				onPreview?.(uiUpdated);
 			} else {
-				const created = await createTag(tagData);
+				const created = await createTagAction(tagData);
 				// Convertir el tipo de retorno a UITag para la interfaz
 				const uiCreated = {
 					...created,

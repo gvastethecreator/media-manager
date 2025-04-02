@@ -17,17 +17,29 @@ const taskLogger = serverLogger.withContext('TaskStatsActions');
 const CACHE_REVALIDATE_SECONDS = 30;
 
 /**
- * Custom error for task stats operations
+ * Interfaz para errores de estadísticas de tareas
  */
-class TaskStatsError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'TaskStatsError';
-  }
+export interface TaskStatsErrorData {
+  name: string;
+  message: string;
+  code?: string;
+  cause?: unknown;
+}
+
+/**
+ * Función para crear errores de estadísticas de tareas (enfoque funcional)
+ */
+function createTaskStatsError(
+  message: string,
+  code?: string,
+  cause?: unknown
+): TaskStatsErrorData {
+  return {
+    name: 'TaskStatsError',
+    message,
+    code,
+    cause
+  };
 }
 
 /**
@@ -113,7 +125,7 @@ export async function getTaskStats() {
         return stats;
       } catch (error) {
         taskLogger.error('❌ Error getting task statistics:', error);
-        throw new TaskStatsError('Failed to get task statistics', 'STATS_FAILED', error);
+        throw createTaskStatsError('Failed to get task statistics', 'STATS_FAILED', error);
       }
     },
     ['task-stats'],
@@ -209,7 +221,7 @@ export async function getTaskTypeMetrics(type: TaskType) {
         return metrics;
       } catch (error) {
         taskLogger.error('❌ Error getting task type metrics:', error);
-        throw new TaskStatsError('Failed to get task type metrics', 'METRICS_FAILED', error);
+        throw createTaskStatsError('Failed to get task type metrics', 'METRICS_FAILED', error);
       }
     },
     ['task-type-metrics', type],
@@ -293,7 +305,7 @@ export async function getTaskFailureAnalysis() {
         return failuresByType;
       } catch (error) {
         taskLogger.error('❌ Error analyzing task failures:', error);
-        throw new TaskStatsError('Failed to analyze task failures', 'ANALYSIS_FAILED', error);
+        throw createTaskStatsError('Failed to analyze task failures', 'ANALYSIS_FAILED', error);
       }
     },
     ['task-failure-analysis'],

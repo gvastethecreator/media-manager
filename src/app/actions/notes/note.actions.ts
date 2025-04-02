@@ -5,20 +5,16 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import {
-	deserializeTags,
-	fromNoteComplete,
-	processNoteFields,
-	toCreateNoteData,
-	toNoteComplete,
-	toUpdateNoteData
+    deserializeTags,
+    fromPrismaNote,
+    toCreateNoteData,
+    toUpdateNoteData
 } from '@/transformers/note';
 import type {
-	CreateNoteData,
-	NoteBase,
-	NoteComplete,
-	NoteWithRelations,
-	NoteWithRelationsComplete,
-	NoteWithStats
+    CreateNoteData,
+    NoteBase,
+    NoteComplete,
+    NoteWithStats
 } from '@/types/entities/note';
 import type { FileItem } from '@/types/file-item';
 import { createNoteSchema, updateNoteSchema } from '@/utils/note/validators';
@@ -80,7 +76,7 @@ export async function getNotes(): Promise<NoteWithStats[]> {
 		// Procesamos los campos serializados y transformamos con los nuevos transformadores
 		return notes.map((note) => {
 		    // Transformar con el nuevo transformador
-		    const noteComplete = toNoteComplete(note);
+		    const noteComplete = fromPrismaNote(note);
 
 			return {
 				...noteComplete,
@@ -127,7 +123,7 @@ export async function getNote(id: string): Promise<NoteComplete> {
 		}
 
 		// Transformar con el nuevo transformador
-		const noteComplete = toNoteComplete(note);
+		const noteComplete = fromPrismaNote(note);
 
 		noteLogger.info('✅ Nota obtenida:', noteComplete.title);
 		return noteComplete;
@@ -160,7 +156,7 @@ export async function createNote(data: CreateNoteData): Promise<NoteComplete> {
 		});
 
 		// Transformar resultado
-		const noteComplete = toNoteComplete(note);
+		const noteComplete = fromPrismaNote(note);
 
 		await emit({
 			type: 'notes:modified',
@@ -198,7 +194,7 @@ export async function updateNote(id: string, data: Partial<CreateNoteData>): Pro
 		});
 
 		// Transformar resultado
-		const noteComplete = toNoteComplete(note);
+		const noteComplete = fromPrismaNote(note);
 
 		await emit({
 			type: 'notes:modified',
@@ -295,9 +291,17 @@ export async function getNotesWithProcessedFields(): Promise<Array<NoteBase & { 
 }
 
 export async function getNoteImages(noteId: string): Promise<FileItem[]> {
-	try {
-		noteLogger.info('🖼️ Obteniendo imágenes de nota:', noteId);
+	noteLogger.info('🖼️ Obteniendo imágenes de nota:', noteId);
 
+	if (!noteId || typeof noteId !== 'string' || noteId.trim() === '') {
+		noteLogger.warn('❌ Intento de obtener imágenes con ID de nota inválido:', noteId);
+		throw createNoteError(
+			'ID de nota inválido proporcionado.',
+			NoteErrorCode.VALIDATION_ERROR,
+		);
+	}
+
+	try {
 		const note = await prisma.note.findUnique({
 			where: { id: noteId },
 			include: {
@@ -331,13 +335,20 @@ export async function getNoteImages(noteId: string): Promise<FileItem[]> {
 		}));
 	} catch (error) {
 		noteLogger.error('❌ Error al obtener imágenes de nota:', error);
-		throw createNoteError('No se pudieron obtener las imágenes de la nota', NoteErrorCode.OPERATION_FAILED, error);
+		if (error instanceof Error && error.name === 'NoteError') {
+			throw error;
+		}
+		throw createNoteError(
+			'No se pudieron obtener las imágenes de la nota',
+			NoteErrorCode.OPERATION_FAILED,
+			error,
+		);
 	}
 }
 
 export async function addImageToNote(noteId: string, imageId: string): Promise<void> {
 	try {
-		noteLogger.info('🔄 Añadiendo imagen a nota:', { noteId, imageId });
+		noteLogger.info('�� Añadiendo imagen a nota:', { noteId, imageId });
 
 		// Verificar si la nota existe
 		const note = await prisma.note.findUnique({

@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
-import { FOLDER_EVENTS, folderService } from '@/services/folder.service';
+import { FOLDER_EVENTS, folderService } from '@/services/folder-service-export';
 import type { ProcessStatus } from '@/types/process';
 import { type NextRequest, NextResponse } from 'next/server';
 

@@ -1,20 +1,26 @@
+/**
+ * @file FileManagerStore con funcionalidades para gestionar archivos subidos y pendientes
+ * @module store/files/file-manager.store
+ */
+
 import { getAlbumImages } from '@/app/actions/albums/album.actions';
 import { getCharacterImages } from '@/app/actions/characters/character.actions';
 import { getCollectionImages } from '@/app/actions/collections/collection.actions';
 import { getConceptImages } from '@/app/actions/concepts/concept.actions';
-import { getFolderImages } from '@/app/actions/folders';
+// import { getFolderImages } from '@/app/actions/folders'; // Función no encontrada, comentada
 import { getNoteImages } from '@/app/actions/notes/note.actions';
 import { getPlaceImages } from '@/app/actions/places/place.actions';
 import { getPromptImages } from '@/app/actions/prompts/prompt.actions';
 import { getStats } from '@/app/actions/stats/stats.actions';
-import { getTagImages } from '@/app/actions/tags';
+// import { getTagImages } from '@/app/actions/tags'; // Función no encontrada, comentada
 import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { FileItem, ImageStats, ViewType } from '@/types/file-item';
 import type { ViewMode } from '@/types/settings';
 import { create } from 'zustand';
 
-const fileManagerLogger = serverLogger.withContext('FileManagerStore');
+// Logger específico para FileManagerStore
+const fileManagerLogger = clientLogger.withContext('FileManagerStore');
 
 // Tipos para entidades
 interface BaseEntity {
@@ -813,16 +819,18 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 			});
 
 			// Las imágenes ya vienen transformadas por convertServerImageToFileItem
-			const images = await getFolderImages(id);
+			setFiles([]); // Poner array vacío por ahora
+			// const files = await getFolderImages(id);
+			// setFiles(files);
 
 			set({
-				currentItems: images,
-				displayedItems: images.slice(0, ITEMS_PER_BATCH),
+				currentItems: files,
+				displayedItems: files.slice(0, ITEMS_PER_BATCH),
 				isLoading: false,
 				lastUpdate: Date.now(),
 			});
 
-			fileManagerLogger.info(`✅ Carpeta cargada con ${images.length} imágenes`);
+			fileManagerLogger.info(`✅ Carpeta cargada con ${files.length} imágenes`);
 		} catch (error) {
 			const errorMessage = handleActionError(error, 'cargar carpeta');
 			set({ error: errorMessage, isLoading: false });

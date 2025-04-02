@@ -8,7 +8,7 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useFileManager } from '@/store/files/file-manager.store';
 import { ScrollText } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
-const viewLogger = serverLogger.withContext('NotesView');
+const viewLogger = clientLogger.withContext('NotesView');
 
 export function NotesView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();

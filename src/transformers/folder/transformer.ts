@@ -5,8 +5,8 @@
 
 import { Logger } from '@/lib/logger';
 import type { Folder, FolderComplete, FolderExtended } from '@/types/entities/folder/types';
-import { extendFolder } from './serializers';
 import { toFolderComplete } from './converters';
+import { extendFolder } from './serializers';
 
 const logger = new Logger('FolderTransformer');
 
@@ -17,7 +17,7 @@ const logger = new Logger('FolderTransformer');
  * @param folder Objeto Folder a transformar (puede ser de Prisma, parcial, etc)
  * @returns Objeto FolderComplete con todas las propiedades
  */
-export function transformFolder(folder: any): FolderComplete {
+function transformFolderBase(folder: any): FolderComplete {
   try {
     // Validar entrada
     if (!folder || typeof folder !== 'object') {
@@ -66,14 +66,14 @@ export function transformFolder(folder: any): FolderComplete {
  * @param isOpen Estado de apertura (opcional)
  * @returns Objeto FolderExtended con propiedades de UI
  */
-export function transformFolderToExtended(
+function transformFolderToExtended(
   folder: Folder | FolderComplete,
   isSelected = false,
   isOpen = false
 ): FolderExtended {
   try {
     // Primero asegurar que tenemos un FolderComplete
-    const folderComplete = 'stats' in folder ? folder : transformFolder(folder);
+    const folderComplete = 'stats' in folder ? folder : transformFolderBase(folder);
 
     // Extender con propiedades de UI
     return {
@@ -101,3 +101,10 @@ export function transformFolderToExtended(
     } as FolderExtended;
   }
 }
+
+// Exportar las funciones principales con sus nombres finales
+export {
+    transformFolderBase,
+    transformFolderToExtended
+};
+

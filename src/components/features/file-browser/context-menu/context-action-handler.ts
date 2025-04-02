@@ -1,6 +1,6 @@
 'use client';
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 
 // Importaciones de server actions para entidades
@@ -27,7 +27,7 @@ import { deleteFile as deleteFileAction } from '@/app/actions/files/file.actions
 import type { ContextMenuAction, ContextMenuActionData } from '@/types/context-menu-actions';
 import type { FileItem } from '@/types/file-item';
 
-const actionLogger = serverLogger.withContext('ContextActionHandler');
+const actionLogger = clientLogger.withContext('ContextActionHandler');
 
 // Modificamos la firma para que el parámetro isMultiSelect sea opcional
 type ToggleItemSelectionFunction = (item: FileItem, isMultiSelect?: boolean) => void;

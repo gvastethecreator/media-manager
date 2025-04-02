@@ -4,7 +4,7 @@
  */
 
 import { getProperties, getProperty } from '@/app/actions/properties/property.actions';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendProperties, extendProperty } from '@/transformers/property/serializers';
 import type {
@@ -16,7 +16,7 @@ import type {
 import type { StateCreator } from 'zustand';
 import type { PropertyState } from '../types';
 
-const propertyLogger = serverLogger.withContext('PropertyStore');
+const propertyLogger = clientLogger.withContext('PropertyStore');
 
 // Slice para operaciones CRUD básicas
 export interface PropertyCoreSlice {

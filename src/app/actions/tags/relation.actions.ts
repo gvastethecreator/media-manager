@@ -5,7 +5,8 @@
  * @module app/actions/tags/relation.actions
  */
 
-import { notifyStatChange } from '@/lib/events';
+// import { notifyStatChange } from '@/lib/events'; // Comentado, usar serverEmit
+import { emit as serverEmit } from '@/lib/events/server'; // Importar serverEmit
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
@@ -92,7 +93,7 @@ export async function assignTagToImages(tagId: string, imageIds: string[]): Prom
     for (const path of REVALIDATE_PATHS) {
       revalidatePath(path);
     }
-    notifyStatChange('tags');
+    await serverEmit({ type: 'stats:change', data: { entity: 'tags' } }); // Usar serverEmit
 
     tagLogger.info('✅ Tag asignado a imágenes:', {
       tagId,
@@ -149,7 +150,7 @@ export async function removeTagFromImages(tagId: string, imageIds: string[]): Pr
     for (const path of REVALIDATE_PATHS) {
       revalidatePath(path);
     }
-    notifyStatChange('tags');
+    await serverEmit({ type: 'stats:change', data: { entity: 'tags' } }); // Usar serverEmit
 
     tagLogger.info('✅ Tag eliminado de imágenes:', {
       tagId,
@@ -255,7 +256,7 @@ export async function updateImageTags(imageId: string, tagIds: string[]): Promis
     for (const path of REVALIDATE_PATHS) {
       revalidatePath(path);
     }
-    notifyStatChange('tags');
+    await serverEmit({ type: 'stats:change', data: { entity: 'tags' } }); // Usar serverEmit
 
     tagLogger.info('✅ Tags de imagen actualizados:', {
       imageId,
@@ -310,7 +311,7 @@ export async function addImageToTag(tagId: string, imageId: string): Promise<voi
     for (const path of REVALIDATE_PATHS) {
       revalidatePath(path);
     }
-    notifyStatChange('tags');
+    await serverEmit({ type: 'stats:change', data: { entity: 'tags' } }); // Usar serverEmit
 
     tagLogger.info('✅ Imagen añadida al tag:', {
       tagId,

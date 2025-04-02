@@ -4,14 +4,14 @@
  * @description Implementación del slice core para la gestión de trabajos en cola
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { QueueJobService } from '@/services/queue-job.service';
 import type { CreateQueueJobInput, QueueJobExtended, UpdateQueueJobInput } from '@/types/entities/queue-job';
 import type { StateCreator } from 'zustand';
 import type { QueueJobState } from '../types';
 
 // Logger para el slice
-const coreLogger = serverLogger.withContext('QueueJobStore:Core');
+const coreLogger = clientLogger.withContext('QueueJobStore:Core');
 
 /**
  * Slice que contiene el estado y las acciones principales para los trabajos en cola

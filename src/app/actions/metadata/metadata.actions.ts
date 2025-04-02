@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import type { Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
+import { createMetadataError as createMetadataErrorAction } from './index';
 import type { ImageMetadata, ImageWithMetadata, UpdateMetadataInput } from './metadata-types.actions';
 
 // Configuración y utilidades
@@ -73,7 +74,7 @@ export async function getImageMetadata(imageId: string): Promise<ImageWithMetada
 		});
 
 		if (!image) {
-			throw createMetadataError('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
+			throw await createMetadataErrorAction('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
 		}
 
 		metadataLogger.info('✅ Metadatos obtenidos');
@@ -83,7 +84,7 @@ export async function getImageMetadata(imageId: string): Promise<ImageWithMetada
 		if (error instanceof Error && error.name === 'MetadataError') {
 			throw error;
 		}
-		throw createMetadataError('No se pudieron obtener los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
+		throw await createMetadataErrorAction('No se pudieron obtener los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -96,7 +97,7 @@ export async function updateImageMetadata(imageId: string, data: UpdateMetadataI
 		});
 
 		if (!image) {
-			throw createMetadataError('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
+			throw await createMetadataErrorAction('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
 		}
 
 		// Obtener los metadatos actuales
@@ -133,7 +134,7 @@ export async function updateImageMetadata(imageId: string, data: UpdateMetadataI
 		if (error instanceof Error && error.name === 'MetadataError') {
 			throw error;
 		}
-		throw createMetadataError('No se pudieron actualizar los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
+		throw await createMetadataErrorAction('No se pudieron actualizar los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -146,7 +147,7 @@ export async function clearImageMetadata(imageId: string): Promise<ImageWithMeta
 		});
 
 		if (!image) {
-			throw createMetadataError('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
+			throw await createMetadataErrorAction('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
 		}
 
 		// Actualizar la imagen limpiando los metadatos
@@ -167,6 +168,6 @@ export async function clearImageMetadata(imageId: string): Promise<ImageWithMeta
 		if (error instanceof Error && error.name === 'MetadataError') {
 			throw error;
 		}
-		throw createMetadataError('No se pudieron limpiar los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
+		throw await createMetadataErrorAction('No se pudieron limpiar los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
 	}
 }

@@ -6,7 +6,7 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useWildcardStore } from '@/store/entities/wildcard';
 import { WandSparkles } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -32,7 +32,7 @@ export interface WildcardWithStats {
 	usageCount: number;
 }
 
-const viewLogger = serverLogger.withContext('WildcardsView');
+const viewLogger = clientLogger.withContext('WildcardsView');
 
 // Componente memoizado para cada tarjeta de comodín
 const MemoizedWildcardCard = React.memo(

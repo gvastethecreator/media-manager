@@ -104,50 +104,56 @@ export function useCategoryStats(initialData: NavigationData) {
 						0
 					);
 				case 'characters':
-					return characters.reduce(
-						(sum: number, character: { _count?: { images: number } }) => sum + (character._count?.images || 0),
-						0
-					);
+					return Array.isArray(characters)
+						? characters.reduce(
+								(sum: number, character: { _count?: { images: number } }) => sum + (character?._count?.images || 0),
+								0
+						  )
+						: 0;
 				case 'places':
-					return places.reduce(
-						(sum: number, place: { _count?: { images: number } }) => sum + (place._count?.images || 0),
-						0
-					);
+					return Array.isArray(places)
+						? places.reduce(
+								(sum: number, place: { _count?: { images: number } }) => sum + (place?._count?.images || 0),
+								0
+						  )
+						: 0;
 				case 'world-items':
-					return worldItems.reduce(
-						(sum: number, worldItem: { _count?: { images: number } }) => sum + (worldItem._count?.images || 0),
-						0
-					);
+					return Array.isArray(worldItems)
+						? worldItems.reduce(
+								(sum: number, worldItem: { _count?: { images: number } }) => sum + (worldItem?._count?.images || 0),
+								0
+						  )
+						: 0;
 				case 'concepts':
-					return concepts.reduce(
-						(sum: number, concept: { _count?: { images: number } }) => sum + (concept._count?.images || 0),
+					return Array.isArray(concepts) ? concepts.reduce(
+						(sum: number, concept: { _count?: { images: number } }) => sum + (concept?._count?.images || 0),
 						0
-					);
+					) : 0;
 				case 'prompts':
-					return prompts.reduce(
-						(sum: number, prompt: { _count?: { images: number } }) => sum + (prompt._count?.images || 0),
+					return Array.isArray(prompts) ? prompts.reduce(
+						(sum: number, prompt: { _count?: { images: number } }) => sum + (prompt?._count?.images || 0),
 						0
-					);
+					) : 0;
 				case 'notes':
-					return notes.reduce(
-						(sum: number, note: { _count?: { images: number } }) => sum + (note._count?.images || 0),
+					return Array.isArray(notes) ? notes.reduce(
+						(sum: number, note: { _count?: { images: number } }) => sum + (note?._count?.images || 0),
 						0
-					);
+					) : 0;
 				case 'groups':
-					return groups.reduce(
-						(sum: number, group: { _count?: { images: number } }) => sum + (group._count?.images || 0),
+					return Array.isArray(groups) ? groups.reduce(
+						(sum: number, group: { _count?: { images: number } }) => sum + (group?._count?.images || 0),
 						0
-					);
+					) : 0;
 				case 'properties':
-					return properties.reduce(
-						(sum: number, property: { _count?: { images: number } }) => sum + (property._count?.images || 0),
+					return Array.isArray(properties) ? properties.reduce(
+						(sum: number, property: { _count?: { images: number } }) => sum + (property?._count?.images || 0),
 						0
-					);
+					) : 0;
 				case 'wildcards':
-					return wildcards.reduce(
-						(sum: number, wildcard: { _count?: { images: number } }) => sum + (wildcard._count?.images || 0),
+					return Array.isArray(wildcards) ? wildcards.reduce(
+						(sum: number, wildcard: { _count?: { images: number } }) => sum + (wildcard?._count?.images || 0),
 						0
-					);
+					) : 0;
 				default:
 					return 0;
 			}

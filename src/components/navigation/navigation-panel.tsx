@@ -4,7 +4,7 @@ import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { NavCategoryChildren, type CategoryChildrenRef } from './components/nav-category-children';
+import { type CategoryChildrenRef, NavCategoryChildren } from './components/nav-category-children';
 import { NavCategoryItem } from './components/nav-category-item';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
@@ -140,7 +140,12 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 
 				// De lo contrario, verificar si algún item de la categoría coincide con la vista actual
 				const items = getCategoryItems(cat.id);
-				return items.some(item => item.id === currentView);
+
+				// DEBUG: Log para ver qué devuelve getCategoryItems
+				console.log(`[NavPanel Debug] Category: ${cat.id}, Items:`, items);
+
+				// Añadir guarda para asegurarse de que 'items' es un array antes de llamar a .some()
+				return Array.isArray(items) && items.some(item => item.id === currentView);
 			});
 
 			if (parentCategory) {

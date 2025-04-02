@@ -2,7 +2,11 @@
 
 import { prisma } from '@/lib/prisma';
 import { validateName } from '@/lib/validations';
-import { mapCreateGroupDataToPrisma, mapUpdateGroupDataToPrisma } from '@/transformers/group/mappers';
+import {
+    fromPrismaGroup,
+    toPrismaGroup,
+    validateGroup
+} from '@/transformers/group/serializers';
 import type { CreateGroupData, GroupWithStats, UpdateGroupData } from '@/types/entities/group/types';
 import { revalidatePath } from 'next/cache';
 
@@ -46,7 +50,7 @@ export async function getGroups(): Promise<GroupWithStats[]> {
  */
 export async function getGroup(id: string): Promise<GroupWithStats | null> {
 	try {
-		return await prisma.group.findUnique({
+		const group = await prisma.group.findUnique({
 			where: { id },
 			include: {
 				_count: {
@@ -68,6 +72,8 @@ export async function getGroup(id: string): Promise<GroupWithStats | null> {
 				},
 			},
 		});
+		if (!group) throw new Error('Grupo no encontrado');
+		return fromPrismaGroup(group);
 	} catch (error) {
 		console.error('Error al obtener grupo:', error);
 		throw new Error('No se pudo obtener el grupo');
@@ -82,8 +88,10 @@ export async function createGroup(data: CreateGroupData): Promise<GroupWithStats
 		// Validar nombre único
 		await validateName('group', data.name);
 
+		validateGroup(data);
+		const prismaData = toPrismaGroup(data);
 		const group = await prisma.group.create({
-			data: mapCreateGroupDataToPrisma(data),
+			data: prismaData,
 			include: {
 				_count: {
 					select: {
@@ -106,7 +114,7 @@ export async function createGroup(data: CreateGroupData): Promise<GroupWithStats
 		});
 
 		revalidatePath('/settings');
-		return group;
+		return fromPrismaGroup(group);
 	} catch (error) {
 		console.error('Error al crear grupo:', error);
 		throw error;
@@ -124,9 +132,11 @@ export async function updateGroup(id: string, data: UpdateGroupData): Promise<Gr
 			await validateName('group', data.name);
 		}
 
+		validateGroup(data);
+		const prismaData = toPrismaGroup(data);
 		const group = await prisma.group.update({
 			where: { id },
-			data: mapUpdateGroupDataToPrisma(data),
+			data: prismaData,
 			include: {
 				_count: {
 					select: {
@@ -149,7 +159,7 @@ export async function updateGroup(id: string, data: UpdateGroupData): Promise<Gr
 		});
 
 		revalidatePath('/settings');
-		return group;
+		return fromPrismaGroup(group);
 	} catch (error) {
 		console.error('Error al actualizar grupo:', error);
 		throw error;
@@ -181,7 +191,7 @@ export async function toggleGroupFavorite(id: string): Promise<GroupWithStats> {
 		const current = await prisma.group.findUnique({ where: { id } });
 		if (!current) throw new Error('Grupo no encontrado');
 
-		const group = await prisma.group.update({
+		const updatedGroup = await prisma.group.update({
 			where: { id },
 			data: { isFavorite: !current.isFavorite },
 			include: {
@@ -206,7 +216,7 @@ export async function toggleGroupFavorite(id: string): Promise<GroupWithStats> {
 		});
 
 		revalidatePath('/settings');
-		return group;
+		return fromPrismaGroup(updatedGroup);
 	} catch (error) {
 		console.error('Error al actualizar favorito:', error);
 		throw error;

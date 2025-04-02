@@ -1,13 +1,13 @@
 import { getCollections } from '@/app/actions/collections/collection.actions';
 import { getFolders } from '@/app/actions/folders';
 import { getTagImages, getTags } from '@/app/actions/tags';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { FileItem, RelatedTag } from '@/types/file-item';
 import type { Collection } from '@prisma/client';
 import { create } from 'zustand';
 
 const ITEMS_PER_BATCH = 50;
-const filesLogger = serverLogger.withContext('FilesStore');
+const filesLogger = clientLogger.withContext('FilesStore');
 
 interface CollectionWithCount {
 	id: string;

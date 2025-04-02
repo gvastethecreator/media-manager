@@ -1,10 +1,10 @@
 /**
- * @file Store de QueueJob
+ * @file Store global para la gestión de trabajos en cola
  * @module store/entities/queue-job/queue-job-store
- * @description Implementación del store para la gestión de trabajos en cola
+ * @description Implementación del store de Zustand para trabajos en cola
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
@@ -15,7 +15,7 @@ import { createQueueJobUISlice } from './slices/ui';
 import { QueueJobState, initialQueueJobState } from './types';
 
 // Logger para el store
-const logger = serverLogger.withContext('QueueJobStore');
+const logger = clientLogger.withContext('QueueJobStore');
 
 /**
  * Store para la gestión de trabajos en cola

@@ -6,7 +6,7 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { usePropertyStore } from '@/store/entities/property';
 import { Variable } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -44,7 +44,7 @@ export interface PropertyWithStats {
 	totalAssociations: number;
 }
 
-const viewLogger = serverLogger.withContext('PropertiesView');
+const viewLogger = clientLogger.withContext('PropertiesView');
 
 // Componente memoizado para cada tarjeta de propiedad
 const MemoizedPropertyCard = React.memo(

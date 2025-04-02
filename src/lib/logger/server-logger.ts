@@ -208,7 +208,13 @@ export class ServerLogger {
 
 	error(message: string, context?: unknown, requestId?: string, startTime?: number): void {
 		if (this.shouldLog('error')) {
-			console.error(this.formatServerMessage('error', message, context, requestId, startTime));
+			// Asegurarse de que el mensaje y el contexto sean strings válidos
+			const safeMessage = String(message);
+			const safeContext = context ?
+				(typeof context === 'string' ? context : JSON.stringify(context, null, 2))
+				: undefined;
+
+			console.error(this.formatServerMessage('error', safeMessage, safeContext, requestId, startTime));
 		}
 	}
 

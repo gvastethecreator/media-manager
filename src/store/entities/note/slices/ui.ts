@@ -1,9 +1,9 @@
-import { serverLogger } from '@/lib/logger/server-logger';
-import { NoteViewMode } from '@/types/entities/note/enums';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { NoteViewMode } from '@/types/entities/note';
 import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
-const uiLogger = serverLogger.withContext('NoteStore:UI');
+const uiLogger = clientLogger.withContext('NoteStore:UI');
 
 export interface UISlice {
 	// Estado

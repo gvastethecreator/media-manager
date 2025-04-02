@@ -100,19 +100,15 @@ const CategoryCounters = memo(function CategoryCounters({
 					size="sm"
 					className="h-5 w-5 p-0 bg-background/50 hover:bg-secondary/60 rounded text-muted-foreground hover:text-foreground transition-all ml-1"
 					title={viewMode === 'list' ? 'Cambiar a vista de cuadrícula' : 'Cambiar a vista de lista'}
+					onClick={handleViewModeToggle}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							handleViewModeToggle(e as any);
+						}
+					}}
 				>
-					<button
-						onClick={handleViewModeToggle}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter' || e.key === ' ') {
-								e.preventDefault();
-								handleViewModeToggle();
-							}
-						}}
-						type="button"
-					>
-						{viewMode === 'list' ? <Grid className="h-3 w-3" /> : <List className="h-3 w-3" />}
-					</button>
+					{viewMode === 'list' ? <Grid className="h-3 w-3" /> : <List className="h-3 w-3" />}
 				</Button>
 			)}
 		</div>
@@ -182,6 +178,14 @@ export const NavCategoryItem = memo(function NavCategoryItem({
 				isCurrent ? 'bg-secondary/30' : 'hover:bg-secondary/10'
 			),
 		[showLabel, isCurrent]
+	);
+
+	const handleViewModeToggle = useCallback(
+		(e: React.MouseEvent) => {
+			e.stopPropagation();
+			onToggleViewMode?.();
+		},
+		[onToggleViewMode]
 	);
 
 	const categoryItem = (

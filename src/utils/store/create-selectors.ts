@@ -24,16 +24,19 @@ export function createSelectors<T extends object, A>(
         return target[prop as keyof typeof target];
       }
 
-      // De lo contrario, crear un selector para esa propiedad
-      return target((state) => {
+      // En lugar de intentar usar hooks directamente, creamos una función segura
+      // que utiliza el método getState directamente para evitar errores de hooks
+      return (state: any) => {
         if (typeof prop !== 'string') {
           throw new Error(`Attempted to access property using non-string key: ${String(prop)}`);
         }
 
-        return state[prop as keyof T & A];
-      });
+        // Si se proporciona un estado, usar ese estado; de lo contrario, obtener el estado actual
+        const storeState = state || target.getState();
+        return storeState[prop as keyof T & A];
+      };
     },
   }) as typeof store & {
-    [K in keyof T & A]: () => T[K & keyof T] | A[K & keyof A]
+    [K in keyof T & A]: (state?: any) => T[K & keyof T] | A[K & keyof A]
   };
 }

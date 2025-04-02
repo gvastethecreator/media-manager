@@ -17,17 +17,29 @@ const taskLogger = serverLogger.withContext('TaskQueryActions');
 const CACHE_REVALIDATE_SECONDS = 30;
 
 /**
- * Error personalizado para consultas de tareas
+ * Interfaz para errores de consulta de tareas
  */
-class TaskQueryError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'TaskQueryError';
-  }
+export interface TaskQueryErrorData {
+  name: string;
+  message: string;
+  code?: string;
+  cause?: unknown;
+}
+
+/**
+ * Función para crear errores de consulta de tareas (enfoque funcional)
+ */
+function createTaskQueryError(
+  message: string,
+  code?: string,
+  cause?: unknown
+): TaskQueryErrorData {
+  return {
+    name: 'TaskQueryError',
+    message,
+    code,
+    cause
+  };
 }
 
 /**
@@ -50,7 +62,7 @@ export async function getTask(id: string): Promise<ScheduledTask | null> {
     return task;
   } catch (error) {
     taskLogger.error('❌ Error al buscar tarea:', error);
-    throw new TaskQueryError('No se pudo obtener la tarea', 'GET_FAILED', error);
+    throw createTaskQueryError('No se pudo obtener la tarea', 'GET_FAILED', error);
   }
 }
 
@@ -88,7 +100,7 @@ export async function getTasks(filters?: {
         return tasks;
       } catch (error) {
         taskLogger.error('❌ Error al obtener lista de tareas:', error);
-        throw new TaskQueryError('No se pudo obtener la lista de tareas', 'LIST_FAILED', error);
+        throw createTaskQueryError('No se pudo obtener la lista de tareas', 'LIST_FAILED', error);
       }
     },
     ['tasks-list', JSON.stringify(filters)],
@@ -127,7 +139,7 @@ export async function getPendingTasks(): Promise<ScheduledTask[]> {
         return tasks;
       } catch (error) {
         taskLogger.error('❌ Error al obtener tareas pendientes:', error);
-        throw new TaskQueryError('No se pudo obtener la lista de tareas pendientes', 'PENDING_FAILED', error);
+        throw createTaskQueryError('No se pudo obtener la lista de tareas pendientes', 'PENDING_FAILED', error);
       }
     },
     ['tasks-pending'],
@@ -161,7 +173,7 @@ export async function getTasksByType(type: TaskType): Promise<ScheduledTask[]> {
         return tasks;
       } catch (error) {
         taskLogger.error('❌ Error al buscar tareas por tipo:', error);
-        throw new TaskQueryError('No se pudo obtener la lista de tareas por tipo', 'TYPE_FAILED', error);
+        throw createTaskQueryError('No se pudo obtener la lista de tareas por tipo', 'TYPE_FAILED', error);
       }
     },
     ['tasks-by-type', type],
@@ -198,6 +210,6 @@ export async function searchTasks(query: string): Promise<ScheduledTask[]> {
     return tasks;
   } catch (error) {
     taskLogger.error('❌ Error al buscar tareas:', error);
-    throw new TaskQueryError('No se pudo realizar la búsqueda de tareas', 'SEARCH_FAILED', error);
+    throw createTaskQueryError('No se pudo realizar la búsqueda de tareas', 'SEARCH_FAILED', error);
   }
 }

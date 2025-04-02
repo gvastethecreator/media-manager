@@ -3,14 +3,14 @@
  * @module store/entities/tag/slices/core.slice
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { transformTag } from '@/transformers/tag';
 import type { Tag } from '@/types/entities/tag/types';
 import { StateCreator } from 'zustand';
 import type { TagCoreActions, TagCoreState, TagStore } from '../types';
 
-const logger = serverLogger.withContext('TagCoreSlice');
+const logger = clientLogger.withContext('TagCoreSlice');
 
 /**
  * 📦 Creador del slice core para el store de Tag

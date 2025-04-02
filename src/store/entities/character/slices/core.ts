@@ -3,7 +3,8 @@
  * @module store/entities/character/slices/core
  */
 
-import { serializeArray, serializeObject, toExtendedCharacter } from '@/transformers/character';
+import { serializeArray, serializeStats } from '@/transformers/character/serializers';
+import { transformCharacterToExtended } from '@/transformers/character/transformer';
 import type { CharacterBase, CharacterExtended } from '@/types/entities/character';
 import { generateCharacterId } from '@/utils/character';
 import type { StateCreator } from 'zustand';
@@ -33,7 +34,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 			const characterExtended =
 				'isSelected' in characterWithId
 					? (characterWithId as CharacterExtended)
-					: toExtendedCharacter(characterWithId as CharacterBase);
+					: transformCharacterToExtended(characterWithId as CharacterBase);
 
 			// Añadir al store
 			return {
@@ -62,7 +63,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 			const processedUpdates = { ...updates };
 
 			if (updates.stats && typeof updates.stats !== 'string') {
-				processedUpdates.stats = serializeObject(updates.stats);
+				processedUpdates.stats = serializeStats(updates.stats);
 			}
 
 			if (updates.filters && typeof updates.filters !== 'string') {
@@ -134,7 +135,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 				const characterExtended =
 					'isSelected' in characterWithId
 						? (characterWithId as CharacterExtended)
-						: toExtendedCharacter(characterWithId as CharacterBase);
+						: transformCharacterToExtended(characterWithId as CharacterBase);
 
 				newCharacters[characterExtended.id] = characterExtended;
 			}
@@ -159,7 +160,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 					const processedUpdates = { ...data };
 
 					if (data.stats && typeof data.stats !== 'string') {
-						processedUpdates.stats = serializeObject(data.stats);
+						processedUpdates.stats = serializeStats(data.stats);
 					}
 
 					if (data.filters && typeof data.filters !== 'string') {

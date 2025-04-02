@@ -87,7 +87,7 @@
   "workbench.commandPalette.experimental.suggestCommands": true,
   "workbench.panel.defaultLocation": "right",
   "workbench.startupEditor": "none",
-  "workbench.iconTheme": "vs-seti",
+  "workbench.iconTheme": "bearded-icons",
   "workbench.view.showQuietly": {
     "workbench.panel.output": true
   },

@@ -14,7 +14,8 @@
     "beardedbear.beardedicons",
     "alefragnani.bookmarks",
     "rphlmr.vscode-drizzle-orm",
-    "biomejs.biome"
+    "biomejs.biome",
+    "fuzionix.file-tree-extractor"
   ],
   "unwantedRecommendations": []
 }

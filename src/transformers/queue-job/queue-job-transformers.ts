@@ -9,7 +9,7 @@ import {
     type QueueJobMetadata,
     QueueJobStatus,
 } from '@/types/entities/queue-job';
-import { deserializeJsonField, serializeJsonField } from '@/utils/transformers/json';
+import { deserializeJsonField, serializeJsonField } from '@/utils/transformers/common';
 import type { QueueJob } from '@prisma/client';
 import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
 import { es } from 'date-fns/locale';

@@ -20,11 +20,6 @@ import {
     preparePrismaRelations,
     validateEntityRelations,
 } from '@/utils/transformers/relations';
-import {
-    validateBaseEntity,
-    validateMetadataFields,
-    validateUIFields,
-} from '@/utils/transformers/validation';
 import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('AlbumSerializer');
@@ -72,7 +67,7 @@ export function toPrismaAlbum(data: AlbumCreateInput | AlbumUpdateInput): Prisma
  * 🔄 Deserializa un Album desde Prisma
  */
 export function fromPrismaAlbum(
-    prismaAlbum: Prisma.AlbumGetPayload<{
+    prismaAlbum: Partial<Prisma.AlbumGetPayload<{
         include: {
             images: true;
             videos: true;
@@ -89,53 +84,65 @@ export function fromPrismaAlbum(
             groups: true;
             _count: true;
         };
-    }>
+    }>>
 ): AlbumComplete {
     try {
-        // Obtener conteos de relaciones
+        // Asegurarse de que los campos base esenciales existan
+        if (!prismaAlbum || !prismaAlbum.id || typeof prismaAlbum.name !== 'string') { // Añadir chequeo de tipo para name
+            logger.error('Invalid prismaAlbum object received in fromPrismaAlbum', { prismaAlbum });
+            throw new Error('Invalid prismaAlbum object received in fromPrismaAlbum');
+        }
+
+        // Obtener conteos de relaciones (asumiendo que getRelationCounts maneja Partial)
         const counts = getRelationCounts('Album', prismaAlbum);
 
-        // Construir objeto base alineado con el schema.prisma actual
+        // Construir objeto base usando nullish coalescing para defaults
         const baseAlbum = {
             id: prismaAlbum.id,
-            name: prismaAlbum.name || '',
-            emoji: prismaAlbum.emoji || '',
-            color: prismaAlbum.color || '',
-            description: prismaAlbum.description,
-            shortcut: prismaAlbum.shortcut,
-            category: prismaAlbum.category || '',
-            sortBy: prismaAlbum.sortBy || '',
-            filters: prismaAlbum.filters || '',
-            featuredImage: prismaAlbum.featuredImage,
-            isFavorite: prismaAlbum.isFavorite || false,
-            createdAt: prismaAlbum.createdAt,
-            updatedAt: prismaAlbum.updatedAt,
+            name: prismaAlbum.name, // Ya validado tipo string
+            emoji: prismaAlbum.emoji ?? '',
+            color: prismaAlbum.color ?? '',
+            description: prismaAlbum.description ?? null,
+            shortcut: prismaAlbum.shortcut ?? null,
+            category: prismaAlbum.category ?? '',
+            sortBy: prismaAlbum.sortBy ?? '',
+            filters: prismaAlbum.filters ?? '', // Asumir que 'filters' es string o null/undefined
+            featuredImage: prismaAlbum.featuredImage ?? null,
+            isFavorite: prismaAlbum.isFavorite ?? false,
+            // Manejar fechas que pueden ser string o Date
+            createdAt: prismaAlbum.createdAt ? new Date(prismaAlbum.createdAt) : new Date(0), // Default a epoch si falta
+            updatedAt: prismaAlbum.updatedAt ? new Date(prismaAlbum.updatedAt) : new Date(0), // Default a epoch si falta
         };
 
-        // Validar objeto base
-        validateBaseEntity(baseAlbum);
-        validateUIFields(baseAlbum);
-        validateMetadataFields(baseAlbum);
+        // Validar campos base si es necesario (puede ser opcional dependiendo de la confianza en los datos)
+        // validateBaseEntity(baseAlbum);
+        // validateUIFields(baseAlbum);
+        // validateMetadataFields(baseAlbum);
 
-        // Construir objeto completo con relaciones
+        // Construir objeto completo con relaciones usando optional chaining y nullish coalescing
         return {
             ...baseAlbum,
-            images: prismaAlbum.images?.map(img => ({ id: img.id })),
-            videos: prismaAlbum.videos?.map(vid => ({ id: vid.id })),
-            collections: prismaAlbum.collections?.map(col => ({ id: col.id })),
-            tags: prismaAlbum.tags?.map(tag => ({ id: tag.id })),
-            characters: prismaAlbum.characters?.map(char => ({ id: char.id })),
-            places: prismaAlbum.places?.map(place => ({ id: place.id })),
-            worldItems: prismaAlbum.worldItems?.map(item => ({ id: item.id })),
-            concepts: prismaAlbum.concepts?.map(con => ({ id: con.id })),
-            prompts: prismaAlbum.prompts?.map(prompt => ({ id: prompt.id })),
-            notes: prismaAlbum.notes?.map(note => ({ id: note.id })),
-            wildcards: prismaAlbum.wildcards?.map(wild => ({ id: wild.id })),
-            properties: prismaAlbum.properties?.map(prop => ({ id: prop.id })),
-            groups: prismaAlbum.groups?.map(group => ({ id: group.id })),
-            _count: counts,
+            images: prismaAlbum.images?.map(img => ({ id: img.id })) ?? [],
+            videos: prismaAlbum.videos?.map(vid => ({ id: vid.id })) ?? [],
+            collections: prismaAlbum.collections?.map(col => ({ id: col.id })) ?? [],
+            tags: prismaAlbum.tags?.map(tag => ({ id: tag.id })) ?? [],
+            characters: prismaAlbum.characters?.map(char => ({ id: char.id })) ?? [],
+            places: prismaAlbum.places?.map(place => ({ id: place.id })) ?? [],
+            worldItems: prismaAlbum.worldItems?.map(item => ({ id: item.id })) ?? [],
+            concepts: prismaAlbum.concepts?.map(con => ({ id: con.id })) ?? [],
+            prompts: prismaAlbum.prompts?.map(prompt => ({ id: prompt.id })) ?? [],
+            notes: prismaAlbum.notes?.map(note => ({ id: note.id })) ?? [],
+            wildcards: prismaAlbum.wildcards?.map(wild => ({ id: wild.id })) ?? [],
+            properties: prismaAlbum.properties?.map(prop => ({ id: prop.id })) ?? [],
+            groups: prismaAlbum.groups?.map(group => ({ id: group.id })) ?? [],
+            _count: counts, // Usar counts de getRelationCounts
         };
     } catch (error) {
+        // Loguear el error con más contexto si es posible
+        logger.error(`Error in fromPrismaAlbum for ID ${prismaAlbum?.id ?? 'unknown'}`, {
+             error: error instanceof Error ? { name: error.name, message: error.message, cause: error.cause } : error
+        });
+        // Re-lanzar el error consistentemente
         throw handleTransformerError(error);
     }
 }

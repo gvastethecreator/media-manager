@@ -1,12 +1,12 @@
 'use client';
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { getFolders } from '@/services/folder.service';
-import type { Folder, FolderStats } from '@/types/entities/folders';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { folderService } from '@/services/folder-service-export';
+import type { FolderStats } from '@/types/entities/folders';
 import { useCallback, useState } from 'react';
 import { type ExtendedFolder, initialStats } from '../folder-types';
 
-const stateLogger = serverLogger.withContext('FoldersState');
+const stateLogger = clientLogger.withContext('FoldersState');
 
 /**
  * Hook para gestionar el estado básico de las carpetas
@@ -22,7 +22,7 @@ export function useFoldersState() {
 		try {
 			setIsLoading(true);
 			setError(null);
-			const folders = await getFolders();
+			const folders = await folderService.getFolders();
 
 			// Transformar datos de manera segura
 			const transformedFolders = folders.map((folder) => ({

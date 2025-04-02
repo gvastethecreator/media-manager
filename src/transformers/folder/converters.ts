@@ -3,8 +3,8 @@
  * @module transformers/folder/converters
  */
 
-import { DEFAULT_FOLDER_COLOR, DEFAULT_FOLDER_EMOJI } from '@/lib/constants';
-import { Logger } from '@/lib/logger';
+import { DEFAULT_COLORS, DEFAULT_EMOJIS } from '@/lib/constants';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type {
     Folder,
     FolderComplete,
@@ -13,7 +13,7 @@ import type {
 } from '@/types/entities/folder/types';
 import { normalizeFolderPath } from './serializers';
 
-const logger = new Logger('FolderConverters');
+const logger = serverLogger.withContext('FolderConverters');
 
 /**
  * 📂 Convierte un objeto Folder de Prisma a un objeto FolderComplete
@@ -33,8 +33,8 @@ export function toFolderComplete(folder: any): FolderComplete {
       name: folder.name || '',
       path: folder.path || '',
       description: folder.description || '',
-      color: folder.color || DEFAULT_FOLDER_COLOR,
-      emoji: folder.emoji || DEFAULT_FOLDER_EMOJI,
+      color: folder.color || DEFAULT_COLORS.primary,
+      emoji: folder.emoji || DEFAULT_EMOJIS.folder,
       parentId: folder.parentId || null,
       createdAt: folder.createdAt || new Date(),
       updatedAt: folder.updatedAt || new Date(),

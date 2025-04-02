@@ -6,14 +6,16 @@ import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { groupFavoritesByType, mapCreateFavoriteDataToPrisma, toFavoriteExtended } from '@/transformers/favorite';
 import { transformImageToFileItem } from '@/transformers/favorite/serializers';
+import { transformFavoriteToExtended } from '@/transformers/favorite/transformer';
 import {
-	FavoriteAction,
-	type FavoriteBase,
-	type FavoriteCreateInput,
-	FavoriteEntityType,
-	FavoriteErrorCode,
-	FavoriteEventType,
-	type FavoriteWithImage,
+    type CreateFavoriteData,
+    FavoriteAction,
+    type FavoriteBase,
+    type FavoriteCreateInput,
+    FavoriteEntityType,
+    FavoriteErrorCode,
+    FavoriteEventType,
+    type FavoriteWithImage,
 } from '@/types/entities/favorite';
 import { revalidatePath } from 'next/cache';
 
@@ -318,5 +320,27 @@ export async function getFavoriteStats() {
 			FavoriteErrorCode.OPERATION_FAILED,
 			error
 		);
+	}
+}
+
+/**
+ * ➕ Crea un nuevo favorito
+ */
+export async function createFavorite(data: CreateFavoriteData) {
+	try {
+		favoriteLogger.info('⭐ Creando nuevo favorito:', { data });
+
+		// Utilizar el transformer para mapear datos de creación
+		const createData = toPrismaFavorite(data);
+		const favorite = await prisma.favorite.create({
+			data: createData,
+			include: { /* ... */ }
+		});
+		await revalidateAllPaths();
+		// Usar función correcta
+		return transformFavoriteToExtended(fromPrismaFavorite(favorite));
+	} catch (error) {
+		favoriteLogger.error('❌ Error al crear favorito:', { data, error });
+		throw createFavoriteError('No se pudo crear el favorito', FavoriteErrorCode.OPERATION_FAILED, error);
 	}
 }

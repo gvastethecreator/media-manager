@@ -2,7 +2,7 @@
 
 import { reindexAllFolders } from '@/app/actions/folders';
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import type {
 	ErrorResponse,
@@ -18,7 +18,7 @@ import { useFoldersOperations } from './use-folders-operations';
 import { useFoldersPolling } from './use-folders-polling';
 import { useFoldersState } from './use-folders-state';
 
-const folderLogger = serverLogger.withContext('useFolders');
+const folderLogger = clientLogger.withContext('useFolders');
 
 /**
  * Hook principal para la gestión completa de carpetas

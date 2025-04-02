@@ -1,6 +1,6 @@
 'use client';
 
-import { type TagWithStats as ServerTagWithStats, deleteTag, getTags } from '@/app/actions/tags';
+import { type TagWithStats as ServerTagWithStats, deleteTagAction, getTagsAction } from '@/app/actions/tags';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,7 +55,7 @@ export function TagsSettings() {
 		const loadTags = async () => {
 			try {
 				setIsLoading(true);
-				const data = await getTags();
+				const data = await getTagsAction();
 				// Convertir los datos para que coincidan con nuestra interfaz
 				const formattedTags = data.map(tag => ({
 					...tag,
@@ -116,17 +116,19 @@ export function TagsSettings() {
 
 	// Manejar eliminación de etiqueta
 	const handleDeleteTag = useCallback(async (id: string) => {
-		try {
-			await deleteTag(id);
-			setTags(prev => prev.filter(tag => tag.id !== id));
-			setSelectedTag(null);
-			setIsEditing(false);
-			toastService.success('Etiqueta eliminada');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar la etiqueta', {
-				description: errorMessage,
-			});
+		if (window.confirm('¿Estás seguro de que quieres eliminar esta etiqueta?')) {
+			try {
+				await deleteTagAction(id);
+				setTags(prev => prev.filter(tag => tag.id !== id));
+				setSelectedTag(null);
+				setIsEditing(false);
+				toastService.success('Etiqueta eliminada');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar la etiqueta', {
+					description: errorMessage,
+				});
+			}
 		}
 	}, []);
 
