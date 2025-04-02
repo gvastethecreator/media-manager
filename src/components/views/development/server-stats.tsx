@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
 // Logger específico para este componente
-const logger = serverLogger.withContext('ServerStats');
+const logger = clientLogger.withContext('ServerStats');
 
 // Interfaces para las estadísticas
 interface SystemStats {

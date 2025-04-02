@@ -13,29 +13,20 @@ import type {
     TagUpdateInput,
 } from '@/types/entities/tag/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
-import {
-    mapCreateTagDataToPrisma,
-    mapTagSearchOptionsToPrisma,
-    mapTagToRelatedTag,
-    mapUpdateTagDataToPrisma,
-} from './mappers';
-import {
-    extendTag,
-    fromPrismaTag,
-    parseTagFilters,
-    toPrismaTag,
-    validateTag,
-} from './serializers';
-// Importar transformador principal y sus funciones asociadas
-import { transformTag as transformTagMain, transformTagToExtended, transformTagToWithStats } from './transformer';
+import { mapTagSearchOptionsToPrisma } from './mappers';
+import { validateTag } from './serializers';
+import { transformTag as transformTagMain } from './transformer';
+
+// Re-exportar todo desde los módulos principales
+export * from './mappers';
+export * from './serializers';
+export * from './transformer';
 
 const logger = new Logger('TagTransformer');
 
-// Exportar el transformador principal y sus variantes
-export const transformTag = transformTagMain;
-export { transformTagToExtended, transformTagToWithStats };
+// Re-exportar el transformador principal con el nombre deseado
+export { transformTagMain as transformTag };
 
-// Compatibilidad con código existente:
 /**
  * 🔍 Busca tags según los criterios especificados
  */
@@ -51,7 +42,7 @@ export async function searchTags(options: TagSearchOptions): Promise<TagSearchRe
     ]);
 
     // Deserializar resultados
-    const tags = items.map(item => transformTag(item));
+    const tags = items.map(item => transformTagMain(item));
 
     return {
       items: tags,
@@ -92,7 +83,7 @@ export async function getTagById(id: string): Promise<TagComplete | null> {
       return null;
     }
 
-    return transformTag(tag);
+    return transformTagMain(tag);
   } catch (error) {
     throw handleTransformerError(error);
   }
@@ -130,7 +121,7 @@ export async function createTag(data: TagCreateInput): Promise<TagComplete> {
       },
     });
 
-    return transformTag(tag);
+    return transformTagMain(tag);
   } catch (error) {
     throw handleTransformerError(error);
   }
@@ -169,7 +160,7 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagCo
       },
     });
 
-    return transformTag(tag);
+    return transformTagMain(tag);
   } catch (error) {
     throw handleTransformerError(error);
   }
@@ -199,44 +190,16 @@ export function toRelatedTag(tag: TagComplete) {
   }
 }
 
-// Exportar transformadores individuales
-export {
-    // Serializadores
-    extendTag,
-    fromPrismaTag,
-    // Mappers
-    mapCreateTagDataToPrisma,
-    mapTagSearchOptionsToPrisma,
-    mapTagToRelatedTag,
-    mapUpdateTagDataToPrisma, parseTagFilters,
-    toPrismaTag,
-    validateTag
-};
-
-// Exportar otros serializadores
-    export {
-        extendTags,
-        formatSize,
-        fromTagComplete,
-        generateTagColor,
-        generateTagEmoji,
-        normalizeTagCategory,
-        normalizeTagRarity,
-        tagToTagWithStats,
-        toTagComplete
-    } from './serializers';
-
 // Exportar otros mappers
 export {
-    createTagFilter,
-    createTagOrderBy,
-    mapTagFiltersToPrisma,
-    transformCompleteTagToPrisma,
+    mapCreateTagDataToPrisma, mapTagFiltersToPrisma, mapTagToRelatedTag, mapUpdateTagDataToPrisma, transformCompleteTagToPrisma,
     transformTagToPrisma
 } from './mappers';
 
-// Exportar nuevos converters
+// Re-exportar funciones específicas de v2
 export {
-    mapCompleteToTag, mapTagToComplete, tagToDisplayObject
+    mapCompleteToTag,
+    mapTagToComplete,
+    tagToDisplayObject
 } from './v2/converters';
 

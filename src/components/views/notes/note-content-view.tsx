@@ -3,13 +3,13 @@
 import { getNoteImages } from '@/app/actions/notes/note.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useFileManager } from '@/store/files/file-manager.store';
 import { ScrollText } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 
-const viewLogger = serverLogger.withContext('NoteContentView');
+const viewLogger = clientLogger.withContext('NoteContentView');
 
 export function NoteContentView() {
 	const {

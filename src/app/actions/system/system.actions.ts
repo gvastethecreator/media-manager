@@ -11,6 +11,7 @@ import fs from 'fs/promises';
 import { revalidatePath, unstable_cache } from 'next/cache';
 import os from 'os';
 import path from 'path';
+import { createSystemError } from './system.errors';
 
 // Logger específico para acciones del sistema
 const systemLogger = serverLogger.withContext('SystemActions');
@@ -31,19 +32,6 @@ const revalidateSystemPaths = async () => {
 	}
 	systemLogger.info('🔄 Rutas del sistema revalidadas');
 };
-
-/**
- * Clase de error personalizada para operaciones del sistema
- */
-class SystemError extends Error {
-	constructor(
-		message: string,
-		public cause?: unknown
-	) {
-		super(message);
-		this.name = 'SystemError';
-	}
-}
 
 /**
  * Interfaz para estadísticas del sistema
@@ -134,7 +122,7 @@ export async function getSystemStats(): Promise<SystemStats> {
 				} satisfies SystemStats;
 			} catch (error) {
 				systemLogger.error('❌ Error al obtener estadísticas del sistema:', error);
-				throw new SystemError('No se pudieron obtener las estadísticas del sistema', error);
+				throw createSystemError('No se pudieron obtener las estadísticas del sistema', 'STATS_FETCH_ERROR', error);
 			}
 		},
 		['system-stats'],
@@ -250,6 +238,6 @@ export async function getSystemVersion(): Promise<{
 		};
 	} catch (error) {
 		systemLogger.error('❌ Error al obtener versión del sistema:', error);
-		throw new SystemError('No se pudo obtener la información de versión', error);
+		throw createSystemError('No se pudo obtener la información de versión', 'VERSION_FETCH_ERROR', error);
 	}
 }

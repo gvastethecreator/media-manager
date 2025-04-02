@@ -8,17 +8,18 @@ import { convertServerImageToFileItem } from '@/services/image-converter.service
 import type { ServerImage } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import {
-  mapCreateAlbumDataToPrisma,
-  mapUpdateAlbumDataToPrisma
+    mapCreateAlbumDataToPrisma,
+    mapUpdateAlbumDataToPrisma
 } from '@/transformers/album/mappers';
 import {
-  toExtendedAlbum
+    fromPrismaAlbum
 } from '@/transformers/album/serializers';
+import { transformAlbumToExtended } from '@/transformers/album/transformer';
 import type {
-  Album,
-  AlbumBase,
-  CreateAlbumData,
-  UpdateAlbumData
+    Album,
+    AlbumBase,
+    CreateAlbumData,
+    UpdateAlbumData
 } from '@/types/entities/album';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
@@ -79,108 +80,70 @@ const notifyAlbumChange = async (action: 'create' | 'update' | 'delete', album: 
 // Acciones del servidor
 export async function getAlbums(): Promise<AlbumWithStats[]> {
 	try {
-		albumLogger.info('🎞️ Obteniendo álbumes con estadísticas');
+		albumLogger.info('🎞️ Obteniendo álbumes con estadísticas simplificadas');
 
-		// Obtener álbumes con conteos y estadísticas
+		// Obtener álbumes solo con conteos básicos
 		const albums = await prisma.album.findMany({
 			include: {
 				_count: {
 					select: {
-						images: true,
+						images: true, // Conteo directo es eficiente
 						groups: true,
 						properties: true,
 						wildcards: true
 					},
 				},
-				images: {
-					select: {
-						size: true,
-						updatedAt: true,
-					},
-					orderBy: {
-						updatedAt: 'desc',
-					},
-					take: 1,
-				},
+				// Comentado/Eliminado: Incluir imágenes y calcular stats aquí es costoso
+				// images: {
+				// 	select: {
+				// 		size: true,
+				// 		updatedAt: true,
+				// 	},
+				// 	orderBy: {
+				// 		updatedAt: 'desc',
+				// 	},
+				// 	take: 1,
+				// },
 			},
 			orderBy: [
-				{
-					images: {
-						_count: 'desc',
-					},
-				},
+				// Simplificar ordenación si es posible, o mantener si es necesaria
+				// La ordenación por _count puede ser costosa
+				// { images: { _count: 'desc' } },
 				{
 					name: 'asc',
 				},
 			],
 		});
 
-		// Calcular estadísticas adicionales
-		const albumsWithStats = await Promise.all(
-			albums.map(async (album: any) => {
-				// Deserializar campos JSON utilizando el nuevo transformador
-				const extendedAlbum = toExtendedAlbum(album as AlbumBase);
+		// Mapear resultados llamando directamente a los transformadores
+		const albumsWithStats = albums.map((album: any) => {
+		    // Ahora que fromPrismaAlbum es robusto, podemos llamarlo directamente
+		    // transformAlbumToExtended también debería poder manejar el resultado.
+		    const extendedAlbum = transformAlbumToExtended(fromPrismaAlbum(album));
 
-				// Calcular tamaño total
-				const totalSize = await prisma.image.aggregate({
-					where: {
-						albums: {
-							some: {
-								id: album.id,
-							},
-						},
-					},
-					_sum: {
-						size: true,
-					},
-				});
+		    // Acceso seguro a _count
+		    const count = album._count || { images: 0, groups: 0, properties: 0, wildcards: 0 };
 
-				// Obtener distribución por carpetas
-				const distribution = await prisma.folder.findMany({
-					where: {
-						images: {
-							some: {
-								albums: {
-									some: {
-										id: album.id,
-									},
-								},
-							},
-						},
-					},
-					select: {
-						name: true,
-						_count: {
-							select: {
-								images: true,
-							},
-						},
-					},
-					take: 5,
-					orderBy: {
-						images: {
-							_count: 'desc',
-						},
-					},
-				});
+		    return {
+		        ...extendedAlbum,
+		        _count: count,
+		        totalSize: 0,
+		        lastUpdated: album.updatedAt,
+		        distribution: [],
+		    };
+		});
 
-				return {
-					...extendedAlbum,
-					_count: album._count,
-					totalSize: totalSize._sum.size || 0,
-					lastUpdated: album.images?.[0]?.updatedAt || album.updatedAt,
-					distribution: distribution.map((d: any) => ({
-						name: d.name,
-						count: d._count.images,
-					})),
-				};
-			})
-		);
+		// Comentado/Eliminado: Cálculo complejo de estadísticas movido
+		// const albumsWithStats = await Promise.all(
+		// 	albums.map(async (album: any) => {
+		// 		// ... código eliminado para calcular totalSize y distribution ...
+		// 	})
+		// );
 
-		albumLogger.info('✅ Álbumes obtenidos', { count: albums.length });
+		albumLogger.info('✅ Álbumes (simplificado) obtenidos', { count: albums.length });
 		return albumsWithStats;
 	} catch (error) {
-		albumLogger.error('❌ Error al obtener álbumes', error);
+		albumLogger.error('❌ Error al obtener álbumes (simplificado)', error);
 		throw createAlbumError('No se pudieron obtener los álbumes', AlbumErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -209,7 +172,7 @@ export async function getAlbum(id: string): Promise<Album> {
 		albumLogger.info('✅ Álbum obtenido:', album.name);
 
 		// Convertir el resultado de Prisma al tipo Album usando el nuevo transformador
-		const albumData = toExtendedAlbum(album as unknown as AlbumBase);
+		const albumData = transformAlbumToExtended(fromPrismaAlbum(album as AlbumBase));
 
 		return albumData;
 	} catch (error) {
@@ -240,7 +203,7 @@ export async function createAlbum(data: CreateAlbumData): Promise<Album> {
 		albumLogger.info('✅ Álbum creado:', album.name);
 
 		// Convertir el resultado de Prisma al tipo Album usando el nuevo transformador
-		const albumData = toExtendedAlbum(album as unknown as AlbumBase);
+		const albumData = transformAlbumToExtended(fromPrismaAlbum(album as AlbumBase));
 
 		return albumData;
 	} catch (error) {
@@ -278,7 +241,7 @@ export async function updateAlbum(id: string, data: UpdateAlbumData): Promise<Al
 		albumLogger.info('✅ Álbum actualizado:', updatedAlbum.name);
 
 		// Convertir el resultado de Prisma al tipo Album usando el nuevo transformador
-		const albumData = toExtendedAlbum(updatedAlbum as unknown as AlbumBase);
+		const albumData = transformAlbumToExtended(fromPrismaAlbum(updatedAlbum as AlbumBase));
 
 		return albumData;
 	} catch (error) {

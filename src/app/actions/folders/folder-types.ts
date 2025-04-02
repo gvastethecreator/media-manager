@@ -1,10 +1,10 @@
 import type {
-	CreateFolderData,
-	FolderBase,
-	FolderExtended,
-	FolderStats,
-	FolderSummary,
-	UpdateFolderData,
+    CreateFolderData,
+    FolderBase,
+    FolderExtended,
+    FolderStats,
+    FolderSummary,
+    UpdateFolderData,
 } from '@/types/entities/folder';
 
 // Re-exportamos los tipos principales
@@ -24,7 +24,7 @@ export interface ProcessStatus {
 	currentFile?: string;
 	timestamp?: number;
 	folderId?: string;
-	phase?: 'scanning' | 'indexing' | 'thumbnails' | 'metadata' | 'error' | 'starting';
+	phase?: 'scanning' | 'indexing' | 'thumbnails' | 'metadata' | 'error' | 'starting' | 'prepare' | 'scan' | 'index' | 'cleanup' | 'complete' | 'cancelled';
 	filesProcessed?: number;
 	totalFiles?: number;
 	fileDetails?: {
@@ -57,6 +57,20 @@ export interface ProcessStatus {
 	endTime?: number;
 	processingSpeed?: number;
 	estimatedTimeRemaining?: number;
+	canCancel?: boolean;
+	error?: string;
+	// Propiedades adicionales para integraciones
+	success?: boolean;
+	message?: string;
+	id?: string;
+	name?: string;
+	path?: string;
+	totalSize?: number;
+	stats?: {
+		processed: number;
+		total: number;
+		totalSize: number;
+	};
 }
 
 /**
@@ -103,6 +117,20 @@ export interface FolderResponse {
 export const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
 
 /**
+ * Códigos de error específicos para operaciones de carpetas
+ */
+export enum FOLDER_ERROR_CODES {
+	NOT_FOUND = 'FOLDER_NOT_FOUND',
+	ALREADY_EXISTS = 'FOLDER_ALREADY_EXISTS',
+	PATH_INVALID = 'FOLDER_PATH_INVALID',
+	OPERATION_IN_PROGRESS = 'OPERATION_IN_PROGRESS',
+	INDEXING_FAILED = 'INDEXING_FAILED',
+	PERMISSION_DENIED = 'PERMISSION_DENIED',
+	NETWORK_ERROR = 'NETWORK_ERROR',
+	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR'
+}
+
+/**
  * Respuesta de error en operaciones
  */
 export interface ErrorResponse {
@@ -112,25 +140,95 @@ export interface ErrorResponse {
 	phase?: string;
 	timestamp: number;
 	type?: string;
+	code?: string;
 }
 
-/**
- * Callbacks para operaciones de indexación
- */
+// Callbacks para operaciones de indexación
 export interface IndexCallbacks {
 	onProgress?: (status: ProcessStatus) => void;
 	onError?: (error: ErrorResponse) => void;
 	onComplete?: (data: FolderResponse) => void;
+	onCancel?: () => void;
 }
 
-export class FolderError extends Error {
-	constructor(
-		message: string,
-		public cause?: unknown
-	) {
-		super(message);
-		this.name = 'FolderError';
+/**
+ * Interfaz para errores del servicio de carpetas
+ */
+export interface FolderError {
+	name: string;
+	message: string;
+	code: FOLDER_ERROR_CODES;
+	timestamp: number;
+	folderId?: string;
+	details?: string;
+	stack?: string;
+	cause?: unknown;
+}
+
+/**
+ * Crea un objeto de error para operaciones de carpetas (enfoque funcional)
+ */
+export function createFolderError(
+	message: string,
+	code: FOLDER_ERROR_CODES = FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
+	details?: string,
+	folderId?: string,
+	cause?: unknown
+): FolderError {
+	return {
+		name: 'FolderServiceError',
+		message,
+		code,
+		timestamp: Date.now(),
+		folderId,
+		details: details || (cause instanceof Error ? cause.stack : undefined),
+		stack: new Error(message).stack,
+		cause
+	};
+}
+
+/**
+ * Convierte un error genérico a FolderError
+ */
+export function fromError(error: unknown, folderId?: string): FolderError {
+	// Si ya es un FolderError, lo devolvemos
+	if (error && typeof error === 'object' && 'code' in error && 'name' in error
+		&& (error as any).name === 'FolderServiceError') {
+		return error as FolderError;
 	}
+
+	// Si es un Error estándar
+	if (error instanceof Error) {
+		return createFolderError(
+			error.message,
+			FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
+			error.stack,
+			folderId,
+			error
+		);
+	}
+
+	// Cualquier otro tipo
+	return createFolderError(
+		String(error),
+		FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
+		undefined,
+		folderId,
+		error
+	);
+}
+
+/**
+ * Convierte un FolderError a un objeto ErrorResponse para las acciones
+ */
+export function folderErrorToResponse(error: FolderError): ErrorResponse {
+	return {
+		message: error.message,
+		details: error.details || error.stack || '',
+		timestamp: error.timestamp,
+		folderId: error.folderId,
+		code: error.code
+	};
 }
 
 export interface FolderCreate {
@@ -176,4 +274,73 @@ export interface ImageWithRelations {
 	characters?: ImageEntity[];
 	places?: ImageEntity[];
 	worldItems?: ImageEntity[];
+}
+
+/**
+ * Opciones para indexación
+ */
+export interface IndexOptions {
+	recursive?: boolean;
+	skipExisting?: boolean;
+	onProgress?: (status: ProcessStatus) => void;
+	includeHidden?: boolean;
+	batchSize?: number;
+	processMetadata?: boolean;
+	maxConcurrent?: number;
+}
+
+/**
+ * Opciones para reindexación
+ */
+export interface ReindexOptions extends IndexOptions {
+	deleteOrphans?: boolean;
+	forceScan?: boolean;
+}
+
+/**
+ * Estado de indexación
+ */
+export interface IndexState {
+	id: string;
+	status: 'pending' | 'running' | 'completed' | 'error' | 'cancelled';
+	progress: number;
+	started: Date;
+	completed?: Date;
+	message?: string;
+	error?: string;
+	stats?: {
+		processed: number;
+		total: number;
+		totalSize: number;
+	};
+}
+
+/**
+ * Opciones para crear una carpeta
+ */
+export interface CreateFolderOptions {
+	name?: string;
+	description?: string;
+	emoji?: string;
+	color?: string;
+	autoReindex?: boolean;
+	parentId?: string | null;
+	isPublic?: boolean;
+}
+
+/**
+ * Opciones para actualizar una carpeta
+ */
+export interface UpdateFolderOptions {
+	name?: string;
+	description?: string;
+	emoji?: string;
+	color?: string;
+	autoReindex?: boolean;
+	parentId?: string | null;
+	isPublic?: boolean;
+	totalFiles?: number;
+	totalSize?: number;
+	lastIndexed?: Date;
+	status?: string;
 }

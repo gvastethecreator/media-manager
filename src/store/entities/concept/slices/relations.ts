@@ -1,9 +1,9 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { EntityType } from '@/types/entities/entities';
 import type { StateCreator } from 'zustand';
 import type { ConceptStore } from '../types';
 
-const relationsLogger = serverLogger.withContext('ConceptStore:Relations');
+const relationsLogger = clientLogger.withContext('ConceptStore:Relations');
 
 export interface RelationsSlice {
 	// Acciones para gestionar relaciones entre conceptos y otras entidades

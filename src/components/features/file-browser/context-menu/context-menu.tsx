@@ -13,7 +13,7 @@ import { useFileManager } from '@/store/files/file-manager.store';
 import { Copy, Download, Flag, FolderOpen, Heart, HeartOff, ImageIcon, Info, Share2, Trash2 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import {
 	AlbumsSubmenu,
 	CharactersSubmenu,
@@ -29,7 +29,7 @@ import { useEntityLoader } from './hooks/use-entity-loader';
 import type { FileContextMenuProps } from './types';
 
 // Logger para el componente
-const contextMenuLogger = serverLogger.withContext('ContextMenu');
+const contextMenuLogger = clientLogger.withContext('ContextMenu');
 
 // Componentes memoizados para evitar re-renderizados
 const MemoizedContextMenuTrigger = memo(ContextMenuTrigger);

@@ -11,12 +11,12 @@
 import { thumbnailCache } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { imageService } from '@/services/image.service';
+import { imageService } from '@/services/image-service-export';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
+    ServiceErrorCode,
     createEntityNotFoundError,
     createServiceError,
-    ServiceErrorCode,
     toServiceError,
 } from '@/utils/errors/service-errors';
 import fs from 'fs/promises';

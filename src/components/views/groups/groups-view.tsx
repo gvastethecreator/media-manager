@@ -6,7 +6,7 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
 import { Group as GroupIcon } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 import { GroupCard } from './group-card';
 
-const viewLogger = serverLogger.withContext('GroupsView');
+const viewLogger = clientLogger.withContext('GroupsView');
 
 // Componente memoizado para cada tarjeta de grupo
 const MemoizedGroupCard = React.memo(

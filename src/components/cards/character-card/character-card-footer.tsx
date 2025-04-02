@@ -1,6 +1,6 @@
 'use client';
 
-import { getCardIdFromUrl } from '@/lib/utils';
+import { getCardIdFromUrl } from '@/lib/utils/index';
 import {
 	Heart,
 	ImageIcon,

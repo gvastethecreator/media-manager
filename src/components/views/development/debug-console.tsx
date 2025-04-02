@@ -5,11 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LogViewer, useLogViewer } from '@/components/ui/log-viewer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useConsoleCapture } from '@/lib/hooks/use-console-capture';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useEffect, useState } from 'react';
 
 // Crear un logger específico para este componente
-const debugLogger = serverLogger.withContext('DebugConsole');
+const debugLogger = clientLogger.withContext('DebugConsole');
 
 export function DebugConsole() {
 	const [activeTab, setActiveTab] = useState('console');
@@ -138,10 +138,10 @@ export function DebugConsole() {
 											Puedes usar el logger mejorado en tu código importando:
 										</p>
 										<pre className="bg-muted p-2 rounded-md text-xs mt-2">
-											{`import { serverLogger } from '@/lib/logger/server-logger';
+											{`import { clientLogger } from '@/lib/logger/client-logger';
 
 // Crear un logger específico para tu componente
-const myLogger = serverLogger.withContext('MiComponente');
+const myLogger = clientLogger.withContext('MiComponente');
 
 // Usar el logger
 myLogger.info('Mensaje informativo');

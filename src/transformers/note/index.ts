@@ -1,10 +1,10 @@
 /**
- * @file Transformer para la entidad Note
+ * @file Índice de transformadores para la entidad Note
  * @module transformers/note
  */
 
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/lib/constants';
-import { NotFoundError, TransformerError } from '@/lib/errors';
+import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
+import { EntityError, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
@@ -15,6 +15,7 @@ import type {
     NoteSearchResult,
     NoteUpdateInput
 } from '@/types/entities/note/types';
+import { TransformerError } from '@/utils/transformers/errors';
 import {
     mapCreateNoteDataToPrisma,
     mapNoteFiltersToPrisma,
@@ -38,13 +39,13 @@ export async function searchNotes(
     try {
         const {
             page = 1,
-            pageSize = DEFAULT_PAGE_SIZE,
+            pageSize = DEFAULT_VIEW_CONFIG.pageSize,
             sortBy = 'updatedAt',
             sortOrder = 'desc',
         } = options;
 
         // Limitar el tamaño de página
-        const limitedPageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+        const limitedPageSize = Math.min(pageSize, 100);
 
         // Obtener argumentos para Prisma
         const prismaArgs = mapNoteSearchOptionsToPrisma({
@@ -154,7 +155,7 @@ export async function getNoteById(
 
         // Si no existe y se debe lanzar error
         if (!note && throwIfNotFound) {
-            throw new NotFoundError(`Nota con ID ${id} no encontrada`);
+            throw new EntityError(`Nota con ID ${id} no encontrada`, EntityErrorCode.NOT_FOUND);
         }
 
         // Si no existe, devolver null
@@ -169,7 +170,7 @@ export async function getNoteById(
             deserializeFields: true
         });
     } catch (error) {
-        if (error instanceof NotFoundError) {
+        if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
             throw error;
         }
         logger.error(`Error obteniendo nota ${id}:`, error);
@@ -313,7 +314,7 @@ export async function updateNote(
         });
 
         if (!existingNote) {
-            throw new NotFoundError(`Nota con ID ${id} no encontrada`);
+            throw new EntityError(`Nota con ID ${id} no encontrada`, EntityErrorCode.NOT_FOUND);
         }
 
         // Validar los datos de actualización combinados con los existentes
@@ -336,7 +337,7 @@ export async function updateNote(
             deserializeFields: true
         });
     } catch (error) {
-        if (error instanceof NotFoundError) {
+        if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
             throw error;
         }
         logger.error(`Error actualizando nota ${id}:`, error);
@@ -362,7 +363,7 @@ export async function deleteNote(
         });
 
         if (!existingNote) {
-            throw new NotFoundError(`Nota con ID ${id} no encontrada`);
+            throw new EntityError(`Nota con ID ${id} no encontrada`, EntityErrorCode.NOT_FOUND);
         }
 
         if (softDelete) {
@@ -383,7 +384,7 @@ export async function deleteNote(
 
         return true;
     } catch (error) {
-        if (error instanceof NotFoundError) {
+        if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
             throw error;
         }
         logger.error(`Error eliminando nota ${id}:`, error);
@@ -448,4 +449,8 @@ export const NoteTransformer = {
 };
 
 export default NoteTransformer;
+
+export * from './mappers';
+export * from './serializers';
+export * from './transformer';
 

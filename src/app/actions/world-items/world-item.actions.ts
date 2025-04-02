@@ -12,20 +12,21 @@ import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers
 import {
-  createWorldItemFilter,
-  createWorldItemOrderBy,
-  mapCreateWorldItemDataToPrisma,
-  mapUpdateWorldItemDataToPrisma,
-  toExtendedWorldItem
+    mapWorldItemFiltersToPrisma as createWorldItemFilter,
+    mapWorldItemOrderByToPrisma as createWorldItemOrderBy,
+    fromPrismaWorldItem,
+    mapCreateWorldItemDataToPrisma,
+    mapUpdateWorldItemDataToPrisma,
+    transformWorldItemToExtended as toExtendedWorldItem
 } from '@/transformers/world-item';
 import type {
-  CreateWorldItemData,
-  UpdateWorldItemData,
-  WorldItem,
-  WorldItemBase,
-  WorldItemExtended,
-  WorldItemFilters,
-  WorldItemSortCriteria
+    CreateWorldItemData,
+    UpdateWorldItemData,
+    WorldItem,
+    WorldItemBase,
+    WorldItemExtended,
+    WorldItemFilters,
+    WorldItemSortCriteria
 } from '@/types/entities/world-item';
 
 // Configuración y utilidades
@@ -155,12 +156,19 @@ export async function getWorldItems(
 	}
 
 	try {
-		worldItemLogger.info('🔍 Obteniendo objetos del mundo');
+		worldItemLogger.info('🔍 Obteniendo objetos del mundo (simplificado)');
 
 		// Crear el filtro y el ordenamiento con los nuevos transformadores
 		const whereCondition = createWorldItemFilter(filters);
-		const orderByCondition = sortBy ? createWorldItemOrderBy(sortBy) : { updatedAt: 'desc' };
+		// Cambiar el orderBy por defecto: Eliminar ordenación por _count de relación
+		const defaultOrderBy = { updatedAt: 'desc' } as const; // Ordenar por fecha de actualización por defecto
+		const orderByCondition = sortBy ? createWorldItemOrderBy(sortBy) : defaultOrderBy;
 
+		// DEBUG: Log de condiciones (ya presente, pero aseguramos que esté activo)
+		worldItemLogger.debug('🔍 Prisma findMany - Where:', JSON.stringify(whereCondition, null, 2));
+		worldItemLogger.debug('🔍 Prisma findMany - OrderBy:', JSON.stringify(orderByCondition, null, 2));
+
+		// Consulta simplificada: Solo incluir _count
 		const worldItems = await prisma.worldItem.findMany({
 			where: whereCondition,
 			include: {
@@ -173,109 +181,53 @@ export async function getWorldItems(
 						groups: true,
 						properties: true,
 						wildcards: true,
-						tagEntities: true,
+						tags: true,
 					},
 				},
-				images: {
-					take: 5,
-					orderBy: { createdAt: 'desc' },
-					select: {
-						id: true,
-						thumbnail: true,
-						thumbnailWidth: true,
-						thumbnailHeight: true,
-						thumbnailSize: true,
-					},
-				},
-				groups: {
-					select: {
-						id: true,
-						name: true,
-					},
-				},
-				properties: {
-					select: {
-						id: true,
-						name: true,
-					},
-				},
-				wildcards: {
-					select: {
-						id: true,
-						name: true,
-					},
-				},
-				tagEntities: {
-					select: {
-						id: true,
-						name: true,
-					},
-				},
+				// Comentado/Eliminado: Incluir relaciones completas es costoso aquí
+				// images: { ... },
+				// groups: { ... },
+				// properties: { ... },
+				// wildcards: { ... },
+				// tagEntities: { ... },
 			},
 			orderBy: orderByCondition,
 		});
 
-		// Obtener datos estadísticos y transformar
-		const processedItems = await Promise.all(
-			worldItems.map(async (worldItem) => {
-				// Calcular tamaño total
-				const totalSize = await prisma.image.aggregate({
-					where: {
-						worldItems: {
-							some: {
-								id: worldItem.id,
-							},
-						},
-					},
-					_sum: {
-						size: true,
-					},
-				});
+		// Mapear resultados llamando directamente a los transformadores
+		const processedItems = worldItems.map((worldItem) => {
+		    // Ahora que fromPrismaWorldItem es robusto y parsea JSON,
+		    // podemos llamar a toExtendedWorldItem directamente.
+		    const extendedItem = toExtendedWorldItem(fromPrismaWorldItem(worldItem));
 
-				// Convertir thumbnails a formatos legibles
-				const recentImages = worldItem.images
-					.filter((img) => img.thumbnail && img.thumbnailSize && img.thumbnailSize < 100000)
-					.map((img) => {
-						if (img.thumbnail) {
-							return `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`;
-						}
-						return '';
-					})
-					.filter(Boolean);
+		    return {
+		        ...extendedItem,
+		        totalSize: 0, // Calcular por separado o bajo demanda
+		        imageCount: worldItem._count?.images ?? 0,
+		        recentImages: [], // Obtener por separado o bajo demanda
+		    };
+		});
 
-				// Usar el nuevo transformador para convertir a formato extendido
-				const extendedItem = toExtendedWorldItem(worldItem);
+		// Comentado/Eliminado: Cálculo complejo de estadísticas y recentImages movido
+		// const processedItems = await Promise.all(
+		// 	worldItems.map(async (worldItem) => {
+		// 		// ... cálculo de totalSize y recentImages eliminado ...
+		// 	})
+		// );
 
-				// Agregar datos estadísticos
-				return {
-					...extendedItem,
-					totalSize: totalSize._sum.size || 0,
-					imageCount: worldItem._count.images,
-					recentImages,
-					// Mantener vacíos los arrays de relaciones para evitar duplicación
-					// ya que ya están incluidos en los campos deserializados
-					groups: [],
-					properties: [],
-					wildcards: [],
-					tagEntities: [],
-				};
-			})
-		);
-
-		// Guardar en caché solo si no se usaron filtros
 		if (useCache) {
 			await worldItemsCache.set('all', processedItems);
+			worldItemLogger.info('💾 Caché de objetos del mundo actualizada');
 		}
 
-		worldItemLogger.info('✅ Objetos del mundo obtenidos', { count: processedItems.length });
+		worldItemLogger.info('✅ Objetos del mundo (simplificado) obtenidos', { count: worldItems.length });
 		return processedItems;
 	} catch (error) {
-		worldItemLogger.error('❌ Error al obtener objetos del mundo', error);
-		throw createWorldItemError(
-			'No se pudieron obtener los objetos del mundo',
-			WorldItemErrorCode.OPERATION_FAILED,
-			error
-		);
+		worldItemLogger.error('❌ Error al obtener objetos del mundo (simplificado):', error);
+		if (error instanceof Error && error.name === 'WorldItemError') {
+			throw error;
+		}
+		throw createWorldItemError('No se pudieron obtener los objetos del mundo', WorldItemErrorCode.OPERATION_FAILED, error);
 	}
 }
 

@@ -5,26 +5,47 @@
 
 import type { StateCreator } from 'zustand';
 import {
-	mapCreateVideoDataToPrisma,
-	mapVideoVisualConfigToPrisma,
-	mapVideoVisualConfigUpdateToPrisma,
+    mapCreateVideoDataToPrisma,
+    mapVideoVisualConfigUpdateToPrisma
 } from '../../../../transformers/video/mappers';
-import { extendVideo, extendVideos } from '../../../../transformers/video/serializers';
+import {
+    transformVideo,
+    transformVideoWithStats,
+    transformVideos,
+    transformVideosWithStats
+} from '../../../../transformers/video/serializers';
 import type {
-	CreateVideoData,
-	UpdateVideoData,
-	Video,
-	VideoBase,
-	VideoVisualConfig,
+    CreateVideoData,
+    UpdateVideoData,
+    Video,
+    VideoBase,
+    VideoComplete,
+    VideoFilters,
+    VideoVisualConfig,
 } from '../../../../types/entities/video';
 import type { VideoState } from '../types';
 
 // Slice para operaciones CRUD básicas
 export interface VideoCoreSlice {
-	// Getters
+	// Getters básicos
 	getVideo: (id: string) => Video | undefined;
 	getVideos: () => Video[];
 	getVideosByFolder: (folderId: string) => Video[];
+
+	// Selectores avanzados
+	selectVideos: (options?: {
+		withStats?: boolean,
+		filters?: VideoFilters,
+		sortBy?: keyof VideoComplete,
+		sortDirection?: 'asc' | 'desc'
+	}) => Video[];
+	selectVideosByFolder: (folderId: string, options?: {
+		withStats?: boolean,
+		filters?: VideoFilters,
+		sortBy?: keyof VideoComplete,
+		sortDirection?: 'asc' | 'desc'
+	}) => Video[];
+	selectVideoById: (id: string, options?: { withStats?: boolean }) => Video | undefined;
 
 	// Operaciones
 	addVideo: (video: VideoBase) => void;
@@ -52,7 +73,7 @@ export interface VideoCoreSlice {
 
 // Creador del slice
 export const createVideoCoreSlice: StateCreator<VideoState, [], [], VideoCoreSlice> = (set, get) => ({
-	// Getters
+	// Getters básicos
 	getVideo: (id: string) => {
 		return get().core.videos[id];
 	},
@@ -65,41 +86,111 @@ export const createVideoCoreSlice: StateCreator<VideoState, [], [], VideoCoreSli
 		return Object.values(get().core.videos).filter((video) => video.folderId === folderId);
 	},
 
+	// Selectores avanzados
+	selectVideos: (options = {}) => {
+		const { withStats = false, filters = {}, sortBy = 'updatedAt', sortDirection = 'desc' } = options;
+		let videos = Object.values(get().core.videos);
+
+		// Aplicar filtros
+		if (filters) {
+			videos = applyVideoFilters(videos, filters);
+		}
+
+		// Ordenar
+		videos = videos.sort((a, b) => {
+			const valueA = a[sortBy as keyof Video];
+			const valueB = b[sortBy as keyof Video];
+
+			if (typeof valueA === 'string' && typeof valueB === 'string') {
+				return sortDirection === 'asc'
+					? valueA.localeCompare(valueB)
+					: valueB.localeCompare(valueA);
+			}
+
+			// Para fechas y números
+			return sortDirection === 'asc'
+				? (valueA < valueB ? -1 : 1)
+				: (valueA > valueB ? -1 : 1);
+		});
+
+		// Aplicar estadísticas si se requiere
+		if (withStats) {
+			return transformVideosWithStats(videos, { safe: true, defaultValue: [] });
+		}
+
+		return videos;
+	},
+
+	selectVideosByFolder: (folderId, options = {}) => {
+		const { withStats = false, filters = {}, sortBy = 'updatedAt', sortDirection = 'desc' } = options;
+
+		// Filtrar por carpeta
+		const folderFilters = { ...filters, folderId };
+		return get().selectVideos({ withStats, filters: folderFilters, sortBy, sortDirection });
+	},
+
+	selectVideoById: (id, options = {}) => {
+		const { withStats = false } = options;
+		const video = get().core.videos[id];
+
+		if (!video) return undefined;
+
+		if (withStats) {
+			return transformVideoWithStats(video, { safe: true, defaultValue: undefined });
+		}
+
+		return video;
+	},
+
 	// Operaciones síncronas
 	addVideo: (video: VideoBase) => {
-		const extendedVideo = extendVideo(video);
-		set((state) => ({
-			core: {
-				...state.core,
-				videos: {
-					...state.core.videos,
-					[video.id]: extendedVideo,
+		try {
+			const extendedVideo = transformVideo(video, { safe: true });
+			if (!extendedVideo) return;
+
+			set((state) => ({
+				core: {
+					...state.core,
+					videos: {
+						...state.core.videos,
+						[video.id]: extendedVideo,
+					},
+					lastUpdated: Date.now(),
 				},
-				lastUpdated: Date.now(),
-			},
-		}));
+			}));
+		} catch (error) {
+			console.error('Error al añadir video al store:', error);
+		}
 	},
 
 	addVideos: (videos: VideoBase[]) => {
-		const extendedVideos = extendVideos(videos);
-		const videosMap = extendedVideos.reduce(
-			(acc, video) => {
-				acc[video.id] = video;
-				return acc;
-			},
-			{} as Record<string, Video>
-		);
+		try {
+			const extendedVideos = transformVideos(videos, { safe: true });
+			if (!extendedVideos.length) return;
 
-		set((state) => ({
-			core: {
-				...state.core,
-				videos: {
-					...state.core.videos,
-					...videosMap,
+			const videosMap = extendedVideos.reduce(
+				(acc, video) => {
+					if (video && video.id) {
+						acc[video.id] = video;
+					}
+					return acc;
 				},
-				lastUpdated: Date.now(),
-			},
-		}));
+				{} as Record<string, Video>
+			);
+
+			set((state) => ({
+				core: {
+					...state.core,
+					videos: {
+						...state.core.videos,
+						...videosMap,
+					},
+					lastUpdated: Date.now(),
+				},
+			}));
+		} catch (error) {
+			console.error('Error al añadir múltiples videos al store:', error);
+		}
 	},
 
 	updateVideo: (id: string, data: UpdateVideoData) => {
@@ -249,88 +340,119 @@ export const createVideoCoreSlice: StateCreator<VideoState, [], [], VideoCoreSli
 		}
 	},
 
-	// Visual Config
 	updateVideoVisualConfig: async (videoId: string, config: Partial<VideoVisualConfig>) => {
-		const { setLoading, setError, getVideo } = get();
 		try {
-			setLoading(true);
-			const video = getVideo(videoId);
-			if (!video) {
-				setError('Video no encontrado');
-				return undefined;
-			}
-
-			const prismaConfig = mapVideoVisualConfigUpdateToPrisma(config);
-			const response = await fetch(`/api/videos/${videoId}/visual-config`, {
-				method: 'PUT',
+			// Simulación de llamada a API, reemplazar con implementación real
+			const prismaData = mapVideoVisualConfigUpdateToPrisma(config);
+			const response = await fetch(`/api/videos/${videoId}/config`, {
+				method: 'PATCH',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify(prismaConfig),
+				body: JSON.stringify(prismaData),
 			});
 
-			if (!response.ok) throw new Error('Error al actualizar la configuración del video');
+			if (!response.ok) throw new Error('Error al actualizar configuración visual');
 
-			const updatedVideo = await response.json();
-			set((state) => ({
-				core: {
-					...state.core,
-					videos: {
-						...state.core.videos,
-						[videoId]: {
-							...video,
-							...updatedVideo,
-						},
-					},
-					lastUpdated: Date.now(),
-				},
-			}));
-			return updatedVideo;
+			return await response.json();
 		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			console.error('Error al actualizar configuración visual:', error);
 			return undefined;
-		} finally {
-			setLoading(false);
 		}
 	},
 
 	fetchVideoVisualConfig: async (videoId: string) => {
-		const { setLoading, setError, getVideo } = get();
 		try {
-			setLoading(true);
-			const video = getVideo(videoId);
-			if (!video) {
-				setError('Video no encontrado');
-				return undefined;
-			}
+			// Simulación de llamada a API, reemplazar con implementación real
+			const response = await fetch(`/api/videos/${videoId}/config`);
+			if (!response.ok) throw new Error('Error al obtener configuración visual');
 
-			const prismaConfig = mapVideoVisualConfigToPrisma(video);
-			const response = await fetch(`/api/videos/${videoId}/visual-config`, {
-				method: 'GET',
-			});
-
-			if (!response.ok) throw new Error('Error al obtener la configuración del video');
-
-			const videoConfig = await response.json();
-			set((state) => ({
-				core: {
-					...state.core,
-					videos: {
-						...state.core.videos,
-						[videoId]: {
-							...video,
-							...videoConfig,
-						},
-					},
-					lastUpdated: Date.now(),
-				},
-			}));
-			return videoConfig;
+			return await response.json();
 		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			console.error('Error al obtener configuración visual:', error);
 			return undefined;
-		} finally {
-			setLoading(false);
 		}
 	},
 });
+
+/**
+ * 🔍 Aplica filtros a un array de videos
+ * @param videos Array de videos a filtrar
+ * @param filters Filtros a aplicar
+ * @returns Videos filtrados
+ */
+function applyVideoFilters(videos: Video[], filters: VideoFilters): Video[] {
+	let filtered = [...videos];
+
+	// Filtro por búsqueda
+	if (filters.search) {
+		const searchTerm = filters.search.toLowerCase();
+		filtered = filtered.filter(video =>
+			video.name.toLowerCase().includes(searchTerm) ||
+			(video.description?.toLowerCase().includes(searchTerm) || false)
+		);
+	}
+
+	// Filtro por carpeta
+	if (filters.folderId) {
+		filtered = filtered.filter(video => video.folderId === filters.folderId);
+	}
+
+	// Filtro por favoritos
+	if (filters.isFavorite !== undefined) {
+		filtered = filtered.filter(video => video.isFavorite === filters.isFavorite);
+	}
+
+	// Filtro por visibilidad
+	if (filters.isPublic !== undefined) {
+		filtered = filtered.filter(video => video.isPublic === filters.isPublic);
+	}
+
+	// Filtro por duración
+	if (filters.duration) {
+		if (filters.duration.min !== undefined) {
+			filtered = filtered.filter(video => video.duration >= filters.duration?.min || 0);
+		}
+		if (filters.duration.max !== undefined) {
+			filtered = filtered.filter(video => video.duration <= (filters.duration?.max || Number.POSITIVE_INFINITY));
+		}
+	}
+
+	// Filtro por resolución
+	if (filters.resolution) {
+		if (filters.resolution.min !== undefined && filters.resolution.min > 0) {
+			filtered = filtered.filter(video =>
+				video.height !== null && video.height >= (filters.resolution?.min || 0)
+			);
+		}
+		if (filters.resolution.max !== undefined) {
+			filtered = filtered.filter(video =>
+				video.height !== null && video.height <= (filters.resolution?.max || Number.POSITIVE_INFINITY)
+			);
+		}
+	}
+
+	// Filtro por etiquetas
+	if (filters.tags && filters.tags.length > 0) {
+		filtered = filtered.filter(video => {
+			if (!video.tags) return false;
+			return filters.tags?.some(tagId =>
+				video.tags?.some(tag => tag.id === tagId)
+			) || false;
+		});
+	}
+
+	// Filtro por rango de fechas
+	if (filters.dateRange) {
+		if (filters.dateRange.start) {
+			const startDate = new Date(filters.dateRange.start);
+			filtered = filtered.filter(video => new Date(video.createdAt) >= startDate);
+		}
+		if (filters.dateRange.end) {
+			const endDate = new Date(filters.dateRange.end);
+			filtered = filtered.filter(video => new Date(video.createdAt) <= endDate);
+		}
+	}
+
+	return filtered;
+}

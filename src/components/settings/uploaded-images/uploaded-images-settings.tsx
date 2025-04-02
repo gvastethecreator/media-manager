@@ -26,7 +26,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
 import type { UploadedImageStats } from '@/types/uploaded-images';
@@ -48,7 +48,7 @@ import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 
-const sectionLogger = serverLogger.withContext('UploadedImagesSettings');
+const sectionLogger = clientLogger.withContext('UploadedImagesSettings');
 
 export function UploadedImagesSettings() {
 	const [activeTab, setActiveTab] = useState('general');

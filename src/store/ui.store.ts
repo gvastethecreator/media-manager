@@ -1,9 +1,10 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { produce } from 'immer';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const uiLogger = serverLogger.withContext('UIStore');
+// Logger para el store de UI
+const uiLogger = clientLogger.withContext('UIStore');
 
 export type ViewMode = 'grid' | 'list' | 'masonry' | 'cards' | 'details';
 export type ThumbnailSize = 'small' | 'medium' | 'large';
@@ -176,3 +177,4 @@ export const useThemeSetting = () => {
 
 // Tipos exportados para uso en componentes
 export type { UIState };
+

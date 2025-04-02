@@ -31,17 +31,29 @@ async function revalidateTaskPaths() {
 }
 
 /**
- * Error personalizado para acciones de tareas
+ * Interfaz para errores de acciones de tareas
  */
-class TaskError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'TaskError';
-  }
+export interface TaskErrorData {
+  name: string;
+  message: string;
+  code?: string;
+  cause?: unknown;
+}
+
+/**
+ * Función para crear errores de acciones de tareas (enfoque funcional)
+ */
+function createTaskError(
+  message: string,
+  code?: string,
+  cause?: unknown
+): TaskErrorData {
+  return {
+    name: 'TaskError',
+    message,
+    code,
+    cause
+  };
 }
 
 /**
@@ -76,7 +88,7 @@ export async function createTask(data: Omit<ScheduledTask, 'id' | 'createdAt' | 
     return task;
   } catch (error) {
     taskLogger.error('❌ Error al crear tarea:', error);
-    throw new TaskError('No se pudo crear la tarea', 'CREATE_FAILED', error);
+    throw createTaskError('No se pudo crear la tarea', 'CREATE_FAILED', error);
   }
 }
 
@@ -93,7 +105,7 @@ export async function updateTask(id: string, data: Partial<ScheduledTask>): Prom
     });
 
     if (!existingTask) {
-      throw new TaskError('Tarea no encontrada', 'NOT_FOUND');
+      throw createTaskError('Tarea no encontrada', 'NOT_FOUND');
     }
 
     // Actualizar la tarea
@@ -122,7 +134,16 @@ export async function updateTask(id: string, data: Partial<ScheduledTask>): Prom
     return task;
   } catch (error) {
     taskLogger.error('❌ Error al actualizar tarea:', error);
-    throw new TaskError('No se pudo actualizar la tarea', 'UPDATE_FAILED', error);
+
+    // Reenviar el error si ya es un TaskError
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'TaskError') {
+      throw error;
+    }
+
+    throw createTaskError('No se pudo actualizar la tarea', 'UPDATE_FAILED', error);
   }
 }
 
@@ -139,12 +160,12 @@ export async function deleteTask(id: string): Promise<boolean> {
     });
 
     if (!task) {
-      throw new TaskError('Tarea no encontrada', 'NOT_FOUND');
+      throw createTaskError('Tarea no encontrada', 'NOT_FOUND');
     }
 
     // Verificar que la tarea no está en ejecución
     if (task.status === 'RUNNING') {
-      throw new TaskError(
+      throw createTaskError(
         'No se puede eliminar una tarea en ejecución',
         'TASK_RUNNING'
       );
@@ -162,7 +183,16 @@ export async function deleteTask(id: string): Promise<boolean> {
     return true;
   } catch (error) {
     taskLogger.error('❌ Error al eliminar tarea:', error);
-    throw new TaskError('No se pudo eliminar la tarea', 'DELETE_FAILED', error);
+
+    // Reenviar el error si ya es un TaskError
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'TaskError') {
+      throw error;
+    }
+
+    throw createTaskError('No se pudo eliminar la tarea', 'DELETE_FAILED', error);
   }
 }
 
@@ -182,7 +212,7 @@ export async function deleteTasks(ids: string[]): Promise<boolean> {
     });
 
     if (runningTasks.length > 0) {
-      throw new TaskError(
+      throw createTaskError(
         'No se pueden eliminar tareas en ejecución',
         'TASKS_RUNNING',
         { runningTaskIds: runningTasks.map(t => t.id) }
@@ -203,6 +233,15 @@ export async function deleteTasks(ids: string[]): Promise<boolean> {
     return true;
   } catch (error) {
     taskLogger.error('❌ Error al eliminar tareas:', error);
-    throw new TaskError('No se pudieron eliminar las tareas', 'DELETE_MULTIPLE_FAILED', error);
+
+    // Reenviar el error si ya es un TaskError
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'TaskError') {
+      throw error;
+    }
+
+    throw createTaskError('No se pudieron eliminar las tareas', 'DELETE_MULTIPLE_FAILED', error);
   }
 }

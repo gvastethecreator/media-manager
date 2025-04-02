@@ -1,4 +1,4 @@
-import type { FOLDER_EVENTS } from '@/services/folder.service';
+import type { FOLDER_EVENTS } from '@/services/folder-service-export';
 
 export interface ProcessStatus {
 	status?: string;
@@ -30,3 +30,4 @@ export interface ExtendedProcessStatus extends ProcessStatus {
 }
 
 export type { FOLDER_EVENTS };
+

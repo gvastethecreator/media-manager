@@ -2,15 +2,13 @@ import { prisma } from '@/lib/prisma';
 import { validateProfilePreferences } from '@/lib/utils/profile/profile-utils';
 import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
-  type CreateProfileInput,
-  Language,
-  type ProfileFilters,
-  type ProfilePaginationOptions,
-  ThemeMode,
-  type UpdateProfileInput,
+    type CreateProfileInput,
+    Language,
+    type ProfileFilters,
+    type ProfilePaginationOptions,
+    ThemeMode,
+    type UpdateProfileInput,
 } from '@/types/entities/profile/types';
-import { revalidatePath } from 'next/cache';
-import 'server-only';
 
 /**
  * Obtiene todos los perfiles con paginación y filtros
@@ -166,10 +164,6 @@ export async function createProfile(data: CreateProfileInput) {
 			data: profileData,
 		});
 
-		// Revalidar rutas
-		revalidatePath('/profiles');
-		revalidatePath('/settings');
-
 		return transformProfile(profile);
 	} catch (error) {
 		console.error('Error creando perfil:', error);
@@ -216,10 +210,6 @@ export async function updateProfile(id: string, data: UpdateProfileInput) {
 			data: updateData,
 		});
 
-		// Revalidar rutas
-		revalidatePath('/profiles');
-		revalidatePath('/settings');
-
 		return transformProfile(updatedProfile);
 	} catch (error) {
 		console.error(`Error actualizando perfil ${id}:`, error);
@@ -250,10 +240,6 @@ export async function updateProfilePreferences(id: string, preferences: Record<s
 			data: validatedPreferences,
 		});
 
-		// Revalidar rutas
-		revalidatePath('/profiles');
-		revalidatePath('/settings');
-
 		return transformProfile(updatedProfile);
 	} catch (error) {
 		console.error(`Error actualizando preferencias del perfil ${id}:`, error);
@@ -262,7 +248,7 @@ export async function updateProfilePreferences(id: string, preferences: Record<s
 }
 
 /**
- * Activar un perfil específico y desactivar los demás
+ * Establecer un perfil como activo
  */
 export async function setActiveProfile(id: string) {
 	try {
@@ -275,26 +261,21 @@ export async function setActiveProfile(id: string) {
 			throw new Error('Perfil no encontrado');
 		}
 
-		// Transacción: desactivar todos y activar el solicitado
-		await prisma.$transaction([
-			prisma.profile.updateMany({
-				where: { isActive: true },
-				data: { isActive: false },
-			}),
-			prisma.profile.update({
-				where: { id },
-				data: { isActive: true },
-			}),
-		]);
+		// Desactivar todos los perfiles
+		await prisma.profile.updateMany({
+			where: { isActive: true },
+			data: { isActive: false },
+		});
 
-		// Revalidar rutas
-		revalidatePath('/profiles');
-		revalidatePath('/settings');
-		revalidatePath('/');
+		// Activar el perfil seleccionado
+		const updatedProfile = await prisma.profile.update({
+			where: { id },
+			data: { isActive: true },
+		});
 
-		return true;
+		return transformProfile(updatedProfile);
 	} catch (error) {
-		console.error(`Error activando perfil ${id}:`, error);
+		console.error(`Error estableciendo perfil activo ${id}:`, error);
 		throw error;
 	}
 }
@@ -313,34 +294,36 @@ export async function deleteProfile(id: string) {
 			throw new Error('Perfil no encontrado');
 		}
 
-		// Verificar que no es el último perfil
+		// Verificar si es el único perfil restante
 		const profileCount = await prisma.profile.count();
 		if (profileCount <= 1) {
-			throw new Error('No se puede eliminar el último perfil');
+			throw new Error('No se puede eliminar el único perfil existente');
 		}
 
-		// Si es el perfil activo, activar otro
+		// Si el perfil a eliminar es el activo, debemos activar otro
+		let activateAnother = false;
 		if (profile.isActive) {
-			const anotherProfile = await prisma.profile.findFirst({
-				where: { id: { not: id } },
-			});
-
-			if (anotherProfile) {
-				await prisma.profile.update({
-					where: { id: anotherProfile.id },
-					data: { isActive: true },
-				});
-			}
+			activateAnother = true;
 		}
 
-		// Eliminar perfil
+		// Eliminar el perfil
 		await prisma.profile.delete({
 			where: { id },
 		});
 
-		// Revalidar rutas
-		revalidatePath('/profiles');
-		revalidatePath('/settings');
+		// Si era el perfil activo, activar el primer perfil disponible
+		if (activateAnother) {
+			const firstProfile = await prisma.profile.findFirst({
+				orderBy: { createdAt: 'asc' },
+			});
+
+			if (firstProfile) {
+				await prisma.profile.update({
+					where: { id: firstProfile.id },
+					data: { isActive: true },
+				});
+			}
+		}
 
 		return true;
 	} catch (error) {
@@ -369,11 +352,6 @@ export async function ensureDefaultProfile() {
 				},
 			});
 
-			// Revalidar rutas
-			revalidatePath('/profiles');
-			revalidatePath('/settings');
-
-			return true;
 		}
 
 		// Asegurarse de que haya un perfil activo
@@ -392,10 +370,6 @@ export async function ensureDefaultProfile() {
 					where: { id: firstProfile.id },
 					data: { isActive: true },
 				});
-
-				// Revalidar rutas
-				revalidatePath('/profiles');
-				revalidatePath('/settings');
 			}
 		}
 

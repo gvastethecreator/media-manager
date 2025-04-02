@@ -1,5 +1,5 @@
 import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { ThumbnailStats } from '@/types/thumbnails';
 import { create } from 'zustand';
 
@@ -126,7 +126,7 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 				throw new Error('No se pudieron cargar las estadísticas de miniaturas. Por favor, intenta más tarde.');
 			}
 		} catch (error) {
-			serverLogger.error('Error inicializando thumbnails:', error);
+			clientLogger.error('Error inicializando thumbnails:', error);
 			store.setError(error instanceof Error ? error.message : 'Error desconocido');
 			// Establecer estadísticas vacías para evitar errores en la UI
 			store.setStats(initialStats);

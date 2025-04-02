@@ -1,19 +1,19 @@
 'use client';
 
-import { type TagWithStats, getTags } from '@/app/actions/tags';
-import { TagCard } from '@/components/cards/tag-card';
+import { getTagsAction } from '@/app/actions/tags';
+import { TagCard, type TagWithStats } from '@/components/cards/tag-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useFileManager } from '@/store/files/file-manager.store';
 import { Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
-const viewLogger = serverLogger.withContext('TagsView');
+const viewLogger = clientLogger.withContext('TagsView');
 
 // Crear un componente de tarjeta memorizada para optimizar
 const MemoizedTagCard = memo(
@@ -49,7 +49,7 @@ export function TagsView({ className }: ViewProps) {
 			try {
 				setIsLoading(true);
 				viewLogger.info('🔄 Cargando etiquetas...');
-				const fetchedTags = await getTags();
+				const fetchedTags = await getTagsAction();
 
 				// Transformar los datos para adaptarlos al formato esperado
 				const transformedTags = fetchedTags.map((tagData) => {

@@ -1,10 +1,10 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { PromptSortOption } from '@/types/entities/prompt/enums';
 import type { PromptFilters } from '@/types/entities/prompt/extended';
 import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
-const filtersLogger = serverLogger.withContext('PromptStore:Filters');
+const filtersLogger = clientLogger.withContext('PromptStore:Filters');
 
 export interface FiltersSlice {
 	// Estado

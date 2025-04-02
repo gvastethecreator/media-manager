@@ -7,7 +7,7 @@
 
 import { createEntityErrorObject } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { profileService } from '@/services/profile.service';
+import { profileService } from '@/services/profile-service-export';
 import {
     type CreateProfileInput,
     type ProfileExtended,
@@ -22,6 +22,49 @@ const profileLogger = serverLogger.withContext('ProfileActions');
 
 // Rutas que deben ser revalidadas cuando los perfiles cambian
 const REVALIDATE_PATHS = ['/settings', '/profiles', '/profiles/[id]', '/'] as const;
+
+/**
+ * Función auxiliar para formatear errores sin causar recursión
+ */
+function formatError(error: unknown) {
+  if (error instanceof Error) {
+    // Extraer solo lo esencial del error para evitar recursión
+    const formattedError = {
+      message: error.message,
+      name: error.name,
+      stack: error.stack?.split('\n').slice(0, 3).join('\n') // Solo las primeras 3 líneas del stack
+    };
+
+    // Añadir código si existe
+    if ('code' in error && error.code) {
+      Object.assign(formattedError, { code: error.code });
+    }
+
+    // Si hay una causa simple, añadirla (sin profundizar)
+    if ('cause' in error && error.cause) {
+      if (error.cause instanceof Error) {
+        Object.assign(formattedError, {
+          cause: {
+            message: error.cause.message,
+            name: error.cause.name
+          }
+        });
+      } else if (typeof error.cause === 'object') {
+        Object.assign(formattedError, {
+          cause: { info: 'Causa del error (objeto simplificado)' }
+        });
+      } else {
+        Object.assign(formattedError, {
+          cause: { info: String(error.cause) }
+        });
+      }
+    }
+
+    return formattedError;
+  }
+
+  return { message: 'Error desconocido', type: typeof error };
+}
 
 /**
  * Revalida todas las rutas relevantes cuando cambian los perfiles
@@ -55,7 +98,12 @@ export async function getProfiles(
     return profiles;
   } catch (error) {
     profileLogger.error('❌ Error al obtener perfiles:', error);
-    throw createEntityErrorObject('ProfileError', 'No se pudieron obtener los perfiles', 'GET_FAILED', error);
+    throw createEntityErrorObject(
+      'ProfileError',
+      'No se pudieron obtener los perfiles',
+      'GET_FAILED',
+      formatError(error)
+    );
   }
 }
 
@@ -75,7 +123,12 @@ export async function getProfile(id: string): Promise<ProfileExtended> {
     return profile;
   } catch (error) {
     profileLogger.error('❌ Error al obtener perfil:', error);
-    throw createEntityErrorObject('ProfileError', 'No se pudo obtener el perfil', 'GET_FAILED', error);
+    throw createEntityErrorObject(
+      'ProfileError',
+      'No se pudo obtener el perfil',
+      'GET_FAILED',
+      formatError(error)
+    );
   }
 }
 
@@ -91,7 +144,12 @@ export async function createProfile(data: CreateProfileInput): Promise<ProfileEx
     return profile;
   } catch (error) {
     profileLogger.error('❌ Error al crear perfil:', error);
-    throw createEntityErrorObject('ProfileError', 'No se pudo crear el perfil', 'CREATE_FAILED', error);
+    throw createEntityErrorObject(
+      'ProfileError',
+      'No se pudo crear el perfil',
+      'CREATE_FAILED',
+      formatError(error)
+    );
   }
 }
 
@@ -107,7 +165,12 @@ export async function updateProfile(id: string, data: UpdateProfileInput): Promi
     return profile;
   } catch (error) {
     profileLogger.error('❌ Error al actualizar perfil:', error);
-    throw createEntityErrorObject('ProfileError', 'No se pudo actualizar el perfil', 'UPDATE_FAILED', error);
+    throw createEntityErrorObject(
+      'ProfileError',
+      'No se pudo actualizar el perfil',
+      'UPDATE_FAILED',
+      formatError(error)
+    );
   }
 }
 
@@ -122,7 +185,12 @@ export async function deleteProfile(id: string): Promise<void> {
     await revalidateAllPaths();
   } catch (error) {
     profileLogger.error('❌ Error al eliminar perfil:', error);
-    throw createEntityErrorObject('ProfileError', 'No se pudo eliminar el perfil', 'DELETE_FAILED', error);
+    throw createEntityErrorObject(
+      'ProfileError',
+      'No se pudo eliminar el perfil',
+      'DELETE_FAILED',
+      formatError(error)
+    );
   }
 }
 
@@ -144,7 +212,12 @@ export async function activateProfile(id: string): Promise<ProfileExtended> {
     return profile;
   } catch (error) {
     profileLogger.error('❌ Error al activar perfil:', error);
-    throw createEntityErrorObject('ProfileError', 'No se pudo activar el perfil', 'ACTIVATE_FAILED', error);
+    throw createEntityErrorObject(
+      'ProfileError',
+      'No se pudo activar el perfil',
+      'ACTIVATE_FAILED',
+      formatError(error)
+    );
   }
 }
 
@@ -164,6 +237,11 @@ export async function getActiveProfile(): Promise<ProfileExtended> {
     return profile;
   } catch (error) {
     profileLogger.error('❌ Error al obtener perfil activo:', error);
-    throw createEntityErrorObject('ProfileError', 'No se pudo obtener el perfil activo', 'GET_FAILED', error);
+    throw createEntityErrorObject(
+      'ProfileError',
+      'No se pudo obtener el perfil activo',
+      'GET_FAILED',
+      formatError(error)
+    );
   }
 }

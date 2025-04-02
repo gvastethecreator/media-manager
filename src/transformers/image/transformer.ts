@@ -1,141 +1,300 @@
 /**
  * @file Transformador principal para la entidad Image
- * @module transformers/image/transformer
+ * @module transformers/image
+ * @description Funciones para transformar imágenes de su formato Prisma al formato de la aplicación
  */
 
 import { Logger } from '@/lib/logger';
-import type { Image, ImageComplete, ImageExtended } from '@/types/entities/image/types';
-import { mapImageToComplete } from './mappers';
-import { extendImage } from './serializers';
+import { pathToUrl } from '@/lib/url-utils';
+import { BaseImageSchema, CompleteImageSchema, ExtendedImageSchema } from '@/lib/validators/image-validators';
+import type { ImageBase, ImageComplete, ImageExtended } from '@/types/entities/image/types';
+import type { ThumbnailQuality } from '@/types/thumbnails';
+import { TransformerErrorCode, createTransformerError } from '@/utils/errors/transformer-errors';
+import { calculateAspectRatio, calculateDominantColor, generateThumbnailUrl } from '@/utils/image-utils';
+import path from 'path';
 
 const logger = new Logger('ImageTransformer');
 
 /**
- * 🖼️ Transformador principal para la entidad Image
- * Punto de entrada unificado para transformar objetos Image a diferentes formatos
- *
- * @param image Objeto Image a transformar (puede ser de Prisma, parcial, etc)
- * @returns Objeto ImageComplete con todas las propiedades
+ * Transforma un objeto de imagen al formato básico de la aplicación
+ * @param image Objeto de imagen (puede ser de prisma o cualquier formato)
+ * @returns Imagen en formato base
  */
-export function transformImage(image: any): ImageComplete {
+export const transformImage = <T extends Record<string, any>>(image: T): ImageBase => {
+  if (!image) {
+    logger.error('Intento de transformar una imagen nula o indefinida');
+    throw createTransformerError({
+      code: TransformerErrorCode.NULL_INPUT,
+      message: 'No se puede transformar una imagen nula o indefinida',
+      context: { input: image }
+    });
+  }
+
   try {
-    // Validar entrada
-    if (!image || typeof image !== 'object') {
-      logger.warn('⚠️ Intentando transformar un objeto Image inválido:', image);
-      throw new Error('Invalid image object');
+    // Mapeamos los datos básicos
+    const baseImage = mapImageToBase(image);
+
+    // Validamos con el esquema
+    const validation = BaseImageSchema.safeParse(baseImage);
+    if (!validation.success) {
+      logger.warn('Transformación a imagen base falló validación:', validation.error);
+      // Intento de recuperación básica, incluimos solo los campos críticos
+      return {
+        id: image.id || '',
+        name: image.name || 'Imagen sin nombre',
+        path: image.path || '',
+        hash: image.hash || '',
+        createdAt: image.createdAt || new Date(),
+        updatedAt: image.updatedAt || new Date(),
+        size: image.size || 0,
+        width: image.width || 0,
+        height: image.height || 0,
+        folderId: image.folderId || null
+      };
     }
 
-    // Convertir a formato completo
-    const imageComplete = mapImageToComplete(image);
-
-    // Extender con propiedades adicionales
-    return extendImage(imageComplete);
+    return validation.data;
   } catch (error) {
-    logger.error('❌ Error transformando Image:', error);
-    // En caso de error, devolver el objeto original con estructura mínima
-    return {
-      id: image?.id || 'unknown',
-      name: image?.name || 'Unknown Image',
-      description: image?.description || '',
-      path: image?.path || '',
-      hash: image?.hash || '',
-      size: image?.size || 0,
-      width: image?.width || 0,
-      height: image?.height || 0,
-      thumbnailPath: image?.thumbnailPath || null,
-      thumbnailWidth: image?.thumbnailWidth || 0,
-      thumbnailHeight: image?.thumbnailHeight || 0,
-      metadata: image?.metadata || null,
-      isFavorite: image?.isFavorite || false,
-      isPublic: image?.isPublic || false,
-      folderId: image?.folderId || null,
-      createdAt: image?.createdAt || new Date(),
-      updatedAt: image?.updatedAt || new Date(),
-      addedAt: image?.addedAt || new Date(),
-      folder: image?.folder || null,
-      tags: image?.tags || [],
-      albums: image?.albums || [],
-      collections: image?.collections || [],
-      characters: image?.characters || [],
-      places: image?.places || [],
-      prompts: image?.prompts || [],
-      _count: image?._count || {
-        tags: 0,
-        albums: 0,
-        collections: 0,
-        characters: 0,
-        places: 0,
-        prompts: 0,
-      }
-    };
+    logger.error('Error en transformImage:', error);
+    throw createTransformerError({
+      code: TransformerErrorCode.TRANSFORM_FAILED,
+      message: 'Error transformando imagen a formato base',
+      cause: error instanceof Error ? error : new Error(String(error)),
+      context: { input: image }
+    });
   }
-}
+};
 
 /**
- * 🔄 Transforma un Image a la versión extendida para UI
- *
- * @param image Objeto Image a transformar
- * @param isSelected Estado de selección (opcional)
- * @returns Objeto ImageExtended con propiedades de UI
+ * Transforma un array de imágenes al formato básico
+ * @param images Array de objetos de imagen
+ * @returns Array de imágenes en formato base
  */
-export function transformImageToExtended(
-  image: Image | ImageComplete,
-  isSelected = false
-): ImageExtended {
-  try {
-    // Primero asegurar que tenemos un ImageComplete
-    const imageComplete = '_count' in image ? image : transformImage(image);
-
-    // Calcular propiedades adicionales para UI
-    const hasThumbnail = !!imageComplete.thumbnailPath;
-    const thumbnailUrl = hasThumbnail
-      ? `/api/images/${imageComplete.id}/thumbnail`
-      : null;
-    const fullUrl = `/api/images/${imageComplete.id}`;
-    const aspectRatio = imageComplete.width && imageComplete.height
-      ? imageComplete.width / imageComplete.height
-      : 1;
-    const parsedMetadata = imageComplete.metadata
-      ? (typeof imageComplete.metadata === 'string'
-          ? JSON.parse(imageComplete.metadata)
-          : imageComplete.metadata)
-      : null;
-
-    // Extender con propiedades de UI
-    return {
-      ...imageComplete,
-      isSelected,
-      isLoading: false,
-      hasError: false,
-      isDragging: false,
-      isDropTarget: false,
-      displayName: imageComplete.name || 'Sin nombre',
-      thumbnailUrl,
-      fullUrl,
-      aspectRatio,
-      metadata: parsedMetadata,
-      hasThumbnail,
-      hasMetadata: !!parsedMetadata,
-      isProcessed: true,
-    };
-  } catch (error) {
-    logger.error('❌ Error transformando Image a Extended:', error);
-    // Devolver versión básica en caso de error
-    return {
-      ...image,
-      isSelected,
-      isLoading: false,
-      hasError: true, // Marcamos como error
-      isDragging: false,
-      isDropTarget: false,
-      displayName: image.name || 'Sin nombre',
-      thumbnailUrl: null,
-      fullUrl: `/api/images/${image.id}`,
-      aspectRatio: 1,
-      metadata: null,
-      hasThumbnail: false,
-      hasMetadata: false,
-      isProcessed: false,
-    } as ImageExtended;
+export const transformImages = <T extends Record<string, any>>(images: T[]): ImageBase[] => {
+  if (!Array.isArray(images)) {
+    logger.error('Intento de transformar un valor no array:', typeof images);
+    return [];
   }
+
+  return images.map(image => {
+    try {
+      return transformImage(image);
+    } catch (error) {
+      logger.warn('Error transformando imagen en array:', error);
+      // Continuamos con el resto del array
+      return null;
+    }
+  }).filter(Boolean) as ImageBase[];
+};
+
+/**
+ * Transforma un objeto de imagen al formato completo de la aplicación
+ * @param image Objeto de imagen
+ * @returns Imagen en formato completo
+ */
+export const transformImageToComplete = <T extends Record<string, any>>(image: T): ImageComplete => {
+  if (!image) {
+    logger.error('Intento de transformar a formato completo una imagen nula');
+    throw createTransformerError({
+      code: TransformerErrorCode.NULL_INPUT,
+      message: 'No se puede transformar a formato completo una imagen nula',
+      context: { input: image }
+    });
+  }
+
+  try {
+    // Primero transformamos a base para asegurar integridad
+    const baseImage = transformImage(image);
+
+    // Luego mapeamos al formato completo
+    const completeImage = mapImageToComplete(image, baseImage);
+
+    // Validamos con el esquema
+    const validation = CompleteImageSchema.safeParse(completeImage);
+    if (!validation.success) {
+      logger.warn('Transformación a imagen completa falló validación:', validation.error);
+      // Devolvemos una versión garantizada con los campos necesarios
+      return {
+        ...baseImage,
+        url: image.url || pathToUrl(image.path),
+        aspectRatio: calculateAspectRatio(baseImage.width, baseImage.height),
+        thumbnails: {},
+        metadata: image.metadata || {},
+        stats: {
+          views: image.stats?.views || 0,
+          downloads: image.stats?.downloads || 0,
+          favorites: image.stats?.favorites || 0,
+          lastAccessed: image.stats?.lastAccessed || null
+        },
+        visualConfig: {
+          isHidden: image.visualConfig?.isHidden || false,
+          isPinned: image.visualConfig?.isPinned || false,
+          dominantColor: calculateDominantColor(image) || '#333333'
+        },
+        isPublic: image.isPublic || false
+      };
+    }
+
+    return validation.data;
+  } catch (error) {
+    logger.error('Error en transformImageToComplete:', error);
+    // Si falla, intentamos devolver al menos la versión base
+    try {
+      return {
+        ...transformImage(image),
+        url: pathToUrl(image.path),
+        aspectRatio: calculateAspectRatio(image.width || 0, image.height || 0),
+        thumbnails: {},
+        metadata: {},
+        stats: { views: 0, downloads: 0, favorites: 0, lastAccessed: null },
+        visualConfig: { isHidden: false, isPinned: false, dominantColor: '#333333' },
+        isPublic: false
+      };
+    } catch (fallbackError) {
+      logger.error('Error crítico en transformador de imagen:', fallbackError);
+      throw createTransformerError({
+        code: TransformerErrorCode.TRANSFORM_FAILED,
+        message: 'Error transformando imagen a formato completo',
+        cause: error instanceof Error ? error : new Error(String(error)),
+        context: { input: image }
+      });
+    }
+  }
+};
+
+/**
+ * Transforma un array de imágenes al formato completo
+ * @param images Array de objetos de imagen
+ * @returns Array de imágenes en formato completo
+ */
+export const transformImagesToComplete = <T extends Record<string, any>>(images: T[]): ImageComplete[] => {
+  if (!Array.isArray(images)) {
+    logger.error('Intento de transformar a completo un valor no array:', typeof images);
+    return [];
+  }
+
+  return images.map(image => {
+    try {
+      return transformImageToComplete(image);
+    } catch (error) {
+      logger.warn('Error transformando imagen en array a completo:', error);
+      // Continuamos con el resto del array
+      return null;
+    }
+  }).filter(Boolean) as ImageComplete[];
+};
+
+/**
+ * Transforma un objeto de imagen al formato extendido (UI) de la aplicación
+ * @param image Objeto de imagen
+ * @returns Imagen en formato extendido listo para UI
+ */
+export const transformImageToExtended = <T extends Record<string, any>>(image: T): ImageExtended => {
+  if (!image) {
+    logger.error('Intento de transformar a formato extendido una imagen nula');
+    throw createTransformerError({
+      code: TransformerErrorCode.NULL_INPUT,
+      message: 'No se puede transformar a formato extendido una imagen nula',
+      context: { input: image }
+    });
+  }
+
+  try {
+    // Primero transformamos a completo para asegurar todos los campos
+    const completeImage = transformImageToComplete(image);
+
+    // Luego mapeamos al formato extendido
+    const extendedImage = mapImageToExtended(image, completeImage);
+
+    // Generamos URLs de thumbnails
+    const thumbnails = Object.values(ThumbnailQuality).reduce((acc, quality) => {
+      acc[quality] = generateThumbnailUrl(image.id, quality);
+      return acc;
+    }, {} as Record<ThumbnailQuality, string>);
+
+    // Añadimos propiedades calculadas
+    extendedImage.thumbnails = thumbnails;
+    extendedImage.displayName = extendedImage.name || path.basename(extendedImage.path || '');
+    extendedImage.formattedSize = formatFileSize(extendedImage.size);
+    extendedImage.dimensions = `${extendedImage.width}×${extendedImage.height}`;
+
+    // Validamos con el esquema
+    const validation = ExtendedImageSchema.safeParse(extendedImage);
+    if (!validation.success) {
+      logger.warn('Transformación a imagen extendida falló validación:', validation.error);
+      // Devolvemos una versión garantizada con los campos extendidos mínimos
+      return {
+        ...completeImage,
+        thumbnails,
+        displayName: image.name || path.basename(image.path || ''),
+        formattedSize: formatFileSize(image.size || 0),
+        dimensions: `${image.width || 0}×${image.height || 0}`,
+        selected: false,
+        selectionOrder: 0,
+        isDetailView: false,
+        visible: true
+      };
+    }
+
+    return validation.data;
+  } catch (error) {
+    logger.error('Error en transformImageToExtended:', error);
+    // Si falla, intentamos devolver al menos la versión completa
+    try {
+      const base = transformImageToComplete(image);
+      return {
+        ...base,
+        thumbnails: {},
+        displayName: image.name || 'Imagen sin nombre',
+        formattedSize: '0 KB',
+        dimensions: '0×0',
+        selected: false,
+        selectionOrder: 0,
+        isDetailView: false,
+        visible: true
+      };
+    } catch (fallbackError) {
+      logger.error('Error crítico en transformador extendido:', fallbackError);
+      throw createTransformerError({
+        code: TransformerErrorCode.TRANSFORM_FAILED,
+        message: 'Error transformando imagen a formato extendido',
+        cause: error instanceof Error ? error : new Error(String(error)),
+        context: { input: image }
+      });
+    }
+  }
+};
+
+/**
+ * Transforma un array de imágenes al formato extendido
+ * @param images Array de objetos de imagen
+ * @returns Array de imágenes en formato extendido
+ */
+export const transformImagesToExtended = <T extends Record<string, any>>(images: T[]): ImageExtended[] => {
+  if (!Array.isArray(images)) {
+    logger.error('Intento de transformar a extendido un valor no array:', typeof images);
+    return [];
+  }
+
+  return images.map(image => {
+    try {
+      return transformImageToExtended(image);
+    } catch (error) {
+      logger.warn('Error transformando imagen en array a extendido:', error);
+      // Continuamos con el resto del array
+      return null;
+    }
+  }).filter(Boolean) as ImageExtended[];
+};
+
+/**
+ * Formatea el tamaño del archivo en una cadena legible
+ */
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 B';
+
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+
+  return `${(bytes / (1024 ** i)).toFixed(2)} ${sizes[i]}`;
 }

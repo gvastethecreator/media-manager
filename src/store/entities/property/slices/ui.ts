@@ -3,12 +3,12 @@
  * @module store/entities/property/slices/ui
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { PropertyViewMode } from '@/types/entities/property';
 import type { StateCreator } from 'zustand';
 import type { PropertyState } from '../types';
 
-const uiLogger = serverLogger.withContext('PropertyStore:UI');
+const uiLogger = clientLogger.withContext('PropertyStore:UI');
 
 // Slice para operaciones de UI
 export interface PropertyUISlice {

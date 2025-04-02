@@ -1,13 +1,14 @@
+import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { toastService } from '@/services/toast.service';
 
 import { PLACE_STORE_NAME } from './constants';
 import type { PlaceStore } from './types';
 
-const placeLogger = serverLogger.withContext('PlaceStore');
+// Crear logger
+const placeLogger = clientLogger.withContext('PlaceStore');
 
 // 🏗️ Crear el store con persistencia
 export const usePlaceStore = create<PlaceStore>()(

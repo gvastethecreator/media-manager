@@ -1,232 +1,334 @@
 'use server';
 
 /**
- * @file Acciones de consulta para carpetas
+ * @file Query actions for folders
  * @module app/actions/folders/query.actions
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { toFolderExtended } from '@/transformers/folder';
-import { type FolderExtended } from '@/types/entities/folder';
-import { unstable_cache } from 'next/cache';
+import {
+    mapFolderFiltersToPrisma,
+    transformFolder,
+    transformFolderToExtended
+} from '@/transformers/folder';
+import { type FolderComplete, type FolderFilters } from '@/types/entities/folder';
+import { revalidatePath } from 'next/cache';
 
-// Logger específico para acciones de consulta
-const logger = serverLogger.withContext('FolderActions:query');
-
-// Tiempo de caché en segundos
-const CACHE_REVALIDATE_SECONDS = 30;
+// Logger para acciones de consulta
+const queryLogger = serverLogger.withContext('FolderQueryActions');
 
 /**
- * Error personalizado para consultas de carpetas
+ * Obtiene todas las carpetas
+ * @param includeStats Si se deben incluir estadísticas avanzadas
+ * @returns Lista de carpetas
  */
-class FolderQueryError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'FolderQueryError';
+export async function getFolders(includeStats = false) {
+  try {
+    queryLogger.info('📂 Obteniendo todas las carpetas');
+
+    const folders = await prisma.folder.findMany({
+      include: {
+        _count: {
+          select: {
+            images: true,
+            videos: true,
+            children: true,
+          }
+        },
+        parent: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    // Transformar a modelo extendido con transformador
+    const transformedFolders = folders.map(folder => transformFolderToExtended(folder));
+
+    queryLogger.info(`✅ Obtenidas ${transformedFolders.length} carpetas`);
+
+    return transformedFolders;
+  } catch (error) {
+    queryLogger.error('❌ Error obteniendo carpetas:', error);
+    throw new Error(`Error al obtener carpetas: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 /**
- * Obtiene una carpeta específica por ID
+ * Obtiene una carpeta por su ID
+ * @param id ID de la carpeta
+ * @param includeStats Si se deben incluir estadísticas avanzadas
+ * @returns Carpeta extendida
  */
-export async function getFolder(id: string): Promise<FolderExtended | null> {
+export async function getFolderById(id: string, includeStats = false): Promise<FolderComplete> {
   try {
-    logger.info('🔍 Buscando carpeta por ID:', id);
+    queryLogger.info('🔍 Obteniendo carpeta por ID:', id);
 
     const folder = await prisma.folder.findUnique({
       where: { id },
       include: {
-        images: true,
         _count: {
           select: {
             images: true,
-          },
+            videos: true,
+            children: true,
+          }
         },
+        parent: true,
+        children: true,
       },
     });
 
     if (!folder) {
-      logger.warn('⚠️ Carpeta no encontrada:', id);
-      return null;
+      throw new Error(`Carpeta con ID ${id} no encontrada`);
     }
 
-    // Transformar la carpeta para la respuesta
-    const transformedFolder = toFolderExtended(folder);
+    // Transformar a modelo completo con transformador
+    const transformedFolder = transformFolder(folder);
 
-    logger.info('✅ Carpeta encontrada:', { id });
+    queryLogger.info('✅ Carpeta obtenida:', { id: transformedFolder.id, name: transformedFolder.name });
+
     return transformedFolder;
   } catch (error) {
-    logger.error('❌ Error al buscar carpeta:', error);
-    throw new FolderQueryError('No se pudo obtener la carpeta', 'GET_FAILED', error);
+    queryLogger.error(`❌ Error obteniendo carpeta ${id}:`, error);
+    throw new Error(`Error al obtener carpeta: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 /**
- * Obtiene todas las carpetas
+ * Busca carpetas según filtros
+ * @param filters Filtros para la búsqueda
+ * @param options Opciones adicionales
+ * @returns Lista de carpetas que coinciden con los filtros
  */
-export async function getFolders(): Promise<FolderExtended[]> {
-  const getCachedFolders = unstable_cache(
-    async () => {
-      try {
-        logger.info('📋 Obteniendo lista de carpetas');
+export async function searchFolders(
+  filters: FolderFilters,
+  options: {
+    page?: number;
+    limit?: number;
+    sort?: string;
+    includeStats?: boolean;
+    includeImages?: boolean;
+    includeVideos?: boolean;
+    includeParent?: boolean;
+    includeChildren?: boolean;
+  } = {}
+) {
+  try {
+    const {
+      page = 1,
+      limit = 50,
+      sort = 'updatedAt:desc',
+      includeStats = false,
+      includeImages = false,
+      includeVideos = false,
+      includeParent = true,
+      includeChildren = false,
+    } = options;
 
-        const folders = await prisma.folder.findMany({
-          include: {
-            images: true,
-            _count: {
-              select: {
-                images: true,
-              },
-            },
-          },
-          orderBy: {
-            name: 'asc',
-          },
-        });
+    queryLogger.info('🔍 Buscando carpetas con filtros:', { filters, options });
 
-        // Transformar las carpetas para la respuesta
-        const transformedFolders = folders.map(toFolderExtended);
+    // Convertir filtros a prisma con el transformador
+    const prismaFilters = mapFolderFiltersToPrisma(filters);
 
-        logger.info('✅ Lista de carpetas obtenida:', { count: folders.length });
-        return transformedFolders;
-      } catch (error) {
-        logger.error('❌ Error al obtener lista de carpetas:', error);
-        throw new FolderQueryError('No se pudo obtener la lista de carpetas', 'LIST_FAILED', error);
+    // Determinar orden
+    const [sortField, sortDirection] = sort.split(':');
+    const orderBy: Record<string, 'asc' | 'desc'> = {};
+    orderBy[sortField || 'updatedAt'] = (sortDirection === 'asc' ? 'asc' : 'desc');
+
+    // Calcular paginación
+    const skip = (page - 1) * limit;
+
+    // Construir includes dinámicamente
+    const include: any = {
+      _count: {
+        select: {
+          images: true,
+          videos: true,
+          children: true,
+        }
       }
-    },
-    ['folders-list'],
-    {
-      revalidate: CACHE_REVALIDATE_SECONDS,
-      tags: ['folders'],
-    }
-  );
+    };
 
-  return getCachedFolders();
-}
+    if (includeParent) include.parent = true;
+    if (includeChildren) include.children = true;
+    if (includeImages) include.images = { take: 5 }; // Limitar para evitar queries pesadas
+    if (includeVideos) include.videos = { take: 5 }; // Limitar para evitar queries pesadas
 
-/**
- * Obtiene carpetas por ruta
- */
-export async function getFolderByPath(path: string): Promise<FolderExtended | null> {
-  try {
-    logger.info('🔍 Buscando carpeta por ruta:', path);
+    // Realizar búsqueda
+    const [folders, totalCount] = await Promise.all([
+      prisma.folder.findMany({
+        where: prismaFilters,
+        include,
+        orderBy,
+        skip,
+        take: limit,
+      }),
+      prisma.folder.count({
+        where: prismaFilters,
+      }),
+    ]);
 
-    const folder = await prisma.folder.findFirst({
-      where: { path },
-      include: {
-        images: true,
-        _count: {
-          select: {
-            images: true,
-          },
-        },
+    // Transformar resultados
+    const transformedFolders = folders.map(folder => transformFolderToExtended(folder));
+
+    queryLogger.info(`✅ Búsqueda completada: ${transformedFolders.length} de ${totalCount} carpetas`);
+
+    return {
+      data: transformedFolders,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        pages: Math.ceil(totalCount / limit),
       },
-    });
-
-    if (!folder) {
-      logger.warn('⚠️ Carpeta no encontrada:', path);
-      return null;
-    }
-
-    // Transformar la carpeta para la respuesta
-    const transformedFolder = toFolderExtended(folder);
-
-    logger.info('✅ Carpeta encontrada:', { path });
-    return transformedFolder;
+    };
   } catch (error) {
-    logger.error('❌ Error al buscar carpeta por ruta:', error);
-    throw new FolderQueryError('No se pudo obtener la carpeta', 'GET_BY_PATH_FAILED', error);
+    queryLogger.error('❌ Error buscando carpetas:', error);
+    throw new Error(`Error al buscar carpetas: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 /**
- * Busca carpetas por nombre
+ * Obtiene carpetas para la vista de árbol
+ * Optimizado para navegación jerárquica
  */
-export async function searchFolders(query: string): Promise<FolderExtended[]> {
+export async function getFolderTree() {
   try {
-    logger.info('🔍 Buscando carpetas:', query);
+    queryLogger.info('🌳 Obteniendo árbol de carpetas');
 
+    // Optimizar query para árbol
     const folders = await prisma.folder.findMany({
-      where: {
-        OR: [
-          { name: { contains: query, mode: 'insensitive' } },
-          { path: { contains: query, mode: 'insensitive' } },
-        ],
-      },
-      include: {
-        images: true,
+      select: {
+        id: true,
+        name: true,
+        path: true,
+        parentId: true,
+        emoji: true,
+        color: true,
+        totalFiles: true,
         _count: {
           select: {
+            children: true,
             images: true,
-          },
-        },
+            videos: true,
+          }
+        }
       },
       orderBy: {
         name: 'asc',
       },
     });
 
-    // Transformar las carpetas para la respuesta
-    const transformedFolders = folders.map(toFolderExtended);
+    // Construir estructura de árbol
+    const folderMap = new Map();
 
-    logger.info('✅ Carpetas encontradas:', { count: folders.length, query });
-    return transformedFolders;
+    // Poblar el mapa usando for...of
+    for (const folder of folders) {
+      folderMap.set(folder.id, {
+        ...folder,
+        children: [],
+        level: 0,
+        isOpen: false,
+        isSelected: false,
+        hasChildren: folder._count.children > 0,
+        totalItems: (folder._count.images || 0) + (folder._count.videos || 0),
+      });
+    }
+
+    // Construir jerarquía de carpetas
+    const rootFolders: any[] = [];
+
+    // Construir relaciones padre-hijo usando for...of
+    for (const folder of folders) {
+      const folderWithMeta = folderMap.get(folder.id);
+
+      if (folder.parentId && folderMap.has(folder.parentId)) {
+        // Es una carpeta hija
+        const parent = folderMap.get(folder.parentId);
+        folderWithMeta.level = parent.level + 1;
+        parent.children.push(folderWithMeta);
+      } else {
+        // Es una carpeta raíz
+        rootFolders.push(folderWithMeta);
+      }
+    }
+
+    queryLogger.info(`✅ Árbol de carpetas obtenido: ${rootFolders.length} carpetas raíz, ${folders.length} carpetas totales`);
+
+    return rootFolders;
   } catch (error) {
-    logger.error('❌ Error al buscar carpetas:', error);
-    throw new FolderQueryError('No se pudo realizar la búsqueda de carpetas', 'SEARCH_FAILED', error);
+    queryLogger.error('❌ Error obteniendo árbol de carpetas:', error);
+    throw new Error(`Error al obtener árbol de carpetas: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 /**
- * Obtiene carpetas sin indexar
+ * Obtiene estadísticas generales de carpetas
  */
-export async function getUnindexedFolders(): Promise<FolderExtended[]> {
-  const getCachedUnindexedFolders = unstable_cache(
-    async () => {
-      try {
-        logger.info('📋 Obteniendo carpetas sin indexar');
+export async function getFoldersStats() {
+  try {
+    queryLogger.info('📊 Obteniendo estadísticas de carpetas');
 
-        const folders = await prisma.folder.findMany({
-          where: {
-            OR: [
-              { lastIndexed: null },
-              { autoReindex: true },
-            ],
-          },
-          include: {
-            images: true,
-            _count: {
-              select: {
-                images: true,
-              },
-            },
-          },
-          orderBy: {
-            name: 'asc',
-          },
-        });
+    const [folderCount, totalImages, totalVideos, totalFolderSize, recentFolders] = await Promise.all([
+      prisma.folder.count(),
+      prisma.image.count(),
+      prisma.video.count(),
+      prisma.folder.aggregate({
+        _sum: {
+          totalSize: true,
+        },
+      }),
+      prisma.folder.findMany({
+        take: 5,
+        orderBy: {
+          updatedAt: 'desc',
+        },
+        select: {
+          id: true,
+          name: true,
+          totalFiles: true,
+          totalSize: true,
+        },
+      }),
+    ]);
 
-        // Transformar las carpetas para la respuesta
-        const transformedFolders = folders.map(toFolderExtended);
+    const stats = {
+      totalFolders: folderCount,
+      totalImages,
+      totalVideos,
+      totalFiles: totalImages + totalVideos,
+      totalSize: totalFolderSize._sum.totalSize || 0,
+      recentFolders,
+    };
 
-        logger.info('✅ Carpetas sin indexar obtenidas:', { count: folders.length });
-        return transformedFolders;
-      } catch (error) {
-        logger.error('❌ Error al obtener carpetas sin indexar:', error);
-        throw new FolderQueryError('No se pudieron obtener las carpetas sin indexar', 'UNINDEXED_FAILED', error);
-      }
-    },
-    ['folders-unindexed'],
-    {
-      revalidate: CACHE_REVALIDATE_SECONDS,
-      tags: ['folders'],
-    }
-  );
+    queryLogger.info('✅ Estadísticas de carpetas obtenidas');
 
-  return getCachedUnindexedFolders();
+    return stats;
+  } catch (error) {
+    queryLogger.error('❌ Error obteniendo estadísticas de carpetas:', error);
+    throw new Error(`Error al obtener estadísticas: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Revalida las rutas relacionadas con carpetas
+ */
+export async function revalidateFolderRoutes() {
+  try {
+    queryLogger.info('🔄 Revalidando rutas de carpetas');
+
+    // Revalidar rutas que muestran carpetas
+    revalidatePath('/folders');
+    revalidatePath('/dashboard');
+    revalidatePath('/api/folders');
+
+    queryLogger.info('✅ Rutas revalidadas');
+
+    return { success: true };
+  } catch (error) {
+    queryLogger.error('❌ Error revalidando rutas:', error);
+    throw new Error(`Error al revalidar rutas: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }

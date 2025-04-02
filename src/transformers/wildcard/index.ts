@@ -1,15 +1,29 @@
 /**
- * @file Exporta los componentes principales para el transformer de Wildcard
+ * @file Exportaciones para el transformer de Wildcard
  * @module transformers/wildcard
  */
 
-// Exportar todas las funciones de serialización
-export * from './serializers';
+// Exportar tipos explícitamente
+export type { TransformWildcardOptions } from './transformer';
 
-// Exportar todas las funciones de mapeo
-export * from './mappers';
-export { fromPrismaWildcard as transformWildcard };
+// Exportar transformadores
+export {
+    transformWildcard,
+    transformWildcardToExtended,
+    transformWildcardToWithStats,
+    transformWildcards
+} from './transformer';
 
-// Alias de función principal para facilitar su uso
-import { fromPrismaWildcard } from './serializers';
+// Exportar serializadores
+export {
+    parseWildcardChildren,
+    serializeWildcardChildren,
+    toRelatedWildcard
+} from './serializers';
+
+// Exportar mappers
+export { } from './mappers';
+
+// Exportar funciones específicas de mappers que sí se usan
+export { mapCreateWildcardDataToPrisma, mapUpdateWildcardDataToPrisma, mapWildcardFiltersToPrisma } from './mappers';
 

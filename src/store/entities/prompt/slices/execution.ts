@@ -1,9 +1,9 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { PromptExecutionParams, PromptExecutionResult } from '@/types/entities/prompt';
 import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
-const executionLogger = serverLogger.withContext('PromptStore:Execution');
+const executionLogger = clientLogger.withContext('PromptStore:Execution');
 
 export interface ExecutionSlice {
 	// Estado

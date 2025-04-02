@@ -4,7 +4,7 @@
  */
 
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/lib/constants';
-import { NotFoundError, TransformerError } from '@/lib/errors';
+import { EntityError, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
@@ -13,10 +13,23 @@ import type {
     GroupSearchResult,
     GroupUpdateInput
 } from '@/types/entities/group';
+import { TransformerError } from '@/utils/transformers/errors';
 import { toGroupListItem } from './mappers';
 import { parseGroupFilterObject, toExtendedGroup, toPrismaGroup, validateGroup } from './serializers';
+// Importar el transformador principal y sus funciones asociadas
+import {
+    transformGroup as transformGroupMain,
+    transformGroupToExtended,
+    transformGroupToWithStats,
+    transformGroups as transformGroupsMain
+} from './transformer';
 
 const logger = serverLogger.withContext('GroupTransformer');
+
+// Exportar el transformador principal y sus variantes
+export const transformGroup = transformGroupMain;
+export const transformGroups = transformGroupsMain;
+export { transformGroupToExtended, transformGroupToWithStats };
 
 /**
  * Busca grupos según los filtros proporcionados
@@ -148,7 +161,7 @@ export async function getGroupById(
 
     // Si no existe y se debe lanzar error
     if (!group && throwIfNotFound) {
-      throw new NotFoundError(`Grupo con ID ${id} no encontrado`);
+      throw new EntityError(`Grupo con ID ${id} no encontrado`, EntityErrorCode.NOT_FOUND);
     }
 
     // Si no existe, devolver null
@@ -159,7 +172,7 @@ export async function getGroupById(
     // Transformar a formato extendido
     return toExtendedGroup(group);
   } catch (error) {
-    if (error instanceof NotFoundError) {
+    if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
       throw error;
     }
     logger.error(`Error obteniendo grupo ${id}:`, error);
@@ -295,7 +308,7 @@ export async function updateGroup(
     });
 
     if (!existingGroup) {
-      throw new NotFoundError(`Grupo con ID ${id} no encontrado`);
+      throw new EntityError(`Grupo con ID ${id} no encontrado`, EntityErrorCode.NOT_FOUND);
     }
 
     // Validar datos de actualización
@@ -332,7 +345,7 @@ export async function updateGroup(
     // Transformar resultado
     return toExtendedGroup(updatedGroup);
   } catch (error) {
-    if (error instanceof NotFoundError) {
+    if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
       throw error;
     }
     logger.error(`Error actualizando grupo ${id}:`, error);
@@ -358,7 +371,7 @@ export async function deleteGroup(
     });
 
     if (!existingGroup) {
-      throw new NotFoundError(`Grupo con ID ${id} no encontrado`);
+      throw new EntityError(`Grupo con ID ${id} no encontrado`, EntityErrorCode.NOT_FOUND);
     }
 
     if (softDelete) {
@@ -379,7 +392,7 @@ export async function deleteGroup(
 
     return true;
   } catch (error) {
-    if (error instanceof NotFoundError) {
+    if (error instanceof EntityError && error.code === EntityErrorCode.NOT_FOUND) {
       throw error;
     }
     logger.error(`Error eliminando grupo ${id}:`, error);
@@ -439,7 +452,12 @@ export const GroupTransformer = {
   createGroup,
   updateGroup,
   deleteGroup,
-  toRelatedGroup
+  toRelatedGroup,
+  // Añadir nuevas funciones al objeto exportado
+  transformGroup,
+  transformGroups,
+  transformGroupToExtended,
+  transformGroupToWithStats
 };
 
 export default GroupTransformer;

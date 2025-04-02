@@ -7,16 +7,16 @@ import { type ServerImage, convertServerImageToFileItem } from '@/services/image
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 // Importaciones actualizadas usando nuevos tipos y transformers
 import {
-  mapCollectionExtendedFromComplete,
-  mapCreateCollectionDataToPrisma,
-  mapUpdateCollectionDataToPrisma
+    mapCreateCollectionDataToPrisma,
+    mapUpdateCollectionDataToPrisma,
+    transformCollectionToExtended
 } from '@/transformers/collection';
-import { toCollectionComplete } from '@/transformers/collection/serializers';
+import { fromPrismaCollection } from '@/transformers/collection/serializers';
 import type {
-  CollectionBase,
-  CollectionExtended,
-  CreateCollectionData,
-  UpdateCollectionData
+    CollectionBase,
+    CollectionExtended,
+    CreateCollectionData,
+    UpdateCollectionData
 } from '@/types/entities/collection';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
@@ -219,9 +219,9 @@ export async function getCollection(id: string): Promise<CollectionExtended> {
 			throw createCollectionError('Colección no encontrada', CollectionErrorCode.NOT_FOUND);
 		}
 
-        // Transformar usando los nuevos serializadores
-        const collectionComplete = toCollectionComplete(collection);
-        const collectionExtended = mapCollectionExtendedFromComplete(collectionComplete, collection._count.images);
+        // Transformar usando los nuevos serializadores y transformadores
+        const collectionComplete = fromPrismaCollection(collection);
+        const collectionExtended = transformCollectionToExtended(collectionComplete);
 
 		collectionLogger.info('✅ Colección obtenida:', collection.name);
 		return {
@@ -247,25 +247,15 @@ export async function createCollection(data: CreateCollectionData): Promise<Coll
 		// Crear la colección
 		const collection = await prisma.collection.create({
 			data: prismaData,
-            include: {
-                _count: {
-                    select: {
-                        images: true,
-                        groups: true,
-                        properties: true,
-                        wildcards: true
-                    },
-                },
-            },
+            include: { _count: true }
 		});
 
-        // Transformar usando los nuevos serializadores
-        const collectionComplete = toCollectionComplete(collection);
-        const collectionExtended = mapCollectionExtendedFromComplete(collectionComplete, 0);
+        await revalidateAllPaths();
+        await notifyCollectionChange('create', collection);
 
-		// Notificar cambio
-		await notifyCollectionChange('create', collection);
-		await revalidateAllPaths();
+        // Transformar
+        const collectionComplete = fromPrismaCollection(collection);
+        const collectionExtended = transformCollectionToExtended(collectionComplete);
 
 		collectionLogger.info('✅ Colección creada:', collection.name);
 		return {
@@ -298,25 +288,15 @@ export async function updateCollection(id: string, data: UpdateCollectionData): 
 		const collection = await prisma.collection.update({
 			where: { id },
 			data: prismaData,
-            include: {
-                _count: {
-                    select: {
-                        images: true,
-                        groups: true,
-                        properties: true,
-                        wildcards: true
-                    },
-                },
-            },
+            include: { _count: true }
 		});
 
-        // Transformar usando los nuevos serializadores
-        const collectionComplete = toCollectionComplete(collection);
-        const collectionExtended = mapCollectionExtendedFromComplete(collectionComplete, collection._count.images);
+        await revalidateAllPaths();
+        await notifyCollectionChange('update', collection);
 
-		// Notificar cambio
-		await notifyCollectionChange('update', collection);
-		await revalidateAllPaths();
+        // Transformar
+        const collectionComplete = fromPrismaCollection(collection);
+        const collectionExtended = transformCollectionToExtended(collectionComplete);
 
 		collectionLogger.info('✅ Colección actualizada:', collection.name);
 		return {

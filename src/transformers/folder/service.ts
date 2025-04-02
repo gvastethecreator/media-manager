@@ -13,12 +13,12 @@ import type {
     FolderUpdateInput,
     FolderWithStats
 } from '@/types/entities/folder/types';
+import { transformFolder } from './index';
 import {
     mapCreateFolderDataToPrisma,
     mapFolderSearchOptionsToPrisma,
     mapUpdateFolderDataToPrisma
 } from './mappers';
-import { transformFolder } from './transformer';
 
 const logger = new Logger('FolderService');
 

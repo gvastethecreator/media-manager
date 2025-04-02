@@ -1,28 +1,70 @@
-// Re-exportar tipos y errores
-export * from './metadata-extractors.actions';
-export * from './metadata-parsers.actions';
-export * from './metadata-types.actions';
-export * from './metadata-utils.actions';
-export * from './metadata.actions';
+'use server';
 
-// Re-exportar funciones principales
-export { clearMetadataCache, extractMetadata, preloadMetadata } from './metadata-extractors.actions';
+/**
+ * @file Exportaciones asíncronas para funciones de gestión de metadatos
+ * @module app/actions/metadata
+ */
 
-// Re-exportar utilidades públicas
-export { getImageFormat, isSupportedImageFormat } from './metadata-utils.actions';
-
-// Función para obtener metadatos desde servidor por ID
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { FileMetadata } from '@/types/metadata.types';
-import { parseMetadataString } from './metadata-parsers.actions';
+import * as MetadataErrorsActions from './metadata-errors.actions';
+import * as MetadataExtractorsActions from './metadata-extractors.actions';
+import * as MetadataParsersActions from './metadata-parsers.actions';
+import { parseMetadataString as parseMetadataStringInternal } from './metadata-parsers.actions';
+import * as MetadataUtilsActions from './metadata-utils.actions';
+import * as MetadataActions from './metadata.actions';
 
-const metadataLogger = serverLogger.withContext('MetadataAPI');
+// Logger para funciones de este archivo
+const metadataLogger = serverLogger.withContext('MetadataIndexActions');
 
+// Re-exportamos cada función como asíncrona para cumplir con las restricciones de 'use server'
+
+// Exportaciones de metadata-errors.actions
+export async function createMetadataError(...args: Parameters<typeof MetadataErrorsActions.createMetadataError>) {
+	return MetadataErrorsActions.createMetadataError(...args);
+}
+
+// Exportaciones de metadata-extractors.actions
+export async function extractMetadata(...args: Parameters<typeof MetadataExtractorsActions.extractMetadata>) {
+	return MetadataExtractorsActions.extractMetadata(...args);
+}
+
+// Exportaciones de metadata-parsers.actions
+export async function parseExifData(...args: Parameters<typeof MetadataParsersActions.parseExifData>) {
+	return MetadataParsersActions.parseExifData(...args);
+}
+export async function parseSharpMetadata(...args: Parameters<typeof MetadataParsersActions.parseSharpMetadata>) {
+	return MetadataParsersActions.parseSharpMetadata(...args);
+}
+export async function parseMetadataString(...args: Parameters<typeof MetadataParsersActions.parseMetadataString>) {
+	return MetadataParsersActions.parseMetadataString(...args);
+}
+export async function getAIGenerationInfo(...args: Parameters<typeof MetadataParsersActions.getAIGenerationInfo>) {
+	return MetadataParsersActions.getAIGenerationInfo(...args);
+}
+
+// Exportaciones de metadata-utils.actions
+export async function getImageFormat(...args: Parameters<typeof MetadataUtilsActions.getImageFormat>) {
+	return MetadataUtilsActions.getImageFormat(...args);
+}
+export async function isSupportedImageFormat(...args: Parameters<typeof MetadataUtilsActions.isSupportedImageFormat>) {
+	return MetadataUtilsActions.isSupportedImageFormat(...args);
+}
+export async function withRetry(...args: Parameters<typeof MetadataUtilsActions.withRetry>) {
+	return MetadataUtilsActions.withRetry(...args);
+}
+
+// Exportaciones de metadata.actions
+export async function getImageMetadata(...args: Parameters<typeof MetadataActions.getImageMetadata>) {
+	return MetadataActions.getImageMetadata(...args);
+}
+
+// Restauramos la función getImageMetadataById directamente en este archivo
 /**
  * Obtiene y parsea los metadatos de una imagen por su ID
  */
-export async function parseMetadata(imageId: string): Promise<FileMetadata | null> {
+export async function getImageMetadataById(imageId: string): Promise<FileMetadata | null> {
 	try {
 		metadataLogger.info(`Consultando metadatos para imagen: ${imageId}`);
 
@@ -37,7 +79,7 @@ export async function parseMetadata(imageId: string): Promise<FileMetadata | nul
 		}
 
 		// Usar la función existente para parsear los metadatos
-		const parsedMetadata = await parseMetadataString(image.metadata);
+		const parsedMetadata = await parseMetadataStringInternal(image.metadata as string);
 
 		return parsedMetadata;
 	} catch (error) {
@@ -45,3 +87,9 @@ export async function parseMetadata(imageId: string): Promise<FileMetadata | nul
 		return null;
 	}
 }
+
+// Exportar tipos relevantes (no necesitan ser async)
+export type { MetadataErrorData } from './metadata-errors.actions';
+export type { ImageFormat } from './metadata-types.actions';
+export type { FileMetadata }; // Se importó arriba
+

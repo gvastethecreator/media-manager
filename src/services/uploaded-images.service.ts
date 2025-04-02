@@ -2,8 +2,8 @@ import { processImage } from '@/lib/image-processing';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
+import { fromDB, transformUploadedImage } from '@/transformers/uploaded-image';
 import type { UploadedImageType } from '@/types/entities/uploaded-image';
-import { uploadedImageTransformer } from '@/types/entities/uploaded-image/transformers';
 import type {
     CreateUploadedImageParams,
     GetUploadedImagesParams,
@@ -17,8 +17,8 @@ import type {
     UploadedImageStats
 } from '@/types/uploaded-images';
 import {
-    createEntityNotFoundError,
     ServiceErrorCode,
+    createEntityNotFoundError,
     toServiceError
 } from '@/utils/errors/service-errors';
 
@@ -113,8 +113,8 @@ class UploadedImagesService {
 			});
 
 			// Usar el transformer para convertir el registro a la respuesta
-			const entity = uploadedImageTransformer.fromDB(image);
-			const result = uploadedImageTransformer.toClient(entity);
+			const entity = fromDB(image);
+			const result = transformUploadedImage(entity);
 
 			// Emitir evento de creación
 			await this.emitEvent(this.EVENTS.IMAGE_CREATED, result);
@@ -201,8 +201,8 @@ class UploadedImagesService {
 			});
 
 			// Usar el transformer para convertir el registro a la respuesta
-			const entity = uploadedImageTransformer.fromDB(image);
-			const result = uploadedImageTransformer.toClient(entity);
+			const entity = fromDB(image);
+			const result = transformUploadedImage(entity);
 
 			// Emitir evento de actualización
 			await this.emitEvent(this.EVENTS.IMAGE_UPDATED, result);
@@ -341,8 +341,8 @@ class UploadedImagesService {
 
 			// Transformar los resultados usando el transformer
 			const items = rawImages.map((image) => {
-				const entity = uploadedImageTransformer.fromDB(image);
-				return uploadedImageTransformer.toClient(entity);
+				const entity = fromDB(image);
+				return transformUploadedImage(entity);
 			});
 
 			// Obtener estadísticas si se incluyen en la respuesta

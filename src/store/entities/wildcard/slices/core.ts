@@ -4,7 +4,7 @@
  */
 
 import { getWildcard, getWildcards } from '@/app/actions/wildcards/wildcard.actions';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendWildcard, extendWildcards } from '@/transformers/wildcard/serializers';
 import type {
@@ -16,7 +16,7 @@ import type {
 import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
 
-const wildcardLogger = serverLogger.withContext('WildcardStore');
+const wildcardLogger = clientLogger.withContext('WildcardStore');
 
 // Slice para operaciones CRUD básicas
 export interface WildcardCoreSlice {
@@ -82,12 +82,12 @@ export const createWildcardCoreSlice: StateCreator<
     const wildcards = get().getWildcards();
 
     // Primero inicializa todos los arrays de hijos
-    wildcards.forEach((wildcard) => {
+    for (const wildcard of wildcards) {
       hierarchy[wildcard.id] = [];
-    });
+    }
 
     // Luego asigna los hijos a sus respectivos padres
-    wildcards.forEach((wildcard) => {
+    for (const wildcard of wildcards) {
       if (wildcard.parentId) {
         // Si tiene padre, lo agrega a los hijos del padre
         if (hierarchy[wildcard.parentId]) {
@@ -97,7 +97,7 @@ export const createWildcardCoreSlice: StateCreator<
         // Si no tiene padre, es un comodín de nivel raíz
         hierarchy.root.push(wildcard.id);
       }
-    });
+    }
 
     return hierarchy;
   },

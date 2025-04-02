@@ -1,7 +1,9 @@
 /**
- * @file Exportaciones para el transformer de Place
+ * @file Índice de transformadores para la entidad Place
  * @module transformers/place
  */
 
-bilidad con la versión anterior
-// mediante la exportación por defecto del objeto PlaceTransformer
+export * from './mappers';
+export * from './serializers';
+export * from './transformer';
+

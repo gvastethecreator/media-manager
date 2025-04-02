@@ -1,10 +1,10 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 import { createCoreSlice, createFiltersSlice, createRelationsSlice, createUISlice } from './slices';
 import type { ConceptStore } from './types';
-import { devtools } from 'zustand/middleware';
 
-const storeLogger = serverLogger.withContext('ConceptStore');
+const storeLogger = clientLogger.withContext('ConceptStore');
 
 /**
  * Store para la gestión de conceptos combinando todas las slices

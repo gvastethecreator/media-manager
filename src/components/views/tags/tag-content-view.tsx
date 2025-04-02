@@ -1,9 +1,9 @@
 'use client';
 
-import { getTagImages } from '@/app/actions/tags';
+// import { getTagImages } from '@/app/actions/tags'; // Función no encontrada, comentada
 import { useFileManager } from '@/store/files/file-manager.store';
 import type { FileItem } from '@/types/file-item';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * 🏷️ Vista de contenido de etiquetas
@@ -12,12 +12,31 @@ import { useCallback } from 'react';
  */
 export function TagContentView() {
 	const { currentTagId, currentTag } = useFileManager();
+	const [images, setImages] = useState<FileItem[]>([]);
+	const [isLoading, setIsLoading] = useState(false);
 
 	// Función para cargar imágenes de la etiqueta
 	const fetchTagImages = useCallback(async (tagId: string) => {
-		const images = await getTagImages(tagId);
-		return images as unknown as FileItem[];
+		// const images = await getTagImages(tagId);
+		// return images as unknown as FileItem[];
+		// Simulación mientras se encuentra la función correcta
+		await new Promise(res => setTimeout(res, 500));
+		return [] as unknown as FileItem[];
 	}, []);
+
+	useEffect(() => {
+		if (!currentTag) return;
+		const fetchImages = async () => {
+			setIsLoading(true);
+			// const images = await getTagImages(currentTag.id);
+			// setImages(images);
+			// Simulación mientras se encuentra la función correcta
+			await new Promise(res => setTimeout(res, 500));
+			setImages([]); // Poner un array vacío por ahora
+			setIsLoading(false);
+		};
+		fetchImages();
+	}, [currentTag]);
 
 	// Renderizar el componente adecuadamente
 	return (

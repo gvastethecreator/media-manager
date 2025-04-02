@@ -5,11 +5,11 @@ import { EmptyState } from '@/components/core/data-display/empty-state/empty-sta
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { useFiles } from '@/lib/contexts';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { ImageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-const viewLogger = serverLogger.withContext('AllImagesView');
+const viewLogger = clientLogger.withContext('AllImagesView');
 
 export function AllImagesView() {
 	const { currentItems: items, handleSelectItem, isLoading: contextLoading, setFiles } = useFiles();

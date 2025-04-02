@@ -1,9 +1,9 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { PromptViewMode } from '@/types/entities/prompt';
 import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
-const uiLogger = serverLogger.withContext('PromptStore:UI');
+const uiLogger = clientLogger.withContext('PromptStore:UI');
 
 export interface UISlice {
 	// Estado

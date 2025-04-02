@@ -3,18 +3,17 @@
  * @module transformers/folder/serializers
  */
 
-import { Logger } from '@/lib/logger';
-import { DEFAULT_FOLDER_COLOR, DEFAULT_FOLDER_EMOJI } from '@/lib/constants';
+import { DEFAULT_COLORS, DEFAULT_EMOJIS } from '@/lib/constants';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { FolderType } from '@/types/entities/folder/enums';
 import type {
-	Folder,
-	FolderComplete,
-	FolderExtended,
-	FolderStats,
-	FolderWithStats
+    Folder,
+    FolderComplete,
+    FolderStats,
+    FolderWithStats
 } from '@/types/entities/folder/types';
 
-const logger = new Logger('FolderSerializers');
+const logger = serverLogger.withContext('FolderSerializers');
 
 /**
  * 🎨 Genera un color aleatorio para una carpeta
@@ -39,7 +38,7 @@ export function generateFolderColor(): string {
 		return colors[Math.floor(Math.random() * colors.length)];
 	} catch (error) {
 		logger.error('Error generando color para folder:', error);
-		return DEFAULT_FOLDER_COLOR;
+		return DEFAULT_COLORS.primary;
 	}
 }
 
@@ -54,7 +53,7 @@ export function generateFolderEmoji(): string {
 		return emojis[Math.floor(Math.random() * emojis.length)];
 	} catch (error) {
 		logger.error('Error generando emoji para folder:', error);
-		return DEFAULT_FOLDER_EMOJI;
+		return DEFAULT_EMOJIS.folder;
 	}
 }
 
@@ -251,8 +250,8 @@ export function fromPrismaFolder(prismaFolder: any): Folder {
 			name: prismaFolder.name,
 			path: prismaFolder.path,
 			description: prismaFolder.description || '',
-			color: prismaFolder.color || DEFAULT_FOLDER_COLOR,
-			emoji: prismaFolder.emoji || DEFAULT_FOLDER_EMOJI,
+			color: prismaFolder.color || DEFAULT_COLORS.primary,
+			emoji: prismaFolder.emoji || DEFAULT_EMOJIS.folder,
 			parentId: prismaFolder.parentId,
 			createdAt: prismaFolder.createdAt,
 			updatedAt: prismaFolder.updatedAt,
@@ -286,8 +285,8 @@ export function extendFolder(folder: FolderComplete): FolderComplete {
 			name: folder.name || '',
 			path: folder.path || '/',
 			description: folder.description || '',
-			color: folder.color || DEFAULT_FOLDER_COLOR,
-			emoji: folder.emoji || DEFAULT_FOLDER_EMOJI,
+			color: folder.color || DEFAULT_COLORS.primary,
+			emoji: folder.emoji || DEFAULT_EMOJIS.folder,
 			metadata: folder.metadata || {},
 			children: folder.children || [],
 			_count: folder._count || {
@@ -300,5 +299,39 @@ export function extendFolder(folder: FolderComplete): FolderComplete {
 	} catch (error) {
 		logger.error('Error extendiendo folder:', error);
 		return folder;
+	}
+}
+
+/**
+ * 🔄 Convierte un FolderComplete a un objeto RelatedFolder
+ *
+ * @param folder Objeto FolderComplete
+ * @returns Objeto RelatedFolder
+ */
+export function toRelatedFolder(folder: FolderComplete): {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	type: string;
+} {
+	try {
+		return {
+			id: folder.id,
+			name: folder.name,
+			emoji: folder.emoji || DEFAULT_EMOJIS.folder,
+			color: folder.color || DEFAULT_COLORS.primary,
+			type: 'folder',
+		};
+	} catch (error) {
+		logger.error('Error creando objeto RelatedFolder:', error);
+		// Devolver un objeto básico en caso de error
+		return {
+			id: folder.id,
+			name: folder.name || 'Folder',
+			emoji: DEFAULT_EMOJIS.folder,
+			color: DEFAULT_COLORS.primary,
+			type: 'folder',
+		};
 	}
 }

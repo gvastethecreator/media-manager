@@ -5,8 +5,12 @@
 
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
+import {
+    mapPropertySearchOptionsToPrisma,
+    toCreatePropertyData,
+    toUpdatePropertyData
+} from '@/transformers/property';
 import type { CreatePropertyData, PropertyBase, PropertyFilters, PropertySortCriteria, PropertyWithRelations, UpdatePropertyData } from '@/types/entities/property/types';
-import { mapCreatePropertyDataToPrisma, mapPropertySearchOptionsToPrisma, mapUpdatePropertyDataToPrisma } from './mappers';
 import { calculatePropertyStats, extendProperty, validateProperty } from './serializers';
 
 /**
@@ -107,8 +111,8 @@ export class PropertyTransformer {
         throw new Error('El nombre de la propiedad es requerido');
       }
 
-      // Mapear datos al formato de Prisma
-      const prismaData = mapCreatePropertyDataToPrisma(data);
+      // Usar el nombre correcto del mapper
+      const prismaData = toCreatePropertyData(data);
 
       // Crear nueva propiedad
       const property = await prisma.property.create({
@@ -138,8 +142,8 @@ export class PropertyTransformer {
         throw new Error(`Propiedad con ID ${id} no encontrada`);
       }
 
-      // Mapear datos al formato de Prisma
-      const prismaData = mapUpdatePropertyDataToPrisma(data);
+      // Usar el nombre correcto del mapper
+      const prismaData = toUpdatePropertyData(data);
 
       // Actualizar propiedad
       const updatedProperty = await prisma.property.update({

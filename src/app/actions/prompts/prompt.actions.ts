@@ -9,7 +9,12 @@ import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers actualizados
-import { mapCreatePromptDataToPrisma, mapUpdatePromptDataToPrisma, toExtendedPrompt, toPromptWithStats } from '@/transformers/prompt';
+import {
+    mapCreatePromptDataToPrisma,
+    mapUpdatePromptDataToPrisma,
+    toExtendedPrompt,
+    toPromptWithStats
+} from '@/transformers/prompt';
 import type {
     PromptBase,
     PromptCreateInput,

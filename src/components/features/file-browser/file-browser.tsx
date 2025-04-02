@@ -2,7 +2,7 @@
 
 import { FileViewer, type ImageItem } from '@/components/features/file-viewer/file-viewer';
 import { ALL_ENTITIES } from '@/constants/entities';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileManager } from '@/store/files/file-manager.store';
@@ -22,7 +22,7 @@ import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
 
 // Para propósitos de depuración - mantenemos esta variable aunque esté sin usar en la mayoría de los casos
-const gridLogger = serverLogger.withContext('FileGrid');
+const gridLogger = clientLogger.withContext('FileGrid');
 
 /**
  * FileBrowser - Componente avanzado para visualización y gestión de archivos

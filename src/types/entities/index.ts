@@ -34,3 +34,6 @@ export * from './queueJob';
 // Exportación de entidades comunes
 export * from './entities';
 
+// Exportar tipos de Character desde su archivo centralizado
+export * from './character-export';
+

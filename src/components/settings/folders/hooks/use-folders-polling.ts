@@ -1,11 +1,11 @@
 'use client';
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
 import type { ProcessStatus } from '@/types/process';
 import { useCallback, useRef, useState } from 'react';
 
-const pollingLogger = serverLogger.withContext('FoldersPolling');
+const pollingLogger = clientLogger.withContext('FoldersPolling');
 
 interface UsePollingOptions {
 	onStatusUpdate: (status: ProcessStatus) => void;

@@ -30,6 +30,36 @@ interface VideoTransformOptions {
 }
 
 /**
+ * 🔄 Maneja errores durante la transformación de videos
+ * @param error Error capturado
+ * @param message Mensaje personalizado
+ * @param defaultReturn Valor por defecto a retornar si se habilita recuperación
+ * @param recover Si se debe intentar recuperación parcial
+ * @returns Nunca retorna si recover es false, retorna defaultReturn si recover es true
+ */
+export function handleTransformerError<T>(
+	error: unknown,
+	message: string,
+	defaultReturn?: T,
+	recover = false
+): T | never {
+	const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+	const fullMessage = `${message}: ${errorMessage}`;
+
+	// Registrar en el log
+	log.error(fullMessage, { error });
+
+	// Si se permite recuperación, retornar valor por defecto
+	if (recover && defaultReturn !== undefined) {
+		log.warn('Recuperando de error con valor por defecto en transformador');
+		return defaultReturn;
+	}
+
+	// De lo contrario, lanzar el error
+	throw new Error(fullMessage);
+}
+
+/**
  * 🔄 Serializa un video completo para Prisma
  * @param video Objeto VideoComplete con metadatos deserializados
  * @returns Objeto formateado para Prisma
@@ -76,8 +106,12 @@ export function toPrismaVideo(
 
 		return prismaData;
 	} catch (error) {
-		log.error('Error transformando video a formato Prisma', { error });
-		throw new Error(`Error transformando video a formato Prisma: ${(error as Error).message}`);
+		return handleTransformerError(
+			error,
+			'Error transformando video a formato Prisma',
+			undefined,
+			false
+		);
 	}
 }
 
@@ -135,151 +169,132 @@ export function fromPrismaVideo(
 
 		return videoComplete as VideoComplete;
 	} catch (error) {
-		log.error('Error transformando video desde formato Prisma', { error });
-		throw new Error(`Error transformando video desde formato Prisma: ${(error as Error).message}`);
+		return handleTransformerError(
+			error,
+			'Error transformando video desde formato Prisma',
+			{
+				id: prismaVideo?.id || 'error',
+				name: prismaVideo?.name || 'Error al transformar video',
+				path: prismaVideo?.path || '',
+				size: prismaVideo?.size || 0,
+				duration: prismaVideo?.duration || 0,
+				width: prismaVideo?.width || 0,
+				height: prismaVideo?.height || 0,
+				createdAt: prismaVideo?.createdAt || new Date(),
+				updatedAt: prismaVideo?.updatedAt || new Date(),
+				folderId: prismaVideo?.folderId || null
+			} as VideoComplete,
+			true
+		);
 	}
 }
 
 /**
- * 🔍 Deserializa los metadatos de un video
- * @param metadata String serializado de metadatos
- * @returns Objeto de metadatos deserializado o null
- */
-export function deserializeVideoMetadata(metadata: string | null): VideoMetadata | null {
-	if (!metadata) return null;
-
-	try {
-		return JSON.parse(metadata) as VideoMetadata;
-	} catch (error) {
-		log.error('Error deserializando metadatos de video', { error, metadata });
-		return null;
-	}
-}
-
-/**
- * 💾 Serializa los metadatos de un video
+ * 🔢 Serializa metadatos de video a formato JSON
  * @param metadata Objeto de metadatos
- * @returns String serializado o null
+ * @returns String JSON
  */
-export function serializeVideoMetadata(metadata: VideoMetadata | null): string | null {
-	if (!metadata) return null;
-
+export function serializeVideoMetadata(metadata: VideoMetadata): string {
 	try {
 		return JSON.stringify(metadata);
 	} catch (error) {
-		log.error('Error serializando metadatos de video', { error });
-		return null;
+		return handleTransformerError(
+			error,
+			'Error serializando metadatos de video',
+			'{}',
+			true
+		);
 	}
 }
 
 /**
- * 🔄 Serializa la configuración visual de un video
- * @param config Configuración visual completa
- * @returns Configuración visual con campos serializados
+ * 🔢 Deserializa metadatos de video desde formato JSON
+ * @param metadataStr String JSON
+ * @returns Objeto de metadatos
+ */
+export function deserializeVideoMetadata(metadataStr: string): VideoMetadata {
+	try {
+		return JSON.parse(metadataStr) as VideoMetadata;
+	} catch (error) {
+		return handleTransformerError(
+			error,
+			'Error deserializando metadatos de video',
+			{} as VideoMetadata,
+			true
+		);
+	}
+}
+
+/**
+ * 🔄 Serializa configuración visual de video para Prisma
+ * @param config Configuración visual
+ * @returns Objeto formateado para Prisma
+ */
+export function toPrismaVideoVisualConfig(
+	config: VideoVisualConfig
+): Record<string, any> {
+	try {
+		// Extraer campos que no deben ir al modelo Prisma
+		const { ...prismaData } = config;
+		return prismaData;
+	} catch (error) {
+		return handleTransformerError(
+			error,
+			'Error transformando configuración visual de video a formato Prisma',
+			{},
+			true
+		);
+	}
+}
+
+/**
+ * 🔄 Deserializa configuración visual de video desde Prisma
+ * @param prismaConfig Configuración visual desde Prisma
+ * @returns Configuración visual completa
  */
 export function fromVideoVisualConfigComplete(
-	config: VideoVisualConfigComplete
-): VideoVisualConfig {
-	const baseConfig: VideoVisualConfig = {
-		...config
-	};
-
-	// Serializar campos JSON
-	if (config.layersConfig) {
-		try {
-			baseConfig.layerSystem = JSON.stringify(config.layersConfig);
-		} catch (error) {
-			log.error('Error serializando layersConfig', { error });
-		}
-	}
-
-	if (config.effectsConfig) {
-		try {
-			baseConfig.effects = JSON.stringify(config.effectsConfig);
-		} catch (error) {
-			log.error('Error serializando effectsConfig', { error });
-		}
-	}
-
-	if (config.performanceConfig) {
-		try {
-			baseConfig.performance = JSON.stringify(config.performanceConfig);
-		} catch (error) {
-			log.error('Error serializando performanceConfig', { error });
-		}
-	}
-
-	if (config.statesConfig) {
-		try {
-			baseConfig.states = JSON.stringify(config.statesConfig);
-		} catch (error) {
-			log.error('Error serializando statesConfig', { error });
-		}
-	}
-
-	return baseConfig;
-}
-
-/**
- * 🔄 Deserializa la configuración visual de un video
- * @param config Configuración visual con campos serializados
- * @returns Configuración visual completa con campos deserializados
- */
-export function toVideoVisualConfigComplete(
-	config: VideoVisualConfig
+	prismaConfig: VideoVisualConfig & Record<string, any>
 ): VideoVisualConfigComplete {
-	const completeConfig: VideoVisualConfigComplete = {
-		...config
-	};
+	try {
+		// Crear configuración visual completa
+		const visualConfig: VideoVisualConfigComplete = {
+			...prismaConfig
+		};
 
-	// Deserializar campos JSON
-	if (config.layerSystem) {
-		try {
-			completeConfig.layersConfig = JSON.parse(config.layerSystem);
-		} catch (error) {
-			log.error('Error deserializando layerSystem', { error });
-		}
+		return visualConfig;
+	} catch (error) {
+		return handleTransformerError(
+			error,
+			'Error transformando configuración visual de video desde formato Prisma',
+			{
+				id: prismaConfig?.id || 'error',
+				videoId: prismaConfig?.videoId || 'error',
+				brightness: prismaConfig?.brightness || 1,
+				contrast: prismaConfig?.contrast || 1,
+				saturation: prismaConfig?.saturation || 1,
+				createdAt: prismaConfig?.createdAt || new Date(),
+				updatedAt: prismaConfig?.updatedAt || new Date()
+			},
+			true
+		);
 	}
-
-	if (config.effects) {
-		try {
-			completeConfig.effectsConfig = JSON.parse(config.effects);
-		} catch (error) {
-			log.error('Error deserializando effects', { error });
-		}
-	}
-
-	if (config.performance) {
-		try {
-			completeConfig.performanceConfig = JSON.parse(config.performance);
-		} catch (error) {
-			log.error('Error deserializando performance', { error });
-		}
-	}
-
-	if (config.states) {
-		try {
-			completeConfig.statesConfig = JSON.parse(config.states);
-		} catch (error) {
-			log.error('Error deserializando states', { error });
-		}
-	}
-
-	return completeConfig;
 }
 
 /**
- * 🔍 Valida y formatea un video para su uso
- * @param video Datos del video a validar
- * @returns Video validado y formateado
+ * 🧪 Valida un video contra el esquema
+ * @param video Video a validar
+ * @returns Video validado
  */
-export function validateVideo(video: Record<string, any>): VideoComplete {
+export function validateVideo(video: unknown): VideoBase {
 	try {
-		const validatedData = VideoSchema.parse(video);
-		return validatedData as unknown as VideoComplete;
+		return VideoSchema.parse(video);
 	} catch (error) {
-		log.error('Error validando datos de video', { error, video });
-		throw new Error(`Error validando datos de video: ${(error as Error).message}`);
+		return handleTransformerError(
+			error,
+			'Error validando video contra esquema',
+			undefined,
+			false
+		);
 	}
 }
 
@@ -308,8 +323,24 @@ export function extendVideo(
 
 		return extendedVideo;
 	} catch (error) {
-		log.error('Error extendiendo video', { error, video });
-		throw new Error(`Error extendiendo video: ${(error as Error).message}`);
+		return handleTransformerError(
+			error,
+			'Error extendiendo video',
+			{
+				id: video?.id || 'error',
+				name: video?.name || 'Error al extender video',
+				path: video?.path || '',
+				size: video?.size || 0,
+				duration: video?.duration || 0,
+				width: video?.width || 0,
+				height: video?.height || 0,
+				createdAt: video?.createdAt || new Date(),
+				updatedAt: video?.updatedAt || new Date(),
+				folderId: video?.folderId || null,
+				thumbnailUrl: video?.id ? `/api/videos/${video.id}/thumbnail` : null
+			} as VideoComplete,
+			true
+		);
 	}
 }
 
@@ -323,7 +354,23 @@ export function extendVideos(
 	videos: (VideoBase & Record<string, any>)[],
 	options: VideoTransformOptions = {}
 ): VideoComplete[] {
-	return videos.map(video => extendVideo(video, options));
+	try {
+		return videos.map(video => extendVideo(video, options));
+	} catch (error) {
+		log.error('Error extendiendo múltiples videos', { error });
+		// Intentar procesar cada uno individualmente para recuperar los que se puedan
+		const results: VideoComplete[] = [];
+		for (const video of videos) {
+			try {
+				results.push(extendVideo(video, options));
+			} catch (innerError) {
+				log.error(`Error procesando video individual ${video?.id || 'desconocido'}`, { innerError });
+				// Continuar con el siguiente
+			}
+		}
+		log.warn(`Recuperados ${results.length} de ${videos.length} videos`);
+		return results;
+	}
 }
 
 // Exportar funciones obsoletas con alias para mantener compatibilidad

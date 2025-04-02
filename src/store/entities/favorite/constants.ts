@@ -1,3 +1,31 @@
+/**
+ * @file Constantes para el store de Favorite
+ * @module store/entities/favorite/constants
+ */
+
+import { FavoriteSortCriteria, FavoriteViewMode } from './types';
+
+/**
+ * Valores por defecto para el modo de visualización
+ */
+export const DEFAULT_VIEW_MODE = FavoriteViewMode.GRID;
+
+/**
+ * Valores por defecto para la ordenación
+ */
+export const DEFAULT_SORT_CRITERIA = FavoriteSortCriteria.UPDATED_AT;
+export const DEFAULT_SORT_DIRECTION = 'desc' as const;
+
+/**
+ * Valores por defecto para filtros
+ */
+export const DEFAULT_FILTERS = {
+	entityType: [],
+	createdAfter: null,
+	createdBefore: null,
+	search: '',
+};
+
 // 🏷️ Nombre del store para persistencia
 export const FAVORITE_STORE_NAME = 'favorite-store';
 

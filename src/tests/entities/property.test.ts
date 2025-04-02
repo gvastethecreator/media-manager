@@ -4,15 +4,15 @@
  */
 
 import {
-  mapCreatePropertyDataToPrisma,
-  mapPropertyFiltersToPrisma,
-  mapUpdatePropertyDataToPrisma
-} from '../../transformers/property/mappers';
+    mapPropertyFiltersToPrisma,
+    toCreatePropertyData,
+    toUpdatePropertyData
+} from '@/transformers/property/mappers';
 import {
-  extendProperties,
-  extendProperty
-} from '../../transformers/property/serializers';
-import type { CreatePropertyData, PropertyBase, PropertyFilters, UpdatePropertyData } from '../../types/entities/property';
+    extendProperties,
+    extendProperty
+} from '@/transformers/property/serializers';
+import type { CreatePropertyData, PropertyBase, PropertyFilters, UpdatePropertyData } from '@/types/entities/property';
 
 describe('Property Serializers', () => {
   const mockPropertyBase: PropertyBase = {
@@ -101,7 +101,7 @@ describe('Property Mappers', () => {
         category: 'technical'
       };
 
-      const result = mapCreatePropertyDataToPrisma(createData);
+      const result = toCreatePropertyData(createData);
 
       expect(result.name).toBe(createData.name);
       expect(result.emoji).toBe(createData.emoji);
@@ -115,7 +115,7 @@ describe('Property Mappers', () => {
         name: 'Minimal Property'
       };
 
-      const result = mapCreatePropertyDataToPrisma(minimalData);
+      const result = toCreatePropertyData(minimalData);
 
       expect(result.name).toBe(minimalData.name);
       expect(result.emoji).toBe('🔍');
@@ -133,7 +133,7 @@ describe('Property Mappers', () => {
         color: '#ea580c'
       };
 
-      const result = mapUpdatePropertyDataToPrisma(updateData);
+      const result = toUpdatePropertyData(updateData);
 
       expect(result.name).toBe(updateData.name);
       expect(result.emoji).toBe(updateData.emoji);
@@ -150,7 +150,7 @@ describe('Property Mappers', () => {
         // All other fields undefined
       };
 
-      const result = mapUpdatePropertyDataToPrisma(updateData);
+      const result = toUpdatePropertyData(updateData);
 
       expect(result.name).toBe(updateData.name);
       expect(Object.keys(result)).toHaveLength(1); // Only name should be included

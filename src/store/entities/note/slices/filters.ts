@@ -1,10 +1,10 @@
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { NoteSortOption } from '@/types/entities/note/enums';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { NoteSortOption } from '@/types/entities/note';
 import type { NoteFilters } from '@/types/entities/note/extended';
 import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
-const filtersLogger = serverLogger.withContext('NoteStore:Filters');
+const filtersLogger = clientLogger.withContext('NoteStore:Filters');
 
 export interface FiltersSlice {
 	// Estado

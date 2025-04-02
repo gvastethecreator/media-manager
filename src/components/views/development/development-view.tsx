@@ -1,11 +1,14 @@
 'use client';
 
+import ImagesExample from '@/app/components/examples/ImagesExample';
+import { TagsExample } from '@/app/components/examples/TagsExample';
+import FolderManagerExample from '@/components/examples/folder-manager-example';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, Bug, Code2, FileCode2, Gauge, Loader2, RefreshCw, Server } from 'lucide-react';
+import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Image, Loader2, RefreshCw, Server, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import type { ViewProps } from '../types';
@@ -81,6 +84,18 @@ export function DevelopmentView(_props: ViewProps) {
 						<TabsTrigger value="docs" className="gap-2">
 							<FileCode2 className="h-4 w-4" />
 							Documentación
+						</TabsTrigger>
+						<TabsTrigger value="folders" className="gap-2">
+							<Folder className="h-4 w-4" />
+							Carpetas
+						</TabsTrigger>
+						<TabsTrigger value="tags" className="gap-2">
+							<Tag className="h-4 w-4" />
+							Etiquetas
+						</TabsTrigger>
+						<TabsTrigger value="images" className="gap-2">
+							<Image className="h-4 w-4" />
+							Imágenes
 						</TabsTrigger>
 						<TabsTrigger value="stats" className="gap-2">
 							<BarChart className="h-4 w-4" />
@@ -164,6 +179,30 @@ export function DevelopmentView(_props: ViewProps) {
 										</HoverCard>
 									))}
 								</div>
+							</CardContent>
+						</Card>
+					</TabsContent>
+
+					<TabsContent value="folders" className="mt-4">
+						<Card className="border-2 border-primary/10">
+							<CardContent className="p-4">
+								<FolderManagerExample />
+							</CardContent>
+						</Card>
+					</TabsContent>
+
+					<TabsContent value="tags" className="mt-4">
+						<Card className="border-2 border-primary/10">
+							<CardContent className="p-4">
+								<TagsExample />
+							</CardContent>
+						</Card>
+					</TabsContent>
+
+					<TabsContent value="images" className="mt-4">
+						<Card className="border-2 border-primary/10">
+							<CardContent className="p-4">
+								<ImagesExample />
 							</CardContent>
 						</Card>
 					</TabsContent>

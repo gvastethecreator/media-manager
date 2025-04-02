@@ -3,12 +3,12 @@
  * @module store/entities/property/slices/filters
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { PropertySortCriteria } from '@/types/entities/property';
 import type { StateCreator } from 'zustand';
 import type { PropertyState } from '../types';
 
-const filtersLogger = serverLogger.withContext('PropertyStore:Filters');
+const filtersLogger = clientLogger.withContext('PropertyStore:Filters');
 
 // Slice para operaciones de filtrado
 export interface PropertyFiltersSlice {

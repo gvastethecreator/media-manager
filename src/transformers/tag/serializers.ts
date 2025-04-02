@@ -31,6 +31,19 @@ import { type TagBase, TagCategory, type TagComplete, type TagExtended, type Tag
 // Logger específico para serializadores de Tag
 const serializerLogger = serverLogger.withContext('TagSerializers');
 
+// Valores por defecto
+export const DEFAULT_TAG_EMOJI = '🏷️';
+export const DEFAULT_TAG_COLOR = '#6b7280'; // Color neutral por defecto
+
+// Opciones de transformación (similares a otros módulos)
+export interface TagTransformOptions {
+	validateFields?: boolean;
+	deserializeFields?: boolean;
+	includeRelations?: boolean;
+	includeUI?: boolean;
+	includeStats?: boolean;
+}
+
 const logger = new Logger('TagSerializer');
 
 /**
@@ -350,22 +363,13 @@ export function normalizeTagCategory(category?: string | null): string {
  * @returns Color en formato hexadecimal
  */
 export function generateTagColor(name: string): string {
-	if (!name) return '#3b82f6'; // Azul por defecto
-
-	// Generar un hash del nombre
-	let hash = 0;
-	for (let i = 0; i < name.length; i++) {
-		hash = name.charCodeAt(i) + ((hash << 5) - hash);
-	}
-
-	// Convertir a color hexadecimal
-	let color = '#';
-	for (let i = 0; i < 3; i++) {
-		const value = (hash >> (i * 8)) & 0xff;
-		color += `00${value.toString(16)}`.substr(-2);
-	}
-
-	return color;
+	const colors = [
+		'#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+		'#ec4899', '#06b6d4', '#84cc16', '#6366f1', '#14b8a6',
+		'#f97316', '#d946ef', '#6b7280' // Añadido gris
+	];
+	const hashValue = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+	return colors[hashValue % colors.length];
 }
 
 /**
@@ -375,42 +379,18 @@ export function generateTagColor(name: string): string {
  * @returns Emoji representativo
  */
 export function generateTagEmoji(name: string, category?: string): string {
-	// Mapeo de categorías a emojis
-	const categoryEmojis: Record<string, string> = {
-		'general': '🏷️',
-		'subject': '👤',
-		'style': '✨',
-		'color': '🎨',
-		'quality': '⭐',
-		'technique': '🔧',
-		'composition': '📐',
-		'content': '📄',
-		'emotion': '😊',
-		'theme': '🎭',
-		'genre': '📚',
-		'custom': '🔖',
-		'other': '📌',
-	};
+	const normalizedName = name.toLowerCase();
+	const normalizedCategory = category?.toLowerCase() || '';
 
-	// Si hay categoría y está en el mapeo, usar ese emoji
-	if (category && categoryEmojis[category.toLowerCase()]) {
-		return categoryEmojis[category.toLowerCase()];
-	}
+	if (normalizedCategory === 'person') return '👤';
+	if (normalizedCategory === 'place') return '📍';
+	if (normalizedCategory === 'event') return '🎉';
+	if (normalizedCategory === 'organization') return '🏢';
+	if (normalizedCategory === 'concept') return '💡';
+	if (normalizedCategory === 'project') return '🏗️';
 
-	// Análisis básico del nombre para decidir un emoji
-	const lowerName = name.toLowerCase();
-
-	if (lowerName.includes('person') || lowerName.includes('character')) return '👤';
-	if (lowerName.includes('place') || lowerName.includes('location')) return '📍';
-	if (lowerName.includes('object') || lowerName.includes('item')) return '🔮';
-	if (lowerName.includes('concept') || lowerName.includes('idea')) return '💭';
-	if (lowerName.includes('event') || lowerName.includes('celebration')) return '🎉';
-	if (lowerName.includes('color') || lowerName.includes('colour')) return '🎨';
-	if (lowerName.includes('style') || lowerName.includes('design')) return '✨';
-	if (lowerName.includes('emotion') || lowerName.includes('feeling')) return '😊';
-
-	// Emoji por defecto
-	return '🏷️';
+	// Por defecto
+	return DEFAULT_TAG_EMOJI;
 }
 
 /**

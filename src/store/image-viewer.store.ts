@@ -1,8 +1,8 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { FileItem } from '@/types/file-item';
 import { create } from 'zustand';
 
-const viewerLogger = serverLogger.withContext('ImageViewer');
+const viewerLogger = clientLogger.withContext('ImageViewer');
 
 // Interfaz para el estado del visor
 interface ImageViewerState {

@@ -5,7 +5,7 @@
 
 import type { StateCreator } from 'zustand';
 import { mapCreateAlbumDataToPrisma } from '../../../../transformers/album/mappers';
-import { extendAlbum, extendAlbums } from '../../../../transformers/album/serializers';
+import { extendAlbum } from '../../../../transformers/album/serializers';
 import type {
     Album,
     AlbumBase,
@@ -114,7 +114,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 	},
 
 	addAlbums: (albums: AlbumBase[]) => {
-		const extendedAlbums = extendAlbums(albums);
+		const extendedAlbums = albums.map(album => extendAlbum(album));
 		const albumsMap = extendedAlbums.reduce(
 			(acc, album) => {
 				acc[album.id] = album;
