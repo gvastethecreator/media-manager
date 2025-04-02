@@ -1,13 +1,13 @@
-import { existsSync } from 'fs';
-import { readdir, stat } from 'fs/promises';
-import { extname, join } from 'path';
-import { extractMetadata } from '@/app/actions/metadata';
+import { extractImageMetadata } from '@/app/actions/metadata';
 import { computeHash } from '@/lib/hash';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
-import type { AIMetadata, FileMetadata } from '@/types/metadata';
+import type { FileMetadata } from '@/types/metadata';
+import { existsSync } from 'fs';
+import { readdir, stat } from 'fs/promises';
 import { type NextRequest, NextResponse } from 'next/server';
+import { extname, join } from 'path';
 
 const reindexLogger = serverLogger.withContext('ReindexAPI');
 
@@ -93,7 +93,7 @@ export async function POST(_request: NextRequest, context: { params: { id: strin
 						if (!existingImage) {
 							// Procesar nueva imagen
 							const hash = await computeHash(filePath);
-							const metadata = (await extractMetadata(filePath)) as FileMetadata;
+							const metadata = (await extractImageMetadata(filePath)) as FileMetadata;
 
 							await prisma.image.create({
 								data: {
@@ -114,7 +114,7 @@ export async function POST(_request: NextRequest, context: { params: { id: strin
 							processed++;
 						} else {
 							// Actualizar metadata si es necesario
-							const metadata = await extractMetadata(filePath);
+							const metadata = await extractImageMetadata(filePath);
 							await prisma.image.update({
 								where: { id: existingImage.id },
 								data: {

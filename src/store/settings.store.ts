@@ -3,15 +3,16 @@
  * @module store/settings
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { settingsService } from '@/services/settings.service';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { settingsService } from '@/services/settings-service-export';
 import type { Settings, SettingsUpdate } from '@/types/settings';
-import { createSelectors } from '@/utils/store/create-selectors';
+import { createSelectors } from '@/utils/store-selectors';
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
+import { devtools, persist as zustandPersist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-const logger = serverLogger.withContext('SettingsStore');
+// Logger para el store
+const logger = clientLogger.withContext('SettingsStore');
 
 // Interfaz del estado para la store de configuración
 interface SettingsState {
@@ -53,7 +54,7 @@ type SettingsStore = SettingsState & SettingsActions;
 // Creación de la store
 const useSettingsStoreBase = create<SettingsStore>()(
   devtools(
-    persist(
+    zustandPersist(
       immer((set, get) => ({
         // Estado inicial
         settings: null,

@@ -3,7 +3,32 @@
  * @module store/entities/image/types
  */
 
-import type { Image, ImageSortCriteria, ImageViewMode } from '../../../types/entities/image';
+import type { Image, ImageExtended, ImageSortCriteria, ImageViewMode } from '../../../types/entities/image';
+
+/**
+ * Tipos de agrupamiento para imágenes
+ */
+export enum ImageGroupType {
+	FOLDER = 'folder',
+	DATE = 'date',
+	MONTH = 'month',
+	YEAR = 'year',
+	TAG = 'tag',
+	SIZE = 'size',
+	RESOLUTION = 'resolution',
+	NONE = 'none',
+}
+
+/**
+ * Estructura de un grupo de imágenes
+ */
+export interface ImageGroup {
+	id: string;
+	label: string;
+	count: number;
+	images: Image[];
+	subgroups?: ImageGroup[];
+}
 
 /**
  * Estado principal del store de imágenes
@@ -52,4 +77,26 @@ export interface ImageFiltersState {
 		from: Date | null;
 		to: Date | null;
 	};
+}
+
+/**
+ * Estadísticas de imágenes
+ */
+export interface ImageStoreStats {
+	totalImages: number;
+	totalSize: number;
+	averageSize: number;
+	byFolder: Record<string, number>;
+	byTag: Record<string, number>;
+	byMonth: Record<string, number>;
+	byResolution: Record<string, number>;
+	favorites: number;
+	public: number;
+	private: number;
+	withThumbnails: number;
+	withoutThumbnails: number;
+	largest: ImageExtended | null;
+	smallest: ImageExtended | null;
+	newest: ImageExtended | null;
+	oldest: ImageExtended | null;
 }

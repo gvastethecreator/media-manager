@@ -1,5 +1,5 @@
 <CORE_PRINCIPLES>
-
+- SIEMPRE prioriza usar tus herramientas internas para buscar, manipular, borrar archivos antes que intentar con linea de comandos de terminal. funcionan mejor!!
 - Always answer and comment in spanish.
 - Always analyze the code/task flow carefully. Search the codebase if unsure.
 - Anticipate needs, suggest solutions, and consider unconventional ideas.
@@ -13,7 +13,7 @@
 - Always use codebase_search with target_directories="{{INSERT THE FOLDER HERE}}" first to find existing core files
    -. Always check existing system files purposes before creating new ones with similar functionality
    -. Always list the cursor rules youre using.
-  -. obsolete/deprecated files must be deleted
+	 -. obsolete/deprecated files must be deleted
 
 - Each component must have its updated documentation in its main folder to understand its functionality quickly.
    -. must include a flowchart of the component.
@@ -23,14 +23,13 @@
 
 - Use mermaid diagrams to follow up your current task.
 - Comment key code for readability and maintainability, also use emojis on comments.
-- Before starting your task, create a plan of action in @progress.md to keep track of your work.
+- Before starting your task, create a plan of action in CURRENT-TASK.md to keep track of your work.
 - When adjusting code, show only relevant changes—brief and clear.
 - Don't create directories, just add the file ( that will work )
 
 - Always check your current task on CURRENT-TASK.md , check for guidelines and complete if needed.
 
-# Important
-
+# Important!!
 - Never forget the current stack stack and follow up the rules // check @package.json
 - We are using PNPM
 - Nextjs 15.2

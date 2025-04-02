@@ -5,7 +5,7 @@
 
 import { revalidatePathClient } from '@/app/actions/revalidate';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { VideoService } from '@/services/video.service';
+import { videoService } from '@/services/video-service-export';
 import type {
     CreateVideoInput,
     PaginatedVideos,
@@ -31,7 +31,7 @@ export async function getVideo(
 ): Promise<VideoExtended | null> {
   try {
     log.info('🔍 Buscando video por ID', { id });
-    const video = await VideoService.getVideoById(id, includeRelations);
+    const video = await videoService.getVideoById(id, includeRelations);
     return video;
   } catch (error) {
     log.error('❌ Error al obtener video', { id, error });
@@ -51,7 +51,7 @@ export async function findVideos(
 ): Promise<PaginatedVideos> {
   try {
     log.info('🔍 Buscando videos', { filters, pagination });
-    const result = await VideoService.findVideos(filters, pagination);
+    const result = await videoService.findVideos(filters, pagination);
     return result;
   } catch (error) {
     log.error('❌ Error al buscar videos', { error });
@@ -67,7 +67,7 @@ export async function findVideos(
 export async function createVideo(data: CreateVideoInput): Promise<VideoExtended> {
   try {
     log.info('🎬 Creando nuevo video', { name: data.name });
-    const video = await VideoService.createVideo(data);
+    const video = await videoService.createVideo(data);
 
     // Revalidar rutas
     await revalidatePathClient('/videos');
@@ -92,7 +92,7 @@ export async function updateVideo(
 ): Promise<VideoExtended> {
   try {
     log.info('📝 Actualizando video', { id });
-    const video = await VideoService.updateVideo(id, data);
+    const video = await videoService.updateVideo(id, data);
 
     // Revalidar rutas
     await revalidatePathClient('/videos');
@@ -118,10 +118,10 @@ export async function deleteVideo(id: string): Promise<boolean> {
     log.info('🗑️ Eliminando video', { id });
 
     // Obtener el video para conocer su folderId antes de eliminarlo
-    const video = await VideoService.getVideoById(id);
+    const video = await videoService.getVideoById(id);
     const folderId = video?.folderId;
 
-    const result = await VideoService.deleteVideo(id);
+    const result = await videoService.deleteVideo(id);
 
     // Revalidar rutas
     await revalidatePathClient('/videos');
@@ -148,7 +148,7 @@ export async function toggleVideoFavorite(
 ): Promise<VideoExtended> {
   try {
     log.info(`${isFavorite ? '⭐' : '✖️'} ${isFavorite ? 'Marcando' : 'Desmarcando'} video como favorito`, { id });
-    const video = await VideoService.toggleVideoFavorite(id, isFavorite);
+    const video = await videoService.toggleVideoFavorite(id, isFavorite);
 
     // Revalidar rutas
     await revalidatePathClient('/videos');
@@ -174,7 +174,7 @@ export async function setVideoVisibility(
 ): Promise<VideoExtended> {
   try {
     log.info(`${isPublic ? '🌎' : '🔒'} Cambiando visibilidad de video`, { id, isPublic });
-    const video = await VideoService.setVideoVisibility(id, isPublic);
+    const video = await videoService.setVideoVisibility(id, isPublic);
 
     // Revalidar rutas
     await revalidatePathClient('/videos');
@@ -201,10 +201,10 @@ export async function moveVideoToFolder(
     log.info('📁 Moviendo video a otra carpeta', { id, folderId });
 
     // Obtener el video para conocer su folderId anterior
-    const existingVideo = await VideoService.getVideoById(id);
+    const existingVideo = await videoService.getVideoById(id);
     const oldFolderId = existingVideo?.folderId;
 
-    const video = await VideoService.moveVideoToFolder(id, folderId);
+    const video = await videoService.moveVideoToFolder(id, folderId);
 
     // Revalidar rutas
     await revalidatePathClient('/videos');
@@ -228,7 +228,7 @@ export async function moveVideoToFolder(
 export async function getVideoStats(): Promise<VideoStats> {
   try {
     log.info('📊 Obteniendo estadísticas de videos');
-    const stats = await VideoService.getVideoStats();
+    const stats = await videoService.getVideoStats();
     return stats;
   } catch (error) {
     log.error('❌ Error al obtener estadísticas de videos', { error });

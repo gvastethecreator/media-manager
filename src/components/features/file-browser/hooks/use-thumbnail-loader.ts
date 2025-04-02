@@ -1,11 +1,11 @@
 'use client';
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageResources } from '@/store/image-resources.store';
 import type * as React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
 
-const thumbnailLogger = serverLogger.withContext('ThumbnailLoader');
+const thumbnailLogger = clientLogger.withContext('ThumbnailLoader');
 
 /**
  * Resultado del hook useThumbnailLoader

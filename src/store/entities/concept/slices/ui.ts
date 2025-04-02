@@ -1,9 +1,9 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { ConceptViewMode } from '@/types/entities/concept/enums';
 import type { StateCreator } from 'zustand';
 import type { ConceptStore } from '../types';
 
-const uiLogger = serverLogger.withContext('ConceptStore:UI');
+const uiLogger = clientLogger.withContext('ConceptStore:UI');
 
 export interface UISlice {
 	// Estado

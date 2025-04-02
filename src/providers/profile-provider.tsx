@@ -1,9 +1,9 @@
 'use client';
 
-import { ensureDefaultProfile } from '@/server/actions/profile-actions';
+import { getActiveProfile } from '@/app/actions/profiles';
 import { selectIsDarkMode, useProfileStore } from '@/store/entities/profile/profile-store';
-import { ThemeMode, type ProfileExtended } from '@/types/entities/profile/types';
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { type ProfileExtended, ThemeMode } from '@/types/entities/profile/types';
+import { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
 // Contexto para acceso síncrono al perfil
 interface ProfileContextType {
@@ -41,9 +41,10 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 		const init = async () => {
 			try {
 				// Asegurar que existe un perfil por defecto
-				await ensureDefaultProfile();
+				// Simplemente intentamos obtener el perfil activo, que creará uno por defecto si no existe
+				await getActiveProfile();
 
-				// Cargar el perfil activo
+				// Cargar el perfil activo en el store
 				await fetchActiveProfile();
 
 				setIsInitialized(true);

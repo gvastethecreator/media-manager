@@ -4,10 +4,9 @@
  */
 
 import { getGroup, getGroups } from '@/app/actions/groups/group.actions';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { mapCreateGroupDataToPrisma } from '@/transformers/group/mappers';
-import { extendGroup, extendGroups } from '@/transformers/group/serializers';
+import { extendGroup, toPrismaGroup } from '@/transformers/group/serializers';
 import type {
     CreateGroupData,
     Group,
@@ -17,7 +16,7 @@ import type {
 import type { StateCreator } from 'zustand';
 import type { GroupState } from '../types';
 
-const groupLogger = serverLogger.withContext('GroupStore');
+const groupLogger = clientLogger.withContext('GroupStore');
 
 // Slice para operaciones CRUD básicas
 export interface GroupCoreSlice {
@@ -87,11 +86,11 @@ export const createGroupCoreSlice: StateCreator<
   addGroups: (groups) => {
     groupLogger.info('✅ Añadiendo múltiples grupos al store', groups.length);
     const groupsMap = groups.reduce(
-      (acc, group) => ({
-        ...acc,
-        [group.id]: extendGroup(group),
-      }),
-      {}
+      (acc, group) => {
+        acc[group.id] = extendGroup(group);
+        return acc;
+      },
+      {} as Record<string, Group>
     );
 
     set((state) => ({
@@ -303,8 +302,8 @@ export const createGroupCoreSlice: StateCreator<
     }));
 
     try {
-      // Mapear datos usando transformers
-      const mappedData = mapCreateGroupDataToPrisma(data);
+      // Mapear datos usando la función correcta
+      const mappedData = toPrismaGroup(data);
 
       // Llamar al servidor (simulado)
       // En un entorno real, aquí llamaríamos a la API

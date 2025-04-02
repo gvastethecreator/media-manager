@@ -3,13 +3,13 @@
 import { getPromptImages } from '@/app/actions/prompts/prompt.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useFileManager } from '@/store/files/file-manager.store';
 import { Terminal } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
 
-const viewLogger = serverLogger.withContext('PromptContentView');
+const viewLogger = clientLogger.withContext('PromptContentView');
 
 export function PromptContentView() {
 	const {

@@ -3,12 +3,12 @@
  * @module store/entities/wildcard/slices/ui
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { WildcardViewMode } from '@/types/entities/wildcard';
 import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
 
-const uiLogger = serverLogger.withContext('WildcardStore:UI');
+const uiLogger = clientLogger.withContext('WildcardStore:UI');
 
 // Slice para operaciones de UI
 export interface WildcardUISlice {

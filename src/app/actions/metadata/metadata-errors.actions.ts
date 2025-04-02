@@ -1,17 +1,38 @@
 /**
- * Clase personalizada para errores de metadata
- * Proporciona información detallada sobre errores en el procesamiento de metadata
+ * Utilidades para manejo de errores relacionados con metadatos
+ * @module app/actions/metadata/metadata-errors.actions
  */
-export class MetadataError extends Error {
-	constructor(
-		message: string,
-		public readonly path: string,
-		public readonly code: string,
-		public readonly details?: Record<string, unknown>
-	) {
-		super(message);
-		this.name = 'MetadataError';
-	}
+
+/**
+ * Interfaz para errores de metadatos
+ */
+export interface MetadataErrorData {
+	name: string;
+	message: string;
+	path: string;
+	code: string;
+	details?: Record<string, unknown>;
+	cause?: unknown;
+}
+
+/**
+ * Función para crear errores de metadatos (enfoque funcional)
+ */
+export function createMetadataError(
+	message: string,
+	path: string,
+	code: string,
+	details?: Record<string, unknown>,
+	cause?: unknown
+): MetadataErrorData {
+	return {
+		name: 'MetadataError',
+		message,
+		path,
+		code,
+		details,
+		cause
+	};
 }
 
 /**
@@ -25,4 +46,44 @@ export enum MetadataErrorCode {
 	PARSING_ERROR = 'PARSING_ERROR',
 	TIMEOUT = 'TIMEOUT',
 	UNKNOWN = 'UNKNOWN',
+}
+
+/**
+ * Convierte un error genérico a un error de metadatos
+ */
+export function fromError(error: unknown, path: string): MetadataErrorData {
+	if (error && typeof error === 'object' && 'code' in error && 'path' in error) {
+		return error as MetadataErrorData;
+	}
+
+	return createMetadataError(
+		error instanceof Error ? error.message : String(error),
+		path,
+		MetadataErrorCode.UNKNOWN,
+		undefined,
+		error
+	);
+}
+
+/**
+ * Clase de error para problemas de metadatos
+ */
+export class MetadataError extends Error {
+	public code: MetadataErrorCode;
+	public path?: string;
+	public details?: Record<string, unknown>;
+
+	constructor(
+		message: string,
+		path?: string,
+		code: MetadataErrorCode = MetadataErrorCode.UNKNOWN_ERROR,
+		details?: Record<string, unknown>
+	) {
+		super(message);
+		this.name = 'MetadataError';
+		this.code = code;
+		this.path = path;
+		this.details = details;
+		Object.setPrototypeOf(this, MetadataError.prototype);
+	}
 }

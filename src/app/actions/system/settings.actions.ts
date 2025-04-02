@@ -5,12 +5,13 @@
 
 'use server';
 
-import { db } from '@/db/client';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { prisma } from '@/lib/prisma';
 import { deserializeSettings, mergeSettings, serializeSettings } from '@/transformers/settings';
 import type { Settings } from '@/types/settings';
 import { settingsSchema } from '@/types/settings';
 import { revalidatePath } from 'next/cache';
+import { createSettingsError, isSettingsError } from './settings.errors';
 
 // Logger específico para acciones de configuración
 const logger = serverLogger.withContext('SettingsActions');
@@ -32,20 +33,6 @@ const revalidateAllPaths = async () => {
 const updateSettingsSchema = settingsSchema.partial();
 
 /**
- * Error personalizado para acciones de configuración
- */
-class SettingsError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'SettingsError';
-  }
-}
-
-/**
  * Respuesta estándar para operaciones de configuración
  */
 export interface SettingsResponse {
@@ -63,12 +50,14 @@ async function createDefaultSettings(): Promise<Settings> {
     logger.info('🔧 Creando configuración predeterminada');
 
     // Crear datos predeterminados
-    const defaultData = createDefaultSettingsData();
+    const defaultData = await createDefaultSettingsData();
 
     // Guardar en la base de datos
-    await db.systemSettings.create({
-      data: {
-        id: 'global',
+    await prisma.settings.upsert({
+      where: { id: 'default' },
+      update: {},
+      create: {
+        id: 'default',
         data: defaultData
       }
     });
@@ -84,7 +73,7 @@ async function createDefaultSettings(): Promise<Settings> {
       return resetSystemSettings();
     }
 
-    throw new SettingsError(
+    throw createSettingsError(
       'No se pudo crear la configuración predeterminada',
       'CREATE_DEFAULT_FAILED',
       error
@@ -95,7 +84,7 @@ async function createDefaultSettings(): Promise<Settings> {
 /**
  * Crea el objeto de datos predeterminados para la configuración
  */
-export function createDefaultSettingsData(): Record<string, unknown> {
+export async function createDefaultSettingsData(): Promise<Record<string, unknown>> {
   return {
     theme: 'system',
     fontSize: 16,
@@ -126,7 +115,9 @@ export async function getSystemSettings(): Promise<Settings> {
 
   try {
     // Intentar obtener la configuración existente
-    const settings = await db.systemSettings.findFirst();
+    const settings = await prisma.settings.findUnique({
+      where: { userId: null },
+    });
 
     if (!settings) {
       logger.info('ℹ️ No se encontró configuración global, creando valores predeterminados');
@@ -138,7 +129,7 @@ export async function getSystemSettings(): Promise<Settings> {
     return deserializeSettings(settings.data as Record<string, unknown>);
   } catch (error) {
     logger.error('❌ Error al obtener la configuración global:', error);
-    throw new SettingsError('No se pudo obtener la configuración del sistema', 'GET_FAILED', error);
+    throw createSettingsError('No se pudo obtener la configuración del sistema', 'GET_FAILED', error);
   }
 }
 
@@ -162,21 +153,21 @@ export async function updateSystemSettings(
 
     if (!validationResult.success) {
       logger.error('❌ Datos de configuración inválidos:', validationResult.error);
-      throw new SettingsError('Datos de configuración inválidos', 'VALIDATION_FAILED', validationResult.error);
+      throw createSettingsError('Datos de configuración inválidos', 'VALIDATION_FAILED', validationResult.error);
     }
 
     // Serializar para almacenamiento
     const serializedData = serializeSettings(updatedSettings);
 
     // Actualizar en la base de datos
-    const result = await db.systemSettings.upsert({
-      where: { id: 'global' },
+    const result = await prisma.settings.upsert({
+      where: { id: 'default' },
       update: {
         data: serializedData,
         updatedAt: new Date()
       },
       create: {
-        id: 'global',
+        id: 'default',
         data: serializedData
       }
     });
@@ -192,11 +183,11 @@ export async function updateSystemSettings(
     logger.error('❌ Error al actualizar la configuración global:', error);
 
     // Reenviar el error si ya es un SettingsError
-    if (error instanceof SettingsError) {
+    if (isSettingsError(error)) {
       throw error;
     }
 
-    throw new SettingsError('No se pudo actualizar la configuración del sistema', 'UPDATE_FAILED', error);
+    throw createSettingsError('No se pudo actualizar la configuración del sistema', 'UPDATE_FAILED', error);
   }
 }
 
@@ -208,17 +199,17 @@ export async function resetSystemSettings(): Promise<Settings> {
 
   try {
     // Crear configuración por defecto
-    const defaultSettings = createDefaultSettingsData();
+    const defaultSettings = await createDefaultSettingsData();
 
     // Actualizar en la base de datos
-    await db.systemSettings.upsert({
-      where: { id: 'global' },
+    await prisma.settings.upsert({
+      where: { id: 'default' },
       update: {
         data: defaultSettings,
         updatedAt: new Date()
       },
       create: {
-        id: 'global',
+        id: 'default',
         data: defaultSettings
       }
     });
@@ -232,7 +223,7 @@ export async function resetSystemSettings(): Promise<Settings> {
     return deserializeSettings(defaultSettings);
   } catch (error) {
     logger.error('❌ Error al restablecer la configuración global:', error);
-    throw new SettingsError('No se pudo restablecer la configuración del sistema', 'RESET_FAILED', error);
+    throw createSettingsError('No se pudo restablecer la configuración del sistema', 'RESET_FAILED', error);
   }
 }
 
@@ -244,7 +235,7 @@ export async function getProfileSettings(profileId: string): Promise<Settings | 
 
   try {
     // Verificar si el perfil existe
-    const profile = await db.profile.findUnique({
+    const profile = await prisma.profile.findUnique({
       where: { id: profileId }
     });
 
@@ -254,8 +245,8 @@ export async function getProfileSettings(profileId: string): Promise<Settings | 
     }
 
     // Buscar configuración específica del perfil
-    const settings = await db.profileSettings.findUnique({
-      where: { profileId }
+    const settings = await prisma.settings.findUnique({
+      where: { userId: profileId }
     });
 
     if (!settings) {
@@ -268,7 +259,7 @@ export async function getProfileSettings(profileId: string): Promise<Settings | 
     return deserializeSettings(settings.data as Record<string, unknown>);
   } catch (error) {
     logger.error('❌ Error al obtener la configuración del perfil:', error, { profileId });
-    throw new SettingsError(`No se pudo obtener la configuración del perfil ${profileId}`, 'PROFILE_GET_FAILED', error);
+    throw createSettingsError(`No se pudo obtener la configuración del perfil ${profileId}`, 'PROFILE_GET_FAILED', error);
   }
 }
 
@@ -283,13 +274,13 @@ export async function updateProfileSettings(
 
   try {
     // Verificar si el perfil existe
-    const profile = await db.profile.findUnique({
+    const profile = await prisma.profile.findUnique({
       where: { id: profileId }
     });
 
     if (!profile) {
       logger.warn('⚠️ Perfil no encontrado', { profileId });
-      throw new SettingsError(`Perfil ${profileId} no encontrado`, 'PROFILE_NOT_FOUND');
+      throw createSettingsError(`Perfil ${profileId} no encontrado`, 'PROFILE_NOT_FOUND');
     }
 
     // Obtener configuración actual del perfil (o global si no tiene)
@@ -303,21 +294,21 @@ export async function updateProfileSettings(
 
     if (!validationResult.success) {
       logger.error('❌ Datos de configuración inválidos:', validationResult.error);
-      throw new SettingsError('Datos de configuración inválidos', 'VALIDATION_FAILED', validationResult.error);
+      throw createSettingsError('Datos de configuración inválidos', 'VALIDATION_FAILED', validationResult.error);
     }
 
     // Serializar para almacenamiento
     const serializedData = serializeSettings(newSettings);
 
     // Actualizar en la base de datos
-    const result = await db.profileSettings.upsert({
-      where: { profileId },
+    const result = await prisma.settings.upsert({
+      where: { id: profileId },
       update: {
         data: serializedData,
         updatedAt: new Date()
       },
       create: {
-        profileId,
+        id: profileId,
         data: serializedData
       }
     });
@@ -333,11 +324,11 @@ export async function updateProfileSettings(
     logger.error('❌ Error al actualizar la configuración del perfil:', error, { profileId });
 
     // Reenviar el error si ya es un SettingsError
-    if (error instanceof SettingsError) {
+    if (isSettingsError(error)) {
       throw error;
     }
 
-    throw new SettingsError(`No se pudo actualizar la configuración del perfil ${profileId}`, 'PROFILE_UPDATE_FAILED', error);
+    throw createSettingsError(`No se pudo actualizar la configuración del perfil ${profileId}`, 'PROFILE_UPDATE_FAILED', error);
   }
 }
 
@@ -349,18 +340,18 @@ export async function resetProfileSettings(profileId: string): Promise<void> {
 
   try {
     // Verificar si el perfil existe
-    const profile = await db.profile.findUnique({
+    const profile = await prisma.profile.findUnique({
       where: { id: profileId }
     });
 
     if (!profile) {
       logger.warn('⚠️ Perfil no encontrado', { profileId });
-      throw new SettingsError(`Perfil ${profileId} no encontrado`, 'PROFILE_NOT_FOUND');
+      throw createSettingsError(`Perfil ${profileId} no encontrado`, 'PROFILE_NOT_FOUND');
     }
 
     // Eliminar configuración específica del perfil
-    await db.profileSettings.delete({
-      where: { profileId }
+    await prisma.settings.delete({
+      where: { id: profileId }
     }).catch((err) => {
       // Si no existe, ignorar el error
       if (!err.message.includes('Record to delete does not exist')) {
@@ -376,10 +367,10 @@ export async function resetProfileSettings(profileId: string): Promise<void> {
     logger.error('❌ Error al restablecer la configuración del perfil:', error, { profileId });
 
     // Reenviar el error si ya es un SettingsError
-    if (error instanceof SettingsError) {
+    if (isSettingsError(error)) {
       throw error;
     }
 
-    throw new SettingsError(`No se pudo restablecer la configuración del perfil ${profileId}`, 'PROFILE_RESET_FAILED', error);
+    throw createSettingsError(`No se pudo restablecer la configuración del perfil ${profileId}`, 'PROFILE_RESET_FAILED', error);
   }
 }

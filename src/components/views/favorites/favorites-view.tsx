@@ -4,14 +4,14 @@ import { getFavorites } from '@/app/actions/favorites/favorite.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { useFileManager } from '@/store/files/file-manager.store';
 import type { FileItem } from '@/types/file-item';
 import { Star } from 'lucide-react';
 import { useCallback, useEffect, useMemo } from 'react';
 
-const viewLogger = serverLogger.withContext('FavoritesView');
+const viewLogger = clientLogger.withContext('FavoritesView');
 
 export function FavoritesView() {
 	const { currentItems: items, toggleItemSelection, setItems, isLoading, setIsLoading } = useFileManager();

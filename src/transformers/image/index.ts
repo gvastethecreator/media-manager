@@ -8,24 +8,30 @@ import { prisma } from '@/lib/prisma';
 import type {
     ImageComplete,
     ImageCreateInput,
+    ImageExtended,
     ImageSearchOptions,
     ImageSearchResult,
-    ImageUpdateInput,
+    ImageUpdateInput
 } from '@/types/entities/image/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import {
+    deserializeImageMetadata,
+    getDerivedImageProperties,
     mapCreateImageDataToPrisma,
     mapImageFiltersToPrisma,
     mapImageSearchOptionsToPrisma,
     mapImageToComplete,
     mapImageToRelatedImage,
-    mapUpdateImageDataToPrisma
+    mapToImageSummaries,
+    mapToImageSummary,
+    mapUpdateImageDataToPrisma,
+    serializeImageMetadata,
+    updateImageMetadata
 } from './mappers';
 import {
     extendImage,
     fromPrismaImage,
     parseImageFilters,
-    serializeImageMetadata,
     toPrismaImage,
     validateImage
 } from './serializers';
@@ -203,18 +209,20 @@ export function toRelatedImage(image: ImageComplete) {
 
 // Exportar transformadores y funciones individuales para compatibilidad
 export {
+    deserializeImageMetadata,
     // Serializadores
     extendImage,
-    fromPrismaImage,
+    fromPrismaImage, getDerivedImageProperties,
     // Mappers
     mapCreateImageDataToPrisma,
     mapImageFiltersToPrisma,
     mapImageSearchOptionsToPrisma,
     mapImageToComplete,
-    mapImageToRelatedImage,
-    mapUpdateImageDataToPrisma,
-    parseImageFilters, serializeImageMetadata,
-    toPrismaImage,
-    validateImage
+    mapImageToRelatedImage, mapToImageSummaries,
+    mapToImageSummary, mapUpdateImageDataToPrisma,
+    parseImageFilters, serializeImageMetadata, toPrismaImage, updateImageMetadata, validateImage
 };
+
+// Exportar tipos relevantes
+    export type { ImageExtended };
 

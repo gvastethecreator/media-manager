@@ -22,17 +22,29 @@ const logger = serverLogger.withContext('QueueActions:query');
 const CACHE_REVALIDATE_SECONDS = 30;
 
 /**
- * Error personalizado para consultas de cola
+ * Interfaz para errores de consulta de cola
  */
-class QueueQueryError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'QueueQueryError';
-  }
+export interface QueueQueryErrorData {
+  name: string;
+  message: string;
+  code?: string;
+  cause?: unknown;
+}
+
+/**
+ * Función para crear errores de consulta de cola (enfoque funcional)
+ */
+function createQueueQueryError(
+  message: string,
+  code?: string,
+  cause?: unknown
+): QueueQueryErrorData {
+  return {
+    name: 'QueueQueryError',
+    message,
+    code,
+    cause
+  };
 }
 
 /**
@@ -106,7 +118,7 @@ export async function getRecentQueueJobs(limit = 10): Promise<QueueJobExtended[]
         return jobs;
       } catch (error) {
         logger.error('❌ Error al obtener trabajos recientes:', error);
-        throw new QueueQueryError('No se pudieron obtener los trabajos recientes', 'RECENT_FAILED', error);
+        throw createQueueQueryError('No se pudieron obtener los trabajos recientes', 'RECENT_FAILED', error);
       }
     },
     ['queue-jobs-recent', limit.toString()],
@@ -134,7 +146,7 @@ export async function getQueueJobsByStatus(status: string, limit = 10): Promise<
         return jobs;
       } catch (error) {
         logger.error('❌ Error al obtener trabajos por estado:', error);
-        throw new QueueQueryError('No se pudieron obtener los trabajos por estado', 'STATUS_FAILED', error);
+        throw createQueueQueryError('No se pudieron obtener los trabajos por estado', 'STATUS_FAILED', error);
       }
     },
     ['queue-jobs-status', status, limit.toString()],

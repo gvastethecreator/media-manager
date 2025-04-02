@@ -3,12 +3,12 @@
  * @module store/entities/group/slices/filters
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { Group, GroupSortCriteria, GroupType } from '@/types/entities/group';
 import type { StateCreator } from 'zustand';
 import type { GroupState } from '../types';
 
-const groupLogger = serverLogger.withContext('GroupFilters');
+const groupLogger = clientLogger.withContext('GroupFilters');
 
 // Slice para filtrado y ordenación
 export interface GroupFiltersSlice {

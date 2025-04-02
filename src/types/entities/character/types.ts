@@ -3,9 +3,7 @@
  * @module types/entities/character/character-types
  */
 
-import { BaseEntitySchema } from '@/types/common/base';
 import type { SearchOptionsSchema } from '@/types/common/search';
-import { z } from 'zod';
 import type { Album } from '../album/types';
 import type { Collection } from '../collection/types';
 import type { Concept } from '../concept/types';
@@ -170,45 +168,6 @@ export interface CharacterTransformerOptions {
     includeCount?: boolean;
     customFields?: string[];
 }
-
-// Esquema base para Character
-export const CharacterSchema = BaseEntitySchema.extend({
-    name: z.string(),
-    description: z.string().optional(),
-    level: z.number().int().min(1).max(100),
-    experience: z.number().int().min(0),
-    class: z.string(),
-    race: z.string(),
-    alignment: z.string(),
-    background: z.string(),
-    stats: z.record(z.string(), z.number()).optional(),
-    skills: z.record(z.string(), z.number()).optional(),
-    inventory: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        quantity: z.number().int().min(1),
-        type: z.string(),
-        rarity: z.string().optional(),
-        description: z.string().optional(),
-    })).optional(),
-    spells: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        level: z.number().int().min(0).max(9),
-        school: z.string(),
-        description: z.string().optional(),
-    })).optional(),
-    feats: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string().optional(),
-        requirements: z.array(z.string()).optional(),
-    })).optional(),
-    notes: z.string().optional(),
-    isActive: z.boolean().default(true),
-    isFavorite: z.boolean().default(false),
-    metadata: z.record(z.string(), z.unknown()).optional(),
-});
 
 // Contadores unificados
 export interface CharacterCount {

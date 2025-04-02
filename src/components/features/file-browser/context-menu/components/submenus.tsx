@@ -2,7 +2,7 @@
 
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Badge } from '@/components/ui/badge';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useTagStore } from '@/store/entities/tag';
@@ -24,7 +24,7 @@ import type { ContextMenuAction, LoadingStates } from '../types';
 import { EntitySubMenu } from './entity-submenu';
 
 // Logger para el componente
-const submenuLogger = serverLogger.withContext('ContextSubmenu');
+const submenuLogger = clientLogger.withContext('ContextSubmenu');
 
 interface SubmenuProps {
 	file: FileItem;

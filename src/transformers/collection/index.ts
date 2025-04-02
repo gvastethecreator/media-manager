@@ -25,8 +25,20 @@ import {
     toPrismaCollection,
     validateCollection,
 } from './serializers';
+// Importar el transformador principal y sus funciones asociadas
+import {
+    transformCollection as transformCollectionMain,
+    transformCollectionToExtended,
+    transformCollectionToWithStats,
+    transformCollections as transformCollectionsMain
+} from './transformer';
 
 const logger = serverLogger.withContext('CollectionTransformer');
+
+// Exportar el transformador principal y sus variantes
+export const transformCollection = transformCollectionMain;
+export const transformCollections = transformCollectionsMain;
+export { transformCollectionToExtended, transformCollectionToWithStats };
 
 /**
  * 🔍 Busca colecciones según los criterios especificados
@@ -210,30 +222,22 @@ export function parseCollectionFilterOptions(filters: any) {
   }
 }
 
-// Capa de compatibilidad para código existente
-/**
- * @deprecated Use las funciones individuales exportadas en su lugar.
- * Las funciones recomendadas son:
- * - searchCollections en lugar de CollectionTransformer.search
- * - getCollectionById en lugar de CollectionTransformer.getById
- * - createCollection en lugar de CollectionTransformer.create
- * - updateCollection en lugar de CollectionTransformer.update
- * - deleteCollection en lugar de CollectionTransformer.delete
- * - toRelatedCollection en lugar de CollectionTransformer.toRelated
- * - parseCollectionFilterOptions en lugar de CollectionTransformer.parseFilters
- */
-const CollectionTransformerCompat = {
-  search: searchCollections,
-  getById: getCollectionById,
-  create: createCollection,
-  update: updateCollection,
-  delete: deleteCollection,
-  toRelated: toRelatedCollection,
-  parseFilters: parseCollectionFilterOptions
+// Objeto de compatibilidad para código anterior
+export const CollectionTransformer = {
+  searchCollections,
+  getCollectionById,
+  createCollection,
+  updateCollection,
+  deleteCollection,
+  toRelatedCollection,
+  parseFilters: parseCollectionFilterOptions,
+  transformCollection,
+  transformCollections,
+  transformCollectionToExtended,
+  transformCollectionToWithStats
 };
 
-// Exportar objeto de compatibilidad bajo el mismo nombre que la clase original
-export const CollectionTransformer = CollectionTransformerCompat;
+export default CollectionTransformer;
 
 // Exportar funciones individuales para uso directo
 export {

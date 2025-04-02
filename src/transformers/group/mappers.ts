@@ -3,7 +3,7 @@
  * @module transformers/group/mappers
  */
 
-import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/lib/constants';
+import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
     GroupCard,
@@ -178,11 +178,11 @@ export function parseGroupSearchParams(
 } {
   try {
     // Parsear parámetros de paginación
-    const { page = 1, pageSize = DEFAULT_PAGE_SIZE } = params;
+    const { page = 1, pageSize = DEFAULT_VIEW_CONFIG.pageSize } = params;
 
     // Calcular skip y take para paginación
     const skip = (page - 1) * pageSize;
-    const take = Math.min(pageSize, MAX_PAGE_SIZE);
+    const take = Math.min(pageSize, 100); // Usar 100 como máximo si MAX_PAGE_SIZE no existe
 
     // Construir condiciones de búsqueda
     const where: Prisma.GroupWhereInput = {};
@@ -218,7 +218,7 @@ export function parseGroupSearchParams(
       where: {},
       orderBy: { name: 'asc' },
       skip: 0,
-      take: DEFAULT_PAGE_SIZE
+      take: DEFAULT_VIEW_CONFIG.pageSize
     };
   }
 }
@@ -252,7 +252,7 @@ export function toGroupListProps(
 ): GroupListProps {
   try {
     // Calcular metadatos de paginación
-    const { page = 1, pageSize = DEFAULT_PAGE_SIZE } = params;
+    const { page = 1, pageSize = DEFAULT_VIEW_CONFIG.pageSize } = params;
     const totalPages = Math.ceil(totalCount / pageSize);
     const hasMore = page < totalPages;
 
@@ -280,7 +280,7 @@ export function toGroupListProps(
       filters: {},
       pagination: {
         page: 1,
-        pageSize: DEFAULT_PAGE_SIZE,
+        pageSize: DEFAULT_VIEW_CONFIG.pageSize,
         totalItems: 0,
         totalPages: 0,
         hasMore: false

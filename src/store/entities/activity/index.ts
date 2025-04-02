@@ -4,7 +4,7 @@
  * @description Implementación del store de Zustand para la gestión de actividades del sistema
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { ActivitySortCriteria } from '@/types/entities/activity';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
@@ -14,7 +14,7 @@ import { type ActivityUISlice, createActivityUISlice } from './slices/ui';
 import type { ActivityState } from './types';
 
 // Logger para el store
-const storeLogger = serverLogger.withContext('ActivityStore');
+const storeLogger = clientLogger.withContext('ActivityStore');
 
 // Tipo del store completo que combina todos los slices
 export type ActivityStore = ActivityCoreSlice & ActivityUISlice & ActivityFiltersSlice;

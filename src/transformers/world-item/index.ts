@@ -1,54 +1,30 @@
 /**
- * @file Exportaciones del transformador WorldItem
+ * @file Índice de transformadores para la entidad WorldItem
  * @module transformers/world-item
  */
 
-// Exportaciones principales del serializador
-export {
-    extendWorldItem,
-    extendWorldItems, fromPrismaWorldItem,
-    toPrismaWorldItem, validateWorldItem
-} from './serializers';
+// --- Exportaciones Controladas --- //
 
-// Exportaciones principales de mapeadores
+// De serializers.ts (Funciones actuales)
+export { deserializeAttributes, deserializeEffects, deserializeFilters, deserializeProperties, deserializeRequirements, deserializeStats, deserializeTags, extendWorldItem, extendWorldItems, fromPrismaWorldItem, serializeAttributes, serializeEffects, serializeFilters, serializeProperties, serializeRequirements, serializeStats, serializeTags, toPrismaWorldItem, validateWorldItem } from './serializers';
+
+// De mappers.ts (Funciones actuales)
 export {
-    createFilter,
-    createOrderBy,
-    generateColor,
-    generateEmoji, toCreateData, toSearchOptions, toUpdateData
+    generateColor as generateWorldItemColor, // Renombrar para claridad
+    generateEmoji as generateWorldItemEmoji, // Renombrar para claridad
+    toCreateData as mapCreateWorldItemDataToPrisma, // Renombrar para consistencia
+    toUpdateData as mapUpdateWorldItemDataToPrisma, // Renombrar para consistencia
+    createFilter as mapWorldItemFiltersToPrisma, // Renombrar para consistencia
+    createOrderBy as mapWorldItemOrderByToPrisma // Renombrar para consistencia
+    , // Renombrar para consistencia
+    toSearchOptions as mapWorldItemSearchOptionsToPrisma
 } from './mappers';
 
-// Exportaciones principales de serialización de campos individuales
+// De transformer.ts
 export {
-    deserializeAttributes, deserializeEffects, deserializeFilters, deserializeProperties, deserializeRequirements, deserializeStats, deserializeTags, serializeAttributes, serializeEffects, serializeFilters, serializeProperties, serializeRequirements, serializeStats, serializeTags
-} from './serializers';
+    transformWorldItem, transformWorldItemToExtended,
+    transformWorldItemToWithStats, transformWorldItems
+} from './transformer';
 
-// Exportaciones de funciones obsoletas (para retrocompatibilidad)
-export {
-    // Serializadores antiguos
-    deserializeWorldItemAttributes,
-    deserializeWorldItemEffects,
-    deserializeWorldItemFilters,
-    deserializeWorldItemProperties,
-    deserializeWorldItemRequirements,
-    deserializeWorldItemStats,
-    deserializeWorldItemTags, fromExtendedWorldItem, parseJsonFields, serializeWorldItemAttributes,
-    serializeWorldItemEffects,
-    serializeWorldItemFilters,
-    serializeWorldItemProperties,
-    serializeWorldItemRequirements,
-    serializeWorldItemStats,
-    serializeWorldItemTags, toExtendedWorldItem,
-    toWorldItemWithStats
-} from './serializers';
-
-export {
-    createWorldItemFilter,
-    createWorldItemOrderBy,
-    // Mapeadores antiguos
-    generateWorldItemColor,
-    generateWorldItemEmoji, mapCreateWorldItemDataToPrisma,
-    mapUpdateWorldItemDataToPrisma, toCreateWorldItemData,
-    toUpdateWorldItemData
-} from './mappers';
+// --- Fin Exportaciones Controladas --- //
 

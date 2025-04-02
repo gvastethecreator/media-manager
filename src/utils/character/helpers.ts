@@ -3,16 +3,17 @@
  * @module utils/character/helpers
  */
 
-import { getSuggestedAppearance, serializeObject } from '@/transformers/character';
+// Importación comentada porque las funciones no existen actualmente
+// import { getSuggestedAppearance, serializeObject } from '@/transformers/character';
 import type {
-	CharacterBase,
-	CharacterCategory,
-	CharacterClass,
-	CharacterExtended,
-	CharacterRace,
-	CharacterRelationship,
-	CharacterSortOption,
-	CharacterSummary,
+    CharacterBase,
+    CharacterCategory,
+    CharacterClass,
+    CharacterExtended,
+    CharacterRace,
+    CharacterRelationship,
+    CharacterSortOption,
+    CharacterSummary,
 } from '@/types/entities/character';
 import { CharacterRelationshipType } from '@/types/entities/character/enums';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,8 +32,13 @@ export function generateCharacterId(): string {
  * @returns Objeto Character con valores predeterminados
  */
 export function createNewCharacter(overrides: Partial<CharacterBase> = {}): CharacterBase {
-	const characterClass = (overrides.class?.toLowerCase() || 'warrior') as CharacterClass;
-	const { color, emoji } = getSuggestedAppearance(characterClass);
+	// Lógica comentada que dependía de getSuggestedAppearance
+	// const characterClass = (overrides.class?.toLowerCase() || 'warrior') as CharacterClass;
+	// const { color, emoji } = getSuggestedAppearance(characterClass);
+
+	// Valores por defecto temporales para color y emoji
+	const color = '#CCCCCC';
+	const emoji = '👤';
 
 	const now = new Date();
 
@@ -108,7 +114,7 @@ export function getCharacterLevelAsNumber(character: CharacterExtended | Charact
 
 	if (typeof character.level === 'string') {
 		const parsedLevel = Number.parseInt(character.level, 10);
-		return isNaN(parsedLevel) ? 1 : parsedLevel;
+		return Number.isNaN(parsedLevel) ? 1 : parsedLevel;
 	}
 
 	return 1;
@@ -165,18 +171,18 @@ export function groupCharactersByCategory(
 	const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
 
 	// Inicializar todas las categorías
-	Object.values(CharacterCategory).forEach((category) => {
+	for (const category of Object.values(CharacterCategory)) {
 		groups[category] = [];
-	});
+	}
 
 	// Agrupar personajes
-	characters.forEach((character) => {
+	for (const character of characters) {
 		const category = character.category || 'other';
 		if (!groups[category]) {
 			groups[category] = [];
 		}
 		groups[category].push(character);
-	});
+	}
 
 	return groups as Record<CharacterCategory, (CharacterExtended | CharacterSummary)[]>;
 }
@@ -192,18 +198,18 @@ export function groupCharactersByClass(
 	const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
 
 	// Inicializar todas las clases
-	Object.values(CharacterClass).forEach((characterClass) => {
+	for (const characterClass of Object.values(CharacterClass)) {
 		groups[characterClass] = [];
-	});
+	}
 
 	// Agrupar personajes
-	characters.forEach((character) => {
+	for (const character of characters) {
 		const characterClass = character.class || 'unknown';
 		if (!groups[characterClass]) {
 			groups[characterClass] = [];
 		}
 		groups[characterClass].push(character);
-	});
+	}
 
 	return groups as Record<CharacterClass, (CharacterExtended | CharacterSummary)[]>;
 }
@@ -219,18 +225,18 @@ export function groupCharactersByRace(
 	const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
 
 	// Inicializar todas las razas
-	Object.values(CharacterRace).forEach((race) => {
+	for (const race of Object.values(CharacterRace)) {
 		groups[race] = [];
-	});
+	}
 
 	// Agrupar personajes
-	characters.forEach((character) => {
+	for (const character of characters) {
 		const race = character.race || 'unknown';
 		if (!groups[race]) {
 			groups[race] = [];
 		}
 		groups[race].push(character);
-	});
+	}
 
 	return groups as Record<CharacterRace, (CharacterExtended | CharacterSummary)[]>;
 }
@@ -335,3 +341,13 @@ export function prepareInitialStats(characterClass: CharacterClass): string {
 
 	return serializeObject(modifiedStats);
 }
+
+// Lógica comentada que dependía de serializeObject
+// /**
+//  * Serializa un objeto para guardarlo como JSON en la base de datos
+//  * @param obj Objeto a serializar
+//  * @returns Cadena JSON del objeto
+//  */
+// export function serializeCharacterData<T>(obj: T): string {
+// 	return serializeObject(obj); // Usando la función de transformer
+// }

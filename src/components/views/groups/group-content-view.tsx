@@ -5,14 +5,14 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
 import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
-const logger = serverLogger.withContext('GroupContentView');
+const logger = clientLogger.withContext('GroupContentView');
 
 export function GroupContentView(_props: ViewProps) {
 	const params = useParams();

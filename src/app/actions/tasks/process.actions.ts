@@ -31,17 +31,29 @@ async function revalidateTaskPaths() {
 }
 
 /**
- * Custom error for task process operations
+ * Interfaz para errores de procesamiento de tareas
  */
-class TaskProcessError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'TaskProcessError';
-  }
+export interface TaskProcessErrorData {
+  name: string;
+  message: string;
+  code?: string;
+  cause?: unknown;
+}
+
+/**
+ * Función para crear errores de procesamiento de tareas (enfoque funcional)
+ */
+function createTaskProcessError(
+  message: string,
+  code?: string,
+  cause?: unknown
+): TaskProcessErrorData {
+  return {
+    name: 'TaskProcessError',
+    message,
+    code,
+    cause
+  };
 }
 
 /**
@@ -56,11 +68,11 @@ export async function startTask(id: string): Promise<ScheduledTask> {
     });
 
     if (!task) {
-      throw new TaskProcessError('Task not found', 'TASK_NOT_FOUND');
+      throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
     }
 
     if (task.status === 'RUNNING') {
-      throw new TaskProcessError('Task is already running', 'TASK_RUNNING');
+      throw createTaskProcessError('Task is already running', 'TASK_RUNNING');
     }
 
     const updatedTask = await prisma.scheduledTask.update({
@@ -77,7 +89,16 @@ export async function startTask(id: string): Promise<ScheduledTask> {
     return updatedTask;
   } catch (error) {
     taskLogger.error('❌ Error starting task:', error);
-    throw new TaskProcessError('Failed to start task', 'START_FAILED', error);
+
+    // Reenviar el error si ya es un TaskProcessError
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'TaskProcessError') {
+      throw error;
+    }
+
+    throw createTaskProcessError('Failed to start task', 'START_FAILED', error);
   }
 }
 
@@ -93,11 +114,11 @@ export async function completeTask(id: string, result?: unknown): Promise<Schedu
     });
 
     if (!task) {
-      throw new TaskProcessError('Task not found', 'TASK_NOT_FOUND');
+      throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
     }
 
     if (task.status !== 'RUNNING') {
-      throw new TaskProcessError('Task is not running', 'TASK_NOT_RUNNING');
+      throw createTaskProcessError('Task is not running', 'TASK_NOT_RUNNING');
     }
 
     // Calculate next run time for recurring tasks
@@ -124,7 +145,16 @@ export async function completeTask(id: string, result?: unknown): Promise<Schedu
     return updatedTask;
   } catch (error) {
     taskLogger.error('❌ Error completing task:', error);
-    throw new TaskProcessError('Failed to complete task', 'COMPLETE_FAILED', error);
+
+    // Reenviar el error si ya es un TaskProcessError
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'TaskProcessError') {
+      throw error;
+    }
+
+    throw createTaskProcessError('Failed to complete task', 'COMPLETE_FAILED', error);
   }
 }
 
@@ -140,7 +170,7 @@ export async function failTask(id: string, error: Error | string): Promise<Sched
     });
 
     if (!task) {
-      throw new TaskProcessError('Task not found', 'TASK_NOT_FOUND');
+      throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
     }
 
     // Calculate next run time for recurring tasks with retry
@@ -168,7 +198,16 @@ export async function failTask(id: string, error: Error | string): Promise<Sched
     return updatedTask;
   } catch (error) {
     taskLogger.error('❌ Error marking task as failed:', error);
-    throw new TaskProcessError('Failed to mark task as failed', 'FAIL_FAILED', error);
+
+    // Reenviar el error si ya es un TaskProcessError
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'TaskProcessError') {
+      throw error;
+    }
+
+    throw createTaskProcessError('Failed to mark task as failed', 'FAIL_FAILED', error);
   }
 }
 
@@ -184,11 +223,11 @@ export async function pauseTask(id: string): Promise<ScheduledTask> {
     });
 
     if (!task) {
-      throw new TaskProcessError('Task not found', 'TASK_NOT_FOUND');
+      throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
     }
 
     if (task.status !== 'RUNNING' && task.status !== 'SCHEDULED') {
-      throw new TaskProcessError('Task cannot be paused', 'TASK_NOT_PAUSABLE');
+      throw createTaskProcessError('Task cannot be paused', 'TASK_NOT_PAUSABLE');
     }
 
     const updatedTask = await prisma.scheduledTask.update({
@@ -203,7 +242,16 @@ export async function pauseTask(id: string): Promise<ScheduledTask> {
     return updatedTask;
   } catch (error) {
     taskLogger.error('❌ Error pausing task:', error);
-    throw new TaskProcessError('Failed to pause task', 'PAUSE_FAILED', error);
+
+    // Reenviar el error si ya es un TaskProcessError
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'TaskProcessError') {
+      throw error;
+    }
+
+    throw createTaskProcessError('Failed to pause task', 'PAUSE_FAILED', error);
   }
 }
 
@@ -219,11 +267,11 @@ export async function resumeTask(id: string): Promise<ScheduledTask> {
     });
 
     if (!task) {
-      throw new TaskProcessError('Task not found', 'TASK_NOT_FOUND');
+      throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
     }
 
     if (task.status !== 'PAUSED') {
-      throw new TaskProcessError('Task is not paused', 'TASK_NOT_PAUSED');
+      throw createTaskProcessError('Task is not paused', 'TASK_NOT_PAUSED');
     }
 
     const updatedTask = await prisma.scheduledTask.update({
@@ -239,7 +287,16 @@ export async function resumeTask(id: string): Promise<ScheduledTask> {
     return updatedTask;
   } catch (error) {
     taskLogger.error('❌ Error resuming task:', error);
-    throw new TaskProcessError('Failed to resume task', 'RESUME_FAILED', error);
+
+    // Reenviar el error si ya es un TaskProcessError
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'TaskProcessError') {
+      throw error;
+    }
+
+    throw createTaskProcessError('Failed to resume task', 'RESUME_FAILED', error);
   }
 }
 
@@ -255,11 +312,11 @@ export async function rescheduleTask(id: string, nextRunAt: Date): Promise<Sched
     });
 
     if (!task) {
-      throw new TaskProcessError('Task not found', 'TASK_NOT_FOUND');
+      throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
     }
 
     if (task.status === 'RUNNING') {
-      throw new TaskProcessError('Cannot reschedule running task', 'TASK_RUNNING');
+      throw createTaskProcessError('Cannot reschedule running task', 'TASK_RUNNING');
     }
 
     const updatedTask = await prisma.scheduledTask.update({
@@ -275,6 +332,15 @@ export async function rescheduleTask(id: string, nextRunAt: Date): Promise<Sched
     return updatedTask;
   } catch (error) {
     taskLogger.error('❌ Error rescheduling task:', error);
-    throw new TaskProcessError('Failed to reschedule task', 'RESCHEDULE_FAILED', error);
+
+    // Reenviar el error si ya es un TaskProcessError
+    if (error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'TaskProcessError') {
+      throw error;
+    }
+
+    throw createTaskProcessError('Failed to reschedule task', 'RESCHEDULE_FAILED', error);
   }
 }

@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail.service';
+import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail-service-export';
 import { useThumbnailStore } from '@/store/thumbnails.store';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import { useEffect } from 'react';

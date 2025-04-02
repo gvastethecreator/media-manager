@@ -1,7 +1,7 @@
 'use client';
 
 import { getAlbums } from '@/app/actions/albums/album.actions';
-import { getCharacters } from '@/app/actions/characters/character.actions';
+import { searchCharacters } from '@/app/actions/characters/character.actions';
 import { getCollections } from '@/app/actions/collections/collection.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
 import { getGroups } from '@/app/actions/groups/group.actions';
@@ -9,10 +9,10 @@ import { getNotes } from '@/app/actions/notes/note.actions';
 import { getPlaces } from '@/app/actions/places/place.actions';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
 import { getProperties } from '@/app/actions/properties/property.actions';
-import { getTags } from '@/app/actions/tags';
+import { getTagsAction } from '@/app/actions/tags';
 import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
 import { useCollectionStore } from '@/store/entities/collection';
@@ -29,7 +29,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import type { LoadingStates } from '../types';
 
 // Logger para el componente
-const entityLoaderLogger = serverLogger.withContext('EntityLoader');
+const entityLoaderLogger = clientLogger.withContext('EntityLoader');
 
 // Interfaces para los stores
 interface BaseEntityStore {
@@ -60,7 +60,7 @@ const initialLoadingStates: LoadingStates = {
 // Mapeo de entidades a funciones de acción del servidor
 const entityActionMap = {
 	tags: {
-		action: getTags,
+		action: getTagsAction,
 		storeMethod: 'setTags'
 	},
 	albums: {
@@ -72,7 +72,7 @@ const entityActionMap = {
 		storeMethod: 'setCollections'
 	},
 	characters: {
-		action: getCharacters,
+		action: searchCharacters,
 		storeMethod: 'setCharacters'
 	},
 	places: {

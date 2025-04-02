@@ -68,33 +68,52 @@ export function formatProfileDate(date: Date): string {
  * @throws Error si la validación falla
  */
 export function parseProfilePreferences(profile: Profile): ProfilePreferences {
+	let rawPreferences: any = {}; // Initialize as empty object
 	try {
-		// Crear objeto de preferencias inicial
-		const rawPreferences = {
-			theme: profile.theme as ThemeMode,
-			color: profile.color,
-			emoji: profile.emoji,
-			language: profile.language as Language,
-			// Valores por defecto para el resto de campos
-			enableAnimations: true,
-			enableSounds: false,
-			enableHaptics: false,
-			enableNotifications: true,
-			defaultView: 'grid' as const,
-			defaultSort: 'name' as const,
-			itemsPerPage: 50,
-			showHiddenFiles: false,
-			highContrast: false,
-			reducedMotion: false,
-			fontSize: 'medium' as const,
-			outlineElements: false,
-		};
+		// Intentar parsear las preferencias desde profile.settings si existe
+		if (profile.settings && typeof profile.settings === 'string') {
+			// ✨ Specific try-catch for JSON parsing ✨
+			try {
+				rawPreferences = JSON.parse(profile.settings);
+				// Ensure rawPreferences is an object after parsing
+				if (typeof rawPreferences !== 'object' || rawPreferences === null) {
+					console.warn('[Profile Transformer] Parsed profile.settings is not an object, using default.');
+					rawPreferences = {};
+				}
+			} catch (jsonError) {
+				console.error('[Profile Transformer] Error parsing profile.settings JSON:', jsonError);
+				rawPreferences = {}; // Default to empty object on JSON parse error
+			}
+		} else if (profile.settings && typeof profile.settings === 'object') {
+			// Si ya es un objeto (e.g., desde una actualización previa)
+			rawPreferences = profile.settings;
+		} else {
+		    // If profile.settings is null, undefined, or other type, start with empty object
+		    rawPreferences = {};
+		}
 
-		// Validar y parsear con Zod
+		// Sanitize color (outside the JSON parse try-catch)
+		if (rawPreferences.color && typeof rawPreferences.color === 'string') {
+			const colorRegex = /^#[0-9A-Fa-f]{6}$/;
+			if (!colorRegex.test(rawPreferences.color)) {
+				console.warn(
+					`[Profile Transformer] Invalid color format '${rawPreferences.color}' found. Using default.`,
+				);
+				rawPreferences.color = profilePreferencesSchema.shape.color._def.defaultValue; // Use schema default
+			}
+		} else if ('color' in rawPreferences && typeof rawPreferences.color !== 'string') {
+			console.warn(
+				`[Profile Transformer] Invalid type for color ('${typeof rawPreferences.color}'). Using default.`,
+			);
+			rawPreferences.color = profilePreferencesSchema.shape.color._def.defaultValue;
+		} // No else needed, if color is missing, Zod default applies
+
+		// Validar y parsear con Zod (ahora con rawPreferences más seguro)
 		return profilePreferencesSchema.parse(rawPreferences);
 	} catch (error) {
-		console.error('Error parsing profile preferences:', error);
-		// Retornar valores por defecto si falla la validación
+		console.error('[Profile Transformer] Final error parsing profile preferences:', error);
+		// Retornar valores por defecto si falla la validación final
+		// Parsear {} es seguro porque el schema tiene defaults para todo.
 		return profilePreferencesSchema.parse({});
 	}
 }

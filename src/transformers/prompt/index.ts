@@ -3,32 +3,90 @@
  * @module transformers/prompt
  */
 
-// Importar el transformer v2
-import PromptTransformer from './v2';
+// Importar funciones del transformer
+import {
+    transformPrompt,
+    transformPromptToExtended,
+    transformPromptToWithStats,
+    transformPrompts
+} from './transformer';
 
-// Reexportar el transformer completo como exportación por defecto para compatibilidad
-export default PromptTransformer;
+// Importar funciones de serialización
+import {
+    deserializeParameters,
+    deserializeTags,
+    serializeParameters,
+    serializeTags,
+    toExtendedPrompt
+} from './serializers';
 
-// Exportar funciones individuales
+// Importar funciones de mapeo
+import {
+    filterPrompts,
+    mapCreatePromptDataToPrisma,
+    mapUpdatePromptDataToPrisma,
+    paginatePrompts,
+    processPrompts,
+    sortPrompts,
+    toPromptWithStats
+} from './mappers';
+
+// Exportar tipos explícitamente
+export type { TransformPromptOptions } from './transformer';
+
+// Exportar funciones del transformer
 export {
-    createPrompt, deletePrompt,
-    getPromptById, getPromptsByIds,
-    searchPrompts, updatePrompt
-} from './v2';
-
-// Exportar funciones de utilidad
-export {
-    filterPrompts, mapCreatePromptDataToPrisma,
-    mapUpdatePromptDataToPrisma, paginatePrompts,
-    processPrompts, sortPrompts, toPromptWithStats
-} from './v2/mappers';
+    transformPrompt,
+    transformPromptToExtended,
+    transformPromptToWithStats,
+    transformPrompts
+};
 
 // Exportar funciones de serialización
-export {
-    deserializeParameters, deserializeTags,
-    serializeParameters, serializeTags, toExtendedPrompt, validatePrompt
-} from './v2/serializers';
+    export {
+        deserializeParameters,
+        deserializeTags,
+        serializeParameters,
+        serializeTags,
+        toExtendedPrompt
+    };
 
-// Nota: Se mantiene compatibilidad con la versión anterior
-// mediante la exportación por defecto del objeto PromptTransformer
+// Exportar funciones de mapeo
+    export {
+        filterPrompts,
+        mapCreatePromptDataToPrisma,
+        mapUpdatePromptDataToPrisma,
+        paginatePrompts,
+        processPrompts,
+        sortPrompts,
+        toPromptWithStats
+    };
+
+// Crear y exportar un objeto con todas las funciones para mantener compatibilidad
+const PromptTransformer = {
+    // Transformer
+    transformPrompt,
+    transformPrompts,
+    transformPromptToExtended,
+    transformPromptToWithStats,
+
+    // Serialización
+    deserializeParameters,
+    deserializeTags,
+    serializeParameters,
+    serializeTags,
+    toExtendedPrompt,
+
+    // Mapeo
+    filterPrompts,
+    mapCreatePromptDataToPrisma,
+    mapUpdatePromptDataToPrisma,
+    paginatePrompts,
+    processPrompts,
+    sortPrompts,
+    toPromptWithStats
+};
+
+// Exportar todo como un objeto por defecto para mantener compatibilidad
+export default PromptTransformer;
 

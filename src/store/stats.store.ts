@@ -1,9 +1,9 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { createStoreFactory } from './store.factory';
 import type { BaseEntity } from './types';
 
-const statsLogger = serverLogger.withContext('StatsStore');
+const statsLogger = clientLogger.withContext('StatsStore');
 
 // Interfaces existentes
 interface FolderStat {

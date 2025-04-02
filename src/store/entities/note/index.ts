@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 
 import { VERSIONING } from '@/lib/constants';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 import { createCoreSlice } from './slices/core';
 import { createFiltersSlice } from './slices/filters';
@@ -11,7 +11,7 @@ import { createSelectionSlice } from './slices/selection';
 import { createUISlice } from './slices/ui';
 import type { NoteStore } from './types';
 
-const storeLogger = serverLogger.withContext('NoteStore');
+const storeLogger = clientLogger.withContext('NoteStore');
 
 // Combinamos todos los slices para crear el store completo
 export const useNoteStore = create<NoteStore>()(
@@ -77,3 +77,4 @@ export * from './slices/relations';
 export * from './slices/selection';
 export * from './slices/ui';
 export * from './types';
+

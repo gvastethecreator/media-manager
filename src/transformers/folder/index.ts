@@ -3,25 +3,52 @@
  * @module transformers/folder
  */
 
-// Exportar converters
-export * from './converters';
+// Importar explícitamente para evitar conflictos y controlar exportaciones
+import { mapFolderToFolder, toPrismaFolder } from './converters';
+import { mapCreateFolderDataToPrisma, mapFolderFiltersToPrisma, mapUpdateFolderDataToPrisma } from './mappers';
+import {
+    extendFolder, fromFolderComplete,
+    fromPrismaFolder,
+    generateFolderColor, generateFolderEmoji, normalizeFolderPath,
+    normalizeFolderType, parseFolderFilters, toRelatedFolder, validateFolder, withFolderStats
+} from './serializers';
+import {
+    createFolder,
+    deleteFolder,
+    getFolderById,
+    getFolderWithStats,
+    searchFolders,
+    updateFolder
+} from './service';
+import { transformFolderBase, transformFolderToExtended } from './transformer';
 
-// Exportar serializadores
-export * from './serializers';
+// --- Re-exportaciones controladas --- //
 
-// Exportar mappers
-export * from './mappers';
+// De converters.ts (excluimos toFolderComplete original)
+export { mapFolderToFolder, toPrismaFolder };
 
-// Exportar servicio
-export * from './service';
+// De serializers.ts
+    export {
+        extendFolder, fromFolderComplete,
+        fromPrismaFolder, generateFolderColor, generateFolderEmoji, normalizeFolderPath, normalizeFolderType, parseFolderFilters, toRelatedFolder, validateFolder, withFolderStats
+    };
 
-// Exportar transformador principal
-export * from './transformer';
+// De mappers.ts
+    export { mapCreateFolderDataToPrisma, mapFolderFiltersToPrisma, mapUpdateFolderDataToPrisma };
 
-/**
- * Transforma un objeto Folder de Prisma a un objeto FolderExtended
- * @param folder Carpeta de Prisma
- * @returns Objeto transformado con propiedades adicionales
- */
-export const transformFolder = toFolderExtended;
+// De service.ts - Exportar funciones individuales
+    export {
+        createFolder,
+        deleteFolder,
+        getFolderById,
+        getFolderWithStats,
+        searchFolders,
+        updateFolder
+    };
+
+// De transformer.ts (exportamos transformFolderBase como transformFolder)
+    export {
+        transformFolderBase as transformFolder,
+        transformFolderToExtended
+    };
 

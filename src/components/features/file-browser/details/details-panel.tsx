@@ -1,7 +1,6 @@
 'use client';
 
-import { updateImageStats } from '@/app/actions/images';
-import { parseMetadata } from '@/app/actions/metadata';
+import { getImageMetadataById } from '@/app/actions/metadata';
 import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -190,7 +189,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 
 			// Crear nueva promesa para la petición
 			detailsLogger.info('Solicitando metadata del servidor');
-			const metadataPromise = parseMetadata(itemId).then(result => {
+			const metadataPromise = getImageMetadataById(itemId).then(result => {
 				// Si no hay resultado del servidor pero tenemos metadata local, intentar parsearla directamente
 				if (!result && itemMetadata) {
 					detailsLogger.info('Intentando parsear metadata local directamente');
@@ -280,9 +279,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 
 					timeoutId = setTimeout(() => {
 						if (isMounted) {
-							updateImageStats(item.id, 'view').catch((err: Error) =>
-								detailsLogger.error('Error actualizando estadísticas:', err)
-							);
+							// updateStats();
 						}
 					}, 1000);
 

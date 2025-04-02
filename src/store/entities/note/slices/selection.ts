@@ -1,8 +1,8 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
-const selectionLogger = serverLogger.withContext('NoteStore:Selection');
+const selectionLogger = clientLogger.withContext('NoteStore:Selection');
 
 export interface SelectionSlice {
 	// Estado

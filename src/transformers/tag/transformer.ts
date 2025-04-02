@@ -10,10 +10,20 @@ import type {
     TagExtended,
     TagWithStats
 } from '@/types/entities/tag/types';
+import { handleTransformerError } from '@/utils/transformers/errors';
 import { extendTag } from './serializers';
 import { mapTagToComplete } from './v2/converters';
 
 const logger = new Logger('TagTransformer');
+
+/**
+ * Opciones para la transformación de tags
+ */
+export interface TransformTagOptions {
+  includeRelations?: boolean;
+  includeCount?: boolean;
+  customFields?: string[];
+}
 
 /**
  * 🏷️ Transformador principal para la entidad Tag
@@ -21,15 +31,15 @@ const logger = new Logger('TagTransformer');
  *
  * @param tag Objeto Tag a transformar (puede ser de Prisma, parcial, etc)
  * @returns Objeto TagComplete con todas las propiedades
+ * @throws Error si el tag es inválido o no se puede transformar
  */
 export function transformTag(tag: any): TagComplete {
-  try {
-    // Validar entrada
-    if (!tag || typeof tag !== 'object') {
-      logger.warn('⚠️ Intentando transformar un objeto Tag inválido:', tag);
-      throw new Error('Invalid tag object');
-    }
+  if (!tag || typeof tag !== 'object') {
+    logger.warn('⚠️ Intentando transformar un objeto Tag inválido:', tag);
+    throw new Error('Invalid tag object');
+  }
 
+  try {
     // Convertir a formato completo
     const tagComplete = mapTagToComplete(tag);
 
@@ -37,28 +47,7 @@ export function transformTag(tag: any): TagComplete {
     return extendTag(tagComplete);
   } catch (error) {
     logger.error('❌ Error transformando Tag:', error);
-    // En caso de error, devolver el objeto original con estructura mínima
-    return {
-      id: tag?.id || 'unknown',
-      name: tag?.name || 'Unknown Tag',
-      emoji: tag?.emoji || '🏷️',
-      color: tag?.color || '#3b82f6',
-      description: tag?.description || '',
-      shortcut: tag?.shortcut || null,
-      category: tag?.category || 'general',
-      featuredImage: tag?.featuredImage || null,
-      isFavorite: tag?.isFavorite || false,
-      createdAt: tag?.createdAt || new Date(),
-      updatedAt: tag?.updatedAt || new Date(),
-      images: tag?.images || [],
-      albums: tag?.albums || [],
-      _count: tag?._count || {
-        images: 0,
-        videos: 0,
-        albums: 0,
-        collections: 0
-      }
-    };
+    throw handleTransformerError(error, 'Error transformando Tag');
   }
 }
 
@@ -66,37 +55,54 @@ export function transformTag(tag: any): TagComplete {
  * 🔄 Transforma un Tag a la versión extendida para UI
  *
  * @param tag Objeto Tag a transformar
- * @param isSelected Estado de selección (opcional)
+ * @param options Opciones adicionales de transformación
  * @returns Objeto TagExtended con propiedades de UI
+ * @throws Error si hay un problema en la transformación
  */
 export function transformTagToExtended(
   tag: Tag | TagComplete,
-  isSelected = false
+  options: {
+    isSelected?: boolean;
+    isHighlighted?: boolean;
+    isEditing?: boolean;
+    isExpanded?: boolean;
+    isLoading?: boolean;
+    hasError?: boolean;
+    isDragging?: boolean;
+    isDropTarget?: boolean;
+  } = {}
 ): TagExtended {
   try {
     // Primero asegurar que tenemos un TagComplete
     const tagComplete = '_count' in tag ? tag : transformTag(tag);
 
+    // Opciones con valores por defecto
+    const {
+      isSelected = false,
+      isHighlighted = false,
+      isEditing = false,
+      isExpanded = false,
+      isLoading = false,
+      hasError = false,
+      isDragging = false,
+      isDropTarget = false
+    } = options;
+
     // Extender con propiedades de UI
     return {
       ...tagComplete,
       isSelected,
-      isLoading: false,
-      hasError: false,
-      isDragging: false,
-      isDropTarget: false
+      isHighlighted,
+      isEditing,
+      isExpanded,
+      isLoading,
+      hasError,
+      isDragging,
+      isDropTarget
     };
   } catch (error) {
     logger.error('❌ Error transformando Tag a Extended:', error);
-    // Devolver versión básica en caso de error
-    return {
-      ...tag,
-      isSelected,
-      isLoading: false,
-      hasError: true, // Marcamos como error
-      isDragging: false,
-      isDropTarget: false
-    } as TagExtended;
+    throw handleTransformerError(error, 'Error transformando Tag a Extended');
   }
 }
 
@@ -105,6 +111,7 @@ export function transformTagToExtended(
  *
  * @param tag Objeto Tag a transformar
  * @returns Objeto TagWithStats con estadísticas adicionales
+ * @throws Error si hay un problema en la transformación
  */
 export function transformTagToWithStats(
   tag: Tag | TagComplete
@@ -114,43 +121,81 @@ export function transformTagToWithStats(
     const tagComplete = '_count' in tag ? tag : transformTag(tag);
 
     // Calcular estadísticas
+    const totalImages = tagComplete._count?.images || 0;
+    const totalVideos = tagComplete._count?.videos || 0;
+    const totalAlbums = tagComplete._count?.albums || 0;
+    const totalCollections = tagComplete._count?.collections || 0;
+    const totalCharacters = tagComplete._count?.characters || 0;
+    const totalPlaces = tagComplete._count?.places || 0;
+    const totalWorldItems = tagComplete._count?.worldItems || 0;
+    const totalConcepts = tagComplete._count?.concepts || 0;
+    const totalPrompts = tagComplete._count?.prompts || 0;
+    const totalNotes = tagComplete._count?.notes || 0;
+    const totalWildcards = tagComplete._count?.wildcards || 0;
+    const totalProperties = tagComplete._count?.properties || 0;
+    const totalGroups = tagComplete._count?.groups || 0;
+
     const totalItems =
-      (tagComplete._count?.images || 0) +
-      (tagComplete._count?.videos || 0) +
-      (tagComplete._count?.albums || 0) +
-      (tagComplete._count?.collections || 0) +
-      (tagComplete._count?.characters || 0) +
-      (tagComplete._count?.places || 0);
+      totalImages +
+      totalVideos +
+      totalAlbums +
+      totalCollections +
+      totalCharacters +
+      totalPlaces +
+      totalWorldItems +
+      totalConcepts +
+      totalPrompts +
+      totalNotes +
+      totalWildcards +
+      totalProperties +
+      totalGroups;
 
     // Devolver con estadísticas
     return {
       ...tagComplete,
       stats: {
         totalItems,
-        totalImages: tagComplete._count?.images || 0,
-        totalVideos: tagComplete._count?.videos || 0,
-        totalAlbums: tagComplete._count?.albums || 0,
-        totalCollections: tagComplete._count?.collections || 0,
-        totalCharacters: tagComplete._count?.characters || 0,
-        totalPlaces: tagComplete._count?.places || 0,
+        totalImages,
+        totalVideos,
+        totalAlbums,
+        totalCollections,
+        totalCharacters,
+        totalPlaces,
+        totalWorldItems,
+        totalConcepts,
+        totalPrompts,
+        totalNotes,
+        totalWildcards,
+        totalProperties,
+        totalGroups,
         lastUsed: null // Esto podría calcularse con lógica adicional
       }
     };
   } catch (error) {
     logger.error('❌ Error transformando Tag a WithStats:', error);
-    // Devolver versión básica en caso de error
-    return {
-      ...tag,
-      stats: {
-        totalItems: 0,
-        totalImages: 0,
-        totalVideos: 0,
-        totalAlbums: 0,
-        totalCollections: 0,
-        totalCharacters: 0,
-        totalPlaces: 0,
-        lastUsed: null
-      }
-    } as TagWithStats;
+    throw handleTransformerError(error, 'Error transformando Tag a WithStats');
   }
+}
+
+/**
+ * 🔖 Transforma múltiples tags
+ * Función de utilidad para transformar arrays de tags
+ *
+ * @param tags Array de tags a transformar
+ * @returns Array de tags transformados
+ */
+export function transformTags(tags: any[]): TagComplete[] {
+  if (!Array.isArray(tags)) {
+    logger.warn('⚠️ Intentando transformar un array no válido:', tags);
+    return [];
+  }
+
+  return tags.map(tag => {
+    try {
+      return transformTag(tag);
+    } catch (error) {
+      logger.error(`❌ Error transformando tag ${tag?.id || 'desconocido'}:`, error);
+      return null;
+    }
+  }).filter((tag): tag is TagComplete => tag !== null);
 }

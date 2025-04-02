@@ -1,16 +1,16 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import {
-	createCoreSlice,
-	createExecutionSlice,
-	createFiltersSlice,
-	createRelationsSlice,
-	createUISlice,
+    createCoreSlice,
+    createExecutionSlice,
+    createFiltersSlice,
+    createRelationsSlice,
+    createUISlice,
 } from './slices';
 import type { PromptStore } from './types';
 
-const storeLogger = serverLogger.withContext('PromptStore');
+const storeLogger = clientLogger.withContext('PromptStore');
 
 /**
  * Store para la gestión de prompts combinando todas las slices

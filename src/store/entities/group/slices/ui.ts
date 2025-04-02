@@ -3,12 +3,12 @@
  * @module store/entities/group/slices/ui
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { GroupDisplayState, GroupViewMode } from '@/types/entities/group';
 import type { StateCreator } from 'zustand';
 import type { GroupState } from '../types';
 
-const groupLogger = serverLogger.withContext('GroupUI');
+const groupLogger = clientLogger.withContext('GroupUI');
 
 // Slice para estado de UI
 export interface GroupUISlice {

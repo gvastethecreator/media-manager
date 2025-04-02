@@ -9,9 +9,9 @@ import { z } from 'zod';
  * Esquema base para todas las entidades
  */
 export const BaseEntitySchema = z.object({
-  id: z.string().uuid().optional(),
+  id: z.string().cuid("El ID debe ser un CUID válido").optional(),
   emoji: z.string().optional(),
-  color: z.string().optional(),
+  color: z.string().regex(/^#([0-9a-fA-F]{3}){1,2}$/, "Color debe ser un valor hexadecimal válido (#RRGGBB o #RGB)").optional(),
   isFavorite: z.boolean().default(false),
   createdAt: z.date().or(z.string()).optional(),
   updatedAt: z.date().or(z.string()).optional(),

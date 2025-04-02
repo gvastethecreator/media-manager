@@ -1,10 +1,10 @@
 'use client';
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useEffect, useState } from 'react';
 
 // Logger específico para este componente
-const logger = serverLogger.withContext('ServerInitializer');
+const logger = clientLogger.withContext('ServerInitializer');
 
 /**
  * Componente que inicializa el servidor automáticamente

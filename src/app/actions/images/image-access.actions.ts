@@ -1,8 +1,7 @@
 'use server';
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
-import { imageService } from '@/services/image.service';
+import { imageService } from '@/services/image-service-export';
 import {
     createEntityNotFoundError,
     toServiceError,

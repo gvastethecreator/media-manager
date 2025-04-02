@@ -7,7 +7,7 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useFileManager } from '@/store/files/file-manager.store';
 import type { Collection } from '@/types/entities/collections';
@@ -16,7 +16,7 @@ import { motion } from 'motion/react';
 import { memo, useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
-const viewLogger = serverLogger.withContext('CollectionsView');
+const viewLogger = clientLogger.withContext('CollectionsView');
 
 // Definir la interfaz para colecciones con datos adicionales
 interface CollectionWithDetails extends Collection {
