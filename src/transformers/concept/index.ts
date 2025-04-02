@@ -15,82 +15,20 @@ import type {
 } from '@/types/entities/concept/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 
-// Importar directamente las funciones necesarias
 import {
-    ConceptTransformOptions,
-    deserializeTags,
-    extendConcept,
-    extendConcepts,
-    fromConceptComplete,
-    fromPrismaConcept,
-    serializeTags,
-    toConceptComplete,
-    toConceptExtendedComplete,
-    toConceptWithRelationsComplete,
-    toConceptWithRelationsExtendedComplete,
-    toConceptWithStatsComplete,
-    toExtendedConcept,
-    toPrismaConcept,
-    validateConcept
-} from './serializers';
-
-// Exportar serializadores
-export {
-    // Tipos
-    ConceptTransformOptions,
-    deserializeTags,
-    extendConcept,
-    extendConcepts,
-    fromConceptComplete,
-    // Funciones principales
-    fromPrismaConcept,
-    // Funciones de deserialización/serialización
-    serializeTags,
-    // Funciones obsoletas
-    toConceptComplete,
-    toConceptExtendedComplete,
-    toConceptWithRelationsComplete,
-    toConceptWithRelationsExtendedComplete,
-    toConceptWithStatsComplete,
-    toExtendedConcept,
-    toPrismaConcept,
-    // Funciones de validación y extensión
-    validateConcept
-};
-
-// Importar mappers
-    import {
-        filterConcepts,
-        mapCreateConceptDataToPrisma,
-        mapUpdateConceptDataToPrisma,
-        paginateConcepts,
-        processConcepts,
-        sortConcepts,
-        toCreateConceptData,
-        toRelatedConcept,
-        toSearchFilters,
-        toSearchOptions,
-        toSearchResult,
-        toUpdateConceptData
-    } from './mappers';
-
-// Exportar mappers
-export {
-    filterConcepts,
-    // Funciones obsoletas
-    mapCreateConceptDataToPrisma,
-    mapUpdateConceptDataToPrisma,
-    paginateConcepts,
-    processConcepts,
-    sortConcepts,
-    // Funciones principales
     toCreateConceptData,
-    toRelatedConcept,
-    toSearchFilters,
     toSearchOptions,
     toSearchResult,
     toUpdateConceptData
-};
+} from './mappers';
+
+// Importar funciones de serialización
+import * as serializers from './serializers';
+
+// Re-exportar todo desde los módulos principales
+export * from './mappers';
+export * from './serializers';
+export * from './transformer';
 
 const logger = serverLogger.withContext('ConceptTransformer');
 
@@ -109,13 +47,14 @@ export async function searchConcepts(options: ConceptSearchOptions = {}): Promis
         ]);
 
         // Deserializar resultados
-        const concepts = items.map(item => fromPrismaConcept(item, {
+        const concepts = items.map(item => serializers.fromPrismaConcept(item, {
             includeStats: options.includeCount,
             includeRelations: options.includeRelations,
             includeUI: true
         }));
 
-        return toSearchResult(concepts, options, total);
+        // Usar toSearchResult con los parámetros correctos
+        return toSearchResult(concepts, total, options);
     } catch (error) {
         throw handleTransformerError(error);
     }
@@ -129,19 +68,6 @@ export async function getConceptById(id: string): Promise<ConceptComplete | null
         const concept = await prisma.concept.findUnique({
             where: { id },
             include: {
-                images: true,
-                videos: true,
-                albums: true,
-                collections: true,
-                tagEntities: true,
-                characters: true,
-                places: true,
-                worldItems: true,
-                prompts: true,
-                notes: true,
-                wildcards: true,
-                properties: true,
-                groups: true,
                 _count: true,
             },
         });
@@ -150,8 +76,8 @@ export async function getConceptById(id: string): Promise<ConceptComplete | null
             return null;
         }
 
-        return fromPrismaConcept(concept, {
-            includeRelations: true,
+        return serializers.fromPrismaConcept(concept, {
+            includeRelations: false,
             includeStats: true,
             includeUI: true
         });
@@ -166,7 +92,7 @@ export async function getConceptById(id: string): Promise<ConceptComplete | null
 export async function createConcept(data: ConceptCreateInput): Promise<ConceptComplete> {
     try {
         // Validar datos de entrada
-        validateConcept(data);
+        serializers.validateConcept(data);
 
         // Mapear datos a formato Prisma
         const createData = toCreateConceptData(data);
@@ -175,25 +101,12 @@ export async function createConcept(data: ConceptCreateInput): Promise<ConceptCo
         const concept = await prisma.concept.create({
             data: createData,
             include: {
-                images: true,
-                videos: true,
-                albums: true,
-                collections: true,
-                tagEntities: true,
-                characters: true,
-                places: true,
-                worldItems: true,
-                prompts: true,
-                notes: true,
-                wildcards: true,
-                properties: true,
-                groups: true,
                 _count: true,
             },
         });
 
-        return fromPrismaConcept(concept, {
-            includeRelations: true,
+        return serializers.fromPrismaConcept(concept, {
+            includeRelations: false,
             includeStats: true,
             includeUI: true
         });
@@ -208,7 +121,7 @@ export async function createConcept(data: ConceptCreateInput): Promise<ConceptCo
 export async function updateConcept(id: string, data: ConceptUpdateInput): Promise<ConceptComplete> {
     try {
         // Validar datos de entrada
-        validateConcept(data);
+        serializers.validateConcept(data);
 
         // Mapear datos a formato Prisma
         const updateData = toUpdateConceptData(data);
@@ -218,25 +131,12 @@ export async function updateConcept(id: string, data: ConceptUpdateInput): Promi
             where: { id },
             data: updateData,
             include: {
-                images: true,
-                videos: true,
-                albums: true,
-                collections: true,
-                tagEntities: true,
-                characters: true,
-                places: true,
-                worldItems: true,
-                prompts: true,
-                notes: true,
-                wildcards: true,
-                properties: true,
-                groups: true,
                 _count: true,
             },
         });
 
-        return fromPrismaConcept(concept, {
-            includeRelations: true,
+        return serializers.fromPrismaConcept(concept, {
+            includeRelations: false,
             includeStats: true,
             includeUI: true
         });
@@ -268,25 +168,12 @@ export async function getConceptsByIds(ids: string[]): Promise<ConceptComplete[]
         const concepts = await prisma.concept.findMany({
             where: { id: { in: ids } },
             include: {
-                images: true,
-                videos: true,
-                albums: true,
-                collections: true,
-                tagEntities: true,
-                characters: true,
-                places: true,
-                worldItems: true,
-                prompts: true,
-                notes: true,
-                wildcards: true,
-                properties: true,
-                groups: true,
                 _count: true,
             },
         });
 
-        return concepts.map(concept => fromPrismaConcept(concept, {
-            includeRelations: true,
+        return concepts.map(concept => serializers.fromPrismaConcept(concept, {
+            includeRelations: false,
             includeStats: true,
             includeUI: true
         }));
@@ -308,8 +195,6 @@ export function parseConceptFilters(filtersStr: string): ConceptFilters {
 }
 
 // Objeto de compatibilidad para mantener la API pública actual
-// Este objeto se mantendrá para compatibilidad con código existente
-// pero se recomienda usar las funciones exportadas directamente
 export default {
     // Funciones principales
     searchConcepts,
@@ -321,19 +206,17 @@ export default {
     parseConceptFilters,
 
     // Serializers
-    fromPrismaConcept,
-    toPrismaConcept,
-    serializeTags,
-    deserializeTags,
-    validateConcept,
-    extendConcept,
+    fromPrismaConcept: serializers.fromPrismaConcept,
+    toPrismaConcept: serializers.toPrismaConcept,
+    serializeTags: serializers.serializeTags,
+    deserializeTags: serializers.deserializeTags,
+    validateConcept: serializers.validateConcept,
+    extendConcept: serializers.extendConcept,
 
     // Mappers
     toCreateConceptData,
     toUpdateConceptData,
     toSearchOptions,
-    toSearchFilters,
-    toSearchResult,
-    toRelatedConcept
+    toSearchResult
 };
 

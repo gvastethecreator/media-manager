@@ -17,17 +17,29 @@ const logger = serverLogger.withContext('QueueActions:stats');
 const CACHE_REVALIDATE_SECONDS = 30;
 
 /**
- * Error personalizado para estadísticas de cola
+ * Interfaz para errores de estadísticas de cola
  */
-class QueueStatsError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'QueueStatsError';
-  }
+export interface QueueStatsErrorData {
+  name: string;
+  message: string;
+  code?: string;
+  cause?: unknown;
+}
+
+/**
+ * Función para crear errores de estadísticas de cola (enfoque funcional)
+ */
+function createQueueStatsError(
+  message: string,
+  code?: string,
+  cause?: unknown
+): QueueStatsErrorData {
+  return {
+    name: 'QueueStatsError',
+    message,
+    code,
+    cause
+  };
 }
 
 /**
@@ -78,7 +90,7 @@ export async function getQueueStatsByQueue(queue: string): Promise<Record<string
         return stats;
       } catch (error) {
         logger.error('❌ Error al obtener estadísticas de cola:', error);
-        throw new QueueStatsError('No se pudieron obtener las estadísticas de la cola', 'QUEUE_STATS_FAILED', error);
+        throw createQueueStatsError('No se pudieron obtener las estadísticas de la cola', 'QUEUE_STATS_FAILED', error);
       }
     },
     ['queue-stats', queue],
@@ -154,7 +166,7 @@ export async function getQueuePerformanceStats(): Promise<{
         return stats;
       } catch (error) {
         logger.error('❌ Error al obtener estadísticas de rendimiento:', error);
-        throw new QueueStatsError('No se pudieron obtener las estadísticas de rendimiento', 'PERFORMANCE_STATS_FAILED', error);
+        throw createQueueStatsError('No se pudieron obtener las estadísticas de rendimiento', 'PERFORMANCE_STATS_FAILED', error);
       }
     },
     ['queue-performance-stats'],

@@ -8,8 +8,17 @@
 import { scanFolder } from '@/lib/folder-scanner';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { type ProcessStatus } from '@/types/process';
+import { formatBytes } from '@/lib/utils/format.utils';
 import { revalidatePath } from 'next/cache';
+import PQueue from 'p-queue';
+import {
+    FOLDER_ERROR_CODES,
+    FolderResponse,
+    IndexOptions,
+    ProcessStatus,
+    ReindexOptions,
+    createFolderError
+} from './folder-types';
 
 // Logger for process actions
 const folderLogger = serverLogger.withContext('FolderProcessActions');
@@ -23,101 +32,300 @@ const REVALIDATE_PATHS = [
   '/api/images',
 ];
 
+// Configuración predeterminada para procesamiento por lotes
+const DEFAULT_BATCH_SIZE = 50;
+const DEFAULT_MAX_CONCURRENT = 3;
+
 /**
  * Revalidates all folder-related paths
  */
 async function revalidateFolderPaths() {
-  folderLogger.info('🔄 Revalidating folder paths');
+  folderLogger.info('🔄 Revalidando rutas de carpetas');
   for (const path of REVALIDATE_PATHS) {
     revalidatePath(path);
   }
 }
 
 /**
- * Custom error for folder processing operations
+ * Crear un error de procesamiento de carpetas (enfoque funcional)
  */
-class FolderProcessError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'FolderProcessError';
+function createProcessError(
+  message: string,
+  code: string = FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
+  cause?: unknown
+) {
+  return createFolderError(
+    message,
+    code as FOLDER_ERROR_CODES,
+    cause instanceof Error ? cause.stack : undefined,
+    undefined,
+    cause
+  );
+}
+
+/**
+ * Procesa un lote de imágenes para una carpeta
+ * @param folderId ID de la carpeta
+ * @param imagePaths Rutas de imágenes a procesar
+ * @returns Resultado del procesamiento
+ */
+async function processImageBatch(folderId: string, imagePaths: string[]): Promise<{processed: number, errors: number}> {
+  let processed = 0;
+  let errors = 0;
+
+  // Crear transacción para operaciones CRUD masivas
+  const operations = imagePaths.map(imagePath => {
+    return prisma.image.upsert({
+      where: { path: imagePath },
+      create: {
+        path: imagePath,
+        name: imagePath.split('/').pop() || '',
+        folderId,
+        status: 'PENDING',
+      },
+      update: {
+        folderId,
+        status: 'PENDING',
+      },
+    }).then(() => processed++)
+      .catch(() => errors++);
+  });
+
+  // Ejecutar todas las operaciones concurrentemente
+  await Promise.allSettled(operations);
+
+  return { processed, errors };
+}
+
+/**
+ * Divide un array en lotes del tamaño especificado
+ * @param array Array a dividir
+ * @param batchSize Tamaño de cada lote
+ * @returns Array de lotes
+ */
+function chunkArray<T>(array: T[], batchSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += batchSize) {
+    chunks.push(array.slice(i, i + batchSize));
   }
+  return chunks;
 }
 
 /**
  * Indexes a folder and updates its content in the database
+ * @param id ID de la carpeta
+ * @param options Opciones de indexación
  */
-export async function indexFolder(id: string): Promise<ProcessStatus> {
-  try {
-    folderLogger.info('📂 Starting folder indexing:', id);
+export async function indexFolder(id: string, options?: IndexOptions): Promise<ProcessStatus> {
+  // Configuración por defecto
+  const batchSize = options?.batchSize || DEFAULT_BATCH_SIZE;
+  const maxConcurrent = options?.maxConcurrent || DEFAULT_MAX_CONCURRENT;
+  const onProgress = options?.onProgress;
 
-    // Get folder
+  try {
+    folderLogger.info('📂 Iniciando indexación de carpeta:', id);
+
+    // Obtener carpeta
     const folder = await prisma.folder.findUnique({
       where: { id },
     });
 
     if (!folder) {
-      throw new FolderProcessError('Folder not found', 'FOLDER_NOT_FOUND');
+      throw createProcessError('Carpeta no encontrada', FOLDER_ERROR_CODES.NOT_FOUND);
     }
 
-    // Scan folder contents
-    const scanResult = await scanFolder(folder.path);
+    // Escanear contenido de carpeta
+    folderLogger.info('🔍 Escaneando carpeta:', folder.path);
+    const scanStart = Date.now();
+    const scanResult = await scanFolder(folder.path, {
+      recursive: options?.recursive ?? true,
+      includeHidden: options?.includeHidden ?? false
+    });
+    const scanDuration = Date.now() - scanStart;
 
-    // Update folder with scan results
+    folderLogger.info(`✅ Carpeta escaneada en ${scanDuration}ms:`, {
+      totalFiles: scanResult.totalFiles,
+      totalImages: scanResult.images.length
+    });
+
+    // Notificar progreso después de escaneo
+    if (onProgress) {
+      onProgress({
+        status: 'Carpeta escaneada, procesando imágenes...',
+        progress: 10,
+        phase: 'scan',
+        filesProcessed: 0,
+        totalFiles: scanResult.images.length,
+        processingSpeed: scanResult.totalFiles / (scanDuration / 1000)
+      });
+    }
+
+    // Actualizar carpeta con resultados del escaneo
     await prisma.folder.update({
       where: { id },
       data: {
         lastIndexed: new Date(),
         totalFiles: scanResult.totalFiles,
         totalSize: scanResult.totalSize,
+        status: 'INDEXING',
+      },
+    });
+
+    // Dividir imágenes en lotes para procesamiento
+    const imageChunks = chunkArray(scanResult.images, batchSize);
+    let totalProcessed = 0;
+    let totalErrors = 0;
+
+    // Procesar lotes de imágenes en paralelo con límite de concurrencia
+    folderLogger.info(`🖼️ Procesando ${scanResult.images.length} imágenes en ${imageChunks.length} lotes`);
+    const startTime = Date.now();
+
+    // Para control de concurrencia
+    let activePromises = 0;
+    let nextChunkIndex = 0;
+    const results: {processed: number, errors: number}[] = [];
+
+    // Función para lanzar el próximo lote
+    const launchNextBatch = async () => {
+      if (nextChunkIndex >= imageChunks.length) return;
+
+      const chunkIndex = nextChunkIndex++;
+      const chunk = imageChunks[chunkIndex];
+      activePromises++;
+
+      try {
+        // Notificar progreso de procesamiento
+        if (onProgress) {
+          const elapsed = Date.now() - startTime;
+          const processedSoFar = totalProcessed;
+          const speed = elapsed > 0 ? (processedSoFar / (elapsed / 1000)) : 0;
+          const remaining = scanResult.images.length - processedSoFar;
+          const estimatedTimeRemaining = speed > 0 ? remaining / speed : 0;
+
+          onProgress({
+            status: `Procesando lote ${chunkIndex + 1}/${imageChunks.length}...`,
+            progress: Math.round((totalProcessed / scanResult.images.length) * 90) + 10, // 10-100%
+            phase: 'index',
+            filesProcessed: totalProcessed,
+            totalFiles: scanResult.images.length,
+            processingSpeed: speed,
+            estimatedTimeRemaining: estimatedTimeRemaining
+          });
+        }
+
+        // Procesar el lote actual
+        folderLogger.debug(`Procesando lote ${chunkIndex + 1}/${imageChunks.length} (${chunk.length} imágenes)`);
+        const result = await processImageBatch(folder.id, chunk);
+
+        // Actualizar contadores
+        totalProcessed += result.processed;
+        totalErrors += result.errors;
+        results.push(result);
+
+      } catch (error) {
+        folderLogger.error(`Error procesando lote ${chunkIndex + 1}:`, error);
+        totalErrors += chunk.length;
+      } finally {
+        activePromises--;
+        // Verificar si podemos lanzar más lotes
+        if (activePromises < maxConcurrent) {
+          await launchNextBatch();
+        }
+      }
+    };
+
+    // Iniciar procesamiento paralelo con límite de concurrencia
+    const initialBatches = Math.min(maxConcurrent, imageChunks.length);
+    const initialPromises = [];
+
+    for (let i = 0; i < initialBatches; i++) {
+      initialPromises.push(launchNextBatch());
+    }
+
+    // Esperar a que todos los lotes terminen
+    await Promise.all(initialPromises);
+
+    // Esperar a que se completen todos los lotes restantes
+    while (activePromises > 0 || nextChunkIndex < imageChunks.length) {
+      if (activePromises < maxConcurrent && nextChunkIndex < imageChunks.length) {
+        await launchNextBatch();
+      } else {
+        // Pequeña pausa para evitar CPU spinning
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+    }
+
+    // Actualizar estado final de la carpeta
+    await prisma.folder.update({
+      where: { id },
+      data: {
         status: 'INDEXED',
       },
     });
 
-    // Process found images
-    for (const imagePath of scanResult.images) {
-      await prisma.image.upsert({
-        where: { path: imagePath },
-        create: {
-          path: imagePath,
-          name: imagePath.split('/').pop() || '',
-          folderId: folder.id,
-          status: 'PENDING',
-        },
-        update: {
-          folderId: folder.id,
-          status: 'PENDING',
-        },
-      });
-    }
+    // Calcular estadísticas finales
+    const totalDuration = Date.now() - startTime;
+    const processingSpeed = totalProcessed / (totalDuration / 1000);
 
     await revalidateFolderPaths();
 
-    folderLogger.info('✅ Folder indexed successfully:', {
+    folderLogger.info('✅ Indexación de carpeta completada con éxito:', {
       id,
       totalFiles: scanResult.totalFiles,
       totalImages: scanResult.images.length,
+      imagesProcessed: totalProcessed,
+      errors: totalErrors,
+      duration: `${(totalDuration / 1000).toFixed(2)}s`,
+      speed: `${processingSpeed.toFixed(2)} img/s`
     });
+
+    // Notificar finalización
+    if (onProgress) {
+      onProgress({
+        status: 'Indexación completada',
+        progress: 100,
+        phase: 'complete',
+        filesProcessed: totalProcessed,
+        totalFiles: scanResult.images.length,
+        processingSpeed
+      });
+    }
 
     return {
       success: true,
-      message: `Folder indexed successfully. Found ${scanResult.totalFiles} files and ${scanResult.images.length} images.`,
+      message: `Carpeta indexada con éxito. Encontrados ${scanResult.totalFiles} archivos y procesadas ${totalProcessed} imágenes.`,
+      filesProcessed: totalProcessed,
+      totalFiles: scanResult.images.length,
+      totalErrors: totalErrors,
+      processingSpeed
     };
   } catch (error) {
-    folderLogger.error('❌ Error indexing folder:', error);
-    throw new FolderProcessError('Failed to index folder', 'INDEX_FAILED', error);
+    folderLogger.error('❌ Error indexando carpeta:', error);
+
+    // Notificar error
+    if (onProgress) {
+      onProgress({
+        status: 'Error en indexación',
+        progress: 0,
+        phase: 'error',
+        error: error instanceof Error ? error.message : 'Error desconocido'
+      });
+    }
+
+    throw createProcessError(
+      'Error al indexar carpeta',
+      error instanceof Error ? error.message : FOLDER_ERROR_CODES.INDEXING_FAILED,
+      error
+    );
   }
 }
 
 /**
  * Reindexes all folders marked for auto-reindexing
  */
-export async function reindexAutoFolders(): Promise<ProcessStatus> {
+export async function reindexAutoFolders(options?: IndexOptions): Promise<ProcessStatus> {
   try {
-    folderLogger.info('🔄 Starting auto-reindex of folders');
+    folderLogger.info('🔄 Iniciando reindexación automática de carpetas');
 
     const folders = await prisma.folder.findMany({
       where: {
@@ -131,21 +339,32 @@ export async function reindexAutoFolders(): Promise<ProcessStatus> {
 
     for (const folder of folders) {
       try {
-        await indexFolder(folder.id);
+        await indexFolder(folder.id, options);
         totalSuccess++;
       } catch (error) {
         totalErrors++;
-        folderLogger.error('❌ Error reindexing folder:', {
+        folderLogger.error('❌ Error reindexando carpeta:', {
           folderId: folder.id,
           error,
         });
       }
       totalProcessed++;
+
+      // Notificar progreso si hay callback
+      if (options?.onProgress) {
+        options.onProgress({
+          status: `Reindexando carpetas (${totalProcessed}/${folders.length})`,
+          progress: Math.round((totalProcessed / folders.length) * 100),
+          phase: 'index',
+          filesProcessed: totalProcessed,
+          totalFiles: folders.length
+        });
+      }
     }
 
     await revalidateFolderPaths();
 
-    folderLogger.info('✅ Auto-reindex completed:', {
+    folderLogger.info('✅ Reindexación automática completada:', {
       totalProcessed,
       totalSuccess,
       totalErrors,
@@ -153,11 +372,11 @@ export async function reindexAutoFolders(): Promise<ProcessStatus> {
 
     return {
       success: true,
-      message: `Auto-reindex completed. Processed ${totalProcessed} folders: ${totalSuccess} successful, ${totalErrors} failed.`,
+      message: `Reindexación completada. Procesadas ${totalProcessed} carpetas: ${totalSuccess} exitosas, ${totalErrors} con errores.`,
     };
   } catch (error) {
-    folderLogger.error('❌ Error during auto-reindex:', error);
-    throw new FolderProcessError('Failed to auto-reindex folders', 'AUTO_REINDEX_FAILED', error);
+    folderLogger.error('❌ Error durante la reindexación automática:', error);
+    throw createProcessError('Error en reindexación automática', FOLDER_ERROR_CODES.INDEXING_FAILED, error);
   }
 }
 
@@ -166,11 +385,11 @@ export async function reindexAutoFolders(): Promise<ProcessStatus> {
  */
 export async function validateFolderPath(path: string): Promise<ProcessStatus> {
   try {
-    folderLogger.info('🔍 Validating folder path:', path);
+    folderLogger.info('🔍 Validando ruta de carpeta:', path);
 
     const scanResult = await scanFolder(path);
 
-    folderLogger.info('✅ Folder path validated:', {
+    folderLogger.info('✅ Ruta de carpeta validada:', {
       path,
       accessible: true,
       totalFiles: scanResult.totalFiles,
@@ -178,11 +397,11 @@ export async function validateFolderPath(path: string): Promise<ProcessStatus> {
 
     return {
       success: true,
-      message: `Folder is accessible and contains ${scanResult.totalFiles} files.`,
+      message: `La carpeta es accesible y contiene ${scanResult.totalFiles} archivos.`,
     };
   } catch (error) {
-    folderLogger.error('❌ Error validating folder path:', error);
-    throw new FolderProcessError('Failed to validate folder path', 'VALIDATION_FAILED', error);
+    folderLogger.error('❌ Error validando ruta de carpeta:', error);
+    throw createProcessError('Error al validar ruta de carpeta', FOLDER_ERROR_CODES.PATH_INVALID, error);
   }
 }
 
@@ -191,9 +410,9 @@ export async function validateFolderPath(path: string): Promise<ProcessStatus> {
  */
 export async function repairFolder(id: string): Promise<ProcessStatus> {
   try {
-    folderLogger.info('🔧 Starting folder repair:', id);
+    folderLogger.info('🔧 Iniciando reparación de carpeta:', id);
 
-    // Get folder
+    // Obtener carpeta
     const folder = await prisma.folder.findUnique({
       where: { id },
       include: {
@@ -202,13 +421,13 @@ export async function repairFolder(id: string): Promise<ProcessStatus> {
     });
 
     if (!folder) {
-      throw new FolderProcessError('Folder not found', 'FOLDER_NOT_FOUND');
+      throw createProcessError('Carpeta no encontrada', FOLDER_ERROR_CODES.NOT_FOUND);
     }
 
-    // Scan folder contents
+    // Escanear contenido de carpeta
     const scanResult = await scanFolder(folder.path);
 
-    // Update folder statistics
+    // Actualizar estadísticas de carpeta
     await prisma.folder.update({
       where: { id },
       data: {
@@ -218,23 +437,28 @@ export async function repairFolder(id: string): Promise<ProcessStatus> {
       },
     });
 
-    // Remove images that no longer exist
+    // Eliminar imágenes que ya no existen
     const existingPaths = new Set(scanResult.images);
     const removedImages = folder.images.filter(img => !existingPaths.has(img.path));
 
     if (removedImages.length > 0) {
-      await prisma.image.deleteMany({
-        where: {
-          id: {
-            in: removedImages.map(img => img.id),
+      // Dividir en lotes para mejor rendimiento en grandes colecciones
+      const deleteChunks = chunkArray(removedImages.map(img => img.id), DEFAULT_BATCH_SIZE);
+
+      for (const chunk of deleteChunks) {
+        await prisma.image.deleteMany({
+          where: {
+            id: {
+              in: chunk,
+            },
           },
-        },
-      });
+        });
+      }
     }
 
     await revalidateFolderPaths();
 
-    folderLogger.info('✅ Folder repaired successfully:', {
+    folderLogger.info('✅ Reparación de carpeta completada:', {
       id,
       removedImages: removedImages.length,
       updatedStats: {
@@ -245,10 +469,217 @@ export async function repairFolder(id: string): Promise<ProcessStatus> {
 
     return {
       success: true,
-      message: `Folder repaired successfully. Removed ${removedImages.length} invalid images and updated statistics.`,
+      message: `Reparación completada. Eliminadas ${removedImages.length} imágenes inválidas y actualizadas estadísticas.`,
     };
   } catch (error) {
-    folderLogger.error('❌ Error repairing folder:', error);
-    throw new FolderProcessError('Failed to repair folder', 'REPAIR_FAILED', error);
+    folderLogger.error('❌ Error reparando carpeta:', error);
+    throw createProcessError('Error al reparar carpeta', FOLDER_ERROR_CODES.UNEXPECTED_ERROR, error);
+  }
+}
+
+/**
+ * Reindexes a folder, with additional options for thorough reindexing
+ * @param id ID of the folder to reindex
+ * @param options Additional options for reindexing
+ */
+export async function reindexFolder(id: string, options?: ReindexOptions): Promise<FolderResponse> {
+  try {
+    folderLogger.info('🔄 Iniciando reindexación de carpeta:', id);
+
+    // Obtener carpeta
+    const folder = await prisma.folder.findUnique({
+      where: { id },
+      include: {
+        images: options?.deleteOrphans,
+      },
+    });
+
+    if (!folder) {
+      throw createProcessError('Carpeta no encontrada', FOLDER_ERROR_CODES.NOT_FOUND);
+    }
+
+    folderLogger.info('📂 Reindexando carpeta:', {
+      id,
+      path: folder.path,
+      options: {
+        deleteOrphans: options?.deleteOrphans || false,
+        forceScan: options?.forceScan || false,
+        processMetadata: options?.processMetadata || false,
+      },
+    });
+
+    // Notificar inicio del proceso
+    if (options?.onProgress) {
+      options.onProgress({
+        status: 'Iniciando reindexación',
+        progress: 0,
+        folderId: id,
+        phase: 'prepare',
+      });
+    }
+
+    // Escanear carpeta
+    const scanResult = await scanFolder(folder.path, {
+      includeHidden: options?.includeHidden,
+      recursive: options?.recursive,
+    });
+
+    // Notificar que terminó el escaneo
+    if (options?.onProgress) {
+      options.onProgress({
+        status: 'Escaneo completado',
+        progress: 10,
+        folderId: id,
+        phase: 'scan',
+        totalFiles: scanResult.totalFiles,
+      });
+    }
+
+    // Si se solicita eliminación de huérfanos
+    if (options?.deleteOrphans && folder.images) {
+      const existingPaths = new Set(scanResult.images);
+      const orphanedImages = folder.images.filter(img => !existingPaths.has(img.path));
+
+      if (orphanedImages.length > 0) {
+        folderLogger.info('🗑️ Eliminando imágenes huérfanas:', {
+          count: orphanedImages.length,
+          folderId: id,
+        });
+
+        // Notificar limpieza
+        if (options.onProgress) {
+          options.onProgress({
+            status: `Eliminando ${orphanedImages.length} imágenes huérfanas`,
+            progress: 20,
+            folderId: id,
+            phase: 'cleanup',
+          });
+        }
+
+        // Eliminar en lotes para mejor rendimiento
+        const deleteChunks = chunkArray(orphanedImages.map(img => img.id), options.batchSize || DEFAULT_BATCH_SIZE);
+
+        for (const [index, chunk] of deleteChunks.entries()) {
+          await prisma.image.deleteMany({
+            where: {
+              id: {
+                in: chunk,
+              },
+            },
+          });
+
+          // Actualizar progreso de limpieza
+          if (options.onProgress) {
+            const cleanupProgress = 20 + Math.floor((index / deleteChunks.length) * 10);
+            options.onProgress({
+              status: `Limpieza en progreso (${index + 1}/${deleteChunks.length})`,
+              progress: cleanupProgress,
+              folderId: id,
+              phase: 'cleanup',
+            });
+          }
+        }
+      }
+    }
+
+    // Procesar imágenes encontradas
+    const imagePaths = Array.isArray(scanResult.images) ? scanResult.images : [];
+    const batchSize = options?.batchSize || DEFAULT_BATCH_SIZE;
+    const batches = chunkArray(imagePaths, batchSize);
+
+    // Configurar procesamiento concurrente
+    const maxConcurrent = options?.maxConcurrent || 3;
+    let completedBatches = 0;
+    let totalProcessed = 0;
+    let totalErrors = 0;
+
+    folderLogger.info('🔄 Iniciando procesamiento de imágenes:', {
+      totalImages: imagePaths.length,
+      batches: batches.length,
+      batchSize,
+      maxConcurrent,
+    });
+
+    // Procesar lotes en paralelo con límite de concurrencia
+    const processBatch = async (batch: string[]): Promise<void> => {
+      const result = await processImageBatch(id, batch);
+      totalProcessed += result.processed;
+      totalErrors += result.errors;
+      completedBatches++;
+
+      // Calcular progreso y notificar
+      if (options?.onProgress) {
+        const indexProgress = 30 + Math.floor((completedBatches / batches.length) * 70);
+        options.onProgress({
+          status: `Procesando imágenes (${completedBatches}/${batches.length} lotes)`,
+          progress: indexProgress,
+          folderId: id,
+          phase: 'index',
+          filesProcessed: totalProcessed,
+          totalFiles: imagePaths.length,
+          errors: result.errors > 0 ? [{
+            file: 'batch',
+            error: `${result.errors} errores en este lote`,
+            timestamp: Date.now()
+          }] : undefined,
+        });
+      }
+    };
+
+    // Procesar lotes con control de concurrencia
+    const queue = new PQueue({ concurrency: maxConcurrent });
+    await Promise.all(batches.map(batch => queue.add(() => processBatch(batch))));
+
+    // Actualizar estadísticas de la carpeta
+    await prisma.folder.update({
+      where: { id },
+      data: {
+        totalFiles: scanResult.totalFiles,
+        totalSize: scanResult.totalSize,
+        lastIndexed: new Date(),
+      },
+    });
+
+    await revalidateFolderPaths();
+
+    // Notificar finalización
+    const result: FolderResponse = {
+      id: id,
+      name: folder.name,
+      path: folder.path,
+      totalFiles: scanResult.totalFiles,
+      totalSize: scanResult.totalSize,
+      lastIndexed: new Date().toISOString(),
+      createdAt: folder.createdAt.toISOString(),
+      updatedAt: new Date().toISOString(),
+      success: true,
+      stats: {
+        processed: totalProcessed,
+        total: scanResult.totalFiles,
+        totalSize: scanResult.totalSize
+      }
+    };
+
+    folderLogger.info('✅ Reindexación completada:', {
+      id,
+      path: folder.path,
+      processed: totalProcessed,
+      errors: totalErrors,
+      totalFiles: scanResult.totalFiles,
+      totalSize: formatBytes(scanResult.totalSize),
+    });
+
+    return result;
+  } catch (error) {
+    folderLogger.error('❌ Error en reindexación de carpeta:', {
+      id,
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+
+    throw createProcessError(
+      'Error al reindexar carpeta',
+      error instanceof Error ? error.message : FOLDER_ERROR_CODES.INDEXING_FAILED,
+      error
+    );
   }
 }

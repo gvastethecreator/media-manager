@@ -12,6 +12,13 @@ export {
     serverLogger
 } from './server-logger';
 
+// Exportar el logger del cliente para componentes del lado del cliente
+export {
+    ClientLogger,
+    clientLogger,
+    createClientServiceLogger
+} from './client-logger';
+
 // Exportar configuración y tipos
 export {
     LogLevelSchema,

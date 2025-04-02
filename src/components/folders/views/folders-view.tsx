@@ -1,23 +1,23 @@
 'use client';
 
-import { getFolders } from '@/app/actions/folders/folder-crud.actions';
 import { FolderCard } from '@/components/cards/folder-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { folderService } from '@/services/folder-service-export';
 import { useFileManager } from '@/store/files/file-manager.store';
 import type { Folder } from '@/types/entities/folders';
-import { FolderIcon, XCircle, RefreshCcw, DatabaseIcon } from 'lucide-react';
+import { DatabaseIcon, FolderIcon, RefreshCcw, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../../views/types';
-import { Button, buttonVariants } from '@/components/ui/button';
-import Link from 'next/link';
 
-const viewLogger = serverLogger.withContext('FoldersView');
+const viewLogger = clientLogger.withContext('FoldersView');
 
 // Actualizar la definición de tipo para Folder para incluir _count
 type FolderWithCount = Folder & {
@@ -61,12 +61,15 @@ export function FoldersView(_props: ViewProps) {
 
 	// Usar el nuevo hook de eventos optimistas del cliente
 	const [optimisticFolders, _addEvent] = clientEvents.useEvents<Folder[]>(folders);
+	// Mantener un contador de reintentos
+	const [retryCount, setRetryCount] = useState(0);
+	const maxRetries = 3;
 
 	const loadFolders = useCallback(async () => {
 		try {
-			setIsLoading(true);
+			setIsLoading(true); // Siempre poner en loading al iniciar la carga/reintento
 			viewLogger.info('🔄 Cargando carpetas...');
-			const data = await getFolders();
+			const data = await folderService.getFolders();
 			const transformedData = data.map((folderData: any) => {
 				return {
 					...folderData,
@@ -79,19 +82,54 @@ export function FoldersView(_props: ViewProps) {
 			});
 
 			setFolders(transformedData);
+			setRetryCount(0); // Reiniciar el contador de reintentos si la carga es exitosa
+			setError(null); // Limpiar cualquier error previo
 			viewLogger.info(`✅ ${data.length} carpetas cargadas`);
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+
+			// Gestionar los casos de errores de concurrencia o transitorios
+			const isTransientError =
+				(errorMessage.includes('Operación') && errorMessage.includes('en progreso')) ||
+				errorMessage.includes('ECONNREFUSED') ||
+				errorMessage.includes('timeout') ||
+				errorMessage.includes('network');
+
+			if (isTransientError && retryCount < maxRetries) {
+				// Calcular retraso de reintento exponencial (300ms, 900ms, 2700ms)
+				const retryDelay = 300 * (3 ** retryCount);
+				viewLogger.debug(`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...`);
+
+				// Incrementar contador de reintentos y programar un nuevo intento
+				setRetryCount(prev => prev + 1);
+				setTimeout(() => {
+					loadFolders();
+				}, retryDelay);
+				return;
+			}
+
+			// Si hemos alcanzado el máximo de reintentos o no es un error transitorio, mostrar el error
+			if (retryCount >= maxRetries) {
+				viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`);
+			}
+
 			viewLogger.error('❌ Error cargando carpetas:', error);
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
 		}
-	}, []);
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- isLoading se maneja internamente, retryCount es la única dependencia externa necesaria para la lógica de reintento.
+	}, [retryCount]);
 
 	useEffect(() => {
+		viewLogger.debug('🟢 FoldersView Montado'); // <-- Log de montaje
 		loadFolders();
-	}, [loadFolders]);
+
+		return () => {
+			viewLogger.debug('🔴 FoldersView Desmontado'); // <-- Log de desmontaje
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- Solo queremos ejecutar esto al montar
+	}, []); // <-- Cambiar dependencia a array vacío
 
 	const handleFolderClick = useCallback(
 		async (folder: FolderWithCount) => {

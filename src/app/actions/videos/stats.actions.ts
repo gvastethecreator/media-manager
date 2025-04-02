@@ -4,7 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { VideoService } from '@/services/video.service';
+import { videoService } from '@/services/video-service-export';
 import type { VideoStats } from '@/types/entities/video/types';
 
 // Logger específico para las acciones
@@ -17,7 +17,7 @@ const log = serverLogger.withContext('VideoActions:stats');
 export async function getVideoStats(): Promise<VideoStats> {
   try {
     log.info('📊 Obteniendo estadísticas generales de videos');
-    const stats = await VideoService.getVideoStats();
+    const stats = await videoService.getVideoStats();
     log.info('✅ Estadísticas de videos obtenidas', { total: stats.total });
     return stats;
   } catch (error) {

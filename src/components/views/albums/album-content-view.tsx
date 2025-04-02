@@ -4,13 +4,13 @@ import { getAlbumImages } from '@/app/actions/albums/album.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useFileManager } from '@/store/files/file-manager.store';
 import type { FileItem } from '@/types/file-item';
 import { Album } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-const viewLogger = serverLogger.withContext('AlbumContentView');
+const viewLogger = clientLogger.withContext('AlbumContentView');
 
 export function AlbumContentView() {
 	const { currentAlbumId } = useFileManager();

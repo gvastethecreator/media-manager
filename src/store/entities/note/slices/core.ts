@@ -1,15 +1,15 @@
-import { serverLogger } from '@/lib/logger/server-logger';
-import { toNoteWithStats } from '@/transformers/note';
-import type { NoteBase, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { transformNoteToWithStats } from '@/transformers/note/transformer';
+import type { Note, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
-const coreLogger = serverLogger.withContext('NoteStore:Core');
+const coreLogger = clientLogger.withContext('NoteStore:Core');
 
 export interface CoreSlice {
 	// Estado
 	notes: NoteWithStats[];
-	selectedNote: NoteBase | null;
+	selectedNote: Note | null;
 	isLoading: boolean;
 	error: string | null;
 
@@ -19,7 +19,7 @@ export interface CoreSlice {
 	createNote: (note: NoteCreateInput) => Promise<void>;
 	updateNote: (id: string, note: NoteUpdateInput) => Promise<void>;
 	deleteNote: (id: string) => Promise<void>;
-	selectNote: (note: NoteBase | null) => void;
+	selectNote: (note: Note | null) => void;
 	reset: () => void;
 }
 
@@ -31,7 +31,7 @@ const mockApi = {
 			setTimeout(() => resolve([]), 500);
 		});
 	},
-	createNote: async (note: NoteCreateInput): Promise<NoteBase> => {
+	createNote: async (note: NoteCreateInput): Promise<Note> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
 				const newNote = {
@@ -39,19 +39,19 @@ const mockApi = {
 					...note,
 					createdAt: new Date(),
 					updatedAt: new Date(),
-				} as unknown as NoteBase;
+				} as unknown as Note;
 				resolve(newNote);
 			}, 500);
 		});
 	},
-	updateNote: async (id: string, note: NoteUpdateInput): Promise<NoteBase> => {
+	updateNote: async (id: string, note: NoteUpdateInput): Promise<Note> => {
 		return new Promise((resolve) => {
 			setTimeout(() => {
 				const updatedNote = {
 					id,
 					...note,
 					updatedAt: new Date(),
-				} as unknown as NoteBase;
+				} as unknown as Note;
 				resolve(updatedNote);
 			}, 500);
 		});
@@ -79,8 +79,8 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			// Llamar a server action para obtener notas
 			const notes = await mockApi.getNotes();
 
-			// Transformar resultados si es necesario
-			const transformedNotes = notes.map(toNoteWithStats);
+			// Transformar resultados con la función correcta
+			const transformedNotes = notes.map(transformNoteToWithStats);
 
 			set({ notes: transformedNotes, isLoading: false });
 			coreLogger.info('✅ Notas cargadas:', { count: transformedNotes.length });

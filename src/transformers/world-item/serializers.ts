@@ -19,6 +19,9 @@ import type {
     WorldItemStat,
     WorldItemUI
 } from '@/types/entities/world-item/types';
+import { handleTransformerError } from '@/utils/transformers/errors';
+import { getRelationCounts } from '@/utils/transformers/relations';
+import { Prisma } from '@prisma/client';
 
 // Logger específico para este módulo
 const logger = createLogger('WorldItemTransformer:Serializers');
@@ -270,39 +273,75 @@ export function deserializeTags(tagsString?: string | null): string[] {
 }
 
 /**
- * Convierte un WorldItem de Prisma a un objeto con campos deserializados
- * @param worldItem - WorldItem de la base de datos
- * @param options - Opciones de deserialización
- * @returns WorldItem con campos deserializados
+ * 🔄 Deserializa un WorldItem desde Prisma, manejando campos JSON y relaciones
  */
 export function fromPrismaWorldItem(
-	worldItem: WorldItemBase,
-	options: {
-		includeRelations?: boolean;
-		includeUI?: boolean;
-	} = {}
-): WorldItemDeserialized {
+	// ✨ Aceptar un objeto parcial y más genérico ✨
+	prismaItem: Partial<Prisma.WorldItemGetPayload<{
+		include: { // Definir todas las relaciones *posibles*
+			images: true; videos: true; notes: true; concepts: true;
+			prompts: true; groups: true; properties: true; wildcards: true;
+			tags: true; _count: true;
+		};
+	}>>
+): WorldItem {
 	try {
-		if (!worldItem) {
-			throw new Error('WorldItem no proporcionado');
+		// Validar campos esenciales
+		if (!prismaItem || !prismaItem.id || typeof prismaItem.name !== 'string') {
+			logger.error('Invalid prismaItem object received in fromPrismaWorldItem', { prismaItem });
+			throw new Error('Invalid prismaItem object received');
 		}
 
-		// Deserializar todos los campos JSON
-		const result: WorldItemDeserialized = {
-			...worldItem,
-			attributesList: deserializeAttributes(worldItem.attributes),
-			effectsList: deserializeEffects(worldItem.effects),
-			requirementsList: deserializeRequirements(worldItem.requirements),
-			statsList: deserializeStats(worldItem.stats),
-			propertiesList: deserializeProperties(worldItem.properties),
-			filtersList: deserializeFilters(worldItem.filters),
-			tagsList: deserializeTags(worldItem.tags)
+		// Parsear campos JSON de forma segura
+		const parseJsonField = <T>(field: string | null | undefined, defaultValue: T): T => {
+			if (typeof field !== 'string' || !field) return defaultValue;
+			try {
+				return JSON.parse(field) as T;
+			} catch (e) {
+				logger.warn(`Failed to parse JSON field for WorldItem ${prismaItem.id}:`, e);
+				return defaultValue;
+			}
 		};
 
-		return result;
+		const baseItem: WorldItemBase = {
+			id: prismaItem.id,
+			name: prismaItem.name,
+			description: prismaItem.description ?? null,
+			type: prismaItem.type ?? '', // Asumir que type siempre debe existir
+			category: prismaItem.category ?? null,
+			rarity: prismaItem.rarity ?? null,
+			value: prismaItem.value ?? null,
+			// Parsear campos JSON
+			properties: parseJsonField(prismaItem.properties, {}), // Default a objeto vacío
+			effects: parseJsonField(prismaItem.effects, []),      // Default a array vacío
+			attributes: parseJsonField(prismaItem.attributes, []), // Default a array vacío
+			requirements: parseJsonField(prismaItem.requirements, {}), // Default a objeto vacío
+			isFavorite: prismaItem.isFavorite ?? false,
+			createdAt: prismaItem.createdAt ? new Date(prismaItem.createdAt) : new Date(0),
+			updatedAt: prismaItem.updatedAt ? new Date(prismaItem.updatedAt) : new Date(0),
+		};
+
+		// Obtener conteos
+		const counts = getRelationCounts('WorldItem', prismaItem);
+
+		// Construir objeto completo
+		return {
+			...baseItem,
+			images: prismaItem.images?.map(img => ({ id: img.id })) ?? [],
+			videos: prismaItem.videos?.map(vid => ({ id: vid.id })) ?? [],
+			notes: prismaItem.notes?.map(note => ({ id: note.id })) ?? [],
+			concepts: prismaItem.concepts?.map(con => ({ id: con.id })) ?? [],
+			prompts: prismaItem.prompts?.map(p => ({ id: p.id })) ?? [],
+			groups: prismaItem.groups?.map(g => ({ id: g.id })) ?? [],
+			properties: prismaItem.properties?.map(p => ({ id: p.id })) ?? [],
+			wildcards: prismaItem.wildcards?.map(w => ({ id: w.id })) ?? [],
+			tags: prismaItem.tags?.map(t => ({ id: t.id })) ?? [],
+			_count: counts,
+		};
+
 	} catch (error) {
 		logger.error('Error en fromPrismaWorldItem:', error);
-		throw new Error(`Error deserializando WorldItem: ${error instanceof Error ? error.message : String(error)}`);
+		throw handleTransformerError(error);
 	}
 }
 

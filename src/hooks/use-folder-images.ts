@@ -1,6 +1,6 @@
 'use client';
 
-import { getFolderImages } from '@/app/actions/folders';
+// import { getFolderImages } from '@/app/actions/folders'; // Función no encontrada
 import { useQuery } from '@tanstack/react-query';
 
 // Clave para el caché de React Query

@@ -17,7 +17,8 @@ export type {
 } from './types';
 
 // Exportar validaciones
-export { TagSchema, tagFilterSchema } from './types';
+export { TagSchema } from './types';
+export type { TagFilters } from './types';
 
 export type {
     TagFilter,

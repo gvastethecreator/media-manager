@@ -1,12 +1,12 @@
 'use client';
 
 import { ALL_ENTITIES, PRIORITY_ENTITIES } from '@/constants/entities';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useEntityLoader } from './context-menu/hooks/use-entity-loader';
 
 // Logger específico para el componente
-const preloaderLogger = serverLogger.withContext('EntityPreloader');
+const preloaderLogger = clientLogger.withContext('EntityPreloader');
 
 type PreloaderMode = 'all' | 'priority' | 'custom';
 

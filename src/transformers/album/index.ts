@@ -20,16 +20,27 @@ import {
     mapUpdateAlbumDataToPrisma,
 } from './mappers';
 import {
-    extendAlbum,
     fromPrismaAlbum,
     generateAlbumColor,
     generateAlbumEmoji,
     parseAlbumFilters,
     toPrismaAlbum,
-    validateAlbum,
+    validateAlbum
 } from './serializers';
+// Importar el transformador principal y sus funciones asociadas
+import {
+    transformAlbum as transformAlbumMain,
+    transformAlbumToExtended,
+    transformAlbumToWithStats,
+    transformAlbums as transformAlbumsMain
+} from './transformer';
 
 const logger = serverLogger.withContext('AlbumTransformer');
+
+// Exportar el transformador principal y sus variantes
+export const transformAlbum = transformAlbumMain;
+export const transformAlbums = transformAlbumsMain;
+export { transformAlbumToExtended, transformAlbumToWithStats };
 
 /**
  * 🔍 Busca álbumes según los criterios especificados
@@ -263,47 +274,21 @@ export function generateAlbumEmojiFromName(name: string, type?: string) {
     }
 }
 
-// Capa de compatibilidad para código existente
-/**
- * @deprecated Use las funciones individuales exportadas en su lugar.
- * Las funciones recomendadas son:
- * - searchAlbums en lugar de AlbumTransformer.search
- * - getAlbumById en lugar de AlbumTransformer.getById
- * - createAlbum en lugar de AlbumTransformer.create
- * - updateAlbum en lugar de AlbumTransformer.update
- * - deleteAlbum en lugar de AlbumTransformer.delete
- * - toRelatedAlbum en lugar de AlbumTransformer.toRelated
- * - parseAlbumFilterOptions en lugar de AlbumTransformer.parseFilters
- * - generateAlbumColorFromName en lugar de AlbumTransformer.generateColor
- * - generateAlbumEmojiFromName en lugar de AlbumTransformer.generateEmoji
- */
-const AlbumTransformerCompat = {
-    search: searchAlbums,
-    getById: getAlbumById,
-    create: createAlbum,
-    update: updateAlbum,
-    delete: deleteAlbum,
-    toRelated: toRelatedAlbum,
-    parseFilters: parseAlbumFilterOptions,
-    generateColor: generateAlbumColorFromName,
-    generateEmoji: generateAlbumEmojiFromName
+// Objeto de compatibilidad para código anterior
+export const AlbumTransformer = {
+    searchAlbums,
+    getAlbumById,
+    createAlbum,
+    updateAlbum,
+    deleteAlbum,
+    toRelatedAlbum,
+    parseAlbumFilterOptions,
+    // Añadir nuevas funciones al objeto exportado
+    transformAlbum,
+    transformAlbums,
+    transformAlbumToExtended,
+    transformAlbumToWithStats
 };
 
-// Exportar objeto de compatibilidad bajo el mismo nombre que la clase original
-export const AlbumTransformer = AlbumTransformerCompat;
-
-// Exportar funciones individuales para uso directo
-export {
-    extendAlbum,
-    fromPrismaAlbum,
-    generateAlbumColor,
-    generateAlbumEmoji,
-    mapAlbumSearchOptionsToPrisma,
-    mapAlbumToRelatedAlbum,
-    mapCreateAlbumDataToPrisma,
-    mapUpdateAlbumDataToPrisma,
-    parseAlbumFilters,
-    toPrismaAlbum,
-    validateAlbum
-};
+export default AlbumTransformer;
 

@@ -1,15 +1,15 @@
 /**
- * @file Slice UI para el store de QueueJob
+ * @file Slice de UI para el store de QueueJob
  * @module store/entities/queue-job/slices/ui
- * @description Implementación del slice UI para la gestión de la interfaz de usuario de trabajos en cola
+ * @description Implementación del slice de UI para la gestión de trabajos en cola
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { StateCreator } from 'zustand';
 import type { QueueJobState } from '../types';
 
 // Logger para el slice
-const uiLogger = serverLogger.withContext('QueueJobStore:UI');
+const uiLogger = clientLogger.withContext('QueueJobStore:UI');
 
 /**
  * Slice que contiene el estado y las acciones de la interfaz de usuario

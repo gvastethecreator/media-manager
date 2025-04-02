@@ -29,17 +29,29 @@ const revalidateQueuePaths = async () => {
 };
 
 /**
- * Error personalizado para acciones de control
+ * Interfaz para errores de acciones de control
  */
-class QueueControlError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'QueueControlError';
-  }
+export interface QueueControlErrorData {
+  name: string;
+  message: string;
+  code?: string;
+  cause?: unknown;
+}
+
+/**
+ * Función para crear errores de acciones de control (enfoque funcional)
+ */
+function createQueueControlError(
+  message: string,
+  code?: string,
+  cause?: unknown
+): QueueControlErrorData {
+  return {
+    name: 'QueueControlError',
+    message,
+    code,
+    cause
+  };
 }
 
 /**

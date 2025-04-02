@@ -9,7 +9,7 @@ import { Alert, AlertCircle, AlertDescription, AlertTitle } from '@/components/u
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
 import { clientEvents } from '@/lib/client/events.client';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useFileManager } from '@/store/files/file-manager.store';
 import { MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
-const viewLogger = serverLogger.withContext('PromptsView');
+const viewLogger = clientLogger.withContext('PromptsView');
 
 export function PromptsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();

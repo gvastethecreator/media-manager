@@ -1,25 +1,22 @@
 'use server';
 
-import { type Stats, statSync } from 'fs';
-import * as fs from 'fs/promises';
 import { CacheManager } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AIMetadata, FileMetadata } from '@/types/metadata';
+import { type Stats, statSync } from 'fs';
+import * as fs from 'fs/promises';
 import sharp from 'sharp';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
 import {
-	getAIGenerationInfo,
-	parseExifData,
-	parseMetadataString,
-	parseSharpMetadata,
+    getAIGenerationInfo,
+    parseExifData,
+    parseMetadataString,
+    parseSharpMetadata,
 } from './metadata-parsers.actions';
 import {
-	type ExtendedFileMetadata,
-	type ImageFormat,
-	METADATA_RETRY_CONFIG,
-	type MetadataOptions,
-	type SharpColourspaceEnum,
-	type SharpFormatEnum,
+    type ExtendedFileMetadata,
+    METADATA_RETRY_CONFIG,
+    type MetadataOptions
 } from './metadata-types.actions';
 import { getImageFormat, isSupportedImageFormat, withRetry } from './metadata-utils.actions';
 
@@ -438,38 +435,11 @@ export async function preloadMetadata(paths: string[]): Promise<void> {
 }
 
 /**
- * Parsea un string de metadatos
- */
-export { parseMetadataString as parseMetadata };
-
-/**
  * Limpia la caché de metadatos
  */
 export async function clearMetadataCache(): Promise<void> {
-	try {
-		extractorLogger.info('🧹 Limpiando caché de metadatos...');
-
-		// Estadísticas antes de la limpieza
-		const cacheDiagnosis = await metadataCache.diagnose();
-		const beforeSize = cacheDiagnosis.total;
-		const beforeKeys = cacheDiagnosis.keys;
-
-		// Limpiar completamente
-		await metadataCache.clear();
-
-		// Verificar resultado
-		const afterDiagnosis = await metadataCache.diagnose();
-		const afterSize = afterDiagnosis.total;
-
-		extractorLogger.info(`✅ Caché de metadatos limpiada correctamente. Elementos eliminados: ${beforeSize}`, {
-			beforeSize,
-			afterSize,
-			sampleKeys: beforeKeys.slice(0, 5),
-		});
-
-		return Promise.resolve();
-	} catch (error) {
-		extractorLogger.error('❌ Error limpiando caché de metadatos:', error);
-		throw error;
-	}
+	extractorLogger.info('Limpiando caché de metadatos');
+	await metadataCache.clear();
+	extractorLogger.info('Caché de metadatos limpiada');
 }
+

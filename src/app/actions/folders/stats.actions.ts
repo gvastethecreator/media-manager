@@ -9,6 +9,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { FolderStats } from '@/types/entities/folder';
 import { revalidateTag, unstable_cache } from 'next/cache';
+import { FOLDER_ERROR_CODES } from './folder-types';
 
 // Logger for stats actions
 const folderLogger = serverLogger.withContext('FolderStatsActions');
@@ -20,17 +21,29 @@ const CACHE_REVALIDATE_SECONDS = 30;
 const FOLDER_STATS_TAGS = ['folders', 'folder-stats', 'statistics'];
 
 /**
- * Custom error for folder statistics operations
+ * Interfaz para errores de estadísticas de carpetas
  */
-class FolderStatsError extends Error {
-  constructor(
-    message: string,
-    public code?: string,
-    public cause?: unknown
-  ) {
-    super(message);
-    this.name = 'FolderStatsError';
-  }
+export interface FolderStatsErrorData {
+  name: string;
+  message: string;
+  code: string;
+  cause?: unknown;
+}
+
+/**
+ * Función para crear errores de estadísticas de carpetas (enfoque funcional)
+ */
+function createFolderStatsError(
+  message: string,
+  code: string = FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
+  cause?: unknown
+): FolderStatsErrorData {
+  return {
+    name: 'FolderStatsError',
+    message,
+    code,
+    cause
+  };
 }
 
 /**
@@ -152,7 +165,7 @@ export async function getFolderStats(): Promise<FolderStatsResponse> {
         return stats;
       } catch (error) {
         folderLogger.error('❌ Error getting folder statistics:', error);
-        throw new FolderStatsError('Failed to get folder statistics', 'STATS_FAILED', error);
+        throw createFolderStatsError('Failed to get folder statistics', 'STATS_FAILED', error);
       }
     },
     ['folder-stats'],
@@ -226,7 +239,7 @@ export async function getFolderStorageStats(): Promise<FolderStorageStatsRespons
         return stats;
       } catch (error) {
         folderLogger.error('❌ Error getting folder storage statistics:', error);
-        throw new FolderStatsError('Failed to get folder storage statistics', 'STORAGE_STATS_FAILED', error);
+        throw createFolderStatsError('Failed to get folder storage statistics', 'STORAGE_STATS_FAILED', error);
       }
     },
     ['folder-storage-stats'],
@@ -313,7 +326,7 @@ export async function getFolderIndexingStats(): Promise<FolderIndexingStatsRespo
         return stats;
       } catch (error) {
         folderLogger.error('❌ Error getting folder indexing statistics:', error);
-        throw new FolderStatsError('Failed to get folder indexing statistics', 'INDEXING_STATS_FAILED', error);
+        throw createFolderStatsError('Failed to get folder indexing statistics', 'INDEXING_STATS_FAILED', error);
       }
     },
     ['folder-indexing-stats'],
@@ -363,7 +376,7 @@ export async function getFolderStatsById(folderId: string): Promise<FolderStats>
     });
 
     if (!folder) {
-      throw new FolderStatsError(`Folder with ID ${folderId} not found`, 'FOLDER_NOT_FOUND');
+      throw createFolderStatsError(`Folder with ID ${folderId} not found`, 'FOLDER_NOT_FOUND');
     }
 
     // Calcular estadísticas basadas en los datos encontrados
@@ -413,7 +426,7 @@ export async function getFolderStatsById(folderId: string): Promise<FolderStats>
 
   } catch (error) {
     folderLogger.error(`❌ Error getting statistics for folder ${folderId}:`, error);
-    throw new FolderStatsError(`Failed to get statistics for folder ${folderId}`, 'FOLDER_STATS_FAILED', error);
+    throw createFolderStatsError(`Failed to get statistics for folder ${folderId}`, 'FOLDER_STATS_FAILED', error);
   }
 }
 
@@ -432,6 +445,6 @@ export async function revalidateFolderStats(): Promise<void> {
     folderLogger.info('✅ Folder statistics caches revalidated successfully');
   } catch (error) {
     folderLogger.error('❌ Error revalidating folder statistics caches:', error);
-    throw new FolderStatsError('Failed to revalidate folder statistics caches', 'REVALIDATION_FAILED', error);
+    throw createFolderStatsError('Failed to revalidate folder statistics caches', 'REVALIDATION_FAILED', error);
   }
 }

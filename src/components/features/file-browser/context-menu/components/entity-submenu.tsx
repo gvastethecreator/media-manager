@@ -11,13 +11,13 @@ import {
 } from '@/components/ui/context-menu';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { Plus } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import type { SubMenuProps } from '../types';
 
 // Logger para debugging
-const submenuLogger = serverLogger.withContext('EntitySubmenu');
+const submenuLogger = clientLogger.withContext('EntitySubmenu');
 
 // Componentes memoizados para reducir renderizaciones
 const MemoizedContextMenuItem = memo(ContextMenuItem);

@@ -4,9 +4,9 @@ import {
 	type ProfileCreate,
 	type ProfileUpdate,
 	type ProfileWithStats,
-	profileService,
-} from '@/services/profile.service';
-import { toastService } from '@/services/toast.service';
+} from '@/services/profile-service-export';
+import { profileClient } from '@/services/profile/client';
+import { toastService } from '@/services/toast-service-export';
 import type { ThumbnailQuality } from '@/types/thumbnails';
 import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react';
 
@@ -106,11 +106,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 	// Cargar perfiles
 	const loadProfiles = useCallback(async () => {
 		try {
-			const profiles = await profileService.getProfiles();
+			const profiles = await profileClient.getProfiles();
 
 			// Si no hay perfiles, crear uno por defecto
 			if (profiles.length === 0) {
-				const _defaultProfile = await profileService.createProfile({
+				const _defaultProfile = await profileClient.createProfile({
 					name: 'Default',
 					emoji: '🐸',
 					color: '#10b981', // esmeralda
@@ -118,7 +118,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 				});
 
 				// Recargar los perfiles
-				const updatedProfiles = await profileService.getProfiles();
+				const updatedProfiles = await profileClient.getProfiles();
 				// Buscar el perfil activo por una propiedad diferente (presumiblemente existe una propiedad id)
 				const activeProfile = updatedProfiles.find((p) => p.id === _defaultProfile.id);
 
@@ -135,10 +135,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
 			// Si no hay perfil activo, activar el primero
 			if (!activeProfile && profiles.length > 0) {
-				await profileService.setActiveProfile(profiles[0].id);
+				await profileClient.setActiveProfile(profiles[0].id);
 
 				// Recargar los perfiles
-				const updatedProfiles = await profileService.getProfiles();
+				const updatedProfiles = await profileClient.getProfiles();
 				const newActiveProfile = updatedProfiles[0]; // El primer perfil después de establecerlo como activo
 
 				setSettings((prev) => ({
@@ -213,9 +213,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 	const updateProfile = async (id: string | null, data: ProfileCreate | ProfileUpdate) => {
 		try {
 			if (id) {
-				await profileService.updateProfile(id, data as ProfileUpdate);
+				await profileClient.updateProfile(id, data as ProfileUpdate);
 			} else {
-				await profileService.createProfile(data as ProfileCreate);
+				await profileClient.createProfile(data as ProfileCreate);
 			}
 			// Recargar los perfiles para obtener la lista actualizada
 			await loadProfiles();
@@ -230,7 +230,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 	// Establecer perfil activo
 	const setActiveProfile = async (id: string) => {
 		try {
-			await profileService.setActiveProfile(id);
+			await profileClient.setActiveProfile(id);
 			await loadProfiles();
 			toastService.success('Perfil activo actualizado correctamente');
 		} catch (error) {
@@ -243,7 +243,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 	// Eliminar perfil
 	const deleteProfile = async (id: string) => {
 		try {
-			await profileService.deleteProfile(id);
+			await profileClient.deleteProfile(id);
 			await loadProfiles();
 			toastService.success('Perfil eliminado correctamente');
 		} catch (error) {

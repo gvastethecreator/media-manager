@@ -5,6 +5,10 @@
 
 import { Logger } from '@/lib/logger';
 import { serverLogger } from '@/lib/logger/server-logger';
+import {
+    deserializeImageMetadata,
+    serializeImageMetadata,
+} from '@/transformers/file/serializers';
 import type {
     ImageCreateInput,
     ImageFilters,
@@ -23,12 +27,6 @@ import type {
     ImageMetadata,
     ImageSummary
 } from '../../types/entities/image';
-import {
-    deserializeImageMetadata,
-    fromImageComplete,
-    serializeImageMetadata,
-    toImageComplete
-} from './serializers';
 
 // Logger específico para mappers de Image
 const mapperLogger = serverLogger.withContext('ImageMappers');
@@ -610,8 +608,12 @@ export function getDerivedImageProperties(image: ImageBase | ImageComplete): Par
 			derived.metadata = image.metadata;
 		} else if (typeof (image as ImageBase).metadata === 'string') {
 			// Necesitamos deserializar los metadatos
-			const complete = toImageComplete(image as ImageBase);
-			derived.metadata = complete.metadata;
+			try {
+				derived.metadata = JSON.parse((image as ImageBase).metadata as string);
+			} catch (e) {
+				mapperLogger.warn('Error deserializando metadata en getDerived:', e);
+				derived.metadata = {}; // Fallback a objeto vacío
+			}
 		}
 
 		return derived;
@@ -641,26 +643,24 @@ export function updateImageMetadata(
 
 		if (typeof currentMetadata === 'string' && currentMetadata) {
 			// Convertir string JSON a objeto
-			const temp: ImageBase = { metadata: currentMetadata } as ImageBase;
-			const complete = toImageComplete(temp);
-			metadata = complete.metadata;
+			try {
+				metadata = JSON.parse(currentMetadata);
+			} catch(e) {
+				mapperLogger.warn('Error deserializando metadata en update:', e);
+				metadata = {}; // Fallback
+			}
 		}
 
-		// Combinar con las actualizaciones
-		const combined: ImageMetadata = {
-			...(metadata || {}),
-			...updates
-		};
+		// Combinar con actualizaciones
+		const combined = { ...metadata, ...updates };
 
 		// Convertir de vuelta a string JSON
-		const temp: ImageComplete = { metadata: combined } as ImageComplete;
-		const base = fromImageComplete(temp);
-		return base.metadata || '{}';
+		return serializeImageMetadata(combined) || '{}';
 	} catch (error) {
 		mapperLogger.error('❌ Error al actualizar metadatos de imagen:', error);
 		// Fallback al método antiguo
-		const current = serializeImageMetadata(currentMetadata) || {};
+		const current = deserializeImageMetadata(currentMetadata) || {};
 		const updated = { ...current, ...updates };
-		return deserializeImageMetadata(updated) || '{}';
+		return serializeImageMetadata(updated) || '{}';
 	}
 }

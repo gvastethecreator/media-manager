@@ -106,6 +106,45 @@ export interface PropertyComplete extends PropertyBase {
 }
 
 /**
+ * Interfaz extendida con campos adicionales para UI
+ */
+export interface PropertyExtended extends PropertyComplete {
+  displayName: string;
+  formattedDate: string;
+  colorClass: string;
+  categoryLabel: string;
+}
+
+/**
+ * Interfaz para estadísticas de propiedad
+ */
+export interface PropertyStats {
+  imageCount: number;
+  videoCount: number;
+  albumCount: number;
+  collectionCount: number;
+  tagCount: number;
+  characterCount: number;
+  placeCount: number;
+  worldItemCount: number;
+  conceptCount: number;
+  promptCount: number;
+  noteCount: number;
+  wildcardCount: number;
+  groupCount: number;
+  totalContentItems: number;
+  usageCount: number;
+  lastUpdated: Date;
+}
+
+/**
+ * Interfaz para propiedad con estadísticas
+ */
+export interface PropertyWithStats extends PropertyComplete {
+  stats: PropertyStats;
+}
+
+/**
  * Interfaz para crear una propiedad
  */
 export interface CreatePropertyData {
