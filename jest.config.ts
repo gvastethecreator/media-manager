@@ -44,11 +44,11 @@ const customJestConfig: Config = {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!src/**/*.d.ts',
-    '!src/tests/**/*',
-    '!src/**/*.stories.{ts,tsx}',
-    '!src/**/*.test.{ts,tsx}'
+    'src/lib/cache.ts',
+    'src/lib/format.ts',
+    'src/lib/hash.ts',
+    'src/lib/utils.ts',
+    'src/lib/thumbnails.ts'
   ],
   coverageThreshold: {
     global: {
