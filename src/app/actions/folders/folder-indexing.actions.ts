@@ -5,16 +5,18 @@
  * @module app/actions/folders/folder-indexing.actions
  */
 
+import { throttleEvent } from '@/lib/event-throttler';
+import { invalidateFolderCache } from '@/lib/folder-cache'; // 🚀 NUEVA IMPORTACIÓN
 import { scanFolder } from '@/lib/folder-scanner';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import {
-    FOLDER_ERROR_CODES,
-    FolderResponse,
-    IndexOptions,
-    ReindexOptions,
-    createFolderError
+  FOLDER_ERROR_CODES,
+  FolderResponse,
+  IndexOptions,
+  ReindexOptions,
+  createFolderError
 } from './folder-types';
 
 // Logger específico para el archivo
@@ -30,17 +32,25 @@ const REVALIDATE_PATHS = [
 ];
 
 /**
- * Revalida todas las rutas relevantes
+ * Revalida todas las rutas relevantes - OPTIMIZADO ⚡
  */
-async function revalidatePaths() {
-  for (const path of REVALIDATE_PATHS) {
-    revalidatePath(path);
-  }
-  indexingLogger.info('🔄 Rutas revalidadas');
-}
+const revalidatePaths = throttleEvent(
+  async (folderId?: string) => {
+    for (const path of REVALIDATE_PATHS) {
+      revalidatePath(path);
+    }
+    // 🚀 OPTIMIZACIÓN: Invalidar cache específico si se proporciona ID
+    if (folderId) {
+      invalidateFolderCache(folderId);
+    }
+    indexingLogger.info('🔄 Rutas revalidadas y cache invalidado');
+  },
+  'folder-revalidation',
+  { delay: 2000, merge: true } // 🚀 Throttle revalidación por 2 segundos
+);
 
 /**
- * Indexa una carpeta y actualiza su contenido en la base de datos
+ * Indexa una carpeta y actualiza su contenido en la base de datos - OPTIMIZADO ⚡
  * @param id ID de la carpeta
  * @param options Opciones de indexación
  */
@@ -48,69 +58,78 @@ export async function indexFolder(id: string, options?: IndexOptions): Promise<F
   try {
     indexingLogger.info('📂 Iniciando indexación de carpeta:', id);
 
-    // Obtener la carpeta de la base de datos
-    const folder = await prisma.folder.findUnique({
-      where: { id },
-    });
+    // 🚀 OPTIMIZACIÓN: Usar transacción para batch queries
+    const result = await prisma.$transaction(async (tx) => {
+      // Obtener la carpeta de la base de datos
+      const folder = await tx.folder.findUnique({
+        where: { id },
+      });
 
-    if (!folder) {
-      throw createFolderError('Carpeta no encontrada', FOLDER_ERROR_CODES.NOT_FOUND);
-    }
+      if (!folder) {
+        throw createFolderError('Carpeta no encontrada', FOLDER_ERROR_CODES.NOT_FOUND);
+      }
 
-    // Actualizar el estado de la carpeta a "indexando"
-    await prisma.folder.update({
-      where: { id },
-      data: {
-        status: 'INDEXING',
-      },
-    });
+      // Actualizar el estado de la carpeta a "indexando"
+      await tx.folder.update({
+        where: { id },
+        data: {
+          status: 'INDEXING',
+        },
+      });
 
-    // Escanear la carpeta
-    indexingLogger.info('🔍 Escaneando carpeta:', folder.path);
-    const scanResult = await scanFolder(folder.path, {
-      recursive: options?.recursive ?? true,
-      includeHidden: options?.includeHidden ?? false
-    });
+      // Escanear la carpeta
+      indexingLogger.info('🔍 Escaneando carpeta:', folder.path);
+      const scanResult = await scanFolder(folder.path, {
+        recursive: options?.recursive ?? true,
+        includeHidden: options?.includeHidden ?? false
+      });
 
-    // Actualizar la carpeta con los resultados del escaneo
-    const updatedFolder = await prisma.folder.update({
-      where: { id },
-      data: {
-        totalFiles: scanResult.totalFiles,
-        totalSize: scanResult.totalSize,
-        lastIndexed: new Date(),
-        status: 'INDEXED',
-      },
-    });
+      // 🚀 OPTIMIZACIÓN: Batch update con estadísticas calculadas
+      const updatedFolder = await tx.folder.update({
+        where: { id },
+        data: {
+          totalFiles: scanResult.totalFiles,
+          totalSize: scanResult.totalSize,
+          lastIndexed: new Date(),
+          status: 'INDEXED',
+          // Nuevas estadísticas optimizadas
+          imageCount: scanResult.images.length,
+          videoCount: scanResult.videos.length,
+          otherCount: scanResult.others.length,
+        },
+      });
 
-    // Revalidar rutas
-    await revalidatePaths();
+      return { updatedFolder, scanResult };
+    });    // Revalidar rutas fuera de la transacción
+    await revalidatePaths(id);
 
-    // Crear la respuesta
+    // Crear la respuesta optimizada
     const response: FolderResponse = {
-      id: updatedFolder.id,
-      name: updatedFolder.name,
-      path: updatedFolder.path,
-      totalFiles: updatedFolder.totalFiles,
-      totalSize: updatedFolder.totalSize,
-      lastIndexed: updatedFolder.lastIndexed,
-      createdAt: updatedFolder.createdAt,
-      updatedAt: updatedFolder.updatedAt,
-      autoReindex: updatedFolder.autoReindex,
-      isWatched: updatedFolder.isWatched,
-      status: updatedFolder.status,
-      parentId: updatedFolder.parentId,
+      id: result.updatedFolder.id,
+      name: result.updatedFolder.name,
+      path: result.updatedFolder.path,
+      totalFiles: result.updatedFolder.totalFiles,
+      totalSize: result.updatedFolder.totalSize,
+      lastIndexed: result.updatedFolder.lastIndexed,
+      createdAt: result.updatedFolder.createdAt,
+      updatedAt: result.updatedFolder.updatedAt,
+      autoReindex: result.updatedFolder.autoReindex,
+      isWatched: result.updatedFolder.isWatched,
+      status: result.updatedFolder.status,
+      parentId: result.updatedFolder.parentId,
       stats: {
-        totalImages: scanResult.images.length,
-        totalVideos: scanResult.videos.length,
-        totalOthers: scanResult.others.length,
-        averageFileSize: scanResult.totalFiles > 0 ? scanResult.totalSize / scanResult.totalFiles : 0,
+        totalImages: result.scanResult.images.length,
+        totalVideos: result.scanResult.videos.length,
+        totalOthers: result.scanResult.others.length,
+        averageFileSize: result.scanResult.totalFiles > 0 ? result.scanResult.totalSize / result.scanResult.totalFiles : 0,
       }
     };
 
     indexingLogger.info('✅ Carpeta indexada correctamente:', {
       id: response.id,
-      totalFiles: response.totalFiles
+      totalFiles: response.totalFiles,
+      images: response.stats.totalImages,
+      videos: response.stats.totalVideos
     });
 
     return response;
@@ -146,6 +165,78 @@ export async function reindexFolder(id: string, options?: ReindexOptions): Promi
     indexingLogger.error('❌ Error reindexando carpeta:', error);
     throw createFolderError(
       'Error al reindexar carpeta',
+      FOLDER_ERROR_CODES.INDEXING_ERROR,
+      error instanceof Error ? error.stack : undefined,
+      undefined,
+      error
+    );
+  }
+}
+
+/**
+ * 🚀 VERSIONES OPTIMIZADAS CON THROTTLING
+ */
+
+/**
+ * Versión throttled de indexFolder - previene múltiples indexaciones simultáneas
+ */
+export const indexFolderThrottled = throttleEvent(
+  indexFolder,
+  'index-folder',
+  { delay: 3000, merge: false, useLatestArgs: true }
+);
+
+/**
+ * Versión throttled de reindexFolder - previene reindexaciones en masa
+ */
+export const reindexFolderThrottled = throttleEvent(
+  reindexFolder,
+  'reindex-folder',
+  { delay: 5000, merge: true, useLatestArgs: true }
+);
+
+/**
+ * 🚀 OPTIMIZACIÓN: Indexación por lotes para múltiples carpetas
+ */
+export async function indexMultipleFolders(
+  folderIds: string[],
+  options?: IndexOptions
+): Promise<FolderResponse[]> {
+  try {
+    indexingLogger.info('📁 Iniciando indexación por lotes:', {
+      folderCount: folderIds.length
+    });
+
+    // Procesar en chunks de 3 carpetas simultáneamente para evitar sobrecarga
+    const chunks = [];
+    for (let i = 0; i < folderIds.length; i += 3) {
+      chunks.push(folderIds.slice(i, i + 3));
+    }
+
+    const results: FolderResponse[] = [];
+
+    for (const chunk of chunks) {
+      const chunkPromises = chunk.map(id => indexFolder(id, options));
+      const chunkResults = await Promise.allSettled(chunkPromises);
+        for (const result of chunkResults) {
+        if (result.status === 'fulfilled') {
+          results.push(result.value);
+        } else {
+          indexingLogger.warn('⚠️ Error en indexación de chunk:', result.reason);
+        }
+      }
+    }
+
+    indexingLogger.info('✅ Indexación por lotes completada:', {
+      processed: results.length,
+      requested: folderIds.length
+    });
+
+    return results;
+  } catch (error) {
+    indexingLogger.error('❌ Error en indexación por lotes:', error);
+    throw createFolderError(
+      'Error en indexación por lotes',
       FOLDER_ERROR_CODES.INDEXING_ERROR,
       error instanceof Error ? error.stack : undefined,
       undefined,

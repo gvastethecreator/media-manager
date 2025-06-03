@@ -21,7 +21,7 @@ const DEFAULT_SUPPORTED_EXTENSIONS = [
 ];
 
 /**
- * Interfaz para los resultados del escaneo de carpetas
+ * Interfaz para los resultados del escaneo de carpetas - OPTIMIZADA ⚡
  */
 export interface FolderScanResult {
   path: string;               // Ruta de la carpeta escaneada
@@ -32,6 +32,11 @@ export interface FolderScanResult {
   totalSize: number;          // Tamaño total en bytes
   scannedAt: Date;            // Fecha y hora del escaneo
   error?: string;             // Error si ocurrió alguno
+  // 🚀 NUEVAS PROPIEDADES OPTIMIZADAS
+  stats?: ScanStats;          // Estadísticas clasificadas de archivos
+  images: FileInfo[];         // Archivos de imagen (acceso directo)
+  videos: FileInfo[];         // Archivos de video (acceso directo)
+  others: FileInfo[];         // Otros archivos (acceso directo)
 }
 
 /**
@@ -97,8 +102,7 @@ export async function scanFolder(
     sortDirection = 'asc',
     limit = 1000
   } = options;
-
-  // Resultado inicial
+  // Resultado inicial - OPTIMIZADO ⚡
   const result: FolderScanResult = {
     path: normalizedPath,
     files: [],
@@ -106,7 +110,11 @@ export async function scanFolder(
     totalFiles: 0,
     totalDirectories: 0,
     totalSize: 0,
-    scannedAt: new Date()
+    scannedAt: new Date(),
+    // 🚀 Inicializar nuevas propiedades optimizadas
+    images: [],
+    videos: [],
+    others: []
   };
 
   try {
@@ -130,18 +138,22 @@ export async function scanFolder(
     );
 
     // Ordenar archivos según las opciones
-    sortFileList(result.files, sortFiles, sortDirection);
-
-    // Aplicar límite
+    sortFileList(result.files, sortFiles, sortDirection);    // Aplicar límite
     if (limit > 0 && result.files.length > limit) {
       result.files = result.files.slice(0, limit);
     }
+
+    // 🚀 OPTIMIZACIÓN: Generar estadísticas al final
+    result.stats = extractScanStats(result.files);
 
     scannerLogger.info('✅ Escaneo completado:', {
       path: normalizedPath,
       totalFiles: result.totalFiles,
       totalDirectories: result.totalDirectories,
-      totalSize: result.totalSize
+      totalSize: result.totalSize,
+      images: result.images.length,
+      videos: result.videos.length,
+      others: result.others.length
     });
 
     return result;
@@ -155,7 +167,7 @@ export async function scanFolder(
 }
 
 /**
- * Escanea un directorio recursivamente (función interna)
+ * Escanea un directorio recursivamente (función interna) - OPTIMIZADO ⚡
  */
 async function scanDirectory(
   basePath: string,
@@ -180,80 +192,38 @@ async function scanDirectory(
     // Leer contenido del directorio
     const entries = await fs.readdir(currentPath, { withFileTypes: true });
 
+    // 🚀 OPTIMIZACIÓN: Procesar archivos y directorios en paralelo
+    const filePromises: Promise<void>[] = [];
+    const directoryPromises: Promise<void>[] = [];
+
     for (const entry of entries) {
-      // Saltar archivos/carpetas ocultos si no están incluidos
+      // Saltar archivos ocultos si no están habilitados
       if (!options.includeHidden && entry.name.startsWith('.')) {
         continue;
       }
 
-      const entryPath = path.join(currentPath, entry.name);
-      const relativePath = path.relative(basePath, entryPath);
+      const fullPath = path.join(currentPath, entry.name);
+      const relativePath = path.relative(basePath, fullPath);
 
-      // Si es un directorio
-      if (entry.isDirectory()) {
-        // Incrementar contador de directorios
-        result.totalDirectories++;
-
-        // Obtener información de la carpeta
-        const stats = await fs.stat(entryPath);
-
-        // Añadir a la lista de directorios
-        const dirInfo: DirectoryInfo = {
-          name: entry.name,
-          path: entryPath,
-          relativePath,
-          modifiedAt: stats.mtime,
-          isDirectory: true
-        };
-
-        result.directories.push(dirInfo);
-
-        // Si es recursivo y no hemos alcanzado la profundidad máxima, escanear subcarpeta
-        if (options.recursive && (options.maxDepth === 0 || options.currentDepth < options.maxDepth)) {
-          await scanDirectory(
-            basePath,
-            entryPath,
-            result,
-            {
-              ...options,
-              currentDepth: options.currentDepth + 1
-            }
-          );
-        }
-      }
-      // Si es un archivo
-      else if (entry.isFile()) {
-        // Obtener extensión
-        const extension = path.extname(entry.name).toLowerCase();
-
-        // Verificar si la extensión está incluida/excluida
-        const isIncluded = options.includeExtensions.length === 0 ||
-                          options.includeExtensions.includes(extension);
-        const isExcluded = options.excludeExtensions.includes(extension);
-
-        if (isIncluded && !isExcluded) {
-          // Obtener estadísticas del archivo
-          const stats = await fs.stat(entryPath);
-
-          // Incrementar contadores
-          result.totalFiles++;
-          result.totalSize += stats.size;
-
-          // Añadir a la lista de archivos
-          const fileInfo: FileInfo = {
-            name: entry.name,
-            path: entryPath,
-            relativePath,
-            extension,
-            size: stats.size,
-            modifiedAt: stats.mtime,
-            isDirectory: false
-          };
-
-          result.files.push(fileInfo);
-        }
+      if (entry.isFile()) {
+        // 🚀 Procesar archivos en paralelo
+        filePromises.push(processFileEntry(fullPath, relativePath, result, options));
+      } else if (entry.isDirectory() && options.recursive && options.currentDepth < options.maxDepth) {
+        // 🚀 Procesar directorios en paralelo
+        directoryPromises.push(processDirectoryEntry(fullPath, relativePath, basePath, result, options));
       }
     }
+
+    // Procesar todos los archivos en paralelo (máximo 10 concurrent)
+    const chunks = chunkArray(filePromises, 10);
+    for (const chunk of chunks) {
+      await Promise.all(chunk);
+    }    // Procesar directorios recursivamente en paralelo (máximo 5 concurrent)
+    const dirChunks = chunkArray(directoryPromises, 5);
+    for (const chunk of dirChunks) {
+      await Promise.all(chunk);
+    }
+
   } catch (error) {
     scannerLogger.error('Error escaneando subdirectorio:', { path: currentPath, error });
     // Continuar con otros directorios en caso de error
@@ -325,5 +295,161 @@ export async function getFolderStats(folderPath: string): Promise<{
       isDirectory: false,
       error: errorMessage
     };
+  }
+}
+
+/**
+ * Información estadística optimizada del escaneo
+ */
+export interface ScanStats {
+  images: FileInfo[];
+  videos: FileInfo[];
+  others: FileInfo[];
+}
+
+/**
+ * Extrae estadísticas optimizadas de archivos clasificados
+ * 🚀 OPTIMIZACIÓN: Clasificación durante el escaneo
+ */
+export function extractScanStats(files: FileInfo[]): ScanStats {
+  const stats: ScanStats = {
+    images: [],
+    videos: [],
+    others: []
+  };
+
+  // Extensiones de imágenes y videos para clasificación rápida
+  const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif', '.bmp', '.tiff', '.tif', '.svg']);
+  const videoExtensions = new Set(['.mp4', '.webm', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.m4v']);
+
+  for (const file of files) {
+    const ext = file.extension.toLowerCase();
+    if (imageExtensions.has(ext)) {
+      stats.images.push(file);
+    } else if (videoExtensions.has(ext)) {
+      stats.videos.push(file);
+    } else {
+      stats.others.push(file);
+    }
+  }
+
+  return stats;
+}
+
+/**
+ * 🚀 FUNCIONES AUXILIARES PARA OPTIMIZACIÓN
+ */
+
+/**
+ * Divide un array en chunks para procesamiento paralelo controlado
+ */
+function chunkArray<T>(array: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    chunks.push(array.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+/**
+ * Procesa un archivo individual de forma asíncrona - OPTIMIZADO ⚡
+ */
+async function processFileEntry(
+  fullPath: string,
+  relativePath: string,
+  result: FolderScanResult,
+  options: {
+    includeExtensions: string[];
+    excludeExtensions: string[];
+    limit: number;
+  }
+): Promise<void> {
+  try {
+    // Verificar límite antes de procesar
+    if (options.limit > 0 && result.files.length >= options.limit) {
+      return;
+    }
+
+    const stats = await fs.stat(fullPath);
+    const extension = path.extname(fullPath).toLowerCase();
+
+    // Verificar extensiones incluidas/excluidas
+    const includeFile =
+      (options.includeExtensions.length === 0 || options.includeExtensions.includes(extension)) &&
+      !options.excludeExtensions.includes(extension);
+
+    if (includeFile) {
+      const fileInfo: FileInfo = {
+        name: path.basename(fullPath),
+        path: fullPath,
+        relativePath,
+        extension,
+        size: stats.size,
+        modifiedAt: stats.mtime,
+        isDirectory: false
+      };
+
+      result.files.push(fileInfo);
+      result.totalFiles++;
+      result.totalSize += stats.size;
+
+      // 🚀 OPTIMIZACIÓN: Clasificar archivos durante el escaneo
+      const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif', '.bmp', '.tiff', '.tif', '.svg']);
+      const videoExtensions = new Set(['.mp4', '.webm', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.m4v']);
+
+      if (imageExtensions.has(extension)) {
+        result.images.push(fileInfo);
+      } else if (videoExtensions.has(extension)) {
+        result.videos.push(fileInfo);
+      } else {
+        result.others.push(fileInfo);
+      }
+    }
+  } catch (error) {
+    scannerLogger.warn('⚠️ Error procesando archivo:', { path: fullPath, error });
+  }
+}
+
+/**
+ * Procesa un directorio individual de forma asíncrona
+ */
+async function processDirectoryEntry(
+  fullPath: string,
+  relativePath: string,
+  basePath: string,
+  result: FolderScanResult,
+  options: {
+    recursive: boolean;
+    currentDepth: number;
+    maxDepth: number;
+    includeExtensions: string[];
+    excludeExtensions: string[];
+    includeHidden: boolean;
+    limit: number;
+  }
+): Promise<void> {
+  try {
+    const stats = await fs.stat(fullPath);
+
+    const dirInfo: DirectoryInfo = {
+      name: path.basename(fullPath),
+      path: fullPath,
+      relativePath,
+      modifiedAt: stats.mtime,
+      isDirectory: true
+    };
+
+    result.directories.push(dirInfo);
+    result.totalDirectories++;
+
+    // Recursión con aumento de profundidad
+    if (options.recursive && options.currentDepth < options.maxDepth) {
+      await scanDirectory(basePath, fullPath, result, {
+        ...options,
+        currentDepth: options.currentDepth + 1
+      });
+    }
+  } catch (error) {
+    scannerLogger.warn('⚠️ Error procesando directorio:', { path: fullPath, error });
   }
 }

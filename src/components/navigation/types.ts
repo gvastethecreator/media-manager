@@ -2,6 +2,14 @@ import type { NavigationData } from '@/components/navigation/actions/navigation.
 import type { ViewType } from '@/types/file-item';
 import type { LucideIcon } from 'lucide-react';
 
+/**
+ * @description Representa una entidad que puede tener un conteo de imágenes asociadas.
+ *              Utilizado comúnmente por modelos de Prisma con relaciones _count.
+ */
+export type ItemWithImageCount = {
+	_count?: { images?: number }; // 🖼️ El conteo de imágenes es opcional.
+};
+
 export interface NavPanelProps {
 	initialData: NavigationData;
 	isCollapsed?: boolean;

@@ -5,6 +5,7 @@
  * @module app/actions/folders/folder-crud.actions
  */
 
+import { invalidateAllFolderCache } from '@/lib/folder-cache'; // 🚀 NUEVA IMPORTACIÓN
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { transformFolder } from '@/transformers/folder';
@@ -24,13 +25,15 @@ const REVALIDATE_PATHS = [
 ];
 
 /**
- * Revalida todas las rutas relevantes
+ * Revalida todas las rutas relevantes - OPTIMIZADO ⚡
  */
 async function revalidatePaths() {
   for (const path of REVALIDATE_PATHS) {
     revalidatePath(path);
   }
-  crudLogger.info('🔄 Rutas revalidadas');
+  // 🚀 OPTIMIZACIÓN: Invalidar cache también
+  invalidateAllFolderCache();
+  crudLogger.info('🔄 Rutas revalidadas y cache invalidado');
 }
 
 /**
