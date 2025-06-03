@@ -1,13 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { EmojiPicker } from "../ui/emoji-picker";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { CompactPicker } from "react-color";
 import { cn } from "@/lib/utils";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
 
 // Tipos base para las entidades
 export interface BaseEntityFormData {

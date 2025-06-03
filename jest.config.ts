@@ -73,7 +73,6 @@ const customJestConfig: Config = {
     url: 'http://localhost:3000',
     customExportConditions: [''],
   },
-  resolver: '<rootDir>/src/tests/resolver.js',
   verbose: true,
   detectOpenHandles: true,
   forceExit: true

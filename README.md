@@ -102,6 +102,12 @@ El sistema utiliza variables de entorno para su configuración. Copia el archivo
 - Documenta los componentes y funciones principales
 - Usa commits semánticos
 
+## Pruebas
+
+Las guías de testing se encuentran en [docs/testing/GUIDELINES.md](docs/testing/GUIDELINES.md).
+Para ejecutar la suite utiliza `pnpm test`. El objetivo es mantener una cobertura
+superior al 80 % en líneas y statements.
+
 ## Licencia
 
 MIT - Ver [LICENSE](LICENSE) para más detalles.

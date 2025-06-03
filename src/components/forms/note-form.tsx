@@ -1,22 +1,22 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Separator } from "../ui/separator";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
-import { EmojiPicker } from "../ui/emoji-picker";
+} from "@/components/ui/select";
+import { EmojiPicker } from "@/components/ui/emoji-picker";
 import { CompactPicker } from "react-color";
 import { useState } from "react";
-import { Label } from "../ui/label";
+import { Label } from "@/components/ui/label";
 
 const NOTE_CATEGORIES = [
 	{ value: "personal", label: "Personal" },
