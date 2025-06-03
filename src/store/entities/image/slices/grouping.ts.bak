@@ -1,7 +1,99 @@
 /**
- * Recalcula los grupos de imágenes basado en la configuración actual
+ * @file Slice para agrupación y selección del store de imágenes
+ * @module store/entities/image/slices/grouping
  */
-recalculateGroups: (allImages: ImageExtended[]) => {
+
+import { Logger } from '@/lib/logger';
+import { transformImageToExtended, transformImageToWithStats } from '@/transformers/image/transformer';
+import type { ImageExtended, ImageGroupType, ImageSortCriteria, ImageWithStats } from '@/types/entities/image';
+import { format } from 'date-fns';
+import type { StateCreator } from 'zustand';
+import type { ImageGroup, ImageState, ImageStoreStats } from '../types';
+
+// Logger para el slice
+const groupingLogger = new Logger('ImageGroupingSlice');
+const selectionLogger = new Logger('ImageSelectionSlice');
+
+// Slice para agrupación y selección
+export interface ImageGroupingSlice {
+	// Estado de agrupación
+	grouping: {
+		groupBy: ImageGroupType | null;
+		sortCriteria: ImageSortCriteria;
+	};
+	groupedImages: ImageGroup[];
+	filteredImages: ImageExtended[];
+	stats: ImageStoreStats;
+
+	// Estado de selección
+	selection: {
+		selectedIds: string[];
+	};
+
+	// Acciones de agrupación
+	recalculateGroups: (allImages: ImageExtended[]) => void;
+	setGroupBy: (groupBy: ImageGroupType | null) => void;
+	setSortCriteria: (sortCriteria: ImageSortCriteria) => void;
+	sortImages: (images: ImageExtended[], criteria: ImageSortCriteria) => ImageExtended[];
+
+	// Acciones de selección
+	toggleSelection: (imageId: string) => void;
+	selectRange: (imageId: string) => void;
+	selectAll: () => void;
+	clearSelection: () => void;
+	updateIsSelectedState: () => void;
+
+	// Utilidades
+	getVisibleImages: (includeStats?: boolean) => ImageExtended[] | ImageWithStats[];
+	calculateStats: (images: ImageWithStats[]) => ImageStoreStats;
+}
+
+// Creador del slice
+export const createImageGroupingSlice: StateCreator<ImageState, [], [], ImageGroupingSlice> = (set, get) => ({
+	// Estado inicial
+	grouping: {
+		groupBy: null,
+		sortCriteria: 'date' as ImageSortCriteria,
+	},
+	groupedImages: [],
+	filteredImages: [],
+	stats: {
+		total: 0,
+		favorites: 0,
+		public: 0,
+		private: 0,
+		withThumbnails: 0,
+		withoutThumbnails: 0,
+		fileTypes: {},
+		largest: null,
+		smallest: null,
+		newest: null,
+		oldest: null,
+	},
+	selection: {
+		selectedIds: [],
+	},
+
+	// Función para ordenar imágenes
+	sortImages: (images: ImageExtended[], sortCriteria: ImageSortCriteria): ImageExtended[] => {
+		return [...images].sort((a, b) => {
+			switch (sortCriteria) {
+				case 'name':
+					return a.name.localeCompare(b.name);
+				case 'date':
+					return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+				case 'size':
+					return (b.size || 0) - (a.size || 0);
+				default:
+					return 0;
+			}
+		});
+	},
+
+	/**
+	 * Recalcula los grupos de imágenes basado en la configuración actual
+	 */
+	recalculateGroups: (allImages: ImageExtended[]) => {
   const { groupBy, sortCriteria } = get().grouping;
   const { selectedIds } = get().selection;
   groupingLogger.info('🔄 Recalculando grupos', { groupBy, sortCriteria });
@@ -69,50 +161,45 @@ recalculateGroups: (allImages: ImageExtended[]) => {
     count: images.length
   }));
 
-  // Ordenar los grupos
-  groupedArray.sort((a, b) => {
-    if (groupBy === 'month' || groupBy === 'day') {
-      return b.label.localeCompare(a.label); // Fecha más reciente primero
-    }
-    // TODO: Añadir lógica de ordenación para otros tipos de grupos si es necesario
-    return a.label.localeCompare(b.label);
-  });
+		// Ordenar los grupos
+		groupedArray.sort((a, b) => {
+			if (groupBy === 'month' || groupBy === 'day') {
+				return b.label.localeCompare(a.label); // Fecha más reciente primero
+			}
+			// TODO: Añadir lógica de ordenación para otros tipos de grupos si es necesario
+			return a.label.localeCompare(b.label);
+		});
 
-  set({ groupedImages: groupedArray, stats: get().calculateStats(allImages) });
-  groupingLogger.info('✅ Grupos recalculados:', groupedArray.length);
-},
+		set({ groupedImages: groupedArray, stats: get().calculateStats(allImages as ImageWithStats[]) });
+		groupingLogger.info('✅ Grupos recalculados:', groupedArray.length);
+	},
 
-/**
- * Establece el criterio de agrupación y recalcula los grupos
- */
-setGroupBy: (groupBy: ImageGroupType | null) => {
-  groupingLogger.info('🏷️ Estableciendo agrupación por:', groupBy);
-  set((state) => ({
-    grouping: { ...state.grouping, groupBy },
-  }));
-  get().recalculateGroups(get().getVisibleImages(true));
-},
+	/**
+	 * Establece el criterio de agrupación y recalcula los grupos
+	 */
+	setGroupBy: (groupBy: ImageGroupType | null) => {
+		groupingLogger.info('🏷️ Estableciendo agrupación por:', groupBy);
+		set((state) => ({
+			grouping: { ...state.grouping, groupBy },
+		}));
+		get().recalculateGroups(get().getVisibleImages(true) as ImageExtended[]);
+	},
 
-/**
- * Establece el criterio de ordenación y reordena los grupos existentes
- */
-setSortCriteria: (sortCriteria: ImageSortCriteria) => {
-  groupingLogger.info('⇅ Estableciendo ordenación por:', sortCriteria);
-  set((state) => ({
-    grouping: { ...state.grouping, sortCriteria },
-  }));
-  // Reordenar las imágenes dentro de cada grupo existente
-  const reorderedGroups = get().groupedImages.map(group => ({
-    ...group,
-    images: get().sortImages(group.images, sortCriteria)
-  }));
-  set({ groupedImages: reorderedGroups });
-},
-
-// --- Selection Slice ---
-selection: {
-  selectedIds: [],
-},
+	/**
+	 * Establece el criterio de ordenación y reordena los grupos existentes
+	 */
+	setSortCriteria: (sortCriteria: ImageSortCriteria) => {
+		groupingLogger.info('⇅ Estableciendo ordenación por:', sortCriteria);
+		set((state) => ({
+			grouping: { ...state.grouping, sortCriteria },
+		}));
+		// Reordenar las imágenes dentro de cada grupo existente
+		const reorderedGroups = get().groupedImages.map(group => ({
+			...group,
+			images: get().sortImages(group.images as ImageExtended[], sortCriteria)
+		}));
+		set({ groupedImages: reorderedGroups });
+	},
 
 /**
  * Selecciona o deselecciona una imagen
