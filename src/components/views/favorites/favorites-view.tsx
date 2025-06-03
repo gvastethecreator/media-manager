@@ -6,7 +6,7 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
 import type { FileItem } from '@/types/file-item';
 import { Star } from 'lucide-react';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -14,7 +14,14 @@ import { useCallback, useEffect, useMemo } from 'react';
 const viewLogger = clientLogger.withContext('FavoritesView');
 
 export function FavoritesView() {
-	const { currentItems: items, toggleItemSelection, setItems, isLoading, setIsLoading } = useFileManager();
+	// 🌟 Usar el store unificado con métodos específicos para favoritos
+	const {
+		currentItems: items,
+		toggleItemSelection,
+		isLoading,
+		setIsLoading,
+		setCurrentItems
+	} = useUnifiedFileManager();
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticItems, _addEvent] = clientEvents.useEvents<FileItem[]>(items);
@@ -23,35 +30,26 @@ export function FavoritesView() {
 		try {
 			viewLogger.info('🔄 Cargando favoritos...');
 			setIsLoading(true);
-			const favorites = await getFavorites();
-			// Asegurarnos de que los objetos retornados por getFavorites sean compatibles con FileItem
-			const adaptedFavorites: FileItem[] = favorites.map((f) => {
-				// Convertir explícitamente a FileItem con campos requeridos
-				const imageData = f.image as unknown as {
-					id: string;
-					hash: string;
-					name: string;
-					path: string;
-					type: string;
-					size: number;
-					width: number;
-					height: number;
-					// otros campos necesarios
-				};
 
-				return {
-					...(imageData as unknown as FileItem),
-					isFavorite: true,
-				};
-			});
-			setItems(adaptedFavorites);
-			viewLogger.info('✅ Favoritos cargados');
+			// Obtener favoritos desde la API
+			const favorites = await getFavorites();
+
+			// Transformar a FileItem[] con isFavorite: true
+			const favoriteItems: FileItem[] = favorites.map((f) => ({
+				...f.image,
+				isFavorite: true, // Asegurar que todos los favoritos tengan esta propiedad
+			}));
+
+			// 🌟 Actualizar el store unificado con los favoritos
+			setCurrentItems(favoriteItems);
+
+			viewLogger.info('✅ Favoritos cargados:', { count: favoriteItems.length });
 		} catch (error) {
 			viewLogger.error('❌ Error cargando favoritos:', error);
 		} finally {
 			setIsLoading(false);
 		}
-	}, [setItems, setIsLoading]);
+	}, [setIsLoading, setCurrentItems]);
 
 	useEffect(() => {
 		loadFavorites();

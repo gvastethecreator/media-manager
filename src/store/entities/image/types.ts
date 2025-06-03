@@ -38,6 +38,7 @@ export interface ImageState {
 	core: ImageCoreState;
 	ui: ImageUIState;
 	filters: ImageFiltersState;
+	grouping: ImageGroupingState;
 }
 
 /**
@@ -48,6 +49,20 @@ export interface ImageCoreState {
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;
+}
+
+/**
+ * Estado del slice de agrupación
+ */
+export interface ImageGroupingState {
+	groupBy: ImageGroupType | null;
+	sortCriteria: ImageSortCriteria;
+	groupedImages: ImageGroup[];
+	filteredImages: ImageExtended[];
+	stats: ImageStoreStats;
+	selection: {
+		selectedIds: string[];
+	};
 }
 
 /**

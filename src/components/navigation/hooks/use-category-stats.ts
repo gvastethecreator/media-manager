@@ -45,157 +45,211 @@ export function useCategoryStats(initialData: NavigationData) {
 		wildcards = [],
 	} = initialData || {};
 
-	// Función auxiliar para obtener la cantidad de ítems para cada categoría
+	/**
+	 * 🗂️ Función auxiliar para obtener array de items de manera segura
+	 * @param items Array de items, resultado de búsqueda o cualquier estructura de datos
+	 * @returns Array de items normalizado
+	 */
+	const getSafeItemsArray = useCallback((items: any): any[] => {
+		// 📝 Si ya es un array, devolverlo
+		if (Array.isArray(items)) {
+			return items;
+		}
+		// 🔍 Si es un resultado de búsqueda con propiedad `items` (CharacterSearchResult, ConceptSearchResult, etc.)
+		if (items && typeof items === 'object') {
+			if (Array.isArray(items.items)) {
+				return items.items;
+			}
+			if (Array.isArray(items.data)) {
+				return items.data;
+			}
+		}
+		return [];
+	}, []);
+
+	/**
+	 * 🔢 Función auxiliar para obtener la longitud de arrays de manera segura
+	 * @param items Array de items, resultado de búsqueda o cualquier estructura de datos
+	 * @returns Número de items
+	 */
+	const getSafeArrayLength = useCallback((items: any): number => {
+		// 📝 Si es un array, devolver su longitud
+		if (Array.isArray(items)) {
+			return items.length;
+		}
+		// 🔍 Si es un resultado de búsqueda con propiedades específicas
+		if (items && typeof items === 'object') {
+			// Para CharacterSearchResult, ConceptSearchResult, etc.
+			if (Array.isArray(items.items)) {
+				return items.items.length;
+			}
+			// Para otros tipos de resultados de búsqueda
+			if (Array.isArray(items.data)) {
+				return items.data.length;
+			}
+			// Si tiene un total directo
+			if (typeof items.total === 'number') {
+				return items.total;
+			}
+		}
+		return 0;
+	}, []);
+
+	/**
+	 * 🔢 Función auxiliar para calcular el total de imágenes de manera segura
+	 * @param items Array de items o resultado de búsqueda
+	 * @returns Número total de imágenes
+	 */
+	const calculateTotalImages = useCallback((items: any): number => {
+		const itemsArray = getSafeItemsArray(items);
+
+		return itemsArray.reduce((sum: number, item: any) => {
+			// 🛡️ Manejo seguro de diferentes estructuras de _count
+			if (item?._count?.images) {
+				return sum + item._count.images;
+			}
+			// 📊 Alternativa para items con imageCount directo
+			if (typeof item?.imageCount === 'number') {
+				return sum + item.imageCount;
+			}
+			return sum;
+		}, 0);
+	}, [getSafeItemsArray]);
+
+	/**
+	 * 🗂️ Función auxiliar para mapear items de navegación a CategoryChild de manera segura
+	 * @param items Array de items del tipo de navegación
+	 * @returns Array de CategoryChild mapeados de manera segura
+	 */
+	const mapToCategoryChildren = useCallback((items: any): CategoryChild[] => {
+		const itemsArray = getSafeItemsArray(items);
+
+		return itemsArray.map((item): CategoryChild => ({
+			id: item.id || '',
+			name: item.name || item.title || '', // 📝 Soporte para notas que usan 'title'
+			title: item.title,
+			emoji: item.emoji,
+			color: item.color,
+			path: item.path,
+			description: item.description,
+			_count: item._count ? {
+				images: item._count.images || 0,
+				folders: item._count.folders,
+				collections: item._count.collections,
+				tags: item._count.tags,
+			} : undefined
+		}));
+	}, [getSafeItemsArray]);
+
+	// 🔢 Función auxiliar para obtener la cantidad de ítems para cada categoría
 	const getCategoryItemCount = useCallback(
 		(categoryId: ViewType): number => {
 			switch (categoryId) {
 				case 'collections':
-					return stats?.totalCollections || collections.length || 0;
+					return stats?.totalCollections || getSafeArrayLength(collections) || 0;
 				case 'folders':
-					return stats?.totalFolders || folders.length || 0;
+					return stats?.totalFolders || getSafeArrayLength(folders) || 0;
 				case 'tags':
-					return stats?.totalTags || tags.length || 0;
+					return stats?.totalTags || getSafeArrayLength(tags) || 0;
 				case 'albums':
-					return stats?.totalAlbums || albums.length || 0;
+					return stats?.totalAlbums || getSafeArrayLength(albums) || 0;
 				case 'characters':
-					return stats?.totalCharacters || characters.length || 0;
+					return stats?.totalCharacters || getSafeArrayLength(characters) || 0;
 				case 'places':
-					return stats?.totalPlaces || places.length || 0;
+					return stats?.totalPlaces || getSafeArrayLength(places) || 0;
 				case 'world-items':
-					return stats?.totalObjects || worldItems.length || 0;
+					return stats?.totalObjects || getSafeArrayLength(worldItems) || 0;
 				case 'concepts':
-					return concepts.length || 0;
+					return getSafeArrayLength(concepts) || 0;
 				case 'prompts':
-					return prompts.length || 0;
+					return getSafeArrayLength(prompts) || 0;
 				case 'notes':
-					return notes.length || 0;
+					return getSafeArrayLength(notes) || 0;
 				case 'groups':
-					return stats?.totalGroups || groups.length || 0;
+					return stats?.totalGroups || getSafeArrayLength(groups) || 0;
 				case 'properties':
-					return stats?.totalProperties || properties.length || 0;
+					return stats?.totalProperties || getSafeArrayLength(properties) || 0;
 				case 'wildcards':
-					return stats?.totalWildcards || wildcards.length || 0;
+					return stats?.totalWildcards || getSafeArrayLength(wildcards) || 0;
 				default:
 					return 0;
 			}
 		},
-		[albums, characters, collections, concepts, folders, notes, places, prompts, stats, tags, worldItems, groups, properties, wildcards]
+		[getSafeArrayLength, albums, characters, collections, concepts, folders, notes, places, prompts, stats, tags, worldItems, groups, properties, wildcards]
 	);
 
-	// Calcula y devuelve el número de imágenes para una categoría
+	// 📊 Calcula y devuelve el número de imágenes para una categoría
 	const getImagesForCategory = useCallback(
 		(categoryId: ViewType): number => {
 			switch (categoryId) {
 				case 'collections':
-					return collections.reduce(
-						(sum: number, collection: { _count?: { images: number } }) => sum + (collection._count?.images || 0),
-						0
-					);
+					return calculateTotalImages(collections);
 				case 'folders':
-					return folders.reduce(
-						(sum: number, folder: { _count?: { images: number } }) => sum + (folder._count?.images || 0),
-						0
-					);
+					return calculateTotalImages(folders);
 				case 'tags':
-					return tags.reduce((sum: number, tag: { _count?: { images: number } }) => sum + (tag._count?.images || 0), 0);
+					return calculateTotalImages(tags);
 				case 'albums':
-					return albums.reduce(
-						(sum: number, album: { _count?: { images: number } }) => sum + (album._count?.images || 0),
-						0
-					);
+					return calculateTotalImages(albums);
 				case 'characters':
-					return Array.isArray(characters)
-						? characters.reduce(
-								(sum: number, character: { _count?: { images: number } }) => sum + (character?._count?.images || 0),
-								0
-						  )
-						: 0;
+					return calculateTotalImages(characters);
 				case 'places':
-					return Array.isArray(places)
-						? places.reduce(
-								(sum: number, place: { _count?: { images: number } }) => sum + (place?._count?.images || 0),
-								0
-						  )
-						: 0;
+					return calculateTotalImages(places);
 				case 'world-items':
-					return Array.isArray(worldItems)
-						? worldItems.reduce(
-								(sum: number, worldItem: { _count?: { images: number } }) => sum + (worldItem?._count?.images || 0),
-								0
-						  )
-						: 0;
+					return calculateTotalImages(worldItems);
 				case 'concepts':
-					return Array.isArray(concepts) ? concepts.reduce(
-						(sum: number, concept: { _count?: { images: number } }) => sum + (concept?._count?.images || 0),
-						0
-					) : 0;
+					return calculateTotalImages(concepts);
 				case 'prompts':
-					return Array.isArray(prompts) ? prompts.reduce(
-						(sum: number, prompt: { _count?: { images: number } }) => sum + (prompt?._count?.images || 0),
-						0
-					) : 0;
+					return calculateTotalImages(prompts);
 				case 'notes':
-					return Array.isArray(notes) ? notes.reduce(
-						(sum: number, note: { _count?: { images: number } }) => sum + (note?._count?.images || 0),
-						0
-					) : 0;
+					return calculateTotalImages(notes);
 				case 'groups':
-					return Array.isArray(groups) ? groups.reduce(
-						(sum: number, group: { _count?: { images: number } }) => sum + (group?._count?.images || 0),
-						0
-					) : 0;
+					return calculateTotalImages(groups);
 				case 'properties':
-					return Array.isArray(properties) ? properties.reduce(
-						(sum: number, property: { _count?: { images: number } }) => sum + (property?._count?.images || 0),
-						0
-					) : 0;
+					return calculateTotalImages(properties);
 				case 'wildcards':
-					return Array.isArray(wildcards) ? wildcards.reduce(
-						(sum: number, wildcard: { _count?: { images: number } }) => sum + (wildcard?._count?.images || 0),
-						0
-					) : 0;
+					return calculateTotalImages(wildcards);
 				default:
 					return 0;
 			}
 		},
-		[albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems, groups, properties, wildcards]
+		[calculateTotalImages, albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems, groups, properties, wildcards]
 	);
 
-	// Función para obtener los elementos hijos de cada categoría con corrección de tipos
+	// 🏷️ Función para obtener los elementos hijos de cada categoría con mapeo seguro de tipos
 	const getCategoryItems = useCallback(
-		(categoryId: ViewType) => {
+		(categoryId: ViewType): CategoryChild[] => {
 			switch (categoryId) {
 				case 'collections':
-					return collections as unknown as CategoryChild[];
+					return mapToCategoryChildren(collections);
 				case 'folders':
-					return folders as unknown as CategoryChild[];
+					return mapToCategoryChildren(folders);
 				case 'tags':
-					return tags as unknown as CategoryChild[];
+					return mapToCategoryChildren(tags);
 				case 'albums':
-					return albums as unknown as CategoryChild[];
+					return mapToCategoryChildren(albums);
 				case 'characters':
-					return characters as unknown as CategoryChild[];
+					return mapToCategoryChildren(characters);
 				case 'places':
-					return places as unknown as CategoryChild[];
+					return mapToCategoryChildren(places);
 				case 'world-items':
-					return worldItems as unknown as CategoryChild[];
+					return mapToCategoryChildren(worldItems);
 				case 'concepts':
-					return concepts as unknown as CategoryChild[];
+					return mapToCategoryChildren(concepts);
 				case 'prompts':
-					return prompts as unknown as CategoryChild[];
+					return mapToCategoryChildren(prompts);
 				case 'notes':
-					return notes as unknown as CategoryChild[];
+					return mapToCategoryChildren(notes);
 				case 'groups':
-					return groups as unknown as CategoryChild[];
+					return mapToCategoryChildren(groups);
 				case 'properties':
-					return properties as unknown as CategoryChild[];
+					return mapToCategoryChildren(properties);
 				case 'wildcards':
-					return wildcards as unknown as CategoryChild[];
+					return mapToCategoryChildren(wildcards);
 				default:
-					return [] as CategoryChild[];
+					return [];
 			}
 		},
-		[albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems, groups, properties, wildcards]
+		[mapToCategoryChildren, albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems, groups, properties, wildcards]
 	);
 
 	return {

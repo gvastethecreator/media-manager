@@ -5,36 +5,26 @@ import { EmptyState } from '@/components/core/data-display/empty-state/empty-sta
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useFolderImages } from '@/hooks/use-folder-images';
-import type { FileManagerState } from '@/store/files/file-manager.store';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useFolder } from '@/lib/hooks/use-navigation';
 import type { FileItem, FileProcessingStatus, FileType } from '@/types/file-item';
 import { Folder } from 'lucide-react';
 import { useCallback, useEffect } from 'react';
 
 export function FolderContentView() {
-	// Obtener el ID de la carpeta actual del store
-	const currentFolderId = useFileManager((state: FileManagerState) => state.currentFolderId);
-	const setItems = useFileManager((state: FileManagerState) => state.setItems);
+	// 📂 Usar el hook especializado para carpetas
+	const { currentFolder, setCurrentFolder, folderImages, isLoading: folderLoading } = useFolder();
+	const currentFolderId = currentFolder?.id || null;
 
 	// Usar el hook personalizado para obtener las imágenes
 	const { data: images, isLoading, isError, error, refetch } = useFolderImages(currentFolderId);
 
-	// Actualizar el store cuando cambian las imágenes
+	// 🔄 Actualizar el contexto de carpeta cuando cambian las imágenes
 	useEffect(() => {
-		if (images) {
-			// Usar una conversión explícita para evitar problemas de tipo
-			const fileItems = images.map(img => ({
-				...img,
-				id: img.id,
-				type: 'image' as FileType,
-				mimeType: 'image/jpeg',
-				processingStatus: 'completed' as FileProcessingStatus,
-				metadata: img.metadata || '{}'
-			})) as unknown as FileItem[];
-
-			setItems(fileItems);
+		if (images && currentFolderId) {
+			// Las imágenes se actualizan automáticamente a través del store unificado
+			// No necesitamos setItems manual
 		}
-	}, [images, setItems]);
+	}, [images, currentFolderId]);
 
 	// Función para reindexar la carpeta
 	const handleReindex = useCallback(async () => {
@@ -50,7 +40,7 @@ export function FolderContentView() {
 	}, [currentFolderId, refetch]);
 
 	// Mostrar estado de carga
-	if (isLoading) {
+	if (isLoading || folderLoading) {
 		return (
 			<div className="flex items-center justify-center h-full">
 				<LoadingSpinner />
@@ -69,18 +59,22 @@ export function FolderContentView() {
 		);
 	}
 
+	// 🎯 Usar las imágenes del hook o del store unificado
+	const displayImages = folderImages.length > 0 ? folderImages :
+		(images ? images.map((img: any) => ({
+			...img,
+			id: img.id,
+			type: 'image' as FileType,
+			mimeType: 'image/jpeg',
+			processingStatus: 'completed' as FileProcessingStatus,
+			metadata: img.metadata || '{}'
+		})) as FileItem[] : []);
+
 	// Renderizar el navegador de archivos
 	return (
 		<div className="h-full w-full">
 			<FileBrowser
-				items={images ? images.map(img => ({
-					...img,
-					id: img.id,
-					type: 'image' as FileType,
-					mimeType: 'image/jpeg',
-					processingStatus: 'completed' as FileProcessingStatus,
-					metadata: img.metadata || '{}'
-				})) as unknown as FileItem[] : []}
+				items={displayImages}
 				onItemClick={(item) => {
 					// Aquí puedes manejar el clic en un item si es necesario
 				}}
