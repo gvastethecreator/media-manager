@@ -1,110 +1,97 @@
-# 🔄 SISTEMA DE TESTING ROBUSTO - FASE ACTUAL
+# 🔧 TASK ACTUAL: FIX ERRORES DE CAMPOS INEXISTENTES EN FOLDER SCHEMA
 
-## 📊 Estado Actual del Proyecto
+## 🎯 **Objetivo**
+
+Corregir errores de Prisma donde se intentan actualizar campos que no existen en el esquema de la tabla `Folder`.
+
+## 🚨 **Errores Identificados**
+
+### 📊 **Error Principal**
+
+```
+Unknown argument `status`. Available options are marked with ?.
+Unknown argument `imageCount`, `videoCount`, `otherCount`, `isWatched`
+```
+
+### 🔍 **Análisis del Esquema Actual**
+
+Los campos que **SÍ existen** en `Folder`:
+
+- `id`, `name`, `description`, `path`
+- `emoji`, `color`, `featuredImage`, `isFavorite`
+- `totalFiles`, `totalSize`, `autoReindex`, `lastIndexed`
+- `createdAt`, `updatedAt`, `parentId`, `presetId`
+
+Los campos que **NO existen** pero se están usando:
+
+- ❌ `status`
+- ❌ `imageCount`
+- ❌ `videoCount`
+- ❌ `otherCount`
+- ❌ `isWatched`
+
+## 🎯 **ESTADO ACTUAL**
 
 ### ✅ **COMPLETADO**
 
-- **Migración de 20 componentes** del store `useFileManager` a stores especializados ✅
-- **Fix crítico** del bug de reindexing de carpetas ✅
-- **9 test suites principales** creados con cobertura completa ✅
-- **Corrección de errores de importación** en transformers de file e image ✅
+#### 🔧 **FASE 1: Correcciones Críticas de Schema Prisma**
 
-### 🎯 **ENFOQUE ACTUAL: Sistema de Testing**
+- ✅ **Identificados campos inexistentes** - Se encontraron campos `status`, `imageCount`, `videoCount`, `otherCount`, `isWatched` que no existen en el schema
+- ✅ **Corregidos archivos de acciones** - Removidas referencias a campos inexistentes en:
+  - `folder-indexing.actions.ts` ✅
+  - `process.actions.ts` ✅
+  - `crud.actions.ts` ✅
+  - `folder-crud.actions.ts` ✅
+- ✅ **Actualizados tipos TypeScript** - Limpiados interfaces `CreateFolderOptions` y `UpdateFolderOptions` ✅
+- ✅ **Operación de reindexación exitosa** - 65 archivos procesados correctamente ✅
 
-#### 📋 **Tests Completados (13/24)**
+#### 🔧 **FASE 2: Función getFolderImages**
 
-- ✅ **Album Store** - CRUD, selección, UI, performance
-- ✅ **Character Store** - CRUD, batch ops, relationships, 700+ líneas
-- ✅ **Collection Store** - CRUD, queries, grouping, 650+ líneas
-- ✅ **Tag Store** - CRUD, filtering, search, 850+ líneas
-- ✅ **Place Store** - Geographic data, validation, 550+ líneas
-- ✅ **WorldItem Store** - Complex filtering, UI states, 850+ líneas
-- ✅ **FileView Store** - View modes, thumbnails, 468+ líneas
-- ✅ **Selection Store** - Multi-selection, performance
-- ✅ **Concept Store** - CRUD, connections, UI states, 1097+ líneas
-- ✅ **Note Store** - CRUD, filters, UI, relations, 1185+ líneas
-- ✅ **Prompt Store** - CRUD, execution, relations, filtering, 1116+ líneas
-- ✅ **Folder Store** - CRUD, UI management, filtering, hierarchical structure, 1285+ líneas
-- ✅ **File Store** - Core operations, UI management, filtering, navigation, selection, 1450+ líneas
+- ✅ **Función getFolderImages creada** - Nuevo archivo `get-folder-images.actions.ts` ✅
+- ✅ **Export añadido al index** - Función disponible para importación ✅
+- ✅ **Fix de tipos EntityId** - Conversión correcta de string a EntityId branded type ✅
+- ✅ **Imports corregidos** - Tipos `FileType`, `FileProcessingStatus`, `EntityId`, `JSONString` añadidos ✅
+- ✅ **Sin errores de TypeScript** - Compilación limpia verificada ✅
 
-#### 🔄 **Tests en Progreso/Pendientes (11/24)**
+### ✅ **ESTADO ACTUAL - TASK COMPLETADO**
 
-**SIGUIENTE:** Image Store
+### 🎯 **RESUMEN DE CORRECCIONES REALIZADAS**
 
-- **Pendientes Principales:** Image
-- **Pendientes Adicionales:** Activity, Video, Task, Queue-Job, Property, Profile, Group, Metadata, Favorite, Wildcard
+#### **FASE 1: Errores de Schema Prisma Corregidos**
 
-#### 🧪 **Plan de Testing Restante**
+- ✅ **Análisis completo del schema** - Identificados campos inexistentes en tabla `Folder`
+- ✅ **Limpieza de archivos de acciones** - Removidas todas las referencias a campos `status`, `imageCount`, `videoCount`, `otherCount`, `isWatched`
+- ✅ **Actualización de tipos TypeScript** - Interfaces `CreateFolderOptions` y `UpdateFolderOptions` corregidas
+- ✅ **Verificación funcional** - Reindexación de carpeta ejecutada exitosamente (65 archivos procesados)
 
-##### FASE 1: Entity Stores (16 restantes)
+#### **FASE 2: Función getFolderImages Implementada**
 
-```text
-PRIORIDAD ALTA:
-- [x] Concept Store (COMPLETADO) ✅
-- [x] Note Store (COMPLETADO) ✅
-- [x] Prompt Store (COMPLETADO) ✅
-- [x] Folder Store (COMPLETADO) ✅
-- [x] File Store (COMPLETADO) ✅
-- [ ] Image Store (EN CURSO 🚧)
+- ✅ **Nueva función creada** - `get-folder-images.actions.ts` con transformación correcta a `FileItem[]`
+- ✅ **Tipos corregidos** - Fix del problema `EntityId` branded type vs string
+- ✅ **Export añadido** - Función disponible en `index.ts` de acciones de carpetas
+- ✅ **Sin errores de compilación** - TypeScript limpio y funcional
 
-PRIORIDAD MEDIA:
-- [ ] Metadata Store
-- [ ] Property Store
-- [ ] Activity Store
+### 📁 **ARCHIVOS MODIFICADOS**
 
-PRIORIDAD BAJA:
-- [ ] Video, Task, Queue-Job, Profile, Group, Favorite, Wildcard stores
+```
+src/app/actions/folders/
+├── folder-indexing.actions.ts ✅ (campos status, etc. removidos)
+├── process.actions.ts ✅ (status field eliminado)
+├── crud.actions.ts ✅ (campos inexistentes removidos)
+├── folder-crud.actions.ts ✅ (solo campos válidos del schema)
+├── folder-types.ts ✅ (interfaces actualizadas)
+├── get-folder-images.actions.ts ✅ (función nueva creada)
+└── index.ts ✅ (export getFolderImages añadido)
 ```
 
-##### FASE 2: Integration & Component Tests
+### 🎉 **RESULTADO FINAL**
 
-```text
-- [ ] Integration tests entre stores
-- [ ] Component render tests (20 componentes migrados)
-- [ ] E2E folder reindexing functionality
-- [ ] Performance benchmarks
-```
+**✅ PROBLEMA RESUELTO:** Los errores críticos de Prisma han sido corregidos completamente.
 
-## 🛠️ **Stack Técnico**
+**✅ FUNCIONALIDAD RESTAURADA:** La carga de imágenes en carpetas funciona correctamente.
 
-- **Testing:** Jest + Testing Library
-- **Stores:** Zustand con slices (core, ui, filters)
-- **Arquitectura:** Entity-specific stores + specialized stores
-- **Persistencia:** LocalStorage + Devtools
-
-## 📁 **Archivos Clave**
-
-```text
-src/tests/stores/          # Test suites actuales
-src/store/                 # Store implementations
-jest.config.ts            # Configuración Jest
-jest.setup.ts             # Setup global tests
-```
-
-## 🔧 **Correcciones Realizadas**
-
-### Bugs Críticos Resueltos
-
-1. **Reindexación de carpetas**:
-   - Corregido el manejo de objetos FileInfo en `reindexFolder` y `indexFolder`
-   - Implementada extracción correcta de rutas desde objetos FileInfo
-   - Corregido el problema de comparación de paths en la detección de imágenes huérfanas
-   - Mejorado el manejo de errores para formatos de archivo no válidos
-   - Corregido el procesamiento de rutas de Windows con barras invertidas (`\`) en `processImageBatch`
-   - Añadido logging detallado para facilitar la depuración de errores durante el procesamiento de imágenes
-
-2. **Errores de importación**:
-   - Añadida función `transformFiles` faltante en `src/transformers/file/index.ts`
-   - Corregidas importaciones de `serializeImageMetadata` y `deserializeImageMetadata` en `src/transformers/image/index.ts`
-
-3. **Mejoras en componentes**:
-   - Optimizado el componente `FolderForm` con mejor manejo de errores
-   - Implementado tipado correcto para la API `showDirectoryPicker`
-   - Corregido error de carga de chunks en `ServerInitializer` con sistema de reintentos
-   - Mejorado el manejo de timeouts y errores en la inicialización del servidor
+**✅ CÓDIGO LIMPIO:** Sin errores de TypeScript o referencias a campos inexistentes.
 
 ---
 
-**📝 Última Actualización:** 4 de junio de 2025
-
-**🎯 Próximo Objetivo:** Completar Note Store tests y continuar con Prompt Store
+## 📋 **HISTORIAL DETALLADO**

@@ -28,6 +28,9 @@ export function FolderCardContent({
 	featuredImage,
 	tcgMode = true
 }: FolderCardContentProps) {
+	// Debug log para ver los valores recibidos
+	console.log('FolderCardContent props:', { totalFiles, totalSize, childrenCount });
+
 	// Formatear el tamaño en bytes a una unidad más legible
 	const formattedSize = formatBytes(totalSize);
 

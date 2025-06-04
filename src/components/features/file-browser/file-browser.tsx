@@ -469,10 +469,30 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 		return processedItem;
 	}, []);
 
+	// Depuración: Registrar los items recibidos
+	useEffect(() => {
+		gridLogger.info(`📊 FileBrowser recibió ${items.length} items`);
+
+		if (items.length > 0) {
+			// Mostrar información del primer item para depuración
+			const firstItem = items[0];
+			gridLogger.debug('📄 Primer item recibido:', {
+				id: firstItem.id,
+				name: firstItem.name,
+				type: firstItem.type,
+				thumbnail: firstItem.thumbnail ? 'Disponible' : 'No disponible',
+				thumbnailUrl: firstItem.thumbnail
+			});
+		} else {
+			gridLogger.debug('📄 No se recibieron items');
+		}
+	}, [items]);
+
 	// Renderizado de cada elemento virtual - memoizado
 	const renderVirtualItem = useCallback((virtualItem: any) => {
 		const item = items[virtualItem.index];
 		if (!item) {
+			gridLogger.warn(`⚠️ Item no encontrado en índice ${virtualItem.index}`);
 			return null;
 		}
 
@@ -481,8 +501,13 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 
 		// Verificar que el item tenga un ID válido
 		if (!processedItem.id || typeof processedItem.id !== 'string' || processedItem.id.trim() === '') {
-			gridLogger.warn('Intentando renderizar item con ID inválido:', processedItem);
+			gridLogger.warn('⚠️ Intentando renderizar item con ID inválido:', processedItem);
 			return null;
+		}
+
+		// Depuración: Verificar si el item tiene thumbnail
+		if (!processedItem.thumbnail) {
+			gridLogger.debug(`⚠️ Item sin thumbnail: ${processedItem.id} (${processedItem.name})`);
 		}
 
 		const style: React.CSSProperties = {
@@ -505,6 +530,11 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 		// Ahora que sabemos que item.id es válido, podemos acceder al recurso
 		const resource = imageResources.resources.get(processedItem.id);
 		const thumbnail = resource?.thumbnail || null;
+
+		// Depuración: Verificar si se encontró el recurso en el store
+		if (!resource && processedItem.type === 'image') {
+			gridLogger.debug(`⚠️ Recurso no encontrado para imagen: ${processedItem.id}`);
+		}
 
 		// Verificar si el item está seleccionado
 		const isSelected = selectedItems.some((selected) => selected.id === processedItem.id);

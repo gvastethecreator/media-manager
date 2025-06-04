@@ -12,11 +12,11 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import {
-  FOLDER_ERROR_CODES,
-  FolderResponse,
-  IndexOptions,
-  ReindexOptions,
-  createFolderError
+    FOLDER_ERROR_CODES,
+    FolderResponse,
+    IndexOptions,
+    ReindexOptions,
+    createFolderError
 } from './folder-types';
 
 // Logger específico para el archivo
@@ -67,13 +67,11 @@ export async function indexFolder(id: string, options?: IndexOptions): Promise<F
 
       if (!folder) {
         throw createFolderError('Carpeta no encontrada', FOLDER_ERROR_CODES.NOT_FOUND);
-      }
-
-      // Actualizar el estado de la carpeta a "indexando"
+      }      // Marcar inicio de indexación actualizando lastIndexed
       await tx.folder.update({
         where: { id },
         data: {
-          status: 'INDEXING',
+          lastIndexed: new Date(),
         },
       });
 
@@ -82,28 +80,20 @@ export async function indexFolder(id: string, options?: IndexOptions): Promise<F
       const scanResult = await scanFolder(folder.path, {
         recursive: options?.recursive ?? true,
         includeHidden: options?.includeHidden ?? false
-      });
-
-      // 🚀 OPTIMIZACIÓN: Batch update con estadísticas calculadas
+      });      // 🚀 OPTIMIZACIÓN: Batch update con estadísticas calculadas
       const updatedFolder = await tx.folder.update({
         where: { id },
         data: {
           totalFiles: scanResult.totalFiles,
           totalSize: scanResult.totalSize,
           lastIndexed: new Date(),
-          status: 'INDEXED',
-          // Nuevas estadísticas optimizadas
-          imageCount: scanResult.images.length,
-          videoCount: scanResult.videos.length,
-          otherCount: scanResult.others.length,
+          // Solo campos que existen en el esquema
         },
       });
 
       return { updatedFolder, scanResult };
     });    // Revalidar rutas fuera de la transacción
-    await revalidatePaths(id);
-
-    // Crear la respuesta optimizada
+    await revalidatePaths(id);    // Crear la respuesta optimizada
     const response: FolderResponse = {
       id: result.updatedFolder.id,
       name: result.updatedFolder.name,
@@ -114,8 +104,6 @@ export async function indexFolder(id: string, options?: IndexOptions): Promise<F
       createdAt: result.updatedFolder.createdAt,
       updatedAt: result.updatedFolder.updatedAt,
       autoReindex: result.updatedFolder.autoReindex,
-      isWatched: result.updatedFolder.isWatched,
-      status: result.updatedFolder.status,
       parentId: result.updatedFolder.parentId,
       stats: {
         totalImages: result.scanResult.images.length,

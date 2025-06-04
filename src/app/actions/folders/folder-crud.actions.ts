@@ -62,8 +62,7 @@ export async function createFolder(path: string, options: CreateFolderOptions = 
     const folderName = options.name || path.split('/').pop() || path.split('\\').pop() || 'Nueva carpeta';
 
     // Crear la carpeta en la base de datos
-    const folder = await prisma.folder.create({
-      data: {
+    const folder = await prisma.folder.create({      data: {
         name: folderName,
         path,
         description: options.description || '',
@@ -71,8 +70,7 @@ export async function createFolder(path: string, options: CreateFolderOptions = 
         color: options.color || '',
         autoReindex: options.autoReindex || false,
         parentId: options.parentId || null,
-        isPublic: options.isPublic || false,
-        status: 'PENDING',
+        // Solo usar campos que existen en el esquema
       },
       include: {
         parent: true,
@@ -128,9 +126,7 @@ export async function updateFolder(id: string, data: UpdateFolderOptions): Promi
         `No se encontró ninguna carpeta con ID ${id}`,
         FOLDER_ERROR_CODES.NOT_FOUND
       );
-    }
-
-    // Actualizar la carpeta
+    }    // Actualizar la carpeta
     const updatedFolder = await prisma.folder.update({
       where: { id },
       data: {
@@ -140,7 +136,7 @@ export async function updateFolder(id: string, data: UpdateFolderOptions): Promi
         color: data.color,
         autoReindex: data.autoReindex,
         parentId: data.parentId,
-        isPublic: data.isPublic,
+        // Solo usar campos que existen en el esquema
       },
       include: {
         parent: true,

@@ -108,9 +108,7 @@ export async function createFolder(path: string, options: CreateFolderOptions = 
     }
 
     // Extraer nombre de la carpeta de la ruta
-    const folderName = options.name || path.split('/').pop() || path.split('\\').pop() || 'Nueva carpeta';
-
-    // Crear la carpeta en la base de datos
+    const folderName = options.name || path.split('/').pop() || path.split('\\').pop() || 'Nueva carpeta';    // Crear la carpeta en la base de datos
     const folder = await prisma.folder.create({
       data: {
         name: folderName,
@@ -120,8 +118,7 @@ export async function createFolder(path: string, options: CreateFolderOptions = 
         color: options.color || '',
         autoReindex: options.autoReindex || false,
         parentId: options.parentId || null,
-        isPublic: options.isPublic || false,
-        status: 'PENDING',
+        // Solo usar campos que existen en el esquema
       },
       include: {
         parent: true,
