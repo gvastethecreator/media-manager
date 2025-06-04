@@ -9,7 +9,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
-import { useFileManager } from '@/store/files/file-manager.store';
 import type { Collection } from '@/types/entities/collections';
 import { BookMarked } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -43,8 +42,12 @@ MemoizedCollectionCard.displayName = 'MemoizedCollectionCard';
 
 export function CollectionsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentCollection } = useFileManager();
-	const { collections: storeCollections, isLoading: storeLoading } = useCollectionStore();
+	const {
+		collections: storeCollections,
+		isLoading: storeLoading,
+		selectCollection
+	} = useCollectionStore();
+
 	const [collections, setCollections] = useState<CollectionWithDetails[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -129,17 +132,9 @@ export function CollectionsView(_props: ViewProps) {
 		(collection: CollectionWithDetails) => {
 			viewLogger.info('🖱️ Click en colección:', collection.name);
 			setCurrentView('collection-content');
-			setCurrentCollection(collection.id);
-			// Actualizar la información completa de la colección en el store
-			useFileManager.setState({
-				currentCollection: {
-					id: collection.id,
-					name: collection.name,
-					count: collection._count?.images || 0,
-				},
-			});
+			selectCollection(collection.id);
 		},
-		[setCurrentView, setCurrentCollection]
+		[setCurrentView, selectCollection]
 	);
 
 	if (error) {

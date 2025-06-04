@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useFileStore } from '@/store/entities/file';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { FileItem } from '@/types/file-item';
 import { Search } from 'lucide-react';
@@ -43,18 +43,35 @@ export function SearchView(_props: ViewProps) {
 		type: 'all',
 	});
 
-	const { currentItems: items, toggleItemSelection, loadItems, isLoading } = useFileManager();
+	const { items, toggleItemSelection, setIsLoading, isLoading } = useFileStore(state => ({
+		items: state.files,
+		toggleItemSelection: state.toggleFileSelection,
+		setIsLoading: state.setLoading,
+		isLoading: state.isLoading,
+	}));
+
 	const { openViewer } = useImageViewer();
 
 	const handleSearch = useCallback(() => {
 		if (filters.query) {
-			loadItems(`/api/search?query=${encodeURIComponent(filters.query)}&type=${filters.type}`);
+			setIsLoading(true);
+			// Usar API fetch directamente para la búsqueda
+			fetch(`/api/search?query=${encodeURIComponent(filters.query)}&type=${filters.type}`)
+				.then(res => res.json())
+				.then(data => {
+					useFileStore.setState({ files: data });
+					setIsLoading(false);
+				})
+				.catch(err => {
+					console.error('Error en búsqueda:', err);
+					setIsLoading(false);
+				});
 		}
-	}, [filters, loadItems]);
+	}, [filters, setIsLoading]);
 
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
-			toggleItemSelection(item, false);
+			toggleItemSelection(item);
 		},
 		[toggleItemSelection]
 	);

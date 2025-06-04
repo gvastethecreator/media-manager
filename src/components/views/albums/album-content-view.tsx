@@ -5,7 +5,7 @@ import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useAlbumStore } from '@/store/entities/album';
 import type { FileItem } from '@/types/file-item';
 import { Album } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -13,7 +13,11 @@ import { useCallback, useEffect, useState } from 'react';
 const viewLogger = clientLogger.withContext('AlbumContentView');
 
 export function AlbumContentView() {
-	const { currentAlbumId } = useFileManager();
+	const currentAlbumId = useAlbumStore(state => state.ui.currentAlbumId);
+	const album = useAlbumStore(state =>
+		currentAlbumId ? state.core.albums[currentAlbumId] : null
+	);
+
 	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -56,17 +60,19 @@ export function AlbumContentView() {
 		error,
 		toggleItemSelection: handleItemSelection,
 		currentContainerId: currentAlbumId ?? null,
+		containerName: album?.name ?? null,
 		emptyState: !currentAlbumId
 			? {
-					icon: Album,
-					title: 'No hay álbum seleccionado',
-					description: 'Selecciona un álbum para ver su contenido.',
-				}
+				icon: Album,
+				title: 'No hay álbum seleccionado',
+				description: 'Selecciona un álbum para ver su contenido.',
+			}
 			: {
-					icon: Album,
-					title: 'Álbum sin imágenes',
-					description: 'Este álbum no tiene imágenes asociadas.',
-				},
+				icon: Album,
+				title: 'Álbum sin imágenes',
+				description: 'Este álbum no tiene imágenes asociadas.',
+			},
+		onRefresh: loadAlbumImages,
 	};
 
 	return (

@@ -7,7 +7,7 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useTagStore } from '@/store/entities/tag';
 import { Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useEffect, useState } from 'react';
@@ -38,7 +38,10 @@ MemoizedTagCard.displayName = 'MemoizedTagCard';
  */
 export function TagsView({ className }: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentTag } = useFileManager();
+	const { selectedId, setSelectedId } = useTagStore((state) => ({
+		selectedId: state.selectedId,
+		setSelectedId: (id: string) => state.setSelectedId(id),
+	}));
 	const [tags, setTags] = useState<TagWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -90,21 +93,13 @@ export function TagsView({ className }: ViewProps) {
 
 			viewLogger.info('🔍 Seleccionando etiqueta:', tag.id, tag.name);
 
-			// Primero actualizar el estado con la información completa
-			useFileManager.setState({
-				currentTag: {
-					id: tag.id,
-					name: tag.name || 'Sin nombre',
-					color: tag.color || '#cccccc',
-					count: tag._count?.images || 0,
-				},
-			});
+			// Actualizar el estado de selección en el store de etiquetas
+			setSelectedId(tag.id);
 
-			// Luego cambiar la vista y cargar el contenido
+			// Luego cambiar la vista para mostrar el contenido
 			setCurrentView('tag-content');
-			setCurrentTag(tag.id);
 		},
-		[setCurrentView, setCurrentTag]
+		[setCurrentView, setSelectedId]
 	);
 
 	// Renderizar estados de carga y error
