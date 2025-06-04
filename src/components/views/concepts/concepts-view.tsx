@@ -9,7 +9,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useConceptStore } from '@/store/entities/concept';
 import { LightbulbIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -20,7 +20,7 @@ const viewLogger = clientLogger.withContext('ConceptsView');
 
 export function ConceptsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentConcept } = useFileManager();
+	const { selectConcept } = useConceptStore();
 	const router = useRouter();
 	const [concepts, setConcepts] = useState<ConceptWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -54,9 +54,9 @@ export function ConceptsView(_props: ViewProps) {
 		(concept: ConceptWithStats) => {
 			viewLogger.info('🖱️ Click en concepto:', concept.name);
 			setCurrentView('concept-content');
-			setCurrentConcept(concept.id);
+			selectConcept(concept);
 		},
-		[setCurrentView, setCurrentConcept]
+		[setCurrentView, selectConcept]
 	);
 
 	const handleEditConcept = useCallback(

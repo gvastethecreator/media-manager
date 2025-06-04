@@ -31,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					'selection:bg-primary selection:text-primary-foreground'
 				)}
 			>
+				{/* Restaurado con manejo mejorado de errores y reintentos */}
 				<ServerInitializer />
 
 				<AppProvider>
