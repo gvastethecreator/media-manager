@@ -11,6 +11,7 @@ import { prisma } from '@/lib/prisma';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { revalidatePath } from 'next/cache';
 import PQueue from 'p-queue';
+import path from 'path';
 import {
     FOLDER_ERROR_CODES,
     FolderResponse,
@@ -66,38 +67,63 @@ function createProcessError(
 /**
  * Procesa un lote de imágenes para una carpeta
  * @param folderId ID de la carpeta
- * @param imagePaths Rutas de imágenes a procesar
- * @returns Resultado del procesamiento
+ * @param imagePaths Rutas de las imágenes
+ * @returns Número de imágenes procesadas y errores
  */
 async function processImageBatch(folderId: string, imagePaths: string[]): Promise<{processed: number, errors: number}> {
   let processed = 0;
   let errors = 0;
 
-  // Crear transacción para operaciones CRUD masivas
+  folderLogger.debug(`Procesando lote de ${imagePaths.length} imágenes`);
+
   const operations = imagePaths.map(imagePath => {
     try {
-      // Extraer nombre de archivo desde la ruta, compatible con Windows y Unix
-      const name = imagePath.split(/[\/\\]/).pop() || '';
+      if (!imagePath.trim()) {
+        folderLogger.warn('Ruta de imagen vacía detectada');
+        errors++;
+        return Promise.resolve(false);
+      }
 
-      folderLogger.debug(`Procesando imagen: ${imagePath}`);
+      // Extraer el nombre de la imagen del path
+      const fileName = path.basename(imagePath);
+
+      // Preparar datos para la imagen con todos los campos obligatorios
+      const imageData = {
+        path: imagePath,
+        name: fileName,
+        folderId,
+        hash: 'temp-' + Date.now().toString().substring(7), // Hash único temporal
+        size: 0,            // Se actualizará con el tamaño real posteriormente
+        width: 1,           // Valor temporal
+        height: 1,          // Valor temporal
+        // Asegurarse de que se cumplan las restricciones del modelo
+        isFavorite: false,  // Valor por defecto para campo requerido
+        metadata: '{}',     // Metadata vacía como JSON válido
+      };
 
       return prisma.image.upsert({
         where: { path: imagePath },
-        create: {
-          path: imagePath,
-          name: name,
-          folderId,
-          status: 'PENDING',
-        },
+        create: imageData,
         update: {
           folderId,
-          status: 'PENDING',
+          metadata: '{}',   // Aseguramos que el metadata es JSON válido
         },
       }).then(() => {
         processed++;
         return true;
       }).catch((error) => {
         folderLogger.error(`Error procesando imagen ${imagePath}:`, error);
+
+        // Log detallado del error para diagnóstico
+        if (error.name === 'PrismaClientValidationError') {
+          folderLogger.error(`Detalles de validación para ${imagePath}:`, {
+            errorName: error.name,
+            errorMessage: error.message,
+            validationError: true,
+            imageData
+          });
+        }
+
         errors++;
         return false;
       });
@@ -176,16 +202,13 @@ export async function indexFolder(id: string, options?: IndexOptions): Promise<P
         totalFiles: scanResult.images.length,
         processingSpeed: scanResult.totalFiles / (scanDuration / 1000)
       });
-    }
-
-    // Actualizar carpeta con resultados del escaneo
+    }    // Actualizar carpeta con resultados del escaneo
     await prisma.folder.update({
       where: { id },
       data: {
         lastIndexed: new Date(),
         totalFiles: scanResult.totalFiles,
         totalSize: scanResult.totalSize,
-        status: 'INDEXING',
       },
     });
 
@@ -283,13 +306,11 @@ export async function indexFolder(id: string, options?: IndexOptions): Promise<P
         // Pequeña pausa para evitar CPU spinning
         await new Promise(resolve => setTimeout(resolve, 50));
       }
-    }
-
-    // Actualizar estado final de la carpeta
+    }    // Actualizar estado final de la carpeta (solo campos válidos)
     await prisma.folder.update({
       where: { id },
       data: {
-        status: 'INDEXED',
+        lastIndexed: new Date(),
       },
     });
 
@@ -560,9 +581,7 @@ export async function repairFolder(id: string): Promise<ProcessStatus> {
 
     if (!folder) {
       throw createProcessError('Carpeta no encontrada', FOLDER_ERROR_CODES.NOT_FOUND);
-    }
-
-    // Escanear contenido de carpeta
+    }    // Escanear contenido de carpeta
     const scanResult = await scanFolder(folder.path);
 
     // Actualizar estadísticas de carpeta
@@ -571,7 +590,7 @@ export async function repairFolder(id: string): Promise<ProcessStatus> {
       data: {
         totalFiles: scanResult.totalFiles,
         totalSize: scanResult.totalSize,
-        status: 'ACTIVE',
+        lastIndexed: new Date(),
       },
     });
 

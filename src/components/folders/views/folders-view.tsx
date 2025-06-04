@@ -25,6 +25,9 @@ type FolderWithCount = Folder & {
 	_count?: {
 		images: number;
 	};
+	// Asegurar que estos campos están disponibles explícitamente
+	totalSize: number;
+	totalFiles: number;
 };
 
 // Componente memoizado para cada tarjeta de carpeta
@@ -45,7 +48,9 @@ const MemoizedFolderCard = React.memo(
 			prevProps.folder.name === nextProps.folder.name &&
 			prevProps.folder.emoji === nextProps.folder.emoji &&
 			prevProps.folder.updatedAt === nextProps.folder.updatedAt &&
-			(prevProps.folder._count?.images || 0) === (nextProps.folder._count?.images || 0)
+			(prevProps.folder._count?.images || 0) === (nextProps.folder._count?.images || 0) &&
+			prevProps.folder.totalSize === nextProps.folder.totalSize &&
+			prevProps.folder.totalFiles === nextProps.folder.totalFiles
 		);
 	}
 );
@@ -90,9 +95,22 @@ export function FoldersView(_props: ViewProps) {
 						lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
 						createdAt: new Date(folderData.createdAt),
 						updatedAt: new Date(folderData.updatedAt),
-						// Asegurarnos de que _count existe
+						// Asegurarnos de que _count existe y preservar datos importantes
 						_count: folderData._count || { images: folderData.imageCount || 0 },
-					} as Folder;
+						// Asegurar que estos campos se preservan
+						totalSize: folderData.totalSize || 0,
+						totalFiles: folderData.totalFiles || 0,
+					} as FolderWithCount;
+				});
+
+				viewLogger.debug('Datos de carpetas transformados:', {
+					firstFolder: transformedData[0] ? {
+						id: transformedData[0].id,
+						name: transformedData[0].name,
+						totalSize: transformedData[0].totalSize,
+						totalFiles: transformedData[0].totalFiles,
+						imageCount: transformedData[0]._count?.images
+					} : 'No hay carpetas'
 				});
 
 				setFolders(transformedData);
@@ -179,8 +197,21 @@ export function FoldersView(_props: ViewProps) {
 				// 2. 🆝 Actualizar el nuevo store de carpetas - cargar la carpeta específica
 				await setCurrentFolderId(folder.id);
 
-				// Para simplificar la migración, solo pasamos null y dejamos que el store cargue la carpeta
-				setCurrentFolder(null);
+				// Para simplificar la migración, solo pasamos la carpeta completa al store
+				setCurrentFolder({
+					id: folder.id,
+					name: folder.name,
+					path: folder.path,
+					emoji: folder.emoji,
+					color: folder.color,
+					isAutoIndex: folder.isAutoIndex,
+					lastIndexed: folder.lastIndexed,
+					totalFiles: folder.totalFiles,
+					totalSize: folder.totalSize,
+					imageCount: folder._count?.images || 0,
+					createdAt: folder.createdAt,
+					updatedAt: folder.updatedAt
+				});
 
 				// 3. Ahora cambiar la vista
 				setCurrentView('folder-content');
@@ -230,6 +261,18 @@ export function FoldersView(_props: ViewProps) {
 				description="Agrega carpetas desde el panel de configuración para comenzar a indexar tus imágenes."
 			/>
 		);
+	}
+
+	// Log de depuración para ver qué datos tenemos disponibles
+	if (optimisticFolders.length > 0) {
+		viewLogger.debug('Datos de carpeta para renderizado:', {
+			id: optimisticFolders[0].id,
+			name: optimisticFolders[0].name,
+			totalSize: optimisticFolders[0].totalSize,
+			totalFiles: optimisticFolders[0].totalFiles,
+			_count: optimisticFolders[0]._count,
+			updatedAt: optimisticFolders[0].updatedAt
+		});
 	}
 
 	return (

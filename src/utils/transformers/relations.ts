@@ -92,6 +92,77 @@ export const ENTITY_RELATIONS: Record<string, Record<string, RelationDefinition>
     properties: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Property' },
     groups: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Group' },
   },
+  Album: {
+    // Relaciones con contenido
+    images: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Image' },
+    videos: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Video' },
+
+    // Relaciones con entidades principales
+    collections: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Collection' },
+    tags: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Tag' },
+    characters: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Character' },
+    places: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Place' },
+    worldItems: { type: RELATION_TYPES.MANY_TO_MANY, target: 'WorldItem' },
+    concepts: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Concept' },
+    prompts: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Prompt' },
+    notes: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Note' },
+    wildcards: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Wildcard' },
+    properties: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Property' },
+    groups: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Group' },
+  },
+  WorldItem: {
+    // Relaciones con contenido
+    images: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Image' },
+    videos: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Video' },
+
+    // Relaciones con entidades principales
+    albums: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Album' },
+    collections: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Collection' },
+    tags: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Tag' },
+    characters: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Character' },
+    places: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Place' },
+    concepts: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Concept' },
+    prompts: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Prompt' },
+    notes: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Note' },
+    wildcards: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Wildcard' },
+    properties: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Property' },
+    groups: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Group' },
+  },
+  Video: {
+    folder: { type: RELATION_TYPES.MANY_TO_ONE, target: 'Folder', required: true },
+
+    // Relaciones con entidades principales
+    albums: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Album' },
+    collections: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Collection' },
+    tags: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Tag' },
+    characters: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Character' },
+    places: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Place' },
+    worldItems: { type: RELATION_TYPES.MANY_TO_MANY, target: 'WorldItem' },
+    concepts: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Concept' },
+    prompts: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Prompt' },
+    notes: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Note' },
+    wildcards: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Wildcard' },
+    properties: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Property' },
+    groups: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Group' },
+  },
+  Note: {
+    // Relaciones con contenido
+    images: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Image' },
+    videos: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Video' },
+
+    // Relaciones con entidades principales
+    albums: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Album' },
+    collections: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Collection' },
+    tags: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Tag' },
+    characters: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Character' },
+    places: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Place' },
+    worldItems: { type: RELATION_TYPES.MANY_TO_MANY, target: 'WorldItem' },
+    concepts: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Concept' },
+    prompts: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Prompt' },
+    wildcards: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Wildcard' },
+    properties: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Property' },
+    groups: { type: RELATION_TYPES.MANY_TO_MANY, target: 'Group' },
+  },
 };
 
 /**
