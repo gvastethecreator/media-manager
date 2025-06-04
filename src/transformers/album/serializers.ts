@@ -16,9 +16,8 @@ import {
 } from '@/utils/transformers/common';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import {
-    getRelationCounts,
     preparePrismaRelations,
-    validateEntityRelations,
+    validateEntityRelations
 } from '@/utils/transformers/relations';
 import type { Prisma } from '@prisma/client';
 
@@ -93,8 +92,22 @@ export function fromPrismaAlbum(
             throw new Error('Invalid prismaAlbum object received in fromPrismaAlbum');
         }
 
-        // Obtener conteos de relaciones (asumiendo que getRelationCounts maneja Partial)
-        const counts = getRelationCounts('Album', prismaAlbum);
+        // Usar conteos directamente de Prisma si están disponibles, o calcular solo las relaciones
+        const counts = prismaAlbum._count || {
+            images: 0,
+            videos: 0,
+            collections: 0,
+            tags: 0,
+            characters: 0,
+            places: 0,
+            worldItems: 0,
+            concepts: 0,
+            prompts: 0,
+            notes: 0,
+            wildcards: 0,
+            properties: 0,
+            groups: 0
+        };
 
         // Construir objeto base usando nullish coalescing para defaults
         const baseAlbum = {

@@ -17,7 +17,7 @@
     "check:fix": "biome check --max-diagnostics=unlimited --write .",
     "biome:ci": "biome ci --max-diagnostics=unlimited .",
     "analyze": "node scripts/analyze/index.mjs",
-    "db:full-reset": "rimraf prisma/dev.db && prisma migrate dev --name init && prisma db seed",
+    "db:full-reset": "rimraf prisma/dev.db prisma/migrations && prisma migrate dev --name init && prisma db seed",
     "drizzle:generate": "drizzle-kit generate",
     "drizzle:push": "drizzle-kit push",
     "drizzle:studio": "drizzle-kit studio",

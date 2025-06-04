@@ -23,6 +23,7 @@ import { create } from 'zustand';
 import { getAlbumImages } from '@/app/actions/albums/album.actions';
 import { getCharacterImages } from '@/app/actions/characters/character.actions';
 import { getFavorites } from '@/app/actions/favorites/favorite.actions';
+import { getFolderImages } from '@/app/actions/folders';
 // 🚀 Importaciones de acciones optimizadas - CORREGIDAS
 import { getTagImages } from '@/app/actions/tags/query.actions';
 import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
@@ -376,12 +377,16 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
         let rawItems: any[] = [];        // 🎯 Cargar según contexto usando APIs disponibles
         switch (context) {
           case 'folder': {
-            // Usar API endpoint específica para imágenes de carpeta
+            // Usar la función server action getFolderImages en lugar del fetch
             if (id) {
-              const response = await fetch(`/api/folders/${id}/images/all`);
-              if (!response.ok) throw new Error('Error cargando imágenes de carpeta');
-              const data = await response.json();
-              rawItems = data.items || [];
+              try {
+                fileManagerLogger.info(`🔄 Obteniendo imágenes de carpeta con ID: ${id}`);
+                rawItems = await getFolderImages(id);
+                fileManagerLogger.debug(`✅ Obtenidas ${rawItems.length} imágenes para carpeta ${id}`);
+              } catch (folderError) {
+                fileManagerLogger.error(`❌ Error obteniendo imágenes de carpeta ${id}:`, folderError);
+                throw new Error('Error cargando imágenes de carpeta');
+              }
             }
             break;
           }

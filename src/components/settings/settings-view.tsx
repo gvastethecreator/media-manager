@@ -186,7 +186,7 @@ const tabsData: TabItem[] = [
 export function SettingsView() {
 	const [activeTab, setActiveTab] = React.useState('system');
 
-	// Escuchar el evento para cambiar la pestaña activa desde otros componentes
+	// 📡 Escuchar el evento para cambiar la pestaña activa desde otros componentes
 	React.useEffect(() => {
 		const handleSetSettingsTab = (event: CustomEvent<{ tab: string }>) => {
 			const { tab } = event.detail;
@@ -204,103 +204,131 @@ export function SettingsView() {
 		};
 	}, []);
 
-	// Estilos base comunes para todos los tabs
-	const tabBaseStyles = cn(
-		'flex items-center justify-center gap-2 px-3 h-9',
-		'text-[9px] border-b-2 border-transparent',
-		'cursor-pointer rounded-none group',
-		'hover:bg-secondary/20 data-[state=active]:bg-secondary/30',
-		'data-[state=active]:border-white/10 data-[state=active]:text-primary',
-		'transition-all duration-150 hover:scale-105 active:scale-95 data-[state=active]:scale-100'
-	);
-
 	return (
-		<div className="p-0 m-0 h-full w-full rounded-none flex flex-col">
-			{/* Eliminamos el EntityPreloader redundante, ya tenemos uno centralizado en ViewContainer */}
-
-			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full rounded-none flex flex-col flex-1">
-				{/* TabsList con posición sticky */}
-				<div className="sticky top-0 z-7 backdrop-blur-sm shadow-sm">
-					<TabsList className="flex w-full h-8 bg-transparent rounded-none justify-start border-b-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+		<div className="h-full w-full">
+			<Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-row">
+				{/* 🎨 Sidebar vertical con navegación de tabs */}
+				<div className="w-64 flex-shrink-0 border-r-2 border-border/20 bg-background/50 backdrop-blur-sm h-full overflow-y-auto">
+					<TabsList className="flex flex-col w-full h-auto bg-transparent rounded-none p-2 gap-1 justify-start">
 						{tabsData.map((tab) => (
-							<TabsTrigger key={tab.id} value={tab.id} className={tabBaseStyles}>
-								<span style={{ color: tab.color }} className="flex items-center justify-center">
+							<TabsTrigger
+								key={tab.id}
+								value={tab.id}
+								className={cn(
+									'flex items-center justify-start gap-3 px-4 py-3 w-full',
+									'text-sm font-medium border border-transparent rounded-lg',
+									'cursor-pointer group transition-all duration-200',
+									'hover:bg-secondary/30 hover:border-border/20 hover:scale-[1.02]',
+									'data-[state=active]:bg-secondary/50 data-[state=active]:border-white/10',
+									'data-[state=active]:text-primary data-[state=active]:shadow-sm',
+									'active:scale-[0.98] data-[state=active]:scale-100'
+								)}
+							>
+								{/* 🎨 Icono con color temático */}
+								<span
+									style={{ color: tab.color }}
+									className="flex items-center justify-center flex-shrink-0 transition-transform duration-200 group-hover:scale-110"
+								>
 									{tab.icon}
 								</span>
-								{tab.label}
+
+								{/* 📝 Label con truncado inteligente */}
+								<span className="text-left truncate flex-1 group-data-[state=active]:font-semibold">
+									{tab.label}
+								</span>
+
+								{/* ✨ Indicador visual del estado activo */}
+								<div
+									className="w-1 h-4 rounded-full opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-200"
+									style={{ backgroundColor: tab.color }}
+								/>
 							</TabsTrigger>
 						))}
 					</TabsList>
 				</div>
 
-				{/* Contenido de los tabs */}
-				<div className="flex-1 overflow-hidden">
-					<TabsContent value="system" className="gap-0 px-1 h-full overflow-auto">
-						<div className="grid grid-cols-2 gap-1 w-full">
+				{/* 📋 Contenido de los tabs con área expandible */}
+				<div className="flex-1 h-full overflow-auto">
+					<TabsContent value="system" className="h-full w-full p-6 m-0 border-none">
+						<div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
 							<FoldersSettings />
-							<ThumbnailsSettings />
 							<SystemSettings />
 						</div>
 					</TabsContent>
 
-					<TabsContent value="albums" className="px-1 h-full overflow-auto">
+					<TabsContent value="entities-cards" className="h-full w-full p-6 m-0 border-none">
+						{/* 🃏 TODO: Implementar configuración de tarjetas de entidades */}
+						<div className="flex items-center justify-center h-full text-muted-foreground">
+							<div className="text-center">
+								<ListIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+								<p className="text-lg font-medium">Configuración de Tarjetas</p>
+								<p className="text-sm">Próximamente disponible</p>
+							</div>
+						</div>
+					</TabsContent>
+
+					<TabsContent value="albums" className="h-full w-full p-6 m-0 border-none">
 						<AlbumsSettings />
 					</TabsContent>
 
-					<TabsContent value="collections" className="px-1 h-full overflow-auto">
+					<TabsContent value="collections" className="h-full w-full p-6 m-0 border-none">
 						<CollectionsSettings />
 					</TabsContent>
 
-					<TabsContent value="tags" className="px-1 h-full overflow-auto">
+					<TabsContent value="tags" className="h-full w-full p-6 m-0 border-none">
 						<TagsSettings />
 					</TabsContent>
 
-					<TabsContent value="characters" className="px-1 h-full overflow-auto">
+					<TabsContent value="characters" className="h-full w-full p-6 m-0 border-none">
 						<CharactersSettings />
 					</TabsContent>
 
-					<TabsContent value="world-items" className="px-1 h-full overflow-auto">
+					<TabsContent value="world-items" className="h-full w-full p-6 m-0 border-none">
 						<WorldItemsSettings />
 					</TabsContent>
 
-					<TabsContent value="places" className="px-1 h-full overflow-auto">
+					<TabsContent value="places" className="h-full w-full p-6 m-0 border-none">
 						<PlacesSettings />
 					</TabsContent>
 
-					<TabsContent value="concepts" className="px-1 h-full overflow-auto">
+					<TabsContent value="concepts" className="h-full w-full p-6 m-0 border-none">
 						<ConceptsSettings />
 					</TabsContent>
 
-					<TabsContent value="prompts" className="px-1 h-full overflow-auto">
+					<TabsContent value="prompts" className="h-full w-full p-6 m-0 border-none">
 						<PromptSettings />
 					</TabsContent>
 
-					<TabsContent value="notes" className="px-1 h-full overflow-auto">
+					<TabsContent value="notes" className="h-full w-full p-6 m-0 border-none">
 						<NotesSettings />
 					</TabsContent>
 
-					<TabsContent value="uploaded-images" className="px-1 h-full overflow-auto">
+					<TabsContent value="uploaded-images" className="h-full w-full p-6 m-0 border-none">
 						<UploadedImagesSettings />
 					</TabsContent>
 
-					<TabsContent value="shortcuts" className="px-1 h-full overflow-auto">
+					<TabsContent value="shortcuts" className="h-full w-full p-6 m-0 border-none">
 						<ShortcutsSettings />
 					</TabsContent>
 
-					<TabsContent value="profiles" className="px-1 h-full overflow-auto">
+					<TabsContent value="profiles" className="h-full w-full p-6 m-0 border-none">
 						<ProfilesSettings />
 					</TabsContent>
 
-					<TabsContent value="properties" className="px-1 h-full overflow-auto">
+					<TabsContent value="properties" className="h-full w-full p-6 m-0 border-none">
 						<PropertiesSettings />
 					</TabsContent>
 
-					<TabsContent value="groups" className="px-1 h-full overflow-auto">
+					<TabsContent value="groups" className="h-full w-full p-6 m-0 border-none">
 						<GroupsSettings />
 					</TabsContent>
 
-					<TabsContent value="wildcards" className="px-1 h-full overflow-auto">
+					<TabsContent value="wildcards" className="h-full w-full p-6 m-0 border-none">
 						<WildcardsSettings />
+					</TabsContent>
+
+					<TabsContent value="thumbnails" className="h-full w-full p-6 m-0 border-none">
+						<ThumbnailsSettings />
 					</TabsContent>
 				</div>
 			</Tabs>
