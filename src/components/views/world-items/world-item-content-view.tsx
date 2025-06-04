@@ -5,7 +5,8 @@ import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useSelectionStore } from '@/store/selection.store';
+import { useWorldItemStore } from '@/store/entities/world-item';
 import type { FileItem } from '@/types/file-item';
 import { Box } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -13,7 +14,12 @@ import { useCallback, useEffect, useState } from 'react';
 const viewLogger = clientLogger.withContext('WorldItemContentView');
 
 export function WorldItemContentView() {
-	const { currentWorldItemId } = useFileManager();
+	const selectedId = useWorldItemStore(state => state.ui.selectedId);
+	const selectedWorldItem = useWorldItemStore(state =>
+		state.worldItems.find(item => item.id === selectedId)
+	);
+	const { toggleSelection } = useSelectionStore();
+
 	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -22,14 +28,14 @@ export function WorldItemContentView() {
 	const [optimisticItems, _addEvent] = clientEvents.useEvents<FileItem[]>(items);
 
 	const loadWorldItemImages = useCallback(async () => {
-		if (!currentWorldItemId) {
+		if (!selectedId) {
 			return;
 		}
 
 		try {
 			setIsLoading(true);
 			viewLogger.info('🔄 Cargando imágenes del objeto del mundo...');
-			const data = await getWorldItemImages(currentWorldItemId);
+			const data = await getWorldItemImages(selectedId);
 			setItems(data as unknown as FileItem[]);
 			viewLogger.info('✅ Imágenes cargadas');
 		} catch (err) {
@@ -39,7 +45,7 @@ export function WorldItemContentView() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, [currentWorldItemId]);
+	}, [selectedId]);
 
 	useEffect(() => {
 		// Cargar imágenes inicialmente
@@ -48,25 +54,28 @@ export function WorldItemContentView() {
 
 	const handleItemSelection = useCallback((item: FileItem) => {
 		viewLogger.info('🖱️ Item seleccionado:', item.name);
-	}, []);
+		toggleSelection(item.id, item);
+	}, [toggleSelection]);
 
 	const contentProps: BaseContentProps = {
 		items: optimisticItems,
 		isLoading,
 		error,
 		toggleItemSelection: handleItemSelection,
-		currentContainerId: currentWorldItemId ?? null,
-		emptyState: !currentWorldItemId
+		currentContainerId: selectedId ?? null,
+		containerName: selectedWorldItem?.name ?? null,
+		emptyState: !selectedId
 			? {
-					icon: Box,
-					title: 'No hay objeto del mundo seleccionado',
-					description: 'Selecciona un objeto del mundo para ver su contenido.',
-				}
+				icon: Box,
+				title: 'No hay objeto del mundo seleccionado',
+				description: 'Selecciona un objeto del mundo para ver su contenido.',
+			}
 			: {
-					icon: Box,
-					title: 'Objeto del mundo sin imágenes',
-					description: 'Este objeto del mundo no tiene imágenes asociadas.',
-				},
+				icon: Box,
+				title: 'Objeto del mundo sin imágenes',
+				description: 'Este objeto del mundo no tiene imágenes asociadas.',
+			},
+		onRefresh: loadWorldItemImages,
 	};
 
 	return (

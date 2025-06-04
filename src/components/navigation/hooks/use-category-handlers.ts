@@ -1,8 +1,17 @@
 import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { useAlbumStore } from '@/store/entities/album';
+import { useCharacterStore } from '@/store/entities/character';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useConceptStore } from '@/store/entities/concept';
+import { useFolderStore } from '@/store/entities/folder';
 import { useGroupStore } from '@/store/entities/group';
+import { useNoteStore } from '@/store/entities/note';
+import { usePlaceStore } from '@/store/entities/place';
+import { usePromptStore } from '@/store/entities/prompt/store';
 import { usePropertyStore } from '@/store/entities/property';
+import { useTagStore } from '@/store/entities/tag';
 import { useWildcardStore } from '@/store/entities/wildcard';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useWorldItemStore } from '@/store/entities/world-item';
 import type { ViewType } from '@/types/file-item';
 import { useCallback } from 'react';
 
@@ -12,64 +21,52 @@ import { useCallback } from 'react';
  */
 export function useCategoryHandlers() {
 	const { currentView, setCurrentView } = useNavigationStore();
-	const {
-		setCurrentCollection,
-		setCurrentFolder,
-		setCurrentTag,
-		setCurrentAlbum,
-		setCurrentCharacter,
-		setCurrentPlace,
-		setCurrentWorldItem,
-		setCurrentConcept,
-		setCurrentPrompt,
-		setCurrentNote,
-		currentCollectionId,
-		currentFolderId,
-		currentTagId,
-		currentAlbumId,
-		currentCharacterId,
-		currentPlaceId,
-		currentWorldItemId,
-		currentConceptId,
-		currentPromptId,
-		currentNoteId,
-	} = useFileManager();
 
-	// Stores para las nuevas entidades
-	const { getGroup, setCurrentGroupId, currentGroupId } = useGroupStore();
-	const { getProperty, setCurrentPropertyId, currentPropertyId } = usePropertyStore();
-	const { getWildcard, setCurrentWildcardId, currentWildcardId } = useWildcardStore();
+	// Stores específicos para cada entidad
+	const { selectCollection, selectedCollectionId } = useCollectionStore();
+	const { selectFolder, selectedFolderId } = useFolderStore();
+	const { selectTag, selectedTagId } = useTagStore();
+	const { selectAlbum, selectedAlbumId } = useAlbumStore();
+	const { selectCharacter, selectedCharacterId } = useCharacterStore();
+	const { selectPlace, selectedPlaceId } = usePlaceStore();
+	const { selectWorldItem, selectedWorldItemId } = useWorldItemStore();
+	const { selectConcept, selectedConceptId } = useConceptStore();
+	const { selectPrompt, selectedPromptId } = usePromptStore();
+	const { selectNote, selectedNoteId } = useNoteStore();
+	const { selectGroup, selectedGroupId } = useGroupStore();
+	const { selectProperty, selectedPropertyId } = usePropertyStore();
+	const { selectWildcard, selectedWildcardId } = useWildcardStore();
 
 	// Función para limpiar todas las selecciones actuales
 	const clearAllSelections = useCallback(() => {
 		// 🧹 Limpiar todas las selecciones para evitar estados huérfanos
-		setCurrentCollection('');
-		setCurrentFolder('');
-		setCurrentTag('');
-		setCurrentAlbum('');
-		setCurrentCharacter('');
-		setCurrentPlace('');
-		setCurrentWorldItem('');
-		setCurrentConcept('');
-		setCurrentPrompt('');
-		setCurrentNote('');
-		setCurrentGroupId?.('');
-		setCurrentPropertyId?.('');
-		setCurrentWildcardId?.('');
+		selectCollection(null);
+		selectFolder(null);
+		selectTag(null);
+		selectAlbum(null);
+		selectCharacter(null);
+		selectPlace(null);
+		selectWorldItem(null);
+		selectConcept(null);
+		selectPrompt(null);
+		selectNote(null);
+		selectGroup?.(null);
+		selectProperty?.(null);
+		selectWildcard?.(null);
 	}, [
-		setCurrentCollection,
-		setCurrentFolder,
-		setCurrentTag,
-		setCurrentAlbum,
-		setCurrentCharacter,
-		setCurrentPlace,
-		setCurrentWorldItem,
-		setCurrentConcept,
-		setCurrentPrompt,
-		setCurrentNote,
-		setCurrentGroupId,
-		setCurrentPropertyId,
-		setCurrentWildcardId,
+		selectCollection,
+		selectFolder,
+		selectTag,
+		selectAlbum,
+		selectCharacter,
+		selectPlace,
+		selectWorldItem,
+		selectConcept,
+		selectPrompt,
+		selectNote,
+		selectGroup,
+		selectProperty,
+		selectWildcard,
 	]);
 
 	// Función para manejar el clic en una categoría
@@ -92,9 +89,9 @@ export function useCategoryHandlers() {
 
 			// Establecer vista y colección actual
 			setCurrentView('collection-content');
-			setCurrentCollection(collectionId);
+			selectCollection(collectionId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentCollection]
+		[clearAllSelections, setCurrentView, selectCollection]
 	);
 
 	// Función para manejar el clic en una carpeta
@@ -105,9 +102,9 @@ export function useCategoryHandlers() {
 
 			// Establecer vista y carpeta actual
 			setCurrentView('folder-content');
-			setCurrentFolder(folderId);
+			selectFolder(folderId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentFolder]
+		[clearAllSelections, setCurrentView, selectFolder]
 	);
 
 	const handleTagClick = useCallback(
@@ -116,9 +113,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('tag-content');
-			setCurrentTag(tagName);
+			selectTag(tagName);
 		},
-		[clearAllSelections, setCurrentView, setCurrentTag]
+		[clearAllSelections, setCurrentView, selectTag]
 	);
 
 	const handleAlbumClick = useCallback(
@@ -127,9 +124,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('album-content');
-			setCurrentAlbum(albumId);
+			selectAlbum(albumId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentAlbum]
+		[clearAllSelections, setCurrentView, selectAlbum]
 	);
 
 	const handleCharacterClick = useCallback(
@@ -138,9 +135,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('character-content');
-			setCurrentCharacter(characterId);
+			selectCharacter(characterId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentCharacter]
+		[clearAllSelections, setCurrentView, selectCharacter]
 	);
 
 	const handlePlaceClick = useCallback(
@@ -149,9 +146,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('place-content');
-			setCurrentPlace(placeId);
+			selectPlace(placeId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentPlace]
+		[clearAllSelections, setCurrentView, selectPlace]
 	);
 
 	const handleWorldItemClick = useCallback(
@@ -160,9 +157,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('world-item-content');
-			setCurrentWorldItem(worldItemId);
+			selectWorldItem(worldItemId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentWorldItem]
+		[clearAllSelections, setCurrentView, selectWorldItem]
 	);
 
 	// Añadir manejadores para conceptos, prompts y notas
@@ -172,9 +169,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('concept-content');
-			setCurrentConcept(conceptId);
+			selectConcept(conceptId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentConcept]
+		[clearAllSelections, setCurrentView, selectConcept]
 	);
 
 	const handlePromptClick = useCallback(
@@ -183,9 +180,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('prompt-content');
-			setCurrentPrompt(promptId);
+			selectPrompt(promptId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentPrompt]
+		[clearAllSelections, setCurrentView, selectPrompt]
 	);
 
 	const handleNoteClick = useCallback(
@@ -194,9 +191,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('note-content');
-			setCurrentNote(noteId);
+			selectNote(noteId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentNote]
+		[clearAllSelections, setCurrentView, selectNote]
 	);
 
 	// Handlers para las nuevas entidades
@@ -206,9 +203,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('group-content');
-			setCurrentGroupId?.(groupId);
+			selectGroup?.(groupId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentGroupId]
+		[clearAllSelections, setCurrentView, selectGroup]
 	);
 
 	const handlePropertyClick = useCallback(
@@ -217,9 +214,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('property-content');
-			setCurrentPropertyId?.(propertyId);
+			selectProperty?.(propertyId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentPropertyId]
+		[clearAllSelections, setCurrentView, selectProperty]
 	);
 
 	const handleWildcardClick = useCallback(
@@ -228,9 +225,9 @@ export function useCategoryHandlers() {
 			clearAllSelections();
 
 			setCurrentView('wildcard-content');
-			setCurrentWildcardId?.(wildcardId);
+			selectWildcard?.(wildcardId);
 		},
-		[clearAllSelections, setCurrentView, setCurrentWildcardId]
+		[clearAllSelections, setCurrentView, selectWildcard]
 	);
 
 	// Función para obtener el manejador de clic adecuado para cada tipo de categoría
@@ -326,49 +323,49 @@ export function useCategoryHandlers() {
 		(categoryId: ViewType): string | null => {
 			switch (categoryId) {
 				case 'collections':
-					return currentCollectionId || null;
+					return selectedCollectionId || null;
 				case 'folders':
-					return currentFolderId || null;
+					return selectedFolderId || null;
 				case 'tags':
-					return currentTagId || null;
+					return selectedTagId || null;
 				case 'albums':
-					return currentAlbumId || null;
+					return selectedAlbumId || null;
 				case 'characters':
-					return currentCharacterId || null;
+					return selectedCharacterId || null;
 				case 'places':
-					return currentPlaceId || null;
+					return selectedPlaceId || null;
 				case 'world-items':
-					return currentWorldItemId || null;
+					return selectedWorldItemId || null;
 				case 'concepts':
-					return currentConceptId || null;
+					return selectedConceptId || null;
 				case 'prompts':
-					return currentPromptId || null;
+					return selectedPromptId || null;
 				case 'notes':
-					return currentNoteId || null;
+					return selectedNoteId || null;
 				case 'groups':
-					return currentGroupId || null;
+					return selectedGroupId || null;
 				case 'properties':
-					return currentPropertyId || null;
+					return selectedPropertyId || null;
 				case 'wildcards':
-					return currentWildcardId || null;
+					return selectedWildcardId || null;
 				default:
 					return null;
 			}
 		},
 		[
-			currentAlbumId,
-			currentCharacterId,
-			currentCollectionId,
-			currentConceptId,
-			currentFolderId,
-			currentNoteId,
-			currentPlaceId,
-			currentPromptId,
-			currentTagId,
-			currentWorldItemId,
-			currentGroupId,
-			currentPropertyId,
-			currentWildcardId,
+			selectedAlbumId,
+			selectedCharacterId,
+			selectedCollectionId,
+			selectedConceptId,
+			selectedFolderId,
+			selectedNoteId,
+			selectedPlaceId,
+			selectedPromptId,
+			selectedTagId,
+			selectedWorldItemId,
+			selectedGroupId,
+			selectedPropertyId,
+			selectedWildcardId,
 		]
 	);
 

@@ -1,7 +1,7 @@
 'use client';
 
 // import { getTagImages } from '@/app/actions/tags'; // Función no encontrada, comentada
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useTagStore } from '@/store/entities/tag';
 import type { FileItem } from '@/types/file-item';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -11,7 +11,11 @@ import { useCallback, useEffect, useState } from 'react';
  * Muestra todas las imágenes asociadas a una etiqueta utilizando el componente EntityCard
  */
 export function TagContentView() {
-	const { currentTagId, currentTag } = useFileManager();
+	const selectedId = useTagStore((state) => state.selectedId);
+	const selectedTag = useTagStore((state) =>
+		state.items.find(tag => tag.id === selectedId)
+	);
+
 	const [images, setImages] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -25,7 +29,7 @@ export function TagContentView() {
 	}, []);
 
 	useEffect(() => {
-		if (!currentTag) return;
+		if (!selectedId) return;
 		const fetchImages = async () => {
 			setIsLoading(true);
 			// const images = await getTagImages(currentTag.id);
@@ -36,14 +40,14 @@ export function TagContentView() {
 			setIsLoading(false);
 		};
 		fetchImages();
-	}, [currentTag]);
+	}, [selectedId]);
 
 	// Renderizar el componente adecuadamente
 	return (
 		<div className="flex flex-col h-full w-full p-4">
-			<h1 className="text-2xl font-bold mb-4">Imágenes con etiqueta: {currentTag?.name || 'Cargando...'}</h1>
+			<h1 className="text-2xl font-bold mb-4">Imágenes con etiqueta: {selectedTag?.name || 'Cargando...'}</h1>
 
-			<p className="text-muted-foreground mb-6">{currentTag?.count || 0} imágenes con esta etiqueta</p>
+			<p className="text-muted-foreground mb-6">{selectedTag?._count?.images || 0} imágenes con esta etiqueta</p>
 
 			<div className="text-center mt-8">
 				<p className="text-muted-foreground">Componente TagContentView en desarrollo. Próximamente disponible.</p>

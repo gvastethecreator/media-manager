@@ -25,7 +25,28 @@ import {
     serializeDirectoryContents,
     serializeFileListForUI,
     serializeFileOperationResult,
+    serializeImageMetadata,
 } from './serializers';
+
+/**
+ * Transforma un array de archivos base a archivos mejorados
+ * @param files Array de archivos base
+ * @returns Array de archivos transformados y mejorados
+ */
+export function transformFiles(files: any[]): any[] {
+    try {
+        return files.map(file => {
+            if (file.isDirectory) {
+                return toEnhancedDirectory(file);
+            } else {
+                return toEnhancedImageFile(file);
+            }
+        });
+    } catch (error) {
+        console.error('Error transformando archivos:', error);
+        return [];
+    }
+}
 
 // Reexportaciones explícitas
 export {
@@ -37,7 +58,7 @@ export {
     generateFileId, getColorForFileType, getIconForFileType, mapStatsToFileInfo, pathsToTreeStructure,
     serializeDirectoryContents,
     serializeFileListForUI,
-    serializeFileOperationResult, toEnhancedDirectory,
+    serializeFileOperationResult, serializeImageMetadata, toEnhancedDirectory,
     toEnhancedImageFile, toFileListItem
 };
 
@@ -55,9 +76,11 @@ export const fileTransformer = {
     applyFileFilters,
     toEnhancedDirectory,
     toEnhancedImageFile,
+    transformFiles,
 
     // Desde serializers
     deserializeImageMetadata,
+    serializeImageMetadata,
     formatFileSize,
     pathsToTreeStructure,
     serializeDirectoryContents,

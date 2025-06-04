@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useFileStoreBase } from '@/store/entities/file';
 import type { ViewType } from '@/types/file-item';
 import {
 	Archive,
@@ -57,8 +57,21 @@ export function ViewToolbar({
 	isRightPanelVisible,
 }: ViewToolbarProps) {
 	const { currentView, getCurrentItem } = useNavigationStore();
-	const { viewMode, setViewMode, selectedItems, clearSelection, sortBy, setSortBy, sortOrder, setSortOrder } =
-		useFileManager();
+
+	// 🆕 Usar los nuevos stores específicos de entidades
+	const viewMode = useFileStoreBase((state) => state.viewMode);
+	const setViewMode = useFileStoreBase((state) => state.setViewMode);
+	const selectedFileIds = useFileStoreBase((state) => state.selectedFileIds);
+	const files = useFileStoreBase((state) => state.files);
+	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
+	const sortBy = useFileStoreBase((state) => state.sortBy);
+	const setSortBy = useFileStoreBase((state) => state.setSortBy);
+	const sortDirection = useFileStoreBase((state) => state.sortDirection);
+	const setSortDirection = useFileStoreBase((state) => state.setSortDirection);
+
+	// 🎯 Obtener items seleccionados con información completa
+	const selectedItems = selectedFileIds.map(id => files[id as keyof typeof files]).filter(Boolean);
+
 	const { isVisible, toggleVisibility } = useDetailsPanel();
 
 	// Lista de vistas que requieren el panel de detalles
@@ -84,20 +97,20 @@ export function ViewToolbar({
 		}
 		if (window.confirm(`¿Estás seguro de que quieres eliminar ${selectedItems.length} archivo(s)?`)) {
 			for (const item of selectedItems) {
-				if (item.path) {
+				if (item?.path) {
 					window.electron?.deleteFile(item.path);
 				}
 			}
-			clearSelection();
+			deselectAllFiles();
 		}
-	}, [selectedItems, clearSelection]);
+	}, [selectedItems, deselectAllFiles]);
 
 	const handleDownloadSelected = useCallback(() => {
 		if (selectedItems.length === 0) {
 			return;
 		}
 		for (const item of selectedItems) {
-			if (item.path) {
+			if (item?.path) {
 				window.electron?.downloadFile(item.path);
 			}
 		}
@@ -107,7 +120,7 @@ export function ViewToolbar({
 		if (selectedItems.length === 0) {
 			return;
 		}
-		const paths = selectedItems.map((item) => item.path).filter(Boolean) as string[];
+		const paths = selectedItems.map((item) => item?.path).filter(Boolean) as string[];
 		if (paths.length > 0) {
 			console.warn('La funcionalidad de compresión no está implementada en esta versión');
 			alert('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
@@ -124,15 +137,15 @@ export function ViewToolbar({
 	}, [selectedItems]);
 
 	const handleSort = useCallback(
-		(field: string) => {
+		(field: 'name' | 'createdAt' | 'modifiedAt') => {
 			if (sortBy === field) {
-				setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+				setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
 			} else {
 				setSortBy(field);
-				setSortOrder('asc');
+				setSortDirection('asc');
 			}
 		},
-		[sortBy, sortOrder, setSortBy, setSortOrder]
+		[sortBy, sortDirection, setSortBy, setSortDirection]
 	);
 
 	const renderSortButtons = () => (
@@ -148,7 +161,7 @@ export function ViewToolbar({
 				<FileText className={cn('h-3.5 w-3.5', sortBy === 'name' && 'text-primary')} />
 				{sortBy === 'name' && (
 					<span className="ml-0.5">
-						{sortOrder === 'asc' ? (
+						{sortDirection === 'asc' ? (
 							<ArrowUp className="h-2.5 w-2.5 text-primary" />
 						) : (
 							<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -161,13 +174,13 @@ export function ViewToolbar({
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por fecha de modificación"
-				onClick={() => handleSort('updatedAt')}
-				data-active={sortBy === 'updatedAt'}
+				onClick={() => handleSort('modifiedAt')}
+				data-active={sortBy === 'modifiedAt'}
 			>
-				<Clock className={cn('h-3.5 w-3.5', sortBy === 'updatedAt' && 'text-primary')} />
-				{sortBy === 'updatedAt' && (
+				<Clock className={cn('h-3.5 w-3.5', sortBy === 'modifiedAt' && 'text-primary')} />
+				{sortBy === 'modifiedAt' && (
 					<span className="ml-0.5">
-						{sortOrder === 'asc' ? (
+						{sortDirection === 'asc' ? (
 							<ArrowUp className="h-2.5 w-2.5 text-primary" />
 						) : (
 							<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -186,7 +199,7 @@ export function ViewToolbar({
 				<Calendar className={cn('h-3.5 w-3.5', sortBy === 'createdAt' && 'text-primary')} />
 				{sortBy === 'createdAt' && (
 					<span className="ml-0.5">
-						{sortOrder === 'asc' ? (
+						{sortDirection === 'asc' ? (
 							<ArrowUp className="h-2.5 w-2.5 text-primary" />
 						) : (
 							<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -213,21 +226,21 @@ export function ViewToolbar({
 				variant="ghost"
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
-				onClick={() => setViewMode('masonry')}
-				title="Vista de mosaico"
-				data-active={viewMode === 'masonry'}
+				onClick={() => setViewMode('details')}
+				title="Vista de detalles"
+				data-active={viewMode === 'details'}
 			>
-				<LayoutGrid className={cn('h-3.5 w-3.5', viewMode === 'masonry' && 'text-primary font-bold')} />
+				<LayoutGrid className={cn('h-3.5 w-3.5', viewMode === 'details' && 'text-primary font-bold')} />
 			</Button>
 			<Button
 				variant="ghost"
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
-				onClick={() => setViewMode('cards')}
-				title="Vista de tarjetas"
-				data-active={viewMode === 'cards'}
+				onClick={() => setViewMode('tree')}
+				title="Vista de árbol"
+				data-active={viewMode === 'tree'}
 			>
-				<GalleryHorizontal className={cn('h-3.5 w-3.5', viewMode === 'cards' && 'text-primary font-bold')} />
+				<GalleryHorizontal className={cn('h-3.5 w-3.5', viewMode === 'tree' && 'text-primary font-bold')} />
 			</Button>
 			<Button
 				variant="ghost"
@@ -311,7 +324,7 @@ export function ViewToolbar({
 						size="icon"
 						className="h-7 w-7 hover:bg-accent"
 						title="Limpiar selección"
-						onClick={clearSelection}
+						onClick={deselectAllFiles}
 					>
 						<X className="h-3.5 w-3.5" />
 					</Button>

@@ -2,40 +2,49 @@
 
 import { getPlaceImages } from '@/app/actions/places/place.actions';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { usePlaceStore } from '@/store/entities/place';
 import type { FileItem } from '@/types/file-item';
 import { MapPin } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BaseContentView } from '../base/base-content-view';
 import { ContentViewProvider } from '../base/content-view-provider';
 
 export function PlaceContentView() {
-	const { currentPlaceId } = useFileManager();
+	const selectedPlaceId = usePlaceStore(state => state.selectedPlaceId);
+	const selectedPlace = usePlaceStore(state =>
+		selectedPlaceId ? state.getPlaceById(selectedPlaceId) : null
+	);
+
 	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
+	const loadPlaceImages = useCallback(async () => {
+		if (!selectedPlaceId) {
+			setItems([]);
+			return;
+		}
+
+		try {
+			setIsLoading(true);
+			const images = await getPlaceImages(selectedPlaceId);
+			setItems(images as unknown as FileItem[]);
+		} catch (err) {
+			setError(err instanceof Error ? err.message : 'Error desconocido');
+		} finally {
+			setIsLoading(false);
+		}
+	}, [selectedPlaceId]);
+
 	useEffect(() => {
-		const loadPlaceImages = async () => {
-			if (!currentPlaceId) {
-				return;
-			}
-
-			try {
-				setIsLoading(true);
-				const images = await getPlaceImages(currentPlaceId);
-				setItems(images as unknown as FileItem[]);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : 'Error desconocido');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
 		loadPlaceImages();
-	}, [currentPlaceId]);
+	}, [loadPlaceImages]);
 
-	if (!currentPlaceId) {
+	const handleItemSelection = useCallback((item: FileItem) => {
+		console.log('Item seleccionado:', item.name);
+	}, []);
+
+	if (!selectedPlaceId) {
 		return (
 			<EmptyState
 				icon={MapPin}
@@ -50,13 +59,15 @@ export function PlaceContentView() {
 			items={items}
 			isLoading={isLoading}
 			error={error}
-			currentContainerId={currentPlaceId}
-			containerName="lugar"
+			toggleItemSelection={handleItemSelection}
+			currentContainerId={selectedPlaceId}
+			containerName={selectedPlace?.name ?? "lugar"}
 			emptyState={{
 				icon: MapPin,
 				title: 'No hay imágenes en este lugar',
 				description: 'Este lugar no tiene imágenes asociadas',
 			}}
+			onRefresh={loadPlaceImages}
 		>
 			<BaseContentView />
 		</ContentViewProvider>

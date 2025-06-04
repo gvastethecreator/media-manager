@@ -4,63 +4,63 @@ import { getConceptImages } from '@/app/actions/concepts/concept.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { selectSelectedConcept, useConceptStore } from '@/store/entities/concept';
 import { Lightbulb } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 const viewLogger = clientLogger.withContext('ConceptContentView');
 
 export function ConceptContentView() {
-	const {
-		currentItems: items,
-		toggleItemSelection,
-		currentConceptId,
-		setCurrentConcept,
-		isLoading,
-		currentConcept,
-		setItems,
-		setIsLoading,
-	} = useFileManager();
+	const selectedConcept = useConceptStore(selectSelectedConcept);
+	const [items, setItems] = useState([]);
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState(null);
 
 	const loadConceptImages = useCallback(async () => {
-		if (!currentConceptId) {
+		if (!selectedConcept) {
 			setItems([]);
 			return;
 		}
 
 		try {
-			viewLogger.info('🔄 Cargando imágenes del concepto:', currentConceptId);
+			viewLogger.info('🔄 Cargando imágenes del concepto:', selectedConcept.id);
 			setIsLoading(true);
-			const images = await getConceptImages(currentConceptId);
+			const images = await getConceptImages(selectedConcept.id);
 			setItems(images);
 			viewLogger.info(`✅ ${images.length} imágenes cargadas`);
 		} catch (error) {
 			viewLogger.error('❌ Error cargando imágenes:', error);
 			toast.error('Error al cargar las imágenes del concepto');
 			setItems([]);
+			setError(error instanceof Error ? error.message : 'Error desconocido');
 		} finally {
 			setIsLoading(false);
 		}
-	}, [currentConceptId, setIsLoading, setItems]);
+	}, [selectedConcept]);
 
 	useEffect(() => {
 		loadConceptImages();
 	}, [loadConceptImages]);
 
+	const toggleItemSelection = useCallback((item) => {
+		// Implementar la lógica de selección de items si es necesaria
+		viewLogger.info('🔄 Toggle selección de item:', item?.id);
+	}, []);
+
 	const contentProps: BaseContentProps = {
 		items,
 		isLoading,
+		error,
 		toggleItemSelection,
-		currentContainerId: currentConceptId ?? null,
-		containerName: currentConcept?.name ?? null,
-		setCurrentContainer: setCurrentConcept,
+		currentContainerId: selectedConcept?.id ?? null,
+		containerName: selectedConcept?.name ?? null,
+		setCurrentContainer: () => { }, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: Lightbulb,
 			title: 'Concepto vacío',
-			description: `No se encontraron imágenes en ${
-				currentConcept?.name || 'este concepto'
-			}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${selectedConcept?.name || 'este concepto'
+				}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadConceptImages,
 	};

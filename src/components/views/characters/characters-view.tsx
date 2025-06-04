@@ -8,7 +8,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useCharacterStore } from '@/store/entities/character';
 import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -24,7 +24,7 @@ const DEFAULT_CHARACTER_OPTIONS: CardOptions = {
 
 export function CharactersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentCharacter } = useFileManager();
+	const { selectCharacter } = useCharacterStore();
 	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -79,18 +79,9 @@ export function CharactersView(_props: ViewProps) {
 		(character: CharacterWithStats) => {
 			viewLogger.info('🖱️ Click en personaje:', character.name);
 			setCurrentView('character-content');
-			setCurrentCharacter(character.id);
-			// Actualizar la información completa del personaje en el store
-			useFileManager.setState({
-				currentCharacter: {
-					id: character.id,
-					name: character.name,
-					emoji: character.emoji || '👤',
-					count: character._count?.images || 0,
-				},
-			});
+			selectCharacter(character.id);
 		},
-		[setCurrentView, setCurrentCharacter]
+		[setCurrentView, selectCharacter]
 	);
 
 	if (error) {

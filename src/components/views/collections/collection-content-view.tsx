@@ -3,75 +3,99 @@
 import { getCollectionImages, removeImageFromCollection } from '@/app/actions/collections/collection.actions';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
 import type { FileItem } from '@/types/file-item';
-import type { Collection } from '@prisma/client';
 import { Library } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
+const logger = clientLogger.withContext('CollectionContentView');
 
 export function CollectionContentView() {
-	const { selectedItem: currentCollection, addImageToCollection, selectItem, isLoading } = useCollectionStore();
+	const {
+		selectedCollectionId,
+		getSelectedCollection,
+		addImageToCollection,
+		selectCollection,
+		isLoading
+	} = useCollectionStore();
+
+	const currentCollection = getSelectedCollection();
 
 	const [collectionImages, setCollectionImages] = useState<FileItem[]>([]);
+	const [loadingImages, setLoadingImages] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (!currentCollection?.id) {
+		if (!selectedCollectionId) {
 			setCollectionImages([]);
 			return;
 		}
 
 		const loadImages = async () => {
 			try {
-				const images = await getCollectionImages(currentCollection.id);
+				setLoadingImages(true);
+				logger.info(`🔄 Cargando imágenes para colección: ${selectedCollectionId}`);
+				const images = await getCollectionImages(selectedCollectionId);
 				setCollectionImages(images);
 				setError(null);
+				logger.info(`✅ ${images.length} imágenes cargadas para colección`);
 			} catch (error) {
-				console.error('Error loading collection images:', error);
-				setError('Error al cargar las imágenes de la colección');
+				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+				logger.error('❌ Error cargando imágenes de colección:', error);
+				setError(errorMessage);
+				setCollectionImages([]);
+			} finally {
+				setLoadingImages(false);
 			}
 		};
 
 		loadImages();
-	}, [currentCollection?.id]);
+	}, [selectedCollectionId]);
 
-	const handleToggleItemSelection = async (item: FileItem) => {
-		if (!currentCollection) {
+	const handleToggleItemSelection = useCallback(async (item: FileItem) => {
+		if (!selectedCollectionId) {
+			logger.warn('⚠️ No hay colección seleccionada para modificar');
 			return;
 		}
 
 		const isSelected = collectionImages.some((img) => img.id === item.id);
+		logger.info(`🔄 ${isSelected ? 'Eliminando' : 'Añadiendo'} imagen ${item.id} ${isSelected ? 'de' : 'a'} colección ${selectedCollectionId}`);
 
-		if (isSelected) {
-			await removeImageFromCollection(currentCollection.id, item.id);
-		} else {
-			await addImageToCollection(currentCollection.id, item.id);
+		try {
+			if (isSelected) {
+				await removeImageFromCollection(selectedCollectionId, item.id);
+			} else {
+				await addImageToCollection(selectedCollectionId, item.id);
+			}
+
+			// Recargar imágenes después de la operación
+			const updatedImages = await getCollectionImages(selectedCollectionId);
+			setCollectionImages(updatedImages);
+			logger.info('✅ Colección actualizada correctamente');
+		} catch (error) {
+			logger.error('❌ Error al modificar colección:', error);
+			setError('Error al modificar la colección');
 		}
-
-		// Recargar imágenes después de la operación
-		const updatedImages = await getCollectionImages(currentCollection.id);
-		setCollectionImages(updatedImages);
-	};
-
-	const _setCurrentContainer = (collection: Collection) => {
-		selectItem(collection);
-	};
+	}, [selectedCollectionId, collectionImages, addImageToCollection]);
 
 	const contentProps: CollectionContentProps = {
 		items: collectionImages,
-		isLoading,
+		isLoading: isLoading || loadingImages,
 		error,
 		toggleItemSelection: handleToggleItemSelection,
-		currentContainerId: currentCollection?.id ?? null,
+		currentContainerId: selectedCollectionId,
 		containerName: currentCollection?.name ?? null,
-		setCurrentContainer: async (id: string) => {
-			const collection = { id, name: '' }; // Mínimo requerido para selección
-			selectItem(collection as Collection);
-		},
+		setCurrentContainer: useCallback((id: string) => {
+			logger.info(`🔄 Cambiando a colección: ${id}`);
+			selectCollection(id);
+		}, [selectCollection]),
 		emptyState: {
 			icon: Library,
 			title: 'Colección vacía',
-			description: `No se encontraron imágenes en ${currentCollection?.name || 'esta colección'}`,
+			description: currentCollection
+				? `No se encontraron imágenes en ${currentCollection.name}`
+				: 'No hay colección seleccionada',
 		},
 	};
 

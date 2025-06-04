@@ -1,7 +1,19 @@
-import { useFileManager } from '@/store/files/file-manager.store';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { useAlbumStore } from '@/store/entities/album';
+import { useCharacterStore } from '@/store/entities/character';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useConceptStore } from '@/store/entities/concept';
+import { useFolderStore } from '@/store/entities/folder';
+import { useNoteStore } from '@/store/entities/note';
+import { usePlaceStore } from '@/store/entities/place';
+import { usePromptStore } from '@/store/entities/prompt/store';
+import { useTagStore } from '@/store/entities/tag';
+import { useWorldItemStore } from '@/store/entities/world-item';
 import { useNavigationStore } from '@/store/navigation.store';
 import type { ViewType } from '@/types/file-item';
 import { useCallback } from 'react';
+
+const navLogger = clientLogger.withContext('NavigationUtils');
 
 /**
  * Hook personalizado para manejar la navegación y los cambios de vista
@@ -9,72 +21,47 @@ import { useCallback } from 'react';
  */
 export function useNavigation() {
 	const { currentView, setCurrentView } = useNavigationStore();
-	const {
-		// Estados actuales
-		currentCollectionId,
-		currentFolderId,
-		currentTagId,
-		currentAlbumId,
-		currentCharacterId,
-		currentPlaceId,
-		currentWorldItemId,
-		// Variables no utilizadas pero mantenidas para referencia
-		// currentConceptId,
-		// currentPromptId,
-		// currentNoteId,
 
-		// Objetos actuales
-		currentCollection,
-		currentFolder,
-		currentTag,
-		currentAlbum,
-		currentCharacter,
-		currentPlace,
-		currentWorldItem,
-		// Variables no utilizadas pero mantenidas para referencia
-		// currentConcept,
-		// currentPrompt,
-		// currentNote,
-
-		// Métodos set
-		setCurrentCollection,
-		setCurrentFolder,
-		setCurrentTag,
-		setCurrentAlbum,
-		setCurrentCharacter,
-		setCurrentPlace,
-		setCurrentWorldItem,
-		setCurrentConcept,
-		setCurrentPrompt,
-		setCurrentNote,
-	} = useFileManager();
+	// Stores específicos para cada entidad
+	const { selectCollection, selectedCollectionId, getSelectedCollection } = useCollectionStore();
+	const { selectFolder, selectedFolderId } = useFolderStore();
+	const { selectTag, selectedTagId } = useTagStore();
+	const { selectAlbum, selectedAlbumId } = useAlbumStore();
+	const { selectCharacter, selectedCharacterId } = useCharacterStore();
+	const { selectPlace, selectedPlaceId } = usePlaceStore();
+	const { selectWorldItem, selectedWorldItemId } = useWorldItemStore();
+	const { selectConcept, selectedConceptId } = useConceptStore();
+	const { selectPrompt, selectedPromptId } = usePromptStore();
+	const { selectNote, selectedNoteId } = useNoteStore();
 
 	/**
-	 * Limpia todas las selecciones actuales
+	 * Limpia todas las selecciones actuales de todas las entidades
 	 */
 	const clearAllSelections = useCallback(() => {
-		// Usar "" para todos para evitar errores de tipo
-		setCurrentCollection('');
-		setCurrentFolder('');
-		setCurrentTag('');
-		setCurrentAlbum('');
-		setCurrentCharacter('');
-		setCurrentPlace('');
-		setCurrentWorldItem('');
-		setCurrentConcept?.('');
-		setCurrentPrompt?.('');
-		setCurrentNote?.('');
+		navLogger.info('🧹 Limpiando todas las selecciones de entidades');
+
+		// Limpiar selecciones en cada store usando null o undefined según corresponda
+		selectCollection(null);
+		selectFolder(null);
+		selectTag(null);
+		selectAlbum(null);
+		selectCharacter(null);
+		selectPlace(null);
+		selectWorldItem(null);
+		selectConcept(null);
+		selectPrompt(null);
+		selectNote(null);
 	}, [
-		setCurrentCollection,
-		setCurrentFolder,
-		setCurrentTag,
-		setCurrentAlbum,
-		setCurrentCharacter,
-		setCurrentPlace,
-		setCurrentWorldItem,
-		setCurrentConcept,
-		setCurrentPrompt,
-		setCurrentNote,
+		selectCollection,
+		selectFolder,
+		selectTag,
+		selectAlbum,
+		selectCharacter,
+		selectPlace,
+		selectWorldItem,
+		selectConcept,
+		selectPrompt,
+		selectNote,
 	]);
 
 	/**
@@ -83,56 +70,58 @@ export function useNavigation() {
 	const navigateToView = useCallback(
 		(viewType: ViewType) => {
 			try {
+				navLogger.info(`🔄 Navegando a vista: ${viewType}`);
+
 				// Limpiar selecciones que no corresponden a la vista actual
 				if (viewType !== 'collection-content') {
-					setCurrentCollection('');
+					selectCollection(null);
 				}
 				if (viewType !== 'folder-content') {
-					setCurrentFolder('');
+					selectFolder(null);
 				}
 				if (viewType !== 'tag-content') {
-					setCurrentTag('');
+					selectTag(null);
 				}
 				if (viewType !== 'album-content') {
-					setCurrentAlbum('');
+					selectAlbum(null);
 				}
 				if (viewType !== 'character-content') {
-					setCurrentCharacter('');
+					selectCharacter(null);
 				}
 				if (viewType !== 'place-content') {
-					setCurrentPlace('');
+					selectPlace(null);
 				}
 				if (viewType !== 'world-item-content') {
-					setCurrentWorldItem('');
+					selectWorldItem(null);
 				}
-				if (viewType !== 'concept-content' && setCurrentConcept) {
-					setCurrentConcept('');
+				if (viewType !== 'concept-content') {
+					selectConcept(null);
 				}
-				if (viewType !== 'prompt-content' && setCurrentPrompt) {
-					setCurrentPrompt('');
+				if (viewType !== 'prompt-content') {
+					selectPrompt(null);
 				}
-				if (viewType !== 'note-content' && setCurrentNote) {
-					setCurrentNote('');
+				if (viewType !== 'note-content') {
+					selectNote(null);
 				}
 
 				// Cambiar la vista
 				setCurrentView(viewType);
 			} catch (error) {
-				console.error('Error al navegar a la vista:', error);
+				navLogger.error('❌ Error al navegar a la vista:', error);
 			}
 		},
 		[
 			setCurrentView,
-			setCurrentCollection,
-			setCurrentFolder,
-			setCurrentTag,
-			setCurrentAlbum,
-			setCurrentCharacter,
-			setCurrentPlace,
-			setCurrentWorldItem,
-			setCurrentConcept,
-			setCurrentPrompt,
-			setCurrentNote,
+			selectCollection,
+			selectFolder,
+			selectTag,
+			selectAlbum,
+			selectCharacter,
+			selectPlace,
+			selectWorldItem,
+			selectConcept,
+			selectPrompt,
+			selectNote,
 		]
 	);
 
@@ -141,11 +130,12 @@ export function useNavigation() {
 	 */
 	const navigateToCollection = useCallback(
 		(id: string) => {
+			navLogger.info(`📚 Navegando a colección: ${id}`);
 			clearAllSelections();
-			setCurrentCollection(id);
+			selectCollection(id);
 			setCurrentView('collection-content');
 		},
-		[clearAllSelections, setCurrentCollection, setCurrentView]
+		[clearAllSelections, selectCollection, setCurrentView]
 	);
 
 	/**
@@ -153,11 +143,12 @@ export function useNavigation() {
 	 */
 	const navigateToFolder = useCallback(
 		(id: string) => {
+			navLogger.info(`📁 Navegando a carpeta: ${id}`);
 			clearAllSelections();
-			setCurrentFolder(id);
+			selectFolder(id);
 			setCurrentView('folder-content');
 		},
-		[clearAllSelections, setCurrentFolder, setCurrentView]
+		[clearAllSelections, selectFolder, setCurrentView]
 	);
 
 	/**
@@ -165,11 +156,12 @@ export function useNavigation() {
 	 */
 	const navigateToTag = useCallback(
 		(id: string) => {
+			navLogger.info(`🏷️ Navegando a etiqueta: ${id}`);
 			clearAllSelections();
-			setCurrentTag(id);
+			selectTag(id);
 			setCurrentView('tag-content');
 		},
-		[clearAllSelections, setCurrentTag, setCurrentView]
+		[clearAllSelections, selectTag, setCurrentView]
 	);
 
 	/**
@@ -177,11 +169,12 @@ export function useNavigation() {
 	 */
 	const navigateToAlbum = useCallback(
 		(id: string) => {
+			navLogger.info(`🖼️ Navegando a álbum: ${id}`);
 			clearAllSelections();
-			setCurrentAlbum(id);
+			selectAlbum(id);
 			setCurrentView('album-content');
 		},
-		[clearAllSelections, setCurrentAlbum, setCurrentView]
+		[clearAllSelections, selectAlbum, setCurrentView]
 	);
 
 	/**
@@ -189,11 +182,12 @@ export function useNavigation() {
 	 */
 	const navigateToCharacter = useCallback(
 		(id: string) => {
+			navLogger.info(`👤 Navegando a personaje: ${id}`);
 			clearAllSelections();
-			setCurrentCharacter(id);
+			selectCharacter(id);
 			setCurrentView('character-content');
 		},
-		[clearAllSelections, setCurrentCharacter, setCurrentView]
+		[clearAllSelections, selectCharacter, setCurrentView]
 	);
 
 	/**
@@ -201,11 +195,12 @@ export function useNavigation() {
 	 */
 	const navigateToPlace = useCallback(
 		(id: string) => {
+			navLogger.info(`🌍 Navegando a lugar: ${id}`);
 			clearAllSelections();
-			setCurrentPlace(id);
+			selectPlace(id);
 			setCurrentView('place-content');
 		},
-		[clearAllSelections, setCurrentPlace, setCurrentView]
+		[clearAllSelections, selectPlace, setCurrentView]
 	);
 
 	/**
@@ -213,11 +208,51 @@ export function useNavigation() {
 	 */
 	const navigateToWorldItem = useCallback(
 		(id: string) => {
+			navLogger.info(`🧩 Navegando a objeto mundial: ${id}`);
 			clearAllSelections();
-			setCurrentWorldItem(id);
+			selectWorldItem(id);
 			setCurrentView('world-item-content');
 		},
-		[clearAllSelections, setCurrentWorldItem, setCurrentView]
+		[clearAllSelections, selectWorldItem, setCurrentView]
+	);
+
+	/**
+	 * Navega a la vista de contenido de un concepto específico
+	 */
+	const navigateToConcept = useCallback(
+		(id: string) => {
+			navLogger.info(`💡 Navegando a concepto: ${id}`);
+			clearAllSelections();
+			selectConcept(id);
+			setCurrentView('concept-content');
+		},
+		[clearAllSelections, selectConcept, setCurrentView]
+	);
+
+	/**
+	 * Navega a la vista de contenido de un prompt específico
+	 */
+	const navigateToPrompt = useCallback(
+		(id: string) => {
+			navLogger.info(`💬 Navegando a prompt: ${id}`);
+			clearAllSelections();
+			selectPrompt(id);
+			setCurrentView('prompt-content');
+		},
+		[clearAllSelections, selectPrompt, setCurrentView]
+	);
+
+	/**
+	 * Navega a la vista de contenido de una nota específica
+	 */
+	const navigateToNote = useCallback(
+		(id: string) => {
+			navLogger.info(`📝 Navegando a nota: ${id}`);
+			clearAllSelections();
+			selectNote(id);
+			setCurrentView('note-content');
+		},
+		[clearAllSelections, selectNote, setCurrentView]
 	);
 
 	/**
@@ -225,6 +260,7 @@ export function useNavigation() {
 	 */
 	const navigateToMainFromContent = useCallback(() => {
 		const mainView = currentView.replace('-content', '') as ViewType;
+		navLogger.info(`🔙 Navegando a vista principal: ${mainView}`);
 		clearAllSelections();
 		setCurrentView(mainView);
 	}, [currentView, clearAllSelections, setCurrentView]);
@@ -233,114 +269,58 @@ export function useNavigation() {
 	 * Navega a la vista de inicio (galería)
 	 */
 	const navigateToHome = useCallback(() => {
+		navLogger.info('🏠 Navegando a inicio (galería)');
 		clearAllSelections();
 		setCurrentView('all-images');
 	}, [clearAllSelections, setCurrentView]);
 
 	/**
 	 * Obtiene el elemento actual seleccionado basado en la vista actual
-	 * con información detallada adicional básica
 	 */
 	const getCurrentItem = useCallback(() => {
 		// Detectamos el tipo de vista actual y obtenemos la información básica
 		switch (currentView) {
 			case 'collection-content':
-				return currentCollection
-					? {
-							id: currentCollectionId,
-							name: currentCollection.name,
-							// Propiedades que espera BreadcrumbsProps
-							itemType: 'collection',
-							// Añadir propiedades opcionales que puedan ser útiles
-							color: currentCollection.color,
-							emoji: currentCollection.emoji,
-						}
-					: undefined;
+				return getSelectedCollection();
 			case 'folder-content':
-				return currentFolder
-					? {
-							id: currentFolderId,
-							name: currentFolder.name,
-							path: currentFolder.path,
-							description: currentFolder.description,
-							emoji: currentFolder.emoji,
-							_count: currentFolder._count,
-							totalSize: currentFolder.totalSize,
-							lastIndexed: currentFolder.lastIndexed,
-							createdAt: currentFolder.createdAt,
-							updatedAt: currentFolder.updatedAt,
-							// Propiedades que espera BreadcrumbsProps
-							itemType: 'folder',
-						}
-					: undefined;
+				return useFolderStore.getState().selected;
 			case 'tag-content':
-				return currentTag
-					? {
-							id: currentTagId,
-							name: currentTag.name,
-							// Propiedades básicas comunes
-							itemType: 'tag',
-						}
-					: undefined;
+				return useTagStore.getState().getSelectedTag();
 			case 'album-content':
-				return currentAlbum
-					? {
-							id: currentAlbumId,
-							name: currentAlbum.name,
-							// Propiedades básicas comunes
-							itemType: 'album',
-						}
-					: undefined;
+				return useAlbumStore.getState().getSelectedAlbum();
 			case 'character-content':
-				return currentCharacter
-					? {
-							id: currentCharacterId,
-							name: currentCharacter.name,
-							// Propiedades básicas comunes
-							itemType: 'character',
-						}
-					: undefined;
+				return useCharacterStore.getState().getSelectedCharacter();
 			case 'place-content':
-				return currentPlace
-					? {
-							id: currentPlaceId,
-							name: currentPlace.name,
-							// Propiedades básicas comunes
-							itemType: 'place',
-						}
-					: undefined;
+				return usePlaceStore.getState().getSelectedPlace();
 			case 'world-item-content':
-				return currentWorldItem
-					? {
-							id: currentWorldItemId,
-							name: currentWorldItem.name,
-							// Propiedades básicas comunes
-							itemType: 'world-item',
-						}
-					: undefined;
+				return useWorldItemStore.getState().getSelectedItem();
+			case 'concept-content':
+				return useConceptStore.getState().getSelectedConcept();
+			case 'prompt-content':
+				return usePromptStore.getState().selectedPrompt;
+			case 'note-content':
+				return useNoteStore.getState().selectedNote;
 			default:
-				return undefined;
+				return null;
 		}
-	}, [
-		currentView,
-		currentCollectionId,
-		currentCollection,
-		currentFolderId,
-		currentFolder,
-		currentTagId,
-		currentTag,
-		currentAlbumId,
-		currentAlbum,
-		currentCharacterId,
-		currentCharacter,
-		currentPlaceId,
-		currentPlace,
-		currentWorldItemId,
-		currentWorldItem,
-	]);
+	}, [currentView, getSelectedCollection]);
 
 	return {
+		// Estados actuales
 		currentView,
+		currentCollectionId: selectedCollectionId,
+		currentFolderId: selectedFolderId,
+		currentTagId: selectedTagId,
+		currentAlbumId: selectedAlbumId,
+		currentCharacterId: selectedCharacterId,
+		currentPlaceId: selectedPlaceId,
+		currentWorldItemId: selectedWorldItemId,
+		currentConceptId: selectedConceptId,
+		currentPromptId: selectedPromptId,
+		currentNoteId: selectedNoteId,
+
+		// Acciones de navegación
+		setCurrentView,
 		navigateToView,
 		navigateToCollection,
 		navigateToFolder,
@@ -349,8 +329,13 @@ export function useNavigation() {
 		navigateToCharacter,
 		navigateToPlace,
 		navigateToWorldItem,
+		navigateToConcept,
+		navigateToPrompt,
+		navigateToNote,
 		navigateToMainFromContent,
 		navigateToHome,
+
+		// Utilidades
 		clearAllSelections,
 		getCurrentItem,
 	};

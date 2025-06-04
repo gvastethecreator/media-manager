@@ -4,7 +4,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProfileContext } from '@/lib/contexts';
-import { Briefcase, Bug, ChevronLeft, ChevronRight, CircleDot, Citrus, Coffee, Home, IdCard, Leaf, Moon, Palette, Settings2, Sun, Sunset, TreePine, Waves } from 'lucide-react';
+import { Briefcase, Bug, ChevronLeft, ChevronRight, CircleDot, Citrus, Coffee, Eye, Home, IdCard, Leaf, Moon, Palette, Settings2, Sun, Sunset, TreePine, Waves } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from 'next-themes';
 import { memo, useCallback, useMemo } from 'react';
@@ -108,6 +108,7 @@ interface NavPanelHeaderProps {
 	onOpenSettings: () => void;
 	onOpenDevelopment: () => void;
 	onOpenEntityCards: () => void;
+	onToggleZenMode?: () => void; // 🧘 Nuevo prop para modo zen
 	isCollapsed?: boolean;
 	onToggleCollapse?: () => void;
 }
@@ -178,6 +179,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 	onOpenSettings,
 	onOpenDevelopment,
 	onOpenEntityCards,
+	onToggleZenMode, // 🧘 Nuevo prop para modo zen
 	isCollapsed = false,
 	onToggleCollapse,
 }: NavPanelHeaderProps) {
@@ -218,7 +220,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.1, ease: 'easeOut' }}
-			className="relative bg-gradient-to-b from-background/90 to-transparent py-1 border-b border-border/20 shadow-sm"
+			className="relative bg-gradient-to-b from-background/90 to-transparent py-2 border-b border-border/20 shadow-sm"
 		>
 			{/* Si está colapsado, mostramos en formato vertical con avatar arriba */}
 			{isCollapsed ? (
@@ -261,6 +263,18 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							tooltipSide="right"
 						/>
 
+						{/* 🧘 Botón de modo zen */}
+						{onToggleZenMode && (
+							<MemoizedHeaderButton
+								icon={<Eye className="h-3.5 w-3.5" />}
+								onClick={onToggleZenMode}
+								tooltipTitle="Modo Zen"
+								tooltipContent="Activa el modo de concentración"
+								tooltipNote="Oculta distracciones"
+								tooltipSide="right"
+							/>
+						)}
+
 						<MemoizedHeaderButton
 							icon={getThemeIcon(theme)}
 							onClick={handleThemeToggle}
@@ -279,36 +293,42 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 					</div>
 				</div>
 			) : (
-				/* Mantener layout horizontal cuando no está colapsado */
-				<div className="flex items-center justify-between px-3">
-					{/* Perfil y estadísticas */}
-					<div className="flex items-center gap-2">
-						<MemoizedAvatar color={activeProfileData.color} emoji={activeProfileData.emoji} />
+				/* 📋 Nuevo layout en 2 filas cuando no está colapsado */
+				<div className="flex flex-col gap-2 px-3">
+					{/* 🔸 Primera fila: Avatar, nombre y estadísticas */}
+					<div className="flex items-center justify-between">
+						{/* Perfil y estadísticas */}
+						<div className="flex items-center gap-2">
+							<MemoizedAvatar color={activeProfileData.color} emoji={activeProfileData.emoji} />
 
-						<div className="flex flex-col">
-							<motion.div
-								initial={{ opacity: 0, width: 0 }}
-								animate={{ opacity: 1, width: 'auto' }}
-								transition={{ delay: 0.1 }}
-								className="flex items-center"
-							>
-								<span className="text-xs leading-tight text-foreground/60">{activeProfileData?.name}</span>
-								<span className="inline-flex items-center gap-1 text-[10px] ml-2 text-muted-foreground">
-									{totalImages.toLocaleString()} imagenes
-								</span>
-							</motion.div>
+							<div className="flex flex-col">
+								<motion.div
+									initial={{ opacity: 0, width: 0 }}
+									animate={{ opacity: 1, width: 'auto' }}
+									transition={{ delay: 0.1 }}
+									className="flex items-center gap-2"
+								>
+									<span className="text-xs leading-tight text-foreground/80 font-medium">
+										{activeProfileData?.name}
+									</span>
+									<span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-accent/30 rounded-full text-muted-foreground">
+										📸 {totalImages.toLocaleString()} imágenes
+									</span>
+								</motion.div>
+							</div>
 						</div>
-					</div>
 
-					{/* Controles y acciones */}
-					<div className="flex items-center gap-1">
+						{/* Botón de colapsar */}
 						<MemoizedHeaderButton
 							icon={<ChevronLeft className="h-3.5 w-3.5" />}
 							onClick={onToggleCollapse || (() => { })}
 							tooltipTitle="Colapsar Panel"
 							tooltipContent=""
 						/>
+					</div>
 
+					{/* 🔹 Segunda fila: Botones de acción */}
+					<div className="flex items-center justify-center gap-1">
 						<MemoizedHeaderButton
 							icon={<Home className="h-3.5 w-3.5" />}
 							onClick={handleHomeClick}
@@ -330,6 +350,17 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							tooltipContent="Accede a herramientas de desarrollo y depuración"
 							tooltipNote="Solo para administradores"
 						/>
+
+						{/* 🧘 Botón de modo zen */}
+						{onToggleZenMode && (
+							<MemoizedHeaderButton
+								icon={<Eye className="h-3.5 w-3.5" />}
+								onClick={onToggleZenMode}
+								tooltipTitle="Modo Zen"
+								tooltipContent="Activa el modo de concentración"
+								tooltipNote="Oculta distracciones"
+							/>
+						)}
 
 						<MemoizedHeaderButton
 							icon={getThemeIcon(theme)}

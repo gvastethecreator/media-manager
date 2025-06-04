@@ -5,7 +5,7 @@ import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useCharacterStore } from '@/store/entities/character';
 import type { FileItem } from '@/types/file-item';
 import { Users } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -13,7 +13,9 @@ import { useCallback, useEffect, useState } from 'react';
 const viewLogger = clientLogger.withContext('CharacterContentView');
 
 export function CharacterContentView() {
-	const { currentCharacterId } = useFileManager();
+	const { selectedCharacterId, getSelectedCharacter } = useCharacterStore();
+	const currentCharacter = getSelectedCharacter();
+
 	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -22,24 +24,27 @@ export function CharacterContentView() {
 	const [optimisticItems, _addEvent] = clientEvents.useEvents<FileItem[]>(items);
 
 	const loadCharacterImages = useCallback(async () => {
-		if (!currentCharacterId) {
+		if (!selectedCharacterId) {
+			setItems([]);
+			setIsLoading(false);
 			return;
 		}
 
 		try {
 			setIsLoading(true);
-			viewLogger.info('🔄 Cargando imágenes del personaje...');
-			const data = await getCharacterImages(currentCharacterId);
+			viewLogger.info(`🔄 Cargando imágenes del personaje: ${selectedCharacterId}`);
+			const data = await getCharacterImages(selectedCharacterId);
 			setItems(data as unknown as FileItem[]);
-			viewLogger.info('✅ Imágenes cargadas');
+			viewLogger.info(`✅ ${data.length} imágenes cargadas para el personaje`);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 			viewLogger.error('❌ Error cargando imágenes:', errorMessage);
 			setError(errorMessage);
+			setItems([]);
 		} finally {
 			setIsLoading(false);
 		}
-	}, [currentCharacterId]);
+	}, [selectedCharacterId]);
 
 	useEffect(() => {
 		// Cargar imágenes inicialmente
@@ -55,18 +60,21 @@ export function CharacterContentView() {
 		isLoading,
 		error,
 		toggleItemSelection: handleItemSelection,
-		currentContainerId: currentCharacterId ?? null,
-		emptyState: !currentCharacterId
+		currentContainerId: selectedCharacterId ?? null,
+		containerName: currentCharacter?.name ?? null,
+		emptyState: !selectedCharacterId
 			? {
-					icon: Users,
-					title: 'No hay personaje seleccionado',
-					description: 'Selecciona un personaje para ver su contenido.',
-				}
+				icon: Users,
+				title: 'No hay personaje seleccionado',
+				description: 'Selecciona un personaje para ver su contenido.',
+			}
 			: {
-					icon: Users,
-					title: 'Personaje sin imágenes',
-					description: 'Este personaje no tiene imágenes asociadas.',
-				},
+				icon: Users,
+				title: 'Personaje sin imágenes',
+				description: currentCharacter
+					? `${currentCharacter.name} no tiene imágenes asociadas.`
+					: 'Este personaje no tiene imágenes asociadas.',
+			},
 	};
 
 	return (

@@ -9,7 +9,7 @@ import {
 	ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { useFavoriteStore } from '@/store/entities/favorite';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useSelectionStore } from '@/store/selection.store';
 import { Copy, Download, Flag, FolderOpen, Heart, HeartOff, ImageIcon, Info, Share2, Trash2 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -178,7 +178,7 @@ const ContextMenuItems = memo(function ContextMenuItems({
 export const FileContextMenu = memo(function FileContextMenu({ file, children, onAction }: FileContextMenuProps) {
 	const { toggleFavorite, isFavorited } = useFavoriteStore();
 	const { loadingStates, handleOpenChange, loadEntityData } = useEntityLoader();
-	const { selectedItems } = useFileManager();
+	const { selectedItems, isItemSelected, toggleSelection } = useSelectionStore();
 	const [isOpen, setIsOpen] = useState(false);
 
 	// Efecto para verificar si las entidades ya están cargadas y actualizar el UI apropiadamente
@@ -197,9 +197,9 @@ export const FileContextMenu = memo(function FileContextMenu({ file, children, o
 
 	// Memoizamos el texto del botón de marcar
 	const markToggleText = useMemo(() => {
-		const isSelected = selectedItems.some((item) => item.id === file.id);
+		const isSelected = isItemSelected(file.id);
 		return isSelected ? 'Desmarcar' : 'Marcar';
-	}, [selectedItems, file.id]);
+	}, [isItemSelected, file.id]);
 
 	// Memoizamos los handlers para acciones comunes
 	const handlePreview = useCallback(() => {
@@ -209,8 +209,9 @@ export const FileContextMenu = memo(function FileContextMenu({ file, children, o
 
 	const handleMarkToggle = useCallback(() => {
 		contextMenuLogger.info('🚩 Toggle marca:', file.id);
+		toggleSelection(file.id, file);
 		onAction('mark-toggle', file);
-	}, [onAction, file]);
+	}, [onAction, file, toggleSelection]);
 
 	const handleOpenLocation = useCallback(() => {
 		contextMenuLogger.info('📂 Abrir ubicación:', file.id);
@@ -249,69 +250,51 @@ export const FileContextMenu = memo(function FileContextMenu({ file, children, o
 	// Memoizamos el estado de favorito
 	const isFileFavorited = useMemo(() => isFavorited(file.id), [isFavorited, file.id]);
 
-	// Memoizamos las props para submenús comunes
-	const submenuProps = useMemo(() => ({
-		file,
-		onAction,
-		loadingStates,
-		onOpenChange: handleOpenChange
-	}), [file, onAction, loadingStates, handleOpenChange]);
+	// Crear objetos de props para submenús - memoizado para evitar re-renderizados
+	const submenuProps = useMemo(
+		() => ({
+			file,
+			onAction,
+			loadEntityData,
+			loadingStates,
+		}),
+		[file, onAction, loadEntityData, loadingStates]
+	);
 
-	// Controlamos cuando renderizar el contenido del menú
-	const handleMenuOpenChange = useCallback((open: boolean) => {
-		if (open) {
-			contextMenuLogger.info('📂 Menú contextual abierto para:', file.id);
-		} else {
-			contextMenuLogger.info('📁 Menú contextual cerrado para:', file.id);
-		}
-		setIsOpen(open);
-	}, [file.id]);
-
-	// Memoizamos los items del menú para solo renderizarlos cuando sea necesario
-	const menuItems = useMemo(() => {
-		if (!isOpen) return null;
-
-		return (
-			<ContextMenuItems
-				file={file}
-				onAction={onAction}
-				markToggleText={markToggleText}
-				isFileFavorited={isFileFavorited}
-				submenuProps={submenuProps}
-				handleFavoriteToggle={handleFavoriteToggle}
-				handleMarkToggle={handleMarkToggle}
-				handlePreview={handlePreview}
-				handleOpenLocation={handleOpenLocation}
-				handleDownload={handleDownload}
-				handleCopy={handleCopy}
-				handleCopyPath={handleCopyPath}
-				handleShowProperties={handleShowProperties}
-				handleDelete={handleDelete}
-			/>
-		);
-	}, [
-		isOpen,
-		file,
-		onAction,
-		markToggleText,
-		isFileFavorited,
-		submenuProps,
-		handleFavoriteToggle,
-		handleMarkToggle,
-		handlePreview,
-		handleOpenLocation,
-		handleDownload,
-		handleCopy,
-		handleCopyPath,
-		handleShowProperties,
-		handleDelete
-	]);
+	// Manejador memoizado para cambios en el estado de apertura del menú
+	const handleContextMenuOpenChange = useCallback(
+		(open: boolean) => {
+			setIsOpen(open);
+			// Solo cargar entidades cuando se abre el menú
+			if (open) {
+				handleOpenChange(open);
+			}
+		},
+		[handleOpenChange]
+	);
 
 	return (
-		<ContextMenu onOpenChange={handleMenuOpenChange}>
-			<MemoizedContextMenuTrigger asChild>{children}</MemoizedContextMenuTrigger>
+		<ContextMenu onOpenChange={handleContextMenuOpenChange}>
+			<MemoizedContextMenuTrigger>{children}</MemoizedContextMenuTrigger>
 			<MemoizedContextMenuPortal>
-				{menuItems}
+				{isOpen && (
+					<ContextMenuItems
+						file={file}
+						onAction={onAction}
+						markToggleText={markToggleText}
+						isFileFavorited={isFileFavorited}
+						submenuProps={submenuProps}
+						handleFavoriteToggle={handleFavoriteToggle}
+						handleMarkToggle={handleMarkToggle}
+						handlePreview={handlePreview}
+						handleOpenLocation={handleOpenLocation}
+						handleDownload={handleDownload}
+						handleCopy={handleCopy}
+						handleCopyPath={handleCopyPath}
+						handleShowProperties={handleShowProperties}
+						handleDelete={handleDelete}
+					/>
+				)}
 			</MemoizedContextMenuPortal>
 		</ContextMenu>
 	);

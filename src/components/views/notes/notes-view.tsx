@@ -9,7 +9,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useNoteStore } from '@/store/entities/note';
 import { ScrollText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -20,7 +20,7 @@ const viewLogger = clientLogger.withContext('NotesView');
 
 export function NotesView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentNote } = useFileManager();
+	const { selectNote } = useNoteStore();
 	const router = useRouter();
 	const [notes, setNotes] = useState<NoteWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -54,9 +54,9 @@ export function NotesView(_props: ViewProps) {
 		(note: NoteWithStats) => {
 			viewLogger.info('🖱️ Click en nota:', note.title);
 			setCurrentView('note-content');
-			setCurrentNote(note.id);
+			selectNote(note);
 		},
-		[setCurrentView, setCurrentNote]
+		[setCurrentView, selectNote]
 	);
 
 	const handleEditNote = useCallback(

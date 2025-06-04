@@ -9,8 +9,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { folderService } from '@/services/folder-service-export';
-import { useFileManager } from '@/store/files/file-manager.store';
-import type { Folder } from '@/types/entities/folders';
+import { useFileStoreBase } from '@/store/entities/file';
+import { useFolderStore } from '@/store/entities/folder';
+import type { Folder } from '@/types/entities/folder';
 import { DatabaseIcon, FolderIcon, RefreshCcw, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
@@ -44,7 +45,7 @@ const MemoizedFolderCard = React.memo(
 			prevProps.folder.name === nextProps.folder.name &&
 			prevProps.folder.emoji === nextProps.folder.emoji &&
 			prevProps.folder.updatedAt === nextProps.folder.updatedAt &&
-			prevProps.folder.imageCount === nextProps.folder.imageCount
+			(prevProps.folder._count?.images || 0) === (nextProps.folder._count?.images || 0)
 		);
 	}
 );
@@ -54,7 +55,17 @@ MemoizedFolderCard.displayName = 'MemoizedFolderCard';
 
 export function FoldersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentFolder, clearSelection } = useFileManager();
+
+	// 🆕 Usar los nuevos stores específicos
+	const folderStore = useFolderStore();
+	const {
+		setSelected: setCurrentFolder,
+		loadFolder: setCurrentFolderId
+	} = folderStore;
+
+	// 🧹 Para limpiar selección - usar el hook base directamente
+	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
+
 	const [folders, setFolders] = useState<FolderWithCount[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -70,21 +81,27 @@ export function FoldersView(_props: ViewProps) {
 			setIsLoading(true); // Siempre poner en loading al iniciar la carga/reintento
 			viewLogger.info('🔄 Cargando carpetas...');
 			const data = await folderService.getFolders();
-			const transformedData = data.map((folderData: any) => {
-				return {
-					...folderData,
-					lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
-					createdAt: new Date(folderData.createdAt),
-					updatedAt: new Date(folderData.updatedAt),
-					// Asegurarnos de que _count existe
-					_count: folderData._count || { images: folderData.imageCount || 0 },
-				} as Folder;
-			});
 
-			setFolders(transformedData);
-			setRetryCount(0); // Reiniciar el contador de reintentos si la carga es exitosa
-			setError(null); // Limpiar cualquier error previo
-			viewLogger.info(`✅ ${data.length} carpetas cargadas`);
+			// ✅ data ahora es el array correcto, no necesitamos .map si ya viene correcto
+			if (Array.isArray(data)) {
+				const transformedData = data.map((folderData: any) => {
+					return {
+						...folderData,
+						lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : null,
+						createdAt: new Date(folderData.createdAt),
+						updatedAt: new Date(folderData.updatedAt),
+						// Asegurarnos de que _count existe
+						_count: folderData._count || { images: folderData.imageCount || 0 },
+					} as Folder;
+				});
+
+				setFolders(transformedData);
+				setRetryCount(0); // Reiniciar el contador de reintentos si la carga es exitosa
+				setError(null); // Limpiar cualquier error previo
+				viewLogger.info(`✅ ${transformedData.length} carpetas cargadas`);
+			} else {
+				throw new Error('Respuesta del servicio no es un array válido');
+			}
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 
@@ -128,8 +145,7 @@ export function FoldersView(_props: ViewProps) {
 		return () => {
 			viewLogger.debug('🔴 FoldersView Desmontado'); // <-- Log de desmontaje
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps -- Solo queremos ejecutar esto al montar
-	}, []); // <-- Cambiar dependencia a array vacío
+	}, [loadFolders]); // <-- Incluir loadFolders en las dependencias
 
 	const handleFolderClick = useCallback(
 		async (folder: FolderWithCount) => {
@@ -143,7 +159,7 @@ export function FoldersView(_props: ViewProps) {
 				}
 
 				// Limpiar selecciones previas
-				clearSelection();
+				deselectAllFiles();
 
 				// Asegurarnos de establecer la información completa de la carpeta en ambos stores
 
@@ -154,25 +170,17 @@ export function FoldersView(_props: ViewProps) {
 						id: folder.id,
 						name: folder.name,
 						emoji: folder.emoji || '',
-						count: folder._count?.images || folder.imageCount || 0,
+						count: folder._count?.images || 0,
 						itemType: 'folder',
 					},
 					navigationDirection: 1, // Indicar navegación hacia adelante
 				});
 
-				// 2. Actualizar el store de gestor de archivos
-				useFileManager.setState({
-					currentFolder: {
-						id: folder.id,
-						name: folder.name,
-						count: folder._count?.images || folder.imageCount || 0,
-					},
-					currentFolderId: folder.id,
-					currentView: 'folder-content',
-					isLoading: true, // Indicar que comenzará la carga
-					selectedItems: [], // Limpiar selección explícitamente
-					currentItems: [], // Limpiar items actuales para evitar datos antiguos
-				});
+				// 2. 🆝 Actualizar el nuevo store de carpetas - cargar la carpeta específica
+				await setCurrentFolderId(folder.id);
+
+				// Para simplificar la migración, solo pasamos null y dejamos que el store cargue la carpeta
+				setCurrentFolder(null);
 
 				// 3. Ahora cambiar la vista
 				setCurrentView('folder-content');
@@ -182,7 +190,7 @@ export function FoldersView(_props: ViewProps) {
 				viewLogger.error('❌ Error al cambiar a la carpeta:', error);
 			}
 		},
-		[setCurrentView, clearSelection]
+		[setCurrentView, deselectAllFiles, setCurrentFolder, setCurrentFolderId]
 	);
 
 	if (error) {
