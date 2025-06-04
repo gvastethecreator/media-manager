@@ -9,7 +9,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useWorldItemStore } from '@/store/entities/world-item';
 import { Box } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -25,7 +25,7 @@ const DEFAULT_WORLD_ITEM_OPTIONS: CardOptions = {
 
 export function WorldItemsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentWorldItem } = useFileManager();
+	const selectWorldItem = useWorldItemStore(state => state.selectWorldItem);
 	const [worldItems, setWorldItems] = useState<WorldItemWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -78,9 +78,9 @@ export function WorldItemsView(_props: ViewProps) {
 		(worldItem: WorldItemWithStats) => {
 			viewLogger.info('🖱️ Click en objeto del mundo:', worldItem.name);
 			setCurrentView('world-item-content');
-			setCurrentWorldItem(worldItem.id);
+			selectWorldItem(worldItem.id);
 		},
-		[setCurrentView, setCurrentWorldItem]
+		[setCurrentView, selectWorldItem]
 	);
 
 	const handleEditWorldItem = useCallback((worldItem: WorldItemWithStats) => {

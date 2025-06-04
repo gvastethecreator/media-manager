@@ -13,8 +13,7 @@ export {
 
 // Re-exportar acciones de búsqueda y consulta
 export {
-    getFolderById, getFolderTree, getFolders, getFoldersStats,
-    revalidateFolderRoutes,
+    getFolderById, getFolders, getFoldersStats, getFolderTree, revalidateFolderRoutes,
     searchFolders
 } from './query.actions';
 
@@ -29,7 +28,7 @@ export {
 
 // Re-exportar acciones de procesamiento
 export {
-    indexFolder, reindexAutoFolders, reindexFolder, repairFolder,
+    indexFolder, reindexFolder, repairFolder,
     validateFolderPath
 } from './process.actions';
 
@@ -53,9 +52,7 @@ export type {
     ImageWithRelations, IndexCallbacks, IndexOptions, IndexState, ProcessStatus, ReindexOptions, UpdateFolderOptions
 } from './folder-types';
 
-export {
-    FOLDER_ERROR_CODES, SUPPORTED_FORMATS, createFolderError, folderErrorToResponse, fromError
-} from './folder-types';
+export { createFolderError, FOLDER_ERROR_CODES, folderErrorToResponse, fromError, SUPPORTED_FORMATS } from './folder-types';
 
 // Re-exportar estadísticas existentes
 export {
@@ -68,9 +65,10 @@ export type {
     CreateFolderData, FolderBase, FolderExtended, FolderStats, FolderSummary, UpdateFolderData
 } from '@/types/entities/folder';
 
-// Re-exportar acciones de carpetas específicas desde process.actions
+// Re-exportar acciones específicas para reindexación global
 export {
-    reindexAutoFolders as reindexAllFolders // Renombrar para que coincida con el error
+    reindexAllFoldersInSystem as reindexAllFolders, // ✅ CORREGIDO: Función que reindexea TODAS las carpetas
+    reindexAutoFolders // Función que reindexea solo carpetas marcadas para auto-reindex
 } from './process.actions';
 
 // NOTA: updateFolderAutoReindex parece no existir

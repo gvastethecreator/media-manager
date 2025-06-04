@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { usePromptStore } from '@/store/entities/prompt/store';
 import { MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -21,7 +21,7 @@ const viewLogger = clientLogger.withContext('PromptsView');
 
 export function PromptsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentPrompt } = useFileManager();
+	const { selectPrompt } = usePromptStore();
 	const router = useRouter();
 	const [prompts, setPrompts] = useState<PromptWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -55,9 +55,9 @@ export function PromptsView(_props: ViewProps) {
 		(prompt: PromptWithStats) => {
 			viewLogger.info('🖱️ Click en prompt:', prompt.name);
 			setCurrentView('prompt-content');
-			setCurrentPrompt(prompt.id);
+			selectPrompt(prompt);
 		},
-		[setCurrentView, setCurrentPrompt]
+		[setCurrentView, selectPrompt]
 	);
 
 	const handlePromptEdit = useCallback(

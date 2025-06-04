@@ -15,7 +15,6 @@ import type {
 } from '@/types/entities/image/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import {
-    deserializeImageMetadata,
     getDerivedImageProperties,
     mapCreateImageDataToPrisma,
     mapImageFiltersToPrisma,
@@ -25,7 +24,6 @@ import {
     mapToImageSummaries,
     mapToImageSummary,
     mapUpdateImageDataToPrisma,
-    serializeImageMetadata,
     updateImageMetadata
 } from './mappers';
 import {
@@ -35,6 +33,11 @@ import {
     toPrismaImage,
     validateImage
 } from './serializers';
+// Importar serializadores de file para metadatos
+import {
+    deserializeImageMetadata,
+    serializeImageMetadata
+} from '@/transformers/file/serializers';
 // Importar transformador principal y sus funciones asociadas
 import { transformImage, transformImageToExtended } from './transformer';
 
@@ -209,6 +212,7 @@ export function toRelatedImage(image: ImageComplete) {
 
 // Exportar transformadores y funciones individuales para compatibilidad
 export {
+    // Funciones para metadatos
     deserializeImageMetadata,
     // Serializadores
     extendImage,

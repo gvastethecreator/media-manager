@@ -8,7 +8,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { usePlaceStore } from '@/store/entities/place';
 import { LandPlot } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
@@ -24,7 +24,7 @@ const DEFAULT_PLACE_OPTIONS: CardOptions = {
 
 export function PlacesView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentPlace } = useFileManager();
+	const { selectPlace } = usePlaceStore();
 	const [places, setPlaces] = useState<PlaceWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -86,18 +86,9 @@ export function PlacesView(_props: ViewProps) {
 		(place: PlaceWithStats) => {
 			viewLogger.info('🖱️ Click en lugar:', place.name);
 			setCurrentView('place-content');
-			setCurrentPlace(place.id);
-			// Actualizar la información completa del lugar en el store
-			useFileManager.setState({
-				currentPlace: {
-					id: place.id,
-					name: place.name,
-					emoji: place.emoji || '📍',
-					count: place._count?.images || 0,
-				},
-			});
+			selectPlace(place.id);
 		},
-		[setCurrentView, setCurrentPlace]
+		[setCurrentView, selectPlace]
 	);
 
 	if (error) {

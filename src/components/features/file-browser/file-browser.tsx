@@ -5,8 +5,9 @@ import { ALL_ENTITIES } from '@/constants/entities';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useFileViewStore } from '@/store/file-view.store';
 import { useImageResources } from '@/store/image-resources.store';
+import { useSelectionStore } from '@/store/selection.store';
 import type { FileItem } from '@/types/file-item';
 import type * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -81,7 +82,8 @@ const useRightPanelState = () => {
  * - Integración con sistema de menú contextual
  */
 const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClick, loadMoreItems }: FileBrowserProps) => {
-	const { selectedItems, viewMode, toggleItemSelection } = useFileManager();
+	const { selectedItems, toggleSelection, selectItem, clearSelection } = useSelectionStore();
+	const { viewMode, setViewMode } = useFileViewStore();
 	const imageResources = useImageResources();
 	const { setVisible, setSelectedItems } = useDetailsPanel();
 	const { isCollapsed, updateCollapsedState } = useRightPanelState();
@@ -252,7 +254,7 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 			prevSelectedItemRef.current = item;
 
 			// Actualizar selección
-			toggleItemSelection(item, false);
+			toggleSelection(item, false);
 
 			// Mostrar y expandir panel de detalles si está colapsado
 			if (isCollapsed) {
@@ -269,7 +271,7 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 				onItemClick(item);
 			}
 		},
-		[toggleItemSelection, setVisible, onItemClick, selectedItems, isCollapsed, updateCollapsedState, mapToDetailsImageItem, setSelectedItems]
+		[toggleSelection, setVisible, onItemClick, selectedItems, isCollapsed, updateCollapsedState, mapToDetailsImageItem, setSelectedItems]
 	);
 
 	// Manejador personalizado para el doble clic en ítems
@@ -302,20 +304,20 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 		[items, onItemDoubleClick, mapFileItemToImageItem]
 	);
 
-	// Función wrapper memoizada para toggleItemSelection
-	const toggleItemSelectionWrapper = useCallback(
+	// Función wrapper memoizada para toggleSelection
+	const toggleSelectionWrapper = useCallback(
 		(fileItem: FileItem, isMultiSelect = false) => {
-			toggleItemSelection(fileItem, isMultiSelect);
+			toggleSelection(fileItem, isMultiSelect);
 		},
-		[toggleItemSelection]
+		[toggleSelection]
 	);
 
 	// Manejador de acciones contextuales - memoizado
 	const handleContextMenuAction = useCallback(
 		(action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
-			handleContextAction(action, item, data, handleItemDoubleClick, toggleItemSelectionWrapper);
+			handleContextAction(action, item, data, handleItemDoubleClick, toggleSelectionWrapper);
 		},
-		[handleItemDoubleClick, toggleItemSelectionWrapper]
+		[handleItemDoubleClick, toggleSelectionWrapper]
 	);
 
 	// Efecto para cargar thumbnails visibles cuando cambia la lista

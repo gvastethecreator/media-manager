@@ -8,7 +8,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFileManager } from '@/store/files/file-manager.store';
+import { useAlbumStore } from '@/store/entities/album';
 import { Album as AlbumIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
@@ -60,7 +60,7 @@ MemoizedAlbumCard.displayName = 'MemoizedAlbumCard';
 
 export function AlbumsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { setCurrentAlbum } = useFileManager();
+	const { selectAlbum, openViewer } = useAlbumStore();
 	const router = useRouter();
 	const [albums, setAlbums] = useState<AlbumWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -97,18 +97,12 @@ export function AlbumsView(_props: ViewProps) {
 			const albumData = album as any;
 			viewLogger.info('🖱️ Click en álbum:', albumData.name);
 			setCurrentView('album-content');
-			setCurrentAlbum(albumData.id);
-			// Actualizar la información completa del álbum en el store
-			useFileManager.setState({
-				currentAlbum: {
-					id: albumData.id,
-					name: albumData.name,
-					emoji: albumData.emoji || '📔',
-					count: album._count?.images || 0,
-				},
-			});
+
+			// Seleccionar el álbum y abrir el visor
+			selectAlbum(albumData.id);
+			openViewer(albumData.id);
 		},
-		[setCurrentView, setCurrentAlbum]
+		[setCurrentView, selectAlbum, openViewer]
 	);
 
 	if (error) {
