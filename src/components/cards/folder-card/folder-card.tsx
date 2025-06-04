@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import type { Folder } from '@/types/entities/folders';
-import { memo, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';
@@ -22,9 +22,9 @@ type FolderCardData = Folder & {
 	isFavorite?: boolean;
 };
 
-export interface FolderCardProps {
-	folder: FolderCardData;
-	onClick: () => void;
+interface FolderCardProps {
+	folder: Folder | FolderCardData;
+	onClick?: () => void;
 	href?: string;
 	className?: string;
 	compact?: boolean;
@@ -33,10 +33,9 @@ export interface FolderCardProps {
 }
 
 /**
- * Componente principal para mostrar una carpeta como una carta (Client Component).
- * Recibe los datos de la carpeta como props.
+ * Componente para mostrar una carpeta en formato de tarjeta
  */
-export function FolderCard({
+export const FolderCard = memo(function FolderCard({
 	folder,
 	onClick,
 	href,
@@ -46,39 +45,45 @@ export function FolderCard({
 	tcgMode = false
 }: FolderCardProps) {
 	// Validar que el objeto folder exista
-	if (!folder || !folder.id) {
-		console.error("FolderCard: Objeto folder inválido recibido", folder);
-		return (
-			<div className="p-2 text-sm text-red-500 border border-red-200 rounded-md bg-red-50 dark:bg-red-950 dark:border-red-900">
-				Error: Datos de carpeta inválidos
-			</div>
-		);
+	if (!folder) {
+		console.error('FolderCard recibió un objeto folder inválido');
+		return null;
 	}
 
-	// Ya no se necesita fetching aquí
-	// const folderData = await getFolderStats(folderId); // Eliminar
-	const folderData = folder; // Usar el prop directamente
+	// Preparar datos con fallbacks
+	const folderData = useMemo(() => {
+		// Extraer conteos de _count si existen
+		const imageCount = folder._count?.images ?? folder.imageCount ?? 0;
 
-	// Ya no se necesita generar color secundario aquí, podría hacerse en el componente padre
-	// o si es puramente visual, calcularlo aquí si es necesario (pero sin async)
-	const primaryColor = folderData.color || '#6366f1';
-	// const secondaryColor = await generateSecondaryColor(primaryColor); // Eliminar
-	// Ejemplo de cálculo síncrono simple (ajustar según necesidad)
-	const secondaryColor = useMemo(() => {
-		// Lógica simple para derivar un color secundario (ej. aclarar/oscurecer)
-		// Reemplazar con la lógica real de generateSecondaryColor si es posible hacerla síncrona
-		// o pasar el secondaryColor como prop si se calcula en el servidor.
-		// Por ahora, un valor por defecto o derivado simple.
-		const hex = primaryColor.replace('#', '');
-		const r = Number.parseInt(hex.substring(0, 2), 16);
-		const g = Number.parseInt(hex.substring(2, 4), 16);
-		const b = Number.parseInt(hex.substring(4, 6), 16);
-		// Aclarar ligeramente (ejemplo)
-		const nr = Math.min(255, r + 30);
-		const ng = Math.min(255, g + 30);
-		const nb = Math.min(255, b + 30);
-		return `#${nr.toString(16).padStart(2, '0')}${ng.toString(16).padStart(2, '0')}${nb.toString(16).padStart(2, '0')}`;
-	}, [primaryColor]);
+		return {
+			...folder,
+			// Asegurar que tenemos conteo de imágenes en ambos formatos posibles
+			imageCount,
+			_count: {
+				...(folder._count || {}),
+				images: imageCount
+			},
+			// Asegurar valores por defecto para otros campos
+			totalFiles: folder.totalFiles ?? imageCount ?? 0,
+			totalSize: folder.totalSize ?? 0,
+			recentImageUrls: [],
+			childrenCount: 0,
+			lastIndexed: folder.lastIndexed || null
+		};
+	}, [folder]);
+
+	// Colores para personalización
+	const primaryColor = useMemo(() => folderData.color || '#3b82f6', [folderData.color]);
+	const secondaryColor = useMemo(() =>
+		primaryColor === '#3b82f6' ? '#1d4ed8' : primaryColor
+		, [primaryColor]);
+
+	// Manejador de clicks para la tarjeta
+	const handleCardClick = useCallback(() => {
+		if (onClick && interactive) {
+			onClick();
+		}
+	}, [onClick, interactive]);
 
 	// Establecer la URL base del enlace
 	const baseHref = href || `/dashboard/folders/${folderData.id}`;
@@ -198,7 +203,7 @@ export function FolderCard({
 		return (
 			<button
 				type="button"
-				onClick={onClick}
+				onClick={handleCardClick}
 				onKeyDown={handleKeyDown}
 				className="block h-full w-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary text-left p-0 border-none bg-transparent appearance-none"
 			>
@@ -215,7 +220,7 @@ export function FolderCard({
 
 	// Si no es interactivo, devolver solo el contenido
 	return cardContent;
-}
+});
 
 // Exportar componente memorizado para mejor rendimiento
 export const MemoizedFolderCard = memo(FolderCard, (prevProps, nextProps) => {

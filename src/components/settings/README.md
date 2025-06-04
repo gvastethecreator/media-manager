@@ -2,7 +2,53 @@
 
 ## Descripción General
 
-El módulo Settings proporciona una interfaz completa para la gestión y configuración de diferentes entidades y funcionalidades de la aplicación. Está diseñado de forma modular, con componentes específicos para cada tipo de entidad, todos accesibles a través de una interfaz de navegación por pestañas.
+El módulo Settings proporciona una interfaz completa para la gestión y configuración de diferentes entidades y funcionalidades de la aplicación. Está diseñado de forma modular, con componentes específicos para cada tipo de entidad, todos accesibles a través de una **interfaz de navegación vertical** que mejora la experiencia de usuario.
+
+## 🎨 **ACTUALIZACIÓN: Layout Vertical (Diciembre 2024)**
+
+### ✅ **Transformación Completada**
+
+Se ha rediseñado completamente el componente `SettingsView` de un layout horizontal de pestañas a un **diseño vertical tipo sidebar** más moderno y funcional.
+
+### 🔄 **Layout Architecture**
+
+```mermaid
+graph TD
+    A[SettingsView Container] --> B[Horizontal Flex Layout]
+    B --> C[Sidebar Vertical - 256px]
+    B --> D[Content Area - flex-1]
+
+    C --> E[Vertical TabsList]
+    E --> F[18 Tab Items]
+    F --> G[Icon + Label + Active Indicator]
+
+    D --> H[TabsContent Areas]
+    H --> I[System Settings]
+    H --> J[Albums Settings]
+    H --> K[...otros 16 tabs]
+```
+
+### 🎯 **Características del Nuevo Diseño**
+
+#### **Sidebar Vertical**
+
+- ✅ Ancho fijo de 256px (`w-64`)
+- ✅ Border derecho sutil (`border-r-2 border-border/20`)
+- ✅ Fondo semi-transparente con blur (`bg-background/50 backdrop-blur-sm`)
+- ✅ Scroll interno si necesario
+
+#### **Tab Design Mejorado**
+
+- ✅ Iconos coloreados según esquema temático
+- ✅ Labels con truncado inteligente
+- ✅ Indicador visual del estado activo (barra coloreada)
+- ✅ Animaciones suaves y micro-interacciones
+
+#### **Responsive & Accessibility**
+
+- ✅ Grid adaptativo (1 col mobile / 2 cols XL)
+- ✅ Event listener preservado para navegación programática
+- 🔄 **TODO**: Keyboard navigation y tooltips
 
 ## Estructura General
 

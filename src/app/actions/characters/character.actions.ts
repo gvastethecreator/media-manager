@@ -12,6 +12,7 @@ import {
     searchCharacters as searchCharactersTransformer,
     updateCharacter as updateCharacterTransformer,
 } from '@/transformers/character';
+import type { CharacterBase } from '@/types/entities/character/base';
 import type {
     CharacterCreateInput,
     CharacterSearchOptions,
@@ -63,13 +64,24 @@ const notifyCharacterChange = async (
 	statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
 };
 
-// Interfaces extendidas
+// Interfaces extendidas - 🔧 Tipo completo con todas las propiedades necesarias
 export interface CharacterWithStats extends CharacterBase {
 	_count: {
 		images: number;
-		groups: number;
-		properties: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
 		wildcards: number;
+		properties: number;
+		groups: number;
+		relatedCharacters: number;
+		relatedTo: number;
 	};
 	totalSize: number;
 	imageCount?: number;
@@ -94,7 +106,7 @@ export async function searchCharacters(options: CharacterSearchOptions) {
 	try {
 		characterLogger.info('🔍 Buscando personajes');
 		const result = await searchCharactersTransformer(options);
-		characterLogger.info('✅ Personajes encontrados', { count: result.length });
+		characterLogger.info('✅ Personajes encontrados', { count: result.items?.length || result.total || 0 });
 		return result;
 	} catch (error) {
 		characterLogger.error('❌ Error al buscar personajes', error);
@@ -213,11 +225,7 @@ export async function getCharacterImages(id: string) {
 						width: true,
 						height: true,
 						size: true,
-						aspectRatio: true,
-						blurhash: true,
-						palette: true,
-						format: true,
-						focalPoint: true,
+						metadata: true,
 						thumbnail: true,
 						thumbnailWidth: true,
 						thumbnailHeight: true,
@@ -231,7 +239,14 @@ export async function getCharacterImages(id: string) {
 		if (!characterWithImages) {
 			throw createCharacterError('Personaje no encontrado', EntityErrorCode.NOT_FOUND);
 		}
-		const images = characterWithImages.images.map((image) => {
+
+		// 🔧 Fix: Verificar que characterWithImages.images existe antes de mapear
+		if (!characterWithImages.images) {
+			characterLogger.info('✅ Personaje sin imágenes encontrado', { id });
+			return [];
+		}
+
+		const images = characterWithImages.images.map((image: any) => {
 			const thumbnailUrl = image.thumbnail
 				? `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`
 				: null;

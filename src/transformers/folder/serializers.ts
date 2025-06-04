@@ -134,17 +134,31 @@ function calculateFolderLevel(path: string): number {
 }
 
 /**
- * 📏 Calcula el tamaño aproximado de una carpeta
+ * 📊 Calcula el tamaño aproximado de una carpeta
  *
  * @param folder Objeto folder
- * @returns Tamaño en bytes
+ * @returns Tamaño calculado
  */
 function calculateFolderSize(folder: Folder): number {
-	// Por ahora devolvemos un valor simulado
-	// En una implementación real, deberíamos sumar los tamaños de todos los archivos
-	const imagesCount = folder._count?.images || 0;
-	const averageImageSize = 2 * 1024 * 1024; // 2MB promedio por imagen
-	return imagesCount * averageImageSize;
+	try {
+		// Uso directo del campo totalSize si está disponible
+		if (typeof folder.totalSize === 'number' && !isNaN(folder.totalSize)) {
+			return folder.totalSize;
+		}
+
+		// Si no hay totalSize pero hay un valor en _count mostraremos ese dato
+		if (folder._count?.images) {
+			// Tamaño estimado muy aproximado basado en la cantidad de imágenes
+			// (podría mejorarse en el futuro con datos reales)
+			return folder._count.images * 2000000; // ~2 MB por imagen como estimación
+		}
+
+		// Si no hay información disponible, devolver 0
+		return 0;
+	} catch (error) {
+		logger.error('Error calculando tamaño de carpeta:', error);
+		return 0;
+	}
 }
 
 /**
@@ -276,6 +290,14 @@ export function fromPrismaFolder(prismaFolder: any): Folder {
  */
 export function extendFolder(folder: FolderComplete): FolderComplete {
 	try {
+		// Log para depuración
+		logger.debug('🔍 Extendiendo folder:', {
+			id: folder.id,
+			name: folder.name,
+			totalSize: folder.totalSize,
+			totalFiles: folder.totalFiles
+		});
+
 		// Si ya tiene estadísticas, las mantenemos
 		const folderWithStats = folder.stats ? folder : withFolderStats(folder);
 
@@ -289,6 +311,9 @@ export function extendFolder(folder: FolderComplete): FolderComplete {
 			emoji: folder.emoji || DEFAULT_EMOJIS.folder,
 			metadata: folder.metadata || {},
 			children: folder.children || [],
+			// Preservar explícitamente totalSize y totalFiles
+			totalSize: folder.totalSize || 0,
+			totalFiles: folder.totalFiles || 0,
 			_count: folder._count || {
 				children: 0,
 				images: 0,

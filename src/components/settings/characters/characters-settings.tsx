@@ -46,7 +46,14 @@ export function CharactersSettings() {
 			try {
 				setIsLoading(true);
 				const data = await searchCharacters({});
-				setCharacters(data);
+				// 🔧 Fix: data es CharacterSearchResult, necesitamos extraer items y transformar a CharacterWithStats
+				const charactersList = Array.isArray(data) ? data : data.items || [];
+				const charactersWithStats = charactersList.map(character => ({
+					...character,
+					totalSize: 0,
+					imageCount: character._count?.images || 0
+				})) as CharacterWithStats[];
+				setCharacters(charactersWithStats);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
@@ -61,17 +68,23 @@ export function CharactersSettings() {
 		loadCharacters();
 	}, []);
 
-	// Calcular estadísticas generales
-	const stats = {
+	// Calcular estadísticas generales - 📊 Verificar que characters sea un array válido
+	const stats = Array.isArray(characters) ? {
 		totalCharacters: characters.length,
 		totalImages: characters.reduce((acc, character) => acc + (character._count?.images || 0), 0),
 		totalSize: characters.reduce((acc, character) => acc + (character.totalSize || 0), 0),
 		unusedCharacters: characters.filter(character => (character._count?.images || 0) === 0).length,
 		favoriteCharacters: characters.filter(character => character.isFavorite).length,
+	} : {
+		totalCharacters: 0,
+		totalImages: 0,
+		totalSize: 0,
+		unusedCharacters: 0,
+		favoriteCharacters: 0,
 	};
 
-	// Filtrar personajes basados en los criterios seleccionados
-	const filteredCharacters = characters.filter(character => {
+	// Filtrar personajes basados en los criterios seleccionados - 🔍 Verificar que characters sea un array
+	const filteredCharacters = Array.isArray(characters) ? characters.filter(character => {
 		let matches = true;
 
 		// Filtrar por búsqueda
@@ -99,7 +112,7 @@ export function CharactersSettings() {
 		}
 
 		return matches;
-	});
+	}) : [];
 
 	// Manejar eliminación de personaje
 	const handleDeleteCharacter = useCallback(async (id: string) => {

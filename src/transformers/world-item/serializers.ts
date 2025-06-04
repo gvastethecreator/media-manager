@@ -295,10 +295,44 @@ export function fromPrismaWorldItem(
 		// Parsear campos JSON de forma segura
 		const parseJsonField = <T>(field: string | null | undefined, defaultValue: T): T => {
 			if (typeof field !== 'string' || !field) return defaultValue;
+
+			// Ignorar valores específicos que sabemos que no son JSON
+			if (field === 'empty_array') return [] as unknown as T;
+			if (field === 'empty_object') return {} as unknown as T;
+
 			try {
 				return JSON.parse(field) as T;
 			} catch (e) {
-				logger.warn(`Failed to parse JSON field for WorldItem ${prismaItem.id}:`, e);
+				// Intentar reparar formatos comunes que causan problemas
+				logger.warn(`Intentando reparar campo JSON inválido para WorldItem: "${field.substring(0, 50)}${field.length > 50 ? '...' : ''}"`);
+
+				// Caso especial: formato tipo "Fuerza 15, Destreza 10"
+				if (/^[A-Za-z]+\s+\d+[,]?\s*[A-Za-z]*/.test(field)) {
+					try {
+						// Convertir a formato JSON válido
+						const formattedItems = field.split(',')
+							.map(item => item.trim())
+							.filter(Boolean)
+							.map(item => {
+								const matches = item.match(/^([A-Za-z]+)\s+(\d+)(.*)$/);
+								if (matches) {
+									return {
+										name: matches[1],
+										value: parseInt(matches[2]),
+										description: matches[3]?.trim() || ''
+									};
+								}
+								return { name: item, value: 0, description: '' };
+							});
+
+						return formattedItems as unknown as T;
+					} catch {
+						logger.error(`No se pudo reparar el campo como lista de atributos: ${field}`);
+					}
+				}
+
+				// Si no podemos repararlo, regresamos el valor por defecto
+				logger.warn(`Failed to parse JSON field: ${e}. Using default value.`);
 				return defaultValue;
 			}
 		};

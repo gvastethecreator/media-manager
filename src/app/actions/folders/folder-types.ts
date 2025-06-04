@@ -263,7 +263,6 @@ export interface ImageWithRelations {
 	thumbnailSize?: number;
 	thumbnailWidth?: number;
 	thumbnailHeight?: number;
-	isPublic?: boolean;
 	isFavorite?: boolean;
 	folderId?: string;
 	createdAt?: Date | string;
@@ -325,7 +324,7 @@ export interface CreateFolderOptions {
 	color?: string;
 	autoReindex?: boolean;
 	parentId?: string | null;
-	isPublic?: boolean;
+	// Solo campos que existen en el esquema
 }
 
 /**
@@ -338,9 +337,8 @@ export interface UpdateFolderOptions {
 	color?: string;
 	autoReindex?: boolean;
 	parentId?: string | null;
-	isPublic?: boolean;
 	totalFiles?: number;
 	totalSize?: number;
 	lastIndexed?: Date;
-	status?: string;
+	// Solo campos que existen en el esquema
 }

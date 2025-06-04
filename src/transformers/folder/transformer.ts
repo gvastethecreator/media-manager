@@ -72,8 +72,24 @@ function transformFolderToExtended(
   isOpen = false
 ): FolderExtended {
   try {
+    // Log para depuración
+    logger.debug('📂 Transformando folder a extendido:', {
+      id: folder.id,
+      name: folder.name,
+      totalSize: folder.totalSize,
+      _count: folder._count,
+      stats: 'stats' in folder ? folder.stats : null
+    });
+
     // Primero asegurar que tenemos un FolderComplete
     const folderComplete = 'stats' in folder ? folder : transformFolderBase(folder);
+
+    // Log después de transformación básica
+    logger.debug('📂 Folder transformado a complete:', {
+      id: folderComplete.id,
+      totalSize: folderComplete.totalSize,
+      stats: folderComplete.stats
+    });
 
     // Extender con propiedades de UI
     return {

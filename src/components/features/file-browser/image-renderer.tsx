@@ -1,8 +1,12 @@
 'use client';
 
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+
+// Logger para depuración
+const logger = clientLogger.withContext('ImageRenderer');
 
 interface ImageRendererProps {
 	src: string;
@@ -39,6 +43,16 @@ const ImageRendererComponent = ({
 	const isFirstRender = useRef(true);
 	const prevSrc = useRef(src);
 
+	// Depuración: Registrar cuando se renderiza con una nueva URL
+	useEffect(() => {
+		if (isFirstRender.current) {
+			logger.debug(`🖼️ Primera renderización: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
+			isFirstRender.current = false;
+		} else if (prevSrc.current !== src) {
+			logger.debug(`🔄 URL cambiada: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
+		}
+	}, [src]);
+
 	// Solo resetear el estado de carga si la fuente cambia realmente
 	useEffect(() => {
 		// No hacemos nada en el primer renderizado
@@ -56,19 +70,21 @@ const ImageRendererComponent = ({
 	}, [src]);
 
 	const handleError = useCallback(() => {
+		logger.warn(`❌ Error al cargar imagen: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
 		setError(true);
 		setIsLoading(false);
 		if (onError) {
 			onError();
 		}
-	}, [onError]);
+	}, [onError, src]);
 
 	const handleLoad = useCallback(() => {
+		logger.debug(`✅ Imagen cargada: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
 		setIsLoading(false);
 		if (onLoad) {
 			onLoad();
 		}
-	}, [onLoad]);
+	}, [onLoad, src]);
 
 	const handleClick = useCallback(() => {
 		if (onClick && !error) {
@@ -98,6 +114,15 @@ const ImageRendererComponent = ({
 		onLoad: handleLoad,
 		onClick: handleClick
 	};
+
+	// Depuración: Verificar si la URL es válida
+	useEffect(() => {
+		if (!src) {
+			logger.warn('⚠️ URL de imagen vacía');
+		} else if (!src.startsWith('http') && !src.startsWith('/')) {
+			logger.warn(`⚠️ URL de imagen posiblemente inválida: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
+		}
+	}, [src]);
 
 	if (error) {
 		return (
