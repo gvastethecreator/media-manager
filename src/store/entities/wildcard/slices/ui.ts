@@ -58,23 +58,45 @@ export interface WildcardUISlice {
 export const createWildcardUISlice: StateCreator<WildcardState, [], [], WildcardUISlice> = (set, get) => ({
 	// Selección
 	selectWildcard: (id) => {
+		// Si id es null, limpiar la selección
+		if (id === null) {
+			uiLogger.info('🧹 Limpiando selección de comodines');
+			set((state) => ({
+				ui: {
+					...state.ui,
+					selectedIds: [],
+				},
+			}));
+			return;
+		}
+
 		uiLogger.info('🔍 Seleccionando comodín:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: [...state.ui.selectedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: [...currentSelectedIds, id],
+				},
+			};
+		});
 	},
 
 	deselectWildcard: (id) => {
 		uiLogger.info('🔍 Deseleccionando comodín:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: state.ui.selectedIds.filter((selectedId) => selectedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: currentSelectedIds.filter((selectedId) => selectedId !== id),
+				},
+			};
+		});
 	},
 
 	toggleWildcardSelection: (id) => {
@@ -90,12 +112,17 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 
 	selectMultipleWildcards: (ids) => {
 		uiLogger.info('🔍 Seleccionando múltiples comodines:', ids.length);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: [...new Set([...state.ui.selectedIds, ...ids])],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: [...new Set([...currentSelectedIds, ...ids])],
+				},
+			};
+		});
 	},
 
 	clearWildcardSelection: () => {
@@ -109,7 +136,9 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 	},
 
 	isWildcardSelected: (id) => {
-		return get().ui.selectedIds.includes(id);
+		// Asegurarse de que selectedIds está inicializado
+		const selectedIds = get().ui.selectedIds || [];
+		return selectedIds.includes(id);
 	},
 
 	// Visor
@@ -218,7 +247,9 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 
 	// Expansión (para vistas jerárquicas)
 	toggleWildcardExpanded: (id) => {
-		const isExpanded = get().ui.expandedIds.includes(id);
+		// Asegurarse de que expandedIds está inicializado
+		const expandedIds = get().ui.expandedIds || [];
+		const isExpanded = expandedIds.includes(id);
 		uiLogger.info(`🔄 ${isExpanded ? 'Colapsando' : 'Expandiendo'} comodín:`, id);
 
 		if (isExpanded) {
@@ -230,22 +261,32 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 
 	expandWildcard: (id) => {
 		uiLogger.info('📂 Expandiendo comodín:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: [...state.ui.expandedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: [...currentExpandedIds, id],
+				},
+			};
+		});
 	},
 
 	collapseWildcard: (id) => {
 		uiLogger.info('📁 Colapsando comodín:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.filter((expandedId) => expandedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.filter((expandedId) => expandedId !== id),
+				},
+			};
+		});
 	},
 
 	expandAllWildcards: () => {
@@ -293,12 +334,17 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 		getChildrenIds(id);
 
 		// Establecer todos los IDs como expandidos
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: [...new Set([...state.ui.expandedIds, ...idsToExpand])],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: [...new Set([...currentExpandedIds, ...idsToExpand])],
+				},
+			};
+		});
 	},
 
 	collapseBranch: (id) => {
@@ -324,12 +370,17 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 		getChildrenIds(id);
 
 		// Quitar todos los IDs de expandidos
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.filter((expandedId) => !idsToCollapse.includes(expandedId)),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.filter((expandedId) => !idsToCollapse.includes(expandedId)),
+				},
+			};
+		});
 	},
 
 	// Reset

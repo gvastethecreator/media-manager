@@ -13,7 +13,7 @@ const uiLogger = clientLogger.withContext('PropertyStore:UI');
 // Slice para operaciones de UI
 export interface PropertyUISlice {
 	// Selección
-	selectProperty: (id: string) => void;
+	selectProperty: (id: string | null) => void;
 	deselectProperty: (id: string) => void;
 	togglePropertySelection: (id: string) => void;
 	selectMultipleProperties: (ids: string[]) => void;
@@ -54,23 +54,45 @@ export interface PropertyUISlice {
 export const createPropertyUISlice: StateCreator<PropertyState, [], [], PropertyUISlice> = (set, get) => ({
 	// Selección
 	selectProperty: (id) => {
+		// Si id es null, limpiar la selección
+		if (id === null) {
+			uiLogger.info('🧹 Limpiando selección de propiedades');
+			set((state) => ({
+				ui: {
+					...state.ui,
+					selectedIds: [],
+				},
+			}));
+			return;
+		}
+
 		uiLogger.info('🔍 Seleccionando propiedad:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: [...state.ui.selectedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: currentSelectedIds.includes(id) ? currentSelectedIds : [...currentSelectedIds, id],
+				},
+			};
+		});
 	},
 
 	deselectProperty: (id) => {
 		uiLogger.info('🔍 Deseleccionando propiedad:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: state.ui.selectedIds.filter((selectedId) => selectedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: currentSelectedIds.filter((selectedId) => selectedId !== id),
+				},
+			};
+		});
 	},
 
 	togglePropertySelection: (id) => {
@@ -86,12 +108,17 @@ export const createPropertyUISlice: StateCreator<PropertyState, [], [], Property
 
 	selectMultipleProperties: (ids) => {
 		uiLogger.info('🔍 Seleccionando múltiples propiedades:', ids.length);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: [...new Set([...state.ui.selectedIds, ...ids])],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: [...new Set([...currentSelectedIds, ...ids])],
+				},
+			};
+		});
 	},
 
 	clearPropertySelection: () => {
@@ -105,7 +132,9 @@ export const createPropertyUISlice: StateCreator<PropertyState, [], [], Property
 	},
 
 	isPropertySelected: (id) => {
-		return get().ui.selectedIds.includes(id);
+		// Asegurarse de que selectedIds está inicializado
+		const selectedIds = get().ui.selectedIds || [];
+		return selectedIds.includes(id);
 	},
 
 	// Visor
@@ -214,7 +243,9 @@ export const createPropertyUISlice: StateCreator<PropertyState, [], [], Property
 
 	// Expansión (para vistas jerárquicas)
 	togglePropertyExpanded: (id) => {
-		const isExpanded = get().ui.expandedIds.includes(id);
+		// Asegurarse de que expandedIds está inicializado
+		const expandedIds = get().ui.expandedIds || [];
+		const isExpanded = expandedIds.includes(id);
 		uiLogger.info(`🔄 ${isExpanded ? 'Colapsando' : 'Expandiendo'} propiedad:`, id);
 
 		if (isExpanded) {
@@ -226,22 +257,32 @@ export const createPropertyUISlice: StateCreator<PropertyState, [], [], Property
 
 	expandProperty: (id) => {
 		uiLogger.info('📂 Expandiendo propiedad:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: [...state.ui.expandedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.includes(id) ? currentExpandedIds : [...currentExpandedIds, id],
+				},
+			};
+		});
 	},
 
 	collapseProperty: (id) => {
 		uiLogger.info('📁 Colapsando propiedad:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.filter((expandedId) => expandedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.filter((expandedId) => expandedId !== id),
+				},
+			};
+		});
 	},
 
 	expandAllProperties: () => {

@@ -10,7 +10,7 @@ import type { VideoState } from '../types';
 // Slice para estado de UI
 export interface VideoUISlice {
 	// Selección de videos
-	selectVideo: (id: string) => void;
+	selectVideo: (id: string | null) => void;
 	deselectVideo: (id: string) => void;
 	toggleVideoSelection: (id: string) => void;
 	selectMultipleVideos: (ids: string[]) => void;
@@ -44,38 +44,67 @@ export interface VideoUISlice {
 // Creador del slice
 export const createVideoUISlice: StateCreator<VideoState, [], [], VideoUISlice> = (set, get) => ({
 	// Selección de videos
-	selectVideo: (id: string) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: state.ui.selectedIds.includes(id) ? state.ui.selectedIds : [...state.ui.selectedIds, id],
-			},
-		}));
+	selectVideo: (id: string | null) => {
+		// Si id es null, limpiar la selección
+		if (id === null) {
+			set((state) => ({
+				ui: {
+					...state.ui,
+					selectedIds: [],
+				},
+			}));
+			return;
+		}
+
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: currentSelectedIds.includes(id) ? currentSelectedIds : [...currentSelectedIds, id],
+				},
+			};
+		});
 	},
 
 	deselectVideo: (id: string) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: state.ui.selectedIds.filter((selectedId) => selectedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: currentSelectedIds.filter((selectedId) => selectedId !== id),
+				},
+			};
+		});
 	},
 
 	toggleVideoSelection: (id: string) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: state.ui.selectedIds.includes(id)
-					? state.ui.selectedIds.filter((selectedId) => selectedId !== id)
-					: [...state.ui.selectedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: currentSelectedIds.includes(id)
+						? currentSelectedIds.filter((selectedId) => selectedId !== id)
+						: [...currentSelectedIds, id],
+				},
+			};
+		});
 	},
 
 	selectMultipleVideos: (ids: string[]) => {
 		set((state) => {
-			const uniqueIds = [...new Set([...state.ui.selectedIds, ...ids])];
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+			const uniqueIds = [...new Set([...currentSelectedIds, ...ids])];
+
 			return {
 				ui: {
 					...state.ui,
@@ -95,11 +124,14 @@ export const createVideoUISlice: StateCreator<VideoState, [], [], VideoUISlice> 
 	},
 
 	getSelectedVideos: () => {
-		return get().ui.selectedIds;
+		// Asegurarse de que selectedIds está inicializado
+		return get().ui.selectedIds || [];
 	},
 
 	isVideoSelected: (id: string) => {
-		return get().ui.selectedIds.includes(id);
+		// Asegurarse de que selectedIds está inicializado
+		const selectedIds = get().ui.selectedIds || [];
+		return selectedIds.includes(id);
 	},
 
 	// Visor de videos
@@ -180,36 +212,53 @@ export const createVideoUISlice: StateCreator<VideoState, [], [], VideoUISlice> 
 
 	// Expansión de detalles
 	expandVideo: (id: string) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.includes(id) ? state.ui.expandedIds : [...state.ui.expandedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.includes(id) ? currentExpandedIds : [...currentExpandedIds, id],
+				},
+			};
+		});
 	},
 
 	collapseVideo: (id: string) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.filter((expandedId) => expandedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.filter((expandedId) => expandedId !== id),
+				},
+			};
+		});
 	},
 
 	toggleVideoExpansion: (id: string) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.includes(id)
-					? state.ui.expandedIds.filter((expandedId) => expandedId !== id)
-					: [...state.ui.expandedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.includes(id)
+						? currentExpandedIds.filter((expandedId) => expandedId !== id)
+						: [...currentExpandedIds, id],
+				},
+			};
+		});
 	},
 
 	isVideoExpanded: (id: string) => {
-		return get().ui.expandedIds.includes(id);
+		// Asegurarse de que expandedIds está inicializado
+		const expandedIds = get().ui.expandedIds || [];
+		return expandedIds.includes(id);
 	},
 
 	// Resaltado
