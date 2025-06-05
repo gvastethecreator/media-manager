@@ -37,8 +37,7 @@ src/
 ├── components/             # Componentes compartidos
 │   ├── ui/                 # Componentes de UI (shadcn)
 │   └── views/              # Vistas principales
-├── docs/                   # Documentación detallada
-│   └── entities/           # Documentación por entidad
+├── docs/                   # Documentación general
 ├── examples/               # Componentes de ejemplo
 ├── lib/                    # Utilidades y funciones
 ├── services/               # Servicios de negocio
@@ -148,12 +147,8 @@ graph TD
 
 ## Estructura de Documentación
 
-Cada entidad cuenta con documentación detallada en `src/docs/entities/[nombre-entidad]/`:
-
-1. **README.md**: Descripción general y características principales
-2. **entity-structure.md**: Diagramas de estructura y relaciones
-3. **examples.md**: Ejemplos prácticos de uso
-4. **implementation-summary.md**: Resumen de la implementación
+Cada entidad cuenta con documentación detallada dentro de
+`src/transformers/<entidad>/README.md` o `documentation.md`.
 
 ## Ejemplos de Uso
 
