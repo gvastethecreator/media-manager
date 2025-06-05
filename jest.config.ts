@@ -9,17 +9,31 @@ const customJestConfig: Config = {
 	testEnvironment: 'jest-environment-jsdom',
 	setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 	moduleNameMapper: {
+		// 🎯 Path mappings
 		'^@/(.*)$': '<rootDir>/src/$1',
+		
+		// 🌐 Next.js 15 modules con mocks
+		'^next/navigation$': '<rootDir>/src/tests/__mocks__/next/navigation.ts',
 		'^next/server$': require.resolve('next/server'),
-		'^next/navigation$': require.resolve('next/navigation'),
 		'^next/headers$': require.resolve('next/headers'),
 		'^next/router$': require.resolve('next/router'),
 		'^next/link$': require.resolve('next/link'),
 		'^next/image$': require.resolve('next/image'),
 		'^next/dynamic$': require.resolve('next/dynamic'),
+		
+		// 💾 Prisma mock
+		'^@prisma/client$': '<rootDir>/src/tests/__mocks__/@prisma/client.ts',
+		
+		// 🎨 Styles como objetos
 		'^.+\\.(css|sass|scss)$': 'identity-obj-proxy',
+		
+		// 🖼️ Assets como strings
+		'^.+\\.(jpg|jpeg|png|gif|webp|avif|svg)$': '<rootDir>/src/tests/image-mock.js',
 	},
-	testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+	testMatch: [
+		'**/__tests__/**/*.{ts,tsx}',
+		'**/?(*.)+(spec|test).{ts,tsx}'
+	],
 	transform: {
 		'^.+\\.(js|jsx|ts|tsx|mjs)$': [
 			'ts-jest',
