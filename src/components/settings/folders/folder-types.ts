@@ -1,5 +1,5 @@
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
-import type { FolderStats } from '@/types/entities/folders';
+import type { FolderStats } from '@/types/entities/folder';
 import type {
 	ExtendedProcessStatus,
 	ProcessStatus,

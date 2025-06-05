@@ -4,7 +4,7 @@ import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats-service-export';
-import type { FolderStats } from '@/types/entities/folders';
+import type { FolderStats } from '@/types/entities/folder';
 
 const folderLogger = serverLogger.withContext('FolderService');
 
