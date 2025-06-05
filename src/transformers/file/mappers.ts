@@ -3,18 +3,18 @@
  * @module transformers/file/mappers
  */
 
-import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	type DirectoryInfo,
-	type EnhancedDirectory,
-	type EnhancedImageFile,
-	FILE_EXTENSION_GROUPS,
-	type FileBase,
-	type FileFilterOptions,
-	type FileInfo,
-	FileType,
+    type DirectoryInfo,
+    type EnhancedDirectory,
+    type EnhancedImageFile,
+    FILE_EXTENSION_GROUPS,
+    type FileBase,
+    type FileFilterOptions,
+    type FileInfo,
+    FileType,
 } from '@/types/entities/file/index';
+import path from 'path';
 
 const mappersLogger = serverLogger.withContext('File:Mappers');
 
@@ -54,13 +54,17 @@ export function determineFileType(extension: string): FileType {
 	// Comprobar por tipo usando las constantes predefinidas
 	if (FILE_EXTENSION_GROUPS.IMAGE.includes(normalizedExt as any)) {
 		return FileType.IMAGE;
-	}if (FILE_EXTENSION_GROUPS.VIDEO.includes(normalizedExt as any)) {
+	}
+	if (FILE_EXTENSION_GROUPS.VIDEO.includes(normalizedExt as any)) {
 		return FileType.VIDEO;
-	}if (FILE_EXTENSION_GROUPS.AUDIO.includes(normalizedExt as any)) {
+	}
+	if (FILE_EXTENSION_GROUPS.AUDIO.includes(normalizedExt as any)) {
 		return FileType.AUDIO;
-	}if (FILE_EXTENSION_GROUPS.DOCUMENT.includes(normalizedExt as any)) {
+	}
+	if (FILE_EXTENSION_GROUPS.DOCUMENT.includes(normalizedExt as any)) {
 		return FileType.DOCUMENT;
-	}if (FILE_EXTENSION_GROUPS.ARCHIVE.includes(normalizedExt as any)) {
+	}
+	if (FILE_EXTENSION_GROUPS.ARCHIVE.includes(normalizedExt as any)) {
 		return FileType.ARCHIVE;
 	}
 
@@ -261,7 +265,7 @@ export function toEnhancedDirectory(fileInfo: FileInfo, childItems: FileBase[] =
 			let fileCount = 0;
 
 			// Procesar cada item
-			childItems.forEach((item) => {
+			for (const item of childItems) {
 				if (!item.isDirectory) {
 					// Contar por tipo
 					if (!(item.type in stats.fileTypes)) {
@@ -289,7 +293,7 @@ export function toEnhancedDirectory(fileInfo: FileInfo, childItems: FileBase[] =
 						contentSummary.others++;
 					}
 				}
-			});
+			}
 
 			// Calcular tamaño total y promedio
 			stats.totalSize = totalFileSize;
@@ -436,18 +440,18 @@ export function applyFileFilters(files: FileBase[], options: FileFilterOptions):
 
 		// Filtrar por tamaño
 		if (options.minSize !== undefined) {
-			filteredFiles = filteredFiles.filter((file) => file.isDirectory || file.size >= options.minSize!);
+			filteredFiles = filteredFiles.filter((file) => file.isDirectory || file.size >= options.minSize);
 		}
 		if (options.maxSize !== undefined) {
-			filteredFiles = filteredFiles.filter((file) => file.isDirectory || file.size <= options.maxSize!);
+			filteredFiles = filteredFiles.filter((file) => file.isDirectory || file.size <= options.maxSize);
 		}
 
 		// Filtrar por fecha de modificación
 		if (options.modifiedAfter) {
-			filteredFiles = filteredFiles.filter((file) => file.modifiedAt >= options.modifiedAfter!);
+			filteredFiles = filteredFiles.filter((file) => file.modifiedAt >= options.modifiedAfter);
 		}
 		if (options.modifiedBefore) {
-			filteredFiles = filteredFiles.filter((file) => file.modifiedAt <= options.modifiedBefore!);
+			filteredFiles = filteredFiles.filter((file) => file.modifiedAt <= options.modifiedBefore);
 		}
 
 		// Filtrar archivos ocultos

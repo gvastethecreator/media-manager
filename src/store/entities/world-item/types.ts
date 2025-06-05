@@ -140,15 +140,6 @@ export interface WorldItemUIState {
 	viewMode: WorldItemViewMode;
 }
 
-// 🔍 Filtros
-export interface WorldItemFilters {
-	sortBy: WorldItemSortCriteria;
-	searchTerm: string;
-	category: string | null;
-	rarity: string | null;
-	type: string | null;
-}
-
 // 🔄 Acciones del store
 export interface WorldItemActions {
 	// Carga de items
@@ -175,13 +166,7 @@ export interface WorldItemActions {
 	getSortedWorldItems: () => WorldItem[];
 }
 
-// 📊 Enums para vistas y ordenamiento
-export enum WorldItemViewMode {
-	LIST = 'list',
-	GRID = 'grid',
-	COMPACT = 'compact',
-}
-
+// 📊 Enum para ordenamiento
 export enum WorldItemSortCriteria {
 	NAME_ASC = 'name_asc',
 	NAME_DESC = 'name_desc',

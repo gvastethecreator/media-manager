@@ -6,15 +6,14 @@
 import { createLogger } from '@/lib/logger';
 import { PlaceSchema } from '@/types/entities/place/schema';
 import type {
-	PlaceBase,
-	PlaceComplete,
-	PlaceCreateInput,
-	PlaceDanger,
-	PlaceFilters,
-	PlaceRelations,
-	PlaceResource,
-	PlaceStats,
-	PlaceUpdateInput,
+    PlaceBase,
+    PlaceComplete,
+    PlaceCreateInput,
+    PlaceDanger,
+    PlaceFilters,
+    PlaceResource,
+    PlaceStats,
+    PlaceUpdateInput
 } from '@/types/entities/place/types';
 
 // Logger específico para el transformer de Place
@@ -153,7 +152,7 @@ export function fromPrismaPlace(
 		// Incluir relaciones si están presentes y habilitadas
 		if (includeRelations) {
 			// Mantener todas las relaciones que existan en el objeto Prisma
-			const relationsFields: (keyof PlaceRelations)[] = [
+			const relationsFields = [
 				'images',
 				'videos',
 				'albums',
@@ -169,11 +168,11 @@ export function fromPrismaPlace(
 				'groups',
 			];
 
-			relationsFields.forEach((field) => {
+			for (const field of relationsFields) {
 				if (prismaPlace[field]) {
 					placeComplete[field] = prismaPlace[field];
 				}
-			});
+			}
 
 			// Incluir contadores si están presentes
 			if (prismaPlace._count) {

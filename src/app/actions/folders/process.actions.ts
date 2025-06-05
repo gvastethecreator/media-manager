@@ -214,11 +214,12 @@ export async function indexFolder(id: string, options?: IndexOptions): Promise<P
 				// Verificar si fileInfo es un objeto con propiedad path
 				if (fileInfo && typeof fileInfo === 'object' && 'path' in fileInfo) {
 					return fileInfo.path;
-				}if (typeof fileInfo === 'string') {
+				}
+				if (typeof fileInfo === 'string') {
 					return fileInfo;
 				}
-					folderLogger.warn('⚠️ Formato de imagen no válido en scanResult:', fileInfo);
-					return null; // Será filtrado a continuación
+				folderLogger.warn('⚠️ Formato de imagen no válido en scanResult:', fileInfo);
+				return null; // Será filtrado a continuación
 			})
 			.filter(Boolean); // Filtrar valores nulos
 		const batchSize = options?.batchSize || DEFAULT_BATCH_SIZE;
@@ -704,7 +705,8 @@ export async function reindexFolder(id: string, options?: ReindexOptions): Promi
 						// Verificar si fileInfo es un objeto con propiedad path
 						if (fileInfo && typeof fileInfo === 'object' && 'path' in fileInfo) {
 							return fileInfo.path;
-						}if (typeof fileInfo === 'string') {
+						}
+						if (typeof fileInfo === 'string') {
 							return fileInfo;
 						}
 						return null; // Será filtrado a continuación
@@ -765,11 +767,12 @@ export async function reindexFolder(id: string, options?: ReindexOptions): Promi
 				// Verificar si fileInfo es un objeto con propiedad path
 				if (fileInfo && typeof fileInfo === 'object' && 'path' in fileInfo) {
 					return fileInfo.path;
-				}if (typeof fileInfo === 'string') {
+				}
+				if (typeof fileInfo === 'string') {
 					return fileInfo;
 				}
-					folderLogger.warn('⚠️ Formato de imagen no válido en scanResult:', fileInfo);
-					return null; // Será filtrado a continuación
+				folderLogger.warn('⚠️ Formato de imagen no válido en scanResult:', fileInfo);
+				return null; // Será filtrado a continuación
 			})
 			.filter(Boolean); // Filtrar valores nulos
 		const batchSize = options?.batchSize || DEFAULT_BATCH_SIZE;

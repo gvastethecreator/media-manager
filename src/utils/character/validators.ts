@@ -114,16 +114,17 @@ export const characterSearchSchema = z.object({
 export function validateCharacterStats(stats: unknown): Record<string, number> | null {
 	try {
 		// Si stats es un string, intentar parsearlo a objeto
+		let parsedStats: unknown = stats;
 		if (typeof stats === 'string') {
 			try {
-				stats = JSON.parse(stats);
+				parsedStats = JSON.parse(stats);
 			} catch {
 				return null;
 			}
 		}
 
 		// Validar con el esquema Zod
-		const validStats = characterStatsSchema.safeParse(stats);
+		const validStats = characterStatsSchema.safeParse(parsedStats);
 
 		if (validStats.success) {
 			return validStats.data;
@@ -144,25 +145,26 @@ export function validateCharacterStats(stats: unknown): Record<string, number> |
 export function validateCharacterFilters(filters: unknown): z.infer<typeof characterFilterSchema>[] {
 	try {
 		// Si filters es un string, intentar parsearlo a array
+		let parsedFilters: unknown = filters;
 		if (typeof filters === 'string') {
 			if (filters === 'empty_array') {
 				return [];
 			}
 
 			try {
-				filters = JSON.parse(filters);
+				parsedFilters = JSON.parse(filters);
 			} catch {
 				return [];
 			}
 		}
 
 		// Si no es un array, devolver array vacío
-		if (!Array.isArray(filters)) {
+		if (!Array.isArray(parsedFilters)) {
 			return [];
 		}
 
 		// Validar cada filtro y devolver solo los válidos
-		return filters
+		return parsedFilters
 			.map((filter) => {
 				const validFilter = characterFilterSchema.safeParse(filter);
 				return validFilter.success ? validFilter.data : null;
@@ -182,25 +184,26 @@ export function validateCharacterFilters(filters: unknown): z.infer<typeof chara
 export function validateCharacterRelationships(relationships: unknown): z.infer<typeof characterRelationshipSchema>[] {
 	try {
 		// Si relationships es un string, intentar parsearlo a array
+		let parsedRelationships: unknown = relationships;
 		if (typeof relationships === 'string') {
 			if (relationships === 'empty_array') {
 				return [];
 			}
 
 			try {
-				relationships = JSON.parse(relationships);
+				parsedRelationships = JSON.parse(relationships);
 			} catch {
 				return [];
 			}
 		}
 
 		// Si no es un array, devolver array vacío
-		if (!Array.isArray(relationships)) {
+		if (!Array.isArray(parsedRelationships)) {
 			return [];
 		}
 
 		// Validar cada relación y devolver solo las válidas
-		return relationships
+		return parsedRelationships
 			.map((relationship) => {
 				const validRelationship = characterRelationshipSchema.safeParse(relationship);
 				return validRelationship.success ? validRelationship.data : null;

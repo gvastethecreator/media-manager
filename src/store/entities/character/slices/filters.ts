@@ -275,7 +275,7 @@ export const createCharacterFiltersSlice: StateCreator<
 
 		const groups: Record<string, CharacterExtended[]> = {};
 
-		characters.forEach((character) => {
+		for (const character of characters) {
 			let key = 'unknown';
 
 			switch (groupingCriteria) {
@@ -305,7 +305,7 @@ export const createCharacterFiltersSlice: StateCreator<
 			}
 
 			groups[key].push(character);
-		});
+		}
 
 		return groups;
 	},
@@ -393,10 +393,10 @@ export const createCharacterFiltersSlice: StateCreator<
 				newFilters[existingIndex] = filter;
 				return { activeFilters: newFilters };
 			}
-				// Añadir nuevo filtro
-				return {
-					activeFilters: [...state.activeFilters, filter],
-				};
+			// Añadir nuevo filtro
+			return {
+				activeFilters: [...state.activeFilters, filter],
+			};
 		});
 	},
 

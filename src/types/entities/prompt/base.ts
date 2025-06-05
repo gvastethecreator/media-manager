@@ -4,7 +4,9 @@ import type { EntityType } from '../entities';
 /**
  * Tipo base para Prompt derivado del schema de Prisma
  */
-export type PromptBase = Prisma.PromptGetPayload<{}>;
+export type PromptBase = Prisma.PromptGetPayload<{
+	include: { _count: true };
+}>;
 
 /**
  * Interfaz para crear un nuevo prompt
