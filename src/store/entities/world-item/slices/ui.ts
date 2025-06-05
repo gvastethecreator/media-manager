@@ -29,7 +29,8 @@ export interface WorldItemUISlice {
 	resetFilters: () => void;
 	toggleExpanded: (id: string) => void;
 	toggleSelected: (id: string) => void;
-	selectItems: (ids: string[]) => void;
+	selectItems: (ids: string[] | null) => void;
+	selectWorldItem: (id: string | null) => void;
 	clearSelection: () => void;
 	setCurrentItemId: (id: string | null) => void;
 	setIsCreatingItem: (isCreating: boolean) => void;
@@ -72,32 +73,57 @@ export const createWorldItemUISlice: StateCreator<WorldItemStore, [], [], WorldI
 
 	toggleExpanded: (id) => {
 		set((state) => {
-			if (state.expandedIds.includes(id)) {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.expandedIds || [];
+
+			if (currentExpandedIds.includes(id)) {
 				return {
-					expandedIds: state.expandedIds.filter((expandedId) => expandedId !== id),
+					expandedIds: currentExpandedIds.filter((expandedId) => expandedId !== id),
 				};
 			}
 			return {
-				expandedIds: [...state.expandedIds, id],
+				expandedIds: [...currentExpandedIds, id],
 			};
 		});
 	},
 
 	toggleSelected: (id) => {
 		set((state) => {
-			if (state.selectedIds.includes(id)) {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.selectedIds || [];
+
+			if (currentSelectedIds.includes(id)) {
 				return {
-					selectedIds: state.selectedIds.filter((selectedId) => selectedId !== id),
+					selectedIds: currentSelectedIds.filter((selectedId) => selectedId !== id),
 				};
 			}
 			return {
-				selectedIds: [...state.selectedIds, id],
+				selectedIds: [...currentSelectedIds, id],
 			};
 		});
 	},
 
 	selectItems: (ids) => {
+		// Si ids es null, limpiar la selección
+		if (ids === null) {
+			set({ selectedIds: [] });
+			return;
+		}
+
 		set({ selectedIds: ids });
+	},
+
+	// Método específico para seleccionar un solo ítem (o limpiar selección)
+	selectWorldItem: (id) => {
+		if (id === null) {
+			set({ selectedIds: [] });
+			return;
+		}
+
+		set({
+			selectedIds: [id],
+			currentItemId: id
+		});
 	},
 
 	clearSelection: () => {
