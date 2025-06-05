@@ -60,8 +60,8 @@ export function generateFolderEmoji(): string {
  */
 export function normalizeFolderPath(path: string): string {
 	try {
-		// Eliminar espacios en blanco
-		let normalizedPath = path.trim();
+		// 🐞 FIX: Reemplazar barras invertidas de Windows por barras normales
+		let normalizedPath = path.trim().replace(/\\/g, '/');
 
 		// Asegurar que comienza con /
 		if (!normalizedPath.startsWith('/')) {
@@ -122,7 +122,8 @@ export function withFolderStats(folder: Folder): FolderWithStats {
  * @returns Nivel de profundidad
  */
 function calculateFolderLevel(path: string): number {
-	if (!path) return 0;
+	// 🐞 FIX: Añadir una guarda para evitar errores si el path es nulo o indefinido
+	if (!path || typeof path !== 'string') return 0;
 	// Contar el número de separadores / excepto el inicial
 	const normalizedPath = normalizeFolderPath(path);
 	return normalizedPath === '/' ? 0 : (normalizedPath.match(/\//g) || []).length;

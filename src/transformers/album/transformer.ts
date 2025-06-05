@@ -90,27 +90,20 @@ export function transformAlbumToWithStats(album: Album): AlbumWithStats {
 	try {
 		const baseAlbum = transformAlbum(album);
 
-		// Calcular totales para las estadísticas
-		const counts = baseAlbum._count || {
-			images: 0,
-			videos: 0,
-			collections: 0,
-			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			concepts: 0,
-			prompts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
-		};
+		// 🐞 FIX: Asegurarse de que _count y las relaciones existan antes de acceder a ellas
+		const counts = baseAlbum._count || {};
+		const images = Array.isArray(baseAlbum.images) ? baseAlbum.images : [];
+		const videos = Array.isArray(baseAlbum.videos) ? baseAlbum.videos : [];
+
+		const imageCount = counts.images ?? 0;
+		const videoCount = counts.videos ?? 0;
+		const tagCount = counts.tags ?? 0;
+		const groupCount = counts.groups ?? 0;
 
 		// Calcular tamaño total (simulado)
 		const totalSize =
-			(baseAlbum.images?.length || 0) * 5 * 1024 * 1024 + // 5MB promedio por imagen
-			(baseAlbum.videos?.length || 0) * 20 * 1024 * 1024; // 20MB promedio por video
+			(images.length || 0) * 5 * 1024 * 1024 + // 5MB promedio por imagen
+			(videos.length || 0) * 20 * 1024 * 1024; // 20MB promedio por video
 
 		// Determinar la última actualización
 		const lastUpdated = baseAlbum.updatedAt || new Date();
@@ -120,16 +113,16 @@ export function transformAlbumToWithStats(album: Album): AlbumWithStats {
 			...baseAlbum,
 			totalSize,
 			lastUpdated,
-			imageCount: counts.images,
-			videoCount: counts.videos,
+			imageCount,
+			videoCount,
 			albumCount: 0, // Los álbumes no contienen otros álbumes
-			tagCount: counts.tags,
-			groupCount: counts.groups,
+			tagCount,
+			groupCount,
 			distribution: [
-				{ name: 'images', count: counts.images },
-				{ name: 'videos', count: counts.videos },
-				{ name: 'tags', count: counts.tags },
-				{ name: 'groups', count: counts.groups },
+				{ name: 'images', count: imageCount },
+				{ name: 'videos', count: videoCount },
+				{ name: 'tags', count: tagCount },
+				{ name: 'groups', count: groupCount },
 			],
 		};
 	} catch (error) {
