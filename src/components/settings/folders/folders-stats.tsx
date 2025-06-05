@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import type { FolderStats } from '@/types/entities/folders';
+import type { FolderStats } from '@/types/entities/folder';
 import { motion } from 'motion/react';
 
 interface FoldersStatsProps {
