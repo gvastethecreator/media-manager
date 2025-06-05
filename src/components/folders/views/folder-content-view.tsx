@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useFolderImages } from '@/hooks/use-folder-images';
 import { folderResponseCache } from '@/lib/folder-cache';
-import { useFolder } from '@/lib/hooks/use-navigation';
+// Usar el hook del store de carpetas para mantener consistencia con FoldersView
+import { useFolder } from '@/hooks/folder/use-folder';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { Folder, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -32,11 +33,11 @@ export function FolderContentView() {
 		logger.info('🔍 DIAGNÓSTICO DETALLADO CARPETAS VACÍAS:', {
 			currentFolder: currentFolder
 				? {
-					id: currentFolder.id,
-					name: currentFolder.name,
-					path: (currentFolder as any).path || 'No disponible',
-					count: currentFolder.count || 0,
-				}
+						id: currentFolder.id,
+						name: currentFolder.name,
+						path: (currentFolder as any).path || 'No disponible',
+						count: currentFolder.count || 0,
+					}
 				: null,
 			currentFolderId,
 			imagesLength: images?.length || 0,
@@ -47,14 +48,18 @@ export function FolderContentView() {
 		});
 
 		if (currentFolder) {
-			logger.info(`📂 Carpeta actual: ${currentFolder.name} (${currentFolderId}) - Conteo esperado: ${currentFolder.count}`);
+			logger.info(
+				`📂 Carpeta actual: ${currentFolder.name} (${currentFolderId}) - Conteo esperado: ${currentFolder.count}`
+			);
 		}
 
 		if (images !== undefined) {
 			logger.info(`🖼️ Imágenes cargadas: ${images.length}`);
 			// 🔍 DIAGNÓSTICO: Log detallado cuando no hay imágenes pero debería haberlas
 			if (images.length === 0 && currentFolder?.count && currentFolder.count > 0) {
-				logger.warn(`🚨 PROBLEMA DETECTADO: Carpeta "${currentFolder?.name}" debería tener ${currentFolder.count} imágenes pero devuelve 0`);
+				logger.warn(
+					`🚨 PROBLEMA DETECTADO: Carpeta "${currentFolder?.name}" debería tener ${currentFolder.count} imágenes pero devuelve 0`
+				);
 				logger.warn(`   📂 FolderId: ${currentFolderId}`);
 				logger.warn(`   📍 Path: ${(currentFolder as any)?.path || 'No disponible'}`);
 				logger.warn(`   ⏱️ isLoading: ${isLoading}`);
@@ -97,7 +102,7 @@ export function FolderContentView() {
 	const handleForceRefresh = useCallback(async () => {
 		logger.info('🔄 Forzando recarga de imágenes');
 		setIsManuallyRefreshing(true);
-		setRetryCount(prev => prev + 1);
+		setRetryCount((prev) => prev + 1);
 
 		try {
 			// Limpiar caché para esta carpeta
@@ -157,9 +162,10 @@ export function FolderContentView() {
 				<EmptyState
 					icon={Folder}
 					title="No hay imágenes"
-					description={currentFolder?.count && currentFolder.count > 0
-						? `Esta carpeta debería tener ${currentFolder.count} imágenes pero no se pudieron cargar.`
-						: "Esta carpeta está vacía. Haz clic en Reindexar para buscar nuevas imágenes."
+					description={
+						currentFolder?.count && currentFolder.count > 0
+							? `Esta carpeta debería tener ${currentFolder.count} imágenes pero no se pudieron cargar.`
+							: 'Esta carpeta está vacía. Haz clic en Reindexar para buscar nuevas imágenes.'
 					}
 				/>
 
