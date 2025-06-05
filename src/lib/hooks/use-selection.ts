@@ -48,7 +48,9 @@ export const useSelection = () => {
 		// 🎨 Selección por criterios
 		selectByType: (type: 'image' | 'file' | 'folder') => {
 			const itemsOfType = store.displayedItems.filter((item) => item.type === type);
-			itemsOfType.forEach((item) => store.selectItem(item));
+			for (const item of itemsOfType) {
+				store.selectItem(item);
+			}
 			selectionLogger.info(`🎯 Seleccionados ${itemsOfType.length} items de tipo ${type}`);
 		},
 
@@ -57,14 +59,18 @@ export const useSelection = () => {
 				const size = item.size || 0;
 				return (!minSize || size >= minSize) && (!maxSize || size <= maxSize);
 			});
-			filteredItems.forEach((item) => store.selectItem(item));
+			for (const item of filteredItems) {
+				store.selectItem(item);
+			}
 			selectionLogger.info(`🎯 Seleccionados ${filteredItems.length} items por tamaño`);
 		},
 
 		selectRecent: (days = 7) => {
 			const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 			const recentItems = store.displayedItems.filter((item) => item.createdAt && item.createdAt > cutoffDate);
-			recentItems.forEach((item) => store.selectItem(item));
+			for (const item of recentItems) {
+				store.selectItem(item);
+			}
 			selectionLogger.info(`🎯 Seleccionados ${recentItems.length} items recientes (${days} días)`);
 		},
 	};
