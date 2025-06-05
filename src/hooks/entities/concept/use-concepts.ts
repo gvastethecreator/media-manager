@@ -1,5 +1,6 @@
 import { useConceptStore } from '@/store/entities/concept';
 import { processConcepts } from '@/transformers/concept/mappers';
+import type { ConceptBase } from '@/types/entities/concept/base';
 import { useEffect } from 'react';
 import { useConceptActions } from './use-concept-actions';
 import { useConceptFilters } from './use-concept-filters';
@@ -20,23 +21,27 @@ export function useConcepts() {
 	// Efecto para cargar conceptos al montar el componente
 	useEffect(() => {
 		actions.loadConcepts();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [actions]);
 
 	// Procesar conceptos con filtros, ordenamiento y paginación actuales
-	const processedData = processConcepts(concepts, filters, sortBy, page, pageSize);
+	// Convertir ConceptWithStats[] a ConceptBase[] para el procesamiento
+	const conceptsBase: ConceptBase[] = concepts.map(concept => {
+		// Extraer solo las propiedades de ConceptBase
+		const { _count, ...baseProperties } = concept;
+		return baseProperties as ConceptBase;
+	});
+	const processedData = processConcepts(conceptsBase, filters, sortBy, page, pageSize);
 
 	return {
 		// Estado básico
 		concepts,
 		processedConcepts: processedData.items,
-		selectedConcept,
 		isLoading,
 		error,
 
 		// Metadatos de paginación
 		totalConcepts: processedData.total,
-		totalPages: processedData.totalPages,
+		totalPages: Math.ceil(processedData.total / pageSize),
 
 		// Acciones de entidad
 		...actions,
