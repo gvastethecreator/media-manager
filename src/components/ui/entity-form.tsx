@@ -654,7 +654,7 @@ export function EntityForm({
 							{isSubmitting || isLoading ? (
 								<motion.div
 									animate={{ rotate: 360 }}
-									transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+									transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
 									className="h-4 w-4 border-2 border-current border-t-transparent rounded-full"
 								/>
 							) : (

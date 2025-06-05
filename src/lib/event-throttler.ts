@@ -128,8 +128,8 @@ export class BatchThrottler<T> {
 
   constructor(
     private processor: (items: T[]) => Promise<void>,
-    private delay: number = 1000,
-    private maxBatchSize: number = 50
+    private delay = 1000,
+    private maxBatchSize = 50
   ) {}
 
   /**
@@ -221,7 +221,7 @@ export class BatchThrottler<T> {
  */
 export function debounceEvent<T extends (...args: any[]) => any>(
   fn: T,
-  delay: number = 300
+  delay = 300
 ): T {
   let timeoutId: NodeJS.Timeout | null = null;
 

@@ -77,7 +77,7 @@ export default function CharactersExample() {
 
 	const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
-		const numValue = parseInt(value);
+		const numValue = Number.parseInt(value);
 		if (!isNaN(numValue)) {
 			setFormData(prev => ({ ...prev, [name]: numValue }));
 		}

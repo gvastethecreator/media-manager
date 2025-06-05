@@ -61,13 +61,13 @@ function repairJsonField(field) {
   }
 
   // Paso 1: Normalizar strings comunes
-  let normalized = normalizeCommonStrings(trimmed);
+  const normalized = normalizeCommonStrings(trimmed);
   if (normalized) {
     return normalized;
   }
 
   // Paso 2: Reparar patrones específicos
-  let repaired = repairAttributePattern(trimmed);
+  const repaired = repairAttributePattern(trimmed);
   if (repaired) {
     return repaired;
   }

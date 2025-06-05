@@ -358,7 +358,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
       const cacheKey = id ? `${context}:${id}` : context;
 
       // ⚡ Verificar cache primero
-      let items = folderCache.get(cacheKey);
+      const items = folderCache.get(cacheKey);
 
       if (items) {
         fileManagerLogger.info('⚡ Usando items desde cache:', cacheKey);
