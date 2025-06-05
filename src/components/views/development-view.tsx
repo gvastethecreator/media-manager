@@ -1,20 +1,7 @@
 'use client';
 
-import ImagesExample from '@/app/components/examples/ImagesExample';
-import { TagsExample } from '@/app/components/examples/TagsExample';
-import ImageCardExample from '@/components/cards/image-card/image-card-example';
-import ImageGalleryExample from '@/components/cards/image-card/image-gallery-example';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AlbumsExample from '@/examples/AlbumsExample';
-import CharactersExample from '@/examples/CharactersExample';
-import CollectionsExample from '@/examples/CollectionsExample';
-import EntityCardExample from '@/examples/EntityCardExample';
-import EntityListExample from '@/examples/EntityListExample';
-import { GroupsExampleEnhanced } from '@/examples/GroupsExampleEnhanced';
-import PlacesExample from '@/examples/PlacesExample';
-import SimpleExample from '@/examples/SimpleExample';
-import VideosExample from '@/examples/VideosExample';
 import {
 	Activity,
 	CreditCard,
@@ -129,55 +116,94 @@ export function DevelopmentView() {
 				</TabsList>
 
 				<TabsContent value="dashboard" className="flex-1 p-0">
-					<DashboardTab />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Dashboard</h3>
+						<p className="text-muted-foreground">Contenido del dashboard en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="settings" className="flex-1 p-0">
-					<SettingsTab />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Configuración</h3>
+						<p className="text-muted-foreground">Configuración del sistema en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="server" className="flex-1 p-0">
-					<ServerTab />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Servidor</h3>
+						<p className="text-muted-foreground">Información del servidor en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="database" className="flex-1 p-0">
-					<DatabaseTab />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Base de datos</h3>
+						<p className="text-muted-foreground">Información de la base de datos en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="folders" className="flex-1 p-0">
-					<FoldersTab />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Carpetas</h3>
+						<p className="text-muted-foreground">Gestión de carpetas en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="tags" className="flex-1 p-0">
-					<TagsExample />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Etiquetas</h3>
+						<p className="text-muted-foreground">Gestión de etiquetas en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="groups" className="flex-1 p-0">
-					<GroupsExampleEnhanced />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Grupos</h3>
+						<p className="text-muted-foreground">Gestión de grupos en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="images" className="flex-1 p-0">
-					<ImagesExample />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Imágenes</h3>
+						<p className="text-muted-foreground">Gestión de imágenes en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="collections" className="flex-1 p-0">
-					<CollectionsExample />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Colecciones</h3>
+						<p className="text-muted-foreground">Gestión de colecciones en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="albums" className="flex-1 p-0">
-					<AlbumsExample />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Álbumes</h3>
+						<p className="text-muted-foreground">Gestión de álbumes en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="characters" className="flex-1 p-0">
-					<CharactersExample />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Personajes</h3>
+						<p className="text-muted-foreground">Gestión de personajes en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="places" className="flex-1 p-0">
-					<PlacesExample />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Lugares</h3>
+						<p className="text-muted-foreground">Gestión de lugares en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="videos" className="flex-1 p-0">
-					<VideosExample />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Videos</h3>
+						<p className="text-muted-foreground">Gestión de videos en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="ui-components" className="h-full flex-1">
@@ -195,24 +221,39 @@ export function DevelopmentView() {
 							</TabsList>
 						</div>
 						<TabsContent value="cards" className="flex-1 overflow-y-auto">
-							<EntityCardExample />
+							<div className="p-4">
+								<h3 className="text-lg font-medium">Tarjetas</h3>
+								<p className="text-muted-foreground">Componentes de tarjetas en desarrollo</p>
+							</div>
 						</TabsContent>
 						<TabsContent value="lists" className="flex-1 overflow-y-auto">
-							<EntityListExample />
+							<div className="p-4">
+								<h3 className="text-lg font-medium">Listas</h3>
+								<p className="text-muted-foreground">Componentes de listas en desarrollo</p>
+							</div>
 						</TabsContent>
 					</Tabs>
 				</TabsContent>
 
 				<TabsContent value="image-gallery" className="flex-1 p-0 overflow-auto">
-					<ImageGalleryExample />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Galería de imágenes</h3>
+						<p className="text-muted-foreground">Componente de galería en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="image-card" className="flex-1 p-0 overflow-auto">
-					<ImageCardExample />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Tarjetas de imágenes</h3>
+						<p className="text-muted-foreground">Componente de tarjetas de imágenes en desarrollo</p>
+					</div>
 				</TabsContent>
 
 				<TabsContent value="simple" className="flex-1 p-0">
-					<SimpleExample />
+					<div className="p-4">
+						<h3 className="text-lg font-medium">Componente simple</h3>
+						<p className="text-muted-foreground">Componente simple en desarrollo</p>
+					</div>
 				</TabsContent>
 			</Tabs>
 		</div>
