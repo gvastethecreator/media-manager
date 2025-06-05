@@ -1,35 +1,90 @@
-# 🐛 Resolución de Errores de Lint de Biome
+# 🧪 Configuración de Jest y Tests - Image Manager
 
-## 📋 Plan de Acción
+## 📋 Análisis Inicial
 
-### 🎯 Tipos de Errores Identificados:
-1. **useExhaustiveDependencies** - Dependencias faltantes en hooks
-2. **noForEach** - Preferir for...of en lugar de forEach (performance)
-3. **noStaticOnlyClass** - Evitar clases que solo tienen métodos estáticos
-4. **noImplicitAnyLet** - Variables sin tipo explícito
-5. **noNonNullAssertion** - Evitar non-null assertions
-6. **noParameterAssign** - No reasignar parámetros de función
-7. **noAccumulatingSpread** - Evitar spread en accumulators
-8. **noBannedTypes** - No usar tipos prohibidos como `{}`
-9. **noRedeclare** - No redeclarar tipos/interfaces
-10. **noMisleadingCharacterClass** - Regex con clases de caracteres problemáticas
+### Stack Detectado
 
-### 🚀 Estrategia de Resolución:
-1. Empezar con errores de tipos y dependencias (más críticos)
-2. Refactorizar clases estáticas a funciones
-3. Optimizar forEach a for...of
-4. Corregir tipos y assertions
-5. Limpiar redeclaraciones
+- **Next.js**: 15.3.3
+- **React**: 19.1.0  
+- **TypeScript**: 5.8.3
+- **Tailwind CSS**: 4.1.8
+- **Prisma**: 6.9.0 (ORM actual)
+- **Testing**: Jest 29.7.0 + Testing Library
+- **Package Manager**: PNPM
 
-### 📊 Progress:
-- [ ] Errores de hooks y dependencias (2 archivos)
-- [ ] Clases estáticas (3 archivos)
-- [ ] forEach optimizations (14 archivos)
-- [ ] Tipos y assertions (6 archivos)
-- [ ] Redeclaraciones y otros (3 archivos)
+### 🔍 Problemas Identificados (RESUELTOS)
 
-**Total: 45 errores en ~28 archivos**
+1. ✅ **Resolver faltante**: `src/tests/resolver.js` creado
+2. ✅ **Configuración incompleta**: Jest config ajustado para React 19 y Next.js 15
+3. ✅ **Estructura de tests**: Directorio `src/tests/` creado con organización completa
+
+### 🎯 Plan de Acción Escalonado
+
+#### Fase 1: Configuración Base ✅ COMPLETADA
+
+- [x] **Resolver faltante**: Creado `src/tests/resolver.js` con compatibilidad completa
+- [x] **Configuración Jest**: Ajustado para React 19 + Next.js 15 + TypeScript 5.8
+- [x] **Estructura de tests**: Creado directorio `/tests/` con organización completa
+- [x] **Setup básico**: Configurado jest.setup.ts con mocks globales
+- [x] **Utilities**: Creadas utilidades para testing (`test-utils.tsx`)
+- [x] **Fixtures**: Datos de prueba para entidades (`entities.ts`)
+- [x] **Mocks**: Prisma client + Next.js navigation + archivos
+- [x] **Test inicial**: Verificación de funcionamiento con test básico
+- [x] **Documentación**: README.md completo + AGENTS.md
+
+#### Fase 2: Tests Unitarios 🔄 SIGUIENTE
+
+- [ ] **Custom Hooks**: Testing de hooks personalizados del proyecto
+- [ ] **Zustand Stores**: Testing de estado global y actions  
+- [ ] **Transformers/Utils**: Testing de funciones puras y helpers
+- [ ] **Core Components**: Testing de componentes base Shadcn/UI
+
+#### Fase 3: Tests de Componentes (FUTURO)
+
+- [ ] **Features principales**: Folder scanner, image viewer
+- [ ] **Formularios**: React Hook Form + validaciones
+- [ ] **Layouts**: Navigation, panels, responsive
+- [ ] **Interactions**: Drag & drop, keyboard shortcuts
+
+#### Fase 4: Tests de Integración (FUTURO)
+
+- [ ] **API Routes**: Testing de endpoints Next.js
+- [ ] **Database**: Testing de operaciones Prisma
+- [ ] **File System**: Testing de folder scanner
+- [ ] **Cache**: Testing de strategies de cache
+
+## 📊 Estado Actual
+
+### ✅ Archivos Creados
+
+```
+src/tests/
+├── resolver.js                      # ✅ Resolver personalizado Jest
+├── image-mock.js                    # ✅ Mock archivos imagen
+├── README.md                        # ✅ Documentación completa
+├── helpers/test-utils.tsx           # ✅ Utilidades testing
+├── fixtures/entities.ts             # ✅ Datos prueba
+├── __mocks__/@prisma/client.ts      # ✅ Mock Prisma
+├── __mocks__/next/navigation.ts     # ✅ Mock Next.js
+└── setup/react-testing.test.tsx    # ✅ Test verificación
+```
+
+### ✅ Configuraciones Actualizadas
+
+- **jest.config.ts**: Optimizado para stack actual
+- **jest.setup.ts**: Setup global con mocks
+- **tsconfig.test.json**: TypeScript para tests
+- **AGENTS.md**: Documentación completa para agentes futuros
+
+### 🎯 Próximos Pasos
+
+1. **Ejecutar tests**: Verificar funcionamiento completo
+2. **Hook testing**: Implementar tests para custom hooks
+3. **Store testing**: Testing de Zustand stores
+4. **Component testing**: Setup para Shadcn/UI
 
 ---
-*Iniciado: 5 de junio de 2025*
-*Estado: En progreso 🔄*
+
+**Estado**: ✅ Configuración base completada  
+**Próximo**: Fase 2 - Tests Unitarios  
+**Fecha**: 5 de junio de 2025
