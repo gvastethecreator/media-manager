@@ -11,4 +11,3 @@ export type { WildcardComplete as Wildcard } from './types';
 
 // Exportar enums específicamente
 export { WildcardSortCriteria, WildcardViewMode } from './types';
-

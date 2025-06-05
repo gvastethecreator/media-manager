@@ -4,7 +4,7 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { SettingsView } from '@/components/settings/settings-view';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
-import { memo, useRef, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { EntityPreloader } from '../features/file-browser/entity-preloader';
 import { FolderContentView } from '../folders/views/folder-content-view';
 import { FoldersView } from '../folders/views/folders-view';

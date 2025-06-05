@@ -3,13 +3,7 @@
 import { deleteAlbum, getAlbums } from '@/app/actions/albums/album.actions';
 import { AlbumCard } from '@/components/cards/album-card/album-card';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import toastService from '@/services/toast.service';
@@ -64,14 +58,14 @@ export function AlbumsSettings() {
 		totalAlbums: albums.length,
 		totalImages: albums.reduce((acc, album) => acc + (album._count?.images || 0), 0),
 		totalSize: albums.reduce((acc, album) => acc + (album.totalSize || 0), 0),
-		emptyAlbums: albums.filter(album => (album._count?.images || 0) === 0).length,
+		emptyAlbums: albums.filter((album) => (album._count?.images || 0) === 0).length,
 	};
 
 	// Manejar eliminación de álbum
 	const handleDeleteAlbum = useCallback(async (id: string) => {
 		try {
 			await deleteAlbum(id);
-			setAlbums(prev => prev.filter(album => album.id !== id));
+			setAlbums((prev) => prev.filter((album) => album.id !== id));
 			setSelectedAlbum(null);
 			setIsEditing(false);
 			toastService.success('Álbum eliminado');
@@ -90,25 +84,24 @@ export function AlbumsSettings() {
 	}, []);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const handleDeleteButtonClick = useCallback((e: React.MouseEvent<HTMLButtonElement>, id: string) => {
-		e.stopPropagation();
-		handleDeleteAlbum(id);
-	}, [handleDeleteAlbum]);
+	const handleDeleteButtonClick = useCallback(
+		(e: React.MouseEvent<HTMLButtonElement>, id: string) => {
+			e.stopPropagation();
+			handleDeleteAlbum(id);
+		},
+		[handleDeleteAlbum]
+	);
 
 	// Manejar creación exitosa
 	const handleAlbumCreated = useCallback((newAlbum: Album) => {
-		setAlbums(prev => [...prev, newAlbum as unknown as AlbumWithStats]);
+		setAlbums((prev) => [...prev, newAlbum as unknown as AlbumWithStats]);
 		toastService.success('Álbum creado');
 	}, []);
 
 	// Manejar actualización exitosa
 	const handleAlbumUpdated = useCallback((updatedAlbum: Album) => {
-		setAlbums(prev =>
-			prev.map(album =>
-				album.id === updatedAlbum.id
-					? { ...album, ...updatedAlbum } as AlbumWithStats
-					: album
-			)
+		setAlbums((prev) =>
+			prev.map((album) => (album.id === updatedAlbum.id ? ({ ...album, ...updatedAlbum } as AlbumWithStats) : album))
 		);
 		toastService.success('Álbum actualizado');
 	}, []);
@@ -146,11 +139,7 @@ export function AlbumsSettings() {
 						icon={Info}
 						title="Error al cargar álbumes"
 						description={error}
-						actions={
-							<Button onClick={() => window.location.reload()}>
-								Intentar de nuevo
-							</Button>
-						}
+						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -166,7 +155,10 @@ export function AlbumsSettings() {
 						<div className="flex items-center justify-between">
 							<CardTitle className="text-sm">Álbumes ({albums.length})</CardTitle>
 							<Button
-								onClick={() => { setSelectedAlbum(null); setIsEditing(false); }}
+								onClick={() => {
+									setSelectedAlbum(null);
+									setIsEditing(false);
+								}}
 								size="sm"
 								variant="ghost"
 								className="h-6 w-6 p-0"
@@ -239,9 +231,7 @@ export function AlbumsSettings() {
 					<CardHeader className="py-2 px-3">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-sm">
-									{isEditing ? 'Editar Álbum' : 'Nuevo Álbum'}
-								</CardTitle>
+								<CardTitle className="text-sm">{isEditing ? 'Editar Álbum' : 'Nuevo Álbum'}</CardTitle>
 								<CardDescription className="text-xs">
 									{isEditing
 										? 'Modifica los detalles del álbum seleccionado'
@@ -251,12 +241,7 @@ export function AlbumsSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedAlbum && (
 									<>
-										<Button
-											variant="outline"
-											size="sm"
-											className="h-7 text-xs"
-											onClick={handleReset}
-										>
+										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
 											Cancelar
 										</Button>
 										<Button
@@ -270,12 +255,7 @@ export function AlbumsSettings() {
 										</Button>
 									</>
 								)}
-								<Button
-									type="submit"
-									size="sm"
-									className="h-7 text-xs"
-									form="album-form"
-								>
+								<Button type="submit" size="sm" className="h-7 text-xs" form="album-form">
 									<Save className="h-3 w-3 mr-1" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
@@ -318,15 +298,11 @@ export function AlbumsSettings() {
 												}}
 											/>
 										) : selectedAlbum ? (
-											<AlbumCard
-												album={selectedAlbum as unknown as typeof AlbumCard.prototype.props.album}
-											/>
+											<AlbumCard album={selectedAlbum as unknown as typeof AlbumCard.prototype.props.album} />
 										) : (
 											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
 												<AlbumIcon className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">
-													Vista previa
-												</p>
+												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
 											</div>
 										)}
 									</div>

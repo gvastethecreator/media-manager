@@ -16,13 +16,7 @@ interface GroupPreviewProps {
 	isDeleting?: boolean;
 }
 
-export function GroupPreview({
-	group,
-	onEdit,
-	onDelete,
-	onFavoriteToggle,
-	isDeleting = false,
-}: GroupPreviewProps) {
+export function GroupPreview({ group, onEdit, onDelete, onFavoriteToggle, isDeleting = false }: GroupPreviewProps) {
 	return (
 		<>
 			<GroupHeader
@@ -53,20 +47,14 @@ export function GroupPreview({
 					<div className="space-y-2">
 						<h3 className="text-sm font-medium">Imagen destacada</h3>
 						<div className="relative w-full h-32 bg-muted rounded-md overflow-hidden">
-							<img
-								src={group.featuredImage}
-								alt={group.name}
-								className="w-full h-full object-cover"
-							/>
+							<img src={group.featuredImage} alt={group.name} className="w-full h-full object-cover" />
 						</div>
 					</div>
 				)}
 			</CardContent>
 
 			<CardFooter className="px-6">
-				<div className="text-sm text-muted-foreground">
-					Creado el {formatDate(group.createdAt)}
-				</div>
+				<div className="text-sm text-muted-foreground">Creado el {formatDate(group.createdAt)}</div>
 			</CardFooter>
 		</>
 	);

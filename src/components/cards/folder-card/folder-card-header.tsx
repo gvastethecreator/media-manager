@@ -23,7 +23,7 @@ export function FolderCardHeader({
 	secondaryColor,
 	path,
 	tcgMode = true,
-	isFavorite = false
+	isFavorite = false,
 }: FolderCardHeaderProps) {
 	// Determinar si es una carpeta raíz basado en la ruta
 	const isRootFolder = path === '/' || !path?.includes('/') || path === '';
@@ -48,22 +48,13 @@ export function FolderCardHeader({
 		<div className="relative">
 			{/* Versión estándar del encabezado */}
 			{!tcgMode && (
-				<div
-					className="px-4 py-2 flex items-center border-b"
-					style={{ borderColor: `${primaryColor}40` }}
-				>
-					<div
-						className="text-2xl mr-3"
-						style={{ filter: `drop-shadow(0 1px 1px ${primaryColor}80)` }}
-					>
+				<div className="px-4 py-2 flex items-center border-b" style={{ borderColor: `${primaryColor}40` }}>
+					<div className="text-2xl mr-3" style={{ filter: `drop-shadow(0 1px 1px ${primaryColor}80)` }}>
 						{emoji}
 					</div>
 
 					<div className="flex-1 min-w-0">
-						<h3
-							className="font-semibold text-base truncate"
-							style={{ color: primaryColor }}
-						>
+						<h3 className="font-semibold text-base truncate" style={{ color: primaryColor }}>
 							{name}
 						</h3>
 						{path && (
@@ -73,9 +64,7 @@ export function FolderCardHeader({
 						)}
 					</div>
 
-					{isFavorite && (
-						<Star className="w-4 h-4 fill-yellow-200 text-yellow-400 ml-2" />
-					)}
+					{isFavorite && <Star className="w-4 h-4 fill-yellow-200 text-yellow-400 ml-2" />}
 				</div>
 			)}
 
@@ -87,7 +76,7 @@ export function FolderCardHeader({
 						className="absolute inset-0 z-0"
 						style={{
 							background: `linear-gradient(to right, ${primaryColor}80, ${primaryColor}40, transparent)`,
-							opacity: 0.9
+							opacity: 0.9,
 						}}
 					/>
 
@@ -101,16 +90,13 @@ export function FolderCardHeader({
 							style={{
 								borderColor: `${primaryColor}`,
 								background: `radial-gradient(circle, ${primaryColor}40, ${primaryColor}20)`,
-								boxShadow: `0 0 10px ${primaryColor}40`
+								boxShadow: `0 0 10px ${primaryColor}40`,
 							}}
 						>
 							<span className="text-xl drop-shadow-md">{emoji}</span>
 
 							{/* Resplandor del emoji */}
-							<div
-								className="absolute inset-0 blur-md opacity-60"
-								style={{ backgroundColor: `${primaryColor}30` }}
-							/>
+							<div className="absolute inset-0 blur-md opacity-60" style={{ backgroundColor: `${primaryColor}30` }} />
 						</div>
 
 						<div className="flex-1 min-w-0">
@@ -118,7 +104,7 @@ export function FolderCardHeader({
 								className="font-bold text-lg truncate"
 								style={{
 									color: 'white',
-									textShadow: `0 0 3px ${primaryColor}, 0 0 5px rgba(0,0,0,0.5)`
+									textShadow: `0 0 3px ${primaryColor}, 0 0 5px rgba(0,0,0,0.5)`,
 								}}
 							>
 								{name}
@@ -133,9 +119,7 @@ export function FolderCardHeader({
 							)}
 						</div>
 
-						{isFavorite && (
-							<Star className="w-5 h-5 fill-yellow-200 text-yellow-400 ml-2" />
-						)}
+						{isFavorite && <Star className="w-5 h-5 fill-yellow-200 text-yellow-400 ml-2" />}
 					</div>
 
 					{/* Barra inferior con tipo de carpeta */}
@@ -144,7 +128,7 @@ export function FolderCardHeader({
 						style={{
 							borderBottom: `1px solid ${primaryColor}50`,
 							borderTop: `1px solid ${primaryColor}30`,
-							boxShadow: 'inset 0 0 10px rgba(0,0,0,0.3)'
+							boxShadow: 'inset 0 0 10px rgba(0,0,0,0.3)',
 						}}
 					>
 						<span className="font-semibold tracking-wide">{folderType}</span>

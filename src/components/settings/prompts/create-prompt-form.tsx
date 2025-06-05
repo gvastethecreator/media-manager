@@ -4,15 +4,7 @@ import { createPrompt, updatePrompt } from '@/app/actions/prompts/prompt.actions
 import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
@@ -29,8 +21,9 @@ import { z } from 'zod';
 // Función para formatear los nombres de modelos para mostrar
 const formatModelName = (model: string): string => {
 	// Eliminar prefijos y guiones, convertir a Title Case
-	return model.split('-')
-		.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+	return model
+		.split('-')
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
 		.join(' ');
 };
 
@@ -64,7 +57,7 @@ export function CreatePromptForm({
 	onCreated,
 	onUpdated,
 	onCancel,
-	onPreview
+	onPreview,
 }: CreatePromptFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -80,8 +73,8 @@ export function CreatePromptForm({
 			category: undefined,
 			model: undefined,
 			parameters: '{}',
-			isFavorite: false
-		}
+			isFavorite: false,
+		},
 	});
 
 	// Actualizar vista previa en tiempo real
@@ -105,7 +98,7 @@ export function CreatePromptForm({
 				emoji: prompt.emoji || '💬',
 				category: prompt.category as PromptCategory | undefined,
 				parameters: prompt.parameters || '{}',
-				isFavorite: prompt.isFavorite || false
+				isFavorite: prompt.isFavorite || false,
 			});
 		}
 	}, [prompt, isEditing, form]);
@@ -119,7 +112,7 @@ export function CreatePromptForm({
 				// Actualizar prompt existente
 				const updatedPrompt = await updatePrompt(prompt.id, {
 					id: prompt.id,
-					...data
+					...data,
 				});
 				if (onUpdated) {
 					onUpdated(updatedPrompt);
@@ -137,7 +130,7 @@ export function CreatePromptForm({
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			toastService.error(isEditing ? 'Error al actualizar el prompt' : 'Error al crear el prompt', {
-				description: errorMessage
+				description: errorMessage,
 			});
 		} finally {
 			setIsSubmitting(false);
@@ -155,14 +148,9 @@ export function CreatePromptForm({
 							<FormItem>
 								<FormLabel>Nombre</FormLabel>
 								<FormControl>
-									<Input
-										placeholder="Nombre del prompt"
-										{...field}
-									/>
+									<Input placeholder="Nombre del prompt" {...field} />
 								</FormControl>
-								<FormDescription>
-									Un nombre descriptivo para identificar este prompt
-								</FormDescription>
+								<FormDescription>Un nombre descriptivo para identificar este prompt</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -174,10 +162,7 @@ export function CreatePromptForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Categoría</FormLabel>
-								<Select
-									onValueChange={field.onChange}
-									defaultValue={field.value}
-								>
+								<Select onValueChange={field.onChange} defaultValue={field.value}>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder="Seleccionar categoría" />
@@ -185,13 +170,13 @@ export function CreatePromptForm({
 									</FormControl>
 									<SelectContent>
 										{Object.values(PromptCategory).map((category) => (
-											<SelectItem key={category} value={category}>{category}</SelectItem>
+											<SelectItem key={category} value={category}>
+												{category}
+											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
-								<FormDescription>
-									La categoría ayuda a organizar tus prompts
-								</FormDescription>
+								<FormDescription>La categoría ayuda a organizar tus prompts</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -205,16 +190,9 @@ export function CreatePromptForm({
 						<FormItem>
 							<FormLabel>Descripción</FormLabel>
 							<FormControl>
-								<Textarea
-									placeholder="Descripción breve del prompt"
-									{...field}
-									value={field.value || ''}
-									rows={2}
-								/>
+								<Textarea placeholder="Descripción breve del prompt" {...field} value={field.value || ''} rows={2} />
 							</FormControl>
-							<FormDescription>
-								Una descripción que explique el propósito de este prompt
-							</FormDescription>
+							<FormDescription>Una descripción que explique el propósito de este prompt</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -235,9 +213,7 @@ export function CreatePromptForm({
 									className="font-mono text-sm"
 								/>
 							</FormControl>
-							<FormDescription>
-								El texto del prompt que se utilizará para generar contenido
-							</FormDescription>
+							<FormDescription>El texto del prompt que se utilizará para generar contenido</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -253,14 +229,9 @@ export function CreatePromptForm({
 							<FormItem>
 								<FormLabel>Emoji</FormLabel>
 								<FormControl>
-									<EmojiPicker
-										value={field.value}
-										onEmojiSelect={field.onChange}
-									/>
+									<EmojiPicker value={field.value} onEmojiSelect={field.onChange} />
 								</FormControl>
-								<FormDescription>
-									Un emoji representativo
-								</FormDescription>
+								<FormDescription>Un emoji representativo</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -273,14 +244,9 @@ export function CreatePromptForm({
 							<FormItem>
 								<FormLabel>Color</FormLabel>
 								<FormControl>
-									<ColorPicker
-										value={field.value}
-										onChange={field.onChange}
-									/>
+									<ColorPicker value={field.value} onChange={field.onChange} />
 								</FormControl>
-								<FormDescription>
-									Color para identificar visualmente
-								</FormDescription>
+								<FormDescription>Color para identificar visualmente</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -292,27 +258,25 @@ export function CreatePromptForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Modelo</FormLabel>
-								<Select
-									onValueChange={field.onChange}
-									defaultValue={field.value}
-								>
+								<Select onValueChange={field.onChange} defaultValue={field.value}>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder="Seleccionar modelo" />
 										</SelectTrigger>
 									</FormControl>
 									<SelectContent>
-										{PromptModel && typeof PromptModel === 'object' ?
+										{PromptModel && typeof PromptModel === 'object' ? (
 											Object.values(PromptModel).map((model) => (
-												<SelectItem key={model} value={model}>{formatModelName(model)}</SelectItem>
-											)) :
+												<SelectItem key={model} value={model}>
+													{formatModelName(model)}
+												</SelectItem>
+											))
+										) : (
 											<SelectItem value="gpt-3.5-turbo">gpt-3.5-turbo</SelectItem>
-										}
+										)}
 									</SelectContent>
 								</Select>
-								<FormDescription>
-									Modelo de IA recomendado
-								</FormDescription>
+								<FormDescription>Modelo de IA recomendado</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -325,16 +289,11 @@ export function CreatePromptForm({
 					render={({ field }) => (
 						<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
 							<FormControl>
-								<Switch
-									checked={field.value}
-									onCheckedChange={field.onChange}
-								/>
+								<Switch checked={field.value} onCheckedChange={field.onChange} />
 							</FormControl>
 							<div className="space-y-1 leading-none">
 								<FormLabel>Marcar como favorito</FormLabel>
-								<FormDescription>
-									Los prompts favoritos aparecerán destacados en los listados
-								</FormDescription>
+								<FormDescription>Los prompts favoritos aparecerán destacados en los listados</FormDescription>
 							</div>
 						</FormItem>
 					)}
@@ -342,19 +301,11 @@ export function CreatePromptForm({
 
 				<div className="flex justify-end gap-2">
 					{onCancel && (
-						<Button
-							type="button"
-							variant="outline"
-							onClick={onCancel}
-							disabled={isSubmitting}
-						>
+						<Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
 							Cancelar
 						</Button>
 					)}
-					<Button
-						type="submit"
-						disabled={isSubmitting}
-					>
+					<Button type="submit" disabled={isSubmitting}>
 						{isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
 					</Button>
 				</div>

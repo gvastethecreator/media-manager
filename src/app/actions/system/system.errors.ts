@@ -16,16 +16,12 @@ export interface SystemErrorData {
 /**
  * Función para crear errores del sistema (enfoque funcional)
  */
-export function createSystemError(
-	message: string,
-	code?: string,
-	cause?: unknown
-): SystemErrorData {
+export function createSystemError(message: string, code?: string, cause?: unknown): SystemErrorData {
 	return {
 		name: 'SystemError',
 		message,
 		code,
-		cause
+		cause,
 	};
 }
 
@@ -33,8 +29,5 @@ export function createSystemError(
  * Verifica si un error es un SystemErrorData
  */
 export function isSystemError(error: unknown): error is SystemErrorData {
-	return error !== null &&
-	       typeof error === 'object' &&
-	       'name' in error &&
-	       (error as any).name === 'SystemError';
+	return error !== null && typeof error === 'object' && 'name' in error && (error as any).name === 'SystemError';
 }

@@ -18,58 +18,57 @@ import { deleteConcept as deleteConceptAction } from './concept-delete.actions';
 
 // Importar acciones para la gestión de imágenes relacionadas
 import {
-    addConceptImage as addConceptImageAction,
-    getConceptImages as getConceptImagesAction,
-    removeConceptImage as removeConceptImageAction
+	addConceptImage as addConceptImageAction,
+	getConceptImages as getConceptImagesAction,
+	removeConceptImage as removeConceptImageAction,
 } from './concept-images.actions';
 
 // Re-exportar funciones individuales - Acciones básicas
 export async function getConcepts() {
-  return ConceptActions.getConcepts();
+	return ConceptActions.getConcepts();
 }
 
 export async function getConcept(id: string) {
-  return ConceptActions.getConcept(id);
+	return ConceptActions.getConcept(id);
 }
 
 export async function getConceptWithRelations(id: string) {
-  return ConceptActions.getConceptWithRelations(id);
+	return ConceptActions.getConceptWithRelations(id);
 }
 
 export async function createConcept(data: any) {
-  return ConceptActions.createConcept(data);
+	return ConceptActions.createConcept(data);
 }
 
 export async function updateConcept(id: string, data: any) {
-  return ConceptActions.updateConcept(id, data);
+	return ConceptActions.updateConcept(id, data);
 }
 
 export async function linkEntityToConcept(conceptId: string, entityId: string, entityType: string) {
-  return ConceptActions.linkEntityToConcept(conceptId, entityId, entityType);
+	return ConceptActions.linkEntityToConcept(conceptId, entityId, entityType);
 }
 
 export async function unlinkEntityFromConcept(conceptId: string, entityId: string, entityType: string) {
-  return ConceptActions.unlinkEntityFromConcept(conceptId, entityId, entityType);
+	return ConceptActions.unlinkEntityFromConcept(conceptId, entityId, entityType);
 }
 
 // Re-exportar funciones individuales - Acciones de eliminación
 export async function deleteConcept(id: string) {
-  return deleteConceptAction(id);
+	return deleteConceptAction(id);
 }
 
 // Re-exportar funciones individuales - Acciones de imágenes
 export async function addConceptImage(conceptId: string, imageId: string) {
-  return addConceptImageAction(conceptId, imageId);
+	return addConceptImageAction(conceptId, imageId);
 }
 
 export async function getConceptImages(conceptId: string) {
-  return getConceptImagesAction(conceptId);
+	return getConceptImagesAction(conceptId);
 }
 
 export async function removeConceptImage(conceptId: string, imageId: string) {
-  return removeConceptImageAction(conceptId, imageId);
+	return removeConceptImageAction(conceptId, imageId);
 }
 
 // Exportar interfaces
 export type { ConceptWithImages } from './concept.actions';
-

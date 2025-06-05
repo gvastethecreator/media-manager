@@ -6,15 +6,15 @@
 import { createLogger } from '@/lib/logger';
 import { PlaceSchema } from '@/types/entities/place/schema';
 import type {
-    PlaceBase,
-    PlaceComplete,
-    PlaceCreateInput,
-    PlaceDanger,
-    PlaceFilters,
-    PlaceRelations,
-    PlaceResource,
-    PlaceStats,
-    PlaceUpdateInput
+	PlaceBase,
+	PlaceComplete,
+	PlaceCreateInput,
+	PlaceDanger,
+	PlaceFilters,
+	PlaceRelations,
+	PlaceResource,
+	PlaceStats,
+	PlaceUpdateInput,
 } from '@/types/entities/place/types';
 
 // Logger específico para el transformer de Place
@@ -51,7 +51,7 @@ export function toPrismaPlace(
 
 		// Base de datos para Prisma
 		const prismaData: Record<string, any> = {
-			...(place as Record<string, any>)
+			...(place as Record<string, any>),
 		};
 
 		// Serializar campos JSON si están presentes y son objetos/arrays
@@ -78,37 +78,37 @@ export function toPrismaPlace(
 		}
 
 		// Eliminar campos que no pertenecen al modelo Prisma
-		delete prismaData.dangersArray;
-		delete prismaData.resourcesArray;
-		delete prismaData.statsObject;
-		delete prismaData.filtersObject;
+		prismaData.dangersArray = undefined;
+		prismaData.resourcesArray = undefined;
+		prismaData.statsObject = undefined;
+		prismaData.filtersObject = undefined;
 
 		// Eliminar propiedades de UI
-		delete prismaData.isSelected;
-		delete prismaData.isExpanded;
-		delete prismaData.isEditing;
-		delete prismaData.isHighlighted;
-		delete prismaData.dangerLevel;
-		delete prismaData.displayPopulation;
-		delete prismaData.displaySize;
-		delete prismaData.regionPath;
-		delete prismaData.recentImages;
+		prismaData.isSelected = undefined;
+		prismaData.isExpanded = undefined;
+		prismaData.isEditing = undefined;
+		prismaData.isHighlighted = undefined;
+		prismaData.dangerLevel = undefined;
+		prismaData.displayPopulation = undefined;
+		prismaData.displaySize = undefined;
+		prismaData.regionPath = undefined;
+		prismaData.recentImages = undefined;
 
 		// Eliminar relaciones que se manejan de forma separada
-		delete prismaData.images;
-		delete prismaData.videos;
-		delete prismaData.albums;
-		delete prismaData.collections;
-		delete prismaData.tags;
-		delete prismaData.characters;
-		delete prismaData.worldItems;
-		delete prismaData.concepts;
-		delete prismaData.prompts;
-		delete prismaData.notes;
-		delete prismaData.wildcards;
-		delete prismaData.properties;
-		delete prismaData.groups;
-		delete prismaData._count;
+		prismaData.images = undefined;
+		prismaData.videos = undefined;
+		prismaData.albums = undefined;
+		prismaData.collections = undefined;
+		prismaData.tags = undefined;
+		prismaData.characters = undefined;
+		prismaData.worldItems = undefined;
+		prismaData.concepts = undefined;
+		prismaData.prompts = undefined;
+		prismaData.notes = undefined;
+		prismaData.wildcards = undefined;
+		prismaData.properties = undefined;
+		prismaData.groups = undefined;
+		prismaData._count = undefined;
 
 		return prismaData;
 	} catch (error) {
@@ -132,7 +132,7 @@ export function fromPrismaPlace(
 
 		// Base del lugar
 		const placeComplete: Record<string, any> = {
-			...prismaPlace
+			...prismaPlace,
 		};
 
 		// Deserializar campos JSON
@@ -154,11 +154,22 @@ export function fromPrismaPlace(
 		if (includeRelations) {
 			// Mantener todas las relaciones que existan en el objeto Prisma
 			const relationsFields: (keyof PlaceRelations)[] = [
-				'images', 'videos', 'albums', 'collections', 'tags', 'characters',
-				'worldItems', 'concepts', 'prompts', 'notes', 'wildcards', 'properties', 'groups'
+				'images',
+				'videos',
+				'albums',
+				'collections',
+				'tags',
+				'characters',
+				'worldItems',
+				'concepts',
+				'prompts',
+				'notes',
+				'wildcards',
+				'properties',
+				'groups',
 			];
 
-			relationsFields.forEach(field => {
+			relationsFields.forEach((field) => {
 				if (prismaPlace[field]) {
 					placeComplete[field] = prismaPlace[field];
 				}
@@ -359,7 +370,7 @@ export function extendPlaces(
 	places: (PlaceBase & Record<string, any>)[],
 	options: PlaceTransformOptions = {}
 ): PlaceComplete[] {
-	return places.map(place => extendPlace(place, options));
+	return places.map((place) => extendPlace(place, options));
 }
 
 /**
@@ -374,7 +385,7 @@ function getDangerLevel(dangersJson: string | null): string {
 		return 'Seguro';
 	}
 
-	const maxLevel = Math.max(...dangers.map(danger => danger.level || 0));
+	const maxLevel = Math.max(...dangers.map((danger) => danger.level || 0));
 
 	if (maxLevel >= 8) return 'Extremo';
 	if (maxLevel >= 6) return 'Alto';
@@ -432,7 +443,7 @@ function getRegionPath(region: string | null): string[] {
 	if (!region) return [];
 
 	// Separar por '/' o '>' para crear la jerarquía
-	return region.split(/[\/|>]/).map(r => r.trim());
+	return region.split(/[\/|>]/).map((r) => r.trim());
 }
 
 // Exportar funciones obsoletas con alias para mantener compatibilidad

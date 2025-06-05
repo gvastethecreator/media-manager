@@ -3,23 +3,10 @@
 import { createConcept, updateConcept } from '@/app/actions/concepts/concept.actions';
 import { Button } from '@/components/ui/button';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -61,7 +48,7 @@ export function CreateConceptForm({
 	onCreated,
 	onUpdated,
 	onCancel,
-	onPreview
+	onPreview,
 }: CreateConceptFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -76,8 +63,8 @@ export function CreateConceptForm({
 			emoji: '💡',
 			category: 'general',
 			tags: '[]',
-			isFavorite: false
-		}
+			isFavorite: false,
+		},
 	});
 
 	// Actualizar vista previa en tiempo real
@@ -101,7 +88,7 @@ export function CreateConceptForm({
 				emoji: concept.emoji || '💡',
 				category: concept.category || 'general',
 				tags: concept.tags || '[]',
-				isFavorite: concept.isFavorite || false
+				isFavorite: concept.isFavorite || false,
 			});
 		}
 	}, [concept, isEditing, form]);
@@ -115,7 +102,7 @@ export function CreateConceptForm({
 				// Actualizar concepto existente con el ID
 				const updatedConcept = await updateConcept(concept.id, {
 					id: concept.id,
-					...data
+					...data,
 				});
 				if (onUpdated) {
 					onUpdated(updatedConcept);
@@ -133,7 +120,7 @@ export function CreateConceptForm({
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			toastService.error(isEditing ? 'Error al actualizar el concepto' : 'Error al crear el concepto', {
-				description: errorMessage
+				description: errorMessage,
 			});
 		} finally {
 			setIsSubmitting(false);
@@ -154,7 +141,7 @@ export function CreateConceptForm({
 									<Input
 										placeholder="Nombre del concepto"
 										{...field}
-										className={cn(form.formState.errors.name && "border-destructive")}
+										className={cn(form.formState.errors.name && 'border-destructive')}
 									/>
 								</FormControl>
 								<FormMessage />
@@ -168,10 +155,7 @@ export function CreateConceptForm({
 						render={({ field }) => (
 							<FormItem className="space-y-2">
 								<FormLabel>Categoría</FormLabel>
-								<Select
-									onValueChange={field.onChange}
-									defaultValue={field.value}
-								>
+								<Select onValueChange={field.onChange} defaultValue={field.value}>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder="Seleccionar categoría" />
@@ -179,7 +163,9 @@ export function CreateConceptForm({
 									</FormControl>
 									<SelectContent>
 										{Object.values(ConceptCategory).map((category) => (
-											<SelectItem key={category} value={category}>{category.replace('_', ' ')}</SelectItem>
+											<SelectItem key={category} value={category}>
+												{category.replace('_', ' ')}
+											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
@@ -196,12 +182,7 @@ export function CreateConceptForm({
 						<FormItem className="space-y-2">
 							<FormLabel>Descripción</FormLabel>
 							<FormControl>
-								<Textarea
-									placeholder="Descripción breve del concepto"
-									{...field}
-									value={field.value || ''}
-									rows={2}
-								/>
+								<Textarea placeholder="Descripción breve del concepto" {...field} value={field.value || ''} rows={2} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -248,19 +229,12 @@ export function CreateConceptForm({
 										</PopoverTrigger>
 										<PopoverContent side="right" className="w-auto p-0 border-none">
 											<FormControl>
-												<HexColorPicker
-													color={field.value}
-													onChange={field.onChange}
-												/>
+												<HexColorPicker color={field.value} onChange={field.onChange} />
 											</FormControl>
 										</PopoverContent>
 									</Popover>
 									<FormControl>
-										<Input
-											value={field.value}
-											onChange={(e) => field.onChange(e.target.value)}
-											className="flex-1"
-										/>
+										<Input value={field.value} onChange={(e) => field.onChange(e.target.value)} className="flex-1" />
 									</FormControl>
 								</div>
 								<FormMessage />
@@ -288,11 +262,7 @@ export function CreateConceptForm({
 										</PopoverContent>
 									</Popover>
 									<FormControl>
-										<Input
-											value={field.value}
-											onChange={(e) => field.onChange(e.target.value)}
-											className="flex-1"
-										/>
+										<Input value={field.value} onChange={(e) => field.onChange(e.target.value)} className="flex-1" />
 									</FormControl>
 								</div>
 								<FormMessage />
@@ -313,13 +283,18 @@ export function CreateConceptForm({
 									value={field.value !== '[]' && field.value ? JSON.parse(field.value).join(', ') : ''}
 									onChange={(e) => {
 										// Convertir texto separado por comas a formato JSON
-										const tagsArray = e.target.value.split(',').map(tag => tag.trim()).filter(Boolean);
+										const tagsArray = e.target.value
+											.split(',')
+											.map((tag) => tag.trim())
+											.filter(Boolean);
 										field.onChange(JSON.stringify(tagsArray));
 									}}
 								/>
 							</FormControl>
 							<FormMessage />
-							<p className="text-xs text-muted-foreground">Las etiquetas te ayudan a organizar y encontrar tus conceptos más fácilmente.</p>
+							<p className="text-xs text-muted-foreground">
+								Las etiquetas te ayudan a organizar y encontrar tus conceptos más fácilmente.
+							</p>
 						</FormItem>
 					)}
 				/>
@@ -330,11 +305,7 @@ export function CreateConceptForm({
 					render={({ field }) => (
 						<FormItem className="flex items-center space-x-2">
 							<FormControl>
-								<Switch
-									checked={field.value}
-									onCheckedChange={field.onChange}
-									id="isFavorite"
-								/>
+								<Switch checked={field.value} onCheckedChange={field.onChange} id="isFavorite" />
 							</FormControl>
 							<FormLabel htmlFor="isFavorite">Marcar como favorito</FormLabel>
 						</FormItem>

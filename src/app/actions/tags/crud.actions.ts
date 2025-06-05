@@ -17,12 +17,7 @@ import { revalidatePath } from 'next/cache';
 const tagLogger = serverLogger.withContext('TagCrudActions');
 
 // Rutas para revalidar después de operaciones
-const REVALIDATE_PATHS = [
-	'/dashboard/tags',
-	'/dashboard/images',
-	'/dashboard/stats',
-	'/api/tags',
-];
+const REVALIDATE_PATHS = ['/dashboard/tags', '/dashboard/images', '/dashboard/stats', '/api/tags'];
 
 // Manejo de errores - enfoque funcional
 enum TagErrorCode {
@@ -135,7 +130,7 @@ export async function deleteTag(id: string): Promise<void> {
 		// Verificar si la etiqueta existe
 		const tag = await prisma.tag.findUnique({
 			where: { id },
-			select: { id: true, name: true }
+			select: { id: true, name: true },
 		});
 
 		if (!tag) {

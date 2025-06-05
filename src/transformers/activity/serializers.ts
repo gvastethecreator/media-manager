@@ -5,11 +5,11 @@
 
 import { type ActivityListResponse } from '../../types/entities/activity';
 import {
-    type Activity,
-    type ActivityBase,
-    ActivityCategory,
-    type ActivityMetadata,
-    ActivityType,
+	type Activity,
+	type ActivityBase,
+	ActivityCategory,
+	type ActivityMetadata,
+	ActivityType,
 } from '../../types/entities/activity/index';
 import { activityListResponseSchema, activitySchema } from './schema';
 import { normalizeActivityFilters } from './validators';
@@ -202,9 +202,7 @@ export function serializeActivity(activity: Activity): Record<string, any> {
 		const validData = activitySchema.parse(activity);
 
 		// Formatear fechas
-		const createdAt = validData.createdAt instanceof Date
-			? validData.createdAt.toISOString()
-			: validData.createdAt;
+		const createdAt = validData.createdAt instanceof Date ? validData.createdAt.toISOString() : validData.createdAt;
 
 		// Crear objeto base
 		const serialized: Record<string, any> = {
@@ -276,9 +274,7 @@ export function deserializeActivity(data: Record<string, any>): Activity | null 
 		const parsed = activitySchema.parse(data);
 
 		// Convertir fechas si es necesario
-		const createdAt = typeof parsed.createdAt === 'string'
-			? new Date(parsed.createdAt)
-			: parsed.createdAt;
+		const createdAt = typeof parsed.createdAt === 'string' ? new Date(parsed.createdAt) : parsed.createdAt;
 
 		// Construir objeto final
 		const activity: Activity = {
@@ -311,9 +307,7 @@ export function deserializeActivityListResponse(data: Record<string, any>): Acti
 		const parsed = activityListResponseSchema.parse(data);
 
 		// Deserializar cada actividad
-		const activities = parsed.activities
-			.map(deserializeActivity)
-			.filter((a): a is Activity => a !== null);
+		const activities = parsed.activities.map(deserializeActivity).filter((a): a is Activity => a !== null);
 
 		return {
 			activities,
@@ -351,15 +345,15 @@ export function serializeActivityFilters(filters: Record<string, any>): Record<s
 
 	// Formatear fechas para API
 	if (normalizedFilters.startDate) {
-		serialized.from = normalizedFilters.startDate instanceof Date
-			? normalizedFilters.startDate.toISOString()
-			: normalizedFilters.startDate;
+		serialized.from =
+			normalizedFilters.startDate instanceof Date
+				? normalizedFilters.startDate.toISOString()
+				: normalizedFilters.startDate;
 	}
 
 	if (normalizedFilters.endDate) {
-		serialized.to = normalizedFilters.endDate instanceof Date
-			? normalizedFilters.endDate.toISOString()
-			: normalizedFilters.endDate;
+		serialized.to =
+			normalizedFilters.endDate instanceof Date ? normalizedFilters.endDate.toISOString() : normalizedFilters.endDate;
 	}
 
 	return serialized;

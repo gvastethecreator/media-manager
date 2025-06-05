@@ -1,8 +1,8 @@
+import { createHash } from 'crypto';
+import { promises as fs, existsSync } from 'fs';
+import { extname, join } from 'path';
 import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { createHash } from 'crypto';
-import { existsSync, promises as fs } from 'fs';
-import { extname, join } from 'path';
 import sharp from 'sharp';
 import type { ImageFormat } from './image';
 import { formatBytes } from './utils/format.utils';
@@ -326,7 +326,9 @@ export async function generateThumbnail(
 			};
 		} catch (processingError) {
 			thumbLogger.error('Error procesando imagen:', processingError);
-			throw new Error(`Error procesando imagen: ${processingError instanceof Error ? processingError.message : String(processingError)}`);
+			throw new Error(
+				`Error procesando imagen: ${processingError instanceof Error ? processingError.message : String(processingError)}`
+			);
 		}
 	} catch (error) {
 		thumbLogger.error('Error generando thumbnail:', error);

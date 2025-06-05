@@ -4,4 +4,3 @@ export * from './components/submenus';
 export { handleContextAction } from './context-action-handler';
 export * from './context-menu';
 export * from './types';
-

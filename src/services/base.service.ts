@@ -2,11 +2,8 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { Transformer } from '@/types/common/transformer';
 import type { FileItem } from '@/types/file-item';
-import {
-    createEntityNotFoundError,
-    toServiceError
-} from '@/utils/errors/service-errors';
-import { imageConverterService, type ServerImage } from './image-converter.service';
+import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
+import { type ServerImage, imageConverterService } from './image-converter.service';
 
 const SERVICE_NAME = 'BaseService';
 const baseLogger = serverLogger.withContext(SERVICE_NAME);
@@ -45,11 +42,7 @@ export class BaseService<DBRecord, Entity, Result> {
 	protected serviceName: string;
 	protected transformer?: Transformer<DBRecord, Entity, Result>;
 
-	constructor(
-		model: PrismaModelOperations,
-		modelName: string,
-		transformer?: Transformer<DBRecord, Entity, Result>
-	) {
+	constructor(model: PrismaModelOperations, modelName: string, transformer?: Transformer<DBRecord, Entity, Result>) {
 		this.model = model;
 		this.modelName = modelName;
 		this.serviceName = `${modelName}Service`;
@@ -111,7 +104,7 @@ export class BaseService<DBRecord, Entity, Result> {
 			throw toServiceError(error, {
 				serviceName: this.serviceName,
 				message: `Error al obtener lista de ${this.modelName}`,
-				context: { where, orderBy }
+				context: { where, orderBy },
 			});
 		}
 	}
@@ -159,7 +152,7 @@ export class BaseService<DBRecord, Entity, Result> {
 			throw toServiceError(error, {
 				serviceName: this.serviceName,
 				message: `Error al obtener ${this.modelName}`,
-				context: { id }
+				context: { id },
 			});
 		}
 	}
@@ -231,7 +224,7 @@ export class BaseService<DBRecord, Entity, Result> {
 			throw toServiceError(error, {
 				serviceName: this.serviceName,
 				message: `Error al obtener imágenes de ${this.modelName}`,
-				context: { id }
+				context: { id },
 			});
 		}
 	}
@@ -278,11 +271,11 @@ export class BaseService<DBRecord, Entity, Result> {
 		include?: Record<string, unknown>
 	): Promise<Result | null> {
 		try {
-			const item = await this.model.findUnique({
+			const item = (await this.model.findUnique({
 				where: { id },
 				...(select && { select }),
 				...(include && { include }),
-			}) as DBRecord | null;
+			})) as DBRecord | null;
 
 			if (!item) {
 				return null;
@@ -294,7 +287,7 @@ export class BaseService<DBRecord, Entity, Result> {
 			throw toServiceError(error, {
 				serviceName: this.serviceName,
 				message: `Error al obtener ${this.modelName}`,
-				context: { id, select, include }
+				context: { id, select, include },
 			});
 		}
 	}

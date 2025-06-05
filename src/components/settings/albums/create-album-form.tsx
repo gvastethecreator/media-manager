@@ -4,14 +4,7 @@ import { createAlbum, updateAlbum } from '@/app/actions/albums/album.actions';
 import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,14 +18,8 @@ import { z } from 'zod';
 
 // Esquema de validación
 const createAlbumSchema = z.object({
-	name: z
-		.string()
-		.min(1, 'El nombre es requerido')
-		.max(100, 'El nombre no debe exceder los 100 caracteres'),
-	description: z
-		.string()
-		.max(500, 'La descripción no debe exceder los 500 caracteres')
-		.optional(),
+	name: z.string().min(1, 'El nombre es requerido').max(100, 'El nombre no debe exceder los 100 caracteres'),
+	description: z.string().max(500, 'La descripción no debe exceder los 500 caracteres').optional(),
 	emoji: z.string().default('📔'),
 	color: z.string().default('#3b82f6'),
 	sortBy: z.string().default('name'),
@@ -142,12 +129,7 @@ export function CreateAlbumForm({
 
 	// Botón de guardar/crear que aparecerá en la parte superior
 	const saveButton = (
-		<Button
-			type="submit"
-			className="h-8 text-xs"
-			disabled={isSubmitting}
-			onClick={form.handleSubmit(onSubmit)}
-		>
+		<Button type="submit" className="h-8 text-xs" disabled={isSubmitting} onClick={form.handleSubmit(onSubmit)}>
 			{isSubmitting && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
 			<Save className="h-3 w-3 mr-1" />
 			{isEditing ? 'Guardar cambios' : 'Crear álbum'}
@@ -187,12 +169,7 @@ export function CreateAlbumForm({
 									Emoji
 								</FormLabel>
 								<FormControl>
-									<EmojiPicker
-										value={field.value}
-										onEmojiSelect={field.onChange}
-										compact
-										showLabel={false}
-									/>
+									<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
 								</FormControl>
 								<FormMessage className="text-[10px]" />
 							</FormItem>
@@ -210,12 +187,7 @@ export function CreateAlbumForm({
 									Color
 								</FormLabel>
 								<FormControl>
-									<ColorPicker
-										value={field.value}
-										onChange={field.onChange}
-										compact
-										showLabel={false}
-									/>
+									<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
 								</FormControl>
 								<FormMessage className="text-[10px]" />
 							</FormItem>
@@ -258,10 +230,7 @@ export function CreateAlbumForm({
 									<ClipboardList className="h-3 w-3" />
 									Categoría
 								</FormLabel>
-								<Select
-									onValueChange={field.onChange}
-									defaultValue={field.value || undefined}
-								>
+								<Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
 									<FormControl>
 										<SelectTrigger className="h-8 text-xs">
 											<SelectValue placeholder="Seleccionar" />
@@ -269,12 +238,24 @@ export function CreateAlbumForm({
 									</FormControl>
 									<SelectContent>
 										<SelectGroup>
-											<SelectItem value="personal" className="text-xs">Personal</SelectItem>
-											<SelectItem value="trabajo" className="text-xs">Trabajo</SelectItem>
-											<SelectItem value="viajes" className="text-xs">Viajes</SelectItem>
-											<SelectItem value="eventos" className="text-xs">Eventos</SelectItem>
-											<SelectItem value="proyectos" className="text-xs">Proyectos</SelectItem>
-											<SelectItem value="otro" className="text-xs">Otro</SelectItem>
+											<SelectItem value="personal" className="text-xs">
+												Personal
+											</SelectItem>
+											<SelectItem value="trabajo" className="text-xs">
+												Trabajo
+											</SelectItem>
+											<SelectItem value="viajes" className="text-xs">
+												Viajes
+											</SelectItem>
+											<SelectItem value="eventos" className="text-xs">
+												Eventos
+											</SelectItem>
+											<SelectItem value="proyectos" className="text-xs">
+												Proyectos
+											</SelectItem>
+											<SelectItem value="otro" className="text-xs">
+												Otro
+											</SelectItem>
 										</SelectGroup>
 									</SelectContent>
 								</Select>
@@ -293,10 +274,7 @@ export function CreateAlbumForm({
 									<Gem className="h-3 w-3" />
 									Rareza
 								</FormLabel>
-								<Select
-									onValueChange={field.onChange}
-									defaultValue={field.value || undefined}
-								>
+								<Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
 									<FormControl>
 										<SelectTrigger className="h-8 text-xs">
 											<SelectValue placeholder="Seleccionar" />
@@ -304,11 +282,21 @@ export function CreateAlbumForm({
 									</FormControl>
 									<SelectContent>
 										<SelectGroup>
-											<SelectItem value="common" className="text-xs">Común</SelectItem>
-											<SelectItem value="uncommon" className="text-xs">Poco común</SelectItem>
-											<SelectItem value="rare" className="text-xs">Raro</SelectItem>
-											<SelectItem value="epic" className="text-xs">Épico</SelectItem>
-											<SelectItem value="legendary" className="text-xs">Legendario</SelectItem>
+											<SelectItem value="common" className="text-xs">
+												Común
+											</SelectItem>
+											<SelectItem value="uncommon" className="text-xs">
+												Poco común
+											</SelectItem>
+											<SelectItem value="rare" className="text-xs">
+												Raro
+											</SelectItem>
+											<SelectItem value="epic" className="text-xs">
+												Épico
+											</SelectItem>
+											<SelectItem value="legendary" className="text-xs">
+												Legendario
+											</SelectItem>
 										</SelectGroup>
 									</SelectContent>
 								</Select>

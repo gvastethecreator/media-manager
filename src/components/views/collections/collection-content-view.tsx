@@ -12,13 +12,8 @@ import { useCallback, useEffect, useState } from 'react';
 const logger = clientLogger.withContext('CollectionContentView');
 
 export function CollectionContentView() {
-	const {
-		selectedCollectionId,
-		getSelectedCollection,
-		addImageToCollection,
-		selectCollection,
-		isLoading
-	} = useCollectionStore();
+	const { selectedCollectionId, getSelectedCollection, addImageToCollection, selectCollection, isLoading } =
+		useCollectionStore();
 
 	const currentCollection = getSelectedCollection();
 
@@ -53,31 +48,36 @@ export function CollectionContentView() {
 		loadImages();
 	}, [selectedCollectionId]);
 
-	const handleToggleItemSelection = useCallback(async (item: FileItem) => {
-		if (!selectedCollectionId) {
-			logger.warn('⚠️ No hay colección seleccionada para modificar');
-			return;
-		}
-
-		const isSelected = collectionImages.some((img) => img.id === item.id);
-		logger.info(`🔄 ${isSelected ? 'Eliminando' : 'Añadiendo'} imagen ${item.id} ${isSelected ? 'de' : 'a'} colección ${selectedCollectionId}`);
-
-		try {
-			if (isSelected) {
-				await removeImageFromCollection(selectedCollectionId, item.id);
-			} else {
-				await addImageToCollection(selectedCollectionId, item.id);
+	const handleToggleItemSelection = useCallback(
+		async (item: FileItem) => {
+			if (!selectedCollectionId) {
+				logger.warn('⚠️ No hay colección seleccionada para modificar');
+				return;
 			}
 
-			// Recargar imágenes después de la operación
-			const updatedImages = await getCollectionImages(selectedCollectionId);
-			setCollectionImages(updatedImages);
-			logger.info('✅ Colección actualizada correctamente');
-		} catch (error) {
-			logger.error('❌ Error al modificar colección:', error);
-			setError('Error al modificar la colección');
-		}
-	}, [selectedCollectionId, collectionImages, addImageToCollection]);
+			const isSelected = collectionImages.some((img) => img.id === item.id);
+			logger.info(
+				`🔄 ${isSelected ? 'Eliminando' : 'Añadiendo'} imagen ${item.id} ${isSelected ? 'de' : 'a'} colección ${selectedCollectionId}`
+			);
+
+			try {
+				if (isSelected) {
+					await removeImageFromCollection(selectedCollectionId, item.id);
+				} else {
+					await addImageToCollection(selectedCollectionId, item.id);
+				}
+
+				// Recargar imágenes después de la operación
+				const updatedImages = await getCollectionImages(selectedCollectionId);
+				setCollectionImages(updatedImages);
+				logger.info('✅ Colección actualizada correctamente');
+			} catch (error) {
+				logger.error('❌ Error al modificar colección:', error);
+				setError('Error al modificar la colección');
+			}
+		},
+		[selectedCollectionId, collectionImages, addImageToCollection]
+	);
 
 	const contentProps: CollectionContentProps = {
 		items: collectionImages,
@@ -86,10 +86,13 @@ export function CollectionContentView() {
 		toggleItemSelection: handleToggleItemSelection,
 		currentContainerId: selectedCollectionId,
 		containerName: currentCollection?.name ?? null,
-		setCurrentContainer: useCallback((id: string) => {
-			logger.info(`🔄 Cambiando a colección: ${id}`);
-			selectCollection(id);
-		}, [selectCollection]),
+		setCurrentContainer: useCallback(
+			(id: string) => {
+				logger.info(`🔄 Cambiando a colección: ${id}`);
+				selectCollection(id);
+			},
+			[selectCollection]
+		),
 		emptyState: {
 			icon: Library,
 			title: 'Colección vacía',

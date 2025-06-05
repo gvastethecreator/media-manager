@@ -130,7 +130,9 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 			// Agregar más logging para diagnóstico
 			if (resource) {
-				resourceLogger.debug(`Recurso encontrado en caché para ID: ${id}, tiene thumbnail: ${!!resource.thumbnail}, error: ${resource.error || 'ninguno'}`);
+				resourceLogger.debug(
+					`Recurso encontrado en caché para ID: ${id}, tiene thumbnail: ${!!resource.thumbnail}, error: ${resource.error || 'ninguno'}`
+				);
 			} else {
 				resourceLogger.debug(`Recurso no encontrado en caché para ID: ${id}, intentando cargar...`);
 			}
@@ -149,7 +151,9 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					const checkInterval = setInterval(() => {
 						attempts++;
 						const updatedResource = state.resources.get(id);
-						resourceLogger.debug(`Intento ${attempts}/${CACHE_CONFIG.maxRetries} esperando thumbnail para ID ${id}, thumbnail disponible: ${!!updatedResource?.thumbnail}`);
+						resourceLogger.debug(
+							`Intento ${attempts}/${CACHE_CONFIG.maxRetries} esperando thumbnail para ID ${id}, thumbnail disponible: ${!!updatedResource?.thumbnail}`
+						);
 
 						if (updatedResource?.thumbnail || attempts >= CACHE_CONFIG.maxRetries) {
 							clearInterval(checkInterval);
@@ -214,9 +218,8 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					};
 					state.resources.set(id, errorResource);
 					throw new Error(data.error);
-				} else {
-					throw new Error(`No se pudo cargar el thumbnail para ID ${id}, sin error específico`);
 				}
+					throw new Error(`No se pudo cargar el thumbnail para ID ${id}, sin error específico`);
 			} catch (error) {
 				resourceLogger.error('Error al cargar thumbnail:', {
 					id,

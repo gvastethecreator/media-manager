@@ -1,10 +1,10 @@
 import {
-    type GeneralStats,
-    getImageStats,
-    getSystemStats,
-    incrementImageDownload,
-    incrementImageView,
-    invalidateStats,
+	type GeneralStats,
+	getImageStats,
+	getSystemStats,
+	incrementImageDownload,
+	incrementImageView,
+	invalidateStats,
 } from '@/app/actions/stats/stats.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';

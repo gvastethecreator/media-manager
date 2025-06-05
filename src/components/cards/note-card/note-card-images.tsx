@@ -2,8 +2,8 @@
 
 import { cn } from '@/lib/utils';
 import { ImageIcon } from 'lucide-react';
-import { nanoid } from "nanoid";
-import React, { Suspense, useEffect, useState } from "react";
+import { nanoid } from 'nanoid';
+import React, { Suspense, useEffect, useState } from 'react';
 import { getRecentNoteImages } from './note-server-actions';
 
 interface NoteCardImagesProps {
@@ -59,10 +59,7 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 
 	return (
 		<div
-			className={cn(
-				"relative h-[150px] overflow-hidden border-b border-gray-400/30",
-				tcgMode && "pb-1"
-			)}
+			className={cn('relative h-[150px] overflow-hidden border-b border-gray-400/30', tcgMode && 'pb-1')}
 			style={getBorderStyles()}
 		>
 			{/* Contenedor de imágenes con grid */}
@@ -70,7 +67,7 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 				className={cn(
 					'w-full h-full grid gap-0.5',
 					images.length >= 4 ? 'grid-cols-3 grid-rows-2' : 'grid-cols-2 grid-rows-2',
-					tcgMode && "rounded-md overflow-hidden"
+					tcgMode && 'rounded-md overflow-hidden'
 				)}
 				style={{
 					backgroundImage: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
@@ -102,8 +99,9 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 								<div
 									key={image.id}
 									className={cn(
-										"relative overflow-hidden w-full h-full",
-										tcgMode && "transition-all duration-300 hover:brightness-110 hover:z-10 hover:transform hover:scale-105"
+										'relative overflow-hidden w-full h-full',
+										tcgMode &&
+											'transition-all duration-300 hover:brightness-110 hover:z-10 hover:transform hover:scale-105'
 									)}
 								>
 									<img
@@ -124,8 +122,8 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 									<div
 										key={`placeholder-${renderKey}-position-${i + 1}`}
 										className={cn(
-											"bg-black/20 w-full h-full flex items-center justify-center",
-											tcgMode && "border border-white/10"
+											'bg-black/20 w-full h-full flex items-center justify-center',
+											tcgMode && 'border border-white/10'
 										)}
 									>
 										<ImageIcon className="w-5 h-5 opacity-20" />

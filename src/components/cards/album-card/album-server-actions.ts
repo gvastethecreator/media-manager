@@ -42,9 +42,7 @@ export interface AlbumCardData extends Album {
 /**
  * Obtiene los datos de un álbum para mostrar en una tarjeta
  */
-export async function getAlbumCardData(
-	albumId: string
-): Promise<AlbumCardData> {
+export async function getAlbumCardData(albumId: string): Promise<AlbumCardData> {
 	const prisma = await getPrismaClient();
 
 	const album = await prisma.album.findUnique({
@@ -151,14 +149,14 @@ export async function getAlbumCardData(
 		lastModified: album.updatedAt,
 		coverImageUrl: album.featuredImage ? `/api/images/${album.featuredImage}` : null,
 		thumbnailUrls: recentImagePaths.slice(0, 3),
-		entitiesCount
+		entitiesCount,
 	};
 
 	// Crear viewConfig básico
 	const viewConfig = {
 		theme: album.theme || 'default',
 		layout: album.layout || 'grid',
-		thumbnailSize: (album.thumbnailSize as 'small' | 'medium' | 'large') || 'medium'
+		thumbnailSize: (album.thumbnailSize as 'small' | 'medium' | 'large') || 'medium',
 	};
 
 	return {
@@ -168,7 +166,7 @@ export async function getAlbumCardData(
 		totalSize,
 		filters,
 		metadata,
-		viewConfig
+		viewConfig,
 	};
 }
 
@@ -203,11 +201,8 @@ export async function getAlbumsForCards(options: {
 			...(isFavorite !== undefined ? { isFavorite } : {}),
 			...(searchTerm
 				? {
-						OR: [
-							{ name: { contains: searchTerm } },
-							{ description: { contains: searchTerm } },
-						],
-				  }
+						OR: [{ name: { contains: searchTerm } }, { description: { contains: searchTerm } }],
+					}
 				: {}),
 		},
 		include: {
@@ -243,12 +238,8 @@ export async function getAlbumsForCards(options: {
 
 				// Obtener algunas imágenes y videos recientes para mostrar en la tarjeta
 				const recentMedia = await getRecentAlbumMedia(album.id, 4);
-				const recentImagePaths = recentMedia
-					.filter(media => !media.isVideo)
-					.map(media => media.thumbnailUrl);
-				const recentVideoPaths = recentMedia
-					.filter(media => media.isVideo)
-					.map(media => media.thumbnailUrl);
+				const recentImagePaths = recentMedia.filter((media) => !media.isVideo).map((media) => media.thumbnailUrl);
+				const recentVideoPaths = recentMedia.filter((media) => media.isVideo).map((media) => media.thumbnailUrl);
 
 				// Crear objeto de metadata
 				const metadata = {
@@ -275,7 +266,7 @@ export async function getAlbumsForCards(options: {
 				const viewConfig = {
 					theme: album.theme || 'default',
 					layout: album.layout || 'grid',
-					thumbnailSize: (album.thumbnailSize as 'small' | 'medium' | 'large') || 'medium'
+					thumbnailSize: (album.thumbnailSize as 'small' | 'medium' | 'large') || 'medium',
 				};
 
 				return {
@@ -285,7 +276,7 @@ export async function getAlbumsForCards(options: {
 					totalSize,
 					filters,
 					metadata,
-					viewConfig
+					viewConfig,
 				};
 			})
 		);
@@ -352,26 +343,24 @@ export async function getRecentAlbumMedia(albumId: string, limit = 6): Promise<T
 	});
 
 	// Combinar y formatear los resultados
-	const imageResults: ThumbnailImage[] = recentImages.map(img => ({
+	const imageResults: ThumbnailImage[] = recentImages.map((img) => ({
 		id: img.id,
 		name: img.name,
 		thumbnailUrl: `/api/thumbnails/${img.id}`,
 		url: `/api/images/${img.id}`,
-		isVideo: false
+		isVideo: false,
 	}));
 
-	const videoResults: ThumbnailImage[] = recentVideos.map(video => ({
+	const videoResults: ThumbnailImage[] = recentVideos.map((video) => ({
 		id: video.id,
 		name: video.name,
 		thumbnailUrl: `/api/video-thumbnails/${video.id}`,
 		url: `/api/videos/${video.id}`,
-		isVideo: true
+		isVideo: true,
 	}));
 
 	// Combinar y ordenar por ID (como proxy de fecha)
-	return [...imageResults, ...videoResults]
-		.sort((a, b) => a.id > b.id ? -1 : 1)
-		.slice(0, limit);
+	return [...imageResults, ...videoResults].sort((a, b) => (a.id > b.id ? -1 : 1)).slice(0, limit);
 }
 
 /**
@@ -435,7 +424,7 @@ export async function searchAlbums(options: {
 						{ category: { contains: searchTerm } },
 						{ shortcut: { contains: searchTerm } },
 					],
-			  }
+				}
 			: {}),
 	};
 

@@ -13,7 +13,7 @@ export function GroupFilters({ filtersString }: GroupFiltersProps) {
 			if (!Array.isArray(parsed)) return [];
 
 			// Validar cada filtro con zod
-			return parsed.filter(filter => {
+			return parsed.filter((filter) => {
 				try {
 					groupFilterSchema.parse(filter);
 					return true;

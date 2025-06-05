@@ -1,19 +1,9 @@
 'use client';
 
 import { getCardIdFromUrl } from '@/lib/utils/index';
-import {
-	Heart,
-	ImageIcon,
-	Scroll,
-	Shield,
-	Sparkles,
-	Star,
-	Swords,
-	Video,
-	Wand
-} from 'lucide-react';
-import { nanoid } from "nanoid";
-import React from "react";
+import { Heart, ImageIcon, Scroll, Shield, Sparkles, Star, Swords, Video, Wand } from 'lucide-react';
+import { nanoid } from 'nanoid';
+import React from 'react';
 
 interface CharacterCardFooterProps {
 	/** ID o URL del personaje */
@@ -55,7 +45,7 @@ export function CharacterCardFooter({
 	power = 1,
 	alignment = 'Neutral',
 	skills = [],
-	tcgMode = true
+	tcgMode = true,
 }: CharacterCardFooterProps) {
 	// Generar un ID de renderizado único
 	const renderKey = React.useMemo(() => nanoid(), []);
@@ -66,10 +56,10 @@ export function CharacterCardFooter({
 	// Determinar el color de rareza
 	const getRarityColor = (level: number) => {
 		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
-		if (level >= 7) return 'rgb(255, 128, 0)';   // Legendario
-		if (level >= 5) return 'rgb(163, 53, 238)';  // Épico
-		if (level >= 3) return 'rgb(0, 112, 221)';   // Raro
-		return 'rgb(30, 255, 0)';                    // Común
+		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+		if (level >= 3) return 'rgb(0, 112, 221)'; // Raro
+		return 'rgb(30, 255, 0)'; // Común
 	};
 
 	// Calcular estrellas de rareza (1-5)
@@ -78,12 +68,10 @@ export function CharacterCardFooter({
 	// Simplificar la alineación para el ícono
 	const getAlignmentIcon = () => {
 		const lowerAlignment = alignment.toLowerCase();
-		if (lowerAlignment.includes('good') || lowerAlignment.includes('lawful'))
-			return <Shield className="w-3.5 h-3.5" />;
+		if (lowerAlignment.includes('good') || lowerAlignment.includes('lawful')) return <Shield className="w-3.5 h-3.5" />;
 		if (lowerAlignment.includes('evil') || lowerAlignment.includes('chaotic'))
 			return <Swords className="w-3.5 h-3.5" />;
-		if (lowerAlignment.includes('neutral'))
-			return <Scroll className="w-3.5 h-3.5" />;
+		if (lowerAlignment.includes('neutral')) return <Scroll className="w-3.5 h-3.5" />;
 		return <Star className="w-3.5 h-3.5" />;
 	};
 
@@ -139,10 +127,15 @@ export function CharacterCardFooter({
 				{/* Indicador de rareza con estrellas */}
 				<div className="flex items-center gap-0.5" style={{ color: getRarityColor(rarityLevel) }}>
 					<span className="text-[10px] font-semibold mr-1">
-						{rarityLevel >= 9 ? 'MYTHIC' :
-							rarityLevel >= 7 ? 'LEGENDARY' :
-								rarityLevel >= 5 ? 'EPIC' :
-									rarityLevel >= 3 ? 'RARE' : 'COMMON'}
+						{rarityLevel >= 9
+							? 'MYTHIC'
+							: rarityLevel >= 7
+								? 'LEGENDARY'
+								: rarityLevel >= 5
+									? 'EPIC'
+									: rarityLevel >= 3
+										? 'RARE'
+										: 'COMMON'}
 					</span>
 					{[...Array(rarityStars)].map((_, i) => (
 						<Star key={`rarity-star-${renderKey}-${i + 1}`} className="h-3 w-3 fill-current" />
@@ -172,22 +165,19 @@ export function CharacterCardFooter({
 			)}
 
 			{/* Línea decorativa inferior en estilo TCG */}
-			<div
-				className="mt-2 h-1 w-full rounded-full overflow-hidden"
-				style={{ background: 'rgba(255,255,255,0.1)' }}>
+			<div className="mt-2 h-1 w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.1)' }}>
 				<div
 					className="h-full rounded-full"
 					style={{
 						width: `${(rarityLevel / 10) * 100}%`,
 						background: getRarityColor(rarityLevel),
 						boxShadow: `0 0 8px ${getRarityColor(rarityLevel)}`,
-					}} />
+					}}
+				/>
 			</div>
 
 			{/* ID de la carta en formato TCG */}
-			<div className="mt-2 text-[9px] opacity-60 text-right">
-				#{characterId}
-			</div>
+			<div className="mt-2 text-[9px] opacity-60 text-right">#{characterId}</div>
 		</div>
 	);
 }

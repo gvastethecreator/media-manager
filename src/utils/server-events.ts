@@ -10,8 +10,8 @@ import { clientEvents } from '@/lib/events/client';
 type EventCallback<T = unknown> = (data: T) => void;
 
 interface EventSubscription {
-  type: string;
-  callback: EventCallback;
+	type: string;
+	callback: EventCallback;
 }
 
 /**
@@ -20,15 +20,15 @@ interface EventSubscription {
  * @returns Función para cancelar la suscripción
  */
 export function subscribe<T = unknown>(subscription: EventSubscription): () => void {
-  const { type, callback } = subscription;
+	const { type, callback } = subscription;
 
-  // Registrar el callback con el sistema de eventos del cliente
-  clientEvents.on<T>(type, callback as EventCallback<T>);
+	// Registrar el callback con el sistema de eventos del cliente
+	clientEvents.on<T>(type, callback as EventCallback<T>);
 
-  // Devolver función para cancelar suscripción
-  return () => {
-    clientEvents.off<T>(type, callback as EventCallback<T>);
-  };
+	// Devolver función para cancelar suscripción
+	return () => {
+		clientEvents.off<T>(type, callback as EventCallback<T>);
+	};
 }
 
 /**
@@ -37,11 +37,11 @@ export function subscribe<T = unknown>(subscription: EventSubscription): () => v
  * @param data Datos del evento
  */
 export function emit<T = unknown>(type: string, data: T): void {
-  clientEvents.emit(type, data);
+	clientEvents.emit(type, data);
 }
 
 // Namespace para mantener la compatibilidad con código existente que usa ServerEventManager
 export const ServerEventManager = {
-  subscribe,
-  emit
+	subscribe,
+	emit,
 };

@@ -13,7 +13,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
 			attribute="data-theme"
 			defaultTheme="light"
 			enableSystem={false}
-			themes={['light', 'dark', 'cafe', 'violeta', 'madera', 'nocturno', 'verde', 'atardecer', 'corporativo', 'carbon', 'teal', 'citrico']}
+			themes={[
+				'light',
+				'dark',
+				'cafe',
+				'violeta',
+				'madera',
+				'nocturno',
+				'verde',
+				'atardecer',
+				'corporativo',
+				'carbon',
+				'teal',
+				'citrico',
+			]}
 			enableColorScheme
 			disableTransitionOnChange
 		>
@@ -21,10 +34,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 				<QueryProvider>
 					<CacheProvider>
 						<FileProvider>
-
 							<Toaster position="bottom-right" richColors closeButton />
 							{children}
-
 						</FileProvider>
 					</CacheProvider>
 				</QueryProvider>

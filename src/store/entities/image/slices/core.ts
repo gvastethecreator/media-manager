@@ -5,10 +5,7 @@
  */
 
 import { Logger } from '@/lib/logger';
-import {
-    transformImageToExtended,
-    transformImagesToExtended
-} from '@/transformers/image/transformer';
+import { transformImageToExtended, transformImagesToExtended } from '@/transformers/image/transformer';
 import type { CreateImageData, Image, ImageBase, UpdateImageData } from '@/types/entities/image';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';

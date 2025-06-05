@@ -11,50 +11,52 @@ export const languageSchema = z.enum(['es', 'en']);
 
 // Esquema para la sección de apariencia
 export const appearanceSchema = z.object({
-  theme: themeModeSchema,
-  fontSize: z.number().min(12).max(24),
-  language: languageSchema,
-  reducedAnimations: z.boolean(),
-  highContrast: z.boolean(),
+	theme: themeModeSchema,
+	fontSize: z.number().min(12).max(24),
+	language: languageSchema,
+	reducedAnimations: z.boolean(),
+	highContrast: z.boolean(),
 });
 
 // Esquema para la sección de notificaciones
 export const notificationsSchema = z.object({
-  enabled: z.boolean(),
-  email: z.boolean(),
-  desktop: z.boolean(),
-  frequency: z.enum(['daily', 'weekly', 'monthly']),
+	enabled: z.boolean(),
+	email: z.boolean(),
+	desktop: z.boolean(),
+	frequency: z.enum(['daily', 'weekly', 'monthly']),
 });
 
 // Esquema para la sección de privacidad
 export const privacySchema = z.object({
-  shareUsageData: z.boolean(),
-  storeCookies: z.boolean(),
-  storeHistory: z.boolean(),
+	shareUsageData: z.boolean(),
+	storeCookies: z.boolean(),
+	storeHistory: z.boolean(),
 });
 
 // Esquema para la sección avanzada
 export const advancedSchema = z.object({
-  apiKey: z.string().nullable(),
-  devMode: z.boolean(),
-  experimentalFeatures: z.boolean(),
+	apiKey: z.string().nullable(),
+	devMode: z.boolean(),
+	experimentalFeatures: z.boolean(),
 });
 
 // Esquema completo de configuración
 export const settingsSchema = z.object({
-  appearance: appearanceSchema,
-  notifications: notificationsSchema,
-  privacy: privacySchema,
-  advanced: advancedSchema,
+	appearance: appearanceSchema,
+	notifications: notificationsSchema,
+	privacy: privacySchema,
+	advanced: advancedSchema,
 });
 
 // Esquema para actualizaciones parciales
-export const updateSettingsSchema = z.object({
-  appearance: appearanceSchema.partial().optional(),
-  notifications: notificationsSchema.partial().optional(),
-  privacy: privacySchema.partial().optional(),
-  advanced: advancedSchema.partial().optional(),
-}).partial();
+export const updateSettingsSchema = z
+	.object({
+		appearance: appearanceSchema.partial().optional(),
+		notifications: notificationsSchema.partial().optional(),
+		privacy: privacySchema.partial().optional(),
+		advanced: advancedSchema.partial().optional(),
+	})
+	.partial();
 
 // Tipos inferidos
 export type ThemeMode = z.infer<typeof themeModeSchema>;

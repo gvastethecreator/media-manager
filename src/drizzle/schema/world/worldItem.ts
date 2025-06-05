@@ -16,21 +16,21 @@ import { characters } from './character';
 import { places } from './place';
 
 export const worldItems = sqliteTable(
-    'WorldItem',
-    {
-        ...organizationFields,
-        type: text('type').default('misc'),
-        rarity: text('rarity').default('common'),
-        attributes: text('attributes').default('empty_array'),
-        effects: text('effects').default('empty_array'),
-        size: text('size').default('medium'),
-        requirements: text('requirements').default(''),
-        origin: text('origin').default(''),
-        stats: text('stats').default(''),
-    },
-    (table) => ({
-        ...createCommonIndexes(table),
-    })
+	'WorldItem',
+	{
+		...organizationFields,
+		type: text('type').default('misc'),
+		rarity: text('rarity').default('common'),
+		attributes: text('attributes').default('empty_array'),
+		effects: text('effects').default('empty_array'),
+		size: text('size').default('medium'),
+		requirements: text('requirements').default(''),
+		origin: text('origin').default(''),
+		stats: text('stats').default(''),
+	},
+	(table) => ({
+		...createCommonIndexes(table),
+	})
 );
 
 // Tablas de relación
@@ -50,17 +50,17 @@ export const worldItemsToGroups = createRelationTable('WorldItemToGroup', 'World
 
 // Relaciones
 export const worldItemsRelations = relations(worldItems, ({ many }) => ({
-    images: many(images, { through: worldItemsToImages }),
-    videos: many(videos, { through: worldItemsToVideos }),
-    albums: many(albums, { through: worldItemsToAlbums }),
-    collections: many(collections, { through: worldItemsToCollections }),
-    tags: many(tags, { through: worldItemsToTags }),
-    characters: many(characters, { through: worldItemsToCharacters }),
-    places: many(places, { through: worldItemsToPlaces }),
-    concepts: many(concepts, { through: worldItemsToConcepts }),
-    prompts: many(prompts, { through: worldItemsToPrompts }),
-    notes: many(notes, { through: worldItemsToNotes }),
-    wildcards: many(wildcards, { through: worldItemsToWildcards }),
-    properties: many(properties, { through: worldItemsToProperties }),
-    groups: many(groups, { through: worldItemsToGroups }),
+	images: many(images, { through: worldItemsToImages }),
+	videos: many(videos, { through: worldItemsToVideos }),
+	albums: many(albums, { through: worldItemsToAlbums }),
+	collections: many(collections, { through: worldItemsToCollections }),
+	tags: many(tags, { through: worldItemsToTags }),
+	characters: many(characters, { through: worldItemsToCharacters }),
+	places: many(places, { through: worldItemsToPlaces }),
+	concepts: many(concepts, { through: worldItemsToConcepts }),
+	prompts: many(prompts, { through: worldItemsToPrompts }),
+	notes: many(notes, { through: worldItemsToNotes }),
+	wildcards: many(wildcards, { through: worldItemsToWildcards }),
+	properties: many(properties, { through: worldItemsToProperties }),
+	groups: many(groups, { through: worldItemsToGroups }),
 }));

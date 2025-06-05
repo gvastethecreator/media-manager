@@ -1,13 +1,9 @@
 'use server';
 
+import { existsSync } from 'fs';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import {
-    createEntityNotFoundError,
-    createFileNotFoundError,
-    toServiceError
-} from '@/utils/errors/service-errors';
-import { existsSync } from 'fs';
+import { createEntityNotFoundError, createFileNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 import sharp from 'sharp';
 import type { ImageProcessingOptions } from './image-types.actions';
 

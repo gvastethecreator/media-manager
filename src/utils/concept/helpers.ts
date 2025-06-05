@@ -143,7 +143,9 @@ export function findRelatedConcepts(
 		// Obtener las etiquetas del concepto de referencia
 		const conceptTagsArray = Array.isArray(concept.tags)
 			? concept.tags
-			: (typeof concept.tags === 'string' ? deserializeTags(concept.tags) : []);
+			: typeof concept.tags === 'string'
+				? deserializeTags(concept.tags)
+				: [];
 
 		const conceptCategory = concept.category || '';
 
@@ -157,9 +159,7 @@ export function findRelatedConcepts(
 			}
 
 			// Obtener las etiquetas del concepto a comparar
-			const cTagsArray = Array.isArray(c.tags)
-				? c.tags
-				: (typeof c.tags === 'string' ? deserializeTags(c.tags) : []);
+			const cTagsArray = Array.isArray(c.tags) ? c.tags : typeof c.tags === 'string' ? deserializeTags(c.tags) : [];
 
 			// Puntos por tags coincidentes
 			const commonTags = conceptTagsArray.filter((tag) => cTagsArray.includes(tag));
@@ -190,9 +190,7 @@ export function findRelatedConcepts(
 			const { tags, ...rest } = match.concept;
 
 			// Parsear las etiquetas correctamente
-			const parsedTags = Array.isArray(tags)
-				? tags
-				: (typeof tags === 'string' ? deserializeTags(tags) : []);
+			const parsedTags = Array.isArray(tags) ? tags : typeof tags === 'string' ? deserializeTags(tags) : [];
 
 			// Construir el concepto extendido
 			return {

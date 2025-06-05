@@ -9,25 +9,25 @@ import * as PropertyActions from './property.actions';
 
 // Re-exportar funciones individuales
 export async function getProperties() {
-  return PropertyActions.getProperties();
+	return PropertyActions.getProperties();
 }
 
 export async function getProperty(id: string) {
-  return PropertyActions.getProperty(id);
+	return PropertyActions.getProperty(id);
 }
 
 export async function createProperty(data: any) {
-  return PropertyActions.createProperty(data);
+	return PropertyActions.createProperty(data);
 }
 
 export async function updateProperty(id: string, data: any) {
-  return PropertyActions.updateProperty(id, data);
+	return PropertyActions.updateProperty(id, data);
 }
 
 export async function togglePropertyFavorite(id: string) {
-  return PropertyActions.togglePropertyFavorite(id);
+	return PropertyActions.togglePropertyFavorite(id);
 }
 
 export async function deleteProperty(id: string) {
-  return PropertyActions.deleteProperty(id);
+	return PropertyActions.deleteProperty(id);
 }

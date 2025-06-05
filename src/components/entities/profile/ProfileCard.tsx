@@ -28,17 +28,9 @@ export function ProfileCard({
 	isExpanded = false,
 	onSelect,
 	onExpand,
-	className
+	className,
 }: ProfileCardProps) {
-	const {
-		name,
-		avatarUrl,
-		isActive,
-		theme,
-		language,
-		description,
-		stats
-	} = profile;
+	const { name, avatarUrl, isActive, theme, language, description, stats } = profile;
 
 	return (
 		<motion.div
@@ -65,9 +57,7 @@ export function ProfileCard({
 							<AvatarImage src={avatarUrl} alt={name} />
 							<AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
 						</Avatar>
-						<Badge variant={isActive ? 'default' : 'secondary'}>
-							{isActive ? 'Activo' : 'Inactivo'}
-						</Badge>
+						<Badge variant={isActive ? 'default' : 'secondary'}>{isActive ? 'Activo' : 'Inactivo'}</Badge>
 					</div>
 					<div>
 						<CardTitle className="line-clamp-1">{name}</CardTitle>
@@ -88,10 +78,7 @@ export function ProfileCard({
 
 				<CardContent>
 					{description && (
-						<p className={cn(
-							'text-sm text-muted-foreground',
-							isExpanded ? 'line-clamp-none' : 'line-clamp-2'
-						)}>
+						<p className={cn('text-sm text-muted-foreground', isExpanded ? 'line-clamp-none' : 'line-clamp-2')}>
 							{description}
 						</p>
 					)}
@@ -123,8 +110,7 @@ export function ProfileCard({
 							{/* Contenido expandido */}
 							<div className="space-y-2">
 								<p className="text-sm">
-									<span className="font-medium">Creado:</span>{' '}
-									{new Date(profile.createdAt).toLocaleDateString()}
+									<span className="font-medium">Creado:</span> {new Date(profile.createdAt).toLocaleDateString()}
 								</p>
 								<p className="text-sm">
 									<span className="font-medium">Última actualización:</span>{' '}
@@ -157,7 +143,10 @@ export function ProfileCard({
 						strokeLinecap="round"
 						strokeLinejoin="round"
 						animate={{ rotate: isExpanded ? 180 : 0 }}
+						aria-label={isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}
+						role="img"
 					>
+						<title>{isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}</title>
 						<polyline points="6 9 12 15 18 9" />
 					</motion.svg>
 				</button>

@@ -6,40 +6,37 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CollectionComplete, CollectionExtended, CollectionSummary } from '@/types/entities/collection';
 import {
-    COLLECTION_CATEGORY_COLORS,
-    COLLECTION_CATEGORY_EMOJIS,
-    type CollectionCategory
+	COLLECTION_CATEGORY_COLORS,
+	COLLECTION_CATEGORY_EMOJIS,
+	type CollectionCategory,
 } from '@/types/entities/collection';
 import type {
-    CollectionCreateInput,
-    CollectionFilters,
-    CollectionSearchOptions,
-    CollectionUpdateInput,
-    RelatedCollection
+	CollectionCreateInput,
+	CollectionFilters,
+	CollectionSearchOptions,
+	CollectionUpdateInput,
+	RelatedCollection,
 } from '@/types/entities/collection/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import type { Image, Prisma, Collection as PrismaCollection } from '@prisma/client';
-import {
-    toCollectionComplete,
-    toCollectionExtended
-} from './serializers';
+import { toCollectionComplete, toCollectionExtended } from './serializers';
 
 const logger = serverLogger.withContext('CollectionMapper');
 
 // Enum local para direcciones de ordenamiento
 enum SortDirection {
-    ASC = 'asc',
-    DESC = 'desc'
+	ASC = 'asc',
+	DESC = 'desc',
 }
 
 // Enum local para rareza de colecciones
 enum CollectionRarity {
-    COMMON = 'COMMON',
-    UNCOMMON = 'UNCOMMON',
-    RARE = 'RARE',
-    EPIC = 'EPIC',
-    LEGENDARY = 'LEGENDARY'
+	COMMON = 'COMMON',
+	UNCOMMON = 'UNCOMMON',
+	RARE = 'RARE',
+	EPIC = 'EPIC',
+	LEGENDARY = 'LEGENDARY',
 }
 
 /**
@@ -53,12 +50,12 @@ export function mapCollectionsFromPrisma(
 	imageCountMap?: Record<string, number>
 ): CollectionExtended[] {
 	return collections.map((collection) => {
-        const extended = toCollectionExtended(collection);
-        return {
-            ...extended,
-            imageCount: imageCountMap?.[collection.id] || 0
-        };
-    });
+		const extended = toCollectionExtended(collection);
+		return {
+			...extended,
+			imageCount: imageCountMap?.[collection.id] || 0,
+		};
+	});
 }
 
 /**
@@ -67,7 +64,7 @@ export function mapCollectionsFromPrisma(
  * @returns CollectionComplete con campos JSON deserializados
  */
 export function mapCollectionCompletFromPrisma(collection: PrismaCollection): CollectionComplete {
-    return toCollectionComplete(collection);
+	return toCollectionComplete(collection);
 }
 
 /**
@@ -77,22 +74,22 @@ export function mapCollectionCompletFromPrisma(collection: PrismaCollection): Co
  * @returns CollectionExtended con propiedades adicionales
  */
 export function mapCollectionExtendedFromComplete(
-    collection: CollectionComplete,
-    imageCount?: number
+	collection: CollectionComplete,
+	imageCount?: number
 ): CollectionExtended {
-    return {
-        ...collection,
-        // Propiedades adicionales de UI
-        isSelected: false,
-        isHovered: false,
-        isOpen: false,
-        isLoading: false,
-        hasError: false,
-        // Datos calculados
-        parsedFilters: collection.filters,
-        imageCount: imageCount || 0,
-        totalValue: collection.price || 0,
-    };
+	return {
+		...collection,
+		// Propiedades adicionales de UI
+		isSelected: false,
+		isHovered: false,
+		isOpen: false,
+		isLoading: false,
+		hasError: false,
+		// Datos calculados
+		parsedFilters: collection.filters,
+		imageCount: imageCount || 0,
+		totalValue: collection.price || 0,
+	};
 }
 
 /**
@@ -183,300 +180,320 @@ export function extractFeaturedImages(collection: CollectionExtended & { images?
  * 🔄 Mapea datos de creación de Collection a formato Prisma
  */
 export function mapCreateCollectionDataToPrisma(data: CollectionCreateInput): Prisma.CollectionCreateInput {
-  try {
-    // Extraer relaciones para manejarlas por separado
-    const {
-      owner, parent, children, images, videos, albums,
-      tags, groups, characters, places, items, notes, sharedWith,
-      ...baseData
-    } = data;
+	try {
+		// Extraer relaciones para manejarlas por separado
+		const {
+			owner,
+			parent,
+			children,
+			images,
+			videos,
+			albums,
+			tags,
+			groups,
+			characters,
+			places,
+			items,
+			notes,
+			sharedWith,
+			...baseData
+		} = data;
 
-    // Preparar relaciones para creación
-    const createRelations: Prisma.CollectionCreateInput = {};
+		// Preparar relaciones para creación
+		const createRelations: Prisma.CollectionCreateInput = {};
 
-    // Crear connect para cada relación si existe
-    if (owner) {
-      createRelations.owner = { connect: { id: owner.id } };
-    }
+		// Crear connect para cada relación si existe
+		if (owner) {
+			createRelations.owner = { connect: { id: owner.id } };
+		}
 
-    if (parent) {
-      createRelations.parent = { connect: { id: parent.id } };
-    }
+		if (parent) {
+			createRelations.parent = { connect: { id: parent.id } };
+		}
 
-    if (children?.length) {
-      createRelations.children = { connect: children.map(child => ({ id: child.id })) };
-    }
+		if (children?.length) {
+			createRelations.children = { connect: children.map((child) => ({ id: child.id })) };
+		}
 
-    if (images?.length) {
-      createRelations.images = { connect: images.map(img => ({ id: img.id })) };
-    }
+		if (images?.length) {
+			createRelations.images = { connect: images.map((img) => ({ id: img.id })) };
+		}
 
-    if (videos?.length) {
-      createRelations.videos = { connect: videos.map(video => ({ id: video.id })) };
-    }
+		if (videos?.length) {
+			createRelations.videos = { connect: videos.map((video) => ({ id: video.id })) };
+		}
 
-    if (albums?.length) {
-      createRelations.albums = { connect: albums.map(album => ({ id: album.id })) };
-    }
+		if (albums?.length) {
+			createRelations.albums = { connect: albums.map((album) => ({ id: album.id })) };
+		}
 
-    if (tags?.length) {
-      createRelations.tags = { connect: tags.map(tag => ({ id: tag.id })) };
-    }
+		if (tags?.length) {
+			createRelations.tags = { connect: tags.map((tag) => ({ id: tag.id })) };
+		}
 
-    if (groups?.length) {
-      createRelations.groups = { connect: groups.map(group => ({ id: group.id })) };
-    }
+		if (groups?.length) {
+			createRelations.groups = { connect: groups.map((group) => ({ id: group.id })) };
+		}
 
-    if (characters?.length) {
-      createRelations.characters = { connect: characters.map(char => ({ id: char.id })) };
-    }
+		if (characters?.length) {
+			createRelations.characters = { connect: characters.map((char) => ({ id: char.id })) };
+		}
 
-    if (places?.length) {
-      createRelations.places = { connect: places.map(place => ({ id: place.id })) };
-    }
+		if (places?.length) {
+			createRelations.places = { connect: places.map((place) => ({ id: place.id })) };
+		}
 
-    if (items?.length) {
-      createRelations.items = { connect: items.map(item => ({ id: item.id })) };
-    }
+		if (items?.length) {
+			createRelations.items = { connect: items.map((item) => ({ id: item.id })) };
+		}
 
-    if (notes?.length) {
-      createRelations.notes = { connect: notes.map(note => ({ id: note.id })) };
-    }
+		if (notes?.length) {
+			createRelations.notes = { connect: notes.map((note) => ({ id: note.id })) };
+		}
 
-    if (sharedWith?.length) {
-      createRelations.sharedWith = { connect: sharedWith.map(user => ({ id: user.id })) };
-    }
+		if (sharedWith?.length) {
+			createRelations.sharedWith = { connect: sharedWith.map((user) => ({ id: user.id })) };
+		}
 
-    return {
-      ...baseData,
-      ...createRelations,
-    };
-  } catch (error) {
-    logger.error('Error in mapCreateCollectionDataToPrisma:', error);
-    throw error;
-  }
+		return {
+			...baseData,
+			...createRelations,
+		};
+	} catch (error) {
+		logger.error('Error in mapCreateCollectionDataToPrisma:', error);
+		throw error;
+	}
 }
 
 /**
  * 🔄 Mapea datos de actualización de Collection a formato Prisma
  */
 export function mapUpdateCollectionDataToPrisma(data: CollectionUpdateInput): Prisma.CollectionUpdateInput {
-  try {
-    // Extraer relaciones para manejarlas por separado
-    const {
-      owner, parent, children, images, videos, albums,
-      tags, groups, characters, places, items, notes, sharedWith,
-      ...baseData
-    } = data;
+	try {
+		// Extraer relaciones para manejarlas por separado
+		const {
+			owner,
+			parent,
+			children,
+			images,
+			videos,
+			albums,
+			tags,
+			groups,
+			characters,
+			places,
+			items,
+			notes,
+			sharedWith,
+			...baseData
+		} = data;
 
-    // Preparar relaciones para actualización
-    const updateRelations: Prisma.CollectionUpdateInput = {};
+		// Preparar relaciones para actualización
+		const updateRelations: Prisma.CollectionUpdateInput = {};
 
-    // Crear connect/set para cada relación si existe
-    if (owner) {
-      updateRelations.owner = { connect: { id: owner.id } };
-    }
+		// Crear connect/set para cada relación si existe
+		if (owner) {
+			updateRelations.owner = { connect: { id: owner.id } };
+		}
 
-    if (parent) {
-      updateRelations.parent = { connect: { id: parent.id } };
-    }
+		if (parent) {
+			updateRelations.parent = { connect: { id: parent.id } };
+		}
 
-    if (children) {
-      updateRelations.children = { set: children.map(child => ({ id: child.id })) };
-    }
+		if (children) {
+			updateRelations.children = { set: children.map((child) => ({ id: child.id })) };
+		}
 
-    if (images) {
-      updateRelations.images = { set: images.map(img => ({ id: img.id })) };
-    }
+		if (images) {
+			updateRelations.images = { set: images.map((img) => ({ id: img.id })) };
+		}
 
-    if (videos) {
-      updateRelations.videos = { set: videos.map(video => ({ id: video.id })) };
-    }
+		if (videos) {
+			updateRelations.videos = { set: videos.map((video) => ({ id: video.id })) };
+		}
 
-    if (albums) {
-      updateRelations.albums = { set: albums.map(album => ({ id: album.id })) };
-    }
+		if (albums) {
+			updateRelations.albums = { set: albums.map((album) => ({ id: album.id })) };
+		}
 
-    if (tags) {
-      updateRelations.tags = { set: tags.map(tag => ({ id: tag.id })) };
-    }
+		if (tags) {
+			updateRelations.tags = { set: tags.map((tag) => ({ id: tag.id })) };
+		}
 
-    if (groups) {
-      updateRelations.groups = { set: groups.map(group => ({ id: group.id })) };
-    }
+		if (groups) {
+			updateRelations.groups = { set: groups.map((group) => ({ id: group.id })) };
+		}
 
-    if (characters) {
-      updateRelations.characters = { set: characters.map(char => ({ id: char.id })) };
-    }
+		if (characters) {
+			updateRelations.characters = { set: characters.map((char) => ({ id: char.id })) };
+		}
 
-    if (places) {
-      updateRelations.places = { set: places.map(place => ({ id: place.id })) };
-    }
+		if (places) {
+			updateRelations.places = { set: places.map((place) => ({ id: place.id })) };
+		}
 
-    if (items) {
-      updateRelations.items = { set: items.map(item => ({ id: item.id })) };
-    }
+		if (items) {
+			updateRelations.items = { set: items.map((item) => ({ id: item.id })) };
+		}
 
-    if (notes) {
-      updateRelations.notes = { set: notes.map(note => ({ id: note.id })) };
-    }
+		if (notes) {
+			updateRelations.notes = { set: notes.map((note) => ({ id: note.id })) };
+		}
 
-    if (sharedWith) {
-      updateRelations.sharedWith = { set: sharedWith.map(user => ({ id: user.id })) };
-    }
+		if (sharedWith) {
+			updateRelations.sharedWith = { set: sharedWith.map((user) => ({ id: user.id })) };
+		}
 
-    return {
-      ...baseData,
-      ...updateRelations,
-    };
-  } catch (error) {
-    logger.error('Error in mapUpdateCollectionDataToPrisma:', error);
-    throw error;
-  }
+		return {
+			...baseData,
+			...updateRelations,
+		};
+	} catch (error) {
+		logger.error('Error in mapUpdateCollectionDataToPrisma:', error);
+		throw error;
+	}
 }
 
 /**
  * 🔄 Mapea opciones de búsqueda de Collection a formato Prisma
  */
-export function mapCollectionSearchOptionsToPrisma(
-  options: CollectionSearchOptions
-): Prisma.CollectionFindManyArgs {
-  try {
-    const { page = 1, pageSize = DEFAULT_PAGE_SIZE, orderBy, filters = {}, include = {} } = options;
+export function mapCollectionSearchOptionsToPrisma(options: CollectionSearchOptions): Prisma.CollectionFindManyArgs {
+	try {
+		const { page = 1, pageSize = DEFAULT_PAGE_SIZE, orderBy, filters = {}, include = {} } = options;
 
-    // Validar y ajustar el tamaño de página
-    const take = Math.min(pageSize, MAX_PAGE_SIZE);
-    const skip = (page - 1) * take;
+		// Validar y ajustar el tamaño de página
+		const take = Math.min(pageSize, MAX_PAGE_SIZE);
+		const skip = (page - 1) * take;
 
-    // Mapear ordenamiento
-    const defaultOrderBy: Prisma.CollectionOrderByWithRelationInput = {
-      createdAt: SortDirection.DESC,
-    };
+		// Mapear ordenamiento
+		const defaultOrderBy: Prisma.CollectionOrderByWithRelationInput = {
+			createdAt: SortDirection.DESC,
+		};
 
-    // Mapear filtros
-    const where = mapCollectionFiltersToPrisma(filters);
+		// Mapear filtros
+		const where = mapCollectionFiltersToPrisma(filters);
 
-    // Mapear inclusiones
-    const includeOptions: Prisma.CollectionInclude = {};
+		// Mapear inclusiones
+		const includeOptions: Prisma.CollectionInclude = {};
 
-    if (include) {
-      if (include.owner) includeOptions.owner = true;
-      if (include.parent) includeOptions.parent = true;
-      if (include.children) includeOptions.children = true;
-      if (include.images) includeOptions.images = true;
-      if (include.videos) includeOptions.videos = true;
-      if (include.albums) includeOptions.albums = true;
-      if (include.tags) includeOptions.tags = true;
-      if (include.groups) includeOptions.groups = true;
-      if (include.characters) includeOptions.characters = true;
-      if (include.places) includeOptions.places = true;
-      if (include.items) includeOptions.items = true;
-      if (include.notes) includeOptions.notes = true;
-      if (include.sharedWith) includeOptions.sharedWith = true;
-      if (include.counts) includeOptions._count = true;
-    }
+		if (include) {
+			if (include.owner) includeOptions.owner = true;
+			if (include.parent) includeOptions.parent = true;
+			if (include.children) includeOptions.children = true;
+			if (include.images) includeOptions.images = true;
+			if (include.videos) includeOptions.videos = true;
+			if (include.albums) includeOptions.albums = true;
+			if (include.tags) includeOptions.tags = true;
+			if (include.groups) includeOptions.groups = true;
+			if (include.characters) includeOptions.characters = true;
+			if (include.places) includeOptions.places = true;
+			if (include.items) includeOptions.items = true;
+			if (include.notes) includeOptions.notes = true;
+			if (include.sharedWith) includeOptions.sharedWith = true;
+			if (include.counts) includeOptions._count = true;
+		}
 
-    return {
-      where,
-      take,
-      skip,
-      orderBy: orderBy || defaultOrderBy,
-      include: Object.keys(includeOptions).length > 0 ? includeOptions : undefined,
-    };
-  } catch (error) {
-    logger.error('Error in mapCollectionSearchOptionsToPrisma:', error);
-    throw handleTransformerError(error);
-  }
+		return {
+			where,
+			take,
+			skip,
+			orderBy: orderBy || defaultOrderBy,
+			include: Object.keys(includeOptions).length > 0 ? includeOptions : undefined,
+		};
+	} catch (error) {
+		logger.error('Error in mapCollectionSearchOptionsToPrisma:', error);
+		throw handleTransformerError(error);
+	}
 }
 
 /**
  * 🔄 Mapea filtros de Collection a formato Prisma
  */
 export function mapCollectionFiltersToPrisma(filters: CollectionFilters): Prisma.CollectionWhereInput {
-  try {
-    const where: Prisma.CollectionWhereInput = {};
+	try {
+		const where: Prisma.CollectionWhereInput = {};
 
-    // Filtro por texto
-    if (filters.text) {
-      where.OR = [
-        { name: { contains: filters.text, mode: 'insensitive' } },
-        { description: { contains: filters.text, mode: 'insensitive' } },
-      ];
-    }
+		// Filtro por texto
+		if (filters.text) {
+			where.OR = [
+				{ name: { contains: filters.text, mode: 'insensitive' } },
+				{ description: { contains: filters.text, mode: 'insensitive' } },
+			];
+		}
 
-    // Filtro por categoría
-    if (filters.category) {
-      where.category = filters.category;
-    }
+		// Filtro por categoría
+		if (filters.category) {
+			where.category = filters.category;
+		}
 
-    // Filtro por propietario
-    if (filters.ownerId) {
-      where.ownerId = filters.ownerId;
-    }
+		// Filtro por propietario
+		if (filters.ownerId) {
+			where.ownerId = filters.ownerId;
+		}
 
-    // Filtro por padre
-    if (filters.parentId) {
-      where.parentId = filters.parentId;
-    }
+		// Filtro por padre
+		if (filters.parentId) {
+			where.parentId = filters.parentId;
+		}
 
-    // Filtro por favorito
-    if (filters.favorite !== undefined) {
-      where.isFavorite = filters.favorite;
-    }
+		// Filtro por favorito
+		if (filters.favorite !== undefined) {
+			where.isFavorite = filters.favorite;
+		}
 
-    // Filtro por publicación
-    if (filters.public !== undefined) {
-      where.isPublic = filters.public;
-    }
+		// Filtro por publicación
+		if (filters.public !== undefined) {
+			where.isPublic = filters.public;
+		}
 
-    // Filtro por fecha
-    if (filters.dateRange) {
-      if (filters.dateRange.from) {
-        where.createdAt = {
-          ...(where.createdAt || {}),
-          gte: new Date(filters.dateRange.from),
-        };
-      }
-      if (filters.dateRange.to) {
-        where.createdAt = {
-          ...(where.createdAt || {}),
-          lte: new Date(filters.dateRange.to),
-        };
-      }
-    }
+		// Filtro por fecha
+		if (filters.dateRange) {
+			if (filters.dateRange.from) {
+				where.createdAt = {
+					...(where.createdAt || {}),
+					gte: new Date(filters.dateRange.from),
+				};
+			}
+			if (filters.dateRange.to) {
+				where.createdAt = {
+					...(where.createdAt || {}),
+					lte: new Date(filters.dateRange.to),
+				};
+			}
+		}
 
-    // Filtro por IDs de entidades relacionadas
-    if (filters.imageIds && filters.imageIds.length > 0) {
-      where.images = {
-        some: {
-          id: { in: filters.imageIds },
-        },
-      };
-    }
+		// Filtro por IDs de entidades relacionadas
+		if (filters.imageIds && filters.imageIds.length > 0) {
+			where.images = {
+				some: {
+					id: { in: filters.imageIds },
+				},
+			};
+		}
 
-    if (filters.tagIds && filters.tagIds.length > 0) {
-      where.tags = {
-        some: {
-          id: { in: filters.tagIds },
-        },
-      };
-    }
+		if (filters.tagIds && filters.tagIds.length > 0) {
+			where.tags = {
+				some: {
+					id: { in: filters.tagIds },
+				},
+			};
+		}
 
-    return where;
-  } catch (error) {
-    logger.error('Error in mapCollectionFiltersToPrisma:', error);
-    throw handleTransformerError(error);
-  }
+		return where;
+	} catch (error) {
+		logger.error('Error in mapCollectionFiltersToPrisma:', error);
+		throw handleTransformerError(error);
+	}
 }
 
 /**
  * 🔄 Mapea una Collection a su versión relacionada
  */
 export function mapCollectionToRelatedCollection(collection: CollectionComplete): RelatedCollection {
-  try {
-    return { id: collection.id };
-  } catch (error) {
-    logger.error('Error in mapCollectionToRelatedCollection:', error);
-    throw handleTransformerError(error);
-  }
+	try {
+		return { id: collection.id };
+	} catch (error) {
+		logger.error('Error in mapCollectionToRelatedCollection:', error);
+		throw handleTransformerError(error);
+	}
 }

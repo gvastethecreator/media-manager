@@ -8,14 +8,14 @@ import { groupFavoritesByType, mapCreateFavoriteDataToPrisma, toFavoriteExtended
 import { transformImageToFileItem } from '@/transformers/favorite/serializers';
 import { transformFavoriteToExtended } from '@/transformers/favorite/transformer';
 import {
-    type CreateFavoriteData,
-    FavoriteAction,
-    type FavoriteBase,
-    type FavoriteCreateInput,
-    FavoriteEntityType,
-    FavoriteErrorCode,
-    FavoriteEventType,
-    type FavoriteWithImage,
+	type CreateFavoriteData,
+	FavoriteAction,
+	type FavoriteBase,
+	type FavoriteCreateInput,
+	FavoriteEntityType,
+	FavoriteErrorCode,
+	FavoriteEventType,
+	type FavoriteWithImage,
 } from '@/types/entities/favorite';
 import { revalidatePath } from 'next/cache';
 
@@ -334,7 +334,9 @@ export async function createFavorite(data: CreateFavoriteData) {
 		const createData = toPrismaFavorite(data);
 		const favorite = await prisma.favorite.create({
 			data: createData,
-			include: { /* ... */ }
+			include: {
+				/* ... */
+			},
 		});
 		await revalidateAllPaths();
 		// Usar función correcta

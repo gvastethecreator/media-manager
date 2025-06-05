@@ -12,7 +12,7 @@ import {
 	ImageIcon,
 	InfoIcon,
 	StarIcon,
-	ZoomInIcon
+	ZoomInIcon,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import Image from 'next/image';
@@ -167,9 +167,7 @@ export function ImageCardImproved({
 			>
 				<div className="text-center p-4">
 					<ImageIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-					<p className="text-sm text-gray-500 dark:text-gray-400">
-						{error || 'No se pudo cargar la imagen'}
-					</p>
+					<p className="text-sm text-gray-500 dark:text-gray-400">{error || 'No se pudo cargar la imagen'}</p>
 				</div>
 			</div>
 		);
@@ -177,22 +175,22 @@ export function ImageCardImproved({
 
 	const primaryColor = getPrimaryColor();
 	const imageFormat = imageData.metadata?.format || 'unknown';
-	const cameraInfo = imageData.metadata?.camera?.make || imageData.metadata?.camera?.model
-		? `${imageData.metadata.camera.make || ''} ${imageData.metadata.camera.model || ''}`.trim()
-		: null;
+	const cameraInfo =
+		imageData.metadata?.camera?.make || imageData.metadata?.camera?.model
+			? `${imageData.metadata.camera.make || ''} ${imageData.metadata.camera.model || ''}`.trim()
+			: null;
 
 	// Calcular total de relaciones
-	const totalRelations = showRelations && imageData._count
-		? (
-			(imageData._count.tags || 0) +
-			(imageData._count.albums || 0) +
-			(imageData._count.collections || 0) +
-			(imageData._count.characters || 0) +
-			(imageData._count.places || 0) +
-			(imageData._count.worldItems || 0) +
-			(imageData._count.notes || 0)
-		)
-		: 0;
+	const totalRelations =
+		showRelations && imageData._count
+			? (imageData._count.tags || 0) +
+				(imageData._count.albums || 0) +
+				(imageData._count.collections || 0) +
+				(imageData._count.characters || 0) +
+				(imageData._count.places || 0) +
+				(imageData._count.worldItems || 0) +
+				(imageData._count.notes || 0)
+			: 0;
 
 	// Contenido de la tarjeta
 	const cardContent = (
@@ -212,11 +210,7 @@ export function ImageCardImproved({
 			initial={{ opacity: 0, y: 10 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.3 }}
-			style={
-				isTcgMode
-					? { boxShadow: `0 8px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30` }
-					: {}
-			}
+			style={isTcgMode ? { boxShadow: `0 8px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30` } : {}}
 		>
 			{/* Imagen principal */}
 			<div className="relative w-full h-0 pb-[75%]">
@@ -238,7 +232,7 @@ export function ImageCardImproved({
 				{/* Overlay en hover */}
 				<div
 					className={cn(
-						"absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300",
+						'absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300',
 						isHovered || variant === 'gallery' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
 					)}
 				>
@@ -251,14 +245,10 @@ export function ImageCardImproved({
 						{showDetails && (
 							<div className="flex flex-wrap gap-2 mt-1">
 								{getHumanReadableDimensions() && (
-									<p className="text-xs text-white/80">
-										{getHumanReadableDimensions()}
-									</p>
+									<p className="text-xs text-white/80">{getHumanReadableDimensions()}</p>
 								)}
 								{imageFormat && imageFormat !== 'unknown' && (
-									<p className="text-xs text-white/80 uppercase">
-										{imageFormat}
-									</p>
+									<p className="text-xs text-white/80 uppercase">{imageFormat}</p>
 								)}
 							</div>
 						)}
@@ -286,10 +276,7 @@ export function ImageCardImproved({
 
 				{/* Indicador de favoritos */}
 				{imageData.isFavorite && (
-					<div className={cn(
-						"absolute top-2 left-2 flex items-center justify-center",
-						isSelected && "left-9"
-					)}>
+					<div className={cn('absolute top-2 left-2 flex items-center justify-center', isSelected && 'left-9')}>
 						<StarIcon className="w-5 h-5 text-yellow-400 fill-yellow-400" />
 					</div>
 				)}
@@ -300,16 +287,11 @@ export function ImageCardImproved({
 				<div className="p-3">
 					{/* Título e información principal */}
 					<div className="flex justify-between items-start mb-2">
-						<h3 className={cn(
-							"font-medium line-clamp-1",
-							isTcgMode ? "text-white" : "text-foreground"
-						)}>
+						<h3 className={cn('font-medium line-clamp-1', isTcgMode ? 'text-white' : 'text-foreground')}>
 							{imageData.title || 'Sin título'}
 						</h3>
 
-						{imageData.isFavorite && !isTcgMode && (
-							<StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-						)}
+						{imageData.isFavorite && !isTcgMode && <StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />}
 					</div>
 
 					{/* Información técnica */}
@@ -346,17 +328,14 @@ export function ImageCardImproved({
 									className="text-[10px] h-5 px-1.5 truncate max-w-[100px]"
 									style={{
 										borderColor: `${tag.color}50`,
-										backgroundColor: isTcgMode ? `${tag.color}20` : undefined
+										backgroundColor: isTcgMode ? `${tag.color}20` : undefined,
 									}}
 								>
 									{tag.name}
 								</Badge>
 							))}
 							{imageData.tags.length > 3 && (
-								<Badge
-									variant="outline"
-									className="text-[10px] h-5 px-1.5"
-								>
+								<Badge variant="outline" className="text-[10px] h-5 px-1.5">
 									+{imageData.tags.length - 3}
 								</Badge>
 							)}
@@ -381,19 +360,27 @@ export function ImageCardImproved({
 						className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-500"
 						style={{
 							background: `radial-gradient(circle at 50% 50%, ${primaryColor}20 0%, transparent 70%)`,
-							zIndex: 1
+							zIndex: 1,
 						}}
 					/>
 
 					{/* Esquinas decorativas */}
-					<div className="absolute top-0 left-0 w-5 h-5 border-t border-l rounded-br-sm opacity-60 pointer-events-none"
-						style={{ borderColor: `${primaryColor}80` }} />
-					<div className="absolute top-0 right-0 w-5 h-5 border-t border-r rounded-bl-sm opacity-60 pointer-events-none"
-						style={{ borderColor: `${primaryColor}80` }} />
-					<div className="absolute bottom-0 left-0 w-5 h-5 border-b border-l rounded-tr-sm opacity-60 pointer-events-none"
-						style={{ borderColor: `${primaryColor}80` }} />
-					<div className="absolute bottom-0 right-0 w-5 h-5 border-b border-r rounded-tl-sm opacity-60 pointer-events-none"
-						style={{ borderColor: `${primaryColor}80` }} />
+					<div
+						className="absolute top-0 left-0 w-5 h-5 border-t border-l rounded-br-sm opacity-60 pointer-events-none"
+						style={{ borderColor: `${primaryColor}80` }}
+					/>
+					<div
+						className="absolute top-0 right-0 w-5 h-5 border-t border-r rounded-bl-sm opacity-60 pointer-events-none"
+						style={{ borderColor: `${primaryColor}80` }}
+					/>
+					<div
+						className="absolute bottom-0 left-0 w-5 h-5 border-b border-l rounded-tr-sm opacity-60 pointer-events-none"
+						style={{ borderColor: `${primaryColor}80` }}
+					/>
+					<div
+						className="absolute bottom-0 right-0 w-5 h-5 border-b border-r rounded-tl-sm opacity-60 pointer-events-none"
+						style={{ borderColor: `${primaryColor}80` }}
+					/>
 				</>
 			)}
 		</motion.div>

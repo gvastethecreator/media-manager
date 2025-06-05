@@ -141,11 +141,13 @@ export function EntityStats({
 										'transition-colors bg-background-muted/10 hover:bg-background-muted/20'
 									)}
 									style={{ borderLeft: `3px solid ${stat.color || primaryColor}` }}
-									{...(animated ? {
-										initial: { opacity: 0, y: 5 },
-										animate: { opacity: 1, y: 0 },
-										transition: { delay: index * 0.1 }
-									} : {})}
+									{...(animated
+										? {
+												initial: { opacity: 0, y: 5 },
+												animate: { opacity: 1, y: 0 },
+												transition: { delay: index * 0.1 },
+											}
+										: {})}
 								>
 									{stat.icon && <span className="mr-1.5">{stat.icon}</span>}
 									<span className="font-semibold mr-1">{stat.value}</span>

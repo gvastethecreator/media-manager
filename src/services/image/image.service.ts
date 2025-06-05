@@ -53,11 +53,11 @@ import { transformImageToExtended } from '@/transformers/image';
 import type { ImageExtended } from '@/types/entities/image/types';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
-    ServiceErrorCode,
-    createEntityNotFoundError,
-    createFileNotFoundError,
-    createServiceError,
-    toServiceError
+	ServiceErrorCode,
+	createEntityNotFoundError,
+	createFileNotFoundError,
+	createServiceError,
+	toServiceError,
 } from '@/utils/errors/service-errors';
 import { statsService } from '../stats.service';
 
@@ -149,7 +149,7 @@ class ImageService {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_WRITE_ERROR,
 				message: 'Error al crear directorio de caché',
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -214,7 +214,7 @@ class ImageService {
 				code: ServiceErrorCode.FILE_READ_ERROR,
 				message: 'Error al procesar imagen',
 				context: { inputPath, options },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -260,7 +260,7 @@ class ImageService {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al crear imagen',
 				context: { data },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -281,7 +281,7 @@ class ImageService {
 					code: ServiceErrorCode.INVALID_INPUT,
 					message: 'Calidad de thumbnail inválida',
 					context: { quality },
-					serviceName: SERVICE_NAME
+					serviceName: SERVICE_NAME,
 				});
 			}
 
@@ -330,13 +330,13 @@ class ImageService {
 				message: 'Error al generar thumbnail',
 				imageId,
 				quality,
-				error: error instanceof Error ? error.message : String(error)
+				error: error instanceof Error ? error.message : String(error),
 			});
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_PROCESSING_ERROR,
 				message: 'Error al generar thumbnail',
 				context: { imageId, quality },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -358,7 +358,7 @@ class ImageService {
 					code: ServiceErrorCode.INVALID_INPUT,
 					message: 'Calidad de thumbnail inválida',
 					context: { quality },
-					serviceName: SERVICE_NAME
+					serviceName: SERVICE_NAME,
 				});
 			}
 
@@ -397,7 +397,7 @@ class ImageService {
 						code: ServiceErrorCode.FILE_NOT_FOUND,
 						message: 'No se pudo generar el thumbnail',
 						context: { imageId, quality },
-						serviceName: SERVICE_NAME
+						serviceName: SERVICE_NAME,
 					});
 				}
 
@@ -414,13 +414,13 @@ class ImageService {
 				message: 'Error al obtener thumbnail',
 				imageId,
 				quality,
-				error: error instanceof Error ? error.message : String(error)
+				error: error instanceof Error ? error.message : String(error),
 			});
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_READ_ERROR,
 				message: 'Error al obtener thumbnail',
 				context: { imageId, quality },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -444,13 +444,13 @@ class ImageService {
 			await this.emitEvent(IMAGE_EVENTS.ERROR, {
 				message: 'Error al obtener imagen original',
 				imageId,
-				error: error instanceof Error ? error.message : String(error)
+				error: error instanceof Error ? error.message : String(error),
 			});
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_READ_ERROR,
 				message: 'Error al obtener imagen original',
 				context: { imageId },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -501,13 +501,13 @@ class ImageService {
 			await this.emitEvent(IMAGE_EVENTS.ERROR, {
 				message: 'Error al obtener metadatos',
 				imageId,
-				error: error instanceof Error ? error.message : String(error)
+				error: error instanceof Error ? error.message : String(error),
 			});
 			throw toServiceError(error, {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al obtener metadatos',
 				context: { imageId },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}

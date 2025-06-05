@@ -38,9 +38,10 @@ export function WildcardCard({ wildcard, onClick, className }: WildcardCardProps
 	};
 
 	// Extracto de valores
-	const valuesPreview = wildcard.values.length > 0
-		? wildcard.values.slice(0, 3).join(', ') + (wildcard.values.length > 3 ? '...' : '')
-		: 'Sin valores';
+	const valuesPreview =
+		wildcard.values.length > 0
+			? wildcard.values.slice(0, 3).join(', ') + (wildcard.values.length > 3 ? '...' : '')
+			: 'Sin valores';
 
 	return (
 		<Card
@@ -65,10 +66,7 @@ export function WildcardCard({ wildcard, onClick, className }: WildcardCardProps
 			</div>
 
 			{/* Cabecera con nombre y patrón */}
-			<div
-				className="p-4 flex items-center gap-3 border-b"
-				style={{ borderColor: `${cardColor}30` }}
-			>
+			<div className="p-4 flex items-center gap-3 border-b" style={{ borderColor: `${cardColor}30` }}>
 				<div
 					className="flex items-center justify-center w-10 h-10 rounded-full text-white"
 					style={{ backgroundColor: cardColor }}
@@ -104,14 +102,8 @@ export function WildcardCard({ wildcard, onClick, className }: WildcardCardProps
 			{/* Pie con estadísticas */}
 			<div className="p-4 border-t bg-muted/30" style={{ borderColor: `${cardColor}30` }}>
 				<div className="flex items-center justify-between">
-					<span className="text-sm font-medium">
-						{wildcard.usageCount} usos
-					</span>
-					<Badge
-						variant="outline"
-						className="text-xs"
-						style={{ borderColor: cardColor }}
-					>
+					<span className="text-sm font-medium">{wildcard.usageCount} usos</span>
+					<Badge variant="outline" className="text-xs" style={{ borderColor: cardColor }}>
 						{formatDate(wildcard.updatedAt)}
 					</Badge>
 				</div>

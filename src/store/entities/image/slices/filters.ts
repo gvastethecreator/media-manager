@@ -174,15 +174,8 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 
 	// Reimplementación síncrona de applyFilters
 	applyFilters: (images: Image[]) => {
-		const {
-			searchQuery,
-			filterByTag,
-			filterByAlbum,
-			filterByFolderId,
-			filterFavorites,
-			filterPublic,
-			dateRange,
-		} = get().filters;
+		const { searchQuery, filterByTag, filterByAlbum, filterByFolderId, filterFavorites, filterPublic, dateRange } =
+			get().filters;
 
 		let filtered = [...images];
 
@@ -199,16 +192,12 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 
 		// Filtro por etiquetas (debe tener TODAS las etiquetas seleccionadas)
 		if (filterByTag.length > 0) {
-			filtered = filtered.filter((img) =>
-				filterByTag.every((tagId) => img.tags?.some((t) => t.id === tagId))
-			);
+			filtered = filtered.filter((img) => filterByTag.every((tagId) => img.tags?.some((t) => t.id === tagId)));
 		}
 
 		// Filtro por álbumes (debe estar en ALGUNO de los álbumes seleccionados)
 		if (filterByAlbum.length > 0) {
-			filtered = filtered.filter((img) =>
-				filterByAlbum.some((albumId) => img.albums?.some((a) => a.id === albumId))
-			);
+			filtered = filtered.filter((img) => filterByAlbum.some((albumId) => img.albums?.some((a) => a.id === albumId)));
 		}
 
 		// Filtro por carpeta
@@ -286,7 +275,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 	selectImagesByIds: (ids: string[]) => {
 		const { selectedIds } = get().ui;
 		return ids
-			.map(id => {
+			.map((id) => {
 				const image = get().core.images[id];
 				if (!image) return null;
 				return transformImageToExtended(image, { isSelected: selectedIds.includes(id) });
@@ -297,7 +286,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 	selectImageByPath: (path: string) => {
 		const { getImages } = get();
 		const images = getImages();
-		const image = images.find(img => img.path === path);
+		const image = images.find((img) => img.path === path);
 
 		if (!image) return null;
 
@@ -306,14 +295,12 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 	},
 
 	selectImagesByFolder: (folderId: string, includeStats = false) => {
-		const allImages = Object.values(get().core.images).map(img => transformImageToExtended(img));
-		const images = allImages.filter(img => img.folderId === folderId);
+		const allImages = Object.values(get().core.images).map((img) => transformImageToExtended(img));
+		const images = allImages.filter((img) => img.folderId === folderId);
 		const selectedIds = get().ui.selectedIds;
 
 		if (includeStats) {
-			return images.map(image =>
-				transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) })
-			);
+			return images.map((image) => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
 		}
 
 		return images;
@@ -323,11 +310,25 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		const imagesInFolder = get().selectImagesByFolder(folderId);
 
 		const totalSize = imagesInFolder.reduce((sum, img) => sum + (img.size || 0), 0);
-		const withThumbnails = imagesInFolder.filter(img => img.thumbnails && Object.keys(img.thumbnails).length > 0).length;
-		const largest = imagesInFolder.reduce((max, img) => (img.size > (max?.size || 0) ? img : max), null as ImageExtended | null);
-		const smallest = imagesInFolder.reduce((min, img) => (img.size < (min?.size || Number.POSITIVE_INFINITY) ? img : min), null as ImageExtended | null);
-		const newest = imagesInFolder.reduce((latest, img) => (new Date(img.createdAt) > new Date(latest?.createdAt || 0) ? img : latest), null as ImageExtended | null);
-		const oldest = imagesInFolder.reduce((earliest, img) => (new Date(img.createdAt) < new Date(earliest?.createdAt || Date.now()) ? img : earliest), null as ImageExtended | null);
+		const withThumbnails = imagesInFolder.filter(
+			(img) => img.thumbnails && Object.keys(img.thumbnails).length > 0
+		).length;
+		const largest = imagesInFolder.reduce(
+			(max, img) => (img.size > (max?.size || 0) ? img : max),
+			null as ImageExtended | null
+		);
+		const smallest = imagesInFolder.reduce(
+			(min, img) => (img.size < (min?.size || Number.POSITIVE_INFINITY) ? img : min),
+			null as ImageExtended | null
+		);
+		const newest = imagesInFolder.reduce(
+			(latest, img) => (new Date(img.createdAt) > new Date(latest?.createdAt || 0) ? img : latest),
+			null as ImageExtended | null
+		);
+		const oldest = imagesInFolder.reduce(
+			(earliest, img) => (new Date(img.createdAt) < new Date(earliest?.createdAt || Date.now()) ? img : earliest),
+			null as ImageExtended | null
+		);
 
 		return {
 			total: imagesInFolder.length,
@@ -338,7 +339,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 			largest: largest ? transformImageToExtended(largest) : null,
 			smallest: smallest ? transformImageToExtended(smallest) : null,
 			newest: newest ? transformImageToExtended(newest) : null,
-			oldest: oldest ? transformImageToExtended(oldest) : null
+			oldest: oldest ? transformImageToExtended(oldest) : null,
 		};
 	},
 
@@ -346,7 +347,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		const filteredImages = get().getFilteredImages();
 		const { selectedIds } = get().ui;
 
-		return filteredImages.map(image =>
+		return filteredImages.map((image) =>
 			transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) })
 		);
 	},
@@ -361,9 +362,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		const sortedImages = get().applySort(images);
 		const { selectedIds } = get().ui;
 
-		return sortedImages.map(image =>
-			transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) })
-		);
+		return sortedImages.map((image) => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
 	},
 
 	selectGroupedImages: (groupBy: ImageGroupType) => {
@@ -382,7 +381,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 							id: folderId,
 							label: folderName,
 							count: 0,
-							images: []
+							images: [],
 						};
 					}
 
@@ -398,7 +397,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 					id: 'sin-etiquetas',
 					label: 'Sin etiquetas',
 					count: 0,
-					images: []
+					images: [],
 				};
 
 				// Agrupar por etiqueta
@@ -415,7 +414,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 								id: tag.id,
 								label: tag.name,
 								count: 0,
-								images: []
+								images: [],
 							};
 						}
 
@@ -434,7 +433,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 					const dateLabel = new Intl.DateTimeFormat('es', {
 						year: 'numeric',
 						month: 'long',
-						day: 'numeric'
+						day: 'numeric',
 					}).format(date);
 
 					if (!groups[dateKey]) {
@@ -442,7 +441,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 							id: dateKey,
 							label: dateLabel,
 							count: 0,
-							images: []
+							images: [],
 						};
 					}
 
@@ -459,7 +458,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 					const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
 					const monthLabel = new Intl.DateTimeFormat('es', {
 						year: 'numeric',
-						month: 'long'
+						month: 'long',
 					}).format(date);
 
 					if (!groups[monthKey]) {
@@ -467,7 +466,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 							id: monthKey,
 							label: monthLabel,
 							count: 0,
-							images: []
+							images: [],
 						};
 					}
 
@@ -488,7 +487,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 							id: yearKey,
 							label: yearKey,
 							count: 0,
-							images: []
+							images: [],
 						};
 					}
 
@@ -505,7 +504,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 					{ key: 'small', label: 'Pequeño (100KB - 1MB)', max: 1024 * 1024 },
 					{ key: 'medium', label: 'Medio (1MB - 5MB)', max: 5 * 1024 * 1024 },
 					{ key: 'large', label: 'Grande (5MB - 20MB)', max: 20 * 1024 * 1024 },
-					{ key: 'huge', label: 'Muy grande (> 20MB)', max: Number.POSITIVE_INFINITY }
+					{ key: 'huge', label: 'Muy grande (> 20MB)', max: Number.POSITIVE_INFINITY },
 				];
 
 				// Inicializar grupos
@@ -514,15 +513,13 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 						id: range.key,
 						label: range.label,
 						count: 0,
-						images: []
+						images: [],
 					};
 				}
 
 				// Asignar imágenes a grupos
 				for (const image of filteredImages) {
-					const range = sizeRanges.find((r, i) =>
-						image.size < r.max || i === sizeRanges.length - 1
-					);
+					const range = sizeRanges.find((r, i) => image.size < r.max || i === sizeRanges.length - 1);
 
 					if (range) {
 						groups[range.key].images.push(image);
@@ -539,7 +536,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 					{ key: 'hd', label: 'HD (1-2MP)', max: 2000000 },
 					{ key: 'fhd', label: 'Full HD (2-4MP)', max: 4000000 },
 					{ key: '4k', label: '4K (4-10MP)', max: 10000000 },
-					{ key: '8k', label: '8K+ (> 10MP)', max: Number.POSITIVE_INFINITY }
+					{ key: '8k', label: '8K+ (> 10MP)', max: Number.POSITIVE_INFINITY },
 				];
 
 				// Inicializar grupos
@@ -548,16 +545,14 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 						id: range.key,
 						label: range.label,
 						count: 0,
-						images: []
+						images: [],
 					};
 				}
 
 				// Asignar imágenes a grupos
 				for (const image of filteredImages) {
 					const resolution = image.width * image.height;
-					const range = resRanges.find((r, i) =>
-						resolution < r.max || i === resRanges.length - 1
-					);
+					const range = resRanges.find((r, i) => resolution < r.max || i === resRanges.length - 1);
 
 					if (range) {
 						groups[range.key].images.push(image);
@@ -569,11 +564,11 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 
 			default: {
 				// Sin agrupación, un solo grupo con todas las imágenes
-				groups['all'] = {
+				groups.all = {
 					id: 'all',
 					label: 'Todas las imágenes',
 					count: filteredImages.length,
-					images: filteredImages
+					images: filteredImages,
 				};
 			}
 		}
@@ -588,8 +583,8 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		const { selectedIds } = get().ui;
 
 		return images
-			.filter(image => image.tags?.some(tag => tag.id === tagId))
-			.map(image => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
+			.filter((image) => image.tags?.some((tag) => tag.id === tagId))
+			.map((image) => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
 	},
 
 	selectFilteredByFolder: (folderId: string) => {
@@ -597,9 +592,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		const images = getImagesByFolder(folderId);
 		const { selectedIds } = get().ui;
 
-		return images.map(image =>
-			transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) })
-		);
+		return images.map((image) => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
 	},
 
 	selectFavorites: () => {
@@ -608,8 +601,8 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		const { selectedIds } = get().ui;
 
 		return images
-			.filter(image => image.isFavorite)
-			.map(image => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
+			.filter((image) => image.isFavorite)
+			.map((image) => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
 	},
 
 	selectPublic: () => {
@@ -618,8 +611,8 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		const { selectedIds } = get().ui;
 
 		return images
-			.filter(image => image.isPublic)
-			.map(image => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
+			.filter((image) => image.isPublic)
+			.map((image) => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
 	},
 
 	selectPrivate: () => {
@@ -628,8 +621,8 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		const { selectedIds } = get().ui;
 
 		return images
-			.filter(image => !image.isPublic)
-			.map(image => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
+			.filter((image) => !image.isPublic)
+			.map((image) => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
 	},
 
 	selectWithThumbnails: () => {
@@ -638,8 +631,8 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		const { selectedIds } = get().ui;
 
 		return images
-			.filter(image => !!image.thumbnailPath)
-			.map(image => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
+			.filter((image) => !!image.thumbnailPath)
+			.map((image) => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
 	},
 
 	selectWithoutThumbnails: () => {
@@ -648,8 +641,8 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		const { selectedIds } = get().ui;
 
 		return images
-			.filter(image => !image.thumbnailPath)
-			.map(image => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
+			.filter((image) => !image.thumbnailPath)
+			.map((image) => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
 	},
 
 	selectImagesByDateRange: (from: Date, to: Date) => {
@@ -662,11 +655,11 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 		maxDate.setDate(maxDate.getDate() + 1);
 
 		return images
-			.filter(image => {
+			.filter((image) => {
 				const date = new Date(image.createdAt);
 				return date >= from && date < maxDate;
 			})
-			.map(image => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
+			.map((image) => transformImageToExtended(image, { isSelected: selectedIds.includes(image.id) }));
 	},
 
 	selectImageStats: () => {
@@ -690,7 +683,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 				largest: null,
 				smallest: null,
 				newest: null,
-				oldest: null
+				oldest: null,
 			};
 		}
 
@@ -765,7 +758,7 @@ export const createImageFiltersSlice: StateCreator<ImageState, [], [], ImageFilt
 			largest: largest ? transformImageToExtended(transformImageToExtended(largest)) : null,
 			smallest: smallest ? transformImageToExtended(transformImageToExtended(smallest)) : null,
 			newest: newest ? transformImageToExtended(transformImageToExtended(newest)) : null,
-			oldest: oldest ? transformImageToExtended(transformImageToExtended(oldest)) : null
+			oldest: oldest ? transformImageToExtended(transformImageToExtended(oldest)) : null,
 		};
-	}
+	},
 });

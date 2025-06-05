@@ -63,10 +63,7 @@ export function FoldersView(_props: ViewProps) {
 
 	// 🆕 Usar los nuevos stores específicos
 	const folderStore = useFolderStore();
-	const {
-		setSelected: setCurrentFolder,
-		loadFolder: setCurrentFolderId
-	} = folderStore;
+	const { setSelected: setCurrentFolder, loadFolder: setCurrentFolderId } = folderStore;
 
 	// 🧹 Para limpiar selección - usar el hook base directamente
 	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
@@ -104,13 +101,15 @@ export function FoldersView(_props: ViewProps) {
 				});
 
 				viewLogger.debug('Datos de carpetas transformados:', {
-					firstFolder: transformedData[0] ? {
-						id: transformedData[0].id,
-						name: transformedData[0].name,
-						totalSize: transformedData[0].totalSize,
-						totalFiles: transformedData[0].totalFiles,
-						imageCount: transformedData[0]._count?.images
-					} : 'No hay carpetas'
+					firstFolder: transformedData[0]
+						? {
+								id: transformedData[0].id,
+								name: transformedData[0].name,
+								totalSize: transformedData[0].totalSize,
+								totalFiles: transformedData[0].totalFiles,
+								imageCount: transformedData[0]._count?.images,
+							}
+						: 'No hay carpetas',
 				});
 
 				setFolders(transformedData);
@@ -132,11 +131,13 @@ export function FoldersView(_props: ViewProps) {
 
 			if (isTransientError && retryCount < maxRetries) {
 				// Calcular retraso de reintento exponencial (300ms, 900ms, 2700ms)
-				const retryDelay = 300 * (3 ** retryCount);
-				viewLogger.debug(`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...`);
+				const retryDelay = 300 * 3 ** retryCount;
+				viewLogger.debug(
+					`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...`
+				);
 
 				// Incrementar contador de reintentos y programar un nuevo intento
-				setRetryCount(prev => prev + 1);
+				setRetryCount((prev) => prev + 1);
 				setTimeout(() => {
 					loadFolders();
 				}, retryDelay);
@@ -210,7 +211,7 @@ export function FoldersView(_props: ViewProps) {
 					totalSize: folder.totalSize,
 					imageCount: folder._count?.images || 0,
 					createdAt: folder.createdAt,
-					updatedAt: folder.updatedAt
+					updatedAt: folder.updatedAt,
 				});
 
 				// 3. Ahora cambiar la vista
@@ -232,14 +233,15 @@ export function FoldersView(_props: ViewProps) {
 					<h3 className="text-xl font-semibold text-destructive mb-2">Error al cargar carpetas</h3>
 					<p className="text-sm mb-4">{error}</p>
 					<p className="text-xs text-muted-foreground mb-4">
-						Este error podría estar relacionado con problemas de conexión a la base de datos o problemas con la estructura de tablas.
+						Este error podría estar relacionado con problemas de conexión a la base de datos o problemas con la
+						estructura de tablas.
 					</p>
 					<div className="flex flex-col gap-2">
 						<Button variant="outline" onClick={loadFolders}>
 							<RefreshCcw className="h-4 w-4 mr-2" />
 							Reintentar
 						</Button>
-						<Link href="/diagnostics/database" className={buttonVariants({ variant: "default" })}>
+						<Link href="/diagnostics/database" className={buttonVariants({ variant: 'default' })}>
 							<DatabaseIcon className="h-4 w-4 mr-2" />
 							Ejecutar diagnóstico
 						</Link>
@@ -271,7 +273,7 @@ export function FoldersView(_props: ViewProps) {
 			totalSize: optimisticFolders[0].totalSize,
 			totalFiles: optimisticFolders[0].totalFiles,
 			_count: optimisticFolders[0]._count,
-			updatedAt: optimisticFolders[0].updatedAt
+			updatedAt: optimisticFolders[0].updatedAt,
 		});
 	}
 
@@ -308,10 +310,7 @@ export function FoldersView(_props: ViewProps) {
 										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
 										data-folder-id={folder.id}
 									>
-										<MemoizedFolderCard
-											folder={folder}
-											onFolderClick={onFolderClick}
-										/>
+										<MemoizedFolderCard folder={folder} onFolderClick={onFolderClick} />
 									</div>
 								</motion.div>
 							);

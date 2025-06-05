@@ -5,15 +5,15 @@
 
 import { z } from 'zod';
 import {
-    type PlaceDanger,
-    type PlaceFilters,
-    type PlaceResource,
-    type PlaceStats,
-    ClimateType,
-    DangerLevel,
-    GovernmentType,
-    PlaceCategory,
-    PlaceType,
+	ClimateType,
+	DangerLevel,
+	GovernmentType,
+	PlaceCategory,
+	type PlaceDanger,
+	type PlaceFilters,
+	type PlaceResource,
+	type PlaceStats,
+	PlaceType,
 } from '../../types/entities/place';
 
 /**

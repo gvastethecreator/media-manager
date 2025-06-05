@@ -1,8 +1,8 @@
-import * as pathUtils from '@/lib/path-utils';
-import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
+import * as pathUtils from '@/lib/path-utils';
+import { prisma } from '@/lib/prisma';
 
 // Esta función debe ser llamada solo en el servidor
 export const fsService = {

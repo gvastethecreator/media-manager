@@ -61,10 +61,7 @@ export interface PromptCardData {
 /**
  * Busca prompts en la base de datos
  */
-export async function searchPrompts(
-	query = '',
-	limit = 50
-): Promise<PromptCardData[]> {
+export async function searchPrompts(query = '', limit = 50): Promise<PromptCardData[]> {
 	try {
 		const prisma = await getPrismaClient();
 
@@ -102,9 +99,9 @@ export async function searchPrompts(
 				tags: {
 					take: 10,
 					select: {
-						name: true
-					}
-				}
+						name: true,
+					},
+				},
 			},
 		});
 
@@ -125,7 +122,7 @@ export async function searchPrompts(
 				}
 
 				// Extraer nombres de etiquetas si están disponibles
-				const parsedTags = prompt.tags ? prompt.tags.map(tag => tag.name) : [];
+				const parsedTags = prompt.tags ? prompt.tags.map((tag) => tag.name) : [];
 
 				return {
 					...prompt,
@@ -155,9 +152,9 @@ export async function getRecentPromptImages(promptId: string) {
 			where: {
 				prompts: {
 					some: {
-						id: promptId
-					}
-				}
+						id: promptId,
+					},
+				},
 			},
 			orderBy: { createdAt: 'desc' },
 			take: 6,
@@ -168,11 +165,9 @@ export async function getRecentPromptImages(promptId: string) {
 		});
 
 		// Transformar a formato requerido
-		return images.map(image => ({
+		return images.map((image) => ({
 			id: image.id,
-			thumbnailUrl: image.thumbnail
-				? `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`
-				: '',
+			thumbnailUrl: image.thumbnail ? `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}` : '',
 		}));
 	} catch (error) {
 		console.error('Error cargando imágenes:', error);
@@ -210,9 +205,9 @@ export async function getPromptById(id: string): Promise<PromptCardData | null> 
 				tags: {
 					take: 10,
 					select: {
-						name: true
-					}
-				}
+						name: true,
+					},
+				},
 			},
 		});
 
@@ -232,7 +227,7 @@ export async function getPromptById(id: string): Promise<PromptCardData | null> 
 		}
 
 		// Extraer nombres de etiquetas
-		const parsedTags = prompt.tags ? prompt.tags.map(tag => tag.name) : [];
+		const parsedTags = prompt.tags ? prompt.tags.map((tag) => tag.name) : [];
 
 		return {
 			...prompt,

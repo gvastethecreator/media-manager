@@ -98,8 +98,8 @@ export const createUISlice: FolderUISlice = (set, get) => ({
 				uiState: {
 					...uiState,
 					showStatsModal: true,
-					statsSelectedFolderId: folderId
-				}
+					statsSelectedFolderId: folderId,
+				},
 			});
 		},
 
@@ -110,8 +110,8 @@ export const createUISlice: FolderUISlice = (set, get) => ({
 				uiState: {
 					...uiState,
 					showStatsModal: false,
-					statsSelectedFolderId: null
-				}
+					statsSelectedFolderId: null,
+				},
 			});
 		},
 	},

@@ -47,9 +47,7 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 	return (
 		<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 			<DialogHeader>
-				<DialogTitle>
-					{property ? 'Editar propiedad' : 'Crear nueva propiedad'}
-				</DialogTitle>
+				<DialogTitle>{property ? 'Editar propiedad' : 'Crear nueva propiedad'}</DialogTitle>
 			</DialogHeader>
 
 			<Form {...form}>
@@ -63,9 +61,7 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 								<FormControl>
 									<Input {...field} placeholder="Nombre único para identificar la propiedad" />
 								</FormControl>
-								<FormDescription>
-									El nombre de la propiedad, visible en listados e imágenes.
-								</FormDescription>
+								<FormDescription>El nombre de la propiedad, visible en listados e imágenes.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -81,9 +77,7 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 									<FormControl>
 										<EmojiPicker value={field.value} onChange={field.onChange} />
 									</FormControl>
-									<FormDescription>
-										Un emoji representativo para la propiedad
-									</FormDescription>
+									<FormDescription>Un emoji representativo para la propiedad</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -98,9 +92,7 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 									<FormControl>
 										<ColorPicker value={field.value} onChange={field.onChange} />
 									</FormControl>
-									<FormDescription>
-										Color para identificar visualmente la propiedad
-									</FormDescription>
+									<FormDescription>Color para identificar visualmente la propiedad</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -115,9 +107,7 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 									<FormControl>
 										<CategoryPicker value={field.value} onChange={field.onChange} />
 									</FormControl>
-									<FormDescription>
-										Ayuda a organizar las propiedades por grupos
-									</FormDescription>
+									<FormDescription>Ayuda a organizar las propiedades por grupos</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -138,9 +128,7 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 										rows={3}
 									/>
 								</FormControl>
-								<FormDescription>
-									Una descripción que ayude a entender el propósito de la propiedad
-								</FormDescription>
+								<FormDescription>Una descripción que ayude a entender el propósito de la propiedad</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -153,15 +141,9 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 							<FormItem>
 								<FormLabel>Atajo (Opcional)</FormLabel>
 								<FormControl>
-									<Input
-										{...field}
-										placeholder="Ej: Ctrl+P"
-										value={field.value || ''}
-									/>
+									<Input {...field} placeholder="Ej: Ctrl+P" value={field.value || ''} />
 								</FormControl>
-								<FormDescription>
-									Un atajo de teclado para acceder rápidamente a esta propiedad
-								</FormDescription>
+								<FormDescription>Un atajo de teclado para acceder rápidamente a esta propiedad</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -180,9 +162,7 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 										placeholder="Selecciona una imagen representativa"
 									/>
 								</FormControl>
-								<FormDescription>
-									Una imagen que represente visualmente esta propiedad
-								</FormDescription>
+								<FormDescription>Una imagen que represente visualmente esta propiedad</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -200,10 +180,7 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 									</FormDescription>
 								</div>
 								<FormControl>
-									<Checkbox
-										checked={field.value}
-										onCheckedChange={field.onChange}
-									/>
+									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 								</FormControl>
 							</FormItem>
 						)}
@@ -213,9 +190,7 @@ export function CreatePropertyForm({ property, onSubmit, onCancel }: CreatePrope
 						<Button variant="outline" type="button" onClick={onCancel}>
 							Cancelar
 						</Button>
-						<Button type="submit">
-							{property ? 'Actualizar' : 'Crear'} propiedad
-						</Button>
+						<Button type="submit">{property ? 'Actualizar' : 'Crear'} propiedad</Button>
 					</DialogFooter>
 				</form>
 			</Form>

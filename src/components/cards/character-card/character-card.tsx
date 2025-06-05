@@ -52,20 +52,24 @@ export function CharacterCard({
 
 		// Añadir imágenes si están disponibles
 		if (character.recentImages?.length) {
-			media.push(...character.recentImages.map(path => ({
-				id: path,
-				thumbnailUrl: path,
-				isVideo: false
-			})));
+			media.push(
+				...character.recentImages.map((path) => ({
+					id: path,
+					thumbnailUrl: path,
+					isVideo: false,
+				}))
+			);
 		}
 
 		// Añadir videos si están disponibles
 		if (character.recentVideos?.length) {
-			media.push(...character.recentVideos.map(path => ({
-				id: path,
-				thumbnailUrl: path,
-				isVideo: true
-			})));
+			media.push(
+				...character.recentVideos.map((path) => ({
+					id: path,
+					thumbnailUrl: path,
+					isVideo: true,
+				}))
+			);
 		}
 
 		return media;
@@ -110,9 +114,13 @@ export function CharacterCard({
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar color predeterminado basado en la clase
 		if (!character.color) {
-			return character.class === 'Warrior' ? '#c0392b' :
-				character.class === 'Mage' ? '#2980b9' :
-					character.class === 'Rogue' ? '#27ae60' : '#8e44ad';
+			return character.class === 'Warrior'
+				? '#c0392b'
+				: character.class === 'Mage'
+					? '#2980b9'
+					: character.class === 'Rogue'
+						? '#27ae60'
+						: '#8e44ad';
 		}
 
 		// Oscurecer el color primario para el secundario
@@ -187,7 +195,7 @@ export function CharacterCard({
 									transparent 100%)
 								`,
 								backgroundSize: '200% 200%',
-								animation: 'gradient-shift 3s ease infinite'
+								animation: 'gradient-shift 3s ease infinite',
 							}}
 						/>
 
@@ -196,25 +204,30 @@ export function CharacterCard({
 							<div
 								className="absolute inset-0"
 								style={{
-									background: rarityLevel === 'Mythic'
-										? `linear-gradient(45deg, transparent, ${primaryColor}70, gold, ${primaryColor}70, transparent)`
-										: rarityLevel === 'Rare'
-											? `linear-gradient(45deg, transparent, ${primaryColor}70, silver, ${primaryColor}70, transparent)`
-											: rarityLevel === 'Uncommon'
-												? `linear-gradient(45deg, transparent, ${primaryColor}70, ${secondaryColor}70, transparent)`
-												: `linear-gradient(45deg, transparent, ${primaryColor}40, transparent)`,
+									background:
+										rarityLevel === 'Mythic'
+											? `linear-gradient(45deg, transparent, ${primaryColor}70, gold, ${primaryColor}70, transparent)`
+											: rarityLevel === 'Rare'
+												? `linear-gradient(45deg, transparent, ${primaryColor}70, silver, ${primaryColor}70, transparent)`
+												: rarityLevel === 'Uncommon'
+													? `linear-gradient(45deg, transparent, ${primaryColor}70, ${secondaryColor}70, transparent)`
+													: `linear-gradient(45deg, transparent, ${primaryColor}40, transparent)`,
 									backgroundSize: '300% 300%',
-									animation: 'shine 6s linear infinite'
+									animation: 'shine 6s linear infinite',
 								}}
 							/>
 						</div>
 
 						{/* Sello de poder en el modo TCG */}
 						<div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 opacity-10 pointer-events-none z-1">
-							<div className="w-full h-full rounded-full border-2 border-dashed flex items-center justify-center"
-								style={{ borderColor: primaryColor }}>
+							<div
+								className="w-full h-full rounded-full border-2 border-dashed flex items-center justify-center"
+								style={{ borderColor: primaryColor }}
+							>
 								<div className="text-xs font-bold" style={{ color: primaryColor }}>
-									POWER<br />{power}
+									POWER
+									<br />
+									{power}
 								</div>
 							</div>
 						</div>
@@ -222,11 +235,12 @@ export function CharacterCard({
 						{/* Sello de rareza holográfico cuando es favorito */}
 						{character.isFavorite && (
 							<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
-								<div className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+								<div
+									className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
 									style={{
 										background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 										backgroundSize: '600% 600%',
-										animation: 'shine 3s linear infinite'
+										animation: 'shine 3s linear infinite',
 									}}
 								/>
 							</div>
@@ -253,12 +267,7 @@ export function CharacterCard({
 					{!compact && (
 						<>
 							{/* Galería de imágenes */}
-							<CharacterCardImages
-								images={cardMedia}
-								emoji={character.emoji}
-								tcgMode={tcgMode}
-								compact={false}
-							/>
+							<CharacterCardImages images={cardMedia} emoji={character.emoji} tcgMode={tcgMode} compact={false} />
 
 							{/* Contenido con descripción y contadores */}
 							<CharacterCardContent

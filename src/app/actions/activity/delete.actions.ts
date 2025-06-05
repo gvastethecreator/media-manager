@@ -10,10 +10,7 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from 'next/cache';
 
-import {
-    ActivityEventType,
-    type ActivityType
-} from '@/types/entities/activity';
+import { ActivityEventType, type ActivityType } from '@/types/entities/activity';
 
 const activityLogger = serverLogger.withContext('ActivityDeleteActions');
 

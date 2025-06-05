@@ -36,9 +36,7 @@ export function ProfileManager({ className }: ProfileManagerProps) {
 				<div className="flex items-center justify-center py-12">
 					<div className="flex flex-col items-center gap-4">
 						<div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-						<p className="text-sm text-muted-foreground">
-							Cargando perfiles...
-						</p>
+						<p className="text-sm text-muted-foreground">Cargando perfiles...</p>
 					</div>
 				</div>
 			)}
@@ -58,7 +56,10 @@ export function ProfileManager({ className }: ProfileManagerProps) {
 								strokeWidth="2"
 								strokeLinecap="round"
 								strokeLinejoin="round"
+								aria-label="Error al cargar perfiles"
+								role="img"
 							>
+								<title>Error al cargar perfiles</title>
 								<circle cx="12" cy="12" r="10" />
 								<line x1="12" y1="8" x2="12" y2="12" />
 								<line x1="12" y1="16" x2="12.01" y2="16" />
@@ -66,18 +67,14 @@ export function ProfileManager({ className }: ProfileManagerProps) {
 						</div>
 						<div className="text-center">
 							<p className="font-medium">Error al cargar los perfiles</p>
-							<p className="text-sm text-muted-foreground mt-1">
-								{profilesError}
-							</p>
+							<p className="text-sm text-muted-foreground mt-1">{profilesError}</p>
 						</div>
 					</div>
 				</div>
 			)}
 
 			{/* Lista de perfiles */}
-			{!isLoadingProfiles && !profilesError && (
-				<ProfileList />
-			)}
+			{!isLoadingProfiles && !profilesError && <ProfileList />}
 		</div>
 	);
 }

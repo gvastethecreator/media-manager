@@ -66,7 +66,7 @@ export function CharacterCardContent({
 	alignment = 'Neutral',
 	metadata = {},
 	compact = false,
-	tcgMode = true
+	tcgMode = true,
 }: CharacterCardContentProps) {
 	// Limitar descripción para modo compacto
 	const displayDescription = compact
@@ -104,7 +104,7 @@ export function CharacterCardContent({
 			.replace(/_/g, ' ') // Reemplazar guiones bajos con espacios
 			.trim()
 			.split(' ')
-			.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
 			.join(' ');
 
 		// Usar abreviaturas para estadísticas comunes
@@ -119,7 +119,7 @@ export function CharacterCardContent({
 	};
 
 	// Normalizar las habilidades a un formato estándar
-	const normalizedAbilities = abilities.map(ability => {
+	const normalizedAbilities = abilities.map((ability) => {
 		if (typeof ability === 'string') {
 			return { name: ability, description: '' };
 		}
@@ -132,9 +132,7 @@ export function CharacterCardContent({
 			<div className="py-2 px-3 flex flex-col gap-1">
 				{/* Descripción corta */}
 				{displayDescription && (
-					<p className="text-xs line-clamp-2 text-muted-foreground italic">
-						{displayDescription}
-					</p>
+					<p className="text-xs line-clamp-2 text-muted-foreground italic">{displayDescription}</p>
 				)}
 
 				{/* Estadísticas básicas */}
@@ -144,7 +142,7 @@ export function CharacterCardContent({
 							className="px-1.5 py-0.5 rounded font-medium"
 							style={{
 								backgroundColor: `${primaryColor}30`,
-								color: primaryColor
+								color: primaryColor,
 							}}
 						>
 							Lvl {level}
@@ -159,7 +157,7 @@ export function CharacterCardContent({
 							className="text-xs font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5"
 							style={{
 								backgroundColor: `${secondaryColor}30`,
-								color: secondaryColor
+								color: secondaryColor,
 							}}
 						>
 							<ArrowUpRight className="w-3 h-3" />
@@ -187,14 +185,12 @@ export function CharacterCardContent({
 						<div
 							className="absolute -left-2 -right-2 -top-1 -bottom-1 opacity-10 rounded"
 							style={{
-								background: `linear-gradient(135deg, ${primaryColor}70 0%, transparent 60%)`
+								background: `linear-gradient(135deg, ${primaryColor}70 0%, transparent 60%)`,
 							}}
 						/>
 					)}
 
-					<div className="relative">
-						{displayDescription}
-					</div>
+					<div className="relative">{displayDescription}</div>
 				</div>
 			)}
 
@@ -246,7 +242,7 @@ export function CharacterCardContent({
 								className="flex items-center justify-between gap-1 px-1.5 py-0.5 rounded"
 								style={{
 									backgroundColor: `${primaryColor}20`,
-									border: tcgMode ? `1px solid ${primaryColor}40` : 'none'
+									border: tcgMode ? `1px solid ${primaryColor}40` : 'none',
 								}}
 								whileHover={{ scale: 1.05, backgroundColor: `${primaryColor}30` }}
 							>
@@ -267,7 +263,7 @@ export function CharacterCardContent({
 					style={{
 						backgroundColor: `${getAlignmentColor()}20`,
 						color: getAlignmentColor(),
-						border: `1px dashed ${getAlignmentColor()}40`
+						border: `1px dashed ${getAlignmentColor()}40`,
 					}}
 				>
 					<Sparkles className="w-3 h-3" /> {alignment}
@@ -279,7 +275,7 @@ export function CharacterCardContent({
 						style={{
 							backgroundColor: `${secondaryColor}20`,
 							color: secondaryColor,
-							border: `1px solid ${secondaryColor}30`
+							border: `1px solid ${secondaryColor}30`,
 						}}
 					>
 						{metadata.rarityLevel}
@@ -305,7 +301,7 @@ export function CharacterCardContent({
 									borderColor: `${primaryColor}50`,
 									backgroundImage: tcgMode
 										? `linear-gradient(135deg, ${primaryColor}40, ${secondaryColor}30, ${primaryColor}20)`
-										: undefined
+										: undefined,
 								}}
 								whileHover={{ scale: 1.02, y: -2 }}
 							>
@@ -314,7 +310,7 @@ export function CharacterCardContent({
 									<div
 										className="absolute inset-0 opacity-10 pointer-events-none"
 										style={{
-											backgroundImage: `radial-gradient(circle at 10% 10%, ${primaryColor}, transparent 60%)`
+											backgroundImage: `radial-gradient(circle at 10% 10%, ${primaryColor}, transparent 60%)`,
 										}}
 									/>
 								)}
@@ -326,9 +322,7 @@ export function CharacterCardContent({
 									</div>
 
 									{ability.description && (
-										<div className="text-[10px] italic mt-0.5 opacity-80 line-clamp-2">
-											{ability.description}
-										</div>
+										<div className="text-[10px] italic mt-0.5 opacity-80 line-clamp-2">{ability.description}</div>
 									)}
 								</div>
 							</motion.div>
@@ -341,28 +335,26 @@ export function CharacterCardContent({
 			{(goals.length > 0 || personality.length > 0) && (
 				<div className="mt-2 grid grid-cols-2 gap-1.5 text-[10px] opacity-90">
 					{goals.length > 0 && (
-						<div
-							className="px-1.5 py-1 rounded"
-							style={{ backgroundColor: `${primaryColor}15` }}
-						>
+						<div className="px-1.5 py-1 rounded" style={{ backgroundColor: `${primaryColor}15` }}>
 							<div className="font-semibold mb-0.5">OBJETIVOS:</div>
 							<ul className="list-disc list-inside pl-1">
 								{goals.slice(0, 2).map((goal) => (
-									<li key={`goal-${goal.substring(0, 15)}`} className="truncate">{goal}</li>
+									<li key={`goal-${goal.substring(0, 15)}`} className="truncate">
+										{goal}
+									</li>
 								))}
 							</ul>
 						</div>
 					)}
 
 					{personality.length > 0 && (
-						<div
-							className="px-1.5 py-1 rounded"
-							style={{ backgroundColor: `${secondaryColor}15` }}
-						>
+						<div className="px-1.5 py-1 rounded" style={{ backgroundColor: `${secondaryColor}15` }}>
 							<div className="font-semibold mb-0.5">PERSONALIDAD:</div>
 							<ul className="list-disc list-inside pl-1">
 								{personality.slice(0, 2).map((trait) => (
-									<li key={`trait-${trait.substring(0, 15)}`} className="truncate">{trait}</li>
+									<li key={`trait-${trait.substring(0, 15)}`} className="truncate">
+										{trait}
+									</li>
 								))}
 							</ul>
 						</div>
@@ -371,11 +363,7 @@ export function CharacterCardContent({
 			)}
 
 			{/* ID de carta TCG */}
-			{tcgMode && metadata.cardId && (
-				<div className="mt-auto text-[9px] text-right opacity-60">
-					{metadata.cardId}
-				</div>
-			)}
+			{tcgMode && metadata.cardId && <div className="mt-auto text-[9px] text-right opacity-60">{metadata.cardId}</div>}
 		</div>
 	);
 }

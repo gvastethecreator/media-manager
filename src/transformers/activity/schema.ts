@@ -10,64 +10,64 @@ import { ActivityCategory, ActivitySortCriteria, ActivityType } from '../../type
  * Esquema base para actividades
  */
 export const activityBaseSchema = z.object({
-  id: z.string(),
-  type: z.string(),
-  description: z.string(),
-  imageId: z.string().nullable().optional(),
-  createdAt: z.union([z.string(), z.date()]),
+	id: z.string(),
+	type: z.string(),
+	description: z.string(),
+	imageId: z.string().nullable().optional(),
+	createdAt: z.union([z.string(), z.date()]),
 });
 
 /**
  * Esquema para relaciones de imagen en actividades
  */
 export const activityImageRelationSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  path: z.string(),
-  thumbnail: z.string().nullable().optional(),
+	id: z.string(),
+	name: z.string(),
+	path: z.string(),
+	thumbnail: z.string().nullable().optional(),
 });
 
 /**
  * Esquema para actividades completas
  */
 export const activitySchema = activityBaseSchema.extend({
-  image: activityImageRelationSchema.nullable().optional(),
-  iconEmoji: z.string().optional(),
-  iconColor: z.string().optional(),
-  category: z.string().optional(),
-  isSelected: z.boolean().optional(),
-  isExpanded: z.boolean().optional(),
+	image: activityImageRelationSchema.nullable().optional(),
+	iconEmoji: z.string().optional(),
+	iconColor: z.string().optional(),
+	category: z.string().optional(),
+	isSelected: z.boolean().optional(),
+	isExpanded: z.boolean().optional(),
 });
 
 /**
  * Esquema para creación de actividades
  */
 export const createActivitySchema = z.object({
-  type: z.string(),
-  description: z.string(),
-  imageId: z.string().optional(),
+	type: z.string(),
+	description: z.string(),
+	imageId: z.string().optional(),
 });
 
 /**
  * Esquema para filtros de actividades
  */
 export const activityFiltersSchema = z.object({
-  types: z.array(z.string()).optional(),
-  startDate: z.union([z.string(), z.date()]).optional(),
-  endDate: z.union([z.string(), z.date()]).optional(),
-  imageId: z.string().optional(),
-  searchQuery: z.string().optional(),
-  limit: z.number().positive().optional(),
-  offset: z.number().nonnegative().optional(),
+	types: z.array(z.string()).optional(),
+	startDate: z.union([z.string(), z.date()]).optional(),
+	endDate: z.union([z.string(), z.date()]).optional(),
+	imageId: z.string().optional(),
+	searchQuery: z.string().optional(),
+	limit: z.number().positive().optional(),
+	offset: z.number().nonnegative().optional(),
 });
 
 /**
  * Esquema para response de listado de actividades
  */
 export const activityListResponseSchema = z.object({
-  activities: z.array(activitySchema),
-  totalCount: z.number(),
-  hasMore: z.boolean(),
+	activities: z.array(activitySchema),
+	totalCount: z.number(),
+	hasMore: z.boolean(),
 });
 
 /**

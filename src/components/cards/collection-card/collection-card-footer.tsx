@@ -36,7 +36,7 @@ export function CollectionCardFooter({
 			className={`p-3 border-t ${compact ? 'mt-auto' : ''}`}
 			style={{
 				borderColor: `${primaryColor}40`,
-				background: compact ? `linear-gradient(to top, ${primaryColor}25, transparent)` : 'transparent'
+				background: compact ? `linear-gradient(to top, ${primaryColor}25, transparent)` : 'transparent',
 			}}
 		>
 			{/* Pie de la carta */}
@@ -49,7 +49,7 @@ export function CollectionCardFooter({
 						style={{
 							border: `1px solid ${primaryColor}40`,
 							background: `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}30)`,
-							boxShadow: `0 1px 3px ${primaryColor}20`
+							boxShadow: `0 1px 3px ${primaryColor}20`,
 						}}
 					>
 						<Image className="w-3.5 h-3.5" />
@@ -62,7 +62,7 @@ export function CollectionCardFooter({
 						style={{
 							border: `1px solid ${primaryColor}40`,
 							background: `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}30)`,
-							boxShadow: `0 1px 3px ${primaryColor}20`
+							boxShadow: `0 1px 3px ${primaryColor}20`,
 						}}
 					>
 						<Database className="w-3.5 h-3.5" />
@@ -76,7 +76,7 @@ export function CollectionCardFooter({
 						className="flex items-center gap-1 bg-red-500/10 px-2 py-1 rounded-sm"
 						style={{
 							color: 'rgb(239, 68, 68)',
-							boxShadow: '0 0 5px rgba(239, 68, 68, 0.3)'
+							boxShadow: '0 0 5px rgba(239, 68, 68, 0.3)',
 						}}
 					>
 						<Heart className="w-3.5 h-3.5 fill-current" />
@@ -110,7 +110,7 @@ export function CollectionCardFooter({
 						className="mt-1 text-xs text-center text-muted-foreground italic"
 						style={{
 							opacity: 0.7,
-							textShadow: `0 0 5px ${primaryColor}30`
+							textShadow: `0 0 5px ${primaryColor}30`,
 						}}
 					>
 						♦ Colección digital ♦ {imagesCount > 0 ? `${imagesCount} items` : 'Sin items'}

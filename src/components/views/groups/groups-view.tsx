@@ -142,10 +142,7 @@ export function GroupsView(_props: ViewProps) {
 									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
 									data-group-id={(group as any).id}
 								>
-									<MemoizedGroupCard
-										group={group}
-										onGroupClick={onGroupClick}
-									/>
+									<MemoizedGroupCard group={group} onGroupClick={onGroupClick} />
 								</div>
 							</motion.div>
 						);

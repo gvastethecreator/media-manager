@@ -16,23 +16,23 @@ import { characters } from './character';
 import { worldItems } from './worldItem';
 
 export const places = sqliteTable(
-    'Place',
-    {
-        ...organizationFields,
-        region: text('region').default('unknown'),
-        type: text('type').default('unknown'),
-        climate: text('climate').default('temperate'),
-        population: integer('population').default(0),
-        government: text('government').default('unknown'),
-        dangers: text('dangers').default('empty_array'),
-        resources: text('resources').default('empty_array'),
-        lore: text('lore').default(''),
-        history: text('history').default(''),
-        stats: text('stats').default(''),
-    },
-    (table) => ({
-        ...createCommonIndexes(table),
-    })
+	'Place',
+	{
+		...organizationFields,
+		region: text('region').default('unknown'),
+		type: text('type').default('unknown'),
+		climate: text('climate').default('temperate'),
+		population: integer('population').default(0),
+		government: text('government').default('unknown'),
+		dangers: text('dangers').default('empty_array'),
+		resources: text('resources').default('empty_array'),
+		lore: text('lore').default(''),
+		history: text('history').default(''),
+		stats: text('stats').default(''),
+	},
+	(table) => ({
+		...createCommonIndexes(table),
+	})
 );
 
 // Tablas de relación
@@ -52,17 +52,17 @@ export const placesToGroups = createRelationTable('PlaceToGroup', 'Place', 'Grou
 
 // Relaciones
 export const placesRelations = relations(places, ({ many }) => ({
-    images: many(images, { through: placesToImages }),
-    videos: many(videos, { through: placesToVideos }),
-    albums: many(albums, { through: placesToAlbums }),
-    collections: many(collections, { through: placesToCollections }),
-    tags: many(tags, { through: placesToTags }),
-    characters: many(characters, { through: placesToCharacters }),
-    worldItems: many(worldItems, { through: placesToWorldItems }),
-    concepts: many(concepts, { through: placesToConcepts }),
-    prompts: many(prompts, { through: placesToPrompts }),
-    notes: many(notes, { through: placesToNotes }),
-    wildcards: many(wildcards, { through: placesToWildcards }),
-    properties: many(properties, { through: placesToProperties }),
-    groups: many(groups, { through: placesToGroups }),
+	images: many(images, { through: placesToImages }),
+	videos: many(videos, { through: placesToVideos }),
+	albums: many(albums, { through: placesToAlbums }),
+	collections: many(collections, { through: placesToCollections }),
+	tags: many(tags, { through: placesToTags }),
+	characters: many(characters, { through: placesToCharacters }),
+	worldItems: many(worldItems, { through: placesToWorldItems }),
+	concepts: many(concepts, { through: placesToConcepts }),
+	prompts: many(prompts, { through: placesToPrompts }),
+	notes: many(notes, { through: placesToNotes }),
+	wildcards: many(wildcards, { through: placesToWildcards }),
+	properties: many(properties, { through: placesToProperties }),
+	groups: many(groups, { through: placesToGroups }),
 }));

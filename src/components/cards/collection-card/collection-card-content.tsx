@@ -43,9 +43,7 @@ export function CollectionCardContent({
 	metadata,
 }: CollectionCardContentProps) {
 	// Determinar qué ediciones usar, prefiriendo parsedEditions
-	const editionsList = parsedEditions.length > 0
-		? parsedEditions
-		: Array.isArray(editions) ? editions : [];
+	const editionsList = parsedEditions.length > 0 ? parsedEditions : Array.isArray(editions) ? editions : [];
 
 	// Formatear precio
 	const formattedPrice = price
@@ -69,13 +67,11 @@ export function CollectionCardContent({
 				backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
 				backgroundSize: 'cover',
 				backgroundPosition: 'center',
-				backgroundBlendMode: 'overlay'
+				backgroundBlendMode: 'overlay',
 			}}
 		>
 			{/* Overlay para mantener legibilidad sobre imagen */}
-			{backgroundImage && (
-				<div className="absolute inset-0 bg-black/30 z-0" />
-			)}
+			{backgroundImage && <div className="absolute inset-0 bg-black/30 z-0" />}
 
 			{/* Contenido con posición relativa para estar sobre el overlay */}
 			<div className="relative z-10 h-full flex flex-col">
@@ -87,7 +83,7 @@ export function CollectionCardContent({
 							style={{
 								backgroundColor: rarityColors.background,
 								color: rarityColors.text,
-								border: `1px solid ${rarityColors.border}`
+								border: `1px solid ${rarityColors.border}`,
 							}}
 						>
 							{metadata.rarityLevel}
@@ -105,23 +101,13 @@ export function CollectionCardContent({
 				{/* Contadores con estilo TCG */}
 				{metadata && (
 					<div className="flex items-center gap-3 mb-2">
-						<motion.div
-							className="flex items-center gap-1 text-xs"
-							whileHover={{ scale: 1.05 }}
-						>
+						<motion.div className="flex items-center gap-1 text-xs" whileHover={{ scale: 1.05 }}>
 							<Diamond className="w-3.5 h-3.5" style={{ color: rarityColors.border }} />
-							<span className="font-bold">
-								{metadata.cardId}
-							</span>
+							<span className="font-bold">{metadata.cardId}</span>
 						</motion.div>
-						<motion.div
-							className="flex items-center gap-1 text-xs"
-							whileHover={{ scale: 1.05 }}
-						>
+						<motion.div className="flex items-center gap-1 text-xs" whileHover={{ scale: 1.05 }}>
 							<Bookmark className="w-3.5 h-3.5 text-muted-foreground" />
-							<span className="font-medium">
-								{metadata.totalItems} elementos
-							</span>
+							<span className="font-medium">{metadata.totalItems} elementos</span>
 						</motion.div>
 					</div>
 				)}
@@ -132,7 +118,7 @@ export function CollectionCardContent({
 					style={{
 						borderColor: `${primaryColor}30`,
 						backgroundColor: `${primaryColor}15`,
-						boxShadow: `inset 0 0 10px ${derivedSecondaryColor}30`
+						boxShadow: `inset 0 0 10px ${derivedSecondaryColor}30`,
 					}}
 				>
 					{/* Grid de propiedades */}
@@ -205,9 +191,7 @@ export function CollectionCardContent({
 									</li>
 								))}
 								{editionsList.length > 2 && (
-									<li className="text-xs italic text-muted-foreground">
-										...y {editionsList.length - 2} más
-									</li>
+									<li className="text-xs italic text-muted-foreground">...y {editionsList.length - 2} más</li>
 								)}
 							</ul>
 						</div>
@@ -216,10 +200,7 @@ export function CollectionCardContent({
 			</div>
 
 			{/* Decoración de esquina estilo TCG */}
-			<div
-				className="absolute bottom-1 right-1 w-4 h-4 opacity-70"
-				style={{ color: primaryColor }}
-			>
+			<div className="absolute bottom-1 right-1 w-4 h-4 opacity-70" style={{ color: primaryColor }}>
 				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
 					<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
 					<path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />

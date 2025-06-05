@@ -4,29 +4,26 @@
  */
 
 import { type Activity, type ActivityFilters, type CreateActivityData } from '../../types/entities/activity';
-import {
-    activityFiltersSchema,
-    activitySchema,
-    activityTypeSchema,
-    createActivitySchema
-} from './schema';
+import { activityFiltersSchema, activitySchema, activityTypeSchema, createActivitySchema } from './schema';
 
 /**
  * Valida los datos para crear una actividad
  * @param data Datos a validar
  * @returns Datos validados o error
  */
-export function validateCreateActivityData(data: CreateActivityData): { success: true; data: CreateActivityData } | { success: false; error: string } {
-  try {
-    const result = createActivitySchema.parse(data);
-    return { success: true, data: result };
-  } catch (error) {
-    // Si es un error de Zod, formateamos el mensaje
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Datos de actividad inválidos' };
-  }
+export function validateCreateActivityData(
+	data: CreateActivityData
+): { success: true; data: CreateActivityData } | { success: false; error: string } {
+	try {
+		const result = createActivitySchema.parse(data);
+		return { success: true, data: result };
+	} catch (error) {
+		// Si es un error de Zod, formateamos el mensaje
+		if (error instanceof Error) {
+			return { success: false, error: error.message };
+		}
+		return { success: false, error: 'Datos de actividad inválidos' };
+	}
 }
 
 /**
@@ -34,16 +31,18 @@ export function validateCreateActivityData(data: CreateActivityData): { success:
  * @param activity Actividad a validar
  * @returns Actividad validada o error
  */
-export function validateActivity(activity: Activity): { success: true; data: Activity } | { success: false; error: string } {
-  try {
-    const result = activitySchema.parse(activity);
-    return { success: true, data: result };
-  } catch (error) {
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Actividad inválida' };
-  }
+export function validateActivity(
+	activity: Activity
+): { success: true; data: Activity } | { success: false; error: string } {
+	try {
+		const result = activitySchema.parse(activity);
+		return { success: true, data: result };
+	} catch (error) {
+		if (error instanceof Error) {
+			return { success: false, error: error.message };
+		}
+		return { success: false, error: 'Actividad inválida' };
+	}
 }
 
 /**
@@ -51,16 +50,18 @@ export function validateActivity(activity: Activity): { success: true; data: Act
  * @param filters Filtros a validar
  * @returns Filtros validados o error
  */
-export function validateActivityFilters(filters: ActivityFilters): { success: true; data: ActivityFilters } | { success: false; error: string } {
-  try {
-    const result = activityFiltersSchema.parse(filters);
-    return { success: true, data: result };
-  } catch (error) {
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Filtros inválidos' };
-  }
+export function validateActivityFilters(
+	filters: ActivityFilters
+): { success: true; data: ActivityFilters } | { success: false; error: string } {
+	try {
+		const result = activityFiltersSchema.parse(filters);
+		return { success: true, data: result };
+	} catch (error) {
+		if (error instanceof Error) {
+			return { success: false, error: error.message };
+		}
+		return { success: false, error: 'Filtros inválidos' };
+	}
 }
 
 /**
@@ -69,12 +70,12 @@ export function validateActivityFilters(filters: ActivityFilters): { success: tr
  * @returns true si es válido, false si no lo es
  */
 export function isValidActivityType(type: string): boolean {
-  try {
-    activityTypeSchema.parse(type);
-    return true;
-  } catch {
-    return false;
-  }
+	try {
+		activityTypeSchema.parse(type);
+		return true;
+	} catch {
+		return false;
+	}
 }
 
 /**
@@ -83,13 +84,13 @@ export function isValidActivityType(type: string): boolean {
  * @returns Filtros normalizados
  */
 export function normalizeActivityFilters(filters: ActivityFilters): ActivityFilters {
-  return {
-    types: filters.types || [],
-    searchQuery: filters.searchQuery || '',
-    limit: filters.limit || 20,
-    offset: filters.offset || 0,
-    ...(filters.startDate ? { startDate: filters.startDate } : {}),
-    ...(filters.endDate ? { endDate: filters.endDate } : {}),
-    ...(filters.imageId ? { imageId: filters.imageId } : {}),
-  };
+	return {
+		types: filters.types || [],
+		searchQuery: filters.searchQuery || '',
+		limit: filters.limit || 20,
+		offset: filters.offset || 0,
+		...(filters.startDate ? { startDate: filters.startDate } : {}),
+		...(filters.endDate ? { endDate: filters.endDate } : {}),
+		...(filters.imageId ? { imageId: filters.imageId } : {}),
+	};
 }

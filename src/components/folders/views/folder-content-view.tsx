@@ -25,16 +25,18 @@ export function FolderContentView() {
 	// 🔄 Registrar información sobre la carpeta y las imágenes
 	useEffect(() => {
 		logger.info('🔍 DIAGNÓSTICO DETALLADO CARPETAS VACÍAS:', {
-			currentFolder: currentFolder ? {
-				id: currentFolder.id,
-				name: currentFolder.name,
-				path: (currentFolder as any).path || 'No disponible'
-			} : null,
+			currentFolder: currentFolder
+				? {
+						id: currentFolder.id,
+						name: currentFolder.name,
+						path: (currentFolder as any).path || 'No disponible',
+					}
+				: null,
 			currentFolderId,
 			imagesLength: images?.length || 0,
 			isLoading,
 			isError,
-			errorMessage: error instanceof Error ? error.message : error
+			errorMessage: error instanceof Error ? error.message : error,
 		});
 
 		if (currentFolder) {
@@ -51,7 +53,7 @@ export function FolderContentView() {
 				logger.warn(`   ⏱️ isLoading: ${isLoading}`);
 				logger.warn(`   ❌ isError: ${isError}`);
 				if (error) {
-					logger.warn(`   📊 Error details:`, error);
+					logger.warn('   📊 Error details:', error);
 				}
 			} else {
 				// Log de la primera imagen para verificar estructura

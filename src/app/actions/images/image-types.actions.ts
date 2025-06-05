@@ -3,11 +3,7 @@
  * @module app/actions/images/image-types
  */
 
-import type {
-    CreateImageData,
-    ImageBase,
-    ImageExtended
-} from '@/types/entities/image';
+import type { CreateImageData, ImageBase, ImageExtended } from '@/types/entities/image';
 import type { ImageResult } from '@/types/entities/image/transformer';
 
 /**

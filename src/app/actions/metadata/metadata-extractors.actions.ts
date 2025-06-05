@@ -1,23 +1,19 @@
 'use server';
 
+import { type Stats, statSync } from 'fs';
 import { CacheManager } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AIMetadata, FileMetadata } from '@/types/metadata';
-import { type Stats, statSync } from 'fs';
 import * as fs from 'fs/promises';
 import sharp from 'sharp';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
 import {
-    getAIGenerationInfo,
-    parseExifData,
-    parseMetadataString,
-    parseSharpMetadata,
+	getAIGenerationInfo,
+	parseExifData,
+	parseMetadataString,
+	parseSharpMetadata,
 } from './metadata-parsers.actions';
-import {
-    type ExtendedFileMetadata,
-    METADATA_RETRY_CONFIG,
-    type MetadataOptions
-} from './metadata-types.actions';
+import { type ExtendedFileMetadata, METADATA_RETRY_CONFIG, type MetadataOptions } from './metadata-types.actions';
 import { getImageFormat, isSupportedImageFormat, withRetry } from './metadata-utils.actions';
 
 const extractorLogger = serverLogger.withContext('MetadataExtractors');
@@ -442,4 +438,3 @@ export async function clearMetadataCache(): Promise<void> {
 	await metadataCache.clear();
 	extractorLogger.info('Caché de metadatos limpiada');
 }
-

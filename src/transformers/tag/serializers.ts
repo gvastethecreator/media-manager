@@ -5,28 +5,19 @@
 
 import { Logger } from '@/lib/logger';
 import { serverLogger } from '@/lib/logger/server-logger';
-import {
-    type TagCreateInput,
-    TagSchema,
-    type TagUpdateInput,
-} from '@/types/entities/tag/types';
-import {
-    validateFieldType,
-    validateRequiredFields
-} from '@/utils/transformers/common';
+import { type TagCreateInput, TagSchema, type TagUpdateInput } from '@/types/entities/tag/types';
+import { validateFieldType, validateRequiredFields } from '@/utils/transformers/common';
 import { handleTransformerError } from '@/utils/transformers/errors';
-import {
-    getRelationCounts,
-    preparePrismaRelations,
-    validateEntityRelations,
-} from '@/utils/transformers/relations';
-import {
-    validateBaseEntity,
-    validateMetadataFields,
-    validateUIFields,
-} from '@/utils/transformers/validation';
+import { getRelationCounts, preparePrismaRelations, validateEntityRelations } from '@/utils/transformers/relations';
+import { validateBaseEntity, validateMetadataFields, validateUIFields } from '@/utils/transformers/validation';
 import type { Prisma } from '@prisma/client';
-import { type TagBase, TagCategory, type TagComplete, type TagExtended, type TagWithStats } from '../../types/entities/tag/index';
+import {
+	type TagBase,
+	TagCategory,
+	type TagComplete,
+	type TagExtended,
+	type TagWithStats,
+} from '../../types/entities/tag/index';
 
 // Logger específico para serializadores de Tag
 const serializerLogger = serverLogger.withContext('TagSerializers');
@@ -124,19 +115,19 @@ export function fromPrismaTag(
 		// Construir objeto completo con relaciones
 		return {
 			...baseTag,
-			images: prismaTag.images?.map(img => ({ id: img.id })),
-			videos: prismaTag.videos?.map(vid => ({ id: vid.id })),
-			albums: prismaTag.albums?.map(alb => ({ id: alb.id })),
-			collections: prismaTag.collections?.map(col => ({ id: col.id })),
-			characters: prismaTag.characters?.map(char => ({ id: char.id })),
-			places: prismaTag.places?.map(place => ({ id: place.id })),
-			worldItems: prismaTag.worldItems?.map(item => ({ id: item.id })),
-			concepts: prismaTag.concepts?.map(con => ({ id: con.id })),
-			prompts: prismaTag.prompts?.map(prompt => ({ id: prompt.id })),
-			notes: prismaTag.notes?.map(note => ({ id: note.id })),
-			wildcards: prismaTag.wildcards?.map(wild => ({ id: wild.id })),
-			properties: prismaTag.properties?.map(prop => ({ id: prop.id })),
-			groups: prismaTag.groups?.map(group => ({ id: group.id })),
+			images: prismaTag.images?.map((img) => ({ id: img.id })),
+			videos: prismaTag.videos?.map((vid) => ({ id: vid.id })),
+			albums: prismaTag.albums?.map((alb) => ({ id: alb.id })),
+			collections: prismaTag.collections?.map((col) => ({ id: col.id })),
+			characters: prismaTag.characters?.map((char) => ({ id: char.id })),
+			places: prismaTag.places?.map((place) => ({ id: place.id })),
+			worldItems: prismaTag.worldItems?.map((item) => ({ id: item.id })),
+			concepts: prismaTag.concepts?.map((con) => ({ id: con.id })),
+			prompts: prismaTag.prompts?.map((prompt) => ({ id: prompt.id })),
+			notes: prismaTag.notes?.map((note) => ({ id: note.id })),
+			wildcards: prismaTag.wildcards?.map((wild) => ({ id: wild.id })),
+			properties: prismaTag.properties?.map((prop) => ({ id: prop.id })),
+			groups: prismaTag.groups?.map((group) => ({ id: group.id })),
 			_count: counts,
 		};
 	} catch (error) {
@@ -248,7 +239,7 @@ export function toTagComplete(tag: TagBase): TagComplete {
 		// Actualmente Tag no tiene campos JSON, así que simplemente devolvemos el objeto
 		// En un futuro, si se añaden campos JSON, aquí se parsearían
 		return {
-			...tag
+			...tag,
 		};
 	} catch (error) {
 		serializerLogger.error('❌ Error al deserializar Tag a TagComplete:', error);
@@ -267,7 +258,7 @@ export function fromTagComplete(tag: TagComplete): TagBase {
 		// Actualmente Tag no tiene campos JSON, así que simplemente devolvemos el objeto
 		// En un futuro, si se añaden campos JSON, aquí se serializarían
 		return {
-			...tag
+			...tag,
 		};
 	} catch (error) {
 		serializerLogger.error('❌ Error al serializar TagComplete a TagBase:', error);
@@ -318,7 +309,7 @@ export function tagToTagWithStats(tag: TagBase & { _count?: { images?: number } 
 	return {
 		...completeTag,
 		count: imageCount,
-		size: tag.totalSize ? formatSize(tag.totalSize) : "0 B",
+		size: tag.totalSize ? formatSize(tag.totalSize) : '0 B',
 	};
 }
 
@@ -364,9 +355,19 @@ export function normalizeTagCategory(category?: string | null): string {
  */
 export function generateTagColor(name: string): string {
 	const colors = [
-		'#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
-		'#ec4899', '#06b6d4', '#84cc16', '#6366f1', '#14b8a6',
-		'#f97316', '#d946ef', '#6b7280' // Añadido gris
+		'#3b82f6',
+		'#ef4444',
+		'#10b981',
+		'#f59e0b',
+		'#8b5cf6',
+		'#ec4899',
+		'#06b6d4',
+		'#84cc16',
+		'#6366f1',
+		'#14b8a6',
+		'#f97316',
+		'#d946ef',
+		'#6b7280', // Añadido gris
 	];
 	const hashValue = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 	return colors[hashValue % colors.length];
@@ -406,13 +407,13 @@ export function normalizeTagRarity(rarity?: string | null): string {
 
 	// Mapeo de posibles valores a los estándar
 	const rarityMap: Record<string, string> = {
-		'common': 'common',
-		'uncommon': 'uncommon',
-		'rare': 'rare',
-		'epic': 'epic',
-		'legendary': 'legendary',
-		'mythic': 'mythic',
-		'unique': 'unique'
+		common: 'common',
+		uncommon: 'uncommon',
+		rare: 'rare',
+		epic: 'epic',
+		legendary: 'legendary',
+		mythic: 'mythic',
+		unique: 'unique',
 	};
 
 	// Verificar si coincide con alguna rareza estándar

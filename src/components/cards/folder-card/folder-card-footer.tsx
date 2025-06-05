@@ -17,8 +17,8 @@ export function FolderCardFooter({ folder, tcgMode = false, children }: FolderCa
 	return (
 		<div
 			className={cn(
-				"flex justify-between items-center mt-auto p-2",
-				tcgMode ? "border-t border-white/20 bg-black/40" : "bg-card"
+				'flex justify-between items-center mt-auto p-2',
+				tcgMode ? 'border-t border-white/20 bg-black/40' : 'bg-card'
 			)}
 			style={!tcgMode ? { borderTop: `1px solid ${folder.color}20` } : {}}
 		>
@@ -32,10 +32,7 @@ export function FolderCardFooter({ folder, tcgMode = false, children }: FolderCa
 							style={{ borderColor: `${folder.color}50` }}
 							title="Folder icon"
 						>
-							<FolderIcon
-								className="w-3 h-3"
-								style={{ color: folder.color }}
-							/>
+							<FolderIcon className="w-3 h-3" style={{ color: folder.color }} />
 						</div>
 						<span className="ml-1 text-[0.65rem] font-semibold text-white/70">
 							Collection ID: {folder.id.slice(0, 8)}

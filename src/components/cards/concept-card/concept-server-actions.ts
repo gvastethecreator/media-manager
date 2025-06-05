@@ -49,15 +49,12 @@ export async function getRecentConceptImages(conceptId: string, limit = 6): Prom
 				thumbnailSize: true,
 				isFavorite: true,
 			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ createdAt: 'desc' },
-			],
+			orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
 			take: limit,
 		});
 
 		// Convertir los thumbnails a URLs de datos
-		const thumbnails: ThumbnailImage[] = images.map(image => {
+		const thumbnails: ThumbnailImage[] = images.map((image) => {
 			let thumbnailUrl = '';
 
 			// Verificar si tenemos un thumbnail válido
@@ -77,7 +74,9 @@ export async function getRecentConceptImages(conceptId: string, limit = 6): Prom
 		return thumbnails;
 	} catch (error) {
 		conceptCardLogger.error('❌ Error obteniendo imágenes para ConceptCard:', error);
-		throw new Error(`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 
@@ -136,9 +135,9 @@ export async function getConceptCounts(conceptId: string): Promise<{
 						wildcards: true,
 						properties: true,
 						groups: true,
-					}
-				}
-			}
+					},
+				},
+			},
 		});
 
 		if (!counts) {
@@ -226,9 +225,9 @@ export async function getConceptWithRelations(conceptId: string) {
 						wildcards: true,
 						properties: true,
 						groups: true,
-					}
-				}
-			}
+					},
+				},
+			},
 		});
 
 		if (!concept) {
@@ -240,9 +239,7 @@ export async function getConceptWithRelations(conceptId: string) {
 			...concept,
 			// Solo intentar parsear tags si la propiedad existe y es un string
 			// usando el operador de acceso seguro ? para evitar errores
-			tags: typeof concept?.tags === 'string' && concept.tags
-				? JSON.parse(concept.tags)
-				: concept?.tags || []
+			tags: typeof concept?.tags === 'string' && concept.tags ? JSON.parse(concept.tags) : concept?.tags || [],
 		};
 
 		conceptCardLogger.info('✅ Concepto obtenido correctamente');

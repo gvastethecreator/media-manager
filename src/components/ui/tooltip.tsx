@@ -34,14 +34,20 @@ const TooltipTrigger = memo(
 		const { onPointerMove, onPointerLeave, onPointerDown, onFocus, onBlur, onClick, ...restProps } = props;
 
 		// Creamos callbacks estables para cada evento, solo si están definidos
-		const stableOnPointerMove = useCallback(onPointerMove ? (e: React.PointerEvent) => onPointerMove(e) : undefined, []);
+		const stableOnPointerMove = useCallback(
+			onPointerMove ? (e: React.PointerEvent) => onPointerMove(e) : undefined,
+			[]
+		);
 
 		const stableOnPointerLeave = useCallback(
 			onPointerLeave ? (e: React.PointerEvent) => onPointerLeave(e) : undefined,
 			[]
 		);
 
-		const stableOnPointerDown = useCallback(onPointerDown ? (e: React.PointerEvent) => onPointerDown(e) : undefined, []);
+		const stableOnPointerDown = useCallback(
+			onPointerDown ? (e: React.PointerEvent) => onPointerDown(e) : undefined,
+			[]
+		);
 
 		const stableOnFocus = useCallback(onFocus ? (e: React.FocusEvent) => onFocus(e) : undefined, []);
 
@@ -121,4 +127,3 @@ const TooltipContent = memo(function TooltipContent({
 TooltipContent.displayName = 'TooltipContent';
 
 export { GlobalTooltipProvider, Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };
-

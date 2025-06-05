@@ -51,4 +51,3 @@ export const useFavoriteStore = createSelectors(useFavoriteStoreBase);
 // Re-exportar tipos y constantes
 export * from './constants';
 export * from './types';
-

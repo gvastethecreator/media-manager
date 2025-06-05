@@ -88,7 +88,7 @@ export const useActivityStore = create<ActivityStore>()(
 		),
 		{
 			name: 'ActivityStore',
-			enabled: process.env.NODE_ENV === 'development'
+			enabled: process.env.NODE_ENV === 'development',
 		}
 	)
 );
@@ -103,4 +103,3 @@ export { createActivityUISlice } from './slices/ui';
 
 // Exportar selectores útiles
 export * from './selectors';
-

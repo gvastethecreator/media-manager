@@ -217,12 +217,7 @@ export const toastService = {
 				},
 				'success'
 			),
-		error: (title: string, options?: ToastOptions) =>
-			showToast(
-				title,
-				options,
-				'error'
-			),
+		error: (title: string, options?: ToastOptions) => showToast(title, options, 'error'),
 	},
 	favorite: {
 		added: () =>
@@ -282,7 +277,7 @@ export const toastService = {
 				TOAST_TYPES.system.error,
 				{
 					description: message,
-					...options
+					...options,
 				},
 				'error'
 			),

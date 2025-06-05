@@ -28,17 +28,23 @@ export function mapCreatePromptDataToPrisma(data: any): any {
 		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
 		// Conexión con grupos si existen
-		groups: data.groupIds ? {
-			connect: data.groupIds.map((id: string) => ({ id })),
-		} : undefined,
+		groups: data.groupIds
+			? {
+					connect: data.groupIds.map((id: string) => ({ id })),
+				}
+			: undefined,
 		// Conexión con propiedades si existen
-		properties: data.propertyIds ? {
-			connect: data.propertyIds.map((id: string) => ({ id })),
-		} : undefined,
+		properties: data.propertyIds
+			? {
+					connect: data.propertyIds.map((id: string) => ({ id })),
+				}
+			: undefined,
 		// Conexión con comodines si existen
-		wildcards: data.wildcardIds ? {
-			connect: data.wildcardIds.map((id: string) => ({ id })),
-		} : undefined,
+		wildcards: data.wildcardIds
+			? {
+					connect: data.wildcardIds.map((id: string) => ({ id })),
+				}
+			: undefined,
 	};
 }
 

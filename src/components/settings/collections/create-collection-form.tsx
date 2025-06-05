@@ -11,7 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
 import type { CollectionBase as Collection, CreateCollectionData } from '@/types/entities/collection/base';
-import { COLLECTION_CATEGORY_COLORS, COLLECTION_CATEGORY_EMOJIS, CollectionCategory, CollectionPlatform, CollectionRarity } from '@/types/entities/collection/enums';
+import {
+	COLLECTION_CATEGORY_COLORS,
+	COLLECTION_CATEGORY_EMOJIS,
+	CollectionCategory,
+	CollectionPlatform,
+	CollectionRarity,
+} from '@/types/entities/collection/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -19,14 +25,20 @@ import { z } from 'zod';
 
 // Esquema de validación
 const createCollectionSchema = z.object({
-	name: z.string().min(2, {
-		message: 'El nombre debe tener al menos 2 caracteres',
-	}).max(50, {
-		message: 'El nombre no debe exceder los 50 caracteres',
-	}),
-	description: z.string().max(200, {
-		message: 'La descripción no debe exceder los 200 caracteres',
-	}).optional(),
+	name: z
+		.string()
+		.min(2, {
+			message: 'El nombre debe tener al menos 2 caracteres',
+		})
+		.max(50, {
+			message: 'El nombre no debe exceder los 50 caracteres',
+		}),
+	description: z
+		.string()
+		.max(200, {
+			message: 'La descripción no debe exceder los 200 caracteres',
+		})
+		.optional(),
 	color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
 		message: 'El color debe ser un código hexadecimal válido',
 	}),
@@ -58,7 +70,7 @@ export function CreateCollectionForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel
+	onCancel,
 }: CreateCollectionFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -120,7 +132,7 @@ export function CreateCollectionForm({
 				}
 				let color = '#';
 				for (let i = 0; i < 3; i++) {
-					const value = (hash >> (i * 8)) & 0xFF;
+					const value = (hash >> (i * 8)) & 0xff;
 					color += `00${value.toString(16)}`.substr(-2);
 				}
 				return color;
@@ -130,15 +142,25 @@ export function CreateCollectionForm({
 
 			// Intentar asignar un emoji relevante basado en palabras clave
 			const keywords: Record<string, string> = {
-				'arte': '🎨', 'art': '🎨',
-				'foto': '📷', 'photo': '📷',
-				'digital': '💻', 'web': '🌐',
-				'game': '🎮', 'juego': '🎮',
-				'música': '🎵', 'music': '🎵',
-				'movie': '🎬', 'película': '🎬', 'cine': '🎬',
-				'libro': '📚', 'book': '📚',
-				'anime': '🌟', 'manga': '📖',
-				'comic': '💬', 'historieta': '💬'
+				arte: '🎨',
+				art: '🎨',
+				foto: '📷',
+				photo: '📷',
+				digital: '💻',
+				web: '🌐',
+				game: '🎮',
+				juego: '🎮',
+				música: '🎵',
+				music: '🎵',
+				movie: '🎬',
+				película: '🎬',
+				cine: '🎬',
+				libro: '📚',
+				book: '📚',
+				anime: '🌟',
+				manga: '📖',
+				comic: '💬',
+				historieta: '💬',
 			};
 
 			const lowerName = name.toLowerCase();
@@ -184,7 +206,6 @@ export function CreateCollectionForm({
 				onCreated?.(created);
 				form.reset();
 			}
-
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} la colección`, {
@@ -222,9 +243,7 @@ export function CreateCollectionForm({
 									}}
 								/>
 							</FormControl>
-							<FormDescription>
-								El nombre de la colección, visible en listados e imágenes.
-							</FormDescription>
+							<FormDescription>El nombre de la colección, visible en listados e imágenes.</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -237,15 +256,9 @@ export function CreateCollectionForm({
 						<FormItem>
 							<FormLabel>Descripción (Opcional)</FormLabel>
 							<FormControl>
-								<Textarea
-									placeholder="Describe brevemente esta colección"
-									{...field}
-									value={field.value || ''}
-								/>
+								<Textarea placeholder="Describe brevemente esta colección" {...field} value={field.value || ''} />
 							</FormControl>
-							<FormDescription>
-								Una descripción breve para entender el propósito de esta colección.
-							</FormDescription>
+							<FormDescription>Una descripción breve para entender el propósito de esta colección.</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -259,14 +272,9 @@ export function CreateCollectionForm({
 							<FormItem>
 								<FormLabel>Emoji</FormLabel>
 								<FormControl>
-									<EmojiPicker
-										value={field.value}
-										onEmojiSelect={(emoji) => field.onChange(emoji)}
-									/>
+									<EmojiPicker value={field.value} onEmojiSelect={(emoji) => field.onChange(emoji)} />
 								</FormControl>
-								<FormDescription>
-									Selecciona un emoji representativo.
-								</FormDescription>
+								<FormDescription>Selecciona un emoji representativo.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -279,14 +287,9 @@ export function CreateCollectionForm({
 							<FormItem>
 								<FormLabel>Color</FormLabel>
 								<FormControl>
-									<ColorPicker
-										value={field.value}
-										onChange={(color) => field.onChange(color)}
-									/>
+									<ColorPicker value={field.value} onChange={(color) => field.onChange(color)} />
 								</FormControl>
-								<FormDescription>
-									Color para identificar visualmente la colección.
-								</FormDescription>
+								<FormDescription>Color para identificar visualmente la colección.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -322,9 +325,7 @@ export function CreateCollectionForm({
 									))}
 								</SelectContent>
 							</Select>
-							<FormDescription>
-								Agrupa colecciones del mismo tipo para una mejor organización.
-							</FormDescription>
+							<FormDescription>Agrupa colecciones del mismo tipo para una mejor organización.</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -337,10 +338,7 @@ export function CreateCollectionForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Rareza (Opcional)</FormLabel>
-								<Select
-									onValueChange={(value) => field.onChange(value || undefined)}
-									value={field.value}
-								>
+								<Select onValueChange={(value) => field.onChange(value || undefined)} value={field.value}>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder="Selecciona rareza" />
@@ -354,9 +352,7 @@ export function CreateCollectionForm({
 										))}
 									</SelectContent>
 								</Select>
-								<FormDescription>
-									Indica qué tan exclusiva es esta colección.
-								</FormDescription>
+								<FormDescription>Indica qué tan exclusiva es esta colección.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -368,10 +364,7 @@ export function CreateCollectionForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Plataforma (Opcional)</FormLabel>
-								<Select
-									onValueChange={(value) => field.onChange(value || undefined)}
-									value={field.value}
-								>
+								<Select onValueChange={(value) => field.onChange(value || undefined)} value={field.value}>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder="Selecciona plataforma" />
@@ -385,9 +378,7 @@ export function CreateCollectionForm({
 										))}
 									</SelectContent>
 								</Select>
-								<FormDescription>
-									Indica de qué plataforma proviene la colección.
-								</FormDescription>
+								<FormDescription>Indica de qué plataforma proviene la colección.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -402,14 +393,9 @@ export function CreateCollectionForm({
 							<FormItem>
 								<FormLabel>URL (Opcional)</FormLabel>
 								<FormControl>
-									<Input
-										placeholder="https://ejemplo.com/coleccion"
-										{...field}
-									/>
+									<Input placeholder="https://ejemplo.com/coleccion" {...field} />
 								</FormControl>
-								<FormDescription>
-									Enlace principal a la colección.
-								</FormDescription>
+								<FormDescription>Enlace principal a la colección.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -430,9 +416,7 @@ export function CreateCollectionForm({
 										value={field.value || ''}
 									/>
 								</FormControl>
-								<FormDescription>
-									Valor estimado o costo de la colección.
-								</FormDescription>
+								<FormDescription>Valor estimado o costo de la colección.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -464,25 +448,14 @@ export function CreateCollectionForm({
 
 				<div className="flex justify-end gap-2">
 					{onCancel && (
-						<Button
-							type="button"
-							variant="outline"
-							onClick={onCancel}
-						>
+						<Button type="button" variant="outline" onClick={onCancel}>
 							Cancelar
 						</Button>
 					)}
-					<Button
-						type="button"
-						variant="outline"
-						onClick={generateSuggestions}
-					>
+					<Button type="button" variant="outline" onClick={generateSuggestions}>
 						Generar sugerencias
 					</Button>
-					<Button
-						type="submit"
-						disabled={isSubmitting}
-					>
+					<Button type="submit" disabled={isSubmitting}>
 						{isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
 					</Button>
 				</div>

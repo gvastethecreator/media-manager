@@ -93,15 +93,15 @@ const CreateButton = memo(function CreateButton({
 
 	// Mapeo de entidades a sus correspondientes tabs en SettingsView
 	const entityToSettingsTabMap: Record<string, string> = {
-		'álbum': 'albums',
-		'etiqueta': 'tags',
-		'colección': 'collections',
-		'personaje': 'characters',
-		'lugar': 'places',
+		álbum: 'albums',
+		etiqueta: 'tags',
+		colección: 'collections',
+		personaje: 'characters',
+		lugar: 'places',
 		'objeto del mundo': 'world-items',
-		'prompt': 'prompts',
-		'nota': 'notes',
-		'concepto': 'concepts',
+		prompt: 'prompts',
+		nota: 'notes',
+		concepto: 'concepts',
 	};
 
 	const handleCreateClick = useCallback(() => {
@@ -121,7 +121,7 @@ const CreateButton = memo(function CreateButton({
 			// Para que esto funcione, SettingsView debe escuchar por este evento
 			window.dispatchEvent(
 				new CustomEvent('set-settings-tab', {
-					detail: { tab: settingsTab }
+					detail: { tab: settingsTab },
 				})
 			);
 		}
@@ -163,22 +163,28 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 	}, [onCreateAction, entityName]);
 
 	// Callback para manejar el cambio de estado abierto/cerrado
-	const handleOpenChange = useCallback((open: boolean) => {
-		submenuLogger.info(`${open ? '📂' : '📁'} Submenú ${entityName} ${open ? 'abierto' : 'cerrado'}`);
-		if (onOpenChange) {
-			onOpenChange(open);
-		}
-	}, [onOpenChange, entityName]);
+	const handleOpenChange = useCallback(
+		(open: boolean) => {
+			submenuLogger.info(`${open ? '📂' : '📁'} Submenú ${entityName} ${open ? 'abierto' : 'cerrado'}`);
+			if (onOpenChange) {
+				onOpenChange(open);
+			}
+		},
+		[onOpenChange, entityName]
+	);
 
 	// Callback para la selección de una entidad
-	const handleSelectAction = useCallback((entity: any) => {
-		try {
-			submenuLogger.info(`✅ Seleccionado ${entityName}:`, (entity as any).id || 'unknown');
-			onSelectAction(entity);
-		} catch (error) {
-			submenuLogger.error(`❌ Error al seleccionar ${entityName}:`, error);
-		}
-	}, [onSelectAction, entityName]);
+	const handleSelectAction = useCallback(
+		(entity: any) => {
+			try {
+				submenuLogger.info(`✅ Seleccionado ${entityName}:`, (entity as any).id || 'unknown');
+				onSelectAction(entity);
+			} catch (error) {
+				submenuLogger.error(`❌ Error al seleccionar ${entityName}:`, error);
+			}
+		},
+		[onSelectAction, entityName]
+	);
 
 	// Memoizar la lista de entidades renderizadas
 	const renderedItems = useMemo(() => {
@@ -272,9 +278,5 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 
 // Nuevo componente para mostrar un indicador de error sin bloquear el contenido
 const ErrorIndicator = memo(function ErrorIndicator({ entityName }: { entityName: string }) {
-	return (
-		<div className="px-2 py-1 text-xs text-red-500 italic">
-			Error al cargar todos los {entityName}
-		</div>
-	);
+	return <div className="px-2 py-1 text-xs text-red-500 italic">Error al cargar todos los {entityName}</div>;
 });

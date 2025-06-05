@@ -7,10 +7,7 @@ import { revalidatePath } from 'next/cache';
 
 // Importamos el transformer y utilities de errores
 import { imageTransformer } from '@/types/entities/image/transformer';
-import {
-    createEntityNotFoundError,
-    toServiceError
-} from '@/utils/errors/service-errors';
+import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 
 // Importamos tipos necesarios
 import type { CreateImageData, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image';

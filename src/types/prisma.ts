@@ -141,75 +141,75 @@ export interface ExtendedCharacter {
  * Tipo de dato Prisma
  */
 export enum PrismaFieldType {
-    STRING = 'String',
-    INT = 'Int',
-    FLOAT = 'Float',
-    BOOLEAN = 'Boolean',
-    DATETIME = 'DateTime',
-    JSON = 'Json',
-    ENUM = 'Enum',
-    RELATION = 'Relation'
+	STRING = 'String',
+	INT = 'Int',
+	FLOAT = 'Float',
+	BOOLEAN = 'Boolean',
+	DATETIME = 'DateTime',
+	JSON = 'Json',
+	ENUM = 'Enum',
+	RELATION = 'Relation',
 }
 
 /**
  * Tipo de relación Prisma
  */
 export enum PrismaRelationType {
-    ONE_TO_ONE = '1-1',
-    ONE_TO_MANY = '1-n',
-    MANY_TO_ONE = 'n-1',
-    MANY_TO_MANY = 'm-n'
+	ONE_TO_ONE = '1-1',
+	ONE_TO_MANY = '1-n',
+	MANY_TO_ONE = 'n-1',
+	MANY_TO_MANY = 'm-n',
 }
 
 /**
  * Campo de modelo Prisma
  */
 export interface PrismaField {
-    name: string;
-    type: PrismaFieldType;
-    isRequired: boolean;
-    isUnique: boolean;
-    isId: boolean;
-    isList: boolean;
-    hasDefaultValue: boolean;
-    defaultValue?: any;
-    relationName?: string;
-    relationType?: PrismaRelationType;
-    relationToModelName?: string;
+	name: string;
+	type: PrismaFieldType;
+	isRequired: boolean;
+	isUnique: boolean;
+	isId: boolean;
+	isList: boolean;
+	hasDefaultValue: boolean;
+	defaultValue?: any;
+	relationName?: string;
+	relationType?: PrismaRelationType;
+	relationToModelName?: string;
 }
 
 /**
  * Modelo Prisma
  */
 export interface PrismaModel {
-    name: string;
-    tableName: string;
-    fields: PrismaField[];
-    uniqueFields: string[][];
-    relations: Record<string, PrismaRelationType>;
+	name: string;
+	tableName: string;
+	fields: PrismaField[];
+	uniqueFields: string[][];
+	relations: Record<string, PrismaRelationType>;
 }
 
 /**
  * Opciones de consulta Prisma
  */
 export interface PrismaQueryOptions {
-    select?: Record<string, boolean>;
-    include?: Record<string, boolean>;
-    where?: Record<string, any>;
-    orderBy?: Record<string, 'asc' | 'desc'>;
-    skip?: number;
-    take?: number;
-    distinct?: string[];
+	select?: Record<string, boolean>;
+	include?: Record<string, boolean>;
+	where?: Record<string, any>;
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	skip?: number;
+	take?: number;
+	distinct?: string[];
 }
 
 /**
  * Resultado de operación Prisma
  */
 export interface PrismaResult<T = any> {
-    success: boolean;
-    data?: T;
-    count?: number;
-    error?: Error;
+	success: boolean;
+	data?: T;
+	count?: number;
+	error?: Error;
 }
 
 // Validaciones Zod
@@ -217,35 +217,35 @@ export const prismaFieldTypeSchema = z.nativeEnum(PrismaFieldType);
 export const prismaRelationTypeSchema = z.nativeEnum(PrismaRelationType);
 
 export const prismaFieldSchema = z.object({
-    name: z.string(),
-    type: prismaFieldTypeSchema,
-    isRequired: z.boolean(),
-    isUnique: z.boolean(),
-    isId: z.boolean(),
-    isList: z.boolean(),
-    hasDefaultValue: z.boolean(),
-    defaultValue: z.any().optional(),
-    relationName: z.string().optional(),
-    relationType: prismaRelationTypeSchema.optional(),
-    relationToModelName: z.string().optional()
+	name: z.string(),
+	type: prismaFieldTypeSchema,
+	isRequired: z.boolean(),
+	isUnique: z.boolean(),
+	isId: z.boolean(),
+	isList: z.boolean(),
+	hasDefaultValue: z.boolean(),
+	defaultValue: z.any().optional(),
+	relationName: z.string().optional(),
+	relationType: prismaRelationTypeSchema.optional(),
+	relationToModelName: z.string().optional(),
 });
 
 export const prismaModelSchema = z.object({
-    name: z.string(),
-    tableName: z.string(),
-    fields: z.array(prismaFieldSchema),
-    uniqueFields: z.array(z.array(z.string())),
-    relations: z.record(prismaRelationTypeSchema)
+	name: z.string(),
+	tableName: z.string(),
+	fields: z.array(prismaFieldSchema),
+	uniqueFields: z.array(z.array(z.string())),
+	relations: z.record(prismaRelationTypeSchema),
 });
 
 export const prismaQueryOptionsSchema = z.object({
-    select: z.record(z.boolean()).optional(),
-    include: z.record(z.boolean()).optional(),
-    where: z.record(z.any()).optional(),
-    orderBy: z.record(z.enum(['asc', 'desc'])).optional(),
-    skip: z.number().nonnegative().optional(),
-    take: z.number().positive().optional(),
-    distinct: z.array(z.string()).optional()
+	select: z.record(z.boolean()).optional(),
+	include: z.record(z.boolean()).optional(),
+	where: z.record(z.any()).optional(),
+	orderBy: z.record(z.enum(['asc', 'desc'])).optional(),
+	skip: z.number().nonnegative().optional(),
+	take: z.number().positive().optional(),
+	distinct: z.array(z.string()).optional(),
 });
 
 // Tipos inferidos

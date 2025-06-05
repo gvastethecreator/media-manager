@@ -17,50 +17,50 @@ export type UploadedImageType = UploadedFileType;
  * Schema for uploaded image validation
  */
 export const UploadedImageSchema = z.object({
-  ...BaseEntitySchema.shape,
-  ...MetadataFieldsSchema.shape,
-  path: z.string(),
-  originalName: z.string().optional(),
-  type: z.nativeEnum(UploadedFileType),
-  category: z.string(),
-  size: z.number(),
-  width: z.number(),
-  height: z.number(),
-  metadata: z.string().nullable().optional(),
-  uploadedAt: z.date(),
+	...BaseEntitySchema.shape,
+	...MetadataFieldsSchema.shape,
+	path: z.string(),
+	originalName: z.string().optional(),
+	type: z.nativeEnum(UploadedFileType),
+	category: z.string(),
+	size: z.number(),
+	width: z.number(),
+	height: z.number(),
+	metadata: z.string().nullable().optional(),
+	uploadedAt: z.date(),
 });
 
 /**
  * Base interface for uploaded images
  */
 export interface UploadedImageBase extends BaseEntity {
-  path: string;
-  originalName?: string;
-  type: UploadedImageType;
-  category: string;
-  size: number;
-  width: number;
-  height: number;
-  metadata?: string | null;
-  uploadedAt: Date;
+	path: string;
+	originalName?: string;
+	type: UploadedImageType;
+	category: string;
+	size: number;
+	width: number;
+	height: number;
+	metadata?: string | null;
+	uploadedAt: Date;
 }
 
 /**
  * Interface for dimensions with aspect ratio
  */
 export interface UploadedImageDimensions {
-  width: number;
-  height: number;
-  aspectRatio: number;
+	width: number;
+	height: number;
+	aspectRatio: number;
 }
 
 /**
  * Interface for uploaded image with additional client-side properties
  */
 export interface UploadedImageExtended extends UploadedImageBase {
-  dimensions: UploadedImageDimensions;
-  url: string;
-  thumbnailUrl?: string;
+	dimensions: UploadedImageDimensions;
+	url: string;
+	thumbnailUrl?: string;
 }
 
 /**

@@ -1,24 +1,19 @@
 'use client';
 
-import { createProperty, deleteProperty, getProperties, togglePropertyFavorite, updateProperty } from '@/app/actions/properties/property.actions';
+import {
+	createProperty,
+	deleteProperty,
+	getProperties,
+	togglePropertyFavorite,
+	updateProperty,
+} from '@/app/actions/properties/property.actions';
 import { PropertyPreview } from '@/components/settings/properties/property-preview';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import type { createPropertySchema, propertyFiltersSchema } from '@/lib/validations/property';
 import toastService from '@/services/toast.service';
@@ -81,7 +76,7 @@ export function PropertiesSettings() {
 		try {
 			setIsLoading(true);
 			const data = await getProperties();
-			const propertiesWithStats = data.map(property => ({
+			const propertiesWithStats = data.map((property) => ({
 				...property,
 				totalAssociations: Object.values(property._count).reduce((a, b) => a + b, 0),
 			})) as PropertyWithStats[];
@@ -98,18 +93,19 @@ export function PropertiesSettings() {
 	};
 
 	// Filtrar propiedades basadas en los criterios validados
-	const filteredProperties = properties.filter(property => {
+	const filteredProperties = properties.filter((property) => {
 		let matches = true;
 		if (filters.searchQuery) {
 			const normalizedQuery = filters.searchQuery.toLowerCase();
-			matches = matches && (
-				property.name.toLowerCase().includes(normalizedQuery) ||
-				property.description?.toLowerCase().includes(normalizedQuery) ||
-				false
-			);
+			matches =
+				matches &&
+				(property.name.toLowerCase().includes(normalizedQuery) ||
+					property.description?.toLowerCase().includes(normalizedQuery) ||
+					false);
 		}
 		if (filters.categories && filters.categories.length > 0) {
-			matches = matches && (property.category ? filters.categories.includes(property.category as PropertyCategory) : false);
+			matches =
+				matches && (property.category ? filters.categories.includes(property.category as PropertyCategory) : false);
 		}
 		if (filters.onlyFavorites) {
 			matches = matches && property.isFavorite;
@@ -136,20 +132,26 @@ export function PropertiesSettings() {
 	const stats = {
 		totalProperties: properties.length,
 		totalAssociations: properties.reduce((acc, property) => acc + property.totalAssociations, 0),
-		emptyProperties: properties.filter(property => property.totalAssociations === 0).length,
-		favoriteProperties: properties.filter(property => property.isFavorite).length,
-		byCategory: properties.reduce((acc, property) => {
-			const category = property.category || 'sin categoría';
-			acc[category] = (acc[category] || 0) + 1;
-			return acc;
-		}, {} as Record<string, number>),
+		emptyProperties: properties.filter((property) => property.totalAssociations === 0).length,
+		favoriteProperties: properties.filter((property) => property.isFavorite).length,
+		byCategory: properties.reduce(
+			(acc, property) => {
+				const category = property.category || 'sin categoría';
+				acc[category] = (acc[category] || 0) + 1;
+				return acc;
+			},
+			{} as Record<string, number>
+		),
 	};
 
 	// Manejadores actualizados
 	const handleCreateProperty = async (data: PropertyFormData) => {
 		try {
 			const newProperty = await createProperty(data);
-			setProperties(prev => [...prev, { ...newProperty, _count: emptyCount, totalAssociations: 0 } as PropertyWithStats]);
+			setProperties((prev) => [
+				...prev,
+				{ ...newProperty, _count: emptyCount, totalAssociations: 0 } as PropertyWithStats,
+			]);
 			setIsCreateDialogOpen(false);
 			toastService.success('Propiedad creada correctamente');
 		} catch (err) {
@@ -163,7 +165,7 @@ export function PropertiesSettings() {
 	const handleUpdateProperty = async (id: string, data: PropertyFormData) => {
 		try {
 			const updatedProperty = await updateProperty(id, data);
-			setProperties(prev => prev.map(p => p.id === id ? { ...p, ...updatedProperty } : p));
+			setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...updatedProperty } : p)));
 			setSelectedProperty(null);
 			setIsEditMode(false);
 			toastService.success('Propiedad actualizada correctamente');
@@ -179,7 +181,7 @@ export function PropertiesSettings() {
 		try {
 			setIsDeleting(true);
 			await deleteProperty(id);
-			setProperties(prev => prev.filter(p => p.id !== id));
+			setProperties((prev) => prev.filter((p) => p.id !== id));
 			setSelectedProperty(null);
 			toastService.success('Propiedad eliminada correctamente');
 		} catch (err) {
@@ -195,15 +197,15 @@ export function PropertiesSettings() {
 	const handleToggleFavorite = async (property: PropertyWithStats) => {
 		try {
 			await togglePropertyFavorite(property.id);
-			setProperties(prev => prev.map(p =>
-				p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p
-			));
+			setProperties((prev) => prev.map((p) => (p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p)));
 
 			if (selectedProperty?.id === property.id) {
-				setSelectedProperty(prev => prev ? { ...prev, isFavorite: !prev.isFavorite } : null);
+				setSelectedProperty((prev) => (prev ? { ...prev, isFavorite: !prev.isFavorite } : null));
 			}
 
-			toastService.success(`${property.name} ${!property.isFavorite ? 'marcada como favorita' : 'desmarcada como favorita'}`);
+			toastService.success(
+				`${property.name} ${!property.isFavorite ? 'marcada como favorita' : 'desmarcada como favorita'}`
+			);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 			toastService.error('Error al actualizar favorito', {
@@ -305,12 +307,7 @@ export function PropertiesSettings() {
 												? 'No se encontraron propiedades con los filtros aplicados'
 												: 'No hay propiedades creadas'}
 										</p>
-										<Button
-											variant="ghost"
-											size="sm"
-											className="mt-2"
-											onClick={() => setIsCreateDialogOpen(true)}
-										>
+										<Button variant="ghost" size="sm" className="mt-2" onClick={() => setIsCreateDialogOpen(true)}>
 											Crear propiedad
 										</Button>
 									</div>
@@ -328,14 +325,10 @@ export function PropertiesSettings() {
 												</span>
 												<div className="flex flex-col items-start">
 													<span className="font-medium">{property.name}</span>
-													<span className="text-xs opacity-50">
-														{property.totalAssociations} elementos
-													</span>
+													<span className="text-xs opacity-50">{property.totalAssociations} elementos</span>
 												</div>
 											</div>
-											{property.isFavorite && (
-												<StarIcon className="h-3 w-3 absolute right-2 top-2 text-yellow-500" />
-											)}
+											{property.isFavorite && <StarIcon className="h-3 w-3 absolute right-2 top-2 text-yellow-500" />}
 											<Button
 												variant="ghost"
 												size="icon"
@@ -379,23 +372,15 @@ export function PropertiesSettings() {
 					) : (
 						<div className="flex flex-col items-center justify-center h-full">
 							<FolderIcon className="h-12 w-12 opacity-20" />
-							<p className="text-sm opacity-50 mt-2">
-								Selecciona una propiedad para ver sus detalles
-							</p>
+							<p className="text-sm opacity-50 mt-2">Selecciona una propiedad para ver sus detalles</p>
 						</div>
 					)}
 				</Card>
 			</div>
 
 			{/* Dialog para crear nueva propiedad */}
-			<Dialog
-				open={isCreateDialogOpen}
-				onOpenChange={setIsCreateDialogOpen}
-			>
-				<CreatePropertyForm
-					onSubmit={handleCreateProperty}
-					onCancel={() => setIsCreateDialogOpen(false)}
-				/>
+			<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+				<CreatePropertyForm onSubmit={handleCreateProperty} onCancel={() => setIsCreateDialogOpen(false)} />
 			</Dialog>
 		</div>
 	);

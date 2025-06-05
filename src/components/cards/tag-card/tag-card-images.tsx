@@ -34,7 +34,7 @@ export function TagCardImages({
 	rarity = TagRarity.COMMON,
 	featuredImage = null,
 	tcgMode = true,
-	compact = false
+	compact = false,
 }: TagCardImagesProps) {
 	// Estado para almacenar las imágenes
 	const [images, setImages] = useState<ThumbnailImage[]>([]);
@@ -42,13 +42,14 @@ export function TagCardImages({
 	const [error, setError] = useState<string | null>(null);
 
 	// Conseguir un factor de brillo basado en la rareza para efectos visuales
-	const rarityBrightness = {
-		[TagRarity.COMMON]: 1,
-		[TagRarity.UNCOMMON]: 1.2,
-		[TagRarity.RARE]: 1.5,
-		[TagRarity.EPIC]: 1.8,
-		[TagRarity.LEGENDARY]: 2.2
-	}[rarity as keyof typeof rarityBrightness] || 1;
+	const rarityBrightness =
+		{
+			[TagRarity.COMMON]: 1,
+			[TagRarity.UNCOMMON]: 1.2,
+			[TagRarity.RARE]: 1.5,
+			[TagRarity.EPIC]: 1.8,
+			[TagRarity.LEGENDARY]: 2.2,
+		}[rarity as keyof typeof rarityBrightness] || 1;
 
 	// Cargar imágenes al montar el componente
 	useEffect(() => {
@@ -60,7 +61,7 @@ export function TagCardImages({
 
 				// Si hay una imagen destacada, asegurarse de que aparezca primero
 				if (featuredImage && fetchedImages.length > 0) {
-					const filteredImages = fetchedImages.filter(img => img.id !== featuredImage.id);
+					const filteredImages = fetchedImages.filter((img) => img.id !== featuredImage.id);
 					setImages([featuredImage as ThumbnailImage, ...filteredImages]);
 				} else {
 					setImages(fetchedImages);
@@ -81,10 +82,7 @@ export function TagCardImages({
 	// Elemento placeholder para cuando no hay imágenes
 	const renderPlaceholder = () => (
 		<div className="flex flex-col items-center justify-center h-full">
-			<ImageIcon
-				className="text-muted-foreground mb-2"
-				style={{ color: `${primaryColor}70` }}
-			/>
+			<ImageIcon className="text-muted-foreground mb-2" style={{ color: `${primaryColor}70` }} />
 			<p className="text-xs text-muted-foreground text-center" style={{ color: `${primaryColor}90` }}>
 				{error || 'No hay imágenes con esta etiqueta'}
 			</p>
@@ -95,15 +93,10 @@ export function TagCardImages({
 	if (loading) {
 		return (
 			<div
-				className={cn(
-					"flex-shrink-0 flex items-center justify-center bg-black/5",
-					compact ? "h-[120px]" : "h-[140px]"
-				)}
+				className={cn('flex-shrink-0 flex items-center justify-center bg-black/5', compact ? 'h-[120px]' : 'h-[140px]')}
 				style={{
 					borderBottom: `1px solid ${primaryColor}20`,
-					background: tcgMode
-						? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
-						: `${primaryColor}05`
+					background: tcgMode ? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)` : `${primaryColor}05`,
 				}}
 			>
 				<div
@@ -118,15 +111,10 @@ export function TagCardImages({
 	if (error || images.length === 0) {
 		return (
 			<div
-				className={cn(
-					"flex-shrink-0 bg-black/5",
-					compact ? "h-[120px]" : "h-[140px]"
-				)}
+				className={cn('flex-shrink-0 bg-black/5', compact ? 'h-[120px]' : 'h-[140px]')}
 				style={{
 					borderBottom: `1px solid ${primaryColor}20`,
-					background: tcgMode
-						? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
-						: `${primaryColor}05`
+					background: tcgMode ? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)` : `${primaryColor}05`,
 				}}
 			>
 				{renderPlaceholder()}
@@ -137,21 +125,16 @@ export function TagCardImages({
 	// Renderizar mosaico de imágenes - diseño especial para etiquetas
 	return (
 		<div
-			className={cn(
-				"flex-shrink-0 overflow-hidden relative",
-				compact ? "h-[120px]" : "h-[140px]"
-			)}
+			className={cn('flex-shrink-0 overflow-hidden relative', compact ? 'h-[120px]' : 'h-[140px]')}
 			style={{
-				borderBottom: `1px solid ${primaryColor}20`
+				borderBottom: `1px solid ${primaryColor}20`,
 			}}
 		>
 			{/* Fondo estilizado */}
 			<div
 				className="absolute inset-0 -z-10"
 				style={{
-					background: tcgMode
-						? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)`
-						: `${primaryColor}05`
+					background: tcgMode ? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)` : `${primaryColor}05`,
 				}}
 			/>
 
@@ -168,10 +151,7 @@ export function TagCardImages({
 			{/* Grid de imágenes con efecto de mosaico etiquetado */}
 			<div className="grid grid-cols-3 grid-rows-2 gap-px h-full">
 				{images.slice(0, 6).map((image, index) => (
-					<div
-						key={image.id}
-						className="relative overflow-hidden bg-black/20"
-					>
+					<div key={image.id} className="relative overflow-hidden bg-black/20">
 						{/* Imagen */}
 						<img
 							src={image.thumbnailUrl}
@@ -181,9 +161,7 @@ export function TagCardImages({
 							style={{
 								opacity: tcgMode ? 0.9 : 1,
 								// Efectos específicos de etiqueta: borde sutil y tratamiento de imágen
-								filter: tcgMode
-									? `contrast(1.05) ${index % 2 === 0 ? 'saturate(1.1)' : 'saturate(0.9)'}`
-									: 'none'
+								filter: tcgMode ? `contrast(1.05) ${index % 2 === 0 ? 'saturate(1.1)' : 'saturate(0.9)'}` : 'none',
 							}}
 						/>
 
@@ -193,7 +171,7 @@ export function TagCardImages({
 								className="absolute top-0 left-0 w-[20px] h-[20px] opacity-70"
 								style={{
 									background: primaryColor,
-									clipPath: 'polygon(0 0, 100% 0, 0 100%)'
+									clipPath: 'polygon(0 0, 100% 0, 0 100%)',
 								}}
 							/>
 						)}
@@ -203,10 +181,8 @@ export function TagCardImages({
 							className="absolute inset-0 pointer-events-none"
 							style={{
 								boxShadow: `inset 0 0 0 1px ${primaryColor}30`,
-								background: tcgMode
-									? `linear-gradient(135deg, ${primaryColor}20, transparent)`
-									: 'none',
-								filter: tcgMode && rarity !== TagRarity.COMMON ? `brightness(${rarityBrightness})` : 'none'
+								background: tcgMode ? `linear-gradient(135deg, ${primaryColor}20, transparent)` : 'none',
+								filter: tcgMode && rarity !== TagRarity.COMMON ? `brightness(${rarityBrightness})` : 'none',
 							}}
 						/>
 
@@ -216,7 +192,7 @@ export function TagCardImages({
 								className="absolute bottom-0 right-0 w-[15px] h-[15px]"
 								style={{
 									background: primaryColor,
-									clipPath: 'polygon(100% 0, 100% 100%, 0 100%)'
+									clipPath: 'polygon(100% 0, 100% 100%, 0 100%)',
 								}}
 							/>
 						)}
@@ -231,7 +207,7 @@ export function TagCardImages({
 					style={{
 						background: `${primaryColor}80`,
 						color: 'white',
-						boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+						boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
 					}}
 				>
 					+{images.length - 6}

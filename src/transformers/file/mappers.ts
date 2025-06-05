@@ -3,6 +3,7 @@
  * @module transformers/file/mappers
  */
 
+import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	type DirectoryInfo,
@@ -14,7 +15,6 @@ import {
 	type FileInfo,
 	FileType,
 } from '@/types/entities/file/index';
-import path from 'path';
 
 const mappersLogger = serverLogger.withContext('File:Mappers');
 
@@ -54,13 +54,13 @@ export function determineFileType(extension: string): FileType {
 	// Comprobar por tipo usando las constantes predefinidas
 	if (FILE_EXTENSION_GROUPS.IMAGE.includes(normalizedExt as any)) {
 		return FileType.IMAGE;
-	} else if (FILE_EXTENSION_GROUPS.VIDEO.includes(normalizedExt as any)) {
+	}if (FILE_EXTENSION_GROUPS.VIDEO.includes(normalizedExt as any)) {
 		return FileType.VIDEO;
-	} else if (FILE_EXTENSION_GROUPS.AUDIO.includes(normalizedExt as any)) {
+	}if (FILE_EXTENSION_GROUPS.AUDIO.includes(normalizedExt as any)) {
 		return FileType.AUDIO;
-	} else if (FILE_EXTENSION_GROUPS.DOCUMENT.includes(normalizedExt as any)) {
+	}if (FILE_EXTENSION_GROUPS.DOCUMENT.includes(normalizedExt as any)) {
 		return FileType.DOCUMENT;
-	} else if (FILE_EXTENSION_GROUPS.ARCHIVE.includes(normalizedExt as any)) {
+	}if (FILE_EXTENSION_GROUPS.ARCHIVE.includes(normalizedExt as any)) {
 		return FileType.ARCHIVE;
 	}
 
@@ -302,7 +302,7 @@ export function toEnhancedDirectory(fileInfo: FileInfo, childItems: FileBase[] =
 			isDirectory: true,
 			iconUrl: '/icons/folder.svg',
 			thumbnailUrl: childItems.some((item) => item.type === FileType.IMAGE)
-				? '/api/directory-thumbnail?path=' + encodeURIComponent(fileInfo.path)
+				? `/api/directory-thumbnail?path=${encodeURIComponent(fileInfo.path)}`
 				: undefined,
 			itemCount: childItems.length,
 			hasSubdirectories: childItems.some((item) => item.isDirectory),
@@ -422,15 +422,15 @@ export function applyFileFilters(files: FileBase[], options: FileFilterOptions):
 			filteredFiles = filteredFiles.filter((file) => {
 				if (file.isDirectory) return true; // Mantener directorios
 				const fileExt = path.extname(file.name).toLowerCase();
-				return options.extensions!.includes(fileExt);
+				return options.extensions?.includes(fileExt);
 			});
 		}
 
 		// Filtrar por tipos
 		if (options.types && options.types.length > 0) {
 			filteredFiles = filteredFiles.filter((file) => {
-				if (file.isDirectory && options.types!.includes(FileType.DIRECTORY)) return true;
-				return options.types!.includes(file.type);
+				if (file.isDirectory && options.types?.includes(FileType.DIRECTORY)) return true;
+				return options.types?.includes(file.type);
 			});
 		}
 

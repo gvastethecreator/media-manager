@@ -4,15 +4,7 @@ import { createNote, updateNote } from '@/app/actions/notes/note.actions';
 import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -61,7 +53,7 @@ export function CreateNoteForm({
 	onCreated,
 	onUpdated,
 	onCancel,
-	onPreview
+	onPreview,
 }: CreateNoteFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -76,8 +68,8 @@ export function CreateNoteForm({
 			emoji: '📝',
 			category: undefined,
 			tags: '[]',
-			isFavorite: false
-		}
+			isFavorite: false,
+		},
 	});
 
 	// Actualizar vista previa en tiempo real
@@ -101,7 +93,7 @@ export function CreateNoteForm({
 				emoji: (note as ExtendedNote).emoji || '📝',
 				category: note.category as NoteCategory | undefined,
 				tags: note.tags || '[]',
-				isFavorite: note.isFavorite || false
+				isFavorite: note.isFavorite || false,
 			});
 		}
 	}, [note, isEditing, form]);
@@ -115,7 +107,7 @@ export function CreateNoteForm({
 				// Actualizar nota existente - incluir ID como parte de la actualización
 				const updatedNote = await updateNote(note.id, {
 					...data,
-					id: note.id
+					id: note.id,
 				});
 				if (onUpdated) {
 					onUpdated(updatedNote);
@@ -133,7 +125,7 @@ export function CreateNoteForm({
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			toastService.error(isEditing ? 'Error al actualizar la nota' : 'Error al crear la nota', {
-				description: errorMessage
+				description: errorMessage,
 			});
 		} finally {
 			setIsSubmitting(false);
@@ -151,14 +143,9 @@ export function CreateNoteForm({
 							<FormItem>
 								<FormLabel>Título</FormLabel>
 								<FormControl>
-									<Input
-										placeholder="Título de la nota"
-										{...field}
-									/>
+									<Input placeholder="Título de la nota" {...field} />
 								</FormControl>
-								<FormDescription>
-									Un título descriptivo para identificar esta nota
-								</FormDescription>
+								<FormDescription>Un título descriptivo para identificar esta nota</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -170,10 +157,7 @@ export function CreateNoteForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Categoría</FormLabel>
-								<Select
-									onValueChange={field.onChange}
-									defaultValue={field.value}
-								>
+								<Select onValueChange={field.onChange} defaultValue={field.value}>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder="Seleccionar categoría" />
@@ -181,13 +165,13 @@ export function CreateNoteForm({
 									</FormControl>
 									<SelectContent>
 										{Object.values(NoteCategory).map((category) => (
-											<SelectItem key={category} value={category}>{category}</SelectItem>
+											<SelectItem key={category} value={category}>
+												{category}
+											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
-								<FormDescription>
-									La categoría ayuda a organizar tus notas
-								</FormDescription>
+								<FormDescription>La categoría ayuda a organizar tus notas</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -208,9 +192,7 @@ export function CreateNoteForm({
 									rows={2}
 								/>
 							</FormControl>
-							<FormDescription>
-								Un resumen corto para entender rápidamente el contenido
-							</FormDescription>
+							<FormDescription>Un resumen corto para entender rápidamente el contenido</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -223,16 +205,9 @@ export function CreateNoteForm({
 						<FormItem>
 							<FormLabel>Contenido</FormLabel>
 							<FormControl>
-								<Textarea
-									placeholder="Contenido detallado de la nota"
-									{...field}
-									value={field.value || ''}
-									rows={8}
-								/>
+								<Textarea placeholder="Contenido detallado de la nota" {...field} value={field.value || ''} rows={8} />
 							</FormControl>
-							<FormDescription>
-								El contenido principal de la nota
-							</FormDescription>
+							<FormDescription>El contenido principal de la nota</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -246,15 +221,9 @@ export function CreateNoteForm({
 							<FormItem>
 								<FormLabel>Emoji</FormLabel>
 								<FormControl>
-									<EmojiPicker
-										value={field.value}
-										onChange={field.onChange}
-										onEmojiSelect={field.onChange}
-									/>
+									<EmojiPicker value={field.value} onChange={field.onChange} onEmojiSelect={field.onChange} />
 								</FormControl>
-								<FormDescription>
-									Un emoji representativo
-								</FormDescription>
+								<FormDescription>Un emoji representativo</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -267,14 +236,9 @@ export function CreateNoteForm({
 							<FormItem>
 								<FormLabel>Color</FormLabel>
 								<FormControl>
-									<ColorPicker
-										value={field.value}
-										onChange={field.onChange}
-									/>
+									<ColorPicker value={field.value} onChange={field.onChange} />
 								</FormControl>
-								<FormDescription>
-									Color para identificar visualmente
-								</FormDescription>
+								<FormDescription>Color para identificar visualmente</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -293,7 +257,10 @@ export function CreateNoteForm({
 									value={field.value !== '[]' ? JSON.parse(field.value || '[]').join(', ') : ''}
 									onChange={(e) => {
 										// Convertir texto separado por comas a formato JSON
-										const tagsArray = e.target.value.split(',').map(tag => tag.trim()).filter(Boolean);
+										const tagsArray = e.target.value
+											.split(',')
+											.map((tag) => tag.trim())
+											.filter(Boolean);
 										field.onChange(JSON.stringify(tagsArray));
 									}}
 								/>
@@ -312,16 +279,11 @@ export function CreateNoteForm({
 					render={({ field }) => (
 						<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
 							<FormControl>
-								<Switch
-									checked={field.value}
-									onCheckedChange={field.onChange}
-								/>
+								<Switch checked={field.value} onCheckedChange={field.onChange} />
 							</FormControl>
 							<div className="space-y-1 leading-none">
 								<FormLabel>Marcar como favorita</FormLabel>
-								<FormDescription>
-									Las notas favoritas aparecerán destacadas en los listados
-								</FormDescription>
+								<FormDescription>Las notas favoritas aparecerán destacadas en los listados</FormDescription>
 							</div>
 						</FormItem>
 					)}
@@ -329,19 +291,11 @@ export function CreateNoteForm({
 
 				<div className="flex justify-end gap-2">
 					{onCancel && (
-						<Button
-							type="button"
-							variant="outline"
-							onClick={onCancel}
-							disabled={isSubmitting}
-						>
+						<Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
 							Cancelar
 						</Button>
 					)}
-					<Button
-						type="submit"
-						disabled={isSubmitting}
-					>
+					<Button type="submit" disabled={isSubmitting}>
 						{isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
 					</Button>
 				</div>

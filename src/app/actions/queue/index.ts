@@ -35,4 +35,3 @@ export const getQueueStatus = QueryActions.getQueueStatus;
 
 // De stats.actions
 export const getQueueStats = StatsActions.getQueueStats;
-

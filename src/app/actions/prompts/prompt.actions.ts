@@ -10,17 +10,17 @@ import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers actualizados
 import {
-    mapCreatePromptDataToPrisma,
-    mapUpdatePromptDataToPrisma,
-    toExtendedPrompt,
-    toPromptWithStats
+	mapCreatePromptDataToPrisma,
+	mapUpdatePromptDataToPrisma,
+	toExtendedPrompt,
+	toPromptWithStats,
 } from '@/transformers/prompt';
 import type {
-    PromptBase,
-    PromptCreateInput,
-    PromptExtended,
-    PromptUpdateInput,
-    PromptWithStats,
+	PromptBase,
+	PromptCreateInput,
+	PromptExtended,
+	PromptUpdateInput,
+	PromptWithStats,
 } from '@/types/entities/prompt';
 
 const promptLogger = serverLogger.withContext('PromptActions');
@@ -592,7 +592,7 @@ export async function addImageToPrompt(promptId: string, imageId: string): Promi
 		// Verificar que el prompt existe
 		const prompt = await prisma.prompt.findUnique({
 			where: { id: promptId },
-			select: { id: true, name: true }
+			select: { id: true, name: true },
 		});
 
 		if (!prompt) {
@@ -602,7 +602,7 @@ export async function addImageToPrompt(promptId: string, imageId: string): Promi
 		// Verificar que la imagen existe
 		const image = await prisma.image.findUnique({
 			where: { id: imageId },
-			select: { id: true }
+			select: { id: true },
 		});
 
 		if (!image) {
@@ -614,9 +614,9 @@ export async function addImageToPrompt(promptId: string, imageId: string): Promi
 			where: { id: promptId },
 			data: {
 				images: {
-					connect: { id: imageId }
-				}
-			}
+					connect: { id: imageId },
+				},
+			},
 		});
 
 		// Notificar cambio

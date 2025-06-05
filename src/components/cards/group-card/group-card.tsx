@@ -60,10 +60,7 @@ export function GroupCard({
 
 	// Preparar media para la galería
 	const allMedia = useMemo(() => {
-		return [
-			...(group.recentImages || []),
-			...(group.recentVideos || [])
-		];
+		return [...(group.recentImages || []), ...(group.recentVideos || [])];
 	}, [group.recentImages, group.recentVideos]);
 
 	// Función de manejadores de eventos
@@ -81,21 +78,24 @@ export function GroupCard({
 	};
 
 	// Determinar el número total de entidades
-	const entityCounts = useMemo(() => ({
-		images: group._count.images,
-		videos: group._count.videos,
-		albums: group._count.albums,
-		collections: group._count.collections,
-		tags: group._count.tags,
-		characters: group._count.characters,
-		places: group._count.places,
-		worldItems: group._count.worldItems,
-		concepts: group._count.concepts,
-		prompts: group._count.prompts,
-		notes: group._count.notes,
-		wildcards: group._count.wildcards,
-		properties: group._count.properties
-	}), [group._count]);
+	const entityCounts = useMemo(
+		() => ({
+			images: group._count.images,
+			videos: group._count.videos,
+			albums: group._count.albums,
+			collections: group._count.collections,
+			tags: group._count.tags,
+			characters: group._count.characters,
+			places: group._count.places,
+			worldItems: group._count.worldItems,
+			concepts: group._count.concepts,
+			prompts: group._count.prompts,
+			notes: group._count.notes,
+			wildcards: group._count.wildcards,
+			properties: group._count.properties,
+		}),
+		[group._count]
+	);
 
 	// Preparar filters count
 	const filtersCount = useMemo(() => {
@@ -111,21 +111,19 @@ export function GroupCard({
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 			className={cn(
-				"relative rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm transition-all",
-				isHovered && !disabled && "shadow-md scale-[1.01]",
-				disabled && "opacity-70 cursor-not-allowed",
-				isSelected && "ring-2",
+				'relative rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm transition-all',
+				isHovered && !disabled && 'shadow-md scale-[1.01]',
+				disabled && 'opacity-70 cursor-not-allowed',
+				isSelected && 'ring-2',
 				className
 			)}
 			style={{
 				maxWidth: compact ? '280px' : '300px',
 				minWidth: compact ? '220px' : '260px',
 				borderRadius: tcgMode ? '0.5rem' : '0.375rem',
-				boxShadow: tcgMode
-					? `0 0 0 1px ${primaryColor}30, 0 2px 10px ${primaryColor}20`
-					: undefined,
+				boxShadow: tcgMode ? `0 0 0 1px ${primaryColor}30, 0 2px 10px ${primaryColor}20` : undefined,
 				backgroundColor: tcgMode ? '#1a1a1a' : undefined,
-				ringColor: isSelected ? primaryColor : undefined
+				ringColor: isSelected ? primaryColor : undefined,
 			}}
 		>
 			{/* Encabezado */}
@@ -194,13 +192,13 @@ export function GroupCard({
 						background: [
 							`linear-gradient(45deg, transparent, ${primaryColor}50, transparent)`,
 							`linear-gradient(45deg, transparent, ${primaryColor}80, transparent)`,
-							`linear-gradient(45deg, transparent, ${primaryColor}50, transparent)`
-						]
+							`linear-gradient(45deg, transparent, ${primaryColor}50, transparent)`,
+						],
 					}}
 					transition={{
 						duration: 2,
 						repeat: Number.POSITIVE_INFINITY,
-						repeatType: 'reverse'
+						repeatType: 'reverse',
 					}}
 				/>
 			)}

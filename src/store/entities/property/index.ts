@@ -16,59 +16,59 @@ export type PropertyStore = PropertyState & PropertyCoreSlice & PropertyUISlice 
 
 // Estado inicial
 const initialState: PropertyState = {
-  core: {
-    properties: {},
-    propertyItems: {},
-    isLoading: false,
-    error: null,
-    lastUpdated: null,
-  },
-  ui: {
-    selectedIds: [],
-    viewMode: PropertyViewMode.GRID,
-    isViewerOpen: false,
-    currentPropertyId: null,
-    displayState: {},
-    draggedPropertyId: null,
-    dropTargetPropertyId: null,
-    highlightedId: null,
-    expandedIds: [],
-  },
-  filters: {
-    sortBy: PropertySortCriteria.NAME_ASC,
-    searchQuery: '',
-    filterByCategory: null,
-    filterFavorites: false,
-    dateRange: {
-      from: null,
-      to: null,
-    },
-  },
+	core: {
+		properties: {},
+		propertyItems: {},
+		isLoading: false,
+		error: null,
+		lastUpdated: null,
+	},
+	ui: {
+		selectedIds: [],
+		viewMode: PropertyViewMode.GRID,
+		isViewerOpen: false,
+		currentPropertyId: null,
+		displayState: {},
+		draggedPropertyId: null,
+		dropTargetPropertyId: null,
+		highlightedId: null,
+		expandedIds: [],
+	},
+	filters: {
+		sortBy: PropertySortCriteria.NAME_ASC,
+		searchQuery: '',
+		filterByCategory: null,
+		filterFavorites: false,
+		dateRange: {
+			from: null,
+			to: null,
+		},
+	},
 };
 
 // Crear store combinando slices
 export const usePropertyStore = create<PropertyStore>()(
-  devtools(
-    persist(
-      (set, get, ...rest) => ({
-        ...initialState,
-        ...createPropertyCoreSlice(set, get, ...rest),
-        ...createPropertyUISlice(set, get, ...rest),
-        ...createPropertyFiltersSlice(set, get, ...rest),
-      }),
-      {
-        name: 'property-store',
-        partialize: (state) => ({
-          ui: {
-            viewMode: state.ui.viewMode,
-            expandedIds: state.ui.expandedIds,
-          },
-          filters: {
-            sortBy: state.filters.sortBy,
-          },
-        }),
-      }
-    ),
-    { name: 'PropertyStore' }
-  )
+	devtools(
+		persist(
+			(set, get, ...rest) => ({
+				...initialState,
+				...createPropertyCoreSlice(set, get, ...rest),
+				...createPropertyUISlice(set, get, ...rest),
+				...createPropertyFiltersSlice(set, get, ...rest),
+			}),
+			{
+				name: 'property-store',
+				partialize: (state) => ({
+					ui: {
+						viewMode: state.ui.viewMode,
+						expandedIds: state.ui.expandedIds,
+					},
+					filters: {
+						sortBy: state.filters.sortBy,
+					},
+				}),
+			}
+		),
+		{ name: 'PropertyStore' }
+	)
 );

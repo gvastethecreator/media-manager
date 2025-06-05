@@ -20,15 +20,15 @@ export const DEFAULT_SORT_DIRECTION = 'desc' as const;
  * Valores por defecto para filtros
  */
 export const DEFAULT_FILTERS = {
-  status: [],
-  priority: [],
-  type: [],
-  tags: [],
-  search: '',
-  createdAfter: null,
-  createdBefore: null,
-  updatedAfter: null,
-  updatedBefore: null,
+	status: [],
+	priority: [],
+	type: [],
+	tags: [],
+	search: '',
+	createdAfter: null,
+	createdBefore: null,
+	updatedAfter: null,
+	updatedBefore: null,
 };
 
 /**
@@ -40,8 +40,8 @@ export const TASK_STORE_NAME = 'task-store';
  * Estados de carga
  */
 export const LOADING_STATES = {
-  IDLE: 'idle',
-  LOADING: 'loading',
-  ERROR: 'error',
-  SUCCESS: 'success',
+	IDLE: 'idle',
+	LOADING: 'loading',
+	ERROR: 'error',
+	SUCCESS: 'success',
 } as const;

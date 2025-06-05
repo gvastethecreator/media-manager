@@ -64,17 +64,17 @@ export function CharacterContentView() {
 		containerName: currentCharacter?.name ?? null,
 		emptyState: !selectedCharacterId
 			? {
-				icon: Users,
-				title: 'No hay personaje seleccionado',
-				description: 'Selecciona un personaje para ver su contenido.',
-			}
+					icon: Users,
+					title: 'No hay personaje seleccionado',
+					description: 'Selecciona un personaje para ver su contenido.',
+				}
 			: {
-				icon: Users,
-				title: 'Personaje sin imágenes',
-				description: currentCharacter
-					? `${currentCharacter.name} no tiene imágenes asociadas.`
-					: 'Este personaje no tiene imágenes asociadas.',
-			},
+					icon: Users,
+					title: 'Personaje sin imágenes',
+					description: currentCharacter
+						? `${currentCharacter.name} no tiene imágenes asociadas.`
+						: 'Este personaje no tiene imágenes asociadas.',
+				},
 	};
 
 	return (

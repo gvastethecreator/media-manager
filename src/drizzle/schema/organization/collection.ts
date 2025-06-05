@@ -17,20 +17,20 @@ import { tags } from './tag';
 
 // Definición de la tabla
 export const collections = sqliteTable(
-    'Collection',
-    {
-        ...organizationFields,
-        rating: real('rating').default(0),
-        isFavorite: text('isFavorite').default('false'),
-    },
-    (table) => {
-        const indexes = createIndexes('collection');
-        return {
-            nameIdx: indexes.nameIdx.on(table.name),
-            categoryIdx: indexes.categoryIdx.on(table.category),
-            createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
-        };
-    }
+	'Collection',
+	{
+		...organizationFields,
+		rating: real('rating').default(0),
+		isFavorite: text('isFavorite').default('false'),
+	},
+	(table) => {
+		const indexes = createIndexes('collection');
+		return {
+			nameIdx: indexes.nameIdx.on(table.name),
+			categoryIdx: indexes.categoryIdx.on(table.category),
+			createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
+		};
+	}
 );
 
 // Tablas de relación
@@ -50,19 +50,19 @@ export const collectionsToProperties = createRelationTable('CollectionToProperty
 
 // Definición de relaciones
 const relatedEntities = {
-    images,
-    videos,
-    albums,
-    tags,
-    groups,
-    characters,
-    places,
-    worldItems,
-    concepts,
-    notes,
-    prompts,
-    wildcards,
-    properties,
+	images,
+	videos,
+	albums,
+	tags,
+	groups,
+	characters,
+	places,
+	worldItems,
+	concepts,
+	notes,
+	prompts,
+	wildcards,
+	properties,
 };
 
 // Relaciones

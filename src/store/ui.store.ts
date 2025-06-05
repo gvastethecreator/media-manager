@@ -177,4 +177,3 @@ export const useThemeSetting = () => {
 
 // Tipos exportados para uso en componentes
 export type { UIState };
-

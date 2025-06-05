@@ -20,12 +20,46 @@ interface EmojiPickerProps {
 }
 
 const commonEmojis = [
-	'📦', '🗃️', '🧰', '💎', '🏆', '🎁', '🔮', '⚔️', '🛡️', '📚',
-	'🧙‍♂️', '🧝‍♀️', '🧪', '🧬', '🔍', '🔑', '💰', '🪙', '🧿', '🏺',
-	'🍄', '🌿', '🔥', '💧', '⚡', '🌪️', '❄️', '🪄', '🧠', '💀'
+	'📦',
+	'🗃️',
+	'🧰',
+	'💎',
+	'🏆',
+	'🎁',
+	'🔮',
+	'⚔️',
+	'🛡️',
+	'📚',
+	'🧙‍♂️',
+	'🧝‍♀️',
+	'🧪',
+	'🧬',
+	'🔍',
+	'🔑',
+	'💰',
+	'🪙',
+	'🧿',
+	'🏺',
+	'🍄',
+	'🌿',
+	'🔥',
+	'💧',
+	'⚡',
+	'🌪️',
+	'❄️',
+	'🪄',
+	'🧠',
+	'💀',
 ];
 
-export function EmojiPicker({ onEmojiSelect, value, className, compact = false, showLabel = true, onChange }: EmojiPickerProps) {
+export function EmojiPicker({
+	onEmojiSelect,
+	value,
+	className,
+	compact = false,
+	showLabel = true,
+	onChange,
+}: EmojiPickerProps) {
 	const { theme } = useTheme();
 	const [searchTerm, setSearchTerm] = useState('');
 	const [selectedEmoji, setSelectedEmoji] = useState(value || '');
@@ -38,19 +72,25 @@ export function EmojiPicker({ onEmojiSelect, value, className, compact = false, 
 		}
 	}, [value]);
 
-	const handleEmojiSelect = useCallback((emoji: any) => {
-		setSelectedEmoji(emoji.native);
-		if (onEmojiSelect) onEmojiSelect(emoji.native);
-		if (onChange) onChange(emoji.native);
-		if (compact) setOpen(false);
-	}, [onEmojiSelect, compact, onChange]);
+	const handleEmojiSelect = useCallback(
+		(emoji: any) => {
+			setSelectedEmoji(emoji.native);
+			if (onEmojiSelect) onEmojiSelect(emoji.native);
+			if (onChange) onChange(emoji.native);
+			if (compact) setOpen(false);
+		},
+		[onEmojiSelect, compact, onChange]
+	);
 
-	const handleQuickSelect = useCallback((emoji: string) => {
-		setSelectedEmoji(emoji);
-		if (onEmojiSelect) onEmojiSelect(emoji);
-		if (onChange) onChange(emoji);
-		if (compact) setOpen(false);
-	}, [onEmojiSelect, compact, onChange]);
+	const handleQuickSelect = useCallback(
+		(emoji: string) => {
+			setSelectedEmoji(emoji);
+			if (onEmojiSelect) onEmojiSelect(emoji);
+			if (onChange) onChange(emoji);
+			if (compact) setOpen(false);
+		},
+		[onEmojiSelect, compact, onChange]
+	);
 
 	const handleSearchFocus = useCallback(() => {
 		if (inputRef.current) {
@@ -64,16 +104,10 @@ export function EmojiPicker({ onEmojiSelect, value, className, compact = false, 
 				<PopoverTrigger asChild>
 					<Button
 						variant="outline"
-						className={cn(
-							"h-8 w-full",
-							showLabel ? "justify-between" : "justify-center",
-							className
-						)}
+						className={cn('h-8 w-full', showLabel ? 'justify-between' : 'justify-center', className)}
 					>
 						<span className="text-base">{selectedEmoji}</span>
-						{showLabel && (
-							<Smile className="h-3.5 w-3.5 ml-2 text-muted-foreground" />
-						)}
+						{showLabel && <Smile className="h-3.5 w-3.5 ml-2 text-muted-foreground" />}
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent className="w-56 p-0" align="start" sideOffset={8}>
@@ -96,10 +130,7 @@ export function EmojiPicker({ onEmojiSelect, value, className, compact = false, 
 								<Button
 									key={emoji}
 									variant="ghost"
-									className={cn(
-										"h-6 w-6 p-0",
-										selectedEmoji === emoji && "bg-accent text-accent-foreground"
-									)}
+									className={cn('h-6 w-6 p-0', selectedEmoji === emoji && 'bg-accent text-accent-foreground')}
 									onClick={() => handleQuickSelect(emoji)}
 								>
 									<span className="text-sm">{emoji}</span>
@@ -147,7 +178,7 @@ export function EmojiPicker({ onEmojiSelect, value, className, compact = false, 
 	}
 
 	return (
-		<div className={cn("flex flex-col w-[350px]", className)}>
+		<div className={cn('flex flex-col w-[350px]', className)}>
 			<div className="p-2 border-b">
 				<div className="relative">
 					<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -167,10 +198,7 @@ export function EmojiPicker({ onEmojiSelect, value, className, compact = false, 
 					<Button
 						key={emoji}
 						variant="ghost"
-						className={cn(
-							"h-8 w-8 p-0",
-							selectedEmoji === emoji && "bg-accent text-accent-foreground"
-						)}
+						className={cn('h-8 w-8 p-0', selectedEmoji === emoji && 'bg-accent text-accent-foreground')}
 						onClick={() => handleQuickSelect(emoji)}
 					>
 						<span className="text-lg">{emoji}</span>

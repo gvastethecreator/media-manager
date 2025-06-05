@@ -17,24 +17,24 @@ import { wildcards } from './wildcard';
 
 // Definición de la tabla
 export const notes = sqliteTable(
-    'Note',
-    {
-        ...organizationFields,
-        title: text('title').notNull(),
-        content: text('content').default(''),
-        category: text('category').default('general'),
-        priority: integer('priority').default(0),
-        status: text('status').default('active'),
-        presetId: text('presetId'),
-    },
-    (table) => {
-        const indexes = createIndexes('note');
-        return {
-            nameIdx: indexes.nameIdx.on(table.name),
-            categoryIdx: indexes.categoryIdx.on(table.category),
-            createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
-        };
-    }
+	'Note',
+	{
+		...organizationFields,
+		title: text('title').notNull(),
+		content: text('content').default(''),
+		category: text('category').default('general'),
+		priority: integer('priority').default(0),
+		status: text('status').default('active'),
+		presetId: text('presetId'),
+	},
+	(table) => {
+		const indexes = createIndexes('note');
+		return {
+			nameIdx: indexes.nameIdx.on(table.name),
+			categoryIdx: indexes.categoryIdx.on(table.category),
+			createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
+		};
+	}
 );
 
 // Tablas de relación
@@ -54,19 +54,19 @@ export const notesToGroups = createRelationTable('NoteToGroup', 'Note', 'Group')
 
 // Definición de relaciones
 const relatedEntities = {
-    images,
-    videos,
-    albums,
-    collections,
-    tags,
-    characters,
-    places,
-    worldItems,
-    concepts,
-    prompts,
-    wildcards,
-    properties,
-    groups
+	images,
+	videos,
+	albums,
+	collections,
+	tags,
+	characters,
+	places,
+	worldItems,
+	concepts,
+	prompts,
+	wildcards,
+	properties,
+	groups,
 };
 
 // Relaciones

@@ -108,23 +108,37 @@ export async function getNavigationData(): Promise<NavigationData> {
 	try {
 		navLogger.info('🧭 Obteniendo datos de navegación');
 
-		const [folders, collections, tags, albums, characters, places, worldItems, concepts, prompts, notes, groups, properties, wildcards, stats] =
-			await Promise.allSettled([
-				getFolders(),
-				getCollections(),
-				getTagsAction(),
-				getAlbums(),
-				searchCharacters({}),
-				getPlaces(),
-				getWorldItems(),
-				getConcepts(),
-				getPrompts(),
-				getNotes(),
-				getGroups(),
-				getProperties(),
-				getWildcards(),
-				getSystemStats(),
-			]);
+		const [
+			folders,
+			collections,
+			tags,
+			albums,
+			characters,
+			places,
+			worldItems,
+			concepts,
+			prompts,
+			notes,
+			groups,
+			properties,
+			wildcards,
+			stats,
+		] = await Promise.allSettled([
+			getFolders(),
+			getCollections(),
+			getTagsAction(),
+			getAlbums(),
+			searchCharacters({}),
+			getPlaces(),
+			getWorldItems(),
+			getConcepts(),
+			getPrompts(),
+			getNotes(),
+			getGroups(),
+			getProperties(),
+			getWildcards(),
+			getSystemStats(),
+		]);
 
 		navLogger.info('✅ Datos de navegación obtenidos exitosamente');
 

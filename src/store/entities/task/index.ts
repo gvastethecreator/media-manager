@@ -17,26 +17,26 @@ export type TaskStore = CoreState & CoreActions & UIState & UIActions & FiltersS
 
 // Crear el store con todos los slices
 const useTaskStoreBase = create<TaskStore>()(
-  devtools(
-    persist(
-      (...a) => ({
-        ...createCoreSlice(...a),
-        ...createUISlice(...a),
-        ...createFiltersSlice(...a),
-      }),
-      {
-        name: 'task-store',
-        // Solo persistir algunas partes del state
-        partialize: (state) => ({
-          viewMode: state.viewMode,
-          sortCriteria: state.sortCriteria,
-          sortDirection: state.sortDirection,
-          filters: state.filters,
-        }),
-      }
-    ),
-    { name: 'TaskStore' }
-  )
+	devtools(
+		persist(
+			(...a) => ({
+				...createCoreSlice(...a),
+				...createUISlice(...a),
+				...createFiltersSlice(...a),
+			}),
+			{
+				name: 'task-store',
+				// Solo persistir algunas partes del state
+				partialize: (state) => ({
+					viewMode: state.viewMode,
+					sortCriteria: state.sortCriteria,
+					sortDirection: state.sortDirection,
+					filters: state.filters,
+				}),
+			}
+		),
+		{ name: 'TaskStore' }
+	)
 );
 
 // Exportar el store con selectores

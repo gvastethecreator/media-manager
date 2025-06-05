@@ -1,11 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -63,9 +59,7 @@ export function ColorPicker({ value, onChange, className }: ColorPickerProps) {
 							}}
 							title={`Color: ${color}`}
 						>
-							{value === color && (
-								<span className="text-white text-xs">✓</span>
-							)}
+							{value === color && <span className="text-white text-xs">✓</span>}
 						</Button>
 					))}
 				</div>

@@ -3,7 +3,6 @@
  * Se mantiene temporalmente por compatibilidad con código existente.
  */
 
-
 // Clase simplificada que redirige a ServerLogger
 export class EnhancedLogger {
 	private context: string;

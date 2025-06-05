@@ -136,8 +136,8 @@ const customFileOperationsService = {
 						// Usar la API moderna del portapapeles
 						await navigator.clipboard.write([
 							new ClipboardItem({
-								[blob.type]: blob
-							})
+								[blob.type]: blob,
+							}),
 						]);
 						actionLogger.info('✅ Imagen copiada al portapapeles');
 					} catch (error) {

@@ -3,23 +3,10 @@
 import { createWorldItem, updateWorldItem } from '@/app/actions/world-items/world-item.actions';
 import { Button } from '@/components/ui/button';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -63,7 +50,7 @@ export function CreateWorldItemForm({
 	onCreated,
 	onUpdated,
 	onCancel,
-	onPreview
+	onPreview,
 }: CreateWorldItemFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,8 +66,8 @@ export function CreateWorldItemForm({
 			category: 'none',
 			rarity: 'none',
 			origin: '',
-			isFavorite: false
-		}
+			isFavorite: false,
+		},
 	});
 
 	// Enviar datos para vista previa en tiempo real
@@ -105,7 +92,7 @@ export function CreateWorldItemForm({
 				category: worldItem.category || 'none',
 				rarity: worldItem.rarity || 'none',
 				origin: worldItem.origin || '',
-				isFavorite: worldItem.isFavorite || false
+				isFavorite: worldItem.isFavorite || false,
 			});
 		}
 	}, [worldItem, isEditing, form]);
@@ -132,7 +119,7 @@ export function CreateWorldItemForm({
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			toastService.error(isEditing ? 'Error al actualizar el objeto' : 'Error al crear el objeto', {
-				description: errorMessage
+				description: errorMessage,
 			});
 		} finally {
 			setIsSubmitting(false);
@@ -162,7 +149,7 @@ export function CreateWorldItemForm({
 										<Input
 											placeholder="Nombre del objeto"
 											{...field}
-											className={cn(form.formState.errors.name && "border-destructive")}
+											className={cn(form.formState.errors.name && 'border-destructive')}
 										/>
 									</FormControl>
 									<FormMessage />
@@ -177,10 +164,7 @@ export function CreateWorldItemForm({
 								<FormItem className="space-y-2">
 									<FormLabel>Origen</FormLabel>
 									<FormControl>
-										<Input
-											placeholder="Origen del objeto"
-											{...field}
-										/>
+										<Input placeholder="Origen del objeto" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -195,12 +179,7 @@ export function CreateWorldItemForm({
 							<FormItem className="space-y-2">
 								<FormLabel>Descripción</FormLabel>
 								<FormControl>
-									<Textarea
-										placeholder="Descripción del objeto"
-										{...field}
-										value={field.value || ''}
-										rows={3}
-									/>
+									<Textarea placeholder="Descripción del objeto" {...field} value={field.value || ''} rows={3} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -228,19 +207,12 @@ export function CreateWorldItemForm({
 											</PopoverTrigger>
 											<PopoverContent side="right" className="w-auto p-0 border-none">
 												<FormControl>
-													<HexColorPicker
-														color={field.value}
-														onChange={field.onChange}
-													/>
+													<HexColorPicker color={field.value} onChange={field.onChange} />
 												</FormControl>
 											</PopoverContent>
 										</Popover>
 										<FormControl>
-											<Input
-												value={field.value}
-												onChange={(e) => field.onChange(e.target.value)}
-												className="flex-1"
-											/>
+											<Input value={field.value} onChange={(e) => field.onChange(e.target.value)} className="flex-1" />
 										</FormControl>
 									</div>
 									<FormMessage />
@@ -268,11 +240,7 @@ export function CreateWorldItemForm({
 											</PopoverContent>
 										</Popover>
 										<FormControl>
-											<Input
-												value={field.value}
-												onChange={(e) => field.onChange(e.target.value)}
-												className="flex-1"
-											/>
+											<Input value={field.value} onChange={(e) => field.onChange(e.target.value)} className="flex-1" />
 										</FormControl>
 									</div>
 									<FormMessage />
@@ -288,10 +256,7 @@ export function CreateWorldItemForm({
 							render={({ field }) => (
 								<FormItem className="space-y-2">
 									<FormLabel>Tipo</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-									>
+									<Select onValueChange={field.onChange} defaultValue={field.value}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Seleccionar tipo" />
@@ -300,7 +265,9 @@ export function CreateWorldItemForm({
 										<SelectContent>
 											<SelectItem value="none">Ninguno</SelectItem>
 											{Object.values(WorldItemType).map((type) => (
-												<SelectItem key={type} value={type}>{type}</SelectItem>
+												<SelectItem key={type} value={type}>
+													{type}
+												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
@@ -315,10 +282,7 @@ export function CreateWorldItemForm({
 							render={({ field }) => (
 								<FormItem className="space-y-2">
 									<FormLabel>Categoría</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-									>
+									<Select onValueChange={field.onChange} defaultValue={field.value}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Seleccionar categoría" />
@@ -327,7 +291,9 @@ export function CreateWorldItemForm({
 										<SelectContent>
 											<SelectItem value="none">Ninguna</SelectItem>
 											{Object.values(WorldItemCategory).map((category) => (
-												<SelectItem key={category} value={category}>{category}</SelectItem>
+												<SelectItem key={category} value={category}>
+													{category}
+												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
@@ -342,10 +308,7 @@ export function CreateWorldItemForm({
 							render={({ field }) => (
 								<FormItem className="space-y-2">
 									<FormLabel>Rareza</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-									>
+									<Select onValueChange={field.onChange} defaultValue={field.value}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Seleccionar rareza" />
@@ -354,7 +317,9 @@ export function CreateWorldItemForm({
 										<SelectContent>
 											<SelectItem value="none">Ninguna</SelectItem>
 											{Object.values(RarityLevel).map((rarity) => (
-												<SelectItem key={rarity} value={rarity}>{rarity}</SelectItem>
+												<SelectItem key={rarity} value={rarity}>
+													{rarity}
+												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
@@ -370,11 +335,7 @@ export function CreateWorldItemForm({
 						render={({ field }) => (
 							<FormItem className="flex items-center space-x-2 pt-2">
 								<FormControl>
-									<Switch
-										checked={field.value}
-										onCheckedChange={field.onChange}
-										id="isFavorite"
-									/>
+									<Switch checked={field.value} onCheckedChange={field.onChange} id="isFavorite" />
 								</FormControl>
 								<FormLabel htmlFor="isFavorite">Marcar como favorito</FormLabel>
 							</FormItem>

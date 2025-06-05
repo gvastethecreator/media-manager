@@ -9,36 +9,39 @@ import * as FolderImagesAction from './folder-images.action';
 import * as ImageAccessActions from './image-access.actions';
 import * as ImageCrudActions from './image-crud.actions';
 import * as ImageProcessingActions from './image-processing.actions';
-import { generateThumbnail as generateThumbnailFromAction, getThumbnail as getThumbnailFromAction } from './image-thumbnails.actions';
+import {
+	generateThumbnail as generateThumbnailFromAction,
+	getThumbnail as getThumbnailFromAction,
+} from './image-thumbnails.actions';
 import * as ImagesRandomAction from './images-random.action';
 
 // Re-exportamos cada función como asíncrona para cumplir con las restricciones de 'use server'
 
 // Exportaciones de image-access.actions
 export async function getImageUrl(...args: Parameters<typeof ImageAccessActions.getImageUrl>) {
-  return ImageAccessActions.getImageUrl(...args);
+	return ImageAccessActions.getImageUrl(...args);
 }
 export async function getOriginalImage(...args: Parameters<typeof ImageAccessActions.getOriginalImage>) {
-  return ImageAccessActions.getOriginalImage(...args);
+	return ImageAccessActions.getOriginalImage(...args);
 }
 
 // Exportaciones de image-crud.actions
 export async function createImageAction(...args: Parameters<typeof ImageCrudActions.createImage>) {
-  return ImageCrudActions.createImage(...args);
+	return ImageCrudActions.createImage(...args);
 }
 export async function updateImageAction(...args: Parameters<typeof ImageCrudActions.updateImage>) {
-  return ImageCrudActions.updateImage(...args);
+	return ImageCrudActions.updateImage(...args);
 }
 export async function deleteImageAction(...args: Parameters<typeof ImageCrudActions.deleteImage>) {
-  return ImageCrudActions.deleteImage(...args);
+	return ImageCrudActions.deleteImage(...args);
 }
 export async function setImageFavoriteAction(...args: Parameters<typeof ImageCrudActions.updateFavoriteStatus>) {
-  return ImageCrudActions.updateFavoriteStatus(...args);
+	return ImageCrudActions.updateFavoriteStatus(...args);
 }
 
 // Exportaciones de image-processing.actions
 export async function processImageAction(...args: Parameters<typeof ImageProcessingActions.processImage>) {
-  return ImageProcessingActions.processImage(...args);
+	return ImageProcessingActions.processImage(...args);
 }
 // La función reprocessImageAction no existe en el archivo fuente
 // export async function reprocessImageAction(...args: Parameters<typeof ImageProcessingActions.reprocessImageAction>) {
@@ -57,20 +60,24 @@ export async function processImageAction(...args: Parameters<typeof ImageProcess
 
 // Exportaciones de image-thumbnails.actions
 export async function getThumbnail(...args: Parameters<typeof getThumbnailFromAction>) {
-  return getThumbnailFromAction(...args);
+	return getThumbnailFromAction(...args);
 }
 export async function generateThumbnail(...args: Parameters<typeof generateThumbnailFromAction>) {
-  return generateThumbnailFromAction(...args);
+	return generateThumbnailFromAction(...args);
 }
 
 // Exportaciones de folder-images.action
-export async function getLatestFolderImagesAction(...args: Parameters<typeof FolderImagesAction.getLatestFolderImages>) {
-  return FolderImagesAction.getLatestFolderImages(...args);
+export async function getLatestFolderImagesAction(
+	...args: Parameters<typeof FolderImagesAction.getLatestFolderImages>
+) {
+	return FolderImagesAction.getLatestFolderImages(...args);
 }
 
 // Exportaciones de images-random.action
-export async function getRandomImagesForEntityAction(...args: Parameters<typeof ImagesRandomAction.getRandomImagesForEntity>) {
-  return ImagesRandomAction.getRandomImagesForEntity(...args);
+export async function getRandomImagesForEntityAction(
+	...args: Parameters<typeof ImagesRandomAction.getRandomImagesForEntity>
+) {
+	return ImagesRandomAction.getRandomImagesForEntity(...args);
 }
 
 // NOTA: Funciones faltantes o no exportadas comentadas en la versión anterior, se mantienen omitidas
@@ -82,4 +89,3 @@ export async function getRandomImagesForEntityAction(...args: Parameters<typeof 
 
 // image-types.actions
 export type { GetImagesOptions, GetImagesResult, ImageResult } from './image-types.actions';
-

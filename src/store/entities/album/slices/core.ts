@@ -7,11 +7,11 @@ import type { StateCreator } from 'zustand';
 import { mapCreateAlbumDataToPrisma } from '../../../../transformers/album/mappers';
 import { extendAlbum } from '../../../../transformers/album/serializers';
 import type {
-    Album,
-    AlbumBase,
-    CreateAlbumData,
-    UpdateAlbumData,
-    UpdateAlbumItemsData,
+	Album,
+	AlbumBase,
+	CreateAlbumData,
+	UpdateAlbumData,
+	UpdateAlbumItemsData,
 } from '../../../../types/entities/album';
 import type { AlbumState } from '../types';
 
@@ -46,7 +46,10 @@ export interface AlbumCoreSlice {
 	removePropertyFromAlbum: (albumId: string, propertyId: string) => void;
 	addWildcardToAlbum: (albumId: string, wildcardId: string) => void;
 	removeWildcardFromAlbum: (albumId: string, wildcardId: string) => void;
-	updateAlbumRelations: (albumId: string, data: { groupIds?: string[], propertyIds?: string[], wildcardIds?: string[] }) => void;
+	updateAlbumRelations: (
+		albumId: string,
+		data: { groupIds?: string[]; propertyIds?: string[]; wildcardIds?: string[] }
+	) => void;
 
 	// Estado de carga
 	setLoading: (isLoading: boolean) => void;
@@ -85,17 +88,17 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 
 	getAlbumGroups: (albumId: string) => {
 		const album = get().core.albums[albumId];
-		return album?.groups?.map(group => group.id) || [];
+		return album?.groups?.map((group) => group.id) || [];
 	},
 
 	getAlbumProperties: (albumId: string) => {
 		const album = get().core.albums[albumId];
-		return album?.properties?.map(property => property.id) || [];
+		return album?.properties?.map((property) => property.id) || [];
 	},
 
 	getAlbumWildcards: (albumId: string) => {
 		const album = get().core.albums[albumId];
-		return album?.wildcards?.map(wildcard => wildcard.id) || [];
+		return album?.wildcards?.map((wildcard) => wildcard.id) || [];
 	},
 
 	// Operaciones síncronas
@@ -114,7 +117,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 	},
 
 	addAlbums: (albums: AlbumBase[]) => {
-		const extendedAlbums = albums.map(album => extendAlbum(album));
+		const extendedAlbums = albums.map((album) => extendAlbum(album));
 		const albumsMap = extendedAlbums.reduce(
 			(acc, album) => {
 				acc[album.id] = album;
@@ -263,7 +266,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 			if (!album) return state;
 
 			const currentGroups = album.groups || [];
-			if (currentGroups.some(g => g.id === groupId)) return state;
+			if (currentGroups.some((g) => g.id === groupId)) return state;
 
 			return {
 				core: {
@@ -293,7 +296,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 						...state.core.albums,
 						[albumId]: {
 							...album,
-							groups: album.groups.filter(g => g.id !== groupId),
+							groups: album.groups.filter((g) => g.id !== groupId),
 						},
 					},
 					lastUpdated: Date.now(),
@@ -308,7 +311,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 			if (!album) return state;
 
 			const currentProperties = album.properties || [];
-			if (currentProperties.some(p => p.id === propertyId)) return state;
+			if (currentProperties.some((p) => p.id === propertyId)) return state;
 
 			return {
 				core: {
@@ -338,7 +341,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 						...state.core.albums,
 						[albumId]: {
 							...album,
-							properties: album.properties.filter(p => p.id !== propertyId),
+							properties: album.properties.filter((p) => p.id !== propertyId),
 						},
 					},
 					lastUpdated: Date.now(),
@@ -353,7 +356,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 			if (!album) return state;
 
 			const currentWildcards = album.wildcards || [];
-			if (currentWildcards.some(w => w.id === wildcardId)) return state;
+			if (currentWildcards.some((w) => w.id === wildcardId)) return state;
 
 			return {
 				core: {
@@ -383,7 +386,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 						...state.core.albums,
 						[albumId]: {
 							...album,
-							wildcards: album.wildcards.filter(w => w.id !== wildcardId),
+							wildcards: album.wildcards.filter((w) => w.id !== wildcardId),
 						},
 					},
 					lastUpdated: Date.now(),
@@ -392,7 +395,10 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 		});
 	},
 
-	updateAlbumRelations: (albumId: string, data: { groupIds?: string[], propertyIds?: string[], wildcardIds?: string[] }) => {
+	updateAlbumRelations: (
+		albumId: string,
+		data: { groupIds?: string[]; propertyIds?: string[]; wildcardIds?: string[] }
+	) => {
 		set((state) => {
 			const album = state.core.albums[albumId];
 			if (!album) return state;
@@ -400,15 +406,15 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 			const updates: any = { ...album };
 
 			if (data.groupIds) {
-				updates.groups = data.groupIds.map(id => ({ id }));
+				updates.groups = data.groupIds.map((id) => ({ id }));
 			}
 
 			if (data.propertyIds) {
-				updates.properties = data.propertyIds.map(id => ({ id }));
+				updates.properties = data.propertyIds.map((id) => ({ id }));
 			}
 
 			if (data.wildcardIds) {
-				updates.wildcards = data.wildcardIds.map(id => ({ id }));
+				updates.wildcards = data.wildcardIds.map((id) => ({ id }));
 			}
 
 			return {

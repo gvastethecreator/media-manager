@@ -12,9 +12,7 @@ import { useCallback, useEffect, useState } from 'react';
  */
 export function TagContentView() {
 	const selectedId = useTagStore((state) => state.selectedId);
-	const selectedTag = useTagStore((state) =>
-		state.items.find(tag => tag.id === selectedId)
-	);
+	const selectedTag = useTagStore((state) => state.items.find((tag) => tag.id === selectedId));
 
 	const [images, setImages] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +22,7 @@ export function TagContentView() {
 		// const images = await getTagImages(tagId);
 		// return images as unknown as FileItem[];
 		// Simulación mientras se encuentra la función correcta
-		await new Promise(res => setTimeout(res, 500));
+		await new Promise((res) => setTimeout(res, 500));
 		return [] as unknown as FileItem[];
 	}, []);
 
@@ -35,7 +33,7 @@ export function TagContentView() {
 			// const images = await getTagImages(currentTag.id);
 			// setImages(images);
 			// Simulación mientras se encuentra la función correcta
-			await new Promise(res => setTimeout(res, 500));
+			await new Promise((res) => setTimeout(res, 500));
 			setImages([]); // Poner un array vacío por ahora
 			setIsLoading(false);
 		};

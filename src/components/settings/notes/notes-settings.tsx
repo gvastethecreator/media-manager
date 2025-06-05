@@ -3,13 +3,7 @@
 import { deleteNote, getNotes } from '@/app/actions/notes/note.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
@@ -72,28 +66,30 @@ export function NotesSettings() {
 	}, []);
 
 	// Calcular estadísticas generales
-	const stats = useMemo(() => ({
-		total: notes.length,
-		favorites: notes.filter(note => note.isFavorite).length,
-		withRelations: notes.filter(note =>
-			(note._count?.images || 0) > 0 ||
-			(note._count?.concepts || 0) > 0 ||
-			(note._count?.prompts || 0) > 0
-		).length,
-	}), [notes]);
+	const stats = useMemo(
+		() => ({
+			total: notes.length,
+			favorites: notes.filter((note) => note.isFavorite).length,
+			withRelations: notes.filter(
+				(note) => (note._count?.images || 0) > 0 || (note._count?.concepts || 0) > 0 || (note._count?.prompts || 0) > 0
+			).length,
+		}),
+		[notes]
+	);
 
 	// Filtrar notas basados en los criterios seleccionados
 	const getFilteredNotes = useCallback(() => {
-		return notes.filter(note => {
+		return notes.filter((note) => {
 			let matches = true;
 
 			// Filtrar por búsqueda
 			if (searchQuery) {
 				const normalizedQuery = searchQuery.toLowerCase();
-				matches = matches && Boolean(
-					note.title.toLowerCase().includes(normalizedQuery) ||
-					(note.content?.toLowerCase().includes(normalizedQuery))
-				);
+				matches =
+					matches &&
+					Boolean(
+						note.title.toLowerCase().includes(normalizedQuery) || note.content?.toLowerCase().includes(normalizedQuery)
+					);
 			}
 
 			// Filtrar por categoría
@@ -117,7 +113,7 @@ export function NotesSettings() {
 	const handleDeleteNote = useCallback(async (id: string) => {
 		try {
 			await deleteNote(id);
-			setNotes(prev => prev.filter(note => note.id !== id));
+			setNotes((prev) => prev.filter((note) => note.id !== id));
 			setSelectedNote(null);
 			setIsEditing(false);
 			toastService.success('Nota eliminada');
@@ -137,7 +133,7 @@ export function NotesSettings() {
 
 	// Manejar creación exitosa
 	const handleNoteCreated = useCallback((newNote: ExtendedNote) => {
-		setNotes(prev => [
+		setNotes((prev) => [
 			{
 				...newNote,
 				_count: {
@@ -146,22 +142,18 @@ export function NotesSettings() {
 					prompts: 0,
 					characters: 0,
 					places: 0,
-					worldItems: 0
-				}
+					worldItems: 0,
+				},
 			} as ExtendedNote,
-			...prev
+			...prev,
 		]);
 		toastService.success('Nota creada');
 	}, []);
 
 	// Manejar actualización exitosa
 	const handleNoteUpdated = useCallback((updatedNote: ExtendedNote) => {
-		setNotes(prev =>
-			prev.map(note =>
-				note.id === updatedNote.id
-					? { ...note, ...updatedNote } as ExtendedNote
-					: note
-			)
+		setNotes((prev) =>
+			prev.map((note) => (note.id === updatedNote.id ? ({ ...note, ...updatedNote } as ExtendedNote) : note))
 		);
 		toastService.success('Nota actualizada');
 	}, []);
@@ -185,9 +177,10 @@ export function NotesSettings() {
 	}, []);
 
 	// Extraer categorías únicas de las notas
-	const uniqueCategories = useMemo(() =>
-		Array.from(new Set(notes.map(note => note.category).filter(Boolean))) as string[],
-		[notes]);
+	const uniqueCategories = useMemo(
+		() => Array.from(new Set(notes.map((note) => note.category).filter(Boolean))) as string[],
+		[notes]
+	);
 
 	// Componente de botón de eliminación
 	const DeleteButton = ({ noteId }: { noteId: string }) => {
@@ -230,11 +223,7 @@ export function NotesSettings() {
 						icon={Info}
 						title="Error al cargar notas"
 						description={error}
-						actions={
-							<Button onClick={() => window.location.reload()}>
-								Intentar de nuevo
-							</Button>
-						}
+						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -259,11 +248,7 @@ export function NotesSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button
-											size="sm"
-											variant="ghost"
-											className="h-6 w-6 p-0"
-										>
+										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
@@ -291,8 +276,10 @@ export function NotesSettings() {
 													className="w-full h-8 text-xs rounded-md border border-input px-3"
 												>
 													<option value="">Todas las categorías</option>
-													{uniqueCategories.map(category => (
-														<option key={category} value={category}>{category}</option>
+													{uniqueCategories.map((category) => (
+														<option key={category} value={category}>
+															{category}
+														</option>
 													))}
 												</select>
 											</div>
@@ -303,7 +290,9 @@ export function NotesSettings() {
 													checked={onlyFavorites}
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor="favorites" className="text-xs">Solo favoritas</Label>
+												<Label htmlFor="favorites" className="text-xs">
+													Solo favoritas
+												</Label>
 											</div>
 
 											<div className="flex justify-between">
@@ -318,7 +307,10 @@ export function NotesSettings() {
 									</PopoverContent>
 								</Popover>
 								<Button
-									onClick={() => { setSelectedNote(null); setIsEditing(false); }}
+									onClick={() => {
+										setSelectedNote(null);
+										setIsEditing(false);
+									}}
 									size="sm"
 									variant="ghost"
 									className="h-6 w-6 p-0"
@@ -350,9 +342,7 @@ export function NotesSettings() {
 									icon={FileText}
 									title="No hay notas"
 									description={
-										notes.length > 0
-											? "No se encontraron notas con los filtros aplicados"
-											: "Crea tu primera nota"
+										notes.length > 0 ? 'No se encontraron notas con los filtros aplicados' : 'Crea tu primera nota'
 									}
 									className="py-6"
 									actions={
@@ -409,9 +399,7 @@ export function NotesSettings() {
 					<CardHeader className="py-2 px-3">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-sm">
-									{isEditing ? 'Editar Nota' : 'Nueva Nota'}
-								</CardTitle>
+								<CardTitle className="text-sm">{isEditing ? 'Editar Nota' : 'Nueva Nota'}</CardTitle>
 								<CardDescription className="text-xs">
 									{isEditing
 										? 'Modifica los detalles de la nota seleccionada'
@@ -421,12 +409,7 @@ export function NotesSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedNote && (
 									<>
-										<Button
-											variant="outline"
-											size="sm"
-											className="h-7 text-xs"
-											onClick={handleReset}
-										>
+										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
 											Cancelar
 										</Button>
 										<Button
@@ -440,12 +423,7 @@ export function NotesSettings() {
 										</Button>
 									</>
 								)}
-								<Button
-									type="submit"
-									size="sm"
-									className="h-7 text-xs"
-									form="note-form"
-								>
+								<Button type="submit" size="sm" className="h-7 text-xs" form="note-form">
 									<Save className="h-3 w-3 mr-1" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
@@ -472,8 +450,12 @@ export function NotesSettings() {
 										{previewData || selectedNote ? (
 											<div className="flex flex-col p-4 border rounded-lg bg-background">
 												<div className="flex items-center mb-3 gap-2">
-													<div className="w-10 h-10 rounded-md flex items-center justify-center text-xl"
-														style={{ backgroundColor: (previewData?.color || (selectedNote as ExtendedNote)?.color || '#3b82f6') }}>
+													<div
+														className="w-10 h-10 rounded-md flex items-center justify-center text-xl"
+														style={{
+															backgroundColor: previewData?.color || (selectedNote as ExtendedNote)?.color || '#3b82f6',
+														}}
+													>
 														{previewData?.emoji || (selectedNote as ExtendedNote)?.emoji || '📝'}
 													</div>
 													<div className="flex-1">
@@ -496,22 +478,24 @@ export function NotesSettings() {
 
 												<div className="bg-muted p-3 rounded-md text-xs max-h-[200px] overflow-y-auto mb-3">
 													<div className="prose prose-sm prose-stone dark:prose-invert">
-														{previewData?.content || selectedNote?.content || 'El contenido de la nota aparecerá aquí...'}
+														{previewData?.content ||
+															selectedNote?.content ||
+															'El contenido de la nota aparecerá aquí...'}
 													</div>
 												</div>
 
 												<div className="flex flex-wrap gap-2 mt-auto">
 													{(previewData?.isFavorite || selectedNote?.isFavorite) && (
-														<Badge variant="outline" className="text-xs">Favorita</Badge>
+														<Badge variant="outline" className="text-xs">
+															Favorita
+														</Badge>
 													)}
 												</div>
 											</div>
 										) : (
 											<div className="flex flex-col items-center justify-center h-[300px] bg-muted/50 rounded-lg border border-dashed">
 												<FileText className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">
-													Vista previa
-												</p>
+												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
 											</div>
 										)}
 									</div>

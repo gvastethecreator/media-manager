@@ -34,7 +34,7 @@ export function useFolderImages(folderId: string | null) {
 					logger.debug('📄 Primera imagen recibida:', {
 						id: images[0].id,
 						name: images[0].name,
-						thumbnail: images[0].thumbnail ? 'Disponible' : 'No disponible'
+						thumbnail: images[0].thumbnail ? 'Disponible' : 'No disponible',
 					});
 				} else {
 					logger.debug('📄 No se recibieron imágenes');

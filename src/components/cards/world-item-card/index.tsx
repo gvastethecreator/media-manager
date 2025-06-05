@@ -8,4 +8,3 @@ export * from './world-item-server-actions';
 import { memo } from 'react';
 import { WorldItemCard } from './world-item-card';
 export const MemoizedWorldItemCard = memo(WorldItemCard);
-

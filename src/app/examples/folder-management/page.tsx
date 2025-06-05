@@ -22,9 +22,7 @@ export default function FolderManagementPage() {
 
 			<div className="mt-8 space-y-4">
 				<h2 className="text-2xl font-semibold">Detalles de la implementación</h2>
-				<p>
-					Este componente demuestra la integración entre React y el servicio de carpetas funcional, mostrando:
-				</p>
+				<p>Este componente demuestra la integración entre React y el servicio de carpetas funcional, mostrando:</p>
 				<ul className="list-disc pl-6 space-y-2">
 					<li>Gestión de estado con React hooks</li>
 					<li>Suscripción a eventos del servicio mediante callbacks</li>

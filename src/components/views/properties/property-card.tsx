@@ -28,7 +28,7 @@ const PROPERTY_TYPE_COLORS = {
 	string: '#3b82f6', // blue-500
 	number: '#10b981', // emerald-500
 	boolean: '#6366f1', // indigo-500
-	date: '#f97316',   // orange-500
+	date: '#f97316', // orange-500
 	select: '#8b5cf6', // violet-500
 	default: '#64748b', // slate-500
 } as const;
@@ -47,8 +47,10 @@ export function PropertyCard({ property, onClick, className }: PropertyCardProps
 
 	// Determinar el tipo para iconos y colores
 	const propertyType = (property.type || 'default').toLowerCase();
-	const IconComponent = PROPERTY_TYPE_ICONS[propertyType as keyof typeof PROPERTY_TYPE_ICONS] || PROPERTY_TYPE_ICONS.default;
-	const propertyColor = PROPERTY_TYPE_COLORS[propertyType as keyof typeof PROPERTY_TYPE_COLORS] || PROPERTY_TYPE_COLORS.default;
+	const IconComponent =
+		PROPERTY_TYPE_ICONS[propertyType as keyof typeof PROPERTY_TYPE_ICONS] || PROPERTY_TYPE_ICONS.default;
+	const propertyColor =
+		PROPERTY_TYPE_COLORS[propertyType as keyof typeof PROPERTY_TYPE_COLORS] || PROPERTY_TYPE_COLORS.default;
 
 	// Formatear fecha para mostrar
 	const formatDate = (date: Date | string) => {
@@ -77,10 +79,7 @@ export function PropertyCard({ property, onClick, className }: PropertyCardProps
 			data-property-id={property.id}
 		>
 			{/* Cabecera con tipo y nombre */}
-			<div
-				className="p-4 flex items-center gap-3 border-b"
-				style={{ borderColor: `${propertyColor}30` }}
-			>
+			<div className="p-4 flex items-center gap-3 border-b" style={{ borderColor: `${propertyColor}30` }}>
 				<div
 					className="flex items-center justify-center w-10 h-10 rounded-full text-white"
 					style={{ backgroundColor: propertyColor }}
@@ -114,21 +113,17 @@ export function PropertyCard({ property, onClick, className }: PropertyCardProps
 				)}
 
 				{property.required && (
-					<Badge className="mt-3 text-xs" variant="secondary">Requerido</Badge>
+					<Badge className="mt-3 text-xs" variant="secondary">
+						Requerido
+					</Badge>
 				)}
 			</div>
 
 			{/* Pie con estadísticas */}
 			<div className="p-4 border-t bg-muted/30" style={{ borderColor: `${propertyColor}30` }}>
 				<div className="flex items-center justify-between">
-					<span className="text-sm font-medium">
-						{property.totalAssociations} asociaciones
-					</span>
-					<Badge
-						variant="outline"
-						className="text-xs"
-						style={{ borderColor: propertyColor }}
-					>
+					<span className="text-sm font-medium">{property.totalAssociations} asociaciones</span>
+					<Badge variant="outline" className="text-xs" style={{ borderColor: propertyColor }}>
 						{formatDate(property.updatedAt)}
 					</Badge>
 				</div>

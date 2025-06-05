@@ -70,7 +70,7 @@ export function ViewToolbar({
 	const setSortDirection = useFileStoreBase((state) => state.setSortDirection);
 
 	// 🎯 Obtener items seleccionados con información completa
-	const selectedItems = selectedFileIds.map(id => files[id as keyof typeof files]).filter(Boolean);
+	const selectedItems = selectedFileIds.map((id) => files[id as keyof typeof files]).filter(Boolean);
 
 	const { isVisible, toggleVisibility } = useDetailsPanel();
 

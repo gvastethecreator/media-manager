@@ -20,7 +20,7 @@ export enum EntityType {
 	FOLDER = 'folder',
 	QUEUE_JOB = 'queue_job',
 	PROFILE = 'profile',
-	ACTIVITY = 'activity'
+	ACTIVITY = 'activity',
 }
 
 /**
@@ -47,4 +47,3 @@ export interface EntityRelation {
 
 // Re-export for backwards compatibility
 export type { UploadedImageType } from '@/types/entities/uploaded-image';
-

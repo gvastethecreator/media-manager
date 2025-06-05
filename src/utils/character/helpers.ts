@@ -6,14 +6,14 @@
 // Importación comentada porque las funciones no existen actualmente
 // import { getSuggestedAppearance, serializeObject } from '@/transformers/character';
 import type {
-    CharacterBase,
-    CharacterCategory,
-    CharacterClass,
-    CharacterExtended,
-    CharacterRace,
-    CharacterRelationship,
-    CharacterSortOption,
-    CharacterSummary,
+	CharacterBase,
+	CharacterCategory,
+	CharacterClass,
+	CharacterExtended,
+	CharacterRace,
+	CharacterRelationship,
+	CharacterSortOption,
+	CharacterSummary,
 } from '@/types/entities/character';
 import { CharacterRelationshipType } from '@/types/entities/character/enums';
 import { v4 as uuidv4 } from 'uuid';

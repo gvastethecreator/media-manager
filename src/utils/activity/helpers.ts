@@ -4,7 +4,7 @@
  */
 
 import { getActivityCategory } from '../../transformers/activity/serializers';
-import { ActivityCategory, ActivityType, type Activity } from '../../types/entities/activity';
+import { type Activity, ActivityCategory, ActivityType } from '../../types/entities/activity';
 
 /**
  * Obtiene un título descriptivo para la actividad

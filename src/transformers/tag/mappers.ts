@@ -5,12 +5,7 @@
 
 import { Logger } from '@/lib/logger';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    TagCreateInput,
-    TagFilters,
-    TagSearchOptions,
-    TagUpdateInput,
-} from '@/types/entities/tag/types';
+import type { TagCreateInput, TagFilters, TagSearchOptions, TagUpdateInput } from '@/types/entities/tag/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -69,19 +64,19 @@ export function mapCreateTagDataToPrisma(data: TagCreateInput): Prisma.TagCreate
 
 		// Preparar relaciones
 		const relations = {
-			images: data.images?.length ? { connect: data.images.map(img => ({ id: img.id })) } : undefined,
-			videos: data.videos?.length ? { connect: data.videos.map(vid => ({ id: vid.id })) } : undefined,
-			albums: data.albums?.length ? { connect: data.albums.map(alb => ({ id: alb.id })) } : undefined,
-			collections: data.collections?.length ? { connect: data.collections.map(col => ({ id: col.id })) } : undefined,
-			characters: data.characters?.length ? { connect: data.characters.map(char => ({ id: char.id })) } : undefined,
-			places: data.places?.length ? { connect: data.places.map(place => ({ id: place.id })) } : undefined,
-			worldItems: data.worldItems?.length ? { connect: data.worldItems.map(item => ({ id: item.id })) } : undefined,
-			concepts: data.concepts?.length ? { connect: data.concepts.map(con => ({ id: con.id })) } : undefined,
-			prompts: data.prompts?.length ? { connect: data.prompts.map(prompt => ({ id: prompt.id })) } : undefined,
-			notes: data.notes?.length ? { connect: data.notes.map(note => ({ id: note.id })) } : undefined,
-			wildcards: data.wildcards?.length ? { connect: data.wildcards.map(wild => ({ id: wild.id })) } : undefined,
-			properties: data.properties?.length ? { connect: data.properties.map(prop => ({ id: prop.id })) } : undefined,
-			groups: data.groups?.length ? { connect: data.groups.map(group => ({ id: group.id })) } : undefined,
+			images: data.images?.length ? { connect: data.images.map((img) => ({ id: img.id })) } : undefined,
+			videos: data.videos?.length ? { connect: data.videos.map((vid) => ({ id: vid.id })) } : undefined,
+			albums: data.albums?.length ? { connect: data.albums.map((alb) => ({ id: alb.id })) } : undefined,
+			collections: data.collections?.length ? { connect: data.collections.map((col) => ({ id: col.id })) } : undefined,
+			characters: data.characters?.length ? { connect: data.characters.map((char) => ({ id: char.id })) } : undefined,
+			places: data.places?.length ? { connect: data.places.map((place) => ({ id: place.id })) } : undefined,
+			worldItems: data.worldItems?.length ? { connect: data.worldItems.map((item) => ({ id: item.id })) } : undefined,
+			concepts: data.concepts?.length ? { connect: data.concepts.map((con) => ({ id: con.id })) } : undefined,
+			prompts: data.prompts?.length ? { connect: data.prompts.map((prompt) => ({ id: prompt.id })) } : undefined,
+			notes: data.notes?.length ? { connect: data.notes.map((note) => ({ id: note.id })) } : undefined,
+			wildcards: data.wildcards?.length ? { connect: data.wildcards.map((wild) => ({ id: wild.id })) } : undefined,
+			properties: data.properties?.length ? { connect: data.properties.map((prop) => ({ id: prop.id })) } : undefined,
+			groups: data.groups?.length ? { connect: data.groups.map((group) => ({ id: group.id })) } : undefined,
 		};
 
 		return {
@@ -113,19 +108,19 @@ export function mapUpdateTagDataToPrisma(data: TagUpdateInput): Prisma.TagUpdate
 
 		// Preparar relaciones
 		const relations = {
-			images: data.images?.length ? { set: data.images.map(img => ({ id: img.id })) } : undefined,
-			videos: data.videos?.length ? { set: data.videos.map(vid => ({ id: vid.id })) } : undefined,
-			albums: data.albums?.length ? { set: data.albums.map(alb => ({ id: alb.id })) } : undefined,
-			collections: data.collections?.length ? { set: data.collections.map(col => ({ id: col.id })) } : undefined,
-			characters: data.characters?.length ? { set: data.characters.map(char => ({ id: char.id })) } : undefined,
-			places: data.places?.length ? { set: data.places.map(place => ({ id: place.id })) } : undefined,
-			worldItems: data.worldItems?.length ? { set: data.worldItems.map(item => ({ id: item.id })) } : undefined,
-			concepts: data.concepts?.length ? { set: data.concepts.map(con => ({ id: con.id })) } : undefined,
-			prompts: data.prompts?.length ? { set: data.prompts.map(prompt => ({ id: prompt.id })) } : undefined,
-			notes: data.notes?.length ? { set: data.notes.map(note => ({ id: note.id })) } : undefined,
-			wildcards: data.wildcards?.length ? { set: data.wildcards.map(wild => ({ id: wild.id })) } : undefined,
-			properties: data.properties?.length ? { set: data.properties.map(prop => ({ id: prop.id })) } : undefined,
-			groups: data.groups?.length ? { set: data.groups.map(group => ({ id: group.id })) } : undefined,
+			images: data.images?.length ? { set: data.images.map((img) => ({ id: img.id })) } : undefined,
+			videos: data.videos?.length ? { set: data.videos.map((vid) => ({ id: vid.id })) } : undefined,
+			albums: data.albums?.length ? { set: data.albums.map((alb) => ({ id: alb.id })) } : undefined,
+			collections: data.collections?.length ? { set: data.collections.map((col) => ({ id: col.id })) } : undefined,
+			characters: data.characters?.length ? { set: data.characters.map((char) => ({ id: char.id })) } : undefined,
+			places: data.places?.length ? { set: data.places.map((place) => ({ id: place.id })) } : undefined,
+			worldItems: data.worldItems?.length ? { set: data.worldItems.map((item) => ({ id: item.id })) } : undefined,
+			concepts: data.concepts?.length ? { set: data.concepts.map((con) => ({ id: con.id })) } : undefined,
+			prompts: data.prompts?.length ? { set: data.prompts.map((prompt) => ({ id: prompt.id })) } : undefined,
+			notes: data.notes?.length ? { set: data.notes.map((note) => ({ id: note.id })) } : undefined,
+			wildcards: data.wildcards?.length ? { set: data.wildcards.map((wild) => ({ id: wild.id })) } : undefined,
+			properties: data.properties?.length ? { set: data.properties.map((prop) => ({ id: prop.id })) } : undefined,
+			groups: data.groups?.length ? { set: data.groups.map((group) => ({ id: group.id })) } : undefined,
 		};
 
 		return {
@@ -140,9 +135,7 @@ export function mapUpdateTagDataToPrisma(data: TagUpdateInput): Prisma.TagUpdate
 /**
  * 🔄 Mapea opciones de búsqueda de Tag a formato Prisma
  */
-export function mapTagSearchOptionsToPrisma(
-	options: TagSearchOptions
-): Prisma.TagFindManyArgs {
+export function mapTagSearchOptionsToPrisma(options: TagSearchOptions): Prisma.TagFindManyArgs {
 	try {
 		const { skip = 0, take = DEFAULT_PAGE_SIZE, orderBy, filters = {}, include = {} } = options;
 
@@ -150,9 +143,11 @@ export function mapTagSearchOptionsToPrisma(
 		const validatedPageSize = Math.min(take, MAX_PAGE_SIZE);
 
 		// Mapear ordenamiento
-		const orderByMapped = orderBy ? {
-			[orderBy.field]: orderBy.direction,
-		} : { createdAt: 'desc' };
+		const orderByMapped = orderBy
+			? {
+					[orderBy.field]: orderBy.direction,
+				}
+			: { createdAt: 'desc' };
 
 		// Mapear filtros
 		const where = mapTagFiltersToPrisma(filters);

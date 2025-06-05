@@ -32,12 +32,7 @@ export interface UIActions {
 }
 
 // Slice del store para UI
-export const createUISlice: StateCreator<
-	FavoriteStore,
-	[],
-	[],
-	UIState & UIActions
-> = (set, get) => ({
+export const createUISlice: StateCreator<FavoriteStore, [], [], UIState & UIActions> = (set, get) => ({
 	// Estado inicial
 	viewMode: FavoriteViewMode.GRID,
 	sortCriteria: FavoriteSortCriteria.CREATED_AT,

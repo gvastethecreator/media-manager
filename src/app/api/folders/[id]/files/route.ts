@@ -1,7 +1,7 @@
+import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type NextRequest, NextResponse } from 'next/server';
-import path from 'path';
 
 const filesLogger = serverLogger.withContext('FilesAPI');
 

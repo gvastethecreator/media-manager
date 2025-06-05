@@ -45,8 +45,8 @@ export function PromptCardGrid({
 	tcgMode = true,
 	compact = false,
 	selectedPromptId = null,
-	searchPlaceholder = "Buscar prompts...",
-	maxPrompts = 50
+	searchPlaceholder = 'Buscar prompts...',
+	maxPrompts = 50,
 }: PromptCardGridProps) {
 	const [prompts, setPrompts] = useState<PromptCardData[]>(initialPrompts);
 	const [searchTerm, setSearchTerm] = useState('');
@@ -89,7 +89,10 @@ export function PromptCardGrid({
 	// Renderizar esqueletos de carga
 	const renderSkeletons = () => {
 		return Array.from({ length: 6 }).map((_, index) => (
-			<div key={`prompt-skeleton-${Math.random().toString(36).substring(2)}`} className="w-[300px] md:w-[320px] h-[400px]">
+			<div
+				key={`prompt-skeleton-${Math.random().toString(36).substring(2)}`}
+				className="w-[300px] md:w-[320px] h-[400px]"
+			>
 				<Skeleton className="h-full w-full rounded-xl" />
 			</div>
 		));

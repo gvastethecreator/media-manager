@@ -92,7 +92,7 @@ export async function getTags(): Promise<TagWithStats[]> {
 						images: true,
 						groups: true,
 						properties: true,
-						wildcards: true
+						wildcards: true,
 					},
 				},
 				images: {
@@ -259,9 +259,7 @@ export async function getTagImages(id: string): Promise<FileItem[]> {
 		});
 
 		// Convertir a FileItem para la UI
-		const fileItems = images.map((image) =>
-			convertServerImageToFileItem(image as unknown as ServerImage)
-		);
+		const fileItems = images.map((image) => convertServerImageToFileItem(image as unknown as ServerImage));
 
 		tagLogger.info('✅ Imágenes obtenidas para tag:', {
 			tagId: id,
@@ -277,7 +275,11 @@ export async function getTagImages(id: string): Promise<FileItem[]> {
 			throw error;
 		}
 
-		throw createTagError(`No se pudieron obtener las imágenes para la etiqueta: ${id}`, TagErrorCode.OPERATION_FAILED, error);
+		throw createTagError(
+			`No se pudieron obtener las imágenes para la etiqueta: ${id}`,
+			TagErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 

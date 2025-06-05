@@ -5,12 +5,7 @@
 
 import { DEFAULT_COLORS, DEFAULT_EMOJIS } from '@/lib/constants';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-  Folder,
-  FolderComplete,
-  FolderCreateInput,
-  FolderUpdateInput
-} from '@/types/entities/folder/types';
+import type { Folder, FolderComplete, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder/types';
 import { normalizeFolderPath } from './serializers';
 
 const logger = serverLogger.withContext('FolderConverters');
@@ -23,53 +18,53 @@ const logger = serverLogger.withContext('FolderConverters');
  * @returns Objeto FolderComplete con propiedades adicionales
  */
 export function toFolderComplete(folder: any): FolderComplete {
-  try {
-    if (!folder || typeof folder !== 'object') {
-      throw new Error('Invalid folder object');
-    }
+	try {
+		if (!folder || typeof folder !== 'object') {
+			throw new Error('Invalid folder object');
+		}
 
-    return {
-      // 🔑 Campos básicos de identificación (requeridos por PrismaFolder)
-      id: folder.id,
-      name: folder.name || '',
-      path: folder.path || '',
-      description: folder.description || null,
+		return {
+			// 🔑 Campos básicos de identificación (requeridos por PrismaFolder)
+			id: folder.id,
+			name: folder.name || '',
+			path: folder.path || '',
+			description: folder.description || null,
 
-      // 🎨 Propiedades de visualización (requeridos por PrismaFolder)
-      emoji: folder.emoji || DEFAULT_EMOJIS.folder,
-      color: folder.color || DEFAULT_COLORS.primary,
-      featuredImage: folder.featuredImage || null,
-      isFavorite: folder.isFavorite || false,
+			// 🎨 Propiedades de visualización (requeridos por PrismaFolder)
+			emoji: folder.emoji || DEFAULT_EMOJIS.folder,
+			color: folder.color || DEFAULT_COLORS.primary,
+			featuredImage: folder.featuredImage || null,
+			isFavorite: folder.isFavorite || false,
 
-      // 📊 Propiedades de sistema (requeridos por PrismaFolder)
-      totalFiles: folder.totalFiles || 0,
-      totalSize: folder.totalSize || 0,
-      autoReindex: folder.autoReindex || false,
-      lastIndexed: folder.lastIndexed || null,
+			// 📊 Propiedades de sistema (requeridos por PrismaFolder)
+			totalFiles: folder.totalFiles || 0,
+			totalSize: folder.totalSize || 0,
+			autoReindex: folder.autoReindex || false,
+			lastIndexed: folder.lastIndexed || null,
 
-      // 🗂️ Relaciones (requeridos por PrismaFolder)
-      parentId: folder.parentId || null,
-      presetId: folder.presetId || null,
+			// 🗂️ Relaciones (requeridos por PrismaFolder)
+			parentId: folder.parentId || null,
+			presetId: folder.presetId || null,
 
-      // 📅 Metadatos de timestamp (requeridos por PrismaFolder)
-      createdAt: folder.createdAt || new Date(),
-      updatedAt: folder.updatedAt || new Date(),
+			// 📅 Metadatos de timestamp (requeridos por PrismaFolder)
+			createdAt: folder.createdAt || new Date(),
+			updatedAt: folder.updatedAt || new Date(),
 
-      // 🔗 Campos adicionales esperados por FolderComplete
-      children: folder.children || [],
-      parent: folder.parent || null,
-      stats: folder.stats || null,
-      metadata: folder.metadata || {},
-      _count: folder._count || {
-        children: 0,
-        images: 0,
-        videos: 0,
-      },
-    };
-  } catch (error) {
-    logger.error('Error converting to FolderComplete:', error);
-    return folder;
-  }
+			// 🔗 Campos adicionales esperados por FolderComplete
+			children: folder.children || [],
+			parent: folder.parent || null,
+			stats: folder.stats || null,
+			metadata: folder.metadata || {},
+			_count: folder._count || {
+				children: 0,
+				images: 0,
+				videos: 0,
+			},
+		};
+	} catch (error) {
+		logger.error('Error converting to FolderComplete:', error);
+		return folder;
+	}
 }
 
 /**
@@ -79,24 +74,24 @@ export function toFolderComplete(folder: any): FolderComplete {
  * @returns Datos transformados para Prisma
  */
 export function toPrismaFolder(data: FolderCreateInput | FolderUpdateInput): any {
-  try {
-    const result: any = { ...data };
+	try {
+		const result: any = { ...data };
 
-    // Normalizar el path si existe
-    if (data.path !== undefined) {
-      result.path = normalizeFolderPath(data.path);
-    }
+		// Normalizar el path si existe
+		if (data.path !== undefined) {
+			result.path = normalizeFolderPath(data.path);
+		}
 
-    // Convertir objetos complejos a JSON si existen
-    if (data.metadata && typeof data.metadata === 'object') {
-      result.metadata = data.metadata;
-    }
+		// Convertir objetos complejos a JSON si existen
+		if (data.metadata && typeof data.metadata === 'object') {
+			result.metadata = data.metadata;
+		}
 
-    return result;
-  } catch (error) {
-    logger.error('Error converting to Prisma format:', error);
-    return data;
-  }
+		return result;
+	} catch (error) {
+		logger.error('Error converting to Prisma format:', error);
+		return data;
+	}
 }
 
 /**
@@ -108,21 +103,21 @@ export function toPrismaFolder(data: FolderCreateInput | FolderUpdateInput): any
  * @returns Nuevo objeto Folder con propiedades combinadas
  */
 export function mapFolderToFolder(source: Partial<Folder>, target?: Partial<Folder>): Folder {
-  try {
-    const result: any = { ...target, ...source };
+	try {
+		const result: any = { ...target, ...source };
 
-    // Asegurar que las fechas sean objetos Date
-    if (result.createdAt && !(result.createdAt instanceof Date)) {
-      result.createdAt = new Date(result.createdAt);
-    }
+		// Asegurar que las fechas sean objetos Date
+		if (result.createdAt && !(result.createdAt instanceof Date)) {
+			result.createdAt = new Date(result.createdAt);
+		}
 
-    if (result.updatedAt && !(result.updatedAt instanceof Date)) {
-      result.updatedAt = new Date(result.updatedAt);
-    }
+		if (result.updatedAt && !(result.updatedAt instanceof Date)) {
+			result.updatedAt = new Date(result.updatedAt);
+		}
 
-    return result as Folder;
-  } catch (error) {
-    logger.error('Error mapping folder to folder:', error);
-    return { ...target, ...source } as Folder;
-  }
+		return result as Folder;
+	} catch (error) {
+		logger.error('Error mapping folder to folder:', error);
+		return { ...target, ...source } as Folder;
+	}
 }

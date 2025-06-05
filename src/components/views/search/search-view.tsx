@@ -43,7 +43,7 @@ export function SearchView(_props: ViewProps) {
 		type: 'all',
 	});
 
-	const { items, toggleItemSelection, setIsLoading, isLoading } = useFileStore(state => ({
+	const { items, toggleItemSelection, setIsLoading, isLoading } = useFileStore((state) => ({
 		items: state.files,
 		toggleItemSelection: state.toggleFileSelection,
 		setIsLoading: state.setLoading,
@@ -57,12 +57,12 @@ export function SearchView(_props: ViewProps) {
 			setIsLoading(true);
 			// Usar API fetch directamente para la búsqueda
 			fetch(`/api/search?query=${encodeURIComponent(filters.query)}&type=${filters.type}`)
-				.then(res => res.json())
-				.then(data => {
+				.then((res) => res.json())
+				.then((data) => {
 					useFileStore.setState({ files: data });
 					setIsLoading(false);
 				})
-				.catch(err => {
+				.catch((err) => {
 					console.error('Error en búsqueda:', err);
 					setIsLoading(false);
 				});

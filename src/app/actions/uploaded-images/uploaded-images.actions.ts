@@ -1,12 +1,12 @@
 'use server';
 
+import * as path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { uploadedImagesService } from '@/services/uploaded-images.service';
 import type { UploadedImageCreateInput, UploadedImageType } from '@/types/entities/uploaded-image';
 import type { UploadedImageFilters } from '@/types/uploaded-images';
 import { mkdir, writeFile } from 'fs/promises';
 import { revalidatePath } from 'next/cache';
-import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 const actionLogger = serverLogger.withContext('ServerAction:UploadedImages');

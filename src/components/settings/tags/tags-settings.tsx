@@ -3,13 +3,7 @@
 import { type TagWithStats as ServerTagWithStats, deleteTagAction, getTagsAction } from '@/app/actions/tags';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
@@ -26,7 +20,8 @@ import { CreateTagForm } from './create-tag-form';
 type ButtonClickHandler = React.MouseEventHandler<HTMLButtonElement>;
 
 // Extender la interfaz TagWithStats para incluir los campos que necesitamos
-interface TagWithStats extends Omit<ServerTagWithStats, 'emoji' | 'lastUpdated' | 'createdAt' | 'updatedAt' | 'description' | 'shortcut'> {
+interface TagWithStats
+	extends Omit<ServerTagWithStats, 'emoji' | 'lastUpdated' | 'createdAt' | 'updatedAt' | 'description' | 'shortcut'> {
 	emoji: string | null;
 	category?: string | null;
 	isFavorite?: boolean;
@@ -57,12 +52,12 @@ export function TagsSettings() {
 				setIsLoading(true);
 				const data = await getTagsAction();
 				// Convertir los datos para que coincidan con nuestra interfaz
-				const formattedTags = data.map(tag => ({
+				const formattedTags = data.map((tag) => ({
 					...tag,
 					emoji: tag.emoji || null,
 					createdAt: new Date(tag.createdAt),
 					updatedAt: new Date(tag.updatedAt),
-					lastUpdated: new Date(tag.lastUpdated)
+					lastUpdated: new Date(tag.lastUpdated),
 				})) as TagWithStats[];
 
 				setTags(formattedTags);
@@ -85,12 +80,12 @@ export function TagsSettings() {
 		totalTags: tags.length,
 		totalImages: tags.reduce((acc, tag) => acc + (tag._count?.images || 0), 0),
 		totalSize: tags.reduce((acc, tag) => acc + (tag.totalSize || 0), 0),
-		unusedTags: tags.filter(tag => (tag._count?.images || 0) === 0).length,
-		favoriteTags: tags.filter(tag => tag.isFavorite).length,
+		unusedTags: tags.filter((tag) => (tag._count?.images || 0) === 0).length,
+		favoriteTags: tags.filter((tag) => tag.isFavorite).length,
 	};
 
 	// Filtrar tags basados en los criterios seleccionados
-	const filteredTags = tags.filter(tag => {
+	const filteredTags = tags.filter((tag) => {
 		let matches = true;
 
 		// Filtrar por búsqueda
@@ -119,7 +114,7 @@ export function TagsSettings() {
 		if (window.confirm('¿Estás seguro de que quieres eliminar esta etiqueta?')) {
 			try {
 				await deleteTagAction(id);
-				setTags(prev => prev.filter(tag => tag.id !== id));
+				setTags((prev) => prev.filter((tag) => tag.id !== id));
 				setSelectedTag(null);
 				setIsEditing(false);
 				toastService.success('Etiqueta eliminada');
@@ -133,13 +128,16 @@ export function TagsSettings() {
 	}, []);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const handleDeleteButtonClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-		e.stopPropagation();
-		const id = (e.currentTarget as HTMLButtonElement).getAttribute('data-id');
-		if (id) {
-			handleDeleteTag(id);
-		}
-	}, [handleDeleteTag]);
+	const handleDeleteButtonClick = useCallback(
+		(e: React.MouseEvent<HTMLButtonElement>) => {
+			e.stopPropagation();
+			const id = (e.currentTarget as HTMLButtonElement).getAttribute('data-id');
+			if (id) {
+				handleDeleteTag(id);
+			}
+		},
+		[handleDeleteTag]
+	);
 
 	// Manejar edición de etiqueta
 	const handleEditTag = useCallback((tag: TagWithStats) => {
@@ -170,33 +168,33 @@ export function TagsSettings() {
 			description: newTag.description || null,
 			createdAt: new Date(newTag.createdAt),
 			updatedAt: new Date(newTag.updatedAt),
-			emoji: newTag.emoji || "🏷️",
+			emoji: newTag.emoji || '🏷️',
 			_count: { images: 0 },
 			totalSize: 0,
 			lastUpdated: new Date(),
 			category: newTag.category || null,
 			isFavorite: newTag.isFavorite || false,
-			shortcut: newTag.shortcut || null
+			shortcut: newTag.shortcut || null,
 		};
 
-		setTags(prev => [...prev, statsTag]);
+		setTags((prev) => [...prev, statsTag]);
 		toastService.success('Etiqueta creada');
 	}, []);
 
 	// Manejar actualización exitosa
 	const handleTagUpdated = useCallback((updatedTag: Tag) => {
-		setTags(prev =>
-			prev.map(tag =>
+		setTags((prev) =>
+			prev.map((tag) =>
 				tag.id === updatedTag.id
-					? {
-						...tag,
-						name: updatedTag.name,
-						description: updatedTag.description,
-						color: updatedTag.color,
-						emoji: updatedTag.emoji || tag.emoji,
-						category: updatedTag.category,
-						isFavorite: updatedTag.isFavorite,
-					} as TagWithStats
+					? ({
+							...tag,
+							name: updatedTag.name,
+							description: updatedTag.description,
+							color: updatedTag.color,
+							emoji: updatedTag.emoji || tag.emoji,
+							category: updatedTag.category,
+							isFavorite: updatedTag.isFavorite,
+						} as TagWithStats)
 					: tag
 			)
 		);
@@ -222,9 +220,7 @@ export function TagsSettings() {
 	}, []);
 
 	// Extraer categorías únicas de los tags
-	const uniqueCategories = Array.from(
-		new Set(tags.map(tag => tag.category).filter(Boolean))
-	) as string[];
+	const uniqueCategories = Array.from(new Set(tags.map((tag) => tag.category).filter(Boolean))) as string[];
 
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
@@ -248,11 +244,7 @@ export function TagsSettings() {
 						icon={Info}
 						title="Error al cargar etiquetas"
 						description={error}
-						actions={
-							<Button onClick={() => window.location.reload()}>
-								Intentar de nuevo
-							</Button>
-						}
+						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -277,11 +269,7 @@ export function TagsSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button
-											size="sm"
-											variant="ghost"
-											className="h-6 w-6 p-0"
-										>
+										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
@@ -303,18 +291,16 @@ export function TagsSettings() {
 											<div className="space-y-2">
 												<Label>Categorías</Label>
 												<div className="grid grid-cols-2 gap-2">
-													{uniqueCategories.map(category => (
+													{uniqueCategories.map((category) => (
 														<div key={category} className="flex items-center space-x-2">
 															<Checkbox
 																id={`category-${category}`}
 																checked={selectedCategories.includes(category)}
 																onCheckedChange={(checked) => {
 																	if (checked) {
-																		setSelectedCategories(prev => [...prev, category]);
+																		setSelectedCategories((prev) => [...prev, category]);
 																	} else {
-																		setSelectedCategories(prev =>
-																			prev.filter(cat => cat !== category)
-																		);
+																		setSelectedCategories((prev) => prev.filter((cat) => cat !== category));
 																	}
 																}}
 															/>
@@ -332,7 +318,9 @@ export function TagsSettings() {
 													checked={onlyFavorites}
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor="favorites" className="text-xs">Solo favoritos</Label>
+												<Label htmlFor="favorites" className="text-xs">
+													Solo favoritos
+												</Label>
 											</div>
 
 											<div className="flex justify-between">
@@ -347,7 +335,10 @@ export function TagsSettings() {
 									</PopoverContent>
 								</Popover>
 								<Button
-									onClick={() => { setSelectedTag(null); setIsEditing(false); }}
+									onClick={() => {
+										setSelectedTag(null);
+										setIsEditing(false);
+									}}
 									size="sm"
 									variant="ghost"
 									className="h-6 w-6 p-0"
@@ -376,8 +367,8 @@ export function TagsSettings() {
 									title="No hay etiquetas"
 									description={
 										tags.length > 0
-											? "No se encontraron etiquetas con los filtros aplicados"
-											: "Crea tu primera etiqueta"
+											? 'No se encontraron etiquetas con los filtros aplicados'
+											: 'Crea tu primera etiqueta'
 									}
 									className="py-6"
 									actions={
@@ -402,9 +393,7 @@ export function TagsSettings() {
 											<div className="flex-1 min-w-0">
 												<h4 className="text-xs font-medium truncate">{tag.name}</h4>
 												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													{tag.category && (
-														<span>{tag.category}</span>
-													)}
+													{tag.category && <span>{tag.category}</span>}
 													{(tag._count?.images || 0) > 0 && (
 														<>
 															<span>•</span>
@@ -443,9 +432,7 @@ export function TagsSettings() {
 					<CardHeader className="py-2 px-3">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-sm">
-									{isEditing ? 'Editar Etiqueta' : 'Nueva Etiqueta'}
-								</CardTitle>
+								<CardTitle className="text-sm">{isEditing ? 'Editar Etiqueta' : 'Nueva Etiqueta'}</CardTitle>
 								<CardDescription className="text-xs">
 									{isEditing
 										? 'Modifica los detalles de la etiqueta seleccionada'
@@ -455,12 +442,7 @@ export function TagsSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedTag && (
 									<>
-										<Button
-											variant="outline"
-											size="sm"
-											className="h-7 text-xs"
-											onClick={handleReset}
-										>
+										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
 											Cancelar
 										</Button>
 										<Button
@@ -474,12 +456,7 @@ export function TagsSettings() {
 										</Button>
 									</>
 								)}
-								<Button
-									type="submit"
-									size="sm"
-									className="h-7 text-xs"
-									form="tag-form"
-								>
+								<Button type="submit" size="sm" className="h-7 text-xs" form="tag-form">
 									<Save className="h-3 w-3 mr-1" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
@@ -505,8 +482,10 @@ export function TagsSettings() {
 									<div className="w-[180px] transition-all duration-300">
 										{previewData || selectedTag ? (
 											<div className="flex flex-col items-center p-4 border rounded-lg bg-background">
-												<div className="w-12 h-12 mb-3 rounded-full flex items-center justify-center text-2xl"
-													style={{ backgroundColor: (previewData?.color || selectedTag?.color || '#3b82f6') }}>
+												<div
+													className="w-12 h-12 mb-3 rounded-full flex items-center justify-center text-2xl"
+													style={{ backgroundColor: previewData?.color || selectedTag?.color || '#3b82f6' }}
+												>
 													{previewData?.emoji || selectedTag?.emoji || '🏷️'}
 												</div>
 												<h3 className="text-lg font-medium">
@@ -523,7 +502,9 @@ export function TagsSettings() {
 														</Badge>
 													)}
 													{(previewData?.isFavorite || selectedTag?.isFavorite) && (
-														<Badge variant="outline" className="text-xs">Favorito</Badge>
+														<Badge variant="outline" className="text-xs">
+															Favorito
+														</Badge>
 													)}
 												</div>
 
@@ -536,9 +517,7 @@ export function TagsSettings() {
 										) : (
 											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
 												<TagIcon className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">
-													Vista previa
-												</p>
+												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
 											</div>
 										)}
 									</div>

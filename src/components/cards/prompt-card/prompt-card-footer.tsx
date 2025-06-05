@@ -27,20 +27,16 @@ export function PromptCardFooter({
 	tagsCount,
 	primaryColor,
 	secondaryColor,
-	tcgMode = true
+	tcgMode = true,
 }: PromptCardFooterProps) {
 	const formattedDate = format(new Date(updatedAt), 'dd/MM/yyyy', { locale: es });
-	const daysSinceUpdate = Math.floor(
-		(new Date().getTime() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24)
-	);
+	const daysSinceUpdate = Math.floor((new Date().getTime() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24));
 
 	const isRecent = daysSinceUpdate < 7;
 
 	// Color estilizado para el footer
 	const borderColor = `${primaryColor}40`;
-	const bgColor = tcgMode
-		? `linear-gradient(to top, ${primaryColor}20, transparent)`
-		: undefined;
+	const bgColor = tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined;
 
 	return (
 		<div
@@ -50,7 +46,7 @@ export function PromptCardFooter({
 			)}
 			style={{
 				borderTop: `1px solid ${borderColor}`,
-				background: bgColor
+				background: bgColor,
 			}}
 		>
 			{/* Fecha de actualización */}
@@ -94,10 +90,7 @@ export function PromptCardFooter({
 
 			{/* Sello TCG en la esquina inferior */}
 			{tcgMode && (
-				<div
-					className="absolute bottom-1 right-1 text-[0.6rem] font-mono opacity-60"
-					style={{ color: primaryColor }}
-				>
+				<div className="absolute bottom-1 right-1 text-[0.6rem] font-mono opacity-60" style={{ color: primaryColor }}>
 					P{String(createdAt.getTime()).slice(-4)}
 				</div>
 			)}

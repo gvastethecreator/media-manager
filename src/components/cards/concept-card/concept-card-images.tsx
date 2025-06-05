@@ -2,8 +2,8 @@
 
 import { cn } from '@/lib/utils';
 import { ImageIcon, Sparkles } from 'lucide-react';
-import { nanoid } from "nanoid";
-import React, { Suspense, useEffect, useState } from "react";
+import { nanoid } from 'nanoid';
+import React, { Suspense, useEffect, useState } from 'react';
 import { getRecentConceptImages } from './concept-server-actions';
 
 interface ConceptCardImagesProps {
@@ -17,12 +17,7 @@ interface ConceptCardImagesProps {
  * Componente para mostrar las imágenes recientes de un concepto en una tarjeta.
  * Diseñado para parecer la ilustración de una carta TCG con efectos visuales.
  */
-export function ConceptCardImages({
-	conceptId,
-	primaryColor,
-	secondaryColor,
-	tcgMode = true
-}: ConceptCardImagesProps) {
+export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcgMode = true }: ConceptCardImagesProps) {
 	const [images, setImages] = useState<{ id: string; thumbnailUrl: string }[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -50,12 +45,7 @@ export function ConceptCardImages({
 	}, [conceptId]);
 
 	return (
-		<div
-			className={cn(
-				"relative h-[160px] overflow-hidden",
-				tcgMode ? "border-b-0" : "border-b border-gray-400/30"
-			)}
-		>
+		<div className={cn('relative h-[160px] overflow-hidden', tcgMode ? 'border-b-0' : 'border-b border-gray-400/30')}>
 			{/* Marco decorativo para TCG */}
 			{tcgMode && (
 				<>
@@ -66,14 +56,8 @@ export function ConceptCardImages({
 					/>
 
 					{/* Bordes laterales con el color primario */}
-					<div
-						className="absolute top-0 bottom-0 left-0 w-[2px] z-10"
-						style={{ background: primaryColor }}
-					/>
-					<div
-						className="absolute top-0 bottom-0 right-0 w-[2px] z-10"
-						style={{ background: primaryColor }}
-					/>
+					<div className="absolute top-0 bottom-0 left-0 w-[2px] z-10" style={{ background: primaryColor }} />
+					<div className="absolute top-0 bottom-0 right-0 w-[2px] z-10" style={{ background: primaryColor }} />
 				</>
 			)}
 
@@ -84,12 +68,10 @@ export function ConceptCardImages({
 					images.length >= 4 ? 'grid-cols-3 grid-rows-2' : 'grid-cols-2 grid-rows-2'
 				)}
 				style={{
-					backgroundImage: tcgMode ?
-						`linear-gradient(to bottom, ${secondaryColor}80, ${secondaryColor})` :
-						`linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
-					borderBottom: tcgMode ?
-						`2px solid ${primaryColor}` :
-						`1px solid ${primaryColor}50`,
+					backgroundImage: tcgMode
+						? `linear-gradient(to bottom, ${secondaryColor}80, ${secondaryColor})`
+						: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
+					borderBottom: tcgMode ? `2px solid ${primaryColor}` : `1px solid ${primaryColor}50`,
 				}}
 			>
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} tcgMode={tcgMode} />}>
@@ -97,7 +79,11 @@ export function ConceptCardImages({
 						// Mostrar placeholders mientras carga
 						<>
 							{[...Array(6)].map((_, i) => (
-								<ImageLoading key={`loading-${renderKey}-star-${i + 1}`} backgroundColor={secondaryColor} tcgMode={tcgMode} />
+								<ImageLoading
+									key={`loading-${renderKey}-star-${i + 1}`}
+									backgroundColor={secondaryColor}
+									tcgMode={tcgMode}
+								/>
 							))}
 						</>
 					) : error ? (
@@ -109,8 +95,8 @@ export function ConceptCardImages({
 						// Mostrar mensaje si no hay imágenes
 						<div
 							className={cn(
-								"col-span-full row-span-full flex flex-col items-center justify-center text-center p-4",
-								tcgMode ? "bg-black/30" : ""
+								'col-span-full row-span-full flex flex-col items-center justify-center text-center p-4',
+								tcgMode ? 'bg-black/30' : ''
 							)}
 						>
 							{tcgMode ? (
@@ -136,17 +122,14 @@ export function ConceptCardImages({
 							{images.map((image, index) => (
 								<div
 									key={image.id}
-									className={cn(
-										"relative overflow-hidden w-full h-full",
-										tcgMode ? "border border-white/10" : ""
-									)}
+									className={cn('relative overflow-hidden w-full h-full', tcgMode ? 'border border-white/10' : '')}
 								>
 									<img
 										src={image.thumbnailUrl}
 										alt={`Imagen ${index + 1}`}
 										className={cn(
-											"w-full h-full object-cover",
-											tcgMode ? "hover:scale-110 transition-transform duration-500" : ""
+											'w-full h-full object-cover',
+											tcgMode ? 'hover:scale-110 transition-transform duration-500' : ''
 										)}
 										loading="lazy"
 									/>
@@ -161,8 +144,8 @@ export function ConceptCardImages({
 									<div
 										key={`placeholder-${renderKey}-position-${i + 1}`}
 										className={cn(
-											"w-full h-full flex items-center justify-center",
-											tcgMode ? "bg-black/40 border border-white/5" : "bg-black/20"
+											'w-full h-full flex items-center justify-center',
+											tcgMode ? 'bg-black/40 border border-white/5' : 'bg-black/20'
 										)}
 									>
 										<ImageIcon className="w-5 h-5 opacity-20" />
@@ -184,15 +167,18 @@ export function ConceptCardImages({
 }
 
 // Componente para mostrar mientras se cargan las imágenes
-function ImageLoading({ backgroundColor, tcgMode = false }: {
+function ImageLoading({
+	backgroundColor,
+	tcgMode = false,
+}: {
 	backgroundColor: string;
 	tcgMode?: boolean;
 }) {
 	return (
 		<div
 			className={cn(
-				"animate-pulse relative overflow-hidden w-full h-full flex items-center justify-center",
-				tcgMode ? "border border-white/5" : ""
+				'animate-pulse relative overflow-hidden w-full h-full flex items-center justify-center',
+				tcgMode ? 'border border-white/5' : ''
 			)}
 			style={{ backgroundColor: tcgMode ? `${backgroundColor}60` : `${backgroundColor}30` }}
 		>

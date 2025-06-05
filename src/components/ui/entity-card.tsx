@@ -136,18 +136,13 @@ export function EntityCard({
 			tcgMode={tcgMode}
 		>
 			{/* Encabezado */}
-			<CardHeader
-				title={title}
-				subtitle={subtitle}
-				icon={icon}
-				primaryColor={primaryColor}
-			/>
+			<CardHeader title={title} subtitle={subtitle} icon={icon} primaryColor={primaryColor} />
 
 			{/* Contenido principal */}
 			<div className="flex-1 p-3 flex flex-col">
 				{/* Descripción */}
 				{description && (
-					<p className={cn("text-sm text-muted-foreground", compact ? "line-clamp-1" : "line-clamp-2")}>
+					<p className={cn('text-sm text-muted-foreground', compact ? 'line-clamp-1' : 'line-clamp-2')}>
 						{description}
 					</p>
 				)}
@@ -156,7 +151,10 @@ export function EntityCard({
 				{thumbnails && thumbnails.length > 0 && (
 					<div className="mt-2 flex gap-1">
 						{thumbnails.slice(0, 4).map((src, idx) => (
-							<div key={`${title}-thumb-${src.substring(src.lastIndexOf('/') + 1, src.length)}-${idx}`} className="w-10 h-10 overflow-hidden rounded-sm">
+							<div
+								key={`${title}-thumb-${src.substring(src.lastIndexOf('/') + 1, src.length)}-${idx}`}
+								className="w-10 h-10 overflow-hidden rounded-sm"
+							>
 								<img
 									src={src}
 									alt={`${title} thumbnail ${idx + 1}`}
@@ -196,10 +194,22 @@ export function EntityCard({
 			{/* Efectos de TCG */}
 			{tcgMode && (
 				<div className="absolute inset-0 pointer-events-none">
-					<div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 rounded-tl-md" style={{ borderColor: primaryColor }} />
-					<div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 rounded-tr-md" style={{ borderColor: primaryColor }} />
-					<div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 rounded-bl-md" style={{ borderColor: primaryColor }} />
-					<div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 rounded-br-md" style={{ borderColor: primaryColor }} />
+					<div
+						className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 rounded-tl-md"
+						style={{ borderColor: primaryColor }}
+					/>
+					<div
+						className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 rounded-tr-md"
+						style={{ borderColor: primaryColor }}
+					/>
+					<div
+						className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 rounded-bl-md"
+						style={{ borderColor: primaryColor }}
+					/>
+					<div
+						className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 rounded-br-md"
+						style={{ borderColor: primaryColor }}
+					/>
 				</div>
 			)}
 		</CardContainer>
@@ -212,7 +222,11 @@ export function EntityCard({
 		return (
 			<motion.div
 				whileHover={animationMode === 'hover' ? { scale: 1.02, transition: { duration: 0.2 } } : undefined}
-				animate={animationMode === 'always' ? { y: [0, -5, 0], transition: { duration: 2, repeat: Number.MAX_SAFE_INTEGER } } : undefined}
+				animate={
+					animationMode === 'always'
+						? { y: [0, -5, 0], transition: { duration: 2, repeat: Number.MAX_SAFE_INTEGER } }
+						: undefined
+				}
 				className="w-full"
 			>
 				{content}
@@ -237,13 +251,7 @@ export function EntityCard({
 	if (href) {
 		return wrapWithAnimation(
 			<Link href={href} className="block">
-				{tcgMode ? (
-					<ShineButton>
-						{cardContent}
-					</ShineButton>
-				) : (
-					cardContent
-				)}
+				{tcgMode ? <ShineButton>{cardContent}</ShineButton> : cardContent}
 			</Link>
 		);
 	}

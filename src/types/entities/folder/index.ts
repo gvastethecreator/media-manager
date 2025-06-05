@@ -4,7 +4,15 @@
  */
 
 export type {
-  CreateFolderData, FolderBase, FolderComplete, FolderExtended, FolderExtendedComplete, FolderFilters, FolderSummary, FolderTreeItem, UpdateFolderData
+	CreateFolderData,
+	FolderBase,
+	FolderComplete,
+	FolderExtended,
+	FolderExtendedComplete,
+	FolderFilters,
+	FolderSummary,
+	FolderTreeItem,
+	UpdateFolderData,
 } from './types';
 
 export { FOLDER_SORT_PROPERTY_MAP, FolderSortCriteria } from './types';
@@ -16,4 +24,3 @@ export type { FolderExtendedComplete as Folder } from './types';
 // export * from './base';
 // export * from './enums';
 // export * from './extended';
-

@@ -6,13 +6,7 @@ interface GroupDetailsProps {
 	color?: string;
 }
 
-export function GroupDetails({
-	description,
-	category,
-	shortcut,
-	sortBy,
-	color
-}: GroupDetailsProps) {
+export function GroupDetails({ description, category, shortcut, sortBy, color }: GroupDetailsProps) {
 	return (
 		<>
 			{/* Descripción */}
@@ -48,10 +42,7 @@ export function GroupDetails({
 				<div className="space-y-2">
 					<h3 className="text-sm font-medium">Color</h3>
 					<div className="flex items-center gap-2">
-						<div
-							className="w-4 h-4 rounded"
-							style={{ backgroundColor: color }}
-						/>
+						<div className="w-4 h-4 rounded" style={{ backgroundColor: color }} />
 						<span className="text-sm text-muted-foreground">{color}</span>
 					</div>
 				</div>

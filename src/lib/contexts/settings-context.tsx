@@ -1,10 +1,6 @@
 'use client';
 
-import {
-	type ProfileCreate,
-	type ProfileUpdate,
-	type ProfileWithStats,
-} from '@/services/profile-service-export';
+import { type ProfileCreate, type ProfileUpdate, type ProfileWithStats } from '@/services/profile-service-export';
 import { profileClient } from '@/services/profile/client';
 import { toastService } from '@/services/toast-service-export';
 import type { ThumbnailQuality } from '@/types/thumbnails';

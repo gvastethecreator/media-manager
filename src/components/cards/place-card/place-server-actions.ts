@@ -43,9 +43,7 @@ export interface PlaceCardData extends Place {
 /**
  * Obtiene los datos de un lugar para mostrar en una tarjeta
  */
-export async function getPlaceCardData(
-	placeId: string
-): Promise<PlaceCardData> {
+export async function getPlaceCardData(placeId: string): Promise<PlaceCardData> {
 	const prisma = await getPrismaClient();
 
 	try {
@@ -136,7 +134,7 @@ export async function getPlaceCardData(
 			rarityLevel,
 			cardId: `P${place.id.substring(0, 6)}`,
 			healthPoints: calculatePlaceHealth(parsedDangers?.length || 0, parsedResources?.length || 0),
-			valueLevel: calculateValueLevel(parsedResources, place.population)
+			valueLevel: calculateValueLevel(parsedResources, place.population),
 		};
 
 		return {
@@ -227,7 +225,7 @@ function calculateValueLevel(resources: PlaceResource[] | undefined, population:
 	}, 0);
 
 	// Combinar con población
-	const totalValue = (resourceValue * 0.7) + (Math.log10(population + 1) * 2 * 0.3);
+	const totalValue = resourceValue * 0.7 + Math.log10(population + 1) * 2 * 0.3;
 
 	// Escalar a 1-10
 	return Math.max(1, Math.min(10, Math.round(totalValue)));

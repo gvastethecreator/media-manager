@@ -91,9 +91,7 @@ export function GroupContentView(_props: ViewProps) {
 					</div>
 					<div>
 						<h1 className="text-2xl font-bold">{group.name}</h1>
-						{group.category && (
-							<p className="text-muted-foreground">{group.category}</p>
-						)}
+						{group.category && <p className="text-muted-foreground">{group.category}</p>}
 					</div>
 				</div>
 
@@ -142,9 +140,7 @@ export function GroupContentView(_props: ViewProps) {
 					</TabsContent>
 
 					<TabsContent value="entities" className="space-y-4">
-						<p className="text-center text-muted-foreground py-10">
-							Este grupo contiene entidades de diferentes tipos
-						</p>
+						<p className="text-center text-muted-foreground py-10">Este grupo contiene entidades de diferentes tipos</p>
 						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 							{/* Álbums */}
 							{(group._count?.albums || 0) > 0 && (

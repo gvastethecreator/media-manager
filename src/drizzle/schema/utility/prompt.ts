@@ -17,21 +17,21 @@ import { wildcards } from './wildcard';
 
 // Definición de la tabla
 export const prompts = sqliteTable(
-    'Prompt',
-    {
-        ...organizationFields,
-        content: text('content').default(''),
-        purpose: text('purpose').default(''),
-        parameters: text('parameters').default(''),
-    },
-    (table) => {
-        const indexes = createIndexes('prompt');
-        return {
-            nameIdx: indexes.nameIdx.on(table.name),
-            categoryIdx: indexes.categoryIdx.on(table.category),
-            createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
-        };
-    }
+	'Prompt',
+	{
+		...organizationFields,
+		content: text('content').default(''),
+		purpose: text('purpose').default(''),
+		parameters: text('parameters').default(''),
+	},
+	(table) => {
+		const indexes = createIndexes('prompt');
+		return {
+			nameIdx: indexes.nameIdx.on(table.name),
+			categoryIdx: indexes.categoryIdx.on(table.category),
+			createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
+		};
+	}
 );
 
 // Tablas de relación
@@ -51,19 +51,19 @@ export const promptsToGroups = createRelationTable('PromptToGroup', 'Prompt', 'G
 
 // Definición de relaciones
 const relatedEntities = {
-    images,
-    videos,
-    albums,
-    collections,
-    tags,
-    characters,
-    places,
-    worldItems,
-    concepts,
-    notes,
-    wildcards,
-    properties,
-    groups
+	images,
+	videos,
+	albums,
+	collections,
+	tags,
+	characters,
+	places,
+	worldItems,
+	concepts,
+	notes,
+	wildcards,
+	properties,
+	groups,
 };
 
 // Relaciones

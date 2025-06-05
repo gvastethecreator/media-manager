@@ -8,7 +8,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import type { ImageItem } from '@/types/image-item';
 import { PanelRightClose, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { memo, Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, memo, useCallback, useEffect, useState } from 'react';
 
 // Lazy load del StatsPanel para reducir carga inicial
 const StatsPanel = dynamic(() => import('../stats/stats-panel'), {
@@ -114,8 +114,8 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 				</div>
 			</div>
 
-			{!isCollapsed && (
-				hasSelectedItems ? (
+			{!isCollapsed &&
+				(hasSelectedItems ? (
 					<ScrollArea className="flex-1">
 						<div className="p-2">
 							<DetailsPanel selectedItems={selectedItems as ImageItem[]} />
@@ -123,8 +123,7 @@ export function RightPanel({ className, isCollapsed, onToggleCollapse }: RightPa
 					</ScrollArea>
 				) : (
 					shouldShowStats && <LazyStatsPanel />
-				)
-			)}
+				))}
 		</div>
 	);
 }

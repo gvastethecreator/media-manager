@@ -25,7 +25,7 @@ import type { WorldItem } from '@/types/entities/world-item';
 
 // Tipo que representa una entidad con ID
 export interface Entity {
-  id: string;
+	id: string;
 }
 
 // Verificador de tipo en tiempo de compilación
@@ -33,21 +33,21 @@ export type VerifyEntityType<T extends Entity> = T;
 
 // Verificar todas las entidades
 export type VerifiedEntityTypes = {
-  album: VerifyEntityType<Album>;
-  character: VerifyEntityType<Character>;
-  collection: VerifyEntityType<Collection>;
-  concept: VerifyEntityType<Concept>;
-  folder: VerifyEntityType<Folder>;
-  group: VerifyEntityType<Group>;
-  image: VerifyEntityType<Image>;
-  note: VerifyEntityType<Note>;
-  place: VerifyEntityType<Place>;
-  prompt: VerifyEntityType<Prompt>;
-  property: VerifyEntityType<Property>;
-  tag: VerifyEntityType<Tag>;
-  video: VerifyEntityType<Video>;
-  wildcard: VerifyEntityType<Wildcard>;
-  worldItem: VerifyEntityType<WorldItem>;
+	album: VerifyEntityType<Album>;
+	character: VerifyEntityType<Character>;
+	collection: VerifyEntityType<Collection>;
+	concept: VerifyEntityType<Concept>;
+	folder: VerifyEntityType<Folder>;
+	group: VerifyEntityType<Group>;
+	image: VerifyEntityType<Image>;
+	note: VerifyEntityType<Note>;
+	place: VerifyEntityType<Place>;
+	prompt: VerifyEntityType<Prompt>;
+	property: VerifyEntityType<Property>;
+	tag: VerifyEntityType<Tag>;
+	video: VerifyEntityType<Video>;
+	wildcard: VerifyEntityType<Wildcard>;
+	worldItem: VerifyEntityType<WorldItem>;
 };
 
 /**
@@ -55,6 +55,6 @@ export type VerifiedEntityTypes = {
  * y no debe ser llamada en producción
  */
 export function validateEntityExports(): void {
-  console.info('✅ Todas las entidades están correctamente exportadas');
-  // Esta función no hace nada, solo sirve para validación en tiempo de compilación
+	console.info('✅ Todas las entidades están correctamente exportadas');
+	// Esta función no hace nada, solo sirve para validación en tiempo de compilación
 }

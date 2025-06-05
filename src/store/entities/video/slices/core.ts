@@ -4,24 +4,21 @@
  */
 
 import type { StateCreator } from 'zustand';
+import { mapCreateVideoDataToPrisma, mapVideoVisualConfigUpdateToPrisma } from '../../../../transformers/video/mappers';
 import {
-    mapCreateVideoDataToPrisma,
-    mapVideoVisualConfigUpdateToPrisma
-} from '../../../../transformers/video/mappers';
-import {
-    transformVideo,
-    transformVideoWithStats,
-    transformVideos,
-    transformVideosWithStats
+	transformVideo,
+	transformVideoWithStats,
+	transformVideos,
+	transformVideosWithStats,
 } from '../../../../transformers/video/serializers';
 import type {
-    CreateVideoData,
-    UpdateVideoData,
-    Video,
-    VideoBase,
-    VideoComplete,
-    VideoFilters,
-    VideoVisualConfig,
+	CreateVideoData,
+	UpdateVideoData,
+	Video,
+	VideoBase,
+	VideoComplete,
+	VideoFilters,
+	VideoVisualConfig,
 } from '../../../../types/entities/video';
 import type { VideoState } from '../types';
 
@@ -34,17 +31,20 @@ export interface VideoCoreSlice {
 
 	// Selectores avanzados
 	selectVideos: (options?: {
-		withStats?: boolean,
-		filters?: VideoFilters,
-		sortBy?: keyof VideoComplete,
-		sortDirection?: 'asc' | 'desc'
+		withStats?: boolean;
+		filters?: VideoFilters;
+		sortBy?: keyof VideoComplete;
+		sortDirection?: 'asc' | 'desc';
 	}) => Video[];
-	selectVideosByFolder: (folderId: string, options?: {
-		withStats?: boolean,
-		filters?: VideoFilters,
-		sortBy?: keyof VideoComplete,
-		sortDirection?: 'asc' | 'desc'
-	}) => Video[];
+	selectVideosByFolder: (
+		folderId: string,
+		options?: {
+			withStats?: boolean;
+			filters?: VideoFilters;
+			sortBy?: keyof VideoComplete;
+			sortDirection?: 'asc' | 'desc';
+		}
+	) => Video[];
 	selectVideoById: (id: string, options?: { withStats?: boolean }) => Video | undefined;
 
 	// Operaciones
@@ -102,15 +102,11 @@ export const createVideoCoreSlice: StateCreator<VideoState, [], [], VideoCoreSli
 			const valueB = b[sortBy as keyof Video];
 
 			if (typeof valueA === 'string' && typeof valueB === 'string') {
-				return sortDirection === 'asc'
-					? valueA.localeCompare(valueB)
-					: valueB.localeCompare(valueA);
+				return sortDirection === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
 			}
 
 			// Para fechas y números
-			return sortDirection === 'asc'
-				? (valueA < valueB ? -1 : 1)
-				: (valueA > valueB ? -1 : 1);
+			return sortDirection === 'asc' ? (valueA < valueB ? -1 : 1) : valueA > valueB ? -1 : 1;
 		});
 
 		// Aplicar estadísticas si se requiere
@@ -170,7 +166,7 @@ export const createVideoCoreSlice: StateCreator<VideoState, [], [], VideoCoreSli
 
 			const videosMap = extendedVideos.reduce(
 				(acc, video) => {
-					if (video && video.id) {
+					if (video?.id) {
 						acc[video.id] = video;
 					}
 					return acc;
@@ -387,58 +383,54 @@ function applyVideoFilters(videos: Video[], filters: VideoFilters): Video[] {
 	// Filtro por búsqueda
 	if (filters.search) {
 		const searchTerm = filters.search.toLowerCase();
-		filtered = filtered.filter(video =>
-			video.name.toLowerCase().includes(searchTerm) ||
-			(video.description?.toLowerCase().includes(searchTerm) || false)
+		filtered = filtered.filter(
+			(video) =>
+				video.name.toLowerCase().includes(searchTerm) || video.description?.toLowerCase().includes(searchTerm) || false
 		);
 	}
 
 	// Filtro por carpeta
 	if (filters.folderId) {
-		filtered = filtered.filter(video => video.folderId === filters.folderId);
+		filtered = filtered.filter((video) => video.folderId === filters.folderId);
 	}
 
 	// Filtro por favoritos
 	if (filters.isFavorite !== undefined) {
-		filtered = filtered.filter(video => video.isFavorite === filters.isFavorite);
+		filtered = filtered.filter((video) => video.isFavorite === filters.isFavorite);
 	}
 
 	// Filtro por visibilidad
 	if (filters.isPublic !== undefined) {
-		filtered = filtered.filter(video => video.isPublic === filters.isPublic);
+		filtered = filtered.filter((video) => video.isPublic === filters.isPublic);
 	}
 
 	// Filtro por duración
 	if (filters.duration) {
 		if (filters.duration.min !== undefined) {
-			filtered = filtered.filter(video => video.duration >= filters.duration?.min || 0);
+			filtered = filtered.filter((video) => video.duration >= filters.duration?.min || 0);
 		}
 		if (filters.duration.max !== undefined) {
-			filtered = filtered.filter(video => video.duration <= (filters.duration?.max || Number.POSITIVE_INFINITY));
+			filtered = filtered.filter((video) => video.duration <= (filters.duration?.max || Number.POSITIVE_INFINITY));
 		}
 	}
 
 	// Filtro por resolución
 	if (filters.resolution) {
 		if (filters.resolution.min !== undefined && filters.resolution.min > 0) {
-			filtered = filtered.filter(video =>
-				video.height !== null && video.height >= (filters.resolution?.min || 0)
-			);
+			filtered = filtered.filter((video) => video.height !== null && video.height >= (filters.resolution?.min || 0));
 		}
 		if (filters.resolution.max !== undefined) {
-			filtered = filtered.filter(video =>
-				video.height !== null && video.height <= (filters.resolution?.max || Number.POSITIVE_INFINITY)
+			filtered = filtered.filter(
+				(video) => video.height !== null && video.height <= (filters.resolution?.max || Number.POSITIVE_INFINITY)
 			);
 		}
 	}
 
 	// Filtro por etiquetas
 	if (filters.tags && filters.tags.length > 0) {
-		filtered = filtered.filter(video => {
+		filtered = filtered.filter((video) => {
 			if (!video.tags) return false;
-			return filters.tags?.some(tagId =>
-				video.tags?.some(tag => tag.id === tagId)
-			) || false;
+			return filters.tags?.some((tagId) => video.tags?.some((tag) => tag.id === tagId)) || false;
 		});
 	}
 
@@ -446,11 +438,11 @@ function applyVideoFilters(videos: Video[], filters: VideoFilters): Video[] {
 	if (filters.dateRange) {
 		if (filters.dateRange.start) {
 			const startDate = new Date(filters.dateRange.start);
-			filtered = filtered.filter(video => new Date(video.createdAt) >= startDate);
+			filtered = filtered.filter((video) => new Date(video.createdAt) >= startDate);
 		}
 		if (filters.dateRange.end) {
 			const endDate = new Date(filters.dateRange.end);
-			filtered = filtered.filter(video => new Date(video.createdAt) <= endDate);
+			filtered = filtered.filter((video) => new Date(video.createdAt) <= endDate);
 		}
 	}
 

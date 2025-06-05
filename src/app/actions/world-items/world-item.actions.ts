@@ -12,21 +12,21 @@ import { revalidatePath } from 'next/cache';
 
 // Importar tipos y transformers
 import {
-    mapWorldItemFiltersToPrisma as createWorldItemFilter,
-    mapWorldItemOrderByToPrisma as createWorldItemOrderBy,
-    fromPrismaWorldItem,
-    mapCreateWorldItemDataToPrisma,
-    mapUpdateWorldItemDataToPrisma,
-    transformWorldItemToExtended as toExtendedWorldItem
+	mapWorldItemFiltersToPrisma as createWorldItemFilter,
+	mapWorldItemOrderByToPrisma as createWorldItemOrderBy,
+	fromPrismaWorldItem,
+	mapCreateWorldItemDataToPrisma,
+	mapUpdateWorldItemDataToPrisma,
+	transformWorldItemToExtended as toExtendedWorldItem,
 } from '@/transformers/world-item';
 import type {
-    CreateWorldItemData,
-    UpdateWorldItemData,
-    WorldItem,
-    WorldItemBase,
-    WorldItemExtended,
-    WorldItemFilters,
-    WorldItemSortCriteria
+	CreateWorldItemData,
+	UpdateWorldItemData,
+	WorldItem,
+	WorldItemBase,
+	WorldItemExtended,
+	WorldItemFilters,
+	WorldItemSortCriteria,
 } from '@/types/entities/world-item';
 
 // Configuración y utilidades
@@ -125,11 +125,13 @@ const notifyWorldItemChange = async (
 export async function getWorldItems(
 	filters?: WorldItemFilters,
 	sortBy?: WorldItemSortCriteria
-): Promise<(WorldItemExtended & {
-	totalSize: number;
-	imageCount?: number;
-	recentImages?: string[]
-})[]> {
+): Promise<
+	(WorldItemExtended & {
+		totalSize: number;
+		imageCount?: number;
+		recentImages?: string[];
+	})[]
+> {
 	// Si hay filtros activos o un criterio de ordenación específico,
 	// saltamos la caché para obtener datos frescos
 	const useCache = !filters && !sortBy;
@@ -196,16 +198,16 @@ export async function getWorldItems(
 
 		// Mapear resultados llamando directamente a los transformadores
 		const processedItems = worldItems.map((worldItem) => {
-		    // Ahora que fromPrismaWorldItem es robusto y parsea JSON,
-		    // podemos llamar a toExtendedWorldItem directamente.
-		    const extendedItem = toExtendedWorldItem(fromPrismaWorldItem(worldItem));
+			// Ahora que fromPrismaWorldItem es robusto y parsea JSON,
+			// podemos llamar a toExtendedWorldItem directamente.
+			const extendedItem = toExtendedWorldItem(fromPrismaWorldItem(worldItem));
 
-		    return {
-		        ...extendedItem,
-		        totalSize: 0, // Calcular por separado o bajo demanda
-		        imageCount: worldItem._count?.images ?? 0,
-		        recentImages: [], // Obtener por separado o bajo demanda
-		    };
+			return {
+				...extendedItem,
+				totalSize: 0, // Calcular por separado o bajo demanda
+				imageCount: worldItem._count?.images ?? 0,
+				recentImages: [], // Obtener por separado o bajo demanda
+			};
 		});
 
 		// Comentado/Eliminado: Cálculo complejo de estadísticas y recentImages movido
@@ -227,7 +229,11 @@ export async function getWorldItems(
 		if (error instanceof Error && error.name === 'WorldItemError') {
 			throw error;
 		}
-		throw createWorldItemError('No se pudieron obtener los objetos del mundo', WorldItemErrorCode.OPERATION_FAILED, error);
+		throw createWorldItemError(
+			'No se pudieron obtener los objetos del mundo',
+			WorldItemErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 

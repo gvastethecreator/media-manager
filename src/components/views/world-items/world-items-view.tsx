@@ -25,7 +25,7 @@ const DEFAULT_WORLD_ITEM_OPTIONS: CardOptions = {
 
 export function WorldItemsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const selectWorldItem = useWorldItemStore(state => state.selectWorldItem);
+	const selectWorldItem = useWorldItemStore((state) => state.selectWorldItem);
 	const [worldItems, setWorldItems] = useState<WorldItemWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -126,11 +126,7 @@ export function WorldItemsView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<WorldItemCard
-								worldItem={worldItem}
-								onClick={handleWorldItemClick}
-								className="h-full"
-							/>
+							<WorldItemCard worldItem={worldItem} onClick={handleWorldItemClick} className="h-full" />
 						</motion.div>
 					))}
 				</div>

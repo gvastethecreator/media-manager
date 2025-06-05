@@ -1,7 +1,7 @@
+import { existsSync } from 'fs';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { FileMetadata } from '@/types/file-item';
-import { existsSync } from 'fs';
 import { readFile } from 'fs/promises';
 import sharp from 'sharp';
 
