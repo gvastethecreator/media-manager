@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { CalendarIcon, Filter, RotateCcw, Save, SearchIcon, SlidersHorizontal, Trash } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Badge } from './badge';
 import { Calendar } from './calendar';
 
@@ -199,7 +199,7 @@ export function EntityFilter({
 	}).length;
 
 	// Actualizar valores de filtro
-	const updateFilterValue = (id: string, value: any) => {
+	const updateFilterValue = useCallback((id: string, value: any) => {
 		setFilterValues((prev) => {
 			const newValues = { ...prev, [id]: value };
 
@@ -210,14 +210,14 @@ export function EntityFilter({
 
 			return newValues;
 		});
-	};
+	}, []);
 
 	// Busqueda rápida
 	useEffect(() => {
 		if (showQuickSearch) {
 			updateFilterValue('quickSearch', quickSearch);
 		}
-	}, [quickSearch, showQuickSearch]);
+	}, [quickSearch, showQuickSearch, updateFilterValue]);
 
 	// Notificar cambios en filtros
 	useEffect(() => {

@@ -213,7 +213,7 @@ export function EntityForm({
 	const generateZodSchema = () => {
 		const schemaMap: Record<string, any> = {};
 
-		fields.forEach((field) => {
+		for (const field of fields) {
 			let fieldSchema: any = z.any();
 
 			// Configurar el tipo base del campo según su tipo
@@ -266,7 +266,7 @@ export function EntityForm({
 					fieldSchema = fieldSchema.min(
 						field.validation.minLength,
 						field.validation.customMessage ||
-							`${field.label} debe tener al menos ${field.validation.minLength} caracteres`
+						`${field.label} debe tener al menos ${field.validation.minLength} caracteres`
 					);
 				}
 
@@ -274,7 +274,7 @@ export function EntityForm({
 					fieldSchema = fieldSchema.max(
 						field.validation.maxLength,
 						field.validation.customMessage ||
-							`${field.label} no puede tener más de ${field.validation.maxLength} caracteres`
+						`${field.label} no puede tener más de ${field.validation.maxLength} caracteres`
 					);
 				}
 
@@ -301,7 +301,7 @@ export function EntityForm({
 			}
 
 			schemaMap[field.name] = fieldSchema;
-		});
+		}
 
 		return z.object(schemaMap);
 	};
@@ -321,7 +321,7 @@ export function EntityForm({
 			// Resetear el formulario con los nuevos valores
 			const defaultValues: Record<string, any> = {};
 
-			fields.forEach((field) => {
+			for (const field of fields) {
 				// Si el campo existe en initialData, usar ese valor
 				if (field.name in initialData) {
 					defaultValues[field.name] = initialData[field.name];
@@ -347,7 +347,7 @@ export function EntityForm({
 							defaultValues[field.name] = '';
 					}
 				}
-			});
+			}
 
 			form.reset(defaultValues as FormData);
 		}
