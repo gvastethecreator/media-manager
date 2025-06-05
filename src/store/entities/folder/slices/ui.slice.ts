@@ -40,6 +40,21 @@ export const createFolderUISlice: StateCreator<FolderStore, [], [], { ui: Folder
 	},
 	// Selecciona una carpeta
 	selectFolder: (id) => {
+		// Si id es null, limpiar la selección
+		if (id === null) {
+			logger.info('🧹 Limpiando selección de carpeta');
+			set((state) => ({
+				ui: {
+					...state.ui,
+					selectedIds: [],
+				},
+			}));
+
+			// También limpiar la carpeta seleccionada en el core state
+			get().setSelected(null);
+			return;
+		}
+
 		logger.info(`🔍 Seleccionando carpeta: ${id}`);
 
 		set((state) => {

@@ -414,7 +414,7 @@ export interface FolderUIActions {
 	setViewMode: (mode: FolderViewMode) => void;
 
 	// Selección
-	selectFolder: (id: string) => void;
+	selectFolder: (id: string | null) => void;
 	unselectFolder: (id: string) => void;
 	selectMultipleFolders: (ids: string[]) => void;
 	clearSelection: () => void;
@@ -446,7 +446,7 @@ export interface FolderStore extends FolderCoreState, FolderCoreActions {
 
 	// Acciones de UI
 	setViewMode: (mode: FolderViewMode) => void;
-	selectFolder: (id: string) => void;
+	selectFolder: (id: string | null) => void;
 	unselectFolder: (id: string) => void;
 	selectMultipleFolders: (ids: string[]) => void;
 	clearSelection: () => void;

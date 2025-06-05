@@ -13,7 +13,7 @@ const groupLogger = clientLogger.withContext('GroupUI');
 // Slice para estado de UI
 export interface GroupUISlice {
 	// Selección de grupos
-	selectGroup: (id: string) => void;
+	selectGroup: (id: string | null) => void;
 	deselectGroup: (id: string) => void;
 	toggleGroupSelection: (id: string) => void;
 	selectMultipleGroups: (ids: string[]) => void;
@@ -58,6 +58,18 @@ export interface GroupUISlice {
 export const createGroupUISlice: StateCreator<GroupState, [], [], GroupUISlice> = (set, get) => ({
 	// Selección de grupos
 	selectGroup: (id) => {
+		// Si id es null, limpiar la selección
+		if (id === null) {
+			groupLogger.info('🧹 Limpiando selección de grupos');
+			set((state) => ({
+				ui: {
+					...state.ui,
+					selectedIds: [],
+				},
+			}));
+			return;
+		}
+
 		groupLogger.info('🎯 Seleccionando grupo:', id);
 		set((state) => ({
 			ui: {
@@ -69,24 +81,32 @@ export const createGroupUISlice: StateCreator<GroupState, [], [], GroupUISlice> 
 
 	deselectGroup: (id) => {
 		groupLogger.info('⭕ Deseleccionando grupo:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: state.ui.selectedIds.filter((selectedId) => selectedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: currentSelectedIds.filter((selectedId) => selectedId !== id),
+				},
+			};
+		});
 	},
 
 	toggleGroupSelection: (id) => {
 		groupLogger.info('🔄 Alternando selección de grupo:', id);
 		set((state) => {
-			const isSelected = state.ui.selectedIds.includes(id);
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+			const isSelected = currentSelectedIds.includes(id);
+
 			return {
 				ui: {
 					...state.ui,
 					selectedIds: isSelected
-						? state.ui.selectedIds.filter((selectedId) => selectedId !== id)
-						: [...state.ui.selectedIds, id],
+						? currentSelectedIds.filter((selectedId) => selectedId !== id)
+						: [...currentSelectedIds, id],
 				},
 			};
 		});
@@ -94,12 +114,17 @@ export const createGroupUISlice: StateCreator<GroupState, [], [], GroupUISlice> 
 
 	selectMultipleGroups: (ids) => {
 		groupLogger.info('📑 Seleccionando múltiples grupos:', ids.length);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: [...new Set([...state.ui.selectedIds, ...ids])],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: [...new Set([...currentSelectedIds, ...ids])],
+				},
+			};
+		});
 	},
 
 	clearSelection: () => {
@@ -113,11 +138,14 @@ export const createGroupUISlice: StateCreator<GroupState, [], [], GroupUISlice> 
 	},
 
 	getSelectedGroups: () => {
-		return get().ui.selectedIds;
+		// Asegurarse de que selectedIds está inicializado
+		return get().ui.selectedIds || [];
 	},
 
 	isGroupSelected: (id) => {
-		return get().ui.selectedIds.includes(id);
+		// Asegurarse de que selectedIds está inicializado
+		const selectedIds = get().ui.selectedIds || [];
+		return selectedIds.includes(id);
 	},
 
 	// Visor de grupos
@@ -186,41 +214,56 @@ export const createGroupUISlice: StateCreator<GroupState, [], [], GroupUISlice> 
 	// Expansión de grupos
 	expandGroup: (id) => {
 		groupLogger.info('📂 Expandiendo grupo:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.includes(id) ? state.ui.expandedIds : [...state.ui.expandedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.includes(id) ? currentExpandedIds : [...currentExpandedIds, id],
+				},
+			};
+		});
 	},
 
 	collapseGroup: (id) => {
 		groupLogger.info('📁 Colapsando grupo:', id);
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.filter((expandedId) => expandedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.filter((expandedId) => expandedId !== id),
+				},
+			};
+		});
 	},
 
 	toggleGroupExpansion: (id) => {
 		groupLogger.info('🔄 Alternando expansión de grupo:', id);
 		set((state) => {
-			const isExpanded = state.ui.expandedIds.includes(id);
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+			const isExpanded = currentExpandedIds.includes(id);
+
 			return {
 				ui: {
 					...state.ui,
 					expandedIds: isExpanded
-						? state.ui.expandedIds.filter((expandedId) => expandedId !== id)
-						: [...state.ui.expandedIds, id],
+						? currentExpandedIds.filter((expandedId) => expandedId !== id)
+						: [...currentExpandedIds, id],
 				},
 			};
 		});
 	},
 
 	isGroupExpanded: (id) => {
-		return get().ui.expandedIds.includes(id);
+		// Asegurarse de que expandedIds está inicializado
+		const expandedIds = get().ui.expandedIds || [];
+		return expandedIds.includes(id);
 	},
 
 	expandAllGroups: () => {
