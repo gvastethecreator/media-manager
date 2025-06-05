@@ -1,8 +1,5 @@
 'use client';
 
-import ImagesExample from '@/app/components/examples/ImagesExample';
-import { TagsExample } from '@/app/components/examples/TagsExample';
-import FolderManagerExample from '@/components/examples/folder-manager-example';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
@@ -186,7 +183,10 @@ export function DevelopmentView(_props: ViewProps) {
 					<TabsContent value="folders" className="mt-4">
 						<Card className="border-2 border-primary/10">
 							<CardContent className="p-4">
-								<FolderManagerExample />
+								<div className="p-4">
+									<h3 className="text-lg font-medium">Carpetas</h3>
+									<p className="text-muted-foreground">Gestión de carpetas en desarrollo</p>
+								</div>
 							</CardContent>
 						</Card>
 					</TabsContent>
@@ -194,7 +194,10 @@ export function DevelopmentView(_props: ViewProps) {
 					<TabsContent value="tags" className="mt-4">
 						<Card className="border-2 border-primary/10">
 							<CardContent className="p-4">
-								<TagsExample />
+								<div className="p-4">
+									<h3 className="text-lg font-medium">Etiquetas</h3>
+									<p className="text-muted-foreground">Gestión de etiquetas en desarrollo</p>
+								</div>
 							</CardContent>
 						</Card>
 					</TabsContent>
@@ -202,7 +205,10 @@ export function DevelopmentView(_props: ViewProps) {
 					<TabsContent value="images" className="mt-4">
 						<Card className="border-2 border-primary/10">
 							<CardContent className="p-4">
-								<ImagesExample />
+								<div className="p-4">
+									<h3 className="text-lg font-medium">Imágenes</h3>
+									<p className="text-muted-foreground">Gestión de imágenes en desarrollo</p>
+								</div>
 							</CardContent>
 						</Card>
 					</TabsContent>
