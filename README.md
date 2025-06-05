@@ -6,7 +6,7 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 
 ## Tecnologías
 
-- **Next.js 15.2** - Framework de React con App Router
+ - **Next.js 15.3.3** - Framework de React con App Router
 - **React 19** - Biblioteca de UI
 - **Prisma** - ORM para acceso a base de datos (futura migración a Drizzle)
 - **Tailwind CSS 4** - Framework de estilos
@@ -14,6 +14,7 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 - **Zustand** - Gestión de estado
 - **Server Actions** - Acciones del servidor para operaciones CRUD
 - **Motion** - Animaciones fluidas
+- **Biome** - Linter y formateador unificado
 
 ## Características Principales
 
