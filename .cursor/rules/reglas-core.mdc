@@ -37,8 +37,8 @@ alwaysApply: true
 
 # Important!! 
 - Never forget the current stack stack and follow up the rules // check @package.json 
-- We are using PNPM 
-- Nextjs 15.2
+- We are using PNPM
+- Next.js 15.3.3
 - React19
 - Prisma as ORM ( soon migrating to drizzle )
 - Tailwindcss 4

@@ -103,7 +103,7 @@ WARN [WorldItemTransformer:Serializers] Failed to parse JSON field: SyntaxError:
 
 ## 🔧 STACK TÉCNICO
 
-- Next.js 15.2 + React 19
+- Next.js 15.3.3 + React 19
 - Prisma ORM (migrando a Drizzle)
 - Tailwind CSS 4 + Shadcn/ui
 - Motion/React para animaciones

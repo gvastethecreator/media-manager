@@ -1,18 +1,17 @@
 # Mejoras en la Calidad de Código
 
-## Configuración de ESLint y Herramientas de Calidad
+## Uso de Biome para Mantener la Calidad
 
-### Configuración de ESLint
+El proyecto utiliza **Biome** como herramienta unificada de linting, formateo y comprobaciones de tipo. Toda la configuración necesaria se encuentra en el archivo `biome.json`.
 
-Se ha implementado una configuración personalizada de ESLint para mejorar la calidad del código y prevenir errores comunes. La configuración se encuentra en el archivo `eslint.config.mjs` y se han añadido reglas específicas para detectar y prevenir el uso incorrecto de variables con guiones bajos.
+Los scripts principales disponibles son:
 
-```javascript
-// Configuración de ESLint para detectar problemas de guiones bajos en variables
-{
-  name: "underscore-problem-detection",
-  rules: {
-    "no-underscore-var-mismatch": "error", // Regla personalizada
-  }
+```json
+"scripts": {
+  "lint": "biome lint --max-diagnostics=none .",
+  "lint:fix": "biome lint --write .",
+  "format": "biome format --write .",
+  "check": "biome check --max-diagnostics=none ."
 }
 ```
 
@@ -28,51 +27,12 @@ Se ha creado un script especial (`scripts/fix-variable-names.mjs`) para detectar
 
 ### Hook de Pre-commit
 
-Se ha implementado un hook de pre-commit que ejecuta automáticamente verificaciones de calidad de código antes de cada commit. El hook realiza las siguientes verificaciones:
-
-1. **Verificación de ESLint**: Comprueba que los archivos TypeScript/TSX modificados cumplan con las reglas de ESLint.
-2. **Verificación de nombres de variables**: Detecta patrones de nombres de variables problemáticos.
-3. **Verificación de console.log**: Advierte sobre la presencia de declaraciones `console.log` en el código.
-
-```bash
-# Fragmento del hook pre-commit
-echo "${YELLOW}🔍 Verificando patrones de nombres de variables...${NC}"
-pnpm lint:vars
-
-if [ $? -ne 0 ]; then
-  echo "${RED}❌ Se encontraron variables con nombres problemáticos.${NC}"
-  echo "${YELLOW}💡 Corrígelos manualmente o ejecuta 'pnpm lint:vars:fix' para intentar una corrección automática.${NC}"
-  exit 1
-fi
-```
-
-### Scripts en package.json
-
-Se han añadido varios scripts en `package.json` para facilitar la ejecución de las herramientas de calidad de código:
-
-- `lint:vars`: Verifica la presencia de patrones de nombres de variables problemáticos.
-- `lint:vars:fix`: Corrige automáticamente los patrones de nombres de variables.
-- `lint:fix`: Ejecuta el script de corrección de errores de lint.
-- `lint:staged`: Ejecuta ESLint solo en los archivos modificados que están preparados para commit.
-
-```json
-"scripts": {
-  "lint": "eslint --config eslint.config.mjs .",
-  "lint:strict": "eslint --config eslint.config.mjs --max-warnings=0 .",
-  "lint:fix": "node scripts/lint-fix.mjs",
-  "lint:format": "prettier --write .",
-  "lint:full": "pnpm lint:fix && pnpm lint:format",
-  "lint:report": "node scripts/lint-report.js",
-  "lint:staged": "eslint --config eslint.config.mjs --fix $(git diff --staged --name-only --diff-filter=ACMR | grep -E \"\\.(js|jsx|ts|tsx)$\")",
-  "lint:vars": "node scripts/fix-variable-names.mjs --check",
-  "lint:vars:fix": "node scripts/fix-variable-names.mjs --fix"
-}
-```
+En la actualidad no existe un hook de pre‑commit activo. En versiones anteriores del proyecto se utilizaban scripts personalizados basados en ESLint, pero ahora Biome centraliza todas las verificaciones necesarias.
 
 ## Beneficios
 
 - **Prevención de errores**: Las herramientas automatizadas detectan y previenen errores comunes antes de que lleguen al repositorio.
-- **Consistencia**: La configuración de ESLint y Prettier asegura un estilo de código coherente en todo el proyecto.
+- **Consistencia**: Biome unifica linting y formateo para mantener un estilo de código coherente en todo el proyecto.
 - **Flujo de trabajo mejorado**: Los scripts y hooks automatizan tareas tediosas, permitiendo a los desarrolladores centrarse en el código.
 - **Detección temprana**: Los problemas se identifican en la fase de desarrollo, no en producción.
 
@@ -80,7 +40,7 @@ Se han añadido varios scripts en `package.json` para facilitar la ejecución de
 
 ```mermaid
 graph TD
-    A[Desarrollo de Código] --> B[ESLint + Prettier]
+    A[Desarrollo de Código] --> B[Biome]
     B --> C{¿Hay errores?}
     C -->|Sí| D[Corrección Automática]
     D --> E{¿Persisten errores?}

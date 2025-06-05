@@ -1,8 +1,8 @@
-# Mejores Prácticas para Server Actions en Next.js 15
+# Mejores Prácticas para Server Actions en Next.js 15.3.3
 
 ## Introducción
 
-Este documento presenta las mejores prácticas para trabajar con Server Actions en Next.js 15, basadas en la experiencia adquirida durante la refactorización de nuestra aplicación. Las Server Actions son una característica poderosa que permite ejecutar código en el servidor desde componentes cliente, pero requieren seguir ciertas convenciones para funcionar correctamente.
+Este documento presenta las mejores prácticas para trabajar con Server Actions en Next.js 15.3.3, basadas en la experiencia adquirida durante la refactorización de nuestra aplicación. Las Server Actions son una característica poderosa que permite ejecutar código en el servidor desde componentes cliente, pero requieren seguir ciertas convenciones para funcionar correctamente.
 
 ## Restricciones de Server Actions
 
@@ -227,4 +227,4 @@ export {
 
 ## Conclusión
 
-Siguiendo estas mejores prácticas, podrás aprovechar las Server Actions de Next.js 15 de manera efectiva, manteniendo un código limpio, mantenible y libre de errores. La clave está en entender las restricciones y adaptar el código para trabajar dentro de ellas, separando claramente las responsabilidades entre cliente y servidor.
+Siguiendo estas mejores prácticas, podrás aprovechar las Server Actions de Next.js 15.3.3 de manera efectiva, manteniendo un código limpio, mantenible y libre de errores. La clave está en entender las restricciones y adaptar el código para trabajar dentro de ellas, separando claramente las responsabilidades entre cliente y servidor.
