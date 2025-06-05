@@ -12,7 +12,7 @@ import type {
 } from '@/types/entities/folder/types';
 import { StateCreator } from 'zustand';
 
-const logger = new Logger('FolderUISlice');
+const logger = new Logger({ context: 'FolderUISlice' });
 
 /**
  * 🎮 Creador del slice de UI para el store de Folder
@@ -44,21 +44,23 @@ export const createFolderUISlice: StateCreator<
       }
     }));
   },
-
   // Selecciona una carpeta
   selectFolder: (id) => {
     logger.info(`🔍 Seleccionando carpeta: ${id}`);
 
     set(state => {
+      // 🔧 Verificar que selectedIds existe y es un array
+      const currentSelectedIds = state.ui.selectedIds || [];
+
       // Si ya está seleccionada, no hacer nada
-      if (state.ui.selectedIds.includes(id)) {
+      if (currentSelectedIds.includes(id)) {
         return state;
       }
 
       return {
         ui: {
           ...state.ui,
-          selectedIds: [...state.ui.selectedIds, id]
+          selectedIds: [...currentSelectedIds, id]
         }
       };
     });
@@ -69,31 +71,37 @@ export const createFolderUISlice: StateCreator<
       get().setSelected(folder);
     }
   },
-
   // Deselecciona una carpeta
   unselectFolder: (id) => {
     logger.info(`🔍 Deseleccionando carpeta: ${id}`);
 
-    set(state => ({
-      ui: {
-        ...state.ui,
-        selectedIds: state.ui.selectedIds.filter(selectedId => selectedId !== id)
-      }
-    }));
+    set(state => {
+      // 🔧 Verificar que selectedIds existe y es un array
+      const currentSelectedIds = state.ui.selectedIds || [];
+
+      return {
+        ui: {
+          ...state.ui,
+          selectedIds: currentSelectedIds.filter(selectedId => selectedId !== id)
+        }
+      };
+    });
 
     // Si la carpeta deseleccionada era la selected en el core state, limpiarla
     if (get().selected?.id === id) {
       get().setSelected(null);
     }
   },
-
   // Selecciona múltiples carpetas
   selectMultipleFolders: (ids) => {
     logger.info(`🔍 Seleccionando múltiples carpetas: ${ids.length}`);
 
     set(state => {
+      // 🔧 Verificar que selectedIds existe y es un array
+      const currentSelectedIds = state.ui.selectedIds || [];
+
       // Filtrar IDs que no estén ya seleccionados
-      const newIds = ids.filter(id => !state.ui.selectedIds.includes(id));
+      const newIds = ids.filter(id => !currentSelectedIds.includes(id));
 
       // Si no hay nuevos IDs, no hacer nada
       if (newIds.length === 0) {
@@ -103,7 +111,7 @@ export const createFolderUISlice: StateCreator<
       return {
         ui: {
           ...state.ui,
-          selectedIds: [...state.ui.selectedIds, ...newIds]
+          selectedIds: [...currentSelectedIds, ...newIds]
         }
       };
     });
@@ -123,51 +131,58 @@ export const createFolderUISlice: StateCreator<
     // También limpiar la carpeta seleccionada en el core state
     get().setSelected(null);
   },
-
   // Expande una carpeta
   expandFolder: (id) => {
     logger.info(`📂 Expandiendo carpeta: ${id}`);
 
     set(state => {
+      // 🔧 Verificar que expandedIds existe y es un array
+      const currentExpandedIds = state.ui.expandedIds || [];
+
       // Si ya está expandida, no hacer nada
-      if (state.ui.expandedIds.includes(id)) {
+      if (currentExpandedIds.includes(id)) {
         return state;
       }
 
       return {
         ui: {
           ...state.ui,
-          expandedIds: [...state.ui.expandedIds, id]
+          expandedIds: [...currentExpandedIds, id]
         }
       };
     });
   },
-
   // Colapsa una carpeta
   collapseFolder: (id) => {
     logger.info(`📁 Colapsando carpeta: ${id}`);
 
-    set(state => ({
-      ui: {
-        ...state.ui,
-        expandedIds: state.ui.expandedIds.filter(expandedId => expandedId !== id)
-      }
-    }));
-  },
+    set(state => {
+      // 🔧 Verificar que expandedIds existe y es un array
+      const currentExpandedIds = state.ui.expandedIds || [];
 
+      return {
+        ui: {
+          ...state.ui,
+          expandedIds: currentExpandedIds.filter(expandedId => expandedId !== id)
+        }
+      };
+    });
+  },
   // Alterna la expansión de una carpeta
   toggleFolderExpansion: (id) => {
     logger.info(`🔄 Alternando expansión de carpeta: ${id}`);
 
     set(state => {
-      const isExpanded = state.ui.expandedIds.includes(id);
+      // 🔧 Verificar que expandedIds existe y es un array
+      const currentExpandedIds = state.ui.expandedIds || [];
+      const isExpanded = currentExpandedIds.includes(id);
 
       return {
         ui: {
           ...state.ui,
           expandedIds: isExpanded
-            ? state.ui.expandedIds.filter(expandedId => expandedId !== id)
-            : [...state.ui.expandedIds, id]
+            ? currentExpandedIds.filter(expandedId => expandedId !== id)
+            : [...currentExpandedIds, id]
         }
       };
     });

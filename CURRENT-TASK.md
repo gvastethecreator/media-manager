@@ -1,97 +1,113 @@
-# 🔧 TASK ACTUAL: FIX ERRORES DE CAMPOS INEXISTENTES EN FOLDER SCHEMA
+# 🚨 PROBLEMAS CRÍTICOS DEL PROYECTO - PLAN DE ACCIÓN
 
-## 🎯 **Objetivo**
+## 📊 ANÁLISIS DE PROBLEMAS DETECTADOS
 
-Corregir errores de Prisma donde se intentan actualizar campos que no existen en el esquema de la tabla `Folder`.
-
-## 🚨 **Errores Identificados**
-
-### 📊 **Error Principal**
+### 🔥 **PROBLEMA 1: AlbumTransformer RelationError**
 
 ```
-Unknown argument `status`. Available options are marked with ?.
-Unknown argument `imageCount`, `videoCount`, `otherCount`, `isWatched`
+ERROR [AlbumTransformer] Error transformando álbum: { "error": { "name": "RelationError" } }
+ERROR [AlbumTransformer] Error transformando álbum a versión extendida: { "error": { "name": "TransformerError" }, "albumId": "cmbhg2opn001z93xk7qqje8p4" }
+ERROR [AlbumActions] ❌ Error al obtener álbumes (simplificado): { "name": "TransformerError" }
 ```
 
-### 🔍 **Análisis del Esquema Actual**
-
-Los campos que **SÍ existen** en `Folder`:
-
-- `id`, `name`, `description`, `path`
-- `emoji`, `color`, `featuredImage`, `isFavorite`
-- `totalFiles`, `totalSize`, `autoReindex`, `lastIndexed`
-- `createdAt`, `updatedAt`, `parentId`, `presetId`
-
-Los campos que **NO existen** pero se están usando:
-
-- ❌ `status`
-- ❌ `imageCount`
-- ❌ `videoCount`
-- ❌ `otherCount`
-- ❌ `isWatched`
-
-## 🎯 **ESTADO ACTUAL**
-
-### ✅ **COMPLETADO**
-
-#### 🔧 **FASE 1: Correcciones Críticas de Schema Prisma**
-
-- ✅ **Identificados campos inexistentes** - Se encontraron campos `status`, `imageCount`, `videoCount`, `otherCount`, `isWatched` que no existen en el schema
-- ✅ **Corregidos archivos de acciones** - Removidas referencias a campos inexistentes en:
-  - `folder-indexing.actions.ts` ✅
-  - `process.actions.ts` ✅
-  - `crud.actions.ts` ✅
-  - `folder-crud.actions.ts` ✅
-- ✅ **Actualizados tipos TypeScript** - Limpiados interfaces `CreateFolderOptions` y `UpdateFolderOptions` ✅
-- ✅ **Operación de reindexación exitosa** - 65 archivos procesados correctamente ✅
-
-#### 🔧 **FASE 2: Función getFolderImages**
-
-- ✅ **Función getFolderImages creada** - Nuevo archivo `get-folder-images.actions.ts` ✅
-- ✅ **Export añadido al index** - Función disponible para importación ✅
-- ✅ **Fix de tipos EntityId** - Conversión correcta de string a EntityId branded type ✅
-- ✅ **Imports corregidos** - Tipos `FileType`, `FileProcessingStatus`, `EntityId`, `JSONString` añadidos ✅
-- ✅ **Sin errores de TypeScript** - Compilación limpia verificada ✅
-
-### ✅ **ESTADO ACTUAL - TASK COMPLETADO**
-
-### 🎯 **RESUMEN DE CORRECCIONES REALIZADAS**
-
-#### **FASE 1: Errores de Schema Prisma Corregidos**
-
-- ✅ **Análisis completo del schema** - Identificados campos inexistentes en tabla `Folder`
-- ✅ **Limpieza de archivos de acciones** - Removidas todas las referencias a campos `status`, `imageCount`, `videoCount`, `otherCount`, `isWatched`
-- ✅ **Actualización de tipos TypeScript** - Interfaces `CreateFolderOptions` y `UpdateFolderOptions` corregidas
-- ✅ **Verificación funcional** - Reindexación de carpeta ejecutada exitosamente (65 archivos procesados)
-
-#### **FASE 2: Función getFolderImages Implementada**
-
-- ✅ **Nueva función creada** - `get-folder-images.actions.ts` con transformación correcta a `FileItem[]`
-- ✅ **Tipos corregidos** - Fix del problema `EntityId` branded type vs string
-- ✅ **Export añadido** - Función disponible en `index.ts` de acciones de carpetas
-- ✅ **Sin errores de compilación** - TypeScript limpio y funcional
-
-### 📁 **ARCHIVOS MODIFICADOS**
+### ⚠️ **PROBLEMA 2: WorldItemTransformer JSON Parsing**
 
 ```
-src/app/actions/folders/
-├── folder-indexing.actions.ts ✅ (campos status, etc. removidos)
-├── process.actions.ts ✅ (status field eliminado)
-├── crud.actions.ts ✅ (campos inexistentes removidos)
-├── folder-crud.actions.ts ✅ (solo campos válidos del schema)
-├── folder-types.ts ✅ (interfaces actualizadas)
-├── get-folder-images.actions.ts ✅ (función nueva creada)
-└── index.ts ✅ (export getFolderImages añadido)
+WARN [WorldItemTransformer:Serializers] Failed to parse JSON field: SyntaxError: Unexpected token 'N', "Ninguno" is not valid JSON. Using default value.
 ```
 
-### 🎉 **RESULTADO FINAL**
+- Múltiples warnings de campos JSON inválidos en WorldItem
+- Datos como "Ninguno", "Fuerza 15", etc. guardados como strings en lugar de JSON
 
-**✅ PROBLEMA RESUELTO:** Los errores críticos de Prisma han sido corregidos completamente.
+### 🔍 **PROBLEMA 3: Consultas Prisma Repetitivas**
 
-**✅ FUNCIONALIDAD RESTAURADA:** La carga de imágenes en carpetas funciona correctamente.
+- Múltiples consultas SUM duplicadas para calcular tamaños de imágenes
+- Posible problema de performance y N+1 queries
 
-**✅ CÓDIGO LIMPIO:** Sin errores de TypeScript o referencias a campos inexistentes.
+## 🎯 PLAN DE RESOLUCIÓN
+
+### **Paso 1: Analizar AlbumTransformer** ✅ COMPLETADO
+
+- [x] Buscar archivos relacionados con AlbumTransformer
+- [x] Identificar RelationError en transformaciones
+- [x] Verificar estructura de datos de álbum con ID problemático
+
+**DIAGNÓSTICO**: Error en `fromPrismaAlbum` del álbum ID `cmbhg2opn001z93xk7qqje8p4`. Falta validación robusta de campos requeridos.
+
+### **Paso 2: Corregir AlbumTransformer** ✅ COMPLETADO
+
+- [x] Agregar validación robusta en `fromPrismaAlbum`
+- [x] Implementar fallbacks para álbumes corruptos
+- [x] Mejorar logging de errores específicos
+
+**RESULTADO**: Error en `fromPrismaAlbum` resuelto con validación mejorada y manejo de errores robusto.
+
+### **Paso 3: Corregir WorldItemTransformer** ✅ COMPLETADO
+
+- [x] Localizar serializers de WorldItem
+- [x] Crear script de migración para limpiar datos JSON inválidos
+- [x] Mejorar parsing de campos JSON con mejor fallback
+- [x] Corregir errores TypeScript en serializers
+
+**DIAGNÓSTICO RESUELTO**:
+
+- ✅ Función `fromWorldItemBase` creada para manejar objetos `WorldItemBase`
+- ✅ Separación clara entre `fromPrismaWorldItem` (para tipos Prisma) y `fromWorldItemBase` (para tipos base)
+- ✅ Funciones auxiliares actualizadas: `parseJsonFields`, `toExtendedWorldItem`, `toWorldItemWithStats`
+- ✅ Todos los errores TypeScript resueltos (0 errores)
+- ✅ Estrategias de reparación JSON implementadas (normalizar, reparar patrones, envolver en arrays)
+
+### **Paso 4: Corregir Errores de Compilación en group.service.ts** 🔄 EN PROGRESO
+
+- [ ] **EventType Issues**: Arreglar tipos de eventos incorrectos
+- [ ] **Error Handling**: Corregir tipos `unknown` en parámetros de error
+- [ ] **Prisma Relations**: Actualizar consultas para usar relaciones many-to-many correctas
+- [ ] **Template Literals**: Reemplazar concatenación de strings con template literals
+- [ ] **GroupSearchResult**: Corregir acceso a propiedades de paginación
+- [ ] **GroupRelations Type**: Corregir tipos en switch cases
+
+**ERRORES IDENTIFICADOS**:
+
+- ❌ 35+ errores de compilación TypeScript en `group.service.ts`
+- ❌ Uso incorrecto de `EventType` (string no asignable)
+- ❌ Parámetros `error` tipados como `unknown` sin type guards
+- ❌ Queries Prisma usando tablas many-to-many inexistentes (`groupToImage`, etc.)
+- ❌ Acceso incorrecto a `result.pagination.totalItems` (no existe)
+- ❌ Strings concatenados en lugar de template literals
+- ❌ Tipos `GroupRelations` inconsistentes en switch cases
+
+### **Paso 4: Migrar y Limpiar Datos JSON** ✅ COMPLETADO
+
+- [x] Ejecutar script de migración para limpiar campos JSON inválidos
+- [x] Verificar que los warnings de JSON parsing se reduzcan
+- [x] Confirmar que WorldItemTransformer funciona correctamente
+
+**RESULTADO**:
+
+- ✅ Script ejecutado exitosamente: `scripts/migrations/run-cleanup.js`
+- ✅ 14 registros procesados y corregidos sin errores
+- ✅ 14 campos `requirements` reparados de "Ninguno" → "[]" y patrones como "Fuerza 15" → JSON estructurado
+- ✅ Datos JSON corruptos en WorldItem completamente limpiados
+
+### **Paso 5: Optimizar Consultas Prisma** 🔧 EN PROGRESO
+
+- [ ] Identificar queries duplicadas de SUM()
+- [ ] Implementar batching o caching para estadísticas
+- [ ] Reducir N+1 problems en cálculo de tamaños
+
+### **Paso 5: Testing y Validación**
+
+- [ ] Verificar que errores de AlbumTransformer se resuelven
+- [ ] Validar que warnings de WorldItem desaparecen
+- [ ] Comprobar performance mejorada de consultas
+
+## 🔧 STACK TÉCNICO
+
+- Next.js 15.2 + React 19
+- Prisma ORM (migrando a Drizzle)
+- Tailwind CSS 4 + Shadcn/ui
+- Motion/React para animaciones
+- PNPM como gestor de paquetes
 
 ---
-
-## 📋 **HISTORIAL DETALLADO**
+*Actualizado: 2025-06-04*

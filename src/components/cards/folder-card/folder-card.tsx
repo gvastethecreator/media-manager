@@ -2,11 +2,12 @@
 
 import { cn } from '@/lib/utils';
 import type { Folder } from '@/types/entities/folders';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';
 import { FolderCardImages } from './folder-card-images';
+import { getRecentFolderImages } from './folder-server-actions';
 
 // Tipo extendido para asegurar que tenemos los datos necesarios
 // Podrías necesitar ajustar este tipo basado en lo que realmente usa FolderCard y sus hijos
@@ -43,12 +44,29 @@ export const FolderCard = memo(function FolderCard({
 	compact = false,
 	interactive = true,
 	tcgMode = false
-}: FolderCardProps) {
-	// Validar que el objeto folder exista
+}: FolderCardProps) {	// Validar que el objeto folder exista
 	if (!folder) {
 		console.error('FolderCard recibió un objeto folder inválido');
 		return null;
 	}
+
+	// 🖼️ Estado para thumbnails dinámicos
+	const [recentImages, setRecentImages] = useState<string[]>([]);
+
+	// 🔄 Cargar imágenes al montar
+	useEffect(() => {
+		async function loadImages() {
+			try {
+				const fetchedImages = await getRecentFolderImages(folder.id, 4);
+				const imageUrls = fetchedImages.map(img => img.thumbnailUrl).filter(Boolean);
+				setRecentImages(imageUrls);
+			} catch (error) {
+				console.error('Error loading folder images:', error);
+				setRecentImages([]);
+			}
+		}
+		loadImages();
+	}, [folder.id]);
 
 	// Preparar datos con fallbacks
 	const folderData = useMemo(() => {
@@ -62,15 +80,14 @@ export const FolderCard = memo(function FolderCard({
 			_count: {
 				...(folder._count || {}),
 				images: imageCount
-			},
-			// Asegurar valores por defecto para otros campos
+			},			// Asegurar valores por defecto para otros campos
 			totalFiles: folder.totalFiles ?? imageCount ?? 0,
 			totalSize: folder.totalSize ?? 0,
-			recentImageUrls: [],
+			recentImageUrls: recentImages, // 🖼️ Usar imágenes cargadas dinámicamente
 			childrenCount: 0,
 			lastIndexed: folder.lastIndexed || null
 		};
-	}, [folder]);
+	}, [folder, recentImages]); // 🔄 Incluir recentImages en dependencias
 
 	// Colores para personalización
 	const primaryColor = useMemo(() => folderData.color || '#3b82f6', [folderData.color]);
@@ -187,7 +204,6 @@ export const FolderCard = memo(function FolderCard({
 			)}
 		</div>
 	);
-
 	// Si es interactivo, envolver en un elemento clickeable que llame a onClick
 	if (interactive) {
 		// Usar un div o button si Link no es apropiado o si href no se usa para la interacción principal
@@ -196,7 +212,9 @@ export const FolderCard = memo(function FolderCard({
 		const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
 			if (event.key === 'Enter' || event.key === ' ') {
 				event.preventDefault(); // Prevenir scroll en espacio
-				onClick();
+				if (onClick) { // ✅ Verificar que onClick existe
+					onClick();
+				}
 			}
 		};
 

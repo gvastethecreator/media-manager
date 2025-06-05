@@ -3,6 +3,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { MOCK_STATS, USE_MOCK_STATS } from '@/lib/mock/stats.mock';
 import { prisma } from '@/lib/prisma';
+import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
 import { revalidatePath, unstable_cache } from 'next/cache';
 
 // Constantes para caché
@@ -125,48 +126,14 @@ const getCachedStats = unstable_cache(
 		}
 
 		try {
-			statsLogger.info('📊 Obteniendo estadísticas del sistema');
+			statsLogger.info('📊 Obteniendo estadísticas del sistema con optimizaciones');
 
-			const [
-				totalImages,
-				totalFolders,
-				totalCollections,
-				totalTags,
-				totalAlbums,
-				totalCharacters,
-				totalPlaces,
-				totalWorldItems,
-				totalActivities,
-				totalSize,
-				totalViews,
-				totalDownloads,
-				topTags,
-				recentActivity,
-			] = await Promise.all([
-				prisma.image.count(),
-				prisma.folder.count(),
-				prisma.collection.count(),
-				prisma.tag.count(),
-				prisma.album.count(),
-				prisma.character.count(),
-				prisma.place.count(),
-				prisma.worldItem.count(),
-				prisma.activity.count(),
-				prisma.folder.aggregate({
-					_sum: {
-						totalSize: true,
-					},
-				}),
-				prisma.imageStats.aggregate({
-					_sum: {
-						views: true,
-					},
-				}),
-				prisma.imageStats.aggregate({
-					_sum: {
-						downloads: true,
-					},
-				}),
+			// 🚀 Usar servicio optimizado para los conteos principales
+			const optimizedStatsService = OptimizedStatsService.getInstance(prisma);
+			const globalStats = await optimizedStatsService.getGlobalStatsOptimized();
+
+			// 📊 Obtener topTags y recentActivity por separado (optimización futura)
+			const [topTags, recentActivity] = await Promise.all([
 				prisma.tag.findMany({
 					select: {
 						id: true,
@@ -206,29 +173,10 @@ const getCachedStats = unstable_cache(
 				}),
 			]);
 
-			// Calcular total de favoritos
-			const totalFavorites = await prisma.image.count({
-				where: {
-					isFavorite: true,
-				},
-			});
-
-			statsLogger.info('✅ Estadísticas del sistema obtenidas');
+			statsLogger.info('✅ Estadísticas del sistema obtenidas (optimizadas)');
 
 			return {
-				totalImages,
-				totalFolders,
-				totalCollections,
-				totalTags,
-				totalAlbums,
-				totalCharacters,
-				totalPlaces,
-				totalWorldItems,
-				totalFavorites,
-				totalActivities,
-				totalSize: totalSize._sum.totalSize || 0,
-				totalViews: totalViews._sum.views || 0,
-				totalDownloads: totalDownloads._sum.downloads || 0,
+				...globalStats,
 				topTags: topTags.map((tag: TopTag) => ({
 					...tag,
 					count: tag._count.images,
@@ -448,7 +396,6 @@ export async function getImageStats(imageId: string) {
 				data: {
 					imageId,
 					views: 0,
-					downloads: 0,
 					lastViewed: new Date(),
 				},
 			});
@@ -495,16 +442,13 @@ export async function incrementImageDownload(imageId: string) {
 	try {
 		statsLogger.info('⬇️ Incrementando descarga de imagen:', imageId);
 
-		const stats = await prisma.imageStats.update({
-			where: { imageId },
-			data: {
-				downloads: { increment: 1 },
-			},
-		});
+		// Nota: downloads no está en el esquema ImageStats actual
+		// Por ahora solo revalidamos el path
+		statsLogger.warn('⚠️ Campo downloads no encontrado en esquema ImageStats');
 
-		statsLogger.info('✅ Descarga de imagen incrementada');
+		statsLogger.info('✅ Descarga de imagen registrada (sin actualizar BD)');
 		revalidatePath('/stats');
-		return stats;
+		return null;
 	} catch (error) {
 		statsLogger.error('❌ Error al incrementar descarga de imagen:', error);
 		throw createStatsError('No se pudo incrementar la descarga de la imagen', StatsErrorCode.OPERATION_FAILED, error);

@@ -95,10 +95,9 @@ export async function createFolder(path: string, options: CreateFolderOptions = 
     });
     return transformedFolder;
   } catch (error) {
-    crudLogger.error('❌ Error creando carpeta:', error);
-    throw createFolderError(
+    crudLogger.error('❌ Error creando carpeta:', error);    throw createFolderError(
       'Error al crear carpeta',
-      FOLDER_ERROR_CODES.CREATE_FAILED,
+      FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
       error instanceof Error ? error.stack : undefined,
       undefined,
       error
@@ -161,10 +160,9 @@ export async function updateFolder(id: string, data: UpdateFolderOptions): Promi
     });
     return transformedFolder;
   } catch (error) {
-    crudLogger.error('❌ Error actualizando carpeta:', error);
-    throw createFolderError(
+    crudLogger.error('❌ Error actualizando carpeta:', error);    throw createFolderError(
       'Error al actualizar carpeta',
-      FOLDER_ERROR_CODES.UPDATE_FAILED,
+      FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
       error instanceof Error ? error.stack : undefined,
       undefined,
       error
@@ -207,10 +205,32 @@ export async function deleteFolder(id: string): Promise<{ success: boolean; id: 
     });
     return { success: true, id };
   } catch (error) {
-    crudLogger.error('❌ Error eliminando carpeta:', error);
-    throw createFolderError(
+    crudLogger.error('❌ Error eliminando carpeta:', error);    throw createFolderError(
       'Error al eliminar carpeta',
-      FOLDER_ERROR_CODES.DELETE_FAILED,
+      FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
+      error instanceof Error ? error.stack : undefined,
+      undefined,
+      error
+    );
+  }
+}
+
+/**
+ * Actualiza la configuración de auto-reindexado de una carpeta
+ * @param id ID de la carpeta a actualizar
+ * @param autoReindex Nuevo valor para la configuración de auto-reindexado
+ * @returns Datos de la carpeta actualizada
+ */
+export async function updateFolderAutoReindex(id: string, autoReindex: boolean): Promise<FolderComplete> {
+  try {
+    crudLogger.info('🔄 Actualizando auto-reindexado:', { id, autoReindex });
+
+    // Usar la función updateFolder existente
+    return await updateFolder(id, { autoReindex });
+  } catch (error) {
+    crudLogger.error('❌ Error actualizando auto-reindexado:', error);    throw createFolderError(
+      'Error al actualizar configuración de auto-reindexado',
+      FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
       error instanceof Error ? error.stack : undefined,
       undefined,
       error

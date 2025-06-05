@@ -1,17 +1,35 @@
+import { scanFolder } from './folder-scanner';
 import { prisma } from './prisma';
 
+/**
+ * 🔧 FIXED: Actualiza estadísticas usando el mismo criterio que el reindexado
+ * Ahora usa scanFolder() para obtener totalFiles y totalSize reales del sistema de archivos
+ * en lugar de contar solo las imágenes en la BD
+ */
 export async function updateFolderStats(folderId: string) {
-	const stats = await prisma.image.aggregate({
-		where: { folderId },
-		_count: { _all: true },
-		_sum: { size: true },
+	// Obtener la carpeta para acceder a su path
+	const folder = await prisma.folder.findUnique({
+		where: { id: folderId },
+		select: { path: true }
 	});
 
+	if (!folder) {
+		throw new Error(`Carpeta con ID ${folderId} no encontrada`);
+	}
+
+	// 📊 USAR EL MISMO CRITERIO QUE EL REINDEXADO: scanFolder()
+	// Esto asegura consistencia entre reindexado y actualización de estadísticas
+	const scanResult = await scanFolder(folder.path, {
+		recursive: true,
+		includeHidden: false
+	});
+
+	// Actualizar con los mismos valores que usa el reindexado
 	await prisma.folder.update({
 		where: { id: folderId },
 		data: {
-			totalFiles: stats._count._all,
-			totalSize: stats._sum.size || 0,
+			totalFiles: scanResult.totalFiles,    // 🎯 Ahora usa el mismo criterio
+			totalSize: scanResult.totalSize,      // 🎯 Ahora usa el mismo criterio
 			lastIndexed: new Date(),
 		},
 	});
