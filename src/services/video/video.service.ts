@@ -153,7 +153,7 @@ export async function updateVideo(
  */
 export async function getVideoById(
   id: string,
-  includeRelations: boolean = false
+  includeRelations = false
 ): Promise<VideoExtended | null> {
   try {
     logger.info('🔍 Buscando video por ID:', { id });

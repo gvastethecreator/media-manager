@@ -212,7 +212,7 @@ export function EntityCard({
 		return (
 			<motion.div
 				whileHover={animationMode === 'hover' ? { scale: 1.02, transition: { duration: 0.2 } } : undefined}
-				animate={animationMode === 'always' ? { y: [0, -5, 0], transition: { duration: 2, repeat: Infinity } } : undefined}
+				animate={animationMode === 'always' ? { y: [0, -5, 0], transition: { duration: 2, repeat: Number.POSITIVE_INFINITY } } : undefined}
 				className="w-full"
 			>
 				{content}

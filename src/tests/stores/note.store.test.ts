@@ -366,7 +366,7 @@ jest.mock('@/store/entities/note/slices/relations', () => ({
 }));
 
 // 📝 Datos de prueba
-const createMockNote = (id: string = 'note_1'): NoteWithStats => ({
+const createMockNote = (id = 'note_1'): NoteWithStats => ({
 	id,
 	title: `Test Note ${id}`,
 	content: 'Test content for note',
@@ -1114,7 +1114,7 @@ describe('NoteStore Tests', () => {
 			store.setFilters({
 				search: null as any,
 				category: undefined,
-				priority: NaN,
+				priority: Number.NaN,
 				tags: null as any,
 			});
 

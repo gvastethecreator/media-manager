@@ -75,7 +75,7 @@ function repairAttributePattern(field: string): string | null {
 /**
  * 🧹 Limpia un campo JSON específico
  */
-function cleanJsonField(field: string | null, fieldName: string, defaultValue: string = '[]'): { value: string; wasFixed: boolean } {
+function cleanJsonField(field: string | null, fieldName: string, defaultValue = '[]'): { value: string; wasFixed: boolean } {
 	if (!field || field === 'null' || field === 'undefined') {
 		return { value: defaultValue, wasFixed: true };
 	}
