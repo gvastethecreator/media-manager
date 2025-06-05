@@ -62,7 +62,7 @@ export const useSelection = () => {
       selectionLogger.info(`🎯 Seleccionados ${filteredItems.length} items por tamaño`);
     },
 
-    selectRecent: (days: number = 7) => {
+    selectRecent: (days = 7) => {
       const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
       const recentItems = store.displayedItems.filter(item =>
         item.createdAt && item.createdAt > cutoffDate
