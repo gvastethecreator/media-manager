@@ -229,7 +229,7 @@ export function EntityHeader({
 						)}
 
 						{breadcrumbItems.map((item, index) => (
-							<React.Fragment key={`breadcrumb-${index}`}>
+							<React.Fragment key={`${item.label}-${item.href || index}`}>
 								{(backUrl || index > 0) && <BreadcrumbSeparator />}
 								<BreadcrumbItem>
 									{item.href ? (
@@ -263,6 +263,7 @@ export function EntityHeader({
 								{title}
 								{showFavoriteButton && onToggleFavorite && (
 									<button
+										type="button"
 										onClick={onToggleFavorite}
 										className="focus:outline-none"
 										aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
@@ -308,14 +309,14 @@ export function EntityHeader({
 										</Button>
 									</DropdownMenuTrigger>
 									<DropdownMenuContent align="end">
-										{dropdownActions.map((action, index) => (
+										{dropdownActions.map((action) => (
 											<DropdownMenuItem
-												key={`dropdown-action-${index}`}
+												key={action.label}
 												onClick={action.onClick}
 												className={cn(
 													'cursor-pointer',
 													action.variant === 'destructive' &&
-														'text-destructive focus:text-destructive hover:text-destructive'
+													'text-destructive focus:text-destructive hover:text-destructive'
 												)}
 											>
 												{action.icon && <span className="mr-2">{action.icon}</span>}

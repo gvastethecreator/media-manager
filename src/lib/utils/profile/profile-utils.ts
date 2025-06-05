@@ -210,11 +210,11 @@ export function validateProfilePreferences(preferences: Record<string, unknown>)
 		'outlineElements',
 	];
 
-	booleanFields.forEach((field) => {
+	for (const field of booleanFields) {
 		if (typeof preferences[field] === 'boolean') {
 			validatedPreferences[field as keyof ProfilePreferences] = preferences[field] as boolean;
 		}
-	});
+	}
 
 	// Vista por defecto
 	if (preferences.defaultView && ['grid', 'list', 'gallery', 'compact'].includes(preferences.defaultView as string)) {

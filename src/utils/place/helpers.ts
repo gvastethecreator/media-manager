@@ -163,7 +163,7 @@ export function buildPlaceTree(places: Place[]) {
 	const rootPlaces: Place[] = [];
 
 	// Primero, agregar lugares sin región a la raíz
-	places.forEach((place) => {
+	for (const place of places) {
 		if (!place.region) {
 			rootPlaces.push(place);
 		} else {
@@ -171,7 +171,7 @@ export function buildPlaceTree(places: Place[]) {
 			let current = tree;
 
 			// Crear la estructura de árbol para la región
-			path.forEach((segment, index) => {
+			for (const [index, segment] of path.entries()) {
 				if (!current[segment]) {
 					current[segment] = { places: [], children: {} };
 				}
@@ -181,9 +181,9 @@ export function buildPlaceTree(places: Place[]) {
 				}
 
 				current = current[segment].children;
-			});
+			}
 		}
-	});
+	}
 
 	return { rootPlaces, tree };
 }
@@ -313,10 +313,10 @@ export function calculatePlaceStats(places: Place[]) {
 function countByProperty(places: Place[], property: keyof Place): Record<string, number> {
 	const counts: Record<string, number> = {};
 
-	places.forEach((place) => {
+	for (const place of places) {
 		const value = String(place[property] || 'unknown');
 		counts[value] = (counts[value] || 0) + 1;
-	});
+	}
 
 	return counts;
 }

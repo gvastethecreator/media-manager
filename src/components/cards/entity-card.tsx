@@ -150,11 +150,11 @@ export function EntityCard({
 				{/* Miniatura de imágenes si hay disponibles */}
 				{thumbnails && thumbnails.length > 0 && (
 					<div className="mt-2 flex gap-1">
-						{thumbnails.slice(0, 4).map((src, idx) => (
-							<div key={`thumb-${idx}`} className="w-10 h-10 overflow-hidden rounded-sm">
+						{thumbnails.slice(0, 4).map((src) => (
+							<div key={src} className="w-10 h-10 overflow-hidden rounded-sm">
 								<img
 									src={src}
-									alt={`${title} thumbnail ${idx + 1}`}
+									alt={`${title} thumbnail`}
 									className="w-full h-full object-cover"
 									loading="lazy"
 								/>
