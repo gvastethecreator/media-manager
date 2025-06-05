@@ -6,10 +6,10 @@
 import { DEFAULT_COLORS, DEFAULT_EMOJIS } from '@/lib/constants';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    Folder,
-    FolderComplete,
-    FolderCreateInput,
-    FolderUpdateInput
+  Folder,
+  FolderComplete,
+  FolderCreateInput,
+  FolderUpdateInput
 } from '@/types/entities/folder/types';
 import { normalizeFolderPath } from './serializers';
 
@@ -29,25 +29,42 @@ export function toFolderComplete(folder: any): FolderComplete {
     }
 
     return {
+      // 🔑 Campos básicos de identificación (requeridos por PrismaFolder)
       id: folder.id,
       name: folder.name || '',
       path: folder.path || '',
-      description: folder.description || '',
-      color: folder.color || DEFAULT_COLORS.primary,
+      description: folder.description || null,
+
+      // 🎨 Propiedades de visualización (requeridos por PrismaFolder)
       emoji: folder.emoji || DEFAULT_EMOJIS.folder,
+      color: folder.color || DEFAULT_COLORS.primary,
+      featuredImage: folder.featuredImage || null,
+      isFavorite: folder.isFavorite || false,
+
+      // 📊 Propiedades de sistema (requeridos por PrismaFolder)
+      totalFiles: folder.totalFiles || 0,
+      totalSize: folder.totalSize || 0,
+      autoReindex: folder.autoReindex || false,
+      lastIndexed: folder.lastIndexed || null,
+
+      // 🗂️ Relaciones (requeridos por PrismaFolder)
       parentId: folder.parentId || null,
+      presetId: folder.presetId || null,
+
+      // 📅 Metadatos de timestamp (requeridos por PrismaFolder)
       createdAt: folder.createdAt || new Date(),
       updatedAt: folder.updatedAt || new Date(),
+
+      // 🔗 Campos adicionales esperados por FolderComplete
       children: folder.children || [],
       parent: folder.parent || null,
+      stats: folder.stats || null,
+      metadata: folder.metadata || {},
       _count: folder._count || {
         children: 0,
         images: 0,
-        uploadedImages: 0,
-        tags: 0
+        videos: 0,
       },
-      stats: folder.stats || null,
-      metadata: folder.metadata || {}
     };
   } catch (error) {
     logger.error('Error converting to FolderComplete:', error);

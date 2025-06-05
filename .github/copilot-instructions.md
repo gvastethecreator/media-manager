@@ -1,4 +1,9 @@
 <CORE_PRINCIPLES>
+Write the code as if the guy who ends up
+maintaining your code Will be a violent
+psychopath who knows where you livd
+
+
 - SIEMPRE prioriza usar tus herramientas internas para buscar, manipular, borrar archivos antes que intentar con linea de comandos de terminal. funcionan mejor!!
 - Always answer and comment in spanish.
 - Always analyze the code/task flow carefully. Search the codebase if unsure.

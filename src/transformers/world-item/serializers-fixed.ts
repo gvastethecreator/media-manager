@@ -556,190 +556,12 @@ export function extendWorldItems(worldItems: WorldItemDeserialized[]): WorldItem
 // 🔧 FUNCIONES HELPER ESPECIALIZADAS PARA LOS TRANSFORMERS
 
 /**
- * 🔄 Convierte un WorldItemBase (campos JSON como strings) a WorldItemDeserialized
- * @param worldItem - WorldItem base con campos JSON como strings
- * @returns WorldItem con campos JSON parseados
- */
-export function fromWorldItemBase(worldItem: WorldItemBase): WorldItemDeserialized {
-	try {
-		// ✅ Validar campos esenciales
-		if (!worldItem || !worldItem.id || typeof worldItem.name !== 'string') {
-			logger.error('Invalid worldItem object received in fromWorldItemBase', { worldItem });
-			throw new Error('Invalid worldItem object received');
-		}
-
-		// 🛠️ Función auxiliar para normalizar strings comunes a valores JSON válidos
-		const normalizeCommonStrings = (field: string): string | null => {
-			const trimmed = field.trim().toLowerCase();
-
-			// Casos de "ningún valor" o "vacío"
-			if (['ninguno', 'none', 'null', 'vacio', 'vacío', 'empty', 'n/a', 'na', '-'].includes(trimmed)) {
-				return '[]'; // Array vacío por defecto
-			}
-
-			// Casos de objetos vacíos
-			if (['{}', 'objeto vacio', 'objeto vacío', 'no hay'].includes(trimmed)) {
-				return '{}';
-			}
-
-			return null; // No se pudo normalizar
-		};
-
-		// 🔧 Función auxiliar para reparar patrones de atributos tipo "Fuerza 15"
-		const repairAttributePattern = (field: string): string | null => {
-			// Detectar patrones como "Fuerza 15", "Fuerza 15, Destreza 10", etc.
-			const attributePattern = /^[A-Za-zÀ-ÿ\s]+\s+\d+/;
-			if (!attributePattern.test(field)) return null;
-
-			try {
-				const items = field.split(',')
-					.map(item => item.trim())
-					.filter(Boolean)
-					.map(item => {
-						// Buscar patrón: "Nombre + Número + (opcional) descripción"
-						const matches = item.match(/^([A-Za-zÀ-ÿ\s]+?)\s+(\d+)(.*)$/);
-						if (matches) {
-							return {
-								name: matches[1].trim(),
-								value: Number.parseInt(matches[2], 10), // ✅ Usar Number.parseInt
-								description: matches[3]?.trim() || ''
-							};
-						}
-
-						// Fallback: considerar todo como nombre
-						return { name: item, value: 0, description: '' };
-					});
-
-				return JSON.stringify(items);
-			} catch (error) {
-				logger.error(`❌ Error al reparar patrón de atributos: ${field}`, error);
-				return null;
-			}
-		};
-
-		// 🎯 Parsear campos JSON de forma segura con múltiples estrategias de reparación
-		const parseJsonField = <T>(field: string | null | undefined, defaultValue: T): T => {
-			if (typeof field !== 'string' || !field) return defaultValue;
-
-			// Valores especiales conocidos
-			if (field === 'empty_array') return [] as unknown as T;
-			if (field === 'empty_object') return {} as unknown as T;
-
-			try {
-				return JSON.parse(field) as T;
-			} catch (originalError) {
-				logger.debug(`🔄 Intentando reparar campo JSON para WorldItem: "${field.substring(0, 50)}${field.length > 50 ? '...' : ''}"`);
-
-				// 🔧 Estrategia 1: Normalizar strings comunes
-				const normalized = normalizeCommonStrings(field);
-				if (normalized) {
-					try {
-						const parsed = JSON.parse(normalized);
-						logger.info(`✅ Campo reparado con normalización: "${field}" → ${normalized}`);
-						return parsed as T;
-					} catch (error) {
-						logger.error(`❌ Error al parsear campo normalizado: ${normalized}`, error);
-					}
-				}
-
-				// 🔧 Estrategia 2: Reparar patrones de atributos
-				const repairedAttribute = repairAttributePattern(field);
-				if (repairedAttribute) {
-					try {
-						const parsed = JSON.parse(repairedAttribute);
-						logger.info(`✅ Campo reparado como atributos: "${field}" → ${repairedAttribute}`);
-						return parsed as T;
-					} catch (error) {
-						logger.error(`❌ Error al parsear atributos reparados: ${repairedAttribute}`, error);
-					}
-				}
-
-				// 🔧 Estrategia 3: Intentar envolver en array si parece ser un elemento único
-				if (field.length > 0 && !field.startsWith('[') && !field.startsWith('{')) {
-					try {
-						// Envolver en array como string
-						const wrappedAsArray = `["${field.replace(/"/g, '\\"')}"]`;
-						const parsed = JSON.parse(wrappedAsArray);
-						logger.info(`✅ Campo envuelto en array: "${field}" → ${wrappedAsArray}`);
-						return parsed as T;
-					} catch (error) {
-						logger.debug(`❌ No se pudo envolver en array: ${field}`, error);
-					}
-				}
-
-				// 🚨 Si todas las estrategias fallan, registrar para análisis y usar valor por defecto
-				logger.warn(`❌ No se pudo reparar campo JSON para WorldItem. Campo: "${field}", Error original: ${originalError}. Usando valor por defecto.`);
-				return defaultValue;
-			}
-		};
-
-		// 🏗️ Construir objeto base completo
-		const baseItem: WorldItemBase = {
-			// ✅ Campos requeridos
-			id: worldItem.id,
-			name: worldItem.name,
-			description: worldItem.description ?? null,
-			shortcut: worldItem.shortcut ?? null,
-
-			// ✅ Campos categóricos con valores por defecto seguros
-			category: worldItem.category ?? 'other',
-			type: worldItem.type ?? 'item',
-			rarity: worldItem.rarity ?? 'common',
-			size: worldItem.size ?? 'medium',
-			origin: worldItem.origin ?? 'unknown',
-
-			// ✅ Campos JSON como strings serializados (para WorldItemBase)
-			attributes: typeof worldItem.attributes === 'string' ? worldItem.attributes : JSON.stringify(worldItem.attributes || []),
-			effects: typeof worldItem.effects === 'string' ? worldItem.effects : JSON.stringify(worldItem.effects || []),
-			requirements: typeof worldItem.requirements === 'string' ? worldItem.requirements : JSON.stringify(worldItem.requirements || {}),
-			stats: typeof worldItem.stats === 'string' ? worldItem.stats : JSON.stringify(worldItem.stats || []),
-			properties: typeof worldItem.properties === 'string' ? worldItem.properties : JSON.stringify(worldItem.properties || []),
-			filters: typeof worldItem.filters === 'string' ? worldItem.filters : JSON.stringify(worldItem.filters || []),
-
-			// ✅ Otros campos
-			featuredImage: worldItem.featuredImage ?? null,
-			isFavorite: worldItem.isFavorite ?? false,
-			emoji: worldItem.emoji ?? '🔮',
-			color: worldItem.color ?? '#6D28D9',
-			sortBy: worldItem.sortBy ?? 'name',
-
-			// ✅ Timestamps
-			createdAt: worldItem.createdAt ? new Date(worldItem.createdAt) : new Date(),
-			updatedAt: worldItem.updatedAt ? new Date(worldItem.updatedAt) : new Date(),
-		};
-
-		// 🎯 Parsear campos JSON para la versión deserializada
-		const deserializedFields: WorldItemDeserializedFields = {
-			attributesList: parseJsonField(baseItem.attributes, [] as WorldItemAttribute[]),
-			effectsList: parseJsonField(baseItem.effects, [] as WorldItemEffect[]),
-			requirementsList: parseJsonField(baseItem.requirements, [] as WorldItemRequirement[]),
-			statsList: parseJsonField(baseItem.stats, [] as WorldItemStat[]),
-			propertiesList: parseJsonField(baseItem.properties, [] as WorldItemProperty[]),
-			filtersList: parseJsonField(baseItem.filters, [] as WorldItemFilter[]),
-			tagsList: [] as string[], // WorldItemBase no tiene tags directamente
-		};
-
-		// 🏗️ Construir objeto deserializado completo
-		const deserializedItem: WorldItemDeserialized = {
-			...baseItem,
-			...deserializedFields
-		};
-
-		return deserializedItem;
-
-	} catch (error) {
-		logger.error('Error en fromWorldItemBase:', error);
-		throw handleTransformerError(error);
-	}
-}
-
-/**
  * ✅ Función auxiliar para transformar WorldItem base a deserializado
  * @param worldItem - WorldItem base
  * @returns WorldItem deserializado
  */
 export function parseJsonFields(worldItem: WorldItemBase): WorldItemDeserialized {
-	return fromWorldItemBase(worldItem);
+	return fromPrismaWorldItem(worldItem);
 }
 
 /**
@@ -748,7 +570,7 @@ export function parseJsonFields(worldItem: WorldItemBase): WorldItemDeserialized
  * @returns WorldItem completo con UI
  */
 export function toExtendedWorldItem(worldItem: WorldItemBase): WorldItemComplete {
-	const deserializedItem = fromWorldItemBase(worldItem);
+	const deserializedItem = fromPrismaWorldItem(worldItem);
 	return extendWorldItem(deserializedItem);
 }
 
@@ -758,7 +580,7 @@ export function toExtendedWorldItem(worldItem: WorldItemBase): WorldItemComplete
  * @returns WorldItem completo con estadísticas
  */
 export function toWorldItemWithStats(worldItem: WorldItemBase & { _count?: { images?: number; relatedItems?: number } }): WorldItemComplete {
-	const extendedItem = extendWorldItem(fromWorldItemBase(worldItem));
+	const extendedItem = extendWorldItem(fromPrismaWorldItem(worldItem));
 
 	// Agregar conteos si están disponibles
 	if (worldItem._count) {
