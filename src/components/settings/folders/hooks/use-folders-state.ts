@@ -2,7 +2,7 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { folderService } from '@/services/folder-service-export';
-import type { FolderStats } from '@/types/entities/folders';
+import type { FolderStats } from '@/types/entities/folder';
 import { useCallback, useState } from 'react';
 import { type ExtendedFolder, initialStats } from '../folder-types';
 
@@ -42,6 +42,16 @@ export function useFoldersState() {
 				count: transformedFolders.length,
 			});
 			setFolders(transformedFolders);
+
+			// Calcular estadísticas básicas a partir de las carpetas
+			const totalFiles = transformedFolders.reduce((acc, f) => acc + (f.totalFiles || f._count.images || 0), 0);
+			const totalSize = transformedFolders.reduce((acc, f) => acc + (f.totalSize || 0), 0);
+			setStats({
+				totalFolders: transformedFolders.length,
+				totalFiles,
+				totalSize,
+				lastIndexed: null,
+			});
 		} catch (error) {
 			stateLogger.error('❌ Error cargando carpetas:', error);
 			setError(error instanceof Error ? error.message : 'No se pudieron cargar las carpetas');
