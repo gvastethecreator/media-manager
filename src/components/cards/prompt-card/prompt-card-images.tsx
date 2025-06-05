@@ -26,7 +26,7 @@ export function PromptCardImages({
 	images = [],
 	primaryColor,
 	secondaryColor = '#0369a1',
-	tcgMode = true
+	tcgMode = true,
 }: PromptCardImagesProps) {
 	const [isLoading, setIsLoading] = useState(false);
 	const [activeImage, setActiveImage] = useState<string | null>(mainImage || images[0] || null);
@@ -45,10 +45,7 @@ export function PromptCardImages({
 
 	return (
 		<div
-			className={cn(
-				"relative overflow-hidden border-b",
-				containerHeight
-			)}
+			className={cn('relative overflow-hidden border-b', containerHeight)}
 			style={{ borderColor: `${primaryColor}40` }}
 		>
 			{/* Contenedor de im?genes */}
@@ -68,9 +65,10 @@ export function PromptCardImages({
 							<p className="text-sm opacity-70">Sin im?genes</p>
 
 							{tcgMode && (
-								<div className="absolute inset-0 opacity-20 pointer-events-none"
+								<div
+									className="absolute inset-0 opacity-20 pointer-events-none"
 									style={{
-										background: `repeating-linear-gradient(45deg, transparent, transparent 10px, ${primaryColor}20 10px, ${primaryColor}20 20px)`
+										background: `repeating-linear-gradient(45deg, transparent, transparent 10px, ${primaryColor}20 10px, ${primaryColor}20 20px)`,
 									}}
 								/>
 							)}
@@ -85,8 +83,8 @@ export function PromptCardImages({
 										src={activeImage}
 										alt="Imagen destacada"
 										className={cn(
-											"w-full h-full object-cover",
-											tcgMode && "transition-transform duration-700 hover:scale-110"
+											'w-full h-full object-cover',
+											tcgMode && 'transition-transform duration-700 hover:scale-110'
 										)}
 										loading="lazy"
 										onLoad={() => setIsLoading(false)}
@@ -101,7 +99,7 @@ export function PromptCardImages({
 												style={{
 													background: `linear-gradient(45deg, transparent 0%, ${primaryColor}80 45%, white 50%, ${primaryColor}80 55%, transparent 100%)`,
 													backgroundSize: '200% 200%',
-													animation: 'shine 5s ease-in-out infinite'
+													animation: 'shine 5s ease-in-out infinite',
 												}}
 											/>
 											<div className="absolute bottom-0 left-0 w-full h-1/4 bg-gradient-to-t from-black/40 to-transparent" />
@@ -112,19 +110,15 @@ export function PromptCardImages({
 
 							{/* Miniaturas inferiores */}
 							{displayImages.length > 1 && (
-								<div
-									className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-1 z-10"
-								>
+								<div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-1 z-10">
 									{displayImages.map((img, idx) => (
 										<button
 											type="button"
 											key={`thumb-${img.substring(0, 8)}-${idx + 1}`}
 											className={cn(
-												"w-2 h-2 rounded-full transition-all",
-												activeImage === img
-													? "bg-white scale-125 shadow-lg"
-													: "bg-white/50 hover:bg-white/80",
-												tcgMode && "outline outline-1 outline-offset-1"
+												'w-2 h-2 rounded-full transition-all',
+												activeImage === img ? 'bg-white scale-125 shadow-lg' : 'bg-white/50 hover:bg-white/80',
+												tcgMode && 'outline outline-1 outline-offset-1'
 											)}
 											style={{ outlineColor: activeImage === img ? primaryColor : 'transparent' }}
 											onClick={() => setActiveImage(img)}

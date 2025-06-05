@@ -28,20 +28,10 @@ export function ImagePicker({ value, onChange, className }: ImagePickerProps) {
 		<div className={cn('space-y-4', className)}>
 			{value ? (
 				<div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-					<Image
-						src={value}
-						alt="Imagen seleccionada"
-						fill
-						className="object-cover"
-					/>
+					<Image src={value} alt="Imagen seleccionada" fill className="object-cover" />
 					<div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
 						<div className="absolute inset-0 flex items-center justify-center gap-2">
-							<Button
-								type="button"
-								variant="secondary"
-								size="sm"
-								onClick={() => onChange(null)}
-							>
+							<Button type="button" variant="secondary" size="sm" onClick={() => onChange(null)}>
 								Eliminar
 							</Button>
 						</div>
@@ -54,13 +44,7 @@ export function ImagePicker({ value, onChange, className }: ImagePickerProps) {
 						<p>Arrastra una imagen o haz clic para seleccionar</p>
 						<p className="text-xs">PNG, JPG o GIF hasta 10MB</p>
 					</div>
-					<Input
-						type="file"
-						accept="image/*"
-						onChange={handleFileChange}
-						className="hidden"
-						id="image-upload"
-					/>
+					<Input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="image-upload" />
 					<Button
 						type="button"
 						variant="secondary"

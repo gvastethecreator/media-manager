@@ -13,4 +13,3 @@ export * from './types';
 // Re-exportar ConceptWithRelations como Concept para consistencia con otras entidades
 import type { ConceptWithRelations } from './types';
 export type Concept = ConceptWithRelations;
-

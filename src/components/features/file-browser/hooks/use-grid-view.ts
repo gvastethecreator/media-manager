@@ -185,16 +185,16 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 				}
 
 				// Acceder directamente al store para verificar si ya existe
-					const resource = imageResources.resources.get(item.id);
+				const resource = imageResources.resources.get(item.id);
 
 				// Solo cargar si:
 				// 1. No tiene thumbnail en el resource
 				// 2. No está ya en la cola de carga
 				// 3. No tiene un error registrado (o si lo queremos reintentar)
-					if (!resource?.thumbnail && !loadQueueRef.current.has(item.id)) {
-						itemsToLoad.push(item);
-					}
+				if (!resource?.thumbnail && !loadQueueRef.current.has(item.id)) {
+					itemsToLoad.push(item);
 				}
+			}
 
 			// Si no hay items para cargar, salir temprano
 			if (itemsToLoad.length === 0) {
@@ -217,19 +217,17 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 
 			// Cargar thumbnails por lotes para mejorar rendimiento
 			try {
-			for (let i = 0; i < itemsToLoad.length; i += BATCH_SIZE) {
+				for (let i = 0; i < itemsToLoad.length; i += BATCH_SIZE) {
 					// Verificar de nuevo si el componente sigue montado
 					if (!loadQueueRef.current) {
 						return; // Salir si el componente se ha desmontado
 					}
 
-				const batch = itemsToLoad.slice(i, i + BATCH_SIZE);
+					const batch = itemsToLoad.slice(i, i + BATCH_SIZE);
 
 					try {
 						// Usar Promise.allSettled para evitar que un error detenga todo el lote
-						const results = await Promise.allSettled(
-							batch.map((item) => loadThumbnail(item.id))
-						);
+						const results = await Promise.allSettled(batch.map((item) => loadThumbnail(item.id)));
 
 						// Loggear errores individuales para diagnóstico
 						results.forEach((result, index) => {
@@ -242,10 +240,10 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 						// Continuar con el siguiente lote a pesar del error
 					}
 
-				// Pequeña pausa entre lotes para no bloquear la UI
-				if (i + BATCH_SIZE < itemsToLoad.length) {
-					await new Promise((resolve) => setTimeout(resolve, 10));
-				}
+					// Pequeña pausa entre lotes para no bloquear la UI
+					if (i + BATCH_SIZE < itemsToLoad.length) {
+						await new Promise((resolve) => setTimeout(resolve, 10));
+					}
 				}
 			} catch (error) {
 				console.error('Error general cargando thumbnails:', error);

@@ -104,7 +104,7 @@ export async function seedProperties(prisma: PrismaClient): Promise<void> {
 			// Crear propiedades
 			for (const propertyData of sampleProperties) {
 				await prisma.property.create({
-					data: propertyData
+					data: propertyData,
 				});
 			}
 

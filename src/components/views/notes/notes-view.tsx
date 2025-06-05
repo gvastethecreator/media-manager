@@ -106,11 +106,7 @@ export function NotesView(_props: ViewProps) {
 							transition={{ delay: index * 0.1 }}
 							className="cursor-pointer"
 						>
-							<MemoizedNoteCard
-								note={note}
-								onClick={() => handleNoteClick(note)}
-								className="h-full"
-							/>
+							<MemoizedNoteCard note={note} onClick={() => handleNoteClick(note)} className="h-full" />
 						</motion.div>
 					))}
 				</div>

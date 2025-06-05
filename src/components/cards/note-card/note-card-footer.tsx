@@ -48,22 +48,22 @@ export function NoteCardFooter({
 	const wasUpdated = updatedAtDate.getTime() - createdAtDate.getTime() > 60000; // 1 minuto de diferencia
 	const updatedFormattedDate = wasUpdated
 		? formatDistanceToNow(updatedAtDate, {
-			addSuffix: true,
-			locale: es,
-		})
+				addSuffix: true,
+				locale: es,
+			})
 		: null;
 
 	// Obtener color de prioridad
 	const getPriorityColor = () => {
 		switch (priority) {
 			case 0:
-				return "#4b5563"; // Gris para normal
+				return '#4b5563'; // Gris para normal
 			case 1:
-				return "#fbbf24"; // Amarillo para alta
+				return '#fbbf24'; // Amarillo para alta
 			case 2:
-				return "#ef4444"; // Rojo para urgente
+				return '#ef4444'; // Rojo para urgente
 			default:
-				return "#9ca3af"; // Gris claro para baja
+				return '#9ca3af'; // Gris claro para baja
 		}
 	};
 
@@ -86,8 +86,8 @@ export function NoteCardFooter({
 	return (
 		<div
 			className={cn(
-				"px-3 py-2 mt-auto border-t border-gray-400/30 flex flex-col gap-1",
-				tcgMode && "backdrop-blur-sm rounded-b-[4.75%]"
+				'px-3 py-2 mt-auto border-t border-gray-400/30 flex flex-col gap-1',
+				tcgMode && 'backdrop-blur-sm rounded-b-[4.75%]'
 			)}
 			style={getFooterStyles()}
 		>
@@ -97,24 +97,15 @@ export function NoteCardFooter({
 					{status && (
 						<div className="flex items-center gap-1">
 							<ListChecks className="h-3 w-3" style={{ color: primaryColor }} />
-							<span className={cn(
-								"opacity-80",
-								tcgMode && "font-medium tracking-wide"
-							)}>
+							<span className={cn('opacity-80', tcgMode && 'font-medium tracking-wide')}>
 								{status.charAt(0).toUpperCase() + status.slice(1)}
 							</span>
 						</div>
 					)}
 					{priority !== undefined && (
 						<div className="flex items-center gap-1">
-							<BarChart4
-								className="h-3 w-3"
-								style={{ color: getPriorityColor() }}
-							/>
-							<span
-								className={cn("opacity-80", tcgMode && "font-medium")}
-								style={{ color: getPriorityColor() }}
-							>
+							<BarChart4 className="h-3 w-3" style={{ color: getPriorityColor() }} />
+							<span className={cn('opacity-80', tcgMode && 'font-medium')} style={{ color: getPriorityColor() }}>
 								P{priority}
 							</span>
 						</div>
@@ -146,23 +137,22 @@ export function NoteCardFooter({
 					</div>
 
 					{/* Indicador de favorito */}
-					{isFavorite && (
-						tcgMode ?
-							<Star className="h-3.5 w-3.5 fill-current text-yellow-500" /> :
+					{isFavorite &&
+						(tcgMode ? (
+							<Star className="h-3.5 w-3.5 fill-current text-yellow-500" />
+						) : (
 							<Heart className="h-3 w-3 fill-current text-pink-500" />
-					)}
+						))}
 				</div>
 
 				{/* Fecha */}
 				<div className="flex items-center gap-1">
-					{wasUpdated ?
-						<RefreshCw className="h-3 w-3 text-muted-foreground" /> :
+					{wasUpdated ? (
+						<RefreshCw className="h-3 w-3 text-muted-foreground" />
+					) : (
 						<Calendar className="h-3 w-3 text-muted-foreground" />
-					}
-					<span className={cn(
-						"opacity-80 text-[0.65rem]",
-						tcgMode && "tracking-tight"
-					)}>
+					)}
+					<span className={cn('opacity-80 text-[0.65rem]', tcgMode && 'tracking-tight')}>
 						{wasUpdated ? updatedFormattedDate : formattedDate}
 					</span>
 				</div>
@@ -178,9 +168,11 @@ export function NoteCardFooter({
 			{/* Sello TCG en la parte inferior */}
 			{tcgMode && (
 				<div className="mt-1 pt-1 border-t border-white/10 flex justify-center">
-					<div className="text-[0.65rem] opacity-60 tracking-wide uppercase font-medium"
-						style={{ color: primaryColor }}>
-						Image Manager • Note #{note => note.id?.substring(0, 6)}
+					<div
+						className="text-[0.65rem] opacity-60 tracking-wide uppercase font-medium"
+						style={{ color: primaryColor }}
+					>
+						Image Manager • Note #{(note) => note.id?.substring(0, 6)}
 					</div>
 				</div>
 			)}

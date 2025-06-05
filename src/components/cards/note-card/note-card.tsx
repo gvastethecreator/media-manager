@@ -157,23 +157,21 @@ export function NoteCard({ note, onClick, className, style, tcgMode = true }: No
 			<CardHeader
 				title={note.title}
 				subtitle={note.category || 'General'}
-				icon={note.emoji ?
-					<span className="text-lg">{note.emoji}</span> :
-					tcgMode ?
-						<BookOpen className="w-4 h-4" /> :
+				icon={
+					note.emoji ? (
+						<span className="text-lg">{note.emoji}</span>
+					) : tcgMode ? (
+						<BookOpen className="w-4 h-4" />
+					) : (
 						<ScrollText className="w-4 h-4" />
+					)
 				}
 				primaryColor={primaryColor}
 				variant={tcgMode ? 'tcg' : 'default'}
 			/>
 
 			{/* Sección de imágenes */}
-			<NoteCardImages
-				noteId={note.id}
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
-				tcgMode={tcgMode}
-			/>
+			<NoteCardImages noteId={note.id} primaryColor={primaryColor} secondaryColor={secondaryColor} tcgMode={tcgMode} />
 
 			{/* Contenido principal */}
 			<NoteCardContent

@@ -138,8 +138,8 @@ export async function getImageCardData(imageId: string): Promise<ImageCardData> 
 						places: true,
 						worldItems: true,
 						notes: true,
-					}
-				}
+					},
+				},
 			},
 		});
 
@@ -188,6 +188,8 @@ export async function getImageCardData(imageId: string): Promise<ImageCardData> 
 		return result;
 	} catch (error) {
 		imageCardLogger.error('❌ Error obteniendo información de imagen:', error);
-		throw new Error(`Error al obtener datos de imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`Error al obtener datos de imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }

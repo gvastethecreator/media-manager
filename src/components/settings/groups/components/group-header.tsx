@@ -32,13 +32,7 @@ export function GroupHeader({
 						<CardTitle className="text-xl font-bold flex items-center gap-2">
 							{name}
 							{isFavorite && onFavoriteToggle && (
-								<Button
-									variant="ghost"
-									size="icon"
-									onClick={onFavoriteToggle}
-									className="h-4 w-4 p-0"
-									title="Favorito"
-								>
+								<Button variant="ghost" size="icon" onClick={onFavoriteToggle} className="h-4 w-4 p-0" title="Favorito">
 									<StarIcon className="h-4 w-4 text-yellow-500" />
 								</Button>
 							)}
@@ -47,23 +41,12 @@ export function GroupHeader({
 				</div>
 				<div className="flex items-center gap-2">
 					{onEdit && (
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={onEdit}
-							title="Editar"
-						>
+						<Button variant="ghost" size="icon" onClick={onEdit} title="Editar">
 							<EditIcon className="h-4 w-4" />
 						</Button>
 					)}
 					{onDelete && (
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={onDelete}
-							disabled={isDeleting}
-							title="Eliminar"
-						>
+						<Button variant="ghost" size="icon" onClick={onDelete} disabled={isDeleting} title="Eliminar">
 							<Trash className="h-4 w-4" />
 						</Button>
 					)}

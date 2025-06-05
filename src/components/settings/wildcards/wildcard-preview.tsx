@@ -1,11 +1,5 @@
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { Wildcard } from '@prisma/client';
 import { ChevronRight, EditIcon, StarIcon, Trash } from 'lucide-react';
@@ -44,14 +38,12 @@ export function WildcardPreview({
 	isDeleting = false,
 }: WildcardPreviewProps) {
 	// Convertir el string JSON de children a array
-	const children = wildcard.children !== 'empty_array'
-		? JSON.parse(wildcard.children)
-		: [];
+	const children = wildcard.children !== 'empty_array' ? JSON.parse(wildcard.children) : [];
 
 	const totalElements = wildcard._count
 		? Object.entries(wildcard._count)
-			.filter(([key]) => key !== 'childWildcards')
-			.reduce((a, [_, b]) => a + b, 0)
+				.filter(([key]) => key !== 'childWildcards')
+				.reduce((a, [_, b]) => a + b, 0)
 		: 0;
 
 	return (
@@ -66,35 +58,20 @@ export function WildcardPreview({
 							<CardTitle className="text-xl font-bold flex items-center gap-2">
 								{wildcard.parent && (
 									<>
-										<span className="text-sm text-muted-foreground">
-											{wildcard.parent.name}
-										</span>
+										<span className="text-sm text-muted-foreground">{wildcard.parent.name}</span>
 										<ChevronRight className="h-4 w-4" />
 									</>
 								)}
 								{wildcard.name}
 							</CardTitle>
-							{wildcard.isFavorite && (
-								<StarIcon className="h-4 w-4 text-yellow-500" />
-							)}
+							{wildcard.isFavorite && <StarIcon className="h-4 w-4 text-yellow-500" />}
 						</div>
 					</div>
 					<div className="flex items-center gap-2">
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={onEdit}
-							title="Editar"
-						>
+						<Button variant="ghost" size="icon" onClick={onEdit} title="Editar">
 							<EditIcon className="h-4 w-4" />
 						</Button>
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={onDelete}
-							disabled={isDeleting}
-							title="Eliminar"
-						>
+						<Button variant="ghost" size="icon" onClick={onDelete} disabled={isDeleting} title="Eliminar">
 							<Trash className="h-4 w-4" />
 						</Button>
 					</div>
@@ -128,10 +105,7 @@ export function WildcardPreview({
 				<div className="space-y-2">
 					<h3 className="text-sm font-medium">Color</h3>
 					<div className="flex items-center gap-2">
-						<div
-							className="w-4 h-4 rounded"
-							style={{ backgroundColor: wildcard.color }}
-						/>
+						<div className="w-4 h-4 rounded" style={{ backgroundColor: wildcard.color }} />
 						<span className="text-sm text-muted-foreground">{wildcard.color}</span>
 					</div>
 				</div>
@@ -142,9 +116,7 @@ export function WildcardPreview({
 					<div className="grid grid-cols-2 gap-4">
 						<Card className="p-4 bg-muted/50">
 							<p className="text-sm font-medium">Hijos directos</p>
-							<p className="text-2xl font-bold">
-								{wildcard._count?.childWildcards || 0}
-							</p>
+							<p className="text-2xl font-bold">{wildcard._count?.childWildcards || 0}</p>
 						</Card>
 						<Card className="p-4 bg-muted/50">
 							<p className="text-sm font-medium">Valores</p>
@@ -161,18 +133,16 @@ export function WildcardPreview({
 									<div
 										key={child.id}
 										className={cn(
-											"rounded-md p-2",
-											"bg-muted/30 hover:bg-muted/50",
-											"transition-colors duration-200",
-											"flex items-center gap-2"
+											'rounded-md p-2',
+											'bg-muted/30 hover:bg-muted/50',
+											'transition-colors duration-200',
+											'flex items-center gap-2'
 										)}
 									>
 										<span role="img" aria-label="emoji">
 											{child.emoji}
 										</span>
-										<span className="text-sm font-medium">
-											{child.name}
-										</span>
+										<span className="text-sm font-medium">{child.name}</span>
 									</div>
 								))}
 							</div>
@@ -187,11 +157,7 @@ export function WildcardPreview({
 								{children.map((value: string, index: number) => (
 									<div
 										key={`value-${wildcard.id}-${value}-${index + 1}`}
-										className={cn(
-											"rounded-md p-2",
-											"bg-muted/30",
-											"text-sm"
-										)}
+										className={cn('rounded-md p-2', 'bg-muted/30', 'text-sm')}
 									>
 										{value}
 									</div>
@@ -211,15 +177,9 @@ export function WildcardPreview({
 								.map(([key, count]) => (
 									<div
 										key={key}
-										className={cn(
-											"rounded-md p-2",
-											"bg-muted/30 hover:bg-muted/50",
-											"transition-colors duration-200"
-										)}
+										className={cn('rounded-md p-2', 'bg-muted/30 hover:bg-muted/50', 'transition-colors duration-200')}
 									>
-										<p className="text-xs font-medium capitalize">
-											{key.replace(/([A-Z])/g, ' $1').trim()}
-										</p>
+										<p className="text-xs font-medium capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
 										<p className="text-lg font-bold">{count}</p>
 									</div>
 								))}
@@ -232,11 +192,7 @@ export function WildcardPreview({
 					<div className="space-y-2">
 						<h3 className="text-sm font-medium">Imagen destacada</h3>
 						<div className="relative w-full h-32 bg-muted rounded-md overflow-hidden">
-							<img
-								src={wildcard.featuredImage}
-								alt={wildcard.name}
-								className="w-full h-full object-cover"
-							/>
+							<img src={wildcard.featuredImage} alt={wildcard.name} className="w-full h-full object-cover" />
 						</div>
 					</div>
 				)}

@@ -5,12 +5,12 @@
 
 import type { Profile } from '@prisma/client';
 import type {
-    CreateProfileSchemaType,
-    ProfileFiltersSchemaType,
-    ProfilePaginationSchemaType,
-    ProfilePreferencesSchemaType,
-    UpdateProfilePreferencesSchemaType,
-    UpdateProfileSchemaType,
+	CreateProfileSchemaType,
+	ProfileFiltersSchemaType,
+	ProfilePaginationSchemaType,
+	ProfilePreferencesSchemaType,
+	UpdateProfilePreferencesSchemaType,
+	UpdateProfileSchemaType,
 } from './schema';
 
 // Enums para temas

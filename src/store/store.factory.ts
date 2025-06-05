@@ -18,10 +18,7 @@ export interface StoreOptions<T> {
  * @param options - Opciones de configuración
  * @returns Una instancia del store
  */
-export function createStore<T extends object>(
-	createFn: StateCreator<T, [], []>,
-	options: StoreOptions<T>
-) {
+export function createStore<T extends object>(createFn: StateCreator<T, [], []>, options: StoreOptions<T>) {
 	// Si no se proporciona un nombre, usar 'store' por defecto
 	const storeName = options.name || 'store';
 
@@ -34,15 +31,10 @@ export function createStore<T extends object>(
 	// 1. persist - para guardar el state en localStorage
 	// 2. devtools - para conectar con Redux DevTools
 	return create<T>()(
-		devtools(
-			options.persistOptions
-				? persist(createFn, options.persistOptions)
-				: createFn,
-			{
-				name: storeName,
-				...options.devtoolOptions,
-			}
-		)
+		devtools(options.persistOptions ? persist(createFn, options.persistOptions) : createFn, {
+			name: storeName,
+			...options.devtoolOptions,
+		})
 	);
 }
 

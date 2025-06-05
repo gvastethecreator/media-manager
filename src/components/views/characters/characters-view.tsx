@@ -117,11 +117,7 @@ export function CharactersView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<CharacterCard
-								character={character}
-								onClick={() => handleCharacterClick(character)}
-								className="h-full"
-							/>
+							<CharacterCard character={character} onClick={() => handleCharacterClick(character)} className="h-full" />
 						</motion.div>
 					))}
 				</div>

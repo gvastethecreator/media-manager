@@ -97,11 +97,15 @@ const ThumbnailItem = memo(function ThumbnailItem({
 	}, [image.id, image.thumbnail, imageResources.resources, thumbnail, error]);
 
 	// Memoizar la clase base
-	const baseClassName = useMemo(() => cn(
-		'relative overflow-hidden rounded-md mr-2 cursor-pointer',
-		'transition-all duration-200 ease-out',
-		isActive ? 'ring-2 ring-primary' : 'hover:ring-1 hover:ring-primary/50'
-	), [isActive]);
+	const baseClassName = useMemo(
+		() =>
+			cn(
+				'relative overflow-hidden rounded-md mr-2 cursor-pointer',
+				'transition-all duration-200 ease-out',
+				isActive ? 'ring-2 ring-primary' : 'hover:ring-1 hover:ring-primary/50'
+			),
+		[isActive]
+	);
 
 	// Renderizado condicional memoizado
 	const thumbnailContent = useMemo(() => {
@@ -127,11 +131,14 @@ const ThumbnailItem = memo(function ThumbnailItem({
 	}, [error, thumbnail, image.name]);
 
 	// Memoizar los estilos de animación
-	const animateStyles = useMemo(() => ({
-		width: isActive ? THUMBNAIL_SIZES.active.width : THUMBNAIL_SIZES.normal.width,
-		height: isActive ? THUMBNAIL_SIZES.active.height : THUMBNAIL_SIZES.normal.height,
-		opacity: isActive ? 1 : 0.8,
-	}), [isActive]);
+	const animateStyles = useMemo(
+		() => ({
+			width: isActive ? THUMBNAIL_SIZES.active.width : THUMBNAIL_SIZES.normal.width,
+			height: isActive ? THUMBNAIL_SIZES.active.height : THUMBNAIL_SIZES.normal.height,
+			opacity: isActive ? 1 : 0.8,
+		}),
+		[isActive]
+	);
 
 	return (
 		<motion.div
@@ -165,7 +172,7 @@ const ToolbarActions = memo(function ToolbarActions({
 	onReset,
 	onCopy,
 	onDownload,
-	onClose
+	onClose,
 }: {
 	onZoomIn: () => void;
 	onZoomOut: () => void;
@@ -205,7 +212,7 @@ const ToolbarActions = memo(function ToolbarActions({
 const ThumbnailNavigation = memo(function ThumbnailNavigation({
 	images,
 	currentIndex,
-	onSelectImage
+	onSelectImage,
 }: {
 	images: ImageItem[];
 	currentIndex: number;
@@ -218,7 +225,7 @@ const ThumbnailNavigation = memo(function ThumbnailNavigation({
 		return images.slice(startIndex, endIndex).map((image, i) => ({
 			image,
 			isActive: i + startIndex === currentIndex,
-			index: i + startIndex
+			index: i + startIndex,
 		}));
 	}, [images, currentIndex]);
 
@@ -245,7 +252,7 @@ export const FileViewer = memo(function FileViewer({
 	initialIndex = 0,
 	isOpen,
 	onClose,
-	triggerRef
+	triggerRef,
 }: FileViewerProps) {
 	const [currentIndex, setCurrentIndex] = useState(initialIndex);
 	const [urls, setUrls] = useState<Record<string, string>>({});
@@ -327,7 +334,7 @@ export const FileViewer = memo(function FileViewer({
 		if (!isOpen) return;
 
 		const loadInitialUrls = async () => {
-			const imagesToLoad = indicesToLoad.map(idx => images[idx]).filter(img => img && !urls[img.id]);
+			const imagesToLoad = indicesToLoad.map((idx) => images[idx]).filter((img) => img && !urls[img.id]);
 
 			if (!imagesToLoad.length) {
 				setIsLoading(false);
@@ -351,7 +358,7 @@ export const FileViewer = memo(function FileViewer({
 				);
 
 				if (Object.keys(newUrls).length > 0) {
-					setUrls(prev => ({ ...prev, ...newUrls }));
+					setUrls((prev) => ({ ...prev, ...newUrls }));
 				}
 
 				setIsLoading(false);
@@ -371,16 +378,19 @@ export const FileViewer = memo(function FileViewer({
 	}, []);
 
 	// Manejar zoom con la rueda
-	const handleWheel = useCallback((e: React.WheelEvent) => {
-		e.preventDefault();
-		const zoomFactor = 0.1;
-		const newScale = Math.min(Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)), 8);
-		setScale(newScale);
-	}, [scale]);
+	const handleWheel = useCallback(
+		(e: React.WheelEvent) => {
+			e.preventDefault();
+			const zoomFactor = 0.1;
+			const newScale = Math.min(Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)), 8);
+			setScale(newScale);
+		},
+		[scale]
+	);
 
 	// Función memoizada para cambiar el zoom
 	const handleZoom = useCallback((factor: number) => {
-		setScale(prevScale => {
+		setScale((prevScale) => {
 			const newScale = Math.min(Math.max(0.1, prevScale + factor), 8);
 			return newScale;
 		});
@@ -401,7 +411,7 @@ export const FileViewer = memo(function FileViewer({
 			// Si no, obtenemos la URL
 			if (!url) {
 				url = await loadImageUrl(currentImage.id);
-				setUrls(prev => ({ ...prev, [currentImage.id]: url }));
+				setUrls((prev) => ({ ...prev, [currentImage.id]: url }));
 			}
 
 			// Copiamos la URL al portapapeles
@@ -426,7 +436,7 @@ export const FileViewer = memo(function FileViewer({
 			// Si no, obtenemos la URL
 			if (!url) {
 				url = await loadImageUrl(currentImage.id);
-				setUrls(prev => ({ ...prev, [currentImage.id]: url }));
+				setUrls((prev) => ({ ...prev, [currentImage.id]: url }));
 			}
 
 			// Creamos un enlace para la descarga
@@ -473,7 +483,7 @@ export const FileViewer = memo(function FileViewer({
 			if (e.key === 'Escape') {
 				onClose();
 			} else if (e.key === 'ArrowLeft') {
-				setCurrentIndex(prev => {
+				setCurrentIndex((prev) => {
 					const newIndex = prev > 0 ? prev - 1 : images.length - 1;
 					// Anunciar para lectores de pantalla
 					if (images[newIndex]) {
@@ -482,7 +492,7 @@ export const FileViewer = memo(function FileViewer({
 					return newIndex;
 				});
 			} else if (e.key === 'ArrowRight') {
-				setCurrentIndex(prev => {
+				setCurrentIndex((prev) => {
 					const newIndex = prev < images.length - 1 ? prev + 1 : 0;
 					// Anunciar para lectores de pantalla
 					if (images[newIndex]) {
@@ -512,12 +522,14 @@ export const FileViewer = memo(function FileViewer({
 	}, [resetView]);
 
 	// Memoizar la clase del dialog
-	const dialogClassName = useMemo(() =>
-		cn(
-			'fixed inset-0 z-[9999] flex flex-col items-center justify-center w-full h-full bg-black/90 backdrop-blur-sm p-0 m-0',
-			isOpen ? 'flex' : 'hidden'
-		),
-		[isOpen]);
+	const dialogClassName = useMemo(
+		() =>
+			cn(
+				'fixed inset-0 z-[9999] flex flex-col items-center justify-center w-full h-full bg-black/90 backdrop-blur-sm p-0 m-0',
+				isOpen ? 'flex' : 'hidden'
+			),
+		[isOpen]
+	);
 
 	// No renderizar nada si no hay imágenes o el visor está cerrado
 	if (!isOpen || !images?.length || !currentImage) {
@@ -548,7 +560,7 @@ export const FileViewer = memo(function FileViewer({
 					if (e.key === 'Escape') {
 						onClose();
 					} else if (e.key === 'ArrowLeft') {
-						setCurrentIndex(prev => {
+						setCurrentIndex((prev) => {
 							const newIndex = prev > 0 ? prev - 1 : images.length - 1;
 							// Announce for screen readers
 							if (images[newIndex]) {
@@ -557,7 +569,7 @@ export const FileViewer = memo(function FileViewer({
 							return newIndex;
 						});
 					} else if (e.key === 'ArrowRight') {
-						setCurrentIndex(prev => {
+						setCurrentIndex((prev) => {
 							const newIndex = prev < images.length - 1 ? prev + 1 : 0;
 							// Announce for screen readers
 							if (images[newIndex]) {
@@ -660,11 +672,7 @@ export const FileViewer = memo(function FileViewer({
 				</motion.div>
 
 				{/* Thumbnails */}
-				<ThumbnailNavigation
-					images={images}
-					currentIndex={currentIndex}
-					onSelectImage={handleSelectImage}
-				/>
+				<ThumbnailNavigation images={images} currentIndex={currentIndex} onSelectImage={handleSelectImage} />
 
 				{/* Navigation hints */}
 				<div className="fixed bottom-4 left-4 text-xs text-muted-foreground/50 pointer-events-none select-none max-w-[300px]">

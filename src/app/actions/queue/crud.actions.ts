@@ -8,18 +8,18 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import * as QueueJobService from '@/services/queue-job.service';
 import {
-    type CreateQueueJobInput,
-    type PaginatedQueueJobs,
-    type QueueJobExtended,
-    type QueueJobFilters,
-    type QueueJobPaginationOptions,
-    type UpdateQueueJobInput
+	type CreateQueueJobInput,
+	type PaginatedQueueJobs,
+	type QueueJobExtended,
+	type QueueJobFilters,
+	type QueueJobPaginationOptions,
+	type UpdateQueueJobInput,
 } from '@/types/entities/queue-job';
 import {
-    createQueueJobSchema,
-    queueJobFiltersSchema,
-    queueJobPaginationSchema,
-    updateQueueJobSchema
+	createQueueJobSchema,
+	queueJobFiltersSchema,
+	queueJobPaginationSchema,
+	updateQueueJobSchema,
 } from '@/types/entities/queue-job/schema';
 import { revalidatePath } from 'next/cache';
 
@@ -32,28 +32,28 @@ const logger = serverLogger.withContext('QueueActions:crud');
  * @returns Lista paginada de trabajos
  */
 export async function getQueueJobs(
-  filters: QueueJobFilters = {},
-  pagination: QueueJobPaginationOptions = {}
+	filters: QueueJobFilters = {},
+	pagination: QueueJobPaginationOptions = {}
 ): Promise<PaginatedQueueJobs> {
-  try {
-    logger.debug('🔍 Obteniendo trabajos en cola', { filters, pagination });
+	try {
+		logger.debug('🔍 Obteniendo trabajos en cola', { filters, pagination });
 
-    // Validar parámetros
-    const validatedFilters = queueJobFiltersSchema.parse(filters);
-    const validatedPagination = queueJobPaginationSchema.parse(pagination);
+		// Validar parámetros
+		const validatedFilters = queueJobFiltersSchema.parse(filters);
+		const validatedPagination = queueJobPaginationSchema.parse(pagination);
 
-    // Obtener trabajos
-    const result = await QueueJobService.findQueueJobs(validatedFilters, validatedPagination);
+		// Obtener trabajos
+		const result = await QueueJobService.findQueueJobs(validatedFilters, validatedPagination);
 
-    // Revalidar rutas
-    revalidatePath('/queue');
-    revalidatePath('/dashboard');
+		// Revalidar rutas
+		revalidatePath('/queue');
+		revalidatePath('/dashboard');
 
-    return result;
-  } catch (error) {
-    logger.error('❌ Error obteniendo trabajos en cola:', error);
-    throw error;
-  }
+		return result;
+	} catch (error) {
+		logger.error('❌ Error obteniendo trabajos en cola:', error);
+		throw error;
+	}
 }
 
 /**
@@ -62,24 +62,24 @@ export async function getQueueJobs(
  * @returns Trabajo creado
  */
 export async function createQueueJob(input: CreateQueueJobInput): Promise<QueueJobExtended> {
-  try {
-    logger.debug('➕ Creando trabajo en cola', input);
+	try {
+		logger.debug('➕ Creando trabajo en cola', input);
 
-    // Validar input
-    const validatedInput = createQueueJobSchema.parse(input);
+		// Validar input
+		const validatedInput = createQueueJobSchema.parse(input);
 
-    // Crear trabajo
-    const job = await QueueJobService.createQueueJob(validatedInput);
+		// Crear trabajo
+		const job = await QueueJobService.createQueueJob(validatedInput);
 
-    // Revalidar rutas
-    revalidatePath('/queue');
-    revalidatePath('/dashboard');
+		// Revalidar rutas
+		revalidatePath('/queue');
+		revalidatePath('/dashboard');
 
-    return job;
-  } catch (error) {
-    logger.error('❌ Error creando trabajo en cola:', error);
-    throw error;
-  }
+		return job;
+	} catch (error) {
+		logger.error('❌ Error creando trabajo en cola:', error);
+		throw error;
+	}
 }
 
 /**
@@ -88,29 +88,26 @@ export async function createQueueJob(input: CreateQueueJobInput): Promise<QueueJ
  * @param input - Datos a actualizar
  * @returns Trabajo actualizado
  */
-export async function updateQueueJob(
-  id: string,
-  input: UpdateQueueJobInput
-): Promise<QueueJobExtended> {
-  try {
-    logger.debug('✏️ Actualizando trabajo en cola', { id, input });
+export async function updateQueueJob(id: string, input: UpdateQueueJobInput): Promise<QueueJobExtended> {
+	try {
+		logger.debug('✏️ Actualizando trabajo en cola', { id, input });
 
-    // Validar input
-    const validatedInput = updateQueueJobSchema.parse(input);
+		// Validar input
+		const validatedInput = updateQueueJobSchema.parse(input);
 
-    // Actualizar trabajo
-    const job = await QueueJobService.updateQueueJob(id, validatedInput);
+		// Actualizar trabajo
+		const job = await QueueJobService.updateQueueJob(id, validatedInput);
 
-    // Revalidar rutas
-    revalidatePath('/queue');
-    revalidatePath('/dashboard');
-    revalidatePath(`/queue/${id}`);
+		// Revalidar rutas
+		revalidatePath('/queue');
+		revalidatePath('/dashboard');
+		revalidatePath(`/queue/${id}`);
 
-    return job;
-  } catch (error) {
-    logger.error('❌ Error actualizando trabajo en cola:', error);
-    throw error;
-  }
+		return job;
+	} catch (error) {
+		logger.error('❌ Error actualizando trabajo en cola:', error);
+		throw error;
+	}
 }
 
 /**
@@ -118,17 +115,17 @@ export async function updateQueueJob(
  * @param id - ID del trabajo
  */
 export async function deleteQueueJob(id: string): Promise<void> {
-  try {
-    logger.debug('🗑️ Eliminando trabajo en cola', { id });
+	try {
+		logger.debug('🗑️ Eliminando trabajo en cola', { id });
 
-    // Eliminar trabajo
-    await QueueJobService.deleteQueueJob(id);
+		// Eliminar trabajo
+		await QueueJobService.deleteQueueJob(id);
 
-    // Revalidar rutas
-    revalidatePath('/queue');
-    revalidatePath('/dashboard');
-  } catch (error) {
-    logger.error('❌ Error eliminando trabajo en cola:', error);
-    throw error;
-  }
+		// Revalidar rutas
+		revalidatePath('/queue');
+		revalidatePath('/dashboard');
+	} catch (error) {
+		logger.error('❌ Error eliminando trabajo en cola:', error);
+		throw error;
+	}
 }

@@ -4,12 +4,12 @@
  */
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { type CollectionCoreSlice, createCollectionCoreSlice } from './slices/core';
+import { type CollectionFiltersSlice, createCollectionFiltersSlice } from './slices/filters';
+import { type CollectionUISlice, createCollectionUISlice } from './slices/ui';
 import type { CollectionState } from './types';
-import { createCollectionCoreSlice, type CollectionCoreSlice } from './slices/core';
-import { createCollectionUISlice, type CollectionUISlice } from './slices/ui';
-import { createCollectionFiltersSlice, type CollectionFiltersSlice } from './slices/filters';
 
 /**
  * Tipo completo del store combinado

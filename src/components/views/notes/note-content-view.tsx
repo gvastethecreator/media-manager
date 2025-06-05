@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 const viewLogger = clientLogger.withContext('NoteContentView');
 
 export function NoteContentView() {
-	const selectedNote = useNoteStore(state => state.selectedNote);
+	const selectedNote = useNoteStore((state) => state.selectedNote);
 	const [items, setItems] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState(null);
@@ -55,12 +55,13 @@ export function NoteContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedNote?.id ?? null,
 		containerName: selectedNote?.title ?? selectedNote?.name ?? null,
-		setCurrentContainer: () => { }, // No es necesario en el nuevo enfoque
+		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: ScrollText,
 			title: 'Nota vacía',
-			description: `No se encontraron imágenes en ${selectedNote?.title ?? selectedNote?.name ?? 'esta nota'
-				}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${
+				selectedNote?.title ?? selectedNote?.name ?? 'esta nota'
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadNoteImages,
 	};

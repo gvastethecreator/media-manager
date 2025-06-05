@@ -124,11 +124,7 @@ export function PlacesView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<MemoizedPlaceCard
-								place={place}
-								onClick={() => handlePlaceClick(place)}
-								className="h-full"
-							/>
+							<MemoizedPlaceCard place={place} onClick={() => handlePlaceClick(place)} className="h-full" />
 						</motion.div>
 					))}
 				</div>

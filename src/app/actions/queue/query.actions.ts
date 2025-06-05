@@ -8,10 +8,10 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import * as QueueJobService from '@/services/queue-job.service';
 import {
-    type PaginatedQueueJobs,
-    type QueueJobExtended,
-    type QueueJobFilters,
-    type QueueJobPaginationOptions
+	type PaginatedQueueJobs,
+	type QueueJobExtended,
+	type QueueJobFilters,
+	type QueueJobPaginationOptions,
 } from '@/types/entities/queue-job';
 import { unstable_cache } from 'next/cache';
 
@@ -25,26 +25,22 @@ const CACHE_REVALIDATE_SECONDS = 30;
  * Interfaz para errores de consulta de cola
  */
 export interface QueueQueryErrorData {
-  name: string;
-  message: string;
-  code?: string;
-  cause?: unknown;
+	name: string;
+	message: string;
+	code?: string;
+	cause?: unknown;
 }
 
 /**
  * Función para crear errores de consulta de cola (enfoque funcional)
  */
-function createQueueQueryError(
-  message: string,
-  code?: string,
-  cause?: unknown
-): QueueQueryErrorData {
-  return {
-    name: 'QueueQueryError',
-    message,
-    code,
-    cause
-  };
+function createQueueQueryError(message: string, code?: string, cause?: unknown): QueueQueryErrorData {
+	return {
+		name: 'QueueQueryError',
+		message,
+		code,
+		cause,
+	};
 }
 
 /**
@@ -53,24 +49,24 @@ function createQueueQueryError(
  * @returns Trabajo o null si no existe
  */
 export async function getQueueJob(id: string): Promise<QueueJobExtended | null> {
-  const getCachedJob = unstable_cache(
-    async () => {
-      try {
-        logger.debug('🔍 Buscando trabajo en cola por ID', { id });
-        return await QueueJobService.getQueueJobById(id);
-      } catch (error) {
-        logger.error('❌ Error al buscar trabajo en cola:', error);
-        throw error;
-      }
-    },
-    ['queue-job', id],
-    {
-      revalidate: CACHE_REVALIDATE_SECONDS,
-      tags: ['queue-jobs'],
-    }
-  );
+	const getCachedJob = unstable_cache(
+		async () => {
+			try {
+				logger.debug('🔍 Buscando trabajo en cola por ID', { id });
+				return await QueueJobService.getQueueJobById(id);
+			} catch (error) {
+				logger.error('❌ Error al buscar trabajo en cola:', error);
+				throw error;
+			}
+		},
+		['queue-job', id],
+		{
+			revalidate: CACHE_REVALIDATE_SECONDS,
+			tags: ['queue-jobs'],
+		}
+	);
 
-  return getCachedJob();
+	return getCachedJob();
 }
 
 /**
@@ -80,83 +76,83 @@ export async function getQueueJob(id: string): Promise<QueueJobExtended | null> 
  * @returns Lista paginada de trabajos
  */
 export async function getQueueJobs(
-  filters: QueueJobFilters = {},
-  pagination: QueueJobPaginationOptions = { page: 1, limit: 20 }
+	filters: QueueJobFilters = {},
+	pagination: QueueJobPaginationOptions = { page: 1, limit: 20 }
 ): Promise<PaginatedQueueJobs> {
-  const getCachedJobs = unstable_cache(
-    async () => {
-      try {
-        logger.debug('📋 Obteniendo lista de trabajos en cola', { filters, pagination });
-        return await QueueJobService.findQueueJobs(filters, pagination);
-      } catch (error) {
-        logger.error('❌ Error al obtener lista de trabajos en cola:', error);
-        throw error;
-      }
-    },
-    ['queue-jobs-list', JSON.stringify(filters), JSON.stringify(pagination)],
-    {
-      revalidate: CACHE_REVALIDATE_SECONDS,
-      tags: ['queue-jobs'],
-    }
-  );
+	const getCachedJobs = unstable_cache(
+		async () => {
+			try {
+				logger.debug('📋 Obteniendo lista de trabajos en cola', { filters, pagination });
+				return await QueueJobService.findQueueJobs(filters, pagination);
+			} catch (error) {
+				logger.error('❌ Error al obtener lista de trabajos en cola:', error);
+				throw error;
+			}
+		},
+		['queue-jobs-list', JSON.stringify(filters), JSON.stringify(pagination)],
+		{
+			revalidate: CACHE_REVALIDATE_SECONDS,
+			tags: ['queue-jobs'],
+		}
+	);
 
-  return getCachedJobs();
+	return getCachedJobs();
 }
 
 /**
  * Obtiene trabajos recientes
  */
 export async function getRecentQueueJobs(limit = 10): Promise<QueueJobExtended[]> {
-  const getCachedRecentJobs = unstable_cache(
-    async () => {
-      try {
-        logger.info('📥 Obteniendo trabajos recientes');
+	const getCachedRecentJobs = unstable_cache(
+		async () => {
+			try {
+				logger.info('📥 Obteniendo trabajos recientes');
 
-        const jobs = await QueueJobService.findRecentQueueJobs(limit);
+				const jobs = await QueueJobService.findRecentQueueJobs(limit);
 
-        logger.info('✅ Trabajos recientes obtenidos:', { count: jobs.length });
-        return jobs;
-      } catch (error) {
-        logger.error('❌ Error al obtener trabajos recientes:', error);
-        throw createQueueQueryError('No se pudieron obtener los trabajos recientes', 'RECENT_FAILED', error);
-      }
-    },
-    ['queue-jobs-recent', limit.toString()],
-    {
-      revalidate: CACHE_REVALIDATE_SECONDS,
-      tags: ['queue-jobs'],
-    }
-  );
+				logger.info('✅ Trabajos recientes obtenidos:', { count: jobs.length });
+				return jobs;
+			} catch (error) {
+				logger.error('❌ Error al obtener trabajos recientes:', error);
+				throw createQueueQueryError('No se pudieron obtener los trabajos recientes', 'RECENT_FAILED', error);
+			}
+		},
+		['queue-jobs-recent', limit.toString()],
+		{
+			revalidate: CACHE_REVALIDATE_SECONDS,
+			tags: ['queue-jobs'],
+		}
+	);
 
-  return getCachedRecentJobs();
+	return getCachedRecentJobs();
 }
 
 /**
  * Obtiene trabajos por estado
  */
 export async function getQueueJobsByStatus(status: string, limit = 10): Promise<QueueJobExtended[]> {
-  const getCachedJobsByStatus = unstable_cache(
-    async () => {
-      try {
-        logger.info('📥 Obteniendo trabajos por estado:', status);
+	const getCachedJobsByStatus = unstable_cache(
+		async () => {
+			try {
+				logger.info('📥 Obteniendo trabajos por estado:', status);
 
-        const jobs = await QueueJobService.findQueueJobsByStatus(status, limit);
+				const jobs = await QueueJobService.findQueueJobsByStatus(status, limit);
 
-        logger.info('✅ Trabajos por estado obtenidos:', { status, count: jobs.length });
-        return jobs;
-      } catch (error) {
-        logger.error('❌ Error al obtener trabajos por estado:', error);
-        throw createQueueQueryError('No se pudieron obtener los trabajos por estado', 'STATUS_FAILED', error);
-      }
-    },
-    ['queue-jobs-status', status, limit.toString()],
-    {
-      revalidate: CACHE_REVALIDATE_SECONDS,
-      tags: ['queue-jobs'],
-    }
-  );
+				logger.info('✅ Trabajos por estado obtenidos:', { status, count: jobs.length });
+				return jobs;
+			} catch (error) {
+				logger.error('❌ Error al obtener trabajos por estado:', error);
+				throw createQueueQueryError('No se pudieron obtener los trabajos por estado', 'STATUS_FAILED', error);
+			}
+		},
+		['queue-jobs-status', status, limit.toString()],
+		{
+			revalidate: CACHE_REVALIDATE_SECONDS,
+			tags: ['queue-jobs'],
+		}
+	);
 
-  return getCachedJobsByStatus();
+	return getCachedJobsByStatus();
 }
 
 /**

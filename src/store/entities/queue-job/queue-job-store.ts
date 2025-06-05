@@ -26,42 +26,42 @@ const logger = clientLogger.withContext('QueueJobStore');
  * - filters: filtros, ordenamiento y paginación
  */
 export const useQueueJobStore = create<QueueJobState>()(
-  devtools(
-    persist(
-      immer((...a) => ({
-        // Estado inicial
-        ...initialQueueJobState,
+	devtools(
+		persist(
+			immer((...a) => ({
+				// Estado inicial
+				...initialQueueJobState,
 
-        // Slices
-        ...createQueueJobCoreSlice(...a),
-        ...createQueueJobUISlice(...a),
-        ...createQueueJobFiltersSlice(...a),
-      })),
-      {
-        name: 'queue-job-store',
-        // Solo persistir las preferencias de UI y filtros
-        partialize: (state) => ({
-          ui: {
-            viewMode: state.ui.viewMode
-          },
-          filters: {
-            pageSize: state.filters.pageSize,
-            sortField: state.filters.sortField,
-            sortOrder: state.filters.sortOrder
-          }
-        }),
-        onRehydrateStorage: () => {
-          logger.info('🔄 Store de QueueJob hidratado desde localStorage');
-          return (state) => {
-            if (state) {
-              logger.debug('🧮 Estado de QueueJob restaurado', { state });
-            }
-          };
-        }
-      }
-    ),
-    { name: 'QueueJobStore' }
-  )
+				// Slices
+				...createQueueJobCoreSlice(...a),
+				...createQueueJobUISlice(...a),
+				...createQueueJobFiltersSlice(...a),
+			})),
+			{
+				name: 'queue-job-store',
+				// Solo persistir las preferencias de UI y filtros
+				partialize: (state) => ({
+					ui: {
+						viewMode: state.ui.viewMode,
+					},
+					filters: {
+						pageSize: state.filters.pageSize,
+						sortField: state.filters.sortField,
+						sortOrder: state.filters.sortOrder,
+					},
+				}),
+				onRehydrateStorage: () => {
+					logger.info('🔄 Store de QueueJob hidratado desde localStorage');
+					return (state) => {
+						if (state) {
+							logger.debug('🧮 Estado de QueueJob restaurado', { state });
+						}
+					};
+				},
+			}
+		),
+		{ name: 'QueueJobStore' }
+	)
 );
 
 /**
@@ -73,7 +73,7 @@ logger.info('🚀 Store de QueueJob inicializado');
  * Exportación de selectores
  */
 export const queueJobStore = {
-  use: useQueueJobStore,
-  get: useQueueJobStore.getState,
-  selectors: queueJobSelectors
+	use: useQueueJobStore,
+	get: useQueueJobStore.getState,
+	selectors: queueJobSelectors,
 };

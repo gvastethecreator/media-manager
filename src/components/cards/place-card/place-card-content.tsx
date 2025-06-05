@@ -35,12 +35,11 @@ export function PlaceCardContent({
 	parsedStats = {},
 	primaryColor = '#10b981',
 	tcgMode = true,
-	compact = false
+	compact = false,
 }: PlaceCardContentProps) {
 	// Descripción corta para mostrar
-	const shortDescription = description && description.length > 120
-		? `${description.substring(0, 120)}...`
-		: description;
+	const shortDescription =
+		description && description.length > 120 ? `${description.substring(0, 120)}...` : description;
 
 	// Calcular la longitud de elementos a mostrar basada en el modo compacto
 	const maxTags = compact ? 2 : 4;
@@ -53,10 +52,14 @@ export function PlaceCardContent({
 	// Función para obtener ícono según tipo de estadística
 	const getStatIcon = (statName: string) => {
 		switch (statName.toLowerCase()) {
-			case 'defense': return <ShieldIcon className="w-3 h-3 mr-1" />;
-			case 'wealth': return <CircleDollarSignIcon className="w-3 h-3 mr-1" />;
-			case 'danger': return <AlertTriangleIcon className="w-3 h-3 mr-1" />;
-			default: return null;
+			case 'defense':
+				return <ShieldIcon className="w-3 h-3 mr-1" />;
+			case 'wealth':
+				return <CircleDollarSignIcon className="w-3 h-3 mr-1" />;
+			case 'danger':
+				return <AlertTriangleIcon className="w-3 h-3 mr-1" />;
+			default:
+				return null;
 		}
 	};
 
@@ -66,25 +69,15 @@ export function PlaceCardContent({
 
 	return (
 		<div
-			className={cn(
-				"flex flex-col px-3 py-2",
-				compact ? "space-y-1" : "space-y-2"
-			)}
+			className={cn('flex flex-col px-3 py-2', compact ? 'space-y-1' : 'space-y-2')}
 			style={{
-				background: tcgMode
-					? `linear-gradient(to bottom, transparent, ${primaryColor}10)`
-					: undefined,
-				borderBottom: tcgMode ? `1px solid ${borderColor}` : undefined
+				background: tcgMode ? `linear-gradient(to bottom, transparent, ${primaryColor}10)` : undefined,
+				borderBottom: tcgMode ? `1px solid ${borderColor}` : undefined,
 			}}
 		>
 			{/* Descripción del lugar */}
 			{shortDescription && (
-				<div className={cn(
-					"text-xs leading-tight",
-					compact ? "line-clamp-2" : "line-clamp-3"
-				)}>
-					{shortDescription}
-				</div>
+				<div className={cn('text-xs leading-tight', compact ? 'line-clamp-2' : 'line-clamp-3')}>{shortDescription}</div>
 			)}
 
 			{/* Información básica del lugar si no está en modo TCG */}
@@ -114,22 +107,23 @@ export function PlaceCardContent({
 					{/* Columna de recursos */}
 					{parsedResources && parsedResources.length > 0 && (
 						<div className="space-y-1">
-							<div className="font-semibold text-xs flex items-center"
-								style={{ color: primaryColor }}>
+							<div className="font-semibold text-xs flex items-center" style={{ color: primaryColor }}>
 								<CircleDollarSignIcon className="w-3 h-3 mr-1" />
 								Recursos
 							</div>
 							<div className="flex flex-wrap gap-1">
 								{parsedResources.slice(0, maxTags).map((resource) => (
-									<Badge key={`resource-${resource.name}`} variant="outline"
+									<Badge
+										key={`resource-${resource.name}`}
+										variant="outline"
 										className="px-1 h-5 bg-black/10 text-xs"
-										style={{ borderColor: tagColor }}>
+										style={{ borderColor: tagColor }}
+									>
 										{resource.name}
 									</Badge>
 								))}
 								{parsedResources.length > maxTags && (
-									<Badge variant="outline" className="px-1 h-5 bg-black/10 text-xs"
-										style={{ borderColor: tagColor }}>
+									<Badge variant="outline" className="px-1 h-5 bg-black/10 text-xs" style={{ borderColor: tagColor }}>
 										+{parsedResources.length - maxTags}
 									</Badge>
 								)}
@@ -140,22 +134,23 @@ export function PlaceCardContent({
 					{/* Columna de peligros */}
 					{parsedDangers && parsedDangers.length > 0 && (
 						<div className="space-y-1">
-							<div className="font-semibold text-xs flex items-center"
-								style={{ color: primaryColor }}>
+							<div className="font-semibold text-xs flex items-center" style={{ color: primaryColor }}>
 								<AlertTriangleIcon className="w-3 h-3 mr-1" />
 								Peligros
 							</div>
 							<div className="flex flex-wrap gap-1">
 								{parsedDangers.slice(0, maxTags).map((danger) => (
-									<Badge key={`danger-${danger.type}`} variant="outline"
+									<Badge
+										key={`danger-${danger.type}`}
+										variant="outline"
 										className="px-1 h-5 bg-black/10 text-xs"
-										style={{ borderColor: tagColor }}>
+										style={{ borderColor: tagColor }}
+									>
 										{danger.type}
 									</Badge>
 								))}
 								{parsedDangers.length > maxTags && (
-									<Badge variant="outline" className="px-1 h-5 bg-black/10 text-xs"
-										style={{ borderColor: tagColor }}>
+									<Badge variant="outline" className="px-1 h-5 bg-black/10 text-xs" style={{ borderColor: tagColor }}>
 										+{parsedDangers.length - maxTags}
 									</Badge>
 								)}
@@ -167,14 +162,13 @@ export function PlaceCardContent({
 
 			{/* Estadísticas del lugar en modo TCG */}
 			{tcgMode && displayStats.length > 0 && (
-				<div className={cn(
-					"grid gap-1",
-					compact ? "grid-cols-2" : "grid-cols-4"
-				)}>
+				<div className={cn('grid gap-1', compact ? 'grid-cols-2' : 'grid-cols-4')}>
 					{displayStats.map(([stat, value]) => (
-						<div key={`stat-${stat}`}
+						<div
+							key={`stat-${stat}`}
 							className="flex items-center text-xs bg-black/5 rounded px-1 py-0.5"
-							style={{ borderLeft: `2px solid ${primaryColor}` }}>
+							style={{ borderLeft: `2px solid ${primaryColor}` }}
+						>
 							{getStatIcon(stat)}
 							<span className="capitalize">{stat}</span>
 							<span className="ml-auto font-medium">{value}</span>

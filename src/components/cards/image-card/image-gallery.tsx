@@ -5,7 +5,7 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuTrigger
+	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -91,9 +91,10 @@ export function ImageGallery({
 
 		// Si tenemos objetos completos, filtrar por título y etiquetas
 		if (typeof images[0] !== 'string') {
-			return (images as ImageCardData[]).filter(image =>
-				image.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-				image.tags?.some(tag => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
+			return (images as ImageCardData[]).filter(
+				(image) =>
+					image.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+					image.tags?.some((tag) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
 			);
 		}
 
@@ -118,7 +119,7 @@ export function ImageGallery({
 					comparison = (a.title || '').localeCompare(b.title || '');
 					break;
 				case 'date':
-					comparison = (new Date(a.createdAt || 0)).getTime() - (new Date(b.createdAt || 0)).getTime();
+					comparison = new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
 					break;
 				case 'size':
 					comparison = (a.fileSize || 0) - (b.fileSize || 0);
@@ -136,36 +137,40 @@ export function ImageGallery({
 	}, [filteredImages, sortBy, sortDirection]);
 
 	// Manejar selección de imagen
-	const handleImageSelect = useCallback((image: ImageCardData) => {
-		if (!selectable) return;
+	const handleImageSelect = useCallback(
+		(image: ImageCardData) => {
+			if (!selectable) return;
 
-		setSelectedImages(prev => {
-			const imageId = image.id;
-			const newSelection = prev.includes(imageId)
-				? prev.filter(id => id !== imageId)
-				: [...prev, imageId];
+			setSelectedImages((prev) => {
+				const imageId = image.id;
+				const newSelection = prev.includes(imageId) ? prev.filter((id) => id !== imageId) : [...prev, imageId];
 
-			// Notificar cambio en selección
-			if (onSelectionChange) {
-				onSelectionChange(newSelection);
-			}
+				// Notificar cambio en selección
+				if (onSelectionChange) {
+					onSelectionChange(newSelection);
+				}
 
-			return newSelection;
-		});
-	}, [selectable, onSelectionChange]);
+				return newSelection;
+			});
+		},
+		[selectable, onSelectionChange]
+	);
 
 	// Manejar clic en imagen
-	const handleImageClick = useCallback((image: ImageCardData) => {
-		if (selectable) {
-			handleImageSelect(image);
-		} else if (onImageClick) {
-			onImageClick(image);
-		}
-	}, [selectable, handleImageSelect, onImageClick]);
+	const handleImageClick = useCallback(
+		(image: ImageCardData) => {
+			if (selectable) {
+				handleImageSelect(image);
+			} else if (onImageClick) {
+				onImageClick(image);
+			}
+		},
+		[selectable, handleImageSelect, onImageClick]
+	);
 
 	// Cambiar dirección de ordenamiento
 	const toggleSortDirection = useCallback(() => {
-		setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+		setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
 	}, []);
 
 	// Cargar más imágenes
@@ -202,11 +207,9 @@ export function ImageGallery({
 	// Renderizar contenido vacío
 	if (!loading && sortedImages.length === 0) {
 		return (
-			<div className={cn("flex flex-col items-center justify-center py-12 px-4", className)}>
+			<div className={cn('flex flex-col items-center justify-center py-12 px-4', className)}>
 				<div className="text-center">
-					<h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">
-						{emptyMessage}
-					</h3>
+					<h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">{emptyMessage}</h3>
 					<p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
 						No se encontraron imágenes que coincidan con los criterios actuales.
 					</p>
@@ -216,13 +219,11 @@ export function ImageGallery({
 	}
 
 	return (
-		<div className={cn("space-y-4", className)}>
+		<div className={cn('space-y-4', className)}>
 			{/* Cabecera con título y controles */}
 			{(title || showControls) && (
 				<div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-					{title && (
-						<h2 className="text-2xl font-bold dark:text-white">{title}</h2>
-					)}
+					{title && <h2 className="text-2xl font-bold dark:text-white">{title}</h2>}
 
 					{showControls && (
 						<div className="flex flex-wrap gap-2 items-center">
@@ -240,27 +241,17 @@ export function ImageGallery({
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button variant="outline" size="sm" className="h-9">
-										<SortAsc className={cn("h-4 w-4 mr-2", sortDirection === 'desc' && "hidden")} />
-										<SortDesc className={cn("h-4 w-4 mr-2", sortDirection === 'asc' && "hidden")} />
+										<SortAsc className={cn('h-4 w-4 mr-2', sortDirection === 'desc' && 'hidden')} />
+										<SortDesc className={cn('h-4 w-4 mr-2', sortDirection === 'asc' && 'hidden')} />
 										<span>Ordenar</span>
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
-									<DropdownMenuItem onClick={() => setSortBy('title')}>
-										Por título
-									</DropdownMenuItem>
-									<DropdownMenuItem onClick={() => setSortBy('date')}>
-										Por fecha
-									</DropdownMenuItem>
-									<DropdownMenuItem onClick={() => setSortBy('size')}>
-										Por tamaño
-									</DropdownMenuItem>
-									<DropdownMenuItem onClick={() => setSortBy('width')}>
-										Por ancho
-									</DropdownMenuItem>
-									<DropdownMenuItem onClick={() => setSortBy('height')}>
-										Por alto
-									</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setSortBy('title')}>Por título</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setSortBy('date')}>Por fecha</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setSortBy('size')}>Por tamaño</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setSortBy('width')}>Por ancho</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setSortBy('height')}>Por alto</DropdownMenuItem>
 									<DropdownMenuItem onClick={toggleSortDirection}>
 										{sortDirection === 'asc' ? 'Ascendente' : 'Descendente'}
 									</DropdownMenuItem>
@@ -272,10 +263,7 @@ export function ImageGallery({
 								<Button
 									variant="ghost"
 									size="sm"
-									className={cn(
-										"h-9 px-2 rounded-none rounded-l-md",
-										layout === 'grid' && "bg-primary/10"
-									)}
+									className={cn('h-9 px-2 rounded-none rounded-l-md', layout === 'grid' && 'bg-primary/10')}
 									onClick={() => setLayout('grid')}
 								>
 									<Grid3X3Icon className="h-4 w-4" />
@@ -284,8 +272,8 @@ export function ImageGallery({
 									variant="ghost"
 									size="sm"
 									className={cn(
-										"h-9 px-2 rounded-none border-l border-r border-input",
-										layout === 'grid-dense' && "bg-primary/10"
+										'h-9 px-2 rounded-none border-l border-r border-input',
+										layout === 'grid-dense' && 'bg-primary/10'
 									)}
 									onClick={() => setLayout('grid-dense')}
 								>
@@ -294,10 +282,7 @@ export function ImageGallery({
 								<Button
 									variant="ghost"
 									size="sm"
-									className={cn(
-										"h-9 px-2 rounded-none rounded-r-md",
-										layout === 'list' && "bg-primary/10"
-									)}
+									className={cn('h-9 px-2 rounded-none rounded-r-md', layout === 'list' && 'bg-primary/10')}
 									onClick={() => setLayout('list')}
 								>
 									<ListIcon className="h-4 w-4" />
@@ -335,7 +320,7 @@ export function ImageGallery({
 							animate={{
 								opacity: 1,
 								y: 0,
-								transition: { delay: index * 0.05, duration: 0.3 }
+								transition: { delay: index * 0.05, duration: 0.3 },
 							}}
 							exit={{ opacity: 0, scale: 0.9 }}
 							className={layout === 'list' ? 'w-full' : undefined}
@@ -371,12 +356,7 @@ export function ImageGallery({
 			{/* Botón "Cargar más" */}
 			{showLoadMore && hasMoreImages && (
 				<div className="mt-8 flex justify-center">
-					<Button
-						variant="outline"
-						onClick={handleLoadMore}
-						disabled={isLoadingMore}
-						className="px-4 py-2"
-					>
+					<Button variant="outline" onClick={handleLoadMore} disabled={isLoadingMore} className="px-4 py-2">
 						{isLoadingMore ? (
 							<>
 								<RefreshCw className="mr-2 h-4 w-4 animate-spin" />

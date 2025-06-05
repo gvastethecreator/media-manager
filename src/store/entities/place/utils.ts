@@ -33,12 +33,12 @@ export const filterPlaces = (places: Place[], filters: PlaceFilters, searchQuery
 			const query = searchQuery.toLowerCase();
 			const matchesSearch =
 				place.name.toLowerCase().includes(query) ||
-				(place.description && place.description.toLowerCase().includes(query)) ||
-				(place.type && place.type.toLowerCase().includes(query)) ||
-				(place.region && place.region.toLowerCase().includes(query)) ||
-				(place.climate && place.climate.toLowerCase().includes(query)) ||
-				(place.government && place.government.toLowerCase().includes(query)) ||
-				(place.category && place.category.toLowerCase().includes(query));
+				(place.description?.toLowerCase().includes(query)) ||
+				(place.type?.toLowerCase().includes(query)) ||
+				(place.region?.toLowerCase().includes(query)) ||
+				(place.climate?.toLowerCase().includes(query)) ||
+				(place.government?.toLowerCase().includes(query)) ||
+				(place.category?.toLowerCase().includes(query));
 
 			if (!matchesSearch) return false;
 		}

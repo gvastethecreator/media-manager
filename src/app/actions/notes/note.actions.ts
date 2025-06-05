@@ -4,18 +4,8 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import {
-    deserializeTags,
-    fromPrismaNote,
-    toCreateNoteData,
-    toUpdateNoteData
-} from '@/transformers/note';
-import type {
-    CreateNoteData,
-    NoteBase,
-    NoteComplete,
-    NoteWithStats
-} from '@/types/entities/note';
+import { deserializeTags, fromPrismaNote, toCreateNoteData, toUpdateNoteData } from '@/transformers/note';
+import type { CreateNoteData, NoteBase, NoteComplete, NoteWithStats } from '@/types/entities/note';
 import type { FileItem } from '@/types/file-item';
 import { createNoteSchema, updateNoteSchema } from '@/utils/note/validators';
 import { revalidatePath } from 'next/cache';
@@ -75,8 +65,8 @@ export async function getNotes(): Promise<NoteWithStats[]> {
 
 		// Procesamos los campos serializados y transformamos con los nuevos transformadores
 		return notes.map((note) => {
-		    // Transformar con el nuevo transformador
-		    const noteComplete = fromPrismaNote(note);
+			// Transformar con el nuevo transformador
+			const noteComplete = fromPrismaNote(note);
 
 			return {
 				...noteComplete,
@@ -152,7 +142,7 @@ export async function createNote(data: CreateNoteData): Promise<NoteComplete> {
 
 		// Crear la nota
 		const note = await prisma.note.create({
-			data: createData
+			data: createData,
 		});
 
 		// Transformar resultado
@@ -284,7 +274,7 @@ export async function getNoteWithProcessedFields(id: string): Promise<NoteBase &
  */
 export async function getNotesWithProcessedFields(): Promise<Array<NoteBase & { parsedTags: string[] }>> {
 	const notes = await getNotes();
-	return notes.map(note => ({
+	return notes.map((note) => ({
 		...note,
 		parsedTags: deserializeTags(note.tags),
 	}));
@@ -295,10 +285,7 @@ export async function getNoteImages(noteId: string): Promise<FileItem[]> {
 
 	if (!noteId || typeof noteId !== 'string' || noteId.trim() === '') {
 		noteLogger.warn('❌ Intento de obtener imágenes con ID de nota inválido:', noteId);
-		throw createNoteError(
-			'ID de nota inválido proporcionado.',
-			NoteErrorCode.VALIDATION_ERROR,
-		);
+		throw createNoteError('ID de nota inválido proporcionado.', NoteErrorCode.VALIDATION_ERROR);
 	}
 
 	try {
@@ -338,11 +325,7 @@ export async function getNoteImages(noteId: string): Promise<FileItem[]> {
 		if (error instanceof Error && error.name === 'NoteError') {
 			throw error;
 		}
-		throw createNoteError(
-			'No se pudieron obtener las imágenes de la nota',
-			NoteErrorCode.OPERATION_FAILED,
-			error,
-		);
+		throw createNoteError('No se pudieron obtener las imágenes de la nota', NoteErrorCode.OPERATION_FAILED, error);
 	}
 }
 

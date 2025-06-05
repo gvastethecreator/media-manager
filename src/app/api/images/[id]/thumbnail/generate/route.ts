@@ -1,6 +1,6 @@
+import { createReadStream, existsSync } from 'fs';
 import { THUMBNAIL_QUALITY_CONFIG, normalizeQuality } from '@/lib/config/thumbnail.config';
 import { prisma } from '@/lib/prisma';
-import { createReadStream, existsSync } from 'fs';
 import { type NextRequest, NextResponse } from 'next/server';
 import sharp from 'sharp';
 import { pipeline } from 'stream/promises';

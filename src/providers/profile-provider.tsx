@@ -19,7 +19,7 @@ const ProfileContext = createContext<ProfileContextType>({
 	isLoading: true,
 	profile: null,
 	error: null,
-	applyTheme: () => { },
+	applyTheme: () => {},
 });
 
 export const useProfile = () => useContext(ProfileContext);

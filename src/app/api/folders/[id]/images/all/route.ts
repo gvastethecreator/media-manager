@@ -1,3 +1,4 @@
+import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
@@ -9,7 +10,6 @@ import type {
 	RelatedWorldItem,
 } from '@/types/file-item';
 import { type NextRequest, NextResponse } from 'next/server';
-import path from 'path';
 
 const imagesLogger = serverLogger.withContext('ImagesAPI');
 

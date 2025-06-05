@@ -8,33 +8,39 @@ import { Language, ThemeMode } from './types';
 
 // Esquema para preferencias de perfil
 export const profilePreferencesSchema = z.object({
-  theme: z.nativeEnum(ThemeMode).default(ThemeMode.SYSTEM),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un valor hexadecimal válido').default('#3b82f6'),
-  emoji: z.string().emoji('Debe ser un emoji válido').default('👤'),
-  language: z.nativeEnum(Language).default(Language.SPANISH),
-  enableAnimations: z.boolean().default(true),
-  enableSounds: z.boolean().default(false),
-  enableHaptics: z.boolean().default(false),
-  enableNotifications: z.boolean().default(true),
-  defaultView: z.enum(['grid', 'list', 'gallery', 'compact']).default('grid'),
-  defaultSort: z.enum(['name', 'date', 'size', 'type']).default('name'),
-  itemsPerPage: z.number().int().min(10).max(100).default(50),
-  showHiddenFiles: z.boolean().default(false),
-  highContrast: z.boolean().default(false),
-  reducedMotion: z.boolean().default(false),
-  fontSize: z.enum(['small', 'medium', 'large']).default('medium'),
-  outlineElements: z.boolean().default(false),
+	theme: z.nativeEnum(ThemeMode).default(ThemeMode.SYSTEM),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un valor hexadecimal válido')
+		.default('#3b82f6'),
+	emoji: z.string().emoji('Debe ser un emoji válido').default('👤'),
+	language: z.nativeEnum(Language).default(Language.SPANISH),
+	enableAnimations: z.boolean().default(true),
+	enableSounds: z.boolean().default(false),
+	enableHaptics: z.boolean().default(false),
+	enableNotifications: z.boolean().default(true),
+	defaultView: z.enum(['grid', 'list', 'gallery', 'compact']).default('grid'),
+	defaultSort: z.enum(['name', 'date', 'size', 'type']).default('name'),
+	itemsPerPage: z.number().int().min(10).max(100).default(50),
+	showHiddenFiles: z.boolean().default(false),
+	highContrast: z.boolean().default(false),
+	reducedMotion: z.boolean().default(false),
+	fontSize: z.enum(['small', 'medium', 'large']).default('medium'),
+	outlineElements: z.boolean().default(false),
 });
 
 // Esquema para crear un perfil
 export const createProfileSchema = z.object({
-  name: z.string().min(2, 'Nombre debe tener al menos 2 caracteres').max(50, 'Nombre no puede exceder 50 caracteres'),
-  emoji: z.string().emoji('Debe ser un emoji válido').optional(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un valor hexadecimal válido').optional(),
-  theme: z.nativeEnum(ThemeMode).optional(),
-  language: z.nativeEnum(Language).optional(),
-  description: z.string().max(500, 'Descripción no puede exceder 500 caracteres').nullable().optional(),
-  isActive: z.boolean().optional(),
+	name: z.string().min(2, 'Nombre debe tener al menos 2 caracteres').max(50, 'Nombre no puede exceder 50 caracteres'),
+	emoji: z.string().emoji('Debe ser un emoji válido').optional(),
+	color: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un valor hexadecimal válido')
+		.optional(),
+	theme: z.nativeEnum(ThemeMode).optional(),
+	language: z.nativeEnum(Language).optional(),
+	description: z.string().max(500, 'Descripción no puede exceder 500 caracteres').nullable().optional(),
+	isActive: z.boolean().optional(),
 });
 
 // Esquema para actualizar un perfil
@@ -45,18 +51,18 @@ export const updateProfilePreferencesSchema = profilePreferencesSchema.partial()
 
 // Esquema para filtros de búsqueda
 export const profileFiltersSchema = z.object({
-  search: z.string().optional(),
-  isActive: z.boolean().optional(),
-  theme: z.nativeEnum(ThemeMode).optional(),
-  language: z.nativeEnum(Language).optional(),
+	search: z.string().optional(),
+	isActive: z.boolean().optional(),
+	theme: z.nativeEnum(ThemeMode).optional(),
+	language: z.nativeEnum(Language).optional(),
 });
 
 // Esquema para opciones de paginación
 export const profilePaginationSchema = z.object({
-  page: z.number().int().min(1).optional(),
-  limit: z.number().int().min(1).max(100).optional(),
-  sortBy: z.enum(['name', 'createdAt', 'updatedAt']).optional(),
-  sortDirection: z.enum(['asc', 'desc']).optional(),
+	page: z.number().int().min(1).optional(),
+	limit: z.number().int().min(1).max(100).optional(),
+	sortBy: z.enum(['name', 'createdAt', 'updatedAt']).optional(),
+	sortDirection: z.enum(['asc', 'desc']).optional(),
 });
 
 // Inferencia de tipos desde los esquemas

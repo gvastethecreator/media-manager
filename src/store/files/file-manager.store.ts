@@ -1427,4 +1427,3 @@ export const useFileManager = create<FileManagerState & FileManagerActions>((set
 
 // Tipos exportados para uso en componentes
 export type { BaseEntity, CollectionEntity, EntityWithEmoji, FileManagerState, TagEntity };
-

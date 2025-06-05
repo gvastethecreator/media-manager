@@ -8,13 +8,13 @@ import { fromDBToBase, toDBRecord, toExtended } from './transformer';
 
 // Exportar transformadores (se puede excluir lo ya importado si se prefiere, pero no es necesario)
 export {
-    fromDBToBase,
-    toDBRecord,
-    toExtended,
-    transformUploadedImage,
-    transformUploadedImages,
-    type UploadedImageDBRecord,
-    type UploadedImageResult
+	fromDBToBase,
+	toDBRecord,
+	toExtended,
+	transformUploadedImage,
+	transformUploadedImages,
+	type UploadedImageDBRecord,
+	type UploadedImageResult,
 } from './transformer';
 
 // Exportar alias para mayor compatibilidad con el código existente

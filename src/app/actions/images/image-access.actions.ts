@@ -2,10 +2,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { imageService } from '@/services/image-service-export';
-import {
-    createEntityNotFoundError,
-    toServiceError,
-} from '@/utils/errors/service-errors';
+import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 
 const SERVER_ACTION_NAME = 'ImageAccess';
 const imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);

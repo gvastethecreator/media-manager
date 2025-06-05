@@ -110,7 +110,8 @@ const CategoryWithChildren = memo(function CategoryWithChildren({
 export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = false, onToggleCollapse }: NavPanelProps) {
 	// Hooks para manejar la lógica del panel
 	const { isCategoryCollapsed, handleCollapseToggle, expandCategory } = useCategoryCollapse();
-	const { currentView, handleCategoryClick, getItemClickHandler, getSelectedChildId, hasCategoryChildSelected } = useCategoryHandlers();
+	const { currentView, handleCategoryClick, getItemClickHandler, getSelectedChildId, hasCategoryChildSelected } =
+		useCategoryHandlers();
 	const { getCategoryItemCount, getImagesForCategory, getCategoryItems, stats } = useCategoryStats(initialData);
 	const { handleOpenSettings, handleOpenDevelopment, handleOpenEntityCards, handleMainNavigate } = useMainNavigation();
 
@@ -125,14 +126,14 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 	useEffect(() => {
 		if (currentView) {
 			// Si la vista actual es una categoría principal, la expandimos directamente
-			const isMainCategory = NAVIGATION_CATEGORIES.some(cat => cat.id === currentView);
+			const isMainCategory = NAVIGATION_CATEGORIES.some((cat) => cat.id === currentView);
 			if (isMainCategory) {
 				expandCategory(currentView);
 				return;
 			}
 
 			// Buscar la categoría padre a la que pertenece la vista actual de contenido
-			const parentCategory = NAVIGATION_CATEGORIES.find(cat => {
+			const parentCategory = NAVIGATION_CATEGORIES.find((cat) => {
 				// Si la vista actual es de contenido (ej: folder-content), buscar la categoría padre (folders)
 				if (currentView.endsWith('-content')) {
 					return hasCategoryChildSelected(cat.id);
@@ -145,7 +146,7 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 				console.log(`[NavPanel Debug] Category: ${cat.id}, Items:`, items);
 
 				// Añadir guarda para asegurarse de que 'items' es un array antes de llamar a .some()
-				return Array.isArray(items) && items.some(item => item.id === currentView);
+				return Array.isArray(items) && items.some((item) => item.id === currentView);
 			});
 
 			if (parentCategory) {

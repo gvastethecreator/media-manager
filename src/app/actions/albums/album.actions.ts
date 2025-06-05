@@ -7,20 +7,10 @@ import { convertServerImageToFileItem } from '@/services/image-converter.service
 // Importaciones actualizadas usando nuevos tipos y transformers
 import type { ServerImage } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import {
-    mapCreateAlbumDataToPrisma,
-    mapUpdateAlbumDataToPrisma
-} from '@/transformers/album/mappers';
-import {
-    fromPrismaAlbum
-} from '@/transformers/album/serializers';
+import { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from '@/transformers/album/mappers';
+import { fromPrismaAlbum } from '@/transformers/album/serializers';
 import { transformAlbumToExtended } from '@/transformers/album/transformer';
-import type {
-    Album,
-    AlbumBase,
-    CreateAlbumData,
-    UpdateAlbumData
-} from '@/types/entities/album';
+import type { Album, AlbumBase, CreateAlbumData, UpdateAlbumData } from '@/types/entities/album';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 
@@ -90,7 +80,7 @@ export async function getAlbums(): Promise<AlbumWithStats[]> {
 						images: true, // Conteo directo es eficiente
 						groups: true,
 						properties: true,
-						wildcards: true
+						wildcards: true,
 					},
 				},
 				// Comentado/Eliminado: Incluir imágenes y calcular stats aquí es costoso
@@ -117,20 +107,20 @@ export async function getAlbums(): Promise<AlbumWithStats[]> {
 
 		// Mapear resultados llamando directamente a los transformadores
 		const albumsWithStats = albums.map((album: any) => {
-		    // Ahora que fromPrismaAlbum es robusto, podemos llamarlo directamente
-		    // transformAlbumToExtended también debería poder manejar el resultado.
-		    const extendedAlbum = transformAlbumToExtended(fromPrismaAlbum(album));
+			// Ahora que fromPrismaAlbum es robusto, podemos llamarlo directamente
+			// transformAlbumToExtended también debería poder manejar el resultado.
+			const extendedAlbum = transformAlbumToExtended(fromPrismaAlbum(album));
 
-		    // Acceso seguro a _count
-		    const count = album._count || { images: 0, groups: 0, properties: 0, wildcards: 0 };
+			// Acceso seguro a _count
+			const count = album._count || { images: 0, groups: 0, properties: 0, wildcards: 0 };
 
-		    return {
-		        ...extendedAlbum,
-		        _count: count,
-		        totalSize: 0,
-		        lastUpdated: album.updatedAt,
-		        distribution: [],
-		    };
+			return {
+				...extendedAlbum,
+				_count: count,
+				totalSize: 0,
+				lastUpdated: album.updatedAt,
+				distribution: [],
+			};
 		});
 
 		// Comentado/Eliminado: Cálculo complejo de estadísticas movido
@@ -159,7 +149,7 @@ export async function getAlbum(id: string): Promise<Album> {
 						images: true,
 						groups: true,
 						properties: true,
-						wildcards: true
+						wildcards: true,
 					},
 				},
 			},

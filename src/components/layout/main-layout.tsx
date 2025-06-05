@@ -64,16 +64,9 @@ const CentralPanel = React.memo(function CentralPanel({
 				{toolbar}
 				<div className="flex-1 relative resize-container">
 					{/* No rendericemos el contenido cuando estamos redimensionando */}
-					{!isResizing && (
-						<div className="absolute inset-0 w-full h-full view-container-transition">
-							{children}
-						</div>
-					)}
+					{!isResizing && <div className="absolute inset-0 w-full h-full view-container-transition">{children}</div>}
 					{isResizing && (
-						<div
-							className="absolute inset-0 w-full h-full bg-background/80"
-							style={RESIZING_OVERLAY_STYLE}
-						/>
+						<div className="absolute inset-0 w-full h-full bg-background/80" style={RESIZING_OVERLAY_STYLE} />
 					)}
 				</div>
 			</div>
@@ -214,27 +207,30 @@ export function MainLayout() {
 	}, []);
 
 	// Manejador para el estado de arrastre con throttling
-	const handleDragging = useCallback((isDragging: boolean) => {
-		const now = Date.now();
+	const handleDragging = useCallback(
+		(isDragging: boolean) => {
+			const now = Date.now();
 
-		// Si es un cambio de estado (inicio/fin) o si ha pasado suficiente tiempo desde el último evento
-		if (isDragging !== isResizing || now - lastResizeTimeRef.current >= resizeThrottleMs) {
-			lastResizeTimeRef.current = now;
+			// Si es un cambio de estado (inicio/fin) o si ha pasado suficiente tiempo desde el último evento
+			if (isDragging !== isResizing || now - lastResizeTimeRef.current >= resizeThrottleMs) {
+				lastResizeTimeRef.current = now;
 
-			// Solo actualizamos el estado si hay un cambio real
-			if (isDragging !== isResizing) {
-				setIsResizing(isDragging);
+				// Solo actualizamos el estado si hay un cambio real
+				if (isDragging !== isResizing) {
+					setIsResizing(isDragging);
+				}
+
+				// Aplicar o quitar clase al body para prevenir selección de texto
+				// Esto no causa rerenderizados
+				if (isDragging) {
+					document.body.classList.add('resize-active');
+				} else {
+					document.body.classList.remove('resize-active');
+				}
 			}
-
-			// Aplicar o quitar clase al body para prevenir selección de texto
-			// Esto no causa rerenderizados
-			if (isDragging) {
-				document.body.classList.add('resize-active');
-			} else {
-				document.body.classList.remove('resize-active');
-			}
-		}
-	}, [isResizing]);
+		},
+		[isResizing]
+	);
 
 	// Manejar colapso y expansión del panel de navegación
 	const handleNavPanelCollapse = useCallback(() => {
@@ -311,9 +307,7 @@ export function MainLayout() {
 	// Optimizar el cálculo de tamaños por defecto
 	const defaultSizes = useMemo<PanelSizes>(() => {
 		const nav = isNavPanelCollapsed ? PANEL_CONFIG.nav.collapsedSize : navPanelSize;
-		const right = isVisible
-			? (isRightPanelCollapsed ? PANEL_CONFIG.right.collapsedSize : rightPanelSize)
-			: 0;
+		const right = isVisible ? (isRightPanelCollapsed ? PANEL_CONFIG.right.collapsedSize : rightPanelSize) : 0;
 		const content = 100 - nav - (isVisible ? right : 0);
 
 		return {
@@ -324,28 +318,28 @@ export function MainLayout() {
 	}, [isNavPanelCollapsed, navPanelSize, isRightPanelCollapsed, rightPanelSize, isVisible]);
 
 	// Crear estilos de los paneles sólo cuando sus dependencias realmente cambien
-	const navPanelStyleDeps = useMemo(
-		() => [isResizing, isNavPanelCollapsed],
-		[isResizing, isNavPanelCollapsed]
-	);
+	const navPanelStyleDeps = useMemo(() => [isResizing, isNavPanelCollapsed], [isResizing, isNavPanelCollapsed]);
 
-	const rightPanelStyleDeps = useMemo(
-		() => [isResizing, isRightPanelCollapsed],
-		[isResizing, isRightPanelCollapsed]
-	);
+	const rightPanelStyleDeps = useMemo(() => [isResizing, isRightPanelCollapsed], [isResizing, isRightPanelCollapsed]);
 
 	// Optimizar los estilos de los paneles
-	const navPanelStyle = useMemo(() => ({
-		transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
-		minWidth: isNavPanelCollapsed ? '35px' : undefined,
-		maxWidth: isNavPanelCollapsed ? '35px' : undefined,
-	}), [isResizing, isNavPanelCollapsed, ...navPanelStyleDeps]);
+	const navPanelStyle = useMemo(
+		() => ({
+			transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
+			minWidth: isNavPanelCollapsed ? '35px' : undefined,
+			maxWidth: isNavPanelCollapsed ? '35px' : undefined,
+		}),
+		[isResizing, isNavPanelCollapsed, ...navPanelStyleDeps]
+	);
 
-	const rightPanelStyle = useMemo(() => ({
-		transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
-		minWidth: isRightPanelCollapsed ? '35px' : undefined,
-		maxWidth: isRightPanelCollapsed ? '35px' : undefined,
-	}), [isResizing, isRightPanelCollapsed, ...rightPanelStyleDeps]);
+	const rightPanelStyle = useMemo(
+		() => ({
+			transition: isResizing ? 'none' : 'all 0.2s ease-in-out',
+			minWidth: isRightPanelCollapsed ? '35px' : undefined,
+			maxWidth: isRightPanelCollapsed ? '35px' : undefined,
+		}),
+		[isResizing, isRightPanelCollapsed, ...rightPanelStyleDeps]
+	);
 
 	// Datos de imagen procesados para evitar procesarlos en cada renderizado
 	const processedImages = useMemo(() => {
@@ -354,65 +348,85 @@ export function MainLayout() {
 			const metadata = img.metadata ? JSON.parse(img.metadata) : {};
 			return {
 				...img,
-				parsedMetadata: metadata
+				parsedMetadata: metadata,
 			};
 		});
 	}, [images]);
 
 	// Props memoizados para componentes
-	const navPanelProps = useMemo(() => ({
-		isCollapsed: isNavPanelCollapsed,
-		onToggleCollapse: toggleNavPanelCollapse
-	}), [isNavPanelCollapsed, toggleNavPanelCollapse]);
+	const navPanelProps = useMemo(
+		() => ({
+			isCollapsed: isNavPanelCollapsed,
+			onToggleCollapse: toggleNavPanelCollapse,
+		}),
+		[isNavPanelCollapsed, toggleNavPanelCollapse]
+	);
 
-	const rightPanelProps = useMemo(() => ({
-		isCollapsed: isRightPanelCollapsed,
-		onToggleCollapse: toggleRightPanelCollapse
-	}), [isRightPanelCollapsed, toggleRightPanelCollapse]);
+	const rightPanelProps = useMemo(
+		() => ({
+			isCollapsed: isRightPanelCollapsed,
+			onToggleCollapse: toggleRightPanelCollapse,
+		}),
+		[isRightPanelCollapsed, toggleRightPanelCollapse]
+	);
 
-	const viewToolbarProps = useMemo(() => ({
-		isRightPanelCollapsed,
-		toggleRightPanelCollapse,
-		isRightPanelVisible: isVisible
-	}), [isRightPanelCollapsed, toggleRightPanelCollapse, isVisible]);
+	const viewToolbarProps = useMemo(
+		() => ({
+			isRightPanelCollapsed,
+			toggleRightPanelCollapse,
+			isRightPanelVisible: isVisible,
+		}),
+		[isRightPanelCollapsed, toggleRightPanelCollapse, isVisible]
+	);
 
 	// Callback para manejar el layout
-	const handleLayout = useCallback((sizes: number[]) => {
-		// Persistir los tamaños al cambiar el layout
-		const [nav, content, right] = sizes;
-		if (nav && !isNavPanelCollapsed) {
-			// Lotes las actualizaciones para reducir rerenderiazados
-			requestAnimationFrame(() => {
-				setNavPanelSize(nav);
-			});
-		}
-		if (right && !isRightPanelCollapsed && isVisible) {
-			requestAnimationFrame(() => {
-				setRightPanelSize(right);
-			});
-		}
-	}, [isNavPanelCollapsed, isRightPanelCollapsed, isVisible, setNavPanelSize, setRightPanelSize]);
+	const handleLayout = useCallback(
+		(sizes: number[]) => {
+			// Persistir los tamaños al cambiar el layout
+			const [nav, content, right] = sizes;
+			if (nav && !isNavPanelCollapsed) {
+				// Lotes las actualizaciones para reducir rerenderiazados
+				requestAnimationFrame(() => {
+					setNavPanelSize(nav);
+				});
+			}
+			if (right && !isRightPanelCollapsed && isVisible) {
+				requestAnimationFrame(() => {
+					setRightPanelSize(right);
+				});
+			}
+		},
+		[isNavPanelCollapsed, isRightPanelCollapsed, isVisible, setNavPanelSize, setRightPanelSize]
+	);
 
 	// Clases memoizadas para el ResizableHandle
-	const navHandleClassName = useMemo(() => cn(
-		'cursor-col-resize focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
-		isNavPanelCollapsed ? 'nav-panel-collapsed-handle' : ''
-	), [isNavPanelCollapsed]);
+	const navHandleClassName = useMemo(
+		() =>
+			cn(
+				'cursor-col-resize focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+				isNavPanelCollapsed ? 'nav-panel-collapsed-handle' : ''
+			),
+		[isNavPanelCollapsed]
+	);
 
-	const rightHandleClassName = useMemo(() => cn(
-		'cursor-col-resize focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
-		isRightPanelCollapsed ? 'right-panel-collapsed-handle' : ''
-	), [isRightPanelCollapsed]);
+	const rightHandleClassName = useMemo(
+		() =>
+			cn(
+				'cursor-col-resize focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+				isRightPanelCollapsed ? 'right-panel-collapsed-handle' : ''
+			),
+		[isRightPanelCollapsed]
+	);
 
-	const navPanelClassName = useMemo(() => cn(
-		'bg-background-primary transition-all',
-		isNavPanelCollapsed && 'min-w-[35px] max-w-[35px]'
-	), [isNavPanelCollapsed]);
+	const navPanelClassName = useMemo(
+		() => cn('bg-background-primary transition-all', isNavPanelCollapsed && 'min-w-[35px] max-w-[35px]'),
+		[isNavPanelCollapsed]
+	);
 
-	const rightPanelClassName = useMemo(() => cn(
-		'bg-background-primary transition-all',
-		isRightPanelCollapsed && 'min-w-[35px] max-w-[35px]'
-	), [isRightPanelCollapsed]);
+	const rightPanelClassName = useMemo(
+		() => cn('bg-background-primary transition-all', isRightPanelCollapsed && 'min-w-[35px] max-w-[35px]'),
+		[isRightPanelCollapsed]
+	);
 
 	// Optimización usando renderización condicional completa
 	const renderViewContent = useMemo(() => {
@@ -427,11 +441,7 @@ export function MainLayout() {
 
 	return (
 		<div className="flex h-screen w-full bg-background">
-			<ResizablePanelGroup
-				direction="horizontal"
-				className="h-full w-full"
-				onLayout={handleLayout}
-			>
+			<ResizablePanelGroup direction="horizontal" className="h-full w-full" onLayout={handleLayout}>
 				{/* Panel de navegación */}
 				<ResizablePanel
 					defaultSize={defaultSizes.nav}
@@ -451,10 +461,7 @@ export function MainLayout() {
 				</ResizablePanel>
 
 				{/* Separador para panel de navegación */}
-				<ResizerHandle
-					className={navHandleClassName}
-					onDragging={handleDragging}
-				/>
+				<ResizerHandle className={navHandleClassName} onDragging={handleDragging} />
 
 				{/* Panel central optimizado */}
 				<CentralPanel
@@ -468,10 +475,7 @@ export function MainLayout() {
 				{/* Panel derecho optimizado */}
 				{isVisible && (
 					<>
-						<ResizerHandle
-							className={rightHandleClassName}
-							onDragging={handleDragging}
-						/>
+						<ResizerHandle className={rightHandleClassName} onDragging={handleDragging} />
 						<ResizablePanel
 							defaultSize={defaultSizes.right}
 							minSize={isRightPanelCollapsed ? PANEL_CONFIG.right.collapsedSize : PANEL_CONFIG.right.minSize}
@@ -494,7 +498,7 @@ export function MainLayout() {
 
 			{isOpen && !isResizing && (
 				<FileViewer
-					images={processedImages.map(img => ({
+					images={processedImages.map((img) => ({
 						id: img.id,
 						name: img.name,
 						path: img.path,
@@ -510,7 +514,7 @@ export function MainLayout() {
 						alt: img.name,
 						width: img.parsedMetadata?.dimensions?.width || 800,
 						height: img.parsedMetadata?.dimensions?.height || 600,
-						thumbnail: ''
+						thumbnail: '',
 					}))}
 					initialIndex={currentIndex}
 					isOpen={isOpen}

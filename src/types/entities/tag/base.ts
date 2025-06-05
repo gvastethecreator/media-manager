@@ -14,26 +14,26 @@ export type TagBase = PrismaTag;
  * Interfaz para crear una nueva etiqueta
  */
 export interface TagCreateInput {
-  name: string;
-  emoji?: string;
-  color?: string;
-  description?: string | null;
-  shortcut?: string | null;
-  category?: string | null;
-  featuredImage?: string | null;
-  isFavorite?: boolean;
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
 }
 
 /**
  * Interfaz para actualizar una etiqueta existente
  */
 export interface TagUpdateInput {
-  name?: string;
-  emoji?: string;
-  color?: string;
-  description?: string | null;
-  shortcut?: string | null;
-  category?: string | null;
-  featuredImage?: string | null;
-  isFavorite?: boolean;
+	name?: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
 }

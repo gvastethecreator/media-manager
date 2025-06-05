@@ -4,7 +4,16 @@ import { serverLogger } from './logger/server-logger';
 // Re-exportar TransformerError y otras clases de error relacionadas desde utils/transformers/errors
 // para mantener compatibilidad con el código existente
 export {
-    handleTransformerError, MappingError, MetadataError, RelationError, SearchError, SerializationError, TransformerError, TypeMismatchError, UIError, ValidationError
+	handleTransformerError,
+	MappingError,
+	MetadataError,
+	RelationError,
+	SearchError,
+	SerializationError,
+	TransformerError,
+	TypeMismatchError,
+	UIError,
+	ValidationError,
 } from '@/utils/transformers/errors';
 
 const _errorLogger = serverLogger.withContext('ErrorHandler');
@@ -54,18 +63,14 @@ export class EntityError extends Error {
 			name: this.name,
 			message: this.message,
 			code: this.code,
-			cause: this.cause
+			cause: this.cause,
 		};
 	}
 }
 
 // Errores específicos para cada tipo de entidad
 export class CharacterError extends EntityError {
-	constructor(
-		message: string,
-		code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED,
-		cause?: unknown
-	) {
+	constructor(message: string, code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED, cause?: unknown) {
 		super(message, code, cause);
 		this.name = 'CharacterError';
 
@@ -75,11 +80,7 @@ export class CharacterError extends EntityError {
 }
 
 export class ConceptError extends EntityError {
-	constructor(
-		message: string,
-		code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED,
-		cause?: unknown
-	) {
+	constructor(message: string, code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED, cause?: unknown) {
 		super(message, code, cause);
 		this.name = 'ConceptError';
 
@@ -89,11 +90,7 @@ export class ConceptError extends EntityError {
 }
 
 export class PromptError extends EntityError {
-	constructor(
-		message: string,
-		code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED,
-		cause?: unknown
-	) {
+	constructor(message: string, code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED, cause?: unknown) {
 		super(message, code, cause);
 		this.name = 'PromptError';
 
@@ -137,7 +134,7 @@ export function createEntityErrorObject(
 		name,
 		message,
 		code,
-		cause
+		cause,
 	};
 }
 

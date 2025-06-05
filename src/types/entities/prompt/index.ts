@@ -12,4 +12,3 @@ export * from './types';
 
 // Alias común para el tipo principal
 export type { PromptWithRelations as Prompt } from './types';
-

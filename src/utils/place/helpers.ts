@@ -4,7 +4,7 @@
  */
 
 import { deserializePlaceDangers } from '../../transformers/place';
-import { type Place, PLACE_SORT_PROPERTY_MAP, type PlaceFilters, PlaceSortCriteria } from '../../types/entities/place';
+import { PLACE_SORT_PROPERTY_MAP, type Place, type PlaceFilters, PlaceSortCriteria } from '../../types/entities/place';
 
 /**
  * Ordena una lista de lugares según el criterio especificado
@@ -235,7 +235,7 @@ export function findPlacesByType(places: Place[], type: string): Place[] {
  * @returns Lista de lugares de la región
  */
 export function findPlacesByRegion(places: Place[], region: string): Place[] {
-	return places.filter((place) => place.region && place.region.startsWith(region));
+	return places.filter((place) => place.region?.startsWith(region));
 }
 
 /**

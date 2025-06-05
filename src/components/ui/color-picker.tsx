@@ -66,50 +66,27 @@ export function ColorPicker({ value, onChange, className, compact = false, showL
 					variant="outline"
 					aria-expanded={open}
 					className={cn(
-						compact ? "h-8" : "h-9",
-						showLabel || !compact ? "w-full justify-between" : "w-8 p-0 justify-center",
+						compact ? 'h-8' : 'h-9',
+						showLabel || !compact ? 'w-full justify-between' : 'w-8 p-0 justify-center',
 						className
 					)}
 				>
-					<div
-						className={cn(
-							"flex items-center gap-2",
-							!showLabel && compact && "flex-1 justify-center"
-						)}
-					>
+					<div className={cn('flex items-center gap-2', !showLabel && compact && 'flex-1 justify-center')}>
 						<div
-							className={cn(
-								"rounded-full border",
-								compact ? "h-4 w-4" : "h-5 w-5"
-							)}
+							className={cn('rounded-full border', compact ? 'h-4 w-4' : 'h-5 w-5')}
 							style={{ backgroundColor: currentColor }}
 						/>
-						{(showLabel || !compact) && (
-							<span className={compact ? "text-xs truncate" : ""}>{currentColor}</span>
-						)}
+						{(showLabel || !compact) && <span className={compact ? 'text-xs truncate' : ''}>{currentColor}</span>}
 					</div>
 					{(showLabel || !compact) && (
-						<Palette className={cn(
-							"ml-auto shrink-0 opacity-50",
-							compact ? "h-3 w-3" : "h-4 w-4"
-						)} />
+						<Palette className={cn('ml-auto shrink-0 opacity-50', compact ? 'h-3 w-3' : 'h-4 w-4')} />
 					)}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent
-				className={cn(
-					"p-3",
-					compact ? "w-56" : "w-64"
-				)}
-				align="start"
-				sideOffset={8}
-			>
+			<PopoverContent className={cn('p-3', compact ? 'w-56' : 'w-64')} align="start" sideOffset={8}>
 				<div className="space-y-3">
 					<div className="space-y-1">
-						<Label
-							htmlFor="custom-color"
-							className={compact ? "text-xs" : ""}
-						>
+						<Label htmlFor="custom-color" className={compact ? 'text-xs' : ''}>
 							Color personalizado
 						</Label>
 						<div className="flex gap-2">
@@ -118,50 +95,36 @@ export function ColorPicker({ value, onChange, className, compact = false, showL
 								type="color"
 								value={currentColor}
 								onChange={handleColorChange}
-								className={cn(
-									"p-0 cursor-pointer",
-									compact ? "h-7 w-7" : "h-8 w-8"
-								)}
+								className={cn('p-0 cursor-pointer', compact ? 'h-7 w-7' : 'h-8 w-8')}
 							/>
 							<Input
 								type="text"
 								value={currentColor}
 								onChange={(e) => setCurrentColor(e.target.value)}
-								className={cn(
-									"flex-1",
-									compact ? "h-7 text-xs" : "h-8"
-								)}
+								className={cn('flex-1', compact ? 'h-7 text-xs' : 'h-8')}
 								maxLength={9}
 							/>
 							<Button
 								variant="outline"
 								size="sm"
-								className={cn(
-									"p-0",
-									compact ? "h-7 w-7" : "h-8 w-8"
-								)}
+								className={cn('p-0', compact ? 'h-7 w-7' : 'h-8 w-8')}
 								onClick={() => applyColor(currentColor)}
 							>
-								<Check className={compact ? "h-3 w-3" : "h-4 w-4"} />
+								<Check className={compact ? 'h-3 w-3' : 'h-4 w-4'} />
 								<span className="sr-only">Aplicar color</span>
 							</Button>
 						</div>
 					</div>
 
 					<div className="space-y-1">
-						<Label className={compact ? "text-xs" : ""}>
-							Colores predefinidos
-						</Label>
-						<div className={cn(
-							"grid gap-2",
-							compact ? "grid-cols-6" : "grid-cols-5"
-						)}>
+						<Label className={compact ? 'text-xs' : ''}>Colores predefinidos</Label>
+						<div className={cn('grid gap-2', compact ? 'grid-cols-6' : 'grid-cols-5')}>
 							{PRESET_COLORS.slice(0, compact ? 12 : 20).map((color) => (
 								<button
 									key={color}
 									className={cn(
-										"w-6 h-6 rounded-md border border-muted flex items-center justify-center",
-										isSelected(color) && "ring-1 ring-ring"
+										'w-6 h-6 rounded-md border border-muted flex items-center justify-center',
+										isSelected(color) && 'ring-1 ring-ring'
 									)}
 									style={{ backgroundColor: color }}
 									onClick={() => applyColor(color)}
@@ -169,10 +132,9 @@ export function ColorPicker({ value, onChange, className, compact = false, showL
 									aria-label={`Seleccionar color ${color}`}
 								>
 									{isSelected(color) && (
-										<Check className={cn(
-											color === '#ffffff' ? 'text-black' : 'text-white',
-											compact ? "h-3 w-3" : "h-4 w-4"
-										)} />
+										<Check
+											className={cn(color === '#ffffff' ? 'text-black' : 'text-white', compact ? 'h-3 w-3' : 'h-4 w-4')}
+										/>
 									)}
 									<span className="sr-only">{color}</span>
 								</button>

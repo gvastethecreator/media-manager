@@ -25,7 +25,7 @@ export interface CharacterCardData extends Character {
 	totalSize?: number;
 	// Campos parseados para mejor visualización en la UI
 	parsedStats?: Record<string, number>;
-	parsedRelationships?: Array<{id?: string; name: string; type: string; description?: string}>;
+	parsedRelationships?: Array<{ id?: string; name: string; type: string; description?: string }>;
 	parsedGoals?: string[];
 	parsedFears?: string[];
 	parsedBeliefs?: string[];
@@ -46,10 +46,7 @@ export interface CharacterCardData extends Character {
 /**
  * Obtiene los datos de un personaje para mostrar en una tarjeta
  */
-export async function getCharacterCardData(
-	characterId: string,
-	includeRelated = false
-): Promise<CharacterCardData> {
+export async function getCharacterCardData(characterId: string, includeRelated = false): Promise<CharacterCardData> {
 	const prisma = await getPrismaClient();
 
 	const character = await prisma.character.findUnique({
@@ -75,27 +72,29 @@ export async function getCharacterCardData(
 					relatedTo: true,
 				},
 			},
-			...(includeRelated ? {
-				// Incluir relaciones directas si se solicitan
-				relatedCharacters: {
-					select: {
-						id: true,
-						name: true,
-						emoji: true,
-						color: true,
-					},
-					take: 5,
-				},
-				// Añadir otras relaciones relevantes
-				tags: {
-					select: {
-						id: true,
-						name: true,
-						color: true,
-					},
-					take: 5,
-				},
-			} : {}),
+			...(includeRelated
+				? {
+						// Incluir relaciones directas si se solicitan
+						relatedCharacters: {
+							select: {
+								id: true,
+								name: true,
+								emoji: true,
+								color: true,
+							},
+							take: 5,
+						},
+						// Añadir otras relaciones relevantes
+						tags: {
+							select: {
+								id: true,
+								name: true,
+								color: true,
+							},
+							take: 5,
+						},
+					}
+				: {}),
 		},
 	});
 
@@ -169,7 +168,12 @@ export async function getCharacterCardData(
 
 	// Calcular metadatos para la tarjeta TCG
 	const power = calculateCharacterPower(character.level, parsedStats);
-	const rarityLevel = determineRarityLevel(character.level, power, parsedSkills?.length || 0, parsedAbilities?.length || 0);
+	const rarityLevel = determineRarityLevel(
+		character.level,
+		power,
+		parsedSkills?.length || 0,
+		parsedAbilities?.length || 0
+	);
 	const metadata = {
 		power,
 		rarityLevel,
@@ -244,7 +248,7 @@ export async function getCharactersForCards(options: {
 							{ class: { contains: searchTerm } },
 							{ race: { contains: searchTerm } },
 						],
-				  }
+					}
 				: {}),
 		},
 		include: {
@@ -279,12 +283,8 @@ export async function getCharactersForCards(options: {
 			characters.map(async (character) => {
 				// Obtener imágenes y videos recientes
 				const recentMedia = await getRecentCharacterMedia(character.id, 4);
-				const recentImagePaths = recentMedia
-					.filter(media => !media.isVideo)
-					.map(media => media.thumbnailUrl);
-				const recentVideoPaths = recentMedia
-					.filter(media => media.isVideo)
-					.map(media => media.thumbnailUrl);
+				const recentImagePaths = recentMedia.filter((media) => !media.isVideo).map((media) => media.thumbnailUrl);
+				const recentVideoPaths = recentMedia.filter((media) => media.isVideo).map((media) => media.thumbnailUrl);
 
 				// Parsear campos serializados como JSON
 				const parsedStats = parseJsonField(character.stats);
@@ -298,7 +298,12 @@ export async function getCharactersForCards(options: {
 
 				// Calcular metadatos para TCG
 				const power = calculateCharacterPower(character.level, parsedStats);
-				const rarityLevel = determineRarityLevel(character.level, power, parsedSkills?.length || 0, parsedAbilities?.length || 0);
+				const rarityLevel = determineRarityLevel(
+					character.level,
+					power,
+					parsedSkills?.length || 0,
+					parsedAbilities?.length || 0
+				);
 				const metadata = {
 					power,
 					rarityLevel,
@@ -355,8 +360,13 @@ function calculateCharacterPower(level: number, stats?: Record<string, number>):
 }
 
 // Determinar el nivel de rareza de la carta basado en poder y habilidades
-function determineRarityLevel(level: number, power: number, skillsCount: number, abilitiesCount: number): 'Common' | 'Uncommon' | 'Rare' | 'Mythic' {
-	const totalScore = power + (skillsCount * 5) + (abilitiesCount * 10);
+function determineRarityLevel(
+	level: number,
+	power: number,
+	skillsCount: number,
+	abilitiesCount: number
+): 'Common' | 'Uncommon' | 'Rare' | 'Mythic' {
+	const totalScore = power + skillsCount * 5 + abilitiesCount * 10;
 
 	if (totalScore > 300 || level >= 30) return 'Mythic';
 	if (totalScore > 200 || level >= 20) return 'Rare';
@@ -366,12 +376,12 @@ function determineRarityLevel(level: number, power: number, skillsCount: number,
 
 // Calcular puntos de salud basados en constitución y nivel
 function calculateHealthPoints(constitution: number, level: number): number {
-	return constitution * 5 + (level * 10);
+	return constitution * 5 + level * 10;
 }
 
 // Calcular puntos de maná basados en inteligencia y nivel
 function calculateManaPoints(intelligence: number, level: number): number {
-	return intelligence * 5 + (level * 5);
+	return intelligence * 5 + level * 5;
 }
 
 // Interfaz para las imágenes thumbnail
@@ -430,26 +440,24 @@ export async function getRecentCharacterMedia(characterId: string, limit = 6): P
 	});
 
 	// Combinar y formatear los resultados
-	const imageResults: ThumbnailImage[] = recentImages.map(img => ({
+	const imageResults: ThumbnailImage[] = recentImages.map((img) => ({
 		id: img.id,
 		name: img.name,
 		thumbnailUrl: `/api/thumbnails/${img.id}`,
 		url: `/api/images/${img.id}`,
-		isVideo: false
+		isVideo: false,
 	}));
 
-	const videoResults: ThumbnailImage[] = recentVideos.map(video => ({
+	const videoResults: ThumbnailImage[] = recentVideos.map((video) => ({
 		id: video.id,
 		name: video.name,
 		thumbnailUrl: `/api/video-thumbnails/${video.id}`,
 		url: `/api/videos/${video.id}`,
-		isVideo: true
+		isVideo: true,
 	}));
 
 	// Combinar y ordenar por ID (como proxy de fecha)
-	return [...imageResults, ...videoResults]
-		.sort((a, b) => a.id > b.id ? -1 : 1)
-		.slice(0, limit);
+	return [...imageResults, ...videoResults].sort((a, b) => (a.id > b.id ? -1 : 1)).slice(0, limit);
 }
 
 /**
@@ -465,18 +473,18 @@ export async function getRelatedCharacters(characterId: string, limit = 5): Prom
 				{
 					relatedCharacters: {
 						some: {
-							id: characterId
-						}
-					}
+							id: characterId,
+						},
+					},
 				},
 				{
 					relatedTo: {
 						some: {
-							id: characterId
-						}
-					}
-				}
-			]
+							id: characterId,
+						},
+					},
+				},
+			],
 		},
 		include: {
 			_count: {

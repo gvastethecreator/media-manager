@@ -1,5 +1,5 @@
-import type { UploadedImageMetadata, UploadedImageProcessingOptions } from '@/types/uploaded-images';
 import * as path from 'path';
+import type { UploadedImageMetadata, UploadedImageProcessingOptions } from '@/types/uploaded-images';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
 

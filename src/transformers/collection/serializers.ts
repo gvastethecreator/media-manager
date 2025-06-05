@@ -5,36 +5,27 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    CollectionComplete,
-    CollectionEdition,
-    CollectionExtended,
-    CollectionFilter,
-    CollectionSummary
+	CollectionComplete,
+	CollectionEdition,
+	CollectionExtended,
+	CollectionFilter,
+	CollectionSummary,
 } from '@/types/entities/collection';
 import {
-    type CollectionBase,
-    type CollectionCreateInput,
-    CollectionSchema,
-    type CollectionUpdateInput,
+	type CollectionBase,
+	type CollectionCreateInput,
+	CollectionSchema,
+	type CollectionUpdateInput,
 } from '@/types/entities/collection/types';
 import {
-    deserializeJsonField,
-    serializeJsonField,
-    validateFieldType,
-    validateRequiredFields,
+	deserializeJsonField,
+	serializeJsonField,
+	validateFieldType,
+	validateRequiredFields,
 } from '@/utils/transformers/common';
-import {
-    handleTransformerError
-} from '@/utils/transformers/errors';
-import {
-    getRelationCounts,
-    preparePrismaRelations,
-    validateEntityRelations,
-} from '@/utils/transformers/relations';
-import {
-    validateBaseEntity,
-    validateMetadataFields
-} from '@/utils/transformers/validation';
+import { handleTransformerError } from '@/utils/transformers/errors';
+import { getRelationCounts, preparePrismaRelations, validateEntityRelations } from '@/utils/transformers/relations';
+import { validateBaseEntity, validateMetadataFields } from '@/utils/transformers/validation';
 import type { Prisma, Collection as PrismaCollection } from '@prisma/client';
 
 const logger = serverLogger.withContext('CollectionSerializer');
@@ -54,9 +45,10 @@ export function toCollectionExtended(collection: PrismaCollection | CollectionCo
 		isLoading: false,
 		hasError: false,
 		// Calculados/runtime
-		parsedFilters: 'filters' in collection && Array.isArray(collection.filters)
-			? collection.filters
-			: parseCollectionFiltersFromString(collection.filters),
+		parsedFilters:
+			'filters' in collection && Array.isArray(collection.filters)
+				? collection.filters
+				: parseCollectionFiltersFromString(collection.filters),
 		imageCount: 0,
 		totalValue: collection.price || 0,
 	};
@@ -117,7 +109,9 @@ export function toCollectionSummary(
 /**
  * 🔄 Serializa una Collection para Prisma
  */
-export function toPrismaCollection(data: CollectionCreateInput | CollectionUpdateInput): Prisma.CollectionCreateInput | Prisma.CollectionUpdateInput {
+export function toPrismaCollection(
+	data: CollectionCreateInput | CollectionUpdateInput
+): Prisma.CollectionCreateInput | Prisma.CollectionUpdateInput {
 	try {
 		// Validar campos requeridos para creación
 		if (!('id' in data)) {
@@ -186,7 +180,7 @@ export function fromPrismaCollection(
 			description: prismaCollection.description,
 			type: prismaCollection.type,
 			category: prismaCollection.category,
-			tags: prismaCollection.tags?.map(tag => tag.name),
+			tags: prismaCollection.tags?.map((tag) => tag.name),
 			isPublic: prismaCollection.isPublic,
 			isFavorite: prismaCollection.isFavorite,
 			metadata,
@@ -204,17 +198,17 @@ export function fromPrismaCollection(
 			...baseCollection,
 			owner: prismaCollection.owner ? { id: prismaCollection.owner.id } : undefined,
 			parent: prismaCollection.parent ? { id: prismaCollection.parent.id } : undefined,
-			children: prismaCollection.children?.map(child => ({ id: child.id })),
-			images: prismaCollection.images?.map(img => ({ id: img.id })),
-			videos: prismaCollection.videos?.map(video => ({ id: video.id })),
-			albums: prismaCollection.albums?.map(album => ({ id: album.id })),
-			tags: prismaCollection.tags?.map(tag => ({ id: tag.id })),
-			groups: prismaCollection.groups?.map(group => ({ id: group.id })),
-			characters: prismaCollection.characters?.map(char => ({ id: char.id })),
-			places: prismaCollection.places?.map(place => ({ id: place.id })),
-			items: prismaCollection.items?.map(item => ({ id: item.id })),
-			notes: prismaCollection.notes?.map(note => ({ id: note.id })),
-			sharedWith: prismaCollection.sharedWith?.map(user => ({ id: user.id })),
+			children: prismaCollection.children?.map((child) => ({ id: child.id })),
+			images: prismaCollection.images?.map((img) => ({ id: img.id })),
+			videos: prismaCollection.videos?.map((video) => ({ id: video.id })),
+			albums: prismaCollection.albums?.map((album) => ({ id: album.id })),
+			tags: prismaCollection.tags?.map((tag) => ({ id: tag.id })),
+			groups: prismaCollection.groups?.map((group) => ({ id: group.id })),
+			characters: prismaCollection.characters?.map((char) => ({ id: char.id })),
+			places: prismaCollection.places?.map((place) => ({ id: place.id })),
+			items: prismaCollection.items?.map((item) => ({ id: item.id })),
+			notes: prismaCollection.notes?.map((note) => ({ id: note.id })),
+			sharedWith: prismaCollection.sharedWith?.map((user) => ({ id: user.id })),
 			_count: counts,
 		};
 	} catch (error) {

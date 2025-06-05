@@ -31,7 +31,7 @@ export function createMetadataError(
 		path,
 		code,
 		details,
-		cause
+		cause,
 	};
 }
 

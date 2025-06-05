@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import Image from "next/image";
+import Image from 'next/image';
 
 export interface FolderCardImagesProps {
 	featuredImage?: string | null;
@@ -20,15 +20,12 @@ export function FolderCardImages({
 	recentImages = [],
 	primaryColor,
 	secondaryColor = primaryColor,
-	tcgMode = false
+	tcgMode = false,
 }: FolderCardImagesProps) {
 	// Si hay una imagen destacada, la mostramos como principal
 	if (featuredImage) {
 		return (
-			<div className={cn(
-				"relative w-full h-40 overflow-hidden",
-				tcgMode ? "border-b border-white/10" : ""
-			)}>
+			<div className={cn('relative w-full h-40 overflow-hidden', tcgMode ? 'border-b border-white/10' : '')}>
 				{/* Imagen principal */}
 				<Image
 					src={featuredImage}
@@ -45,7 +42,7 @@ export function FolderCardImages({
 						className="absolute inset-0 mix-blend-overlay"
 						style={{
 							background: `linear-gradient(135deg, ${primaryColor}40, transparent 80%)`,
-							boxShadow: `inset 0 0 30px ${primaryColor}30`
+							boxShadow: `inset 0 0 30px ${primaryColor}30`,
 						}}
 					/>
 				)}
@@ -75,15 +72,14 @@ export function FolderCardImages({
 		const images = recentImages.slice(0, 4);
 
 		return (
-			<div className={cn(
-				"relative w-full h-40 grid grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden",
-				tcgMode ? "border-b border-white/10 p-0.5 bg-black/20" : ""
-			)}>
+			<div
+				className={cn(
+					'relative w-full h-40 grid grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden',
+					tcgMode ? 'border-b border-white/10 p-0.5 bg-black/20' : ''
+				)}
+			>
 				{images.map((image, index) => (
-					<div
-						key={`recent-image-${generateImageKey(image, index)}`}
-						className="relative overflow-hidden"
-					>
+					<div key={`recent-image-${generateImageKey(image, index)}`} className="relative overflow-hidden">
 						<Image
 							src={image}
 							alt={`Imagen reciente ${index + 1}`}
@@ -98,7 +94,7 @@ export function FolderCardImages({
 								className="absolute inset-0 mix-blend-overlay"
 								style={{
 									background: `linear-gradient(135deg, ${index % 2 === 0 ? primaryColor : secondaryColor}30, transparent 80%)`,
-									boxShadow: `inset 0 0 20px ${primaryColor}20`
+									boxShadow: `inset 0 0 20px ${primaryColor}20`,
 								}}
 							/>
 						)}
@@ -120,7 +116,7 @@ export function FolderCardImages({
 							style={{
 								background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`,
 								color: 'white',
-								textShadow: '0 1px 2px rgba(0,0,0,0.5)'
+								textShadow: '0 1px 2px rgba(0,0,0,0.5)',
 							}}
 						>
 							x{images.length}
@@ -135,21 +131,18 @@ export function FolderCardImages({
 	return (
 		<div
 			className={cn(
-				"relative w-full h-40 flex items-center justify-center",
-				tcgMode
-					? "bg-gradient-to-br from-gray-900 to-gray-800 border-b border-white/10"
-					: "bg-muted"
+				'relative w-full h-40 flex items-center justify-center',
+				tcgMode ? 'bg-gradient-to-br from-gray-900 to-gray-800 border-b border-white/10' : 'bg-muted'
 			)}
-			style={tcgMode ? {
-				backgroundImage: `radial-gradient(circle at 70% 30%, ${primaryColor}30 0%, transparent 50%)`
-			} : {}}
+			style={
+				tcgMode
+					? {
+							backgroundImage: `radial-gradient(circle at 70% 30%, ${primaryColor}30 0%, transparent 50%)`,
+						}
+					: {}
+			}
 		>
-			<div
-				className={cn(
-					"text-lg font-medium text-center p-4",
-					tcgMode ? "text-white/70" : "text-muted-foreground"
-				)}
-			>
+			<div className={cn('text-lg font-medium text-center p-4', tcgMode ? 'text-white/70' : 'text-muted-foreground')}>
 				Sin imágenes
 			</div>
 
@@ -164,7 +157,7 @@ export function FolderCardImages({
 					<div
 						className="absolute bottom-2 right-2 w-8 h-8 rounded-full opacity-30"
 						style={{
-							background: `conic-gradient(${primaryColor}, ${secondaryColor}, ${primaryColor})`
+							background: `conic-gradient(${primaryColor}, ${secondaryColor}, ${primaryColor})`,
 						}}
 					/>
 				</>

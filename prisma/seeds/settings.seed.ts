@@ -17,7 +17,7 @@ export async function seedSettings(prisma: PrismaClient): Promise<void> {
 			if (settingsCount === 0) {
 				// Comprobar si existe un perfil "huérfano" (sin settings)
 				const orphanProfile = await prisma.profile.findFirst({
-					where: { settingsId: null }
+					where: { settingsId: null },
 				});
 
 				if (orphanProfile) {
@@ -26,20 +26,20 @@ export async function seedSettings(prisma: PrismaClient): Promise<void> {
 						data: {
 							theme: 'system',
 							language: 'es',
-							profileId: orphanProfile.id
-						}
+							profileId: orphanProfile.id,
+						},
 					});
 
 					// Obtener el settings recién creado
 					const settings = await prisma.settings.findFirst({
-						where: { profileId: orphanProfile.id }
+						where: { profileId: orphanProfile.id },
 					});
 
 					// Actualizar el perfil con el ID de settings
 					if (settings) {
 						await prisma.profile.update({
 							where: { id: orphanProfile.id },
-							data: { settingsId: settings.id }
+							data: { settingsId: settings.id },
 						});
 					}
 
@@ -51,8 +51,8 @@ export async function seedSettings(prisma: PrismaClient): Promise<void> {
 						data: {
 							theme: 'system',
 							language: 'es',
-							profileId: 'settings-without-profile'
-						}
+							profileId: 'settings-without-profile',
+						},
 					});
 					seedLogger.info('✅ Settings independiente creado');
 				}

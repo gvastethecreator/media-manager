@@ -8,11 +8,11 @@
  * Re-exportación de tipos y constantes relacionados con imágenes
  */
 export {
-    IMAGE_EVENTS,
-    THUMBNAIL_QUALITY_CONFIG, // Exportar la config
-    type ThumbnailQuality, // Exportar el tipo
-    type CreateImageInput, // Exportar tipos de input/options
-    type ImageProcessingOptions
+	IMAGE_EVENTS,
+	THUMBNAIL_QUALITY_CONFIG, // Exportar la config
+	type ThumbnailQuality, // Exportar el tipo
+	type CreateImageInput, // Exportar tipos de input/options
+	type ImageProcessingOptions,
 } from './image/image.service';
 
 /**
@@ -22,6 +22,10 @@ export { imageService } from './image/image.service';
 
 // Exportar transformadores para facilitar su uso
 export {
-    transformImage, transformImageToComplete, transformImageToExtended, transformImages, transformImagesToComplete, transformImagesToExtended
+	transformImage,
+	transformImageToComplete,
+	transformImageToExtended,
+	transformImages,
+	transformImagesToComplete,
+	transformImagesToExtended,
 } from '@/transformers/image/transformer';
-

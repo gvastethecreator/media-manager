@@ -17,7 +17,7 @@ export function searchTags(tags: Tag[], searchTerm: string): Tag[] {
 	if (!normalizedTerm) return tags;
 
 	return tags.filter(
-		(tag) => tag.name.toLowerCase().includes(normalizedTerm) || (tag.description?.toLowerCase().includes(normalizedTerm))
+		(tag) => tag.name.toLowerCase().includes(normalizedTerm) || tag.description?.toLowerCase().includes(normalizedTerm)
 	);
 }
 

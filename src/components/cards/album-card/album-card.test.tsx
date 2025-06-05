@@ -17,9 +17,7 @@ jest.mock('./album-server-actions', () => ({
 
 // Mock de Next.js Link
 jest.mock('next/link', () => {
-	return ({ children, href }: { children: React.ReactNode; href: string }) => (
-		<a href={href}>{children}</a>
-	);
+	return ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>;
 });
 
 describe('AlbumCard', () => {
@@ -88,7 +86,7 @@ describe('AlbumCard', () => {
 
 		// Como las estadísticas se cargan de forma asíncrona, debemos esperar
 		// Normalmente usaríamos waitFor, pero para simplificar:
-		await new Promise(resolve => setTimeout(resolve, 0));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		// Verificar que se muestran las estadísticas
 		expect(screen.getByText('42')).toBeInTheDocument(); // número de imágenes
@@ -101,7 +99,7 @@ describe('AlbumCard', () => {
 		expect(getRecentAlbumImages).toHaveBeenCalledWith(mockAlbum.id);
 
 		// Como las imágenes se cargan de forma asíncrona, debemos esperar
-		await new Promise(resolve => setTimeout(resolve, 0));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		// Verificar que se muestran las imágenes (o al menos sus contenedores)
 		const images = document.querySelectorAll('img');

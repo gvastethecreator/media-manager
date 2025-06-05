@@ -34,7 +34,7 @@ export async function getRecentFolderImages(folderId: string, limit = 6) {
 		});
 
 		// Transformar los datos para devolverlos
-		const imageData = images.map(image => {
+		const imageData = images.map((image) => {
 			// Verificar si hay thumbnail
 			let thumbnailUrl = '';
 			if (image.thumbnail) {

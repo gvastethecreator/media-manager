@@ -35,7 +35,7 @@ export function CollectionCard({
 	style,
 	compact = false,
 	showEntitiesCount = true,
-	showImagesCount = true
+	showImagesCount = true,
 }: CollectionCardProps) {
 	// Calcular valores derivados
 	const imagesCount = collection._count?.images || 0;
@@ -172,10 +172,7 @@ export function CollectionCard({
 		>
 			{/* Resplandor de borde en hover */}
 			<div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-				<div
-					className="absolute inset-0 rounded-[4.75%] blur-md -z-10"
-					style={glowStyle}
-				/>
+				<div className="absolute inset-0 rounded-[4.75%] blur-md -z-10" style={glowStyle} />
 			</div>
 
 			{/* Textura holográfica tipo TCG */}
@@ -189,24 +186,40 @@ export function CollectionCard({
 			<div className="absolute inset-2 rounded-[4%] border border-white/20 pointer-events-none z-0" />
 
 			{/* Esquinas y marcos decorativos estilo TCG */}
-			<div className="absolute top-1 left-1 w-5 h-5 border-t-2 border-l-2 rounded-tl-md z-20"
-				style={{ borderColor: primaryColor }} />
-			<div className="absolute top-1 right-1 w-5 h-5 border-t-2 border-r-2 rounded-tr-md z-20"
-				style={{ borderColor: primaryColor }} />
-			<div className="absolute bottom-1 left-1 w-5 h-5 border-b-2 border-l-2 rounded-bl-md z-20"
-				style={{ borderColor: primaryColor }} />
-			<div className="absolute bottom-1 right-1 w-5 h-5 border-b-2 border-r-2 rounded-br-md z-20"
-				style={{ borderColor: primaryColor }} />
+			<div
+				className="absolute top-1 left-1 w-5 h-5 border-t-2 border-l-2 rounded-tl-md z-20"
+				style={{ borderColor: primaryColor }}
+			/>
+			<div
+				className="absolute top-1 right-1 w-5 h-5 border-t-2 border-r-2 rounded-tr-md z-20"
+				style={{ borderColor: primaryColor }}
+			/>
+			<div
+				className="absolute bottom-1 left-1 w-5 h-5 border-b-2 border-l-2 rounded-bl-md z-20"
+				style={{ borderColor: primaryColor }}
+			/>
+			<div
+				className="absolute bottom-1 right-1 w-5 h-5 border-b-2 border-r-2 rounded-br-md z-20"
+				style={{ borderColor: primaryColor }}
+			/>
 
 			{/* Ornamentos decorativos en las esquinas */}
-			<div className="absolute top-3 left-3 w-3 h-3 rounded-full z-20 opacity-70"
-				style={{ backgroundColor: primaryColor }} />
-			<div className="absolute top-3 right-3 w-3 h-3 rounded-full z-20 opacity-70"
-				style={{ backgroundColor: primaryColor }} />
-			<div className="absolute bottom-3 left-3 w-3 h-3 rounded-full z-20 opacity-70"
-				style={{ backgroundColor: primaryColor }} />
-			<div className="absolute bottom-3 right-3 w-3 h-3 rounded-full z-20 opacity-70"
-				style={{ backgroundColor: primaryColor }} />
+			<div
+				className="absolute top-3 left-3 w-3 h-3 rounded-full z-20 opacity-70"
+				style={{ backgroundColor: primaryColor }}
+			/>
+			<div
+				className="absolute top-3 right-3 w-3 h-3 rounded-full z-20 opacity-70"
+				style={{ backgroundColor: primaryColor }}
+			/>
+			<div
+				className="absolute bottom-3 left-3 w-3 h-3 rounded-full z-20 opacity-70"
+				style={{ backgroundColor: primaryColor }}
+			/>
+			<div
+				className="absolute bottom-3 right-3 w-3 h-3 rounded-full z-20 opacity-70"
+				style={{ backgroundColor: primaryColor }}
+			/>
 
 			{/* Contenido estructurado de la tarjeta */}
 			<div className="flex flex-col h-full relative z-1">

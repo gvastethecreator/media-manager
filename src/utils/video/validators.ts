@@ -180,7 +180,7 @@ export function isValidVideoFilename(filename: string): boolean {
 
 	// Verificar caracteres no permitidos
 	const invalidCharsRegex = /[<>:"\/\\|?*]/g;
-	const controlCharsPresent = filename.split('').some(char => char.charCodeAt(0) < 32);
+	const controlCharsPresent = filename.split('').some((char) => char.charCodeAt(0) < 32);
 	const hasInvalidChars = invalidCharsRegex.test(filename) || controlCharsPresent;
 
 	// Verificar longitud

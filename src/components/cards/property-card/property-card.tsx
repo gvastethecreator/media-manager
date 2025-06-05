@@ -29,12 +29,7 @@ export interface PropertyCardProps {
  * Card para mostrar una propiedad
  * Sigue el diseño de los otros componentes de tarjetas
  */
-export function PropertyCard({
-	property,
-	onClick,
-	className,
-	showBadges = true,
-}: PropertyCardProps) {
+export function PropertyCard({ property, onClick, className, showBadges = true }: PropertyCardProps) {
 	// Calcular colores
 	const primaryColor = useMemo(() => property.color || '#3b82f6', [property.color]);
 	const secondaryColor = useMemo(() => {
@@ -89,10 +84,7 @@ export function PropertyCard({
 			<CardHeader
 				title={property.name}
 				subtitle={property.category || 'General'}
-				icon={property.emoji ?
-					<span className="text-lg">{property.emoji}</span> :
-					<Microscope className="h-4 w-4" />
-				}
+				icon={property.emoji ? <span className="text-lg">{property.emoji}</span> : <Microscope className="h-4 w-4" />}
 				primaryColor={primaryColor}
 			/>
 
@@ -100,40 +92,26 @@ export function PropertyCard({
 			<div className="flex-1 p-3 flex flex-col">
 				{/* Descripción */}
 				{property.description && (
-					<p className="text-sm line-clamp-2 mb-2 text-muted-foreground">
-						{property.description}
-					</p>
+					<p className="text-sm line-clamp-2 mb-2 text-muted-foreground">{property.description}</p>
 				)}
 
 				{/* Estadísticas */}
 				{showBadges && (
 					<div className="mt-auto flex flex-wrap gap-1">
 						{property._count?.images ? (
-							<Badge
-								variant="outline"
-								className="text-xs"
-								style={{ borderColor: `${primaryColor}50` }}
-							>
+							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
 								{property._count.images} imágenes
 							</Badge>
 						) : null}
 
 						{property._count?.videos ? (
-							<Badge
-								variant="outline"
-								className="text-xs"
-								style={{ borderColor: `${primaryColor}50` }}
-							>
+							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
 								{property._count.videos} videos
 							</Badge>
 						) : null}
 
 						{totalRelations > 0 && (
-							<Badge
-								variant="outline"
-								className="text-xs"
-								style={{ borderColor: `${primaryColor}50` }}
-							>
+							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
 								{totalRelations} relaciones
 							</Badge>
 						)}
@@ -149,7 +127,7 @@ export function PropertyCard({
 			<button
 				onClick={handleClick}
 				onKeyDown={handleKeyDown}
-				className={cn("cursor-pointer text-left p-0 m-0 w-full", className)}
+				className={cn('cursor-pointer text-left p-0 m-0 w-full', className)}
 				type="button"
 			>
 				{cardContent}

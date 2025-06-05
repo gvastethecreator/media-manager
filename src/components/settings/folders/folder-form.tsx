@@ -141,11 +141,7 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 				</Button>
 			</div>
 
-			{errorMessage && (
-				<div className="text-xs text-red-500 px-1">
-					{errorMessage}
-				</div>
-			)}
+			{errorMessage && <div className="text-xs text-red-500 px-1">{errorMessage}</div>}
 		</form>
 	);
 }
