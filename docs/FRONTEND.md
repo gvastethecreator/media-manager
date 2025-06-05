@@ -4,7 +4,7 @@
 
 ### Core
 
-- **Next.js 15**
+- **Next.js 15.3.3**
 
   - App Router
   - Server Components

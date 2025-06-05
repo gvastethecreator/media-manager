@@ -1,8 +1,8 @@
-# Guía para Server Actions en Next.js 15
+# Guía para Server Actions en Next.js 15.3.3
 
 ## Introducción
 
-Las Server Actions en Next.js 15 permiten ejecutar código asíncrono en el servidor directamente desde componentes del cliente o servidor. Esta guía describe las mejores prácticas y patrones a seguir al implementar Server Actions en nuestra aplicación de gestión de imágenes.
+Las Server Actions en Next.js 15.3.3 permiten ejecutar código asíncrono en el servidor directamente desde componentes del cliente o servidor. Esta guía describe las mejores prácticas y patrones a seguir al implementar Server Actions en nuestra aplicación de gestión de imágenes.
 
 ## Reglas Fundamentales
 
@@ -429,6 +429,6 @@ export async function createFolder(data: FolderData): Promise<Folder> {
 
 ## Conclusión
 
-Siguiendo estos patrones y mejores prácticas, mantendremos un código limpio, predecible y libre de errores al trabajar con Server Actions en Next.js 15. Estos patrones aseguran que nuestro código se adhiera a las restricciones del framework mientras mantiene una buena arquitectura y organización.
+Siguiendo estos patrones y mejores prácticas, mantendremos un código limpio, predecible y libre de errores al trabajar con Server Actions en Next.js 15.3.3. Estos patrones aseguran que nuestro código se adhiera a las restricciones del framework mientras mantiene una buena arquitectura y organización.
 
 Recuerda que las restricciones de `'use server'` están diseñadas para asegurar un límite claro entre código del servidor y cliente, mejorando la seguridad y predecibilidad de nuestra aplicación.
