@@ -4,6 +4,7 @@
  */
 
 import type { FolderExtended } from '@/types/entities/folder';
+import { createSelector } from 'reselect';
 import { create } from 'zustand';
 import { createCoreSlice } from './slices/core';
 import { createFiltersSlice } from './slices/filters';
@@ -51,71 +52,76 @@ export const selectActiveOnly = (state: FolderStore) => state.filtersState.activ
 export const selectCategoryFilter = (state: FolderStore) => state.filtersState.categoryFilter;
 
 // Selectores compuestos que calculan información derivada
-export const selectFilteredFolders = (state: FolderStore): FolderExtended[] => {
-	const { folders } = state.coreState;
-	const { searchTerm, sortBy, sortDirection, showFavorites, activeOnly, categoryFilter } = state.filtersState;
+export const selectFilteredFolders = createSelector(
+	[selectFolders, selectSearchTerm, selectSortBy, selectSortDirection, selectShowFavorites, selectActiveOnly, selectCategoryFilter],
+	(folders, searchTerm, sortBy, sortDirection, showFavorites, activeOnly, categoryFilter): FolderExtended[] => {
+		// Aplicar filtros
+		return folders
+			.filter((folder) => {
+				// Filtro por término de búsqueda
+				if (searchTerm && !folder.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+					return false;
+				}
 
-	// Aplicar filtros
-	return folders
-		.filter((folder) => {
-			// Filtro por término de búsqueda
-			if (searchTerm && !folder.name.toLowerCase().includes(searchTerm.toLowerCase())) {
-				return false;
-			}
+				// Filtro por favoritos
+				if (showFavorites && !folder.isFavorite) {
+					return false;
+				}
 
-			// Filtro por favoritos
-			if (showFavorites && !folder.isFavorite) {
-				return false;
-			}
+				// Filtro por activo/inactivo (si applicable)
+				if (activeOnly && folder.isHidden) {
+					return false;
+				}
 
-			// Filtro por activo/inactivo (si applicable)
-			if (activeOnly && folder.isHidden) {
-				return false;
-			}
+				// Filtro por categoría
+				if (categoryFilter && folder.category !== categoryFilter) {
+					return false;
+				}
 
-			// Filtro por categoría
-			if (categoryFilter && folder.category !== categoryFilter) {
-				return false;
-			}
+				return true;
+			})
+			.sort((a, b) => {
+				// Ordenación básica
+				const aValue = a[sortBy as keyof FolderExtended];
+				const bValue = b[sortBy as keyof FolderExtended];
 
-			return true;
-		})
-		.sort((a, b) => {
-			// Ordenación básica
-			const aValue = a[sortBy as keyof FolderExtended];
-			const bValue = b[sortBy as keyof FolderExtended];
+				// Para fechas y números
+				if (typeof aValue === 'number' && typeof bValue === 'number') {
+					return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+				}
 
-			// Para fechas y números
-			if (typeof aValue === 'number' && typeof bValue === 'number') {
-				return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-			}
+				// Para strings
+				if (typeof aValue === 'string' && typeof bValue === 'string') {
+					return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+				}
 
-			// Para strings
-			if (typeof aValue === 'string' && typeof bValue === 'string') {
-				return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-			}
+				// Para fechas
+				if (aValue instanceof Date && bValue instanceof Date) {
+					return sortDirection === 'asc' ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
+				}
 
-			// Para fechas
-			if (aValue instanceof Date && bValue instanceof Date) {
-				return sortDirection === 'asc' ? aValue.getTime() - bValue.getTime() : bValue.getTime() - aValue.getTime();
-			}
-
-			return 0;
-		});
-};
+				return 0;
+			});
+	}
+);
 
 // Selector para carpetas favoritas
-export const selectFavoriteFolders = (state: FolderStore): FolderExtended[] => {
-	return state.coreState.folders.filter((folder) => folder.isFavorite);
-};
+export const selectFavoriteFolders = createSelector(
+	[selectFolders],
+	(folders): FolderExtended[] => {
+		return folders.filter((folder) => folder.isFavorite);
+	}
+);
 
 // Selector para estadísticas generales
-export const selectFolderStats = (state: FolderStore) => {
-	const folders = state.coreState.folders;
-	return {
-		total: folders.length,
-		favorites: folders.filter((folder) => folder.isFavorite).length,
-		empty: folders.filter((folder) => (folder.totalFiles || 0) === 0).length,
-		// Otras estadísticas relevantes
-	};
-};
+export const selectFolderStats = createSelector(
+	[selectFolders],
+	(folders) => {
+		return {
+			total: folders.length,
+			favorites: folders.filter((folder) => folder.isFavorite).length,
+			empty: folders.filter((folder) => (folder.totalFiles || 0) === 0).length,
+			// Otras estadísticas relevantes
+		};
+	}
+);

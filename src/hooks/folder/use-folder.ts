@@ -4,22 +4,23 @@
  */
 
 import {
-	selectCurrentFolder,
-	selectError,
-	selectFavoriteFolders,
-	selectFilteredFolders,
-	selectFolderStats,
-	selectFolders,
-	selectIsLoading,
-	selectItemSize,
-	selectSearchTerm,
-	selectShowFavorites,
-	selectSortBy,
-	selectSortDirection,
-	selectViewMode,
-	useFolderStore,
+    selectCurrentFolder,
+    selectError,
+    selectFavoriteFolders,
+    selectFilteredFolders,
+    selectFolderStats,
+    selectFolders,
+    selectIsLoading,
+    selectItemSize,
+    selectSearchTerm,
+    selectShowFavorites,
+    selectSortBy,
+    selectSortDirection,
+    selectViewMode,
+    useFolderStore,
 } from '@/store/entities/folder';
 import { useEffect } from 'react';
+import { shallow } from 'zustand/shallow';
 
 /**
  * Hook para facilitar el acceso al store de carpetas
@@ -52,7 +53,7 @@ export function useFolder(
 
 	// Acceso al estado mediante selectores para optimizar renders
 	const folders = useFolderStore(selectFolders);
-	const filteredFolders = useFolderStore(selectFilteredFolders);
+	const filteredFolders = useFolderStore(selectFilteredFolders, shallow);
 	const currentFolder = useFolderStore(selectCurrentFolder);
 	const isLoading = useFolderStore(selectIsLoading);
 	const error = useFolderStore(selectError);
@@ -62,8 +63,8 @@ export function useFolder(
 	const sortDirection = useFolderStore(selectSortDirection);
 	const searchTerm = useFolderStore(selectSearchTerm);
 	const showFavorites = useFolderStore(selectShowFavorites);
-	const favoriteFolders = useFolderStore(selectFavoriteFolders);
-	const stats = useFolderStore(selectFolderStats);
+	const favoriteFolders = useFolderStore(selectFavoriteFolders, shallow);
+	const stats = useFolderStore(selectFolderStats, shallow);
 
 	// Efecto para cargar datos al montar el componente
 	useEffect(() => {

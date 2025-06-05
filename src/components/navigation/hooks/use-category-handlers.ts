@@ -24,7 +24,10 @@ export function useCategoryHandlers() {
 
 	// Stores específicos para cada entidad
 	const { selectCollection, selectedCollectionId } = useCollectionStore();
-	const { selectFolder, selectedFolderId } = useFolderStore();
+	const {
+		coreActions: { setCurrentFolder: selectFolder },
+		coreState: { currentFolderId: selectedFolderId },
+	} = useFolderStore();
 	const { selectTag, selectedTagId } = useTagStore();
 	const { selectAlbum, selectedAlbumId } = useAlbumStore();
 	const { selectCharacter, selectedCharacterId } = useCharacterStore();
