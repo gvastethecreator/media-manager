@@ -36,10 +36,11 @@ export const groupImages = (images: Image[], groupBy: string | null): Record<str
 	return images.reduce(
 		(groups, image) => {
 			const key = image[groupBy]?.toString() || 'otros';
-			return {
-				...groups,
-				[key]: [...(groups[key] || []), image],
-			};
+			if (!groups[key]) {
+				groups[key] = [];
+			}
+			groups[key].push(image);
+			return groups;
 		},
 		{} as Record<string, Image[]>
 	);
