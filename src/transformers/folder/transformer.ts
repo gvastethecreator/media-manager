@@ -50,6 +50,8 @@ function transformFolderBase(folder: any): FolderComplete {
 				uploadedImages: 0,
 				tags: 0,
 			},
+			totalFiles: 0,
+			totalSize: 0,
 			metadata: folder?.metadata || {},
 			color: folder?.color || '#3b82f6',
 			emoji: folder?.emoji || '📁',
@@ -120,3 +122,4 @@ function transformFolderToExtended(
 
 // Exportar las funciones principales con sus nombres finales
 export { transformFolderBase, transformFolderToExtended };
+

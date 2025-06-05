@@ -62,8 +62,9 @@ export function FoldersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 
 	// 🆕 Usar los nuevos stores específicos
-	const folderStore = useFolderStore();
-	const { setSelected: setCurrentFolder, loadFolder: setCurrentFolderId } = folderStore;
+	const {
+		coreActions: { fetchFolderById: setCurrentFolderId, setCurrentFolder },
+	} = useFolderStore();
 
 	// 🧹 Para limpiar selección - usar el hook base directamente
 	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
@@ -103,12 +104,12 @@ export function FoldersView(_props: ViewProps) {
 				viewLogger.debug('Datos de carpetas transformados:', {
 					firstFolder: transformedData[0]
 						? {
-								id: transformedData[0].id,
-								name: transformedData[0].name,
-								totalSize: transformedData[0].totalSize,
-								totalFiles: transformedData[0].totalFiles,
-								imageCount: transformedData[0]._count?.images,
-							}
+							id: transformedData[0].id,
+							name: transformedData[0].name,
+							totalSize: transformedData[0].totalSize,
+							totalFiles: transformedData[0].totalFiles,
+							imageCount: transformedData[0]._count?.images,
+						}
 						: 'No hay carpetas',
 				});
 
@@ -198,22 +199,6 @@ export function FoldersView(_props: ViewProps) {
 				// 2. 🆝 Actualizar el nuevo store de carpetas - cargar la carpeta específica
 				await setCurrentFolderId(folder.id);
 
-				// Para simplificar la migración, solo pasamos la carpeta completa al store
-				setCurrentFolder({
-					id: folder.id,
-					name: folder.name,
-					path: folder.path,
-					emoji: folder.emoji,
-					color: folder.color,
-					isAutoIndex: folder.isAutoIndex,
-					lastIndexed: folder.lastIndexed,
-					totalFiles: folder.totalFiles,
-					totalSize: folder.totalSize,
-					imageCount: folder._count?.images || 0,
-					createdAt: folder.createdAt,
-					updatedAt: folder.updatedAt,
-				});
-
 				// 3. Ahora cambiar la vista
 				setCurrentView('folder-content');
 
@@ -222,7 +207,7 @@ export function FoldersView(_props: ViewProps) {
 				viewLogger.error('❌ Error al cambiar a la carpeta:', error);
 			}
 		},
-		[setCurrentView, deselectAllFiles, setCurrentFolder, setCurrentFolderId]
+		[setCurrentView, deselectAllFiles, setCurrentFolderId]
 	);
 
 	if (error) {

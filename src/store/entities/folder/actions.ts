@@ -4,19 +4,20 @@
  */
 
 import {
-	createFolder as createFolderAction,
-	deleteFolder as deleteFolderAction,
-	getFolder as getFolderAction,
-	getFolders as getFoldersAction,
-	updateFolder as updateFolderAction,
+    createFolder as createFolderAction,
+    deleteFolder as deleteFolderAction,
+    updateFolder as updateFolderAction,
 } from '@/app/actions/folders/folder-crud.actions';
 
+// 🚀 NUEVAS IMPORTACIONES: Funciones de servicio para obtener datos
+import { getFolderById as getFolderAction, searchFolders as getFoldersAction } from '@/transformers/folder';
+
 import {
-	adaptCreateFolderData,
-	adaptFolderResponse,
-	adaptFoldersArray,
-	adaptUpdateFolderData,
-	handleFolderActionError,
+    adaptCreateFolderData,
+    adaptFolderResponse,
+    adaptFoldersArray,
+    adaptUpdateFolderData,
+    handleFolderActionError,
 } from '@/adapters/folder';
 
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -31,7 +32,7 @@ const actionsLogger = clientLogger.withContext('FolderStoreActions');
 export async function fetchFolders() {
 	try {
 		actionsLogger.info('🔍 Obteniendo todas las carpetas');
-		const foldersData = await getFoldersAction();
+		const foldersData = await getFoldersAction({}); // Usar searchFolders sin filtros
 		return adaptFoldersArray(foldersData);
 	} catch (error) {
 		return handleFolderActionError(error);

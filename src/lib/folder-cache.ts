@@ -159,3 +159,32 @@ export function getFolderCacheKey(folderId: string, operation?: string): string 
   }
   return `folder:${folderId}`;
 }
+
+// 🚀 Funciones de invalidación de caché
+
+/**
+ * Invalida el caché para una carpeta específica y todas sus variantes.
+ * También limpia la caché de listas de carpetas, ya que podrían estar desactualizadas.
+ * @param folderId ID de la carpeta a invalidar.
+ */
+export function invalidateFolderCache(folderId: string): void {
+  if (!folderId) {
+    cacheLogger.warn('⚠️ Se intentó invalidar caché sin folderId');
+    return;
+  }
+  const baseKey = getFolderCacheKey(folderId); // `folder:${folderId}`
+  // Eliminar la entrada base y cualquier entrada con sufijo (ej. 'folder:ID:metadata')
+  folderResponseCache.clear(baseKey);
+  // Las listas de carpetas podrían cambiar si una carpeta se actualiza.
+  folderListCache.clear(); // Invalidar todas las listas
+  cacheLogger.info(`🗑️ Caché invalidado para folderId: ${folderId} y listas de carpetas`);
+}
+
+/**
+ * Invalida toda la caché de carpetas (respuestas individuales y listas).
+ */
+export function invalidateAllFolderCache(): void {
+  folderResponseCache.clear('folder:'); // Elimina todas las entradas de `folderResponseCache` que comienzan con 'folder:'
+  folderListCache.clear(); // Elimina todas las entradas de `folderListCache`
+  cacheLogger.info('🗑️ Toda la caché de carpetas y listas de carpetas ha sido invalidada.');
+}

@@ -6,12 +6,12 @@
 import { Logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import type {
-	Folder,
-	FolderComplete,
-	FolderCreateInput,
-	FolderSearchOptions,
-	FolderUpdateInput,
-	FolderWithStats,
+    Folder,
+    FolderComplete,
+    FolderCreateInput,
+    FolderSearchOptions,
+    FolderUpdateInput,
+    FolderWithStats,
 } from '@/types/entities/folder/types';
 import { transformFolder } from './index';
 import { mapCreateFolderDataToPrisma, mapFolderSearchOptionsToPrisma, mapUpdateFolderDataToPrisma } from './mappers';
@@ -51,8 +51,12 @@ export async function getFolderById(id: string): Promise<FolderComplete | null> 
 
 		return transformFolder(folder);
 	} catch (error) {
-		logger.error(`❌ Error al obtener carpeta por ID: ${id}`, error);
-		throw error;
+		const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+		logger.error(`❌ Error al obtener carpeta por ID: ${id}`, {
+			message: errorMessage,
+			stack: error instanceof Error ? error.stack : undefined,
+		});
+		throw new Error(`Error al obtener carpeta por ID: ${id}. Causa: ${errorMessage}`);
 	}
 }
 
@@ -145,8 +149,13 @@ export async function searchFolders(options: FolderSearchOptions = {}): Promise<
 			hasMore,
 		};
 	} catch (error) {
-		logger.error('❌ Error al buscar carpetas:', error);
-		throw error;
+		const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+		logger.error('❌ Error al buscar carpetas:', {
+			message: errorMessage,
+			stack: error instanceof Error ? error.stack : undefined,
+			options,
+		});
+		throw new Error(`Error al buscar carpetas: ${errorMessage}`);
 	}
 }
 

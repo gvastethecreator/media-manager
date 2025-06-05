@@ -5,7 +5,7 @@
 
 import type { FolderResponse, ProcessStatus } from '@/app/actions/folders/folder-types';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { deserializeFolderResponse } from '@/transformers/folder';
+import { transformFolderToExtended } from '@/transformers/folder';
 import type { CreateFolderData, FolderExtended, UpdateFolderData } from '@/types/entities/folder';
 
 const adapterLogger = serverLogger.withContext('FolderAdapter');
@@ -35,7 +35,7 @@ export function adaptFolderResponse(folderResponse: FolderResponse | null): Acti
 
 	try {
 		// Usar el transformador para convertir al nuevo formato
-		const transformedFolder = deserializeFolderResponse(folderResponse);
+		const transformedFolder = transformFolderToExtended(folderResponse);
 
 		return {
 			success: true,
@@ -59,7 +59,7 @@ export function adaptFolderResponse(folderResponse: FolderResponse | null): Acti
  */
 export function adaptFoldersArray(foldersResponse: FolderResponse[]): ActionResponse<FolderExtended[]> {
 	try {
-		const transformedFolders = foldersResponse.map(deserializeFolderResponse);
+		const transformedFolders = foldersResponse.map(transformFolderToExtended);
 
 		return {
 			success: true,
