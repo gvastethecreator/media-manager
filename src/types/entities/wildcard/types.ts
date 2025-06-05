@@ -19,6 +19,18 @@ import type { Video } from '../video/video-types';
 import type { WorldItem } from '../world-item/types';
 
 /**
+ * Interfaz para un hijo de wildcard
+ */
+export interface WildcardChild {
+	id?: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+	shortcut?: string | null;
+	children?: WildcardChild[];
+}
+
+/**
  * Interfaz base para comodín
  */
 export interface WildcardBase extends PrismaWildcard {
@@ -88,7 +100,7 @@ export interface WildcardUI {
 	hasParent: boolean;
 	hasChildren: boolean;
 	itemCount: number;
-	parsedChildren: any[];
+	parsedChildren: WildcardChild[];
 	lastUpdated: Date;
 }
 
@@ -96,7 +108,7 @@ export interface WildcardUI {
  * Interfaz para datos deserializados
  */
 export interface WildcardDeserialized extends WildcardBase {
-	parsedChildren?: any[];
+	parsedChildren?: WildcardChild[];
 	_relations?: WildcardRelations;
 	_count?: WildcardCounts;
 	_ui?: WildcardUI;
@@ -107,13 +119,14 @@ export interface WildcardDeserialized extends WildcardBase {
  */
 export interface WildcardWithRelations extends WildcardBase {
 	_relations: WildcardRelations;
+	childrenData?: WildcardChild[];
 }
 
 /**
  * Interfaz completa que incluye todos los campos y relaciones
  */
 export interface WildcardComplete extends WildcardBase {
-	parsedChildren: any[];
+	parsedChildren: WildcardChild[];
 	_relations?: WildcardRelations;
 	_count?: WildcardCounts;
 	_ui: WildcardUI;
@@ -129,7 +142,7 @@ export interface CreateWildcardData {
 	description?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
-	children?: string | any[];
+	children?: string | WildcardChild[];
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	parentId?: string | null;
@@ -145,7 +158,7 @@ export interface UpdateWildcardData {
 	description?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
-	children?: string | any[];
+	children?: string | WildcardChild[];
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	parentId?: string | null;

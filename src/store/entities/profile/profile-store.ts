@@ -82,8 +82,8 @@ export const useProfileStore = create<ProfileStore>()(
 							set({ activeProfile: transformedProfile });
 							return transformedProfile;
 						}
-							set({ activeProfile: null });
-							return null;
+						set({ activeProfile: null });
+						return null;
 					} catch (error) {
 						const errorMessage = error instanceof Error ? error.message : 'Error obteniendo perfil activo';
 						set({ activeProfileError: errorMessage });
@@ -110,8 +110,8 @@ export const useProfileStore = create<ProfileStore>()(
 
 							return true;
 						}
-							set({ activeProfileError: 'No se pudo activar el perfil' });
-							return false;
+						set({ activeProfileError: 'No se pudo activar el perfil' });
+						return false;
 					} catch (error) {
 						const errorMessage = error instanceof Error ? error.message : 'Error estableciendo perfil activo';
 						set({ activeProfileError: errorMessage });

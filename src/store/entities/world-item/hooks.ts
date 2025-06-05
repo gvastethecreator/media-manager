@@ -165,14 +165,18 @@ export const useWorldItemActions = () => {
 		// Acciones por lotes
 		updateMultiple: useCallback(
 			(ids: string[], data: Partial<WorldItem>) => {
-				ids.forEach((id) => store.updateWorldItem(id, data));
+				for (const id of ids) {
+					store.updateWorldItem(id, data);
+				}
 			},
 			[store]
 		),
 
 		removeMultiple: useCallback(
 			(ids: string[]) => {
-				ids.forEach((id) => store.removeWorldItem(id));
+				for (const id of ids) {
+					store.removeWorldItem(id);
+				}
 			},
 			[store]
 		),

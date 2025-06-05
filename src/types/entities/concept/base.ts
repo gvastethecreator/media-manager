@@ -4,7 +4,9 @@ import type { EntityType } from '../entities';
 /**
  * Tipo base para Concept derivado del schema de Prisma
  */
-export type ConceptBase = Prisma.ConceptGetPayload<{}>;
+export type ConceptBase = Prisma.ConceptGetPayload<{
+	include: { _count: true };
+}>;
 
 /**
  * Interfaz para crear un nuevo concepto

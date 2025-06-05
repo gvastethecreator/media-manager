@@ -5,16 +5,33 @@
 
 import { logger } from '@/lib/logger';
 import { WildcardSchema } from '@/types/entities/wildcard/schema';
-import type { WildcardBase, WildcardWithRelations } from '@/types/entities/wildcard/types';
+import type { WildcardBase, WildcardChild, WildcardWithRelations } from '@/types/entities/wildcard/types';
 
 /**
  * Extiende un comodín con campos deserializados y relaciones
  */
 export function extendWildcard(wildcard: WildcardBase): WildcardWithRelations {
 	try {
-		// Inicializar objeto de conteo
+		// Inicializar objeto de relaciones y conteo
 		const extendedWildcard: WildcardWithRelations = {
 			...wildcard,
+			_relations: {
+				parent: null,
+				childWildcards: [],
+				images: [],
+				videos: [],
+				albums: [],
+				collections: [],
+				tags: [],
+				characters: [],
+				places: [],
+				worldItems: [],
+				concepts: [],
+				prompts: [],
+				notes: [],
+				properties: [],
+				groups: [],
+			},
 			_count: {
 				childWildcards: 0,
 				images: 0,
@@ -36,9 +53,12 @@ export function extendWildcard(wildcard: WildcardBase): WildcardWithRelations {
 		return extendedWildcard;
 	} catch (error) {
 		logger.error('Error extendiendo el comodín:', error);
-		// Devolver el comodín original si hay error
+		// Devolver el comodín original si hay error, con campos mínimos requeridos
 		return {
 			...wildcard,
+			_relations: {
+				childWildcards: [],
+			},
 			_count: {},
 		};
 	}
@@ -47,7 +67,7 @@ export function extendWildcard(wildcard: WildcardBase): WildcardWithRelations {
 /**
  * Serializa el campo de hijos de un comodín
  */
-export function serializeWildcardChildren(children: any[]): string {
+export function serializeWildcardChildren(children: WildcardChild[]): string {
 	try {
 		return JSON.stringify(children || []);
 	} catch (error) {
@@ -59,7 +79,7 @@ export function serializeWildcardChildren(children: any[]): string {
 /**
  * Deserializa el campo de hijos de un comodín
  */
-export function deserializeWildcardChildren(childrenStr: string): any[] {
+export function deserializeWildcardChildren(childrenStr: string): WildcardChild[] {
 	try {
 		if (!childrenStr) return [];
 		return JSON.parse(childrenStr);
@@ -87,38 +107,47 @@ export function validateWildcard(wildcard: WildcardBase): boolean {
  */
 export function buildWildcardTree(wildcards: WildcardWithRelations[]): WildcardWithRelations[] {
 	try {
-		const map = new Map<string, WildcardWithRelations>();
+		const map = new Map<string, WildcardWithRelations & { childWildcards: WildcardWithRelations[] }>();
 		const tree: WildcardWithRelations[] = [];
 
 		// Crear un mapa para búsqueda rápida
 		for (const wildcard of wildcards) {
-			wildcard.childWildcards = [];
-			map.set(wildcard.id, wildcard);
+			const extendedWildcard = {
+				...wildcard,
+				childWildcards: [],
+			};
+			map.set(wildcard.id, extendedWildcard);
 		}
 
 		// Construir la jerarquía
 		for (const wildcard of wildcards) {
+			const wildcardWithChildren = map.get(wildcard.id);
+			if (!wildcardWithChildren) continue;
+
 			if (wildcard.parentId) {
 				// Obtener el padre si existe
 				const parent = map.get(wildcard.parentId);
 				if (parent) {
 					// Agregar como hijo
-					parent.childWildcards.push(wildcard);
+					const childItem = map.get(wildcard.id);
+					if (childItem) {
+						parent.childWildcards.push(childItem);
 
-					// Si el padre tiene color o emoji y el hijo no, heredar
-					if (!wildcard.color && parent.color) {
-						wildcard.color = parent.color;
-					}
-					if (!wildcard.emoji && parent.emoji) {
-						wildcard.emoji = parent.emoji;
+						// Si el padre tiene color o emoji y el hijo no, heredar
+						if (!wildcard.color && parent.color) {
+							childItem.color = parent.color;
+						}
+						if (!wildcard.emoji && parent.emoji) {
+							childItem.emoji = parent.emoji;
+						}
 					}
 				} else {
 					// Si no se encuentra el padre, agregar a la raíz
-					tree.push(wildcard);
+					tree.push(wildcardWithChildren);
 				}
 			} else {
 				// Si no tiene padre, es un nodo raíz
-				tree.push(wildcard);
+				tree.push(wildcardWithChildren);
 			}
 		}
 

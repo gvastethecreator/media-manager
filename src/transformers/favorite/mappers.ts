@@ -5,16 +5,16 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	FavoriteBase,
-	FavoriteCreateInput,
-	FavoriteExtended,
-	FavoriteFilters,
-	FavoriteUpdateInput,
+    FavoriteBase,
+    FavoriteCreateInput,
+    FavoriteExtended,
+    FavoriteFilters,
+    FavoriteUpdateInput,
 } from '@/types/entities/favorite';
 import {
-	FAVORITE_ENTITY_COLORS,
-	FAVORITE_ENTITY_DISPLAY_NAMES,
-	FAVORITE_ENTITY_EMOJIS,
+    FAVORITE_ENTITY_COLORS,
+    FAVORITE_ENTITY_DISPLAY_NAMES,
+    FAVORITE_ENTITY_EMOJIS,
 } from '@/types/entities/favorite';
 
 const mappersLogger = serverLogger.withContext('Favorite:Mappers');
@@ -106,13 +106,13 @@ export function groupFavoritesByType(favorites: FavoriteExtended[]) {
 	const groupedByType: Record<string, FavoriteExtended[]> = {};
 
 	// Agrupar por tipo de entidad
-	favorites.forEach((favorite) => {
+	for (const favorite of favorites) {
 		const type = favorite.entityType.toLowerCase();
 		if (!groupedByType[type]) {
 			groupedByType[type] = [];
 		}
 		groupedByType[type].push(favorite);
-	});
+	}
 
 	// Convertir a formato para UI
 	return Object.entries(groupedByType).map(([type, items]) => ({

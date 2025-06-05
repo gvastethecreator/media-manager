@@ -266,7 +266,7 @@ export function EntityForm({
 					fieldSchema = fieldSchema.min(
 						field.validation.minLength,
 						field.validation.customMessage ||
-						`${field.label} debe tener al menos ${field.validation.minLength} caracteres`
+							`${field.label} debe tener al menos ${field.validation.minLength} caracteres`
 					);
 				}
 
@@ -274,7 +274,7 @@ export function EntityForm({
 					fieldSchema = fieldSchema.max(
 						field.validation.maxLength,
 						field.validation.customMessage ||
-						`${field.label} no puede tener más de ${field.validation.maxLength} caracteres`
+							`${field.label} no puede tener más de ${field.validation.maxLength} caracteres`
 					);
 				}
 

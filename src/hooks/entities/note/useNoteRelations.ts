@@ -44,7 +44,7 @@ export const useNoteRelations = () => {
 			if (isAttached) {
 				return detachNoteFromEntity(noteId, entityId, entityType);
 			}
-				return attachNoteToEntity(noteId, entityId, entityType);
+			return attachNoteToEntity(noteId, entityId, entityType);
 		},
 		[attachNoteToEntity, detachNoteFromEntity]
 	);
