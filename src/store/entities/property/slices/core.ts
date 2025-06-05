@@ -75,21 +75,12 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 
 	addProperties: (properties) => {
 		propertyLogger.info('✅ Añadiendo múltiples propiedades al store', properties.length);
-		const propertiesMap = properties.reduce(
-			(acc, property) => ({
-				...acc,
-				[property.id]: extendProperty(property),
-			}),
-			{}
-		);
+		const propertiesMap = propertiesToMap(properties);
 
 		set((state) => ({
 			core: {
 				...state.core,
-				properties: {
-					...state.core.properties,
-					...propertiesMap,
-				},
+				properties: propertiesMap,
 				lastUpdated: new Date(),
 			},
 		}));
@@ -355,3 +346,18 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 		}
 	},
 });
+
+/**
+ * Convierte un array de propiedades a un mapa por ID
+ * @param properties Array de propiedades
+ * @returns Mapa de propiedades por ID
+ */
+function propertiesToMap(properties: PropertyBase[]): Record<string, PropertyWithRelations> {
+	const propertiesMap: Record<string, PropertyWithRelations> = {};
+
+	for (const property of properties) {
+		propertiesMap[property.id] = extendProperty(property);
+	}
+
+	return propertiesMap;
+}

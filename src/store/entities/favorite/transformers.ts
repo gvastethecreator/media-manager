@@ -44,3 +44,47 @@ export const groupImages = (images: Image[], groupBy: string | null): Record<str
 		{} as Record<string, Image[]>
 	);
 };
+
+/**
+ * Agrupa imágenes por un campo específico
+ * @param images Lista de imágenes a agrupar
+ * @param groupBy Campo por el que agrupar
+ * @returns Objeto con imágenes agrupadas
+ */
+export function groupImagesByField(images: Image[], groupBy: keyof Image): Record<string, Image[]> {
+	// Validar que el campo existe
+	if (!images.length || !(groupBy in images[0])) {
+		return {};
+	}
+
+	// Crear objeto para agrupar
+	const result: Record<string, Image[]> = {};
+
+	// Agrupar imágenes
+	for (const image of images) {
+		const key = image[groupBy]?.toString() || 'otros';
+		if (!result[key]) {
+			result[key] = [];
+		}
+		result[key].push(image);
+	}
+
+	return result;
+}
+
+/**
+ * Agrupa imágenes favoritas por categoría
+ * @param favorites Lista de favoritos
+ * @returns Imágenes agrupadas por categoría
+ */
+export function groupFavoritesByCategory(favorites: FavoriteWithImage[]): Record<string, ImageWithFavorite[]> {
+	// Extraer imágenes de favoritos
+	const images = favorites.map((fav) => ({
+		...fav.image,
+		favoriteId: fav.id,
+		favoriteCreatedAt: fav.createdAt,
+	}));
+
+	// Usar la función de agrupación
+	return groupImagesByField(images, 'category');
+}

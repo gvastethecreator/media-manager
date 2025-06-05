@@ -152,12 +152,7 @@ export function EntityCard({
 					<div className="mt-2 flex gap-1">
 						{thumbnails.slice(0, 4).map((src) => (
 							<div key={src} className="w-10 h-10 overflow-hidden rounded-sm">
-								<img
-									src={src}
-									alt={`${title} thumbnail`}
-									className="w-full h-full object-cover"
-									loading="lazy"
-								/>
+								<img src={src} alt={`${title} thumbnail`} className="w-full h-full object-cover" loading="lazy" />
 							</div>
 						))}
 						{thumbnails.length > 4 && (

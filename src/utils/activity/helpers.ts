@@ -102,7 +102,7 @@ export function filterActivitiesByCategory(activities: Activity[], category: Act
 export function groupActivitiesByDate(activities: Activity[]): Record<string, Activity[]> {
 	const groupedActivities: Record<string, Activity[]> = {};
 
-	activities.forEach((activity) => {
+	for (const activity of activities) {
 		const date = new Date(activity.createdAt);
 		const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
 
@@ -111,7 +111,7 @@ export function groupActivitiesByDate(activities: Activity[]): Record<string, Ac
 		}
 
 		groupedActivities[dateKey].push(activity);
-	});
+	}
 
 	return groupedActivities;
 }

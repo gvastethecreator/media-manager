@@ -24,7 +24,8 @@ export function bufferToBase64Image(buffer: Buffer | null | undefined, mimeType 
 		// Asegurarnos de que estamos tratando con un Buffer
 		if (Buffer.isBuffer(buffer)) {
 			return `data:${mimeType};base64,${buffer.toString('base64')}`;
-		}if (typeof buffer === 'object') {
+		}
+		if (typeof buffer === 'object') {
 			// Intentar convertir un objeto similar a buffer
 			return `data:${mimeType};base64,${Buffer.from(buffer).toString('base64')}`;
 		}

@@ -39,7 +39,7 @@ export function transformFiles(files: any[]): any[] {
 			if (file.isDirectory) {
 				return toEnhancedDirectory(file);
 			}
-				return toEnhancedImageFile(file);
+			return toEnhancedImageFile(file);
 		});
 	} catch (error) {
 		console.error('Error transformando archivos:', error);

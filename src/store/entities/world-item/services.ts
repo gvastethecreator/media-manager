@@ -260,19 +260,27 @@ export class WorldItemService {
 			// Actualizar el store según la operación
 			switch (options.operation) {
 				case 'delete':
-					options.ids.forEach((id) => worldItemApi.removeWorldItem(id));
+					for (const id of options.ids) {
+						worldItemApi.removeWorldItem(id);
+					}
 					break;
 				case 'favorite':
-					options.ids.forEach((id) => worldItemApi.updateWorldItem(id, { isFavorite: true }));
+					for (const id of options.ids) {
+						worldItemApi.updateWorldItem(id, { isFavorite: true });
+					}
 					break;
 				case 'unfavorite':
-					options.ids.forEach((id) => worldItemApi.updateWorldItem(id, { isFavorite: false }));
+					for (const id of options.ids) {
+						worldItemApi.updateWorldItem(id, { isFavorite: false });
+					}
 					break;
 				case 'update':
 				case 'changeType':
 				case 'changeCategory':
 					if (options.data) {
-						options.ids.forEach((id) => worldItemApi.updateWorldItem(id, options.data as Partial<WorldItem>));
+						for (const id of options.ids) {
+							worldItemApi.updateWorldItem(id, options.data as Partial<WorldItem>);
+						}
 					}
 					break;
 			}

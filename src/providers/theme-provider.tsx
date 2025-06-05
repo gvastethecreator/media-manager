@@ -24,13 +24,13 @@ const customThemes = [
 function ThemeDebugger() {
 	useEffect(() => {
 		const observer = new MutationObserver((mutations) => {
-			mutations.forEach((mutation) => {
+			for (const mutation of mutations) {
 				if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
 					const target = mutation.target as HTMLElement;
 					console.log(`Tema cambiado a: ${target.getAttribute('data-theme')}`);
 					console.log(`HTML tiene atributo data-theme: ${document.documentElement.getAttribute('data-theme')}`);
 				}
-			});
+			}
 		});
 
 		observer.observe(document.documentElement, { attributes: true });
