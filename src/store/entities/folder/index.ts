@@ -27,11 +27,12 @@ export const useFolderStore = create<FolderStore>()(
         name: 'folder-store',
         // Solo persistir algunas partes del estado
         partialize: (state) => ({
-          // Solo persiste filtros y UI
+          // Solo persiste filtros y UI (sin selectedIds para evitar estados inconsistentes)
           filters: state.filters,
           ui: {
             viewMode: state.ui.viewMode,
-            expandedIds: state.ui.expandedIds
+            expandedIds: state.ui.expandedIds,
+            selectedIds: [] // 🔧 Siempre resetear selección al persistir
           }
         }),
       }

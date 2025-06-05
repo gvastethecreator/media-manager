@@ -63,27 +63,8 @@ export const notifyGroupChange = async (
   action: 'create' | 'update' | 'delete' | 'items:add' | 'items:remove',
   group: GroupComplete | { id: string }
 ) => {
-  let eventType: string;
-
-  switch (action) {
-    case 'create':
-      eventType = GROUP_EVENTS.CREATED;
-      break;
-    case 'update':
-      eventType = GROUP_EVENTS.UPDATED;
-      break;
-    case 'delete':
-      eventType = GROUP_EVENTS.DELETED;
-      break;
-    case 'items:add':
-      eventType = GROUP_EVENTS.ITEMS_ADDED;
-      break;
-    case 'items:remove':
-      eventType = GROUP_EVENTS.ITEMS_REMOVED;
-      break;
-    default:
-      eventType = 'group:modified';
-  }
+  // Usar EventType válido del sistema central
+  const eventType = 'update'; // Tipo válido para grupos según EventType
 
   // Emitir evento
   await emit({
@@ -94,7 +75,7 @@ export const notifyGroupChange = async (
   // Notificar a estadísticas
   statsEventEmitter.emit(STATS_EVENTS.GROUP_CHANGE);
 
-  logger.info('🔔 Notificado cambio en grupo: ' + action, { groupId: group.id });
+  logger.info(`🔔 Notificado cambio en grupo: ${action}`, { groupId: group.id });
 };
 
 /**
@@ -102,19 +83,22 @@ export const notifyGroupChange = async (
  */
 export const getGroupService = async (id: string): Promise<GroupComplete | null> => {
   try {
-    logger.info('🔍 Buscando grupo con ID: ' + id);
+    logger.info(`🔍 Buscando grupo con ID: ${id}`);
     const group = await getGroupById(id, { includeRelations: true, throwIfNotFound: false });
 
     if (!group) {
-      logger.warn('⚠️ Grupo no encontrado: ' + id);
+      logger.warn(`⚠️ Grupo no encontrado: ${id}`);
       return null;
     }
 
-    logger.info('✅ Grupo encontrado: ' + group.name);
+    logger.info(`✅ Grupo encontrado: ${group.name}`);
     return group;
   } catch (error) {
     logger.error('❌ Error al obtener grupo por ID', { error, groupId: id });
-    throw createGroupError('Error al obtener grupo: ' + error.message, GroupErrorCode.OPERATION_FAILED, error);
+
+    // Type guard para manejar error unknown
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw createGroupError(`Error al obtener grupo: ${errorMessage}`, GroupErrorCode.OPERATION_FAILED, error);
   }
 };
 
@@ -122,19 +106,17 @@ export const getGroupService = async (id: string): Promise<GroupComplete | null>
  * Obtiene múltiples grupos por sus IDs
  */
 export const getGroupsByIdsService = async (ids: string[]): Promise<GroupComplete[]> => {
-  try {
-    logger.info('🔍 Buscando grupos por IDs, cantidad: ' + ids.length);
+  try {    logger.info(`🔍 Buscando grupos por IDs, cantidad: ${ids.length}`);
 
     if (ids.length === 0) {
       return [];
     }
 
     const groups = await getGroupsByIds(ids, { includeRelations: true });
-    logger.info('✅ Grupos encontrados: ' + groups.length);
-    return groups;
-  } catch (error) {
+    logger.info(`✅ Grupos encontrados: ${groups.length}`);
+    return groups;  } catch (error) {
     logger.error('❌ Error al obtener grupos por IDs', { error, ids });
-    throw createGroupError('Error al obtener grupos: ' + error.message, GroupErrorCode.OPERATION_FAILED, error);
+    throw createGroupError(`Error al obtener grupos: ${error instanceof Error ? error.message : String(error)}`, GroupErrorCode.OPERATION_FAILED, error);
   }
 };
 
@@ -150,15 +132,14 @@ export const searchGroupsService = async (
     sortOrder?: 'asc' | 'desc';
     includeInactive?: boolean;
   } = {}
-): Promise<GroupSearchResult> => {
-  try {
+): Promise<GroupSearchResult> => {  try {
     logger.info('🔍 Buscando grupos con filtros');
     const result = await searchGroups(filters, options);
-    logger.info('✅ Búsqueda completada, encontrados ' + result.pagination.totalItems + ' grupos');
+    logger.info(`✅ Búsqueda completada, encontrados ${result.total} grupos`);
     return result;
   } catch (error) {
     logger.error('❌ Error al buscar grupos', { error, filters, options });
-    throw createGroupError('Error al buscar grupos: ' + error.message, GroupErrorCode.OPERATION_FAILED, error);
+    throw createGroupError(`Error al buscar grupos: ${error instanceof Error ? error.message : String(error)}`, GroupErrorCode.OPERATION_FAILED, error);
   }
 };
 
@@ -173,11 +154,9 @@ export const createGroupService = async (data: GroupCreateInput): Promise<GroupC
     if (data.name) {
       const existingGroup = await prisma.group.findFirst({
         where: { name: data.name }
-      });
-
-      if (existingGroup) {
+      });      if (existingGroup) {
         throw createGroupError(
-          'Ya existe un grupo con el nombre "' + data.name + '"',
+          `Ya existe un grupo con el nombre "${data.name}"`,
           GroupErrorCode.ALREADY_EXISTS
         );
       }
@@ -187,18 +166,16 @@ export const createGroupService = async (data: GroupCreateInput): Promise<GroupC
     const group = await createGroup(data);
 
     // Notificar creación
-    await notifyGroupChange('create', group);
-
-    logger.info('✅ Grupo creado: ' + group.name, { groupId: group.id });
+    await notifyGroupChange('create', group);    logger.info(`✅ Grupo creado: ${group.name}`, { groupId: group.id });
     return group;
   } catch (error) {
     logger.error('❌ Error al crear grupo', { error, data });
 
-    if (error.name === 'GroupServiceError') {
+    if (error instanceof Error && error.name === 'GroupServiceError') {
       throw error;
     }
 
-    throw createGroupError('Error al crear grupo: ' + error.message, GroupErrorCode.OPERATION_FAILED, error);
+    throw createGroupError(`Error al crear grupo: ${error instanceof Error ? error.message : String(error)}`, GroupErrorCode.OPERATION_FAILED, error);
   }
 };
 
@@ -207,7 +184,7 @@ export const createGroupService = async (data: GroupCreateInput): Promise<GroupC
  */
 export const updateGroupService = async (id: string, data: GroupUpdateInput): Promise<GroupComplete> => {
   try {
-    logger.info('📝 Actualizando grupo: ' + id);
+    logger.info(`📝 Actualizando grupo: ${id}`);
 
     // Verificar que el grupo existe
     const existingGroup = await prisma.group.findUnique({
@@ -216,7 +193,7 @@ export const updateGroupService = async (id: string, data: GroupUpdateInput): Pr
 
     if (!existingGroup) {
       throw createGroupError(
-        'No se encontró el grupo con ID: ' + id,
+        `No se encontró el grupo con ID: ${id}`,
         GroupErrorCode.NOT_FOUND
       );
     }
@@ -232,7 +209,7 @@ export const updateGroupService = async (id: string, data: GroupUpdateInput): Pr
 
       if (groupWithSameName) {
         throw createGroupError(
-          'Ya existe un grupo con el nombre "' + data.name + '"',
+          `Ya existe un grupo con el nombre "${data.name}"`,
           GroupErrorCode.ALREADY_EXISTS
         );
       }
@@ -244,16 +221,16 @@ export const updateGroupService = async (id: string, data: GroupUpdateInput): Pr
     // Notificar actualización
     await notifyGroupChange('update', group);
 
-    logger.info('✅ Grupo actualizado: ' + group.name, { groupId: group.id });
+    logger.info(`✅ Grupo actualizado: ${group.name}`, { groupId: group.id });
     return group;
   } catch (error) {
     logger.error('❌ Error al actualizar grupo', { error, groupId: id, data });
 
-    if (error.name === 'GroupServiceError') {
+    if (error instanceof Error && error.name === 'GroupServiceError') {
       throw error;
     }
 
-    throw createGroupError('Error al actualizar grupo: ' + error.message, GroupErrorCode.OPERATION_FAILED, error);
+    throw createGroupError(`Error al actualizar grupo: ${error instanceof Error ? error.message : String(error)}`, GroupErrorCode.OPERATION_FAILED, error);
   }
 };
 
@@ -262,7 +239,7 @@ export const updateGroupService = async (id: string, data: GroupUpdateInput): Pr
  */
 export const deleteGroupService = async (id: string): Promise<void> => {
   try {
-    logger.info('🗑️ Eliminando grupo: ' + id);
+    logger.info(`🗑️ Eliminando grupo: ${id}`);
 
     // Verificar que el grupo existe
     const existingGroup = await prisma.group.findUnique({
@@ -271,7 +248,7 @@ export const deleteGroupService = async (id: string): Promise<void> => {
 
     if (!existingGroup) {
       throw createGroupError(
-        'No se encontró el grupo con ID: ' + id,
+        `No se encontró el grupo con ID: ${id}`,
         GroupErrorCode.NOT_FOUND
       );
     }
@@ -282,15 +259,15 @@ export const deleteGroupService = async (id: string): Promise<void> => {
     // Eliminar usando el transformador
     await deleteGroup(id);
 
-    logger.info('✅ Grupo eliminado: ' + id);
+    logger.info(`✅ Grupo eliminado: ${id}`);
   } catch (error) {
     logger.error('❌ Error al eliminar grupo', { error, groupId: id });
 
-    if (error.name === 'GroupServiceError') {
+    if (error instanceof Error && error.name === 'GroupServiceError') {
       throw error;
     }
 
-    throw createGroupError('Error al eliminar grupo: ' + error.message, GroupErrorCode.OPERATION_FAILED, error);
+    throw createGroupError(`Error al eliminar grupo: ${error instanceof Error ? error.message : String(error)}`, GroupErrorCode.OPERATION_FAILED, error);
   }
 };
 
@@ -299,38 +276,52 @@ export const deleteGroupService = async (id: string): Promise<void> => {
  */
 export const getGroupStatsService = async (id: string): Promise<GroupWithStats> => {
   try {
-    logger.info('📊 Obteniendo estadísticas del grupo: ' + id);
+    logger.info(`📊 Obteniendo estadísticas del grupo: ${id}`);
 
-    // Verificar que el grupo existe
-    const group = await getGroupById(id, { includeRelations: false, throwIfNotFound: true });
-
-    // Contar los elementos relacionados
-    const [imagesCount, videosCount, albumsCount, tagsCount] = await Promise.all([
-      prisma.groupToImage.count({ where: { groupId: id } }),
-      prisma.groupToVideo.count({ where: { groupId: id } }),
-      prisma.groupToAlbum.count({ where: { groupId: id } }),
-      prisma.groupToTag.count({ where: { groupId: id } })
-    ]);
-
-    // Construir el objeto de estadísticas
-    const stats = {
-      ...group,
-      stats: {
-        totalItems: imagesCount + videosCount + albumsCount + tagsCount,
-        itemCounts: {
-          images: imagesCount,
-          videos: videosCount,
-          albums: albumsCount,
-          tags: tagsCount
+    // Verificar que el grupo existe y obtener conteos usando _count
+    const groupWithCounts = await prisma.group.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            images: true,
+            videos: true,
+            albums: true,
+            tags: true,
+            collections: true,
+            characters: true,
+            places: true,
+            worldItems: true,
+            concepts: true,
+            prompts: true,
+            notes: true,
+            wildcards: true,
+            properties: true
+          }
         }
       }
+    });
+
+    if (!groupWithCounts) {
+      throw createGroupError(
+        `No se encontró el grupo con ID: ${id}`,
+        GroupErrorCode.NOT_FOUND
+      );
+    }
+
+    // Construir el objeto de estadísticas
+    const stats: GroupWithStats = {
+      ...groupWithCounts,
+      _count: groupWithCounts._count,
+      totalEntities: Object.values(groupWithCounts._count).reduce((total, count) => total + count, 0),
+      lastUpdated: groupWithCounts.updatedAt
     };
 
-    logger.info('✅ Estadísticas obtenidas para grupo: ' + id);
+    logger.info(`✅ Estadísticas obtenidas para grupo: ${id}`);
     return stats;
   } catch (error) {
     logger.error('❌ Error al obtener estadísticas del grupo', { error, groupId: id });
-    throw createGroupError('Error al obtener estadísticas: ' + error.message, GroupErrorCode.OPERATION_FAILED, error);
+    throw createGroupError(`Error al obtener estadísticas: ${error instanceof Error ? error.message : String(error)}`, GroupErrorCode.OPERATION_FAILED, error);
   }
 };
 
@@ -340,7 +331,7 @@ export const getGroupStatsService = async (id: string): Promise<GroupWithStats> 
 export const addItemToGroupService = async (
   groupId: string,
   itemId: string,
-  itemType: GroupRelations
+  itemType: keyof GroupRelations
 ): Promise<void> => {
   try {
     logger.info('➕ Añadiendo elemento a grupo', { groupId, itemId, itemType });
@@ -352,36 +343,56 @@ export const addItemToGroupService = async (
 
     if (!existingGroup) {
       throw createGroupError(
-        'No se encontró el grupo con ID: ' + groupId,
+        `No se encontró el grupo con ID: ${groupId}`,
         GroupErrorCode.NOT_FOUND
       );
     }
 
-    // Validar y crear la relación según el tipo
+    // Validar y crear la relación según el tipo usando connect
     switch (itemType) {
       case 'images':
-        await prisma.groupToImage.create({
-          data: { groupId, imageId: itemId }
+        await prisma.group.update({
+          where: { id: groupId },
+          data: {
+            images: {
+              connect: { id: itemId }
+            }
+          }
         });
         break;
       case 'videos':
-        await prisma.groupToVideo.create({
-          data: { groupId, videoId: itemId }
+        await prisma.group.update({
+          where: { id: groupId },
+          data: {
+            videos: {
+              connect: { id: itemId }
+            }
+          }
         });
         break;
       case 'albums':
-        await prisma.groupToAlbum.create({
-          data: { groupId, albumId: itemId }
+        await prisma.group.update({
+          where: { id: groupId },
+          data: {
+            albums: {
+              connect: { id: itemId }
+            }
+          }
         });
         break;
       case 'tags':
-        await prisma.groupToTag.create({
-          data: { groupId, tagId: itemId }
+        await prisma.group.update({
+          where: { id: groupId },
+          data: {
+            tags: {
+              connect: { id: itemId }
+            }
+          }
         });
         break;
       default:
         throw createGroupError(
-          'Tipo de elemento no soportado: ' + itemType,
+          `Tipo de elemento no soportado: ${itemType}`,
           GroupErrorCode.INVALID_DATA
         );
     }
@@ -393,11 +404,11 @@ export const addItemToGroupService = async (
   } catch (error) {
     logger.error('❌ Error al añadir elemento al grupo', { error, groupId, itemId, itemType });
 
-    if (error.name === 'GroupServiceError') {
+    if (error instanceof Error && error.name === 'GroupServiceError') {
       throw error;
     }
 
-    throw createGroupError('Error al añadir elemento: ' + error.message, GroupErrorCode.OPERATION_FAILED, error);
+    throw createGroupError(`Error al añadir elemento: ${error instanceof Error ? error.message : String(error)}`, GroupErrorCode.OPERATION_FAILED, error);
   }
 };
 
@@ -407,7 +418,7 @@ export const addItemToGroupService = async (
 export const removeItemFromGroupService = async (
   groupId: string,
   itemId: string,
-  itemType: GroupRelations
+  itemType: keyof GroupRelations
 ): Promise<void> => {
   try {
     logger.info('➖ Eliminando elemento del grupo', { groupId, itemId, itemType });
@@ -419,44 +430,56 @@ export const removeItemFromGroupService = async (
 
     if (!existingGroup) {
       throw createGroupError(
-        'No se encontró el grupo con ID: ' + groupId,
+        `No se encontró el grupo con ID: ${groupId}`,
         GroupErrorCode.NOT_FOUND
       );
     }
 
-    // Validar y eliminar la relación según el tipo
+    // Validar y eliminar la relación según el tipo usando disconnect
     switch (itemType) {
       case 'images':
-        await prisma.groupToImage.delete({
-          where: {
-            groupId_imageId: { groupId, imageId: itemId }
+        await prisma.group.update({
+          where: { id: groupId },
+          data: {
+            images: {
+              disconnect: { id: itemId }
+            }
           }
         });
         break;
       case 'videos':
-        await prisma.groupToVideo.delete({
-          where: {
-            groupId_videoId: { groupId, videoId: itemId }
+        await prisma.group.update({
+          where: { id: groupId },
+          data: {
+            videos: {
+              disconnect: { id: itemId }
+            }
           }
         });
         break;
       case 'albums':
-        await prisma.groupToAlbum.delete({
-          where: {
-            groupId_albumId: { groupId, albumId: itemId }
+        await prisma.group.update({
+          where: { id: groupId },
+          data: {
+            albums: {
+              disconnect: { id: itemId }
+            }
           }
         });
         break;
       case 'tags':
-        await prisma.groupToTag.delete({
-          where: {
-            groupId_tagId: { groupId, tagId: itemId }
+        await prisma.group.update({
+          where: { id: groupId },
+          data: {
+            tags: {
+              disconnect: { id: itemId }
+            }
           }
         });
         break;
       default:
         throw createGroupError(
-          'Tipo de elemento no soportado: ' + itemType,
+          `Tipo de elemento no soportado: ${itemType}`,
           GroupErrorCode.INVALID_DATA
         );
     }
@@ -468,11 +491,11 @@ export const removeItemFromGroupService = async (
   } catch (error) {
     logger.error('❌ Error al eliminar elemento del grupo', { error, groupId, itemId, itemType });
 
-    if (error.name === 'GroupServiceError') {
+    if (error instanceof Error && error.name === 'GroupServiceError') {
       throw error;
     }
 
-    throw createGroupError('Error al eliminar elemento: ' + error.message, GroupErrorCode.OPERATION_FAILED, error);
+    throw createGroupError(`Error al eliminar elemento: ${error instanceof Error ? error.message : String(error)}`, GroupErrorCode.OPERATION_FAILED, error);
   }
 };
 

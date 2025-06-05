@@ -1,7 +1,7 @@
 'use client';
 
-import { createFolder, deleteFolder, reindexFolder } from '@/app/actions/folders';
-// import { clearMetadataCache } from '@/app/actions/metadata'; // Función no encontrada
+import { createFolder, deleteFolder, reindexFolder, updateFolderAutoReindex } from '@/app/actions/folders';
+import { clearMetadataCache } from '@/app/actions/metadata';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { useCallback } from 'react';
@@ -106,9 +106,7 @@ export function useFoldersOperations({
 				operationsLogger.info('🔄 Actualizando auto-reindexado:', { folderId, value });
 
 				// Llamar a la acción del servidor
-				// await updateFolderAutoReindex(folderId, value);
-				// TODO: Implementar o encontrar la función correcta
-				console.warn('updateFolderAutoReindex no implementado');
+				await updateFolderAutoReindex(folderId, value);
 
 				// Recargar datos
 				await onLoadData();
@@ -149,9 +147,7 @@ export function useFoldersOperations({
 			operationsLogger.info('🧹 Limpiando caché de metadatos');
 
 			// Llamar a la acción del servidor para limpiar la caché
-			// await clearMetadataCache();
-			// TODO: Implementar o encontrar la función correcta
-			console.warn('clearMetadataCache no implementado');
+			await clearMetadataCache();
 
 			// Recargar datos después de limpiar la caché
 			await onLoadData();
