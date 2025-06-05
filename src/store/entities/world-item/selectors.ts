@@ -40,7 +40,7 @@ export const selectWorldItemStats = () => {
 	const rarityCount: Record<string, number> = {};
 	const categoryCount: Record<string, number> = {};
 
-	worldItems.forEach((item) => {
+	for (const item of worldItems) {
 		// Contar por tipo
 		typeCount[item.type] = (typeCount[item.type] || 0) + 1;
 
@@ -51,7 +51,7 @@ export const selectWorldItemStats = () => {
 		if (item.category) {
 			categoryCount[item.category] = (categoryCount[item.category] || 0) + 1;
 		}
-	});
+	}
 
 	return {
 		total: worldItems.length,
@@ -95,3 +95,30 @@ export const selectSortOptions = () => [
 	{ value: 'rarity_asc', label: 'Rareza (común a legendario)' },
 	{ value: 'rarity_desc', label: 'Rareza (legendario a común)' },
 ];
+
+/**
+ * Calcula estadísticas de los objetos del mundo
+ */
+export function calculateWorldItemStats(worldItems: WorldItem[]): WorldItemStats {
+	const typeCount: Record<string, number> = {};
+	const categoryCount: Record<string, number> = {};
+
+	for (const item of worldItems) {
+		// Contar por tipo
+		if (item.type) {
+			typeCount[item.type] = (typeCount[item.type] || 0) + 1;
+		}
+
+		// Contar por categoría
+		if (item.category) {
+			categoryCount[item.category] = (categoryCount[item.category] || 0) + 1;
+		}
+	}
+
+	return {
+		total: worldItems.length,
+		byType: typeCount,
+		byCategory: categoryCount,
+		favorites: worldItems.filter((item) => item.isFavorite).length,
+	};
+}

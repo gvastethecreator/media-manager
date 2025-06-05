@@ -174,7 +174,15 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 				// Asegurarse de que se use un valor válido de ThumbnailQuality
 				const quality = ThumbnailQuality.MEDIUM;
-				let data;
+				let data:
+					| {
+							thumbnail?: string;
+							mimeType?: string;
+							width?: number;
+							height?: number;
+							error?: string;
+					  }
+					| undefined;
 
 				try {
 					data = await getThumbnail(id, quality);
@@ -219,7 +227,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					state.resources.set(id, errorResource);
 					throw new Error(data.error);
 				}
-					throw new Error(`No se pudo cargar el thumbnail para ID ${id}, sin error específico`);
+				throw new Error(`No se pudo cargar el thumbnail para ID ${id}, sin error específico`);
 			} catch (error) {
 				resourceLogger.error('Error al cargar thumbnail:', {
 					id,

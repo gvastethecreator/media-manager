@@ -73,8 +73,8 @@ export function throttleEvent<T extends (...args: any[]) => Promise<any>>(
 		}
 
 		// Crear nueva promesa throttled
-		let resolve: (value: any) => void;
-		let reject: (error: any) => void;
+		let resolve = (value: any): void => {};
+		let reject = (error: any): void => {};
 
 		const promise = new Promise<ReturnType<T>>((res, rej) => {
 			resolve = res;
@@ -84,8 +84,8 @@ export function throttleEvent<T extends (...args: any[]) => Promise<any>>(
 		// Almacenar el evento pendiente
 		pendingEvents.set(key, {
 			promise,
-			resolve: resolve!,
-			reject: reject!,
+			resolve,
+			reject,
 			lastCall: now,
 			args,
 		});

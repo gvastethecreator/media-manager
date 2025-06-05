@@ -4,7 +4,9 @@ import type { EntityType } from '../entities';
 /**
  * Tipo base para Note derivado del schema de Prisma
  */
-export type NoteBase = Prisma.NoteGetPayload<{}>;
+export type NoteBase = Prisma.NoteGetPayload<{
+	include: { _count: true };
+}>;
 
 /**
  * Interfaz para crear una nueva nota

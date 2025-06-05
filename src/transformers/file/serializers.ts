@@ -5,11 +5,10 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	type DirectoryReadResult,
-	type FileBase,
-	type FileListItem,
-	type FileOperationResult,
-	FileType,
+    type DirectoryReadResult,
+    type FileBase,
+    type FileListItem,
+    type FileOperationResult
 } from '@/types/entities/file';
 import { toFileListItem } from './mappers';
 
@@ -142,41 +141,50 @@ export function pathsToTreeStructure(paths: string[]): any[] {
 		const pathMap: Record<string, any> = {};
 
 		// Construir el árbol
-		paths.forEach((fullPath) => {
+		for (const fullPath of paths) {
 			// Dividir la ruta en segmentos
 			const segments = fullPath.split('/').filter(Boolean);
-			let currentLevel = tree;
-			let currentPath = '';
 
-			// Recorrer cada segmento y construir el árbol
-			segments.forEach((segment, index) => {
-				currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+			// Comenzar desde la raíz
+			let currentNode = tree;
 
-				// Buscar si ya existe este nodo
-				let existingNode = pathMap[currentPath];
+			// Construir la ruta segmento por segmento
+			for (let i = 0; i < segments.length; i++) {
+				const segment = segments[i];
+				const isFile = i === segments.length - 1 && !fullPath.endsWith('/');
+				const currentPath = segments.slice(0, i + 1).join('/');
 
-				if (!existingNode) {
-					// Crear un nuevo nodo
-					const newNode = {
-						id: currentPath,
+				// Buscar si el nodo ya existe
+				let node = currentNode.children.find((child) => child.name === segment);
+
+				if (!node) {
+					// Crear nuevo nodo
+					node = {
+						id: generateFileId(currentPath),
 						name: segment,
 						path: currentPath,
+						isDirectory: !isFile,
 						children: [],
-						isDirectory: true,
-						type: FileType.DIRECTORY,
-						level: index,
+						size: 0,
+						modifiedAt: new Date(),
+						createdAt: new Date(),
 					};
 
-					// Agregar a la estructura
-					currentLevel.push(newNode);
-					pathMap[currentPath] = newNode;
-					existingNode = newNode;
+					// Añadir al nodo actual
+					currentNode.children.push(node);
 				}
 
-				// Actualizar nivel actual para el siguiente segmento
-				currentLevel = existingNode.children;
-			});
-		});
+				// Si es el último segmento y es un archivo, actualizar propiedades
+				if (isFile && i === segments.length - 1) {
+					if (fileInfoMap[fullPath]) {
+						node = { ...node, ...fileInfoMap[fullPath] };
+					}
+				}
+
+				// Actualizar el nodo actual para la siguiente iteración
+				currentNode = node;
+			}
+		}
 
 		return tree;
 	} catch (error) {
