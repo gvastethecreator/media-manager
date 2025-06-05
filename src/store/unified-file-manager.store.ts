@@ -387,7 +387,9 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 					lastUpdate: Date.now(),
 				});
 				return;
-			} // 🔄 Usar operation queue para evitar race conditions
+			}
+
+			// 🔄 Usar operation queue para evitar race conditions
 			await state.operationQueue.add(async () => {
 				set({ isLoading: true, error: null });
 
@@ -398,11 +400,56 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 						if (id) {
 							try {
 								fileManagerLogger.info(`🔄 Obteniendo imágenes de carpeta con ID: ${id}`);
+
+								// Intentar obtener imágenes con la acción del servidor
 								rawItems = await getFolderImages(id);
+
+								// Verificar si se obtuvo una respuesta válida
+								if (!Array.isArray(rawItems)) {
+									fileManagerLogger.warn(`⚠️ La respuesta no es un array: ${typeof rawItems}`);
+									rawItems = [];
+								}
+
 								fileManagerLogger.debug(`✅ Obtenidas ${rawItems.length} imágenes para carpeta ${id}`);
+
+								// Si hay imágenes, registrar la primera para diagnóstico
+								if (rawItems.length > 0) {
+									const firstItem = rawItems[0];
+									fileManagerLogger.debug('📄 Primera imagen:', {
+										id: firstItem.id,
+										name: firstItem.name,
+										path: firstItem.path,
+										hasThumbnail: !!firstItem.thumbnail
+									});
+								} else {
+									// Si no hay imágenes, verificar si la carpeta existe y tiene archivos
+									const getFolderById = await import('@/app/actions/folders/query.actions').then(
+										(mod) => mod.getFolderById
+									);
+									const folderDetails = await getFolderById(id);
+
+									if (folderDetails && (folderDetails.totalFiles > 0 || folderDetails._count?.images > 0)) {
+										fileManagerLogger.warn(`⚠️ La carpeta tiene ${folderDetails.totalFiles || folderDetails._count?.images} archivos pero no se obtuvieron imágenes`);
+									}
+								}
 							} catch (folderError) {
 								fileManagerLogger.error(`❌ Error obteniendo imágenes de carpeta ${id}:`, folderError);
-								throw new Error('Error cargando imágenes de carpeta');
+								// Intentar con un enfoque alternativo si falla el principal
+								try {
+									fileManagerLogger.info(`🔄 Intentando método alternativo para carpeta ${id}`);
+									const response = await fetch(`/api/folders/${id}/images/all`);
+									if (response.ok) {
+										const data = await response.json();
+										rawItems = data.items || [];
+										fileManagerLogger.info(`✅ Método alternativo: ${rawItems.length} imágenes obtenidas`);
+									}
+								} catch (altError) {
+									fileManagerLogger.error(`❌ Método alternativo también falló:`, altError);
+								}
+
+								if (rawItems.length === 0) {
+									throw new Error('Error cargando imágenes de carpeta');
+								}
 							}
 						}
 						break;
@@ -450,8 +497,10 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 						throw new Error(`Contexto no soportado: ${context}`);
 				}
 
-				// 💾 Guardar en cache
-				folderCache.set(cacheKey, rawItems);
+				// 💾 Guardar en cache solo si hay items
+				if (rawItems.length > 0) {
+					folderCache.set(cacheKey, rawItems);
+				}
 
 				// 🔄 Transformar items
 				const transformedItems = rawItems.map(transformToFileItem);
@@ -459,9 +508,18 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 				set({
 					currentItems: transformedItems,
 					displayedItems: transformedItems.slice(0, ITEMS_PER_BATCH),
-					isProcessingThumbnails: true,
+					isProcessingThumbnails: transformedItems.length > 0,
 					lastUpdate: Date.now(),
 				});
+
+				// Actualizar el contador de la carpeta actual si es necesario
+				if (context === 'folder' && id && state.currentFolder) {
+					const updatedFolder = {
+						...state.currentFolder,
+						count: transformedItems.length,
+					};
+					set({ currentFolder: updatedFolder });
+				}
 
 				fileManagerLogger.info(`✅ ${transformedItems.length} items cargados para ${context}`);
 			});
@@ -592,7 +650,36 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 
 		fileManagerLogger.info('📂 Cambiando a carpeta:', id);
 
-		const folder = state.folders.find((f) => f.id === id) || null;
+		// Buscar la carpeta en el array de carpetas
+		const folder = state.folders.find((f) => f.id === id);
+
+		// Si no se encuentra la carpeta o no tiene información completa, intentar obtenerla
+		let folderWithDetails = folder;
+		if (!folder || !folder.count) {
+			try {
+				// Intentar obtener información detallada de la carpeta
+				const getFolderById = await import('@/app/actions/folders/query.actions').then(
+					(mod) => mod.getFolderById
+				);
+				const folderDetails = await getFolderById(id);
+				if (folderDetails) {
+					folderWithDetails = {
+						id: folderDetails.id,
+						name: folderDetails.name,
+						// Asegurar que count tenga un valor correcto
+						count: folderDetails.totalFiles || folderDetails._count?.images || 0,
+					};
+					fileManagerLogger.debug('📊 Detalles de carpeta obtenidos:', {
+						id: folderWithDetails.id,
+						name: folderWithDetails.name,
+						count: folderWithDetails.count
+					});
+				}
+			} catch (error) {
+				fileManagerLogger.warn('⚠️ Error obteniendo detalles de carpeta:', error);
+			}
+		}
+
 		set({
 			currentContext: 'folder',
 			currentFolderId: id,
@@ -602,7 +689,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 			currentCharacterId: null,
 			currentPlaceId: null,
 			currentWorldItemId: null,
-			currentFolder: folder,
+			currentFolder: folderWithDetails,
 			currentCollection: null,
 			currentTag: null,
 			currentAlbum: null,
