@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import type { Folder } from '@/types/entities/folders';
+import type { Folder } from '@/types/entities/folder';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
