@@ -14,13 +14,14 @@ import { isValidImageFormat } from './validators';
 export function formatImageSize(bytes: number): string {
 	if (bytes < 1024) {
 		return `${bytes} B`;
-	} else if (bytes < 1024 * 1024) {
-		return `${(bytes / 1024).toFixed(1)} KB`;
-	} else if (bytes < 1024 * 1024 * 1024) {
-		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-	} else {
-		return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 	}
+	if (bytes < 1024 * 1024) {
+		return `${(bytes / 1024).toFixed(1)} KB`;
+	}
+	if (bytes < 1024 * 1024 * 1024) {
+		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+	}
+	return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
 }
 
 /**
@@ -92,19 +93,19 @@ export function getExifSummary(metadata?: ImageMetadata): Record<string, string>
 	const summary: Record<string, string> = {};
 
 	// Datos de cámara
-	if (exif.make) summary['Cámara'] = `${exif.make}${exif.model ? ` ${exif.model}` : ''}`;
-	if (exif.lensModel) summary['Lente'] = exif.lensModel as string;
+	if (exif.make) summary.Cámara = `${exif.make}${exif.model ? ` ${exif.model}` : ''}`;
+	if (exif.lensModel) summary.Lente = exif.lensModel as string;
 
 	// Configuración de disparo
-	if (exif.exposureTime) summary['Exposición'] = exif.exposureTime as string;
-	if (exif.fNumber) summary['Apertura'] = `f/${exif.fNumber}`;
-	if (exif.iso) summary['ISO'] = `ISO ${exif.iso}`;
+	if (exif.exposureTime) summary.Exposición = exif.exposureTime as string;
+	if (exif.fNumber) summary.Apertura = `f/${exif.fNumber}`;
+	if (exif.iso) summary.ISO = `ISO ${exif.iso}`;
 	if (exif.focalLength) summary['Distancia focal'] = exif.focalLength as string;
 
 	// Fecha
 	if (exif.dateTimeOriginal) {
 		const date = new Date(exif.dateTimeOriginal as string);
-		summary['Fecha'] = date.toLocaleDateString();
+		summary.Fecha = date.toLocaleDateString();
 	}
 
 	return summary;
@@ -132,7 +133,7 @@ export function extractTagSuggestions(metadata?: ImageMetadata): string[] {
 	}
 
 	// Sugerencias de IPTC si están disponibles
-	if (metadata.iptc && metadata.iptc.keywords) {
+	if (metadata.iptc?.keywords) {
 		const keywords = metadata.iptc.keywords as string[];
 		suggestions.push(...keywords);
 	}

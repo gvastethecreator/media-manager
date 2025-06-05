@@ -15,7 +15,7 @@ Image Manager es una aplicación moderna de gestión y visualización de archivo
 
 ### Frontend Stack
 
-- Next.js 15 con App Router y Server Components
+- Next.js 15.3.3 con App Router y Server Components
 - React 19 con hooks avanzados
 - Tailwind CSS para estilos
 - Shadcn/ui para componentes base
