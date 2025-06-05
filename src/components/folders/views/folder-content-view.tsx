@@ -24,14 +24,45 @@ export function FolderContentView() {
 
 	// 🔄 Registrar información sobre la carpeta y las imágenes
 	useEffect(() => {
+		logger.info('🔍 DIAGNÓSTICO DETALLADO CARPETAS VACÍAS:', {
+			currentFolder: currentFolder ? {
+				id: currentFolder.id,
+				name: currentFolder.name,
+				path: (currentFolder as any).path || 'No disponible'
+			} : null,
+			currentFolderId,
+			imagesLength: images?.length || 0,
+			isLoading,
+			isError,
+			errorMessage: error instanceof Error ? error.message : error
+		});
+
 		if (currentFolder) {
 			logger.info(`📂 Carpeta actual: ${currentFolder.name} (${currentFolderId})`);
 		}
 
-		if (images) {
+		if (images !== undefined) {
 			logger.info(`🖼️ Imágenes cargadas: ${images.length}`);
+			// 🔍 DIAGNÓSTICO: Log detallado cuando no hay imágenes pero debería haberlas
+			if (images.length === 0) {
+				logger.warn(`🚨 PROBLEMA DETECTADO: Carpeta "${currentFolder?.name}" devuelve 0 imágenes`);
+				logger.warn(`   📂 FolderId: ${currentFolderId}`);
+				logger.warn(`   📍 Path: ${(currentFolder as any)?.path || 'No disponible'}`);
+				logger.warn(`   ⏱️ isLoading: ${isLoading}`);
+				logger.warn(`   ❌ isError: ${isError}`);
+				if (error) {
+					logger.warn(`   📊 Error details:`, error);
+				}
+			} else {
+				// Log de la primera imagen para verificar estructura
+				const firstImage = images[0];
+				logger.info(`📄 Primera imagen: ${firstImage.name} (ID: ${firstImage.id})`);
+				// Thumbnail no existe en FileItem, usar path en su lugar
+				logger.info(`   📁 Path: ${firstImage.path}`);
+				logger.info(`   📐 Tamaño: ${firstImage.size} bytes`);
+			}
 		}
-	}, [currentFolder, currentFolderId, images]);
+	}, [currentFolder, currentFolderId, images, isLoading, isError, error]);
 
 	// Función para reindexar la carpeta
 	const handleReindex = useCallback(async () => {
@@ -73,9 +104,11 @@ export function FolderContentView() {
 					icon={Folder}
 					title="Error al cargar imágenes"
 					description={`Ha ocurrido un error al cargar las imágenes. ${error instanceof Error ? error.message : ''}`}
-					actionText="Reintentar"
-					onAction={refetch}
 				/>
+				<Button variant="outline" size="sm" onClick={refetch}>
+					<RefreshCw className="h-4 w-4 mr-2" />
+					Reintentar
+				</Button>
 			</div>
 		);
 	}
@@ -89,9 +122,12 @@ export function FolderContentView() {
 					icon={Folder}
 					title="No hay imágenes"
 					description="Esta carpeta está vacía. Haz clic en Reindexar para buscar nuevas imágenes."
-					actionText="Reindexar Carpeta"
-					onAction={handleReindex}
 				/>
+
+				<Button variant="outline" size="sm" onClick={handleReindex}>
+					<RefreshCw className="h-4 w-4 mr-2" />
+					Reindexar Carpeta
+				</Button>
 
 				<Button variant="outline" size="sm" onClick={handleForceRefresh}>
 					<RefreshCw className="h-4 w-4 mr-2" />

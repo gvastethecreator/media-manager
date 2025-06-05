@@ -63,7 +63,7 @@ export function toPrismaAlbum(data: AlbumCreateInput | AlbumUpdateInput): Prisma
 }
 
 /**
- * 🔄 Deserializa un Album desde Prisma
+ * 🔄 Deserializa un Album desde Prisma con validación robusta
  */
 export function fromPrismaAlbum(
     prismaAlbum: Partial<Prisma.AlbumGetPayload<{
@@ -86,13 +86,42 @@ export function fromPrismaAlbum(
     }>>
 ): AlbumComplete {
     try {
-        // Asegurarse de que los campos base esenciales existan
-        if (!prismaAlbum || !prismaAlbum.id || typeof prismaAlbum.name !== 'string') { // Añadir chequeo de tipo para name
-            logger.error('Invalid prismaAlbum object received in fromPrismaAlbum', { prismaAlbum });
-            throw new Error('Invalid prismaAlbum object received in fromPrismaAlbum');
+        // 🔍 Validación exhaustiva de entrada
+        if (!prismaAlbum) {
+            logger.error('❌ fromPrismaAlbum: Received null or undefined prismaAlbum');
+            throw new Error('Album data is null or undefined');
         }
 
-        // Usar conteos directamente de Prisma si están disponibles, o calcular solo las relaciones
+        if (!prismaAlbum.id) {
+            logger.error('❌ fromPrismaAlbum: Missing required id field', { prismaAlbum });
+            throw new Error('Album ID is required but missing');
+        }
+
+        if (!prismaAlbum.name || typeof prismaAlbum.name !== 'string') {
+            logger.error('❌ fromPrismaAlbum: Invalid or missing name field', {
+                albumId: prismaAlbum.id,
+                name: prismaAlbum.name,
+                nameType: typeof prismaAlbum.name
+            });
+            throw new Error(`Album name is invalid: ${typeof prismaAlbum.name}`);
+        }
+
+        // 🛡️ Validar tipos de datos críticos para evitar errores de transformación
+        if (prismaAlbum.emoji && typeof prismaAlbum.emoji !== 'string') {
+            logger.warn('⚠️ fromPrismaAlbum: Invalid emoji type, using fallback', {
+                albumId: prismaAlbum.id,
+                emojiType: typeof prismaAlbum.emoji
+            });
+        }
+
+        if (prismaAlbum.color && typeof prismaAlbum.color !== 'string') {
+            logger.warn('⚠️ fromPrismaAlbum: Invalid color type, using fallback', {
+                albumId: prismaAlbum.id,
+                colorType: typeof prismaAlbum.color
+            });
+        }
+
+        // 📊 Usar conteos directamente de Prisma con validación
         const counts = prismaAlbum._count || {
             images: 0,
             videos: 0,
@@ -109,22 +138,63 @@ export function fromPrismaAlbum(
             groups: 0
         };
 
-        // Construir objeto base usando nullish coalescing para defaults
+        // 🛡️ Funciones helper para validar y limpiar fechas
+        const parseValidDate = (dateValue: unknown, fallback: Date = new Date()): Date => {
+            if (!dateValue) return fallback;
+
+            if (dateValue instanceof Date) {
+                return Number.isNaN(dateValue.getTime()) ? fallback : dateValue;
+            }
+
+            if (typeof dateValue === 'string') {
+                const parsed = new Date(dateValue);
+                return Number.isNaN(parsed.getTime()) ? fallback : parsed;
+            }
+
+            logger.warn('⚠️ fromPrismaAlbum: Invalid date format, using fallback', {
+                albumId: prismaAlbum.id,
+                dateValue,
+                dateType: typeof dateValue
+            });
+            return fallback;
+        };
+
+        // 🛡️ Helper para validar relaciones y evitar errores de transformación
+        const safeMapRelation = <T extends { id: any }>(
+            relationArray: T[] | null | undefined,
+            relationName: string
+        ): { id: any }[] => {
+            if (!relationArray) return [];
+
+            if (!Array.isArray(relationArray)) {
+                logger.warn(`⚠️ fromPrismaAlbum: ${relationName} is not an array, using empty array`, {
+                    albumId: prismaAlbum.id,
+                    relationName,
+                    actualType: typeof relationArray
+                });
+                return [];
+            }
+
+            return relationArray
+                .filter(item => item?.id) // 🔍 Filtrar elementos inválidos usando optional chaining
+                .map(item => ({ id: item.id }));
+        };
+
+        // 🏗️ Construir objeto base con validación exhaustiva
         const baseAlbum = {
             id: prismaAlbum.id,
-            name: prismaAlbum.name, // Ya validado tipo string
-            emoji: prismaAlbum.emoji ?? '',
-            color: prismaAlbum.color ?? '',
-            description: prismaAlbum.description ?? null,
-            shortcut: prismaAlbum.shortcut ?? null,
-            category: prismaAlbum.category ?? '',
-            sortBy: prismaAlbum.sortBy ?? '',
-            filters: prismaAlbum.filters ?? '', // Asumir que 'filters' es string o null/undefined
-            featuredImage: prismaAlbum.featuredImage ?? null,
-            isFavorite: prismaAlbum.isFavorite ?? false,
-            // Manejar fechas que pueden ser string o Date
-            createdAt: prismaAlbum.createdAt ? new Date(prismaAlbum.createdAt) : new Date(0), // Default a epoch si falta
-            updatedAt: prismaAlbum.updatedAt ? new Date(prismaAlbum.updatedAt) : new Date(0), // Default a epoch si falta
+            name: prismaAlbum.name, // Ya validado como string
+            emoji: (typeof prismaAlbum.emoji === 'string') ? prismaAlbum.emoji : '',
+            color: (typeof prismaAlbum.color === 'string') ? prismaAlbum.color : '',
+            description: (typeof prismaAlbum.description === 'string') ? prismaAlbum.description : null,
+            shortcut: (typeof prismaAlbum.shortcut === 'string') ? prismaAlbum.shortcut : null,
+            category: (typeof prismaAlbum.category === 'string') ? prismaAlbum.category : '',
+            sortBy: (typeof prismaAlbum.sortBy === 'string') ? prismaAlbum.sortBy : '',
+            filters: (typeof prismaAlbum.filters === 'string') ? prismaAlbum.filters : '',
+            featuredImage: (typeof prismaAlbum.featuredImage === 'string') ? prismaAlbum.featuredImage : null,
+            isFavorite: Boolean(prismaAlbum.isFavorite),
+            createdAt: parseValidDate(prismaAlbum.createdAt, new Date(0)),
+            updatedAt: parseValidDate(prismaAlbum.updatedAt, new Date(0)),
         };
 
         // Validar campos base si es necesario (puede ser opcional dependiendo de la confianza en los datos)
@@ -132,24 +202,37 @@ export function fromPrismaAlbum(
         // validateUIFields(baseAlbum);
         // validateMetadataFields(baseAlbum);
 
-        // Construir objeto completo con relaciones usando optional chaining y nullish coalescing
-        return {
+        // 🏗️ Construir objeto completo con relaciones validadas
+        const albumComplete: AlbumComplete = {
             ...baseAlbum,
-            images: prismaAlbum.images?.map(img => ({ id: img.id })) ?? [],
-            videos: prismaAlbum.videos?.map(vid => ({ id: vid.id })) ?? [],
-            collections: prismaAlbum.collections?.map(col => ({ id: col.id })) ?? [],
-            tags: prismaAlbum.tags?.map(tag => ({ id: tag.id })) ?? [],
-            characters: prismaAlbum.characters?.map(char => ({ id: char.id })) ?? [],
-            places: prismaAlbum.places?.map(place => ({ id: place.id })) ?? [],
-            worldItems: prismaAlbum.worldItems?.map(item => ({ id: item.id })) ?? [],
-            concepts: prismaAlbum.concepts?.map(con => ({ id: con.id })) ?? [],
-            prompts: prismaAlbum.prompts?.map(prompt => ({ id: prompt.id })) ?? [],
-            notes: prismaAlbum.notes?.map(note => ({ id: note.id })) ?? [],
-            wildcards: prismaAlbum.wildcards?.map(wild => ({ id: wild.id })) ?? [],
-            properties: prismaAlbum.properties?.map(prop => ({ id: prop.id })) ?? [],
-            groups: prismaAlbum.groups?.map(group => ({ id: group.id })) ?? [],
-            _count: counts, // Usar counts de getRelationCounts
+            images: safeMapRelation(prismaAlbum.images, 'images'),
+            videos: safeMapRelation(prismaAlbum.videos, 'videos'),
+            collections: safeMapRelation(prismaAlbum.collections, 'collections'),
+            tags: safeMapRelation(prismaAlbum.tags, 'tags'),
+            characters: safeMapRelation(prismaAlbum.characters, 'characters'),
+            places: safeMapRelation(prismaAlbum.places, 'places'),
+            worldItems: safeMapRelation(prismaAlbum.worldItems, 'worldItems'),
+            concepts: safeMapRelation(prismaAlbum.concepts, 'concepts'),
+            prompts: safeMapRelation(prismaAlbum.prompts, 'prompts'),
+            notes: safeMapRelation(prismaAlbum.notes, 'notes'),
+            wildcards: safeMapRelation(prismaAlbum.wildcards, 'wildcards'),
+            properties: safeMapRelation(prismaAlbum.properties, 'properties'),
+            groups: safeMapRelation(prismaAlbum.groups, 'groups'),
+            _count: counts,
         };
+
+        // 📝 Log exitoso para debugging
+        logger.debug(`✅ fromPrismaAlbum: Successfully transformed album ${baseAlbum.id}`, {
+            albumId: baseAlbum.id,
+            name: baseAlbum.name,
+            relationCounts: {
+                images: albumComplete.images?.length || 0,
+                videos: albumComplete.videos?.length || 0,
+                tags: albumComplete.tags?.length || 0
+            }
+        });
+
+        return albumComplete;
     } catch (error) {
         // Loguear el error con más contexto si es posible
         logger.error(`Error in fromPrismaAlbum for ID ${prismaAlbum?.id ?? 'unknown'}`, {

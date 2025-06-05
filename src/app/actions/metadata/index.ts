@@ -29,6 +29,9 @@ export async function createMetadataError(...args: Parameters<typeof MetadataErr
 export async function extractMetadata(...args: Parameters<typeof MetadataExtractorsActions.extractMetadata>) {
 	return MetadataExtractorsActions.extractMetadata(...args);
 }
+export async function clearMetadataCache(...args: Parameters<typeof MetadataExtractorsActions.clearMetadataCache>) {
+	return MetadataExtractorsActions.clearMetadataCache(...args);
+}
 
 // Exportaciones de metadata-parsers.actions
 export async function parseExifData(...args: Parameters<typeof MetadataParsersActions.parseExifData>) {

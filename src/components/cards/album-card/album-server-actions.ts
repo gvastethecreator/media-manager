@@ -1,6 +1,7 @@
 'use server';
 
 import { getPrismaClient } from '@/lib/db';
+import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
 import type { Album } from '@/types/entities/album';
 
 export interface AlbumCardData extends Album {
@@ -374,7 +375,7 @@ export async function getRecentAlbumMedia(albumId: string, limit = 6): Promise<T
 }
 
 /**
- * Obtiene estadísticas de un álbum: conteos y tamaño total
+ * 🚀 Obtiene estadísticas de un álbum con consultas optimizadas
  */
 export async function getAlbumStats(albumId: string): Promise<{
 	imageCount: number;
@@ -384,103 +385,15 @@ export async function getAlbumStats(albumId: string): Promise<{
 }> {
 	const prisma = await getPrismaClient();
 
-	// Obtener conteo de imágenes
-	const imageCountResult = await prisma.image.count({
-		where: {
-			albums: {
-				some: {
-					id: albumId,
-				},
-			},
-		},
-	});
-
-	// Obtener conteo de videos
-	const videoCountResult = await prisma.video.count({
-		where: {
-			albums: {
-				some: {
-					id: albumId,
-				},
-			},
-		},
-	});
-
-	// Obtener tamaño total sumando los tamaños de imágenes y videos
-	const imageSizeResult = await prisma.image.aggregate({
-		where: {
-			albums: {
-				some: {
-					id: albumId,
-				},
-			},
-		},
-		_sum: {
-			size: true,
-		},
-	});
-
-	const videoSizeResult = await prisma.video.aggregate({
-		where: {
-			albums: {
-				some: {
-					id: albumId,
-				},
-			},
-		},
-		_sum: {
-			size: true,
-		},
-	});
-
-	// Calcular el tamaño total
-	const totalImageSize = imageSizeResult._sum.size || 0;
-	const totalVideoSize = videoSizeResult._sum.size || 0;
-	const totalSize = totalImageSize + totalVideoSize;
-
-	// Contar todas las entidades relacionadas
-	const album = await prisma.album.findUnique({
-		where: {
-			id: albumId,
-		},
-		include: {
-			_count: {
-				select: {
-					collections: true,
-					tags: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					notes: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
-				},
-			},
-		},
-	});
-
-	const entitiesCount = album?._count ? (
-		(album._count.collections || 0) +
-		(album._count.tags || 0) +
-		(album._count.characters || 0) +
-		(album._count.places || 0) +
-		(album._count.worldItems || 0) +
-		(album._count.concepts || 0) +
-		(album._count.prompts || 0) +
-		(album._count.notes || 0) +
-		(album._count.wildcards || 0) +
-		(album._count.properties || 0) +
-		(album._count.groups || 0)
-	) : 0;
+	// 🚀 Usar servicio optimizado - una consulta en lugar de 15+
+	const optimizedStatsService = OptimizedStatsService.getInstance(prisma);
+	const stats = await optimizedStatsService.getAlbumStatsOptimized(albumId);
 
 	return {
-		imageCount: imageCountResult,
-		videoCount: videoCountResult,
-		totalSize,
-		entitiesCount,
+		imageCount: stats.imageCount,
+		videoCount: stats.videoCount,
+		totalSize: stats.totalSize,
+		entitiesCount: stats.entitiesCount,
 	};
 }
 

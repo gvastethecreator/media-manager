@@ -1,13 +1,12 @@
 import {
-	type GeneralStats,
-	getImageStats,
-	getSystemStats,
-	incrementImageDownload,
-	incrementImageView,
-	invalidateStats,
+    type GeneralStats,
+    getImageStats,
+    getSystemStats,
+    incrementImageDownload,
+    incrementImageView,
+    invalidateStats,
 } from '@/app/actions/stats/stats.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
 
 const statsLogger = serverLogger.withContext('StatsService');
@@ -30,6 +29,7 @@ export const STATS_EVENTS = {
 	CONCEPT_CHANGE: 'concept_change',
 	PROMPT_CHANGE: 'prompt_change',
 	NOTE_CHANGE: 'note_change',
+	GROUP_CHANGE: 'group_change',
 } as const;
 
 // Mapeo de eventos internos a EventType compatible

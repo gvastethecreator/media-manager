@@ -3,8 +3,9 @@
  * @module types/entities/world-item/types
  */
 
-import type { BaseEntity, RelationCount, UIData } from '@/types/common/transformer';
-import type { Image } from '../image/types';
+import type { BaseEntity, BaseRelationCounts } from '@/types/common/transformer';
+import type { UIFields } from '@/utils/transformers/common';
+import type { Image } from '../image';
 import {
     WORLD_ITEM_SORT_PROPERTY_MAP,
     type WorldItemCategory,
@@ -90,7 +91,7 @@ export interface WorldItemRelations {
 /**
  * Contadores del objeto del mundo
  */
-export interface WorldItemCounts extends RelationCount {
+export interface WorldItemCounts extends BaseRelationCounts {
   images?: number;
   relatedItems?: number;
 }
@@ -98,10 +99,11 @@ export interface WorldItemCounts extends RelationCount {
 /**
  * Datos de UI para el objeto del mundo
  */
-export interface WorldItemUI extends UIData {
+export interface WorldItemUI extends UIFields {
   emoji: string;
   color: string;
   viewMode?: WorldItemViewMode;
+  formattedDate?: string; // 📅 Fecha formateada para mostrar en UI
 }
 
 /**
@@ -242,8 +244,13 @@ export interface WorldItemUpdateInput {
 /* Exportación de tipos adicionales para retrocompatibilidad */
 export type {
     WorldItemCreateInput as CreateWorldItemData,
-    WorldItemUpdateInput as UpdateWorldItemData, WorldItemDeserialized as WorldItem, WorldItemAttribute as WorldItemAttributes,
-    WorldItemEffect as WorldItemEffects, WorldItemFilter as WorldItemFilters, WorldItemProperty as WorldItemProperties, WorldItemRequirement as WorldItemRequirements,
+    WorldItemUpdateInput as UpdateWorldItemData,
+    WorldItemDeserialized as WorldItem,
+    WorldItemAttribute as WorldItemAttributes,
+    WorldItemEffect as WorldItemEffects,
+    WorldItemFilter as WorldItemFilterType,
+    WorldItemProperty as WorldItemProperties,
+    WorldItemRequirement as WorldItemRequirements,
     WorldItemStat as WorldItemStats
 };
 
