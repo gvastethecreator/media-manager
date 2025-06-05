@@ -27,7 +27,7 @@ const log = serverLogger.withContext('VideoActions');
  */
 export async function getVideo(
   id: string,
-  includeRelations: boolean = false
+  includeRelations = false
 ): Promise<VideoExtended | null> {
   try {
     log.info('🔍 Buscando video por ID', { id });

@@ -47,7 +47,7 @@ export class FolderCache {
   };
 
   constructor(
-    private maxSize: number = 1000,
+    private maxSize = 1000,
     private defaultTtl: number = 5 * 60 * 1000 // 5 minutos
   ) {
     // Limpiar cache expirado cada 2 minutos
@@ -259,7 +259,7 @@ export const folderListCache = new FolderCache(200, 3 * 60 * 1000); // 3 min TTL
 /**
  * Genera una clave de cache para una carpeta
  */
-export function getFolderCacheKey(id: string, operation: string = 'get'): string {
+export function getFolderCacheKey(id: string, operation = 'get'): string {
   return `folder:${operation}:${id}`;
 }
 

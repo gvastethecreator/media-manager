@@ -328,7 +328,7 @@ export function fromPrismaWorldItem(
 						if (matches) {
 							return {
 								name: matches[1].trim(),
-								value: parseInt(matches[2]),
+								value: Number.parseInt(matches[2]),
 								description: matches[3]?.trim() || ''
 							};
 						}
