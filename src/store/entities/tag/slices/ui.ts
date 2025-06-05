@@ -12,7 +12,7 @@ export interface TagUISlice {
 	ui: TagUIState;
 
 	// Acciones de selección
-	selectTag: (id: string) => void;
+	selectTag: (id: string | null) => void;
 	deselectTag: (id: string) => void;
 	toggleTagSelection: (id: string) => void;
 	selectMultipleTags: (ids: string[]) => void;
@@ -47,41 +47,72 @@ export const createTagUISlice: StateCreator<TagState & TagUISlice, [], [], TagUI
 
 	// Acción para seleccionar una etiqueta
 	selectTag: (id) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedId: id,
-				selectedIds: state.ui.selectedIds.includes(id) ? state.ui.selectedIds : [...state.ui.selectedIds, id],
-			},
-		}));
+		// Si id es null, limpiar la selección
+		if (id === null) {
+			set((state) => ({
+				ui: {
+					...state.ui,
+					selectedId: null,
+					selectedIds: [],
+				},
+			}));
+			return;
+		}
+
+		// Si id tiene un valor, añadirlo a la selección
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedId: id,
+					selectedIds: currentSelectedIds.includes(id) ? currentSelectedIds : [...currentSelectedIds, id],
+				},
+			};
+		});
 	},
 
 	// Acción para deseleccionar una etiqueta
 	deselectTag: (id) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: state.ui.selectedIds.filter((selectedId) => selectedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: currentSelectedIds.filter((selectedId) => selectedId !== id),
+				},
+			};
+		});
 	},
 
 	// Acción para alternar la selección de una etiqueta
 	toggleTagSelection: (id) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: state.ui.selectedIds.includes(id)
-					? state.ui.selectedIds.filter((selectedId) => selectedId !== id)
-					: [...state.ui.selectedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: currentSelectedIds.includes(id)
+						? currentSelectedIds.filter((selectedId) => selectedId !== id)
+						: [...currentSelectedIds, id],
+				},
+			};
+		});
 	},
 
 	// Acción para seleccionar múltiples etiquetas
 	selectMultipleTags: (ids) => {
 		set((state) => {
-			const uniqueIds = [...new Set([...state.ui.selectedIds, ...ids])];
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+			const uniqueIds = [...new Set([...currentSelectedIds, ...ids])];
+
 			return {
 				ui: {
 					...state.ui,
@@ -103,40 +134,58 @@ export const createTagUISlice: StateCreator<TagState & TagUISlice, [], [], TagUI
 
 	// Acción para expandir una etiqueta
 	expandTag: (id) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.includes(id) ? state.ui.expandedIds : [...state.ui.expandedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.includes(id) ? currentExpandedIds : [...currentExpandedIds, id],
+				},
+			};
+		});
 	},
 
 	// Acción para colapsar una etiqueta
 	collapseTag: (id) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.filter((expandedId) => expandedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.filter((expandedId) => expandedId !== id),
+				},
+			};
+		});
 	},
 
 	// Acción para alternar la expansión de una etiqueta
 	toggleTagExpansion: (id) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.includes(id)
-					? state.ui.expandedIds.filter((expandedId) => expandedId !== id)
-					: [...state.ui.expandedIds, id],
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.includes(id)
+						? currentExpandedIds.filter((expandedId) => expandedId !== id)
+						: [...currentExpandedIds, id],
+				},
+			};
+		});
 	},
 
 	// Acción para expandir múltiples etiquetas
 	expandMultipleTags: (ids) => {
 		set((state) => {
-			const uniqueIds = [...new Set([...state.ui.expandedIds, ...ids])];
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+			const uniqueIds = [...new Set([...currentExpandedIds, ...ids])];
+
 			return {
 				ui: {
 					...state.ui,

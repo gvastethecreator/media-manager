@@ -167,6 +167,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 	},
 
 	selectConcept: (concept) => {
+		coreLogger.info(concept ? `🔍 Seleccionando concepto: ${concept.id}` : '🧹 Limpiando selección de concepto');
 		set({ selectedConcept: concept });
 	},
 

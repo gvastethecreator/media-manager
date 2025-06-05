@@ -11,7 +11,7 @@ import type { ActivityState } from '../types';
  */
 export interface ActivityUISlice {
 	// Selección
-	selectActivity: (id: string) => void;
+	selectActivity: (id: string | null) => void;
 	unselectActivity: (id: string) => void;
 	toggleActivitySelection: (id: string) => void;
 	selectMultipleActivities: (ids: string[]) => void;
@@ -44,30 +44,50 @@ export interface ActivityUISlice {
  */
 export const createActivityUISlice: StateCreator<ActivityState, [], [], ActivityUISlice> = (set, get) => ({
 	// Funciones de selección
-	selectActivity: (id: string) => {
+	selectActivity: (id: string | null) => {
+		// Si id es null, limpiar la selección
+		if (id === null) {
+			set((state) => ({
+				ui: {
+					...state.ui,
+					selectedIds: [],
+				},
+			}));
+			return;
+		}
+
 		set((state) => {
-			if (state.ui.selectedIds.includes(id)) return state;
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+			if (currentSelectedIds.includes(id)) return state;
+
 			return {
 				ui: {
 					...state.ui,
-					selectedIds: [...state.ui.selectedIds, id],
+					selectedIds: [...currentSelectedIds, id],
 				},
 			};
 		});
 	},
 
 	unselectActivity: (id: string) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: state.ui.selectedIds.filter((selectedId) => selectedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					selectedIds: currentSelectedIds.filter((selectedId) => selectedId !== id),
+				},
+			};
+		});
 	},
 
 	toggleActivitySelection: (id: string) => {
 		set((state) => {
-			const { selectedIds } = state.ui;
+			// Asegurarse de que selectedIds está inicializado
+			const selectedIds = state.ui.selectedIds || [];
 			const isSelected = selectedIds.includes(id);
 
 			return {
@@ -81,8 +101,11 @@ export const createActivityUISlice: StateCreator<ActivityState, [], [], Activity
 
 	selectMultipleActivities: (ids: string[]) => {
 		set((state) => {
+			// Asegurarse de que selectedIds está inicializado
+			const currentSelectedIds = state.ui.selectedIds || [];
+
 			// Filtrar para no tener duplicados
-			const uniqueIds = [...new Set([...state.ui.selectedIds, ...ids])];
+			const uniqueIds = [...new Set([...currentSelectedIds, ...ids])];
 			return {
 				ui: {
 					...state.ui,
@@ -104,28 +127,37 @@ export const createActivityUISlice: StateCreator<ActivityState, [], [], Activity
 	// Funciones de expansión
 	expandActivity: (id: string) => {
 		set((state) => {
-			if (state.ui.expandedIds.includes(id)) return state;
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+			if (currentExpandedIds.includes(id)) return state;
+
 			return {
 				ui: {
 					...state.ui,
-					expandedIds: [...state.ui.expandedIds, id],
+					expandedIds: [...currentExpandedIds, id],
 				},
 			};
 		});
 	},
 
 	collapseActivity: (id: string) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				expandedIds: state.ui.expandedIds.filter((expandedId) => expandedId !== id),
-			},
-		}));
+		set((state) => {
+			// Asegurarse de que expandedIds está inicializado
+			const currentExpandedIds = state.ui.expandedIds || [];
+
+			return {
+				ui: {
+					...state.ui,
+					expandedIds: currentExpandedIds.filter((expandedId) => expandedId !== id),
+				},
+			};
+		});
 	},
 
 	toggleActivityExpansion: (id: string) => {
 		set((state) => {
-			const { expandedIds } = state.ui;
+			// Asegurarse de que expandedIds está inicializado
+			const expandedIds = state.ui.expandedIds || [];
 			const isExpanded = expandedIds.includes(id);
 
 			return {
@@ -197,10 +229,14 @@ export const createActivityUISlice: StateCreator<ActivityState, [], [], Activity
 
 	// Getters
 	isActivitySelected: (id: string) => {
-		return get().ui.selectedIds.includes(id);
+		// Asegurarse de que selectedIds está inicializado
+		const selectedIds = get().ui.selectedIds || [];
+		return selectedIds.includes(id);
 	},
 
 	isActivityExpanded: (id: string) => {
-		return get().ui.expandedIds.includes(id);
+		// Asegurarse de que expandedIds está inicializado
+		const expandedIds = get().ui.expandedIds || [];
+		return expandedIds.includes(id);
 	},
 });
