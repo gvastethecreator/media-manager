@@ -288,7 +288,7 @@ export const createCharacterFiltersSlice: StateCreator<
 				case 'category':
 					key = character.category || 'other';
 					break;
-				case 'level':
+				case 'level': {
 					const level = getCharacterLevelAsNumber(character);
 					// Agrupar por rangos de nivel
 					if (level <= 5) key = '1-5';
@@ -297,6 +297,7 @@ export const createCharacterFiltersSlice: StateCreator<
 					else if (level <= 20) key = '16-20';
 					else key = '21+';
 					break;
+				}
 			}
 
 			if (!groups[key]) {
@@ -391,12 +392,11 @@ export const createCharacterFiltersSlice: StateCreator<
 				const newFilters = [...state.activeFilters];
 				newFilters[existingIndex] = filter;
 				return { activeFilters: newFilters };
-			} else {
+			}
 				// Añadir nuevo filtro
 				return {
 					activeFilters: [...state.activeFilters, filter],
 				};
-			}
 		});
 	},
 

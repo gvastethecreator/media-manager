@@ -10,4 +10,3 @@ export * from './types';
 
 // Alias común para el tipo principal
 export type { CharacterWithRelations as Character } from './types';
-

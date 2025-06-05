@@ -6,17 +6,17 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import {
-    createCharacter as createCharacterTransformer,
-    deleteCharacter as deleteCharacterTransformer,
-    getCharacterById as getCharacterByIdTransformer,
-    searchCharacters as searchCharactersTransformer,
-    updateCharacter as updateCharacterTransformer,
+	createCharacter as createCharacterTransformer,
+	deleteCharacter as deleteCharacterTransformer,
+	getCharacterById as getCharacterByIdTransformer,
+	searchCharacters as searchCharactersTransformer,
+	updateCharacter as updateCharacterTransformer,
 } from '@/transformers/character';
 import type { CharacterBase } from '@/types/entities/character/base';
 import type {
-    CharacterCreateInput,
-    CharacterSearchOptions,
-    CharacterUpdateInput,
+	CharacterCreateInput,
+	CharacterSearchOptions,
+	CharacterUpdateInput,
 } from '@/types/entities/character/types';
 import { revalidatePath } from 'next/cache';
 
@@ -130,9 +130,7 @@ export async function getCharacterById(id: string) {
 		characterLogger.error('❌ Error al obtener personaje', { id, error });
 		throw createCharacterError(
 			'No se pudo obtener el personaje',
-			error instanceof Error && 'code' in error
-				? (error.code as EntityErrorCode)
-				: EntityErrorCode.OPERATION_FAILED,
+			error instanceof Error && 'code' in error ? (error.code as EntityErrorCode) : EntityErrorCode.OPERATION_FAILED,
 			error
 		);
 	}
@@ -170,9 +168,7 @@ export async function updateCharacter(id: string, data: CharacterUpdateInput) {
 		characterLogger.error('❌ Error al actualizar personaje', { id, error });
 		throw createCharacterError(
 			'No se pudo actualizar el personaje',
-			error instanceof Error && 'code' in error
-				? (error.code as EntityErrorCode)
-				: EntityErrorCode.OPERATION_FAILED,
+			error instanceof Error && 'code' in error ? (error.code as EntityErrorCode) : EntityErrorCode.OPERATION_FAILED,
 			error
 		);
 	}
@@ -193,9 +189,7 @@ export async function deleteCharacter(id: string): Promise<{ id: string }> {
 		characterLogger.error('❌ Error al eliminar personaje', { id, error });
 		throw createCharacterError(
 			'No se pudo eliminar el personaje',
-			error instanceof Error && 'code' in error
-				? (error.code as EntityErrorCode)
-				: EntityErrorCode.OPERATION_FAILED,
+			error instanceof Error && 'code' in error ? (error.code as EntityErrorCode) : EntityErrorCode.OPERATION_FAILED,
 			error
 		);
 	}
@@ -334,10 +328,6 @@ export async function removeImageFromCharacter(characterId: string, imageId: str
 		return { success: true };
 	} catch (error) {
 		characterLogger.error('❌ Error al eliminar imagen de personaje', { characterId, imageId, error });
-		throw createCharacterError(
-			'No se pudo eliminar la imagen del personaje',
-			EntityErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createCharacterError('No se pudo eliminar la imagen del personaje', EntityErrorCode.OPERATION_FAILED, error);
 	}
 }

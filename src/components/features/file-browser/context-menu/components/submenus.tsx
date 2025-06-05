@@ -7,17 +7,7 @@ import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useTagStore } from '@/store/entities/tag';
 import type { FileItem } from '@/types/file-item';
-import {
-	BookmarkPlus,
-	Box,
-	Laptop,
-	Lightbulb,
-	MapPin,
-	Sparkles,
-	StickyNote,
-	Tag as TagIcon,
-	User
-} from 'lucide-react';
+import { BookmarkPlus, Box, Laptop, Lightbulb, MapPin, Sparkles, StickyNote, Tag as TagIcon, User } from 'lucide-react';
 import { memo } from 'react';
 import { useEntityLoader } from '../hooks/use-entity-loader';
 import type { ContextMenuAction, LoadingStates } from '../types';
@@ -82,12 +72,7 @@ export const CollectionsSubmenu = memo(function CollectionsSubmenu({
 });
 
 // Componente para el submenú de etiquetas
-export const TagsSubmenu = memo(function TagsSubmenu({
-	file,
-	onAction,
-	loadingStates,
-	onOpenChange
-}: SubmenuProps) {
+export const TagsSubmenu = memo(function TagsSubmenu({ file, onAction, loadingStates, onOpenChange }: SubmenuProps) {
 	const tagStore = useTagStore();
 	const { loadEntityData } = useEntityLoader();
 	// Usar as para hacer type assertion sin modificar el tipo base
@@ -127,7 +112,7 @@ export const AlbumsSubmenu = memo(function AlbumsSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	onOpenChange
+	onOpenChange,
 }: SubmenuProps) {
 	const albumStore = useAlbumStore();
 	const { loadEntityData } = useEntityLoader();
@@ -169,7 +154,7 @@ export const CharactersSubmenu = memo(function CharactersSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	onOpenChange
+	onOpenChange,
 }: SubmenuProps) {
 	return (
 		<EntitySubMenu
@@ -185,7 +170,7 @@ export const CharactersSubmenu = memo(function CharactersSubmenu({
 					characterId: character.id,
 					characterName: character.name,
 					characterImage: character.image,
-					characterDescription: character.description
+					characterDescription: character.description,
 				});
 			}}
 			onCreateAction={() => {
@@ -207,7 +192,7 @@ export const PlacesSubmenu = memo(function PlacesSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	onOpenChange
+	onOpenChange,
 }: SubmenuProps) {
 	return (
 		<EntitySubMenu
@@ -236,7 +221,7 @@ export const WorldItemsSubmenu = memo(function WorldItemsSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	onOpenChange
+	onOpenChange,
 }: SubmenuProps) {
 	return (
 		<EntitySubMenu
@@ -265,7 +250,7 @@ export const PromptsSubmenu = memo(function PromptsSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	onOpenChange
+	onOpenChange,
 }: SubmenuProps) {
 	return (
 		<EntitySubMenu
@@ -290,12 +275,7 @@ export const PromptsSubmenu = memo(function PromptsSubmenu({
 });
 
 // Componente para el submenú de notas
-export const NotesSubmenu = memo(function NotesSubmenu({
-	file,
-	onAction,
-	loadingStates,
-	onOpenChange
-}: SubmenuProps) {
+export const NotesSubmenu = memo(function NotesSubmenu({ file, onAction, loadingStates, onOpenChange }: SubmenuProps) {
 	return (
 		<EntitySubMenu
 			title="Notas"
@@ -323,7 +303,7 @@ export const ConceptsSubmenu = memo(function ConceptsSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	onOpenChange
+	onOpenChange,
 }: SubmenuProps) {
 	return (
 		<EntitySubMenu

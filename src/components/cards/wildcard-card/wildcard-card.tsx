@@ -26,12 +26,7 @@ export interface WildcardCardProps {
  * Card para mostrar un comodín
  * Sigue el diseño de los otros componentes de tarjetas
  */
-export function WildcardCard({
-	wildcard,
-	onClick,
-	className,
-	showBadges = true,
-}: WildcardCardProps) {
+export function WildcardCard({ wildcard, onClick, className, showBadges = true }: WildcardCardProps) {
 	// Calcular colores
 	const primaryColor = useMemo(() => wildcard.color || '#3b82f6', [wildcard.color]);
 	const secondaryColor = useMemo(() => {
@@ -55,9 +50,7 @@ export function WildcardCard({
 	}, [wildcard.color]);
 
 	// Calcular número total de relaciones
-	const totalMedia =
-		(wildcard._count?.images || 0) +
-		(wildcard._count?.videos || 0);
+	const totalMedia = (wildcard._count?.images || 0) + (wildcard._count?.videos || 0);
 
 	const childCount = wildcard._count?.childWildcards || 0;
 
@@ -96,10 +89,7 @@ export function WildcardCard({
 			<CardHeader
 				title={wildcard.name}
 				subtitle={wildcard.category || 'General'}
-				icon={wildcard.emoji ?
-					<span className="text-lg">{wildcard.emoji}</span> :
-					<Shuffle className="h-4 w-4" />
-				}
+				icon={wildcard.emoji ? <span className="text-lg">{wildcard.emoji}</span> : <Shuffle className="h-4 w-4" />}
 				primaryColor={primaryColor}
 			/>
 
@@ -107,40 +97,26 @@ export function WildcardCard({
 			<div className="flex-1 p-3 flex flex-col">
 				{/* Descripción */}
 				{wildcard.description && (
-					<p className="text-sm line-clamp-2 mb-2 text-muted-foreground">
-						{wildcard.description}
-					</p>
+					<p className="text-sm line-clamp-2 mb-2 text-muted-foreground">{wildcard.description}</p>
 				)}
 
 				{/* Estadísticas */}
 				{showBadges && (
 					<div className="mt-auto flex flex-wrap gap-1">
 						{totalMedia > 0 && (
-							<Badge
-								variant="outline"
-								className="text-xs"
-								style={{ borderColor: `${primaryColor}50` }}
-							>
+							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
 								{totalMedia} archivos
 							</Badge>
 						)}
 
 						{childCount > 0 && (
-							<Badge
-								variant="outline"
-								className="text-xs"
-								style={{ borderColor: `${primaryColor}50` }}
-							>
+							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
 								{childCount} variantes
 							</Badge>
 						)}
 
 						{Array.isArray(children) && children.length > 0 && (
-							<Badge
-								variant="outline"
-								className="text-xs"
-								style={{ borderColor: `${primaryColor}50` }}
-							>
+							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
 								{children.length} opciones
 							</Badge>
 						)}
@@ -156,7 +132,7 @@ export function WildcardCard({
 			<button
 				onClick={handleClick}
 				onKeyDown={handleKeyDown}
-				className={cn("cursor-pointer text-left p-0 m-0 w-full", className)}
+				className={cn('cursor-pointer text-left p-0 m-0 w-full', className)}
 				type="button"
 			>
 				{cardContent}

@@ -17,18 +17,18 @@ import { tags } from './tag';
 
 // Definición de la tabla
 export const groups = sqliteTable(
-    'Group',
-    {
-        ...organizationFields,
-    },
-    (table) => {
-        const indexes = createIndexes('group');
-        return {
-            nameIdx: indexes.nameIdx.on(table.name),
-            categoryIdx: indexes.categoryIdx.on(table.category),
-            createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
-        };
-    }
+	'Group',
+	{
+		...organizationFields,
+	},
+	(table) => {
+		const indexes = createIndexes('group');
+		return {
+			nameIdx: indexes.nameIdx.on(table.name),
+			categoryIdx: indexes.categoryIdx.on(table.category),
+			createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
+		};
+	}
 );
 
 // Tablas de relación
@@ -48,19 +48,19 @@ export const groupsToProperties = createRelationTable('GroupToProperty', 'Group'
 
 // Definición de relaciones
 const relatedEntities = {
-    images,
-    videos,
-    albums,
-    collections,
-    tags,
-    characters,
-    places,
-    worldItems,
-    concepts,
-    notes,
-    prompts,
-    wildcards,
-    properties,
+	images,
+	videos,
+	albums,
+	collections,
+	tags,
+	characters,
+	places,
+	worldItems,
+	concepts,
+	notes,
+	prompts,
+	wildcards,
+	properties,
 };
 
 // Relaciones

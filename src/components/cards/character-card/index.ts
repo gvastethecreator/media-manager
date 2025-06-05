@@ -9,4 +9,3 @@ export * from './character-server-actions';
 import { memo } from 'react';
 import { CharacterCard } from './character-card';
 export const MemoizedCharacterCard = memo(CharacterCard);
-

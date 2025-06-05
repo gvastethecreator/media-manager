@@ -2,11 +2,11 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import {
-    createCoreSlice,
-    createExecutionSlice,
-    createFiltersSlice,
-    createRelationsSlice,
-    createUISlice,
+	createCoreSlice,
+	createExecutionSlice,
+	createFiltersSlice,
+	createRelationsSlice,
+	createUISlice,
 } from './slices';
 import type { PromptStore } from './types';
 

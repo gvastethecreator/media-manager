@@ -303,10 +303,10 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			prev.map((file) =>
 				file.id === fileId
 					? {
-						...file,
-						name: newName,
-						path: file.path.replace(/[^/]+$/, newName),
-					}
+							...file,
+							name: newName,
+							path: file.path.replace(/[^/]+$/, newName),
+						}
 					: file
 			)
 		);

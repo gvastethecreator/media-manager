@@ -37,7 +37,7 @@ export function GroupCardImages({
 	rarityLevel = 1,
 	holographicEffect = true,
 	tcgMode = true,
-	compact = false
+	compact = false,
 }: GroupCardImagesProps) {
 	// Estado para el ángulo de visualización (para efecto holográfico)
 	const [viewAngle, setViewAngle] = useState({ x: 0, y: 0 });
@@ -108,11 +108,7 @@ export function GroupCardImages({
 
 	return (
 		<div
-			className={cn(
-				"relative overflow-hidden",
-				compact ? "h-24" : "h-40",
-				tcgMode && "border-b border-white/10"
-			)}
+			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-40', tcgMode && 'border-b border-white/10')}
 			onMouseMove={handleMouseMove}
 			onMouseLeave={handleMouseLeave}
 		>
@@ -130,14 +126,22 @@ export function GroupCardImages({
 			{tcgMode && rarityLevel >= 3 && (
 				<div className="absolute inset-0 z-10 pointer-events-none">
 					{/* Bordes estilo TCG */}
-					<div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 rounded-br-sm opacity-60"
-						style={{ borderColor: primaryColor }} />
-					<div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 rounded-bl-sm opacity-60"
-						style={{ borderColor: primaryColor }} />
-					<div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 rounded-tr-sm opacity-60"
-						style={{ borderColor: primaryColor }} />
-					<div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 rounded-tl-sm opacity-60"
-						style={{ borderColor: primaryColor }} />
+					<div
+						className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 rounded-br-sm opacity-60"
+						style={{ borderColor: primaryColor }}
+					/>
+					<div
+						className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 rounded-bl-sm opacity-60"
+						style={{ borderColor: primaryColor }}
+					/>
+					<div
+						className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 rounded-tr-sm opacity-60"
+						style={{ borderColor: primaryColor }}
+					/>
+					<div
+						className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 rounded-tl-sm opacity-60"
+						style={{ borderColor: primaryColor }}
+					/>
 				</div>
 			)}
 
@@ -145,11 +149,12 @@ export function GroupCardImages({
 				<motion.div
 					className="relative w-full h-full z-10 grid grid-cols-2 grid-rows-2 gap-px"
 					style={{
-						transform: tcgMode && holographicEffect
-							? `perspective(1000px) rotateY(${viewAngle.x * 5}deg) rotateX(${-viewAngle.y * 5}deg)`
-							: undefined,
+						transform:
+							tcgMode && holographicEffect
+								? `perspective(1000px) rotateY(${viewAngle.x * 5}deg) rotateX(${-viewAngle.y * 5}deg)`
+								: undefined,
 						transformStyle: 'preserve-3d',
-						transition: 'transform 0.1s ease-out'
+						transition: 'transform 0.1s ease-out',
 					}}
 				>
 					{/* Mostrar imágenes en una grilla 2x2 */}
@@ -163,13 +168,13 @@ export function GroupCardImages({
 								alt={`Group content ${index + 1}`}
 								fill
 								className={cn(
-									"object-cover",
-									rarityLevel >= 5 && tcgMode && holographicEffect && "transition-all duration-500"
+									'object-cover',
+									rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
 								)}
 								style={{
 									...holographicStyle,
 									transformStyle: 'preserve-3d',
-									opacity: 0.9
+									opacity: 0.9,
 								}}
 							/>
 
@@ -178,7 +183,7 @@ export function GroupCardImages({
 								className="absolute inset-0 pointer-events-none"
 								style={{
 									background: `linear-gradient(to bottom, transparent 70%, ${primaryColor}40 100%)`,
-									opacity: 0.6
+									opacity: 0.6,
 								}}
 							/>
 						</div>

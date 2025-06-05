@@ -1,4 +1,4 @@
-import { render, screen, act } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ImageCard } from './image-card';
 import { getImageCardData } from './image-server-actions';
@@ -10,9 +10,7 @@ jest.mock('./image-server-actions', () => ({
 
 // Mock de Next.js Link
 jest.mock('next/link', () => {
-	return ({ children, href }: { children: React.ReactNode; href: string }) => (
-		<a href={href}>{children}</a>
-	);
+	return ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>;
 });
 
 describe('ImageCard', () => {

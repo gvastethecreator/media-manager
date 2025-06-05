@@ -1,9 +1,22 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { BarChart4, BookMarked, FileText, FolderOpen, HashIcon, Image, ListChecks, MapPin, Tag, TagIcon, UserSquare, Video } from 'lucide-react';
-import { nanoid } from "nanoid";
-import React, { useEffect, useState } from "react";
-import { getNoteCounts, type NoteRelationCounts } from './note-server-actions';
+import {
+	BarChart4,
+	BookMarked,
+	FileText,
+	FolderOpen,
+	HashIcon,
+	Image,
+	ListChecks,
+	MapPin,
+	Tag,
+	TagIcon,
+	UserSquare,
+	Video,
+} from 'lucide-react';
+import { nanoid } from 'nanoid';
+import React, { useEffect, useState } from 'react';
+import { type NoteRelationCounts, getNoteCounts } from './note-server-actions';
 
 interface NoteCardContentProps {
 	content?: string | null;
@@ -30,7 +43,7 @@ export function NoteCardContent({
 	primaryColor,
 	secondaryColor,
 	noteId,
-	tcgMode = true
+	tcgMode = true,
 }: NoteCardContentProps) {
 	// Generar un ID de renderizado único
 	const renderKey = React.useMemo(() => nanoid(), []);
@@ -49,7 +62,7 @@ export function NoteCardContent({
 		tags: 0,
 		wildcards: 0,
 		properties: 0,
-		groups: 0
+		groups: 0,
 	});
 
 	// Determinar si se muestran elementos
@@ -57,9 +70,7 @@ export function NoteCardContent({
 	const hasContent = content && content.length > 0;
 
 	// Formatear la prioridad con etiquetas
-	const priorityLabel = priority === 0 ? 'Normal' :
-		priority === 1 ? 'Alta' :
-			priority === 2 ? 'Urgente' : 'Baja';
+	const priorityLabel = priority === 0 ? 'Normal' : priority === 1 ? 'Alta' : priority === 2 ? 'Urgente' : 'Baja';
 
 	// Cargar recuentos de relaciones al montar el componente
 	useEffect(() => {
@@ -79,14 +90,15 @@ export function NoteCardContent({
 	const totalRelations = Object.values(relationCounts).reduce((sum, count) => sum + count, 0);
 
 	return (
-		<div className={cn(
-			"p-3 flex-1 overflow-hidden flex flex-col",
-			tcgMode ? "bg-card/90 bg-gradient-to-b from-black/40 to-black/60" : "bg-card/80"
-		)}>
+		<div
+			className={cn(
+				'p-3 flex-1 overflow-hidden flex flex-col',
+				tcgMode ? 'bg-card/90 bg-gradient-to-b from-black/40 to-black/60' : 'bg-card/80'
+			)}
+		>
 			{/* Sección de categoría y etiquetas */}
 			<div className="mb-2 flex justify-between items-center">
-				<div className="text-xs uppercase tracking-wider font-medium"
-					style={{ color: primaryColor }}>
+				<div className="text-xs uppercase tracking-wider font-medium" style={{ color: primaryColor }}>
 					{category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Nota'}
 				</div>
 				{status && (
@@ -108,19 +120,14 @@ export function NoteCardContent({
 			</div>
 
 			{/* Contenido de la nota */}
-			<div className={cn(
-				"mb-2 text-muted-foreground",
-				tcgMode ? "p-2 bg-black/20 rounded border border-white/10" : ""
-			)}
-				style={{ fontSize: '0.8rem', lineHeight: '1.25rem' }}>
+			<div
+				className={cn('mb-2 text-muted-foreground', tcgMode ? 'p-2 bg-black/20 rounded border border-white/10' : '')}
+				style={{ fontSize: '0.8rem', lineHeight: '1.25rem' }}
+			>
 				{hasContent ? (
-					<div className="overflow-hidden line-clamp-4">
-						{content}
-					</div>
+					<div className="overflow-hidden line-clamp-4">{content}</div>
 				) : (
-					<div className="italic opacity-70 text-center py-1">
-						Sin contenido
-					</div>
+					<div className="italic opacity-70 text-center py-1">Sin contenido</div>
 				)}
 			</div>
 
@@ -140,17 +147,14 @@ export function NoteCardContent({
 								style={{
 									backgroundColor: `${primaryColor}20`,
 									borderColor: `${primaryColor}40`,
-									color: primaryColor
+									color: primaryColor,
 								}}
 							>
 								{tag}
 							</Badge>
 						))}
 						{Array.isArray(tags) && tags.length > 5 && (
-							<Badge
-								variant="outline"
-								className="text-xs px-1.5 py-0.5 opacity-70"
-							>
+							<Badge variant="outline" className="text-xs px-1.5 py-0.5 opacity-70">
 								+{tags.length - 5} más
 							</Badge>
 						)}
@@ -226,25 +230,37 @@ export function NoteCardContent({
 			{tcgMode && totalRelations > 0 && (
 				<div className="flex justify-center gap-2 mt-2">
 					{relationCounts.tags > 0 && (
-						<Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20">
+						<Badge
+							variant="outline"
+							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
+						>
 							<TagIcon className="h-3 w-3" />
 							<span>{relationCounts.tags}</span>
 						</Badge>
 					)}
 					{relationCounts.prompts > 0 && (
-						<Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20">
+						<Badge
+							variant="outline"
+							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
+						>
 							<BookMarked className="h-3 w-3" />
 							<span>{relationCounts.prompts}</span>
 						</Badge>
 					)}
 					{relationCounts.places > 0 && (
-						<Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20">
+						<Badge
+							variant="outline"
+							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
+						>
 							<MapPin className="h-3 w-3" />
 							<span>{relationCounts.places}</span>
 						</Badge>
 					)}
 					{relationCounts.worldItems > 0 && (
-						<Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20">
+						<Badge
+							variant="outline"
+							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
+						>
 							<HashIcon className="h-3 w-3" />
 							<span>{relationCounts.worldItems}</span>
 						</Badge>
@@ -256,7 +272,12 @@ export function NoteCardContent({
 }
 
 // Componente para mostrar un contador de estadísticas
-function StatCounter({ icon, count, label, primaryColor }: {
+function StatCounter({
+	icon,
+	count,
+	label,
+	primaryColor,
+}: {
 	icon: React.ReactNode;
 	count: number;
 	label: string;
@@ -274,7 +295,13 @@ function StatCounter({ icon, count, label, primaryColor }: {
 }
 
 // Componente para barra de estadísticas estilo TCG
-function StatBar({ icon, label, value, maxValue, primaryColor }: {
+function StatBar({
+	icon,
+	label,
+	value,
+	maxValue,
+	primaryColor,
+}: {
 	icon: React.ReactNode;
 	label: string;
 	value: number;
@@ -291,7 +318,9 @@ function StatBar({ icon, label, value, maxValue, primaryColor }: {
 					{icon}
 					<span className="opacity-80">{label}</span>
 				</div>
-				<span className="font-medium" style={{ color: primaryColor }}>{value}</span>
+				<span className="font-medium" style={{ color: primaryColor }}>
+					{value}
+				</span>
 			</div>
 			<div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
 				<div
@@ -299,7 +328,7 @@ function StatBar({ icon, label, value, maxValue, primaryColor }: {
 					style={{
 						width: `${percentage}%`,
 						backgroundColor: primaryColor,
-						boxShadow: `0 0 4px ${primaryColor}`
+						boxShadow: `0 0 4px ${primaryColor}`,
 					}}
 				/>
 			</div>

@@ -27,9 +27,8 @@ export function GroupCardHeader({
 	organizationLevel = 1,
 	isFavorite = false,
 	tcgMode = true,
-	compact = false
+	compact = false,
 }: GroupCardHeaderProps) {
-
 	// Función para obtener el icono según el tipo de organización
 	const getOrgTypeIcon = () => {
 		switch (organizationType.toLowerCase()) {
@@ -49,14 +48,12 @@ export function GroupCardHeader({
 	return (
 		<div
 			className={cn(
-				"relative overflow-hidden border-b",
-				tcgMode ? "border-white/10 bg-gradient-to-r from-black/30 to-transparent" : "border-gray-200",
-				compact ? "p-2" : "p-3"
+				'relative overflow-hidden border-b',
+				tcgMode ? 'border-white/10 bg-gradient-to-r from-black/30 to-transparent' : 'border-gray-200',
+				compact ? 'p-2' : 'p-3'
 			)}
 			style={{
-				background: tcgMode
-					? `linear-gradient(135deg, ${color}60, ${color}20, transparent)`
-					: undefined
+				background: tcgMode ? `linear-gradient(135deg, ${color}60, ${color}20, transparent)` : undefined,
 			}}
 		>
 			{/* Fondo decorativo para TCG */}
@@ -66,7 +63,7 @@ export function GroupCardHeader({
 					<div
 						className="absolute inset-0"
 						style={{
-							backgroundImage: `radial-gradient(circle at 30% 50%, ${color}40, transparent 70%)`
+							backgroundImage: `radial-gradient(circle at 30% 50%, ${color}40, transparent 70%)`,
 						}}
 					/>
 				</div>
@@ -76,32 +73,22 @@ export function GroupCardHeader({
 				{/* Emoji del grupo */}
 				<div
 					className={cn(
-						"flex items-center justify-center rounded",
-						tcgMode ? "bg-black/20 p-1" : "bg-white/10 p-0.5",
-						compact ? "h-6 w-6 mr-1.5" : "h-8 w-8 mr-2"
+						'flex items-center justify-center rounded',
+						tcgMode ? 'bg-black/20 p-1' : 'bg-white/10 p-0.5',
+						compact ? 'h-6 w-6 mr-1.5' : 'h-8 w-8 mr-2'
 					)}
 					style={{
-						boxShadow: tcgMode ? `0 0 10px ${color}40` : undefined
+						boxShadow: tcgMode ? `0 0 10px ${color}40` : undefined,
 					}}
 				>
-					<span className={compact ? "text-lg" : "text-xl"}>{emoji}</span>
+					<span className={compact ? 'text-lg' : 'text-xl'}>{emoji}</span>
 				</div>
 
 				{/* Nombre y categoría */}
 				<div className="flex-1 min-w-0">
-					<h3 className={cn(
-						"font-semibold line-clamp-1",
-						compact ? "text-sm" : "text-base"
-					)}>
-						{name}
-					</h3>
+					<h3 className={cn('font-semibold line-clamp-1', compact ? 'text-sm' : 'text-base')}>{name}</h3>
 					<div className="flex items-center">
-						<span className={cn(
-							"text-xs opacity-80",
-							compact ? "line-clamp-1" : ""
-						)}>
-							{category}
-						</span>
+						<span className={cn('text-xs opacity-80', compact ? 'line-clamp-1' : '')}>{category}</span>
 					</div>
 				</div>
 
@@ -117,17 +104,9 @@ export function GroupCardHeader({
 						<div className="flex items-center space-x-0.5">
 							{Array.from({ length: Math.min(5, organizationLevel) }).map((_, i) => {
 								const levelValue = `org-level-${name}-${i + 1}-${organizationLevel}`;
-								return (
-									<div
-										key={levelValue}
-										className="w-1.5 h-1.5 rounded-full"
-										style={{ backgroundColor: color }}
-									/>
-								);
+								return <div key={levelValue} className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />;
 							})}
-							{organizationLevel > 5 && (
-								<span className="text-[10px] ml-1">+{organizationLevel - 5}</span>
-							)}
+							{organizationLevel > 5 && <span className="text-[10px] ml-1">+{organizationLevel - 5}</span>}
 						</div>
 					</div>
 				)}
@@ -148,11 +127,7 @@ export function GroupCardHeader({
 			)}
 
 			{/* Estrella de favorito */}
-			{isFavorite && (
-				<div className="absolute top-1 right-1 text-yellow-400 text-xs">
-					★
-				</div>
-			)}
+			{isFavorite && <div className="absolute top-1 right-1 text-yellow-400 text-xs">★</div>}
 		</div>
 	);
 }

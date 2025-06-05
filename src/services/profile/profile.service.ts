@@ -6,15 +6,15 @@
 import { prisma } from '@/lib/prisma';
 import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
-    type CreateProfileInput,
-    type ProfileExtended,
-    type ProfileFilters,
-    type ProfilePaginationOptions,
-    type UpdateProfileInput,
-    createProfileSchema,
-    profileFiltersSchema,
-    profilePaginationSchema,
-    updateProfileSchema,
+	type CreateProfileInput,
+	type ProfileExtended,
+	type ProfileFilters,
+	type ProfilePaginationOptions,
+	type UpdateProfileInput,
+	createProfileSchema,
+	profileFiltersSchema,
+	profilePaginationSchema,
+	updateProfileSchema,
 } from '@/types/entities/profile';
 import { toServiceError } from '@/utils/errors/service-errors';
 import type { Profile } from '@prisma/client';
@@ -51,10 +51,7 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 	/**
 	 * Obtiene todos los perfiles con filtros y paginación
 	 */
-	async getProfiles(
-		filters?: ProfileFilters,
-		pagination?: ProfilePaginationOptions
-	): Promise<ProfileExtended[]> {
+	async getProfiles(filters?: ProfileFilters, pagination?: ProfilePaginationOptions): Promise<ProfileExtended[]> {
 		try {
 			// Validar filtros y paginación
 			const validatedFilters = filters ? profileFiltersSchema.parse(filters) : {};
@@ -162,7 +159,7 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 			const profile = await this.model.findFirst({
 				where: { isActive: true },
 			});
-			return profile ? (this.transformer?.toEntity(profile) || profile) : null;
+			return profile ? this.transformer?.toEntity(profile) || profile : null;
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -176,10 +173,4 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 export const profileService = ProfileServiceImpl.getInstance();
 
 // Exportar tipos útiles para los consumidores del servicio
-export type {
-    CreateProfileInput,
-    ProfileExtended,
-    ProfileFilters,
-    ProfilePaginationOptions,
-    UpdateProfileInput
-};
+export type { CreateProfileInput, ProfileExtended, ProfileFilters, ProfilePaginationOptions, UpdateProfileInput };

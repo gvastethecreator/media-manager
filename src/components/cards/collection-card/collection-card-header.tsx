@@ -29,7 +29,7 @@ export function CollectionCardHeader({
 				className="absolute top-0 left-0 right-0 h-0.5 z-10"
 				style={{
 					background: `linear-gradient(to right, transparent, ${color}, transparent)`,
-					boxShadow: `0 0 5px ${color}`
+					boxShadow: `0 0 5px ${color}`,
 				}}
 			/>
 
@@ -38,7 +38,7 @@ export function CollectionCardHeader({
 				className="h-16 pt-2.5 px-3.5 flex items-center relative overflow-hidden"
 				style={{
 					background: `linear-gradient(90deg, ${color}90, ${color}60)`,
-					borderBottom: `1px solid ${color}`
+					borderBottom: `1px solid ${color}`,
 				}}
 			>
 				{/* Patrón de fondo estilo TCG */}
@@ -57,7 +57,7 @@ export function CollectionCardHeader({
 						style={{
 							background: `linear-gradient(135deg, white, ${color}20)`,
 							border: `1px solid ${color}`,
-							boxShadow: `0 0 5px ${color}80, inset 0 0 3px ${color}80`
+							boxShadow: `0 0 5px ${color}80, inset 0 0 3px ${color}80`,
 						}}
 					>
 						{emoji}
@@ -65,10 +65,7 @@ export function CollectionCardHeader({
 
 					{/* Nombre de la colección (como título de la carta) */}
 					<h3
-						className={cn(
-							"font-bold text-lg tracking-tight truncate",
-							"text-white z-10"
-						)}
+						className={cn('font-bold text-lg tracking-tight truncate', 'text-white z-10')}
 						style={{ textShadow: `0 0 3px ${color}, 0 0 5px rgba(0,0,0,0.5)` }}
 					>
 						{name}
@@ -78,7 +75,7 @@ export function CollectionCardHeader({
 					{isFavorite && (
 						<Star
 							className="w-4 h-4 text-yellow-400 fill-yellow-400 z-10 ml-auto flex-shrink-0"
-							style={{ filter: "drop-shadow(0 0 2px rgba(0,0,0,0.5))" }}
+							style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }}
 						/>
 					)}
 				</div>
@@ -98,7 +95,7 @@ export function CollectionCardHeader({
 				style={{
 					borderBottom: `1px solid ${color}50`,
 					borderTop: `1px solid ${color}30`,
-					boxShadow: 'inset 0 0 10px rgba(0,0,0,0.3)'
+					boxShadow: 'inset 0 0 10px rgba(0,0,0,0.3)',
 				}}
 			>
 				{/* Categoría (como tipo de carta TCG) */}

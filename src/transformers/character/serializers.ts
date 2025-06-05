@@ -25,7 +25,7 @@ export function fromPrismaCharacter<T extends Partial<Character> | unknown>(
 			deserializeFields = true,
 			includeRelations = false,
 			includeUI = true,
-			includeStats = false
+			includeStats = false,
 		} = options;
 
 		// Preparar el objeto base
@@ -35,36 +35,18 @@ export function fromPrismaCharacter<T extends Partial<Character> | unknown>(
 		const parsedCharacter: CharacterComplete = {
 			...character,
 			// Deserializar campos JSON si se requiere
-			stats: deserializeFields
-				? deserializeStats(character.stats)
-				: character.stats,
+			stats: deserializeFields ? deserializeStats(character.stats) : character.stats,
 			psychologicalProfile: character.psychologicalProfile || '',
 			socialProfile: character.socialProfile || '',
-			relationships: deserializeFields
-				? deserializeRelationships(character.relationships)
-				: character.relationships,
-			goals: deserializeFields
-				? deserializeArray(character.goals)
-				: character.goals,
-			fears: deserializeFields
-				? deserializeArray(character.fears)
-				: character.fears,
-			beliefs: deserializeFields
-				? deserializeArray(character.beliefs)
-				: character.beliefs,
-			personality: deserializeFields
-				? deserializeArray(character.personality)
-				: character.personality,
-			skills: deserializeFields
-				? deserializeArray(character.skills)
-				: character.skills,
-			abilities: deserializeFields
-				? deserializeArray(character.abilities)
-				: character.abilities,
-			filters: deserializeFields
-				? deserializeFilters(character.filters)
-				: character.filters,
-			notes: character.notes?.map(note => ({ id: note.id })) ?? [],
+			relationships: deserializeFields ? deserializeRelationships(character.relationships) : character.relationships,
+			goals: deserializeFields ? deserializeArray(character.goals) : character.goals,
+			fears: deserializeFields ? deserializeArray(character.fears) : character.fears,
+			beliefs: deserializeFields ? deserializeArray(character.beliefs) : character.beliefs,
+			personality: deserializeFields ? deserializeArray(character.personality) : character.personality,
+			skills: deserializeFields ? deserializeArray(character.skills) : character.skills,
+			abilities: deserializeFields ? deserializeArray(character.abilities) : character.abilities,
+			filters: deserializeFields ? deserializeFilters(character.filters) : character.filters,
+			notes: character.notes?.map((note) => ({ id: note.id })) ?? [],
 		};
 
 		// --- VALIDACIÓN ZOD DESPUÉS DE DESERIALIZAR ---
@@ -109,7 +91,7 @@ export function toPrismaCharacter<T extends Partial<CharacterComplete>>(
 			personality: serializeArray(character.personality),
 			skills: serializeArray(character.skills),
 			abilities: serializeArray(character.abilities),
-			filters: serializeFilters(character.filters)
+			filters: serializeFilters(character.filters),
 		};
 	} catch (error) {
 		serverLogger.error(`Error serializando character para Prisma: ${error}`);

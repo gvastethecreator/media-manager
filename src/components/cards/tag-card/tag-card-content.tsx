@@ -1,6 +1,22 @@
 import { cn } from '@/lib/utils';
 import { TagRarity } from '@/types/entities/tag/enums';
-import { Album, BookOpen, FileImage, FileText, Folder, Image, Keyboard, ListChecks, MapPin, MessageSquare, Package, PanelTop, Tag as TagIcon, UserSquare, Video } from 'lucide-react';
+import {
+	Album,
+	BookOpen,
+	FileImage,
+	FileText,
+	Folder,
+	Image,
+	Keyboard,
+	ListChecks,
+	MapPin,
+	MessageSquare,
+	Package,
+	PanelTop,
+	Tag as TagIcon,
+	UserSquare,
+	Video,
+} from 'lucide-react';
 
 interface TagCardContentProps {
 	description?: string | null;
@@ -47,10 +63,10 @@ export function TagCardContent({
 	notesCount = 0,
 	wildcardsCount = 0,
 	propertiesCount = 0,
-	groupsCount = 0
+	groupsCount = 0,
 }: TagCardContentProps) {
 	// Determinar si mostrar los contadores de relaciones (solo si hay al menos uno con valor)
-	const hasRelationships = (
+	const hasRelationships =
 		albumsCount > 0 ||
 		collectionsCount > 0 ||
 		charactersCount > 0 ||
@@ -61,17 +77,17 @@ export function TagCardContent({
 		notesCount > 0 ||
 		wildcardsCount > 0 ||
 		propertiesCount > 0 ||
-		groupsCount > 0
-	);
+		groupsCount > 0;
 
 	// Conseguir un factor de brillo basado en la rareza para efectos visuales
-	const rarityBrightness = {
-		[TagRarity.COMMON]: 1,
-		[TagRarity.UNCOMMON]: 1.2,
-		[TagRarity.RARE]: 1.5,
-		[TagRarity.EPIC]: 1.8,
-		[TagRarity.LEGENDARY]: 2.2
-	}[rarity as keyof typeof rarityBrightness] || 1;
+	const rarityBrightness =
+		{
+			[TagRarity.COMMON]: 1,
+			[TagRarity.UNCOMMON]: 1.2,
+			[TagRarity.RARE]: 1.5,
+			[TagRarity.EPIC]: 1.8,
+			[TagRarity.LEGENDARY]: 2.2,
+		}[rarity as keyof typeof rarityBrightness] || 1;
 
 	// Renderizar una barra de stats para TCG mode
 	const renderStatBar = (icon: React.ReactNode, count: number, label: string, color: string = primaryColor) => {
@@ -89,24 +105,23 @@ export function TagCardContent({
 						style={{
 							width: `${Math.min(100, (count / 10) * 100)}%`,
 							background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`,
-							boxShadow: `0 0 ${rarityBrightness * 5}px ${color}70`
+							boxShadow: `0 0 ${rarityBrightness * 5}px ${color}70`,
 						}}
 					/>
 				</div>
-				<span className="font-mono text-xs" style={{ color }}>{count}</span>
+				<span className="font-mono text-xs" style={{ color }}>
+					{count}
+				</span>
 			</div>
 		);
 	};
 
 	return (
 		<div
-			className={cn(
-				"flex-grow p-3 overflow-y-auto scrollbar-thin",
-				tcgMode && "bg-black/5"
-			)}
+			className={cn('flex-grow p-3 overflow-y-auto scrollbar-thin', tcgMode && 'bg-black/5')}
 			style={{
 				scrollbarColor: `${primaryColor} transparent`,
-				background: tcgMode ? 'rgba(0,0,0,0.03)' : 'transparent'
+				background: tcgMode ? 'rgba(0,0,0,0.03)' : 'transparent',
 			}}
 		>
 			{/* Contenedor con borde estilizado similar a las reglas de TCG */}
@@ -120,10 +135,7 @@ export function TagCardContent({
 				{/* Icono decorativo de etiqueta */}
 				{tcgMode && (
 					<div className="flex items-center gap-1 mb-2">
-						<TagIcon
-							className="w-4 h-4 opacity-70"
-							style={{ color: primaryColor }}
-						/>
+						<TagIcon className="w-4 h-4 opacity-70" style={{ color: primaryColor }} />
 						<div
 							className="flex-grow h-px"
 							style={{ background: `linear-gradient(to right, ${primaryColor}70, transparent)` }}
@@ -134,48 +146,44 @@ export function TagCardContent({
 				{/* Descripción principal */}
 				<div
 					className={cn(
-						"mb-3 text-xs",
-						tcgMode
-							? "bg-black/10 p-2 rounded border border-white/5"
-							: "text-muted-foreground"
+						'mb-3 text-xs',
+						tcgMode ? 'bg-black/10 p-2 rounded border border-white/5' : 'text-muted-foreground'
 					)}
 					style={{
 						lineHeight: '1.25rem',
 						color: tcgMode ? 'white' : `${primaryColor}DD`,
-						boxShadow: tcgMode ? `inset 0 0 ${rarityBrightness * 5}px ${primaryColor}20` : 'none'
+						boxShadow: tcgMode ? `inset 0 0 ${rarityBrightness * 5}px ${primaryColor}20` : 'none',
 					}}
 				>
 					{description ? (
 						<p className={tcgMode ? '' : 'italic'}>{description}</p>
 					) : (
-						<p className="italic text-center opacity-70">
-							Sin descripción
-						</p>
+						<p className="italic text-center opacity-70">Sin descripción</p>
 					)}
 				</div>
 
 				{/* Contadores de relaciones en modo TCG */}
 				{tcgMode && hasRelationships && (
 					<div className="mb-3 flex flex-col">
-						{renderStatBar(<Image className="w-3.5 h-3.5" />, imagesCount, "Imágenes")}
-						{renderStatBar(<Video className="w-3.5 h-3.5" />, videosCount, "Videos")}
-						{renderStatBar(<Album className="w-3.5 h-3.5" />, albumsCount, "Álbumes")}
-						{renderStatBar(<Folder className="w-3.5 h-3.5" />, collectionsCount, "Colecciones")}
-						{renderStatBar(<UserSquare className="w-3.5 h-3.5" />, charactersCount, "Personajes")}
-						{renderStatBar(<MapPin className="w-3.5 h-3.5" />, placesCount, "Lugares")}
-						{renderStatBar(<Package className="w-3.5 h-3.5" />, worldItemsCount, "Objetos")}
-						{renderStatBar(<BookOpen className="w-3.5 h-3.5" />, conceptsCount, "Conceptos")}
-						{renderStatBar(<MessageSquare className="w-3.5 h-3.5" />, promptsCount, "Prompts")}
-						{renderStatBar(<FileText className="w-3.5 h-3.5" />, notesCount, "Notas")}
-						{renderStatBar(<FileImage className="w-3.5 h-3.5" />, wildcardsCount, "Wildcards")}
-						{renderStatBar(<ListChecks className="w-3.5 h-3.5" />, propertiesCount, "Propiedades")}
-						{renderStatBar(<PanelTop className="w-3.5 h-3.5" />, groupsCount, "Grupos")}
+						{renderStatBar(<Image className="w-3.5 h-3.5" />, imagesCount, 'Imágenes')}
+						{renderStatBar(<Video className="w-3.5 h-3.5" />, videosCount, 'Videos')}
+						{renderStatBar(<Album className="w-3.5 h-3.5" />, albumsCount, 'Álbumes')}
+						{renderStatBar(<Folder className="w-3.5 h-3.5" />, collectionsCount, 'Colecciones')}
+						{renderStatBar(<UserSquare className="w-3.5 h-3.5" />, charactersCount, 'Personajes')}
+						{renderStatBar(<MapPin className="w-3.5 h-3.5" />, placesCount, 'Lugares')}
+						{renderStatBar(<Package className="w-3.5 h-3.5" />, worldItemsCount, 'Objetos')}
+						{renderStatBar(<BookOpen className="w-3.5 h-3.5" />, conceptsCount, 'Conceptos')}
+						{renderStatBar(<MessageSquare className="w-3.5 h-3.5" />, promptsCount, 'Prompts')}
+						{renderStatBar(<FileText className="w-3.5 h-3.5" />, notesCount, 'Notas')}
+						{renderStatBar(<FileImage className="w-3.5 h-3.5" />, wildcardsCount, 'Wildcards')}
+						{renderStatBar(<ListChecks className="w-3.5 h-3.5" />, propertiesCount, 'Propiedades')}
+						{renderStatBar(<PanelTop className="w-3.5 h-3.5" />, groupsCount, 'Grupos')}
 					</div>
 				)}
 
 				{/* Atajo de teclado */}
 				{shortcut && (
-					<div className={cn("mt-auto", !tcgMode && "pt-2")}>
+					<div className={cn('mt-auto', !tcgMode && 'pt-2')}>
 						<div className="flex items-center gap-1 text-xs">
 							<Keyboard className="w-3.5 h-3.5 text-muted-foreground" />
 							<span className="font-medium text-muted-foreground">Atajo:</span>
@@ -184,7 +192,7 @@ export function TagCardContent({
 								style={{
 									background: `${primaryColor}15`,
 									border: `1px solid ${primaryColor}30`,
-									color: primaryColor
+									color: primaryColor,
 								}}
 							>
 								{shortcut}

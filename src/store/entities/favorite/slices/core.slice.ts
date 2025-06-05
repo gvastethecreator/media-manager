@@ -13,80 +13,73 @@ const logger = clientLogger.withContext('FavoriteStore.CoreSlice');
 
 // Estado
 export interface CoreState {
-  favorites: FavoriteExtended[];
-  isLoading: boolean;
-  error: string | null;
+	favorites: FavoriteExtended[];
+	isLoading: boolean;
+	error: string | null;
 }
 
 // Acciones
 export interface CoreActions {
-  // Carga de datos
-  setFavorites: (favorites: FavoriteExtended[]) => void;
-  setLoading: (isLoading: boolean) => void;
-  setError: (error: string | null) => void;
+	// Carga de datos
+	setFavorites: (favorites: FavoriteExtended[]) => void;
+	setLoading: (isLoading: boolean) => void;
+	setError: (error: string | null) => void;
 
-  // Gestión de favoritos
-  addFavorite: (favorite: FavoriteExtended) => void;
-  removeFavorite: (id: string) => void;
-  updateFavorite: (id: string, data: Partial<FavoriteExtended>) => void;
-  clearFavorites: () => void;
+	// Gestión de favoritos
+	addFavorite: (favorite: FavoriteExtended) => void;
+	removeFavorite: (id: string) => void;
+	updateFavorite: (id: string, data: Partial<FavoriteExtended>) => void;
+	clearFavorites: () => void;
 }
 
 // Slice del store para core
-export const createCoreSlice: StateCreator<
-  FavoriteStore,
-  [],
-  [],
-  CoreState & CoreActions
-> = (set) => ({
-  // Estado inicial
-  favorites: [],
-  isLoading: false,
-  error: null,
+export const createCoreSlice: StateCreator<FavoriteStore, [], [], CoreState & CoreActions> = (set) => ({
+	// Estado inicial
+	favorites: [],
+	isLoading: false,
+	error: null,
 
-  // Carga de datos
-  setFavorites: (favorites) => {
-    set({ favorites });
-    logger.info('📦 Favoritos cargados:', favorites.length);
-  },
+	// Carga de datos
+	setFavorites: (favorites) => {
+		set({ favorites });
+		logger.info('📦 Favoritos cargados:', favorites.length);
+	},
 
-  setLoading: (isLoading) => {
-    set({ isLoading });
-  },
+	setLoading: (isLoading) => {
+		set({ isLoading });
+	},
 
-  setError: (error) => {
-    set({ error });
-    if (error) {
-      logger.error('❌ Error en favoritos:', error);
-    }
-  },
+	setError: (error) => {
+		set({ error });
+		if (error) {
+			logger.error('❌ Error en favoritos:', error);
+		}
+	},
 
-  // Gestión de favoritos
-  addFavorite: (favorite) => {
-    set((state) => ({
-      favorites: [...state.favorites, favorite],
-    }));
-    logger.info('➕ Favorito añadido:', favorite.id);
-  },
+	// Gestión de favoritos
+	addFavorite: (favorite) => {
+		set((state) => ({
+			favorites: [...state.favorites, favorite],
+		}));
+		logger.info('➕ Favorito añadido:', favorite.id);
+	},
 
-  removeFavorite: (id) => {
-    set((state) => ({
-      favorites: state.favorites.filter((favorite) => favorite.id !== id),
-    }));
-    logger.info('➖ Favorito eliminado:', id);
-  },
+	removeFavorite: (id) => {
+		set((state) => ({
+			favorites: state.favorites.filter((favorite) => favorite.id !== id),
+		}));
+		logger.info('➖ Favorito eliminado:', id);
+	},
 
-  updateFavorite: (id, data) => {
-    set((state) => ({
-      favorites: state.favorites.map((favorite) =>
-        favorite.id === id ? { ...favorite, ...data } : favorite
-      ),
-    }));
-    logger.info('📝 Favorito actualizado:', id);
-  },
+	updateFavorite: (id, data) => {
+		set((state) => ({
+			favorites: state.favorites.map((favorite) => (favorite.id === id ? { ...favorite, ...data } : favorite)),
+		}));
+		logger.info('📝 Favorito actualizado:', id);
+	},
 
-  clearFavorites: () => {
-    set({ favorites: [] });
-    logger.info('🧹 Favoritos eliminados');
-  },
+	clearFavorites: () => {
+		set({ favorites: [] });
+		logger.info('🧹 Favoritos eliminados');
+	},
 });

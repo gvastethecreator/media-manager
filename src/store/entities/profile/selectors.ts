@@ -56,40 +56,39 @@ export const selectGroupBy = (state: ProfileStoreState) => state.groupBy;
 /**
  * Selectores compuestos
  */
-export const selectIsProfileSelected = (id: string) => (state: ProfileStoreState) =>
-  state.selectedProfileId === id;
+export const selectIsProfileSelected = (id: string) => (state: ProfileStoreState) => state.selectedProfileId === id;
 
 export const selectIsProfileExpanded = (id: string) => (state: ProfileStoreState) =>
-  state.expandedProfileIds.includes(id);
+	state.expandedProfileIds.includes(id);
 
 export const selectProfileById = (id: string) => (state: ProfileStoreState) =>
-  state.profiles.find(profile => profile.id === id);
+	state.profiles.find((profile) => profile.id === id);
 
 export const selectFilteredProfiles = (state: ProfileStoreState) => {
-  const { profiles, searchTerm, activeFilters } = state;
+	const { profiles, searchTerm, activeFilters } = state;
 
-  return profiles.filter(profile => {
-    // Filtrar por término de búsqueda
-    if (searchTerm && !profile.name.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
-    }
+	return profiles.filter((profile) => {
+		// Filtrar por término de búsqueda
+		if (searchTerm && !profile.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+			return false;
+		}
 
-    // Filtrar por filtros activos
-    if (activeFilters.length > 0) {
-      return activeFilters.every(filter => {
-        switch (filter) {
-          case 'active':
-            return profile.isActive;
-          case 'inactive':
-            return !profile.isActive;
-          case 'hasAvatar':
-            return !!profile.avatarUrl;
-          default:
-            return true;
-        }
-      });
-    }
+		// Filtrar por filtros activos
+		if (activeFilters.length > 0) {
+			return activeFilters.every((filter) => {
+				switch (filter) {
+					case 'active':
+						return profile.isActive;
+					case 'inactive':
+						return !profile.isActive;
+					case 'hasAvatar':
+						return !!profile.avatarUrl;
+					default:
+						return true;
+				}
+			});
+		}
 
-    return true;
-  });
+		return true;
+	});
 };

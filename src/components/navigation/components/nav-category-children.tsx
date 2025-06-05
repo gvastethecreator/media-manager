@@ -333,14 +333,11 @@ const CategoryItems = memo(
 			tagsContainerClassName,
 			tagClickHandlers,
 			itemClickHandlers,
-			isItemSelected
+			isItemSelected,
 		]);
 
 		// Memoizamos los items renderizados
-		const renderedItems = useMemo(
-			() => renderItems(),
-			[renderItems]
-		);
+		const renderedItems = useMemo(() => renderItems(), [renderItems]);
 
 		return <div className={containerClassName}>{renderedItems}</div>;
 	},
@@ -395,7 +392,6 @@ export const NavCategoryChildren = memo(
 
 			return (
 				<>
-
 					{/* Renderizado condicional de los ítems */}
 					<CategoryItems
 						items={items}

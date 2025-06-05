@@ -13,7 +13,7 @@ export async function seedProfiles(prisma: PrismaClient): Promise<void> {
 		if (await tableExists(prisma, 'Profile')) {
 			// Verificar si ya existe un perfil por defecto
 			const existingProfile = await prisma.profile.findFirst({
-				where: { name: 'Default' }
+				where: { name: 'Default' },
 			});
 
 			if (!existingProfile) {
@@ -25,7 +25,7 @@ export async function seedProfiles(prisma: PrismaClient): Promise<void> {
 						emoji: '🐸',
 						color: '#AE3F94FF',
 						description: 'Perfil por defecto',
-						isActive: true
+						isActive: true,
 					},
 				});
 
@@ -34,19 +34,19 @@ export async function seedProfiles(prisma: PrismaClient): Promise<void> {
 					data: {
 						theme: 'system',
 						language: 'es',
-						profileId: 'default-profile-id'
-					}
+						profileId: 'default-profile-id',
+					},
 				});
 
 				// Actualizar el perfil con el ID de settings
 				const settings = await prisma.settings.findFirst({
-					where: { profileId: 'default-profile-id' }
+					where: { profileId: 'default-profile-id' },
 				});
 
 				if (settings) {
 					await prisma.profile.update({
 						where: { id: 'default-profile-id' },
-						data: { settingsId: settings.id }
+						data: { settingsId: settings.id },
 					});
 				}
 

@@ -10,10 +10,8 @@ import { BaseContentView } from '../base/base-content-view';
 import { ContentViewProvider } from '../base/content-view-provider';
 
 export function PlaceContentView() {
-	const selectedPlaceId = usePlaceStore(state => state.selectedPlaceId);
-	const selectedPlace = usePlaceStore(state =>
-		selectedPlaceId ? state.getPlaceById(selectedPlaceId) : null
-	);
+	const selectedPlaceId = usePlaceStore((state) => state.selectedPlaceId);
+	const selectedPlace = usePlaceStore((state) => (selectedPlaceId ? state.getPlaceById(selectedPlaceId) : null));
 
 	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -61,7 +59,7 @@ export function PlaceContentView() {
 			error={error}
 			toggleItemSelection={handleItemSelection}
 			currentContainerId={selectedPlaceId}
-			containerName={selectedPlace?.name ?? "lugar"}
+			containerName={selectedPlace?.name ?? 'lugar'}
 			emptyState={{
 				icon: MapPin,
 				title: 'No hay imágenes en este lugar',

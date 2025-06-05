@@ -49,15 +49,12 @@ export async function getRecentWorldItemImages(worldItemId: string, limit = 6): 
 				thumbnailHeight: true,
 				thumbnailSize: true,
 			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ createdAt: 'desc' },
-			],
+			orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
 			take: limit,
 		});
 
 		// Convertir los thumbnails a URLs de datos
-		const thumbnails: ThumbnailImage[] = images.map(image => {
+		const thumbnails: ThumbnailImage[] = images.map((image) => {
 			let thumbnailUrl = '';
 
 			// Verificar si tenemos un thumbnail válido
@@ -77,7 +74,9 @@ export async function getRecentWorldItemImages(worldItemId: string, limit = 6): 
 		return thumbnails;
 	} catch (error) {
 		worldItemCardLogger.error('❌ Error obteniendo imágenes para WorldItemCard:', error);
-		throw new Error(`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 
@@ -100,8 +99,8 @@ export async function getWorldItemWithRelations(worldItemId: string): Promise<Wo
 		const worldItemBasic = await prisma.worldItem.findUnique({
 			where: { id: worldItemId },
 			select: {
-				featuredImage: true
-			}
+				featuredImage: true,
+			},
 		});
 
 		if (!worldItemBasic) {
@@ -128,25 +127,27 @@ export async function getWorldItemWithRelations(worldItemId: string): Promise<Wo
 						wildcards: true,
 						properties: true,
 						groups: true,
-					}
+					},
 				},
 				// Incluir imagen destacada si existe
-				images: worldItemBasic.featuredImage ? {
-					where: {
-						id: {
-							equals: worldItemBasic.featuredImage
+				images: worldItemBasic.featuredImage
+					? {
+							where: {
+								id: {
+									equals: worldItemBasic.featuredImage,
+								},
+							},
+							take: 1,
+							select: {
+								id: true,
+								name: true,
+								thumbnail: true,
+								thumbnailWidth: true,
+								thumbnailHeight: true,
+							},
 						}
-					},
-					take: 1,
-					select: {
-						id: true,
-						name: true,
-						thumbnail: true,
-						thumbnailWidth: true,
-						thumbnailHeight: true,
-					}
-				} : undefined
-			}
+					: undefined,
+			},
 		});
 
 		if (!worldItem) {
@@ -174,9 +175,16 @@ export async function getWorldItemWithRelations(worldItemId: string): Promise<Wo
 			...worldItem,
 			featuredImage: featuredImageData,
 			// Parsear campos JSON si existen como strings
-			attributes: typeof worldItem.attributes === 'string' && worldItem.attributes ? JSON.parse(worldItem.attributes) : worldItem.attributes,
-			effects: typeof worldItem.effects === 'string' && worldItem.effects ? JSON.parse(worldItem.effects) : worldItem.effects,
-			requirements: typeof worldItem.requirements === 'string' && worldItem.requirements ? JSON.parse(worldItem.requirements) : worldItem.requirements,
+			attributes:
+				typeof worldItem.attributes === 'string' && worldItem.attributes
+					? JSON.parse(worldItem.attributes)
+					: worldItem.attributes,
+			effects:
+				typeof worldItem.effects === 'string' && worldItem.effects ? JSON.parse(worldItem.effects) : worldItem.effects,
+			requirements:
+				typeof worldItem.requirements === 'string' && worldItem.requirements
+					? JSON.parse(worldItem.requirements)
+					: worldItem.requirements,
 			stats: typeof worldItem.stats === 'string' && worldItem.stats ? JSON.parse(worldItem.stats) : worldItem.stats,
 		} as unknown as WorldItemWithRelations;
 
@@ -184,7 +192,9 @@ export async function getWorldItemWithRelations(worldItemId: string): Promise<Wo
 		return worldItemWithRelations;
 	} catch (error) {
 		worldItemCardLogger.error('❌ Error obteniendo objeto del mundo con relaciones:', error);
-		throw new Error(`No se pudo obtener el objeto del mundo: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudo obtener el objeto del mundo: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 
@@ -206,7 +216,7 @@ export async function searchWorldItems(query = '', limit = 100): Promise<WorldIt
 					{ description: { contains: query } },
 					{ type: { contains: query } },
 					{ category: { contains: query } },
-				]
+				],
 			},
 			include: {
 				_count: {
@@ -224,22 +234,21 @@ export async function searchWorldItems(query = '', limit = 100): Promise<WorldIt
 						wildcards: true,
 						properties: true,
 						groups: true,
-					}
-				}
+					},
+				},
 			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ name: 'asc' },
-			],
+			orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
 			take: limit,
 		});
 
 		// Procesar cada objeto para manejar campos JSON
-		const worldItemsWithRelations = worldItems.map(item => ({
+		const worldItemsWithRelations = worldItems.map((item) => ({
 			...item,
-			attributes: typeof item.attributes === 'string' && item.attributes ? JSON.parse(item.attributes) : item.attributes,
+			attributes:
+				typeof item.attributes === 'string' && item.attributes ? JSON.parse(item.attributes) : item.attributes,
 			effects: typeof item.effects === 'string' && item.effects ? JSON.parse(item.effects) : item.effects,
-			requirements: typeof item.requirements === 'string' && item.requirements ? JSON.parse(item.requirements) : item.requirements,
+			requirements:
+				typeof item.requirements === 'string' && item.requirements ? JSON.parse(item.requirements) : item.requirements,
 			stats: typeof item.stats === 'string' && item.stats ? JSON.parse(item.stats) : item.stats,
 		})) as unknown as WorldItemWithRelations[];
 
@@ -247,6 +256,8 @@ export async function searchWorldItems(query = '', limit = 100): Promise<WorldIt
 		return worldItemsWithRelations;
 	} catch (error) {
 		worldItemCardLogger.error('❌ Error buscando objetos del mundo:', error);
-		throw new Error(`No se pudieron buscar objetos del mundo: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudieron buscar objetos del mundo: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }

@@ -16,29 +16,29 @@ import { places } from './place';
 import { worldItems } from './worldItem';
 
 export const characters = sqliteTable(
-    'Character',
-    {
-        ...organizationFields,
-        level: integer('level').default(1),
-        class: text('class').default('unknown'),
-        race: text('race').default('unknown'),
-        type: text('type'),
-        alignment: text('alignment').default('neutral'),
-        backstory: text('backstory').default(''),
-        stats: text('stats').default(''),
-        psychologicalProfile: text('psychologicalProfile').default(''),
-        socialProfile: text('socialProfile').default(''),
-        relationships: text('relationships').default('empty_array'),
-        goals: text('goals').default('empty_array'),
-        fears: text('fears').default('empty_array'),
-        beliefs: text('beliefs').default('empty_array'),
-        personality: text('personality').default('empty_array'),
-        skills: text('skills').default('empty_array'),
-        abilities: text('abilities').default('empty_array'),
-    },
-    (table) => ({
-        ...createCommonIndexes(table),
-    })
+	'Character',
+	{
+		...organizationFields,
+		level: integer('level').default(1),
+		class: text('class').default('unknown'),
+		race: text('race').default('unknown'),
+		type: text('type'),
+		alignment: text('alignment').default('neutral'),
+		backstory: text('backstory').default(''),
+		stats: text('stats').default(''),
+		psychologicalProfile: text('psychologicalProfile').default(''),
+		socialProfile: text('socialProfile').default(''),
+		relationships: text('relationships').default('empty_array'),
+		goals: text('goals').default('empty_array'),
+		fears: text('fears').default('empty_array'),
+		beliefs: text('beliefs').default('empty_array'),
+		personality: text('personality').default('empty_array'),
+		skills: text('skills').default('empty_array'),
+		abilities: text('abilities').default('empty_array'),
+	},
+	(table) => ({
+		...createCommonIndexes(table),
+	})
 );
 
 // Tablas de relación
@@ -59,19 +59,19 @@ export const characterToCharacterRelations = createRelationTable('CharacterRelat
 
 // Relaciones
 export const charactersRelations = relations(characters, ({ many }) => ({
-    images: many(images, { through: charactersToImages }),
-    videos: many(videos, { through: charactersToVideos }),
-    albums: many(albums, { through: charactersToAlbums }),
-    collections: many(collections, { through: charactersToCollections }),
-    tags: many(tags, { through: charactersToTags }),
-    places: many(places, { through: charactersToPlaces }),
-    worldItems: many(worldItems, { through: charactersToWorldItems }),
-    concepts: many(concepts, { through: charactersToConcepts }),
-    prompts: many(prompts, { through: charactersToPrompts }),
-    notes: many(notes, { through: charactersToNotes }),
-    wildcards: many(wildcards, { through: charactersToWildcards }),
-    properties: many(properties, { through: charactersToProperties }),
-    groups: many(groups, { through: charactersToGroups }),
-    relatedCharacters: many(characters, { through: characterToCharacterRelations }),
-    relatedTo: many(characters, { through: characterToCharacterRelations }),
+	images: many(images, { through: charactersToImages }),
+	videos: many(videos, { through: charactersToVideos }),
+	albums: many(albums, { through: charactersToAlbums }),
+	collections: many(collections, { through: charactersToCollections }),
+	tags: many(tags, { through: charactersToTags }),
+	places: many(places, { through: charactersToPlaces }),
+	worldItems: many(worldItems, { through: charactersToWorldItems }),
+	concepts: many(concepts, { through: charactersToConcepts }),
+	prompts: many(prompts, { through: charactersToPrompts }),
+	notes: many(notes, { through: charactersToNotes }),
+	wildcards: many(wildcards, { through: charactersToWildcards }),
+	properties: many(properties, { through: charactersToProperties }),
+	groups: many(groups, { through: charactersToGroups }),
+	relatedCharacters: many(characters, { through: characterToCharacterRelations }),
+	relatedTo: many(characters, { through: characterToCharacterRelations }),
 }));

@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 const viewLogger = clientLogger.withContext('PromptContentView');
 
 export function PromptContentView() {
-	const selectedPrompt = usePromptStore(state => state.selectedPrompt);
+	const selectedPrompt = usePromptStore((state) => state.selectedPrompt);
 	const [items, setItems] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState(null);
@@ -55,12 +55,13 @@ export function PromptContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedPrompt?.id ?? null,
 		containerName: selectedPrompt?.name ?? null,
-		setCurrentContainer: () => { }, // No es necesario en el nuevo enfoque
+		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: Terminal,
 			title: 'Prompt vacío',
-			description: `No se encontraron imágenes en ${selectedPrompt?.name || 'este prompt'
-				}. Puedes agregar imágenes arrastrándolas aquí.`,
+			description: `No se encontraron imágenes en ${
+				selectedPrompt?.name || 'este prompt'
+			}. Puedes agregar imágenes arrastrándolas aquí.`,
 		},
 		onRefresh: loadPromptImages,
 	};

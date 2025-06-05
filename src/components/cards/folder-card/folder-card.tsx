@@ -43,8 +43,9 @@ export const FolderCard = memo(function FolderCard({
 	className,
 	compact = false,
 	interactive = true,
-	tcgMode = false
-}: FolderCardProps) {	// Validar que el objeto folder exista
+	tcgMode = false,
+}: FolderCardProps) {
+	// Validar que el objeto folder exista
 	if (!folder) {
 		console.error('FolderCard recibió un objeto folder inválido');
 		return null;
@@ -58,7 +59,7 @@ export const FolderCard = memo(function FolderCard({
 		async function loadImages() {
 			try {
 				const fetchedImages = await getRecentFolderImages(folder.id, 4);
-				const imageUrls = fetchedImages.map(img => img.thumbnailUrl).filter(Boolean);
+				const imageUrls = fetchedImages.map((img) => img.thumbnailUrl).filter(Boolean);
 				setRecentImages(imageUrls);
 			} catch (error) {
 				console.error('Error loading folder images:', error);
@@ -79,21 +80,19 @@ export const FolderCard = memo(function FolderCard({
 			imageCount,
 			_count: {
 				...(folder._count || {}),
-				images: imageCount
-			},			// Asegurar valores por defecto para otros campos
+				images: imageCount,
+			}, // Asegurar valores por defecto para otros campos
 			totalFiles: folder.totalFiles ?? imageCount ?? 0,
 			totalSize: folder.totalSize ?? 0,
 			recentImageUrls: recentImages, // 🖼️ Usar imágenes cargadas dinámicamente
 			childrenCount: 0,
-			lastIndexed: folder.lastIndexed || null
+			lastIndexed: folder.lastIndexed || null,
 		};
 	}, [folder, recentImages]); // 🔄 Incluir recentImages en dependencias
 
 	// Colores para personalización
 	const primaryColor = useMemo(() => folderData.color || '#3b82f6', [folderData.color]);
-	const secondaryColor = useMemo(() =>
-		primaryColor === '#3b82f6' ? '#1d4ed8' : primaryColor
-		, [primaryColor]);
+	const secondaryColor = useMemo(() => (primaryColor === '#3b82f6' ? '#1d4ed8' : primaryColor), [primaryColor]);
 
 	// Manejador de clicks para la tarjeta
 	const handleCardClick = useCallback(() => {
@@ -109,14 +108,18 @@ export const FolderCard = memo(function FolderCard({
 	const cardContent = (
 		<div
 			className={cn(
-				"group flex flex-col relative h-full overflow-hidden rounded-md transition-all duration-300",
-				tcgMode ? "bg-gradient-to-b from-gray-900 to-black shadow-lg border border-white/10" : "bg-card shadow",
-				interactive && "hover:shadow-md cursor-pointer",
+				'group flex flex-col relative h-full overflow-hidden rounded-md transition-all duration-300',
+				tcgMode ? 'bg-gradient-to-b from-gray-900 to-black shadow-lg border border-white/10' : 'bg-card shadow',
+				interactive && 'hover:shadow-md cursor-pointer',
 				className
 			)}
-			style={tcgMode ? {
-				boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`
-			} : {}}
+			style={
+				tcgMode
+					? {
+							boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
+						}
+					: {}
+			}
 		>
 			{/* Borde brillante para TCG mode */}
 			{tcgMode && (
@@ -124,7 +127,7 @@ export const FolderCard = memo(function FolderCard({
 					className="absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300"
 					style={{
 						boxShadow: `inset 0 0 0 1px ${primaryColor}50, 0 0 15px ${primaryColor}30`,
-						zIndex: 20
+						zIndex: 20,
 					}}
 				/>
 			)}
@@ -166,7 +169,7 @@ export const FolderCard = memo(function FolderCard({
 				folder={{
 					id: folderData.id,
 					name: folderData.name,
-					color: primaryColor
+					color: primaryColor,
 				}}
 				tcgMode={tcgMode}
 			>
@@ -187,19 +190,27 @@ export const FolderCard = memo(function FolderCard({
 						className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
 						style={{
 							background: `radial-gradient(circle at 50% 50%, ${primaryColor}10 0%, transparent 70%)`,
-							zIndex: 1
+							zIndex: 1,
 						}}
 					/>
 
 					{/* Esquinas decorativas TCG */}
-					<div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 rounded-br-sm opacity-60 pointer-events-none"
-						style={{ borderColor: `${primaryColor}80` }} />
-					<div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 rounded-bl-sm opacity-60 pointer-events-none"
-						style={{ borderColor: `${primaryColor}80` }} />
-					<div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 rounded-tr-sm opacity-60 pointer-events-none"
-						style={{ borderColor: `${primaryColor}80` }} />
-					<div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 rounded-tl-sm opacity-60 pointer-events-none"
-						style={{ borderColor: `${primaryColor}80` }} />
+					<div
+						className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 rounded-br-sm opacity-60 pointer-events-none"
+						style={{ borderColor: `${primaryColor}80` }}
+					/>
+					<div
+						className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 rounded-bl-sm opacity-60 pointer-events-none"
+						style={{ borderColor: `${primaryColor}80` }}
+					/>
+					<div
+						className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 rounded-tr-sm opacity-60 pointer-events-none"
+						style={{ borderColor: `${primaryColor}80` }}
+					/>
+					<div
+						className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 rounded-tl-sm opacity-60 pointer-events-none"
+						style={{ borderColor: `${primaryColor}80` }}
+					/>
 				</>
 			)}
 		</div>
@@ -212,7 +223,8 @@ export const FolderCard = memo(function FolderCard({
 		const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
 			if (event.key === 'Enter' || event.key === ' ') {
 				event.preventDefault(); // Prevenir scroll en espacio
-				if (onClick) { // ✅ Verificar que onClick existe
+				if (onClick) {
+					// ✅ Verificar que onClick existe
 					onClick();
 				}
 			}
@@ -243,12 +255,14 @@ export const FolderCard = memo(function FolderCard({
 // Exportar componente memorizado para mejor rendimiento
 export const MemoizedFolderCard = memo(FolderCard, (prevProps, nextProps) => {
 	// Comparar las props relevantes, especialmente el objeto folder
-	return prevProps.folder.id === nextProps.folder.id &&
+	return (
+		prevProps.folder.id === nextProps.folder.id &&
 		prevProps.folder.name === nextProps.folder.name &&
 		prevProps.folder.emoji === nextProps.folder.emoji &&
 		prevProps.folder.updatedAt === nextProps.folder.updatedAt && // Comparar fechas/timestamps si es posible
 		prevProps.folder.imageCount === nextProps.folder.imageCount &&
 		prevProps.folder.isFavorite === nextProps.folder.isFavorite &&
 		prevProps.className === nextProps.className &&
-		prevProps.tcgMode === nextProps.tcgMode;
+		prevProps.tcgMode === nextProps.tcgMode
+	);
 });

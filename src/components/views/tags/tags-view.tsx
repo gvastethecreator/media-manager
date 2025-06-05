@@ -17,9 +17,7 @@ const viewLogger = clientLogger.withContext('TagsView');
 
 // Crear un componente de tarjeta memorizada para optimizar
 const MemoizedTagCard = memo(
-	({ tag, onClick }: { tag: TagWithStats; onClick: () => void }) => (
-		<TagCard tag={tag} onClick={onClick} />
-	),
+	({ tag, onClick }: { tag: TagWithStats; onClick: () => void }) => <TagCard tag={tag} onClick={onClick} />,
 	(prevProps, nextProps) => {
 		// Solo re-renderizar si cambian estos valores
 		return (
@@ -137,12 +135,7 @@ export function TagsView({ className }: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.05 }}
 						>
-							{tag.id && (
-								<MemoizedTagCard
-									tag={tag}
-									onClick={() => handleTagClick(tag)}
-								/>
-							)}
+							{tag.id && <MemoizedTagCard tag={tag} onClick={() => handleTagClick(tag)} />}
 						</motion.div>
 					))}
 				</div>

@@ -5,11 +5,15 @@
 
 // Exportar todas las funciones y tipos del transformador
 export {
-    TransformTaskOptions, getTaskVisualProps, transformTask, transformTaskToWithStats, transformTasks
+	TransformTaskOptions,
+	getTaskVisualProps,
+	transformTask,
+	transformTaskToWithStats,
+	transformTasks,
 } from './transformer';
 
 // Exportar funciones de serialización
 export {
-    fromPrismaTask,
-    toExtendedTask
+	fromPrismaTask,
+	toExtendedTask,
 } from './serializers';

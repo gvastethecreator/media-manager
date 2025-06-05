@@ -67,10 +67,7 @@ export async function getRecentCollectionImages(collectionId: string): Promise<T
 				},
 				thumbnail: { not: null }, // Solo imágenes con thumbnail
 			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ createdAt: 'desc' },
-			],
+			orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
 			take: 6, // Tomar sólo las 6 más recientes para mostrar en la tarjeta
 			select: {
 				id: true,
@@ -83,7 +80,7 @@ export async function getRecentCollectionImages(collectionId: string): Promise<T
 		});
 
 		// Convertir los thumbnails a URLs de datos
-		const thumbnails: ThumbnailImage[] = images.map(image => {
+		const thumbnails: ThumbnailImage[] = images.map((image) => {
 			let thumbnailUrl = '';
 
 			// Verificar si tenemos un thumbnail válido
@@ -166,10 +163,7 @@ export async function getCollectionForCard(collectionId: string): Promise<Collec
 /**
  * Obtiene los datos de una colección para mostrar en una tarjeta
  */
-export async function getCollectionCardData(
-	collectionId: string,
-	includeRelated = false
-): Promise<CollectionCardData> {
+export async function getCollectionCardData(collectionId: string, includeRelated = false): Promise<CollectionCardData> {
 	const prisma = await getPrismaClient();
 
 	const collection = await prisma.collection.findUnique({
@@ -194,26 +188,28 @@ export async function getCollectionCardData(
 					groups: true,
 				},
 			},
-			...(includeRelated ? {
-				// Incluir relaciones directas si se solicitan
-				tags: {
-					select: {
-						id: true,
-						name: true,
-						color: true,
-					},
-					take: 5,
-				},
-				// Otras relaciones relevantes
-				characters: {
-					select: {
-						id: true,
-						name: true,
-						emoji: true,
-					},
-					take: 3,
-				},
-			} : {}),
+			...(includeRelated
+				? {
+						// Incluir relaciones directas si se solicitan
+						tags: {
+							select: {
+								id: true,
+								name: true,
+								color: true,
+							},
+							take: 5,
+						},
+						// Otras relaciones relevantes
+						characters: {
+							select: {
+								id: true,
+								name: true,
+								emoji: true,
+							},
+							take: 3,
+						},
+					}
+				: {}),
 		},
 	});
 
@@ -291,7 +287,7 @@ export async function getCollectionCardData(
 	const metadata = {
 		rarityLevel,
 		cardId: `COL-${collection.id.substring(0, 6)}`,
-		totalItems: totalRelatedItems
+		totalItems: totalRelatedItems,
 	};
 
 	return {
@@ -344,7 +340,7 @@ export async function getCollectionsForCards(options: {
 							{ platform: { contains: searchTerm } },
 							{ network: { contains: searchTerm } },
 						],
-				  }
+					}
 				: {}),
 		},
 		include: {
@@ -378,12 +374,8 @@ export async function getCollectionsForCards(options: {
 			collections.map(async (collection) => {
 				// Obtener imágenes y videos recientes
 				const recentMedia = await getRecentCollectionMedia(collection.id, 4);
-				const recentImagePaths = recentMedia
-					.filter(media => !media.isVideo)
-					.map(media => media.thumbnailUrl);
-				const recentVideoPaths = recentMedia
-					.filter(media => media.isVideo)
-					.map(media => media.thumbnailUrl);
+				const recentImagePaths = recentMedia.filter((media) => !media.isVideo).map((media) => media.thumbnailUrl);
+				const recentVideoPaths = recentMedia.filter((media) => media.isVideo).map((media) => media.thumbnailUrl);
 
 				// Parsear campos serializados como JSON
 				const parsedEditions = parseJsonField(collection.editions);
@@ -391,9 +383,7 @@ export async function getCollectionsForCards(options: {
 
 				// Calcular nivel de rareza
 				const totalRelatedItems =
-					(collection._count.images || 0) +
-					(collection._count.videos || 0) +
-					(collection._count.characters || 0);
+					(collection._count.images || 0) + (collection._count.videos || 0) + (collection._count.characters || 0);
 
 				const rarityLevel = determineRarityLevel(totalRelatedItems);
 
@@ -401,7 +391,7 @@ export async function getCollectionsForCards(options: {
 				const metadata = {
 					rarityLevel,
 					cardId: `COL-${collection.id.substring(0, 6)}`,
-					totalItems: totalRelatedItems
+					totalItems: totalRelatedItems,
 				};
 
 				return {
@@ -468,26 +458,24 @@ export async function getRecentCollectionMedia(collectionId: string, limit = 6):
 	});
 
 	// Combinar y formatear los resultados
-	const imageResults: ThumbnailMedia[] = recentImages.map(img => ({
+	const imageResults: ThumbnailMedia[] = recentImages.map((img) => ({
 		id: img.id,
 		name: img.name,
 		thumbnailUrl: `/api/thumbnails/${img.id}`,
 		url: `/api/images/${img.id}`,
-		isVideo: false
+		isVideo: false,
 	}));
 
-	const videoResults: ThumbnailMedia[] = recentVideos.map(video => ({
+	const videoResults: ThumbnailMedia[] = recentVideos.map((video) => ({
 		id: video.id,
 		name: video.name,
 		thumbnailUrl: `/api/video-thumbnails/${video.id}`,
 		url: `/api/videos/${video.id}`,
-		isVideo: true
+		isVideo: true,
 	}));
 
 	// Combinar y ordenar por ID (como proxy de fecha)
-	return [...imageResults, ...videoResults]
-		.sort((a, b) => a.id > b.id ? -1 : 1)
-		.slice(0, limit);
+	return [...imageResults, ...videoResults].sort((a, b) => (a.id > b.id ? -1 : 1)).slice(0, limit);
 }
 
 // Función para determinar el nivel de rareza basado en el número total de elementos relacionados

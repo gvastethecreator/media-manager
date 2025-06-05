@@ -66,15 +66,12 @@ export async function getRecentNoteImages(noteId: string, limit = 6): Promise<Th
 				thumbnailHeight: true,
 				thumbnailSize: true,
 			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ createdAt: 'desc' },
-			],
+			orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
 			take: limit,
 		});
 
 		// Convertir los thumbnails a URLs de datos
-		const thumbnails: ThumbnailImage[] = images.map(image => {
+		const thumbnails: ThumbnailImage[] = images.map((image) => {
 			let thumbnailUrl = '';
 
 			// Verificar si tenemos un thumbnail válido
@@ -94,7 +91,9 @@ export async function getRecentNoteImages(noteId: string, limit = 6): Promise<Th
 		return thumbnails;
 	} catch (error) {
 		noteCardLogger.error('❌ Error obteniendo imágenes para NoteCard:', error);
-		throw new Error(`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 
@@ -131,10 +130,10 @@ export async function getNoteCounts(noteId: string): Promise<NoteRelationCounts>
 						tags: true,
 						wildcards: true,
 						properties: true,
-						groups: true
-					}
-				}
-			}
+						groups: true,
+					},
+				},
+			},
 		});
 
 		if (!counts) {
@@ -154,7 +153,7 @@ export async function getNoteCounts(noteId: string): Promise<NoteRelationCounts>
 			tags: counts._count.tags,
 			wildcards: counts._count.wildcards,
 			properties: counts._count.properties,
-			groups: counts._count.groups
+			groups: counts._count.groups,
 		};
 
 		noteCardLogger.info('✅ Recuentos obtenidos para NoteCard');
@@ -174,7 +173,7 @@ export async function getNoteCounts(noteId: string): Promise<NoteRelationCounts>
 			tags: 0,
 			wildcards: 0,
 			properties: 0,
-			groups: 0
+			groups: 0,
 		};
 	}
 }

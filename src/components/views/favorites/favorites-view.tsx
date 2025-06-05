@@ -20,7 +20,7 @@ export function FavoritesView() {
 		toggleItemSelection,
 		isLoading,
 		setIsLoading,
-		setCurrentItems
+		setCurrentItems,
 	} = useUnifiedFileManager();
 
 	// Usar el hook de eventos optimistas del cliente

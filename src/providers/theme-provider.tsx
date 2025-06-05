@@ -5,13 +5,26 @@ import { ThemeProvider as NextThemeProvider, useTheme } from 'next-themes';
 import { useEffect } from 'react';
 
 // Definimos los temas personalizados
-const customThemes = ['light', 'dark', 'cafe', 'violeta', 'madera', 'nocturno', 'verde', 'atardecer', 'corporativo', 'carbon', 'teal', 'citrico'];
+const customThemes = [
+	'light',
+	'dark',
+	'cafe',
+	'violeta',
+	'madera',
+	'nocturno',
+	'verde',
+	'atardecer',
+	'corporativo',
+	'carbon',
+	'teal',
+	'citrico',
+];
 
 // Componente de debug para monitorear cambios en el tema
 function ThemeDebugger() {
 	useEffect(() => {
 		const observer = new MutationObserver((mutations) => {
-			mutations.forEach(mutation => {
+			mutations.forEach((mutation) => {
 				if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
 					const target = mutation.target as HTMLElement;
 					console.log(`Tema cambiado a: ${target.getAttribute('data-theme')}`);
@@ -44,12 +57,7 @@ function ThemeEnforcer() {
 
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 	return (
-		<NextThemeProvider
-			attribute="data-theme"
-			defaultTheme="light"
-			themes={customThemes}
-			{...props}
-		>
+		<NextThemeProvider attribute="data-theme" defaultTheme="light" themes={customThemes} {...props}>
 			{children}
 			<ThemeDebugger />
 			<ThemeEnforcer />

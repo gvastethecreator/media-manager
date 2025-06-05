@@ -11,37 +11,28 @@ import { NextResponse } from 'next/server';
  * Manejador para POST - Restablece la configuración de un perfil
  * a los valores globales
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
-  try {
-    const profileId = params.id;
+export async function POST(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
+	try {
+		const profileId = params.id;
 
-    if (!profileId) {
-      return NextResponse.json(
-        { error: 'ID de perfil no proporcionado' },
-        { status: 400 }
-      );
-    }
+		if (!profileId) {
+			return NextResponse.json({ error: 'ID de perfil no proporcionado' }, { status: 400 });
+		}
 
-    await resetProfileSettings(profileId);
+		await resetProfileSettings(profileId);
 
-    return NextResponse.json(
-      { success: true, message: 'Configuración del perfil restablecida a valores globales' },
-      {
-        status: 200,
-        headers: {
-          'Cache-Control': 'no-store, max-age=0',
-        }
-      }
-    );
-  } catch (error) {
-    console.error('Error al resetear configuración de perfil:', error);
+		return NextResponse.json(
+			{ success: true, message: 'Configuración del perfil restablecida a valores globales' },
+			{
+				status: 200,
+				headers: {
+					'Cache-Control': 'no-store, max-age=0',
+				},
+			}
+		);
+	} catch (error) {
+		console.error('Error al resetear configuración de perfil:', error);
 
-    return NextResponse.json(
-      { error: 'Error al restablecer la configuración del perfil' },
-      { status: 500 }
-    );
-  }
+		return NextResponse.json({ error: 'Error al restablecer la configuración del perfil' }, { status: 500 });
+	}
 }

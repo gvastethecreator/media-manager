@@ -76,7 +76,7 @@ export const createCollectionFiltersSlice: StateCreator<
 		return collections.filter(
 			(collection) =>
 				collection.name.toLowerCase().includes(term) ||
-				(collection.description && collection.description.toLowerCase().includes(term))
+				(collection.description?.toLowerCase().includes(term))
 		);
 	},
 

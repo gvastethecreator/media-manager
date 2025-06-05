@@ -4,17 +4,8 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import {
-  extendPlace,
-  mapCreatePlaceDataToPrisma,
-  mapUpdatePlaceDataToPrisma
-} from '@/transformers/place';
-import type {
-  CreatePlaceData,
-  PlaceBase,
-  PlaceExtendedComplete,
-  UpdatePlaceData
-} from '@/types/entities/place';
+import { extendPlace, mapCreatePlaceDataToPrisma, mapUpdatePlaceDataToPrisma } from '@/transformers/place';
+import type { CreatePlaceData, PlaceBase, PlaceExtendedComplete, UpdatePlaceData } from '@/types/entities/place';
 import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
@@ -29,7 +20,11 @@ enum PlaceErrorCode {
 }
 
 // Función creadora de errores (enfoque funcional)
-const createPlaceError = async (message: string, code: PlaceErrorCode = PlaceErrorCode.OPERATION_FAILED, cause?: unknown) => {
+const createPlaceError = async (
+	message: string,
+	code: PlaceErrorCode = PlaceErrorCode.OPERATION_FAILED,
+	cause?: unknown
+) => {
 	const error = new Error(message);
 	error.name = 'PlaceError';
 	Object.assign(error, { code, cause });
@@ -95,7 +90,7 @@ export async function getPlaces(): Promise<PlaceExtendedComplete[]> {
 						images: true,
 						groups: true,
 						properties: true,
-						wildcards: true
+						wildcards: true,
 					},
 				},
 				images: {
@@ -114,14 +109,14 @@ export async function getPlaces(): Promise<PlaceExtendedComplete[]> {
 		});
 
 		const countsMap = new Map(
-			places.map(place => [
+			places.map((place) => [
 				place.id,
 				{
 					images: place._count.images,
 					groups: place._count.groups,
 					properties: place._count.properties,
-					wildcards: place._count.wildcards
-				}
+					wildcards: place._count.wildcards,
+				},
 			])
 		);
 
@@ -142,7 +137,7 @@ export async function getPlaces(): Promise<PlaceExtendedComplete[]> {
 
 				const placeExtended = extendPlace(place, {
 					...countsMap.get(place.id),
-					totalSize: totalSize._sum.size || 0
+					totalSize: totalSize._sum.size || 0,
 				});
 
 				// Agregar imágenes recientes
@@ -183,7 +178,7 @@ export async function getPlace(id: string): Promise<PlaceExtendedComplete> {
 						images: true,
 						groups: true,
 						properties: true,
-						wildcards: true
+						wildcards: true,
 					},
 				},
 			},
@@ -211,7 +206,7 @@ export async function getPlace(id: string): Promise<PlaceExtendedComplete> {
 			groups: place._count.groups,
 			properties: place._count.properties,
 			wildcards: place._count.wildcards,
-			totalSize: totalSize._sum.size || 0
+			totalSize: totalSize._sum.size || 0,
 		});
 
 		placeLogger.info('✅ Lugar obtenido:', id);

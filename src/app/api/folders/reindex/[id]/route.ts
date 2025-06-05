@@ -1,13 +1,13 @@
+import { existsSync } from 'fs';
+import { extname, join } from 'path';
 import { extractImageMetadata } from '@/app/actions/metadata';
 import { computeHash } from '@/lib/hash';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
 import type { FileMetadata } from '@/types/metadata';
-import { existsSync } from 'fs';
 import { readdir, stat } from 'fs/promises';
 import { type NextRequest, NextResponse } from 'next/server';
-import { extname, join } from 'path';
 
 const reindexLogger = serverLogger.withContext('ReindexAPI');
 

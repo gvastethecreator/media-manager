@@ -3,22 +3,12 @@
 import { deleteConcept, getConcepts } from '@/app/actions/concepts/concept.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
 import type { ConceptExtended } from '@/types/entities/concept';
 import type { ConceptWithStats } from '@/types/entities/concept/base';
@@ -66,17 +56,19 @@ export function ConceptsSettings() {
 
 	// Filtrar conceptos basados en los criterios seleccionados
 	const getFilteredConcepts = useCallback(() => {
-		return concepts.filter(concept => {
+		return concepts.filter((concept) => {
 			let matches = true;
 
 			// Filtrar por búsqueda
 			if (searchQuery) {
 				const normalizedQuery = searchQuery.toLowerCase();
-				matches = matches && Boolean(
-					concept.name.toLowerCase().includes(normalizedQuery) ||
-					(concept.description?.toLowerCase().includes(normalizedQuery)) ||
-					(concept.content?.toLowerCase().includes(normalizedQuery))
-				);
+				matches =
+					matches &&
+					Boolean(
+						concept.name.toLowerCase().includes(normalizedQuery) ||
+							concept.description?.toLowerCase().includes(normalizedQuery) ||
+							concept.content?.toLowerCase().includes(normalizedQuery)
+					);
 			}
 
 			// Filtrar por categoría
@@ -100,7 +92,7 @@ export function ConceptsSettings() {
 	const handleDeleteConcept = useCallback(async (id: string) => {
 		try {
 			await deleteConcept(id);
-			setConcepts(prev => prev.filter(concept => concept.id !== id));
+			setConcepts((prev) => prev.filter((concept) => concept.id !== id));
 			setSelectedConcept(null);
 			setIsEditing(false);
 			toastService.success('Concepto eliminado');
@@ -119,14 +111,17 @@ export function ConceptsSettings() {
 	}, []);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const handleDeleteButtonClick = useCallback((e: React.MouseEvent<HTMLButtonElement>, id: string) => {
-		e.stopPropagation();
-		handleDeleteConcept(id);
-	}, [handleDeleteConcept]);
+	const handleDeleteButtonClick = useCallback(
+		(e: React.MouseEvent<HTMLButtonElement>, id: string) => {
+			e.stopPropagation();
+			handleDeleteConcept(id);
+		},
+		[handleDeleteConcept]
+	);
 
 	// Manejar creación exitosa
 	const handleConceptCreated = useCallback((newConcept: ConceptExtended) => {
-		setConcepts(prev => [
+		setConcepts((prev) => [
 			{
 				...newConcept,
 				_count: {
@@ -135,21 +130,19 @@ export function ConceptsSettings() {
 					worldItems: 0,
 					notes: 0,
 					prompts: 0,
-					images: 0
-				}
+					images: 0,
+				},
 			} as ConceptWithStats,
-			...prev
+			...prev,
 		]);
 		toastService.success('Concepto creado');
 	}, []);
 
 	// Manejar actualización exitosa
 	const handleConceptUpdated = useCallback((updatedConcept: ConceptExtended) => {
-		setConcepts(prev =>
-			prev.map(concept =>
-				concept.id === updatedConcept.id
-					? { ...concept, ...updatedConcept } as ConceptWithStats
-					: concept
+		setConcepts((prev) =>
+			prev.map((concept) =>
+				concept.id === updatedConcept.id ? ({ ...concept, ...updatedConcept } as ConceptWithStats) : concept
 			)
 		);
 		toastService.success('Concepto actualizado');
@@ -174,7 +167,7 @@ export function ConceptsSettings() {
 	}, []);
 
 	// Extraer categorías únicas de los conceptos
-	const uniqueCategories = Array.from(new Set(concepts.map(concept => concept.category))).filter(Boolean) as string[];
+	const uniqueCategories = Array.from(new Set(concepts.map((concept) => concept.category))).filter(Boolean) as string[];
 
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
@@ -198,11 +191,7 @@ export function ConceptsSettings() {
 						icon={Info}
 						title="Error al cargar conceptos"
 						description={error}
-						actions={
-							<Button onClick={() => window.location.reload()}>
-								Intentar de nuevo
-							</Button>
-						}
+						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -227,11 +216,7 @@ export function ConceptsSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button
-											size="sm"
-											variant="ghost"
-											className="h-6 w-6 p-0"
-										>
+										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
@@ -259,8 +244,10 @@ export function ConceptsSettings() {
 													className="w-full h-8 text-xs rounded-md border border-input px-3"
 												>
 													<option value="">Todas las categorías</option>
-													{uniqueCategories.map(category => (
-														<option key={category} value={category}>{category}</option>
+													{uniqueCategories.map((category) => (
+														<option key={category} value={category}>
+															{category}
+														</option>
 													))}
 												</select>
 											</div>
@@ -271,7 +258,9 @@ export function ConceptsSettings() {
 													checked={onlyFavorites}
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor="favorites" className="text-xs">Solo favoritos</Label>
+												<Label htmlFor="favorites" className="text-xs">
+													Solo favoritos
+												</Label>
 											</div>
 
 											<div className="flex justify-between">
@@ -286,7 +275,10 @@ export function ConceptsSettings() {
 									</PopoverContent>
 								</Popover>
 								<Button
-									onClick={() => { setSelectedConcept(null); setIsEditing(false); }}
+									onClick={() => {
+										setSelectedConcept(null);
+										setIsEditing(false);
+									}}
 									size="sm"
 									variant="ghost"
 									className="h-6 w-6 p-0"
@@ -319,8 +311,8 @@ export function ConceptsSettings() {
 									title="No hay conceptos"
 									description={
 										concepts.length > 0
-											? "No se encontraron conceptos con los filtros aplicados"
-											: "Crea tu primer concepto"
+											? 'No se encontraron conceptos con los filtros aplicados'
+											: 'Crea tu primer concepto'
 									}
 									className="py-6"
 									actions={
@@ -388,9 +380,7 @@ export function ConceptsSettings() {
 					<CardHeader className="py-2 px-3">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-sm">
-									{isEditing ? 'Editar Concepto' : 'Nuevo Concepto'}
-								</CardTitle>
+								<CardTitle className="text-sm">{isEditing ? 'Editar Concepto' : 'Nuevo Concepto'}</CardTitle>
 								<CardDescription className="text-xs">
 									{isEditing
 										? 'Modifica los detalles del concepto seleccionado'
@@ -400,12 +390,7 @@ export function ConceptsSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedConcept && (
 									<>
-										<Button
-											variant="outline"
-											size="sm"
-											className="h-7 text-xs"
-											onClick={handleReset}
-										>
+										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
 											Cancelar
 										</Button>
 										<Button
@@ -419,12 +404,7 @@ export function ConceptsSettings() {
 										</Button>
 									</>
 								)}
-								<Button
-									type="submit"
-									size="sm"
-									className="h-7 text-xs"
-									form="concept-form"
-								>
+								<Button type="submit" size="sm" className="h-7 text-xs" form="concept-form">
 									<Save className="h-3 w-3 mr-1" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
@@ -450,8 +430,10 @@ export function ConceptsSettings() {
 									<div className="w-[180px] transition-all duration-300">
 										{previewData || selectedConcept ? (
 											<div className="flex flex-col items-center p-4 border rounded-lg bg-background">
-												<div className="w-12 h-12 mb-3 rounded-full flex items-center justify-center text-2xl"
-													style={{ backgroundColor: (previewData?.color || selectedConcept?.color || '#3b82f6') }}>
+												<div
+													className="w-12 h-12 mb-3 rounded-full flex items-center justify-center text-2xl"
+													style={{ backgroundColor: previewData?.color || selectedConcept?.color || '#3b82f6' }}
+												>
 													{previewData?.emoji || selectedConcept?.emoji || '💡'}
 												</div>
 												<h3 className="text-lg font-medium">
@@ -466,24 +448,22 @@ export function ConceptsSettings() {
 														{previewData?.category || selectedConcept?.category || 'general'}
 													</Badge>
 													{(previewData?.isFavorite || selectedConcept?.isFavorite) && (
-														<Badge variant="outline" className="text-xs">Favorito</Badge>
+														<Badge variant="outline" className="text-xs">
+															Favorito
+														</Badge>
 													)}
 												</div>
 
 												{(previewData?.content || selectedConcept?.content) && (
 													<div className="mt-4 p-2 text-xs bg-muted rounded w-full">
-														<p className="line-clamp-3">
-															{previewData?.content || selectedConcept?.content}
-														</p>
+														<p className="line-clamp-3">{previewData?.content || selectedConcept?.content}</p>
 													</div>
 												)}
 											</div>
 										) : (
 											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
 												<LightbulbIcon className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">
-													Vista previa
-												</p>
+												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
 											</div>
 										)}
 									</div>

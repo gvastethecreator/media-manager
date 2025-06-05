@@ -42,11 +42,7 @@ MemoizedCollectionCard.displayName = 'MemoizedCollectionCard';
 
 export function CollectionsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const {
-		collections: storeCollections,
-		isLoading: storeLoading,
-		selectCollection
-	} = useCollectionStore();
+	const { collections: storeCollections, isLoading: storeLoading, selectCollection } = useCollectionStore();
 
 	const [collections, setCollections] = useState<CollectionWithDetails[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -61,10 +57,10 @@ export function CollectionsView(_props: ViewProps) {
 			viewLogger.info(`✅ Usando ${storeCollections.length} colecciones desde store centralizado`);
 
 			// Transformar las colecciones al formato esperado
-			const transformedData = storeCollections.map(collection => ({
+			const transformedData = storeCollections.map((collection) => ({
 				...collection,
 				_count: { images: collection.imageCount || 0 },
-				recentImages: collection.recentImages || []
+				recentImages: collection.recentImages || [],
 			}));
 
 			setCollections(transformedData);
@@ -171,10 +167,7 @@ export function CollectionsView(_props: ViewProps) {
 							transition={{ delay: index * 0.1 }}
 						>
 							{collection.id && (
-								<MemoizedCollectionCard
-									collection={collection}
-									onClick={() => handleCollectionClick(collection)}
-								/>
+								<MemoizedCollectionCard collection={collection} onClick={() => handleCollectionClick(collection)} />
 							)}
 						</motion.div>
 					))}

@@ -46,15 +46,12 @@ export async function getRecentTagImages(tagId: string, limit = 6): Promise<Thum
 				thumbnailWidth: true,
 				thumbnailHeight: true,
 			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ createdAt: 'desc' },
-			],
+			orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
 			take: limit,
 		});
 
 		// Convertir a formato ThumbnailImage
-		const thumbnails = images.map(image => ({
+		const thumbnails = images.map((image) => ({
 			id: image.id,
 			name: image.name,
 			thumbnailUrl: image.thumbnail ? (typeof image.thumbnail === 'string' ? image.thumbnail : '') : '',
@@ -64,7 +61,9 @@ export async function getRecentTagImages(tagId: string, limit = 6): Promise<Thum
 		return thumbnails;
 	} catch (error) {
 		tagCardLogger.error('❌ Error obteniendo imágenes para TagCard:', error);
-		throw new Error(`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		throw new Error(
+			`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`
+		);
 	}
 }
 
@@ -87,8 +86,8 @@ export async function getTagWithRelations(tagId: string): Promise<TagWithRelatio
 		const tagBasic = await prisma.tag.findUnique({
 			where: { id: tagId },
 			select: {
-				featuredImage: true
-			}
+				featuredImage: true,
+			},
 		});
 
 		if (!tagBasic) {
@@ -115,25 +114,27 @@ export async function getTagWithRelations(tagId: string): Promise<TagWithRelatio
 						wildcards: true,
 						properties: true,
 						groups: true,
-					}
+					},
 				},
 				// Incluir imagen destacada si existe
-				images: tagBasic.featuredImage ? {
-					where: {
-						id: {
-							equals: tagBasic.featuredImage
+				images: tagBasic.featuredImage
+					? {
+							where: {
+								id: {
+									equals: tagBasic.featuredImage,
+								},
+							},
+							take: 1,
+							select: {
+								id: true,
+								name: true,
+								thumbnail: true,
+								thumbnailWidth: true,
+								thumbnailHeight: true,
+							},
 						}
-					},
-					take: 1,
-					select: {
-						id: true,
-						name: true,
-						thumbnail: true,
-						thumbnailWidth: true,
-						thumbnailHeight: true,
-					}
-				} : undefined
-			}
+					: undefined,
+			},
 		});
 
 		if (!tag) {
@@ -148,9 +149,11 @@ export async function getTagWithRelations(tagId: string): Promise<TagWithRelatio
 			featuredImageData = {
 				id: image.id,
 				name: image.name,
-				thumbnailUrl: image.thumbnail ? (typeof image.thumbnail === 'string' ?
-					image.thumbnail :
-					`data:image/jpeg;base64,${Buffer.from(image.thumbnail as unknown as Uint8Array).toString('base64')}`) : '',
+				thumbnailUrl: image.thumbnail
+					? typeof image.thumbnail === 'string'
+						? image.thumbnail
+						: `data:image/jpeg;base64,${Buffer.from(image.thumbnail as unknown as Uint8Array).toString('base64')}`
+					: '',
 				width: image.thumbnailWidth || 100,
 				height: image.thumbnailHeight || 100,
 			};
@@ -183,11 +186,7 @@ export async function searchTags(query = '', limit = 100): Promise<TagWithRelati
 
 		const tags = await prisma.tag.findMany({
 			where: {
-				OR: [
-					{ name: { contains: query } },
-					{ description: { contains: query } },
-					{ category: { contains: query } },
-				]
+				OR: [{ name: { contains: query } }, { description: { contains: query } }, { category: { contains: query } }],
 			},
 			include: {
 				_count: {
@@ -205,13 +204,10 @@ export async function searchTags(query = '', limit = 100): Promise<TagWithRelati
 						wildcards: true,
 						properties: true,
 						groups: true,
-					}
-				}
+					},
+				},
 			},
-			orderBy: [
-				{ isFavorite: 'desc' },
-				{ name: 'asc' },
-			],
+			orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
 			take: limit,
 		});
 

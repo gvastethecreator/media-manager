@@ -2,22 +2,11 @@
 
 import { createGroup, deleteGroup, getGroups, updateGroup } from '@/app/actions/groups/group.actions';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import toastService from '@/services/toast.service';
 import type { GroupWithStats } from '@/types/entities/group/types';
@@ -68,15 +57,15 @@ export function GroupsSettings() {
 	};
 
 	// Filtrar grupos basados en los criterios seleccionados
-	const filteredGroups = groups.filter(group => {
+	const filteredGroups = groups.filter((group) => {
 		let matches = true;
 		if (searchQuery) {
 			const normalizedQuery = searchQuery.toLowerCase();
-			matches = matches && (
-				group.name.toLowerCase().includes(normalizedQuery) ||
-				group.description?.toLowerCase().includes(normalizedQuery) ||
-				false
-			);
+			matches =
+				matches &&
+				(group.name.toLowerCase().includes(normalizedQuery) ||
+					group.description?.toLowerCase().includes(normalizedQuery) ||
+					false);
 		}
 		if (selectedCategories.length > 0) {
 			matches = matches && (group.category ? selectedCategories.includes(group.category) : false);
@@ -108,19 +97,17 @@ export function GroupsSettings() {
 			return acc + Object.values(group._count).reduce((a, b) => a + b, 0);
 		}, 0),
 		totalRelationTypes: groups.reduce((acc, group) => {
-			return acc + Object.values(group._count).filter(count => count > 0).length;
+			return acc + Object.values(group._count).filter((count) => count > 0).length;
 		}, 0),
-		emptyGroups: groups.filter(group =>
-			Object.values(group._count).reduce((a, b) => a + b, 0) === 0
-		).length,
-		favoriteGroups: groups.filter(group => group.isFavorite).length,
+		emptyGroups: groups.filter((group) => Object.values(group._count).reduce((a, b) => a + b, 0) === 0).length,
+		favoriteGroups: groups.filter((group) => group.isFavorite).length,
 	};
 
 	// Manejadores
 	const handleCreateGroup = async (data: Partial<Group>) => {
 		try {
 			const newGroup = await createGroup(data);
-			setGroups(prev => [...prev, newGroup as GroupWithStats]);
+			setGroups((prev) => [...prev, newGroup as GroupWithStats]);
 			setIsCreateDialogOpen(false);
 			toastService.success('Grupo creado correctamente');
 		} catch (err) {
@@ -134,7 +121,7 @@ export function GroupsSettings() {
 	const handleUpdateGroup = async (id: string, data: Partial<Group>) => {
 		try {
 			const updatedGroup = await updateGroup(id, data);
-			setGroups(prev => prev.map(g => g.id === id ? { ...g, ...updatedGroup } : g));
+			setGroups((prev) => prev.map((g) => (g.id === id ? { ...g, ...updatedGroup } : g)));
 			setSelectedGroup(null);
 			setIsEditMode(false);
 			toastService.success('Grupo actualizado correctamente');
@@ -149,7 +136,7 @@ export function GroupsSettings() {
 	const handleDeleteGroup = async (id: string) => {
 		try {
 			await deleteGroup(id);
-			setGroups(prev => prev.filter(g => g.id !== id));
+			setGroups((prev) => prev.filter((g) => g.id !== id));
 			setSelectedGroup(null);
 			toastService.success('Grupo eliminado correctamente');
 		} catch (err) {
@@ -168,11 +155,7 @@ export function GroupsSettings() {
 					<CardHeader className="space-y-1 py-2 px-3">
 						<div className="flex items-center justify-between">
 							<CardTitle className="text-xl font-bold">Grupos</CardTitle>
-							<Button
-								size="sm"
-								variant="ghost"
-								onClick={() => setIsCreateDialogOpen(true)}
-							>
+							<Button size="sm" variant="ghost" onClick={() => setIsCreateDialogOpen(true)}>
 								<PlusIcon className="h-4 w-4" />
 							</Button>
 						</div>
@@ -188,26 +171,19 @@ export function GroupsSettings() {
 							</div>
 						</div>
 						<div className="flex gap-2">
-							<Select
-								value={sortBy}
-								onValueChange={(value: GroupSortCriteria) => setSortBy(value)}
-							>
+							<Select value={sortBy} onValueChange={(value: GroupSortCriteria) => setSortBy(value)}>
 								<SelectTrigger className="h-8">
 									<SelectValue placeholder="Ordenar por..." />
 								</SelectTrigger>
 								<SelectContent>
-									{SORT_OPTIONS.map(option => (
+									{SORT_OPTIONS.map((option) => (
 										<SelectItem key={option.value} value={option.value}>
 											{option.label}
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
-							<Toggle
-								pressed={onlyFavorites}
-								onPressedChange={setOnlyFavorites}
-								size="sm"
-							>
+							<Toggle pressed={onlyFavorites} onPressedChange={setOnlyFavorites} size="sm">
 								<StarIcon className="h-4 w-4" />
 							</Toggle>
 						</div>
@@ -233,9 +209,7 @@ export function GroupsSettings() {
 												</span>
 											</div>
 										</div>
-										{group.isFavorite && (
-											<StarIcon className="h-3 w-3 absolute right-2 top-2" />
-										)}
+										{group.isFavorite && <StarIcon className="h-3 w-3 absolute right-2 top-2" />}
 										<Button
 											variant="ghost"
 											size="icon"
@@ -266,31 +240,20 @@ export function GroupsSettings() {
 								onCancel={() => setIsEditMode(false)}
 							/>
 						) : (
-							<GroupPreview
-								group={selectedGroup as GroupWithStats}
-								onEdit={() => setIsEditMode(true)}
-							/>
+							<GroupPreview group={selectedGroup as GroupWithStats} onEdit={() => setIsEditMode(true)} />
 						)
 					) : (
 						<div className="flex flex-col items-center justify-center h-full">
 							<FolderIcon className="h-12 w-12 opacity-20" />
-							<p className="text-sm opacity-50 mt-2">
-								Selecciona un grupo para ver sus detalles
-							</p>
+							<p className="text-sm opacity-50 mt-2">Selecciona un grupo para ver sus detalles</p>
 						</div>
 					)}
 				</Card>
 			</div>
 
 			{/* Dialog para crear nuevo grupo */}
-			<Dialog
-				open={isCreateDialogOpen}
-				onOpenChange={setIsCreateDialogOpen}
-			>
-				<CreateGroupForm
-					onSubmit={handleCreateGroup}
-					onCancel={() => setIsCreateDialogOpen(false)}
-				/>
+			<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+				<CreateGroupForm onSubmit={handleCreateGroup} onCancel={() => setIsCreateDialogOpen(false)} />
 			</Dialog>
 		</div>
 	);

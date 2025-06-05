@@ -8,22 +8,21 @@ export type { TransformWildcardOptions } from './transformer';
 
 // Exportar transformadores
 export {
-    transformWildcard,
-    transformWildcardToExtended,
-    transformWildcardToWithStats,
-    transformWildcards
+	transformWildcard,
+	transformWildcardToExtended,
+	transformWildcardToWithStats,
+	transformWildcards,
 } from './transformer';
 
 // Exportar serializadores
 export {
-    parseWildcardChildren,
-    serializeWildcardChildren,
-    toRelatedWildcard
+	parseWildcardChildren,
+	serializeWildcardChildren,
+	toRelatedWildcard,
 } from './serializers';
 
 // Exportar mappers
-export { } from './mappers';
+export {} from './mappers';
 
 // Exportar funciones específicas de mappers que sí se usan
 export { mapCreateWildcardDataToPrisma, mapUpdateWildcardDataToPrisma, mapWildcardFiltersToPrisma } from './mappers';
-

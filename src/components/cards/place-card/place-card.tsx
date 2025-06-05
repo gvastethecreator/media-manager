@@ -86,10 +86,15 @@ export function PlaceCard({
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar color predeterminado basado en el tipo
 		if (!color) {
-			return type === 'city' ? '#2563eb' :
-				type === 'forest' ? '#047857' :
-					type === 'mountain' ? '#b91c1c' :
-						type === 'desert' ? '#d97706' : '#064e3b';
+			return type === 'city'
+				? '#2563eb'
+				: type === 'forest'
+					? '#047857'
+					: type === 'mountain'
+						? '#b91c1c'
+						: type === 'desert'
+							? '#d97706'
+							: '#064e3b';
 		}
 
 		// Oscurecer el color primario para el secundario
@@ -179,7 +184,7 @@ export function PlaceCard({
 									transparent 100%)
 								`,
 								backgroundSize: '200% 200%',
-								animation: 'gradient-shift 3s ease infinite'
+								animation: 'gradient-shift 3s ease infinite',
 							}}
 						/>
 
@@ -188,25 +193,30 @@ export function PlaceCard({
 							<div
 								className="absolute inset-0"
 								style={{
-									background: rarityLevel >= 9
-										? `linear-gradient(45deg, transparent, ${primaryColor}70, gold, ${primaryColor}70, transparent)`
-										: rarityLevel >= 7
-											? `linear-gradient(45deg, transparent, ${primaryColor}70, silver, ${primaryColor}70, transparent)`
-											: rarityLevel >= 5
-												? `linear-gradient(45deg, transparent, ${primaryColor}70, ${secondaryColor}70, transparent)`
-												: `linear-gradient(45deg, transparent, ${primaryColor}40, transparent)`,
+									background:
+										rarityLevel >= 9
+											? `linear-gradient(45deg, transparent, ${primaryColor}70, gold, ${primaryColor}70, transparent)`
+											: rarityLevel >= 7
+												? `linear-gradient(45deg, transparent, ${primaryColor}70, silver, ${primaryColor}70, transparent)`
+												: rarityLevel >= 5
+													? `linear-gradient(45deg, transparent, ${primaryColor}70, ${secondaryColor}70, transparent)`
+													: `linear-gradient(45deg, transparent, ${primaryColor}40, transparent)`,
 									backgroundSize: '300% 300%',
-									animation: 'shine 6s linear infinite'
+									animation: 'shine 6s linear infinite',
 								}}
 							/>
 						</div>
 
 						{/* Sello de valor estratégico en el modo TCG */}
 						<div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 opacity-10 pointer-events-none z-1">
-							<div className="w-full h-full rounded-full border-2 border-dashed flex items-center justify-center"
-								style={{ borderColor: primaryColor }}>
+							<div
+								className="w-full h-full rounded-full border-2 border-dashed flex items-center justify-center"
+								style={{ borderColor: primaryColor }}
+							>
 								<div className="text-xs font-bold" style={{ color: primaryColor }}>
-									VALOR<br />{valueLevel}
+									VALOR
+									<br />
+									{valueLevel}
 								</div>
 							</div>
 						</div>
@@ -214,11 +224,12 @@ export function PlaceCard({
 						{/* Sello de rareza holográfico cuando es favorito */}
 						{isFavorite && (
 							<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
-								<div className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+								<div
+									className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
 									style={{
 										background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 										backgroundSize: '600% 600%',
-										animation: 'shine 3s linear infinite'
+										animation: 'shine 3s linear infinite',
 									}}
 								/>
 							</div>

@@ -1,10 +1,15 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import type { WorldItemEffect, WorldItemProperty, WorldItemRequirement, WorldItemStats } from '@/types/entities/world-item/stats-types';
-import { nanoid } from "nanoid";
+import type {
+	WorldItemEffect,
+	WorldItemProperty,
+	WorldItemRequirement,
+	WorldItemStats,
+} from '@/types/entities/world-item/stats-types';
+import { nanoid } from 'nanoid';
 import { useTheme } from 'next-themes';
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
 
 interface WorldItemCardContentProps {
 	description?: string | null;
@@ -31,7 +36,7 @@ export function WorldItemCardContent({
 	stats,
 	origin,
 	rarity,
-	primaryColor = '#3b82f6'
+	primaryColor = '#3b82f6',
 }: WorldItemCardContentProps) {
 	const { theme } = useTheme();
 	const isDark = theme === 'dark';
@@ -105,15 +110,11 @@ export function WorldItemCardContent({
 			style={{
 				borderTop: `1px solid ${primaryColor}20`,
 				borderBottom: `1px solid ${primaryColor}20`,
-				background: `linear-gradient(180deg, transparent 0%, ${primaryColor}05 50%, transparent 100%)`
+				background: `linear-gradient(180deg, transparent 0%, ${primaryColor}05 50%, transparent 100%)`,
 			}}
 		>
 			{/* Descripción */}
-			{description && (
-				<div className="mb-1 italic text-muted-foreground">
-					{description}
-				</div>
-			)}
+			{description && <div className="mb-1 italic text-muted-foreground">{description}</div>}
 
 			{/* Atributos */}
 			{parsedAttributes && parsedAttributes.length > 0 && (
@@ -124,7 +125,7 @@ export function WorldItemCardContent({
 							className="rounded-sm px-1.5 py-0.5 text-[10px] font-medium"
 							style={{
 								backgroundColor: `${primaryColor}20`,
-								color: isDark ? 'white' : primaryColor
+								color: isDark ? 'white' : primaryColor,
 							}}
 						>
 							{attr}
@@ -136,7 +137,10 @@ export function WorldItemCardContent({
 			{/* Origen */}
 			{origin && (
 				<div className="text-xs text-muted-foreground">
-					<span className="font-semibold text-foreground" style={{ color: primaryColor }}>Origen:</span> {origin}
+					<span className="font-semibold text-foreground" style={{ color: primaryColor }}>
+						Origen:
+					</span>{' '}
+					{origin}
 				</div>
 			)}
 
@@ -157,10 +161,15 @@ export function WorldItemCardContent({
 
 			{/* Estadísticas */}
 			{parsedStats && Object.keys(parsedStats).length > 0 && (
-				<div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1 border-t border-dashed pt-1" style={{ borderColor: `${primaryColor}30` }}>
+				<div
+					className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1 border-t border-dashed pt-1"
+					style={{ borderColor: `${primaryColor}30` }}
+				>
 					{Object.entries(parsedStats).map(([key, value]) => (
 						<div key={`stat-${renderKey}-${key}`} className="flex justify-between text-[10px]">
-							<span className="font-semibold" style={{ color: primaryColor }}>{key}:</span>
+							<span className="font-semibold" style={{ color: primaryColor }}>
+								{key}:
+							</span>
 							<span>{typeof value === 'number' ? value : String(value)}</span>
 						</div>
 					))}
@@ -170,12 +179,11 @@ export function WorldItemCardContent({
 			{/* Efectos */}
 			{parsedEffects && parsedEffects.length > 0 && (
 				<div className="mt-1 border-t border-dashed pt-1" style={{ borderColor: `${primaryColor}30` }}>
-					<div className="font-semibold mb-0.5 text-xs" style={{ color: primaryColor }}>Efectos:</div>
+					<div className="font-semibold mb-0.5 text-xs" style={{ color: primaryColor }}>
+						Efectos:
+					</div>
 					{parsedEffects.map((effect: WorldItemEffect, index: number) => (
-						<div
-							key={`effect-${renderKey}-${effect.name || `effect-${index + 1}`}`}
-							className="text-[10px] mb-0.5"
-						>
+						<div key={`effect-${renderKey}-${effect.name || `effect-${index + 1}`}`} className="text-[10px] mb-0.5">
 							<span className="font-medium">{effect.name}: </span>
 							<span className="text-muted-foreground">{effect.description}</span>
 						</div>
@@ -186,12 +194,11 @@ export function WorldItemCardContent({
 			{/* Requerimientos */}
 			{parsedRequirements && Object.keys(parsedRequirements).length > 0 && (
 				<div className="mt-1 border-t border-dashed pt-1" style={{ borderColor: `${primaryColor}30` }}>
-					<div className="font-semibold mb-0.5 text-xs" style={{ color: primaryColor }}>Requisitos:</div>
+					<div className="font-semibold mb-0.5 text-xs" style={{ color: primaryColor }}>
+						Requisitos:
+					</div>
 					{Object.entries(parsedRequirements).map(([key, req]) => (
-						<div
-							key={`req-${renderKey}-${key}`}
-							className="text-[10px] mb-0.5"
-						>
+						<div key={`req-${renderKey}-${key}`} className="text-[10px] mb-0.5">
 							<span className="font-medium">{key}: </span>
 							<span className="text-muted-foreground">{typeof req === 'object' ? req.value : req}</span>
 						</div>
@@ -203,12 +210,12 @@ export function WorldItemCardContent({
 			{rarity && (
 				<div
 					className={cn(
-						"mt-auto pt-1 text-center font-semibold text-[10px] rounded-sm",
-						rarity.toLowerCase() === "legendary" && "animate-pulse"
+						'mt-auto pt-1 text-center font-semibold text-[10px] rounded-sm',
+						rarity.toLowerCase() === 'legendary' && 'animate-pulse'
 					)}
 					style={{
 						color: primaryColor,
-						textShadow: rarity.toLowerCase() === "legendary" ? `0 0 5px ${primaryColor}80` : undefined
+						textShadow: rarity.toLowerCase() === 'legendary' ? `0 0 5px ${primaryColor}80` : undefined,
 					}}
 				>
 					{rarity.toUpperCase()}

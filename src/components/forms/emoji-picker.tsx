@@ -1,10 +1,6 @@
 'use client';
 
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Button } from '../ui/button';
@@ -34,11 +30,7 @@ export function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
-				<Button
-					variant="outline"
-					type="button"
-					className={cn('w-24 justify-between', className)}
-				>
+				<Button variant="outline" type="button" className={cn('w-24 justify-between', className)}>
 					{value}
 				</Button>
 			</PopoverTrigger>
@@ -46,12 +38,24 @@ export function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
 				<Tabs value={activeTab} onValueChange={setActiveTab}>
 					<div className="border-b px-3">
 						<TabsList className="h-11">
-							<TabsTrigger value="activities" className="text-lg">🎨</TabsTrigger>
-							<TabsTrigger value="faces" className="text-lg">😀</TabsTrigger>
-							<TabsTrigger value="nature" className="text-lg">🌟</TabsTrigger>
-							<TabsTrigger value="food" className="text-lg">🍎</TabsTrigger>
-							<TabsTrigger value="objects" className="text-lg">📱</TabsTrigger>
-							<TabsTrigger value="symbols" className="text-lg">❤️</TabsTrigger>
+							<TabsTrigger value="activities" className="text-lg">
+								🎨
+							</TabsTrigger>
+							<TabsTrigger value="faces" className="text-lg">
+								😀
+							</TabsTrigger>
+							<TabsTrigger value="nature" className="text-lg">
+								🌟
+							</TabsTrigger>
+							<TabsTrigger value="food" className="text-lg">
+								🍎
+							</TabsTrigger>
+							<TabsTrigger value="objects" className="text-lg">
+								📱
+							</TabsTrigger>
+							<TabsTrigger value="symbols" className="text-lg">
+								❤️
+							</TabsTrigger>
 						</TabsList>
 					</div>
 					<ScrollArea className="h-72">

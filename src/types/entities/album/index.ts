@@ -14,7 +14,7 @@ export {
 	AlbumPrivacyLevel,
 	AlbumSortCriteria,
 	AlbumType,
-	AlbumViewMode
+	AlbumViewMode,
 } from './enums';
 
 // Exportar desde definiciones extendidas
@@ -23,12 +23,15 @@ export type {
 	AlbumWithStats,
 	FolderDistribution,
 	ParsedAlbum,
-	ParsedAlbumWithRelations
+	ParsedAlbumWithRelations,
 } from './extended';
 
 // Exportar tipos estadísticos
 export type {
-	AlbumDateDistribution, AlbumItemDistribution,
-	AlbumLocationDistribution, AlbumStats, AlbumStatsOverview, AlbumTimeRange
+	AlbumDateDistribution,
+	AlbumItemDistribution,
+	AlbumLocationDistribution,
+	AlbumStats,
+	AlbumStatsOverview,
+	AlbumTimeRange,
 } from './stats-types';
-

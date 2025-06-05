@@ -6,12 +6,7 @@ import {
 	uploadImages,
 } from '@/app/actions/uploaded-images/uploaded-images.actions';
 import { MemoizedImageCard } from '@/components/cards/image-card';
-import {
-	Alert,
-	AlertCircle,
-	AlertDescription,
-	AlertTitle,
-} from '@/components/ui/alert';
+import { Alert, AlertCircle, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -449,7 +444,8 @@ export function UploadedImagesView() {
 						<ImageIcon className="h-16 w-16 text-muted-foreground mb-4" />
 						<h3 className="text-lg font-medium mb-2">No hay imágenes subidas</h3>
 						<p className="text-sm text-muted-foreground text-center max-w-md">
-							No se encontraron imágenes subidas. Sube imágenes haciendo clic en el botón de arriba o arrastra y suelta archivos aquí.
+							No se encontraron imágenes subidas. Sube imágenes haciendo clic en el botón de arriba o arrastra y suelta
+							archivos aquí.
 						</p>
 					</div>
 				) : (
@@ -461,9 +457,7 @@ export function UploadedImagesView() {
 								aspectRatio="square"
 								showTags={true}
 								onClick={() => handleSelectItem(image)}
-								className={cn(
-									selectedImage === image.id && "ring-2 ring-primary"
-								)}
+								className={cn(selectedImage === image.id && 'ring-2 ring-primary')}
 							/>
 						))}
 					</div>

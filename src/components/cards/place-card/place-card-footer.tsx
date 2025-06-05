@@ -32,23 +32,19 @@ export function PlaceCardFooter({
 	healthPoints = 100,
 	cardId = '',
 	tcgMode = true,
-	compact = false
+	compact = false,
 }: PlaceCardFooterProps) {
 	// Determinar estrellas de poder a mostrar (escala 1-5)
 	const powerStars = Math.max(1, Math.min(5, Math.ceil(power / 2)));
 
 	// Formatear fecha de creación
-	const formattedDate = createdAt ?
-		format(createdAt, 'MMM yyyy', { locale: es }) : '';
+	const formattedDate = createdAt ? format(createdAt, 'MMM yyyy', { locale: es }) : '';
 
 	return (
 		<div
-			className={cn(
-				"px-3 py-2",
-				tcgMode ? "border-t border-white/10" : ""
-			)}
+			className={cn('px-3 py-2', tcgMode ? 'border-t border-white/10' : '')}
 			style={{
-				background: tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined
+				background: tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined,
 			}}
 		>
 			{tcgMode ? (
@@ -57,19 +53,12 @@ export function PlaceCardFooter({
 					<div className="flex justify-between items-center">
 						{/* HP */}
 						<div className="flex items-center">
-							<HeartIcon
-								className="h-3.5 w-3.5 mr-1"
-								style={{ color: primaryColor }}
-							/>
+							<HeartIcon className="h-3.5 w-3.5 mr-1" style={{ color: primaryColor }} />
 							<span className="text-xs font-semibold">{healthPoints}</span>
 						</div>
 
 						{/* Fecha de creación */}
-						{createdAt && !compact && (
-							<div className="text-xs opacity-70">
-								{formattedDate}
-							</div>
-						)}
+						{createdAt && !compact && <div className="text-xs opacity-70">{formattedDate}</div>}
 					</div>
 
 					{/* Segunda fila: contadores de medios */}
@@ -96,37 +85,23 @@ export function PlaceCardFooter({
 						<div className="flex items-center">
 							{/* Renderizar estrellas sin usar índices como keys */}
 							<div className="flex">
-								{power >= 1 && (
-									<Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />
-								)}
-								{power >= 3 && (
-									<Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />
-								)}
-								{power >= 5 && (
-									<Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />
-								)}
-								{power >= 7 && (
-									<Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />
-								)}
-								{power >= 9 && (
-									<Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />
-								)}
+								{power >= 1 && <Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />}
+								{power >= 3 && <Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />}
+								{power >= 5 && <Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />}
+								{power >= 7 && <Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />}
+								{power >= 9 && <Star className="h-3 w-3 fill-current" style={{ color: primaryColor }} />}
 							</div>
 						</div>
 
 						{/* ID de carta */}
-						<div className="text-[10px] opacity-60 font-mono">
-							{cardId}
-						</div>
+						<div className="text-[10px] opacity-60 font-mono">{cardId}</div>
 					</div>
 				</div>
 			) : (
 				// Versión no-TCG simplificada
 				<div className="flex justify-between items-center">
 					<div className="flex items-center text-xs text-muted-foreground">
-						{createdAt && (
-							<span>{formattedDate}</span>
-						)}
+						{createdAt && <span>{formattedDate}</span>}
 					</div>
 
 					<div className="flex items-center space-x-2 text-xs text-muted-foreground">

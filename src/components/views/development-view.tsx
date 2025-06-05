@@ -15,7 +15,27 @@ import { GroupsExampleEnhanced } from '@/examples/GroupsExampleEnhanced';
 import PlacesExample from '@/examples/PlacesExample';
 import SimpleExample from '@/examples/SimpleExample';
 import VideosExample from '@/examples/VideosExample';
-import { Activity, CreditCard, Database, Folder, LayoutGrid, ListOrdered, LucideFilm, LucideGalleryHorizontal, LucideImage, LucideImagePlus, LucideLibrary, LucideMap, LucideTag, LucideUsers, LucideUsers2, LucideVideo, Plus, Server, Settings } from 'lucide-react';
+import {
+	Activity,
+	CreditCard,
+	Database,
+	Folder,
+	LayoutGrid,
+	ListOrdered,
+	LucideFilm,
+	LucideGalleryHorizontal,
+	LucideImage,
+	LucideImagePlus,
+	LucideLibrary,
+	LucideMap,
+	LucideTag,
+	LucideUsers,
+	LucideUsers2,
+	LucideVideo,
+	Plus,
+	Server,
+	Settings,
+} from 'lucide-react';
 import { DialogUploader } from '../dialogs/uploader/dialog-uploader';
 
 export function DevelopmentView() {
@@ -24,9 +44,7 @@ export function DevelopmentView() {
 			<div className="flex items-center justify-between space-y-2">
 				<div>
 					<h2 className="text-2xl font-bold tracking-tight">Panel de Desarrollo</h2>
-					<p className="text-muted-foreground">
-						Componentes y características en desarrollo para pruebas
-					</p>
+					<p className="text-muted-foreground">Componentes y características en desarrollo para pruebas</p>
 				</div>
 				<div className="flex items-center space-x-2">
 					<DialogUploader />

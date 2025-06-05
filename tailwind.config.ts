@@ -75,16 +75,14 @@ const config: Config = {
 			animation: {
 				'accordion-down': 'var(--animate-accordion-down)',
 				'accordion-up': 'var(--animate-accordion-up)',
-				'shine': 'var(--animate-shine)',
+				shine: 'var(--animate-shine)',
 				'border-beam': 'var(--animate-border-beam)',
-				'meteor': 'var(--animate-meteor)',
+				meteor: 'var(--animate-meteor)',
 				'shiny-text': 'var(--animate-shiny-text)',
 			},
 		},
 	},
-	plugins: [
-		require('tw-animate-css')
-	],
+	plugins: [require('tw-animate-css')],
 };
 
 export default config;

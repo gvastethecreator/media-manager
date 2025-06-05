@@ -1,12 +1,12 @@
 import { prisma } from '@/lib/prisma';
 import { transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
-  Language,
-  type PaginatedProfiles,
-  type ProfileFilters,
-  type ProfilePaginationOptions,
-  type ProfilePreferences,
-  ThemeMode,
+	Language,
+	type PaginatedProfiles,
+	type ProfileFilters,
+	type ProfilePaginationOptions,
+	type ProfilePreferences,
+	ThemeMode,
 } from '@/types/entities/profile/types';
 import type { Profile } from '@prisma/client';
 

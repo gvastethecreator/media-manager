@@ -496,12 +496,12 @@ Isolda la Nacida del Hielo es una de las guerreras más respetadas entre los cla
 
 			for (const concept of conceptsData) {
 				const existingConcept = await prisma.concept.findFirst({
-					where: { name: concept.name }
+					where: { name: concept.name },
 				});
 
 				if (!existingConcept) {
 					await prisma.concept.create({
-						data: concept
+						data: concept,
 					});
 				}
 			}
