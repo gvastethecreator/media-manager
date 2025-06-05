@@ -5,22 +5,18 @@ import { type EventType, emit } from '@/lib/server/events.server';
 import { fromDB, transformUploadedImage } from '@/transformers/uploaded-image';
 import type { UploadedImageType } from '@/types/entities/uploaded-image';
 import type {
-    CreateUploadedImageParams,
-    GetUploadedImagesParams,
-    UpdateUploadedImageParams,
-    UploadedImageDimensions,
-    UploadedImageEvents,
-    UploadedImageMetadata,
-    UploadedImageProcessingOptions,
-    UploadedImageResult,
-    UploadedImageResults,
-    UploadedImageStats
+	CreateUploadedImageParams,
+	GetUploadedImagesParams,
+	UpdateUploadedImageParams,
+	UploadedImageDimensions,
+	UploadedImageEvents,
+	UploadedImageMetadata,
+	UploadedImageProcessingOptions,
+	UploadedImageResult,
+	UploadedImageResults,
+	UploadedImageStats,
 } from '@/types/uploaded-images';
-import {
-    ServiceErrorCode,
-    createEntityNotFoundError,
-    toServiceError
-} from '@/utils/errors/service-errors';
+import { ServiceErrorCode, createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 
 const SERVICE_NAME = 'UploadedImagesService';
 const uploadedImagesLogger = serverLogger.withContext(SERVICE_NAME);
@@ -126,7 +122,7 @@ class UploadedImagesService {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al crear imagen subida',
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -214,7 +210,7 @@ class UploadedImagesService {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al actualizar imagen subida',
 				context: { id, params },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -246,7 +242,7 @@ class UploadedImagesService {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al eliminar imagen subida',
 				context: { id },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -360,7 +356,7 @@ class UploadedImagesService {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al obtener imágenes subidas',
 				context: { params },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -401,7 +397,7 @@ class UploadedImagesService {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al obtener estadísticas de imágenes',
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -472,7 +468,7 @@ class UploadedImagesService {
 				code: ServiceErrorCode.FILE_WRITE_ERROR,
 				message: 'Error al procesar la imagen',
 				context: { path, options },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}
@@ -493,7 +489,7 @@ class UploadedImagesService {
 				code: ServiceErrorCode.FILE_WRITE_ERROR,
 				message: 'Error al eliminar archivo de imagen',
 				context: { path },
-				serviceName: SERVICE_NAME
+				serviceName: SERVICE_NAME,
 			});
 		}
 	}

@@ -15,13 +15,13 @@ const log = serverLogger.withContext('VideoActions:stats');
  * @returns Estadísticas completas de videos
  */
 export async function getVideoStats(): Promise<VideoStats> {
-  try {
-    log.info('📊 Obteniendo estadísticas generales de videos');
-    const stats = await videoService.getVideoStats();
-    log.info('✅ Estadísticas de videos obtenidas', { total: stats.total });
-    return stats;
-  } catch (error) {
-    log.error('❌ Error al obtener estadísticas de videos', { error });
-    throw error;
-  }
+	try {
+		log.info('📊 Obteniendo estadísticas generales de videos');
+		const stats = await videoService.getVideoStats();
+		log.info('✅ Estadísticas de videos obtenidas', { total: stats.total });
+		return stats;
+	} catch (error) {
+		log.error('❌ Error al obtener estadísticas de videos', { error });
+		throw error;
+	}
 }

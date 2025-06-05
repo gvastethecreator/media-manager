@@ -3,13 +3,7 @@
 import { type CharacterWithStats, deleteCharacter, searchCharacters } from '@/app/actions/characters/character.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
@@ -48,10 +42,10 @@ export function CharactersSettings() {
 				const data = await searchCharacters({});
 				// 🔧 Fix: data es CharacterSearchResult, necesitamos extraer items y transformar a CharacterWithStats
 				const charactersList = Array.isArray(data) ? data : data.items || [];
-				const charactersWithStats = charactersList.map(character => ({
+				const charactersWithStats = charactersList.map((character) => ({
 					...character,
 					totalSize: 0,
-					imageCount: character._count?.images || 0
+					imageCount: character._count?.images || 0,
 				})) as CharacterWithStats[];
 				setCharacters(charactersWithStats);
 			} catch (err) {
@@ -69,56 +63,62 @@ export function CharactersSettings() {
 	}, []);
 
 	// Calcular estadísticas generales - 📊 Verificar que characters sea un array válido
-	const stats = Array.isArray(characters) ? {
-		totalCharacters: characters.length,
-		totalImages: characters.reduce((acc, character) => acc + (character._count?.images || 0), 0),
-		totalSize: characters.reduce((acc, character) => acc + (character.totalSize || 0), 0),
-		unusedCharacters: characters.filter(character => (character._count?.images || 0) === 0).length,
-		favoriteCharacters: characters.filter(character => character.isFavorite).length,
-	} : {
-		totalCharacters: 0,
-		totalImages: 0,
-		totalSize: 0,
-		unusedCharacters: 0,
-		favoriteCharacters: 0,
-	};
+	const stats = Array.isArray(characters)
+		? {
+				totalCharacters: characters.length,
+				totalImages: characters.reduce((acc, character) => acc + (character._count?.images || 0), 0),
+				totalSize: characters.reduce((acc, character) => acc + (character.totalSize || 0), 0),
+				unusedCharacters: characters.filter((character) => (character._count?.images || 0) === 0).length,
+				favoriteCharacters: characters.filter((character) => character.isFavorite).length,
+			}
+		: {
+				totalCharacters: 0,
+				totalImages: 0,
+				totalSize: 0,
+				unusedCharacters: 0,
+				favoriteCharacters: 0,
+			};
 
 	// Filtrar personajes basados en los criterios seleccionados - 🔍 Verificar que characters sea un array
-	const filteredCharacters = Array.isArray(characters) ? characters.filter(character => {
-		let matches = true;
+	const filteredCharacters = Array.isArray(characters)
+		? characters.filter((character) => {
+				let matches = true;
 
-		// Filtrar por búsqueda
-		if (searchQuery) {
-			const normalizedQuery = searchQuery.toLowerCase();
-			matches = matches && Boolean(
-				character.name.toLowerCase().includes(normalizedQuery) ||
-				character.description?.toLowerCase().includes(normalizedQuery)
-			);
-		}
+				// Filtrar por búsqueda
+				if (searchQuery) {
+					const normalizedQuery = searchQuery.toLowerCase();
+					matches =
+						matches &&
+						Boolean(
+							character.name.toLowerCase().includes(normalizedQuery) ||
+								character.description?.toLowerCase().includes(normalizedQuery)
+						);
+				}
 
-		// Filtrar por categorías
-		if (selectedCategories.length > 0) {
-			matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
-		}
+				// Filtrar por categorías
+				if (selectedCategories.length > 0) {
+					matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
+				}
 
-		// Filtrar por clases
-		if (selectedClasses.length > 0) {
-			matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
-		}
+				// Filtrar por clases
+				if (selectedClasses.length > 0) {
+					matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
+				}
 
-		// Filtrar por favoritos
-		if (onlyFavorites) {
-			matches = matches && !!character.isFavorite;
-		}
+				// Filtrar por favoritos
+				if (onlyFavorites) {
+					matches = matches && !!character.isFavorite;
+				}
 
-		return matches;
-	}) : [];
+				return matches;
+			})
+		: [];
 
 	// Manejar eliminación de personaje
 	const handleDeleteCharacter = useCallback(async (id: string) => {
 		try {
 			await deleteCharacter(id);
-			setCharacters(prev => prev.filter(character => character.id !== id));
+			setCharacters((prev) => prev.filter((character) => character.id !== id));
 			setSelectedCharacter(null);
 			setIsEditing(false);
 			toastService.success('Personaje eliminado');
@@ -137,24 +137,25 @@ export function CharactersSettings() {
 	}, []);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const handleDeleteButtonClick = useCallback((e: React.MouseEvent<HTMLButtonElement>, id: string) => {
-		e.stopPropagation();
-		handleDeleteCharacter(id);
-	}, [handleDeleteCharacter]);
+	const handleDeleteButtonClick = useCallback(
+		(e: React.MouseEvent<HTMLButtonElement>, id: string) => {
+			e.stopPropagation();
+			handleDeleteCharacter(id);
+		},
+		[handleDeleteCharacter]
+	);
 
 	// Manejar creación exitosa
 	const handleCharacterCreated = useCallback((newCharacter: Character) => {
-		setCharacters(prev => [...prev, newCharacter as unknown as CharacterWithStats]);
+		setCharacters((prev) => [...prev, newCharacter as unknown as CharacterWithStats]);
 		toastService.success('Personaje creado');
 	}, []);
 
 	// Manejar actualización exitosa
 	const handleCharacterUpdated = useCallback((updatedCharacter: Character) => {
-		setCharacters(prev =>
-			prev.map(character =>
-				character.id === updatedCharacter.id
-					? { ...character, ...updatedCharacter } as CharacterWithStats
-					: character
+		setCharacters((prev) =>
+			prev.map((character) =>
+				character.id === updatedCharacter.id ? ({ ...character, ...updatedCharacter } as CharacterWithStats) : character
 			)
 		);
 		toastService.success('Personaje actualizado');
@@ -180,8 +181,10 @@ export function CharactersSettings() {
 	}, []);
 
 	// Extraer categorías y clases únicas de los personajes
-	const uniqueCategories = Array.from(new Set(characters.map(character => character.category).filter(Boolean))) as string[];
-	const uniqueClasses = Array.from(new Set(characters.map(character => character.class).filter(Boolean))) as string[];
+	const uniqueCategories = Array.from(
+		new Set(characters.map((character) => character.category).filter(Boolean))
+	) as string[];
+	const uniqueClasses = Array.from(new Set(characters.map((character) => character.class).filter(Boolean))) as string[];
 
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
@@ -205,11 +208,7 @@ export function CharactersSettings() {
 						icon={Info}
 						title="Error al cargar personajes"
 						description={error}
-						actions={
-							<Button onClick={() => window.location.reload()}>
-								Intentar de nuevo
-							</Button>
-						}
+						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -234,11 +233,7 @@ export function CharactersSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button
-											size="sm"
-											variant="ghost"
-											className="h-6 w-6 p-0"
-										>
+										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
@@ -260,18 +255,16 @@ export function CharactersSettings() {
 											<div className="space-y-2">
 												<Label>Categorías</Label>
 												<div className="grid grid-cols-2 gap-2">
-													{uniqueCategories.map(category => (
+													{uniqueCategories.map((category) => (
 														<div key={category} className="flex items-center space-x-2">
 															<Checkbox
 																id={`category-${category}`}
 																checked={selectedCategories.includes(category)}
 																onCheckedChange={(checked) => {
 																	if (checked) {
-																		setSelectedCategories(prev => [...prev, category]);
+																		setSelectedCategories((prev) => [...prev, category]);
 																	} else {
-																		setSelectedCategories(prev =>
-																			prev.filter(cat => cat !== category)
-																		);
+																		setSelectedCategories((prev) => prev.filter((cat) => cat !== category));
 																	}
 																}}
 															/>
@@ -286,18 +279,16 @@ export function CharactersSettings() {
 											<div className="space-y-2">
 												<Label>Clases</Label>
 												<div className="grid grid-cols-2 gap-2">
-													{uniqueClasses.map(characterClass => (
+													{uniqueClasses.map((characterClass) => (
 														<div key={characterClass} className="flex items-center space-x-2">
 															<Checkbox
 																id={`class-${characterClass}`}
 																checked={selectedClasses.includes(characterClass)}
 																onCheckedChange={(checked) => {
 																	if (checked) {
-																		setSelectedClasses(prev => [...prev, characterClass]);
+																		setSelectedClasses((prev) => [...prev, characterClass]);
 																	} else {
-																		setSelectedClasses(prev =>
-																			prev.filter(c => c !== characterClass)
-																		);
+																		setSelectedClasses((prev) => prev.filter((c) => c !== characterClass));
 																	}
 																}}
 															/>
@@ -315,7 +306,9 @@ export function CharactersSettings() {
 													checked={onlyFavorites}
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor="favorites" className="text-xs">Solo favoritos</Label>
+												<Label htmlFor="favorites" className="text-xs">
+													Solo favoritos
+												</Label>
 											</div>
 
 											<div className="flex justify-between">
@@ -330,7 +323,10 @@ export function CharactersSettings() {
 									</PopoverContent>
 								</Popover>
 								<Button
-									onClick={() => { setSelectedCharacter(null); setIsEditing(false); }}
+									onClick={() => {
+										setSelectedCharacter(null);
+										setIsEditing(false);
+									}}
 									size="sm"
 									variant="ghost"
 									className="h-6 w-6 p-0"
@@ -359,8 +355,8 @@ export function CharactersSettings() {
 									title="No hay personajes"
 									description={
 										characters.length > 0
-											? "No se encontraron personajes con los filtros aplicados"
-											: "Crea tu primer personaje"
+											? 'No se encontraron personajes con los filtros aplicados'
+											: 'Crea tu primer personaje'
 									}
 									className="py-6"
 									actions={
@@ -391,9 +387,7 @@ export function CharactersSettings() {
 											<div className="flex-1 min-w-0">
 												<h4 className="text-xs font-medium truncate">{character.name}</h4>
 												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													{character.race && (
-														<span>{character.race}</span>
-													)}
+													{character.race && <span>{character.race}</span>}
 													{character.class && (
 														<>
 															<span>•</span>
@@ -437,9 +431,7 @@ export function CharactersSettings() {
 					<CardHeader className="py-2 px-3">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-sm">
-									{isEditing ? 'Editar Personaje' : 'Nuevo Personaje'}
-								</CardTitle>
+								<CardTitle className="text-sm">{isEditing ? 'Editar Personaje' : 'Nuevo Personaje'}</CardTitle>
 								<CardDescription className="text-xs">
 									{isEditing
 										? 'Modifica los detalles del personaje seleccionado'
@@ -449,12 +441,7 @@ export function CharactersSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedCharacter && (
 									<>
-										<Button
-											variant="outline"
-											size="sm"
-											className="h-7 text-xs"
-											onClick={handleReset}
-										>
+										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
 											Cancelar
 										</Button>
 										<Button
@@ -468,12 +455,7 @@ export function CharactersSettings() {
 										</Button>
 									</>
 								)}
-								<Button
-									type="submit"
-									size="sm"
-									className="h-7 text-xs"
-									form="character-form"
-								>
+								<Button type="submit" size="sm" className="h-7 text-xs" form="character-form">
 									<Save className="h-3 w-3 mr-1" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
@@ -500,11 +482,9 @@ export function CharactersSettings() {
 											<div className="flex flex-col items-center p-4 border rounded-lg bg-background">
 												<div
 													className="w-16 h-16 mb-3 rounded-full flex items-center justify-center text-white"
-													style={{ backgroundColor: (previewData?.color || selectedCharacter?.color || '#3b82f6') }}
+													style={{ backgroundColor: previewData?.color || selectedCharacter?.color || '#3b82f6' }}
 												>
-													<span className="text-xl">
-														{(previewData?.emoji || selectedCharacter?.emoji || '👤')}
-													</span>
+													<span className="text-xl">{previewData?.emoji || selectedCharacter?.emoji || '👤'}</span>
 												</div>
 												<h3 className="text-lg font-medium text-center">
 													{previewData?.name || selectedCharacter?.name || 'Nuevo Personaje'}
@@ -540,9 +520,7 @@ export function CharactersSettings() {
 										) : (
 											<div className="flex flex-col items-center justify-center h-[300px] bg-muted/50 rounded-lg border border-dashed">
 												<Users className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">
-													Vista previa
-												</p>
+												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
 											</div>
 										)}
 									</div>

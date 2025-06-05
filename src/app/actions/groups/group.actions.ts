@@ -2,11 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { validateName } from '@/lib/validations';
-import {
-    fromPrismaGroup,
-    toPrismaGroup,
-    validateGroup
-} from '@/transformers/group/serializers';
+import { fromPrismaGroup, toPrismaGroup, validateGroup } from '@/transformers/group/serializers';
 import type { CreateGroupData, GroupWithStats, UpdateGroupData } from '@/types/entities/group/types';
 import { revalidatePath } from 'next/cache';
 

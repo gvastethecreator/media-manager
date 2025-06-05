@@ -16,62 +16,62 @@ export type WildcardStore = WildcardState & WildcardCoreSlice & WildcardUISlice 
 
 // Estado inicial
 const initialState: WildcardState = {
-  core: {
-    wildcards: {},
-    wildcardItems: {},
-    isLoading: false,
-    error: null,
-    lastUpdated: null,
-  },
-  ui: {
-    selectedIds: [],
-    viewMode: WildcardViewMode.GRID,
-    isViewerOpen: false,
-    currentWildcardId: null,
-    displayState: {},
-    draggedWildcardId: null,
-    dropTargetWildcardId: null,
-    highlightedId: null,
-    expandedIds: [],
-  },
-  filters: {
-    sortBy: WildcardSortCriteria.NAME_ASC,
-    searchQuery: '',
-    filterByCategory: null,
-    filterFavorites: false,
-    parentId: null,
-    onlyWithChildren: false,
-    dateRange: {
-      from: null,
-      to: null,
-    },
-  },
+	core: {
+		wildcards: {},
+		wildcardItems: {},
+		isLoading: false,
+		error: null,
+		lastUpdated: null,
+	},
+	ui: {
+		selectedIds: [],
+		viewMode: WildcardViewMode.GRID,
+		isViewerOpen: false,
+		currentWildcardId: null,
+		displayState: {},
+		draggedWildcardId: null,
+		dropTargetWildcardId: null,
+		highlightedId: null,
+		expandedIds: [],
+	},
+	filters: {
+		sortBy: WildcardSortCriteria.NAME_ASC,
+		searchQuery: '',
+		filterByCategory: null,
+		filterFavorites: false,
+		parentId: null,
+		onlyWithChildren: false,
+		dateRange: {
+			from: null,
+			to: null,
+		},
+	},
 };
 
 // Crear store combinando slices
 export const useWildcardStore = create<WildcardStore>()(
-  devtools(
-    persist(
-      (set, get, ...rest) => ({
-        ...initialState,
-        ...createWildcardCoreSlice(set, get, ...rest),
-        ...createWildcardUISlice(set, get, ...rest),
-        ...createWildcardFiltersSlice(set, get, ...rest),
-      }),
-      {
-        name: 'wildcard-store',
-        partialize: (state) => ({
-          ui: {
-            viewMode: state.ui.viewMode,
-            expandedIds: state.ui.expandedIds,
-          },
-          filters: {
-            sortBy: state.filters.sortBy,
-            parentId: state.filters.parentId,
-          },
-        }),
-      }
-    ),
-    { name: 'WildcardStore' }
-  )
+	devtools(
+		persist(
+			(set, get, ...rest) => ({
+				...initialState,
+				...createWildcardCoreSlice(set, get, ...rest),
+				...createWildcardUISlice(set, get, ...rest),
+				...createWildcardFiltersSlice(set, get, ...rest),
+			}),
+			{
+				name: 'wildcard-store',
+				partialize: (state) => ({
+					ui: {
+						viewMode: state.ui.viewMode,
+						expandedIds: state.ui.expandedIds,
+					},
+					filters: {
+						sortBy: state.filters.sortBy,
+						parentId: state.filters.parentId,
+					},
+				}),
+			}
+		),
+		{ name: 'WildcardStore' }
+	)
 );

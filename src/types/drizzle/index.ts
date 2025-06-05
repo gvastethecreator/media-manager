@@ -14,29 +14,29 @@ export * from './wildcard';
 
 // Tipo de mapa para consultas de relaciones
 export interface RelationMap {
-  [key: string]: {
-    model: string;
-    fields: string[];
-    references: string[];
-  };
+	[key: string]: {
+		model: string;
+		fields: string[];
+		references: string[];
+	};
 }
 
 // Tipo para opciones de consulta comunes
 export interface QueryOptions {
-  include?: Record<string, boolean | Record<string, any>>;
-  select?: Record<string, boolean | Record<string, any>>;
-  where?: Record<string, any>;
-  orderBy?: Array<Record<string, 'asc' | 'desc'>>;
-  skip?: number;
-  take?: number;
+	include?: Record<string, boolean | Record<string, any>>;
+	select?: Record<string, boolean | Record<string, any>>;
+	where?: Record<string, any>;
+	orderBy?: Array<Record<string, 'asc' | 'desc'>>;
+	skip?: number;
+	take?: number;
 }
 
 // Tipo para resultados de consultas con paginación
 export interface PaginatedResult<T> {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
-  hasMore: boolean;
+	items: T[];
+	total: number;
+	page: number;
+	limit: number;
+	totalPages: number;
+	hasMore: boolean;
 }

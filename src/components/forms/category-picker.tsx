@@ -1,12 +1,6 @@
 'use client';
 
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { createPropertySchema } from '@/lib/validations/property';
 import type { z } from 'zod';
 
@@ -26,10 +20,7 @@ const categories: Array<{ value: PropertyCategory; label: string; icon: string }
 
 export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
 	return (
-		<Select
-			value={value}
-			onValueChange={(value: PropertyCategory) => onChange(value)}
-		>
+		<Select value={value} onValueChange={(value: PropertyCategory) => onChange(value)}>
 			<SelectTrigger>
 				<SelectValue placeholder="Selecciona una categoría" />
 			</SelectTrigger>

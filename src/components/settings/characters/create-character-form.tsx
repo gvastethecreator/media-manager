@@ -11,7 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
 import type { CharacterBase as Character, CreateCharacterData } from '@/types/entities/character/base';
-import { CHARACTER_CLASS_COLORS, CHARACTER_CLASS_EMOJIS, CharacterAlignment, CharacterCategory, CharacterClass, CharacterRace } from '@/types/entities/character/enums';
+import {
+	CHARACTER_CLASS_COLORS,
+	CHARACTER_CLASS_EMOJIS,
+	CharacterAlignment,
+	CharacterCategory,
+	CharacterClass,
+	CharacterRace,
+} from '@/types/entities/character/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -19,14 +26,20 @@ import { z } from 'zod';
 
 // Esquema de validación
 const createCharacterSchema = z.object({
-	name: z.string().min(2, {
-		message: 'El nombre debe tener al menos 2 caracteres',
-	}).max(50, {
-		message: 'El nombre no debe exceder los 50 caracteres',
-	}),
-	description: z.string().max(200, {
-		message: 'La descripción no debe exceder los 200 caracteres',
-	}).optional(),
+	name: z
+		.string()
+		.min(2, {
+			message: 'El nombre debe tener al menos 2 caracteres',
+		})
+		.max(50, {
+			message: 'El nombre no debe exceder los 50 caracteres',
+		}),
+	description: z
+		.string()
+		.max(200, {
+			message: 'La descripción no debe exceder los 200 caracteres',
+		})
+		.optional(),
 	color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
 		message: 'El color debe ser un código hexadecimal válido',
 	}),
@@ -60,7 +73,7 @@ export function CreateCharacterForm({
 	isEditing = false,
 	onCreated,
 	onUpdated,
-	onCancel
+	onCancel,
 }: CreateCharacterFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -92,9 +105,9 @@ export function CreateCharacterForm({
 				description: character.description || '',
 				color: character.color || '#3b82f6',
 				emoji: character.emoji || '👤',
-				class: character.class as CharacterClass || CharacterClass.UNKNOWN,
-				race: character.race as CharacterRace || CharacterRace.UNKNOWN,
-				alignment: character.alignment as CharacterAlignment || CharacterAlignment.NEUTRAL,
+				class: (character.class as CharacterClass) || CharacterClass.UNKNOWN,
+				race: (character.race as CharacterRace) || CharacterRace.UNKNOWN,
+				alignment: (character.alignment as CharacterAlignment) || CharacterAlignment.NEUTRAL,
 				level: character.level || 1,
 				backstory: character.backstory || '',
 				psychologicalProfile: character.psychologicalProfile || '',
@@ -126,7 +139,7 @@ export function CreateCharacterForm({
 				}
 				let color = '#';
 				for (let i = 0; i < 3; i++) {
-					const value = (hash >> (i * 8)) & 0xFF;
+					const value = (hash >> (i * 8)) & 0xff;
 					color += `00${value.toString(16)}`.substr(-2);
 				}
 				return color;
@@ -136,19 +149,36 @@ export function CreateCharacterForm({
 
 			// Intentar asignar un emoji relevante basado en palabras clave
 			const keywords: Record<string, string> = {
-				'guerrero': '⚔️', 'warrior': '⚔️',
-				'mago': '🔮', 'mage': '🔮', 'wizard': '🔮',
-				'ladrón': '🗡️', 'rogue': '🗡️', 'thief': '🗡️',
-				'clérigo': '✨', 'cleric': '✨', 'priest': '✨',
-				'ranger': '🏹', 'arquero': '🏹', 'archer': '🏹',
-				'bardo': '🎭', 'bard': '🎭',
-				'paladín': '🛡️', 'paladin': '🛡️',
-				'druida': '🌿', 'druid': '🌿',
-				'monje': '👊', 'monk': '👊',
-				'brujo': '📜', 'warlock': '📜',
-				'hechicero': '🌟', 'sorcerer': '🌟',
-				'bárbaro': '🪓', 'barbarian': '🪓',
-				'artificero': '⚙️', 'artificer': '⚙️',
+				guerrero: '⚔️',
+				warrior: '⚔️',
+				mago: '🔮',
+				mage: '🔮',
+				wizard: '🔮',
+				ladrón: '🗡️',
+				rogue: '🗡️',
+				thief: '🗡️',
+				clérigo: '✨',
+				cleric: '✨',
+				priest: '✨',
+				ranger: '🏹',
+				arquero: '🏹',
+				archer: '🏹',
+				bardo: '🎭',
+				bard: '🎭',
+				paladín: '🛡️',
+				paladin: '🛡️',
+				druida: '🌿',
+				druid: '🌿',
+				monje: '👊',
+				monk: '👊',
+				brujo: '📜',
+				warlock: '📜',
+				hechicero: '🌟',
+				sorcerer: '🌟',
+				bárbaro: '🪓',
+				barbarian: '🪓',
+				artificero: '⚙️',
+				artificer: '⚙️',
 			};
 
 			const lowerName = name.toLowerCase();
@@ -196,7 +226,6 @@ export function CreateCharacterForm({
 				onCreated?.(created);
 				form.reset();
 			}
-
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} el personaje`, {
@@ -229,9 +258,7 @@ export function CreateCharacterForm({
 									}}
 								/>
 							</FormControl>
-							<FormDescription>
-								El nombre del personaje, visible en listados e imágenes.
-							</FormDescription>
+							<FormDescription>El nombre del personaje, visible en listados e imágenes.</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -244,15 +271,9 @@ export function CreateCharacterForm({
 						<FormItem>
 							<FormLabel>Descripción (Opcional)</FormLabel>
 							<FormControl>
-								<Textarea
-									placeholder="Describe brevemente este personaje"
-									{...field}
-									value={field.value || ''}
-								/>
+								<Textarea placeholder="Describe brevemente este personaje" {...field} value={field.value || ''} />
 							</FormControl>
-							<FormDescription>
-								Una descripción breve para entender quién es este personaje.
-							</FormDescription>
+							<FormDescription>Una descripción breve para entender quién es este personaje.</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -266,14 +287,9 @@ export function CreateCharacterForm({
 							<FormItem>
 								<FormLabel>Emoji</FormLabel>
 								<FormControl>
-									<EmojiPicker
-										value={field.value}
-										onEmojiSelect={(emoji) => field.onChange(emoji)}
-									/>
+									<EmojiPicker value={field.value} onEmojiSelect={(emoji) => field.onChange(emoji)} />
 								</FormControl>
-								<FormDescription>
-									Selecciona un emoji representativo.
-								</FormDescription>
+								<FormDescription>Selecciona un emoji representativo.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -286,14 +302,9 @@ export function CreateCharacterForm({
 							<FormItem>
 								<FormLabel>Color</FormLabel>
 								<FormControl>
-									<ColorPicker
-										value={field.value}
-										onChange={(color) => field.onChange(color)}
-									/>
+									<ColorPicker value={field.value} onChange={(color) => field.onChange(color)} />
 								</FormControl>
-								<FormDescription>
-									Color para identificar visualmente al personaje.
-								</FormDescription>
+								<FormDescription>Color para identificar visualmente al personaje.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -330,9 +341,7 @@ export function CreateCharacterForm({
 										))}
 									</SelectContent>
 								</Select>
-								<FormDescription>
-									Clase o profesión del personaje.
-								</FormDescription>
+								<FormDescription>Clase o profesión del personaje.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -344,10 +353,7 @@ export function CreateCharacterForm({
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Raza</FormLabel>
-								<Select
-									onValueChange={(value) => field.onChange(value || CharacterRace.UNKNOWN)}
-									value={field.value}
-								>
+								<Select onValueChange={(value) => field.onChange(value || CharacterRace.UNKNOWN)} value={field.value}>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder="Selecciona una raza" />
@@ -361,9 +367,7 @@ export function CreateCharacterForm({
 										))}
 									</SelectContent>
 								</Select>
-								<FormDescription>
-									Raza o especie del personaje.
-								</FormDescription>
+								<FormDescription>Raza o especie del personaje.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -389,16 +393,16 @@ export function CreateCharacterForm({
 									<SelectContent>
 										{Object.entries(CharacterAlignment).map(([key, value]) => (
 											<SelectItem key={key} value={value}>
-												{value.replace('-', ' ').split(' ').map(word =>
-													word.charAt(0).toUpperCase() + word.slice(1)
-												).join(' ')}
+												{value
+													.replace('-', ' ')
+													.split(' ')
+													.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+													.join(' ')}
 											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
-								<FormDescription>
-									Alineamiento moral y ético del personaje.
-								</FormDescription>
+								<FormDescription>Alineamiento moral y ético del personaje.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -421,9 +425,7 @@ export function CreateCharacterForm({
 										value={field.value || 1}
 									/>
 								</FormControl>
-								<FormDescription>
-									Nivel de experiencia o poder (1-100).
-								</FormDescription>
+								<FormDescription>Nivel de experiencia o poder (1-100).</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -444,9 +446,7 @@ export function CreateCharacterForm({
 									className="min-h-[120px]"
 								/>
 							</FormControl>
-							<FormDescription>
-								Trasfondo o historia de origen del personaje.
-							</FormDescription>
+							<FormDescription>Trasfondo o historia de origen del personaje.</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -460,15 +460,9 @@ export function CreateCharacterForm({
 							<FormItem>
 								<FormLabel>Perfil Psicológico (Opcional)</FormLabel>
 								<FormControl>
-									<Textarea
-										placeholder="Rasgos psicológicos del personaje"
-										{...field}
-										value={field.value || ''}
-									/>
+									<Textarea placeholder="Rasgos psicológicos del personaje" {...field} value={field.value || ''} />
 								</FormControl>
-								<FormDescription>
-									Personalidad, motivaciones, temores, etc.
-								</FormDescription>
+								<FormDescription>Personalidad, motivaciones, temores, etc.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -481,15 +475,9 @@ export function CreateCharacterForm({
 							<FormItem>
 								<FormLabel>Perfil Social (Opcional)</FormLabel>
 								<FormControl>
-									<Textarea
-										placeholder="Relaciones sociales del personaje"
-										{...field}
-										value={field.value || ''}
-									/>
+									<Textarea placeholder="Relaciones sociales del personaje" {...field} value={field.value || ''} />
 								</FormControl>
-								<FormDescription>
-									Relaciones, status social, amistades y enemistades.
-								</FormDescription>
+								<FormDescription>Relaciones, status social, amistades y enemistades.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -502,10 +490,7 @@ export function CreateCharacterForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Categoría (Opcional)</FormLabel>
-							<Select
-								onValueChange={(value) => field.onChange(value || undefined)}
-								value={field.value}
-							>
+							<Select onValueChange={(value) => field.onChange(value || undefined)} value={field.value}>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue placeholder="Selecciona una categoría" />
@@ -519,9 +504,7 @@ export function CreateCharacterForm({
 									))}
 								</SelectContent>
 							</Select>
-							<FormDescription>
-								Categoría o rol del personaje (protagonista, antagonista, etc.).
-							</FormDescription>
+							<FormDescription>Categoría o rol del personaje (protagonista, antagonista, etc.).</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -552,25 +535,14 @@ export function CreateCharacterForm({
 
 				<div className="flex justify-end gap-2">
 					{onCancel && (
-						<Button
-							type="button"
-							variant="outline"
-							onClick={onCancel}
-						>
+						<Button type="button" variant="outline" onClick={onCancel}>
 							Cancelar
 						</Button>
 					)}
-					<Button
-						type="button"
-						variant="outline"
-						onClick={generateSuggestions}
-					>
+					<Button type="button" variant="outline" onClick={generateSuggestions}>
 						Generar sugerencias
 					</Button>
-					<Button
-						type="submit"
-						disabled={isSubmitting}
-					>
+					<Button type="submit" disabled={isSubmitting}>
 						{isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
 					</Button>
 				</div>

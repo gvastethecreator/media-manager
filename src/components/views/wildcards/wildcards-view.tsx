@@ -76,11 +76,11 @@ export function WildcardsView(_props: ViewProps) {
 			const data = await getWildcards();
 
 			// Calcular estadísticas adicionales
-			const wildcardsWithStats = data.map(wildcard => {
+			const wildcardsWithStats = data.map((wildcard) => {
 				const usageCount = (wildcard._count?.prompts || 0) + (wildcard._count?.images || 0);
 				return {
 					...wildcard,
-					usageCount
+					usageCount,
 				};
 			});
 
@@ -162,10 +162,7 @@ export function WildcardsView(_props: ViewProps) {
 									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
 									data-wildcard-id={(wildcard as any).id}
 								>
-									<MemoizedWildcardCard
-										wildcard={wildcard}
-										onWildcardClick={onWildcardClick}
-									/>
+									<MemoizedWildcardCard wildcard={wildcard} onWildcardClick={onWildcardClick} />
 								</div>
 							</motion.div>
 						);

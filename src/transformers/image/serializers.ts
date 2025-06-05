@@ -5,11 +5,11 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    ImageBase,
-    ImageComplete,
-    ImageCreateInput,
-    ImageRelations,
-    ImageUpdateInput
+	ImageBase,
+	ImageComplete,
+	ImageCreateInput,
+	ImageRelations,
+	ImageUpdateInput,
 } from '@/types/entities/image/types';
 import { ImageSchema } from '@/types/entities/image/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
@@ -26,10 +26,28 @@ export function toPrismaImage(
 ): Prisma.ImageCreateInput | Prisma.ImageUpdateInput {
 	try {
 		const {
-			id, title, description, path, alt, source, prompt,
-			negativePrompt, params, width, height, size, type,
-			category, status, sensitive, favorite, published,
-			quality, upscaled, folderId, ...relations
+			id,
+			title,
+			description,
+			path,
+			alt,
+			source,
+			prompt,
+			negativePrompt,
+			params,
+			width,
+			height,
+			size,
+			type,
+			category,
+			status,
+			sensitive,
+			favorite,
+			published,
+			quality,
+			upscaled,
+			folderId,
+			...relations
 		} = data;
 
 		// Validar campos requeridos para creación
@@ -205,9 +223,9 @@ export function validateImage(data: unknown): ImageComplete {
 		if (error instanceof z.ZodError) {
 			logger.error('Error de validación en imagen', {
 				error: error.errors,
-				data
+				data,
 			});
-			throw new Error(`Validación fallida: ${error.errors.map(e => e.message).join(', ')}`);
+			throw new Error(`Validación fallida: ${error.errors.map((e) => e.message).join(', ')}`);
 		}
 		throw handleTransformerError(error);
 	}
@@ -244,32 +262,36 @@ export function extendImage(
 export function parseImageFilters(filters: unknown): Record<string, unknown> {
 	try {
 		// Validar y parsear filtros con Zod
-		const schema = z.object({
-			text: z.string().optional(),
-			category: z.enum(['GENERAL', 'ARTWORK', 'PHOTO', 'SCREENSHOT', 'OTHER']).optional(),
-			type: z.enum(['ORIGINAL', 'GENERATED', 'EDITED', 'VARIANT', 'UPSCALED']).optional(),
-			status: z.enum(['PENDING', 'PROCESSING', 'READY', 'ERROR']).optional(),
-			sensitive: z.boolean().optional(),
-			favorite: z.boolean().optional(),
-			published: z.boolean().optional(),
-			folderId: z.string().optional(),
-			dateRange: z.object({
-				from: z.string().optional(),
-				to: z.string().optional(),
-			}).optional(),
-			albumIds: z.array(z.string()).optional(),
-			collectionIds: z.array(z.string()).optional(),
-			tagIds: z.array(z.string()).optional(),
-			characterIds: z.array(z.string()).optional(),
-			placeIds: z.array(z.string()).optional(),
-			worldItemIds: z.array(z.string()).optional(),
-			conceptIds: z.array(z.string()).optional(),
-			promptIds: z.array(z.string()).optional(),
-			noteIds: z.array(z.string()).optional(),
-			wildcardIds: z.array(z.string()).optional(),
-			propertyIds: z.array(z.string()).optional(),
-			groupIds: z.array(z.string()).optional(),
-		}).optional();
+		const schema = z
+			.object({
+				text: z.string().optional(),
+				category: z.enum(['GENERAL', 'ARTWORK', 'PHOTO', 'SCREENSHOT', 'OTHER']).optional(),
+				type: z.enum(['ORIGINAL', 'GENERATED', 'EDITED', 'VARIANT', 'UPSCALED']).optional(),
+				status: z.enum(['PENDING', 'PROCESSING', 'READY', 'ERROR']).optional(),
+				sensitive: z.boolean().optional(),
+				favorite: z.boolean().optional(),
+				published: z.boolean().optional(),
+				folderId: z.string().optional(),
+				dateRange: z
+					.object({
+						from: z.string().optional(),
+						to: z.string().optional(),
+					})
+					.optional(),
+				albumIds: z.array(z.string()).optional(),
+				collectionIds: z.array(z.string()).optional(),
+				tagIds: z.array(z.string()).optional(),
+				characterIds: z.array(z.string()).optional(),
+				placeIds: z.array(z.string()).optional(),
+				worldItemIds: z.array(z.string()).optional(),
+				conceptIds: z.array(z.string()).optional(),
+				promptIds: z.array(z.string()).optional(),
+				noteIds: z.array(z.string()).optional(),
+				wildcardIds: z.array(z.string()).optional(),
+				propertyIds: z.array(z.string()).optional(),
+				groupIds: z.array(z.string()).optional(),
+			})
+			.optional();
 
 		const validatedFilters = schema.parse(filters) || {};
 		return validatedFilters;
@@ -277,9 +299,9 @@ export function parseImageFilters(filters: unknown): Record<string, unknown> {
 		if (error instanceof z.ZodError) {
 			logger.error('Error de validación en filtros de imagen', {
 				error: error.errors,
-				filters
+				filters,
 			});
-			throw new Error(`Filtros inválidos: ${error.errors.map(e => e.message).join(', ')}`);
+			throw new Error(`Filtros inválidos: ${error.errors.map((e) => e.message).join(', ')}`);
 		}
 		throw handleTransformerError(error);
 	}

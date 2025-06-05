@@ -4,13 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import {
-    TaskBase,
-    TaskExtended,
-    TaskStatus,
-    TaskType,
-    TaskWithStats
-} from '@/types/entities/task';
+import { TaskBase, TaskExtended, TaskStatus, TaskType, TaskWithStats } from '@/types/entities/task';
 import { TransformerError } from '@/utils/transformers/errors';
 import { fromPrismaTask, toExtendedTask } from './serializers';
 
@@ -21,16 +15,16 @@ const logger = serverLogger.child({ module: 'TaskTransformer' });
  * Opciones para la transformación de tareas
  */
 export interface TransformTaskOptions {
-  /** Habilita la validación de campos */
-  validateFields?: boolean;
-  /** Deserializa campos JSON */
-  deserializeFields?: boolean;
-  /** Incluye relaciones */
-  includeRelations?: boolean;
-  /** Incluye propiedades UI */
-  includeUI?: boolean;
-  /** Incluye estadísticas calculadas */
-  includeStats?: boolean;
+	/** Habilita la validación de campos */
+	validateFields?: boolean;
+	/** Deserializa campos JSON */
+	deserializeFields?: boolean;
+	/** Incluye relaciones */
+	includeRelations?: boolean;
+	/** Incluye propiedades UI */
+	includeUI?: boolean;
+	/** Incluye estadísticas calculadas */
+	includeStats?: boolean;
 }
 
 /**
@@ -41,27 +35,27 @@ export interface TransformTaskOptions {
  * @throws TransformerError si hay errores en la validación o transformación
  */
 export function transformTask<T extends Partial<TaskBase> | unknown>(
-  input: T,
-  options: TransformTaskOptions = {}
+	input: T,
+	options: TransformTaskOptions = {}
 ): TaskExtended {
-  try {
-    if (!input || typeof input !== 'object') {
-      logger.error('⚠️ Intentando transformar un objeto Task inválido:', input);
-      throw new TransformerError('Error transformando tarea: objeto inválido');
-    }
+	try {
+		if (!input || typeof input !== 'object') {
+			logger.error('⚠️ Intentando transformar un objeto Task inválido:', input);
+			throw new TransformerError('Error transformando tarea: objeto inválido');
+		}
 
-    // Si es un objeto de Prisma, primero lo transformamos al formato base
-    if ('handler' in input && typeof input.handler === 'string') {
-      const baseTask = fromPrismaTask(input);
-      return toExtendedTask(baseTask, options);
-    }
+		// Si es un objeto de Prisma, primero lo transformamos al formato base
+		if ('handler' in input && typeof input.handler === 'string') {
+			const baseTask = fromPrismaTask(input);
+			return toExtendedTask(baseTask, options);
+		}
 
-    // Si ya es un objeto Task, simplemente extenderlo
-    return toExtendedTask(input as TaskBase, options);
-  } catch (error) {
-    logger.error('❌ Error transformando Task:', error);
-    throw new TransformerError('Error transformando tarea', { cause: error });
-  }
+		// Si ya es un objeto Task, simplemente extenderlo
+		return toExtendedTask(input as TaskBase, options);
+	} catch (error) {
+		logger.error('❌ Error transformando Task:', error);
+		throw new TransformerError('Error transformando tarea', { cause: error });
+	}
 }
 
 /**
@@ -71,15 +65,15 @@ export function transformTask<T extends Partial<TaskBase> | unknown>(
  * @returns Array de Tasks transformados
  */
 export function transformTasks<T extends Partial<TaskBase>[] | unknown[]>(
-  input: T,
-  options: TransformTaskOptions = {}
+	input: T,
+	options: TransformTaskOptions = {}
 ): TaskExtended[] {
-  if (!Array.isArray(input)) {
-    logger.error('⚠️ Intentando transformar un array de Tasks inválido:', input);
-    throw new TransformerError('Error transformando tareas: el input no es un array');
-  }
+	if (!Array.isArray(input)) {
+		logger.error('⚠️ Intentando transformar un array de Tasks inválido:', input);
+		throw new TransformerError('Error transformando tareas: el input no es un array');
+	}
 
-  return input.map(item => transformTask(item, options));
+	return input.map((item) => transformTask(item, options));
 }
 
 /**
@@ -88,27 +82,27 @@ export function transformTasks<T extends Partial<TaskBase>[] | unknown[]>(
  * @returns TaskWithStats con estadísticas adicionales
  */
 export function transformTaskToWithStats(task: TaskBase): TaskWithStats {
-  try {
-    // Primero transformamos a extended
-    const taskExtended = transformTask(task, { includeUI: true });
+	try {
+		// Primero transformamos a extended
+		const taskExtended = transformTask(task, { includeUI: true });
 
-    // Calculamos estadísticas basadas en los datos disponibles
-    return {
-      ...taskExtended,
-      stats: {
-        averageRuntime: 0,
-        lastRuntime: 0,
-        successCount: 0,
-        failureCount: 0,
-        retryCount: 0,
-        averageCpuUsage: 0,
-        averageMemoryUsage: 0
-      }
-    };
-  } catch (error) {
-    logger.error('❌ Error transformando Task a WithStats:', error);
-    throw new TransformerError('Error al transformar tarea con estadísticas', { cause: error });
-  }
+		// Calculamos estadísticas basadas en los datos disponibles
+		return {
+			...taskExtended,
+			stats: {
+				averageRuntime: 0,
+				lastRuntime: 0,
+				successCount: 0,
+				failureCount: 0,
+				retryCount: 0,
+				averageCpuUsage: 0,
+				averageMemoryUsage: 0,
+			},
+		};
+	} catch (error) {
+		logger.error('❌ Error transformando Task a WithStats:', error);
+		throw new TransformerError('Error al transformar tarea con estadísticas', { cause: error });
+	}
 }
 
 /**
@@ -117,32 +111,32 @@ export function transformTaskToWithStats(task: TaskBase): TaskWithStats {
  * @returns Objeto con color e icono
  */
 export function getTaskVisualProps(task: TaskBase): { color: string; icon: string } {
-  // Mapeo de tipos a iconos
-  const typeIconMap: Record<string, string> = {
-    [TaskType.MAINTENANCE]: '🔧',
-    [TaskType.PROCESSING]: '⚙️',
-    [TaskType.IMPORT]: '📥',
-    [TaskType.EXPORT]: '📤',
-    [TaskType.INDEXING]: '🔍',
-    [TaskType.CLEANUP]: '🧹',
-    [TaskType.BACKUP]: '💾',
-    [TaskType.CUSTOM]: '🔮'
-  };
+	// Mapeo de tipos a iconos
+	const typeIconMap: Record<string, string> = {
+		[TaskType.MAINTENANCE]: '🔧',
+		[TaskType.PROCESSING]: '⚙️',
+		[TaskType.IMPORT]: '📥',
+		[TaskType.EXPORT]: '📤',
+		[TaskType.INDEXING]: '🔍',
+		[TaskType.CLEANUP]: '🧹',
+		[TaskType.BACKUP]: '💾',
+		[TaskType.CUSTOM]: '🔮',
+	};
 
-  // Mapeo de estados a colores
-  const statusColorMap: Record<string, string> = {
-    [TaskStatus.PENDING]: '#6941C6',     // Púrpura
-    [TaskStatus.SCHEDULED]: '#3538CD',   // Índigo
-    [TaskStatus.RUNNING]: '#026AA2',     // Azul
-    [TaskStatus.COMPLETED]: '#039855',   // Verde
-    [TaskStatus.FAILED]: '#D92D20',      // Rojo
-    [TaskStatus.CANCELLED]: '#B54708',   // Naranja
-    [TaskStatus.PAUSED]: '#EAAA08'       // Amarillo
-  };
+	// Mapeo de estados a colores
+	const statusColorMap: Record<string, string> = {
+		[TaskStatus.PENDING]: '#6941C6', // Púrpura
+		[TaskStatus.SCHEDULED]: '#3538CD', // Índigo
+		[TaskStatus.RUNNING]: '#026AA2', // Azul
+		[TaskStatus.COMPLETED]: '#039855', // Verde
+		[TaskStatus.FAILED]: '#D92D20', // Rojo
+		[TaskStatus.CANCELLED]: '#B54708', // Naranja
+		[TaskStatus.PAUSED]: '#EAAA08', // Amarillo
+	};
 
-  // Obtener el icono y color adecuados
-  const icon = typeIconMap[task.type] || '⚡';
-  const color = statusColorMap[task.status] || '#667085'; // Gris por defecto
+	// Obtener el icono y color adecuados
+	const icon = typeIconMap[task.type] || '⚡';
+	const color = statusColorMap[task.status] || '#667085'; // Gris por defecto
 
-  return { color, icon };
+	return { color, icon };
 }

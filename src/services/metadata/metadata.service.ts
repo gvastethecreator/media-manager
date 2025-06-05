@@ -4,7 +4,12 @@
  */
 
 import { db } from '@/lib/prisma';
-import { mapCreateMetadataDataToPrisma, mapUpdateMetadataDataToPrisma, transformMetadata, transformMetadatas } from '@/transformers/metadata';
+import {
+	mapCreateMetadataDataToPrisma,
+	mapUpdateMetadataDataToPrisma,
+	transformMetadata,
+	transformMetadatas,
+} from '@/transformers/metadata';
 import { MetadataBase } from '@/types/entities/metadata/base';
 import { MetadataExtended } from '@/types/entities/metadata/extended';
 
@@ -13,18 +18,18 @@ import { MetadataExtended } from '@/types/entities/metadata/extended';
  * @returns Array de metadatos extendidos
  */
 export async function getAllMetadata(): Promise<MetadataExtended[]> {
-  try {
-    const metadatas = await db.metadata.findMany({
-      orderBy: {
-        updatedAt: 'desc',
-      },
-    });
+	try {
+		const metadatas = await db.metadata.findMany({
+			orderBy: {
+				updatedAt: 'desc',
+			},
+		});
 
-    return transformMetadatas(metadatas);
-  } catch (error) {
-    console.error('Error al obtener metadatos:', error);
-    return [];
-  }
+		return transformMetadatas(metadatas);
+	} catch (error) {
+		console.error('Error al obtener metadatos:', error);
+		return [];
+	}
 }
 
 /**
@@ -33,18 +38,18 @@ export async function getAllMetadata(): Promise<MetadataExtended[]> {
  * @returns Metadatos extendidos o null si no se encuentra
  */
 export async function getMetadataByImageId(imageId: string): Promise<MetadataExtended | null> {
-  try {
-    const metadata = await db.metadata.findUnique({
-      where: {
-        imageId,
-      },
-    });
+	try {
+		const metadata = await db.metadata.findUnique({
+			where: {
+				imageId,
+			},
+		});
 
-    return transformMetadata(metadata);
-  } catch (error) {
-    console.error(`Error al obtener metadatos para imagen ${imageId}:`, error);
-    return null;
-  }
+		return transformMetadata(metadata);
+	} catch (error) {
+		console.error(`Error al obtener metadatos para imagen ${imageId}:`, error);
+		return null;
+	}
 }
 
 /**
@@ -53,18 +58,18 @@ export async function getMetadataByImageId(imageId: string): Promise<MetadataExt
  * @returns Metadatos extendidos o null si no se encuentra
  */
 export async function getMetadataById(id: string): Promise<MetadataExtended | null> {
-  try {
-    const metadata = await db.metadata.findUnique({
-      where: {
-        id,
-      },
-    });
+	try {
+		const metadata = await db.metadata.findUnique({
+			where: {
+				id,
+			},
+		});
 
-    return transformMetadata(metadata);
-  } catch (error) {
-    console.error(`Error al obtener metadatos ${id}:`, error);
-    return null;
-  }
+		return transformMetadata(metadata);
+	} catch (error) {
+		console.error(`Error al obtener metadatos ${id}:`, error);
+		return null;
+	}
 }
 
 /**
@@ -73,18 +78,18 @@ export async function getMetadataById(id: string): Promise<MetadataExtended | nu
  * @returns Metadatos creados o null si hay error
  */
 export async function createMetadata(data: Partial<MetadataBase>): Promise<MetadataExtended | null> {
-  try {
-    const prismaData = mapCreateMetadataDataToPrisma(data);
+	try {
+		const prismaData = mapCreateMetadataDataToPrisma(data);
 
-    const metadata = await db.metadata.create({
-      data: prismaData,
-    });
+		const metadata = await db.metadata.create({
+			data: prismaData,
+		});
 
-    return transformMetadata(metadata);
-  } catch (error) {
-    console.error('Error al crear metadatos:', error);
-    return null;
-  }
+		return transformMetadata(metadata);
+	} catch (error) {
+		console.error('Error al crear metadatos:', error);
+		return null;
+	}
 }
 
 /**
@@ -94,21 +99,21 @@ export async function createMetadata(data: Partial<MetadataBase>): Promise<Metad
  * @returns Metadatos actualizados o null si hay error
  */
 export async function updateMetadata(id: string, data: Partial<MetadataBase>): Promise<MetadataExtended | null> {
-  try {
-    const prismaData = mapUpdateMetadataDataToPrisma(data);
+	try {
+		const prismaData = mapUpdateMetadataDataToPrisma(data);
 
-    const metadata = await db.metadata.update({
-      where: {
-        id,
-      },
-      data: prismaData,
-    });
+		const metadata = await db.metadata.update({
+			where: {
+				id,
+			},
+			data: prismaData,
+		});
 
-    return transformMetadata(metadata);
-  } catch (error) {
-    console.error(`Error al actualizar metadatos ${id}:`, error);
-    return null;
-  }
+		return transformMetadata(metadata);
+	} catch (error) {
+		console.error(`Error al actualizar metadatos ${id}:`, error);
+		return null;
+	}
 }
 
 /**
@@ -117,18 +122,18 @@ export async function updateMetadata(id: string, data: Partial<MetadataBase>): P
  * @returns true si se eliminó correctamente, false si hubo error
  */
 export async function deleteMetadata(id: string): Promise<boolean> {
-  try {
-    await db.metadata.delete({
-      where: {
-        id,
-      },
-    });
+	try {
+		await db.metadata.delete({
+			where: {
+				id,
+			},
+		});
 
-    return true;
-  } catch (error) {
-    console.error(`Error al eliminar metadatos ${id}:`, error);
-    return false;
-  }
+		return true;
+	} catch (error) {
+		console.error(`Error al eliminar metadatos ${id}:`, error);
+		return false;
+	}
 }
 
 /**
@@ -137,16 +142,16 @@ export async function deleteMetadata(id: string): Promise<boolean> {
  * @returns true si se eliminaron correctamente, false si hubo error
  */
 export async function deleteMetadataByImageId(imageId: string): Promise<boolean> {
-  try {
-    await db.metadata.delete({
-      where: {
-        imageId,
-      },
-    });
+	try {
+		await db.metadata.delete({
+			where: {
+				imageId,
+			},
+		});
 
-    return true;
-  } catch (error) {
-    console.error(`Error al eliminar metadatos para imagen ${imageId}:`, error);
-    return false;
-  }
+		return true;
+	} catch (error) {
+		console.error(`Error al eliminar metadatos para imagen ${imageId}:`, error);
+		return false;
+	}
 }

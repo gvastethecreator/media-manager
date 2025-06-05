@@ -11,4 +11,3 @@ export * from './types';
 
 // Alias común para el tipo principal
 export type { NoteWithRelations as Note } from './types';
-

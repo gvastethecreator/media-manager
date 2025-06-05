@@ -30,7 +30,7 @@ export async function seedFolders(prisma: PrismaClient): Promise<void> {
 			// Crear carpetas
 			for (const folderData of sampleFolders) {
 				await prisma.folder.create({
-					data: folderData
+					data: folderData,
 				});
 			}
 

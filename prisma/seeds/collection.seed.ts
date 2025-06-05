@@ -21,18 +21,18 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 						sections: [
 							{
 								title: 'Teorías Elementales',
-								description: 'Estudios sobre la naturaleza de los elementos mágicos'
+								description: 'Estudios sobre la naturaleza de los elementos mágicos',
 							},
 							{
 								title: 'Rituales Prohibidos',
-								description: 'Documentación sobre prácticas mágicas peligrosas'
+								description: 'Documentación sobre prácticas mágicas peligrosas',
 							},
 							{
 								title: 'Artefactos Legendarios',
-								description: 'Catálogo de objetos mágicos poderosos'
-							}
+								description: 'Catálogo de objetos mágicos poderosos',
+							},
 						],
-						tags: ['magia', 'rituales', 'elementos']
+						tags: ['magia', 'rituales', 'elementos'],
 					}),
 					featuredImage: null,
 					isFavorite: true,
@@ -47,18 +47,18 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 						sections: [
 							{
 								title: 'Guerras del Norte',
-								description: 'Conflictos con los clanes guerreros del norte'
+								description: 'Conflictos con los clanes guerreros del norte',
 							},
 							{
 								title: 'Batallas Legendarias',
-								description: 'Encuentros históricos que cambiaron el reino'
+								description: 'Encuentros históricos que cambiaron el reino',
 							},
 							{
 								title: 'Tácticas Militares',
-								description: 'Estrategias y formaciones de combate'
-							}
+								description: 'Estrategias y formaciones de combate',
+							},
 						],
-						tags: ['guerra', 'batallas', 'historia']
+						tags: ['guerra', 'batallas', 'historia'],
 					}),
 					featuredImage: null,
 					isFavorite: false,
@@ -73,18 +73,18 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 						sections: [
 							{
 								title: 'Leyes Reales',
-								description: 'Edictos y decretos del monarca'
+								description: 'Edictos y decretos del monarca',
 							},
 							{
 								title: 'Tratados Comerciales',
-								description: 'Acuerdos con otros reinos y gremios'
+								description: 'Acuerdos con otros reinos y gremios',
 							},
 							{
 								title: 'Registros Nobiliarios',
-								description: 'Linajes y títulos de la nobleza'
-							}
+								description: 'Linajes y títulos de la nobleza',
+							},
 						],
-						tags: ['política', 'leyes', 'nobleza']
+						tags: ['política', 'leyes', 'nobleza'],
 					}),
 					featuredImage: null,
 					isFavorite: false,
@@ -99,18 +99,18 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 						sections: [
 							{
 								title: 'Sagas Ancestrales',
-								description: 'Historias transmitidas por generaciones'
+								description: 'Historias transmitidas por generaciones',
 							},
 							{
 								title: 'Ritos del Hielo',
-								description: 'Tradiciones y ceremonias del norte'
+								description: 'Tradiciones y ceremonias del norte',
 							},
 							{
 								title: 'Profecías Invernales',
-								description: 'Predicciones de los videntes del hielo'
-							}
+								description: 'Predicciones de los videntes del hielo',
+							},
 						],
-						tags: ['norte', 'tradiciones', 'leyendas']
+						tags: ['norte', 'tradiciones', 'leyendas'],
 					}),
 					featuredImage: null,
 					isFavorite: false,
@@ -125,18 +125,18 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 						sections: [
 							{
 								title: 'Manifestaciones Abismales',
-								description: 'Documentación de fenómenos del Abismo'
+								description: 'Documentación de fenómenos del Abismo',
 							},
 							{
 								title: 'Estudios de Corrupción',
-								description: 'Efectos del Abismo en seres vivos'
+								description: 'Efectos del Abismo en seres vivos',
 							},
 							{
 								title: 'Teorías Dimensionales',
-								description: 'Hipótesis sobre la naturaleza del Abismo'
-							}
+								description: 'Hipótesis sobre la naturaleza del Abismo',
+							},
 						],
-						tags: ['abismo', 'investigación', 'dimensional']
+						tags: ['abismo', 'investigación', 'dimensional'],
 					}),
 					featuredImage: null,
 					isFavorite: false,
@@ -151,18 +151,18 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 						sections: [
 							{
 								title: 'Orden de la Luz Eterna',
-								description: 'Historia y principios de los paladines'
+								description: 'Historia y principios de los paladines',
 							},
 							{
 								title: 'Círculo del Equilibrio',
-								description: 'Tradiciones de los druidas'
+								description: 'Tradiciones de los druidas',
 							},
 							{
 								title: 'Hermandad de las Sombras',
-								description: 'Secretos de los asesinos'
-							}
+								description: 'Secretos de los asesinos',
+							},
 						],
-						tags: ['órdenes', 'organizaciones', 'hermandades']
+						tags: ['órdenes', 'organizaciones', 'hermandades'],
 					}),
 					featuredImage: null,
 					isFavorite: false,
@@ -177,18 +177,18 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 						sections: [
 							{
 								title: 'Bestias Mágicas',
-								description: 'Catálogo de criaturas mágicas'
+								description: 'Catálogo de criaturas mágicas',
 							},
 							{
 								title: 'Aberraciones Abismales',
-								description: 'Seres corrompidos por el Abismo'
+								description: 'Seres corrompidos por el Abismo',
 							},
 							{
 								title: 'Espíritus y Apariciones',
-								description: 'Entidades sobrenaturales'
-							}
+								description: 'Entidades sobrenaturales',
+							},
 						],
-						tags: ['criaturas', 'bestias', 'monstruos']
+						tags: ['criaturas', 'bestias', 'monstruos'],
 					}),
 					featuredImage: null,
 					isFavorite: false,
@@ -203,32 +203,32 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 						sections: [
 							{
 								title: 'Tierras del Norte',
-								description: 'Geografía de las regiones heladas'
+								description: 'Geografía de las regiones heladas',
 							},
 							{
 								title: 'Rutas Comerciales',
-								description: 'Caminos y pasos importantes'
+								description: 'Caminos y pasos importantes',
 							},
 							{
 								title: 'Lugares Místicos',
-								description: 'Ubicaciones de poder mágico'
-							}
+								description: 'Ubicaciones de poder mágico',
+							},
 						],
-						tags: ['mapas', 'geografía', 'lugares']
+						tags: ['mapas', 'geografía', 'lugares'],
 					}),
 					featuredImage: null,
 					isFavorite: false,
-				}
+				},
 			];
 
 			for (const collection of collections) {
 				const existingCollection = await prisma.collection.findFirst({
-					where: { name: collection.name }
+					where: { name: collection.name },
 				});
 
 				if (!existingCollection) {
 					await prisma.collection.create({
-						data: collection
+						data: collection,
 					});
 				}
 			}

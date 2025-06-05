@@ -5,22 +5,33 @@
  */
 
 import albumService, {
-    addImageToAlbumService,
-    ALBUM_EVENTS,
-    AlbumErrorCode,
-    createAlbumError,
-    createAlbumService,
-    deleteAlbumService,
-    getAlbumService,
-    getAlbumStatsService,
-    notifyAlbumChange,
-    removeImageFromAlbumService,
-    searchAlbumsService,
-    updateAlbumService
+	addImageToAlbumService,
+	ALBUM_EVENTS,
+	AlbumErrorCode,
+	createAlbumError,
+	createAlbumService,
+	deleteAlbumService,
+	getAlbumService,
+	getAlbumStatsService,
+	notifyAlbumChange,
+	removeImageFromAlbumService,
+	searchAlbumsService,
+	updateAlbumService,
 } from './album.service';
 
 export {
-    addImageToAlbumService, ALBUM_EVENTS, AlbumErrorCode, createAlbumError, createAlbumService, deleteAlbumService, getAlbumService, getAlbumStatsService, notifyAlbumChange, removeImageFromAlbumService, searchAlbumsService, updateAlbumService
+	addImageToAlbumService,
+	ALBUM_EVENTS,
+	AlbumErrorCode,
+	createAlbumError,
+	createAlbumService,
+	deleteAlbumService,
+	getAlbumService,
+	getAlbumStatsService,
+	notifyAlbumChange,
+	removeImageFromAlbumService,
+	searchAlbumsService,
+	updateAlbumService,
 };
 
 export default albumService;

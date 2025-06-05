@@ -112,7 +112,7 @@ const ImageRendererComponent = ({
 		loading: priority ? 'eager' : 'lazy',
 		onError: handleError,
 		onLoad: handleLoad,
-		onClick: handleClick
+		onClick: handleClick,
 	};
 
 	// Depuración: Verificar si la URL es válida

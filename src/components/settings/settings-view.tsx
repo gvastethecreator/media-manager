@@ -190,7 +190,7 @@ export function SettingsView() {
 	React.useEffect(() => {
 		const handleSetSettingsTab = (event: CustomEvent<{ tab: string }>) => {
 			const { tab } = event.detail;
-			if (tab && tabsData.some(tabData => tabData.id === tab)) {
+			if (tab && tabsData.some((tabData) => tabData.id === tab)) {
 				setActiveTab(tab);
 			}
 		};
@@ -233,9 +233,7 @@ export function SettingsView() {
 								</span>
 
 								{/* 📝 Label con truncado inteligente */}
-								<span className="text-left truncate flex-1 group-data-[state=active]:font-semibold">
-									{tab.label}
-								</span>
+								<span className="text-left truncate flex-1 group-data-[state=active]:font-semibold">{tab.label}</span>
 
 								{/* ✨ Indicador visual del estado activo */}
 								<div

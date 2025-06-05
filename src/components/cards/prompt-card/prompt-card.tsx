@@ -41,7 +41,7 @@ function PromptCardComponent({
 	onClick,
 	isSelected = false,
 	className,
-	style
+	style,
 }: PromptCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
 
@@ -63,7 +63,7 @@ function PromptCardComponent({
 		updatedAt,
 		_count,
 		recentImages = [],
-		model
+		model,
 	} = prompt;
 
 	// Calcular valores derivados
@@ -87,7 +87,7 @@ function PromptCardComponent({
 		places: _count?.places || 0,
 		worldItems: _count?.worldItems || 0,
 		collections: collectionsCount,
-		albums: albumsCount
+		albums: albumsCount,
 	};
 
 	// Colores para el gradiente
@@ -172,7 +172,7 @@ function PromptCardComponent({
 									transparent 100%)
 								`,
 								backgroundSize: '200% 200%',
-								animation: 'gradient-shift 3s ease infinite'
+								animation: 'gradient-shift 3s ease infinite',
 							}}
 						/>
 
@@ -197,8 +197,10 @@ function PromptCardComponent({
 						{/* Sello de modelo */}
 						{model && (
 							<div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 opacity-10 pointer-events-none z-1">
-								<div className="w-full h-full rounded-full border-2 border-dashed flex items-center justify-center text-center"
-									style={{ borderColor: primaryColor }}>
+								<div
+									className="w-full h-full rounded-full border-2 border-dashed flex items-center justify-center text-center"
+									style={{ borderColor: primaryColor }}
+								>
 									<div className="text-xs font-bold" style={{ color: primaryColor }}>
 										{model.split('-')[0].toUpperCase()}
 									</div>
@@ -209,11 +211,12 @@ function PromptCardComponent({
 						{/* Sello de favorito */}
 						{isFavorite && (
 							<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
-								<div className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+								<div
+									className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
 									style={{
 										background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 										backgroundSize: '600% 600%',
-										animation: 'shine 3s linear infinite'
+										animation: 'shine 3s linear infinite',
 									}}
 								/>
 							</div>
@@ -228,12 +231,13 @@ function PromptCardComponent({
 						className="bg-primary/80 text-primary-foreground px-3 py-2 flex items-center gap-2"
 						style={{
 							background: `linear-gradient(90deg, ${primaryColor}95, ${primaryColor}70)`,
-							borderBottom: `2px solid ${primaryColor}`
+							borderBottom: `2px solid ${primaryColor}`,
 						}}
 					>
-						<div className="w-8 h-8 flex-shrink-0 rounded-full bg-background/20 flex items-center justify-center"
+						<div
+							className="w-8 h-8 flex-shrink-0 rounded-full bg-background/20 flex items-center justify-center"
 							style={{
-								boxShadow: `0 0 10px ${primaryColor}40 inset`
+								boxShadow: `0 0 10px ${primaryColor}40 inset`,
 							}}
 						>
 							<span className="text-xl">{emoji}</span>
@@ -261,7 +265,7 @@ function PromptCardComponent({
 							{/* Sección de imágenes */}
 							<PromptCardImages
 								mainImage={featuredImage || recentImages?.[0]?.thumbnailUrl}
-								images={recentImages.map(img => img.thumbnailUrl)}
+								images={recentImages.map((img) => img.thumbnailUrl)}
 								primaryColor={primaryColor}
 								secondaryColor={secondaryColor}
 								tcgMode={tcgMode}

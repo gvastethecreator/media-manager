@@ -14,10 +14,10 @@ import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image-service-export';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
-    ServiceErrorCode,
-    createEntityNotFoundError,
-    createServiceError,
-    toServiceError,
+	ServiceErrorCode,
+	createEntityNotFoundError,
+	createServiceError,
+	toServiceError,
 } from '@/utils/errors/service-errors';
 import fs from 'fs/promises';
 import { revalidatePath } from 'next/cache';

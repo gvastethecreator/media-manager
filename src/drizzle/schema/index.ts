@@ -32,4 +32,3 @@ export * from './utility/wildcard';
 
 // Types
 export * from './types';
-

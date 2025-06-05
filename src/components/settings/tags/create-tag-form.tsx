@@ -21,14 +21,20 @@ import { z } from 'zod';
 
 // Esquema de validación
 const createTagSchema = z.object({
-	name: z.string().min(2, {
-		message: 'El nombre debe tener al menos 2 caracteres',
-	}).max(50, {
-		message: 'El nombre no debe exceder los 50 caracteres',
-	}),
-	description: z.string().max(200, {
-		message: 'La descripción no debe exceder los 200 caracteres',
-	}).optional(),
+	name: z
+		.string()
+		.min(2, {
+			message: 'El nombre debe tener al menos 2 caracteres',
+		})
+		.max(50, {
+			message: 'El nombre no debe exceder los 50 caracteres',
+		}),
+	description: z
+		.string()
+		.max(200, {
+			message: 'La descripción no debe exceder los 200 caracteres',
+		})
+		.optional(),
 	color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, {
 		message: 'El color debe ser un código hexadecimal válido',
 	}),
@@ -56,7 +62,7 @@ export function CreateTagForm({
 	onCreated,
 	onUpdated,
 	onCancel,
-	onPreview
+	onPreview,
 }: CreateTagFormProps) {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -129,7 +135,7 @@ export function CreateTagForm({
 					...updated,
 					emoji: data.emoji,
 					category: data.category,
-					isFavorite: data.isFavorite
+					isFavorite: data.isFavorite,
 				} as unknown as UITag;
 
 				onUpdated?.(uiUpdated);
@@ -141,14 +147,13 @@ export function CreateTagForm({
 					...created,
 					emoji: data.emoji,
 					category: data.category,
-					isFavorite: data.isFavorite
+					isFavorite: data.isFavorite,
 				} as unknown as UITag;
 
 				onCreated?.(uiCreated);
 				onPreview?.(uiCreated);
 				form.reset();
 			}
-
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} la etiqueta`, {
@@ -191,9 +196,7 @@ export function CreateTagForm({
 									}}
 								/>
 							</FormControl>
-							<FormDescription>
-								El nombre de la etiqueta, visible en listados e imágenes.
-							</FormDescription>
+							<FormDescription>El nombre de la etiqueta, visible en listados e imágenes.</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -206,15 +209,9 @@ export function CreateTagForm({
 						<FormItem>
 							<FormLabel>Descripción (Opcional)</FormLabel>
 							<FormControl>
-								<Textarea
-									placeholder="Describe brevemente esta etiqueta"
-									{...field}
-									value={field.value || ''}
-								/>
+								<Textarea placeholder="Describe brevemente esta etiqueta" {...field} value={field.value || ''} />
 							</FormControl>
-							<FormDescription>
-								Una descripción breve para entender el propósito de esta etiqueta.
-							</FormDescription>
+							<FormDescription>Una descripción breve para entender el propósito de esta etiqueta.</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -228,14 +225,9 @@ export function CreateTagForm({
 							<FormItem>
 								<FormLabel>Emoji</FormLabel>
 								<FormControl>
-									<EmojiPicker
-										value={field.value}
-										onChange={(emoji) => field.onChange(emoji)}
-									/>
+									<EmojiPicker value={field.value} onChange={(emoji) => field.onChange(emoji)} />
 								</FormControl>
-								<FormDescription>
-									Selecciona un emoji representativo.
-								</FormDescription>
+								<FormDescription>Selecciona un emoji representativo.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -248,14 +240,9 @@ export function CreateTagForm({
 							<FormItem>
 								<FormLabel>Color</FormLabel>
 								<FormControl>
-									<ColorPicker
-										value={field.value}
-										onChange={(color) => field.onChange(color)}
-									/>
+									<ColorPicker value={field.value} onChange={(color) => field.onChange(color)} />
 								</FormControl>
-								<FormDescription>
-									Color para identificar visualmente la etiqueta.
-								</FormDescription>
+								<FormDescription>Color para identificar visualmente la etiqueta.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -293,9 +280,7 @@ export function CreateTagForm({
 									))}
 								</SelectContent>
 							</Select>
-							<FormDescription>
-								Agrupa etiquetas del mismo tipo para una mejor organización.
-							</FormDescription>
+							<FormDescription>Agrupa etiquetas del mismo tipo para una mejor organización.</FormDescription>
 							<FormMessage />
 						</FormItem>
 					)}
@@ -326,25 +311,14 @@ export function CreateTagForm({
 
 				<div className="flex justify-end gap-2">
 					{onCancel && (
-						<Button
-							type="button"
-							variant="outline"
-							onClick={onCancel}
-						>
+						<Button type="button" variant="outline" onClick={onCancel}>
 							Cancelar
 						</Button>
 					)}
-					<Button
-						type="button"
-						variant="outline"
-						onClick={generateSuggestions}
-					>
+					<Button type="button" variant="outline" onClick={generateSuggestions}>
 						Generar sugerencias
 					</Button>
-					<Button
-						type="submit"
-						disabled={isSubmitting}
-					>
+					<Button type="submit" disabled={isSubmitting}>
 						{isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
 					</Button>
 				</div>

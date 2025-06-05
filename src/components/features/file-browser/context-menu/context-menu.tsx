@@ -41,7 +41,7 @@ const MemoizedContextMenuPortal = memo(ContextMenuPortal);
 // Componente de botón de favorito memoizado
 const FavoriteButton = memo(function FavoriteButton({
 	isFavorited,
-	onClick
+	onClick,
 }: {
 	isFavorited: boolean;
 	onClick: () => void;
@@ -66,7 +66,7 @@ const FavoriteButton = memo(function FavoriteButton({
 // Componente de botón de marcar memoizado
 const MarkButton = memo(function MarkButton({
 	markText,
-	onClick
+	onClick,
 }: {
 	markText: string;
 	onClick: () => void;
@@ -94,7 +94,7 @@ const ContextMenuItems = memo(function ContextMenuItems({
 	handleCopy,
 	handleCopyPath,
 	handleShowProperties,
-	handleDelete
+	handleDelete,
 }: {
 	file: FileContextMenuProps['file'];
 	onAction: FileContextMenuProps['onAction'];
@@ -302,4 +302,3 @@ export const FileContextMenu = memo(function FileContextMenu({ file, children, o
 
 // Exportar también las acciones desde types.ts
 export type { ContextMenuAction } from './types';
-

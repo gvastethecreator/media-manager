@@ -190,19 +190,17 @@ export function EntityFilter({
 	const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
 	// Contar filtros activos (excluyendo la búsqueda rápida)
-	const activeFiltersCount = Object.entries(filterValues).filter(
-		([key, value]) => {
-			if (key === 'quickSearch') return false;
-			if (value === undefined || value === null) return false;
-			if (Array.isArray(value) && value.length === 0) return false;
-			if (value === '') return false;
-			return true;
-		}
-	).length;
+	const activeFiltersCount = Object.entries(filterValues).filter(([key, value]) => {
+		if (key === 'quickSearch') return false;
+		if (value === undefined || value === null) return false;
+		if (Array.isArray(value) && value.length === 0) return false;
+		if (value === '') return false;
+		return true;
+	}).length;
 
 	// Actualizar valores de filtro
 	const updateFilterValue = (id: string, value: any) => {
-		setFilterValues(prev => {
+		setFilterValues((prev) => {
 			const newValues = { ...prev, [id]: value };
 
 			// Si el valor es nulo, indefinido o cadena vacía, eliminarlo
@@ -309,7 +307,10 @@ export function EntityFilter({
 											if (checked) {
 												updateFilterValue(filter.id, [...values, option.value]);
 											} else {
-												updateFilterValue(filter.id, values.filter(v => v !== option.value));
+												updateFilterValue(
+													filter.id,
+													values.filter((v) => v !== option.value)
+												);
 											}
 										}}
 									/>
@@ -333,10 +334,7 @@ export function EntityFilter({
 							<div className="space-y-2">
 								{filter.options?.map((option) => (
 									<div className="flex items-center space-x-2" key={String(option.value)}>
-										<RadioGroupItem
-											value={String(option.value)}
-											id={`${filter.id}-${option.value}`}
-										/>
+										<RadioGroupItem value={String(option.value)} id={`${filter.id}-${option.value}`} />
 										<Label htmlFor={`${filter.id}-${option.value}`} className="cursor-pointer">
 											{option.label}
 										</Label>
@@ -357,17 +355,16 @@ export function EntityFilter({
 									id={filter.id}
 									variant="outline"
 									className={cn(
-										"w-full justify-start text-left font-normal",
-										!filterValues[filter.id] && "text-muted-foreground"
+										'w-full justify-start text-left font-normal',
+										!filterValues[filter.id] && 'text-muted-foreground'
 									)}
 								>
 									<CalendarIcon className="mr-2 h-4 w-4" />
-									{filterValues[filter.id] ?
-										(filterValues[filter.id] instanceof Date ?
-											filterValues[filter.id].toLocaleDateString() :
-											new Date(filterValues[filter.id]).toLocaleDateString()
-										) :
-										filter.placeholder || "Seleccionar fecha"}
+									{filterValues[filter.id]
+										? filterValues[filter.id] instanceof Date
+											? filterValues[filter.id].toLocaleDateString()
+											: new Date(filterValues[filter.id]).toLocaleDateString()
+										: filter.placeholder || 'Seleccionar fecha'}
 								</Button>
 							</PopoverTrigger>
 							<PopoverContent className="w-auto p-0">
@@ -403,7 +400,7 @@ export function EntityFilter({
 	};
 
 	return (
-		<div className={cn("space-y-4", className)}>
+		<div className={cn('space-y-4', className)}>
 			{/* Barra superior con búsqueda rápida y botones de acción */}
 			<div className="flex flex-col sm:flex-row gap-2">
 				{/* Búsqueda rápida */}
@@ -426,10 +423,7 @@ export function EntityFilter({
 						<Button
 							variant="outline"
 							size="sm"
-							className={cn(
-								"flex items-center gap-1",
-								activeFiltersCount > 0 && "bg-primary/10"
-							)}
+							className={cn('flex items-center gap-1', activeFiltersCount > 0 && 'bg-primary/10')}
 						>
 							<SlidersHorizontal className="h-4 w-4" />
 							<span>Filtros</span>
@@ -445,12 +439,7 @@ export function EntityFilter({
 							<div className="flex items-center justify-between">
 								<h3 className="text-sm font-medium">Filtros avanzados</h3>
 								{activeFiltersCount > 0 && (
-									<Button
-										variant="ghost"
-										size="sm"
-										className="h-8 px-2 text-xs"
-										onClick={clearAllFilters}
-									>
+									<Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={clearAllFilters}>
 										<RotateCcw className="mr-2 h-3 w-3" />
 										{clearButtonText}
 									</Button>
@@ -458,10 +447,7 @@ export function EntityFilter({
 							</div>
 
 							{/* Grid de filtros */}
-							<div className={cn(
-								"grid gap-4",
-								compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"
-							)}>
+							<div className={cn('grid gap-4', compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2')}>
 								{filters.map(renderFilter)}
 							</div>
 
@@ -528,12 +514,7 @@ export function EntityFilter({
 
 				{/* Mostrar filtros activos como badges */}
 				{activeFiltersCount > 0 && (
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={clearAllFilters}
-						className="hidden sm:flex items-center gap-1"
-					>
+					<Button variant="ghost" size="sm" onClick={clearAllFilters} className="hidden sm:flex items-center gap-1">
 						<RotateCcw className="h-3.5 w-3.5 mr-1" />
 						Limpiar filtros
 					</Button>
@@ -547,13 +528,17 @@ export function EntityFilter({
 						.filter(([key]) => key !== 'quickSearch')
 						.map(([key, value]) => {
 							// Omitir valores vacíos
-							if (value === undefined || value === null || value === '' ||
-								(Array.isArray(value) && value.length === 0)) {
+							if (
+								value === undefined ||
+								value === null ||
+								value === '' ||
+								(Array.isArray(value) && value.length === 0)
+							) {
 								return null;
 							}
 
 							// Buscar la definición de filtro correspondiente
-							const filterDef = filters.find(f => f.id === key);
+							const filterDef = filters.find((f) => f.id === key);
 							if (!filterDef) return null;
 
 							// Formatear el valor para mostrar
@@ -562,8 +547,8 @@ export function EntityFilter({
 							if (Array.isArray(value)) {
 								// Para arrays, buscar las etiquetas correspondientes
 								if (filterDef.options) {
-									const labels = value.map(v =>
-										filterDef.options?.find(opt => String(opt.value) === String(v))?.label || v
+									const labels = value.map(
+										(v) => filterDef.options?.find((opt) => String(opt.value) === String(v))?.label || v
 									);
 									displayValue = labels.join(', ');
 								} else {
@@ -582,20 +567,15 @@ export function EntityFilter({
 								// Para valores simples como strings o números
 								if (filterDef.options) {
 									// Si hay opciones definidas, buscar la etiqueta correspondiente
-									displayValue = filterDef.options.find(opt =>
-										String(opt.value) === String(value)
-									)?.label || String(value);
+									displayValue =
+										filterDef.options.find((opt) => String(opt.value) === String(value))?.label || String(value);
 								} else {
 									displayValue = String(value);
 								}
 							}
 
 							return (
-								<Badge
-									key={key}
-									variant="outline"
-									className="flex items-center gap-1 py-1 pl-2 pr-1"
-								>
+								<Badge key={key} variant="outline" className="flex items-center gap-1 py-1 pl-2 pr-1">
 									<span className="font-medium">{filterDef.label}:</span>
 									<span className="mr-1">{displayValue}</span>
 									<Button

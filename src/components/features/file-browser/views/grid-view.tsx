@@ -38,25 +38,34 @@ export const GridView = memo(function GridView({
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
 	// Memoizamos los handlers para evitar recreaciones
-	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-		if (e.key === 'Enter' || e.key === ' ') {
-			e.preventDefault();
-			onClick?.(item);
-		}
-	}, [onClick, item]);
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				onClick?.(item);
+			}
+		},
+		[onClick, item]
+	);
 
 	// Simplificamos la función de manejo de mouse
-	const handleClick = useCallback((e: React.MouseEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		onClick?.(item);
-	}, [onClick, item]);
+	const handleClick = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			onClick?.(item);
+		},
+		[onClick, item]
+	);
 
-	const handleDoubleClick = useCallback((e: React.MouseEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		onDoubleClick?.(item);
-	}, [onDoubleClick, item]);
+	const handleDoubleClick = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			onDoubleClick?.(item);
+		},
+		[onDoubleClick, item]
+	);
 
 	// Memoizamos la clase para evitar recálculos
 	const buttonClassName = useMemo(() => {

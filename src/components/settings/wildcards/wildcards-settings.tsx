@@ -1,13 +1,14 @@
 'use client';
 
-import { createWildcard, deleteWildcard, getRootWildcards, getWildcards, updateWildcard } from '@/app/actions/wildcards/wildcard.actions';
-import { Button } from '@/components/ui/button';
 import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+	createWildcard,
+	deleteWildcard,
+	getRootWildcards,
+	getWildcards,
+	updateWildcard,
+} from '@/app/actions/wildcards/wildcard.actions';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -36,10 +37,9 @@ type CreateWildcardFormValues = {
 };
 
 // Importación dinámica para evitar problemas con SSR
-const CreateWildcardForm = dynamic(
-	() => import('./create-wildcard-form').then(mod => mod.CreateWildcardForm),
-	{ ssr: false }
-);
+const CreateWildcardForm = dynamic(() => import('./create-wildcard-form').then((mod) => mod.CreateWildcardForm), {
+	ssr: false,
+});
 
 interface WildcardWithRelations extends Omit<Wildcard, 'children'> {
 	id: string;
@@ -97,13 +97,10 @@ export function WildcardsSettings() {
 	const loadWildcards = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			const [allWildcards, rootWildcardsList] = await Promise.all([
-				getWildcards(),
-				getRootWildcards()
-			]);
+			const [allWildcards, rootWildcardsList] = await Promise.all([getWildcards(), getRootWildcards()]);
 
 			// Convertir y extender los wildcards con las propiedades necesarias
-			const extendedWildcards = allWildcards.map(wildcard => ({
+			const extendedWildcards = allWildcards.map((wildcard) => ({
 				...wildcard,
 				_count: {
 					...wildcard._count,
@@ -117,7 +114,7 @@ export function WildcardsSettings() {
 					prompts: 0,
 					notes: 0,
 					properties: 0,
-				}
+				},
 			})) as WildcardWithRelations[];
 
 			setWildcards(extendedWildcards);
@@ -147,7 +144,7 @@ export function WildcardsSettings() {
 
 				while (currentWildcard.parent) {
 					breadcrumbPath.unshift(currentWildcard.parent);
-					const parentWildcard = wildcards.find(w => w.id === currentWildcard.parent?.id);
+					const parentWildcard = wildcards.find((w) => w.id === currentWildcard.parent?.id);
 					if (!parentWildcard) break;
 					currentWildcard = parentWildcard;
 				}
@@ -163,9 +160,9 @@ export function WildcardsSettings() {
 
 	// Función para expandir/colapsar un comodín
 	const toggleExpand = (id: string) => {
-		setExpandedWildcards(prev => ({
+		setExpandedWildcards((prev) => ({
 			...prev,
-			[id]: !prev[id]
+			[id]: !prev[id],
 		}));
 	};
 
@@ -187,26 +184,23 @@ export function WildcardsSettings() {
 	};
 
 	// Filtrar comodines basados en los criterios seleccionados
-	const filteredWildcards = wildcards.filter(wildcard => {
+	const filteredWildcards = wildcards.filter((wildcard) => {
 		let matches = true;
 
 		// Filtrado por jerarquía si showOnlyRoots está activado
 		if (showOnlyRoots) {
-			matches = matches && (
-				currentParentId === null
-					? wildcard.parentId === null
-					: wildcard.parentId === currentParentId
-			);
+			matches =
+				matches && (currentParentId === null ? wildcard.parentId === null : wildcard.parentId === currentParentId);
 		}
 
 		// Filtrado por búsqueda
 		if (searchQuery) {
 			const normalizedQuery = searchQuery.toLowerCase();
-			matches = matches && (
-				wildcard.name.toLowerCase().includes(normalizedQuery) ||
-				wildcard.description?.toLowerCase().includes(normalizedQuery) ||
-				false
-			);
+			matches =
+				matches &&
+				(wildcard.name.toLowerCase().includes(normalizedQuery) ||
+					wildcard.description?.toLowerCase().includes(normalizedQuery) ||
+					false);
 		}
 
 		// Filtrado por categoría
@@ -239,8 +233,8 @@ export function WildcardsSettings() {
 	// Estadísticas
 	const stats = {
 		totalWildcards: wildcards.length,
-		rootWildcards: wildcards.filter(w => !w.parentId).length,
-		totalChildren: wildcards.filter(w => w.parentId).length,
+		rootWildcards: wildcards.filter((w) => !w.parentId).length,
+		totalChildren: wildcards.filter((w) => w.parentId).length,
 		totalValues: wildcards.reduce((acc, w) => {
 			try {
 				const children = w.children !== 'empty_array' ? JSON.parse(w.children).length : 0;
@@ -249,7 +243,7 @@ export function WildcardsSettings() {
 				return acc;
 			}
 		}, 0),
-		favoriteWildcards: wildcards.filter(w => w.isFavorite).length,
+		favoriteWildcards: wildcards.filter((w) => w.isFavorite).length,
 	};
 
 	// Manejadores
@@ -263,7 +257,7 @@ export function WildcardsSettings() {
 			// Formateamos children como string JSON para la API
 			const formattedData = {
 				...data,
-				children: JSON.stringify(data.children)
+				children: JSON.stringify(data.children),
 			};
 
 			const newWildcard = await createWildcard(formattedData);
@@ -283,7 +277,7 @@ export function WildcardsSettings() {
 			// Formateamos children como string JSON para la API
 			const formattedData = {
 				...data,
-				children: JSON.stringify(data.children)
+				children: JSON.stringify(data.children),
 			};
 
 			await updateWildcard(id, formattedData);
@@ -346,10 +340,7 @@ export function WildcardsSettings() {
 									className="h-5 w-5 p-0"
 									onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleExpandClick(event, wildcard.id)}
 								>
-									<ChevronRight className={cn(
-										"h-4 w-4 transition-transform",
-										isExpanded && "rotate-90"
-									)} />
+									<ChevronRight className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-90')} />
 								</Button>
 							)}
 							<span role="img" aria-label="emoji">
@@ -358,15 +349,11 @@ export function WildcardsSettings() {
 							<div className="flex flex-col items-start">
 								<span className="font-medium">{wildcard.name}</span>
 								{hasChildren && (
-									<span className="text-xs opacity-50">
-										{wildcard._count?.childWildcards} subcomodines
-									</span>
+									<span className="text-xs opacity-50">{wildcard._count?.childWildcards} subcomodines</span>
 								)}
 							</div>
 						</div>
-						{wildcard.isFavorite && (
-							<StarIcon className="h-3 w-3 absolute right-8 top-2" />
-						)}
+						{wildcard.isFavorite && <StarIcon className="h-3 w-3 absolute right-8 top-2" />}
 						<Button
 							variant="ghost"
 							size="icon"
@@ -393,28 +380,18 @@ export function WildcardsSettings() {
 		if (currentParentId === null) return null;
 
 		// Encontrar el comodín actual
-		const currentWildcard = wildcards.find(w => w.id === currentParentId);
+		const currentWildcard = wildcards.find((w) => w.id === currentParentId);
 		if (!currentWildcard) return null;
 
 		return (
 			<div className="flex items-center gap-1 mb-2 text-sm text-muted-foreground">
-				<Button
-					variant="ghost"
-					size="sm"
-					className="h-6 px-2"
-					onClick={() => changeParent(null)}
-				>
+				<Button variant="ghost" size="sm" className="h-6 px-2" onClick={() => changeParent(null)}>
 					Raíz
 				</Button>
 				{breadcrumbs.map((crumb, index) => (
 					<div key={crumb.id} className="flex items-center">
 						<ChevronRight className="h-3 w-3 mx-1" />
-						<Button
-							variant="ghost"
-							size="sm"
-							className="h-6 px-2"
-							onClick={() => changeParent(crumb.id)}
-						>
+						<Button variant="ghost" size="sm" className="h-6 px-2" onClick={() => changeParent(crumb.id)}>
 							{crumb.name}
 						</Button>
 					</div>
@@ -437,11 +414,7 @@ export function WildcardsSettings() {
 					<CardHeader className="space-y-1 py-2 px-3">
 						<div className="flex items-center justify-between">
 							<CardTitle className="text-xl font-bold">Comodines</CardTitle>
-							<Button
-								size="sm"
-								variant="ghost"
-								onClick={() => setIsCreateDialogOpen(true)}
-							>
+							<Button size="sm" variant="ghost" onClick={() => setIsCreateDialogOpen(true)}>
 								<PlusIcon className="h-4 w-4" />
 							</Button>
 						</div>
@@ -460,10 +433,7 @@ export function WildcardsSettings() {
 							</div>
 						</div>
 						<div className="flex gap-2">
-							<Select
-								value={sortBy}
-								onValueChange={(value) => setSortBy(value as typeof sortBy)}
-							>
+							<Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
 								<SelectTrigger className="h-8">
 									<SelectValue placeholder="Ordenar por..." />
 								</SelectTrigger>
@@ -473,11 +443,7 @@ export function WildcardsSettings() {
 									<SelectItem value="createdAt">Fecha</SelectItem>
 								</SelectContent>
 							</Select>
-							<Toggle
-								pressed={onlyFavorites}
-								onPressedChange={setOnlyFavorites}
-								size="sm"
-							>
+							<Toggle pressed={onlyFavorites} onPressedChange={setOnlyFavorites} size="sm">
 								<StarIcon className="h-4 w-4" />
 							</Toggle>
 							<Toggle
@@ -517,7 +483,7 @@ export function WildcardsSettings() {
 						isEditMode ? (
 							<CreateWildcardForm
 								wildcard={selectedWildcard}
-								parentWildcards={wildcards.filter(w => w.id !== selectedWildcard.id)}
+								parentWildcards={wildcards.filter((w) => w.id !== selectedWildcard.id)}
 								onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
 								onCancel={() => setIsEditMode(false)}
 							/>
@@ -531,19 +497,14 @@ export function WildcardsSettings() {
 					) : (
 						<div className="flex flex-col items-center justify-center h-full">
 							<WandIcon className="h-12 w-12 opacity-20" />
-							<p className="text-sm opacity-50 mt-2">
-								Selecciona un comodín para ver sus detalles
-							</p>
+							<p className="text-sm opacity-50 mt-2">Selecciona un comodín para ver sus detalles</p>
 						</div>
 					)}
 				</Card>
 			</div>
 
 			{/* Dialog para crear nuevo comodín */}
-			<Dialog
-				open={isCreateDialogOpen}
-				onOpenChange={setIsCreateDialogOpen}
-			>
+			<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
 				<DialogContent>
 					<CreateWildcardForm
 						parentWildcards={wildcards}

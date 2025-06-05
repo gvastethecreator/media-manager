@@ -164,7 +164,7 @@ export function EntityList({
 	sortOptions = [
 		{ label: 'Nombre', value: 'name' },
 		{ label: 'Más recientes', value: 'recent' },
-		{ label: 'Más antiguos', value: 'oldest' }
+		{ label: 'Más antiguos', value: 'oldest' },
 	],
 	categoryFilters = [],
 	tagFilters = [],
@@ -189,26 +189,27 @@ export function EntityList({
 		// Aplicar búsqueda por texto
 		if (searchTerm) {
 			const searchLower = searchTerm.toLowerCase();
-			result = result.filter(item =>
-				item.title.toLowerCase().includes(searchLower) ||
-				item.description?.toLowerCase().includes(searchLower) ||
-				item.searchableText?.toLowerCase().includes(searchLower) ||
-				item.subtitle?.toLowerCase().includes(searchLower)
+			result = result.filter(
+				(item) =>
+					item.title.toLowerCase().includes(searchLower) ||
+					item.description?.toLowerCase().includes(searchLower) ||
+					item.searchableText?.toLowerCase().includes(searchLower) ||
+					item.subtitle?.toLowerCase().includes(searchLower)
 			);
 		}
 
 		// Aplicar filtro por categoría
 		if (selectedCategoryFilter !== 'all') {
-			result = result.filter(item => item.category === selectedCategoryFilter);
+			result = result.filter((item) => item.category === selectedCategoryFilter);
 		}
 
 		// Aplicar filtro por etiqueta
 		if (selectedTagFilter !== 'all') {
-			result = result.filter(item => item.tags?.includes(selectedTagFilter));
+			result = result.filter((item) => item.tags?.includes(selectedTagFilter));
 		}
 
 		// Aplicar ordenación
-		const currentSortOption = sortOptions.find(opt => opt.value === selectedSort);
+		const currentSortOption = sortOptions.find((opt) => opt.value === selectedSort);
 		if (currentSortOption?.sortFn) {
 			result.sort(currentSortOption.sortFn);
 		} else {
@@ -257,10 +258,8 @@ export function EntityList({
 	// Manejar selección de items
 	const toggleItemSelection = (id: string) => {
 		if (allowSelection) {
-			setSelectedIds(prev => {
-				const newSelection = prev.includes(id)
-					? prev.filter(itemId => itemId !== id)
-					: [...prev, id];
+			setSelectedIds((prev) => {
+				const newSelection = prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id];
 
 				// Notificar cambio si hay callback
 				if (onSelectionChange) {
@@ -292,26 +291,28 @@ export function EntityList({
 	// Renderizar el grid de items
 	const renderGrid = () => {
 		if (paginatedItems.length === 0) {
-			return emptyState || (
-				<div className="w-full flex flex-col items-center justify-center py-12 text-center">
-					<div className="mb-4 rounded-full bg-muted p-3">
-						<Search className="h-6 w-6 text-muted-foreground" />
+			return (
+				emptyState || (
+					<div className="w-full flex flex-col items-center justify-center py-12 text-center">
+						<div className="mb-4 rounded-full bg-muted p-3">
+							<Search className="h-6 w-6 text-muted-foreground" />
+						</div>
+						<h3 className="text-lg font-medium">No se encontraron elementos</h3>
+						<p className="text-sm text-muted-foreground mt-1">Intenta ajustar tus filtros o búsqueda</p>
 					</div>
-					<h3 className="text-lg font-medium">No se encontraron elementos</h3>
-					<p className="text-sm text-muted-foreground mt-1">
-						Intenta ajustar tus filtros o búsqueda
-					</p>
-				</div>
+				)
 			);
 		}
 
 		return (
-			<div className={cn(
-				"grid gap-4",
-				viewType === 'grid' && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-				viewType === 'list' && "grid-cols-1",
-				viewType === 'compact' && "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6"
-			)}>
+			<div
+				className={cn(
+					'grid gap-4',
+					viewType === 'grid' && 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+					viewType === 'list' && 'grid-cols-1',
+					viewType === 'compact' && 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6'
+				)}
+			>
 				{paginatedItems.map((item) => {
 					const isSelected = selectedIds.includes(item.id);
 
@@ -319,10 +320,7 @@ export function EntityList({
 					const cardProps: EntityCardProps = {
 						...item,
 						onClick: () => handleItemClick(item.id),
-						className: cn(
-							isSelected && allowSelection && "ring-2 ring-primary",
-							item.className
-						),
+						className: cn(isSelected && allowSelection && 'ring-2 ring-primary', item.className),
 						compact: viewType === 'compact',
 						tcgMode: tcgMode,
 					};
@@ -359,7 +357,7 @@ export function EntityList({
 
 	// Estructura del componente
 	return (
-		<div className={cn("w-full space-y-4", className)}>
+		<div className={cn('w-full space-y-4', className)}>
 			{/* Encabezado con título y acciones */}
 			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div>
@@ -418,10 +416,7 @@ export function EntityList({
 				{showFilters && (
 					<div className="flex items-center gap-2">
 						{/* Selector de ordenación */}
-						<Select
-							value={selectedSort}
-							onValueChange={setSelectedSort}
-						>
+						<Select value={selectedSort} onValueChange={setSelectedSort}>
 							<SelectTrigger className="w-[140px]">
 								<SelectValue placeholder="Ordenar por" />
 							</SelectTrigger>
@@ -461,7 +456,7 @@ export function EntityList({
 								>
 									Todas
 								</Badge>
-								{categoryFilters.map(category => (
+								{categoryFilters.map((category) => (
 									<Badge
 										key={category}
 										variant={selectedCategoryFilter === category ? 'default' : 'outline'}
@@ -487,7 +482,7 @@ export function EntityList({
 								>
 									Todas
 								</Badge>
-								{tagFilters.map(tag => (
+								{tagFilters.map((tag) => (
 									<Badge
 										key={tag}
 										variant={selectedTagFilter === tag ? 'default' : 'outline'}
@@ -506,9 +501,7 @@ export function EntityList({
 			{/* Barra de información y selección */}
 			{(allowSelection || filteredItems.length > 0) && (
 				<div className="flex justify-between items-center text-sm text-muted-foreground">
-					<div>
-						{filteredItems.length} elementos encontrados
-					</div>
+					<div>{filteredItems.length} elementos encontrados</div>
 
 					{allowSelection && selectedIds.length > 0 && (
 						<div className="flex items-center gap-2">

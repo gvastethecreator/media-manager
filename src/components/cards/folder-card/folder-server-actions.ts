@@ -34,7 +34,7 @@ export async function getRecentFolderImages(folderId: string, limit = 4) {
 		// Verificar que la carpeta existe
 		const folder = await prisma.folder.findUnique({
 			where: { id: folderId },
-			select: { id: true }
+			select: { id: true },
 		});
 
 		if (!folder) {
@@ -45,24 +45,22 @@ export async function getRecentFolderImages(folderId: string, limit = 4) {
 		// Obtener las imágenes más recientes asociadas a esta carpeta
 		const images = await prisma.image.findMany({
 			where: {
-				folderId: folderId
+				folderId: folderId,
 			},
 			orderBy: {
-				updatedAt: 'desc'
+				updatedAt: 'desc',
 			},
 			take: limit,
 			select: {
 				id: true,
-				thumbnail: true
-			}
+				thumbnail: true,
+			},
 		});
 
 		// Transformar a formato requerido
-		return images.map(image => ({
+		return images.map((image) => ({
 			id: image.id,
-			thumbnailUrl: image.thumbnail
-				? `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`
-				: '',
+			thumbnailUrl: image.thumbnail ? `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}` : '',
 		}));
 	} catch (error) {
 		folderCardLogger.error('❌ Error obteniendo imágenes recientes de carpeta:', error);
@@ -89,7 +87,7 @@ export async function getFolderStats(folderId?: string) {
 		// Obtener información básica de la carpeta
 		const folder = await prisma.folder.findUnique({
 			where: {
-				id: folderId
+				id: folderId,
 			},
 			select: {
 				id: true,
@@ -105,8 +103,8 @@ export async function getFolderStats(folderId?: string) {
 				autoReindex: true,
 				lastIndexed: true,
 				createdAt: true,
-				updatedAt: true
-			}
+				updatedAt: true,
+			},
 		});
 
 		if (!folder) {
@@ -118,30 +116,28 @@ export async function getFolderStats(folderId?: string) {
 		const childrenCount = await prisma.folder.count({
 			where: {
 				path: {
-					startsWith: `${folder.path}/`
-				}
-			}
+					startsWith: `${folder.path}/`,
+				},
+			},
 		});
 
 		// Obtener URLs de imágenes recientes para mostrar en la tarjeta
 		const recentImages = await prisma.image.findMany({
 			where: {
-				folderId: folderId
+				folderId: folderId,
 			},
 			orderBy: {
-				updatedAt: 'desc'
+				updatedAt: 'desc',
 			},
 			take: 4,
 			select: {
-				thumbnail: true
-			}
+				thumbnail: true,
+			},
 		});
 
 		// Extraer solo las URLs de las imágenes
-		const imageUrls = recentImages.map(img =>
-			img.thumbnail
-				? `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}`
-				: ''
+		const imageUrls = recentImages.map((img) =>
+			img.thumbnail ? `data:image/jpeg;base64,${Buffer.from(img.thumbnail).toString('base64')}` : ''
 		);
 
 		// Devolver la carpeta con estadísticas adicionales
@@ -149,7 +145,7 @@ export async function getFolderStats(folderId?: string) {
 		return {
 			...folder,
 			childrenCount,
-			recentImageUrls: imageUrls
+			recentImageUrls: imageUrls,
 		};
 	} catch (error) {
 		folderCardLogger.error('❌ Error obteniendo estadísticas de carpeta:', error);

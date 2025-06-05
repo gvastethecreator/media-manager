@@ -24,15 +24,7 @@ interface CardContainerProps extends React.HTMLAttributes<HTMLDivElement> {
  */
 export const CardContainer = forwardRef<HTMLDivElement, CardContainerProps>(
 	(
-		{
-			primaryColor = '#0ea5e9',
-			secondaryColor = '#0369a1',
-			glowLevel = 1,
-			className,
-			style,
-			children,
-			...props
-		},
+		{ primaryColor = '#0ea5e9', secondaryColor = '#0369a1', glowLevel = 1, className, style, children, ...props },
 		ref
 	) => {
 		// Calcular nivel de brillo para los efectos
@@ -55,15 +47,7 @@ export const CardContainer = forwardRef<HTMLDivElement, CardContainerProps>(
 		};
 
 		return (
-			<div
-				ref={ref}
-				className={cn(
-					'card-container border-2 relative',
-					className
-				)}
-				style={containerStyle}
-				{...props}
-			>
+			<div ref={ref} className={cn('card-container border-2 relative', className)} style={containerStyle} {...props}>
 				{/* Efecto de brillo interno */}
 				{glowLevel > 0 && (
 					<div

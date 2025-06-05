@@ -1,6 +1,6 @@
 'use client';
 
-import { getAlbums, type AlbumWithStats } from '@/app/actions/albums/album.actions';
+import { type AlbumWithStats, getAlbums } from '@/app/actions/albums/album.actions';
 import { AlbumCard } from '@/components/cards/album-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -153,10 +153,7 @@ export function AlbumsView(_props: ViewProps) {
 									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
 									data-album-id={(album as any).id}
 								>
-									<MemoizedAlbumCard
-										album={album}
-										onAlbumClick={onAlbumClick}
-									/>
+									<MemoizedAlbumCard album={album} onAlbumClick={onAlbumClick} />
 								</div>
 							</motion.div>
 						);

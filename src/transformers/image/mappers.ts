@@ -5,27 +5,24 @@
 
 import { Logger } from '@/lib/logger';
 import { serverLogger } from '@/lib/logger/server-logger';
-import {
-    deserializeImageMetadata,
-    serializeImageMetadata,
-} from '@/transformers/file/serializers';
+import { deserializeImageMetadata, serializeImageMetadata } from '@/transformers/file/serializers';
 import type {
-    ImageCreateInput,
-    ImageFilters,
-    ImageSearchOptions,
-    ImageUpdateInput,
-    RelatedImage,
+	ImageCreateInput,
+	ImageFilters,
+	ImageSearchOptions,
+	ImageUpdateInput,
+	RelatedImage,
 } from '@/types/entities/image/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 import type {
-    ImageBase,
-    ImageComplete,
-    ImageExtended,
-    ImageExtendedComplete,
-    ImageMetadata,
-    ImageSummary
+	ImageBase,
+	ImageComplete,
+	ImageExtended,
+	ImageExtendedComplete,
+	ImageMetadata,
+	ImageSummary,
 } from '../../types/entities/image';
 
 // Logger específico para mappers de Image
@@ -101,7 +98,7 @@ export function mapImageToComplete(image: any): ImageComplete {
 // Enum para direcciones de ordenamiento
 enum SortDirection {
 	ASC = 'asc',
-	DESC = 'desc'
+	DESC = 'desc',
 }
 
 /**
@@ -109,7 +106,9 @@ enum SortDirection {
  * @param image Imagen completa
  * @returns Resumen básico de la imagen
  */
-export function mapToImageSummary(image: ImageBase | ImageComplete | ImageExtended | ImageExtendedComplete): ImageSummary {
+export function mapToImageSummary(
+	image: ImageBase | ImageComplete | ImageExtended | ImageExtendedComplete
+): ImageSummary {
 	try {
 		return {
 			id: image.id,
@@ -148,7 +147,9 @@ export function mapToImageSummary(image: ImageBase | ImageComplete | ImageExtend
  * @param images Array de imágenes
  * @returns Array de resúmenes de imágenes
  */
-export function mapToImageSummaries(images: (ImageBase | ImageComplete | ImageExtended | ImageExtendedComplete)[]): ImageSummary[] {
+export function mapToImageSummaries(
+	images: (ImageBase | ImageComplete | ImageExtended | ImageExtendedComplete)[]
+): ImageSummary[] {
 	return images.map(mapToImageSummary);
 }
 
@@ -159,8 +160,18 @@ export function mapCreateImageDataToPrisma(data: ImageCreateInput): Prisma.Image
 	try {
 		// Base data sin relaciones
 		const {
-			albums, collections, tags, characters, places, worldItems,
-			concepts, prompts, notes, wildcards, properties, groups,
+			albums,
+			collections,
+			tags,
+			characters,
+			places,
+			worldItems,
+			concepts,
+			prompts,
+			notes,
+			wildcards,
+			properties,
+			groups,
 			...baseData
 		} = data;
 
@@ -170,73 +181,73 @@ export function mapCreateImageDataToPrisma(data: ImageCreateInput): Prisma.Image
 		// Crear connect para cada relación si existe
 		if (albums?.length) {
 			createRelations.albums = {
-				connect: albums.map(item => ({ id: item.id }))
+				connect: albums.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (collections?.length) {
 			createRelations.collections = {
-				connect: collections.map(item => ({ id: item.id }))
+				connect: collections.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (tags?.length) {
 			createRelations.tags = {
-				connect: tags.map(item => ({ id: item.id }))
+				connect: tags.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (characters?.length) {
 			createRelations.characters = {
-				connect: characters.map(item => ({ id: item.id }))
+				connect: characters.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (places?.length) {
 			createRelations.places = {
-				connect: places.map(item => ({ id: item.id }))
+				connect: places.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (worldItems?.length) {
 			createRelations.worldItems = {
-				connect: worldItems.map(item => ({ id: item.id }))
+				connect: worldItems.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (concepts?.length) {
 			createRelations.concepts = {
-				connect: concepts.map(item => ({ id: item.id }))
+				connect: concepts.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (prompts?.length) {
 			createRelations.prompts = {
-				connect: prompts.map(item => ({ id: item.id }))
+				connect: prompts.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (notes?.length) {
 			createRelations.notes = {
-				connect: notes.map(item => ({ id: item.id }))
+				connect: notes.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (wildcards?.length) {
 			createRelations.wildcards = {
-				connect: wildcards.map(item => ({ id: item.id }))
+				connect: wildcards.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (properties?.length) {
 			createRelations.properties = {
-				connect: properties.map(item => ({ id: item.id }))
+				connect: properties.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (groups?.length) {
 			createRelations.groups = {
-				connect: groups.map(item => ({ id: item.id }))
+				connect: groups.map((item) => ({ id: item.id })),
 			};
 		}
 
@@ -256,8 +267,18 @@ export function mapUpdateImageDataToPrisma(data: ImageUpdateInput): Prisma.Image
 	try {
 		// Base data sin relaciones
 		const {
-			albums, collections, tags, characters, places, worldItems,
-			concepts, prompts, notes, wildcards, properties, groups,
+			albums,
+			collections,
+			tags,
+			characters,
+			places,
+			worldItems,
+			concepts,
+			prompts,
+			notes,
+			wildcards,
+			properties,
+			groups,
 			...baseData
 		} = data;
 
@@ -267,73 +288,73 @@ export function mapUpdateImageDataToPrisma(data: ImageUpdateInput): Prisma.Image
 		// Crear set para cada relación si existe
 		if (albums) {
 			updateRelations.albums = {
-				set: albums.map(item => ({ id: item.id }))
+				set: albums.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (collections) {
 			updateRelations.collections = {
-				set: collections.map(item => ({ id: item.id }))
+				set: collections.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (tags) {
 			updateRelations.tags = {
-				set: tags.map(item => ({ id: item.id }))
+				set: tags.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (characters) {
 			updateRelations.characters = {
-				set: characters.map(item => ({ id: item.id }))
+				set: characters.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (places) {
 			updateRelations.places = {
-				set: places.map(item => ({ id: item.id }))
+				set: places.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (worldItems) {
 			updateRelations.worldItems = {
-				set: worldItems.map(item => ({ id: item.id }))
+				set: worldItems.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (concepts) {
 			updateRelations.concepts = {
-				set: concepts.map(item => ({ id: item.id }))
+				set: concepts.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (prompts) {
 			updateRelations.prompts = {
-				set: prompts.map(item => ({ id: item.id }))
+				set: prompts.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (notes) {
 			updateRelations.notes = {
-				set: notes.map(item => ({ id: item.id }))
+				set: notes.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (wildcards) {
 			updateRelations.wildcards = {
-				set: wildcards.map(item => ({ id: item.id }))
+				set: wildcards.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (properties) {
 			updateRelations.properties = {
-				set: properties.map(item => ({ id: item.id }))
+				set: properties.map((item) => ({ id: item.id })),
 			};
 		}
 
 		if (groups) {
 			updateRelations.groups = {
-				set: groups.map(item => ({ id: item.id }))
+				set: groups.map((item) => ({ id: item.id })),
 			};
 		}
 
@@ -592,7 +613,9 @@ export function mapImageToRelatedImage(image: ImageComplete): RelatedImage {
  * @param image Imagen base o completa
  * @returns Propiedades adicionales calculadas
  */
-export function getDerivedImageProperties(image: ImageBase | ImageComplete): Partial<ImageExtended | ImageExtendedComplete> {
+export function getDerivedImageProperties(
+	image: ImageBase | ImageComplete
+): Partial<ImageExtended | ImageExtendedComplete> {
 	try {
 		const derived: Partial<ImageExtendedComplete> = {};
 
@@ -621,7 +644,7 @@ export function getDerivedImageProperties(image: ImageBase | ImageComplete): Par
 		mapperLogger.error('❌ Error al obtener propiedades derivadas de imagen:', error);
 		return {
 			hasThumbnail: !!image.thumbnail,
-			aspectRatio: image.width && image.height ? image.width / image.height : 1
+			aspectRatio: image.width && image.height ? image.width / image.height : 1,
 		};
 	}
 }
@@ -645,7 +668,7 @@ export function updateImageMetadata(
 			// Convertir string JSON a objeto
 			try {
 				metadata = JSON.parse(currentMetadata);
-			} catch(e) {
+			} catch (e) {
 				mapperLogger.warn('Error deserializando metadata en update:', e);
 				metadata = {}; // Fallback
 			}

@@ -58,9 +58,7 @@ const VIEW_COMPONENT_MAP = {
 
 // Memoizamos el estado del panel colapsado para evitar lecturas frecuentes del localStorage
 const useRightPanelState = () => {
-	const [isCollapsed, setIsCollapsed] = useState(() =>
-		localStorage.getItem('right-panel-collapsed') === 'true'
-	);
+	const [isCollapsed, setIsCollapsed] = useState(() => localStorage.getItem('right-panel-collapsed') === 'true');
 
 	const updateCollapsedState = useCallback((newState: boolean) => {
 		localStorage.setItem('right-panel-collapsed', String(newState));
@@ -81,7 +79,13 @@ const useRightPanelState = () => {
  * - Selección múltiple de archivos
  * - Integración con sistema de menú contextual
  */
-const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClick, loadMoreItems }: FileBrowserProps) => {
+const FileBrowserComponent = ({
+	items,
+	isResizing,
+	onItemClick,
+	onItemDoubleClick,
+	loadMoreItems,
+}: FileBrowserProps) => {
 	const { selectedItems, toggleSelection, selectItem, clearSelection } = useSelectionStore();
 	const { viewMode, setViewMode } = useFileViewStore();
 	const imageResources = useImageResources();
@@ -164,20 +168,21 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 		const preloadAllEntities = async () => {
 			try {
 				const results = await Promise.allSettled(
-					allEntities.map(entity =>
-						loadEntityData(entity as any)
-							.catch(err => {
-								gridLogger.warn(`⚠️ Error al precargar ${entity}:`, err);
-								return [];
-							})
+					allEntities.map((entity) =>
+						loadEntityData(entity as any).catch((err) => {
+							gridLogger.warn(`⚠️ Error al precargar ${entity}:`, err);
+							return [];
+						})
 					)
 				);
 
 				// Informar sobre el resultado de la precarga
-				const succeeded = results.filter(r => r.status === 'fulfilled').length;
-				const failed = results.filter(r => r.status === 'rejected').length;
+				const succeeded = results.filter((r) => r.status === 'fulfilled').length;
+				const failed = results.filter((r) => r.status === 'rejected').length;
 
-				gridLogger.info(`✅ Precarga de respaldo completada desde FileBrowser: ${succeeded} exitosas, ${failed} fallidas`);
+				gridLogger.info(
+					`✅ Precarga de respaldo completada desde FileBrowser: ${succeeded} exitosas, ${failed} fallidas`
+				);
 
 				// Marcar globalmente que la precarga está completa
 				if (typeof window !== 'undefined') {
@@ -205,49 +210,57 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 	}, [loadEntityData]);
 
 	// Función memoizada para mapear FileItem a ImageItem
-	const mapFileItemToImageItem = useCallback((fileItem: FileItem): ImageItem => ({
-		id: fileItem.id,
-		name: fileItem.name,
-		type: fileItem.type,
-		path: fileItem.path,
-		size: fileItem.size,
-		width: fileItem.width || null,
-		height: fileItem.height || null,
-		url: fileItem.thumbnail || undefined,
-		thumbnail: fileItem.thumbnail,
-		src: fileItem.thumbnail || undefined,
-		alt: fileItem.name,
-		mimeType: undefined,
-		metadata: fileItem.metadata,
-		parsedMetadata: undefined
-	}), []);
+	const mapFileItemToImageItem = useCallback(
+		(fileItem: FileItem): ImageItem => ({
+			id: fileItem.id,
+			name: fileItem.name,
+			type: fileItem.type,
+			path: fileItem.path,
+			size: fileItem.size,
+			width: fileItem.width || null,
+			height: fileItem.height || null,
+			url: fileItem.thumbnail || undefined,
+			thumbnail: fileItem.thumbnail,
+			src: fileItem.thumbnail || undefined,
+			alt: fileItem.name,
+			mimeType: undefined,
+			metadata: fileItem.metadata,
+			parsedMetadata: undefined,
+		}),
+		[]
+	);
 
 	// Función memoizada para mapear FileItem a ImageItem para el panel de detalles
-	const mapToDetailsImageItem = useCallback((item: FileItem): ImageItem => ({
-		id: item.id,
-		name: item.name,
-		path: item.path,
-		url: item.thumbnail || undefined,
-		src: item.thumbnail || '',
-		alt: item.name,
-		metadata: item.metadata,
-		fileSize: item.size,
-		width: item.width,
-		height: item.height,
-		tags: item.tags?.map((tag) => tag.name),
-		createdAt: item.createdAt,
-		updatedAt: item.updatedAt,
-		mimeType: item.type === 'image' ? 'image/jpeg' : undefined, // Ajustar según el tipo real
-		parsedMetadata: item.metadata ? JSON.parse(item.metadata) : undefined,
-	}), []);
+	const mapToDetailsImageItem = useCallback(
+		(item: FileItem): ImageItem => ({
+			id: item.id,
+			name: item.name,
+			path: item.path,
+			url: item.thumbnail || undefined,
+			src: item.thumbnail || '',
+			alt: item.name,
+			metadata: item.metadata,
+			fileSize: item.size,
+			width: item.width,
+			height: item.height,
+			tags: item.tags?.map((tag) => tag.name),
+			createdAt: item.createdAt,
+			updatedAt: item.updatedAt,
+			mimeType: item.type === 'image' ? 'image/jpeg' : undefined, // Ajustar según el tipo real
+			parsedMetadata: item.metadata ? JSON.parse(item.metadata) : undefined,
+		}),
+		[]
+	);
 
 	// Manejador personalizado para el clic en ítems - optimizado
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
 			// Evitar procesamiento si es el mismo ítem y ya está seleccionado
-			if (prevSelectedItemRef.current?.id === item.id &&
+			if (
+				prevSelectedItemRef.current?.id === item.id &&
 				selectedItems.length === 1 &&
-				selectedItems[0].id === item.id) {
+				selectedItems[0].id === item.id
+			) {
 				return;
 			}
 
@@ -271,7 +284,16 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 				onItemClick(item);
 			}
 		},
-		[toggleSelection, setVisible, onItemClick, selectedItems, isCollapsed, updateCollapsedState, mapToDetailsImageItem, setSelectedItems]
+		[
+			toggleSelection,
+			setVisible,
+			onItemClick,
+			selectedItems,
+			isCollapsed,
+			updateCollapsedState,
+			mapToDetailsImageItem,
+			setSelectedItems,
+		]
 	);
 
 	// Manejador personalizado para el doble clic en ítems
@@ -280,12 +302,10 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 			// Verificar que sea una imagen
 			if (item && item.type === 'image') {
 				// Convertir FileItem a ImageItem (según la interfaz de FileViewer.tsx)
-				const imageItems = items
-					.filter(fileItem => fileItem.type === 'image')
-					.map(mapFileItemToImageItem);
+				const imageItems = items.filter((fileItem) => fileItem.type === 'image').map(mapFileItemToImageItem);
 
 				// Encontrar el índice del elemento seleccionado
-				const initialIndex = imageItems.findIndex(img => img.id === item.id);
+				const initialIndex = imageItems.findIndex((img) => img.id === item.id);
 
 				if (initialIndex !== -1) {
 					// Establecer los datos del visor
@@ -343,7 +363,7 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 			if (visibleItems.length === 0) return;
 
 			// Filtrar solo los items que aún no han sido procesados
-			const newVisibleItems = visibleItems.filter(item => {
+			const newVisibleItems = visibleItems.filter((item) => {
 				// Si ya lo hemos procesado, omitirlo
 				if (loadedItemIdsRef.current.has(item.id)) return false;
 
@@ -375,7 +395,10 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 			return;
 		}
 
-		const selectedItemIds = selectedItems.map(item => item.id).sort().join(',');
+		const selectedItemIds = selectedItems
+			.map((item) => item.id)
+			.sort()
+			.join(',');
 		if (selectedItemIds === prevSelectedItemIdsRef.current) {
 			return;
 		}
@@ -406,31 +429,39 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 	}, [virtualizer, isTransitioning]);
 
 	// Estilo general del contenedor - memoizado para evitar recreaciones
-	const containerStyle = useMemo(() => ({
-		height: virtualizer ? virtualizer.getTotalSize() : 0,
-		width: '100%',
-		position: 'relative' as const,
-		contain: 'strict' as const,
-	}), [virtualizer]);
+	const containerStyle = useMemo(
+		() => ({
+			height: virtualizer ? virtualizer.getTotalSize() : 0,
+			width: '100%',
+			position: 'relative' as const,
+			contain: 'strict' as const,
+		}),
+		[virtualizer]
+	);
 
 	// Estilo del contenedor principal de la grilla - memoizado
-	const gridContainerStyle = useMemo(() => ({
-		height: '100%',
-		width: '100%',
-		position: 'relative' as const,
-		contain: 'strict' as const,
-		willChange: 'transform',
-		padding: GRID_CONFIG[viewMode].padding,
-	}), [viewMode]);
+	const gridContainerStyle = useMemo(
+		() => ({
+			height: '100%',
+			width: '100%',
+			position: 'relative' as const,
+			contain: 'strict' as const,
+			willChange: 'transform',
+			padding: GRID_CONFIG[viewMode].padding,
+		}),
+		[viewMode]
+	);
 
 	// Clase del contenedor de la grilla - memoizada
-	const gridContainerClassName = useMemo(() =>
-		cn(
-			'h-full w-full overflow-auto relative transition-all duration-200',
-			viewMode === 'list' && 'px-2 py-1',
-			isTransitioning && 'opacity-0 transition-opacity duration-50'
-		),
-		[viewMode, isTransitioning]);
+	const gridContainerClassName = useMemo(
+		() =>
+			cn(
+				'h-full w-full overflow-auto relative transition-all duration-200',
+				viewMode === 'list' && 'px-2 py-1',
+				isTransitioning && 'opacity-0 transition-opacity duration-50'
+			),
+		[viewMode, isTransitioning]
+	);
 
 	// Función para procesar/extraer item si es una promesa
 	const processItem = useCallback((item: FileItem): FileItem => {
@@ -481,7 +512,7 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 				name: firstItem.name,
 				type: firstItem.type,
 				thumbnail: firstItem.thumbnail ? 'Disponible' : 'No disponible',
-				thumbnailUrl: firstItem.thumbnail
+				thumbnailUrl: firstItem.thumbnail,
 			});
 		} else {
 			gridLogger.debug('📄 No se recibieron items');
@@ -489,94 +520,93 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 	}, [items]);
 
 	// Renderizado de cada elemento virtual - memoizado
-	const renderVirtualItem = useCallback((virtualItem: any) => {
-		const item = items[virtualItem.index];
-		if (!item) {
-			gridLogger.warn(`⚠️ Item no encontrado en índice ${virtualItem.index}`);
-			return null;
-		}
+	const renderVirtualItem = useCallback(
+		(virtualItem: any) => {
+			const item = items[virtualItem.index];
+			if (!item) {
+				gridLogger.warn(`⚠️ Item no encontrado en índice ${virtualItem.index}`);
+				return null;
+			}
 
-		// Procesar el item (manejar casos de ReactPromise)
-		const processedItem = processItem(item);
+			// Procesar el item (manejar casos de ReactPromise)
+			const processedItem = processItem(item);
 
-		// Verificar que el item tenga un ID válido
-		if (!processedItem.id || typeof processedItem.id !== 'string' || processedItem.id.trim() === '') {
-			gridLogger.warn('⚠️ Intentando renderizar item con ID inválido:', processedItem);
-			return null;
-		}
+			// Verificar que el item tenga un ID válido
+			if (!processedItem.id || typeof processedItem.id !== 'string' || processedItem.id.trim() === '') {
+				gridLogger.warn('⚠️ Intentando renderizar item con ID inválido:', processedItem);
+				return null;
+			}
 
-		// Depuración: Verificar si el item tiene thumbnail
-		if (!processedItem.thumbnail) {
-			gridLogger.debug(`⚠️ Item sin thumbnail: ${processedItem.id} (${processedItem.name})`);
-		}
+			// Depuración: Verificar si el item tiene thumbnail
+			if (!processedItem.thumbnail) {
+				gridLogger.debug(`⚠️ Item sin thumbnail: ${processedItem.id} (${processedItem.name})`);
+			}
 
-		const style: React.CSSProperties = {
-			position: 'absolute',
-			top: 0,
-			left: 0,
-			transform: `translate3d(${viewMode === 'list' ? 0 : virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
+			const style: React.CSSProperties = {
+				position: 'absolute',
+				top: 0,
+				left: 0,
+				transform: `translate3d(${
+					viewMode === 'list' ? 0 : virtualItem.lane * (itemSize + GRID_CONFIG.gap[viewMode])
 				}px, ${virtualItem.start}px, 0)`,
-			width: viewMode === 'list' ? '100%' : itemSize,
-			height:
-				viewMode === 'masonry'
-					? calculateMasonryHeight(processedItem, itemSize)
-					: virtualItem.size - GRID_CONFIG.gap[viewMode],
-			padding: 0,
-			willChange: 'transform',
-		};
+				width: viewMode === 'list' ? '100%' : itemSize,
+				height:
+					viewMode === 'masonry'
+						? calculateMasonryHeight(processedItem, itemSize)
+						: virtualItem.size - GRID_CONFIG.gap[viewMode],
+				padding: 0,
+				willChange: 'transform',
+			};
 
-		const ViewComponent = VIEW_COMPONENT_MAP[viewMode];
+			const ViewComponent = VIEW_COMPONENT_MAP[viewMode];
 
-		// Ahora que sabemos que item.id es válido, podemos acceder al recurso
-		const resource = imageResources.resources.get(processedItem.id);
-		const thumbnail = resource?.thumbnail || null;
+			// Ahora que sabemos que item.id es válido, podemos acceder al recurso
+			const resource = imageResources.resources.get(processedItem.id);
+			const thumbnail = resource?.thumbnail || null;
 
-		// Depuración: Verificar si se encontró el recurso en el store
-		if (!resource && processedItem.type === 'image') {
-			gridLogger.debug(`⚠️ Recurso no encontrado para imagen: ${processedItem.id}`);
-		}
+			// Depuración: Verificar si se encontró el recurso en el store
+			if (!resource && processedItem.type === 'image') {
+				gridLogger.debug(`⚠️ Recurso no encontrado para imagen: ${processedItem.id}`);
+			}
 
-		// Verificar si el item está seleccionado
-		const isSelected = selectedItems.some((selected) => selected.id === processedItem.id);
+			// Verificar si el item está seleccionado
+			const isSelected = selectedItems.some((selected) => selected.id === processedItem.id);
 
-		// Propiedades de estilo del item
-		const itemStyle = {
-			width: '100%',
-			height: '100%',
-		};
+			// Propiedades de estilo del item
+			const itemStyle = {
+				width: '100%',
+				height: '100%',
+			};
 
-		return (
-			<div
-				key={`${viewMode}-${virtualItem.key}`}
-				data-index={virtualItem.index}
-				className="absolute"
-				style={style}
-			>
-				<ViewComponent
-					item={processedItem}
-					onClick={handleItemClick}
-					onDoubleClick={handleItemDoubleClick}
-					onContextAction={handleContextMenuAction}
-					shouldLoad={true}
-					isSelected={isSelected}
-					itemSize={itemSize}
-					thumbnail={thumbnail}
-					style={itemStyle}
-				/>
-			</div>
-		);
-	}, [
-		items,
-		viewMode,
-		itemSize,
-		calculateMasonryHeight,
-		imageResources,
-		selectedItems,
-		handleItemClick,
-		handleItemDoubleClick,
-		handleContextMenuAction,
-		processItem
-	]);
+			return (
+				<div key={`${viewMode}-${virtualItem.key}`} data-index={virtualItem.index} className="absolute" style={style}>
+					<ViewComponent
+						item={processedItem}
+						onClick={handleItemClick}
+						onDoubleClick={handleItemDoubleClick}
+						onContextAction={handleContextMenuAction}
+						shouldLoad={true}
+						isSelected={isSelected}
+						itemSize={itemSize}
+						thumbnail={thumbnail}
+						style={itemStyle}
+					/>
+				</div>
+			);
+		},
+		[
+			items,
+			viewMode,
+			itemSize,
+			calculateMasonryHeight,
+			imageResources,
+			selectedItems,
+			handleItemClick,
+			handleItemDoubleClick,
+			handleContextMenuAction,
+			processItem,
+		]
+	);
 
 	// Función para cerrar el visor - memoizada
 	const handleCloseViewer = useCallback(() => {
@@ -585,15 +615,8 @@ const FileBrowserComponent = ({ items, isResizing, onItemClick, onItemDoubleClic
 
 	return (
 		<div ref={constraintsRef} className="relative h-full w-full">
-			<div
-				ref={gridParentRef}
-				className={gridContainerClassName}
-				onScroll={handleScroll}
-				style={gridContainerStyle}
-			>
-				<div style={containerStyle}>
-					{!isTransitioning && virtualItems.map(renderVirtualItem)}
-				</div>
+			<div ref={gridParentRef} className={gridContainerClassName} onScroll={handleScroll} style={gridContainerStyle}>
+				<div style={containerStyle}>{!isTransitioning && virtualItems.map(renderVirtualItem)}</div>
 				<div ref={loadMoreRef} className="h-px w-full" />
 			</div>
 

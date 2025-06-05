@@ -11,18 +11,11 @@ import type { CharacterComplete, CharacterWithRelations } from './types';
  * Interfaz extendida con campos deserializados para Character
  * Convierte los campos JSON string a sus respectivos objetos/arrays
  */
-export interface CharacterExtended extends Omit<
-	CharacterWithRelations,
-	| 'stats'
-	| 'relationships'
-	| 'goals'
-	| 'fears'
-	| 'beliefs'
-	| 'personality'
-	| 'skills'
-	| 'abilities'
-	| 'filters'
-> {
+export interface CharacterExtended
+	extends Omit<
+		CharacterWithRelations,
+		'stats' | 'relationships' | 'goals' | 'fears' | 'beliefs' | 'personality' | 'skills' | 'abilities' | 'filters'
+	> {
 	/**
 	 * Estadísticas del personaje como objeto
 	 * En la base de datos es almacenado como string JSON

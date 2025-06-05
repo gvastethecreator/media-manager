@@ -151,9 +151,7 @@ export function ImageCard({
 			>
 				<div className="text-center p-4">
 					<ImageIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-					<p className="text-sm text-gray-500">
-						{error || 'No se pudo cargar la imagen'}
-					</p>
+					<p className="text-sm text-gray-500">{error || 'No se pudo cargar la imagen'}</p>
 				</div>
 			</div>
 		);
@@ -209,30 +207,42 @@ export function ImageCard({
 			{tcgMode && (
 				<>
 					{/* Esquinas decorativas en estilo TCG */}
-					<div className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 rounded-tl-md z-20 pointer-events-none"
-						style={{ borderColor: `${primaryColor}70` }} />
-					<div className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 rounded-tr-md z-20 pointer-events-none"
-						style={{ borderColor: `${primaryColor}70` }} />
-					<div className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 rounded-bl-md z-20 pointer-events-none"
-						style={{ borderColor: `${primaryColor}70` }} />
-					<div className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 rounded-br-md z-20 pointer-events-none"
-						style={{ borderColor: `${primaryColor}70` }} />
+					<div
+						className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 rounded-tl-md z-20 pointer-events-none"
+						style={{ borderColor: `${primaryColor}70` }}
+					/>
+					<div
+						className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 rounded-tr-md z-20 pointer-events-none"
+						style={{ borderColor: `${primaryColor}70` }}
+					/>
+					<div
+						className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 rounded-bl-md z-20 pointer-events-none"
+						style={{ borderColor: `${primaryColor}70` }}
+					/>
+					<div
+						className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 rounded-br-md z-20 pointer-events-none"
+						style={{ borderColor: `${primaryColor}70` }}
+					/>
 
 					{/* Borde brillante al hacer hover */}
 					<div
 						className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 z-10"
 						style={{
-							boxShadow: `inset 0 0 0 1px ${primaryColor}50, 0 0 15px ${primaryColor}30`
+							boxShadow: `inset 0 0 0 1px ${primaryColor}50, 0 0 15px ${primaryColor}30`,
 						}}
 					/>
 
 					{/* Barra superior TCG */}
-					<div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-r z-20"
+					<div
+						className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-r z-20"
 						style={{
 							background: `linear-gradient(to right, ${primaryColor}90, ${primaryColor}30)`,
-						}}>
+						}}
+					>
 						<div className="flex items-center justify-between px-2 h-full">
-							<span className="text-xs font-medium text-white truncate max-w-[70%]">{imageData.name || 'Sin título'}</span>
+							<span className="text-xs font-medium text-white truncate max-w-[70%]">
+								{imageData.name || 'Sin título'}
+							</span>
 							<div className="flex items-center gap-1">
 								{imageData.metadata?.format && (
 									<span className="px-1.5 py-0.5 text-[10px] bg-black/30 rounded uppercase text-white/90">
@@ -252,26 +262,30 @@ export function ImageCard({
 						src={imageData.thumbnailUrl}
 						alt={imageData.name || 'Imagen'}
 						className={cn(
-							"w-full h-full object-cover",
-							tcgMode && "pt-8" // Espacio para la barra superior en modo TCG
+							'w-full h-full object-cover',
+							tcgMode && 'pt-8' // Espacio para la barra superior en modo TCG
 						)}
 						loading="lazy"
 					/>
 				) : (
-					<div className={cn(
-						"w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-900",
-						tcgMode && "pt-8" // Espacio para la barra superior en modo TCG
-					)}>
+					<div
+						className={cn(
+							'w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-900',
+							tcgMode && 'pt-8' // Espacio para la barra superior en modo TCG
+						)}
+					>
 						<ImageIcon className="h-10 w-10 text-gray-400" />
 					</div>
 				)}
 
 				{/* Overlay con información (visible al hacer hover o siempre en modo TCG) */}
 				{showDetails && (
-					<div className={cn(
-						'absolute inset-0 bg-gradient-to-t from-black/70 to-transparent transition-opacity',
-						tcgMode ? 'opacity-70 group-hover:opacity-90' : (isHovered ? 'opacity-100' : 'opacity-0')
-					)}>
+					<div
+						className={cn(
+							'absolute inset-0 bg-gradient-to-t from-black/70 to-transparent transition-opacity',
+							tcgMode ? 'opacity-70 group-hover:opacity-90' : isHovered ? 'opacity-100' : 'opacity-0'
+						)}
+					>
 						<div className="absolute bottom-0 left-0 right-0 p-3">
 							{/* Nombre y dimensiones */}
 							{!tcgMode && (
@@ -321,7 +335,10 @@ export function ImageCard({
 											</Badge>
 										)}
 										{imageData.hash && (
-											<Badge variant="outline" className="bg-black/40 text-[10px] border-none py-0 px-1.5 h-4 truncate max-w-[60px]">
+											<Badge
+												variant="outline"
+												className="bg-black/40 text-[10px] border-none py-0 px-1.5 h-4 truncate max-w-[60px]"
+											>
 												<HashIcon className="h-2 w-2 mr-1" />
 												{imageData.hash.substring(0, 6)}
 											</Badge>
@@ -386,10 +403,7 @@ export function ImageCard({
 											</Badge>
 										))}
 										{imageData.tags.length > 3 && (
-											<Badge
-												variant="outline"
-												className="py-0 h-4 text-[10px] bg-gray-800/60 border-gray-700/60"
-											>
+											<Badge variant="outline" className="py-0 h-4 text-[10px] bg-gray-800/60 border-gray-700/60">
 												+{imageData.tags.length - 3}
 											</Badge>
 										)}
@@ -433,10 +447,7 @@ export function ImageCard({
 							</Badge>
 						))}
 						{imageData.tags.length > 5 && (
-							<Badge
-								variant="outline"
-								className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60"
-							>
+							<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
 								+{imageData.tags.length - 5}
 							</Badge>
 						)}

@@ -4,12 +4,7 @@
  */
 
 import { profilePreferencesSchema } from '@/types/entities/profile/schema';
-import {
-    Language,
-    type ProfileExtended,
-    type ProfilePreferences,
-    ThemeMode,
-} from '@/types/entities/profile/types';
+import { Language, type ProfileExtended, type ProfilePreferences, ThemeMode } from '@/types/entities/profile/types';
 import type { Profile } from '@prisma/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -88,23 +83,19 @@ export function parseProfilePreferences(profile: Profile): ProfilePreferences {
 			// Si ya es un objeto (e.g., desde una actualización previa)
 			rawPreferences = profile.settings;
 		} else {
-		    // If profile.settings is null, undefined, or other type, start with empty object
-		    rawPreferences = {};
+			// If profile.settings is null, undefined, or other type, start with empty object
+			rawPreferences = {};
 		}
 
 		// Sanitize color (outside the JSON parse try-catch)
 		if (rawPreferences.color && typeof rawPreferences.color === 'string') {
 			const colorRegex = /^#[0-9A-Fa-f]{6}$/;
 			if (!colorRegex.test(rawPreferences.color)) {
-				console.warn(
-					`[Profile Transformer] Invalid color format '${rawPreferences.color}' found. Using default.`,
-				);
+				console.warn(`[Profile Transformer] Invalid color format '${rawPreferences.color}' found. Using default.`);
 				rawPreferences.color = profilePreferencesSchema.shape.color._def.defaultValue; // Use schema default
 			}
 		} else if ('color' in rawPreferences && typeof rawPreferences.color !== 'string') {
-			console.warn(
-				`[Profile Transformer] Invalid type for color ('${typeof rawPreferences.color}'). Using default.`,
-			);
+			console.warn(`[Profile Transformer] Invalid type for color ('${typeof rawPreferences.color}'). Using default.`);
 			rawPreferences.color = profilePreferencesSchema.shape.color._def.defaultValue;
 		} // No else needed, if color is missing, Zod default applies
 

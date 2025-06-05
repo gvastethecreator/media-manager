@@ -84,7 +84,11 @@ export async function getImageMetadata(imageId: string): Promise<ImageWithMetada
 		if (error instanceof Error && error.name === 'MetadataError') {
 			throw error;
 		}
-		throw await createMetadataErrorAction('No se pudieron obtener los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
+		throw await createMetadataErrorAction(
+			'No se pudieron obtener los metadatos',
+			MetadataErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -134,7 +138,11 @@ export async function updateImageMetadata(imageId: string, data: UpdateMetadataI
 		if (error instanceof Error && error.name === 'MetadataError') {
 			throw error;
 		}
-		throw await createMetadataErrorAction('No se pudieron actualizar los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
+		throw await createMetadataErrorAction(
+			'No se pudieron actualizar los metadatos',
+			MetadataErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }
 
@@ -168,6 +176,10 @@ export async function clearImageMetadata(imageId: string): Promise<ImageWithMeta
 		if (error instanceof Error && error.name === 'MetadataError') {
 			throw error;
 		}
-		throw await createMetadataErrorAction('No se pudieron limpiar los metadatos', MetadataErrorCode.OPERATION_FAILED, error);
+		throw await createMetadataErrorAction(
+			'No se pudieron limpiar los metadatos',
+			MetadataErrorCode.OPERATION_FAILED,
+			error
+		);
 	}
 }

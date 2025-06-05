@@ -1,12 +1,18 @@
 'use client';
 
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import {
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuTrigger
+	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EntityStats, StatItem } from '@/components/ui/entity-stats';
 import { cn } from '@/lib/utils';
@@ -159,13 +165,13 @@ export function EntityHeader({
 	rightContent,
 }: EntityHeaderProps) {
 	// Ordenar acciones
-	const sortedActions = [...actions].sort((a, b) =>
-		(a.order || Number.POSITIVE_INFINITY) - (b.order || Number.POSITIVE_INFINITY)
+	const sortedActions = [...actions].sort(
+		(a, b) => (a.order || Number.POSITIVE_INFINITY) - (b.order || Number.POSITIVE_INFINITY)
 	);
 
 	// Separar acciones normales y del menú desplegable
-	const mainActions = sortedActions.filter(action => !action.inDropdown);
-	const dropdownActions = sortedActions.filter(action => action.inDropdown);
+	const mainActions = sortedActions.filter((action) => !action.inDropdown);
+	const dropdownActions = sortedActions.filter((action) => action.inDropdown);
 
 	// Renderizar un botón de acción
 	const renderActionButton = (action: EntityHeaderAction, index: number) => {
@@ -178,24 +184,14 @@ export function EntityHeader({
 
 		if (action.href) {
 			return (
-				<Button
-					key={`action-${index}`}
-					variant={action.variant || 'default'}
-					size="sm"
-					asChild
-				>
+				<Button key={`action-${index}`} variant={action.variant || 'default'} size="sm" asChild>
 					<Link href={action.href}>{buttonContent}</Link>
 				</Button>
 			);
 		}
 
 		return (
-			<Button
-				key={`action-${index}`}
-				variant={action.variant || 'default'}
-				size="sm"
-				onClick={action.onClick}
-			>
+			<Button key={`action-${index}`} variant={action.variant || 'default'} size="sm" onClick={action.onClick}>
 				{buttonContent}
 			</Button>
 		);
@@ -218,7 +214,7 @@ export function EntityHeader({
 	};
 
 	return (
-		<div className={cn("space-y-4", className)}>
+		<div className={cn('space-y-4', className)}>
 			{/* Breadcrumbs */}
 			{(breadcrumbItems.length > 0 || backUrl) && (
 				<Breadcrumb className="mb-4">
@@ -269,12 +265,12 @@ export function EntityHeader({
 									<button
 										onClick={onToggleFavorite}
 										className="focus:outline-none"
-										aria-label={isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
+										aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
 									>
 										<StarIcon
 											className={cn(
-												"h-5 w-5 transition-colors",
-												isFavorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground hover:text-yellow-400"
+												'h-5 w-5 transition-colors',
+												isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground hover:text-yellow-400'
 											)}
 										/>
 									</button>
@@ -285,19 +281,12 @@ export function EntityHeader({
 					</div>
 
 					{/* Descripción */}
-					{description && (
-						<p className="text-muted-foreground max-w-2xl">{description}</p>
-					)}
+					{description && <p className="text-muted-foreground max-w-2xl">{description}</p>}
 
 					{/* Estadísticas */}
 					{stats && stats.length > 0 && (
 						<div className="pt-1">
-							<EntityStats
-								stats={stats}
-								primaryColor={primaryColor}
-								asBadges={true}
-								animated={true}
-							/>
+							<EntityStats stats={stats} primaryColor={primaryColor} asBadges={true} animated={true} />
 						</div>
 					)}
 				</div>
@@ -324,8 +313,9 @@ export function EntityHeader({
 												key={`dropdown-action-${index}`}
 												onClick={action.onClick}
 												className={cn(
-													"cursor-pointer",
-													action.variant === 'destructive' && "text-destructive focus:text-destructive hover:text-destructive"
+													'cursor-pointer',
+													action.variant === 'destructive' &&
+														'text-destructive focus:text-destructive hover:text-destructive'
 												)}
 											>
 												{action.icon && <span className="mr-2">{action.icon}</span>}
@@ -348,15 +338,8 @@ export function EntityHeader({
 					transition={{ duration: 0.3 }}
 					className="relative w-full h-40 sm:h-60 overflow-hidden rounded-lg"
 				>
-					<img
-						src={featuredImage}
-						alt={`Imagen destacada de ${title}`}
-						className="w-full h-full object-cover"
-					/>
-					<div
-						className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"
-						aria-hidden="true"
-					/>
+					<img src={featuredImage} alt={`Imagen destacada de ${title}`} className="w-full h-full object-cover" />
+					<div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" aria-hidden="true" />
 				</motion.div>
 			)}
 		</div>

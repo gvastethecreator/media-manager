@@ -8,16 +8,12 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 
+import { extendActivities, extendActivity, mapActivityFiltersToPrisma } from '@/transformers/activity';
 import {
-    extendActivities,
-    extendActivity,
-    mapActivityFiltersToPrisma,
-} from '@/transformers/activity';
-import {
-    type Activity,
-    type ActivityFilters,
-    type ActivityListResponse,
-    type ActivityType,
+	type Activity,
+	type ActivityFilters,
+	type ActivityListResponse,
+	type ActivityType,
 } from '@/types/entities/activity';
 
 const activityLogger = serverLogger.withContext('ActivityQueryActions');

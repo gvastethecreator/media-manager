@@ -58,7 +58,7 @@ export function TagCard({
 		updatedAt,
 		isFavorite = false,
 		viewMode,
-		featuredImage
+		featuredImage,
 	} = tag;
 
 	// Calcular valores derivados
@@ -78,9 +78,19 @@ export function TagCard({
 
 	// Calcular total de relaciones para mostrar la rareza
 	const totalRelations =
-		imagesCount + videosCount + albumsCount + collectionsCount +
-		charactersCount + placesCount + worldItemsCount + conceptsCount +
-		promptsCount + notesCount + wildcardsCount + propertiesCount + groupsCount;
+		imagesCount +
+		videosCount +
+		albumsCount +
+		collectionsCount +
+		charactersCount +
+		placesCount +
+		worldItemsCount +
+		conceptsCount +
+		promptsCount +
+		notesCount +
+		wildcardsCount +
+		propertiesCount +
+		groupsCount;
 
 	// Determinar rareza basada en relaciones
 	const determineRarity = (): TagRarity => {
@@ -101,7 +111,7 @@ export function TagCard({
 		[TagRarity.UNCOMMON]: '#22c55e',
 		[TagRarity.RARE]: '#3b82f6',
 		[TagRarity.VERY_RARE]: '#8b5cf6',
-		[TagRarity.LEGENDARY]: '#f59e0b'
+		[TagRarity.LEGENDARY]: '#f59e0b',
 	};
 
 	// Color de efecto basado en rareza
@@ -113,7 +123,7 @@ export function TagCard({
 		[TagRarity.UNCOMMON]: 5,
 		[TagRarity.RARE]: 10,
 		[TagRarity.VERY_RARE]: 15,
-		[TagRarity.LEGENDARY]: 20
+		[TagRarity.LEGENDARY]: 20,
 	};
 
 	const rarityGlow = rarityGlowMap[calculatedRarity] || 0;
@@ -157,17 +167,15 @@ export function TagCard({
 	);
 
 	// Procesar la imagen destacada para asegurarnos de que tiene el formato correcto
-	const processedFeaturedImage = featuredImage && typeof featuredImage === 'object'
-		? featuredImage
-		: null;
+	const processedFeaturedImage = featuredImage && typeof featuredImage === 'object' ? featuredImage : null;
 
 	// Render
 	return (
 		<motion.article
 			className={cn(
-				"flex flex-col overflow-hidden border-border relative z-0",
-				disabled && "opacity-70 pointer-events-none",
-				interactive && !disabled && "cursor-pointer hover:shadow-lg transition-shadow duration-300",
+				'flex flex-col overflow-hidden border-border relative z-0',
+				disabled && 'opacity-70 pointer-events-none',
+				interactive && !disabled && 'cursor-pointer hover:shadow-lg transition-shadow duration-300',
 				className
 			)}
 			style={{
@@ -176,7 +184,7 @@ export function TagCard({
 				borderRadius: tcgMode ? '8px' : undefined,
 				maxWidth: compact ? 300 : undefined,
 				boxShadow: tcgMode ? `0 0 ${rarityGlow}px ${cardColor}30` : undefined,
-				...style
+				...style,
 			}}
 			whileHover={!disabled && interactive ? { y: -5 } : {}}
 			whileTap={!disabled && interactive && onClick ? { scale: 0.98 } : {}}
@@ -193,9 +201,9 @@ export function TagCard({
 			{/* Card Container con efecto TCG */}
 			<div
 				className={cn(
-					"rounded-xl h-full w-full overflow-hidden transition-all duration-300 ease-out",
-					tcgMode && "shadow-md",
-					isHovered && tcgMode && "scale-[1.01]"
+					'rounded-xl h-full w-full overflow-hidden transition-all duration-300 ease-out',
+					tcgMode && 'shadow-md',
+					isHovered && tcgMode && 'scale-[1.01]'
 				)}
 				style={{
 					background: `linear-gradient(135deg, ${cardColor}15, ${cardColor}05)`,
@@ -216,7 +224,7 @@ export function TagCard({
 									transparent 100%)
 								`,
 								backgroundSize: '200% 200%',
-								animation: 'gradient-shift 3s ease infinite'
+								animation: 'gradient-shift 3s ease infinite',
 							}}
 						/>
 
@@ -236,16 +244,10 @@ export function TagCard({
 						{calculatedRarity !== TagRarity.COMMON && (
 							<div className="absolute top-2 right-2 z-10">
 								<div
-									className={cn(
-										"rounded-full p-1",
-										calculatedRarity === TagRarity.LEGENDARY && "animate-pulse"
-									)}
+									className={cn('rounded-full p-1', calculatedRarity === TagRarity.LEGENDARY && 'animate-pulse')}
 									style={{ backgroundColor: `${rarityColor}30` }}
 								>
-									<Sparkles
-										className="h-4 w-4"
-										style={{ color: rarityColor }}
-									/>
+									<Sparkles className="h-4 w-4" style={{ color: rarityColor }} />
 								</div>
 							</div>
 						)}

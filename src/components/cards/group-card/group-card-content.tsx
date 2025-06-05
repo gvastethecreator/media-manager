@@ -42,20 +42,25 @@ export function GroupCardContent({
 	entityCounts = {},
 	primaryColor = '#3b82f6',
 	tcgMode = true,
-	compact = false
+	compact = false,
 }: GroupCardContentProps) {
 	// Descripción corta para mostrar
-	const shortDescription = description && description.length > 120
-		? `${description.substring(0, 120)}...`
-		: description;
+	const shortDescription =
+		description && description.length > 120 ? `${description.substring(0, 120)}...` : description;
 
 	// Calcular grupos de entidades para estadísticas
 	const mediaCount = (entityCounts.images || 0) + (entityCounts.videos || 0);
 	const collectionCount = (entityCounts.albums || 0) + (entityCounts.collections || 0);
-	const worldCount = (entityCounts.characters || 0) + (entityCounts.places || 0) +
-		(entityCounts.worldItems || 0) + (entityCounts.concepts || 0);
-	const utilityCount = (entityCounts.prompts || 0) + (entityCounts.notes || 0) +
-		(entityCounts.wildcards || 0) + (entityCounts.properties || 0);
+	const worldCount =
+		(entityCounts.characters || 0) +
+		(entityCounts.places || 0) +
+		(entityCounts.worldItems || 0) +
+		(entityCounts.concepts || 0);
+	const utilityCount =
+		(entityCounts.prompts || 0) +
+		(entityCounts.notes || 0) +
+		(entityCounts.wildcards || 0) +
+		(entityCounts.properties || 0);
 	const totalEntities = Object.values(entityCounts).reduce((sum, count) => sum + (count || 0), 0);
 
 	// Calcular colores para elementos de UI basados en el color primario
@@ -64,25 +69,15 @@ export function GroupCardContent({
 
 	return (
 		<div
-			className={cn(
-				"flex flex-col px-3 py-2",
-				compact ? "space-y-1" : "space-y-1.5"
-			)}
+			className={cn('flex flex-col px-3 py-2', compact ? 'space-y-1' : 'space-y-1.5')}
 			style={{
-				background: tcgMode
-					? `linear-gradient(to bottom, transparent, ${primaryColor}10)`
-					: undefined,
-				borderBottom: tcgMode ? `1px solid ${borderColor}` : undefined
+				background: tcgMode ? `linear-gradient(to bottom, transparent, ${primaryColor}10)` : undefined,
+				borderBottom: tcgMode ? `1px solid ${borderColor}` : undefined,
 			}}
 		>
 			{/* Descripción del grupo */}
 			{shortDescription && (
-				<div className={cn(
-					"text-xs leading-tight",
-					compact ? "line-clamp-2" : "line-clamp-3"
-				)}>
-					{shortDescription}
-				</div>
+				<div className={cn('text-xs leading-tight', compact ? 'line-clamp-2' : 'line-clamp-3')}>{shortDescription}</div>
 			)}
 
 			{/* Filtros y flexibilidad en modo TCG */}
@@ -92,7 +87,9 @@ export function GroupCardContent({
 					{filtersCount > 0 && (
 						<div className="flex items-center space-x-1">
 							<FilterIcon className="w-3 h-3" style={{ color: primaryColor }} />
-							<span className="font-medium">{filtersCount} {filtersCount === 1 ? 'filtro' : 'filtros'}</span>
+							<span className="font-medium">
+								{filtersCount} {filtersCount === 1 ? 'filtro' : 'filtros'}
+							</span>
 						</div>
 					)}
 
@@ -108,10 +105,7 @@ export function GroupCardContent({
 
 			{/* Estadísticas de entidades en modo TCG */}
 			{tcgMode && totalEntities > 0 && (
-				<div className={cn(
-					"grid gap-1",
-					compact ? "grid-cols-2" : "grid-cols-4"
-				)}>
+				<div className={cn('grid gap-1', compact ? 'grid-cols-2' : 'grid-cols-4')}>
 					{mediaCount > 0 && (
 						<div
 							className="flex items-center justify-between text-xs bg-black/5 rounded px-1.5 py-0.5"

@@ -62,7 +62,7 @@ async function main() {
 		// Sembrar settings después de perfiles (por la relación cíclica)
 		await seedSettings(prisma);
 
-		 // Sembrar carpetas
+		// Sembrar carpetas
 		await seedFolders(prisma);
 
 		// Sembrar etiquetas

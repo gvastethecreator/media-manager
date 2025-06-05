@@ -1,10 +1,10 @@
 import type {
-    CreateFolderData,
-    FolderBase,
-    FolderExtended,
-    FolderStats,
-    FolderSummary,
-    UpdateFolderData,
+	CreateFolderData,
+	FolderBase,
+	FolderExtended,
+	FolderStats,
+	FolderSummary,
+	UpdateFolderData,
 } from '@/types/entities/folder';
 
 // Re-exportamos los tipos principales
@@ -24,7 +24,19 @@ export interface ProcessStatus {
 	currentFile?: string;
 	timestamp?: number;
 	folderId?: string;
-	phase?: 'scanning' | 'indexing' | 'thumbnails' | 'metadata' | 'error' | 'starting' | 'prepare' | 'scan' | 'index' | 'cleanup' | 'complete' | 'cancelled';
+	phase?:
+		| 'scanning'
+		| 'indexing'
+		| 'thumbnails'
+		| 'metadata'
+		| 'error'
+		| 'starting'
+		| 'prepare'
+		| 'scan'
+		| 'index'
+		| 'cleanup'
+		| 'complete'
+		| 'cancelled';
 	filesProcessed?: number;
 	totalFiles?: number;
 	fileDetails?: {
@@ -127,7 +139,7 @@ export enum FOLDER_ERROR_CODES {
 	INDEXING_FAILED = 'INDEXING_FAILED',
 	PERMISSION_DENIED = 'PERMISSION_DENIED',
 	NETWORK_ERROR = 'NETWORK_ERROR',
-	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR'
+	UNEXPECTED_ERROR = 'UNEXPECTED_ERROR',
 }
 
 /**
@@ -183,7 +195,7 @@ export function createFolderError(
 		folderId,
 		details: details || (cause instanceof Error ? cause.stack : undefined),
 		stack: new Error(message).stack,
-		cause
+		cause,
 	};
 }
 
@@ -192,30 +204,23 @@ export function createFolderError(
  */
 export function fromError(error: unknown, folderId?: string): FolderError {
 	// Si ya es un FolderError, lo devolvemos
-	if (error && typeof error === 'object' && 'code' in error && 'name' in error
-		&& (error as any).name === 'FolderServiceError') {
+	if (
+		error &&
+		typeof error === 'object' &&
+		'code' in error &&
+		'name' in error &&
+		(error as any).name === 'FolderServiceError'
+	) {
 		return error as FolderError;
 	}
 
 	// Si es un Error estándar
 	if (error instanceof Error) {
-		return createFolderError(
-			error.message,
-			FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
-			error.stack,
-			folderId,
-			error
-		);
+		return createFolderError(error.message, FOLDER_ERROR_CODES.UNEXPECTED_ERROR, error.stack, folderId, error);
 	}
 
 	// Cualquier otro tipo
-	return createFolderError(
-		String(error),
-		FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
-		undefined,
-		folderId,
-		error
-	);
+	return createFolderError(String(error), FOLDER_ERROR_CODES.UNEXPECTED_ERROR, undefined, folderId, error);
 }
 
 /**
@@ -227,7 +232,7 @@ export function folderErrorToResponse(error: FolderError): ErrorResponse {
 		details: error.details || error.stack || '',
 		timestamp: error.timestamp,
 		folderId: error.folderId,
-		code: error.code
+		code: error.code,
 	};
 }
 

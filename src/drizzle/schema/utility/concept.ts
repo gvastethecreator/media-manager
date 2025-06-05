@@ -17,19 +17,19 @@ import { wildcards } from './wildcard';
 
 // Definición de la tabla
 export const concepts = sqliteTable(
-    'Concept',
-    {
-        ...organizationFields,
-        content: text('content').default(''),
-    },
-    (table) => {
-        const indexes = createIndexes('concept');
-        return {
-            nameIdx: indexes.nameIdx.on(table.name),
-            categoryIdx: indexes.categoryIdx.on(table.category),
-            createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
-        };
-    }
+	'Concept',
+	{
+		...organizationFields,
+		content: text('content').default(''),
+	},
+	(table) => {
+		const indexes = createIndexes('concept');
+		return {
+			nameIdx: indexes.nameIdx.on(table.name),
+			categoryIdx: indexes.categoryIdx.on(table.category),
+			createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
+		};
+	}
 );
 
 // Tablas de relación
@@ -49,19 +49,19 @@ export const conceptsToGroups = createRelationTable('ConceptToGroup', 'Concept',
 
 // Definición de relaciones
 const relatedEntities = {
-    images,
-    videos,
-    albums,
-    collections,
-    tags,
-    characters,
-    places,
-    worldItems,
-    prompts,
-    notes,
-    wildcards,
-    properties,
-    groups
+	images,
+	videos,
+	albums,
+	collections,
+	tags,
+	characters,
+	places,
+	worldItems,
+	prompts,
+	notes,
+	wildcards,
+	properties,
+	groups,
 };
 
 // Relaciones

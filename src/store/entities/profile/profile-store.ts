@@ -1,12 +1,12 @@
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
 import { transformProfile } from '@/transformers/profile/profile-transformers';
 import {
-  type PaginatedProfiles,
-  type ProfileExtended,
-  type ProfileFilters,
-  type ProfilePaginationOptions,
-  type ProfilePreferences,
-  ThemeMode,
+	type PaginatedProfiles,
+	type ProfileExtended,
+	type ProfileFilters,
+	type ProfilePaginationOptions,
+	type ProfilePreferences,
+	ThemeMode,
 } from '@/types/entities/profile/types';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
@@ -81,10 +81,9 @@ export const useProfileStore = create<ProfileStore>()(
 							const transformedProfile = transformProfile(profile);
 							set({ activeProfile: transformedProfile });
 							return transformedProfile;
-						} else {
+						}
 							set({ activeProfile: null });
 							return null;
-						}
 					} catch (error) {
 						const errorMessage = error instanceof Error ? error.message : 'Error obteniendo perfil activo';
 						set({ activeProfileError: errorMessage });
@@ -110,10 +109,9 @@ export const useProfileStore = create<ProfileStore>()(
 							}
 
 							return true;
-						} else {
+						}
 							set({ activeProfileError: 'No se pudo activar el perfil' });
 							return false;
-						}
 					} catch (error) {
 						const errorMessage = error instanceof Error ? error.message : 'Error estableciendo perfil activo';
 						set({ activeProfileError: errorMessage });

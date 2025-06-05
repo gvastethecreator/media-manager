@@ -1,8 +1,5 @@
 import type { ErrorResponse, FolderResponse, IndexCallbacks, ProcessStatus } from '@/app/actions/folders';
-import {
-    createFolder as createFolderAction,
-    deleteFolder as deleteFolderAction
-} from '@/app/actions/folders';
+import { createFolder as createFolderAction, deleteFolder as deleteFolderAction } from '@/app/actions/folders';
 import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
@@ -196,7 +193,10 @@ class FolderServiceClass {
 						// Intentar loguear de forma más segura, extrayendo mensaje y stack si es posible
 						const errorMessage = callbackError instanceof Error ? callbackError.message : String(callbackError);
 						const errorStack = callbackError instanceof Error ? callbackError.stack : undefined;
-						folderLogger.error(`Error en callback de evento ${event}: ${errorMessage}`, { stack: errorStack, originalArgs: args });
+						folderLogger.error(`Error en callback de evento ${event}: ${errorMessage}`, {
+							stack: errorStack,
+							originalArgs: args,
+						});
 					}
 				}
 			}
@@ -293,14 +293,13 @@ class FolderServiceClass {
 		return this.withConcurrencyControl('getFolders', async () => {
 			try {
 				folderLogger.info('📁 Obteniendo carpetas...');
-				const getFoldersAction = await import('@/app/actions/folders/folder-get.actions').then(
-					(mod) => mod.getFolders
-				);
+				const getFoldersAction = await import('@/app/actions/folders/folder-get.actions').then((mod) => mod.getFolders);
 				const folders = await getFoldersAction();
 				folderLogger.info(`✅ ${folders.length} carpetas obtenidas`);
 				return folders;
 			} catch (error) {
-				const isCriticalError = error instanceof Error &&
+				const isCriticalError =
+					error instanceof Error &&
 					!(error.message.includes('Operación') && error.message.includes('en progreso')) &&
 					!error.message.includes('ECONNREFUSED') &&
 					!error.message.includes('network') &&
@@ -310,7 +309,7 @@ class FolderServiceClass {
 					message: error instanceof Error ? error.message : 'Error desconocido al obtener carpetas',
 					details: error instanceof Error ? error.stack : String(error),
 					timestamp: Date.now(),
-					type: isCriticalError ? 'critical' : 'transient'
+					type: isCriticalError ? 'critical' : 'transient',
 				};
 
 				// Solo usar error para errores críticos, usar warn para no críticos

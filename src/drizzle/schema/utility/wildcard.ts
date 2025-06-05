@@ -17,31 +17,31 @@ import { properties } from './property';
 
 // Definir primero el tipo para evitar referencias circulares
 export interface WildcardSelectType {
-  id: number;
-  name: string;
-  description: string;
-  category: string;
-  createdAt: string;
-  updatedAt: string;
-  parentId: number | null;
+	id: number;
+	name: string;
+	description: string;
+	category: string;
+	createdAt: string;
+	updatedAt: string;
+	parentId: number | null;
 }
 
 // Definición de la tabla
 export const wildcards = sqliteTable(
-    'Wildcard',
-    {
-        ...organizationFields,
-        children: text('children').default('[]'),
-        parentId: integer('parentId'),
-    },
-    (table) => {
-        const indexes = createIndexes('wildcard');
-        return {
-            nameIdx: indexes.nameIdx.on(table.name),
-            categoryIdx: indexes.categoryIdx.on(table.category),
-            createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
-        };
-    }
+	'Wildcard',
+	{
+		...organizationFields,
+		children: text('children').default('[]'),
+		parentId: integer('parentId'),
+	},
+	(table) => {
+		const indexes = createIndexes('wildcard');
+		return {
+			nameIdx: indexes.nameIdx.on(table.name),
+			categoryIdx: indexes.categoryIdx.on(table.category),
+			createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
+		};
+	}
 );
 
 // Tablas de relación
@@ -61,26 +61,26 @@ export const wildcardsToGroups = createRelationTable('WildcardToGroup', 'Wildcar
 
 // Definición de relaciones
 const relatedEntities = {
-    images,
-    videos,
-    albums,
-    collections,
-    tags,
-    characters,
-    places,
-    worldItems,
-    concepts,
-    notes,
-    prompts,
-    properties,
-    groups,
+	images,
+	videos,
+	albums,
+	collections,
+	tags,
+	characters,
+	places,
+	worldItems,
+	concepts,
+	notes,
+	prompts,
+	properties,
+	groups,
 };
 
 // Relaciones
 export const wildcardsRelations = relations(wildcards, ({ one, many }) => {
-    const manyRelations = createManyToManyRelations(relatedEntities)({ many });
+	const manyRelations = createManyToManyRelations(relatedEntities)({ many });
 
-    return {
-        ...manyRelations,
-    };
+	return {
+		...manyRelations,
+	};
 });

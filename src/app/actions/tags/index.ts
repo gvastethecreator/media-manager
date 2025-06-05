@@ -13,41 +13,41 @@ import * as RelationActions from './relation.actions'; // Importar todas las acc
 
 // Exportaciones de crud.actions
 export async function createTagAction(...args: Parameters<typeof CrudActions.createTag>) {
-  return CrudActions.createTag(...args);
+	return CrudActions.createTag(...args);
 }
 export async function updateTagAction(...args: Parameters<typeof CrudActions.updateTag>) {
-  return CrudActions.updateTag(...args);
+	return CrudActions.updateTag(...args);
 }
 export async function deleteTagAction(...args: Parameters<typeof CrudActions.deleteTag>) {
-  return CrudActions.deleteTag(...args);
+	return CrudActions.deleteTag(...args);
 }
 
 // Exportaciones de query.actions
 export async function getTagByIdAction(...args: Parameters<typeof QueryActions.getTag>) {
-  return QueryActions.getTag(...args);
+	return QueryActions.getTag(...args);
 }
 export async function getTagsAction(...args: Parameters<typeof QueryActions.getTags>) {
-  return QueryActions.getTags(...args);
+	return QueryActions.getTags(...args);
 }
 export async function searchTagsAction(...args: Parameters<typeof QueryActions.searchTags>) {
-  return QueryActions.searchTags(...args);
+	return QueryActions.searchTags(...args);
 }
 
 // Exportaciones de relation.actions
 export async function addImageToTag(...args: Parameters<typeof RelationActions.addImageToTag>) {
-  return RelationActions.addImageToTag(...args);
+	return RelationActions.addImageToTag(...args);
 }
 export async function assignTagToImages(...args: Parameters<typeof RelationActions.assignTagToImages>) {
-  return RelationActions.assignTagToImages(...args);
+	return RelationActions.assignTagToImages(...args);
 }
 export async function getSuggestedTags(...args: Parameters<typeof RelationActions.getSuggestedTags>) {
-  return RelationActions.getSuggestedTags(...args);
+	return RelationActions.getSuggestedTags(...args);
 }
 export async function removeTagFromImages(...args: Parameters<typeof RelationActions.removeTagFromImages>) {
-  return RelationActions.removeTagFromImages(...args);
+	return RelationActions.removeTagFromImages(...args);
 }
 export async function updateImageTags(...args: Parameters<typeof RelationActions.updateImageTags>) {
-  return RelationActions.updateImageTags(...args);
+	return RelationActions.updateImageTags(...args);
 }
 
 // NOTA: Los transformadores de tags ya no pueden exportarse desde este archivo debido a las
@@ -58,4 +58,3 @@ export async function updateImageTags(...args: Parameters<typeof RelationActions
 //
 // 2. Importe desde el archivo cliente para mantener la organización:
 //    import { createTag, transformTag, ... } from '@/app/actions/tags/client-tag-exports';
-

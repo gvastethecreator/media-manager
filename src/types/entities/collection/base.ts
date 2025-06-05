@@ -27,18 +27,18 @@ export interface CollectionSummary {
  * Representación completa de la colección con campos JSON deserializados
  */
 export interface CollectionComplete extends Omit<PrismaCollection, 'filters' | 'sortBy' | 'editions'> {
-    /**
-     * Filtros deserializados como un array de objetos
-     */
-    filters: CollectionFilter[];
+	/**
+	 * Filtros deserializados como un array de objetos
+	 */
+	filters: CollectionFilter[];
 
-    /**
-     * Criterio de ordenación deserializado como objeto
-     */
-    sortBy: any;
+	/**
+	 * Criterio de ordenación deserializado como objeto
+	 */
+	sortBy: any;
 
-    /**
-     * Ediciones deserializadas como array de objetos
-     */
-    editions: CollectionEdition[];
+	/**
+	 * Ediciones deserializadas como array de objetos
+	 */
+	editions: CollectionEdition[];
 }

@@ -4,27 +4,24 @@
  */
 
 import { createLogger } from '@/lib/logger';
+import { WorldItemCategory, WorldItemType } from '@/types/entities/world-item/enums';
 import {
-    WorldItemCategory,
-    WorldItemType
-} from '@/types/entities/world-item/enums';
-import {
-    WORLD_ITEM_SORT_PROPERTY_MAP,
-    type WorldItemCreateInput,
-    type WorldItemFilters,
-    type WorldItemSearchOptions,
-    type WorldItemSortCriteria,
-    type WorldItemUpdateInput
+	WORLD_ITEM_SORT_PROPERTY_MAP,
+	type WorldItemCreateInput,
+	type WorldItemFilters,
+	type WorldItemSearchOptions,
+	type WorldItemSortCriteria,
+	type WorldItemUpdateInput,
 } from '@/types/entities/world-item/types';
 import type { Prisma } from '@prisma/client';
 import {
-    serializeAttributes,
-    serializeEffects,
-    serializeFilters,
-    serializeProperties,
-    serializeRequirements,
-    serializeStats,
-    serializeTags
+	serializeAttributes,
+	serializeEffects,
+	serializeFilters,
+	serializeProperties,
+	serializeRequirements,
+	serializeStats,
+	serializeTags,
 } from './serializers';
 
 // Logger específico para este módulo
@@ -85,7 +82,9 @@ function hslToHex(h: number, s: number, l: number): string {
 	const sNormalized = s / 100;
 	const lNormalized = l / 100;
 
-	let r: number, g: number, b: number;
+	let r: number;
+	let g: number;
+	let b: number;
 
 	if (sNormalized === 0) {
 		r = g = b = lNormalized;
@@ -94,17 +93,18 @@ function hslToHex(h: number, s: number, l: number): string {
 			let tValue = t;
 			if (tValue < 0) tValue += 1;
 			if (tValue > 1) tValue -= 1;
-			if (tValue < 1/6) return p + (q - p) * 6 * tValue;
-			if (tValue < 1/2) return q;
-			if (tValue < 2/3) return p + (q - p) * (2/3 - tValue) * 6;
+			if (tValue < 1 / 6) return p + (q - p) * 6 * tValue;
+			if (tValue < 1 / 2) return q;
+			if (tValue < 2 / 3) return p + (q - p) * (2 / 3 - tValue) * 6;
 			return p;
 		};
 
-		const q = lNormalized < 0.5 ? lNormalized * (1 + sNormalized) : lNormalized + sNormalized - lNormalized * sNormalized;
+		const q =
+			lNormalized < 0.5 ? lNormalized * (1 + sNormalized) : lNormalized + sNormalized - lNormalized * sNormalized;
 		const p = 2 * lNormalized - q;
-		r = hue2rgb(p, q, hNormalized + 1/3);
+		r = hue2rgb(p, q, hNormalized + 1 / 3);
 		g = hue2rgb(p, q, hNormalized);
-		b = hue2rgb(p, q, hNormalized - 1/3);
+		b = hue2rgb(p, q, hNormalized - 1 / 3);
 	}
 
 	const toHex = (x: number) => {
@@ -141,7 +141,26 @@ export function generateEmoji(type: string, name?: string): string {
 		}
 
 		// Set de emojis genéricos
-		const genericEmojis = ['🗿', '🎭', '🔮', '💎', '⚱️', '🧩', '🎯', '🎪', '🎠', '🎨', '🎰', '🧸', '🎁', '🎊', '🎷', '🎸', '🎺', '🎻'];
+		const genericEmojis = [
+			'🗿',
+			'🎭',
+			'🔮',
+			'💎',
+			'⚱️',
+			'🧩',
+			'🎯',
+			'🎪',
+			'🎠',
+			'🎨',
+			'🎰',
+			'🧸',
+			'🎁',
+			'🎊',
+			'🎷',
+			'🎸',
+			'🎺',
+			'🎻',
+		];
 
 		// Si hay un nombre, generar un emoji basado en él
 		if (name) {
@@ -181,7 +200,7 @@ export function toCreateData(data: WorldItemCreateInput): Prisma.WorldItemCreate
 			color: data.color ?? generateColor(data.name, data.category ?? 'general'),
 			isFavorite: data.isFavorite ?? false,
 			sortBy: data.sortBy ?? 'name:asc',
-			featuredImage: data.featuredImage ?? null
+			featuredImage: data.featuredImage ?? null,
 		};
 
 		// Serializar campos JSON
@@ -216,7 +235,7 @@ export function toCreateData(data: WorldItemCreateInput): Prisma.WorldItemCreate
 		// Manejar relaciones
 		if (data.images) {
 			serializedData.images = {
-				connect: data.images.connect.map(item => ({ id: item.id }))
+				connect: data.images.connect.map((item) => ({ id: item.id })),
 			};
 		}
 
@@ -235,18 +254,18 @@ export function toCreateData(data: WorldItemCreateInput): Prisma.WorldItemCreate
 export function toUpdateData(data: WorldItemUpdateInput): Prisma.WorldItemUpdateInput {
 	try {
 		const serializedData: Prisma.WorldItemUpdateInput = {
-			...data
+			...data,
 		};
 
 		// Remover campos que necesitan serialización
-		delete serializedData.attributes;
-		delete serializedData.effects;
-		delete serializedData.requirements;
-		delete serializedData.stats;
-		delete serializedData.properties;
-		delete serializedData.filters;
-		delete serializedData.tags;
-		delete serializedData.images;
+		serializedData.attributes = undefined;
+		serializedData.effects = undefined;
+		serializedData.requirements = undefined;
+		serializedData.stats = undefined;
+		serializedData.properties = undefined;
+		serializedData.filters = undefined;
+		serializedData.tags = undefined;
+		serializedData.images = undefined;
 
 		// Serializar campos JSON si existen en los datos originales
 		if (data.attributes) {
@@ -280,7 +299,7 @@ export function toUpdateData(data: WorldItemUpdateInput): Prisma.WorldItemUpdate
 		// Manejar relaciones
 		if (data.images) {
 			serializedData.images = {
-				set: data.images.set.map(item => ({ id: item.id }))
+				set: data.images.set.map((item) => ({ id: item.id })),
 			};
 		}
 
@@ -306,14 +325,14 @@ export function toSearchOptions(options: WorldItemSearchOptions = {}): Prisma.Wo
 			skip,
 			take,
 			orderBy: createOrderBy(sortBy),
-			where: createFilter(filters)
+			where: createFilter(filters),
 		};
 
 		// Incluir relaciones si se solicitan
 		if (includeImages) {
 			args.include = {
 				...args.include,
-				images: true
+				images: true,
 			};
 		}
 
@@ -324,9 +343,9 @@ export function toSearchOptions(options: WorldItemSearchOptions = {}): Prisma.Wo
 				_count: {
 					select: {
 						images: true,
-						relatedItems: true
-					}
-				}
+						relatedItems: true,
+					},
+				},
 			};
 		}
 
@@ -337,7 +356,7 @@ export function toSearchOptions(options: WorldItemSearchOptions = {}): Prisma.Wo
 		return {
 			skip: 0,
 			take: 20,
-			orderBy: { name: 'asc' }
+			orderBy: { name: 'asc' },
 		};
 	}
 }
@@ -359,62 +378,62 @@ export function createFilter(filters: WorldItemFilters = {}): Prisma.WorldItemWh
 					{ name: { contains: filters.query, mode: 'insensitive' } },
 					{ description: { contains: filters.query, mode: 'insensitive' } },
 					{ shortcut: { contains: filters.query, mode: 'insensitive' } },
-					{ origin: { contains: filters.query, mode: 'insensitive' } }
-				]
+					{ origin: { contains: filters.query, mode: 'insensitive' } },
+				],
 			});
 		}
 
 		// Filtro por tipos
 		if (filters.types && filters.types.length > 0) {
 			conditions.push({
-				type: { in: filters.types }
+				type: { in: filters.types },
 			});
 		}
 
 		// Filtro por categorías
 		if (filters.categories && filters.categories.length > 0) {
 			conditions.push({
-				category: { in: filters.categories }
+				category: { in: filters.categories },
 			});
 		}
 
 		// Filtro por rarezas
 		if (filters.rarities && filters.rarities.length > 0) {
 			conditions.push({
-				rarity: { in: filters.rarities }
+				rarity: { in: filters.rarities },
 			});
 		}
 
 		// Filtro por nivel mínimo/máximo (asumiendo que hay un campo de nivel en los datos)
 		if (filters.minLevel !== undefined) {
 			conditions.push({
-				requirements: { contains: `"level":${filters.minLevel}` }
+				requirements: { contains: `"level":${filters.minLevel}` },
 			});
 		}
 
 		if (filters.maxLevel !== undefined) {
 			conditions.push({
-				requirements: { contains: `"level":${filters.maxLevel}` }
+				requirements: { contains: `"level":${filters.maxLevel}` },
 			});
 		}
 
 		// Filtro por valor mínimo/máximo (asumiendo que hay un campo de valor en los datos)
 		if (filters.minValue !== undefined) {
 			conditions.push({
-				properties: { contains: `"value":${filters.minValue}` }
+				properties: { contains: `"value":${filters.minValue}` },
 			});
 		}
 
 		if (filters.maxValue !== undefined) {
 			conditions.push({
-				properties: { contains: `"value":${filters.maxValue}` }
+				properties: { contains: `"value":${filters.maxValue}` },
 			});
 		}
 
 		// Filtro por favoritos
 		if (filters.isFavorite !== undefined) {
 			conditions.push({
-				isFavorite: filters.isFavorite
+				isFavorite: filters.isFavorite,
 			});
 		}
 
@@ -422,17 +441,11 @@ export function createFilter(filters: WorldItemFilters = {}): Prisma.WorldItemWh
 		if (filters.hasImages !== undefined) {
 			if (filters.hasImages) {
 				conditions.push({
-					OR: [
-						{ featuredImage: { not: null } },
-						{ images: { some: {} } }
-					]
+					OR: [{ featuredImage: { not: null } }, { images: { some: {} } }],
 				});
 			} else {
 				conditions.push({
-					AND: [
-						{ featuredImage: null },
-						{ images: { none: {} } }
-					]
+					AND: [{ featuredImage: null }, { images: { none: {} } }],
 				});
 			}
 		}

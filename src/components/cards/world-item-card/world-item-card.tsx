@@ -62,7 +62,7 @@ export function WorldItemCard({
 		requirements,
 		stats,
 		properties,
-		featuredImage
+		featuredImage,
 	} = worldItem;
 
 	// Calcular valores derivados
@@ -82,9 +82,19 @@ export function WorldItemCard({
 
 	// Calcular total de relaciones para efectos visuales
 	const totalRelations =
-		imagesCount + videosCount + albumsCount + collectionsCount +
-		tagsCount + charactersCount + placesCount + conceptsCount +
-		promptsCount + notesCount + wildcardsCount + propertiesCount + groupsCount;
+		imagesCount +
+		videosCount +
+		albumsCount +
+		collectionsCount +
+		tagsCount +
+		charactersCount +
+		placesCount +
+		conceptsCount +
+		promptsCount +
+		notesCount +
+		wildcardsCount +
+		propertiesCount +
+		groupsCount;
 
 	// Colores para el gradiente y el icono - derivados del tipo y rareza del objeto
 	const { primaryColor, secondaryColor, icon, intensityFactor } = useMemo(() => {
@@ -134,7 +144,7 @@ export function WorldItemCard({
 			uncommon: 1.1,
 			rare: 1.2,
 			epic: 1.3,
-			legendary: 1.5
+			legendary: 1.5,
 		};
 
 		const intensityFactor = rarityFactors[rarity?.toLowerCase() || 'common'] || 1;
@@ -143,7 +153,7 @@ export function WorldItemCard({
 			primaryColor: primaryCol,
 			secondaryColor: secondaryCol,
 			icon: iconComponent,
-			intensityFactor
+			intensityFactor,
 		};
 	}, [color, type, rarity]);
 
@@ -153,7 +163,7 @@ export function WorldItemCard({
 		uncommon: '#22c55e',
 		rare: '#3b82f6',
 		epic: '#8b5cf6',
-		legendary: '#f59e0b'
+		legendary: '#f59e0b',
 	};
 
 	// Color de efecto basado en rareza
@@ -165,7 +175,7 @@ export function WorldItemCard({
 		uncommon: 5,
 		rare: 10,
 		epic: 15,
-		legendary: 20
+		legendary: 20,
 	};
 
 	const rarityGlow = rarityGlowMap[rarity?.toLowerCase()] || 0;
@@ -242,17 +252,15 @@ export function WorldItemCard({
 	}, [stats]);
 
 	// Procesar la imagen destacada
-	const processedFeaturedImage = featuredImage && typeof featuredImage === 'object'
-		? featuredImage
-		: null;
+	const processedFeaturedImage = featuredImage && typeof featuredImage === 'object' ? featuredImage : null;
 
 	// Render del componente
 	return (
 		<motion.article
 			className={cn(
-				"flex flex-col overflow-hidden border-border relative z-0",
-				disabled && "opacity-70 pointer-events-none",
-				interactive && !disabled && "cursor-pointer hover:shadow-lg transition-shadow duration-300",
+				'flex flex-col overflow-hidden border-border relative z-0',
+				disabled && 'opacity-70 pointer-events-none',
+				interactive && !disabled && 'cursor-pointer hover:shadow-lg transition-shadow duration-300',
 				className
 			)}
 			style={{
@@ -261,7 +269,7 @@ export function WorldItemCard({
 				borderRadius: tcgMode ? '8px' : undefined,
 				maxWidth: compact ? 300 : undefined,
 				boxShadow: tcgMode ? `0 0 ${rarityGlow}px ${primaryColor}30` : undefined,
-				...style
+				...style,
 			}}
 			whileHover={!disabled && interactive ? { y: -5 } : {}}
 			whileTap={!disabled && interactive && onClick ? { scale: 0.98 } : {}}
@@ -278,9 +286,9 @@ export function WorldItemCard({
 			{/* Card Container con efecto TCG */}
 			<div
 				className={cn(
-					"rounded-xl h-full w-full overflow-hidden transition-all duration-300 ease-out",
-					tcgMode && "shadow-md",
-					isHovered && tcgMode && "scale-[1.01]"
+					'rounded-xl h-full w-full overflow-hidden transition-all duration-300 ease-out',
+					tcgMode && 'shadow-md',
+					isHovered && tcgMode && 'scale-[1.01]'
 				)}
 				style={{
 					background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)`,
@@ -302,7 +310,7 @@ export function WorldItemCard({
 									transparent 100%)
 								`,
 								backgroundSize: '200% 200%',
-								animation: 'gradient-shift 3s ease infinite'
+								animation: 'gradient-shift 3s ease infinite',
 							}}
 						/>
 
@@ -313,25 +321,17 @@ export function WorldItemCard({
 								background: `radial-gradient(circle, ${rarityColor}50 0%, transparent 70%)`,
 							}}
 						>
-							<div className="w-full h-full flex items-center justify-center">
-								{icon}
-							</div>
+							<div className="w-full h-full flex items-center justify-center">{icon}</div>
 						</div>
 
 						{/* Indicador visual de rareza */}
 						{rarity && rarity.toLowerCase() !== 'common' && (
 							<div className="absolute top-2 right-2 z-10">
 								<div
-									className={cn(
-										"rounded-full p-1",
-										rarity.toLowerCase() === "legendary" && "animate-pulse"
-									)}
+									className={cn('rounded-full p-1', rarity.toLowerCase() === 'legendary' && 'animate-pulse')}
 									style={{ backgroundColor: `${rarityColor}30` }}
 								>
-									<Sparkles
-										className="h-4 w-4"
-										style={{ color: rarityColor }}
-									/>
+									<Sparkles className="h-4 w-4" style={{ color: rarityColor }} />
 								</div>
 							</div>
 						)}
@@ -341,19 +341,10 @@ export function WorldItemCard({
 				{/* Contenido estructurado de la tarjeta */}
 
 				{/* Encabezado de la tarjeta */}
-				<CardHeader
-					title={name}
-					subtitle={type || 'Objeto'}
-					icon={icon}
-					primaryColor={primaryColor}
-				/>
+				<CardHeader title={name} subtitle={type || 'Objeto'} icon={icon} primaryColor={primaryColor} />
 
 				{/* Sección de imágenes */}
-				<WorldItemCardImages
-					worldItemId={id}
-					primaryColor={primaryColor}
-					secondaryColor={secondaryColor}
-				/>
+				<WorldItemCardImages worldItemId={id} primaryColor={primaryColor} secondaryColor={secondaryColor} />
 
 				{/* Contenido principal */}
 				<WorldItemCardContent

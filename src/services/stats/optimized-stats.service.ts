@@ -28,7 +28,9 @@ export class OptimizedStatsService {
 	 * 🎯 Reemplazo optimizado para getAlbumStats() - Una consulta en lugar de 15+
 	 */
 	getAlbumStatsOptimized = unstable_cache(
-		async (albumId: string): Promise<{
+		async (
+			albumId: string
+		): Promise<{
 			imageCount: number;
 			videoCount: number;
 			totalSize: number;
@@ -85,7 +87,7 @@ export class OptimizedStatsService {
 				WHERE a.id = ${albumId}
 			`;
 
-			const stats = Array.isArray(statsQuery) ? statsQuery[0] as any : statsQuery;
+			const stats = Array.isArray(statsQuery) ? (statsQuery[0] as any) : statsQuery;
 
 			const breakdown = {
 				collections: Number(stats.collectionsCount) || 0,
@@ -98,7 +100,7 @@ export class OptimizedStatsService {
 				notes: Number(stats.notesCount) || 0,
 				wildcards: Number(stats.wildcardsCount) || 0,
 				properties: Number(stats.propertiesCount) || 0,
-				groups: Number(stats.groupsCount) || 0
+				groups: Number(stats.groupsCount) || 0,
 			};
 
 			return {
@@ -106,7 +108,7 @@ export class OptimizedStatsService {
 				videoCount: Number(stats.videoCount) || 0,
 				totalSize: (Number(stats.imageTotalSize) || 0) + (Number(stats.videoTotalSize) || 0),
 				entitiesCount: Object.values(breakdown).reduce((sum, count) => sum + count, 0),
-				breakdown
+				breakdown,
 			};
 		},
 		['album-stats'],
@@ -124,7 +126,8 @@ export class OptimizedStatsService {
 
 			// 🚀 Una consulta para todos los álbumes en lugar de N consultas separadas
 			const placeholders = albumIds.map(() => '?').join(',');
-			const batchStatsQuery = await this.prisma.$queryRawUnsafe(`
+			const batchStatsQuery = await this.prisma.$queryRawUnsafe(
+				`
 				SELECT
 					a.id as albumId,
 					a.name as albumName,
@@ -141,20 +144,25 @@ export class OptimizedStatsService {
 				LEFT JOIN Video v ON av.B = v.id
 				WHERE a.id IN (${placeholders})
 				GROUP BY a.id, a.name
-			`, ...albumIds);
+			`,
+				...albumIds
+			);
 
-			return (batchStatsQuery as any[]).reduce((acc, stats) => {
-				acc[stats.albumId] = {
-					albumId: stats.albumId,
-					albumName: stats.albumName,
-					imageCount: Number(stats.imageCount) || 0,
-					videoCount: Number(stats.videoCount) || 0,
-					totalSize: (Number(stats.imageTotalSize) || 0) + (Number(stats.videoTotalSize) || 0),
-					favoritesCount: (Number(stats.favoriteImagesCount) || 0) + (Number(stats.favoriteVideosCount) || 0),
-					totalCount: (Number(stats.imageCount) || 0) + (Number(stats.videoCount) || 0)
-				};
-				return acc;
-			}, {} as Record<string, any>);
+			return (batchStatsQuery as any[]).reduce(
+				(acc, stats) => {
+					acc[stats.albumId] = {
+						albumId: stats.albumId,
+						albumName: stats.albumName,
+						imageCount: Number(stats.imageCount) || 0,
+						videoCount: Number(stats.videoCount) || 0,
+						totalSize: (Number(stats.imageTotalSize) || 0) + (Number(stats.videoTotalSize) || 0),
+						favoritesCount: (Number(stats.favoriteImagesCount) || 0) + (Number(stats.favoriteVideosCount) || 0),
+						totalCount: (Number(stats.imageCount) || 0) + (Number(stats.videoCount) || 0),
+					};
+					return acc;
+				},
+				{} as Record<string, any>
+			);
 		},
 		['batch-album-stats'],
 		{ revalidate: 300, tags: ['album-stats'] }
@@ -203,7 +211,7 @@ export class OptimizedStatsService {
 					(SELECT COUNT(*) FROM Video WHERE isFavorite = true) as totalVideoFavorites
 			`;
 
-			const stats = Array.isArray(globalStatsQuery) ? globalStatsQuery[0] as any : globalStatsQuery;
+			const stats = Array.isArray(globalStatsQuery) ? (globalStatsQuery[0] as any) : globalStatsQuery;
 
 			return {
 				totalImages: Number(stats.totalImages) || 0,
@@ -219,7 +227,7 @@ export class OptimizedStatsService {
 				totalSize: (Number(stats.totalImageSize) || 0) + (Number(stats.totalVideoSize) || 0),
 				totalViews: Number(stats.totalViews) || 0,
 				totalDownloads: Number(stats.totalDownloads) || 0,
-				totalFavorites: (Number(stats.totalImageFavorites) || 0) + (Number(stats.totalVideoFavorites) || 0)
+				totalFavorites: (Number(stats.totalImageFavorites) || 0) + (Number(stats.totalVideoFavorites) || 0),
 			};
 		},
 		['global-stats'],
@@ -229,7 +237,9 @@ export class OptimizedStatsService {
 	 * 🎯 Estadísticas de grupo optimizadas - Reemplaza múltiples count() queries
 	 */
 	getGroupStatsOptimized = unstable_cache(
-		async (groupId: string): Promise<{
+		async (
+			groupId: string
+		): Promise<{
 			imageCount: number;
 			videoCount: number;
 			albumCount: number;
@@ -263,7 +273,7 @@ export class OptimizedStatsService {
 				WHERE g.id = ${groupId}
 			`;
 
-			const stats = Array.isArray(groupStatsQuery) ? groupStatsQuery[0] as any : groupStatsQuery;
+			const stats = Array.isArray(groupStatsQuery) ? (groupStatsQuery[0] as any) : groupStatsQuery;
 
 			const imageCount = Number(stats.imageCount) || 0;
 			const videoCount = Number(stats.videoCount) || 0;
@@ -280,8 +290,8 @@ export class OptimizedStatsService {
 					images: imageCount,
 					videos: videoCount,
 					albums: albumCount,
-					tags: tagCount
-				}
+					tags: tagCount,
+				},
 			};
 		},
 		['group-stats'],
@@ -293,15 +303,15 @@ export class OptimizedStatsService {
 	 */
 	getBatchTagStatsOptimized = unstable_cache(
 		async (tagIds?: string[]): Promise<Record<string, any>> => {
-			this.logger.debug(`📊 Obteniendo estadísticas por lotes para tags`);
+			this.logger.debug('📊 Obteniendo estadísticas por lotes para tags');
 
 			// Si no se proporcionan IDs, obtener todos los tags
-			const whereClause = tagIds && tagIds.length > 0
-				? `WHERE t.id IN (${tagIds.map(() => '?').join(',')})`
-				: '';
+			const whereClause = tagIds && tagIds.length > 0 ? `WHERE t.id IN (${tagIds.map(() => '?').join(',')})` : '';
 
-			const batchTagStatsQuery = tagIds && tagIds.length > 0
-				? await this.prisma.$queryRawUnsafe(`
+			const batchTagStatsQuery =
+				tagIds && tagIds.length > 0
+					? await this.prisma.$queryRawUnsafe(
+							`
 					SELECT
 						t.id as tagId,
 						t.name,
@@ -322,8 +332,10 @@ export class OptimizedStatsService {
 					LEFT JOIN Wildcard w ON tw.B = w.id
 					WHERE t.id IN (${tagIds.map(() => '?').join(',')})
 					GROUP BY t.id, t.name, t.color
-				`, ...tagIds)
-				: await this.prisma.$queryRaw`
+				`,
+							...tagIds
+						)
+					: await this.prisma.$queryRaw`
 					SELECT
 						t.id as tagId,
 						t.name,
@@ -358,8 +370,8 @@ export class OptimizedStatsService {
 						images: Number(stats.imageCount) || 0,
 						groups: Number(stats.groupCount) || 0,
 						properties: Number(stats.propertyCount) || 0,
-						wildcards: Number(stats.wildcardCount) || 0
-					}
+						wildcards: Number(stats.wildcardCount) || 0,
+					},
 				};
 				return acc;
 			}, {});
@@ -373,14 +385,15 @@ export class OptimizedStatsService {
 	 */
 	getBatchCollectionStatsOptimized = unstable_cache(
 		async (collectionIds?: string[]): Promise<Record<string, any>> => {
-			this.logger.debug(`📊 Obteniendo estadísticas por lotes para colecciones`);
+			this.logger.debug('📊 Obteniendo estadísticas por lotes para colecciones');
 
-			const whereClause = collectionIds && collectionIds.length > 0
-				? `WHERE c.id IN (${collectionIds.map(() => '?').join(',')})`
-				: '';
+			const whereClause =
+				collectionIds && collectionIds.length > 0 ? `WHERE c.id IN (${collectionIds.map(() => '?').join(',')})` : '';
 
-			const batchCollectionStatsQuery = collectionIds && collectionIds.length > 0
-				? await this.prisma.$queryRawUnsafe(`
+			const batchCollectionStatsQuery =
+				collectionIds && collectionIds.length > 0
+					? await this.prisma.$queryRawUnsafe(
+							`
 					SELECT
 						c.id as collectionId,
 						c.name,
@@ -400,8 +413,10 @@ export class OptimizedStatsService {
 					LEFT JOIN Wildcard w ON cw.B = w.id
 					WHERE c.id IN (${collectionIds.map(() => '?').join(',')})
 					GROUP BY c.id, c.name
-				`, ...collectionIds)
-				: await this.prisma.$queryRaw`
+				`,
+							...collectionIds
+						)
+					: await this.prisma.$queryRaw`
 					SELECT
 						c.id as collectionId,
 						c.name,
@@ -422,7 +437,9 @@ export class OptimizedStatsService {
 					GROUP BY c.id, c.name
 				`;
 
-			const statsArray = Array.isArray(batchCollectionStatsQuery) ? batchCollectionStatsQuery : [batchCollectionStatsQuery];
+			const statsArray = Array.isArray(batchCollectionStatsQuery)
+				? batchCollectionStatsQuery
+				: [batchCollectionStatsQuery];
 			return statsArray.reduce((acc: Record<string, any>, stats: any) => {
 				acc[stats.collectionId] = {
 					imageCount: Number(stats.imageCount) || 0,
@@ -434,8 +451,8 @@ export class OptimizedStatsService {
 						images: Number(stats.imageCount) || 0,
 						groups: Number(stats.groupCount) || 0,
 						properties: Number(stats.propertyCount) || 0,
-						wildcards: Number(stats.wildcardCount) || 0
-					}
+						wildcards: Number(stats.wildcardCount) || 0,
+					},
 				};
 				return acc;
 			}, {});
@@ -466,7 +483,7 @@ export class OptimizedStatsService {
 					(SELECT COUNT(*) FROM Note WHERE isFavorite = true) as noteCount
 			`;
 
-			const stats = Array.isArray(favoriteStatsQuery) ? favoriteStatsQuery[0] as any : favoriteStatsQuery;
+			const stats = Array.isArray(favoriteStatsQuery) ? (favoriteStatsQuery[0] as any) : favoriteStatsQuery;
 
 			const characterCount = Number(stats.characterCount) || 0;
 			const placeCount = Number(stats.placeCount) || 0;
@@ -476,7 +493,8 @@ export class OptimizedStatsService {
 			const promptCount = Number(stats.promptCount) || 0;
 			const noteCount = Number(stats.noteCount) || 0;
 
-			const total = characterCount + placeCount + worldItemCount + collectionCount + conceptCount + promptCount + noteCount;
+			const total =
+				characterCount + placeCount + worldItemCount + collectionCount + conceptCount + promptCount + noteCount;
 
 			return {
 				total,
@@ -487,82 +505,30 @@ export class OptimizedStatsService {
 					collection: collectionCount,
 					concept: conceptCount,
 					prompt: promptCount,
-					note: noteCount
-				}
+					note: noteCount,
+				},
 			};
 		},
 		['favorite-stats'],
 		{ revalidate: 300, tags: ['favorite-stats'] }
-	);
-					FROM Video v
-					LEFT JOIN _AlbumToVideo av ON v.id = av.B
-					LEFT JOIN Album a ON av.A = a.id
-					LEFT JOIN _TagToVideo tv ON v.id = tv.B
-					LEFT JOIN Tag t ON tv.A = t.id
-					LEFT JOIN _CharacterToVideo cv ON v.id = cv.B
-					LEFT JOIN Character c ON cv.A = c.id
-					LEFT JOIN VideoStats vs ON v.id = vs.videoId
-					WHERE v.id IN (${placeholders})
-					GROUP BY v.id, v.name, v.size, v.duration, v.width, v.height, vs.views, vs.downloads
-				`, ...videoIds);
-
-				return (videoStatsQuery as any[]).reduce((acc, stats) => {
-					acc[stats.videoId] = {
-						id: stats.videoId,
-						name: stats.name,
-						size: Number(stats.size) || 0,
-						duration: Number(stats.duration) || 0,
-						resolution: `${stats.width}x${stats.height}`,
-						albumsCount: Number(stats.albumsCount) || 0,
-						tagsCount: Number(stats.tagsCount) || 0,
-						charactersCount: Number(stats.charactersCount) || 0,
-						views: Number(stats.views) || 0,
-						downloads: Number(stats.downloads) || 0
-					};
-					return acc;
-				}, {} as Record<string, any>);
-			} else {
-				// Estadísticas generales de videos
-				const generalVideoStatsQuery = await this.prisma.$queryRaw`
-					SELECT
-						COUNT(*) as totalVideos,
-						COALESCE(SUM(size), 0) as totalSize,
-						COALESCE(AVG(duration), 0) as avgDuration,
-						COALESCE(SUM(CASE WHEN vs.views IS NOT NULL THEN vs.views ELSE 0 END), 0) as totalViews,
-						COALESCE(SUM(CASE WHEN vs.downloads IS NOT NULL THEN vs.downloads ELSE 0 END), 0) as totalDownloads,
-						COUNT(CASE WHEN v.isFavorite = true THEN 1 END) as totalFavorites
-					FROM Video v
-					LEFT JOIN VideoStats vs ON v.id = vs.videoId
-				`;
-
-				const stats = Array.isArray(generalVideoStatsQuery) ? generalVideoStatsQuery[0] as any : generalVideoStatsQuery;
-
-				return {
-					totalVideos: Number(stats.totalVideos) || 0,
-					totalSize: Number(stats.totalSize) || 0,
-					avgDuration: Number(stats.avgDuration) || 0,
-					totalViews: Number(stats.totalViews) || 0,
-					totalDownloads: Number(stats.totalDownloads) || 0,
-					totalFavorites: Number(stats.totalFavorites) || 0
-				};
-			}
-		},
-		['video-stats'],
-		{ revalidate: 300, tags: ['video-stats'] }
 	);
 
 	/**
 	 * 🎯 Top tags optimizado con una sola consulta
 	 */
 	getTopTagsOptimized = unstable_cache(
-		async (limit = 10): Promise<Array<{
-			id: string;
-			name: string;
-			color: string;
-			count: number;
-			imageCount: number;
-			videoCount: number;
-		}>> => {
+		async (
+			limit = 10
+		): Promise<
+			Array<{
+				id: string;
+				name: string;
+				color: string;
+				count: number;
+				imageCount: number;
+				videoCount: number;
+			}>
+		> => {
 			this.logger.debug(`📊 Obteniendo top ${limit} tags optimizado`);
 
 			// 🚀 Una consulta optimizada para obtener tags con conteos
@@ -583,13 +549,13 @@ export class OptimizedStatsService {
 				LIMIT ${limit}
 			`;
 
-			return (topTagsQuery as any[]).map(tag => ({
+			return (topTagsQuery as any[]).map((tag) => ({
 				id: tag.id,
 				name: tag.name,
 				color: tag.color || '#6B7280',
 				count: Number(tag.totalCount) || 0,
 				imageCount: Number(tag.imageCount) || 0,
-				videoCount: Number(tag.videoCount) || 0
+				videoCount: Number(tag.videoCount) || 0,
 			}));
 		},
 		['top-tags'],
@@ -615,5 +581,5 @@ export const optimizedStatsUtils = {
 	invalidateGlobalCache: () => {
 		// Invalidar en Next.js 15 cache
 		// Esta función se llamaría después de operaciones significativas
-	}
+	},
 };

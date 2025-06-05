@@ -1,15 +1,9 @@
 'use client';
 
-import { deletePlace, getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
+import { type PlaceWithStats, deletePlace, getPlaces } from '@/app/actions/places/place.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
@@ -65,22 +59,24 @@ export function PlacesSettings() {
 		totalPlaces: places.length,
 		totalImages: places.reduce((acc, place) => acc + (place._count?.images || 0), 0),
 		totalSize: places.reduce((acc, place) => acc + (place.totalSize || 0), 0),
-		unusedPlaces: places.filter(place => (place._count?.images || 0) === 0).length,
-		favoritePlaces: places.filter(place => place.isFavorite).length,
+		unusedPlaces: places.filter((place) => (place._count?.images || 0) === 0).length,
+		favoritePlaces: places.filter((place) => place.isFavorite).length,
 	};
 
 	// Filtrar lugares basados en los criterios seleccionados
-	const filteredPlaces = places.filter(place => {
+	const filteredPlaces = places.filter((place) => {
 		let matches = true;
 
 		// Filtrar por búsqueda
 		if (searchQuery) {
 			const normalizedQuery = searchQuery.toLowerCase();
-			matches = matches && Boolean(
-				place.name.toLowerCase().includes(normalizedQuery) ||
-				(place.description?.toLowerCase().includes(normalizedQuery)) ||
-				(place.region?.toLowerCase().includes(normalizedQuery))
-			);
+			matches =
+				matches &&
+				Boolean(
+					place.name.toLowerCase().includes(normalizedQuery) ||
+						place.description?.toLowerCase().includes(normalizedQuery) ||
+						place.region?.toLowerCase().includes(normalizedQuery)
+				);
 		}
 
 		// Filtrar por tipos
@@ -105,7 +101,7 @@ export function PlacesSettings() {
 	const handleDeletePlace = useCallback(async (id: string) => {
 		try {
 			await deletePlace(id);
-			setPlaces(prev => prev.filter(place => place.id !== id));
+			setPlaces((prev) => prev.filter((place) => place.id !== id));
 			setSelectedPlace(null);
 			setIsEditing(false);
 			toastService.success('Lugar eliminado');
@@ -125,18 +121,14 @@ export function PlacesSettings() {
 
 	// Manejar creación exitosa
 	const handlePlaceCreated = useCallback((newPlace: Place) => {
-		setPlaces(prev => [...prev, newPlace as unknown as PlaceWithStats]);
+		setPlaces((prev) => [...prev, newPlace as unknown as PlaceWithStats]);
 		toastService.success('Lugar creado');
 	}, []);
 
 	// Manejar actualización exitosa
 	const handlePlaceUpdated = useCallback((updatedPlace: Place) => {
-		setPlaces(prev =>
-			prev.map(place =>
-				place.id === updatedPlace.id
-					? { ...place, ...updatedPlace } as PlaceWithStats
-					: place
-			)
+		setPlaces((prev) =>
+			prev.map((place) => (place.id === updatedPlace.id ? ({ ...place, ...updatedPlace } as PlaceWithStats) : place))
 		);
 		toastService.success('Lugar actualizado');
 	}, []);
@@ -161,8 +153,8 @@ export function PlacesSettings() {
 	}, []);
 
 	// Extraer tipos y regiones únicos de los lugares
-	const uniqueTypes = Array.from(new Set(places.map(place => place.type).filter(Boolean))) as string[];
-	const uniqueRegions = Array.from(new Set(places.map(place => place.region).filter(Boolean))) as string[];
+	const uniqueTypes = Array.from(new Set(places.map((place) => place.type).filter(Boolean))) as string[];
+	const uniqueRegions = Array.from(new Set(places.map((place) => place.region).filter(Boolean))) as string[];
 
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
@@ -186,11 +178,7 @@ export function PlacesSettings() {
 						icon={Info}
 						title="Error al cargar lugares"
 						description={error}
-						actions={
-							<Button onClick={() => window.location.reload()}>
-								Intentar de nuevo
-							</Button>
-						}
+						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -215,11 +203,7 @@ export function PlacesSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button
-											size="sm"
-											variant="ghost"
-											className="h-6 w-6 p-0"
-										>
+										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
@@ -241,18 +225,16 @@ export function PlacesSettings() {
 											<div className="space-y-2">
 												<Label>Tipos</Label>
 												<div className="grid grid-cols-2 gap-2">
-													{uniqueTypes.map(type => (
+													{uniqueTypes.map((type) => (
 														<div key={type} className="flex items-center space-x-2">
 															<Checkbox
 																id={`type-${type}`}
 																checked={selectedTypes.includes(type)}
 																onCheckedChange={(checked) => {
 																	if (checked) {
-																		setSelectedTypes(prev => [...prev, type]);
+																		setSelectedTypes((prev) => [...prev, type]);
 																	} else {
-																		setSelectedTypes(prev =>
-																			prev.filter(t => t !== type)
-																		);
+																		setSelectedTypes((prev) => prev.filter((t) => t !== type));
 																	}
 																}}
 															/>
@@ -267,18 +249,16 @@ export function PlacesSettings() {
 											<div className="space-y-2">
 												<Label>Regiones</Label>
 												<div className="grid grid-cols-2 gap-2">
-													{uniqueRegions.map(region => (
+													{uniqueRegions.map((region) => (
 														<div key={region} className="flex items-center space-x-2">
 															<Checkbox
 																id={`region-${region}`}
 																checked={selectedRegions.includes(region)}
 																onCheckedChange={(checked) => {
 																	if (checked) {
-																		setSelectedRegions(prev => [...prev, region]);
+																		setSelectedRegions((prev) => [...prev, region]);
 																	} else {
-																		setSelectedRegions(prev =>
-																			prev.filter(r => r !== region)
-																		);
+																		setSelectedRegions((prev) => prev.filter((r) => r !== region));
 																	}
 																}}
 															/>
@@ -296,7 +276,9 @@ export function PlacesSettings() {
 													checked={onlyFavorites}
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor="favorites" className="text-xs">Solo favoritos</Label>
+												<Label htmlFor="favorites" className="text-xs">
+													Solo favoritos
+												</Label>
 											</div>
 
 											<div className="flex justify-between">
@@ -311,7 +293,10 @@ export function PlacesSettings() {
 									</PopoverContent>
 								</Popover>
 								<Button
-									onClick={() => { setSelectedPlace(null); setIsEditing(false); }}
+									onClick={() => {
+										setSelectedPlace(null);
+										setIsEditing(false);
+									}}
 									size="sm"
 									variant="ghost"
 									className="h-6 w-6 p-0"
@@ -339,9 +324,7 @@ export function PlacesSettings() {
 									icon={MapPin}
 									title="No hay lugares"
 									description={
-										places.length > 0
-											? "No se encontraron lugares con los filtros aplicados"
-											: "Crea tu primer lugar"
+										places.length > 0 ? 'No se encontraron lugares con los filtros aplicados' : 'Crea tu primer lugar'
 									}
 									className="py-6"
 									actions={
@@ -409,9 +392,7 @@ export function PlacesSettings() {
 					<CardHeader className="py-2 px-3">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-sm">
-									{isEditing ? 'Editar Lugar' : 'Nuevo Lugar'}
-								</CardTitle>
+								<CardTitle className="text-sm">{isEditing ? 'Editar Lugar' : 'Nuevo Lugar'}</CardTitle>
 								<CardDescription className="text-xs">
 									{isEditing
 										? 'Modifica los detalles del lugar seleccionado'
@@ -421,12 +402,7 @@ export function PlacesSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedPlace && (
 									<>
-										<Button
-											variant="outline"
-											size="sm"
-											className="h-7 text-xs"
-											onClick={handleReset}
-										>
+										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
 											Cancelar
 										</Button>
 										<Button
@@ -440,12 +416,7 @@ export function PlacesSettings() {
 										</Button>
 									</>
 								)}
-								<Button
-									type="submit"
-									size="sm"
-									className="h-7 text-xs"
-									form="place-form"
-								>
+								<Button type="submit" size="sm" className="h-7 text-xs" form="place-form">
 									<Save className="h-3 w-3 mr-1" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
@@ -473,9 +444,11 @@ export function PlacesSettings() {
 											<div className="flex flex-col p-4 border rounded-lg bg-background">
 												<div
 													className="w-full aspect-video mb-3 rounded-md flex items-center justify-center"
-													style={{ backgroundColor: (previewData?.color || selectedPlace?.color || '#3b82f6') }}
+													style={{ backgroundColor: previewData?.color || selectedPlace?.color || '#3b82f6' }}
 												>
-													<span className="text-4xl text-white">{previewData?.emoji || selectedPlace?.emoji || '📍'}</span>
+													<span className="text-4xl text-white">
+														{previewData?.emoji || selectedPlace?.emoji || '📍'}
+													</span>
 												</div>
 												<h3 className="text-lg font-medium">
 													{previewData?.name || selectedPlace?.name || 'Nuevo Lugar'}
@@ -506,7 +479,8 @@ export function PlacesSettings() {
 
 												{(previewData?.population || selectedPlace?.population) && (
 													<p className="mt-1 text-xs">
-														<span className="font-medium">Población:</span> {previewData?.population || selectedPlace?.population}
+														<span className="font-medium">Población:</span>{' '}
+														{previewData?.population || selectedPlace?.population}
 													</p>
 												)}
 
@@ -517,9 +491,7 @@ export function PlacesSettings() {
 										) : (
 											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
 												<MapPin className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">
-													Vista previa
-												</p>
+												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
 											</div>
 										)}
 									</div>

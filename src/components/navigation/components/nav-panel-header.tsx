@@ -4,13 +4,47 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProfileContext } from '@/lib/contexts';
-import { Briefcase, Bug, ChevronLeft, ChevronRight, CircleDot, Citrus, Coffee, Eye, Home, IdCard, Leaf, Moon, Palette, Settings2, Sun, Sunset, TreePine, Waves } from 'lucide-react';
+import {
+	Briefcase,
+	Bug,
+	ChevronLeft,
+	ChevronRight,
+	CircleDot,
+	Citrus,
+	Coffee,
+	Eye,
+	Home,
+	IdCard,
+	Leaf,
+	Moon,
+	Palette,
+	Settings2,
+	Sun,
+	Sunset,
+	TreePine,
+	Waves,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTheme } from 'next-themes';
 import { memo, useCallback, useMemo } from 'react';
 
 // Constante con los temas disponibles
-const THEMES = ['light', 'dark', 'cafe', 'violeta', 'madera', 'nocturno', 'verde', 'atardecer', 'corporativo', 'carbon', 'teal', 'citrico', 'aurora', 'neon'];
+const THEMES = [
+	'light',
+	'dark',
+	'cafe',
+	'violeta',
+	'madera',
+	'nocturno',
+	'verde',
+	'atardecer',
+	'corporativo',
+	'carbon',
+	'teal',
+	'citrico',
+	'aurora',
+	'neon',
+];
 
 // Función para obtener el siguiente tema
 function getNextTheme(currentTheme: string | undefined): string {
@@ -232,7 +266,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 					<div className="flex flex-col gap-2">
 						<MemoizedHeaderButton
 							icon={<ChevronRight className="h-3.5 w-3.5" />}
-							onClick={onToggleCollapse || (() => { })}
+							onClick={onToggleCollapse || (() => {})}
 							tooltipTitle="Expandir Panel"
 							tooltipContent=""
 							tooltipSide="right"
@@ -321,7 +355,7 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 						{/* Botón de colapsar */}
 						<MemoizedHeaderButton
 							icon={<ChevronLeft className="h-3.5 w-3.5" />}
-							onClick={onToggleCollapse || (() => { })}
+							onClick={onToggleCollapse || (() => {})}
 							tooltipTitle="Colapsar Panel"
 							tooltipContent=""
 						/>

@@ -17,18 +17,18 @@ import { tags } from './tag';
 
 // Definición de la tabla
 export const albums = sqliteTable(
-    'Album',
-    {
-        ...organizationFields,
-    },
-    (table) => {
-        const indexes = createIndexes('album');
-        return {
-            nameIdx: indexes.nameIdx.on(table.name),
-            categoryIdx: indexes.categoryIdx.on(table.category),
-            createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
-        };
-    }
+	'Album',
+	{
+		...organizationFields,
+	},
+	(table) => {
+		const indexes = createIndexes('album');
+		return {
+			nameIdx: indexes.nameIdx.on(table.name),
+			categoryIdx: indexes.categoryIdx.on(table.category),
+			createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
+		};
+	}
 );
 
 // Tablas de relación
@@ -48,19 +48,19 @@ export const albumsToProperties = createRelationTable('AlbumToProperty', 'Album'
 
 // Definición de relaciones
 const relatedEntities = {
-    images,
-    videos,
-    collections,
-    tags,
-    groups,
-    characters,
-    places,
-    worldItems,
-    concepts,
-    notes,
-    prompts,
-    wildcards,
-    properties,
+	images,
+	videos,
+	collections,
+	tags,
+	groups,
+	characters,
+	places,
+	worldItems,
+	concepts,
+	notes,
+	prompts,
+	wildcards,
+	properties,
 };
 
 // Relaciones

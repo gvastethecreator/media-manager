@@ -17,29 +17,29 @@ export type FileStore = CoreState & CoreActions & UIState & UIActions & FiltersS
 
 // Crear el store con slices
 export const useFileStoreBase = create<FileStore>()(
-  devtools(
-    persist(
-      (...a) => ({
-        ...createCoreSlice(...a),
-        ...createUISlice(...a),
-        ...createFiltersSlice(...a),
-      }),
-      {
-        name: 'file-store',
-        partialize: (state) => ({
-          // Solo persistir configuraciones de UI y filtros
-          selectedFileIds: state.selectedFileIds,
-          filterOptions: state.filterOptions,
-          sortBy: state.sortBy,
-          sortDirection: state.sortDirection,
-          viewMode: state.viewMode,
-          lastVisitedPath: state.lastVisitedPath,
-          expandedFolders: state.expandedFolders,
-        }),
-      }
-    ),
-    { name: 'FileStore' }
-  )
+	devtools(
+		persist(
+			(...a) => ({
+				...createCoreSlice(...a),
+				...createUISlice(...a),
+				...createFiltersSlice(...a),
+			}),
+			{
+				name: 'file-store',
+				partialize: (state) => ({
+					// Solo persistir configuraciones de UI y filtros
+					selectedFileIds: state.selectedFileIds,
+					filterOptions: state.filterOptions,
+					sortBy: state.sortBy,
+					sortDirection: state.sortDirection,
+					viewMode: state.viewMode,
+					lastVisitedPath: state.lastVisitedPath,
+					expandedFolders: state.expandedFolders,
+				}),
+			}
+		),
+		{ name: 'FileStore' }
+	)
 );
 
 // Exportar store con selectores

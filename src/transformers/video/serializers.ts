@@ -6,14 +6,14 @@
 import { createLogger } from '@/lib/logger';
 import { VideoSchema } from '@/types/entities/video/schema';
 import type {
-    VideoBase,
-    VideoComplete,
-    VideoCreateInput,
-    VideoMetadata,
-    VideoRelations,
-    VideoUpdateInput,
-    VideoVisualConfig,
-    VideoVisualConfigComplete
+	VideoBase,
+	VideoComplete,
+	VideoCreateInput,
+	VideoMetadata,
+	VideoRelations,
+	VideoUpdateInput,
+	VideoVisualConfig,
+	VideoVisualConfigComplete,
 } from '@/types/entities/video/types';
 
 // Logger específico para el transformer de Video
@@ -106,12 +106,7 @@ export function toPrismaVideo(
 
 		return prismaData;
 	} catch (error) {
-		return handleTransformerError(
-			error,
-			'Error transformando video a formato Prisma',
-			undefined,
-			false
-		);
+		return handleTransformerError(error, 'Error transformando video a formato Prisma', undefined, false);
 	}
 }
 
@@ -130,7 +125,7 @@ export function fromPrismaVideo(
 
 		// Base del video
 		const videoComplete: Record<string, any> = {
-			...prismaVideo
+			...prismaVideo,
 		};
 
 		// Deserializar metadatos si es un string y está habilitada la opción
@@ -142,9 +137,19 @@ export function fromPrismaVideo(
 		if (includeRelations) {
 			// Mantener todas las relaciones que existan en el objeto Prisma
 			const relationsFields: (keyof VideoRelations)[] = [
-				'folder', 'albums', 'collections', 'tags', 'characters',
-				'places', 'worldItems', 'concepts', 'prompts', 'notes',
-				'wildcards', 'properties', 'groups'
+				'folder',
+				'albums',
+				'collections',
+				'tags',
+				'characters',
+				'places',
+				'worldItems',
+				'concepts',
+				'prompts',
+				'notes',
+				'wildcards',
+				'properties',
+				'groups',
 			];
 
 			for (const field of relationsFields) {
@@ -182,7 +187,7 @@ export function fromPrismaVideo(
 				height: prismaVideo?.height || 0,
 				createdAt: prismaVideo?.createdAt || new Date(),
 				updatedAt: prismaVideo?.updatedAt || new Date(),
-				folderId: prismaVideo?.folderId || null
+				folderId: prismaVideo?.folderId || null,
 			} as VideoComplete,
 			true
 		);
@@ -198,12 +203,7 @@ export function serializeVideoMetadata(metadata: VideoMetadata): string {
 	try {
 		return JSON.stringify(metadata);
 	} catch (error) {
-		return handleTransformerError(
-			error,
-			'Error serializando metadatos de video',
-			'{}',
-			true
-		);
+		return handleTransformerError(error, 'Error serializando metadatos de video', '{}', true);
 	}
 }
 
@@ -216,12 +216,7 @@ export function deserializeVideoMetadata(metadataStr: string): VideoMetadata {
 	try {
 		return JSON.parse(metadataStr) as VideoMetadata;
 	} catch (error) {
-		return handleTransformerError(
-			error,
-			'Error deserializando metadatos de video',
-			{} as VideoMetadata,
-			true
-		);
+		return handleTransformerError(error, 'Error deserializando metadatos de video', {} as VideoMetadata, true);
 	}
 }
 
@@ -230,9 +225,7 @@ export function deserializeVideoMetadata(metadataStr: string): VideoMetadata {
  * @param config Configuración visual
  * @returns Objeto formateado para Prisma
  */
-export function toPrismaVideoVisualConfig(
-	config: VideoVisualConfig
-): Record<string, any> {
+export function toPrismaVideoVisualConfig(config: VideoVisualConfig): Record<string, any> {
 	try {
 		// Extraer campos que no deben ir al modelo Prisma
 		const { ...prismaData } = config;
@@ -258,7 +251,7 @@ export function fromVideoVisualConfigComplete(
 	try {
 		// Crear configuración visual completa
 		const visualConfig: VideoVisualConfigComplete = {
-			...prismaConfig
+			...prismaConfig,
 		};
 
 		return visualConfig;
@@ -273,7 +266,7 @@ export function fromVideoVisualConfigComplete(
 				contrast: prismaConfig?.contrast || 1,
 				saturation: prismaConfig?.saturation || 1,
 				createdAt: prismaConfig?.createdAt || new Date(),
-				updatedAt: prismaConfig?.updatedAt || new Date()
+				updatedAt: prismaConfig?.updatedAt || new Date(),
 			},
 			true
 		);
@@ -289,12 +282,7 @@ export function validateVideo(video: unknown): VideoBase {
 	try {
 		return VideoSchema.parse(video);
 	} catch (error) {
-		return handleTransformerError(
-			error,
-			'Error validando video contra esquema',
-			undefined,
-			false
-		);
+		return handleTransformerError(error, 'Error validando video contra esquema', undefined, false);
 	}
 }
 
@@ -337,7 +325,7 @@ export function extendVideo(
 				createdAt: video?.createdAt || new Date(),
 				updatedAt: video?.updatedAt || new Date(),
 				folderId: video?.folderId || null,
-				thumbnailUrl: video?.id ? `/api/videos/${video.id}/thumbnail` : null
+				thumbnailUrl: video?.id ? `/api/videos/${video.id}/thumbnail` : null,
 			} as VideoComplete,
 			true
 		);
@@ -355,7 +343,7 @@ export function extendVideos(
 	options: VideoTransformOptions = {}
 ): VideoComplete[] {
 	try {
-		return videos.map(video => extendVideo(video, options));
+		return videos.map((video) => extendVideo(video, options));
 	} catch (error) {
 		log.error('Error extendiendo múltiples videos', { error });
 		// Intentar procesar cada uno individualmente para recuperar los que se puedan

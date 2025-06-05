@@ -5,23 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage
-} from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
@@ -51,7 +37,7 @@ const createPlaceSchema = z.object({
 	notableLocations: z.string().max(200, 'Máximo 200 caracteres').optional().nullable(),
 	notablePersons: z.string().max(200, 'Máximo 200 caracteres').optional().nullable(),
 	category: z.string().optional().nullable(),
-	isFavorite: z.boolean().default(false)
+	isFavorite: z.boolean().default(false),
 });
 
 type CreatePlaceFormValues = z.infer<typeof createPlaceSchema>;
@@ -74,7 +60,7 @@ const defaultValues: Partial<CreatePlaceFormValues> = {
 	notableLocations: null,
 	notablePersons: null,
 	category: null,
-	isFavorite: false
+	isFavorite: false,
 };
 
 // Definir una interfaz extendida para place con las propiedades adicionales
@@ -94,20 +80,14 @@ interface CreatePlaceFormProps {
 	onPreview?: (data: any) => void;
 }
 
-export function CreatePlaceForm({
-	place,
-	isEditing = false,
-	onCreated,
-	onUpdated,
-	onCancel
-}: CreatePlaceFormProps) {
+export function CreatePlaceForm({ place, isEditing = false, onCreated, onUpdated, onCancel }: CreatePlaceFormProps) {
 	const [isPending, setIsPending] = useState(false);
 
 	// Inicializar el formulario con react-hook-form
 	const form = useForm<CreatePlaceFormValues>({
 		resolver: zodResolver(createPlaceSchema),
 		defaultValues,
-		mode: 'onChange'
+		mode: 'onChange',
 	});
 
 	// Cargar los datos del lugar si está en modo edición
@@ -130,7 +110,7 @@ export function CreatePlaceForm({
 				notableLocations: (place as ExtendedPlace).notableLocations || null,
 				notablePersons: (place as ExtendedPlace).notablePersons || null,
 				category: place.category || null,
-				isFavorite: place.isFavorite || false
+				isFavorite: place.isFavorite || false,
 			};
 
 			form.reset(formValues);
@@ -161,17 +141,17 @@ export function CreatePlaceForm({
 	function generateTagEmoji(name: string, category?: string): string {
 		// Mapeo básico de categorías a emojis
 		const categoryEmojis: Record<string, string> = {
-			'Ciudad': '🏙️',
-			'Pueblo': '🏘️',
-			'Aldea': '🏡',
-			'Bosque': '🌲',
-			'Montaña': '⛰️',
-			'Desierto': '🏜️',
-			'Castillo': '🏰',
-			'Ruina': '🏚️',
-			'Mazmorra': '🧱',
-			'Cueva': '🕳️',
-			'Fortaleza': '🏯',
+			Ciudad: '🏙️',
+			Pueblo: '🏘️',
+			Aldea: '🏡',
+			Bosque: '🌲',
+			Montaña: '⛰️',
+			Desierto: '🏜️',
+			Castillo: '🏰',
+			Ruina: '🏚️',
+			Mazmorra: '🧱',
+			Cueva: '🕳️',
+			Fortaleza: '🏯',
 		};
 
 		// Si hay categoría y está en el mapeo, usar ese emoji
@@ -211,13 +191,13 @@ export function CreatePlaceForm({
 		}
 
 		const newColor = generateTagColor(baseText);
-		const newEmoji = generateTagEmoji(baseText, (category || type) || undefined);
+		const newEmoji = generateTagEmoji(baseText, category || type || undefined);
 
 		form.setValue('color', newColor);
 		form.setValue('emoji', newEmoji);
 
 		toastService.success('Sugerencias generadas', {
-			description: 'Se han generado nuevas sugerencias de color y emoji.'
+			description: 'Se han generado nuevas sugerencias de color y emoji.',
 		});
 	};
 
@@ -234,7 +214,7 @@ export function CreatePlaceForm({
 				}
 
 				toastService.success('Lugar actualizado', {
-					description: 'El lugar ha sido actualizado correctamente.'
+					description: 'El lugar ha sido actualizado correctamente.',
 				});
 			} else {
 				const newPlace = await createPlace(values);
@@ -246,16 +226,14 @@ export function CreatePlaceForm({
 				form.reset(defaultValues);
 
 				toastService.success('Lugar creado', {
-					description: 'El lugar ha sido creado correctamente.'
+					description: 'El lugar ha sido creado correctamente.',
 				});
 			}
 		} catch (error) {
-			const errorMessage = error instanceof Error
-				? error.message
-				: 'Ocurrió un error al procesar el lugar';
+			const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error al procesar el lugar';
 
 			toastService.error('Error', {
-				description: errorMessage
+				description: errorMessage,
 			});
 		} finally {
 			setIsPending(false);
@@ -277,9 +255,7 @@ export function CreatePlaceForm({
 									<FormControl>
 										<Input placeholder="Nombre del lugar" {...field} />
 									</FormControl>
-									<FormDescription>
-										Nombre único que identifica este lugar
-									</FormDescription>
+									<FormDescription>Nombre único que identifica este lugar</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -300,9 +276,7 @@ export function CreatePlaceForm({
 											value={field.value || ''}
 										/>
 									</FormControl>
-									<FormDescription>
-										Una descripción breve que ayude a identificar este lugar
-									</FormDescription>
+									<FormDescription>Una descripción breve que ayude a identificar este lugar</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -318,15 +292,9 @@ export function CreatePlaceForm({
 								<FormItem>
 									<FormLabel>Emoji</FormLabel>
 									<FormControl>
-										<EmojiPicker
-											value={field.value}
-											onChange={field.onChange}
-											onEmojiSelect={field.onChange}
-										/>
+										<EmojiPicker value={field.value} onChange={field.onChange} onEmojiSelect={field.onChange} />
 									</FormControl>
-									<FormDescription>
-										Un emoji representativo
-									</FormDescription>
+									<FormDescription>Un emoji representativo</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -340,14 +308,9 @@ export function CreatePlaceForm({
 								<FormItem>
 									<FormLabel>Color</FormLabel>
 									<FormControl>
-										<ColorPicker
-											value={field.value}
-											onChange={field.onChange}
-										/>
+										<ColorPicker value={field.value} onChange={field.onChange} />
 									</FormControl>
-									<FormDescription>
-										Color representativo
-									</FormDescription>
+									<FormDescription>Color representativo</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -364,26 +327,21 @@ export function CreatePlaceForm({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Tipo</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										value={field.value || ''}
-									>
+									<Select onValueChange={field.onChange} value={field.value || ''}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Seleccionar tipo" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											{Object.values(PlaceType).map(type => (
+											{Object.values(PlaceType).map((type) => (
 												<SelectItem key={type} value={type}>
 													{type}
 												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
-									<FormDescription>
-										El tipo específico de lugar
-									</FormDescription>
+									<FormDescription>El tipo específico de lugar</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -396,26 +354,21 @@ export function CreatePlaceForm({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Categoría</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										value={field.value || ''}
-									>
+									<Select onValueChange={field.onChange} value={field.value || ''}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Seleccionar categoría" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											{Object.values(PlaceCategory).map(category => (
+											{Object.values(PlaceCategory).map((category) => (
 												<SelectItem key={category} value={category}>
 													{category}
 												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
-									<FormDescription>
-										Categoría general del lugar
-									</FormDescription>
+									<FormDescription>Categoría general del lugar</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -431,15 +384,9 @@ export function CreatePlaceForm({
 								<FormItem>
 									<FormLabel>Región</FormLabel>
 									<FormControl>
-										<Input
-											placeholder="Región a la que pertenece"
-											{...field}
-											value={field.value || ''}
-										/>
+										<Input placeholder="Región a la que pertenece" {...field} value={field.value || ''} />
 									</FormControl>
-									<FormDescription>
-										Ubicación geográfica más amplia
-									</FormDescription>
+									<FormDescription>Ubicación geográfica más amplia</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -464,9 +411,7 @@ export function CreatePlaceForm({
 											}}
 										/>
 									</FormControl>
-									<FormDescription>
-										Número aproximado de habitantes
-									</FormDescription>
+									<FormDescription>Número aproximado de habitantes</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -481,26 +426,21 @@ export function CreatePlaceForm({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Clima</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										value={field.value || ''}
-									>
+									<Select onValueChange={field.onChange} value={field.value || ''}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Seleccionar clima" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											{Object.values(ClimateType).map(climate => (
+											{Object.values(ClimateType).map((climate) => (
 												<SelectItem key={climate} value={climate}>
 													{climate}
 												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
-									<FormDescription>
-										Condiciones climáticas predominantes
-									</FormDescription>
+									<FormDescription>Condiciones climáticas predominantes</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -513,26 +453,21 @@ export function CreatePlaceForm({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>Gobierno</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										value={field.value || ''}
-									>
+									<Select onValueChange={field.onChange} value={field.value || ''}>
 										<FormControl>
 											<SelectTrigger>
 												<SelectValue placeholder="Seleccionar gobierno" />
 											</SelectTrigger>
 										</FormControl>
 										<SelectContent>
-											{Object.values(GovernmentType).map(government => (
+											{Object.values(GovernmentType).map((government) => (
 												<SelectItem key={government} value={government}>
 													{government}
 												</SelectItem>
 											))}
 										</SelectContent>
 									</Select>
-									<FormDescription>
-										Tipo de gobierno o liderazgo
-									</FormDescription>
+									<FormDescription>Tipo de gobierno o liderazgo</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -557,9 +492,7 @@ export function CreatePlaceForm({
 											value={field.value || ''}
 										/>
 									</FormControl>
-									<FormDescription>
-										Principales actividades económicas
-									</FormDescription>
+									<FormDescription>Principales actividades económicas</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -580,9 +513,7 @@ export function CreatePlaceForm({
 											value={field.value || ''}
 										/>
 									</FormControl>
-									<FormDescription>
-										Aspectos culturales destacables
-									</FormDescription>
+									<FormDescription>Aspectos culturales destacables</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -603,9 +534,7 @@ export function CreatePlaceForm({
 											value={field.value || ''}
 										/>
 									</FormControl>
-									<FormDescription>
-										Eventos históricos importantes
-									</FormDescription>
+									<FormDescription>Eventos históricos importantes</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -628,9 +557,7 @@ export function CreatePlaceForm({
 											value={field.value || ''}
 										/>
 									</FormControl>
-									<FormDescription>
-										Sitios de interés dentro del lugar
-									</FormDescription>
+									<FormDescription>Sitios de interés dentro del lugar</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -651,9 +578,7 @@ export function CreatePlaceForm({
 											value={field.value || ''}
 										/>
 									</FormControl>
-									<FormDescription>
-										Personajes relevantes del lugar
-									</FormDescription>
+									<FormDescription>Personajes relevantes del lugar</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -669,16 +594,11 @@ export function CreatePlaceForm({
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
 								<FormControl>
-									<Checkbox
-										checked={field.value}
-										onCheckedChange={field.onChange}
-									/>
+									<Checkbox checked={field.value} onCheckedChange={field.onChange} />
 								</FormControl>
 								<div className="space-y-1 leading-none">
 									<FormLabel>Marcar como favorito</FormLabel>
-									<FormDescription>
-										Los lugares favoritos aparecerán destacados en la aplicación
-									</FormDescription>
+									<FormDescription>Los lugares favoritos aparecerán destacados en la aplicación</FormDescription>
 								</div>
 							</FormItem>
 						)}
@@ -688,19 +608,11 @@ export function CreatePlaceForm({
 				<div className="flex justify-between">
 					<div className="flex gap-2">
 						{onCancel && (
-							<Button
-								type="button"
-								variant="outline"
-								onClick={onCancel}
-							>
+							<Button type="button" variant="outline" onClick={onCancel}>
 								Cancelar
 							</Button>
 						)}
-						<Button
-							type="button"
-							variant="outline"
-							onClick={generateSuggestions}
-						>
+						<Button type="button" variant="outline" onClick={generateSuggestions}>
 							<SparklesIcon className="mr-2 h-4 w-4" />
 							Generar sugerencias
 						</Button>

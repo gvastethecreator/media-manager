@@ -25,7 +25,7 @@ export function WorldItemCardFooter({
 	category = 'Objeto',
 	type = 'ITEM',
 	primaryColor,
-	secondaryColor
+	secondaryColor,
 }: WorldItemCardFooterProps) {
 	// Convertir fechas a objetos Date si son strings
 	const createdAtDate = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
@@ -34,11 +34,11 @@ export function WorldItemCardFooter({
 	// Calcular tiempo relativo
 	const createdTimeAgo = formatDistanceToNow(createdAtDate, {
 		addSuffix: true,
-		locale: es
+		locale: es,
 	});
 	const updatedTimeAgo = formatDistanceToNow(updatedAtDate, {
 		addSuffix: true,
-		locale: es
+		locale: es,
 	});
 
 	// Mapear el tipo a un icono
@@ -58,28 +58,20 @@ export function WorldItemCardFooter({
 			className="px-3 py-2 text-xs text-white/80"
 			style={{
 				background: `linear-gradient(to top, ${secondaryColor}90, ${secondaryColor}60)`,
-				borderTop: `1px solid ${primaryColor}40`
+				borderTop: `1px solid ${primaryColor}40`,
 			}}
 		>
 			<div className="flex justify-between items-center mb-1.5">
 				{/* Categoría del objeto */}
 				<div className="flex items-center">
 					{getTypeIcon()}
-					<span className="uppercase tracking-wide font-medium">
-						{category || type}
-					</span>
+					<span className="uppercase tracking-wide font-medium">{category || type}</span>
 				</div>
 
 				{/* Contador de imágenes y favorito */}
 				<div className="flex items-center space-x-2">
 					{/* Indicador de favorito */}
-					{isFavorite && (
-						<Star
-							size={14}
-							className="fill-yellow-400 text-yellow-400"
-							aria-label="Favorito"
-						/>
-					)}
+					{isFavorite && <Star size={14} className="fill-yellow-400 text-yellow-400" aria-label="Favorito" />}
 
 					{/* Contador de imágenes */}
 					<div className="flex items-center">
@@ -93,15 +85,11 @@ export function WorldItemCardFooter({
 			<div className="flex justify-between text-[0.65rem] text-white/60">
 				<div className="flex items-center">
 					<Calendar size={12} className="mr-1" />
-					<span title={`Creado: ${createdAtDate.toLocaleString()}`}>
-						{createdTimeAgo}
-					</span>
+					<span title={`Creado: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
 				</div>
 				<div className="flex items-center">
 					<Clock size={12} className="mr-1" />
-					<span title={`Actualizado: ${updatedAtDate.toLocaleString()}`}>
-						{updatedTimeAgo}
-					</span>
+					<span title={`Actualizado: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
 				</div>
 			</div>
 		</div>

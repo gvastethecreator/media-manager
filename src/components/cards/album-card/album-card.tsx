@@ -66,7 +66,7 @@ export function AlbumCard({
 	style,
 	compact = false,
 	isSelected = false,
-	tcgMode = false
+	tcgMode = false,
 }: AlbumCardProps) {
 	// Calcular valores derivados
 	const imagesCount = album._count?.images || 0;
@@ -211,10 +211,7 @@ export function AlbumCard({
 			{/* Resplandor de borde en hover - solo visible en modo TCG */}
 			{tcgMode && (
 				<div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-					<div
-						className="absolute inset-0 rounded-[4.75%] blur-md -z-10"
-						style={glowStyle}
-					/>
+					<div className="absolute inset-0 rounded-[4.75%] blur-md -z-10" style={glowStyle} />
 				</div>
 			)}
 
@@ -240,49 +237,59 @@ export function AlbumCard({
 								transparent 100%)
 							`,
 							backgroundSize: '200% 200%',
-							animation: 'gradient-shift 3s ease infinite'
+							animation: 'gradient-shift 3s ease infinite',
 						}}
 					/>
 				</>
 			)}
 
 			{/* Marco interior tipo TCG - solo visible en modo TCG */}
-			{tcgMode && (
-				<div className="absolute inset-2 rounded-[4%] border border-white/20 pointer-events-none z-0" />
-			)}
+			{tcgMode && <div className="absolute inset-2 rounded-[4%] border border-white/20 pointer-events-none z-0" />}
 
 			{/* Esquinas y marcos decorativos estilo TCG - solo visibles en modo TCG */}
 			{tcgMode && (
 				<>
-					<div className="absolute top-1 left-1 w-5 h-5 border-t-2 border-l-2 rounded-tl-md z-20"
-						style={{ borderColor: `${primaryColor}` }} />
-					<div className="absolute top-1 right-1 w-5 h-5 border-t-2 border-r-2 rounded-tr-md z-20"
-						style={{ borderColor: `${primaryColor}` }} />
-					<div className="absolute bottom-1 left-1 w-5 h-5 border-b-2 border-l-2 rounded-bl-md z-20"
-						style={{ borderColor: `${primaryColor}` }} />
-					<div className="absolute bottom-1 right-1 w-5 h-5 border-b-2 border-r-2 rounded-br-md z-20"
-						style={{ borderColor: `${primaryColor}` }} />
+					<div
+						className="absolute top-1 left-1 w-5 h-5 border-t-2 border-l-2 rounded-tl-md z-20"
+						style={{ borderColor: `${primaryColor}` }}
+					/>
+					<div
+						className="absolute top-1 right-1 w-5 h-5 border-t-2 border-r-2 rounded-tr-md z-20"
+						style={{ borderColor: `${primaryColor}` }}
+					/>
+					<div
+						className="absolute bottom-1 left-1 w-5 h-5 border-b-2 border-l-2 rounded-bl-md z-20"
+						style={{ borderColor: `${primaryColor}` }}
+					/>
+					<div
+						className="absolute bottom-1 right-1 w-5 h-5 border-b-2 border-r-2 rounded-br-md z-20"
+						style={{ borderColor: `${primaryColor}` }}
+					/>
 
 					{/* Ornamentos decorativos en las esquinas */}
-					<div className="absolute top-3 left-3 w-3 h-3 rounded-full z-20 opacity-70"
-						style={{ backgroundColor: `${primaryColor}` }} />
-					<div className="absolute top-3 right-3 w-3 h-3 rounded-full z-20 opacity-70"
-						style={{ backgroundColor: `${primaryColor}` }} />
-					<div className="absolute bottom-3 left-3 w-3 h-3 rounded-full z-20 opacity-70"
-						style={{ backgroundColor: `${primaryColor}` }} />
-					<div className="absolute bottom-3 right-3 w-3 h-3 rounded-full z-20 opacity-70"
-						style={{ backgroundColor: `${primaryColor}` }} />
+					<div
+						className="absolute top-3 left-3 w-3 h-3 rounded-full z-20 opacity-70"
+						style={{ backgroundColor: `${primaryColor}` }}
+					/>
+					<div
+						className="absolute top-3 right-3 w-3 h-3 rounded-full z-20 opacity-70"
+						style={{ backgroundColor: `${primaryColor}` }}
+					/>
+					<div
+						className="absolute bottom-3 left-3 w-3 h-3 rounded-full z-20 opacity-70"
+						style={{ backgroundColor: `${primaryColor}` }}
+					/>
+					<div
+						className="absolute bottom-3 right-3 w-3 h-3 rounded-full z-20 opacity-70"
+						style={{ backgroundColor: `${primaryColor}` }}
+					/>
 				</>
 			)}
 
 			{/* Estructura de la tarjeta */}
 			<div className="flex flex-col h-full z-10 relative">
 				{/* Cabecera con nombre, emoji e info básica */}
-				<AlbumCardHeader
-					album={album}
-					compact={compact}
-					primaryColor={primaryColor}
-				/>
+				<AlbumCardHeader album={album} compact={compact} primaryColor={primaryColor} />
 
 				{/* Contenido principal: imágenes, contadores y stats */}
 				<div className="flex-1 flex flex-col overflow-hidden">

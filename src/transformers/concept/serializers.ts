@@ -6,12 +6,12 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { ConceptSchema } from '@/types/entities/concept/schema';
 import type {
-    ConceptBase,
-    ConceptComplete,
-    ConceptCounts,
-    ConceptDeserialized,
-    ConceptRelations,
-    ConceptUI
+	ConceptBase,
+	ConceptComplete,
+	ConceptCounts,
+	ConceptDeserialized,
+	ConceptRelations,
+	ConceptUI,
 } from '@/types/entities/concept/types';
 import type { Prisma } from '@prisma/client';
 
@@ -78,16 +78,12 @@ export function fromPrismaConcept<T extends ConceptBase>(
 	options: ConceptTransformOptions = {}
 ): T & ConceptDeserialized & Partial<Record<'_relations' | '_count' | '_ui', any>> {
 	try {
-		const {
-			includeRelations = false,
-			includeUI = false,
-			includeStats = false
-		} = options;
+		const { includeRelations = false, includeUI = false, includeStats = false } = options;
 
 		// Deserializar campos JSON
 		const result = {
 			...concept,
-			tags: deserializeTags(concept.tags)
+			tags: deserializeTags(concept.tags),
 		} as T & ConceptDeserialized;
 
 		// Agregar relaciones si están presentes y se solicitan
@@ -104,9 +100,7 @@ export function fromPrismaConcept<T extends ConceptBase>(
 		if (includeUI) {
 			result._ui = {
 				previewContent: concept.content ? getPreviewContent(concept.content) : undefined,
-				lastUpdated: concept.updatedAt instanceof Date
-					? concept.updatedAt
-					: new Date(concept.updatedAt)
+				lastUpdated: concept.updatedAt instanceof Date ? concept.updatedAt : new Date(concept.updatedAt),
 			} as ConceptUI;
 		}
 
@@ -168,7 +162,9 @@ export function validateConcept(concept: unknown): void {
  * @param concept Concepto base
  * @returns Concepto con campos UI adicionales
  */
-export function extendConcept<T extends ConceptBase | ConceptComplete>(concept: T): T & {
+export function extendConcept<T extends ConceptBase | ConceptComplete>(
+	concept: T
+): T & {
 	_ui: ConceptUI;
 } {
 	try {
@@ -176,18 +172,16 @@ export function extendConcept<T extends ConceptBase | ConceptComplete>(concept: 
 			...concept,
 			_ui: {
 				previewContent: concept.content ? getPreviewContent(concept.content) : undefined,
-				lastUpdated: concept.updatedAt instanceof Date
-					? concept.updatedAt
-					: new Date(concept.updatedAt)
-			}
+				lastUpdated: concept.updatedAt instanceof Date ? concept.updatedAt : new Date(concept.updatedAt),
+			},
 		};
 	} catch (error) {
 		logger.error('Error extendiendo concept:', error);
 		return {
 			...concept,
 			_ui: {
-				lastUpdated: new Date()
-			}
+				lastUpdated: new Date(),
+			},
 		};
 	}
 }
@@ -200,7 +194,7 @@ export function extendConcept<T extends ConceptBase | ConceptComplete>(concept: 
 export function extendConcepts<T extends ConceptBase | ConceptComplete>(
 	concepts: T[]
 ): ReturnType<typeof extendConcept<T>>[] {
-	return concepts.map(concept => extendConcept(concept));
+	return concepts.map((concept) => extendConcept(concept));
 }
 
 /**
@@ -211,9 +205,7 @@ export function extendConcepts<T extends ConceptBase | ConceptComplete>(
  */
 function getPreviewContent(content: string, maxLength = 150): string {
 	if (!content) return '';
-	return content.length > maxLength
-		? `${content.substring(0, maxLength).trim()}...`
-		: content;
+	return content.length > maxLength ? `${content.substring(0, maxLength).trim()}...` : content;
 }
 
 /**
@@ -221,7 +213,7 @@ function getPreviewContent(content: string, maxLength = 150): string {
  */
 export function toConceptComplete<T extends ConceptBase>(concept: T): T & ConceptDeserialized {
 	return fromPrismaConcept(concept, {
-		deserializeFields: true
+		deserializeFields: true,
 	});
 }
 
@@ -231,14 +223,16 @@ export function toConceptComplete<T extends ConceptBase>(concept: T): T & Concep
 export function toConceptWithRelationsComplete(concept: ConceptBase): ConceptComplete {
 	return fromPrismaConcept(concept, {
 		deserializeFields: true,
-		includeRelations: true
+		includeRelations: true,
 	}) as ConceptComplete;
 }
 
 /**
  * Convierte un concepto completo a concepto serializado
  */
-export function fromConceptComplete<T extends ConceptComplete>(concept: T): Prisma.ConceptCreateInput | Prisma.ConceptUpdateInput {
+export function fromConceptComplete<T extends ConceptComplete>(
+	concept: T
+): Prisma.ConceptCreateInput | Prisma.ConceptUpdateInput {
 	return toPrismaConcept(concept);
 }
 
@@ -254,9 +248,10 @@ export function toExtendedConcept(concept: ConceptBase): ConceptBase & {
 /**
  * Convierte un concepto a concepto extendido completo
  */
-export function toConceptExtendedComplete(concept: ConceptBase): ConceptBase & ConceptDeserialized & {
-	_ui: ConceptUI;
-} {
+export function toConceptExtendedComplete(concept: ConceptBase): ConceptBase &
+	ConceptDeserialized & {
+		_ui: ConceptUI;
+	} {
 	return extendConcept(toConceptComplete(concept));
 }
 
@@ -277,6 +272,6 @@ export function toConceptWithRelationsExtendedComplete(concept: ConceptBase): Co
 export function toConceptWithStatsComplete(concept: ConceptBase): ConceptComplete {
 	return fromPrismaConcept(concept, {
 		deserializeFields: true,
-		includeStats: true
+		includeStats: true,
 	}) as ConceptComplete;
 }

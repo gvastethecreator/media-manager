@@ -130,4 +130,3 @@ export const usePlaceStore = create<PlaceStore>()(
 export * from './constants';
 export * from './transformers';
 export * from './types';
-

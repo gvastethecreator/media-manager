@@ -6,15 +6,15 @@
  */
 
 import {
-    CONSOLE_COLORS,
-    type LogType,
-    createConsoleTable,
-    createElapsedTime,
-    createProgressBar,
-    createSeparator,
-    createSeparatorEnd,
-    createTextBlock,
-    formatConsoleMessage,
+	CONSOLE_COLORS,
+	type LogType,
+	createConsoleTable,
+	createElapsedTime,
+	createProgressBar,
+	createSeparator,
+	createSeparatorEnd,
+	createTextBlock,
+	formatConsoleMessage,
 } from './console-formatter';
 import { type LogLevel, loggerConfig } from './logger.config';
 
@@ -210,8 +210,10 @@ export class ServerLogger {
 		if (this.shouldLog('error')) {
 			// Asegurarse de que el mensaje y el contexto sean strings válidos
 			const safeMessage = String(message);
-			const safeContext = context ?
-				(typeof context === 'string' ? context : JSON.stringify(context, null, 2))
+			const safeContext = context
+				? typeof context === 'string'
+					? context
+					: JSON.stringify(context, null, 2)
 				: undefined;
 
 			console.error(this.formatServerMessage('error', safeMessage, safeContext, requestId, startTime));

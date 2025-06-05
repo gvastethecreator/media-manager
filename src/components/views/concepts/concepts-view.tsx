@@ -106,11 +106,7 @@ export function ConceptsView(_props: ViewProps) {
 							transition={{ delay: index * 0.1 }}
 							className="cursor-pointer"
 						>
-							<MemoizedConceptCard
-								concept={concept}
-								onClick={() => handleConceptClick(concept)}
-								className="h-full"
-							/>
+							<MemoizedConceptCard concept={concept} onClick={() => handleConceptClick(concept)} className="h-full" />
 						</motion.div>
 					))}
 				</div>

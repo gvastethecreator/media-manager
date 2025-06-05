@@ -27,12 +27,14 @@ export function CollectionCardImages({
 }: CollectionCardImagesProps) {
 	// Estado para manejar las imágenes
 	const [loading, setLoading] = useState(!recentImages.length && !recentVideos.length);
-	const [thumbnails, setThumbnails] = useState<Array<{
-		id: string;
-		thumbnailUrl: string;
-		url?: string;
-		isVideo?: boolean;
-	}>>([]);
+	const [thumbnails, setThumbnails] = useState<
+		Array<{
+			id: string;
+			thumbnailUrl: string;
+			url?: string;
+			isVideo?: boolean;
+		}>
+	>([]);
 
 	// Calcular color secundario derivado si no se proporciona
 	const derivedSecondaryColor = secondaryColor || `${primaryColor}90`;
@@ -42,16 +44,16 @@ export function CollectionCardImages({
 		// Si ya tenemos imágenes o videos proporcionados, usarlos
 		if (recentImages.length > 0 || recentVideos.length > 0) {
 			const combinedMedia = [
-				...recentImages.map(url => ({
+				...recentImages.map((url) => ({
 					id: url.split('/').pop() || 'img-fallback',
 					thumbnailUrl: url,
-					isVideo: false
+					isVideo: false,
 				})),
-				...recentVideos.map(url => ({
+				...recentVideos.map((url) => ({
 					id: url.split('/').pop() || 'video-fallback',
 					thumbnailUrl: url,
-					isVideo: true
-				}))
+					isVideo: true,
+				})),
 			];
 
 			setThumbnails(combinedMedia);
@@ -83,10 +85,7 @@ export function CollectionCardImages({
 
 	// Placeholder para mostrar cuando no hay imágenes
 	const renderPlaceholder = () => (
-		<div
-			className="h-full flex items-center justify-center p-4 text-center"
-			style={{ color: `${primaryColor}80` }}
-		>
+		<div className="h-full flex items-center justify-center p-4 text-center" style={{ color: `${primaryColor}80` }}>
 			<div className="flex flex-col items-center gap-2">
 				<ImageOffIcon className="w-10 h-10 opacity-40" />
 				<p className="text-xs opacity-60">No hay imágenes disponibles</p>
@@ -131,41 +130,40 @@ export function CollectionCardImages({
 
 			{/* Contenedor de imágenes */}
 			<div className="relative z-1 grid grid-cols-3 gap-1 h-full">
-				{sortedThumbnails.length > 0 ? (
-					// Mostrar hasta 3 imágenes
-					sortedThumbnails.slice(0, 3).map((thumbnail, idx) => (
-						<motion.div
-							key={thumbnail.id}
-							className="h-full rounded-sm overflow-hidden shadow-sm bg-black/30 relative"
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.3, delay: idx * 0.1 }}
-						>
-							<img
-								src={thumbnail.thumbnailUrl}
-								alt=""
-								className="w-full h-full object-cover"
-								loading="lazy"
-							/>
-							{/* Indicador para videos */}
-							{thumbnail.isVideo && (
-								<div className="absolute bottom-1 right-1 bg-black/60 p-0.5 rounded-full">
-									<VideoIcon className="w-3 h-3 text-white" />
-								</div>
-							)}
-						</motion.div>
-					))
-				) : (
-					// Placeholder cuando no hay imágenes
-					renderPlaceholder()
-				)}
+				{sortedThumbnails.length > 0
+					? // Mostrar hasta 3 imágenes
+						sortedThumbnails
+							.slice(0, 3)
+							.map((thumbnail, idx) => (
+								<motion.div
+									key={thumbnail.id}
+									className="h-full rounded-sm overflow-hidden shadow-sm bg-black/30 relative"
+									initial={{ opacity: 0, y: 10 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ duration: 0.3, delay: idx * 0.1 }}
+								>
+									<img src={thumbnail.thumbnailUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+									{/* Indicador para videos */}
+									{thumbnail.isVideo && (
+										<div className="absolute bottom-1 right-1 bg-black/60 p-0.5 rounded-full">
+											<VideoIcon className="w-3 h-3 text-white" />
+										</div>
+									)}
+								</motion.div>
+							))
+					: // Placeholder cuando no hay imágenes
+						renderPlaceholder()}
 			</div>
 
 			{/* Partículas decorativas estilo TCG */}
-			<div className="absolute -bottom-1 right-2 w-4 h-4 rounded-full opacity-60 z-10"
-				style={{ backgroundColor: primaryColor }} />
-			<div className="absolute -top-1 left-2 w-2 h-2 rounded-full opacity-60 z-10"
-				style={{ backgroundColor: derivedSecondaryColor }} />
+			<div
+				className="absolute -bottom-1 right-2 w-4 h-4 rounded-full opacity-60 z-10"
+				style={{ backgroundColor: primaryColor }}
+			/>
+			<div
+				className="absolute -top-1 left-2 w-2 h-2 rounded-full opacity-60 z-10"
+				style={{ backgroundColor: derivedSecondaryColor }}
+			/>
 		</div>
 	);
 }

@@ -15,145 +15,139 @@ export type SortDirection = 'asc' | 'desc';
 
 // Estado
 export interface FiltersState {
-  // Opciones de filtro
-  filterOptions: FileFilterOptions;
+	// Opciones de filtro
+	filterOptions: FileFilterOptions;
 
-  // Ordenación
-  sortBy: SortField;
-  sortDirection: SortDirection;
+	// Ordenación
+	sortBy: SortField;
+	sortDirection: SortDirection;
 
-  // Búsqueda
-  searchTerm: string;
+	// Búsqueda
+	searchTerm: string;
 }
 
 // Acciones
 export interface FiltersActions {
-  // Setters
-  setSortBy: (field: SortField) => void;
-  setSortDirection: (direction: SortDirection) => void;
-  toggleSortDirection: () => void;
+	// Setters
+	setSortBy: (field: SortField) => void;
+	setSortDirection: (direction: SortDirection) => void;
+	toggleSortDirection: () => void;
 
-  // Filtros
-  setFilterOptions: (options: FileFilterOptions) => void;
-  updateFilterOption: <K extends keyof FileFilterOptions>(
-    key: K,
-    value: FileFilterOptions[K]
-  ) => void;
-  resetFilters: () => void;
+	// Filtros
+	setFilterOptions: (options: FileFilterOptions) => void;
+	updateFilterOption: <K extends keyof FileFilterOptions>(key: K, value: FileFilterOptions[K]) => void;
+	resetFilters: () => void;
 
-  // Búsqueda
-  setSearchTerm: (term: string) => void;
+	// Búsqueda
+	setSearchTerm: (term: string) => void;
 
-  // Selectores
-  getFilteredFiles: () => EnhancedFile[];
-  getFilteredAndSortedFiles: () => EnhancedFile[];
+	// Selectores
+	getFilteredFiles: () => EnhancedFile[];
+	getFilteredAndSortedFiles: () => EnhancedFile[];
 }
 
 // Estado inicial
 const initialState: FiltersState = {
-  filterOptions: {},
-  sortBy: 'name',
-  sortDirection: 'asc',
-  searchTerm: ''
+	filterOptions: {},
+	sortBy: 'name',
+	sortDirection: 'asc',
+	searchTerm: '',
 };
 
 // Crear slice
-export const createFiltersSlice: StateCreator<
-  FileStore,
-  [],
-  [],
-  FiltersState & FiltersActions
-> = (set, get) => ({
-  ...initialState,
+export const createFiltersSlice: StateCreator<FileStore, [], [], FiltersState & FiltersActions> = (set, get) => ({
+	...initialState,
 
-  // Setters
-  setSortBy: (sortBy) => set({ sortBy }),
-  setSortDirection: (sortDirection) => set({ sortDirection }),
-  toggleSortDirection: () => {
-    const { sortDirection } = get();
-    set({ sortDirection: sortDirection === 'asc' ? 'desc' : 'asc' });
-  },
+	// Setters
+	setSortBy: (sortBy) => set({ sortBy }),
+	setSortDirection: (sortDirection) => set({ sortDirection }),
+	toggleSortDirection: () => {
+		const { sortDirection } = get();
+		set({ sortDirection: sortDirection === 'asc' ? 'desc' : 'asc' });
+	},
 
-  // Filtros
-  setFilterOptions: (filterOptions) => set({ filterOptions }),
-  updateFilterOption: (key, value) => {
-    const { filterOptions } = get();
-    set({
-      filterOptions: {
-        ...filterOptions,
-        [key]: value
-      }
-    });
-  },
-  resetFilters: () => set({
-    filterOptions: {},
-    searchTerm: '',
-    sortBy: 'name',
-    sortDirection: 'asc'
-  }),
+	// Filtros
+	setFilterOptions: (filterOptions) => set({ filterOptions }),
+	updateFilterOption: (key, value) => {
+		const { filterOptions } = get();
+		set({
+			filterOptions: {
+				...filterOptions,
+				[key]: value,
+			},
+		});
+	},
+	resetFilters: () =>
+		set({
+			filterOptions: {},
+			searchTerm: '',
+			sortBy: 'name',
+			sortDirection: 'asc',
+		}),
 
-  // Búsqueda
-  setSearchTerm: (searchTerm) => set({ searchTerm }),
+	// Búsqueda
+	setSearchTerm: (searchTerm) => set({ searchTerm }),
 
-  // Selectores
-  getFilteredFiles: () => {
-    const { files, filterOptions, searchTerm } = get();
+	// Selectores
+	getFilteredFiles: () => {
+		const { files, filterOptions, searchTerm } = get();
 
-    let filtered = [...files];
+		let filtered = [...files];
 
-    // Aplicar filtros basados en FileFilterOptions
-    filtered = applyFileFilters(filtered, filterOptions);
+		// Aplicar filtros basados en FileFilterOptions
+		filtered = applyFileFilters(filtered, filterOptions);
 
-    // Aplicar búsqueda por término
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(file =>
-        file.name.toLowerCase().includes(term) ||
-        file.path.toLowerCase().includes(term) ||
-        file.type.toLowerCase().includes(term)
-      );
-    }
+		// Aplicar búsqueda por término
+		if (searchTerm) {
+			const term = searchTerm.toLowerCase();
+			filtered = filtered.filter(
+				(file) =>
+					file.name.toLowerCase().includes(term) ||
+					file.path.toLowerCase().includes(term) ||
+					file.type.toLowerCase().includes(term)
+			);
+		}
 
-    return filtered;
-  },
+		return filtered;
+	},
 
-  getFilteredAndSortedFiles: () => {
-    const { sortBy, sortDirection } = get();
-    const filteredFiles = get().getFilteredFiles();
+	getFilteredAndSortedFiles: () => {
+		const { sortBy, sortDirection } = get();
+		const filteredFiles = get().getFilteredFiles();
 
-    return [...filteredFiles].sort((a, b) => {
-      let comparison = 0;
+		return [...filteredFiles].sort((a, b) => {
+			let comparison = 0;
 
-      // Siempre mostrar directorios primero si se ordena por nombre
-      if (sortBy === 'name') {
-        if (a.isDirectory !== b.isDirectory) {
-          return a.isDirectory ? -1 : 1;
-        }
-      }
+			// Siempre mostrar directorios primero si se ordena por nombre
+			if (sortBy === 'name') {
+				if (a.isDirectory !== b.isDirectory) {
+					return a.isDirectory ? -1 : 1;
+				}
+			}
 
-      // Ordenar por el campo específico
-      switch (sortBy) {
-        case 'name':
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case 'size':
-          comparison = (a.size || 0) - (b.size || 0);
-          break;
-        case 'type':
-          comparison = a.type.localeCompare(b.type);
-          break;
-        case 'createdAt':
-          comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          break;
-        case 'modifiedAt':
-          comparison = new Date(a.modifiedAt).getTime() - new Date(b.modifiedAt).getTime();
-          break;
-        default:
-          comparison = 0;
-      }
+			// Ordenar por el campo específico
+			switch (sortBy) {
+				case 'name':
+					comparison = a.name.localeCompare(b.name);
+					break;
+				case 'size':
+					comparison = (a.size || 0) - (b.size || 0);
+					break;
+				case 'type':
+					comparison = a.type.localeCompare(b.type);
+					break;
+				case 'createdAt':
+					comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+					break;
+				case 'modifiedAt':
+					comparison = new Date(a.modifiedAt).getTime() - new Date(b.modifiedAt).getTime();
+					break;
+				default:
+					comparison = 0;
+			}
 
-      // Aplicar dirección de ordenación
-      return sortDirection === 'asc' ? comparison : -comparison;
-    });
-  }
+			// Aplicar dirección de ordenación
+			return sortDirection === 'asc' ? comparison : -comparison;
+		});
+	},
 });

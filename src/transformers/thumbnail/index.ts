@@ -9,9 +9,9 @@ export * from './transformer';
 import * as transformerFunctions from './transformer';
 
 export const thumbnailTransformer = {
-    transform: transformerFunctions.transformThumbnail,
-    transformMany: transformerFunctions.transformThumbnails,
-    toWithStats: transformerFunctions.transformThumbnailToWithStats,
-    toExtended: transformerFunctions.transformThumbnailToExtended,
-    calculateStats: transformerFunctions.calculateThumbnailStats
+	transform: transformerFunctions.transformThumbnail,
+	transformMany: transformerFunctions.transformThumbnails,
+	toWithStats: transformerFunctions.transformThumbnailToWithStats,
+	toExtended: transformerFunctions.transformThumbnailToExtended,
+	calculateStats: transformerFunctions.calculateThumbnailStats,
 };

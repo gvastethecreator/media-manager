@@ -5,17 +5,15 @@
 
 import { createLogger } from '@/lib/logger';
 import type {
-    PlaceComplete,
-    PlaceCreateInput,
-    PlaceFilters,
-    PlaceSearchOptions,
-    PlaceUpdateInput,
-    RelatedPlace
+	PlaceComplete,
+	PlaceCreateInput,
+	PlaceFilters,
+	PlaceSearchOptions,
+	PlaceUpdateInput,
+	RelatedPlace,
 } from '@/types/entities/place/types';
 import type { Prisma } from '@prisma/client';
-import {
-    toPrismaPlace
-} from './serializers';
+import { toPrismaPlace } from './serializers';
 
 // Logger específico para el transformer de Place
 const log = createLogger('place-mapper');
@@ -36,86 +34,88 @@ export function mapCreatePlaceDataToPrisma(data: PlaceCreateInput): Prisma.Place
 		// Relaciones opcionales
 		if (data.images && data.images.length > 0) {
 			relations.images = {
-				connect: data.images.map(img => ({ id: typeof img === 'string' ? img : img.id }))
+				connect: data.images.map((img) => ({ id: typeof img === 'string' ? img : img.id })),
 			};
 		}
 
 		if (data.videos && data.videos.length > 0) {
 			relations.videos = {
-				connect: data.videos.map(vid => ({ id: typeof vid === 'string' ? vid : vid.id }))
+				connect: data.videos.map((vid) => ({ id: typeof vid === 'string' ? vid : vid.id })),
 			};
 		}
 
 		if (data.albums && data.albums.length > 0) {
 			relations.albums = {
-				connect: data.albums.map(album => ({ id: typeof album === 'string' ? album : album.id }))
+				connect: data.albums.map((album) => ({ id: typeof album === 'string' ? album : album.id })),
 			};
 		}
 
 		if (data.collections && data.collections.length > 0) {
 			relations.collections = {
-				connect: data.collections.map(collection => ({ id: typeof collection === 'string' ? collection : collection.id }))
+				connect: data.collections.map((collection) => ({
+					id: typeof collection === 'string' ? collection : collection.id,
+				})),
 			};
 		}
 
 		if (data.tags && data.tags.length > 0) {
 			relations.tags = {
-				connect: data.tags.map(tag => ({ id: typeof tag === 'string' ? tag : tag.id }))
+				connect: data.tags.map((tag) => ({ id: typeof tag === 'string' ? tag : tag.id })),
 			};
 		}
 
 		if (data.characters && data.characters.length > 0) {
 			relations.characters = {
-				connect: data.characters.map(character => ({ id: typeof character === 'string' ? character : character.id }))
+				connect: data.characters.map((character) => ({ id: typeof character === 'string' ? character : character.id })),
 			};
 		}
 
 		if (data.worldItems && data.worldItems.length > 0) {
 			relations.worldItems = {
-				connect: data.worldItems.map(item => ({ id: typeof item === 'string' ? item : item.id }))
+				connect: data.worldItems.map((item) => ({ id: typeof item === 'string' ? item : item.id })),
 			};
 		}
 
 		if (data.concepts && data.concepts.length > 0) {
 			relations.concepts = {
-				connect: data.concepts.map(concept => ({ id: typeof concept === 'string' ? concept : concept.id }))
+				connect: data.concepts.map((concept) => ({ id: typeof concept === 'string' ? concept : concept.id })),
 			};
 		}
 
 		if (data.prompts && data.prompts.length > 0) {
 			relations.prompts = {
-				connect: data.prompts.map(prompt => ({ id: typeof prompt === 'string' ? prompt : prompt.id }))
+				connect: data.prompts.map((prompt) => ({ id: typeof prompt === 'string' ? prompt : prompt.id })),
 			};
 		}
 
 		if (data.notes && data.notes.length > 0) {
 			relations.notes = {
-				connect: data.notes.map(note => ({ id: typeof note === 'string' ? note : note.id }))
+				connect: data.notes.map((note) => ({ id: typeof note === 'string' ? note : note.id })),
 			};
 		}
 
 		if (data.wildcards && data.wildcards.length > 0) {
 			relations.wildcards = {
-				connect: data.wildcards.map(wildcard => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id }))
+				connect: data.wildcards.map((wildcard) => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id })),
 			};
 		}
 
 		if (data.properties && data.properties.length > 0) {
 			relations.properties = {
-				connect: data.properties.map(property => ({ id: typeof property === 'string' ? property : property.id }))
+				connect: data.properties.map((property) => ({ id: typeof property === 'string' ? property : property.id })),
 			};
 		}
 
 		if (data.groups && data.groups.length > 0) {
 			relations.groups = {
-				connect: data.groups.map(group => ({ id: typeof group === 'string' ? group : group.id }))
+				connect: data.groups.map((group) => ({ id: typeof group === 'string' ? group : group.id })),
 			};
 		}
 
 		// Combinar datos base con relaciones
 		return {
 			...prismaData,
-			...relations
+			...relations,
 		} as Prisma.PlaceCreateInput;
 	} catch (error) {
 		log.error('Error mapeando datos de creación de lugar', { error, data });
@@ -140,79 +140,81 @@ export function mapUpdatePlaceDataToPrisma(placeId: string, data: PlaceUpdateInp
 		// Relaciones opcionales
 		if (data.images) {
 			relations.images = {
-				set: data.images.map(img => ({ id: typeof img === 'string' ? img : img.id }))
+				set: data.images.map((img) => ({ id: typeof img === 'string' ? img : img.id })),
 			};
 		}
 
 		if (data.videos) {
 			relations.videos = {
-				set: data.videos.map(vid => ({ id: typeof vid === 'string' ? vid : vid.id }))
+				set: data.videos.map((vid) => ({ id: typeof vid === 'string' ? vid : vid.id })),
 			};
 		}
 
 		if (data.albums) {
 			relations.albums = {
-				set: data.albums.map(album => ({ id: typeof album === 'string' ? album : album.id }))
+				set: data.albums.map((album) => ({ id: typeof album === 'string' ? album : album.id })),
 			};
 		}
 
 		if (data.collections) {
 			relations.collections = {
-				set: data.collections.map(collection => ({ id: typeof collection === 'string' ? collection : collection.id }))
+				set: data.collections.map((collection) => ({
+					id: typeof collection === 'string' ? collection : collection.id,
+				})),
 			};
 		}
 
 		if (data.tags) {
 			relations.tags = {
-				set: data.tags.map(tag => ({ id: typeof tag === 'string' ? tag : tag.id }))
+				set: data.tags.map((tag) => ({ id: typeof tag === 'string' ? tag : tag.id })),
 			};
 		}
 
 		if (data.characters) {
 			relations.characters = {
-				set: data.characters.map(character => ({ id: typeof character === 'string' ? character : character.id }))
+				set: data.characters.map((character) => ({ id: typeof character === 'string' ? character : character.id })),
 			};
 		}
 
 		if (data.worldItems) {
 			relations.worldItems = {
-				set: data.worldItems.map(item => ({ id: typeof item === 'string' ? item : item.id }))
+				set: data.worldItems.map((item) => ({ id: typeof item === 'string' ? item : item.id })),
 			};
 		}
 
 		if (data.concepts) {
 			relations.concepts = {
-				set: data.concepts.map(concept => ({ id: typeof concept === 'string' ? concept : concept.id }))
+				set: data.concepts.map((concept) => ({ id: typeof concept === 'string' ? concept : concept.id })),
 			};
 		}
 
 		if (data.prompts) {
 			relations.prompts = {
-				set: data.prompts.map(prompt => ({ id: typeof prompt === 'string' ? prompt : prompt.id }))
+				set: data.prompts.map((prompt) => ({ id: typeof prompt === 'string' ? prompt : prompt.id })),
 			};
 		}
 
 		if (data.notes) {
 			relations.notes = {
-				set: data.notes.map(note => ({ id: typeof note === 'string' ? note : note.id }))
+				set: data.notes.map((note) => ({ id: typeof note === 'string' ? note : note.id })),
 			};
 		}
 
 		if (data.wildcards) {
 			relations.wildcards = {
-				set: data.wildcards.map(wildcard => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id }))
+				set: data.wildcards.map((wildcard) => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id })),
 			};
 		}
 
 		if (data.properties) {
 			relations.properties = {
-				set: data.properties.map(property => ({ id: typeof property === 'string' ? property : property.id }))
+				set: data.properties.map((property) => ({ id: typeof property === 'string' ? property : property.id })),
 			};
 		}
 
 		if (data.groups) {
 			relations.groups = {
-				set: data.groups.map(group => ({ id: typeof group === 'string' ? group : group.id }))
+				set: data.groups.map((group) => ({ id: typeof group === 'string' ? group : group.id })),
 			};
 		}
 
@@ -221,8 +223,8 @@ export function mapUpdatePlaceDataToPrisma(placeId: string, data: PlaceUpdateInp
 			where: { id: placeId },
 			data: {
 				...prismaData,
-				...relations
-			}
+				...relations,
+			},
 		};
 	} catch (error) {
 		log.error('Error mapeando datos de actualización de lugar', { error, data });
@@ -349,22 +351,22 @@ export function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWher
 					{ climate: { contains: filters.searchQuery, mode: 'insensitive' } },
 					{ government: { contains: filters.searchQuery, mode: 'insensitive' } },
 					{ lore: { contains: filters.searchQuery, mode: 'insensitive' } },
-					{ history: { contains: filters.searchQuery, mode: 'insensitive' } }
-				]
+					{ history: { contains: filters.searchQuery, mode: 'insensitive' } },
+				],
 			});
 		}
 
 		// Filtrar por categorías
 		if (filters.categories && filters.categories.length > 0) {
 			AND.push({
-				category: { in: filters.categories }
+				category: { in: filters.categories },
 			});
 		}
 
 		// Filtrar por regiones
 		if (filters.regions && filters.regions.length > 0) {
-			const regionConditions = filters.regions.map(region => ({
-				region: { contains: region }
+			const regionConditions = filters.regions.map((region) => ({
+				region: { contains: region },
 			}));
 			AND.push({ OR: regionConditions });
 		}
@@ -372,14 +374,14 @@ export function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWher
 		// Filtrar por tipos
 		if (filters.types && filters.types.length > 0) {
 			AND.push({
-				type: { in: filters.types }
+				type: { in: filters.types },
 			});
 		}
 
 		// Filtrar por climas
 		if (filters.climates && filters.climates.length > 0) {
 			AND.push({
-				climate: { in: filters.climates }
+				climate: { in: filters.climates },
 			});
 		}
 
@@ -396,8 +398,8 @@ export function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWher
 
 		// Filtrar por gobiernos
 		if (filters.governments && filters.governments.length > 0) {
-			const govConditions = filters.governments.map(government => ({
-				government: { contains: government }
+			const govConditions = filters.governments.map((government) => ({
+				government: { contains: government },
 			}));
 			AND.push({ OR: govConditions });
 		}
@@ -411,32 +413,32 @@ export function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWher
 		if (filters.hasImages) {
 			AND.push({
 				images: {
-					some: {}
-				}
+					some: {},
+				},
 			});
 		}
 
 		if (filters.hasNotes) {
 			AND.push({
 				notes: {
-					some: {}
-				}
+					some: {},
+				},
 			});
 		}
 
 		if (filters.hasConcepts) {
 			AND.push({
 				concepts: {
-					some: {}
-				}
+					some: {},
+				},
 			});
 		}
 
 		if (filters.hasPrompts) {
 			AND.push({
 				prompts: {
-					some: {}
-				}
+					some: {},
+				},
 			});
 		}
 
@@ -459,11 +461,7 @@ export function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWher
  * @param strength Fuerza de la relación
  * @returns Objeto de lugar relacionado
  */
-export function mapPlaceToRelatedPlace(
-	place: PlaceComplete,
-	count = 1,
-	strength = 1
-): RelatedPlace {
+export function mapPlaceToRelatedPlace(place: PlaceComplete, count = 1, strength = 1): RelatedPlace {
 	return {
 		id: place.id,
 		name: place.name,
@@ -473,7 +471,7 @@ export function mapPlaceToRelatedPlace(
 		region: place.region || undefined,
 		type: place.type || undefined,
 		count,
-		strength
+		strength,
 	};
 }
 
@@ -582,7 +580,7 @@ export function suggestPlaceEmoji(type?: string | null, category?: string | null
 export function getCompleteLocationName(name: string, region?: string | null): string {
 	if (!region) return name;
 
-	const regionParts = region.split(/[\/|>]/).map(r => r.trim());
+	const regionParts = region.split(/[\/|>]/).map((r) => r.trim());
 	const lastRegion = regionParts[regionParts.length - 1];
 
 	return `${name}, ${lastRegion}`;

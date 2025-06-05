@@ -123,12 +123,7 @@ export interface TagFilterActions {
 /**
  * 📦 Tipo del store completo de Tag
  */
-export interface TagStore extends
-	TagCoreState,
-	TagCoreActions,
-	TagUIState,
-	TagUIActions,
-	TagFilterActions {
+export interface TagStore extends TagCoreState, TagCoreActions, TagUIState, TagUIActions, TagFilterActions {
 	/** Filtros actuales */
 	filters: TagFilters;
 }

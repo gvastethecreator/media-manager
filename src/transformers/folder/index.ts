@@ -7,19 +7,19 @@
 import { mapFolderToFolder, toPrismaFolder } from './converters';
 import { mapCreateFolderDataToPrisma, mapFolderFiltersToPrisma, mapUpdateFolderDataToPrisma } from './mappers';
 import {
-    extendFolder, fromFolderComplete,
-    fromPrismaFolder,
-    generateFolderColor, generateFolderEmoji, normalizeFolderPath,
-    normalizeFolderType, parseFolderFilters, toRelatedFolder, validateFolder, withFolderStats
+	extendFolder,
+	fromFolderComplete,
+	fromPrismaFolder,
+	generateFolderColor,
+	generateFolderEmoji,
+	normalizeFolderPath,
+	normalizeFolderType,
+	parseFolderFilters,
+	toRelatedFolder,
+	validateFolder,
+	withFolderStats,
 } from './serializers';
-import {
-    createFolder,
-    deleteFolder,
-    getFolderById,
-    getFolderWithStats,
-    searchFolders,
-    updateFolder
-} from './service';
+import { createFolder, deleteFolder, getFolderById, getFolderWithStats, searchFolders, updateFolder } from './service';
 import { transformFolderBase, transformFolderToExtended } from './transformer';
 
 // --- Re-exportaciones controladas --- //
@@ -28,27 +28,25 @@ import { transformFolderBase, transformFolderToExtended } from './transformer';
 export { mapFolderToFolder, toPrismaFolder };
 
 // De serializers.ts
-    export {
-        extendFolder, fromFolderComplete,
-        fromPrismaFolder, generateFolderColor, generateFolderEmoji, normalizeFolderPath, normalizeFolderType, parseFolderFilters, toRelatedFolder, validateFolder, withFolderStats
-    };
+export {
+	extendFolder,
+	fromFolderComplete,
+	fromPrismaFolder,
+	generateFolderColor,
+	generateFolderEmoji,
+	normalizeFolderPath,
+	normalizeFolderType,
+	parseFolderFilters,
+	toRelatedFolder,
+	validateFolder,
+	withFolderStats,
+};
 
 // De mappers.ts
-    export { mapCreateFolderDataToPrisma, mapFolderFiltersToPrisma, mapUpdateFolderDataToPrisma };
+export { mapCreateFolderDataToPrisma, mapFolderFiltersToPrisma, mapUpdateFolderDataToPrisma };
 
 // De service.ts - Exportar funciones individuales
-    export {
-        createFolder,
-        deleteFolder,
-        getFolderById,
-        getFolderWithStats,
-        searchFolders,
-        updateFolder
-    };
+export { createFolder, deleteFolder, getFolderById, getFolderWithStats, searchFolders, updateFolder };
 
 // De transformer.ts (exportamos transformFolderBase como transformFolder)
-    export {
-        transformFolderBase as transformFolder,
-        transformFolderToExtended
-    };
-
+export { transformFolderBase as transformFolder, transformFolderToExtended };

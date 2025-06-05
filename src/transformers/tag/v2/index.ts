@@ -14,42 +14,42 @@ export * from './mappers';
 
 // Importar las funciones localmente para el objeto de exportación
 import {
-    DEFAULT_TAG_COLOR,
-    DEFAULT_TAG_EMOJI,
-    extendTag,
-    extendTags,
-    fromPrismaTag,
-    toPrismaTag,
-    validateTag
+	DEFAULT_TAG_COLOR,
+	DEFAULT_TAG_EMOJI,
+	extendTag,
+	extendTags,
+	fromPrismaTag,
+	toPrismaTag,
+	validateTag,
 } from './serializers';
 
 import {
-    toCreateTagData,
-    toRelatedTag,
-    toSearchFilters,
-    toSearchOptions,
-    toSearchResult,
-    toUpdateTagData
+	toCreateTagData,
+	toRelatedTag,
+	toSearchFilters,
+	toSearchOptions,
+	toSearchResult,
+	toUpdateTagData,
 } from './mappers';
 
 // Objeto para mantener compatibilidad con código existente
 const TagTransformer = {
-  // Serializadores
-  fromPrismaTag,
-  toPrismaTag,
-  validateTag,
-  extendTag,
-  extendTags,
-  DEFAULT_TAG_COLOR,
-  DEFAULT_TAG_EMOJI,
+	// Serializadores
+	fromPrismaTag,
+	toPrismaTag,
+	validateTag,
+	extendTag,
+	extendTags,
+	DEFAULT_TAG_COLOR,
+	DEFAULT_TAG_EMOJI,
 
-  // Mappers
-  toCreateTagData,
-  toUpdateTagData,
-  toSearchOptions,
-  toSearchFilters,
-  toSearchResult,
-  toRelatedTag
+	// Mappers
+	toCreateTagData,
+	toUpdateTagData,
+	toSearchOptions,
+	toSearchFilters,
+	toSearchResult,
+	toRelatedTag,
 };
 
 export default TagTransformer;

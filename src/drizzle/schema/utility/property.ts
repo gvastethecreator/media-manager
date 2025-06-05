@@ -17,18 +17,18 @@ import { wildcards } from './wildcard';
 
 // Definición de la tabla
 export const properties = sqliteTable(
-    'Property',
-    {
-        ...organizationFields,
-    },
-    (table) => {
-        const indexes = createIndexes('property');
-        return {
-            nameIdx: indexes.nameIdx.on(table.name),
-            categoryIdx: indexes.categoryIdx.on(table.category),
-            createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
-        };
-    }
+	'Property',
+	{
+		...organizationFields,
+	},
+	(table) => {
+		const indexes = createIndexes('property');
+		return {
+			nameIdx: indexes.nameIdx.on(table.name),
+			categoryIdx: indexes.categoryIdx.on(table.category),
+			createdAtIdx: indexes.createdAtIdx.on(table.createdAt),
+		};
+	}
 );
 
 // Tablas de relación
@@ -48,19 +48,19 @@ export const propertiesToGroups = createRelationTable('PropertyToGroup', 'Proper
 
 // Definición de relaciones
 const relatedEntities = {
-    images,
-    videos,
-    albums,
-    collections,
-    tags,
-    characters,
-    places,
-    worldItems,
-    concepts,
-    prompts,
-    notes,
-    wildcards,
-    groups
+	images,
+	videos,
+	albums,
+	collections,
+	tags,
+	characters,
+	places,
+	worldItems,
+	concepts,
+	prompts,
+	notes,
+	wildcards,
+	groups,
 };
 
 // Relaciones

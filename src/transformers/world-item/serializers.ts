@@ -6,19 +6,19 @@
 import { createLogger } from '@/lib/logger';
 import { WorldItemSchema } from '@/types/entities/world-item/schema';
 import type {
-    WorldItemAttribute,
-    WorldItemBase,
-    WorldItemComplete,
-    WorldItemCounts,
-    WorldItemDeserialized,
-    WorldItemDeserializedFields,
-    WorldItemEffect,
-    WorldItemFilter,
-    WorldItemProperty,
-    WorldItemRelations,
-    WorldItemRequirement,
-    WorldItemStat,
-    WorldItemUI
+	WorldItemAttribute,
+	WorldItemBase,
+	WorldItemComplete,
+	WorldItemCounts,
+	WorldItemDeserialized,
+	WorldItemDeserializedFields,
+	WorldItemEffect,
+	WorldItemFilter,
+	WorldItemProperty,
+	WorldItemRelations,
+	WorldItemRequirement,
+	WorldItemStat,
+	WorldItemUI,
 } from '@/types/entities/world-item/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { Prisma } from '@prisma/client';
@@ -279,13 +279,22 @@ export function deserializeTags(tagsString?: string | null): string[] {
  * 🔄 Deserializa un WorldItem desde Prisma, manejando campos JSON y relaciones - VERSIÓN CORREGIDA ✅
  */
 export function fromPrismaWorldItem(
-	prismaItem: Partial<Prisma.WorldItemGetPayload<{
-		include: {
-			images: true; videos: true; notes: true; concepts: true;
-			prompts: true; groups: true; properties: true; wildcards: true;
-			tags: true; _count: true;
-		};
-	}>>
+	prismaItem: Partial<
+		Prisma.WorldItemGetPayload<{
+			include: {
+				images: true;
+				videos: true;
+				notes: true;
+				concepts: true;
+				prompts: true;
+				groups: true;
+				properties: true;
+				wildcards: true;
+				tags: true;
+				_count: true;
+			};
+		}>
+	>
 ): WorldItemDeserialized {
 	try {
 		// ✅ Validar campos esenciales
@@ -318,17 +327,18 @@ export function fromPrismaWorldItem(
 			if (!attributePattern.test(field)) return null;
 
 			try {
-				const items = field.split(',')
-					.map(item => item.trim())
+				const items = field
+					.split(',')
+					.map((item) => item.trim())
 					.filter(Boolean)
-					.map(item => {
+					.map((item) => {
 						// Buscar patrón: "Nombre + Número + (opcional) descripción"
 						const matches = item.match(/^([A-Za-zÀ-ÿ\s]+?)\s+(\d+)(.*)$/);
 						if (matches) {
 							return {
 								name: matches[1].trim(),
 								value: Number.parseInt(matches[2], 10), // ✅ Usar Number.parseInt
-								description: matches[3]?.trim() || ''
+								description: matches[3]?.trim() || '',
 							};
 						}
 						// Fallback: considerar todo como nombre
@@ -353,7 +363,9 @@ export function fromPrismaWorldItem(
 			try {
 				return JSON.parse(field) as T;
 			} catch (originalError) {
-				logger.debug(`🔄 Intentando reparar campo JSON para WorldItem: "${field.substring(0, 50)}${field.length > 50 ? '...' : ''}"`);
+				logger.debug(
+					`🔄 Intentando reparar campo JSON para WorldItem: "${field.substring(0, 50)}${field.length > 50 ? '...' : ''}"`
+				);
 
 				// 🔧 Estrategia 1: Normalizar strings comunes
 				const normalized = normalizeCommonStrings(field);
@@ -393,7 +405,9 @@ export function fromPrismaWorldItem(
 				}
 
 				// 🚨 Si todas las estrategias fallan, registrar para análisis y usar valor por defecto
-				logger.warn(`❌ No se pudo reparar campo JSON para WorldItem. Campo: "${field}", Error original: ${originalError}. Usando valor por defecto.`);
+				logger.warn(
+					`❌ No se pudo reparar campo JSON para WorldItem. Campo: "${field}", Error original: ${originalError}. Usando valor por defecto.`
+				);
 				return defaultValue;
 			}
 		};
@@ -414,11 +428,16 @@ export function fromPrismaWorldItem(
 			origin: prismaItem.origin ?? 'unknown',
 
 			// ✅ Campos JSON como strings serializados (para WorldItemBase)
-			attributes: typeof prismaItem.attributes === 'string' ? prismaItem.attributes : JSON.stringify(prismaItem.attributes || []),
+			attributes:
+				typeof prismaItem.attributes === 'string' ? prismaItem.attributes : JSON.stringify(prismaItem.attributes || []),
 			effects: typeof prismaItem.effects === 'string' ? prismaItem.effects : JSON.stringify(prismaItem.effects || []),
-			requirements: typeof prismaItem.requirements === 'string' ? prismaItem.requirements : JSON.stringify(prismaItem.requirements || {}),
+			requirements:
+				typeof prismaItem.requirements === 'string'
+					? prismaItem.requirements
+					: JSON.stringify(prismaItem.requirements || {}),
 			stats: typeof prismaItem.stats === 'string' ? prismaItem.stats : JSON.stringify(prismaItem.stats || []),
-			properties: typeof prismaItem.properties === 'string' ? prismaItem.properties : JSON.stringify(prismaItem.properties || []),
+			properties:
+				typeof prismaItem.properties === 'string' ? prismaItem.properties : JSON.stringify(prismaItem.properties || []),
 			filters: typeof prismaItem.filters === 'string' ? prismaItem.filters : JSON.stringify(prismaItem.filters || []),
 
 			// ✅ Otros campos
@@ -441,17 +460,16 @@ export function fromPrismaWorldItem(
 			statsList: parseJsonField(baseItem.stats, [] as WorldItemStat[]),
 			propertiesList: parseJsonField(baseItem.properties, [] as WorldItemProperty[]),
 			filtersList: parseJsonField(baseItem.filters, [] as WorldItemFilter[]),
-			tagsList: parseJsonField(JSON.stringify(prismaItem.tags?.map(t => t.name) || []), [] as string[]),
+			tagsList: parseJsonField(JSON.stringify(prismaItem.tags?.map((t) => t.name) || []), [] as string[]),
 		};
 
 		// 🏗️ Construir objeto deserializado completo
 		const deserializedItem: WorldItemDeserialized = {
 			...baseItem,
-			...deserializedFields
+			...deserializedFields,
 		};
 
 		return deserializedItem;
-
 	} catch (error) {
 		logger.error('Error en fromPrismaWorldItem:', error);
 		throw handleTransformerError(error);
@@ -470,16 +488,8 @@ export function toPrismaWorldItem(worldItem: Partial<WorldItemDeserialized>): Pa
 		}
 
 		// Extraer los campos que necesitan ser serializados
-		const {
-			attributesList,
-			effectsList,
-			requirementsList,
-			statsList,
-			propertiesList,
-			filtersList,
-			tagsList,
-			...rest
-		} = worldItem;
+		const { attributesList, effectsList, requirementsList, statsList, propertiesList, filtersList, tagsList, ...rest } =
+			worldItem;
 
 		// Serializar campos según sea necesario
 		const result: Partial<WorldItemBase> = {
@@ -490,7 +500,7 @@ export function toPrismaWorldItem(worldItem: Partial<WorldItemDeserialized>): Pa
 			...(statsList && { stats: serializeStats(statsList) }),
 			...(propertiesList && { properties: serializeProperties(propertiesList) }),
 			...(filtersList && { filters: serializeFilters(filtersList) }),
-			...(tagsList && { tags: serializeTags(tagsList) })
+			...(tagsList && { tags: serializeTags(tagsList) }),
 		};
 
 		return result;
@@ -511,13 +521,15 @@ export function extendWorldItem(worldItem: WorldItemDeserialized): WorldItemComp
 		const ui: WorldItemUI = {
 			emoji: worldItem.emoji || '🔮',
 			color: worldItem.color || '#6D28D9',
-			formattedDate: worldItem.updatedAt ? new Date(worldItem.updatedAt).toLocaleDateString() : new Date().toLocaleDateString()
+			formattedDate: worldItem.updatedAt
+				? new Date(worldItem.updatedAt).toLocaleDateString()
+				: new Date().toLocaleDateString(),
 		};
 
 		// ✅ Crear contadores seguros
 		const counts: WorldItemCounts = {
 			images: 0,
-			relatedItems: 0
+			relatedItems: 0,
 		};
 
 		// ✅ Crear relaciones vacías
@@ -527,7 +539,7 @@ export function extendWorldItem(worldItem: WorldItemDeserialized): WorldItemComp
 			...worldItem,
 			ui,
 			counts,
-			relations
+			relations,
 		};
 	} catch (error) {
 		logger.error('Error extendiendo WorldItem:', error);
@@ -536,10 +548,10 @@ export function extendWorldItem(worldItem: WorldItemDeserialized): WorldItemComp
 			ui: {
 				emoji: '🔮',
 				color: '#6D28D9',
-				formattedDate: new Date().toLocaleDateString()
+				formattedDate: new Date().toLocaleDateString(),
 			},
 			counts: {},
-			relations: {}
+			relations: {},
 		};
 	}
 }
@@ -592,17 +604,18 @@ export function fromWorldItemBase(worldItem: WorldItemBase): WorldItemDeserializ
 			if (!attributePattern.test(field)) return null;
 
 			try {
-				const items = field.split(',')
-					.map(item => item.trim())
+				const items = field
+					.split(',')
+					.map((item) => item.trim())
 					.filter(Boolean)
-					.map(item => {
+					.map((item) => {
 						// Buscar patrón: "Nombre + Número + (opcional) descripción"
 						const matches = item.match(/^([A-Za-zÀ-ÿ\s]+?)\s+(\d+)(.*)$/);
 						if (matches) {
 							return {
 								name: matches[1].trim(),
 								value: Number.parseInt(matches[2], 10), // ✅ Usar Number.parseInt
-								description: matches[3]?.trim() || ''
+								description: matches[3]?.trim() || '',
 							};
 						}
 
@@ -628,7 +641,9 @@ export function fromWorldItemBase(worldItem: WorldItemBase): WorldItemDeserializ
 			try {
 				return JSON.parse(field) as T;
 			} catch (originalError) {
-				logger.debug(`🔄 Intentando reparar campo JSON para WorldItem: "${field.substring(0, 50)}${field.length > 50 ? '...' : ''}"`);
+				logger.debug(
+					`🔄 Intentando reparar campo JSON para WorldItem: "${field.substring(0, 50)}${field.length > 50 ? '...' : ''}"`
+				);
 
 				// 🔧 Estrategia 1: Normalizar strings comunes
 				const normalized = normalizeCommonStrings(field);
@@ -668,7 +683,9 @@ export function fromWorldItemBase(worldItem: WorldItemBase): WorldItemDeserializ
 				}
 
 				// 🚨 Si todas las estrategias fallan, registrar para análisis y usar valor por defecto
-				logger.warn(`❌ No se pudo reparar campo JSON para WorldItem. Campo: "${field}", Error original: ${originalError}. Usando valor por defecto.`);
+				logger.warn(
+					`❌ No se pudo reparar campo JSON para WorldItem. Campo: "${field}", Error original: ${originalError}. Usando valor por defecto.`
+				);
 				return defaultValue;
 			}
 		};
@@ -689,11 +706,16 @@ export function fromWorldItemBase(worldItem: WorldItemBase): WorldItemDeserializ
 			origin: worldItem.origin ?? 'unknown',
 
 			// ✅ Campos JSON como strings serializados (para WorldItemBase)
-			attributes: typeof worldItem.attributes === 'string' ? worldItem.attributes : JSON.stringify(worldItem.attributes || []),
+			attributes:
+				typeof worldItem.attributes === 'string' ? worldItem.attributes : JSON.stringify(worldItem.attributes || []),
 			effects: typeof worldItem.effects === 'string' ? worldItem.effects : JSON.stringify(worldItem.effects || []),
-			requirements: typeof worldItem.requirements === 'string' ? worldItem.requirements : JSON.stringify(worldItem.requirements || {}),
+			requirements:
+				typeof worldItem.requirements === 'string'
+					? worldItem.requirements
+					: JSON.stringify(worldItem.requirements || {}),
 			stats: typeof worldItem.stats === 'string' ? worldItem.stats : JSON.stringify(worldItem.stats || []),
-			properties: typeof worldItem.properties === 'string' ? worldItem.properties : JSON.stringify(worldItem.properties || []),
+			properties:
+				typeof worldItem.properties === 'string' ? worldItem.properties : JSON.stringify(worldItem.properties || []),
 			filters: typeof worldItem.filters === 'string' ? worldItem.filters : JSON.stringify(worldItem.filters || []),
 
 			// ✅ Otros campos
@@ -722,11 +744,10 @@ export function fromWorldItemBase(worldItem: WorldItemBase): WorldItemDeserializ
 		// 🏗️ Construir objeto deserializado completo
 		const deserializedItem: WorldItemDeserialized = {
 			...baseItem,
-			...deserializedFields
+			...deserializedFields,
 		};
 
 		return deserializedItem;
-
 	} catch (error) {
 		logger.error('Error en fromWorldItemBase:', error);
 		throw handleTransformerError(error);
@@ -757,7 +778,9 @@ export function toExtendedWorldItem(worldItem: WorldItemBase): WorldItemComplete
  * @param worldItem - WorldItem base con conteos opcionales
  * @returns WorldItem completo con estadísticas
  */
-export function toWorldItemWithStats(worldItem: WorldItemBase & { _count?: { images?: number; relatedItems?: number } }): WorldItemComplete {
+export function toWorldItemWithStats(
+	worldItem: WorldItemBase & { _count?: { images?: number; relatedItems?: number } }
+): WorldItemComplete {
 	const extendedItem = extendWorldItem(fromWorldItemBase(worldItem));
 
 	// Agregar conteos si están disponibles
@@ -765,7 +788,7 @@ export function toWorldItemWithStats(worldItem: WorldItemBase & { _count?: { ima
 		extendedItem.counts = {
 			...extendedItem.counts,
 			images: worldItem._count.images ?? 0,
-			relatedItems: worldItem._count.relatedItems ?? 0
+			relatedItems: worldItem._count.relatedItems ?? 0,
 		};
 	}
 

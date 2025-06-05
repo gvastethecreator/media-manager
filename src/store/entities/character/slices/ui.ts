@@ -83,14 +83,14 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 				const updatedCharacters = { ...state.characters };
 
 				// Resetear todos los personajes con hover
-				Object.keys(updatedCharacters).forEach((id) => {
+				for (const id of Object.keys(updatedCharacters)) {
 					if (updatedCharacters[id].isHovered) {
 						updatedCharacters[id] = {
 							...updatedCharacters[id],
 							isHovered: false,
 						};
 					}
-				});
+				}
 
 				// Establecer hover en el personaje seleccionado
 				if (characterId && updatedCharacters[characterId]) {
@@ -194,12 +194,12 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 
 			// Actualizar cada personaje
 			const updatedCharacters = { ...state.characters };
-			characterIds.forEach((id) => {
+			for (const id of characterIds) {
 				updatedCharacters[id] = {
 					...updatedCharacters[id],
 					isOpen: true,
 				};
-			});
+			}
 
 			return {
 				expandedCharacterIds: characterIds,
@@ -215,12 +215,12 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 		set((state) => {
 			// Actualizar cada personaje
 			const updatedCharacters = { ...state.characters };
-			Object.keys(updatedCharacters).forEach((id) => {
+			for (const id of Object.keys(updatedCharacters)) {
 				updatedCharacters[id] = {
 					...updatedCharacters[id],
-					isOpen: false,
+					isExpanded: false,
 				};
-			});
+			}
 
 			return {
 				expandedCharacterIds: [],
@@ -286,16 +286,14 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 		set((state) => {
 			// Resetear estados de UI en cada personaje
 			const updatedCharacters = { ...state.characters };
-			Object.keys(updatedCharacters).forEach((id) => {
+			for (const id of Object.keys(updatedCharacters)) {
 				updatedCharacters[id] = {
 					...updatedCharacters[id],
 					isSelected: false,
-					isHovered: false,
-					isOpen: false,
-					isLoading: false,
-					hasError: false,
+					isExpanded: false,
+					isEditing: false,
 				};
-			});
+			}
 
 			return {
 				selectedCharacterId: null,

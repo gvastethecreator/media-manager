@@ -88,11 +88,11 @@ export function PropertiesView(_props: ViewProps) {
 			const data = await getProperties();
 
 			// Calcular total de asociaciones para cada propiedad
-			const propertiesWithStats = data.map(property => {
+			const propertiesWithStats = data.map((property) => {
 				const totalAssociations = Object.values(property._count || {}).reduce((sum, count) => sum + (count || 0), 0);
 				return {
 					...property,
-					totalAssociations
+					totalAssociations,
 				};
 			});
 
@@ -174,10 +174,7 @@ export function PropertiesView(_props: ViewProps) {
 									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
 									data-property-id={(property as any).id}
 								>
-									<MemoizedPropertyCard
-										property={property}
-										onPropertyClick={onPropertyClick}
-									/>
+									<MemoizedPropertyCard property={property} onPropertyClick={onPropertyClick} />
 								</div>
 							</motion.div>
 						);

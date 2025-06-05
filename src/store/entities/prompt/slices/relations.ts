@@ -17,7 +17,10 @@ export interface RelationsSlice {
 	removePropertyFromPrompt: (promptId: string, propertyId: string) => Promise<void>;
 	addWildcardToPrompt: (promptId: string, wildcardId: string) => Promise<void>;
 	removeWildcardFromPrompt: (promptId: string, wildcardId: string) => Promise<void>;
-	updatePromptRelations: (promptId: string, data: { groupIds?: string[], propertyIds?: string[], wildcardIds?: string[] }) => Promise<void>;
+	updatePromptRelations: (
+		promptId: string,
+		data: { groupIds?: string[]; propertyIds?: string[]; wildcardIds?: string[] }
+	) => Promise<void>;
 }
 
 // Acciones mock para desarrollo (se reemplazarán con server actions)
@@ -54,7 +57,10 @@ const mockApi = {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 
-	updatePromptRelations: async (promptId: string, data: { groupIds?: string[], propertyIds?: string[], wildcardIds?: string[] }): Promise<void> => {
+	updatePromptRelations: async (
+		promptId: string,
+		data: { groupIds?: string[]; propertyIds?: string[]; wildcardIds?: string[] }
+	): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 };

@@ -9,9 +9,9 @@ export * from './client';
 
 // Solo exportar tipos del servicio interno (no exportar la implementación)
 export type {
-    CreateProfileInput,
-    ProfileExtended,
-    ProfileFilters,
-    ProfilePaginationOptions,
-    UpdateProfileInput
+	CreateProfileInput,
+	ProfileExtended,
+	ProfileFilters,
+	ProfilePaginationOptions,
+	UpdateProfileInput,
 } from './profile.service';

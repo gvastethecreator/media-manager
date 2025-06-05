@@ -418,7 +418,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	getCharacterGroups: (characterId: string) => {
 		const character = get().characters[characterId];
 		if (!character || !character.groups) return [];
-		return character.groups.map(group => group.id);
+		return character.groups.map((group) => group.id);
 	},
 
 	/**
@@ -429,7 +429,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	getCharacterProperties: (characterId: string) => {
 		const character = get().characters[characterId];
 		if (!character || !character.properties) return [];
-		return character.properties.map(property => property.id);
+		return character.properties.map((property) => property.id);
 	},
 
 	/**
@@ -440,7 +440,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	getCharacterWildcards: (characterId: string) => {
 		const character = get().characters[characterId];
 		if (!character || !character.wildcards) return [];
-		return character.wildcards.map(wildcard => wildcard.id);
+		return character.wildcards.map((wildcard) => wildcard.id);
 	},
 
 	/**
@@ -454,7 +454,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 			if (!character) return state;
 
 			const currentGroups = character.groups || [];
-			if (currentGroups.some(g => g.id === groupId)) return state;
+			if (currentGroups.some((g) => g.id === groupId)) return state;
 
 			return {
 				characters: {
@@ -484,7 +484,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 					...state.characters,
 					[characterId]: {
 						...character,
-						groups: character.groups.filter(g => g.id !== groupId),
+						groups: character.groups.filter((g) => g.id !== groupId),
 						updatedAt: new Date(),
 					},
 				},
@@ -503,7 +503,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 			if (!character) return state;
 
 			const currentProperties = character.properties || [];
-			if (currentProperties.some(p => p.id === propertyId)) return state;
+			if (currentProperties.some((p) => p.id === propertyId)) return state;
 
 			return {
 				characters: {
@@ -533,7 +533,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 					...state.characters,
 					[characterId]: {
 						...character,
-						properties: character.properties.filter(p => p.id !== propertyId),
+						properties: character.properties.filter((p) => p.id !== propertyId),
 						updatedAt: new Date(),
 					},
 				},
@@ -552,7 +552,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 			if (!character) return state;
 
 			const currentWildcards = character.wildcards || [];
-			if (currentWildcards.some(w => w.id === wildcardId)) return state;
+			if (currentWildcards.some((w) => w.id === wildcardId)) return state;
 
 			return {
 				characters: {
@@ -582,7 +582,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 					...state.characters,
 					[characterId]: {
 						...character,
-						wildcards: character.wildcards.filter(w => w.id !== wildcardId),
+						wildcards: character.wildcards.filter((w) => w.id !== wildcardId),
 						updatedAt: new Date(),
 					},
 				},
@@ -595,11 +595,14 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 	 * @param characterId ID del personaje
 	 * @param data Datos de relaciones a actualizar
 	 */
-	updateCharacterRelations: (characterId: string, data: {
-		groupIds?: string[],
-		propertyIds?: string[],
-		wildcardIds?: string[]
-	}) => {
+	updateCharacterRelations: (
+		characterId: string,
+		data: {
+			groupIds?: string[];
+			propertyIds?: string[];
+			wildcardIds?: string[];
+		}
+	) => {
 		set((state) => {
 			const character = state.characters[characterId];
 			if (!character) return state;
@@ -607,15 +610,15 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 			const updates = { ...character };
 
 			if (data.groupIds !== undefined) {
-				updates.groups = data.groupIds.map(id => ({ id }));
+				updates.groups = data.groupIds.map((id) => ({ id }));
 			}
 
 			if (data.propertyIds !== undefined) {
-				updates.properties = data.propertyIds.map(id => ({ id }));
+				updates.properties = data.propertyIds.map((id) => ({ id }));
 			}
 
 			if (data.wildcardIds !== undefined) {
-				updates.wildcards = data.wildcardIds.map(id => ({ id }));
+				updates.wildcards = data.wildcardIds.map((id) => ({ id }));
 			}
 
 			updates.updatedAt = new Date();

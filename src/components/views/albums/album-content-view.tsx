@@ -13,10 +13,8 @@ import { useCallback, useEffect, useState } from 'react';
 const viewLogger = clientLogger.withContext('AlbumContentView');
 
 export function AlbumContentView() {
-	const currentAlbumId = useAlbumStore(state => state.ui.currentAlbumId);
-	const album = useAlbumStore(state =>
-		currentAlbumId ? state.core.albums[currentAlbumId] : null
-	);
+	const currentAlbumId = useAlbumStore((state) => state.ui.currentAlbumId);
+	const album = useAlbumStore((state) => (currentAlbumId ? state.core.albums[currentAlbumId] : null));
 
 	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -63,15 +61,15 @@ export function AlbumContentView() {
 		containerName: album?.name ?? null,
 		emptyState: !currentAlbumId
 			? {
-				icon: Album,
-				title: 'No hay álbum seleccionado',
-				description: 'Selecciona un álbum para ver su contenido.',
-			}
+					icon: Album,
+					title: 'No hay álbum seleccionado',
+					description: 'Selecciona un álbum para ver su contenido.',
+				}
 			: {
-				icon: Album,
-				title: 'Álbum sin imágenes',
-				description: 'Este álbum no tiene imágenes asociadas.',
-			},
+					icon: Album,
+					title: 'Álbum sin imágenes',
+					description: 'Este álbum no tiene imágenes asociadas.',
+				},
 		onRefresh: loadAlbumImages,
 	};
 

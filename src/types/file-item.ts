@@ -11,50 +11,50 @@ import type { MediaMetadata } from './metadata.types';
  * Estado de procesamiento de archivo
  */
 export enum FileProcessingStatus {
-    PENDING = 'pending',
-    PROCESSING = 'processing',
-    COMPLETED = 'completed',
-    FAILED = 'failed'
+	PENDING = 'pending',
+	PROCESSING = 'processing',
+	COMPLETED = 'completed',
+	FAILED = 'failed',
 }
 
 /**
  * Tipo de archivo
  */
 export enum FileType {
-    IMAGE = 'image',
-    VIDEO = 'video',
-    AUDIO = 'audio',
-    DOCUMENT = 'document',
-    OTHER = 'other'
+	IMAGE = 'image',
+	VIDEO = 'video',
+	AUDIO = 'audio',
+	DOCUMENT = 'document',
+	OTHER = 'other',
 }
 
 /**
  * Interfaz base para archivos
  */
 export interface FileItem {
-    id: EntityId;
-    name: string;
-    path: string;
-    type: FileType;
-    size: number;
-    mimeType: string;
-    metadata: JSONString<MediaMetadata>;
-    processingStatus: FileProcessingStatus;
-    errorMessage?: string;
-    createdAt: Date;
-    updatedAt: Date;
+	id: EntityId;
+	name: string;
+	path: string;
+	type: FileType;
+	size: number;
+	mimeType: string;
+	metadata: JSONString<MediaMetadata>;
+	processingStatus: FileProcessingStatus;
+	errorMessage?: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
  * Opciones de procesamiento
  */
 export interface FileProcessingOptions {
-    generateThumbnail?: boolean;
-    extractMetadata?: boolean;
-    optimizeFile?: boolean;
-    maxWidth?: number;
-    maxHeight?: number;
-    quality?: number;
+	generateThumbnail?: boolean;
+	extractMetadata?: boolean;
+	optimizeFile?: boolean;
+	maxWidth?: number;
+	maxHeight?: number;
+	quality?: number;
 }
 
 // Validación con Zod
@@ -62,26 +62,26 @@ export const fileProcessingStatusSchema = z.nativeEnum(FileProcessingStatus);
 export const fileTypeSchema = z.nativeEnum(FileType);
 
 export const fileItemSchema = z.object({
-    id: z.string(),
-    name: z.string().min(1),
-    path: z.string().min(1),
-    type: fileTypeSchema,
-    size: z.number().positive(),
-    mimeType: z.string(),
-    metadata: z.string(),
-    processingStatus: fileProcessingStatusSchema,
-    errorMessage: z.string().optional(),
-    createdAt: z.date(),
-    updatedAt: z.date()
+	id: z.string(),
+	name: z.string().min(1),
+	path: z.string().min(1),
+	type: fileTypeSchema,
+	size: z.number().positive(),
+	mimeType: z.string(),
+	metadata: z.string(),
+	processingStatus: fileProcessingStatusSchema,
+	errorMessage: z.string().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
 });
 
 export const fileProcessingOptionsSchema = z.object({
-    generateThumbnail: z.boolean().optional(),
-    extractMetadata: z.boolean().optional(),
-    optimizeFile: z.boolean().optional(),
-    maxWidth: z.number().positive().optional(),
-    maxHeight: z.number().positive().optional(),
-    quality: z.number().min(1).max(100).optional()
+	generateThumbnail: z.boolean().optional(),
+	extractMetadata: z.boolean().optional(),
+	optimizeFile: z.boolean().optional(),
+	maxWidth: z.number().positive().optional(),
+	maxHeight: z.number().positive().optional(),
+	quality: z.number().min(1).max(100).optional(),
 });
 
 // Tipos inferidos

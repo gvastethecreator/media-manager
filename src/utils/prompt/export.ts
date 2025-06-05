@@ -324,13 +324,7 @@ export function exportPrompt(prompt: PromptBase | PromptExtended, config: Prompt
 
 			case PromptExportFormat.CSV: {
 				// Implementación simplificada para CSV (solo una fila)
-				const fields = [
-					prompt.id,
-					prompt.title,
-					prompt.content,
-					prompt.category,
-					prompt.model,
-				];
+				const fields = [prompt.id, prompt.title, prompt.content, prompt.category, prompt.model];
 				content = includeMetadata
 					? `id,title,content,category,model\n"${fields.join('","')}"`
 					: `"${prompt.title}","${prompt.content}"`;

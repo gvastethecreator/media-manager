@@ -5,17 +5,17 @@ import type { EventType } from '@/lib/server/events.server';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import {
-    createConcept as createConceptTransformer,
-    deleteConcept as deleteConceptTransformer,
-    getConceptById as getConceptByIdTransformer,
-    searchConcepts as searchConceptsTransformer,
-    updateConcept as updateConceptTransformer,
+	createConcept as createConceptTransformer,
+	deleteConcept as deleteConceptTransformer,
+	getConceptById as getConceptByIdTransformer,
+	searchConcepts as searchConceptsTransformer,
+	updateConcept as updateConceptTransformer,
 } from '@/transformers/concept';
 import type {
-    ConceptCreateInput,
-    ConceptSearchOptions,
-    ConceptSearchResult,
-    ConceptUpdateInput,
+	ConceptCreateInput,
+	ConceptSearchOptions,
+	ConceptSearchResult,
+	ConceptUpdateInput,
 } from '@/types/entities/concept/types';
 import { revalidatePath } from 'next/cache';
 
@@ -24,44 +24,41 @@ const REVALIDATE_PATHS = ['/settings', '/concepts', '/concepts/[id]'] as const;
 
 // Códigos de error
 enum ConceptErrorCode {
-    NOT_FOUND = 'NOT_FOUND',
-    VALIDATION_ERROR = 'VALIDATION_ERROR',
-    OPERATION_FAILED = 'OPERATION_FAILED',
+	NOT_FOUND = 'NOT_FOUND',
+	VALIDATION_ERROR = 'VALIDATION_ERROR',
+	OPERATION_FAILED = 'OPERATION_FAILED',
 }
 
 // Función creadora de errores (enfoque funcional)
 const createConceptError = (
-    message: string,
-    code: ConceptErrorCode = ConceptErrorCode.OPERATION_FAILED,
-    cause?: unknown
+	message: string,
+	code: ConceptErrorCode = ConceptErrorCode.OPERATION_FAILED,
+	cause?: unknown
 ) => {
-    const error = new Error(message);
-    error.name = 'ConceptError';
-    Object.assign(error, { code, cause });
-    return error;
+	const error = new Error(message);
+	error.name = 'ConceptError';
+	Object.assign(error, { code, cause });
+	return error;
 };
 
 // Funciones utilitarias
 const revalidateAllPaths = async () => {
-    for (const path of REVALIDATE_PATHS) {
-        revalidatePath(path);
-    }
-    conceptLogger.info('🔄 Rutas revalidadas');
+	for (const path of REVALIDATE_PATHS) {
+		revalidatePath(path);
+	}
+	conceptLogger.info('🔄 Rutas revalidadas');
 };
 
-const notifyConceptChange = async (
-    action: 'create' | 'update' | 'delete',
-    conceptId?: string
-) => {
-    // Emitir evento
-    await emit({
-        type: 'concepts:modified' as EventType,
-        ...(conceptId ? { id: conceptId } : {}),
-        data: { action },
-    });
+const notifyConceptChange = async (action: 'create' | 'update' | 'delete', conceptId?: string) => {
+	// Emitir evento
+	await emit({
+		type: 'concepts:modified' as EventType,
+		...(conceptId ? { id: conceptId } : {}),
+		data: { action },
+	});
 
-    // Actualizar estadísticas
-    statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
+	// Actualizar estadísticas
+	statsEventEmitter.emit(STATS_EVENTS.CONCEPT_CHANGE);
 };
 
 // Acciones del servidor
@@ -70,19 +67,17 @@ const notifyConceptChange = async (
  * @param options Opciones de búsqueda
  * @returns Resultado de la búsqueda de conceptos
  */
-export async function searchConcepts(
-    options?: ConceptSearchOptions
-): Promise<ConceptSearchResult> {
-    conceptLogger.info('🔍 Buscando conceptos...', options);
-    try {
-        // La lógica interna usa searchConceptsTransformer del transformer
-        const results = await searchConceptsTransformer(options);
-        conceptLogger.info(`✅ Encontrados ${results.total} conceptos`);
-        return results;
-    } catch (error) {
-        conceptLogger.error('❌ Error al buscar conceptos:', error);
-        throw createConceptError('Error al buscar conceptos', ConceptErrorCode.OPERATION_FAILED, error);
-    }
+export async function searchConcepts(options?: ConceptSearchOptions): Promise<ConceptSearchResult> {
+	conceptLogger.info('🔍 Buscando conceptos...', options);
+	try {
+		// La lógica interna usa searchConceptsTransformer del transformer
+		const results = await searchConceptsTransformer(options);
+		conceptLogger.info(`✅ Encontrados ${results.total} conceptos`);
+		return results;
+	} catch (error) {
+		conceptLogger.error('❌ Error al buscar conceptos:', error);
+		throw createConceptError('Error al buscar conceptos', ConceptErrorCode.OPERATION_FAILED, error);
+	}
 }
 
 /**
@@ -91,21 +86,21 @@ export async function searchConcepts(
  * @returns Concepto completo o null si no se encuentra
  */
 export async function getConceptById(id: string) {
-    conceptLogger.info(`🔍 Obteniendo concepto con ID: ${id}`);
-    try {
-        // Usar la función getConceptByIdTransformer importada del transformer
-        const concept = await getConceptByIdTransformer(id);
-        if (!concept) {
-            conceptLogger.warn(`⚠️ Concepto no encontrado con ID: ${id}`);
-            throw createConceptError(`Concepto no encontrado con ID: ${id}`, ConceptErrorCode.NOT_FOUND);
-        }
-        conceptLogger.info(`✅ Concepto obtenido: ${concept.name}`);
-        return concept;
-    } catch (error) {
-        conceptLogger.error(`❌ Error al obtener concepto con ID: ${id}`, error);
-        if (error instanceof Error && error.name === 'ConceptError') throw error;
-        throw createConceptError('Error al obtener concepto', ConceptErrorCode.OPERATION_FAILED, error);
-    }
+	conceptLogger.info(`🔍 Obteniendo concepto con ID: ${id}`);
+	try {
+		// Usar la función getConceptByIdTransformer importada del transformer
+		const concept = await getConceptByIdTransformer(id);
+		if (!concept) {
+			conceptLogger.warn(`⚠️ Concepto no encontrado con ID: ${id}`);
+			throw createConceptError(`Concepto no encontrado con ID: ${id}`, ConceptErrorCode.NOT_FOUND);
+		}
+		conceptLogger.info(`✅ Concepto obtenido: ${concept.name}`);
+		return concept;
+	} catch (error) {
+		conceptLogger.error(`❌ Error al obtener concepto con ID: ${id}`, error);
+		if (error instanceof Error && error.name === 'ConceptError') throw error;
+		throw createConceptError('Error al obtener concepto', ConceptErrorCode.OPERATION_FAILED, error);
+	}
 }
 
 /**
@@ -114,17 +109,17 @@ export async function getConceptById(id: string) {
  * @returns Concepto creado
  */
 export async function createConcept(data: ConceptCreateInput) {
-    conceptLogger.info('✨ Creando nuevo concepto...', data.name);
-    try {
-        const newConcept = await createConceptTransformer(data);
-        conceptLogger.info(`✅ Concepto creado: ${newConcept.name} (ID: ${newConcept.id})`);
-        await revalidateAllPaths();
-        await notifyConceptChange('create', newConcept.id);
-        return newConcept;
-    } catch (error) {
-        conceptLogger.error('❌ Error al crear concepto:', error);
-        throw createConceptError('Error al crear concepto', ConceptErrorCode.OPERATION_FAILED, error);
-    }
+	conceptLogger.info('✨ Creando nuevo concepto...', data.name);
+	try {
+		const newConcept = await createConceptTransformer(data);
+		conceptLogger.info(`✅ Concepto creado: ${newConcept.name} (ID: ${newConcept.id})`);
+		await revalidateAllPaths();
+		await notifyConceptChange('create', newConcept.id);
+		return newConcept;
+	} catch (error) {
+		conceptLogger.error('❌ Error al crear concepto:', error);
+		throw createConceptError('Error al crear concepto', ConceptErrorCode.OPERATION_FAILED, error);
+	}
 }
 
 /**
@@ -134,17 +129,17 @@ export async function createConcept(data: ConceptCreateInput) {
  * @returns Concepto actualizado
  */
 export async function updateConcept(id: string, data: ConceptUpdateInput) {
-    conceptLogger.info(`📝 Actualizando concepto: ${id}`, data);
-    try {
-        const updatedConcept = await updateConceptTransformer(id, data);
-        conceptLogger.info(`✅ Concepto actualizado: ${updatedConcept.name}`);
-        await revalidateAllPaths();
-        await notifyConceptChange('update', id);
-        return updatedConcept;
-    } catch (error) {
-        conceptLogger.error(`❌ Error al actualizar concepto: ${id}`, error);
-        throw createConceptError('Error al actualizar concepto', ConceptErrorCode.OPERATION_FAILED, error);
-    }
+	conceptLogger.info(`📝 Actualizando concepto: ${id}`, data);
+	try {
+		const updatedConcept = await updateConceptTransformer(id, data);
+		conceptLogger.info(`✅ Concepto actualizado: ${updatedConcept.name}`);
+		await revalidateAllPaths();
+		await notifyConceptChange('update', id);
+		return updatedConcept;
+	} catch (error) {
+		conceptLogger.error(`❌ Error al actualizar concepto: ${id}`, error);
+		throw createConceptError('Error al actualizar concepto', ConceptErrorCode.OPERATION_FAILED, error);
+	}
 }
 
 /**
@@ -153,17 +148,17 @@ export async function updateConcept(id: string, data: ConceptUpdateInput) {
  * @returns Objeto indicando éxito
  */
 export async function deleteConcept(id: string): Promise<{ success: boolean }> {
-    conceptLogger.info(`🗑️ Eliminando concepto: ${id}`);
-    try {
-        await deleteConceptTransformer(id);
-        conceptLogger.info(`✅ Concepto eliminado: ${id}`);
-        await revalidateAllPaths();
-        await notifyConceptChange('delete', id);
-        return { success: true };
-    } catch (error) {
-        conceptLogger.error(`❌ Error al eliminar concepto: ${id}`, error);
-        throw createConceptError('Error al eliminar concepto', ConceptErrorCode.OPERATION_FAILED, error);
-    }
+	conceptLogger.info(`🗑️ Eliminando concepto: ${id}`);
+	try {
+		await deleteConceptTransformer(id);
+		conceptLogger.info(`✅ Concepto eliminado: ${id}`);
+		await revalidateAllPaths();
+		await notifyConceptChange('delete', id);
+		return { success: true };
+	} catch (error) {
+		conceptLogger.error(`❌ Error al eliminar concepto: ${id}`, error);
+		throw createConceptError('Error al eliminar concepto', ConceptErrorCode.OPERATION_FAILED, error);
+	}
 }
 
 // --- Funciones Faltantes (Stubs) ---
@@ -172,29 +167,29 @@ export async function deleteConcept(id: string): Promise<{ success: boolean }> {
  * ➕ Asocia una imagen a un concepto (STUB)
  */
 export async function addImageToConcept(conceptId: string, imageId: string): Promise<{ success: boolean }> {
-    conceptLogger.warn('⚠️ Función addImageToConcept no implementada');
-    // Aquí iría la lógica para llamar a prisma.concept.update connect image
-    await notifyConceptChange('update', conceptId); // Asumir que notifica cambio
-    await revalidateAllPaths();
-    // throw createConceptError('Función no implementada', ConceptErrorCode.OPERATION_FAILED);
-    return { success: false }; // Temporalmente retorna false
+	conceptLogger.warn('⚠️ Función addImageToConcept no implementada');
+	// Aquí iría la lógica para llamar a prisma.concept.update connect image
+	await notifyConceptChange('update', conceptId); // Asumir que notifica cambio
+	await revalidateAllPaths();
+	// throw createConceptError('Función no implementada', ConceptErrorCode.OPERATION_FAILED);
+	return { success: false }; // Temporalmente retorna false
 }
 
 /**
  * 🖼️ Obtiene las imágenes asociadas a un concepto (STUB)
  */
 export async function getConceptImages(conceptId: string): Promise<{ images: any[] }> {
-    conceptLogger.warn(`⚠️ Función getConceptImages no implementada para conceptId: ${conceptId}`);
-    // Aquí iría la lógica para buscar el concepto y sus imágenes
-    // throw createConceptError('Función no implementada', ConceptErrorCode.OPERATION_FAILED);
-    return { images: [] }; // Temporalmente retorna array vacío
+	conceptLogger.warn(`⚠️ Función getConceptImages no implementada para conceptId: ${conceptId}`);
+	// Aquí iría la lógica para buscar el concepto y sus imágenes
+	// throw createConceptError('Función no implementada', ConceptErrorCode.OPERATION_FAILED);
+	return { images: [] }; // Temporalmente retorna array vacío
 }
 
 /**
  * 📚 Obtiene todos los conceptos (simplificado, usa search) (STUB)
  */
 export async function getConcepts(options?: ConceptSearchOptions): Promise<ConceptSearchResult> {
-    conceptLogger.warn('⚠️ Función getConcepts redirigida a searchConcepts');
-    // Redirigir a searchConcepts sin filtros específicos por ahora
-    return searchConcepts(options);
+	conceptLogger.warn('⚠️ Función getConcepts redirigida a searchConcepts');
+	// Redirigir a searchConcepts sin filtros específicos por ahora
+	return searchConcepts(options);
 }

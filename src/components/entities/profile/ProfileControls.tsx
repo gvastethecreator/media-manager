@@ -5,24 +5,9 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProfileStore } from '@/store/entities/profile';
-import {
-	Grid2x2,
-	Grid3x3,
-	Layers,
-	LayoutGrid,
-	List,
-	Search,
-	SortAsc,
-	SortDesc,
-} from 'lucide-react';
+import { Grid2x2, Grid3x3, Layers, LayoutGrid, List, Search, SortAsc, SortDesc } from 'lucide-react';
 import { useCallback } from 'react';
 
 export interface ProfileControlsProps {
@@ -73,12 +58,7 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 			{/* Búsqueda */}
 			<div className="relative flex-1">
 				<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-				<Input
-					placeholder="Buscar perfiles..."
-					value={searchTerm}
-					onChange={handleSearchChange}
-					className="pl-9"
-				/>
+				<Input placeholder="Buscar perfiles..." value={searchTerm} onChange={handleSearchChange} className="pl-9" />
 			</div>
 
 			<div className="flex items-center gap-2">
@@ -171,10 +151,7 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 				</Select>
 
 				{/* Agrupar por */}
-				<Select
-					value={groupBy}
-					onValueChange={handleGroupByChange as (value: string) => void}
-				>
+				<Select value={groupBy} onValueChange={handleGroupByChange as (value: string) => void}>
 					<SelectTrigger className="w-[150px]">
 						<SelectValue placeholder="Agrupar por..." />
 					</SelectTrigger>

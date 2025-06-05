@@ -95,4 +95,3 @@ export async function getImageMetadataById(imageId: string): Promise<FileMetadat
 export type { MetadataErrorData } from './metadata-errors.actions';
 export type { ImageFormat } from './metadata-types.actions';
 export type { FileMetadata }; // Se importó arriba
-

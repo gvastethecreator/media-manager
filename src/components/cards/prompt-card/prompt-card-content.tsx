@@ -42,7 +42,7 @@ export function PromptCardContent({
 	secondaryColor,
 	relationCounts = {},
 	tcgMode = true,
-	compact = false
+	compact = false,
 }: PromptCardContentProps) {
 	// Parsear tags si es un string
 	const parsedTags = useMemo(() => {
@@ -87,24 +87,15 @@ export function PromptCardContent({
 		: 'Sin descripción';
 
 	// Determinar qué relaciones mostrar
-	const hasRelations = Object.values(relationCounts).some(count => count > 0);
+	const hasRelations = Object.values(relationCounts).some((count) => count > 0);
 
 	return (
 		<div
-			className={cn(
-				"flex flex-col p-3 flex-1 overflow-hidden",
-				tcgMode ? "bg-card/80" : "bg-card"
-			)}
+			className={cn('flex flex-col p-3 flex-1 overflow-hidden', tcgMode ? 'bg-card/80' : 'bg-card')}
 			style={{
-				background: tcgMode
-					? `linear-gradient(to bottom, transparent, ${primaryColor}10)`
-					: undefined,
-				borderBottom: tcgMode
-					? `1px solid ${borderColor}`
-					: undefined,
-				boxShadow: tcgMode
-					? `0 0 15px ${primaryColor}20 inset`
-					: undefined
+				background: tcgMode ? `linear-gradient(to bottom, transparent, ${primaryColor}10)` : undefined,
+				borderBottom: tcgMode ? `1px solid ${borderColor}` : undefined,
+				boxShadow: tcgMode ? `0 0 15px ${primaryColor}20 inset` : undefined,
 			}}
 		>
 			{/* Sección de categoría y etiquetas */}
@@ -120,7 +111,9 @@ export function PromptCardContent({
 				{hasParameters && (
 					<div className="flex items-center text-xs opacity-70">
 						<Settings className="h-3.5 w-3.5 mr-1" />
-						<span>{parameterKeys.length} {parameterKeys.length === 1 ? "parámetro" : "parámetros"}</span>
+						<span>
+							{parameterKeys.length} {parameterKeys.length === 1 ? 'parámetro' : 'parámetros'}
+						</span>
 					</div>
 				)}
 			</div>
@@ -128,11 +121,7 @@ export function PromptCardContent({
 			{/* Sección de contenido principal */}
 			{mainContent && (
 				<div className="mb-2 text-muted-foreground" style={{ fontSize: '0.8rem', lineHeight: '1.25rem' }}>
-					<div className={cn(
-						"overflow-hidden",
-						compact ? "line-clamp-2" : "line-clamp-3",
-						tcgMode && "font-medium"
-					)}>
+					<div className={cn('overflow-hidden', compact ? 'line-clamp-2' : 'line-clamp-3', tcgMode && 'font-medium')}>
 						{mainContentPreview}
 					</div>
 				</div>
@@ -159,17 +148,14 @@ export function PromptCardContent({
 									backgroundColor: tagColor,
 									color: primaryColor,
 									borderColor: primaryColor,
-									boxShadow: tcgMode ? `0 0 5px ${primaryColor}30` : undefined
+									boxShadow: tcgMode ? `0 0 5px ${primaryColor}30` : undefined,
 								}}
 							>
 								{tag}
 							</Badge>
 						))}
 						{parsedTags.length > maxTagsToShow && (
-							<Badge
-								variant="outline"
-								className="px-1.5 py-0.5 text-xs opacity-70"
-							>
+							<Badge variant="outline" className="px-1.5 py-0.5 text-xs opacity-70">
 								+{parsedTags.length - maxTagsToShow}
 							</Badge>
 						)}
@@ -195,7 +181,8 @@ export function PromptCardContent({
 								<span className="truncate ml-1 opacity-80">
 									{typeof parsedParameters[key] === 'object'
 										? '{...}'
-										: String(parsedParameters[key]).substring(0, 10) + (String(parsedParameters[key]).length > 10 ? '...' : '')}
+										: String(parsedParameters[key]).substring(0, 10) +
+											(String(parsedParameters[key]).length > 10 ? '...' : '')}
 								</span>
 							</div>
 						))}
@@ -239,7 +226,7 @@ function StatCounter({
 	icon,
 	count,
 	label,
-	primaryColor
+	primaryColor,
 }: {
 	icon: React.ReactNode;
 	count: number;

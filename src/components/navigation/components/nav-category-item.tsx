@@ -13,7 +13,7 @@ import { memo, useCallback, useMemo } from 'react';
 const CollapseIndicator = memo(function CollapseIndicator({
 	isCollapsed,
 	onToggleCollapse,
-	color = '#888888'
+	color = '#888888',
 }: {
 	isCollapsed: boolean;
 	onToggleCollapse: (e: React.MouseEvent | React.KeyboardEvent) => void;

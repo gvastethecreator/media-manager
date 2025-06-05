@@ -30,4 +30,3 @@ export interface ExtendedProcessStatus extends ProcessStatus {
 }
 
 export type { FOLDER_EVENTS };
-

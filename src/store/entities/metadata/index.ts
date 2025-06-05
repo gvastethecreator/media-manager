@@ -17,27 +17,27 @@ export type MetadataStore = CoreState & CoreActions & UIState & UIActions & Filt
 
 // Crear el store con slices
 export const useMetadataStoreBase = create<MetadataStore>()(
-  devtools(
-    persist(
-      (...a) => ({
-        ...createCoreSlice(...a),
-        ...createUISlice(...a),
-        ...createFiltersSlice(...a),
-      }),
-      {
-        name: 'metadata-store',
-        partialize: (state) => ({
-          // Solo persistir configuraciones de UI y filtros
-          selectedMetadataIds: state.selectedMetadataIds,
-          filterOptions: state.filterOptions,
-          sortBy: state.sortBy,
-          sortDirection: state.sortDirection,
-          viewMode: state.viewMode,
-        }),
-      }
-    ),
-    { name: 'MetadataStore' }
-  )
+	devtools(
+		persist(
+			(...a) => ({
+				...createCoreSlice(...a),
+				...createUISlice(...a),
+				...createFiltersSlice(...a),
+			}),
+			{
+				name: 'metadata-store',
+				partialize: (state) => ({
+					// Solo persistir configuraciones de UI y filtros
+					selectedMetadataIds: state.selectedMetadataIds,
+					filterOptions: state.filterOptions,
+					sortBy: state.sortBy,
+					sortDirection: state.sortDirection,
+					viewMode: state.viewMode,
+				}),
+			}
+		),
+		{ name: 'MetadataStore' }
+	)
 );
 
 // Exportar store con selectores

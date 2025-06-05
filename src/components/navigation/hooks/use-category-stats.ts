@@ -100,46 +100,56 @@ export function useCategoryStats(initialData: NavigationData) {
 	 * @param items Array de items o resultado de búsqueda
 	 * @returns Número total de imágenes
 	 */
-	const calculateTotalImages = useCallback((items: any): number => {
-		const itemsArray = getSafeItemsArray(items);
+	const calculateTotalImages = useCallback(
+		(items: any): number => {
+			const itemsArray = getSafeItemsArray(items);
 
-		return itemsArray.reduce((sum: number, item: any) => {
-			// 🛡️ Manejo seguro de diferentes estructuras de _count
-			if (item?._count?.images) {
-				return sum + item._count.images;
-			}
-			// 📊 Alternativa para items con imageCount directo
-			if (typeof item?.imageCount === 'number') {
-				return sum + item.imageCount;
-			}
-			return sum;
-		}, 0);
-	}, [getSafeItemsArray]);
+			return itemsArray.reduce((sum: number, item: any) => {
+				// 🛡️ Manejo seguro de diferentes estructuras de _count
+				if (item?._count?.images) {
+					return sum + item._count.images;
+				}
+				// 📊 Alternativa para items con imageCount directo
+				if (typeof item?.imageCount === 'number') {
+					return sum + item.imageCount;
+				}
+				return sum;
+			}, 0);
+		},
+		[getSafeItemsArray]
+	);
 
 	/**
 	 * 🗂️ Función auxiliar para mapear items de navegación a CategoryChild de manera segura
 	 * @param items Array de items del tipo de navegación
 	 * @returns Array de CategoryChild mapeados de manera segura
 	 */
-	const mapToCategoryChildren = useCallback((items: any): CategoryChild[] => {
-		const itemsArray = getSafeItemsArray(items);
+	const mapToCategoryChildren = useCallback(
+		(items: any): CategoryChild[] => {
+			const itemsArray = getSafeItemsArray(items);
 
-		return itemsArray.map((item): CategoryChild => ({
-			id: item.id || '',
-			name: item.name || item.title || '', // 📝 Soporte para notas que usan 'title'
-			title: item.title,
-			emoji: item.emoji,
-			color: item.color,
-			path: item.path,
-			description: item.description,
-			_count: item._count ? {
-				images: item._count.images || 0,
-				folders: item._count.folders,
-				collections: item._count.collections,
-				tags: item._count.tags,
-			} : undefined
-		}));
-	}, [getSafeItemsArray]);
+			return itemsArray.map(
+				(item): CategoryChild => ({
+					id: item.id || '',
+					name: item.name || item.title || '', // 📝 Soporte para notas que usan 'title'
+					title: item.title,
+					emoji: item.emoji,
+					color: item.color,
+					path: item.path,
+					description: item.description,
+					_count: item._count
+						? {
+								images: item._count.images || 0,
+								folders: item._count.folders,
+								collections: item._count.collections,
+								tags: item._count.tags,
+							}
+						: undefined,
+				})
+			);
+		},
+		[getSafeItemsArray]
+	);
 
 	// 🔢 Función auxiliar para obtener la cantidad de ítems para cada categoría
 	const getCategoryItemCount = useCallback(
@@ -175,7 +185,23 @@ export function useCategoryStats(initialData: NavigationData) {
 					return 0;
 			}
 		},
-		[getSafeArrayLength, albums, characters, collections, concepts, folders, notes, places, prompts, stats, tags, worldItems, groups, properties, wildcards]
+		[
+			getSafeArrayLength,
+			albums,
+			characters,
+			collections,
+			concepts,
+			folders,
+			notes,
+			places,
+			prompts,
+			stats,
+			tags,
+			worldItems,
+			groups,
+			properties,
+			wildcards,
+		]
 	);
 
 	// 📊 Calcula y devuelve el número de imágenes para una categoría
@@ -212,7 +238,22 @@ export function useCategoryStats(initialData: NavigationData) {
 					return 0;
 			}
 		},
-		[calculateTotalImages, albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems, groups, properties, wildcards]
+		[
+			calculateTotalImages,
+			albums,
+			characters,
+			collections,
+			concepts,
+			folders,
+			notes,
+			places,
+			prompts,
+			tags,
+			worldItems,
+			groups,
+			properties,
+			wildcards,
+		]
 	);
 
 	// 🏷️ Función para obtener los elementos hijos de cada categoría con mapeo seguro de tipos
@@ -249,7 +290,22 @@ export function useCategoryStats(initialData: NavigationData) {
 					return [];
 			}
 		},
-		[mapToCategoryChildren, albums, characters, collections, concepts, folders, notes, places, prompts, tags, worldItems, groups, properties, wildcards]
+		[
+			mapToCategoryChildren,
+			albums,
+			characters,
+			collections,
+			concepts,
+			folders,
+			notes,
+			places,
+			prompts,
+			tags,
+			worldItems,
+			groups,
+			properties,
+			wildcards,
+		]
 	);
 
 	return {

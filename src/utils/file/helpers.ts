@@ -10,15 +10,15 @@
  * @returns Una cadena formateada con el tamaño y la unidad
  */
 export function formatBytes(bytes: number, decimals = 2): string {
-  if (bytes === 0) return '0 Bytes';
+	if (bytes === 0) return '0 Bytes';
 
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+	const k = 1024;
+	const dm = decimals < 0 ? 0 : decimals;
+	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+	return `${Number.parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
 }
 
 /**
@@ -27,7 +27,7 @@ export function formatBytes(bytes: number, decimals = 2): string {
  * @returns La extensión del archivo sin el punto
  */
 export function getFileExtension(filename: string): string {
-  return filename.slice((filename.lastIndexOf('.') - 1 >>> 0) + 2);
+	return filename.slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2);
 }
 
 /**
@@ -36,8 +36,8 @@ export function getFileExtension(filename: string): string {
  * @returns true si es una extensión de imagen soportada
  */
 export function isImageExtension(extension: string): boolean {
-  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg', 'tiff'];
-  return imageExtensions.includes(extension.toLowerCase());
+	const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg', 'tiff'];
+	return imageExtensions.includes(extension.toLowerCase());
 }
 
 /**
@@ -46,8 +46,8 @@ export function isImageExtension(extension: string): boolean {
  * @returns true si es una extensión de video soportada
  */
 export function isVideoExtension(extension: string): boolean {
-  const videoExtensions = ['mp4', 'webm', 'avi', 'mov', 'mkv', 'flv'];
-  return videoExtensions.includes(extension.toLowerCase());
+	const videoExtensions = ['mp4', 'webm', 'avi', 'mov', 'mkv', 'flv'];
+	return videoExtensions.includes(extension.toLowerCase());
 }
 
 /**
@@ -56,44 +56,44 @@ export function isVideoExtension(extension: string): boolean {
  * @returns El tipo MIME correspondiente o application/octet-stream si no se reconoce
  */
 export function getMimeTypeFromExtension(extension: string): string {
-  const mimeTypes: Record<string, string> = {
-    // Imágenes
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'png': 'image/png',
-    'gif': 'image/gif',
-    'webp': 'image/webp',
-    'avif': 'image/avif',
-    'svg': 'image/svg+xml',
-    'tiff': 'image/tiff',
+	const mimeTypes: Record<string, string> = {
+		// Imágenes
+		jpg: 'image/jpeg',
+		jpeg: 'image/jpeg',
+		png: 'image/png',
+		gif: 'image/gif',
+		webp: 'image/webp',
+		avif: 'image/avif',
+		svg: 'image/svg+xml',
+		tiff: 'image/tiff',
 
-    // Videos
-    'mp4': 'video/mp4',
-    'webm': 'video/webm',
-    'avi': 'video/x-msvideo',
-    'mov': 'video/quicktime',
-    'mkv': 'video/x-matroska',
-    'flv': 'video/x-flv',
+		// Videos
+		mp4: 'video/mp4',
+		webm: 'video/webm',
+		avi: 'video/x-msvideo',
+		mov: 'video/quicktime',
+		mkv: 'video/x-matroska',
+		flv: 'video/x-flv',
 
-    // Documentos
-    'pdf': 'application/pdf',
-    'doc': 'application/msword',
-    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'xls': 'application/vnd.ms-excel',
-    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'ppt': 'application/vnd.ms-powerpoint',
-    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+		// Documentos
+		pdf: 'application/pdf',
+		doc: 'application/msword',
+		docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+		xls: 'application/vnd.ms-excel',
+		xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		ppt: 'application/vnd.ms-powerpoint',
+		pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 
-    // Otros
-    'txt': 'text/plain',
-    'html': 'text/html',
-    'css': 'text/css',
-    'js': 'text/javascript',
-    'json': 'application/json',
-    'xml': 'application/xml',
-    'zip': 'application/zip',
-    'rar': 'application/x-rar-compressed',
-  };
+		// Otros
+		txt: 'text/plain',
+		html: 'text/html',
+		css: 'text/css',
+		js: 'text/javascript',
+		json: 'application/json',
+		xml: 'application/xml',
+		zip: 'application/zip',
+		rar: 'application/x-rar-compressed',
+	};
 
-  return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
+	return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
 }

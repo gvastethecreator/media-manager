@@ -5,20 +5,17 @@
 
 import { createLogger } from '@/lib/logger';
 import type {
-    RelatedVideo,
-    VideoComplete,
-    VideoCreateInput,
-    VideoFilters,
-    VideoMetadata,
-    VideoSearchOptions,
-    VideoUpdateInput,
-    VideoVisualConfigComplete
+	RelatedVideo,
+	VideoComplete,
+	VideoCreateInput,
+	VideoFilters,
+	VideoMetadata,
+	VideoSearchOptions,
+	VideoUpdateInput,
+	VideoVisualConfigComplete,
 } from '@/types/entities/video/types';
 import type { Prisma } from '@prisma/client';
-import {
-    fromVideoVisualConfigComplete,
-    toPrismaVideo
-} from './serializers';
+import { fromVideoVisualConfigComplete, toPrismaVideo } from './serializers';
 
 // Logger específico para el transformer de Video
 const log = createLogger('video-mapper');
@@ -38,86 +35,88 @@ export function mapCreateVideoDataToPrisma(data: VideoCreateInput): Prisma.Video
 
 		// Relación con folder (requerida)
 		relations.folder = {
-			connect: { id: data.folderId }
+			connect: { id: data.folderId },
 		};
 
 		// Relaciones opcionales
 		if (data.albums && data.albums.length > 0) {
 			relations.albums = {
-				connect: data.albums.map(album => ({ id: typeof album === 'string' ? album : album.id }))
+				connect: data.albums.map((album) => ({ id: typeof album === 'string' ? album : album.id })),
 			};
 		}
 
 		if (data.collections && data.collections.length > 0) {
 			relations.collections = {
-				connect: data.collections.map(collection => ({ id: typeof collection === 'string' ? collection : collection.id }))
+				connect: data.collections.map((collection) => ({
+					id: typeof collection === 'string' ? collection : collection.id,
+				})),
 			};
 		}
 
 		if (data.tags && data.tags.length > 0) {
 			relations.tags = {
-				connect: data.tags.map(tag => ({ id: typeof tag === 'string' ? tag : tag.id }))
+				connect: data.tags.map((tag) => ({ id: typeof tag === 'string' ? tag : tag.id })),
 			};
 		}
 
 		if (data.characters && data.characters.length > 0) {
 			relations.characters = {
-				connect: data.characters.map(character => ({ id: typeof character === 'string' ? character : character.id }))
+				connect: data.characters.map((character) => ({ id: typeof character === 'string' ? character : character.id })),
 			};
 		}
 
 		if (data.places && data.places.length > 0) {
 			relations.places = {
-				connect: data.places.map(place => ({ id: typeof place === 'string' ? place : place.id }))
+				connect: data.places.map((place) => ({ id: typeof place === 'string' ? place : place.id })),
 			};
 		}
 
 		if (data.worldItems && data.worldItems.length > 0) {
 			relations.worldItems = {
-				connect: data.worldItems.map(item => ({ id: typeof item === 'string' ? item : item.id }))
+				connect: data.worldItems.map((item) => ({ id: typeof item === 'string' ? item : item.id })),
 			};
 		}
 
 		if (data.concepts && data.concepts.length > 0) {
 			relations.concepts = {
-				connect: data.concepts.map(concept => ({ id: typeof concept === 'string' ? concept : concept.id }))
+				connect: data.concepts.map((concept) => ({ id: typeof concept === 'string' ? concept : concept.id })),
 			};
 		}
 
 		if (data.prompts && data.prompts.length > 0) {
 			relations.prompts = {
-				connect: data.prompts.map(prompt => ({ id: typeof prompt === 'string' ? prompt : prompt.id }))
+				connect: data.prompts.map((prompt) => ({ id: typeof prompt === 'string' ? prompt : prompt.id })),
 			};
 		}
 
 		if (data.notes && data.notes.length > 0) {
 			relations.notes = {
-				connect: data.notes.map(note => ({ id: typeof note === 'string' ? note : note.id }))
+				connect: data.notes.map((note) => ({ id: typeof note === 'string' ? note : note.id })),
 			};
 		}
 
 		if (data.wildcards && data.wildcards.length > 0) {
 			relations.wildcards = {
-				connect: data.wildcards.map(wildcard => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id }))
+				connect: data.wildcards.map((wildcard) => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id })),
 			};
 		}
 
 		if (data.properties && data.properties.length > 0) {
 			relations.properties = {
-				connect: data.properties.map(property => ({ id: typeof property === 'string' ? property : property.id }))
+				connect: data.properties.map((property) => ({ id: typeof property === 'string' ? property : property.id })),
 			};
 		}
 
 		if (data.groups && data.groups.length > 0) {
 			relations.groups = {
-				connect: data.groups.map(group => ({ id: typeof group === 'string' ? group : group.id }))
+				connect: data.groups.map((group) => ({ id: typeof group === 'string' ? group : group.id })),
 			};
 		}
 
 		// Combinar datos base con relaciones
 		return {
 			...prismaData,
-			...relations
+			...relations,
 		};
 	} catch (error) {
 		log.error('Error mapeando datos de creación de video', { error, data });
@@ -142,98 +141,100 @@ export function mapUpdateVideoDataToPrisma(videoId: string, data: VideoUpdateInp
 		// Relación con folder (si se actualiza)
 		if (data.folderId) {
 			relations.folder = {
-				connect: { id: data.folderId }
+				connect: { id: data.folderId },
 			};
 		}
 
 		// Relaciones opcionales
 		if (data.albums) {
 			relations.albums = {
-				set: data.albums.map(album => ({ id: typeof album === 'string' ? album : album.id }))
+				set: data.albums.map((album) => ({ id: typeof album === 'string' ? album : album.id })),
 			};
 		}
 
 		if (data.collections) {
 			relations.collections = {
-				set: data.collections.map(collection => ({ id: typeof collection === 'string' ? collection : collection.id }))
+				set: data.collections.map((collection) => ({
+					id: typeof collection === 'string' ? collection : collection.id,
+				})),
 			};
 		}
 
 		if (data.tags) {
 			relations.tags = {
-				set: data.tags.map(tag => ({ id: typeof tag === 'string' ? tag : tag.id }))
+				set: data.tags.map((tag) => ({ id: typeof tag === 'string' ? tag : tag.id })),
 			};
 		}
 
 		if (data.characters) {
 			relations.characters = {
-				set: data.characters.map(character => ({ id: typeof character === 'string' ? character : character.id }))
+				set: data.characters.map((character) => ({ id: typeof character === 'string' ? character : character.id })),
 			};
 		}
 
 		if (data.places) {
 			relations.places = {
-				set: data.places.map(place => ({ id: typeof place === 'string' ? place : place.id }))
+				set: data.places.map((place) => ({ id: typeof place === 'string' ? place : place.id })),
 			};
 		}
 
 		if (data.worldItems) {
 			relations.worldItems = {
-				set: data.worldItems.map(item => ({ id: typeof item === 'string' ? item : item.id }))
+				set: data.worldItems.map((item) => ({ id: typeof item === 'string' ? item : item.id })),
 			};
 		}
 
 		if (data.concepts) {
 			relations.concepts = {
-				set: data.concepts.map(concept => ({ id: typeof concept === 'string' ? concept : concept.id }))
+				set: data.concepts.map((concept) => ({ id: typeof concept === 'string' ? concept : concept.id })),
 			};
 		}
 
 		if (data.prompts) {
 			relations.prompts = {
-				set: data.prompts.map(prompt => ({ id: typeof prompt === 'string' ? prompt : prompt.id }))
+				set: data.prompts.map((prompt) => ({ id: typeof prompt === 'string' ? prompt : prompt.id })),
 			};
 		}
 
 		if (data.notes) {
 			relations.notes = {
-				set: data.notes.map(note => ({ id: typeof note === 'string' ? note : note.id }))
+				set: data.notes.map((note) => ({ id: typeof note === 'string' ? note : note.id })),
 			};
 		}
 
 		if (data.wildcards) {
 			relations.wildcards = {
-				set: data.wildcards.map(wildcard => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id }))
+				set: data.wildcards.map((wildcard) => ({ id: typeof wildcard === 'string' ? wildcard : wildcard.id })),
 			};
 		}
 
 		if (data.properties) {
 			relations.properties = {
-				set: data.properties.map(property => ({ id: typeof property === 'string' ? property : property.id }))
+				set: data.properties.map((property) => ({ id: typeof property === 'string' ? property : property.id })),
 			};
 		}
 
 		if (data.groups) {
 			relations.groups = {
-				set: data.groups.map(group => ({ id: typeof group === 'string' ? group : group.id }))
+				set: data.groups.map((group) => ({ id: typeof group === 'string' ? group : group.id })),
 			};
 		}
 
 		// Eliminar campos UI que no deben ir a Prisma
-		delete prismaData.thumbnailUrl;
-		delete prismaData.playState;
-		delete prismaData.chapters;
-		delete prismaData.isSelected;
-		delete prismaData.privacyLevel;
-		delete prismaData.sharedWith;
+		prismaData.thumbnailUrl = undefined;
+		prismaData.playState = undefined;
+		prismaData.chapters = undefined;
+		prismaData.isSelected = undefined;
+		prismaData.privacyLevel = undefined;
+		prismaData.sharedWith = undefined;
 
 		// Combinar datos base con relaciones
 		return {
 			where: { id: videoId },
 			data: {
 				...prismaData,
-				...relations
-			}
+				...relations,
+			},
 		};
 	} catch (error) {
 		log.error('Error mapeando datos de actualización de video', { error, data });
@@ -354,8 +355,8 @@ export function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWher
 			AND.push({
 				OR: [
 					{ name: { contains: filters.search, mode: 'insensitive' } },
-					{ description: { contains: filters.search, mode: 'insensitive' } }
-				]
+					{ description: { contains: filters.search, mode: 'insensitive' } },
+				],
 			});
 		}
 
@@ -384,8 +385,8 @@ export function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWher
 		// Filtrar por formatos
 		if (filters.formats && filters.formats.length > 0) {
 			// Buscar en los metadatos serializados (esto es aproximado)
-			const formatFilters = filters.formats.map(format => ({
-				metadata: { contains: `"format":"${format}"` }
+			const formatFilters = filters.formats.map((format) => ({
+				metadata: { contains: `"format":"${format}"` },
 			}));
 			AND.push({ OR: formatFilters });
 		}
@@ -393,7 +394,7 @@ export function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWher
 		// Filtrar por audio (esto es aproximado porque está en los metadatos)
 		if (filters.hasAudio !== undefined) {
 			AND.push({
-				metadata: { contains: `"hasAudio":${filters.hasAudio}` }
+				metadata: { contains: `"hasAudio":${filters.hasAudio}` },
 			});
 		}
 
@@ -415,9 +416,9 @@ export function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWher
 			AND.push({
 				tags: {
 					some: {
-						id: { in: filters.tags }
-					}
-				}
+						id: { in: filters.tags },
+					},
+				},
 			});
 		}
 
@@ -425,9 +426,9 @@ export function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWher
 			AND.push({
 				albums: {
 					some: {
-						id: { in: filters.albums }
-					}
-				}
+						id: { in: filters.albums },
+					},
+				},
 			});
 		}
 
@@ -435,9 +436,9 @@ export function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWher
 			AND.push({
 				collections: {
 					some: {
-						id: { in: filters.collections }
-					}
-				}
+						id: { in: filters.collections },
+					},
+				},
 			});
 		}
 
@@ -524,18 +525,14 @@ export function getVideoFrameTimestamp(totalDuration: number, percentage: number
  * @param strength Fuerza de la relación
  * @returns Objeto de video relacionado
  */
-export function mapVideoToRelatedVideo(
-	video: VideoComplete,
-	count = 1,
-	strength = 1
-): RelatedVideo {
+export function mapVideoToRelatedVideo(video: VideoComplete, count = 1, strength = 1): RelatedVideo {
 	return {
 		id: video.id,
 		name: video.name,
 		thumbnailUrl: video.thumbnailUrl || `/api/videos/${video.id}/thumbnail`,
 		duration: video.duration,
 		count,
-		strength
+		strength,
 	};
 }
 

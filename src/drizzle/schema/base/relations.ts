@@ -13,22 +13,19 @@ export type OneToOne<T, TField extends any[], TRef extends any[]> = { fields: TF
  * @param table2 Nombre de la segunda tabla
  */
 export const createRelationTable = (name: string, table1: string, table2: string) => {
-    const tableName = `${table1}To${table2}`;
-    return sqliteTable(
-        tableName,
-        {
-            [`${table1.toLowerCase()}Id`]: text(`${table1.toLowerCase()}Id`).notNull(),
-            [`${table2.toLowerCase()}Id`]: text(`${table2.toLowerCase()}Id`).notNull(),
-        },
-        (table) => ({
-            pk: primaryKey({
-                columns: [
-                    table[`${table1.toLowerCase()}Id`],
-                    table[`${table2.toLowerCase()}Id`]
-                ]
-            }),
-        })
-    );
+	const tableName = `${table1}To${table2}`;
+	return sqliteTable(
+		tableName,
+		{
+			[`${table1.toLowerCase()}Id`]: text(`${table1.toLowerCase()}Id`).notNull(),
+			[`${table2.toLowerCase()}Id`]: text(`${table2.toLowerCase()}Id`).notNull(),
+		},
+		(table) => ({
+			pk: primaryKey({
+				columns: [table[`${table1.toLowerCase()}Id`], table[`${table2.toLowerCase()}Id`]],
+			}),
+		})
+	);
 };
 
 /**
@@ -39,16 +36,16 @@ export const createRelationTable = (name: string, table1: string, table2: string
  * @param columnName3 Nombre de la columna para el tercer índice
  */
 export const createIndexes = (
-    tableName: string,
-    columnName1 = "name",
-    columnName2 = "category",
-    columnName3 = "createdAt"
+	tableName: string,
+	columnName1 = 'name',
+	columnName2 = 'category',
+	columnName3 = 'createdAt'
 ) => {
-    return {
-        [`${columnName1}Idx`]: index(`${tableName}_${columnName1}_idx`),
-        [`${columnName2}Idx`]: index(`${tableName}_${columnName2}_idx`),
-        [`${columnName3}Idx`]: index(`${tableName}_${columnName3}_idx`),
-    };
+	return {
+		[`${columnName1}Idx`]: index(`${tableName}_${columnName1}_idx`),
+		[`${columnName2}Idx`]: index(`${tableName}_${columnName2}_idx`),
+		[`${columnName3}Idx`]: index(`${tableName}_${columnName3}_idx`),
+	};
 };
 
 /**
@@ -63,11 +60,11 @@ export { relations };
  * @param entities Entidades relacionadas
  */
 export function createManyToManyRelations(entities: Record<string, any>) {
-    return function relationBuilder({ many }: any) {
-        const relations: Record<string, any> = {};
-        for (const [key, entity] of Object.entries(entities)) {
-            relations[key] = many(entity);
-        }
-        return relations;
-    };
+	return function relationBuilder({ many }: any) {
+		const relations: Record<string, any> = {};
+		for (const [key, entity] of Object.entries(entities)) {
+			relations[key] = many(entity);
+		}
+		return relations;
+	};
 }

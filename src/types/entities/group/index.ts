@@ -11,8 +11,14 @@ export type { GroupWithRelations as Group } from './types';
 
 // Exportar tipos principales para uso común
 export type {
-	GroupAdvancedFilter, GroupBase, GroupCacheConfig, GroupFilters, GroupListOptions,
-	GroupSearchResult, GroupWithFiles, GroupWithStats
+	GroupAdvancedFilter,
+	GroupBase,
+	GroupCacheConfig,
+	GroupFilters,
+	GroupListOptions,
+	GroupSearchResult,
+	GroupWithFiles,
+	GroupWithStats,
 } from './types';
 
 // Exportar enums específicamente para que puedan ser utilizados como valores
@@ -20,6 +26,8 @@ export { GroupSortCriteria, GroupViewMode } from './types';
 
 // Exportar schemas de validación
 export {
-	groupAdvancedFilterSchema, groupFilterSchema, groupListOptionsSchema, groupSchema
+	groupAdvancedFilterSchema,
+	groupFilterSchema,
+	groupListOptionsSchema,
+	groupSchema,
 } from './types';
-

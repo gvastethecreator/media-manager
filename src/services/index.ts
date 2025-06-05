@@ -46,41 +46,41 @@ export * from './user.service';
  * Objeto centralizado de servicios para un acceso más limpio
  */
 export const services = {
-  // Entidades base
-  folder: require('./folder/index'),
-  image: require('./image/index'),
-  tag: require('./tag/index'),
-  video: require('./video/index'),
+	// Entidades base
+	folder: require('./folder/index'),
+	image: require('./image/index'),
+	tag: require('./tag/index'),
+	video: require('./video/index'),
 
-  // Entidades organizacionales
-  album: require('./album/index'),
-  collection: require('./collection/index'),
-  group: require('./group/index'),
-  favorite: require('./favorite.service'),
+	// Entidades organizacionales
+	album: require('./album/index'),
+	collection: require('./collection/index'),
+	group: require('./group/index'),
+	favorite: require('./favorite.service'),
 
-  // Entidades adicionales
-  metadata: require('./metadata.service'),
-  exif: require('./exif.service'),
-  keyword: require('./keyword.service'),
-  comment: require('./comment.service'),
+	// Entidades adicionales
+	metadata: require('./metadata.service'),
+	exif: require('./exif.service'),
+	keyword: require('./keyword.service'),
+	comment: require('./comment.service'),
 
-  // Servicios del sistema
-  file: require('./file/index'),
-  thumbnail: require('./thumbnail.service'),
-  uploadedImage: require('./uploaded-image/index'),
+	// Servicios del sistema
+	file: require('./file/index'),
+	thumbnail: require('./thumbnail.service'),
+	uploadedImage: require('./uploaded-image/index'),
 
-  // Servicios de utilidad
-  indexing: require('./indexing.service'),
-  search: require('./search.service'),
-  cache: require('./cache.service'),
+	// Servicios de utilidad
+	indexing: require('./indexing.service'),
+	search: require('./search.service'),
+	cache: require('./cache.service'),
 
-  // Servicios de infraestructura
-  event: require('./event.service'),
-  notification: require('./notification.service'),
-  activity: require('./activity/index'),
-  profile: require('./profile/index'),
-  settings: require('./settings/index'),
-  queueJob: require('./queue-job/index'),
-  user: require('./user.service'),
-  auth: require('./auth.service'),
-}
+	// Servicios de infraestructura
+	event: require('./event.service'),
+	notification: require('./notification.service'),
+	activity: require('./activity/index'),
+	profile: require('./profile/index'),
+	settings: require('./settings/index'),
+	queueJob: require('./queue-job/index'),
+	user: require('./user.service'),
+	auth: require('./auth.service'),
+};

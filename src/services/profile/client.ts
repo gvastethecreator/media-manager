@@ -6,21 +6,21 @@
  */
 
 import {
-    activateProfile,
-    createProfile,
-    deleteProfile,
-    getActiveProfile,
-    getProfile,
-    getProfiles,
-    updateProfile
+	activateProfile,
+	createProfile,
+	deleteProfile,
+	getActiveProfile,
+	getProfile,
+	getProfiles,
+	updateProfile,
 } from '@/app/actions/profiles';
 
 import type {
-    CreateProfileInput,
-    ProfileExtended,
-    ProfileFilters,
-    ProfilePaginationOptions,
-    UpdateProfileInput
+	CreateProfileInput,
+	ProfileExtended,
+	ProfileFilters,
+	ProfilePaginationOptions,
+	UpdateProfileInput,
 } from '@/types/entities/profile/types';
 
 /**
@@ -30,60 +30,46 @@ import type {
  * en lugar de intentar ejecutar código de Prisma directamente en el navegador.
  */
 export const profileClient = {
-    /**
-     * Obtiene todos los perfiles con filtros y paginación
-     */
-    getProfiles: (filters?: ProfileFilters, pagination?: ProfilePaginationOptions) =>
-        getProfiles(filters, pagination),
+	/**
+	 * Obtiene todos los perfiles con filtros y paginación
+	 */
+	getProfiles: (filters?: ProfileFilters, pagination?: ProfilePaginationOptions) => getProfiles(filters, pagination),
 
-    /**
-     * Obtiene un perfil por su ID
-     */
-    getProfileById: (id: string) =>
-        getProfile(id),
+	/**
+	 * Obtiene un perfil por su ID
+	 */
+	getProfileById: (id: string) => getProfile(id),
 
-    /**
-     * Obtiene el perfil activo actual
-     */
-    getActiveProfile: () =>
-        getActiveProfile(),
+	/**
+	 * Obtiene el perfil activo actual
+	 */
+	getActiveProfile: () => getActiveProfile(),
 
-    /**
-     * Crea un nuevo perfil
-     */
-    createProfile: (data: CreateProfileInput) =>
-        createProfile(data),
+	/**
+	 * Crea un nuevo perfil
+	 */
+	createProfile: (data: CreateProfileInput) => createProfile(data),
 
-    /**
-     * Actualiza un perfil existente
-     */
-    updateProfile: (id: string, data: UpdateProfileInput) =>
-        updateProfile(id, data),
+	/**
+	 * Actualiza un perfil existente
+	 */
+	updateProfile: (id: string, data: UpdateProfileInput) => updateProfile(id, data),
 
-    /**
-     * Establece un perfil como activo
-     */
-    setActiveProfile: (id: string) =>
-        activateProfile(id),
+	/**
+	 * Establece un perfil como activo
+	 */
+	setActiveProfile: (id: string) => activateProfile(id),
 
-    /**
-     * Elimina un perfil
-     */
-    deleteProfile: (id: string) =>
-        deleteProfile(id),
+	/**
+	 * Elimina un perfil
+	 */
+	deleteProfile: (id: string) => deleteProfile(id),
 
-    /**
-     * Asegura que existe un perfil por defecto
-     */
-    ensureDefaultProfile: () =>
-        getActiveProfile() // Usamos getActiveProfile como sustituto para ensureDefaultProfile
+	/**
+	 * Asegura que existe un perfil por defecto
+	 */
+	ensureDefaultProfile: () => getActiveProfile(), // Usamos getActiveProfile como sustituto para ensureDefaultProfile
 };
 
 // Re-exportar tipos para conveniencia
-export type {
-    CreateProfileInput,
-    ProfileExtended,
-    ProfileFilters,
-    ProfilePaginationOptions,
-    UpdateProfileInput
-};
+export type { CreateProfileInput, ProfileExtended, ProfileFilters, ProfilePaginationOptions, UpdateProfileInput };

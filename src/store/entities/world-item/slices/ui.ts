@@ -76,11 +76,10 @@ export const createWorldItemUISlice: StateCreator<WorldItemStore, [], [], WorldI
 				return {
 					expandedIds: state.expandedIds.filter((expandedId) => expandedId !== id),
 				};
-			} else {
+			}
 				return {
 					expandedIds: [...state.expandedIds, id],
 				};
-			}
 		});
 	},
 
@@ -90,11 +89,10 @@ export const createWorldItemUISlice: StateCreator<WorldItemStore, [], [], WorldI
 				return {
 					selectedIds: state.selectedIds.filter((selectedId) => selectedId !== id),
 				};
-			} else {
+			}
 				return {
 					selectedIds: [...state.selectedIds, id],
 				};
-			}
 		});
 	},
 

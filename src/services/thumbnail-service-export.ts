@@ -5,7 +5,12 @@
  */
 
 // Importar el servicio y sus tipos
-import { type ProcessOptions, type ProcessStatus, type ThumbnailError, thumbnailService as service } from './thumbnail.service';
+import {
+	type ProcessOptions,
+	type ProcessStatus,
+	type ThumbnailError,
+	thumbnailService as service,
+} from './thumbnail.service';
 
 // Exportar todo del servicio
 export * from './thumbnail.service';

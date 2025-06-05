@@ -43,7 +43,7 @@ export async function getRecentAlbumImages(albumId: string, limit = 6) {
 		}
 
 		// Transformar los datos para devolverlos
-		const imageData = albumWithImages.images.map(image => {
+		const imageData = albumWithImages.images.map((image) => {
 			// Verificar si hay thumbnail
 			let thumbnailUrl = '';
 			if (image.thumbnail) {

@@ -2,15 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -221,7 +213,7 @@ export function EntityForm({
 	const generateZodSchema = () => {
 		const schemaMap: Record<string, any> = {};
 
-		fields.forEach(field => {
+		fields.forEach((field) => {
 			let fieldSchema: any = z.any();
 
 			// Configurar el tipo base del campo según su tipo
@@ -273,14 +265,16 @@ export function EntityForm({
 				if (field.validation.minLength && (field.type === 'text' || field.type === 'textarea')) {
 					fieldSchema = fieldSchema.min(
 						field.validation.minLength,
-						field.validation.customMessage || `${field.label} debe tener al menos ${field.validation.minLength} caracteres`
+						field.validation.customMessage ||
+							`${field.label} debe tener al menos ${field.validation.minLength} caracteres`
 					);
 				}
 
 				if (field.validation.maxLength && (field.type === 'text' || field.type === 'textarea')) {
 					fieldSchema = fieldSchema.max(
 						field.validation.maxLength,
-						field.validation.customMessage || `${field.label} no puede tener más de ${field.validation.maxLength} caracteres`
+						field.validation.customMessage ||
+							`${field.label} no puede tener más de ${field.validation.maxLength} caracteres`
 					);
 				}
 
@@ -327,7 +321,7 @@ export function EntityForm({
 			// Resetear el formulario con los nuevos valores
 			const defaultValues: Record<string, any> = {};
 
-			fields.forEach(field => {
+			fields.forEach((field) => {
 				// Si el campo existe en initialData, usar ese valor
 				if (field.name in initialData) {
 					defaultValues[field.name] = initialData[field.name];
@@ -394,8 +388,8 @@ export function EntityForm({
 	};
 
 	// Ordenar campos por propiedad order
-	const sortedFields = [...fields].sort((a, b) =>
-		(a.order || Number.MAX_SAFE_INTEGER) - (b.order || Number.MAX_SAFE_INTEGER)
+	const sortedFields = [...fields].sort(
+		(a, b) => (a.order || Number.MAX_SAFE_INTEGER) - (b.order || Number.MAX_SAFE_INTEGER)
 	);
 
 	// Renderizar un campo según su tipo
@@ -408,22 +402,17 @@ export function EntityForm({
 						control={form.control}
 						name={field.name}
 						render={({ field: formField }) => (
-							<FormItem className={cn(
-								"space-y-2",
-								field.fullWidth ? "col-span-2" : ""
-							)}>
+							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
 								<FormLabel>{field.label}</FormLabel>
 								<FormControl>
 									<Input
 										placeholder={field.placeholder}
 										{...formField}
-										className={cn(form.formState.errors[field.name] && "border-destructive")}
+										className={cn(form.formState.errors[field.name] && 'border-destructive')}
 										{...field.props}
 									/>
 								</FormControl>
-								{field.description && (
-									<FormDescription>{field.description}</FormDescription>
-								)}
+								{field.description && <FormDescription>{field.description}</FormDescription>}
 								<FormMessage />
 							</FormItem>
 						)}
@@ -437,10 +426,7 @@ export function EntityForm({
 						control={form.control}
 						name={field.name}
 						render={({ field: formField }) => (
-							<FormItem className={cn(
-								"space-y-2",
-								field.fullWidth ? "col-span-2" : ""
-							)}>
+							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
 								<FormLabel>{field.label}</FormLabel>
 								<FormControl>
 									<Textarea
@@ -448,13 +434,11 @@ export function EntityForm({
 										{...formField}
 										value={formField.value || ''}
 										rows={field.props?.rows || 3}
-										className={cn(form.formState.errors[field.name] && "border-destructive")}
+										className={cn(form.formState.errors[field.name] && 'border-destructive')}
 										{...field.props}
 									/>
 								</FormControl>
-								{field.description && (
-									<FormDescription>{field.description}</FormDescription>
-								)}
+								{field.description && <FormDescription>{field.description}</FormDescription>}
 								<FormMessage />
 							</FormItem>
 						)}
@@ -468,15 +452,9 @@ export function EntityForm({
 						control={form.control}
 						name={field.name}
 						render={({ field: formField }) => (
-							<FormItem className={cn(
-								"space-y-2",
-								field.fullWidth ? "col-span-2" : ""
-							)}>
+							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
 								<FormLabel>{field.label}</FormLabel>
-								<Select
-									onValueChange={formField.onChange}
-									defaultValue={formField.value}
-								>
+								<Select onValueChange={formField.onChange} defaultValue={formField.value}>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder={field.placeholder || `Seleccionar ${field.label.toLowerCase()}`} />
@@ -490,9 +468,7 @@ export function EntityForm({
 										))}
 									</SelectContent>
 								</Select>
-								{field.description && (
-									<FormDescription>{field.description}</FormDescription>
-								)}
+								{field.description && <FormDescription>{field.description}</FormDescription>}
 								<FormMessage />
 							</FormItem>
 						)}
@@ -506,23 +482,19 @@ export function EntityForm({
 						control={form.control}
 						name={field.name}
 						render={({ field: formField }) => (
-							<FormItem className={cn(
-								"flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm",
-								field.fullWidth ? "col-span-2" : "",
-								form.formState.errors[field.name] && "border-destructive"
-							)}>
+							<FormItem
+								className={cn(
+									'flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm',
+									field.fullWidth ? 'col-span-2' : '',
+									form.formState.errors[field.name] && 'border-destructive'
+								)}
+							>
 								<div className="space-y-0.5">
 									<FormLabel>{field.label}</FormLabel>
-									{field.description && (
-										<FormDescription>{field.description}</FormDescription>
-									)}
+									{field.description && <FormDescription>{field.description}</FormDescription>}
 								</div>
 								<FormControl>
-									<Switch
-										checked={formField.value}
-										onCheckedChange={formField.onChange}
-										{...field.props}
-									/>
+									<Switch checked={formField.value} onCheckedChange={formField.onChange} {...field.props} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -537,10 +509,7 @@ export function EntityForm({
 						control={form.control}
 						name={field.name}
 						render={({ field: formField }) => (
-							<FormItem className={cn(
-								"space-y-2",
-								field.fullWidth ? "col-span-2" : ""
-							)}>
+							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
 								<FormLabel>{field.label}</FormLabel>
 								<Popover>
 									<PopoverTrigger asChild>
@@ -560,15 +529,10 @@ export function EntityForm({
 										</FormControl>
 									</PopoverTrigger>
 									<PopoverContent className="w-auto p-3">
-										<HexColorPicker
-											color={formField.value}
-											onChange={formField.onChange}
-										/>
+										<HexColorPicker color={formField.value} onChange={formField.onChange} />
 									</PopoverContent>
 								</Popover>
-								{field.description && (
-									<FormDescription>{field.description}</FormDescription>
-								)}
+								{field.description && <FormDescription>{field.description}</FormDescription>}
 								<FormMessage />
 							</FormItem>
 						)}
@@ -582,20 +546,12 @@ export function EntityForm({
 						control={form.control}
 						name={field.name}
 						render={({ field: formField }) => (
-							<FormItem className={cn(
-								"space-y-2",
-								field.fullWidth ? "col-span-2" : ""
-							)}>
+							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
 								<FormLabel>{field.label}</FormLabel>
 								<FormControl>
-									<EmojiPicker
-										value={formField.value}
-										onChange={formField.onChange}
-									/>
+									<EmojiPicker value={formField.value} onChange={formField.onChange} />
 								</FormControl>
-								{field.description && (
-									<FormDescription>{field.description}</FormDescription>
-								)}
+								{field.description && <FormDescription>{field.description}</FormDescription>}
 								<FormMessage />
 							</FormItem>
 						)}
@@ -611,9 +567,9 @@ export function EntityForm({
 	// Estilos según el tipo de formulario
 	const formContainerStyles = cn(
 		className,
-		"space-y-6",
-		formStyle === 'compact' && "max-w-md mx-auto",
-		formStyle === 'card' && "bg-card rounded-lg border shadow p-6"
+		'space-y-6',
+		formStyle === 'compact' && 'max-w-md mx-auto',
+		formStyle === 'card' && 'bg-card rounded-lg border shadow p-6'
 	);
 
 	return (
@@ -629,32 +585,21 @@ export function EntityForm({
 
 				<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
 					{/* Grid de campos */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-						{sortedFields.map(renderField)}
-					</div>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">{sortedFields.map(renderField)}</div>
 
 					{/* Botones de acción */}
 					<div className="flex justify-end gap-3 pt-2">
 						{onCancel && (
-							<Button
-								type="button"
-								variant="outline"
-								onClick={handleCancel}
-								disabled={isSubmitting || isLoading}
-							>
+							<Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting || isLoading}>
 								{cancelLabel}
 							</Button>
 						)}
 
-						<Button
-							type="submit"
-							disabled={isSubmitting || isLoading}
-							className="min-w-24"
-						>
+						<Button type="submit" disabled={isSubmitting || isLoading} className="min-w-24">
 							{isSubmitting || isLoading ? (
 								<motion.div
 									animate={{ rotate: 360 }}
-									transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+									transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
 									className="h-4 w-4 border-2 border-current border-t-transparent rounded-full"
 								/>
 							) : (
@@ -671,17 +616,10 @@ export function EntityForm({
 							<h3 className="text-lg font-medium mb-4">Confirmar acción</h3>
 							<p className="mb-6">{confirmMessage}</p>
 							<div className="flex justify-end gap-3">
-								<Button
-									variant="outline"
-									onClick={() => setShowConfirmation(false)}
-								>
+								<Button variant="outline" onClick={() => setShowConfirmation(false)}>
 									Cancelar
 								</Button>
-								<Button
-									onClick={() => form.handleSubmit(handleSubmit)()}
-								>
-									Confirmar
-								</Button>
+								<Button onClick={() => form.handleSubmit(handleSubmit)()}>Confirmar</Button>
 							</div>
 						</div>
 					</div>

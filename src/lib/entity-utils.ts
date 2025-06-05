@@ -12,44 +12,44 @@ const entityUtilsLogger = serverLogger.withContext('EntityUtils');
  * @returns Objeto con el resultado de la verificación
  */
 export function areEntitiesLoaded(
-  entities: EntityType[] = ALL_ENTITIES,
-  stores: Record<string, any>
+	entities: EntityType[],
+	stores: Record<string, any>
 ): {
-  allLoaded: boolean;
-  loadedCount: number;
-  totalCount: number;
-  loadedEntities: EntityType[];
-  pendingEntities: EntityType[];
+	allLoaded: boolean;
+	loadedCount: number;
+	totalCount: number;
+	loadedEntities: EntityType[];
+	pendingEntities: EntityType[];
 } {
-  let loadedCount = 0;
-  const loadedEntities: EntityType[] = [];
-  const pendingEntities: EntityType[] = [];
+	let loadedCount = 0;
+	const loadedEntities: EntityType[] = [];
+	const pendingEntities: EntityType[] = [];
 
-  for (const entity of entities) {
-    const storeKey = entity.toLowerCase();
+	for (const entity of entities) {
+		const storeKey = entity.toLowerCase();
 
-    // Verificar si el store existe y tiene datos
-    if (
-      storeKey in stores &&
-      stores[storeKey] &&
-      stores[storeKey][storeKey] &&
-      Array.isArray(stores[storeKey][storeKey]) &&
-      stores[storeKey][storeKey].length > 0
-    ) {
-      loadedCount++;
-      loadedEntities.push(entity);
-    } else {
-      pendingEntities.push(entity);
-    }
-  }
+		// Verificar si el store existe y tiene datos
+		if (
+			storeKey in stores &&
+			stores[storeKey] &&
+			stores[storeKey][storeKey] &&
+			Array.isArray(stores[storeKey][storeKey]) &&
+			stores[storeKey][storeKey].length > 0
+		) {
+			loadedCount++;
+			loadedEntities.push(entity);
+		} else {
+			pendingEntities.push(entity);
+		}
+	}
 
-  return {
-    allLoaded: loadedCount === entities.length,
-    loadedCount,
-    totalCount: entities.length,
-    loadedEntities,
-    pendingEntities
-  };
+	return {
+		allLoaded: loadedCount === entities.length,
+		loadedCount,
+		totalCount: entities.length,
+		loadedEntities,
+		pendingEntities,
+	};
 }
 
 /**
@@ -59,20 +59,20 @@ export function areEntitiesLoaded(
  * @returns String con un informe amigable
  */
 export function generateLoadingReport(result: ReturnType<typeof areEntitiesLoaded>): string {
-  const { allLoaded, loadedCount, totalCount, loadedEntities, pendingEntities } = result;
+	const { allLoaded, loadedCount, totalCount, loadedEntities, pendingEntities } = result;
 
-  const percentage = Math.round((loadedCount / totalCount) * 100);
+	const percentage = Math.round((loadedCount / totalCount) * 100);
 
-  let report = `Estado de carga de entidades: ${percentage}% (${loadedCount}/${totalCount})`;
+	let report = `Estado de carga de entidades: ${percentage}% (${loadedCount}/${totalCount})`;
 
-  if (allLoaded) {
-    report += `\n✅ Todas las entidades están cargadas.`;
-  } else {
-    report += `\n⏳ Entidades cargadas: ${loadedEntities.map(e => ENTITY_DISPLAY_NAMES[e]).join(', ')}`;
-    report += `\n⌛ Entidades pendientes: ${pendingEntities.map(e => ENTITY_DISPLAY_NAMES[e]).join(', ')}`;
-  }
+	if (allLoaded) {
+		report += '\n✅ Todas las entidades están cargadas.';
+	} else {
+		report += `\n⏳ Entidades cargadas: ${loadedEntities.map((e) => ENTITY_DISPLAY_NAMES[e]).join(', ')}`;
+		report += `\n⌛ Entidades pendientes: ${pendingEntities.map((e) => ENTITY_DISPLAY_NAMES[e]).join(', ')}`;
+	}
 
-  return report;
+	return report;
 }
 
 /**
@@ -81,11 +81,11 @@ export function generateLoadingReport(result: ReturnType<typeof areEntitiesLoade
  * @param result Resultado de la función areEntitiesLoaded
  */
 export function logLoadingStatus(result: ReturnType<typeof areEntitiesLoaded>): void {
-  const report = generateLoadingReport(result);
+	const report = generateLoadingReport(result);
 
-  if (result.allLoaded) {
-    entityUtilsLogger.info(report);
-  } else {
-    entityUtilsLogger.warn(report);
-  }
+	if (result.allLoaded) {
+		entityUtilsLogger.info(report);
+	} else {
+		entityUtilsLogger.warn(report);
+	}
 }

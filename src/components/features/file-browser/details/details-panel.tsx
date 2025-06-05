@@ -130,11 +130,7 @@ const MultipleSelectionInfo = React.memo(({ items }: { items: ImageItem[] }) => 
 			<div className="grid grid-cols-2 gap-2">
 				{items.map((item) => (
 					<div key={item.id} className="relative aspect-square">
-						<img
-							src={item.url || item.src}
-							alt={item.name}
-							className="w-full h-full object-cover rounded-md"
-						/>
+						<img src={item.url || item.src} alt={item.name} className="w-full h-full object-cover rounded-md" />
 					</div>
 				))}
 			</div>
@@ -189,7 +185,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 
 			// Crear nueva promesa para la petición
 			detailsLogger.info('Solicitando metadata del servidor');
-			const metadataPromise = getImageMetadataById(itemId).then(result => {
+			const metadataPromise = getImageMetadataById(itemId).then((result) => {
 				// Si no hay resultado del servidor pero tenemos metadata local, intentar parsearla directamente
 				if (!result && itemMetadata) {
 					detailsLogger.info('Intentando parsear metadata local directamente');
@@ -440,25 +436,28 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	}, [item, hasMultipleSelection, isProcessing, metadata, hasAIGeneration, selectedItems]);
 
 	// Estado memoizado para el header del panel
-	const renderPanelHeader = useMemo(() => (
-		<CardHeader className="p-3 pb-2 border-b border-border/10 space-y-1">
-			<CardTitle className="flex justify-between items-center">
-				<span className="text-sm font-medium">
-					{hasMultipleSelection ? `${selectedItems.length} imágenes seleccionadas` : 'Detalles'}
-				</span>
-				{item && !hasMultipleSelection && (
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-6 w-6 rounded-md hover:bg-secondary/50"
-						onClick={handleDebug}
-					>
-						<Bug className="h-3.5 w-3.5 text-muted-foreground" />
-					</Button>
-				)}
-			</CardTitle>
-		</CardHeader>
-	), [item, hasMultipleSelection, selectedItems.length, handleDebug]);
+	const renderPanelHeader = useMemo(
+		() => (
+			<CardHeader className="p-3 pb-2 border-b border-border/10 space-y-1">
+				<CardTitle className="flex justify-between items-center">
+					<span className="text-sm font-medium">
+						{hasMultipleSelection ? `${selectedItems.length} imágenes seleccionadas` : 'Detalles'}
+					</span>
+					{item && !hasMultipleSelection && (
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-6 w-6 rounded-md hover:bg-secondary/50"
+							onClick={handleDebug}
+						>
+							<Bug className="h-3.5 w-3.5 text-muted-foreground" />
+						</Button>
+					)}
+				</CardTitle>
+			</CardHeader>
+		),
+		[item, hasMultipleSelection, selectedItems.length, handleDebug]
+	);
 
 	return (
 		<Card className="h-full flex flex-col border-border/30 rounded-md">

@@ -114,7 +114,7 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
 				// Guardar en caché
 				metadataCache.set(cacheKey, {
 					data: result,
-					timestamp: Date.now()
+					timestamp: Date.now(),
 				});
 
 				return result;
@@ -177,7 +177,7 @@ export const getMetadata = (metadata: string | null | Record<string, unknown>): 
 				// Guardar en caché
 				metadataCache.set(cacheKey, {
 					data: result,
-					timestamp: Date.now()
+					timestamp: Date.now(),
 				});
 
 				return result;

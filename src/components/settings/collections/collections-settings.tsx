@@ -1,15 +1,13 @@
 'use client';
 
-import { type CollectionWithStats, deleteCollection, getCollections } from '@/app/actions/collections/collection.actions';
+import {
+	type CollectionWithStats,
+	deleteCollection,
+	getCollections,
+} from '@/app/actions/collections/collection.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
@@ -72,21 +70,23 @@ export function CollectionsSettings() {
 		totalCollections: collections.length,
 		totalImages: collections.reduce((acc, collection) => acc + (collection._count?.images || 0), 0),
 		totalSize: collections.reduce((acc, collection) => acc + (collection.totalSize || 0), 0),
-		emptyCollections: collections.filter(collection => (collection._count?.images || 0) === 0).length,
-		favoriteCollections: collections.filter(collection => collection.isFavorite).length,
+		emptyCollections: collections.filter((collection) => (collection._count?.images || 0) === 0).length,
+		favoriteCollections: collections.filter((collection) => collection.isFavorite).length,
 	};
 
 	// Filtrar colecciones basadas en los criterios seleccionados
-	const filteredCollections = collections.filter(collection => {
+	const filteredCollections = collections.filter((collection) => {
 		let matches = true;
 
 		// Filtrar por búsqueda
 		if (searchQuery.trim() !== '') {
 			const normalizedQuery = searchQuery.toLowerCase();
-			matches = matches && Boolean(
-				collection.name.toLowerCase().includes(normalizedQuery) ||
-				collection.description?.toLowerCase().includes(normalizedQuery)
-			);
+			matches =
+				matches &&
+				Boolean(
+					collection.name.toLowerCase().includes(normalizedQuery) ||
+						collection.description?.toLowerCase().includes(normalizedQuery)
+				);
 		}
 
 		// Filtrar por categorías
@@ -111,7 +111,7 @@ export function CollectionsSettings() {
 	const handleDeleteCollection = useCallback(async (id: string) => {
 		try {
 			await deleteCollection(id);
-			setCollections(prev => prev.filter(collection => collection.id !== id));
+			setCollections((prev) => prev.filter((collection) => collection.id !== id));
 			setSelectedCollection(null);
 			setIsEditing(false);
 			toastService.success('Colección eliminada');
@@ -131,16 +131,16 @@ export function CollectionsSettings() {
 
 	// Manejar creación exitosa
 	const handleCollectionCreated = useCallback((newCollection: Collection) => {
-		setCollections(prev => [...prev, newCollection as unknown as CollectionWithStats]);
+		setCollections((prev) => [...prev, newCollection as unknown as CollectionWithStats]);
 		toastService.success('Colección creada');
 	}, []);
 
 	// Manejar actualización exitosa
 	const handleCollectionUpdated = useCallback((updatedCollection: Collection) => {
-		setCollections(prev =>
-			prev.map(collection =>
+		setCollections((prev) =>
+			prev.map((collection) =>
 				collection.id === updatedCollection.id
-					? { ...collection, ...updatedCollection } as CollectionWithStats
+					? ({ ...collection, ...updatedCollection } as CollectionWithStats)
 					: collection
 			)
 		);
@@ -167,17 +167,24 @@ export function CollectionsSettings() {
 	}, []);
 
 	// Extraer categorías y plataformas únicas de las colecciones
-	const uniqueCategories = Array.from(new Set(collections.map(collection => collection.category).filter(Boolean))) as string[];
-	const uniquePlatforms = Array.from(new Set(collections.map(collection => collection.platform).filter(Boolean))) as string[];
+	const uniqueCategories = Array.from(
+		new Set(collections.map((collection) => collection.category).filter(Boolean))
+	) as string[];
+	const uniquePlatforms = Array.from(
+		new Set(collections.map((collection) => collection.platform).filter(Boolean))
+	) as string[];
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const handleDeleteButtonClick = useCallback<ButtonClickHandler>((e) => {
-		const id = (e.currentTarget as HTMLButtonElement).dataset.id;
-		if (id) {
-			e.stopPropagation();
-			handleDeleteCollection(id);
-		}
-	}, [handleDeleteCollection]);
+	const handleDeleteButtonClick = useCallback<ButtonClickHandler>(
+		(e) => {
+			const id = (e.currentTarget as HTMLButtonElement).dataset.id;
+			if (id) {
+				e.stopPropagation();
+				handleDeleteCollection(id);
+			}
+		},
+		[handleDeleteCollection]
+	);
 
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
@@ -201,11 +208,7 @@ export function CollectionsSettings() {
 						icon={Info}
 						title="Error al cargar colecciones"
 						description={error}
-						actions={
-							<Button onClick={() => window.location.reload()}>
-								Intentar de nuevo
-							</Button>
-						}
+						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -230,11 +233,7 @@ export function CollectionsSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button
-											size="sm"
-											variant="ghost"
-											className="h-6 w-6 p-0"
-										>
+										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
@@ -256,18 +255,16 @@ export function CollectionsSettings() {
 											<div className="space-y-2">
 												<Label>Categorías</Label>
 												<div className="grid grid-cols-2 gap-2">
-													{uniqueCategories.map(category => (
+													{uniqueCategories.map((category) => (
 														<div key={category} className="flex items-center space-x-2">
 															<Checkbox
 																id={`category-${category}`}
 																checked={selectedCategories.includes(category)}
 																onCheckedChange={(checked) => {
 																	if (checked) {
-																		setSelectedCategories(prev => [...prev, category]);
+																		setSelectedCategories((prev) => [...prev, category]);
 																	} else {
-																		setSelectedCategories(prev =>
-																			prev.filter(cat => cat !== category)
-																		);
+																		setSelectedCategories((prev) => prev.filter((cat) => cat !== category));
 																	}
 																}}
 															/>
@@ -282,18 +279,16 @@ export function CollectionsSettings() {
 											<div className="space-y-2">
 												<Label>Plataformas</Label>
 												<div className="grid grid-cols-2 gap-2">
-													{uniquePlatforms.map(platform => (
+													{uniquePlatforms.map((platform) => (
 														<div key={platform} className="flex items-center space-x-2">
 															<Checkbox
 																id={`platform-${platform}`}
 																checked={selectedPlatforms.includes(platform)}
 																onCheckedChange={(checked) => {
 																	if (checked) {
-																		setSelectedPlatforms(prev => [...prev, platform]);
+																		setSelectedPlatforms((prev) => [...prev, platform]);
 																	} else {
-																		setSelectedPlatforms(prev =>
-																			prev.filter(p => p !== platform)
-																		);
+																		setSelectedPlatforms((prev) => prev.filter((p) => p !== platform));
 																	}
 																}}
 															/>
@@ -311,7 +306,9 @@ export function CollectionsSettings() {
 													checked={onlyFavorites}
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor="favorites" className="text-xs">Solo favoritos</Label>
+												<Label htmlFor="favorites" className="text-xs">
+													Solo favoritos
+												</Label>
 											</div>
 
 											<div className="flex justify-between">
@@ -326,7 +323,10 @@ export function CollectionsSettings() {
 									</PopoverContent>
 								</Popover>
 								<Button
-									onClick={() => { setSelectedCollection(null); setIsEditing(false); }}
+									onClick={() => {
+										setSelectedCollection(null);
+										setIsEditing(false);
+									}}
 									size="sm"
 									variant="ghost"
 									className="h-6 w-6 p-0"
@@ -355,8 +355,8 @@ export function CollectionsSettings() {
 									title="No hay colecciones"
 									description={
 										collections.length > 0
-											? "No se encontraron colecciones con los filtros aplicados"
-											: "Crea tu primera colección"
+											? 'No se encontraron colecciones con los filtros aplicados'
+											: 'Crea tu primera colección'
 									}
 									className="py-6"
 									actions={
@@ -387,9 +387,7 @@ export function CollectionsSettings() {
 											<div className="flex-1 min-w-0">
 												<h4 className="text-xs font-medium truncate">{collection.name}</h4>
 												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													{collection.category && (
-														<span>{collection.category}</span>
-													)}
+													{collection.category && <span>{collection.category}</span>}
 													{collection.platform && (
 														<>
 															<span>•</span>
@@ -439,9 +437,7 @@ export function CollectionsSettings() {
 					<CardHeader className="py-2 px-3">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-sm">
-									{isEditing ? 'Editar Colección' : 'Nueva Colección'}
-								</CardTitle>
+								<CardTitle className="text-sm">{isEditing ? 'Editar Colección' : 'Nueva Colección'}</CardTitle>
 								<CardDescription className="text-xs">
 									{isEditing
 										? 'Modifica los detalles de la colección seleccionada'
@@ -451,12 +447,7 @@ export function CollectionsSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedCollection && (
 									<>
-										<Button
-											variant="outline"
-											size="sm"
-											className="h-7 text-xs"
-											onClick={handleReset}
-										>
+										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
 											Cancelar
 										</Button>
 										<Button
@@ -470,12 +461,7 @@ export function CollectionsSettings() {
 										</Button>
 									</>
 								)}
-								<Button
-									type="submit"
-									size="sm"
-									className="h-7 text-xs"
-									form="collection-form"
-								>
+								<Button type="submit" size="sm" className="h-7 text-xs" form="collection-form">
 									<Save className="h-3 w-3 mr-1" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
@@ -501,8 +487,10 @@ export function CollectionsSettings() {
 									<div className="w-[220px] transition-all duration-300">
 										{previewData || selectedCollection ? (
 											<div className="flex flex-col p-4 border rounded-lg bg-background">
-												<div className="w-full aspect-video mb-3 rounded-md flex items-center justify-center bg-muted"
-													style={{ backgroundColor: (previewData?.color || selectedCollection?.color || '#3b82f6') }}>
+												<div
+													className="w-full aspect-video mb-3 rounded-md flex items-center justify-center bg-muted"
+													style={{ backgroundColor: previewData?.color || selectedCollection?.color || '#3b82f6' }}
+												>
 													<span className="text-4xl">{previewData?.emoji || selectedCollection?.emoji || '📚'}</span>
 												</div>
 												<h3 className="text-lg font-medium">
@@ -524,7 +512,9 @@ export function CollectionsSettings() {
 														</Badge>
 													)}
 													{(previewData?.isFavorite || selectedCollection?.isFavorite) && (
-														<Badge variant="outline" className="text-xs">Favorito</Badge>
+														<Badge variant="outline" className="text-xs">
+															Favorito
+														</Badge>
 													)}
 												</div>
 
@@ -537,9 +527,7 @@ export function CollectionsSettings() {
 										) : (
 											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
 												<Library className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">
-													Vista previa
-												</p>
+												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
 											</div>
 										)}
 									</div>
@@ -549,7 +537,7 @@ export function CollectionsSettings() {
 					</CardContent>
 				</Card>
 			</div>
-		</div >
+		</div>
 	);
 }
 

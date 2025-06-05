@@ -14,19 +14,25 @@ export { VideoFormat, VideoPrivacyLevel, VideoQuality, VideoType } from './enums
 
 // Tipos base para estructuras de datos
 export type {
-  VideoBase,
-  VideoChapter, VideoMetadata, VideoPlayState, VideoVisualConfig
+	VideoBase,
+	VideoChapter,
+	VideoMetadata,
+	VideoPlayState,
+	VideoVisualConfig,
 } from './types';
 
 // Tipos extendidos para UI y visualización
 export type {
-  CreateVideoData, Video
+	CreateVideoData,
+	Video,
 } from './types';
 
 // Tipos completos con campos JSON deserializados
 export type {
-  VideoComplete, VideoExtendedComplete,
-  VideoVisualConfigComplete, VideoWithRelationsComplete
+	VideoComplete,
+	VideoExtendedComplete,
+	VideoVisualConfigComplete,
+	VideoWithRelationsComplete,
 } from './types';
 
 // Alias para el tipo principal (usar el extendido completo por consistencia)

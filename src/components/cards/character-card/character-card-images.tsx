@@ -42,7 +42,7 @@ export function CharacterCardImages({
 	rarityLevel = 1,
 	holographicEffect = true,
 	tcgMode = true,
-	compact = false
+	compact = false,
 }: CharacterCardImagesProps) {
 	// Estado para el ángulo de visualización (para efecto holográfico)
 	const [viewAngle, setViewAngle] = useState({ x: 0, y: 0 });
@@ -113,11 +113,7 @@ export function CharacterCardImages({
 
 	return (
 		<div
-			className={cn(
-				"relative overflow-hidden",
-				compact ? "h-24" : "h-48",
-				tcgMode && "border-b border-white/10"
-			)}
+			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-b border-white/10')}
 			onMouseMove={handleMouseMove}
 			onMouseLeave={handleMouseLeave}
 		>
@@ -135,14 +131,22 @@ export function CharacterCardImages({
 			{tcgMode && rarityLevel >= 3 && (
 				<div className="absolute inset-0 z-10 pointer-events-none">
 					{/* Bordes en estilo TCG */}
-					<div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-br-sm opacity-60"
-						style={{ borderColor: primaryColor }} />
-					<div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 rounded-bl-sm opacity-60"
-						style={{ borderColor: primaryColor }} />
-					<div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 rounded-tr-sm opacity-60"
-						style={{ borderColor: primaryColor }} />
-					<div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 rounded-tl-sm opacity-60"
-						style={{ borderColor: primaryColor }} />
+					<div
+						className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-br-sm opacity-60"
+						style={{ borderColor: primaryColor }}
+					/>
+					<div
+						className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 rounded-bl-sm opacity-60"
+						style={{ borderColor: primaryColor }}
+					/>
+					<div
+						className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 rounded-tr-sm opacity-60"
+						style={{ borderColor: primaryColor }}
+					/>
+					<div
+						className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 rounded-tl-sm opacity-60"
+						style={{ borderColor: primaryColor }}
+					/>
 				</div>
 			)}
 
@@ -153,7 +157,7 @@ export function CharacterCardImages({
 					style={{
 						transform: `perspective(1000px) rotateY(${viewAngle.x * 5}deg) rotateX(${-viewAngle.y * 5}deg)`,
 						transformStyle: 'preserve-3d',
-						transition: 'transform 0.1s ease-out'
+						transition: 'transform 0.1s ease-out',
 					}}
 				>
 					{/* Imagen del personaje */}
@@ -162,12 +166,12 @@ export function CharacterCardImages({
 						alt="Character image"
 						fill
 						className={cn(
-							"object-cover",
-							rarityLevel >= 5 && tcgMode && holographicEffect && "transition-all duration-500"
+							'object-cover',
+							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
 						)}
 						style={{
 							...holographicStyle,
-							transformStyle: 'preserve-3d'
+							transformStyle: 'preserve-3d',
 						}}
 					/>
 
@@ -221,7 +225,7 @@ export function CharacterCardImages({
 					<div
 						className="absolute inset-3 border border-white/10 rounded"
 						style={{
-							boxShadow: rarityLevel >= 5 ? `0 0 10px ${primaryColor}50 inset` : 'none'
+							boxShadow: rarityLevel >= 5 ? `0 0 10px ${primaryColor}50 inset` : 'none',
 						}}
 					/>
 

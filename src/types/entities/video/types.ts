@@ -197,7 +197,8 @@ export type VideoCreateInput = Omit<VideoBase, 'id' | 'createdAt' | 'updatedAt'>
  */
 export type VideoUpdateInput = Partial<Omit<VideoBase, 'id'>> & {
 	metadata?: VideoMetadata | string;
-} & Partial<VideoRelations> & Partial<VideoUI>;
+} & Partial<VideoRelations> &
+	Partial<VideoUI>;
 
 /**
  * 🔍 Opciones de búsqueda para Video

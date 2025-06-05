@@ -40,19 +40,16 @@ export function GroupCardFooter({
 	tcgMode = true,
 	compact = false,
 	imagesCount = 0,
-	videosCount = 0
+	videosCount = 0,
 }: GroupCardFooterProps) {
 	// Determinar estrellas de rareza a mostrar (1-5)
 	const rarity = Math.max(1, Math.min(5, Math.ceil(rarityLevel / 2)));
 
 	return (
 		<div
-			className={cn(
-				"px-3 py-2",
-				tcgMode ? "border-t border-white/10" : ""
-			)}
+			className={cn('px-3 py-2', tcgMode ? 'border-t border-white/10' : '')}
 			style={{
-				background: tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined
+				background: tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined,
 			}}
 		>
 			{tcgMode ? (
@@ -61,19 +58,13 @@ export function GroupCardFooter({
 					<div className="flex justify-between items-center">
 						{/* HP */}
 						<div className="flex items-center">
-							<HeartIcon
-								className="h-3.5 w-3.5 mr-1"
-								style={{ color: primaryColor }}
-							/>
+							<HeartIcon className="h-3.5 w-3.5 mr-1" style={{ color: primaryColor }} />
 							<span className="text-xs font-semibold">{hp}</span>
 						</div>
 
 						{/* MP */}
 						<div className="flex items-center">
-							<BrainIcon
-								className="h-3.5 w-3.5 mr-1"
-								style={{ color: primaryColor }}
-							/>
+							<BrainIcon className="h-3.5 w-3.5 mr-1" style={{ color: primaryColor }} />
 							<span className="text-xs font-semibold">{mp}</span>
 						</div>
 
@@ -86,12 +77,8 @@ export function GroupCardFooter({
 					{/* Segunda fila: metadatos (solo en modo completo) */}
 					{!compact && (
 						<div className="flex justify-between items-center">
-							<div className="text-xs opacity-80">
-								{organizationType}
-							</div>
-							<div className="text-xs opacity-80">
-								{category}
-							</div>
+							<div className="text-xs opacity-80">{organizationType}</div>
+							<div className="text-xs opacity-80">{category}</div>
 						</div>
 					)}
 
@@ -114,9 +101,7 @@ export function GroupCardFooter({
 
 							{/* Contador de archivos multimedia */}
 							{(imagesCount > 0 || videosCount > 0) && (
-								<span className="flex items-center text-[10px]">
-									🖼️ {imagesCount + videosCount}
-								</span>
+								<span className="flex items-center text-[10px]">🖼️ {imagesCount + videosCount}</span>
 							)}
 						</div>
 					</div>

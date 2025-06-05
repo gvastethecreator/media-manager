@@ -22,36 +22,32 @@ const REVALIDATE_PATHS = ['/queue', '/dashboard'] as const;
  * Revalida todas las rutas relevantes cuando cambia el estado de la cola
  */
 const revalidateQueuePaths = async () => {
-  for (const path of REVALIDATE_PATHS) {
-    revalidatePath(path);
-  }
-  logger.info('🔄 Rutas de cola revalidadas');
+	for (const path of REVALIDATE_PATHS) {
+		revalidatePath(path);
+	}
+	logger.info('🔄 Rutas de cola revalidadas');
 };
 
 /**
  * Interfaz para errores de acciones de control
  */
 export interface QueueControlErrorData {
-  name: string;
-  message: string;
-  code?: string;
-  cause?: unknown;
+	name: string;
+	message: string;
+	code?: string;
+	cause?: unknown;
 }
 
 /**
  * Función para crear errores de acciones de control (enfoque funcional)
  */
-function createQueueControlError(
-  message: string,
-  code?: string,
-  cause?: unknown
-): QueueControlErrorData {
-  return {
-    name: 'QueueControlError',
-    message,
-    code,
-    cause
-  };
+function createQueueControlError(message: string, code?: string, cause?: unknown): QueueControlErrorData {
+	return {
+		name: 'QueueControlError',
+		message,
+		code,
+		cause,
+	};
 }
 
 /**
@@ -60,29 +56,29 @@ function createQueueControlError(
  * @returns true si se pausó correctamente
  */
 export async function pauseQueue(queue: string): Promise<boolean> {
-  try {
-    logger.debug('⏸️ Pausando cola', { queue });
+	try {
+		logger.debug('⏸️ Pausando cola', { queue });
 
-    // Actualizar todos los trabajos pendientes de la cola
-    await prisma.queueJob.updateMany({
-      where: {
-        queue,
-        status: QueueJobStatus.PENDING,
-      },
-      data: {
-        status: QueueJobStatus.PAUSED,
-      },
-    });
+		// Actualizar todos los trabajos pendientes de la cola
+		await prisma.queueJob.updateMany({
+			where: {
+				queue,
+				status: QueueJobStatus.PENDING,
+			},
+			data: {
+				status: QueueJobStatus.PAUSED,
+			},
+		});
 
-    // Revalidar rutas
-    await revalidateQueuePaths();
+		// Revalidar rutas
+		await revalidateQueuePaths();
 
-    logger.info('✅ Cola pausada:', { queue });
-    return true;
-  } catch (error) {
-    logger.error('❌ Error al pausar cola:', error);
-    throw error;
-  }
+		logger.info('✅ Cola pausada:', { queue });
+		return true;
+	} catch (error) {
+		logger.error('❌ Error al pausar cola:', error);
+		throw error;
+	}
 }
 
 /**
@@ -91,29 +87,29 @@ export async function pauseQueue(queue: string): Promise<boolean> {
  * @returns true si se reanudó correctamente
  */
 export async function resumeQueue(queue: string): Promise<boolean> {
-  try {
-    logger.debug('▶️ Reanudando cola', { queue });
+	try {
+		logger.debug('▶️ Reanudando cola', { queue });
 
-    // Actualizar todos los trabajos pausados de la cola
-    await prisma.queueJob.updateMany({
-      where: {
-        queue,
-        status: QueueJobStatus.PAUSED,
-      },
-      data: {
-        status: QueueJobStatus.PENDING,
-      },
-    });
+		// Actualizar todos los trabajos pausados de la cola
+		await prisma.queueJob.updateMany({
+			where: {
+				queue,
+				status: QueueJobStatus.PAUSED,
+			},
+			data: {
+				status: QueueJobStatus.PENDING,
+			},
+		});
 
-    // Revalidar rutas
-    await revalidateQueuePaths();
+		// Revalidar rutas
+		await revalidateQueuePaths();
 
-    logger.info('✅ Cola reanudada:', { queue });
-    return true;
-  } catch (error) {
-    logger.error('❌ Error al reanudar cola:', error);
-    throw error;
-  }
+		logger.info('✅ Cola reanudada:', { queue });
+		return true;
+	} catch (error) {
+		logger.error('❌ Error al reanudar cola:', error);
+		throw error;
+	}
 }
 
 /**
@@ -122,28 +118,28 @@ export async function resumeQueue(queue: string): Promise<boolean> {
  * @returns Número de trabajos eliminados
  */
 export async function clearQueue(queue: string): Promise<number> {
-  try {
-    logger.debug('🧹 Limpiando cola', { queue });
+	try {
+		logger.debug('🧹 Limpiando cola', { queue });
 
-    // Eliminar trabajos completados y fallidos
-    const result = await prisma.queueJob.deleteMany({
-      where: {
-        queue,
-        status: {
-          in: [QueueJobStatus.COMPLETED, QueueJobStatus.FAILED],
-        },
-      },
-    });
+		// Eliminar trabajos completados y fallidos
+		const result = await prisma.queueJob.deleteMany({
+			where: {
+				queue,
+				status: {
+					in: [QueueJobStatus.COMPLETED, QueueJobStatus.FAILED],
+				},
+			},
+		});
 
-    // Revalidar rutas
-    await revalidateQueuePaths();
+		// Revalidar rutas
+		await revalidateQueuePaths();
 
-    logger.info('✅ Cola limpiada:', { queue, deletedCount: result.count });
-    return result.count;
-  } catch (error) {
-    logger.error('❌ Error al limpiar cola:', error);
-    throw error;
-  }
+		logger.info('✅ Cola limpiada:', { queue, deletedCount: result.count });
+		return result.count;
+	} catch (error) {
+		logger.error('❌ Error al limpiar cola:', error);
+		throw error;
+	}
 }
 
 /**
@@ -152,21 +148,21 @@ export async function clearQueue(queue: string): Promise<number> {
  * @returns El trabajo actualizado
  */
 export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
-  try {
-    logger.debug('🔄 Reintentando trabajo en cola', { id });
+	try {
+		logger.debug('🔄 Reintentando trabajo en cola', { id });
 
-    // Reintentar trabajo
-    const job = await QueueJobService.retryQueueJob(id);
+		// Reintentar trabajo
+		const job = await QueueJobService.retryQueueJob(id);
 
-    // Revalidar rutas
-    await revalidateQueuePaths();
-    revalidatePath(`/queue/${id}`);
+		// Revalidar rutas
+		await revalidateQueuePaths();
+		revalidatePath(`/queue/${id}`);
 
-    return job;
-  } catch (error) {
-    logger.error('❌ Error al reintentar trabajo en cola:', error);
-    throw error;
-  }
+		return job;
+	} catch (error) {
+		logger.error('❌ Error al reintentar trabajo en cola:', error);
+		throw error;
+	}
 }
 
 /**
@@ -175,19 +171,19 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
  * @returns El trabajo actualizado
  */
 export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
-  try {
-    logger.debug('⏹️ Cancelando trabajo en cola', { id });
+	try {
+		logger.debug('⏹️ Cancelando trabajo en cola', { id });
 
-    // Cancelar trabajo
-    const job = await QueueJobService.cancelQueueJob(id);
+		// Cancelar trabajo
+		const job = await QueueJobService.cancelQueueJob(id);
 
-    // Revalidar rutas
-    await revalidateQueuePaths();
-    revalidatePath(`/queue/${id}`);
+		// Revalidar rutas
+		await revalidateQueuePaths();
+		revalidatePath(`/queue/${id}`);
 
-    return job;
-  } catch (error) {
-    logger.error('❌ Error al cancelar trabajo en cola:', error);
-    throw error;
-  }
+		return job;
+	} catch (error) {
+		logger.error('❌ Error al cancelar trabajo en cola:', error);
+		throw error;
+	}
 }

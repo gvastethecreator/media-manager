@@ -1,15 +1,9 @@
 'use client';
 
-import { deleteWorldItem, getWorldItems, type WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
+import { type WorldItemWithStats, deleteWorldItem, getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
@@ -61,10 +55,8 @@ export function WorldItemsSettings() {
 	// Obtener tipos únicos para el filtro
 	const uniqueTypes = useMemo(() => {
 		const types = worldItems
-			.map(item => item.type)
-			.filter((type): type is string =>
-				type !== null && type !== undefined && type !== 'none'
-			);
+			.map((item) => item.type)
+			.filter((type): type is string => type !== null && type !== undefined && type !== 'none');
 
 		return [...new Set(types)];
 	}, [worldItems]);
@@ -72,22 +64,23 @@ export function WorldItemsSettings() {
 	// Obtener rarezas únicas para el filtro
 	const uniqueRarities = useMemo(() => {
 		const rarities = worldItems
-			.map(item => item.rarity)
-			.filter((rarity): rarity is string =>
-				rarity !== null && rarity !== undefined && rarity !== 'none'
-			);
+			.map((item) => item.rarity)
+			.filter((rarity): rarity is string => rarity !== null && rarity !== undefined && rarity !== 'none');
 
 		return [...new Set(rarities)];
 	}, [worldItems]);
 
 	// Calcular estadísticas generales
-	const stats = useMemo(() => ({
-		totalItems: worldItems.length,
-		totalImages: worldItems.reduce((acc, item) => acc + (item._count?.images || 0), 0),
-		totalSize: worldItems.reduce((acc, item) => acc + (item.totalSize || 0), 0),
-		unusedItems: worldItems.filter(item => (item._count?.images || 0) === 0).length,
-		favoriteItems: worldItems.filter(item => item.isFavorite).length,
-	}), [worldItems]);
+	const stats = useMemo(
+		() => ({
+			totalItems: worldItems.length,
+			totalImages: worldItems.reduce((acc, item) => acc + (item._count?.images || 0), 0),
+			totalSize: worldItems.reduce((acc, item) => acc + (item.totalSize || 0), 0),
+			unusedItems: worldItems.filter((item) => (item._count?.images || 0) === 0).length,
+			favoriteItems: worldItems.filter((item) => item.isFavorite).length,
+		}),
+		[worldItems]
+	);
 
 	// Filtrar objetos según criterios
 	const filteredItemsList = useMemo(() => {
@@ -96,55 +89,55 @@ export function WorldItemsSettings() {
 		// Aplicar búsqueda por término
 		if (searchTerm.trim() !== '') {
 			const term = searchTerm.toLowerCase().trim();
-			result = result.filter(item =>
-				item.name.toLowerCase().includes(term) ||
-				(item.description?.toLowerCase().includes(term)) ||
-				(item.origin?.toLowerCase().includes(term))
+			result = result.filter(
+				(item) =>
+					item.name.toLowerCase().includes(term) ||
+					item.description?.toLowerCase().includes(term) ||
+					item.origin?.toLowerCase().includes(term)
 			);
 		}
 
 		// Filtrar por tipos si hay alguno seleccionado
 		if (filterTypes.length > 0) {
-			result = result.filter(item =>
-				item.type && item.type !== 'none' && filterTypes.includes(item.type)
-			);
+			result = result.filter((item) => item.type && item.type !== 'none' && filterTypes.includes(item.type));
 		}
 
 		// Filtrar por rareza si hay alguna seleccionada
 		if (filterRarities.length > 0) {
-			result = result.filter(item =>
-				item.rarity && item.rarity !== 'none' && filterRarities.includes(item.rarity)
-			);
+			result = result.filter((item) => item.rarity && item.rarity !== 'none' && filterRarities.includes(item.rarity));
 		}
 
 		// Filtrar por favoritos si está activado
 		if (showOnlyFavorites) {
-			result = result.filter(item => item.isFavorite);
+			result = result.filter((item) => item.isFavorite);
 		}
 
 		return result;
 	}, [worldItems, filterTypes, filterRarities, showOnlyFavorites, searchTerm]);
 
 	// Manejar eliminación de objeto
-	const handleDeleteItem = useCallback(async (id: string) => {
-		try {
-			await deleteWorldItem(id);
-			setWorldItems(prev => prev.filter(item => item.id !== id));
-			toastService.worldItem.deleted();
+	const handleDeleteItem = useCallback(
+		async (id: string) => {
+			try {
+				await deleteWorldItem(id);
+				setWorldItems((prev) => prev.filter((item) => item.id !== id));
+				toastService.worldItem.deleted();
 
-			// Reset selection if deleted item was selected
-			if (selectedItem?.id === id) {
-				setSelectedItem(null);
-				setIsEditing(false);
-				setPreviewData(null);
+				// Reset selection if deleted item was selected
+				if (selectedItem?.id === id) {
+					setSelectedItem(null);
+					setIsEditing(false);
+					setPreviewData(null);
+				}
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar el objeto', {
+					description: errorMessage,
+				});
 			}
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			toastService.error('Error al eliminar el objeto', {
-				description: errorMessage,
-			});
-		}
-	}, [selectedItem]);
+		},
+		[selectedItem]
+	);
 
 	// Manejar edición de objeto
 	const handleEditItem = useCallback((item: WorldItem) => {
@@ -155,19 +148,15 @@ export function WorldItemsSettings() {
 
 	// Manejar creación exitosa
 	const handleItemCreated = useCallback((newItem: WorldItem) => {
-		setWorldItems(prev => [...prev, newItem as unknown as WorldItemWithStats]);
+		setWorldItems((prev) => [...prev, newItem as unknown as WorldItemWithStats]);
 		toastService.worldItem.created();
 		setPreviewData(null);
 	}, []);
 
 	// Manejar actualización exitosa
 	const handleItemUpdated = useCallback((updatedItem: WorldItem) => {
-		setWorldItems(prev =>
-			prev.map(item =>
-				item.id === updatedItem.id
-					? { ...item, ...updatedItem } as WorldItemWithStats
-					: item
-			)
+		setWorldItems((prev) =>
+			prev.map((item) => (item.id === updatedItem.id ? ({ ...item, ...updatedItem } as WorldItemWithStats) : item))
 		);
 		setIsEditing(false);
 		setSelectedItem(null);
@@ -189,20 +178,12 @@ export function WorldItemsSettings() {
 
 	// Alternar tipo en filtro
 	const toggleType = useCallback((type: string) => {
-		setFilterTypes(prev =>
-			prev.includes(type)
-				? prev.filter(t => t !== type)
-				: [...prev, type]
-		);
+		setFilterTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]));
 	}, []);
 
 	// Alternar rareza en filtro
 	const toggleRarity = useCallback((rarity: string) => {
-		setFilterRarities(prev =>
-			prev.includes(rarity)
-				? prev.filter(r => r !== rarity)
-				: [...prev, rarity]
-		);
+		setFilterRarities((prev) => (prev.includes(rarity) ? prev.filter((r) => r !== rarity) : [...prev, rarity]));
 	}, []);
 
 	// Limpiar todos los filtros
@@ -215,33 +196,49 @@ export function WorldItemsSettings() {
 
 	// Generar color basado en el tipo de objeto
 	const generateTypeColor = useCallback((type?: string | null) => {
-		if (!type || type === 'none') return "#6b7280";
+		if (!type || type === 'none') return '#6b7280';
 
 		switch (type.toLowerCase()) {
-			case "arma": return "#ef4444";
-			case "armadura": return "#3b82f6";
-			case "amuleto": return "#8b5cf6";
-			case "poción": return "#10b981";
-			case "herramienta": return "#f59e0b";
-			case "libro": return "#6366f1";
-			case "reliquia": return "#d946ef";
-			default: return "#6b7280";
+			case 'arma':
+				return '#ef4444';
+			case 'armadura':
+				return '#3b82f6';
+			case 'amuleto':
+				return '#8b5cf6';
+			case 'poción':
+				return '#10b981';
+			case 'herramienta':
+				return '#f59e0b';
+			case 'libro':
+				return '#6366f1';
+			case 'reliquia':
+				return '#d946ef';
+			default:
+				return '#6b7280';
 		}
 	}, []);
 
 	// Generar color basado en la rareza
 	const generateRarityColor = useCallback((rarity?: string | null) => {
-		if (!rarity || rarity === 'none') return "#6b7280";
+		if (!rarity || rarity === 'none') return '#6b7280';
 
 		switch (rarity.toLowerCase()) {
-			case "común": return "#6b7280";
-			case "poco común": return "#22c55e";
-			case "raro": return "#3b82f6";
-			case "épico": return "#8b5cf6";
-			case "legendario": return "#f59e0b";
-			case "mítico": return "#ef4444";
-			case "único": return "#d946ef";
-			default: return "#6b7280";
+			case 'común':
+				return '#6b7280';
+			case 'poco común':
+				return '#22c55e';
+			case 'raro':
+				return '#3b82f6';
+			case 'épico':
+				return '#8b5cf6';
+			case 'legendario':
+				return '#f59e0b';
+			case 'mítico':
+				return '#ef4444';
+			case 'único':
+				return '#d946ef';
+			default:
+				return '#6b7280';
 		}
 	}, []);
 
@@ -263,11 +260,7 @@ export function WorldItemsSettings() {
 						icon={Info}
 						title="Error al cargar objetos"
 						description={error}
-						actions={
-							<Button onClick={() => window.location.reload()}>
-								Intentar de nuevo
-							</Button>
-						}
+						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -284,7 +277,11 @@ export function WorldItemsSettings() {
 							<CardTitle className="text-base">Objetos ({filteredItemsList.length})</CardTitle>
 							<div className="flex items-center gap-1">
 								<Button
-									onClick={() => { setSelectedItem(null); setIsEditing(false); setPreviewData(null); }}
+									onClick={() => {
+										setSelectedItem(null);
+										setIsEditing(false);
+										setPreviewData(null);
+									}}
 									size="sm"
 									variant="ghost"
 									className="h-7 w-7 p-0"
@@ -297,8 +294,8 @@ export function WorldItemsSettings() {
 											size="sm"
 											variant="ghost"
 											className={cn(
-												"h-7 w-7 p-0",
-												(filterTypes.length > 0 || filterRarities.length > 0 || showOnlyFavorites) && "text-primary"
+												'h-7 w-7 p-0',
+												(filterTypes.length > 0 || filterRarities.length > 0 || showOnlyFavorites) && 'text-primary'
 											)}
 										>
 											<Filter className="h-4 w-4" />
@@ -313,7 +310,12 @@ export function WorldItemsSettings() {
 													variant="ghost"
 													className="h-7 px-2 text-xs"
 													onClick={clearFilters}
-													disabled={filterTypes.length === 0 && filterRarities.length === 0 && !showOnlyFavorites && searchTerm === ''}
+													disabled={
+														filterTypes.length === 0 &&
+														filterRarities.length === 0 &&
+														!showOnlyFavorites &&
+														searchTerm === ''
+													}
 												>
 													Limpiar
 												</Button>
@@ -324,11 +326,11 @@ export function WorldItemsSettings() {
 													<Checkbox
 														id="show-favorites"
 														checked={showOnlyFavorites}
-														onCheckedChange={(checked) =>
-															setShowOnlyFavorites(checked === true)
-														}
+														onCheckedChange={(checked) => setShowOnlyFavorites(checked === true)}
 													/>
-													<Label htmlFor="show-favorites" className="text-sm">Solo favoritos</Label>
+													<Label htmlFor="show-favorites" className="text-sm">
+														Solo favoritos
+													</Label>
 												</div>
 											</div>
 
@@ -365,7 +367,9 @@ export function WorldItemsSettings() {
 																	checked={filterTypes.includes(type)}
 																	onCheckedChange={() => toggleType(type)}
 																/>
-																<Label htmlFor={`type-${type}`} className="text-xs">{type}</Label>
+																<Label htmlFor={`type-${type}`} className="text-xs">
+																	{type}
+																</Label>
 															</div>
 														))}
 													</div>
@@ -383,7 +387,9 @@ export function WorldItemsSettings() {
 																	checked={filterRarities.includes(rarity)}
 																	onCheckedChange={() => toggleRarity(rarity)}
 																/>
-																<Label htmlFor={`rarity-${rarity}`} className="text-xs">{rarity}</Label>
+																<Label htmlFor={`rarity-${rarity}`} className="text-xs">
+																	{rarity}
+																</Label>
 															</div>
 														))}
 													</div>
@@ -422,8 +428,8 @@ export function WorldItemsSettings() {
 									title="No hay objetos"
 									description={
 										filterTypes.length > 0 || filterRarities.length > 0 || showOnlyFavorites || searchTerm
-											? "No hay objetos que coincidan con los filtros"
-											: "Crea tu primer objeto"
+											? 'No hay objetos que coincidan con los filtros'
+											: 'Crea tu primer objeto'
 									}
 									className="py-8"
 								/>
@@ -433,7 +439,7 @@ export function WorldItemsSettings() {
 										<button
 											key={item.id}
 											className={cn(
-												"group flex items-center gap-2 p-2 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left",
+												'group flex items-center gap-2 p-2 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left',
 												selectedItem?.id === item.id ? 'bg-muted' : ''
 											)}
 											onClick={() => handleEditItem(item as unknown as WorldItem)}
@@ -459,7 +465,9 @@ export function WorldItemsSettings() {
 													{item.isFavorite && (
 														<>
 															<span>•</span>
-															<Badge variant="outline" className="h-4 text-[10px] px-1">Favorito</Badge>
+															<Badge variant="outline" className="h-4 text-[10px] px-1">
+																Favorito
+															</Badge>
 														</>
 													)}
 												</div>
@@ -490,9 +498,7 @@ export function WorldItemsSettings() {
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
 				<Card className="h-[calc(100vh-8rem)] flex flex-col overflow-hidden border-none bg-muted/30 rounded-sm">
 					<CardHeader className="py-3">
-						<CardTitle className="text-base">
-							{isEditing ? 'Editar Objeto' : 'Nuevo Objeto'}
-						</CardTitle>
+						<CardTitle className="text-base">{isEditing ? 'Editar Objeto' : 'Nuevo Objeto'}</CardTitle>
 						<CardDescription className="text-xs">
 							{isEditing
 								? 'Modifica los detalles del objeto seleccionado'
@@ -517,7 +523,10 @@ export function WorldItemsSettings() {
 								<div className="transition-all duration-300">
 									{previewData ? (
 										<div className="flex flex-col items-center p-4 border rounded-lg bg-background">
-											<div className="w-12 h-12 mb-3 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: previewData.color || generateTypeColor(previewData.type) }}>
+											<div
+												className="w-12 h-12 mb-3 rounded-full flex items-center justify-center text-2xl"
+												style={{ backgroundColor: previewData.color || generateTypeColor(previewData.type) }}
+											>
 												{previewData.emoji || '📦'}
 											</div>
 											<h3 className="text-lg font-medium">{previewData.name}</h3>
@@ -527,7 +536,9 @@ export function WorldItemsSettings() {
 
 											<div className="flex flex-wrap gap-2 mt-3 justify-center">
 												{previewData.type && (
-													<Badge variant="secondary" className="text-xs">{previewData.type}</Badge>
+													<Badge variant="secondary" className="text-xs">
+														{previewData.type}
+													</Badge>
 												)}
 												{previewData.rarity && (
 													<Badge
@@ -535,7 +546,7 @@ export function WorldItemsSettings() {
 														className="capitalize text-xs"
 														style={{
 															borderColor: generateRarityColor(previewData.rarity),
-															color: generateRarityColor(previewData.rarity)
+															color: generateRarityColor(previewData.rarity),
 														}}
 													>
 														{previewData.rarity}
@@ -552,9 +563,7 @@ export function WorldItemsSettings() {
 									) : (
 										<div className="flex flex-col items-center justify-center h-[280px] w-[200px] bg-muted/50 rounded-lg border border-dashed">
 											<Package className="h-8 w-8 text-muted-foreground/50" />
-											<p className="text-xs text-muted-foreground mt-2">
-												Vista previa
-											</p>
+											<p className="text-xs text-muted-foreground mt-2">Vista previa</p>
 										</div>
 									)}
 								</div>

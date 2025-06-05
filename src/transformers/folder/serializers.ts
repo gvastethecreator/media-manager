@@ -6,12 +6,7 @@
 import { DEFAULT_COLORS, DEFAULT_EMOJIS } from '@/lib/constants';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { FolderType } from '@/types/entities/folder/enums';
-import type {
-    Folder,
-    FolderComplete,
-    FolderStats,
-    FolderWithStats
-} from '@/types/entities/folder/types';
+import type { Folder, FolderComplete, FolderStats, FolderWithStats } from '@/types/entities/folder/types';
 
 const logger = serverLogger.withContext('FolderSerializers');
 
@@ -107,12 +102,12 @@ export function withFolderStats(folder: Folder): FolderWithStats {
 			isRoot: folder.parentId === null,
 			isEmpty: (folder._count?.images || 0) === 0 && (folder._count?.children || 0) === 0,
 			hasChildren: (folder._count?.children || 0) > 0,
-			size: calculateFolderSize(folder)
+			size: calculateFolderSize(folder),
 		};
 
 		return {
 			...folder,
-			stats
+			stats,
 		};
 	} catch (error) {
 		logger.error('Error añadiendo estadísticas a folder:', error);
@@ -142,7 +137,7 @@ function calculateFolderLevel(path: string): number {
 function calculateFolderSize(folder: Folder): number {
 	try {
 		// Uso directo del campo totalSize si está disponible
-		if (typeof folder.totalSize === 'number' && !isNaN(folder.totalSize)) {
+		if (typeof folder.totalSize === 'number' && !Number.isNaN(folder.totalSize)) {
 			return folder.totalSize;
 		}
 
@@ -174,7 +169,7 @@ export function normalizeFolderType(type?: string): FolderType {
 		// Convertir a mayúsculas y verificar si existe en el enum
 		const normalizedType = type.toUpperCase();
 		return Object.values(FolderType).includes(normalizedType as FolderType)
-			? normalizedType as FolderType
+			? (normalizedType as FolderType)
 			: FolderType.STANDARD;
 	} catch (error) {
 		logger.error('Error normalizando tipo de folder:', error);
@@ -273,8 +268,8 @@ export function fromPrismaFolder(prismaFolder: any): Folder {
 				children: 0,
 				images: 0,
 				uploadedImages: 0,
-				tags: 0
-			}
+				tags: 0,
+			},
 		};
 	} catch (error) {
 		logger.error('Error convirtiendo de Prisma:', error);
@@ -295,7 +290,7 @@ export function extendFolder(folder: FolderComplete): FolderComplete {
 			id: folder.id,
 			name: folder.name,
 			totalSize: folder.totalSize,
-			totalFiles: folder.totalFiles
+			totalFiles: folder.totalFiles,
 		});
 
 		// Si ya tiene estadísticas, las mantenemos
@@ -318,8 +313,8 @@ export function extendFolder(folder: FolderComplete): FolderComplete {
 				children: 0,
 				images: 0,
 				uploadedImages: 0,
-				tags: 0
-			}
+				tags: 0,
+			},
 		};
 	} catch (error) {
 		logger.error('Error extendiendo folder:', error);

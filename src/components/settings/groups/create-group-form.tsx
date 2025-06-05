@@ -2,23 +2,9 @@
 
 import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { GroupBase } from '@/types/entities/group/types';
@@ -28,9 +14,7 @@ import { z } from 'zod';
 
 // Esquema de validación para el formulario
 const groupFormSchema = z.object({
-	name: z.string()
-		.min(1, 'El nombre es requerido')
-		.max(50, 'El nombre no puede tener más de 50 caracteres'),
+	name: z.string().min(1, 'El nombre es requerido').max(50, 'El nombre no puede tener más de 50 caracteres'),
 	emoji: z.string().default('📂'),
 	color: z.string().default('#3b82f6'),
 	description: z.string().optional(),
@@ -50,11 +34,7 @@ interface CreateGroupFormProps {
 	onCancel: () => void;
 }
 
-export function CreateGroupForm({
-	group,
-	onSubmit,
-	onCancel,
-}: CreateGroupFormProps) {
+export function CreateGroupForm({ group, onSubmit, onCancel }: CreateGroupFormProps) {
 	// Inicializar el formulario con el tipo correcto
 	const form = useForm<FormData>({
 		resolver: zodResolver(groupFormSchema),
@@ -76,9 +56,7 @@ export function CreateGroupForm({
 		<>
 			<CardHeader className="pb-4 px-6">
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-xl font-bold">
-						{group ? 'Editar' : 'Nuevo'} Grupo
-					</CardTitle>
+					<CardTitle className="text-xl font-bold">{group ? 'Editar' : 'Nuevo'} Grupo</CardTitle>
 				</div>
 			</CardHeader>
 
@@ -139,11 +117,7 @@ export function CreateGroupForm({
 								<FormItem>
 									<FormLabel>Descripción</FormLabel>
 									<FormControl>
-										<Textarea
-											placeholder="Descripción del grupo..."
-											className="resize-none"
-											{...field}
-										/>
+										<Textarea placeholder="Descripción del grupo..." className="resize-none" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -157,10 +131,7 @@ export function CreateGroupForm({
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Categoría</FormLabel>
-										<Select
-											value={field.value}
-											onValueChange={field.onChange}
-										>
+										<Select value={field.value} onValueChange={field.onChange}>
 											<FormControl>
 												<SelectTrigger>
 													<SelectValue placeholder="Seleccionar categoría" />
@@ -187,9 +158,7 @@ export function CreateGroupForm({
 										<FormControl>
 											<Input placeholder="Ctrl+G" {...field} />
 										</FormControl>
-										<FormDescription>
-											Opcional: teclas de atajo
-										</FormDescription>
+										<FormDescription>Opcional: teclas de atajo</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -203,31 +172,20 @@ export function CreateGroupForm({
 								<FormItem className="flex items-center justify-between rounded-lg border p-4">
 									<div className="space-y-0.5">
 										<FormLabel>Favorito</FormLabel>
-										<FormDescription>
-											Marcar este grupo como favorito
-										</FormDescription>
+										<FormDescription>Marcar este grupo como favorito</FormDescription>
 									</div>
 									<FormControl>
-										<Switch
-											checked={field.value}
-											onCheckedChange={field.onChange}
-										/>
+										<Switch checked={field.value} onCheckedChange={field.onChange} />
 									</FormControl>
 								</FormItem>
 							)}
 						/>
 
 						<div className="flex justify-end gap-4">
-							<Button
-								type="button"
-								variant="outline"
-								onClick={onCancel}
-							>
+							<Button type="button" variant="outline" onClick={onCancel}>
 								Cancelar
 							</Button>
-							<Button type="submit">
-								{group ? 'Actualizar' : 'Crear'} Grupo
-							</Button>
+							<Button type="submit">{group ? 'Actualizar' : 'Crear'} Grupo</Button>
 						</div>
 					</form>
 				</Form>

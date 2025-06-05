@@ -9,4 +9,3 @@ export * from './folder-server-actions';
 import { memo } from 'react';
 import { FolderCard } from './folder-card';
 export const MemoizedFolderCard = memo(FolderCard);
-

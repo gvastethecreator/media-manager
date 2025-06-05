@@ -10,7 +10,7 @@ export async function updateFolderStats(folderId: string) {
 	// Obtener la carpeta para acceder a su path
 	const folder = await prisma.folder.findUnique({
 		where: { id: folderId },
-		select: { path: true }
+		select: { path: true },
 	});
 
 	if (!folder) {
@@ -21,15 +21,15 @@ export async function updateFolderStats(folderId: string) {
 	// Esto asegura consistencia entre reindexado y actualización de estadísticas
 	const scanResult = await scanFolder(folder.path, {
 		recursive: true,
-		includeHidden: false
+		includeHidden: false,
 	});
 
 	// Actualizar con los mismos valores que usa el reindexado
 	await prisma.folder.update({
 		where: { id: folderId },
 		data: {
-			totalFiles: scanResult.totalFiles,    // 🎯 Ahora usa el mismo criterio
-			totalSize: scanResult.totalSize,      // 🎯 Ahora usa el mismo criterio
+			totalFiles: scanResult.totalFiles, // 🎯 Ahora usa el mismo criterio
+			totalSize: scanResult.totalSize, // 🎯 Ahora usa el mismo criterio
 			lastIndexed: new Date(),
 		},
 	});

@@ -18,22 +18,22 @@ const logger = serverLogger.withContext('QueueActions:process');
  * @returns Trabajo actualizado
  */
 export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
-  try {
-    logger.debug('🔄 Reintentando trabajo en cola', { id });
+	try {
+		logger.debug('🔄 Reintentando trabajo en cola', { id });
 
-    // Reintentar trabajo
-    const job = await QueueJobService.retryQueueJob(id);
+		// Reintentar trabajo
+		const job = await QueueJobService.retryQueueJob(id);
 
-    // Revalidar rutas
-    revalidatePath('/queue');
-    revalidatePath('/dashboard');
-    revalidatePath(`/queue/${id}`);
+		// Revalidar rutas
+		revalidatePath('/queue');
+		revalidatePath('/dashboard');
+		revalidatePath(`/queue/${id}`);
 
-    return job;
-  } catch (error) {
-    logger.error('❌ Error reintentando trabajo en cola:', error);
-    throw error;
-  }
+		return job;
+	} catch (error) {
+		logger.error('❌ Error reintentando trabajo en cola:', error);
+		throw error;
+	}
 }
 
 /**
@@ -42,20 +42,20 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
  * @returns Trabajo actualizado
  */
 export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
-  try {
-    logger.debug('⏹️ Cancelando trabajo en cola', { id });
+	try {
+		logger.debug('⏹️ Cancelando trabajo en cola', { id });
 
-    // Cancelar trabajo
-    const job = await QueueJobService.cancelQueueJob(id);
+		// Cancelar trabajo
+		const job = await QueueJobService.cancelQueueJob(id);
 
-    // Revalidar rutas
-    revalidatePath('/queue');
-    revalidatePath('/dashboard');
-    revalidatePath(`/queue/${id}`);
+		// Revalidar rutas
+		revalidatePath('/queue');
+		revalidatePath('/dashboard');
+		revalidatePath(`/queue/${id}`);
 
-    return job;
-  } catch (error) {
-    logger.error('❌ Error cancelando trabajo en cola:', error);
-    throw error;
-  }
+		return job;
+	} catch (error) {
+		logger.error('❌ Error cancelando trabajo en cola:', error);
+		throw error;
+	}
 }
