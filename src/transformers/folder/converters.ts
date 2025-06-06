@@ -37,7 +37,7 @@ export function toFolderComplete(folder: any): FolderComplete {
 			isFavorite: folder.isFavorite || false,
 
 			// 📊 Propiedades de sistema (requeridos por PrismaFolder)
-			totalFiles: folder.totalFiles || 0,
+			totalFiles: folder.totalFiles || folder._count?.images || 0,
 			totalSize: folder.totalSize || 0,
 			autoReindex: folder.autoReindex || false,
 			lastIndexed: folder.lastIndexed || null,

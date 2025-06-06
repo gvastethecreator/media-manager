@@ -87,15 +87,15 @@ const mockPrismaClient = {
 
   // 🔄 Reset helper para tests
   $reset: () => {
-    Object.values(mockPrismaClient).forEach(model => {
+    for (const model of Object.values(mockPrismaClient)) {
       if (typeof model === 'object' && model !== null) {
-        Object.values(model).forEach(method => {
+        for (const method of Object.values(model)) {
           if (jest.isMockFunction(method)) {
             method.mockReset();
           }
-        });
+        }
       }
-    });
+    }
   },
 };
 

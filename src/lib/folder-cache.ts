@@ -15,8 +15,8 @@ const cacheLogger = clientLogger.withContext('FolderCache');
 class FolderResponseCache {
   private cache: Map<string, any>;
   private maxSize: number;
-  private hits: number = 0;
-  private misses: number = 0;
+  private hits = 0;
+  private misses = 0;
 
   constructor(maxSize = 100) {
     this.cache = new Map();
@@ -99,7 +99,9 @@ class FolderResponseCache {
       }
     }
 
-    keysToDelete.forEach(key => this.cache.delete(key));
+    for (const key of keysToDelete) {
+      this.cache.delete(key);
+    }
     cacheLogger.info(`🧹 Limpiadas ${keysToDelete.length} entradas con patrón: ${pattern}`);
   }
 

@@ -34,6 +34,7 @@ export function useFoldersState() {
 					images: folder._count?.images || 0,
 				},
 				totalSize: Number(folder.totalSize || 0),
+				totalFiles: Number(folder.totalFiles || folder._count?.images || 0),
 				autoReindex: folder.autoReindex || false,
 				recentImages: folder.recentImages?.filter((img): img is string => img !== null) || [],
 			}));
