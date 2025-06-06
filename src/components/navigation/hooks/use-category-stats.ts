@@ -137,6 +137,8 @@ export function useCategoryStats(initialData: NavigationData) {
 					color: item.color,
 					path: item.path,
 					description: item.description,
+					totalFiles: item.totalFiles || 0,
+					totalSize: item.totalSize || 0,
 					_count: item._count
 						? {
 								images: item._count.images || 0,
@@ -263,7 +265,7 @@ export function useCategoryStats(initialData: NavigationData) {
 				case 'collections':
 					return mapToCategoryChildren(collections);
 				case 'folders':
-					return mapToCategoryChildren(folders);
+					return mapToCategoryChildren(folders.slice(0, 500));
 				case 'tags':
 					return mapToCategoryChildren(tags);
 				case 'albums':

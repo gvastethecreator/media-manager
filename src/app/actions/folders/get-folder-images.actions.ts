@@ -1,11 +1,11 @@
 'use server';
 
-import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { FileItem, FileProcessingStatus, FileType } from '@/types/file-item';
 import type { MediaMetadata } from '@/types/metadata.types';
 import type { EntityId, JSONString } from '@/utils/types/utility-types';
+import path from 'path';
 
 const logger = serverLogger.withContext('get-folder-images');
 
@@ -49,20 +49,19 @@ export async function getFolderImages(folderId: string): Promise<FileItem[]> {
 				size: true,
 				width: true,
 				height: true,
-				metadata: true,
-				thumbnail: true,
+				// metadata: true, // ⚠️ Temporal: Excluido para reducir la carga útil y diagnosticar cuelgues
 				thumbnailSize: true,
 				thumbnailWidth: true,
 				thumbnailHeight: true,
 				createdAt: true,
 				updatedAt: true,
-				tags: {
-					select: {
-						id: true,
-						name: true,
-						color: true,
-					},
-				},
+				// tags: { // ⚠️ Temporal: Excluido para reducir la carga útil y diagnosticar cuelgues
+				// 	select: {
+				// 		id: true,
+				// 		name: true,
+				// 		color: true,
+				// 	},
+				// },
 			},
 			orderBy: {
 				name: 'asc',
@@ -116,18 +115,18 @@ export async function getFolderImages(folderId: string): Promise<FileItem[]> {
 					size: image.size || 0,
 					width: image.width || 0,
 					height: image.height || 0,
-					metadata: (image.metadata || '{}') as JSONString<MediaMetadata>,
+					metadata: (image.metadata || '{}') as JSONString<MediaMetadata>, // Se mantiene por tipo, pero se esperará undefined si se excluye en select
 					thumbnail: thumbnailUrl,
 					thumbnailSize: image.thumbnailSize || 0,
 					thumbnailWidth: image.thumbnailWidth || 0,
 					thumbnailHeight: image.thumbnailHeight || 0,
 					createdAt: image.createdAt,
 					updatedAt: image.updatedAt,
-					tags: image.tags.map((tag) => ({
+					tags: (image.tags || []).map((tag: any) => ({
 						id: tag.id,
 						name: tag.name,
 						color: tag.color || '#000000',
-					})),
+					})), // Se mantiene por tipo, se espera array vacío si se excluye en select
 				};
 			})
 		);

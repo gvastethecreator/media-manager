@@ -45,13 +45,13 @@ const ImageRendererComponent = ({
 
 	// Depuración: Registrar cuando se renderiza con una nueva URL
 	useEffect(() => {
-		if (isFirstRender.current) {
-			logger.debug(`🖼️ Primera renderización: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
-			isFirstRender.current = false;
-		} else if (prevSrc.current !== src) {
-			logger.debug(`🔄 URL cambiada: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
-		}
-	}, [src]);
+		// if (isFirstRender.current) {
+		// 	logger.debug(`🖼️ Primera renderización: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
+		// 	isFirstRender.current = false;
+		// } else if (prevSrc.current !== src) {
+		// 	logger.debug(`🔄 URL cambiada: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
+		// }
+	}, []);
 
 	// Solo resetear el estado de carga si la fuente cambia realmente
 	useEffect(() => {
@@ -79,7 +79,7 @@ const ImageRendererComponent = ({
 	}, [onError, src]);
 
 	const handleLoad = useCallback(() => {
-		logger.debug(`✅ Imagen cargada: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
+		// logger.debug(`✅ Imagen cargada: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
 		setIsLoading(false);
 		if (onLoad) {
 			onLoad();
