@@ -76,7 +76,7 @@ const ImageRendererComponent = ({
 		if (onError) {
 			onError();
 		}
-	}, [onError, src]);
+	}, [onError]);
 
 	const handleLoad = useCallback(() => {
 		// logger.debug(`✅ Imagen cargada: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
@@ -84,7 +84,7 @@ const ImageRendererComponent = ({
 		if (onLoad) {
 			onLoad();
 		}
-	}, [onLoad, src]);
+	}, [onLoad]);
 
 	const handleClick = useCallback(() => {
 		if (onClick && !error) {

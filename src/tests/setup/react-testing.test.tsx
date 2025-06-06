@@ -1,8 +1,8 @@
 // 🧪 Test básico para componentes React
 // Verifica que el rendering de componentes funciona
 
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
 
 // 🎨 Componente simple para testing
 const TestComponent = ({ title, children }: { title: string; children?: React.ReactNode }) => (
@@ -39,7 +39,7 @@ describe('⚛️ React Component Testing', () => {
     // 🎯 Props dinámicos
     const props = {
       title: 'Dynamic Title',
-      children: <button>Click me</button>
+      children: <button type="button">Click me</button>
     };
 
     render(<TestComponent {...props} />);
