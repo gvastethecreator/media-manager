@@ -170,26 +170,33 @@ export function FoldersView(_props: ViewProps) {
 	const handleFolderClick = useCallback(
 		(folder: FolderWithCount) => {
 			try {
-				// viewLogger.info('🖱️ Click en carpeta:', folder.name); // Comentado
+				viewLogger.info('🖱️ Click en carpeta:', folder.name); // Descomentado
+				viewLogger.debug('ℹ️ Carpeta clickeada:', folder); // Nuevo log
 
 				// Verificaciones de seguridad
 				if (!folder || !folder.id) {
-					// viewLogger.error('❌ Carpeta inválida:', folder); // Comentado
+					viewLogger.error('❌ Carpeta inválida:', folder); // Descomentado
 					return;
 				}
 
+				viewLogger.debug('🧹 Limpiando selecciones previas...'); // Nuevo log
 				// 🧹 Limpiar selecciones previas
 				deselectAllFiles();
+				viewLogger.debug('✅ Selecciones limpiadas.'); // Nuevo log
 
+				viewLogger.debug('🔄 Actualizando el store de carpetas (setCurrentFolderId)...'); // Nuevo log
 				// 🔄 Actualizar el store de carpetas PRIMERO
 				setCurrentFolderId(folder.id);
+				viewLogger.debug(`✅ setCurrentFolderId llamado con ID: ${folder.id}`); // Nuevo log
 
+				viewLogger.debug('📍 Actualizando la vista de navegación (setCurrentView)...'); // Nuevo log
 				// 📍 Actualizar la vista de navegación
 				setCurrentView('folder-content');
+				viewLogger.debug('✅ setCurrentView llamado a folder-content.'); // Nuevo log
 
-				// viewLogger.info(`✅ Navegando a carpeta: ${folder.name} (${folder.id})`); // Comentado
+				viewLogger.info(`✅ Navegando a carpeta: ${folder.name} (${folder.id})`); // Descomentado
 			} catch (error) {
-				// viewLogger.error('❌ Error al cambiar a la carpeta:', error); // Comentado
+				viewLogger.error('❌ Error al cambiar a la carpeta:', error); // Descomentado
 			}
 		},
 		[setCurrentView, deselectAllFiles, setCurrentFolderId]
