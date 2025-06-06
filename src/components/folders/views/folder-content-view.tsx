@@ -2,6 +2,7 @@
 
 import { reindexFolder } from '@/app/actions/folders';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { FileBrowser } from '@/components/features/file-browser';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 // Usar el hook del store de carpetas para mantener consistencia con FoldersView
@@ -32,16 +33,16 @@ export function FolderContentView() {
 		if (!currentFolderId) return;
 
 		try {
-			// logger.info(`🔄 Iniciando reindexación de carpeta: ${currentFolderId}`); // Comentado
+			logger.info(`🔄 Iniciando reindexación de carpeta: ${currentFolderId}`);
 			setIsManuallyRefreshing(true);
 			await reindexFolder(currentFolderId);
 			// Recargar las imágenes después de reindexar
-			// logger.info('🔄 Recargando imágenes después de reindexar'); // Comentado
+			logger.info('🔄 Recargando imágenes después de reindexar');
 			// Limpiar caché para esta carpeta
 			folderResponseCache.delete(`folder:${currentFolderId}`);
 			await refetch();
 		} catch (error) {
-			// logger.error('❌ Error al reindexar la carpeta:', error); // Comentado
+			logger.error('❌ Error al reindexar la carpeta:', error);
 		} finally {
 			setIsManuallyRefreshing(false);
 		}
@@ -49,7 +50,7 @@ export function FolderContentView() {
 
 	// Función para forzar la recarga de imágenes
 	const handleForceRefresh = useCallback(async () => {
-		// logger.info('🔄 Forzando recarga de imágenes'); // Comentado
+		logger.info('🔄 Forzando recarga de imágenes');
 		setIsManuallyRefreshing(true);
 		setRetryCount((prev) => prev + 1);
 
@@ -57,13 +58,13 @@ export function FolderContentView() {
 			// Limpiar caché para esta carpeta
 			if (currentFolderId) {
 				folderResponseCache.delete(`folder:${currentFolderId}`);
-				// logger.info(`🧹 Caché limpiada para carpeta: ${currentFolderId}`); // Comentado
+				logger.info(`🧹 Caché limpiada para carpeta: ${currentFolderId}`);
 			}
 
 			// Recargar imágenes
 			await refetch();
 		} catch (refreshError) {
-			// logger.error('❌ Error al forzar recarga:', refreshError); // Comentado
+			logger.error('❌ Error al forzar recarga:', refreshError);
 		} finally {
 			setIsManuallyRefreshing(false);
 		}
@@ -71,7 +72,7 @@ export function FolderContentView() {
 
 	// Mostrar estado de carga
 	if (isLoading || folderLoading || isManuallyRefreshing) {
-		// logger.debug('⏳ Mostrando estado de carga'); // Comentado
+		logger.debug('⏳ Mostrando estado de carga');
 		return (
 			<div className="flex items-center justify-center h-full">
 				<LoadingSpinner />
@@ -81,7 +82,7 @@ export function FolderContentView() {
 
 	// Mostrar estado de error
 	if (isError) {
-		// logger.error('❌ Error al cargar imágenes:', error); // Comentado
+		logger.error('❌ Error al cargar imágenes:', error);
 		return (
 			<div className="flex flex-col items-center justify-center h-full gap-4">
 				<EmptyState
@@ -105,7 +106,7 @@ export function FolderContentView() {
 
 	// Mostrar estado vacío si no hay imágenes
 	if (!images || images.length === 0) {
-		// logger.debug('📭 Mostrando estado vacío - No hay imágenes'); // Comentado
+		logger.debug('📭 Mostrando estado vacío - No hay imágenes');
 		return (
 			<div className="flex flex-col items-center justify-center h-full gap-4">
 				<EmptyState
@@ -133,14 +134,27 @@ export function FolderContentView() {
 		);
 	}
 
-	// Usar directamente las imágenes del hook, ya que ahora son FileItem[]
+	// Usar directamente las imágenes del hook
 	const displayImages = images;
-	// logger.debug(`🖼️ Renderizando FileBrowser con ${displayImages.length} imágenes`); // Comentado
+	logger.debug(`🖼️ Renderizando FileBrowser con ${displayImages.length} imágenes`);
+
+	// Verificación de datos
+	if (displayImages && displayImages.length > 0) {
+		const firstImage = displayImages[0];
+		logger.info('📊 Datos de la primera imagen:', {
+			id: firstImage.id,
+			name: firstImage.name,
+			type: firstImage.type,
+			thumbnail: firstImage.thumbnail ? 'Disponible' : 'No disponible',
+			imageUrl: firstImage.imageUrl || 'No disponible',
+			tieneProps: Object.keys(firstImage).join(', ')
+		});
+	}
 
 	// Renderizar el navegador de archivos
 	return (
 		<div className="h-full w-full">
-			{/* <div className="absolute top-2 right-2 z-10">
+			<div className="absolute top-2 right-2 z-10">
 				<Button variant="outline" size="sm" onClick={handleForceRefresh}>
 					<RefreshCw className="h-4 w-4 mr-2" />
 					Recargar
@@ -150,23 +164,12 @@ export function FolderContentView() {
 			<FileBrowser
 				items={displayImages}
 				onItemClick={(item) => {
-					// logger.debug('🖱️ Click en item:', item.id); // Comentado
-					// Aquí puedes manejar el clic en un item si es necesario
+					logger.debug('🖱️ Click en item:', item.id);
 				}}
 				onItemDoubleClick={(item) => {
-					// logger.debug('🖱️🖱️ Doble click en item:', item.id); // Comentado
-					// Aquí puedes manejar el doble clic en un item si es necesario
+					logger.debug('🖱️🖱️ Doble click en item:', item.id);
 				}}
-			/> */}
-			<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4 h-full overflow-y-auto">
-				{displayImages.map((image) => (
-					<div key={image.id} className="relative w-full aspect-square bg-gray-200 flex items-center justify-center text-center p-2 rounded-md">
-						<p className="text-sm text-gray-500 break-words line-clamp-2">{image.name}</p>
-						{/* Opcionalmente, puedes añadir una imagen simple para probar */}
-						{/* {image.thumbnail && <img src={image.thumbnail} alt={image.name} className="absolute inset-0 w-full h-full object-cover" />} */}
-					</div>
-				))}
-			</div>
+			/>
 		</div>
 	);
 }

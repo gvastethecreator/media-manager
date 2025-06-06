@@ -20,6 +20,8 @@ import { CardsView } from './views/cards-view';
 import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
+import { EmptyState } from '@/components/core/data-display';
+import { FileText as FileTextIcon } from 'lucide-react';
 
 const gridLogger = new Logger('FileBrowserGrid');
 // const resourceLogger = new Logger('ImageResourceProcessor'); // Comentado
@@ -85,6 +87,24 @@ const FileBrowserComponent = ({
 	onItemDoubleClick,
 	loadMoreItems,
 }: FileBrowserProps) => {
+	// Debug: Mostrar detalles de los items recibidos
+	useEffect(() => {
+		gridLogger.info(`🔍 FileBrowser recibió ${items?.length || 0} items`);
+		if (items && items.length > 0) {
+			const firstItem = items[0];
+			gridLogger.debug('📄 Primer item recibido:', {
+				id: firstItem.id,
+				name: firstItem.name,
+				type: firstItem.type,
+				thumbnail: firstItem.thumbnail ? 'Disponible' : 'No disponible',
+				imageUrl: firstItem.imageUrl,
+				path: firstItem.path
+			});
+		} else {
+			gridLogger.warn('⚠️ FileBrowser: No se recibieron items o el array está vacío');
+		}
+	}, [items]);
+
 	const { selectedItems, toggleSelection, selectItem, clearSelection } = useSelectionStore();
 	const { viewMode, setViewMode } = useFileViewStore();
 	const imageResources = useImageResources();
