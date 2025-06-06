@@ -444,7 +444,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 										fileManagerLogger.info(`✅ Método alternativo: ${rawItems.length} imágenes obtenidas`);
 									}
 								} catch (altError) {
-									fileManagerLogger.error(`❌ Método alternativo también falló:`, altError);
+									fileManagerLogger.error('❌ Método alternativo también falló:', altError);
 								}
 
 								if (rawItems.length === 0) {

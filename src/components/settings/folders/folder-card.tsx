@@ -9,9 +9,8 @@ import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { ExtendedProcessStatus, ProcessPhase } from '@/types/process';
-import { Folder, RefreshCw, Trash2 } from 'lucide-react';
-import { AlertCircle } from 'lucide-react';
+import type { ExtendedProcessStatus } from '@/types/process';
+import { AlertCircle, Folder, RefreshCw, Trash2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { FolderIndexStatusBadge, type IndexStatus } from './folder-index-status-badge';
@@ -240,7 +239,7 @@ export function FolderCard({
 
 								<div className="flex items-center justify-between gap-2 w-full">
 									<Badge variant="secondary" className="text-[10px] px-2 h-4">
-										{folder._count?.images || 0} imágenes
+										{folder.totalFiles || 0} imágenes
 									</Badge>
 									<Badge variant="secondary" className="text-[10px] px-1 h-4">
 										{formatBytes(Number(folder.totalSize || 0))}
