@@ -74,6 +74,23 @@ function transformFolderToExtended(
 	isOpen = false
 ): FolderExtended {
 	try {
+		// Validación de entrada adicional
+		if (!folder || typeof folder !== 'object') {
+			logger.warn('⚠️ Intentando transformar un objeto Folder inválido a Extended:', folder);
+			throw new Error('Invalid folder object');
+		}
+
+		// Asegurarse de que _count esté definido para evitar errores
+		if (!folder._count) {
+			folder._count = {
+				children: 0,
+				images: 0,
+				videos: 0,
+				uploadedImages: 0,
+				tags: 0
+			};
+		}
+
 		// Log para depuración
 		logger.debug('📂 Transformando folder a extendido:', {
 			id: folder.id,

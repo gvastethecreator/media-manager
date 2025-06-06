@@ -57,9 +57,46 @@ export function adaptFolderResponse(folderResponse: FolderResponse | null): Acti
  * @param foldersResponse Respuesta con múltiples carpetas
  * @returns Respuesta en formato estándar
  */
-export function adaptFoldersArray(foldersResponse: FolderResponse[]): ActionResponse<FolderExtended[]> {
+export function adaptFoldersArray(foldersResponse: FolderResponse[] | null | undefined): ActionResponse<FolderExtended[]> {
 	try {
-		const transformedFolders = foldersResponse.map(transformFolderToExtended);
+		// Validación básica para evitar errores
+		if (!foldersResponse || !Array.isArray(foldersResponse)) {
+			adapterLogger.warn('⚠️ Recibiendo datos de carpetas en formato incorrecto:', foldersResponse);
+			return {
+				success: true,
+				message: 'No hay carpetas disponibles',
+				data: [], // Devolver array vacío en lugar de undefined
+			};
+		}
+
+		// Si no hay carpetas, devolver array vacío
+		if (foldersResponse.length === 0) {
+			return {
+				success: true,
+				message: 'No se encontraron carpetas',
+				data: [],
+			};
+		}
+
+		const transformedFolders = foldersResponse.map(folder => {
+			try {
+				return transformFolderToExtended(folder);
+			} catch (folderError) {
+				adapterLogger.error(`❌ Error transformando carpeta individual (ID: ${folder?.id || 'desconocido'}):`, folderError);
+				// Devolver objeto mínimo para esta carpeta
+				return {
+					id: folder?.id || 'error',
+					name: folder?.name || 'Error en carpeta',
+					path: folder?.path || '/',
+					description: '',
+					parentId: null,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					_count: { children: 0, images: 0, videos: 0, uploadedImages: 0, tags: 0 },
+					hasError: true,
+				} as FolderExtended;
+			}
+		});
 
 		return {
 			success: true,
@@ -72,6 +109,7 @@ export function adaptFoldersArray(foldersResponse: FolderResponse[]): ActionResp
 			success: false,
 			message: 'Error al procesar datos de carpetas',
 			errors: error instanceof Error ? error.message : String(error),
+			data: [], // Siempre devolver un array vacío para evitar errores en el cliente
 		};
 	}
 }
