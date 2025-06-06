@@ -5,10 +5,40 @@
 
 import { TransformerError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { WorldItem, WorldItemExtended, WorldItemWithStats } from '@/types/entities/world-item/types';
+import type { WorldItemExtended } from '@/types/entities/world-item/extended';
+import type { WorldItemDeserialized } from '@/types/entities/world-item/types';
 import { extendWorldItem, fromPrismaWorldItem } from './serializers';
 
 const logger = serverLogger.withContext('WorldItemTransformer');
+
+// 📊 Tipo local para WorldItem con estadísticas
+interface WorldItemWithStats extends WorldItemDeserialized {
+	_count?: {
+		images: number;
+		videos: number;
+		collections: number;
+		albums: number;
+		tags: number;
+		characters: number;
+		places: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
+	lastUpdated: Date;
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	tagCount: number;
+	characterCount: number;
+	placeCount: number;
+	rarityLevel: number;
+	statsDisplay: Array<{ name: string; value: number }>;
+	distribution: Array<{ name: string; count: number }>;
+}
 
 /**
  * 🔄 Transforma un objeto a WorldItem, validando su estructura
@@ -16,7 +46,7 @@ const logger = serverLogger.withContext('WorldItemTransformer');
  * @returns WorldItem validado y estructurado
  * @throws TransformerError si la validación falla
  */
-export function transformWorldItem(worldItem: unknown): WorldItem {
+export function transformWorldItem(worldItem: unknown): WorldItemDeserialized {
 	try {
 		if (!worldItem) {
 			throw new Error('El objeto WorldItem es nulo o indefinido');
@@ -31,7 +61,7 @@ export function transformWorldItem(worldItem: unknown): WorldItem {
 		return extendWorldItem(worldItem as any);
 	} catch (error) {
 		logger.error('Error transformando WorldItem:', { error });
-		throw new TransformerError('Error al transformar WorldItem', { cause: error });
+		throw new TransformerError(`Error al transformar WorldItem: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
 
@@ -41,7 +71,7 @@ export function transformWorldItem(worldItem: unknown): WorldItem {
  * @returns Array de WorldItems validados
  * @throws TransformerError si la validación falla para algún elemento
  */
-export function transformWorldItems(worldItems: unknown[]): WorldItem[] {
+export function transformWorldItems(worldItems: unknown[]): WorldItemDeserialized[] {
 	try {
 		if (!Array.isArray(worldItems)) {
 			throw new Error('El parámetro no es un array');
@@ -50,7 +80,7 @@ export function transformWorldItems(worldItems: unknown[]): WorldItem[] {
 		return worldItems.map((item) => transformWorldItem(item));
 	} catch (error) {
 		logger.error('Error transformando lista de WorldItems:', { error });
-		throw new TransformerError('Error al transformar lista de WorldItems', { cause: error });
+		throw new TransformerError(`Error al transformar lista de WorldItems: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
 
@@ -59,32 +89,81 @@ export function transformWorldItems(worldItems: unknown[]): WorldItem[] {
  * @param worldItem WorldItem base a extender
  * @returns WorldItem extendido con propiedades adicionales
  */
-export function transformWorldItemToExtended(worldItem: WorldItem): WorldItemExtended {
+export function transformWorldItemToExtended(worldItem: WorldItemDeserialized): WorldItemExtended {
 	try {
+		// 🛡️ Validación mejorada de entrada
+		if (!worldItem) {
+			throw new Error('El WorldItem de entrada es nulo o indefinido');
+		}
+
+		// 🛡️ Verificar que worldItem es un objeto válido
+		if (typeof worldItem !== 'object' || !worldItem.id) {
+			throw new Error('El WorldItem debe ser un objeto válido con un ID');
+		}
+
 		const baseItem = transformWorldItem(worldItem);
 
-		// Extender el WorldItem con propiedades para UI
-		return {
-			...baseItem,
-			isSelected: false,
-			isHighlighted: false,
-			isEditing: false,
-			isExpanded: false,
-			displayOrder: 0,
-			// Propiedades calculadas para UI
-			attributesArray:
-				typeof baseItem.attributes === 'string' ? JSON.parse(baseItem.attributes || '[]') : baseItem.attributes || [],
-			effectsArray:
-				typeof baseItem.effects === 'string' ? JSON.parse(baseItem.effects || '[]') : baseItem.effects || [],
-			requirementsArray:
-				typeof baseItem.requirements === 'string'
-					? JSON.parse(baseItem.requirements || '[]')
-					: baseItem.requirements || [],
-			statsObject: typeof baseItem.stats === 'string' ? JSON.parse(baseItem.stats || '{}') : baseItem.stats || {},
+		// 🛡️ Helper para parsear JSON de forma segura
+		const safeJsonParse = <T>(jsonString: string | T | null | undefined, fallback: T): T => {
+			// Si ya es el tipo esperado, devolverlo directamente
+			if (typeof jsonString !== 'string') {
+				return jsonString || fallback;
+			}
+
+			// Si es string vacío o null, usar fallback
+			if (!jsonString || jsonString.trim() === '') {
+				return fallback;
+			}
+
+			// Valores especiales conocidos
+			if (jsonString === 'empty_array') return [] as unknown as T;
+			if (jsonString === 'empty_object') return {} as unknown as T;
+			if (jsonString === '[]') return [] as unknown as T;
+			if (jsonString === '{}') return {} as unknown as T;
+
+			try {
+				const parsed = JSON.parse(jsonString);
+				return parsed || fallback;
+			} catch (error) {
+				logger.warn('Error parseando JSON en transformWorldItemToExtended, usando fallback:', {
+					worldItemId: baseItem.id,
+					jsonString: jsonString.substring(0, 100) + (jsonString.length > 100 ? '...' : ''),
+					error: error instanceof Error ? error.message : String(error)
+				});
+				return fallback;
+			}
 		};
+
+		// Extender el WorldItem con propiedades para UI usando parseo seguro
+		const extendedItem: WorldItemExtended = {
+			...baseItem,
+			// Propiedades de UI básicas
+			isSelected: false,
+			isExpanded: false,
+			isEditing: false,
+			// Propiedades calculadas para UI con parseo seguro
+			stats: safeJsonParse(baseItem.stats, {}),
+			attributes: safeJsonParse(baseItem.attributes, []),
+			effects: safeJsonParse(baseItem.effects, []),
+			properties: safeJsonParse(baseItem.properties, []),
+			requirements: safeJsonParse(baseItem.requirements, {}),
+			filters: safeJsonParse(baseItem.filters, {}),
+		};
+
+		logger.debug('✅ WorldItem transformado a versión extendida exitosamente:', {
+			worldItemId: baseItem.id,
+			attributesCount: extendedItem.attributes?.length || 0,
+			effectsCount: extendedItem.effects?.length || 0,
+		});
+
+		return extendedItem;
 	} catch (error) {
-		logger.error('Error transformando WorldItem a versión extendida:', { error, worldItemId: (worldItem as any)?.id });
-		throw new TransformerError('Error al transformar WorldItem a versión extendida', { cause: error });
+		logger.error('Error transformando WorldItem a versión extendida:', {
+			error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
+			worldItemId: (worldItem as any)?.id,
+			worldItemType: typeof worldItem
+		});
+		throw new TransformerError(`Error al transformar WorldItem a versión extendida: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
 
@@ -93,12 +172,12 @@ export function transformWorldItemToExtended(worldItem: WorldItem): WorldItemExt
  * @param worldItem WorldItem base
  * @returns WorldItem con estadísticas calculadas
  */
-export function transformWorldItemToWithStats(worldItem: WorldItem): WorldItemWithStats {
+export function transformWorldItemToWithStats(worldItem: any): WorldItemWithStats {
 	try {
 		const baseItem = transformWorldItem(worldItem);
 
-		// Calcular totales para las estadísticas
-		const counts = baseItem._count || {
+		// Calcular totales para las estadísticas - usar casting a any para acceder a _count
+		const counts = (baseItem as any)._count || {
 			images: 0,
 			videos: 0,
 			collections: 0,
@@ -144,7 +223,7 @@ export function transformWorldItemToWithStats(worldItem: WorldItem): WorldItemWi
 			error,
 			worldItemId: (worldItem as any)?.id,
 		});
-		throw new TransformerError('Error al transformar WorldItem a versión con estadísticas', { cause: error });
+		throw new TransformerError(`Error al transformar WorldItem a versión con estadísticas: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
 
@@ -177,7 +256,7 @@ function calculateRarityLevel(rarity: string): number {
  * Genera presentación de estadísticas del item para visualización
  * @private
  */
-function generateStatsDisplay(worldItem: WorldItem): Array<{ name: string; value: number }> {
+function generateStatsDisplay(worldItem: WorldItemDeserialized): Array<{ name: string; value: number }> {
 	try {
 		// Si ya tenemos stats como objeto, usar eso directamente
 		const stats = typeof worldItem.stats === 'string' ? JSON.parse(worldItem.stats || '{}') : worldItem.stats || {};

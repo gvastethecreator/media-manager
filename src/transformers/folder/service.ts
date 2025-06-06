@@ -31,7 +31,6 @@ export async function getFolderById(id: string): Promise<FolderComplete | null> 
 		const folder = await prisma.folder.findUnique({
 			where: { id },
 			include: {
-				children: true,
 				parent: true,
 				_count: {
 					select: {

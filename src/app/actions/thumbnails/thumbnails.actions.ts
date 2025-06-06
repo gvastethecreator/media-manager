@@ -1,6 +1,5 @@
 'use server';
 
-import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
@@ -8,11 +7,12 @@ import { generateThumbnail } from '@/lib/thumbnail';
 import type { ProcessOptions } from '@/services/thumbnail-service-export';
 import { thumbnailService } from '@/services/thumbnail-service-export';
 import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
+import { existsSync } from 'fs';
 
 const thumbLogger = serverLogger.withContext('ThumbnailActions');
 
 export interface ThumbnailResponse {
-	thumbnail: string;
+	thumbnailUrl?: string;
 	width?: number;
 	height?: number;
 	size?: number;
@@ -37,7 +37,7 @@ export async function getThumbnail(
 			const error = 'ID no proporcionado o inválido';
 			thumbLogger.error(`❌ ${error}`);
 			return {
-				thumbnail: '',
+				thumbnailUrl: '',
 				error,
 			};
 		}
@@ -61,7 +61,7 @@ export async function getThumbnail(
 			const error = `Imagen no encontrada: ${id}`;
 			thumbLogger.error(`❌ ${error}`);
 			return {
-				thumbnail: '',
+				thumbnailUrl: '',
 				error,
 			};
 		}
@@ -76,17 +76,19 @@ export async function getThumbnail(
 
 		// Si ya tiene thumbnail, devolverlo
 		if (image.thumbnail) {
-			const base64Thumbnail = Buffer.from(image.thumbnail).toString('base64');
+			// No devolver la base64, sino la URL de la API
+			const thumbnailUrl = `/api/images/${image.id}/thumbnail`;
 
-			thumbLogger.info('✅ Thumbnail encontrado en caché:', {
+			thumbLogger.info('✅ Thumbnail encontrado en caché (servido por API):', {
 				id,
 				size: image.thumbnailSize,
 				width: image.thumbnailWidth,
 				height: image.thumbnailHeight,
+				url: thumbnailUrl,
 			});
 
 			return {
-				thumbnail: base64Thumbnail,
+				thumbnailUrl,
 				width: image.thumbnailWidth || undefined,
 				height: image.thumbnailHeight || undefined,
 				size: image.thumbnailSize || undefined,
@@ -106,7 +108,7 @@ export async function getThumbnail(
 			});
 			thumbLogger.error(`❌ ${error}`);
 			return {
-				thumbnail: '',
+				thumbnailUrl: '',
 				error,
 			};
 		}
@@ -121,9 +123,6 @@ export async function getThumbnail(
 				throw new Error('No se pudo generar el thumbnail');
 			}
 
-			// Convertir el buffer a base64
-			const base64Thumbnail = Buffer.from(thumbnail.buffer).toString('base64');
-
 			// Actualizar la imagen con el nuevo thumbnail
 			await prisma.image.update({
 				where: { id },
@@ -136,7 +135,7 @@ export async function getThumbnail(
 				},
 			});
 
-			thumbLogger.info('✅ Nuevo thumbnail generado:', {
+			thumbLogger.info('✅ Nuevo thumbnail generado (servido por API):', {
 				id,
 				size: thumbnail.buffer.length,
 				width: thumbnail.width,
@@ -144,7 +143,7 @@ export async function getThumbnail(
 			});
 
 			return {
-				thumbnail: base64Thumbnail,
+				thumbnailUrl: `/api/images/${id}/thumbnail`,
 				width: thumbnail.width,
 				height: thumbnail.height,
 				size: thumbnail.buffer.length,
@@ -162,7 +161,7 @@ export async function getThumbnail(
 
 			thumbLogger.error('❌ Error generando thumbnail:', genError);
 			return {
-				thumbnail: '',
+				thumbnailUrl: '',
 				error: errorMessage,
 			};
 		}
@@ -170,7 +169,7 @@ export async function getThumbnail(
 		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 		thumbLogger.error('❌ Error obteniendo thumbnail:', { error: errorMessage, id });
 		return {
-			thumbnail: '',
+			thumbnailUrl: '',
 			error: errorMessage,
 		};
 	}

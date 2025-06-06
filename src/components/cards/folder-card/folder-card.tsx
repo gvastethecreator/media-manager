@@ -2,18 +2,17 @@
 
 import { cn } from '@/lib/utils';
 import type { Folder } from '@/types/entities/folder';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';
 import { FolderCardImages } from './folder-card-images';
-import { getRecentFolderImages } from './folder-server-actions';
 
 // Tipo extendido para asegurar que tenemos los datos necesarios
 // Podrías necesitar ajustar este tipo basado en lo que realmente usa FolderCard y sus hijos
 type FolderCardData = Folder & {
 	imageCount?: number; // O _count?.images
-	recentImageUrls?: string[];
+	// recentImageUrls?: string[]; // ❌ Eliminado temporalmente para optimización
 	featuredImage?: string | null;
 	totalFiles?: number;
 	totalSize?: number;
@@ -51,23 +50,23 @@ export const FolderCard = memo(function FolderCard({
 		return null;
 	}
 
-	// 🖼️ Estado para thumbnails dinámicos
-	const [recentImages, setRecentImages] = useState<string[]>([]);
+	// 🖼️ Estado para thumbnails dinámicos - ❌ ELIMINADO TEMPORALMENTE
+	// const [recentImages, setRecentImages] = useState<string[]>([]);
 
-	// 🔄 Cargar imágenes al montar
-	useEffect(() => {
-		async function loadImages() {
-			try {
-				const fetchedImages = await getRecentFolderImages(folder.id, 4);
-				const imageUrls = fetchedImages.map((img) => img.thumbnailUrl).filter(Boolean);
-				setRecentImages(imageUrls);
-			} catch (error) {
-				console.error('Error loading folder images:', error);
-				setRecentImages([]);
-			}
-		}
-		loadImages();
-	}, [folder.id]);
+	// 🔄 Cargar imágenes al montar - ❌ ELIMINADO TEMPORALMENTE
+	// useEffect(() => {
+	// 	async function loadImages() {
+	// 		try {
+	// 			const fetchedImages = await getRecentFolderImages(folder.id, 4);
+	// 			const imageUrls = fetchedImages.map((img) => img.thumbnailUrl).filter(Boolean);
+	// 			setRecentImages(imageUrls);
+	// 		} catch (error) {
+	// 			console.error('Error loading folder images:', error);
+	// 			setRecentImages([]);
+	// 		}
+	// 	}
+	// 	loadImages();
+	// }, [folder.id]);
 
 	// Preparar datos con fallbacks
 	const folderData = useMemo(() => {
@@ -81,14 +80,16 @@ export const FolderCard = memo(function FolderCard({
 			_count: {
 				...(folder._count || {}),
 				images: imageCount,
-			}, // Asegurar valores por defecto para otros campos
+			},
+			// Asegurar valores por defecto para otros campos
 			totalFiles: folder.totalFiles ?? imageCount ?? 0,
 			totalSize: folder.totalSize ?? 0,
-			recentImageUrls: recentImages, // 🖼️ Usar imágenes cargadas dinámicamente
+			// recentImageUrls: recentImages, // 🖼️ Usar imágenes cargadas dinámicamente - ❌ ELIMINADO TEMPORALMENTE
+			recentImageUrls: [], // Asignar un array vacío temporalmente
 			childrenCount: 0,
 			lastIndexed: folder.lastIndexed || null,
 		};
-	}, [folder, recentImages]); // 🔄 Incluir recentImages en dependencias
+	}, [folder]); // 🔄 Removido recentImages de dependencias
 
 	// Colores para personalización
 	const primaryColor = useMemo(() => folderData.color || '#3b82f6', [folderData.color]);
@@ -116,8 +117,8 @@ export const FolderCard = memo(function FolderCard({
 			style={
 				tcgMode
 					? {
-							boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
-						}
+						boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
+					}
 					: {}
 			}
 		>

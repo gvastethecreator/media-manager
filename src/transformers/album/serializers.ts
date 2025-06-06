@@ -5,10 +5,10 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	type AlbumComplete,
-	type AlbumCreateInput,
-	AlbumSchema,
-	type AlbumUpdateInput,
+    type AlbumComplete,
+    type AlbumCreateInput,
+    AlbumSchema,
+    type AlbumUpdateInput,
 } from '@/types/entities/album/types';
 import { validateFieldType, validateRequiredFields } from '@/utils/transformers/common';
 import { handleTransformerError } from '@/utils/transformers/errors';
@@ -84,24 +84,35 @@ export function fromPrismaAlbum(
 	>
 ): AlbumComplete {
 	try {
-		// 🔍 Validación exhaustiva de entrada
+		// 🔍 Validación exhaustiva de entrada - MEJORADA
 		if (!prismaAlbum) {
 			logger.error('❌ fromPrismaAlbum: Received null or undefined prismaAlbum');
 			throw new Error('Album data is null or undefined');
 		}
 
+		// 🛡️ Verificar que prismaAlbum es un objeto válido
+		if (typeof prismaAlbum !== 'object') {
+			logger.error('❌ fromPrismaAlbum: Invalid data type for prismaAlbum', {
+				actualType: typeof prismaAlbum,
+				value: prismaAlbum
+			});
+			throw new Error(`Expected object, received ${typeof prismaAlbum}`);
+		}
+
+		// 🔍 Validar ID requerido
 		if (!prismaAlbum.id) {
 			logger.error('❌ fromPrismaAlbum: Missing required id field', { prismaAlbum });
 			throw new Error('Album ID is required but missing');
 		}
 
-		if (!prismaAlbum.name || typeof prismaAlbum.name !== 'string') {
+		// 🔍 Validar nombre requerido con mejor manejo
+		if (!prismaAlbum.name || typeof prismaAlbum.name !== 'string' || prismaAlbum.name.trim() === '') {
 			logger.error('❌ fromPrismaAlbum: Invalid or missing name field', {
 				albumId: prismaAlbum.id,
 				name: prismaAlbum.name,
 				nameType: typeof prismaAlbum.name,
 			});
-			throw new Error(`Album name is invalid: ${typeof prismaAlbum.name}`);
+			throw new Error(`Album name is invalid: expected non-empty string, got ${typeof prismaAlbum.name}`);
 		}
 
 		// 🛡️ Validar tipos de datos críticos para evitar errores de transformación
@@ -119,21 +130,32 @@ export function fromPrismaAlbum(
 			});
 		}
 
-		// 📊 Usar conteos directamente de Prisma con validación
-		const counts = prismaAlbum._count || {
-			images: 0,
-			videos: 0,
-			collections: 0,
-			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			concepts: 0,
-			prompts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
+		// 📊 Manejar conteos de Prisma de forma segura
+		const countsData = prismaAlbum._count || {};
+
+		// 🛡️ Helper function para obtener un conteo seguro
+		const getSafeCount = (value: unknown): number => {
+			if (typeof value === 'number' && Number.isInteger(value) && value >= 0) {
+				return value;
+			}
+			return 0;
+		};
+
+		// 🛡️ Garantizar estructura de conteos con fallbacks seguros
+		const safeCounts = {
+			images: getSafeCount((countsData as any)?.images),
+			videos: getSafeCount((countsData as any)?.videos),
+			collections: getSafeCount((countsData as any)?.collections),
+			tags: getSafeCount((countsData as any)?.tags),
+			characters: getSafeCount((countsData as any)?.characters),
+			places: getSafeCount((countsData as any)?.places),
+			worldItems: getSafeCount((countsData as any)?.worldItems),
+			concepts: getSafeCount((countsData as any)?.concepts),
+			prompts: getSafeCount((countsData as any)?.prompts),
+			notes: getSafeCount((countsData as any)?.notes),
+			wildcards: getSafeCount((countsData as any)?.wildcards),
+			properties: getSafeCount((countsData as any)?.properties),
+			groups: getSafeCount((countsData as any)?.groups),
 		};
 
 		// 🛡️ Funciones helper para validar y limpiar fechas
@@ -157,25 +179,70 @@ export function fromPrismaAlbum(
 			return fallback;
 		};
 
-		// 🛡️ Helper para validar relaciones y evitar errores de transformación
+		// 🛡️ Helper para validar relaciones y evitar errores de transformación - MEJORADO
 		const safeMapRelation = <T extends { id: any }>(
 			relationArray: T[] | null | undefined,
 			relationName: string
 		): { id: any }[] => {
-			if (!relationArray) return [];
+			// 🔍 Verificar si la relación existe y es válida
+			if (!relationArray) {
+				logger.debug(`⚠️ fromPrismaAlbum: ${relationName} is null/undefined, using empty array`, {
+					albumId: prismaAlbum.id,
+					relationName,
+				});
+				return [];
+			}
 
 			if (!Array.isArray(relationArray)) {
 				logger.warn(`⚠️ fromPrismaAlbum: ${relationName} is not an array, using empty array`, {
 					albumId: prismaAlbum.id,
 					relationName,
 					actualType: typeof relationArray,
+					value: relationArray,
 				});
 				return [];
 			}
 
-			return relationArray
-				.filter((item) => item?.id) // 🔍 Filtrar elementos inválidos usando optional chaining
-				.map((item) => ({ id: item.id }));
+			// 🔍 Filtrar y mapear elementos válidos con mejor validación
+			try {
+				const validItems = relationArray
+					.filter((item) => {
+						if (!item || typeof item !== 'object') {
+							logger.debug(`⚠️ fromPrismaAlbum: Invalid item in ${relationName}, skipping`, {
+								albumId: prismaAlbum.id,
+								relationName,
+								item,
+							});
+							return false;
+						}
+						if (!item.id) {
+							logger.debug(`⚠️ fromPrismaAlbum: Item missing id in ${relationName}, skipping`, {
+								albumId: prismaAlbum.id,
+								relationName,
+								item,
+							});
+							return false;
+						}
+						return true;
+					})
+					.map((item) => ({ id: item.id }));
+
+				logger.debug(`✅ fromPrismaAlbum: Successfully mapped ${relationName}`, {
+					albumId: prismaAlbum.id,
+					relationName,
+					originalCount: relationArray.length,
+					validCount: validItems.length,
+				});
+
+				return validItems;
+			} catch (error) {
+				logger.error(`❌ fromPrismaAlbum: Error mapping ${relationName}, using empty array`, {
+					albumId: prismaAlbum.id,
+					relationName,
+					error: error instanceof Error ? error.message : String(error),
+				});
+				return [];
+			}
 		};
 
 		// 🏗️ Construir objeto base con validación exhaustiva
@@ -216,7 +283,7 @@ export function fromPrismaAlbum(
 			wildcards: safeMapRelation(prismaAlbum.wildcards, 'wildcards'),
 			properties: safeMapRelation(prismaAlbum.properties, 'properties'),
 			groups: safeMapRelation(prismaAlbum.groups, 'groups'),
-			_count: counts,
+			_count: safeCounts,
 		};
 
 		// 📝 Log exitoso para debugging
