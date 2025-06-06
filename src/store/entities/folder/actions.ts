@@ -33,8 +33,20 @@ export async function fetchFolders() {
 	try {
 		actionsLogger.info('🔍 Obteniendo todas las carpetas');
 		const foldersData = await getFoldersAction({}); // Usar searchFolders sin filtros
+
+		// Validar que tenemos un array de carpetas
+		if (!Array.isArray(foldersData)) {
+			actionsLogger.warn('⚠️ La respuesta de getFolders no es un array:', foldersData);
+			return {
+				success: true,
+				message: 'No hay carpetas disponibles',
+				data: [],
+			};
+		}
+
 		return adaptFoldersArray(foldersData);
 	} catch (error) {
+		actionsLogger.error('❌ Error en fetchFolders:', error);
 		return handleFolderActionError(error);
 	}
 }

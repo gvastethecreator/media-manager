@@ -26,22 +26,22 @@ export function useFolderImages(folderId: string | null) {
 			}
 
 			// logger.info(`🔄 Obteniendo imágenes para carpeta: ${folderId}`);
-			const images = await getFolderImages(folderId);
-			// logger.info(`✅ Obtenidas ${images.length} imágenes para carpeta ${folderId}`);
+				const images = await getFolderImages(folderId);
+				// logger.info(`✅ Obtenidas ${images.length} imágenes para carpeta ${folderId}`);
 
-			if (images.length > 0) {
-				// Mostrar información de la primera imagen para depuración
-				// const firstImage = images[0];
-				// logger.debug('📄 Primera imagen recibida:', {
-				// 	id: images[0].id,
-				// 	name: images[0].name,
-				// 	thumbnail: images[0].thumbnail ? 'Disponible' : 'No disponible',
-				// });
-			} else {
-				// logger.debug('📄 No se recibieron imágenes');
-			}
+				if (images.length > 0) {
+					// Mostrar información de la primera imagen para depuración
+					// const firstImage = images[0];
+					// logger.debug('📄 Primera imagen recibida:', {
+					// 	id: images[0].id,
+					// 	name: images[0].name,
+					// 	thumbnail: images[0].thumbnail ? 'Disponible' : 'No disponible',
+					// });
+				} else {
+					// logger.debug('📄 No se recibieron imágenes');
+				}
 
-			return images;
+				return images;
 		},
 		enabled: !!folderId, // Solo ejecutar si hay un folderId
 		staleTime: 30 * 1000, // Considerar datos frescos por 30 segundos

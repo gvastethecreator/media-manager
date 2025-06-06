@@ -1,3 +1,5 @@
+'use server';
+
 /**
  * @file Funciones de servicio para la entidad Folder
  * @module transformers/folder/service
@@ -36,8 +38,7 @@ export async function getFolderById(id: string): Promise<FolderComplete | null> 
 					select: {
 						children: true,
 						images: true,
-						uploadedImages: true,
-						tags: true,
+						videos: true,
 					},
 				},
 			},
@@ -76,8 +77,7 @@ export async function getFolderWithStats(id: string): Promise<FolderWithStats | 
 					select: {
 						children: true,
 						images: true,
-						uploadedImages: true,
-						tags: true,
+						videos: true,
 					},
 				},
 			},
@@ -102,11 +102,7 @@ export async function getFolderWithStats(id: string): Promise<FolderWithStats | 
  * @param options Opciones de búsqueda
  * @returns Resultado con carpetas y conteo
  */
-export async function searchFolders(options: FolderSearchOptions = {}): Promise<{
-	items: FolderComplete[];
-	total: number;
-	hasMore: boolean;
-}> {
+export async function searchFolders(options: FolderSearchOptions = {}): Promise<FolderComplete[]> {
 	try {
 		logger.info('🔍 Buscando carpetas con opciones:', options);
 
@@ -123,8 +119,7 @@ export async function searchFolders(options: FolderSearchOptions = {}): Promise<
 						select: {
 							children: true,
 							images: true,
-							uploadedImages: true,
-							tags: true,
+							videos: true,
 						},
 					},
 				},
@@ -132,8 +127,39 @@ export async function searchFolders(options: FolderSearchOptions = {}): Promise<
 			prisma.folder.count({ where: prismaOptions.where }),
 		]);
 
-		// Transformar resultados
-		const transformedFolders = folders.map((folder) => transformFolder(folder));
+		// Transformar resultados de forma segura
+		const transformedFolders = folders.map(folder => {
+			try {
+				return transformFolder(folder);
+			} catch (error) {
+				// En caso de error al transformar, devolver una versión básica pero válida
+				logger.warn(`⚠️ Error transformando carpeta ${folder.id}:`, error);
+				return {
+					id: folder.id,
+					name: folder.name || 'Carpeta sin nombre',
+					path: folder.path || '/',
+					description: folder.description || '',
+					emoji: folder.emoji || '📁',
+					color: folder.color || '#3b82f6',
+					parentId: folder.parentId,
+					createdAt: folder.createdAt,
+					updatedAt: folder.updatedAt,
+					children: [],
+					parent: null,
+					_count: {
+						children: folder._count?.children || 0,
+						images: folder._count?.images || 0,
+						videos: folder._count?.videos || 0,
+						uploadedImages: 0,
+						tags: 0,
+					},
+					totalFiles: folder.totalFiles || 0,
+					totalSize: folder.totalSize || 0,
+					metadata: {},
+					stats: null,
+				} as FolderComplete;
+			}
+		});
 
 		// Calcular si hay más resultados
 		const skip = options.skip || 0;
@@ -142,11 +168,7 @@ export async function searchFolders(options: FolderSearchOptions = {}): Promise<
 
 		logger.info(`✅ Búsqueda completada, encontradas ${transformedFolders.length} carpetas`);
 
-		return {
-			items: transformedFolders,
-			total,
-			hasMore,
-		};
+		return transformedFolders;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
 		logger.error('❌ Error al buscar carpetas:', {
@@ -154,7 +176,8 @@ export async function searchFolders(options: FolderSearchOptions = {}): Promise<
 			stack: error instanceof Error ? error.stack : undefined,
 			options,
 		});
-		throw new Error(`Error al buscar carpetas: ${errorMessage}`);
+		// En caso de error, devolver un array vacío para evitar errores en cascada
+		return [];
 	}
 }
 
@@ -179,8 +202,7 @@ export async function createFolder(data: FolderCreateInput): Promise<FolderCompl
 					select: {
 						children: true,
 						images: true,
-						uploadedImages: true,
-						tags: true,
+						videos: true,
 					},
 				},
 			},
@@ -228,8 +250,7 @@ export async function updateFolder(id: string, data: FolderUpdateInput): Promise
 					select: {
 						children: true,
 						images: true,
-						uploadedImages: true,
-						tags: true,
+						videos: true,
 					},
 				},
 			},
