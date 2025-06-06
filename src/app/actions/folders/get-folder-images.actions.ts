@@ -77,84 +77,107 @@ export async function getFolderImages(folderId: string): Promise<FileItem[]> {
 				id: firstImage.id,
 				name: firstImage.name,
 				path: firstImage.path,
-				hasThumbnail: !!firstImage.thumbnail,
+				hasThumbnail: !!firstImage.thumbnailSize,
 				size: firstImage.size,
 				dimensions: `${firstImage.width}x${firstImage.height}`,
-				tagsCount: firstImage.tags.length,
 			});
 		} else {
 			logger.debug('📄 No se encontraron imágenes en la carpeta');
+			return [];
 		}
 
 		// Transformar a FileItem
-		const fileItems = await Promise.all(
-			images.map(async (image) => {
-				// Asegurarse de que el thumbnail tenga la ruta correcta
-				let thumbnailUrl = null;
+		const fileItems = images.map((image) => {
+			// Construir las URL necesarias
+			const thumbnailUrl = `/api/images/${image.id}/thumbnail`;
+			const contentUrl = `/api/images/${image.id}/content`;
 
-				// Si no hay thumbnail en la base de datos, intentar generarlo ahora
-				if (!image.thumbnail) {
-					logger.debug(`⚠️ Imagen ${image.id} no tiene thumbnail, generando URL directa`);
-					thumbnailUrl = `/api/images/${image.id}/thumbnail`;
-				} else {
-					// Si hay thumbnail, usar la URL directa
-					thumbnailUrl = `/api/images/${image.id}/thumbnail`;
-					logger.debug(`✅ Imagen ${image.id} tiene thumbnail, usando URL: ${thumbnailUrl}`);
-				}
+			// Obtener el nombre del archivo si no está disponible
+			const name = image.name || path.basename(image.path || 'sin-nombre');
 
-				// Obtener el nombre del archivo si no está disponible
-				const name = image.name || path.basename(image.path || 'sin-nombre');
+			// Crear el objeto FileItem con todas las propiedades necesarias
+			const fileItem: FileItem = {
+				id: image.id as EntityId,
+				name,
+				path: image.path || '',
+				type: 'image' as FileType,
+				mimeType: 'image/jpeg', // Valor por defecto
+				processingStatus: 'completed' as FileProcessingStatus,
+				size: image.size || 0,
+				width: image.width || 0,
+				height: image.height || 0,
+				metadata: {} as JSONString<MediaMetadata>, // Objeto vacío ya que metadata está excluido
+				thumbnail: thumbnailUrl,
+				thumbnailSize: image.thumbnailSize || 0,
+				thumbnailWidth: image.thumbnailWidth || 0,
+				thumbnailHeight: image.thumbnailHeight || 0,
+				createdAt: image.createdAt,
+				updatedAt: image.updatedAt,
+				tags: [], // Array vacío ya que tags está excluido
+				imageUrl: contentUrl, // URL directa a la imagen
+				// Propiedades adicionales para FileBrowserItem
+				src: contentUrl, // Alias de imageUrl para compatibilidad con FileBrowser
+				url: contentUrl, // Otro alias usado en algunos componentes
+				alt: name, // Texto alternativo para la imagen
+			};
 
-				return {
-					id: image.id as EntityId,
-					name,
-					path: image.path || '',
-					type: 'image' as FileType,
-					mimeType: 'image/jpeg', // Valor por defecto
-					processingStatus: 'completed' as FileProcessingStatus,
-					size: image.size || 0,
-					width: image.width || 0,
-					height: image.height || 0,
-					metadata: (image.metadata || '{}') as JSONString<MediaMetadata>, // Se mantiene por tipo, pero se esperará undefined si se excluye en select
-					thumbnail: thumbnailUrl,
-					thumbnailSize: image.thumbnailSize || 0,
-					thumbnailWidth: image.thumbnailWidth || 0,
-					thumbnailHeight: image.thumbnailHeight || 0,
-					createdAt: image.createdAt,
-					updatedAt: image.updatedAt,
-					tags: (image.tags || []).map((tag: any) => ({
-						id: tag.id,
-						name: tag.name,
-						color: tag.color || '#000000',
-					})), // Se mantiene por tipo, se espera array vacío si se excluye en select
-				};
-			})
-		);
+			return fileItem;
+		});
 
 		// Verificar que todas las transformaciones fueron exitosas
 		logger.info(`✅ Transformadas ${fileItems.length} imágenes a FileItem`);
 
-		if (fileItems.length > 0) {
+		// Validar que cada FileItem tenga las propiedades necesarias para el FileBrowser
+		const validItems = fileItems.filter(item => {
+			const hasRequiredProps =
+				!!item.id &&
+				!!item.name &&
+				!!item.thumbnail &&
+				!!item.imageUrl &&
+				!!item.src;
+
+			if (!hasRequiredProps) {
+				logger.warn(`⚠️ Imagen ${item.id} no tiene todas las propiedades requeridas:`, {
+					id: !!item.id,
+					name: !!item.name,
+					thumbnail: !!item.thumbnail,
+					imageUrl: !!item.imageUrl,
+					src: !!item.src
+				});
+			}
+
+			return hasRequiredProps;
+		});
+
+		logger.info(`✅ Validación completada: ${validItems.length}/${fileItems.length} imágenes válidas`);
+
+		if (validItems.length > 0) {
 			// Mostrar información del primer FileItem para depuración
-			const firstItem = fileItems[0];
+			const firstItem = validItems[0];
 			logger.debug('📄 Primer FileItem transformado:', {
 				id: firstItem.id,
 				name: firstItem.name,
-				thumbnail: firstItem.thumbnail ? 'Disponible' : 'No disponible',
-				thumbnailUrl: firstItem.thumbnail,
+				thumbnail: firstItem.thumbnail,
+				imageUrl: firstItem.imageUrl,
+				src: firstItem.src,
+				propiedades: Object.keys(firstItem).join(', ')
+			});
+		} else if (fileItems.length > 0) {
+			// Si hay items pero ninguno es válido, mostrar el primer item con problemas
+			const problemItem = fileItems[0];
+			logger.error('❌ Ningún item válido. Ejemplo de item con problemas:', {
+				id: problemItem.id,
+				name: problemItem.name,
+				thumbnail: problemItem.thumbnail,
+				imageUrl: problemItem.imageUrl,
+				src: problemItem.src,
+				propiedades: Object.keys(problemItem).join(', ')
 			});
 		}
 
-		return fileItems;
+		return validItems;
 	} catch (error) {
-		logger.error(`❌ Error al obtener imágenes de la carpeta ${folderId}:`, error);
-		// Registrar más detalles sobre el error
-		if (error instanceof Error) {
-			logger.error(`Detalles del error: ${error.name} - ${error.message}`);
-			if (error.stack) {
-				logger.error(`Stack trace: ${error.stack}`);
-			}
-		}
+		logger.error('❌ Error al obtener imágenes de la carpeta:', error);
 		return [];
 	}
 }
