@@ -14,37 +14,34 @@ const FOLDER_IMAGES_KEY = 'folder-images';
 export function useFolderImages(folderId: string | null) {
 	// Registrar cuando se llama al hook con un nuevo folderId
 	useEffect(() => {
-		logger.debug(`🔄 Hook llamado con folderId: ${folderId || 'null'}`);
-	}, [folderId]);
+		// logger.debug(`🔄 Hook llamado con folderId: ${folderId || 'null'}`);
+	}, []);
 
 	const query = useQuery({
 		queryKey: [FOLDER_IMAGES_KEY, folderId],
 		queryFn: async () => {
 			if (!folderId) {
-				logger.debug('⚠️ folderId es nulo, devolviendo array vacío');
+				// logger.debug('⚠️ folderId es nulo, devolviendo array vacío');
 				return Promise.resolve([]);
 			}
 
-			logger.info(`🔄 Obteniendo imágenes para carpeta: ${folderId}`);
-			try {
-				const images = await getFolderImages(folderId);
-				logger.info(`✅ Obtenidas ${images.length} imágenes para carpeta ${folderId}`);
+			// logger.info(`🔄 Obteniendo imágenes para carpeta: ${folderId}`);
+			const images = await getFolderImages(folderId);
+			// logger.info(`✅ Obtenidas ${images.length} imágenes para carpeta ${folderId}`);
 
-				if (images.length > 0) {
-					logger.debug('📄 Primera imagen recibida:', {
-						id: images[0].id,
-						name: images[0].name,
-						thumbnail: images[0].thumbnail ? 'Disponible' : 'No disponible',
-					});
-				} else {
-					logger.debug('📄 No se recibieron imágenes');
-				}
-
-				return images;
-			} catch (error) {
-				logger.error(`❌ Error obteniendo imágenes para carpeta ${folderId}:`, error);
-				throw error;
+			if (images.length > 0) {
+				// Mostrar información de la primera imagen para depuración
+				// const firstImage = images[0];
+				// logger.debug('📄 Primera imagen recibida:', {
+				// 	id: images[0].id,
+				// 	name: images[0].name,
+				// 	thumbnail: images[0].thumbnail ? 'Disponible' : 'No disponible',
+				// });
+			} else {
+				// logger.debug('📄 No se recibieron imágenes');
 			}
+
+			return images;
 		},
 		enabled: !!folderId, // Solo ejecutar si hay un folderId
 		staleTime: 30 * 1000, // Considerar datos frescos por 30 segundos
@@ -56,14 +53,14 @@ export function useFolderImages(folderId: string | null) {
 	// Registrar cambios en el estado del query
 	useEffect(() => {
 		if (query.isLoading) {
-			logger.debug(`⏳ Cargando imágenes para carpeta: ${folderId || 'null'}`);
+			// logger.debug(`⏳ Cargando imágenes para carpeta: ${folderId || 'null'}`);
 		} else if (query.isError) {
-			logger.error(`❌ Error en query para carpeta ${folderId}:`, query.error);
+			// logger.error(`❌ Error en query para carpeta ${folderId}:`, query.error); // Comentado
 		} else if (query.isSuccess) {
-			const imageCount = query.data?.length || 0;
-			logger.debug(`✅ Query exitoso para carpeta ${folderId}: ${imageCount} imágenes`);
+			// const imageCount = query.data?.length || 0;
+			// logger.debug(`✅ Query exitoso para carpeta ${folderId}: ${imageCount} imágenes`);
 		}
-	}, [query.isLoading, query.isError, query.isSuccess, query.error, query.data, folderId]);
+	}, [query.isLoading, query.isError, query.isSuccess]);
 
 	return query;
 }

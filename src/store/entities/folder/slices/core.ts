@@ -246,14 +246,25 @@ export const createCoreSlice: FolderCoreSlice = (set, get) => ({
 
 		setCurrentFolderId: (id) => {
 			const { coreState } = get();
-			set({ coreState: { ...coreState, currentFolderId: id } });
 
-			// Si tenemos la carpeta en el estado, la establecemos como actual
+			// 🔄 Una sola actualización de estado para evitar bucles infinitos
 			if (id) {
 				const folder = coreState.folders.find((f) => f.id === id) || null;
-				set({ coreState: { ...coreState, currentFolder: folder, currentFolderId: id } });
+				set({
+					coreState: {
+						...coreState,
+						currentFolder: folder,
+						currentFolderId: id
+					}
+				});
 			} else {
-				set({ coreState: { ...coreState, currentFolder: null, currentFolderId: null } });
+				set({
+					coreState: {
+						...coreState,
+						currentFolder: null,
+						currentFolderId: null
+					}
+				});
 			}
 		},
 

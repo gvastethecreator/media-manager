@@ -8,7 +8,6 @@ import { convertServerImageToFileItem } from '@/services/image-converter.service
 import type { ServerImage } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from '@/transformers/album/mappers';
-import { fromPrismaAlbum } from '@/transformers/album/serializers';
 import { transformAlbumToExtended } from '@/transformers/album/transformer';
 import type { Album, AlbumBase, CreateAlbumData, UpdateAlbumData } from '@/types/entities/album';
 import type { FileItem } from '@/types/file-item';
@@ -105,22 +104,63 @@ export async function getAlbums(): Promise<AlbumWithStats[]> {
 			],
 		});
 
-		// Mapear resultados llamando directamente a los transformadores
+		// Mapear resultados usando solo transformAlbumToExtended (ya incluye fromPrismaAlbum internamente)
 		const albumsWithStats = albums.map((album: any) => {
-			// Ahora que fromPrismaAlbum es robusto, podemos llamarlo directamente
-			// transformAlbumToExtended también debería poder manejar el resultado.
-			const extendedAlbum = transformAlbumToExtended(fromPrismaAlbum(album));
+			try {
+				// 🔧 FIX: Usar solo transformAlbumToExtended, que ya maneja la transformación desde Prisma
+				const extendedAlbum = transformAlbumToExtended(album);
 
-			// Acceso seguro a _count
-			const count = album._count || { images: 0, groups: 0, properties: 0, wildcards: 0 };
+				// Acceso seguro a _count
+				const count = album._count || { images: 0, groups: 0, properties: 0, wildcards: 0 };
 
-			return {
-				...extendedAlbum,
-				_count: count,
-				totalSize: 0,
-				lastUpdated: album.updatedAt,
-				distribution: [],
-			};
+				return {
+					...extendedAlbum,
+					_count: count,
+					totalSize: 0,
+					lastUpdated: album.updatedAt,
+					distribution: [],
+				};
+			} catch (error) {
+				albumLogger.error('❌ Error transformando álbum individual:', { albumId: album?.id, error });
+				// Retornar un álbum básico en caso de error
+				return {
+					id: album?.id || 'unknown',
+					name: album?.name || 'Unknown Album',
+					emoji: album?.emoji || '📁',
+					color: album?.color || '#gray',
+					description: album?.description || null,
+					shortcut: album?.shortcut || null,
+					category: album?.category || '',
+					sortBy: album?.sortBy || '',
+					filters: album?.filters || '',
+					featuredImage: album?.featuredImage || null,
+					isFavorite: album?.isFavorite || false,
+					createdAt: album?.createdAt || new Date(),
+					updatedAt: album?.updatedAt || new Date(),
+					images: [],
+					videos: [],
+					collections: [],
+					tags: [],
+					characters: [],
+					places: [],
+					worldItems: [],
+					concepts: [],
+					prompts: [],
+					notes: [],
+					wildcards: [],
+					properties: [],
+					groups: [],
+					_count: { images: 0, groups: 0, properties: 0, wildcards: 0 },
+					totalSize: 0,
+					lastUpdated: album?.updatedAt || new Date(),
+					distribution: [],
+					isSelected: false,
+					isHighlighted: false,
+					isExpanded: false,
+					isEditing: false,
+					displayOrder: 0,
+				};
+			}
 		});
 
 		// Comentado/Eliminado: Cálculo complejo de estadísticas movido

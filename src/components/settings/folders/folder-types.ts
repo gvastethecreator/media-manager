@@ -1,11 +1,5 @@
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
 import type { FolderStats } from '@/types/entities/folder';
-import type {
-	ExtendedProcessStatus,
-	ProcessStatus,
-	ReindexAllCompleteData,
-	ReindexAllProgressData,
-} from '@/types/process';
 
 // Extender la interfaz Folder para incluir las propiedades adicionales
 export interface ExtendedFolder extends Omit<FolderResponse, 'lastIndexed' | 'createdAt' | 'updatedAt'> {
@@ -15,6 +9,8 @@ export interface ExtendedFolder extends Omit<FolderResponse, 'lastIndexed' | 'cr
 	_count?: {
 		images: number;
 	};
+	totalSize: number;
+	totalFiles: number;
 	autoReindex: boolean;
 	error?: string;
 }

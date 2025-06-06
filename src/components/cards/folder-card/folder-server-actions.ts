@@ -53,14 +53,14 @@ export async function getRecentFolderImages(folderId: string, limit = 4) {
 			take: limit,
 			select: {
 				id: true,
-				thumbnail: true,
+				// thumbnail: true, // ⚠️ Eliminado para no cargar los datos binarios aquí
 			},
 		});
 
-		// Transformar a formato requerido
+		// Transformar a formato requerido - ahora solo construimos la URL
 		return images.map((image) => ({
 			id: image.id,
-			thumbnailUrl: image.thumbnail ? `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}` : '',
+			thumbnailUrl: `/api/images/${image.id}/thumbnail`, // Usar la URL de la API
 		}));
 	} catch (error) {
 		folderCardLogger.error('❌ Error obteniendo imágenes recientes de carpeta:', error);

@@ -19,17 +19,23 @@ import { ConceptContentView } from './concepts/concept-content-view';
 import { ConceptsView } from './concepts/concepts-view';
 import { DevelopmentView } from './development/development-view';
 import { FavoritesView } from './favorites/favorites-view';
+import { GroupContentView } from './groups/group-content-view';
+import { GroupsView } from './groups/groups-view';
 import { NoteContentView } from './notes/note-content-view';
 import { NotesView } from './notes/notes-view';
 import { PlaceContentView } from './places/place-content-view';
 import { PlacesView } from './places/places-view';
 import { PromptContentView } from './prompts/prompt-content-view';
 import { PromptsView } from './prompts/prompts-view';
+import { PropertiesView } from './properties/properties-view';
+import { PropertyContentView } from './properties/property-content-view';
 import { SearchView } from './search/search-view';
 import { TagContentView } from './tags/tag-content-view';
 import { TagsView } from './tags/tags-view';
 import type { ViewType } from './types';
 import { UploadedImagesView } from './uploaded-images/uploaded-images-view';
+import { WildcardContentView } from './wildcards/wildcard-content-view';
+import { WildcardsView } from './wildcards/wildcards-view';
 import { WorldItemContentView } from './world-items/world-item-content-view';
 import { WorldItemsView } from './world-items/world-items-view';
 
@@ -110,6 +116,18 @@ const MemoizedViewContent = memo(({ view }: { view: ViewType }) => {
 			return <NotesView />;
 		case 'note-content':
 			return <NoteContentView />;
+		case 'groups':
+			return <GroupsView />;
+		case 'group-content':
+			return <GroupContentView />;
+		case 'properties':
+			return <PropertiesView />;
+		case 'property-content':
+			return <PropertyContentView />;
+		case 'wildcards':
+			return <WildcardsView />;
+		case 'wildcard-content':
+			return <WildcardContentView />;
 		default:
 			return <DevelopmentView />;
 	}

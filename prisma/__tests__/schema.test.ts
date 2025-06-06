@@ -29,9 +29,9 @@ describe('Prisma Schema', () => {
   ];
 
   // 🗂️ Verificamos que cada modelo está definido en el archivo
-  models.forEach((model) => {
+  for (const model of models) {
     it(`contiene el modelo ${model}`, () => {
       expect(schema).toMatch(new RegExp(`model\\s+${model}\\s+{`));
     });
-  });
+  }
 });
