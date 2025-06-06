@@ -82,7 +82,7 @@ export function FoldersView(_props: ViewProps) {
 	const loadFolders = useCallback(async () => {
 		try {
 			setIsLoading(true); // Siempre poner en loading al iniciar la carga/reintento
-			viewLogger.info('🔄 Cargando carpetas...');
+			// viewLogger.info('🔄 Cargando carpetas...'); // Comentado
 			const data = await folderService.getFolders();
 
 			// ✅ data ahora es el array correcto, no necesitamos .map si ya viene correcto
@@ -101,22 +101,22 @@ export function FoldersView(_props: ViewProps) {
 					} as FolderWithCount;
 				});
 
-				viewLogger.debug('Datos de carpetas transformados:', {
-					firstFolder: transformedData[0]
-						? {
-							id: transformedData[0].id,
-							name: transformedData[0].name,
-							totalSize: transformedData[0].totalSize,
-							totalFiles: transformedData[0].totalFiles,
-							imageCount: transformedData[0]._count?.images,
-						}
-						: 'No hay carpetas',
-				});
+				// viewLogger.debug('Datos de carpetas transformados:', { // Comentado
+				// 	firstFolder: transformedData[0]
+				// 		? {
+				// 		id: transformedData[0].id,
+				// 		name: transformedData[0].name,
+				// 		totalSize: transformedData[0].totalSize,
+				// 		totalFiles: transformedData[0].totalFiles,
+				// 		imageCount: transformedData[0]._count?.images,
+				// 	}
+				// 	: 'No hay carpetas',
+				// });
 
 				setFolders(transformedData);
 				setRetryCount(0); // Reiniciar el contador de reintentos si la carga es exitosa
 				setError(null); // Limpiar cualquier error previo
-				viewLogger.info(`✅ ${transformedData.length} carpetas cargadas`);
+				// viewLogger.info(`✅ ${transformedData.length} carpetas cargadas`); // Comentado
 			} else {
 				throw new Error('Respuesta del servicio no es un array válido');
 			}
@@ -133,9 +133,9 @@ export function FoldersView(_props: ViewProps) {
 			if (isTransientError && retryCount < maxRetries) {
 				// Calcular retraso de reintento exponencial (300ms, 900ms, 2700ms)
 				const retryDelay = 300 * 3 ** retryCount;
-				viewLogger.debug(
-					`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...`
-				);
+				// viewLogger.debug(
+				// 	`🔄 Error transitorio, reintentando en ${retryDelay}ms (intento ${retryCount + 1}/${maxRetries})...` // Comentado
+				// );
 
 				// Incrementar contador de reintentos y programar un nuevo intento
 				setRetryCount((prev) => prev + 1);
@@ -147,10 +147,10 @@ export function FoldersView(_props: ViewProps) {
 
 			// Si hemos alcanzado el máximo de reintentos o no es un error transitorio, mostrar el error
 			if (retryCount >= maxRetries) {
-				viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`);
+				// viewLogger.warn(`⚠️ Alcanzado máximo de reintentos (${maxRetries})`); // Comentado
 			}
 
-			viewLogger.error('❌ Error cargando carpetas:', error);
+			// viewLogger.error('❌ Error cargando carpetas:', error); // Comentado
 			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
@@ -159,52 +159,37 @@ export function FoldersView(_props: ViewProps) {
 	}, [retryCount]);
 
 	useEffect(() => {
-		viewLogger.debug('🟢 FoldersView Montado'); // <-- Log de montaje
+		// viewLogger.debug('🟢 FoldersView Montado'); // <-- Comentado
 		loadFolders();
 
 		return () => {
-			viewLogger.debug('🔴 FoldersView Desmontado'); // <-- Log de desmontaje
+			// viewLogger.debug('🔴 FoldersView Desmontado'); // <-- Comentado
 		};
 	}, [loadFolders]); // <-- Incluir loadFolders en las dependencias
 
 	const handleFolderClick = useCallback(
-		async (folder: FolderWithCount) => {
+		(folder: FolderWithCount) => {
 			try {
-				viewLogger.info('🖱️ Click en carpeta:', folder.name);
+				// viewLogger.info('🖱️ Click en carpeta:', folder.name); // Comentado
 
 				// Verificaciones de seguridad
 				if (!folder || !folder.id) {
-					viewLogger.error('❌ Carpeta inválida:', folder);
+					// viewLogger.error('❌ Carpeta inválida:', folder); // Comentado
 					return;
 				}
 
-				// Limpiar selecciones previas
+				// 🧹 Limpiar selecciones previas
 				deselectAllFiles();
 
-				// Asegurarnos de establecer la información completa de la carpeta en ambos stores
+				// 🔄 Actualizar el store de carpetas PRIMERO
+				setCurrentFolderId(folder.id);
 
-				// 1. Actualizar el store de navegación
-				useNavigationStore.setState({
-					currentView: 'folder-content',
-					currentItem: {
-						id: folder.id,
-						name: folder.name,
-						emoji: folder.emoji || '',
-						count: folder._count?.images || 0,
-						itemType: 'folder',
-					},
-					navigationDirection: 1, // Indicar navegación hacia adelante
-				});
-
-				// 2. 🆝 Actualizar el nuevo store de carpetas - cargar la carpeta específica
-				await setCurrentFolderId(folder.id);
-
-				// 3. Ahora cambiar la vista
+				// 📍 Actualizar la vista de navegación
 				setCurrentView('folder-content');
 
-				viewLogger.info(`✅ Navegando a carpeta: ${folder.name} (${folder.id})`);
+				// viewLogger.info(`✅ Navegando a carpeta: ${folder.name} (${folder.id})`); // Comentado
 			} catch (error) {
-				viewLogger.error('❌ Error al cambiar a la carpeta:', error);
+				// viewLogger.error('❌ Error al cambiar a la carpeta:', error); // Comentado
 			}
 		},
 		[setCurrentView, deselectAllFiles, setCurrentFolderId]
@@ -251,16 +236,16 @@ export function FoldersView(_props: ViewProps) {
 	}
 
 	// Log de depuración para ver qué datos tenemos disponibles
-	if (optimisticFolders.length > 0) {
-		viewLogger.debug('Datos de carpeta para renderizado:', {
-			id: optimisticFolders[0].id,
-			name: optimisticFolders[0].name,
-			totalSize: optimisticFolders[0].totalSize,
-			totalFiles: optimisticFolders[0].totalFiles,
-			_count: optimisticFolders[0]._count,
-			updatedAt: optimisticFolders[0].updatedAt,
-		});
-	}
+	// if (optimisticFolders.length > 0) {
+	// 	viewLogger.debug('Datos de carpeta para renderizado:', { // Comentado
+	// 		id: optimisticFolders[0].id,
+	// 		name: optimisticFolders[0].name,
+	// 		totalSize: optimisticFolders[0].totalSize,
+	// 		totalFiles: optimisticFolders[0].totalFiles,
+	// 		_count: optimisticFolders[0]._count,
+	// 		updatedAt: optimisticFolders[0].updatedAt,
+	// 	});
+	// }
 
 	return (
 		<>
