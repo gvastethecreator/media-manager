@@ -1,6 +1,6 @@
 'use client';
 
-import { reindexFolder } from '@/app/actions/folders';
+import { reindexFolder, scanFolderAction } from '@/app/actions/folders';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { FileBrowser } from '@/components/features/file-browser';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { useFolder } from '@/hooks/folder/use-folder';
 import { useFolderImages } from '@/hooks/use-folder-images';
 import { folderResponseCache } from '@/lib/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { Folder, RefreshCw } from 'lucide-react';
+import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 // Logger para depuración
@@ -24,6 +24,7 @@ export function FolderContentView() {
 	// Estado para controlar la recarga manual
 	const [isManuallyRefreshing, setIsManuallyRefreshing] = useState(false);
 	const [retryCount, setRetryCount] = useState(0);
+	const [scanResults, setScanResults] = useState<any>(null);
 
 	// Usar el hook personalizado para obtener las imágenes
 	const { data: images, isLoading, isError, error, refetch } = useFolderImages(currentFolderId);
@@ -47,6 +48,43 @@ export function FolderContentView() {
 			setIsManuallyRefreshing(false);
 		}
 	}, [currentFolderId, refetch]);
+
+	// Función para escanear directamente la carpeta
+	const handleScanFolder = useCallback(async () => {
+		if (!currentFolder?.path) return;
+
+		try {
+			logger.info(`🔍 Escaneando directamente la carpeta: ${currentFolder.path}`);
+			setIsManuallyRefreshing(true);
+			setScanResults(null);
+
+			// Escanear la carpeta usando la acción del servidor
+			const result = await scanFolderAction(currentFolder.path, {
+				recursive: true,
+				includeHidden: false
+			});
+
+			// Guardar y mostrar los resultados
+			setScanResults(result);
+
+			logger.info('✅ Escaneo directo completado:', {
+				path: currentFolder.path,
+				totalFiles: result.totalFiles,
+				images: result.images.length,
+				videos: result.videos.length,
+				others: result.others.length
+			});
+
+			// Si hay imágenes pero no están en la base de datos, sugerir reindexar
+			if (result.images.length > 0 && (!images || images.length === 0)) {
+				logger.warn(`⚠️ Se encontraron ${result.images.length} imágenes en el sistema de archivos pero ninguna en la base de datos. Se recomienda reindexar.`);
+			}
+		} catch (error) {
+			logger.error('❌ Error al escanear directamente la carpeta:', error);
+		} finally {
+			setIsManuallyRefreshing(false);
+		}
+	}, [currentFolder?.path, images]);
 
 	// Función para forzar la recarga de imágenes
 	const handleForceRefresh = useCallback(async () => {
@@ -99,6 +137,10 @@ export function FolderContentView() {
 						<RefreshCw className="h-4 w-4 mr-2" />
 						Forzar Recarga
 					</Button>
+					<Button variant="outline" size="sm" onClick={handleScanFolder}>
+						<FolderSearch className="h-4 w-4 mr-2" />
+						Escanear Carpeta
+					</Button>
 				</div>
 			</div>
 		);
@@ -119,6 +161,21 @@ export function FolderContentView() {
 					}
 				/>
 
+				{scanResults && (
+					<div className="bg-muted p-4 rounded-md max-w-lg">
+						<h3 className="font-medium mb-2">Resultados del escaneo directo:</h3>
+						<p>Total archivos: {scanResults.totalFiles}</p>
+						<p>Imágenes encontradas: {scanResults.images.length}</p>
+						<p>Videos encontrados: {scanResults.videos.length}</p>
+						{scanResults.images.length > 0 && (
+							<div className="mt-2">
+								<p className="text-warning">Se encontraron imágenes en el sistema de archivos pero no están en la base de datos.</p>
+								<p className="text-sm">Haz clic en "Reindexar Carpeta" para añadirlas a la base de datos.</p>
+							</div>
+						)}
+					</div>
+				)}
+
 				<div className="flex gap-2">
 					<Button variant="outline" size="sm" onClick={handleReindex}>
 						<RefreshCw className="h-4 w-4 mr-2" />
@@ -128,6 +185,11 @@ export function FolderContentView() {
 					<Button variant="outline" size="sm" onClick={handleForceRefresh}>
 						<RefreshCw className="h-4 w-4 mr-2" />
 						Forzar Recarga
+					</Button>
+
+					<Button variant="outline" size="sm" onClick={handleScanFolder}>
+						<FolderSearch className="h-4 w-4 mr-2" />
+						Escanear Carpeta
 					</Button>
 				</div>
 			</div>
@@ -154,7 +216,11 @@ export function FolderContentView() {
 	// Renderizar el navegador de archivos
 	return (
 		<div className="h-full w-full">
-			<div className="absolute top-2 right-2 z-10">
+			<div className="absolute top-2 right-2 z-10 flex gap-2">
+				<Button variant="outline" size="sm" onClick={handleScanFolder}>
+					<FolderSearch className="h-4 w-4 mr-2" />
+					Escanear
+				</Button>
 				<Button variant="outline" size="sm" onClick={handleForceRefresh}>
 					<RefreshCw className="h-4 w-4 mr-2" />
 					Recargar

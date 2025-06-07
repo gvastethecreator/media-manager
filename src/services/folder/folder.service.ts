@@ -293,7 +293,7 @@ class FolderServiceClass {
 		return this.withConcurrencyControl('getFolders', async () => {
 			try {
 				folderLogger.info('📁 Obteniendo carpetas...');
-				const getFoldersAction = await import('@/app/actions/folders/folder-get.actions').then((mod) => mod.getFolders);
+				const getFoldersAction = await import('@/app/actions/folders/get.actions').then((mod) => mod.getFolders);
 				const folders = await getFoldersAction();
 				folderLogger.info(`✅ ${folders.length} carpetas obtenidas`);
 				return folders;
