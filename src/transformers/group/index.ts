@@ -11,20 +11,8 @@ import type { GroupCreateInput, GroupExtended, GroupSearchResult, GroupUpdateInp
 import { TransformerError } from '@/utils/transformers/errors';
 import { toGroupListItem } from './mappers';
 import { parseGroupFilterObject, toExtendedGroup, toPrismaGroup, validateGroup } from './serializers';
-// Importar el transformador principal y sus funciones asociadas
-import {
-	transformGroup as transformGroupMain,
-	transformGroupToExtended,
-	transformGroupToWithStats,
-	transformGroups as transformGroupsMain,
-} from './transformer';
 
 const logger = serverLogger.withContext('GroupTransformer');
-
-// Exportar el transformador principal y sus variantes
-export const transformGroup = transformGroupMain;
-export const transformGroups = transformGroupsMain;
-export { transformGroupToExtended, transformGroupToWithStats };
 
 /**
  * Busca grupos según los filtros proporcionados
@@ -402,37 +390,9 @@ export function toRelatedGroup(
 	} = {}
 ): Record<string, any> {
 	try {
-		const { includeDetails = false } = options;
-
-		// Datos básicos
-		const relatedGroup = {
-			id: group.id,
-			name: group.name,
-			type: 'group',
-		};
-
-		// Si se solicitan detalles, incluir más información
-		if (includeDetails) {
-			return {
-				...relatedGroup,
-				emoji: group.emoji || '📂',
-				color: group.color || '#3b82f6',
-				description: group.description || '',
-				isFavorite: group.favorite || false,
-				createdAt: group.createdAt,
-				updatedAt: group.updatedAt,
-			};
-		}
-
-		return relatedGroup;
+		return mapGroupToRelatedGroup(group);
 	} catch (error) {
-		logger.error('Error creando grupo relacionado:', error);
-		// En caso de error, devolver al menos el ID
-		return {
-			id: group.id,
-			name: 'Error',
-			type: 'group',
-		};
+		throw handleTransformerError(error);
 	}
 }
 
@@ -445,11 +405,23 @@ export const GroupTransformer = {
 	updateGroup,
 	deleteGroup,
 	toRelatedGroup,
-	// Añadir nuevas funciones al objeto exportado
-	transformGroup,
-	transformGroups,
-	transformGroupToExtended,
-	transformGroupToWithStats,
 };
 
 export default GroupTransformer;
+
+// Exportar otros mappers y converters
+// export {
+// 	mapCreateGroupDataToPrisma,
+// 	mapGroupFiltersToPrisma,
+// 	mapGroupToRelatedGroup,
+// 	mapUpdateGroupDataToPrisma,
+// 	transformCompleteGroupToPrisma,
+// 	transformGroupToPrisma,
+// } from './mappers';
+
+// Re-exportar funciones específicas de v2
+// export {
+// 	mapCompleteToGroup,
+// 	mapGroupToComplete,
+// 	groupToDisplayObject,
+// } from './v2/converters';

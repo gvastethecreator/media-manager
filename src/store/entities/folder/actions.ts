@@ -6,11 +6,10 @@
 import {
     createFolder as createFolderAction,
     deleteFolder as deleteFolderAction,
+    getFolderById as getFolderAction,
+    searchFolders as getFoldersAction,
     updateFolder as updateFolderAction,
-} from '@/app/actions/folders/crud.actions';
-
-// 🚀 NUEVAS IMPORTACIONES: Funciones de servicio para obtener datos
-import { getFolderById as getFolderAction, searchFolders as getFoldersAction } from '@/transformers/folder';
+} from '@/app/actions/folders/folder-crud.actions';
 
 import {
     adaptCreateFolderData,

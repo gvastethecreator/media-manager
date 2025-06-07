@@ -133,7 +133,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 			// Validar que el ID sea válido antes de proceder
 			if (!id || typeof id !== 'string' || id.trim() === '') {
-				resourceLogger.error('Intento de cargar thumbnail con ID inválido:', { id });
+				resourceLogger.error('❌ Intento de cargar thumbnail con ID inválido:', { id });
 				return undefined;
 			}
 
@@ -142,12 +142,14 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 			// Si ya tenemos el thumbnail y no está expirado, retornarlo
 			if (resource?.thumbnail && Date.now() - resource.lastUpdate < CACHE_CONFIG.maxAge) {
+				resourceLogger.debug(`✅ Thumbnail encontrado en caché para ID ${id}`);
 				state.resources.touch(id); // ✨ Tocarlo inmediatamente si se sirve desde la caché, usando la instancia correcta
 				return resource.thumbnail;
 			}
 
 			// Si ya está en cola de carga, esperar
 			if (state.loadingQueue.has(id)) {
+				resourceLogger.debug(`⏳ Thumbnail ${id} ya en cola de carga, esperando...`);
 				return new Promise((resolve) => {
 					let attempts = 0;
 					const checkInterval = setInterval(() => {
@@ -157,6 +159,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 						if (updatedResource?.thumbnail || attempts >= CACHE_CONFIG.maxRetries) {
 							clearInterval(checkInterval);
 							if (updatedResource?.thumbnail) {
+								resourceLogger.debug(`✅ Thumbnail ${id} cargado después de espera`);
 							} else {
 								resourceLogger.warn(`⚠️ Se ha excedido el tiempo de espera para ID ${id}`);
 							}
@@ -168,7 +171,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 			try {
 				state.loadingQueue.add(id);
-				resourceLogger.info('Solicitando thumbnail:', { id, quality: ThumbnailQuality.MEDIUM });
+				resourceLogger.info('🔄 Solicitando thumbnail:', { id, quality: ThumbnailQuality.MEDIUM });
 
 				// Asegurarse de que se use un valor válido de ThumbnailQuality
 				const quality = ThumbnailQuality.MEDIUM;
@@ -183,22 +186,34 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					| undefined;
 
 				try {
+					resourceLogger.debug(`📡 Llamando a server action getThumbnail para ID ${id}`);
 					data = await getThumbnail(id, quality);
+					resourceLogger.debug(`✅ Respuesta recibida de getThumbnail para ID ${id}`);
 				} catch (requestError) {
-					resourceLogger.error(`Error en la solicitud de thumbnail para ID ${id}:`, requestError);
+					resourceLogger.error(`❌ Error en la solicitud de thumbnail para ID ${id}:`, requestError);
 					// Propagar el error para que se maneje en el catch exterior
 					throw requestError;
 				}
 
-				resourceLogger.debug(`Data recibida de getThumbnail para ID ${id}:`, data); // ✨ Log para depuración
+				resourceLogger.debug(`📋 Data recibida de getThumbnail para ID ${id}:`, data); // ✨ Log para depuración
 
-				if (!data || !data.thumbnailUrl) {
-					throw new Error(`No se recibió una URL de thumbnail para el ID ${id}`);
+				if (!data) {
+					throw new Error(`❌ No se recibieron datos para el ID ${id}`);
+				}
+
+				if (data.error) {
+					throw new Error(`❌ Error del servidor: ${data.error}`);
+				}
+
+				if (!data.thumbnailUrl) {
+					throw new Error(`❌ No se recibió una URL de thumbnail para el ID ${id}`);
 				}
 
 				// Directamente usar la URL de la miniatura, sin convertir a data:URL
 				const finalThumbnailUrl = data.thumbnailUrl;
 				const newDimensions = data.width && data.height ? { width: data.width, height: data.height } : undefined;
+
+				resourceLogger.debug(`🖼️ URL de thumbnail para ID ${id}: ${finalThumbnailUrl.substring(0, 30)}...`);
 
 				const existingResource = state.resources.get(id); // Usar la instancia correcta de caché
 				const isThumbnailContentChanged = !existingResource || existingResource.thumbnail !== finalThumbnailUrl;
@@ -213,6 +228,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 						existingResource.isLoading = false; // Asegurar que isLoading sea false al completar
 						existingResource.lastUpdate = Date.now();
 						state.resources.touch(id); // Solo tocar para actualizar recencia si se modificó o accedió, usando la instancia correcta
+						resourceLogger.debug(`🔄 Actualizado recurso existente para ID ${id}`);
 					}
 				} else {
 					// Contenido cambiado o recurso nuevo, crear un nuevo objeto ImageResource completo
@@ -224,25 +240,40 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 						dimensions: newDimensions,
 					};
 					state.resources.set(id, newImageResource); // Almacenar el nuevo objeto, usando la instancia correcta
+					resourceLogger.debug(`➕ Creado nuevo recurso para ID ${id}`);
 				}
 
 				// Incrementar la versión solo si el contenido principal cambió o si un error previo fue resuelto
 				if (needsVersionUpdateDueToContent || (existingResource && existingResource.error)) {
 					set({ version: get().version + 1 });
+					resourceLogger.debug(`🔢 Incrementada versión de recursos para ID ${id}`);
 				}
+
+				// Eliminar de la cola de carga
+				state.loadingQueue.delete(id);
 				return finalThumbnailUrl;
 			} catch (error) {
 				resourceLogger.error(`❌ Error al obtener o procesar thumbnail para ID ${id}:`, error);
 				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 				const existingResource = state.resources.get(id); // Usar la instancia correcta de caché
-				const hasErrorChanged = existingResource?.error !== errorMessage; // ✨ Simplificado para comparar directamente el mensaje de error
+				const hasErrorChanged = existingResource?.error !== errorMessage;
 
-				// Siempre se establece el estado de error, ya sea en un objeto nuevo o existente
-				state.resources.set(id, { id, isLoading: false, error: errorMessage, lastUpdate: Date.now() }); // Usar la instancia correcta de caché
+				const errorResource: ImageResource = {
+					id, // id ya está validado como string al inicio de la función
+					isLoading: false, // Asegurar que isLoading sea false al completar
+					error: errorMessage,
+					lastUpdate: Date.now(),
+					thumbnail: existingResource?.thumbnail,
+					originalUrl: existingResource?.originalUrl,
+					dimensions: existingResource?.dimensions,
+				};
+				state.resources.set(id, errorResource); // Usar la instancia correcta de caché
+
 				state.loadingQueue.delete(id);
 
 				if (hasErrorChanged) {
 					set({ version: get().version + 1 }); // Solo incrementar si el estado de error cambia
+					resourceLogger.debug(`🔢 Incrementada versión de recursos por cambio de error para ID ${id}`);
 				}
 				return undefined;
 			}
@@ -298,12 +329,18 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 				const existingResource = state.resources.get(id); // Usar la instancia correcta de caché
 				const hasErrorChanged = existingResource?.error !== errorMessage; // ✨ Simplificado para comparar directamente el mensaje de error
 
-				const errorResource = {
-					...existingResource,
+				const errorResource: ImageResource = {
+					id, // id ya está validado como string al inicio de la función
+					isLoading: false, // Asegurar que isLoading sea false al completar
 					error: errorMessage,
 					lastUpdate: Date.now(),
+					thumbnail: existingResource?.thumbnail,
+					originalUrl: existingResource?.originalUrl,
+					dimensions: existingResource?.dimensions,
 				};
 				state.resources.set(id, errorResource); // Usar la instancia correcta de caché
+
+				state.loadingQueue.delete(id);
 
 				if (hasErrorChanged) {
 					set({ version: get().version + 1 }); // Solo incrementar si el estado de error cambia
