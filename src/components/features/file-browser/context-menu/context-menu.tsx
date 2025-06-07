@@ -176,7 +176,7 @@ const ContextMenuItems = memo(function ContextMenuItems({
 
 // Memoizamos el componente FileContextMenu para evitar renderizaciones innecesarias
 export const FileContextMenu = memo(function FileContextMenu({ file, children, onAction }: FileContextMenuProps) {
-	const { toggleFavorite, isFavorited } = useFavoriteStore();
+	const toggleFavorite = useFavoriteStore((state) => state.toggleFavorite);
 	const { loadingStates, handleOpenChange, loadEntityData } = useEntityLoader();
 	const { selectedItems, isItemSelected, toggleSelection } = useSelectionStore();
 	const [isOpen, setIsOpen] = useState(false);
@@ -248,7 +248,7 @@ export const FileContextMenu = memo(function FileContextMenu({ file, children, o
 	}, [file.id]);
 
 	// Memoizamos el estado de favorito
-	const isFileFavorited = useMemo(() => isFavorited(file.id), [isFavorited, file.id]);
+	const isFileFavorited = useFavoriteStore((state) => state.isFavorited(file.id));
 
 	// Crear objetos de props para submenús - memoizado para evitar re-renderizados
 	const submenuProps = useMemo(
@@ -302,3 +302,4 @@ export const FileContextMenu = memo(function FileContextMenu({ file, children, o
 
 // Exportar también las acciones desde types.ts
 export type { ContextMenuAction } from './types';
+
