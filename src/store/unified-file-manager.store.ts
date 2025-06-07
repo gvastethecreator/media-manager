@@ -24,6 +24,8 @@ import { getAlbumImages } from '@/app/actions/albums/album.actions';
 import { getCharacterImages } from '@/app/actions/characters/character.actions';
 import { getFavorites } from '@/app/actions/favorites/favorite.actions';
 import { getFolderImages } from '@/app/actions/folders';
+import { getCollectionImages } from '@/app/actions/collections';
+import { getImages } from '@/app/actions/images/image-crud.actions';
 // 🚀 Importaciones de acciones optimizadas - CORREGIDAS
 import { getTagImages } from '@/app/actions/tags/query.actions';
 import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
@@ -419,7 +421,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 										id: firstItem.id,
 										name: firstItem.name,
 										path: firstItem.path,
-										hasThumbnail: !!firstItem.thumbnail
+										hasThumbnail: !!firstItem.thumbnail,
 									});
 								} else {
 									// Si no hay imágenes, verificar si la carpeta existe y tiene archivos
@@ -429,7 +431,9 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 									const folderDetails = await getFolderById(id);
 
 									if (folderDetails && (folderDetails.totalFiles > 0 || folderDetails._count?.images > 0)) {
-										fileManagerLogger.warn(`⚠️ La carpeta tiene ${folderDetails.totalFiles || folderDetails._count?.images} archivos pero no se obtuvieron imágenes`);
+										fileManagerLogger.warn(
+											`⚠️ La carpeta tiene ${folderDetails.totalFiles || folderDetails._count?.images} archivos pero no se obtuvieron imágenes`
+										);
 									}
 								}
 							} catch (folderError) {
@@ -437,12 +441,9 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 								// Intentar con un enfoque alternativo si falla el principal
 								try {
 									fileManagerLogger.info(`🔄 Intentando método alternativo para carpeta ${id}`);
-									const response = await fetch(`/api/folders/${id}/images/all`);
-									if (response.ok) {
-										const data = await response.json();
-										rawItems = data.items || [];
-										fileManagerLogger.info(`✅ Método alternativo: ${rawItems.length} imágenes obtenidas`);
-									}
+									const altResponse = await getFolderImages(id);
+									rawItems = altResponse.items || [];
+									fileManagerLogger.info(`✅ Método alternativo: ${rawItems.length} imágenes obtenidas`);
 								} catch (altError) {
 									fileManagerLogger.error('❌ Método alternativo también falló:', altError);
 								}
@@ -455,12 +456,8 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 						break;
 					}
 					case 'collection': {
-						// Usar API endpoint específica para imágenes de colección
 						if (id) {
-							const response = await fetch(`/api/collections/${id}/images/all`);
-							if (!response.ok) throw new Error('Error cargando imágenes de colección');
-							const data = await response.json();
-							rawItems = data.items || [];
+							rawItems = await getCollectionImages(id);
 						}
 						break;
 					}
@@ -486,11 +483,8 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 						break;
 					}
 					case 'all': {
-						// Para todos los items, usar API específica
-						const response = await fetch('/api/images/all');
-						if (!response.ok) throw new Error('Error cargando todas las imágenes');
-						const data = await response.json();
-						rawItems = data.items || [];
+						const result = await getImages({ pageSize: 1000 });
+						rawItems = result.images || [];
 						break;
 					}
 					default:
@@ -658,9 +652,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 		if (!folder || !folder.count) {
 			try {
 				// Intentar obtener información detallada de la carpeta
-				const getFolderById = await import('@/app/actions/folders/query.actions').then(
-					(mod) => mod.getFolderById
-				);
+				const getFolderById = await import('@/app/actions/folders/query.actions').then((mod) => mod.getFolderById);
 				const folderDetails = await getFolderById(id);
 				if (folderDetails) {
 					folderWithDetails = {
@@ -672,7 +664,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 					fileManagerLogger.debug('📊 Detalles de carpeta obtenidos:', {
 						id: folderWithDetails.id,
 						name: folderWithDetails.name,
-						count: folderWithDetails.count
+						count: folderWithDetails.count,
 					});
 				}
 			} catch (error) {
