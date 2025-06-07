@@ -16,7 +16,6 @@ import type { GridGaps } from './config/grid-config';
 import { GRID_CONFIG } from './config/grid-config';
 import { handleContextAction } from './context-menu/context-action-handler';
 import { useEntityLoader } from './context-menu/hooks/use-entity-loader';
-import type { ContextMenuAction } from './context-menu/types';
 import { useGridView } from './hooks/use-grid-view';
 import { useGridVirtualizer } from './hooks/use-grid-virtualizer';
 import { CardsView } from './views/cards-view';
@@ -191,11 +190,12 @@ const FileBrowserComponent = ({
 				gridLogger.warn('⚠️ Detectada precarga bloqueada por más de 5 segundos, liberando precarga');
 				window.entityPreloadInProgress = false;
 				window.entityPreloadComplete = true;
-				return;
 			}
 
-			gridLogger.info('⏳ Hay una precarga en progreso en otro componente, omitiendo precarga desde FileBrowser');
-			return;
+			if (window.entityPreloadInProgress) { // Verificar si todavía está en progreso después de la posible liberación
+				gridLogger.info('⏳ Hay una precarga en progreso en otro componente, omitiendo precarga desde FileBrowser');
+				return;
+			}
 		}
 
 		entitiesPreloadedRef.current = true;
@@ -510,9 +510,12 @@ const FileBrowserComponent = ({
 			.map((virtualItem) => items[virtualItem.index])
 			.filter((item): item is FileItem => !!item); // Filtrar nulos/undefined y asegurar el tipo
 
-		// gridLogger.debug(
-		// 	'Items visibles o cambio de scroll/redimensionamiento, iniciando carga de miniaturas...'
-		// );
+		// Añadir log para depuración
+		gridLogger.debug(
+			`🔄 Cargando miniaturas para ${currentVisibleItems.length} items visibles`
+		);
+
+		// Llamar a la función de carga de miniaturas
 		debouncedLoadThumbnails(currentVisibleItems); // Pasar los ítems visibles aquí
 	}, [debouncedLoadThumbnails, virtualizer, items]); // Añadir `items` a las dependencias
 
@@ -577,7 +580,7 @@ const FileBrowserComponent = ({
 			// gridLogger.debug(`Context menu event on item ID: ${itemId}`); // Comentado
 
 			// Ejemplo de cómo manejar una acción del menú contextual
-			handleContextAction(item as unknown as ContextMenuAction, 'copy');
+			handleContextAction('copy', item);
 		},
 		[selectedItems, clearSelection, selectItem]
 	);

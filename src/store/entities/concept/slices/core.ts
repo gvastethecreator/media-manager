@@ -2,6 +2,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { transformConceptToWithStats } from '@/transformers/concept/transformer';
 import type { ConceptBase, ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept';
 import type { StateCreator } from 'zustand';
+import { createConcept, deleteConcept, searchConcepts, updateConcept } from '../../../../app/actions/concepts/concept.actions';
 import type { ConceptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('ConceptStore:Core');
@@ -23,54 +24,6 @@ export interface CoreSlice {
 	reset: () => void;
 }
 
-// Acciones mock para desarrollo (se reemplazarán con server actions)
-const mockApi = {
-	getConcepts: async (): Promise<ConceptWithStats[]> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-		return [];
-	},
-
-	createConcept: async (concept: ConceptCreateInput): Promise<ConceptBase> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-		return {
-			id: `concept-${Date.now()}`,
-			name: concept.name,
-			emoji: concept.emoji || '💡',
-			color: concept.color || '#3b82f6',
-			description: concept.description || null,
-			content: concept.content || '',
-			category: concept.category || 'general',
-			tags: concept.tags || 'empty_array',
-			featuredImage: concept.featuredImage || null,
-			isFavorite: concept.isFavorite || false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		};
-	},
-
-	updateConcept: async (id: string, concept: ConceptUpdateInput): Promise<ConceptBase> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-		return {
-			id,
-			name: concept.name || 'Concepto actualizado',
-			emoji: concept.emoji || '💡',
-			color: concept.color || '#3b82f6',
-			description: concept.description || null,
-			content: concept.content || '',
-			category: concept.category || 'general',
-			tags: concept.tags || 'empty_array',
-			featuredImage: concept.featuredImage || null,
-			isFavorite: concept.isFavorite || false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		};
-	},
-
-	deleteConcept: async (id: string): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-};
-
 export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (set, get) => ({
 	// Estado inicial
 	concepts: [],
@@ -85,7 +38,8 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('🔄 Cargando conceptos');
 
 			// Llamar a server action para obtener conceptos
-			const concepts = await mockApi.getConcepts();
+			const results = await searchConcepts();
+			const concepts = results.data; // Asumiendo que searchConcepts devuelve un objeto con una propiedad 'data'
 
 			// Transformar resultados con la función correcta
 			const transformedConcepts = concepts.map(transformConceptToWithStats);
@@ -110,10 +64,13 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('✨ Creando concepto:', concept);
 
 			// Llamar a server action para crear concepto
-			await mockApi.createConcept(concept);
-
-			// Recargar conceptos para actualizar la lista
-			await get().loadConcepts();
+			const newConcept = await createConcept(concept);
+			if (newConcept) {
+				// Aquí podrías añadir el nuevo concepto directamente al store
+				// o recargar todos los conceptos si es más sencillo para mantener la consistencia.
+				// Por simplicidad, recargaremos todos los conceptos.
+				await get().loadConcepts();
+			}
 
 			coreLogger.info('✅ Concepto creado');
 		} catch (error) {
@@ -129,10 +86,13 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('🔄 Actualizando concepto:', { id, ...concept });
 
 			// Llamar a server action para actualizar concepto
-			await mockApi.updateConcept(id, concept);
-
-			// Recargar conceptos para actualizar la lista
-			await get().loadConcepts();
+			const updatedConcept = await updateConcept(id, concept);
+			if (updatedConcept) {
+				// Aquí podrías actualizar el concepto directamente en el store
+				// o recargar todos los conceptos si es más sencillo para mantener la consistencia.
+				// Por simplicidad, recargaremos todos los conceptos.
+				await get().loadConcepts();
+			}
 
 			coreLogger.info('✅ Concepto actualizado');
 		} catch (error) {
@@ -148,7 +108,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('🗑️ Eliminando concepto:', id);
 
 			// Llamar a server action para eliminar concepto
-			await mockApi.deleteConcept(id);
+			await deleteConcept(id);
 
 			// Recargar conceptos para actualizar la lista
 			await get().loadConcepts();

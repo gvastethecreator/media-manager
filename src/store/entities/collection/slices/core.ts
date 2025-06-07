@@ -5,6 +5,7 @@
 
 import type { CollectionExtended } from '@/types/entities/collection';
 import type { StateCreator } from 'zustand';
+import { createCollection, deleteCollection, getCollection, getCollections, updateCollection } from '../../../../app/actions/collections/collection.actions';
 import type { CollectionState } from '../types';
 
 /**
@@ -26,6 +27,13 @@ export interface CollectionCoreSlice {
 	// Estado de carga y errores
 	setLoading: (isLoading: boolean) => void;
 	setError: (error: string | null) => void;
+
+	// Acciones asíncronas con Server Actions
+	fetchCollection: (id: string) => Promise<CollectionExtended | undefined>;
+	fetchCollections: () => Promise<CollectionExtended[]>;
+	createCollectionServer: (data: any) => Promise<CollectionExtended | undefined>;
+	updateCollectionServer: (id: string, data: Partial<CollectionExtended>) => Promise<CollectionExtended | undefined>;
+	removeCollectionServer: (id: string) => Promise<boolean>;
 }
 
 /**
@@ -90,5 +98,88 @@ export const createCollectionCoreSlice: StateCreator<
 
 	setError: (error: string | null) => {
 		set({ error });
+	},
+
+	// Acciones asíncronas con Server Actions
+	fetchCollection: async (id: string) => {
+		set({ isLoading: true, error: null });
+		try {
+			const collection = await getCollection(id);
+			if (collection) {
+				get().addCollection(collection);
+				return collection;
+			}
+			return undefined;
+		} catch (error: any) {
+			set({ error: error.message, isLoading: false });
+			console.error('Error fetching collection:', error);
+			return undefined;
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	fetchCollections: async () => {
+		set({ isLoading: true, error: null });
+		try {
+			const collections = await getCollections();
+			get().setCollections(collections);
+			return collections;
+		} catch (error: any) {
+			set({ error: error.message, isLoading: false });
+			console.error('Error fetching collections:', error);
+			return [];
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	createCollectionServer: async (data: any) => {
+		set({ isLoading: true, error: null });
+		try {
+			const newCollection = await createCollection(data);
+			if (newCollection) {
+				get().addCollection(newCollection);
+			}
+			return newCollection;
+		} catch (error: any) {
+			set({ error: error.message, isLoading: false });
+			console.error('Error creating collection:', error);
+			return undefined;
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	updateCollectionServer: async (id: string, data: Partial<CollectionExtended>) => {
+		set({ isLoading: true, error: null });
+		try {
+			const updatedCollection = await updateCollection(id, data);
+			if (updatedCollection) {
+				get().updateCollection(id, updatedCollection);
+			}
+			return updatedCollection;
+		} catch (error: any) {
+			set({ error: error.message, isLoading: false });
+			console.error('Error updating collection:', error);
+			return undefined;
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	removeCollectionServer: async (id: string) => {
+		set({ isLoading: true, error: null });
+		try {
+			await deleteCollection(id);
+			get().removeCollection(id);
+			return true;
+		} catch (error: any) {
+			set({ error: error.message, isLoading: false });
+			console.error('Error removing collection:', error);
+			return false;
+		} finally {
+			set({ isLoading: false });
+		}
 	},
 });
