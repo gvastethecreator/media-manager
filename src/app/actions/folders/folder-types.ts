@@ -342,6 +342,7 @@ export interface UpdateFolderOptions {
 	color?: string;
 	autoReindex?: boolean;
 	parentId?: string | null;
+	path?: string;
 	totalFiles?: number;
 	totalSize?: number;
 	lastIndexed?: Date;

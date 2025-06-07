@@ -3,94 +3,18 @@
 /**
  * @file Query actions for folders
  * @module app/actions/folders/query.actions
+ * @description Contiene acciones de servidor para consultas avanzadas y búsqueda de carpetas,
+ *              así como la obtención de la estructura de árbol de carpetas y estadísticas.
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { mapFolderFiltersToPrisma, transformFolder, transformFolderToExtended } from '@/transformers/folder';
-import { type FolderComplete, type FolderFilters } from '@/types/entities/folder';
+import { mapFolderFiltersToPrisma, transformFolderToExtended } from '@/transformers/folder';
+import { type FolderFilters } from '@/types/entities/folder';
 import { revalidatePath } from 'next/cache';
 
 // Logger para acciones de consulta
 const queryLogger = serverLogger.withContext('FolderQueryActions');
-
-/**
- * Obtiene todas las carpetas
- * @param includeStats Si se deben incluir estadísticas avanzadas
- * @returns Lista de carpetas
- */
-export async function getFolders(includeStats = false) {
-	try {
-		queryLogger.info('📂 Obteniendo todas las carpetas');
-
-		const folders = await prisma.folder.findMany({
-			include: {
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						children: true,
-					},
-				},
-				parent: true,
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-		});
-
-		// Transformar a modelo extendido con transformador
-		const transformedFolders = folders.map((folder) => transformFolderToExtended(folder));
-
-		queryLogger.info(`✅ Obtenidas ${transformedFolders.length} carpetas`);
-
-		return transformedFolders;
-	} catch (error) {
-		queryLogger.error('❌ Error obteniendo carpetas:', error);
-		throw new Error(`Error al obtener carpetas: ${error instanceof Error ? error.message : String(error)}`);
-	}
-}
-
-/**
- * Obtiene una carpeta por su ID
- * @param id ID de la carpeta
- * @param includeStats Si se deben incluir estadísticas avanzadas
- * @returns Carpeta extendida
- */
-export async function getFolderById(id: string, includeStats = false): Promise<FolderComplete> {
-	try {
-		queryLogger.info('🔍 Obteniendo carpeta por ID:', id);
-
-		const folder = await prisma.folder.findUnique({
-			where: { id },
-			include: {
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						children: true,
-					},
-				},
-				parent: true,
-				children: true,
-			},
-		});
-
-		if (!folder) {
-			throw new Error(`Carpeta con ID ${id} no encontrada`);
-		}
-
-		// Transformar a modelo completo con transformador
-		const transformedFolder = transformFolder(folder);
-
-		queryLogger.info('✅ Carpeta obtenida:', { id: transformedFolder.id, name: transformedFolder.name });
-
-		return transformedFolder;
-	} catch (error) {
-		queryLogger.error(`❌ Error obteniendo carpeta ${id}:`, error);
-		throw new Error(`Error al obtener carpeta: ${error instanceof Error ? error.message : String(error)}`);
-	}
-}
 
 /**
  * Busca carpetas según filtros
@@ -251,10 +175,7 @@ export async function getFolderTree() {
 			}
 		}
 
-		queryLogger.info(
-			`✅ Árbol de carpetas obtenido: ${rootFolders.length} carpetas raíz, ${folders.length} carpetas totales`
-		);
-
+		queryLogger.info(`✅ Árbol de carpetas obtenido con ${rootFolders.length} carpetas raíz`);
 		return rootFolders;
 	} catch (error) {
 		queryLogger.error('❌ Error obteniendo árbol de carpetas:', error);
@@ -263,70 +184,56 @@ export async function getFolderTree() {
 }
 
 /**
- * Obtiene estadísticas generales de carpetas
+ * Revalida las rutas relacionadas con las carpetas en el caché de Next.js.
+ * @returns Promesa resuelta cuando la revalidación se completa.
  */
-export async function getFoldersStats() {
+export async function revalidateFolderRoutes() {
 	try {
-		queryLogger.info('📊 Obteniendo estadísticas de carpetas');
+		queryLogger.info('🔄 Revalidando rutas de carpetas...');
+		// Revalidar rutas estáticas y dinámicas relacionadas con carpetas
+		revalidatePath('/folders');
+		revalidatePath('/folders/[id]', 'page'); // Revalidar rutas dinámicas
+		revalidatePath('/api/folders', 'page'); // Revalidar cualquier ruta de API relacionada con carpetas (si aún existe)
 
-		const [folderCount, totalImages, totalVideos, totalFolderSize, recentFolders] = await Promise.all([
-			prisma.folder.count(),
-			prisma.image.count(),
-			prisma.video.count(),
-			prisma.folder.aggregate({
-				_sum: {
-					totalSize: true,
-				},
-			}),
-			prisma.folder.findMany({
-				take: 5,
-				orderBy: {
-					updatedAt: 'desc',
-				},
-				select: {
-					id: true,
-					name: true,
-					totalFiles: true,
-					totalSize: true,
-				},
-			}),
-		]);
-
-		const stats = {
-			totalFolders: folderCount,
-			totalImages,
-			totalVideos,
-			totalFiles: totalImages + totalVideos,
-			totalSize: totalFolderSize._sum.totalSize || 0,
-			recentFolders,
-		};
-
-		queryLogger.info('✅ Estadísticas de carpetas obtenidas');
-
-		return stats;
+		queryLogger.info('✅ Rutas de carpetas revalidadas');
 	} catch (error) {
-		queryLogger.error('❌ Error obteniendo estadísticas de carpetas:', error);
-		throw new Error(`Error al obtener estadísticas: ${error instanceof Error ? error.message : String(error)}`);
+		queryLogger.error('❌ Error revalidando rutas de carpetas:', error);
+		throw new Error(`Error al revalidar rutas de carpetas: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
 
 /**
- * Revalida las rutas relacionadas con carpetas
+ * Obtiene estadísticas generales de carpetas.
+ * @returns Objeto con las estadísticas generales.
  */
-export async function revalidateFolderRoutes() {
+export async function getFoldersStats() {
 	try {
-		queryLogger.info('🔄 Revalidando rutas de carpetas');
+		queryLogger.info('📊 Obteniendo estadísticas generales de carpetas');
 
-		// Revalidar rutas que muestran carpetas
-		revalidatePath('/folders');
-		revalidatePath('/dashboard');
-		revalidatePath('/api/folders');
+		const totalFolders = await prisma.folder.count();
+		const totalImages = await prisma.image.count();
+		const totalVideos = await prisma.video.count();
 
-		queryLogger.info('✅ Rutas revalidadas');
+		const totalSizeResult = await prisma.folder.aggregate({
+			_sum: {
+				totalSize: true,
+			},
+		});
 
-		return { success: true };
+		const totalSize = totalSizeResult._sum.totalSize || 0;
+
+		queryLogger.info('✅ Estadísticas generales obtenidas', { totalFolders, totalImages, totalVideos, totalSize });
+
+		return {
+			totalFolders,
+			totalImages,
+			totalVideos,
+			totalSize,
+		};
 	} catch (error) {
-		queryLogger.error('❌ Error revalidando rutas:', error);
-		throw new Error(`Error al revalidar rutas: ${error instanceof Error ? error.message : String(error)}`);
+		queryLogger.error('❌ Error obteniendo estadísticas generales de carpetas:', error);
+		throw new Error(
+			`Error al obtener estadísticas generales de carpetas: ${error instanceof Error ? error.message : String(error)}`
+		);
 	}
 }
