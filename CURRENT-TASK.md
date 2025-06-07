@@ -491,3 +491,72 @@ interface GroupCardProps {
 10. **`src/store/unified-file-manager.store.ts`**: Reemplazar el `template literal` con un `string literal`.
 
 ---
+
+# Plan de Reorganización de Acciones de Carpetas
+
+## Problemas Identificados
+
+1. **Duplicación de archivos**:
+   - `crud.actions.ts` y `folder-crud.actions.ts` contienen funcionalidad similar
+   - Múltiples implementaciones de `indexFolder` y `reindexFolder` en diferentes archivos
+
+2. **Inconsistencia en nombres de archivos**:
+   - Algunos archivos usan el prefijo `folder-` (ej: `folder-crud.actions.ts`)
+   - Otros archivos no usan el prefijo (ej: `crud.actions.ts`)
+
+3. **Exportaciones inconsistentes**:
+   - El archivo `index.ts` exporta funciones de diferentes archivos con nombres similares
+
+## Plan de Acción
+
+1. **Estandarizar nombres de archivos**:
+   - Decidir un estándar: usar prefijo `folder-` para todos los archivos o eliminarlo para todos
+   - Propuesta: eliminar el prefijo `folder-` para mantener consistencia con otras entidades
+
+2. **Consolidar archivos duplicados**:
+   - Unificar `crud.actions.ts` y `folder-crud.actions.ts` en un solo archivo
+   - Mantener la implementación más completa y actualizada
+
+3. **Unificar implementaciones duplicadas**:
+   - Consolidar las implementaciones de `indexFolder` y `reindexFolder`
+   - Mantener las versiones de `process.actions.ts` que procesan imágenes correctamente
+
+4. **Reorganizar exportaciones en index.ts**:
+   - Limpiar y organizar las exportaciones por categoría
+   - Asegurar que no haya conflictos de nombres
+
+## Progreso
+
+### Completado ✅
+
+1. **Consolidación de archivos CRUD**:
+   - Se ha consolidado la funcionalidad de `folder-crud.actions.ts` en `crud.actions.ts`
+   - Se ha eliminado `folder-crud.actions.ts`
+   - Se ha actualizado `index.ts` para importar desde `crud.actions.ts`
+
+2. **Corrección de exportaciones de indexación**:
+   - Se ha actualizado `index.ts` para exportar `indexFolder` y `reindexFolder` desde `process.actions.ts` (las versiones que procesan imágenes)
+
+### Pendiente 🔄
+
+1. **Renombrar archivos para consistencia**:
+   - `folder-indexing.actions.ts` → `indexing.actions.ts`
+   - `folder-diagnostics.ts` → `diagnostics.actions.ts`
+   - `folder-get.actions.ts` → `get.actions.ts`
+   - `folder-images.actions.ts` → `images.actions.ts`
+
+2. **Actualizar importaciones**:
+   - Actualizar todas las importaciones en el proyecto que apunten a los archivos renombrados
+
+## Próximos Pasos
+
+1. Renombrar los archivos con prefijo `folder-` para mantener consistencia
+2. Actualizar todas las importaciones afectadas
+3. Realizar pruebas para asegurar que todo funcione correctamente
+
+## Beneficios Esperados
+
+- Código más limpio y mantenible
+- Eliminación de duplicación
+- Estructura de archivos consistente
+- Mejora en la claridad de las exportaciones

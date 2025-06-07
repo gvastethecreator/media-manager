@@ -1,6 +1,6 @@
 'use client';
 
-import { runAllDiagnostics } from '@/app/actions/folders/folder-diagnostics';
+import { runAllDiagnostics } from '@/app/actions/folders/diagnostics.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
