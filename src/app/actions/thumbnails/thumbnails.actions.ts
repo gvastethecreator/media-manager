@@ -54,6 +54,7 @@ export async function getThumbnail(
 				thumbnailWidth: true,
 				thumbnailHeight: true,
 				thumbnailError: true,
+				thumbnailMimeType: true,
 			},
 		});
 
@@ -92,7 +93,7 @@ export async function getThumbnail(
 				width: image.thumbnailWidth || undefined,
 				height: image.thumbnailHeight || undefined,
 				size: image.thumbnailSize || undefined,
-				mimeType: 'image/webp',
+				mimeType: image.thumbnailMimeType || 'image/webp',
 			};
 		}
 
@@ -132,6 +133,7 @@ export async function getThumbnail(
 					thumbnailWidth: thumbnail.width,
 					thumbnailHeight: thumbnail.height,
 					thumbnailError: null, // Limpiar error previo si existía
+					thumbnailMimeType: `image/${thumbnail.format}`,
 				},
 			});
 
@@ -147,7 +149,7 @@ export async function getThumbnail(
 				width: thumbnail.width,
 				height: thumbnail.height,
 				size: thumbnail.buffer.length,
-				mimeType: 'image/webp',
+				mimeType: `image/${thumbnail.format}`,
 			};
 		} catch (genError) {
 			// Registrar el error en la imagen

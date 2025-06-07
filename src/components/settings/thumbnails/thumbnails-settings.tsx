@@ -45,7 +45,12 @@ function ThumbnailItem({ image, index }: { image: LastProcessedThumbnail; index:
 			try {
 				setIsLoading(true);
 				const data = await thumbnailActions.getThumbnail(image.id, ThumbnailQuality.MEDIUM);
-				setThumbnail(`data:${data.mimeType || 'image/webp'};base64,${data.thumbnail}`);
+
+				if (data.thumbnailUrl) {
+					setThumbnail(data.thumbnailUrl);
+				} else {
+					setError(data.error || 'No se recibió una URL de thumbnail válida');
+				}
 			} catch (err) {
 				console.error('Error cargando thumbnail:', err);
 				setError(err instanceof Error ? err.message : 'Error desconocido');

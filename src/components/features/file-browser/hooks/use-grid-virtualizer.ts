@@ -24,7 +24,7 @@ interface VirtualizerResult {
 	itemSize: number;
 	rowHeight: number;
 	virtualizer: ReturnType<typeof useVirtualizer<HTMLDivElement, Element>>;
-	calculateMasonryHeight: (item: FileItem, baseWidth: number) => number;
+	calculateMasonryHeight: (item: any, baseWidth: number) => number;
 }
 
 /**
@@ -129,7 +129,12 @@ export function useGridVirtualizer({
 	}, [containerWidth, viewMode, calculateColumns, calculateItemSize]);
 
 	// Optimizar el cálculo de altura para masonry con cache
-	const calculateMasonryHeight = useCallback((item: FileItem, baseWidth: number) => {
+	const calculateMasonryHeight = useCallback((item: any, baseWidth: number) => {
+		// Verificar que el item sea válido
+		if (!item || typeof item !== 'object' || !item.id) {
+			return GRID_CONFIG.masonry.minHeight;
+		}
+
 		// Verificar si ya tenemos las dimensiones en cache
 		if (dimensionCache.has(item.id)) {
 			const cached = dimensionCache.get(item.id);

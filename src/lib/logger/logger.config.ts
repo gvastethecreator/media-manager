@@ -23,7 +23,7 @@ export const LoggerConfigSchema = z.object({
 export type LoggerConfig = z.infer<typeof LoggerConfigSchema>;
 
 export const loggerConfig: LoggerConfig = {
-	level: 'info',
+	level: 'debug',
 	enableConsole: true,
 	format: {
 		timestamp: true,

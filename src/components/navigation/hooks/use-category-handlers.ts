@@ -25,7 +25,10 @@ export function useCategoryHandlers() {
 	// Stores específicos para cada entidad
 	const { selectCollection, selectedCollectionId } = useCollectionStore();
 	const {
-		coreActions: { setCurrentFolder: selectFolder },
+		coreActions: {
+			setCurrentFolder: selectFolder,
+			fetchFolderById,
+		},
 		coreState: { currentFolderId: selectedFolderId },
 	} = useFolderStore();
 	const { selectTag, selectedTagId } = useTagStore();
@@ -99,15 +102,18 @@ export function useCategoryHandlers() {
 
 	// Función para manejar el clic en una carpeta
 	const handleFolderClick = useCallback(
-		(folderId: string) => {
+		async (folderId: string) => {
 			// Limpiar otras selecciones
 			clearAllSelections();
 
 			// Establecer vista y carpeta actual
 			setCurrentView('folder-content');
-			selectFolder(folderId);
+			const folder = await fetchFolderById(folderId);
+			if (folder) {
+				selectFolder(folder);
+			}
 		},
-		[clearAllSelections, setCurrentView, selectFolder]
+		[clearAllSelections, setCurrentView, selectFolder, fetchFolderById]
 	);
 
 	const handleTagClick = useCallback(

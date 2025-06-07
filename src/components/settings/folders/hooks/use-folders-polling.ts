@@ -1,5 +1,6 @@
 'use client';
 
+import { getFolderProcessingStatus } from '@/app/actions/folders/status.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
 import type { ProcessStatus } from '@/types/process';
@@ -62,25 +63,18 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 				normalizedId: folderId,
 			});
 
-			const response = await fetch(url, {
-				method: 'GET',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				cache: 'no-store',
-				next: { revalidate: 0 }, // Asegurar que siempre obtenemos datos frescos
-			});
+			// ✨ Reemplazar llamada a API con Server Action
+			const data = await getFolderProcessingStatus(folderId);
 
-			if (!response.ok) {
-				throw new Error(`Error obteniendo estado: ${response.status}`);
+			// Verificar si la Server Action retornó un error
+			if (data.error) {
+				throw new Error(`Error obteniendo estado: ${data.error}`);
 			}
-
-			const data = await response.json();
 
 			// Reiniciar contador de errores
 			pollingErrorCountRef.current = 0;
 
-			// Verificar primero si el proceso está marcado como completo en la API
+			// Verificar primero si el proceso está marcado como completo
 			if (data.isComplete) {
 				pollingLogger.info('✅ API indica que el proceso está completo:', {
 					folderId,

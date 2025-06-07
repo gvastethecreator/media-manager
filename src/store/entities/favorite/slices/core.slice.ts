@@ -30,10 +30,11 @@ export interface CoreActions {
 	removeFavorite: (id: string) => void;
 	updateFavorite: (id: string, data: Partial<FavoriteExtended>) => void;
 	clearFavorites: () => void;
+	isFavorited: (id: string) => boolean;
 }
 
 // Slice del store para core
-export const createCoreSlice: StateCreator<FavoriteStore, [], [], CoreState & CoreActions> = (set) => ({
+export const createCoreSlice: StateCreator<FavoriteStore, [], [], CoreState & CoreActions> = (set, get) => ({
 	// Estado inicial
 	favorites: [],
 	isLoading: false,
@@ -81,5 +82,13 @@ export const createCoreSlice: StateCreator<FavoriteStore, [], [], CoreState & Co
 	clearFavorites: () => {
 		set({ favorites: [] });
 		logger.info('🧹 Favoritos eliminados');
+	},
+
+	// Verificación de favoritos
+	isFavorited: (id: string) => {
+		const state = get();
+		const result = state.favorites.some((favorite) => favorite.id === id);
+		logger.debug(`Verificando favorito para ID ${id}: ${result}`);
+		return result;
 	},
 });
