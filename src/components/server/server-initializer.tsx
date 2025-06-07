@@ -55,7 +55,14 @@ export function ServerInitializer() {
 
 					// Verificar si la respuesta es exitosa
 					if (!response.ok) {
-						throw new Error(`Error en la respuesta: ${response.status} ${response.statusText}`);
+						let errorBody: any = {};
+						try {
+							errorBody = await response.json();
+						} catch (jsonError) {
+							logger.warn(`No se pudo parsear el cuerpo del error como JSON: ${jsonError}`);
+							errorBody.message = response.statusText; // Fallback al statusText si no es JSON
+						}
+						throw new Error(errorBody.error || errorBody.message || `Error en la respuesta: ${response.status} ${response.statusText}`);
 					}
 
 					const data = await response.json();
@@ -75,14 +82,17 @@ export function ServerInitializer() {
 						if (fetchError.name === 'AbortError') {
 							throw new Error('Timeout al inicializar el servidor');
 						}
+						logger.error('Error de fetch capturado:', fetchError);
 						throw fetchError;
 					}
+					logger.error('Error desconocido capturado:', fetchError);
 					throw new Error(String(fetchError));
 				}
 			} catch (error) {
 				setStatus('error');
 				logger.error('Error al inicializar el servidor', {
 					error: error instanceof Error ? error.message : String(error),
+					fullError: error,
 					retry: retries + 1,
 				});
 
