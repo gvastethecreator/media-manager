@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteFolder } from '@/app/actions/folder';
+import { deleteFolder } from '@/app/actions/folders';
 import {
 	AlertDialog,
 	AlertDialogAction,

@@ -1,17 +1,18 @@
 'use server';
 
 /**
- * @file CRUD actions for folders
+ * @file Acciones CRUD para carpetas
  * @module app/actions/folders/crud.actions
  */
 
+import { invalidateAllFolderCache } from '@/lib/folder-cache';
 import { scanFolder } from '@/lib/folder-scanner';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { transformFolder } from '@/transformers/folder';
 import { type FolderComplete } from '@/types/entities/folder';
 import { revalidatePath } from 'next/cache';
-import { CreateFolderOptions, FOLDER_ERROR_CODES, UpdateFolderOptions } from './folder-types';
+import { CreateFolderOptions, FOLDER_ERROR_CODES, UpdateFolderOptions, createFolderError } from './folder-types';
 
 // Logger para acciones CRUD
 const crudLogger = serverLogger.withContext('FolderCrudActions');
@@ -20,39 +21,16 @@ const crudLogger = serverLogger.withContext('FolderCrudActions');
 const REVALIDATE_PATHS = ['/folders', '/dashboard', '/images', '/api/folders'];
 
 /**
- * Revalida las rutas relacionadas con carpetas
+ * Revalida todas las rutas relevantes
  */
 async function revalidateFolderPaths() {
 	crudLogger.info('🔄 Revalidando rutas de carpetas');
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}
-}
-
-/**
- * Interfaz para errores de operaciones CRUD de carpetas
- */
-export interface FolderCrudErrorData {
-	name: string;
-	message: string;
-	code: string;
-	cause?: unknown;
-}
-
-/**
- * Función para crear errores de operaciones CRUD de carpetas (enfoque funcional)
- */
-function createFolderCrudError(
-	message: string,
-	code: string = FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
-	cause?: unknown
-): FolderCrudErrorData {
-	return {
-		name: 'FolderCrudError',
-		message,
-		code,
-		cause,
-	};
+	// Invalidar cache también
+	invalidateAllFolderCache();
+	crudLogger.info('✅ Rutas revalidadas y cache invalidado');
 }
 
 /**
@@ -67,7 +45,7 @@ export async function createFolder(path: string, options: CreateFolderOptions = 
 
 		// Validar que la ruta no esté vacía
 		if (!path || path.trim() === '') {
-			throw createFolderCrudError('La ruta de la carpeta no puede estar vacía', FOLDER_ERROR_CODES.PATH_INVALID);
+			throw createFolderError('La ruta de la carpeta no puede estar vacía', FOLDER_ERROR_CODES.PATH_INVALID);
 		}
 
 		// Verificar que la carpeta exista y sea accesible
@@ -80,28 +58,32 @@ export async function createFolder(path: string, options: CreateFolderOptions = 
 				totalSize: scanResult.totalSize,
 			});
 		} catch (error) {
-			throw createFolderCrudError(
+			throw createFolderError(
 				`La carpeta no existe o no es accesible: ${path}`,
 				FOLDER_ERROR_CODES.PATH_INVALID,
+				error instanceof Error ? error.stack : undefined,
+				undefined,
 				error
 			);
 		}
 
 		// Verificar si la carpeta ya existe en la base de datos
 		const existingFolder = await prisma.folder.findFirst({
-			where: { path: path },
+			where: { path },
 		});
 
 		if (existingFolder) {
-			throw createFolderCrudError(`Ya existe una carpeta con la ruta ${path}`, FOLDER_ERROR_CODES.ALREADY_EXISTS);
+			throw createFolderError(`Ya existe una carpeta con la ruta ${path}`, FOLDER_ERROR_CODES.ALREADY_EXISTS);
 		}
 
 		// Extraer nombre de la carpeta de la ruta
-		const folderName = options.name || path.split('/').pop() || path.split('\\').pop() || 'Nueva carpeta'; // Crear la carpeta en la base de datos
+		const folderName = options.name || path.split('/').pop() || path.split('\\').pop() || 'Nueva carpeta';
+
+		// Crear la carpeta en la base de datos
 		const folder = await prisma.folder.create({
 			data: {
 				name: folderName,
-				path: path,
+				path,
 				description: options.description || '',
 				emoji: options.emoji || '📁',
 				color: options.color || '',
@@ -126,21 +108,23 @@ export async function createFolder(path: string, options: CreateFolderOptions = 
 
 		// Transformar y devolver resultado
 		const transformedFolder = transformFolder(folder);
-		crudLogger.info('✅ Carpeta creada correctamente:', { id: transformedFolder.id, name: transformedFolder.name });
+		crudLogger.info('✅ Carpeta creada correctamente:', {
+			id: transformedFolder.id,
+			name: transformedFolder.name,
+		});
 		return transformedFolder;
 	} catch (error) {
-		// Manejar errores específicos
-		if (error && typeof error === 'object' && 'name' in error && error.name === 'FolderCrudError') {
-			crudLogger.error(`❌ Error creando carpeta: ${(error as FolderCrudErrorData).code}`, error);
+		crudLogger.error('❌ Error creando carpeta:', error);
+
+		// Si ya es un error de carpeta, simplemente relanzarlo
+		if (error && typeof error === 'object' && 'code' in error &&
+		    typeof error.code === 'string' && error.code.startsWith('FOLDER_')) {
 			throw error;
 		}
 
-		// Manejar otros errores y convertirlos a FolderCrudError
-		const errorMessage = error instanceof Error ? error.message : String(error);
-		crudLogger.error('❌ Error inesperado creando carpeta:', error);
-
 		// Determinar código de error según el mensaje
 		let errorCode = FOLDER_ERROR_CODES.UNEXPECTED_ERROR;
+		const errorMessage = error instanceof Error ? error.message : String(error);
 
 		if (errorMessage.includes('permission') || errorMessage.includes('permiso')) {
 			errorCode = FOLDER_ERROR_CODES.PERMISSION_DENIED;
@@ -150,7 +134,13 @@ export async function createFolder(path: string, options: CreateFolderOptions = 
 			errorCode = FOLDER_ERROR_CODES.PATH_INVALID;
 		}
 
-		throw createFolderCrudError(`Error al crear carpeta: ${errorMessage}`, errorCode, error);
+		throw createFolderError(
+			`Error al crear carpeta: ${errorMessage}`,
+			errorCode,
+			error instanceof Error ? error.stack : undefined,
+			undefined,
+			error
+		);
 	}
 }
 
@@ -166,7 +156,7 @@ export async function updateFolder(id: string, data: UpdateFolderOptions): Promi
 
 		// Validar que el ID no esté vacío
 		if (!id || id.trim() === '') {
-			throw createFolderCrudError('El ID de la carpeta no puede estar vacío', FOLDER_ERROR_CODES.NOT_FOUND);
+			throw createFolderError('El ID de la carpeta no puede estar vacío', FOLDER_ERROR_CODES.NOT_FOUND);
 		}
 
 		// Buscar la carpeta
@@ -175,7 +165,7 @@ export async function updateFolder(id: string, data: UpdateFolderOptions): Promi
 		});
 
 		if (!folder) {
-			throw createFolderCrudError(`No se encontró ninguna carpeta con ID ${id}`, FOLDER_ERROR_CODES.NOT_FOUND);
+			throw createFolderError(`No se encontró ninguna carpeta con ID ${id}`, FOLDER_ERROR_CODES.NOT_FOUND);
 		}
 
 		// Si se actualiza la ruta, verificar que la nueva ruta sea válida
@@ -188,9 +178,11 @@ export async function updateFolder(id: string, data: UpdateFolderOptions): Promi
 					totalFiles: scanResult.totalFiles,
 				});
 			} catch (error) {
-				throw createFolderCrudError(
+				throw createFolderError(
 					`La nueva ruta no existe o no es accesible: ${data.path}`,
 					FOLDER_ERROR_CODES.PATH_INVALID,
+					error instanceof Error ? error.stack : undefined,
+					undefined,
 					error
 				);
 			}
@@ -204,22 +196,26 @@ export async function updateFolder(id: string, data: UpdateFolderOptions): Promi
 			});
 
 			if (existingFolder) {
-				throw createFolderCrudError(
+				throw createFolderError(
 					`Ya existe otra carpeta con la ruta ${data.path}`,
 					FOLDER_ERROR_CODES.ALREADY_EXISTS
 				);
 			}
 		}
 
-		// Filtrar propiedades nulas o indefinidas para no sobrescribir datos existentes
-		const updateData = Object.fromEntries(
-			Object.entries(data).filter(([_, value]) => value !== undefined && value !== null)
-		);
-
 		// Actualizar la carpeta
 		const updatedFolder = await prisma.folder.update({
 			where: { id },
-			data: updateData,
+			data: {
+				name: data.name,
+				path: data.path,
+				description: data.description,
+				emoji: data.emoji,
+				color: data.color,
+				autoReindex: data.autoReindex,
+				parentId: data.parentId,
+				// Solo usar campos que existen en el esquema
+			},
 			include: {
 				parent: true,
 				_count: {
@@ -237,52 +233,117 @@ export async function updateFolder(id: string, data: UpdateFolderOptions): Promi
 
 		// Transformar y devolver resultado
 		const transformedFolder = transformFolder(updatedFolder);
-		crudLogger.info('✅ Carpeta actualizada correctamente:', { id: transformedFolder.id });
+		crudLogger.info('✅ Carpeta actualizada correctamente:', {
+			id: transformedFolder.id,
+			name: transformedFolder.name,
+		});
 		return transformedFolder;
 	} catch (error) {
-		// Manejar errores específicos
-		if (error && typeof error === 'object' && 'name' in error && error.name === 'FolderCrudError') {
-			crudLogger.error(`❌ Error actualizando carpeta: ${(error as FolderCrudErrorData).code}`, error);
+		crudLogger.error('❌ Error actualizando carpeta:', error);
+
+		// Si ya es un error de carpeta, simplemente relanzarlo
+		if (error && typeof error === 'object' && 'code' in error &&
+		    typeof error.code === 'string' && error.code.startsWith('FOLDER_')) {
 			throw error;
 		}
 
-		// Manejar otros errores
-		const errorMessage = error instanceof Error ? error.message : String(error);
-		crudLogger.error('❌ Error inesperado actualizando carpeta:', error);
-
-		// Determinar código de error según el mensaje
-		let errorCode = FOLDER_ERROR_CODES.UNEXPECTED_ERROR;
-
-		if (errorMessage.includes('permission') || errorMessage.includes('permiso')) {
-			errorCode = FOLDER_ERROR_CODES.PERMISSION_DENIED;
-		} else if (errorMessage.includes('already exists') || errorMessage.includes('ya existe')) {
-			errorCode = FOLDER_ERROR_CODES.ALREADY_EXISTS;
-		} else if (errorMessage.includes('not found') || errorMessage.includes('no encontrado')) {
-			errorCode = FOLDER_ERROR_CODES.NOT_FOUND;
-		}
-
-		throw createFolderCrudError(`Error al actualizar carpeta: ${errorMessage}`, errorCode, error);
+		throw createFolderError(
+			'Error al actualizar carpeta',
+			FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
+			error instanceof Error ? error.stack : undefined,
+			undefined,
+			error
+		);
 	}
 }
 
 /**
- * Elimina una carpeta y sus relaciones
+ * Elimina una carpeta y todo su contenido
  * @param id ID de la carpeta a eliminar
- * @returns Indicador de éxito
+ * @returns Confirmación de eliminación
  */
 export async function deleteFolder(id: string): Promise<{ success: boolean; id: string }> {
 	try {
-		crudLogger.info('🗑️ Eliminando carpeta:', { id });
+		crudLogger.info('🗑️ Eliminando carpeta:', id);
 
 		// Validar que el ID no esté vacío
 		if (!id || id.trim() === '') {
-			throw new FolderCrudError('El ID de la carpeta no puede estar vacío', FOLDER_ERROR_CODES.NOT_FOUND);
+			throw createFolderError('El ID de la carpeta no puede estar vacío', FOLDER_ERROR_CODES.NOT_FOUND);
 		}
 
-		// Verificar si la carpeta existe
+		// Buscar la carpeta
 		const folder = await prisma.folder.findUnique({
 			where: { id },
+		});
+
+		if (!folder) {
+			throw createFolderError(`No se encontró ninguna carpeta con ID ${id}`, FOLDER_ERROR_CODES.NOT_FOUND);
+		}
+
+		// Eliminar la carpeta (Prisma se encargará de las relaciones con cascada)
+		await prisma.folder.delete({
+			where: { id },
+		});
+
+		// Revalidar rutas
+		await revalidateFolderPaths();
+
+		crudLogger.info('✅ Carpeta eliminada correctamente:', {
+			id,
+			name: folder.name,
+		});
+		return { success: true, id };
+	} catch (error) {
+		crudLogger.error('❌ Error eliminando carpeta:', error);
+
+		// Si ya es un error de carpeta, simplemente relanzarlo
+		if (error && typeof error === 'object' && 'code' in error &&
+		    typeof error.code === 'string' && error.code.startsWith('FOLDER_')) {
+			throw error;
+		}
+
+		throw createFolderError(
+			'Error al eliminar carpeta',
+			FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
+			error instanceof Error ? error.stack : undefined,
+			undefined,
+			error
+		);
+	}
+}
+
+/**
+ * Actualiza la configuración de reindexación automática de una carpeta
+ * @param id ID de la carpeta
+ * @param autoReindex Nuevo valor para autoReindex
+ * @returns Datos de la carpeta actualizada
+ */
+export async function updateFolderAutoReindex(id: string, autoReindex: boolean): Promise<FolderComplete> {
+	try {
+		crudLogger.info('🔄 Actualizando autoReindex de carpeta:', { id, autoReindex });
+
+		// Validar que el ID no esté vacío
+		if (!id || id.trim() === '') {
+			throw createFolderError('El ID de la carpeta no puede estar vacío', FOLDER_ERROR_CODES.NOT_FOUND);
+		}
+
+		// Buscar la carpeta
+		const folder = await prisma.folder.findUnique({
+			where: { id },
+		});
+
+		if (!folder) {
+			throw createFolderError(`No se encontró ninguna carpeta con ID ${id}`, FOLDER_ERROR_CODES.NOT_FOUND);
+		}
+
+		// Actualizar la carpeta
+		const updatedFolder = await prisma.folder.update({
+			where: { id },
+			data: {
+				autoReindex,
+			},
 			include: {
+				parent: true,
 				_count: {
 					select: {
 						images: true,
@@ -293,70 +354,32 @@ export async function deleteFolder(id: string): Promise<{ success: boolean; id: 
 			},
 		});
 
-		if (!folder) {
-			throw new FolderCrudError(`No se encontró ninguna carpeta con ID ${id}`, FOLDER_ERROR_CODES.NOT_FOUND);
-		}
-
-		// Iniciar transacción para asegurar consistencia
-		await prisma.$transaction(async (tx) => {
-			// Eliminar imágenes relacionadas
-			if (folder._count.images > 0) {
-				crudLogger.info(`Eliminando ${folder._count.images} imágenes de la carpeta:`, { folderId: id });
-				await tx.image.deleteMany({
-					where: { folderId: id },
-				});
-			}
-
-			// Eliminar videos relacionados
-			if (folder._count.videos > 0) {
-				crudLogger.info(`Eliminando ${folder._count.videos} videos de la carpeta:`, { folderId: id });
-				await tx.video.deleteMany({
-					where: { folderId: id },
-				});
-			}
-
-			// Reasignar carpetas hijas (opcional: actualizar a null o moverlas a otra carpeta)
-			if (folder._count.children > 0) {
-				crudLogger.info(`Actualizando ${folder._count.children} carpetas hijas:`, { parentId: id });
-				await tx.folder.updateMany({
-					where: { parentId: id },
-					data: { parentId: null },
-				});
-			}
-
-			// Eliminar la carpeta
-			await tx.folder.delete({
-				where: { id },
-			});
-		});
-
 		// Revalidar rutas
 		await revalidateFolderPaths();
 
-		crudLogger.info('✅ Carpeta eliminada correctamente:', { id });
-		return { success: true, id };
+		// Transformar y devolver resultado
+		const transformedFolder = transformFolder(updatedFolder);
+		crudLogger.info('✅ AutoReindex actualizado correctamente:', {
+			id: transformedFolder.id,
+			name: transformedFolder.name,
+			autoReindex,
+		});
+		return transformedFolder;
 	} catch (error) {
-		// Manejar errores específicos
-		if (error instanceof FolderCrudError) {
-			crudLogger.error(`❌ Error eliminando carpeta: ${error.code}`, error);
+		crudLogger.error('❌ Error actualizando autoReindex:', error);
+
+		// Si ya es un error de carpeta, simplemente relanzarlo
+		if (error && typeof error === 'object' && 'code' in error &&
+		    typeof error.code === 'string' && error.code.startsWith('FOLDER_')) {
 			throw error;
 		}
 
-		// Manejar otros errores
-		const errorMessage = error instanceof Error ? error.message : String(error);
-		crudLogger.error('❌ Error inesperado eliminando carpeta:', error);
-
-		// Determinar código de error según el mensaje
-		let errorCode = FOLDER_ERROR_CODES.UNEXPECTED_ERROR;
-
-		if (errorMessage.includes('permission') || errorMessage.includes('permiso')) {
-			errorCode = FOLDER_ERROR_CODES.PERMISSION_DENIED;
-		} else if (errorMessage.includes('not found') || errorMessage.includes('no encontrado')) {
-			errorCode = FOLDER_ERROR_CODES.NOT_FOUND;
-		} else if (errorMessage.includes('foreign key') || errorMessage.includes('constraint')) {
-			errorCode = FOLDER_ERROR_CODES.OPERATION_IN_PROGRESS;
-		}
-
-		throw new FolderCrudError(`Error al eliminar carpeta: ${errorMessage}`, errorCode, error);
+		throw createFolderError(
+			'Error al actualizar autoReindex',
+			FOLDER_ERROR_CODES.UNEXPECTED_ERROR,
+			error instanceof Error ? error.stack : undefined,
+			undefined,
+			error
+		);
 	}
 }
