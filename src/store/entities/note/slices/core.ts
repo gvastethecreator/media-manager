@@ -1,8 +1,16 @@
 import { clientLogger } from '@/lib/logger/client-logger';
-import { transformNoteToWithStats } from '@/transformers/note/transformer';
+import { toastService } from '@/services/toast.service';
+import { fromPrismaNote } from '@/transformers/note/serializers';
 import type { Note, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
-import type { StateCreator } from 'zustand';
+import { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
+
+import {
+	createNote as createNoteAction,
+	deleteNote as deleteNoteAction,
+	getNotes as getNotesAction,
+	updateNote as updateNoteAction,
+} from '@/app/actions/notes';
 
 const coreLogger = clientLogger.withContext('NoteStore:Core');
 
@@ -23,46 +31,6 @@ export interface CoreSlice {
 	reset: () => void;
 }
 
-// API mock para simular llamadas a server actions
-// Esto sería reemplazado por llamadas reales a los server actions
-const mockApi = {
-	getNotes: async (): Promise<NoteWithStats[]> => {
-		return new Promise((resolve) => {
-			setTimeout(() => resolve([]), 500);
-		});
-	},
-	createNote: async (note: NoteCreateInput): Promise<Note> => {
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				const newNote = {
-					id: `note_${Date.now()}`,
-					...note,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-				} as unknown as Note;
-				resolve(newNote);
-			}, 500);
-		});
-	},
-	updateNote: async (id: string, note: NoteUpdateInput): Promise<Note> => {
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				const updatedNote = {
-					id,
-					...note,
-					updatedAt: new Date(),
-				} as unknown as Note;
-				resolve(updatedNote);
-			}, 500);
-		});
-	},
-	deleteNote: async (id: string): Promise<void> => {
-		return new Promise((resolve) => {
-			setTimeout(() => resolve(), 500);
-		});
-	},
-};
-
 export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set, get) => ({
 	// Estado inicial
 	notes: [],
@@ -76,18 +44,50 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			set({ isLoading: true, error: null });
 			coreLogger.info('🔄 Cargando notas');
 
-			// Llamar a server action para obtener notas
-			const notes = await mockApi.getNotes();
+			// Estrategia 1: Usar server action (preferida)
+			try {
+				const result = await getNotesAction();
 
-			// Transformar resultados con la función correcta
-			const transformedNotes = notes.map(transformNoteToWithStats);
+				if (result && Array.isArray(result)) {
+					set({
+						notes: result.map(fromPrismaNote),
+						isLoading: false,
+					});
+					coreLogger.info('✅ Notas cargadas con Server Action:', result.length);
+					return result;
+				}
+			} catch (serverActionError) {
+				coreLogger.warn('⚠️ Error con Server Action, intentando API:', serverActionError);
+			}
 
-			set({ notes: transformedNotes, isLoading: false });
-			coreLogger.info('✅ Notas cargadas:', { count: transformedNotes.length });
+			// Estrategia 2: Usar API
+			try {
+				const response = await fetch('/api/entities/notes');
+
+				if (!response.ok) {
+					throw new Error(`Error al cargar notas: ${response.status}`);
+				}
+
+				const data = await response.json();
+				const notes = Array.isArray(data) ? data.map(fromPrismaNote) : [];
+
+				set({
+					notes: notes,
+					isLoading: false,
+				});
+
+				coreLogger.info('✅ Notas cargadas vía API:', notes.length);
+				return notes;
+			} catch (apiError) {
+				coreLogger.error('❌ Error con API:', apiError);
+				throw apiError;
+			}
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Error al cargar notas';
-			coreLogger.error('❌ Error al cargar notas:', error);
-			set({ error: message, isLoading: false });
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			coreLogger.error('❌ Error final al cargar notas:', error);
+			set({ error: errorMessage, isLoading: false });
+			toastService.system.error('Error al cargar notas');
+			return [];
 		}
 	},
 
@@ -101,17 +101,49 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			set({ isLoading: true, error: null });
 			coreLogger.info('✨ Creando nota:', note);
 
-			// Llamar a server action para crear nota
-			await mockApi.createNote(note);
+			// Estrategia 1: Usar server action (preferida)
+			try {
+				const newNote = await createNoteAction(note);
 
-			// Recargar notas para actualizar la lista
-			await get().loadNotes();
+				set((state) => ({
+					notes: [...state.notes, newNote],
+					isLoading: false,
+				}));
 
-			coreLogger.info('✅ Nota creada');
+				coreLogger.info('✅ Nota creada correctamente:', newNote.id);
+				toastService.system.success('Nota creada correctamente');
+				return newNote;
+			} catch (serverActionError) {
+				coreLogger.warn('⚠️ Error con Server Action, intentando API:', serverActionError);
+			}
+
+			// Estrategia 2: Usar API
+			const response = await fetch('/api/entities/notes', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(note),
+			});
+
+			if (!response.ok) {
+				throw new Error(`Error al crear nota: ${response.status}`);
+			}
+
+			const newNote = fromPrismaNote(await response.json());
+
+			set((state) => ({
+				notes: [...state.notes, newNote],
+				isLoading: false,
+			}));
+
+			coreLogger.info('✅ Nota creada correctamente vía API:', newNote.id);
+			toastService.system.success('Nota creada correctamente');
+			return newNote;
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Error al crear nota';
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			coreLogger.error('❌ Error al crear nota:', error);
-			set({ error: message, isLoading: false });
+			set({ error: errorMessage, isLoading: false });
+			toastService.system.error('Error al crear nota');
+			return null;
 		}
 	},
 
@@ -120,17 +152,47 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			set({ isLoading: true, error: null });
 			coreLogger.info('🔄 Actualizando nota:', { id, ...note });
 
-			// Llamar a server action para actualizar nota
-			await mockApi.updateNote(id, note);
+			// Estrategia 1: Usar server action (preferida)
+			try {
+				const updatedNote = await updateNoteAction(id, note);
 
-			// Recargar notas para actualizar la lista
-			await get().loadNotes();
+				set((state) => ({
+					notes: state.notes.map((note) => (note.id === id ? updatedNote : note)),
+					isLoading: false,
+				}));
 
-			coreLogger.info('✅ Nota actualizada');
+				coreLogger.info('✅ Nota actualizada correctamente:', id);
+				toastService.system.success('Nota actualizada correctamente');
+				return;
+			} catch (serverActionError) {
+				coreLogger.warn('⚠️ Error con Server Action, intentando API:', serverActionError);
+			}
+
+			// Estrategia 2: Usar API
+			const response = await fetch(`/api/entities/notes/${id}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(note),
+			});
+
+			if (!response.ok) {
+				throw new Error(`Error al actualizar nota: ${response.status}`);
+			}
+
+			const updatedNote = fromPrismaNote(await response.json());
+
+			set((state) => ({
+				notes: state.notes.map((note) => (note.id === id ? updatedNote : note)),
+				isLoading: false,
+			}));
+
+			coreLogger.info('✅ Nota actualizada correctamente vía API:', id);
+			toastService.system.success('Nota actualizada correctamente');
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Error al actualizar nota';
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			coreLogger.error('❌ Error al actualizar nota:', error);
-			set({ error: message, isLoading: false });
+			set({ error: errorMessage, isLoading: false });
+			toastService.system.error('Error al actualizar nota');
 		}
 	},
 
@@ -139,22 +201,43 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			set({ isLoading: true, error: null });
 			coreLogger.info('🗑️ Eliminando nota:', id);
 
-			// Llamar a server action para eliminar nota
-			await mockApi.deleteNote(id);
+			// Estrategia 1: Usar server action (preferida)
+			try {
+				await deleteNoteAction(id);
 
-			// Recargar notas para actualizar la lista
-			await get().loadNotes();
+				set((state) => ({
+					notes: state.notes.filter((note) => note.id !== id),
+					isLoading: false,
+				}));
 
-			// Si la nota seleccionada es la que se eliminó, deseleccionarla
-			if (get().selectedNote?.id === id) {
-				set({ selectedNote: null });
+				coreLogger.info('✅ Nota eliminada correctamente:', id);
+				toastService.system.success('Nota eliminada correctamente');
+				return;
+			} catch (serverActionError) {
+				coreLogger.warn('⚠️ Error con Server Action, intentando API:', serverActionError);
 			}
 
-			coreLogger.info('✅ Nota eliminada');
+			// Estrategia 2: Usar API
+			const response = await fetch(`/api/entities/notes/${id}`, {
+				method: 'DELETE',
+			});
+
+			if (!response.ok) {
+				throw new Error(`Error al eliminar nota: ${response.status}`);
+			}
+
+			set((state) => ({
+				notes: state.notes.filter((note) => note.id !== id),
+				isLoading: false,
+			}));
+
+			coreLogger.info('✅ Nota eliminada correctamente vía API:', id);
+			toastService.system.success('Nota eliminada correctamente');
 		} catch (error) {
-			const message = error instanceof Error ? error.message : 'Error al eliminar nota';
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			coreLogger.error('❌ Error al eliminar nota:', error);
-			set({ error: message, isLoading: false });
+			set({ error: errorMessage, isLoading: false });
+			toastService.system.error('Error al eliminar nota');
 		}
 	},
 

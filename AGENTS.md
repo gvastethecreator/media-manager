@@ -1,277 +1,52 @@
-# 🤖 AGENTS.md - Configuración de Jest y Testing
+debes seguir las tareas de CURRENT-TASK.md
 
-## 📖 Resumen de la Tarea
+## Workflow para Agentes de IA: Resolución de Errores de PrismaClient en el Cliente
 
-### 🎯 Objetivo Principal
-Configurar un sistema de testing robusto y escalable para el **Image Manager** usando Jest como framework principal, compatible con el stack moderno (Next.js 15, React 19, TypeScript 5.8).
+Cuando trabajes en las tareas de `CURRENT-TASK.md` relacionadas con los errores de `PrismaClient` en el cliente, sigue este workflow detallado:
 
-### 🔍 Problema Inicial
-El proyecto tenía configuración de Jest parcial con errores críticos:
-- ❌ **Resolver faltante**: `src/tests/resolver.js` no existía
-- ⚠️ **Incompatibilidades**: Configuración obsoleta para React 19 y Next.js 15
-- 📁 **Estructura incompleta**: Faltaba organización de tests y utilidades
+### 1. **Entendimiento del Problema**
+*   El error `PrismaClient` en el cliente ocurre cuando el módulo `prisma` (o alguna dependencia que lo arrastra) se incluye en el bundle del cliente.
+*   Esto generalmente sucede porque archivos del lado del servidor (como `mappers.ts`, `serializers.ts`, o `index.ts` de un transformador) que importan `Prisma` son importados por código del lado del cliente (como slices de Zustand store o componentes `use client`).
 
-## 🏗️ Arquitectura de Testing Implementada
+### 2. **Fase de Identificación y Análisis (Cuando se te asigne una nueva entidad/transformer)**
+*   **Paso Inicial:** Si se te asigna una nueva entidad (ej. `character`, `collection`, `concept`), el primer paso es ejecutar una búsqueda `grep_search` para `import { prisma } from` dentro del directorio `src/` para esa entidad y sus `transformers`.
+    *   Ejemplo: `grep_search(query='import { prisma } from', include_pattern='src/transformers/character/*.ts')`
+*   **Revisar `index.ts` del Transformer:**
+    *   Lee el `index.ts` del transformer (ej. `src/transformers/character/index.ts`).
+    *   Busca `re-exportaciones` de funciones o tipos que no deberían ser accedidos directamente por el cliente. Si `index.ts` re-exporta funciones que manipulan `prisma` o sus tipos, considera que este archivo **solo debe exportar funciones del lado del servidor** y **no debe re-exportar** nada destinado al cliente.
+    *   Si una función como `transformX` (que es segura para el cliente) se re-exporta aquí, asegúrate de que el cliente la importe directamente desde su archivo de origen (ej. `src/transformers/character/transformer.ts` o `src/transformers/character/serializers.ts`) y no desde `index.ts`.
+    *   **Acción:** Eliminar `re-exportaciones` problemáticas en `index.ts`.
+*   **Revisar `mappers.ts` y `serializers.ts` del Transformer:**
+    *   Lee los archivos `mappers.ts` y `serializers.ts` de la entidad.
+    *   Busca `import type { Prisma } from '@prisma/client';` o cualquier importación de tipos de Prisma.
+    *   Busca usos de tipos `Prisma.X` en firmas de funciones o dentro de la lógica.
+    *   **Acción:**
+        *   Elimina la importación de `Prisma` (`import type { Prisma } from '@prisma/client';`).
+        *   Reemplaza todos los tipos `Prisma.X` por sus equivalentes de dominio (ej. `AlbumCreateInput`, `AlbumUpdateInput`, `AlbumComplete`) que deben estar definidos en `@/types/entities/X/types.ts`. Si un tipo equivalente no existe, notifica al usuario o crea uno genérico apropiado si es trivial.
+        *   Asegúrate de que `mappers.ts` y `serializers.ts` se centren **únicamente en la transformación de datos** y no realicen operaciones directas con `prisma`.
 
-```mermaid
-graph TB
-    subgraph "🔧 Core Config"
-        A[jest.config.ts] --> B[jest.setup.ts]
-        A --> C[tsconfig.test.json]
-        A --> D[resolver.js]
-    end
+### 3. **Fase de Ajuste del Store (Lado del Cliente)**
+*   **Identificar el Slice del Store:** Encuentra el slice de Zustand store correspondiente a la entidad (ej. `src/store/entities/character/slices/core.ts`).
+*   **Revisar Importaciones:**
+    *   Busca importaciones de funciones de transformación que hayan sido modificadas en la fase anterior (ej. `mapCreateXDataToPrisma`).
+    *   Busca cualquier llamada directa a rutas `/api/entities/X` usando `fetch`.
+*   **Asegurar Uso de Server Actions:**
+    *   Las operaciones CRUD (crear, actualizar, eliminar, obtener datos) en el slice del store **deben llamar a las Server Actions correspondientes** (ej. `createCharacterAction`, `deleteCharacterAction`, `getCharactersAction`, `updateCharacterAction`).
+    *   **Acción:**
+        *   Elimina las importaciones de `mappers` o `serializers` que ya no son necesarias o que fueron limpiadas en la fase anterior.
+        *   Asegura que la lógica dentro de las funciones asíncronas del store (ej. `createCharacter`) llame directamente a las Server Actions con los datos de dominio, dejando que la Server Action se encargue de cualquier mapeo a tipos de Prisma en el servidor.
+        *   Si hay una estrategia de respaldo con llamadas `fetch` a rutas API, evalúa si es realmente necesaria. En muchos casos, si la Server Action es robusta, la llamada `fetch` de respaldo puede ser eliminada para simplificar el código. Si se mantiene, asegúrate de que la ruta API también encapsule la lógica de Prisma en el servidor.
 
-    subgraph "🧪 Test Structure"
-        E[src/tests/] --> F[helpers/]
-        E --> G[fixtures/]
-        E --> H[__mocks__/]
-        E --> I[setup/]
-    end
+### 4. **Fase de Verificación**
+*   **Re-ejecutar Búsqueda de Prisma:** Después de realizar todas las correcciones, vuelve a ejecutar `grep_search` para `import { prisma } from` en el directorio `src/` para confirmar que ya no aparece en archivos del lado del cliente.
+*   **Revisar Consola del Navegador:** Inicia la aplicación y navega por las funcionalidades relacionadas con la entidad modificada. Busca cualquier error de `PrismaClient` en la consola del navegador.
+*   **Reportar a `CURRENT-TASK.md`:** Actualiza el estado de las tareas en `CURRENT-TASK.md` y reporta cualquier nuevo hallazgo o problema.
 
-    subgraph "📦 Utilities"
-        F --> J[test-utils.tsx]
-        G --> K[entities.ts]
-        H --> L[@prisma/client.ts]
-        H --> M[next/navigation.ts]
-    end
-
-    subgraph "🎯 Test Types"
-        N[Unit Tests] --> O[Components]
-        N --> P[Hooks]
-        N --> Q[Utils/Stores]
-
-        R[Integration Tests] --> S[API Routes]
-        R --> T[Database]
-        R --> U[File System]
-
-        V[E2E Tests] --> W[User Flows]
-        V --> X[Feature Tests]
-    end
-
-    A --> E
-    E --> N
-    E --> R
-    E --> V
-```
-
-## 🎨 Stack Tecnológico
-
-### 📚 Framework y Herramientas
-- **Jest**: 29.7.0 (Framework de testing principal)
-- **@testing-library/react**: 16.3.0 (Testing de componentes React)
-- **@testing-library/jest-dom**: 6.6.3 (Matchers adicionales)
-- **ts-jest**: 29.3.4 (Soporte para TypeScript)
-- **jest-environment-jsdom**: 30.0.0-beta.3 (Entorno DOM)
-
-### 🏢 Proyecto Base
-- **Next.js**: 15.3.3
-- **React**: 19.1.0
-- **TypeScript**: 5.8.3
-- **Tailwind CSS**: 4.1.8
-- **Prisma**: 6.9.0
-- **Zustand**: 5.0.5 (Estado global)
-- **TanStack Query**: 5.80.2 (Data fetching)
-
-## 📁 Estructura de Archivos Creada
-
-```
-src/tests/
-├── 📄 resolver.js                    # Resolver personalizado para Jest
-├── 📄 image-mock.js                  # Mock para archivos de imagen
-├── 📄 README.md                      # Documentación completa
-│
-├── 📁 helpers/
-│   └── 📄 test-utils.tsx            # Utilidades para rendering y providers
-│
-├── 📁 fixtures/
-│   └── 📄 entities.ts               # Datos de prueba para entidades
-│
-├── 📁 __mocks__/
-│   ├── 📁 @prisma/
-│   │   └── 📄 client.ts             # Mock del cliente Prisma
-│   └── 📁 next/
-│       └── 📄 navigation.ts         # Mock de Next.js navigation
-│
-└── 📁 setup/
-    └── 📄 react-testing.test.tsx    # Test básico de configuración
-```
-
-## 🔧 Configuraciones Implementadas
-
-### 1. **jest.config.ts** - Configuración Principal
-```typescript
-// Configuración optimizada para:
-- Next.js 15 con App Router
-- React 19 compatibility
-- TypeScript 5.8
-- Module resolution personalizado
-- Coverage thresholds (80%)
-- Transform patterns para ESM
-```
-
-### 2. **resolver.js** - Resolución de Módulos
-```javascript
-// Maneja casos especiales:
-- Next.js modules con paths específicos
-- React 19 compatibility
-- CSS/SCSS como identity-obj-proxy
-- Archivos de imagen como mocks
-- ESM modules resolution
-```
-
-### 3. **test-utils.tsx** - Utilidades Principales
-```typescript
-// Funcionalidades incluidas:
-- Custom render con providers
-- React Query test client
-- Next.js router mocks
-- Mock data generators
-- Test helpers exportados
-```
-
-## 🎯 Fases de Implementación
-
-### ✅ Fase 1: Configuración Base (COMPLETADA)
-- [x] **Resolver Jest**: Creado resolver personalizado compatible
-- [x] **Estructura**: Organización de directorios `/tests/`
-- [x] **Mocks básicos**: Prisma, Next.js navigation, archivos
-- [x] **Utilidades**: Helpers para testing, fixtures de datos
-- [x] **Test inicial**: Verificación de funcionamiento básico
-
-### 🔄 Fase 2: Tests Unitarios (SIGUIENTE)
-- [ ] **Hooks personalizados**: Testing de custom hooks
-- [ ] **Stores Zustand**: Testing de estado global
-- [ ] **Transformers/Utils**: Testing de funciones puras
-- [ ] **Components base**: Testing de componentes Shadcn/UI
-
-### 📋 Fase 3: Tests de Componentes (FUTURO)
-- [ ] **Features principales**: Folder scanner, image viewer
-- [ ] **Formularios**: React Hook Form + validaciones
-- [ ] **Layouts**: Navigation, panels, responsive
-- [ ] **Interactions**: Drag & drop, keyboard shortcuts
-
-### 🔗 Fase 4: Tests de Integración (FUTURO)
-- [ ] **API Routes**: Testing de endpoints Next.js
-- [ ] **Database**: Testing de operaciones Prisma
-- [ ] **File System**: Testing de folder scanner
-- [ ] **Cache**: Testing de strategies de cache
-
-## 📊 Métricas y Objetivos
-
-### 🎯 Coverage Targets
-```typescript
-coverageThreshold: {
-  global: {
-    branches: 80,     // 80% cobertura de ramas
-    functions: 80,    // 80% cobertura de funciones
-    lines: 80,        // 80% cobertura de líneas
-    statements: 80,   // 80% cobertura de statements
-  }
-}
-```
-
-### ⚡ Performance Goals
-- **Test Speed**: < 100ms por test unitario
-- **Suite Time**: < 30s para suite completa
-- **Watch Mode**: < 5s para re-run incremental
-- **Memory**: < 512MB para suite completa
-
-## 🛠️ Scripts Disponibles
-
-```bash
-# Testing commands
-pnpm test              # Ejecutar todos los tests
-pnpm test:watch        # Modo watch para desarrollo
-pnpm test:coverage     # Generar reporte de cobertura
-
-# Development workflow
-pnpm dev               # Desarrollo con watch
-pnpm build             # Build para producción
-pnpm lint              # Linting con Biome
-pnpm format            # Formateo de código
-```
-
-## 🎮 Comandos de Testing
-
-### 🚀 Comandos Básicos
-```bash
-# Ejecutar tests específicos
-npx jest src/tests/setup/
-npx jest --testNamePattern="React Component"
-npx jest --watch src/components/
-
-# Debug y análisis
-npx jest --verbose
-npx jest --detectOpenHandles
-npx jest --coverage --coverageReporters=html
-```
-
-### 🔍 Debugging
-```bash
-# Con debugger
-node --inspect-brk node_modules/.bin/jest --runInBand
-node --inspect-brk node_modules/.bin/jest --runInBand --no-cache
-
-# Logs detallados
-DEBUG=* npm test
-```
-
-## 📈 Roadmap de Testing
-
-### 🌟 Corto Plazo (1-2 semanas)
-1. **Completar utilities**: Más helpers específicos del dominio
-2. **Component testing**: Setup para Shadcn/UI components
-3. **Hook testing**: Custom hooks del proyecto
-4. **Store testing**: Zustand stores con mock data
-
-### 🚀 Mediano Plazo (3-4 semanas)
-1. **Integration tests**: API routes + database
-2. **Visual regression**: Screenshot testing
-3. **Performance tests**: Image loading, virtual scrolling
-4. **E2E basics**: Critical user flows
-
-### 🏆 Largo Plazo (1-2 meses)
-1. **Full E2E suite**: Comprehensive user journeys
-2. **CI/CD integration**: GitHub Actions workflows
-3. **Test analytics**: Metrics dashboard
-4. **Advanced mocking**: API mocking strategies
-
-## 🔗 Referencias y Documentación
-
-### 📚 Enlaces Útiles
-- [Jest Configuration](https://jestjs.io/docs/configuration)
-- [Testing Library React](https://testing-library.com/docs/react-testing-library/intro/)
-- [Next.js Testing](https://nextjs.org/docs/app/building-your-application/testing/jest)
-- [Prisma Testing](https://www.prisma.io/docs/guides/testing/unit-testing)
-
-### 🎯 Patterns y Best Practices
-- **AAA Pattern**: Arrange, Act, Assert
-- **Given-When-Then**: Para tests de comportamiento
-- **Test Doubles**: Preferir fakes sobre mocks cuando sea posible
-- **Isolation**: Cada test debe ser independiente
-
-## 📝 Notas para Agentes Futuros
-
-### ⚠️ Consideraciones Importantes
-1. **React 19**: Verificar compatibilidad al actualizar dependencies
-2. **Next.js 15**: App Router patterns en tests
-3. **Prisma**: Usar mocks para DB operations en unit tests
-4. **TypeScript**: Mantener types estrictos en test files
-
-### 🎨 Convenciones Establecidas
-- **Naming**: `*.test.ts` o `*.test.tsx` para test files
-- **Location**: Tests junto al código o en `__tests__/`
-- **Emojis**: Usar emojis en describe/test para claridad visual
-- **Comments**: Comentarios en español con emojis descriptivos
-
-### 🔄 Mantenimiento
-- **Monthly**: Revisar y actualizar dependencies
-- **Quarterly**: Analizar métricas de coverage y performance
-- **As needed**: Actualizar mocks cuando cambie el API
+### Reglas a Seguir Constantemente:
+*   **`nextjs-best-practices`**: Siempre prioriza Server Components y Server Actions para lógica de servidor y mutaciones. Usa `use client` solo para interactividad.
+*   **`typescript-best-practices`**: Mantén la tipificación estricta. Usa interfaces para formas de objetos y `type` para utilidades. Evita el uso de `any` si es posible.
+*   **`prisma-data-access-best-practices`**: `PrismaClient` debe ser usado **exclusivamente en el lado del servidor**. Nunca lo importes ni lo uses en archivos que se compilan para el cliente.
+*   **`react-best-practices`**: Componentes pequeños, funcionales y con responsabilidades claras.
+*   **`CORE_PRINCIPLES`**: Sigue las directrices generales del proyecto (comentarios, emojis, documentación, etc.).
 
 ---
-
-**Estado Actual**: ✅ Configuración base completada, listo para Fase 2
-**Próximo Paso**: Implementar tests para hooks personalizados
-**Responsable**: GitHub Copilot Agent
-**Última Actualización**: 5 de junio de 2025

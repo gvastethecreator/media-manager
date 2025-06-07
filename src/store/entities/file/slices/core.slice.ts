@@ -8,6 +8,7 @@ import { DirectoryReadResult, FileBase } from '@/types/entities/file/base';
 import { EnhancedFile } from '@/types/entities/file/extended';
 import { StateCreator } from 'zustand';
 import { FileStore } from '..';
+import { getDirectoryInfo } from '../../../../app/actions/files/file.actions';
 
 // Estado
 export interface CoreState {
@@ -41,8 +42,8 @@ export interface CoreActions {
 	removeFile: (id: string) => void;
 
 	// Operaciones avanzadas
-	navigateToDirectory: (path: string) => void;
-	navigateUp: () => void;
+	navigateToDirectory: (path: string) => Promise<void>;
+	navigateUp: () => Promise<void>;
 	updateDirectoryContents: (result: DirectoryReadResult) => void;
 	updateFilesFromRaw: (files: FileBase[]) => void;
 
@@ -107,37 +108,47 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 	},
 
 	// Operaciones avanzadas
-	navigateToDirectory: (path) => {
-		const { currentDirectory, parentDirectories } = get();
+	navigateToDirectory: async (path) => {
+		const { currentDirectory, parentDirectories, setIsLoading, setError, updateDirectoryContents } = get();
+		setIsLoading(true);
+		setError(null);
 
-		// Guardar el directorio actual en los padres si existe
-		const newParentDirectories = currentDirectory ? [...parentDirectories, currentDirectory] : parentDirectories;
-
-		set({
-			currentDirectory: path,
-			parentDirectories: newParentDirectories,
-			files: [], // Limpiar archivos al navegar
-		});
+		try {
+			const result = await getDirectoryInfo(path);
+			const newParentDirectories = currentDirectory ? [...parentDirectories, currentDirectory] : parentDirectories;
+			set({ currentDirectory: path, parentDirectories: newParentDirectories });
+			updateDirectoryContents(result);
+		} catch (error: any) {
+			setError(error.message);
+			console.error('Error navigating to directory:', error);
+		} finally {
+			setIsLoading(false);
+		}
 	},
 
-	navigateUp: () => {
-		const { parentDirectories } = get();
+	navigateUp: async () => {
+		const { currentDirectory, parentDirectories, setIsLoading, setError, updateDirectoryContents } = get();
+		setIsLoading(true);
+		setError(null);
 
-		if (parentDirectories.length === 0) {
-			// Si no hay padres, ir a null (root)
-			set({ currentDirectory: null, files: [] });
-			return;
+		try {
+			let targetPath: string | null = null;
+			let newParents: string[] = [];
+
+			if (parentDirectories.length > 0) {
+				targetPath = parentDirectories[parentDirectories.length - 1];
+				newParents = parentDirectories.slice(0, -1);
+			}
+
+			const result = await getDirectoryInfo(targetPath || ''); // Pasar cadena vacía para la raíz
+			set({ currentDirectory: targetPath, parentDirectories: newParents });
+			updateDirectoryContents(result);
+		} catch (error: any) {
+			setError(error.message);
+			console.error('Error navigating up:', error);
+		} finally {
+			setIsLoading(false);
 		}
-
-		// Obtener el último padre
-		const lastParent = parentDirectories[parentDirectories.length - 1];
-		const newParents = parentDirectories.slice(0, -1);
-
-		set({
-			currentDirectory: lastParent,
-			parentDirectories: newParents,
-			files: [], // Limpiar archivos al navegar
-		});
 	},
 
 	updateDirectoryContents: (result) => {

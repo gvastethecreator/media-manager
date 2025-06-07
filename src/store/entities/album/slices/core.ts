@@ -4,14 +4,14 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { mapCreateAlbumDataToPrisma } from '../../../../transformers/album/mappers';
+import { createAlbum, deleteAlbum, getAlbum, getAlbums, moveAlbum } from '../../../../app/actions/albums/album.actions';
 import { extendAlbum } from '../../../../transformers/album/serializers';
 import type {
-	Album,
-	AlbumBase,
-	CreateAlbumData,
-	UpdateAlbumData,
-	UpdateAlbumItemsData,
+    Album,
+    AlbumBase,
+    CreateAlbumData,
+    UpdateAlbumData,
+    UpdateAlbumItemsData,
 } from '../../../../types/entities/album';
 import type { AlbumState } from '../types';
 
@@ -265,8 +265,10 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 			const album = state.core.albums[albumId];
 			if (!album) return state;
 
-			const currentGroups = album.groups || [];
-			if (currentGroups.some((g) => g.id === groupId)) return state;
+			const newGroups = album.groups ? [...album.groups] : [];
+			if (!newGroups.some((g) => g.id === groupId)) {
+				newGroups.push({ id: groupId }); // Solo almacenar el ID del grupo
+			}
 
 			return {
 				core: {
@@ -275,7 +277,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 						...state.core.albums,
 						[albumId]: {
 							...album,
-							groups: [...currentGroups, { id: groupId }],
+							groups: newGroups,
 						},
 					},
 					lastUpdated: Date.now(),
@@ -287,7 +289,9 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 	removeGroupFromAlbum: (albumId: string, groupId: string) => {
 		set((state) => {
 			const album = state.core.albums[albumId];
-			if (!album || !album.groups) return state;
+			if (!album) return state;
+
+			const filteredGroups = album.groups ? album.groups.filter((g) => g.id !== groupId) : [];
 
 			return {
 				core: {
@@ -296,7 +300,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 						...state.core.albums,
 						[albumId]: {
 							...album,
-							groups: album.groups.filter((g) => g.id !== groupId),
+							groups: filteredGroups,
 						},
 					},
 					lastUpdated: Date.now(),
@@ -310,8 +314,10 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 			const album = state.core.albums[albumId];
 			if (!album) return state;
 
-			const currentProperties = album.properties || [];
-			if (currentProperties.some((p) => p.id === propertyId)) return state;
+			const newProperties = album.properties ? [...album.properties] : [];
+			if (!newProperties.some((p) => p.id === propertyId)) {
+				newProperties.push({ id: propertyId });
+			}
 
 			return {
 				core: {
@@ -320,7 +326,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 						...state.core.albums,
 						[albumId]: {
 							...album,
-							properties: [...currentProperties, { id: propertyId }],
+							properties: newProperties,
 						},
 					},
 					lastUpdated: Date.now(),
@@ -332,7 +338,11 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 	removePropertyFromAlbum: (albumId: string, propertyId: string) => {
 		set((state) => {
 			const album = state.core.albums[albumId];
-			if (!album || !album.properties) return state;
+			if (!album) return state;
+
+			const filteredProperties = album.properties
+				? album.properties.filter((p) => p.id !== propertyId)
+				: [];
 
 			return {
 				core: {
@@ -341,7 +351,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 						...state.core.albums,
 						[albumId]: {
 							...album,
-							properties: album.properties.filter((p) => p.id !== propertyId),
+							properties: filteredProperties,
 						},
 					},
 					lastUpdated: Date.now(),
@@ -355,8 +365,10 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 			const album = state.core.albums[albumId];
 			if (!album) return state;
 
-			const currentWildcards = album.wildcards || [];
-			if (currentWildcards.some((w) => w.id === wildcardId)) return state;
+			const newWildcards = album.wildcards ? [...album.wildcards] : [];
+			if (!newWildcards.some((w) => w.id === wildcardId)) {
+				newWildcards.push({ id: wildcardId });
+			}
 
 			return {
 				core: {
@@ -365,7 +377,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 						...state.core.albums,
 						[albumId]: {
 							...album,
-							wildcards: [...currentWildcards, { id: wildcardId }],
+							wildcards: newWildcards,
 						},
 					},
 					lastUpdated: Date.now(),
@@ -377,7 +389,11 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 	removeWildcardFromAlbum: (albumId: string, wildcardId: string) => {
 		set((state) => {
 			const album = state.core.albums[albumId];
-			if (!album || !album.wildcards) return state;
+			if (!album) return state;
+
+			const filteredWildcards = album.wildcards
+				? album.wildcards.filter((w) => w.id !== wildcardId)
+				: [];
 
 			return {
 				core: {
@@ -386,7 +402,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 						...state.core.albums,
 						[albumId]: {
 							...album,
-							wildcards: album.wildcards.filter((w) => w.id !== wildcardId),
+							wildcards: filteredWildcards,
 						},
 					},
 					lastUpdated: Date.now(),
@@ -403,18 +419,15 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 			const album = state.core.albums[albumId];
 			if (!album) return state;
 
-			const updates: any = { ...album };
-
+			const updatedRelations: Partial<AlbumRelations> = {};
 			if (data.groupIds) {
-				updates.groups = data.groupIds.map((id) => ({ id }));
+				updatedRelations.groups = data.groupIds.map((id) => ({ id }));
 			}
-
 			if (data.propertyIds) {
-				updates.properties = data.propertyIds.map((id) => ({ id }));
+				updatedRelations.properties = data.propertyIds.map((id) => ({ id }));
 			}
-
 			if (data.wildcardIds) {
-				updates.wildcards = data.wildcardIds.map((id) => ({ id }));
+				updatedRelations.wildcards = data.wildcardIds.map((id) => ({ id }));
 			}
 
 			return {
@@ -422,7 +435,10 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 					...state.core,
 					albums: {
 						...state.core.albums,
-						[albumId]: updates,
+						[albumId]: {
+							...album,
+							...updatedRelations,
+						},
 					},
 					lastUpdated: Date.now(),
 				},
@@ -430,168 +446,109 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 		});
 	},
 
-	// Estado de carga
+	// Estado de carga y error
 	setLoading: (isLoading: boolean) => {
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading,
-			},
-		}));
+		set((state) => ({ loading: isLoading }));
 	},
-
 	setError: (error: string | null) => {
-		set((state) => ({
-			core: {
-				...state.core,
-				error,
-			},
-		}));
+		set((state) => ({ error: error }));
 	},
 
-	// Operaciones asíncronas (simuladas, se implementarán con llamadas reales a la API)
+	// Acciones asíncronas con Server Actions
 	fetchAlbum: async (id: string) => {
-		const { setLoading, setError, addAlbum } = get();
+		set({ loading: true, error: null });
 		try {
-			setLoading(true);
-			// Simulación de llamada a API, reemplazar con implementación real
-			const response = await fetch(`/api/albums/${id}`);
-			if (!response.ok) throw new Error('Error al cargar el álbum');
-
-			const albumData = await response.json();
-			addAlbum(albumData);
-			return get().core.albums[id];
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			const album = await getAlbum(id);
+			if (album) {
+				get().addAlbum(album);
+				return album;
+			}
+			return undefined;
+		} catch (error: any) {
+			set({ error: error.message, loading: false });
+			console.error('Error fetching album:', error);
 			return undefined;
 		} finally {
-			setLoading(false);
+			set({ loading: false });
 		}
 	},
 
 	fetchAlbums: async (parentId?: string) => {
-		const { setLoading, setError, addAlbums } = get();
+		set({ loading: true, error: null });
 		try {
-			setLoading(true);
-			// Simulación de llamada a API, reemplazar con implementación real
-			let url = '/api/albums';
-			if (parentId) {
-				url += `?parentId=${parentId}`;
-			}
-
-			const response = await fetch(url);
-			if (!response.ok) throw new Error('Error al cargar los álbumes');
-
-			const albumsData = await response.json();
-			addAlbums(albumsData);
-
-			return parentId ? get().getChildAlbums(parentId) : get().getAlbums();
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			const albums = await getAlbums();
+			get().addAlbums(albums);
+			return albums;
+		} catch (error: any) {
+			set({ error: error.message, loading: false });
+			console.error('Error fetching albums:', error);
 			return [];
 		} finally {
-			setLoading(false);
+			set({ loading: false });
 		}
 	},
 
 	createAlbum: async (data: CreateAlbumData) => {
-		const { setLoading, setError, addAlbum } = get();
+		set({ loading: true, error: null });
 		try {
-			setLoading(true);
-			// Simulación de llamada a API, reemplazar con implementación real
-			const prismaData = mapCreateAlbumDataToPrisma(data);
-			const response = await fetch('/api/albums', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(prismaData),
-			});
-
-			if (!response.ok) throw new Error('Error al crear el álbum');
-
-			const createdAlbum = await response.json();
-			addAlbum(createdAlbum);
-
-			// Si tiene elementos iniciales, añadirlos
-			if (data.items && data.items.length > 0 && createdAlbum.id) {
-				get().updateAlbumItems(createdAlbum.id, {
-					items: data.items,
-					replaceExisting: true,
-				});
+			const newAlbum = await createAlbum(data);
+			if (newAlbum) {
+				get().addAlbum(newAlbum);
 			}
-
-			return get().core.albums[createdAlbum.id];
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			return newAlbum;
+		} catch (error: any) {
+			set({ error: error.message, loading: false });
+			console.error('Error creating album:', error);
 			return undefined;
 		} finally {
-			setLoading(false);
+			set({ loading: false });
 		}
 	},
 
 	removeAlbum: async (id: string) => {
-		const { setLoading, setError, deleteAlbum } = get();
+		set({ loading: true, error: null });
 		try {
-			setLoading(true);
-			// Simulación de llamada a API, reemplazar con implementación real
-			const response = await fetch(`/api/albums/${id}`, {
-				method: 'DELETE',
-			});
-
-			if (!response.ok) throw new Error('Error al eliminar el álbum');
-
-			deleteAlbum(id);
+			await deleteAlbum(id);
+			get().deleteAlbum(id);
 			return true;
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+		} catch (error: any) {
+			set({ error: error.message, loading: false });
+			console.error('Error removing album:', error);
 			return false;
 		} finally {
-			setLoading(false);
+			set({ loading: false });
 		}
 	},
 
 	moveAlbum: async (id: string, newParentId: string | null) => {
-		const { setLoading, setError, updateAlbum } = get();
+		set({ loading: true, error: null });
 		try {
-			setLoading(true);
-			// Obtener álbum actual
-			const currentAlbum = get().getAlbum(id);
-			if (!currentAlbum) throw new Error('Álbum no encontrado');
-
-			// Verificar que no se esté moviendo a sí mismo como su propio hijo
-			if (newParentId === id) throw new Error('No se puede mover un álbum a sí mismo');
-
-			// Verificar que no se esté creando un ciclo
-			if (newParentId) {
-				let parent = get().getAlbum(newParentId);
-				while (parent) {
-					if (parent.id === id) {
-						throw new Error('No se puede crear un ciclo en la jerarquía de álbumes');
-					}
-					parent = parent.parentId ? get().getAlbum(parent.parentId) : undefined;
-				}
-			}
-
-			// Simulación de llamada a API, reemplazar con implementación real
-			const response = await fetch(`/api/albums/${id}/move`, {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ parentId: newParentId }),
+			await moveAlbum(id, newParentId);
+			// Actualizar el estado localmente después de la acción exitosa
+			set((state) => {
+				const albumToMove = state.core.albums[id];
+				if (!albumToMove) return state;
+				return {
+					core: {
+						...state.core,
+						albums: {
+							...state.core.albums,
+							[id]: {
+								...albumToMove,
+								parentId: newParentId,
+							},
+						},
+						lastUpdated: Date.now(),
+					},
+				};
 			});
-
-			if (!response.ok) throw new Error('Error al mover el álbum');
-
-			// Actualizar localmente
-			updateAlbum(id, { parentId: newParentId });
 			return true;
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+		} catch (error: any) {
+			set({ error: error.message, loading: false });
+			console.error('Error moving album:', error);
 			return false;
 		} finally {
-			setLoading(false);
+			set({ loading: false });
 		}
 	},
 });

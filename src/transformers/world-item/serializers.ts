@@ -21,28 +21,9 @@ import type {
 	WorldItemUI,
 } from '@/types/entities/world-item/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
-import { Prisma } from '@prisma/client';
-
-// Re-importar el tipo WorldItem desde types para compatibilidad
-export type { WorldItemDeserialized as WorldItem } from '@/types/entities/world-item/types';
 
 // Logger específico para este módulo
 const logger = createLogger('WorldItemTransformer:Serializers');
-
-/**
- * Valida un objeto WorldItem contra su esquema
- * @param worldItem - Objeto WorldItem a validar
- * @returns El objeto validado o lanza un error
- */
-export function validateWorldItem(worldItem: WorldItemBase): WorldItemBase {
-	try {
-		const result = WorldItemSchema.parse(worldItem);
-		return worldItem;
-	} catch (error) {
-		logger.error('Error validando WorldItem:', error);
-		throw new Error(`Datos de WorldItem inválidos: ${error instanceof Error ? error.message : String(error)}`);
-	}
-}
 
 /**
  * Serializa atributos de WorldItem para almacenamiento
@@ -276,642 +257,359 @@ export function deserializeTags(tagsString?: string | null): string[] {
 }
 
 /**
- * 🔄 Deserializa un WorldItem desde Prisma, manejando campos JSON y relaciones - VERSIÓN CORREGIDA ✅
- */
-export function fromPrismaWorldItem(
-	prismaItem: Partial<
-		Prisma.WorldItemGetPayload<{
-			include: {
-				images: true;
-				videos: true;
-				notes: true;
-				concepts: true;
-				prompts: true;
-				groups: true;
-				properties: true;
-				wildcards: true;
-				tags: true;
-				_count: true;
-			};
-		}>
-	>
-): WorldItemDeserialized {
-	try {
-		// ✅ Validar campos esenciales
-		if (!prismaItem || !prismaItem.id || typeof prismaItem.name !== 'string') {
-			logger.error('Invalid prismaItem object received in fromPrismaWorldItem', { prismaItem });
-			throw new Error('Invalid prismaItem object received');
-		}
-
-		// 🛠️ Función auxiliar para normalizar strings comunes a valores JSON válidos
-		const normalizeCommonStrings = (field: string): string | null => {
-			const trimmed = field.trim().toLowerCase();
-
-			// Casos de "ningún valor" o "vacío"
-			if (['ninguno', 'none', 'null', 'vacio', 'vacío', 'empty', 'n/a', 'na', '-'].includes(trimmed)) {
-				return '[]'; // Array vacío por defecto
-			}
-
-			// Casos de objetos vacíos
-			if (['{}', 'objeto vacio', 'objeto vacío', 'no hay'].includes(trimmed)) {
-				return '{}';
-			}
-
-			return null; // No se pudo normalizar
-		};
-
-		// 🔧 Función auxiliar para reparar patrones de atributos tipo "Fuerza 15"
-		const repairAttributePattern = (field: string): string | null => {
-			// Detectar patrones como "Fuerza 15", "Fuerza 15, Destreza 10", etc.
-			const attributePattern = /^[A-Za-zÀ-ÿ\s]+\s+\d+/;
-			if (!attributePattern.test(field)) return null;
-
-			try {
-				const items = field
-					.split(',')
-					.map((item) => item.trim())
-					.filter(Boolean)
-					.map((item) => {
-						// Buscar patrón: "Nombre + Número + (opcional) descripción"
-						const matches = item.match(/^([A-Za-zÀ-ÿ\s]+?)\s+(\d+)(.*)$/);
-						if (matches) {
-							return {
-								name: matches[1].trim(),
-								value: Number.parseInt(matches[2], 10), // ✅ Usar Number.parseInt
-								description: matches[3]?.trim() || '',
-							};
-						}
-						// Fallback: considerar todo como nombre
-						return { name: item, value: 0, description: '' };
-					});
-
-				return JSON.stringify(items);
-			} catch (error) {
-				logger.error(`❌ Error al reparar patrón de atributos: ${field}`, error);
-				return null;
-			}
-		};
-
-		// 🎯 Parsear campos JSON de forma segura con múltiples estrategias de reparación
-		const parseJsonField = <T>(field: string | null | undefined, defaultValue: T): T => {
-			if (typeof field !== 'string' || !field) return defaultValue;
-
-			// Valores especiales conocidos
-			if (field === 'empty_array') return [] as unknown as T;
-			if (field === 'empty_object') return {} as unknown as T;
-
-			try {
-				return JSON.parse(field) as T;
-			} catch (originalError) {
-				logger.debug(
-					`🔄 Intentando reparar campo JSON para WorldItem: "${field.substring(0, 50)}${field.length > 50 ? '...' : ''}"`
-				);
-
-				// 🔧 Estrategia 1: Normalizar strings comunes
-				const normalized = normalizeCommonStrings(field);
-				if (normalized) {
-					try {
-						const parsed = JSON.parse(normalized);
-						logger.info(`✅ Campo reparado con normalización: "${field}" → ${normalized}`);
-						return parsed as T;
-					} catch (error) {
-						logger.error(`❌ Error al parsear campo normalizado: ${normalized}`, error);
-					}
-				}
-
-				// 🔧 Estrategia 2: Reparar patrones de atributos
-				const repairedAttribute = repairAttributePattern(field);
-				if (repairedAttribute) {
-					try {
-						const parsed = JSON.parse(repairedAttribute);
-						logger.info(`✅ Campo reparado como atributos: "${field}" → ${repairedAttribute}`);
-						return parsed as T;
-					} catch (error) {
-						logger.error(`❌ Error al parsear atributos reparados: ${repairedAttribute}`, error);
-					}
-				}
-
-				// 🔧 Estrategia 3: Intentar envolver en array si parece ser un elemento único
-				if (field.length > 0 && !field.startsWith('[') && !field.startsWith('{')) {
-					try {
-						// Envolver en array como string
-						const wrappedAsArray = `["${field.replace(/"/g, '\\"')}"]`;
-						const parsed = JSON.parse(wrappedAsArray);
-						logger.info(`✅ Campo envuelto en array: "${field}" → ${wrappedAsArray}`);
-						return parsed as T;
-					} catch (error) {
-						logger.debug(`❌ No se pudo envolver en array: ${field}`, error);
-					}
-				}
-
-				// 🚨 Si todas las estrategias fallan, registrar para análisis y usar valor por defecto
-				logger.warn(
-					`❌ No se pudo reparar campo JSON para WorldItem. Campo: "${field}", Error original: ${originalError}. Usando valor por defecto.`
-				);
-				return defaultValue;
-			}
-		};
-
-		// 🏗️ Construir objeto base con validaciones mejoradas
-		const baseItem: WorldItemBase = {
-			// ✅ Campos requeridos con validación
-			id: prismaItem.id,
-			name: prismaItem.name,
-			description: prismaItem.description ?? null,
-			shortcut: prismaItem.shortcut ?? null,
-
-			// ✅ Campos categóricos con valores por defecto seguros
-			category: prismaItem.category ?? 'other',
-			type: prismaItem.type ?? 'item',
-			rarity: prismaItem.rarity ?? 'common',
-			size: prismaItem.size ?? 'medium',
-			origin: prismaItem.origin ?? 'unknown',
-
-			// ✅ Campos JSON como strings serializados (para WorldItemBase)
-			attributes:
-				typeof prismaItem.attributes === 'string' ? prismaItem.attributes : JSON.stringify(prismaItem.attributes || []),
-			effects: typeof prismaItem.effects === 'string' ? prismaItem.effects : JSON.stringify(prismaItem.effects || []),
-			requirements:
-				typeof prismaItem.requirements === 'string'
-					? prismaItem.requirements
-					: JSON.stringify(prismaItem.requirements || {}),
-			stats: typeof prismaItem.stats === 'string' ? prismaItem.stats : JSON.stringify(prismaItem.stats || []),
-			properties:
-				typeof prismaItem.properties === 'string' ? prismaItem.properties : JSON.stringify(prismaItem.properties || []),
-			filters: typeof prismaItem.filters === 'string' ? prismaItem.filters : JSON.stringify(prismaItem.filters || []),
-
-			// ✅ Otros campos
-			featuredImage: prismaItem.featuredImage ?? null,
-			isFavorite: prismaItem.isFavorite ?? false,
-			emoji: prismaItem.emoji ?? '🔮',
-			color: prismaItem.color ?? '#6D28D9',
-			sortBy: prismaItem.sortBy ?? 'name',
-
-			// ✅ Timestamps
-			createdAt: prismaItem.createdAt ? new Date(prismaItem.createdAt) : new Date(),
-			updatedAt: prismaItem.updatedAt ? new Date(prismaItem.updatedAt) : new Date(),
-		};
-
-		// 🎯 Parsear campos JSON para la versión deserializada
-		const deserializedFields: WorldItemDeserializedFields = {
-			attributesList: parseJsonField(baseItem.attributes, [] as WorldItemAttribute[]),
-			effectsList: parseJsonField(baseItem.effects, [] as WorldItemEffect[]),
-			requirementsList: parseJsonField(baseItem.requirements, [] as WorldItemRequirement[]),
-			statsList: parseJsonField(baseItem.stats, [] as WorldItemStat[]),
-			propertiesList: parseJsonField(baseItem.properties, [] as WorldItemProperty[]),
-			filtersList: parseJsonField(baseItem.filters, [] as WorldItemFilter[]),
-			tagsList: parseJsonField(JSON.stringify(prismaItem.tags?.map((t) => t.name) || []), [] as string[]),
-		};
-
-		// 🏗️ Construir objeto deserializado completo
-		const deserializedItem: WorldItemDeserialized = {
-			...baseItem,
-			...deserializedFields,
-		};
-
-		return deserializedItem;
-	} catch (error) {
-		logger.error('Error en fromPrismaWorldItem:', error);
-		throw handleTransformerError(error);
-	}
-}
-
-/**
- * Convierte un WorldItem deserializado a formato Prisma para almacenamiento
- * @param worldItem - WorldItem con campos deserializados
- * @returns WorldItem en formato para Prisma
- */
-export function toPrismaWorldItem(worldItem: Partial<WorldItemDeserialized>): Partial<WorldItemBase> {
-	try {
-		if (!worldItem) {
-			throw new Error('WorldItem no proporcionado');
-		}
-
-		// Extraer los campos que necesitan ser serializados
-		const { attributesList, effectsList, requirementsList, statsList, propertiesList, filtersList, tagsList, ...rest } =
-			worldItem;
-
-		// Serializar campos según sea necesario
-		const result: Partial<WorldItemBase> = {
-			...rest,
-			...(attributesList && { attributes: serializeAttributes(attributesList) }),
-			...(effectsList && { effects: serializeEffects(effectsList) }),
-			...(requirementsList && { requirements: serializeRequirements(requirementsList) }),
-			...(statsList && { stats: serializeStats(statsList) }),
-			...(propertiesList && { properties: serializeProperties(propertiesList) }),
-			...(filtersList && { filters: serializeFilters(filtersList) }),
-			...(tagsList && { tags: serializeTags(tagsList) }),
-		};
-
-		return result;
-	} catch (error) {
-		logger.error('Error en toPrismaWorldItem:', error);
-		throw new Error(`Error serializando WorldItem: ${error instanceof Error ? error.message : String(error)}`);
-	}
-}
-
-/**
- * Extiende un WorldItem con campos UI adicionales - VERSIÓN CORREGIDA ✅
- * @param worldItem - WorldItem base
- * @returns WorldItem con campos UI adicionales
+ * Extiende un WorldItem base para incluir propiedades de UI y relaciones,
+ * transformando campos JSON a sus tipos de objeto correspondientes.
+ * @param worldItem - El WorldItem base a extender.
+ * @returns Un WorldItem completo con propiedades de UI y relaciones.
  */
 export function extendWorldItem(worldItem: WorldItemDeserialized): WorldItemComplete {
-	try {
-		// ✅ Crear objeto UI con validación de timestamp
-		const ui: WorldItemUI = {
-			emoji: worldItem.emoji || '🔮',
-			color: worldItem.color || '#6D28D9',
-			formattedDate: worldItem.updatedAt
-				? new Date(worldItem.updatedAt).toLocaleDateString()
-				: new Date().toLocaleDateString(),
-		};
+	// Deserializar todos los campos JSON del WorldItem base
+	const parsedItem: WorldItemDeserialized = {
+		...worldItem,
+		attributes: deserializeAttributes(worldItem.attributes as string),
+		effects: deserializeEffects(worldItem.effects as string),
+		requirements: deserializeRequirements(worldItem.requirements as string),
+		stats: deserializeStats(worldItem.stats as string),
+		properties: deserializeProperties(worldItem.properties as string),
+		filters: deserializeFilters(worldItem.filters as string),
+		tags: deserializeTags(worldItem.tags as string),
+	};
 
-		// ✅ Crear contadores seguros
-		const counts: WorldItemCounts = {
-			images: 0,
-			relatedItems: 0,
-		};
+	// Asignar los valores predeterminados para las relaciones si no existen
+	const relations: WorldItemRelations = {
+		images: [],
+		videos: [],
+		notes: [],
+		concepts: [],
+		prompts: [],
+		groups: [],
+		properties: [],
+		wildcards: [],
+		tags: [],
+	};
 
-		// ✅ Crear relaciones vacías
-		const relations: WorldItemRelations = {};
+	// Combinar el item parseado con las relaciones por defecto y las relaciones existentes
+	const completeItem: WorldItemComplete = {
+		...parsedItem,
+		...relations,
+		// Sobrescribir las relaciones por defecto con las que realmente existen en parsedItem
+		images: (parsedItem as any).images || relations.images,
+		videos: (parsedItem as any).videos || relations.videos,
+		notes: (parsedItem as any).notes || relations.notes,
+		concepts: (parsedItem as any).concepts || relations.concepts,
+		prompts: (parsedItem as any).prompts || relations.prompts,
+		groups: (parsedItem as any).groups || relations.groups,
+		properties: (parsedItem as any).properties || relations.properties,
+		wildcards: (parsedItem as any).wildcards || relations.wildcards,
+		tags: (parsedItem as any).tags || relations.tags,
+		// Añadir contadores (pueden ser opcionales o venir de _count de Prisma)
+		_count: (parsedItem as any)._count || {
+			images: (parsedItem as any).images?.length || 0,
+			videos: (parsedItem as any).videos?.length || 0,
+			notes: (parsedItem as any).notes?.length || 0,
+			concepts: (parsedItem as any).concepts?.length || 0,
+			prompts: (parsedItem as any).prompts?.length || 0,
+			groups: (parsedItem as any).groups?.length || 0,
+			properties: (parsedItem as any).properties?.length || 0,
+			wildcards: (parsedItem as any).wildcards?.length || 0,
+			tags: (parsedItem as any).tags?.length || 0,
+		},
+	};
 
-		return {
-			...worldItem,
-			ui,
-			counts,
-			relations,
-		};
-	} catch (error) {
-		logger.error('Error extendiendo WorldItem:', error);
-		return {
-			...worldItem,
-			ui: {
-				emoji: '🔮',
-				color: '#6D28D9',
-				formattedDate: new Date().toLocaleDateString(),
-			},
-			counts: {},
-			relations: {},
-		};
-	}
+	return completeItem;
 }
 
 /**
- * Extiende múltiples WorldItems con campos UI adicionales
- * @param worldItems - Array de WorldItems
- * @returns Array de WorldItems extendidos
+ * Extiende una lista de WorldItems base.
+ * @param worldItems - Array de WorldItems base a extender.
+ * @returns Array de WorldItems completos.
  */
 export function extendWorldItems(worldItems: WorldItemDeserialized[]): WorldItemComplete[] {
+	if (!Array.isArray(worldItems)) {
+		return [];
+	}
 	return worldItems.map(extendWorldItem);
 }
 
-// 🔧 FUNCIONES HELPER ESPECIALIZADAS PARA LOS TRANSFORMERS
-
 /**
- * 🔄 Convierte un WorldItemBase (campos JSON como strings) a WorldItemDeserialized
- * @param worldItem - WorldItem base con campos JSON como strings
- * @returns WorldItem con campos JSON parseados
+ * Convierte un WorldItem base (deserializado) a su forma WorldItemDeserialized.
+ * Útil para asegurar la estructura mínima y el parseo de JSON si se recibe un objeto plano.
+ * @param worldItem - El WorldItem base.
+ * @returns El WorldItemDeserialized con campos JSON parseados.
  */
 export function fromWorldItemBase(worldItem: WorldItemBase): WorldItemDeserialized {
-	try {
-		// ✅ Validar campos esenciales
-		if (!worldItem || !worldItem.id || typeof worldItem.name !== 'string') {
-			logger.error('Invalid worldItem object received in fromWorldItemBase', { worldItem });
-			throw new Error('Invalid worldItem object received');
-		}
-
-		// 🛠️ Función auxiliar para normalizar strings comunes a valores JSON válidos
-		const normalizeCommonStrings = (field: string): string | null => {
-			const trimmed = field.trim().toLowerCase();
-
-			// Casos de "ningún valor" o "vacío"
-			if (['ninguno', 'none', 'null', 'vacio', 'vacío', 'empty', 'n/a', 'na', '-'].includes(trimmed)) {
-				return '[]'; // Array vacío por defecto
-			}
-
-			// Casos de objetos vacíos
-			if (['{}', 'objeto vacio', 'objeto vacío', 'no hay'].includes(trimmed)) {
-				return '{}';
-			}
-
-			return null; // No se pudo normalizar
-		};
-
-		// 🔧 Función auxiliar para reparar patrones de atributos tipo "Fuerza 15"
-		const repairAttributePattern = (field: string): string | null => {
-			// Detectar patrones como "Fuerza 15", "Fuerza 15, Destreza 10", etc.
-			const attributePattern = /^[A-Za-zÀ-ÿ\s]+\s+\d+/;
-			if (!attributePattern.test(field)) return null;
-
-			try {
-				const items = field
-					.split(',')
-					.map((item) => item.trim())
-					.filter(Boolean)
-					.map((item) => {
-						// Buscar patrón: "Nombre + Número + (opcional) descripción"
-						const matches = item.match(/^([A-Za-zÀ-ÿ\s]+?)\s+(\d+)(.*)$/);
-						if (matches) {
-							return {
-								name: matches[1].trim(),
-								value: Number.parseInt(matches[2], 10), // ✅ Usar Number.parseInt
-								description: matches[3]?.trim() || '',
-							};
-						}
-
-						// Fallback: considerar todo como nombre
-						return { name: item, value: 0, description: '' };
-					});
-
-				return JSON.stringify(items);
-			} catch (error) {
-				logger.error(`❌ Error al reparar patrón de atributos: ${field}`, error);
-				return null;
-			}
-		};
-
-		// 🎯 Parsear campos JSON de forma segura con múltiples estrategias de reparación
-		const parseJsonField = <T>(field: string | null | undefined, defaultValue: T): T => {
-			if (typeof field !== 'string' || !field) return defaultValue;
-
-			// Valores especiales conocidos
-			if (field === 'empty_array') return [] as unknown as T;
-			if (field === 'empty_object') return {} as unknown as T;
-
-			try {
-				return JSON.parse(field) as T;
-			} catch (originalError) {
-				logger.debug(
-					`🔄 Intentando reparar campo JSON para WorldItem: "${field.substring(0, 50)}${field.length > 50 ? '...' : ''}"`
-				);
-
-				// 🔧 Estrategia 1: Normalizar strings comunes
-				const normalized = normalizeCommonStrings(field);
-				if (normalized) {
-					try {
-						const parsed = JSON.parse(normalized);
-						logger.info(`✅ Campo reparado con normalización: "${field}" → ${normalized}`);
-						return parsed as T;
-					} catch (error) {
-						logger.error(`❌ Error al parsear campo normalizado: ${normalized}`, error);
-					}
-				}
-
-				// 🔧 Estrategia 2: Reparar patrones de atributos
-				const repairedAttribute = repairAttributePattern(field);
-				if (repairedAttribute) {
-					try {
-						const parsed = JSON.parse(repairedAttribute);
-						logger.info(`✅ Campo reparado como atributos: "${field}" → ${repairedAttribute}`);
-						return parsed as T;
-					} catch (error) {
-						logger.error(`❌ Error al parsear atributos reparados: ${repairedAttribute}`, error);
-					}
-				}
-
-				// 🔧 Estrategia 3: Intentar envolver en array si parece ser un elemento único
-				if (field.length > 0 && !field.startsWith('[') && !field.startsWith('{')) {
-					try {
-						// Envolver en array como string
-						const wrappedAsArray = `["${field.replace(/"/g, '\\"')}"]`;
-						const parsed = JSON.parse(wrappedAsArray);
-						logger.info(`✅ Campo envuelto en array: "${field}" → ${wrappedAsArray}`);
-						return parsed as T;
-					} catch (error) {
-						logger.debug(`❌ No se pudo envolver en array: ${field}`, error);
-					}
-				}
-
-				// 🚨 Si todas las estrategias fallan, registrar para análisis y usar valor por defecto
-				logger.warn(
-					`❌ No se pudo reparar campo JSON para WorldItem. Campo: "${field}", Error original: ${originalError}. Usando valor por defecto.`
-				);
-				return defaultValue;
-			}
-		};
-
-		// 🏗️ Construir objeto base completo
-		const baseItem: WorldItemBase = {
-			// ✅ Campos requeridos
-			id: worldItem.id,
-			name: worldItem.name,
-			description: worldItem.description ?? null,
-			shortcut: worldItem.shortcut ?? null,
-
-			// ✅ Campos categóricos con valores por defecto seguros
-			category: worldItem.category ?? 'other',
-			type: worldItem.type ?? 'item',
-			rarity: worldItem.rarity ?? 'common',
-			size: worldItem.size ?? 'medium',
-			origin: worldItem.origin ?? 'unknown',
-
-			// ✅ Campos JSON como strings serializados (para WorldItemBase)
-			attributes:
-				typeof worldItem.attributes === 'string' ? worldItem.attributes : JSON.stringify(worldItem.attributes || []),
-			effects: typeof worldItem.effects === 'string' ? worldItem.effects : JSON.stringify(worldItem.effects || []),
-			requirements:
-				typeof worldItem.requirements === 'string'
-					? worldItem.requirements
-					: JSON.stringify(worldItem.requirements || {}),
-			stats: typeof worldItem.stats === 'string' ? worldItem.stats : JSON.stringify(worldItem.stats || []),
-			properties:
-				typeof worldItem.properties === 'string' ? worldItem.properties : JSON.stringify(worldItem.properties || []),
-			filters: typeof worldItem.filters === 'string' ? worldItem.filters : JSON.stringify(worldItem.filters || []),
-
-			// ✅ Otros campos
-			featuredImage: worldItem.featuredImage ?? null,
-			isFavorite: worldItem.isFavorite ?? false,
-			emoji: worldItem.emoji ?? '🔮',
-			color: worldItem.color ?? '#6D28D9',
-			sortBy: worldItem.sortBy ?? 'name',
-
-			// ✅ Timestamps
-			createdAt: worldItem.createdAt ? new Date(worldItem.createdAt) : new Date(),
-			updatedAt: worldItem.updatedAt ? new Date(worldItem.updatedAt) : new Date(),
-		};
-
-		// 🎯 Parsear campos JSON para la versión deserializada
-		const deserializedFields: WorldItemDeserializedFields = {
-			attributesList: parseJsonField(baseItem.attributes, [] as WorldItemAttribute[]),
-			effectsList: parseJsonField(baseItem.effects, [] as WorldItemEffect[]),
-			requirementsList: parseJsonField(baseItem.requirements, [] as WorldItemRequirement[]),
-			statsList: parseJsonField(baseItem.stats, [] as WorldItemStat[]),
-			propertiesList: parseJsonField(baseItem.properties, [] as WorldItemProperty[]),
-			filtersList: parseJsonField(baseItem.filters, [] as WorldItemFilter[]),
-			tagsList: [] as string[], // WorldItemBase no tiene tags directamente
-		};
-
-		// 🏗️ Construir objeto deserializado completo
-		const deserializedItem: WorldItemDeserialized = {
-			...baseItem,
-			...deserializedFields,
-		};
-
-		return deserializedItem;
-	} catch (error) {
-		logger.error('Error en fromWorldItemBase:', error);
-		throw handleTransformerError(error);
-	}
+	// Asegurarse de que los campos JSON estén parseados si vienen como strings
+	return {
+		...worldItem,
+		attributes: deserializeAttributes(worldItem.attributes as string | null),
+		effects: deserializeEffects(worldItem.effects as string | null),
+		requirements: deserializeRequirements(worldItem.requirements as string | null),
+		stats: deserializeStats(worldItem.stats as string | null),
+		properties: deserializeProperties(worldItem.properties as string | null),
+		filters: deserializeFilters(worldItem.filters as string | null),
+		tags: deserializeTags(worldItem.tags as string | null),
+	};
 }
 
 /**
- * ✅ Función auxiliar para transformar WorldItem base a deserializado
- * @param worldItem - WorldItem base
- * @returns WorldItem deserializado
+ * Normaliza strings comunes que pueden ser nulos o vacíos a null.
+ * @param field - El string a normalizar.
+ * @returns null si el string es vacío o nulo, de lo contrario, el string.
+ */
+export const normalizeCommonStrings = (field: string): string | null => {
+	if (field === '' || field === null || field === undefined) {
+		return null;
+	}
+	return field;
+};
+
+/**
+ * Repara patrones de atributos específicos, si es necesario. (Placeholder)
+ * @param field - El string a reparar.
+ * @returns El string reparado.
+ */
+export const repairAttributePattern = (field: string): string | null => {
+	// Implementa lógica de reparación si es necesario
+	return field;
+};
+
+/**
+ * Parsea un campo JSON de forma segura, proporcionando un valor por defecto en caso de error.
+ * @param field - El campo a parsear.
+ * @param defaultValue - El valor por defecto a devolver si el parseo falla.
+ * @returns El objeto parseado o el valor por defecto.
+ */
+export const parseJsonField = <T>(field: string | null | undefined, defaultValue: T): T => {
+	if (field === null || field === undefined || field === '') {
+		return defaultValue;
+	}
+	try {
+		// También considerar el caso de 'empty_object' o 'empty_array' si se usan como marcadores
+		if (typeof field === 'string') {
+			if (field === 'empty_object' && typeof defaultValue === 'object' && !Array.isArray(defaultValue)) {
+				return {} as T;
+			}
+			if (field === 'empty_array' && Array.isArray(defaultValue)) {
+				return [] as T;
+			}
+			return JSON.parse(field) as T;
+		}
+		return field as T;
+	} catch (error) {
+		logger.warn(`Error al parsear campo JSON: ${field}. Usando valor por defecto.`, error);
+		return defaultValue;
+	}
+};
+
+/**
+ * Parsea todos los campos JSON de un WorldItemBase a WorldItemDeserialized.
+ * @param worldItem - El WorldItemBase con posibles strings JSON.
+ * @returns Un WorldItemDeserialized con todos los campos JSON parseados.
  */
 export function parseJsonFields(worldItem: WorldItemBase): WorldItemDeserialized {
-	return fromWorldItemBase(worldItem);
+	return {
+		...worldItem,
+		attributes: parseJsonField(worldItem.attributes, []),
+		effects: parseJsonField(worldItem.effects, []),
+		requirements: parseJsonField(worldItem.requirements, []),
+		stats: parseJsonField(worldItem.stats, {}),
+		properties: parseJsonField(worldItem.properties, []),
+		filters: parseJsonField(worldItem.filters, {}),
+		tags: parseJsonField(worldItem.tags, []),
+	};
 }
 
 /**
- * ✅ Función auxiliar para transformar WorldItem base a completo
- * @param worldItem - WorldItem base
- * @returns WorldItem completo con UI
+ * Transforma un WorldItemBase en un WorldItemComplete (extendido para UI).
+ * @param worldItem - El WorldItemBase a transformar.
+ * @returns El WorldItemComplete.
  */
 export function toExtendedWorldItem(worldItem: WorldItemBase): WorldItemComplete {
-	const deserializedItem = fromWorldItemBase(worldItem);
-	return extendWorldItem(deserializedItem);
+	const deserialized = parseJsonFields(worldItem);
+	return extendWorldItem(deserialized);
 }
 
 /**
- * ✅ Función auxiliar para obtener WorldItem con estadísticas
- * @param worldItem - WorldItem base con conteos opcionales
- * @returns WorldItem completo con estadísticas
+ * Transforma un WorldItem base o completo para incluir estadísticas de conteo y UI.
+ * Esta función es útil cuando se necesita combinar datos de WorldItem con información de conteo
+ * (por ejemplo, el número de imágenes asociadas) y presentarlos en un formato extendido para la UI.
+ *
+ * @param worldItem El WorldItem base o completo, con un campo `_count` opcional.
+ * @returns Un objeto `WorldItemComplete` con propiedades de UI y estadísticas de conteo.
  */
 export function toWorldItemWithStats(
 	worldItem: WorldItemBase & { _count?: { images?: number; relatedItems?: number } }
 ): WorldItemComplete {
-	const extendedItem = extendWorldItem(fromWorldItemBase(worldItem));
+	const extendedItem = extendWorldItem(worldItem);
 
-	// Agregar conteos si están disponibles
-	if (worldItem._count) {
-		extendedItem.counts = {
-			...extendedItem.counts,
-			images: worldItem._count.images ?? 0,
-			relatedItems: worldItem._count.relatedItems ?? 0,
-		};
-	}
+	// Asignar los conteos directamente si están disponibles, de lo contrario, 0
+	const imagesCount = worldItem._count?.images || 0;
+	const relatedItemsCount = worldItem._count?.relatedItems || 0;
 
-	return extendedItem;
+	return {
+		...extendedItem,
+		_count: {
+			...extendedItem._count,
+			images: imagesCount,
+			relatedItems: relatedItemsCount,
+		},
+		// Puedes añadir otras propiedades de UI o cálculos aquí si es necesario
+	};
 }
 
-// Exportar funciones en desuso con advertencias (para retrocompatibilidad)
+// Funciones de serialización/deserialización para campos individuales
+
 /**
- * @deprecated Use deserializeAttributes instead
+ * Deserializa atributos de WorldItem.
+ * @param attributesString - String JSON con atributos.
+ * @returns Array de atributos deserializados.
  */
 export function deserializeWorldItemAttributes(attributesString?: string | null): WorldItemAttribute[] {
-	logger.warn('deserializeWorldItemAttributes está obsoleto. Use deserializeAttributes en su lugar.');
 	return deserializeAttributes(attributesString);
 }
 
 /**
- * @deprecated Use serializeAttributes instead
+ * Serializa atributos de WorldItem.
+ * @param attributes - Atributos a serializar.
+ * @returns String JSON con los atributos serializados.
  */
 export function serializeWorldItemAttributes(attributes: WorldItemAttribute[] | string): string {
-	logger.warn('serializeWorldItemAttributes está obsoleto. Use serializeAttributes en su lugar.');
 	return serializeAttributes(attributes);
 }
 
 /**
- * @deprecated Use deserializeEffects instead
+ * Deserializa efectos de WorldItem.
+ * @param effectsString - String JSON con efectos.
+ * @returns Array de efectos deserializados.
  */
 export function deserializeWorldItemEffects(effectsString?: string | null): WorldItemEffect[] {
-	logger.warn('deserializeWorldItemEffects está obsoleto. Use deserializeEffects en su lugar.');
 	return deserializeEffects(effectsString);
 }
 
 /**
- * @deprecated Use serializeEffects instead
+ * Serializa efectos de WorldItem.
+ * @param effects - Efectos a serializar.
+ * @returns String JSON con los efectos serializados.
  */
 export function serializeWorldItemEffects(effects: WorldItemEffect[] | string): string {
-	logger.warn('serializeWorldItemEffects está obsoleto. Use serializeEffects en su lugar.');
 	return serializeEffects(effects);
 }
 
 /**
- * @deprecated Use deserializeFilters instead
+ * Deserializa filtros de WorldItem.
+ * @param filtersString - String JSON con filtros.
+ * @returns Array de filtros deserializados.
  */
 export function deserializeWorldItemFilters(filtersString?: string | null): WorldItemFilter[] {
-	logger.warn('deserializeWorldItemFilters está obsoleto. Use deserializeFilters en su lugar.');
 	return deserializeFilters(filtersString);
 }
 
 /**
- * @deprecated Use serializeFilters instead
+ * Serializa filtros de WorldItem.
+ * @param filters - Filtros a serializar.
+ * @returns String JSON con los filtros serializados.
  */
 export function serializeWorldItemFilters(filters: WorldItemFilter[] | string): string {
-	logger.warn('serializeWorldItemFilters está obsoleto. Use serializeFilters en su lugar.');
 	return serializeFilters(filters);
 }
 
 /**
- * @deprecated Use deserializeProperties instead
+ * Deserializa propiedades de WorldItem.
+ * @param propertiesString - String JSON con propiedades.
+ * @returns Array de propiedades deserializadas.
  */
 export function deserializeWorldItemProperties(propertiesString?: string | null): WorldItemProperty[] {
-	logger.warn('deserializeWorldItemProperties está obsoleto. Use deserializeProperties en su lugar.');
 	return deserializeProperties(propertiesString);
 }
 
 /**
- * @deprecated Use serializeProperties instead
+ * Serializa propiedades de WorldItem.
+ * @param properties - Propiedades a serializar.
+ * @returns String JSON con las propiedades serializadas.
  */
 export function serializeWorldItemProperties(properties: WorldItemProperty[] | string): string {
-	logger.warn('serializeWorldItemProperties está obsoleto. Use serializeProperties en su lugar.');
 	return serializeProperties(properties);
 }
 
 /**
- * @deprecated Use deserializeRequirements instead
+ * Deserializa requisitos de WorldItem.
+ * @param requirementsString - String JSON con requisitos.
+ * @returns Array de requisitos deserializados.
  */
 export function deserializeWorldItemRequirements(requirementsString?: string | null): WorldItemRequirement[] {
-	logger.warn('deserializeWorldItemRequirements está obsoleto. Use deserializeRequirements en su lugar.');
 	return deserializeRequirements(requirementsString);
 }
 
 /**
- * @deprecated Use serializeRequirements instead
+ * Serializa requisitos de WorldItem.
+ * @param requirements - Requisitos a serializar.
+ * @returns String JSON con los requisitos serializados.
  */
 export function serializeWorldItemRequirements(requirements: WorldItemRequirement[] | string): string {
-	logger.warn('serializeWorldItemRequirements está obsoleto. Use serializeRequirements en su lugar.');
 	return serializeRequirements(requirements);
 }
 
 /**
- * @deprecated Use deserializeStats instead
+ * Deserializa estadísticas de WorldItem.
+ * @param statsString - String JSON con estadísticas.
+ * @returns Array de estadísticas deserializadas.
  */
 export function deserializeWorldItemStats(statsString?: string | null): WorldItemStat[] {
-	logger.warn('deserializeWorldItemStats está obsoleto. Use deserializeStats en su lugar.');
 	return deserializeStats(statsString);
 }
 
 /**
- * @deprecated Use serializeStats instead
+ * Serializa estadísticas de WorldItem.
+ * @param stats - Estadísticas a serializar.
+ * @returns String JSON con las estadísticas serializadas.
  */
 export function serializeWorldItemStats(stats: WorldItemStat[] | string): string {
-	logger.warn('serializeWorldItemStats está obsoleto. Use serializeStats en su lugar.');
 	return serializeStats(stats);
 }
 
 /**
- * @deprecated Use deserializeTags instead
+ * Deserializa etiquetas de WorldItem.
+ * @param tagsString - String JSON con etiquetas.
+ * @returns Array de etiquetas deserializadas.
  */
 export function deserializeWorldItemTags(tagsString?: string | null): string[] {
-	logger.warn('deserializeWorldItemTags está obsoleto. Use deserializeTags en su lugar.');
 	return deserializeTags(tagsString);
 }
 
 /**
- * @deprecated Use serializeTags instead
+ * Serializa etiquetas de WorldItem.
+ * @param tags - Etiquetas a serializar.
+ * @returns String JSON con las etiquetas serializadas.
  */
 export function serializeWorldItemTags(tags: string[] | string): string {
-	logger.warn('serializeWorldItemTags está obsoleto. Use serializeTags en su lugar.');
 	return serializeTags(tags);
 }
 
 /**
- * @deprecated Use toPrismaWorldItem instead
+ * Convierte un WorldItemComplete a WorldItemBase.
+ * @param worldItem - El WorldItemComplete a convertir.
+ * @returns El WorldItemBase.
  */
 export function fromExtendedWorldItem(worldItem: WorldItemComplete): WorldItemBase {
-	logger.warn('fromExtendedWorldItem está obsoleto. Use toPrismaWorldItem en su lugar.');
-	return toPrismaWorldItem(worldItem) as WorldItemBase;
+	const {
+		_count,
+		images,
+		videos,
+		notes,
+		concepts,
+		prompts,
+		groups,
+		properties,
+		wildcards,
+		tags: relatedTags,
+		// Excluir estas propiedades al convertir a WorldItemBase
+		isSelected,
+		isExpanded,
+		isEditing,
+		...
+	} = worldItem;
+	// Retornar solo las propiedades de WorldItemBase
+	return {
+		...
+	};
 }
