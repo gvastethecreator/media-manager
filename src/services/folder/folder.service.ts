@@ -402,11 +402,13 @@ class FolderServiceClass {
 				this.updateProgress(id, initialStatus);
 				callbacks?.onProgress?.(initialStatus);
 
-				const indexFolderAction = await import('@/app/actions/folders/folder-indexing.actions').then(
-					(mod) => mod.indexFolder
+				const { indexFolder } = await import('@/app/actions/folders/process.actions');
+				const result: FolderResponse = await this.withConcurrencyControl(`index-${id}`, () =>
+					indexFolder(id, {
+						...callbacks,
+						onProgress: (status) => this.updateProgress(id, status),
+					})
 				);
-
-				const result: FolderResponse = await indexFolderAction(id);
 
 				// Emitir eventos relevantes con el nuevo sistema
 				await this.emitEvent(FOLDER_EVENTS.INDEXING_COMPLETE, result);
@@ -505,14 +507,16 @@ class FolderServiceClass {
 				// Registramos el manejador de progreso específico para esta operación
 				clientEvents.on('folder:progress', progressHandler);
 
-				const reindexFolderAction = await import('@/app/actions/folders/folder-indexing.actions').then(
-					(mod) => mod.reindexFolder
-				);
-
+				const { reindexFolder } = await import('@/app/actions/folders/process.actions');
 				let result: FolderResponse;
 				try {
 					// Intentar obtener el resultado
-					result = await reindexFolderAction(id);
+					result = await this.withConcurrencyControl(`reindex-${id}`, () =>
+						reindexFolder(id, {
+							...callbacks,
+							onProgress: (status) => this.updateProgress(id, status),
+						})
+					);
 				} catch (actionError) {
 					// Si hay un error, crear un resultado de error
 					result = {

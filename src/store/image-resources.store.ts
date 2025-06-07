@@ -30,16 +30,16 @@ class LRUCache<K, V> {
 	get(key: K): V | undefined {
 		const item = this.cache.get(key);
 		if (item) {
-			// Actualizar timestamp y mover al final (más reciente)
-			this.cache.delete(key);
-			this.cache.set(key, { ...item, timestamp: Date.now() });
+			// No modificar la caché aquí. Solo retornar el valor.
 			return item.value;
 		}
 		return undefined;
 	}
 
 	set(key: K, value: V): void {
-		if (this.cache.size >= this.maxSize) {
+		if (this.cache.has(key)) {
+			this.cache.delete(key); // Eliminar para asegurar que se añada al final (más reciente)
+		} else if (this.cache.size >= this.maxSize) {
 			// Eliminar el item más antiguo
 			const oldestKey = Array.from(this.cache.entries()).sort(([, a], [, b]) => a.timestamp - b.timestamp)[0][0];
 			this.cache.delete(oldestKey);
@@ -63,6 +63,16 @@ class LRUCache<K, V> {
 			}
 		}
 	}
+
+	// Nuevo método para 'tocar' un ítem, actualizando su 'recencia' (lógica LRU)
+	touch(key: K): void {
+		const item = this.cache.get(key);
+		if (item) {
+			// Mover al final (más reciente) y actualizar timestamp
+			this.cache.delete(key);
+			this.cache.set(key, { ...item, timestamp: Date.now() });
+		}
+	}
 }
 
 interface ImageResource {
@@ -83,6 +93,7 @@ interface ImageResourcesState {
 	loadingQueue: Set<string>;
 	preloadQueue: string[];
 	isProcessing: boolean;
+	version: number;
 
 	// Métodos principales
 	getThumbnail: (id: string) => Promise<string | undefined>;
@@ -115,6 +126,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 		loadingQueue: new Set(),
 		preloadQueue: [],
 		isProcessing: false,
+		version: 0,
 
 		getThumbnail: async (id: string) => {
 			const state = get();
@@ -125,11 +137,12 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 				return undefined;
 			}
 
-			// Verificar si el recurso ya está en caché
+			// Verificar si el recurso ya está en caché, usando la instancia correcta
 			const resource = state.resources.get(id);
 
 			// Si ya tenemos el thumbnail y no está expirado, retornarlo
 			if (resource?.thumbnail && Date.now() - resource.lastUpdate < CACHE_CONFIG.maxAge) {
+				state.resources.touch(id); // ✨ Tocarlo inmediatamente si se sirve desde la caché, usando la instancia correcta
 				return resource.thumbnail;
 			}
 
@@ -139,7 +152,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					let attempts = 0;
 					const checkInterval = setInterval(() => {
 						attempts++;
-						const updatedResource = state.resources.get(id);
+						const updatedResource = state.resources.get(id); // Usar la instancia correcta de caché
 
 						if (updatedResource?.thumbnail || attempts >= CACHE_CONFIG.maxRetries) {
 							clearInterval(checkInterval);
@@ -177,71 +190,124 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					throw requestError;
 				}
 
+				resourceLogger.debug(`Data recibida de getThumbnail para ID ${id}:`, data); // ✨ Log para depuración
+
 				if (!data || !data.thumbnailUrl) {
 					throw new Error(`No se recibió una URL de thumbnail para el ID ${id}`);
 				}
 
 				// Directamente usar la URL de la miniatura, sin convertir a data:URL
 				const finalThumbnailUrl = data.thumbnailUrl;
+				const newDimensions = data.width && data.height ? { width: data.width, height: data.height } : undefined;
 
-				// Actualizar caché
-				state.resources.set(id, {
-					id,
-					thumbnail: finalThumbnailUrl,
-					isLoading: false,
-					lastUpdate: Date.now(),
-					dimensions: data.width && data.height ? { width: data.width, height: data.height } : undefined,
-				});
-				state.loadingQueue.delete(id);
+				const existingResource = state.resources.get(id); // Usar la instancia correcta de caché
+				const isThumbnailContentChanged = !existingResource || existingResource.thumbnail !== finalThumbnailUrl;
+				const areDimensionsChanged = !existingResource?.dimensions || !newDimensions ||
+					(existingResource.dimensions.width !== newDimensions.width || existingResource.dimensions.height !== newDimensions.height);
 
+				const needsVersionUpdateDueToContent = isThumbnailContentChanged || areDimensionsChanged;
+
+				if (existingResource && !needsVersionUpdateDueToContent) {
+					// ✨ NUEVO: Reutilizar el objeto existente, actualizando solo las propiedades de estado si cambiaron
+					if (existingResource.isLoading || existingResource.lastUpdate !== Date.now()) { // Comprobar si isLoading o lastUpdate necesitan actualización
+						existingResource.isLoading = false; // Asegurar que isLoading sea false al completar
+						existingResource.lastUpdate = Date.now();
+						state.resources.touch(id); // Solo tocar para actualizar recencia si se modificó o accedió, usando la instancia correcta
+					}
+				} else {
+					// Contenido cambiado o recurso nuevo, crear un nuevo objeto ImageResource completo
+					const newImageResource: ImageResource = {
+						id,
+						thumbnail: finalThumbnailUrl,
+						isLoading: false,
+						lastUpdate: Date.now(),
+						dimensions: newDimensions,
+					};
+					state.resources.set(id, newImageResource); // Almacenar el nuevo objeto, usando la instancia correcta
+				}
+
+				// Incrementar la versión solo si el contenido principal cambió o si un error previo fue resuelto
+				if (needsVersionUpdateDueToContent || (existingResource && existingResource.error)) {
+					set({ version: get().version + 1 });
+				}
 				return finalThumbnailUrl;
 			} catch (error) {
 				resourceLogger.error(`❌ Error al obtener o procesar thumbnail para ID ${id}:`, error);
-				state.resources.set(id, { id, isLoading: false, error: error instanceof Error ? error.message : 'Error desconocido', lastUpdate: Date.now() });
+				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+				const existingResource = state.resources.get(id); // Usar la instancia correcta de caché
+				const hasErrorChanged = existingResource?.error !== errorMessage; // ✨ Simplificado para comparar directamente el mensaje de error
+
+				// Siempre se establece el estado de error, ya sea en un objeto nuevo o existente
+				state.resources.set(id, { id, isLoading: false, error: errorMessage, lastUpdate: Date.now() }); // Usar la instancia correcta de caché
 				state.loadingQueue.delete(id);
+
+				if (hasErrorChanged) {
+					set({ version: get().version + 1 }); // Solo incrementar si el estado de error cambia
+				}
 				return undefined;
 			}
 		},
 
 		getOriginalUrl: async (id: string) => {
 			const state = get();
-			const resource = state.resources.get(id);
+			const resource = state.resources.get(id); // Usar la instancia correcta de caché
 
 			// Si ya tenemos la URL original y no está expirada, retornarla
 			if (resource?.originalUrl && Date.now() - resource.lastUpdate < CACHE_CONFIG.maxAge) {
+				state.resources.touch(id); // Tocarlo inmediatamente si se sirve desde la caché, usando la instancia correcta
 				return resource.originalUrl;
 			}
 
 			try {
 				const url = await getImageUrl(id);
 				if (url) {
-					const existingResource = state.resources.get(id) || {
-						id,
-						isLoading: false,
-						lastUpdate: Date.now(),
-					};
-					const updatedResource = {
-						...existingResource,
-						originalUrl: url,
-						lastUpdate: Date.now(),
-					};
-					state.resources.set(id, updatedResource);
+					const existingResource = state.resources.get(id); // Usar la instancia correcta de caché
+					const isOriginalUrlContentChanged = !existingResource || existingResource.originalUrl !== url;
+
+					const needsVersionUpdateDueToContent = isOriginalUrlContentChanged;
+
+					if (existingResource && !needsVersionUpdateDueToContent) {
+						// ✨ NUEVO: Reutilizar el objeto existente, actualizando solo las propiedades de estado si cambiaron
+						if (existingResource.isLoading || existingResource.lastUpdate !== Date.now()) { // Comprobar si isLoading o lastUpdate necesitan actualización
+							existingResource.isLoading = false; // Asegurar que isLoading sea false al completar
+							existingResource.lastUpdate = Date.now();
+							state.resources.touch(id); // Solo tocar para actualizar recencia si se modificó o accedió, usando la instancia correcta
+						}
+					} else {
+						// Contenido cambiado o recurso nuevo, crear un nuevo objeto ImageResource completo
+						const newImageResource: ImageResource = {
+							id,
+							originalUrl: url,
+							isLoading: false,
+							lastUpdate: Date.now(),
+							dimensions: existingResource?.dimensions, // Mantener dimensiones si no se actualizan aquí
+						};
+						state.resources.set(id, newImageResource); // Almacenar el nuevo objeto, usando la instancia correcta
+					}
+
+					// Incrementar la versión solo si el contenido principal cambió o si un error previo fue resuelto
+					if (needsVersionUpdateDueToContent || (existingResource && existingResource.error)) {
+						set({ version: get().version + 1 });
+					}
 					return url;
 				}
 				return undefined;
 			} catch (error) {
 				resourceLogger.error('Error loading original URL:', { id, error });
-				const existingResource = state.resources.get(id) || {
-					id,
-					isLoading: false,
-					lastUpdate: Date.now(),
-				};
+				const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+				const existingResource = state.resources.get(id); // Usar la instancia correcta de caché
+				const hasErrorChanged = existingResource?.error !== errorMessage; // ✨ Simplificado para comparar directamente el mensaje de error
+
 				const errorResource = {
 					...existingResource,
-					error: error instanceof Error ? error.message : 'Unknown error',
+					error: errorMessage,
 					lastUpdate: Date.now(),
 				};
-				state.resources.set(id, errorResource);
+				state.resources.set(id, errorResource); // Usar la instancia correcta de caché
+
+				if (hasErrorChanged) {
+					set({ version: get().version + 1 }); // Solo incrementar si el estado de error cambia
+				}
 				return undefined;
 			}
 		},
@@ -257,7 +323,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 			// Filtrar IDs que ya están en caché y son recientes
 			const newIds = validIds.filter((id) => {
-				const resource = state.resources.get(id);
+				const resource = state.resources.get(id); // Usar la instancia correcta de caché
 				return !resource?.thumbnail || Date.now() - resource.lastUpdate > CACHE_CONFIG.maxAge;
 			});
 
@@ -306,6 +372,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 		clearResources: () => {
 			const state = get();
 			state.resources.clear();
+			// currentCleanupInterval ha sido eliminado, usar cleanupInterval local
 			if (cleanupInterval) {
 				clearInterval(cleanupInterval);
 			}
@@ -313,7 +380,9 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 				loadingQueue: new Set(),
 				preloadQueue: [],
 				isProcessing: false,
+				version: 0,
 			});
+			// Reiniciar el intervalo de limpieza local
 			startCleanup();
 		},
 	};

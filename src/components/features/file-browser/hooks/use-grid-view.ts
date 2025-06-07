@@ -264,18 +264,34 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 		}, 150);
 	}, []);
 
-	// Implementar debounce para la carga de thumbnails
+	// Función debounced para cargar thumbnails
 	const debouncedLoadThumbnails = useCallback(
 		(visibleItems: FileItem[]) => {
 			if (debounceTimerRef.current) {
 				clearTimeout(debounceTimerRef.current);
 			}
 
+			// Evitar recargas mientras se está scrolleando activamente
+			if (isScrolling) {
+				return;
+			}
+
 			debounceTimerRef.current = setTimeout(() => {
-				loadVisibleThumbnails(visibleItems);
+				// Solo ejecutar si el componente sigue montado
+				if (parentRef.current) {
+					// Log de depuración con información útil
+					console.debug(
+						`[FileBrowserGrid] Cargando thumbnails para ${visibleItems.length} items visibles${
+							isResizing ? ' (redimensionando)' : ''
+						}`
+					);
+
+					// Llamar a la función optimizada de carga
+					loadVisibleThumbnails(visibleItems);
+				}
 			}, DEBOUNCE_TIME);
 		},
-		[loadVisibleThumbnails]
+		[isScrolling, isResizing, loadVisibleThumbnails]
 	);
 
 	return {

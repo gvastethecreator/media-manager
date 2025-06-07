@@ -73,6 +73,7 @@ export function useThumbnailLoader(): UseThumbnailLoaderResult {
 
 			try {
 				loadQueueRef.current.add(itemId);
+				thumbnailLogger.debug(`🔄 Iniciando carga de thumbnail: ${itemId}`);
 
 				// Minimizamos logs innecesarios que pueden afectar el rendimiento
 				if (process.env.NODE_ENV === 'development') {
@@ -81,7 +82,15 @@ export function useThumbnailLoader(): UseThumbnailLoaderResult {
 
 				let thumbnail: string | undefined;
 				try {
+					// Obtenemos el thumbnail desde el store
 					thumbnail = await imageResources.getThumbnail(itemId);
+
+					// Verificar explícitamente si thumbnail es undefined o vacío
+					if (!thumbnail) {
+						thumbnailLogger.warn(`⚠️ getThumbnail devolvió valor vacío para ID ${itemId}`);
+					} else {
+						thumbnailLogger.debug(`✅ getThumbnail devolvió URL: ${thumbnail.substring(0, 50)}${thumbnail.length > 50 ? '...' : ''}`);
+					}
 				} catch (fetchError) {
 					thumbnailLogger.error(`Error al obtener thumbnail desde el store para ${itemId}:`, fetchError);
 					thumbnail = undefined;
@@ -100,7 +109,14 @@ export function useThumbnailLoader(): UseThumbnailLoaderResult {
 						thumbnailLogger.debug(`Thumbnail cargado: ${itemId}`);
 					}
 					retryCountRef.current.delete(itemId);
-					return thumbnail;
+
+					// Comprobar que la URL es realmente válida
+					if (thumbnail.startsWith('/api/images/') || thumbnail.startsWith('data:')) {
+						return thumbnail;
+					} else {
+						thumbnailLogger.warn(`⚠️ URL de thumbnail inválida para ${itemId}: ${thumbnail}`);
+						return null;
+					}
 				}
 
 				// Si no hay thumbnail, incrementar contador de reintentos

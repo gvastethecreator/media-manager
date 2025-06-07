@@ -11,7 +11,7 @@ import { useFolderImages } from '@/hooks/use-folder-images';
 import { folderResponseCache } from '@/lib/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
@@ -27,7 +27,41 @@ export function FolderContentView() {
 	const [scanResults, setScanResults] = useState<any>(null);
 
 	// Usar el hook personalizado para obtener las imágenes
-	const { data: images, isLoading, isError, error, refetch } = useFolderImages(currentFolderId);
+	const { data: imagesResponse, isLoading, isError, error, refetch } = useFolderImages(currentFolderId);
+
+	// Acceder al array de imágenes desde la respuesta de manera segura
+	const images = useMemo(() => {
+		if (!imagesResponse) {
+			return [];
+		}
+
+		// Verificar que tenemos la propiedad items
+		if (!imagesResponse.items || !Array.isArray(imagesResponse.items)) {
+			logger.warn('⚠️ imagesResponse.items no es un array válido');
+			return [];
+		}
+
+		return imagesResponse.items;
+	}, [imagesResponse]);
+
+	// Log simple para depuración sin acceder a propiedades internas que puedan causar problemas
+	logger.debug(`🖼️ Renderizando FileBrowser con ${images.length} imágenes`);
+
+	// Verificación de datos con manejo seguro de errores
+	useEffect(() => {
+		if (images && images.length > 0) {
+			try {
+				const firstImage = images[0];
+				logger.info('📊 Datos de la primera imagen:', {
+					id: firstImage.id,
+					name: firstImage.name,
+					type: firstImage.type || 'unknown'
+				});
+			} catch (err) {
+				logger.error('❌ Error al acceder a los datos de la imagen:', err);
+			}
+		}
+	}, [images]);
 
 	// Función para reindexar la carpeta
 	const handleReindex = useCallback(async () => {
@@ -147,7 +181,7 @@ export function FolderContentView() {
 	}
 
 	// Mostrar estado vacío si no hay imágenes
-	if (!images || images.length === 0) {
+	if (!imagesResponse || !imagesResponse.items || imagesResponse.items.length === 0) {
 		logger.debug('📭 Mostrando estado vacío - No hay imágenes');
 		return (
 			<div className="flex flex-col items-center justify-center h-full gap-4">
@@ -169,7 +203,7 @@ export function FolderContentView() {
 						<p>Videos encontrados: {scanResults.videos.length}</p>
 						{scanResults.images.length > 0 && (
 							<div className="mt-2">
-								<p className="text-warning">Se encontraron imágenes en el sistema de archivos pero no están en la base de datos.</p>
+								<p className="text-warning">Se encontraron imágenes en el sistema de archivos pero ninguna en la base de datos.</p>
 								<p className="text-sm">Haz clic en "Reindexar Carpeta" para añadirlas a la base de datos.</p>
 							</div>
 						)}
@@ -196,24 +230,7 @@ export function FolderContentView() {
 		);
 	}
 
-	// Usar directamente las imágenes del hook
-	const displayImages = images;
-	logger.debug(`🖼️ Renderizando FileBrowser con ${displayImages.length} imágenes`);
-
-	// Verificación de datos
-	if (displayImages && displayImages.length > 0) {
-		const firstImage = displayImages[0];
-		logger.info('📊 Datos de la primera imagen:', {
-			id: firstImage.id,
-			name: firstImage.name,
-			type: firstImage.type,
-			thumbnail: firstImage.thumbnail ? 'Disponible' : 'No disponible',
-			imageUrl: firstImage.imageUrl || 'No disponible',
-			tieneProps: Object.keys(firstImage).join(', ')
-		});
-	}
-
-	// Renderizar el navegador de archivos
+	// Renderizar el navegador de archivos con las imágenes sin procesamiento adicional
 	return (
 		<div className="h-full w-full">
 			<div className="absolute top-2 right-2 z-10 flex gap-2">
@@ -228,7 +245,7 @@ export function FolderContentView() {
 			</div>
 
 			<FileBrowser
-				items={displayImages}
+				items={images}
 				onItemClick={(item) => {
 					logger.debug('🖱️ Click en item:', item.id);
 				}}

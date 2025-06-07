@@ -143,6 +143,7 @@ model Image {
   thumbnailSize        Int?
   thumbnailWidth       Int?
   thumbnailHeight      Int?
+  thumbnailMimeType    String?
   thumbnailError       String?
   thumbnailErrorAt     DateTime?
   thumbnailOptimizedAt DateTime?

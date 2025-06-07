@@ -32,18 +32,27 @@ export function useFolderImages(folderId: string | null) {
 		queryKey: [FOLDER_IMAGES_KEY, folderId],
 		queryFn: async () => {
 			if (!folderId) {
-				logger.debug('⚠️ folderId es nulo, devolviendo array vacío');
-				return Promise.resolve([]);
+				logger.debug('⚠️ folderId es nulo, devolviendo objeto vacío');
+				return Promise.resolve({ items: [], folder: null, status: 200 });
 			}
 
 			try {
 				logger.info(`🔄 Obteniendo imágenes para carpeta: ${folderId}`);
-				const images = await getFolderImages(folderId);
-				logger.info(`✅ Obtenidas ${images.length} imágenes para carpeta ${folderId}`);
+				const response = await getFolderImages(folderId);
 
-				if (images.length > 0) {
+				// Verificar la estructura de la respuesta
+				if (!response) {
+					logger.error('❌ La respuesta de getFolderImages es undefined o null');
+					return { items: [], folder: null, status: 500, error: 'Respuesta vacía del servidor' };
+				}
+
+				// Acceder a los items de manera segura
+				const items = response.items || [];
+				logger.info(`✅ Obtenidas ${items.length} imágenes para carpeta ${folderId}`);
+
+				if (items.length > 0) {
 					// Mostrar información de la primera imagen para depuración
-					const firstImage = images[0];
+					const firstImage = items[0];
 					logger.debug('📄 Primera imagen recibida:', {
 						id: firstImage.id,
 						name: firstImage.name,
@@ -55,7 +64,7 @@ export function useFolderImages(folderId: string | null) {
 					logger.warn(`⚠️ No se recibieron imágenes para la carpeta ${folderId}`);
 				}
 
-				return images;
+				return response;
 			} catch (error) {
 				logger.error(`❌ Error obteniendo imágenes para carpeta ${folderId}:`, error);
 				throw error;
@@ -75,10 +84,10 @@ export function useFolderImages(folderId: string | null) {
 		} else if (query.isError) {
 			logger.error(`❌ Error en query para carpeta ${folderId}:`, query.error);
 		} else if (query.isSuccess) {
-			const imageCount = query.data?.length || 0;
+			const imageCount = query.data?.items?.length || 0;
 			logger.debug(`✅ Query exitoso para carpeta ${folderId}: ${imageCount} imágenes`);
 		}
-	}, [folderId, query.isLoading, query.isError, query.isSuccess, query.data?.length]);
+	}, [folderId, query.isLoading, query.isError, query.isSuccess, query.data?.items?.length]);
 
 	return query;
 }
