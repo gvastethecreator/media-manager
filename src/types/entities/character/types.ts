@@ -322,3 +322,31 @@ export const CHARACTER_SORT_PROPERTY_MAP: Record<CharacterSortCriteria, string> 
 	[CharacterSortCriteria.UPDATED_ASC]: 'updatedAt',
 	[CharacterSortCriteria.UPDATED_DESC]: 'updatedAt',
 };
+
+export interface CharacterPrismaWhereInput {
+	[key: string]: any;
+}
+
+export interface CharacterPrismaOrderByWithRelationInput {
+	[key: string]: any;
+}
+
+export interface CharacterPrismaInclude {
+	[key: string]: boolean | object;
+}
+
+export interface CharacterPrismaFindManyArgs {
+	where?: CharacterPrismaWhereInput;
+	orderBy?: CharacterPrismaOrderByWithRelationInput;
+	skip?: number;
+	take?: number;
+	include?: CharacterPrismaInclude;
+}
+
+export interface CharacterPrismaCreateInput {
+	[key: string]: any;
+}
+
+export interface CharacterPrismaUpdateInput {
+	[key: string]: any;
+}

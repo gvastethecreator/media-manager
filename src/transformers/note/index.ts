@@ -5,26 +5,25 @@
 
 import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
 import { EntityError, EntityErrorCode } from '@/lib/errors';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
-	NoteComplete,
-	NoteCreateInput,
-	NoteFilters,
-	NoteSearchOptions,
-	NoteSearchResult,
-	NoteUpdateInput,
+    NoteComplete,
+    NoteCreateInput,
+    NoteFilters,
+    NoteSearchOptions,
+    NoteSearchResult,
+    NoteUpdateInput,
 } from '@/types/entities/note/types';
 import { TransformerError } from '@/utils/transformers/errors';
 import {
-	mapCreateNoteDataToPrisma,
-	mapNoteFiltersToPrisma,
-	mapNoteSearchOptionsToPrisma,
-	mapUpdateNoteDataToPrisma,
+    mapCreateNoteDataToPrisma,
+    mapNoteFiltersToPrisma,
+    mapNoteSearchOptionsToPrisma,
+    mapUpdateNoteDataToPrisma,
 } from './mappers';
 import { fromPrismaNote, validateNote } from './serializers';
 
-const logger = serverLogger.withContext('NoteTransformer');
+// const logger = serverLogger.withContext('NoteTransformer'); // Comentado o eliminado si no se usa más
 
 /**
  * Busca notas según los filtros proporcionados
@@ -425,20 +424,3 @@ export function toRelatedNote(
 		};
 	}
 }
-
-// Objeto de compatibilidad para código anterior
-export const NoteTransformer = {
-	searchNotes,
-	getNoteById,
-	getNotesByIds,
-	createNote,
-	updateNote,
-	deleteNote,
-	toRelatedNote,
-};
-
-export default NoteTransformer;
-
-export * from './mappers';
-export * from './serializers';
-export * from './transformer';

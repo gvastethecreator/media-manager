@@ -3,7 +3,7 @@
  * @module store/entities/group/slices/core
  */
 
-import { getGroup, getGroups } from '@/app/actions/groups/group.actions';
+import { createGroup as createGroupAction, deleteGroup as deleteGroupAction, getGroup, getGroups } from '@/app/actions/groups/group.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendGroup, toPrismaGroup } from '@/transformers/group/serializers';
@@ -295,14 +295,8 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 			// Mapear datos usando la función correcta
 			const mappedData = toPrismaGroup(data);
 
-			// Llamar al servidor (simulado)
-			// En un entorno real, aquí llamaríamos a la API
-			const createdGroup = {
-				id: `group-${Date.now()}`,
-				...mappedData,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			};
+			// Llamar al servidor
+			const createdGroup = await createGroupAction(mappedData);
 
 			// Extender y añadir al store
 			const extendedGroup = extendGroup(createdGroup as GroupBase);
@@ -341,8 +335,8 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 		}));
 
 		try {
-			// Llamar al servidor (simulado)
-			// En un entorno real, aquí llamaríamos a la API
+			// Llamar al servidor
+			await deleteGroupAction(id);
 
 			// Eliminar del store
 			get().deleteGroup(id);

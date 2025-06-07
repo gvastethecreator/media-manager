@@ -13,7 +13,6 @@ import {
 import { validateFieldType, validateRequiredFields } from '@/utils/transformers/common';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { preparePrismaRelations, validateEntityRelations } from '@/utils/transformers/relations';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('AlbumSerializer');
 
@@ -22,7 +21,7 @@ const logger = serverLogger.withContext('AlbumSerializer');
  */
 export function toPrismaAlbum(
 	data: AlbumCreateInput | AlbumUpdateInput
-): Prisma.AlbumCreateInput | Prisma.AlbumUpdateInput {
+): AlbumCreateInput | AlbumUpdateInput {
 	try {
 		// Validar campos requeridos para creación
 		if (!('id' in data)) {
@@ -52,7 +51,7 @@ export function toPrismaAlbum(
 		return {
 			...sanitizedResult,
 			...relations,
-		} as Prisma.AlbumCreateInput | Prisma.AlbumUpdateInput;
+		} as AlbumCreateInput | AlbumUpdateInput;
 	} catch (error) {
 		throw handleTransformerError(error);
 	}
@@ -62,26 +61,7 @@ export function toPrismaAlbum(
  * 🔄 Deserializa un Album desde Prisma con validación robusta
  */
 export function fromPrismaAlbum(
-	prismaAlbum: Partial<
-		Prisma.AlbumGetPayload<{
-			include: {
-				images: true;
-				videos: true;
-				collections: true;
-				tags: true;
-				characters: true;
-				places: true;
-				worldItems: true;
-				concepts: true;
-				prompts: true;
-				notes: true;
-				wildcards: true;
-				properties: true;
-				groups: true;
-				_count: true;
-			};
-		}>
-	>
+	prismaAlbum: AlbumComplete
 ): AlbumComplete {
 	try {
 		// 🔍 Validación exhaustiva de entrada - MEJORADA

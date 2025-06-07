@@ -461,6 +461,23 @@ export function useEntityLoader() {
 				return [];
 			}
 
+			// Obtener el store correspondiente a la entidad
+			const storeKey = entityName.toLowerCase() as keyof typeof stores;
+			if (!(storeKey in stores)) {
+				entityLoaderLogger.warn(`⚠️ No se encontró store para ${entityName}`);
+				return [];
+			}
+			const store = stores[storeKey];
+			const storeEntityKey = entityName.toLowerCase();
+
+			// Verificar si ya hay datos en el store
+			if ((store as any)[storeEntityKey] && (store as any)[storeEntityKey].length > 0) {
+				entityLoaderLogger.info(
+					`✅ ${entityName} ya disponibles en el store (${(store as any)[storeEntityKey].length} elementos), omitiendo carga.`
+				);
+				return (store as any)[storeEntityKey];
+			}
+
 			// Verificar si la entidad ya está en proceso de precarga global
 			if (typeof window !== 'undefined' && window.preloadingEntities?.has(entityName)) {
 				entityLoaderLogger.info(`⏳ ${entityName} está siendo cargada por otro componente, esperando...`);

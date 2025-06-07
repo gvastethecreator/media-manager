@@ -5,10 +5,12 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { transformTag } from '@/transformers/tag';
+import { transformTag } from '@/transformers/tag/transformer';
 import type { Tag } from '@/types/entities/tag/types';
 import { StateCreator } from 'zustand';
 import type { TagCoreActions, TagCoreState, TagStore } from '../types';
+
+import { createTagAction, deleteTagAction, getTagsAction, updateTagAction } from '@/app/actions/tags';
 
 const logger = clientLogger.withContext('TagCoreSlice');
 
@@ -36,8 +38,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 
 			// Estrategia 1: Usar server action (preferida)
 			try {
-				const { searchTags } = await import('@/transformers/tag');
-				const result = await searchTags({ take: 100 });
+				const result = await getTagsAction({ take: 100 });
 
 				if (result && Array.isArray(result.items)) {
 					set({
@@ -45,11 +46,11 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 						isLoading: false,
 						lastUpdated: Date.now(),
 					});
-					logger.info('✅ Tags cargados con transformer:', result.items.length);
+					logger.info('✅ Tags cargados con Server Action:', result.items.length);
 					return result.items;
 				}
-			} catch (transformerError) {
-				logger.warn('⚠️ Error con transformer, intentando API:', transformerError);
+			} catch (serverActionError) {
+				logger.warn('⚠️ Error con Server Action, intentando API:', serverActionError);
 			}
 
 			// Estrategia 2: Usar API
@@ -96,10 +97,9 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('➕ Creando tag:', data);
 
-			// Estrategia 1: Usar transformer
+			// Estrategia 1: Usar server action (preferida)
 			try {
-				const { createTag } = await import('@/transformers/tag');
-				const newTag = await createTag(data);
+				const newTag = await createTagAction(data);
 
 				set((state) => ({
 					items: [...state.items, newTag],
@@ -110,8 +110,8 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 				logger.info('✅ Tag creado correctamente:', newTag.id);
 				toastService.system.success('Tag creado correctamente');
 				return newTag;
-			} catch (transformerError) {
-				logger.warn('⚠️ Error con transformer, intentando API:', transformerError);
+			} catch (serverActionError) {
+				logger.warn('⚠️ Error con Server Action, intentando API:', serverActionError);
 			}
 
 			// Estrategia 2: Usar API
@@ -151,10 +151,9 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('🔄 Actualizando tag:', { id, data });
 
-			// Estrategia 1: Usar transformer
+			// Estrategia 1: Usar server action (preferida)
 			try {
-				const { updateTag } = await import('@/transformers/tag');
-				const updatedTag = await updateTag(id, data);
+				const updatedTag = await updateTagAction(id, data);
 
 				set((state) => ({
 					items: state.items.map((tag) => (tag.id === id ? updatedTag : tag)),
@@ -165,8 +164,8 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 				logger.info('✅ Tag actualizado correctamente:', id);
 				toastService.system.success('Tag actualizado correctamente');
 				return;
-			} catch (transformerError) {
-				logger.warn('⚠️ Error con transformer, intentando API:', transformerError);
+			} catch (serverActionError) {
+				logger.warn('⚠️ Error con Server Action, intentando API:', serverActionError);
 			}
 
 			// Estrategia 2: Usar API
@@ -204,10 +203,9 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ isLoading: true, error: null });
 			logger.info('🗑️ Eliminando tag:', id);
 
-			// Estrategia 1: Usar transformer
+			// Estrategia 1: Usar server action (preferida)
 			try {
-				const { deleteTag } = await import('@/transformers/tag');
-				await deleteTag(id);
+				await deleteTagAction(id);
 
 				set((state) => ({
 					items: state.items.filter((tag) => tag.id !== id),
@@ -218,8 +216,8 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 				logger.info('✅ Tag eliminado correctamente:', id);
 				toastService.system.success('Tag eliminado correctamente');
 				return;
-			} catch (transformerError) {
-				logger.warn('⚠️ Error con transformer, intentando API:', transformerError);
+			} catch (serverActionError) {
+				logger.warn('⚠️ Error con Server Action, intentando API:', serverActionError);
 			}
 
 			// Estrategia 2: Usar API

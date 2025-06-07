@@ -4,16 +4,15 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { CharacterComplete, CharacterSearchOptions } from '@/types/entities/character/types';
+import type { CharacterComplete, CharacterPrismaCreateInput, CharacterPrismaFindManyArgs, CharacterPrismaInclude, CharacterPrismaOrderByWithRelationInput, CharacterPrismaUpdateInput, CharacterPrismaWhereInput, CharacterSearchOptions } from '@/types/entities/character/types';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 /**
  * 🔄 Mapea opciones de búsqueda a formato Prisma
  * @param options Opciones de búsqueda
  * @returns Opciones formateadas para Prisma
  */
-export function mapCharacterSearchOptionsToPrisma(options: CharacterSearchOptions = {}): Prisma.CharacterFindManyArgs {
+export function mapCharacterSearchOptionsToPrisma(options: CharacterSearchOptions = {}): CharacterPrismaFindManyArgs {
 	try {
 		const { filters = {}, page = 1, pageSize = 20, include, orderBy: customOrderBy } = options;
 
@@ -22,7 +21,7 @@ export function mapCharacterSearchOptionsToPrisma(options: CharacterSearchOption
 		const take = pageSize;
 
 		// Construir cláusula where
-		const where: Prisma.CharacterWhereInput = {};
+		const where: CharacterPrismaWhereInput = {};
 
 		// Procesar filtros específicos
 		if (filters.name) {
@@ -64,10 +63,10 @@ export function mapCharacterSearchOptionsToPrisma(options: CharacterSearchOption
 		}
 
 		// Procesamiento de ordenación
-		const orderBy: Prisma.CharacterOrderByWithRelationInput = customOrderBy || { createdAt: 'desc' };
+		const orderBy: CharacterPrismaOrderByWithRelationInput = customOrderBy || { createdAt: 'desc' };
 
 		// Procesamiento de inclusiones/relaciones
-		const includeRelations: Prisma.CharacterInclude = {};
+		const includeRelations: CharacterPrismaInclude = {};
 
 		if (include?.images) {
 			includeRelations.images = true;
@@ -136,7 +135,7 @@ export function mapCharacterSearchOptionsToPrisma(options: CharacterSearchOption
  * @param data Datos para crear un Character
  * @returns Datos formateados para Prisma create
  */
-export function mapCreateCharacterDataToPrisma(data: any): Prisma.CharacterCreateInput {
+export function mapCreateCharacterDataToPrisma(data: any): CharacterPrismaCreateInput {
 	try {
 		const {
 			tagIds,
@@ -218,7 +217,7 @@ export function mapCreateCharacterDataToPrisma(data: any): Prisma.CharacterCreat
  * @param data Datos para actualizar un Character
  * @returns Datos formateados para Prisma update
  */
-export function mapUpdateCharacterDataToPrisma(data: any): Prisma.CharacterUpdateInput {
+export function mapUpdateCharacterDataToPrisma(data: any): CharacterPrismaUpdateInput {
 	try {
 		const {
 			tagIds,

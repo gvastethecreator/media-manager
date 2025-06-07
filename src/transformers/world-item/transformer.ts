@@ -7,7 +7,8 @@ import { TransformerError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { WorldItemExtended } from '@/types/entities/world-item/extended';
 import type { WorldItemDeserialized } from '@/types/entities/world-item/types';
-import { extendWorldItem, fromPrismaWorldItem } from './serializers';
+import { extendWorldItem } from './serializers';
+import { fromPrismaWorldItem, parseJsonField } from './server';
 
 const logger = serverLogger.withContext('WorldItemTransformer');
 
@@ -103,37 +104,6 @@ export function transformWorldItemToExtended(worldItem: WorldItemDeserialized): 
 
 		const baseItem = transformWorldItem(worldItem);
 
-		// 🛡️ Helper para parsear JSON de forma segura
-		const safeJsonParse = <T>(jsonString: string | T | null | undefined, fallback: T): T => {
-			// Si ya es el tipo esperado, devolverlo directamente
-			if (typeof jsonString !== 'string') {
-				return jsonString || fallback;
-			}
-
-			// Si es string vacío o null, usar fallback
-			if (!jsonString || jsonString.trim() === '') {
-				return fallback;
-			}
-
-			// Valores especiales conocidos
-			if (jsonString === 'empty_array') return [] as unknown as T;
-			if (jsonString === 'empty_object') return {} as unknown as T;
-			if (jsonString === '[]') return [] as unknown as T;
-			if (jsonString === '{}') return {} as unknown as T;
-
-			try {
-				const parsed = JSON.parse(jsonString);
-				return parsed || fallback;
-			} catch (error) {
-				logger.warn('Error parseando JSON en transformWorldItemToExtended, usando fallback:', {
-					worldItemId: baseItem.id,
-					jsonString: jsonString.substring(0, 100) + (jsonString.length > 100 ? '...' : ''),
-					error: error instanceof Error ? error.message : String(error)
-				});
-				return fallback;
-			}
-		};
-
 		// Extender el WorldItem con propiedades para UI usando parseo seguro
 		const extendedItem: WorldItemExtended = {
 			...baseItem,
@@ -142,12 +112,12 @@ export function transformWorldItemToExtended(worldItem: WorldItemDeserialized): 
 			isExpanded: false,
 			isEditing: false,
 			// Propiedades calculadas para UI con parseo seguro
-			stats: safeJsonParse(baseItem.stats, {}),
-			attributes: safeJsonParse(baseItem.attributes, []),
-			effects: safeJsonParse(baseItem.effects, []),
-			properties: safeJsonParse(baseItem.properties, []),
-			requirements: safeJsonParse(baseItem.requirements, {}),
-			filters: safeJsonParse(baseItem.filters, {}),
+			stats: parseJsonField(baseItem.stats, {}),
+			attributes: parseJsonField(baseItem.attributes, []),
+			effects: parseJsonField(baseItem.effects, []),
+			properties: parseJsonField(baseItem.properties, []),
+			requirements: parseJsonField(baseItem.requirements, {}),
+			filters: parseJsonField(baseItem.filters, {}),
 		};
 
 		logger.debug('✅ WorldItem transformado a versión extendida exitosamente:', {

@@ -273,6 +273,7 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 
 			// Evitar recargas mientras se está scrolleando activamente
 			if (isScrolling) {
+				console.debug(`[FileBrowserGrid] Omitiendo carga durante scroll activo`);
 				return;
 			}
 
@@ -281,10 +282,21 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 				if (parentRef.current) {
 					// Log de depuración con información útil
 					console.debug(
-						`[FileBrowserGrid] Cargando thumbnails para ${visibleItems.length} items visibles${
+						`[FileBrowserGrid] 🔄 Cargando thumbnails para ${visibleItems.length} items visibles${
 							isResizing ? ' (redimensionando)' : ''
 						}`
 					);
+
+					// Verificar si hay IDs válidos
+					const validIds = visibleItems
+						.filter(item => item && item.id && typeof item.id === 'string')
+						.map(item => item.id);
+
+					if (validIds.length > 0) {
+						console.debug(`[FileBrowserGrid] �� Primeros 3 IDs: ${validIds.slice(0, 3).join(', ')}`);
+					} else {
+						console.warn(`[FileBrowserGrid] ⚠️ No hay IDs válidos para cargar thumbnails`);
+					}
 
 					// Llamar a la función optimizada de carga
 					loadVisibleThumbnails(visibleItems);

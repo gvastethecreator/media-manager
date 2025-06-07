@@ -6,11 +6,11 @@
 import { Logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import type {
-	TagComplete,
-	TagCreateInput,
-	TagSearchOptions,
-	TagSearchResult,
-	TagUpdateInput,
+    TagComplete,
+    TagCreateInput,
+    TagSearchOptions,
+    TagSearchResult,
+    TagUpdateInput,
 } from '@/types/entities/tag/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { mapTagSearchOptionsToPrisma } from './mappers';
@@ -18,14 +18,14 @@ import { validateTag } from './serializers';
 import { transformTag as transformTagMain } from './transformer';
 
 // Re-exportar todo desde los módulos principales
-export * from './mappers';
-export * from './serializers';
-export * from './transformer';
+// export * from './mappers';
+// export * from './serializers';
+// export * from './transformer';
 
 const logger = new Logger('TagTransformer');
 
 // Re-exportar el transformador principal con el nombre deseado
-export { transformTagMain as transformTag };
+// export { transformTagMain as transformTag };
 
 /**
  * 🔍 Busca tags según los criterios especificados
@@ -192,17 +192,18 @@ export function toRelatedTag(tag: TagComplete) {
 
 // Exportar otros mappers
 export {
-	mapCreateTagDataToPrisma,
-	mapTagFiltersToPrisma,
-	mapTagToRelatedTag,
-	mapUpdateTagDataToPrisma,
-	transformCompleteTagToPrisma,
-	transformTagToPrisma,
+    mapCreateTagDataToPrisma,
+    mapTagFiltersToPrisma,
+    mapTagToRelatedTag,
+    mapUpdateTagDataToPrisma,
+    transformCompleteTagToPrisma,
+    transformTagToPrisma
 } from './mappers';
 
 // Re-exportar funciones específicas de v2
 export {
-	mapCompleteToTag,
-	mapTagToComplete,
-	tagToDisplayObject,
+    mapCompleteToTag,
+    mapTagToComplete,
+    tagToDisplayObject
 } from './v2/converters';
+
