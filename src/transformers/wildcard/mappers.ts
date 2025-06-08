@@ -5,20 +5,20 @@
 
 import { createLogger } from '@/lib/logger';
 import {
-    type CreateWildcardData,
-    type UpdateWildcardData,
-    WILDCARD_SORT_PROPERTY_MAP,
-    type WildcardBase,
-    type WildcardComplete,
-    type WildcardFilters,
-    type WildcardSortCriteria,
+	type CreateWildcardData,
+	type UpdateWildcardData,
+	WILDCARD_SORT_PROPERTY_MAP,
+	type WildcardBase,
+	type WildcardComplete,
+	type WildcardFilters,
+	type WildcardSortCriteria,
 } from '@/types/entities/wildcard';
 import type { Prisma } from '@prisma/client';
 import {
-    DEFAULT_WILDCARD_COLOR,
-    DEFAULT_WILDCARD_EMOJI,
-    serializeWildcardChildren,
-    toRelatedWildcard,
+	DEFAULT_WILDCARD_COLOR,
+	DEFAULT_WILDCARD_EMOJI,
+	serializeWildcardChildren,
+	toRelatedWildcard,
 } from './serializers';
 
 // Logger específico para este módulo

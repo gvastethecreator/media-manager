@@ -4,20 +4,20 @@
  */
 
 import {
-    selectCurrentFolder,
-    selectError,
-    selectFavoriteFolders,
-    selectFilteredFolders,
-    selectFolderStats,
-    selectFolders,
-    selectIsLoading,
-    selectItemSize,
-    selectSearchTerm,
-    selectShowFavorites,
-    selectSortBy,
-    selectSortDirection,
-    selectViewMode,
-    useFolderStore,
+	selectCurrentFolder,
+	selectError,
+	selectFavoriteFolders,
+	selectFilteredFolders,
+	selectFolderStats,
+	selectFolders,
+	selectIsLoading,
+	selectItemSize,
+	selectSearchTerm,
+	selectShowFavorites,
+	selectSortBy,
+	selectSortDirection,
+	selectViewMode,
+	useFolderStore,
 } from '@/store/entities/folder';
 import { useEffect } from 'react';
 import { shallow } from 'zustand/shallow';

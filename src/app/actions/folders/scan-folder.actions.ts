@@ -22,16 +22,16 @@ const logger = serverLogger.withContext('ScanFolderAction');
  * @returns Resultado del escaneo
  */
 export async function scanFolderAction(folderPath: string, options: ScanFolderOptions = {}): Promise<FolderScanResult> {
-  try {
-    logger.info(`🔍 Escaneando carpeta desde acción del servidor: ${folderPath}`, options);
+	try {
+		logger.info(`🔍 Escaneando carpeta desde acción del servidor: ${folderPath}`, options);
 
-    const result = await scanFolderUtil(folderPath, options);
+		const result = await scanFolderUtil(folderPath, options);
 
-    logger.info(`✅ Escaneo completado: ${result.totalFiles} archivos, ${result.images.length} imágenes`);
+		logger.info(`✅ Escaneo completado: ${result.totalFiles} archivos, ${result.images.length} imágenes`);
 
-    return result;
-  } catch (error) {
-    logger.error('❌ Error al escanear carpeta:', error);
-    throw new Error(`Error al escanear carpeta: ${error instanceof Error ? error.message : String(error)}`);
-  }
+		return result;
+	} catch (error) {
+		logger.error('❌ Error al escanear carpeta:', error);
+		throw new Error(`Error al escanear carpeta: ${error instanceof Error ? error.message : String(error)}`);
+	}
 }

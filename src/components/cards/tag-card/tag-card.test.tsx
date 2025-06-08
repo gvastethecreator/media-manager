@@ -42,8 +42,8 @@ describe('TagCard', () => {
 		// Verificar que la descripción se muestra
 		expect(screen.getByText('Etiqueta para fotografías de paisajes')).toBeInTheDocument();
 
-                // Verificar que se muestran datos de imágenes
-                expect(screen.getByText(/Paisajes/)).toBeInTheDocument();
+		// Verificar que se muestran datos de imágenes
+		expect(screen.getByText(/Paisajes/)).toBeInTheDocument();
 	});
 
 	it('llama al onClick cuando se hace clic', async () => {
@@ -58,16 +58,16 @@ describe('TagCard', () => {
 			await user.click(card);
 		}
 
-                // Verificar que se llamó al callback
-                expect(onClickMock).toHaveBeenCalled();
+		// Verificar que se llamó al callback
+		expect(onClickMock).toHaveBeenCalled();
 	});
 
-        it('renderiza un enlace cuando no hay onClick', () => {
-                render(<TagCard tag={mockTag} />);
+	it('renderiza un enlace cuando no hay onClick', () => {
+		render(<TagCard tag={mockTag} />);
 
-                const link = document.querySelector(`a[href="/dashboard/tags/${mockTag.id}"]`);
-                expect(link).toBeNull();
-        });
+		const link = document.querySelector(`a[href="/dashboard/tags/${mockTag.id}"]`);
+		expect(link).toBeNull();
+	});
 
 	it('aplica correctamente los colores personalizados', () => {
 		render(<TagCard tag={mockTag} />);
@@ -84,7 +84,7 @@ describe('TagCard', () => {
 
 		// Verificar que se muestra el badge de favorito
 		// (podría ser un icono o texto, adaptar según la implementación)
-                const favoriteElement = document.querySelector('.favorite-badge');
-                expect(favoriteElement).toBeNull();
+		const favoriteElement = document.querySelector('.favorite-badge');
+		expect(favoriteElement).toBeNull();
 	});
 });

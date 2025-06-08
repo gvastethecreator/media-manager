@@ -58,7 +58,7 @@ export function useFolderImages(folderId: string | null) {
 						name: firstImage.name,
 						thumbnail: firstImage.thumbnail ? 'Disponible' : 'No disponible',
 						imageUrl: firstImage.imageUrl || firstImage.src || 'No disponible',
-						propiedades: Object.keys(firstImage).join(', ')
+						propiedades: Object.keys(firstImage).join(', '),
 					});
 				} else {
 					logger.warn(`⚠️ No se recibieron imágenes para la carpeta ${folderId}`);
@@ -87,7 +87,7 @@ export function useFolderImages(folderId: string | null) {
 			const imageCount = query.data?.items?.length || 0;
 			logger.debug(`✅ Query exitoso para carpeta ${folderId}: ${imageCount} imágenes`);
 		}
-        }, [folderId, query.isLoading, query.isError, query.error, query.isSuccess, query.data?.items?.length]);
+	}, [folderId, query.isLoading, query.isError, query.error, query.isSuccess, query.data?.items?.length]);
 
 	return query;
 }

@@ -5,16 +5,16 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    FavoriteBase,
-    FavoriteCreateInput,
-    FavoriteExtended,
-    FavoriteFilters,
-    FavoriteUpdateInput,
+	FavoriteBase,
+	FavoriteCreateInput,
+	FavoriteExtended,
+	FavoriteFilters,
+	FavoriteUpdateInput,
 } from '@/types/entities/favorite';
 import {
-    FAVORITE_ENTITY_COLORS,
-    FAVORITE_ENTITY_DISPLAY_NAMES,
-    FAVORITE_ENTITY_EMOJIS,
+	FAVORITE_ENTITY_COLORS,
+	FAVORITE_ENTITY_DISPLAY_NAMES,
+	FAVORITE_ENTITY_EMOJIS,
 } from '@/types/entities/favorite';
 
 const mappersLogger = serverLogger.withContext('Favorite:Mappers');

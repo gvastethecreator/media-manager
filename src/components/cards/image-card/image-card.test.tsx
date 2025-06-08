@@ -43,7 +43,7 @@ describe('ImageCard', () => {
 			() => new Promise((resolve) => setTimeout(() => resolve(mockImageData), 100))
 		);
 
-                render(<ImageCard imageId="img-123" />);
+		render(<ImageCard imageId="img-123" />);
 	});
 
 	it('renderiza la imagen correctamente', async () => {
@@ -86,20 +86,18 @@ describe('ImageCard', () => {
 			await user.click(card);
 		}
 
-                // Verificar que se llamó al callback
-                expect(onClickMock).toHaveBeenCalled();
-        });
+		// Verificar que se llamó al callback
+		expect(onClickMock).toHaveBeenCalled();
+	});
 
-        it('renderiza un enlace cuando no hay onClick', async () => {
-                render(<ImageCard imageId="img-123" />);
+	it('renderiza un enlace cuando no hay onClick', async () => {
+		render(<ImageCard imageId="img-123" />);
 
-                await waitFor(() => {
-                        const link = document.querySelector(
-                                `a[href="/images/${mockImageData.id}"]`
-                        );
-                        expect(link).not.toBeNull();
-                });
-        });
+		await waitFor(() => {
+			const link = document.querySelector(`a[href="/images/${mockImageData.id}"]`);
+			expect(link).not.toBeNull();
+		});
+	});
 
 	it('renderiza mensaje de error cuando falla la carga', async () => {
 		// Configurar el mock para simular un error

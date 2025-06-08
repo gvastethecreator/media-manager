@@ -21,11 +21,11 @@ jest.mock('next/link', () => {
 });
 
 describe('AlbumCard', () => {
-       const mockAlbum = {
-               id: 'album123',
-               name: 'Vacaciones 2023',
-               emoji: '🏖️',
-               color: '#3b82f6',
+	const mockAlbum = {
+		id: 'album123',
+		name: 'Vacaciones 2023',
+		emoji: '🏖️',
+		color: '#3b82f6',
 		description: 'Fotos de las vacaciones de verano',
 		createdAt: new Date(),
 		updatedAt: new Date(),
@@ -34,13 +34,13 @@ describe('AlbumCard', () => {
 		shortcut: 'vac23',
 		sortBy: 'name',
 		filters: 'empty_array',
-               texture: null,
-               recentImages: ['data:image/png;base64,dummy1'],
-               _count: {
-                       images: 42,
-                       videos: 0,
-               },
-       };
+		texture: null,
+		recentImages: ['data:image/png;base64,dummy1'],
+		_count: {
+			images: 42,
+			videos: 0,
+		},
+	};
 
 	beforeEach(() => {
 		jest.clearAllMocks();
@@ -71,33 +71,33 @@ describe('AlbumCard', () => {
 			await user.click(card);
 		}
 
-                // Verificar que se llamó al callback
-                expect(onClickMock).toHaveBeenCalled();
+		// Verificar que se llamó al callback
+		expect(onClickMock).toHaveBeenCalled();
 	});
 
-        it('renderiza un enlace cuando no hay onClick', () => {
-                render(<AlbumCard album={mockAlbum} />);
+	it('renderiza un enlace cuando no hay onClick', () => {
+		render(<AlbumCard album={mockAlbum} />);
 
-                const link = document.querySelector(`a[href="/dashboard/albums/${mockAlbum.id}"]`);
-                expect(link).toBeNull();
-        });
+		const link = document.querySelector(`a[href="/dashboard/albums/${mockAlbum.id}"]`);
+		expect(link).toBeNull();
+	});
 
-        it('muestra las estadísticas del álbum', async () => {
-                render(<AlbumCard album={mockAlbum} />);
+	it('muestra las estadísticas del álbum', async () => {
+		render(<AlbumCard album={mockAlbum} />);
 
-                await new Promise((resolve) => setTimeout(resolve, 0));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
-                expect(screen.getByText('42')).toBeInTheDocument();
-        });
+		expect(screen.getByText('42')).toBeInTheDocument();
+	});
 
-        it('carga y muestra las imágenes del álbum', async () => {
-                render(<AlbumCard album={mockAlbum} />);
+	it('carga y muestra las imágenes del álbum', async () => {
+		render(<AlbumCard album={mockAlbum} />);
 
-                await new Promise((resolve) => setTimeout(resolve, 0));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
-                const images = document.querySelectorAll('img');
-                expect(images.length).toBeGreaterThan(0);
-        });
+		const images = document.querySelectorAll('img');
+		expect(images.length).toBeGreaterThan(0);
+	});
 
 	it('aplica correctamente los colores personalizados', () => {
 		render(<AlbumCard album={mockAlbum} />);

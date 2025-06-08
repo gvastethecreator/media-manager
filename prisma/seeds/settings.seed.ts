@@ -3,21 +3,21 @@ import { seedLogger, tableExists } from './utils.seed';
 
 /** Datos de configuración por defecto */
 const defaultSettingsData = {
-    theme: 'system',
-    fontSize: 16,
-    language: 'es',
-    reducedAnimations: false,
-    highContrast: false,
-    notificationsEnabled: true,
-    emailNotifications: false,
-    desktopNotifications: true,
-    notificationFrequency: 'daily',
-    shareUsageData: false,
-    storeCookies: true,
-    storeHistory: true,
-    apiKey: null,
-    devMode: false,
-    experimentalFeatures: false,
+	theme: 'system',
+	fontSize: 16,
+	language: 'es',
+	reducedAnimations: false,
+	highContrast: false,
+	notificationsEnabled: true,
+	emailNotifications: false,
+	desktopNotifications: true,
+	notificationFrequency: 'daily',
+	shareUsageData: false,
+	storeCookies: true,
+	storeHistory: true,
+	apiKey: null,
+	devMode: false,
+	experimentalFeatures: false,
 };
 
 /**
@@ -41,14 +41,14 @@ export async function seedSettings(prisma: PrismaClient): Promise<void> {
 
 				if (orphanProfile) {
 					// Crear settings vinculado al perfil huérfano
-                                        await prisma.settings.create({
-                                                data: {
-                                                        theme: 'system',
-                                                        language: 'es',
-                                                        data: defaultSettingsData,
-                                                        profileId: orphanProfile.id,
-                                                },
-                                        });
+					await prisma.settings.create({
+						data: {
+							theme: 'system',
+							language: 'es',
+							data: defaultSettingsData,
+							profileId: orphanProfile.id,
+						},
+					});
 
 					// Obtener el settings recién creado
 					const settings = await prisma.settings.findFirst({
@@ -67,14 +67,14 @@ export async function seedSettings(prisma: PrismaClient): Promise<void> {
 				} else {
 					// Si no hay perfiles sin settings, crear uno independiente
 					seedLogger.info('ℹ️ No hay perfiles sin settings, creando settings independiente');
-                                        await prisma.settings.create({
-                                                data: {
-                                                        theme: 'system',
-                                                        language: 'es',
-                                                        data: defaultSettingsData,
-                                                        profileId: 'settings-without-profile',
-                                                },
-                                        });
+					await prisma.settings.create({
+						data: {
+							theme: 'system',
+							language: 'es',
+							data: defaultSettingsData,
+							profileId: 'settings-without-profile',
+						},
+					});
 					seedLogger.info('✅ Settings independiente creado');
 				}
 			} else {

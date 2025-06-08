@@ -3,7 +3,12 @@
  * @module store/entities/group/slices/core
  */
 
-import { createGroup as createGroupAction, deleteGroup as deleteGroupAction, getGroup, getGroups } from '@/app/actions/groups/group.actions';
+import {
+	createGroup as createGroupAction,
+	deleteGroup as deleteGroupAction,
+	getGroup,
+	getGroups,
+} from '@/app/actions/groups/group.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendGroup, toPrismaGroup } from '@/transformers/group/serializers';

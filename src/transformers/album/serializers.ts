@@ -5,10 +5,10 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    type AlbumComplete,
-    type AlbumCreateInput,
-    AlbumSchema,
-    type AlbumUpdateInput,
+	type AlbumComplete,
+	type AlbumCreateInput,
+	AlbumSchema,
+	type AlbumUpdateInput,
 } from '@/types/entities/album/types';
 import { validateFieldType, validateRequiredFields } from '@/utils/transformers/common';
 import { handleTransformerError } from '@/utils/transformers/errors';
@@ -19,9 +19,7 @@ const logger = serverLogger.withContext('AlbumSerializer');
 /**
  * 🔄 Serializa un Album para Prisma
  */
-export function toPrismaAlbum(
-	data: AlbumCreateInput | AlbumUpdateInput
-): AlbumCreateInput | AlbumUpdateInput {
+export function toPrismaAlbum(data: AlbumCreateInput | AlbumUpdateInput): AlbumCreateInput | AlbumUpdateInput {
 	try {
 		// Validar campos requeridos para creación
 		if (!('id' in data)) {
@@ -60,9 +58,7 @@ export function toPrismaAlbum(
 /**
  * 🔄 Deserializa un Album desde Prisma con validación robusta
  */
-export function fromPrismaAlbum(
-	prismaAlbum: AlbumComplete
-): AlbumComplete {
+export function fromPrismaAlbum(prismaAlbum: AlbumComplete): AlbumComplete {
 	try {
 		// 🔍 Validación exhaustiva de entrada - MEJORADA
 		if (!prismaAlbum) {
@@ -74,7 +70,7 @@ export function fromPrismaAlbum(
 		if (typeof prismaAlbum !== 'object') {
 			logger.error('❌ fromPrismaAlbum: Invalid data type for prismaAlbum', {
 				actualType: typeof prismaAlbum,
-				value: prismaAlbum
+				value: prismaAlbum,
 			});
 			throw new Error(`Expected object, received ${typeof prismaAlbum}`);
 		}

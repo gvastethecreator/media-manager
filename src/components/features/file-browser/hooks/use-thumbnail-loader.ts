@@ -94,7 +94,9 @@ export function useThumbnailLoader(): UseThumbnailLoaderResult {
 					if (!thumbnail) {
 						thumbnailLogger.warn(`⚠️ getThumbnail devolvió valor vacío para ID ${itemId}`);
 					} else {
-						thumbnailLogger.debug(`✅ getThumbnail devolvió URL para ${itemId}: ${thumbnail.substring(0, 30)}${thumbnail.length > 30 ? '...' : ''}`);
+						thumbnailLogger.debug(
+							`✅ getThumbnail devolvió URL para ${itemId}: ${thumbnail.substring(0, 30)}${thumbnail.length > 30 ? '...' : ''}`
+						);
 					}
 				} catch (fetchError) {
 					thumbnailLogger.error(`❌ Error al obtener thumbnail desde el store para ${itemId}:`, fetchError);
@@ -115,12 +117,12 @@ export function useThumbnailLoader(): UseThumbnailLoaderResult {
 					retryCountRef.current.delete(itemId);
 
 					// Comprobar que la URL es realmente válida
-                                        if (thumbnail.startsWith('/api/images/') || thumbnail.startsWith('data:')) {
-                                                return thumbnail;
-                                        }
-                                        thumbnailLogger.warn(`⚠️ URL de thumbnail inválida para ${itemId}: ${thumbnail}`);
-                                        return null;
-                                }
+					if (thumbnail.startsWith('/api/images/') || thumbnail.startsWith('data:')) {
+						return thumbnail;
+					}
+					thumbnailLogger.warn(`⚠️ URL de thumbnail inválida para ${itemId}: ${thumbnail}`);
+					return null;
+				}
 
 				// Si no hay thumbnail, incrementar contador de reintentos
 				const newRetryCount = retryCount + 1;

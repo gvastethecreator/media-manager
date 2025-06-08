@@ -1,5 +1,6 @@
 'use client';
 
+import { getAppStats, getSystemStats } from '@/app/actions/debug/debug-stats.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { getAppStats, getSystemStats } from '@/app/actions/debug/debug-stats.actions';
 
 // Logger específico para este componente
 const logger = clientLogger.withContext('ServerStats');
@@ -87,13 +87,13 @@ export function ServerStats() {
 			setLoading(true);
 			setError(null);
 
-                        // Cargar estadísticas del sistema
-                        const systemData = await getSystemStats();
-                        setSystemStats(systemData);
+			// Cargar estadísticas del sistema
+			const systemData = await getSystemStats();
+			setSystemStats(systemData);
 
-                        // Cargar estadísticas de la aplicación
-                        const appData = await getAppStats();
-                        setAppStats(appData);
+			// Cargar estadísticas de la aplicación
+			const appData = await getAppStats();
+			setAppStats(appData);
 
 			logger.info('Estadísticas cargadas correctamente');
 		} catch (err) {

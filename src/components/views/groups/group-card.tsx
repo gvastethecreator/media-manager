@@ -63,11 +63,13 @@ export function GroupCard({ group, onClick, className, showBadges = true }: Grou
 
 	// 📊 Calcular estadísticas totales
 	const totalElements = useMemo(() => {
-		return (group._count?.images || 0) +
+		return (
+			(group._count?.images || 0) +
 			(group._count?.videos || 0) +
 			(group._count?.albums || 0) +
 			(group._count?.collections || 0) +
-			(group._count?.tags || 0);
+			(group._count?.tags || 0)
+		);
 	}, [group._count]);
 
 	// 📱 Manejador de eventos de teclado para accesibilidad
@@ -120,7 +122,7 @@ export function GroupCard({ group, onClick, className, showBadges = true }: Grou
 				<div
 					className="w-full h-full"
 					style={{
-						background: `radial-gradient(circle at 100% 0%, ${primaryColor}40, transparent 60%)`
+						background: `radial-gradient(circle at 100% 0%, ${primaryColor}40, transparent 60%)`,
 					}}
 				/>
 			</div>
@@ -138,23 +140,13 @@ export function GroupCard({ group, onClick, className, showBadges = true }: Grou
 
 					{/* 📝 Información del grupo */}
 					<div className="flex-1 min-w-0">
-						<h3 className="font-semibold text-lg leading-tight truncate">
-							{group.name}
-						</h3>
-						{group.category && (
-							<p className="text-sm text-muted-foreground truncate">
-								{group.category}
-							</p>
-						)}
+						<h3 className="font-semibold text-lg leading-tight truncate">{group.name}</h3>
+						{group.category && <p className="text-sm text-muted-foreground truncate">{group.category}</p>}
 					</div>
 
 					{/* ⭐ Indicador de favorito */}
 					{group.isFavorite && (
-						<motion.div
-							initial={{ scale: 0 }}
-							animate={{ scale: 1 }}
-							className="text-yellow-500"
-						>
+						<motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-yellow-500">
 							<Heart className="w-5 h-5 fill-current" />
 						</motion.div>
 					)}
@@ -164,11 +156,7 @@ export function GroupCard({ group, onClick, className, showBadges = true }: Grou
 			{/* 📄 Contenido principal */}
 			<CardContent className="flex-1 pb-3">
 				{/* 📝 Descripción */}
-				{group.description && (
-					<p className="text-sm text-muted-foreground line-clamp-3 mb-3">
-						{group.description}
-					</p>
-				)}
+				{group.description && <p className="text-sm text-muted-foreground line-clamp-3 mb-3">{group.description}</p>}
 
 				{/* 📊 Estadísticas visuales */}
 				<div className="grid grid-cols-2 gap-2 mb-3">
@@ -212,22 +200,14 @@ export function GroupCard({ group, onClick, className, showBadges = true }: Grou
 					<div className="flex flex-wrap gap-1 w-full">
 						{/* 📁 Badge de categoría */}
 						{group.category && group.category !== 'General' && (
-							<Badge
-								variant="outline"
-								className="text-xs"
-								style={{ borderColor: `${primaryColor}50` }}
-							>
+							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
 								{group.category}
 							</Badge>
 						)}
 
 						{/* 📊 Badge de total elementos */}
 						{totalElements > 0 && (
-							<Badge
-								variant="outline"
-								className="text-xs"
-								style={{ borderColor: `${primaryColor}50` }}
-							>
+							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
 								{totalElements} elementos
 							</Badge>
 						)}

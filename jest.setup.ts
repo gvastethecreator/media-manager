@@ -10,8 +10,8 @@ if (typeof global.TextEncoder === 'undefined') {
 
 // Mock next/cache to avoid Request-related errors in tests
 jest.mock('next/cache', () => ({
-  revalidatePath: jest.fn(),
-  unstable_cache: (fn: any) => fn,
+	revalidatePath: jest.fn(),
+	unstable_cache: (fn: any) => fn,
 }));
 // Mock nanoid to avoid ESM parsing issues
 jest.mock('nanoid');
@@ -42,29 +42,41 @@ if (typeof global.Request === 'undefined') {
 		referrerPolicy = '';
 		signal = undefined;
 		body = null;
-		clone() { return this; }
-		arrayBuffer() { return Promise.resolve(new ArrayBuffer(0)); }
-		blob() { return Promise.resolve(new Blob()); }
-		formData() { return Promise.resolve({}); }
-		json() { return Promise.resolve({}); }
-		text() { return Promise.resolve(''); }
+		clone() {
+			return this;
+		}
+		arrayBuffer() {
+			return Promise.resolve(new ArrayBuffer(0));
+		}
+		blob() {
+			return Promise.resolve(new Blob());
+		}
+		formData() {
+			return Promise.resolve({});
+		}
+		json() {
+			return Promise.resolve({});
+		}
+		text() {
+			return Promise.resolve('');
+		}
 	};
 }
 
 // Mock global de prisma para evitar errores en tests que importan código de servidor
 jest.mock('@/lib/prisma', () => ({
-  PrismaClient: jest.fn(() => ({})),
-  prisma: {},
+	PrismaClient: jest.fn(() => ({})),
+	prisma: {},
 }));
 
 // Mock global de p-queue para evitar errores ESM en tests
 jest.mock('p-queue', () => ({
-  default: jest.fn(() => ({ add: jest.fn() })),
+	default: jest.fn(() => ({ add: jest.fn() })),
 }));
 
 // Limpiar mocks después de cada prueba
 afterEach(() => {
-        jest.clearAllMocks();
+	jest.clearAllMocks();
 });
 
 // Polyfill para TextEncoder/TextDecoder usados por Next.js

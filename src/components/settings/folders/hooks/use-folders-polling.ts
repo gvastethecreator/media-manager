@@ -24,8 +24,8 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 	const processingFolderRef = useRef<string | null>(null);
 	const originalFolderIdRef = useRef<string | null>(null);
 	const lastUpdatedRef = useRef<Record<string, number>>({});
-        // Intervalo de polling más espaciado para reducir llamadas al servidor
-        const pollingIntervalRef = useRef<number>(30000); // 30 segundos
+	// Intervalo de polling más espaciado para reducir llamadas al servidor
+	const pollingIntervalRef = useRef<number>(30000); // 30 segundos
 	const pollingErrorCountRef = useRef<number>(0);
 	const consecutiveNoStatusCountRef = useRef<number>(0);
 
@@ -113,27 +113,27 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 					normalizedId: folderId,
 				});
 
-                                // Verificar si hay un ID similar al actual
-                                for (const activeId of data.allActiveIds) {
-                                        if (activeId.includes(folderId.substring(0, 10)) || folderId.includes(activeId.substring(0, 10))) {
-                                                try {
-                                                        const altData = await getFolderProcessingStatus(activeId);
-                                                        if (altData.status) {
-                                                                pollingLogger.info('✅ Encontrado estado usando ID alternativo', {
-                                                                        alternativeId: activeId,
-                                                                        originalId,
-                                                                        normalizedId: folderId,
-                                                                });
+				// Verificar si hay un ID similar al actual
+				for (const activeId of data.allActiveIds) {
+					if (activeId.includes(folderId.substring(0, 10)) || folderId.includes(activeId.substring(0, 10))) {
+						try {
+							const altData = await getFolderProcessingStatus(activeId);
+							if (altData.status) {
+								pollingLogger.info('✅ Encontrado estado usando ID alternativo', {
+									alternativeId: activeId,
+									originalId,
+									normalizedId: folderId,
+								});
 
-                                                                // Usar este estado alternativo
-                                                                data.status = altData.status;
-                                                                break;
-                                                        }
-                                                } catch (error) {
-                                                        pollingLogger.warn('❌ Error al consultar estado alternativo', { alternativeId: activeId, error });
-                                                }
-                                        }
-                                }
+								// Usar este estado alternativo
+								data.status = altData.status;
+								break;
+							}
+						} catch (error) {
+							pollingLogger.warn('❌ Error al consultar estado alternativo', { alternativeId: activeId, error });
+						}
+					}
+				}
 			}
 
 			// Procesar el estado normalmente si está disponible
@@ -259,9 +259,9 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 			// Ejecutar un polling inmediato para obtener el estado actual
 			pollForStatus().catch((error) => pollingLogger.error('Error en polling inicial:', error));
 
-                        // Configurar intervalo de polling más espacioso
-                        pollingIntervalRef.current = 30000; // 30 segundos
-                        pollingTimerRef.current = setInterval(pollForStatus, pollingIntervalRef.current);
+			// Configurar intervalo de polling más espacioso
+			pollingIntervalRef.current = 30000; // 30 segundos
+			pollingTimerRef.current = setInterval(pollForStatus, pollingIntervalRef.current);
 			setIsPolling(true);
 		},
 		[pollForStatus, stopPolling]

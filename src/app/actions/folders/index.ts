@@ -5,38 +5,46 @@
 
 // ✅ Re-exportar acciones CRUD específicas
 export {
-    createFolder,
-    deleteFolder,
-    updateFolder,
-    updateFolderAutoReindex
+	createFolder,
+	deleteFolder,
+	updateFolder,
+	updateFolderAutoReindex,
 } from './crud.actions';
 
 // ✅ Re-exportar acciones de búsqueda y consulta
 export {
-    getFoldersStats, getFolderTree, revalidateFolderRoutes,
-    searchFolders
+	getFoldersStats,
+	getFolderTree,
+	revalidateFolderRoutes,
+	searchFolders,
 } from './query.actions';
 
 // ✅ Re-exportar acciones específicas de obtención de carpetas
 export {
-    getFolderById,
-    getFolders,
-    getFoldersWithFilter
+	getFolderById,
+	getFolders,
+	getFoldersWithFilter,
 } from './get.actions';
 
 // ✅ Re-exportar acciones específicas de indexación y procesamiento de carpetas
 export {
-    indexFolder, indexFolderThrottled, indexMultipleFolders, reindexAllFoldersInSystem as reindexAllFolders,
-    reindexAutoFolders, reindexFolder, reindexFolderThrottled, repairFolder,
-    validateFolderPath
+	indexFolder,
+	indexFolderThrottled,
+	indexMultipleFolders,
+	reindexAllFoldersInSystem as reindexAllFolders,
+	reindexAutoFolders,
+	reindexFolder,
+	reindexFolderThrottled,
+	repairFolder,
+	validateFolderPath,
 } from './process.actions';
 
 // ✅ Re-exportar acciones de diagnóstico
 export {
-    analyzeFolderHealth,
-    checkFolderConsistency,
-    getDuplicateFiles,
-    getOrphanedImages
+	analyzeFolderHealth,
+	checkFolderConsistency,
+	getDuplicateFiles,
+	getOrphanedImages,
 } from './diagnostics.actions';
 
 // ✅ Re-exportar acciones de imágenes en carpetas
@@ -47,43 +55,46 @@ export { getFolderImages } from './get-folder-images.actions';
 
 // ✅ Re-exportar estadísticas
 export {
-    getFolderIndexingStats,
-    getFolderStats,
-    getFolderStatsById,
-    getFolderStorageStats,
-    revalidateFolderStats
+	getFolderIndexingStats,
+	getFolderStats,
+	getFolderStatsById,
+	getFolderStorageStats,
+	revalidateFolderStats,
 } from './stats.actions';
 
 // ✅ Re-exportar tipos existentes de folder-types
 export type {
-    CreateFolderOptions,
-    ErrorResponse,
-    FolderCreate,
-    FolderError,
-    FolderResponse,
-    FolderUpdate,
-    ImageEntity,
-    ImageWithRelations,
-    IndexCallbacks,
-    IndexOptions,
-    IndexState,
-    ProcessStatus,
-    ReindexOptions,
-    UpdateFolderOptions
+	CreateFolderOptions,
+	ErrorResponse,
+	FolderCreate,
+	FolderError,
+	FolderResponse,
+	FolderUpdate,
+	ImageEntity,
+	ImageWithRelations,
+	IndexCallbacks,
+	IndexOptions,
+	IndexState,
+	ProcessStatus,
+	ReindexOptions,
+	UpdateFolderOptions,
 } from './folder-types';
 
 export {
-    createFolderError, FOLDER_ERROR_CODES, folderErrorToResponse,
-    fromError, SUPPORTED_FORMATS
+	createFolderError,
+	FOLDER_ERROR_CODES,
+	folderErrorToResponse,
+	fromError,
+	SUPPORTED_FORMATS,
 } from './folder-types';
 
 // ✅ Re-exportar tipos base desde @/types/entities/folder
 export type {
-    CreateFolderData,
-    FolderBase,
-    FolderExtended,
-    FolderSummary,
-    UpdateFolderData
+	CreateFolderData,
+	FolderBase,
+	FolderExtended,
+	FolderSummary,
+	UpdateFolderData,
 } from '@/types/entities/folder';
 
 // ✅ Exportar la acción del servidor para escanear carpetas
@@ -94,4 +105,3 @@ export * from './get-folder-files.actions'; // 📂 Nueva acción para obtener a
 export * from './get-folder-images.actions'; // 🖼️ Nueva acción para obtener imágenes de carpeta
 export * from './scan-folder.actions';
 export * from './status.actions'; // 📊 Nueva acción de estado de carpeta
-
