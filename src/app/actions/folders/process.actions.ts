@@ -7,7 +7,7 @@
 
 import { throttleEvent } from '@/lib/event-throttler';
 import { invalidateFolderCache } from '@/lib/folder-cache';
-import { scanFolder } from '@/lib/folder-scanner';
+import { scanFolder, type FolderScanResult } from '@/lib/folder-scanner';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
@@ -21,6 +21,7 @@ import {
     ReindexOptions,
     createFolderError,
 } from './folder-types';
+import type { Folder } from '@/types/entities/folder/types';
 
 // Logger for process actions
 const folderLogger = serverLogger.withContext('FolderProcessActions');
@@ -186,8 +187,13 @@ export async function indexFolder(id: string, options?: IndexOptions): Promise<P
 	try {
 		folderLogger.info('📂 Iniciando indexación de carpeta:', id);
 
+<<<<<<< HEAD
 		let folder: any;
 		let scanResult: any;
+=======
+                let folder: Folder | null;
+                let scanResult: FolderScanResult;
+>>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 
 		// Use a transaction for initial folder updates and scanning result update
 		await prisma.$transaction(async (tx) => {

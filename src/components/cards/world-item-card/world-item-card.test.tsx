@@ -56,6 +56,7 @@ describe('WorldItemCard', () => {
 			await user.click(card);
 		}
 
+<<<<<<< HEAD
 		// Verificar que se llamó al callback (evento u objeto)
 		expect(onClickMock).toHaveBeenCalled();
 	});
@@ -68,4 +69,16 @@ describe('WorldItemCard', () => {
 			expect(link).toBeInTheDocument();
 		});
 	});
+=======
+                // Verificar que se llamó al callback
+                expect(onClickMock).toHaveBeenCalled();
+	});
+
+        it('renderiza un enlace cuando no hay onClick', () => {
+                render(<WorldItemCard worldItem={mockWorldItem} />);
+
+                const link = document.querySelector(`a[href="/dashboard/world-items/${mockWorldItem.id}"]`);
+                expect(link).toBeNull();
+        });
+>>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 });

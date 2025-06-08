@@ -3,6 +3,7 @@
 import { ReindexConfirmationDialog } from '@/components/settings/folders/reindex-confirmation-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import {
 	Dialog,
 	DialogContent,
@@ -172,10 +173,16 @@ export function FoldersSettings() {
 						)}
 					</div>
 
-					{/* Estadísticas */}
-					<FoldersStats stats={stats} />
-				</div>
-			</CardContent>
+                                        {/* Estadísticas */}
+                                        <FoldersStats stats={stats} />
+
+                                        {globalReindexStatus.isProcessing && (
+                                                <div className="mt-2">
+                                                        <Progress value={globalReindexStatus.progress} className="h-1.5" />
+                                                </div>
+                                        )}
+                                </div>
+                        </CardContent>
 
 			<ReindexConfirmationDialog
 				open={showReindexDialog}

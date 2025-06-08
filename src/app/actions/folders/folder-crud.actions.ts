@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 'use server';
+=======
+'use server';
+>>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 
 /**
  * @file Funciones CRUD para la entidad Folder, expuestas como Server Actions.
