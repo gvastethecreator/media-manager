@@ -4,6 +4,14 @@
  */
 
 import type { Settings } from '@/types/settings';
+import {
+    getSystemSettings,
+    updateSystemSettings,
+    resetSystemSettings,
+    getProfileSettings,
+    updateProfileSettings,
+    resetProfileSettings,
+} from '@/app/actions/system';
 
 /**
  * Interfaz para operaciones de configuración global
@@ -47,124 +55,72 @@ export const settingsService: SettingsService = {
 	/**
 	 * Obtiene la configuración global del sistema
 	 */
-	async getSystemSettings(): Promise<Settings> {
-		try {
-			const response = await fetch('/api/system/settings');
-			if (!response.ok) {
-				throw new Error('Error al obtener la configuración del sistema');
-			}
-			return response.json();
-		} catch (error) {
-			console.error('Error en getSystemSettings:', error);
-			throw error;
-		}
-	},
+        async getSystemSettings(): Promise<Settings> {
+                try {
+                        return await getSystemSettings();
+                } catch (error) {
+                        console.error('Error en getSystemSettings:', error);
+                        throw error;
+                }
+        },
 
 	/**
 	 * Actualiza la configuración global del sistema
 	 */
-	async updateSystemSettings(data: Partial<Settings>): Promise<Settings> {
-		try {
-			const response = await fetch('/api/system/settings', {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-
-			if (!response.ok) {
-				throw new Error('Error al actualizar la configuración del sistema');
-			}
-
-			return response.json();
-		} catch (error) {
-			console.error('Error en updateSystemSettings:', error);
-			throw error;
-		}
-	},
+        async updateSystemSettings(data: Partial<Settings>): Promise<Settings> {
+                try {
+                        return await updateSystemSettings(data);
+                } catch (error) {
+                        console.error('Error en updateSystemSettings:', error);
+                        throw error;
+                }
+        },
 
 	/**
 	 * Resetea la configuración global a valores predeterminados
 	 */
-	async resetSystemSettings(): Promise<Settings> {
-		try {
-			const response = await fetch('/api/system/settings/reset', {
-				method: 'POST',
-			});
-
-			if (!response.ok) {
-				throw new Error('Error al resetear la configuración del sistema');
-			}
-
-			return response.json();
-		} catch (error) {
-			console.error('Error en resetSystemSettings:', error);
-			throw error;
-		}
-	},
+        async resetSystemSettings(): Promise<Settings> {
+                try {
+                        return await resetSystemSettings();
+                } catch (error) {
+                        console.error('Error en resetSystemSettings:', error);
+                        throw error;
+                }
+        },
 
 	/**
 	 * Obtiene la configuración de un perfil específico
 	 */
-	async getProfileSettings(profileId: string): Promise<Settings | null> {
-		try {
-			const response = await fetch(`/api/profiles/${profileId}/settings`);
-
-			if (response.status === 404) {
-				return null;
-			}
-
-			if (!response.ok) {
-				throw new Error(`Error al obtener la configuración del perfil ${profileId}`);
-			}
-
-			return response.json();
-		} catch (error) {
-			console.error('Error en getProfileSettings:', error);
-			throw error;
-		}
-	},
+        async getProfileSettings(profileId: string): Promise<Settings | null> {
+                try {
+                        return await getProfileSettings(profileId);
+                } catch (error) {
+                        console.error('Error en getProfileSettings:', error);
+                        throw error;
+                }
+        },
 
 	/**
 	 * Actualiza la configuración de un perfil específico
 	 */
-	async updateProfileSettings(profileId: string, data: Partial<Settings>): Promise<Settings> {
-		try {
-			const response = await fetch(`/api/profiles/${profileId}/settings`, {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-
-			if (!response.ok) {
-				throw new Error(`Error al actualizar la configuración del perfil ${profileId}`);
-			}
-
-			return response.json();
-		} catch (error) {
-			console.error('Error en updateProfileSettings:', error);
-			throw error;
-		}
-	},
+        async updateProfileSettings(profileId: string, data: Partial<Settings>): Promise<Settings> {
+                try {
+                        return await updateProfileSettings(profileId, data);
+                } catch (error) {
+                        console.error('Error en updateProfileSettings:', error);
+                        throw error;
+                }
+        },
 
 	/**
 	 * Resetea la configuración de un perfil a los valores globales
 	 */
-	async resetProfileSettings(profileId: string): Promise<void> {
-		try {
-			const response = await fetch(`/api/profiles/${profileId}/settings/reset`, {
-				method: 'POST',
-			});
-
-			if (!response.ok) {
-				throw new Error(`Error al resetear la configuración del perfil ${profileId}`);
-			}
-		} catch (error) {
-			console.error('Error en resetProfileSettings:', error);
-			throw error;
-		}
-	},
+        async resetProfileSettings(profileId: string): Promise<void> {
+                try {
+                        await resetProfileSettings(profileId);
+                } catch (error) {
+                        console.error('Error en resetProfileSettings:', error);
+                        throw error;
+                }
+        },
 };

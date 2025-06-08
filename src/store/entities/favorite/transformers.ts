@@ -1,4 +1,4 @@
-import type { Image } from '@prisma/client';
+import type { Image } from '@/types/entities/image';
 import type { FavoriteViewConfig } from './types';
 
 // 🔄 Transformar imágenes para la vista

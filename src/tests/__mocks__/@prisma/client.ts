@@ -99,4 +99,14 @@ const mockPrismaClient = {
   },
 };
 
-module.exports = mockPrismaClient;
+// Exportar una clase PrismaClient para simular `new PrismaClient()`
+class MockPrismaClient {
+  constructor() {
+    Object.assign(this, mockPrismaClient);
+  }
+}
+
+module.exports = {
+  PrismaClient: MockPrismaClient,
+  mockPrismaClient,
+};

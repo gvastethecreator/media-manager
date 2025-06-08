@@ -4,14 +4,11 @@
  * @description Implementa operaciones CRUD básicas y gestión de estado para imágenes
  */
 
-import { Logger } from '@/lib/logger';
-import { transformImageToExtended, transformImagesToExtended } from '@/transformers/image/transformer';
-import type { CreateImageData, Image, ImageBase, UpdateImageData } from '@/types/entities/image';
+import type { CreateImageData, Image, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image';
+import { extendImage } from '@/transformers/image/serializers';
+import { getImage, getImages, createImage as createServerImage, deleteImage } from '@/app/actions/images/image-crud.actions';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
-
-// Logger para el slice
-const logger = new Logger('ImageCoreSlice');
 
 // Slice para operaciones CRUD básicas
 export interface ImageCoreSlice {
@@ -22,8 +19,8 @@ export interface ImageCoreSlice {
 	getImageByPath: (path: string) => Image | undefined;
 
 	// Operaciones
-	addImage: (image: ImageBase) => void;
-	addImages: (images: ImageBase[]) => void;
+        addImage: (image: ImageExtended) => void;
+        addImages: (images: ImageExtended[]) => void;
 	updateImage: (id: string, data: UpdateImageData) => void;
 	deleteImage: (id: string) => void;
 	clearImages: () => void;
@@ -34,9 +31,9 @@ export interface ImageCoreSlice {
 	setError: (error: string | null) => void;
 
 	// Acciones asíncronas
-	fetchImage: (id: string) => Promise<Image | undefined>;
-	fetchImages: (options?: { folderIds?: string[]; refresh?: boolean }) => Promise<Image[]>;
-	createImage: (data: CreateImageData) => Promise<Image | undefined>;
+        fetchImage: (id: string) => Promise<ImageExtended | undefined>;
+        fetchImages: (options?: { folderIds?: string[]; refresh?: boolean }) => Promise<ImageExtended[]>;
+        createImage: (data: CreateImageData) => Promise<ImageExtended | undefined>;
 	removeImage: (id: string) => Promise<boolean>;
 }
 
@@ -60,130 +57,66 @@ export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSli
 	},
 
 	// Operaciones síncronas
-	addImage: (image: ImageBase) => {
-		try {
-			// Usar el nuevo transformador para garantizar formato correcto
-			const extendedImage = transformImageToExtended(image);
+        addImage: (image: ImageExtended) => {
+                set((state) => ({
+                        core: {
+                                ...state.core,
+                                images: {
+                                        ...state.core.images,
+                                        [image.id]: image,
+                                },
+                                lastUpdated: Date.now(),
+                        },
+                }));
+        },
 
-			set((state) => ({
-				core: {
-					...state.core,
-					images: {
-						...state.core.images,
-						[image.id]: extendedImage,
-					},
-					lastUpdated: Date.now(),
-				},
-			}));
-		} catch (error) {
-			logger.error('Error al añadir imagen:', error);
-			// Intentar una versión mínima para evitar interrumpir el flujo
-			if (image && typeof image === 'object' && 'id' in image) {
-				set((state) => ({
-					core: {
-						...state.core,
-						images: {
-							...state.core.images,
-							[image.id as string]: image as Image,
-						},
-						error: error instanceof Error ? error.message : 'Error al procesar imagen',
-						lastUpdated: Date.now(),
-					},
-				}));
-			}
-		}
-	},
+        addImages: (images: ImageExtended[]) => {
+                const imagesMap = images.reduce((acc, image) => {
+                        if (image?.id) {
+                                acc[image.id] = image;
+                        }
+                        return acc;
+                }, {} as Record<string, Image>);
 
-	addImages: (images: ImageBase[]) => {
-		try {
-			// Usar el nuevo transformador para arrays
-			const extendedImages = transformImagesToExtended(images);
-
-			const imagesMap = extendedImages.reduce(
-				(acc, image) => {
-					if (image?.id) {
-						acc[image.id] = image;
-					}
-					return acc;
-				},
-				{} as Record<string, Image>
-			);
-
-			set((state) => ({
-				core: {
-					...state.core,
-					images: {
-						...state.core.images,
-						...imagesMap,
-					},
-					lastUpdated: Date.now(),
-				},
-			}));
-		} catch (error) {
-			logger.error('Error al añadir múltiples imágenes:', error);
-			// Establecer error en el estado
-			set((state) => ({
-				core: {
-					...state.core,
-					error: error instanceof Error ? error.message : 'Error al procesar imágenes',
-				},
-			}));
-		}
-	},
+                set((state) => ({
+                        core: {
+                                ...state.core,
+                                images: {
+                                        ...state.core.images,
+                                        ...imagesMap,
+                                },
+                                lastUpdated: Date.now(),
+                        },
+                }));
+        },
 
 	updateImage: (id: string, data: UpdateImageData) => {
 		set((state) => {
 			const image = state.core.images[id];
-			if (!image) {
-				logger.warn(`Intento de actualizar imagen inexistente, ID: ${id}`);
-				return state;
-			}
+                        if (!image) {
+                                return state;
+                        }
 
-			try {
-				// Combinar datos y transformar para garantizar consistencia
-				const updatedImageBase = { ...image, ...data };
-				const updatedImage = transformImageToExtended(updatedImageBase);
-
-				return {
-					core: {
-						...state.core,
-						images: {
-							...state.core.images,
-							[id]: updatedImage,
-						},
-						lastUpdated: Date.now(),
-					},
-				};
-			} catch (error) {
-				logger.error(`Error al actualizar imagen ${id}:`, error);
-				// Caer de nuevo a la actualización simple sin transformar
-				return {
-					core: {
-						...state.core,
-						images: {
-							...state.core.images,
-							[id]: {
-								...image,
-								...data,
-							},
-						},
-						error: error instanceof Error ? error.message : 'Error al actualizar imagen',
-						lastUpdated: Date.now(),
-					},
-				};
-			}
-		});
+                        const updatedImage = { ...image, ...data } as Image;
+                        return {
+                                core: {
+                                        ...state.core,
+                                        images: {
+                                                ...state.core.images,
+                                                [id]: updatedImage,
+                                        },
+                                        lastUpdated: Date.now(),
+                                },
+                        };
+                });
 	},
 
 	deleteImage: (id: string) => {
 		set((state) => {
 			const newImages = { ...state.core.images };
-			if (id in newImages) {
-				delete newImages[id];
-				logger.debug(`Imagen eliminada del store: ${id}`);
-			} else {
-				logger.warn(`Intento de eliminar imagen inexistente, ID: ${id}`);
-			}
+                        if (id in newImages) {
+                                delete newImages[id];
+                        }
 
 			return {
 				core: {
@@ -202,8 +135,7 @@ export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSli
 				images: {},
 				lastUpdated: Date.now(),
 			},
-		}));
-		logger.debug('Store de imágenes limpiado completamente');
+                }));
 	},
 
 	clearFolderImages: (folderId: string) => {
@@ -219,7 +151,6 @@ export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSli
 				}
 			}
 
-			logger.debug(`Eliminadas ${count} imágenes de la carpeta ${folderId}`);
 
 			return {
 				core: {
@@ -250,142 +181,79 @@ export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSli
 		}));
 	},
 
-	// Operaciones asíncronas con integración real a la API
-	fetchImage: async (id: string) => {
-		const { setLoading, setError, addImage } = get();
-		try {
-			setLoading(true);
-			logger.debug(`Obteniendo imagen: ${id}`);
+        // Operaciones asíncronas con Server Actions
+        fetchImage: async (id: string) => {
+                const { setLoading, setError, addImage } = get();
+                try {
+                        setLoading(true);
+                        const image = await getImage(id);
+                        if (image) {
+                                addImage(image);
+                        }
+                        return image ?? undefined;
+                } catch (error) {
+                        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+                        setError(errorMessage);
+                        return undefined;
+                } finally {
+                        setLoading(false);
+                }
+        },
 
-			// Implementación real con fetch a la API
-			const response = await fetch(`/api/images/${id}`);
-			if (!response.ok) throw new Error(`Error al cargar la imagen: ${response.statusText}`);
+        fetchImages: async (options = {}) => {
+                const { setLoading, setError, addImages, clearImages } = get();
+                const { refresh = false } = options;
 
-			const result = await response.json();
-			if (!result.success || !result.data) {
-				throw new Error(result.error || 'No se pudo obtener la imagen');
-			}
+                try {
+                        setLoading(true);
 
-			// Transformar y guardar en el store
-			addImage(result.data);
-			return get().core.images[id];
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			logger.error(`Error al obtener imagen ${id}:`, error);
-			setError(errorMessage);
-			return undefined;
-		} finally {
-			setLoading(false);
-		}
-	},
+                        if (refresh) {
+                                clearImages();
+                        }
 
-	fetchImages: async (options = {}) => {
-		const { setLoading, setError, addImages, clearImages } = get();
-		const { folderIds, refresh = false } = options;
+                        const result = await getImages(options);
+                        addImages(result.images);
+                        return Object.values(get().core.images);
+                } catch (error) {
+                        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+                        setError(errorMessage);
+                        return [];
+                } finally {
+                        setLoading(false);
+                }
+        },
 
-		try {
-			setLoading(true);
-			logger.debug(`Obteniendo imágenes${folderIds ? ` de carpetas: ${folderIds.join(', ')}` : ''}`);
+        createImage: async (data: CreateImageData) => {
+                const { setLoading, setError, addImage } = get();
+                try {
+                        setLoading(true);
 
-			// Si se solicita recargar, limpiamos primero
-			if (refresh) {
-				clearImages();
-			}
+                        const newImageBase = await createServerImage(data);
+                        const extended = extendImage(newImageBase);
+                        addImage(extended);
+                        return get().core.images[newImageBase.id];
+                } catch (error) {
+                        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+                        setError(errorMessage);
+                        return undefined;
+                } finally {
+                        setLoading(false);
+                }
+        },
 
-			// Construir URL con parámetros
-			const searchParams = new URLSearchParams();
-			if (folderIds && folderIds.length > 0) {
-				for (const id of folderIds) {
-					searchParams.append('folderIds', id);
-				}
-			}
-
-			const url = `/api/images?${searchParams.toString()}`;
-			const response = await fetch(url);
-
-			if (!response.ok) throw new Error(`Error al cargar imágenes: ${response.statusText}`);
-
-			const result = await response.json();
-			if (!result.success || !result.data) {
-				throw new Error(result.error || 'No se pudieron obtener las imágenes');
-			}
-
-			// Transformar y guardar en el store
-			addImages(result.data);
-			return Object.values(get().core.images);
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			logger.error('Error al obtener imágenes:', error);
-			setError(errorMessage);
-			return [];
-		} finally {
-			setLoading(false);
-		}
-	},
-
-	createImage: async (data: CreateImageData) => {
-		const { setLoading, setError, addImage } = get();
-		try {
-			setLoading(true);
-			logger.debug('Creando nueva imagen:', data.name);
-
-			// Implementación real con fetch a la API
-			const response = await fetch('/api/images', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-
-			if (!response.ok) throw new Error(`Error al crear imagen: ${response.statusText}`);
-
-			const result = await response.json();
-			if (!result.success || !result.data) {
-				throw new Error(result.error || 'No se pudo crear la imagen');
-			}
-
-			// Transformar y guardar en el store
-			addImage(result.data);
-			return get().core.images[result.data.id];
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			logger.error('Error al crear imagen:', error);
-			setError(errorMessage);
-			return undefined;
-		} finally {
-			setLoading(false);
-		}
-	},
-
-	removeImage: async (id: string) => {
-		const { setLoading, setError, deleteImage } = get();
-		try {
-			setLoading(true);
-			logger.debug(`Eliminando imagen: ${id}`);
-
-			// Implementación real con fetch a la API
-			const response = await fetch(`/api/images/${id}`, {
-				method: 'DELETE',
-			});
-
-			if (!response.ok) throw new Error(`Error al eliminar imagen: ${response.statusText}`);
-
-			const result = await response.json();
-			if (!result.success) {
-				throw new Error(result.error || 'No se pudo eliminar la imagen');
-			}
-
-			// Eliminar del store
-			deleteImage(id);
-			return true;
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			logger.error(`Error al eliminar imagen ${id}:`, error);
-			setError(errorMessage);
-			return false;
-		} finally {
-			setLoading(false);
-		}
-	},
+        removeImage: async (id: string) => {
+                const { setLoading, setError, deleteImage: removeLocal } = get();
+                try {
+                        setLoading(true);
+                        await deleteImage(id);
+                        removeLocal(id);
+                        return true;
+                } catch (error) {
+                        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+                        setError(errorMessage);
+                        return false;
+                } finally {
+                        setLoading(false);
+                }
+        },
 });
