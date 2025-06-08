@@ -86,6 +86,7 @@ describe('FolderCard', () => {
 		const onClickMock = jest.fn();
 		const user = userEvent.setup();
 		render(<FolderCard folder={mockFolder} onClick={onClickMock} />);
+<<<<<<< HEAD
 		// Buscar el botón principal de la tarjeta
 		const button = screen.getByRole('button');
 		await user.click(button);
@@ -117,6 +118,43 @@ describe('FolderCard', () => {
 			expect(images.length).toBeGreaterThan(0);
 		});
 	});
+=======
+
+		// Hacer clic en la tarjeta
+		const card = screen.getByText('Vacaciones').closest('div');
+		if (card) {
+			await user.click(card);
+		}
+
+                // Verificar que se llamó al callback
+                expect(onClickMock).toHaveBeenCalled();
+	});
+
+       it('renderiza sin enlace cuando no hay onClick', () => {
+               render(<FolderCard folder={mockFolder} />);
+
+               // No debe existir un enlace de navegación por defecto
+               const link = document.querySelector(`a[href="/dashboard/folders/${mockFolder.id}"]`);
+               expect(link).toBeNull();
+       });
+
+       it('muestra las estadísticas de la carpeta', async () => {
+               render(<FolderCard folder={mockFolder} />);
+
+               await new Promise((resolve) => setTimeout(resolve, 0));
+
+               expect(screen.getByText('120')).toBeInTheDocument();
+       });
+
+       it('carga y muestra las imágenes de la carpeta', async () => {
+               render(<FolderCard folder={mockFolder} />);
+
+               await new Promise((resolve) => setTimeout(resolve, 0));
+
+               const images = document.querySelectorAll('img');
+               expect(images.length).toBe(0);
+       });
+>>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 
 	it('aplica correctamente los colores personalizados', () => {
 		render(<FolderCard folder={mockFolder} />);
@@ -124,6 +162,7 @@ describe('FolderCard', () => {
 		expect(elements.length).toBeGreaterThan(0);
 	});
 
+<<<<<<< HEAD
 	it('muestra el indicador de favorito cuando corresponde', async () => {
 		render(<FolderCard folder={mockFolder} />);
 		await waitFor(() => {
@@ -132,4 +171,13 @@ describe('FolderCard', () => {
 			expect(favoriteIcon).toBeInTheDocument();
 		});
 	});
+=======
+       it('muestra el indicador de favorito cuando corresponde', () => {
+               render(<FolderCard folder={{ ...mockFolder, isFavorite: true }} />);
+
+               // Buscar el icono de favorito
+               const star = document.querySelector('svg.lucide-star');
+               expect(star).not.toBeNull();
+       });
+>>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 });

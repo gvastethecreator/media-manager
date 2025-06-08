@@ -244,7 +244,11 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 				}
 
 				// Incrementar la versión solo si el contenido principal cambió o si un error previo fue resuelto
+<<<<<<< HEAD
 				if (needsVersionUpdateDueToContent || (existingResource?.error)) {
+=======
+                                if (needsVersionUpdateDueToContent || existingResource?.error) {
+>>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 					set({ version: get().version + 1 });
 					resourceLogger.debug(`🔢 Incrementada versión de recursos para ID ${id}`);
 				}
@@ -317,7 +321,11 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					}
 
 					// Incrementar la versión solo si el contenido principal cambió o si un error previo fue resuelto
+<<<<<<< HEAD
 					if (needsVersionUpdateDueToContent || (existingResource?.error)) {
+=======
+                                        if (needsVersionUpdateDueToContent || existingResource?.error) {
+>>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 						set({ version: get().version + 1 });
 					}
 					return url;
