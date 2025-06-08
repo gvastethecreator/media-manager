@@ -2,7 +2,12 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { transformConceptToWithStats } from '@/transformers/concept/transformer';
 import type { ConceptBase, ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept';
 import type { StateCreator } from 'zustand';
-import { createConcept, deleteConcept, searchConcepts, updateConcept } from '../../../../app/actions/concepts/concept.actions';
+import {
+	createConcept,
+	deleteConcept,
+	searchConcepts,
+	updateConcept,
+} from '../../../../app/actions/concepts/concept.actions';
 import type { ConceptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('ConceptStore:Core');

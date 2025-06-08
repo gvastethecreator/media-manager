@@ -46,13 +46,13 @@ export async function repairSystem(...args: Parameters<typeof SystemActions.repa
 	return SystemActions.repairSystem(...args);
 }
 export async function resetDatabase(...args: Parameters<typeof SystemActions.resetDatabase>) {
-        return SystemActions.resetDatabase(...args);
+	return SystemActions.resetDatabase(...args);
 }
 
 // Inicialización del servidor
 export async function initServer(...args: Parameters<typeof import('./init.actions').initServer>) {
-        const mod = await import('./init.actions');
-        return mod.initServer(...args);
+	const mod = await import('./init.actions');
+	return mod.initServer(...args);
 }
 
 // Exportaciones de errores

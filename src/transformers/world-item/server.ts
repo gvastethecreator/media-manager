@@ -6,18 +6,26 @@
 import { createLogger } from '@/lib/logger';
 import { WorldItemSchema } from '@/types/entities/world-item/schema';
 import type {
-    WorldItemAttribute,
-    WorldItemBase,
-    WorldItemDeserialized,
-    WorldItemEffect,
-    WorldItemFilter,
-    WorldItemProperty,
-    WorldItemRequirement,
-    WorldItemStat
+	WorldItemAttribute,
+	WorldItemBase,
+	WorldItemDeserialized,
+	WorldItemEffect,
+	WorldItemFilter,
+	WorldItemProperty,
+	WorldItemRequirement,
+	WorldItemStat,
 } from '@/types/entities/world-item/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { Prisma } from '@prisma/client';
-import { serializeAttributes, serializeEffects, serializeFilters, serializeProperties, serializeRequirements, serializeStats, serializeTags } from './serializers';
+import {
+	serializeAttributes,
+	serializeEffects,
+	serializeFilters,
+	serializeProperties,
+	serializeRequirements,
+	serializeStats,
+	serializeTags,
+} from './serializers';
 
 const logger = createLogger('WorldItemTransformer:Server');
 

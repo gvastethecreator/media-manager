@@ -53,7 +53,15 @@ export const selectCategoryFilter = (state: FolderStore) => state.filtersState.c
 
 // Selectores compuestos que calculan información derivada
 export const selectFilteredFolders = createSelector(
-	[selectFolders, selectSearchTerm, selectSortBy, selectSortDirection, selectShowFavorites, selectActiveOnly, selectCategoryFilter],
+	[
+		selectFolders,
+		selectSearchTerm,
+		selectSortBy,
+		selectSortDirection,
+		selectShowFavorites,
+		selectActiveOnly,
+		selectCategoryFilter,
+	],
 	(folders, searchTerm, sortBy, sortDirection, showFavorites, activeOnly, categoryFilter): FolderExtended[] => {
 		// Aplicar filtros
 		return folders
@@ -106,22 +114,16 @@ export const selectFilteredFolders = createSelector(
 );
 
 // Selector para carpetas favoritas
-export const selectFavoriteFolders = createSelector(
-	[selectFolders],
-	(folders): FolderExtended[] => {
-		return folders.filter((folder) => folder.isFavorite);
-	}
-);
+export const selectFavoriteFolders = createSelector([selectFolders], (folders): FolderExtended[] => {
+	return folders.filter((folder) => folder.isFavorite);
+});
 
 // Selector para estadísticas generales
-export const selectFolderStats = createSelector(
-	[selectFolders],
-	(folders) => {
-		return {
-			total: folders.length,
-			favorites: folders.filter((folder) => folder.isFavorite).length,
-			empty: folders.filter((folder) => (folder.totalFiles || 0) === 0).length,
-			// Otras estadísticas relevantes
-		};
-	}
-);
+export const selectFolderStats = createSelector([selectFolders], (folders) => {
+	return {
+		total: folders.length,
+		favorites: folders.filter((folder) => folder.isFavorite).length,
+		empty: folders.filter((folder) => (folder.totalFiles || 0) === 0).length,
+		// Otras estadísticas relevantes
+	};
+});

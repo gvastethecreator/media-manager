@@ -3,18 +3,18 @@
  * @module transformers/file/mappers
  */
 
+import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    type DirectoryInfo,
-    type EnhancedDirectory,
-    type EnhancedImageFile,
-    FILE_EXTENSION_GROUPS,
-    type FileBase,
-    type FileFilterOptions,
-    type FileInfo,
-    FileType,
+	type DirectoryInfo,
+	type EnhancedDirectory,
+	type EnhancedImageFile,
+	FILE_EXTENSION_GROUPS,
+	type FileBase,
+	type FileFilterOptions,
+	type FileInfo,
+	FileType,
 } from '@/types/entities/file/index';
-import path from 'path';
 
 const mappersLogger = serverLogger.withContext('File:Mappers');
 
