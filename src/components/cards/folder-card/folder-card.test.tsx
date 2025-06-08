@@ -68,34 +68,34 @@ describe('FolderCard', () => {
 			await user.click(card);
 		}
 
-                // Verificar que se llamó al callback
-                expect(onClickMock).toHaveBeenCalled();
+		// Verificar que se llamó al callback
+		expect(onClickMock).toHaveBeenCalled();
 	});
 
-       it('renderiza sin enlace cuando no hay onClick', () => {
-               render(<FolderCard folder={mockFolder} />);
+	it('renderiza sin enlace cuando no hay onClick', () => {
+		render(<FolderCard folder={mockFolder} />);
 
-               // No debe existir un enlace de navegación por defecto
-               const link = document.querySelector(`a[href="/dashboard/folders/${mockFolder.id}"]`);
-               expect(link).toBeNull();
-       });
+		// No debe existir un enlace de navegación por defecto
+		const link = document.querySelector(`a[href="/dashboard/folders/${mockFolder.id}"]`);
+		expect(link).toBeNull();
+	});
 
-       it('muestra las estadísticas de la carpeta', async () => {
-               render(<FolderCard folder={mockFolder} />);
+	it('muestra las estadísticas de la carpeta', async () => {
+		render(<FolderCard folder={mockFolder} />);
 
-               await new Promise((resolve) => setTimeout(resolve, 0));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
-               expect(screen.getByText('120')).toBeInTheDocument();
-       });
+		expect(screen.getByText('120')).toBeInTheDocument();
+	});
 
-       it('carga y muestra las imágenes de la carpeta', async () => {
-               render(<FolderCard folder={mockFolder} />);
+	it('carga y muestra las imágenes de la carpeta', async () => {
+		render(<FolderCard folder={mockFolder} />);
 
-               await new Promise((resolve) => setTimeout(resolve, 0));
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
-               const images = document.querySelectorAll('img');
-               expect(images.length).toBe(0);
-       });
+		const images = document.querySelectorAll('img');
+		expect(images.length).toBe(0);
+	});
 
 	it('aplica correctamente los colores personalizados', () => {
 		render(<FolderCard folder={mockFolder} />);
@@ -105,11 +105,11 @@ describe('FolderCard', () => {
 		expect(elements.length).toBeGreaterThan(0);
 	});
 
-       it('muestra el indicador de favorito cuando corresponde', () => {
-               render(<FolderCard folder={{ ...mockFolder, isFavorite: true }} />);
+	it('muestra el indicador de favorito cuando corresponde', () => {
+		render(<FolderCard folder={{ ...mockFolder, isFavorite: true }} />);
 
-               // Buscar el icono de favorito
-               const star = document.querySelector('svg.lucide-star');
-               expect(star).not.toBeNull();
-       });
+		// Buscar el icono de favorito
+		const star = document.querySelector('svg.lucide-star');
+		expect(star).not.toBeNull();
+	});
 });

@@ -24,7 +24,13 @@ export function transformAlbum(album: unknown): AlbumBase {
 
 		// 🔧 FIX: Primero verificar si viene de Prisma, ANTES de validar
 		// Si el álbum viene de Prisma, transformarlo directamente
-		if (typeof album === 'object' && album !== null && 'images' in album && 'videos' in album && 'collections' in album) {
+		if (
+			typeof album === 'object' &&
+			album !== null &&
+			'images' in album &&
+			'videos' in album &&
+			'collections' in album
+		) {
 			const prismaAlbum = fromPrismaAlbum(album as any);
 			// Convertir AlbumComplete a AlbumBase extrayendo solo los campos base
 			const baseAlbum: AlbumBase = {
@@ -95,7 +101,9 @@ export function transformAlbums(albums: unknown[]): AlbumBase[] {
 		return albums.map((album) => transformAlbum(album));
 	} catch (error) {
 		logger.error('Error transformando lista de álbumes:', error);
-		throw new TransformerError(`Error al transformar lista de álbumes: ${error instanceof Error ? error.message : String(error)}`);
+		throw new TransformerError(
+			`Error al transformar lista de álbumes: ${error instanceof Error ? error.message : String(error)}`
+		);
 	}
 }
 
@@ -135,9 +143,11 @@ export function transformAlbumToExtended(album: AlbumBase): AlbumComplete {
 		logger.error('Error transformando álbum a versión extendida:', {
 			error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
 			albumId: (album as any)?.id,
-			albumType: typeof album
+			albumType: typeof album,
 		});
-		throw new TransformerError(`Error al transformar álbum a versión extendida: ${error instanceof Error ? error.message : String(error)}`);
+		throw new TransformerError(
+			`Error al transformar álbum a versión extendida: ${error instanceof Error ? error.message : String(error)}`
+		);
 	}
 }
 
@@ -213,6 +223,8 @@ export function transformAlbumToWithStats(album: any): AlbumWithStats {
 		};
 	} catch (error) {
 		logger.error('Error transformando álbum a versión con estadísticas:', error);
-		throw new TransformerError(`Error al transformar álbum a versión con estadísticas: ${error instanceof Error ? error.message : String(error)}`);
+		throw new TransformerError(
+			`Error al transformar álbum a versión con estadísticas: ${error instanceof Error ? error.message : String(error)}`
+		);
 	}
 }

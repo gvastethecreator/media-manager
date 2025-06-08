@@ -4,14 +4,14 @@
  */
 
 import type {
-    AdvancedSettings,
-    AppearanceSettings,
-    Language as LanguageType,
-    NotificationsSettings,
-    PrivacySettings,
-    Settings as SettingsType,
-    ThemeMode as ThemeModeType,
-    UpdateSettings,
+	AdvancedSettings,
+	AppearanceSettings,
+	Language as LanguageType,
+	NotificationsSettings,
+	PrivacySettings,
+	Settings as SettingsType,
+	ThemeMode as ThemeModeType,
+	UpdateSettings,
 } from '@/transformers/settings/schema';
 
 // Se importan los esquemas específicamente (no como tipos)
@@ -32,5 +32,4 @@ export type SettingsUpdate = UpdateSettings;
 export { languageSchema, settingsSchema, themeModeSchema, updateSettingsSchema };
 
 // Exportación de tipos internos
-    export type { AdvancedSettings, AppearanceSettings, NotificationsSettings, PrivacySettings };
-
+export type { AdvancedSettings, AppearanceSettings, NotificationsSettings, PrivacySettings };

@@ -26,6 +26,7 @@ import { AlbumsSettings } from './albums/albums-settings';
 import { CharactersSettings } from './characters/characters-settings';
 import { CollectionsSettings } from './collections/collections-settings';
 import { ConceptsSettings } from './concepts/concepts-settings';
+import { EntitiesCardsSettings } from './entities-cards/entities-cards-settings';
 import { FoldersSettings } from './folders/folders-settings';
 import { GroupsSettings } from './groups/groups-settings';
 import { NotesSettings } from './notes/notes-settings';
@@ -40,7 +41,6 @@ import { ThumbnailsSettings } from './thumbnails/thumbnails-settings';
 import { UploadedImagesSettings } from './uploaded-images/uploaded-images-settings';
 import { WildcardsSettings } from './wildcards/wildcards-settings';
 import { WorldItemsSettings } from './world-items/world-items-settings';
-import { EntitiesCardsSettings } from './entities-cards/entities-cards-settings';
 
 // Definición de tipos para estructurar los tabs
 interface TabItem {
@@ -255,9 +255,9 @@ export function SettingsView() {
 						</div>
 					</TabsContent>
 
-                                        <TabsContent value="entities-cards" className="h-full w-full p-6 m-0 border-none">
-                                                <EntitiesCardsSettings />
-                                        </TabsContent>
+					<TabsContent value="entities-cards" className="h-full w-full p-6 m-0 border-none">
+						<EntitiesCardsSettings />
+					</TabsContent>
 
 					<TabsContent value="albums" className="h-full w-full p-6 m-0 border-none">
 						<AlbumsSettings />

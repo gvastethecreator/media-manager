@@ -7,17 +7,17 @@
 import { mapFolderToFolder, toPrismaFolder } from './converters';
 import { mapCreateFolderDataToPrisma, mapFolderFiltersToPrisma, mapUpdateFolderDataToPrisma } from './mappers';
 import {
-    extendFolder,
-    fromFolderComplete,
-    fromPrismaFolder,
-    generateFolderColor,
-    generateFolderEmoji,
-    normalizeFolderPath,
-    normalizeFolderType,
-    parseFolderFilters,
-    toRelatedFolder,
-    validateFolder,
-    withFolderStats,
+	extendFolder,
+	fromFolderComplete,
+	fromPrismaFolder,
+	generateFolderColor,
+	generateFolderEmoji,
+	normalizeFolderPath,
+	normalizeFolderType,
+	parseFolderFilters,
+	toRelatedFolder,
+	validateFolder,
+	withFolderStats,
 } from './serializers';
 import { transformFolderBase, transformFolderToExtended } from './transformer';
 
@@ -27,23 +27,22 @@ import { transformFolderBase, transformFolderToExtended } from './transformer';
 export { mapFolderToFolder, toPrismaFolder };
 
 // De serializers.ts
-    export {
-        extendFolder,
-        fromFolderComplete,
-        fromPrismaFolder,
-        generateFolderColor,
-        generateFolderEmoji,
-        normalizeFolderPath,
-        normalizeFolderType,
-        parseFolderFilters,
-        toRelatedFolder,
-        validateFolder,
-        withFolderStats
-    };
+export {
+	extendFolder,
+	fromFolderComplete,
+	fromPrismaFolder,
+	generateFolderColor,
+	generateFolderEmoji,
+	normalizeFolderPath,
+	normalizeFolderType,
+	parseFolderFilters,
+	toRelatedFolder,
+	validateFolder,
+	withFolderStats,
+};
 
 // De mappers.ts
-    export { mapCreateFolderDataToPrisma, mapFolderFiltersToPrisma, mapUpdateFolderDataToPrisma };
+export { mapCreateFolderDataToPrisma, mapFolderFiltersToPrisma, mapUpdateFolderDataToPrisma };
 
 // De transformer.ts (exportamos transformFolderBase como transformFolder)
-    export { transformFolderBase as transformFolder, transformFolderToExtended };
-
+export { transformFolderBase as transformFolder, transformFolderToExtended };

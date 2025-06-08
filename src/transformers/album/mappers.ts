@@ -5,12 +5,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    AlbumComplete,
-    AlbumCreateInput,
-    AlbumFilters,
-    AlbumSearchOptions,
-    AlbumUpdateInput,
-    RelatedAlbum,
+	AlbumComplete,
+	AlbumCreateInput,
+	AlbumFilters,
+	AlbumSearchOptions,
+	AlbumUpdateInput,
+	RelatedAlbum,
 } from '@/types/entities/album/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 

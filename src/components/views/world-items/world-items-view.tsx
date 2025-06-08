@@ -1,5 +1,6 @@
 'use client';
 
+import { getWorldItemVisualConfig } from '@/app/actions/visual-config.actions';
 import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { WorldItemCard } from '@/components/cards/world-item-card';
@@ -13,7 +14,6 @@ import { useWorldItemStore } from '@/store/entities/world-item';
 import { Box } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
-import { getWorldItemVisualConfig } from '@/app/actions/visual-config.actions';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('WorldItemsView');
@@ -52,17 +52,17 @@ export function WorldItemsView(_props: ViewProps) {
 	}, []);
 
 	// Cargar la configuración visual desde el servidor
-        const loadVisualConfig = useCallback(async () => {
-                try {
-                        viewLogger.info('🔄 Cargando configuración visual para objetos del mundo...');
-                        const config = await getWorldItemVisualConfig();
-                        setVisualConfig({ ...DEFAULT_WORLD_ITEM_OPTIONS, ...config });
-                        viewLogger.info('✅ Configuración visual cargada');
-                } catch (err) {
-                        viewLogger.error('❌ Error cargando configuración visual:', err);
-                        // Mantener la configuración predeterminada en caso de error
-                }
-        }, []);
+	const loadVisualConfig = useCallback(async () => {
+		try {
+			viewLogger.info('🔄 Cargando configuración visual para objetos del mundo...');
+			const config = await getWorldItemVisualConfig();
+			setVisualConfig({ ...DEFAULT_WORLD_ITEM_OPTIONS, ...config });
+			viewLogger.info('✅ Configuración visual cargada');
+		} catch (err) {
+			viewLogger.error('❌ Error cargando configuración visual:', err);
+			// Mantener la configuración predeterminada en caso de error
+		}
+	}, []);
 
 	useEffect(() => {
 		// Cargar objetos inicialmente

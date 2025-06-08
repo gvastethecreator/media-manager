@@ -1,6 +1,7 @@
 'use client';
 
 import { type PlaceWithStats, getPlaces } from '@/app/actions/places/place.actions';
+import { getPlaceVisualConfig } from '@/app/actions/visual-config.actions';
 import { MemoizedPlaceCard } from '@/components/cards/place-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -13,7 +14,6 @@ import { LandPlot } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
-import { getPlaceVisualConfig } from '@/app/actions/visual-config.actions';
 
 const viewLogger = clientLogger.withContext('PlacesView');
 
@@ -61,22 +61,22 @@ export function PlacesView(_props: ViewProps) {
 		loadPlaces();
 	}, [loadPlaces]);
 
-        useEffect(() => {
-                const loadVisualConfig = async () => {
-                        try {
-                                const config = await getPlaceVisualConfig();
-                                setVisualConfig({
-                                        ...DEFAULT_PLACE_OPTIONS,
-                                        ...config,
-                                });
-                        } catch (error) {
-                                console.error('Error al cargar la configuración visual:', error);
-                                // Si hay un error, mantenemos la configuración predeterminada
-                        }
-                };
+	useEffect(() => {
+		const loadVisualConfig = async () => {
+			try {
+				const config = await getPlaceVisualConfig();
+				setVisualConfig({
+					...DEFAULT_PLACE_OPTIONS,
+					...config,
+				});
+			} catch (error) {
+				console.error('Error al cargar la configuración visual:', error);
+				// Si hay un error, mantenemos la configuración predeterminada
+			}
+		};
 
-                loadVisualConfig();
-        }, []);
+		loadVisualConfig();
+	}, []);
 
 	const handlePlaceClick = useCallback(
 		(place: PlaceWithStats) => {

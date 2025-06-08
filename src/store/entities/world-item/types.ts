@@ -4,12 +4,12 @@
  */
 
 import type {
-        CreateWorldItemData,
-        ParsedWorldItemVisualConfig,
-        UpdateWorldItemData,
-        WorldItem,
-        WorldItemFilters,
-        WorldItemViewMode,
+	CreateWorldItemData,
+	ParsedWorldItemVisualConfig,
+	UpdateWorldItemData,
+	WorldItem,
+	WorldItemFilters,
+	WorldItemViewMode,
 } from '../../../types/entities/world-item';
 import type { WorldItemCoreSlice } from './slices/core';
 import type { WorldItemFiltersSlice } from './slices/filters';
@@ -147,8 +147,8 @@ export interface WorldItemActions {
 	loadWorldItems: () => Promise<void>;
 
 	// Gestión de items
-       createWorldItem: (item: CreateWorldItemData) => Promise<void>;
-       updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
+	createWorldItem: (item: CreateWorldItemData) => Promise<void>;
+	updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
 	deleteWorldItem: (id: string) => Promise<void>;
 
 	// Acciones de UI

@@ -1,6 +1,7 @@
 'use client';
 
 import { type CharacterWithStats, searchCharacters } from '@/app/actions/characters/character.actions';
+import { getCharacterVisualConfig } from '@/app/actions/visual-config.actions';
 import { CharacterCard } from '@/components/cards/character-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -13,7 +14,6 @@ import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
-import { getCharacterVisualConfig } from '@/app/actions/visual-config.actions';
 
 const viewLogger = clientLogger.withContext('CharactersView');
 
@@ -54,22 +54,22 @@ export function CharactersView(_props: ViewProps) {
 		loadCharacters();
 	}, [loadCharacters]);
 
-        useEffect(() => {
-                const loadVisualConfig = async () => {
-                        try {
-                                const config = await getCharacterVisualConfig();
-                                setVisualConfig({
-                                        ...DEFAULT_CHARACTER_OPTIONS,
-                                        ...config,
-                                });
-                        } catch (error) {
-                                console.error('Error al cargar la configuración visual:', error);
-                                // Si hay un error, mantenemos la configuración predeterminada
-                        }
-                };
+	useEffect(() => {
+		const loadVisualConfig = async () => {
+			try {
+				const config = await getCharacterVisualConfig();
+				setVisualConfig({
+					...DEFAULT_CHARACTER_OPTIONS,
+					...config,
+				});
+			} catch (error) {
+				console.error('Error al cargar la configuración visual:', error);
+				// Si hay un error, mantenemos la configuración predeterminada
+			}
+		};
 
-                loadVisualConfig();
-        }, []);
+		loadVisualConfig();
+	}, []);
 
 	const handleCharacterClick = useCallback(
 		(character: CharacterWithStats) => {

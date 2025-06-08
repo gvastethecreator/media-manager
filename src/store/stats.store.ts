@@ -1,8 +1,8 @@
+import { getStats as getStatsAction, invalidateStats } from '@/app/actions/stats/stats.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { createStoreFactory } from './store.factory';
 import type { BaseEntity } from './types';
-import { getStats as getStatsAction, invalidateStats } from '@/app/actions/stats/stats.actions';
 
 const statsLogger = clientLogger.withContext('StatsStore');
 
@@ -114,36 +114,36 @@ type StatsUpdate = Partial<StatsData>;
 
 // Acciones del servidor
 const getStats = async () => {
-        try {
-                const data = await getStatsAction();
-                if (!data) throw new Error('No se pudieron obtener las estadísticas');
-                return [
-                        {
-                                id: 'stats',
-                                name: 'Estadísticas',
-                                ...data,
-                        },
-                ];
-        } catch (error) {
-                statsLogger.error('Error al obtener estadísticas:', error);
-                throw error;
-        }
+	try {
+		const data = await getStatsAction();
+		if (!data) throw new Error('No se pudieron obtener las estadísticas');
+		return [
+			{
+				id: 'stats',
+				name: 'Estadísticas',
+				...data,
+			},
+		];
+	} catch (error) {
+		statsLogger.error('Error al obtener estadísticas:', error);
+		throw error;
+	}
 };
 
 const updateStats = async (_id: string, _data: StatsUpdate) => {
-        try {
-                await invalidateStats();
-                const data = await getStatsAction();
-                if (!data) throw new Error('Error al actualizar estadísticas');
-                return {
-                        id: 'stats',
-                        name: 'Estadísticas',
-                        ...data,
-                };
-        } catch (error) {
-                statsLogger.error('Error al actualizar estadísticas:', error);
-                throw error;
-        }
+	try {
+		await invalidateStats();
+		const data = await getStatsAction();
+		if (!data) throw new Error('Error al actualizar estadísticas');
+		return {
+			id: 'stats',
+			name: 'Estadísticas',
+			...data,
+		};
+	} catch (error) {
+		statsLogger.error('Error al actualizar estadísticas:', error);
+		throw error;
+	}
 };
 
 // Crear el store base usando StoreFactory

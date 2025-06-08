@@ -452,9 +452,9 @@ export function useEntityLoader() {
 		[stores, fetchDataFromServer]
 	);
 
-        // Modificar también la función loadEntityData para que sea más tolerante a errores
-        const loadEntityData = useCallback(
-                async (entityName: keyof LoadingStates): Promise<unknown[]> => {
+	// Modificar también la función loadEntityData para que sea más tolerante a errores
+	const loadEntityData = useCallback(
+		async (entityName: keyof LoadingStates): Promise<unknown[]> => {
 			// Verificar si la entidad ya está cargando
 			if (loadingStates[entityName]?.loading) {
 				entityLoaderLogger.info(`🔄 Carga de ${entityName} omitida porque ya está en progreso`);

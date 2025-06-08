@@ -3,21 +3,21 @@
  * @module store/entities/activity/slices/core
  */
 
+import {
+	createActivity as createActivityAction,
+	deleteActivity as deleteActivityAction,
+	getActivityById,
+	getFilteredActivities,
+} from '@/app/actions/activity';
 import type { StateCreator } from 'zustand';
 import { extendActivities, extendActivity } from '../../../../transformers/activity';
 import type {
-        Activity,
-        ActivityBase,
-        ActivityFilters,
-        ActivityListResponse,
-        CreateActivityData,
+	Activity,
+	ActivityBase,
+	ActivityFilters,
+	ActivityListResponse,
+	CreateActivityData,
 } from '../../../../types/entities/activity';
-import {
-        createActivity as createActivityAction,
-        deleteActivity as deleteActivityAction,
-        getActivityById,
-        getFilteredActivities,
-} from '@/app/actions/activity';
 import type { ActivityState } from '../types';
 
 // Slice para operaciones CRUD básicas
@@ -141,71 +141,71 @@ export const createActivityCoreSlice: StateCreator<ActivityState, [], [], Activi
 	},
 
 	// Operaciones asíncronas
-        fetchActivity: async (id: string) => {
-                const { setLoading, setError, addActivity } = get();
-                try {
-                        setLoading(true);
-                        const activity = await getActivityById(id);
-                        if (activity) {
-                                addActivity(activity);
-                        }
-                        return activity ?? undefined;
-                } catch (error) {
-                        setError(error instanceof Error ? error.message : 'Error desconocido');
-                        return undefined;
-                } finally {
-                        setLoading(false);
-                }
-        },
+	fetchActivity: async (id: string) => {
+		const { setLoading, setError, addActivity } = get();
+		try {
+			setLoading(true);
+			const activity = await getActivityById(id);
+			if (activity) {
+				addActivity(activity);
+			}
+			return activity ?? undefined;
+		} catch (error) {
+			setError(error instanceof Error ? error.message : 'Error desconocido');
+			return undefined;
+		} finally {
+			setLoading(false);
+		}
+	},
 
-        fetchActivities: async (filters?: ActivityFilters) => {
-                const { setLoading, setError, addActivities } = get();
-                try {
-                        setLoading(true);
+	fetchActivities: async (filters?: ActivityFilters) => {
+		const { setLoading, setError, addActivities } = get();
+		try {
+			setLoading(true);
 
-                        const result = await getFilteredActivities(filters ?? {});
-                        if (result) {
-                                addActivities(result.activities);
-                                return result;
-                        }
-                        return undefined;
-                } catch (error) {
-                        setError(error instanceof Error ? error.message : 'Error desconocido');
-                        return undefined;
-                } finally {
-                        setLoading(false);
-                }
-        },
+			const result = await getFilteredActivities(filters ?? {});
+			if (result) {
+				addActivities(result.activities);
+				return result;
+			}
+			return undefined;
+		} catch (error) {
+			setError(error instanceof Error ? error.message : 'Error desconocido');
+			return undefined;
+		} finally {
+			setLoading(false);
+		}
+	},
 
-        createActivity: async (data: CreateActivityData) => {
-                const { setLoading, setError, addActivity } = get();
-                try {
-                        setLoading(true);
-                        const createdActivity = await createActivityAction(data.type, data.metadata ?? {}, data.imageId);
-                        addActivity(createdActivity);
-                        return createdActivity;
-                } catch (error) {
-                        setError(error instanceof Error ? error.message : 'Error desconocido');
-                        return undefined;
-                } finally {
-                        setLoading(false);
-                }
-        },
+	createActivity: async (data: CreateActivityData) => {
+		const { setLoading, setError, addActivity } = get();
+		try {
+			setLoading(true);
+			const createdActivity = await createActivityAction(data.type, data.metadata ?? {}, data.imageId);
+			addActivity(createdActivity);
+			return createdActivity;
+		} catch (error) {
+			setError(error instanceof Error ? error.message : 'Error desconocido');
+			return undefined;
+		} finally {
+			setLoading(false);
+		}
+	},
 
-        removeActivity: async (id: string) => {
-                const { setLoading, setError, deleteActivity } = get();
-                try {
-                        setLoading(true);
-                        const result = await deleteActivityAction(id);
-                        if (result) {
-                                deleteActivity(id);
-                        }
-                        return result;
-                } catch (error) {
-                        setError(error instanceof Error ? error.message : 'Error desconocido');
-                        return false;
-                } finally {
-                        setLoading(false);
-                }
-        },
+	removeActivity: async (id: string) => {
+		const { setLoading, setError, deleteActivity } = get();
+		try {
+			setLoading(true);
+			const result = await deleteActivityAction(id);
+			if (result) {
+				deleteActivity(id);
+			}
+			return result;
+		} catch (error) {
+			setError(error instanceof Error ? error.message : 'Error desconocido');
+			return false;
+		} finally {
+			setLoading(false);
+		}
+	},
 });

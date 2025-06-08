@@ -117,8 +117,13 @@ export async function createFolder(path: string, options: CreateFolderOptions = 
 		crudLogger.error('❌ Error creando carpeta:', error);
 
 		// Si ya es un error de carpeta, simplemente relanzarlo
-		if (error && typeof error === 'object' && 'code' in error &&
-		    typeof error.code === 'string' && error.code.startsWith('FOLDER_')) {
+		if (
+			error &&
+			typeof error === 'object' &&
+			'code' in error &&
+			typeof error.code === 'string' &&
+			error.code.startsWith('FOLDER_')
+		) {
 			throw error;
 		}
 
@@ -196,10 +201,7 @@ export async function updateFolder(id: string, data: UpdateFolderOptions): Promi
 			});
 
 			if (existingFolder) {
-				throw createFolderError(
-					`Ya existe otra carpeta con la ruta ${data.path}`,
-					FOLDER_ERROR_CODES.ALREADY_EXISTS
-				);
+				throw createFolderError(`Ya existe otra carpeta con la ruta ${data.path}`, FOLDER_ERROR_CODES.ALREADY_EXISTS);
 			}
 		}
 
@@ -242,8 +244,13 @@ export async function updateFolder(id: string, data: UpdateFolderOptions): Promi
 		crudLogger.error('❌ Error actualizando carpeta:', error);
 
 		// Si ya es un error de carpeta, simplemente relanzarlo
-		if (error && typeof error === 'object' && 'code' in error &&
-		    typeof error.code === 'string' && error.code.startsWith('FOLDER_')) {
+		if (
+			error &&
+			typeof error === 'object' &&
+			'code' in error &&
+			typeof error.code === 'string' &&
+			error.code.startsWith('FOLDER_')
+		) {
 			throw error;
 		}
 
@@ -297,8 +304,13 @@ export async function deleteFolder(id: string): Promise<{ success: boolean; id: 
 		crudLogger.error('❌ Error eliminando carpeta:', error);
 
 		// Si ya es un error de carpeta, simplemente relanzarlo
-		if (error && typeof error === 'object' && 'code' in error &&
-		    typeof error.code === 'string' && error.code.startsWith('FOLDER_')) {
+		if (
+			error &&
+			typeof error === 'object' &&
+			'code' in error &&
+			typeof error.code === 'string' &&
+			error.code.startsWith('FOLDER_')
+		) {
 			throw error;
 		}
 
@@ -369,8 +381,13 @@ export async function updateFolderAutoReindex(id: string, autoReindex: boolean):
 		crudLogger.error('❌ Error actualizando autoReindex:', error);
 
 		// Si ya es un error de carpeta, simplemente relanzarlo
-		if (error && typeof error === 'object' && 'code' in error &&
-		    typeof error.code === 'string' && error.code.startsWith('FOLDER_')) {
+		if (
+			error &&
+			typeof error === 'object' &&
+			'code' in error &&
+			typeof error.code === 'string' &&
+			error.code.startsWith('FOLDER_')
+		) {
 			throw error;
 		}
 
