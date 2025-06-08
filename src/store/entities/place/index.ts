@@ -3,6 +3,12 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { toastService } from '@/services/toast.service';
+import {
+    addImageToPlace,
+    getPlace,
+    getPlaces,
+    removeImageFromPlace,
+} from '@/app/actions/places';
 
 import { PLACE_STORE_NAME } from './constants';
 import type { PlaceStore } from './types';
@@ -32,12 +38,9 @@ export const usePlaceStore = create<PlaceStore>()(
 					set({ isLoading: true, error: null });
 					placeLogger.info('🔄 Cargando lugares...');
 
-					const response = await fetch('/api/entities/places');
-					if (!response.ok) throw new Error('Error al cargar lugares');
-
-					const places = await response.json();
-					set({ places, isLoading: false });
-					placeLogger.info('✅ Lugares cargados correctamente');
+                                        const places = await getPlaces();
+                                        set({ places, isLoading: false });
+                                        placeLogger.info('✅ Lugares cargados correctamente');
 				} catch (error) {
 					placeLogger.error('❌ Error al cargar lugares:', error);
 					set({ error: 'Error al cargar lugares', isLoading: false });
@@ -72,19 +75,11 @@ export const usePlaceStore = create<PlaceStore>()(
 				placeLogger.info('🔄 Configuración de vista actualizada:', config);
 			},
 
-			// 🖼️ Acciones de imágenes
 			addImageToPlace: async (placeId, imageId) => {
 				try {
-					placeLogger.info('➕ Añadiendo imagen a lugar:', { placeId, imageId });
-					const response = await fetch(`/api/places/${placeId}/images`, {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ imageId }),
-					});
-
-					if (!response.ok) throw new Error('Error al añadir imagen al lugar');
-
-					const updatedPlace = await response.json();
+					placeLogger.info('➕ Añadiendo imagen al lugar:', { placeId, imageId });
+                                        await addImageToPlace(placeId, imageId);
+                                        const updatedPlace = await getPlace(placeId);
 					set((state) => ({
 						places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
 					}));
@@ -96,17 +91,11 @@ export const usePlaceStore = create<PlaceStore>()(
 					toastService.system.error('Error al añadir imagen al lugar');
 				}
 			},
-
 			removeImageFromPlace: async (placeId, imageId) => {
 				try {
 					placeLogger.info('➖ Eliminando imagen del lugar:', { placeId, imageId });
-					const response = await fetch(`/api/places/${placeId}/images/${imageId}`, {
-						method: 'DELETE',
-					});
-
-					if (!response.ok) throw new Error('Error al eliminar imagen del lugar');
-
-					const updatedPlace = await response.json();
+                                        await removeImageFromPlace(placeId, imageId);
+                                        const updatedPlace = await getPlace(placeId);
 					set((state) => ({
 						places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
 					}));
