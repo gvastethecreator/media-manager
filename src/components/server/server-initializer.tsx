@@ -2,6 +2,7 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useEffect, useState } from 'react';
+import { initServer as initServerAction } from '@/app/actions/system';
 
 // Logger específico para este componente
 const logger = clientLogger.withContext('ServerInitializer');
@@ -23,7 +24,7 @@ export function ServerInitializer() {
 
 	useEffect(() => {
 		// Función para inicializar el servidor con reintentos
-		const initServer = async () => {
+                const runInitServer = async () => {
 			if (retries >= MAX_RETRIES) {
 				logger.warn(`Máximo de reintentos (${MAX_RETRIES}) alcanzado, no se intentará nuevamente`);
 				setStatus('error');
@@ -34,60 +35,18 @@ export function ServerInitializer() {
 				setStatus('loading');
 				logger.info(`Inicializando servidor... (intento ${retries + 1}/${MAX_RETRIES + 1})`);
 
-				// Llamar a la API de inicialización con timeout
-				const controller = new AbortController();
-				const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos de timeout
-
-				try {
-					const response = await fetch('/api/init-server', {
-						signal: controller.signal,
-						// Evitar caché
-						cache: 'no-store',
-						headers: {
-							'Cache-Control': 'no-cache, no-store, must-revalidate',
-							Pragma: 'no-cache',
-							Expires: '0',
-						},
-					});
-
-					// Limpiar timeout
-					clearTimeout(timeoutId);
-
-					// Verificar si la respuesta es exitosa
-					if (!response.ok) {
-						let errorBody: any = {};
-						try {
-							errorBody = await response.json();
-						} catch (jsonError) {
-							logger.warn(`No se pudo parsear el cuerpo del error como JSON: ${jsonError}`);
-							errorBody.message = response.statusText; // Fallback al statusText si no es JSON
-						}
-						throw new Error(errorBody.error || errorBody.message || `Error en la respuesta: ${response.status} ${response.statusText}`);
-					}
-
-					const data = await response.json();
-
-					if (data.success) {
-						setStatus('success');
-						logger.success('Servidor inicializado correctamente', data);
-					} else {
-						throw new Error(data.message || 'Error desconocido al inicializar el servidor');
-					}
-				} catch (fetchError) {
-					// Limpiar timeout si aún existe
-					clearTimeout(timeoutId);
-
-					// Manejar errores específicos de fetch
-					if (fetchError instanceof Error) {
-						if (fetchError.name === 'AbortError') {
-							throw new Error('Timeout al inicializar el servidor');
-						}
-						logger.error('Error de fetch capturado:', fetchError);
-						throw fetchError;
-					}
-					logger.error('Error desconocido capturado:', fetchError);
-					throw new Error(String(fetchError));
-				}
+                                try {
+                                        await initServerAction();
+                                        setStatus('success');
+                                        logger.success('Servidor inicializado correctamente');
+                                } catch (fetchError) {
+                                        if (fetchError instanceof Error) {
+                                                logger.error('Error al inicializar:', fetchError);
+                                                throw fetchError;
+                                        }
+                                        logger.error('Error desconocido capturado:', fetchError);
+                                        throw new Error(String(fetchError));
+                                }
 			} catch (error) {
 				setStatus('error');
 				logger.error('Error al inicializar el servidor', {
@@ -108,7 +67,7 @@ export function ServerInitializer() {
 		};
 
 		// Inicializar servidor cuando el componente se monta o cuando cambia el contador de reintentos
-		initServer();
+                runInitServer();
 
 		// No es necesario limpiar nada cuando el componente se desmonta
 	}, [retries]);
