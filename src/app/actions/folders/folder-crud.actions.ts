@@ -1,4 +1,4 @@
-''use server'';
+'use server';
 
 /**
  * @file Funciones CRUD para la entidad Folder, expuestas como Server Actions.

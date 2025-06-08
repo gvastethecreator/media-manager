@@ -150,20 +150,14 @@ const fetchStoreData = useCallback(async (entity: SupportedEntities): Promise<an
 				}
 			}
 
-			// 3. Si no hay server action específica, intentar cargar desde la API
-			loadingLogger.info(`🔄 Intentando cargar datos de ${entity} desde API...`);
-			const response = await fetch(`/api/entities/${entity}`);
-			if (!response.ok) {
-				throw new Error(`Error al cargar ${entity} desde API: ${response.status}`);
-			}
-			const data = await response.json();
-			loadingLogger.info(`✅ Datos de ${entity} cargados desde API: ${data.length} items`);
-			return data || [];
-		} catch (error) {
-			loadingLogger.error(`❌ Error al cargar ${entity} sin store:`, error);
-			return []; // Retornar array vacío en caso de error
-		}
-	}
+                        // 3. Si no hay server action específica, devolver array vacío
+                        loadingLogger.warn(`⚠️ No se encontró server action para ${entity}`);
+                        return [];
+                } catch (error) {
+                        loadingLogger.error(`❌ Error al cargar ${entity} sin store:`, error);
+                        return []; // Retornar array vacío en caso de error
+                }
+        }
 
 	// 4. Si hay store, usar el método de carga del store
 	try {
@@ -176,21 +170,8 @@ const fetchStoreData = useCallback(async (entity: SupportedEntities): Promise<an
 	} catch (storeError) {
 		loadingLogger.error(`❌ Error al cargar ${entity} desde store:`, storeError);
 
-		// 5. Intentar cargar desde la API como último recurso
-		try {
-			loadingLogger.info(`🔄 Fallback: intentando cargar ${entity} desde API...`);
-			const response = await fetch(`/api/entities/${entity}`);
-			if (!response.ok) {
-				throw new Error(`Error al cargar ${entity} desde API: ${response.status}`);
-			}
-			const data = await response.json();
-			loadingLogger.info(`✅ Datos de ${entity} cargados desde API (fallback): ${data.length} items`);
-			return data || [];
-		} catch (apiError) {
-			loadingLogger.error(`❌ Error final al cargar ${entity}:`, apiError);
-			return []; // Retornar array vacío en caso de error total
-		}
-	}
+                return []; // Si falla la carga desde el store, devolver vacío
+        }
 }, []);
 
 // Hook principal de carga de entidades
