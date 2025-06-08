@@ -186,8 +186,8 @@ export async function indexFolder(id: string, options?: IndexOptions): Promise<P
 	try {
 		folderLogger.info('📂 Iniciando indexación de carpeta:', id);
 
-		let folder;
-		let scanResult;
+		let folder: any;
+		let scanResult: any;
 
 		// Use a transaction for initial folder updates and scanning result update
 		await prisma.$transaction(async (tx) => {

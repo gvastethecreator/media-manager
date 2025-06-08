@@ -14,9 +14,9 @@ import type {
     CharacterUpdateInput,
     TransformCharacterOptions
 } from '@/types/entities/character/types';
+import { handleTransformerError } from '@/utils/transformers/errors';
 import type { Character, Prisma } from '@prisma/client';
 import { deserializeArray, deserializeFilters, deserializeRelationships, deserializeStats, serializeArray, serializeFilters, serializeRelationships, serializeStats } from './serializers';
-import { handleTransformerError } from './utils/transformers/errors';
 
 // Importar funciones del transformador principal
 

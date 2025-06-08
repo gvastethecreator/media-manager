@@ -10,8 +10,8 @@ const customJestConfig: Config = {
 	setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
 	moduleNameMapper: {
 		// 🎯 Path mappings
-		'^@/(.*)$': '<rootDir>/src/$1',
-		
+		'^@\\/(.*)$': '<rootDir>/src/$1',
+
 		// 🌐 Next.js 15 modules con mocks
 		'^next/navigation$': '<rootDir>/src/tests/__mocks__/next/navigation.ts',
 		'^next/server$': require.resolve('next/server'),
@@ -20,13 +20,13 @@ const customJestConfig: Config = {
 		'^next/link$': require.resolve('next/link'),
 		'^next/image$': require.resolve('next/image'),
 		'^next/dynamic$': require.resolve('next/dynamic'),
-		
+
 		// 💾 Prisma mock
 		'^@prisma/client$': '<rootDir>/src/tests/__mocks__/@prisma/client.ts',
-		
+
 		// 🎨 Styles como objetos
 		'^.+\\.(css|sass|scss)$': 'identity-obj-proxy',
-		
+
 		// 🖼️ Assets como strings
 		'^.+\\.(jpg|jpeg|png|gif|webp|avif|svg)$': '<rootDir>/src/tests/image-mock.js',
 	},
@@ -39,7 +39,6 @@ const customJestConfig: Config = {
 			'ts-jest',
 			{
 				tsconfig: 'tsconfig.test.json',
-				isolatedModules: true,
 				diagnostics: {
 					ignoreCodes: [1343, 151001],
 				},
@@ -77,7 +76,7 @@ const customJestConfig: Config = {
 	},
 	testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/dist/', '<rootDir>/coverage/'],
 	transformIgnorePatterns: [
-		'/node_modules/(?!(next|@next|next/server|next/navigation|next/headers))',
+		'/node_modules/(?!(next|@next|next/server|next/navigation|next/headers|p-queue))',
 		'^.+\\.module\\.(css|sass|scss)$',
 	],
 	moduleDirectories: ['node_modules', '<rootDir>/src'],

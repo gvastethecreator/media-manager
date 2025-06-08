@@ -3,17 +3,17 @@
  * @module transformers/wildcard/v2/mappers
  */
 
-import { TransformerError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	CreateWildcardData,
-	UpdateWildcardData,
-	WildcardBase,
-	WildcardBulkUpdateData,
-	WildcardRelated,
-	WildcardSearchFilters,
-	WildcardSearchOptions,
+    CreateWildcardData,
+    UpdateWildcardData,
+    WildcardBase,
+    WildcardBulkUpdateData,
+    WildcardRelated,
+    WildcardSearchFilters,
+    WildcardSearchOptions,
 } from '@/types/entities/wildcard/types';
+import { TransformerError } from '@/utils/transformers/errors';
 import { DEFAULT_WILDCARD_COLOR, DEFAULT_WILDCARD_EMOJI } from './serializers';
 
 // Logger específico para este módulo
@@ -43,7 +43,7 @@ export function toCreateWildcardData(data: CreateWildcardData): any {
 		return result;
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de wildcard', { error });
-		throw new TransformerError('WildcardTransformer', 'Error mapeando datos de creación de wildcard', { cause: error });
+		throw new TransformerError('Error mapeando datos de creación de wildcard');
 	}
 }
 
@@ -79,9 +79,7 @@ export function toUpdateWildcardData(data: UpdateWildcardData): any {
 		return result;
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de wildcard', { error });
-		throw new TransformerError('WildcardTransformer', 'Error mapeando datos de actualización de wildcard', {
-			cause: error,
-		});
+		throw new TransformerError('Error mapeando datos de actualización de wildcard');
 	}
 }
 
@@ -102,9 +100,7 @@ export function toBulkUpdateWildcardData(data: WildcardBulkUpdateData): any {
 		return result;
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización en lote de wildcards', { error });
-		throw new TransformerError('WildcardTransformer', 'Error mapeando datos de actualización en lote de wildcards', {
-			cause: error,
-		});
+		throw new TransformerError('Error mapeando datos de actualización en lote de wildcards');
 	}
 }
 
@@ -212,7 +208,7 @@ export function toSearchOptions(options: WildcardSearchOptions = {}): any {
 		return { skip, take, orderBy, where, include };
 	} catch (error) {
 		logger.error('Error mapeando opciones de búsqueda', { error });
-		throw new TransformerError('WildcardTransformer', 'Error mapeando opciones de búsqueda', { cause: error });
+		throw new TransformerError('Error mapeando opciones de búsqueda');
 	}
 }
 

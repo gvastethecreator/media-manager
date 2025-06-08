@@ -3,10 +3,10 @@
  * @module transformers/wildcard/v2/serializers
  */
 
-import { TransformerError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { WildcardSchema } from '@/types/entities/wildcard/schema';
 import type { WildcardBase, WildcardComplete, WildcardDeserialized } from '@/types/entities/wildcard/types';
+import { TransformerError } from '@/utils/transformers/errors';
 
 // Logger específico para este módulo
 const logger = serverLogger.child({ module: 'WildcardTransformer:Serializers' });
@@ -37,7 +37,7 @@ export function validateWildcard(wildcard: Partial<WildcardBase>): WildcardBase 
 		return wildcard as WildcardBase;
 	} catch (error) {
 		logger.error('Error validando Wildcard', { error });
-		throw new TransformerError('WildcardTransformer', 'Datos de Wildcard inválidos', { cause: error });
+		throw new TransformerError('Datos de Wildcard inválidos');
 	}
 }
 
@@ -96,7 +96,7 @@ export function toPrismaWildcard(wildcard: Partial<WildcardComplete>, options: W
 		return result;
 	} catch (error) {
 		logger.error('Error serializando wildcard', { error });
-		throw new TransformerError('WildcardTransformer', 'Error serializando wildcard', { cause: error });
+		throw new TransformerError('Error serializando wildcard');
 	}
 }
 
@@ -170,7 +170,7 @@ export function fromPrismaWildcard<T extends WildcardBase>(
 		return result;
 	} catch (error) {
 		logger.error('Error deserializando wildcard', { error });
-		throw new TransformerError('WildcardTransformer', 'Error deserializando wildcard', { cause: error });
+		throw new TransformerError('Error deserializando wildcard');
 	}
 }
 

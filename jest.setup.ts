@@ -1,5 +1,12 @@
-import '@testing-library/jest-dom';
 import { afterEach, jest } from '@jest/globals';
+import '@testing-library/jest-dom';
+
+// Polyfill global para TextEncoder/TextDecoder en entorno Node.js (para Next.js y tests)
+if (typeof global.TextEncoder === 'undefined') {
+	const { TextEncoder, TextDecoder } = require('util');
+	global.TextEncoder = TextEncoder;
+	global.TextDecoder = TextDecoder;
+}
 
 // Mock de fetch para pruebas
 global.fetch = jest.fn(() =>
@@ -8,6 +15,44 @@ global.fetch = jest.fn(() =>
 		json: () => Promise.resolve({}),
 	})
 ) as jest.Mock;
+
+// Mock global mínimo de Request para evitar ReferenceError en tests que importan next/cache
+if (typeof global.Request === 'undefined') {
+	global.Request = class {
+		headers = {};
+		method = '';
+		url = '';
+		bodyUsed = false;
+		cache = '';
+		credentials = '';
+		destination = '';
+		integrity = '';
+		keepalive = false;
+		mode = '';
+		redirect = '';
+		referrer = '';
+		referrerPolicy = '';
+		signal = undefined;
+		body = null;
+		clone() { return this; }
+		arrayBuffer() { return Promise.resolve(new ArrayBuffer(0)); }
+		blob() { return Promise.resolve(new Blob()); }
+		formData() { return Promise.resolve({}); }
+		json() { return Promise.resolve({}); }
+		text() { return Promise.resolve(''); }
+	};
+}
+
+// Mock global de prisma para evitar errores en tests que importan código de servidor
+jest.mock('@/lib/prisma', () => ({
+  PrismaClient: jest.fn(() => ({})),
+  prisma: {},
+}));
+
+// Mock global de p-queue para evitar errores ESM en tests
+jest.mock('p-queue', () => ({
+  default: jest.fn(() => ({ add: jest.fn() })),
+}));
 
 // Limpiar mocks después de cada prueba
 afterEach(() => {
