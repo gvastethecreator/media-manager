@@ -57,7 +57,9 @@ export function adaptFolderResponse(folderResponse: FolderResponse | null): Acti
  * @param foldersResponse Respuesta con múltiples carpetas
  * @returns Respuesta en formato estándar
  */
-export function adaptFoldersArray(foldersResponse: FolderResponse[] | null | undefined): ActionResponse<FolderExtended[]> {
+export function adaptFoldersArray(
+	foldersResponse: FolderResponse[] | null | undefined
+): ActionResponse<FolderExtended[]> {
 	try {
 		// Validación básica para evitar errores
 		if (!foldersResponse || !Array.isArray(foldersResponse)) {
@@ -78,11 +80,14 @@ export function adaptFoldersArray(foldersResponse: FolderResponse[] | null | und
 			};
 		}
 
-		const transformedFolders = foldersResponse.map(folder => {
+		const transformedFolders = foldersResponse.map((folder) => {
 			try {
 				return transformFolderToExtended(folder);
 			} catch (folderError) {
-				adapterLogger.error(`❌ Error transformando carpeta individual (ID: ${folder?.id || 'desconocido'}):`, folderError);
+				adapterLogger.error(
+					`❌ Error transformando carpeta individual (ID: ${folder?.id || 'desconocido'}):`,
+					folderError
+				);
 				// Devolver objeto mínimo para esta carpeta
 				return {
 					id: folder?.id || 'error',

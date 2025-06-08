@@ -122,7 +122,7 @@ export const createWorldItemUISlice: StateCreator<WorldItemStore, [], [], WorldI
 
 		set({
 			selectedIds: [id],
-			currentItemId: id
+			currentItemId: id,
 		});
 	},
 

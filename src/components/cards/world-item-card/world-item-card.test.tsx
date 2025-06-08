@@ -52,14 +52,14 @@ describe('WorldItemCard', () => {
 			await user.click(card);
 		}
 
-                // Verificar que se llamó al callback
-                expect(onClickMock).toHaveBeenCalled();
+		// Verificar que se llamó al callback
+		expect(onClickMock).toHaveBeenCalled();
 	});
 
-        it('renderiza un enlace cuando no hay onClick', () => {
-                render(<WorldItemCard worldItem={mockWorldItem} />);
+	it('renderiza un enlace cuando no hay onClick', () => {
+		render(<WorldItemCard worldItem={mockWorldItem} />);
 
-                const link = document.querySelector(`a[href="/dashboard/world-items/${mockWorldItem.id}"]`);
-                expect(link).toBeNull();
-        });
+		const link = document.querySelector(`a[href="/dashboard/world-items/${mockWorldItem.id}"]`);
+		expect(link).toBeNull();
+	});
 });

@@ -150,14 +150,14 @@ const fetchStoreData = useCallback(async (entity: SupportedEntities): Promise<an
 				}
 			}
 
-                        // 3. Si no hay server action específica, devolver array vacío
-                        loadingLogger.warn(`⚠️ No se encontró server action para ${entity}`);
-                        return [];
-                } catch (error) {
-                        loadingLogger.error(`❌ Error al cargar ${entity} sin store:`, error);
-                        return []; // Retornar array vacío en caso de error
-                }
-        }
+			// 3. Si no hay server action específica, devolver array vacío
+			loadingLogger.warn(`⚠️ No se encontró server action para ${entity}`);
+			return [];
+		} catch (error) {
+			loadingLogger.error(`❌ Error al cargar ${entity} sin store:`, error);
+			return []; // Retornar array vacío en caso de error
+		}
+	}
 
 	// 4. Si hay store, usar el método de carga del store
 	try {
@@ -170,8 +170,8 @@ const fetchStoreData = useCallback(async (entity: SupportedEntities): Promise<an
 	} catch (storeError) {
 		loadingLogger.error(`❌ Error al cargar ${entity} desde store:`, storeError);
 
-                return []; // Si falla la carga desde el store, devolver vacío
-        }
+		return []; // Si falla la carga desde el store, devolver vacío
+	}
 }, []);
 
 // Hook principal de carga de entidades

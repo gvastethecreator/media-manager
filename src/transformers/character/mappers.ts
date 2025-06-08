@@ -4,7 +4,16 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { CharacterComplete, CharacterPrismaCreateInput, CharacterPrismaFindManyArgs, CharacterPrismaInclude, CharacterPrismaOrderByWithRelationInput, CharacterPrismaUpdateInput, CharacterPrismaWhereInput, CharacterSearchOptions } from '@/types/entities/character/types';
+import type {
+	CharacterComplete,
+	CharacterPrismaCreateInput,
+	CharacterPrismaFindManyArgs,
+	CharacterPrismaInclude,
+	CharacterPrismaOrderByWithRelationInput,
+	CharacterPrismaUpdateInput,
+	CharacterPrismaWhereInput,
+	CharacterSearchOptions,
+} from '@/types/entities/character/types';
 import { TransformerError } from '@/utils/transformers/errors';
 
 /**

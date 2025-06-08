@@ -5,16 +5,16 @@
 
 import { createLogger } from '@/lib/logger';
 import type {
-    WorldItemAttribute,
-    WorldItemBase,
-    WorldItemComplete,
-    WorldItemDeserialized,
-    WorldItemEffect,
-    WorldItemFilter,
-    WorldItemProperty,
-    WorldItemRelations,
-    WorldItemRequirement,
-    WorldItemStat
+	WorldItemAttribute,
+	WorldItemBase,
+	WorldItemComplete,
+	WorldItemDeserialized,
+	WorldItemEffect,
+	WorldItemFilter,
+	WorldItemProperty,
+	WorldItemRelations,
+	WorldItemRequirement,
+	WorldItemStat,
 } from '@/types/entities/world-item/types';
 
 // Logger específico para este módulo
@@ -586,22 +586,22 @@ export function serializeWorldItemTags(tags: string[] | string): string {
  * @returns El WorldItemBase.
  */
 export function fromExtendedWorldItem(worldItem: WorldItemComplete): WorldItemBase {
-        const {
-                _count,
-                images,
-                videos,
-                notes,
-                concepts,
-                prompts,
-                groups,
-                properties,
-                wildcards,
-                tags: relatedTags,
-                isSelected,
-                isExpanded,
-                isEditing,
-                ...base
-        } = worldItem;
+	const {
+		_count,
+		images,
+		videos,
+		notes,
+		concepts,
+		prompts,
+		groups,
+		properties,
+		wildcards,
+		tags: relatedTags,
+		isSelected,
+		isExpanded,
+		isEditing,
+		...base
+	} = worldItem;
 
-        return base;
+	return base;
 }
