@@ -3,24 +3,24 @@
  * @module store/entities/video/slices/core
  */
 
+import {
+	getVideoVisualConfig,
+	updateVideoVisualConfig as updateVideoVisualConfigAction,
+} from '@/app/actions/videos/video-visual-config.actions';
+import {
+	createVideo as createServerVideo,
+	deleteVideo as deleteServerVideo,
+	findVideos,
+	getVideo as getServerVideo,
+} from '@/app/actions/videos/video.actions';
 import type { StateCreator } from 'zustand';
 import { mapVideoVisualConfigCompleteUpdateToPrisma } from '../../../../transformers/video/mappers';
-import {
-    getVideoVisualConfig,
-    updateVideoVisualConfig as updateVideoVisualConfigAction,
-} from '@/app/actions/videos/video-visual-config.actions';
 import {
 	transformVideo,
 	transformVideoWithStats,
 	transformVideos,
 	transformVideosWithStats,
 } from '../../../../transformers/video/serializers';
-import {
-       findVideos,
-       createVideo as createServerVideo,
-       deleteVideo as deleteServerVideo,
-       getVideo as getServerVideo,
-} from '@/app/actions/videos/video.actions';
 import type {
 	CreateVideoData,
 	UpdateVideoData,
@@ -255,89 +255,89 @@ export const createVideoCoreSlice: StateCreator<VideoState, [], [], VideoCoreSli
 	},
 
 	// Operaciones asíncronas (simuladas, se implementarán con llamadas reales a la API)
-        fetchVideo: async (id: string) => {
-                const { setLoading, setError, addVideo } = get();
-                try {
-                        setLoading(true);
-                        const video = await getServerVideo(id);
-                        if (video) {
-                                addVideo(video);
-                        }
-                        return get().core.videos[id];
-                } catch (error) {
-                        setError(error instanceof Error ? error.message : 'Error desconocido');
-                        return undefined;
-                } finally {
-                        setLoading(false);
-                }
-        },
+	fetchVideo: async (id: string) => {
+		const { setLoading, setError, addVideo } = get();
+		try {
+			setLoading(true);
+			const video = await getServerVideo(id);
+			if (video) {
+				addVideo(video);
+			}
+			return get().core.videos[id];
+		} catch (error) {
+			setError(error instanceof Error ? error.message : 'Error desconocido');
+			return undefined;
+		} finally {
+			setLoading(false);
+		}
+	},
 
-        fetchVideos: async (folderIds?: string[]) => {
-                const { setLoading, setError, addVideos } = get();
-                try {
-                        setLoading(true);
-                        const filters = folderIds && folderIds.length > 0 ? { folderId: folderIds[0] } : {};
-                        const result = await findVideos(filters);
-                        addVideos(result.data);
-                        return Object.values(get().core.videos);
-                } catch (error) {
-                        setError(error instanceof Error ? error.message : 'Error desconocido');
-                        return [];
-                } finally {
-                        setLoading(false);
-                }
-        },
+	fetchVideos: async (folderIds?: string[]) => {
+		const { setLoading, setError, addVideos } = get();
+		try {
+			setLoading(true);
+			const filters = folderIds && folderIds.length > 0 ? { folderId: folderIds[0] } : {};
+			const result = await findVideos(filters);
+			addVideos(result.data);
+			return Object.values(get().core.videos);
+		} catch (error) {
+			setError(error instanceof Error ? error.message : 'Error desconocido');
+			return [];
+		} finally {
+			setLoading(false);
+		}
+	},
 
-        createVideo: async (data: CreateVideoData) => {
-                const { setLoading, setError, addVideo } = get();
-                try {
-                        setLoading(true);
-                        const createdVideo = await createServerVideo(data);
-                        addVideo(createdVideo);
-                        return get().core.videos[createdVideo.id];
-                } catch (error) {
-                        setError(error instanceof Error ? error.message : 'Error desconocido');
-                        return undefined;
-                } finally {
-                        setLoading(false);
-                }
-        },
+	createVideo: async (data: CreateVideoData) => {
+		const { setLoading, setError, addVideo } = get();
+		try {
+			setLoading(true);
+			const createdVideo = await createServerVideo(data);
+			addVideo(createdVideo);
+			return get().core.videos[createdVideo.id];
+		} catch (error) {
+			setError(error instanceof Error ? error.message : 'Error desconocido');
+			return undefined;
+		} finally {
+			setLoading(false);
+		}
+	},
 
-        removeVideo: async (id: string) => {
-                const { setLoading, setError, deleteVideo } = get();
-                try {
-                        setLoading(true);
-                        await deleteServerVideo(id);
-                        deleteVideo(id);
-                        return true;
-                } catch (error) {
-                        setError(error instanceof Error ? error.message : 'Error desconocido');
-                        return false;
-                } finally {
-                        setLoading(false);
-                }
-        },
+	removeVideo: async (id: string) => {
+		const { setLoading, setError, deleteVideo } = get();
+		try {
+			setLoading(true);
+			await deleteServerVideo(id);
+			deleteVideo(id);
+			return true;
+		} catch (error) {
+			setError(error instanceof Error ? error.message : 'Error desconocido');
+			return false;
+		} finally {
+			setLoading(false);
+		}
+	},
 
-        updateVideoVisualConfig: async (videoId: string, config: Partial<VideoVisualConfig>) => {
-                try {
-                        const prismaData = mapVideoVisualConfigCompleteUpdateToPrisma(config);
-                        const updated = await updateVideoVisualConfigAction(videoId, prismaData);
-                        return updated;
-                } catch (error) {
-                        console.error('Error al actualizar configuración visual:', error);
-                        return undefined;
-                }
-        },
+	updateVideoVisualConfig: async (videoId: string, config: Partial<VideoVisualConfig>) => {
+		try {
+			const prismaData = mapVideoVisualConfigCompleteUpdateToPrisma(config);
+			const updated = await updateVideoVisualConfigAction(videoId, prismaData);
+			return updated;
+		} catch (error) {
+			console.error('Error al actualizar configuración visual:', error);
+			return undefined;
+		}
+	},
 
-        fetchVideoVisualConfig: async (videoId: string) => {
-                try {
-                        const result = await getVideoVisualConfig(videoId);
-                        return result;
-                } catch (error) {
-                        console.error('Error al obtener configuración visual:', error);
-                        return undefined;
-                }
-        },
+	fetchVideoVisualConfig: async (videoId: string) => {
+		try {
+			const result = await getVideoVisualConfig(videoId);
+			return result;
+		} catch (error) {
+			console.error('Error al obtener configuración visual:', error);
+			return undefined;
+		}
+	},
 });
 
 /**

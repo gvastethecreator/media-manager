@@ -3,14 +3,8 @@
  * @module store/entities/tag/slices/core
  */
 
+import { createTagAction, deleteTagAction, getTagByIdAction, getTagsAction, updateTagAction } from '@/app/actions/tags';
 import { extendTag, extendTags } from '@/transformers/tag';
-import {
-       createTagAction,
-       deleteTagAction,
-       getTagByIdAction,
-       getTagsAction,
-       updateTagAction,
-} from '@/app/actions/tags';
 import type { Tag } from '@/types/entities/tag';
 import type { StateCreator } from 'zustand';
 import type { TagCoreState, TagState } from '../types';
@@ -45,112 +39,112 @@ export const createTagCoreSlice: StateCreator<TagState & TagCoreSlice, [], [], T
 	},
 
 	// Acción para obtener todas las etiquetas
-        fetchTags: async () => {
-                const { setTagsLoading, setTagsError, addTags } = get();
+	fetchTags: async () => {
+		const { setTagsLoading, setTagsError, addTags } = get();
 
-                try {
-                        setTagsLoading(true);
-                        setTagsError(null);
+		try {
+			setTagsLoading(true);
+			setTagsError(null);
 
-                        const result = await getTagsAction();
-                        if (result?.items) {
-                                addTags(result.items);
-                        }
-                        return;
-                } catch (error) {
-                        setTagsError(error instanceof Error ? error.message : String(error));
-                } finally {
-                        setTagsLoading(false);
-                }
-        },
+			const result = await getTagsAction();
+			if (result?.items) {
+				addTags(result.items);
+			}
+			return;
+		} catch (error) {
+			setTagsError(error instanceof Error ? error.message : String(error));
+		} finally {
+			setTagsLoading(false);
+		}
+	},
 
 	// Acción para obtener una etiqueta por su ID
-        fetchTagById: async (id) => {
-                const { setTagsLoading, setTagsError, addTag } = get();
+	fetchTagById: async (id) => {
+		const { setTagsLoading, setTagsError, addTag } = get();
 
-                try {
-                        setTagsLoading(true);
+		try {
+			setTagsLoading(true);
 
-                        const existingTag = get().core.tags[id];
-                        if (existingTag) {
-                                return existingTag;
-                        }
+			const existingTag = get().core.tags[id];
+			if (existingTag) {
+				return existingTag;
+			}
 
-                        const tag = await getTagByIdAction(id);
-                        if (tag) {
-                                addTag(tag);
-                        }
+			const tag = await getTagByIdAction(id);
+			if (tag) {
+				addTag(tag);
+			}
 
-                        return tag;
-                } catch (error) {
-                        setTagsError(error instanceof Error ? error.message : String(error));
-                        return null;
-                } finally {
-                        setTagsLoading(false);
-                }
-        },
+			return tag;
+		} catch (error) {
+			setTagsError(error instanceof Error ? error.message : String(error));
+			return null;
+		} finally {
+			setTagsLoading(false);
+		}
+	},
 
 	// Acción para crear una etiqueta
-        createTag: async (tagData) => {
-                const { setTagsLoading, setTagsError, addTag } = get();
+	createTag: async (tagData) => {
+		const { setTagsLoading, setTagsError, addTag } = get();
 
-                try {
-                        setTagsLoading(true);
+		try {
+			setTagsLoading(true);
 
-                        const newTag = await createTagAction(tagData);
-                        if (newTag) {
-                                addTag(newTag);
-                        }
+			const newTag = await createTagAction(tagData);
+			if (newTag) {
+				addTag(newTag);
+			}
 
-                        return newTag;
-                } catch (error) {
-                        setTagsError(error instanceof Error ? error.message : String(error));
-                        return null;
-                } finally {
-                        setTagsLoading(false);
-                }
-        },
+			return newTag;
+		} catch (error) {
+			setTagsError(error instanceof Error ? error.message : String(error));
+			return null;
+		} finally {
+			setTagsLoading(false);
+		}
+	},
 
 	// Acción para actualizar una etiqueta
-        updateTag: async (id, data) => {
-                const { setTagsLoading, setTagsError, updateTagLocally } = get();
+	updateTag: async (id, data) => {
+		const { setTagsLoading, setTagsError, updateTagLocally } = get();
 
-                try {
-                        setTagsLoading(true);
+		try {
+			setTagsLoading(true);
 
-                        const updated = await updateTagAction(id, data);
-                        if (updated) {
-                                updateTagLocally(id, updated);
-                        }
+			const updated = await updateTagAction(id, data);
+			if (updated) {
+				updateTagLocally(id, updated);
+			}
 
-                        return get().core.tags[id] || null;
-                } catch (error) {
-                        setTagsError(error instanceof Error ? error.message : String(error));
-                        return null;
-                } finally {
-                        setTagsLoading(false);
-                }
-        },
+			return get().core.tags[id] || null;
+		} catch (error) {
+			setTagsError(error instanceof Error ? error.message : String(error));
+			return null;
+		} finally {
+			setTagsLoading(false);
+		}
+	},
 
 	// Acción para eliminar una etiqueta
-        deleteTag: async (id) => {
-                const { setTagsLoading, setTagsError, removeTag } = get();
+	deleteTag: async (id) => {
+		const { setTagsLoading, setTagsError, removeTag } = get();
 
-                try {
-                        setTagsLoading(true);
+		try {
+			setTagsLoading(true);
 
-                        await deleteTagAction(id);
+			await deleteTagAction(id);
 
-                        removeTag(id);
+			removeTag(id);
 
-                        return true;
-                } catch (error) {
-                        setTagsError(error instanceof Error ? error.message : String(error));
-                        return false;
-                } finally {
-                        setTagsLoading(false);
-                }
-        },
+			return true;
+		} catch (error) {
+			setTagsError(error instanceof Error ? error.message : String(error));
+			return false;
+		} finally {
+			setTagsLoading(false);
+		}
+	},
 
 	// Acción para añadir una etiqueta al store
 	addTag: (tag) => {

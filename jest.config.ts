@@ -30,10 +30,7 @@ const customJestConfig: Config = {
 		// 🖼️ Assets como strings
 		'^.+\\.(jpg|jpeg|png|gif|webp|avif|svg)$': '<rootDir>/src/tests/image-mock.js',
 	},
-	testMatch: [
-		'**/__tests__/**/*.{ts,tsx}',
-		'**/?(*.)+(spec|test).{ts,tsx}'
-	],
+	testMatch: ['**/__tests__/**/*.{ts,tsx}', '**/?(*.)+(spec|test).{ts,tsx}'],
 	transform: {
 		'^.+\\.(js|jsx|ts|tsx|mjs)$': [
 			'ts-jest',
@@ -75,17 +72,10 @@ const customJestConfig: Config = {
 		},
 	},
 	testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/dist/', '<rootDir>/coverage/'],
-<<<<<<< HEAD
 	transformIgnorePatterns: [
-		'/node_modules/(?!(next|@next|next/server|next/navigation|next/headers|p-queue))',
+		'/node_modules/(?!(next|@next|next/server|next/navigation|next/headers|nanoid|@testing-library/user-event))',
 		'^.+\\.module\\.(css|sass|scss)$',
 	],
-=======
-        transformIgnorePatterns: [
-                '/node_modules/(?!(next|@next|next/server|next/navigation|next/headers|nanoid|@testing-library/user-event))',
-                '^.+\\.module\\.(css|sass|scss)$',
-        ],
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 	moduleDirectories: ['node_modules', '<rootDir>/src'],
 	testEnvironmentOptions: {
 		url: 'http://localhost:3000',

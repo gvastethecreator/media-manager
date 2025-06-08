@@ -7,11 +7,11 @@ import type { StateCreator } from 'zustand';
 import { createAlbum, deleteAlbum, getAlbum, getAlbums, moveAlbum } from '../../../../app/actions/albums/album.actions';
 import { extendAlbum } from '../../../../transformers/album/serializers';
 import type {
-    Album,
-    AlbumBase,
-    CreateAlbumData,
-    UpdateAlbumData,
-    UpdateAlbumItemsData,
+	Album,
+	AlbumBase,
+	CreateAlbumData,
+	UpdateAlbumData,
+	UpdateAlbumItemsData,
 } from '../../../../types/entities/album';
 import type { AlbumState } from '../types';
 
@@ -340,9 +340,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 			const album = state.core.albums[albumId];
 			if (!album) return state;
 
-			const filteredProperties = album.properties
-				? album.properties.filter((p) => p.id !== propertyId)
-				: [];
+			const filteredProperties = album.properties ? album.properties.filter((p) => p.id !== propertyId) : [];
 
 			return {
 				core: {
@@ -391,9 +389,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 			const album = state.core.albums[albumId];
 			if (!album) return state;
 
-			const filteredWildcards = album.wildcards
-				? album.wildcards.filter((w) => w.id !== wildcardId)
-				: [];
+			const filteredWildcards = album.wildcards ? album.wildcards.filter((w) => w.id !== wildcardId) : [];
 
 			return {
 				core: {

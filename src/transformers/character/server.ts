@@ -7,16 +7,25 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { CharacterSchema } from '@/types/entities/character/schema';
 import type {
-    CharacterComplete,
-    CharacterCreateInput,
-    CharacterSearchOptions,
-    CharacterSearchResult,
-    CharacterUpdateInput,
-    TransformCharacterOptions
+	CharacterComplete,
+	CharacterCreateInput,
+	CharacterSearchOptions,
+	CharacterSearchResult,
+	CharacterUpdateInput,
+	TransformCharacterOptions,
 } from '@/types/entities/character/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import type { Character, Prisma } from '@prisma/client';
-import { deserializeArray, deserializeFilters, deserializeRelationships, deserializeStats, serializeArray, serializeFilters, serializeRelationships, serializeStats } from './serializers';
+import {
+	deserializeArray,
+	deserializeFilters,
+	deserializeRelationships,
+	deserializeStats,
+	serializeArray,
+	serializeFilters,
+	serializeRelationships,
+	serializeStats,
+} from './serializers';
 
 // Importar funciones del transformador principal
 
@@ -24,14 +33,14 @@ import { deserializeArray, deserializeFilters, deserializeRelationships, deseria
 
 // Importar mappers
 import {
-    filterCharacters,
-    mapCharacterSearchOptionsToPrisma,
-    mapCharacterToRelatedCharacter,
-    mapCreateCharacterDataToPrisma,
-    mapUpdateCharacterDataToPrisma,
-    paginateCharacters,
-    processCharacters,
-    sortCharacters,
+	filterCharacters,
+	mapCharacterSearchOptionsToPrisma,
+	mapCharacterToRelatedCharacter,
+	mapCreateCharacterDataToPrisma,
+	mapUpdateCharacterDataToPrisma,
+	paginateCharacters,
+	processCharacters,
+	sortCharacters,
 } from './mappers';
 
 const logger = serverLogger.withContext('CharacterTransformer');
