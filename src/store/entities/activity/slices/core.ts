@@ -4,14 +4,20 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { extendActivities, extendActivity, mapCreateActivityDataToPrisma } from '../../../../transformers/activity';
+import { extendActivities, extendActivity } from '../../../../transformers/activity';
 import type {
-	Activity,
-	ActivityBase,
-	ActivityFilters,
-	ActivityListResponse,
-	CreateActivityData,
+        Activity,
+        ActivityBase,
+        ActivityFilters,
+        ActivityListResponse,
+        CreateActivityData,
 } from '../../../../types/entities/activity';
+import {
+        createActivity as createActivityAction,
+        deleteActivity as deleteActivityAction,
+        getActivityById,
+        getFilteredActivities,
+} from '@/app/actions/activity';
 import type { ActivityState } from '../types';
 
 // Slice para operaciones CRUD básicas
@@ -135,125 +141,71 @@ export const createActivityCoreSlice: StateCreator<ActivityState, [], [], Activi
 	},
 
 	// Operaciones asíncronas
-	fetchActivity: async (id: string) => {
-		const { setLoading, setError, addActivity } = get();
-		try {
-			setLoading(true);
-			const response = await fetch(`/api/activity/${id}`);
-			if (!response.ok) throw new Error('Error al cargar la actividad');
+        fetchActivity: async (id: string) => {
+                const { setLoading, setError, addActivity } = get();
+                try {
+                        setLoading(true);
+                        const activity = await getActivityById(id);
+                        if (activity) {
+                                addActivity(activity);
+                        }
+                        return activity ?? undefined;
+                } catch (error) {
+                        setError(error instanceof Error ? error.message : 'Error desconocido');
+                        return undefined;
+                } finally {
+                        setLoading(false);
+                }
+        },
 
-			const activityData = await response.json();
-			addActivity(activityData);
-			return get().core.activities[id];
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
-			return undefined;
-		} finally {
-			setLoading(false);
-		}
-	},
+        fetchActivities: async (filters?: ActivityFilters) => {
+                const { setLoading, setError, addActivities } = get();
+                try {
+                        setLoading(true);
 
-	fetchActivities: async (filters?: ActivityFilters) => {
-		const { setLoading, setError, addActivities } = get();
-		try {
-			setLoading(true);
+                        const result = await getFilteredActivities(filters ?? {});
+                        if (result) {
+                                addActivities(result.activities);
+                                return result;
+                        }
+                        return undefined;
+                } catch (error) {
+                        setError(error instanceof Error ? error.message : 'Error desconocido');
+                        return undefined;
+                } finally {
+                        setLoading(false);
+                }
+        },
 
-			// Construir URL con parámetros de filtro
-			let url = '/api/activity';
-			if (filters) {
-				const params = new URLSearchParams();
-				if (filters.types && filters.types.length > 0) {
-					params.append('types', filters.types.join(','));
-				}
-				if (filters.startDate) {
-					params.append('startDate', new Date(filters.startDate).toISOString());
-				}
-				if (filters.endDate) {
-					params.append('endDate', new Date(filters.endDate).toISOString());
-				}
-				if (filters.imageId) {
-					params.append('imageId', filters.imageId);
-				}
-				if (filters.searchQuery) {
-					params.append('query', filters.searchQuery);
-				}
-				if (filters.limit) {
-					params.append('limit', filters.limit.toString());
-				}
-				if (filters.offset) {
-					params.append('offset', filters.offset.toString());
-				}
+        createActivity: async (data: CreateActivityData) => {
+                const { setLoading, setError, addActivity } = get();
+                try {
+                        setLoading(true);
+                        const createdActivity = await createActivityAction(data.type, data.metadata ?? {}, data.imageId);
+                        addActivity(createdActivity);
+                        return createdActivity;
+                } catch (error) {
+                        setError(error instanceof Error ? error.message : 'Error desconocido');
+                        return undefined;
+                } finally {
+                        setLoading(false);
+                }
+        },
 
-				const queryString = params.toString();
-				if (queryString) {
-					url += `?${queryString}`;
-				}
-			}
-
-			const response = await fetch(url);
-			if (!response.ok) throw new Error('Error al cargar las actividades');
-
-			const data = await response.json();
-			addActivities(data.activities);
-
-			return {
-				activities: Object.values(get().core.activities),
-				totalCount: data.totalCount,
-				hasMore: data.hasMore,
-			};
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
-			return undefined;
-		} finally {
-			setLoading(false);
-		}
-	},
-
-	createActivity: async (data: CreateActivityData) => {
-		const { setLoading, setError, addActivity } = get();
-		try {
-			setLoading(true);
-			const prismaData = mapCreateActivityDataToPrisma(data);
-
-			const response = await fetch('/api/activity', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(prismaData),
-			});
-
-			if (!response.ok) throw new Error('Error al crear la actividad');
-
-			const createdActivity = await response.json();
-			addActivity(createdActivity);
-			return get().core.activities[createdActivity.id];
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
-			return undefined;
-		} finally {
-			setLoading(false);
-		}
-	},
-
-	removeActivity: async (id: string) => {
-		const { setLoading, setError, deleteActivity } = get();
-		try {
-			setLoading(true);
-
-			const response = await fetch(`/api/activity/${id}`, {
-				method: 'DELETE',
-			});
-
-			if (!response.ok) throw new Error('Error al eliminar la actividad');
-
-			deleteActivity(id);
-			return true;
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
-			return false;
-		} finally {
-			setLoading(false);
-		}
-	},
+        removeActivity: async (id: string) => {
+                const { setLoading, setError, deleteActivity } = get();
+                try {
+                        setLoading(true);
+                        const result = await deleteActivityAction(id);
+                        if (result) {
+                                deleteActivity(id);
+                        }
+                        return result;
+                } catch (error) {
+                        setError(error instanceof Error ? error.message : 'Error desconocido');
+                        return false;
+                } finally {
+                        setLoading(false);
+                }
+        },
 });

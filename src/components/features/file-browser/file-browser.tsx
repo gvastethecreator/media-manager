@@ -5,9 +5,8 @@ import { FileViewer, type ImageItem } from '@/components/features/file-viewer/fi
 import { ClientLogger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { useFileViewStore } from '@/store/file-view.store';
+import { useFileStoreBase } from '@/store/entities/file';
 import { useImageResources } from '@/store/image-resources.store';
-import { useSelectionStore } from '@/store/selection.store';
 import type { FileItem } from '@/types/file-item';
 import { FileText as FileTextIcon } from 'lucide-react';
 import type * as React from 'react';
@@ -15,6 +14,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GridGaps } from './config/grid-config';
 import { GRID_CONFIG } from './config/grid-config';
 import { handleContextAction } from './context-menu/context-action-handler';
+import type { ContextMenuAction } from './context-menu/context-menu';
 import { useEntityLoader } from './context-menu/hooks/use-entity-loader';
 import { useGridView } from './hooks/use-grid-view';
 import { useGridVirtualizer } from './hooks/use-grid-virtualizer';
@@ -114,8 +114,15 @@ const FileBrowserComponent = ({
 		}
 	}, [items]);
 
-	const { selectedItems, toggleSelection, selectItem, clearSelection } = useSelectionStore();
-	const { viewMode, setViewMode } = useFileViewStore();
+       const viewMode = useFileStoreBase((state) => state.viewMode);
+       const selectedFileIds = useFileStoreBase((state) => state.selectedFileIds);
+       const selectFile = useFileStoreBase((state) => state.selectFile);
+       const toggleSelectFile = useFileStoreBase((state) => state.toggleSelectFile);
+       const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
+       const selectedItems = useMemo(() => {
+               const setIds = new Set(selectedFileIds);
+               return items.filter((it) => setIds.has(it.id));
+       }, [items, selectedFileIds]);
 	// Seleccionar solo la versión del store para forzar re-renders cuando las miniaturas cambien.
 	const version = useImageResources((state) => state.version);
 	const { setVisible, setSelectedItems } = useDetailsPanel();
@@ -287,7 +294,7 @@ const FileBrowserComponent = ({
 	};
 
 	// Función memoizada para mapear FileItem a ImageItem
-	const mapFileItemToImageItem = useCallback(
+        const mapFileItemToImageItem = useCallback(
 		(fileItem: FileItem): any => {
 			try {
 				// Crear una versión segura para acceder a propiedades que podrían no existir
@@ -459,8 +466,8 @@ const FileBrowserComponent = ({
 				};
 			}
 		},
-		[version] // ✨ mapFileItemToImageItem depende ahora solo de la versión del store
-	);
+                []
+        );
 
 	// Mantenemos una referencia al último array de processedItems para la estabilidad referencial de las dimensiones
 	const processedItemsRef = useRef<ImageItem[]>([]);
@@ -520,25 +527,22 @@ const FileBrowserComponent = ({
 	}, [debouncedLoadThumbnails, virtualizer, items]); // Añadir `items` a las dependencias
 
 	// Función para manejar el clic en un ítem (simple click)
-	const handleItemClick = useCallback(
-		(item: FileItem) => {
-			// gridLogger.info(`Click en ítem: ${item.name} (ID: ${item.id})`); // Comentado
-
-			// Si ya hay items seleccionados y no es el item clickeado, limpia la selección
-			if (selectedItems.length > 0 && !selectedItems.some((s) => s.id === item.id)) {
-				clearSelection();
-			}
-			selectItem(item);
-			if (onItemClick) {
-				onItemClick(item);
-			}
-		},
-		[selectedItems, clearSelection, selectItem, onItemClick]
-	);
+        const handleItemClick = useCallback(
+                (item: FileItem) => {
+                        if (selectedFileIds.length > 0 && !selectedFileIds.includes(item.id)) {
+                                deselectAllFiles();
+                        }
+                        selectFile(item.id);
+                        if (onItemClick) {
+                                onItemClick(item);
+                        }
+                },
+                [selectedFileIds, deselectAllFiles, selectFile, onItemClick]
+        );
 
 	// Función para manejar el doble clic en un ítem
-	const handleItemDoubleClick = useCallback(
-		(item: FileItem) => {
+        const handleItemDoubleClick = useCallback(
+                (item: FileItem) => {
 			// gridLogger.info(`Doble click en ítem: ${item.name} (ID: ${item.id})`); // Comentado
 			if (onItemDoubleClick) {
 				onItemDoubleClick(item);
@@ -547,8 +551,9 @@ const FileBrowserComponent = ({
 			// Abrir el visor de imágenes si es una imagen y tiene una URL de miniatura válida
 			if (item.type === 'image') {
 				// gridLogger.debug('Abriendo visor de imágenes...'); // Comentado
-				setViewerImages(processedItems.filter((img) => img.src && img.src.startsWith('/api/images/')) as ImageItem[]);
-				const initialIndex = processedItems.findIndex((img) => img.id === item.id);
+                                const filteredImages = processedItems.filter((img) => img.src?.startsWith('/api/images/')) as ImageItem[];
+                                setViewerImages(filteredImages);
+                                const initialIndex = filteredImages.findIndex((img) => img.id === item.id);
 				if (initialIndex !== -1) {
 					setViewerInitialIndex(initialIndex);
 					setIsViewerOpen(true);
@@ -561,29 +566,22 @@ const FileBrowserComponent = ({
 	);
 
 	// Función para manejar el clic derecho y abrir el menú contextual
-	const handleContextMenu = useCallback(
-		(item: FileItem, event: React.MouseEvent<HTMLElement>) => {
-			event.preventDefault(); // Evitar el menú contextual nativo del navegador
-			// gridLogger.info(`Context menu click on: ${item.name} (ID: ${item.id})`); // Comentado
+        const handleContextMenu = useCallback(
+                (item: FileItem) => {
+                        if (!selectedFileIds.includes(item.id)) {
+                                deselectAllFiles();
+                                selectFile(item.id);
+                        }
+                },
+                [selectedFileIds, deselectAllFiles, selectFile]
+        );
 
-			// Si el ítem no está seleccionado, seleccionarlo y limpiar otros
-			if (!selectedItems.some((s) => s.id === item.id)) {
-				clearSelection();
-				selectItem(item);
-			}
-
-			const target = event.target as HTMLElement;
-			const itemId = target.dataset.itemId;
-
-			// Aquí puedes usar itemId para identificar el elemento al que se le hizo clic derecho
-			// y mostrar el menú contextual apropiado.
-			// gridLogger.debug(`Context menu event on item ID: ${itemId}`); // Comentado
-
-			// Ejemplo de cómo manejar una acción del menú contextual
-			handleContextAction('copy', item);
-		},
-		[selectedItems, clearSelection, selectItem]
-	);
+        const handleMenuAction = useCallback(
+                (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
+                        handleContextAction(action, item, data, handleItemDoubleClick, toggleSelectFile);
+                },
+                [handleItemDoubleClick, toggleSelectFile]
+        );
 
 	const ViewComponent = VIEW_COMPONENT_MAP[viewMode as keyof typeof VIEW_COMPONENT_MAP];
 
@@ -640,7 +638,8 @@ const FileBrowserComponent = ({
 							isSelected,
 							onClick: () => handleItemClick(originalItem), // Pasar FileItem a los manejadores
 							onDoubleClick: () => handleItemDoubleClick(originalItem),
-							onContextMenu: (e: React.MouseEvent<HTMLElement>) => handleContextMenu(originalItem, e),
+                                                        onContextMenu: () => handleContextMenu(originalItem),
+                                                        onContextAction: handleMenuAction,
 							itemSize: itemSize, // Añadimos explícitamente itemSize que es requerido por GridViewProps
 							style: {
 								position: 'absolute' as const,
