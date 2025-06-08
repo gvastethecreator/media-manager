@@ -40,6 +40,7 @@ import { ThumbnailsSettings } from './thumbnails/thumbnails-settings';
 import { UploadedImagesSettings } from './uploaded-images/uploaded-images-settings';
 import { WildcardsSettings } from './wildcards/wildcards-settings';
 import { WorldItemsSettings } from './world-items/world-items-settings';
+import { EntitiesCardsSettings } from './entities-cards/entities-cards-settings';
 
 // Definición de tipos para estructurar los tabs
 interface TabItem {
@@ -254,16 +255,9 @@ export function SettingsView() {
 						</div>
 					</TabsContent>
 
-					<TabsContent value="entities-cards" className="h-full w-full p-6 m-0 border-none">
-						{/* 🃏 TODO: Implementar configuración de tarjetas de entidades */}
-						<div className="flex items-center justify-center h-full text-muted-foreground">
-							<div className="text-center">
-								<ListIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-								<p className="text-lg font-medium">Configuración de Tarjetas</p>
-								<p className="text-sm">Próximamente disponible</p>
-							</div>
-						</div>
-					</TabsContent>
+                                        <TabsContent value="entities-cards" className="h-full w-full p-6 m-0 border-none">
+                                                <EntitiesCardsSettings />
+                                        </TabsContent>
 
 					<TabsContent value="albums" className="h-full w-full p-6 m-0 border-none">
 						<AlbumsSettings />

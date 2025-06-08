@@ -52,20 +52,18 @@ export function SearchView(_props: ViewProps) {
 
 	const { openViewer } = useImageViewer();
 
-	const handleSearch = useCallback(() => {
-		if (filters.query) {
+	const handleSearch = useCallback(async () => {
+		if (!filters.query) return;
+
+		try {
 			setIsLoading(true);
-			// Usar API fetch directamente para la búsqueda
-			fetch(`/api/search?query=${encodeURIComponent(filters.query)}&type=${filters.type}`)
-				.then((res) => res.json())
-				.then((data) => {
-					useFileStore.setState({ files: data });
-					setIsLoading(false);
-				})
-				.catch((err) => {
-					console.error('Error en búsqueda:', err);
-					setIsLoading(false);
-				});
+			const { searchImages } = await import('@/app/actions/search/search.actions');
+			const files = await searchImages(filters.query, _PAGE_SIZE);
+			useFileStore.setState({ files });
+		} catch (err) {
+			console.error('Error en búsqueda:', err);
+		} finally {
+			setIsLoading(false);
 		}
 	}, [filters, setIsLoading]);
 

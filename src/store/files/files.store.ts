@@ -1,9 +1,13 @@
-import { getCollections } from '@/app/actions/collections/collection.actions';
-import { getFolders } from '@/app/actions/folders';
+import { getCollections, getCollectionImages } from '@/app/actions/collections';
+import { getFolders, getFolderImages } from '@/app/actions/folders';
+import {
+    getImages,
+    getFavoriteImages,
+} from '@/app/actions/images/image-crud.actions';
 import { getTagImages, getTags } from '@/app/actions/tags';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { FileItem, RelatedTag } from '@/types/file-item';
-import type { Collection } from '@prisma/client';
+import type { Collection } from '@/types/entities/collection';
 import { create } from 'zustand';
 
 const ITEMS_PER_BATCH = 50;
@@ -122,47 +126,38 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 		}
 	},
 
-	loadAllImages: async () => {
-		try {
-			set({ isLoading: true });
-			const response = await fetch('/api/images/all');
-			if (!response.ok) {
-				throw new Error('Error al cargar imágenes');
-			}
-			const data = await response.json();
-			const items = data.items || [];
-			set({
-				currentItems: items,
-				displayedItems: items.slice(0, ITEMS_PER_BATCH),
-				isProcessingThumbnails: true,
-			});
-		} catch (error) {
-			set({ error: error instanceof Error ? error.message : 'Error desconocido' });
-		} finally {
-			set({ isLoading: false, isProcessingThumbnails: false });
-		}
-	},
+        loadAllImages: async () => {
+                try {
+                        set({ isLoading: true });
+                        const result = await getImages({ pageSize: 1000 });
+                        const items = result.images || [];
+                        set({
+                                currentItems: items,
+                                displayedItems: items.slice(0, ITEMS_PER_BATCH),
+                                isProcessingThumbnails: true,
+                        });
+                } catch (error) {
+                        set({ error: error instanceof Error ? error.message : 'Error desconocido' });
+                } finally {
+                        set({ isLoading: false, isProcessingThumbnails: false });
+                }
+        },
 
-	loadFavorites: async () => {
-		try {
-			set({ isLoading: true });
-			const response = await fetch('/api/images/favorites/all');
-			if (!response.ok) {
-				throw new Error('Error al cargar favoritos');
-			}
-			const data = await response.json();
-			const items = data.items || [];
-			set({
-				currentItems: items,
-				displayedItems: items.slice(0, ITEMS_PER_BATCH),
-				isProcessingThumbnails: true,
-			});
-		} catch (error) {
-			set({ error: error instanceof Error ? error.message : 'Error desconocido' });
-		} finally {
-			set({ isLoading: false, isProcessingThumbnails: false });
-		}
-	},
+        loadFavorites: async () => {
+                try {
+                        set({ isLoading: true });
+                        const items = await getFavoriteImages();
+                        set({
+                                currentItems: items,
+                                displayedItems: items.slice(0, ITEMS_PER_BATCH),
+                                isProcessingThumbnails: true,
+                        });
+                } catch (error) {
+                        set({ error: error instanceof Error ? error.message : 'Error desconocido' });
+                } finally {
+                        set({ isLoading: false, isProcessingThumbnails: false });
+                }
+        },
 
 	selectItem: (item: FileItem) => {
 		set((state) => ({
@@ -178,47 +173,38 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 		}));
 	},
 
-	handleSelectFolder: async (id: string) => {
-		try {
-			set({ isLoading: true, currentFolderId: id });
-			const response = await fetch(`/api/folders/${id}/images/all`);
-			if (!response.ok) {
-				throw new Error('Error al cargar carpeta');
-			}
-			const data = await response.json();
-			const items = data.items || [];
-			set({
-				currentItems: items,
-				displayedItems: items.slice(0, ITEMS_PER_BATCH),
-				isProcessingThumbnails: true,
-			});
-		} catch (error) {
-			set({ error: error instanceof Error ? error.message : 'Error desconocido' });
-		} finally {
-			set({ isLoading: false, isProcessingThumbnails: false });
-		}
-	},
+        handleSelectFolder: async (id: string) => {
+                try {
+                        set({ isLoading: true, currentFolderId: id });
+                        const response = await getFolderImages(id);
+                        const items = response.items || [];
+                        set({
+                                currentItems: items,
+                                displayedItems: items.slice(0, ITEMS_PER_BATCH),
+                                isProcessingThumbnails: true,
+                        });
+                } catch (error) {
+                        set({ error: error instanceof Error ? error.message : 'Error desconocido' });
+                } finally {
+                        set({ isLoading: false, isProcessingThumbnails: false });
+                }
+        },
 
-	handleSelectCollection: async (id) => {
-		try {
-			set({ isLoading: true, currentCollectionId: id });
-			const response = await fetch(`/api/collections/${id}/images/all`);
-			if (!response.ok) {
-				throw new Error('Error al cargar colección');
-			}
-			const data = await response.json();
-			const items = data.items || [];
-			set({
-				currentItems: items,
-				displayedItems: items.slice(0, ITEMS_PER_BATCH),
-				isProcessingThumbnails: true,
-			});
-		} catch (error) {
-			set({ error: error instanceof Error ? error.message : 'Error desconocido' });
-		} finally {
-			set({ isLoading: false, isProcessingThumbnails: false });
-		}
-	},
+        handleSelectCollection: async (id) => {
+                try {
+                        set({ isLoading: true, currentCollectionId: id });
+                        const items = await getCollectionImages(id);
+                        set({
+                                currentItems: items,
+                                displayedItems: items.slice(0, ITEMS_PER_BATCH),
+                                isProcessingThumbnails: true,
+                        });
+                } catch (error) {
+                        set({ error: error instanceof Error ? error.message : 'Error desconocido' });
+                } finally {
+                        set({ isLoading: false, isProcessingThumbnails: false });
+                }
+        },
 
 	handleSelectTag: async (id) => {
 		try {
