@@ -273,7 +273,7 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 
 			// Evitar recargas mientras se está scrolleando activamente
 			if (isScrolling) {
-				console.debug(`[FileBrowserGrid] Omitiendo carga durante scroll activo`);
+				console.debug('[FileBrowserGrid] Omitiendo carga durante scroll activo');
 				return;
 			}
 
@@ -289,13 +289,14 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 
 					// Verificar si hay IDs válidos
 					const validIds = visibleItems
-						.filter(item => item && item.id && typeof item.id === 'string')
+						.filter(item => item?.id && typeof item.id === 'string')
 						.map(item => item.id);
 
 					if (validIds.length > 0) {
+						// Aquí sí se justifica el template literal por el join
 						console.debug(`[FileBrowserGrid] �� Primeros 3 IDs: ${validIds.slice(0, 3).join(', ')}`);
 					} else {
-						console.warn(`[FileBrowserGrid] ⚠️ No hay IDs válidos para cargar thumbnails`);
+						console.warn('[FileBrowserGrid] ⚠️ No hay IDs válidos para cargar thumbnails');
 					}
 
 					// Llamar a la función optimizada de carga

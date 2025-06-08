@@ -4,19 +4,21 @@
  */
 
 import type { Wildcard as PrismaWildcard } from '@prisma/client';
-import type { Album } from '../album/types';
-import type { Character } from '../character/types';
-import type { Collection } from '../collection/types';
-import type { Concept } from '../concept/types';
-import type { Group } from '../group/types';
-import type { Image } from '../image/image-types';
-import type { Note } from '../note/types';
-import type { Place } from '../place/types';
-import type { Prompt } from '../prompt/types';
-import type { Property } from '../property/types';
-import type { Tag } from '../tag/types';
-import type { Video } from '../video/video-types';
-import type { WorldItem } from '../world-item/types';
+
+// Importar tipos principales usando los alias de índice para evitar errores de importación y mantener consistencia
+import type { AlbumComplete } from '../album/extended';
+import type { CharacterWithRelations as Character } from '../character';
+import type { CollectionWithRelations as Collection } from '../collection';
+import type { Concept } from '../concept';
+import type { Group } from '../group';
+import type { Image } from '../image';
+import type { Note } from '../note';
+import type { Place } from '../place';
+import type { Prompt } from '../prompt';
+import type { Property } from '../property';
+import type { Tag } from '../tag';
+import type { Video } from '../video';
+import type { WorldItem } from '../world-item';
 
 /**
  * Interfaz para un hijo de wildcard
@@ -60,7 +62,7 @@ export interface WildcardRelations {
 	// Otras relaciones
 	images?: Image[];
 	videos?: Video[];
-	albums?: Album[];
+	albums?: AlbumComplete[];
 	collections?: Collection[];
 	tags?: Tag[];
 	characters?: Character[];
@@ -130,6 +132,33 @@ export interface WildcardComplete extends WildcardBase {
 	_relations?: WildcardRelations;
 	_count?: WildcardCounts;
 	_ui: WildcardUI;
+}
+
+/**
+ * Interfaz extendida para Wildcard con propiedades adicionales para UI
+ */
+export interface WildcardExtended extends WildcardComplete {
+	// Puedes agregar aquí propiedades adicionales para la UI si es necesario
+	// Ejemplo: isSelected, isEditing, etc.
+	isSelected?: boolean;
+	isEditing?: boolean;
+	isExpanded?: boolean;
+	isLoading?: boolean;
+	isDropTarget?: boolean;
+	isDragging?: boolean;
+	isHighlighted?: boolean;
+	hasError?: boolean;
+}
+
+/**
+ * Interfaz para Wildcard con estadísticas calculadas
+ */
+export interface WildcardWithStats extends WildcardComplete {
+	stats?: {
+		childCount?: number;
+		depth?: number;
+		[item: string]: number | undefined;
+	};
 }
 
 /**

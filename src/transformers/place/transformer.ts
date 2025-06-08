@@ -3,9 +3,9 @@
  * @module transformers/place/transformer
  */
 
-import { TransformerError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { Place, PlaceExtended, PlaceWithStats } from '@/types/entities/place/types';
+import { TransformerError } from '@/utils/transformers/errors';
 import { extendPlace, fromPrismaPlace } from './serializers';
 
 const logger = serverLogger.withContext('PlaceTransformer');
@@ -31,7 +31,7 @@ export function transformPlace(place: unknown): Place {
 		return extendPlace(place as any);
 	} catch (error) {
 		logger.error('Error transformando lugar:', { error });
-		throw new TransformerError('Error al transformar lugar', { cause: error });
+		throw new TransformerError('Error al transformar lugar');
 	}
 }
 
@@ -50,7 +50,7 @@ export function transformPlaces(places: unknown[]): Place[] {
 		return places.map((place) => transformPlace(place));
 	} catch (error) {
 		logger.error('Error transformando lista de lugares:', { error });
-		throw new TransformerError('Error al transformar lista de lugares', { cause: error });
+		throw new TransformerError('Error al transformar lista de lugares');
 	}
 }
 
@@ -80,7 +80,7 @@ export function transformPlaceToExtended(place: Place): PlaceExtended {
 		};
 	} catch (error) {
 		logger.error('Error transformando lugar a versión extendida:', { error, placeId: (place as any)?.id });
-		throw new TransformerError('Error al transformar lugar a versión extendida', { cause: error });
+		throw new TransformerError('Error al transformar lugar a versión extendida');
 	}
 }
 
@@ -137,7 +137,7 @@ export function transformPlaceToWithStats(place: Place): PlaceWithStats {
 		};
 	} catch (error) {
 		logger.error('Error transformando lugar a versión con estadísticas:', { error, placeId: (place as any)?.id });
-		throw new TransformerError('Error al transformar lugar a versión con estadísticas', { cause: error });
+		throw new TransformerError('Error al transformar lugar a versión con estadísticas');
 	}
 }
 

@@ -1,4 +1,4 @@
-''use server'';
+'use server';
 
 /**
  * @file Funciones CRUD para la entidad Folder, expuestas como Server Actions.
@@ -7,6 +7,8 @@
 
 import { Logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
+import { transformFolder } from '@/transformers/folder';
+import { mapCreateFolderDataToPrisma, mapFolderSearchOptionsToPrisma, mapUpdateFolderDataToPrisma } from '@/transformers/folder/mappers';
 import type {
     Folder,
     FolderComplete,
@@ -15,8 +17,6 @@ import type {
     FolderUpdateInput,
     FolderWithStats,
 } from '@/types/entities/folder/types';
-import { transformFolder } from '@/transformers/folder';
-import { mapCreateFolderDataToPrisma, mapFolderSearchOptionsToPrisma, mapUpdateFolderDataToPrisma } from '@/transformers/folder/mappers';
 import { revalidatePath } from 'next/cache';
 
 const logger = new Logger('FolderCRUDActions');

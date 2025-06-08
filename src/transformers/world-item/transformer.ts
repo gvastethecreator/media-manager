@@ -3,10 +3,10 @@
  * @module transformers/world-item/transformer
  */
 
-import { TransformerError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { WorldItemExtended } from '@/types/entities/world-item/extended';
 import type { WorldItemDeserialized } from '@/types/entities/world-item/types';
+import { TransformerError } from '@/utils/transformers/errors';
 import { extendWorldItem } from './serializers';
 import { fromPrismaWorldItem, parseJsonField } from './server';
 

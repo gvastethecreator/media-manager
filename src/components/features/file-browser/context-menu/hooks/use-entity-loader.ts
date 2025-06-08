@@ -588,7 +588,7 @@ export function useEntityLoader() {
 				return [];
 			}
 		},
-		[fetchDataFromServer, loadingStates]
+		[fetchDataFromServer, loadingStates, stores]
 	);
 
 	return {

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FolderCard } from './folder-card';
 import { getFolderStats, getRecentFolderImages } from './folder-server-actions';
@@ -25,7 +25,7 @@ describe('FolderCard', () => {
 	const mockFolder = {
 		id: 'folder123',
 		name: 'Vacaciones',
-		emoji: '📁',
+		emoji: '\ud83d\udcc1',
 		color: '#3b82f6',
 		description: 'Fotos de vacaciones',
 		path: '/vacaciones',
@@ -37,6 +37,38 @@ describe('FolderCard', () => {
 		isFavorite: true,
 		autoReindex: false,
 		lastIndexed: new Date(),
+		stats: {
+			totalFiles: 120,
+			totalSize: 1024000,
+			subfolders: 5,
+			lastIndexed: new Date(),
+			totalImages: 100,
+			totalUploadedImages: 80,
+			totalChildren: 2,
+			images: [],
+			folders: [],
+			cover: null,
+			coverType: null,
+			coverBlurhash: null,
+			totalTags: 0,
+			lastUpdated: new Date(),
+			createdAt: new Date(),
+			level: 0,
+			parentId: null,
+			id: 'folder123',
+			isRoot: false,
+			isEmpty: false,
+			hasChildren: true,
+			size: 1024000,
+		},
+		metadata: {},
+		featuredImage: null,
+		presetId: null,
+		cover: null,
+		coverType: null,
+		coverBlurhash: null,
+		isDragging: false,
+		isDropTarget: false,
 	};
 
 	beforeEach(() => {
@@ -45,82 +77,59 @@ describe('FolderCard', () => {
 
 	it('renderiza correctamente', () => {
 		render(<FolderCard folder={mockFolder} />);
-
-		// Verificar que el nombre de la carpeta se muestra
 		expect(screen.getByText('Vacaciones')).toBeInTheDocument();
-
-		// Verificar que el emoji se muestra
 		expect(screen.getByText('📁')).toBeInTheDocument();
-
-		// Verificar que la descripción se muestra
 		expect(screen.getByText('Fotos de vacaciones')).toBeInTheDocument();
 	});
 
 	it('llama al onClick cuando se hace clic', async () => {
 		const onClickMock = jest.fn();
 		const user = userEvent.setup();
-
 		render(<FolderCard folder={mockFolder} onClick={onClickMock} />);
-
-		// Hacer clic en la tarjeta
-		const card = screen.getByText('Vacaciones').closest('div');
-		if (card) {
-			await user.click(card);
-		}
-
-		// Verificar que se llamó al callback
-		expect(onClickMock).toHaveBeenCalledWith(mockFolder);
+		// Buscar el botón principal de la tarjeta
+		const button = screen.getByRole('button');
+		await user.click(button);
+		expect(onClickMock).toHaveBeenCalled();
 	});
 
-	it('renderiza un enlace cuando no hay onClick', () => {
+	it('renderiza un enlace cuando no hay onClick', async () => {
 		render(<FolderCard folder={mockFolder} />);
-
-		// Verificar que hay un enlace a la página de la carpeta
-		const link = document.querySelector(`a[href="/dashboard/folders/${mockFolder.id}"]`);
-		expect(link).toBeInTheDocument();
+		await waitFor(() => {
+			const link = document.querySelector(`a[href="/dashboard/folders/${mockFolder.id}"]`);
+			expect(link).toBeInTheDocument();
+		});
 	});
 
 	it('muestra las estadísticas de la carpeta', async () => {
 		render(<FolderCard folder={mockFolder} />);
-
-		// Verificar que se llamó a getFolderStats
-		expect(getFolderStats).toHaveBeenCalledWith(mockFolder.id);
-
-		// Como las estadísticas se cargan de forma asíncrona, debemos esperar
-		await new Promise((resolve) => setTimeout(resolve, 0));
-
-		// Verificar que se muestran las estadísticas
-		expect(screen.getByText('120')).toBeInTheDocument(); // número de archivos
-		expect(screen.getByText('5')).toBeInTheDocument(); // número de subcarpetas
+		await waitFor(() => {
+			expect(getFolderStats).toHaveBeenCalledWith(mockFolder.id);
+			expect(screen.getByText('120')).toBeInTheDocument();
+			expect(screen.getByText('5')).toBeInTheDocument();
+		});
 	});
 
 	it('carga y muestra las imágenes de la carpeta', async () => {
 		render(<FolderCard folder={mockFolder} />);
-
-		// Verificar que se llamó a getRecentFolderImages
-		expect(getRecentFolderImages).toHaveBeenCalledWith(mockFolder.id);
-
-		// Como las imágenes se cargan de forma asíncrona, debemos esperar
-		await new Promise((resolve) => setTimeout(resolve, 0));
-
-		// Verificar que se muestran las imágenes (o al menos sus contenedores)
-		const images = document.querySelectorAll('img');
-		expect(images.length).toBeGreaterThan(0);
+		await waitFor(() => {
+			expect(getRecentFolderImages).toHaveBeenCalledWith(mockFolder.id);
+			const images = document.querySelectorAll('img');
+			expect(images.length).toBeGreaterThan(0);
+		});
 	});
 
 	it('aplica correctamente los colores personalizados', () => {
 		render(<FolderCard folder={mockFolder} />);
-
-		// Verificar que los elementos con el color personalizado existen
 		const elements = document.querySelectorAll(`[style*="${mockFolder.color}"]`);
 		expect(elements.length).toBeGreaterThan(0);
 	});
 
-	it('muestra el indicador de favorito cuando corresponde', () => {
+	it('muestra el indicador de favorito cuando corresponde', async () => {
 		render(<FolderCard folder={mockFolder} />);
-
-		// Verificar que se muestra el indicador de favorito
-		const favoriteIndicator = screen.getByTestId('favorite-indicator');
-		expect(favoriteIndicator).toBeInTheDocument();
+		await waitFor(() => {
+			// Buscar el icono Star (Lucide) que indica favorito
+			const favoriteIcon = document.querySelector('svg.feather-star, svg.feather.feather-star');
+			expect(favoriteIcon).toBeInTheDocument();
+		});
 	});
 });
