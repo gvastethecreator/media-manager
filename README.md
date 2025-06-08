@@ -14,6 +14,17 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 - **Zustand** - Gestión de estado
 - **Server Actions** - Acciones del servidor para operaciones CRUD
 - **Motion** - Animaciones fluidas
+- **Stores** consumen directamente las Server Actions eliminando llamadas a la API REST
+- **PlaceStore** usa `getPlaces` y `getPlace` para cargar datos sin `fetch`
+- **VisualConfig** y estadísticas de debug se obtienen ahora mediante Server Actions
+- **Videos** gestionan su configuración visual con Server Actions
+- **File Manager** consolidado; carga imágenes y colecciones únicamente mediante Server Actions
+- **Legacy file-manager.store.ts** eliminado; se usa solo `unified-file-manager.store.ts`
+- **ImageStore** ahora usa getImage y getImages directamente desde Server Actions
+- **Stores** ya no importan tipos de Prisma, previniendo errores de bundler en el cliente
+- **Entities Cards** permite ajustar efectos de tarjetas para personajes, lugares y objetos
+- **Todas las configuraciones fueron auditadas y funcionan con Server Actions**
+- **EntityPreloader** carga todas las entidades exclusivamente a través de Server Actions, sin recurrir a rutas REST
 - **Biome** - Linter y formateador unificado
 
 ## Características Principales
@@ -26,6 +37,8 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 - **Filtros y ordenación**: Opciones avanzadas en todas las entidades
 - **Estadísticas detalladas**: Métricas de uso y relaciones para cada entidad
 - **Interfaz responsive**: Diseño adaptable a diferentes dispositivos
+- **Seeds de ejemplo**: La base de datos se puede poblar con varios perfiles,
+  carpetas y objetos de muestra ejecutando `pnpm prisma db seed`
 
 ## Estructura del Proyecto
 
@@ -88,8 +101,12 @@ DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/image_manager"
 ```bash
 pnpm prisma migrate dev
 ```
+5. Cargar datos de ejemplo:
+```bash
+pnpm prisma db seed
+```
 
-5. Iniciar el servidor de desarrollo:
+6. Iniciar el servidor de desarrollo:
 ```bash
 pnpm dev
 ```
@@ -205,6 +222,16 @@ Los próximos pasos incluyen:
 2. Optimización de rendimiento
 3. Internacionalización
 4. Mejoras en UI/UX
+
+## Testing
+
+La configuración de Jest se actualizó para transformar dependencias como `nanoid`
+y se añadió un polyfill de `TextEncoder` en `jest.setup.ts`.
+Se incorporaron pruebas unitarias para los selectores del store de perfiles y se
+mejoró el mock de `PrismaClient` para permitir la inicialización en entornos de
+test.
+Se añadió la dependencia @testing-library/user-event para pruebas de interacción.
+Todas las suites de Jest se ejecutan sin fallos tras ajustar los mocks y componentes.
 
 ## Licencia
 

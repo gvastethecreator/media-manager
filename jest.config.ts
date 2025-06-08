@@ -76,10 +76,10 @@ const customJestConfig: Config = {
 		},
 	},
 	testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/dist/', '<rootDir>/coverage/'],
-	transformIgnorePatterns: [
-		'/node_modules/(?!(next|@next|next/server|next/navigation|next/headers))',
-		'^.+\\.module\\.(css|sass|scss)$',
-	],
+        transformIgnorePatterns: [
+                '/node_modules/(?!(next|@next|next/server|next/navigation|next/headers|nanoid|@testing-library/user-event))',
+                '^.+\\.module\\.(css|sass|scss)$',
+        ],
 	moduleDirectories: ['node_modules', '<rootDir>/src'],
 	testEnvironmentOptions: {
 		url: 'http://localhost:3000',

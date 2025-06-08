@@ -38,7 +38,9 @@ export * from './world-items/world-items-view';
 export * from './groups/group-content-view';
 export * from './groups/groups-view';
 export * from './properties/properties-view';
+export * from './properties/property-content-view';
 export * from './wildcards/wildcards-view';
+export * from './wildcards/wildcard-content-view';
 
 // Exportar vistas especiales
 export * from './all-images/all-images-view';

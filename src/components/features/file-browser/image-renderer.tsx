@@ -69,14 +69,14 @@ const ImageRendererComponent = ({
 		}
 	}, [src]);
 
-	const handleError = useCallback(() => {
-		logger.warn(`❌ Error al cargar imagen: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
-		setError(true);
-		setIsLoading(false);
-		if (onError) {
-			onError();
-		}
-	}, [onError]);
+        const handleError = useCallback(() => {
+                logger.warn(`❌ Error al cargar imagen: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
+                setError(true);
+                setIsLoading(false);
+                if (onError) {
+                        onError();
+                }
+        }, [onError, src]);
 
 	const handleLoad = useCallback(() => {
 		// logger.debug(`✅ Imagen cargada: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);

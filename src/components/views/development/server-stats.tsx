@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { getAppStats, getSystemStats } from '@/app/actions/debug/debug-stats.actions';
 
 // Logger específico para este componente
 const logger = clientLogger.withContext('ServerStats');
@@ -86,21 +87,13 @@ export function ServerStats() {
 			setLoading(true);
 			setError(null);
 
-			// Cargar estadísticas del sistema
-			const systemResponse = await fetch('/api/debug/system-stats');
-			if (!systemResponse.ok) {
-				throw new Error(`Error al cargar estadísticas del sistema: ${systemResponse.status}`);
-			}
-			const systemData = await systemResponse.json();
-			setSystemStats(systemData);
+                        // Cargar estadísticas del sistema
+                        const systemData = await getSystemStats();
+                        setSystemStats(systemData);
 
-			// Cargar estadísticas de la aplicación
-			const appResponse = await fetch('/api/debug/app-stats');
-			if (!appResponse.ok) {
-				throw new Error(`Error al cargar estadísticas de la aplicación: ${appResponse.status}`);
-			}
-			const appData = await appResponse.json();
-			setAppStats(appData);
+                        // Cargar estadísticas de la aplicación
+                        const appData = await getAppStats();
+                        setAppStats(appData);
 
 			logger.info('Estadísticas cargadas correctamente');
 		} catch (err) {
