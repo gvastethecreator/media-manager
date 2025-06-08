@@ -586,6 +586,7 @@ export function serializeWorldItemTags(tags: string[] | string): string {
  * @returns El WorldItemBase.
  */
 export function fromExtendedWorldItem(worldItem: WorldItemComplete): WorldItemBase {
+<<<<<<< HEAD
 	const {
 		_count,
 		images,
@@ -608,4 +609,24 @@ return {
     isExpanded,
     isEditing
 };
+=======
+        const {
+                _count,
+                images,
+                videos,
+                notes,
+                concepts,
+                prompts,
+                groups,
+                properties,
+                wildcards,
+                tags: relatedTags,
+                isSelected,
+                isExpanded,
+                isEditing,
+                ...base
+        } = worldItem;
+
+        return base;
+>>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 }

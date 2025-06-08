@@ -4,6 +4,13 @@
  */
 
 import { extendTag, extendTags } from '@/transformers/tag';
+import {
+       createTagAction,
+       deleteTagAction,
+       getTagByIdAction,
+       getTagsAction,
+       updateTagAction,
+} from '@/app/actions/tags';
 import type { Tag } from '@/types/entities/tag';
 import type { StateCreator } from 'zustand';
 import type { TagCoreState, TagState } from '../types';
@@ -38,165 +45,112 @@ export const createTagCoreSlice: StateCreator<TagState & TagCoreSlice, [], [], T
 	},
 
 	// Acción para obtener todas las etiquetas
-	fetchTags: async () => {
-		const { setTagsLoading, setTagsError, addTags } = get();
+        fetchTags: async () => {
+                const { setTagsLoading, setTagsError, addTags } = get();
 
-		try {
-			setTagsLoading(true);
-			setTagsError(null);
+                try {
+                        setTagsLoading(true);
+                        setTagsError(null);
 
-			// Realizar solicitud al servidor
-			const response = await fetch('/api/entities/tags');
-
-			if (!response.ok) {
-				throw new Error(`Error: ${response.status} - ${response.statusText}`);
-			}
-
-			const data = await response.json();
-
-			// Extender y añadir etiquetas al store
-			const extendedTags = extendTags(data.tags);
-			addTags(extendedTags);
-
-			return;
-		} catch (error) {
-			setTagsError(error instanceof Error ? error.message : String(error));
-		} finally {
-			setTagsLoading(false);
-		}
-	},
+                        const result = await getTagsAction();
+                        if (result?.items) {
+                                addTags(result.items);
+                        }
+                        return;
+                } catch (error) {
+                        setTagsError(error instanceof Error ? error.message : String(error));
+                } finally {
+                        setTagsLoading(false);
+                }
+        },
 
 	// Acción para obtener una etiqueta por su ID
-	fetchTagById: async (id) => {
-		const { setTagsLoading, setTagsError, addTag } = get();
+        fetchTagById: async (id) => {
+                const { setTagsLoading, setTagsError, addTag } = get();
 
-		try {
-			setTagsLoading(true);
+                try {
+                        setTagsLoading(true);
 
-			// Comprobar si ya está en el store
-			const existingTag = get().core.tags[id];
-			if (existingTag) {
-				return existingTag;
-			}
+                        const existingTag = get().core.tags[id];
+                        if (existingTag) {
+                                return existingTag;
+                        }
 
-			// Realizar solicitud al servidor
-			const response = await fetch(`/api/entities/tags/${id}`);
+                        const tag = await getTagByIdAction(id);
+                        if (tag) {
+                                addTag(tag);
+                        }
 
-			if (!response.ok) {
-				throw new Error(`Error: ${response.status} - ${response.statusText}`);
-			}
-
-			const data = await response.json();
-
-			// Extender y añadir la etiqueta al store
-			const extendedTag = extendTag(data.tag);
-			addTag(extendedTag);
-
-			return extendedTag;
-		} catch (error) {
-			setTagsError(error instanceof Error ? error.message : String(error));
-			return null;
-		} finally {
-			setTagsLoading(false);
-		}
-	},
+                        return tag;
+                } catch (error) {
+                        setTagsError(error instanceof Error ? error.message : String(error));
+                        return null;
+                } finally {
+                        setTagsLoading(false);
+                }
+        },
 
 	// Acción para crear una etiqueta
-	createTag: async (tagData) => {
-		const { setTagsLoading, setTagsError, addTag } = get();
+        createTag: async (tagData) => {
+                const { setTagsLoading, setTagsError, addTag } = get();
 
-		try {
-			setTagsLoading(true);
+                try {
+                        setTagsLoading(true);
 
-			// Realizar solicitud al servidor
-			const response = await fetch('/api/entities/tags', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(tagData),
-			});
+                        const newTag = await createTagAction(tagData);
+                        if (newTag) {
+                                addTag(newTag);
+                        }
 
-			if (!response.ok) {
-				throw new Error(`Error: ${response.status} - ${response.statusText}`);
-			}
-
-			const data = await response.json();
-
-			// Extender y añadir la etiqueta al store
-			const extendedTag = extendTag(data.tag);
-			addTag(extendedTag);
-
-			return extendedTag;
-		} catch (error) {
-			setTagsError(error instanceof Error ? error.message : String(error));
-			return null;
-		} finally {
-			setTagsLoading(false);
-		}
-	},
+                        return newTag;
+                } catch (error) {
+                        setTagsError(error instanceof Error ? error.message : String(error));
+                        return null;
+                } finally {
+                        setTagsLoading(false);
+                }
+        },
 
 	// Acción para actualizar una etiqueta
-	updateTag: async (id, data) => {
-		const { setTagsLoading, setTagsError, updateTagLocally } = get();
+        updateTag: async (id, data) => {
+                const { setTagsLoading, setTagsError, updateTagLocally } = get();
 
-		try {
-			setTagsLoading(true);
+                try {
+                        setTagsLoading(true);
 
-			// Realizar solicitud al servidor
-			const response = await fetch(`/api/entities/tags/${id}`, {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
+                        const updated = await updateTagAction(id, data);
+                        if (updated) {
+                                updateTagLocally(id, updated);
+                        }
 
-			if (!response.ok) {
-				throw new Error(`Error: ${response.status} - ${response.statusText}`);
-			}
-
-			const responseData = await response.json();
-
-			// Actualizar la etiqueta en el store
-			updateTagLocally(id, responseData.tag);
-
-			return get().core.tags[id] || null;
-		} catch (error) {
-			setTagsError(error instanceof Error ? error.message : String(error));
-			return null;
-		} finally {
-			setTagsLoading(false);
-		}
-	},
+                        return get().core.tags[id] || null;
+                } catch (error) {
+                        setTagsError(error instanceof Error ? error.message : String(error));
+                        return null;
+                } finally {
+                        setTagsLoading(false);
+                }
+        },
 
 	// Acción para eliminar una etiqueta
-	deleteTag: async (id) => {
-		const { setTagsLoading, setTagsError, removeTag } = get();
+        deleteTag: async (id) => {
+                const { setTagsLoading, setTagsError, removeTag } = get();
 
-		try {
-			setTagsLoading(true);
+                try {
+                        setTagsLoading(true);
 
-			// Realizar solicitud al servidor
-			const response = await fetch(`/api/entities/tags/${id}`, {
-				method: 'DELETE',
-			});
+                        await deleteTagAction(id);
 
-			if (!response.ok) {
-				throw new Error(`Error: ${response.status} - ${response.statusText}`);
-			}
+                        removeTag(id);
 
-			// Eliminar la etiqueta del store
-			removeTag(id);
-
-			return true;
-		} catch (error) {
-			setTagsError(error instanceof Error ? error.message : String(error));
-			return false;
-		} finally {
-			setTagsLoading(false);
-		}
-	},
+                        return true;
+                } catch (error) {
+                        setTagsError(error instanceof Error ? error.message : String(error));
+                        return false;
+                } finally {
+                        setTagsLoading(false);
+                }
+        },
 
 	// Acción para añadir una etiqueta al store
 	addTag: (tag) => {
