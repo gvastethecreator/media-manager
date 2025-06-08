@@ -1,61 +1,49 @@
-"use client";
+'use client';
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-	AlertCircle,
-	Check,
-	Edit3,
-	Filter,
-	Globe,
-	Hash,
-	Plus,
-	Search,
-	Star,
-	Trash2,
-	X
-} from "lucide-react";
-import { motion } from "motion/react";
-import { useState } from "react";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { AlertCircle, Check, Edit3, Filter, Globe, Hash, Plus, Search, Star, Trash2, X } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useState } from 'react';
 
 // 🎯 Mock data para wildcards - en implementación real vendría del store
 const mockWildcards = [
 	{
-		id: "wc001",
-		pattern: "*.jpg",
-		description: "Archivos de imagen JPEG",
+		id: 'wc001',
+		pattern: '*.jpg',
+		description: 'Archivos de imagen JPEG',
 		matchCount: 1247,
 		isActive: true,
-		category: "images",
+		category: 'images',
 		priority: 1,
-		createdAt: "2024-01-15T10:30:00Z",
-		lastUsed: "2024-01-20T14:45:00Z"
+		createdAt: '2024-01-15T10:30:00Z',
+		lastUsed: '2024-01-20T14:45:00Z',
 	},
 	{
-		id: "wc002",
-		pattern: "temp_*",
-		description: "Archivos temporales del sistema",
+		id: 'wc002',
+		pattern: 'temp_*',
+		description: 'Archivos temporales del sistema',
 		matchCount: 89,
 		isActive: false,
-		category: "system",
+		category: 'system',
 		priority: 3,
-		createdAt: "2024-01-10T09:15:00Z",
-		lastUsed: "2024-01-18T16:20:00Z"
+		createdAt: '2024-01-10T09:15:00Z',
+		lastUsed: '2024-01-18T16:20:00Z',
 	},
 	{
-		id: "wc003",
-		pattern: "backup_*.zip",
-		description: "Archivos de respaldo comprimidos",
+		id: 'wc003',
+		pattern: 'backup_*.zip',
+		description: 'Archivos de respaldo comprimidos',
 		matchCount: 23,
 		isActive: true,
-		category: "backup",
+		category: 'backup',
 		priority: 2,
-		createdAt: "2024-01-08T11:45:00Z",
-		lastUsed: "2024-01-19T13:30:00Z"
-	}
+		createdAt: '2024-01-08T11:45:00Z',
+		lastUsed: '2024-01-19T13:30:00Z',
+	},
 ];
 
 /**
@@ -64,26 +52,30 @@ const mockWildcards = [
  */
 export function WildcardContentView() {
 	const [isEditing, setIsEditing] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
+	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedWildcard, setSelectedWildcard] = useState(mockWildcards[0]);
 
 	// 🎨 Función para obtener el color de prioridad
 	const getPriorityColor = (priority: number) => {
 		switch (priority) {
-			case 1: return "bg-red-100 text-red-800 border-red-200";
-			case 2: return "bg-yellow-100 text-yellow-800 border-yellow-200";
-			case 3: return "bg-green-100 text-green-800 border-green-200";
-			default: return "bg-gray-100 text-gray-800 border-gray-200";
+			case 1:
+				return 'bg-red-100 text-red-800 border-red-200';
+			case 2:
+				return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+			case 3:
+				return 'bg-green-100 text-green-800 border-green-200';
+			default:
+				return 'bg-gray-100 text-gray-800 border-gray-200';
 		}
 	};
 
 	// 🎨 Función para obtener el color de categoría
 	const getCategoryColor = (category: string) => {
 		const colors: Record<string, string> = {
-			images: "bg-blue-100 text-blue-800 border-blue-200",
-			system: "bg-purple-100 text-purple-800 border-purple-200",
-			backup: "bg-orange-100 text-orange-800 border-orange-200",
-			default: "bg-gray-100 text-gray-800 border-gray-200"
+			images: 'bg-blue-100 text-blue-800 border-blue-200',
+			system: 'bg-purple-100 text-purple-800 border-purple-200',
+			backup: 'bg-orange-100 text-orange-800 border-orange-200',
+			default: 'bg-gray-100 text-gray-800 border-gray-200',
 		};
 		return colors[category] || colors.default;
 	};
@@ -93,7 +85,7 @@ export function WildcardContentView() {
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			exit={{ opacity: 0, y: -20 }}
-			transition={{ duration: 0.3, ease: "easeOut" }}
+			transition={{ duration: 0.3, ease: 'easeOut' }}
 			className="h-full p-6 space-y-6 overflow-auto"
 		>
 			{/* 📊 Header con información del wildcard */}
@@ -108,30 +100,22 @@ export function WildcardContentView() {
 						<Globe className="w-6 h-6" />
 					</div>
 					<div>
-						<h1 className="text-2xl font-bold text-gray-900">
-							{selectedWildcard.pattern}
-						</h1>
+						<h1 className="text-2xl font-bold text-gray-900">{selectedWildcard.pattern}</h1>
 						<p className="text-gray-600">{selectedWildcard.description}</p>
 					</div>
 				</div>
 
 				<div className="flex items-center gap-2">
-					<Badge className={getPriorityColor(selectedWildcard.priority)}>
-						Prioridad {selectedWildcard.priority}
-					</Badge>
+					<Badge className={getPriorityColor(selectedWildcard.priority)}>Prioridad {selectedWildcard.priority}</Badge>
 					<Badge
-						variant={selectedWildcard.isActive ? "default" : "secondary"}
-						className={selectedWildcard.isActive ? "bg-green-100 text-green-800" : ""}
+						variant={selectedWildcard.isActive ? 'default' : 'secondary'}
+						className={selectedWildcard.isActive ? 'bg-green-100 text-green-800' : ''}
 					>
-						{selectedWildcard.isActive ? "Activo" : "Inactivo"}
+						{selectedWildcard.isActive ? 'Activo' : 'Inactivo'}
 					</Badge>
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={() => setIsEditing(!isEditing)}
-					>
+					<Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
 						<Edit3 className="w-4 h-4 mr-2" />
-						{isEditing ? "Cancelar" : "Editar"}
+						{isEditing ? 'Cancelar' : 'Editar'}
 					</Button>
 				</div>
 			</motion.div>
@@ -171,22 +155,28 @@ export function WildcardContentView() {
 								<Hash className="w-5 h-5" />
 								Información del Patrón
 							</CardTitle>
-							<CardDescription>
-								Detalles y configuración del wildcard
-							</CardDescription>
+							<CardDescription>Detalles y configuración del wildcard</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4">
 							{isEditing ? (
-								<>                  <div className="space-y-2">
-									<label htmlFor="wildcard-pattern" className="text-sm font-medium">Patrón</label>
-									<Input id="wildcard-pattern" defaultValue={selectedWildcard.pattern} />
-								</div>
+								<>
+									{' '}
 									<div className="space-y-2">
-										<label htmlFor="wildcard-description" className="text-sm font-medium">Descripción</label>
+										<label htmlFor="wildcard-pattern" className="text-sm font-medium">
+											Patrón
+										</label>
+										<Input id="wildcard-pattern" defaultValue={selectedWildcard.pattern} />
+									</div>
+									<div className="space-y-2">
+										<label htmlFor="wildcard-description" className="text-sm font-medium">
+											Descripción
+										</label>
 										<Textarea id="wildcard-description" defaultValue={selectedWildcard.description} />
 									</div>
 									<div className="space-y-2">
-										<label htmlFor="wildcard-category" className="text-sm font-medium">Categoría</label>
+										<label htmlFor="wildcard-category" className="text-sm font-medium">
+											Categoría
+										</label>
 										<Input id="wildcard-category" defaultValue={selectedWildcard.category} />
 									</div>
 									<div className="flex gap-2">
@@ -208,9 +198,7 @@ export function WildcardContentView() {
 										</div>
 										<div className="flex justify-between">
 											<span className="text-sm text-gray-600">Categoría:</span>
-											<Badge className={getCategoryColor(selectedWildcard.category)}>
-												{selectedWildcard.category}
-											</Badge>
+											<Badge className={getCategoryColor(selectedWildcard.category)}>{selectedWildcard.category}</Badge>
 										</div>
 										<div className="flex justify-between">
 											<span className="text-sm text-gray-600">Creado:</span>
@@ -261,19 +249,17 @@ export function WildcardContentView() {
 					<Card>
 						<CardHeader>
 							<CardTitle>Archivos Coincidentes</CardTitle>
-							<CardDescription>
-								Archivos que coinciden con el patrón {selectedWildcard.pattern}
-							</CardDescription>
+							<CardDescription>Archivos que coinciden con el patrón {selectedWildcard.pattern}</CardDescription>
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-3">
 								{/* 📄 Mock de archivos coincidentes */}
 								{[
-									{ name: "photo_001.jpg", size: "2.3 MB", modified: "2024-01-20", path: "/images/photos/" },
-									{ name: "vacation_2024.jpg", size: "1.8 MB", modified: "2024-01-19", path: "/images/personal/" },
-									{ name: "work_presentation.jpg", size: "987 KB", modified: "2024-01-18", path: "/documents/work/" },
-									{ name: "family_dinner.jpg", size: "3.1 MB", modified: "2024-01-17", path: "/images/family/" },
-									{ name: "screenshot_app.jpg", size: "654 KB", modified: "2024-01-16", path: "/temp/screenshots/" },
+									{ name: 'photo_001.jpg', size: '2.3 MB', modified: '2024-01-20', path: '/images/photos/' },
+									{ name: 'vacation_2024.jpg', size: '1.8 MB', modified: '2024-01-19', path: '/images/personal/' },
+									{ name: 'work_presentation.jpg', size: '987 KB', modified: '2024-01-18', path: '/documents/work/' },
+									{ name: 'family_dinner.jpg', size: '3.1 MB', modified: '2024-01-17', path: '/images/family/' },
+									{ name: 'screenshot_app.jpg', size: '654 KB', modified: '2024-01-16', path: '/temp/screenshots/' },
 								].map((file, index) => (
 									<motion.div
 										key={file.name}
@@ -320,11 +306,7 @@ export function WildcardContentView() {
 
 			{/* ⚠️ Advertencias del sistema */}
 			{!selectedWildcard.isActive && (
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.6 }}
-				>
+				<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
 					<Card className="border-amber-200 bg-amber-50">
 						<CardContent className="pt-6">
 							<div className="flex items-center gap-3">

@@ -62,7 +62,9 @@ export function transformWorldItem(worldItem: unknown): WorldItemDeserialized {
 		return extendWorldItem(worldItem as any);
 	} catch (error) {
 		logger.error('Error transformando WorldItem:', { error });
-		throw new TransformerError(`Error al transformar WorldItem: ${error instanceof Error ? error.message : String(error)}`);
+		throw new TransformerError(
+			`Error al transformar WorldItem: ${error instanceof Error ? error.message : String(error)}`
+		);
 	}
 }
 
@@ -81,7 +83,9 @@ export function transformWorldItems(worldItems: unknown[]): WorldItemDeserialize
 		return worldItems.map((item) => transformWorldItem(item));
 	} catch (error) {
 		logger.error('Error transformando lista de WorldItems:', { error });
-		throw new TransformerError(`Error al transformar lista de WorldItems: ${error instanceof Error ? error.message : String(error)}`);
+		throw new TransformerError(
+			`Error al transformar lista de WorldItems: ${error instanceof Error ? error.message : String(error)}`
+		);
 	}
 }
 
@@ -131,9 +135,11 @@ export function transformWorldItemToExtended(worldItem: WorldItemDeserialized): 
 		logger.error('Error transformando WorldItem a versión extendida:', {
 			error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
 			worldItemId: (worldItem as any)?.id,
-			worldItemType: typeof worldItem
+			worldItemType: typeof worldItem,
 		});
-		throw new TransformerError(`Error al transformar WorldItem a versión extendida: ${error instanceof Error ? error.message : String(error)}`);
+		throw new TransformerError(
+			`Error al transformar WorldItem a versión extendida: ${error instanceof Error ? error.message : String(error)}`
+		);
 	}
 }
 
@@ -193,7 +199,9 @@ export function transformWorldItemToWithStats(worldItem: any): WorldItemWithStat
 			error,
 			worldItemId: (worldItem as any)?.id,
 		});
-		throw new TransformerError(`Error al transformar WorldItem a versión con estadísticas: ${error instanceof Error ? error.message : String(error)}`);
+		throw new TransformerError(
+			`Error al transformar WorldItem a versión con estadísticas: ${error instanceof Error ? error.message : String(error)}`
+		);
 	}
 }
 

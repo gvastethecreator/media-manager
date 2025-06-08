@@ -254,16 +254,16 @@ export const createCoreSlice: FolderCoreSlice = (set, get) => ({
 					coreState: {
 						...coreState,
 						currentFolder: folder,
-						currentFolderId: id
-					}
+						currentFolderId: id,
+					},
 				});
 			} else {
 				set({
 					coreState: {
 						...coreState,
 						currentFolder: null,
-						currentFolderId: null
-					}
+						currentFolderId: null,
+					},
 				});
 			}
 		},

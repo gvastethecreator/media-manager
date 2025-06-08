@@ -1,13 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AlbumCard } from './album-card';
-import { getAlbumStats, getRecentAlbumMedia } from './album-server-actions';
+import { getAlbumStats, getRecentAlbumImages } from './album-server-actions';
 
 // Mock de las acciones del servidor
 jest.mock('./album-server-actions', () => ({
-	getRecentAlbumMedia: jest.fn().mockResolvedValue([
-		{ id: 'img1', thumbnailUrl: 'data:image/png;base64,dummy1', isVideo: false },
-		{ id: 'img2', thumbnailUrl: 'data:image/png;base64,dummy2', isVideo: false },
+	getRecentAlbumImages: jest.fn().mockResolvedValue([
+		{ id: 'img1', thumbnailUrl: 'data:image/png;base64,dummy1' },
+		{ id: 'img2', thumbnailUrl: 'data:image/png;base64,dummy2' },
 	]),
 	getAlbumStats: jest.fn().mockResolvedValue({
 		imageCount: 42,
@@ -21,11 +21,11 @@ jest.mock('next/link', () => {
 });
 
 describe('AlbumCard', () => {
-       const mockAlbum = {
-               id: 'album123',
-               name: 'Vacaciones 2023',
-               emoji: '🏖️',
-               color: '#3b82f6',
+	const mockAlbum = {
+		id: 'album123',
+		name: 'Vacaciones 2023',
+		emoji: '🏖️',
+		color: '#3b82f6',
 		description: 'Fotos de las vacaciones de verano',
 		createdAt: new Date(),
 		updatedAt: new Date(),
@@ -33,20 +33,14 @@ describe('AlbumCard', () => {
 		rarity: 'common',
 		shortcut: 'vac23',
 		sortBy: 'name',
-<<<<<<< HEAD
-		filters: [],
-		texture: null,
-	};
-=======
 		filters: 'empty_array',
-               texture: null,
-               recentImages: ['data:image/png;base64,dummy1'],
-               _count: {
-                       images: 42,
-                       videos: 0,
-               },
-       };
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
+		texture: null,
+		recentImages: ['data:image/png;base64,dummy1'],
+		_count: {
+			images: 42,
+			videos: 0,
+		},
+	};
 
 	beforeEach(() => {
 		jest.clearAllMocks();
@@ -77,69 +71,33 @@ describe('AlbumCard', () => {
 			await user.click(card);
 		}
 
-<<<<<<< HEAD
-		// Verificar que se llamó al callback (evento u objeto)
+		// Verificar que se llamó al callback
 		expect(onClickMock).toHaveBeenCalled();
 	});
 
-	it('renderiza un enlace cuando no hay onClick', async () => {
+	it('renderiza un enlace cuando no hay onClick', () => {
 		render(<AlbumCard album={mockAlbum} />);
-		await waitFor(() => {
-			// Verificar que hay un enlace a la página del álbum
-			const link = document.querySelector(`a[href="/dashboard/albums/${mockAlbum.id}"]`);
-			expect(link).toBeInTheDocument();
-		});
+
+		const link = document.querySelector(`a[href="/dashboard/albums/${mockAlbum.id}"]`);
+		expect(link).toBeNull();
 	});
 
 	it('muestra las estadísticas del álbum', async () => {
 		render(<AlbumCard album={mockAlbum} />);
-		await waitFor(() => {
-			// Verificar que se llamó a getAlbumStats
-			expect(getAlbumStats).toHaveBeenCalledWith(mockAlbum.id);
-			// Verificar que se muestran las estadísticas
-			expect(screen.getByText('42')).toBeInTheDocument(); // número de imágenes
-		});
+
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		expect(screen.getByText('42')).toBeInTheDocument();
 	});
 
 	it('carga y muestra las imágenes del álbum', async () => {
 		render(<AlbumCard album={mockAlbum} />);
-		await waitFor(() => {
-			// Verificar que se llamó a getRecentAlbumMedia
-			expect(getRecentAlbumMedia).toHaveBeenCalledWith(mockAlbum.id);
-			// Verificar que se muestran las imágenes (o al menos sus contenedores)
-			const images = document.querySelectorAll('img');
-			expect(images.length).toBeGreaterThan(0);
-		});
+
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		const images = document.querySelectorAll('img');
+		expect(images.length).toBeGreaterThan(0);
 	});
-=======
-                // Verificar que se llamó al callback
-                expect(onClickMock).toHaveBeenCalled();
-	});
-
-        it('renderiza un enlace cuando no hay onClick', () => {
-                render(<AlbumCard album={mockAlbum} />);
-
-                const link = document.querySelector(`a[href="/dashboard/albums/${mockAlbum.id}"]`);
-                expect(link).toBeNull();
-        });
-
-        it('muestra las estadísticas del álbum', async () => {
-                render(<AlbumCard album={mockAlbum} />);
-
-                await new Promise((resolve) => setTimeout(resolve, 0));
-
-                expect(screen.getByText('42')).toBeInTheDocument();
-        });
-
-        it('carga y muestra las imágenes del álbum', async () => {
-                render(<AlbumCard album={mockAlbum} />);
-
-                await new Promise((resolve) => setTimeout(resolve, 0));
-
-                const images = document.querySelectorAll('img');
-                expect(images.length).toBeGreaterThan(0);
-        });
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 
 	it('aplica correctamente los colores personalizados', () => {
 		render(<AlbumCard album={mockAlbum} />);

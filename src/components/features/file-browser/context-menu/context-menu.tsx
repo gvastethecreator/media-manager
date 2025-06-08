@@ -302,4 +302,3 @@ export const FileContextMenu = memo(function FileContextMenu({ file, children, o
 
 // Exportar también las acciones desde types.ts
 export type { ContextMenuAction } from './types';
-

@@ -6,11 +6,11 @@
 import { Logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import type {
-    TagComplete,
-    TagCreateInput,
-    TagSearchOptions,
-    TagSearchResult,
-    TagUpdateInput,
+	TagComplete,
+	TagCreateInput,
+	TagSearchOptions,
+	TagSearchResult,
+	TagUpdateInput,
 } from '@/types/entities/tag/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { mapTagSearchOptionsToPrisma } from './mappers';
@@ -192,18 +192,17 @@ export function toRelatedTag(tag: TagComplete) {
 
 // Exportar otros mappers
 export {
-    mapCreateTagDataToPrisma,
-    mapTagFiltersToPrisma,
-    mapTagToRelatedTag,
-    mapUpdateTagDataToPrisma,
-    transformCompleteTagToPrisma,
-    transformTagToPrisma
+	mapCreateTagDataToPrisma,
+	mapTagFiltersToPrisma,
+	mapTagToRelatedTag,
+	mapUpdateTagDataToPrisma,
+	transformCompleteTagToPrisma,
+	transformTagToPrisma,
 } from './mappers';
 
 // Re-exportar funciones específicas de v2
 export {
-    mapCompleteToTag,
-    mapTagToComplete,
-    tagToDisplayObject
+	mapCompleteToTag,
+	mapTagToComplete,
+	tagToDisplayObject,
 } from './v2/converters';
-
