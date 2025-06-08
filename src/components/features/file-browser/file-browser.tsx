@@ -466,13 +466,8 @@ const FileBrowserComponent = ({
 				};
 			}
 		},
-<<<<<<< HEAD
-		[] // Eliminado [version] para cumplir con lint
-	);
-=======
                 []
         );
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 
 	// Mantenemos una referencia al último array de processedItems para la estabilidad referencial de las dimensiones
 	const processedItemsRef = useRef<ImageItem[]>([]);
@@ -556,19 +551,14 @@ const FileBrowserComponent = ({
 			// Abrir el visor de imágenes si es una imagen y tiene una URL de miniatura válida
 			if (item.type === 'image') {
 				// gridLogger.debug('Abriendo visor de imágenes...'); // Comentado
-<<<<<<< HEAD
-				setViewerImages(processedItems.filter((img) => img.src?.startsWith('/api/images/')) as ImageItem[]);
-				const initialIndex = processedItems.findIndex((img) => img.id === item.id);
-=======
                                 const filteredImages = processedItems.filter((img) => img.src?.startsWith('/api/images/')) as ImageItem[];
                                 setViewerImages(filteredImages);
                                 const initialIndex = filteredImages.findIndex((img) => img.id === item.id);
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
-				if (initialIndex !== -1) {
-					setViewerInitialIndex(initialIndex);
-					setIsViewerOpen(true);
-				}
-			} else {
+                                if (initialIndex !== -1) {
+                                        setViewerInitialIndex(initialIndex);
+                                        setIsViewerOpen(true);
+                                }
+                        } else {
 				// gridLogger.debug('El doble clic en el ítem no es una imagen o no es válida para el visor.'); // Comentado
 			}
 		},

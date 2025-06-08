@@ -115,21 +115,12 @@ export function useThumbnailLoader(): UseThumbnailLoaderResult {
 					retryCountRef.current.delete(itemId);
 
 					// Comprobar que la URL es realmente válida
-<<<<<<< HEAD
-					if (thumbnail.startsWith('/api/images/') || thumbnail.startsWith('data:')) {
-						return thumbnail;
-					}
-					thumbnailLogger.warn(`⚠️ URL de thumbnail inválida para ${itemId}: ${thumbnail}`);
-					return null;
-				}
-=======
                                         if (thumbnail.startsWith('/api/images/') || thumbnail.startsWith('data:')) {
                                                 return thumbnail;
                                         }
                                         thumbnailLogger.warn(`⚠️ URL de thumbnail inválida para ${itemId}: ${thumbnail}`);
                                         return null;
                                 }
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 
 				// Si no hay thumbnail, incrementar contador de reintentos
 				const newRetryCount = retryCount + 1;
