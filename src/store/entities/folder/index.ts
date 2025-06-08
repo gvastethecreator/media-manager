@@ -8,10 +8,30 @@ export { useFolderStore } from './store';
 
 // Exportar los selectores directamente para que puedan ser importados
 export {
-    selectActiveOnly,
-    selectCategoryFilter, selectCurrentFolder, selectCurrentFolderId, selectError, selectExpandedFolders, // Ya existe un hook useFilteredFolders, asegurar que no haya conflicto o decidir cuál usar.
-    selectFavoriteFolders, selectFilteredFolders, selectFolderStats, selectFolders, selectIsCreating, selectIsDeleting, selectIsLoading, selectIsUpdating, selectItemSize, selectSearchTerm, selectShowCreateModal, selectShowDeleteModal, selectShowEditModal, selectShowFavorites, selectSidebarExpanded, selectSortBy,
-    selectSortDirection, selectViewMode
+	selectActiveOnly,
+	selectCategoryFilter,
+	selectCurrentFolder,
+	selectCurrentFolderId,
+	selectError,
+	selectExpandedFolders, // Ya existe un hook useFilteredFolders, asegurar que no haya conflicto o decidir cuál usar.
+	selectFavoriteFolders,
+	selectFilteredFolders,
+	selectFolderStats,
+	selectFolders,
+	selectIsCreating,
+	selectIsDeleting,
+	selectIsLoading,
+	selectIsUpdating,
+	selectItemSize,
+	selectSearchTerm,
+	selectShowCreateModal,
+	selectShowDeleteModal,
+	selectShowEditModal,
+	selectShowFavorites,
+	selectSidebarExpanded,
+	selectSortBy,
+	selectSortDirection,
+	selectViewMode,
 } from './store';
 
 // Mantener los hooks selectores existentes, que usan useFolderStore internamente
@@ -64,4 +84,3 @@ export const useFolderById = (id?: string | null) =>
 
 // Exportar tipos si es necesario, aunque usualmente los tipos se importan directamente de sus archivos
 export type { FolderCoreSlice, FolderFiltersSlice, FolderStoreState, FolderUISlice } from './types'; // Ajustar según los tipos reales en ./types y ./store
-

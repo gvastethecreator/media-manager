@@ -1,8 +1,8 @@
 'use client';
 
+import { initServer as initServerAction } from '@/app/actions/system';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useEffect, useState } from 'react';
-import { initServer as initServerAction } from '@/app/actions/system';
 
 // Logger específico para este componente
 const logger = clientLogger.withContext('ServerInitializer');
@@ -24,7 +24,7 @@ export function ServerInitializer() {
 
 	useEffect(() => {
 		// Función para inicializar el servidor con reintentos
-                const runInitServer = async () => {
+		const runInitServer = async () => {
 			if (retries >= MAX_RETRIES) {
 				logger.warn(`Máximo de reintentos (${MAX_RETRIES}) alcanzado, no se intentará nuevamente`);
 				setStatus('error');
@@ -35,18 +35,18 @@ export function ServerInitializer() {
 				setStatus('loading');
 				logger.info(`Inicializando servidor... (intento ${retries + 1}/${MAX_RETRIES + 1})`);
 
-                                try {
-                                        await initServerAction();
-                                        setStatus('success');
-                                        logger.success('Servidor inicializado correctamente');
-                                } catch (fetchError) {
-                                        if (fetchError instanceof Error) {
-                                                logger.error('Error al inicializar:', fetchError);
-                                                throw fetchError;
-                                        }
-                                        logger.error('Error desconocido capturado:', fetchError);
-                                        throw new Error(String(fetchError));
-                                }
+				try {
+					await initServerAction();
+					setStatus('success');
+					logger.success('Servidor inicializado correctamente');
+				} catch (fetchError) {
+					if (fetchError instanceof Error) {
+						logger.error('Error al inicializar:', fetchError);
+						throw fetchError;
+					}
+					logger.error('Error desconocido capturado:', fetchError);
+					throw new Error(String(fetchError));
+				}
 			} catch (error) {
 				setStatus('error');
 				logger.error('Error al inicializar el servidor', {
@@ -67,7 +67,7 @@ export function ServerInitializer() {
 		};
 
 		// Inicializar servidor cuando el componente se monta o cuando cambia el contador de reintentos
-                runInitServer();
+		runInitServer();
 
 		// No es necesario limpiar nada cuando el componente se desmonta
 	}, [retries]);

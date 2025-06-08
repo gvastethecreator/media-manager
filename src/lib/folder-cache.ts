@@ -13,115 +13,115 @@ const cacheLogger = clientLogger.withContext('FolderCache');
  * para respuestas de carpetas y otros datos
  */
 class FolderResponseCache {
-  private cache: Map<string, any>;
-  private maxSize: number;
-  private hits = 0;
-  private misses = 0;
+	private cache: Map<string, any>;
+	private maxSize: number;
+	private hits = 0;
+	private misses = 0;
 
-  constructor(maxSize = 100) {
-    this.cache = new Map();
-    this.maxSize = maxSize;
-    cacheLogger.info(`🔄 Inicializando caché con tamaño máximo ${maxSize}`);
-  }
+	constructor(maxSize = 100) {
+		this.cache = new Map();
+		this.maxSize = maxSize;
+		cacheLogger.info(`🔄 Inicializando caché con tamaño máximo ${maxSize}`);
+	}
 
-  /**
-   * Obtiene un valor de la caché
-   * @param key Clave para buscar
-   * @returns El valor almacenado o undefined si no existe
-   */
-  get(key: string): any {
-    const value = this.cache.get(key);
+	/**
+	 * Obtiene un valor de la caché
+	 * @param key Clave para buscar
+	 * @returns El valor almacenado o undefined si no existe
+	 */
+	get(key: string): any {
+		const value = this.cache.get(key);
 
-    if (value !== undefined) {
-      // Actualizar el orden LRU
-      this.cache.delete(key);
-      this.cache.set(key, value);
-      this.hits++;
-      cacheLogger.debug(`✅ Cache hit: ${key}`);
-      return value;
-    }
+		if (value !== undefined) {
+			// Actualizar el orden LRU
+			this.cache.delete(key);
+			this.cache.set(key, value);
+			this.hits++;
+			cacheLogger.debug(`✅ Cache hit: ${key}`);
+			return value;
+		}
 
-    this.misses++;
-    cacheLogger.debug(`❌ Cache miss: ${key}`);
-    return undefined;
-  }
+		this.misses++;
+		cacheLogger.debug(`❌ Cache miss: ${key}`);
+		return undefined;
+	}
 
-  /**
-   * Almacena un valor en la caché
-   * @param key Clave para almacenar
-   * @param value Valor a almacenar
-   */
-  set(key: string, value: any): void {
-    // Si la clave ya existe, eliminarla primero para actualizar el orden LRU
-    if (this.cache.has(key)) {
-      this.cache.delete(key);
-    }
-    // Si la caché está llena, eliminar la entrada más antigua
-    else if (this.cache.size >= this.maxSize) {
-      const oldestKey = this.cache.keys().next().value;
-      if (oldestKey !== undefined) {
-        this.cache.delete(oldestKey);
-        cacheLogger.debug(`🧹 Eliminando entrada más antigua: ${oldestKey}`);
-      }
-    }
+	/**
+	 * Almacena un valor en la caché
+	 * @param key Clave para almacenar
+	 * @param value Valor a almacenar
+	 */
+	set(key: string, value: any): void {
+		// Si la clave ya existe, eliminarla primero para actualizar el orden LRU
+		if (this.cache.has(key)) {
+			this.cache.delete(key);
+		}
+		// Si la caché está llena, eliminar la entrada más antigua
+		else if (this.cache.size >= this.maxSize) {
+			const oldestKey = this.cache.keys().next().value;
+			if (oldestKey !== undefined) {
+				this.cache.delete(oldestKey);
+				cacheLogger.debug(`🧹 Eliminando entrada más antigua: ${oldestKey}`);
+			}
+		}
 
-    this.cache.set(key, value);
-    cacheLogger.debug(`💾 Cache set: ${key}`);
-  }
+		this.cache.set(key, value);
+		cacheLogger.debug(`💾 Cache set: ${key}`);
+	}
 
-  /**
-   * Elimina una entrada específica de la caché
-   * @param key Clave a eliminar
-   * @returns true si se eliminó la entrada, false si no existía
-   */
-  delete(key: string): boolean {
-    cacheLogger.debug(`🗑️ Eliminando de caché: ${key}`);
-    return this.cache.delete(key);
-  }
+	/**
+	 * Elimina una entrada específica de la caché
+	 * @param key Clave a eliminar
+	 * @returns true si se eliminó la entrada, false si no existía
+	 */
+	delete(key: string): boolean {
+		cacheLogger.debug(`🗑️ Eliminando de caché: ${key}`);
+		return this.cache.delete(key);
+	}
 
-  /**
-   * Elimina todas las entradas de la caché que coincidan con un patrón
-   * @param pattern Patrón para filtrar las claves (opcional)
-   */
-  clear(pattern?: string): void {
-    if (!pattern) {
-      cacheLogger.info('🧹 Limpiando toda la caché');
-      this.cache.clear();
-      return;
-    }
+	/**
+	 * Elimina todas las entradas de la caché que coincidan con un patrón
+	 * @param pattern Patrón para filtrar las claves (opcional)
+	 */
+	clear(pattern?: string): void {
+		if (!pattern) {
+			cacheLogger.info('🧹 Limpiando toda la caché');
+			this.cache.clear();
+			return;
+		}
 
-    // Eliminar solo las entradas que coincidan con el patrón
-    const keysToDelete: string[] = [];
+		// Eliminar solo las entradas que coincidan con el patrón
+		const keysToDelete: string[] = [];
 
-    for (const key of this.cache.keys()) {
-      if (key.includes(pattern)) {
-        keysToDelete.push(key);
-      }
-    }
+		for (const key of this.cache.keys()) {
+			if (key.includes(pattern)) {
+				keysToDelete.push(key);
+			}
+		}
 
-    for (const key of keysToDelete) {
-      this.cache.delete(key);
-    }
-    cacheLogger.info(`🧹 Limpiadas ${keysToDelete.length} entradas con patrón: ${pattern}`);
-  }
+		for (const key of keysToDelete) {
+			this.cache.delete(key);
+		}
+		cacheLogger.info(`🧹 Limpiadas ${keysToDelete.length} entradas con patrón: ${pattern}`);
+	}
 
-  /**
-   * Obtiene estadísticas de la caché
-   * @returns Objeto con estadísticas
-   */
-  getStats() {
-    const totalRequests = this.hits + this.misses;
-    const hitRate = totalRequests > 0 ? this.hits / totalRequests : 0;
+	/**
+	 * Obtiene estadísticas de la caché
+	 * @returns Objeto con estadísticas
+	 */
+	getStats() {
+		const totalRequests = this.hits + this.misses;
+		const hitRate = totalRequests > 0 ? this.hits / totalRequests : 0;
 
-    return {
-      size: this.cache.size,
-      maxSize: this.maxSize,
-      hitRate: hitRate,
-      hits: this.hits,
-      misses: this.misses,
-      totalRequests
-    };
-  }
+		return {
+			size: this.cache.size,
+			maxSize: this.maxSize,
+			hitRate: hitRate,
+			hits: this.hits,
+			misses: this.misses,
+			totalRequests,
+		};
+	}
 }
 
 // Exportar una instancia única para toda la aplicación
@@ -138,15 +138,15 @@ export const folderListCache = new FolderResponseCache(50); // Tamaño menor, po
  * @returns Clave de caché para la lista de carpetas.
  */
 export function getFolderListCacheKey(filters?: Record<string, any>): string {
-  if (filters && Object.keys(filters).length > 0) {
-    // Crear una cadena consistente a partir de los filtros
-    const filterString = Object.entries(filters)
-      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
-      .map(([key, value]) => `${key}:${String(value)}`)
-      .join('|');
-    return `folders:list:${filterString}`;
-  }
-  return 'folders:list:all';
+	if (filters && Object.keys(filters).length > 0) {
+		// Crear una cadena consistente a partir de los filtros
+		const filterString = Object.entries(filters)
+			.sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+			.map(([key, value]) => `${key}:${String(value)}`)
+			.join('|');
+		return `folders:list:${filterString}`;
+	}
+	return 'folders:list:all';
 }
 
 /**
@@ -156,10 +156,10 @@ export function getFolderListCacheKey(filters?: Record<string, any>): string {
  * @returns Clave de caché para la carpeta.
  */
 export function getFolderCacheKey(folderId: string, operation?: string): string {
-  if (operation) {
-    return `folder:${folderId}:${operation}`;
-  }
-  return `folder:${folderId}`;
+	if (operation) {
+		return `folder:${folderId}:${operation}`;
+	}
+	return `folder:${folderId}`;
 }
 
 // 🚀 Funciones de invalidación de caché
@@ -170,23 +170,23 @@ export function getFolderCacheKey(folderId: string, operation?: string): string 
  * @param folderId ID de la carpeta a invalidar.
  */
 export function invalidateFolderCache(folderId: string): void {
-  if (!folderId) {
-    cacheLogger.warn('⚠️ Se intentó invalidar caché sin folderId');
-    return;
-  }
-  const baseKey = getFolderCacheKey(folderId); // `folder:${folderId}`
-  // Eliminar la entrada base y cualquier entrada con sufijo (ej. 'folder:ID:metadata')
-  folderResponseCache.clear(baseKey);
-  // Las listas de carpetas podrían cambiar si una carpeta se actualiza.
-  folderListCache.clear(); // Invalidar todas las listas
-  cacheLogger.info(`🗑️ Caché invalidado para folderId: ${folderId} y listas de carpetas`);
+	if (!folderId) {
+		cacheLogger.warn('⚠️ Se intentó invalidar caché sin folderId');
+		return;
+	}
+	const baseKey = getFolderCacheKey(folderId); // `folder:${folderId}`
+	// Eliminar la entrada base y cualquier entrada con sufijo (ej. 'folder:ID:metadata')
+	folderResponseCache.clear(baseKey);
+	// Las listas de carpetas podrían cambiar si una carpeta se actualiza.
+	folderListCache.clear(); // Invalidar todas las listas
+	cacheLogger.info(`🗑️ Caché invalidado para folderId: ${folderId} y listas de carpetas`);
 }
 
 /**
  * Invalida toda la caché de carpetas (respuestas individuales y listas).
  */
 export function invalidateAllFolderCache(): void {
-  folderResponseCache.clear('folder:'); // Elimina todas las entradas de `folderResponseCache` que comienzan con 'folder:'
-  folderListCache.clear(); // Elimina todas las entradas de `folderListCache`
-  cacheLogger.info('🗑️ Toda la caché de carpetas y listas de carpetas ha sido invalidada.');
+	folderResponseCache.clear('folder:'); // Elimina todas las entradas de `folderResponseCache` que comienzan con 'folder:'
+	folderListCache.clear(); // Elimina todas las entradas de `folderListCache`
+	cacheLogger.info('🗑️ Toda la caché de carpetas y listas de carpetas ha sido invalidada.');
 }

@@ -6,14 +6,14 @@
 import { createLogger } from '@/lib/logger';
 import { PlaceSchema } from '@/types/entities/place/schema';
 import type {
-    PlaceBase,
-    PlaceComplete,
-    PlaceCreateInput,
-    PlaceDanger,
-    PlaceFilters,
-    PlaceResource,
-    PlaceStats,
-    PlaceUpdateInput
+	PlaceBase,
+	PlaceComplete,
+	PlaceCreateInput,
+	PlaceDanger,
+	PlaceFilters,
+	PlaceResource,
+	PlaceStats,
+	PlaceUpdateInput,
 } from '@/types/entities/place/types';
 
 // Logger específico para el transformer de Place
