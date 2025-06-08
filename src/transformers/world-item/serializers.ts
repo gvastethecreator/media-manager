@@ -5,16 +5,16 @@
 
 import { createLogger } from '@/lib/logger';
 import type {
-    WorldItemAttribute,
-    WorldItemBase,
-    WorldItemComplete,
-    WorldItemDeserialized,
-    WorldItemEffect,
-    WorldItemFilter,
-    WorldItemProperty,
-    WorldItemRelations,
-    WorldItemRequirement,
-    WorldItemStat
+	WorldItemAttribute,
+	WorldItemBase,
+	WorldItemComplete,
+	WorldItemDeserialized,
+	WorldItemEffect,
+	WorldItemFilter,
+	WorldItemProperty,
+	WorldItemRelations,
+	WorldItemRequirement,
+	WorldItemStat,
 } from '@/types/entities/world-item/types';
 
 // Logger específico para este módulo
@@ -586,7 +586,6 @@ export function serializeWorldItemTags(tags: string[] | string): string {
  * @returns El WorldItemBase.
  */
 export function fromExtendedWorldItem(worldItem: WorldItemComplete): WorldItemBase {
-<<<<<<< HEAD
 	const {
 		_count,
 		images,
@@ -598,35 +597,11 @@ export function fromExtendedWorldItem(worldItem: WorldItemComplete): WorldItemBa
 		properties,
 		wildcards,
 		tags: relatedTags,
-		// Excluir estas propiedades al convertir a WorldItemBase
 		isSelected,
 		isExpanded,
-		isEditing
+		isEditing,
+		...base
 	} = worldItem;
-// Retornar solo las propiedades de WorldItemBase
-return {
-    isSelected,
-    isExpanded,
-    isEditing
-};
-=======
-        const {
-                _count,
-                images,
-                videos,
-                notes,
-                concepts,
-                prompts,
-                groups,
-                properties,
-                wildcards,
-                tags: relatedTags,
-                isSelected,
-                isExpanded,
-                isEditing,
-                ...base
-        } = worldItem;
 
-        return base;
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
+	return base;
 }

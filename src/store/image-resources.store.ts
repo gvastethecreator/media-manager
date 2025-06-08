@@ -217,14 +217,18 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 				const existingResource = state.resources.get(id); // Usar la instancia correcta de caché
 				const isThumbnailContentChanged = !existingResource || existingResource.thumbnail !== finalThumbnailUrl;
-				const areDimensionsChanged = !existingResource?.dimensions || !newDimensions ||
-					(existingResource.dimensions.width !== newDimensions.width || existingResource.dimensions.height !== newDimensions.height);
+				const areDimensionsChanged =
+					!existingResource?.dimensions ||
+					!newDimensions ||
+					existingResource.dimensions.width !== newDimensions.width ||
+					existingResource.dimensions.height !== newDimensions.height;
 
 				const needsVersionUpdateDueToContent = isThumbnailContentChanged || areDimensionsChanged;
 
 				if (existingResource && !needsVersionUpdateDueToContent) {
 					// ✨ NUEVO: Reutilizar el objeto existente, actualizando solo las propiedades de estado si cambiaron
-					if (existingResource.isLoading || existingResource.lastUpdate !== Date.now()) { // Comprobar si isLoading o lastUpdate necesitan actualización
+					if (existingResource.isLoading || existingResource.lastUpdate !== Date.now()) {
+						// Comprobar si isLoading o lastUpdate necesitan actualización
 						existingResource.isLoading = false; // Asegurar que isLoading sea false al completar
 						existingResource.lastUpdate = Date.now();
 						state.resources.touch(id); // Solo tocar para actualizar recencia si se modificó o accedió, usando la instancia correcta
@@ -244,11 +248,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 				}
 
 				// Incrementar la versión solo si el contenido principal cambió o si un error previo fue resuelto
-<<<<<<< HEAD
-				if (needsVersionUpdateDueToContent || (existingResource?.error)) {
-=======
-                                if (needsVersionUpdateDueToContent || existingResource?.error) {
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
+				if (needsVersionUpdateDueToContent || existingResource?.error) {
 					set({ version: get().version + 1 });
 					resourceLogger.debug(`🔢 Incrementada versión de recursos para ID ${id}`);
 				}
@@ -303,7 +303,8 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 					if (existingResource && !needsVersionUpdateDueToContent) {
 						// ✨ NUEVO: Reutilizar el objeto existente, actualizando solo las propiedades de estado si cambiaron
-						if (existingResource.isLoading || existingResource.lastUpdate !== Date.now()) { // Comprobar si isLoading o lastUpdate necesitan actualización
+						if (existingResource.isLoading || existingResource.lastUpdate !== Date.now()) {
+							// Comprobar si isLoading o lastUpdate necesitan actualización
 							existingResource.isLoading = false; // Asegurar que isLoading sea false al completar
 							existingResource.lastUpdate = Date.now();
 							state.resources.touch(id); // Solo tocar para actualizar recencia si se modificó o accedió, usando la instancia correcta
@@ -321,11 +322,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 					}
 
 					// Incrementar la versión solo si el contenido principal cambió o si un error previo fue resuelto
-<<<<<<< HEAD
-					if (needsVersionUpdateDueToContent || (existingResource?.error)) {
-=======
-                                        if (needsVersionUpdateDueToContent || existingResource?.error) {
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
+					if (needsVersionUpdateDueToContent || existingResource?.error) {
 						set({ version: get().version + 1 });
 					}
 					return url;

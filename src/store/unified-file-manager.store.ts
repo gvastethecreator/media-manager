@@ -22,9 +22,9 @@ import { create } from 'zustand';
 
 import { getAlbumImages } from '@/app/actions/albums/album.actions';
 import { getCharacterImages } from '@/app/actions/characters/character.actions';
+import { getCollectionImages } from '@/app/actions/collections';
 import { getFavorites } from '@/app/actions/favorites/favorite.actions';
 import { getFolderImages } from '@/app/actions/folders';
-import { getCollectionImages } from '@/app/actions/collections';
 import { getImages } from '@/app/actions/images/image-crud.actions';
 // 🚀 Importaciones de acciones optimizadas - CORREGIDAS
 import { getTagImages } from '@/app/actions/tags/query.actions';
@@ -421,7 +421,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 										id: firstItem.id,
 										name: firstItem.name,
 										path: firstItem.path,
-										hasThumbnail: !!firstItem.thumbnail
+										hasThumbnail: !!firstItem.thumbnail,
 									});
 								} else {
 									// Si no hay imágenes, verificar si la carpeta existe y tiene archivos
@@ -431,24 +431,26 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 									const folderDetails = await getFolderById(id);
 
 									if (folderDetails && (folderDetails.totalFiles > 0 || folderDetails._count?.images > 0)) {
-										fileManagerLogger.warn(`⚠️ La carpeta tiene ${folderDetails.totalFiles || folderDetails._count?.images} archivos pero no se obtuvieron imágenes`);
+										fileManagerLogger.warn(
+											`⚠️ La carpeta tiene ${folderDetails.totalFiles || folderDetails._count?.images} archivos pero no se obtuvieron imágenes`
+										);
 									}
 								}
-                                                        } catch (folderError) {
-                                                                fileManagerLogger.error(`❌ Error obteniendo imágenes de carpeta ${id}:`, folderError);
-                                                                if (rawItems.length === 0) {
-                                                                        throw new Error('Error cargando imágenes de carpeta');
-                                                                }
-                                                        }
+							} catch (folderError) {
+								fileManagerLogger.error(`❌ Error obteniendo imágenes de carpeta ${id}:`, folderError);
+								if (rawItems.length === 0) {
+									throw new Error('Error cargando imágenes de carpeta');
+								}
+							}
 						}
 						break;
 					}
-                                        case 'collection': {
-                                                if (id) {
-                                                        rawItems = await getCollectionImages(id);
-                                                }
-                                                break;
-                                        }
+					case 'collection': {
+						if (id) {
+							rawItems = await getCollectionImages(id);
+						}
+						break;
+					}
 					case 'tag':
 						if (id) rawItems = await getTagImages(id);
 						break;
@@ -470,11 +472,11 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 						rawItems = favoritesResponse.map((f) => ({ ...f.image, isFavorite: true }));
 						break;
 					}
-                                        case 'all': {
-                                                const result = await getImages({ pageSize: 1000 });
-                                                rawItems = result.images || [];
-                                                break;
-                                        }
+					case 'all': {
+						const result = await getImages({ pageSize: 1000 });
+						rawItems = result.images || [];
+						break;
+					}
 					default:
 						throw new Error(`Contexto no soportado: ${context}`);
 				}
@@ -640,9 +642,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 		if (!folder || !folder.count) {
 			try {
 				// Intentar obtener información detallada de la carpeta
-				const getFolderById = await import('@/app/actions/folders/query.actions').then(
-					(mod) => mod.getFolderById
-				);
+				const getFolderById = await import('@/app/actions/folders/query.actions').then((mod) => mod.getFolderById);
 				const folderDetails = await getFolderById(id);
 				if (folderDetails) {
 					folderWithDetails = {
@@ -654,7 +654,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 					fileManagerLogger.debug('📊 Detalles de carpeta obtenidos:', {
 						id: folderWithDetails.id,
 						name: folderWithDetails.name,
-						count: folderWithDetails.count
+						count: folderWithDetails.count,
 					});
 				}
 			} catch (error) {

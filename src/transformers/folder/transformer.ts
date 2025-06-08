@@ -87,7 +87,7 @@ function transformFolderToExtended(
 				images: 0,
 				videos: 0,
 				uploadedImages: 0,
-				tags: 0
+				tags: 0,
 			};
 		}
 
@@ -139,4 +139,3 @@ function transformFolderToExtended(
 
 // Exportar las funciones principales con sus nombres finales
 export { transformFolderBase, transformFolderToExtended };
-

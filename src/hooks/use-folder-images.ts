@@ -58,7 +58,7 @@ export function useFolderImages(folderId: string | null) {
 						name: firstImage.name,
 						thumbnail: firstImage.thumbnail ? 'Disponible' : 'No disponible',
 						imageUrl: firstImage.imageUrl || firstImage.src || 'No disponible',
-						propiedades: Object.keys(firstImage).join(', ')
+						propiedades: Object.keys(firstImage).join(', '),
 					});
 				} else {
 					logger.warn(`⚠️ No se recibieron imágenes para la carpeta ${folderId}`);
@@ -87,11 +87,7 @@ export function useFolderImages(folderId: string | null) {
 			const imageCount = query.data?.items?.length || 0;
 			logger.debug(`✅ Query exitoso para carpeta ${folderId}: ${imageCount} imágenes`);
 		}
-<<<<<<< HEAD
-	}, [folderId, query.isLoading, query.isError, query.isSuccess, query.data?.items?.length, query.error]);
-=======
-        }, [folderId, query.isLoading, query.isError, query.error, query.isSuccess, query.data?.items?.length]);
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
+	}, [folderId, query.isLoading, query.isError, query.error, query.isSuccess, query.data?.items?.length]);
 
 	return query;
 }

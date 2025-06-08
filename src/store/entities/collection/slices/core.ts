@@ -5,7 +5,13 @@
 
 import type { CollectionExtended } from '@/types/entities/collection';
 import type { StateCreator } from 'zustand';
-import { createCollection, deleteCollection, getCollection, getCollections, updateCollection } from '../../../../app/actions/collections/collection.actions';
+import {
+	createCollection,
+	deleteCollection,
+	getCollection,
+	getCollections,
+	updateCollection,
+} from '../../../../app/actions/collections/collection.actions';
 import type { CollectionState } from '../types';
 
 /**

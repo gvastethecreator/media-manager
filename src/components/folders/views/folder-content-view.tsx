@@ -55,7 +55,7 @@ export function FolderContentView() {
 				logger.info('📊 Datos de la primera imagen:', {
 					id: firstImage.id,
 					name: firstImage.name,
-					type: firstImage.type || 'unknown'
+					type: firstImage.type || 'unknown',
 				});
 			} catch (err) {
 				logger.error('❌ Error al acceder a los datos de la imagen:', err);
@@ -95,7 +95,7 @@ export function FolderContentView() {
 			// Escanear la carpeta usando la acción del servidor
 			const result = await scanFolderAction(currentFolder.path, {
 				recursive: true,
-				includeHidden: false
+				includeHidden: false,
 			});
 
 			// Guardar y mostrar los resultados
@@ -106,12 +106,14 @@ export function FolderContentView() {
 				totalFiles: result.totalFiles,
 				images: result.images.length,
 				videos: result.videos.length,
-				others: result.others.length
+				others: result.others.length,
 			});
 
 			// Si hay imágenes pero no están en la base de datos, sugerir reindexar
 			if (result.images.length > 0 && (!images || images.length === 0)) {
-				logger.warn(`⚠️ Se encontraron ${result.images.length} imágenes en el sistema de archivos pero ninguna en la base de datos. Se recomienda reindexar.`);
+				logger.warn(
+					`⚠️ Se encontraron ${result.images.length} imágenes en el sistema de archivos pero ninguna en la base de datos. Se recomienda reindexar.`
+				);
 			}
 		} catch (error) {
 			logger.error('❌ Error al escanear directamente la carpeta:', error);
@@ -203,7 +205,9 @@ export function FolderContentView() {
 						<p>Videos encontrados: {scanResults.videos.length}</p>
 						{scanResults.images.length > 0 && (
 							<div className="mt-2">
-								<p className="text-warning">Se encontraron imágenes en el sistema de archivos pero ninguna en la base de datos.</p>
+								<p className="text-warning">
+									Se encontraron imágenes en el sistema de archivos pero ninguna en la base de datos.
+								</p>
 								<p className="text-sm">Haz clic en "Reindexar Carpeta" para añadirlas a la base de datos.</p>
 							</div>
 						)}

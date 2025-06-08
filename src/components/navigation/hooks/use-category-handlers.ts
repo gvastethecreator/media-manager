@@ -25,10 +25,7 @@ export function useCategoryHandlers() {
 	// Stores específicos para cada entidad
 	const { selectCollection, selectedCollectionId } = useCollectionStore();
 	const {
-		coreActions: {
-			setCurrentFolder: selectFolder,
-			fetchFolderById,
-		},
+		coreActions: { setCurrentFolder: selectFolder, fetchFolderById },
 		coreState: { currentFolderId: selectedFolderId },
 	} = useFolderStore();
 	const { selectTag, selectedTagId } = useTagStore();

@@ -2,13 +2,8 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import { addImageToPlace, getPlace, getPlaces, removeImageFromPlace } from '@/app/actions/places';
 import { toastService } from '@/services/toast.service';
-import {
-    addImageToPlace,
-    getPlace,
-    getPlaces,
-    removeImageFromPlace,
-} from '@/app/actions/places';
 
 import { PLACE_STORE_NAME } from './constants';
 import type { PlaceStore } from './types';
@@ -38,9 +33,9 @@ export const usePlaceStore = create<PlaceStore>()(
 					set({ isLoading: true, error: null });
 					placeLogger.info('🔄 Cargando lugares...');
 
-                                        const places = await getPlaces();
-                                        set({ places, isLoading: false });
-                                        placeLogger.info('✅ Lugares cargados correctamente');
+					const places = await getPlaces();
+					set({ places, isLoading: false });
+					placeLogger.info('✅ Lugares cargados correctamente');
 				} catch (error) {
 					placeLogger.error('❌ Error al cargar lugares:', error);
 					set({ error: 'Error al cargar lugares', isLoading: false });
@@ -78,8 +73,8 @@ export const usePlaceStore = create<PlaceStore>()(
 			addImageToPlace: async (placeId, imageId) => {
 				try {
 					placeLogger.info('➕ Añadiendo imagen al lugar:', { placeId, imageId });
-                                        await addImageToPlace(placeId, imageId);
-                                        const updatedPlace = await getPlace(placeId);
+					await addImageToPlace(placeId, imageId);
+					const updatedPlace = await getPlace(placeId);
 					set((state) => ({
 						places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
 					}));
@@ -94,8 +89,8 @@ export const usePlaceStore = create<PlaceStore>()(
 			removeImageFromPlace: async (placeId, imageId) => {
 				try {
 					placeLogger.info('➖ Eliminando imagen del lugar:', { placeId, imageId });
-                                        await removeImageFromPlace(placeId, imageId);
-                                        const updatedPlace = await getPlace(placeId);
+					await removeImageFromPlace(placeId, imageId);
+					const updatedPlace = await getPlace(placeId);
 					set((state) => ({
 						places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
 					}));

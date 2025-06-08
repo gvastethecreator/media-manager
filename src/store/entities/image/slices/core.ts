@@ -4,9 +4,14 @@
  * @description Implementa operaciones CRUD básicas y gestión de estado para imágenes
  */
 
-import type { CreateImageData, Image, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image';
+import {
+	createImage as createServerImage,
+	deleteImage,
+	getImage,
+	getImages,
+} from '@/app/actions/images/image-crud.actions';
 import { extendImage } from '@/transformers/image/serializers';
-import { getImage, getImages, createImage as createServerImage, deleteImage } from '@/app/actions/images/image-crud.actions';
+import type { CreateImageData, Image, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
@@ -19,8 +24,8 @@ export interface ImageCoreSlice {
 	getImageByPath: (path: string) => Image | undefined;
 
 	// Operaciones
-        addImage: (image: ImageExtended) => void;
-        addImages: (images: ImageExtended[]) => void;
+	addImage: (image: ImageExtended) => void;
+	addImages: (images: ImageExtended[]) => void;
 	updateImage: (id: string, data: UpdateImageData) => void;
 	deleteImage: (id: string) => void;
 	clearImages: () => void;
@@ -31,9 +36,9 @@ export interface ImageCoreSlice {
 	setError: (error: string | null) => void;
 
 	// Acciones asíncronas
-        fetchImage: (id: string) => Promise<ImageExtended | undefined>;
-        fetchImages: (options?: { folderIds?: string[]; refresh?: boolean }) => Promise<ImageExtended[]>;
-        createImage: (data: CreateImageData) => Promise<ImageExtended | undefined>;
+	fetchImage: (id: string) => Promise<ImageExtended | undefined>;
+	fetchImages: (options?: { folderIds?: string[]; refresh?: boolean }) => Promise<ImageExtended[]>;
+	createImage: (data: CreateImageData) => Promise<ImageExtended | undefined>;
 	removeImage: (id: string) => Promise<boolean>;
 }
 
@@ -57,66 +62,69 @@ export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSli
 	},
 
 	// Operaciones síncronas
-        addImage: (image: ImageExtended) => {
-                set((state) => ({
-                        core: {
-                                ...state.core,
-                                images: {
-                                        ...state.core.images,
-                                        [image.id]: image,
-                                },
-                                lastUpdated: Date.now(),
-                        },
-                }));
-        },
+	addImage: (image: ImageExtended) => {
+		set((state) => ({
+			core: {
+				...state.core,
+				images: {
+					...state.core.images,
+					[image.id]: image,
+				},
+				lastUpdated: Date.now(),
+			},
+		}));
+	},
 
-        addImages: (images: ImageExtended[]) => {
-                const imagesMap = images.reduce((acc, image) => {
-                        if (image?.id) {
-                                acc[image.id] = image;
-                        }
-                        return acc;
-                }, {} as Record<string, Image>);
+	addImages: (images: ImageExtended[]) => {
+		const imagesMap = images.reduce(
+			(acc, image) => {
+				if (image?.id) {
+					acc[image.id] = image;
+				}
+				return acc;
+			},
+			{} as Record<string, Image>
+		);
 
-                set((state) => ({
-                        core: {
-                                ...state.core,
-                                images: {
-                                        ...state.core.images,
-                                        ...imagesMap,
-                                },
-                                lastUpdated: Date.now(),
-                        },
-                }));
-        },
+		set((state) => ({
+			core: {
+				...state.core,
+				images: {
+					...state.core.images,
+					...imagesMap,
+				},
+				lastUpdated: Date.now(),
+			},
+		}));
+	},
 
 	updateImage: (id: string, data: UpdateImageData) => {
 		set((state) => {
 			const image = state.core.images[id];
-                        if (!image) {
-                                return state;
-                        }
+			if (!image) {
+				return state;
+			}
 
-                        const updatedImage = { ...image, ...data } as Image;
-                        return {
-                                core: {
-                                        ...state.core,
-                                        images: {
-                                                ...state.core.images,
-                                                [id]: updatedImage,
-                                        },
-                                        lastUpdated: Date.now(),
-                                },
-                        };
-                });
+			const updatedImage = { ...image, ...data } as Image;
+			return {
+				core: {
+					...state.core,
+					images: {
+						...state.core.images,
+						[id]: updatedImage,
+					},
+					lastUpdated: Date.now(),
+				},
+			};
+		});
 	},
 
 	deleteImage: (id: string) => {
 		set((state) => {
 			const newImages = { ...state.core.images };
-                        if (id in newImages) {
-                                delete newImages[id];
-                        }
+			if (id in newImages) {
+				delete newImages[id];
+			}
 
 			return {
 				core: {
@@ -135,7 +143,7 @@ export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSli
 				images: {},
 				lastUpdated: Date.now(),
 			},
-                }));
+		}));
 	},
 
 	clearFolderImages: (folderId: string) => {
@@ -150,7 +158,6 @@ export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSli
 					count++;
 				}
 			}
-
 
 			return {
 				core: {
@@ -181,79 +188,79 @@ export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSli
 		}));
 	},
 
-        // Operaciones asíncronas con Server Actions
-        fetchImage: async (id: string) => {
-                const { setLoading, setError, addImage } = get();
-                try {
-                        setLoading(true);
-                        const image = await getImage(id);
-                        if (image) {
-                                addImage(image);
-                        }
-                        return image ?? undefined;
-                } catch (error) {
-                        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-                        setError(errorMessage);
-                        return undefined;
-                } finally {
-                        setLoading(false);
-                }
-        },
+	// Operaciones asíncronas con Server Actions
+	fetchImage: async (id: string) => {
+		const { setLoading, setError, addImage } = get();
+		try {
+			setLoading(true);
+			const image = await getImage(id);
+			if (image) {
+				addImage(image);
+			}
+			return image ?? undefined;
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			setError(errorMessage);
+			return undefined;
+		} finally {
+			setLoading(false);
+		}
+	},
 
-        fetchImages: async (options = {}) => {
-                const { setLoading, setError, addImages, clearImages } = get();
-                const { refresh = false } = options;
+	fetchImages: async (options = {}) => {
+		const { setLoading, setError, addImages, clearImages } = get();
+		const { refresh = false } = options;
 
-                try {
-                        setLoading(true);
+		try {
+			setLoading(true);
 
-                        if (refresh) {
-                                clearImages();
-                        }
+			if (refresh) {
+				clearImages();
+			}
 
-                        const result = await getImages(options);
-                        addImages(result.images);
-                        return Object.values(get().core.images);
-                } catch (error) {
-                        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-                        setError(errorMessage);
-                        return [];
-                } finally {
-                        setLoading(false);
-                }
-        },
+			const result = await getImages(options);
+			addImages(result.images);
+			return Object.values(get().core.images);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			setError(errorMessage);
+			return [];
+		} finally {
+			setLoading(false);
+		}
+	},
 
-        createImage: async (data: CreateImageData) => {
-                const { setLoading, setError, addImage } = get();
-                try {
-                        setLoading(true);
+	createImage: async (data: CreateImageData) => {
+		const { setLoading, setError, addImage } = get();
+		try {
+			setLoading(true);
 
-                        const newImageBase = await createServerImage(data);
-                        const extended = extendImage(newImageBase);
-                        addImage(extended);
-                        return get().core.images[newImageBase.id];
-                } catch (error) {
-                        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-                        setError(errorMessage);
-                        return undefined;
-                } finally {
-                        setLoading(false);
-                }
-        },
+			const newImageBase = await createServerImage(data);
+			const extended = extendImage(newImageBase);
+			addImage(extended);
+			return get().core.images[newImageBase.id];
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			setError(errorMessage);
+			return undefined;
+		} finally {
+			setLoading(false);
+		}
+	},
 
-        removeImage: async (id: string) => {
-                const { setLoading, setError, deleteImage: removeLocal } = get();
-                try {
-                        setLoading(true);
-                        await deleteImage(id);
-                        removeLocal(id);
-                        return true;
-                } catch (error) {
-                        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-                        setError(errorMessage);
-                        return false;
-                } finally {
-                        setLoading(false);
-                }
-        },
+	removeImage: async (id: string) => {
+		const { setLoading, setError, deleteImage: removeLocal } = get();
+		try {
+			setLoading(true);
+			await deleteImage(id);
+			removeLocal(id);
+			return true;
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			setError(errorMessage);
+			return false;
+		} finally {
+			setLoading(false);
+		}
+	},
 });

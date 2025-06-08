@@ -6,46 +6,46 @@ import React from 'react';
 
 // 🎨 Componente simple para testing
 const TestComponent = ({ title, children }: { title: string; children?: React.ReactNode }) => (
-  <div data-testid="test-component">
-    <h1>{title}</h1>
-    {children && <div data-testid="content">{children}</div>}
-  </div>
+	<div data-testid="test-component">
+		<h1>{title}</h1>
+		{children && <div data-testid="content">{children}</div>}
+	</div>
 );
 
 describe('⚛️ React Component Testing', () => {
-  test('✅ should render basic component', () => {
-    // 🎯 Renderizar componente simple
-    render(<TestComponent title="Test Title" />);
+	test('✅ should render basic component', () => {
+		// 🎯 Renderizar componente simple
+		render(<TestComponent title="Test Title" />);
 
-    // 🔍 Verificar que se renderizó correctamente
-    expect(screen.getByTestId('test-component')).toBeInTheDocument();
-    expect(screen.getByText('Test Title')).toBeInTheDocument();
-  });
+		// 🔍 Verificar que se renderizó correctamente
+		expect(screen.getByTestId('test-component')).toBeInTheDocument();
+		expect(screen.getByText('Test Title')).toBeInTheDocument();
+	});
 
-  test('🎭 should render component with children', () => {
-    // 🎯 Renderizar con children
-    render(
-      <TestComponent title="Parent Component">
-        <span>Child content</span>
-      </TestComponent>
-    );
+	test('🎭 should render component with children', () => {
+		// 🎯 Renderizar con children
+		render(
+			<TestComponent title="Parent Component">
+				<span>Child content</span>
+			</TestComponent>
+		);
 
-    // 🔍 Verificar contenido
-    expect(screen.getByTestId('content')).toBeInTheDocument();
-    expect(screen.getByText('Child content')).toBeInTheDocument();
-  });
+		// 🔍 Verificar contenido
+		expect(screen.getByTestId('content')).toBeInTheDocument();
+		expect(screen.getByText('Child content')).toBeInTheDocument();
+	});
 
-  test('📦 should handle props correctly', () => {
-    // 🎯 Props dinámicos
-    const props = {
-      title: 'Dynamic Title',
-      children: <button type="button">Click me</button>
-    };
+	test('📦 should handle props correctly', () => {
+		// 🎯 Props dinámicos
+		const props = {
+			title: 'Dynamic Title',
+			children: <button type="button">Click me</button>,
+		};
 
-    render(<TestComponent {...props} />);
+		render(<TestComponent {...props} />);
 
-    // 🔍 Verificar props
-    expect(screen.getByText('Dynamic Title')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
-  });
+		// 🔍 Verificar props
+		expect(screen.getByText('Dynamic Title')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
+	});
 });

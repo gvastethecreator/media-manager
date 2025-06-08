@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 'use server';
-=======
-'use server';
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 
 /**
  * @file Funciones CRUD para la entidad Folder, expuestas como Server Actions.
@@ -12,14 +8,18 @@
 import { Logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { transformFolder } from '@/transformers/folder';
-import { mapCreateFolderDataToPrisma, mapFolderSearchOptionsToPrisma, mapUpdateFolderDataToPrisma } from '@/transformers/folder/mappers';
+import {
+	mapCreateFolderDataToPrisma,
+	mapFolderSearchOptionsToPrisma,
+	mapUpdateFolderDataToPrisma,
+} from '@/transformers/folder/mappers';
 import type {
-    Folder,
-    FolderComplete,
-    FolderCreateInput,
-    FolderSearchOptions,
-    FolderUpdateInput,
-    FolderWithStats,
+	Folder,
+	FolderComplete,
+	FolderCreateInput,
+	FolderSearchOptions,
+	FolderUpdateInput,
+	FolderWithStats,
 } from '@/types/entities/folder/types';
 import { revalidatePath } from 'next/cache';
 
@@ -142,7 +142,7 @@ export async function searchFolders(options: FolderSearchOptions = {}): Promise<
 		]);
 
 		// Transformar resultados de forma segura
-		const transformedFolders = folders.map(folder => {
+		const transformedFolders = folders.map((folder) => {
 			try {
 				return transformFolder(folder);
 			} catch (error) {

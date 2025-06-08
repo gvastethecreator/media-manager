@@ -1,5 +1,6 @@
 'use server';
 
+import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
@@ -10,7 +11,6 @@ import type {
 	RelatedTag,
 	RelatedWorldItem,
 } from '@/types/file-item';
-import path from 'path';
 
 const imagesActionsLogger = serverLogger.withContext('FolderImagesActions');
 
