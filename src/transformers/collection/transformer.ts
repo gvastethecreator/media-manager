@@ -3,7 +3,6 @@
  * @module transformers/collection/transformer
  */
 
-import { TransformerError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	Collection,
@@ -11,6 +10,7 @@ import type {
 	CollectionExtended,
 	CollectionWithStats,
 } from '@/types/entities/collection/types';
+import { TransformerError } from '@/utils/transformers/errors';
 import { fromPrismaCollection, validateCollection } from './serializers';
 
 const logger = serverLogger.withContext('CollectionTransformer');
@@ -47,7 +47,7 @@ export function transformCollection(collection: any): CollectionComplete {
 		throw new TransformerError('Formato de colección no soportado para transformación automática');
 	} catch (error) {
 		logger.error('❌ Error transformando Collection:', error);
-		throw new TransformerError('Error transformando colección', { cause: error });
+		throw new TransformerError('Error transformando colección');
 	}
 }
 
@@ -68,7 +68,7 @@ export function transformCollections(collections: any[]): CollectionComplete[] {
 		return collections.map((collection) => transformCollection(collection));
 	} catch (error) {
 		logger.error('❌ Error transformando lista de colecciones:', error);
-		throw new TransformerError('Error transformando lista de colecciones', { cause: error });
+		throw new TransformerError('Error transformando lista de colecciones');
 	}
 }
 
@@ -130,7 +130,7 @@ export function transformCollectionToExtended(
 		};
 	} catch (error) {
 		logger.error('❌ Error transformando Collection a Extended:', error);
-		throw new TransformerError('Error transformando colección a versión extendida', { cause: error });
+		throw new TransformerError('Error transformando colección a versión extendida');
 	}
 }
 
@@ -194,6 +194,6 @@ export function transformCollectionToWithStats(collection: Collection | Collecti
 		};
 	} catch (error) {
 		logger.error('❌ Error transformando Collection a WithStats:', error);
-		throw new TransformerError('Error transformando colección a versión con estadísticas', { cause: error });
+		throw new TransformerError('Error transformando colección a versión con estadísticas');
 	}
 }

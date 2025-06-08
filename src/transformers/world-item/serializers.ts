@@ -4,23 +4,18 @@
  */
 
 import { createLogger } from '@/lib/logger';
-import { WorldItemSchema } from '@/types/entities/world-item/schema';
 import type {
-	WorldItemAttribute,
-	WorldItemBase,
-	WorldItemComplete,
-	WorldItemCounts,
-	WorldItemDeserialized,
-	WorldItemDeserializedFields,
-	WorldItemEffect,
-	WorldItemFilter,
-	WorldItemProperty,
-	WorldItemRelations,
-	WorldItemRequirement,
-	WorldItemStat,
-	WorldItemUI,
+    WorldItemAttribute,
+    WorldItemBase,
+    WorldItemComplete,
+    WorldItemDeserialized,
+    WorldItemEffect,
+    WorldItemFilter,
+    WorldItemProperty,
+    WorldItemRelations,
+    WorldItemRequirement,
+    WorldItemStat
 } from '@/types/entities/world-item/types';
-import { handleTransformerError } from '@/utils/transformers/errors';
 
 // Logger específico para este módulo
 const logger = createLogger('WorldItemTransformer:Serializers');
@@ -605,11 +600,12 @@ export function fromExtendedWorldItem(worldItem: WorldItemComplete): WorldItemBa
 		// Excluir estas propiedades al convertir a WorldItemBase
 		isSelected,
 		isExpanded,
-		isEditing,
-		...
+		isEditing
 	} = worldItem;
-	// Retornar solo las propiedades de WorldItemBase
-	return {
-		...
-	};
+// Retornar solo las propiedades de WorldItemBase
+return {
+    isSelected,
+    isExpanded,
+    isEditing
+};
 }

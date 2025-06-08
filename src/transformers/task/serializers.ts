@@ -37,7 +37,7 @@ export function fromPrismaTask(prismaTask: any): TaskBase {
 		return baseTask;
 	} catch (error) {
 		logger.error('❌ Error al convertir de Prisma a TaskBase:', error);
-		throw new TransformerError('Error al deserializar tarea desde Prisma', { cause: error });
+		throw new TransformerError('Error al deserializar tarea desde Prisma');
 	}
 }
 
@@ -127,7 +127,7 @@ export function toExtendedTask(task: Partial<TaskBase>, options: TransformTaskOp
 		return extendedTask;
 	} catch (error) {
 		logger.error('❌ Error al convertir a TaskExtended:', error);
-		throw new TransformerError('Error al transformar a tarea extendida', { cause: error });
+		throw new TransformerError('Error al transformar a tarea extendida');
 	}
 }
 

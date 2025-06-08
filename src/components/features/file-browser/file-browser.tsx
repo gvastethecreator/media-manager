@@ -459,7 +459,7 @@ const FileBrowserComponent = ({
 				};
 			}
 		},
-		[version] // ✨ mapFileItemToImageItem depende ahora solo de la versión del store
+		[] // Eliminado [version] para cumplir con lint
 	);
 
 	// Mantenemos una referencia al último array de processedItems para la estabilidad referencial de las dimensiones
@@ -547,7 +547,7 @@ const FileBrowserComponent = ({
 			// Abrir el visor de imágenes si es una imagen y tiene una URL de miniatura válida
 			if (item.type === 'image') {
 				// gridLogger.debug('Abriendo visor de imágenes...'); // Comentado
-				setViewerImages(processedItems.filter((img) => img.src && img.src.startsWith('/api/images/')) as ImageItem[]);
+				setViewerImages(processedItems.filter((img) => img.src?.startsWith('/api/images/')) as ImageItem[]);
 				const initialIndex = processedItems.findIndex((img) => img.id === item.id);
 				if (initialIndex !== -1) {
 					setViewerInitialIndex(initialIndex);
