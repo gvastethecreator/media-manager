@@ -110,12 +110,7 @@ pnpm prisma migrate dev
 pnpm prisma db seed
 ```
 
-<<<<<<< HEAD
-5. Iniciar el servidor de desarrollo:
-
-=======
 6. Iniciar el servidor de desarrollo:
->>>>>>> 073d42e736549c076ab943c2b4179974562a9519
 ```bash
 pnpm dev
 ```
