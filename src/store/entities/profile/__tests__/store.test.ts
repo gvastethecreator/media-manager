@@ -1,6 +1,21 @@
 import { act, renderHook } from '@testing-library/react';
 import { useProfileStore } from '../store';
 
+jest.mock('@/lib/prisma', () => ({
+	prisma: {
+		profile: {
+			findMany: jest.fn(),
+			findUnique: jest.fn(),
+			findFirst: jest.fn(),
+			create: jest.fn(),
+			update: jest.fn(),
+			delete: jest.fn(),
+			count: jest.fn(),
+			upsert: jest.fn(),
+		},
+	},
+}));
+
 describe('Profile Store', () => {
 	beforeEach(() => {
 		// Limpiar el store antes de cada test

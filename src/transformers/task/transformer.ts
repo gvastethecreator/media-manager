@@ -41,7 +41,7 @@ export function transformTask<T extends Partial<TaskBase> | unknown>(
 	try {
 		if (!input || typeof input !== 'object') {
 			logger.error('⚠️ Intentando transformar un objeto Task inválido:', input);
-			throw new TransformerError('Error transformando tarea: objeto inválido');
+			throw new TransformerError('Error transformando tarea');
 		}
 
 		// Si es un objeto de Prisma, primero lo transformamos al formato base
@@ -54,7 +54,7 @@ export function transformTask<T extends Partial<TaskBase> | unknown>(
 		return toExtendedTask(input as TaskBase, options);
 	} catch (error) {
 		logger.error('❌ Error transformando Task:', error);
-		throw new TransformerError('Error transformando tarea', { cause: error });
+		throw new TransformerError('Error transformando tarea');
 	}
 }
 
@@ -101,7 +101,7 @@ export function transformTaskToWithStats(task: TaskBase): TaskWithStats {
 		};
 	} catch (error) {
 		logger.error('❌ Error transformando Task a WithStats:', error);
-		throw new TransformerError('Error al transformar tarea con estadísticas', { cause: error });
+		throw new TransformerError('Error al transformar tarea con estadísticas');
 	}
 }
 

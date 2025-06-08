@@ -117,10 +117,9 @@ export function useThumbnailLoader(): UseThumbnailLoaderResult {
 					// Comprobar que la URL es realmente válida
 					if (thumbnail.startsWith('/api/images/') || thumbnail.startsWith('data:')) {
 						return thumbnail;
-					} else {
-						thumbnailLogger.warn(`⚠️ URL de thumbnail inválida para ${itemId}: ${thumbnail}`);
-						return null;
 					}
+					thumbnailLogger.warn(`⚠️ URL de thumbnail inválida para ${itemId}: ${thumbnail}`);
+					return null;
 				}
 
 				// Si no hay thumbnail, incrementar contador de reintentos
