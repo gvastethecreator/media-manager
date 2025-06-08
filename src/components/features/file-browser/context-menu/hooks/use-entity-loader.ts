@@ -453,7 +453,6 @@ export function useEntityLoader() {
 	);
 
         // Modificar también la función loadEntityData para que sea más tolerante a errores
-        // biome-ignore lint/correctness/useExhaustiveDependencies: stores map is stable in this hook
         const loadEntityData = useCallback(
                 async (entityName: keyof LoadingStates): Promise<unknown[]> => {
 			// Verificar si la entidad ya está cargando
