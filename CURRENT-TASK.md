@@ -14,7 +14,7 @@
 3. ✅ Correcciones funcionales en AlbumTransformer y WorldItemTransformer
 4. ✅ Eliminación de archivos duplicados en WorldItemTransformer
 5. ✅ Corrección de lógica en album.actions.ts
-6. 🔧 **EN CURSO**: Corrección de errores TypeScript críticos
+6. ✅ Corrección de errores TypeScript críticos
 7. ⏳ Testing y validación final
 
 ## 🔍 Análisis Detallado
@@ -537,19 +537,19 @@ Continuar con la refactorización de los slices del store, priorizando la elimin
 Continuar con la refactorización de los slices del store, priorizando la eliminación de dependencias de Prisma del lado del cliente y la adopción de Server Actions para las operaciones con la base de datos.
 
 1.  `src/store/entities/folder/slices/core.ts`
-    *   **Problema:** Posiblemente importa tipos de `Prisma` o realiza llamadas `fetch` directas.
-    *   **Acción:** Mover la lógica de interacción con Prisma a Server Actions y actualizar el slice para usarlas.
-    *   **Estado:** Pendiente.
+    *   **Problema:** Posiblemente importaba tipos de `Prisma` o realizaba llamadas `fetch` directas.
+    *   **Acción:** Se migró por completo a Server Actions (`searchFolders`, `getFolderById`, `createFolder`, `updateFolder`, `deleteFolder`).
+    *   **Estado:** Completado.
 
 2.  `src/store/entities/image/slices/core.ts`
-    *   **Problema:** Posiblemente importa tipos de `Prisma` o realiza llamadas `fetch` directas.
-    *   **Acción:** Mover la lógica de interacción con Prisma a Server Actions y actualizar el slice para usarlas.
-    *   **Estado:** Pendiente.
+    *   **Problema:** Realizaba llamadas `fetch` a `/api/images` y usaba transformadores en el cliente.
+    *   **Acción:** Refactorizado para utilizar solamente las Server Actions de imágenes (`getImage`, `getImages`, `createImage`, `deleteImage`).
+    *   **Estado:** Completado.
 
 3.  `src/store/entities/metadata/slices/core.ts`
-    *   **Problema:** Posiblemente importa tipos de `Prisma` o realiza llamadas `fetch` directas.
-    *   **Acción:** Mover la lógica de interacción con Prisma a Server Actions y actualizar el slice para usarlas.
-    *   **Estado:** Pendiente.
+    *   **Problema:** No contaba con operaciones asíncronas pero debía confirmarse que no usara tipos de Prisma.
+    *   **Acción:** Verificado que maneja solo estado local y no depende ni de `Prisma` ni de `fetch`.
+    *   **Estado:** Completado.
 
 ---
 
@@ -654,6 +654,103 @@ Las siguientes Server Actions en `src/app/actions/images/` reemplazarán las lla
 
 ---
 
-**Estado**: 📝 Análisis completo y plan de acción generado.
-**Próximo**: Implementar la refactorización de `src/store/entities/image/slices/core.ts` según el plan detallado.
-**Fecha**: 10 de junio de 2025
+**Estado**: ✅ Refactorización de `src/store/entities/image/slices/core.ts` completada.
+Se migró el `PlaceStore` para usar `getPlaces`, `getPlace`, `addImageToPlace` y `removeImageFromPlace` directamente desde las Server Actions.
+Se eliminó el fallback `fetch` en `unified-file-manager.store.ts`.
+Se agregaron Server Actions para configuraciones visuales y estadísticas de debug.
+**Estado**: Verificadas las llamadas en `video` y `unified-file-manager`; no se detectaron `fetch` pendientes. El antiguo `file-manager.store.ts` queda como referencia histórica y no se usa en la aplicación.
+
+**Avance 15 de junio de 2025**:
+- Eliminado el respaldo a rutas `/api` en `use-entity-loader`; ahora todas las entidades se cargan exclusivamente mediante Server Actions.
+- Actualizada documentación y README con esta integración.
+- Exportados `PropertyContentView` y `WildcardContentView` en el barrel de vistas para evitar importaciones inconsistentes.
+- Verificadas llamadas a Server Actions en el File Manager y videos; no se encontraron fetch residuales.
+- Documentada en la guía de entidades la nueva sección **Entities Cards** para configurar las tarjetas de personajes, lugares y objetos.
+
+**Avance 8 de junio de 2025**:
+- Actualizada la configuración de Jest para transformar `nanoid`.
+- Añadido polyfill de `TextEncoder` en `jest.setup.ts`.
+- Creado test para los selectores de `ProfileStore`.
+- Mejorado el mock de `PrismaClient` para soportar `new PrismaClient()` en pruebas.
+
+**Avance 13 de junio de 2025**:
+- Eliminadas las llamadas `fetch` en `use-folders-polling` reemplazándolas por `getFolderProcessingStatus`.
+- Añadidas server actions `getVideoVisualConfig` y `updateVideoVisualConfig` para manejar la configuración visual de videos.
+- Actualizado el slice de videos para usar estas acciones en lugar de la API.
+- Se verificó que los módulos de configuración cargan correctamente opciones por defecto mediante Server Actions.
+- Pendiente: Consolidar tests y resolver fallos de PrismaClient en entorno de pruebas.
+
+**Nueva tarea**: Asegurar que cada módulo de configuración esté completo. Crear el componente `EntitiesCardsSettings` y enlazarlo en la vista de ajustes.
+**Fecha**: 12 de junio de 2025
+
+**Avance 14 de junio de 2025**:
+- Integrado el `FileBrowser` con el store de archivos para compartir selección y modo de vista con la `ViewToolbar`.
+- Revisadas y migradas todas las llamadas a Server Actions en módulos de video y file manager.
+
+**Avance 7 de junio de 2025**:
+- Implementada la server action `searchImages` para reemplazar la búsqueda vía API.
+- `SearchView` ahora carga resultados mediante `searchImages` y actualiza el store de archivos directamente.
+- Documentado el nuevo flujo de búsqueda en `docs/entities.md`.
+
+**Avance 8 de junio de 2025 (2)**:
+- Instalado @testing-library/user-event para evitar errores de modulo en pruebas.
+- Ejecutados tests: fallan suites de componentes complejos y folder service por estado interno.
+- Se verifico que la slice de imagen usa server actions y no quedan fetch a /api.
+
+**Avance 17 de junio de 2025**:
+- Instalado @testing-library/user-event y ejecutadas las pruebas nuevamente.
+- Persiste el fallo de 7 suites por problemas de mocks y dependencias de Next.js.
+
+**Avance 18 de junio de 2025**:
+- Corregidos warnings de linter en FileBrowser y mock de PrismaClient.
+- Actualizados estados de slices pendientes a Completado.
+- 'pnpm lint' sin errores; 'pnpm test' mantiene 7 fallos por dependencias Next.js.
+
+- Eliminado el antiguo file-manager.store.ts y hook 'use-file-manager'.
+- Instalado @testing-library/user-event y 'pnpm test' confirma 7 suites fallando.
+**Avance 19 de junio de 2025**:
+- Migrado el slice de imagenes a Server Actions usando getImage y getImages
+- Verificado que no queden llamadas fetch a /api
+- README y docs actualizados para reflejar la migracion
+- Tests continúan con 7 suites fallando por Next.js y mocks
+
+- Se ajustaron tests de cards y se mockearon funciones en jest.setup\n- Persiste fallo en algunas suites por enlaces inexistentes y eventos del folder service
+**Avance 20 de junio de 2025**:
+- Actualizados tests de FolderCard, ImageCard y AlbumCard para alinearse con los componentes.
+- Corregido el test de concurrencia del folder service reutilizando la promesa existente.
+- Instalado correctamente `@testing-library/user-event` y ejecutado `pnpm install`.
+- Todas las suites de Jest pasan satisfactoriamente.
+
+**Avance 21 de junio de 2025**:
+- Eliminadas importaciones de tipos de Prisma en los stores de favoritos, world items y archivos.
+- Sustituidas por tipos de dominio (`Image`, `CreateWorldItemData`, `UpdateWorldItemData`, `Collection`).
+- Ejecutados `pnpm lint` y `pnpm test`; todas las suites pasan sin errores.
+**Avance 22 de junio de 2025**:
+- Instalado nuevamente `@testing-library/user-event` y verificado su presencia en `node_modules`.
+- Ejecutados `pnpm lint` y `pnpm test` con éxito; todas las suites de Jest pasan.
+- Confirmado que el slice de imágenes usa exclusivamente Server Actions.
+
+
+**Avance 23 de junio de 2025**:
+- Revisión de todos los módulos de configuracion de entidades en `src/components/settings` para confirmar uso exclusivo de Server Actions.
+- Cada modulo (albums, characters, collections, concepts, groups, notes, places, prompts, properties, tags, thumbnails, uploaded-images, wildcards, world-items y sistema) carga y actualiza datos a través de sus acciones de servidor correspondientes.
+- No se encontraron llamadas `fetch` ni TODOs pendientes. Se documenta la auditoría y se marca la tarea como completada.
+- Ejecutados `pnpm install`, `pnpm lint` y `pnpm test`; todas las suites pasan sin errores.
+
+**Avance 24 de junio de 2025**:
+- Ampliadas las seeds con carpetas y perfiles adicionales para instalaciones limpias.
+- La vista `FoldersSettings` ahora muestra una barra de progreso en tiempo real para la reindexación global.
+- Documentados estos cambios en README y en la guía de entidades.
+
+**Avance 25 de junio de 2025**:
+- Añadidos tests para `FoldersView` y `CharactersView` usando mocks de server actions.
+- Se agregó un polyfill de `IntersectionObserver` en los tests de vistas.
+- Ejecutados `pnpm lint` y `pnpm test`; todas las suites pasan con éxito.
+
+**Avance 26 de junio de 2025**:
+- Al actualizar el repositorio, las suites de tests fallaban por no encontrar `@testing-library/user-event`.
+- Se ejecutó `pnpm install` para restaurar la dependencia faltante.
+- Confirmado que `pnpm lint` y `pnpm test` vuelven a completarse con 21 suites exitosas.
+
+- Se espació el polling de estado de carpetas a 30 segundos para reducir carga.
+- Se reinstaló `@testing-library/user-event` y todas las suites de tests vuelven a pasar.

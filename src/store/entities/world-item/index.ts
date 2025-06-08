@@ -9,6 +9,12 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { VERSIONING } from '@/lib/constants';
 import { toastService } from '@/services/toast.service';
+import {
+	getWorldItems,
+	createWorldItem as createServerWorldItem,
+	updateWorldItem as updateServerWorldItem,
+	deleteWorldItem as deleteServerWorldItem,
+} from '@/app/actions/world-items/world-item.actions';
 
 import { WorldItemSortCriteria, WorldItemViewMode } from '@/types/entities/world-item/enums';
 import type { WorldItemStore } from './types';
@@ -19,7 +25,6 @@ const worldItemLogger = clientLogger.withContext('WorldItemStore');
 export * from './constants';
 export * from './hooks';
 export * from './selectors';
-export * from './services';
 export * from './transformers';
 export * from './types';
 export * from './utils';
@@ -52,11 +57,8 @@ export const useWorldItemStore = create<WorldItemStore>()(
 					set({ isLoading: true, error: null });
 					worldItemLogger.info('🔄 Cargando objetos del mundo...');
 
-					const response = await fetch('/api/entities/world-items');
-					if (!response.ok) throw new Error('Error al cargar objetos del mundo');
-
-					const worldItems = await response.json();
-					set({ worldItems, isLoading: false });
+					const items = await getWorldItems();
+					set({ worldItems: items, isLoading: false });
 					worldItemLogger.info('✅ Objetos del mundo cargados correctamente');
 				} catch (error) {
 					worldItemLogger.error('❌ Error al cargar objetos del mundo:', error);
@@ -69,15 +71,7 @@ export const useWorldItemStore = create<WorldItemStore>()(
 			createWorldItem: async (item) => {
 				try {
 					worldItemLogger.info('➕ Creando objeto del mundo:', item);
-					const response = await fetch('/api/entities/world-items', {
-						method: 'POST',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(item),
-					});
-
-					if (!response.ok) throw new Error('Error al crear objeto del mundo');
-
-					const newItem = await response.json();
+					const newItem = await createServerWorldItem(item);
 					set((state) => ({ worldItems: [...state.worldItems, newItem] }));
 					worldItemLogger.info('✅ Objeto del mundo creado correctamente');
 					toastService.system.success('Objeto del mundo creado correctamente');
@@ -90,15 +84,7 @@ export const useWorldItemStore = create<WorldItemStore>()(
 			updateWorldItem: async (id, item) => {
 				try {
 					worldItemLogger.info('🔄 Actualizando objeto del mundo:', { id, item });
-					const response = await fetch(`/api/world-items/${id}`, {
-						method: 'PATCH',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify(item),
-					});
-
-					if (!response.ok) throw new Error('Error al actualizar objeto del mundo');
-
-					const updatedItem = await response.json();
+					const updatedItem = await updateServerWorldItem(id, item);
 					set((state) => ({
 						worldItems: state.worldItems.map((i) => (i.id === id ? updatedItem : i)),
 					}));
@@ -113,11 +99,7 @@ export const useWorldItemStore = create<WorldItemStore>()(
 			deleteWorldItem: async (id) => {
 				try {
 					worldItemLogger.info('🗑️ Eliminando objeto del mundo:', id);
-					const response = await fetch(`/api/world-items/${id}`, {
-						method: 'DELETE',
-					});
-
-					if (!response.ok) throw new Error('Error al eliminar objeto del mundo');
+					await deleteServerWorldItem(id);
 
 					set((state) => ({
 						worldItems: state.worldItems.filter((i) => i.id !== id),

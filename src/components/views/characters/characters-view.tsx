@@ -13,6 +13,7 @@ import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
+import { getCharacterVisualConfig } from '@/app/actions/visual-config.actions';
 
 const viewLogger = clientLogger.withContext('CharactersView');
 
@@ -53,27 +54,22 @@ export function CharactersView(_props: ViewProps) {
 		loadCharacters();
 	}, [loadCharacters]);
 
-	useEffect(() => {
-		const loadVisualConfig = async () => {
-			try {
-				const response = await fetch('/api/entities/characters/visual-config');
-				if (!response.ok) {
-					throw new Error('Error al cargar la configuración visual');
-				}
-				const config = await response.json();
-				// Combinar la configuración del servidor con las opciones predeterminadas
-				setVisualConfig({
-					...DEFAULT_CHARACTER_OPTIONS,
-					...config,
-				});
-			} catch (error) {
-				console.error('Error al cargar la configuración visual:', error);
-				// Si hay un error, mantenemos la configuración predeterminada
-			}
-		};
+        useEffect(() => {
+                const loadVisualConfig = async () => {
+                        try {
+                                const config = await getCharacterVisualConfig();
+                                setVisualConfig({
+                                        ...DEFAULT_CHARACTER_OPTIONS,
+                                        ...config,
+                                });
+                        } catch (error) {
+                                console.error('Error al cargar la configuración visual:', error);
+                                // Si hay un error, mantenemos la configuración predeterminada
+                        }
+                };
 
-		loadVisualConfig();
-	}, []);
+                loadVisualConfig();
+        }, []);
 
 	const handleCharacterClick = useCallback(
 		(character: CharacterWithStats) => {

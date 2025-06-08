@@ -87,7 +87,7 @@ export function useFolderImages(folderId: string | null) {
 			const imageCount = query.data?.items?.length || 0;
 			logger.debug(`✅ Query exitoso para carpeta ${folderId}: ${imageCount} imágenes`);
 		}
-	}, [folderId, query.isLoading, query.isError, query.isSuccess, query.data?.items?.length]);
+        }, [folderId, query.isLoading, query.isError, query.error, query.isSuccess, query.data?.items?.length]);
 
 	return query;
 }
