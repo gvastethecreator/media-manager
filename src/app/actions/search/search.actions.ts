@@ -11,7 +11,7 @@ export async function searchImages(query: string, limit = 100): Promise<FileItem
 	try {
 		log.debug('🔎 Buscando imágenes', { query });
 		const result = await getImages({ search: query, pageSize: limit });
-		const items = result.images.map((img) => convertServerImageToFileItem(img as any));
+		const items = result.images.map((img) => convertServerImageToFileItem(img as ServerImage));
 		return items;
 	} catch (error) {
 		log.error('❌ Error buscando imágenes', error);
