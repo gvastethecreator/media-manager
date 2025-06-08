@@ -13,6 +13,7 @@ import { LandPlot } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
+import { getPlaceVisualConfig } from '@/app/actions/visual-config.actions';
 
 const viewLogger = clientLogger.withContext('PlacesView');
 
@@ -60,27 +61,22 @@ export function PlacesView(_props: ViewProps) {
 		loadPlaces();
 	}, [loadPlaces]);
 
-	useEffect(() => {
-		const loadVisualConfig = async () => {
-			try {
-				const response = await fetch('/api/entities/places/visual-config');
-				if (!response.ok) {
-					throw new Error('Error al cargar la configuración visual');
-				}
-				const config = await response.json();
-				// Combinar la configuración del servidor con las opciones predeterminadas
-				setVisualConfig({
-					...DEFAULT_PLACE_OPTIONS,
-					...config,
-				});
-			} catch (error) {
-				console.error('Error al cargar la configuración visual:', error);
-				// Si hay un error, mantenemos la configuración predeterminada
-			}
-		};
+        useEffect(() => {
+                const loadVisualConfig = async () => {
+                        try {
+                                const config = await getPlaceVisualConfig();
+                                setVisualConfig({
+                                        ...DEFAULT_PLACE_OPTIONS,
+                                        ...config,
+                                });
+                        } catch (error) {
+                                console.error('Error al cargar la configuración visual:', error);
+                                // Si hay un error, mantenemos la configuración predeterminada
+                        }
+                };
 
-		loadVisualConfig();
-	}, []);
+                loadVisualConfig();
+        }, []);
 
 	const handlePlaceClick = useCallback(
 		(place: PlaceWithStats) => {

@@ -72,6 +72,8 @@ model Settings {
   // Configuración
   theme    String @default("system")
   language String @default("es")
+  /// Datos de configuración serializados
+  data     Json
 
   // Relaciones
   Profile Profile[]
