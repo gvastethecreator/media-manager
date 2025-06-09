@@ -1,3 +1,10 @@
 # Properties Actions
 
-Acciones del servidor para propiedades personalizadas.
+
+## Funciones disponibles
+- `createProperty`
+- `deleteProperty`
+- `getProperties`
+- `getProperty`
+- `togglePropertyFavorite`
+- `updateProperty`

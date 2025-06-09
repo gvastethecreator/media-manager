@@ -1,3 +1,13 @@
 # Activity Actions
 
-Acciones del servidor para registro de actividad.
+
+## Funciones disponibles
+- `cleanupOldActivities`
+- `createActivity`
+- `deleteActivity`
+- `getActivitiesByImage`
+- `getActivitiesByType`
+- `getActivityById`
+- `getFilteredActivities`
+- `getRecentActivities`
+- `logActivity`

@@ -1,3 +1,15 @@
 # Concepts Actions
 
-Acciones del servidor para conceptos del sistema.
+
+## Funciones disponibles
+- `addConceptImage`
+- `createConcept`
+- `deleteConcept`
+- `getConcept`
+- `getConceptImages`
+- `getConceptWithRelations`
+- `getConcepts`
+- `linkEntityToConcept`
+- `removeConceptImage`
+- `unlinkEntityFromConcept`
+- `updateConcept`

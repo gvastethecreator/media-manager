@@ -1,3 +1,17 @@
 # System Actions
 
-Acciones del servidor para acciones del sistema.
+
+## Funciones disponibles
+- `createDefaultSettingsData`
+- `createSystemError`
+- `getProfileSettings`
+- `getSystemSettings`
+- `getSystemStats`
+- `getSystemVersion`
+- `initServer`
+- `repairSystem`
+- `resetDatabase`
+- `resetProfileSettings`
+- `resetSystemSettings`
+- `updateProfileSettings`
+- `updateSystemSettings`
