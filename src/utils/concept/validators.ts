@@ -16,7 +16,7 @@ export const conceptCreateSchema = z.object({
 	description: z.string().optional().nullable(),
 	content: z.string().optional().default(''),
 	category: z.nativeEnum(ConceptCategory).optional().default(ConceptCategory.GENERAL),
-	tags: z.string().optional().default('empty_array'),
+	tags: z.string().optional().default('[]'),
 	featuredImage: z.string().optional().nullable(),
 	isFavorite: z.boolean().optional().default(false),
 });

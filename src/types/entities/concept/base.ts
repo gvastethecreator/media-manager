@@ -18,7 +18,7 @@ export interface ConceptCreateInput {
 	description?: string | null;
 	content?: string;
 	category?: string;
-	tags?: string;
+	tags?: string | string[]; // Unificado con types.ts
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 }
@@ -34,7 +34,7 @@ export interface ConceptUpdateInput {
 	description?: string | null;
 	content?: string;
 	category?: string;
-	tags?: string;
+	tags?: string | string[]; // Unificado con types.ts
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 }
@@ -60,9 +60,4 @@ export interface ConceptStats {
 	images: number;
 }
 
-/**
- * Interfaz para concepto con estadísticas incluidas
- */
-export interface ConceptWithStats extends ConceptBase {
-	_count: ConceptStats;
-}
+// --- Eliminada la interfaz ConceptWithStats por incompatibilidad de tipos y herencia ---

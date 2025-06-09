@@ -7,14 +7,14 @@ const serializersLogger = serverLogger.withContext('PromptSerializers');
  * Serializa un array de tags desde un string JSON
  * En la base de datos, los tags pueden almacenarse como un string JSON que representa un array
  *
- * @param tagsString String JSON con tags o "empty_array"
+ * @param tagsString String JSON con tags o "[]"
  * @returns Array de strings con los tags correctamente tipado
  */
 export function serializeTags(tagsString?: string | null): string[] {
 	if (!tagsString) return [];
 
 	try {
-		if (tagsString === 'empty_array') return [];
+		if (tagsString === '[]') return [];
 		const parsed = JSON.parse(tagsString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
@@ -25,17 +25,17 @@ export function serializeTags(tagsString?: string | null): string[] {
 
 /**
  * Deserializa un array de tags a string JSON para almacenamiento en BD
- * Si el array está vacío, retorna "empty_array" como convención
+ * Si el array está vacío, retorna "[]" como convención
  *
  * @param tags Array de tags
- * @returns String JSON o "empty_array" si está vacío
+ * @returns String JSON o "[]" si está vacío
  */
 export function deserializeTags(tags: string[]): string {
 	try {
-		return tags && tags.length > 0 ? JSON.stringify(tags) : 'empty_array';
+		return tags && tags.length > 0 ? JSON.stringify(tags) : '[]';
 	} catch (error) {
 		serializersLogger.error('❌ Error al deserializar tags:', error);
-		return 'empty_array';
+		return '[]';
 	}
 }
 

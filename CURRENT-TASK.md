@@ -471,85 +471,88 @@ interface GroupCardProps {
 # Tarea Actual: Resolver Errores de PrismaClient en el Cliente
 
 ## Objetivo
+
 Eliminar todas las instancias de `PrismaClient` que se están incluyendo incorrectamente en el bundle del cliente, asegurando que todas las operaciones de base de datos se realicen exclusivamente a través de Server Actions.
 
 ## Contexto del Problema
+
 Se ha detectado que archivos de transformación (mappers y serializers) están importando tipos de `Prisma` (e.g., `Prisma.AlbumCreateInput`), lo que indirectamente causa que `PrismaClient` sea incluido en el bundle del cliente cuando estos archivos son importados por componentes o stores del lado del cliente. Esto genera errores de runtime en el navegador. Aunque las llamadas a rutas API desde los slices del store son un respaldo, el foco principal es la importación de `Prisma` en archivos que no deben estar en el cliente.
 
 ## Plan de Acción
 
 ### Prioridad Alta: Limpiar Archivos de Transformación (`mappers.ts` y `serializers.ts`)
+
 El problema raíz está en que estos archivos están diseñados para ser de servidor, pero sus tipos `Prisma` los hacen incompatibles con el cliente. La solución es asegurar que estos archivos no importen `Prisma` directamente y que sus tipos sean puramente de dominio (definiendo interfaces o tipos equivalentes si es necesario) o que se utilicen únicamente en Server Actions.
 
 **Archivos a corregir:**
 
-1.  ✅ `src/transformers/character/index.ts` (Renombrado a `server.ts` y refactorizado)
-    *   **Problema:** Contenía re-exportaciones de funciones del lado del cliente y/o importaba `prisma` directamente en un archivo de índice que podría ser importado por el cliente.
-    *   **Acción:** Se aseguró que `server.ts` solo exporte funciones que sean estrictamente del lado del servidor y que interactúen con `prisma`. Se eliminaron re-exportaciones de funciones de transformación que no debían estar en el bundle del cliente.
-    *   **Estado:** Completado.
+1. ✅ `src/transformers/character/index.ts` (Renombrado a `server.ts` y refactorizado)
+    - **Problema:** Contenía re-exportaciones de funciones del lado del cliente y/o importaba `prisma` directamente en un archivo de índice que podría ser importado por el cliente.
+    - **Acción:** Se aseguró que `server.ts` solo exporte funciones que sean estrictamente del lado del servidor y que interactúen con `prisma`. Se eliminaron re-exportaciones de funciones de transformación que no debían estar en el bundle del cliente.
+    - **Estado:** Completado.
 
-2.  ✅ `src/transformers/character/mappers.ts`
-    *   **Problema:** Importaba `Prisma` y utilizaba sus tipos.
-    *   **Acción:** Se eliminaron las importaciones de `Prisma` y se reemplazaron los tipos de Prisma por tipos de dominio (`CharacterCreateInput`, `CharacterUpdateInput`, `CharacterFindManyArgs`, `CharacterWhereInput`) importados de `@/types/entities/character/types`.
-    *   **Estado:** Completado.
+2. ✅ `src/transformers/character/mappers.ts`
+    - **Problema:** Importaba `Prisma` y utilizaba sus tipos.
+    - **Acción:** Se eliminaron las importaciones de `Prisma` y se reemplazaron los tipos de Prisma por tipos de dominio (`CharacterCreateInput`, `CharacterUpdateInput`, `CharacterFindManyArgs`, `CharacterWhereInput`) importados de `@/types/entities/character/types`.
+    - **Estado:** Completado.
 
-3.  ✅ `src/transformers/character/serializers.ts`
-    *   **Problema:** Importaba `Prisma` y utilizaba sus tipos.
-    *   **Acción:** Se movieron las funciones `fromPrismaCharacter`, `toPrismaCharacter` y `validateCharacter` a `src/transformers/character/server.ts`. Se eliminaron las importaciones de `Prisma`.
-    *   **Estado:** Completado.
+3. ✅ `src/transformers/character/serializers.ts`
+    - **Problema:** Importaba `Prisma` y utilizaba sus tipos.
+    - **Acción:** Se movieron las funciones `fromPrismaCharacter`, `toPrismaCharacter` y `validateCharacter` a `src/transformers/character/server.ts`. Se eliminaron las importaciones de `Prisma`.
+    - **Estado:** Completado.
 
-4.  ✅ `src/transformers/world-item/serializers.ts`
-    *   **Problema:** Importaba `Prisma` y utilizaba sus tipos.
-    *   **Acción:** Se movieron las funciones `fromPrismaWorldItem`, `toPrismaWorldItem` y `validateWorldItem` a `src/transformers/world-item/server.ts`. Se eliminaron las importaciones de `Prisma`.
-    *   **Estado:** Completado.
+4. ✅ `src/transformers/world-item/serializers.ts`
+    - **Problema:** Importaba `Prisma` y utilizaba sus tipos.
+    - **Acción:** Se movieron las funciones `fromPrismaWorldItem`, `toPrismaWorldItem` y `validateWorldItem` a `src/transformers/world-item/server.ts`. Se eliminaron las importaciones de `Prisma`.
+    - **Estado:** Completado.
 
-5.  ✅ `src/transformers/world-item/transformer.ts`
-    *   **Problema:** Contenía lógica para `safeJsonParse` que no utilizaba `parseJsonField` de `server.ts`.
-    *   **Acción:** Se refactorizó para usar `parseJsonField` de `src/transformers/world-item/server.ts`.
-    *   **Estado:** Completado.
+5. ✅ `src/transformers/world-item/transformer.ts`
+    - **Problema:** Contenía lógica para `safeJsonParse` que no utilizaba `parseJsonField` de `server.ts`.
+    - **Acción:** Se refactorizó para usar `parseJsonField` de `src/transformers/world-item/server.ts`.
+    - **Estado:** Completado.
 
-6.  ✅ `src/store/entities/album/slices/core.ts`
-    *   **Problema:** Usaba `mapCreateAlbumDataToPrisma` y llamadas a `fetch` para operaciones de creación/lectura/actualización/eliminación de álbumes.
-    *   **Acción:** Se refactorizó para utilizar las Server Actions de álbumes (createAlbum, getAlbum, getAlbums, deleteAlbum, updateAlbum, moveAlbum).
-    *   **Estado:** Completado.
+6. ✅ `src/store/entities/album/slices/core.ts`
+    - **Problema:** Usaba `mapCreateAlbumDataToPrisma` y llamadas a `fetch` para operaciones de creación/lectura/actualización/eliminación de álbumes.
+    - **Acción:** Se refactorizó para utilizar las Server Actions de álbumes (createAlbum, getAlbum, getAlbums, deleteAlbum, updateAlbum, moveAlbum).
+    - **Estado:** Completado.
 
-### Próximos pasos de limpieza de slices del store:
-
-Continuar con la refactorización de los slices del store, priorizando la eliminación de dependencias de Prisma del lado del cliente y la adopción de Server Actions para las operaciones con la base de datos.
-
-1.  ✅ `src/store/entities/collection/slices/core.ts`
-    *   **Problema:** Posiblemente importaba tipos de `Prisma` o realizaba llamadas `fetch` directas.
-    *   **Acción:** Se refactorizó para utilizar las Server Actions de colecciones (`getCollection`, `getCollections`, `createCollection`, `updateCollection`, `deleteCollection`).
-    *   **Estado:** Completado.
-
-2.  ✅ `src/store/entities/concept/slices/core.ts`
-    *   **Problema:** Utilizaba un `mockApi` para las operaciones CRUD.
-    *   **Acción:** Se refactorizó para utilizar las Server Actions de conceptos (`searchConcepts`, `createConcept`, `updateConcept`, `deleteConcept`).
-    *   **Estado:** Completado.
-
-3.  ✅ `src/store/entities/file/slices/core.slice.ts` (Anteriormente `src/store/entities/file/slices/core.ts`)
-    *   **Problema:** Realizaba operaciones de lectura de directorio sin usar Server Actions.
-    *   **Acción:** Se refactorizó para utilizar `getDirectoryInfo` de las Server Actions de archivos.
-    *   **Estado:** Completado.
-
-### Siguientes pasos de limpieza de slices del store:
+### Próximos pasos de limpieza de slices del store
 
 Continuar con la refactorización de los slices del store, priorizando la eliminación de dependencias de Prisma del lado del cliente y la adopción de Server Actions para las operaciones con la base de datos.
 
-1.  `src/store/entities/folder/slices/core.ts`
-    *   **Problema:** Posiblemente importaba tipos de `Prisma` o realizaba llamadas `fetch` directas.
-    *   **Acción:** Se migró por completo a Server Actions (`searchFolders`, `getFolderById`, `createFolder`, `updateFolder`, `deleteFolder`).
-    *   **Estado:** Completado.
+1. ✅ `src/store/entities/collection/slices/core.ts`
+    - **Problema:** Posiblemente importaba tipos de `Prisma` o realizaba llamadas `fetch` directas.
+    - **Acción:** Se refactorizó para utilizar las Server Actions de colecciones (`getCollection`, `getCollections`, `createCollection`, `updateCollection`, `deleteCollection`).
+    - **Estado:** Completado.
 
-2.  `src/store/entities/image/slices/core.ts`
-    *   **Problema:** Realizaba llamadas `fetch` a `/api/images` y usaba transformadores en el cliente.
-    *   **Acción:** Refactorizado para utilizar solamente las Server Actions de imágenes (`getImage`, `getImages`, `createImage`, `deleteImage`).
-    *   **Estado:** Completado.
+2. ✅ `src/store/entities/concept/slices/core.ts`
+    - **Problema:** Utilizaba un `mockApi` para las operaciones CRUD.
+    - **Acción:** Se refactorizó para utilizar las Server Actions de conceptos (`searchConcepts`, `createConcept`, `updateConcept`, `deleteConcept`).
+    - **Estado:** Completado.
 
-3.  `src/store/entities/metadata/slices/core.ts`
-    *   **Problema:** No contaba con operaciones asíncronas pero debía confirmarse que no usara tipos de Prisma.
-    *   **Acción:** Verificado que maneja solo estado local y no depende ni de `Prisma` ni de `fetch`.
-    *   **Estado:** Completado.
+3. ✅ `src/store/entities/file/slices/core.slice.ts` (Anteriormente `src/store/entities/file/slices/core.ts`)
+    - **Problema:** Realizaba operaciones de lectura de directorio sin usar Server Actions.
+    - **Acción:** Se refactorizó para utilizar `getDirectoryInfo` de las Server Actions de archivos.
+    - **Estado:** Completado.
+
+### Siguientes pasos de limpieza de slices del store
+
+Continuar con la refactorización de los slices del store, priorizando la eliminación de dependencias de Prisma del lado del cliente y la adopción de Server Actions para las operaciones con la base de datos.
+
+1. `src/store/entities/folder/slices/core.ts`
+    - **Problema:** Posiblemente importaba tipos de `Prisma` o realizaba llamadas `fetch` directas.
+    - **Acción:** Se migró por completo a Server Actions (`searchFolders`, `getFolderById`, `createFolder`, `updateFolder`, `deleteFolder`).
+    - **Estado:** Completado.
+
+2. `src/store/entities/image/slices/core.ts`
+    - **Problema:** Realizaba llamadas `fetch` a `/api/images` y usaba transformadores en el cliente.
+    - **Acción:** Refactorizado para utilizar solamente las Server Actions de imágenes (`getImage`, `getImages`, `createImage`, `deleteImage`).
+    - **Estado:** Completado.
+
+3. `src/store/entities/metadata/slices/core.ts`
+    - **Problema:** No contaba con operaciones asíncronas pero debía confirmarse que no usara tipos de Prisma.
+    - **Acción:** Verificado que maneja solo estado local y no depende ni de `Prisma` ni de `fetch`.
+    - **Estado:** Completado.
 
 ---
 
@@ -558,40 +561,45 @@ Continuar con la refactorización de los slices del store, priorizando la elimin
 **Fecha**: 10 de junio de 2025
 
 ## Objetivo
+
 Refactorizar el `slice` de imágenes en `src/store/entities/image/slices/core.ts` para que todas las operaciones de fetching y mutación utilicen Server Actions en lugar de llamadas `fetch` directas a rutas API. Esto asegura que la lógica del lado del servidor permanezca exclusivamente en el servidor y mejora la eficiencia y la seguridad.
 
 ## Contexto del Problema
+
 El `slice` de imágenes actualmente realiza operaciones CRUD (Crear, Leer, Actualizar, Eliminar) mediante llamadas `fetch` directas a las rutas API (`/api/images`). Esto es una práctica que se busca reemplazar con el uso de Server Actions, las cuales centralizan la lógica de negocio y acceso a datos en el servidor, evitando la exposición de `PrismaClient` u otras dependencias del servidor en el bundle del cliente.
 
 ## Análisis Detallado
 
 ### Archivo a Refactorizar
+
 - `src/store/entities/image/slices/core.ts`
 
 ### Acciones Asíncronas Actuales (a reemplazar)
+
 - `fetchImage(id: string)`: Actualmente usa `fetch(`/api/images/${id}`)`.
 - `fetchImages(options?)`: Actualmente usa `fetch(`/api/images?${searchParams.toString()}`)`.
 - `createImage(data: CreateImageData)`: Actualmente usa `fetch('/api/images', { method: 'POST', ... })`.
 - `removeImage(id: string)`: Actualmente usa `fetch(`/api/images/${id}`, { method: 'DELETE' })`.
 
 ### Server Actions Identificadas (a utilizar)
+
 Las siguientes Server Actions en `src/app/actions/images/` reemplazarán las llamadas `fetch`:
 
 - **CRUD de Imágenes (`src/app/actions/images/image-crud.actions.ts`)**:
-    - `getImage(id: string): Promise<ImageExtended | null>`: Obtiene una imagen por ID.
-    - `getImages(options?: GetImagesOptions): Promise<GetImagesResult>`: Obtiene múltiples imágenes. `GetImagesResult` contiene `items: ImageExtended[]` y metadatos de paginación.
-    - `createImage(data: CreateImageData): Promise<ImageBase>`: Crea una nueva imagen.
-    - `deleteImage(id: string): Promise<void>`: Elimina una imagen.
-    - `updateImage(id: string, data: UpdateImageData): Promise<ImageBase>`: (No se usa directamente en el slice actual, pero es una acción CRUD relevante).
-    - `updateFavoriteStatus(id: string, isFavorite: boolean)`: (No se usa directamente en el slice actual, pero es una acción CRUD relevante).
-    - `getFavoriteImages(): Promise<ImageExtended[]>`: (No se usa directamente en el slice actual).
+  - `getImage(id: string): Promise<ImageExtended | null>`: Obtiene una imagen por ID.
+  - `getImages(options?: GetImagesOptions): Promise<GetImagesResult>`: Obtiene múltiples imágenes. `GetImagesResult` contiene `items: ImageExtended[]` y metadatos de paginación.
+  - `createImage(data: CreateImageData): Promise<ImageBase>`: Crea una nueva imagen.
+  - `deleteImage(id: string): Promise<void>`: Elimina una imagen.
+  - `updateImage(id: string, data: UpdateImageData): Promise<ImageBase>`: (No se usa directamente en el slice actual, pero es una acción CRUD relevante).
+  - `updateFavoriteStatus(id: string, isFavorite: boolean)`: (No se usa directamente en el slice actual, pero es una acción CRUD relevante).
+  - `getFavoriteImages(): Promise<ImageExtended[]>`: (No se usa directamente en el slice actual).
 
 - **Acceso a Imágenes (`src/app/actions/images/image-access.actions.ts`)**:
-    - `getImageUrl(imageId: string): Promise<string>`: Obtiene la URL de acceso a una imagen. (Relevante para el cliente, pero no para reemplazar llamadas `fetch` directas de la API REST de imágenes).
-    - `getOriginalImage(imageId: string): Promise<{ buffer: Buffer; mimeType: string }>`: Obtiene el buffer de la imagen original. (No relevante para el slice actual).
+  - `getImageUrl(imageId: string): Promise<string>`: Obtiene la URL de acceso a una imagen. (Relevante para el cliente, pero no para reemplazar llamadas `fetch` directas de la API REST de imágenes).
+  - `getOriginalImage(imageId: string): Promise<{ buffer: Buffer; mimeType: string }>`: Obtiene el buffer de la imagen original. (No relevante para el slice actual).
 
 - **Imágenes de Carpeta (`src/app/actions/images/folder-images.action.ts`)**:
-    - `getLatestFolderImages(folderId: string, limit?: number): Promise<{ success: boolean; data?: FileItem[]; message?: string }>`: Obtiene las últimas imágenes de una carpeta. (No relevante para el slice principal, pero útil en otras partes de la aplicación).
+  - `getLatestFolderImages(folderId: string, limit?: number): Promise<{ success: boolean; data?: FileItem[]; message?: string }>`: Obtiene las últimas imágenes de una carpeta. (No relevante para el slice principal, pero útil en otras partes de la aplicación).
 
 ### Mapeo de Acciones Actuales a Server Actions
 
@@ -603,54 +611,56 @@ Las siguientes Server Actions en `src/app/actions/images/` reemplazarán las lla
 | `removeImage(id)`          | `deleteImage(id)`        | `void`                | La SA realiza la eliminación y `deleteImage` del store se encarga de la eliminación local. |
 
 ### Impacto en Tipos y Transformaciones
+
 - Las Server Actions `getImage` y `getImages` ya devuelven `ImageExtended` o un array de `ImageExtended`. Esto significa que las llamadas a `transformImageToExtended` y `transformImagesToExtended` dentro del `slice` para estos casos serán redundantes y deben ser eliminadas.
 - La Server Action `createImage` devuelve `ImageBase`. La función `addImage` del slice espera `ImageBase` y luego la transforma a `ImageExtended` internamente, lo cual es el comportamiento deseado.
 - Las funciones síncronas `addImage` y `addImages` del slice deberían ajustarse para que, si reciben directamente `ImageExtended`, no intenten transformarla de nuevo, o simplemente asegurar que `extendImage` sea idempotente. Sin embargo, dado que `getImage` y `getImages` devuelven `ImageExtended`, lo más limpio es que `addImage` y `addImages` acepten `ImageExtended` directamente para los datos que provienen de estas SA. Para `createImage` (SA), que devuelve `ImageBase`, `addImage` sí debería invocar `extendImage`.
 
 ## Plan de Implementación (Para la IA designada)
 
-1.  **Actualizar Importaciones en `src/store/entities/image/slices/core.ts`**:
-    *   Eliminar importaciones de `Logger` no necesarios.
-    *   Eliminar importaciones de `transformImageToExtended` y `transformImagesToExtended` del archivo `src/transformers/image/transformer`.
-    *   Importar las Server Actions necesarias:
+1. **Actualizar Importaciones en `src/store/entities/image/slices/core.ts`**:
+    - Eliminar importaciones de `Logger` no necesarios.
+    - Eliminar importaciones de `transformImageToExtended` y `transformImagesToExtended` del archivo `src/transformers/image/transformer`.
+    - Importar las Server Actions necesarias:
+
         ```typescript
         import { getImage, getImages, createImage as createServerImage, deleteImage } from '../../../../app/actions/images/image-crud.actions';
         import { extendImage } from '../../../../transformers/image/serializers'; // Mantener para addImage
         ```
 
-2.  **Refactorizar `fetchImage`**:
-    *   Modificar la implementación para llamar a `getImage(id)`.
-    *   Remover la lógica de `fetch` y el parseo de `response.json()`.
-    *   Ajustar el `get().addImage(result.data)` a `get().addImage(image)` ya que `getImage` devuelve `ImageExtended`.
+2. **Refactorizar `fetchImage`**:
+    - Modificar la implementación para llamar a `getImage(id)`.
+    - Remover la lógica de `fetch` y el parseo de `response.json()`.
+    - Ajustar el `get().addImage(result.data)` a `get().addImage(image)` ya que `getImage` devuelve `ImageExtended`.
 
-3.  **Refactorizar `fetchImages`**:
-    *   Modificar la implementación para llamar a `getImages(options)`.
-    *   Remover la lógica de `fetch` y el parseo de `response.json()`.
-    *   Ajustar el `get().addImages(result.data)` a `get().addImages(result.items)` ya que `getImages` devuelve un objeto con la propiedad `items`.
+3. **Refactorizar `fetchImages`**:
+    - Modificar la implementación para llamar a `getImages(options)`.
+    - Remover la lógica de `fetch` y el parseo de `response.json()`.
+    - Ajustar el `get().addImages(result.data)` a `get().addImages(result.items)` ya que `getImages` devuelve un objeto con la propiedad `items`.
 
-4.  **Refactorizar `createImage` (acción asíncrona)**:
-    *   Modificar la implementación para llamar a `createServerImage(data)`.
-    *   Remover la lógica de `fetch` y el parseo de `response.json()`.
-    *   Mantener `get().addImage(newImage)` para que `addImage` se encargue de extender a `ImageExtended` si aún no lo está.
+4. **Refactorizar `createImage` (acción asíncrona)**:
+    - Modificar la implementación para llamar a `createServerImage(data)`.
+    - Remover la lógica de `fetch` y el parseo de `response.json()`.
+    - Mantener `get().addImage(newImage)` para que `addImage` se encargue de extender a `ImageExtended` si aún no lo está.
 
-5.  **Refactorizar `removeImage`**:
-    *   Modificar la implementación para llamar a `deleteImage(id)`.
-    *   Remover la lógica de `fetch`.
-    *   Mantener `get().deleteImage(id)`.
+5. **Refactorizar `removeImage`**:
+    - Modificar la implementación para llamar a `deleteImage(id)`.
+    - Remover la lógica de `fetch`.
+    - Mantener `get().deleteImage(id)`.
 
-6.  **Ajustar `addImage` y `addImages` (operaciones síncronas)**:
-    *   La firma de `addImage` es `(image: ImageBase) => void;` y actualmente llama `transformImageToExtended`.
-    *   La firma de `addImages` es `(images: ImageBase[]) => void;` y actualmente llama `transformImagesToExtended`.
-    *   Como `getImage` y `getImages` devuelven `ImageExtended`, estas funciones síncronas deberían ser capaces de aceptar `ImageExtended`. Se podría sobrecargar o hacer que `transformImageToExtended` sea lo suficientemente inteligente como para no re-transformar si ya está extendida. La opción más sencilla es:
-        *   Cambiar el tipo de `addImage` a `(image: ImageExtended) => void;`.
-        *   Cambiar el tipo de `addImages` a `(images: ImageExtended[]) => void;`.
-        *   Dentro de `addImage`, eliminar la llamada a `transformImageToExtended` y simplemente `set` el `extendedImage`.
-        *   Dentro de `addImages`, eliminar la llamada a `transformImagesToExtended` y simplemente mapear el array de `ImageExtended` a un mapa.
-        *   Para `createImage` (acción asíncrona), que devuelve `ImageBase`, sería necesario llamar `extendImage(newImageBase)` antes de `get().addImage(...)`.
+6. **Ajustar `addImage` y `addImages` (operaciones síncronas)**:
+    - La firma de `addImage` es `(image: ImageBase) => void;` y actualmente llama `transformImageToExtended`.
+    - La firma de `addImages` es `(images: ImageBase[]) => void;` y actualmente llama `transformImagesToExtended`.
+    - Como `getImage` y `getImages` devuelven `ImageExtended`, estas funciones síncronas deberían ser capaces de aceptar `ImageExtended`. Se podría sobrecargar o hacer que `transformImageToExtended` sea lo suficientemente inteligente como para no re-transformar si ya está extendida. La opción más sencilla es:
+        - Cambiar el tipo de `addImage` a `(image: ImageExtended) => void;`.
+        - Cambiar el tipo de `addImages` a `(images: ImageExtended[]) => void;`.
+        - Dentro de `addImage`, eliminar la llamada a `transformImageToExtended` y simplemente `set` el `extendedImage`.
+        - Dentro de `addImages`, eliminar la llamada a `transformImagesToExtended` y simplemente mapear el array de `ImageExtended` a un mapa.
+        - Para `createImage` (acción asíncrona), que devuelve `ImageBase`, sería necesario llamar `extendImage(newImageBase)` antes de `get().addImage(...)`.
 
-7.  **Manejo de Errores y Carga**:
-    *   Asegurar que `setLoading(true)` y `setLoading(false)` se mantengan consistentemente.
-    *   Asegurar que `setError(errorMessage)` capture los errores de las Server Actions (que ya están tipados y logueados por las SA).
+7. **Manejo de Errores y Carga**:
+    - Asegurar que `setLoading(true)` y `setLoading(false)` se mantengan consistentemente.
+    - Asegurar que `setError(errorMessage)` capture los errores de las Server Actions (que ya están tipados y logueados por las SA).
 
 ---
 
@@ -661,6 +671,7 @@ Se agregaron Server Actions para configuraciones visuales y estadísticas de deb
 **Estado**: Verificadas las llamadas en `video` y `unified-file-manager`; no se detectaron `fetch` pendientes. El antiguo `file-manager.store.ts` queda como referencia histórica y no se usa en la aplicación.
 
 **Avance 15 de junio de 2025**:
+
 - Eliminado el respaldo a rutas `/api` en `use-entity-loader`; ahora todas las entidades se cargan exclusivamente mediante Server Actions.
 - Actualizada documentación y README con esta integración.
 - Exportados `PropertyContentView` y `WildcardContentView` en el barrel de vistas para evitar importaciones inconsistentes.
@@ -668,12 +679,14 @@ Se agregaron Server Actions para configuraciones visuales y estadísticas de deb
 - Documentada en la guía de entidades la nueva sección **Entities Cards** para configurar las tarjetas de personajes, lugares y objetos.
 
 **Avance 8 de junio de 2025**:
+
 - Actualizada la configuración de Jest para transformar `nanoid`.
 - Añadido polyfill de `TextEncoder` en `jest.setup.ts`.
 - Creado test para los selectores de `ProfileStore`.
 - Mejorado el mock de `PrismaClient` para soportar `new PrismaClient()` en pruebas.
 
 **Avance 13 de junio de 2025**:
+
 - Eliminadas las llamadas `fetch` en `use-folders-polling` reemplazándolas por `getFolderProcessingStatus`.
 - Añadidas server actions `getVideoVisualConfig` y `updateVideoVisualConfig` para manejar la configuración visual de videos.
 - Actualizado el slice de videos para usar estas acciones en lugar de la API.
@@ -684,24 +697,29 @@ Se agregaron Server Actions para configuraciones visuales y estadísticas de deb
 **Fecha**: 12 de junio de 2025
 
 **Avance 14 de junio de 2025**:
+
 - Integrado el `FileBrowser` con el store de archivos para compartir selección y modo de vista con la `ViewToolbar`.
 - Revisadas y migradas todas las llamadas a Server Actions en módulos de video y file manager.
 
 **Avance 7 de junio de 2025**:
+
 - Implementada la server action `searchImages` para reemplazar la búsqueda vía API.
 - `SearchView` ahora carga resultados mediante `searchImages` y actualiza el store de archivos directamente.
 - Documentado el nuevo flujo de búsqueda en `docs/entities.md`.
 
 **Avance 8 de junio de 2025 (2)**:
+
 - Instalado @testing-library/user-event para evitar errores de modulo en pruebas.
 - Ejecutados tests: fallan suites de componentes complejos y folder service por estado interno.
 - Se verifico que la slice de imagen usa server actions y no quedan fetch a /api.
 
 **Avance 17 de junio de 2025**:
+
 - Instalado @testing-library/user-event y ejecutadas las pruebas nuevamente.
 - Persiste el fallo de 7 suites por problemas de mocks y dependencias de Next.js.
 
 **Avance 18 de junio de 2025**:
+
 - Corregidos warnings de linter en FileBrowser y mock de PrismaClient.
 - Actualizados estados de slices pendientes a Completado.
 - 'pnpm lint' sin errores; 'pnpm test' mantiene 7 fallos por dependencias Next.js.
@@ -722,6 +740,7 @@ Se agregaron Server Actions para configuraciones visuales y estadísticas de deb
 - Todas las suites de Jest pasan satisfactoriamente.
 
 **Avance 21 de junio de 2025**:
+
 - Eliminadas importaciones de tipos de Prisma en los stores de favoritos, world items y archivos.
 - Sustituidas por tipos de dominio (`Image`, `CreateWorldItemData`, `UpdateWorldItemData`, `Collection`).
 - Ejecutados `pnpm lint` y `pnpm test`; todas las suites pasan sin errores.
@@ -730,27 +749,148 @@ Se agregaron Server Actions para configuraciones visuales y estadísticas de deb
 - Ejecutados `pnpm lint` y `pnpm test` con éxito; todas las suites de Jest pasan.
 - Confirmado que el slice de imágenes usa exclusivamente Server Actions.
 
-
 **Avance 23 de junio de 2025**:
+
 - Revisión de todos los módulos de configuracion de entidades en `src/components/settings` para confirmar uso exclusivo de Server Actions.
 - Cada modulo (albums, characters, collections, concepts, groups, notes, places, prompts, properties, tags, thumbnails, uploaded-images, wildcards, world-items y sistema) carga y actualiza datos a través de sus acciones de servidor correspondientes.
 - No se encontraron llamadas `fetch` ni TODOs pendientes. Se documenta la auditoría y se marca la tarea como completada.
 - Ejecutados `pnpm install`, `pnpm lint` y `pnpm test`; todas las suites pasan sin errores.
 
 **Avance 24 de junio de 2025**:
+
 - Ampliadas las seeds con carpetas y perfiles adicionales para instalaciones limpias.
 - La vista `FoldersSettings` ahora muestra una barra de progreso en tiempo real para la reindexación global.
 - Documentados estos cambios en README y en la guía de entidades.
 
 **Avance 25 de junio de 2025**:
+
 - Añadidos tests para `FoldersView` y `CharactersView` usando mocks de server actions.
 - Se agregó un polyfill de `IntersectionObserver` en los tests de vistas.
 - Ejecutados `pnpm lint` y `pnpm test`; todas las suites pasan con éxito.
 
 **Avance 26 de junio de 2025**:
+
 - Al actualizar el repositorio, las suites de tests fallaban por no encontrar `@testing-library/user-event`.
 - Se ejecutó `pnpm install` para restaurar la dependencia faltante.
 - Confirmado que `pnpm lint` y `pnpm test` vuelven a completarse con 21 suites exitosas.
 
 - Se espació el polling de estado de carpetas a 30 segundos para reducir carga.
 - Se reinstaló `@testing-library/user-event` y todas las suites de tests vuelven a pasar.
+
+# Tarea: Eliminación de 'empty_array' como valor por defecto y uso de arrays JSON válidos ('[]')
+
+## Resumen de cambios realizados
+
+- Se reemplazó `@default("empty_array")` por `@default("[]")` en todos los modelos de Prisma que usaban arrays serializados como string.
+- Se actualizaron todos los helpers, mappers y validadores en `src/utils` y `src/transformers` para usar '[]' en vez de 'empty_array'.
+- Se agregaron comentarios en el código para indicar compatibilidad legacy y la necesidad de migrar datos existentes.
+- Se detectaron errores de tipado en algunos archivos, que deben ser revisados y corregidos en una siguiente iteración.
+
+## Próximos pasos sugeridos
+
+- Realizar una migración SQL para reemplazar todos los valores 'empty_array' existentes en la base de datos por '[]' en los campos afectados.
+- Corregir los errores de tipado detectados en los helpers y mappers (ver logs de compilación).
+- Validar que los seeds y nuevas inserciones ya no generen 'empty_array'.
+- Probar la app y verificar que los errores de deserialización han desaparecido.
+
+## Diagrama de flujo de la corrección
+
+```mermaid
+graph TD
+    A[Inicio] --> B[Reemplazar default en schema.prisma]
+    B --> C[Actualizar helpers y validadores]
+    C --> D[Agregar comentarios de compatibilidad]
+    D --> E[Actualizar CURRENT-TASK.md]
+    E --> F{¿Datos legacy?}
+    F -- Sí --> G[Migrar datos en BD]
+    F -- No --> H[Fin]
+    G --> H[Fin]
+```
+
+## Notas
+
+- Si existen datos legacy, ejecutar un script SQL para migrar los valores.
+- Documentar en la wiki del proyecto la decisión y el motivo del cambio.
+
+🟢 Cambios aplicados siguiendo las mejores prácticas y reglas del proyecto.
+
+# Plan de acción para corregir y robustecer el transformer de Character
+
+## Objetivo
+
+Corregir y robustecer el archivo `src/transformers/character/transformer.ts` para asegurar:
+
+- Tipado estricto y correcto.
+- Uso adecuado de los imports y dependencias.
+- Compatibilidad con la arquitectura y los tipos del proyecto.
+- Código mantenible, seguro y documentado.
+
+---
+
+## Pasos del plan
+
+1. **Revisión de imports y dependencias**
+   - Verificar que los imports apunten a los archivos correctos (`fromPrismaCharacter` desde `./server`).
+   - Confirmar que los tipos importados existen y son los adecuados.
+
+2. **Tipado y validación**
+   - Garantizar que las funciones usen los tipos correctos (`Character`, `CharacterComplete`, etc.).
+   - Usar `as unknown as Character` solo cuando sea estrictamente necesario y documentar el motivo.
+   - Validar entradas con Zod y lanzar errores claros.
+
+3. **Refactorización de funciones**
+   - Revisar y mejorar la función principal `transformCharacter` para robustez y claridad.
+   - Revisar funciones auxiliares (`transformCharacters`, `transformCharacterToExtended`, etc.) para asegurar consistencia y tipado estricto.
+   - Añadir comentarios clave y emojis para mejorar la mantenibilidad.
+
+4. **Documentación y ejemplos**
+   - Añadir o actualizar la documentación en el archivo.
+   - Incluir ejemplos de uso y advertencias sobre el tipado.
+   - Agregar un diagrama de flujo (mermaid) del proceso de transformación.
+
+5. **Pruebas y validación**
+   - Verificar que el archivo compile sin errores de tipo.
+   - Validar que los métodos funcionen correctamente con datos reales y mock.
+
+---
+
+## Diagrama de flujo (mermaid)
+
+```mermaid
+flowchart TD
+    A[Entrada: Objeto Character] --> B{¿Es nulo o indefinido?}
+    B -- Sí --> Z[Error: objeto nulo]
+    B -- No --> C{¿Tiene id y name?}
+    C -- Sí --> D[Llama fromPrismaCharacter]
+    C -- No --> E{¿Validar con Zod?}
+    E -- Sí --> F[Validar con CharacterSchema]
+    F -- Error --> Z
+    F -- Ok --> G[Llama fromPrismaCharacter]
+    E -- No --> G
+    D & G --> H[Retorna CharacterComplete]
+```
+
+---
+
+## Ejemplo de uso
+
+```typescript
+import { transformCharacter } from '@/transformers/character/transformer';
+
+const prismaCharacter = { id: '1', name: 'John', ... };
+const character = transformCharacter(prismaCharacter);
+```
+
+---
+
+## Notas
+
+- Usar tipado estricto siempre que sea posible.
+- Documentar cualquier conversión forzada de tipos.
+- Mantener el archivo alineado con los cambios en los tipos globales del proyecto.
+
+---
+
+## Siguiente paso
+
+- Proceder con la revisión y refactorización del archivo según este plan.

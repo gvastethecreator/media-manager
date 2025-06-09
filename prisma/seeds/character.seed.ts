@@ -37,7 +37,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Estoico', 'Melancólico', 'Honorable']),
 					skills: JSON.stringify(['Esgrima', 'Tácticas militares']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Elyra la Cenicienta',
@@ -69,7 +69,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Apasionada', 'Determinada', 'Reservada']),
 					skills: JSON.stringify(['Magia de fuego', 'Alquimia']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Kael el Caminante del Abismo',
@@ -101,7 +101,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Valiente', 'Determinado', 'Atormentado']),
 					skills: JSON.stringify(['Combate cuerpo a cuerpo', 'Estrategia militar']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Morrigan la Velada',
@@ -132,7 +132,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Misteriosa', 'Reservada', 'Obsesionada']),
 					skills: JSON.stringify(['Magia arcana', 'Investigación']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Tharok el Devastador',
@@ -163,7 +163,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Violento', 'Impulsivo', 'Destructivo']),
 					skills: JSON.stringify(['Combate cuerpo a cuerpo', 'Intimidación']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Serafina la Caída',
@@ -194,7 +194,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Compasiva', 'Determinada', 'Generosa']),
 					skills: JSON.stringify(['Sanación', 'Oratoria']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Drenvar el Silencioso',
@@ -225,7 +225,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Silencioso', 'Letal', 'Misterioso']),
 					skills: JSON.stringify(['Sigilo', 'Asesinato']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Liora la Portadora de Luz',
@@ -256,7 +256,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Valiente', 'Justa', 'Dedicada']),
 					skills: JSON.stringify(['Combate cuerpo a cuerpo', 'Liderazgo']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Vorrik el Demente',
@@ -287,7 +287,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Inestable', 'Perturbado', 'Errático']),
 					skills: JSON.stringify(['Magia oscura', 'Invocación']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Eryndor el Eterno',
@@ -318,7 +318,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Ambicioso', 'Despiadado', 'Erudito']),
 					skills: JSON.stringify(['Magia arcana', 'Alquimia']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Garruk el Salvaje',
@@ -350,7 +350,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Protector', 'Sabio', 'Dedicado']),
 					skills: JSON.stringify(['Magia natural', 'Herboristería']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 				{
 					name: 'Isolda la Nacida del Hielo',
@@ -381,7 +381,7 @@ export async function seedCharacters(prisma: PrismaClient): Promise<void> {
 					personality: JSON.stringify(['Feroz', 'Leal', 'Valiente']),
 					skills: JSON.stringify(['Combate cuerpo a cuerpo', 'Supervivencia']),
 					sortBy: 'name',
-					filters: 'empty_array',
+					filters: JSON.stringify([]), // ✨ Corregido: Usar JSON válido para array vacío
 				},
 			];
 
