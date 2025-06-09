@@ -894,3 +894,68 @@ const character = transformCharacter(prismaCharacter);
 ## Siguiente paso
 
 - Proceder con la revisión y refactorización del archivo según este plan.
+
+## UploadedImagesView: Fix de tipos y mapeo
+
+### Plan de acción (09/06/2025)
+
+1. Definir el tipo local `UploadedImageFilters` (search, type).
+2. Corregir el mapeo de `UploadedImageResult` a `FileItem`:
+   - id: EntityId
+   - mimeType: extraer de metadata o fallback
+   - processingStatus: fallback 'COMPLETED'
+   - metadata: asegurar string JSON
+3. Comentar el código clave y documentar el flujo.
+4. Actualizar imports y tipos.
+
+---
+
+- [ ] Definir tipo UploadedImageFilters
+- [ ] Corregir mapeo adaptedItems
+- [ ] Comentar y documentar
+- [ ] Validar tipos y funcionamiento
+
+# 🛠️ Tarea: Corregir error de hooks en FileBrowser
+
+## Estado actual
+
+- El error "Invalid hook call. Hooks can only be called inside of the body of a function component" persiste en `file-browser.tsx`.
+- Se ha verificado que todos los hooks están correctamente usados dentro de componentes o hooks personalizados.
+- No hay múltiples versiones de React según `pnpm why`, pero con PNPM pueden quedar duplicados en `.pnpm` o `node_modules/.pnpm`.
+
+## Plan de acción inmediato
+
+1. Limpiar `node_modules` y el caché de PNPM para eliminar posibles duplicados físicos de React.
+2. Reinstalar dependencias con `pnpm install`.
+3. Reiniciar el servidor de desarrollo.
+4. Probar si el error persiste.
+
+## Comandos a ejecutar
+
+```sh
+pnpm store prune
+pnpm install --force
+```
+
+## Siguiente paso
+
+- Si el error persiste tras limpiar y reinstalar, revisaré posibles problemas en la configuración de Next.js, alias de React en tsconfig o importaciones cruzadas.
+
+---
+
+### Diagrama de flujo de la depuración
+
+```mermaid
+graph TD
+    A[Detectar error de hooks] --> B[Verificar versiones de React]
+    B --> C[Limpiar node_modules y caché]
+    C --> D[Reinstalar dependencias]
+    D --> E[Reiniciar servidor]
+    E --> F{¿Error persiste?}
+    F -- Sí --> G[Revisar configuración Next.js y alias]
+    F -- No --> H[Error resuelto]
+```
+
+---
+
+> Última actualización: 9 de junio de 2025

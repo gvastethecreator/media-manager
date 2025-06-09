@@ -1,17 +1,17 @@
 'use client';
 
-import type { PromptWithStats } from '@/app/actions/prompts/prompt.actions';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
 import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { Alert, AlertCircle, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
-import { MessageSquare } from 'lucide-react';
+import type { PromptWithStats } from '@/types/entities/prompt/base';
+import { AlertCircle, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
