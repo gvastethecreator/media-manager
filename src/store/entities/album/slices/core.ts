@@ -4,24 +4,23 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { createAlbum, deleteAlbum, getAlbum, getAlbums, moveAlbum } from '../../../../app/actions/albums/album.actions';
+import { createAlbum, deleteAlbum, getAlbum, getAlbums } from '../../../../app/actions/albums/album.actions';
 import { extendAlbum } from '../../../../transformers/album/serializers';
 import type {
-	Album,
-	AlbumBase,
-	CreateAlbumData,
-	UpdateAlbumData,
-	UpdateAlbumItemsData,
-} from '../../../../types/entities/album';
+    AlbumBase,
+    AlbumCreateInput,
+    AlbumRelations,
+    AlbumUpdateInput
+} from '../../../../types/entities/album/types';
 import type { AlbumState } from '../types';
 
 // Slice para operaciones CRUD básicas
 export interface AlbumCoreSlice {
 	// Getters
-	getAlbum: (id: string) => Album | undefined;
-	getAlbums: () => Album[];
-	getChildAlbums: (parentId: string) => Album[];
-	getRootAlbums: () => Album[];
+	getAlbum: (id: string) => AlbumBase | undefined;
+	getAlbums: () => AlbumBase[];
+	getChildAlbums: (parentId: string) => AlbumBase[];
+	getRootAlbums: () => AlbumBase[];
 	getAlbumItems: (albumId: string) => Array<{ id: string; type: 'image' | 'video' }>;
 	getAlbumGroups: (albumId: string) => string[];
 	getAlbumProperties: (albumId: string) => string[];
@@ -30,13 +29,13 @@ export interface AlbumCoreSlice {
 	// Operaciones
 	addAlbum: (album: AlbumBase) => void;
 	addAlbums: (albums: AlbumBase[]) => void;
-	updateAlbum: (id: string, data: UpdateAlbumData) => void;
+	updateAlbum: (id: string, data: AlbumUpdateInput) => void;
 	deleteAlbum: (id: string) => void;
 
 	// Gestión de elementos
 	addItemToAlbum: (albumId: string, itemId: string, itemType: 'image' | 'video') => void;
 	removeItemFromAlbum: (albumId: string, itemId: string) => void;
-	updateAlbumItems: (albumId: string, data: UpdateAlbumItemsData) => void;
+	updateAlbumItems: (albumId: string, data: any) => void;
 	clearAlbumItems: (albumId: string) => void;
 
 	// Gestión de relaciones
@@ -56,11 +55,10 @@ export interface AlbumCoreSlice {
 	setError: (error: string | null) => void;
 
 	// Acciones asíncronas
-	fetchAlbum: (id: string) => Promise<Album | undefined>;
-	fetchAlbums: (parentId?: string) => Promise<Album[]>;
-	createAlbum: (data: CreateAlbumData) => Promise<Album | undefined>;
+	fetchAlbum: (id: string) => Promise<AlbumBase | undefined>;
+	fetchAlbums: (parentId?: string) => Promise<AlbumBase[]>;
+	createAlbum: (data: AlbumCreateInput) => Promise<AlbumBase | undefined>;
 	removeAlbum: (id: string) => Promise<boolean>;
-	moveAlbum: (id: string, newParentId: string | null) => Promise<boolean>;
 }
 
 // Creador del slice
@@ -88,17 +86,17 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 
 	getAlbumGroups: (albumId: string) => {
 		const album = get().core.albums[albumId];
-		return album?.groups?.map((group) => group.id) || [];
+		return album?.groups?.map((group: { id: string }) => group.id) || [];
 	},
 
 	getAlbumProperties: (albumId: string) => {
 		const album = get().core.albums[albumId];
-		return album?.properties?.map((property) => property.id) || [];
+		return album?.properties?.map((property: { id: string }) => property.id) || [];
 	},
 
 	getAlbumWildcards: (albumId: string) => {
 		const album = get().core.albums[albumId];
-		return album?.wildcards?.map((wildcard) => wildcard.id) || [];
+		return album?.wildcards?.map((wildcard: { id: string }) => wildcard.id) || [];
 	},
 
 	// Operaciones síncronas
@@ -138,7 +136,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 		}));
 	},
 
-	updateAlbum: (id: string, data: UpdateAlbumData) => {
+	updateAlbum: (id: string, data: AlbumUpdateInput) => {
 		set((state) => {
 			const album = state.core.albums[id];
 			if (!album) return state;
@@ -218,7 +216,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 		});
 	},
 
-	updateAlbumItems: (albumId: string, data: UpdateAlbumItemsData) => {
+	updateAlbumItems: (albumId: string, data: any) => {
 		set((state) => {
 			const currentItems = state.core.albumItems[albumId] || [];
 
@@ -484,7 +482,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 		}
 	},
 
-	createAlbum: async (data: CreateAlbumData) => {
+	createAlbum: async (data: AlbumCreateInput) => {
 		set({ loading: true, error: null });
 		try {
 			const newAlbum = await createAlbum(data);
@@ -510,38 +508,6 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 		} catch (error: any) {
 			set({ error: error.message, loading: false });
 			console.error('Error removing album:', error);
-			return false;
-		} finally {
-			set({ loading: false });
-		}
-	},
-
-	moveAlbum: async (id: string, newParentId: string | null) => {
-		set({ loading: true, error: null });
-		try {
-			await moveAlbum(id, newParentId);
-			// Actualizar el estado localmente después de la acción exitosa
-			set((state) => {
-				const albumToMove = state.core.albums[id];
-				if (!albumToMove) return state;
-				return {
-					core: {
-						...state.core,
-						albums: {
-							...state.core.albums,
-							[id]: {
-								...albumToMove,
-								parentId: newParentId,
-							},
-						},
-						lastUpdated: Date.now(),
-					},
-				};
-			});
-			return true;
-		} catch (error: any) {
-			set({ error: error.message, loading: false });
-			console.error('Error moving album:', error);
 			return false;
 		} finally {
 			set({ loading: false });

@@ -101,7 +101,7 @@ export function isValidPromptTags(tags: string | string[]): boolean {
 	try {
 		// Si es string, intentar parsearlo
 		const tagsArray =
-			typeof tags === 'string' ? (tags === '[]' || tags === 'empty_array' ? [] : JSON.parse(tags)) : tags;
+			typeof tags === 'string' ? (tags === '[]' ? [] : JSON.parse(tags)) : tags;
 
 		// Verificar que sea un array
 		if (!Array.isArray(tagsArray)) {

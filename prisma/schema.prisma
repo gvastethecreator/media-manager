@@ -349,7 +349,7 @@ model Group {
 
   // Configuración
   sortBy  String @default("name")
-  filters String @default("empty_array")
+  filters String @default("[]")
 
   // Propiedades de visualización
   featuredImage String?
@@ -396,7 +396,7 @@ model Album {
 
   // Configuración
   sortBy  String @default("name")
-  filters String @default("empty_array")
+  filters String @default("[]")
 
   // Propiedades de visualización
   featuredImage String?
@@ -445,7 +445,7 @@ model Collection {
 
   // Configuración
   sortBy  String @default("name")
-  filters String @default("empty_array")
+  filters String @default("[]")
 
   // Propiedades externas
   url             String?
@@ -458,7 +458,7 @@ model Collection {
   tokenAddress    String?
   contractAddress String?
   contractType    String?
-  editions        String  @default("empty_array")
+  editions        String  @default("[]")
 
   // Propiedades de visualización
   featuredImage String?
@@ -594,7 +594,7 @@ model Wildcard {
   description String?
   shortcut    String?
   category    String? @default("general")
-  children    String  @default("empty_array")
+  children    String  @default("[]")
 
   // Propiedades de visualización
   featuredImage String?
@@ -650,7 +650,7 @@ model Character {
 
   // Configuración
   sortBy  String @default("name")
-  filters String @default("empty_array")
+  filters String @default("[]")
 
   // Atributos del personaje
   level     Int     @default(1)
@@ -664,13 +664,13 @@ model Character {
   stats                String @default("")
   psychologicalProfile String @default("")
   socialProfile        String @default("")
-  relationships        String @default("empty_array")
-  goals                String @default("empty_array")
-  fears                String @default("empty_array")
-  beliefs              String @default("empty_array")
-  personality          String @default("empty_array")
-  skills               String @default("empty_array")
-  abilities            String @default("empty_array")
+  relationships        String @default("[]")
+  goals                String @default("[]")
+  fears                String @default("[]")
+  beliefs              String @default("[]")
+  personality          String @default("[]")
+  skills               String @default("[]")
+  abilities            String @default("[]")
 
   // Propiedades de visualización
   featuredImage String?
@@ -725,7 +725,7 @@ model Place {
 
   // Configuración
   sortBy  String @default("name")
-  filters String @default("empty_array")
+  filters String @default("[]")
 
   // Atributos del lugar
   region     String @default("unknown")
@@ -735,8 +735,8 @@ model Place {
   government String @default("unknown")
 
   // Características detalladas
-  dangers   String @default("empty_array")
-  resources String @default("empty_array")
+  dangers   String @default("[]")
+  resources String @default("[]")
   lore      String @default("")
   history   String @default("")
   stats     String @default("")
@@ -791,13 +791,13 @@ model WorldItem {
 
   // Configuración
   sortBy  String @default("name")
-  filters String @default("empty_array")
+  filters String @default("[]")
 
   // Atributos del objeto
   type       String @default("misc")
   rarity     String @default("common")
-  attributes String @default("empty_array")
-  effects    String @default("empty_array")
+  attributes String @default("[]")
+  effects    String @default("[]")
   size       String @default("medium")
 
   // Características detalladas
@@ -863,7 +863,7 @@ model Concept {
   // Relaciones con entidades principales
   albums      Album[]      @relation("AlbumToConcept")
   collections Collection[] @relation("CollectionToConcept")
-  tags        Tag[]        @relation("TagToConcept")
+  tagEntities Tag[]        @relation("TagToConcept") // Renombrado para evitar conflicto
   characters  Character[]  @relation("CharacterToConcept")
   places      Place[]      @relation("PlaceToConcept")
   worldItems  WorldItem[]  @relation("WorldItemToConcept")
@@ -898,6 +898,8 @@ model Prompt {
   purpose     String  @default("")
   category    String  @default("general")
   parameters  String  @default("")
+  tags        String  @default("[]") // <--- Campo serializado para arrays
+  tagEntities Tag[]   @relation("TagToPrompt") // <--- Relación renombrada
 
   // Propiedades de visualización
   featuredImage String?
@@ -910,7 +912,6 @@ model Prompt {
   // Relaciones con entidades principales
   albums      Album[]      @relation("AlbumToPrompt")
   collections Collection[] @relation("CollectionToPrompt")
-  tags        Tag[]        @relation("TagToPrompt")
   characters  Character[]  @relation("CharacterToPrompt")
   places      Place[]      @relation("PlaceToPrompt")
   worldItems  WorldItem[]  @relation("WorldItemToPrompt")
