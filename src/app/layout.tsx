@@ -1,7 +1,7 @@
 import '@/app/globals.css';
 import { GlobalErrorHandler } from '@/components/core/global-error-handler';
 import { ServerInitializer } from '@/components/server/server-initializer';
-import { GlobalTooltipProvider } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { ReactScanProvider } from '@/lib/react-scan';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/providers/app-provider';
@@ -36,11 +36,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 				<AppProvider>
 					<ReactScanProvider>
-						<GlobalTooltipProvider>
+						<TooltipProvider>
 							<div className="relative min-h-screen w-full">
 								<GlobalErrorHandler>{children}</GlobalErrorHandler>
 							</div>
-						</GlobalTooltipProvider>
+						</TooltipProvider>
 					</ReactScanProvider>
 				</AppProvider>
 			</body>
