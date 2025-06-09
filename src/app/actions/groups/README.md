@@ -1,3 +1,10 @@
 # Groups Actions
 
-Acciones del servidor para grupos de entidades.
+
+## Funciones disponibles
+- `createGroup`
+- `deleteGroup`
+- `getGroup`
+- `getGroups`
+- `toggleGroupFavorite`
+- `updateGroup`
