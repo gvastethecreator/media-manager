@@ -1,3 +1,14 @@
 # Prompts Actions
 
-Acciones del servidor para prompts e historial.
+
+## Funciones disponibles
+- `addImageToPrompt`
+- `createPrompt`
+- `deletePrompt`
+- `getPrompt`
+- `getPromptImages`
+- `getPromptWithRelations`
+- `getPrompts`
+- `linkEntityToPrompt`
+- `unlinkEntityFromPrompt`
+- `updatePrompt`

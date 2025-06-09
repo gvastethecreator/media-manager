@@ -1,3 +1,4 @@
 # Search Actions
 
-Acciones del servidor para búsqueda avanzada.
+## Funciones disponibles
+- `searchImages`

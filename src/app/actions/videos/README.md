@@ -1,3 +1,13 @@
 # Videos Actions
 
-Acciones del servidor para videos.
+
+## Funciones disponibles
+- `createVideo`
+- `deleteVideo`
+- `findVideos`
+- `getVideo`
+- `getVideoStats`
+- `moveVideoToFolder`
+- `setVideoVisibility`
+- `toggleVideoFavorite`
+- `updateVideo`

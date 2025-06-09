@@ -1,3 +1,18 @@
 # Queue Actions
 
-Acciones del servidor para cola de tareas.
+
+## Funciones disponibles
+- `cancelJob`
+- `createJob`
+- `deleteJob`
+- `getJob`
+- `getJobs`
+- `getQueueStats`
+- `getQueueStatus`
+- `pauseQueue`
+- `processJob`
+- `resumeQueue`
+- `retryJob`
+- `startQueue`
+- `stopQueue`
+- `updateJob`
