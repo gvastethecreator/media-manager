@@ -5,23 +5,23 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	CollectionComplete,
-	CollectionEdition,
-	CollectionExtended,
-	CollectionFilter,
-	CollectionSummary,
+    CollectionComplete,
+    CollectionEdition,
+    CollectionExtended,
+    CollectionFilter,
+    CollectionSummary,
 } from '@/types/entities/collection';
 import {
-	type CollectionBase,
-	type CollectionCreateInput,
-	CollectionSchema,
-	type CollectionUpdateInput,
+    type CollectionBase,
+    type CollectionCreateInput,
+    CollectionSchema,
+    type CollectionUpdateInput,
 } from '@/types/entities/collection/types';
 import {
-	deserializeJsonField,
-	serializeJsonField,
-	validateFieldType,
-	validateRequiredFields,
+    deserializeJsonField,
+    serializeJsonField,
+    validateFieldType,
+    validateRequiredFields,
 } from '@/utils/transformers/common';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { getRelationCounts, preparePrismaRelations, validateEntityRelations } from '@/utils/transformers/relations';
@@ -332,8 +332,8 @@ export function parseCollectionFilters(filters: unknown): Record<string, unknown
  */
 export function parseCollectionFiltersFromString(filtersStr: string): CollectionFilter[] {
 	try {
-		// Si es "empty_array", retornar un array vacío
-		if (!filtersStr || filtersStr === 'empty_array') {
+		// Si es "[]", retornar un array vacío
+		if (!filtersStr || filtersStr === '[]') {
 			return [];
 		}
 
@@ -360,13 +360,13 @@ export function parseCollectionFiltersFromString(filtersStr: string): Collection
 export function serializeCollectionFilters(filters: CollectionFilter[]): string {
 	try {
 		if (!filters || filters.length === 0) {
-			return 'empty_array';
+			return '[]';
 		}
 
 		return JSON.stringify(filters);
 	} catch (error) {
 		console.error('Error al serializar filtros de colección:', error);
-		return 'empty_array';
+		return '[]';
 	}
 }
 

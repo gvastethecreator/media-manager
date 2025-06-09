@@ -2,14 +2,16 @@
 
 import { EmptyState } from '@/components/core/data-display';
 import { FileViewer, type ImageItem } from '@/components/features/file-viewer/file-viewer';
+import FlickeringGrid from '@/components/ui/flickering-grid';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ClientLogger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useImageResources } from '@/store/image-resources.store';
 import type { FileItem } from '@/types/file-item';
+import type { ViewMode } from '@/types/settings';
 import { FileText as FileTextIcon } from 'lucide-react';
-import type * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { GridGaps } from './config/grid-config';
 import { GRID_CONFIG } from './config/grid-config';
@@ -114,7 +116,7 @@ const FileBrowserComponent = ({
 		}
 	}, [items]);
 
-	const viewMode = useFileStoreBase((state) => state.viewMode);
+	const viewMode: ViewMode = useFileStoreBase((state) => state.viewMode as ViewMode);
 	const selectedFileIds = useFileStoreBase((state) => state.selectedFileIds);
 	const selectFile = useFileStoreBase((state) => state.selectFile);
 	const toggleSelectFile = useFileStoreBase((state) => state.toggleSelectFile);
@@ -143,21 +145,46 @@ const FileBrowserComponent = ({
 	// Referencia para controlar si ya se realizó la precarga de entidades
 	const entitiesPreloadedRef = useRef<boolean>(false);
 
-	// Crear una referencia local para el div parent
-	const gridParentRef = useRef<HTMLDivElement>(null);
-
 	// Usar los hooks para separar la lógica
-	const { parentRef, loadMoreRef, containerWidth, isTransitioning, handleScroll, debouncedLoadThumbnails } =
+	const { parentRef, parentCallbackRef, loadMoreRef, containerWidth, isTransitioning, handleScroll, debouncedLoadThumbnails, forceRecalcWidth } =
 		useGridView({
 			viewMode,
 			isResizing,
 			loadMoreItems,
 		});
 
-	// Hook para virtualización - usamos un cast de tipo para resolver el problema de incompatibilidad
+	// --- INICIO: Mejora de robustez para containerWidth ---
+	useEffect(() => {
+		// Si el ancho es 0 y el ref está disponible, intentar recalcular tras un pequeño delay
+		if ((!containerWidth || containerWidth <= 0) && parentRef?.current) {
+			const tryRecalc = () => {
+				forceRecalcWidth();
+				// gridLogger.info(`🛠️ Reintento automático de cálculo de containerWidth`);
+			};
+			// Intentar recalcular tras 100ms y 300ms (doble intento)
+			const t1 = setTimeout(tryRecalc, 100);
+			const t2 = setTimeout(tryRecalc, 300);
+			return () => {
+				clearTimeout(t1);
+				clearTimeout(t2);
+			};
+		}
+	}, [containerWidth, parentRef, forceRecalcWidth]);
+
+	// Refuerzo del callback ref: asegurar que el ResizeObserver siempre se registre y forzar recálculo si es necesario
+	const robustParentCallbackRef = useCallback((node: HTMLDivElement | null) => {
+		if (parentCallbackRef) parentCallbackRef(node);
+		if (node && (!containerWidth || containerWidth <= 0)) {
+			forceRecalcWidth();
+			// gridLogger.info(`🟢 CallbackRef forzó recálculo de containerWidth`);
+		}
+	}, [parentCallbackRef, forceRecalcWidth, containerWidth]);
+	// --- FIN mejora robustez ---
+
+	// Hook para virtualización - ahora parentRef es un RefObject real
 	const { columns, itemSize, virtualizer, calculateMasonryHeight } = useGridVirtualizer({
 		items,
-		parentRef: gridParentRef as React.RefObject<HTMLDivElement>,
+		parentRef,
 		viewMode,
 		containerWidth,
 	});
@@ -575,11 +602,16 @@ const FileBrowserComponent = ({
 		[selectedFileIds, deselectAllFiles, selectFile]
 	);
 
+	// Wrapper para toggleSelectFile que acepta un FileItem
+	const handleToggleSelectFile = useCallback((item: FileItem) => {
+		toggleSelectFile(item.id);
+	}, [toggleSelectFile]);
+
 	const handleMenuAction = useCallback(
 		(action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
-			handleContextAction(action, item, data, handleItemDoubleClick, toggleSelectFile);
+			handleContextAction(action, item, data, handleItemDoubleClick, handleToggleSelectFile);
 		},
-		[handleItemDoubleClick, toggleSelectFile]
+		[handleItemDoubleClick, handleToggleSelectFile]
 	);
 
 	const ViewComponent = VIEW_COMPONENT_MAP[viewMode as keyof typeof VIEW_COMPONENT_MAP];
@@ -591,8 +623,8 @@ const FileBrowserComponent = ({
 	// 	selectedItemsCount: selectedItems.length,
 	// });
 
-	if (!items || items.length === 0) {
-		// gridLogger.info('No items to display in FileBrowser.'); // Comentado
+	if (!items || items.length === 0 || !processedItems || processedItems.length === 0) {
+		gridLogger.warn('⚠️ No hay items válidos para renderizar el grid.');
 		return (
 			<EmptyState
 				icon={FileTextIcon}
@@ -602,16 +634,69 @@ const FileBrowserComponent = ({
 		);
 	}
 
+	// 🔧 CORREGIDO: Protección robusta - solo verificar containerWidth válido y mostrar Skeleton/FlickeringGrid como fallback amigable
+	if (!containerWidth || Number.isNaN(containerWidth) || containerWidth <= 0) {
+		// Loggear el ancho real del div padre si es posible, pero solo una vez por ciclo
+		const realWidth = parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.offsetWidth : 'N/A';
+		if (!hasLoggedWidthErrorRef.current) {
+			gridLogger.error(`❌ containerWidth inválido o no inicializado: ${containerWidth} | ancho real del div padre: ${realWidth}`);
+			hasLoggedWidthErrorRef.current = true;
+		}
+
+		// Mostrar Skeleton y FlickeringGrid como feedback visual mientras se calcula el ancho
+		return (
+			<div className="flex flex-col items-center justify-center h-full w-full gap-4">
+				<div className="w-full max-w-5xl h-72 flex items-center justify-center relative">
+					{/* Skeleton animado para simular el grid */}
+					<Skeleton className="w-full h-full rounded-xl" />
+					<div className="absolute inset-0 pointer-events-none opacity-80">
+						<FlickeringGrid squareSize={16} gridGap={12} maxOpacity={0.18} />
+					</div>
+				</div>
+				<div className="text-xs text-muted-foreground text-center">
+					Calculando layout...<br />
+					<code>containerWidth: {containerWidth}</code><br />
+					<code>ancho real del div padre: {realWidth}</code>
+				</div>
+				<button
+					type="button"
+					className="mt-2 px-3 py-1 rounded bg-muted text-xs hover:bg-accent border"
+					onClick={() => {
+						hasLoggedWidthErrorRef.current = false; // Permitir re-log si vuelve a fallar
+						forceRecalcWidth();
+					}}
+				>
+					Reintentar cálculo
+				</button>
+			</div>
+		);
+	}
+
+	// 🔧 CORREGIDO: El callback ref ahora maneja automáticamente el cálculo del ancho, no necesitamos forzarlo manualmente
+
+	// Protección extra: si el virtualizer no está bien inicializado, evitar renderizar el grid
+	if (!virtualizer || typeof virtualizer.getTotalSize !== 'function' || Number.isNaN(virtualizer.getTotalSize()) || virtualizer.getTotalSize() < 0) {
+		gridLogger.error('❌ Virtualizer no está correctamente inicializado o devuelve tamaño inválido.');
+		return (
+			<EmptyState
+				icon={FileTextIcon}
+				title="Error en la visualización"
+				description="Ocurrió un error al inicializar la vista de archivos. Intenta recargar la página."
+			/>
+		);
+	}
+
 	// Aquí puedes decidir qué vista renderizar basándote en viewMode
 	return (
 		<div
-			ref={constraintsRef}
+			// 🔧 Usar el callback ref robusto que asegura el cálculo inicial
+			ref={robustParentCallbackRef}
 			className={cn(
 				'relative flex-1 flex flex-col h-full overflow-hidden',
 				isTransitioning && 'pointer-events-none opacity-50'
 			)}
 		>
-			<div ref={gridParentRef} onScroll={handleScroll} className="h-full overflow-y-auto scroll-smooth">
+			<div onScroll={handleScroll} className="h-full overflow-y-auto scroll-smooth">
 				<div
 					className="relative w-full p-4"
 					style={{
@@ -641,16 +726,13 @@ const FileBrowserComponent = ({
 							onContextAction: handleMenuAction,
 							itemSize: itemSize, // Añadimos explícitamente itemSize que es requerido por GridViewProps
 							style: {
+								// Solo una vez position/top/left
 								position: 'absolute' as const,
 								top: 0,
 								left: 0,
 								transform: `translateX(${xOffset}px) translateY(${virtualItem.start}px)`,
 								width: itemSize,
-								height: virtualItem.size,
-								// Aplicar altura calculada solo en modo masonry, pasando el FileItem
-								...(viewMode === 'masonry' && {
-									height: calculateMasonryHeight(originalItem as any, itemSize),
-								}),
+								height: viewMode === 'masonry' ? calculateMasonryHeight(originalItem as any, itemSize) : virtualItem.size,
 							},
 						};
 
@@ -677,6 +759,9 @@ const FileBrowserComponent = ({
 		</div>
 	);
 };
+
+// Estado para controlar si ya se logueó el error de containerWidth inválido en este ciclo
+// const hasLoggedWidthErrorRef = useRef(false); // Mover dentro del componente
 
 // Exportar versión memoizada del componente
 export const FileBrowser = memo(FileBrowserComponent);

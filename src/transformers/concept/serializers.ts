@@ -6,12 +6,12 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { ConceptSchema } from '@/types/entities/concept/schema';
 import type {
-	ConceptBase,
-	ConceptComplete,
-	ConceptCounts,
-	ConceptDeserialized,
-	ConceptRelations,
-	ConceptUI,
+    ConceptBase,
+    ConceptComplete,
+    ConceptCounts,
+    ConceptDeserialized,
+    ConceptRelations,
+    ConceptUI,
 } from '@/types/entities/concept/types';
 import type { Prisma } from '@prisma/client';
 
@@ -118,10 +118,10 @@ export function fromPrismaConcept<T extends ConceptBase>(
  */
 export function serializeTags(tags: string[]): string {
 	try {
-		return tags && tags.length > 0 ? JSON.stringify(tags) : 'empty_array';
+		return tags && tags.length > 0 ? JSON.stringify(tags) : '[]';
 	} catch (error) {
 		logger.error('Error serializando tags:', error);
-		return 'empty_array';
+		return '[]';
 	}
 }
 
@@ -134,7 +134,7 @@ export function deserializeTags(tagsString?: string | null): string[] {
 	if (!tagsString) return [];
 
 	try {
-		if (tagsString === 'empty_array') return [];
+		if (tagsString === '[]') return [];
 		const parsed = JSON.parse(tagsString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {

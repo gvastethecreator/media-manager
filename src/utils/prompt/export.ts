@@ -387,7 +387,7 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 			category: parsed.category || 'GENERAL',
 			model: parsed.model || 'GPT_3_5',
 			parameters: parsed.parameters || '{}',
-			tags: parsed.tags || 'empty_array',
+			tags: parsed.tags || '[]',
 			isFavorite: false,
 			emoji: parsed.emoji || '📝',
 			color: parsed.color || '#3b82f6',

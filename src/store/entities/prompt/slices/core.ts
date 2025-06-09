@@ -41,7 +41,7 @@ const mockApi = {
 			content: prompt.content || '',
 			category: prompt.category || 'general',
 			parameters: prompt.parameters || '{}',
-			tags: prompt.tags || 'empty_array',
+			tags: prompt.tags || "[]",
 			featuredImage: prompt.featuredImage || null,
 			isFavorite: prompt.isFavorite || false,
 			createdAt: new Date(),
@@ -51,8 +51,8 @@ const mockApi = {
 
 	updatePrompt: async (id: string, prompt: PromptUpdateInput): Promise<PromptBase> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
-		return {
-			id,
+		const basePrompt: PromptBase = {
+			id: prompt.id || `prompt-${Date.now()}`,
 			name: prompt.name || 'Prompt actualizado',
 			emoji: prompt.emoji || '🎯',
 			color: prompt.color || '#3b82f6',
@@ -60,12 +60,13 @@ const mockApi = {
 			content: prompt.content || '',
 			category: prompt.category || 'general',
 			parameters: prompt.parameters || '{}',
-			tags: prompt.tags || 'empty_array',
+			tags: prompt.tags || '[]',
 			featuredImage: prompt.featuredImage || null,
 			isFavorite: prompt.isFavorite || false,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};
+		return basePrompt;
 	},
 
 	deletePrompt: async (id: string): Promise<void> => {
@@ -128,7 +129,7 @@ export const createCoreSlice: StateCreator<PromptStore, [], [], CoreSlice> = (se
 	updatePrompt: async (id, prompt) => {
 		try {
 			set({ isLoading: true, error: null });
-			coreLogger.info('🔄 Actualizando prompt:', { id, ...prompt });
+			coreLogger.info('🔄 Actualizando prompt:', prompt);
 
 			// Llamar a server action para actualizar prompt
 			await mockApi.updatePrompt(id, prompt);

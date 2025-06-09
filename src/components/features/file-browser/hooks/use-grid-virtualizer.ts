@@ -11,7 +11,7 @@ import { type BaseGridConfig, GRID_CONFIG, getMetadata } from '../config/grid-co
  */
 interface UseGridVirtualizerProps {
 	items: FileItem[];
-	parentRef: RefObject<HTMLDivElement>;
+	parentRef: RefObject<HTMLDivElement | null>; // 🔧 CORREGIDO: Permitir null
 	viewMode: ViewMode;
 	containerWidth: number;
 }
@@ -74,8 +74,8 @@ export function useGridVirtualizer({
 			const availableWidthWithGap = availableWidth - totalPadding;
 			const itemWidth = Math.floor((availableWidthWithGap - totalGapWidth) / cols);
 
-			// Asegurar que el tamaño no exceda el máximo para el modo
-			return Math.min(itemWidth, configObj.maxItemWidth || itemWidth);
+			// El ancho del item ya está correctamente calculado
+			return itemWidth;
 		},
 		[]
 	);

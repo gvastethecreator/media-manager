@@ -6,25 +6,25 @@
 import { createLogger } from '@/lib/logger';
 import { WorldItemSchema } from '@/types/entities/world-item/schema';
 import type {
-	WorldItemAttribute,
-	WorldItemBase,
-	WorldItemDeserialized,
-	WorldItemEffect,
-	WorldItemFilter,
-	WorldItemProperty,
-	WorldItemRequirement,
-	WorldItemStat,
+    WorldItemAttribute,
+    WorldItemBase,
+    WorldItemDeserialized,
+    WorldItemEffect,
+    WorldItemFilter,
+    WorldItemProperty,
+    WorldItemRequirement,
+    WorldItemStat,
 } from '@/types/entities/world-item/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { Prisma } from '@prisma/client';
 import {
-	serializeAttributes,
-	serializeEffects,
-	serializeFilters,
-	serializeProperties,
-	serializeRequirements,
-	serializeStats,
-	serializeTags,
+    serializeAttributes,
+    serializeEffects,
+    serializeFilters,
+    serializeProperties,
+    serializeRequirements,
+    serializeStats,
+    serializeTags,
 } from './serializers';
 
 const logger = createLogger('WorldItemTransformer:Server');
@@ -124,11 +124,8 @@ export function fromPrismaWorldItem(
 		// 🎯 Parsear campos JSON de forma segura con múltiples estrategias de reparación
 		const parseJsonField = <T>(field: string | null | undefined, defaultValue: T): T => {
 			if (typeof field !== 'string' || !field) return defaultValue;
-
-			// Valores especiales conocidos
-			if (field === 'empty_array') return [] as unknown as T;
 			if (field === 'empty_object') return {} as unknown as T;
-
+			if (field === '[]' && Array.isArray(defaultValue)) return [] as T;
 			try {
 				return JSON.parse(field) as T;
 			} catch (originalError) {
@@ -222,7 +219,7 @@ export function fromPrismaWorldItem(
 		};
 
 		// 🎯 Parsear campos JSON para la versión deserializada
-		const deserializedFields: WorldItemDeserializedFields = {
+		const deserializedFields = {
 			attributesList: parseJsonField(baseItem.attributes, [] as WorldItemAttribute[]),
 			effectsList: parseJsonField(baseItem.effects, [] as WorldItemEffect[]),
 			requirementsList: parseJsonField(baseItem.requirements, [] as WorldItemRequirement[]),

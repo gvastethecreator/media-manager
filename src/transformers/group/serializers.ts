@@ -5,18 +5,18 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	type GroupBase,
-	type GroupComplete,
-	type GroupCreateInput,
-	GroupSchema,
-	type GroupTransformerOptions,
-	type GroupUpdateInput,
+    type GroupBase,
+    type GroupComplete,
+    type GroupCreateInput,
+    GroupSchema,
+    type GroupTransformerOptions,
+    type GroupUpdateInput,
 } from '@/types/entities/group/types';
 import {
-	deserializeJsonField,
-	serializeJsonField,
-	validateFieldType,
-	validateRequiredFields,
+    deserializeJsonField,
+    serializeJsonField,
+    validateFieldType,
+    validateRequiredFields,
 } from '@/utils/transformers/common';
 import { DEFAULT_UI_VALUES } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
@@ -48,7 +48,7 @@ export function toPrismaGroup(
 		validateFieldType(data.color, 'string', 'color');
 
 		// Serializar campos JSON
-		const filters = serializeJsonField(data.filters, 'empty_array');
+		const filters = serializeJsonField(data.filters, '[]');
 
 		// Preparar resultado con copia para evitar mutar el original
 		const { isFavorite, ...otherProps } = data;

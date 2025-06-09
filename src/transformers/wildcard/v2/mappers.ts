@@ -5,13 +5,13 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	CreateWildcardData,
-	UpdateWildcardData,
-	WildcardBase,
-	WildcardBulkUpdateData,
-	WildcardRelated,
-	WildcardSearchFilters,
-	WildcardSearchOptions,
+    CreateWildcardData,
+    UpdateWildcardData,
+    WildcardBase,
+    WildcardBulkUpdateData,
+    WildcardRelated,
+    WildcardSearchFilters,
+    WildcardSearchOptions,
 } from '@/types/entities/wildcard/types';
 import { TransformerError } from '@/utils/transformers/errors';
 import { DEFAULT_WILDCARD_COLOR, DEFAULT_WILDCARD_EMOJI } from './serializers';
@@ -37,7 +37,7 @@ export function toCreateWildcardData(data: CreateWildcardData): any {
 			parentId: data.parentId || null,
 			favorite: data.isFavorite || false,
 			featuredImage: data.featuredImage || null,
-			children: data.children ? JSON.stringify(data.children) : 'empty_array',
+			children: data.children ? JSON.stringify(data.children) : '[]',
 		};
 
 		return result;
@@ -298,10 +298,10 @@ function applyFilters(where: Record<string, any>, filters: WildcardSearchFilters
 		if (filters.hasChildren) {
 			where.NOT = {
 				...where.NOT,
-				children: { in: ['[]', 'empty_array', null] },
+				children: { in: ['[]', null] },
 			};
 		} else {
-			where.OR = [{ children: { in: ['[]', 'empty_array'] } }, { children: null }];
+			where.OR = [{ children: { in: ['[]'] } }, { children: null }];
 		}
 	}
 }

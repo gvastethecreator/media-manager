@@ -87,7 +87,7 @@ export function toPrismaWildcard(wildcard: Partial<WildcardComplete>, options: W
 			} else if (Array.isArray(wildcard.children)) {
 				result.children = JSON.stringify(wildcard.children);
 			} else {
-				result.children = 'empty_array';
+				result.children = '[]';
 			}
 		} else if (wildcard.parsedChildren) {
 			result.children = JSON.stringify(wildcard.parsedChildren);
@@ -132,7 +132,7 @@ export function fromPrismaWildcard<T extends WildcardBase>(
 		// Deserializar children si existe y se solicita
 		if (deserializeChildren && wildcard.children) {
 			try {
-				if (wildcard.children === 'empty_array') {
+				if (wildcard.children === '[]') {
 					result.parsedChildren = [];
 				} else {
 					result.parsedChildren = JSON.parse(wildcard.children);
@@ -231,7 +231,7 @@ export function parseChildren(children: string | any[] | null): any[] {
 	if (!children) return [];
 
 	if (typeof children === 'string') {
-		if (children === 'empty_array') return [];
+		if (children === '[]') return [];
 
 		try {
 			return JSON.parse(children);

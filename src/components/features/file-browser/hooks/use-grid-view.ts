@@ -21,12 +21,14 @@ interface UseGridViewProps {
  */
 interface UseGridViewResult {
 	parentRef: React.RefObject<HTMLDivElement | null>;
+	parentCallbackRef: (node: HTMLDivElement | null) => void; // 🔧 NUEVO: callback ref para configurar ResizeObserver
 	loadMoreRef: React.RefObject<HTMLDivElement | null>;
 	containerWidth: number;
 	isScrolling: boolean;
 	isTransitioning: boolean;
 	handleScroll: () => void;
 	debouncedLoadThumbnails: (visibleItems: FileItem[]) => void;
+	forceRecalcWidth: () => void; // NUEVO: función para forzar recálculo manual
 }
 
 /**
@@ -46,13 +48,104 @@ interface UseGridViewResult {
  * @returns Objeto con referencias, estados y funciones para la vista
  */
 export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridViewProps): UseGridViewResult {
-	const parentRef = useRef<HTMLDivElement>(null);
-	const loadMoreRef = useRef<HTMLDivElement>(null);
+	// 🔧 CORREGIDO: Implementación correcta del callback ref con ResizeObserver
 	const [containerWidth, setContainerWidth] = useState(0);
+	const parentRef = useRef<HTMLDivElement | null>(null);
+	const resizeObserverRef = useRef<ResizeObserver | null>(null);
+	const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+	// 🎯 Callback ref CORREGIDO que configura el ResizeObserver inmediatamente
+	const parentCallbackRef = useCallback((node: HTMLDivElement | null) => {
+		// Limpiar el observer anterior si existe
+		if (resizeObserverRef.current) {
+			resizeObserverRef.current.disconnect();
+			resizeObserverRef.current = null;
+		}
+
+		if (resizeTimeoutRef.current) {
+			clearTimeout(resizeTimeoutRef.current);
+			resizeTimeoutRef.current = null;
+		}
+
+		// Actualizar la referencia
+		parentRef.current = node;
+
+		if (node) {
+			// 📏 Calcular ancho inicial inmediatamente
+			const initialWidth = node.offsetWidth;
+			if (initialWidth > 0) {
+				setContainerWidth(initialWidth);
+			}
+
+			// 👁️ Configurar ResizeObserver para el nuevo nodo
+			const updateWidth = (width: number) => {
+				if (width > 0) {
+					setContainerWidth(width);
+				}
+			};
+
+			resizeObserverRef.current = new ResizeObserver((entries) => {
+				if (resizeTimeoutRef.current) {
+					clearTimeout(resizeTimeoutRef.current);
+				}
+
+				const width = entries[0].contentRect.width;
+				if (isResizing) {
+					resizeTimeoutRef.current = setTimeout(() => {
+						updateWidth(width);
+					}, 100);
+				} else {
+					updateWidth(width);
+				}
+			});
+
+			resizeObserverRef.current.observe(node);
+		} else {
+			// Si no hay nodo, resetear el ancho
+			setContainerWidth(0);
+		}
+	}, [isResizing]);
+
+	// 🔄 Función para forzar recálculo manual del ancho
+	const forceRecalcWidth = useCallback(() => {
+		if (parentRef.current) {
+			const width = parentRef.current.offsetWidth;
+			if (width > 0) {
+				setContainerWidth(width);
+			}
+		}
+	}, []);
+
+	// 🌍 Listener global de resize como fallback
+	useEffect(() => {
+		const handler = () => {
+			if (parentRef.current) {
+				const width = parentRef.current.offsetWidth;
+				if (width > 0) {
+					setContainerWidth(width);
+				}
+			}
+		};
+		window.addEventListener('resize', handler);
+		return () => window.removeEventListener('resize', handler);
+	}, []);
+
+	// 🧹 Limpiar al desmontar
+	useEffect(() => {
+		return () => {
+			if (resizeObserverRef.current) {
+				resizeObserverRef.current.disconnect();
+			}
+			if (resizeTimeoutRef.current) {
+				clearTimeout(resizeTimeoutRef.current);
+			}
+		};
+	}, []);
+
+	const loadMoreRef = useRef<HTMLDivElement>(null);
 	const [isScrolling, setIsScrolling] = useState(false);
 	const [isTransitioning, setIsTransitioning] = useState(false);
 	const scrollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const previousViewMode = useRef<ViewMode | null>(null);
 	const imageResources = useImageResources();
@@ -70,9 +163,6 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 		return () => {
 			if (scrollingTimeoutRef.current) {
 				clearTimeout(scrollingTimeoutRef.current);
-			}
-			if (resizeTimeoutRef.current) {
-				clearTimeout(resizeTimeoutRef.current);
 			}
 			if (transitionTimeoutRef.current) {
 				clearTimeout(transitionTimeoutRef.current);
@@ -104,43 +194,6 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 			}, 50);
 		}
 	}, [viewMode]);
-
-	// Optimizar ResizeObserver con mejor manejo de cambios
-	useEffect(() => {
-		if (!parentRef.current) {
-			return;
-		}
-
-		const updateWidth = (width: number) => {
-			if (width > 0 && (width !== containerWidth || previousViewMode.current !== viewMode)) {
-				setContainerWidth(width);
-				previousViewMode.current = viewMode;
-			}
-		};
-
-		const resizeObserver = new ResizeObserver((entries) => {
-			if (resizeTimeoutRef.current) {
-				clearTimeout(resizeTimeoutRef.current);
-			}
-
-			const width = entries[0].contentRect.width;
-			if (isResizing) {
-				resizeTimeoutRef.current = setTimeout(() => {
-					updateWidth(width);
-				}, 100);
-			} else {
-				updateWidth(width);
-			}
-		});
-
-		resizeObserver.observe(parentRef.current);
-		return () => {
-			resizeObserver.disconnect();
-			if (resizeTimeoutRef.current) {
-				clearTimeout(resizeTimeoutRef.current);
-			}
-		};
-	}, [containerWidth, isResizing, viewMode]);
 
 	// Optimizar el manejo del scroll infinito
 	useEffect(() => {
@@ -203,8 +256,8 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 
 			// Precargar recursos para todos los items válidos a cargar
 			const itemIdsToLoad = itemsToLoad
-				.map((item) => item.id)
-				.filter((id): id is string => typeof id === 'string' && id.trim() !== '');
+				.map((item) => String(item.id)) // Convertir EntityId a string explícitamente
+				.filter((id) => typeof id === 'string' && id.trim() !== '');
 
 			if (itemIdsToLoad.length > 0) {
 				try {
@@ -307,12 +360,14 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 	);
 
 	return {
-		parentRef,
+		parentRef, // 🎯 RefObject para useGridVirtualizer
+		parentCallbackRef, // 🔧 Callback ref para el div del DOM (configura ResizeObserver)
 		loadMoreRef,
 		containerWidth,
 		isScrolling,
 		isTransitioning,
 		handleScroll,
 		debouncedLoadThumbnails,
+		forceRecalcWidth,
 	};
 }

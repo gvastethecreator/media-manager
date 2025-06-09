@@ -4,12 +4,12 @@
  */
 
 import {
-	CharacterAlignment,
-	CharacterCategory,
-	CharacterClass,
-	CharacterRace,
-	CharacterRelationshipType,
-	CharacterSortOption,
+    CharacterAlignment,
+    CharacterCategory,
+    CharacterClass,
+    CharacterRace,
+    CharacterRelationshipType,
+    CharacterSortOption,
 } from '@/types/entities/character/enums';
 import * as z from 'zod';
 
@@ -147,7 +147,7 @@ export function validateCharacterFilters(filters: unknown): z.infer<typeof chara
 		// Si filters es un string, intentar parsearlo a array
 		let parsedFilters: unknown = filters;
 		if (typeof filters === 'string') {
-			if (filters === 'empty_array') {
+			if (filters === '[]') {
 				return [];
 			}
 
@@ -186,7 +186,7 @@ export function validateCharacterRelationships(relationships: unknown): z.infer<
 		// Si relationships es un string, intentar parsearlo a array
 		let parsedRelationships: unknown = relationships;
 		if (typeof relationships === 'string') {
-			if (relationships === 'empty_array') {
+			if (relationships === '[]') {
 				return [];
 			}
 

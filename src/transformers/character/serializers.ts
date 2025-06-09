@@ -77,7 +77,8 @@ export function serializeStats(stats: Record<string, any> | string | undefined):
 export function deserializeRelationships(relationships: string | any[] | undefined): any[] {
 	if (typeof relationships === 'string') {
 		try {
-			if (relationships === 'empty_array' || relationships === '') {
+			// Eliminado soporte a 'empty_array', solo se acepta '[]' como array vacío
+			if (relationships === '' || relationships === '[]') {
 				return [];
 			}
 			return JSON.parse(relationships);
@@ -99,13 +100,13 @@ export function serializeRelationships(relationships: any[] | string | undefined
 		return relationships;
 	}
 	if (!relationships || relationships.length === 0) {
-		return 'empty_array';
+		return '[]';
 	}
 	try {
 		return JSON.stringify(relationships);
 	} catch (error) {
 		serverLogger.warn(`Error serializando relationships, usando array vacío: ${error}`);
-		return 'empty_array';
+		return '[]';
 	}
 }
 
@@ -117,7 +118,8 @@ export function serializeRelationships(relationships: any[] | string | undefined
 export function deserializeArray(array: string | any[] | undefined): any[] {
 	if (typeof array === 'string') {
 		try {
-			if (array === 'empty_array' || array === '') {
+			// Eliminado soporte a 'empty_array', solo se acepta '[]' como array vacío
+			if (array === '' || array === '[]') {
 				return [];
 			}
 			return JSON.parse(array);
@@ -139,13 +141,13 @@ export function serializeArray(array: any[] | string | undefined): string {
 		return array;
 	}
 	if (!array || array.length === 0) {
-		return 'empty_array';
+		return '[]';
 	}
 	try {
 		return JSON.stringify(array);
 	} catch (error) {
 		serverLogger.warn(`Error serializando array, usando array vacío: ${error}`);
-		return 'empty_array';
+		return '[]';
 	}
 }
 
