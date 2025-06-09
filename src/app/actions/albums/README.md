@@ -1,3 +1,14 @@
 # Albums Actions
 
-Acciones del servidor para gestión de álbumes.
+
+## Funciones disponibles
+- `addImageToAlbum`
+- `addImagesToAlbum`
+- `createAlbum`
+- `deleteAlbum`
+- `getAlbum`
+- `getAlbumImages`
+- `getAlbums`
+- `removeImageFromAlbum`
+- `removeImagesFromAlbum`
+- `updateAlbum`
