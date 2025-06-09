@@ -57,6 +57,7 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
       aria-disabled="true"
       aria-current="page"
       className={cn("text-foreground font-normal", className)}
+      tabIndex={0}
       {...props}
     />
   )

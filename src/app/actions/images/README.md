@@ -1,3 +1,15 @@
 # Images Actions
 
-Acciones del servidor para operaciones sobre imágenes.
+
+## Funciones disponibles
+- `createImageAction`
+- `deleteImageAction`
+- `generateThumbnail`
+- `getImageUrl`
+- `getLatestFolderImagesAction`
+- `getOriginalImage`
+- `getRandomImagesForEntityAction`
+- `getThumbnail`
+- `processImageAction`
+- `setImageFavoriteAction`
+- `updateImageAction`

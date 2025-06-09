@@ -1,3 +1,16 @@
 # Metadata Actions
 
-Acciones del servidor para metadatos y esquemas.
+
+## Funciones disponibles
+- `clearMetadataCache`
+- `createMetadataError`
+- `extractMetadata`
+- `getAIGenerationInfo`
+- `getImageFormat`
+- `getImageMetadata`
+- `getImageMetadataById`
+- `isSupportedImageFormat`
+- `parseExifData`
+- `parseMetadataString`
+- `parseSharpMetadata`
+- `withRetry`
