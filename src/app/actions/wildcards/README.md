@@ -1,3 +1,13 @@
 # Wildcards Actions
 
-Acciones del servidor para comodines.
+
+## Funciones disponibles
+- `addImageToWildcard`
+- `createWildcard`
+- `deleteWildcard`
+- `getRootWildcards`
+- `getWildcard`
+- `getWildcardImages`
+- `getWildcards`
+- `removeImageFromWildcard`
+- `updateWildcard`
