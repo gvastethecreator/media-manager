@@ -257,6 +257,8 @@ A continuación se listan las acciones disponibles en cada carpeta.
 - `setVideoVisibility`
 - `toggleVideoFavorite`
 - `updateVideo`
+- `getVideoVisualConfig`
+- `updateVideoVisualConfig`
 
 ## wildcards
 - `addImageToWildcard`
