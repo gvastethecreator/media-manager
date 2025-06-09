@@ -959,3 +959,4 @@ graph TD
 ---
 
 > Última actualización: 9 de junio de 2025
+\n- 10 jun 2025: añadida documentación de hooks, store, utils y capa de servicios. Se agregaron tests para invalidación de caché de carpetas.
