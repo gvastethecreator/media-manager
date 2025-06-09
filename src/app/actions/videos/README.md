@@ -11,3 +11,5 @@
 - `setVideoVisibility`
 - `toggleVideoFavorite`
 - `updateVideo`
+- `getVideoVisualConfig`
+- `updateVideoVisualConfig`
