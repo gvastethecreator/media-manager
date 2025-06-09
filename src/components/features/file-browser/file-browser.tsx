@@ -142,8 +142,10 @@ const FileBrowserComponent = ({
 	const [viewerImages, setViewerImages] = useState<ImageItem[]>([]);
 	const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
 
-	// Referencia para controlar si ya se realizó la precarga de entidades
-	const entitiesPreloadedRef = useRef<boolean>(false);
+       // Referencia para controlar si ya se realizó la precarga de entidades
+       const entitiesPreloadedRef = useRef<boolean>(false);
+       // Flag para evitar loguear múltiples veces el mismo error de containerWidth
+       const hasLoggedWidthErrorRef = useRef(false);
 
 	// Usar los hooks para separar la lógica
 	const { parentRef, parentCallbackRef, loadMoreRef, containerWidth, isTransitioning, handleScroll, debouncedLoadThumbnails, forceRecalcWidth } =
