@@ -6,7 +6,7 @@ import {
 	uploadImages,
 } from '@/app/actions/uploaded-images/uploaded-images.actions';
 import { MemoizedImageCard } from '@/components/cards/image-card';
-import { Alert, AlertCircle, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -32,15 +32,24 @@ import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { toastService } from '@/services/toast.service';
-import type { UploadedImageType } from '@/types/entities/uploaded-image';
+import { UploadedImageResult } from '@/transformers/uploaded-image/transformer';
+import type { UploadedImageType } from '@/types/entities/uploaded-image/types';
 import type { FileItem } from '@/types/file-item';
-import type { UploadedImageFilters, UploadedImageResult } from '@/types/uploaded-images';
-import { Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
+import { FileProcessingStatus, FileType } from '@/types/file-item';
+import type { EntityId, JSONString } from '@/utils/types/utility-types';
+import { AlertCircle, Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
+
+// Definición local del tipo de filtros para imágenes subidas
+// ⚠️ Si se amplían los filtros, actualizar aquí y en el panel de filtros
+export type UploadedImageFilters = {
+	search?: string;
+	type?: UploadedImageType;
+};
 
 export function UploadedImagesView() {
 	const [isLoading, setIsLoading] = useState(true);
@@ -212,38 +221,33 @@ export function UploadedImagesView() {
 
 	// Convertir UploadedImageResult a FileItem para compatibilidad con BaseContentView
 	const adaptedItems = useMemo<FileItem[]>(() => {
-		return optimisticItems.map((item) => ({
-			id: item.id,
-			hash: item.metadata?.hash || '',
-			name: item.name,
-			path: item.path,
-			type: 'image',
-			size: item.size,
-			width: item.width,
-			height: item.height,
-			metadata: JSON.stringify(item.metadata),
-			thumbnail: item.thumbnailUrl || null,
-			thumbnailSize: null,
-			thumbnailWidth: item.dimensions?.width || null,
-			thumbnailHeight: item.dimensions?.height || null,
-			thumbnailError: null,
-			thumbnailErrorAt: null,
-			thumbnailOptimizedAt: null,
-			isPublic: false,
-			isFavorite: false,
-			folderId: '',
-			createdAt: item.createdAt,
-			updatedAt: item.updatedAt,
-			collections: [],
-			tags: [],
-			albums: [],
-			characters: [],
-			places: [],
-			worldItems: [],
-			concepts: [],
-			prompts: [],
-			notes: [],
-		}));
+		return optimisticItems.map((item) => {
+			// Extraer mimeType desde metadata si es posible
+			let mimeType = 'image/jpeg';
+			try {
+				if (item.metadata) {
+					const meta = typeof item.metadata === 'string' ? JSON.parse(item.metadata) : item.metadata;
+					if (meta && typeof meta === 'object' && meta.format) {
+						// Ejemplo: meta.format = 'png' => 'image/png'
+						mimeType = `image/${meta.format.toLowerCase()}`;
+					}
+				}
+			} catch { }
+			// Asegurar que metadata es string JSON
+			const metadataString = typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata || {});
+			return {
+				id: item.id as EntityId, // Forzamos el tipo, ya que es string compatible
+				name: item.name,
+				path: item.path,
+				type: FileType.IMAGE,
+				size: item.size,
+				mimeType,
+				metadata: metadataString as JSONString<any>,
+				processingStatus: FileProcessingStatus.COMPLETED, // Enum correcto
+				createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+				updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+			};
+		});
 	}, [optimisticItems]);
 
 	// Función para adaptar el manejador de selección

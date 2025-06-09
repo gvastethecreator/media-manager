@@ -760,8 +760,5 @@ const FileBrowserComponent = ({
 	);
 };
 
-// Estado para controlar si ya se logueó el error de containerWidth inválido en este ciclo
-// const hasLoggedWidthErrorRef = useRef(false); // Mover dentro del componente
-
 // Exportar versión memoizada del componente
 export const FileBrowser = memo(FileBrowserComponent);

@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { GripVerticalIcon } from "lucide-react"
+import * as React from "react"
 import * as ResizablePrimitive from "react-resizable-panels"
 
 import { cn } from "@/lib/utils"
@@ -23,8 +23,10 @@ function ResizablePanelGroup({
 }
 
 function ResizablePanel({
+  isCollapsed, // filtramos para que no llegue al DOM
   ...props
-}: React.ComponentProps<typeof ResizablePrimitive.Panel>) {
+}: React.ComponentProps<typeof ResizablePrimitive.Panel> & { isCollapsed?: boolean }) {
+  // Si necesitas lógica interna con isCollapsed, agrégala aquí
   return <ResizablePrimitive.Panel data-slot="resizable-panel" {...props} />
 }
 
@@ -53,4 +55,5 @@ function ResizableHandle({
   )
 }
 
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle }
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup }
+
