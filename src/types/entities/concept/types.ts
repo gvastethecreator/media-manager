@@ -4,19 +4,6 @@
  */
 
 import type { z } from 'zod';
-import type { Album } from '../album/types';
-import type { Character } from '../character/types';
-import type { Collection } from '../collection/types';
-import type { Group } from '../group/types';
-import type { Image } from '../image/types';
-import type { Note } from '../note/types';
-import type { Place } from '../place/types';
-import type { Prompt } from '../prompt/types';
-import type { Property } from '../property/types';
-import type { Tag } from '../tag/types';
-import type { Video } from '../video/types';
-import type { Wildcard } from '../wildcard/types';
-import type { WorldItem } from '../world-item/types';
 import type { ConceptSchema } from './schema';
 
 /**
@@ -38,29 +25,22 @@ export interface ConceptBase {
 }
 
 /**
- * Etiquetas deserializadas de un concepto
- */
-export interface ConceptTags {
-	items: string[];
-}
-
-/**
  * Relaciones de un concepto con otras entidades
  */
 export interface ConceptRelations {
-	images?: Image[];
-	videos?: Video[];
-	albums?: Album[];
-	collections?: Collection[];
-	tagEntities?: Tag[]; // Renombrado para evitar conflicto con campo tags
-	characters?: Character[];
-	places?: Place[];
-	worldItems?: WorldItem[];
-	prompts?: Prompt[];
-	notes?: Note[];
-	wildcards?: Wildcard[];
-	properties?: Property[];
-	groups?: Group[];
+	images?: any[];
+	videos?: any[];
+	albums?: any[];
+	collections?: any[];
+	tagEntities?: any[];
+	characters?: any[];
+	places?: any[];
+	worldItems?: any[];
+	prompts?: any[];
+	notes?: any[];
+	wildcards?: any[];
+	properties?: any[];
+	groups?: any[];
 }
 
 /**
@@ -91,66 +71,12 @@ export interface ConceptUI {
 }
 
 /**
- * Campos deserializados de un concepto
- */
-export interface ConceptDeserialized {
-	tags: string[];
-}
-
-/**
- * Filtros para búsqueda de conceptos
- */
-export interface ConceptFilters {
-	searchQuery?: string;
-	categories?: string[];
-	onlyFavorites?: boolean;
-	contentContains?: string;
-}
-
-/**
  * Concepto completo con todos los campos y relaciones
  */
-export interface ConceptComplete extends ConceptBase, ConceptDeserialized {
+export interface ConceptComplete extends ConceptBase {
 	_count?: ConceptCounts;
 	_relations?: ConceptRelations;
 	_ui?: ConceptUI;
-}
-
-/**
- * Datos para la creación de un concepto
- */
-export interface ConceptCreateInput {
-	name: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	content?: string;
-	category?: string;
-	tags?: string[] | string; // Acepta tanto array como string JSON
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-
-	// Relaciones
-	groupIds?: string[];
-	propertyIds?: string[];
-	wildcardIds?: string[];
-	imageIds?: string[];
-	videoIds?: string[];
-	albumIds?: string[];
-	collectionIds?: string[];
-	tagIds?: string[];
-	characterIds?: string[];
-	placeIds?: string[];
-	worldItemIds?: string[];
-	promptIds?: string[];
-	noteIds?: string[];
-}
-
-/**
- * Datos para la actualización de un concepto
- */
-export interface ConceptUpdateInput extends Partial<ConceptCreateInput> {
-	id?: string;
 }
 
 /**

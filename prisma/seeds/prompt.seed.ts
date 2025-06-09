@@ -281,7 +281,8 @@ export async function seedPrompts(prisma: PrismaClient): Promise<void> {
 					await prisma.prompt.create({
 						data: {
 							...promptDataWithoutTags,
-							tags: {
+							tags: JSON.stringify(tags), // <--- Campo serializado
+							tagEntities: {
 								connect: tagConnections,
 							},
 						},

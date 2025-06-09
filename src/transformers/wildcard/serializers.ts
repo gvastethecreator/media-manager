@@ -142,7 +142,7 @@ export function generateWildcardColor(name: string): string {
  * @returns Array de hijos parseado o array vacío
  */
 export function parseWildcardChildren(childrenJson: string): any[] {
-	if (!childrenJson || childrenJson === 'empty_array' || childrenJson === '[]') {
+	if (!childrenJson || childrenJson === '[]') {
 		return [];
 	}
 
@@ -162,14 +162,14 @@ export function parseWildcardChildren(childrenJson: string): any[] {
 export function serializeWildcardChildren(children: any[] | string): string {
 	if (typeof children === 'string') return children;
 	if (!children || children.length === 0) {
-		return 'empty_array';
+		return '[]';
 	}
 
 	try {
 		return JSON.stringify(children);
 	} catch (error) {
 		logger.error('Error serializing wildcard children:', error);
-		return 'empty_array';
+		return '[]';
 	}
 }
 

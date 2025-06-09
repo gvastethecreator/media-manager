@@ -5,16 +5,15 @@
 
 import { createLogger } from '@/lib/logger';
 import type {
-	WorldItemAttribute,
-	WorldItemBase,
-	WorldItemComplete,
-	WorldItemDeserialized,
-	WorldItemEffect,
-	WorldItemFilter,
-	WorldItemProperty,
-	WorldItemRelations,
-	WorldItemRequirement,
-	WorldItemStat,
+    WorldItemAttribute,
+    WorldItemBase,
+    WorldItemComplete,
+    WorldItemDeserialized,
+    WorldItemEffect,
+    WorldItemFilter,
+    WorldItemProperty,
+    WorldItemRequirement,
+    WorldItemStat
 } from '@/types/entities/world-item/types';
 
 // Logger específico para este módulo
@@ -44,7 +43,7 @@ export function deserializeAttributes(attributesString?: string | null): WorldIt
 	if (!attributesString) return [];
 
 	try {
-		if (attributesString === 'empty_array' || attributesString === '[]') return [];
+		if (attributesString === '[]') return [];
 		const parsed = JSON.parse(attributesString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
@@ -77,7 +76,8 @@ export function deserializeEffects(effectsString?: string | null): WorldItemEffe
 	if (!effectsString) return [];
 
 	try {
-		if (effectsString === 'empty_array' || effectsString === '[]') return [];
+		// Eliminado soporte a 'empty_array', solo se acepta '[]' como array vacío
+		if (effectsString === '[]') return [];
 		const parsed = JSON.parse(effectsString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
@@ -110,7 +110,7 @@ export function deserializeRequirements(requirementsString?: string | null): Wor
 	if (!requirementsString) return [];
 
 	try {
-		if (requirementsString === 'empty_array' || requirementsString === '[]') return [];
+		if (requirementsString === '[]') return [];
 		const parsed = JSON.parse(requirementsString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
@@ -143,7 +143,8 @@ export function deserializeStats(statsString?: string | null): WorldItemStat[] {
 	if (!statsString) return [];
 
 	try {
-		if (statsString === 'empty_array' || statsString === '[]') return [];
+		// Eliminado soporte a 'empty_array', solo se acepta '[]' como array vacío
+		if (statsString === '[]') return [];
 		const parsed = JSON.parse(statsString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
@@ -176,7 +177,7 @@ export function deserializeProperties(propertiesString?: string | null): WorldIt
 	if (!propertiesString) return [];
 
 	try {
-		if (propertiesString === 'empty_array' || propertiesString === '[]') return [];
+		if (propertiesString === '[]') return [];
 		const parsed = JSON.parse(propertiesString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
@@ -209,7 +210,8 @@ export function deserializeFilters(filtersString?: string | null): WorldItemFilt
 	if (!filtersString) return [];
 
 	try {
-		if (filtersString === 'empty_array' || filtersString === '[]') return [];
+		// Eliminado soporte a 'empty_array', solo se acepta '[]' como array vacío
+		if (filtersString === '[]') return [];
 		const parsed = JSON.parse(filtersString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
@@ -242,7 +244,7 @@ export function deserializeTags(tagsString?: string | null): string[] {
 	if (!tagsString) return [];
 
 	try {
-		if (tagsString === 'empty_array' || tagsString === '[]') return [];
+		if (tagsString === '[]') return [];
 		const parsed = JSON.parse(tagsString);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
@@ -252,66 +254,30 @@ export function deserializeTags(tagsString?: string | null): string[] {
 }
 
 /**
- * Extiende un WorldItem base para incluir propiedades de UI y relaciones,
- * transformando campos JSON a sus tipos de objeto correspondientes.
- * @param worldItem - El WorldItem base a extender.
+ * Extiende un WorldItem deserializado para incluir propiedades de UI y relaciones,
+ * usando los campos deserializados y asignando relaciones vacías por defecto.
+ * @param worldItem - El WorldItem deserializado a extender.
  * @returns Un WorldItem completo con propiedades de UI y relaciones.
  */
 export function extendWorldItem(worldItem: WorldItemDeserialized): WorldItemComplete {
-	// Deserializar todos los campos JSON del WorldItem base
-	const parsedItem: WorldItemDeserialized = {
+	return {
 		...worldItem,
-		attributes: deserializeAttributes(worldItem.attributes as string),
-		effects: deserializeEffects(worldItem.effects as string),
-		requirements: deserializeRequirements(worldItem.requirements as string),
-		stats: deserializeStats(worldItem.stats as string),
-		properties: deserializeProperties(worldItem.properties as string),
-		filters: deserializeFilters(worldItem.filters as string),
-		tags: deserializeTags(worldItem.tags as string),
-	};
-
-	// Asignar los valores predeterminados para las relaciones si no existen
-	const relations: WorldItemRelations = {
-		images: [],
-		videos: [],
-		notes: [],
-		concepts: [],
-		prompts: [],
-		groups: [],
-		properties: [],
-		wildcards: [],
-		tags: [],
-	};
-
-	// Combinar el item parseado con las relaciones por defecto y las relaciones existentes
-	const completeItem: WorldItemComplete = {
-		...parsedItem,
-		...relations,
-		// Sobrescribir las relaciones por defecto con las que realmente existen en parsedItem
-		images: (parsedItem as any).images || relations.images,
-		videos: (parsedItem as any).videos || relations.videos,
-		notes: (parsedItem as any).notes || relations.notes,
-		concepts: (parsedItem as any).concepts || relations.concepts,
-		prompts: (parsedItem as any).prompts || relations.prompts,
-		groups: (parsedItem as any).groups || relations.groups,
-		properties: (parsedItem as any).properties || relations.properties,
-		wildcards: (parsedItem as any).wildcards || relations.wildcards,
-		tags: (parsedItem as any).tags || relations.tags,
-		// Añadir contadores (pueden ser opcionales o venir de _count de Prisma)
-		_count: (parsedItem as any)._count || {
-			images: (parsedItem as any).images?.length || 0,
-			videos: (parsedItem as any).videos?.length || 0,
-			notes: (parsedItem as any).notes?.length || 0,
-			concepts: (parsedItem as any).concepts?.length || 0,
-			prompts: (parsedItem as any).prompts?.length || 0,
-			groups: (parsedItem as any).groups?.length || 0,
-			properties: (parsedItem as any).properties?.length || 0,
-			wildcards: (parsedItem as any).wildcards?.length || 0,
-			tags: (parsedItem as any).tags?.length || 0,
+		// Asignar campos deserializados a los nombres esperados por WorldItemComplete
+		attributesList: worldItem.attributesList,
+		effectsList: worldItem.effectsList,
+		requirementsList: worldItem.requirementsList,
+		statsList: worldItem.statsList,
+		propertiesList: worldItem.propertiesList,
+		filtersList: worldItem.filtersList,
+		tagsList: worldItem.tagsList,
+		// UI y relaciones vacías por defecto
+		ui: {
+			emoji: worldItem.emoji,
+			color: worldItem.color,
 		},
+		relations: {},
+		counts: {},
 	};
-
-	return completeItem;
 }
 
 /**
@@ -333,16 +299,15 @@ export function extendWorldItems(worldItems: WorldItemDeserialized[]): WorldItem
  * @returns El WorldItemDeserialized con campos JSON parseados.
  */
 export function fromWorldItemBase(worldItem: WorldItemBase): WorldItemDeserialized {
-	// Asegurarse de que los campos JSON estén parseados si vienen como strings
 	return {
 		...worldItem,
-		attributes: deserializeAttributes(worldItem.attributes as string | null),
-		effects: deserializeEffects(worldItem.effects as string | null),
-		requirements: deserializeRequirements(worldItem.requirements as string | null),
-		stats: deserializeStats(worldItem.stats as string | null),
-		properties: deserializeProperties(worldItem.properties as string | null),
-		filters: deserializeFilters(worldItem.filters as string | null),
-		tags: deserializeTags(worldItem.tags as string | null),
+		attributesList: deserializeAttributes(worldItem.attributes),
+		effectsList: deserializeEffects(worldItem.effects),
+		requirementsList: deserializeRequirements(worldItem.requirements),
+		statsList: deserializeStats(worldItem.stats),
+		propertiesList: deserializeProperties(worldItem.properties),
+		filtersList: deserializeFilters(worldItem.filters),
+		tagsList: [], // No existe campo tags en WorldItemBase, se inicializa vacío
 	};
 }
 
@@ -379,12 +344,13 @@ export const parseJsonField = <T>(field: string | null | undefined, defaultValue
 		return defaultValue;
 	}
 	try {
-		// También considerar el caso de 'empty_object' o 'empty_array' si se usan como marcadores
+		// Compatibilidad legacy eliminada: ya no se acepta 'empty_array' como marcador de array vacío 🚫
 		if (typeof field === 'string') {
 			if (field === 'empty_object' && typeof defaultValue === 'object' && !Array.isArray(defaultValue)) {
 				return {} as T;
 			}
-			if (field === 'empty_array' && Array.isArray(defaultValue)) {
+			// Solo se acepta '[]' como array vacío serializado
+			if (field === '[]' && Array.isArray(defaultValue)) {
 				return [] as T;
 			}
 			return JSON.parse(field) as T;
@@ -402,16 +368,7 @@ export const parseJsonField = <T>(field: string | null | undefined, defaultValue
  * @returns Un WorldItemDeserialized con todos los campos JSON parseados.
  */
 export function parseJsonFields(worldItem: WorldItemBase): WorldItemDeserialized {
-	return {
-		...worldItem,
-		attributes: parseJsonField(worldItem.attributes, []),
-		effects: parseJsonField(worldItem.effects, []),
-		requirements: parseJsonField(worldItem.requirements, []),
-		stats: parseJsonField(worldItem.stats, {}),
-		properties: parseJsonField(worldItem.properties, []),
-		filters: parseJsonField(worldItem.filters, {}),
-		tags: parseJsonField(worldItem.tags, []),
-	};
+	return fromWorldItemBase(worldItem);
 }
 
 /**
@@ -435,7 +392,9 @@ export function toExtendedWorldItem(worldItem: WorldItemBase): WorldItemComplete
 export function toWorldItemWithStats(
 	worldItem: WorldItemBase & { _count?: { images?: number; relatedItems?: number } }
 ): WorldItemComplete {
-	const extendedItem = extendWorldItem(worldItem);
+	// Primero deserializar los campos JSON
+	const deserialized = fromWorldItemBase(worldItem);
+	const extendedItem = extendWorldItem(deserialized);
 
 	// Asignar los conteos directamente si están disponibles, de lo contrario, 0
 	const imagesCount = worldItem._count?.images || 0;
@@ -443,12 +402,10 @@ export function toWorldItemWithStats(
 
 	return {
 		...extendedItem,
-		_count: {
-			...extendedItem._count,
+		counts: {
 			images: imagesCount,
 			relatedItems: relatedItemsCount,
 		},
-		// Puedes añadir otras propiedades de UI o cálculos aquí si es necesario
 	};
 }
 
@@ -587,21 +544,10 @@ export function serializeWorldItemTags(tags: string[] | string): string {
  */
 export function fromExtendedWorldItem(worldItem: WorldItemComplete): WorldItemBase {
 	const {
-		_count,
-		images,
-		videos,
-		notes,
-		concepts,
-		prompts,
-		groups,
-		properties,
-		wildcards,
-		tags: relatedTags,
-		isSelected,
-		isExpanded,
-		isEditing,
+		ui,
+		relations,
+		counts,
 		...base
 	} = worldItem;
-
 	return base;
 }

@@ -61,6 +61,7 @@ export async function seedProfiles(prisma: PrismaClient): Promise<void> {
 							theme: 'system',
 							language: 'es',
 							profileId: id,
+							data: {}, // Campo JSON requerido por el modelo
 						},
 					});
 

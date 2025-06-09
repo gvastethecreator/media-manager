@@ -267,7 +267,7 @@ export function convertPromptToTemplate(
 		let tags: string[] = [];
 		try {
 			if (typeof prompt.tags === 'string') {
-				tags = prompt.tags === 'empty_array' ? [] : JSON.parse(prompt.tags);
+				tags = prompt.tags === '[]' ? [] : JSON.parse(prompt.tags);
 			} else if (Array.isArray(prompt.tags)) {
 				tags = prompt.tags;
 			}

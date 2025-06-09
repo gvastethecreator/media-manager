@@ -6,14 +6,14 @@
 // Importación comentada porque las funciones no existen actualmente
 // import { getSuggestedAppearance, serializeObject } from '@/transformers/character';
 import type {
-	CharacterBase,
-	CharacterCategory,
-	CharacterClass,
-	CharacterExtended,
-	CharacterRace,
-	CharacterRelationship,
-	CharacterSortOption,
-	CharacterSummary,
+    CharacterBase,
+    CharacterCategory,
+    CharacterClass,
+    CharacterExtended,
+    CharacterRace,
+    CharacterRelationship,
+    CharacterSortOption,
+    CharacterSummary,
 } from '@/types/entities/character';
 import { CharacterRelationshipType } from '@/types/entities/character/enums';
 import { v4 as uuidv4 } from 'uuid';
@@ -56,14 +56,14 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
 		backstory: overrides.backstory || '',
 		stats: overrides.stats || '{}',
 		sortBy: overrides.sortBy || null,
-		filters: overrides.filters || 'empty_array',
+		filters: overrides.filters || '[]',
 		psychologicalProfile: overrides.psychologicalProfile || null,
 		socialProfile: overrides.socialProfile || null,
-		relationships: overrides.relationships || 'empty_array',
-		goals: overrides.goals || 'empty_array',
-		fears: overrides.fears || 'empty_array',
-		beliefs: overrides.beliefs || 'empty_array',
-		personality: overrides.personality || 'empty_array',
+		relationships: overrides.relationships || '[]',
+		goals: overrides.goals || '[]',
+		fears: overrides.fears || '[]',
+		beliefs: overrides.beliefs || '[]',
+		personality: overrides.personality || '[]',
 		featuredImage: overrides.featuredImage || null,
 		isFavorite: overrides.isFavorite || false,
 		createdAt: overrides.createdAt || now,

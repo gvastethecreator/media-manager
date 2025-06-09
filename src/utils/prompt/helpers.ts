@@ -124,7 +124,7 @@ export function preparePromptForSaving(prompt: PromptExtended): PromptBase {
 		// Serializar arrays y objetos a strings JSON
 		return {
 			...basePrompt,
-			tags: parsedTags ? deserializeTags(parsedTags) : 'empty_array',
+			tags: parsedTags ? deserializeTags(parsedTags) : '[]',
 			parameters: parsedParameters ? deserializeParameters(parsedParameters) : '{}',
 		};
 	} catch (error) {

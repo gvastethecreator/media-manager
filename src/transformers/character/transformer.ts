@@ -1,13 +1,41 @@
 /**
  * @file Transformadores para la entidad Character
  * @module transformers/character/transformer
+ *
+ * ⚠️ Este archivo sigue el plan de robustecimiento y buenas prácticas:
+ * - Tipado estricto en todas las funciones
+ * - Validación y conversión segura de tipos
+ * - Comentarios clave y emojis para mantenibilidad
+ * - Documentación de uso y advertencias
+ *
+ * Ejemplo de uso:
+ * ```ts
+ * import { transformCharacter } from '@/transformers/character/transformer';
+ * const prismaCharacter = { id: '1', name: 'John', ... };
+ * const character = transformCharacter(prismaCharacter);
+ * ```
+ *
+ * Diagrama de flujo:
+ * ```mermaid
+ * flowchart TD
+ *   A[Entrada: Objeto Character] --> B{¿Es nulo o indefinido?}
+ *   B -- Sí --> Z[Error: objeto nulo]
+ *   B -- No --> C{¿Tiene id y name?}
+ *   C -- Sí --> D[Llama fromPrismaCharacter]
+ *   C -- No --> E{¿Validar con Zod?}
+ *   E -- Sí --> F[Validar con CharacterSchema]
+ *   F -- Error --> Z
+ *   F -- Ok --> G[Llama fromPrismaCharacter]
+ *   E -- No --> G
+ *   D & G --> H[Retorna CharacterComplete]
+ * ```
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { CharacterSchema } from '@/types/entities/character-export';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Character } from '@prisma/client';
-import { fromPrismaCharacter } from './serializers';
+import { fromPrismaCharacter } from './server';
 import type { CharacterComplete, CharacterExtended, CharacterWithStats, TransformCharacterOptions } from './types';
 
 /**
@@ -28,14 +56,16 @@ export function transformCharacter<T extends Partial<CharacterComplete> | Charac
 		}
 
 		// Si el input es un objeto Prisma, usamos el serializador existente
+		// ⚠️ Conversión forzada a Character solo si es necesario, documentado aquí:
 		if (typeof input === 'object' && 'id' in input && 'name' in input) {
-			return fromPrismaCharacter(input as Character, {
+			const raw = fromPrismaCharacter(input as unknown as Character, {
 				validateFields: options.validateFields ?? true,
 				deserializeFields: options.deserializeFields ?? true,
 				includeRelations: options.includeRelations ?? false,
 				includeUI: options.includeUI ?? true,
 				includeStats: options.includeStats ?? false,
 			});
+			return normalizeCharacterComplete(raw);
 		}
 
 		// Validar con Zod si es necesario
@@ -47,13 +77,15 @@ export function transformCharacter<T extends Partial<CharacterComplete> | Charac
 		}
 
 		// Convertir a CharacterComplete
-		return fromPrismaCharacter(input as Character, {
+		// ⚠️ Conversión forzada a Character para asegurar compatibilidad con el transformer
+		const raw = fromPrismaCharacter(input as unknown as Character, {
 			validateFields: options.validateFields ?? true,
 			deserializeFields: options.deserializeFields ?? true,
 			includeRelations: options.includeRelations ?? false,
 			includeUI: options.includeUI ?? true,
 			includeStats: options.includeStats ?? false,
 		});
+		return normalizeCharacterComplete(raw);
 	} catch (error) {
 		serverLogger.error(`Error transformando character: ${error}`);
 		if (error instanceof TransformerError) {
@@ -167,6 +199,87 @@ export function transformCharacterToWithStats<T extends Partial<CharacterComplet
 }
 
 /**
+ * Normaliza un CharacterComplete para asegurar que todas las propiedades requeridas existen y tienen el tipo correcto
+ * ⚠️ Esto previene errores de tipado cuando el input es parcial, stringificado o proviene de mocks/test
+ */
+function normalizeStringOrArrayField(value: string | any[] | undefined): string {
+	if (Array.isArray(value)) return JSON.stringify(value);
+	if (typeof value === 'string') {
+		try {
+			const parsed = JSON.parse(value);
+			return Array.isArray(parsed) ? value : '[]';
+		} catch {
+			return '[]';
+		}
+	}
+	return '[]';
+}
+function normalizeStringOrObjectField(value: string | object | undefined): string {
+	if (typeof value === 'object' && value !== null) return JSON.stringify(value);
+	if (typeof value === 'string') {
+		try {
+			const parsed = JSON.parse(value);
+			return typeof parsed === 'object' && parsed !== null ? value : '{}';
+		} catch {
+			return '{}';
+		}
+	}
+	return '{}';
+}
+function normalizeCharacterComplete(input: Partial<CharacterComplete>): CharacterComplete {
+	return {
+		id: input.id ?? '',
+		name: input.name ?? '',
+		emoji: input.emoji ?? '🧑',
+		color: input.color ?? '#3b82f6',
+		description: input.description ?? '',
+		shortcut: input.shortcut ?? '',
+		category: input.category ?? 'general',
+		level: input.level ?? 1,
+		class: input.class ?? '',
+		race: input.race ?? '',
+		alignment: input.alignment ?? '',
+		sortBy: (input as any).sortBy ?? '',
+		type: (input as any).type ?? '',
+		backstory: (input as any).backstory ?? '',
+		featuredImage: (input as any).featuredImage ?? '',
+		isFavorite: (input as any).isFavorite ?? false,
+		createdAt: input.createdAt ?? new Date(),
+		updatedAt: input.updatedAt ?? new Date(),
+		images: Array.isArray(input.images) ? input.images : [],
+		videos: Array.isArray(input.videos) ? input.videos : [],
+		albums: Array.isArray(input.albums) ? input.albums : [],
+		collections: Array.isArray(input.collections) ? input.collections : [],
+		tags: Array.isArray(input.tags) ? input.tags : [],
+		notes: Array.isArray(input.notes) ? input.notes : [],
+		places: Array.isArray(input.places) ? input.places : [],
+		worldItems: Array.isArray(input.worldItems) ? input.worldItems : [],
+		concepts: Array.isArray(input.concepts) ? input.concepts : [],
+		prompts: Array.isArray(input.prompts) ? input.prompts : [],
+		wildcards: Array.isArray(input.wildcards) ? input.wildcards : [],
+		properties: Array.isArray(input.properties) ? input.properties : [],
+		groups: Array.isArray(input.groups) ? input.groups : [],
+		relatedCharacters: Array.isArray(input.relatedCharacters) ? input.relatedCharacters : [],
+		relatedTo: Array.isArray(input.relatedTo) ? input.relatedTo : [],
+		_count: input._count ?? {
+			images: 0, videos: 0, albums: 0, collections: 0, tags: 0, notes: 0, places: 0, worldItems: 0, concepts: 0, prompts: 0, wildcards: 0, properties: 0, groups: 0, relatedCharacters: 0, relatedTo: 0
+		},
+		// Campos extendidos y normalizados (como string JSON)
+		stats: normalizeStringOrObjectField(input.stats),
+		psychologicalProfile: input.psychologicalProfile ?? '',
+		socialProfile: input.socialProfile ?? '',
+		relationships: normalizeStringOrArrayField(input.relationships),
+		goals: normalizeStringOrArrayField(input.goals),
+		fears: normalizeStringOrArrayField(input.fears),
+		beliefs: normalizeStringOrArrayField(input.beliefs),
+		personality: normalizeStringOrArrayField(input.personality),
+		skills: normalizeStringOrArrayField(input.skills),
+		abilities: normalizeStringOrArrayField(input.abilities),
+		filters: normalizeStringOrObjectField(input.filters),
+	};
+}
+
+/**
  * 🧮 Calcula la importancia relativa de un personaje basado en sus relaciones
  * @param character Personaje para calcular importancia
  * @returns Valor numérico de importancia
@@ -215,3 +328,5 @@ function calculateTotalContent(character: CharacterComplete): number {
 		character._count.wildcards
 	);
 }
+
+// 📝 NOTA: Mantener este archivo alineado con los tipos globales y actualizar la documentación si cambian los contratos de datos.
