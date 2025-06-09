@@ -1,3 +1,11 @@
 # Profiles Actions
 
-Acciones del servidor para perfiles y ajustes.
+
+## Funciones disponibles
+- `activateProfile`
+- `createProfile`
+- `deleteProfile`
+- `getActiveProfile`
+- `getProfile`
+- `getProfiles`
+- `updateProfile`

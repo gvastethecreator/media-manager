@@ -1,3 +1,12 @@
 # Places Actions
 
-Acciones del servidor para lugares geográficos.
+
+## Funciones disponibles
+- `addImageToPlace`
+- `createPlace`
+- `deletePlace`
+- `getPlace`
+- `getPlaceImages`
+- `getPlaces`
+- `removeImageFromPlace`
+- `updatePlace`

@@ -1,3 +1,13 @@
 # Characters Actions
 
-Acciones del servidor para manejo de personajes.
+
+## Funciones disponibles
+- `addCharacterImage`
+- `createCharacter`
+- `deleteCharacter`
+- `getCharacterById`
+- `getCharacterImages`
+- `getCharacterStats`
+- `getCharacters`
+- `removeCharacterImage`
+- `updateCharacter`

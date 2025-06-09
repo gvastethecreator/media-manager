@@ -1,3 +1,15 @@
 # Tags Actions
 
-Acciones del servidor para etiquetas.
+
+## Funciones disponibles
+- `addImageToTag`
+- `assignTagToImages`
+- `createTagAction`
+- `deleteTagAction`
+- `getSuggestedTags`
+- `getTagByIdAction`
+- `getTagsAction`
+- `removeTagFromImages`
+- `searchTagsAction`
+- `updateImageTags`
+- `updateTagAction`
