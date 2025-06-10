@@ -3,11 +3,11 @@
  * @module transformers/note/transformer
  */
 
-import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { Note, NoteExtended } from '@/types/entities/note';
-import type { NoteComplete } from '@/types/entities/note/complete';
 import type { NoteWithStats } from '@/types/entities/note/base';
+import type { NoteComplete } from '@/types/entities/note/complete';
+import { TransformerError } from '@/utils/transformers/errors';
 import { extendNote, fromPrismaNote } from './serializers';
 
 const logger = serverLogger.withContext('NoteTransformer');

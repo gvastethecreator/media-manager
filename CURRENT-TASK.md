@@ -31,11 +31,12 @@ Se han resuelto exitosamente **TODOS** los problemas críticos del transformer d
 #### Archivo: `src/transformers/note/transformer.ts`
 
 1. **Import corrections:**
+
    ```typescript
    // Antes (❌)
    import type { NoteComplete, NoteWithStats } from '@/types/entities/note/base';
    import { TransformerError } from '@/lib/errors';
-   
+
    // Después (✅)
    import type { NoteComplete } from '@/types/entities/note/complete';
    import type { NoteWithStats } from '@/types/entities/note/base';
@@ -43,20 +44,22 @@ Se han resuelto exitosamente **TODOS** los problemas críticos del transformer d
    ```
 
 2. **Constructor fixes:**
+
    ```typescript
    // Antes (❌)
    throw new TransformerError('Error al transformar nota', { cause: error });
-   
+
    // Después (✅)
    throw new TransformerError('Error al transformar nota');
    ```
 
 3. **Type safety in reduce:**
+
    ```typescript
    // Antes (❌)
    const counts = baseNote._count || { ... };
    relatedItemsCount: Object.values(counts).reduce((sum, count) => sum + count, 0),
-   
+
    // Después (✅)
    const counts: Record<string, number> = baseNote._count || { ... };
    relatedItemsCount: Object.values(counts).reduce((sum: number, count: number) => sum + count, 0),
@@ -76,7 +79,7 @@ Todas las entidades principales ahora tienen sus exports correctos:
 ```typescript
 // Entidades principales disponibles:
 import type { Video } from '@/types/entities/video';        // ✅ VideoComplete
-import type { Album } from '@/types/entities/album';        // ✅ AlbumComplete  
+import type { Album } from '@/types/entities/album';        // ✅ AlbumComplete
 import type { Wildcard } from '@/types/entities/wildcard';  // ✅ WildcardComplete
 import type { Character } from '@/types/entities/character'; // ✅ CharacterWithRelations
 import type { WorldItem } from '@/types/entities/world-item'; // ✅ WorldItemExtended
@@ -87,14 +90,17 @@ import type { WorldItem } from '@/types/entities/world-item'; // ✅ WorldItemEx
 Con el sistema de tipos completamente estable, las siguientes tareas son sugerencias para mejoras futuras:
 
 ### 🔍 Auditoría de Consistencia (Opcional)
+
 - Verificar que otros archivos de entidades sigan el mismo patrón
 - Documentar estándares de tipos para futuros desarrollos
 
-### 📖 Documentación (Opcional)  
+### 📖 Documentación (Opcional)
+
 - Actualizar docs/entities.md con la nueva estructura
 - Crear guía de best practices para tipos
 
 ### 🧪 Testing (Opcional)
+
 - Añadir tests unitarios para validar exports de tipos
 - Verificar imports en componentes principales
 

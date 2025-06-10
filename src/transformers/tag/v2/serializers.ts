@@ -3,10 +3,10 @@
  * @module transformers/tag/v2/serializers
  */
 
-import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TagSchema } from '@/types/entities/tag/schema';
 import type { TagBase, TagComplete } from '@/types/entities/tag/types';
+import { TransformerError } from '@/utils/transformers/errors';
 
 // Logger específico para este módulo
 const logger = serverLogger.withContext('TagTransformer:Serializers');
