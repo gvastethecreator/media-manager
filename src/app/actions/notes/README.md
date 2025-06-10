@@ -425,3 +425,6 @@ describe('Notes Actions', () => {
 - **[Types Reference](../../../types/entities/note/)**: Definiciones de tipos completas
 - **[Validation Schemas](../../../utils/note/validators.ts)**: Schemas Zod para validación
 - **[Service Layer](../../../services/note.service.ts)**: Lógica de negocio del servicio
+
+## Funciones disponibles
+
