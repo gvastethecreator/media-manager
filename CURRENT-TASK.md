@@ -1,6 +1,67 @@
 # 📋 TAREAS ACTUALES - Image Manager
 
-**Última actualización:** 2024-12-28T23:45:00Z
+**Última actualización:** 2024-12-28T23:50:00Z
+
+## 🚨 CRISIS ACTUAL: CORRECCIÓN ERRORES TYPESCRIPT
+
+### 🎯 ESTADO ACTUAL: EN PROGRESO
+
+**Estado**: 🟡 CORRIGIENDO ERRORES TS - Sistemático por categorías
+**Prioridad**: 🔥 CRÍTICA - 4725 líneas de errores TypeScript
+**Fecha de inicio**: 2024-12-28T23:50:00Z
+
+#### 📊 ANÁLISIS COMPLETO DE ERRORES
+
+- **Total de errores:** 3,187 errores de TypeScript
+- **Archivos en log:** 4,724 líneas totales
+
+#### 🔥 TOP ERRORES POR TIPO
+
+1. **TS2339** (1,278) - Propiedades que no existen en el tipo
+2. **TS2322** (347) - Tipos no asignables
+3. **TS2305** (267) - Módulos sin exportaciones por defecto
+4. **TS2345** (217) - Argumentos de tipo que no coinciden
+5. **TS7006** (178) - Parámetros implícitamente tipo 'any'
+6. **TS2353** (172) - Objetos literales solo pueden especificar propiedades conocidas
+7. **TS2551** (76) - Propiedades que no existen (may have meant)
+8. **TS2724** (73) - Propiedades que faltan en el tipo
+9. **TS2304** (73) - No se puede encontrar el nombre
+10. **TS2307** (68) - No se puede encontrar el módulo
+
+#### 📁 ARCHIVOS MÁS PROBLEMÁTICOS
+
+1. `src/types/entities/note/index.ts` - 6 errores
+2. `src/types/entities/character/index.ts` - 3 errores
+3. `src/types/entities/character-export.ts` - 3 errores
+4. `src/types/entities/concept/index.ts` - 2 errores
+5. `src/types/entities/prompt/index.ts` - 2 errores
+
+3. **⚡ Errores en rutas API (.next/types/)** (Múltiples)
+   - TS2344: ParamCheck constraints
+   - Archivos generados - requieren corrección en fuente
+
+4. **📋 Errores en actions y transformers** (Múltiples)
+   - Pendiente de análisis detallado
+
+### 🎯 PLAN DE CORRECCIÓN SISTEMÁTICA
+
+#### ✅ Fase 1: Errores Críticos Simples (AHORA)
+
+- [ ] 🔧 Corregir src/adapters/folder/index.ts (3 errores)
+- [ ] 🔧 Corregir jest.setup.ts (2 errores Mock types)
+- [ ] ✅ Verificar compilación parcial
+
+#### 🔄 Fase 2: Errores de Rutas API (SIGUIENTE)
+
+- [ ] 🔍 Analizar archivos fuente de rutas API
+- [ ] 🔧 Corregir params handling en route handlers
+- [ ] ✅ Verificar regeneración de .next/types/
+
+#### 📋 Fase 3: Actions y Transformers (POSTERIOR)
+
+- [ ] 🔍 Categorizar errores en actions
+- [ ] 🔧 Corregir imports y tipos
+- [ ] ✅ Validación completa
 
 ## ✅ NUEVA CRISIS RESUELTA: SISTEMA DE TRANSFORMADORES NOTE REPARADO
 
@@ -373,36 +434,6 @@ graph LR
 - [ ] **File System**: Testing de folder scanner
 - [ ] **Cache**: Testing de strategies de cache
 
-## 📊 Estado Actual
-
-### ✅ Archivos Creados
-
-```
-src/tests/
-├── resolver.js                      # ✅ Resolver personalizado Jest
-├── image-mock.js                    # ✅ Mock archivos imagen
-├── README.md                        # ✅ Documentación completa
-├── helpers/test-utils.tsx           # ✅ Utilidades testing
-├── fixtures/entities.ts             # ✅ Datos prueba
-├── __mocks__/@prisma/client.ts      # ✅ Mock Prisma
-├── __mocks__/next/navigation.ts     # ✅ Mock Next.js
-└── setup/react-testing.test.tsx    # ✅ Test verificación
-```
-
-### ✅ Configuraciones Actualizadas
-
-- **jest.config.ts**: Optimizado para stack actual
-- **jest.setup.ts**: Setup global con mocks
-- **tsconfig.test.json**: TypeScript para tests
-- **AGENTS.md**: Documentación completa para agentes futuros
-
-### 🎯 Próximos Pasos
-
-1. **Ejecutar tests**: Verificar funcionamiento completo
-2. **Hook testing**: Implementar tests para custom hooks
-3. **Store testing**: Testing de Zustand stores
-4. **Component testing**: Setup para Shadcn/UI
-
 ## Plan de Acción: Solucionar Problemas de Indexación de Carpetas
 
 **Objetivo:** Resolver los errores de importación y ejecución que impiden la correcta indexación de carpetas y la actualización de su estado.
@@ -716,7 +747,7 @@ interface GroupCardProps {
 
 ---
 
-# Tarea Actual: Resolver Errores de PrismaClient en el Cliente
+# Tarea: Resolver Errores de PrismaClient en el Cliente
 
 ## Objetivo
 
@@ -913,7 +944,7 @@ Las siguientes Server Actions en `src/app/actions/images/` reemplazarán las lla
 ---
 
 **Estado**: ✅ Refactorización de `src/store/entities/image/slices/core.ts` completada.
-Se migró el `PlaceStore` para usar `getPlaces`, `getPlace`, `addImageToPlace` y `removeImageFromPlace` directamente desde las Server Actions.
+Se migró el PlaceStore para usar `getPlaces`, `getPlace`, `addImageToPlace` y `removeImageFromPlace` directamente desde las Server Actions.
 Se eliminó el fallback `fetch` en `unified-file-manager.store.ts`.
 Se agregaron Server Actions para configuraciones visuales y estadísticas de debug.
 **Estado**: Verificadas las llamadas en `video` y `unified-file-manager`; no se detectaron `fetch` pendientes. El antiguo `file-manager.store.ts` queda como referencia histórica y no se usa en la aplicación.
