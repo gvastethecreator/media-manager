@@ -3,12 +3,36 @@
  * @module types/entities/world-item
  */
 
-// Exportar desde archivos individuales
-export * from './base';
+// Exportar enumeraciones y constantes
 export * from './enums';
-export * from './extended';
 export * from './stats-types';
-export * from './types';
+export * from './extended';
+
+// Exportar tipos específicos para evitar conflictos
+export type {
+	WorldItemBase,
+	WorldItemRelations,
+	WorldItemCounts,
+	WorldItemUI,
+	WorldItemFilters,
+	WorldItemSearchOptions,
+	WorldItemComplete,
+	WorldItemAttribute,
+	WorldItemEffect,
+	WorldItemRequirement,
+	WorldItemStat,
+	WorldItemProperty,
+	WorldItemFilter,
+	WorldItemTags,
+	WorldItemDeserialized,
+	WorldItemDeserializedFields
+} from './types';
+
+// Exportar tipos de Input desde base.ts para evitar conflictos
+export type {
+	WorldItemCreateInput,
+	WorldItemUpdateInput
+} from './base';
 
 // Exportar enumeraciones explícitamente para mejor claridad
 export {
@@ -22,27 +46,10 @@ export {
 	WorldItemViewMode,
 } from './enums';
 
-// Exportar tipos principales explícitamente
-export type {
-	CreateWorldItemData,
-	UpdateWorldItemData,
-	WorldItemBase,
-	WorldItemCount,
-	WorldItemFilter,
-	WorldItemFilters,
-	WorldItemValidated,
-	WorldItemWithFiles,
-	WorldItemWithRelations,
-	WorldItemWithStats,
-} from './types';
-
 // Exportar tipos estadísticos explícitamente
 export type {
 	WorldItemAttributes,
 	WorldItemDistribution,
-	WorldItemEffect,
-	WorldItemProperty,
-	WorldItemRequirement,
 	WorldItemStats,
 	WorldItemStatsOverview,
 } from './stats-types';
@@ -55,3 +62,6 @@ export type {
 	WorldItemExtended,
 	WorldItemVisualConfig,
 } from './extended';
+
+// 🎯 Alias principal para el tipo WorldItem
+export type { WorldItemExtended as WorldItem } from './extended';

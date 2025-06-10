@@ -6,9 +6,10 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { WorldItemExtended } from '@/types/entities/world-item/extended';
 import type { WorldItemDeserialized } from '@/types/entities/world-item/types';
+import { deserializeJsonField as parseJsonField } from '@/utils/transformers/common';
 import { TransformerError } from '@/utils/transformers/errors';
 import { extendWorldItem } from './serializers';
-import { fromPrismaWorldItem, parseJsonField } from './server';
+import { fromPrismaWorldItem } from './server';
 
 const logger = serverLogger.withContext('WorldItemTransformer');
 

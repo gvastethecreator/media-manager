@@ -3,7 +3,7 @@
  * @module transformers/property/v2/mappers
  */
 
-import { TransformerError } from '@/lib/errors';
+import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	type CreatePropertyData,
@@ -41,7 +41,7 @@ export function toCreatePropertyData(data: CreatePropertyData): Prisma.PropertyC
 		};
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de Property', { error });
-		throw new TransformerError('PropertyTransformer', 'Error mapeando datos de creación', { cause: error });
+		throw new TransformerError('Error mapeando datos de creación');
 	}
 }
 
@@ -67,7 +67,7 @@ export function toUpdatePropertyData(data: PropertyUpdateInput): Prisma.Property
 		return prismaData;
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de Property', { error });
-		throw new TransformerError('PropertyTransformer', 'Error mapeando datos de actualización', { cause: error });
+		throw new TransformerError('Error mapeando datos de actualización');
 	}
 }
 
@@ -203,7 +203,7 @@ export function toSearchResult(
 		};
 	} catch (error) {
 		logger.error('Error generando resultado de búsqueda', { error });
-		throw new TransformerError('PropertyTransformer', 'Error generando resultado de búsqueda', { cause: error });
+		throw new TransformerError('Error generando resultado de búsqueda');
 	}
 }
 

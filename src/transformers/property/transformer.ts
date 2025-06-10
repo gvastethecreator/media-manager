@@ -1,6 +1,12 @@
 /**
  * @file Transformadores para la entidad Property
- * @module transformers/property/transformer
+ * @module transformers/property/t	} catch (error) {
+		logge	} catch (error) {
+		logger.error('❌ Error transformando array de properties:', error);
+		throw new TransformerError('Error al transformar array de Properties');
+	}ror('❌ Error transformando property:', error);
+		throw new TransformerError('Error al transformar Property');
+	}former
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -88,7 +94,7 @@ export function transformProperty<T extends Partial<PropertyBase> | Property | u
 		});
 	} catch (error) {
 		logger.error('Error transformando property', { error });
-		throw new TransformerError('Error al transformar Property', { cause: error });
+		throw new TransformerError('Error al transformar Property');
 	}
 }
 
@@ -111,7 +117,7 @@ export function transformProperties<T extends Partial<PropertyBase> | Property |
 		return properties.map((property) => transformProperty(property, options));
 	} catch (error) {
 		logger.error('Error transformando array de properties', { error });
-		throw new TransformerError('Error al transformar array de Properties', { cause: error });
+		throw new TransformerError('Error al transformar array de Properties');
 	}
 }
 
@@ -141,7 +147,7 @@ export function transformPropertyToExtended<T extends Partial<PropertyComplete> 
 		};
 	} catch (error) {
 		logger.error('Error transformando property a versión extendida', { error });
-		throw new TransformerError('Error al transformar Property a versión extendida', { cause: error });
+		throw new TransformerError('Error al transformar Property a versión extendida');
 	}
 }
 
@@ -187,7 +193,7 @@ export function transformPropertyToWithStats<T extends Partial<PropertyComplete>
 		};
 	} catch (error) {
 		logger.error('Error transformando property con estadísticas', { error });
-		throw new TransformerError('Error al transformar Property con estadísticas', { cause: error });
+		throw new TransformerError('Error al transformar Property con estadísticas');
 	}
 }
 

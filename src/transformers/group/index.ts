@@ -85,7 +85,7 @@ export async function searchGroups(
 		};
 	} catch (error) {
 		logger.error('Error buscando grupos:', error);
-		throw new TransformerError('Error al buscar grupos', { cause: error });
+		throw new TransformerError('Error al buscar grupos');
 	}
 }
 
@@ -161,7 +161,7 @@ export async function getGroupById(
 			throw error;
 		}
 		logger.error(`Error obteniendo grupo ${id}:`, error);
-		throw new TransformerError(`Error al obtener grupo ${id}`, { cause: error });
+		throw new TransformerError(`Error al obtener grupo ${id}`);
 	}
 }
 
@@ -230,7 +230,7 @@ export async function getGroupsByIds(
 		return groups.map((group) => toExtendedGroup(group));
 	} catch (error) {
 		logger.error('Error obteniendo grupos por IDs:', error);
-		throw new TransformerError('Error al obtener grupos por IDs', { cause: error });
+		throw new TransformerError('Error al obtener grupos por IDs');
 	}
 }
 
@@ -273,7 +273,7 @@ export async function createGroup(data: GroupCreateInput): Promise<GroupExtended
 		return toExtendedGroup(group);
 	} catch (error) {
 		logger.error('Error creando grupo:', error);
-		throw new TransformerError('Error al crear grupo', { cause: error });
+		throw new TransformerError('Error al crear grupo');
 	}
 }
 
@@ -329,7 +329,7 @@ export async function updateGroup(id: string, data: GroupUpdateInput): Promise<G
 			throw error;
 		}
 		logger.error(`Error actualizando grupo ${id}:`, error);
-		throw new TransformerError(`Error al actualizar grupo ${id}`, { cause: error });
+		throw new TransformerError(`Error al actualizar grupo ${id}`);
 	}
 }
 
@@ -376,7 +376,7 @@ export async function deleteGroup(
 			throw error;
 		}
 		logger.error(`Error eliminando grupo ${id}:`, error);
-		throw new TransformerError(`Error al eliminar grupo ${id}`, { cause: error });
+		throw new TransformerError(`Error al eliminar grupo ${id}`);
 	}
 }
 
