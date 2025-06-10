@@ -5,63 +5,50 @@
 
 // Exportar enumeraciones y constantes
 export * from './enums';
-export * from './stats-types';
 export * from './extended';
+export * from './stats-types';
 
 // Exportar tipos específicos para evitar conflictos
 export type {
-	WorldItemBase,
-	WorldItemRelations,
-	WorldItemCounts,
-	WorldItemUI,
-	WorldItemFilters,
-	WorldItemSearchOptions,
-	WorldItemComplete,
-	WorldItemAttribute,
-	WorldItemEffect,
-	WorldItemRequirement,
-	WorldItemStat,
-	WorldItemProperty,
-	WorldItemFilter,
-	WorldItemTags,
-	WorldItemDeserialized,
-	WorldItemDeserializedFields
+    WorldItemAttribute, WorldItemBase, WorldItemComplete, WorldItemCounts, WorldItemDeserialized,
+    WorldItemDeserializedFields, WorldItemEffect, WorldItemFilter, WorldItemFilters, WorldItemProperty, WorldItemRelations, WorldItemRequirement, WorldItemSearchOptions, WorldItemStat, WorldItemTags, WorldItemUI
 } from './types';
 
 // Exportar tipos de Input desde base.ts para evitar conflictos
 export type {
-	WorldItemCreateInput,
-	WorldItemUpdateInput
+    WorldItemCreateInput,
+    WorldItemUpdateInput
 } from './base';
 
 // Exportar enumeraciones explícitamente para mejor claridad
 export {
-	WORLD_ITEM_SORT_PROPERTY_MAP,
-	WorldItemCategory,
-	WorldItemRarity,
-	WorldItemRelationshipType,
-	WorldItemSize,
-	WorldItemSortCriteria,
-	WorldItemType,
-	WorldItemViewMode,
+    WORLD_ITEM_SORT_PROPERTY_MAP,
+    WorldItemCategory,
+    WorldItemRarity,
+    WorldItemRelationshipType,
+    WorldItemSize,
+    WorldItemSortCriteria,
+    WorldItemType,
+    WorldItemViewMode
 } from './enums';
 
 // Exportar tipos estadísticos explícitamente
 export type {
-	WorldItemAttributes,
-	WorldItemDistribution,
-	WorldItemStats,
-	WorldItemStatsOverview,
+    WorldItemAttributes,
+    WorldItemDistribution,
+    WorldItemStats,
+    WorldItemStatsOverview
 } from './stats-types';
 
 // Exportar tipos extendidos explícitamente
 export type {
-	ParsedWorldItem,
-	ParsedWorldItemVisualConfig,
-	ParsedWorldItemWithRelations,
-	WorldItemExtended,
-	WorldItemVisualConfig,
+    ParsedWorldItem,
+    ParsedWorldItemVisualConfig,
+    ParsedWorldItemWithRelations,
+    WorldItemExtended,
+    WorldItemVisualConfig
 } from './extended';
 
 // 🎯 Alias principal para el tipo WorldItem
 export type { WorldItemExtended as WorldItem } from './extended';
+

@@ -3,10 +3,10 @@
  * @module transformers/property/v2/serializers
  */
 
-import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { PropertySchema } from '@/types/entities/property/schema';
 import type { PropertyBase, PropertyComplete, PropertyDeserialized } from '@/types/entities/property/types';
+import { TransformerError } from '@/utils/transformers/errors';
 
 // Logger específico para este módulo
 const logger = serverLogger.child({ module: 'PropertyTransformer:Serializers' });

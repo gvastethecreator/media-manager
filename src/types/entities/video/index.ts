@@ -14,28 +14,18 @@ export { VideoFormat, VideoPrivacyLevel, VideoQuality, VideoType } from './enums
 
 // Tipos base para estructuras de datos
 export type {
-    VideoBase,
-    VideoChapter,
-    VideoMetadata,
-    VideoPlayState,
-    VideoVisualConfig
+	VideoBase,
+	VideoChapter,
+	VideoMetadata,
+	VideoPlayState,
+	VideoVisualConfig
 } from './types';
 
 // Tipos extendidos para UI y visualización
 export type {
-    VideoComplete,
-    VideoCreateInput,
-    VideoUpdateInput,
-    VideoSearchOptions,
-    VideoSearchResult,
-    VideoTransformerOptions,
-    RelatedVideo,
-    VideoVisualConfigComplete,
-    VideoValidated,
-    VideoRelations,
-    VideoCounts,
-    VideoUI,
-    VideoFilters
+	RelatedVideo, VideoComplete, VideoCounts, VideoCreateInput, VideoFilters, VideoRelations, VideoSearchOptions,
+	VideoSearchResult,
+	VideoTransformerOptions, VideoUI, VideoUpdateInput, VideoValidated, VideoVisualConfigComplete
 } from './types';
 
 // 🎯 Alias principal para el tipo Video
