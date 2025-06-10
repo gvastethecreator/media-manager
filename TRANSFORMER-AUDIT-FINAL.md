@@ -46,6 +46,7 @@ throw new TransformerError('Message');
 ## 🎯 VALIDACIÓN FINAL
 
 ### ✅ Sin errores de TransformerError
+
 ```bash
 ✅ tag/v2/serializers.ts - 0 errores
 ✅ property/transformer.ts - 0 errores
@@ -55,6 +56,7 @@ throw new TransformerError('Message');
 ```
 
 ### ⚠️ Errores de schema restantes (NO críticos)
+
 ```bash
 ⚠️ tag/v2/mappers.ts - Errores de tipos schema
 ⚠️ property/v2/mappers.ts - Errores de tipos schema

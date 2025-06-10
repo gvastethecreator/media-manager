@@ -12,11 +12,11 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { PropertySchema } from '@/types/entities/property/schema';
 import type {
-	PropertyBase,
-	PropertyComplete,
-	PropertyCounts,
-	PropertyExtended,
-	PropertyWithStats,
+    PropertyBase,
+    PropertyComplete,
+    PropertyCounts,
+    PropertyExtended,
+    PropertyWithStats,
 } from '@/types/entities/property/types';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Property } from '@prisma/client';

@@ -4,18 +4,18 @@
  */
 
 import { createLogger } from '@/lib/logger';
-import { TransformerError } from '@/utils/transformers/errors';
 import { VideoSchema } from '@/types/entities/video/schema';
 import type {
-	VideoBase,
-	VideoComplete,
-	VideoCreateInput,
-	VideoMetadata,
-	VideoRelations,
-	VideoUpdateInput,
-	VideoVisualConfig,
-	VideoVisualConfigComplete,
+    VideoBase,
+    VideoComplete,
+    VideoCreateInput,
+    VideoMetadata,
+    VideoRelations,
+    VideoUpdateInput,
+    VideoVisualConfig,
+    VideoVisualConfigComplete,
 } from '@/types/entities/video/types';
+import { TransformerError } from '@/utils/transformers/errors';
 
 // Logger específico para el transformer de Video
 const log = createLogger('video-transformer');

@@ -9,23 +9,26 @@
 ### 🔍 Constructor TransformerError Inconsistencias
 
 **Constructor correcto** (según `/utils/transformers/errors.ts`):
+
 ```typescript
 export class TransformerError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = 'TransformerError';
-	}
+ constructor(message: string) {
+  super(message);
+  this.name = 'TransformerError';
+ }
 }
 ```
 
 **Patrones incorrectos encontrados**:
 
 #### ❌ Patrón 1: 3 argumentos (Tag v2)
+
 ```typescript
 throw new TransformerError('TagTransformer', 'Datos de Tag inválidos', { cause: error });
 ```
 
 #### ❌ Patrón 2: 2 argumentos (Property, Note serializers)
+
 ```typescript
 throw new TransformerError('Error al transformar Property', { cause: error });
 ```
@@ -33,6 +36,7 @@ throw new TransformerError('Error al transformar Property', { cause: error });
 ## 📊 ENTIDADES AFECTADAS
 
 ### 🚨 CRÍTICAS (20 archivos encontrados)
+
 - ✅ `note/transformer.ts` - YA CORREGIDO
 - 🔧 `tag/v2/serializers.ts` - 3 instancias
 - 🔧 `tag/v2/mappers.ts` - 4 instancias
@@ -42,6 +46,7 @@ throw new TransformerError('Error al transformar Property', { cause: error });
 - 🔧 `note/serializers.ts` - 2 instancias
 
 ### 📋 ARCHIVOS A VERIFICAR
+
 1. `src/transformers/tag/v2/serializers.ts`
 2. `src/transformers/tag/v2/mappers.ts`
 3. `src/transformers/property/transformer.ts`
@@ -52,11 +57,13 @@ throw new TransformerError('Error al transformar Property', { cause: error });
 ## 🔧 ESTRATEGIA DE CORRECCIÓN
 
 ### Paso 1: Corrección por lotes
+
 1. Buscar todos los patrones incorrectos
 2. Reemplazar constructores con versión simplificada
 3. Mantener información de error en logs
 
 ### Paso 2: Validación
+
 1. Verificar que no hay errores TypeScript
 2. Confirmar que logging conserva información
 
@@ -74,6 +81,7 @@ throw new TransformerError('Error transformando datos');
 ```
 
 ## ⏰ TIEMPO ESTIMADO
+
 - **Corrección**: 15-20 minutos
 - **Validación**: 5 minutos
 - **Total**: ~25 minutos
