@@ -321,3 +321,6 @@ Los tests para este módulo cubren:
 - **Memory Management**: Gestión cuidadosa de memoria para estadísticas
 - **Background Processing**: Operaciones de mantenimiento en background
 - **Resource Monitoring**: Monitoreo de recursos del sistema
+
+## Funciones disponibles
+

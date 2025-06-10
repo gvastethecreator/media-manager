@@ -436,3 +436,6 @@ describe('Collections Actions', () => {
 - **[Types Reference](../../../types/entities/collection/)**: Definiciones de tipos completas
 - **[Service Layer](../../../services/collection/)**: Lógica de negocio del servicio
 - **[Store Implementation](../../../store/entities/collection/)**: Gestión de estado cliente
+
+## Funciones disponibles
+

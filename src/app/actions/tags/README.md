@@ -380,3 +380,6 @@ Los tests para este módulo cubren:
 - **Popularity Metrics**: Métricas de popularidad en tiempo real
 - **Trend Analysis**: Análisis de tendencias de etiquetado
 - **Performance Monitoring**: Monitoreo de performance de operaciones
+
+## Funciones disponibles
+

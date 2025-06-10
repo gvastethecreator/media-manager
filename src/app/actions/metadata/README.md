@@ -342,3 +342,6 @@ Los tests para este módulo cubren:
 - **Version Handling**: Manejo de diferentes versiones de metadatos
 - **Encoding Support**: Soporte para múltiples encodings de texto
 - **Platform Independence**: Funcionamiento consistente entre plataformas
+
+## Funciones disponibles
+

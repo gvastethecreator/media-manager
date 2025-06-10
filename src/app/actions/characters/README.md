@@ -402,3 +402,6 @@ Los tests para este módulo cubren:
 - **Archive Management**: Gestión de personajes inactivos o archivados
 - **Data Migration**: Herramientas para migración y consolidación
 - **Performance Monitoring**: Monitoreo de rendimiento en operaciones
+
+## Funciones disponibles
+
