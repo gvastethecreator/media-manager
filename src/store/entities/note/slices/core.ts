@@ -1,7 +1,8 @@
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { fromPrismaNote } from '@/transformers/note/serializers';
-import type { Note, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import { transformNoteToWithStats } from '@/transformers/note/transformer';
+import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
@@ -17,17 +18,17 @@ const coreLogger = clientLogger.withContext('NoteStore:Core');
 export interface CoreSlice {
 	// Estado
 	notes: NoteWithStats[];
-	selectedNote: Note | null;
+	selectedNote: NoteWithStats | null;
 	isLoading: boolean;
 	error: string | null;
 
 	// Acciones
-	loadNotes: () => Promise<void>;
+	loadNotes: () => Promise<NoteWithStats[]>;
 	setNotes: (notes: NoteWithStats[]) => void;
-	createNote: (note: NoteCreateInput) => Promise<void>;
+	createNote: (note: NoteCreateInput) => Promise<NoteWithStats | null>;
 	updateNote: (id: string, note: NoteUpdateInput) => Promise<void>;
 	deleteNote: (id: string) => Promise<void>;
-	selectNote: (note: Note | null) => void;
+	selectNote: (note: NoteWithStats | null) => void;
 	reset: () => void;
 }
 
@@ -45,7 +46,13 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			coreLogger.info('🔄 Cargando notas');
 
 			const result = await getNotesAction();
-			const notes = result.map(fromPrismaNote);
+			// 🔄 Transformar cada NoteComplete a NoteWithStats usando el transformer
+			const notes = result.map((noteWithBasicStats) => {
+				// Convertir a Note completo primero
+				const noteComplete = fromPrismaNote(noteWithBasicStats);
+				// Luego transformar a NoteWithStats
+				return transformNoteToWithStats(noteComplete);
+			});
 
 			set({ notes, isLoading: false });
 			coreLogger.info('✅ Notas cargadas:', notes.length);
@@ -69,7 +76,9 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 			set({ isLoading: true, error: null });
 			coreLogger.info('✨ Creando nota:', note);
 
-			const newNote = await createNoteAction(note);
+			const noteComplete = await createNoteAction(note);
+			// 🔄 Transformar NoteComplete a NoteWithStats
+			const newNote = transformNoteToWithStats(noteComplete);
 
 			set((state) => ({
 				notes: [...state.notes, newNote],
@@ -88,12 +97,14 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 		}
 	},
 
-	updateNote: async (id, note) => {
+	updateNote: async (id, noteData) => {
 		try {
 			set({ isLoading: true, error: null });
-			coreLogger.info('🔄 Actualizando nota:', { id, ...note });
+			coreLogger.info('🔄 Actualizando nota:', { id, noteData });
 
-			const updatedNote = await updateNoteAction(id, note);
+			const noteComplete = await updateNoteAction(id, noteData);
+			// 🔄 Transformar NoteComplete a NoteWithStats
+			const updatedNote = transformNoteToWithStats(noteComplete);
 
 			set((state) => ({
 				notes: state.notes.map((n) => (n.id === id ? updatedNote : n)),

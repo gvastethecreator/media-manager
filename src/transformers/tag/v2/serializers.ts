@@ -3,13 +3,13 @@
  * @module transformers/tag/v2/serializers
  */
 
-import { TransformerError } from '@/lib/errors';
+import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TagSchema } from '@/types/entities/tag/schema';
-import type { TagBase, TagComplete, TagDeserialized } from '@/types/entities/tag/types';
+import type { TagBase, TagComplete } from '@/types/entities/tag/types';
 
 // Logger específico para este módulo
-const logger = serverLogger.child({ module: 'TagTransformer:Serializers' });
+const logger = serverLogger.withContext('TagTransformer:Serializers');
 
 // Constantes para valores por defecto
 export const DEFAULT_TAG_EMOJI = '🏷️';
@@ -37,7 +37,7 @@ export function validateTag(tag: Partial<TagBase>): TagBase {
 		return tag as TagBase;
 	} catch (error) {
 		logger.error('Error validando Tag', { error });
-		throw new TransformerError('TagTransformer', 'Datos de Tag inválidos', { cause: error });
+		throw new TransformerError('Datos de Tag inválidos');
 	}
 }
 
@@ -80,7 +80,7 @@ export function toPrismaTag(tag: Partial<TagComplete>, options: TagTransformOpti
 		return result;
 	} catch (error) {
 		logger.error('Error serializando tag', { error });
-		throw new TransformerError('TagTransformer', 'Error serializando tag', { cause: error });
+		throw new TransformerError('Error serializando tag');
 	}
 }
 
@@ -93,16 +93,15 @@ export function toPrismaTag(tag: Partial<TagComplete>, options: TagTransformOpti
 export function fromPrismaTag<T extends TagBase>(
 	tag: T,
 	options: TagTransformOptions = {}
-): T & TagDeserialized & Partial<Record<'_relations' | '_count' | '_ui', any>> {
+): T & TagComplete & Partial<Record<'_relations' | '_count' | '_ui', any>> {
 	try {
 		const { includeRelations = false, includeUI = false, includeStats = false } = options;
 
 		// Crear resultado base
-		const result = { ...tag } as T & TagDeserialized;
+		const result = { ...tag } as any;
 
 		// Convertir favorite a isFavorite para mantener compatibilidad
 		if ('favorite' in tag) {
-			// @ts-ignore - Ignorar error de tipo ya que estamos adaptando el campo
 			result.isFavorite = tag.favorite;
 		}
 
@@ -127,7 +126,7 @@ export function fromPrismaTag<T extends TagBase>(
 		return result;
 	} catch (error) {
 		logger.error('Error deserializando tag', { error });
-		throw new TransformerError('TagTransformer', 'Error deserializando tag', { cause: error });
+		throw new TransformerError('Error deserializando tag');
 	}
 }
 

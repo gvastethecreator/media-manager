@@ -3,7 +3,7 @@
  * @module transformers/tag/v2/mappers
  */
 
-import { TransformerError } from '@/lib/errors';
+import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	TagBase,
@@ -19,7 +19,7 @@ import type { Prisma } from '@prisma/client';
 import { fromPrismaTag } from './serializers';
 
 // Logger específico para este módulo
-const logger = serverLogger.child({ module: 'TagTransformer:Mappers' });
+const logger = serverLogger.withContext('TagTransformer:Mappers');
 
 /**
  * Convierte datos de creación de Tag a formato compatible con Prisma
@@ -63,7 +63,7 @@ export function toCreateTagData(data: TagCreateInput): Prisma.TagCreateInput {
 		};
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de Tag', { error });
-		throw new TransformerError('TagTransformer', 'Error mapeando datos de creación', { cause: error });
+		throw new TransformerError('Error mapeando datos de creación');
 	}
 }
 
@@ -110,7 +110,7 @@ export function toUpdateTagData(data: TagUpdateInput): Prisma.TagUpdateInput {
 		};
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de Tag', { error });
-		throw new TransformerError('TagTransformer', 'Error mapeando datos de actualización', { cause: error });
+		throw new TransformerError('Error mapeando datos de actualización');
 	}
 }
 
@@ -165,7 +165,7 @@ export function toSearchOptions(options: TagSearchOptions): Prisma.TagFindManyAr
 		};
 	} catch (error) {
 		logger.error('Error mapeando opciones de búsqueda de Tag', { error });
-		throw new TransformerError('TagTransformer', 'Error mapeando opciones de búsqueda', { cause: error });
+		throw new TransformerError('Error mapeando opciones de búsqueda');
 	}
 }
 
@@ -204,7 +204,7 @@ export function toSearchFilters(filters: TagFilters): Prisma.TagWhereInput {
 		return where;
 	} catch (error) {
 		logger.error('Error mapeando filtros de Tag', { error });
-		throw new TransformerError('TagTransformer', 'Error mapeando filtros', { cause: error });
+		throw new TransformerError('Error mapeando filtros');
 	}
 }
 
@@ -238,7 +238,7 @@ export function toSearchResult(tags: TagBase[], total: number, options: TagSearc
 		};
 	} catch (error) {
 		logger.error('Error generando resultado de búsqueda', { error });
-		throw new TransformerError('TagTransformer', 'Error generando resultado de búsqueda', { cause: error });
+		throw new TransformerError('Error generando resultado de búsqueda');
 	}
 }
 

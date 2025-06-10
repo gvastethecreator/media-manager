@@ -42,7 +42,7 @@ export function transformTag(tag: any): TagComplete {
 		return extendTag(tagComplete);
 	} catch (error) {
 		logger.error('❌ Error transformando Tag:', error);
-		throw handleTransformerError(error, 'Error transformando Tag');
+		throw handleTransformerError(error);
 	}
 }
 
@@ -97,7 +97,7 @@ export function transformTagToExtended(
 		};
 	} catch (error) {
 		logger.error('❌ Error transformando Tag a Extended:', error);
-		throw handleTransformerError(error, 'Error transformando Tag a Extended');
+		throw handleTransformerError(error);
 	}
 }
 
@@ -166,7 +166,7 @@ export function transformTagToWithStats(tag: Tag | TagComplete): TagWithStats {
 		};
 	} catch (error) {
 		logger.error('❌ Error transformando Tag a WithStats:', error);
-		throw handleTransformerError(error, 'Error transformando Tag a WithStats');
+		throw handleTransformerError(error);
 	}
 }
 

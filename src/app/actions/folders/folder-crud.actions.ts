@@ -5,25 +5,25 @@
  * @module app/actions/folders/folder-crud.actions
  */
 
-import { Logger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { transformFolder } from '@/transformers/folder';
+import { fromPrismaFolder, transformFolder } from '@/transformers/folder';
 import {
-	mapCreateFolderDataToPrisma,
-	mapFolderSearchOptionsToPrisma,
-	mapUpdateFolderDataToPrisma,
+    mapCreateFolderDataToPrisma,
+    mapFolderSearchOptionsToPrisma,
+    mapUpdateFolderDataToPrisma,
 } from '@/transformers/folder/mappers';
 import type {
-	Folder,
-	FolderComplete,
-	FolderCreateInput,
-	FolderSearchOptions,
-	FolderUpdateInput,
-	FolderWithStats,
+    Folder,
+    FolderComplete,
+    FolderCreateInput,
+    FolderSearchOptions,
+    FolderUpdateInput,
+    FolderWithStats,
 } from '@/types/entities/folder/types';
 import { revalidatePath } from 'next/cache';
 
-const logger = new Logger('FolderCRUDActions');
+const logger = serverLogger.withContext('FolderCRUDActions');
 
 const REVALIDATE_PATHS = ['/settings', '/folders', '/folders/[id]'] as const;
 
@@ -141,37 +141,19 @@ export async function searchFolders(options: FolderSearchOptions = {}): Promise<
 			prisma.folder.count({ where: prismaOptions.where }),
 		]);
 
-		// Transformar resultados de forma segura
+		// Transformar resultados usando el transformador oficial
 		const transformedFolders = folders.map((folder) => {
 			try {
 				return transformFolder(folder);
 			} catch (error) {
-				// En caso de error al transformar, devolver una versión básica pero válida
+				// En caso de error al transformar, loggear y continuar
 				logger.warn(`⚠️ Error transformando carpeta ${folder.id}:`, error);
-				return {
-					id: folder.id,
-					name: folder.name || 'Carpeta sin nombre',
-					path: folder.path || '/',
+				// Intentar transformación básica
+				return transformFolder({
+					...folder,
 					description: folder.description || '',
-					emoji: folder.emoji || '📁',
-					color: folder.color || '#3b82f6',
-					parentId: folder.parentId,
-					createdAt: folder.createdAt,
-					updatedAt: folder.updatedAt,
-					children: [],
-					parent: null,
-					_count: {
-						children: folder._count?.children || 0,
-						images: folder._count?.images || 0,
-						videos: folder._count?.videos || 0,
-						uploadedImages: 0,
-						tags: 0,
-					},
-					totalFiles: folder.totalFiles || 0,
-					totalSize: folder.totalSize || 0,
-					metadata: {},
-					stats: null,
-				} as FolderComplete;
+					// No acceder a _count directamente ya que puede no existir en el tipo
+				});
 			}
 		});
 
@@ -316,13 +298,16 @@ export async function deleteFolder(id: string): Promise<Folder> {
 		}
 
 		// Eliminar la carpeta
-		const folder = await prisma.folder.delete({
+		const deletedFolder = await prisma.folder.delete({
 			where: { id },
 		});
 
-		logger.info(`✅ Carpeta eliminada correctamente con ID: ${folder.id}`);
+		logger.info(`✅ Carpeta eliminada correctamente con ID: ${deletedFolder.id}`);
 		await revalidateAllPaths();
-		return folder;
+
+		// 🔧 Usar fromPrismaFolder para convertir correctamente Prisma -> Folder
+		// Esta función maneja automáticamente description: null -> description: string
+		return fromPrismaFolder(deletedFolder);
 	} catch (error) {
 		logger.error(`❌ Error al eliminar carpeta con ID: ${id}:`, error);
 		throw error;

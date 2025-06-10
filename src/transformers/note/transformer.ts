@@ -3,9 +3,11 @@
  * @module transformers/note/transformer
  */
 
-import { TransformerError } from '@/lib/errors';
+import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { Note, NoteExtended, NoteWithStats } from '@/types/entities/note/types';
+import type { Note, NoteExtended } from '@/types/entities/note';
+import type { NoteComplete } from '@/types/entities/note/complete';
+import type { NoteWithStats } from '@/types/entities/note/base';
 import { extendNote, fromPrismaNote } from './serializers';
 
 const logger = serverLogger.withContext('NoteTransformer');
@@ -31,7 +33,7 @@ export function transformNote(note: unknown): Note {
 		return extendNote(note as any);
 	} catch (error) {
 		logger.error('Error transformando nota:', { error });
-		throw new TransformerError('Error al transformar nota', { cause: error });
+		throw new TransformerError('Error al transformar nota');
 	}
 }
 
@@ -50,7 +52,7 @@ export function transformNotes(notes: unknown[]): Note[] {
 		return notes.map((note) => transformNote(note));
 	} catch (error) {
 		logger.error('Error transformando lista de notas:', { error });
-		throw new TransformerError('Error al transformar lista de notas', { cause: error });
+		throw new TransformerError('Error al transformar lista de notas');
 	}
 }
 
@@ -78,21 +80,21 @@ export function transformNoteToExtended(note: Note): NoteExtended {
 		};
 	} catch (error) {
 		logger.error('Error transformando nota a versión extendida:', { error, noteId: (note as any)?.id });
-		throw new TransformerError('Error al transformar nota a versión extendida', { cause: error });
+		throw new TransformerError('Error al transformar nota a versión extendida');
 	}
 }
 
 /**
  * 🔄 Transforma un Note a su versión con estadísticas
- * @param note Note base
+ * @param note Note base o NoteComplete
  * @returns Note con estadísticas calculadas
  */
-export function transformNoteToWithStats(note: Note): NoteWithStats {
+export function transformNoteToWithStats(note: Note | NoteComplete): NoteWithStats {
 	try {
 		const baseNote = transformNote(note);
 
 		// Calcular totales para las estadísticas
-		const counts = baseNote._count || {
+		const counts: Record<string, number> = baseNote._count || {
 			images: 0,
 			videos: 0,
 			collections: 0,
@@ -126,7 +128,7 @@ export function transformNoteToWithStats(note: Note): NoteWithStats {
 			conceptCount: counts.concepts,
 			importanceLevel,
 			contentLength: baseNote.content ? baseNote.content.length : 0,
-			relatedItemsCount: Object.values(counts).reduce((sum, count) => sum + count, 0),
+			relatedItemsCount: Object.values(counts).reduce((sum: number, count: number) => sum + count, 0),
 			distribution: [
 				{ name: 'images', count: counts.images },
 				{ name: 'videos', count: counts.videos },
@@ -136,7 +138,7 @@ export function transformNoteToWithStats(note: Note): NoteWithStats {
 		};
 	} catch (error) {
 		logger.error('Error transformando nota a versión con estadísticas:', { error, noteId: (note as any)?.id });
-		throw new TransformerError('Error al transformar nota a versión con estadísticas', { cause: error });
+		throw new TransformerError('Error al transformar nota a versión con estadísticas');
 	}
 }
 

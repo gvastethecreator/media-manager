@@ -35,3 +35,6 @@ export type {
 	AlbumStatsOverview,
 	AlbumTimeRange,
 } from './stats-types';
+
+// 🎯 Alias principal para el tipo Album
+export type { AlbumComplete as Album } from './extended';
