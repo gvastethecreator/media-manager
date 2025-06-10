@@ -7,9 +7,12 @@
 
 import * as CharacterActions from './character.actions';
 
+// Re-exportar tipos
+export type { CharacterWithImages, CharacterWithStats } from './character.actions';
+
 // Re-exportar funciones individuales
-export async function getCharacters() {
-	return CharacterActions.getCharacters();
+export async function searchCharacters(options: any) {
+	return CharacterActions.searchCharacters(options);
 }
 
 export async function getCharacterById(id: string) {
@@ -33,13 +36,9 @@ export async function getCharacterImages(id: string) {
 }
 
 export async function addCharacterImage(characterId: string, imageId: string) {
-	return CharacterActions.addCharacterImage(characterId, imageId);
+	return CharacterActions.addImageToCharacter(characterId, imageId);
 }
 
 export async function removeCharacterImage(characterId: string, imageId: string) {
-	return CharacterActions.removeCharacterImage(characterId, imageId);
-}
-
-export async function getCharacterStats(id: string) {
-	return CharacterActions.getCharacterStats(id);
+	return CharacterActions.removeImageFromCharacter(characterId, imageId);
 }

@@ -13,8 +13,8 @@ import * as StatsActions from './stats.actions';
 
 // Re-exportamos cada función como asíncrona para cumplir con las restricciones de 'use server'
 // De control.actions
-export const startQueue = ControlActions.startQueue;
-export const stopQueue = ControlActions.stopQueue;
+// ❌ DISABLED: export const startQueue = ControlActions.startQueue; // Función no existe en ./control.actions
+// ❌ DISABLED: export const stopQueue = ControlActions.stopQueue; // Función no existe en ./control.actions
 export const pauseQueue = ControlActions.pauseQueue;
 export const resumeQueue = ControlActions.resumeQueue;
 
