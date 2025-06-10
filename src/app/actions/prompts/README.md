@@ -463,3 +463,6 @@ describe('Prompts Actions', () => {
 - **[Types Reference](../../../types/entities/prompt/)**: Definiciones de tipos completas
 - **[AI Integration Guide](../../../docs/ai-integration.md)**: Guía de integración con IA
 - **[Error Handling](../../../lib/errors/prompt-errors.ts)**: Sistema de errores especializado
+
+## Funciones disponibles
+

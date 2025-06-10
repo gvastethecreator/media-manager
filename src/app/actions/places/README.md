@@ -437,3 +437,6 @@ Los tests para este módulo cubren:
 - **Regional Optimization**: Optimización por regiones geográficas
 - **Multi-timezone Support**: Soporte para múltiples zonas horarias
 - **International Standards**: Cumplimiento con estándares internacionales de geodatos
+
+## Funciones disponibles
+

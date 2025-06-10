@@ -498,3 +498,6 @@ describe('WorldItems Actions', () => {
 - **[Types Reference](../../../types/entities/world-item/)**: Definiciones de tipos completas
 - **[Cache Service](../../../lib/cache/world-items-cache.ts)**: Implementación del sistema de cache
 - **[Properties Schema](../../../schemas/world-item-properties.ts)**: Esquemas de propiedades por tipo
+
+## Funciones disponibles
+
