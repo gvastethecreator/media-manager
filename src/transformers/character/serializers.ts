@@ -4,30 +4,29 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { CharacterSchema } from '@/types/entities/character/schema';
-import { TransformerError } from '@/utils/transformers/errors';
 
 /**
  * 🔍 Valida un objeto como Character
  * @param input Objeto a validar
  * @returns El objeto validado
  * @throws TransformerError si la validación falla
+ * @deprecated Usar validateCharacter de ./server.ts para evitar duplicación
  */
-export function validateCharacter<T>(input: T): T {
-	try {
-		const result = CharacterSchema.safeParse(input);
-		if (!result.success) {
-			throw new TransformerError(`Validación de character fallida: ${result.error.message}`);
-		}
-		return input;
-	} catch (error) {
-		serverLogger.error(`Error validando character: ${error}`);
-		if (error instanceof TransformerError) {
-			throw error;
-		}
-		throw new TransformerError(`Error validando character: ${(error as Error).message}`);
-	}
-}
+// export function validateCharacter<T>(input: T): T {
+// 	try {
+// 		const result = CharacterSchema.safeParse(input);
+// 		if (!result.success) {
+// 			throw new TransformerError(`Validación de character fallida: ${result.error.message}`);
+// 		}
+// 		return input;
+// 	} catch (error) {
+// 		serverLogger.error(`Error validando character: ${error}`);
+// 		if (error instanceof TransformerError) {
+// 			throw error;
+// 		}
+// 		throw new TransformerError(`Error validando character: ${(error as Error).message}`);
+// 	}
+// }
 
 /**
  * 🔄 Deserializa un string JSON de estadísticas a objeto

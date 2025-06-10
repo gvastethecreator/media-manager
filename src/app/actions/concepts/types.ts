@@ -3,4 +3,4 @@
  * @module app/actions/concepts/types
  */
 
-export type { ConceptWithImages } from './concept.actions';
+// export type { ConceptWithImages } from './concept.actions'; // ❌ DISABLED: type no existe

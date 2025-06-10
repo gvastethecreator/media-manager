@@ -234,6 +234,7 @@ export interface Folder {
 
 /**
  * 📊 Estadísticas de un Folder
+ * NOTA: Hay dos definiciones de FolderStats - revisar y consolidar después
  */
 export interface FolderStats {
 	totalImages: number;

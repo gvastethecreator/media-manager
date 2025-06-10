@@ -5,17 +5,19 @@ import type { EventType } from '@/lib/server/events.server';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import {
-	createConcept as createConceptTransformer,
-	deleteConcept as deleteConceptTransformer,
-	getConceptById as getConceptByIdTransformer,
-	searchConcepts as searchConceptsTransformer,
-	updateConcept as updateConceptTransformer,
+    createConcept as createConceptTransformer,
+    deleteConcept as deleteConceptTransformer,
+    getConceptById as getConceptByIdTransformer,
+    searchConcepts as searchConceptsTransformer,
+    updateConcept as updateConceptTransformer,
 } from '@/transformers/concept';
 import type {
-	ConceptCreateInput,
-	ConceptSearchOptions,
-	ConceptSearchResult,
-	ConceptUpdateInput,
+    ConceptCreateInput,
+    ConceptUpdateInput,
+} from '@/types/entities/concept/base';
+import type {
+    ConceptSearchOptions,
+    ConceptSearchResult,
 } from '@/types/entities/concept/types';
 import { revalidatePath } from 'next/cache';
 
