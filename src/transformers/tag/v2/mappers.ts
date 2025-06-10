@@ -246,23 +246,24 @@ export function toSearchResult(tags: TagBase[], total: number, options: TagSearc
  * Convierte un tag a formato simplificado para relaciones
  * @param tag Tag con posibles conteos
  * @returns Tag formateado para relaciones
+ * @deprecated Usar toRelatedTag de ./serializers.ts para evitar duplicación
  */
-export function toRelatedTag(tag: TagBase & { _count?: any }): {
-	id: string;
-	name: string;
-	color: string;
-	emoji: string;
-	itemCount: number;
-} {
-	const itemCount = tag._count
-		? Object.values(tag._count).reduce((acc: number, count: any) => acc + (count as number), 0)
-		: 0;
+// export function toRelatedTag(tag: TagBase & { _count?: any }): {
+// 	id: string;
+// 	name: string;
+// 	color: string;
+// 	emoji: string;
+// 	itemCount: number;
+// } {
+// 	const itemCount = tag._count
+// 		? Object.values(tag._count).reduce((acc: number, count: any) => acc + (count as number), 0)
+// 		: 0;
 
-	return {
-		id: tag.id,
-		name: tag.name,
-		color: tag.color,
-		emoji: tag.emoji,
-		itemCount,
-	};
-}
+// 	return {
+// 		id: tag.id,
+// 		name: tag.name,
+// 		color: tag.color,
+// 		emoji: tag.emoji,
+// 		itemCount,
+// 	};
+// }

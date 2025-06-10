@@ -18,9 +18,9 @@ import { deleteConcept as deleteConceptAction } from './concept-delete.actions';
 
 // Importar acciones para la gestión de imágenes relacionadas
 import {
-	addConceptImage as addConceptImageAction,
-	getConceptImages as getConceptImagesAction,
-	removeConceptImage as removeConceptImageAction,
+    addConceptImage as addConceptImageAction,
+    getConceptImages as getConceptImagesAction,
+    removeConceptImage as removeConceptImageAction,
 } from './concept-images.actions';
 
 // Re-exportar funciones individuales - Acciones básicas
@@ -28,12 +28,8 @@ export async function getConcepts() {
 	return ConceptActions.getConcepts();
 }
 
-export async function getConcept(id: string) {
-	return ConceptActions.getConcept(id);
-}
-
-export async function getConceptWithRelations(id: string) {
-	return ConceptActions.getConceptWithRelations(id);
+export async function getConceptById(id: string) {
+	return ConceptActions.getConceptById(id);
 }
 
 export async function createConcept(data: any) {
@@ -42,14 +38,6 @@ export async function createConcept(data: any) {
 
 export async function updateConcept(id: string, data: any) {
 	return ConceptActions.updateConcept(id, data);
-}
-
-export async function linkEntityToConcept(conceptId: string, entityId: string, entityType: string) {
-	return ConceptActions.linkEntityToConcept(conceptId, entityId, entityType);
-}
-
-export async function unlinkEntityFromConcept(conceptId: string, entityId: string, entityType: string) {
-	return ConceptActions.unlinkEntityFromConcept(conceptId, entityId, entityType);
 }
 
 // Re-exportar funciones individuales - Acciones de eliminación
@@ -71,4 +59,4 @@ export async function removeConceptImage(conceptId: string, imageId: string) {
 }
 
 // Exportar interfaces
-export type { ConceptWithImages } from './concept.actions';
+// export type { ConceptWithImages } from './concept.actions'; // ❌ DISABLED: type no existe

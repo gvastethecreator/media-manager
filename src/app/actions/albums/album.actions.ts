@@ -9,7 +9,7 @@ import type { ServerImage } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from '@/transformers/album/mappers';
 import { transformAlbumToExtended } from '@/transformers/album/transformer';
-import type { Album, AlbumBase, CreateAlbumData, UpdateAlbumData } from '@/types/entities/album';
+import type { Album, AlbumBase, AlbumUpdateInput, CreateAlbumData } from '@/types/entities/album';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 
@@ -242,7 +242,7 @@ export async function createAlbum(data: CreateAlbumData): Promise<Album> {
 	}
 }
 
-export async function updateAlbum(id: string, data: UpdateAlbumData): Promise<Album> {
+export async function updateAlbum(id: string, data: AlbumUpdateInput): Promise<Album> {
 	try {
 		albumLogger.info('🔄 Actualizando álbum:', id);
 

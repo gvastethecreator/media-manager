@@ -34,8 +34,39 @@ export function adaptFolderResponse(folderResponse: FolderResponse | null): Acti
 	}
 
 	try {
+		// Primero convertir FolderResponse a un formato compatible
+		const folderData = {
+			id: folderResponse.id,
+			name: folderResponse.name,
+			path: folderResponse.path,
+			description: null, // FolderResponse no tiene description
+			parentId: null,
+			presetId: null,
+			emoji: '📁',
+			color: '#3b82f6',
+			featuredImage: null,
+			isFavorite: false,
+			totalFiles: folderResponse.totalFiles || 0,
+			totalSize: folderResponse.totalSize || 0,
+			autoReindex: folderResponse.autoReindex || false,
+			lastIndexed: folderResponse.lastIndexed ? new Date(folderResponse.lastIndexed) : null,
+			createdAt: folderResponse.createdAt ? new Date(folderResponse.createdAt) : new Date(),
+			updatedAt: folderResponse.updatedAt ? new Date(folderResponse.updatedAt) : new Date(),
+			children: [],
+			parent: null,
+			metadata: {},
+			stats: null,
+			_count: {
+				children: 0,
+				images: folderResponse._count?.images || 0,
+				videos: 0,
+				uploadedImages: 0,
+				tags: 0,
+			},
+		};
+
 		// Usar el transformador para convertir al nuevo formato
-		const transformedFolder = transformFolderToExtended(folderResponse);
+		const transformedFolder = transformFolderToExtended(folderData);
 
 		return {
 			success: true,
@@ -82,23 +113,84 @@ export function adaptFoldersArray(
 
 		const transformedFolders = foldersResponse.map((folder) => {
 			try {
-				return transformFolderToExtended(folder);
+				// 🔄 Convertir FolderResponse a formato compatible antes de transformar
+				const folderData = {
+					id: folder.id,
+					name: folder.name,
+					path: folder.path,
+					description: null, // FolderResponse no tiene description
+					parentId: null,
+					presetId: null,
+					emoji: '📁',
+					color: '#3b82f6',
+					featuredImage: null,
+					isFavorite: false,
+					totalFiles: folder.totalFiles || 0,
+					totalSize: folder.totalSize || 0,
+					autoReindex: folder.autoReindex || false,
+					lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null,
+					createdAt: folder.createdAt ? new Date(folder.createdAt) : new Date(),
+					updatedAt: folder.updatedAt ? new Date(folder.updatedAt) : new Date(),
+					children: [],
+					parent: null,
+					metadata: {},
+					stats: null,
+					_count: {
+						children: 0,
+						images: folder._count?.images || 0,
+						videos: 0,
+						uploadedImages: 0,
+						tags: 0,
+					},
+				};
+
+				return transformFolderToExtended(folderData);
 			} catch (folderError) {
 				adapterLogger.error(
 					`❌ Error transformando carpeta individual (ID: ${folder?.id || 'desconocido'}):`,
 					folderError
 				);
-				// Devolver objeto mínimo para esta carpeta
+				// 🛠️ Devolver objeto completo FolderExtended en caso de error
 				return {
+					// Campos básicos
 					id: folder?.id || 'error',
 					name: folder?.name || 'Error en carpeta',
 					path: folder?.path || '/',
-					description: '',
+					description: null,
 					parentId: null,
+					presetId: null,
+
+					// Propiedades visuales
+					emoji: '❌',
+					color: '#ef4444',
+					featuredImage: null,
+					isFavorite: false,
+
+					// Propiedades de sistema
+					totalFiles: 0,
+					totalSize: 0,
+					autoReindex: false,
+					lastIndexed: null,
+
+					// Fechas
 					createdAt: new Date(),
 					updatedAt: new Date(),
+
+					// Relaciones
+					children: [],
+					parent: null,
+					metadata: {},
+					stats: null,
 					_count: { children: 0, images: 0, videos: 0, uploadedImages: 0, tags: 0 },
+
+					// Propiedades UI (específicas de FolderExtended)
+					isSelected: false,
+					isOpen: false,
+					isLoading: false,
 					hasError: true,
+					isDragging: false,
+					isDropTarget: false,
+					level: 0,
 				} as FolderExtended;
 			}
 		});
@@ -207,6 +299,6 @@ export function handleFolderActionError(error: unknown): ActionResponse {
 	return {
 		success: false,
 		message,
-		errors: error,
+		errors: error, // <- Revertido al original
 	};
 }

@@ -21,12 +21,15 @@ global.fetch = jest.fn(() =>
 	Promise.resolve({
 		ok: true,
 		json: () => Promise.resolve({}),
-	})
-) as jest.Mock;
+		text: () => Promise.resolve(''),
+		blob: () => Promise.resolve(new Blob()),
+	} as Response)
+) as any;
 
 // Mock global mínimo de Request para evitar ReferenceError en tests que importan next/cache
 if (typeof global.Request === 'undefined') {
-	global.Request = class {
+	// @ts-ignore - Ignorar errores de tipo para mock simplificado en tests
+	global.Request = class MockRequest {
 		headers = {};
 		method = '';
 		url = '';
@@ -60,7 +63,10 @@ if (typeof global.Request === 'undefined') {
 		text() {
 			return Promise.resolve('');
 		}
-	};
+		bytes() {
+			return Promise.resolve(new Uint8Array());
+		}
+	} as any;
 }
 
 // Mock global de prisma para evitar errores en tests que importan código de servidor

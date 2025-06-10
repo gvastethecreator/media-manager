@@ -1,5 +1,5 @@
 import type { NoteBase } from './base';
-import type { NotePriority, NoteSortOption, NoteStatus, NoteViewMode } from './enums';
+import type { NoteSortOption, NoteViewMode } from './enums';
 
 /**
  * Tipo para representar los tags de una nota como array
@@ -29,19 +29,20 @@ export interface NoteExtended extends NoteBase {
 
 /**
  * Interfaz para filtros de notas
+ * @deprecated Usar NoteFilters de ./types.ts para evitar duplicación
  */
-export interface NoteFilters {
-	search: string;
-	category?: string;
-	status?: NoteStatus;
-	priority?: NotePriority;
-	tags: string[];
-	onlyFavorites: boolean;
-	dateRange?: {
-		from: Date | null;
-		to: Date | null;
-	};
-}
+// export interface NoteFilters {
+// 	search: string;
+// 	category?: string;
+// 	status?: NoteStatus;
+// 	priority?: NotePriority;
+// 	tags: string[];
+// 	onlyFavorites: boolean;
+// 	dateRange?: {
+// 		from: Date | null;
+// 		to: Date | null;
+// 	};
+// }
 
 /**
  * Interfaz para las opciones de visualización de notas
