@@ -7,19 +7,19 @@ import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
 import { EntityError, EntityErrorCode } from '@/lib/errors';
 import { prisma } from '@/lib/prisma';
 import type {
-	NoteComplete,
-	NoteCreateInput,
-	NoteFilters,
-	NoteSearchOptions,
-	NoteSearchResult,
-	NoteUpdateInput,
+    NoteComplete,
+    NoteCreateInput,
+    NoteFilters,
+    NoteSearchOptions,
+    NoteSearchResult,
+    NoteUpdateInput,
 } from '@/types/entities/note/types';
 import { TransformerError } from '@/utils/transformers/errors';
 import {
-	mapCreateNoteDataToPrisma,
-	mapNoteFiltersToPrisma,
-	mapNoteSearchOptionsToPrisma,
-	mapUpdateNoteDataToPrisma,
+    mapCreateNoteDataToPrisma,
+    mapNoteFiltersToPrisma,
+    mapNoteSearchOptionsToPrisma,
+    mapUpdateNoteDataToPrisma,
 } from './mappers';
 import { fromPrismaNote, validateNote } from './serializers';
 

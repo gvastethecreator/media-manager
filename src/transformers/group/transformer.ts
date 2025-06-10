@@ -3,9 +3,9 @@
  * @module transformers/group/transformer
  */
 
-import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { Group, GroupComplete, GroupExtended, GroupWithStats } from '@/types/entities/group/types';
+import { TransformerError } from '@/utils/transformers/errors';
 import { extendGroup } from './serializers';
 
 const logger = serverLogger.withContext('GroupTransformer');

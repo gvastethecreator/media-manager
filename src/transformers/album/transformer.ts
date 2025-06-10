@@ -3,9 +3,9 @@
  * @module transformers/album/transformer
  */
 
-import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AlbumBase, AlbumComplete } from '@/types/entities/album/types';
+import { TransformerError } from '@/utils/transformers/errors';
 import { fromPrismaAlbum } from './serializers';
 
 // 📊 Interfaz local para álbum con estadísticas (usar la correcta)
