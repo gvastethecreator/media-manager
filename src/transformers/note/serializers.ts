@@ -3,7 +3,7 @@
  * @module transformers/note/serializers
  */
 
-import { TransformerError } from '@/lib/errors';
+import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { NoteSchema } from '@/types/entities/note/schema';
 import type {
@@ -80,9 +80,7 @@ export function toPrismaNote(
 		return filteredData;
 	} catch (error) {
 		logger.error('Error transformando note a formato Prisma', { error });
-		throw new TransformerError(`Error transformando note a formato Prisma: ${(error as Error).message}`, {
-			cause: error,
-		});
+		throw new TransformerError(`Error transformando note a formato Prisma: ${(error as Error).message}`);
 	}
 }
 
@@ -177,9 +175,7 @@ export function fromPrismaNote(
 		return noteComplete as NoteComplete;
 	} catch (error) {
 		logger.error('Error transformando note desde formato Prisma', { error });
-		throw new TransformerError(`Error transformando note desde formato Prisma: ${(error as Error).message}`, {
-			cause: error,
-		});
+		throw new TransformerError(`Error transformando note desde formato Prisma: ${(error as Error).message}`);
 	}
 }
 
@@ -226,7 +222,7 @@ export function validateNote(note: Record<string, any>): NoteComplete {
 		return validated as NoteComplete;
 	} catch (error) {
 		logger.error('Error validando nota', { error });
-		throw new TransformerError(`Error validando nota: ${(error as Error).message}`, { cause: error });
+		throw new TransformerError(`Error validando nota: ${(error as Error).message}`);
 	}
 }
 
@@ -246,7 +242,7 @@ export function extendNote(note: NoteBase & Record<string, any>, options: NoteTr
 		});
 	} catch (error) {
 		logger.error('Error extendiendo nota', { error });
-		throw new TransformerError(`Error extendiendo nota: ${(error as Error).message}`, { cause: error });
+		throw new TransformerError(`Error extendiendo nota: ${(error as Error).message}`);
 	}
 }
 

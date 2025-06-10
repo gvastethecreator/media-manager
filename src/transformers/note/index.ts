@@ -82,7 +82,7 @@ export async function searchNotes(
 		};
 	} catch (error) {
 		logger.error('Error buscando notas:', error);
-		throw new TransformerError('Error al buscar notas', { cause: error });
+		throw new TransformerError('Error al buscar notas');
 	}
 }
 
@@ -163,7 +163,7 @@ export async function getNoteById(
 			throw error;
 		}
 		logger.error(`Error obteniendo nota ${id}:`, error);
-		throw new TransformerError(`Error al obtener nota ${id}`, { cause: error });
+		throw new TransformerError(`Error al obtener nota ${id}`);
 	}
 }
 
@@ -240,7 +240,7 @@ export async function getNotesByIds(
 		);
 	} catch (error) {
 		logger.error('Error obteniendo notas por IDs:', error);
-		throw new TransformerError('Error al obtener notas por IDs', { cause: error });
+		throw new TransformerError('Error al obtener notas por IDs');
 	}
 }
 
@@ -287,7 +287,7 @@ export async function createNote(data: NoteCreateInput): Promise<NoteComplete> {
 		});
 	} catch (error) {
 		logger.error('Error creando nota:', error);
-		throw new TransformerError('Error al crear nota', { cause: error });
+		throw new TransformerError('Error al crear nota');
 	}
 }
 
@@ -329,7 +329,7 @@ export async function updateNote(id: string, data: NoteUpdateInput): Promise<Not
 			throw error;
 		}
 		logger.error(`Error actualizando nota ${id}:`, error);
-		throw new TransformerError(`Error al actualizar nota ${id}`, { cause: error });
+		throw new TransformerError(`Error al actualizar nota ${id}`);
 	}
 }
 
@@ -376,7 +376,7 @@ export async function deleteNote(
 			throw error;
 		}
 		logger.error(`Error eliminando nota ${id}:`, error);
-		throw new TransformerError(`Error al eliminar nota ${id}`, { cause: error });
+		throw new TransformerError(`Error al eliminar nota ${id}`);
 	}
 }
 

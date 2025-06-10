@@ -3,7 +3,7 @@
  * @module transformers/group/transformer
  */
 
-import { TransformerError } from '@/lib/errors';
+import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { Group, GroupComplete, GroupExtended, GroupWithStats } from '@/types/entities/group/types';
 import { extendGroup } from './serializers';
@@ -29,7 +29,7 @@ export function transformGroup(group: any): GroupComplete {
 		return extendGroup(group);
 	} catch (error) {
 		logger.error('❌ Error transformando Group:', error);
-		throw new TransformerError('Error transformando grupo', { cause: error });
+		throw new TransformerError('Error transformando grupo');
 	}
 }
 
@@ -50,7 +50,7 @@ export function transformGroups(groups: any[]): GroupComplete[] {
 		return groups.map((group) => transformGroup(group));
 	} catch (error) {
 		logger.error('❌ Error transformando lista de grupos:', error);
-		throw new TransformerError('Error transformando lista de grupos', { cause: error });
+		throw new TransformerError('Error transformando lista de grupos');
 	}
 }
 
@@ -105,7 +105,7 @@ export function transformGroupToExtended(
 		};
 	} catch (error) {
 		logger.error('❌ Error transformando Group a Extended:', error);
-		throw new TransformerError('Error transformando grupo a versión extendida', { cause: error });
+		throw new TransformerError('Error transformando grupo a versión extendida');
 	}
 }
 
@@ -174,6 +174,6 @@ export function transformGroupToWithStats(group: Group | GroupComplete): GroupWi
 		};
 	} catch (error) {
 		logger.error('❌ Error transformando Group a WithStats:', error);
-		throw new TransformerError('Error transformando grupo a versión con estadísticas', { cause: error });
+		throw new TransformerError('Error transformando grupo a versión con estadísticas');
 	}
 }

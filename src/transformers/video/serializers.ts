@@ -4,6 +4,7 @@
  */
 
 import { createLogger } from '@/lib/logger';
+import { TransformerError } from '@/utils/transformers/errors';
 import { VideoSchema } from '@/types/entities/video/schema';
 import type {
 	VideoBase,
@@ -56,7 +57,7 @@ export function handleTransformerError<T>(
 	}
 
 	// De lo contrario, lanzar el error
-	throw new Error(fullMessage);
+	throw new TransformerError(fullMessage);
 }
 
 /**

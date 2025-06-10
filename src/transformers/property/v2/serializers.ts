@@ -3,7 +3,7 @@
  * @module transformers/property/v2/serializers
  */
 
-import { TransformerError } from '@/lib/errors';
+import { TransformerError } from '@/utils/transformers/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { PropertySchema } from '@/types/entities/property/schema';
 import type { PropertyBase, PropertyComplete, PropertyDeserialized } from '@/types/entities/property/types';
@@ -37,7 +37,7 @@ export function validateProperty(property: Partial<PropertyBase>): PropertyBase 
 		return property as PropertyBase;
 	} catch (error) {
 		logger.error('Error validando Property', { error });
-		throw new TransformerError('PropertyTransformer', 'Datos de Property inválidos', { cause: error });
+		throw new TransformerError('Datos de Property inválidos');
 	}
 }
 
@@ -176,7 +176,7 @@ export function toPrismaProperty(property: Partial<PropertyComplete>, options: P
 		return result;
 	} catch (error) {
 		logger.error('Error serializando property', { error });
-		throw new TransformerError('PropertyTransformer', 'Error serializando property', { cause: error });
+		throw new TransformerError('Error serializando property');
 	}
 }
 
@@ -223,7 +223,7 @@ export function fromPrismaProperty<T extends PropertyBase>(
 		return result;
 	} catch (error) {
 		logger.error('Error deserializando property', { error });
-		throw new TransformerError('PropertyTransformer', 'Error deserializando property', { cause: error });
+		throw new TransformerError('Error deserializando property');
 	}
 }
 

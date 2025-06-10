@@ -56,11 +56,37 @@ export interface NoteStats {
 	concepts: number;
 	prompts: number;
 	images: number;
+	videos: number;
+	albums: number;
+	collections: number;
+	tags: number;
+	wildcards: number;
+	properties: number;
+	groups: number;
 }
 
 /**
- * Interfaz para nota con estadísticas incluidas
+ * Interfaz para nota con estadísticas básicas (solo _count)
+ */
+export interface NoteWithBasicStats extends NoteBase {
+	_count: NoteStats;
+}
+
+/**
+ * Interfaz completa para nota con estadísticas extendidas
+ * Incluye todas las propiedades calculadas por el transformer
  */
 export interface NoteWithStats extends NoteBase {
 	_count: NoteStats;
+	lastUpdated: Date;
+	imageCount: number;
+	videoCount: number;
+	albumCount: number;
+	tagCount: number;
+	characterCount: number;
+	conceptCount: number;
+	importanceLevel: number;
+	contentLength: number;
+	relatedItemsCount: number;
+	distribution: Array<{name: string, count: number}>;
 }
