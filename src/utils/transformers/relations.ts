@@ -2,7 +2,7 @@ import { Logger } from '@/lib/logger';
 import { RELATION_TYPES } from './constants';
 import { RelationError } from './errors';
 
-const logger = new Logger('TransformerRelations');
+const logger = new Logger({ context: 'TransformerRelations' });
 
 /**
  * 🔄 Tipo para definición de relaciones

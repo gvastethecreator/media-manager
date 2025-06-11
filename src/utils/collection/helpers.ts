@@ -20,16 +20,16 @@ export function sortCollections(
 
 	switch (sortOption) {
 		case CollectionSortOption.NAME_ASC:
-			return clonedCollections.sort((a, b) => a.name.localeCompare(b.name));
+                        return clonedCollections.sort((a, b) => (a as any).name.localeCompare((b as any).name));
 
 		case CollectionSortOption.NAME_DESC:
-			return clonedCollections.sort((a, b) => b.name.localeCompare(a.name));
+                        return clonedCollections.sort((a, b) => (b as any).name.localeCompare((a as any).name));
 
 		case CollectionSortOption.DATE_ASC:
-			return clonedCollections.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+                        return clonedCollections.sort((a, b) => new Date((a as any).createdAt).getTime() - new Date((b as any).createdAt).getTime());
 
 		case CollectionSortOption.DATE_DESC:
-			return clonedCollections.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                        return clonedCollections.sort((a, b) => new Date((b as any).createdAt).getTime() - new Date((a as any).createdAt).getTime());
 
 		case CollectionSortOption.ITEMS_ASC:
 			return clonedCollections.sort((a, b) => (a.imageCount || 0) - (b.imageCount || 0));
@@ -38,10 +38,10 @@ export function sortCollections(
 			return clonedCollections.sort((a, b) => (b.imageCount || 0) - (a.imageCount || 0));
 
 		case CollectionSortOption.PRICE_ASC:
-			return clonedCollections.sort((a, b) => (a.price || 0) - (b.price || 0));
+                        return clonedCollections.sort((a, b) => ((a as any).price || 0) - ((b as any).price || 0));
 
 		case CollectionSortOption.PRICE_DESC:
-			return clonedCollections.sort((a, b) => (b.price || 0) - (a.price || 0));
+                        return clonedCollections.sort((a, b) => ((b as any).price || 0) - ((a as any).price || 0));
 
 		default:
 			return clonedCollections;
@@ -62,9 +62,9 @@ export function groupCollections(
 		return { all: collections };
 	}
 
-	return collections.reduce(
-		(groups, collection) => {
-			const key = (collection[groupBy] as string) || 'other';
+        return collections.reduce(
+                (groups, collection) => {
+                        const key = ((collection as any)[groupBy] as string) || 'other';
 
 			if (!groups[key]) {
 				groups[key] = [];
@@ -83,8 +83,8 @@ export function groupCollections(
  * @returns Valor total
  */
 export function calculateTotalValue(collections: CollectionExtended[]): number {
-	return collections.reduce((total, collection) => {
-		return total + (collection.price || 0);
+        return collections.reduce((total, collection) => {
+                return total + ((collection as any).price || 0);
 	}, 0);
 }
 

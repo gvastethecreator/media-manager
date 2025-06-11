@@ -3,12 +3,42 @@
  * @module types/entities/character/base
  */
 
-import type { Character as PrismaCharacter } from '@prisma/client';
 
 /**
- * Tipo base para Character, extendido directamente del tipo Prisma
+ * Tipo base para Character alineado con el modelo Prisma
  */
-export type CharacterBase = PrismaCharacter;
+export interface CharacterBase {
+       id: string;
+       name: string;
+       emoji: string;
+       color: string;
+       description?: string | null;
+       shortcut?: string | null;
+       category?: string | null;
+       sortBy: string;
+       filters: string;
+       level: number;
+       class: string;
+       race: string;
+       type?: string | null;
+       alignment: string;
+       backstory: string;
+       stats: string;
+       psychologicalProfile: string;
+       socialProfile: string;
+       relationships: string;
+       goals: string;
+       fears: string;
+       beliefs: string;
+       personality: string;
+       skills: string;
+       abilities: string;
+       featuredImage?: string | null;
+       isFavorite: boolean;
+       createdAt: Date;
+       updatedAt: Date;
+       presetId?: string | null;
+}
 
 /**
  * Datos mínimos requeridos para crear un personaje

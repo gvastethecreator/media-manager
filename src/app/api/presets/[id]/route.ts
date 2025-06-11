@@ -1,6 +1,6 @@
-import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { getVisualPreset, updateVisualPreset } from '@/app/actions/presets';
 
 // Schema de validación para el ID
 const paramsSchema = z.object({
@@ -20,9 +20,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 		// Validar el ID
 		paramsSchema.parse({ id });
 
-		const preset = await prisma.visualPreset.findUnique({
-			where: { id },
-		});
+                const preset = await getVisualPreset(id);
 
 		if (!preset) {
 			return NextResponse.json({ error: 'Preset no encontrado' }, { status: 404 });
@@ -53,10 +51,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 		const body = await request.json();
 
-		const updatedPreset = await prisma.visualPreset.update({
-			where: { id },
-			data: body,
-		});
+                const updatedPreset = await updateVisualPreset(id, body);
 
 		return NextResponse.json(updatedPreset);
 	} catch (error) {

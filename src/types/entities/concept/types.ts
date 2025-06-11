@@ -17,10 +17,9 @@ export interface ConceptBase {
 	color: string;
 	description: string | null;
 	content: string;
-	category: string;
-	tags: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
+        category: string;
+        featuredImage: string | null;
+        isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -51,10 +50,9 @@ export interface ConceptCounts {
 	images?: number;
 	videos?: number;
 	albums?: number;
-	collections?: number;
-	tags?: number;
-	characters?: number;
-	places?: number;
+        collections?: number;
+        characters?: number;
+        places?: number;
 	worldItems?: number;
 	prompts?: number;
 	notes?: number;

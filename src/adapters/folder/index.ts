@@ -6,7 +6,7 @@
 import type { FolderResponse, ProcessStatus } from '@/app/actions/folders/folder-types';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { transformFolderToExtended } from '@/transformers/folder';
-import type { CreateFolderData, FolderExtended, UpdateFolderData } from '@/types/entities/folder';
+import type { CreateFolderData, FolderComplete, FolderExtended, UpdateFolderData } from '@/types/entities/folder';
 
 const adapterLogger = serverLogger.withContext('FolderAdapter');
 
@@ -66,7 +66,9 @@ export function adaptFolderResponse(folderResponse: FolderResponse | null): Acti
 		};
 
 		// Usar el transformador para convertir al nuevo formato
-		const transformedFolder = transformFolderToExtended(folderData);
+                const transformedFolder = transformFolderToExtended(
+                        folderData as unknown as FolderComplete
+                );
 
 		return {
 			success: true,
@@ -144,18 +146,20 @@ export function adaptFoldersArray(
 					},
 				};
 
-				return transformFolderToExtended(folderData);
+                                return transformFolderToExtended(
+                                        folderData as unknown as FolderComplete
+                                );
 			} catch (folderError) {
 				adapterLogger.error(
 					`❌ Error transformando carpeta individual (ID: ${folder?.id || 'desconocido'}):`,
 					folderError
 				);
 				// 🛠️ Devolver objeto completo FolderExtended en caso de error
-				return {
-					// Campos básicos
-					id: folder?.id || 'error',
-					name: folder?.name || 'Error en carpeta',
-					path: folder?.path || '/',
+                                return {
+                                        // Campos básicos
+                                        id: folder?.id || 'error',
+                                        name: folder?.name || 'Error en carpeta',
+                                        path: folder?.path || '/',
 					description: null,
 					parentId: null,
 					presetId: null,
@@ -189,9 +193,9 @@ export function adaptFoldersArray(
 					isLoading: false,
 					hasError: true,
 					isDragging: false,
-					isDropTarget: false,
-					level: 0,
-				} as FolderExtended;
+                                        isDropTarget: false,
+                                        level: 0,
+                                } as unknown as FolderExtended;
 			}
 		});
 

@@ -3,7 +3,7 @@
  * @module utils/tag/helpers
  */
 
-import { generateTagColor, generateTagEmoji } from '../../transformers/tag';
+import { generateTagColor, generateTagEmoji } from '@/transformers/tag/serializers';
 import { type Tag, TagCategory, TagRarity, TagSortCriteria } from '../../types/entities/tag';
 
 /**
@@ -37,11 +37,11 @@ export function sortTags(tags: Tag[], sortBy: TagSortCriteria): Tag[] {
 		case TagSortCriteria.NAME_DESC:
 			return tagsCopy.sort((a, b) => b.name.localeCompare(a.name));
 
-		case TagSortCriteria.COUNT_ASC:
-			return tagsCopy.sort((a, b) => (a._count?.images || 0) - (b._count?.images || 0));
+                case TagSortCriteria.USAGE_ASC:
+                        return tagsCopy.sort((a, b) => (a._count?.images || 0) - (b._count?.images || 0));
 
-		case TagSortCriteria.COUNT_DESC:
-			return tagsCopy.sort((a, b) => (b._count?.images || 0) - (a._count?.images || 0));
+                case TagSortCriteria.USAGE_DESC:
+                        return tagsCopy.sort((a, b) => (b._count?.images || 0) - (a._count?.images || 0));
 
 		case TagSortCriteria.CREATED_ASC:
 			return tagsCopy.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());

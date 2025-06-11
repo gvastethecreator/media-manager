@@ -260,6 +260,7 @@ model UploadedImage {
   // Contenido
   path     String @unique
   category String @default("system")
+  type     String @default("image")
 
   // Propiedades técnicas
   size     Int

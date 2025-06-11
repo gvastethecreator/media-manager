@@ -2,7 +2,7 @@ import { Logger } from '@/lib/logger';
 import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
 
-const logger = new Logger('TransformerValidation');
+const logger = new Logger({ context: 'TransformerValidation' });
 
 /**
  * 🔍 Valida campos base de una entidad
