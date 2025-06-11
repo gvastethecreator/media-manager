@@ -29,10 +29,5 @@ export * from './property';
 export * from './wildcard';
 
 // Utilidades y tipos comunes
-export * from './queueJob';
+export * from './queue-job';
 
-// Exportación de entidades comunes
-export * from './entities';
-
-// Exportar tipos de Character desde su archivo centralizado
-export * from './character-export';

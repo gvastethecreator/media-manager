@@ -1,20 +1,18 @@
 ---
-description: Best practices for using Tailwind CSS 4 in an image management application
-globs: *.ts,*.tsx,*.css
+description: Best practices para Tailwind CSS 4 y Shadcn/ui en 2025
 alwaysApply: false
+globs: *.ts,*.tsx,*.css
 ---
-- **Use utility classes directly in JSX:** Añadir clases Tailwind directamente en elementos JSX para desarrollo rápido de componentes visuales.
-- **Component Abstraction for UI Patterns:** Crear componentes reutilizables para patrones de UI como tarjetas de imágenes o galerías.
-- **Responsive Design with Tailwind Breakpoints:** Utilizar prefijos responsive (`sm:`, `md:`, `lg:`) para diseño adaptativo de galerías de imágenes.
-- **Modern Color System:** Aprovechar el sistema de colores de Tailwind 4 con modificadores de opacidad para superposiciones sobre imágenes.
-- **Custom Utility Creation:** Usar la directiva `@apply` para crear clases personalizadas para patrones comunes como bordes de tarjetas.
-- **Dark Mode Implementation:** Implementar modo oscuro con la variante `dark:` para visualización óptima de imágenes en ambos modos.
-- **Maintain Configuration:** Personalizar colores y variables específicas para la aplicación en `tailwind.config.js`.
-- **Conditional Classes with clsx/twMerge:** Usar `clsx` o `tailwind-merge` para aplicación condicional de clases en estados de selección de imágenes.
-- **Prefer Native CSS Variables:** Para valores dinámicos como relaciones de aspecto, usar variables CSS nativas.
-- **Use shadcn/ui Components:** Aprovechar componentes shadcn/ui con Tailwind para UI consistente.
-- **Image Layout Patterns:** Implementar patrones específicos para disposición de imágenes como grid masonry o aspect ratio.
-- **Animation Classes for Interactions:** Utilizar clases de animación para efectos en hover y selección de imágenes.
+- **Clases utilitarias en JSX:** Usar clases Tailwind directamente en JSX.
+- **Componentes shadcn/ui:** Usar componentes shadcn/ui integrados con Tailwind 4.
+- **Animaciones con motion/react:** Integrar motion/react para animaciones en UI.
+- **Responsive y dark mode:** Usar breakpoints y variantes dark de Tailwind.
+- **Custom utilities y @apply:** Crear utilidades personalizadas con @apply.
+- **Configuración en tailwind.config.js:** Personalizar colores y variables.
+- **Condicionales con clsx/tailwind-merge:** Usar para clases dinámicas.
+- **Patrones de layout modernos:** Grid, aspect-ratio, masonry, etc.
+- **Testing visual y accesibilidad:** Probar componentes con herramientas de accesibilidad.
+- **Documentación y ejemplos en cada componente.**
 
 ```mermaid
 graph TD
@@ -157,3 +155,4 @@ export function ImageViewer({ image, isOpen, onClose }) {
     </div>
   );
 }
+```

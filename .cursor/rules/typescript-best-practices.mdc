@@ -1,23 +1,20 @@
 ---
-description: TypeScript coding standards and type safety guidelines for image management applications
-globs: *.ts,*.tsx
+description: TypeScript coding standards y type safety para 2025
 alwaysApply: false
+globs: *.ts,*.tsx
 ---
-- **Modo Estricto en `tsconfig.json`:** Habilitar el modo estricto para mejorar la verificación de tipos y seguridad.
-- **Inferencia de Tipos:** Usar inferencia de tipos cuando sea posible para reducir anotaciones explícitas.
-- **Interfaces para Objetos, Types para Utilidades:** Usar interfaces para entidades (Image, Album) y types para utilidades.
-- **Generics para Componentes Reutilizables:** Utilizar generics para componentes y hooks que trabajan con diferentes entidades.
-- **Enums vs Union Types:** Usar Union Types para formatos de imagen (`type ImageFormat = 'jpeg' | 'png' | 'webp'`).
-- **Type Guards para Seguridad en Runtime:** Implementar type guards para validar metadatos de imágenes.
-- **Integración con Prisma:** Aprovechar los tipos generados de Prisma para entidades de imágenes y relaciones.
-- **Zod para Validación en Runtime:** Usar Zod para validar datos de entrada relacionados con imágenes.
-- **Organización de Tipos por Entidad:** Estructurar tipos por dominio en archivos dedicados (`types/image.ts`).
-- **Documentación con JSDoc:** Documentar tipos y funciones con JSDoc para mejorar la comprensión.
-- **Tipos para Metadatos de Imágenes:** Crear tipos específicos para estructura EXIF y metadatos.
-- **Manejo de Types para Entities:** Implementar un sistema de tipos coherente para todas las entidades del sistema.
-- **Types para Estado Global:** Aplicar tipado fuerte a los stores Zustand de gestión de imágenes y galerías.
-- **Narrowing de Tipos:** Utilizar técnicas de estrechamiento para manejar diferentes formatos de imagen.
-- **Preferir for...of sobre forEach:** Usar bucles for...of en lugar de forEach para mejor manejo de errores.
+- **Modo estricto en tsconfig.json**
+- **Inferencia de tipos y generics:** Usar inferencia y generics para reutilización y seguridad.
+- **Interfaces para entidades, types para utilidades.**
+- **Validación runtime con Zod:** Siempre validar datos externos.
+- **Integración con Prisma/Drizzle:** Usar tipos generados y migrar progresivamente.
+- **Documentación con JSDoc y ejemplos.**
+- **Tipos canónicos y barrels limpios:** Solo exportar tipos principales, sin duplicados.
+- **Narrowing y type guards:** Usar narrowing y type guards para seguridad en runtime.
+- **Preferir for...of sobre forEach.**
+- **Estructura de tipos por dominio:** Un archivo types.ts por entidad.
+- **Diagramas mermaid para relaciones complejas.**
+- **Testing de tipos y validaciones.**
 
 ```mermaid
 graph TD
@@ -141,3 +138,4 @@ export function useSelection<T extends { id: string }>(items: T[]) {
     clearSelection: useCallback(() => setSelectedIds([]), []),
   };
 }
+```

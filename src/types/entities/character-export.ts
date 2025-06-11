@@ -1,8 +1,7 @@
 /**
  * @file Exportación centralizada de tipos para la entidad Character
  * @module types/entities/character-export
- * @description Punto único de exportación para todos los tipos relacionados con Character
- * @deprecated Usar ./character/index.ts para evitar duplicación
+ * @deprecated Este archivo está obsoleto y será eliminado en la próxima versión. Usar './character/index.ts'.
  */
 
 // Exportar todos los tipos desde sus respectivos archivos

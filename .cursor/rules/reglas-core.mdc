@@ -1,48 +1,25 @@
 ---
-description: 
-globs: 
+description: Reglas core actualizadas para el stack y prácticas 2025
 alwaysApply: true
 ---
 <CORE_PRINCIPLES>
-- SIEMPRE prioriza usar tus herramientas internas para buscar, manipular, borrar archivos antes que intentar con linea de comandos de terminal. funcionan mejor!!
-- Always answer and comment in spanish.
-- Always analyze the code/task flow carefully. Search the codebase if unsure.
-- Always check documentation, update or creat if needed.
-- Anticipate needs, suggest solutions, and consider unconventional ideas.
-- Treat me as an expert—be thorough, accurate, and up-to-date.
-- Use latest stable versions, optimizing/improving code when needed.
-- Clearly flag errors found and propose fixes.
-- Analize throughly and search in the codebase before acting.
-- Always continue as much as possible in the task until finished.
-- Always check the directory to get the structure of the current task folder.
-
-- Always use codebase_search with target_directories="{{INSERT THE FOLDER HERE}}" first to find existing core files
-   -. Always check existing system files purposes before creating new ones with similar functionality
-   -. Always list the cursor rules youre using.
-	 -. obsolete/deprecated files must be deleted
-
-- Each component must have its updated documentation in its main folder to understand its functionality quickly.
-   -. must include a flowchart of the component.
-   -. must include its structure with comments and relationships between files.
-   -. must include examples of use in the project
-   -. other relevant information that helps understand the component.
-
-- Use mermaid diagrams to follow up your current task.
-- Comment key code for readability and maintainability, also use emojis on comments.
-- Before starting your task, create a plan of action in CURRENT-TASK.md to keep track of your work.
-- When adjusting code, show only relevant changes—brief and clear.
-- Don't create directories, just add the file ( that will work )
-
-- Always check your current task on CURRENT-TASK.md , check for guidelines and complete if needed.
-
-# Important!! 
-- Never forget the current stack stack and follow up the rules // check @package.json 
-- We are using PNPM
-- Next.js 15.3.3
-- React19
-- Prisma as ORM ( soon migrating to drizzle )
-- Tailwindcss 4
-- Shadcn/ui ( integrated with tailwind 4 )
-- 'motion/react' for animations
-
+- Prioriza SIEMPRE herramientas internas (no terminal) para manipulación de archivos y código.
+- Comenta y documenta en español, con emojis en comentarios clave.
+- Analiza el flujo y busca en el codebase antes de actuar.
+- Mantén la documentación actualizada en cada carpeta de componente/módulo, incluyendo diagrama mermaid, estructura, ejemplos y relaciones.
+- **Toda funcionalidad, tipo, componente o archivo modificado o creado debe ser documentado inmediatamente después de trabajarlo.**
+- Usa el stack real: Next.js 15.3.3, React 19, Tailwind 4, Shadcn/ui, motion/react, PNPM, Prisma (migrando a Drizzle).
+- Prefiere Server Actions para mutaciones y lógica de negocio; API solo para casos especiales.
+- Valida siempre con Zod antes de persistir datos.
+- Usa tipos canónicos y elimina legacy/duplicados.
+- Antes de crear archivos, revisa si ya existe funcionalidad similar.
+- Mantén CURRENT-TASK.md actualizado y consulta guidelines antes de cada tarea.
+- Usa diagramas mermaid para flujos y relaciones.
+- No crees directorios vacíos, solo archivos.
+- Refuerza la consistencia en nombres, rutas y estructura según el codebase real.
+- Elimina código/archivos obsoletos o duplicados.
+- Usa las últimas features de React 19 y Next.js 15 (SSR, suspense, automatic batching, etc).
+- Integra animaciones con motion/react y UI con Shadcn/ui.
+- Usa stores Zustand para estado global, React Query para server state.
+- Siempre lista las reglas activas en cada tarea relevante.
 </CORE_PRINCIPLES>
