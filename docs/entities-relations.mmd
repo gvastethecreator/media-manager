@@ -1,0 +1,24 @@
+```mermaid
+flowchart TD
+    Activity -->|relaciona| Image
+    Album -->|contiene| Image
+    Character -->|aparece_en| Image
+    Collection -->|agrupa| Image
+    Concept -->|describe| Image
+    Favorite -->|marca| Image
+    File -->|adjunta| Image
+    Folder -->|contiene| File
+    Group -->|organiza| Character
+    Image -->|tiene| Metadata
+    Note -->|anota| Image
+    Place -->|localiza| Image
+    Property -->|atributo| Image
+    Prompt -->|genera| Image
+    Tag -->|etiqueta| Image
+    User -->|crea| Image
+    Video -->|relaciona| Image
+    Wildcard -->|varía| Prompt
+    WorldItem -->|aparece_en| Place
+```
+
+> Diagrama general de relaciones entre entidades principales del sistema. Las flechas indican relaciones directas o de uso frecuente.
