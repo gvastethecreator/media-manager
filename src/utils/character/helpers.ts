@@ -5,7 +5,7 @@
 
 // Importación comentada porque las funciones no existen actualmente
 // import { getSuggestedAppearance, serializeObject } from '@/transformers/character';
-import type {
+import {
     CharacterBase,
     CharacterCategory,
     CharacterClass,
@@ -43,33 +43,33 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
 	const now = new Date();
 
 	return {
-		id: overrides.id || generateCharacterId(),
-		name: overrides.name || 'New Character',
-		emoji: overrides.emoji || emoji,
-		color: overrides.color || color,
-		description: overrides.description || '',
-		shortcut: overrides.shortcut || null,
-		level: overrides.level || 1,
-		class: overrides.class || 'warrior',
-		race: overrides.race || 'human',
-		alignment: overrides.alignment || 'true neutral',
-		backstory: overrides.backstory || '',
-		stats: overrides.stats || '{}',
-		sortBy: overrides.sortBy || null,
-		filters: overrides.filters || '[]',
-		psychologicalProfile: overrides.psychologicalProfile || null,
-		socialProfile: overrides.socialProfile || null,
-		relationships: overrides.relationships || '[]',
-		goals: overrides.goals || '[]',
-		fears: overrides.fears || '[]',
-		beliefs: overrides.beliefs || '[]',
-		personality: overrides.personality || '[]',
-		featuredImage: overrides.featuredImage || null,
-		isFavorite: overrides.isFavorite || false,
-		createdAt: overrides.createdAt || now,
-		updatedAt: overrides.updatedAt || now,
-		category: overrides.category || 'player',
-		presetId: overrides.presetId || null,
+                id: (overrides as any).id || generateCharacterId(),
+                name: (overrides as any).name || 'New Character',
+                emoji: (overrides as any).emoji || emoji,
+                color: (overrides as any).color || color,
+                description: (overrides as any).description || '',
+                shortcut: (overrides as any).shortcut || null,
+                level: (overrides as any).level || 1,
+                class: (overrides as any).class || 'warrior',
+                race: (overrides as any).race || 'human',
+                alignment: (overrides as any).alignment || 'true neutral',
+                backstory: (overrides as any).backstory || '',
+                stats: (overrides as any).stats || '{}',
+                sortBy: (overrides as any).sortBy || null,
+                filters: (overrides as any).filters || '[]',
+                psychologicalProfile: (overrides as any).psychologicalProfile || null,
+                socialProfile: (overrides as any).socialProfile || null,
+                relationships: (overrides as any).relationships || '[]',
+                goals: (overrides as any).goals || '[]',
+                fears: (overrides as any).fears || '[]',
+                beliefs: (overrides as any).beliefs || '[]',
+                personality: (overrides as any).personality || '[]',
+                featuredImage: (overrides as any).featuredImage || null,
+                isFavorite: (overrides as any).isFavorite || false,
+                createdAt: (overrides as any).createdAt || now,
+                updatedAt: (overrides as any).updatedAt || now,
+                category: (overrides as any).category || 'player',
+                presetId: (overrides as any).presetId || null,
 	};
 }
 
@@ -79,7 +79,14 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
  * @returns Cadena con datos normalizados para búsqueda
  */
 export function prepareCharacterSearchString(character: CharacterExtended | CharacterSummary): string {
-	return [character.name, character.class, character.race, character.alignment, character.category, character.emoji]
+        return [
+                (character as any).name,
+                (character as any).class,
+                (character as any).race,
+                (character as any).alignment,
+                (character as any).category,
+                (character as any).emoji,
+        ]
 		.filter(Boolean)
 		.join(' ')
 		.toLowerCase();
@@ -176,8 +183,8 @@ export function groupCharactersByCategory(
 	}
 
 	// Agrupar personajes
-	for (const character of characters) {
-		const category = character.category || 'other';
+        for (const character of characters) {
+                const category = (character as { category?: string }).category || 'other';
 		if (!groups[category]) {
 			groups[category] = [];
 		}
@@ -198,13 +205,13 @@ export function groupCharactersByClass(
 	const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
 
 	// Inicializar todas las clases
-	for (const characterClass of Object.values(CharacterClass)) {
-		groups[characterClass] = [];
+        for (const characterClass of Object.values(CharacterClass) as CharacterClass[]) {
+                groups[characterClass] = [];
 	}
 
 	// Agrupar personajes
-	for (const character of characters) {
-		const characterClass = character.class || 'unknown';
+        for (const character of characters) {
+                const characterClass = (character as { class?: string }).class || 'unknown';
 		if (!groups[characterClass]) {
 			groups[characterClass] = [];
 		}
@@ -225,13 +232,13 @@ export function groupCharactersByRace(
 	const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
 
 	// Inicializar todas las razas
-	for (const race of Object.values(CharacterRace)) {
-		groups[race] = [];
+        for (const race of Object.values(CharacterRace) as CharacterRace[]) {
+                groups[race] = [];
 	}
 
 	// Agrupar personajes
-	for (const character of characters) {
-		const race = character.race || 'unknown';
+        for (const character of characters) {
+                const race = (character as { race?: string }).race || 'unknown';
 		if (!groups[race]) {
 			groups[race] = [];
 		}
@@ -339,7 +346,7 @@ export function prepareInitialStats(characterClass: CharacterClass): string {
 			break;
 	}
 
-	return serializeObject(modifiedStats);
+        return JSON.stringify(modifiedStats);
 }
 
 // Lógica comentada que dependía de serializeObject

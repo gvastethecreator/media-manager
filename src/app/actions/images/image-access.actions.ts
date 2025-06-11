@@ -1,7 +1,9 @@
 'use server';
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image-service-export';
+import { ThumbnailQuality } from '@/types/thumbnails';
 import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 
 const SERVER_ACTION_NAME = 'ImageAccess';
@@ -87,4 +89,31 @@ export async function getOriginalImage(imageId: string): Promise<{ buffer: Buffe
 			message: 'Error al obtener la imagen original',
 		});
 	}
+}
+
+/**
+ * Obtiene el buffer del thumbnail de una imagen
+ */
+export async function getImageThumbnailBuffer(
+  imageId: string,
+  quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
+): Promise<{ buffer: Buffer; mimeType: string }> {
+  try {
+    const buffer = await imageService.getThumbnail(imageId, quality);
+
+    const meta = await prisma.image.findUnique({
+      where: { id: imageId },
+      select: { thumbnailMimeType: true },
+    });
+
+    return {
+      buffer,
+      mimeType: meta?.thumbnailMimeType || 'image/webp',
+    };
+  } catch (error) {
+    throw toServiceError(error, {
+      serviceName: SERVER_ACTION_NAME,
+      message: 'Error al obtener el thumbnail',
+    });
+  }
 }

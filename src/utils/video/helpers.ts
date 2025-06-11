@@ -96,8 +96,8 @@ export function getVideoFormatDescription(format?: VideoFormat): string {
 			return 'WebM';
 		case VideoFormat.FLV:
 			return 'Flash Video';
-		default:
-			return format.toUpperCase();
+                default:
+                        return format ? (format as string).toUpperCase() : 'Desconocido';
 	}
 }
 
@@ -182,11 +182,15 @@ export function extractVideoTagSuggestions(metadata?: VideoMetadata): string[] {
  * @returns true si tiene metadatos completos
  */
 export function hasCompleteMetadata(video: Video): boolean {
-	if (!video.metadata) return false;
+        if (!video.metadata) return false;
 
-	// Comprobar propiedades básicas
-	const { width, height, duration, format, size } = video.metadata;
-	return !!(width && height && duration && format && size);
+        const metadata: VideoMetadata =
+                typeof video.metadata === 'string'
+                        ? JSON.parse(video.metadata)
+                        : video.metadata;
+
+        const { width, height, duration, format, size } = metadata;
+        return !!(width && height && duration && format && size);
 }
 
 /**

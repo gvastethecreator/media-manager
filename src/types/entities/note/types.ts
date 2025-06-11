@@ -25,22 +25,17 @@ import type { WorldItem } from '../world-item/types';
  * 🔄 Tipo base para Note
  */
 export interface NoteBase {
-	id: string;
-	title: string;
-	content: string;
-	category: string;
-	priority: number;
-	status: string;
-	/**
-	 * Campo que almacena un array de tags como string JSON
-	 * Formato: { "items": string[] }
-	 */
-	tags?: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	presetId: string | null;
-	createdAt: Date;
-	updatedAt: Date;
+        id: string;
+        title: string;
+        content: string;
+        category: string;
+        priority: number;
+        status: string;
+        featuredImage: string | null;
+        isFavorite: boolean;
+        presetId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
 }
 
 /**
@@ -111,8 +106,6 @@ export interface NoteUI {
  * 🔄 Campos deserializados de Note
  */
 export interface NoteDeserialized {
-	// Campos JSON deserializados
-	tagsArray?: string[];
 }
 
 /**
@@ -143,11 +136,9 @@ export interface NoteCreateInput {
 	content?: string;
 	category?: string;
 	priority?: number;
-	status?: string;
-	// Campos JSON - pueden aceptar tanto string como array/objeto para flexibilidad
-	tags?: string[] | string;
-	// UI
-	featuredImage?: string | null;
+        status?: string;
+        // UI
+        featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
 	// Relaciones
@@ -174,11 +165,9 @@ export interface NoteUpdateInput {
 	content?: string;
 	category?: string;
 	priority?: number;
-	status?: string;
-	// Campos JSON - pueden aceptar tanto string como array/objeto para flexibilidad
-	tags?: string[] | string;
-	// UI
-	featuredImage?: string | null;
+        status?: string;
+        // UI
+        featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
 	// Relaciones

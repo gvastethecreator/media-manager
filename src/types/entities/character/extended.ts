@@ -3,7 +3,10 @@
  * @module types/entities/character/extended
  */
 
-import type { Concept, Image, Note, Prompt } from '@prisma/client';
+import type { Concept } from '../concept/types';
+import type { Image } from '../image/types';
+import type { Note } from '../note/types';
+import type { Prompt } from '../prompt/types';
 import type { CharacterFilter, CharacterRelationship, CharacterStats } from './base';
 import type { CharacterComplete, CharacterWithRelations } from './types';
 
@@ -74,7 +77,7 @@ export interface CharacterExtended
 	isSelected?: boolean;
 	isExpanded?: boolean;
 	isEditing?: boolean;
-	activeTab?: 'info' | 'stats' | 'relationships' | 'background' | 'images';
+       activeTab?: 'info' | 'stats' | 'relationships' | 'backstory' | 'images';
 
 	// Calculados/runtime
 	parsedFilters?: CharacterFilter[];
@@ -104,7 +107,6 @@ export interface CharacterAttributes {
 	skills: Record<string, number>;
 	traits: string[];
 	inventory: CharacterInventoryItem[];
-	experience: number;
 	health: {
 		current: number;
 		max: number;
@@ -164,7 +166,7 @@ export interface CharacterCard {
 	isExpanded: boolean;
 	isFlipped: boolean;
 	showDetails: boolean;
-	activeTab?: 'info' | 'stats' | 'relationships' | 'background' | 'images';
+       activeTab?: 'info' | 'stats' | 'relationships' | 'backstory' | 'images';
 }
 
 /**

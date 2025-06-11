@@ -126,9 +126,9 @@ export function validateCharacterStats(stats: unknown): Record<string, number> |
 		// Validar con el esquema Zod
 		const validStats = characterStatsSchema.safeParse(parsedStats);
 
-		if (validStats.success) {
-			return validStats.data;
-		}
+                if (validStats.success) {
+                        return validStats.data as Record<string, number>;
+                }
 
 		return null;
 	} catch (error) {
