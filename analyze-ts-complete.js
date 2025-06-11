@@ -44,25 +44,24 @@ try {
 
     // 📈 Análisis por tipo de error
     const errorTypes = {};
-    errors.forEach(error => {
+    for (const error of errors) {
         errorTypes[error.code] = (errorTypes[error.code] || 0) + 1;
-    });
+    }
 
     console.log('📋 TOP 10 TIPOS DE ERRORES:');
     console.log('===========================');
-    Object.entries(errorTypes)
+    for (const [code, count] of Object.entries(errorTypes)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .forEach(([code, count]) => {
-            const percentage = ((count / errors.length) * 100).toFixed(1);
-            console.log(`${code}: ${count} errores (${percentage}%)`);
-        });
+        .slice(0, 10)) {
+        const percentage = ((count / errors.length) * 100).toFixed(1);
+        console.log(`${code}: ${count} errores (${percentage}%)`);
+    }
 
     // 📂 Análisis por archivo
     const fileErrors = {};
-    errors.forEach(error => {
+    for (const error of errors) {
         fileErrors[error.file] = (fileErrors[error.file] || 0) + 1;
-    });
+    }
 
     console.log('\n📂 TOP 15 ARCHIVOS MÁS PROBLEMÁTICOS:');
     console.log('====================================');
@@ -70,17 +69,15 @@ try {
         .sort((a, b) => b[1] - a[1])
         .slice(0, 15);
 
-    topFiles.forEach(([file, count]) => {
+    for (const [file, count] of topFiles) {
         const percentage = ((count / errors.length) * 100).toFixed(1);
         console.log(`${file}: ${count} errores (${percentage}%)`);
-    });
+    }
 
     // 🎯 Archivos en .next vs src
     const nextErrors = errors.filter(e => e.file.includes('.next')).length;
     const srcErrors = errors.filter(e => e.file.includes('src')).length;
-    const otherErrors = errors.length - nextErrors - srcErrors;
-
-    console.log('\n🎯 DISTRIBUCIÓN POR DIRECTORIO:');
+    const otherErrors = errors.length - nextErrors - srcErrors;    console.log('\n🎯 DISTRIBUCIÓN POR DIRECTORIO:');
     console.log('===============================');
     console.log(`📁 .next/: ${nextErrors} errores (${((nextErrors / errors.length) * 100).toFixed(1)}%)`);
     console.log(`📁 src/: ${srcErrors} errores (${((srcErrors / errors.length) * 100).toFixed(1)}%)`);
