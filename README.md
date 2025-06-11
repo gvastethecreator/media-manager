@@ -293,3 +293,5 @@ Para más detalles, ver también:
 - `CURRENT-TASK.md` (plan y checklist de la tarea)
 - `TRANSFORMERS-FIX.md` (convenciones de testing y mocks globales)
 - `AGENTS.md` (reglas de colaboración y traspaso de contexto)
+- `FOLDER-FIX-SUMMARY.md` (resumen de la corrección de indexación de carpetas)
+- `RESUMEN-VERIFICACION-TARJETAS.md` (detalles de las pruebas de tarjetas)
