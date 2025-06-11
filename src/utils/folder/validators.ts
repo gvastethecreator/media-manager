@@ -3,7 +3,18 @@
  * @module utils/folder/validators
  */
 
-import { FOLDER_DEFAULT_COLORS, FOLDER_DEFAULT_EMOJIS } from '@/types/entities/folder';
+const FOLDER_DEFAULT_COLORS = {
+        DEFAULT: '#3b82f6',
+        SYSTEM: '#6b7280',
+};
+
+const FOLDER_DEFAULT_EMOJIS = {
+        DEFAULT: '📁',
+        FAVORITE: '⭐',
+        PHOTOS: '📸',
+        VIDEOS: '🎞',
+        DOWNLOADS: '⬇',
+};
 import { z } from 'zod';
 
 /**
@@ -64,20 +75,20 @@ export const updateFolderSchema = createFolderSchema
  * Esquema para validar campos específicos en actualización de carpetas
  */
 export const updateFolderFieldsSchema = z
-	.object({
-		name: true,
-		description: true,
-		path: true,
-		emoji: true,
-		color: true,
-		featuredImage: true,
-		totalFiles: true,
-		totalSize: true,
-		lastIndexed: true,
-		isFavorite: true,
-		autoReindex: true,
-		presetId: true,
-	})
+        .object({
+                name: z.literal(true),
+                description: z.literal(true),
+                path: z.literal(true),
+                emoji: z.literal(true),
+                color: z.literal(true),
+                featuredImage: z.literal(true),
+                totalFiles: z.literal(true),
+                totalSize: z.literal(true),
+                lastIndexed: z.literal(true),
+                isFavorite: z.literal(true),
+                autoReindex: z.literal(true),
+                presetId: z.literal(true),
+        })
 	.partial();
 
 /**

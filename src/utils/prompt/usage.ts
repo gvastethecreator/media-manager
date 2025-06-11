@@ -18,8 +18,9 @@ interface TokenRates {
  */
 const MODEL_TOKEN_RATES: Record<PromptModel, TokenRates> = {
 	[PromptModel.GPT_3_5]: { inputTokenRate: 0.0005, outputTokenRate: 0.0015 },
-	[PromptModel.GPT_4]: { inputTokenRate: 0.03, outputTokenRate: 0.06 },
-	[PromptModel.GPT_4_TURBO]: { inputTokenRate: 0.01, outputTokenRate: 0.03 },
+        [PromptModel.GPT_4]: { inputTokenRate: 0.03, outputTokenRate: 0.06 },
+        [PromptModel.GPT4_VISION]: { inputTokenRate: 0.03, outputTokenRate: 0.06 },
+        [PromptModel.GPT_4_TURBO]: { inputTokenRate: 0.01, outputTokenRate: 0.03 },
 	[PromptModel.CLAUDE_INSTANT]: { inputTokenRate: 0.0008, outputTokenRate: 0.0024 },
 	[PromptModel.CLAUDE_2]: { inputTokenRate: 0.008, outputTokenRate: 0.024 },
 	[PromptModel.CLAUDE_3_OPUS]: { inputTokenRate: 0.015, outputTokenRate: 0.075 },

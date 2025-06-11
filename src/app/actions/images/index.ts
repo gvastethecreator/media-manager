@@ -10,8 +10,9 @@ import * as ImageAccessActions from './image-access.actions';
 import * as ImageCrudActions from './image-crud.actions';
 import * as ImageProcessingActions from './image-processing.actions';
 import {
-	generateThumbnail as generateThumbnailFromAction,
-	getThumbnail as getThumbnailFromAction,
+        generateThumbnail as generateThumbnailFromAction,
+        getThumbnail as getThumbnailFromAction,
+        generateThumbnailWithForce as generateThumbnailWithForceFromAction,
 } from './image-thumbnails.actions';
 import * as ImagesRandomAction from './images-random.action';
 
@@ -22,7 +23,12 @@ export async function getImageUrl(...args: Parameters<typeof ImageAccessActions.
 	return ImageAccessActions.getImageUrl(...args);
 }
 export async function getOriginalImage(...args: Parameters<typeof ImageAccessActions.getOriginalImage>) {
-	return ImageAccessActions.getOriginalImage(...args);
+        return ImageAccessActions.getOriginalImage(...args);
+}
+export async function getImageThumbnailBuffer(
+  ...args: Parameters<typeof ImageAccessActions.getImageThumbnailBuffer>
+) {
+  return ImageAccessActions.getImageThumbnailBuffer(...args);
 }
 
 // Exportaciones de image-crud.actions
@@ -63,7 +69,12 @@ export async function getThumbnail(...args: Parameters<typeof getThumbnailFromAc
 	return getThumbnailFromAction(...args);
 }
 export async function generateThumbnail(...args: Parameters<typeof generateThumbnailFromAction>) {
-	return generateThumbnailFromAction(...args);
+        return generateThumbnailFromAction(...args);
+}
+export async function generateThumbnailWithForce(
+  ...args: Parameters<typeof generateThumbnailWithForceFromAction>
+) {
+  return generateThumbnailWithForceFromAction(...args);
 }
 
 // Exportaciones de folder-images.action

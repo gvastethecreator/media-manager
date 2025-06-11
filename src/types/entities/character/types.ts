@@ -36,12 +36,11 @@ export interface CharacterBase {
 	id: string;
 	name: string;
 	description?: string;
-	level: number;
-	experience: number;
-	class: string;
-	race: string;
-	alignment: string;
-	background: string;
+        level: number;
+        class: string;
+        race: string;
+        alignment: string;
+        backstory: string;
 	stats?: Record<string, number>;
 	skills?: Record<string, number>;
 	inventory?: Array<{
@@ -124,7 +123,7 @@ export interface CharacterFilters {
 	class?: string[];
 	race?: string[];
 	alignment?: string[];
-	background?: string[];
+        backstory?: string[];
 	isActive?: boolean;
 	isFavorite?: boolean;
 	hasParty?: boolean;

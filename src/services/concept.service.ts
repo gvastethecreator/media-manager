@@ -24,19 +24,17 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 };
 
 interface ConceptFilters {
-	category?: string;
-	search?: string;
-	tags?: string[];
-	sortBy?: 'createdAt' | 'name' | 'category';
-	sortOrder?: 'asc' | 'desc';
-	page?: number;
-	pageSize?: number;
+        category?: string;
+        search?: string;
+        sortBy?: 'createdAt' | 'name' | 'category';
+        sortOrder?: 'asc' | 'desc';
+        page?: number;
+        pageSize?: number;
 }
 
 interface ConceptStats {
-	total: number;
-	byCategory: Record<string, number>;
-	byTag: Record<string, number>;
+        total: number;
+        byCategory: Record<string, number>;
 }
 
 interface ConceptResults {
@@ -135,8 +133,8 @@ export const ConceptService = {
 	},
 
 	async getConcepts(filters: ConceptFilters = {}): Promise<ConceptResults> {
-		try {
-			const { category, search, tags, sortBy = 'createdAt', sortOrder = 'desc', page = 0, pageSize = 50 } = filters;
+                try {
+                        const { category, search, sortBy = 'createdAt', sortOrder = 'desc', page = 0, pageSize = 50 } = filters;
 
 			// Construir where
 			const where: Prisma.ConceptWhereInput = {};
@@ -150,13 +148,7 @@ export const ConceptService = {
 					{ description: { contains: search } },
 				];
 			}
-			if (tags && tags.length > 0) {
-				// Convertimos el array a un string JSON para compararlo con la columna tags
-				const tagsJson = JSON.stringify(tags);
-				where.tags = {
-					contains: tagsJson.substring(1, tagsJson.length - 1), // Quitamos los corchetes
-				};
-			}
+
 
 			// Obtener total
 			const total = await prisma.concept.count({ where });
@@ -197,26 +189,10 @@ export const ConceptService = {
 				_count: true,
 			});
 
-			// Obtener todos los tags únicos y su conteo
-			const concepts = await prisma.concept.findMany({
-				select: {
-					tags: true,
-				},
-			});
-
-			const tagCounts: Record<string, number> = {};
-			for (const concept of concepts) {
-				const tags = JSON.parse(concept.tags || '[]') as string[];
-				for (const tag of tags) {
-					tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-				}
-			}
-
-			return {
-				total,
-				byCategory: Object.fromEntries(byCategory.map((item) => [item.category, item._count])),
-				byTag: tagCounts,
-			};
+                        return {
+                                total,
+                                byCategory: Object.fromEntries(byCategory.map((item) => [item.category, item._count])),
+                        };
 		} catch (error) {
 			conceptLogger.error('Error getting concept stats:', error);
 			throw new Error('Error al obtener estadísticas de conceptos');
