@@ -13,6 +13,7 @@ import type {
 	RelatedAlbum,
 } from '@/types/entities/album/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 
 // Definir constantes localmente en lugar de importarlas
 const DEFAULT_PAGE_SIZE = 20;
@@ -29,7 +30,7 @@ const logger = serverLogger.withContext('AlbumMapper');
 /**
  * 🔄 Mapea datos de creación de Album a formato Prisma
  */
-export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): AlbumCreateInput {
+export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): Prisma.AlbumCreateInput {
 	try {
 		// Preparar datos base - omitiendo propiedades que no existen en Prisma
 		const {
@@ -118,7 +119,7 @@ export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): AlbumCreateI
 		return {
 			...baseData,
 			...relations,
-		} as AlbumCreateInput;
+		} as Prisma.AlbumCreateInput;
 	} catch (error) {
 		throw handleTransformerError(error);
 	}
@@ -127,7 +128,7 @@ export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): AlbumCreateI
 /**
  * 🔄 Mapea datos de actualización de Album a formato Prisma
  */
-export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): AlbumUpdateInput {
+export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): Prisma.AlbumUpdateInput {
 	try {
 		// Extraer solo los campos que existen en Prisma
 		const {
@@ -219,7 +220,7 @@ export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): AlbumUpdateI
 		return {
 			...baseData,
 			...relations,
-		} as AlbumUpdateInput;
+		} as Prisma.AlbumUpdateInput;
 	} catch (error) {
 		throw handleTransformerError(error);
 	}
@@ -228,7 +229,7 @@ export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): AlbumUpdateI
 /**
  * 🔄 Mapea opciones de búsqueda de Album a formato Prisma
  */
-export function mapAlbumSearchOptionsToPrisma(options: AlbumSearchOptions): AlbumFindManyArgs {
+export function mapAlbumSearchOptionsToPrisma(options: AlbumSearchOptions): Prisma.AlbumFindManyArgs {
 	try {
 		const { skip = 0, take = DEFAULT_PAGE_SIZE, orderBy, where = {}, include = {} } = options;
 
@@ -277,7 +278,7 @@ export function mapAlbumSearchOptionsToPrisma(options: AlbumSearchOptions): Albu
 /**
  * 🔄 Mapea filtros de Album a formato Prisma
  */
-export function mapAlbumFiltersToPrisma(filters: AlbumFilters): AlbumWhereInput {
+export function mapAlbumFiltersToPrisma(filters: AlbumFilters): Prisma.AlbumWhereInput {
 	try {
 		const where: Record<string, any> = {};
 
@@ -316,7 +317,7 @@ export function mapAlbumFiltersToPrisma(filters: AlbumFilters): AlbumWhereInput 
 			where.createdAt = { lte: filters.dateRange.end };
 		}
 
-		return where as AlbumWhereInput;
+		return where as Prisma.AlbumWhereInput;
 	} catch (error) {
 		throw handleTransformerError(error);
 	}

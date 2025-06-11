@@ -4,37 +4,39 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { AlbumBase, AlbumComplete } from '@/types/entities/album/types';
+import type { AlbumBase } from '@/types/entities/album/types';
+import type { AlbumComplete as AlbumCompleteExtended, AlbumWithStats } from '@/types/entities/album/extended';
 import { TransformerError } from '@/utils/transformers/errors';
 import { fromPrismaAlbum } from './serializers';
 
-// 📊 Interfaz local para álbum con estadísticas (usar la correcta)
-interface AlbumWithStatsLocal extends AlbumBase {
-	_count: {
-		images: number;
-		videos: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
-	totalSize: number;
-	lastUpdated: Date;
-	itemCount: number;
-	itemDistribution: {
-		images: number;
-		videos: number;
-	};
+const logger = serverLogger.withContext('AlbumTransformer');
+
+/**
+ * 🔧 Helper: Deserializa filters de string JSON a objeto AlbumFilters
+ */
+function deserializeFilters(filtersString: string): import('@/types/entities/album/types').AlbumFilters {
+	try {
+		if (!filtersString || filtersString === '{}' || filtersString === '[]') {
+			return {};
+		}
+		return JSON.parse(filtersString);
+	} catch (error) {
+		logger.warn('⚠️ Error deserializando filters, usando objeto vacío:', { filtersString, error });
+		return {};
+	}
 }
 
-const logger = serverLogger.withContext('AlbumTransformer');
+/**
+ * 🔧 Helper: Serializa objeto AlbumFilters a string JSON
+ */
+function serializeFilters(filters: import('@/types/entities/album/types').AlbumFilters): string {
+	try {
+		return JSON.stringify(filters || {});
+	} catch (error) {
+		logger.warn('⚠️ Error serializando filters, usando string vacío:', { filters, error });
+		return '{}';
+	}
+}
 
 /**
  * 🔄 Transforma un objeto a Album, validando su estructura
@@ -138,7 +140,7 @@ export function transformAlbums(albums: unknown[]): AlbumBase[] {
  * @param album Album base o datos de Prisma a extender
  * @returns Album extendido con propiedades adicionales
  */
-export function transformAlbumToExtended(album: AlbumBase | any): AlbumComplete {
+export function transformAlbumToExtended(album: AlbumBase | any): AlbumCompleteExtended {
 	try {
 		// 🛡️ Validación robusta de entrada
 		if (!album) {
@@ -159,12 +161,19 @@ export function transformAlbumToExtended(album: AlbumBase | any): AlbumComplete 
 		);
 
 		let baseAlbum: AlbumBase;
-		let albumComplete: AlbumComplete;
+		let albumComplete: AlbumCompleteExtended;
 
 		if (hasPrismaRelations) {
 			// 🔄 Transformar desde Prisma usando el serializer
 			logger.debug('🔄 Transformando álbum desde datos de Prisma');
-			albumComplete = fromPrismaAlbum(album);
+			const albumFromPrisma = fromPrismaAlbum(album);
+			
+			// Convertir filters de string a objeto
+			albumComplete = {
+				...albumFromPrisma,
+				filters: deserializeFilters(albumFromPrisma.filters),
+			} as AlbumCompleteExtended;
+			
 			baseAlbum = {
 				id: albumComplete.id,
 				name: albumComplete.name,
@@ -173,8 +182,8 @@ export function transformAlbumToExtended(album: AlbumBase | any): AlbumComplete 
 				description: albumComplete.description,
 				shortcut: albumComplete.shortcut,
 				category: albumComplete.category,
-				sortBy: albumComplete.sortBy,
-				filters: albumComplete.filters,
+				sortBy: albumComplete.sortBy as any, // TODO: Deserializar sortBy también
+				filters: serializeFilters(albumComplete.filters),
 				featuredImage: albumComplete.featuredImage,
 				isFavorite: albumComplete.isFavorite,
 				createdAt: albumComplete.createdAt,
@@ -188,6 +197,7 @@ export function transformAlbumToExtended(album: AlbumBase | any): AlbumComplete 
 			// Crear AlbumComplete con estructuras vacías para relaciones
 			albumComplete = {
 				...baseAlbum,
+				filters: deserializeFilters(baseAlbum.filters),
 				images: [],
 				videos: [],
 				collections: [],
@@ -216,7 +226,7 @@ export function transformAlbumToExtended(album: AlbumBase | any): AlbumComplete 
 					properties: 0,
 					groups: 0,
 				}
-			};
+			} as AlbumCompleteExtended;
 		}
 
 		// ✅ Verificar que la transformación fue exitosa
@@ -243,7 +253,7 @@ export function transformAlbumToExtended(album: AlbumBase | any): AlbumComplete 
  * @param album Album base con datos de relaciones o datos de Prisma
  * @returns Album con estadísticas calculadas
  */
-export function transformAlbumToWithStats(album: any): AlbumWithStatsLocal {
+export function transformAlbumToWithStats(album: any): AlbumWithStats {
 	try {
 		// 🛡️ Validar entrada
 		if (!album) {
@@ -277,7 +287,7 @@ export function transformAlbumToWithStats(album: any): AlbumWithStatsLocal {
 		const lastUpdated = albumComplete.updatedAt || new Date();
 
 		// 🏗️ Construir y devolver el objeto con estadísticas
-		const albumWithStats: AlbumWithStatsLocal = {
+		const albumWithStats: AlbumWithStats = {
 			id: albumComplete.id,
 			name: albumComplete.name,
 			emoji: albumComplete.emoji,
@@ -285,8 +295,8 @@ export function transformAlbumToWithStats(album: any): AlbumWithStatsLocal {
 			description: albumComplete.description,
 			shortcut: albumComplete.shortcut,
 			category: albumComplete.category,
-			sortBy: albumComplete.sortBy,
-			filters: albumComplete.filters,
+			sortBy: albumComplete.sortBy as any, // TODO: Deserializar sortBy también
+			filters: serializeFilters(albumComplete.filters),
 			featuredImage: albumComplete.featuredImage,
 			isFavorite: albumComplete.isFavorite,
 			createdAt: albumComplete.createdAt,

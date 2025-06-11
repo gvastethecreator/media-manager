@@ -8,6 +8,9 @@ export * from './extended';
 export * from './stats-types';
 export * from './types';
 
+// Exportar específicamente CreateAlbumData para compatibilidad
+export type { CreateAlbumData } from './types';
+
 // Exportar desde enumeraciones
 export {
     AlbumDisplayState,
