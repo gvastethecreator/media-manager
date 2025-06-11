@@ -1,6 +1,6 @@
 import { Logger } from '@/lib/logger';
 
-const logger = new Logger('TransformerUtils');
+const logger = new Logger({ context: 'TransformerUtils' });
 
 /**
  * 🔄 Serializa un campo a formato JSON

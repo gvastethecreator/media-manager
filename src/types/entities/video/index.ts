@@ -14,11 +14,11 @@ export { VideoFormat, VideoPrivacyLevel, VideoQuality, VideoType } from './enums
 
 // Tipos base para estructuras de datos
 export type {
-	VideoBase,
-	VideoChapter,
-	VideoMetadata,
-	VideoPlayState,
-	VideoVisualConfig
+        VideoBase,
+        VideoChapter,
+        VideoMetadata,
+        VideoPlaybackState,
+        VideoVisualConfig
 } from './types';
 
 // Tipos extendidos para UI y visualización

@@ -24,23 +24,21 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 };
 
 interface NoteFilters {
-	category?: string;
-	priority?: number;
-	status?: string;
-	search?: string;
-	tags?: string[];
-	sortBy?: 'createdAt' | 'title' | 'category' | 'priority' | 'status';
-	sortOrder?: 'asc' | 'desc';
-	page?: number;
-	pageSize?: number;
+        category?: string;
+        priority?: number;
+        status?: string;
+        search?: string;
+        sortBy?: 'createdAt' | 'title' | 'category' | 'priority' | 'status';
+        sortOrder?: 'asc' | 'desc';
+        page?: number;
+        pageSize?: number;
 }
 
 interface NoteStats {
-	total: number;
-	byCategory: Record<string, number>;
-	byPriority: Record<number, number>;
-	byStatus: Record<string, number>;
-	byTag: Record<string, number>;
+        total: number;
+        byCategory: Record<string, number>;
+        byPriority: Record<number, number>;
+        byStatus: Record<string, number>;
 }
 
 interface NoteResults {
@@ -166,13 +164,7 @@ export const NoteService = {
 			if (search) {
 				where.OR = [{ title: { contains: search } }, { content: { contains: search } }];
 			}
-			if (tags && tags.length > 0) {
-				// Convertimos el array a un string JSON para compararlo con la columna tags
-				const tagsJson = JSON.stringify(tags);
-				where.tags = {
-					contains: tagsJson.substring(1, tagsJson.length - 1), // Quitamos los corchetes
-				};
-			}
+
 
 			// Obtener total
 			const total = await prisma.note.count({ where });
@@ -225,28 +217,12 @@ export const NoteService = {
 				_count: true,
 			});
 
-			// Obtener todos los tags únicos y su conteo
-			const notes = await prisma.note.findMany({
-				select: {
-					tags: true,
-				},
-			});
-
-			const tagCounts: Record<string, number> = {};
-			for (const note of notes) {
-				const tags = JSON.parse(note.tags || '[]') as string[];
-				for (const tag of tags) {
-					tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-				}
-			}
-
-			return {
-				total,
-				byCategory: Object.fromEntries(byCategory.map((item) => [item.category, item._count])),
-				byPriority: Object.fromEntries(byPriority.map((item) => [item.priority, item._count])),
-				byStatus: Object.fromEntries(byStatus.map((item) => [item.status, item._count])),
-				byTag: tagCounts,
-			};
+                        return {
+                                total,
+                                byCategory: Object.fromEntries(byCategory.map((item) => [item.category, item._count])),
+                                byPriority: Object.fromEntries(byPriority.map((item) => [item.priority, item._count])),
+                                byStatus: Object.fromEntries(byStatus.map((item) => [item.status, item._count])),
+                        };
 		} catch (error) {
 			noteLogger.error('Error getting note stats:', error);
 			throw new Error('Error al obtener estadísticas de notas');

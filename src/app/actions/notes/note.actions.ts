@@ -4,7 +4,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { deserializeTags, fromPrismaNote, toCreateNoteData, toUpdateNoteData } from '@/transformers/note';
+import { fromPrismaNote, toCreateNoteData, toUpdateNoteData } from '@/transformers/note';
 import type { CreateNoteData, NoteBase, NoteComplete, NoteWithStats } from '@/types/entities/note';
 import type { FileItem } from '@/types/file-item';
 import { createNoteSchema, updateNoteSchema } from '@/utils/note/validators';
@@ -260,11 +260,11 @@ export async function deleteNote(id: string): Promise<void> {
  * @deprecated Use getNote instead
  */
 export async function getNoteWithProcessedFields(id: string): Promise<NoteBase & { parsedTags: string[] }> {
-	const note = await getNote(id);
-	return {
-		...note,
-		parsedTags: note.tags,
-	};
+        const note = await getNote(id);
+        return {
+                ...note,
+                parsedTags: [],
+        };
 }
 
 /**
@@ -273,11 +273,11 @@ export async function getNoteWithProcessedFields(id: string): Promise<NoteBase &
  * @deprecated Use getNotes instead
  */
 export async function getNotesWithProcessedFields(): Promise<Array<NoteBase & { parsedTags: string[] }>> {
-	const notes = await getNotes();
-	return notes.map((note) => ({
-		...note,
-		parsedTags: deserializeTags(note.tags),
-	}));
+        const notes = await getNotes();
+        return notes.map((note) => ({
+                ...note,
+                parsedTags: [],
+        }));
 }
 
 export async function getNoteImages(noteId: string): Promise<FileItem[]> {

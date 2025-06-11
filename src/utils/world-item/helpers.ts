@@ -4,11 +4,12 @@
  */
 
 import type {
-	RarityLevel,
-	WorldItem,
-	WorldItemProperty,
-	WorldItemStats,
-	WorldItemType,
+        RarityLevel,
+        WorldItemRarity,
+        WorldItem,
+        WorldItemProperty,
+        WorldItemStats,
+        WorldItemType,
 } from '../../types/entities/world-item';
 
 /**
@@ -42,10 +43,11 @@ export function calculatePowerLevel(stats: WorldItemStats): number {
 	}
 
 	// Añadir puntos por efectos
-	if (stats.effects && stats.effects.length > 0) {
-		powerLevel += stats.effects.length * 5;
-		statCount++;
-	}
+        const effects = (stats as unknown as { effects?: unknown[] }).effects;
+        if (Array.isArray(effects) && effects.length > 0) {
+                powerLevel += effects.length * 5;
+                statCount++;
+        }
 
 	// Calcular promedio ponderado
 	if (statCount > 0) {
@@ -62,7 +64,7 @@ export function calculatePowerLevel(stats: WorldItemStats): number {
  * @param name Nombre de la propiedad
  * @returns Valor de la propiedad o null si no existe
  */
-export function findPropertyValue(properties: WorldItemProperty[], name: string): string | number | null {
+export function findPropertyValue(properties: WorldItemProperty[], name: string): string | number | boolean | null {
 	const property = properties.find((p) => p.name.toLowerCase() === name.toLowerCase());
 	return property ? property.value : null;
 }
@@ -76,14 +78,14 @@ export function findPropertyValue(properties: WorldItemProperty[], name: string)
  * @returns Verdadero si cumple con todos los requisitos
  */
 export function meetsRequirements(
-	worldItem: WorldItem,
-	requiredLevel?: number,
-	requiredTypes?: WorldItemType[],
-	requiredRarities?: RarityLevel[]
+        worldItem: WorldItem,
+        requiredLevel?: number,
+        requiredTypes?: WorldItemType[],
+        requiredRarities?: WorldItemRarity[]
 ): boolean {
 	// Verificar nivel
-	if (requiredLevel !== undefined && worldItem.statsObject.level) {
-		if (worldItem.statsObject.level < requiredLevel) {
+        if (requiredLevel !== undefined && worldItem.stats.level) {
+                if (worldItem.stats.level < requiredLevel) {
 			return false;
 		}
 	}
@@ -96,8 +98,8 @@ export function meetsRequirements(
 	}
 
 	// Verificar rareza
-	if (requiredRarities && requiredRarities.length > 0) {
-		if (!requiredRarities.includes(worldItem.rarity as RarityLevel)) {
+        if (requiredRarities && requiredRarities.length > 0) {
+                if (!requiredRarities.includes(worldItem.rarity as WorldItemRarity)) {
 			return false;
 		}
 	}
@@ -123,22 +125,22 @@ export function compareWorldItems(a: WorldItem, b: WorldItem, criteria: string):
 	}
 
 	// Ordenar por fecha de creación
-	if (criteria === 'created_asc') {
-		return a.createdAt.getTime() - b.createdAt.getTime();
-	}
+        if (criteria === 'created_asc') {
+                return a.createdAt!.getTime() - b.createdAt!.getTime();
+        }
 
-	if (criteria === 'created_desc') {
-		return b.createdAt.getTime() - a.createdAt.getTime();
-	}
+        if (criteria === 'created_desc') {
+                return b.createdAt!.getTime() - a.createdAt!.getTime();
+        }
 
 	// Ordenar por fecha de actualización
-	if (criteria === 'updated_asc') {
-		return a.updatedAt.getTime() - b.updatedAt.getTime();
-	}
+        if (criteria === 'updated_asc') {
+                return a.updatedAt!.getTime() - b.updatedAt!.getTime();
+        }
 
-	if (criteria === 'updated_desc') {
-		return b.updatedAt.getTime() - a.updatedAt.getTime();
-	}
+        if (criteria === 'updated_desc') {
+                return b.updatedAt!.getTime() - a.updatedAt!.getTime();
+        }
 
 	// Ordenar por tipo
 	if (criteria === 'type_asc') {
@@ -220,34 +222,34 @@ export function filterWorldItems(
 		}
 
 		// Filtrar por rareza
-		if (filters.rarities && filters.rarities.length > 0) {
-			if (!filters.rarities.includes(item.rarity)) {
+        if (filters.rarities && filters.rarities.length > 0) {
+                        if (!filters.rarities.includes(item.rarity as WorldItemRarity)) {
 				return false;
 			}
 		}
 
 		// Filtrar por nivel
-		if (filters.minLevel !== undefined && item.statsObject.level !== undefined) {
-			if (item.statsObject.level < filters.minLevel) {
+                if (filters.minLevel !== undefined && item.stats.level !== undefined) {
+                        if (item.stats.level < filters.minLevel) {
 				return false;
 			}
 		}
 
-		if (filters.maxLevel !== undefined && item.statsObject.level !== undefined) {
-			if (item.statsObject.level > filters.maxLevel) {
+                if (filters.maxLevel !== undefined && item.stats.level !== undefined) {
+                        if (item.stats.level > filters.maxLevel) {
 				return false;
 			}
 		}
 
 		// Filtrar por valor
-		if (filters.minValue !== undefined && item.statsObject.value !== undefined) {
-			if (item.statsObject.value < filters.minValue) {
+                if (filters.minValue !== undefined && item.stats.value !== undefined) {
+                        if (item.stats.value < filters.minValue) {
 				return false;
 			}
 		}
 
-		if (filters.maxValue !== undefined && item.statsObject.value !== undefined) {
-			if (item.statsObject.value > filters.maxValue) {
+                if (filters.maxValue !== undefined && item.stats.value !== undefined) {
+                        if (item.stats.value > filters.maxValue) {
 				return false;
 			}
 		}

@@ -110,9 +110,9 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
 			md += `**Modelo:** ${displayPrompt.model}\n`;
 
 			// Añadir tags si existen
-			const tags = displayPrompt.parsedTags || [];
-			if (tags.length > 0) {
-				md += `**Tags:** ${tags.map((tag) => `\`${tag}\``).join(', ')}\n`;
+                        const tags: string[] = displayPrompt.parsedTags || [];
+                        if (tags.length > 0) {
+                                md += `**Tags:** ${tags.map((tag: string) => `\`${tag}\``).join(', ')}\n`;
 			}
 
 			// Añadir información de fecha
@@ -231,10 +231,10 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
     <p><strong>Modelo:</strong> ${escapeHtml(displayPrompt.model)}</p>`;
 
 			// Añadir tags si existen
-			const tags = displayPrompt.parsedTags || [];
-			if (tags.length > 0) {
-				html += `
-    <p><strong>Tags:</strong> ${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join(' ')}</p>`;
+                        const tags: string[] = displayPrompt.parsedTags || [];
+                        if (tags.length > 0) {
+                                html += `
+    <p><strong>Tags:</strong> ${tags.map((tag: string) => `<span class="tag">${escapeHtml(tag)}</span>`).join(' ')}</p>`;
 			}
 
 			// Añadir información de fecha
