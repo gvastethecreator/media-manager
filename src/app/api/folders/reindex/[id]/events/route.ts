@@ -5,10 +5,8 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 export async function GET(request: NextRequest, context: { params: { id: string } }) {
-	try {
-		// Esperar y extraer los parámetros de manera asíncrona
-		const params = await Promise.resolve(context.params);
-		const folderId = params.id;
+        try {
+                const { id: folderId } = context.params;
 
 		if (!folderId) {
 			console.error('ID de carpeta no encontrado');

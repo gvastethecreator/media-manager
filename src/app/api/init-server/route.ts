@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import initializeServer from '@/lib/server/init-server';
+import { initServer } from '@/app/actions/system';
 import { NextResponse } from 'next/server';
 
 // Logger específico para esta ruta
@@ -25,11 +25,11 @@ export async function GET() {
 		// Verificar si el servidor ya está inicializado
 		const isServerAlreadyInitialized = await isServerInitialized();
 
-		if (!isServerAlreadyInitialized) {
-			logger.info('Inicializando servidor desde ruta de API');
+                if (!isServerAlreadyInitialized) {
+                        logger.info('Inicializando servidor desde ruta de API');
 
-			// Inicializar servidor (ahora es asíncrono)
-			await initializeServer();
+                        // Inicializar servidor mediante la Server Action
+                        await initServer();
 
 			return NextResponse.json({
 				success: true,

@@ -110,25 +110,17 @@ export function filterPlaces(places: Place[], filters: PlaceFilters): Place[] {
 			}
 		}
 
-		// Filtrar por nivel de peligro
-		if (filters.dangerLevels?.length && place.dangers) {
-			const dangers = deserializePlaceDangers(place.dangers);
-			const placeDangerLevels = dangers.map((d) => d.level).filter(Boolean) as string[];
 
-			if (!placeDangerLevels.some((level) => filters.dangerLevels?.includes(level))) {
-				return false;
-			}
-		}
 
 		// Filtrar por rango de población
-		if (place.population !== null) {
-			if (filters.populationMin !== undefined && place.population < filters.populationMin) {
-				return false;
-			}
-			if (filters.populationMax !== undefined && place.population > filters.populationMax) {
-				return false;
-			}
-		}
+                if (place.population !== null && filters.populationRange) {
+                        if (filters.populationRange.min !== undefined && place.population < filters.populationRange.min) {
+                                return false;
+                        }
+                        if (filters.populationRange.max !== undefined && place.population > filters.populationRange.max) {
+                                return false;
+                        }
+                }
 
 		// Filtrar por favoritos
 		if (filters.onlyFavorites && !place.isFavorite) {

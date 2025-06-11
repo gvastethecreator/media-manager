@@ -13,15 +13,15 @@
  * @module types/entities/entity
  */
 
-// Exportar todos los archivos de la carpeta
-export * from './base';
-export * from './enums';
-export * from './extended';
-export * from './types';
+// Ejemplo de exportaciones que debería contener un archivo real
+// export * from './base';
+// export * from './enums';
+// export * from './extended';
+// export * from './types';
 
 // Exportar el alias principal para la entidad
 // Esto permite importar simplemente: import { Entity } from '@/types/entities/entity'
-export type { EntityWithRelations as Entity } from './types';
+// export type { EntityWithRelations as Entity } from './types';
 
 /**
  * Recomendaciones para archivos de tipos:

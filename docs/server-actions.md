@@ -387,6 +387,12 @@ A continuación se listan las acciones disponibles en cada carpeta:
 - `getThumbnailStats` - Estadísticas de thumbnails
 - `verifySignedToken` - Verifica token de acceso
 
+### presets
+
+- `getVisualPreset`
+- `updateVisualPreset`
+- `getPresetsByType`
+
 ### uploaded-images
 
 - `uploadImages` - Sube múltiples imágenes
@@ -783,6 +789,12 @@ A continuación se listan las acciones disponibles en cada carpeta:
 - `getLastProcessedThumbnails`
 - `getThumbnailStats`
 - `verifySignedToken`
+
+## presets
+
+- `getVisualPreset`
+- `updateVisualPreset`
+- `getPresetsByType`
 
 ## uploaded-images
 

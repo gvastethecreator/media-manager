@@ -308,3 +308,22 @@ export async function reprocessThumbnails(
 		});
 	}
 }
+
+export async function generateThumbnailWithForce(
+  imageId: string,
+  quality: ThumbnailQuality = ThumbnailQuality.MEDIUM,
+  force = false
+): Promise<void> {
+  if (!force) {
+    await generateThumbnail(imageId, quality);
+    return;
+  }
+
+  const image = await prisma.image.findUnique({ where: { id: imageId } });
+  if (!image) {
+    throw createEntityNotFoundError('Imagen', imageId, SERVER_ACTION_NAME);
+  }
+
+  await imageService.generateThumbnail(imageId, quality);
+  revalidatePath(`/api/thumbnails/${imageId}`);
+}
