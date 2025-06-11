@@ -37,7 +37,7 @@ export function toPrismaNote(
 		}
 
 		// Base de datos para Prisma - crear una copia para evitar mutar el original
-		const { isFavorite, tagsArray, ...otherProps } = note as Record<string, any>;
+                const { isFavorite, ...otherProps } = note as Record<string, any>;
 
 		// Resultado base
 		const prismaData: Record<string, any> = { ...otherProps };
@@ -47,10 +47,6 @@ export function toPrismaNote(
 			prismaData.favorite = isFavorite;
 		}
 
-		// Serializar tags si es un array
-		if (deserializeFields && Array.isArray(tagsArray)) {
-			prismaData.tags = serializeTags(tagsArray);
-		}
 
 		// Filtrar propiedades que no pertenecen al modelo Prisma
 		const filteredData: Record<string, any> = {};
@@ -62,7 +58,6 @@ export function toPrismaNote(
 			'content',
 			'color',
 			'emoji',
-			'tags',
 			'status',
 			'favorite',
 			'category',
@@ -105,10 +100,7 @@ export function fromPrismaNote(
 			noteComplete.isFavorite = prismaNote.favorite;
 		}
 
-		// Deserializar campos JSON
-		if (deserializeFields) {
-			noteComplete.tagsArray = deserializeTags(prismaNote.tags);
-		}
+                // No hay campos JSON adicionales que deserializar
 
 		// Incluir relaciones si están presentes y habilitadas
 		if (includeRelations) {
@@ -184,32 +176,6 @@ export function fromPrismaNote(
  * @param tags Array de tags
  * @returns JSON string de tags
  */
-export function serializeTags(tags: string[]): string {
-	try {
-		const tagsObj: NoteTags = { items: tags };
-		return JSON.stringify(tagsObj);
-	} catch (error) {
-		logger.error('Error serializando tags de nota', { error });
-		return JSON.stringify({ items: [] });
-	}
-}
-
-/**
- * 🔍 Deserializa los tags de una nota
- * @param tagsJson JSON string de tags
- * @returns Array de tags
- */
-export function deserializeTags(tagsJson: string | null | undefined): string[] {
-	if (!tagsJson || tagsJson === 'empty_array') return [];
-
-	try {
-		const parsed = JSON.parse(tagsJson) as NoteTags;
-		return Array.isArray(parsed.items) ? parsed.items : [];
-	} catch (error) {
-		logger.error('Error deserializando tags de nota', { error });
-		return [];
-	}
-}
 
 /**
  * 🔍 Valida una nota con el schema
@@ -264,13 +230,11 @@ export function extendNotes(
  * Objeto con las funciones de serialización para compatibilidad
  */
 export const NoteSerializer = {
-	toPrismaNote,
-	fromPrismaNote,
-	serializeTags,
-	deserializeTags,
-	validateNote,
-	extendNote,
-	extendNotes,
+        toPrismaNote,
+        fromPrismaNote,
+        validateNote,
+        extendNote,
+        extendNotes,
 };
 
 // Exportar como default para compatibilidad

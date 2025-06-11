@@ -192,7 +192,7 @@ export function createServiceError(options: CreateServiceErrorOptions): ServiceE
 		category,
 		context,
 		timestamp: error.timestamp,
-		...(cause && { cause: cause instanceof Error ? cause.message : String(cause) }),
+                ...(cause ? { cause: cause instanceof Error ? cause.message : String(cause) } : {}),
 	};
 
 	// Registrar según el nivel especificado

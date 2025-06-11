@@ -26,6 +26,21 @@ graph TD
 - `UploadedImageBase`, `UploadedImageComplete`, `UploadedImageCreateInput`, `UploadedImageUpdateInput`
 - Filtros: `UploadedImageFilters`, `UploadedImageSearchOptions`, `UploadedImageSearchResult`
 
+### Campos principales
+
+- **id**: identificador único de la imagen subida
+- **name**: nombre asignado a la imagen
+- **path**: ruta de almacenamiento
+- **type**: tipo de archivo (`image`, `video`, etc.)
+- **category**: categoría para clasificar la subida
+- **hash**: hash para detección de duplicados
+- **imageId**: referencia a la imagen procesada
+- **size**: tamaño en bytes
+- **width** y **height**: dimensiones originales
+- **metadata**: cadena JSON con metadatos opcionales
+- **uploadedAt**: fecha de carga
+- **createdAt** y **updatedAt**: timestamps de auditoría
+
 ---
 
 ## Ejemplo de uso
@@ -77,4 +92,4 @@ Al eliminar una imagen subida, revisar las relaciones para evitar referencias hu
 
 ---
 
-> Última actualización: 2025-06-10
+> Última actualización: 2025-06-11

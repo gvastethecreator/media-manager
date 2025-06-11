@@ -12,17 +12,18 @@ import type { UploadedImageBase, UploadedImageDimensions, UploadedImageExtended,
  * Type for database uploaded image record
  */
 export type UploadedImageDBRecord = {
-	id: string;
-	name: string;
-	path: string;
-	originalName?: string;
-	type: string;
-	category: string;
-	size: number;
-	width: number;
-	height: number;
-	metadata: string | null;
-	uploadedAt: Date;
+        id: string;
+        name: string;
+        path: string;
+        type: string;
+        category: string;
+        hash: string;
+        imageId: string;
+        size: number;
+        width: number;
+        height: number;
+        metadata: string | null;
+        uploadedAt: Date;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -39,19 +40,20 @@ export const uploadedImageTransformer: Transformer<UploadedImageDBRecord, Upload
 	/**
 	 * Transform database record to domain entity
 	 */
-	fromDB: (record): UploadedImageBase => {
-		return {
-			id: record.id,
-			name: record.name,
-			path: record.path,
-			originalName: record.originalName,
-			type: record.type as UploadedImageType,
-			category: record.category,
-			size: record.size,
-			width: record.width,
-			height: record.height,
-			metadata: record.metadata,
-			uploadedAt: record.uploadedAt,
+        fromDB: (record): UploadedImageBase => {
+                return {
+                        id: record.id,
+                        name: record.name,
+                        path: record.path,
+                        type: record.type as UploadedImageType,
+                        category: record.category,
+                        hash: record.hash,
+                        imageId: record.imageId,
+                        size: record.size,
+                        width: record.width,
+                        height: record.height,
+                        metadata: record.metadata,
+                        uploadedAt: record.uploadedAt,
 			createdAt: record.createdAt,
 			updatedAt: record.updatedAt,
 		};

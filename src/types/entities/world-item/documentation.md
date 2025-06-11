@@ -25,6 +25,16 @@ graph TD
 - `WorldItemBase`, `WorldItemComplete`, `WorldItemCreateInput`, `WorldItemUpdateInput`
 - Filtros: `WorldItemFilters`, `WorldItemSearchOptions`, `WorldItemSearchResult`
 
+### Campos principales
+
+- **id**: identificador único del objeto
+- **name**: nombre descriptivo
+- **type**: categoría del objeto (`weapon`, `tool`, `artifact`, ...)
+- **rarity**: rareza (`COMMON`, `RARE`, etc.)
+- **stats**: objeto con estadísticas numéricas y efectos
+- **properties**: lista de `WorldItemProperty`
+- **createdAt** y **updatedAt**: timestamps de auditoría
+
 ## Ejemplo de uso
 
 ```typescript
@@ -68,4 +78,4 @@ Al eliminar un WorldItem, revisar las relaciones para evitar referencias huérfa
 
 ---
 
-> Última actualización: 2025-06-10
+> Última actualización: 2025-06-11
