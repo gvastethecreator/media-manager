@@ -71,10 +71,9 @@ class TypeScriptErrorFixer {
                             message: match[5],
                             fullLine: line
                         };
-                    }
-                } else if (currentError && line.trim()) {
+                    }                } else if (currentError && line.trim()) {
                     // Líneas adicionales del error
-                    currentError.message += ' ' + line.trim();
+                    currentError.message += ` ${line.trim()}`;
                 }
             }
 
@@ -104,26 +103,22 @@ class TypeScriptErrorFixer {
             'TS2339': { name: 'Propiedades inexistentes', priority: 2, errors: [] },
             'TS2304': { name: 'Nombres no encontrados', priority: 3, errors: [] },
             'otros': { name: 'Otros errores', priority: 4, errors: [] }
-        };
-
-        errors.forEach(error => {
-            const category = categories[error.code] || categories['otros'];
+        };        for (const error of errors) {
+            const category = categories[error.code] || categories.otros;
             category.errors.push(error);
-        });
+        }
 
         // Ordenar por prioridad
         const sortedCategories = Object.entries(categories)
             .filter(([, cat]) => cat.errors.length > 0)
-            .sort((a, b) => a[1].priority - b[1].priority);
-
-        this.logProgress('## 📋 Categorización de Errores\n');
-        sortedCategories.forEach(([code, category]) => {
+            .sort((a, b) => a[1].priority - b[1].priority);        this.logProgress('## 📋 Categorización de Errores\n');
+        for (const [code, category] of sortedCategories) {
             this.logProgress(`### ${code} - ${category.name} (${category.errors.length} errores)`);
-            category.errors.slice(0, 3).forEach(error => {
+            for (const error of category.errors.slice(0, 3)) {
                 this.logProgress(`- \`${error.file}:${error.line}\` - ${error.message.substring(0, 100)}...`);
-            });
+            }
             this.logProgress('');
-        });
+        }
 
         return sortedCategories;
     }
@@ -223,9 +218,8 @@ class TypeScriptErrorFixer {
 
     /**
      * 📝 Escribe al archivo de log
-     */
-    writeToLog(content) {
-        fs.appendFileSync(PROGRESS_LOG, content + '\n');
+     */    writeToLog(content) {
+        fs.appendFileSync(PROGRESS_LOG, `${content}\n`);
     }
 
     /**
@@ -261,24 +255,20 @@ class TypeScriptErrorFixer {
         const minutes = Math.floor(duration / 60000);
         const seconds = Math.floor((duration % 60000) / 1000);
 
-        this.logProgress(`\n# 🏁 Reporte Final`);
+        this.logProgress('\n# 🏁 Reporte Final');
         this.logProgress(`**Duración:** ${minutes}m ${seconds}s`);
         this.logProgress(`**Total errores procesados:** ${this.fixedErrors.length + this.skippedErrors.length}`);
-        this.logProgress('');
-
-        if (this.fixedErrors.length > 0) {
+        this.logProgress('');        if (this.fixedErrors.length > 0) {
             this.logProgress('## ✅ Errores Corregidos');
-            this.fixedErrors.forEach(error => {
+            for (const error of this.fixedErrors) {
                 this.logProgress(`- \`${error.file}:${error.line}\` - ${error.solution}`);
-            });
+            }
             this.logProgress('');
-        }
-
-        if (this.pendingErrors.length > 0) {
+        }        if (this.pendingErrors.length > 0) {
             this.logProgress('## ⏳ Errores Pendientes');
-            this.pendingErrors.slice(0, 10).forEach(error => {
+            for (const error of this.pendingErrors.slice(0, 10)) {
                 this.logProgress(`- \`${error.file}:${error.line}\` - ${error.code}: ${error.message.substring(0, 100)}...`);
-            });
+            }
             this.logProgress('');
         }
     }
@@ -299,14 +289,12 @@ async function main() {
         }
 
         // 2. Categorizar errores
-        const categories = fixer.categorizeErrors(errors);
-
-        // 3. Procesar por archivos (los más problemáticos primero)
+        const categories = fixer.categorizeErrors(errors);        // 3. Procesar por archivos (los más problemáticos primero)
         const fileGroups = {};
-        errors.forEach(error => {
+        for (const error of errors) {
             if (!fileGroups[error.file]) fileGroups[error.file] = [];
             fileGroups[error.file].push(error);
-        });
+        }
 
         const sortedFiles = Object.entries(fileGroups)
             .sort((a, b) => b[1].length - a[1].length)

@@ -37,11 +37,10 @@ try {
                 message: errorMatch[5].trim(),
                 fullMessage: line
             };
-        } else if (currentError && line.trim() && !line.match(/^\s*$/)) {
-            // Líneas adicionales del mensaje (saltar líneas vacías)
+        } else if (currentError && line.trim() && !line.match(/^\s*$/)) {            // Líneas adicionales del mensaje (saltar líneas vacías)
             if (line.trim().length > 0) {
-                currentError.message += ' ' + line.trim();
-                currentError.fullMessage += '\n' + line;
+                currentError.message += ` ${line.trim()}`;
+                currentError.fullMessage += `\n${line}`;
             }
         } else if (!currentError && line.trim() && line.includes('error TS')) {
             // Intentar con formato alternativo
@@ -66,36 +65,30 @@ try {
         errors.push(currentError);
     }
 
-    console.log(`📊 Total de errores encontrados: ${errors.length}\n`);
-
-    // 📈 Estadísticas por tipo de error
+    console.log(`📊 Total de errores encontrados: ${errors.length}\n`);    // 📈 Estadísticas por tipo de error
     const errorTypes = {};
-    errors.forEach(error => {
+    for (const error of errors) {
         errorTypes[error.code] = (errorTypes[error.code] || 0) + 1;
-    });
+    }
 
     console.log('📋 ERRORES POR TIPO:');
     console.log('==================');
-    Object.entries(errorTypes)
-        .sort((a, b) => b[1] - a[1])
-        .forEach(([code, count]) => {
-            console.log(`${code}: ${count} errores`);
-        });
-
-    // 📂 Estadísticas por archivo
+    for (const [code, count] of Object.entries(errorTypes)
+        .sort((a, b) => b[1] - a[1])) {
+        console.log(`${code}: ${count} errores`);
+    }    // 📂 Estadísticas por archivo
     const fileErrors = {};
-    errors.forEach(error => {
+    for (const error of errors) {
         fileErrors[error.file] = (fileErrors[error.file] || 0) + 1;
-    });
+    }
 
     console.log('\n📂 ARCHIVOS MÁS PROBLEMÁTICOS:');
     console.log('==============================');
-    Object.entries(fileErrors)
+    for (const [file, count] of Object.entries(fileErrors)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .forEach(([file, count]) => {
-            console.log(`${file}: ${count} errores`);
-        });
+        .slice(0, 10)) {
+        console.log(`${file}: ${count} errores`);
+    }
 
     // 🎯 Mostrar algunos errores específicos para análisis
     console.log('\n🎯 EJEMPLOS DE ERRORES MÁS COMUNES:');
@@ -104,15 +97,13 @@ try {
     // Agrupar por tipos más comunes
     const commonTypes = Object.entries(errorTypes)
         .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-
-    commonTypes.forEach(([code, count]) => {
+        .slice(0, 5);    for (const [code, count] of commonTypes) {
         console.log(`\n${code} (${count} errores):`);
         const exampleErrors = errors.filter(e => e.code === code).slice(0, 3);
-        exampleErrors.forEach((error, index) => {
+        for (const [index, error] of exampleErrors.entries()) {
             console.log(`  ${index + 1}. ${error.file}:${error.line} - ${error.message.substring(0, 100)}...`);
-        });
-    });
+        }
+    }
 
     // 💾 Generar reporte en markdown
     const report = `# 📊 Análisis de Errores TypeScript
@@ -166,14 +157,12 @@ ${examples.map(error => `- \`${error.file}:${error.line}\` - ${error.message.sub
         { codes: ['TS2339', 'TS2304'], desc: 'Errores de propiedades/nombres - Media prioridad', level: '🟡' },
         { codes: ['TS2571', 'TS2531'], desc: 'Errores de null/undefined - Media prioridad', level: '🟡' },
         { codes: ['TS2740', 'TS2741'], desc: 'Propiedades faltantes - Baja prioridad', level: '🟢' }
-    ];
-
-    priority.forEach(({ codes, desc, level }) => {
+    ];    for (const { codes, desc, level } of priority) {
         const count = codes.reduce((sum, code) => sum + (errorTypes[code] || 0), 0);
         if (count > 0) {
             console.log(`${level} ${desc}: ${count} errores`);
         }
-    });
+    }
 
     console.log('\n✨ ¡Análisis completado!');
 

@@ -35,15 +35,15 @@ console.log(`📊 Encontrados ${ts2339Errors.length} errores TS2339 en archivos 
 
 // Agrupar por archivo
 const errorsByFile = {};
-ts2339Errors.forEach(error => {
+for (const error of ts2339Errors) {
   if (!errorsByFile[error.file]) {
     errorsByFile[error.file] = [];
   }
   errorsByFile[error.file].push(error.missingProperty);
-});
+}
 
 // Corregir cada archivo
-Object.entries(errorsByFile).forEach(([filePath, missingProperties]) => {
+for (const [filePath, missingProperties] of Object.entries(errorsByFile)) {
   console.log(`🔍 Analizando: ${filePath}`);
   console.log(`   Propiedades faltantes: ${missingProperties.join(', ')}`);
 
@@ -52,7 +52,7 @@ Object.entries(errorsByFile).forEach(([filePath, missingProperties]) => {
 
     if (!fs.existsSync(fullPath)) {
       console.log(`   ❌ Archivo no encontrado: ${fullPath}`);
-      return;
+      continue;
     }
 
     let content = fs.readFileSync(fullPath, 'utf8');
@@ -61,16 +61,16 @@ Object.entries(errorsByFile).forEach(([filePath, missingProperties]) => {
     // Buscar el archivo de acciones importado
     const importMatch = content.match(/import \* as (\w+) from ['"]([^'"]+)['"];/);
     if (!importMatch) {
-      console.log(`   ❌ No se encontró import pattern`);
-      return;
+      console.log('   ❌ No se encontró import pattern');
+      continue;
     }
 
     const [, importAlias, importPath] = importMatch;
-    const actualActionsPath = path.resolve(path.dirname(fullPath), importPath + '.ts');
+    const actualActionsPath = path.resolve(path.dirname(fullPath), `${importPath}.ts`);
 
     if (!fs.existsSync(actualActionsPath)) {
       console.log(`   ❌ Archivo de acciones no encontrado: ${actualActionsPath}`);
-      return;
+      continue;
     }
 
     // Leer el archivo de acciones para ver qué funciones realmente existen
@@ -88,21 +88,21 @@ Object.entries(errorsByFile).forEach(([filePath, missingProperties]) => {
     console.log(`   📋 Exports reales encontrados: ${realExports.join(', ')}`);
 
     // Comentar las líneas problemáticas
-    missingProperties.forEach(prop => {
+    for (const prop of missingProperties) {
       const regex = new RegExp(`^(export const ${prop} = ${importAlias}\\.${prop};)$`, 'm');
       if (content.match(regex)) {
         content = content.replace(regex, `// ❌ DISABLED: $1 // Función no existe en ${importPath}`);
         hasChanges = true;
         console.log(`   🔧 Comentada línea: export const ${prop}`);
       }
-    });
+    }
 
     // Guardar cambios si los hubo
     if (hasChanges) {
       fs.writeFileSync(fullPath, content, 'utf8');
-      console.log(`   ✅ Archivo actualizado`);
+      console.log('   ✅ Archivo actualizado');
     } else {
-      console.log(`   ℹ️  No se requirieron cambios`);
+      console.log('   ℹ️  No se requirieron cambios');
     }
 
   } catch (error) {
@@ -110,7 +110,7 @@ Object.entries(errorsByFile).forEach(([filePath, missingProperties]) => {
   }
 
   console.log('');
-});
+}
 
 console.log('🎉 Corrección automática completada!\n');
 console.log('💡 Ejecuta "pnpm tsc --noEmit" para verificar la reducción de errores.');
