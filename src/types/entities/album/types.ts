@@ -111,6 +111,11 @@ export interface AlbumComplete extends AlbumBase, AlbumRelations, AlbumCounts {}
 export type AlbumCreateInput = Omit<AlbumBase, 'id' | 'createdAt' | 'updatedAt'> & Partial<AlbumRelations>;
 
 /**
+ * 📝 Alias para datos de creación de Album (compatibilidad)
+ */
+export type CreateAlbumData = AlbumCreateInput;
+
+/**
  * 📝 Datos para actualizar un Album
  */
 export type AlbumUpdateInput = Partial<Omit<AlbumBase, 'id'>> & Partial<AlbumRelations>;
