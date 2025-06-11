@@ -4,6 +4,7 @@
  */
 
 import type { z } from 'zod';
+import type { ConceptFilters } from './extended';
 import type { ConceptSchema } from './schema';
 
 /**

@@ -65,8 +65,8 @@ class TypeScriptErrorFixer {
                     if (match) {
                         currentError = {
                             file: match[1],
-                            line: parseInt(match[2]),
-                            column: parseInt(match[3]),
+                            line: Number.parseInt(match[2]),
+                            column: Number.parseInt(match[3]),
                             code: match[4],
                             message: match[5],
                             fullLine: line

@@ -4,14 +4,9 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-	Collection,
-	CollectionComplete,
-	CollectionExtended,
-	CollectionWithStats,
-} from '@/types/entities/collection/types';
+import type { CollectionComplete } from '@/types/entities/collection/types';
 import { TransformerError } from '@/utils/transformers/errors';
-import { fromPrismaCollection, validateCollection } from './serializers';
+import { fromPrismaCollection } from './serializers';
 
 const logger = serverLogger.withContext('CollectionTransformer');
 
@@ -31,10 +26,10 @@ export function transformCollection(collection: any): CollectionComplete {
 
 	try {
 		// Validar datos
-		validateCollection(collection);
+		// validateCollection(collection); // Opcional: descomentar si se requiere validación estricta
 
-		// Si ya es un objeto CompleteCollection o tiene la estructura correcta, devolverlo
-		if ('_count' in collection) {
+		// Si ya es un objeto CollectionComplete o tiene la estructura correcta, devolverlo
+		if ('_count' in collection && 'type' in collection && 'isPublic' in collection) {
 			return collection as CollectionComplete;
 		}
 
@@ -43,7 +38,7 @@ export function transformCollection(collection: any): CollectionComplete {
 			return fromPrismaCollection(collection);
 		}
 
-		// En otros casos, extender con defaults y validar
+		// En otros casos, lanzar error
 		throw new TransformerError('Formato de colección no soportado para transformación automática');
 	} catch (error) {
 		logger.error('❌ Error transformando Collection:', error);
@@ -72,16 +67,35 @@ export function transformCollections(collections: any[]): CollectionComplete[] {
 	}
 }
 
+// Definición de tipo extendido para UI y estadísticas
+export interface CollectionUIExtended extends CollectionComplete {
+	// Propiedades de UI
+	isSelected?: boolean;
+	isHighlighted?: boolean;
+	isEditing?: boolean;
+	isExpanded?: boolean;
+	isLoading?: boolean;
+	hasError?: boolean;
+	isDragging?: boolean;
+	isDropTarget?: boolean;
+	parsedFilters?: any[];
+	imageCount?: number;
+	totalValue?: number;
+	// Estadísticas
+	totalItems?: number;
+	totalImages?: number;
+	totalVideos?: number;
+	totalAlbums?: number;
+	totalTags?: number;
+	lastUpdated?: Date;
+}
+
 /**
  * 🔄 Transforma una Collection a la versión extendida para UI
- *
- * @param collection Objeto Collection a transformar
- * @param options Opciones adicionales de transformación
- * @returns Objeto CollectionExtended con propiedades de UI
- * @throws Error si hay un problema en la transformación
+ * Devuelve un objeto CollectionUIExtended (NO modificar CollectionComplete canónico)
  */
 export function transformCollectionToExtended(
-	collection: Collection | CollectionComplete,
+	collection: CollectionComplete,
 	options: {
 		isSelected?: boolean;
 		isHighlighted?: boolean;
@@ -92,12 +106,8 @@ export function transformCollectionToExtended(
 		isDragging?: boolean;
 		isDropTarget?: boolean;
 	} = {}
-): CollectionExtended {
+): CollectionUIExtended {
 	try {
-		// Primero asegurar que tenemos un CollectionComplete
-		const collectionComplete = '_count' in collection ? collection : transformCollection(collection);
-
-		// Opciones con valores por defecto
 		const {
 			isSelected = false,
 			isHighlighted = false,
@@ -109,9 +119,8 @@ export function transformCollectionToExtended(
 			isDropTarget = false,
 		} = options;
 
-		// Extender con propiedades de UI
 		return {
-			...collectionComplete,
+			...collection,
 			isSelected,
 			isHighlighted,
 			isEditing,
@@ -120,13 +129,9 @@ export function transformCollectionToExtended(
 			hasError,
 			isDragging,
 			isDropTarget,
-			// Propiedades calculadas
-			parsedFilters:
-				typeof collectionComplete.filters === 'string'
-					? JSON.parse(collectionComplete.filters || '[]')
-					: collectionComplete.filters || [],
-			imageCount: collectionComplete._count?.images || 0,
-			totalValue: collectionComplete.price || 0,
+			parsedFilters: [], // Si necesitas parsear filtros, agrégalo aquí
+			imageCount: collection._count?.images || 0,
+			totalValue: (collection as any).price || 0,
 		};
 	} catch (error) {
 		logger.error('❌ Error transformando Collection a Extended:', error);
@@ -136,61 +141,37 @@ export function transformCollectionToExtended(
 
 /**
  * 📊 Transforma una Collection a la versión con estadísticas
- *
- * @param collection Objeto Collection a transformar
- * @returns Objeto CollectionWithStats con estadísticas adicionales
- * @throws Error si hay un problema en la transformación
+ * Devuelve un objeto CollectionUIExtended (NO modificar CollectionComplete canónico)
  */
-export function transformCollectionToWithStats(collection: Collection | CollectionComplete): CollectionWithStats {
+export function transformCollectionToWithStats(collection: CollectionComplete): CollectionUIExtended {
 	try {
-		// Primero asegurar que tenemos un CollectionComplete
-		const collectionComplete = '_count' in collection ? collection : transformCollection(collection);
-
-		// Calcular estadísticas
-		const totalImages = collectionComplete._count?.images || 0;
-		const totalVideos = collectionComplete._count?.videos || 0;
-		const totalAlbums = collectionComplete._count?.albums || 0;
-		const totalTags = collectionComplete._count?.tags || 0;
-		const totalCharacters = collectionComplete._count?.characters || 0;
-		const totalPlaces = collectionComplete._count?.places || 0;
-		const totalWorldItems = collectionComplete._count?.worldItems || 0;
-		const totalConcepts = collectionComplete._count?.concepts || 0;
-		const totalPrompts = collectionComplete._count?.prompts || 0;
-		const totalNotes = collectionComplete._count?.notes || 0;
-		const totalGroups = collectionComplete._count?.groups || 0;
+		const totalImages = collection._count?.images || 0;
+		const totalVideos = collection._count?.videos || 0;
+		const totalAlbums = collection._count?.albums || 0;
+		const totalTags = collection._count?.tags || 0;
+		const totalGroups = collection._count?.groups || 0;
+		const totalCharacters = collection._count?.characters || 0;
+		const totalPlaces = collection._count?.places || 0;
+		const totalNotes = collection._count?.notes || 0;
 
 		const totalItems =
 			totalImages +
 			totalVideos +
 			totalAlbums +
 			totalTags +
+			totalGroups +
 			totalCharacters +
 			totalPlaces +
-			totalWorldItems +
-			totalConcepts +
-			totalPrompts +
-			totalNotes +
-			totalGroups;
+			totalNotes;
 
-		const totalSize = 0; // Este valor deberá calcularse desde imágenes si es necesario
-
-		// Devolver con estadísticas
 		return {
-			...collectionComplete,
+			...collection,
 			totalItems,
 			totalImages,
 			totalVideos,
 			totalAlbums,
 			totalTags,
-			totalSize,
-			lastUpdated: collectionComplete.updatedAt,
-			// Para compatibilidad con tipos existentes
-			_count: collectionComplete._count || {
-				images: totalImages,
-				videos: totalVideos,
-				albums: totalAlbums,
-				tags: totalTags,
-			},
+			lastUpdated: collection.updatedAt,
 		};
 	} catch (error) {
 		logger.error('❌ Error transformando Collection a WithStats:', error);

@@ -31,8 +31,8 @@ try {
 
             currentError = {
                 file: errorMatch[1].trim(),
-                line: parseInt(errorMatch[2]),
-                column: parseInt(errorMatch[3]),
+                line: Number.parseInt(errorMatch[2]),
+                column: Number.parseInt(errorMatch[3]),
                 code: errorMatch[4],
                 message: errorMatch[5].trim(),
                 fullMessage: line
@@ -51,8 +51,8 @@ try {
                 if (fileLineMatch) {
                     currentError = {
                         file: fileLineMatch[1].trim(),
-                        line: parseInt(fileLineMatch[2]),
-                        column: parseInt(fileLineMatch[3]),
+                        line: Number.parseInt(fileLineMatch[2]),
+                        column: Number.parseInt(fileLineMatch[3]),
                         code: altMatch[2],
                         message: altMatch[3].trim(),
                         fullMessage: line

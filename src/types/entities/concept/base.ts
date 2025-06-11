@@ -18,7 +18,7 @@ export interface ConceptCreateInput {
 	description?: string | null;
 	content?: string;
 	category?: string;
-	tags?: string | string[]; // Unificado con types.ts
+	tags?: string | string[];
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 }
@@ -34,7 +34,7 @@ export interface ConceptUpdateInput {
 	description?: string | null;
 	content?: string;
 	category?: string;
-	tags?: string | string[]; // Unificado con types.ts
+	tags?: string | string[];
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 }

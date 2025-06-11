@@ -25,18 +25,19 @@ export type NoteBase = Prisma.NoteGetPayload<{
 
 /**
  * Interfaz para actualizar una nota existente
+ * @deprecated Usar NoteUpdateInput de ./types.ts para evitar duplicación
  */
-export interface NoteUpdateInput {
-	id: string;
-	title?: string;
-	content?: string;
-	category?: string;
-	priority?: number;
-	status?: string;
-	tags?: string;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-}
+// export interface NoteUpdateInput {
+// 	id: string;
+// 	title?: string;
+// 	content?: string;
+// 	category?: string;
+// 	priority?: number;
+// 	status?: string;
+// 	tags?: string;
+// 	featuredImage?: string | null;
+// 	isFavorite?: boolean;
+// }
 
 /**
  * Tipo para la relación de nota con otras entidades
