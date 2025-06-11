@@ -3,10 +3,10 @@
  * @module types/entities/place/base
  */
 
-import type { Concept } from '../concepts';
-import type { Image } from '../images';
-import type { Note } from '../notes';
-import type { Prompt } from '../prompts';
+import type { Concept } from '../concept/types';
+import type { Image } from '../image/types';
+import type { Note } from '../note/types';
+import type { Prompt } from '../prompt/types';
 
 /**
  * Datos básicos para crear un nuevo lugar

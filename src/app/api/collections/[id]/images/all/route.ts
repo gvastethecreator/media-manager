@@ -1,62 +1,19 @@
-import { prisma } from '@/lib/prisma';
+import { getCollectionImages } from '@/app/actions/collections';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(_request: NextRequest, context: { params: { id: string } }) {
-	try {
-		const params = await context.params;
-		const { id } = params;
+    try {
+        const { id } = context.params;
 
 		if (!id) {
 			return NextResponse.json({ error: 'ID de colección no proporcionado' }, { status: 400 });
 		}
 
-		const images = await prisma.image.findMany({
-			where: {
-				collections: {
-					some: {
-						id,
-					},
-				},
-			},
-			orderBy: {
-				updatedAt: 'desc',
-			},
-			include: {
-				folder: {
-					select: {
-						id: true,
-						name: true,
-						path: true,
-					},
-				},
-				tags: {
-					select: {
-						id: true,
-						name: true,
-						color: true,
-					},
-				},
-				collections: {
-					select: {
-						id: true,
-						name: true,
-						color: true,
-					},
-				},
-				stats: {
-					select: {
-						views: true,
-						downloads: true,
-						lastViewed: true,
-					},
-				},
-			},
-		});
-
-		return NextResponse.json({ items: images });
+                const images = await getCollectionImages(id);
+                return NextResponse.json({ items: images });
 	} catch (error) {
 		console.error('Error:', error);
 		return NextResponse.json(

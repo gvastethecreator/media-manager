@@ -1,5 +1,6 @@
-import { deserializeTags } from '@/transformers/note';
-import type { NoteBase, NoteExtended, NoteFilters, NoteSortOption } from '@/types/entities/note';
+import { deserializeTags } from '@/transformers/note/serializers';
+import type { NoteComplete, NoteFilters, NoteBase } from '@/types/entities/note/types';
+import type { NoteSortOption } from '@/types/entities/note/enums';
 
 /**
  * Genera un ID único para notas
@@ -15,15 +16,15 @@ export function generateNoteId(): string {
  * @param filters Filtros a aplicar
  * @returns Array de notas filtradas
  */
-export function filterNotes(notes: NoteExtended[], filters: NoteFilters): NoteExtended[] {
-	return notes.filter((note) => {
-		const parsedTags = note.parsedTags || deserializeTags(note.tags);
+export function filterNotes(notes: NoteComplete[], filters: NoteFilters): NoteComplete[] {
+        return notes.filter((note) => {
+                const parsedTags = (note as any).parsedTags || deserializeTags(note.tags);
 
-		// Filtro por búsqueda en título y contenido
-		if (filters.search && filters.search.trim() !== '') {
-			const search = filters.search.toLowerCase();
-			const matchesTitle = note.title.toLowerCase().includes(search);
-			const matchesContent = (note.content || '').toLowerCase().includes(search);
+                // Filtro por búsqueda en título y contenido
+                if (filters.searchQuery && filters.searchQuery.trim() !== '') {
+                        const search = filters.searchQuery.toLowerCase();
+                        const matchesTitle = note.title.toLowerCase().includes(search);
+                        const matchesContent = (note.content || '').toLowerCase().includes(search);
 
 			if (!matchesTitle && !matchesContent) {
 				return false;
@@ -31,28 +32,27 @@ export function filterNotes(notes: NoteExtended[], filters: NoteFilters): NoteEx
 		}
 
 		// Filtro por categoría
-		if (filters.category && note.category !== filters.category) {
-			return false;
-		}
+                if (filters.categories && filters.categories.length > 0 && !filters.categories.includes(note.category)) {
+                        return false;
+                }
 
-		// Filtro por estado
-		if (filters.status && note.status !== filters.status) {
-			return false;
-		}
+                // Filtro por estado
+                if (filters.statuses && filters.statuses.length > 0 && !filters.statuses.includes(note.status)) {
+                        return false;
+                }
 
-		// Filtro por prioridad
-		if (filters.priority !== undefined && note.priority !== filters.priority) {
-			return false;
-		}
+                // Filtro por prioridad
+                if (filters.priorities && filters.priorities.length > 0 && !filters.priorities.includes(note.priority)) {
+                        return false;
+                }
 
-		// Filtro por tags
-		if (filters.tags.length > 0) {
-			const hasAllTags = filters.tags.every((tag) => parsedTags.includes(tag));
-
-			if (!hasAllTags) {
-				return false;
-			}
-		}
+                // Filtro por tags
+                if (filters.hasTags && parsedTags.length === 0) {
+                        return false;
+                }
+                if (filters.contentContains && !note.content.toLowerCase().includes(filters.contentContains.toLowerCase())) {
+                        return false;
+                }
 
 		// Filtro por favoritos
 		if (filters.onlyFavorites && !note.isFavorite) {
@@ -60,20 +60,10 @@ export function filterNotes(notes: NoteExtended[], filters: NoteFilters): NoteEx
 		}
 
 		// Filtro por rango de fechas
-		if (filters.dateRange) {
-			const noteDate = new Date(note.updatedAt);
+                // Nota: NoteFilters actual no incluye rango de fechas
 
-			if (filters.dateRange.from && noteDate < filters.dateRange.from) {
-				return false;
-			}
-
-			if (filters.dateRange.to && noteDate > filters.dateRange.to) {
-				return false;
-			}
-		}
-
-		return true;
-	});
+                return true;
+        });
 }
 
 /**
@@ -82,8 +72,8 @@ export function filterNotes(notes: NoteExtended[], filters: NoteFilters): NoteEx
  * @param sortBy Criterio de ordenación
  * @returns Array de notas ordenadas
  */
-export function sortNotes(notes: NoteExtended[], sortBy: NoteSortOption): NoteExtended[] {
-	const sorters: Record<NoteSortOption, (a: NoteExtended, b: NoteExtended) => number> = {
+export function sortNotes(notes: NoteComplete[], sortBy: NoteSortOption): NoteComplete[] {
+        const sorters: Record<NoteSortOption, (a: NoteComplete, b: NoteComplete) => number> = {
 		title_asc: (a, b) => a.title.localeCompare(b.title),
 		title_desc: (a, b) => b.title.localeCompare(a.title),
 		created_asc: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
@@ -108,9 +98,9 @@ export function sortNotes(notes: NoteExtended[], sortBy: NoteSortOption): NoteEx
  * @returns Objeto con las notas agrupadas por la propiedad
  */
 export function groupNotesByProperty<K extends keyof NoteBase>(
-	notes: NoteExtended[],
-	property: K
-): Record<string, NoteExtended[]> {
+        notes: NoteComplete[],
+        property: K
+): Record<string, NoteComplete[]> {
 	return notes.reduce(
 		(groups, note) => {
 			const key = String(note[property] || 'undefined');
@@ -120,7 +110,7 @@ export function groupNotesByProperty<K extends keyof NoteBase>(
 			groups[key].push(note);
 			return groups;
 		},
-		{} as Record<string, NoteExtended[]>
+                {} as Record<string, NoteComplete[]>
 	);
 }
 
@@ -129,7 +119,7 @@ export function groupNotesByProperty<K extends keyof NoteBase>(
  * @param notes Array de notas
  * @returns Objeto con estadísticas
  */
-export function calculateNoteStats(notes: NoteExtended[]) {
+export function calculateNoteStats(notes: NoteComplete[]) {
 	const totalNotes = notes.length;
 	const byStatus = groupNotesByProperty(notes, 'status');
 	const byCategory = groupNotesByProperty(notes, 'category');
