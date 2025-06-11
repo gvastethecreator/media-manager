@@ -322,3 +322,6 @@ Los tests para este módulo cubren:
 - **Cleanup Processes**: Limpieza automática de archivos huérfanos
 - **Backup Considerations**: Estrategias para respaldo de metadatos
 - **Migration Support**: Herramientas para migración de formatos
+
+## Funciones disponibles
+

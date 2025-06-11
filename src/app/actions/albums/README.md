@@ -240,3 +240,6 @@ Los tests para este módulo se encuentran en `src/app/actions/__tests__/` y cubr
 - Revalidación automática de rutas afectadas
 - Invalidación de cache en operaciones que modifican datos
 - Sincronización con sistema de eventos para updates en tiempo real
+
+## Funciones disponibles
+

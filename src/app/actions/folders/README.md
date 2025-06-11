@@ -449,3 +449,6 @@ Los tests para este módulo cubren:
 - **Smart Reindexing**: Re-indexación inteligente basada en cambios detectados
 - **Cache Invalidation**: Invalidación selectiva de cache
 - **Resource Management**: Control de recursos para evitar exhaustión del sistema
+
+## Funciones disponibles
+
