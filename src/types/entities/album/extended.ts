@@ -4,7 +4,7 @@
  */
 
 import type { AlbumSortCriteria } from './enums';
-import type { Album, AlbumBase, AlbumFilters } from './types';
+import type { AlbumBase, AlbumFilters, AlbumComplete as AlbumCompleteBase } from './types';
 
 /**
  * Interfaz para distribución de imágenes por carpeta
@@ -17,7 +17,7 @@ export interface FolderDistribution {
 /**
  * Interfaz para álbum con estadísticas
  */
-export interface AlbumWithStats extends Album {
+export interface AlbumWithStats extends AlbumCompleteBase {
 	/**
 	 * Tamaño total en bytes de todos los items
 	 */
@@ -66,7 +66,7 @@ export interface AlbumWithStats extends Album {
  * Interfaz para álbum completo con todos los campos procesados (deserializados)
  * Los campos como filters y sortBy están deserializados de sus formatos JSON string
  */
-export interface AlbumComplete extends Omit<Album, 'filters' | 'sortBy'> {
+export interface AlbumComplete extends Omit<AlbumCompleteBase, 'filters' | 'sortBy'> {
 	/**
 	 * Filtros deserializados
 	 */
@@ -96,4 +96,4 @@ export interface ParsedAlbum extends AlbumBase {
 /**
  * Tipo para álbum parseado con relaciones
  */
-export type ParsedAlbumWithRelations = ParsedAlbum & Album;
+export type ParsedAlbumWithRelations = ParsedAlbum & AlbumCompleteBase;
