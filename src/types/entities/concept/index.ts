@@ -4,6 +4,7 @@
  */
 
 // Tipos base y acciones
+export * from './base';
 export * from './actions';
 export * from './complete';
 export * from './enums';
