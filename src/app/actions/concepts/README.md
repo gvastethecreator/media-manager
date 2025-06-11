@@ -405,3 +405,6 @@ describe('Concepts Actions', () => {
 - **[Types Reference](../../../types/entities/concept/)**: Definiciones de tipos completas
 - **[Service Layer](../../../services/concept.service.ts)**: Lógica de negocio del servicio
 - **[Store Implementation](../../../store/entities/concept/)**: Gestión de estado cliente
+
+## Funciones disponibles
+
