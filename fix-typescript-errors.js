@@ -2,6 +2,9 @@
 /**
  * 🔧 Script de corrección automática de errores TypeScript
  * 📝 Registra cada corrección y mantiene un log detallado del progreso
+ *
+ * Actualizado para Image Manager v2 (2025)
+ * Incluye nuevas reglas específicas para tipos canónicos y transformadores
  */
 
 const fs = require('fs');
@@ -12,6 +15,35 @@ const TSC_LOG_FILE = 'tsc-log.txt';
 const PROGRESS_LOG = 'typescript-fixes-log.md';
 const CURRENT_TASK_FILE = 'CURRENT-TASK.md';
 
+// 📝 Configuración de reglas de reemplazo
+const REPLACEMENT_RULES = {
+	// 1. Reemplazar importaciones de tipos Prisma
+	prismaImports: {
+		pattern: /import\s+(?:{[^}]*})?\s*from\s+['"]@prisma\/client['"]/g,
+		replacement: (match, filePath) => {
+			// No reemplazar en archivos de servidor o servicios
+			if (filePath.includes('/server/') || filePath.includes('/services/')) {
+				return match;
+			}
+			// Determinar qué tipos importar basado en el contexto
+			if (filePath.includes('/album/')) {
+				return `import { Album, AlbumBase } from '@/types/entities/album/types'`;
+			} else if (filePath.includes('/image/')) {
+				return `import { Image, ImageBase } from '@/types/entities/image/types'`;
+			}
+			// Regla genérica
+			return `// Reemplazar con tipos canónicos adecuados
+// import { TiposNecesarios } from '@/types/entities/...'`;
+		},
+	},
+
+	// 2. Corregir tipos en transformadores
+	transformerTypes: {
+		pattern: /(\w+):\s*Prisma\.(\w+)/g,
+		replacement: '$1: $2',
+	},
+};
+
 class TypeScriptErrorFixer {
 	constructor() {
 		this.startTime = new Date();
@@ -19,6 +51,7 @@ class TypeScriptErrorFixer {
 		this.pendingErrors = [];
 		this.skippedErrors = [];
 		this.logEntries = [];
+		this.replacementRules = REPLACEMENT_RULES;
 
 		this.initializeLog();
 	}
@@ -41,6 +74,7 @@ class TypeScriptErrorFixer {
 `;
 		this.writeToLog(header);
 		console.log('📝 Log inicializado en:', PROGRESS_LOG);
+		console.log('🔧 Reglas de reemplazo configuradas:', Object.keys(this.replacementRules).length);
 	}
 
 	/**
