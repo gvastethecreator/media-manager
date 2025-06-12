@@ -5,7 +5,6 @@ import { FileViewer, type ImageItem } from '@/components/features/file-viewer/fi
 import FlickeringGrid from '@/components/ui/flickering-grid';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClientLogger } from '@/lib/logger';
-import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useImageResources } from '@/store/image-resources.store';
@@ -26,7 +25,6 @@ import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
 
 const gridLogger = new ClientLogger({ context: 'FileBrowserGrid' });
-// const resourceLogger = new Logger('ImageResourceProcessor'); // Comentado
 
 // Declarar el tipo para window.entityPreloadStartTime
 declare global {
@@ -88,7 +86,7 @@ type FileBrowserItem = FileItem & {
 };
 
 /**
- * Componente principal para la visualización y navegación de archivos
+ * Componente principal para la visualización y navegación de archivos - VERSIÓN CORREGIDA
  *
  * Características principales:
  * - Múltiples modos de visualización (grid, lista, masonry, tarjetas)
@@ -97,25 +95,43 @@ type FileBrowserItem = FileItem & {
  * - Panel de detalles interactivo y arrastrable
  * - Selección múltiple de archivos
  * - Integración con sistema de menú contextual
+ * - SOLUCIÓN CONTAINERWIDTH: Sistema robusto de medición de contenedor
  */
 const FileBrowserComponent = ({
 	items,
-	isResizing,
+	isResizing = false,
 	onItemClick,
 	onItemDoubleClick,
 	loadMoreItems,
 }: FileBrowserProps) => {
-	// Debug: Mostrar detalles de los items recibidos
+
+	// 📊 Función para depurar los items recibidos sin errores de tipo
+	const logItemInfo = useCallback((item: any) => {
+		if (!item) return 'Item nulo o indefinido';
+		try {
+			return {
+				id: item.id || 'Sin ID',
+				name: item.name || 'Sin nombre',
+				type: item.type || 'Sin tipo',
+				src: item.src ? 'Tiene src' : 'Sin src',
+				thumbnail: item.thumbnail ? 'Tiene thumbnail' : 'Sin thumbnail',
+			};
+		} catch (error) {
+			return `Error al analizar item: ${error}`;
+		}
+	}, []);	// Debug: Mostrar detalles de los items recibidos
 	useEffect(() => {
 		gridLogger.info(`🔍 FileBrowser recibió ${items?.length || 0} items`);
+
 		if (items && items.length > 0) {
 			const firstItem = items[0];
 			gridLogger.debug('📄 Primer item recibido:', logItemInfo(firstItem));
 		} else {
 			gridLogger.warn('⚠️ FileBrowser: No se recibieron items o el array está vacío');
 		}
-	}, [items]);
+	}, [items, logItemInfo]);
 
+	// 🏪 Stores
 	const viewMode: ViewMode = useFileStoreBase((state) => state.viewMode as ViewMode);
 	const selectedFileIds = useFileStoreBase((state) => state.selectedFileIds);
 	const selectFile = useFileStoreBase((state) => state.selectFile);
@@ -125,6 +141,7 @@ const FileBrowserComponent = ({
 		const setIds = new Set(selectedFileIds);
 		return items.filter((it) => setIds.has(it.id));
 	}, [items, selectedFileIds]);
+
 	// Seleccionar solo la versión del store para forzar re-renders cuando las miniaturas cambien.
 	const version = useImageResources((state) => state.version);
 	const { setVisible, setSelectedItems } = useDetailsPanel();
@@ -147,155 +164,100 @@ const FileBrowserComponent = ({
 	// Flag para evitar loguear múltiples veces el mismo error de containerWidth
 	const hasLoggedWidthErrorRef = useRef(false);
 
-	// Usar los hooks para separar la lógica
-	const { parentRef, parentCallbackRef, loadMoreRef, containerWidth, isTransitioning, handleScroll, debouncedLoadThumbnails, forceRecalcWidth } =
-		useGridView({
-			viewMode,
-			isResizing,
-			loadMoreItems,
-		});
+	// 🔧 SOLUCIÓN PRINCIPAL: Usar los hooks para separar la lógica con manejo robusto
+	const {
+		parentRef,
+		parentCallbackRef,
+		loadMoreRef,
+		containerWidth,
+		isTransitioning,
+		handleScroll,
+		debouncedLoadThumbnails,
+		forceRecalcWidth
+	} = useGridView({
+		viewMode,
+		isResizing,
+		loadMoreItems,
+	});
 
-	// 🔧 Estado local para el nodo del contenedor y medición
-	const [containerNode, setContainerNode] = useState<HTMLDivElement | null>(null);
-	const [isMeasuring, setIsMeasuring] = useState(false);
+	// 🛡️ Sistema de medición robusta adicional para casos extremos
+	const [isMeasuring, setIsMeasuring] = useState(true);
+	const [forceRender, setForceRender] = useState(0);
 	const measurementTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const measurementAttemptsRef = useRef(0);
-	const MAX_MEASUREMENT_ATTEMPTS = 10;
-	const MEASUREMENT_DELAY_INCREMENT = 50; // Incremento de delay entre intentos
+	const measurementAttemptsRef = useRef(0); const MAX_MEASUREMENT_ATTEMPTS = 10;
+	const MEASUREMENT_DELAY_INCREMENT = 50;
 
-	// 🎯 Función centralizada para medición robusta del contenedor
-	const measureContainer = useCallback((node: HTMLDivElement, strategy: string, attempt = 1): boolean => {
-		if (!node || !document.body.contains(node)) {
-			gridLogger.warn(`⚠️ ${strategy} (intento ${attempt}): Nodo no disponible en DOM`);
+	// Debug: Mostrar cambios en containerWidth e isMeasuring
+	useEffect(() => {
+		gridLogger.debug(`🔧 Estado actualizado - containerWidth: ${containerWidth}, isMeasuring: ${isMeasuring}`);
+	}, [containerWidth, isMeasuring]);
+
+	// 🎯 Función simplificada para medición del contenedor cuando el hook falla
+	const emergencyMeasureContainer = useCallback((node: HTMLDivElement | null, strategy: string): boolean => {
+		if (!node) {
+			gridLogger.debug(`${strategy}: Nodo no disponible`);
 			return false;
 		}
 
-		const parent = node.parentElement;
-		if (!parent) {
-			gridLogger.warn(`⚠️ ${strategy} (intento ${attempt}): Sin elemento padre`);
-			return false;
-		}
-
-		const rect = node.getBoundingClientRect();
 		const offsetWidth = node.offsetWidth;
-		const clientWidth = node.clientWidth;
-		const scrollWidth = node.scrollWidth;
+		const rect = node.getBoundingClientRect();
 
-		// 📊 Diagnóstico detallado para debug
-		const parentRect = parent.getBoundingClientRect();
-		const parentComputedStyle = getComputedStyle(parent);
-		const nodeComputedStyle = getComputedStyle(node);
+		gridLogger.debug(`${strategy}: offsetWidth=${offsetWidth}, boundingWidth=${rect.width}`);
 
-		gridLogger.info(`📏 ${strategy} (intento ${attempt}) - Diagnóstico completo:`, {
-			node: {
-				tagName: node.tagName,
-				className: node.className,
-				offsetWidth,
-				clientWidth,
-				scrollWidth,
-				boundingWidth: rect.width,
-				display: nodeComputedStyle.display,
-				position: nodeComputedStyle.position,
-				visibility: nodeComputedStyle.visibility
-			},
-			parent: {
-				tagName: parent.tagName,
-				className: parent.className,
-				offsetWidth: parent.offsetWidth,
-				clientWidth: parent.clientWidth,
-				boundingWidth: parentRect.width,
-				display: parentComputedStyle.display,
-				position: parentComputedStyle.position,
-				visibility: parentComputedStyle.visibility
-			}
-		});
-
-		// 🎯 Validar que tenemos dimensiones válidas
-		if (offsetWidth > 0 && rect.width > 0) {
-			gridLogger.info(`✅ ${strategy} (intento ${attempt}): Medición exitosa - ${offsetWidth}px`);
+		if (offsetWidth > 0) {
+			gridLogger.info(`✅ ${strategy}: Medición exitosa - ${offsetWidth}px`);
+			setIsMeasuring(false);
+			setForceRender(prev => prev + 1); // Forzar re-render
 			return true;
 		}
 
-		gridLogger.warn(`⚠️ ${strategy} (intento ${attempt}): Dimensiones inválidas - offsetWidth: ${offsetWidth}px, boundingWidth: ${rect.width}px`);
 		return false;
 	}, []);
+	// 🔄 Sistema de intentos progresivos de emergencia
+	const attemptEmergencyMeasurement = useCallback((node: HTMLDivElement | null, attempt = 1) => {
+		const maxAttempts = 10;
+		const delayIncrement = 50;
 
-	// 🔄 Función recursiva para intentos progresivos de medición
-	const attemptMeasurement = useCallback((node: HTMLDivElement, attempt = 1) => {
-		if (attempt > MAX_MEASUREMENT_ATTEMPTS) {
-			gridLogger.error(`❌ Falló la medición después de ${MAX_MEASUREMENT_ATTEMPTS} intentos`);
+		if (!node || attempt > maxAttempts) {
+			gridLogger.warn(`⚠️ Máximo de intentos alcanzado (${maxAttempts})`);
 			setIsMeasuring(false);
 			return;
 		}
 
-		const strategy = `attempt-${attempt}`;
+		measurementAttemptsRef.current = attempt;
 
-		if (measureContainer(node, strategy, attempt)) {
-			// ✅ Medición exitosa - ejecutar callback del hook
-			if (parentCallbackRef) {
-				gridLogger.info('🎯 Ejecutando parentCallbackRef después de medición exitosa');
-				parentCallbackRef(node);
-			}
-			setIsMeasuring(false);
-			measurementAttemptsRef.current = 0;
-			return;
+		if (emergencyMeasureContainer(node, `Intento-${attempt}`)) {
+			return; // Éxito
 		}
 
-		// ⏳ Medición fallida - programar siguiente intento
-		const delay = attempt * MEASUREMENT_DELAY_INCREMENT;
-		gridLogger.info(`⏳ Programando siguiente intento de medición en ${delay}ms`);
-
+		// Programar siguiente intento con delay incremental
+		const delay = delayIncrement * attempt;
 		measurementTimeoutRef.current = setTimeout(() => {
-			if (node && document.body.contains(node)) {
-				attemptMeasurement(node, attempt + 1);
-			} else {
-				gridLogger.warn(`⚠️ Nodo desconectado durante intento ${attempt + 1}, cancelando medición`);
-				setIsMeasuring(false);
-			}
+			attemptEmergencyMeasurement(node, attempt + 1);
 		}, delay);
-	}, [measureContainer, parentCallbackRef]);
-
-	// 🔧 useLayoutEffect para iniciar medición cuando el nodo está disponible
+	}, [emergencyMeasureContainer]);	// 🔧 useLayoutEffect para el sistema de emergencia cuando containerWidth sigue siendo 0
 	useLayoutEffect(() => {
-		if (!containerNode) {
-			setIsMeasuring(false);
-			return;
-		}
+		gridLogger.debug(`🔧 useLayoutEffect ejecutado - containerWidth: ${containerWidth}, isMeasuring: ${isMeasuring}`);
 
-		// Limpiar timeout anterior si existe
-		if (measurementTimeoutRef.current) {
-			clearTimeout(measurementTimeoutRef.current);
-			measurementTimeoutRef.current = null;
-		}
+		// Solo activar el sistema de emergencia si containerWidth sigue siendo 0 después de un tiempo
+		const emergencyTimer = setTimeout(() => {
+			gridLogger.warn(`⏰ Timer de emergencia activado - containerWidth: ${containerWidth}, parentRef.current: ${!!parentRef.current}`);
 
-		gridLogger.info(`🔍 useLayoutEffect: Iniciando medición robusta para nodo ${containerNode.className}`);
-		setIsMeasuring(true);
-		measurementAttemptsRef.current = 0;
-
-		// Intentar medición inmediata primero
-		if (measureContainer(containerNode, 'immediate', 1)) {
-			if (parentCallbackRef) {
-				parentCallbackRef(containerNode);
+			if ((!containerWidth || containerWidth <= 0) && parentRef.current) {
+				gridLogger.warn('🚨 Activando sistema de medición de emergencia');
+				attemptEmergencyMeasurement(parentRef.current);
+			} else {
+				gridLogger.debug('✅ No se necesita sistema de emergencia');
 			}
-			setIsMeasuring(false);
-		} else {
-			// Si falla, iniciar intentos progresivos
-			requestAnimationFrame(() => {
-				if (containerNode && document.body.contains(containerNode)) {
-					attemptMeasurement(containerNode, 2);
-				}
-			});
-		}
+		}, 500); // Esperar 500ms antes de activar emergencia
 
-		// Cleanup al cambiar nodo
 		return () => {
+			clearTimeout(emergencyTimer);
 			if (measurementTimeoutRef.current) {
 				clearTimeout(measurementTimeoutRef.current);
-				measurementTimeoutRef.current = null;
 			}
-			setIsMeasuring(false);
 		};
-	}, [containerNode, measureContainer, attemptMeasurement, parentCallbackRef]);
+	}, [containerWidth, attemptEmergencyMeasurement, parentRef, isMeasuring]);
 
 	// 🧹 Cleanup general del componente
 	useEffect(() => {
@@ -305,23 +267,6 @@ const FileBrowserComponent = ({
 			}
 		};
 	}, []);
-
-	// Callback ref robusto que asigna el nodo e inicia el proceso de medición
-	const robustParentCallbackRef = useCallback((node: HTMLDivElement | null) => {
-		setContainerNode(node);
-		if (node) {
-			gridLogger.info('🔗 robustParentCallbackRef: Nodo asignado, iniciando proceso de medición');
-		} else {
-			gridLogger.info('🔗 robustParentCallbackRef: Nodo limpiado');
-			setIsMeasuring(false);
-		}
-	}, []);
-	// --- FIN callback ref robusto ---
-
-	// Mostrar indicador de medición en curso
-	if (isMeasuring) {
-		gridLogger.info('⏳ Medición en curso, mostrando indicador...');
-	}
 
 	// Resetear el flag de error cuando el containerWidth se vuelve válido
 	useEffect(() => {
@@ -336,7 +281,7 @@ const FileBrowserComponent = ({
 		items,
 		parentRef,
 		viewMode,
-		containerWidth,
+		containerWidth: containerWidth || 1200, // 🛡️ Fallback para evitar 0
 	});
 
 	// Efecto para actualizar la virtualización cuando cambie el ordenamiento
@@ -356,373 +301,218 @@ const FileBrowserComponent = ({
 
 		// Si la precarga global ya está completa, no hacemos nada
 		if (typeof window !== 'undefined' && window.entityPreloadComplete) {
-			gridLogger.info('✅ Entidades ya precargadas globalmente desde layout, omitiendo precarga desde FileBrowser');
+			gridLogger.debug('🔄 Precarga global ya completada, omitiendo precarga local');
+			entitiesPreloadedRef.current = true;
 			return;
 		}
 
-		// Si hay una precarga en progreso que lleva más de 5 segundos, asumimos que
-		// algo salió mal y la marcamos como completada para evitar bloqueos
+		// Verificar si hay una precarga en progreso
 		if (typeof window !== 'undefined' && window.entityPreloadInProgress) {
-			const preloadStartTime = window.entityPreloadStartTime || 0;
-			const now = Date.now();
-			if (now - preloadStartTime > 5000) {
+			gridLogger.debug('🔄 Precarga global en progreso, omitiendo precarga local');
+			return;
+		}
+
+		// Verificar si ha pasado demasiado tiempo desde el inicio de la precarga
+		if (typeof window !== 'undefined' && window.entityPreloadStartTime) {
+			const elapsed = Date.now() - window.entityPreloadStartTime;
+			if (elapsed > 5000) {
 				// 5 segundos
 				gridLogger.warn('⚠️ Detectada precarga bloqueada por más de 5 segundos, liberando precarga');
 				window.entityPreloadInProgress = false;
-				window.entityPreloadComplete = true;
-			}
-
-			if (window.entityPreloadInProgress) {
-				// Verificar si todavía está en progreso después de la posible liberación
-				gridLogger.info('⏳ Hay una precarga en progreso en otro componente, omitiendo precarga desde FileBrowser');
-				return;
+				window.entityPreloadStartTime = undefined;
 			}
 		}
 
-		entitiesPreloadedRef.current = true;
-		gridLogger.info('🚀 Iniciando precarga de entidades de respaldo desde FileBrowser...');
-
-		// Marcar que una precarga está en progreso y registrar el tiempo de inicio
-		if (typeof window !== 'undefined') {
-			window.entityPreloadInProgress = true;
-			window.entityPreloadStartTime = Date.now();
-
-			// Asegurar que entityPreloadInProgress se limpia después de un tiempo máximo
-			setTimeout(() => {
-				if (typeof window !== 'undefined' && window.entityPreloadInProgress && !window.entityPreloadComplete) {
-					gridLogger.warn('⚠️ Forzando finalización de precarga (timeout) para evitar bloqueo');
-					window.entityPreloadInProgress = false;
-					window.entityPreloadComplete = true;
-				}
-			}, 5000); // 5 segundos de timeout máximo (reducido de 10 a 5)
-		}
-
-		// Lista reducida de entidades esenciales a precargar
-		const essentialEntities = ['folders', 'tags', 'collections'];
-
-		// Precargar solo entidades esenciales para evitar bloqueos
-		const preloadEssentialEntities = async () => {
+		const preloadEntities = async () => {
 			try {
-				const results = await Promise.allSettled(
-					essentialEntities.map((entity) =>
-						loadEntityData(entity as any).catch((err) => {
-							gridLogger.warn(`⚠️ Error al precargar ${entity}:`, err);
-							return [];
-						})
-					)
-				);
+				gridLogger.debug('🔄 Iniciando precarga de entidades desde FileBrowser');
+				entitiesPreloadedRef.current = true;
 
-				// Informar sobre el resultado de la precarga
-				const succeeded = results.filter((r) => r.status === 'fulfilled').length;
-				const failed = results.filter((r) => r.status === 'rejected').length;
+				// Marcar precarga en progreso
+				if (typeof window !== 'undefined') {
+					window.entityPreloadInProgress = true;
+					window.entityPreloadStartTime = Date.now();
+				}
 
-				gridLogger.info(
-					`✅ Precarga de respaldo completada desde FileBrowser: ${succeeded} exitosas, ${failed} fallidas`
-				);
+				await loadEntityData('tags');
+				gridLogger.debug('✅ Precarga de entidades completada desde FileBrowser');
 
-				// Marcar globalmente que la precarga está completa
+				// Marcar precarga como completa
 				if (typeof window !== 'undefined') {
 					window.entityPreloadComplete = true;
 					window.entityPreloadInProgress = false;
+					window.entityPreloadStartTime = undefined;
 				}
 			} catch (error) {
-				gridLogger.error('❌ Error durante precarga de entidades:', error);
+				gridLogger.error('❌ Error en precarga de entidades desde FileBrowser:', error);
+				entitiesPreloadedRef.current = false;
 
-				// Limpiar el estado de precarga en progreso en caso de error
+				// Liberar flag de precarga en progreso
 				if (typeof window !== 'undefined') {
 					window.entityPreloadInProgress = false;
-					window.entityPreloadComplete = true; // Marcamos como completa para evitar bloqueos
+					window.entityPreloadStartTime = undefined;
 				}
 			}
 		};
 
-		// Ejecutar la precarga en segundo plano
-		setTimeout(() => {
-			preloadEssentialEntities().catch((error) => {
-				gridLogger.error('❌ Error no capturado en precarga:', error);
-				if (typeof window !== 'undefined') {
-					window.entityPreloadInProgress = false;
-					window.entityPreloadComplete = true;
+		preloadEntities();
+	}, [loadEntityData]);	// Función memoizada para mapear FileItem a ImageItem
+	const mapFileItemToImageItem = useCallback((fileItem: FileItem): ImageItem => {
+		// Obtener dimensiones del resource store si están disponibles
+		const resource = useImageResources.getState().resources.get(fileItem.id);
+
+		let width = resource?.dimensions?.width;
+		let height = resource?.dimensions?.height;
+
+		// Si no hay dimensiones en resource, intentar desde metadata
+		if ((!width || !height) && fileItem.metadata) {
+			try {
+				const metadataObj =
+					typeof fileItem.metadata === 'string' ? JSON.parse(fileItem.metadata) : fileItem.metadata;
+				if (metadataObj?.dimensions) {
+					width = metadataObj.dimensions.width;
+					height = metadataObj.dimensions.height;
 				}
-			});
-		}, 100);
-
-		// Limpiar estados si el componente se desmonta durante la precarga
-		return () => {
-			if (typeof window !== 'undefined' && !window.entityPreloadComplete) {
-				window.entityPreloadInProgress = false;
+			} catch (error) {
+				// Ignorar errores de parsing de metadata
 			}
-		};
-	}, [loadEntityData]);
-
-	// Función para depurar los items recibidos sin errores de tipo
-	const logItemInfo = (item: any) => {
-		return {
-			id: item.id,
-			name: item.name,
-			type: item.type,
-			thumbnail: item.thumbnail ? 'Disponible' : 'No disponible',
-			src: item.src || 'No disponible',
-			path: item.path,
-		};
-	};
-
-	// Función memoizada para mapear FileItem a ImageItem
-	const mapFileItemToImageItem = useCallback((fileItem: FileItem): any => {
-		try {
-			// Crear una versión segura para acceder a propiedades que podrían no existir
-			const safeItem = fileItem as any;
-
-			// Verificar si estamos lidiando con un ReactPromise o un objeto Promise
-			let processedItem = safeItem;
-			if (
-				fileItem &&
-				// ReactPromise tiene 'value', 'status', etc.
-				((typeof fileItem === 'object' && 'value' in fileItem && 'status' in fileItem) ||
-					// Promise regular
-					fileItem instanceof Promise ||
-					// Promesas serializadas como objetos
-					(typeof fileItem === 'object' &&
-						fileItem !== null &&
-						'then' in fileItem &&
-						typeof fileItem.then === 'function'))
-			) {
-				try {
-					gridLogger.warn('⚠️ Detectado ReactPromise como item, intentando extraer el valor:', fileItem);
-
-					// Para ReactPromise podemos intentar obtener el valor directamente
-					if ('value' in fileItem && typeof fileItem.value === 'string') {
-						try {
-							// Intentar parsear el valor como JSON
-							const parsedItem = JSON.parse(fileItem.value);
-							if (parsedItem && typeof parsedItem === 'object' && 'id' in parsedItem) {
-								processedItem = parsedItem;
-							}
-						} catch (parseError) {
-							gridLogger.error('❌ Error al parsear el valor del ReactPromise:', parseError);
-						}
-					}
-				} catch (promiseError) {
-					gridLogger.error('❌ Error al procesar Promise/ReactPromise:', promiseError);
-				}
-			}
-
-			// Obtener el recurso en vivo desde el store directamente, usando getState().resources
-			const resource = useImageResources.getState().resources.get(processedItem.id);
-
-			// Extraer información de dimensiones del item o metadata de manera segura
-			let width = processedItem.width;
-			let height = processedItem.height;
-
-			// Si no hay dimensiones en el item directamente, intentar extraerlas del metadata
-			if ((!width || !height) && processedItem.metadata) {
-				try {
-					const metadataObj =
-						typeof processedItem.metadata === 'string' ? JSON.parse(processedItem.metadata) : processedItem.metadata;
-
-					if (metadataObj?.dimensions) {
-						width = metadataObj.dimensions.width;
-						height = metadataObj.dimensions.height;
-					}
-				} catch (error) {
-					gridLogger.warn(`⚠️ Error al extraer dimensiones del metadata para ${processedItem.id}:`, error);
-				}
-			}
-
-			// Usar dimensiones del resource si están disponibles y no se encontraron otras
-			if ((!width || !height) && resource?.dimensions) {
-				width = resource.dimensions.width;
-				height = resource.dimensions.height;
-			}
-
-			// Determinar la mejor URL de miniatura disponible de manera segura
-			let thumbnailUrl: string | null = null;
-
-			// 1. Preferir miniatura del item si existe directamente
-			if (processedItem.thumbnail && typeof processedItem.thumbnail === 'string') {
-				thumbnailUrl = processedItem.thumbnail;
-			}
-			// 2. Intentar usar imageUrl si está disponible
-			else if (processedItem.imageUrl && typeof processedItem.imageUrl === 'string') {
-				thumbnailUrl = processedItem.imageUrl;
-			}
-			// 3. Intentar usar src si está disponible
-			else if (processedItem.src && typeof processedItem.src === 'string') {
-				thumbnailUrl = processedItem.src;
-			}
-			// 4. Usar recurso cargado desde el store
-			else if (resource?.thumbnail) {
-				thumbnailUrl = resource.thumbnail;
-			}
-			// 5. Como fallback final, construir URL basada en ID
-			else if (processedItem.id) {
-				thumbnailUrl = `/api/images/${processedItem.id}/thumbnail`;
-			}
-
-			// ✨ Log para depuración
-			gridLogger.debug(
-				`Mapped item: ${processedItem.id}, finalSrc: ${thumbnailUrl}, dimensions: ${width || 0}x${height || 0}`
-			);
-
-			// Crear un objeto ImageItem que incluya TODAS las propiedades requeridas
-			// tanto por FileViewer como por useDetailsPanel
-			return {
-				// Propiedades básicas
-				id: processedItem.id,
-				name: processedItem.name,
-				type: processedItem.type || 'image',
-				path: processedItem.path,
-				size: processedItem.size,
-
-				// Dimensiones
-				width: width || 0,
-				height: height || 0,
-
-				// Propiedades de formato
-				mimeType: processedItem.mimeType,
-				format: 'jpeg', // Valor por defecto necesario para la interfaz
-				originalPath: processedItem.path, // Requerido por algunas interfaces
-
-				// Datos para visualización
-				metadata:
-					typeof processedItem.metadata === 'string'
-						? processedItem.metadata
-						: JSON.stringify(processedItem.metadata || {}),
-				thumbnail: thumbnailUrl,
-				url: thumbnailUrl,
-				src: thumbnailUrl,
-				alt: processedItem.name || 'Image',
-
-				// Propiedades adicionales que podrían ser requeridas
-				hash: processedItem.hash || '',
-				status: 'completed',
-				quality: 'high',
-				optimized: true,
-				hasThumbnails: !!thumbnailUrl,
-				isPublic: processedItem.isPublic || false,
-				isFavorite: processedItem.isFavorite || false,
-				uploadedAt: processedItem.createdAt || new Date(),
-				createdAt: processedItem.createdAt || new Date(),
-				updatedAt: processedItem.updatedAt || new Date(),
-
-				// Metadatos procesados
-				parsedMetadata: {
-					dimensions: {
-						width: width || 0,
-						height: height || 0,
-					},
-				},
-			};
-		} catch (error) {
-			// En caso de error, devolver un objeto mínimo pero válido
-			gridLogger.error(`❌ Error al mapear FileItem a ImageItem para ${fileItem?.id || 'unknown'}:`, error);
-
-			return {
-				id: fileItem?.id || `error-${Date.now()}`,
-				name: fileItem?.name || 'Error',
-				type: 'image',
-				path: fileItem?.path || '',
-				size: fileItem?.size || 0,
-				width: 0,
-				height: 0,
-				originalPath: fileItem?.path || '',
-				format: 'jpeg',
-				hash: '',
-				metadata: '{}',
-				status: 'completed',
-				quality: 'high',
-				optimized: false,
-				hasThumbnails: false,
-				isFavorite: false,
-				isPublic: false,
-				uploadedAt: new Date(),
-				thumbnail: null,
-				url: null,
-				src: null,
-				alt: 'Error',
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				parsedMetadata: { dimensions: { width: 0, height: 0 } },
-			};
 		}
+
+		// Usar dimensiones del resource si están disponibles y no se encontraron otras
+		if ((!width || !height) && resource?.dimensions) {
+			width = resource.dimensions.width;
+			height = resource.dimensions.height;
+		}
+
+		// Determinar la URL de la miniatura en orden de prioridad
+		let thumbnailUrl: string | null = null;
+
+		// 1. Usar thumbnail del resource store si está disponible
+		if (resource?.thumbnail && typeof resource.thumbnail === 'string') {
+			thumbnailUrl = resource.thumbnail;
+		}
+		// 2. Usar imageUrl si está disponible (FileItem puede tener imageUrl)
+		else if ('imageUrl' in fileItem && fileItem.imageUrl && typeof fileItem.imageUrl === 'string') {
+			thumbnailUrl = fileItem.imageUrl;
+		}
+		// 3. Construir URL de API si tenemos el path
+		else if (fileItem.path) {
+			thumbnailUrl = `/api/images/${fileItem.id}`;
+		}
+
+		gridLogger.debug(
+			`Mapped item: ${fileItem.id}, finalSrc: ${thumbnailUrl}, dimensions: ${width || 0}x${height || 0}`
+		);
+
+		// Crear un objeto ImageItem compatible con FileViewer
+		return {
+			id: fileItem.id,
+			name: fileItem.name,
+			src: thumbnailUrl,
+			width: width || null,
+			height: height || null,
+			thumbnail: thumbnailUrl,
+			type: fileItem.type || 'image',
+			path: fileItem.path || '',
+			size: fileItem.size || 0,
+			url: thumbnailUrl || undefined,
+			alt: fileItem.name,
+			mimeType: fileItem.type,
+			metadata: fileItem.metadata,
+			parsedMetadata: fileItem.metadata ? (() => {
+				try {
+					const parsed = typeof fileItem.metadata === 'string' ? JSON.parse(fileItem.metadata) : fileItem.metadata;
+					return {
+						dimensions: parsed?.dimensions || { width: width || 0, height: height || 0 },
+						mimeType: fileItem.type,
+						isLocal: true
+					};
+				} catch {
+					return {
+						dimensions: { width: width || 0, height: height || 0 },
+						mimeType: fileItem.type,
+						isLocal: true
+					};
+				}
+			})() : undefined
+		} as ImageItem;
 	}, []);
 
 	// Mantenemos una referencia al último array de processedItems para la estabilidad referencial de las dimensiones
 	const processedItemsRef = useRef<ImageItem[]>([]);
-
 	// Mapeamos los items de entrada para pasarlos al virtualizador y las vistas
 	const processedItems = useMemo(
 		() => items.map((item) => mapFileItemToImageItem(item)),
-		[items, mapFileItemToImageItem] // ✨ processedItems se recalcula si los items de entrada o la función de mapeo cambian.
+		[items, mapFileItemToImageItem]
 	);
 
 	// Actualizar la referencia del último array de processedItems
 	useEffect(() => {
 		processedItemsRef.current = processedItems;
-	}, [processedItems]);
-
-	// Hook para manejar la visibilidad del panel de detalles y el item seleccionado
+	}, [processedItems]);	// Hook para manejar la visibilidad del panel de detalles y el item seleccionado
 	useEffect(() => {
-		// gridLogger.debug('Selected items changed:', selectedItems.length); // Comentado
-
-		// Si hay uno o más ítems seleccionados, muestra el panel y actualiza los ítems seleccionados.
 		if (selectedItems.length > 0) {
 			setVisible(true);
-
-			// Convertir los items seleccionados a ImageItems para satisfacer la interfaz
-			const convertedItems = selectedItems.map((item) => {
-				// Usar el mapeo existente para convertir FileItem a ImageItem
-				return mapFileItemToImageItem(item);
-			});
-
-			setSelectedItems(convertedItems);
+			// Simplificar los items para el panel de detalles - solo usar las propiedades básicas
+			const simplifiedItems = selectedItems.map((item) => ({
+				id: item.id,
+				name: item.name,
+				type: item.type || 'image',
+				path: item.path || '',
+				size: item.size || 0,
+				metadata: item.metadata
+			}));
+			setSelectedItems(simplifiedItems as any); // Usar 'as any' temporalmente para evitar conflictos de tipos
 		} else {
-			// gridLogger.debug('No items selected, hiding details panel.'); // Comentado
 			setVisible(false);
 			setSelectedItems([]);
 		}
-	}, [selectedItems, setVisible, setSelectedItems, mapFileItemToImageItem]);
+	}, [selectedItems, setVisible, setSelectedItems]);
 
 	// Efecto para la carga de miniaturas cuando los items visibles cambian
 	useEffect(() => {
-		// 🛡️ Protección: Validar virtualizer y containerWidth antes de operar
-		if (!virtualizer || typeof virtualizer.getVirtualItems !== 'function') {
+		// Solo proceder si tenemos un virtualizer válido y containerWidth
+		if (!virtualizer || !virtualizer.getVirtualItems || typeof containerWidth !== 'number') {
 			gridLogger.error('❌ virtualizer no está inicializado o no tiene getVirtualItems.');
 			return;
 		}
-		if (!containerWidth || Number.isNaN(containerWidth) || containerWidth <= 0) {
+
+		if (!containerWidth || containerWidth <= 0) {
 			gridLogger.warn('⚠️ containerWidth inválido, omitiendo carga de miniaturas.');
 			return;
 		}
+
 		const virtualItems = virtualizer.getVirtualItems();
 		if (!Array.isArray(virtualItems) || virtualItems.length === 0) {
 			gridLogger.warn('⚠️ virtualItems vacío o no es array, omitiendo carga de miniaturas.');
 			return;
 		}
+
 		// Obtener los ítems actualmente visibles del virtualizador, asegurándonos de que son `FileItem`
 		const currentVisibleItems = virtualItems
 			.map((virtualItem) => items[virtualItem.index])
 			.filter((item): item is FileItem => !!item); // Filtrar nulos/undefined y asegurar el tipo
 
-		if (currentVisibleItems.length === 0) {
-			gridLogger.warn('⚠️ No hay items visibles para cargar miniaturas.');
-			return;
+		// Cargar miniaturas para los items visibles usando la función debounced
+		if (currentVisibleItems.length > 0) {
+			debouncedLoadThumbnails(currentVisibleItems);
 		}
-
-		// Añadir log para depuración
-		gridLogger.debug(`🔄 Cargando miniaturas para ${currentVisibleItems.length} items visibles`);
-
-		// Llamar a la función de carga de miniaturas
-		debouncedLoadThumbnails(currentVisibleItems); // Pasar los ítems visibles aquí
-	}, [debouncedLoadThumbnails, virtualizer, items, containerWidth]); // Añadir containerWidth a las dependencias
+	}, [debouncedLoadThumbnails, virtualizer, items, containerWidth]);
 
 	// Función para manejar el clic en un ítem (simple click)
 	const handleItemClick = useCallback(
 		(item: FileItem) => {
-			if (selectedFileIds.length > 0 && !selectedFileIds.includes(item.id)) {
+			if (selectedFileIds.includes(item.id)) {
+				// Si ya está seleccionado, deseleccionar todo y seleccionar solo este
 				deselectAllFiles();
+				selectFile(item.id);
+			} else {
+				// Si no está seleccionado, deseleccionar todo y seleccionar este
+				deselectAllFiles();
+				selectFile(item.id);
 			}
-			selectFile(item.id);
+
+			// Llamar al callback externo si existe
 			if (onItemClick) {
 				onItemClick(item);
 			}
@@ -733,23 +523,22 @@ const FileBrowserComponent = ({
 	// Función para manejar el doble clic en un ítem
 	const handleItemDoubleClick = useCallback(
 		(item: FileItem) => {
-			// gridLogger.info(`Doble click en ítem: ${item.name} (ID: ${item.id})`); // Comentado
+			// Llamar al callback externo si existe
 			if (onItemDoubleClick) {
 				onItemDoubleClick(item);
-			}
-
-			// Abrir el visor de imágenes si es una imagen y tiene una URL de miniatura válida
-			if (item.type === 'image') {
+			} else {
+				// Comportamiento por defecto: abrir en el visor de imágenes
 				// gridLogger.debug('Abriendo visor de imágenes...'); // Comentado
+
+				// Filtrar solo las imágenes válidas para el visor
 				const filteredImages = processedItems.filter((img) => img.src?.startsWith('/api/images/')) as ImageItem[];
-				setViewerImages(filteredImages);
 				const initialIndex = filteredImages.findIndex((img) => img.id === item.id);
+
 				if (initialIndex !== -1) {
+					setViewerImages(filteredImages);
 					setViewerInitialIndex(initialIndex);
 					setIsViewerOpen(true);
 				}
-			} else {
-				// gridLogger.debug('El doble clic en el ítem no es una imagen o no es válida para el visor.'); // Comentado
 			}
 		},
 		[onItemDoubleClick, processedItems]
@@ -758,6 +547,7 @@ const FileBrowserComponent = ({
 	// Función para manejar el clic derecho y abrir el menú contextual
 	const handleContextMenu = useCallback(
 		(item: FileItem) => {
+			// Asegurar que el item esté seleccionado para el menú contextual
 			if (!selectedFileIds.includes(item.id)) {
 				deselectAllFiles();
 				selectFile(item.id);
@@ -771,6 +561,7 @@ const FileBrowserComponent = ({
 		toggleSelectFile(item.id);
 	}, [toggleSelectFile]);
 
+	// Handler para las acciones del menú contextual
 	const handleMenuAction = useCallback(
 		(action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
 			handleContextAction(action, item, data, handleItemDoubleClick, handleToggleSelectFile);
@@ -780,13 +571,7 @@ const FileBrowserComponent = ({
 
 	const ViewComponent = VIEW_COMPONENT_MAP[viewMode as keyof typeof VIEW_COMPONENT_MAP];
 
-	//gridLogger.debug('FileBrowser renderizado con:', { // Comentado
-	// 	itemsCount: items.length,
-	// 	viewMode,
-	// 	isResizing,
-	// 	selectedItemsCount: selectedItems.length,
-	// });
-
+	// 🛡️ Validaciones de seguridad antes del render
 	if (!items || items.length === 0 || !processedItems || processedItems.length === 0) {
 		gridLogger.warn('⚠️ No hay items válidos para renderizar el grid.');
 		return (
@@ -797,9 +582,16 @@ const FileBrowserComponent = ({
 			/>
 		);
 	}
-
 	// 🛡️ Protección robusta: fallback visual y logs controlados para containerWidth inválido
-	if (isMeasuring || !containerWidth || Number.isNaN(containerWidth) || containerWidth <= 0) {
+	if ((isMeasuring && measurementAttemptsRef.current < MAX_MEASUREMENT_ATTEMPTS) || !containerWidth || Number.isNaN(containerWidth) || containerWidth <= 0) {
+		gridLogger.warn('🚨 DEBUGGING - Activando fallback visual:', {
+			isMeasuring,
+			measurementAttempts: measurementAttemptsRef.current,
+			maxAttempts: MAX_MEASUREMENT_ATTEMPTS,
+			containerWidth,
+			isNaN: Number.isNaN(containerWidth)
+		});
+
 		// Diagnóstico detallado del contenedor padre
 		const realWidth = parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.offsetWidth : 'N/A';
 		const realHeight = parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.offsetHeight : 'N/A';
@@ -848,7 +640,12 @@ const FileBrowserComponent = ({
 						className="mt-2 px-3 py-1 rounded bg-muted text-xs hover:bg-accent border"
 						onClick={() => {
 							hasLoggedWidthErrorRef.current = false; // Permitir re-log si vuelve a fallar
-							forceRecalcWidth();
+							measurementAttemptsRef.current = 0; // Reiniciar contador
+							setIsMeasuring(true); // Iniciar nuevo ciclo de medición
+							forceRecalcWidth(); // Intentar recálculo desde useGridView
+							if (parentRef.current) {
+								attemptEmergencyMeasurement(parentRef.current); // Y también desde el sistema de emergencia
+							}
 						}}
 					>
 						Reintentar cálculo
@@ -857,8 +654,6 @@ const FileBrowserComponent = ({
 			</div>
 		);
 	}
-
-	// 🔧 CORREGIDO: El callback ref ahora maneja automáticamente el cálculo del ancho, no necesitamos forzarlo manualmente
 
 	// Protección extra: si el virtualizer no está bien inicializado, evitar renderizar el grid
 	if (!virtualizer || typeof virtualizer.getTotalSize !== 'function' || Number.isNaN(virtualizer.getTotalSize()) || virtualizer.getTotalSize() < 0) {
@@ -872,47 +667,48 @@ const FileBrowserComponent = ({
 		);
 	}
 
-	// Aquí puedes decidir qué vista renderizar basándote en viewMode
+	// 🎯 RENDER PRINCIPAL - Aquí el containerWidth ya es válido
 	return (
 		<div
-			// 🔧 Usar el callback ref robusto que asegura el cálculo inicial
-			ref={robustParentCallbackRef}
-			className={cn(
-				'relative flex-1 flex flex-col h-full overflow-hidden',
-				isTransitioning && 'pointer-events-none opacity-50'
+			ref={parentCallbackRef} // 🔧 Usar el callback ref del hook para configurar ResizeObserver
+			className="h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden"
+		>			{/* Visor de imágenes */}
+			{isViewerOpen && (
+				<FileViewer
+					isOpen={isViewerOpen}
+					images={viewerImages}
+					initialIndex={viewerInitialIndex}
+					onClose={() => setIsViewerOpen(false)}
+				/>
 			)}
-		>
+
 			<div onScroll={handleScroll} className="h-full overflow-y-auto scroll-smooth">
 				<div
-					className="relative w-full p-4"
 					style={{
-						height: virtualizer.getTotalSize(),
+						height: `${virtualizer.getTotalSize()}px`,
+						width: '100%',
+						position: 'relative',
 					}}
 				>
 					{virtualizer.getVirtualItems().map((virtualItem) => {
-						const originalItem = items[virtualItem.index]; // Este es el FileItem original
-						const processedItem = processedItems[virtualItem.index]; // Este es el ImageItem procesado
+						const originalItem = items[virtualItem.index];
+						const processedItem = processedItems[virtualItem.index];
 
-						// Asegúrate de que el item exista antes de intentar renderizarlo
 						if (!originalItem || !processedItem) {
-							// gridLogger.warn(`Skipping render for undefined item at index ${virtualItem.index}`); // Comentado
 							return null;
 						}
 
-						const isSelected = selectedItems.some((selected) => selected.id === originalItem.id);
+						const isSelected = selectedFileIds.includes(originalItem.id);
 						const currentGap = GRID_CONFIG.gap[viewMode as keyof GridGaps];
-						const xOffset = (virtualItem.index % columns) * (itemSize + currentGap);
-
-						const commonProps = {
-							item: processedItem, // Pasar ImageItem a la vista
+						const xOffset = (virtualItem.index % columns) * (itemSize + currentGap); const commonProps = {
+							item: originalItem, // Usar FileItem directamente en lugar de ImageItem
 							isSelected,
-							onClick: () => handleItemClick(originalItem), // Pasar FileItem a los manejadores
+							onClick: () => handleItemClick(originalItem),
 							onDoubleClick: () => handleItemDoubleClick(originalItem),
 							onContextMenu: () => handleContextMenu(originalItem),
 							onContextAction: handleMenuAction,
-							itemSize: itemSize, // Añadimos explícitamente itemSize que es requerido por GridViewProps
+							itemSize: itemSize,
 							style: {
-								// Solo una vez position/top/left
 								position: 'absolute' as const,
 								top: 0,
 								left: 0,
@@ -922,26 +718,13 @@ const FileBrowserComponent = ({
 							},
 						};
 
-						return <ViewComponent key={processedItem.id} {...commonProps} />;
+						return <ViewComponent key={`${originalItem.id}-${virtualItem.index}`} {...commonProps} />;
 					})}
-					{loadMoreItems && (
-						<div ref={loadMoreRef} className="h-1 w-full" /> // Elemento sentinel para cargar más
-					)}
 				</div>
-			</div>
 
-			{isViewerOpen && (
-				<FileViewer
-					images={viewerImages}
-					initialIndex={viewerInitialIndex}
-					isOpen={isViewerOpen}
-					onClose={() => {
-						setIsViewerOpen(false);
-						setViewerImages([]);
-						setViewerInitialIndex(0);
-					}}
-				/>
-			)}
+				{/* Elemento para scroll infinito */}
+				{loadMoreItems && <div ref={loadMoreRef} className="h-4" />}
+			</div>
 		</div>
 	);
 };

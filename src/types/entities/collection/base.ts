@@ -3,13 +3,22 @@
  * @module types/entities/collection/base
  */
 
-import type { Collection as PrismaCollection } from '@prisma/client';
-import type { CollectionEdition, CollectionFilter } from './types';
-
 /**
- * Tipo base para Collection, extendido directamente del tipo Prisma
+ * 📚 Tipo base para Collection, solo campos canónicos y serializables
  */
-export type CollectionBase = PrismaCollection;
+export interface CollectionBase {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	category?: string;
+	imageCount?: number;
+	filters?: string;
+	sortBy?: string;
+	editions?: string;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
 
 /**
  * Resumen básico de una colección para listados
@@ -26,19 +35,18 @@ export interface CollectionSummary {
 /**
  * Representación completa de la colección con campos JSON deserializados
  */
-export interface CollectionComplete extends Omit<PrismaCollection, 'filters' | 'sortBy' | 'editions'> {
-	/**
-	 * Filtros deserializados como un array de objetos
-	 */
-	filters: CollectionFilter[];
-
-	/**
-	 * Criterio de ordenación deserializado como objeto
-	 */
+export interface CollectionComplete {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	category?: string;
+	imageCount?: number;
+	filters: any[];
 	sortBy: any;
-
-	/**
-	 * Ediciones deserializadas como array de objetos
-	 */
-	editions: CollectionEdition[];
+	editions: any[];
+	createdAt?: Date;
+	updatedAt?: Date;
 }
+
+// ✅ CollectionBase ahora es seguro y serializable para frontend/backend.

@@ -1,17 +1,27 @@
 /**
- * @file Tipos base para la entidad Tag derivados del modelo Prisma
+ * @file Tipos base para la entidad Tag
  * @module types/entities/tag/base
  */
 
-import type { Tag as PrismaTag } from '@prisma/client';
-
 /**
- * Tipo base para Tag derivado directamente del tipo Prisma
+ * 🏷️ Tipo base para Tag, solo campos canónicos y serializables
  */
-export type TagBase = PrismaTag;
+export interface TagBase {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
 
 /**
- * Interfaz para crear una nueva etiqueta
+ * Datos para crear una etiqueta
  */
 export interface TagCreateInput {
 	name: string;
@@ -25,7 +35,7 @@ export interface TagCreateInput {
 }
 
 /**
- * Interfaz para actualizar una etiqueta existente
+ * Datos para actualizar una etiqueta
  */
 export interface TagUpdateInput {
 	name?: string;
@@ -37,3 +47,5 @@ export interface TagUpdateInput {
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 }
+
+// ✅ TagBase ahora es seguro y serializable para frontend/backend.

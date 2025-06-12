@@ -1,15 +1,27 @@
-import type { Prisma } from '@prisma/client';
-import type { EntityType } from '../entities';
-
 /**
- * Tipo base para Prompt derivado del schema de Prisma
+ * 💬 Tipo base para Prompt, solo campos canónicos y serializables
  */
-export type PromptBase = Prisma.PromptGetPayload<{
-	include: { _count: true };
-}>;
+export interface PromptBase {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	content?: string;
+	category?: string;
+	parameters?: string;
+	tags?: string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	groupIds?: string[];
+	propertyIds?: string[];
+	wildcardIds?: string[];
+	createdAt?: Date;
+	updatedAt?: Date;
+}
 
 /**
- * Interfaz para crear un nuevo prompt
+ * Datos para crear un prompt
  */
 export interface PromptCreateInput {
 	name: string;
@@ -28,7 +40,7 @@ export interface PromptCreateInput {
 }
 
 /**
- * Interfaz para actualizar un prompt existente
+ * Datos para actualizar un prompt
  */
 export interface PromptUpdateInput {
 	id: string;
@@ -48,32 +60,12 @@ export interface PromptUpdateInput {
 }
 
 /**
- * Tipo para la relación de prompt con otras entidades
+ * Relación de prompt con otras entidades
  */
 export interface PromptRelation {
 	entityId: string;
-	entityType: EntityType;
+	entityType: string;
 	promptId: string;
 }
 
-/**
- * Interfaz para estadísticas de un prompt
- */
-export interface PromptStats {
-	characters: number;
-	places: number;
-	worldItems: number;
-	notes: number;
-	concepts: number;
-	images: number;
-	groups: number;
-	properties: number;
-	wildcards: number;
-}
-
-/**
- * Interfaz para prompt con estadísticas incluidas
- */
-export interface PromptWithStats extends PromptBase {
-	_count: PromptStats;
-}
+// ✅ PromptBase ahora es seguro y serializable para frontend/backend.

@@ -1,4 +1,4 @@
-# 🔧 FileBrowser containerWidth Fix - Reporte Final
+# 🔧 FileBrowser containerWidth Fix - Reporte Final ✅ COMPLETADO
 
 ## 📋 Problema Original
 
@@ -8,27 +8,102 @@ Este error aparecía cuando se navegaba a una carpeta (via FolderContentView) po
 
 ## 🎯 Soluciones Implementadas
 
-### 1. **Callback Ref Multi-Estrategia** ✅
+### 1. **Sistema de Medición Robusta** ✅
 
-Implementé un `robustParentCallbackRef` en FileBrowser que utiliza múltiples estrategias para asegurar el cálculo del ancho:
+Implementé un sistema multi-estrategia en FileBrowser para asegurar el cálculo del ancho:
 
 ```typescript
-// 1. Inmediato - verifica si ya tiene dimensiones
-const immediateWidth = node.offsetWidth;
+// 🎯 Función simplificada para medición del contenedor cuando el hook falla
+const emergencyMeasureContainer = useCallback((node: HTMLDivElement | null, strategy: string): boolean => {
+ if (!node) {
+  gridLogger.debug(`${strategy}: Nodo no disponible`);
+  return false;
+ }
 
-// 2. RequestAnimationFrame - después del próximo repaint
-requestAnimationFrame(() => { /* calcular ancho */ });
+ const offsetWidth = node.offsetWidth;
+ const rect = node.getBoundingClientRect();
 
-// 3. Timeout - después de que el CSS se aplique (100ms)
-setTimeout(() => { /* calcular ancho */ }, 100);
+ gridLogger.debug(`${strategy}: offsetWidth=${offsetWidth}, boundingWidth=${rect.width}`);
 
-// 4. IntersectionObserver - cuando el elemento es visible
-const intersectionObserver = new IntersectionObserver(/* ... */);
+ if (offsetWidth > 0) {
+  gridLogger.info(`✅ ${strategy}: Medición exitosa - ${offsetWidth}px`);
+  setIsMeasuring(false);
+  setForceRender(prev => prev + 1); // Forzar re-render
+  return true;
+ }
+
+ return false;
+}, []);
+
+// 🔄 Sistema de intentos progresivos de emergencia
+const attemptEmergencyMeasurement = useCallback((node: HTMLDivElement | null, attempt = 1) => {
+ const maxAttempts = 10;
+ const delayIncrement = 50;
+
+ if (!node || attempt > maxAttempts) {
+  gridLogger.warn(`⚠️ Máximo de intentos alcanzado (${maxAttempts})`);
+  setIsMeasuring(false);
+  return;
+ }
+
+ measurementAttemptsRef.current = attempt;
+
+ if (emergencyMeasureContainer(node, `Intento-${attempt}`)) {
+  return; // Éxito
+ }
+
+ // Programar siguiente intento con delay incremental
+ const delay = delayIncrement * attempt;
+ measurementTimeoutRef.current = setTimeout(() => {
+  attemptEmergencyMeasurement(node, attempt + 1);
+ }, delay);
+}, [emergencyMeasureContainer]);
 ```
 
-### 2. **Cálculo Agresivo en useGridView Hook** ✅
+### 2. **Feedback Visual Durante Medición** ✅
 
-Mejoré el `parentCallbackRef` en `useGridView` para ser más agresivo en el cálculo inicial:
+Mejoré la UX durante la medición del contenedor:
+
+```typescript
+// Mostrar Skeleton y FlickeringGrid como feedback visual mientras se calcula el ancho
+return (
+ <div className="flex flex-col items-center justify-center h-full w-full gap-4">
+  <div className="w-full max-w-5xl h-72 flex items-center justify-center relative">
+   {/* Skeleton animado para simular el grid */}
+   <Skeleton className="w-full h-full rounded-xl" />
+   <div className="absolute inset-0 pointer-events-none opacity-80">
+    <FlickeringGrid squareSize={16} gridGap={12} maxOpacity={0.18} />
+   </div>
+  </div>
+  <div className="text-xs text-muted-foreground text-center">
+   {statusMessage}<br />
+   <code>{detailMessage}</code><br />
+   <code>ancho real del div padre: {realWidth}</code>
+  </div>
+  {!isMeasuring && (
+   <button
+    type="button"
+    className="mt-2 px-3 py-1 rounded bg-muted text-xs hover:bg-accent border"
+    onClick={() => {
+     hasLoggedWidthErrorRef.current = false; // Permitir re-log si vuelve a fallar
+     measurementAttemptsRef.current = 0; // Reiniciar contador
+     setIsMeasuring(true); // Iniciar nuevo ciclo de medición
+     forceRecalcWidth(); // Intentar recálculo desde useGridView
+     if (parentRef.current) {
+      attemptEmergencyMeasurement(parentRef.current); // Y también desde el sistema de emergencia
+     }
+    }}
+   >
+    Reintentar cálculo
+   </button>
+  )}
+ </div>
+);
+```
+
+### 3. **Corrección de Errores TypeScript** ✅
+
+Solucioné los problemas de tipos en el FileBrowser:
 
 ```typescript
 const calculateInitialWidth = () => {

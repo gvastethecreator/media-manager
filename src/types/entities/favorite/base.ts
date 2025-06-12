@@ -4,16 +4,16 @@
  */
 
 /**
- * Tipo base para Favorite derivado directamente de Prisma
+ * ⭐ Tipo base para Favorite, solo campos canónicos y serializables
  */
-export type FavoriteBase = {
+export interface FavoriteBase {
 	id: string;
 	entityId: string;
 	entityType: string;
 	userId?: string;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 /**
  * Enum para los tipos de entidades que pueden ser favoritas
@@ -59,14 +59,6 @@ export interface FavoriteFilters {
 	limit?: number;
 	offset?: number;
 	sort?: 'createdAt' | 'updatedAt';
-	order?: 'asc' | 'desc';
 }
 
-/**
- * Respuesta para listado de favoritos
- */
-export interface FavoriteListResponse {
-	items: FavoriteBase[];
-	total: number;
-	hasMore: boolean;
-}
+// ✅ FavoriteBase ahora es seguro y serializable para frontend/backend.

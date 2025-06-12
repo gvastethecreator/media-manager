@@ -2,7 +2,7 @@
 
 import { reindexFolder, scanFolderAction } from '@/app/actions/folders';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { FileBrowser } from '@/components/features/file-browser';
+import { FileBrowser2 } from '@/components/features/file-browser/file-browser-2';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 // Usar el hook del store de carpetas para mantener consistencia con FoldersView
@@ -10,11 +10,29 @@ import { useFolder } from '@/hooks/folder/use-folder';
 import { useFolderImages } from '@/hooks/use-folder-images';
 import { folderResponseCache } from '@/lib/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { FileItem, FileProcessingStatus, FileType } from '@/types/file-item';
 import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
+
+// 🔄 Función para convertir ApiResponseFileItem a FileItem
+function mapApiFileToFileItem(apiFile: any): FileItem {
+	return {
+		id: apiFile.id,
+		name: apiFile.name,
+		path: apiFile.path,
+		type: (apiFile.type as FileType) || FileType.OTHER,
+		size: apiFile.size || 0,
+		mimeType: apiFile.mimeType || 'application/octet-stream',
+		metadata: apiFile.metadata || '{}',
+		processingStatus: FileProcessingStatus.COMPLETED,
+		errorMessage: apiFile.errorMessage || undefined,
+		createdAt: new Date(apiFile.createdAt || Date.now()),
+		updatedAt: new Date(apiFile.updatedAt || Date.now()),
+	};
+}
 
 export function FolderContentView() {
 	// 📂 Usar el hook especializado para carpetas (solo para obtener el ID y metadatos)
@@ -29,8 +47,8 @@ export function FolderContentView() {
 	// Usar el hook personalizado para obtener las imágenes
 	const { data: imagesResponse, isLoading, isError, error, refetch } = useFolderImages(currentFolderId);
 
-	// Acceder al array de imágenes desde la respuesta de manera segura
-	const images = useMemo(() => {
+	// Acceder al array de imágenes desde la respuesta de manera segura y mapearlo
+	const images: FileItem[] = useMemo(() => {
 		if (!imagesResponse) {
 			return [];
 		}
@@ -41,11 +59,12 @@ export function FolderContentView() {
 			return [];
 		}
 
-		return imagesResponse.items;
+		// Mapear ApiResponseFileItem a FileItem
+		return imagesResponse.items.map(mapApiFileToFileItem);
 	}, [imagesResponse]);
 
 	// Log simple para depuración sin acceder a propiedades internas que puedan causar problemas
-	logger.debug(`🖼️ Renderizando FileBrowser con ${images.length} imágenes`);
+	logger.debug(`🖼️ Renderizando FileBrowser2 con ${images.length} imágenes`);
 
 	// Verificación de datos con manejo seguro de errores
 	useEffect(() => {
@@ -165,7 +184,7 @@ export function FolderContentView() {
 					description={`Ha ocurrido un error al cargar las imágenes. ${error instanceof Error ? error.message : ''}`}
 				/>
 				<div className="flex gap-2">
-					<Button variant="outline" size="sm" onClick={refetch}>
+					<Button variant="outline" size="sm" onClick={() => refetch()}>
 						<RefreshCw className="h-4 w-4 mr-2" />
 						Reintentar
 					</Button>
@@ -235,11 +254,12 @@ export function FolderContentView() {
 	}
 
 	// 🛡️ Validación adicional: proteger contra arrays inconsistentes o corruptos
-	const isArraySafe = Array.isArray(images) && images.every((img) => img && typeof img === 'object' && typeof img.then !== 'function');
+	const isArraySafe = Array.isArray(images) && images.every((img) => img && typeof img === 'object');
 	if (!isArraySafe) {
 		logger.error('🛡️ Array de imágenes inconsistente o corrupto detectado en FolderContentView', { images });
 		return (
 			<EmptyState
+				icon={Folder}
 				title="Error de datos"
 				description="Se detectaron datos inconsistentes al cargar las imágenes de la carpeta. Por favor, reindexa o contacta soporte."
 			/>
@@ -260,14 +280,14 @@ export function FolderContentView() {
 				</Button>
 			</div>
 
-			{/* 🛡️ El contenedor de FileBrowser ahora ocupa todo el espacio disponible */}
+			{/* 🛡️ El contenedor de FileBrowser2 ahora ocupa todo el espacio disponible */}
 			<div className="flex-1 min-h-0 min-w-0 h-full w-full overflow-hidden">
-				<FileBrowser
+				<FileBrowser2
 					items={images}
-					onItemClick={(item) => {
-						logger.debug('🖱️ Click en item:', item.id);
+					onItemSelect={(item: FileItem) => {
+						logger.debug('🖱️ Select en item:', item.id);
 					}}
-					onItemDoubleClick={(item) => {
+					onItemDoubleClick={(item: FileItem) => {
 						logger.debug('🖱️🖱️ Doble click en item:', item.id);
 					}}
 				/>

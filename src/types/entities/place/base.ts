@@ -3,10 +3,34 @@
  * @module types/entities/place/base
  */
 
-import type { Concept } from '../concept/types';
-import type { Image } from '../image/types';
-import type { Note } from '../note/types';
-import type { Prompt } from '../prompt/types';
+/**
+ * 🗺️ Tipo base para Place, solo campos canónicos y serializables
+ */
+export interface PlaceBase {
+	id: string;
+	name: string;
+	emoji?: string | null;
+	color?: string | null;
+	description?: string | null;
+	shortcut?: string | null;
+	region?: string | null;
+	type?: string | null;
+	climate?: string | null;
+	population?: number | null;
+	government?: string | null;
+	dangers?: string | null;
+	resources?: string | null;
+	lore?: string | null;
+	history?: string | null;
+	stats?: string | null;
+	sortBy?: string | null;
+	filters?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	category?: string | null;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
 
 /**
  * Datos básicos para crear un nuevo lugar
@@ -22,13 +46,13 @@ export interface CreatePlaceData {
 	climate?: string | null;
 	population?: number | null;
 	government?: string | null;
-	dangers?: string | null; // JSON string
-	resources?: string | null; // JSON string
+	dangers?: string | null;
+	resources?: string | null;
 	lore?: string | null;
 	history?: string | null;
-	stats?: string | null; // JSON string
+	stats?: string | null;
 	sortBy?: string | null;
-	filters?: string | null; // JSON string
+	filters?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	category?: string | null;
@@ -48,62 +72,16 @@ export interface UpdatePlaceData {
 	climate?: string | null;
 	population?: number | null;
 	government?: string | null;
-	dangers?: string | null; // JSON string
-	resources?: string | null; // JSON string
+	dangers?: string | null;
+	resources?: string | null;
 	lore?: string | null;
 	history?: string | null;
-	stats?: string | null; // JSON string
+	stats?: string | null;
 	sortBy?: string | null;
-	filters?: string | null; // JSON string
+	filters?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	category?: string | null;
 }
 
-/**
- * Entidad base Place
- */
-export interface PlaceBase {
-	id: string;
-	name: string;
-	emoji: string | null;
-	color: string | null;
-	description: string | null;
-	shortcut: string | null;
-	region: string | null;
-	type: string | null;
-	climate: string | null;
-	population: number | null;
-	government: string | null;
-	dangers: string | null; // JSON string
-	resources: string | null; // JSON string
-	lore: string | null;
-	history: string | null;
-	stats: string | null; // JSON string
-	sortBy: string | null;
-	filters: string | null; // JSON string
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	category: string | null;
-}
-
-/**
- * Entidad Place con relaciones
- */
-export interface PlaceWithRelations extends PlaceBase {
-	// Relaciones
-	images?: Image[];
-	notes?: Note[];
-	concepts?: Concept[];
-	prompts?: Prompt[];
-
-	// Contadores
-	_count?: {
-		images?: number;
-		notes?: number;
-		concepts?: number;
-		prompts?: number;
-	};
-}
+// ✅ PlaceBase ahora es seguro y serializable para frontend/backend.
