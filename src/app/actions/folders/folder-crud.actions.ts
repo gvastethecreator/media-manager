@@ -27,40 +27,97 @@ import { revalidatePath } from 'next/cache';
 const logger = serverLogger.withContext('FolderCrudActions');
 
 /**
- * 🔒 Asegura que cualquier objeto con thumbnail binario sea serializable
- * Convierte Uint8Array/Buffer a string (URL o base64)
+ * 🔒 Asegura que cualquier objeto con datos binarios (Uint8Array/Buffer) sea serializable
+ * Convierte todos los Uint8Array/Buffer a string (URL o base64) de forma recursiva
  *
- * @param obj Objeto que puede contener thumbnails no serializables
+ * @param obj Objeto que puede contener datos binarios no serializables
  * @returns Objeto seguro para serialización
  */
 function ensureSerializableThumbnails<T>(obj: T): T {
-	// Si no es un objeto o es null, devolverlo tal cual
-	if (!obj || typeof obj !== 'object') return obj;
+	// Si no es un objeto o es null/undefined, devolverlo tal cual
+	if (obj === null || obj === undefined || typeof obj !== 'object') {
+		return obj;
+	}
+
+	// Evitar procesar tipos que definitivamente no son objetos regulares
+	if (obj instanceof Date || obj instanceof RegExp) {
+		return obj;
+	}
+
+	// Si es un Uint8Array o Buffer, convertirlo a base64 directamente
+	if (obj instanceof Uint8Array || (typeof Buffer !== 'undefined' && obj instanceof Buffer)) {
+		try {
+			const buffer = Buffer.from(obj);
+			// Usar un MIME type genérico, ya que no tenemos contexto de qué tipo es
+			return `data:image/webp;base64,${buffer.toString('base64')}` as unknown as T;
+		} catch (error) {
+			// En caso de error, loggear y devolver un string vacío en lugar de datos binarios
+			serverLogger.error('❌ Error convirtiendo datos binarios a base64:', error);
+			return '' as unknown as T;
+		}
+	}
+
+	// Si es un array, procesar cada elemento
+	if (Array.isArray(obj)) {
+		return obj.map((item: unknown) =>
+			ensureSerializableThumbnails(item)
+		) as unknown as T;
+	}
 
 	// Copia para no modificar el original
-	const result = { ...obj as object } as Record<string, any>;
+	const result = { ...obj } as Record<string, any>;
 
 	// Procesar propiedades
 	for (const key in result) {
+		// Saltar propiedades que no son del propio objeto
+		if (!Object.prototype.hasOwnProperty.call(result, key)) continue;
+
 		const value = result[key];
 
-		// Si es un thumbnail de tipo Uint8Array/Buffer
-		if (key === 'thumbnail' && value instanceof Uint8Array) {
-			// Convertir a base64
-			const thumbnailBuffer = Buffer.from(value);
-			const mimeType = (result.thumbnailMimeType as string) || 'image/webp';
-			result[key] = `data:${mimeType};base64,${thumbnailBuffer.toString('base64')}`;
+		// Si el valor es null o undefined, mantenerlo así
+		if (value === null || value === undefined) continue;
+
+		// Si es un Uint8Array o Buffer (datos binarios)
+		if (value instanceof Uint8Array || (typeof Buffer !== 'undefined' && value instanceof Buffer)) {
+			try {
+				// Convertir a base64
+				const buffer = Buffer.from(value);
+
+				// Determinar el MIME type basado en el nombre de la propiedad o usar uno genérico
+				let mimeType = 'application/octet-stream';
+				if (key === 'thumbnail' || key.includes('thumbnail') || key.includes('Thumbnail')) {
+					mimeType = result.thumbnailMimeType || 'image/webp';
+				} else if (key.includes('image') || key.includes('Image')) {
+					mimeType = 'image/jpeg';
+				} else if (key.includes('photo') || key.includes('Photo')) {
+					mimeType = 'image/jpeg';
+				} else if (key.includes('avatar') || key.includes('Avatar')) {
+					mimeType = 'image/jpeg';
+				} else if (key.includes('icon') || key.includes('Icon')) {
+					mimeType = 'image/png';
+				}
+
+				result[key] = `data:${mimeType};base64,${buffer.toString('base64')}`;
+			} catch (error) {
+				// En caso de error, loggear y continuar con un string vacío
+				serverLogger.error(`❌ Error convirtiendo propiedad ${key} a base64:`, error);
+				result[key] = '';
+			}
 		}
-		// Si es un array, procesar cada elemento
+		// Si es un array, procesar cada elemento recursivamente
 		else if (Array.isArray(value)) {
 			result[key] = value.map((item: unknown) =>
-				item && typeof item === 'object'
-					? ensureSerializableThumbnails(item)
-					: item
+				ensureSerializableThumbnails(item)
 			);
 		}
-		// Si es un objeto (que no sea Date ni null), procesarlo recursivamente
-		else if (value && typeof value === 'object' && !(value instanceof Date)) {
+		// Si es un objeto (que no sea Date, RegExp, etc), procesarlo recursivamente
+		else if (value && typeof value === 'object' &&
+			!(value instanceof Date) &&
+			!(value instanceof RegExp) &&
+			!(value instanceof Map) &&
+			!(value instanceof Set) &&
+			!(typeof (value as any).then === 'function') // no procesar promesas
+		) {
 			result[key] = ensureSerializableThumbnails(value);
 		}
 	}
