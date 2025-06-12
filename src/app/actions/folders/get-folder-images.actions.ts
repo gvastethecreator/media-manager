@@ -19,10 +19,10 @@ const imagesActionsLogger = serverLogger.withContext('FolderImagesActions');
 
 /**
  * 🔒 API Response File Item - SEGURO PARA SERIALIZACIÓN
- * 
+ *
  * Esta interfaz define un formato seguro para enviar al cliente,
  * eliminando cualquier posibilidad de datos binarios no serializables.
- * 
+ *
  * ⚠️ IMPORTANTE: No usar spread de objetos de Prisma, solo campos explícitamente
  * transformados a tipos serializables.
  */
@@ -104,11 +104,11 @@ const apiResponseFileItemSchema = z.object({
 
 /**
  * 🔒 Obtiene las imágenes de una carpeta con formato seguro para serialización
- * 
+ *
  * Este Server Action realiza una transformación completa de los datos de Prisma
  * a un formato seguro para serialización, eliminando cualquier referencia a
  * objetos binarios (Buffer/Uint8Array) u otros tipos no serializables.
- * 
+ *
  * @param folderId ID de la carpeta
  * @returns Objeto con items (imágenes) y metadata de carpeta, 100% serializable
  */
@@ -149,8 +149,8 @@ export async function getFolderImages(folderId: string) {
 				const safeMetadata = {
 					mimeType: metadataObj.mimeType || 'image/jpeg',
 					size: imgRecord.size,
-					dimensions: imgRecord.width && imgRecord.height 
-						? { width: imgRecord.width, height: imgRecord.height } 
+					dimensions: imgRecord.width && imgRecord.height
+						? { width: imgRecord.width, height: imgRecord.height }
 						: undefined,
 					fileSystem: {
 						size: imgRecord.size,
@@ -168,7 +168,7 @@ export async function getFolderImages(folderId: string) {
 					id: c.id,
 					name: c.name,
 				}));
-				
+
 				const safeTags: RelatedTag[] = imgRecord.tags.map((t) => ({
 					id: t.id,
 					name: t.name,
@@ -180,15 +180,15 @@ export async function getFolderImages(folderId: string) {
 				try {
 					thumbnailUrl = await getThumbnail(imgRecord.id, ThumbnailQuality.MEDIUM);
 				} catch (err) {
-					imagesActionsLogger.warn('No se pudo obtener thumbnail para imagen', { 
-						imageId: imgRecord.id, 
-						error: err 
+					imagesActionsLogger.warn('No se pudo obtener thumbnail para imagen', {
+						imageId: imgRecord.id,
+						error: err
 					});
 				}
 
 				// 🏞️ Determinar valor final del thumbnail (siempre string o null)
 				let safeThumbnail: string | null = null;
-				
+
 				if (thumbnailUrl) {
 					// Caso 1: Tenemos URL directa (mejor opción)
 					safeThumbnail = thumbnailUrl;
@@ -208,7 +208,7 @@ export async function getFolderImages(folderId: string) {
 				const isPublic = Boolean(
 					'isPublic' in imgRecord ? imgRecord.isPublic : false
 				);
-				
+
 				const isFavorite = Boolean(
 					'isFavorite' in imgRecord ? imgRecord.isFavorite : false
 				);
@@ -248,7 +248,7 @@ export async function getFolderImages(folderId: string) {
 					try {
 						apiResponseFileItemSchema.parse(safeFileItem);
 					} catch (validationError) {
-						imagesActionsLogger.error('❌ Error validación de schema de imagen:', { 
+						imagesActionsLogger.error('❌ Error validación de schema de imagen:', {
 							imageId: imgRecord.id,
 							error: validationError
 						});
