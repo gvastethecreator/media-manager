@@ -8,10 +8,8 @@ import { convertServerImageToFileItem } from '@/services/image-converter.service
 import type { ServerImage } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from '@/transformers/album/mappers';
-import { fromPrismaAlbum } from '@/transformers/album/serializers';
-import { transformAlbumToExtended, transformAlbumToWithStats } from '@/transformers/album/transformer';
+import { transformAlbumToExtended } from '@/transformers/album/transformer';
 import type { Album, AlbumBase, AlbumUpdateInput, CreateAlbumData } from '@/types/entities/album';
-import type { AlbumWithStats } from '@/types/entities/album/extended';
 import type { FileItem } from '@/types/file-item';
 import { revalidatePath } from 'next/cache';
 
@@ -33,6 +31,23 @@ const createAlbumError = (message: string, code: AlbumErrorCode = AlbumErrorCode
 	Object.assign(error, { code, cause });
 	return error;
 };
+
+// Interfaz para álbum con estadísticas (para compatibilidad)
+export interface AlbumWithStats extends AlbumBase {
+	_count: {
+		images: number;
+		groups: number;
+		properties: number;
+		wildcards: number;
+	};
+	totalSize: number;
+	lastUpdated: Date;
+	distribution?: Array<{
+		name: string;
+		count: number;
+	}>;
+	presetId?: string;
+}
 
 // Utilitarias funcionales
 const revalidateAllPaths = async () => {
@@ -92,34 +107,59 @@ export async function getAlbums(): Promise<AlbumWithStats[]> {
 		// Mapear resultados usando solo transformAlbumToExtended (ya incluye fromPrismaAlbum internamente)
 		const albumsWithStats = albums.map((album: any) => {
 			try {
-				// Usar el transformer específico para álbumes con estadísticas
-				return transformAlbumToWithStats(album);
+				// 🔧 FIX: Usar solo transformAlbumToExtended, que ya maneja la transformación desde Prisma
+				const extendedAlbum = transformAlbumToExtended(album);
+
+				// Acceso seguro a _count
+				const count = album._count || { images: 0, groups: 0, properties: 0, wildcards: 0 };
+
+				return {
+					...extendedAlbum,
+					_count: count,
+					totalSize: 0,
+					lastUpdated: album.updatedAt,
+					distribution: [],
+				};
 			} catch (error) {
 				albumLogger.error('❌ Error transformando álbum individual:', { albumId: album?.id, error });
-				// Crear un AlbumWithStats básico en caso de error
-				const basicAlbum = transformAlbumToExtended(album);
+				// Retornar un álbum básico en caso de error
 				return {
-					...basicAlbum,
+					id: album?.id || 'unknown',
+					name: album?.name || 'Unknown Album',
+					emoji: album?.emoji || '📁',
+					color: album?.color || '#gray',
+					description: album?.description || null,
+					shortcut: album?.shortcut || null,
+					category: album?.category || '',
+					sortBy: album?.sortBy || '',
+					filters: album?.filters || '',
+					featuredImage: album?.featuredImage || null,
+					isFavorite: album?.isFavorite || false,
+					createdAt: album?.createdAt || new Date(),
+					updatedAt: album?.updatedAt || new Date(),
+					images: [],
+					videos: [],
+					collections: [],
+					tags: [],
+					characters: [],
+					places: [],
+					worldItems: [],
+					concepts: [],
+					prompts: [],
+					notes: [],
+					wildcards: [],
+					properties: [],
+					groups: [],
+					_count: { images: 0, groups: 0, properties: 0, wildcards: 0 },
 					totalSize: 0,
 					lastUpdated: album?.updatedAt || new Date(),
-					itemCount: 0,
-					itemDistribution: { images: 0, videos: 0 },
-					_count: {
-						images: 0,
-						videos: 0,
-						collections: 0,
-						tags: 0,
-						characters: 0,
-						places: 0,
-						worldItems: 0,
-						concepts: 0,
-						prompts: 0,
-						notes: 0,
-						wildcards: 0,
-						properties: 0,
-						groups: 0,
-					},
-				} as AlbumWithStats;
+					distribution: [],
+					isSelected: false,
+					isHighlighted: false,
+					isExpanded: false,
+					isEditing: false,
+					displayOrder: 0,
+				};
 			}
 		});
 

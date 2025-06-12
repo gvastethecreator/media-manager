@@ -2,7 +2,6 @@
 
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { SettingsView } from '@/components/settings/settings-view';
-import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo, useEffect, useRef, useState } from 'react';
 import { EntityPreloader } from '../features/file-browser/entity-preloader';
@@ -167,7 +166,7 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 	}, []);
 
 	return (
-		<div className={cn('h-full flex flex-col')}>
+		<div className="h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden">
 			{/* Solo montar el EntityPreloader una vez al inicio */}
 			{showPreloader && (
 				<EntityPreloader
@@ -181,20 +180,14 @@ export function ViewContainer({ isResizing }: ViewContainerProps) {
 				/>
 			)}
 
-			<AnimatePresence initial={false} custom={navigationDirection}>
+			<AnimatePresence mode="wait">
 				<motion.div
 					key={currentView}
-					custom={navigationDirection}
-					variants={variants}
-					initial="enter"
-					animate="center"
-					exit="exit"
-					transition={{
-						x: { type: 'spring', stiffness: 400, damping: 35 },
-						opacity: { duration: 0.15 },
-						scale: { duration: 0.2 },
-					}}
-					className="absolute inset-0 w-full h-full"
+					className="h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden view-container-transition"
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					exit={{ opacity: 0 }}
+					transition={{ duration: 0.18 }}
 				>
 					<MemoizedViewContent view={currentView} />
 				</motion.div>
