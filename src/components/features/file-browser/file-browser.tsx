@@ -104,7 +104,6 @@ const FileBrowserComponent = ({
 	onItemDoubleClick,
 	loadMoreItems,
 }: FileBrowserProps) => {
-
 	// 📊 Función para depurar los items recibidos sin errores de tipo
 	const logItemInfo = useCallback((item: any) => {
 		if (!item) return 'Item nulo o indefinido';
@@ -119,7 +118,7 @@ const FileBrowserComponent = ({
 		} catch (error) {
 			return `Error al analizar item: ${error}`;
 		}
-	}, []);	// Debug: Mostrar detalles de los items recibidos
+	}, []); // Debug: Mostrar detalles de los items recibidos
 	useEffect(() => {
 		gridLogger.info(`🔍 FileBrowser recibió ${items?.length || 0} items`);
 
@@ -173,7 +172,7 @@ const FileBrowserComponent = ({
 		isTransitioning,
 		handleScroll,
 		debouncedLoadThumbnails,
-		forceRecalcWidth
+		forceRecalcWidth,
 	} = useGridView({
 		viewMode,
 		isResizing,
@@ -184,7 +183,8 @@ const FileBrowserComponent = ({
 	const [isMeasuring, setIsMeasuring] = useState(true);
 	const [forceRender, setForceRender] = useState(0);
 	const measurementTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const measurementAttemptsRef = useRef(0); const MAX_MEASUREMENT_ATTEMPTS = 10;
+	const measurementAttemptsRef = useRef(0);
+	const MAX_MEASUREMENT_ATTEMPTS = 10;
 	const MEASUREMENT_DELAY_INCREMENT = 50;
 
 	// Debug: Mostrar cambios en containerWidth e isMeasuring
@@ -207,41 +207,46 @@ const FileBrowserComponent = ({
 		if (offsetWidth > 0) {
 			gridLogger.info(`✅ ${strategy}: Medición exitosa - ${offsetWidth}px`);
 			setIsMeasuring(false);
-			setForceRender(prev => prev + 1); // Forzar re-render
+			setForceRender((prev) => prev + 1); // Forzar re-render
 			return true;
 		}
 
 		return false;
 	}, []);
 	// 🔄 Sistema de intentos progresivos de emergencia
-	const attemptEmergencyMeasurement = useCallback((node: HTMLDivElement | null, attempt = 1) => {
-		const maxAttempts = 10;
-		const delayIncrement = 50;
+	const attemptEmergencyMeasurement = useCallback(
+		(node: HTMLDivElement | null, attempt = 1) => {
+			const maxAttempts = 10;
+			const delayIncrement = 50;
 
-		if (!node || attempt > maxAttempts) {
-			gridLogger.warn(`⚠️ Máximo de intentos alcanzado (${maxAttempts})`);
-			setIsMeasuring(false);
-			return;
-		}
+			if (!node || attempt > maxAttempts) {
+				gridLogger.warn(`⚠️ Máximo de intentos alcanzado (${maxAttempts})`);
+				setIsMeasuring(false);
+				return;
+			}
 
-		measurementAttemptsRef.current = attempt;
+			measurementAttemptsRef.current = attempt;
 
-		if (emergencyMeasureContainer(node, `Intento-${attempt}`)) {
-			return; // Éxito
-		}
+			if (emergencyMeasureContainer(node, `Intento-${attempt}`)) {
+				return; // Éxito
+			}
 
-		// Programar siguiente intento con delay incremental
-		const delay = delayIncrement * attempt;
-		measurementTimeoutRef.current = setTimeout(() => {
-			attemptEmergencyMeasurement(node, attempt + 1);
-		}, delay);
-	}, [emergencyMeasureContainer]);	// 🔧 useLayoutEffect para el sistema de emergencia cuando containerWidth sigue siendo 0
+			// Programar siguiente intento con delay incremental
+			const delay = delayIncrement * attempt;
+			measurementTimeoutRef.current = setTimeout(() => {
+				attemptEmergencyMeasurement(node, attempt + 1);
+			}, delay);
+		},
+		[emergencyMeasureContainer]
+	); // 🔧 useLayoutEffect para el sistema de emergencia cuando containerWidth sigue siendo 0
 	useLayoutEffect(() => {
 		gridLogger.debug(`🔧 useLayoutEffect ejecutado - containerWidth: ${containerWidth}, isMeasuring: ${isMeasuring}`);
 
 		// Solo activar el sistema de emergencia si containerWidth sigue siendo 0 después de un tiempo
 		const emergencyTimer = setTimeout(() => {
-			gridLogger.warn(`⏰ Timer de emergencia activado - containerWidth: ${containerWidth}, parentRef.current: ${!!parentRef.current}`);
+			gridLogger.warn(
+				`⏰ Timer de emergencia activado - containerWidth: ${containerWidth}, parentRef.current: ${!!parentRef.current}`
+			);
 
 			if ((!containerWidth || containerWidth <= 0) && parentRef.current) {
 				gridLogger.warn('🚨 Activando sistema de medición de emergencia');
@@ -356,7 +361,7 @@ const FileBrowserComponent = ({
 		};
 
 		preloadEntities();
-	}, [loadEntityData]);	// Función memoizada para mapear FileItem a ImageItem
+	}, [loadEntityData]); // Función memoizada para mapear FileItem a ImageItem
 	const mapFileItemToImageItem = useCallback((fileItem: FileItem): ImageItem => {
 		// Obtener dimensiones del resource store si están disponibles
 		const resource = useImageResources.getState().resources.get(fileItem.id);
@@ -367,8 +372,7 @@ const FileBrowserComponent = ({
 		// Si no hay dimensiones en resource, intentar desde metadata
 		if ((!width || !height) && fileItem.metadata) {
 			try {
-				const metadataObj =
-					typeof fileItem.metadata === 'string' ? JSON.parse(fileItem.metadata) : fileItem.metadata;
+				const metadataObj = typeof fileItem.metadata === 'string' ? JSON.parse(fileItem.metadata) : fileItem.metadata;
 				if (metadataObj?.dimensions) {
 					width = metadataObj.dimensions.width;
 					height = metadataObj.dimensions.height;
@@ -419,22 +423,24 @@ const FileBrowserComponent = ({
 			alt: fileItem.name,
 			mimeType: fileItem.type,
 			metadata: fileItem.metadata,
-			parsedMetadata: fileItem.metadata ? (() => {
-				try {
-					const parsed = typeof fileItem.metadata === 'string' ? JSON.parse(fileItem.metadata) : fileItem.metadata;
-					return {
-						dimensions: parsed?.dimensions || { width: width || 0, height: height || 0 },
-						mimeType: fileItem.type,
-						isLocal: true
-					};
-				} catch {
-					return {
-						dimensions: { width: width || 0, height: height || 0 },
-						mimeType: fileItem.type,
-						isLocal: true
-					};
-				}
-			})() : undefined
+			parsedMetadata: fileItem.metadata
+				? (() => {
+						try {
+							const parsed = typeof fileItem.metadata === 'string' ? JSON.parse(fileItem.metadata) : fileItem.metadata;
+							return {
+								dimensions: parsed?.dimensions || { width: width || 0, height: height || 0 },
+								mimeType: fileItem.type,
+								isLocal: true,
+							};
+						} catch {
+							return {
+								dimensions: { width: width || 0, height: height || 0 },
+								mimeType: fileItem.type,
+								isLocal: true,
+							};
+						}
+					})()
+				: undefined,
 		} as ImageItem;
 	}, []);
 
@@ -449,7 +455,7 @@ const FileBrowserComponent = ({
 	// Actualizar la referencia del último array de processedItems
 	useEffect(() => {
 		processedItemsRef.current = processedItems;
-	}, [processedItems]);	// Hook para manejar la visibilidad del panel de detalles y el item seleccionado
+	}, [processedItems]); // Hook para manejar la visibilidad del panel de detalles y el item seleccionado
 	useEffect(() => {
 		if (selectedItems.length > 0) {
 			setVisible(true);
@@ -460,7 +466,7 @@ const FileBrowserComponent = ({
 				type: item.type || 'image',
 				path: item.path || '',
 				size: item.size || 0,
-				metadata: item.metadata
+				metadata: item.metadata,
 			}));
 			setSelectedItems(simplifiedItems as any); // Usar 'as any' temporalmente para evitar conflictos de tipos
 		} else {
@@ -557,9 +563,12 @@ const FileBrowserComponent = ({
 	);
 
 	// Wrapper para toggleSelectFile que acepta un FileItem
-	const handleToggleSelectFile = useCallback((item: FileItem) => {
-		toggleSelectFile(item.id);
-	}, [toggleSelectFile]);
+	const handleToggleSelectFile = useCallback(
+		(item: FileItem) => {
+			toggleSelectFile(item.id);
+		},
+		[toggleSelectFile]
+	);
 
 	// Handler para las acciones del menú contextual
 	const handleMenuAction = useCallback(
@@ -583,21 +592,31 @@ const FileBrowserComponent = ({
 		);
 	}
 	// 🛡️ Protección robusta: fallback visual y logs controlados para containerWidth inválido
-	if ((isMeasuring && measurementAttemptsRef.current < MAX_MEASUREMENT_ATTEMPTS) || !containerWidth || Number.isNaN(containerWidth) || containerWidth <= 0) {
+	if (
+		(isMeasuring && measurementAttemptsRef.current < MAX_MEASUREMENT_ATTEMPTS) ||
+		!containerWidth ||
+		Number.isNaN(containerWidth) ||
+		containerWidth <= 0
+	) {
 		gridLogger.warn('🚨 DEBUGGING - Activando fallback visual:', {
 			isMeasuring,
 			measurementAttempts: measurementAttemptsRef.current,
 			maxAttempts: MAX_MEASUREMENT_ATTEMPTS,
 			containerWidth,
-			isNaN: Number.isNaN(containerWidth)
+			isNaN: Number.isNaN(containerWidth),
 		});
 
 		// Diagnóstico detallado del contenedor padre
 		const realWidth = parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.offsetWidth : 'N/A';
-		const realHeight = parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.offsetHeight : 'N/A';
-		const parentClasses = parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.className : 'N/A';
+		const realHeight =
+			parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.offsetHeight : 'N/A';
+		const parentClasses =
+			parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.className : 'N/A';
 		const hasParent = !!(parentRef && 'current' in parentRef && parentRef.current?.parentElement);
-		const parentParentClasses = hasParent && parentRef && 'current' in parentRef && parentRef.current?.parentElement ? parentRef.current.parentElement.className : 'N/A';
+		const parentParentClasses =
+			hasParent && parentRef && 'current' in parentRef && parentRef.current?.parentElement
+				? parentRef.current.parentElement.className
+				: 'N/A';
 
 		if (!hasLoggedWidthErrorRef.current && !isMeasuring) {
 			gridLogger.error(`❌ containerWidth inválido: ${containerWidth}`);
@@ -611,9 +630,7 @@ const FileBrowserComponent = ({
 		}
 
 		// Determinar el mensaje de estado
-		const statusMessage = isMeasuring
-			? 'Midiendo contenedor...'
-			: 'Calculando layout...';
+		const statusMessage = isMeasuring ? 'Midiendo contenedor...' : 'Calculando layout...';
 
 		const detailMessage = isMeasuring
 			? `Intento ${measurementAttemptsRef.current + 1}/${MAX_MEASUREMENT_ATTEMPTS}`
@@ -630,8 +647,10 @@ const FileBrowserComponent = ({
 					</div>
 				</div>
 				<div className="text-xs text-muted-foreground text-center">
-					{statusMessage}<br />
-					<code>{detailMessage}</code><br />
+					{statusMessage}
+					<br />
+					<code>{detailMessage}</code>
+					<br />
 					<code>ancho real del div padre: {realWidth}</code>
 				</div>
 				{!isMeasuring && (
@@ -656,7 +675,12 @@ const FileBrowserComponent = ({
 	}
 
 	// Protección extra: si el virtualizer no está bien inicializado, evitar renderizar el grid
-	if (!virtualizer || typeof virtualizer.getTotalSize !== 'function' || Number.isNaN(virtualizer.getTotalSize()) || virtualizer.getTotalSize() < 0) {
+	if (
+		!virtualizer ||
+		typeof virtualizer.getTotalSize !== 'function' ||
+		Number.isNaN(virtualizer.getTotalSize()) ||
+		virtualizer.getTotalSize() < 0
+	) {
 		gridLogger.error('❌ Virtualizer no está correctamente inicializado o devuelve tamaño inválido.');
 		return (
 			<EmptyState
@@ -672,7 +696,9 @@ const FileBrowserComponent = ({
 		<div
 			ref={parentCallbackRef} // 🔧 Usar el callback ref del hook para configurar ResizeObserver
 			className="h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden"
-		>			{/* Visor de imágenes */}
+		>
+			{' '}
+			{/* Visor de imágenes */}
 			{isViewerOpen && (
 				<FileViewer
 					isOpen={isViewerOpen}
@@ -681,7 +707,6 @@ const FileBrowserComponent = ({
 					onClose={() => setIsViewerOpen(false)}
 				/>
 			)}
-
 			<div onScroll={handleScroll} className="h-full overflow-y-auto scroll-smooth">
 				<div
 					style={{
@@ -700,7 +725,8 @@ const FileBrowserComponent = ({
 
 						const isSelected = selectedFileIds.includes(originalItem.id);
 						const currentGap = GRID_CONFIG.gap[viewMode as keyof GridGaps];
-						const xOffset = (virtualItem.index % columns) * (itemSize + currentGap); const commonProps = {
+						const xOffset = (virtualItem.index % columns) * (itemSize + currentGap);
+						const commonProps = {
 							item: originalItem, // Usar FileItem directamente en lugar de ImageItem
 							isSelected,
 							onClick: () => handleItemClick(originalItem),
@@ -714,7 +740,8 @@ const FileBrowserComponent = ({
 								left: 0,
 								transform: `translateX(${xOffset}px) translateY(${virtualItem.start}px)`,
 								width: itemSize,
-								height: viewMode === 'masonry' ? calculateMasonryHeight(originalItem as any, itemSize) : virtualItem.size,
+								height:
+									viewMode === 'masonry' ? calculateMasonryHeight(originalItem as any, itemSize) : virtualItem.size,
 							},
 						};
 

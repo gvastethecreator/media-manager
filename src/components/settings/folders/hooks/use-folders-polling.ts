@@ -89,11 +89,24 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 			}
 
 			if ('isComplete' in data && data.isComplete) {
-				pollingLogger.info('✅ API indica que el proceso está completo:', { folderId, originalId, finishedAt: data.finishedAt, mappings: data.knownMappings });
-				const completeStatus: ProcessStatus = { folderId, phase: 'complete', progress: 100, status: 'Proceso completado', timestamp: Date.now() };
+				pollingLogger.info('✅ API indica que el proceso está completo:', {
+					folderId,
+					originalId,
+					finishedAt: data.finishedAt,
+					mappings: data.knownMappings,
+				});
+				const completeStatus: ProcessStatus = {
+					folderId,
+					phase: 'complete',
+					progress: 100,
+					status: 'Proceso completado',
+					timestamp: Date.now(),
+				};
 				onStatusUpdate(completeStatus);
 				onComplete(folderId);
-				setTimeout(() => { stopPolling(); }, 500);
+				setTimeout(() => {
+					stopPolling();
+				}, 500);
 				return;
 			}
 
@@ -102,18 +115,42 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 				pollingLogger.info('📊 Progreso obtenido vía polling:', statusObj);
 				lastUpdatedRef.current[folderId] = statusObj.timestamp || Date.now();
 				onStatusUpdate(statusObj);
-				const isComplete = statusObj.phase === 'complete' || (statusObj.progress === 100 && statusObj.phase === 'metadata') || (statusObj.progress === 100 && typeof statusObj.filesProcessed === 'number' && typeof statusObj.totalFiles === 'number' && statusObj.filesProcessed > 0 && statusObj.totalFiles > 0 && statusObj.filesProcessed >= statusObj.totalFiles);
+				const isComplete =
+					statusObj.phase === 'complete' ||
+					(statusObj.progress === 100 && statusObj.phase === 'metadata') ||
+					(statusObj.progress === 100 &&
+						typeof statusObj.filesProcessed === 'number' &&
+						typeof statusObj.totalFiles === 'number' &&
+						statusObj.filesProcessed > 0 &&
+						statusObj.totalFiles > 0 &&
+						statusObj.filesProcessed >= statusObj.totalFiles);
 				if (isComplete) {
 					pollingLogger.info('✅ Proceso completado detectado vía polling:', statusObj);
 					onComplete(folderId);
-					setTimeout(() => { stopPolling(); }, 500);
+					setTimeout(() => {
+						stopPolling();
+					}, 500);
 				}
 			} else {
 				consecutiveNoStatusCountRef.current++;
-				pollingLogger.warn('⚠️ No se encontró estado para la carpeta', { folderId, originalId, consecutiveNoStatus: consecutiveNoStatusCountRef.current, mappings: data.knownMappings });
+				pollingLogger.warn('⚠️ No se encontró estado para la carpeta', {
+					folderId,
+					originalId,
+					consecutiveNoStatus: consecutiveNoStatusCountRef.current,
+					mappings: data.knownMappings,
+				});
 				if (consecutiveNoStatusCountRef.current >= MAX_NO_STATUS_ATTEMPTS) {
-					pollingLogger.error('❌ Estado de proceso no disponible tras varios intentos. Forzando error.', { folderId, attempts: consecutiveNoStatusCountRef.current });
-					const errorStatus: ProcessStatus = { folderId, phase: 'error', progress: 0, status: 'Error: no se pudo obtener el estado del proceso', timestamp: Date.now() };
+					pollingLogger.error('❌ Estado de proceso no disponible tras varios intentos. Forzando error.', {
+						folderId,
+						attempts: consecutiveNoStatusCountRef.current,
+					});
+					const errorStatus: ProcessStatus = {
+						folderId,
+						phase: 'error',
+						progress: 0,
+						status: 'Error: no se pudo obtener el estado del proceso',
+						timestamp: Date.now(),
+					};
 					onStatusUpdate(errorStatus);
 					stopPolling();
 				}
@@ -121,7 +158,11 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 		} catch (error) {
 			pollingErrorCountRef.current++;
 			const errorMessage = `Error en polling: ${error instanceof Error ? error.message : String(error)}`;
-			pollingLogger.error(errorMessage, { errorCount: pollingErrorCountRef.current, folderId: processingFolderRef.current, originalId: originalFolderIdRef.current });
+			pollingLogger.error(errorMessage, {
+				errorCount: pollingErrorCountRef.current,
+				folderId: processingFolderRef.current,
+				originalId: originalFolderIdRef.current,
+			});
 			if (pollingErrorCountRef.current >= 5) {
 				pollingLogger.error('Demasiados errores de polling, deteniendo', { errorCount: pollingErrorCountRef.current });
 				stopPolling();

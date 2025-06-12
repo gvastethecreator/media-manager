@@ -43,7 +43,7 @@ export function toCreateConceptData(data: ConceptCreateInput): Prisma.ConceptCre
 		description: data.description ?? null,
 		content: data.content || '',
 		category: data.category || 'general',
-		tags: Array.isArray(data.tags) ? JSON.stringify(data.tags) : (typeof data.tags === 'string' ? data.tags : '[]'),
+		tags: Array.isArray(data.tags) ? JSON.stringify(data.tags) : typeof data.tags === 'string' ? data.tags : '[]',
 		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
 	};
@@ -65,7 +65,12 @@ export function toUpdateConceptData(data: ConceptUpdateInput): Prisma.ConceptUpd
 	if (data.category !== undefined) result.category = data.category;
 	if (data.featuredImage !== undefined) result.featuredImage = data.featuredImage;
 	if (data.isFavorite !== undefined) result.isFavorite = data.isFavorite;
-	if (data.tags !== undefined) result.tags = Array.isArray(data.tags) ? JSON.stringify(data.tags) : (typeof data.tags === 'string' ? data.tags : '[]');
+	if (data.tags !== undefined)
+		result.tags = Array.isArray(data.tags)
+			? JSON.stringify(data.tags)
+			: typeof data.tags === 'string'
+				? data.tags
+				: '[]';
 	return result as Prisma.ConceptUpdateInput;
 }
 

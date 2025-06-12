@@ -77,7 +77,7 @@ export interface CharacterExtended
 	isSelected?: boolean;
 	isExpanded?: boolean;
 	isEditing?: boolean;
-       activeTab?: 'info' | 'stats' | 'relationships' | 'backstory' | 'images';
+	activeTab?: 'info' | 'stats' | 'relationships' | 'backstory' | 'images';
 
 	// Calculados/runtime
 	parsedFilters?: CharacterFilter[];
@@ -166,7 +166,7 @@ export interface CharacterCard {
 	isExpanded: boolean;
 	isFlipped: boolean;
 	showDetails: boolean;
-       activeTab?: 'info' | 'stats' | 'relationships' | 'backstory' | 'images';
+	activeTab?: 'info' | 'stats' | 'relationships' | 'backstory' | 'images';
 }
 
 /**

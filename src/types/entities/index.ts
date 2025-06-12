@@ -30,4 +30,3 @@ export * from './wildcard';
 
 // Utilidades y tipos comunes
 export * from './queue-job';
-

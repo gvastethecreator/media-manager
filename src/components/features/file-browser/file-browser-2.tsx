@@ -32,10 +32,10 @@ const gridLogger = clientLogger.withContext('FileBrowser2');
 // Todos los campos son serializables para evitar errores de "Only plain objects..."
 type FileBrowserFileItem = FileItem & {
 	thumbnail?: string | null; // Siempre string o null, nunca Buffer/Uint8Array
-	createdAt: string;        // ISO string, no Date
-	updatedAt: string;        // ISO string, no Date
-	modifiedAt: string;       // ISO string, no Date
-	accessedAt: string;       // ISO string, no Date
+	createdAt: string; // ISO string, no Date
+	updatedAt: string; // ISO string, no Date
+	modifiedAt: string; // ISO string, no Date
+	accessedAt: string; // ISO string, no Date
 };
 
 interface FileBrowser2Props {
@@ -111,20 +111,25 @@ export const FileBrowser2 = memo<FileBrowser2Props>(function FileBrowser2({
 				if (measure()) return;
 
 				// Estrategia 4: Fallback fijo (no más intentos)
-				gridLogger.warn(`[FileBrowser2] ⚠️ Falló medición después de ${attempt} intentos, usando fallback: ${FALLBACK_WIDTH}px`);
+				gridLogger.warn(
+					`[FileBrowser2] ⚠️ Falló medición después de ${attempt} intentos, usando fallback: ${FALLBACK_WIDTH}px`
+				);
 				setContainerWidth(FALLBACK_WIDTH);
 			}, 100);
 		});
 	}, []);
 
 	// 📎 Callback ref para medición del contenedor
-	const containerCallbackRef = useCallback((element: HTMLDivElement | null) => {
-		if (element && element !== containerRef.current) {
-			containerRef.current = element;
-			gridLogger.debug('[FileBrowser2] 📎 Nuevo contenedor detectado, iniciando medición');
-			measureContainer(element);
-		}
-	}, [measureContainer]);
+	const containerCallbackRef = useCallback(
+		(element: HTMLDivElement | null) => {
+			if (element && element !== containerRef.current) {
+				containerRef.current = element;
+				gridLogger.debug('[FileBrowser2] 📎 Nuevo contenedor detectado, iniciando medición');
+				measureContainer(element);
+			}
+		},
+		[measureContainer]
+	);
 
 	// 📊 Cálculo del grid
 	const itemsPerRow = containerWidth > 0 ? Math.floor((containerWidth + GAP) / (ITEM_WIDTH + GAP)) : 0;
@@ -139,42 +144,42 @@ export const FileBrowser2 = memo<FileBrowser2Props>(function FileBrowser2({
 	});
 
 	// 🎯 Event handlers
-	const handleItemClick = useCallback((item: FileItem) => {
-		setSelectedItemId(item.id);
-		onItemSelect?.(item);
-	}, [onItemSelect]);
+	const handleItemClick = useCallback(
+		(item: FileItem) => {
+			setSelectedItemId(item.id);
+			onItemSelect?.(item);
+		},
+		[onItemSelect]
+	);
 
-	const handleItemDoubleClick = useCallback((item: FileItem) => {
-		onItemDoubleClick?.(item);
-	}, [onItemDoubleClick]);
+	const handleItemDoubleClick = useCallback(
+		(item: FileItem) => {
+			onItemDoubleClick?.(item);
+		},
+		[onItemDoubleClick]
+	);
 
 	// 🔄 Fallback durante medición o loading/reindex
 	if (containerWidth === 0 || isLoading || isReindexing) {
 		return (
-			<div
-				ref={containerCallbackRef}
-				className={clsx(
-					'flex-1 h-full w-full overflow-hidden relative',
-					className
-				)}
-			>
+			<div ref={containerCallbackRef} className={clsx('flex-1 h-full w-full overflow-hidden relative', className)}>
 				<div className="flex flex-col items-center justify-center h-full">
 					<Skeleton className="w-full h-40 mb-4" />
 					<div className="text-sm text-muted-foreground">
-						{isReindexing
-							? (
-								<>
-									<span className="block mb-2">Reindexando carpeta...</span>
-									<div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-										<div
-											className="bg-primary h-full transition-all duration-300 ease-in-out"
-											style={{ width: `${Math.round(reindexProgress)}%` }}
-										/>
-									</div>
-									<span className="text-xs mt-2 text-muted-foreground">{Math.round(reindexProgress)}%</span>
-								</>
-							)
-							: 'Calculando dimensiones del contenedor...'}
+						{isReindexing ? (
+							<>
+								<span className="block mb-2">Reindexando carpeta...</span>
+								<div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+									<div
+										className="bg-primary h-full transition-all duration-300 ease-in-out"
+										style={{ width: `${Math.round(reindexProgress)}%` }}
+									/>
+								</div>
+								<span className="text-xs mt-2 text-muted-foreground">{Math.round(reindexProgress)}%</span>
+							</>
+						) : (
+							'Calculando dimensiones del contenedor...'
+						)}
 					</div>
 				</div>
 				{/* Overlay visual si está reindexando */}
@@ -188,16 +193,12 @@ export const FileBrowser2 = memo<FileBrowser2Props>(function FileBrowser2({
 		);
 	}
 
-	gridLogger.debug(`[FileBrowser2] 🎯 Renderizando grid: ${itemsPerRow} items/fila, ${totalRows} filas, ${items.length} items`);
+	gridLogger.debug(
+		`[FileBrowser2] 🎯 Renderizando grid: ${itemsPerRow} items/fila, ${totalRows} filas, ${items.length} items`
+	);
 
 	return (
-		<div
-			ref={containerCallbackRef}
-			className={clsx(
-				'flex-1 h-full w-full overflow-auto',
-				className
-			)}
-		>
+		<div ref={containerCallbackRef} className={clsx('flex-1 h-full w-full overflow-auto', className)}>
 			<div
 				style={{
 					height: virtualizer.getTotalSize(),
@@ -255,12 +256,7 @@ interface GridItemProps {
 	onDoubleClick: () => void;
 }
 
-const GridItem = memo<GridItemProps>(function GridItem({
-	item,
-	isSelected,
-	onClick,
-	onDoubleClick
-}) {
+const GridItem = memo<GridItemProps>(function GridItem({ item, isSelected, onClick, onDoubleClick }) {
 	// 🖼️ Estado para manejo de errores de imagen
 	const [imageError, setImageError] = useState(false);
 
@@ -274,9 +270,8 @@ const GridItem = memo<GridItemProps>(function GridItem({
 	}, [item.id, item.name]);
 	// 🖼️ Compatibilidad: usar item.thumbnail si existe, si no fallback a /api/images/{item.id}/thumbnail
 	// Nos aseguramos que el thumbnail sea string o undefined pero nunca null
-	const thumbnailUrl = (item.thumbnail && typeof item.thumbnail === 'string')
-		? item.thumbnail
-		: `/api/images/${item.id}/thumbnail`;
+	const thumbnailUrl =
+		item.thumbnail && typeof item.thumbnail === 'string' ? item.thumbnail : `/api/images/${item.id}/thumbnail`;
 
 	return (
 		<motion.div
@@ -290,13 +285,13 @@ const GridItem = memo<GridItemProps>(function GridItem({
 				'relative group cursor-pointer',
 				'w-48 h-52 rounded-lg overflow-hidden',
 				'border-2 transition-all duration-200',
-				isSelected
-					? 'border-blue-500 shadow-lg'
-					: 'border-transparent hover:border-gray-300'
+				isSelected ? 'border-blue-500 shadow-lg' : 'border-transparent hover:border-gray-300'
 			)}
 			onClick={onClick}
 			onDoubleClick={onDoubleClick}
-		>      {/* 🖼️ Miniatura */}
+		>
+			{' '}
+			{/* 🖼️ Miniatura */}
 			<div className="w-full h-40 bg-gray-100 rounded-t-lg overflow-hidden">
 				{item.type === 'image' ? (
 					imageError ? (
@@ -320,21 +315,13 @@ const GridItem = memo<GridItemProps>(function GridItem({
 					</div>
 				)}
 			</div>
-
 			{/* 📝 Información del archivo */}
 			<div className="p-3 bg-white">
-				<h3 className="text-sm font-medium text-gray-900 truncate">
-					{item.name}
-				</h3>
-				<p className="text-xs text-gray-500 mt-1">
-					{item.type.toUpperCase()}
-				</p>
+				<h3 className="text-sm font-medium text-gray-900 truncate">{item.name}</h3>
+				<p className="text-xs text-gray-500 mt-1">{item.type.toUpperCase()}</p>
 			</div>
-
 			{/* ✨ Overlay de selección */}
-			{isSelected && (
-				<div className="absolute inset-0 bg-blue-500 bg-opacity-10 pointer-events-none rounded-lg" />
-			)}
+			{isSelected && <div className="absolute inset-0 bg-blue-500 bg-opacity-10 pointer-events-none rounded-lg" />}
 		</motion.div>
 	);
 });

@@ -6,12 +6,12 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { NoteSchema } from '@/types/entities/note/schema';
 import type {
-    NoteBase,
-    NoteComplete,
-    NoteCreateInput,
-    NoteTags,
-    NoteTransformerOptions,
-    NoteUpdateInput,
+	NoteBase,
+	NoteComplete,
+	NoteCreateInput,
+	NoteTags,
+	NoteTransformerOptions,
+	NoteUpdateInput,
 } from '@/types/entities/note/types';
 import { TransformerError } from '@/utils/transformers/errors';
 
@@ -37,7 +37,7 @@ export function toPrismaNote(
 		}
 
 		// Base de datos para Prisma - crear una copia para evitar mutar el original
-                const { isFavorite, ...otherProps } = note as Record<string, any>;
+		const { isFavorite, ...otherProps } = note as Record<string, any>;
 
 		// Resultado base
 		const prismaData: Record<string, any> = { ...otherProps };
@@ -46,7 +46,6 @@ export function toPrismaNote(
 		if (isFavorite !== undefined) {
 			prismaData.favorite = isFavorite;
 		}
-
 
 		// Filtrar propiedades que no pertenecen al modelo Prisma
 		const filteredData: Record<string, any> = {};
@@ -100,7 +99,7 @@ export function fromPrismaNote(
 			noteComplete.isFavorite = prismaNote.favorite;
 		}
 
-                // No hay campos JSON adicionales que deserializar
+		// No hay campos JSON adicionales que deserializar
 
 		// Incluir relaciones si están presentes y habilitadas
 		if (includeRelations) {
@@ -230,11 +229,11 @@ export function extendNotes(
  * Objeto con las funciones de serialización para compatibilidad
  */
 export const NoteSerializer = {
-        toPrismaNote,
-        fromPrismaNote,
-        validateNote,
-        extendNote,
-        extendNotes,
+	toPrismaNote,
+	fromPrismaNote,
+	validateNote,
+	extendNote,
+	extendNotes,
 };
 
 // Exportar como default para compatibilidad

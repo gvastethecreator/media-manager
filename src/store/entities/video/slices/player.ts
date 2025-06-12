@@ -37,8 +37,8 @@ export interface VideoPlayerSlice {
 	setQuality: (quality: string) => void;
 
 	// Estado global
-        setPlayState: (state: VideoPlayState) => void;
-        getPlayState: () => VideoPlayState;
+	setPlayState: (state: VideoPlayState) => void;
+	getPlayState: () => VideoPlayState;
 
 	// Utilidades
 	getProgressPercentage: () => number;
@@ -215,14 +215,14 @@ export const createVideoPlayerSlice: StateCreator<VideoState, [], [], VideoPlaye
 	},
 
 	// Estado global
-        setPlayState: (playState: VideoPlayState) => {
-                set((state) => ({
-                        player: {
-                                ...state.player,
-                                playState,
-                        },
-                }));
-        },
+	setPlayState: (playState: VideoPlayState) => {
+		set((state) => ({
+			player: {
+				...state.player,
+				playState,
+			},
+		}));
+	},
 
 	getPlayState: () => {
 		return get().player.playState;

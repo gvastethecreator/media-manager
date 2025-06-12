@@ -232,7 +232,7 @@ export function UploadedImagesView() {
 						mimeType = `image/${meta.format.toLowerCase()}`;
 					}
 				}
-			} catch { }
+			} catch {}
 			// Asegurar que metadata es string JSON
 			const metadataString = typeof item.metadata === 'string' ? item.metadata : JSON.stringify(item.metadata || {});
 			return {

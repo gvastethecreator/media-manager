@@ -24,17 +24,17 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 };
 
 interface ConceptFilters {
-        category?: string;
-        search?: string;
-        sortBy?: 'createdAt' | 'name' | 'category';
-        sortOrder?: 'asc' | 'desc';
-        page?: number;
-        pageSize?: number;
+	category?: string;
+	search?: string;
+	sortBy?: 'createdAt' | 'name' | 'category';
+	sortOrder?: 'asc' | 'desc';
+	page?: number;
+	pageSize?: number;
 }
 
 interface ConceptStats {
-        total: number;
-        byCategory: Record<string, number>;
+	total: number;
+	byCategory: Record<string, number>;
 }
 
 interface ConceptResults {
@@ -133,8 +133,8 @@ export const ConceptService = {
 	},
 
 	async getConcepts(filters: ConceptFilters = {}): Promise<ConceptResults> {
-                try {
-                        const { category, search, sortBy = 'createdAt', sortOrder = 'desc', page = 0, pageSize = 50 } = filters;
+		try {
+			const { category, search, sortBy = 'createdAt', sortOrder = 'desc', page = 0, pageSize = 50 } = filters;
 
 			// Construir where
 			const where: Prisma.ConceptWhereInput = {};
@@ -148,7 +148,6 @@ export const ConceptService = {
 					{ description: { contains: search } },
 				];
 			}
-
 
 			// Obtener total
 			const total = await prisma.concept.count({ where });
@@ -189,10 +188,10 @@ export const ConceptService = {
 				_count: true,
 			});
 
-                        return {
-                                total,
-                                byCategory: Object.fromEntries(byCategory.map((item) => [item.category, item._count])),
-                        };
+			return {
+				total,
+				byCategory: Object.fromEntries(byCategory.map((item) => [item.category, item._count])),
+			};
 		} catch (error) {
 			conceptLogger.error('Error getting concept stats:', error);
 			throw new Error('Error al obtener estadísticas de conceptos');

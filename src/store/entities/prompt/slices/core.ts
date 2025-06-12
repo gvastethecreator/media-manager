@@ -41,7 +41,7 @@ const mockApi = {
 			content: prompt.content || '',
 			category: prompt.category || 'general',
 			parameters: prompt.parameters || '{}',
-			tags: prompt.tags || "[]",
+			tags: prompt.tags || '[]',
 			featuredImage: prompt.featuredImage || null,
 			isFavorite: prompt.isFavorite || false,
 			createdAt: new Date(),

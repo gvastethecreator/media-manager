@@ -25,11 +25,11 @@ export async function GET() {
 		// Verificar si el servidor ya está inicializado
 		const isServerAlreadyInitialized = await isServerInitialized();
 
-                if (!isServerAlreadyInitialized) {
-                        logger.info('Inicializando servidor desde ruta de API');
+		if (!isServerAlreadyInitialized) {
+			logger.info('Inicializando servidor desde ruta de API');
 
-                        // Inicializar servidor mediante la Server Action
-                        await initServer();
+			// Inicializar servidor mediante la Server Action
+			await initServer();
 
 			return NextResponse.json({
 				success: true,

@@ -5,13 +5,13 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    TagBase,
-    TagComplete,
-    TagCreateInput,
-    TagFilters,
-    TagSearchOptions,
-    TagSearchResult,
-    TagUpdateInput,
+	TagBase,
+	TagComplete,
+	TagCreateInput,
+	TagFilters,
+	TagSearchOptions,
+	TagSearchResult,
+	TagUpdateInput,
 } from '@/types/entities/tag/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { TransformerError } from '@/utils/transformers/errors';

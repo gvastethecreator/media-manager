@@ -17,36 +17,36 @@ export type UploadedImageType = UploadedFileType;
  * Schema for uploaded image validation
  */
 export const UploadedImageSchema = z.object({
-        ...BaseEntitySchema.shape,
-        ...MetadataFieldsSchema.shape,
-        name: z.string(),
-        path: z.string(),
-        type: z.nativeEnum(UploadedFileType),
-        category: z.string(),
-        hash: z.string(),
-        imageId: z.string(),
-        size: z.number(),
-        width: z.number(),
-        height: z.number(),
-        metadata: z.string().nullable().optional(),
-        uploadedAt: z.date(),
+	...BaseEntitySchema.shape,
+	...MetadataFieldsSchema.shape,
+	name: z.string(),
+	path: z.string(),
+	type: z.nativeEnum(UploadedFileType),
+	category: z.string(),
+	hash: z.string(),
+	imageId: z.string(),
+	size: z.number(),
+	width: z.number(),
+	height: z.number(),
+	metadata: z.string().nullable().optional(),
+	uploadedAt: z.date(),
 });
 
 /**
  * Base interface for uploaded images
  */
 export interface UploadedImageBase extends BaseEntity {
-        name: string;
-        path: string;
-        type: UploadedImageType;
-        category: string;
-        hash: string;
-        imageId: string;
-        size: number;
-        width: number;
-        height: number;
-        metadata?: string | null;
-        uploadedAt: Date;
+	name: string;
+	path: string;
+	type: UploadedImageType;
+	category: string;
+	hash: string;
+	imageId: string;
+	size: number;
+	width: number;
+	height: number;
+	metadata?: string | null;
+	uploadedAt: Date;
 }
 
 /**
@@ -70,14 +70,11 @@ export interface UploadedImageExtended extends UploadedImageBase {
 /**
  * Data required to create an uploaded image
  */
-export type UploadedImageCreateInput = Omit<
-        UploadedImageBase,
-        'id' | 'createdAt' | 'updatedAt' | 'hash' | 'imageId'
->;
+export type UploadedImageCreateInput = Omit<UploadedImageBase, 'id' | 'createdAt' | 'updatedAt' | 'hash' | 'imageId'>;
 
 /**
  * Data for updating an uploaded image
  */
 export type UploadedImageUpdateInput = Partial<
-        Omit<UploadedImageBase, 'id' | 'createdAt' | 'updatedAt' | 'hash' | 'imageId'>
+	Omit<UploadedImageBase, 'id' | 'createdAt' | 'updatedAt' | 'hash' | 'imageId'>
 >;

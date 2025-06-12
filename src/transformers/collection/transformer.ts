@@ -155,14 +155,7 @@ export function transformCollectionToWithStats(collection: CollectionComplete): 
 		const totalNotes = collection._count?.notes || 0;
 
 		const totalItems =
-			totalImages +
-			totalVideos +
-			totalAlbums +
-			totalTags +
-			totalGroups +
-			totalCharacters +
-			totalPlaces +
-			totalNotes;
+			totalImages + totalVideos + totalAlbums + totalTags + totalGroups + totalCharacters + totalPlaces + totalNotes;
 
 		return {
 			...collection,

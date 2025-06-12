@@ -9,8 +9,13 @@ import { transformImage, transformImageToExtended } from './transformer';
 
 // Exportar el transformador principal y utilidades canónicas
 export {
-    extendImage,
-    fromPrismaImage, mapImageToComplete, mapToImageSummaries, mapToImageSummary, parseImageFilters, transformImage,
-    transformImageToExtended, validateImage
+	extendImage,
+	fromPrismaImage,
+	mapImageToComplete,
+	mapToImageSummaries,
+	mapToImageSummary,
+	parseImageFilters,
+	transformImage,
+	transformImageToExtended,
+	validateImage,
 };
-

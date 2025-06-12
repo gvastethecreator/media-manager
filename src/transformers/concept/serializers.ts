@@ -6,12 +6,12 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { ConceptSchema } from '@/types/entities/concept/schema';
 import type {
-    ConceptBase,
-    ConceptComplete,
-    ConceptCounts,
-    ConceptDeserialized,
-    ConceptRelations,
-    ConceptUI,
+	ConceptBase,
+	ConceptComplete,
+	ConceptCounts,
+	ConceptDeserialized,
+	ConceptRelations,
+	ConceptUI,
 } from '@/types/entities/concept/types';
 import type { Prisma } from '@prisma/client';
 

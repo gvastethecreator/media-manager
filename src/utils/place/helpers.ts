@@ -110,17 +110,15 @@ export function filterPlaces(places: Place[], filters: PlaceFilters): Place[] {
 			}
 		}
 
-
-
 		// Filtrar por rango de población
-                if (place.population !== null && filters.populationRange) {
-                        if (filters.populationRange.min !== undefined && place.population < filters.populationRange.min) {
-                                return false;
-                        }
-                        if (filters.populationRange.max !== undefined && place.population > filters.populationRange.max) {
-                                return false;
-                        }
-                }
+		if (place.population !== null && filters.populationRange) {
+			if (filters.populationRange.min !== undefined && place.population < filters.populationRange.min) {
+				return false;
+			}
+			if (filters.populationRange.max !== undefined && place.population > filters.populationRange.max) {
+				return false;
+			}
+		}
 
 		// Filtrar por favoritos
 		if (filters.onlyFavorites && !place.isFavorite) {

@@ -18,9 +18,9 @@ import { deleteConcept as deleteConceptAction } from './concept-delete.actions';
 
 // Importar acciones para la gestión de imágenes relacionadas
 import {
-    addConceptImage as addConceptImageAction,
-    getConceptImages as getConceptImagesAction,
-    removeConceptImage as removeConceptImageAction,
+	addConceptImage as addConceptImageAction,
+	getConceptImages as getConceptImagesAction,
+	removeConceptImage as removeConceptImageAction,
 } from './concept-images.actions';
 
 // Re-exportar funciones individuales - Acciones básicas

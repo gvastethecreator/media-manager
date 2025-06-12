@@ -17,14 +17,14 @@ export function generateNoteId(): string {
  * @returns Array de notas filtradas
  */
 export function filterNotes(notes: NoteComplete[], filters: NoteFilters): NoteComplete[] {
-        return notes.filter((note) => {
-                const parsedTags = (note as any).parsedTags || deserializeTags(note.tags);
+	return notes.filter((note) => {
+		const parsedTags = (note as any).parsedTags || deserializeTags(note.tags);
 
-                // Filtro por búsqueda en título y contenido
-                if (filters.searchQuery && filters.searchQuery.trim() !== '') {
-                        const search = filters.searchQuery.toLowerCase();
-                        const matchesTitle = note.title.toLowerCase().includes(search);
-                        const matchesContent = (note.content || '').toLowerCase().includes(search);
+		// Filtro por búsqueda en título y contenido
+		if (filters.searchQuery && filters.searchQuery.trim() !== '') {
+			const search = filters.searchQuery.toLowerCase();
+			const matchesTitle = note.title.toLowerCase().includes(search);
+			const matchesContent = (note.content || '').toLowerCase().includes(search);
 
 			if (!matchesTitle && !matchesContent) {
 				return false;
@@ -32,27 +32,27 @@ export function filterNotes(notes: NoteComplete[], filters: NoteFilters): NoteCo
 		}
 
 		// Filtro por categoría
-                if (filters.categories && filters.categories.length > 0 && !filters.categories.includes(note.category)) {
-                        return false;
-                }
+		if (filters.categories && filters.categories.length > 0 && !filters.categories.includes(note.category)) {
+			return false;
+		}
 
-                // Filtro por estado
-                if (filters.statuses && filters.statuses.length > 0 && !filters.statuses.includes(note.status)) {
-                        return false;
-                }
+		// Filtro por estado
+		if (filters.statuses && filters.statuses.length > 0 && !filters.statuses.includes(note.status)) {
+			return false;
+		}
 
-                // Filtro por prioridad
-                if (filters.priorities && filters.priorities.length > 0 && !filters.priorities.includes(note.priority)) {
-                        return false;
-                }
+		// Filtro por prioridad
+		if (filters.priorities && filters.priorities.length > 0 && !filters.priorities.includes(note.priority)) {
+			return false;
+		}
 
-                // Filtro por tags
-                if (filters.hasTags && parsedTags.length === 0) {
-                        return false;
-                }
-                if (filters.contentContains && !note.content.toLowerCase().includes(filters.contentContains.toLowerCase())) {
-                        return false;
-                }
+		// Filtro por tags
+		if (filters.hasTags && parsedTags.length === 0) {
+			return false;
+		}
+		if (filters.contentContains && !note.content.toLowerCase().includes(filters.contentContains.toLowerCase())) {
+			return false;
+		}
 
 		// Filtro por favoritos
 		if (filters.onlyFavorites && !note.isFavorite) {
@@ -60,10 +60,10 @@ export function filterNotes(notes: NoteComplete[], filters: NoteFilters): NoteCo
 		}
 
 		// Filtro por rango de fechas
-                // Nota: NoteFilters actual no incluye rango de fechas
+		// Nota: NoteFilters actual no incluye rango de fechas
 
-                return true;
-        });
+		return true;
+	});
 }
 
 /**
@@ -73,7 +73,7 @@ export function filterNotes(notes: NoteComplete[], filters: NoteFilters): NoteCo
  * @returns Array de notas ordenadas
  */
 export function sortNotes(notes: NoteComplete[], sortBy: NoteSortOption): NoteComplete[] {
-        const sorters: Record<NoteSortOption, (a: NoteComplete, b: NoteComplete) => number> = {
+	const sorters: Record<NoteSortOption, (a: NoteComplete, b: NoteComplete) => number> = {
 		title_asc: (a, b) => a.title.localeCompare(b.title),
 		title_desc: (a, b) => b.title.localeCompare(a.title),
 		created_asc: (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
@@ -98,8 +98,8 @@ export function sortNotes(notes: NoteComplete[], sortBy: NoteSortOption): NoteCo
  * @returns Objeto con las notas agrupadas por la propiedad
  */
 export function groupNotesByProperty<K extends keyof NoteBase>(
-        notes: NoteComplete[],
-        property: K
+	notes: NoteComplete[],
+	property: K
 ): Record<string, NoteComplete[]> {
 	return notes.reduce(
 		(groups, note) => {
@@ -110,7 +110,7 @@ export function groupNotesByProperty<K extends keyof NoteBase>(
 			groups[key].push(note);
 			return groups;
 		},
-                {} as Record<string, NoteComplete[]>
+		{} as Record<string, NoteComplete[]>
 	);
 }
 

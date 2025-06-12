@@ -19,16 +19,16 @@ jest.mock('nanoid');
 // Mock de fetch para pruebas
 global.fetch = jest.fn() as unknown as jest.MockedFunction<typeof fetch>;
 (global.fetch as jest.MockedFunction<typeof fetch>).mockResolvedValue({
-        ok: true,
-        json: async () => ({}),
-        text: async () => '',
-        blob: async () => new Blob(),
+	ok: true,
+	json: async () => ({}),
+	text: async () => '',
+	blob: async () => new Blob(),
 } as Response);
 
 // Mock global mínimo de Request para evitar ReferenceError en tests que importan next/cache
 if (typeof global.Request === 'undefined') {
-        // Simplified mock of Request used only for tests
-        global.Request = class MockRequest {
+	// Simplified mock of Request used only for tests
+	global.Request = class MockRequest {
 		headers = {};
 		method = '';
 		url = '';
@@ -65,7 +65,7 @@ if (typeof global.Request === 'undefined') {
 		bytes() {
 			return Promise.resolve(new Uint8Array());
 		}
-        } as unknown as typeof Request;
+	} as unknown as typeof Request;
 }
 
 // Mock global de prisma para evitar errores en tests que importan código de servidor
