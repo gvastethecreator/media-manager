@@ -1,12 +1,12 @@
 'use server';
 
-import * as path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { uploadedImagesService } from '@/services/uploaded-images';
 import type { UploadedImageCreateInput, UploadedImageType } from '@/types/entities/uploaded-image';
 import type { UploadedImageFilters } from '@/types/uploaded-images';
 import { mkdir, writeFile } from 'fs/promises';
 import { revalidatePath } from 'next/cache';
+import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 const actionLogger = serverLogger.withContext('ServerAction:UploadedImages');
@@ -143,12 +143,12 @@ export async function uploadImages(formData: FormData) {
 function ensureThumbnailsAreStrings(data: any): any {
 	// Si es null o no es objeto
 	if (!data || typeof data !== 'object') return data;
-	
+
 	// Si es array
 	if (Array.isArray(data)) {
 		return data.map(item => ensureThumbnailsAreStrings(item));
 	}
-	
+
 	// Si es un Uint8Array/Buffer
 	if (data instanceof Uint8Array || (typeof Buffer !== 'undefined' && data instanceof Buffer)) {
 		try {
@@ -157,13 +157,13 @@ function ensureThumbnailsAreStrings(data: any): any {
 			return null;
 		}
 	}
-	
+
 	// Para objetos normales
 	const result = { ...data };
 	for (const key in result) {
 		if (Object.prototype.hasOwnProperty.call(result, key)) {
 			// Si la clave parece un thumbnail y es binario
-			if ((key === 'thumbnail' || key.includes('thumbnail')) && 
+			if ((key === 'thumbnail' || key.includes('thumbnail')) &&
 				(result[key] instanceof Uint8Array || (typeof Buffer !== 'undefined' && result[key] instanceof Buffer))) {
 				try {
 					const mimeType = result.thumbnailMimeType || 'image/webp';
@@ -318,21 +318,21 @@ function ensureSerializable<T>(obj: T): T {
 
 	// Para objetos normales (no Date, RegExp, etc.)
 	if (obj && typeof obj === 'object' &&
-		!(obj instanceof Date) && 
-		!(obj instanceof RegExp) && 
-		!(obj instanceof Map) && 
+		!(obj instanceof Date) &&
+		!(obj instanceof RegExp) &&
+		!(obj instanceof Map) &&
 		!(obj instanceof Set)) {
-		
+
 		// Crear copia para no modificar el original
 		const result = { ...obj } as Record<string, any>;
-		
+
 		// Procesar cada propiedad recursivamente
 		for (const key in result) {
 			if (Object.prototype.hasOwnProperty.call(result, key)) {
 				result[key] = ensureSerializable(result[key]);
 			}
 		}
-		
+
 		return result as unknown as T;
 	}
 
