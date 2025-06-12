@@ -1,44 +1,43 @@
-
 /**
- * @file Tipos base para la entidad Character derivados directamente de Prisma
+ * @file Tipos base para la entidad Character
  * @module types/entities/character/base
  */
 import { z } from 'zod';
 
 /**
- * Tipo base para Character alineado con el modelo Prisma
+ * 🧑‍🎤 Tipo base para Character, solo campos canónicos y serializables
  */
 export interface CharacterBase {
-       id: string;
-       name: string;
-       emoji: string;
-       color: string;
-       description?: string | null;
-       shortcut?: string | null;
-       category?: string | null;
-       sortBy: string;
-       filters: string;
-       level: number;
-       class: string;
-       race: string;
-       type?: string | null;
-       alignment: string;
-       backstory: string;
-       stats: string;
-       psychologicalProfile: string;
-       socialProfile: string;
-       relationships: string;
-       goals: string;
-       fears: string;
-       beliefs: string;
-       personality: string;
-       skills: string;
-       abilities: string;
-       featuredImage?: string | null;
-       isFavorite: boolean;
-       createdAt: Date;
-       updatedAt: Date;
-       presetId?: string | null;
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	sortBy: string;
+	filters: string;
+	level: number;
+	class: string;
+	race: string;
+	type?: string | null;
+	alignment: string;
+	backstory: string;
+	stats: string;
+	psychologicalProfile: string;
+	socialProfile: string;
+	relationships: string;
+	goals: string;
+	fears: string;
+	beliefs: string;
+	personality: string;
+	skills: string;
+	abilities: string;
+	featuredImage?: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	presetId?: string | null;
 }
 
 /**
@@ -65,24 +64,10 @@ export interface UpdateCharacterData {
 	emoji?: string;
 	color?: string;
 	description?: string;
-	shortcut?: string;
-	level?: number;
 	class?: string;
 	race?: string;
 	alignment?: string;
-	backstory?: string;
-	stats?: string;
-	sortBy?: string;
-	filters?: string;
-	psychologicalProfile?: string;
-	socialProfile?: string;
-	relationships?: string;
-	goals?: string;
-	fears?: string;
-	beliefs?: string;
-	personality?: string;
-	featuredImage?: string;
-	isFavorite?: boolean;
+	level?: number;
 	presetId?: string | null;
 	category?: string;
 }

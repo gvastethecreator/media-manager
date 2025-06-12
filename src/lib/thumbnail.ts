@@ -1,8 +1,8 @@
-import { createHash } from 'crypto';
-import { promises as fs, existsSync } from 'fs';
-import { extname, join } from 'path';
 import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { createHash } from 'crypto';
+import { existsSync, promises as fs } from 'fs';
+import { extname, join } from 'path';
 import sharp from 'sharp';
 import type { ImageFormat } from './image';
 import { formatBytes } from './utils/format.utils';
@@ -175,7 +175,17 @@ export async function generateThumbnail(
 	options: Partial<ThumbnailOptions> = {}
 ): Promise<ThumbnailResult> {
 	try {
-		// Validar archivo
+		// 🟡 Logging detallado para depuración de acceso a archivos y permisos
+		thumbLogger.info('🔍 Verificando acceso al archivo para thumbnail:', filePath);
+		thumbLogger.info('🟡 existsSync:', existsSync(filePath));
+		try {
+			await fs.access(filePath, fs.constants.R_OK);
+			thumbLogger.info('🟢 Permiso de lectura OK para:', filePath);
+		} catch (permError) {
+			thumbLogger.error('🔴 Sin permiso de lectura para:', filePath, permError instanceof Error ? permError.message : String(permError));
+		}
+		thumbLogger.info('🟡 Usuario proceso:', process.env.USERNAME || process.env.USER || (typeof process.getuid === 'function' ? process.getuid() : 'N/A'));
+
 		if (!existsSync(filePath)) {
 			thumbLogger.error(`Archivo no encontrado: ${filePath}`);
 			throw new Error(`Archivo no encontrado: ${filePath}`);

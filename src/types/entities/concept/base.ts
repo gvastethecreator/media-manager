@@ -1,15 +1,23 @@
-import type { Prisma } from '@prisma/client';
-import type { EntityType } from '../entities';
-
 /**
- * Tipo base para Concept derivado del schema de Prisma
+ * 💡 Tipo base para Concept, solo campos canónicos y serializables
  */
-export type ConceptBase = Prisma.ConceptGetPayload<{
-	include: { _count: true };
-}>;
+export interface ConceptBase {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	content?: string;
+	category?: string;
+	tags?: string | string[];
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
 
 /**
- * Interfaz para crear un nuevo concepto
+ * Datos para crear un concepto
  */
 export interface ConceptCreateInput {
 	name: string;
@@ -24,7 +32,7 @@ export interface ConceptCreateInput {
 }
 
 /**
- * Interfaz para actualizar un concepto existente
+ * Datos para actualizar un concepto
  */
 export interface ConceptUpdateInput {
 	id: string;
@@ -40,16 +48,16 @@ export interface ConceptUpdateInput {
 }
 
 /**
- * Tipo para la relación de concepto con otras entidades
+ * Relación de concepto con otras entidades
  */
 export interface ConceptRelation {
 	entityId: string;
-	entityType: EntityType;
+	entityType: string;
 	conceptId: string;
 }
 
 /**
- * Interfaz para estadísticas de un concepto
+ * Estadísticas de un concepto
  */
 export interface ConceptStats {
 	characters: number;
@@ -60,4 +68,4 @@ export interface ConceptStats {
 	images: number;
 }
 
-// --- Eliminada la interfaz ConceptWithStats por incompatibilidad de tipos y herencia ---
+// ✅ ConceptBase ahora es seguro y serializable para frontend/backend.

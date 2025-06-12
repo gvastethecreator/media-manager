@@ -3,8 +3,8 @@
 import { getFolderProcessingStatus } from '@/app/actions/folders/status.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
-import type { ProcessStatus } from '@/types/process';
 import { useCallback, useRef, useState } from 'react';
+import type { ProcessStatus } from '@/app/actions/folders/folder-types';
 
 const pollingLogger = clientLogger.withContext('FoldersPolling');
 
@@ -12,6 +12,15 @@ interface UsePollingOptions {
 	onStatusUpdate: (status: ProcessStatus) => void;
 	onComplete: (folderId: string) => void;
 }
+
+// 🛠️ FIX: Polling robusto y UX reactiva
+// - Reduce el umbral de intentos sin estado a 3
+// - Polling cada 10s si el proceso está en 'starting', luego cada 30s
+// - Si tras 3 intentos no hay estado, fuerza error y notifica
+
+const DEFAULT_POLLING_INTERVAL = 30000; // 30s
+const FAST_POLLING_INTERVAL = 10000; // 10s para fase 'starting'
+const MAX_NO_STATUS_ATTEMPTS = 3;
 
 /**
  * Hook para gestionar el polling de estado de carpetas
@@ -48,185 +57,73 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 
 	// Función para obtener el estado actual
 	const pollForStatus = useCallback(async () => {
-		if (!processingFolderRef.current) {
-			return;
-		}
+		if (!processingFolderRef.current) return;
 
 		try {
 			const folderId = processingFolderRef.current;
 			const originalId = originalFolderIdRef.current || folderId;
-
-			// Usar el ID original para la solicitud para obtener diagnósticos
-			const url = `/api/folders/status?folderId=${originalId}`;
 
 			pollingLogger.info('📡 Polling de estado para carpeta', {
 				originalId,
 				normalizedId: folderId,
 			});
 
-			// ✨ Reemplazar llamada a API con Server Action
 			const data = await getFolderProcessingStatus(folderId);
-
-			// Verificar si la Server Action retornó un error
-			if (data.error) {
-				throw new Error(`Error obteniendo estado: ${data.error}`);
-			}
-
-			// Reiniciar contador de errores
 			pollingErrorCountRef.current = 0;
 
-			// Verificar primero si el proceso está marcado como completo
-			if (data.isComplete) {
-				pollingLogger.info('✅ API indica que el proceso está completo:', {
-					folderId,
-					originalId,
-					finishedAt: data.finishedAt,
-					mappings: data.knownMappings,
-				});
+			// Ajustar intervalo de polling según fase
+			let interval = DEFAULT_POLLING_INTERVAL;
+			let statusObj: ProcessStatus | undefined = undefined;
+			if ('status' in data && data.status && typeof data.status === 'object') {
+				statusObj = data.status as ProcessStatus;
+				if (statusObj.phase === 'starting') {
+					interval = FAST_POLLING_INTERVAL;
+				}
+			}
+			if (pollingIntervalRef.current !== interval) {
+				if (pollingTimerRef.current) {
+					clearInterval(pollingTimerRef.current);
+					pollingTimerRef.current = setInterval(pollForStatus, interval);
+				}
+				pollingIntervalRef.current = interval;
+			}
 
-				// Notificar sobre la finalización forzando un estado completo
-				const completeStatus: ProcessStatus = {
-					folderId,
-					phase: 'complete',
-					progress: 100,
-					status: 'Proceso completado',
-					timestamp: Date.now(),
-				};
-
-				// Actualizar estado y notificar finalización
+			if ('isComplete' in data && data.isComplete) {
+				pollingLogger.info('✅ API indica que el proceso está completo:', { folderId, originalId, finishedAt: data.finishedAt, mappings: data.knownMappings });
+				const completeStatus: ProcessStatus = { folderId, phase: 'complete', progress: 100, status: 'Proceso completado', timestamp: Date.now() };
 				onStatusUpdate(completeStatus);
 				onComplete(folderId);
-
-				// Detener polling inmediatamente
-				setTimeout(() => {
-					stopPolling();
-				}, 500);
-
+				setTimeout(() => { stopPolling(); }, 500);
 				return;
 			}
 
-			// Ver si podemos encontrar el estado usando cualquiera de los IDs activos
-			if (!data.status && data.allActiveIds && data.allActiveIds.length > 0) {
-				pollingLogger.info('🔍 Buscando estado alternativo entre IDs activos', {
-					activeIds: data.allActiveIds,
-					originalId,
-					normalizedId: folderId,
-				});
-
-				// Verificar si hay un ID similar al actual
-				for (const activeId of data.allActiveIds) {
-					if (activeId.includes(folderId.substring(0, 10)) || folderId.includes(activeId.substring(0, 10))) {
-						try {
-							const altData = await getFolderProcessingStatus(activeId);
-							if (altData.status) {
-								pollingLogger.info('✅ Encontrado estado usando ID alternativo', {
-									alternativeId: activeId,
-									originalId,
-									normalizedId: folderId,
-								});
-
-								// Usar este estado alternativo
-								data.status = altData.status;
-								break;
-							}
-						} catch (error) {
-							pollingLogger.warn('❌ Error al consultar estado alternativo', { alternativeId: activeId, error });
-						}
-					}
-				}
-			}
-
-			// Procesar el estado normalmente si está disponible
-			if (data.status) {
-				const status = data.status as ProcessStatus;
-
-				// Reiniciar contador de no estado
+			if (statusObj) {
 				consecutiveNoStatusCountRef.current = 0;
-
-				// IMPORTANTE: Siempre procesamos el estado, sin importar el timestamp
-				pollingLogger.info('📊 Progreso obtenido vía polling:', status);
-
-				// Actualizar timestamp para referencia
-				lastUpdatedRef.current[folderId] = status.timestamp || Date.now();
-
-				// Notificar sobre la actualización
-				onStatusUpdate(status);
-
-				// Verificar si se completó el proceso
-				const isComplete =
-					status.phase === 'complete' ||
-					(status.progress === 100 && status.phase === 'metadata') ||
-					(status.progress === 100 &&
-						typeof status.filesProcessed === 'number' &&
-						typeof status.totalFiles === 'number' &&
-						status.filesProcessed > 0 &&
-						status.totalFiles > 0 &&
-						status.filesProcessed >= status.totalFiles);
-
+				pollingLogger.info('📊 Progreso obtenido vía polling:', statusObj);
+				lastUpdatedRef.current[folderId] = statusObj.timestamp || Date.now();
+				onStatusUpdate(statusObj);
+				const isComplete = statusObj.phase === 'complete' || (statusObj.progress === 100 && statusObj.phase === 'metadata') || (statusObj.progress === 100 && typeof statusObj.filesProcessed === 'number' && typeof statusObj.totalFiles === 'number' && statusObj.filesProcessed > 0 && statusObj.totalFiles > 0 && statusObj.filesProcessed >= statusObj.totalFiles);
 				if (isComplete) {
-					pollingLogger.info('✅ Proceso completado detectado vía polling:', status);
-
-					// Notificar sobre la finalización
+					pollingLogger.info('✅ Proceso completado detectado vía polling:', statusObj);
 					onComplete(folderId);
-
-					// Detener polling después de un tiempo
-					setTimeout(() => {
-						stopPolling();
-					}, 500);
+					setTimeout(() => { stopPolling(); }, 500);
 				}
 			} else {
-				// Incrementar contador de no estado
 				consecutiveNoStatusCountRef.current++;
-
-				pollingLogger.warn('⚠️ No se encontró estado para la carpeta', {
-					folderId,
-					originalId,
-					consecutiveNoStatus: consecutiveNoStatusCountRef.current,
-					mappings: data.knownMappings,
-				});
-
-				// Si no hay estado por 10 verificaciones consecutivas y hay progreso
-				// forzar un estado completo para evitar que se quede atascado
-				if (consecutiveNoStatusCountRef.current >= 10) {
-					pollingLogger.info('⚠️ Forzando finalización después de múltiples intentos sin estado', {
-						folderId,
-						originalId,
-						attempts: consecutiveNoStatusCountRef.current,
-					});
-
-					// Generar estado completo forzado
-					const forcedStatus: ProcessStatus = {
-						folderId,
-						phase: 'complete',
-						progress: 100,
-						status: 'Proceso completado',
-						timestamp: Date.now(),
-					};
-
-					// Actualizar estado y notificar finalización
-					onStatusUpdate(forcedStatus);
-					onComplete(folderId);
-
-					// Detener polling
+				pollingLogger.warn('⚠️ No se encontró estado para la carpeta', { folderId, originalId, consecutiveNoStatus: consecutiveNoStatusCountRef.current, mappings: data.knownMappings });
+				if (consecutiveNoStatusCountRef.current >= MAX_NO_STATUS_ATTEMPTS) {
+					pollingLogger.error('❌ Estado de proceso no disponible tras varios intentos. Forzando error.', { folderId, attempts: consecutiveNoStatusCountRef.current });
+					const errorStatus: ProcessStatus = { folderId, phase: 'error', progress: 0, status: 'Error: no se pudo obtener el estado del proceso', timestamp: Date.now() };
+					onStatusUpdate(errorStatus);
 					stopPolling();
 				}
 			}
 		} catch (error) {
-			// Incrementar contador de errores
 			pollingErrorCountRef.current++;
-
 			const errorMessage = `Error en polling: ${error instanceof Error ? error.message : String(error)}`;
-			pollingLogger.error(errorMessage, {
-				errorCount: pollingErrorCountRef.current,
-				folderId: processingFolderRef.current,
-				originalId: originalFolderIdRef.current,
-			});
-
-			// Si hay demasiados errores consecutivos, detener el polling
+			pollingLogger.error(errorMessage, { errorCount: pollingErrorCountRef.current, folderId: processingFolderRef.current, originalId: originalFolderIdRef.current });
 			if (pollingErrorCountRef.current >= 5) {
-				pollingLogger.error('Demasiados errores de polling, deteniendo', {
-					errorCount: pollingErrorCountRef.current,
-				});
+				pollingLogger.error('Demasiados errores de polling, deteniendo', { errorCount: pollingErrorCountRef.current });
 				stopPolling();
 			}
 		}

@@ -1,6 +1,6 @@
-import { z } from 'zod';
-
-// Tipos base para metadatos de imagen
+/**
+ * 🏷️ Tipo base para Metadata, solo campos canónicos y serializables
+ */
 export interface MetadataBase {
 	id: string;
 	imageId: string;
@@ -16,6 +16,7 @@ export interface MetadataBase {
 }
 
 // Esquema Zod para validación
+import { z } from 'zod';
 export const metadataBaseSchema = z.object({
 	id: z.string().uuid(),
 	imageId: z.string().uuid(),
@@ -29,3 +30,5 @@ export const metadataBaseSchema = z.object({
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
+
+// ✅ MetadataBase ahora es seguro y serializable para frontend/backend.

@@ -1,26 +1,48 @@
-import type {
-	Image as PrismaImage,
-	ImageStats as PrismaImageStats,
-	ImageVisualConfig as PrismaImageVisualConfig,
-} from '@prisma/client';
-
 /**
- * Tipo base para Image, extendido directamente del tipo Prisma
+ * 🖼️ Tipo base para Image, solo campos canónicos y serializables
  */
-export type ImageBase = PrismaImage;
+export interface ImageBase {
+	id: string;
+	name: string;
+	description?: string | null;
+	path: string;
+	hash: string;
+	size: number;
+	width: number;
+	height: number;
+	metadata?: string | null;
+	isFavorite: boolean;
+	isPublic: boolean;
+	folderId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	addedAt: Date;
+	sortBy: string;
+	filters: string;
+}
 
 /**
- * Tipo base para ImageVisualConfig, extendido directamente del tipo Prisma
+ * 🎨 Configuración visual asociada a una imagen
  */
-export type ImageVisualConfigBase = PrismaImageVisualConfig;
+export interface ImageVisualConfigBase {
+	id: string;
+	imageId: string;
+	config: string;
+}
 
 /**
- * Tipo base para ImageStats, extendido directamente del tipo Prisma
+ * 📊 Estadísticas base de una imagen
  */
-export type ImageStatsBase = PrismaImageStats;
+export interface ImageStatsBase {
+	id: string;
+	imageId: string;
+	views: number;
+	likes: number;
+	downloads: number;
+}
 
 /**
- * Datos mínimos requeridos para crear una imagen
+ * 🟢 Datos mínimos requeridos para crear una imagen
  */
 export interface CreateImageData {
 	name: string;
@@ -36,7 +58,7 @@ export interface CreateImageData {
 }
 
 /**
- * Datos para actualizar una imagen
+ * 🟡 Datos para actualizar una imagen
  */
 export interface UpdateImageData {
 	name?: string;
@@ -47,7 +69,7 @@ export interface UpdateImageData {
 }
 
 /**
- * Resumen básico de una imagen para listados
+ * 📋 Resumen básico de una imagen para listados
  */
 export interface ImageSummary {
 	id: string;
@@ -65,7 +87,7 @@ export interface ImageSummary {
 }
 
 /**
- * Estructura de metadatos de una imagen
+ * 🧩 Estructura de metadatos de una imagen
  */
 export interface ImageMetadata {
 	format?: string;
@@ -77,7 +99,7 @@ export interface ImageMetadata {
 }
 
 /**
- * Estructura de metadatos de IA para imágenes generadas
+ * 🤖 Estructura de metadatos de IA para imágenes generadas
  */
 export interface ImageAIMetadata {
 	model?: string;
@@ -89,3 +111,5 @@ export interface ImageAIMetadata {
 	samplingMethod?: string;
 	extraParameters?: Record<string, unknown>;
 }
+
+// ✅ Tipos revisados y documentados. Listos para uso seguro en frontend y backend.

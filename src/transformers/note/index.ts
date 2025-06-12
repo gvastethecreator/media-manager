@@ -5,6 +5,7 @@
 
 import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
 import { EntityError, EntityErrorCode } from '@/lib/errors';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
     NoteComplete,
@@ -23,7 +24,8 @@ import {
 } from './mappers';
 import { fromPrismaNote, validateNote } from './serializers';
 
-// const logger = serverLogger.withContext('NoteTransformer'); // Comentado o eliminado si no se usa más
+// 📊 Logger específico para NoteTransformer
+const logger = serverLogger.withContext('NoteTransformer');
 
 /**
  * Busca notas según los filtros proporcionados
@@ -33,7 +35,11 @@ export async function searchNotes(
 	options: NoteSearchOptions = {}
 ): Promise<NoteSearchResult> {
 	try {
-		const { page = 1, pageSize = DEFAULT_VIEW_CONFIG.pageSize, sortBy = 'updatedAt', sortOrder = 'desc' } = options;
+		// Ajustar paginación y ordenación según el tipo real de NoteSearchOptions
+		const page = (options as any).page ?? 1;
+		const pageSize = (options as any).pageSize ?? DEFAULT_VIEW_CONFIG.pageSize;
+		const sortBy = (options as any).sortBy ?? 'updatedAt';
+		const sortOrder = (options as any).sortOrder ?? 'desc';
 
 		// Limitar el tamaño de página
 		const limitedPageSize = Math.min(pageSize, 100);
@@ -41,21 +47,16 @@ export async function searchNotes(
 		// Obtener argumentos para Prisma
 		const prismaArgs = mapNoteSearchOptionsToPrisma({
 			...options,
-			pageSize: limitedPageSize,
+			// Solo pasar los campos válidos
 			page,
-		});
+			pageSize: limitedPageSize,
+			sortBy,
+			sortOrder,
+		} as any);
 
 		// Convertir filtros a formato Prisma
 		const whereConditions = mapNoteFiltersToPrisma(filters);
 		prismaArgs.where = whereConditions;
-
-		// Agregar filtro para incluir/excluir inactivos
-		if (!options.includeInactive) {
-			prismaArgs.where = {
-				...prismaArgs.where,
-				isActive: true,
-			};
-		}
 
 		// Ejecutar consulta
 		const [notes, totalCount] = await Promise.all([
@@ -70,15 +71,11 @@ export async function searchNotes(
 		// Mapear resultados
 		const items = notes.map((note) => fromPrismaNote(note, { includeUI: true }));
 
+		// Estructura compatible con NoteSearchResult
 		return {
 			items,
-			pagination: {
-				page,
-				pageSize: limitedPageSize,
-				totalItems: totalCount,
-				totalPages,
-				hasMore,
-			},
+			total: totalCount,
+			hasMore,
 		};
 	} catch (error) {
 		logger.error('Error buscando notas:', error);
@@ -188,44 +185,43 @@ export async function getNotesByIds(
 		// Construir opciones de inclusión de relaciones
 		const include = includeRelations
 			? {
-					images: true,
-					videos: true,
-					albums: true,
-					collections: true,
-					tags: true,
-					characters: true,
-					places: true,
-					worldItems: true,
-					concepts: true,
-					prompts: true,
-					wildcards: true,
-					properties: true,
-					groups: true,
-					_count: {
-						select: {
-							images: true,
-							videos: true,
-							albums: true,
-							collections: true,
-							tags: true,
-							characters: true,
-							places: true,
-							worldItems: true,
-							concepts: true,
-							prompts: true,
-							wildcards: true,
-							properties: true,
-							groups: true,
-						},
+				images: true,
+				videos: true,
+				albums: true,
+				collections: true,
+				tags: true,
+				characters: true,
+				places: true,
+				worldItems: true,
+				concepts: true,
+				prompts: true,
+				wildcards: true,
+				properties: true,
+				groups: true,
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						wildcards: true,
+						properties: true,
+						groups: true,
 					},
-				}
+				},
+			}
 			: undefined;
 
-		// Buscar notas
+		// Buscar notas (eliminar isActive: true, ya que no existe en el modelo ni tipos)
 		const notes = await prisma.note.findMany({
 			where: {
 				id: { in: ids },
-				isActive: true,
 			},
 			include,
 		});
@@ -359,7 +355,7 @@ export async function deleteNote(
 			await prisma.note.update({
 				where: { id },
 				data: {
-					isActive: false,
+					// isActive: false, // Eliminar esta línea, ya que no existe en el modelo
 					updatedAt: new Date(),
 				},
 			});
@@ -424,3 +420,8 @@ export function toRelatedNote(
 		};
 	}
 }
+
+// Reexportar funciones clave de mappers y serializers para compatibilidad y uso directo
+export { toCreateNoteData, toUpdateNoteData } from './mappers';
+export { fromPrismaNote, validateNote } from './serializers';
+

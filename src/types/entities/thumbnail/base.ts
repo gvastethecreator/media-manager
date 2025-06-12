@@ -42,7 +42,7 @@ export enum ThumbnailPosition {
 }
 
 /**
- * Interfaz base para Thumbnail
+ * 🖼️ Tipo base para Thumbnail, solo campos canónicos y serializables
  */
 export interface ThumbnailBase {
 	id: string;
@@ -108,3 +108,5 @@ export const thumbnailBaseSchema = z.object({
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
+
+// ✅ ThumbnailBase ahora es seguro y serializable para frontend/backend.
