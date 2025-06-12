@@ -528,4 +528,3 @@ graph TD
 
 > Última actualización: 2025-06-10
 > Responsable: get-folder-images.actions.ts
-

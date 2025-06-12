@@ -8,6 +8,7 @@ Este módulo contiene el hook principal `useFolders` y los hooks auxiliares para
 - **Ubicación:** `src/components/settings/folders/hooks/`
 
 ## Hooks incluidos
+
 - `useFolders`: Hook principal, orquesta todo el flujo de carpetas.
 - `useFoldersState`: Estado y acciones locales (folders, stats, errores).
 - `useFoldersPolling`: Polling seguro para estado de procesos.
@@ -41,11 +42,13 @@ function FoldersSettings() {
 ```
 
 ## Best practices
+
 - Siempre validar con Zod antes de persistir datos.
 - Usar los tipos canónicos de `@/app/actions/folders/folder-types.ts`.
 - No importar tipos de Prisma en ningún archivo cliente.
 - Documentar cualquier cambio relevante en este README.
 
 ## Referencias
+
 - [Transformers de Folder](../../../transformers/folder/README.md)
 - [Arquitectura de eventos](../../../lib/events/README.md)

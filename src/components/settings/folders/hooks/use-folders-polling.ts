@@ -1,10 +1,10 @@
 'use client';
 
+import type { ProcessStatus } from '@/app/actions/folders/folder-types';
 import { getFolderProcessingStatus } from '@/app/actions/folders/status.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
 import { useCallback, useRef, useState } from 'react';
-import type { ProcessStatus } from '@/app/actions/folders/folder-types';
 
 const pollingLogger = clientLogger.withContext('FoldersPolling');
 
