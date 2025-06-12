@@ -428,3 +428,14 @@ describe('Notes Actions', () => {
 
 ## Funciones disponibles
 
+- `getNotes()` - Obtiene todas las notas con estadísticas.
+- `getNote(id)` - Devuelve una nota completa por ID.
+- `createNote(data)` - Crea una nueva nota.
+- `updateNote(id, data)` - Actualiza una nota existente.
+- `deleteNote(id)` - Elimina una nota y sus relaciones.
+- `getNoteImages(noteId)` - Obtiene imágenes asociadas a una nota.
+- `addImageToNote(noteId, imageId)` - Relaciona una imagen con una nota.
+- `removeImageFromNote(noteId, imageId)` - Desasocia una imagen de una nota.
+- `getNoteWithProcessedFields(id)` *(deprecated)* - Versión antigua con tags procesados.
+- `getNotesWithProcessedFields()` *(deprecated)* - Obtiene todas las notas con tags procesados.
+
