@@ -20,7 +20,7 @@ const imagesActionsLogger = serverLogger.withContext('FolderImagesActions');
 /**
  * 🔄 Convierte un thumbnail de tipo binario (Uint8Array/Buffer) a string o null
  * Esta función es robusta y maneja diferentes tipos de entrada
- * 
+ *
  * @param thumbnail El thumbnail que puede ser binario, string o null/undefined
  * @param mimeType El tipo MIME para usar en la URL data (por defecto webp)
  * @returns Una cadena base64 con formato URL data o null
@@ -59,7 +59,7 @@ function ensureThumbnailIsStringOrNull(thumbnail: unknown, mimeType = 'image/web
 				if (possibleBase64) {
 					return `data:${mimeType};base64,${thumbnail}`;
 				}
-				
+
 				// Si no parece base64, es una cadena normal y no sabemos cómo manejarla
 				imagesActionsLogger.warn('⚠️ Cadena no reconocida como base64:', thumbnail.substring(0, 20) + '...');
 				return null;
@@ -295,7 +295,7 @@ export async function getFolderImages(folderId: string) {
 						} else {
 							// Caso especial, intentar extraer datos binarios de algún objeto
 							imagesActionsLogger.warn(`⚠️ Thumbnail con tipo inesperado: ${typeof imgRecord.thumbnail} para imagen ${imgRecord.id}`);
-							
+
 							// Forzar fallback a null, mejor que romper la serialización
 							safeThumbnail = null;
 						}
@@ -380,7 +380,7 @@ export async function getFolderImages(folderId: string) {
 			},
 			status: 200,
 		};
-		
+
 		// 🛡️ Verificación final de seguridad: garantizar que ningún thumbnail sea Uint8Array
 		const safeResponse = {
 			...initialResponse,
