@@ -303,11 +303,12 @@ export interface RelatedWildcard {
 	color?: string;
 }
 
-export interface ImageItem extends FileItem {
+// Corrección: Redefinir ImageItem para resolver problemas de tipo
+export interface ImageItem extends Omit<FileItem, 'mimeType'> {
 	url?: string;
 	src: string;
 	alt: string;
-	mimeType?: string;
+	mimeType?: string; // Hacemos que sea opcional para compatibilidad
 }
 
 export interface ThumbnailResponse {
@@ -316,6 +317,18 @@ export interface ThumbnailResponse {
 	height?: number;
 	size?: number;
 	mimeType?: string;
+}
+
+/**
+ * 🔒 Versión serializable de FileItem para Server/Client Components
+ * 
+ * Este tipo garantiza que todos los campos son serializables y seguros
+ * para pasar de Server Components a Client Components en Next.js.
+ */
+export interface SerializableFileItem extends Omit<FileItem, 'createdAt' | 'updatedAt'> {
+	createdAt: string; // ISO string
+	updatedAt: string; // ISO string
+	thumbnail?: string | null; // URL o base64, nunca Buffer
 }
 
 export interface ViewProps {
