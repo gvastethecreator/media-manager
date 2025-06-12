@@ -1,17 +1,38 @@
 /**
- * @file Tipos base para la entidad WorldItem derivados del modelo Prisma
+ * @file Tipos base para la entidad WorldItem
  * @module types/entities/world-item/base
  */
 
-import type { WorldItem as PrismaWorldItem } from '@prisma/client';
-
 /**
- * Tipo base para WorldItem derivado directamente del tipo Prisma
+ * 🌍 Tipo base para WorldItem, solo campos canónicos y serializables
  */
-export type WorldItemBase = PrismaWorldItem;
+export interface WorldItemBase {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	type?: string;
+	rarity?: string;
+	size?: string;
+	origin?: string;
+	attributes?: string;
+	effects?: string;
+	requirements?: string;
+	stats?: string;
+	properties?: string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	sortBy?: string;
+	filters?: string;
+	createdAt?: Date;
+	updatedAt?: Date;
+}
 
 /**
- * Interfaz para crear un nuevo objeto del mundo
+ * Datos para crear un WorldItem
  */
 export interface WorldItemCreateInput {
 	name: string;
@@ -36,7 +57,7 @@ export interface WorldItemCreateInput {
 }
 
 /**
- * Interfaz para actualizar un objeto del mundo
+ * Datos para actualizar un WorldItem
  */
 export interface WorldItemUpdateInput {
 	name?: string;
@@ -59,3 +80,5 @@ export interface WorldItemUpdateInput {
 	sortBy?: string;
 	filters?: string;
 }
+
+// ✅ WorldItemBase ahora es seguro y serializable para frontend/backend.

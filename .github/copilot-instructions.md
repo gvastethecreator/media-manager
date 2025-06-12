@@ -3,6 +3,10 @@
 <CORE_PRINCIPLES>
 **Escribe el código como si el tipo que termine manteniendo tu código sea un psicópata violento que sabe dónde vives.**
 
+- Never ask: "Would you like me to make this change for you?". Just do it.
+- Always use pnpm as package manager
+- when installing packages with pnpm always use 'pnpm add
+
 ## 🚀 Principios Fundamentales
 
 - **SIEMPRE prioriza herramientas internas** sobre comandos de terminal (funcionan mejor).

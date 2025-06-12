@@ -296,6 +296,48 @@ graph TD
 - **Retorna**: Información del contenido encontrado
 - **Uso**: Para preview antes de agregar carpeta al sistema
 
+# 🏷️ Server Actions: Folders
+
+## Descripción
+
+Acciones del lado del servidor para operaciones sobre carpetas: indexado, reindexado, borrado, validación, emisión de eventos y sincronización de estado.
+
+- **Stack:** Next.js 15, Server Actions, Prisma, eventos custom.
+- **Ubicación:** `src/app/actions/folders/`
+
+## Acciones principales
+
+- `indexFolder`
+- `reindexFolder`
+- `reindexAllFoldersInSystem`
+- `validateFolderPath`
+- `repairFolder`
+
+## Diagrama de flujo de acción y eventos
+
+```mermaid
+graph TD
+  U[Usuario inicia acción] --> SA[Server Action ejecuta proceso]
+  SA -->|Progreso| E1[emitEvent(PROGRESS)]
+  SA -->|Finaliza| E2[emitEvent(COMPLETE)]
+  SA -->|Error| E3[emitEvent(ERROR)]
+  SA -->|Reindex global| E4[emitEvent(REINDEX_ALL_PROGRESS/COMPLETE)]
+  E2 & E4 --> FE[Frontend actualiza UI]
+```
+
+## Ejemplo de uso
+
+```ts
+await reindexAllFoldersInSystem();
+// El frontend recibirá eventos y refrescará la UI automáticamente
+```
+
+## Best practices
+
+- Validar siempre con Zod antes de persistir.
+- Emitir eventos de finalización y error correctamente.
+- Documentar cualquier cambio relevante en este README.
+
 ## 🔗 Relaciones y Dependencias
 
 ### 📦 Servicios Utilizados
@@ -450,5 +492,40 @@ Los tests para este módulo cubren:
 - **Cache Invalidation**: Invalidación selectiva de cache
 - **Resource Management**: Control de recursos para evitar exhaustión del sistema
 
-## Funciones disponibles
+## 🖼️ Convención de serialización de thumbnails (get-folder-images.actions.ts)
+
+- El campo `thumbnail` NUNCA debe ser un objeto binario (Buffer/Uint8Array) al cliente.
+- Se prioriza el uso de `thumbnailUrl` (string URL pública o de la API). Si no existe, se genera un string base64 desde el buffer solo como fallback.
+- Ambos campos pueden ser `null` si no hay thumbnail.
+- Los campos booleanos `isPublic` e `isFavorite` se fuerzan a booleanos explícitos para evitar errores de tipado.
+- Se documenta y valida que la respuesta es siempre serializable y segura para Client Components de Next.js/React.
+
+### Ejemplo de objeto serializado
+
+```json
+{
+  "id": "abc123",
+  "name": "foto.jpg",
+  "thumbnail": "/api/images/abc123/thumbnail",
+  "thumbnailSize": 12345,
+  "isPublic": false,
+  "isFavorite": true,
+  ...
+}
+```
+
+### Diagrama de flujo (mermaid)
+
+```mermaid
+graph TD
+    A[Obtener imágenes de carpeta] --> B[Obtener thumbnailUrl vía Server Action]
+    B -->|Si existe| C[Asignar thumbnail = thumbnailUrl]
+    B -->|Si NO existe pero hay buffer| D[Convertir buffer a base64]
+    D --> E[Asignar thumbnail = base64]
+    C & E --> F[Limpiar campos binarios]
+    F --> G[Enviar solo strings serializables al cliente]
+```
+
+> Última actualización: 2025-06-10
+> Responsable: get-folder-images.actions.ts
 
