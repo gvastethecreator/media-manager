@@ -18,6 +18,90 @@ import { z } from 'zod';
 const imagesActionsLogger = serverLogger.withContext('FolderImagesActions');
 
 /**
+ * 🔄 Convierte un thumbnail de tipo binario (Uint8Array/Buffer) a string o null
+ * Esta función es robusta y maneja diferentes tipos de entrada
+ * 
+ * @param thumbnail El thumbnail que puede ser binario, string o null/undefined
+ * @param mimeType El tipo MIME para usar en la URL data (por defecto webp)
+ * @returns Una cadena base64 con formato URL data o null
+ */
+function ensureThumbnailIsStringOrNull(thumbnail: unknown, mimeType = 'image/webp'): string | null {
+	try {
+		// Si es null o undefined, devolver null
+		if (thumbnail == null) {
+			return null;
+		}
+
+		// Caso especial para objetos que tienen _buffer o data internos
+		// Algunos ORM o frameworks guardan datos binarios así
+		if (thumbnail && typeof thumbnail === 'object' && !Array.isArray(thumbnail)) {
+			// Intentar acceder a propiedades comunes de datos binarios
+			const bufferObj = thumbnail as any;
+			if (bufferObj._buffer) {
+				thumbnail = bufferObj._buffer;
+			} else if (bufferObj.buffer) {
+				thumbnail = bufferObj.buffer;
+			} else if (bufferObj.data) {
+				thumbnail = bufferObj.data;
+			}
+		}
+
+		// Si ya es una cadena, verificar si es una URL data válida
+		if (typeof thumbnail === 'string') {
+			// Si ya parece ser una URL data, devolverla tal cual
+			if (thumbnail.startsWith('data:') || thumbnail.startsWith('http')) {
+				return thumbnail;
+			}
+			// Si es una cadena que no parece una URL, intentar tratarla como datos base64
+			try {
+				// Verificar si ya es base64 (aproximado)
+				const possibleBase64 = /^[A-Za-z0-9+/=]+$/.test(thumbnail);
+				if (possibleBase64) {
+					return `data:${mimeType};base64,${thumbnail}`;
+				}
+				
+				// Si no parece base64, es una cadena normal y no sabemos cómo manejarla
+				imagesActionsLogger.warn('⚠️ Cadena no reconocida como base64:', thumbnail.substring(0, 20) + '...');
+				return null;
+			} catch (e) {
+				// Si falla, devolver null
+				imagesActionsLogger.warn('⚠️ Error al procesar cadena como base64:', e);
+				return null;
+			}
+		}
+
+		// Si es un Uint8Array o Buffer, convertirlo a URL data base64
+		if (
+			thumbnail instanceof Uint8Array ||
+			(typeof Buffer !== 'undefined' && thumbnail instanceof Buffer) ||
+			(thumbnail && typeof thumbnail === 'object' && 'byteLength' in thumbnail) // ArrayBuffer o similar
+		) {
+			try {
+				const buffer = Buffer.from(thumbnail as any);
+				return `data:${mimeType};base64,${buffer.toString('base64')}`;
+			} catch (e) {
+				imagesActionsLogger.warn('⚠️ Error al convertir binario a base64:', e);
+				return null;
+			}
+		}
+
+		// Para cualquier otro tipo, intentar usar Buffer.from como último recurso
+		try {
+			imagesActionsLogger.warn(`⚠️ Intentando conversión forzada de tipo ${typeof thumbnail} a Buffer`);
+			const buffer = Buffer.from(thumbnail as any);
+			return `data:${mimeType};base64,${buffer.toString('base64')}`;
+		} catch (lastError) {
+			imagesActionsLogger.warn('⚠️ Tipo de thumbnail no manejable:', typeof thumbnail);
+			return null;
+		}
+	} catch (error) {
+		// En caso de cualquier error, loggear y devolver null para ser seguros
+		imagesActionsLogger.error('❌ Error crítico al procesar thumbnail:', error);
+		return null;
+	}
+}
+
+/**
  * 🔒 API Response File Item - SEGURO PARA SERIALIZACIÓN
  *
  * Esta interfaz define un formato seguro para enviar al cliente,
@@ -194,13 +278,38 @@ export async function getFolderImages(folderId: string) {
 					safeThumbnail = thumbnailUrl;
 				} else if (imgRecord.thumbnail) {
 					// Caso 2: Tenemos buffer que debemos convertir a base64
-					// Verificamos el tipo para evitar intentar convertir si ya es string
-					const thumbnailBuffer = typeof imgRecord.thumbnail === 'string'
-						? Buffer.from(imgRecord.thumbnail) // Si ya es string por alguna razón
-						: Buffer.from(imgRecord.thumbnail); // Si es Buffer/Uint8Array
+					try {
+						// Verificar el tipo de thumbnail y realizar la conversión más apropiada
+						if (typeof imgRecord.thumbnail === 'string') {
+							// Si ya es string, verificar si es una URL o base64
+							if (imgRecord.thumbnail.startsWith('data:') || imgRecord.thumbnail.startsWith('http')) {
+								safeThumbnail = imgRecord.thumbnail;
+							} else {
+								// Intentar usar como base64
+								safeThumbnail = `data:${safeMetadata.mimeType};base64,${imgRecord.thumbnail}`;
+							}
+						} else if (imgRecord.thumbnail instanceof Uint8Array || Buffer.isBuffer(imgRecord.thumbnail)) {
+							// Convertir directamente desde buffer
+							const buffer = Buffer.from(imgRecord.thumbnail);
+							safeThumbnail = `data:${safeMetadata.mimeType};base64,${buffer.toString('base64')}`;
+						} else {
+							// Caso especial, intentar extraer datos binarios de algún objeto
+							imagesActionsLogger.warn(`⚠️ Thumbnail con tipo inesperado: ${typeof imgRecord.thumbnail} para imagen ${imgRecord.id}`);
+							
+							// Forzar fallback a null, mejor que romper la serialización
+							safeThumbnail = null;
+						}
+					} catch (thumbError) {
+						// En caso de cualquier error, loggearlo y usar null como fallback
+						imagesActionsLogger.error(`❌ Error procesando thumbnail para imagen ${imgRecord.id}:`, thumbError);
+						safeThumbnail = null;
+					}
+				}
 
-					const mimeType = safeMetadata.mimeType || 'image/webp';
-					safeThumbnail = `data:${mimeType};base64,${thumbnailBuffer.toString('base64')}`;
+				// Garantizar que el thumbnail sea null o string (doble verificación)
+				if (safeThumbnail !== null && typeof safeThumbnail !== 'string') {
+					imagesActionsLogger.warn(`⚠️ Thumbnail con tipo incorrecto después de conversión: ${typeof safeThumbnail} para imagen ${imgRecord.id}`);
+					safeThumbnail = null;
 				}
 
 				// Determinar si la imagen es pública y favorita
@@ -260,7 +369,7 @@ export async function getFolderImages(folderId: string) {
 		);
 
 		// Paso 4: Crear respuesta final con carpeta segura para serialización
-		const safeResponse = {
+		const initialResponse = {
 			items: safeFiles,
 			folder: {
 				id: folderData.id,
@@ -271,6 +380,47 @@ export async function getFolderImages(folderId: string) {
 			},
 			status: 200,
 		};
+		
+		// 🛡️ Verificación final de seguridad: garantizar que ningún thumbnail sea Uint8Array
+		const safeResponse = {
+			...initialResponse,
+			items: initialResponse.items.map(item => {
+				// Si el thumbnail sigue siendo un objeto binario (a pesar de nuestros esfuerzos), forzar su conversión
+				if (item.thumbnail && typeof item.thumbnail !== 'string') {
+					imagesActionsLogger.warn(`⚠️ Forzando conversión de thumbnail en PASO FINAL para imagen ${item.id}`);
+					return {
+						...item,
+						thumbnail: ensureThumbnailIsStringOrNull(item.thumbnail, 'image/webp')
+					};
+				}
+				return item;
+			})
+		};
+
+		// ✅ Validación colectiva final: asegurar que todo es serializable
+		if (process.env.NODE_ENV === 'development') {
+			try {
+				// Verificar que todos los items son objetos planos JSON-serializables
+				JSON.parse(JSON.stringify(safeResponse));
+				imagesActionsLogger.debug('✅ Verificación final: respuesta es serializable');
+			} catch (jsonError) {
+				imagesActionsLogger.error('❌ ERROR CRÍTICO: La respuesta no es serializable:', jsonError);
+				// Intentar identificar el problema
+				try {
+					const problematicItems = safeResponse.items.filter(item => {
+						try {
+							JSON.parse(JSON.stringify(item));
+							return false; // No es problemático
+						} catch {
+							return true; // Es problemático
+						}
+					});
+					imagesActionsLogger.error(`Encontrados ${problematicItems.length} items no serializables`);
+				} catch (e) {
+					imagesActionsLogger.error('No se pudo analizar items problemáticos:', e);
+				}
+			}
+		}
 
 		return safeResponse;
 	} catch (error) {
