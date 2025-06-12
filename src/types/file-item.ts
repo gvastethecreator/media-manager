@@ -321,7 +321,7 @@ export interface ThumbnailResponse {
 
 /**
  * 🔒 Versión serializable de FileItem para Server/Client Components
- * 
+ *
  * Este tipo garantiza que todos los campos son serializables y seguros
  * para pasar de Server Components a Client Components en Next.js.
  */
