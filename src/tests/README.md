@@ -255,8 +255,8 @@ await waitFor(() => expect(screen.getByText('42')).toBeInTheDocument());
 ## ✅ Checklist de cobertura mínima
 
 - [x] Componentes de tarjetas (album, folder, image, tag, world-item)
-- [ ] Slices de Zustand de entidades principales (folder, image, metadata, ...)
-- [ ] Transformadores y utilidades de transformación
+- [x] Slices de Zustand de entidades principales (folder, image, metadata, ...)
+- [x] Transformadores y utilidades de transformación
 - [ ] Hooks personalizados
 - [ ] Componentes core y features críticos
 - [x] Utils y servicios
@@ -277,8 +277,8 @@ await waitFor(() => expect(screen.getByText('42')).toBeInTheDocument());
 - [x] Utils y servicios core (`src/lib`, `src/utils/folder`)
 - [x] Prisma schema (`prisma/__tests__/schema.test.ts`)
 - [x] Store de profile (acciones, tipos, estado)
-- [ ] Slices de otras entidades (folder, image, metadata, etc.)
-- [ ] Transformadores de entidades (tests unitarios de transformación)
+- [x] Slices de otras entidades (folder, image, metadata, etc.)
+- [x] Transformadores de entidades (tests unitarios de transformación)
 - [ ] Hooks personalizados (`src/hooks`)
 - [x] Componentes de tarjetas (album, folder, image, tag, world-item)
 - [ ] Componentes core y features críticos
@@ -297,5 +297,5 @@ await waitFor(() => expect(screen.getByText('42')).toBeInTheDocument());
 - Se recomienda auditar y agregar tests para slices de entidades principales, transformadores y hooks.
 - Mantener actualizado este checklist tras cada iteración de refactor/testing.
 
-**Última actualización**: ${new Date().toLocaleDateString('es-ES')}
+**Última actualización**: 2025-06-12
 **Versión**: 1.0.0
