@@ -1,56 +1,23 @@
-/**
- * 🔄 Tipo base para Image (tipos canónicos sin dependencias de Prisma)
- */
-export interface ImageBase {
-	id: string;
-	name: string;
-	description?: string | null;
-	path: string;
-	hash: string;
-	size: number;
-	width: number;
-	height: number;
-	metadata?: string | null;
-	isFavorite: boolean;
-	isPublic: boolean;
-	folderId?: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-}
+import type {
+	Image as PrismaImage,
+	ImageStats as PrismaImageStats,
+	ImageVisualConfig as PrismaImageVisualConfig,
+} from '@prisma/client';
 
 /**
- * 🎨 Tipo base para configuración visual de Image
+ * Tipo base para Image, extendido directamente del tipo Prisma
  */
-export interface ImageVisualConfigBase {
-	id: string;
-	imageId: string;
-	brightness: number;
-	contrast: number;
-	saturation: number;
-	hue: number;
-	gamma: number;
-	highlights: number;
-	shadows: number;
-	clarity: number;
-	vibrance: number;
-	createdAt: Date;
-	updatedAt: Date;
-}
+export type ImageBase = PrismaImage;
 
 /**
- * 📊 Tipo base para estadísticas de Image
+ * Tipo base para ImageVisualConfig, extendido directamente del tipo Prisma
  */
-export interface ImageStatsBase {
-	id: string;
-	imageId: string;
-	viewCount: number;
-	favoriteCount: number;
-	shareCount: number;
-	downloadCount: number;
-	lastViewedAt?: Date | null;
-	createdAt: Date;
-	updatedAt: Date;
-}
+export type ImageVisualConfigBase = PrismaImageVisualConfig;
+
+/**
+ * Tipo base para ImageStats, extendido directamente del tipo Prisma
+ */
+export type ImageStatsBase = PrismaImageStats;
 
 /**
  * Datos mínimos requeridos para crear una imagen

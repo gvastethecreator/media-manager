@@ -5,13 +5,13 @@
  */
 
 import {
-	createImage as createServerImage,
-	deleteImage,
-	getImage,
-	getImages,
+    createImage as createServerImage,
+    deleteImage,
+    getImage,
+    getImages,
 } from '@/app/actions/images/image-crud.actions';
 import { extendImage } from '@/transformers/image/serializers';
-import type { CreateImageData, Image, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image';
+import type { CreateImageData, Image, ImageExtended, UpdateImageData } from '@/types/entities/image';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
@@ -76,7 +76,15 @@ export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSli
 	},
 
 	addImages: (images: ImageExtended[]) => {
-		const imagesMap = images.reduce(
+		// 🛡️ Robustez: filtrar nulos, promesas y tipos inválidos antes de agregar al store
+		const validImages = images.filter((img, idx) => {
+			const isValid = img && typeof img === 'object' && typeof (img as any).then !== 'function';
+			if (!isValid) {
+				console.warn(`🛡️ Imagen excluida en posición ${idx}: nulo, promesa o tipo inválido`, { img });
+			}
+			return isValid;
+		});
+		const imagesMap = validImages.reduce(
 			(acc, image) => {
 				if (image?.id) {
 					acc[image.id] = image;
