@@ -9,30 +9,72 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { fromPrismaFolder, transformFolder } from '@/transformers/folder';
 import {
-    mapCreateFolderDataToPrisma,
-    mapFolderSearchOptionsToPrisma,
-    mapUpdateFolderDataToPrisma,
+	mapCreateFolderDataToPrisma,
+	mapFolderSearchOptionsToPrisma,
+	mapUpdateFolderDataToPrisma,
 } from '@/transformers/folder/mappers';
 import type {
-    Folder,
-    FolderComplete,
-    FolderCreateInput,
-    FolderSearchOptions,
-    FolderUpdateInput,
-    FolderWithStats,
+	Folder,
+	FolderComplete,
+	FolderCreateInput,
+	FolderSearchOptions,
+	FolderUpdateInput,
+	FolderWithStats,
 } from '@/types/entities/folder/types';
 import { revalidatePath } from 'next/cache';
 
-const logger = serverLogger.withContext('FolderCRUDActions');
+// Logger centralizado
+const logger = serverLogger.withContext('FolderCrudActions');
 
-const REVALIDATE_PATHS = ['/settings', '/folders', '/folders/[id]'] as const;
+/**
+ * 🔒 Asegura que cualquier objeto con thumbnail binario sea serializable
+ * Convierte Uint8Array/Buffer a string (URL o base64)
+ *
+ * @param obj Objeto que puede contener thumbnails no serializables
+ * @returns Objeto seguro para serialización
+ */
+function ensureSerializableThumbnails<T>(obj: T): T {
+	// Si no es un objeto o es null, devolverlo tal cual
+	if (!obj || typeof obj !== 'object') return obj;
 
-const revalidateAllPaths = async () => {
-	for (const path of REVALIDATE_PATHS) {
-		revalidatePath(path);
+	// Copia para no modificar el original
+	const result = { ...obj as object } as Record<string, any>;
+
+	// Procesar propiedades
+	for (const key in result) {
+		const value = result[key];
+
+		// Si es un thumbnail de tipo Uint8Array/Buffer
+		if (key === 'thumbnail' && value instanceof Uint8Array) {
+			// Convertir a base64
+			const thumbnailBuffer = Buffer.from(value);
+			const mimeType = (result.thumbnailMimeType as string) || 'image/webp';
+			result[key] = `data:${mimeType};base64,${thumbnailBuffer.toString('base64')}`;
+		}
+		// Si es un array, procesar cada elemento
+		else if (Array.isArray(value)) {
+			result[key] = value.map((item: unknown) =>
+				item && typeof item === 'object'
+					? ensureSerializableThumbnails(item)
+					: item
+			);
+		}
+		// Si es un objeto (que no sea Date ni null), procesarlo recursivamente
+		else if (value && typeof value === 'object' && !(value instanceof Date)) {
+			result[key] = ensureSerializableThumbnails(value);
+		}
 	}
-	logger.info('🔄 Rutas revalidadas');
-};
+
+	return result as unknown as T;
+}
+
+/**
+ * Revalida todos los paths relevantes para carpetas
+ */
+async function revalidateAllPaths() {
+	revalidatePath('/folders');
+	revalidatePath('/');
+}
 
 /**
  * 🔍 Obtiene una carpeta por su ID
@@ -63,7 +105,9 @@ export async function getFolderById(id: string): Promise<FolderComplete | null> 
 			return null;
 		}
 
-		return transformFolder(folder);
+		const transformedFolder = transformFolder(folder);
+		// Asegurar que cualquier thumbnail sea serializable
+		return ensureSerializableThumbnails(transformedFolder);
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
 		logger.error(`❌ Error al obtener carpeta por ID: ${id}`, {
@@ -102,8 +146,9 @@ export async function getFolderWithStats(id: string): Promise<FolderWithStats | 
 			return null;
 		}
 
-		// transformFolder ya incluye las estadísticas
-		return transformFolder(folder) as FolderWithStats;
+		// transformFolder ya incluye las estadísticas pero aseguramos que sea serializable
+		const transformedFolder = transformFolder(folder) as FolderWithStats;
+		return ensureSerializableThumbnails(transformedFolder);
 	} catch (error) {
 		logger.error(`❌ Error al obtener carpeta con estadísticas, ID: ${id}`, error);
 		throw error;
@@ -164,9 +209,14 @@ export async function searchFolders(options: FolderSearchOptions = {}): Promise<
 
 		logger.info(`✅ Búsqueda completada, encontradas ${transformedFolders.length} carpetas`);
 
+		// Asegurar que todos los thumbnails sean serializables
+		const serializableFolders = transformedFolders.map(folder =>
+			ensureSerializableThumbnails(folder)
+		);
+
 		await revalidateAllPaths();
 
-		return transformedFolders;
+		return serializableFolders;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
 		logger.error('❌ Error al buscar carpetas:', {
@@ -208,7 +258,8 @@ export async function createFolder(data: FolderCreateInput): Promise<FolderCompl
 
 		logger.info(`✅ Carpeta creada correctamente con ID: ${folder.id}`);
 		await revalidateAllPaths();
-		return transformFolder(folder);
+		const transformedFolder = transformFolder(folder);
+		return ensureSerializableThumbnails(transformedFolder);
 	} catch (error) {
 		logger.error('❌ Error al crear carpeta:', error);
 		throw error;
@@ -256,7 +307,8 @@ export async function updateFolder(id: string, data: FolderUpdateInput): Promise
 
 		logger.info(`✅ Carpeta actualizada correctamente con ID: ${folder.id}`);
 		await revalidateAllPaths();
-		return transformFolder(folder);
+		const transformedFolder = transformFolder(folder);
+		return ensureSerializableThumbnails(transformedFolder);
 	} catch (error) {
 		logger.error(`❌ Error al actualizar carpeta con ID: ${id}:`, error);
 		throw error;
