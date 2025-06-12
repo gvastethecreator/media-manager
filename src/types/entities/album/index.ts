@@ -3,46 +3,38 @@
  * @module types/entities/album
  */
 
-export type {
-       AlbumBase,
-       AlbumRelations,
-       AlbumCounts,
-       AlbumFilters,
-       AlbumComplete,
-       AlbumCreateInput,
-       AlbumUpdateInput,
-       AlbumSearchOptions,
-       AlbumSearchResult,
-       AlbumTransformerOptions,
-       RelatedAlbum,
-} from './types';
+// Exportar desde archivo base
+export * from './extended';
+export * from './stats-types';
+export * from './types';
 
+// Exportar desde enumeraciones
+export {
+    AlbumDisplayState,
+    AlbumPrivacyLevel,
+    AlbumSortCriteria,
+    AlbumType,
+    AlbumViewMode
+} from './enums';
+
+// Exportar desde definiciones extendidas
 export type {
-       AlbumWithStats,
-       FolderDistribution,
-       ParsedAlbum,
-       ParsedAlbumWithRelations,
+    AlbumComplete,
+    AlbumWithStats,
+    FolderDistribution,
+    ParsedAlbum,
+    ParsedAlbumWithRelations
 } from './extended';
 
+// Exportar tipos estadísticos
 export type {
-       AlbumDateDistribution,
-       AlbumItemDistribution,
-       AlbumLocationDistribution,
-       AlbumStats,
-       AlbumStatsOverview,
-       AlbumTimeRange,
+    AlbumDateDistribution,
+    AlbumItemDistribution,
+    AlbumLocationDistribution,
+    AlbumStats,
+    AlbumStatsOverview,
+    AlbumTimeRange
 } from './stats-types';
-
-// Exportar específicamente CreateAlbumData para compatibilidad
-export type { CreateAlbumData } from './types';
-
-export {
-       AlbumDisplayState,
-       AlbumPrivacyLevel,
-       AlbumSortCriteria,
-       AlbumType,
-       AlbumViewMode,
-} from './enums';
 
 // 🎯 Alias principal para el tipo Album
 export type { AlbumComplete as Album } from './extended';

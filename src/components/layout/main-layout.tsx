@@ -59,15 +59,19 @@ const CentralPanel = React.memo(function CentralPanel({
 	children: React.ReactNode;
 }) {
 	return (
-		<ResizablePanel defaultSize={defaultSize} minSize={70} className="h-full w-full">
-			<div className="flex flex-col h-full">
+		// ⚠️ Es crucial mantener estas clases para que los grids virtualizados (FileBrowser, etc.) funcionen correctamente
+		<ResizablePanel
+			defaultSize={defaultSize}
+			minSize={70}
+			className="h-full w-full min-h-0 min-w-0 flex-1 flex flex-col"
+		>
+			<div className="flex flex-col h-full w-full min-h-0 min-w-0 flex-1 overflow-hidden">
 				{toolbar}
-				<div className="flex-1 relative resize-container">
-					{/* No rendericemos el contenido cuando estamos redimensionando */}
-					{!isResizing && <div className="absolute inset-0 w-full h-full view-container-transition">{children}</div>}
-					{isResizing && (
-						<div className="absolute inset-0 w-full h-full bg-background/80" style={RESIZING_OVERLAY_STYLE} />
-					)}
+				{/* ⚠️ CLAVE: Mantener siempre montado el contenido para evitar desmontajes de FileBrowser */}
+				<div className="flex-1 min-h-0 min-w-0 w-full h-full overflow-hidden resize-container">
+					<div className={`h-full w-full min-h-0 min-w-0 flex-1 view-container-transition ${isResizing ? 'pointer-events-none' : ''}`}>
+						{children}
+					</div>
 				</div>
 			</div>
 		</ResizablePanel>
@@ -139,39 +143,6 @@ const MemoizedRightPanel = React.memo(RightPanel);
 const MemoizedViewContainer = React.memo(ViewContainer);
 const MemoizedViewToolbar = React.memo(ViewToolbar);
 
-// Usar un timer para demorar el renderizado de contenido pesado
-function useDelayedRenderState(isActive: boolean, delay = 100): boolean {
-	const [shouldRender, setShouldRender] = useState(!isActive);
-	const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-	useEffect(() => {
-		// Limpiar cualquier timer pendiente
-		if (timerRef.current) {
-			clearTimeout(timerRef.current);
-			timerRef.current = null;
-		}
-
-		if (isActive) {
-			// Si estamos activando (resizing), ocultar inmediatamente
-			setShouldRender(false);
-		} else {
-			// Cuando termine el resize, esperamos un poco para volver a mostrar
-			timerRef.current = setTimeout(() => {
-				setShouldRender(true);
-				timerRef.current = null;
-			}, delay);
-		}
-
-		return () => {
-			if (timerRef.current) {
-				clearTimeout(timerRef.current);
-			}
-		};
-	}, [isActive, delay]);
-
-	return shouldRender;
-}
-
 export function MainLayout() {
 	const [isResizing, setIsResizing] = useState(false);
 	const { isOpen, images, currentIndex, closeViewer } = useImageViewer();
@@ -179,9 +150,6 @@ export function MainLayout() {
 	const navPanelRef = useRef(null);
 	const rightPanelRef = useRef(null);
 	const { isVisible } = useDetailsPanel();
-
-	// Estado para renderizado retrasado después del redimensionamiento
-	const shouldRenderContent = useDelayedRenderState(isResizing, 200);
 
 	// Estado para los paneles colapsables
 	const [isNavPanelCollapsed, setIsNavPanelCollapsed] = useLocalStorage('nav-panel-collapsed', false);
@@ -430,14 +398,9 @@ export function MainLayout() {
 
 	// Optimización usando renderización condicional completa
 	const renderViewContent = useMemo(() => {
-		// Solo renderizamos el contenido real si no estamos redimensionando
-		// Esto es clave para el rendimiento
-		if (isResizing) {
-			return null;
-		}
-
-		return shouldRenderContent ? <MemoizedViewContainer isResizing={false} /> : null;
-	}, [isResizing, shouldRenderContent]);
+		// Renderizar siempre el contenido, FileBrowser maneja internamente el estado de isResizing
+		return <MemoizedViewContainer isResizing={isResizing} />;
+	}, [isResizing]);
 
 	return (
 		<div className="flex h-screen w-full bg-background">

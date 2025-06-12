@@ -12,7 +12,7 @@ import { useImageResources } from '@/store/image-resources.store';
 import type { FileItem } from '@/types/file-item';
 import type { ViewMode } from '@/types/settings';
 import { FileText as FileTextIcon } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { GridGaps } from './config/grid-config';
 import { GRID_CONFIG } from './config/grid-config';
 import { handleContextAction } from './context-menu/context-action-handler';
@@ -142,10 +142,10 @@ const FileBrowserComponent = ({
 	const [viewerImages, setViewerImages] = useState<ImageItem[]>([]);
 	const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
 
-       // Referencia para controlar si ya se realizó la precarga de entidades
-       const entitiesPreloadedRef = useRef<boolean>(false);
-       // Flag para evitar loguear múltiples veces el mismo error de containerWidth
-       const hasLoggedWidthErrorRef = useRef(false);
+	// Referencia para controlar si ya se realizó la precarga de entidades
+	const entitiesPreloadedRef = useRef<boolean>(false);
+	// Flag para evitar loguear múltiples veces el mismo error de containerWidth
+	const hasLoggedWidthErrorRef = useRef(false);
 
 	// Usar los hooks para separar la lógica
 	const { parentRef, parentCallbackRef, loadMoreRef, containerWidth, isTransitioning, handleScroll, debouncedLoadThumbnails, forceRecalcWidth } =
@@ -155,33 +155,181 @@ const FileBrowserComponent = ({
 			loadMoreItems,
 		});
 
-	// --- INICIO: Mejora de robustez para containerWidth ---
-	useEffect(() => {
-		// Si el ancho es 0 y el ref está disponible, intentar recalcular tras un pequeño delay
-		if ((!containerWidth || containerWidth <= 0) && parentRef?.current) {
-			const tryRecalc = () => {
-				forceRecalcWidth();
-				// gridLogger.info(`🛠️ Reintento automático de cálculo de containerWidth`);
-			};
-			// Intentar recalcular tras 100ms y 300ms (doble intento)
-			const t1 = setTimeout(tryRecalc, 100);
-			const t2 = setTimeout(tryRecalc, 300);
-			return () => {
-				clearTimeout(t1);
-				clearTimeout(t2);
-			};
-		}
-	}, [containerWidth, parentRef, forceRecalcWidth]);
+	// 🔧 Estado local para el nodo del contenedor y medición
+	const [containerNode, setContainerNode] = useState<HTMLDivElement | null>(null);
+	const [isMeasuring, setIsMeasuring] = useState(false);
+	const measurementTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const measurementAttemptsRef = useRef(0);
+	const MAX_MEASUREMENT_ATTEMPTS = 10;
+	const MEASUREMENT_DELAY_INCREMENT = 50; // Incremento de delay entre intentos
 
-	// Refuerzo del callback ref: asegurar que el ResizeObserver siempre se registre y forzar recálculo si es necesario
-	const robustParentCallbackRef = useCallback((node: HTMLDivElement | null) => {
-		if (parentCallbackRef) parentCallbackRef(node);
-		if (node && (!containerWidth || containerWidth <= 0)) {
-			forceRecalcWidth();
-			// gridLogger.info(`🟢 CallbackRef forzó recálculo de containerWidth`);
+	// 🎯 Función centralizada para medición robusta del contenedor
+	const measureContainer = useCallback((node: HTMLDivElement, strategy: string, attempt = 1): boolean => {
+		if (!node || !document.body.contains(node)) {
+			gridLogger.warn(`⚠️ ${strategy} (intento ${attempt}): Nodo no disponible en DOM`);
+			return false;
 		}
-	}, [parentCallbackRef, forceRecalcWidth, containerWidth]);
-	// --- FIN mejora robustez ---
+
+		const parent = node.parentElement;
+		if (!parent) {
+			gridLogger.warn(`⚠️ ${strategy} (intento ${attempt}): Sin elemento padre`);
+			return false;
+		}
+
+		const rect = node.getBoundingClientRect();
+		const offsetWidth = node.offsetWidth;
+		const clientWidth = node.clientWidth;
+		const scrollWidth = node.scrollWidth;
+
+		// 📊 Diagnóstico detallado para debug
+		const parentRect = parent.getBoundingClientRect();
+		const parentComputedStyle = getComputedStyle(parent);
+		const nodeComputedStyle = getComputedStyle(node);
+
+		gridLogger.info(`📏 ${strategy} (intento ${attempt}) - Diagnóstico completo:`, {
+			node: {
+				tagName: node.tagName,
+				className: node.className,
+				offsetWidth,
+				clientWidth,
+				scrollWidth,
+				boundingWidth: rect.width,
+				display: nodeComputedStyle.display,
+				position: nodeComputedStyle.position,
+				visibility: nodeComputedStyle.visibility
+			},
+			parent: {
+				tagName: parent.tagName,
+				className: parent.className,
+				offsetWidth: parent.offsetWidth,
+				clientWidth: parent.clientWidth,
+				boundingWidth: parentRect.width,
+				display: parentComputedStyle.display,
+				position: parentComputedStyle.position,
+				visibility: parentComputedStyle.visibility
+			}
+		});
+
+		// 🎯 Validar que tenemos dimensiones válidas
+		if (offsetWidth > 0 && rect.width > 0) {
+			gridLogger.info(`✅ ${strategy} (intento ${attempt}): Medición exitosa - ${offsetWidth}px`);
+			return true;
+		}
+
+		gridLogger.warn(`⚠️ ${strategy} (intento ${attempt}): Dimensiones inválidas - offsetWidth: ${offsetWidth}px, boundingWidth: ${rect.width}px`);
+		return false;
+	}, []);
+
+	// 🔄 Función recursiva para intentos progresivos de medición
+	const attemptMeasurement = useCallback((node: HTMLDivElement, attempt = 1) => {
+		if (attempt > MAX_MEASUREMENT_ATTEMPTS) {
+			gridLogger.error(`❌ Falló la medición después de ${MAX_MEASUREMENT_ATTEMPTS} intentos`);
+			setIsMeasuring(false);
+			return;
+		}
+
+		const strategy = `attempt-${attempt}`;
+
+		if (measureContainer(node, strategy, attempt)) {
+			// ✅ Medición exitosa - ejecutar callback del hook
+			if (parentCallbackRef) {
+				gridLogger.info('🎯 Ejecutando parentCallbackRef después de medición exitosa');
+				parentCallbackRef(node);
+			}
+			setIsMeasuring(false);
+			measurementAttemptsRef.current = 0;
+			return;
+		}
+
+		// ⏳ Medición fallida - programar siguiente intento
+		const delay = attempt * MEASUREMENT_DELAY_INCREMENT;
+		gridLogger.info(`⏳ Programando siguiente intento de medición en ${delay}ms`);
+
+		measurementTimeoutRef.current = setTimeout(() => {
+			if (node && document.body.contains(node)) {
+				attemptMeasurement(node, attempt + 1);
+			} else {
+				gridLogger.warn(`⚠️ Nodo desconectado durante intento ${attempt + 1}, cancelando medición`);
+				setIsMeasuring(false);
+			}
+		}, delay);
+	}, [measureContainer, parentCallbackRef]);
+
+	// 🔧 useLayoutEffect para iniciar medición cuando el nodo está disponible
+	useLayoutEffect(() => {
+		if (!containerNode) {
+			setIsMeasuring(false);
+			return;
+		}
+
+		// Limpiar timeout anterior si existe
+		if (measurementTimeoutRef.current) {
+			clearTimeout(measurementTimeoutRef.current);
+			measurementTimeoutRef.current = null;
+		}
+
+		gridLogger.info(`🔍 useLayoutEffect: Iniciando medición robusta para nodo ${containerNode.className}`);
+		setIsMeasuring(true);
+		measurementAttemptsRef.current = 0;
+
+		// Intentar medición inmediata primero
+		if (measureContainer(containerNode, 'immediate', 1)) {
+			if (parentCallbackRef) {
+				parentCallbackRef(containerNode);
+			}
+			setIsMeasuring(false);
+		} else {
+			// Si falla, iniciar intentos progresivos
+			requestAnimationFrame(() => {
+				if (containerNode && document.body.contains(containerNode)) {
+					attemptMeasurement(containerNode, 2);
+				}
+			});
+		}
+
+		// Cleanup al cambiar nodo
+		return () => {
+			if (measurementTimeoutRef.current) {
+				clearTimeout(measurementTimeoutRef.current);
+				measurementTimeoutRef.current = null;
+			}
+			setIsMeasuring(false);
+		};
+	}, [containerNode, measureContainer, attemptMeasurement, parentCallbackRef]);
+
+	// 🧹 Cleanup general del componente
+	useEffect(() => {
+		return () => {
+			if (measurementTimeoutRef.current) {
+				clearTimeout(measurementTimeoutRef.current);
+			}
+		};
+	}, []);
+
+	// Callback ref robusto que asigna el nodo e inicia el proceso de medición
+	const robustParentCallbackRef = useCallback((node: HTMLDivElement | null) => {
+		setContainerNode(node);
+		if (node) {
+			gridLogger.info('🔗 robustParentCallbackRef: Nodo asignado, iniciando proceso de medición');
+		} else {
+			gridLogger.info('🔗 robustParentCallbackRef: Nodo limpiado');
+			setIsMeasuring(false);
+		}
+	}, []);
+	// --- FIN callback ref robusto ---
+
+	// Mostrar indicador de medición en curso
+	if (isMeasuring) {
+		gridLogger.info('⏳ Medición en curso, mostrando indicador...');
+	}
+
+	// Resetear el flag de error cuando el containerWidth se vuelve válido
+	useEffect(() => {
+		if (containerWidth > 0 && hasLoggedWidthErrorRef.current) {
+			hasLoggedWidthErrorRef.current = false;
+			gridLogger.info(`✅ containerWidth calculado correctamente: ${containerWidth}px`);
+		}
+	}, [containerWidth]);
 
 	// Hook para virtualización - ahora parentRef es un RefObject real
 	const { columns, itemSize, virtualizer, calculateMasonryHeight } = useGridVirtualizer({
@@ -537,22 +685,36 @@ const FileBrowserComponent = ({
 
 	// Efecto para la carga de miniaturas cuando los items visibles cambian
 	useEffect(() => {
-		if (virtualizer.getVirtualItems().length === 0) {
+		// 🛡️ Protección: Validar virtualizer y containerWidth antes de operar
+		if (!virtualizer || typeof virtualizer.getVirtualItems !== 'function') {
+			gridLogger.error('❌ virtualizer no está inicializado o no tiene getVirtualItems.');
 			return;
 		}
-
+		if (!containerWidth || Number.isNaN(containerWidth) || containerWidth <= 0) {
+			gridLogger.warn('⚠️ containerWidth inválido, omitiendo carga de miniaturas.');
+			return;
+		}
+		const virtualItems = virtualizer.getVirtualItems();
+		if (!Array.isArray(virtualItems) || virtualItems.length === 0) {
+			gridLogger.warn('⚠️ virtualItems vacío o no es array, omitiendo carga de miniaturas.');
+			return;
+		}
 		// Obtener los ítems actualmente visibles del virtualizador, asegurándonos de que son `FileItem`
-		const currentVisibleItems = virtualizer
-			.getVirtualItems()
+		const currentVisibleItems = virtualItems
 			.map((virtualItem) => items[virtualItem.index])
 			.filter((item): item is FileItem => !!item); // Filtrar nulos/undefined y asegurar el tipo
+
+		if (currentVisibleItems.length === 0) {
+			gridLogger.warn('⚠️ No hay items visibles para cargar miniaturas.');
+			return;
+		}
 
 		// Añadir log para depuración
 		gridLogger.debug(`🔄 Cargando miniaturas para ${currentVisibleItems.length} items visibles`);
 
 		// Llamar a la función de carga de miniaturas
 		debouncedLoadThumbnails(currentVisibleItems); // Pasar los ítems visibles aquí
-	}, [debouncedLoadThumbnails, virtualizer, items]); // Añadir `items` a las dependencias
+	}, [debouncedLoadThumbnails, virtualizer, items, containerWidth]); // Añadir containerWidth a las dependencias
 
 	// Función para manejar el clic en un ítem (simple click)
 	const handleItemClick = useCallback(
@@ -636,14 +798,34 @@ const FileBrowserComponent = ({
 		);
 	}
 
-	// 🔧 CORREGIDO: Protección robusta - solo verificar containerWidth válido y mostrar Skeleton/FlickeringGrid como fallback amigable
-	if (!containerWidth || Number.isNaN(containerWidth) || containerWidth <= 0) {
-		// Loggear el ancho real del div padre si es posible, pero solo una vez por ciclo
+	// 🛡️ Protección robusta: fallback visual y logs controlados para containerWidth inválido
+	if (isMeasuring || !containerWidth || Number.isNaN(containerWidth) || containerWidth <= 0) {
+		// Diagnóstico detallado del contenedor padre
 		const realWidth = parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.offsetWidth : 'N/A';
-		if (!hasLoggedWidthErrorRef.current) {
-			gridLogger.error(`❌ containerWidth inválido o no inicializado: ${containerWidth} | ancho real del div padre: ${realWidth}`);
+		const realHeight = parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.offsetHeight : 'N/A';
+		const parentClasses = parentRef && 'current' in parentRef && parentRef.current ? parentRef.current.className : 'N/A';
+		const hasParent = !!(parentRef && 'current' in parentRef && parentRef.current?.parentElement);
+		const parentParentClasses = hasParent && parentRef && 'current' in parentRef && parentRef.current?.parentElement ? parentRef.current.parentElement.className : 'N/A';
+
+		if (!hasLoggedWidthErrorRef.current && !isMeasuring) {
+			gridLogger.error(`❌ containerWidth inválido: ${containerWidth}`);
+			gridLogger.error('📊 Diagnóstico detallado del contenedor:');
+			gridLogger.error(`   - offsetWidth real: ${realWidth}px`);
+			gridLogger.error(`   - offsetHeight real: ${realHeight}px`);
+			gridLogger.error(`   - className del div: "${parentClasses}"`);
+			gridLogger.error(`   - tiene padre: ${hasParent}`);
+			gridLogger.error(`   - className del padre: "${parentParentClasses}"`);
 			hasLoggedWidthErrorRef.current = true;
 		}
+
+		// Determinar el mensaje de estado
+		const statusMessage = isMeasuring
+			? 'Midiendo contenedor...'
+			: 'Calculando layout...';
+
+		const detailMessage = isMeasuring
+			? `Intento ${measurementAttemptsRef.current + 1}/${MAX_MEASUREMENT_ATTEMPTS}`
+			: `containerWidth: ${containerWidth}`;
 
 		// Mostrar Skeleton y FlickeringGrid como feedback visual mientras se calcula el ancho
 		return (
@@ -656,20 +838,22 @@ const FileBrowserComponent = ({
 					</div>
 				</div>
 				<div className="text-xs text-muted-foreground text-center">
-					Calculando layout...<br />
-					<code>containerWidth: {containerWidth}</code><br />
+					{statusMessage}<br />
+					<code>{detailMessage}</code><br />
 					<code>ancho real del div padre: {realWidth}</code>
 				</div>
-				<button
-					type="button"
-					className="mt-2 px-3 py-1 rounded bg-muted text-xs hover:bg-accent border"
-					onClick={() => {
-						hasLoggedWidthErrorRef.current = false; // Permitir re-log si vuelve a fallar
-						forceRecalcWidth();
-					}}
-				>
-					Reintentar cálculo
-				</button>
+				{!isMeasuring && (
+					<button
+						type="button"
+						className="mt-2 px-3 py-1 rounded bg-muted text-xs hover:bg-accent border"
+						onClick={() => {
+							hasLoggedWidthErrorRef.current = false; // Permitir re-log si vuelve a fallar
+							forceRecalcWidth();
+						}}
+					>
+						Reintentar cálculo
+					</button>
+				)}
 			</div>
 		);
 	}
