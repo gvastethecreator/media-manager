@@ -55,7 +55,7 @@ graph TD
     Q --> R
 ```
 
-## 📋 Server Actions Disponibles
+## Funciones disponibles
 
 ### 🏗️ CRUD Básico (crud.actions.ts)
 
