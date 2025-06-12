@@ -77,6 +77,20 @@ export function useFolderImages(folderId: string | null) {
 		refetchOnMount: true, // Recargar al montar el componente para asegurar datos frescos
 	});
 
+	// 🛡️ Robustez: filtrar y loguear elementos inválidos en items antes de exponerlos a la UI
+	const safeData = query.data && Array.isArray(query.data.items)
+		? {
+			...query.data,
+			items: query.data.items.filter((img, idx) => {
+				const isValid = img && typeof img === 'object' && typeof (img as any).then !== 'function';
+				if (!isValid) {
+					logger.warn(`🛡️ Imagen excluida en posición ${idx}: nulo, promesa o tipo inválido`, { img });
+				}
+				return isValid;
+			}),
+		}
+		: query.data;
+
 	// Registrar cambios en el estado del query
 	useEffect(() => {
 		if (query.isLoading) {
@@ -84,10 +98,10 @@ export function useFolderImages(folderId: string | null) {
 		} else if (query.isError) {
 			logger.error(`❌ Error en query para carpeta ${folderId}:`, query.error);
 		} else if (query.isSuccess) {
-			const imageCount = query.data?.items?.length || 0;
-			logger.debug(`✅ Query exitoso para carpeta ${folderId}: ${imageCount} imágenes`);
+			const imageCount = safeData?.items?.length || 0;
+			logger.debug(`✅ Query exitoso para carpeta ${folderId}: ${imageCount} imágenes (validadas)`);
 		}
-	}, [folderId, query.isLoading, query.isError, query.error, query.isSuccess, query.data?.items?.length]);
+	}, [folderId, query.isLoading, query.isError, query.error, query.isSuccess, safeData?.items?.length]);
 
-	return query;
+	return { ...query, data: safeData };
 }

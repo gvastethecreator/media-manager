@@ -4,7 +4,6 @@
  * @description Funciones para transformar imágenes de su formato Prisma al formato de la aplicación
  */
 
-import path from 'path';
 import { Logger } from '@/lib/logger';
 import { pathToUrl } from '@/lib/url-utils';
 import { BaseImageSchema, CompleteImageSchema, ExtendedImageSchema } from '@/lib/validators/image-validators';
@@ -12,8 +11,15 @@ import type { ImageBase, ImageComplete, ImageExtended } from '@/types/entities/i
 import type { ThumbnailQuality } from '@/types/thumbnails';
 import { TransformerErrorCode, createTransformerError } from '@/utils/errors/transformer-errors';
 import { calculateAspectRatio, calculateDominantColor, generateThumbnailUrl } from '@/utils/image-utils';
+import path from 'path';
 
 const logger = new Logger('ImageTransformer');
+
+/**
+ * ⚠️ Robustez reforzada: nunca se propagan arrays nulos, promesas ni datos corruptos.
+ * Todos los métodos de transformación de arrays filtran y loguean exclusiones.
+ * Si modificas la estructura de Image, actualiza este archivo y el README.md.
+ */
 
 /**
  * Transforma un objeto de imagen al formato básico de la aplicación
@@ -77,16 +83,19 @@ export const transformImages = <T extends Record<string, any>>(images: T[]): Ima
 	}
 
 	return images
-		.map((image) => {
+		.map((image, idx) => {
+			if (!image || typeof image !== 'object' || typeof image.then === 'function') {
+				logger.warn(`Elemento excluido en posición ${idx}: nulo, promesa o tipo inválido`, { image });
+				return null;
+			}
 			try {
 				return transformImage(image);
 			} catch (error) {
-				logger.warn('Error transformando imagen en array:', error);
-				// Continuamos con el resto del array
+				logger.warn(`Error transformando imagen en array en posición ${idx}:`, error);
 				return null;
 			}
 		})
-		.filter(Boolean) as ImageBase[];
+		.filter((img): img is ImageBase => !!img);
 };
 
 /**
@@ -176,16 +185,19 @@ export const transformImagesToComplete = <T extends Record<string, any>>(images:
 	}
 
 	return images
-		.map((image) => {
+		.map((image, idx) => {
+			if (!image || typeof image !== 'object' || typeof image.then === 'function') {
+				logger.warn(`Elemento excluido en posición ${idx}: nulo, promesa o tipo inválido`, { image });
+				return null;
+			}
 			try {
 				return transformImageToComplete(image);
 			} catch (error) {
-				logger.warn('Error transformando imagen en array a completo:', error);
-				// Continuamos con el resto del array
+				logger.warn(`Error transformando imagen en array a completo en posición ${idx}:`, error);
 				return null;
 			}
 		})
-		.filter(Boolean) as ImageComplete[];
+		.filter((img): img is ImageComplete => !!img);
 };
 
 /**
@@ -284,16 +296,19 @@ export const transformImagesToExtended = <T extends Record<string, any>>(images:
 	}
 
 	return images
-		.map((image) => {
+		.map((image, idx) => {
+			if (!image || typeof image !== 'object' || typeof image.then === 'function') {
+				logger.warn(`Elemento excluido en posición ${idx}: nulo, promesa o tipo inválido`, { image });
+				return null;
+			}
 			try {
 				return transformImageToExtended(image);
 			} catch (error) {
-				logger.warn('Error transformando imagen en array a extendido:', error);
-				// Continuamos con el resto del array
+				logger.warn(`Error transformando imagen en array a extendido en posición ${idx}:`, error);
 				return null;
 			}
 		})
-		.filter(Boolean) as ImageExtended[];
+		.filter((img): img is ImageExtended => !!img);
 };
 
 /**

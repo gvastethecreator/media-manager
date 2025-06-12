@@ -53,8 +53,7 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 	const parentRef = useRef<HTMLDivElement | null>(null);
 	const resizeObserverRef = useRef<ResizeObserver | null>(null);
 	const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-	// 🎯 Callback ref CORREGIDO que configura el ResizeObserver inmediatamente
+	// 🎯 Callback ref SIMPLIFICADO que configura el ResizeObserver inmediatamente
 	const parentCallbackRef = useCallback((node: HTMLDivElement | null) => {
 		// Limpiar el observer anterior si existe
 		if (resizeObserverRef.current) {
@@ -71,10 +70,33 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 		parentRef.current = node;
 
 		if (node) {
-			// 📏 Calcular ancho inicial inmediatamente
-			const initialWidth = node.offsetWidth;
-			if (initialWidth > 0) {
-				setContainerWidth(initialWidth);
+			// 📏 Cálculo agresivo del ancho inicial con múltiples estrategias
+			const calculateInitialWidth = (source: string) => {
+				// Asegurarse de que el nodo esté en el DOM y tenga un layout válido
+				if (!node.parentElement || node.offsetWidth === 0) {
+					console.warn(`[useGridView] calculateInitialWidth (${source}): Nodo no listo o sin dimensiones. offsetWidth: ${node.offsetWidth}, parentElement: ${!!node.parentElement}`);
+					return false;
+				}
+				const width = node.offsetWidth;
+				console.debug(`[useGridView] calculateInitialWidth (${source}): width = ${width}px`);
+				if (width > 0) {
+					setContainerWidth(width);
+					return true;
+				}
+				return false;
+			};
+
+			// 1. Intentar inmediatamente
+			if (!calculateInitialWidth('immediate')) {
+				// 2. RequestAnimationFrame si no hay ancho inicial
+				requestAnimationFrame(() => {
+					if (!calculateInitialWidth('RAF')) {
+						// 3. Timeout como último recurso
+						setTimeout(() => {
+							calculateInitialWidth('setTimeout');
+						}, 100); // Aumentado ligeramente
+					}
+				});
 			}
 
 			// 👁️ Configurar ResizeObserver para el nuevo nodo
@@ -109,12 +131,48 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 	// 🔄 Función para forzar recálculo manual del ancho
 	const forceRecalcWidth = useCallback(() => {
 		if (parentRef.current) {
-			const width = parentRef.current.offsetWidth;
-			if (width > 0) {
-				setContainerWidth(width);
+			const node = parentRef.current;
+			const isInDOM = document.body.contains(node);
+			const hasParent = !!node.parentElement;
+
+			console.debug('[useGridView] forceRecalcWidth: Iniciando recálculo manual');
+			console.debug(`[useGridView] forceRecalcWidth: Estado - En DOM: ${isInDOM}, Tiene Padre: ${hasParent}`);
+
+			if (isInDOM && hasParent) {
+				const width = node.offsetWidth;
+				const rect = node.getBoundingClientRect();
+
+				console.debug(`[useGridView] forceRecalcWidth: Dimensiones - offsetWidth: ${width}px, boundingWidth: ${rect.width}px`);
+
+				if (width > 0) {
+					setContainerWidth(width);
+					console.debug(`[useGridView] forceRecalcWidth: ✅ ContainerWidth actualizado a ${width}px`);
+				} else {
+					console.warn('[useGridView] forceRecalcWidth: ⚠️ Dimensiones inválidas, no se actualiza containerWidth');
+				}
+			} else {
+				console.warn(`[useGridView] forceRecalcWidth: ⚠️ Nodo no está listo. En DOM: ${isInDOM}, Tiene Padre: ${hasParent}`);
 			}
+		} else {
+			console.warn('[useGridView] forceRecalcWidth: ⚠️ parentRef.current es null');
 		}
 	}, []);
+
+	const loadMoreRef = useRef<HTMLDivElement>(null);
+	const [isScrolling, setIsScrolling] = useState(false);
+	const [isTransitioning, setIsTransitioning] = useState(false);
+	const scrollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const previousViewMode = useRef<ViewMode | null>(null);
+	const imageResources = useImageResources();
+	const { loadThumbnail, loadQueueRef } = useThumbnailLoader();
+
+	// Referencia para el debounce timer
+	const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+	// Constantes para optimizar la carga
+	const BATCH_SIZE = 5; // Número de thumbnails a cargar simultáneamente
+	const DEBOUNCE_TIME = 200; // Tiempo para debounce en ms
 
 	// 🌍 Listener global de resize como fallback
 	useEffect(() => {
@@ -141,22 +199,6 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 			}
 		};
 	}, []);
-
-	const loadMoreRef = useRef<HTMLDivElement>(null);
-	const [isScrolling, setIsScrolling] = useState(false);
-	const [isTransitioning, setIsTransitioning] = useState(false);
-	const scrollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const previousViewMode = useRef<ViewMode | null>(null);
-	const imageResources = useImageResources();
-	const { loadThumbnail, loadQueueRef } = useThumbnailLoader();
-
-	// Referencia para el debounce timer
-	const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-	// Constantes para optimizar la carga
-	const BATCH_SIZE = 5; // Número de thumbnails a cargar simultáneamente
-	const DEBOUNCE_TIME = 200; // Tiempo para debounce en ms
 
 	// Limpiar timeouts
 	useEffect(() => {
@@ -346,7 +388,7 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 						.map((item) => item.id);
 
 					if (validIds.length > 0) {
-						console.debug(`[FileBrowserGrid] �� Primeros 3 IDs: ${validIds.slice(0, 3).join(', ')}`);
+						console.debug(`[FileBrowserGrid] 📋 Primeros 3 IDs: ${validIds.slice(0, 3).join(', ')}`);
 					} else {
 						console.warn('[FileBrowserGrid] ⚠️ No hay IDs válidos para cargar thumbnails');
 					}

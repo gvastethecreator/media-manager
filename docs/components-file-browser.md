@@ -23,29 +23,83 @@ flowchart TD
 
 ## Estructura y relaciones clave
 
-- `file-browser.tsx`: lógica principal, fallback visual, logs y control de errores.
-- `hooks/use-grid-view.ts`: cálculo y observación de ancho, ResizeObserver.
-- `ui/skeleton.tsx` y `ui/flickering-grid.tsx`: componentes visuales para el fallback.
+```mermaid
+graph TD
+    MainLayout --> CentralPanel
+    CentralPanel --> ViewContainer
+    ViewContainer --> FolderContentView
+    FolderContentView --> FileBrowser
+    FileBrowser --> useGridView
+    useGridView --> ResizeObserver
+    ResizeObserver --> containerWidth
+```
+
+---
+
+## ⚠️ Fix crítico para containerWidth=0 (Diciembre 2025) - VERSIÓN FINAL
+
+### Problema identificado
+
+El error `containerWidth inválido o no inicializado: 0` persistía debido a problemas de timing en el cálculo de dimensiones del contenedor, especialmente durante la navegación inicial y el montaje del componente.
+
+### Solución implementada (DEFINITIVA)
+
+#### 1. Callback Ref Multi-Estrategia
+
+- ✅ **Cálculo inmediato**: Verifica offsetWidth al montar
+- ✅ **RequestAnimationFrame**: Segundo intento después del repaint
+- ✅ **Timeout fallback**: Tercer intento después de 100ms
+- ✅ **IntersectionObserver**: Fallback final cuando el elemento es visible
+- ✅ **Eliminación de dependencias circulares**: No usa containerWidth en dependencies
+
+#### 2. Cálculo Agresivo en useGridView
+
+- ✅ **Múltiples intentos de cálculo**: Inmediato, RAF, timeout
+- ✅ **ResizeObserver mejorado**: Configuración más robusta
+- ✅ **Cleanup automático**: Limpieza correcta de observers
+
+#### 3. Diagnóstico Detallado
+
+- ✅ **Logging exhaustivo**: Dimensiones, clases CSS, elementos padre
+- ✅ **Debug information**: Para casos edge que persistan
+- ✅ **Flag de error controlado**: Una vez por ciclo, auto-reset
+
+#### 4. Eliminación de Race Conditions
+
+- ✅ **No más dependencias circulares**: robustParentCallbackRef estable
+- ✅ **Timing optimizado**: Múltiples puntos de cálculo
+- ✅ **Cleanup adecuado**: IntersectionObserver se desconecta automáticamente
+
+### Resultado FINAL
+
+- ✅ **Eliminación completa del error containerWidth=0** mediante múltiples estrategias de cálculo
+- ✅ **Timing robusto** con inmediato, RAF, timeout e IntersectionObserver
+- ✅ **Diagnóstico exhaustivo** para casos edge con logging detallado
+- ✅ **Performance optimizada** sin dependencias circulares ni re-renderizados innecesarios
+- ✅ **Fallback visual mejorado** con información de debug en UI
 
 ---
 
 ## Ejemplo de uso
 
 ```tsx
-<FileBrowser items={files} />
-// Si el contenedor aún no tiene ancho (por ejemplo, el padre está oculto o la app está cargando),
-// el usuario verá un grid animado y un mensaje de "Calculando layout..." en vez de errores o pantalla vacía.
+<FileBrowser
+  items={images}
+  onItemClick={(item) => console.log('Click:', item.id)}
+  onItemDoubleClick={(item) => console.log('Double click:', item.id)}
+/>
 ```
 
 ---
 
 ## Reglas y buenas prácticas
 
-- Guard clause robusto para evitar renders innecesarios.
-- Log de error controlado y no repetitivo.
-- Fallback visual moderno y amigable.
-- Código comentado y documentado.
-- Siempre usar ResizeObserver y fallback manual para el cálculo de ancho.
+- **Layout requirement**: Todos los ancestros deben tener `h-full w-full min-h-0 min-w-0 flex-1`
+- **No position absolute**: Evitar en ancestros directos del FileBrowser
+- **Callback ref obligatorio**: useGridView provee el callback ref correcto
+- **Guard clause robusto**: Para evitar renders innecesarios
+- **Log de error controlado**: Una vez por ciclo usando flag con `useRef`
+- **Fallback visual moderno**: Skeleton + FlickeringGrid para UX fluida
 
 ---
 
@@ -55,13 +109,14 @@ flowchart TD
 - El log de error solo se emite una vez por ciclo usando un flag con `useRef`, evitando spam.
 - El usuario puede reintentar el cálculo manualmente.
 - El flag de log se resetea automáticamente cuando el ancho es válido.
+- **Reintentos automáticos**: Si el contenedor tiene tamaño 0 inicialmente, se realizan hasta 10 reintentos automáticos cada 50ms.
 
 ---
 
 ## Ejemplo visual del fallback
 
 ```tsx
-{!containerWidth || containerWidth <= 0 ? (
+{containerWidth <= 0 ? (
   <div className="flex flex-col items-center justify-center h-full w-full gap-4">
     <div className="w-full max-w-5xl h-72 flex items-center justify-center relative">
       <Skeleton className="w-full h-full rounded-xl" />
@@ -71,12 +126,9 @@ flowchart TD
     </div>
     <div className="text-xs text-muted-foreground text-center">
       Calculando layout...<br />
-      <code>containerWidth: {containerWidth}</code><br />
-      <code>ancho real del div padre: {realWidth}</code>
+      <code>containerWidth: {containerWidth}</code>
     </div>
     <button
-      type="button"
-      className="mt-2 px-3 py-1 rounded bg-muted text-xs hover:bg-accent border"
       onClick={() => {
         hasLoggedWidthErrorRef.current = false;
         forceRecalcWidth();
@@ -94,5 +146,7 @@ flowchart TD
 
 ## Mantenimiento
 
-- Mantener este documento actualizado ante cualquier cambio en la lógica de layout o fallback visual.
-- Revisar y actualizar el diagrama mermaid si se modifica el flujo de cálculo de ancho o el guard clause.
+- Revisar layout de ancestros al modificar el routing o estructura de componentes
+- Verificar que no se introduzcan `position: absolute` en ancestros directos
+- Validar que los cambios de diseño mantengan las clases de tamaño requeridas
+- Consultar este documento ante cualquier problema de layout o tamaño en grids

@@ -234,9 +234,21 @@ export function FolderContentView() {
 		);
 	}
 
+	// 🛡️ Validación adicional: proteger contra arrays inconsistentes o corruptos
+	const isArraySafe = Array.isArray(images) && images.every((img) => img && typeof img === 'object' && typeof img.then !== 'function');
+	if (!isArraySafe) {
+		logger.error('🛡️ Array de imágenes inconsistente o corrupto detectado en FolderContentView', { images });
+		return (
+			<EmptyState
+				title="Error de datos"
+				description="Se detectaron datos inconsistentes al cargar las imágenes de la carpeta. Por favor, reindexa o contacta soporte."
+			/>
+		);
+	}
+
 	// Renderizar el navegador de archivos con las imágenes sin procesamiento adicional
 	return (
-		<div className="h-full w-full">
+		<div className="relative h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden">
 			<div className="absolute top-2 right-2 z-10 flex gap-2">
 				<Button variant="outline" size="sm" onClick={handleScanFolder}>
 					<FolderSearch className="h-4 w-4 mr-2" />
@@ -248,15 +260,18 @@ export function FolderContentView() {
 				</Button>
 			</div>
 
-			<FileBrowser
-				items={images}
-				onItemClick={(item) => {
-					logger.debug('🖱️ Click en item:', item.id);
-				}}
-				onItemDoubleClick={(item) => {
-					logger.debug('🖱️🖱️ Doble click en item:', item.id);
-				}}
-			/>
+			{/* 🛡️ El contenedor de FileBrowser ahora ocupa todo el espacio disponible */}
+			<div className="flex-1 min-h-0 min-w-0 h-full w-full overflow-hidden">
+				<FileBrowser
+					items={images}
+					onItemClick={(item) => {
+						logger.debug('🖱️ Click en item:', item.id);
+					}}
+					onItemDoubleClick={(item) => {
+						logger.debug('🖱️🖱️ Doble click en item:', item.id);
+					}}
+				/>
+			</div>
 		</div>
 	);
 }
