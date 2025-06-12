@@ -34,19 +34,21 @@ Se ha implementado en `folder-crud.actions.ts` una función robusta que:
 ## 🚀 Buenas prácticas para evitar errores
 
 1. **Transformar siempre los datos binarios**:
+
    ```typescript
    // ❌ NO devolver directamente datos de la base de datos
    return { thumbnail: image.thumbnail };
-   
+
    // ✅ SÍ transformar a formato serializable
-   return { 
-     thumbnail: image.thumbnail 
-       ? `data:image/webp;base64,${Buffer.from(image.thumbnail).toString('base64')}` 
-       : null 
+   return {
+     thumbnail: image.thumbnail
+       ? `data:image/webp;base64,${Buffer.from(image.thumbnail).toString('base64')}`
+       : null
    };
    ```
 
 2. **Usar validación antes de devolver datos**:
+
    ```typescript
    // Verificar que todos los datos son serializables
    try {
@@ -57,10 +59,11 @@ Se ha implementado en `folder-crud.actions.ts` una función robusta que:
    ```
 
 3. **Evitar spreads directos de objetos de Prisma**:
+
    ```typescript
    // ❌ NO hacer esto
    return { ...prismaObject };
-   
+
    // ✅ SÍ crear objetos con propiedades explícitas
    return {
      id: prismaObject.id,

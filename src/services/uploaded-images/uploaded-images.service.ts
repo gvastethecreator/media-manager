@@ -5,16 +5,16 @@ import { type EventType, emit } from '@/lib/server/events.server';
 import { fromDB, transformUploadedImage } from '@/transformers/uploaded-image';
 import type { UploadedImageType } from '@/types/entities/uploaded-image';
 import type {
-	CreateUploadedImageParams,
-	GetUploadedImagesParams,
-	UpdateUploadedImageParams,
-	UploadedImageDimensions,
-	UploadedImageEvents,
-	UploadedImageMetadata,
-	UploadedImageProcessingOptions,
-	UploadedImageResult,
-	UploadedImageResults,
-	UploadedImageStats,
+    CreateUploadedImageParams,
+    GetUploadedImagesParams,
+    UpdateUploadedImageParams,
+    UploadedImageDimensions,
+    UploadedImageEvents,
+    UploadedImageMetadata,
+    UploadedImageProcessingOptions,
+    UploadedImageResult,
+    UploadedImageResults,
+    UploadedImageStats,
 } from '@/types/uploaded-images';
 import { ServiceErrorCode, createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 
