@@ -3,7 +3,6 @@
  * @module types/entities/wildcard/types
  */
 
-
 // Importar tipos principales usando los alias de índice para evitar errores de importación y mantener consistencia
 import type { AlbumComplete } from '../album/extended';
 import type { CharacterWithRelations as Character } from '../character';
@@ -35,28 +34,28 @@ export interface WildcardChild {
  * Interfaz base para comodín
  */
 export interface WildcardBase {
-       id: string;
-       name: string;
-       emoji: string;
-       color: string;
-       description: string | null;
-       shortcut: string | null;
-       category: string | null;
-       children: string; // JSON string de hijos
-       featuredImage: string | null;
-       isFavorite: boolean;
-       parentId: string | null;
-       createdAt: Date;
-       updatedAt: Date;
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	children: string; // JSON string de hijos
+	featuredImage: string | null;
+	isFavorite: boolean;
+	parentId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
  * Interfaz para relaciones de Wildcard
  */
 export interface WildcardRelations {
-       // Relaciones jerárquicas
-       parent?: WildcardBase | null;
-       childWildcards?: WildcardBase[];
+	// Relaciones jerárquicas
+	parent?: WildcardBase | null;
+	childWildcards?: WildcardBase[];
 
 	// Otras relaciones
 	images?: Image[];

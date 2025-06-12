@@ -159,31 +159,43 @@ const apiResponseFileItemSchema = z.object({
 	updatedAt: z.string(),
 	modifiedAt: z.string(),
 	accessedAt: z.string(),
-	collections: z.array(z.object({
-		id: z.string(),
-		name: z.string()
-	})),
-	tags: z.array(z.object({
-		id: z.string(),
-		name: z.string(),
-		color: z.string()
-	})),
-	albums: z.array(z.object({
-		id: z.string(),
-		name: z.string()
-	})),
-	characters: z.array(z.object({
-		id: z.string(),
-		name: z.string()
-	})),
-	places: z.array(z.object({
-		id: z.string(),
-		name: z.string()
-	})),
-	objects: z.array(z.object({
-		id: z.string(),
-		name: z.string()
-	}))
+	collections: z.array(
+		z.object({
+			id: z.string(),
+			name: z.string(),
+		})
+	),
+	tags: z.array(
+		z.object({
+			id: z.string(),
+			name: z.string(),
+			color: z.string(),
+		})
+	),
+	albums: z.array(
+		z.object({
+			id: z.string(),
+			name: z.string(),
+		})
+	),
+	characters: z.array(
+		z.object({
+			id: z.string(),
+			name: z.string(),
+		})
+	),
+	places: z.array(
+		z.object({
+			id: z.string(),
+			name: z.string(),
+		})
+	),
+	objects: z.array(
+		z.object({
+			id: z.string(),
+			name: z.string(),
+		})
+	),
 });
 
 /**
@@ -225,7 +237,7 @@ export async function getFolderImages(folderId: string) {
 			id: folderData.id,
 			name: folderData.name,
 			imageCount: folderData.images.length,
-		});				// Paso 3: Transformar cada imagen a formato seguro
+		}); // Paso 3: Transformar cada imagen a formato seguro
 		const safeFiles: ApiResponseFileItem[] = await Promise.all(
 			folderData.images.map(async (imgRecord) => {
 				// 📊 Procesar metadata como string JSON
@@ -233,9 +245,8 @@ export async function getFolderImages(folderId: string) {
 				const safeMetadata = {
 					mimeType: metadataObj.mimeType || 'image/jpeg',
 					size: imgRecord.size,
-					dimensions: imgRecord.width && imgRecord.height
-						? { width: imgRecord.width, height: imgRecord.height }
-						: undefined,
+					dimensions:
+						imgRecord.width && imgRecord.height ? { width: imgRecord.width, height: imgRecord.height } : undefined,
 					fileSystem: {
 						size: imgRecord.size,
 						created: imgRecord.createdAt.toISOString(),
@@ -266,7 +277,7 @@ export async function getFolderImages(folderId: string) {
 				} catch (err) {
 					imagesActionsLogger.warn('No se pudo obtener thumbnail para imagen', {
 						imageId: imgRecord.id,
-						error: err
+						error: err,
 					});
 				}
 
@@ -294,7 +305,9 @@ export async function getFolderImages(folderId: string) {
 							safeThumbnail = `data:${safeMetadata.mimeType};base64,${buffer.toString('base64')}`;
 						} else {
 							// Caso especial, intentar extraer datos binarios de algún objeto
-							imagesActionsLogger.warn(`⚠️ Thumbnail con tipo inesperado: ${typeof imgRecord.thumbnail} para imagen ${imgRecord.id}`);
+							imagesActionsLogger.warn(
+								`⚠️ Thumbnail con tipo inesperado: ${typeof imgRecord.thumbnail} para imagen ${imgRecord.id}`
+							);
 
 							// Forzar fallback a null, mejor que romper la serialización
 							safeThumbnail = null;
@@ -308,19 +321,17 @@ export async function getFolderImages(folderId: string) {
 
 				// Garantizar que el thumbnail sea null o string (doble verificación)
 				if (safeThumbnail !== null && typeof safeThumbnail !== 'string') {
-					imagesActionsLogger.warn(`⚠️ Thumbnail con tipo incorrecto después de conversión: ${typeof safeThumbnail} para imagen ${imgRecord.id}`);
+					imagesActionsLogger.warn(
+						`⚠️ Thumbnail con tipo incorrecto después de conversión: ${typeof safeThumbnail} para imagen ${imgRecord.id}`
+					);
 					safeThumbnail = null;
 				}
 
 				// Determinar si la imagen es pública y favorita
 				// Aseguramos valores booleanos explícitos
-				const isPublic = Boolean(
-					'isPublic' in imgRecord ? imgRecord.isPublic : false
-				);
+				const isPublic = Boolean('isPublic' in imgRecord ? imgRecord.isPublic : false);
 
-				const isFavorite = Boolean(
-					'isFavorite' in imgRecord ? imgRecord.isFavorite : false
-				);
+				const isFavorite = Boolean('isFavorite' in imgRecord ? imgRecord.isFavorite : false);
 
 				// 🛡️ Crear objeto completamente nuevo (sin spread del objeto de Prisma)
 				// con tipos explícitamente seguros para serialización
@@ -359,7 +370,7 @@ export async function getFolderImages(folderId: string) {
 					} catch (validationError) {
 						imagesActionsLogger.error('❌ Error validación de schema de imagen:', {
 							imageId: imgRecord.id,
-							error: validationError
+							error: validationError,
 						});
 					}
 				}
@@ -384,17 +395,17 @@ export async function getFolderImages(folderId: string) {
 		// 🛡️ Verificación final de seguridad: garantizar que ningún thumbnail sea Uint8Array
 		const safeResponse = {
 			...initialResponse,
-			items: initialResponse.items.map(item => {
+			items: initialResponse.items.map((item) => {
 				// Si el thumbnail sigue siendo un objeto binario (a pesar de nuestros esfuerzos), forzar su conversión
 				if (item.thumbnail && typeof item.thumbnail !== 'string') {
 					imagesActionsLogger.warn(`⚠️ Forzando conversión de thumbnail en PASO FINAL para imagen ${item.id}`);
 					return {
 						...item,
-						thumbnail: ensureThumbnailIsStringOrNull(item.thumbnail, 'image/webp')
+						thumbnail: ensureThumbnailIsStringOrNull(item.thumbnail, 'image/webp'),
 					};
 				}
 				return item;
-			})
+			}),
 		};
 
 		// ✅ Validación colectiva final: asegurar que todo es serializable
@@ -407,7 +418,7 @@ export async function getFolderImages(folderId: string) {
 				imagesActionsLogger.error('❌ ERROR CRÍTICO: La respuesta no es serializable:', jsonError);
 				// Intentar identificar el problema
 				try {
-					const problematicItems = safeResponse.items.filter(item => {
+					const problematicItems = safeResponse.items.filter((item) => {
 						try {
 							JSON.parse(JSON.stringify(item));
 							return false; // No es problemático

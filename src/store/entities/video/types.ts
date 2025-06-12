@@ -66,7 +66,7 @@ export interface VideoPlayerState {
 	volume: number;
 	playbackRate: number;
 	isMuted: boolean;
-        playState: VideoPlayState;
+	playState: VideoPlayState;
 	currentTime: number;
 	duration: number;
 	bufferedPercentage: number;

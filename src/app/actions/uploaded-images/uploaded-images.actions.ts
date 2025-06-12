@@ -146,7 +146,7 @@ function ensureThumbnailsAreStrings(data: any): any {
 
 	// Si es array
 	if (Array.isArray(data)) {
-		return data.map(item => ensureThumbnailsAreStrings(item));
+		return data.map((item) => ensureThumbnailsAreStrings(item));
 	}
 
 	// Si es un Uint8Array/Buffer
@@ -163,8 +163,10 @@ function ensureThumbnailsAreStrings(data: any): any {
 	for (const key in result) {
 		if (Object.prototype.hasOwnProperty.call(result, key)) {
 			// Si la clave parece un thumbnail y es binario
-			if ((key === 'thumbnail' || key.includes('thumbnail')) &&
-				(result[key] instanceof Uint8Array || (typeof Buffer !== 'undefined' && result[key] instanceof Buffer))) {
+			if (
+				(key === 'thumbnail' || key.includes('thumbnail')) &&
+				(result[key] instanceof Uint8Array || (typeof Buffer !== 'undefined' && result[key] instanceof Buffer))
+			) {
 				try {
 					const mimeType = result.thumbnailMimeType || 'image/webp';
 					result[key] = `data:${mimeType};base64,${Buffer.from(result[key]).toString('base64')}`;
@@ -204,12 +206,12 @@ export async function getUploadedImages(filters?: UploadedImageFilters) {
 				...safeResult,
 				items: safeResult.items.map((item: any) => ({
 					...item,
-					thumbnail: null // Eliminar thumbnails problemáticos
-				}))
+					thumbnail: null, // Eliminar thumbnails problemáticos
+				})),
 			};
 			return {
 				success: true,
-				...fallbackResult
+				...fallbackResult,
 			};
 		}
 
@@ -313,16 +315,18 @@ function ensureSerializable<T>(obj: T): T {
 
 	// Si es un array, procesar cada elemento
 	if (Array.isArray(obj)) {
-		return obj.map(item => ensureSerializable(item)) as unknown as T;
+		return obj.map((item) => ensureSerializable(item)) as unknown as T;
 	}
 
 	// Para objetos normales (no Date, RegExp, etc.)
-	if (obj && typeof obj === 'object' &&
+	if (
+		obj &&
+		typeof obj === 'object' &&
 		!(obj instanceof Date) &&
 		!(obj instanceof RegExp) &&
 		!(obj instanceof Map) &&
-		!(obj instanceof Set)) {
-
+		!(obj instanceof Set)
+	) {
 		// Crear copia para no modificar el original
 		const result = { ...obj } as Record<string, any>;
 

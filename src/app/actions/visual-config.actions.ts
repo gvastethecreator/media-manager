@@ -115,56 +115,52 @@ export async function getWorldItemVisualConfig(): Promise<CardOptions> {
 import { prisma } from '@/lib/prisma';
 
 export async function getEntityVisualConfig(entityType: string, entityId: string) {
-  switch (entityType) {
-    case 'folders':
-      return prisma.folderVisualConfig.findFirst({ where: { folder: { id: entityId } } });
-    case 'images':
-      return prisma.imageVisualConfig.findFirst({ where: { image: { id: entityId } } });
-    case 'videos':
-      return prisma.videoVisualConfig.findFirst({ where: { video: { id: entityId } } });
-    default:
-      throw new Error('Tipo de entidad no válido');
-  }
+	switch (entityType) {
+		case 'folders':
+			return prisma.folderVisualConfig.findFirst({ where: { folder: { id: entityId } } });
+		case 'images':
+			return prisma.imageVisualConfig.findFirst({ where: { image: { id: entityId } } });
+		case 'videos':
+			return prisma.videoVisualConfig.findFirst({ where: { video: { id: entityId } } });
+		default:
+			throw new Error('Tipo de entidad no válido');
+	}
 }
 
-export async function upsertEntityVisualConfig(
-  entityType: string,
-  entityId: string,
-  data: Record<string, unknown>
-) {
-  switch (entityType) {
-    case 'folders':
-      return prisma.folderVisualConfig.upsert({
-        where: { id: (data as any).id || '' },
-        update: { ...data, folder: { connect: { id: entityId } } },
-        create: { ...data, folder: { connect: { id: entityId } } },
-      });
-    case 'images':
-      return prisma.imageVisualConfig.upsert({
-        where: { id: (data as any).id || '' },
-        update: { ...data, image: { connect: { id: entityId } } },
-        create: { ...data, image: { connect: { id: entityId } } },
-      });
-    case 'videos':
-      return prisma.videoVisualConfig.upsert({
-        where: { id: (data as any).id || '' },
-        update: { ...data, video: { connect: { id: entityId } } },
-        create: { ...data, video: { connect: { id: entityId } } },
-      });
-    default:
-      throw new Error('Tipo de entidad no válido');
-  }
+export async function upsertEntityVisualConfig(entityType: string, entityId: string, data: Record<string, unknown>) {
+	switch (entityType) {
+		case 'folders':
+			return prisma.folderVisualConfig.upsert({
+				where: { id: (data as any).id || '' },
+				update: { ...data, folder: { connect: { id: entityId } } },
+				create: { ...data, folder: { connect: { id: entityId } } },
+			});
+		case 'images':
+			return prisma.imageVisualConfig.upsert({
+				where: { id: (data as any).id || '' },
+				update: { ...data, image: { connect: { id: entityId } } },
+				create: { ...data, image: { connect: { id: entityId } } },
+			});
+		case 'videos':
+			return prisma.videoVisualConfig.upsert({
+				where: { id: (data as any).id || '' },
+				update: { ...data, video: { connect: { id: entityId } } },
+				create: { ...data, video: { connect: { id: entityId } } },
+			});
+		default:
+			throw new Error('Tipo de entidad no válido');
+	}
 }
 
 export async function deleteEntityVisualConfig(entityType: string, entityId: string) {
-  switch (entityType) {
-    case 'folders':
-      return prisma.folderVisualConfig.delete({ where: { folder: { id: entityId } } });
-    case 'images':
-      return prisma.imageVisualConfig.delete({ where: { image: { id: entityId } } });
-    case 'videos':
-      return prisma.videoVisualConfig.delete({ where: { video: { id: entityId } } });
-    default:
-      throw new Error('Tipo de entidad no válido');
-  }
+	switch (entityType) {
+		case 'folders':
+			return prisma.folderVisualConfig.delete({ where: { folder: { id: entityId } } });
+		case 'images':
+			return prisma.imageVisualConfig.delete({ where: { image: { id: entityId } } });
+		case 'videos':
+			return prisma.videoVisualConfig.delete({ where: { video: { id: entityId } } });
+		default:
+			throw new Error('Tipo de entidad no válido');
+	}
 }

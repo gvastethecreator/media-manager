@@ -23,26 +23,26 @@ export function FileBrowserTest({ items }: FileBrowserTestProps) {
 				<div className="flex gap-1">
 					<button
 						onClick={() => setActiveVersion('v1')}
-						className={`px-3 py-1 text-xs rounded border ${activeVersion === 'v1'
+						className={`px-3 py-1 text-xs rounded border ${
+							activeVersion === 'v1'
 								? 'bg-blue-500 text-white border-blue-500'
 								: 'bg-background hover:bg-muted border-border'
-							}`}
+						}`}
 					>
 						V1 (Original)
 					</button>
 					<button
 						onClick={() => setActiveVersion('v2')}
-						className={`px-3 py-1 text-xs rounded border ${activeVersion === 'v2'
+						className={`px-3 py-1 text-xs rounded border ${
+							activeVersion === 'v2'
 								? 'bg-green-500 text-white border-green-500'
 								: 'bg-background hover:bg-muted border-border'
-							}`}
+						}`}
 					>
 						V2 (Minimalista)
 					</button>
 				</div>
-				<div className="ml-auto text-xs text-muted-foreground">
-					Items: {items.length}
-				</div>
+				<div className="ml-auto text-xs text-muted-foreground">Items: {items.length}</div>
 			</div>
 
 			{/* Contenedor del FileBrowser activo */}

@@ -262,7 +262,21 @@ function normalizeCharacterComplete(input: Partial<CharacterComplete>): Characte
 		relatedCharacters: Array.isArray(input.relatedCharacters) ? input.relatedCharacters : [],
 		relatedTo: Array.isArray(input.relatedTo) ? input.relatedTo : [],
 		_count: input._count ?? {
-			images: 0, videos: 0, albums: 0, collections: 0, tags: 0, notes: 0, places: 0, worldItems: 0, concepts: 0, prompts: 0, wildcards: 0, properties: 0, groups: 0, relatedCharacters: 0, relatedTo: 0
+			images: 0,
+			videos: 0,
+			albums: 0,
+			collections: 0,
+			tags: 0,
+			notes: 0,
+			places: 0,
+			worldItems: 0,
+			concepts: 0,
+			prompts: 0,
+			wildcards: 0,
+			properties: 0,
+			groups: 0,
+			relatedCharacters: 0,
+			relatedTo: 0,
 		},
 		// Campos extendidos y normalizados (como string JSON)
 		stats: normalizeStringOrObjectField(input.stats),

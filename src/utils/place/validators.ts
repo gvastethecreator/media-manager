@@ -5,12 +5,12 @@
 
 import { z } from 'zod';
 import {
-        PlaceCategory,
-        type PlaceDanger,
-        type PlaceFilters,
-        type PlaceResource,
-        type PlaceStats,
-        PlaceType,
+	PlaceCategory,
+	type PlaceDanger,
+	type PlaceFilters,
+	type PlaceResource,
+	type PlaceStats,
+	PlaceType,
 } from '../../types/entities/place';
 import { ClimateType, DangerLevel, GovernmentType } from '../../types/entities/place/enums';
 
@@ -73,23 +73,23 @@ export const placeStatsSchema = z.object({
  * Esquema para validar filtros de lugar
  */
 export const placeFiltersSchema = z.object({
-        searchQuery: z.string().optional(),
-        categories: z.array(z.string()).optional(),
-        types: z.array(z.string()).optional(),
-        climates: z.array(z.string()).optional(),
-        governments: z.array(z.string()).optional(),
-        dangerLevels: z.array(z.string()).optional(),
-        populationRange: z
-                .object({
-                        min: z.number().int().optional(),
-                        max: z.number().int().optional(),
-                })
-                .optional(),
-        onlyFavorites: z.boolean().optional(),
-        hasImages: z.boolean().optional(),
-        hasNotes: z.boolean().optional(),
-        hasConcepts: z.boolean().optional(),
-        hasPrompts: z.boolean().optional(),
+	searchQuery: z.string().optional(),
+	categories: z.array(z.string()).optional(),
+	types: z.array(z.string()).optional(),
+	climates: z.array(z.string()).optional(),
+	governments: z.array(z.string()).optional(),
+	dangerLevels: z.array(z.string()).optional(),
+	populationRange: z
+		.object({
+			min: z.number().int().optional(),
+			max: z.number().int().optional(),
+		})
+		.optional(),
+	onlyFavorites: z.boolean().optional(),
+	hasImages: z.boolean().optional(),
+	hasNotes: z.boolean().optional(),
+	hasConcepts: z.boolean().optional(),
+	hasPrompts: z.boolean().optional(),
 });
 
 /**
@@ -143,15 +143,15 @@ export function validatePlaceFilters(filters: unknown) {
  * @returns Peligros validados o null si es inválido
  */
 export function parseAndValidateDangers(dangersJson: string | null): PlaceDanger[] | null {
-        if (!dangersJson) return [];
+	if (!dangersJson) return [];
 
 	try {
 		const dangers = JSON.parse(dangersJson);
-                const validationResult = validatePlaceDangers(dangers);
+		const validationResult = validatePlaceDangers(dangers);
 
-                if (validationResult.success) {
-                        return validationResult.data as PlaceDanger[];
-                }
+		if (validationResult.success) {
+			return validationResult.data as PlaceDanger[];
+		}
 		console.error('Validación de peligros fallida:', validationResult.error);
 		return null;
 	} catch (error) {
@@ -166,15 +166,15 @@ export function parseAndValidateDangers(dangersJson: string | null): PlaceDanger
  * @returns Recursos validados o null si es inválido
  */
 export function parseAndValidateResources(resourcesJson: string | null): PlaceResource[] | null {
-        if (!resourcesJson) return [];
+	if (!resourcesJson) return [];
 
 	try {
 		const resources = JSON.parse(resourcesJson);
-                const validationResult = validatePlaceResources(resources);
+		const validationResult = validatePlaceResources(resources);
 
-                if (validationResult.success) {
-                        return validationResult.data as PlaceResource[];
-                }
+		if (validationResult.success) {
+			return validationResult.data as PlaceResource[];
+		}
 		console.error('Validación de recursos fallida:', validationResult.error);
 		return null;
 	} catch (error) {
@@ -189,15 +189,15 @@ export function parseAndValidateResources(resourcesJson: string | null): PlaceRe
  * @returns Estadísticas validadas o null si es inválido
  */
 export function parseAndValidateStats(statsJson: string | null): PlaceStats | null {
-        if (!statsJson) return {};
+	if (!statsJson) return {};
 
 	try {
 		const stats = JSON.parse(statsJson);
-                const validationResult = validatePlaceStats(stats);
+		const validationResult = validatePlaceStats(stats);
 
-                if (validationResult.success) {
-                        return validationResult.data as PlaceStats;
-                }
+		if (validationResult.success) {
+			return validationResult.data as PlaceStats;
+		}
 		console.error('Validación de estadísticas fallida:', validationResult.error);
 		return null;
 	} catch (error) {
@@ -212,15 +212,15 @@ export function parseAndValidateStats(statsJson: string | null): PlaceStats | nu
  * @returns Filtros validados o null si es inválido
  */
 export function parseAndValidateFilters(filtersJson: string | null): PlaceFilters | null {
-        if (!filtersJson) return {};
+	if (!filtersJson) return {};
 
 	try {
 		const filters = JSON.parse(filtersJson);
-                const validationResult = validatePlaceFilters(filters);
+		const validationResult = validatePlaceFilters(filters);
 
-                if (validationResult.success) {
-                        return validationResult.data as PlaceFilters;
-                }
+		if (validationResult.success) {
+			return validationResult.data as PlaceFilters;
+		}
 		console.error('Validación de filtros fallida:', validationResult.error);
 		return null;
 	} catch (error) {

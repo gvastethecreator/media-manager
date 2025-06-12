@@ -10,32 +10,31 @@ export * from './types';
 
 // Exportar desde enumeraciones
 export {
-    AlbumDisplayState,
-    AlbumPrivacyLevel,
-    AlbumSortCriteria,
-    AlbumType,
-    AlbumViewMode
+	AlbumDisplayState,
+	AlbumPrivacyLevel,
+	AlbumSortCriteria,
+	AlbumType,
+	AlbumViewMode,
 } from './enums';
 
 // Exportar desde definiciones extendidas
 export type {
-    AlbumComplete,
-    AlbumWithStats,
-    FolderDistribution,
-    ParsedAlbum,
-    ParsedAlbumWithRelations
+	AlbumComplete,
+	AlbumWithStats,
+	FolderDistribution,
+	ParsedAlbum,
+	ParsedAlbumWithRelations,
 } from './extended';
 
 // Exportar tipos estadísticos
 export type {
-    AlbumDateDistribution,
-    AlbumItemDistribution,
-    AlbumLocationDistribution,
-    AlbumStats,
-    AlbumStatsOverview,
-    AlbumTimeRange
+	AlbumDateDistribution,
+	AlbumItemDistribution,
+	AlbumLocationDistribution,
+	AlbumStats,
+	AlbumStatsOverview,
+	AlbumTimeRange,
 } from './stats-types';
 
 // 🎯 Alias principal para el tipo Album
 export type { AlbumComplete as Album } from './extended';
-

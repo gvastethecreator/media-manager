@@ -6,16 +6,16 @@
 import type { FolderExtended } from '@/types/entities/folder';
 
 const FOLDER_DEFAULT_COLORS = {
-        DEFAULT: '#3b82f6',
-        SYSTEM: '#6b7280',
+	DEFAULT: '#3b82f6',
+	SYSTEM: '#6b7280',
 };
 
 const FOLDER_DEFAULT_EMOJIS = {
-        DEFAULT: '📁',
-        FAVORITE: '⭐',
-        PHOTOS: '📸',
-        VIDEOS: '🎞',
-        DOWNLOADS: '⬇',
+	DEFAULT: '📁',
+	FAVORITE: '⭐',
+	PHOTOS: '📸',
+	VIDEOS: '🎞',
+	DOWNLOADS: '⬇',
 };
 
 /**
@@ -85,7 +85,7 @@ export function generateSafeFolderPath(name: string, parentPath?: string): strin
  * @returns Color para la carpeta
  */
 export function getFolderColor(folder: Partial<FolderExtended>): string {
-        if (folder.color) return folder.color;
+	if (folder.color) return folder.color;
 
 	// Si la ruta sugiere que es una carpeta del sistema
 	if (folder.path && (folder.path.startsWith('/system') || folder.path.includes('/config/'))) {
@@ -101,7 +101,7 @@ export function getFolderColor(folder: Partial<FolderExtended>): string {
  * @returns Emoji para la carpeta
  */
 export function getFolderEmoji(folder: Partial<FolderExtended>): string {
-        if (folder.emoji) return folder.emoji;
+	if (folder.emoji) return folder.emoji;
 
 	// Detectar carpetas especiales por su nombre o ruta
 	const name = folder.name?.toLowerCase() || '';

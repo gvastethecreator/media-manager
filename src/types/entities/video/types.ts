@@ -70,11 +70,11 @@ export interface VideoChapter {
  * ⏯️ Estado de reproducción de video
  */
 export interface VideoPlaybackState {
-        position: number; // Posición actual en segundos
-        lastPlayed: Date | string;
-        completed: boolean;
-        favorite: boolean;
-        watchCount: number;
+	position: number; // Posición actual en segundos
+	lastPlayed: Date | string;
+	completed: boolean;
+	favorite: boolean;
+	watchCount: number;
 }
 
 /**
@@ -146,7 +146,7 @@ export interface VideoCounts {
  */
 export interface VideoUI {
 	thumbnailUrl?: string;
-        playState?: VideoPlaybackState;
+	playState?: VideoPlaybackState;
 	chapters?: VideoChapter[];
 	privacyLevel?: VideoPrivacyLevel;
 	sharedWith?: string[];

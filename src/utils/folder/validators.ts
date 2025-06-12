@@ -4,16 +4,16 @@
  */
 
 const FOLDER_DEFAULT_COLORS = {
-        DEFAULT: '#3b82f6',
-        SYSTEM: '#6b7280',
+	DEFAULT: '#3b82f6',
+	SYSTEM: '#6b7280',
 };
 
 const FOLDER_DEFAULT_EMOJIS = {
-        DEFAULT: '📁',
-        FAVORITE: '⭐',
-        PHOTOS: '📸',
-        VIDEOS: '🎞',
-        DOWNLOADS: '⬇',
+	DEFAULT: '📁',
+	FAVORITE: '⭐',
+	PHOTOS: '📸',
+	VIDEOS: '🎞',
+	DOWNLOADS: '⬇',
 };
 import { z } from 'zod';
 
@@ -75,20 +75,20 @@ export const updateFolderSchema = createFolderSchema
  * Esquema para validar campos específicos en actualización de carpetas
  */
 export const updateFolderFieldsSchema = z
-        .object({
-                name: z.literal(true),
-                description: z.literal(true),
-                path: z.literal(true),
-                emoji: z.literal(true),
-                color: z.literal(true),
-                featuredImage: z.literal(true),
-                totalFiles: z.literal(true),
-                totalSize: z.literal(true),
-                lastIndexed: z.literal(true),
-                isFavorite: z.literal(true),
-                autoReindex: z.literal(true),
-                presetId: z.literal(true),
-        })
+	.object({
+		name: z.literal(true),
+		description: z.literal(true),
+		path: z.literal(true),
+		emoji: z.literal(true),
+		color: z.literal(true),
+		featuredImage: z.literal(true),
+		totalFiles: z.literal(true),
+		totalSize: z.literal(true),
+		lastIndexed: z.literal(true),
+		isFavorite: z.literal(true),
+		autoReindex: z.literal(true),
+		presetId: z.literal(true),
+	})
 	.partial();
 
 /**

@@ -5,13 +5,13 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    CreateWildcardData,
-    UpdateWildcardData,
-    WildcardBase,
-    WildcardBulkUpdateData,
-    WildcardRelated,
-    WildcardSearchFilters,
-    WildcardSearchOptions,
+	CreateWildcardData,
+	UpdateWildcardData,
+	WildcardBase,
+	WildcardBulkUpdateData,
+	WildcardRelated,
+	WildcardSearchFilters,
+	WildcardSearchOptions,
 } from '@/types/entities/wildcard/types';
 import { TransformerError } from '@/utils/transformers/errors';
 import { DEFAULT_WILDCARD_COLOR, DEFAULT_WILDCARD_EMOJI } from './serializers';

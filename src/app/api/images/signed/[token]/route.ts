@@ -2,8 +2,8 @@ import { verifySignedToken } from '@/app/actions/thumbnails/thumbnails.actions';
 import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(_request: NextRequest, context: { params: { token: string } }) {
-    try {
-        const { token } = context.params;
+	try {
+		const { token } = context.params;
 
 		// Verificar token y obtener imagen
 		const { buffer, mimeType } = await verifySignedToken(token);

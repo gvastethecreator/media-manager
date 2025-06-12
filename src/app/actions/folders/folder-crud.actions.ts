@@ -59,9 +59,7 @@ function ensureSerializableThumbnails<T>(obj: T): T {
 
 	// Si es un array, procesar cada elemento
 	if (Array.isArray(obj)) {
-		return obj.map((item: unknown) =>
-			ensureSerializableThumbnails(item)
-		) as unknown as T;
+		return obj.map((item: unknown) => ensureSerializableThumbnails(item)) as unknown as T;
 	}
 
 	// Copia para no modificar el original
@@ -106,12 +104,12 @@ function ensureSerializableThumbnails<T>(obj: T): T {
 		}
 		// Si es un array, procesar cada elemento recursivamente
 		else if (Array.isArray(value)) {
-			result[key] = value.map((item: unknown) =>
-				ensureSerializableThumbnails(item)
-			);
+			result[key] = value.map((item: unknown) => ensureSerializableThumbnails(item));
 		}
 		// Si es un objeto (que no sea Date, RegExp, etc), procesarlo recursivamente
-		else if (value && typeof value === 'object' &&
+		else if (
+			value &&
+			typeof value === 'object' &&
 			!(value instanceof Date) &&
 			!(value instanceof RegExp) &&
 			!(value instanceof Map) &&
@@ -267,9 +265,7 @@ export async function searchFolders(options: FolderSearchOptions = {}): Promise<
 		logger.info(`✅ Búsqueda completada, encontradas ${transformedFolders.length} carpetas`);
 
 		// Asegurar que todos los thumbnails sean serializables
-		const serializableFolders = transformedFolders.map(folder =>
-			ensureSerializableThumbnails(folder)
-		);
+		const serializableFolders = transformedFolders.map((folder) => ensureSerializableThumbnails(folder));
 
 		await revalidateAllPaths();
 

@@ -2,22 +2,22 @@
  * Categorías disponibles para prompts
  */
 export enum PromptCategory {
-        GENERAL = 'general',
-        TEXT = 'text',
-        IMAGE = 'image',
-        AUDIO = 'audio',
-        VIDEO = 'video',
-        CODE = 'code',
-        CHAT = 'chat',
-        WORLDBUILDING = 'worldbuilding',
-        CHARACTER = 'character',
-        SETTING = 'setting',
-        STORY = 'story',
-        CREATIVE = 'creative',
-        ASSISTANT = 'assistant',
-        SYSTEM = 'system',
-        UNCLASSIFIED = 'unclassified',
-        OTHER = 'other',
+	GENERAL = 'general',
+	TEXT = 'text',
+	IMAGE = 'image',
+	AUDIO = 'audio',
+	VIDEO = 'video',
+	CODE = 'code',
+	CHAT = 'chat',
+	WORLDBUILDING = 'worldbuilding',
+	CHARACTER = 'character',
+	SETTING = 'setting',
+	STORY = 'story',
+	CREATIVE = 'creative',
+	ASSISTANT = 'assistant',
+	SYSTEM = 'system',
+	UNCLASSIFIED = 'unclassified',
+	OTHER = 'other',
 }
 
 /**

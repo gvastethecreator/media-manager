@@ -127,7 +127,7 @@ export async function executePrompt(
 	prompt: PromptBase,
 	config: PromptExecutionConfig = {}
 ): Promise<PromptExecutionResult> {
-        const startTime = Date.now();
+	const startTime = Date.now();
 
 	try {
 		// Configuración por defecto
@@ -145,7 +145,7 @@ export async function executePrompt(
 		// Preparar contenido reemplazando variables
 		const preparedContent = preparePromptContent(prompt, finalConfig.variables);
 
-                executionLogger.info(`🚀 Ejecutando prompt: ${prompt.title}`);
+		executionLogger.info(`🚀 Ejecutando prompt: ${prompt.title}`);
 
 		// Por ahora, simulamos la ejecución para desarrollo
 		// En producción, aquí se conectaría con la API del modelo específico
@@ -162,14 +162,14 @@ export async function executePrompt(
 		const executionTime = Date.now() - startTime;
 
 		// Crear resultado
-                const result: PromptExecutionResult = {
-                        promptId: prompt.id,
-                        content: response.content,
-                        model: finalConfig.model as string,
-                        tokens: response.tokens,
-                        executionTime,
-                        timestamp: new Date(),
-                };
+		const result: PromptExecutionResult = {
+			promptId: prompt.id,
+			content: response.content,
+			model: finalConfig.model as string,
+			tokens: response.tokens,
+			executionTime,
+			timestamp: new Date(),
+		};
 
 		// Si se debe guardar en el historial, hacerlo
 		if (finalConfig.saveToHistory) {
@@ -184,13 +184,13 @@ export async function executePrompt(
 		const executionTime = Date.now() - startTime;
 		executionLogger.error('❌ Error al ejecutar prompt:', error);
 
-                return {
-                        promptId: prompt.id,
-                        content: `Error: ${error instanceof Error ? error.message : 'Error desconocido'}`,
-                        model: (config.model as string) || prompt.model,
-                        executionTime,
-                        timestamp: new Date(),
-                };
+		return {
+			promptId: prompt.id,
+			content: `Error: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			model: (config.model as string) || prompt.model,
+			executionTime,
+			timestamp: new Date(),
+		};
 	}
 }
 

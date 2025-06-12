@@ -286,7 +286,11 @@ class ImageService {
 			try {
 				await fs.access(image.path, fs.constants.R_OK);
 			} catch (permError: any) {
-				imageLogger.error('🔴 Sin permiso de lectura para:', image.path, permError instanceof Error ? permError.message : String(permError));
+				imageLogger.error(
+					'🔴 Sin permiso de lectura para:',
+					image.path,
+					permError instanceof Error ? permError.message : String(permError)
+				);
 				throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
 			}
 
@@ -412,9 +416,16 @@ class ImageService {
 				await fs.access(image.path, fs.constants.R_OK);
 				imageLogger.info('🟢 Permiso de lectura OK para:', image.path);
 			} catch (permError) {
-				imageLogger.error('🔴 Sin permiso de lectura para:', image.path, permError instanceof Error ? permError.message : String(permError));
+				imageLogger.error(
+					'🔴 Sin permiso de lectura para:',
+					image.path,
+					permError instanceof Error ? permError.message : String(permError)
+				);
 			}
-			imageLogger.info('🟡 Usuario proceso:', process.env.USERNAME || process.env.USER || (typeof process.getuid === 'function' ? process.getuid() : 'N/A'));
+			imageLogger.info(
+				'🟡 Usuario proceso:',
+				process.env.USERNAME || process.env.USER || (typeof process.getuid === 'function' ? process.getuid() : 'N/A')
+			);
 
 			try {
 				return await fs.readFile(image.path);

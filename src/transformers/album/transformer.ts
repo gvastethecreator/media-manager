@@ -151,12 +151,8 @@ export function transformAlbumToExtended(album: AlbumBase | any): AlbumComplete 
 		}
 
 		// 🔍 Detectar si viene directamente de Prisma (tiene relaciones)
-		const hasPrismaRelations = album && (
-			'images' in album ||
-			'videos' in album ||
-			'collections' in album ||
-			'_count' in album
-		);
+		const hasPrismaRelations =
+			album && ('images' in album || 'videos' in album || 'collections' in album || '_count' in album);
 
 		let baseAlbum: AlbumBase;
 		let albumComplete: AlbumComplete;
@@ -215,7 +211,7 @@ export function transformAlbumToExtended(album: AlbumBase | any): AlbumComplete 
 					wildcards: 0,
 					properties: 0,
 					groups: 0,
-				}
+				},
 			};
 		}
 
@@ -317,7 +313,7 @@ export function transformAlbumToWithStats(album: any): AlbumWithStatsLocal {
 
 		logger.debug('✅ Álbum transformado a versión con estadísticas:', {
 			id: albumWithStats.id,
-			itemCount: albumWithStats.itemCount
+			itemCount: albumWithStats.itemCount,
 		});
 
 		return albumWithStats;
