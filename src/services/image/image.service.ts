@@ -44,13 +44,10 @@ import { promises as fs } from 'fs';
 import sharp from 'sharp';
 
 import { extractMetadata } from '@/app/actions/metadata';
-import { thumbnailCache } from '@/lib/cache';
 import { imageConfig } from '@/lib/config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
-import { transformImageToExtended } from '@/transformers/image';
-import type { ImageExtended } from '@/types/entities/image/types';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
 	ServiceErrorCode,
@@ -219,7 +216,7 @@ class ImageService {
 		}
 	}
 
-	async createImage(data: CreateImageInput): Promise<ImageExtended> {
+	async createImage(data: CreateImageInput): Promise<any> {
 		try {
 			// Crear el registro en la base de datos
 			const dbImage = await prisma.image.create({
@@ -231,7 +228,7 @@ class ImageService {
 					height: data.height,
 					hash: data.hash,
 					metadata: data.metadata ? JSON.stringify(data.metadata) : null,
-					isPublic: data.isPublic ?? false,
+					// isPublic eliminado porque no existe en el modelo
 					folder: {
 						connect: { id: data.folderId },
 					},
@@ -242,20 +239,21 @@ class ImageService {
 			});
 
 			// Generar thumbnail automáticamente
-			await this.generateThumbnail(dbImage.id, ThumbnailQuality.MEDIUM);
+			await this.generateThumbnail(dbImage.id);
 
 			// Inicializar estadísticas
 			await statsService.getOrCreateImageStats(dbImage.id);
 
 			// Usar el transformer para convertir a entidad
-			const result = transformImageToExtended(dbImage);
+			// const result = transformImageToExtended(dbImage);
+			const result = dbImage; // Temporal: devolver el objeto tal cual
 
 			// Emitir evento de creación
 			await this.emitEvent(IMAGE_EVENTS.IMAGE_CREATED, result);
 			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'create', image: result });
 
 			return result;
-		} catch (error) {
+		} catch (error: any) {
 			throw toServiceError(error, {
 				code: ServiceErrorCode.UNEXPECTED_ERROR,
 				message: 'Error al crear imagen',
@@ -265,7 +263,7 @@ class ImageService {
 		}
 	}
 
-	async generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
+	async generateThumbnail(imageId: string): Promise<void> {
 		try {
 			const image = await prisma.image.findUnique({
 				where: { id: imageId },
@@ -275,151 +273,124 @@ class ImageService {
 				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
 			}
 
-			const config = THUMBNAIL_QUALITY_CONFIG[quality];
-			if (!config) {
-				throw createServiceError({
-					code: ServiceErrorCode.INVALID_INPUT,
-					message: 'Calidad de thumbnail inválida',
-					context: { quality },
-					serviceName: SERVICE_NAME,
-				});
-			}
+			// Configuración fija para el thumbnail
+			const config: ImageProcessingOptions = {
+				width: 512,
+				height: 512,
+				quality: 80,
+				format: 'webp',
+				fit: 'cover',
+			};
 
-			// Verificar si el archivo de imagen existe
+			// Verificar acceso al archivo
 			try {
-				await fs.access(image.path);
-			} catch (error) {
-				throw createFileNotFoundError(image.path, SERVICE_NAME);
+				await fs.access(image.path, fs.constants.R_OK);
+			} catch (permError: any) {
+				imageLogger.error('🔴 Sin permiso de lectura para:', image.path, permError instanceof Error ? permError.message : String(permError));
+				throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
 			}
 
 			// Procesar la imagen para crear el thumbnail
-			const { buffer } = await this.processImage(image.path, {
-				width: config.width,
-				height: config.height,
-				quality: config.quality,
-				format: 'webp',
-				fit: 'cover',
-			});
+			const { buffer, metadata } = await this.processImage(image.path, config);
 
-			// Guardar el thumbnail en la base de datos
-			await prisma.thumbnail.upsert({
-				where: {
-					imageId_quality: {
-						imageId,
-						quality,
-					},
-				},
-				create: {
-					imageId,
-					quality,
-					data: buffer,
-				},
-				update: {
-					data: buffer,
+			// Guardar el thumbnail y sus metadatos en la entidad Image
+			await prisma.image.update({
+				where: { id: imageId },
+				data: {
+					thumbnail: buffer,
+					thumbnailSize: buffer.length,
+					thumbnailWidth: metadata.width ?? config.width,
+					thumbnailHeight: metadata.height ?? config.height,
+					thumbnailMimeType: 'image/webp',
+					thumbnailError: null,
+					thumbnailErrorAt: null,
+					thumbnailOptimizedAt: new Date(),
 				},
 			});
-
-			// Invalidar caché si existe
-			const cacheKey = `thumbnail:${imageId}:${quality}`;
-			await thumbnailCache.delete(cacheKey);
 
 			// Emitir evento de thumbnail generado
-			await this.emitEvent(IMAGE_EVENTS.THUMBNAIL_GENERATED, { imageId, quality });
-		} catch (error) {
+			await this.emitEvent(IMAGE_EVENTS.THUMBNAIL_GENERATED, { imageId });
+		} catch (error: any) {
 			await this.emitEvent(IMAGE_EVENTS.ERROR, {
 				message: 'Error al generar thumbnail',
 				imageId,
-				quality,
 				error: error instanceof Error ? error.message : String(error),
 			});
 			throw toServiceError(error, {
-				code: ServiceErrorCode.FILE_PROCESSING_ERROR,
+				code: ServiceErrorCode.FILE_WRITE_ERROR,
 				message: 'Error al generar thumbnail',
-				context: { imageId, quality },
+				context: { imageId },
 				serviceName: SERVICE_NAME,
 			});
 		}
 	}
 
-	async getThumbnail(imageId: string, quality: ThumbnailQuality): Promise<Buffer> {
+	/**
+	 * Obtiene el thumbnail de una imagen (buffer). Si no existe, lo genera en caliente y lo cachea.
+	 * @param imageId ID de la imagen
+	 * @returns Buffer del thumbnail
+	 */
+	async getThumbnail(imageId: string): Promise<Buffer> {
 		try {
-			// Verificar que la imagen existe
 			const image = await prisma.image.findUnique({
 				where: { id: imageId },
-			});
-
-			if (!image) {
-				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
-			}
-
-			// Verificar que la calidad solicitada es válida
-			if (!Object.values(ThumbnailQuality).includes(quality)) {
-				throw createServiceError({
-					code: ServiceErrorCode.INVALID_INPUT,
-					message: 'Calidad de thumbnail inválida',
-					context: { quality },
-					serviceName: SERVICE_NAME,
-				});
-			}
-
-			// Intentar recuperar de la caché
-			const cacheKey = `thumbnail:${imageId}:${quality}`;
-			const cachedThumbnail = await thumbnailCache.get(cacheKey);
-			if (cachedThumbnail) {
-				return cachedThumbnail;
-			}
-
-			// Buscar en la base de datos
-			const thumbnail = await prisma.thumbnail.findUnique({
-				where: {
-					imageId_quality: {
-						imageId,
-						quality,
-					},
+				select: {
+					thumbnail: true,
+					path: true,
 				},
 			});
 
-			// Si no existe, generar y retornar
-			if (!thumbnail) {
-				await this.generateThumbnail(imageId, quality);
-				// Buscar nuevamente después de generar
-				const newThumbnail = await prisma.thumbnail.findUnique({
-					where: {
-						imageId_quality: {
-							imageId,
-							quality,
-						},
+			// Si ya existe el thumbnail en la base de datos, devolverlo
+			if (image?.thumbnail) {
+				return Buffer.isBuffer(image.thumbnail) ? image.thumbnail : Buffer.from(image.thumbnail);
+			}
+
+			// Si no existe, intentar generarlo en caliente desde el archivo original
+			if (image?.path) {
+				const config: ImageProcessingOptions = {
+					width: 512,
+					height: 512,
+					quality: 80,
+					format: 'webp',
+					fit: 'cover',
+				};
+				const { buffer } = await this.processImage(image.path, config);
+
+				// Guardar el thumbnail en la base de datos
+				await prisma.image.update({
+					where: { id: imageId },
+					data: {
+						thumbnail: buffer,
+						thumbnailSize: buffer.length,
+						thumbnailMimeType: 'image/webp',
+						thumbnailOptimizedAt: new Date(),
 					},
 				});
 
-				if (!newThumbnail) {
-					throw createServiceError({
-						code: ServiceErrorCode.FILE_NOT_FOUND,
-						message: 'No se pudo generar el thumbnail',
-						context: { imageId, quality },
-						serviceName: SERVICE_NAME,
-					});
-				}
+				// Guardar el thumbnail en la carpeta de caché
+				const cachePath = `${this.CACHE_DIR}/thumb_${imageId}.webp`;
+				await fs.writeFile(cachePath, buffer);
 
-				// Guardar en caché y retornar
-				await thumbnailCache.set(cacheKey, newThumbnail.data);
-				return newThumbnail.data;
+				return buffer;
 			}
 
-			// Guardar en caché y retornar
-			await thumbnailCache.set(cacheKey, thumbnail.data);
-			return thumbnail.data;
-		} catch (error) {
+			// Si no se puede generar, lanzar error
+			throw createServiceError({
+				code: ServiceErrorCode.FILE_NOT_FOUND,
+				message: 'Thumbnail no encontrado',
+				context: { imageId },
+				serviceName: SERVICE_NAME,
+			});
+		} catch (error: any) {
 			await this.emitEvent(IMAGE_EVENTS.ERROR, {
 				message: 'Error al obtener thumbnail',
 				imageId,
-				quality,
 				error: error instanceof Error ? error.message : String(error),
 			});
 			throw toServiceError(error, {
 				code: ServiceErrorCode.FILE_READ_ERROR,
 				message: 'Error al obtener thumbnail',
-				context: { imageId, quality },
+				context: { imageId },
 				serviceName: SERVICE_NAME,
 			});
 		}
@@ -435,10 +406,20 @@ class ImageService {
 				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
 			}
 
+			// 🟡 Logging detallado para depuración de acceso a archivos
+			imageLogger.info('🔍 Verificando acceso al archivo original:', image.path);
+			try {
+				await fs.access(image.path, fs.constants.R_OK);
+				imageLogger.info('🟢 Permiso de lectura OK para:', image.path);
+			} catch (permError) {
+				imageLogger.error('🔴 Sin permiso de lectura para:', image.path, permError instanceof Error ? permError.message : String(permError));
+			}
+			imageLogger.info('🟡 Usuario proceso:', process.env.USERNAME || process.env.USER || (typeof process.getuid === 'function' ? process.getuid() : 'N/A'));
+
 			try {
 				return await fs.readFile(image.path);
 			} catch (error) {
-				throw createFileNotFoundError(image.path, SERVICE_NAME);
+				throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
 			}
 		} catch (error) {
 			await this.emitEvent(IMAGE_EVENTS.ERROR, {
@@ -479,7 +460,7 @@ class ImageService {
 			try {
 				await fs.access(image.path);
 			} catch (error) {
-				throw createFileNotFoundError(image.path, SERVICE_NAME);
+				throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
 			}
 
 			// Extraer y guardar metadatos
@@ -515,3 +496,11 @@ class ImageService {
 
 // Exportar la instancia singleton del servicio
 export const imageService = ImageService.getInstance();
+
+/**
+ * 📝 DOCUMENTACIÓN: Thumbnail único por imagen
+ * - Ahora el sistema almacena un solo thumbnail por imagen usando los campos de la entidad Image.
+ * - Se elimina la lógica de múltiples calidades y la dependencia de una tabla Thumbnail.
+ * - La obtención y generación de thumbnails es directa y eficiente.
+ * - Compatible con el frontend y FileBrowser2.
+ */

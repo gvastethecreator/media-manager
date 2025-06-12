@@ -50,7 +50,7 @@ export interface RetryPolicy {
 }
 
 /**
- * Tipo base para Task
+ * ✅ Tipo base para Task, solo campos canónicos y serializables
  */
 export interface TaskBase {
 	id: string;
@@ -59,49 +59,8 @@ export interface TaskBase {
 	description?: string;
 	priority: TaskPriority;
 	status: TaskStatus;
-	schedule?: string; // expresión cron
-	handler: string; // función a ejecutar
-	params?: Record<string, any>; // parámetros para el handler
-	timeout?: number; // en milisegundos
-	retryPolicy?: RetryPolicy;
-	dependencies?: string[]; // IDs de tareas que deben completarse antes
-	tags?: string[];
 	createdAt: Date;
 	updatedAt: Date;
 }
 
-/**
- * Entrada para crear una nueva tarea
- */
-export interface TaskCreateInput {
-	type: TaskType | string;
-	name: string;
-	description?: string;
-	priority: TaskPriority;
-	status?: TaskStatus;
-	schedule?: string;
-	handler: string;
-	params?: Record<string, any>;
-	timeout?: number;
-	retryPolicy?: RetryPolicy;
-	dependencies?: string[];
-	tags?: string[];
-}
-
-/**
- * Entrada para actualizar una tarea existente
- */
-export interface TaskUpdateInput {
-	type?: TaskType | string;
-	name?: string;
-	description?: string;
-	priority?: TaskPriority;
-	status?: TaskStatus;
-	schedule?: string;
-	handler?: string;
-	params?: Record<string, any>;
-	timeout?: number;
-	retryPolicy?: RetryPolicy;
-	dependencies?: string[];
-	tags?: string[];
-}
+// ✅ TaskBase ahora es seguro y serializable para frontend/backend.

@@ -1,16 +1,9 @@
 'use client';
 
 import { reindexAllFolders } from '@/app/actions/folders';
-import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import type {
-	ErrorResponse,
-	ExtendedProcessStatus,
-	ProcessStatus,
-	ReindexAllCompleteData,
-	ReindexAllProgressData,
-} from '@/types/process';
+import type { ProcessStatus, ReindexAllProgressData, ReindexAllCompleteData, ErrorResponse, FolderResponse } from '@/app/actions/folders/folder-types';
 import { useCallback, useEffect, useState } from 'react';
 import { type ExtendedFolder, initialGlobalReindexStatus } from '../folder-types';
 import { useFoldersEvents } from './use-folders-events';
@@ -52,7 +45,7 @@ export function useFolders() {
 
 	// Función para manejar la finalización de un proceso
 	const handleProcessComplete = useCallback(
-		(folderId: string) => {
+		async (folderId: string) => {
 			folderLogger.info('✅ Proceso completado:', { folderId });
 
 			// Limpiar estados INMEDIATAMENTE
@@ -60,7 +53,7 @@ export function useFolders() {
 			setProcessProgress(0);
 
 			// Actualizar UI para mostrar completado por un momento
-			setProcessStatus((prev) => ({
+			setProcessStatus((prev: ExtendedProcessStatus) => ({
 				...prev,
 				phase: 'complete',
 				status: 'Proceso completado',
@@ -68,12 +61,20 @@ export function useFolders() {
 				folderId: folderId,
 			}));
 
-			// Recargar datos inmediatamente
-			loadFolders().catch((error) => folderLogger.error('Error recargando carpetas:', error));
+			// 🟢 FIX: Forzar recarga inmediata de carpetas y estadísticas tras completar
+			try {
+				await Promise.all([
+					loadFolders(/*forceNoCache*/),
+					loadStats(),
+				]);
+				folderLogger.info('🟢 Carpetas y stats recargadas tras completar proceso');
+			} catch (err) {
+				folderLogger.error('❌ Error recargando carpetas/stats tras completar:', err);
+			}
 
 			// Limpiar estado después de mostrar completado
 			setTimeout(() => {
-				setProcessStatus((prev) => {
+				setProcessStatus((prev: ExtendedProcessStatus) => {
 					// Solo limpiar si el folderId aún coincide (evita limpiar un proceso diferente)
 					if (prev.folderId === folderId) {
 						folderLogger.info('🧹 Limpiando estado de proceso para carpeta:', folderId);
@@ -85,9 +86,9 @@ export function useFolders() {
 				// Asegurarse una vez más que se ha limpiado el estado de procesamiento
 				setIsProcessing(false);
 				setProcessProgress(0);
-			}, 3000);
+			}, 1500); // ⏱️ Reducido el timeout para mayor reactividad
 		},
-		[loadFolders]
+		[loadFolders, loadStats]
 	);
 
 	// Función para manejar los errores de procesamiento
@@ -138,7 +139,7 @@ export function useFolders() {
 			}
 
 			// Actualizar estado del proceso
-			setProcessStatus((prevStatus) => {
+			setProcessStatus((prevStatus: ExtendedProcessStatus) => {
 				const updatedStatus = {
 					...prevStatus,
 					...status,
@@ -203,6 +204,15 @@ export function useFolders() {
 		onStatusUpdate: handleStatusUpdate,
 		onComplete: handleProcessComplete,
 	});
+
+	// --- FIX: Validación defensiva para evitar pasar un objeto como folderId ---
+	const safeStartPolling = useCallback((folderId: string) => {
+		if (typeof folderId !== 'string') {
+			folderLogger.warn('⚠️ [FIX] startPolling llamado con folderId no string:', folderId);
+			return;
+		}
+		startPolling(folderId);
+	}, [startPolling]);
 
 	// Configurar eventos de servidor (respaldo)
 	useFoldersEvents({
@@ -308,7 +318,7 @@ export function useFolders() {
 	} = useFoldersOperations({
 		onStartProcessing: (folderId: string) => {
 			startProcessing(folderId);
-			startPolling(folderId);
+			safeStartPolling(folderId);
 		},
 		onLoadData: loadInitialData,
 		onError: (error) => {
@@ -417,3 +427,32 @@ export function useFolders() {
 		setError,
 	};
 }
+
+// Definición local para ExtendedProcessStatus
+export interface ExtendedProcessStatus extends ProcessStatus {
+  globalProgress?: {
+    current: number;
+    total: number;
+    progress: number;
+  };
+}
+
+/**
+ * 🛠️ FIX: Se fuerza la recarga de carpetas y estadísticas tras la finalización de un proceso
+ * para asegurar que la UI refleje el estado actualizado en tiempo real, incluso si hay delays
+ * de caché o diferencias de IDs entre backend y frontend.
+ *
+ * - Se reduce el timeout de limpieza para mayor reactividad.
+ * - Se documenta el motivo y el flujo.
+ *
+ * Diagrama de flujo:
+ *
+ * ```mermaid
+ * graph TD
+ *   A[Proceso Backend Termina] --> B[Evento/Callback onComplete]
+ *   B --> C[setProcessStatus(complete)]
+ *   C --> D[loadFolders() + loadStats()]
+ *   D --> E[UI Refresca Estado]
+ *   E --> F[setTimeout Limpia Estado]
+ * ```
+ */

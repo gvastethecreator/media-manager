@@ -2,10 +2,10 @@ import type {
 	CreateFolderData,
 	FolderBase,
 	FolderExtended,
-	FolderStats,
 	FolderSummary,
 	UpdateFolderData,
 } from '@/types/entities/folder';
+import type { FolderStats } from '@/types/entities/folder/types';
 
 // Re-exportamos los tipos principales
 export type { CreateFolderData, FolderBase, FolderExtended, FolderStats, FolderSummary, UpdateFolderData };
@@ -348,3 +348,33 @@ export interface UpdateFolderOptions {
 	lastIndexed?: Date;
 	// Solo campos que existen en el esquema
 }
+
+/**
+ * 📦 Datos de progreso para reindexación global de carpetas
+ * Usado en eventos y estado global de reindexado
+ */
+export interface ReindexAllProgressData {
+	processedFolders: number;
+	totalFolders: number;
+	currentFolder?: string;
+	phase?: string; // Puede ser 'preparing', 'index', 'complete', etc.
+	status?: string;
+	errors?: Array<{ folderId: string; error: string }>;
+}
+
+/**
+ * 📦 Datos de finalización para reindexación global de carpetas
+ * Usado en eventos y estado global de reindexado
+ */
+export interface ReindexAllCompleteData {
+	processedFolders: number;
+	totalFolders: number;
+	errors: Array<{ folderId: string; error: string }>;
+	phase?: string; // 'complete'
+	status?: string;
+	endTime?: number;
+	duration?: number;
+}
+
+// 📝 Documentación: Estos tipos se usan para tipar los eventos y el estado global de reindexado en hooks y UI.
+// Ver diagrama de flujo en la documentación del módulo.

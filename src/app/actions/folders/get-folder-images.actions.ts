@@ -1,6 +1,6 @@
 'use server';
 
-import path from 'path';
+import { getThumbnail } from '@/app/actions/images/image-thumbnails.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
@@ -11,6 +11,8 @@ import type {
 	RelatedTag,
 	RelatedWorldItem,
 } from '@/types/file-item';
+import { ThumbnailQuality } from '@/types/thumbnails';
+import path from 'path';
 
 const imagesActionsLogger = serverLogger.withContext('FolderImagesActions');
 
@@ -51,25 +53,11 @@ export async function getFolderImages(folderId: string) {
 			where: { id: folderId },
 			include: {
 				images: {
-					orderBy: {
-						name: 'asc',
-					},
+					orderBy: { name: 'asc' },
 					include: {
 						stats: true,
-						tags: {
-							select: {
-								id: true,
-								name: true,
-								color: true,
-							},
-						},
-						collections: {
-							select: {
-								id: true,
-								name: true,
-								color: true,
-							},
-						},
+						tags: { select: { id: true, name: true, color: true } },
+						collections: { select: { id: true, name: true, color: true } },
 					},
 				},
 			},
@@ -86,65 +74,88 @@ export async function getFolderImages(folderId: string) {
 			imageCount: folder.images.length,
 		});
 
-		const files: ApiResponseFileItem[] = folder.images.map((image) => {
-			// Construir metadata
-			const metadata = {
-				mimeType: image.metadata ? JSON.parse(image.metadata).mimeType : undefined,
-				size: image.size,
-				dimensions: image.width && image.height ? { width: image.width, height: image.height } : undefined,
-				fileSystem: {
+		// 🚨 Convención: thumbnail NUNCA debe ser binario al cliente
+		const files: ApiResponseFileItem[] = await Promise.all(
+			folder.images.map(async (img) => {
+				// Forzar tipado para incluir campos escalares
+				const image = img as typeof img & { isPublic?: boolean; isFavorite?: boolean };
+
+				const metadata = {
+					mimeType: image.metadata ? JSON.parse(image.metadata).mimeType : undefined,
 					size: image.size,
-					created: image.createdAt.toISOString(),
-					modified: image.updatedAt.toISOString(),
-					accessed: image.updatedAt.toISOString(),
-				},
-				extension: image.path ? path.extname(image.path).slice(1) : undefined,
-				exif: image.metadata ? JSON.parse(image.metadata).exif : undefined,
-				generation: image.metadata ? JSON.parse(image.metadata).generation : undefined,
-			};
+					dimensions: image.width && image.height ? { width: image.width, height: image.height } : undefined,
+					fileSystem: {
+						size: image.size,
+						created: image.createdAt.toISOString(),
+						modified: image.updatedAt.toISOString(),
+						accessed: image.updatedAt.toISOString(),
+					},
+					extension: image.path ? path.extname(image.path).slice(1) : undefined,
+					exif: image.metadata ? JSON.parse(image.metadata).exif : undefined,
+					generation: image.metadata ? JSON.parse(image.metadata).generation : undefined,
+				};
 
-			// Mapear colecciones y tags al formato requerido
-			const collections: RelatedCollection[] = image.collections.map((c) => ({
-				id: c.id,
-				name: c.name,
-			}));
+				const collections: RelatedCollection[] = image.collections.map((c) => ({
+					id: c.id,
+					name: c.name,
+				}));
+				const tags: RelatedTag[] = image.tags.map((t) => ({
+					id: t.id,
+					name: t.name,
+					color: t.color,
+				}));
 
-			const tags: RelatedTag[] = image.tags.map((t) => ({
-				id: t.id,
-				name: t.name,
-				color: t.color,
-			}));
+				let thumbnailUrl: string | null = null;
+				try {
+					thumbnailUrl = await getThumbnail(image.id, ThumbnailQuality.MEDIUM);
+				} catch (err) {
+					imagesActionsLogger.warn('No se pudo obtener thumbnail para imagen', { imageId: image.id, error: err });
+				}
 
-			return {
-				id: image.id,
-				name: image.name,
-				path: image.path,
-				type: 'image',
-				size: image.size,
-				width: image.width,
-				height: image.height,
-				metadata: JSON.stringify(metadata),
-				thumbnail: image.thumbnail
-					? `data:${metadata.mimeType || 'image/webp'};base64,${Buffer.from(image.thumbnail).toString('base64')}`
-					: null,
-				thumbnailSize: image.thumbnailSize,
-				thumbnailWidth: image.thumbnailWidth,
-				thumbnailHeight: image.thumbnailHeight,
-				isPublic: image.isPublic || false,
-				isFavorite: image.isFavorite || false,
-				folderId: folder.id,
-				createdAt: image.createdAt,
-				updatedAt: image.updatedAt,
-				modifiedAt: image.updatedAt,
-				accessedAt: image.updatedAt,
-				collections,
-				tags,
-				albums: [],
-				characters: [],
-				places: [],
-				objects: [],
-			};
-		});
+				// 🟢 Convención: thumbnailUrl tiene prioridad, thumbnail base64 solo si no hay URL
+				let thumbnail: string | null = null;
+				if (thumbnailUrl) {
+					thumbnail = thumbnailUrl;
+				} else if (image.thumbnail && typeof image.thumbnail !== 'string') {
+					// Si existe un buffer, convertir a base64 (solo como fallback)
+					const mimeType = metadata.mimeType || 'image/webp';
+					thumbnail = `data:${mimeType};base64,${Buffer.from(image.thumbnail).toString('base64')}`;
+				} else if (typeof image.thumbnail === 'string') {
+					// Si por alguna razón ya es string, usarlo
+					thumbnail = image.thumbnail;
+				} else {
+					thumbnail = null;
+				}
+
+				return {
+					id: image.id,
+					name: image.name,
+					path: image.path,
+					type: 'image',
+					size: image.size,
+					width: image.width,
+					height: image.height,
+					metadata: JSON.stringify(metadata),
+					thumbnail, // Siempre string serializable o null
+					thumbnailSize: image.thumbnailSize,
+					thumbnailWidth: image.thumbnailWidth,
+					thumbnailHeight: image.thumbnailHeight,
+					isPublic: Boolean(image.isPublic),
+					isFavorite: Boolean(image.isFavorite),
+					folderId: folder.id,
+					createdAt: image.createdAt,
+					updatedAt: image.updatedAt,
+					modifiedAt: image.updatedAt,
+					accessedAt: image.updatedAt,
+					collections,
+					tags,
+					albums: [],
+					characters: [],
+					places: [],
+					objects: [],
+				};
+			})
+		);
 
 		return {
 			items: files,

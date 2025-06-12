@@ -39,6 +39,8 @@ export interface ImageBase extends BaseEntity {
 	metadata?: string | null;
 	isFavorite: boolean;
 	addedAt: Date;
+	sortBy: string;
+	filters: string;
 }
 
 /**

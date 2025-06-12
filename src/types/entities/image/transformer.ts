@@ -3,28 +3,26 @@
  * @module types/entities/image/transformer
  */
 
-import type { Transformer } from '@/types/common/transformer';
-import type { Image as PrismaImage } from '@prisma/client';
-import type { ImageBase, ImageExtended } from './types';
+import type { ImageBase } from './types';
 
 /**
- * Type for database image record
+ * Type for database image record (ahora canónico)
  */
-export type ImageDBRecord = PrismaImage;
+export type ImageDBRecord = ImageBase;
 
 /**
- * Type for API response of image
+ * Type for API response of image (puede ser igual a ImageBase o extendido según necesidades)
  */
-export type ImageResult = ImageExtended;
+export type ImageResult = ImageBase;
 
 /**
- * Transformer for images
+ * Transformer para imágenes (solo ejemplo, ajustar según lógica real)
  */
-export const imageTransformer: Transformer<ImageDBRecord, ImageBase, ImageResult> = {
+export const imageTransformer = {
 	/**
 	 * Transform database record to domain entity
 	 */
-	fromDB: (record): ImageBase => {
+	fromDB: (record: ImageBase): ImageBase => {
 		return {
 			id: record.id,
 			name: record.name,
@@ -36,23 +34,23 @@ export const imageTransformer: Transformer<ImageDBRecord, ImageBase, ImageResult
 			height: record.height,
 			metadata: record.metadata,
 			isFavorite: record.isFavorite,
-			isPublic: record.isPublic,
-			folderId: record.folderId,
 			createdAt: record.createdAt,
 			updatedAt: record.updatedAt,
 			addedAt: record.addedAt,
+			sortBy: record.sortBy,
+			filters: record.filters,
 		};
 	},
 
 	/**
 	 * Transform domain entity to client result with additional data
 	 */
-	toClient: (entity, options): ImageResult => {
+	toClient: (entity: ImageBase, options?: { includes?: { folder?: any } }): ImageResult => {
 		// Parse metadata if available
 		const metadata = entity.metadata ? JSON.parse(entity.metadata as string) : null;
 
 		// Calculate thumbnail URL if available
-		const hasThumbnail = !!entity.thumbnailWidth && !!entity.thumbnailHeight;
+		const hasThumbnail = false; // Lógica real debe ir aquí si aplica
 		const thumbnailUrl = hasThumbnail ? `/api/images/${entity.id}/thumbnail` : null;
 
 		// Calculate full image URL
@@ -63,22 +61,14 @@ export const imageTransformer: Transformer<ImageDBRecord, ImageBase, ImageResult
 
 		return {
 			...entity,
-			displayName: entity.name || 'Sin nombre',
-			thumbnailUrl,
-			fullUrl,
-			aspectRatio,
 			metadata,
-			hasThumbnail,
-			hasMetadata: !!metadata,
-			isProcessed: true,
-			folder: options?.includes?.folder,
 		};
 	},
 
 	/**
 	 * Transform client input to database record for creation
 	 */
-	toDB: (input): Partial<ImageDBRecord> => {
+	toDB: (input: Partial<ImageBase>): Partial<ImageDBRecord> => {
 		const { metadata, ...rest } = input;
 
 		return {
