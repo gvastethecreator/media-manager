@@ -182,9 +182,16 @@ export async function generateThumbnail(
 			await fs.access(filePath, fs.constants.R_OK);
 			thumbLogger.info('🟢 Permiso de lectura OK para:', filePath);
 		} catch (permError) {
-			thumbLogger.error('🔴 Sin permiso de lectura para:', filePath, permError instanceof Error ? permError.message : String(permError));
+			thumbLogger.error(
+				'🔴 Sin permiso de lectura para:',
+				filePath,
+				permError instanceof Error ? permError.message : String(permError)
+			);
 		}
-		thumbLogger.info('🟡 Usuario proceso:', process.env.USERNAME || process.env.USER || (typeof process.getuid === 'function' ? process.getuid() : 'N/A'));
+		thumbLogger.info(
+			'🟡 Usuario proceso:',
+			process.env.USERNAME || process.env.USER || (typeof process.getuid === 'function' ? process.getuid() : 'N/A')
+		);
 
 		if (!existsSync(filePath)) {
 			thumbLogger.error(`Archivo no encontrado: ${filePath}`);

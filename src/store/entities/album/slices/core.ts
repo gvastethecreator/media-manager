@@ -7,10 +7,10 @@ import type { StateCreator } from 'zustand';
 import { createAlbum, deleteAlbum, getAlbum, getAlbums } from '../../../../app/actions/albums/album.actions';
 import { extendAlbum } from '../../../../transformers/album/serializers';
 import type {
-    AlbumBase,
-    AlbumCreateInput,
-    AlbumRelations,
-    AlbumUpdateInput
+	AlbumBase,
+	AlbumCreateInput,
+	AlbumRelations,
+	AlbumUpdateInput,
 } from '../../../../types/entities/album/types';
 import type { AlbumState } from '../types';
 

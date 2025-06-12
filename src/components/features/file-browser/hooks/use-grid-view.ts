@@ -54,79 +54,84 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 	const resizeObserverRef = useRef<ResizeObserver | null>(null);
 	const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	// 🎯 Callback ref SIMPLIFICADO que configura el ResizeObserver inmediatamente
-	const parentCallbackRef = useCallback((node: HTMLDivElement | null) => {
-		// Limpiar el observer anterior si existe
-		if (resizeObserverRef.current) {
-			resizeObserverRef.current.disconnect();
-			resizeObserverRef.current = null;
-		}
-
-		if (resizeTimeoutRef.current) {
-			clearTimeout(resizeTimeoutRef.current);
-			resizeTimeoutRef.current = null;
-		}
-
-		// Actualizar la referencia
-		parentRef.current = node;
-
-		if (node) {
-			// 📏 Cálculo agresivo del ancho inicial con múltiples estrategias
-			const calculateInitialWidth = (source: string) => {
-				// Asegurarse de que el nodo esté en el DOM y tenga un layout válido
-				if (!node.parentElement || node.offsetWidth === 0) {
-					console.warn(`[useGridView] calculateInitialWidth (${source}): Nodo no listo o sin dimensiones. offsetWidth: ${node.offsetWidth}, parentElement: ${!!node.parentElement}`);
-					return false;
-				}
-				const width = node.offsetWidth;
-				console.debug(`[useGridView] calculateInitialWidth (${source}): width = ${width}px`);
-				if (width > 0) {
-					setContainerWidth(width);
-					return true;
-				}
-				return false;
-			};
-
-			// 1. Intentar inmediatamente
-			if (!calculateInitialWidth('immediate')) {
-				// 2. RequestAnimationFrame si no hay ancho inicial
-				requestAnimationFrame(() => {
-					if (!calculateInitialWidth('RAF')) {
-						// 3. Timeout como último recurso
-						setTimeout(() => {
-							calculateInitialWidth('setTimeout');
-						}, 100); // Aumentado ligeramente
-					}
-				});
+	const parentCallbackRef = useCallback(
+		(node: HTMLDivElement | null) => {
+			// Limpiar el observer anterior si existe
+			if (resizeObserverRef.current) {
+				resizeObserverRef.current.disconnect();
+				resizeObserverRef.current = null;
 			}
 
-			// 👁️ Configurar ResizeObserver para el nuevo nodo
-			const updateWidth = (width: number) => {
-				if (width > 0) {
-					setContainerWidth(width);
-				}
-			};
+			if (resizeTimeoutRef.current) {
+				clearTimeout(resizeTimeoutRef.current);
+				resizeTimeoutRef.current = null;
+			}
 
-			resizeObserverRef.current = new ResizeObserver((entries) => {
-				if (resizeTimeoutRef.current) {
-					clearTimeout(resizeTimeoutRef.current);
+			// Actualizar la referencia
+			parentRef.current = node;
+
+			if (node) {
+				// 📏 Cálculo agresivo del ancho inicial con múltiples estrategias
+				const calculateInitialWidth = (source: string) => {
+					// Asegurarse de que el nodo esté en el DOM y tenga un layout válido
+					if (!node.parentElement || node.offsetWidth === 0) {
+						console.warn(
+							`[useGridView] calculateInitialWidth (${source}): Nodo no listo o sin dimensiones. offsetWidth: ${node.offsetWidth}, parentElement: ${!!node.parentElement}`
+						);
+						return false;
+					}
+					const width = node.offsetWidth;
+					console.debug(`[useGridView] calculateInitialWidth (${source}): width = ${width}px`);
+					if (width > 0) {
+						setContainerWidth(width);
+						return true;
+					}
+					return false;
+				};
+
+				// 1. Intentar inmediatamente
+				if (!calculateInitialWidth('immediate')) {
+					// 2. RequestAnimationFrame si no hay ancho inicial
+					requestAnimationFrame(() => {
+						if (!calculateInitialWidth('RAF')) {
+							// 3. Timeout como último recurso
+							setTimeout(() => {
+								calculateInitialWidth('setTimeout');
+							}, 100); // Aumentado ligeramente
+						}
+					});
 				}
 
-				const width = entries[0].contentRect.width;
-				if (isResizing) {
-					resizeTimeoutRef.current = setTimeout(() => {
+				// 👁️ Configurar ResizeObserver para el nuevo nodo
+				const updateWidth = (width: number) => {
+					if (width > 0) {
+						setContainerWidth(width);
+					}
+				};
+
+				resizeObserverRef.current = new ResizeObserver((entries) => {
+					if (resizeTimeoutRef.current) {
+						clearTimeout(resizeTimeoutRef.current);
+					}
+
+					const width = entries[0].contentRect.width;
+					if (isResizing) {
+						resizeTimeoutRef.current = setTimeout(() => {
+							updateWidth(width);
+						}, 100);
+					} else {
 						updateWidth(width);
-					}, 100);
-				} else {
-					updateWidth(width);
-				}
-			});
+					}
+				});
 
-			resizeObserverRef.current.observe(node);
-		} else {
-			// Si no hay nodo, resetear el ancho
-			setContainerWidth(0);
-		}
-	}, [isResizing]);
+				resizeObserverRef.current.observe(node);
+			} else {
+				// Si no hay nodo, resetear el ancho
+				setContainerWidth(0);
+			}
+		},
+		[isResizing]
+	);
 
 	// 🔄 Función para forzar recálculo manual del ancho
 	const forceRecalcWidth = useCallback(() => {
@@ -142,7 +147,9 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 				const width = node.offsetWidth;
 				const rect = node.getBoundingClientRect();
 
-				console.debug(`[useGridView] forceRecalcWidth: Dimensiones - offsetWidth: ${width}px, boundingWidth: ${rect.width}px`);
+				console.debug(
+					`[useGridView] forceRecalcWidth: Dimensiones - offsetWidth: ${width}px, boundingWidth: ${rect.width}px`
+				);
 
 				if (width > 0) {
 					setContainerWidth(width);
@@ -151,7 +158,9 @@ export function useGridView({ viewMode, isResizing, loadMoreItems }: UseGridView
 					console.warn('[useGridView] forceRecalcWidth: ⚠️ Dimensiones inválidas, no se actualiza containerWidth');
 				}
 			} else {
-				console.warn(`[useGridView] forceRecalcWidth: ⚠️ Nodo no está listo. En DOM: ${isInDOM}, Tiene Padre: ${hasParent}`);
+				console.warn(
+					`[useGridView] forceRecalcWidth: ⚠️ Nodo no está listo. En DOM: ${isInDOM}, Tiene Padre: ${hasParent}`
+				);
 			}
 		} else {
 			console.warn('[useGridView] forceRecalcWidth: ⚠️ parentRef.current es null');

@@ -8,19 +8,19 @@ import { EntityError, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
-    NoteComplete,
-    NoteCreateInput,
-    NoteFilters,
-    NoteSearchOptions,
-    NoteSearchResult,
-    NoteUpdateInput,
+	NoteComplete,
+	NoteCreateInput,
+	NoteFilters,
+	NoteSearchOptions,
+	NoteSearchResult,
+	NoteUpdateInput,
 } from '@/types/entities/note/types';
 import { TransformerError } from '@/utils/transformers/errors';
 import {
-    mapCreateNoteDataToPrisma,
-    mapNoteFiltersToPrisma,
-    mapNoteSearchOptionsToPrisma,
-    mapUpdateNoteDataToPrisma,
+	mapCreateNoteDataToPrisma,
+	mapNoteFiltersToPrisma,
+	mapNoteSearchOptionsToPrisma,
+	mapUpdateNoteDataToPrisma,
 } from './mappers';
 import { fromPrismaNote, validateNote } from './serializers';
 
@@ -185,37 +185,37 @@ export async function getNotesByIds(
 		// Construir opciones de inclusión de relaciones
 		const include = includeRelations
 			? {
-				images: true,
-				videos: true,
-				albums: true,
-				collections: true,
-				tags: true,
-				characters: true,
-				places: true,
-				worldItems: true,
-				concepts: true,
-				prompts: true,
-				wildcards: true,
-				properties: true,
-				groups: true,
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						albums: true,
-						collections: true,
-						tags: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
+					images: true,
+					videos: true,
+					albums: true,
+					collections: true,
+					tags: true,
+					characters: true,
+					places: true,
+					worldItems: true,
+					concepts: true,
+					prompts: true,
+					wildcards: true,
+					properties: true,
+					groups: true,
+					_count: {
+						select: {
+							images: true,
+							videos: true,
+							albums: true,
+							collections: true,
+							tags: true,
+							characters: true,
+							places: true,
+							worldItems: true,
+							concepts: true,
+							prompts: true,
+							wildcards: true,
+							properties: true,
+							groups: true,
+						},
 					},
-				},
-			}
+				}
 			: undefined;
 
 		// Buscar notas (eliminar isActive: true, ya que no existe en el modelo ni tipos)
@@ -424,4 +424,3 @@ export function toRelatedNote(
 // Reexportar funciones clave de mappers y serializers para compatibilidad y uso directo
 export { toCreateNoteData, toUpdateNoteData } from './mappers';
 export { fromPrismaNote, validateNote } from './serializers';
-

@@ -1,7 +1,13 @@
 'use client';
 
 import { reindexAllFolders } from '@/app/actions/folders';
-import type { ErrorResponse, FolderResponse, ProcessStatus, ReindexAllCompleteData, ReindexAllProgressData } from '@/app/actions/folders/folder-types';
+import type {
+	ErrorResponse,
+	FolderResponse,
+	ProcessStatus,
+	ReindexAllCompleteData,
+	ReindexAllProgressData,
+} from '@/app/actions/folders/folder-types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { useCallback, useEffect, useState } from 'react';
@@ -63,10 +69,7 @@ export function useFolders() {
 
 			// 🟢 FIX: Forzar recarga inmediata de carpetas y estadísticas tras completar
 			try {
-				await Promise.all([
-					loadFolders(/*forceNoCache*/),
-					loadStats(),
-				]);
+				await Promise.all([loadFolders(/*forceNoCache*/), loadStats()]);
 				folderLogger.info('🟢 Carpetas y stats recargadas tras completar proceso');
 			} catch (err) {
 				folderLogger.error('❌ Error recargando carpetas/stats tras completar:', err);
@@ -206,13 +209,16 @@ export function useFolders() {
 	});
 
 	// --- FIX: Validación defensiva para evitar pasar un objeto como folderId ---
-	const safeStartPolling = useCallback((folderId: string) => {
-		if (typeof folderId !== 'string') {
-			folderLogger.warn('⚠️ [FIX] startPolling llamado con folderId no string:', folderId);
-			return;
-		}
-		startPolling(folderId);
-	}, [startPolling]);
+	const safeStartPolling = useCallback(
+		(folderId: string) => {
+			if (typeof folderId !== 'string') {
+				folderLogger.warn('⚠️ [FIX] startPolling llamado con folderId no string:', folderId);
+				return;
+			}
+			startPolling(folderId);
+		},
+		[startPolling]
+	);
 
 	// Configurar eventos de servidor (respaldo)
 	useFoldersEvents({
@@ -430,11 +436,11 @@ export function useFolders() {
 
 // Definición local para ExtendedProcessStatus
 export interface ExtendedProcessStatus extends ProcessStatus {
-  globalProgress?: {
-    current: number;
-    total: number;
-    progress: number;
-  };
+	globalProgress?: {
+		current: number;
+		total: number;
+		progress: number;
+	};
 }
 
 /**

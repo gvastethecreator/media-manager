@@ -69,7 +69,9 @@ const CentralPanel = React.memo(function CentralPanel({
 				{toolbar}
 				{/* ⚠️ CLAVE: Mantener siempre montado el contenido para evitar desmontajes de FileBrowser */}
 				<div className="flex-1 min-h-0 min-w-0 w-full h-full overflow-hidden resize-container">
-					<div className={`h-full w-full min-h-0 min-w-0 flex-1 view-container-transition ${isResizing ? 'pointer-events-none' : ''}`}>
+					<div
+						className={`h-full w-full min-h-0 min-w-0 flex-1 view-container-transition ${isResizing ? 'pointer-events-none' : ''}`}
+					>
 						{children}
 					</div>
 				</div>

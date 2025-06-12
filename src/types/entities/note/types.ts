@@ -25,17 +25,17 @@ import type { WorldItem } from '../world-item/types';
  * 🔄 Tipo base para Note
  */
 export interface NoteBase {
-        id: string;
-        title: string;
-        content: string;
-        category: string;
-        priority: number;
-        status: string;
-        featuredImage: string | null;
-        isFavorite: boolean;
-        presetId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
+	id: string;
+	title: string;
+	content: string;
+	category: string;
+	priority: number;
+	status: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	presetId: string | null;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 /**
@@ -105,7 +105,7 @@ export interface NoteUI {
 /**
  * 🔄 Campos deserializados de Note
  */
-export type NoteDeserialized = {}
+export type NoteDeserialized = {};
 
 /**
  * 🔍 Interfaz para filtros de búsqueda de notas
@@ -135,9 +135,9 @@ export interface NoteCreateInput {
 	content?: string;
 	category?: string;
 	priority?: number;
-        status?: string;
-        // UI
-        featuredImage?: string | null;
+	status?: string;
+	// UI
+	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
 	// Relaciones
@@ -164,9 +164,9 @@ export interface NoteUpdateInput {
 	content?: string;
 	category?: string;
 	priority?: number;
-        status?: string;
-        // UI
-        featuredImage?: string | null;
+	status?: string;
+	// UI
+	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
 	// Relaciones

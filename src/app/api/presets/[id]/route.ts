@@ -20,7 +20,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 		// Validar el ID
 		paramsSchema.parse({ id });
 
-                const preset = await getVisualPreset(id);
+		const preset = await getVisualPreset(id);
 
 		if (!preset) {
 			return NextResponse.json({ error: 'Preset no encontrado' }, { status: 404 });
@@ -51,7 +51,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 		const body = await request.json();
 
-                const updatedPreset = await updateVisualPreset(id, body);
+		const updatedPreset = await updateVisualPreset(id, body);
 
 		return NextResponse.json(updatedPreset);
 	} catch (error) {

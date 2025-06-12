@@ -104,11 +104,11 @@ export const CharacterSchema = BaseEntitySchema.extend({
 	id: z.string().cuid(),
 	name: z.string().min(1, 'El nombre es obligatorio'),
 	description: z.string().optional(),
-        level: z.number().int().min(1).max(100).default(1),
-        class: z.string(),
-        race: z.string(),
-        alignment: z.string(),
-        backstory: z.string().optional(),
+	level: z.number().int().min(1).max(100).default(1),
+	class: z.string(),
+	race: z.string(),
+	alignment: z.string(),
+	backstory: z.string().optional(),
 
 	// Objetos complejos (parsear JSON antes de validar)
 	stats: z.preprocess(safeJsonParse({}), CharacterStatsSchema.optional()),

@@ -4,29 +4,50 @@
  */
 
 export type {
-       CharacterBase, CharacterComplete, CharacterCount, CharacterCounts, CharacterCreateInput, CharacterFilters,
-       CharacterIncludes, CharacterRelations, CharacterSearchOptions,
-       CharacterSearchResult,
-       CharacterTransformerOptions, CharacterUpdateInput, CharacterWithRelations,
-       CreateCharacterData,
-       UpdateCharacterData
+	CharacterBase,
+	CharacterComplete,
+	CharacterCount,
+	CharacterCounts,
+	CharacterCreateInput,
+	CharacterFilters,
+	CharacterIncludes,
+	CharacterRelations,
+	CharacterSearchOptions,
+	CharacterSearchResult,
+	CharacterTransformerOptions,
+	CharacterUpdateInput,
+	CharacterWithRelations,
+	CreateCharacterData,
+	UpdateCharacterData,
 } from './types';
 
 export {
-       CHARACTER_SORT_PROPERTY_MAP, CharacterSortCriteria
+	CHARACTER_SORT_PROPERTY_MAP,
+	CharacterSortCriteria,
 } from './types';
 
-export type { CharacterAttributes, CharacterCard, CharacterExtended, CharacterInventoryItem, CharacterListItem, CharacterSummary, CharacterViewConfig } from './extended';
+export type {
+	CharacterAttributes,
+	CharacterCard,
+	CharacterExtended,
+	CharacterInventoryItem,
+	CharacterListItem,
+	CharacterSummary,
+	CharacterViewConfig,
+} from './extended';
 
 export {
-       CharacterFiltersSchema, CharacterRelationsSchema, CharacterSchema, CreateCharacterSchema,
-       UpdateCharacterSchema
+	CharacterFiltersSchema,
+	CharacterRelationsSchema,
+	CharacterSchema,
+	CreateCharacterSchema,
+	UpdateCharacterSchema,
 } from './base';
 
 export {
-       CharacterCategory,
-       CharacterClass,
-       CharacterRace
+	CharacterCategory,
+	CharacterClass,
+	CharacterRace,
 } from './enums';
 
 // Alias común para el tipo principal

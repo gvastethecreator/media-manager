@@ -59,11 +59,11 @@ export const VideoChapterSchema = z.object({
  * ⏯️ Esquema para estado de reproducción
  */
 export const VideoPlaybackStateSchema = z.object({
-        position: z.number(),
-        lastPlayed: z.union([z.date(), z.string()]),
-        completed: z.boolean(),
-        favorite: z.boolean(),
-        watchCount: z.number(),
+	position: z.number(),
+	lastPlayed: z.union([z.date(), z.string()]),
+	completed: z.boolean(),
+	favorite: z.boolean(),
+	watchCount: z.number(),
 });
 
 /**
@@ -94,5 +94,5 @@ export const VideoSchema = z.object({
 	privacyLevel: z.nativeEnum(VideoPrivacyLevel).optional(),
 	sharedWith: z.array(z.string()).optional(),
 	chapters: z.array(VideoChapterSchema).optional(),
-        playState: VideoPlaybackStateSchema.optional(),
+	playState: VideoPlaybackStateSchema.optional(),
 });
