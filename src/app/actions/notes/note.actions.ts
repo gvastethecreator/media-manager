@@ -260,11 +260,11 @@ export async function deleteNote(id: string): Promise<void> {
  * @deprecated Use getNote instead
  */
 export async function getNoteWithProcessedFields(id: string): Promise<NoteBase & { parsedTags: string[] }> {
-        const note = await getNote(id);
-        return {
-                ...note,
-                parsedTags: [],
-        };
+	const note = await getNote(id);
+	return {
+		...note,
+		parsedTags: [],
+	};
 }
 
 /**
@@ -273,11 +273,11 @@ export async function getNoteWithProcessedFields(id: string): Promise<NoteBase &
  * @deprecated Use getNotes instead
  */
 export async function getNotesWithProcessedFields(): Promise<Array<NoteBase & { parsedTags: string[] }>> {
-        const notes = await getNotes();
-        return notes.map((note) => ({
-                ...note,
-                parsedTags: [],
-        }));
+	const notes = await getNotes();
+	return notes.map((note) => ({
+		...note,
+		parsedTags: [],
+	}));
 }
 
 export async function getNoteImages(noteId: string): Promise<FileItem[]> {

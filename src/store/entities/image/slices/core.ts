@@ -5,10 +5,10 @@
  */
 
 import {
-    createImage as createServerImage,
-    deleteImage,
-    getImage,
-    getImages,
+	createImage as createServerImage,
+	deleteImage,
+	getImage,
+	getImages,
 } from '@/app/actions/images/image-crud.actions';
 import { extendImage } from '@/transformers/image/serializers';
 import type { CreateImageData, Image, ImageExtended, UpdateImageData } from '@/types/entities/image';

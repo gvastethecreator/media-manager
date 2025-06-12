@@ -17,18 +17,18 @@ import type { JSONString } from '@/utils/types/utility-types';
  * Tipo para el registro de base de datos de una imagen subida
  */
 export type UploadedImageDBRecord = {
-        id: string;
-        name: string;
-        path: string;
-        type: string;
-        category: string;
-        hash: string;
-        imageId: string;
-        size: number;
-        width: number;
-        height: number;
-        metadata: string | null;
-        uploadedAt: Date;
+	id: string;
+	name: string;
+	path: string;
+	type: string;
+	category: string;
+	hash: string;
+	imageId: string;
+	size: number;
+	width: number;
+	height: number;
+	metadata: string | null;
+	uploadedAt: Date;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -44,19 +44,19 @@ export type UploadedImageResult = UploadedImageExtended;
  * @returns Entidad base de UploadedImage
  */
 export function fromDBToBase(record: UploadedImageDBRecord): UploadedImageBase {
-        return {
-                id: record.id,
-                name: record.name,
-                path: record.path,
-                type: record.type as UploadedImageType,
-                category: record.category,
-                hash: record.hash,
-                imageId: record.imageId,
-                size: record.size,
-                width: record.width,
-                height: record.height,
-                metadata: record.metadata,
-                uploadedAt: record.uploadedAt,
+	return {
+		id: record.id,
+		name: record.name,
+		path: record.path,
+		type: record.type as UploadedImageType,
+		category: record.category,
+		hash: record.hash,
+		imageId: record.imageId,
+		size: record.size,
+		width: record.width,
+		height: record.height,
+		metadata: record.metadata,
+		uploadedAt: record.uploadedAt,
 		createdAt: record.createdAt,
 		updatedAt: record.updatedAt,
 	};

@@ -6,14 +6,14 @@
 import { createLogger } from '@/lib/logger';
 import { VideoSchema } from '@/types/entities/video/schema';
 import type {
-    VideoBase,
-    VideoComplete,
-    VideoCreateInput,
-    VideoMetadata,
-    VideoRelations,
-    VideoUpdateInput,
-    VideoVisualConfig,
-    VideoVisualConfigComplete,
+	VideoBase,
+	VideoComplete,
+	VideoCreateInput,
+	VideoMetadata,
+	VideoRelations,
+	VideoUpdateInput,
+	VideoVisualConfig,
+	VideoVisualConfigComplete,
 } from '@/types/entities/video/types';
 import { TransformerError } from '@/utils/transformers/errors';
 

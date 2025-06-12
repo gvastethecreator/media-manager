@@ -100,8 +100,7 @@ export function isValidPromptParameters(parameters: string | Record<string, any>
 export function isValidPromptTags(tags: string | string[]): boolean {
 	try {
 		// Si es string, intentar parsearlo
-		const tagsArray =
-			typeof tags === 'string' ? (tags === '[]' ? [] : JSON.parse(tags)) : tags;
+		const tagsArray = typeof tags === 'string' ? (tags === '[]' ? [] : JSON.parse(tags)) : tags;
 
 		// Verificar que sea un array
 		if (!Array.isArray(tagsArray)) {

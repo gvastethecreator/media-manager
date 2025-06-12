@@ -78,18 +78,19 @@ export function useFolderImages(folderId: string | null) {
 	});
 
 	// 🛡️ Robustez: filtrar y loguear elementos inválidos en items antes de exponerlos a la UI
-	const safeData = query.data && Array.isArray(query.data.items)
-		? {
-			...query.data,
-			items: query.data.items.filter((img, idx) => {
-				const isValid = img && typeof img === 'object' && typeof (img as any).then !== 'function';
-				if (!isValid) {
-					logger.warn(`🛡️ Imagen excluida en posición ${idx}: nulo, promesa o tipo inválido`, { img });
+	const safeData =
+		query.data && Array.isArray(query.data.items)
+			? {
+					...query.data,
+					items: query.data.items.filter((img, idx) => {
+						const isValid = img && typeof img === 'object' && typeof (img as any).then !== 'function';
+						if (!isValid) {
+							logger.warn(`🛡️ Imagen excluida en posición ${idx}: nulo, promesa o tipo inválido`, { img });
+						}
+						return isValid;
+					}),
 				}
-				return isValid;
-			}),
-		}
-		: query.data;
+			: query.data;
 
 	// Registrar cambios en el estado del query
 	useEffect(() => {
