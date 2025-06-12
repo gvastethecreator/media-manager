@@ -95,10 +95,13 @@ graph TD
 
 ### 🔍 Consultas y Búsqueda (get.actions.ts, query.actions.ts)
 
+> 📝 **Nota importante**: Ver [SERIALIZATION.md](./SERIALIZATION.md) para convenciones de serialización de datos entre servidor y cliente.
+
 #### `getFolders(): Promise<FolderExtended[]>`
 
 - **Descripción**: Obtiene todas las carpetas con relaciones básicas
 - **Retorna**: Array de carpetas con conteos e información extendida
+- **Seguridad**: Datos serializables para Server/Client Components
 - **Optimización**: Include selectivo para evitar over-fetching
 
 #### `getFolderById(id: string): Promise<FolderExtended>`

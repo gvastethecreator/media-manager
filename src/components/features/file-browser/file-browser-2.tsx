@@ -27,11 +27,16 @@ const gridLogger = clientLogger.withContext('FileBrowser2');
 // - Fallback inmediato a 1200px si falla la medición
 // - GridItem simplificado sin dependencias pesadas
 
-// 📝 Extensión local del tipo FileItem para soportar miniaturas
-// Esto es necesario porque el tipo canónico FileItem no incluye 'thumbnail',
-// pero los objetos recibidos desde el backend sí la traen.
-// Cuando se unifique el tipo, eliminar esta extensión.
-type FileBrowserFileItem = FileItem & { thumbnail?: string };
+// 📝 Definición local del tipo FileItem para soportar miniaturas
+// Este tipo se adapta a lo que recibe desde el Server Action getFolderImages
+// Todos los campos son serializables para evitar errores de "Only plain objects..."
+type FileBrowserFileItem = FileItem & { 
+  thumbnail?: string | null; // Siempre string o null, nunca Buffer/Uint8Array 
+  createdAt: string;        // ISO string, no Date
+  updatedAt: string;        // ISO string, no Date
+  modifiedAt: string;       // ISO string, no Date
+  accessedAt: string;       // ISO string, no Date
+};
 
 interface FileBrowser2Props {
 	items: FileBrowserFileItem[];
@@ -267,9 +272,11 @@ const GridItem = memo<GridItemProps>(function GridItem({
 	const handleImageLoad = useCallback(() => {
 		gridLogger.debug(`[FileBrowser2] ✅ Thumbnail cargado para imagen ${item.id}: ${item.name}`);
 	}, [item.id, item.name]);
-
 	// 🖼️ Compatibilidad: usar item.thumbnail si existe, si no fallback a /api/images/{item.id}/thumbnail
-	const thumbnailUrl = item.thumbnail || `/api/images/${item.id}/thumbnail`;
+	// Nos aseguramos que el thumbnail sea string o undefined pero nunca null
+	const thumbnailUrl = (item.thumbnail && typeof item.thumbnail === 'string') 
+		? item.thumbnail 
+		: `/api/images/${item.id}/thumbnail`;
 
 	return (
 		<motion.div
