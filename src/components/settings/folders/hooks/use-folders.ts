@@ -1,9 +1,9 @@
 'use client';
 
 import { reindexAllFolders } from '@/app/actions/folders';
+import type { ErrorResponse, FolderResponse, ProcessStatus, ReindexAllCompleteData, ReindexAllProgressData } from '@/app/actions/folders/folder-types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import type { ProcessStatus, ReindexAllProgressData, ReindexAllCompleteData, ErrorResponse, FolderResponse } from '@/app/actions/folders/folder-types';
 import { useCallback, useEffect, useState } from 'react';
 import { type ExtendedFolder, initialGlobalReindexStatus } from '../folder-types';
 import { useFoldersEvents } from './use-folders-events';

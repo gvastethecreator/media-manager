@@ -1,9 +1,9 @@
 import type {
-	CreateFolderData,
-	FolderBase,
-	FolderExtended,
-	FolderSummary,
-	UpdateFolderData,
+    CreateFolderData,
+    FolderBase,
+    FolderExtended,
+    FolderSummary,
+    UpdateFolderData,
 } from '@/types/entities/folder';
 import type { FolderStats } from '@/types/entities/folder/types';
 

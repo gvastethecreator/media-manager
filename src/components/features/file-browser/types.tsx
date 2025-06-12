@@ -1,5 +1,5 @@
-import type { FOLDER_EVENTS } from '@/services/folder-service-export';
 import type { ProcessStatus } from '@/app/actions/folders/folder-types';
+import type { FOLDER_EVENTS } from '@/services/folder-service-export';
 
 export type { ProcessStatus };
 
@@ -12,3 +12,4 @@ export interface ExtendedProcessStatus extends ProcessStatus {
 }
 
 export type { FOLDER_EVENTS };
+
