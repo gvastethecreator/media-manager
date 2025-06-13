@@ -7,7 +7,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import type { FolderStats } from '@/types/entities/folder';
+import type { Image, Video } from '@prisma/client'; // Importar tipos de Prisma
 import { revalidateTag, unstable_cache } from 'next/cache';
 import { FOLDER_ERROR_CODES } from './folder-types';
 
@@ -53,7 +53,7 @@ export interface FolderStatsResponse {
 	totalFolders: number;
 	totalImages: number;
 	totalSize: number;
-	statusDistribution: Record<string, number>;
+	// statusDistribution: Record<string, number>; // Eliminado porque Folder no tiene 'status'
 	recentFolders: Array<{
 		id: string;
 		name: string;
@@ -74,6 +74,7 @@ export interface FolderStorageStatsResponse {
 		size: number;
 		imageCount: number;
 	}>;
+	// fileTypeDistribution?: Record<string, number>; // Comentado, requiere mimeType en Image
 }
 
 /**
@@ -100,7 +101,7 @@ export async function getFolderStats(): Promise<FolderStatsResponse> {
 			try {
 				folderLogger.info('📊 Getting folder statistics');
 
-				const [totalFolders, totalImages, totalSize, foldersByStatus, recentFolders] = await Promise.all([
+				const [totalFolders, totalImages, totalSizeAggregate, recentFolders] = await Promise.all([
 					// Total folders count
 					prisma.folder.count(),
 
@@ -114,11 +115,11 @@ export async function getFolderStats(): Promise<FolderStatsResponse> {
 						},
 					}),
 
-					// Folders grouped by status
-					prisma.folder.groupBy({
-						by: ['status'],
-						_count: true,
-					}),
+					// Folders grouped by status - Eliminado porque Folder no tiene 'status'
+					// prisma.folder.groupBy({
+					// 	by: ['status'],
+					// 	_count: true,
+					// }),
 
 					// Recent folders
 					prisma.folder.findMany({
@@ -139,10 +140,10 @@ export async function getFolderStats(): Promise<FolderStatsResponse> {
 				const stats: FolderStatsResponse = {
 					totalFolders,
 					totalImages,
-					totalSize: totalSize._sum.totalSize || 0,
-					statusDistribution: Object.fromEntries(
-						foldersByStatus.map((status) => [status.status || 'unknown', status._count])
-					),
+					totalSize: totalSizeAggregate._sum.totalSize || 0,
+					// statusDistribution: Object.fromEntries( // Eliminado
+					// 	foldersByStatus.map((statusGroup) => [statusGroup.status || 'unknown', statusGroup._count])
+					// ),
 					recentFolders: recentFolders.map((folder) => ({
 						id: folder.id,
 						name: folder.name,
@@ -178,7 +179,7 @@ export async function getFolderStorageStats(): Promise<FolderStorageStatsRespons
 			try {
 				folderLogger.info('💾 Getting folder storage statistics');
 
-				const [totalSize, sizeByFolder, fileTypeDistribution] = await Promise.all([
+				const [totalSizeAggregate, sizeByFolder /*, rawFileTypeDistribution */] = await Promise.all([
 					// Total size across all folders
 					prisma.folder.aggregate({
 						_sum: {
@@ -205,21 +206,34 @@ export async function getFolderStorageStats(): Promise<FolderStorageStatsRespons
 					}),
 
 					// Distribución por tipo de archivo (esta consulta es simulada, ajusta según tu esquema)
-					prisma.$queryRaw`SELECT
-            SUM(CASE WHEN i.mimeType LIKE 'image/%' THEN 1 ELSE 0 END) as images,
-            SUM(CASE WHEN i.mimeType LIKE 'video/%' THEN 1 ELSE 0 END) as videos,
-            SUM(CASE WHEN i.mimeType NOT LIKE 'image/%' AND i.mimeType NOT LIKE 'video/%' THEN 1 ELSE 0 END) as others
-            FROM Image i`,
+					// Comentado porque Image no tiene mimeType y la consulta raw fallaría
+					// prisma.$queryRaw`SELECT
+          //   SUM(CASE WHEN i.mimeType LIKE 'image/%' THEN 1 ELSE 0 END) as images,
+          //   SUM(CASE WHEN i.mimeType LIKE 'video/%' THEN 1 ELSE 0 END) as videos,
+          //   SUM(CASE WHEN i.mimeType NOT LIKE 'image/%' AND i.mimeType NOT LIKE 'video/%' THEN 1 ELSE 0 END) as others
+          //   FROM Image i`,
 				]);
 
+				// let fileTypeDistributionData: Record<string, number> | undefined = undefined;
+				// if (rawFileTypeDistribution && Array.isArray(rawFileTypeDistribution) && rawFileTypeDistribution.length > 0) {
+				//   const dist = rawFileTypeDistribution[0] as { images: bigint, videos: bigint, others: bigint };
+				//   fileTypeDistributionData = {
+				//     images: Number(dist.images) || 0,
+				//     videos: Number(dist.videos) || 0,
+				//     others: Number(dist.others) || 0,
+				//   };
+				// }
+
+
 				const stats: FolderStorageStatsResponse = {
-					totalSize: totalSize._sum.totalSize || 0,
+					totalSize: totalSizeAggregate._sum.totalSize || 0,
 					topFolders: sizeByFolder.map((folder) => ({
 						id: folder.id,
 						name: folder.name,
 						size: folder.totalSize || 0,
 						imageCount: folder._count.images,
 					})),
+					// fileTypeDistribution: fileTypeDistributionData, // Comentado
 				};
 
 				folderLogger.info('✅ Folder storage statistics retrieved successfully');
@@ -300,7 +314,7 @@ export async function getFolderIndexingStats(): Promise<FolderIndexingStatsRespo
 					recentlyIndexed: recentlyIndexed.map((folder) => ({
 						id: folder.id,
 						name: folder.name,
-						lastIndexed: folder.lastIndexed || new Date(),
+						lastIndexed: folder.lastIndexed || new Date(), // Proporcionar un valor por defecto si es null
 						imageCount: folder._count.images,
 					})),
 				};
@@ -322,75 +336,115 @@ export async function getFolderIndexingStats(): Promise<FolderIndexingStatsRespo
 	return getCachedIndexingStats();
 }
 
+// Tipos para las imágenes y videos seleccionados en getFolderStatsById
+type SelectedImage = Pick<Image, 'id' | 'size' | 'metadata'>;
+type SelectedVideo = Pick<Video, 'id' | 'size' | 'metadata'>;
+
+// Interfaz para las estadísticas detalladas de una carpeta
+export interface DetailedFolderStats {
+  totalFiles: number;
+  totalSize: number;
+  lastIndexed: Date | null;
+  fileDistribution: {
+    images: number;
+    videos: number;
+    other: number;
+  };
+  sizeDistribution: {
+    images: number;
+    videos: number;
+    other: number;
+  };
+  metadataStats: {
+    processed: number;
+    pending: number;
+    failed: number;
+  };
+  processingStats: { // Estos campos pueden necesitar más lógica o datos que no están disponibles actualmente
+    lastProcessingTime: number;
+    averageProcessingTime: number;
+    processingStatus: string;
+  };
+	// Añadir cualquier otro campo que devuelva la función
+	id: string;
+	name: string;
+	path: string;
+	// ... otros campos del modelo Folder que se quieran exponer
+}
+
+
 /**
  * Gets detailed statistics for a specific folder
  */
-export async function getFolderStatsById(folderId: string): Promise<FolderStats> {
+export async function getFolderStatsById(folderId: string): Promise<DetailedFolderStats> {
 	try {
 		folderLogger.info(`📊 Getting statistics for folder ${folderId}`);
 
-		const folder = await prisma.folder.findUnique({
+		const folderData = await prisma.folder.findUnique({
 			where: { id: folderId },
 			include: {
 				_count: {
 					select: {
 						images: true,
 						videos: true,
-						children: true,
+						children: true, // Mantener si es útil, o quitar si no se usa
 					},
 				},
 				images: {
 					select: {
 						id: true,
 						size: true,
-						mimeType: true,
-						hasMetadata: true,
+						metadata: true, // Cambiado de hasMetadata a metadata
 					},
 				},
 				videos: {
 					select: {
 						id: true,
 						size: true,
-						mimeType: true,
-						hasMetadata: true,
+						metadata: true, // Cambiado de hasMetadata a metadata
 					},
 				},
 			},
 		});
 
-		if (!folder) {
-			throw createFolderStatsError(`Folder with ID ${folderId} not found`, 'FOLDER_NOT_FOUND');
+		if (!folderData) {
+			throw createFolderStatsError(`Folder with ID ${folderId} not found`, FOLDER_ERROR_CODES.NOT_FOUND);
 		}
 
 		// Calcular estadísticas basadas en los datos encontrados
-		const totalImagesSize = folder.images.reduce((sum, img) => sum + (img.size || 0), 0);
-		const totalVideosSize = folder.videos.reduce((sum, vid) => sum + (vid.size || 0), 0);
-		const otherFilesCount = folder.totalFiles
-			? folder.totalFiles - (folder._count.images || 0) - (folder._count.videos || 0)
-			: 0;
-		const otherFilesSize = folder.totalSize ? folder.totalSize - totalImagesSize - totalVideosSize : 0;
+		const totalImagesSize = folderData.images.reduce((sum: number, img: SelectedImage) => sum + (img.size || 0), 0);
+		const totalVideosSize = folderData.videos.reduce((sum: number, vid: SelectedVideo) => sum + (vid.size || 0), 0);
+
+		const numImages = folderData._count?.images || 0;
+		const numVideos = folderData._count?.videos || 0;
+
+		const otherFilesCount = (folderData.totalFiles || 0) - numImages - numVideos;
+		const otherFilesSize = (folderData.totalSize || 0) - totalImagesSize - totalVideosSize;
 
 		// Estadísticas de metadatos
-		const imagesWithMetadata = folder.images.filter((img) => img.hasMetadata).length;
-		const videosWithMetadata = folder.videos.filter((vid) => vid.hasMetadata).length;
+		const imagesWithMetadata = folderData.images.filter((img: SelectedImage) => img.metadata !== null).length;
+		const videosWithMetadata = folderData.videos.filter((vid: SelectedVideo) => vid.metadata !== null).length;
 		const totalWithMetadata = imagesWithMetadata + videosWithMetadata;
-		const totalFilesWithPossibleMetadata = folder._count.images + folder._count.videos;
+		const totalFilesWithPossibleMetadata = numImages + numVideos;
 
-		const folderStats: FolderStats = {
-			totalFiles: folder.totalFiles || 0,
-			totalSize: folder.totalSize || 0,
-			lastIndexed: folder.lastIndexed,
+		const stats: DetailedFolderStats = {
+			id: folderData.id,
+			name: folderData.name,
+			path: folderData.path,
+			totalFiles: folderData.totalFiles || 0,
+			totalSize: folderData.totalSize || 0,
+			lastIndexed: folderData.lastIndexed,
 
 			fileDistribution: {
-				images: folder._count.images || 0,
-				videos: folder._count.videos || 0,
-				other: otherFilesCount,
+				images: numImages,
+				videos: numVideos,
+				other: otherFilesCount < 0 ? 0 : otherFilesCount, // Asegurar que no sea negativo
 			},
 
 			sizeDistribution: {
 				images: totalImagesSize,
 				videos: totalVideosSize,
-				other: otherFilesSize,
+				other: otherFilesSize < 0 ? 0 : otherFilesSize, // Asegurar que no sea negativo
 			},
 
 			metadataStats: {
@@ -402,14 +456,17 @@ export async function getFolderStatsById(folderId: string): Promise<FolderStats>
 			processingStats: {
 				lastProcessingTime: 0, // No tenemos esta información aún
 				averageProcessingTime: 0, // No tenemos esta información aún
-				processingStatus: 'idle',
+				processingStatus: 'idle', // Asumir idle si no hay más info
 			},
 		};
 
 		folderLogger.info(`✅ Statistics for folder ${folderId} retrieved successfully`);
-		return folderStats;
+		return stats;
 	} catch (error) {
 		folderLogger.error(`❌ Error getting statistics for folder ${folderId}:`, error);
+		if (error instanceof Error && (error as FolderStatsErrorData).code === FOLDER_ERROR_CODES.NOT_FOUND) {
+			throw error;
+		}
 		throw createFolderStatsError(`Failed to get statistics for folder ${folderId}`, 'FOLDER_STATS_FAILED', error);
 	}
 }
