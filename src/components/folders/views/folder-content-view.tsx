@@ -2,7 +2,7 @@
 
 import { reindexFolder, scanFolderAction } from '@/app/actions/folders';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { FileBrowser2 } from '@/components/features/file-browser/file-browser';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 // Usar el hook del store de carpetas para mantener consistencia con FoldersView
@@ -280,9 +280,9 @@ export function FolderContentView() {
 				</Button>
 			</div>
 
-			{/* 🛡️ El contenedor de FileBrowser2 ahora ocupa todo el espacio disponible */}
+			{/* 🛡️ El contenedor de FileBrowser ahora ocupa todo el espacio disponible */}
 			<div className="flex-1 min-h-0 min-w-0 h-full w-full overflow-hidden">
-				<FileBrowser2
+				<FileBrowser
 					items={images}
 					onItemSelect={(item: FileItem) => {
 						logger.debug('🖱️ Select en item:', item.id);
