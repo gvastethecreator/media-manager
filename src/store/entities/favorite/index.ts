@@ -12,6 +12,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 // Importar tipos
 
 // Importar slices
+import { ApiActions, ApiState, createApiSlice } from './api.slice';
 import { CoreActions, CoreState, createCoreSlice } from './slices/core.slice';
 import { FiltersActions, FiltersState, createFiltersSlice } from './slices/filters.slice';
 import { UIActions, UIState, createUISlice } from './slices/ui.slice';
@@ -19,7 +20,7 @@ import { UIActions, UIState, createUISlice } from './slices/ui.slice';
 const favoriteLogger = clientLogger.withContext('FavoriteStore');
 
 // Tipo del store completo
-export type FavoriteStore = CoreState & CoreActions & UIState & UIActions & FiltersState & FiltersActions;
+export type FavoriteStore = CoreState & CoreActions & UIState & UIActions & FiltersState & FiltersActions & ApiState & ApiActions;
 
 // Crear el store con todos los slices
 const useFavoriteStoreBase = create<FavoriteStore>()(
@@ -29,6 +30,7 @@ const useFavoriteStoreBase = create<FavoriteStore>()(
 				...createCoreSlice(...a),
 				...createUISlice(...a),
 				...createFiltersSlice(...a),
+				...createApiSlice(...a),
 			}),
 			{
 				name: 'favorite-store',
@@ -51,3 +53,4 @@ export const useFavoriteStore = createSelectors(useFavoriteStoreBase);
 // Re-exportar tipos y constantes
 export * from './constants';
 export * from './types';
+
