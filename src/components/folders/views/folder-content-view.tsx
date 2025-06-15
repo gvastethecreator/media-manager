@@ -2,7 +2,7 @@
 
 import { reindexFolder, scanFolderAction } from '@/app/actions/folders';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { FileBrowser2 } from '@/components/features/file-browser/file-browser-2';
+import { FileBrowser2 } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 // Usar el hook del store de carpetas para mantener consistencia con FoldersView
