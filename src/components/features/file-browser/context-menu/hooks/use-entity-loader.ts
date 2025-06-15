@@ -26,7 +26,7 @@ import { useTagStore } from '@/store/entities/tag';
 import { useWildcardStore } from '@/store/entities/wildcard';
 import { useWorldItemStore } from '@/store/entities/world-item';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import type { LoadingStates } from '../types';
+import type { EntityLoadingState, LoadingStates } from '../types';
 
 // Logger para el componente
 const entityLoaderLogger = clientLogger.withContext('EntityLoader');
@@ -148,9 +148,30 @@ const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityName
 	}
 };
 
+/**
+ * Hook para cargar entidades para los submenús del menú contextual
+ */
 export function useEntityLoader() {
-	// Estados de carga para cada tipo de entidad
-	const [loadingStates, setLoadingStates] = useState<LoadingStates>(initialLoadingStates);
+	// Estado inicial para todas las entidades
+	const initialLoadingState: EntityLoadingState = {
+		loading: false,
+		open: false,
+		loaded: false
+	};
+
+	// Estado para todas las entidades
+	const [loadingStates, setLoadingStates] = useState<LoadingStates>({
+		collections: { ...initialLoadingState },
+		tags: { ...initialLoadingState },
+		albums: { ...initialLoadingState },
+		characters: { ...initialLoadingState },
+		places: { ...initialLoadingState },
+		objects: { ...initialLoadingState },
+		worldItems: { ...initialLoadingState },
+		prompts: { ...initialLoadingState },
+		notes: { ...initialLoadingState },
+		concepts: { ...initialLoadingState }
+	});
 
 	// Ref para controlar si la precarga ya se ha ejecutado
 	const preloadExecutedRef = useRef<boolean>(false);
@@ -201,399 +222,94 @@ export function useEntityLoader() {
 		]
 	);
 
-	// Función mejorada para cargar datos desde server actions
-	const fetchDataFromServer = useCallback(
-		async (entity: keyof LoadingStates) => {
-			if (!(entity in entityActionMap)) {
-				entityLoaderLogger.warn(`No hay configuración de server action para ${entity}`);
-				return false;
+	// Función para actualizar el estado de carga de una entidad
+	const updateLoadingState = useCallback((entity: keyof LoadingStates, state: Partial<EntityLoadingState>) => {
+		setLoadingStates(prev => ({
+			...prev,
+			[entity]: {
+				...prev[entity],
+				...state
+			}
+		}));
+	}, []);
+
+	// Función para manejar el cambio de estado abierto/cerrado de un submenú
+	const handleOpenChange = useCallback((entity: keyof LoadingStates, isOpen: boolean) => {
+		updateLoadingState(entity, { open: isOpen });
+
+		// Si se abre y no se ha cargado, cargar los datos
+		if (isOpen && !loadingStates[entity].loaded) {
+			loadEntityData(entity);
+		}
+	}, [loadingStates, updateLoadingState]);
+
+	// Función para cargar datos de una entidad específica
+	const loadEntityData = useCallback(async (entity: keyof LoadingStates) => {
+		// Si ya está cargando o ya está cargado, no hacer nada
+		if (loadingStates[entity].loading || loadingStates[entity].loaded) {
+			return;
+		}
+
+		// Marcar como cargando
+		updateLoadingState(entity, { loading: true });
+
+		try {
+			// Cargar datos según el tipo de entidad
+			switch (entity) {
+				case 'collections':
+					await collectionStore.fetchCollections();
+					break;
+				case 'tags':
+					await tagStore.fetchTags();
+					break;
+				case 'albums':
+					await albumStore.fetchAlbums();
+					break;
+				// Implementar otros casos según sea necesario
+				case 'characters':
+					if (typeof characterStore.fetchCharacters === 'function') {
+						await characterStore.fetchCharacters();
+					}
+					break;
+				case 'places':
+					if (typeof placeStore.fetchPlaces === 'function') {
+						await placeStore.fetchPlaces();
+					}
+					break;
+				case 'worldItems':
+					if (typeof worldItemStore.fetchWorldItems === 'function') {
+						await worldItemStore.fetchWorldItems();
+					}
+					break;
+				case 'prompts':
+					if (typeof promptStore.fetchPrompts === 'function') {
+						await promptStore.fetchPrompts();
+					}
+					break;
+				case 'notes':
+					if (typeof noteStore.fetchNotes === 'function') {
+						await noteStore.fetchNotes();
+					}
+					break;
+				case 'concepts':
+					if (typeof conceptStore.fetchConcepts === 'function') {
+						await conceptStore.fetchConcepts();
+					}
+					break;
 			}
 
-			try {
-				const { action, storeMethod } = entityActionMap[entity as keyof typeof entityActionMap];
-				entityLoaderLogger.info(`📡 Cargando ${entity} desde server action...`);
-
-				// Ejecutar la acción del servidor
-				const data = await action();
-
-				if (!data) {
-					entityLoaderLogger.warn(`No se recibieron datos para ${entity}`);
-					return false;
-				}
-
-				// Acceder al store correspondiente
-				const storeKey = entity as keyof typeof stores;
-				if (!(storeKey in stores)) {
-					entityLoaderLogger.error(`No se encontró store para ${entity}`);
-					return false;
-				}
-
-				const store = stores[storeKey];
-
-				// Actualizar store con método apropiado
-				if (typeof (store as any)[storeMethod] === 'function') {
-					entityLoaderLogger.info(`✅ Actualizando store ${entity} con ${data.length || 0} elementos`);
-					(store as any)[storeMethod](data);
-					return true;
-				}
-
-				entityLoaderLogger.warn(`El método ${storeMethod} no existe en el store ${entity}`);
-
-				// Intentar métodos alternativos conocidos
-				if (entity === 'collections' && typeof (store as any).addCollections === 'function') {
-					(store as any).addCollections(data);
-					return true;
-				}
-
-				if (entity === 'tags' && typeof (store as any).addTags === 'function') {
-					(store as any).addTags(data);
-					return true;
-				}
-
-				return false;
-			} catch (error) {
-				entityLoaderLogger.error(`❌ Error cargando datos de ${entity} desde server action:`, error);
-				return false;
-			}
-		},
-		[stores]
-	);
-
-	// Modificar la función fetchStoreData para ser más resiliente
-	const fetchStoreData = useCallback(
-		async (entity: keyof LoadingStates) => {
-			// Verificar primero si la precarga global ya está completa
-			if (typeof window !== 'undefined' && window.entityPreloadComplete) {
-				const storeKey = entity.toLowerCase() as keyof typeof stores;
-				const store = stores[storeKey];
-
-				// Si hay datos en el store, no necesitamos cargar de nuevo
-				if (store && (store as any)[storeKey] && (store as any)[storeKey].length > 0) {
-					entityLoaderLogger.info(
-						`✅ ${entity} ya disponibles globalmente (${(store as any)[storeKey].length} elementos), omitiendo carga.`
-					);
-					return (store as any)[storeKey];
-				}
-
-				// Si no hay datos pero la precarga global está marcada como completa, probablemente hubo un error previo
-				entityLoaderLogger.info(
-					`⚠️ Precarga global marcada como completa pero ${entity} no tiene datos, intentando cargar...`
-				);
-			}
-
-			entityLoaderLogger.info(`🔄 Intentando cargar ${entity}...`);
-			const storeKey = entity.toLowerCase() as keyof typeof stores;
-
-			// Verificar que tengamos un store válido
-			if (!(storeKey in stores)) {
-				entityLoaderLogger.warn(`⚠️ Store para ${entity} no encontrado`);
-
-				// Intentar directamente con server action como fallback
-				if (entity in entityActionMap) {
-					entityLoaderLogger.info(`🔄 Intentando cargar ${entity} directamente con server action como respaldo...`);
-					try {
-						const serverSuccess = await fetchDataFromServer(entity);
-						if (serverSuccess) {
-							entityLoaderLogger.info(`✅ Datos de ${entity} cargados directamente desde server action`);
-							// Aquí puede haber un problema si stores[storeKey] no existe
-							// Intentamos acceder de manera segura
-							const storeData = stores[storeKey] ? (stores[storeKey] as any)[entity.toLowerCase()] || [] : [];
-							return storeData;
-						}
-					} catch (error) {
-						entityLoaderLogger.error(`⚠️ Error en server action para ${entity}:`, error);
-					}
-				}
-
-				// En lugar de lanzar error, devolvemos un array vacío y lo registramos
-				entityLoaderLogger.warn(`⚠️ No se encontró un store válido para ${entity}, devolviendo array vacío`);
-				return [];
-			}
-
-			const store = stores[storeKey];
-
-			// ✨ Verificar si ya hay datos en el store ANTES de intentar cargar
-			const storeEntityKey = entity.toLowerCase(); // p.ej., 'tags', 'collections'
-			if ((store as any)[storeEntityKey] && (store as any)[storeEntityKey].length > 0) {
-				entityLoaderLogger.info(
-					`✅ ${entity} ya disponibles en el store (${(store as any)[storeEntityKey].length} elementos), omitiendo carga.`
-				);
-				// Asegurarse de que el estado 'loaded' esté correcto, sin disparar 'loading'
-				setLoadingStates((prev) => {
-					// Solo actualizar si no estaba marcado como loaded o si tenía error
-					if (!prev[entity]?.loaded || prev[entity]?.hasError) {
-						return {
-							...prev,
-							[entity]: {
-								...prev[entity],
-								loaded: true,
-								loading: false,
-								hasError: false,
-								loadedCount: (store as any)[storeEntityKey].length,
-							},
-						};
-					}
-					return prev; // No cambiar estado si ya estaba loaded y sin error
-				});
-
-				return (store as any)[storeEntityKey] || [];
-			}
-
-			// Verificar si esta entidad ya está en proceso de carga por otro componente
-			if (typeof window !== 'undefined' && window.preloadingEntities?.has(entity)) {
-				entityLoaderLogger.info(`⏳ ${entity} está siendo cargada por otro componente, esperando...`);
-				// Esperar brevemente y luego verificar si ya están disponibles
-				await new Promise((resolve) => setTimeout(resolve, 500));
-
-				// Verificar nuevamente si los datos ya están disponibles
-				if ((store as any)[storeEntityKey] && (store as any)[storeEntityKey].length > 0) {
-					entityLoaderLogger.info(
-						`✅ ${entity} ya cargados por otro componente (${(store as any)[storeEntityKey].length} elementos).`
-					);
-					return (store as any)[storeEntityKey];
-				}
-			}
-
-			// Si llegamos aquí, necesitamos cargar los datos
-			try {
-				// ESTRATEGIA 1: Server Actions (si están definidas)
-				if (entity in entityActionMap) {
-					entityLoaderLogger.info(`📡 Intentando cargar ${entity} con server action...`);
-					try {
-						const serverSuccess = await fetchDataFromServer(entity);
-						if (serverSuccess) {
-							entityLoaderLogger.info(`✅ Datos de ${entity} cargados desde servidor`);
-							return (store as any)[entity.toLowerCase()] || [];
-						}
-					} catch (error) {
-						entityLoaderLogger.warn(`⚠️ Falló carga desde servidor para ${entity}:`, error);
-						// Continuamos con otras estrategias, no bloqueamos
-					}
-				}
-
-				// ESTRATEGIA 2: Métodos específicos del Store (loadXXX)
-				const loadMethodName = `load${entity.charAt(0).toUpperCase() + entity.slice(1)}`; // loadTags, loadCollections, etc.
-				if (typeof (store as any)[loadMethodName] === 'function') {
-					try {
-						entityLoaderLogger.info(`🔄 Intentando cargar ${entity} con ${loadMethodName}...`);
-						await (store as any)[loadMethodName]();
-						const data = (store as any)[entity.toLowerCase()] || [];
-						if (data.length > 0) {
-							entityLoaderLogger.info(`✅ ${entity} cargados con ${loadMethodName} (${data.length} elementos)`);
-							return data;
-						}
-					} catch (err) {
-						entityLoaderLogger.warn(`⚠️ Error con ${loadMethodName}:`, err);
-						// Continuamos con la siguiente estrategia
-					}
-				}
-
-				// ESTRATEGIA 3: Métodos específicos del Store (fetchXXX)
-				const fetchMethodName = `fetch${entity.charAt(0).toUpperCase() + entity.slice(1)}`; // fetchCollections, fetchTags, etc.
-				if (typeof (store as any)[fetchMethodName] === 'function') {
-					try {
-						entityLoaderLogger.info(`🔄 Intentando cargar ${entity} con ${fetchMethodName}...`);
-						await (store as any)[fetchMethodName]();
-						const data = (store as any)[entity.toLowerCase()] || [];
-						if (data.length > 0) {
-							entityLoaderLogger.info(`✅ ${entity} cargados con ${fetchMethodName} (${data.length} elementos)`);
-							return data;
-						}
-					} catch (err) {
-						entityLoaderLogger.warn(`⚠️ Error con ${fetchMethodName}:`, err);
-						// Esta fue nuestra última estrategia, pero aún así no lanzamos error
-					}
-				}
-
-				// Si llegamos aquí, no pudimos cargar con ninguna estrategia
-				if (entity === 'albums' || entity === 'tags' || entity === 'collections') {
-					// Para entidades críticas, generamos datos de prueba para evitar errores en la UI
-					entityLoaderLogger.warn(`⚠️ Generando datos de prueba para ${entity}`);
-
-					// Crear un array vacío o con datos de muestra según la entidad
-					const sampleData = [];
-					if (entity === 'tags') {
-						// Añadir algunas etiquetas de muestra
-						sampleData.push({ id: 'sample1', name: 'Muestra' });
-					}
-					if (entity === 'collections') {
-						// Añadir alguna colección de muestra
-						sampleData.push({ id: 'sample1', name: 'Colección de muestra' });
-					}
-					if (entity === 'albums') {
-						// Añadir algún álbum de muestra
-						sampleData.push({ id: 'sample1', name: 'Álbum de muestra' });
-					}
-
-					// Intentar actualizar el store con estos datos
-					try {
-						const setMethodName = `set${entity.charAt(0).toUpperCase() + entity.slice(1)}`; // setTags, setCollections, etc.
-						if (typeof (store as any)[setMethodName] === 'function') {
-							(store as any)[setMethodName](sampleData);
-							entityLoaderLogger.info(`✅ Datos de muestra establecidos para ${entity}`);
-							return sampleData;
-						}
-					} catch (e) {
-						entityLoaderLogger.warn(`⚠️ No se pudieron establecer datos de muestra para ${entity}`);
-					}
-				}
-
-				entityLoaderLogger.warn(`⚠️ Todas las estrategias fallaron para cargar ${entity}, devolviendo array vacío`);
-
-				// Devolver array vacío en lugar de lanzar error
-				return [];
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-				entityLoaderLogger.warn(`⚠️ Error final al cargar ${entity}: ${errorMessage}`);
-				// Devolver array vacío en lugar de propagar el error
-				return [];
-			}
-		},
-		[stores, fetchDataFromServer]
-	);
-
-	// Modificar también la función loadEntityData para que sea más tolerante a errores
-	const loadEntityData = useCallback(
-		async (entityName: keyof LoadingStates): Promise<unknown[]> => {
-			// Verificar si la entidad ya está cargando
-			if (loadingStates[entityName]?.loading) {
-				entityLoaderLogger.info(`🔄 Carga de ${entityName} omitida porque ya está en progreso`);
-				return [];
-			}
-
-			// Obtener el store correspondiente a la entidad
-			const storeKey = entityName.toLowerCase() as keyof typeof stores;
-			if (!(storeKey in stores)) {
-				entityLoaderLogger.warn(`⚠️ No se encontró store para ${entityName}`);
-				return [];
-			}
-			const store = stores[storeKey];
-			const storeEntityKey = entityName.toLowerCase();
-
-			// Verificar si ya hay datos en el store
-			if ((store as any)[storeEntityKey] && (store as any)[storeEntityKey].length > 0) {
-				entityLoaderLogger.info(
-					`✅ ${entityName} ya disponibles en el store (${(store as any)[storeEntityKey].length} elementos), omitiendo carga.`
-				);
-				return (store as any)[storeEntityKey];
-			}
-
-			// Verificar si la entidad ya está en proceso de precarga global
-			if (typeof window !== 'undefined' && window.preloadingEntities?.has(entityName)) {
-				entityLoaderLogger.info(`⏳ ${entityName} está siendo cargada por otro componente, esperando...`);
-				// Esperar brevemente y luego verificar si ya están disponibles
-				await new Promise((resolve) => setTimeout(resolve, 500));
-
-				// Verificar nuevamente si los datos ya están disponibles
-				if ((store as any)[storeEntityKey] && (store as any)[storeEntityKey].length > 0) {
-					entityLoaderLogger.info(
-						`✅ ${entityName} ya cargados por otro componente (${(store as any)[storeEntityKey].length} elementos).`
-					);
-					return (store as any)[storeEntityKey];
-				}
-			}
-
-			// Si llegamos aquí, necesitamos cargar los datos
-			try {
-				// ESTRATEGIA 1: Server Actions (si están definidas)
-				if (entityName in entityActionMap) {
-					entityLoaderLogger.info(`📡 Intentando cargar ${entityName} con server action...`);
-					try {
-						const serverSuccess = await fetchDataFromServer(entityName);
-						if (serverSuccess) {
-							entityLoaderLogger.info(`✅ Datos de ${entityName} cargados desde servidor`);
-							return (store as any)[entityName.toLowerCase()] || [];
-						}
-					} catch (error) {
-						entityLoaderLogger.warn(`⚠️ Falló carga desde servidor para ${entityName}:`, error);
-						// Continuamos con otras estrategias, no bloqueamos
-					}
-				}
-
-				// ESTRATEGIA 2: Métodos específicos del Store (loadXXX)
-				const loadMethodName = `load${entityName.charAt(0).toUpperCase() + entityName.slice(1)}`; // loadTags, loadCollections, etc.
-				if (typeof (store as any)[loadMethodName] === 'function') {
-					try {
-						entityLoaderLogger.info(`🔄 Intentando cargar ${entityName} con ${loadMethodName}...`);
-						await (store as any)[loadMethodName]();
-						const data = (store as any)[entityName.toLowerCase()] || [];
-						if (data.length > 0) {
-							entityLoaderLogger.info(`✅ ${entityName} cargados con ${loadMethodName} (${data.length} elementos)`);
-							return data;
-						}
-					} catch (err) {
-						entityLoaderLogger.warn(`⚠️ Error con ${loadMethodName}:`, err);
-						// Continuamos con la siguiente estrategia
-					}
-				}
-
-				// ESTRATEGIA 3: Métodos específicos del Store (fetchXXX)
-				const fetchMethodName = `fetch${entityName.charAt(0).toUpperCase() + entityName.slice(1)}`; // fetchCollections, fetchTags, etc.
-				if (typeof (store as any)[fetchMethodName] === 'function') {
-					try {
-						entityLoaderLogger.info(`🔄 Intentando cargar ${entityName} con ${fetchMethodName}...`);
-						await (store as any)[fetchMethodName]();
-						const data = (store as any)[entityName.toLowerCase()] || [];
-						if (data.length > 0) {
-							entityLoaderLogger.info(`✅ ${entityName} cargados con ${fetchMethodName} (${data.length} elementos)`);
-							return data;
-						}
-					} catch (err) {
-						entityLoaderLogger.warn(`⚠️ Error con ${fetchMethodName}:`, err);
-						// Esta fue nuestra última estrategia, pero aún así no lanzamos error
-					}
-				}
-
-				// Si llegamos aquí, no pudimos cargar con ninguna estrategia
-				if (entityName === 'albums' || entityName === 'tags' || entityName === 'collections') {
-					// Para entidades críticas, generamos datos de prueba para evitar errores en la UI
-					entityLoaderLogger.warn(`⚠️ Generando datos de prueba para ${entityName}`);
-
-					// Crear un array vacío o con datos de muestra según la entidad
-					const sampleData = [];
-					if (entityName === 'tags') {
-						// Añadir algunas etiquetas de muestra
-						sampleData.push({ id: 'sample1', name: 'Muestra' });
-					}
-					if (entityName === 'collections') {
-						// Añadir alguna colección de muestra
-						sampleData.push({ id: 'sample1', name: 'Colección de muestra' });
-					}
-					if (entityName === 'albums') {
-						// Añadir algún álbum de muestra
-						sampleData.push({ id: 'sample1', name: 'Álbum de muestra' });
-					}
-
-					// Intentar actualizar el store con estos datos
-					try {
-						const setMethodName = `set${entityName.charAt(0).toUpperCase() + entityName.slice(1)}`; // setTags, setCollections, etc.
-						if (typeof (store as any)[setMethodName] === 'function') {
-							(store as any)[setMethodName](sampleData);
-							entityLoaderLogger.info(`✅ Datos de muestra establecidos para ${entityName}`);
-							return sampleData;
-						}
-					} catch (e) {
-						entityLoaderLogger.warn(`⚠️ No se pudieron establecer datos de muestra para ${entityName}`);
-					}
-				}
-
-				entityLoaderLogger.warn(`⚠️ Todas las estrategias fallaron para cargar ${entityName}, devolviendo array vacío`);
-
-				// Devolver array vacío en lugar de lanzar error
-				return [];
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-				entityLoaderLogger.warn(`⚠️ Error final al cargar ${entityName}: ${errorMessage}`);
-				// Devolver array vacío en lugar de propagar el error
-				return [];
-			}
-		},
-		[fetchDataFromServer, loadingStates, stores]
-	);
+			// Marcar como cargado exitosamente
+			updateLoadingState(entity, { loading: false, loaded: true });
+		} catch (error) {
+			console.error(`Error cargando ${entity}:`, error);
+			// Marcar como error
+			updateLoadingState(entity, { loading: false });
+		}
+	}, [loadingStates, updateLoadingState, collectionStore, tagStore, albumStore, characterStore, placeStore, worldItemStore, promptStore, noteStore, conceptStore]);
 
 	return {
 		loadingStates,
-		fetchStoreData,
 		loadEntityData,
+		handleOpenChange
 	};
 }

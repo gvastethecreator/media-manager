@@ -1,30 +1,24 @@
 import type { FileItem } from '@/types/file-item';
 import type * as React from 'react';
 
-// Tipos de acciones del menú contextual
+/**
+ * Tipos de acciones disponibles en el menú contextual
+ */
 export type ContextMenuAction =
 	| 'mark-toggle'
 	| 'favorite-toggle'
-	| 'collection-add'
-	| 'tag-add'
-	| 'album-add'
-	| 'character-add'
-	| 'place-add'
-	| 'object-add'
-	| 'world-item-add'
+	| 'add-to-collection'
+	| 'add-tag'
+	| 'add-to-album'
 	| 'collection-create'
 	| 'tag-create'
 	| 'album-create'
 	| 'character-create'
 	| 'place-create'
-	| 'object-create'
 	| 'world-item-create'
-	| 'prompt-add'
-	| 'note-add'
-	| 'concept-add'
-	| 'prompt-create'
-	| 'note-create'
-	| 'concept-create'
+	| 'object-create' // Legacy
+	| 'object-add' // Legacy
+	| 'world-item-add'
 	| 'preview'
 	| 'open'
 	| 'download'
@@ -39,50 +33,48 @@ export interface ContextMenuActionData {
 	[key: string]: unknown;
 }
 
-// Props para el componente principal del menú contextual
+/**
+ * Props para el componente principal del menú contextual
+ */
 export interface FileContextMenuProps {
 	file: FileItem;
 	children: React.ReactNode;
 	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
 }
 
-// Estado de carga para submenu
-export interface LoadingState {
+/**
+ * Props para los componentes de submenú
+ */
+export interface SubmenuProps {
+	file: FileItem;
+	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
+	loadingStates: LoadingStates;
+}
+
+/**
+ * Estado de carga para cada tipo de entidad
+ */
+export interface EntityLoadingState {
 	loading: boolean;
 	open: boolean;
 	loaded: boolean;
-	hasError: boolean;
-	loadedCount: number; // Número de elementos cargados correctamente
 }
 
-// Estados de carga para todos los tipos de entidades
-export interface LoadingStates {
-	collections: LoadingState;
-	tags: LoadingState;
-	albums: LoadingState;
-	characters: LoadingState;
-	places: LoadingState;
-	objects?: LoadingState;
-	worldItems: LoadingState;
-	prompts: LoadingState;
-	notes: LoadingState;
-	concepts: LoadingState;
-}
-
-// Propiedades para el submenú de entidades
-export interface SubMenuProps {
-	title?: string;
-	icon?: React.ReactNode;
-	entityName: string;
-	entities: any[];
-	isLoading: boolean;
-	hasError: boolean;
-	loadedCount?: number;
-	onSelectAction: (entity: any) => void;
-	onCreateAction: () => void;
-	renderItemAction: (entity: any) => React.ReactNode;
-	onOpenChange?: (open: boolean) => void;
-}
+/**
+ * Estado de carga para todos los tipos de entidades
+ */
+export type LoadingStates = {
+	collections: EntityLoadingState;
+	tags: EntityLoadingState;
+	albums: EntityLoadingState;
+	characters: EntityLoadingState;
+	places: EntityLoadingState;
+	objects: EntityLoadingState; // Legacy
+	worldItems: EntityLoadingState;
+	prompts: EntityLoadingState;
+	notes: EntityLoadingState;
+	concepts: EntityLoadingState;
+};
 
 // Función auxiliar para parsear metadata
 export const getMetadata = (metadata: string | null) => {
