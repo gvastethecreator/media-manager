@@ -4,6 +4,9 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { toast } from '@/services/toast.service';
 
 // Importaciones de server actions para entidades
+import { addImageToAlbum } from '@/app/actions/albums/album.actions';
+import { addImageToCollection } from '@/app/actions/collections/collection-images.actions';
+import { addTagToImage } from '@/app/actions/tags/tag-images.actions';
 
 // Importaciones de stores en entidades
 
@@ -64,7 +67,7 @@ const customFileOperationsService = {
 
 			// Si es una ruta local, necesitamos convertirla a una URL descargable
 			// Para esto, debemos tener un endpoint que permita acceder al archivo
-			const downloadUrl = `/api/files/download?path=${encodeURIComponent(path)}`;
+			const downloadUrl = `/api/images/${filename}/content`;
 
 			// Usar fetch para obtener el archivo como blob
 			const response = await fetch(downloadUrl);
@@ -93,7 +96,7 @@ const customFileOperationsService = {
 	copyFileToClipboard: async (path: string) => {
 		try {
 			// Para copiar una imagen al portapapeles, primero necesitamos cargarla
-			const imageUrl = `/api/files/view?path=${encodeURIComponent(path)}`;
+			const imageUrl = `/api/images/${path.split('/').pop()}/content`;
 
 			// Creamos un elemento de imagen temporal
 			const img = new Image();
@@ -127,8 +130,10 @@ const customFileOperationsService = {
 							}),
 						]);
 						actionLogger.info('✅ Imagen copiada al portapapeles');
+						toast.success('Imagen copiada al portapapeles');
 					} catch (error) {
 						actionLogger.error('❌ Error al copiar imagen al portapapeles:', error);
+						toast.error('No se pudo copiar la imagen al portapapeles');
 						throw error;
 					}
 				}
@@ -146,74 +151,102 @@ const customFileOperationsService = {
 			// Usar la server action para eliminar el archivo
 			await deleteFileAction(path);
 			actionLogger.info('✅ Archivo eliminado:', path);
+			toast.success('Archivo eliminado correctamente');
 			return Promise.resolve();
 		} catch (error) {
+			toast.error('Error al eliminar el archivo');
 			return Promise.reject(error);
 		}
 	},
 };
 
-export const handleContextAction = (
+export const handleContextAction = async (
 	action: ContextMenuAction,
 	item: FileItem,
 	data?: Record<string, unknown>,
 	handleItemDoubleClick?: (item: FileItem) => void,
 	toggleSelectFile?: (id: string) => void,
-): void => {
-	switch (action) {
-		case 'preview':
-			if (handleItemDoubleClick) {
-				handleItemDoubleClick(item);
-			}
-			break;
+): Promise<void> => {
+	try {
+		switch (action) {
+			case 'preview':
+				if (handleItemDoubleClick) {
+					handleItemDoubleClick(item);
+				}
+				break;
 
-		case 'favorite-toggle':
-			// Esta acción se maneja en el componente FileContextMenu
-			break;
+			case 'favorite-toggle':
+				// Esta acción se maneja en el componente FileContextMenu
+				break;
 
-		case 'mark-toggle':
-			if (toggleSelectFile) {
-				toggleSelectFile(item.id);
-			}
-			break;
+			case 'mark-toggle':
+				if (toggleSelectFile) {
+					toggleSelectFile(item.id);
+				}
+				break;
 
-		case 'open':
-			// Abrir ubicación del archivo
-			toast.info('Abrir ubicación: ' + item.path);
-			break;
+			case 'open':
+				// Abrir ubicación del archivo
+				await customFileOperationsService.openPath(item.path);
+				break;
 
-		case 'download':
-			// Descargar archivo
-			toast.info('Descargando: ' + item.name);
-			break;
+			case 'download':
+				// Descargar archivo
+				toast.info(`Descargando: ${item.name}`);
+				await customFileOperationsService.downloadFile(item.path);
+				break;
 
-		case 'copy':
-			// Copiar al portapapeles
-			toast.success('Imagen copiada al portapapeles');
-			break;
+			case 'copy':
+				// Copiar al portapapeles
+				await customFileOperationsService.copyFileToClipboard(item.path);
+				break;
 
-		case 'copy-path':
-			// Copiar ruta
-			navigator.clipboard.writeText(item.path)
-				.then(() => toast.success('Ruta copiada al portapapeles'))
-				.catch(() => toast.error('No se pudo copiar la ruta'));
-			break;
+			case 'copy-path':
+				// Copiar ruta
+				await navigator.clipboard.writeText(item.path)
+					.then(() => toast.success('Ruta copiada al portapapeles'))
+					.catch(() => toast.error('No se pudo copiar la ruta'));
+				break;
 
-		case 'delete':
-			// Eliminar archivo
-			if (confirm(`¿Estás seguro de que quieres eliminar "${item.name}"?`)) {
-				toast.info('Eliminando: ' + item.name);
-			}
-			break;
+			case 'delete':
+				// Eliminar archivo
+				if (confirm(`¿Estás seguro de que quieres eliminar "${item.name}"?`)) {
+					await customFileOperationsService.deleteFile(item.path);
+				}
+				break;
 
-		case 'add-to-collection':
-		case 'add-to-album':
-		case 'add-tag':
-			// Estas acciones requieren implementación específica
-			toast.info(`Acción ${action} no implementada completamente`);
-			break;
+			case 'add-to-collection':
+				if (data?.collectionId) {
+					// Añadir a colección
+					const collectionId = data.collectionId as string;
+					await addImageToCollection(item.id, collectionId);
+					toast.success('Imagen añadida a la colección');
+				}
+				break;
 
-		default:
-			console.warn(`Acción no implementada: ${action}`);
+			case 'add-to-album':
+				if (data?.albumId) {
+					// Añadir a álbum
+					const albumId = data.albumId as string;
+					await addImageToAlbum(item.id, albumId);
+					toast.success('Imagen añadida al álbum');
+				}
+				break;
+
+			case 'add-tag':
+				if (data?.tagId) {
+					// Añadir etiqueta
+					const tagId = data.tagId as string;
+					await addTagToImage(item.id, tagId);
+					toast.success('Etiqueta añadida a la imagen');
+				}
+				break;
+
+			default:
+				console.warn(`Acción no implementada: ${action}`);
+		}
+	} catch (error) {
+		actionLogger.error(`Error al ejecutar acción ${action}:`, error);
+		toast.error(`Error al ejecutar la acción: ${error instanceof Error ? error.message : 'Error desconocido'}`);
 	}
 };

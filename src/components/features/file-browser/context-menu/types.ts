@@ -34,12 +34,12 @@ export interface ContextMenuActionData {
 }
 
 /**
- * Props para el componente principal del menú contextual
+ * Props para el menú contextual de archivos
  */
 export interface FileContextMenuProps {
 	file: FileItem;
 	children: React.ReactNode;
-	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
+	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void | Promise<void>;
 }
 
 /**
