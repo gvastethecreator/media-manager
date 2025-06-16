@@ -13,7 +13,7 @@ import { FavoriteStore } from '..';
 const logger = clientLogger.withContext('FavoriteStore.ApiSlice');
 
 // Estado
-export interface ApiState {}
+export type ApiState = Record<string, unknown>
 
 // Acciones
 export interface ApiActions {

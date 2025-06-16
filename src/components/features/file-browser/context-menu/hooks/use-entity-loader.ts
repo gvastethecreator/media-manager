@@ -33,15 +33,18 @@ const entityLoaderLogger = clientLogger.withContext('EntityLoader');
 
 // Interfaces para los stores
 interface BaseEntityStore {
-	getCollections?: () => unknown[];
-	getTags?: () => unknown[];
-	getAlbums?: () => unknown[];
-	getCharacters?: () => unknown[];
-	getPlaces?: () => unknown[];
-	getWorldItems?: () => unknown[];
-	getPrompts?: () => unknown[];
-	getNotes?: () => unknown[];
-	getConcepts?: () => unknown[];
+	fetchCollections?: () => Promise<unknown>;
+	fetchTags?: () => Promise<unknown>;
+	fetchAlbums?: () => Promise<unknown>;
+	fetchCharacters?: () => Promise<unknown>;
+	fetchPlaces?: () => Promise<unknown>;
+	fetchWorldItems?: () => Promise<unknown>;
+	fetchPrompts?: () => Promise<unknown>;
+	fetchNotes?: () => Promise<unknown>;
+	fetchConcepts?: () => Promise<unknown>;
+	fetchGroups?: () => Promise<unknown>;
+	fetchProperties?: () => Promise<unknown>;
+	fetchWildcards?: () => Promise<unknown>;
 }
 
 // Estado inicial para la carga de entidades
@@ -156,7 +159,9 @@ export function useEntityLoader() {
 	const initialLoadingState: EntityLoadingState = {
 		loading: false,
 		open: false,
-		loaded: false
+		loaded: false,
+		hasError: false,
+		loadedCount: 0
 	};
 
 	// Estado para todas las entidades
@@ -254,18 +259,32 @@ export function useEntityLoader() {
 		updateLoadingState(entity, { loading: true });
 
 		try {
+			entityLoaderLogger.info(`🔄 Cargando datos para ${entity}...`);
+
 			// Cargar datos según el tipo de entidad
 			switch (entity) {
 				case 'collections':
-					await collectionStore.fetchCollections();
+					if (typeof collectionStore.fetchCollections === 'function') {
+						await collectionStore.fetchCollections();
+						entityLoaderLogger.info(`✅ Colecciones cargadas: ${Object.keys(collectionStore.getCollections()).length}`);
+					} else {
+						throw new Error('Método fetchCollections no disponible');
+					}
 					break;
 				case 'tags':
-					await tagStore.fetchTags();
+					if (typeof tagStore.fetchTags === 'function') {
+						await tagStore.fetchTags();
+					} else {
+						throw new Error('Método fetchTags no disponible');
+					}
 					break;
 				case 'albums':
-					await albumStore.fetchAlbums();
+					if (typeof albumStore.fetchAlbums === 'function') {
+						await albumStore.fetchAlbums();
+					} else {
+						throw new Error('Método fetchAlbums no disponible');
+					}
 					break;
-				// Implementar otros casos según sea necesario
 				case 'characters':
 					if (typeof characterStore.fetchCharacters === 'function') {
 						await characterStore.fetchCharacters();
@@ -296,16 +315,39 @@ export function useEntityLoader() {
 						await conceptStore.fetchConcepts();
 					}
 					break;
+				case 'groups':
+					if (typeof groupStore.fetchGroups === 'function') {
+						await groupStore.fetchGroups();
+					}
+					break;
+				case 'properties':
+					if (typeof propertyStore.fetchProperties === 'function') {
+						await propertyStore.fetchProperties();
+					}
+					break;
+				case 'wildcards':
+					if (typeof wildcardStore.fetchWildcards === 'function') {
+						await wildcardStore.fetchWildcards();
+					}
+					break;
 			}
 
 			// Marcar como cargado exitosamente
-			updateLoadingState(entity, { loading: false, loaded: true });
+			updateLoadingState(entity, {
+				loading: false,
+				loaded: true,
+				hasError: false,
+				loadedCount: loadingStates[entity].loadedCount + 1
+			});
 		} catch (error) {
-			console.error(`Error cargando ${entity}:`, error);
+			entityLoaderLogger.error(`❌ Error cargando ${entity}:`, error);
 			// Marcar como error
-			updateLoadingState(entity, { loading: false });
+			updateLoadingState(entity, {
+				loading: false,
+				hasError: true
+			});
 		}
-	}, [loadingStates, updateLoadingState, collectionStore, tagStore, albumStore, characterStore, placeStore, worldItemStore, promptStore, noteStore, conceptStore]);
+	}, [loadingStates, updateLoadingState, collectionStore, tagStore, albumStore, characterStore, placeStore, worldItemStore, promptStore, noteStore, conceptStore, groupStore, propertyStore, wildcardStore]);
 
 	return {
 		loadingStates,

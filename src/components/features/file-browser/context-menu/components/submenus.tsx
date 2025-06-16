@@ -2,8 +2,11 @@
 
 import { ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from '@/components/ui/context-menu';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useTagStore } from '@/store/entities/tag';
+import { useAlbumStore } from '@/store/entities/album';
 import type { FileItem } from '@/types/file-item';
-import { Album, BookImage, Box, MapPin, Tag, User2 } from 'lucide-react';
+import { Album, BookImage, Box, Loader2, MapPin, Tag, User2 } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import type { ContextMenuAction, LoadingStates } from '../types';
 
@@ -15,40 +18,55 @@ interface SubmenuProps {
 	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
 	loadEntityData: (entity: keyof LoadingStates) => Promise<void>;
 	loadingStates: LoadingStates;
+	handleOpenChange: (entity: keyof LoadingStates, isOpen: boolean) => void;
 }
 
 // Componente para el submenú de colecciones
 export const CollectionsSubmenu = memo(function CollectionsSubmenu({
 	file,
 	onAction,
-	loadEntityData,
 	loadingStates,
+	handleOpenChange,
 }: SubmenuProps) {
-	// Cargar colecciones cuando se abre el submenú
-	const handleOpenChange = useCallback(() => {
-		loadEntityData('collections');
-	}, [loadEntityData]);
+	// Obtener las colecciones del store
+	const collections = useCollectionStore(state => state.getCollections());
+
+	// Manejar apertura del submenú
+	const handleSubMenuOpenChange = useCallback((open: boolean) => {
+		handleOpenChange('collections', open);
+	}, [handleOpenChange]);
 
 	return (
-		<ContextMenuSub onOpenChange={handleOpenChange}>
+		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
 			<ContextMenuSubTrigger>
 				<BookImage className="mr-2 h-4 w-4" />
 				<span>Colecciones</span>
 			</ContextMenuSubTrigger>
 			<ContextMenuSubContent className="w-48">
 				{loadingStates.collections.loading ? (
-					<ContextMenuItem disabled>Cargando...</ContextMenuItem>
+					<ContextMenuItem disabled>
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+						<span>Cargando...</span>
+					</ContextMenuItem>
+				) : collections && collections.length > 0 ? (
+					<>
+						{collections.map(collection => (
+							<ContextMenuItem
+								key={collection.id}
+								onClick={() => onAction('add-to-collection', file, { collectionId: collection.id, collectionName: collection.name })}
+							>
+								{collection.name}
+							</ContextMenuItem>
+						))}
+						<ContextMenuItem onClick={() => onAction('collection-create', file)}>
+							<span className="text-primary">+ Nueva colección</span>
+						</ContextMenuItem>
+					</>
 				) : (
 					<>
-						<ContextMenuItem
-							onClick={() => onAction('add-to-collection', file, { collectionId: 'collection1', collectionName: 'Paisajes' })}
-						>
-							Paisajes
-						</ContextMenuItem>
-						<ContextMenuItem
-							onClick={() => onAction('add-to-collection', file, { collectionId: 'collection2', collectionName: 'Retratos' })}
-						>
-							Retratos
+						<ContextMenuItem disabled>No hay colecciones disponibles</ContextMenuItem>
+						<ContextMenuItem onClick={() => onAction('collection-create', file)}>
+							<span className="text-primary">+ Nueva colección</span>
 						</ContextMenuItem>
 					</>
 				)}
@@ -58,28 +76,51 @@ export const CollectionsSubmenu = memo(function CollectionsSubmenu({
 });
 
 // Componente para el submenú de etiquetas
-export const TagsSubmenu = memo(function TagsSubmenu({ file, onAction, loadEntityData, loadingStates }: SubmenuProps) {
-	// Cargar etiquetas cuando se abre el submenú
-	const handleOpenChange = useCallback(() => {
-		loadEntityData('tags');
-	}, [loadEntityData]);
+export const TagsSubmenu = memo(function TagsSubmenu({
+	file,
+	onAction,
+	loadingStates,
+	handleOpenChange
+}: SubmenuProps) {
+	// Obtener las etiquetas del store
+	const tags = useTagStore(state => Object.values(state.core.tags));
+
+	// Manejar apertura del submenú
+	const handleSubMenuOpenChange = useCallback((open: boolean) => {
+		handleOpenChange('tags', open);
+	}, [handleOpenChange]);
 
 	return (
-		<ContextMenuSub onOpenChange={handleOpenChange}>
+		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
 			<ContextMenuSubTrigger>
 				<Tag className="mr-2 h-4 w-4" />
 				<span>Etiquetas</span>
 			</ContextMenuSubTrigger>
 			<ContextMenuSubContent className="w-48">
 				{loadingStates.tags.loading ? (
-					<ContextMenuItem disabled>Cargando...</ContextMenuItem>
+					<ContextMenuItem disabled>
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+						<span>Cargando...</span>
+					</ContextMenuItem>
+				) : tags && tags.length > 0 ? (
+					<>
+						{tags.map(tag => (
+							<ContextMenuItem
+								key={tag.id}
+								onClick={() => onAction('add-tag', file, { tagId: tag.id, tagName: tag.name })}
+							>
+								{tag.name}
+							</ContextMenuItem>
+						))}
+						<ContextMenuItem onClick={() => onAction('tag-create', file)}>
+							<span className="text-primary">+ Nueva etiqueta</span>
+						</ContextMenuItem>
+					</>
 				) : (
 					<>
-						<ContextMenuItem onClick={() => onAction('add-tag', file, { tagId: 'tag1', tagName: 'Naturaleza' })}>
-							Naturaleza
-						</ContextMenuItem>
-						<ContextMenuItem onClick={() => onAction('add-tag', file, { tagId: 'tag2', tagName: 'Personas' })}>
-							Personas
+						<ContextMenuItem disabled>No hay etiquetas disponibles</ContextMenuItem>
+						<ContextMenuItem onClick={() => onAction('tag-create', file)}>
+							<span className="text-primary">+ Nueva etiqueta</span>
 						</ContextMenuItem>
 					</>
 				)}
@@ -92,30 +133,48 @@ export const TagsSubmenu = memo(function TagsSubmenu({ file, onAction, loadEntit
 export const AlbumsSubmenu = memo(function AlbumsSubmenu({
 	file,
 	onAction,
-	loadEntityData,
 	loadingStates,
+	handleOpenChange
 }: SubmenuProps) {
-	// Cargar álbumes cuando se abre el submenú
-	const handleOpenChange = useCallback(() => {
-		loadEntityData('albums');
-	}, [loadEntityData]);
+	// Obtener los álbumes del store
+	const albums = useAlbumStore(state => state.getAlbums());
+
+	// Manejar apertura del submenú
+	const handleSubMenuOpenChange = useCallback((open: boolean) => {
+		handleOpenChange('albums', open);
+	}, [handleOpenChange]);
 
 	return (
-		<ContextMenuSub onOpenChange={handleOpenChange}>
+		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
 			<ContextMenuSubTrigger>
 				<Album className="mr-2 h-4 w-4" />
 				<span>Álbumes</span>
 			</ContextMenuSubTrigger>
 			<ContextMenuSubContent className="w-48">
 				{loadingStates.albums.loading ? (
-					<ContextMenuItem disabled>Cargando...</ContextMenuItem>
+					<ContextMenuItem disabled>
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+						<span>Cargando...</span>
+					</ContextMenuItem>
+				) : albums && albums.length > 0 ? (
+					<>
+						{albums.map(album => (
+							<ContextMenuItem
+								key={album.id}
+								onClick={() => onAction('add-to-album', file, { albumId: album.id, albumName: album.name })}
+							>
+								{album.name}
+							</ContextMenuItem>
+						))}
+						<ContextMenuItem onClick={() => onAction('album-create', file)}>
+							<span className="text-primary">+ Nuevo álbum</span>
+						</ContextMenuItem>
+					</>
 				) : (
 					<>
-						<ContextMenuItem onClick={() => onAction('add-to-album', file, { albumId: 'album1', albumName: 'Vacaciones' })}>
-							Vacaciones
-						</ContextMenuItem>
-						<ContextMenuItem onClick={() => onAction('add-to-album', file, { albumId: 'album2', albumName: 'Trabajo' })}>
-							Trabajo
+						<ContextMenuItem disabled>No hay álbumes disponibles</ContextMenuItem>
+						<ContextMenuItem onClick={() => onAction('album-create', file)}>
+							<span className="text-primary">+ Nuevo álbum</span>
 						</ContextMenuItem>
 					</>
 				)}
@@ -128,25 +187,33 @@ export const AlbumsSubmenu = memo(function AlbumsSubmenu({
 export const CharactersSubmenu = memo(function CharactersSubmenu({
 	file,
 	onAction,
-	loadEntityData,
 	loadingStates,
+	handleOpenChange
 }: SubmenuProps) {
-	// Cargar personajes cuando se abre el submenú
-	const handleOpenChange = useCallback(() => {
-		loadEntityData('characters');
-	}, [loadEntityData]);
+	// Manejar apertura del submenú
+	const handleSubMenuOpenChange = useCallback((open: boolean) => {
+		handleOpenChange('characters', open);
+	}, [handleOpenChange]);
 
 	return (
-		<ContextMenuSub onOpenChange={handleOpenChange}>
+		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
 			<ContextMenuSubTrigger>
 				<User2 className="mr-2 h-4 w-4" />
 				<span>Personajes</span>
 			</ContextMenuSubTrigger>
 			<ContextMenuSubContent className="w-48">
 				{loadingStates.characters.loading ? (
-					<ContextMenuItem disabled>Cargando...</ContextMenuItem>
+					<ContextMenuItem disabled>
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+						<span>Cargando...</span>
+					</ContextMenuItem>
 				) : (
-					<ContextMenuItem disabled>Sin personajes disponibles</ContextMenuItem>
+					<>
+						<ContextMenuItem disabled>Sin personajes disponibles</ContextMenuItem>
+						<ContextMenuItem onClick={() => onAction('character-create', file)}>
+							<span className="text-primary">+ Nuevo personaje</span>
+						</ContextMenuItem>
+					</>
 				)}
 			</ContextMenuSubContent>
 		</ContextMenuSub>
@@ -157,25 +224,33 @@ export const CharactersSubmenu = memo(function CharactersSubmenu({
 export const PlacesSubmenu = memo(function PlacesSubmenu({
 	file,
 	onAction,
-	loadEntityData,
 	loadingStates,
+	handleOpenChange
 }: SubmenuProps) {
-	// Cargar lugares cuando se abre el submenú
-	const handleOpenChange = useCallback(() => {
-		loadEntityData('places');
-	}, [loadEntityData]);
+	// Manejar apertura del submenú
+	const handleSubMenuOpenChange = useCallback((open: boolean) => {
+		handleOpenChange('places', open);
+	}, [handleOpenChange]);
 
 	return (
-		<ContextMenuSub onOpenChange={handleOpenChange}>
+		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
 			<ContextMenuSubTrigger>
 				<MapPin className="mr-2 h-4 w-4" />
 				<span>Lugares</span>
 			</ContextMenuSubTrigger>
 			<ContextMenuSubContent className="w-48">
 				{loadingStates.places.loading ? (
-					<ContextMenuItem disabled>Cargando...</ContextMenuItem>
+					<ContextMenuItem disabled>
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+						<span>Cargando...</span>
+					</ContextMenuItem>
 				) : (
-					<ContextMenuItem disabled>Sin lugares disponibles</ContextMenuItem>
+					<>
+						<ContextMenuItem disabled>Sin lugares disponibles</ContextMenuItem>
+						<ContextMenuItem onClick={() => onAction('place-create', file)}>
+							<span className="text-primary">+ Nuevo lugar</span>
+						</ContextMenuItem>
+					</>
 				)}
 			</ContextMenuSubContent>
 		</ContextMenuSub>
@@ -186,25 +261,33 @@ export const PlacesSubmenu = memo(function PlacesSubmenu({
 export const WorldItemsSubmenu = memo(function WorldItemsSubmenu({
 	file,
 	onAction,
-	loadEntityData,
 	loadingStates,
+	handleOpenChange
 }: SubmenuProps) {
-	// Cargar objetos del mundo cuando se abre el submenú
-	const handleOpenChange = useCallback(() => {
-		loadEntityData('worldItems');
-	}, [loadEntityData]);
+	// Manejar apertura del submenú
+	const handleSubMenuOpenChange = useCallback((open: boolean) => {
+		handleOpenChange('worldItems', open);
+	}, [handleOpenChange]);
 
 	return (
-		<ContextMenuSub onOpenChange={handleOpenChange}>
+		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
 			<ContextMenuSubTrigger>
 				<Box className="mr-2 h-4 w-4" />
 				<span>Objetos</span>
 			</ContextMenuSubTrigger>
 			<ContextMenuSubContent className="w-48">
 				{loadingStates.worldItems.loading ? (
-					<ContextMenuItem disabled>Cargando...</ContextMenuItem>
+					<ContextMenuItem disabled>
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+						<span>Cargando...</span>
+					</ContextMenuItem>
 				) : (
-					<ContextMenuItem disabled>Sin objetos disponibles</ContextMenuItem>
+					<>
+						<ContextMenuItem disabled>Sin objetos disponibles</ContextMenuItem>
+						<ContextMenuItem onClick={() => onAction('world-item-create', file)}>
+							<span className="text-primary">+ Nuevo objeto</span>
+						</ContextMenuItem>
+					</>
 				)}
 			</ContextMenuSubContent>
 		</ContextMenuSub>
@@ -215,14 +298,19 @@ export const WorldItemsSubmenu = memo(function WorldItemsSubmenu({
 export const PromptsSubmenu = memo(function PromptsSubmenu({
 	file,
 	onAction,
-	loadEntityData,
 	loadingStates,
+	handleOpenChange
 }: SubmenuProps) {
 	return null;
 });
 
 // Componente para el submenú de notas
-export const NotesSubmenu = memo(function NotesSubmenu({ file, onAction, loadEntityData, loadingStates }: SubmenuProps) {
+export const NotesSubmenu = memo(function NotesSubmenu({
+	file,
+	onAction,
+	loadingStates,
+	handleOpenChange
+}: SubmenuProps) {
 	return null;
 });
 
@@ -230,8 +318,8 @@ export const NotesSubmenu = memo(function NotesSubmenu({ file, onAction, loadEnt
 export const ConceptsSubmenu = memo(function ConceptsSubmenu({
 	file,
 	onAction,
-	loadEntityData,
 	loadingStates,
+	handleOpenChange
 }: SubmenuProps) {
 	return null;
 });
