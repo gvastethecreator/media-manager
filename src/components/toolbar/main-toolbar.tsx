@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { useFileStoreBase } from '@/store/entities/file';
+import { useSelectionStore } from '@/store/selection.store';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { ViewType } from '@/types/file-item';
 import {
 	Archive,
@@ -59,18 +60,14 @@ export function ViewToolbar({
 	const { currentView, getCurrentItem } = useNavigationStore();
 
 	// 🆕 Usar los nuevos stores específicos de entidades
-	const viewMode = useFileStoreBase((state) => state.viewMode);
-	const setViewMode = useFileStoreBase((state) => state.setViewMode);
-	const selectedFileIds = useFileStoreBase((state) => state.selectedFileIds);
-	const files = useFileStoreBase((state) => state.files);
-	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
-	const sortBy = useFileStoreBase((state) => state.sortBy);
-	const setSortBy = useFileStoreBase((state) => state.setSortBy);
-	const sortDirection = useFileStoreBase((state) => state.sortDirection);
-	const setSortDirection = useFileStoreBase((state) => state.setSortDirection);
+    const viewMode = useViewOptionsStore((state) => state.viewMode);
+    const setViewMode = useViewOptionsStore((state) => state.setViewMode);
+    const sort = useViewOptionsStore((state) => state.sort);
+    const setSort = useViewOptionsStore((state) => state.setSort);
 
-	// 🎯 Obtener items seleccionados con información completa
-	const selectedItems = selectedFileIds.map((id) => files[id as keyof typeof files]).filter(Boolean);
+    const selectedItems = useSelectionStore((state) => state.selectedItems);
+    const clearSelection = useSelectionStore((state) => state.clearSelection);
+
 
 	const { isVisible, toggleVisibility } = useDetailsPanel();
 
@@ -101,9 +98,9 @@ export function ViewToolbar({
 					window.electron?.deleteFile(item.path);
 				}
 			}
-			deselectAllFiles();
-		}
-	}, [selectedItems, deselectAllFiles]);
+                        clearSelection();
+               }
+       }, [selectedItems, clearSelection]);
 
 	const handleDownloadSelected = useCallback(() => {
 		if (selectedItems.length === 0) {
@@ -136,17 +133,16 @@ export function ViewToolbar({
 		}
 	}, [selectedItems]);
 
-	const handleSort = useCallback(
-		(field: 'name' | 'createdAt' | 'modifiedAt') => {
-			if (sortBy === field) {
-				setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-			} else {
-				setSortBy(field);
-				setSortDirection('asc');
-			}
-		},
-		[sortBy, sortDirection, setSortBy, setSortDirection]
-	);
+    const handleSort = useCallback(
+                (field: 'name' | 'createdAt' | 'modifiedAt') => {
+                        if (sort.field === field) {
+                                setSort({ direction: sort.direction === 'asc' ? 'desc' : 'asc' });
+                        } else {
+                                setSort({ field, direction: 'asc' });
+                        }
+                },
+                [sort, setSort]
+        );
 
 	const renderSortButtons = () => (
 		<div className="flex items-center gap-0.5">
@@ -155,58 +151,58 @@ export function ViewToolbar({
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por nombre"
-				onClick={() => handleSort('name')}
-				data-active={sortBy === 'name'}
-			>
-				<FileText className={cn('h-3.5 w-3.5', sortBy === 'name' && 'text-primary')} />
-				{sortBy === 'name' && (
-					<span className="ml-0.5">
-						{sortDirection === 'asc' ? (
-							<ArrowUp className="h-2.5 w-2.5 text-primary" />
-						) : (
-							<ArrowDown className="h-2.5 w-2.5 text-primary" />
-						)}
-					</span>
-				)}
-			</Button>
+                                onClick={() => handleSort('name')}
+                                data-active={sort.field === 'name'}
+                        >
+                                <FileText className={cn('h-3.5 w-3.5', sort.field === 'name' && 'text-primary')} />
+                                {sort.field === 'name' && (
+                                        <span className="ml-0.5">
+                                                {sort.direction === 'asc' ? (
+                                                        <ArrowUp className="h-2.5 w-2.5 text-primary" />
+                                                ) : (
+                                                        <ArrowDown className="h-2.5 w-2.5 text-primary" />
+                                                )}
+                                        </span>
+                                )}
+                        </Button>
 			<Button
 				variant="ghost"
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por fecha de modificación"
-				onClick={() => handleSort('modifiedAt')}
-				data-active={sortBy === 'modifiedAt'}
-			>
-				<Clock className={cn('h-3.5 w-3.5', sortBy === 'modifiedAt' && 'text-primary')} />
-				{sortBy === 'modifiedAt' && (
-					<span className="ml-0.5">
-						{sortDirection === 'asc' ? (
-							<ArrowUp className="h-2.5 w-2.5 text-primary" />
-						) : (
-							<ArrowDown className="h-2.5 w-2.5 text-primary" />
-						)}
-					</span>
-				)}
-			</Button>
+                                onClick={() => handleSort('modifiedAt')}
+                                data-active={sort.field === 'modifiedAt'}
+                        >
+                                <Clock className={cn('h-3.5 w-3.5', sort.field === 'modifiedAt' && 'text-primary')} />
+                                {sort.field === 'modifiedAt' && (
+                                        <span className="ml-0.5">
+                                                {sort.direction === 'asc' ? (
+                                                        <ArrowUp className="h-2.5 w-2.5 text-primary" />
+                                                ) : (
+                                                        <ArrowDown className="h-2.5 w-2.5 text-primary" />
+                                                )}
+                                        </span>
+                                )}
+                        </Button>
 			<Button
 				variant="ghost"
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por fecha de creación"
-				onClick={() => handleSort('createdAt')}
-				data-active={sortBy === 'createdAt'}
-			>
-				<Calendar className={cn('h-3.5 w-3.5', sortBy === 'createdAt' && 'text-primary')} />
-				{sortBy === 'createdAt' && (
-					<span className="ml-0.5">
-						{sortDirection === 'asc' ? (
-							<ArrowUp className="h-2.5 w-2.5 text-primary" />
-						) : (
-							<ArrowDown className="h-2.5 w-2.5 text-primary" />
-						)}
-					</span>
-				)}
-			</Button>
+                                onClick={() => handleSort('createdAt')}
+                                data-active={sort.field === 'createdAt'}
+                        >
+                                <Calendar className={cn('h-3.5 w-3.5', sort.field === 'createdAt' && 'text-primary')} />
+                                {sort.field === 'createdAt' && (
+                                        <span className="ml-0.5">
+                                                {sort.direction === 'asc' ? (
+                                                        <ArrowUp className="h-2.5 w-2.5 text-primary" />
+                                                ) : (
+                                                        <ArrowDown className="h-2.5 w-2.5 text-primary" />
+                                                )}
+                                        </span>
+                                )}
+                        </Button>
 		</div>
 	);
 
@@ -324,7 +320,7 @@ export function ViewToolbar({
 						size="icon"
 						className="h-7 w-7 hover:bg-accent"
 						title="Limpiar selección"
-						onClick={deselectAllFiles}
+                                                onClick={clearSelection}
 					>
 						<X className="h-3.5 w-3.5" />
 					</Button>

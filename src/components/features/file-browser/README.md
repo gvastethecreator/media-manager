@@ -21,6 +21,12 @@ flowchart TD
 
 Para un análisis detallado del flujo de precarga consulta `docs/entity-preloader-integration.md`.
 
+## Integración con `view-options`
+
+El modo de visualización y las preferencias de orden se obtienen del slice
+`view-options` de Zustand. Esto permite que la toolbar y otros componentes
+compartan estado de manera reactiva y persistente.
+
 # FileBrowser: Fallback visual y robustez de layout
 
 ## Fallback visual y logs controlados
