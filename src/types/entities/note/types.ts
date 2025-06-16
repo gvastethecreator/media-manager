@@ -105,7 +105,7 @@ export interface NoteUI {
 /**
  * 🔄 Campos deserializados de Note
  */
-export type NoteDeserialized = {};
+export type NoteDeserialized = Record<string, unknown>;
 
 /**
  * 🔍 Interfaz para filtros de búsqueda de notas
