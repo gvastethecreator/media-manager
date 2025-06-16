@@ -4,12 +4,11 @@
  */
 
 import type {
-	RarityLevel,
-	WorldItemRarity,
-	WorldItem,
-	WorldItemProperty,
-	WorldItemStats,
-	WorldItemType,
+    WorldItem,
+    WorldItemProperty,
+    WorldItemRarity,
+    WorldItemStats,
+    WorldItemType
 } from '../../types/entities/world-item';
 
 /**
@@ -126,20 +125,20 @@ export function compareWorldItems(a: WorldItem, b: WorldItem, criteria: string):
 
 	// Ordenar por fecha de creación
 	if (criteria === 'created_asc') {
-		return a.createdAt!.getTime() - b.createdAt!.getTime();
+		return (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0);
 	}
 
 	if (criteria === 'created_desc') {
-		return b.createdAt!.getTime() - a.createdAt!.getTime();
+		return (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0);
 	}
 
 	// Ordenar por fecha de actualización
 	if (criteria === 'updated_asc') {
-		return a.updatedAt!.getTime() - b.updatedAt!.getTime();
+		return (a.updatedAt?.getTime() ?? 0) - (b.updatedAt?.getTime() ?? 0);
 	}
 
 	if (criteria === 'updated_desc') {
-		return b.updatedAt!.getTime() - a.updatedAt!.getTime();
+		return (b.updatedAt?.getTime() ?? 0) - (a.updatedAt?.getTime() ?? 0);
 	}
 
 	// Ordenar por tipo
