@@ -1,6 +1,5 @@
 // Export main components
 export { FileBrowser } from './file-browser';
-export { IntegratedFileBrowser } from './integrated-file-browser';
 
 // Export utility hooks and helpers
 export { useFilteredData } from './hooks/use-filtered-data';
@@ -16,5 +15,9 @@ export { VirtualizerWrapper } from './views/virtualizer-wrapper';
 // Export renderer
 export { ImageRenderer } from './image-renderer';
 
+// Export components
+export { GridItem } from './components/grid-item';
+
 // Export types
 export * from './types';
+

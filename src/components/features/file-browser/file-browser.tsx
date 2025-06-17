@@ -5,7 +5,6 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { EmptyState } from '@/components/core/data-display';
 import { type ImageItem } from '@/components/features/file-viewer/file-viewer';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -15,15 +14,11 @@ import { useImageResources } from '@/store/image-resources.store';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { FileItem } from '@/types/file-item';
-import clsx from 'clsx';
-import { FileTextIcon, Star } from 'lucide-react';
-import { FileContextMenu } from './context-menu/context-menu';
+import { FileTextIcon } from 'lucide-react';
 import type { ContextMenuAction } from './context-menu/types';
-import { GridItem } from './components/grid-item';
 import { useFilteredData } from './hooks/use-filtered-data';
-import { ImageRenderer } from './image-renderer';
 import './styles/scrollbar.css';
-import { FileBrowserActions, SelectionActions, SortTypeSelector, StatusBar, ViewTypeSelector } from './toolbar';
+import { StatusBar } from './toolbar/status-bar';
 import { fileItemsToImageItems } from './utils/file-converters';
 import { CardsView } from './views/cards-view';
 import { ListView } from './views/list-view';
@@ -73,7 +68,7 @@ type FileBrowserFileItem = FileItem & {
 };
 
 interface FileBrowserProps {
-	items: FileBrowserFileItem[];
+	items: FileItem[];
 	onItemSelect?: (item: FileItem) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
 	className?: string;
@@ -459,7 +454,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					![...currentIds].every(id => newIds.has(id));
 
 				if (needsUpdate) {
-					setDetailsPanelItems(detailItems);
+					// Usar type assertion para compatibilidad temporal
+					setDetailsPanelItems(detailItems as any);
 				}
 			}
 		} else {
@@ -483,7 +479,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				}),
 			};
 
-			setDetailsPanelItems([folderStats as unknown as ImageItem]);
+			setDetailsPanelItems([folderStats as any]);
 		}
 
 		// Asegurarse de que el panel esté visible
@@ -537,54 +533,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		};
 	}, [contextMenuFile]);
 
-	// 🎨 Memoizamos el contenido renderizado para evitar re-cálculos
-	const renderedContent = useMemo(() => {
-		console.log("[FileBrowser] Renderizando contenido:", {
-			viewMode,
-			itemsCount: visibleItems?.length || 0,
-			isLoading,
-			filterOptions,
-			hasData: visibleItems && visibleItems.length > 0
-		});
-
-		if (isLoading) {
-			return <Skeleton className="w-full h-full" />;
-		}
-
-		if (!visibleItems || visibleItems.length === 0) {
-			return (
-				<EmptyState
-					icon={FileTextIcon}
-					title="No files found"
-					description={
-						filterOptions
-							? 'No favorite files match your search.'
-							: 'No files match your current search or filter.'
-					}
-				/>
-			);
-		}
-
-		const viewProps = {
-			items: visibleItems,
-			onItemClick: handleItemClick,
-			onItemDoubleClick: handleItemDoubleClick,
-			onContextMenu: handleContextMenu, // Pasamos el manejador de menú contextual
-		};
-
-		switch (viewMode) {
-			case 'grid':
-				return <SimpleGridView {...viewProps} />;
-			case 'list':
-				return <ListView {...viewProps} />;
-			case 'masonry':
-				return <MasonryView {...viewProps} />;
-			case 'cards':
-				return <CardsView {...viewProps} />;
-			default:
-				return <SimpleGridView {...viewProps} />;
-		}
-	}, [visibleItems, isLoading, viewMode, handleItemClick, handleItemDoubleClick, handleContextMenu, filterOptions]);
+	// Eliminado el renderedContent memoizado - ahora se maneja directamente en el JSX principal
 
 	// Referencia al contenedor principal para manejar el foco
 	const mainRef = useRef<HTMLDivElement>(null);
@@ -623,6 +572,9 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 	}, [processedItems, setSelectedIds, clearSelection]);
 
+	// 🔄 Usar items directamente con type assertion para compatibilidad
+	const transformedItems = items as FileBrowserFileItem[];
+
 	return (
 		<div
 			className={cn(
@@ -630,35 +582,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				className
 			)}
 			onKeyDown={handleKeyDown}
-			tabIndex={0}
 			role="application"
 			aria-label="Explorador de archivos"
 			ref={mainRef}
 			style={{ userSelect: 'none' }}
 		>
-			{/* Barra de herramientas */}
-			<div className="border-b p-2 flex items-center space-x-2">
-				<div className="flex space-x-1">
-					<ViewTypeSelector />
-					<SortTypeSelector />
-				</div>
-
-				<div className="flex-1 min-w-0">
-					<Input
-						placeholder="Buscar archivos..."
-						value={searchInput}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						className="max-w-sm"
-					/>
-				</div>
-
-				<div className="flex space-x-1">
-					<SelectionActions items={currentViewItems} />
-					<FileBrowserActions />
-				</div>
-			</div>
-
-			<div className="relative flex-1 min-h-0">
+			<div className="relative flex-1 min-h-0 h-full">
 				{/* Vista principal de archivos */}
 				<div className="absolute inset-0">
 					{isLoading && (
@@ -676,51 +605,60 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 							/>
 						) : (
 							<AnimatePresence mode="wait">
-									<motion.div 
-										key={viewMode}
-										className="h-full w-full"
-										initial={{ opacity: 0, y: 10 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: -10 }}
-										transition={{ duration: 0.2 }}
-									>
-										{viewMode === 'list' && (
-											<ListView
-												items={currentViewItems}
-												onItemClick={handleItemClick}
-												onItemDoubleClick={handleItemDoubleClick}
-												onContextMenu={handleContextMenu}
-											/>
-										)}
+								<motion.div
+									key={viewMode}
+									className="h-full w-full"
+									initial={{ opacity: 0, y: 10 }}
+									animate={{ opacity: 1, y: 0 }}
+									exit={{ opacity: 0, y: -10 }}
+									transition={{ duration: 0.2 }}
+								>
+									{viewMode === 'list' && (
+										<ListView
+											items={currentViewItems}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											onContextMenu={handleContextMenu}
+										/>
+									)}
 
-										{viewMode === 'grid' && (
-											<SimpleGridView
-												items={currentViewItems}
-												onItemClick={handleItemClick}
-												onItemDoubleClick={handleItemDoubleClick}
-												onContextMenu={handleContextMenu}
-											/>
-										)}
+									{viewMode === 'grid' && (
+										<SimpleGridView
+											items={currentViewItems}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											onContextMenu={handleContextMenu}
+										/>
+									)}
 
-										{viewMode === 'masonry' && (
-											<MasonryView
-												items={currentViewItems}
-												onItemClick={handleItemClick}
-												onItemDoubleClick={handleItemDoubleClick}
-												onContextMenu={handleContextMenu}
-											/>
-										)}
+									{viewMode === 'masonry' && (
+										<MasonryView
+											items={currentViewItems}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											onContextMenu={handleContextMenu}
+										/>
+									)}
 
-										{(!viewMode || (viewMode !== 'list' && viewMode !== 'grid' && viewMode !== 'masonry')) && (
-											<SimpleGridView
-												items={currentViewItems}
-												onItemClick={handleItemClick}
-												onItemDoubleClick={handleItemDoubleClick}
-												onContextMenu={handleContextMenu}
-											/>
-										)}
-									</motion.div>
-								</AnimatePresence>
+									{viewMode === 'cards' && (
+										<CardsView
+											items={currentViewItems}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											onContextMenu={handleContextMenu}
+										/>
+									)}
+
+									{(!viewMode || (viewMode !== 'list' && viewMode !== 'grid' && viewMode !== 'masonry' && viewMode !== 'cards')) && (
+										<SimpleGridView
+											items={currentViewItems}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											onContextMenu={handleContextMenu}
+										/>
+									)}
+								</motion.div>
+							</AnimatePresence>
 						)
 					)}
 				</div>
