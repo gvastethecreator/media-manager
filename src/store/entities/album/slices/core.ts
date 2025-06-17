@@ -442,10 +442,10 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 
 	// Estado de carga y error
 	setLoading: (isLoading: boolean) => {
-		set((state) => ({ loading: isLoading }));
+		set((_state) => ({ loading: isLoading }));
 	},
 	setError: (error: string | null) => {
-		set((state) => ({ error: error }));
+		set((_state) => ({ error: error }));
 	},
 
 	// Acciones asíncronas con Server Actions
@@ -467,7 +467,7 @@ export const createAlbumCoreSlice: StateCreator<AlbumState, [], [], AlbumCoreSli
 		}
 	},
 
-	fetchAlbums: async (parentId?: string) => {
+	fetchAlbums: async (_parentId?: string) => {
 		set({ loading: true, error: null });
 		try {
 			const albums = await getAlbums();

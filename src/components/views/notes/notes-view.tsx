@@ -1,5 +1,9 @@
 'use client';
 
+import { ScrollText } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import type { NoteWithStats } from '@/app/actions/notes/note.actions';
 import { getNotes } from '@/app/actions/notes/note.actions';
 import { MemoizedNoteCard } from '@/components/cards/note-card';
@@ -10,10 +14,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useNoteStore } from '@/store/entities/note';
-import { ScrollText } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('NotesView');
@@ -59,7 +59,7 @@ export function NotesView(_props: ViewProps) {
 		[setCurrentView, selectNote]
 	);
 
-	const handleEditNote = useCallback(
+	const _handleEditNote = useCallback(
 		(note: NoteWithStats) => {
 			viewLogger.info('⚙️ Editando nota:', note.title);
 			router.push(`/settings/notes?id=${note.id}`);
@@ -67,7 +67,7 @@ export function NotesView(_props: ViewProps) {
 		[router]
 	);
 
-	const handleDeleteNote = useCallback((id: string) => {
+	const _handleDeleteNote = useCallback((id: string) => {
 		viewLogger.info('🗑️ Eliminando nota:', id);
 		// Implementar lógica de eliminación
 	}, []);

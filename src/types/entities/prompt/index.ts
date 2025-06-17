@@ -8,7 +8,6 @@ export * from './base';
 export * from './enums';
 export * from './extended';
 export * from './schema';
-export * from './types';
-
 // Alias común para el tipo principal
 export type { PromptWithRelations as Prompt } from './types';
+export * from './types';

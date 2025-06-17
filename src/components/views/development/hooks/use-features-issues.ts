@@ -1,6 +1,6 @@
 'use client';
 
-import { BookImage, Cloud, Database, Folder, ImageIcon, type LucideIcon, Server, Settings, Zap } from 'lucide-react';
+import { BookImage, Cloud, Database, Folder, ImageIcon, Server, Settings, Zap } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Feature } from '../cards/feature-card';
 import type { Issue } from '../cards/issue-card';

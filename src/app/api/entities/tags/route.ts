@@ -1,5 +1,5 @@
-import { serverLogger } from '@/lib/logger/server-logger';
 import { type NextRequest, NextResponse } from 'next/server';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const logger = serverLogger.withContext('TagsAPI');
 
@@ -61,7 +61,7 @@ const testTags = [
  * GET /api/entities/tags
  * Recupera la lista de etiquetas
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
 	try {
 		logger.info('📥 Petición GET recibida para obtener etiquetas');
 

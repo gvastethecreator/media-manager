@@ -3,23 +3,23 @@
  * @module store/entities/video/slices/core
  */
 
-import {
-	getVideoVisualConfig,
-	updateVideoVisualConfig as updateVideoVisualConfigAction,
-} from '@/app/actions/videos/video-visual-config.actions';
+import type { StateCreator } from 'zustand';
 import {
 	createVideo as createServerVideo,
 	deleteVideo as deleteServerVideo,
 	findVideos,
 	getVideo as getServerVideo,
 } from '@/app/actions/videos/video.actions';
-import type { StateCreator } from 'zustand';
+import {
+	getVideoVisualConfig,
+	updateVideoVisualConfig as updateVideoVisualConfigAction,
+} from '@/app/actions/videos/video-visual-config.actions';
 import { mapVideoVisualConfigCompleteUpdateToPrisma } from '../../../../transformers/video/mappers';
 import {
 	transformVideo,
-	transformVideoWithStats,
 	transformVideos,
 	transformVideosWithStats,
+	transformVideoWithStats,
 } from '../../../../transformers/video/serializers';
 import type {
 	CreateVideoData,

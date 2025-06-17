@@ -3,11 +3,11 @@
  * @module transformers/wildcard/transformer
  */
 
+import type { Wildcard } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { WildcardSchema } from '@/types/entities/wildcard/schema';
 import type { WildcardComplete, WildcardExtended, WildcardWithStats } from '@/types/entities/wildcard/types';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Wildcard } from '@prisma/client';
 import { parseWildcardChildren } from './serializers';
 
 /**

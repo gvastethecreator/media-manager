@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from 'react';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
@@ -9,7 +10,6 @@ import { usePlaceStore } from '@/store/entities/place';
 import { usePromptStore } from '@/store/entities/prompt';
 import { useTagStore } from '@/store/entities/tag';
 import { useWorldItemStore } from '@/store/entities/world-item';
-import { useCallback, useEffect, useState } from 'react';
 
 // Tipos
 export type SupportedEntities =
@@ -57,7 +57,7 @@ const getStoreForEntity = (entity: SupportedEntities) => {
 
 // Función para manejar timeouts en promesas
 const withTimeout = <T>(promise: Promise<T>, timeoutMs: number, entityName: string): Promise<T> => {
-	return new Promise<T>((resolve, reject) => {
+	return new Promise<T>((resolve, _reject) => {
 		const timeout = setTimeout(() => {
 			loadingLogger.warn(`⏱️ Timeout excedido (${timeoutMs}ms) cargando ${entityName}`);
 			resolve([] as unknown as T); // Resolver con array vacío en caso de timeout
@@ -197,7 +197,7 @@ export const useEntityLoader = () => {
 				loadEntityData(entity).catch(console.error);
 			}
 		},
-		[loadingStates]
+		[loadingStates, loadEntityData]
 	);
 
 	// Función principal para cargar datos de entidades

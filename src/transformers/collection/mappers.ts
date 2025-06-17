@@ -3,6 +3,7 @@
  * @module transformers/collection/mappers
  */
 
+import type { Image, Prisma, Collection as PrismaCollection } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CollectionComplete, CollectionExtended, CollectionSummary } from '@/types/entities/collection';
 import {
@@ -19,7 +20,6 @@ import type {
 } from '@/types/entities/collection/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
-import type { Image, Prisma, Collection as PrismaCollection } from '@prisma/client';
 import { toCollectionComplete, toCollectionExtended } from './serializers';
 
 const logger = serverLogger.withContext('CollectionMapper');

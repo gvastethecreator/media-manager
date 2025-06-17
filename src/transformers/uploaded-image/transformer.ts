@@ -80,7 +80,7 @@ export function toExtended(entity: UploadedImageBase): UploadedImageExtended {
 	const thumbnailUrl = `/api/images/thumbnails/${encodeURIComponent(entity.path)}`;
 
 	// Parsear metadata si está disponible
-	const parsedMetadata = entity.metadata ? (JSON.parse(entity.metadata) as MediaMetadata) : null;
+	const _parsedMetadata = entity.metadata ? (JSON.parse(entity.metadata) as MediaMetadata) : null;
 
 	return {
 		...entity,

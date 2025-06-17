@@ -4,11 +4,8 @@
  */
 
 export * from './enums';
-export * from './types';
-
 // Reexportar enums explícitamente para evitar problemas de importación
 export { ActivityCategory, ActivitySortCriteria, ActivityType } from './enums';
-
 // Reexportar tipos explícitamente
 export type {
 	Activity,
@@ -19,3 +16,4 @@ export type {
 	ActivityWithImage,
 	CreateActivityData,
 } from './types';
+export * from './types';

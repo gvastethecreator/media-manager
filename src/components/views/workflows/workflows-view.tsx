@@ -7,10 +7,7 @@ import { WorkflowCard } from '@/components/entities/workflow/workflow-card';
  */
 export function WorkflowsView() {
 	// Ejemplo de datos mock
-	const workflows = [
-		{ name: 'Pipeline de imágenes' },
-		{ name: 'Automatización de backup' },
-	];
+	const workflows = [{ name: 'Pipeline de imágenes' }, { name: 'Automatización de backup' }];
 
 	return (
 		<div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

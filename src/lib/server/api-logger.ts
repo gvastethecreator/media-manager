@@ -108,7 +108,7 @@ export const apiLogger = {
 									startTime
 								);
 							});
-					} catch (error) {
+					} catch (_error) {
 						logData.body = '[Error al procesar el cuerpo]';
 						logger.http(
 							`Solicitud recibida: ${req.method} ${new URL(req.url).pathname}`,

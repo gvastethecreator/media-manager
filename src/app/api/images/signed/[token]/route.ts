@@ -1,5 +1,5 @@
-import { verifySignedToken } from '@/app/actions/thumbnails/thumbnails.actions';
 import { type NextRequest, NextResponse } from 'next/server';
+import { verifySignedToken } from '@/app/actions/thumbnails/thumbnails.actions';
 
 export async function GET(_request: NextRequest, context: { params: { token: string } }) {
 	try {

@@ -3,9 +3,9 @@
  * @module transformers/character/types
  */
 
+import type { Character } from '@prisma/client';
 import type { CharacterBase } from '@/types/entities/character/base';
 import type { CharacterExtended, CharacterWithStats } from '@/types/entities/character/types';
-import type { Character } from '@prisma/client';
 
 /**
  * Tipo para un personaje completo con todas sus propiedades

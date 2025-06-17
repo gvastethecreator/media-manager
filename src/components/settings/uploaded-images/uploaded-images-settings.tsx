@@ -1,5 +1,22 @@
 'use client';
 
+import {
+	FileSpreadsheet,
+	Filter,
+	FolderUp,
+	Grid3X3,
+	ImagePlus,
+	ImportIcon,
+	Plus,
+	RefreshCw,
+	SlidersHorizontal,
+	Trash2,
+	UploadCloud,
+	X,
+} from 'lucide-react';
+import { motion } from 'motion/react';
+import type * as React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { getUploadedImageStats, uploadImages } from '@/app/actions/uploaded-images/uploaded-images.actions';
 import {
 	AlertDialog,
@@ -30,23 +47,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
 import type { UploadedImageStats } from '@/types/uploaded-images';
-import {
-	FileSpreadsheet,
-	Filter,
-	FolderUp,
-	Grid3X3,
-	ImagePlus,
-	ImportIcon,
-	Plus,
-	RefreshCw,
-	SlidersHorizontal,
-	Trash2,
-	UploadCloud,
-	X,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import type * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
 
 const sectionLogger = clientLogger.withContext('UploadedImagesSettings');
 

@@ -1,6 +1,6 @@
-import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { clientLogger } from '@/lib/logger/client-logger';
 import {
 	createCoreSlice,
 	createExecutionSlice,

@@ -3,10 +3,8 @@
  * @module store/entities/world-item
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-
 import {
 	createWorldItem as createServerWorldItem,
 	deleteWorldItem as deleteServerWorldItem,
@@ -14,6 +12,7 @@ import {
 	updateWorldItem as updateServerWorldItem,
 } from '@/app/actions/world-items/world-item.actions';
 import { VERSIONING } from '@/lib/constants';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 
 import { WorldItemSortCriteria, WorldItemViewMode } from '@/types/entities/world-item/enums';
@@ -121,7 +120,7 @@ export const useWorldItemStore = create<WorldItemStore>()(
 			// 🔍 Filtros
 			updateFilters: (filters) => set((state) => ({ filters: { ...state.filters, ...filters } })),
 			clearFilters: () =>
-				set((state) => ({
+				set((_state) => ({
 					filters: {
 						sortBy: WorldItemSortCriteria.NAME_ASC,
 						searchTerm: '',

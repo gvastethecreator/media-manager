@@ -1,5 +1,7 @@
 'use client';
 
+import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import {
 	type CollectionWithStats,
 	deleteCollection,
@@ -16,8 +18,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import toastService from '@/services/toast.service';
 import type { CollectionBase as Collection } from '@/types/entities/collection/base';
 import { CollectionCategory } from '@/types/entities/collection/enums';
-import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreateCollectionForm } from './create-collection-form';
 
 // Tipo ampliado para Collection que incluye _count
@@ -175,7 +175,7 @@ export function CollectionsSettings() {
 	) as string[];
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const handleDeleteButtonClick = useCallback<ButtonClickHandler>(
+	const _handleDeleteButtonClick = useCallback<ButtonClickHandler>(
 		(e) => {
 			const id = (e.currentTarget as HTMLButtonElement).dataset.id;
 			if (id) {
@@ -542,7 +542,7 @@ export function CollectionsSettings() {
 }
 
 // Función auxiliar para generar colores basados en categoría
-function generateCategoryColor(category: CollectionCategory): string {
+function _generateCategoryColor(category: CollectionCategory): string {
 	switch (category) {
 		case CollectionCategory.ART:
 			return 'bg-blue-500';

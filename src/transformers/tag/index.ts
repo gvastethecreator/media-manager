@@ -22,7 +22,7 @@ import { transformTag as transformTagMain } from './transformer';
 // export * from './serializers';
 // export * from './transformer';
 
-const logger = new Logger('TagTransformer');
+const _logger = new Logger('TagTransformer');
 
 // Re-exportar el transformador principal con el nombre deseado
 // export { transformTagMain as transformTag };

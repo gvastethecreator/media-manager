@@ -1,6 +1,6 @@
+import { create } from 'zustand';
 import { getStats as getStatsAction, invalidateStats } from '@/app/actions/stats/stats.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { create } from 'zustand';
 import { createStoreFactory } from './store.factory';
 import type { BaseEntity } from './types';
 

@@ -1,12 +1,11 @@
 'use client';
 
-import { clientLogger } from '@/lib/logger/client-logger';
-import { toast } from '@/services/toast.service';
-
 // Importaciones de server actions para entidades
 import { addImageToAlbum } from '@/app/actions/albums/album.actions';
 import { addImageToCollection } from '@/app/actions/collections/collection-images.actions';
 import { addTagToImage } from '@/app/actions/tags/tag-images.actions';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toast } from '@/services/toast.service';
 
 // Importaciones de stores en entidades
 
@@ -23,7 +22,7 @@ const actionLogger = clientLogger.withContext('ContextActionHandler');
 type ToggleItemSelectionFunction = (item: FileItem, isMultiSelect?: boolean) => void;
 
 // Redireccionar acciones obsoletas a las nuevas
-function redirectLegacyAction(action: ContextMenuAction): {
+function _redirectLegacyAction(action: ContextMenuAction): {
 	newAction: ContextMenuAction;
 	newData?: Record<string, unknown>;
 } {
@@ -46,7 +45,7 @@ const customFileOperationsService = {
 		try {
 			// En navegador web, podemos intentar abrir una ventana nueva
 			// con la ruta en formato file:// (esto funciona en algunos navegadores)
-			const url = `file://${path}`;
+			const _url = `file://${path}`;
 			const folderPath = path.substring(0, path.lastIndexOf('/'));
 			const folderUrl = `file://${folderPath}`;
 
@@ -165,7 +164,7 @@ export const handleContextAction = async (
 	item: FileItem,
 	data?: Record<string, unknown>,
 	handleItemDoubleClick?: (item: FileItem) => void,
-	toggleSelectFile?: (id: string) => void,
+	toggleSelectFile?: (id: string) => void
 ): Promise<void> => {
 	try {
 		switch (action) {
@@ -203,7 +202,8 @@ export const handleContextAction = async (
 
 			case 'copy-path':
 				// Copiar ruta
-				await navigator.clipboard.writeText(item.path)
+				await navigator.clipboard
+					.writeText(item.path)
 					.then(() => toast.success('Ruta copiada al portapapeles'))
 					.catch(() => toast.error('No se pudo copiar la ruta'));
 				break;

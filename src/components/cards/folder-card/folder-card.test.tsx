@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FolderCard } from './folder-card';
-import { getFolderStats, getRecentFolderImages } from './folder-server-actions';
 
 // Mock de las acciones del servidor
 jest.mock('./folder-server-actions', () => ({

@@ -1,5 +1,7 @@
 'use client';
 
+import { Album as AlbumIcon, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { deleteAlbum, getAlbums } from '@/app/actions/albums/album.actions';
 import { AlbumCard } from '@/components/cards/album-card/album-card';
 import { Button } from '@/components/ui/button';
@@ -10,8 +12,6 @@ import toastService from '@/services/toast.service';
 import type { Album } from '@/types/entities/album';
 import type { AlbumWithStats } from '@/types/entities/album/extended';
 import { formatBytes } from '@/utils/file/helpers';
-import { Album as AlbumIcon, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreateAlbumForm } from './create-album-form';
 
 // Extender el tipo Album para añadir las propiedades que faltan
@@ -84,7 +84,7 @@ export function AlbumsSettings() {
 	}, []);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const handleDeleteButtonClick = useCallback(
+	const _handleDeleteButtonClick = useCallback(
 		(e: React.MouseEvent<HTMLButtonElement>, id: string) => {
 			e.stopPropagation();
 			handleDeleteAlbum(id);

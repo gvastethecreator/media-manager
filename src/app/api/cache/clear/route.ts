@@ -1,7 +1,6 @@
-import { clearMetadataCache } from '@/app/actions/metadata';
-import { metadataCache } from '@/lib/cache';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { NextResponse } from 'next/server';
+import { clearMetadataCache } from '@/app/actions/metadata';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const routeLogger = serverLogger.withContext('CacheAPI');
 

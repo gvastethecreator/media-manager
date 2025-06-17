@@ -1,7 +1,7 @@
-import { serverLogger } from '@/lib/logger/server-logger';
 import { getOriginalImage } from '@/app/actions/images';
+import { serverLogger } from '@/lib/logger/server-logger';
 
-const apiLogger = serverLogger.withContext('ImageAPI');
+const _apiLogger = serverLogger.withContext('ImageAPI');
 
 export async function GET(_request: Request, context: { params: { id: string } }) {
 	const headers = new Headers();

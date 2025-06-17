@@ -1,5 +1,3 @@
-import { cn } from '@/lib/utils';
-import { TagRarity } from '@/types/entities/tag/enums';
 import {
 	Album,
 	BookOpen,
@@ -17,6 +15,8 @@ import {
 	UserSquare,
 	Video,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { TagRarity } from '@/types/entities/tag/enums';
 
 interface TagCardContentProps {
 	description?: string | null;

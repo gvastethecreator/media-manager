@@ -1,8 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { initServer as initServerAction } from '@/app/actions/system';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useEffect, useState } from 'react';
 
 // Logger específico para este componente
 const logger = clientLogger.withContext('ServerInitializer');
@@ -19,7 +19,7 @@ const RETRY_DELAY = 2000; // 2 segundos
  * la aplicación se carga en el navegador.
  */
 export function ServerInitializer() {
-	const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+	const [_status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 	const [retries, setRetries] = useState(0);
 
 	useEffect(() => {

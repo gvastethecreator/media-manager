@@ -134,15 +134,15 @@ export const createWorldItemUISlice: StateCreator<WorldItemStore, [], [], WorldI
 		set({ currentItemId: id });
 	},
 
-	setIsCreatingItem: (isCreating) => {
+	setIsCreatingItem: (_isCreating) => {
 		set({ isCreatingItem });
 	},
 
-	setIsEditingItem: (isEditing) => {
+	setIsEditingItem: (_isEditing) => {
 		set({ isEditingItem });
 	},
 
-	setIsProcessingAction: (isProcessing) => {
+	setIsProcessingAction: (_isProcessing) => {
 		set({ isProcessingAction });
 	},
 

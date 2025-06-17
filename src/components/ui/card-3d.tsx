@@ -1,9 +1,9 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { animate, motion, useMotionValue, useTransform } from 'motion/react';
 import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 // Tipos flexibles para permitir diferentes sistemas de tipos
 interface Card3DProps {

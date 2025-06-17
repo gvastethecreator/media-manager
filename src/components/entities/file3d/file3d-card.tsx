@@ -1,6 +1,7 @@
 // Card para File3D
-import { Card } from '@/components/ui/card';
+
 import { Box } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 export function File3DCard({ name, format }: { name: string; format: string }) {
 	return (

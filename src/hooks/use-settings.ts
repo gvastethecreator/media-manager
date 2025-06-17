@@ -3,8 +3,8 @@
  * @module hooks/use-settings
  */
 
-import { useSettingsStore } from '@/store/settings.store';
 import { useEffect } from 'react';
+import { useSettingsStore } from '@/store/settings.store';
 
 /**
  * Hook personalizado que proporciona acceso a la configuración global

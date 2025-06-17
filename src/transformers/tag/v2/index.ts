@@ -5,13 +5,19 @@
 
 // Exportar todos los converters
 export * from './converters';
-
+// Exportar mappers
+export * from './mappers';
 // Exportar serializadores
 export * from './serializers';
 
-// Exportar mappers
-export * from './mappers';
-
+import {
+	toCreateTagData,
+	toRelatedTag,
+	toSearchFilters,
+	toSearchOptions,
+	toSearchResult,
+	toUpdateTagData,
+} from './mappers';
 // Importar las funciones localmente para el objeto de exportación
 import {
 	DEFAULT_TAG_COLOR,
@@ -22,15 +28,6 @@ import {
 	toPrismaTag,
 	validateTag,
 } from './serializers';
-
-import {
-	toCreateTagData,
-	toRelatedTag,
-	toSearchFilters,
-	toSearchOptions,
-	toSearchResult,
-	toUpdateTagData,
-} from './mappers';
 
 // Objeto para mantener compatibilidad con código existente
 const TagTransformer = {

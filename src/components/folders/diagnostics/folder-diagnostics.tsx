@@ -1,11 +1,11 @@
 'use client';
 
+import { AlertTriangle, Check, Database, RefreshCcw, X } from 'lucide-react';
+import { useState } from 'react';
 import { runAllDiagnostics } from '@/app/actions/folders/diagnostics.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Check, Database, RefreshCcw, X } from 'lucide-react';
-import { useState } from 'react';
 
 type DiagnosticResult = Awaited<ReturnType<typeof runAllDiagnostics>>;
 

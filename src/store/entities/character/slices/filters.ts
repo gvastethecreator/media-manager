@@ -3,6 +3,7 @@
  * @module store/entities/character/slices/filters
  */
 
+import type { StateCreator } from 'zustand';
 import type {
 	CharacterAlignment,
 	CharacterCategory,
@@ -13,7 +14,6 @@ import type {
 	CharacterSortOption,
 } from '@/types/entities/character';
 import { compareCharacters, getCharacterLevelAsNumber, matchesCharacterSearch } from '@/utils/character';
-import type { StateCreator } from 'zustand';
 import type { CharacterFiltersSlice, CharacterState } from '../types';
 
 /**

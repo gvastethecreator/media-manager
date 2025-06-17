@@ -1,6 +1,6 @@
+import { useCallback } from 'react';
 import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
 import type { ViewType } from '@/types/file-item';
-import { useCallback } from 'react';
 import type { CategoryChild } from '../types';
 
 /**

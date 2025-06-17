@@ -1,9 +1,9 @@
-import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { createHash } from 'crypto';
 import { existsSync, promises as fs } from 'fs';
 import { extname, join } from 'path';
 import sharp from 'sharp';
+import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { ImageFormat } from './image';
 import { formatBytes } from './utils/format.utils';
 

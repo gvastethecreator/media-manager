@@ -3,16 +3,16 @@
  * @module transformers/tag/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { Logger } from '@/lib/logger';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { TagCreateInput, TagFilters, TagSearchOptions, TagUpdateInput } from '@/types/entities/tag/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 import type { TagBase, TagComplete } from '../../types/entities/tag/index';
 import { fromTagComplete } from './serializers';
 
-const logger = new Logger('TagMapper');
+const _logger = new Logger('TagMapper');
 
 // Logger específico para mappers de Tag
 const mapperLogger = serverLogger.withContext('TagMappers');

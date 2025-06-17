@@ -1,13 +1,13 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import { useSelectionStore } from '@/store/ui/selection.slice';
-import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { FileItem } from '@/types/file-item';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import type { FileItem } from '@/types/file-item';
 import { ImageRenderer } from '../image-renderer';
 import '../styles/scrollbar.css';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
@@ -33,7 +33,7 @@ const getMetadata = (metadata: string | null) => {
 	}
 };
 
-function formatBytes(bytes: number): string {
+function _formatBytes(bytes: number): string {
 	if (bytes === 0) {
 		return '0 B';
 	}
@@ -101,11 +101,12 @@ export const MasonryItem = memo(function MasonryItem({
 	const height = item.height || metadata?.dimensions?.height || metadata?.height || 200;
 
 	// Obtener URL de la miniatura
-	const thumbnailUrl = typeof item.thumbnail === 'string'
-		? item.thumbnail
-		: typeof item.src === 'string'
-			? item.src
-			: `/api/images/${item.id}/thumbnail`;
+	const thumbnailUrl =
+		typeof item.thumbnail === 'string'
+			? item.thumbnail
+			: typeof item.src === 'string'
+				? item.src
+				: `/api/images/${item.id}/thumbnail`;
 
 	// Calcular altura según las dimensiones de la imagen
 	const aspectRatio = width && height ? width / height : 1;
@@ -201,7 +202,7 @@ export const MasonryView = memo(function MasonryView({
 
 	// Renderizar un elemento de la lista
 	const renderItem = useCallback(
-		(index: number, item: FileItem) => {
+		(_index: number, item: FileItem) => {
 			const isSelected = selectedIds.includes(item.id);
 			const isActive = activeId === item.id;
 

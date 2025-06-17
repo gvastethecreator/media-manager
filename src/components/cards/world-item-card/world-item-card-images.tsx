@@ -1,8 +1,8 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { ImageIcon } from 'lucide-react';
 import { Suspense, useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { getRecentWorldItemImages } from './world-item-server-actions';
 
 interface WorldItemCardImagesProps {
@@ -55,14 +55,12 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} />}>
 					{isLoading ? (
 						// Mostrar placeholders mientras carga
-						<>
-							{Array.from({ length: 6 }).map((_, i) => (
-								<ImageLoading
-									key={`loading-placeholder-${worldItemId}-${Math.random().toString(36).substring(2, 9)}`}
-									backgroundColor={secondaryColor}
-								/>
-							))}
-						</>
+						Array.from({ length: 6 }).map((_, _i) => (
+							<ImageLoading
+								key={`loading-placeholder-${worldItemId}-${Math.random().toString(36).substring(2, 9)}`}
+								backgroundColor={secondaryColor}
+							/>
+						))
 					) : error ? (
 						// Mostrar mensaje de error
 						<div className="col-span-full row-span-full flex items-center justify-center text-destructive text-sm">
@@ -89,7 +87,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 							))}
 							{/* Rellena con placeholders si hay menos de 6 imágenes */}
 							{images.length < 6 &&
-								Array.from({ length: 6 - images.length }).map((_, i) => (
+								Array.from({ length: 6 - images.length }).map((_, _i) => (
 									<div
 										key={`empty-placeholder-${worldItemId}-${Math.random().toString(36).substring(2, 9)}`}
 										className="bg-black/20 w-full h-full flex items-center justify-center"

@@ -1,5 +1,9 @@
 'use client';
 
+import { AlertCircle, Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
+import { motion } from 'motion/react';
+import type * as React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
 	deleteUploadedImage,
 	getUploadedImages,
@@ -37,10 +41,6 @@ import type { UploadedImageType } from '@/types/entities/uploaded-image/types';
 import type { FileItem } from '@/types/file-item';
 import { FileProcessingStatus, FileType } from '@/types/file-item';
 import type { EntityId, JSONString } from '@/utils/types/utility-types';
-import { AlertCircle, Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
-import { motion } from 'motion/react';
-import type * as React from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
 
@@ -61,7 +61,7 @@ export function UploadedImagesView() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [totalItems, setTotalItems] = useState(0);
-	const [error, setError] = useState<string | null>(null);
+	const [error, _setError] = useState<string | null>(null);
 
 	// Función para cargar las imágenes subidas
 	const loadImages = useCallback(async () => {
@@ -263,7 +263,7 @@ export function UploadedImagesView() {
 	);
 
 	// Props compartidos con el componente base
-	const contentProps: BaseContentProps = {
+	const _contentProps: BaseContentProps = {
 		items: adaptedItems,
 		isLoading,
 		toggleItemSelection: adaptedToggleItemSelection,

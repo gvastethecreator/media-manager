@@ -1,10 +1,10 @@
 'use client';
 
+import { FileText, Hash, Key, Variable } from 'lucide-react';
+import { useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { FileText, Hash, Key, Variable } from 'lucide-react';
-import { useCallback } from 'react';
 import type { PropertyWithStats } from './properties-view';
 
 export interface PropertyCardProps {

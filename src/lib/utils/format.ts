@@ -4,14 +4,14 @@
  * @param decimals Número de decimales a mostrar (por defecto 2)
  * @returns Cadena formateada con unidades (B, KB, MB, GB, TB)
  */
-export function formatFileSize(bytes: number, decimals: number = 2): string {
-  if (bytes === 0) return '0 Bytes';
+export function formatFileSize(bytes: number, decimals = 2): string {
+	if (bytes === 0) return '0 Bytes';
 
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+	const k = 1024;
+	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(decimals))} ${sizes[i]}`;
+	return `${Number.parseFloat((bytes / k ** i).toFixed(decimals))} ${sizes[i]}`;
 }
 
 /**
@@ -21,17 +21,17 @@ export function formatFileSize(bytes: number, decimals: number = 2): string {
  * @returns Cadena formateada con la fecha
  */
 export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+	const dateObj = typeof date === 'string' ? new Date(date) : date;
 
-  const defaultOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  };
+	const defaultOptions: Intl.DateTimeFormatOptions = {
+		year: 'numeric',
+		month: 'short',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+	};
 
-  return dateObj.toLocaleDateString(undefined, options || defaultOptions);
+	return dateObj.toLocaleDateString(undefined, options || defaultOptions);
 }
 
 /**
@@ -41,9 +41,9 @@ export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOpt
  * @param suffix Sufijo a añadir si se trunca (por defecto "...")
  * @returns Texto truncado
  */
-export function truncateText(text: string, maxLength: number = 100, suffix: string = '...'): string {
-  if (!text) return '';
-  if (text.length <= maxLength) return text;
+export function truncateText(text: string, maxLength = 100, suffix = '...'): string {
+	if (!text) return '';
+	if (text.length <= maxLength) return text;
 
-  return text.substring(0, maxLength) + suffix;
+	return text.substring(0, maxLength) + suffix;
 }

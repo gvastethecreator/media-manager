@@ -1,5 +1,8 @@
 'use client';
 
+import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
+import { motion } from 'motion/react';
+import type React from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import {
 	Breadcrumb,
@@ -10,9 +13,6 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import type { ViewType } from '@/components/views/types';
-import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
-import { motion } from 'motion/react';
-import type React from 'react';
 
 interface BreadcrumbsProps {
 	currentView: ViewType;

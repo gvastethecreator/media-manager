@@ -1,9 +1,9 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { ImageIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { Suspense, useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { getRecentNoteImages } from './note-server-actions';
 
 interface NoteCardImagesProps {
@@ -76,11 +76,9 @@ export function NoteCardImages({ noteId, primaryColor, secondaryColor, tcgMode =
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} />}>
 					{isLoading ? (
 						// Mostrar placeholders mientras carga
-						<>
-							{[...Array(6)].map((_, i) => (
-								<ImageLoading key={`loading-${renderKey}-position-${i + 1}`} backgroundColor={secondaryColor} />
-							))}
-						</>
+						[...Array(6)].map((_, i) => (
+							<ImageLoading key={`loading-${renderKey}-position-${i + 1}`} backgroundColor={secondaryColor} />
+						))
 					) : error ? (
 						// Mostrar mensaje de error
 						<div className="col-span-full row-span-full flex items-center justify-center text-destructive text-sm">

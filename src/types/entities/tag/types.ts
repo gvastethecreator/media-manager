@@ -3,8 +3,8 @@
  * @module types/entities/tag/types
  */
 
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 
 /**
  * 🔍 Esquema de validación para Tag

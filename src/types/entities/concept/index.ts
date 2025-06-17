@@ -3,9 +3,9 @@
  * @module types/entities/concept
  */
 
+export * from './actions';
 // Tipos base y acciones
 export * from './base';
-export * from './actions';
 export * from './complete';
 export * from './enums';
 export * from './extended';

@@ -5,8 +5,8 @@
 
 'use client';
 
-import { useProfileStore } from '@/store/entities/profile';
 import { useEffect } from 'react';
+import { useProfileStore } from '@/store/entities/profile';
 import { ProfileControls } from './ProfileControls';
 import { ProfileList } from './ProfileList';
 

@@ -5,6 +5,7 @@
 
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { createEntityErrorObject } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { profileService } from '@/services/profile-service-export';
@@ -15,7 +16,6 @@ import {
 	type ProfilePaginationOptions,
 	type UpdateProfileInput,
 } from '@/types/entities/profile';
-import { revalidatePath } from 'next/cache';
 
 // Logger específico para acciones de perfil
 const profileLogger = serverLogger.withContext('ProfileActions');

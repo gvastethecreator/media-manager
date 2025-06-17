@@ -1,8 +1,8 @@
 'use client';
 
+import { Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Album } from '@/types/entities/album';
-import { Heart } from 'lucide-react';
 
 interface AlbumCardHeaderProps {
 	album: Album;

@@ -1,9 +1,9 @@
 // 🎯 Servicio optimizado de estadísticas para reemplazar consultas SUM repetitivas
 // filepath: d:\DEV\image-manager\src\services\stats\optimized-stats.service.ts
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { PrismaClient } from '@prisma/client';
 import { unstable_cache } from 'next/cache';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 /**
  * 🚀 Servicio optimizado que agrupa consultas SUM y usa caché inteligente
@@ -306,7 +306,7 @@ export class OptimizedStatsService {
 			this.logger.debug('📊 Obteniendo estadísticas por lotes para tags');
 
 			// Si no se proporcionan IDs, obtener todos los tags
-			const whereClause = tagIds && tagIds.length > 0 ? `WHERE t.id IN (${tagIds.map(() => '?').join(',')})` : '';
+			const _whereClause = tagIds && tagIds.length > 0 ? `WHERE t.id IN (${tagIds.map(() => '?').join(',')})` : '';
 
 			const batchTagStatsQuery =
 				tagIds && tagIds.length > 0
@@ -387,7 +387,7 @@ export class OptimizedStatsService {
 		async (collectionIds?: string[]): Promise<Record<string, any>> => {
 			this.logger.debug('📊 Obteniendo estadísticas por lotes para colecciones');
 
-			const whereClause =
+			const _whereClause =
 				collectionIds && collectionIds.length > 0 ? `WHERE c.id IN (${collectionIds.map(() => '?').join(',')})` : '';
 
 			const batchCollectionStatsQuery =

@@ -7,10 +7,11 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 // Definir tipos e interfaces para el toast
-type ToastProps = React.ComponentProps<'div'> & VariantProps<typeof toastVariants> & {
-	open?: boolean;
-	onOpenChange?: (open: boolean) => void;
-};
+type ToastProps = React.ComponentProps<'div'> &
+	VariantProps<typeof toastVariants> & {
+		open?: boolean;
+		onOpenChange?: (open: boolean) => void;
+	};
 
 interface ToastActionElement extends React.ReactElement { }
 
@@ -39,74 +40,58 @@ function useToast() {
 }
 
 // Componentes
-const ToastProvider = React.forwardRef<
-	HTMLDivElement,
-	React.PropsWithChildren<Record<string, unknown>>
->(({ children }, ref) => {
-	const [toasts, setToasts] = React.useState<ToastContextValue['toasts']>([]);
+const ToastProvider = React.forwardRef<HTMLDivElement, React.PropsWithChildren<Record<string, unknown>>>(
+	({ children }, _ref) => {
+		const [toasts, setToasts] = React.useState<ToastContextValue['toasts']>([]);
 
-	const toast = React.useCallback((props: Omit<ToastProps, 'id'>) => {
-		const id = Math.random().toString(36).substring(2, 9);
-		const newToast = {
-			id,
-			...props,
-			open: true,
-			onOpenChange: (open: boolean) => {
-				if (!open) {
-					dismiss(id);
-				}
-			},
+		// Mover toast y dismiss fuera de useCallback para evitar referencia circular
+		const dismiss = (toastId?: string) => {
+			setToasts((prev) => prev.map((t) => (toastId === undefined || t.id === toastId ? { ...t, open: false } : t)));
+
+			setTimeout(() => {
+				setToasts((prev) => prev.filter((t) => (toastId === undefined ? false : t.id !== toastId)));
+			}, 300);
 		};
 
-		setToasts((prev) => [newToast, ...prev].slice(0, 5));
+		const toast = (props: Omit<ToastProps, 'id'>) => {
+			const id = Math.random().toString(36).substring(2, 9);
+			const newToast = {
+				id,
+				...props,
+				open: true,
+				onOpenChange: (open: boolean) => {
+					if (!open) {
+						dismiss(id);
+					}
+				},
+			};
 
-		return {
-			id,
-			dismiss: () => dismiss(id),
-			update: (props: ToastProps) =>
-				setToasts((prev) =>
-					prev.map((t) => (t.id === id ? { ...t, ...props } : t))
-				),
+			setToasts((prev) => [newToast, ...prev].slice(0, 5));
+
+			return {
+				id,
+				dismiss: () => dismiss(id),
+				update: (props: ToastProps) => setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, ...props } : t))),
+			};
 		};
-	}, []);
 
-	const dismiss = React.useCallback((toastId?: string) => {
-		setToasts((prev) =>
-			prev.map((t) =>
-				toastId === undefined || t.id === toastId
-					? { ...t, open: false }
-					: t
-			)
-		);
-
-		setTimeout(() => {
-			setToasts((prev) =>
-				prev.filter((t) => (toastId === undefined ? false : t.id !== toastId))
-			);
-		}, 300);
-	}, []);
-
-	return (
-		<ToastContext.Provider value={{ toasts, toast, dismiss }}>
-			{children}
-		</ToastContext.Provider>
-	);
-});
+		return <ToastContext.Provider value={{ toasts, toast, dismiss }}>{children as React.ReactNode}</ToastContext.Provider>;
+	}
+);
 ToastProvider.displayName = 'ToastProvider';
 
-const ToastViewport = React.forwardRef<
-	HTMLDivElement,
-	React.ComponentPropsWithoutRef<'div'>
->(({ className, ...props }, ref) => (
-	<div
-		ref={ref}
-		className={cn(
-			'fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]',
-			className
-		)}
-		{...props}
-	/>
-));
+const ToastViewport = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
+	({ className, ...props }, ref) => (
+		<div
+			ref={ref}
+			className={cn(
+				'fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]',
+				className
+			)}
+			{...props}
+		/>
+	)
+);
 ToastViewport.displayName = 'ToastViewport';
 
 const toastVariants = cva(
@@ -124,63 +109,61 @@ const toastVariants = cva(
 	}
 );
 
-const Toast = React.forwardRef<
-	HTMLDivElement,
-	ToastProps
->(({ className, variant, ...props }, ref) => {
+const Toast = React.forwardRef<HTMLDivElement, ToastProps>(({ className, variant, ...props }, ref) => {
 	return <div ref={ref} className={cn(toastVariants({ variant }), className)} {...props} />;
 });
 Toast.displayName = 'Toast';
 
-const ToastAction = React.forwardRef<
-	HTMLButtonElement,
-	React.ComponentPropsWithoutRef<'button'>
->(({ className, ...props }, ref) => (
-	<button
-		ref={ref}
-		className={cn(
-			'inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive',
-			className
-		)}
-		{...props}
-	/>
-));
+const ToastAction = React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(
+	({ className, ...props }, ref) => (
+		<button
+			ref={ref}
+			className={cn(
+				'inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive',
+				className
+			)}
+			{...props}
+		/>
+	)
+);
 ToastAction.displayName = 'ToastAction';
 
-const ToastClose = React.forwardRef<
-	HTMLButtonElement,
-	React.ComponentPropsWithoutRef<'button'>
->(({ className, ...props }, ref) => (
-	<button
-		ref={ref}
-		className={cn(
-			'absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600',
-			className
-		)}
-		{...props}
-	>
-		<X className="h-4 w-4" />
-	</button>
-));
+const ToastClose = React.forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(
+	({ className, ...props }, ref) => (
+		<button
+			ref={ref}
+			className={cn(
+				'absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600',
+				className
+			)}
+			{...props}
+		>
+			<X className="h-4 w-4" />
+		</button>
+	)
+);
 ToastClose.displayName = 'ToastClose';
 
-const ToastTitle = React.forwardRef<
-	HTMLDivElement,
-	React.ComponentPropsWithoutRef<'div'>
->(({ className, ...props }, ref) => (
-	<div ref={ref} className={cn('text-sm font-semibold', className)} {...props} />
-));
+const ToastTitle = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
+	({ className, ...props }, ref) => <div ref={ref} className={cn('text-sm font-semibold', className)} {...props} />
+);
 ToastTitle.displayName = 'ToastTitle';
 
-const ToastDescription = React.forwardRef<
-	HTMLDivElement,
-	React.ComponentPropsWithoutRef<'div'>
->(({ className, ...props }, ref) => (
-	<div ref={ref} className={cn('text-sm opacity-90', className)} {...props} />
-));
+const ToastDescription = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>(
+	({ className, ...props }, ref) => <div ref={ref} className={cn('text-sm opacity-90', className)} {...props} />
+);
 ToastDescription.displayName = 'ToastDescription';
 
 export {
-	Toast, ToastAction, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport, useToast, type ToastActionElement, type ToastProps
+	Toast,
+	ToastAction,
+	ToastClose,
+	ToastDescription,
+	ToastProvider,
+	ToastTitle,
+	ToastViewport,
+	useToast,
+	type ToastActionElement,
+	type ToastProps
 };
 

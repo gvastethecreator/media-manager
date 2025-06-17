@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { getFolderById, updateFolder } from '@/app/actions/folders';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import type { Folder } from '@/types/entities/folder';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
 interface EditFolderPageProps {
 	params: {

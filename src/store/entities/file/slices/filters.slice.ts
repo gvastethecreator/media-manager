@@ -3,10 +3,10 @@
  * @module store/entities/file/slices/filters
  */
 
+import { StateCreator } from 'zustand';
 import { applyFileFilters } from '@/transformers/file';
 import { FileFilterOptions } from '@/types/entities/file/base';
 import { EnhancedFile } from '@/types/entities/file/extended';
-import { StateCreator } from 'zustand';
 import { FileStore } from '..';
 
 // Tipos para filtros

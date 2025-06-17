@@ -5,6 +5,7 @@
  * @module app/actions/folders/folder-crud.actions
  */
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { fromPrismaFolder, transformFolder } from '@/transformers/folder';
@@ -21,7 +22,6 @@ import type {
 	FolderUpdateInput,
 	FolderWithStats,
 } from '@/types/entities/folder/types';
-import { revalidatePath } from 'next/cache';
 
 // Logger centralizado
 const logger = serverLogger.withContext('FolderCrudActions');
@@ -68,7 +68,7 @@ function ensureSerializableThumbnails<T>(obj: T): T {
 	// Procesar propiedades
 	for (const key in result) {
 		// Saltar propiedades que no son del propio objeto
-		if (!Object.prototype.hasOwnProperty.call(result, key)) continue;
+		if (!Object.hasOwn(result, key)) continue;
 
 		const value = result[key];
 
@@ -259,8 +259,8 @@ export async function searchFolders(options: FolderSearchOptions = {}): Promise<
 
 		// Calcular si hay más resultados
 		const skip = options.skip || 0;
-		const take = options.take || 50;
-		const hasMore = skip + transformedFolders.length < total;
+		const _take = options.take || 50;
+		const _hasMore = skip + transformedFolders.length < total;
 
 		logger.info(`✅ Búsqueda completada, encontradas ${transformedFolders.length} carpetas`);
 

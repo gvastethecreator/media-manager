@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import type { HTMLAttributes, ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 interface TypographyProps extends HTMLAttributes<HTMLElement> {
 	children: ReactNode;

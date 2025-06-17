@@ -1,9 +1,9 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { ImageIcon, Sparkles } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { Suspense, useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { getRecentConceptImages } from './concept-server-actions';
 
 interface ConceptCardImagesProps {
@@ -77,15 +77,13 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} tcgMode={tcgMode} />}>
 					{isLoading ? (
 						// Mostrar placeholders mientras carga
-						<>
-							{[...Array(6)].map((_, i) => (
-								<ImageLoading
-									key={`loading-${renderKey}-star-${i + 1}`}
-									backgroundColor={secondaryColor}
-									tcgMode={tcgMode}
-								/>
-							))}
-						</>
+						[...Array(6)].map((_, i) => (
+							<ImageLoading
+								key={`loading-${renderKey}-star-${i + 1}`}
+								backgroundColor={secondaryColor}
+								tcgMode={tcgMode}
+							/>
+						))
 					) : error ? (
 						// Mostrar mensaje de error
 						<div className="col-span-full row-span-full flex items-center justify-center text-destructive text-sm">
@@ -167,13 +165,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 }
 
 // Componente para mostrar mientras se cargan las imágenes
-function ImageLoading({
-	backgroundColor,
-	tcgMode = false,
-}: {
-	backgroundColor: string;
-	tcgMode?: boolean;
-}) {
+function ImageLoading({ backgroundColor, tcgMode = false }: { backgroundColor: string; tcgMode?: boolean }) {
 	return (
 		<div
 			className={cn(

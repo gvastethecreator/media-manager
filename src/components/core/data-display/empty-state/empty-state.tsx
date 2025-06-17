@@ -1,9 +1,9 @@
 'use client';
 
-import BlurFade from '@/components/ui/blur-fade';
-import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
+import BlurFade from '@/components/ui/blur-fade';
+import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {
 	icon: LucideIcon;

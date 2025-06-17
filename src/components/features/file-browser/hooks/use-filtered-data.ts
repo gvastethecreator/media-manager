@@ -1,6 +1,6 @@
+import { useMemo } from 'react';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { FileItem } from '@/types/file-item';
-import { useMemo } from 'react';
 
 /**
  * Hook personalizado para filtrar y ordenar datos según las opciones de vista globales
@@ -10,101 +10,97 @@ import { useMemo } from 'react';
  * @returns Los datos filtrados y ordenados
  */
 export function useFilteredData<T extends FileItem[]>(
-  data: T,
-  searchFields: string[] = ['name', 'description', 'tags']
+	data: T,
+	searchFields: string[] = ['name', 'description', 'tags']
 ): T {
-  // Obtenemos las opciones de filtrado y ordenación del store global
-  const filterOptions = useViewOptionsStore((state) => state.filterOptions);
-  const sortOptions = useViewOptionsStore((state) => state.sortOptions);
-  const searchQuery = useViewOptionsStore((state) => state.searchQuery);
+	// Obtenemos las opciones de filtrado y ordenación del store global
+	const filterOptions = useViewOptionsStore((state) => state.filterOptions);
+	const sortOptions = useViewOptionsStore((state) => state.sortOptions);
+	const searchQuery = useViewOptionsStore((state) => state.searchQuery);
 
-  return useMemo(() => {
-    // Agregar un console.log para depuración
-    console.log("[useFilteredData]", {
-      dataLength: data?.length || 0,
-      filterOptions,
-      sortOptions,
-      searchQuery
-    });
+	return useMemo(() => {
+		// Agregar un console.log para depuración
+		console.log('[useFilteredData]', {
+			dataLength: data?.length || 0,
+			filterOptions,
+			sortOptions,
+			searchQuery,
+		});
 
-    if (!data || data.length === 0) {
-      return [] as unknown as T;
-    }
+		if (!data || data.length === 0) {
+			return [] as unknown as T;
+		}
 
-    let filteredData = [...data];
+		let filteredData = [...data];
 
-    // Aplicar filtros
-    if (filterOptions.length > 0) {
-      filteredData = filteredData.filter(item => {
-        return filterOptions.every(filter => {
-          const value = item[filter.field as keyof FileItem];
-          if (value === undefined) return false;
+		// Aplicar filtros
+		if (filterOptions.length > 0) {
+			filteredData = filteredData.filter((item) => {
+				return filterOptions.every((filter) => {
+					const value = item[filter.field as keyof FileItem];
+					if (value === undefined) return false;
 
-          switch (filter.operator) {
-            case 'eq':
-              return value === filter.value;
-            case 'neq':
-              return value !== filter.value;
-            case 'gt':
-              return value > filter.value;
-            case 'lt':
-              return value < filter.value;
-            case 'contains':
-              return typeof value === 'string' &&
-                value.toLowerCase().includes(String(filter.value).toLowerCase());
-            case 'startsWith':
-              return typeof value === 'string' &&
-                value.toLowerCase().startsWith(String(filter.value).toLowerCase());
-            case 'endsWith':
-              return typeof value === 'string' &&
-                value.toLowerCase().endsWith(String(filter.value).toLowerCase());
-            default:
-              return true;
-          }
-        });
-      });
-    }
+					switch (filter.operator) {
+						case 'eq':
+							return value === filter.value;
+						case 'neq':
+							return value !== filter.value;
+						case 'gt':
+							return value > filter.value;
+						case 'lt':
+							return value < filter.value;
+						case 'contains':
+							return typeof value === 'string' && value.toLowerCase().includes(String(filter.value).toLowerCase());
+						case 'startsWith':
+							return typeof value === 'string' && value.toLowerCase().startsWith(String(filter.value).toLowerCase());
+						case 'endsWith':
+							return typeof value === 'string' && value.toLowerCase().endsWith(String(filter.value).toLowerCase());
+						default:
+							return true;
+					}
+				});
+			});
+		}
 
-    // Aplicar búsqueda
-    if (searchQuery && searchQuery.trim() !== '') {
-      const query = searchQuery.toLowerCase().trim();
+		// Aplicar búsqueda
+		if (searchQuery && searchQuery.trim() !== '') {
+			const query = searchQuery.toLowerCase().trim();
 
-      filteredData = filteredData.filter(item => {
-        // Buscar en los campos especificados
-        return searchFields.some(field => {
-          const value = item[field as keyof FileItem];
-          return value !== undefined &&
-            String(value).toLowerCase().includes(query);
-        });
-      });
-    }
+			filteredData = filteredData.filter((item) => {
+				// Buscar en los campos especificados
+				return searchFields.some((field) => {
+					const value = item[field as keyof FileItem];
+					return value !== undefined && String(value).toLowerCase().includes(query);
+				});
+			});
+		}
 
-    // Aplicar ordenación
-    if (sortOptions.length > 0) {
-      filteredData.sort((a, b) => {
-        for (const sort of sortOptions) {
-          const aValue = a[sort.field as keyof FileItem];
-          const bValue = b[sort.field as keyof FileItem];
+		// Aplicar ordenación
+		if (sortOptions.length > 0) {
+			filteredData.sort((a, b) => {
+				for (const sort of sortOptions) {
+					const aValue = a[sort.field as keyof FileItem];
+					const bValue = b[sort.field as keyof FileItem];
 
-          if (aValue === bValue) continue;
+					if (aValue === bValue) continue;
 
-          if (aValue === undefined) return 1;
-          if (bValue === undefined) return -1;
+					if (aValue === undefined) return 1;
+					if (bValue === undefined) return -1;
 
-          const direction = sort.direction === 'asc' ? 1 : -1;
+					const direction = sort.direction === 'asc' ? 1 : -1;
 
-          if (typeof aValue === 'string' && typeof bValue === 'string') {
-            return aValue.localeCompare(bValue) * direction;
-          }
+					if (typeof aValue === 'string' && typeof bValue === 'string') {
+						return aValue.localeCompare(bValue) * direction;
+					}
 
-          return (aValue > bValue ? 1 : -1) * direction;
-        }
+					return (aValue > bValue ? 1 : -1) * direction;
+				}
 
-        return 0;
-      });
-    }
+				return 0;
+			});
+		}
 
-    console.log("[useFilteredData] Resultado:", filteredData.length);
-    return filteredData as T;
-  }, [data, filterOptions, sortOptions, searchQuery, searchFields]);
+		console.log('[useFilteredData] Resultado:', filteredData.length);
+		return filteredData as T;
+	}, [data, filterOptions, sortOptions, searchQuery, searchFields]);
 }

@@ -1,4 +1,4 @@
-```tsx
+''`tsx
 import { useState } from 'react';
 import { Tabs } from 'your-tabs-component-library';
 
@@ -19,4 +19,4 @@ const MyComponent = () => {
 };
 
 export default MyComponent;
-```
+```;

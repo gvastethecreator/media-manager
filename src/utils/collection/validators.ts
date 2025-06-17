@@ -3,8 +3,8 @@
  * @module utils/collection/validators
  */
 
-import { CollectionCategory, CollectionPlatform, CollectionRarity } from '@/types/entities/collection';
 import { z } from 'zod';
+import { CollectionCategory, CollectionPlatform, CollectionRarity } from '@/types/entities/collection';
 import { isValidCollectionUrl } from './helpers';
 
 /**

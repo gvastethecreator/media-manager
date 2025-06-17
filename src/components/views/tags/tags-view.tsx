@@ -1,5 +1,8 @@
 'use client';
 
+import { Tag } from 'lucide-react';
+import { motion } from 'motion/react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { getTagsAction } from '@/app/actions/tags';
 import { TagCard, type TagWithStats } from '@/components/cards/tag-card';
 import { EmptyState } from '@/components/core/data-display';
@@ -8,9 +11,6 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useTagStore } from '@/store/entities/tag';
-import { Tag } from 'lucide-react';
-import { motion } from 'motion/react';
-import { memo, useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('TagsView');

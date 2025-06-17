@@ -1,7 +1,7 @@
+import { useCallback } from 'react';
 import { useConceptStore } from '@/store/entities/concept';
 import type { ConceptSortOption, ConceptViewMode } from '@/types/entities/concept/enums';
 import type { ConceptFilters } from '@/types/entities/concept/extended';
-import { useCallback } from 'react';
 
 /**
  * Hook que proporciona funcionalidades para gestionar filtros de conceptos

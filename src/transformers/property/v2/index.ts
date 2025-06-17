@@ -3,20 +3,6 @@
  * @module transformers/property/v2
  */
 
-// Exportar serializadores
-export {
-	DEFAULT_PROPERTY_COLOR,
-	DEFAULT_PROPERTY_EMOJI,
-	PropertyTransformOptions,
-	extendProperties,
-	extendProperty,
-	fromPrismaProperty,
-	generatePropertyColor,
-	generatePropertyEmoji,
-	toPrismaProperty,
-	validateProperty,
-} from './serializers';
-
 // Exportar mappers
 export {
 	toCreatePropertyData,
@@ -26,6 +12,19 @@ export {
 	toSearchResult,
 	toUpdatePropertyData,
 } from './mappers';
+// Exportar serializadores
+export {
+	DEFAULT_PROPERTY_COLOR,
+	DEFAULT_PROPERTY_EMOJI,
+	extendProperties,
+	extendProperty,
+	fromPrismaProperty,
+	generatePropertyColor,
+	generatePropertyEmoji,
+	PropertyTransformOptions,
+	toPrismaProperty,
+	validateProperty,
+} from './serializers';
 
 // Objeto para mantener compatibilidad con código existente
 const PropertyTransformer = {

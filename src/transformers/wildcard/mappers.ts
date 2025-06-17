@@ -3,6 +3,7 @@
  * @module transformers/wildcard/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { createLogger } from '@/lib/logger';
 import {
 	type CreateWildcardData,
@@ -13,7 +14,6 @@ import {
 	type WildcardFilters,
 	type WildcardSortCriteria,
 } from '@/types/entities/wildcard';
-import type { Prisma } from '@prisma/client';
 import {
 	DEFAULT_WILDCARD_COLOR,
 	DEFAULT_WILDCARD_EMOJI,

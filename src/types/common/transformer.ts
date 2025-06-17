@@ -1,6 +1,6 @@
-import type { MetadataFields, UIFields } from '@/utils/transformers/common';
 import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
+import type { MetadataFields, UIFields } from '@/utils/transformers/common';
 
 /**
  * 🔍 Esquema base para validación de campos comunes

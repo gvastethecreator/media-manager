@@ -1,7 +1,7 @@
 import * as path from 'path';
-import type { UploadedImageMetadata, UploadedImageProcessingOptions } from '@/types/uploaded-images';
 import sharp from 'sharp';
 import { v4 as uuidv4 } from 'uuid';
+import type { UploadedImageMetadata, UploadedImageProcessingOptions } from '@/types/uploaded-images';
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
 

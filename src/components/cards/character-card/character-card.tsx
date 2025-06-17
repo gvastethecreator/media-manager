@@ -1,9 +1,9 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { CardContainer } from '../card-container';
 import { CharacterCardContent } from './character-card-content';
 import { CharacterCardFooter } from './character-card-footer';
@@ -138,7 +138,7 @@ export function CharacterCard({
 
 			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			// Si hay algún error, volver al valor por defecto
 			return '#6d28d9';
 		}

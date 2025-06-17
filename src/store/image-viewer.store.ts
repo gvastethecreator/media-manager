@@ -1,6 +1,6 @@
+import { create } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { FileItem } from '@/types/file-item';
-import { create } from 'zustand';
 
 const viewerLogger = clientLogger.withContext('ImageViewer');
 

@@ -3,6 +3,25 @@
  * @module types/entities/queue-job
  */
 
+// Re-exportar tipos de esquemas
+export type {
+	CreateQueueJobSchemaType,
+	QueueJobFiltersSchemaType,
+	QueueJobMetadataSchemaType,
+	QueueJobPaginationSchemaType,
+	QueueJobStatusType,
+	UpdateQueueJobSchemaType,
+} from './schema';
+
+// Re-exportar esquemas Zod para validación
+export {
+	createQueueJobSchema,
+	QueueJobStatus,
+	queueJobFiltersSchema,
+	queueJobMetadataSchema,
+	queueJobPaginationSchema,
+	updateQueueJobSchema,
+} from './schema';
 // Re-exportar tipos específicos para conveniencia
 export type {
 	CreateQueueJobInput,
@@ -14,23 +33,3 @@ export type {
 	QueueStats,
 	UpdateQueueJobInput,
 } from './types';
-
-// Re-exportar esquemas Zod para validación
-export {
-	QueueJobStatus,
-	createQueueJobSchema,
-	queueJobFiltersSchema,
-	queueJobMetadataSchema,
-	queueJobPaginationSchema,
-	updateQueueJobSchema,
-} from './schema';
-
-// Re-exportar tipos de esquemas
-export type {
-	CreateQueueJobSchemaType,
-	QueueJobFiltersSchemaType,
-	QueueJobMetadataSchemaType,
-	QueueJobPaginationSchemaType,
-	QueueJobStatusType,
-	UpdateQueueJobSchemaType,
-} from './schema';

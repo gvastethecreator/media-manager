@@ -1,7 +1,7 @@
 'use server';
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { getImageThumbnailBuffer } from '@/app/actions/images';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const apiLogger = serverLogger.withContext('ThumbnailAPI');
 

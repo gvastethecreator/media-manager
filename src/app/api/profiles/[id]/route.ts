@@ -1,5 +1,5 @@
-import { deleteProfile, getProfile, updateProfile } from '@/app/actions/profiles/profile.actions';
 import { NextResponse } from 'next/server';
+import { deleteProfile, getProfile, updateProfile } from '@/app/actions/profiles/profile.actions';
 
 export async function GET(_request: Request, { params }: { params: { id: string } }) {
 	try {

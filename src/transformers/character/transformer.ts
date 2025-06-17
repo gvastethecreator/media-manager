@@ -31,10 +31,10 @@
  * ```
  */
 
+import type { Character } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { CharacterSchema } from '@/types/entities/character-export';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Character } from '@prisma/client';
 import { fromPrismaCharacter } from './server';
 import type { CharacterComplete, CharacterExtended, CharacterWithStats, TransformCharacterOptions } from './types';
 
