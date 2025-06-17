@@ -979,3 +979,55 @@ model Note {
   @@index([status])
   @@index([createdAt])
 }
+
+// =====================
+// Nuevas entidades 2025-06-17
+// =====================
+
+model Workflow {
+  id        String   @id @default(cuid())
+  name      String
+  filePath  String // Ruta al archivo JSON
+  content   String // Contenido JSON (puede ser largo)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  name      String
+  filePath  String // Ruta al archivo md o txt
+  content   String // Contenido del documento
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JsonFile {
+  id        String   @id @default(cuid())
+  name      String
+  filePath  String // Ruta al archivo JSON
+  content   String // Contenido JSON
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model File3D {
+  id        String   @id @default(cuid())
+  name      String
+  filePath  String // Ruta al archivo 3D
+  format    String // Formato (glb, obj, fbx, etc)
+  size      Int // Tamaño en bytes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Audio {
+  id        String   @id @default(cuid())
+  name      String
+  filePath  String // Ruta al archivo de audio
+  format    String // Formato (mp3, wav, flac, etc)
+  duration  Int? // Duración en segundos
+  size      Int // Tamaño en bytes
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

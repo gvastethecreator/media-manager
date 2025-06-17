@@ -295,3 +295,35 @@ Implementación de optimizaciones significativas en el componente FileBrowser pa
 ## Notas
 
 Las optimizaciones se han implementado siguiendo las mejores prácticas de React 19, Next.js 15 y TypeScript, con un enfoque en la modularidad y el rendimiento.
+
+---
+
+## 🆕 Tarea: Sección de Interfaz en Settings
+
+**Objetivo:** Permitir al usuario personalizar la interfaz (tipografía, tema, animaciones, etc) desde la pantalla de configuración.
+
+### Alcance
+
+- Crear componente `InterfaceSection` en settings.
+- Definir tipos canónicos y validación Zod para preferencias de interfaz.
+- Integrar con store Zustand para persistencia y reactividad.
+- Documentar flujo y estructura.
+
+### Diagrama de flujo (mermaid)
+
+```mermaid
+graph TD
+    A[SettingsView] --> B[InterfaceSection]
+    B --> C[Zustand Store]
+    B --> D[Zod Validation]
+    C --> E[Persistencia local]
+    B --> F[UI: Tipografía, Tema, Animaciones]
+```
+
+### Tareas
+
+- [x] Crear stub inicial de InterfaceSection
+- [ ] Definir tipos y Zod schema para preferencias de interfaz
+- [ ] Crear/actualizar store Zustand para settings/interfaz
+- [ ] Integrar InterfaceSection en settings-view
+- [ ] Documentar en README.md y actualizar diagramas

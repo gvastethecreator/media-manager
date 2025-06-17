@@ -23,12 +23,17 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 import { AlbumsSettings } from './albums/albums-settings';
+import { AudioSettings } from './audio/audio-settings';
 import { CharactersSettings } from './characters/characters-settings';
 import { CollectionsSettings } from './collections/collections-settings';
 import { ConceptsSettings } from './concepts/concepts-settings';
+import { DocumentSettings } from './document/document-settings';
 import { EntitiesCardsSettings } from './entities-cards/entities-cards-settings';
+import { File3DSettings } from './file3d/file3d-settings';
 import { FoldersSettings } from './folders/folders-settings';
 import { GroupsSettings } from './groups/groups-settings';
+import InterfaceSection from './interface-section';
+import { JsonFileSettings } from './json-file/json-file-settings';
 import { NotesSettings } from './notes/notes-settings';
 import { PlacesSettings } from './places/places-settings';
 import { ProfilesSettings } from './profiles/profiles-settings';
@@ -40,6 +45,7 @@ import { TagsSettings } from './tags/tags-settings';
 import { ThumbnailsSettings } from './thumbnails/thumbnails-settings';
 import { UploadedImagesSettings } from './uploaded-images/uploaded-images-settings';
 import { WildcardsSettings } from './wildcards/wildcards-settings';
+import { WorkflowSettings } from './workflow/workflow-settings';
 import { WorldItemsSettings } from './world-items/world-items-settings';
 
 // Definición de tipos para estructurar los tabs
@@ -70,6 +76,11 @@ const tabColors = {
 	properties: '#f472b6', // Pink
 	groups: '#a855f7', // Purple
 	wildcards: '#ec4899', // Pink
+	document: '#fbbf24', // Amber
+	audio: '#38bdf8', // Sky
+	'json-file': '#f472b6', // Pink
+	workflow: '#a3e635', // Lime
+	file3d: '#818cf8', // Indigo
 };
 
 // Definición de todos los tabs para evitar la duplicación de código
@@ -182,6 +193,36 @@ const tabsData: TabItem[] = [
 		icon: <ImageIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors.thumbnails,
 	},
+	{
+		id: 'document',
+		label: 'Documentos',
+		icon: <BookIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.document,
+	},
+	{
+		id: 'audio',
+		label: 'Audio',
+		icon: <WandIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.audio,
+	},
+	{
+		id: 'json-file',
+		label: 'JSON',
+		icon: <BoxIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors['json-file'],
+	},
+	{
+		id: 'workflow',
+		label: 'Workflows',
+		icon: <Grid2X2Icon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.workflow,
+	},
+	{
+		id: 'file3d',
+		label: '3D',
+		icon: <BoxIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
+		color: tabColors.file3d,
+	},
 ];
 
 export function SettingsView() {
@@ -252,6 +293,8 @@ export function SettingsView() {
 						<div className="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
 							<FoldersSettings />
 							<SystemSettings />
+							{/* 🎨 Nueva sección de interfaz */}
+							<InterfaceSection />
 						</div>
 					</TabsContent>
 
@@ -321,6 +364,22 @@ export function SettingsView() {
 
 					<TabsContent value="thumbnails" className="h-full w-full p-6 m-0 border-none">
 						<ThumbnailsSettings />
+					</TabsContent>
+
+					<TabsContent value="document" className="h-full w-full p-6 m-0 border-none">
+						<DocumentSettings />
+					</TabsContent>
+					<TabsContent value="audio" className="h-full w-full p-6 m-0 border-none">
+						<AudioSettings />
+					</TabsContent>
+					<TabsContent value="json-file" className="h-full w-full p-6 m-0 border-none">
+						<JsonFileSettings />
+					</TabsContent>
+					<TabsContent value="workflow" className="h-full w-full p-6 m-0 border-none">
+						<WorkflowSettings />
+					</TabsContent>
+					<TabsContent value="file3d" className="h-full w-full p-6 m-0 border-none">
+						<File3DSettings />
 					</TabsContent>
 				</div>
 			</Tabs>

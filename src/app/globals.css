@@ -782,6 +782,7 @@ html[data-theme="dark"] {
 		transition: none !important;
 	}
 }
+
 /*
   ---break---
 */
@@ -795,6 +796,7 @@ html[data-theme="dark"] {
 	--sidebar-border: hsl(220 13% 91%);
 	--sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
+
 /*
   ---break---
 */
@@ -808,14 +810,16 @@ html[data-theme="dark"] {
 	--sidebar-border: hsl(240 3.7% 15.9%);
 	--sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
+
 /*
   ---break---
 */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+	* {
+		@apply border-border outline-ring/50;
 	}
-  body {
-    @apply bg-background text-foreground;
+
+	body {
+		@apply bg-background text-foreground;
 	}
 }

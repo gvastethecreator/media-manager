@@ -1,11 +1,11 @@
-import { getSystemStats } from '@/app/actions/stats/stats.actions';
+import { getSystemStatsExtended } from '@/app/actions/stats/stats.actions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { AlertCircle, BarChart } from 'lucide-react';
 import { StatCard } from './stat-card';
 
 export async function GeneralStats() {
-	const stats = await getSystemStats();
+	const stats = await getSystemStatsExtended();
 
 	if (!stats) {
 		return (
@@ -65,6 +65,36 @@ export async function GeneralStats() {
 			value: stats.totalWorldItems,
 			icon: 'Box',
 			color: 'text-amber-500',
+		},
+		{
+			title: 'Documentos',
+			value: stats.totalDocuments,
+			icon: 'Book',
+			color: 'text-amber-500',
+		},
+		{
+			title: 'Audio',
+			value: stats.totalAudio,
+			icon: 'Activity',
+			color: 'text-sky-500',
+		},
+		{
+			title: 'JSON',
+			value: stats.totalJsonFiles,
+			icon: 'Box',
+			color: 'text-pink-500',
+		},
+		{
+			title: 'Workflows',
+			value: stats.totalWorkflows,
+			icon: 'Grid2X2',
+			color: 'text-lime-500',
+		},
+		{
+			title: '3D',
+			value: stats.totalFile3D,
+			icon: 'Box',
+			color: 'text-indigo-500',
 		},
 	] as const;
 

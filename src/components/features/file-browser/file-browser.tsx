@@ -25,6 +25,19 @@ import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
 
+// Configuración del cache y carga secuencial
+const BROWSER_CONFIG = {
+	// Tamaño máximo del caché (cuántos elementos mantener en memoria)
+	cacheSize: 500,
+	// Configuración para carga secuencial
+	sequential: {
+		initialBatchSize: 50,    // Cuántos elementos cargar inicialmente
+		additionalBatchSize: 30, // Cuántos elementos cargar en cada lote adicional
+		loadThreshold: 0.7,      // Porcentaje de scroll para cargar más (0-1)
+		scrollLoadDelay: 200     // Tiempo de espera tras detener scroll antes de cargar más
+	}
+};
+
 // 📊 Logger específico para FileBrowser
 const logger = clientLogger.withContext('FileBrowser');
 
@@ -113,6 +126,11 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// ✅ Usar una ref para el seguimiento no causa re-renders
 	const lastSelectedItemIndexRef = useRef<number | null>(null);
 
+	// Control de carga progresiva
+	const [visibleItemCount, setVisibleItemCount] = useState<number>(BROWSER_CONFIG.sequential.initialBatchSize);
+	const scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const loadingMoreRef = useRef<boolean>(false);
+
 	// Estado para el menú contextual personalizado
 	const [contextMenuFile, setContextMenuFile] = useState<FileItem | null>(null);
 	const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
@@ -147,6 +165,33 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Seleccionar solo la versión del store para forzar re-renders cuando las miniaturas cambien
 	const imageResourcesVersion = useImageResources((state) => state.version);
+
+	// Cargar más elementos de forma controlada
+	const loadMoreItemsSequentially = useCallback(() => {
+		if (loadingMoreRef.current) return;
+
+		// Marcar como cargando
+		loadingMoreRef.current = true;
+		logger.debug(`[FileBrowser] Cargando más elementos secuencialmente: ${visibleItemCount} → ${visibleItemCount + BROWSER_CONFIG.sequential.additionalBatchSize}`);
+
+		// Usar setTimeout para dar tiempo a la UI para responder
+		setTimeout(() => {
+			setVisibleItemCount(prev => {
+				// Limitar al número máximo de elementos o al tamaño del caché
+				const newCount = Math.min(
+					prev + BROWSER_CONFIG.sequential.additionalBatchSize,
+					items.length,
+					BROWSER_CONFIG.cacheSize
+				);
+				return newCount;
+			});
+
+			// Desmarcar como cargando después de un breve retraso
+			setTimeout(() => {
+				loadingMoreRef.current = false;
+			}, 100);
+		}, 50);
+	}, [items.length, visibleItemCount]);
 
 	// 🔧 **Sistema de medición progresivo**
 	// Estrategia: inmediato → RAF → timeout → fallback fijo
@@ -209,36 +254,6 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// si `items` y las opciones de vista no cambian.
 	const filteredItems = useFilteredData(items);
 
-	// 🔍 Manejador de selección de elementos - ESTABILIZADO con getState()
-	// Esta es la clave: la función no se recrea cuando la selección cambia.
-	const handleItemClick = useCallback((clickedItem: FileItem, e: React.MouseEvent) => {
-		const { ctrlKey, metaKey, shiftKey } = e;
-		const { selectedIds, setSelectedIds, toggleSelectedId, clearSelection } = useSelectionStore.getState();
-
-		const currentIndex = filteredItems.findIndex(i => i.id === clickedItem.id);
-		if (currentIndex === -1) return;
-
-		// La lógica de selección permanece igual, pero ahora usa el estado más reciente del store
-		if (shiftKey && lastSelectedItemIndexRef.current !== null) {
-			const start = Math.min(lastSelectedItemIndexRef.current, currentIndex);
-			const end = Math.max(lastSelectedItemIndexRef.current, currentIndex);
-			const idsToSelect = filteredItems.slice(start, end + 1).map(i => i.id);
-			setSelectedIds(idsToSelect);
-		} else if (ctrlKey || metaKey) {
-			toggleSelectedId(clickedItem.id);
-			lastSelectedItemIndexRef.current = currentIndex;
-		} else {
-			if (selectedIds.length === 1 && selectedIds[0] === clickedItem.id) {
-				clearSelection();
-				lastSelectedItemIndexRef.current = null;
-			} else {
-				setSelectedIds([clickedItem.id]);
-				lastSelectedItemIndexRef.current = currentIndex;
-			}
-		}
-		onItemSelect?.(clickedItem);
-	}, [filteredItems, onItemSelect]); // Se eliminan las dependencias del store de selección
-
 	// 🔄 Preprocesar los elementos para asegurar que tengan todos los campos necesarios
 	const processedItems = useMemo(() => {
 		return filteredItems.map(item => {
@@ -271,6 +286,50 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			};
 		});
 	}, [filteredItems]);
+
+	// Limitar los elementos visibles para carga progresiva
+	const visibleItems = useMemo(() => {
+		return processedItems.slice(0, visibleItemCount);
+	}, [processedItems, visibleItemCount]);
+
+	// Resetear conteo visible cuando cambian los elementos
+	useEffect(() => {
+		setVisibleItemCount(Math.min(
+			BROWSER_CONFIG.sequential.initialBatchSize,
+			items.length
+		));
+		loadingMoreRef.current = false;
+	}, [items]);
+
+	// 🔍 Manejador de selección de elementos - ESTABILIZADO con getState()
+	// Esta es la clave: la función no se recrea cuando la selección cambia.
+	const handleItemClick = useCallback((clickedItem: FileItem, e: React.MouseEvent) => {
+		const { ctrlKey, metaKey, shiftKey } = e;
+		const { selectedIds, setSelectedIds, toggleSelectedId, clearSelection } = useSelectionStore.getState();
+
+		const currentIndex = filteredItems.findIndex(i => i.id === clickedItem.id);
+		if (currentIndex === -1) return;
+
+		// La lógica de selección permanece igual, pero ahora usa el estado más reciente del store
+		if (shiftKey && lastSelectedItemIndexRef.current !== null) {
+			const start = Math.min(lastSelectedItemIndexRef.current, currentIndex);
+			const end = Math.max(lastSelectedItemIndexRef.current, currentIndex);
+			const idsToSelect = filteredItems.slice(start, end + 1).map(i => i.id);
+			setSelectedIds(idsToSelect);
+		} else if (ctrlKey || metaKey) {
+			toggleSelectedId(clickedItem.id);
+			lastSelectedItemIndexRef.current = currentIndex;
+		} else {
+			if (selectedIds.length === 1 && selectedIds[0] === clickedItem.id) {
+				clearSelection();
+				lastSelectedItemIndexRef.current = null;
+			} else {
+				setSelectedIds([clickedItem.id]);
+				lastSelectedItemIndexRef.current = currentIndex;
+			}
+		}
+		onItemSelect?.(clickedItem);
+	}, [filteredItems, onItemSelect]); // Se eliminan las dependencias del store de selección
 
 	// 🔍 Manejador de doble click (abrir visor) - ESTABILIZADO
 	const handleItemDoubleClick = useCallback((item: FileItem) => {
@@ -422,7 +481,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			return <Skeleton className="w-full h-full" />;
 		}
 
-		if (!processedItems || processedItems.length === 0) {
+		if (!visibleItems || visibleItems.length === 0) {
 			return (
 				<EmptyState
 					icon={FileTextIcon}
@@ -437,7 +496,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		const viewProps = {
-			items: processedItems,
+			items: visibleItems,
 			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
 			onContextMenu: handleContextMenu, // Pasamos el manejador de menú contextual
@@ -455,13 +514,26 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			default:
 				return <GridView {...viewProps} />;
 		}
-	}, [processedItems, isLoading, viewMode, handleItemClick, handleItemDoubleClick, handleContextMenu, filterFavorites]);
+	}, [visibleItems, isLoading, viewMode, handleItemClick, handleItemDoubleClick, handleContextMenu, filterFavorites]);
 
 	return (
-		<div ref={containerCallbackRef} className={cn('relative h-full w-full', className)}>
+		<div
+			ref={containerCallbackRef}
+			className={cn('relative h-full w-full', className)}
+		>
 			<AnimatePresence mode="wait">
 				{renderedContent}
 			</AnimatePresence>
+
+			{/* Indicador de carga de más elementos */}
+			{visibleItemCount < processedItems.length && (
+				<div className="w-full py-4 flex justify-center items-center">
+					<div className="flex items-center gap-2 text-sm text-muted-foreground">
+						<div className="w-4 h-4 rounded-full border-2 border-t-transparent border-primary/30 animate-spin" />
+						<span>Cargando más elementos...</span>
+					</div>
+				</div>
+			)}
 
 			{isViewerOpen && (
 				<FileViewer
@@ -556,7 +628,6 @@ const GridItem = memo<GridItemProps>(function GridItem({
 						src={thumbnailUrl}
 						alt={item.name}
 						className="h-full w-full object-cover transition-transform"
-						onError={() => { }}
 					/>
 				</div>
 

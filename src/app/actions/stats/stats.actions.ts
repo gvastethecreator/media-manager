@@ -200,6 +200,30 @@ export async function getSystemStats(): Promise<GeneralStats | null> {
 	return getCachedStats();
 }
 
+// Nuevos tipos para stats de entidades extendidas
+export interface ExtendedStats {
+	totalDocuments: number;
+	totalAudio: number;
+	totalJsonFiles: number;
+	totalWorkflows: number;
+	totalFile3D: number;
+}
+
+// Extender getSystemStats para incluir nuevas entidades
+export async function getSystemStatsExtended(): Promise<GeneralStats & ExtendedStats | null> {
+	const base = await getSystemStats();
+	if (!base) return null;
+	// TODO: Reemplazar por queries reales a Prisma/Drizzle
+	return {
+		...base,
+		totalDocuments: 0,
+		totalAudio: 0,
+		totalJsonFiles: 0,
+		totalWorkflows: 0,
+		totalFile3D: 0,
+	};
+}
+
 // Interfaces para los mapeos de datos
 interface EntityWithImageCount {
 	id: string;
