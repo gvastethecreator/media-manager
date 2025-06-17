@@ -64,6 +64,8 @@ export interface TagCoreState {
 export interface TagCoreActions {
 	/** Carga todos los tags */
 	loadTags: () => Promise<TagComplete[]>;
+	/** Obtiene todos los tags */
+	getTags: () => TagComplete[];
 	/** Crea un nuevo tag */
 	createTag: (tag: Partial<Tag>) => Promise<TagComplete | null>;
 	/** Actualiza un tag existente */

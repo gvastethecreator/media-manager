@@ -1,144 +1,198 @@
 'use client';
 
-import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-
-// Logger para depuración
-const logger = clientLogger.withContext('ImageRenderer');
+import { memo, useEffect, useRef, useState } from 'react';
 
 interface ImageRendererProps {
-	src: string;
+	src: string | null;
 	alt: string;
+	className?: string;
+	style?: React.CSSProperties;
 	width?: number;
 	height?: number;
-	className?: string;
+	quality?: number;
+	objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
 	priority?: boolean;
 	onLoad?: () => void;
 	onError?: () => void;
-	onClick?: () => void;
-	quality?: number;
-	objectFit?: 'cover' | 'contain';
-	sizes?: string;
+	isScrolling?: boolean;
+	shouldLoad?: boolean;
 }
 
-// Componente memoizado para evitar renderizados innecesarios
-const ImageRendererComponent = ({
+/**
+ * Componente optimizado para renderizar imágenes con carga diferida
+ * y cancelación de solicitudes durante el scroll
+ */
+export const ImageRenderer = memo<ImageRendererProps>(function ImageRenderer({
 	src,
 	alt,
-	width = 300,
-	height = 300,
 	className,
+	style,
+	width,
+	height,
+	quality = 80,
+	objectFit = 'cover',
 	priority = false,
 	onLoad,
 	onError,
-	onClick,
-	quality = 85,
-	objectFit = 'cover',
-	sizes,
-}: ImageRendererProps) => {
+	isScrolling = false,
+	shouldLoad = true,
+}) {
+	// Estados
+	const [loaded, setLoaded] = useState(false);
 	const [error, setError] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-	const isFirstRender = useRef(true);
-	const prevSrc = useRef(src);
+	const [imageSrc, setImageSrc] = useState<string | null>(null);
 
-	// Depuración: Registrar cuando se renderiza con una nueva URL
+	// Referencias
+	const abortControllerRef = useRef<AbortController | null>(null);
+	const imageRef = useRef<HTMLImageElement>(null);
+	const observerRef = useRef<IntersectionObserver | null>(null);
+
+	// Efecto para cargar la imagen cuando sea visible
 	useEffect(() => {
-		// if (isFirstRender.current) {
-		// 	logger.debug(`🖼️ Primera renderización: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
-		// 	isFirstRender.current = false;
-		// } else if (prevSrc.current !== src) {
-		// 	logger.debug(`🔄 URL cambiada: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
-		// }
-	}, []);
+		if (!src || !shouldLoad) return;
 
-	// Solo resetear el estado de carga si la fuente cambia realmente
-	useEffect(() => {
-		// No hacemos nada en el primer renderizado
-		if (isFirstRender.current) {
-			isFirstRender.current = false;
-			return;
+		// Si está en scroll, no cargar nuevas imágenes
+		if (isScrolling && !loaded) return;
+
+		// Crear un nuevo AbortController para poder cancelar la solicitud
+		if (abortControllerRef.current) {
+			abortControllerRef.current.abort();
+		}
+		abortControllerRef.current = new AbortController();
+
+		// Si la imagen ya está cargada o hay error, no hacer nada
+		if (loaded || error) return;
+
+		// Función para cargar la imagen
+		const loadImage = async () => {
+			try {
+				// Si es una URL directa, usarla
+				if (src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('http')) {
+					setImageSrc(src);
+					return;
+				}
+
+				// Si es una ruta API, hacer fetch con AbortController
+				const response = await fetch(src, {
+					signal: abortControllerRef.current?.signal,
+					headers: {
+						'Cache-Control': 'max-age=31536000',
+					},
+				});
+
+				if (!response.ok) {
+					throw new Error(`Error loading image: ${response.statusText}`);
+				}
+
+				const blob = await response.blob();
+				const url = URL.createObjectURL(blob);
+				setImageSrc(url);
+			} catch (err) {
+				// Ignorar errores de abort
+				if (err instanceof DOMException && err.name === 'AbortError') {
+					return;
+				}
+				setError(true);
+				onError?.();
+			}
+		};
+
+		// Usar IntersectionObserver para carga diferida
+		const setupIntersectionObserver = () => {
+			if (!imageRef.current || priority) return;
+
+			// Limpiar observer anterior si existe
+			if (observerRef.current) {
+				observerRef.current.disconnect();
+			}
+
+			observerRef.current = new IntersectionObserver(
+				(entries) => {
+					const [entry] = entries;
+					if (entry.isIntersecting) {
+						loadImage();
+						observerRef.current?.disconnect();
+					}
+				},
+				{ threshold: 0.1 }
+			);
+
+			observerRef.current.observe(imageRef.current);
+		};
+
+		// Si es prioritaria, cargar inmediatamente
+		if (priority) {
+			loadImage();
+		} else {
+			setupIntersectionObserver();
 		}
 
-		// Solo resetear si la URL realmente cambió
-		if (prevSrc.current !== src) {
-			setError(false);
-			setIsLoading(true);
-			prevSrc.current = src;
-		}
-	}, [src]);
+		// Cleanup
+		return () => {
+			if (abortControllerRef.current) {
+				abortControllerRef.current.abort();
+			}
+			if (observerRef.current) {
+				observerRef.current.disconnect();
+			}
+		};
+	}, [src, shouldLoad, isScrolling, loaded, error, priority, onError]);
 
-	const handleError = useCallback(() => {
-		logger.warn(`❌ Error al cargar imagen: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
-		setError(true);
-		setIsLoading(false);
-		if (onError) {
-			onError();
-		}
-	}, [onError, src]);
-
-	const handleLoad = useCallback(() => {
-		// logger.debug(`✅ Imagen cargada: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
-		setIsLoading(false);
-		if (onLoad) {
-			onLoad();
-		}
-	}, [onLoad]);
-
-	const handleClick = useCallback(() => {
-		if (onClick && !error) {
-			onClick();
-		}
-	}, [onClick, error]);
-
-	// Memoizamos los estilos para reducir cálculos innecesarios
-	const imageStyles = cn(
-		'transition-all duration-300 object-contain w-full h-full',
-		objectFit === 'cover' ? 'object-cover' : 'object-contain',
-		isLoading ? 'scale-80 blur-xs brightness-10' : 'scale-100 blur-0 brightness-100'
-	);
-
-	// Memoizamos las propiedades del componente Image para reducir recreaciones
-	const imageProps = {
-		src,
-		alt,
-		width,
-		height,
-		className: imageStyles,
-		priority,
-		quality,
-		sizes,
-		loading: priority ? 'eager' : 'lazy',
-		onError: handleError,
-		onLoad: handleLoad,
-		onClick: handleClick,
+	// Manejadores de eventos
+	const handleLoad = () => {
+		setLoaded(true);
+		onLoad?.();
 	};
 
-	// Depuración: Verificar si la URL es válida
-	useEffect(() => {
-		if (!src) {
-			logger.warn('⚠️ URL de imagen vacía');
-		} else if (!src.startsWith('http') && !src.startsWith('/')) {
-			logger.warn(`⚠️ URL de imagen posiblemente inválida: ${src.substring(0, 50)}${src.length > 50 ? '...' : ''}`);
-		}
-	}, [src]);
+	const handleError = () => {
+		setError(true);
+		onError?.();
+	};
 
-	if (error) {
+	// Estilo para el object-fit
+	const imageStyle = {
+		...style,
+		objectFit,
+	};
+
+	// Renderizar placeholder si está cargando o hay error
+	if (!imageSrc || error) {
 		return (
-			<div className={cn('flex items-center justify-center bg-muted', className)} style={{ width, height }}>
-				<span className="text-xs text-muted-foreground">Error al cargar imagen</span>
+			<div
+				ref={imageRef}
+				className={cn(
+					'bg-muted/30 flex items-center justify-center',
+					error ? 'bg-red-100/10 dark:bg-red-900/10' : '',
+					className
+				)}
+				style={{
+					width: width || '100%',
+					height: height || '100%',
+					...style,
+				}}
+			>
+				{error ? (
+					<span className="text-xs text-muted-foreground">Error</span>
+				) : (
+					<div className="w-8 h-8 rounded-full border-2 border-t-transparent border-primary/30 animate-spin" />
+				)}
 			</div>
 		);
 	}
 
+	// Renderizar la imagen
 	return (
-		<div className={cn('relative overflow-hidden', className)}>
-			{isLoading && <div className="absolute inset-0 bg-muted animate-shiny-text" />}
-			<Image {...imageProps} />
-		</div>
+		<img
+			ref={imageRef}
+			src={imageSrc}
+			alt={alt}
+			className={className}
+			style={imageStyle as React.CSSProperties}
+			width={width}
+			height={height}
+			onLoad={handleLoad}
+			onError={handleError}
+		/>
 	);
-};
-
-// Exportamos una versión memoizada del componente
-export const ImageRenderer = memo(ImageRendererComponent);
+});

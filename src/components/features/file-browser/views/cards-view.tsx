@@ -2,6 +2,8 @@
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { FileItem } from '@/types/file-item';
 import {
 	BookImage,
@@ -10,31 +12,30 @@ import {
 	Camera,
 	HardDrive,
 	Heart,
-	ImageIcon,
 	MapPin,
 	Maximize2,
 	Palette,
 	Share2,
 	User2,
-	Wand2,
+	Wand2
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import type * as React from 'react';
-import { memo, useCallback, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ContextMenuAction } from '../context-menu/context-menu';
 import { FileContextMenu } from '../context-menu/context-menu';
 import { ImageRenderer } from '../image-renderer';
+import { VirtualizerWrapper } from './virtualizer-wrapper';
 
-interface CardsViewProps {
+interface CardItemProps {
 	item: FileItem;
-	itemSize: number;
 	isSelected?: boolean;
+	isActive?: boolean;
 	isScrolling?: boolean;
 	shouldLoad?: boolean;
-	thumbnail?: string | null;
-	onClick?: (item: FileItem) => void;
+	onClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onDoubleClick?: (item: FileItem) => void;
 	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
-	style?: React.CSSProperties;
 }
 
 const getMetadata = (metadata: string | null) => {
@@ -58,34 +59,32 @@ function formatBytes(bytes: number): string {
 	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
-export const CardsView = memo(function CardsView({
+export const CardItem = memo(function CardItem({
 	item,
-	itemSize,
 	isSelected,
-	isScrolling,
-	shouldLoad,
-	thumbnail,
+	isActive,
+	isScrolling = false,
+	shouldLoad = true,
 	onClick,
 	onDoubleClick,
 	onContextAction,
-	style,
-}: CardsViewProps) {
+}: CardItemProps) {
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
 	const metadata = useMemo(() => getMetadata(item.metadata), [item.metadata]);
 
 	const imageHeight = useMemo(() => {
 		if (metadata?.dimensions) {
-			return Math.min(itemSize / (metadata.dimensions.width / metadata.dimensions.height), itemSize * 0.6);
+			return Math.min(item.itemSize / (metadata.dimensions.width / metadata.dimensions.height), item.itemSize * 0.6);
 		}
-		return itemSize * 0.5;
-	}, [metadata, itemSize]);
+		return item.itemSize * 0.5;
+	}, [metadata, item.itemSize]);
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
-				onClick?.(item);
+				onClick?.(item, e);
 			}
 		},
 		[onClick, item]
@@ -95,7 +94,7 @@ export const CardsView = memo(function CardsView({
 		(e: React.MouseEvent) => {
 			e.preventDefault();
 			e.stopPropagation();
-			onClick?.(item);
+			onClick?.(item, e);
 		},
 		[onClick, item]
 	);
@@ -121,35 +120,27 @@ export const CardsView = memo(function CardsView({
 			cn(
 				'relative w-full h-full bg-card rounded-lg border shadow-xs overflow-hidden group hover:shadow-md transition-all duration-200 text-left',
 				isSelected && 'ring-2 ring-primary',
-				isScrolling && 'opacity-50'
+				isActive && 'ring-2 ring-secondary',
+				item.isScrolling && 'opacity-50'
 			),
-		[isSelected, isScrolling]
+		[isSelected, isActive, item.isScrolling]
 	);
 
 	const ImageContent = useMemo(() => {
-		return shouldLoad && thumbnail ? (
+		const thumbnailUrl = item.thumbnail || `/api/images/${item.id}/thumbnail`;
+		return (
 			<div className="relative w-full h-full">
-				<div
-					className="absolute inset-0 bg-cover bg-center blur-xs opacity-30 brightness-50"
-					style={{
-						backgroundImage: `url(${thumbnail})`,
-					}}
-				/>
 				<ImageRenderer
-					src={thumbnail}
+					src={thumbnailUrl}
 					alt={item.name}
-					width={metadata?.dimensions?.width}
-					height={metadata?.dimensions?.height}
-					className={cn('h-full w-full object-contain transition-all duration-200', 'group-hover:scale-[1.02]')}
-					quality={75}
+					className="w-full h-full rounded-md"
+					objectFit="cover"
+					isScrolling={isScrolling}
+					shouldLoad={shouldLoad}
 				/>
-			</div>
-		) : (
-			<div className="flex items-center justify-center h-full bg-muted">
-				<ImageIcon className="h-8 w-8 text-muted-foreground/50" />
 			</div>
 		);
-	}, [shouldLoad, thumbnail, item.name, metadata?.dimensions?.width, metadata?.dimensions?.height]);
+	}, [item.thumbnail, item.id, item.name, isScrolling, shouldLoad]);
 
 	const StatusBadges = useMemo(
 		() => (
@@ -291,15 +282,15 @@ export const CardsView = memo(function CardsView({
 
 	return (
 		<FileContextMenu file={item} onAction={handleContextAction}>
-			<button
+			<motion.div
 				ref={buttonRef}
-				type="button"
 				className={buttonClassName}
-				style={style}
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
 				onKeyDown={handleKeyDown}
-				aria-pressed={isSelected}
+				whileHover={{ scale: 1.02 }}
+				whileTap={{ scale: 0.98 }}
+				layout
 			>
 				<div className="flex flex-col h-full">
 					<div className="relative overflow-hidden" style={{ height: imageHeight }}>
@@ -321,7 +312,98 @@ export const CardsView = memo(function CardsView({
 						</div>
 					</div>
 				</div>
-			</button>
+			</motion.div>
 		</FileContextMenu>
+	);
+});
+
+export interface CardsViewProps {
+	items: FileItem[];
+	onItemClick?: (item: FileItem, e: React.MouseEvent) => void;
+	onItemDoubleClick?: (item: FileItem) => void;
+	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	className?: string;
+}
+
+export const CardsView = memo(function CardsView({
+	items,
+	onItemClick,
+	onItemDoubleClick,
+	onContextAction,
+	className,
+}: CardsViewProps) {
+	// Estados y referencias
+	const [isScrolling, setIsScrolling] = useState(false);
+	const scrollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+	// Stores
+	const { selectedIds, activeId } = useSelectionStore();
+	const { itemSize } = useViewOptionsStore();
+
+	// Manejar eventos de scroll
+	const handleScrollStart = useCallback(() => {
+		setIsScrolling(true);
+	}, []);
+
+	const handleScrollEnd = useCallback(() => {
+		// Usar un timeout para evitar cambios de estado frecuentes
+		if (scrollingTimeoutRef.current) {
+			clearTimeout(scrollingTimeoutRef.current);
+		}
+
+		scrollingTimeoutRef.current = setTimeout(() => {
+			setIsScrolling(false);
+			scrollingTimeoutRef.current = null;
+		}, 150);
+	}, []);
+
+	// Limpiar timeout al desmontar
+	useEffect(() => {
+		return () => {
+			if (scrollingTimeoutRef.current) {
+				clearTimeout(scrollingTimeoutRef.current);
+			}
+		};
+	}, []);
+
+	// Renderizar un elemento de la lista
+	const renderItem = useCallback(
+		(index: number, item: FileItem) => {
+			const isSelected = selectedIds.includes(item.id);
+			const isActive = activeId === item.id;
+
+			// Calcular si el elemento debe cargarse (para optimizar rendimiento)
+			const shouldLoad = !isScrolling || index < 20;
+
+			return (
+				<CardItem
+					key={item.id}
+					item={item}
+					isSelected={isSelected}
+					isActive={isActive}
+					isScrolling={isScrolling}
+					shouldLoad={shouldLoad}
+					onClick={onItemClick}
+					onDoubleClick={onItemDoubleClick}
+					onContextAction={onContextAction}
+				/>
+			);
+		},
+		[selectedIds, activeId, isScrolling, onItemClick, onItemDoubleClick, onContextAction]
+	);
+
+	return (
+		<AnimatePresence mode="wait">
+			<VirtualizerWrapper
+				type="grid"
+				data={items}
+				itemContent={renderItem}
+				itemSize={itemSize}
+				gridClassName={cn('w-full h-full p-4', className)}
+				layoutId="cards-view"
+				onScrollStart={handleScrollStart}
+				onScrollEnd={handleScrollEnd}
+			/>
+		</AnimatePresence>
 	);
 });
