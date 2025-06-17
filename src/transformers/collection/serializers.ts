@@ -3,6 +3,7 @@
  * @module transformers/collection/serializers
  */
 
+import type { Prisma, Collection as PrismaCollection } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	CollectionComplete,
@@ -26,9 +27,8 @@ import {
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { getRelationCounts, preparePrismaRelations, validateEntityRelations } from '@/utils/transformers/relations';
 import { validateBaseEntity, validateMetadataFields } from '@/utils/transformers/validation';
-import type { Prisma, Collection as PrismaCollection } from '@prisma/client';
 
-const logger = serverLogger.withContext('CollectionSerializer');
+const _logger = serverLogger.withContext('CollectionSerializer');
 
 /**
  * Transforma un objeto Collection de Prisma a un objeto CollectionExtended
@@ -234,7 +234,7 @@ export function validateCollection(data: unknown): CollectionComplete {
  */
 export async function extendCollection(
 	collection: CollectionComplete,
-	options: {
+	_options: {
 		includeRelations?: boolean;
 		includeCount?: boolean;
 		customFields?: string[];

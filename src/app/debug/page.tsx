@@ -1,7 +1,7 @@
+import type { Metadata } from 'next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DebugConsole } from '@/components/views/development/debug-console';
 import { ServerStats } from '@/components/views/development/server-stats';
-import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: 'Consola de Depuración',

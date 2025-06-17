@@ -1,8 +1,8 @@
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { getFolderById } from '@/app/actions/folder';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import DeleteFolderButton from './delete-button';
 
 interface FolderPageProps {

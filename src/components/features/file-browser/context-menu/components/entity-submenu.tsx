@@ -1,5 +1,7 @@
 'use client';
 
+import { Plus } from 'lucide-react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import {
 	ContextMenuItem,
@@ -12,8 +14,6 @@ import {
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { Plus } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo } from 'react';
 import type { SubMenuProps } from '../types';
 
 // Logger para debugging

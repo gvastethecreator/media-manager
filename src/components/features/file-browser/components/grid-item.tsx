@@ -1,10 +1,10 @@
 'use client';
 
-import { FileItem } from '@/types/file-item';
 import clsx from 'clsx';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback } from 'react';
+import { FileItem } from '@/types/file-item';
 import { FileContextMenu } from '../context-menu/context-menu';
 import type { ContextMenuAction } from '../context-menu/types';
 import { ImageRenderer } from '../image-renderer';
@@ -55,7 +55,7 @@ export const GridItem = memo<GridItemProps>(function GridItem({
 	onClick,
 	onDoubleClick,
 	onContextMenu,
-	onContextAction
+	onContextAction,
 }) {
 	// 🎯 Función para manejar las acciones del menú contextual
 	const handleAction = useCallback(
@@ -66,11 +66,12 @@ export const GridItem = memo<GridItemProps>(function GridItem({
 	);
 
 	// 🖼️ Asegurarse de que thumbnailUrl sea una string válida
-	const thumbnailUrl = typeof item.thumbnail === 'string'
-		? item.thumbnail
-		: typeof item.src === 'string'
-			? item.src
-			: `/api/images/${item.id}/thumbnail`;
+	const thumbnailUrl =
+		typeof item.thumbnail === 'string'
+			? item.thumbnail
+			: typeof item.src === 'string'
+				? item.src
+				: `/api/images/${item.id}/thumbnail`;
 
 	return (
 		<FileContextMenu file={item} onAction={handleAction}>

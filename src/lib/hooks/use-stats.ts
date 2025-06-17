@@ -1,8 +1,8 @@
+import type { ImageStats } from '@prisma/client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { GeneralStats } from '@/app/actions/stats/stats.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { statsService } from '@/services/stats.service';
-import type { ImageStats } from '@prisma/client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const statsLogger = serverLogger.withContext('StatsHook');
 

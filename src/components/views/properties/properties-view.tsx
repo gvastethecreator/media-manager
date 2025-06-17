@@ -1,5 +1,9 @@
 'use client';
 
+import { Variable } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getProperties } from '@/app/actions/properties/property.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -8,10 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePropertyStore } from '@/store/entities/property';
-import { Variable } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 import { PropertyCard } from './property-card';
 
@@ -48,13 +48,7 @@ const viewLogger = clientLogger.withContext('PropertiesView');
 
 // Componente memoizado para cada tarjeta de propiedad
 const MemoizedPropertyCard = React.memo(
-	({
-		property,
-		onPropertyClick,
-	}: {
-		property: PropertyWithStats;
-		onPropertyClick: () => void;
-	}) => {
+	({ property, onPropertyClick }: { property: PropertyWithStats; onPropertyClick: () => void }) => {
 		return <PropertyCard property={property} onClick={onPropertyClick} className="h-full" />;
 	},
 	(prevProps, nextProps) => {

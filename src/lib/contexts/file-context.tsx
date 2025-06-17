@@ -1,8 +1,8 @@
 'use client';
 
+import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 import { logActivity } from '@/app/actions/activity/activity.actions';
 import { clientEvents } from '@/lib/client/events.client';
-import { type ReactNode, createContext, useCallback, useContext, useState } from 'react';
 
 export interface FileItem {
 	id: string;

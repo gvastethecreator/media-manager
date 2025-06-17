@@ -3,6 +3,7 @@
  * @module utils/character/validators
  */
 
+import * as z from 'zod';
 import {
 	CharacterAlignment,
 	CharacterCategory,
@@ -11,7 +12,6 @@ import {
 	CharacterRelationshipType,
 	CharacterSortOption,
 } from '@/types/entities/character/enums';
-import * as z from 'zod';
 
 /**
  * Esquema de validación para estadísticas de personaje

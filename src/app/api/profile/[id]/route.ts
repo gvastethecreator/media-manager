@@ -1,8 +1,8 @@
-import { deleteProfile, getProfile, updateProfile } from '@/app/actions/profiles/profile.actions';
 import { NextResponse } from 'next/server';
+import { deleteProfile, getProfile, updateProfile } from '@/app/actions/profiles/profile.actions';
 
 // GET /api/profile/[id] - Obtener un perfil específico
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, { params }: { params: { id: string } }) {
 	const id = params.id;
 
 	try {
@@ -29,7 +29,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // DELETE /api/profile/[id] - Eliminar un perfil
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
 	const id = params.id;
 
 	try {

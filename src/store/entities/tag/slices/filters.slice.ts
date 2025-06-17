@@ -3,8 +3,8 @@
  * @module store/entities/tag/slices/filters.slice
  */
 
-import { TagSortCriteria } from '@/types/entities/tag/enums';
 import { StateCreator } from 'zustand';
+import { TagSortCriteria } from '@/types/entities/tag/enums';
 import type { TagFilterActions, TagFilters, TagStore } from '../types';
 
 /**

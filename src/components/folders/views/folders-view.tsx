@@ -1,5 +1,9 @@
 'use client';
 
+import { DatabaseIcon, FolderIcon, RefreshCcw, XCircle } from 'lucide-react';
+import { motion } from 'motion/react';
+import Link from 'next/link';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FolderCard } from '@/components/cards/folder-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -12,10 +16,6 @@ import { folderService } from '@/services/folder-service-export';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
 import type { Folder } from '@/types/entities/folder';
-import { DatabaseIcon, FolderIcon, RefreshCcw, XCircle } from 'lucide-react';
-import { motion } from 'motion/react';
-import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../../views/types';
 
 const viewLogger = clientLogger.withContext('FoldersView');
@@ -32,13 +32,7 @@ type FolderWithCount = Folder & {
 
 // Componente memoizado para cada tarjeta de carpeta
 const MemoizedFolderCard = React.memo(
-	({
-		folder,
-		onFolderClick,
-	}: {
-		folder: FolderWithCount;
-		onFolderClick: () => void;
-	}) => {
+	({ folder, onFolderClick }: { folder: FolderWithCount; onFolderClick: () => void }) => {
 		return <FolderCard folder={folder} onClick={onFolderClick} className="h-full" />;
 	},
 	(prevProps, nextProps) => {

@@ -4,20 +4,19 @@
  */
 
 import {
-	createFolder as createFolderAction,
-	deleteFolder as deleteFolderAction,
-	getFolderById as getFolderAction,
-	searchFolders as getFoldersAction,
-	updateFolder as updateFolderAction,
-} from '@/app/actions/folders/folder-crud.actions';
-
-import {
 	adaptCreateFolderData,
 	adaptFolderResponse,
 	adaptFoldersArray,
 	adaptUpdateFolderData,
 	handleFolderActionError,
 } from '@/adapters/folder';
+import {
+	createFolder as createFolderAction,
+	deleteFolder as deleteFolderAction,
+	getFolderById as getFolderAction,
+	searchFolders as getFoldersAction,
+	updateFolder as updateFolderAction,
+} from '@/app/actions/folders/folder-crud.actions';
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { CreateFolderData, UpdateFolderData } from '@/types/entities/folder';

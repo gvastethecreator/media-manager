@@ -1,6 +1,6 @@
-import { serverLogger } from '@/lib/logger/server-logger';
-import { reindexFolder } from '@/app/actions/folders';
 import { type NextRequest, NextResponse } from 'next/server';
+import { reindexFolder } from '@/app/actions/folders';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const reindexLogger = serverLogger.withContext('ReindexAPI');
 

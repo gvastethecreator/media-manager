@@ -3,9 +3,9 @@
  * @module types/entities/uploaded-image/types
  */
 
+import { z } from 'zod';
 import { type BaseEntity, BaseEntitySchema, MetadataFieldsSchema } from '@/types/common/transformer';
 import { UploadedFileType } from '@/types/uploaded-images';
-import { z } from 'zod';
 
 /**
  * Re-export the UploadedFileType for use as UploadedImageType

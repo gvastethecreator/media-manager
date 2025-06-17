@@ -3,6 +3,7 @@
  * @module transformers/concept/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept/base';
 import type { ConceptFilters } from '@/types/entities/concept/extended';
@@ -13,7 +14,6 @@ import {
 	ConceptSearchResult,
 	ConceptSortCriteria,
 } from '@/types/entities/concept/types';
-import type { Prisma } from '@prisma/client';
 import { deserializeTags } from './serializers';
 
 const logger = serverLogger.withContext('ConceptMapper');

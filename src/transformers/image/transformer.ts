@@ -4,14 +4,14 @@
  * @description Funciones para transformar imágenes de su formato Prisma al formato de la aplicación
  */
 
+import path from 'path';
 import { Logger } from '@/lib/logger';
 import { pathToUrl } from '@/lib/url-utils';
 import { BaseImageSchema, CompleteImageSchema, ExtendedImageSchema } from '@/lib/validators/image-validators';
 import type { ImageBase, ImageComplete, ImageExtended } from '@/types/entities/image/types';
 import type { ThumbnailQuality } from '@/types/thumbnails';
-import { TransformerErrorCode, createTransformerError } from '@/utils/errors/transformer-errors';
+import { createTransformerError, TransformerErrorCode } from '@/utils/errors/transformer-errors';
 import { calculateAspectRatio, calculateDominantColor, generateThumbnailUrl } from '@/utils/image-utils';
-import path from 'path';
 
 const logger = new Logger('ImageTransformer');
 

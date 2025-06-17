@@ -144,7 +144,7 @@ export const extractNumberFromStats = (statsJson: string | null, key: string): n
 		const stats = JSON.parse(statsJson);
 		const value = stats[key];
 		return typeof value === 'number' ? value : undefined;
-	} catch (error) {
+	} catch (_error) {
 		return undefined;
 	}
 };
@@ -159,7 +159,7 @@ export const parsePlaceStats = (statsJson: string | null): Record<string, any> =
 
 	try {
 		return JSON.parse(statsJson);
-	} catch (error) {
+	} catch (_error) {
 		return {};
 	}
 };
@@ -172,7 +172,7 @@ export const parsePlaceStats = (statsJson: string | null): Record<string, any> =
 export const stringifyPlaceStats = (stats: Record<string, any>): string => {
 	try {
 		return JSON.stringify(stats);
-	} catch (error) {
+	} catch (_error) {
 		return '{}';
 	}
 };

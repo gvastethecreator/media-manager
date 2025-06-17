@@ -3,10 +3,9 @@
  * @module store/entities/tag/slices/core
  */
 
-import { createTagAction, deleteTagAction, getTagByIdAction, getTagsAction, updateTagAction } from '@/app/actions/tags';
-import { extendTag, extendTags } from '@/transformers/tag';
-import type { Tag } from '@/types/entities/tag';
 import type { StateCreator } from 'zustand';
+import { createTagAction, deleteTagAction, getTagByIdAction, getTagsAction, updateTagAction } from '@/app/actions/tags';
+import type { Tag } from '@/types/entities/tag';
 import type { TagCoreState, TagState } from '../types';
 
 export interface TagCoreSlice {
@@ -240,7 +239,7 @@ export const createTagCoreSlice: StateCreator<TagState & TagCoreSlice, [], [], T
 
 	// Acción para resetear el store
 	resetTags: () => {
-		set((state) => ({
+		set((_state) => ({
 			core: {
 				tags: {},
 				isLoading: false,

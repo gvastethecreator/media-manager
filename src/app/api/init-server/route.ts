@@ -1,6 +1,6 @@
-import { serverLogger } from '@/lib/logger/server-logger';
-import { initServer } from '@/app/actions/system';
 import { NextResponse } from 'next/server';
+import { initServer } from '@/app/actions/system';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 // Logger específico para esta ruta
 const logger = serverLogger.withContext('InitServerRoute');

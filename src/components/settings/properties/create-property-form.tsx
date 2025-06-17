@@ -1,9 +1,9 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { Property } from '@prisma/client';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
-
 import { CategoryPicker } from '@/components/forms/category-picker';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,7 +15,6 @@ import { ImagePicker } from '@/components/ui/image-picker';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { createPropertySchema } from '@/lib/validations/property';
-import type { Property } from '@prisma/client';
 
 type FormData = z.infer<typeof createPropertySchema>;
 

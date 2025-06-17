@@ -1,6 +1,6 @@
 import { deserializeTags } from '@/transformers/note/serializers';
-import type { NoteComplete, NoteFilters, NoteBase } from '@/types/entities/note/types';
 import type { NoteSortOption } from '@/types/entities/note/enums';
+import type { NoteBase, NoteComplete, NoteFilters } from '@/types/entities/note/types';
 
 /**
  * Genera un ID único para notas

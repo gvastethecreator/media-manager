@@ -3,6 +3,7 @@
  * @module transformers/concept/serializers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { ConceptSchema } from '@/types/entities/concept/schema';
 import type {
@@ -13,7 +14,6 @@ import type {
 	ConceptRelations,
 	ConceptUI,
 } from '@/types/entities/concept/types';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('ConceptSerializer');
 

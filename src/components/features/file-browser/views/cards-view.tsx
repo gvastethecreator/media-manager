@@ -1,10 +1,5 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { useSelectionStore } from '@/store/ui/selection.slice';
-import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { FileItem } from '@/types/file-item';
 import {
 	BookImage,
 	Box,
@@ -17,11 +12,16 @@ import {
 	Palette,
 	Share2,
 	User2,
-	Wand2
+	Wand2,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { memo, useCallback, useMemo, useRef } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import type { FileItem } from '@/types/file-item';
 import { ImageRenderer } from '../image-renderer';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
 
@@ -78,9 +78,9 @@ export const CardItem = memo(function CardItem({
 			const width = Number(metadata.dimensions.width);
 			const height = Number(metadata.dimensions.height);
 
-			if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
+			if (!Number.isNaN(width) && !Number.isNaN(height) && width > 0 && height > 0) {
 				const aspectRatio = width / height;
-				if (isFinite(aspectRatio) && aspectRatio > 0) {
+				if (Number.isFinite(aspectRatio) && aspectRatio > 0) {
 					return Math.min(itemSize / aspectRatio, itemSize * 0.6);
 				}
 			}
@@ -88,7 +88,7 @@ export const CardItem = memo(function CardItem({
 		return itemSize * 0.5;
 	}, [metadata, item.itemSize]);
 
-	const handleKeyDown = useCallback(
+	const _handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
@@ -142,7 +142,7 @@ export const CardItem = memo(function CardItem({
 			<div
 				className="relative w-full"
 				style={{
-					height: `${imageHeight}px`
+					height: `${imageHeight}px`,
 				}}
 			>
 				<ImageRenderer
@@ -347,7 +347,7 @@ export const CardsView = memo(function CardsView({
 	const { itemSize } = useViewOptionsStore();
 
 	const renderItem = useCallback(
-		(index: number, item: FileItem) => {
+		(_index: number, item: FileItem) => {
 			const isSelected = selectedIds.includes(item.id);
 			const isActive = activeId === item.id;
 

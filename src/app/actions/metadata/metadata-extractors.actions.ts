@@ -1,11 +1,11 @@
 'use server';
 
 import { type Stats, statSync } from 'fs';
+import * as fs from 'fs/promises';
+import sharp from 'sharp';
 import { CacheManager } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AIMetadata, FileMetadata } from '@/types/metadata';
-import * as fs from 'fs/promises';
-import sharp from 'sharp';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
 import {
 	getAIGenerationInfo,

@@ -3,6 +3,8 @@
  * @module hooks/folder/use-folder
  */
 
+import { useEffect } from 'react';
+import { shallow } from 'zustand/shallow';
 import {
 	selectCurrentFolder,
 	selectError,
@@ -19,20 +21,13 @@ import {
 	selectViewMode,
 	useFolderStore,
 } from '@/store/entities/folder';
-import { useEffect } from 'react';
-import { shallow } from 'zustand/shallow';
 
 /**
  * Hook para facilitar el acceso al store de carpetas
  * @param options Opciones para personalizar el comportamiento (filtrado automático, etc)
  * @returns Objeto con estado y acciones de carpetas
  */
-export function useFolder(
-	options: {
-		autoFilter?: boolean;
-		loadOnMount?: boolean;
-	} = {}
-) {
+export function useFolder(options: { autoFilter?: boolean; loadOnMount?: boolean } = {}) {
 	const { autoFilter = true, loadOnMount = true } = options;
 
 	// Acceso a las acciones del store

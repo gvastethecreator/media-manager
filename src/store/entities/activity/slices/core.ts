@@ -3,13 +3,13 @@
  * @module store/entities/activity/slices/core
  */
 
+import type { StateCreator } from 'zustand';
 import {
 	createActivity as createActivityAction,
 	deleteActivity as deleteActivityAction,
 	getActivityById,
 	getFilteredActivities,
 } from '@/app/actions/activity';
-import type { StateCreator } from 'zustand';
 import { extendActivities, extendActivity } from '../../../../transformers/activity';
 import type {
 	Activity,

@@ -3,9 +3,9 @@
  * @module store/entities/group/slices/filters
  */
 
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { Group, GroupSortCriteria, GroupType } from '@/types/entities/group';
-import type { StateCreator } from 'zustand';
 import type { GroupState } from '../types';
 
 const groupLogger = clientLogger.withContext('GroupFilters');

@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma';
 import { searchNotes } from './index';
-import { fromPrismaNote } from './serializers';
 
 jest.mock('@/lib/prisma', () => ({
 	prisma: {

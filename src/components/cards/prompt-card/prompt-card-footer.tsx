@@ -1,9 +1,9 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Calendar, Image, Tag, Video } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PromptCardFooterProps {
 	createdAt: Date;
@@ -30,7 +30,7 @@ export function PromptCardFooter({
 	tcgMode = true,
 }: PromptCardFooterProps) {
 	const formattedDate = format(new Date(updatedAt), 'dd/MM/yyyy', { locale: es });
-	const daysSinceUpdate = Math.floor((new Date().getTime() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+	const daysSinceUpdate = Math.floor((Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24));
 
 	const isRecent = daysSinceUpdate < 7;
 

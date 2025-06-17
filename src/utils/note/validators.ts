@@ -1,5 +1,5 @@
-import { NoteCategory, NotePriority, NoteStatus } from '@/types/entities/note';
 import { z } from 'zod';
+import { NoteCategory, NotePriority, NoteStatus } from '@/types/entities/note';
 
 /**
  * Esquema para validar tags

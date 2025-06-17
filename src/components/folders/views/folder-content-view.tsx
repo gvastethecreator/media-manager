@@ -1,5 +1,7 @@
 'use client';
 
+import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { reindexFolder, scanFolderAction } from '@/app/actions/folders';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
@@ -11,8 +13,6 @@ import { useFolderImages } from '@/hooks/use-folder-images';
 import { folderResponseCache } from '@/lib/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { FileItem, FileProcessingStatus, FileType } from '@/types/file-item';
-import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
@@ -41,7 +41,7 @@ export function FolderContentView() {
 
 	// Estado para controlar la recarga manual
 	const [isManuallyRefreshing, setIsManuallyRefreshing] = useState(false);
-	const [retryCount, setRetryCount] = useState(0);
+	const [_retryCount, setRetryCount] = useState(0);
 	const [scanResults, setScanResults] = useState<any>(null);
 
 	// Usar el hook personalizado para obtener las imágenes

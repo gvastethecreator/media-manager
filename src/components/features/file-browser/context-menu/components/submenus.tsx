@@ -1,17 +1,22 @@
 'use client';
 
-import { ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger } from '@/components/ui/context-menu';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { useCollectionStore } from '@/store/entities/collection';
-import { useTagStore } from '@/store/entities/tag';
-import { useAlbumStore } from '@/store/entities/album';
-import type { FileItem } from '@/types/file-item';
 import { Album, BookImage, Box, Loader2, MapPin, Tag, User2 } from 'lucide-react';
 import { memo, useCallback } from 'react';
+import {
+	ContextMenuItem,
+	ContextMenuSub,
+	ContextMenuSubContent,
+	ContextMenuSubTrigger,
+} from '@/components/ui/context-menu';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { useAlbumStore } from '@/store/entities/album';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useTagStore } from '@/store/entities/tag';
+import type { FileItem } from '@/types/file-item';
 import type { ContextMenuAction, LoadingStates } from '../types';
 
 // Logger para el componente
-const submenuLogger = clientLogger.withContext('ContextSubmenu');
+const _submenuLogger = clientLogger.withContext('ContextSubmenu');
 
 interface SubmenuProps {
 	file: FileItem;
@@ -29,12 +34,15 @@ export const CollectionsSubmenu = memo(function CollectionsSubmenu({
 	handleOpenChange,
 }: SubmenuProps) {
 	// Obtener las colecciones del store
-	const collections = useCollectionStore(state => state.getCollections());
+	const collections = useCollectionStore((state) => state.getCollections());
 
 	// Manejar apertura del submenú
-	const handleSubMenuOpenChange = useCallback((open: boolean) => {
-		handleOpenChange('collections', open);
-	}, [handleOpenChange]);
+	const handleSubMenuOpenChange = useCallback(
+		(open: boolean) => {
+			handleOpenChange('collections', open);
+		},
+		[handleOpenChange]
+	);
 
 	return (
 		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
@@ -50,10 +58,12 @@ export const CollectionsSubmenu = memo(function CollectionsSubmenu({
 					</ContextMenuItem>
 				) : collections && collections.length > 0 ? (
 					<>
-						{collections.map(collection => (
+						{collections.map((collection) => (
 							<ContextMenuItem
 								key={collection.id}
-								onClick={() => onAction('add-to-collection', file, { collectionId: collection.id, collectionName: collection.name })}
+								onClick={() =>
+									onAction('add-to-collection', file, { collectionId: collection.id, collectionName: collection.name })
+								}
 							>
 								{collection.name}
 							</ContextMenuItem>
@@ -80,15 +90,18 @@ export const TagsSubmenu = memo(function TagsSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	handleOpenChange
+	handleOpenChange,
 }: SubmenuProps) {
 	// Obtener las etiquetas del store
-	const tags = useTagStore(state => Object.values(state.core.tags));
+	const tags = useTagStore((state) => Object.values(state.core.tags));
 
 	// Manejar apertura del submenú
-	const handleSubMenuOpenChange = useCallback((open: boolean) => {
-		handleOpenChange('tags', open);
-	}, [handleOpenChange]);
+	const handleSubMenuOpenChange = useCallback(
+		(open: boolean) => {
+			handleOpenChange('tags', open);
+		},
+		[handleOpenChange]
+	);
 
 	return (
 		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
@@ -104,7 +117,7 @@ export const TagsSubmenu = memo(function TagsSubmenu({
 					</ContextMenuItem>
 				) : tags && tags.length > 0 ? (
 					<>
-						{tags.map(tag => (
+						{tags.map((tag) => (
 							<ContextMenuItem
 								key={tag.id}
 								onClick={() => onAction('add-tag', file, { tagId: tag.id, tagName: tag.name })}
@@ -134,15 +147,18 @@ export const AlbumsSubmenu = memo(function AlbumsSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	handleOpenChange
+	handleOpenChange,
 }: SubmenuProps) {
 	// Obtener los álbumes del store
-	const albums = useAlbumStore(state => state.getAlbums());
+	const albums = useAlbumStore((state) => state.getAlbums());
 
 	// Manejar apertura del submenú
-	const handleSubMenuOpenChange = useCallback((open: boolean) => {
-		handleOpenChange('albums', open);
-	}, [handleOpenChange]);
+	const handleSubMenuOpenChange = useCallback(
+		(open: boolean) => {
+			handleOpenChange('albums', open);
+		},
+		[handleOpenChange]
+	);
 
 	return (
 		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
@@ -158,7 +174,7 @@ export const AlbumsSubmenu = memo(function AlbumsSubmenu({
 					</ContextMenuItem>
 				) : albums && albums.length > 0 ? (
 					<>
-						{albums.map(album => (
+						{albums.map((album) => (
 							<ContextMenuItem
 								key={album.id}
 								onClick={() => onAction('add-to-album', file, { albumId: album.id, albumName: album.name })}
@@ -188,12 +204,15 @@ export const CharactersSubmenu = memo(function CharactersSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	handleOpenChange
+	handleOpenChange,
 }: SubmenuProps) {
 	// Manejar apertura del submenú
-	const handleSubMenuOpenChange = useCallback((open: boolean) => {
-		handleOpenChange('characters', open);
-	}, [handleOpenChange]);
+	const handleSubMenuOpenChange = useCallback(
+		(open: boolean) => {
+			handleOpenChange('characters', open);
+		},
+		[handleOpenChange]
+	);
 
 	return (
 		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
@@ -225,12 +244,15 @@ export const PlacesSubmenu = memo(function PlacesSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	handleOpenChange
+	handleOpenChange,
 }: SubmenuProps) {
 	// Manejar apertura del submenú
-	const handleSubMenuOpenChange = useCallback((open: boolean) => {
-		handleOpenChange('places', open);
-	}, [handleOpenChange]);
+	const handleSubMenuOpenChange = useCallback(
+		(open: boolean) => {
+			handleOpenChange('places', open);
+		},
+		[handleOpenChange]
+	);
 
 	return (
 		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
@@ -262,12 +284,15 @@ export const WorldItemsSubmenu = memo(function WorldItemsSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	handleOpenChange
+	handleOpenChange,
 }: SubmenuProps) {
 	// Manejar apertura del submenú
-	const handleSubMenuOpenChange = useCallback((open: boolean) => {
-		handleOpenChange('worldItems', open);
-	}, [handleOpenChange]);
+	const handleSubMenuOpenChange = useCallback(
+		(open: boolean) => {
+			handleOpenChange('worldItems', open);
+		},
+		[handleOpenChange]
+	);
 
 	return (
 		<ContextMenuSub onOpenChange={handleSubMenuOpenChange}>
@@ -299,7 +324,7 @@ export const PromptsSubmenu = memo(function PromptsSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	handleOpenChange
+	handleOpenChange,
 }: SubmenuProps) {
 	return null;
 });
@@ -309,7 +334,7 @@ export const NotesSubmenu = memo(function NotesSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	handleOpenChange
+	handleOpenChange,
 }: SubmenuProps) {
 	return null;
 });
@@ -319,7 +344,7 @@ export const ConceptsSubmenu = memo(function ConceptsSubmenu({
 	file,
 	onAction,
 	loadingStates,
-	handleOpenChange
+	handleOpenChange,
 }: SubmenuProps) {
 	return null;
 });

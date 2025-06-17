@@ -1,13 +1,13 @@
 'use server';
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { uploadedImagesService } from '@/services/uploaded-images';
-import type { UploadedImageCreateInput, UploadedImageType } from '@/types/entities/uploaded-image';
-import type { UploadedImageFilters } from '@/types/uploaded-images';
 import { mkdir, writeFile } from 'fs/promises';
 import { revalidatePath } from 'next/cache';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { uploadedImagesService } from '@/services/uploaded-images';
+import type { UploadedImageCreateInput, UploadedImageType } from '@/types/entities/uploaded-image';
+import type { UploadedImageFilters } from '@/types/uploaded-images';
 
 const actionLogger = serverLogger.withContext('ServerAction:UploadedImages');
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
@@ -68,7 +68,7 @@ export async function uploadImages(formData: FormData) {
 			};
 
 			// Preparamos los datos de entrada usando los tipos del transformer
-			const imageData: UploadedImageCreateInput = {
+			const _imageData: UploadedImageCreateInput = {
 				name: file.name,
 				path: filePath,
 				type,
@@ -153,7 +153,7 @@ function ensureThumbnailsAreStrings(data: any): any {
 	if (data instanceof Uint8Array || (typeof Buffer !== 'undefined' && data instanceof Buffer)) {
 		try {
 			return `data:image/webp;base64,${Buffer.from(data).toString('base64')}`;
-		} catch (e) {
+		} catch (_e) {
 			return null;
 		}
 	}
@@ -161,7 +161,7 @@ function ensureThumbnailsAreStrings(data: any): any {
 	// Para objetos normales
 	const result = { ...data };
 	for (const key in result) {
-		if (Object.prototype.hasOwnProperty.call(result, key)) {
+		if (Object.hasOwn(result, key)) {
 			// Si la clave parece un thumbnail y es binario
 			if (
 				(key === 'thumbnail' || key.includes('thumbnail')) &&
@@ -170,7 +170,7 @@ function ensureThumbnailsAreStrings(data: any): any {
 				try {
 					const mimeType = result.thumbnailMimeType || 'image/webp';
 					result[key] = `data:${mimeType};base64,${Buffer.from(result[key]).toString('base64')}`;
-				} catch (e) {
+				} catch (_e) {
 					result[key] = null;
 				}
 			} else {
@@ -293,7 +293,7 @@ export async function getUploadedImageStats() {
  * @param obj Objeto que puede contener datos binarios no serializables
  * @returns Objeto seguro para serialización
  */
-function ensureSerializable<T>(obj: T): T {
+function _ensureSerializable<T>(obj: T): T {
 	if (obj === null || obj === undefined) {
 		return obj;
 	}
@@ -315,7 +315,7 @@ function ensureSerializable<T>(obj: T): T {
 
 	// Si es un array, procesar cada elemento
 	if (Array.isArray(obj)) {
-		return obj.map((item) => ensureSerializable(item)) as unknown as T;
+		return obj.map((item) => _ensureSerializable(item)) as unknown as T;
 	}
 
 	// Para objetos normales (no Date, RegExp, etc.)
@@ -332,8 +332,8 @@ function ensureSerializable<T>(obj: T): T {
 
 		// Procesar cada propiedad recursivamente
 		for (const key in result) {
-			if (Object.prototype.hasOwnProperty.call(result, key)) {
-				result[key] = ensureSerializable(result[key]);
+			if (Object.hasOwn(result, key)) {
+				result[key] = _ensureSerializable(result[key]);
 			}
 		}
 

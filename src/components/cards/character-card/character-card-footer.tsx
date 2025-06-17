@@ -1,9 +1,9 @@
 'use client';
 
-import { getCardIdFromUrl } from '@/lib/utils/index';
 import { Heart, ImageIcon, Scroll, Shield, Sparkles, Star, Swords, Video, Wand } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React from 'react';
+import { getCardIdFromUrl } from '@/lib/utils/index';
 
 interface CharacterCardFooterProps {
 	/** ID o URL del personaje */
@@ -147,7 +147,7 @@ export function CharacterCardFooter({
 			{skills && skills.length > 0 && (
 				<div className="mt-2 border-t border-white/10 pt-2">
 					<div className="flex flex-wrap gap-1.5">
-						{skills.slice(0, 3).map((skill, index) => (
+						{skills.slice(0, 3).map((skill, _index) => (
 							<div
 								key={`skill-${characterId}-${skill.name}`}
 								className="px-1.5 py-0.5 rounded text-[10px] font-medium flex items-center gap-0.5"

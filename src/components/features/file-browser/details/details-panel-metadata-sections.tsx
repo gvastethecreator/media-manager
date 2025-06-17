@@ -1,30 +1,10 @@
 'use client';
 
+import { Calendar, Camera, Copy, CopyCheck, ImageIcon, Info, MapPin } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { formatDate } from '@/lib/utils/format.utils';
-import {
-	AlignLeft,
-	Calendar,
-	Camera,
-	Clock,
-	FileDigit,
-	FileImage,
-	FileType,
-	HardDrive,
-	Info,
-	MapIcon,
-	MapPin,
-	Maximize2,
-	Tag,
-	Target,
-	User2,
-	Variable,
-} from 'lucide-react';
-import { Copy, CopyCheck, ImageIcon } from 'lucide-react';
-import * as React from 'react';
-import { useState } from 'react';
 import { InfoItem } from './details-panel-info-item';
 import type { MetadataComponentProps } from './details-panel-types';
 

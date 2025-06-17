@@ -3,8 +3,8 @@
  * @module components/cards/tag-card
  */
 
-export * from './tag-card';
 export type { TagCardProps } from './tag-card';
+export * from './tag-card';
 
 // Componente memorizado para mejorar rendimiento
 import { memo } from 'react';

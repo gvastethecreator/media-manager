@@ -1,6 +1,6 @@
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { ConceptViewMode } from '@/types/entities/concept/enums';
-import type { StateCreator } from 'zustand';
 import type { ConceptStore } from '../types';
 
 const uiLogger = clientLogger.withContext('ConceptStore:UI');

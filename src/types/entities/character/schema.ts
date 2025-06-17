@@ -4,26 +4,26 @@
  * @description Define el esquema de validación utilizando Zod para la entidad Character
  */
 
-import { BaseEntitySchema } from '@/types/common/base';
 import { z } from 'zod';
+import { BaseEntitySchema } from '@/types/common/base';
 
 // Esquema para validar strings no vacíos
-const nonEmptyString = z.string().min(1, 'El campo no puede estar vacío');
+const _nonEmptyString = z.string().min(1, 'El campo no puede estar vacío');
 
 // Esquema para validar strings opcionales
-const optionalString = z.string().optional();
+const _optionalString = z.string().optional();
 
 // Esquema para validar arrays
-const stringArray = z.array(z.string()).optional().default([]);
+const _stringArray = z.array(z.string()).optional().default([]);
 
 // Esquema para estadísticas
-const statsSchema = z.union([z.string(), z.record(z.any()), z.undefined()]).optional();
+const _statsSchema = z.union([z.string(), z.record(z.any()), z.undefined()]).optional();
 
 // Esquema para filtros
-const filtersSchema = z.union([z.string(), z.record(z.any()), z.undefined()]).optional();
+const _filtersSchema = z.union([z.string(), z.record(z.any()), z.undefined()]).optional();
 
 // Esquema para relaciones
-const relationshipsSchema = z.union([z.string(), z.array(z.any()), z.undefined()]).optional();
+const _relationshipsSchema = z.union([z.string(), z.array(z.any()), z.undefined()]).optional();
 
 /**
  * 🧍 Esquema para inventario de personaje

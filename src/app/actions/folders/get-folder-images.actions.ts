@@ -1,19 +1,19 @@
 'use server';
 
+import path from 'path';
+import { z } from 'zod';
 import { getThumbnail } from '@/app/actions/images/image-thumbnails.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
-    RelatedAlbum,
-    RelatedCharacter,
-    RelatedCollection,
-    RelatedPlace,
-    RelatedTag,
-    RelatedWorldItem,
+	RelatedAlbum,
+	RelatedCharacter,
+	RelatedCollection,
+	RelatedPlace,
+	RelatedTag,
+	RelatedWorldItem,
 } from '@/types/file-item';
 import { ThumbnailQuality } from '@/types/thumbnails';
-import path from 'path';
-import { z } from 'zod';
 
 const imagesActionsLogger = serverLogger.withContext('FolderImagesActions');
 
@@ -62,7 +62,9 @@ function ensureThumbnailIsStringOrNull(thumbnail: unknown, mimeType = 'image/web
 				}
 
 				// Si no parece base64, es una cadena normal y no sabemos cómo manejarla
-				imagesActionsLogger.warn(`⚠️ Cadena no reconocida como base64: ${typeof thumbnail === 'string' ? thumbnail.substring(0, 20) : ''}...`);
+				imagesActionsLogger.warn(
+					`⚠️ Cadena no reconocida como base64: ${typeof thumbnail === 'string' ? thumbnail.substring(0, 20) : ''}...`
+				);
 				return null;
 			} catch (e) {
 				// Si falla, devolver null
@@ -79,9 +81,7 @@ function ensureThumbnailIsStringOrNull(thumbnail: unknown, mimeType = 'image/web
 		) {
 			try {
 				// Asegurarnos de que estamos trabajando con un Buffer válido
-				const buffer = Buffer.isBuffer(localThumbnail)
-					? localThumbnail
-					: Buffer.from(localThumbnail as any);
+				const buffer = Buffer.isBuffer(localThumbnail) ? localThumbnail : Buffer.from(localThumbnail as any);
 				return `data:${mimeType};base64,${buffer.toString('base64')}`;
 			} catch (e) {
 				imagesActionsLogger.warn('⚠️ Error al convertir binario a base64:', e);
@@ -94,7 +94,7 @@ function ensureThumbnailIsStringOrNull(thumbnail: unknown, mimeType = 'image/web
 			imagesActionsLogger.warn(`⚠️ Intentando conversión forzada de tipo ${typeof localThumbnail} a Buffer`);
 			const buffer = Buffer.from(localThumbnail as any);
 			return `data:${mimeType};base64,${buffer.toString('base64')}`;
-		} catch (lastError) {
+		} catch (_lastError) {
 			imagesActionsLogger.warn('⚠️ Tipo de thumbnail no manejable:', typeof localThumbnail);
 			return null;
 		}

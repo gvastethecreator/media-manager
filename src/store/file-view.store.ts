@@ -1,7 +1,7 @@
-import { clientLogger } from '@/lib/logger/client-logger';
-import type { ViewMode } from '@/types/settings';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { ViewMode } from '@/types/settings';
 
 const viewLogger = clientLogger.withContext('FileViewStore');
 
@@ -50,7 +50,7 @@ const initialState = {
  */
 export const useFileViewStore = create<FileViewState>()(
 	persist(
-		(set, get) => ({
+		(set, _get) => ({
 			...initialState,
 
 			setViewMode: (mode: ViewMode) => {

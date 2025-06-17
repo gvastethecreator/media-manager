@@ -1,6 +1,6 @@
+import type { LucideIcon } from 'lucide-react';
 import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
 import type { ViewType } from '@/types/file-item';
-import type { LucideIcon } from 'lucide-react';
 
 /**
  * @description Representa una entidad que puede tener un conteo de imágenes asociadas.

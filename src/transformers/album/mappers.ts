@@ -24,7 +24,7 @@ enum SortDirection {
 	desc = 'desc',
 }
 
-const logger = serverLogger.withContext('AlbumMapper');
+const _logger = serverLogger.withContext('AlbumMapper');
 
 /**
  * 🔄 Mapea datos de creación de Album a formato Prisma

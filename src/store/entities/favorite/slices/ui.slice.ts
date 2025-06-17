@@ -3,8 +3,8 @@
  * @module store/entities/favorite/slices/ui
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
 import { StateCreator } from 'zustand';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { FavoriteStore } from '..';
 import { FavoriteSortCriteria, FavoriteViewMode } from '../types';
 

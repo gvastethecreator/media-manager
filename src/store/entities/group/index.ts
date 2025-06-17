@@ -6,9 +6,9 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { GroupSortCriteria, GroupViewMode } from '../../../types/entities/group';
-import { type GroupCoreSlice, createGroupCoreSlice } from './slices/core';
-import { type GroupFiltersSlice, createGroupFiltersSlice } from './slices/filters';
-import { type GroupUISlice, createGroupUISlice } from './slices/ui';
+import { createGroupCoreSlice, type GroupCoreSlice } from './slices/core';
+import { createGroupFiltersSlice, type GroupFiltersSlice } from './slices/filters';
+import { createGroupUISlice, type GroupUISlice } from './slices/ui';
 import type { GroupState } from './types';
 
 // Combinación de todos los slices

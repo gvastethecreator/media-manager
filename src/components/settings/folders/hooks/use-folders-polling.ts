@@ -1,10 +1,10 @@
 'use client';
 
+import { useCallback, useRef, useState } from 'react';
 import type { ProcessStatus } from '@/app/actions/folders/folder-types';
 import { getFolderProcessingStatus } from '@/app/actions/folders/status.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { normalizeId } from '@/lib/utils/id.utils';
-import { useCallback, useRef, useState } from 'react';
 
 const pollingLogger = clientLogger.withContext('FoldersPolling');
 
@@ -73,7 +73,7 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 
 			// Ajustar intervalo de polling según fase
 			let interval = DEFAULT_POLLING_INTERVAL;
-			let statusObj: ProcessStatus | undefined = undefined;
+			let statusObj: ProcessStatus | undefined;
 			if ('status' in data && data.status && typeof data.status === 'object') {
 				statusObj = data.status as ProcessStatus;
 				if (statusObj.phase === 'starting') {

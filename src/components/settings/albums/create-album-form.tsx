@@ -1,5 +1,10 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Bookmark, ClipboardList, Gem, Loader2, PaintBucket, Pencil, Save, TextCursor } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { createAlbum, updateAlbum } from '@/app/actions/albums/album.actions';
 import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
@@ -10,11 +15,6 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
 import type { Album } from '@/types/entities/album';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Bookmark, ClipboardList, Gem, Loader2, PaintBucket, Pencil, Save, TextCursor } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 // Esquema de validación
 const createAlbumSchema = z.object({
@@ -128,7 +128,7 @@ export function CreateAlbumForm({
 	);
 
 	// Botón de guardar/crear que aparecerá en la parte superior
-	const saveButton = (
+	const _saveButton = (
 		<Button type="submit" className="h-8 text-xs" disabled={isSubmitting} onClick={form.handleSubmit(onSubmit)}>
 			{isSubmitting && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
 			<Save className="h-3 w-3 mr-1" />

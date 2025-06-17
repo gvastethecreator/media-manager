@@ -3,6 +3,7 @@
  * @module transformers/tag/serializers
  */
 
+import type { Prisma } from '@prisma/client';
 import { Logger } from '@/lib/logger';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type TagCreateInput, TagSchema, type TagUpdateInput } from '@/types/entities/tag/types';
@@ -10,7 +11,6 @@ import { validateFieldType, validateRequiredFields } from '@/utils/transformers/
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { getRelationCounts, preparePrismaRelations, validateEntityRelations } from '@/utils/transformers/relations';
 import { validateBaseEntity, validateMetadataFields, validateUIFields } from '@/utils/transformers/validation';
-import type { Prisma } from '@prisma/client';
 import {
 	type TagBase,
 	TagCategory,
@@ -35,7 +35,7 @@ export interface TagTransformOptions {
 	includeStats?: boolean;
 }
 
-const logger = new Logger('TagSerializer');
+const _logger = new Logger('TagSerializer');
 
 /**
  * 🔄 Serializa un Tag para Prisma
@@ -153,7 +153,7 @@ export function validateTag(data: unknown): TagComplete {
  */
 export async function extendTag(
 	tag: TagComplete,
-	options: {
+	_options: {
 		includeRelations?: boolean;
 		includeCount?: boolean;
 		customFields?: string[];
@@ -338,7 +338,7 @@ export function normalizeTagCategory(category?: string | null): string {
 
 	// Intentar mapear a una categoría existente del enum
 	const lowerCategory = category.toLowerCase();
-	for (const [key, value] of Object.entries(TagCategory)) {
+	for (const [_key, value] of Object.entries(TagCategory)) {
 		if (value.toLowerCase() === lowerCategory) {
 			return value;
 		}
@@ -380,7 +380,7 @@ export function generateTagColor(name: string): string {
  * @returns Emoji representativo
  */
 export function generateTagEmoji(name: string, category?: string): string {
-	const normalizedName = name.toLowerCase();
+	const _normalizedName = name.toLowerCase();
 	const normalizedCategory = category?.toLowerCase() || '';
 
 	if (normalizedCategory === 'person') return '👤';

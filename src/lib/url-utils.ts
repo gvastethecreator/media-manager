@@ -55,7 +55,7 @@ export function isValidUrl(url: string): boolean {
 	try {
 		new URL(url);
 		return true;
-	} catch (error) {
+	} catch (_error) {
 		// Verificar si podría ser una URL relativa
 		if (url.startsWith('/') || url.startsWith('./') || url.startsWith('../')) {
 			return true;

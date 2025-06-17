@@ -5,8 +5,6 @@
 
 export * from './base';
 export * from './enums';
-export * from './extended';
-
 // Re-exportar enums específicos para facilitar su uso
 export {
 	CommonMimeType,
@@ -17,3 +15,4 @@ export {
 	FileSortOption,
 	FileType,
 } from './enums';
+export * from './extended';

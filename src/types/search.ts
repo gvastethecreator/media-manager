@@ -3,8 +3,8 @@
  * @module types/search
  */
 
-import type { JSONString } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { JSONString } from '@/utils/types/utility-types';
 
 /**
  * Operador de búsqueda

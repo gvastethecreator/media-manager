@@ -4,6 +4,7 @@
  * @description Implementa operaciones CRUD básicas y gestión de estado para imágenes
  */
 
+import type { StateCreator } from 'zustand';
 import {
 	createImage as createServerImage,
 	deleteImage,
@@ -12,7 +13,6 @@ import {
 } from '@/app/actions/images/image-crud.actions';
 import { extendImage } from '@/transformers/image/serializers';
 import type { CreateImageData, Image, ImageExtended, UpdateImageData } from '@/types/entities/image';
-import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
 // Slice para operaciones CRUD básicas
@@ -157,13 +157,13 @@ export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSli
 	clearFolderImages: (folderId: string) => {
 		set((state) => {
 			const newImages = { ...state.core.images };
-			let count = 0;
+			let _count = 0;
 
 			// Usar for...of en lugar de forEach
 			for (const imageId of Object.keys(newImages)) {
 				if (newImages[imageId].folderId === folderId) {
 					delete newImages[imageId];
-					count++;
+					_count++;
 				}
 			}
 

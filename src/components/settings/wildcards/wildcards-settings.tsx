@@ -1,5 +1,9 @@
 'use client';
 
+import type { Wildcard } from '@prisma/client';
+import { ChevronRight, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash, WandIcon } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { useCallback, useEffect, useState } from 'react';
 import {
 	createWildcard,
 	deleteWildcard,
@@ -16,10 +20,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Toggle } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
-import type { Wildcard } from '@prisma/client';
-import { ChevronRight, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash, WandIcon } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useState } from 'react';
 import { WildcardPreview } from './wildcard-preview';
 
 // Importar el tipo de formulario que hemos definido
@@ -76,10 +76,10 @@ interface WildcardWithRelations extends Omit<Wildcard, 'children'> {
 
 export function WildcardsSettings() {
 	const [wildcards, setWildcards] = useState<WildcardWithRelations[]>([]);
-	const [rootWildcards, setRootWildcards] = useState<Wildcard[]>([]);
+	const [_rootWildcards, setRootWildcards] = useState<Wildcard[]>([]);
 	const [expandedWildcards, setExpandedWildcards] = useState<Record<string, boolean>>({});
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const [_isLoading, setIsLoading] = useState(true);
+	const [_error, setError] = useState<string | null>(null);
 	const [selectedWildcard, setSelectedWildcard] = useState<WildcardWithRelations | null>(null);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
@@ -88,7 +88,7 @@ export function WildcardsSettings() {
 
 	// Filtros y ordenamiento
 	const [searchQuery, setSearchQuery] = useState('');
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [selectedCategories, _setSelectedCategories] = useState<string[]>([]);
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
 	const [showOnlyRoots, setShowOnlyRoots] = useState(true);
 	const [sortBy, setSortBy] = useState<'name' | 'category' | 'createdAt'>('name');
@@ -173,7 +173,7 @@ export function WildcardsSettings() {
 	};
 
 	// Función para navegar hacia arriba en la jerarquía
-	const navigateUp = () => {
+	const _navigateUp = () => {
 		if (breadcrumbs.length > 0) {
 			const parentIndex = breadcrumbs.length - 2;
 			const parentId = parentIndex >= 0 ? breadcrumbs[parentIndex].id : null;
@@ -231,7 +231,7 @@ export function WildcardsSettings() {
 	});
 
 	// Estadísticas
-	const stats = {
+	const _stats = {
 		totalWildcards: wildcards.length,
 		rootWildcards: wildcards.filter((w) => !w.parentId).length,
 		totalChildren: wildcards.filter((w) => w.parentId).length,
@@ -239,7 +239,7 @@ export function WildcardsSettings() {
 			try {
 				const children = w.children !== 'empty_array' ? JSON.parse(w.children).length : 0;
 				return acc + children;
-			} catch (e) {
+			} catch (_e) {
 				return acc;
 			}
 		}, 0),
@@ -260,7 +260,7 @@ export function WildcardsSettings() {
 				children: JSON.stringify(data.children),
 			};
 
-			const newWildcard = await createWildcard(formattedData);
+			const _newWildcard = await createWildcard(formattedData);
 			await loadWildcards(); // Recargar para actualizar jerarquías
 			setIsCreateDialogOpen(false);
 			toastService.success('Comodín creado correctamente');
@@ -388,7 +388,7 @@ export function WildcardsSettings() {
 				<Button variant="ghost" size="sm" className="h-6 px-2" onClick={() => changeParent(null)}>
 					Raíz
 				</Button>
-				{breadcrumbs.map((crumb, index) => (
+				{breadcrumbs.map((crumb, _index) => (
 					<div key={crumb.id} className="flex items-center">
 						<ChevronRight className="h-3 w-3 mx-1" />
 						<Button variant="ghost" size="sm" className="h-6 px-2" onClick={() => changeParent(crumb.id)}>

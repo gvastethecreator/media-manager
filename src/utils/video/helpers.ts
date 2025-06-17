@@ -287,7 +287,7 @@ export function hasVisualConfigChanged(
 					const objB = JSON.parse(configB[key] as string);
 					// Comparación simple de estructuras JSON
 					if (JSON.stringify(objA) !== JSON.stringify(objB)) return true;
-				} catch (e) {
+				} catch (_e) {
 					// Si falla el parse, comparar como strings
 					if (configA[key] !== configB[key]) return true;
 				}

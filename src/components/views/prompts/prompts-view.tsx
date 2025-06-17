@@ -1,5 +1,9 @@
 'use client';
 
+import { AlertCircle, MessageSquare } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
 import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';
@@ -11,10 +15,6 @@ import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
 import type { PromptWithStats } from '@/types/entities/prompt/base';
-import { AlertCircle, MessageSquare } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('PromptsView');
@@ -60,7 +60,7 @@ export function PromptsView(_props: ViewProps) {
 		[setCurrentView, selectPrompt]
 	);
 
-	const handlePromptEdit = useCallback(
+	const _handlePromptEdit = useCallback(
 		(id: string) => {
 			viewLogger.info('⚙️ Editando prompt:', id);
 			router.push(`/settings/prompts?id=${id}`);
@@ -68,7 +68,7 @@ export function PromptsView(_props: ViewProps) {
 		[router]
 	);
 
-	const handlePromptDelete = useCallback((id: string) => {
+	const _handlePromptDelete = useCallback((id: string) => {
 		viewLogger.info('🗑️ Eliminando prompt:', id);
 		// Implementar lógica de eliminación
 	}, []);

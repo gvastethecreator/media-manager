@@ -3,16 +3,9 @@
  * @module transformers/wildcard
  */
 
-// Exportar tipos explícitamente
-export type { TransformWildcardOptions } from './transformer';
-
-// Exportar transformadores
-export {
-	transformWildcard,
-	transformWildcardToExtended,
-	transformWildcardToWithStats,
-	transformWildcards,
-} from './transformer';
+// Exportar mappers
+// Exportar funciones específicas de mappers que sí se usan
+export { mapCreateWildcardDataToPrisma, mapUpdateWildcardDataToPrisma, mapWildcardFiltersToPrisma } from './mappers';
 
 // Exportar serializadores
 export {
@@ -20,9 +13,12 @@ export {
 	serializeWildcardChildren,
 	toRelatedWildcard,
 } from './serializers';
-
-// Exportar mappers
-export {} from './mappers';
-
-// Exportar funciones específicas de mappers que sí se usan
-export { mapCreateWildcardDataToPrisma, mapUpdateWildcardDataToPrisma, mapWildcardFiltersToPrisma } from './mappers';
+// Exportar tipos explícitamente
+export type { TransformWildcardOptions } from './transformer';
+// Exportar transformadores
+export {
+	transformWildcard,
+	transformWildcards,
+	transformWildcardToExtended,
+	transformWildcardToWithStats,
+} from './transformer';

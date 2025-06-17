@@ -4,8 +4,8 @@
  * @description Proporciona funciones para escanear carpetas y obtener información de sus archivos
  */
 
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
 import { serverLogger } from './logger/server-logger';
 import { normalizePath } from './path-utils';
 
@@ -266,7 +266,7 @@ export async function folderExists(folderPath: string): Promise<boolean> {
 	try {
 		const stats = await fs.stat(folderPath);
 		return stats.isDirectory();
-	} catch (error) {
+	} catch (_error) {
 		return false;
 	}
 }

@@ -1,11 +1,11 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import type { WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
-import type { WorldItemWithRelations } from '@/types/entities/world-item/types';
 import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
+import type { WorldItemWithRelations } from '@/types/entities/world-item/types';
 import { CardHeader } from '../card-header';
 import { WorldItemCardContent } from './world-item-card-content';
 import { WorldItemCardFooter } from './world-item-card-footer';
@@ -81,7 +81,7 @@ export function WorldItemCard({
 	const groupsCount = worldItem._count?.groups || 0;
 
 	// Calcular total de relaciones para efectos visuales
-	const totalRelations =
+	const _totalRelations =
 		imagesCount +
 		videosCount +
 		albumsCount +
@@ -196,7 +196,7 @@ export function WorldItemCard({
 		if (typeof properties === 'string' && properties) {
 			try {
 				return JSON.parse(properties);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}
@@ -208,7 +208,7 @@ export function WorldItemCard({
 		if (typeof requirements === 'string' && requirements) {
 			try {
 				return JSON.parse(requirements);
-			} catch (e) {
+			} catch (_e) {
 				return {};
 			}
 		}
@@ -220,7 +220,7 @@ export function WorldItemCard({
 		if (typeof attributes === 'string' && attributes) {
 			try {
 				return JSON.parse(attributes);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}
@@ -232,7 +232,7 @@ export function WorldItemCard({
 		if (typeof effects === 'string' && effects) {
 			try {
 				return JSON.parse(effects);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}
@@ -244,7 +244,7 @@ export function WorldItemCard({
 		if (typeof stats === 'string' && stats) {
 			try {
 				return JSON.parse(stats);
-			} catch (e) {
+			} catch (_e) {
 				return {};
 			}
 		}
@@ -252,7 +252,7 @@ export function WorldItemCard({
 	}, [stats]);
 
 	// Procesar la imagen destacada
-	const processedFeaturedImage = featuredImage && typeof featuredImage === 'object' ? featuredImage : null;
+	const _processedFeaturedImage = featuredImage && typeof featuredImage === 'object' ? featuredImage : null;
 
 	// Render del componente
 	return (
@@ -393,7 +393,7 @@ function darkenColor(color?: string | null): string | null {
 
 		// Convertir de vuelta a hex
 		return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-	} catch (e) {
+	} catch (_e) {
 		// Si hay algún error, volver al valor por defecto
 		return null;
 	}

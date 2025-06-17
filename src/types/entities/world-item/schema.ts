@@ -3,8 +3,8 @@
  * @module types/entities/world-item/schema
  */
 
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from './enums';
 
 /**

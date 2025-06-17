@@ -13,7 +13,9 @@ export function DocumentSettings() {
 			<Separator className="my-0" />
 			<CardContent className="p-3">
 				<div className="flex flex-col gap-4">
-					<span className="text-xs text-muted-foreground">Configuraciones y gestión de documentos (markdown, txt).</span>
+					<span className="text-xs text-muted-foreground">
+						Configuraciones y gestión de documentos (markdown, txt).
+					</span>
 					{/* Aquí irán controles y opciones específicas */}
 				</div>
 			</CardContent>

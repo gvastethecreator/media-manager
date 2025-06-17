@@ -1,9 +1,9 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import { Album, Code, Image, Settings, Target, UserSquare } from 'lucide-react';
 import { useMemo } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface PromptCardContentProps {
 	description?: string | null;
@@ -49,7 +49,7 @@ export function PromptCardContent({
 		if (typeof tags === 'string') {
 			try {
 				return tags ? JSON.parse(tags) : [];
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}
@@ -61,7 +61,7 @@ export function PromptCardContent({
 		if (typeof parameters === 'string') {
 			try {
 				return parameters ? JSON.parse(parameters) : {};
-			} catch (e) {
+			} catch (_e) {
 				return {};
 			}
 		}
@@ -87,7 +87,7 @@ export function PromptCardContent({
 		: 'Sin descripción';
 
 	// Determinar qué relaciones mostrar
-	const hasRelations = Object.values(relationCounts).some((count) => count > 0);
+	const _hasRelations = Object.values(relationCounts).some((count) => count > 0);
 
 	return (
 		<div

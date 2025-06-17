@@ -1,9 +1,9 @@
 'use client';
 
-import { Skeleton } from '@/components/ui/skeleton';
 import { ImageOffIcon, VideoIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { getRecentCollectionMedia } from './collection-server-actions';
 
 interface CollectionCardImagesProps {

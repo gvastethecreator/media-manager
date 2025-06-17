@@ -4,8 +4,6 @@
  */
 
 import type { z } from 'zod';
-import type { NoteSchema } from './schema';
-
 // Importación de tipos para relaciones
 import type { Album } from '../album/types';
 import type { Character } from '../character/types';
@@ -20,6 +18,7 @@ import type { Tag } from '../tag/types';
 import type { Video } from '../video/types';
 import type { Wildcard } from '../wildcard/types';
 import type { WorldItem } from '../world-item/types';
+import type { NoteSchema } from './schema';
 
 /**
  * 🔄 Tipo base para Note

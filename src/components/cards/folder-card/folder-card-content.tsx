@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
 import { FolderOutputIcon, HardDriveIcon, TimerResetIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface FolderCardContentProps {
 	description?: string | null;

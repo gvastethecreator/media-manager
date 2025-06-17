@@ -1,9 +1,9 @@
 import { createHmac } from 'crypto';
+import fs from 'fs/promises';
 import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
 import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import fs from 'fs/promises';
 
 const thumbLogger = serverLogger.withContext('ThumbnailService');
 

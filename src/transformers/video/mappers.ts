@@ -3,6 +3,7 @@
  * @module transformers/video/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { createLogger } from '@/lib/logger';
 import type {
 	RelatedVideo,
@@ -14,7 +15,6 @@ import type {
 	VideoUpdateInput,
 	VideoVisualConfigComplete,
 } from '@/types/entities/video/types';
-import type { Prisma } from '@prisma/client';
 import { fromVideoVisualConfigComplete, toPrismaVideo } from './serializers';
 
 // Logger específico para el transformer de Video

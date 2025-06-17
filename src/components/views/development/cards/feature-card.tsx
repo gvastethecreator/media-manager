@@ -2,7 +2,6 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import type { ReactNode } from 'react';
 import { StatusBadge } from './status-badge';
 
 export interface Feature {

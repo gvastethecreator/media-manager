@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
@@ -13,7 +14,6 @@ import { useTagStore } from '@/store/entities/tag';
 import { useWildcardStore } from '@/store/entities/wildcard';
 import { useWorldItemStore } from '@/store/entities/world-item';
 import type { ViewType } from '@/types/file-item';
-import { useCallback } from 'react';
 
 /**
  * Hook que proporciona manejadores para las interacciones con categorías

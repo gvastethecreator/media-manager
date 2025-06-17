@@ -4,8 +4,8 @@
  * Se comunica con la base de datos a través de Server Actions
  */
 
-import { Card } from '@/components/ui/card';
 import { Suspense } from 'react';
+import { Card } from '@/components/ui/card';
 import { GeneralStats } from './components/general-stats';
 import { RecentActivity } from './components/recent-activity';
 import { StatsLoading } from './components/stats-loading';

@@ -1,6 +1,6 @@
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { EntityType } from '@/types/entities/entities';
-import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
 const relationsLogger = clientLogger.withContext('PromptStore:Relations');
@@ -25,41 +25,41 @@ export interface RelationsSlice {
 
 // Acciones mock para desarrollo (se reemplazarán con server actions)
 const mockApi = {
-	addPromptToEntity: async (promptId: string, entityId: string, entityType: EntityType): Promise<void> => {
+	addPromptToEntity: async (_promptId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 
-	removePromptFromEntity: async (promptId: string, entityId: string, entityType: EntityType): Promise<void> => {
+	removePromptFromEntity: async (_promptId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 
-	addGroupToPrompt: async (promptId: string, groupId: string): Promise<void> => {
+	addGroupToPrompt: async (_promptId: string, _groupId: string): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 
-	removeGroupFromPrompt: async (promptId: string, groupId: string): Promise<void> => {
+	removeGroupFromPrompt: async (_promptId: string, _groupId: string): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 
-	addPropertyToPrompt: async (promptId: string, propertyId: string): Promise<void> => {
+	addPropertyToPrompt: async (_promptId: string, _propertyId: string): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 
-	removePropertyFromPrompt: async (promptId: string, propertyId: string): Promise<void> => {
+	removePropertyFromPrompt: async (_promptId: string, _propertyId: string): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 
-	addWildcardToPrompt: async (promptId: string, wildcardId: string): Promise<void> => {
+	addWildcardToPrompt: async (_promptId: string, _wildcardId: string): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 
-	removeWildcardFromPrompt: async (promptId: string, wildcardId: string): Promise<void> => {
+	removeWildcardFromPrompt: async (_promptId: string, _wildcardId: string): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 
 	updatePromptRelations: async (
-		promptId: string,
-		data: { groupIds?: string[]; propertyIds?: string[]; wildcardIds?: string[] }
+		_promptId: string,
+		_data: { groupIds?: string[]; propertyIds?: string[]; wildcardIds?: string[] }
 	): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},

@@ -3,11 +3,11 @@
  * @module transformers/concept/transformer
  */
 
+import type { Concept } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { ConceptSchema } from '@/types/entities/concept/schema';
 import type { ConceptComplete, ConceptExtended, ConceptWithStats } from '@/types/entities/concept/types';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Concept } from '@prisma/client';
 import { fromPrismaConcept } from './serializers';
 
 /**

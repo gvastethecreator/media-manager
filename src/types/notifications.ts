@@ -3,8 +3,8 @@
  * @module types/notifications
  */
 
-import type { EntityId, JSONString } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { EntityId, JSONString } from '@/utils/types/utility-types';
 import { EventSeverity } from './events';
 
 /**

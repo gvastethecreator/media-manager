@@ -1,7 +1,7 @@
-import { clientLogger } from '@/lib/logger/client-logger';
 import { produce } from 'immer';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 // Logger para el store de UI
 const uiLogger = clientLogger.withContext('UIStore');

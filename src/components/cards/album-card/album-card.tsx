@@ -1,10 +1,9 @@
 'use client';
 
+import { motion } from 'motion/react';
+import React, { useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { Album } from '@/types/entities/album';
-import { motion } from 'motion/react';
-import React from 'react';
-import { useCallback, useMemo } from 'react';
 import { AlbumCardContent } from './album-card-content';
 import { AlbumCardFooter } from './album-card-footer';
 import { AlbumCardHeader } from './album-card-header';
@@ -108,7 +107,7 @@ export function AlbumCard({
 
 			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			// Si hay algún error, volver al valor por defecto
 			return '#6d28d9';
 		}
@@ -126,11 +125,11 @@ export function AlbumCard({
 	);
 
 	// Parsear los filtros si están almacenados como JSON string
-	const filters = useMemo(() => {
+	const _filters = useMemo(() => {
 		if (typeof album.filters === 'string' && album.filters !== 'empty_array') {
 			try {
 				return JSON.parse(album.filters);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}

@@ -5,32 +5,30 @@
  * para mantener compatibilidad con diferentes patrones de importación en el código.
  */
 
-// Exportar directamente desde el logger del servidor
-export {
-	ServerLogger as Logger,
-	ServerLogger, // Exportar ServerLogger también como Logger para compatibilidad
-	createServerServiceLogger as createLogger,
-	serverLogger,
-} from './server-logger';
-
 // Exportar el logger del cliente para componentes del lado del cliente
 export {
 	ClientLogger,
 	clientLogger,
 	createClientServiceLogger,
 } from './client-logger';
+// Re-exportar enhanced-logger para compatibilidad
+export {
+	createEnhancedServiceLogger,
+	EnhancedLogger,
+} from './enhanced-logger';
 
 // Exportar configuración y tipos
 export {
-	LogLevelSchema,
-	LoggerConfigSchema,
-	loggerConfig,
-	type LogLevel,
 	type LoggerConfig,
+	LoggerConfigSchema,
+	type LogLevel,
+	LogLevelSchema,
+	loggerConfig,
 } from './logger.config';
-
-// Re-exportar enhanced-logger para compatibilidad
+// Exportar directamente desde el logger del servidor
 export {
-	EnhancedLogger,
-	createEnhancedServiceLogger,
-} from './enhanced-logger';
+	createServerServiceLogger as createLogger,
+	ServerLogger as Logger,
+	ServerLogger, // Exportar ServerLogger también como Logger para compatibilidad
+	serverLogger,
+} from './server-logger';

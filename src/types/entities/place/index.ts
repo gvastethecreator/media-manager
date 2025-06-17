@@ -4,6 +4,7 @@
  */
 
 // Exportar desde archivo base
+// Exportar tipo principal
 export type {
 	CreatePlaceData,
 	PlaceBase,
@@ -11,6 +12,7 @@ export type {
 	PlaceDanger,
 	PlaceExtended,
 	PlaceExtendedComplete,
+	PlaceExtendedComplete as Place,
 	PlaceFilters,
 	PlaceResource,
 	PlaceStat,
@@ -18,7 +20,6 @@ export type {
 	PlaceWithRelations,
 	UpdatePlaceData,
 } from './types';
-
 // Exportar desde enumeraciones
 export {
 	PLACE_SORT_PROPERTY_MAP,
@@ -27,6 +28,3 @@ export {
 	PlaceSortCriteria,
 	PlaceType,
 } from './types';
-
-// Exportar tipo principal
-export type { PlaceExtendedComplete as Place } from './types';

@@ -1,6 +1,8 @@
 'use client';
 
-import { type TagWithStats as ServerTagWithStats, deleteTagAction, getTagsAction } from '@/app/actions/tags';
+import { Filter, Info, Loader2, PlusCircle, Save, Tag as TagIcon, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { deleteTagAction, getTagsAction, type TagWithStats as ServerTagWithStats } from '@/app/actions/tags';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +14,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import toastService from '@/services/toast.service';
 import { TagCategory } from '@/types/entities/tag/enums';
 import type { Tag } from '@/types/entities/tag/types';
-import { Filter, Info, Loader2, PlusCircle, Save, Tag as TagIcon, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreateTagForm } from './create-tag-form';
 
 // Definir tipo para el manejador de eventos del botón
@@ -532,7 +532,7 @@ export function TagsSettings() {
 }
 
 // Función auxiliar para generar colores basados en categoría
-function generateCategoryColor(category: TagCategory): string {
+function _generateCategoryColor(category: TagCategory): string {
 	switch (category) {
 		case TagCategory.CHARACTER:
 			return 'bg-blue-500';

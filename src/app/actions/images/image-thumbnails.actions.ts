@@ -8,20 +8,20 @@
  */
 'use server';
 
+import fs from 'fs/promises';
+import { revalidatePath } from 'next/cache';
+import sharp from 'sharp';
 import { thumbnailCache } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image-service-export';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
-	ServiceErrorCode,
 	createEntityNotFoundError,
 	createServiceError,
+	ServiceErrorCode,
 	toServiceError,
 } from '@/utils/errors/service-errors';
-import fs from 'fs/promises';
-import { revalidatePath } from 'next/cache';
-import sharp from 'sharp';
 import type { CleanupThumbnailsResult, ReprocessThumbnailsResult, ThumbnailStatsResult } from './image-types.actions';
 
 const SERVER_ACTION_NAME = 'ImageThumbnails';
@@ -246,10 +246,7 @@ export async function getThumbnailStats(): Promise<ThumbnailStatsResult> {
  * Reprocesa las miniaturas de todas las imágenes
  */
 export async function reprocessThumbnails(
-	options: {
-		force?: boolean;
-		quality?: ThumbnailQuality;
-	} = {}
+	options: { force?: boolean; quality?: ThumbnailQuality } = {}
 ): Promise<ReprocessThumbnailsResult> {
 	const startTime = Date.now();
 	let processed = 0;

@@ -5,6 +5,8 @@
  * @module app/actions/folders/process.actions
  */
 
+import { revalidatePath } from 'next/cache';
+import PQueue from 'p-queue';
 import path from 'path';
 import { throttleEvent } from '@/lib/event-throttler';
 import { invalidateFolderCache } from '@/lib/folder-cache';
@@ -12,15 +14,13 @@ import { type FolderScanResult, scanFolder } from '@/lib/folder-scanner';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { Folder } from '@/types/entities/folder/types';
-import { revalidatePath } from 'next/cache';
-import PQueue from 'p-queue';
 import {
+	createFolderError,
 	FOLDER_ERROR_CODES,
 	FolderResponse,
 	IndexOptions,
 	ProcessStatus,
 	ReindexOptions,
-	createFolderError,
 } from './folder-types';
 
 // Logger for process actions

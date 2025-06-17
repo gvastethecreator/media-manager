@@ -1,9 +1,5 @@
 'use client';
 
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useProfileContext } from '@/lib/contexts';
 import {
 	Briefcase,
 	Bug,
@@ -27,6 +23,10 @@ import {
 import { motion } from 'motion/react';
 import { useTheme } from 'next-themes';
 import { memo, useCallback, useMemo } from 'react';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useProfileContext } from '@/lib/contexts';
 
 // Constante con los temas disponibles
 const THEMES = [
@@ -185,13 +185,7 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 });
 
 // Componente de avatar memoizado
-const MemoizedAvatar = memo(function Avatar({
-	color,
-	emoji,
-}: {
-	color: string;
-	emoji: string;
-}) {
+const MemoizedAvatar = memo(function Avatar({ color, emoji }: { color: string; emoji: string }) {
 	return (
 		<motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative group">
 			<div

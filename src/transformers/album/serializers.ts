@@ -302,7 +302,7 @@ export function validateAlbum(data: unknown): AlbumComplete {
  */
 export async function extendAlbum(
 	album: AlbumComplete,
-	options: {
+	_options: {
 		includeRelations?: boolean;
 		includeCount?: boolean;
 		customFields?: string[];
