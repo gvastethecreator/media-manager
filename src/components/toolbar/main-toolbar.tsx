@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { useFileStoreBase } from '@/store/entities/file';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore, ViewMode } from '@/store/ui/view-options.slice';
 import type { ViewType } from '@/types/file-item';
 import {
 	Archive,
@@ -49,28 +50,32 @@ export interface ViewToolbarProps {
 	isRightPanelCollapsed?: boolean;
 	toggleRightPanelCollapse?: () => void;
 	isRightPanelVisible?: boolean;
+	allItemIds?: string[]; // IDs de todos los elementos disponibles para selección
 }
 
 export function ViewToolbar({
 	isRightPanelCollapsed,
 	toggleRightPanelCollapse,
 	isRightPanelVisible,
+	allItemIds = [],
 }: ViewToolbarProps) {
 	const { currentView, getCurrentItem } = useNavigationStore();
 
-	// 🆕 Usar los nuevos stores específicos de entidades
-	const viewMode = useFileStoreBase((state) => state.viewMode);
-	const setViewMode = useFileStoreBase((state) => state.setViewMode);
-	const selectedFileIds = useFileStoreBase((state) => state.selectedFileIds);
-	const files = useFileStoreBase((state) => state.files);
-	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
-	const sortBy = useFileStoreBase((state) => state.sortBy);
-	const setSortBy = useFileStoreBase((state) => state.setSortBy);
-	const sortDirection = useFileStoreBase((state) => state.sortDirection);
-	const setSortDirection = useFileStoreBase((state) => state.setSortDirection);
+	// 🔄 Usar los nuevos stores de Zustand
+	const viewMode = useViewOptionsStore((state) => state.viewMode);
+	const setViewMode = useViewOptionsStore((state) => state.setViewMode);
+	const sortOptions = useViewOptionsStore((state) => state.sortOptions);
+	const addSortOption = useViewOptionsStore((state) => state.addSortOption);
+	const searchQuery = useViewOptionsStore((state) => state.searchQuery);
+	const setSearchQuery = useViewOptionsStore((state) => state.setSearchQuery);
+	const itemSize = useViewOptionsStore((state) => state.itemSize);
+	const setItemSize = useViewOptionsStore((state) => state.setItemSize);
 
-	// 🎯 Obtener items seleccionados con información completa
-	const selectedItems = selectedFileIds.map((id) => files[id as keyof typeof files]).filter(Boolean);
+	// 🔄 Store de selección
+	const selectedIds = useSelectionStore((state) => state.selectedIds);
+	const clearSelection = useSelectionStore((state) => state.clearSelection);
+	const selectAll = useSelectionStore((state) => state.selectAll);
+	const invertSelection = useSelectionStore((state) => state.invertSelection);
 
 	const { isVisible, toggleVisibility } = useDetailsPanel();
 
@@ -90,63 +95,72 @@ export function ViewToolbar({
 
 	const showDetailsButton = viewsWithDetails.includes(currentView);
 
-	// Acciones para archivos marcados
+	// 🔄 Acciones para archivos seleccionados
 	const handleDeleteSelected = useCallback(() => {
-		if (selectedItems.length === 0) {
+		if (selectedIds.length === 0) {
 			return;
 		}
-		if (window.confirm(`¿Estás seguro de que quieres eliminar ${selectedItems.length} archivo(s)?`)) {
-			for (const item of selectedItems) {
-				if (item?.path) {
-					window.electron?.deleteFile(item.path);
-				}
-			}
-			deselectAllFiles();
+		if (window.confirm(`¿Estás seguro de que quieres eliminar ${selectedIds.length} archivo(s)?`)) {
+			// Implementar la eliminación de archivos usando server actions
+			// TODO: Implementar server action para eliminar archivos
+			clearSelection();
 		}
-	}, [selectedItems, deselectAllFiles]);
+	}, [selectedIds, clearSelection]);
 
 	const handleDownloadSelected = useCallback(() => {
-		if (selectedItems.length === 0) {
+		if (selectedIds.length === 0) {
 			return;
 		}
-		for (const item of selectedItems) {
-			if (item?.path) {
-				window.electron?.downloadFile(item.path);
-			}
-		}
-	}, [selectedItems]);
+		// TODO: Implementar server action para descargar archivos
+	}, [selectedIds]);
 
 	const handleCompressFiles = useCallback(() => {
-		if (selectedItems.length === 0) {
+		if (selectedIds.length === 0) {
 			return;
 		}
-		const paths = selectedItems.map((item) => item?.path).filter(Boolean) as string[];
-		if (paths.length > 0) {
-			console.warn('La funcionalidad de compresión no está implementada en esta versión');
-			alert('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
-		}
-	}, [selectedItems]);
+		// TODO: Implementar server action para comprimir archivos
+		console.warn('La funcionalidad de compresión no está implementada en esta versión');
+		alert('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
+	}, [selectedIds]);
 
 	const handleCopySelected = useCallback(() => {
-		if (selectedItems.length === 0) {
+		if (selectedIds.length === 0) {
 			return;
 		}
-		if (selectedItems[0]?.path) {
-			window.electron?.copyFileToClipboard(selectedItems[0].path);
-		}
-	}, [selectedItems]);
+		// TODO: Implementar server action para copiar archivos
+	}, [selectedIds]);
 
+	// 🔄 Manejador de ordenación
 	const handleSort = useCallback(
-		(field: 'name' | 'createdAt' | 'modifiedAt') => {
-			if (sortBy === field) {
-				setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+		(field: string) => {
+			const currentSortOption = sortOptions.find(option => option.field === field);
+			if (currentSortOption) {
+				// Cambiar dirección si ya existe
+				addSortOption({
+					field,
+					direction: currentSortOption.direction === 'asc' ? 'desc' : 'asc'
+				});
 			} else {
-				setSortBy(field);
-				setSortDirection('asc');
+				// Añadir nueva opción de ordenación
+				addSortOption({ field, direction: 'asc' });
 			}
 		},
-		[sortBy, sortDirection, setSortBy, setSortDirection]
+		[sortOptions, addSortOption]
 	);
+
+	// 🔄 Manejador de selección
+	const handleSelectAll = useCallback(() => {
+		selectAll(allItemIds);
+	}, [selectAll, allItemIds]);
+
+	const handleInvertSelection = useCallback(() => {
+		invertSelection(allItemIds);
+	}, [invertSelection, allItemIds]);
+
+	// 🔄 Manejador de cambio de tamaño
+	const handleSizeChange = useCallback((delta: number) => {
+		setItemSize(Math.max(50, Math.min(300, itemSize + delta)));
+	}, [itemSize, setItemSize]);
 
 	const renderSortButtons = () => (
 		<div className="flex items-center gap-0.5">
@@ -156,12 +170,12 @@ export function ViewToolbar({
 				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por nombre"
 				onClick={() => handleSort('name')}
-				data-active={sortBy === 'name'}
+				data-active={sortOptions.some(opt => opt.field === 'name')}
 			>
-				<FileText className={cn('h-3.5 w-3.5', sortBy === 'name' && 'text-primary')} />
-				{sortBy === 'name' && (
+				<FileText className={cn('h-3.5 w-3.5', sortOptions.some(opt => opt.field === 'name') && 'text-primary')} />
+				{sortOptions.some(opt => opt.field === 'name') && (
 					<span className="ml-0.5">
-						{sortDirection === 'asc' ? (
+						{sortOptions.find(opt => opt.field === 'name')?.direction === 'asc' ? (
 							<ArrowUp className="h-2.5 w-2.5 text-primary" />
 						) : (
 							<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -175,12 +189,12 @@ export function ViewToolbar({
 				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por fecha de modificación"
 				onClick={() => handleSort('modifiedAt')}
-				data-active={sortBy === 'modifiedAt'}
+				data-active={sortOptions.some(opt => opt.field === 'modifiedAt')}
 			>
-				<Clock className={cn('h-3.5 w-3.5', sortBy === 'modifiedAt' && 'text-primary')} />
-				{sortBy === 'modifiedAt' && (
+				<Clock className={cn('h-3.5 w-3.5', sortOptions.some(opt => opt.field === 'modifiedAt') && 'text-primary')} />
+				{sortOptions.some(opt => opt.field === 'modifiedAt') && (
 					<span className="ml-0.5">
-						{sortDirection === 'asc' ? (
+						{sortOptions.find(opt => opt.field === 'modifiedAt')?.direction === 'asc' ? (
 							<ArrowUp className="h-2.5 w-2.5 text-primary" />
 						) : (
 							<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -194,12 +208,12 @@ export function ViewToolbar({
 				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por fecha de creación"
 				onClick={() => handleSort('createdAt')}
-				data-active={sortBy === 'createdAt'}
+				data-active={sortOptions.some(opt => opt.field === 'createdAt')}
 			>
-				<Calendar className={cn('h-3.5 w-3.5', sortBy === 'createdAt' && 'text-primary')} />
-				{sortBy === 'createdAt' && (
+				<Calendar className={cn('h-3.5 w-3.5', sortOptions.some(opt => opt.field === 'createdAt') && 'text-primary')} />
+				{sortOptions.some(opt => opt.field === 'createdAt') && (
 					<span className="ml-0.5">
-						{sortDirection === 'asc' ? (
+						{sortOptions.find(opt => opt.field === 'createdAt')?.direction === 'asc' ? (
 							<ArrowUp className="h-2.5 w-2.5 text-primary" />
 						) : (
 							<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -226,21 +240,21 @@ export function ViewToolbar({
 				variant="ghost"
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
-				onClick={() => setViewMode('details')}
-				title="Vista de detalles"
-				data-active={viewMode === 'details'}
+				onClick={() => setViewMode('cards')}
+				title="Vista de tarjetas"
+				data-active={viewMode === 'cards'}
 			>
-				<LayoutGrid className={cn('h-3.5 w-3.5', viewMode === 'details' && 'text-primary font-bold')} />
+				<LayoutGrid className={cn('h-3.5 w-3.5', viewMode === 'cards' && 'text-primary font-bold')} />
 			</Button>
 			<Button
 				variant="ghost"
 				size="icon"
 				className="h-7 w-7 hover:bg-accent"
-				onClick={() => setViewMode('tree')}
-				title="Vista de árbol"
-				data-active={viewMode === 'tree'}
+				onClick={() => setViewMode('masonry')}
+				title="Vista de mosaico"
+				data-active={viewMode === 'masonry'}
 			>
-				<GalleryHorizontal className={cn('h-3.5 w-3.5', viewMode === 'tree' && 'text-primary font-bold')} />
+				<GalleryHorizontal className={cn('h-3.5 w-3.5', viewMode === 'masonry' && 'text-primary font-bold')} />
 			</Button>
 			<Button
 				variant="ghost"
@@ -256,139 +270,167 @@ export function ViewToolbar({
 	);
 
 	const renderSelectionActions = () => {
-		if (selectedItems.length === 0) {
-			return null;
-		}
+		if (selectedIds.length === 0) return null;
 
 		return (
-			<div className="flex items-center gap-1.5 bg-accent/10 rounded-md p-0.5">
-				<Badge variant="secondary" className="gap-1 text-xs py-0.5 px-1.5">
-					<span>{selectedItems.length}</span>
-					<span>seleccionado{selectedItems.length !== 1 ? 's' : ''}</span>
+			<motion.div
+				initial={{ opacity: 0, y: -10 }}
+				animate={{ opacity: 1, y: 0 }}
+				exit={{ opacity: 0, y: -10 }}
+				className="flex items-center gap-1 ml-2"
+			>
+				<Badge variant="secondary" className="h-5 px-1.5">
+					{selectedIds.length} {selectedIds.length === 1 ? 'seleccionado' : 'seleccionados'}
 				</Badge>
-
-				<Separator orientation="vertical" className="h-5 w-px bg-border" />
-
-				<div className="flex items-center gap-0.5">
-					{showDetailsButton && (
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-7 w-7 hover:bg-accent"
-							title={isVisible ? 'Ocultar panel de detalles' : 'Mostrar panel de detalles'}
-							onClick={toggleVisibility}
-							data-active={isVisible}
-						>
-							<Info className={cn('h-3.5 w-3.5', isVisible && 'text-primary font-bold')} />
-						</Button>
-					)}
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7 hover:bg-accent"
-						title="Eliminar archivos seleccionados"
-						onClick={handleDeleteSelected}
-					>
-						<Trash2 className="h-3.5 w-3.5 text-destructive" />
-					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7 hover:bg-accent"
-						title="Descargar archivos seleccionados"
-						onClick={handleDownloadSelected}
-					>
-						<Download className="h-3.5 w-3.5" />
-					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7 hover:bg-accent"
-						title="Comprimir archivos seleccionados"
-						onClick={handleCompressFiles}
-					>
-						<Archive className="h-3.5 w-3.5" />
-					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7 hover:bg-accent"
-						title="Copiar archivo seleccionado"
-						onClick={handleCopySelected}
-						disabled={selectedItems.length !== 1}
-					>
-						<Copy className="h-3.5 w-3.5" />
-					</Button>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-7 w-7 hover:bg-accent"
-						title="Limpiar selección"
-						onClick={deselectAllFiles}
-					>
-						<X className="h-3.5 w-3.5" />
-					</Button>
-					{/* Botón para colapsar/expandir el panel derecho */}
-					{isVisible && toggleRightPanelCollapse && (
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-7 w-7 hover:bg-accent"
-							title={isRightPanelCollapsed ? 'Expandir panel de detalles' : 'Colapsar panel de detalles'}
-							onClick={toggleRightPanelCollapse}
-						>
-							{isRightPanelCollapsed ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
-						</Button>
-					)}
-				</div>
-			</div>
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-6 w-6 hover:bg-accent"
+					onClick={clearSelection}
+					title="Limpiar selección"
+				>
+					<X className="h-3.5 w-3.5" />
+				</Button>
+				<Separator orientation="vertical" className="h-4 mx-1" />
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-6 w-6 hover:bg-accent"
+					onClick={handleSelectAll}
+					title="Seleccionar todo"
+				>
+					<Plus className="h-3.5 w-3.5" />
+				</Button>
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-6 w-6 hover:bg-accent"
+					onClick={handleInvertSelection}
+					title="Invertir selección"
+				>
+					<ArrowRight className="h-3.5 w-3.5" />
+				</Button>
+				<Separator orientation="vertical" className="h-4 mx-1" />
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-6 w-6 hover:bg-accent"
+					onClick={handleDeleteSelected}
+					title="Eliminar seleccionados"
+				>
+					<Trash2 className="h-3.5 w-3.5 text-destructive" />
+				</Button>
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-6 w-6 hover:bg-accent"
+					onClick={handleDownloadSelected}
+					title="Descargar seleccionados"
+				>
+					<Download className="h-3.5 w-3.5" />
+				</Button>
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-6 w-6 hover:bg-accent"
+					onClick={handleCopySelected}
+					title="Copiar seleccionados"
+				>
+					<Copy className="h-3.5 w-3.5" />
+				</Button>
+				<Button
+					variant="ghost"
+					size="icon"
+					className="h-6 w-6 hover:bg-accent"
+					onClick={handleCompressFiles}
+					title="Comprimir seleccionados"
+				>
+					<Archive className="h-3.5 w-3.5" />
+				</Button>
+			</motion.div>
 		);
 	};
 
+	// 🔄 Añadir controles de tamaño
+	const renderSizeControls = () => (
+		<div className="flex items-center gap-0.5">
+			<Button
+				variant="ghost"
+				size="icon"
+				className="h-7 w-7 hover:bg-accent"
+				onClick={() => handleSizeChange(-10)}
+				title="Reducir tamaño"
+			>
+				<ArrowDown className="h-3.5 w-3.5" />
+			</Button>
+			<Button
+				variant="ghost"
+				size="icon"
+				className="h-7 w-7 hover:bg-accent"
+				onClick={() => handleSizeChange(10)}
+				title="Aumentar tamaño"
+			>
+				<ArrowUp className="h-3.5 w-3.5" />
+			</Button>
+		</div>
+	);
+
+	// 🔄 Añadir campo de búsqueda
+	const renderSearchInput = () => (
+		<div className="flex items-center gap-1 ml-2">
+			<div className="relative">
+				<Search className="h-3.5 w-3.5 absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+				<input
+					type="text"
+					placeholder="Buscar..."
+					className="h-7 pl-7 pr-2 rounded-md bg-accent/10 border-none focus:ring-1 focus:ring-primary text-sm"
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+				/>
+				{searchQuery && (
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-5 w-5 absolute right-1 top-1/2 transform -translate-y-1/2 hover:bg-accent"
+						onClick={() => setSearchQuery('')}
+						title="Limpiar búsqueda"
+					>
+						<X className="h-2.5 w-2.5" />
+					</Button>
+				)}
+			</div>
+		</div>
+	);
+
 	const renderContextActions = () => {
 		switch (currentView) {
-			case 'all-images':
-			case 'favorites':
-			case 'search':
-				return (
-					<div className="flex items-center gap-0.5">
-						<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-accent">
-							<Download className="h-3.5 w-3.5" />
-						</Button>
-						<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-accent">
-							<Share2 className="h-3.5 w-3.5" />
-						</Button>
-					</div>
-				);
-			case 'collections':
-			case 'folders':
-			case 'tags':
-			case 'albums':
-			case 'characters':
-			case 'places':
-			case 'world-items':
-				return (
-					<div className="flex items-center gap-0.5">
-						<Button variant="ghost" size="sm" className="h-7 text-xs px-2">
-							<Plus className="h-3.5 w-3.5 mr-1" />
-							Nuevo
-						</Button>
-					</div>
-				);
 			case 'collection-content':
-			case 'folder-content':
-			case 'tag-content':
-			case 'album-content':
-			case 'character-content':
-			case 'place-content':
-			case 'world-item-content':
 				return (
 					<div className="flex items-center gap-0.5">
-						<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-accent">
-							<Edit className="h-3.5 w-3.5" />
+						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
+							<Plus className="h-3.5 w-3.5 mr-1" />
+							<span className="text-xs">Añadir imágenes</span>
 						</Button>
-						<Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-accent">
-							<Trash2 className="h-3.5 w-3.5 text-destructive" />
+						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
+							<Edit className="h-3.5 w-3.5 mr-1" />
+							<span className="text-xs">Editar colección</span>
+						</Button>
+						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
+							<Share2 className="h-3.5 w-3.5 mr-1" />
+							<span className="text-xs">Compartir</span>
+						</Button>
+					</div>
+				);
+			case 'folder-content':
+				return (
+					<div className="flex items-center gap-0.5">
+						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
+							<Plus className="h-3.5 w-3.5 mr-1" />
+							<span className="text-xs">Nueva carpeta</span>
+						</Button>
+						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
+							<ImageIcon className="h-3.5 w-3.5 mr-1" />
+							<span className="text-xs">Subir imágenes</span>
 						</Button>
 					</div>
 				);
@@ -400,61 +442,72 @@ export function ViewToolbar({
 	const renderIcon = () => {
 		switch (currentView) {
 			case 'all-images':
-				return <ImageIcon className="h-3.5 w-3.5 text-primary" />;
+				return <ImageIcon className="h-4 w-4 mr-2 text-primary" />;
 			case 'favorites':
-				return <Star className="h-3.5 w-3.5 text-amber-500" />;
-			case 'search':
-				return <Search className="h-3.5 w-3.5 text-blue-500" />;
-			case 'collections':
+				return <Star className="h-4 w-4 mr-2 text-yellow-500" />;
 			case 'collection-content':
-				return <BookImage className="h-3.5 w-3.5 text-indigo-500" />;
-			case 'folders':
+				return <BookImage className="h-4 w-4 mr-2 text-blue-500" />;
 			case 'folder-content':
-				return <FolderIcon className="h-3.5 w-3.5 text-yellow-500" />;
-			case 'tags':
+				return <FolderIcon className="h-4 w-4 mr-2 text-yellow-500" />;
 			case 'tag-content':
-				return <TagIcon className="h-3.5 w-3.5 text-green-500" />;
-			case 'albums':
+				return <TagIcon className="h-4 w-4 mr-2 text-green-500" />;
 			case 'album-content':
-				return <Camera className="h-3.5 w-3.5 text-purple-500" />;
-			case 'characters':
+				return <Camera className="h-4 w-4 mr-2 text-purple-500" />;
 			case 'character-content':
-				return <User2 className="h-3.5 w-3.5 text-sky-500" />;
-			case 'places':
+				return <User2 className="h-4 w-4 mr-2 text-red-500" />;
 			case 'place-content':
-				return <MapPin className="h-3.5 w-3.5 text-rose-500" />;
-			case 'world-items':
+				return <MapPin className="h-4 w-4 mr-2 text-cyan-500" />;
 			case 'world-item-content':
-				return <Box className="h-3.5 w-3.5 text-orange-500" />;
+				return <Box className="h-4 w-4 mr-2 text-orange-500" />;
 			default:
 				return null;
 		}
 	};
 
-	return (
-		<motion.div
-			initial={{ opacity: 0, y: -10 }}
-			animate={{ opacity: 1, y: 0 }}
-			className="flex flex-col bg-background border-b border-border"
-		>
-			<div className="flex w-full items-center justify-between gap-3 py-1 px-2">
-				<div className="flex items-center gap-2">
-					<div className="flex items-center justify-center h-7 w-7 rounded-md bg-accent/10">{renderIcon()}</div>
-					<div className="flex items-center">
-						<ViewBreadcrumbs currentView={currentView as ViewType} currentItem={getCurrentItem() || undefined} />
-						<EntityDetails />
-					</div>
-				</div>
+	const item = getCurrentItem();
 
-				<div className="flex items-center gap-3">
-					{renderSortButtons()}
-					<Separator orientation="vertical" className="h-5 w-px bg-border" />
-					{renderViewButtons()}
-					<Separator orientation="vertical" className="h-5 w-px bg-border" />
-					{renderSelectionActions()}
-					{renderContextActions()}
-				</div>
+	return (
+		<div className="flex items-center justify-between h-10 px-2 border-b">
+			<div className="flex items-center">
+				<ViewBreadcrumbs />
+				{renderSelectionActions()}
 			</div>
-		</motion.div>
+
+			<div className="flex items-center gap-2">
+				{renderSearchInput()}
+				{renderSortButtons()}
+				{renderViewButtons()}
+				{renderSizeControls()}
+				{renderContextActions()}
+
+				{showDetailsButton && (
+					<Button
+						variant="ghost"
+						size="icon"
+						className={cn('h-7 w-7 hover:bg-accent', isVisible && 'bg-accent')}
+						onClick={toggleVisibility}
+						title={isVisible ? 'Ocultar detalles' : 'Mostrar detalles'}
+					>
+						<Info className="h-3.5 w-3.5" />
+					</Button>
+				)}
+
+				{isRightPanelVisible && (
+					<Button
+						variant="ghost"
+						size="icon"
+						className="h-7 w-7 hover:bg-accent"
+						onClick={toggleRightPanelCollapse}
+						title={isRightPanelCollapsed ? 'Expandir panel' : 'Colapsar panel'}
+					>
+						{isRightPanelCollapsed ? (
+							<ArrowLeft className="h-3.5 w-3.5" />
+						) : (
+							<ArrowRight className="h-3.5 w-3.5" />
+						)}
+					</Button>
+				)}
+			</div>
+		</div>
 	);
 }

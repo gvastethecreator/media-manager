@@ -13,15 +13,17 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useImageResources } from '@/store/image-resources.store';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { FileItem } from '@/types/file-item';
 import { FileText as FileTextIcon, Star } from 'lucide-react';
 import { handleContextAction } from './context-menu/context-action-handler';
 import { FileContextMenu } from './context-menu/context-menu';
 import type { ContextMenuAction } from './context-menu/types';
+import { useFilteredData } from './hooks/use-filtered-data';
 import { ImageRenderer } from './image-renderer';
 
 // 📊 Logger específico para FileBrowser
-const gridLogger = clientLogger.withContext('FileBrowser');
+const logger = clientLogger.withContext('FileBrowser');
 
 // 🎯 **FileBrowser: Versión Minimalista**
 //
@@ -51,7 +53,6 @@ type FileBrowserFileItem = FileItem & {
 
 interface FileBrowserProps {
 	items: FileBrowserFileItem[];
-	viewMode?: 'grid' | 'list' | 'masonry' | 'cards';
 	onItemSelect?: (item: FileItem) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
 	className?: string;
@@ -90,7 +91,6 @@ const formatFileSize = (bytes: number): string => {
 
 export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	items,
-	viewMode = 'grid',
 	onItemSelect,
 	onItemDoubleClick,
 	className,
@@ -109,6 +109,9 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
 	// Último elemento seleccionado para soportar selección con Shift
 	const [lastSelectedItemIndex, setLastSelectedItemIndex] = useState<number | null>(null);
+
+	// 🔍 Opciones de vista globales
+	const viewMode = useViewOptionsStore((state) => state.viewMode);
 
 	// 📐 Refs para medición directa
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -146,14 +149,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Estrategia: inmediato → RAF → timeout → fallback fijo
 	const measureContainer = useCallback((element: HTMLDivElement) => {
 		const attempt = ++measurementAttemptsRef.current;
-		gridLogger.debug(`[FileBrowser] Intento medición ${attempt}`);
+		logger.debug(`[FileBrowser] Intento medición ${attempt}`);
 
 		const measure = () => {
 			const width = element.offsetWidth;
-			gridLogger.debug(`[FileBrowser] offsetWidth = ${width}px`);
+			logger.debug(`[FileBrowser] offsetWidth = ${width}px`);
 
 			if (width > 0) {
-				gridLogger.info(`[FileBrowser] ✅ Medición exitosa: ${width}px`);
+				logger.info(`[FileBrowser] ✅ Medición exitosa: ${width}px`);
 				setContainerWidth(width);
 				return true;
 			}
@@ -172,7 +175,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				if (measure()) return;
 
 				// Estrategia 4: Fallback fijo (no más intentos)
-				gridLogger.warn(
+				logger.warn(
 					`[FileBrowser] ⚠️ Falló medición después de ${attempt} intentos, usando fallback: ${FALLBACK_WIDTH}px`
 				);
 				setContainerWidth(FALLBACK_WIDTH);
@@ -185,16 +188,18 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		(element: HTMLDivElement | null) => {
 			if (element && element !== containerRef.current) {
 				containerRef.current = element;
-				gridLogger.debug('[FileBrowser] 📎 Nuevo contenedor detectado, iniciando medición');
+				logger.debug('[FileBrowser] 📎 Nuevo contenedor detectado, iniciando medición');
 				measureContainer(element);
 			}
 		},
 		[measureContainer]
 	);
 
+	const filteredItems = useFilteredData(items);
+
 	// 📊 Cálculo del grid
 	const itemsPerRow = containerWidth > 0 ? Math.floor((containerWidth + GAP) / (ITEM_WIDTH + GAP)) : 0;
-	const totalRows = itemsPerRow > 0 ? Math.ceil(items.length / itemsPerRow) : 0;
+	const totalRows = itemsPerRow > 0 ? Math.ceil(filteredItems.length / itemsPerRow) : 0;
 
 	// 🎮 Virtualización simple
 	const virtualizer = useVirtualizer({
@@ -225,8 +230,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 			// Seleccionar todos los elementos en el rango
 			for (let i = startIdx; i <= endIdx; i++) {
-				if (i < items.length && items[i].id) {
-					selectFile(items[i].id);
+				if (i < filteredItems.length && filteredItems[i].id) {
+					selectFile(filteredItems[i].id);
 				}
 			}
 		}
@@ -246,7 +251,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		// Actualizar panel de detalles
-		const selectedItems = items
+		const selectedItems = filteredItems
 			.filter((i) => i.id && selectedFileIds.includes(i.id))
 			.map((i) => ({
 				id: i.id,
@@ -275,7 +280,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		// Callback personalizado si existe
 		onItemSelect?.(item);
-	}, [selectedFileIds, toggleSelectFile, selectFile, deselectAllFiles, onItemSelect, setDetailsPanelItems, setDetailsPanelVisible, lastSelectedItemIndex, items]);
+	}, [selectedFileIds, toggleSelectFile, selectFile, deselectAllFiles, onItemSelect, setDetailsPanelItems, setDetailsPanelVisible, lastSelectedItemIndex, filteredItems]);
 
 	// 🔍 Manejador de doble clic
 	const handleDoubleClick = useCallback((item: FileItem) => {
@@ -286,7 +291,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		// Abrir el visor de imágenes
-		const validItems = items.filter((i) =>
+		const validItems = filteredItems.filter((i) =>
 			(i.type?.startsWith('image/') || i.mimeType?.startsWith('image/'))
 		);
 		const index = validItems.findIndex((i) => i.id === item.id);
@@ -316,7 +321,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		onItemDoubleClick?.(item);
-	}, [items, onItemDoubleClick]);
+	}, [filteredItems, onItemDoubleClick]);
 
 	// 🖱️ Manejador de acciones de contexto
 	const handleItemContextAction = useCallback(async (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
@@ -413,7 +418,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Efecto para actualizar el panel de detalles cuando cambian los items seleccionados
 	useEffect(() => {
-		const selectedItems = items.filter(item => selectedFileIds.includes(item.id));
+		const selectedItems = filteredItems.filter(item => selectedFileIds.includes(item.id));
 
 		if (selectedItems.length > 0) {
 			// Mostrar el panel de detalles
@@ -443,13 +448,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			setDetailsPanelItems(detailsItems as any);
 
 			// Log para depuración
-			gridLogger.debug(`[FileBrowser] 🔍 ${selectedItems.length} items seleccionados, panel de detalles actualizado`);
+			logger.debug(`[FileBrowser] 🔍 ${selectedItems.length} items seleccionados, panel de detalles actualizado`);
 		} else {
 			// Ocultar el panel de detalles si no hay selección
 			setDetailsPanelVisible(false);
 			setDetailsPanelItems([]);
 		}
-	}, [items, selectedFileIds, setDetailsPanelVisible, setDetailsPanelItems]);
+	}, [filteredItems, selectedFileIds, setDetailsPanelVisible, setDetailsPanelItems]);
 
 	// Efecto para el scroll infinito
 	useEffect(() => {
@@ -513,7 +518,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	}
 
 	// 🛡️ Validaciones de seguridad antes del render
-	if (!items || items.length === 0) {
+	if (!filteredItems || filteredItems.length === 0) {
 		return (
 			<EmptyState
 				icon={FileTextIcon}
@@ -523,8 +528,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		);
 	}
 
-	gridLogger.debug(
-		`[FileBrowser] 🎯 Renderizando grid: ${itemsPerRow} items/fila, ${totalRows} filas, ${items.length} items`
+	logger.debug(
+		`[FileBrowser] 🎯 Renderizando grid: ${itemsPerRow} items/fila, ${totalRows} filas, ${filteredItems.length} items`
 	);
 
 	return (
@@ -571,7 +576,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 							>
 								{Array.from({ length: itemsPerRow }, (_, colIndex) => {
 									const itemIndex = virtualRow.index * itemsPerRow + colIndex;
-									const item = items[itemIndex];
+									const item = filteredItems[itemIndex];
 
 									if (!item) return null;
 

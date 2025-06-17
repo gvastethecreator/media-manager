@@ -13,6 +13,7 @@ Componente para visualización y gestión de archivos con integración completa 
 - **Favoritos**: Marcado de archivos como favoritos
 - **Scroll infinito**: Carga progresiva de archivos
 - **Reindexado**: Soporte para mostrar progreso de reindexado
+- **Estado persistente**: El modo de vista se controla mediante el slice `view-options` y se guarda en `localStorage`
 
 ## 🔧 Uso básico
 
@@ -108,7 +109,6 @@ graph TD
 | Prop | Tipo | Descripción |
 |------|------|-------------|
 | `items` | `FileItem[]` | Lista de archivos a mostrar |
-| `viewMode` | `'grid' \| 'list' \| 'masonry' \| 'cards'` | Modo de visualización |
 | `onItemSelect` | `(item: FileItem) => void` | Callback al seleccionar un archivo |
 | `onItemDoubleClick` | `(item: FileItem) => void` | Callback al hacer doble click en un archivo |
 | `className` | `string` | Clase CSS adicional |
