@@ -8,7 +8,13 @@ import {
 	ContextMenuSeparator,
 	ContextMenuTrigger,
 } from '@/components/ui/context-menu';
+import { useAlbumStore } from '@/store/entities/album';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useTagStore } from '@/store/entities/tag';
+import type { Tag as TagType } from '@/types/entities/tag';
 import {
+	Album,
+	BookImage,
 	Copy,
 	Download,
 	ExternalLink,
@@ -16,11 +22,12 @@ import {
 	HeartOff,
 	Loader2,
 	Star,
+	Tag,
 	Trash
 } from 'lucide-react';
 import { memo, useState } from 'react';
-import { AlbumsSubmenu, CollectionsSubmenu, TagsSubmenu } from './components/submenus';
-import type { FileContextMenuProps } from './types';
+import { EnhancedSubmenu } from './components/enhanced-submenu';
+import type { ContextMenuAction, FileContextMenuProps } from './types';
 
 /**
  * Menú contextual para archivos
@@ -30,6 +37,11 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 	const { loadingStates, loadEntityData, handleOpenChange } = useEntityLoader();
 	// Estado para controlar la acción en proceso
 	const [processingAction, setProcessingAction] = useState<ContextMenuAction | null>(null);
+
+	// Obtener datos de los stores
+	const collections = useCollectionStore(state => state.getCollections());
+	const tags = useTagStore(state => state.getTags?.() || []);
+	const albums = useAlbumStore(state => state.getAlbums());
 
 	// Manejador de acciones con indicador de carga
 	const handleAction = async (action: ContextMenuAction, data?: Record<string, unknown>) => {
@@ -89,27 +101,58 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 
 				<ContextMenuSeparator />
 
-				{/* Submenús para entidades */}
-				<CollectionsSubmenu
+				{/* Submenús mejorados para entidades */}
+				<EnhancedSubmenu
+					title="Colecciones"
+					icon={<BookImage className="h-4 w-4" />}
+					items={collections.map(c => ({
+						...c,
+						isFavorite: Boolean(c.isFavorite),
+						isRecent: Boolean(c.isRecent)
+					}))}
+					isLoading={loadingStates.collections.loading}
 					file={file}
 					onAction={onAction}
-					loadEntityData={loadEntityData}
-					loadingStates={loadingStates}
-					handleOpenChange={handleOpenChange}
+					actionType="add-to-collection"
+					createActionType="collection-create"
+					onOpenChange={(isOpen) => handleOpenChange('collections', isOpen)}
 				/>
-				<TagsSubmenu
+
+				<EnhancedSubmenu
+					title="Etiquetas"
+					icon={<Tag className="h-4 w-4" />}
+					items={tags.map((t: TagType) => ({
+						id: t.id,
+						name: t.name,
+						isFavorite: false,
+						isRecent: false
+					}))}
+					isLoading={loadingStates.tags.loading}
 					file={file}
 					onAction={onAction}
-					loadEntityData={loadEntityData}
-					loadingStates={loadingStates}
-					handleOpenChange={handleOpenChange}
+					actionType="add-tag"
+					createActionType="tag-create"
+					onOpenChange={(isOpen) => handleOpenChange('tags', isOpen)}
+					dataIdField="tagId"
+					dataNameField="tagName"
 				/>
-				<AlbumsSubmenu
+
+				<EnhancedSubmenu
+					title="Álbumes"
+					icon={<Album className="h-4 w-4" />}
+					items={albums.map(a => ({
+						...a,
+						isFavorite: Boolean(a.isFavorite),
+						isRecent: Boolean(a.isRecent)
+					}))}
+					isLoading={loadingStates.albums.loading}
 					file={file}
 					onAction={onAction}
-					loadEntityData={loadEntityData}
-					loadingStates={loadingStates}
-					handleOpenChange={handleOpenChange}
+					actionType="add-to-album"
+					createActionType="album-create"
+					onOpenChange={(isOpen) => handleOpenChange('albums', isOpen)}
+					dataIdField="albumId"
+					dataNameField="albumName"
 				/>
 
 				<ContextMenuSeparator />
@@ -168,8 +211,8 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 				{/* Acciones destructivas */}
 				<ContextMenuItem
 					onClick={() => handleAction('delete')}
-					className="text-red-600"
 					disabled={processingAction === 'delete'}
+					className="text-red-600 focus:text-red-600"
 				>
 					{processingAction === 'delete' ? (
 						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
