@@ -2,7 +2,7 @@
 
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { IntegratedFileBrowser } from '@/components/features/file-browser';
+import { FileBrowser } from '@/components/features/file-browser';
 import BlurFade from '@/components/ui/blur-fade';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageViewer } from '@/store/image-viewer.store';
@@ -188,10 +188,9 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 	return (
 		<div className={`h-full w-full flex overflow-hidden ${className || ''}`}>
 			<div className="h-full w-full overflow-auto">
-				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>
-					<IntegratedFileBrowser
+				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>					<FileBrowser
 						items={items}
-						onItemClick={handleItemClick}
+						onItemSelect={handleItemClick}
 						onItemDoubleClick={handleItemDoubleClick}
 						// Pasar funciones opcionales para cargar más items si existen en el contexto
 						loadMoreItems={
