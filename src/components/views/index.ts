@@ -35,12 +35,17 @@ export * from './world-items/world-item-content-view';
 export * from './world-items/world-items-view';
 
 // Exportar nuevas vistas de entidades
+export * from './audio/audio-view';
+export * from './documents/documents-view';
+export * from './file3d/file3d-view';
 export * from './groups/group-content-view';
 export * from './groups/groups-view';
+export * from './json-files/json-files-view';
 export * from './properties/properties-view';
 export * from './properties/property-content-view';
-export * from './wildcards/wildcards-view';
 export * from './wildcards/wildcard-content-view';
+export * from './wildcards/wildcards-view';
+export * from './workflows/workflows-view';
 
 // Exportar vistas especiales
 export * from './all-images/all-images-view';
@@ -48,3 +53,4 @@ export * from './development/development-view';
 export * from './favorites/favorites-view';
 export * from './search/search-view';
 export * from './uploaded-images/uploaded-images-view';
+

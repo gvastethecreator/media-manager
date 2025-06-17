@@ -7,7 +7,7 @@ import type { FileItem } from '@/types/file-item';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { ImageRenderer } from '../image-renderer';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
 
@@ -51,6 +51,10 @@ export const MasonryItem = memo(function MasonryItem({
 	onContextMenu,
 	style,
 }: MasonryItemProps) {
+	// Estados para controlar la carga y visualización
+	const [isImageLoaded, setIsImageLoaded] = useState(false);
+	const [hasError, setHasError] = useState(false);
+
 	// Memoizamos los handlers para evitar recreaciones
 	const handleClick = useCallback(
 		(e: React.MouseEvent) => {
@@ -109,6 +113,17 @@ export const MasonryItem = memo(function MasonryItem({
 		height: style?.height || `${Math.floor(200 / aspectRatio)}px`,
 	};
 
+	// Manejadores para la carga de imágenes
+	const handleImageLoad = useCallback(() => {
+		setIsImageLoaded(true);
+		setHasError(false);
+	}, []);
+
+	const handleImageError = useCallback(() => {
+		setHasError(true);
+		setIsImageLoaded(false);
+	}, []);
+
 	return (
 		<motion.div
 			className={itemClassName}
@@ -122,12 +137,30 @@ export const MasonryItem = memo(function MasonryItem({
 		>
 			{/* Imagen */}
 			<div className="w-full h-full overflow-hidden">
-				<ImageRenderer
-					src={thumbnailUrl}
-					alt={item.name}
-					className="h-full w-full object-cover transition-transform"
-					onError={() => { }}
-				/>
+				{/* Mostrar imagen solo si tenemos una URL válida */}
+				{thumbnailUrl && (
+					<ImageRenderer
+						src={thumbnailUrl}
+						alt={item.name}
+						className="h-full w-full object-cover transition-transform"
+						onLoad={handleImageLoad}
+						onError={handleImageError}
+					/>
+				)}
+
+				{/* Mostrar placeholder durante la carga */}
+				{!isImageLoaded && !hasError && (
+					<div className="w-full h-full bg-muted/20 animate-pulse flex items-center justify-center">
+						<span className="text-xs text-muted-foreground">Cargando...</span>
+					</div>
+				)}
+
+				{/* Mostrar fallback en caso de error */}
+				{hasError && (
+					<div className="w-full h-full bg-muted/10 flex items-center justify-center">
+						<span className="text-xs text-muted-foreground">Error al cargar</span>
+					</div>
+				)}
 			</div>
 
 			{/* Overlay con información al pasar el mouse */}
