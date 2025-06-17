@@ -188,6 +188,37 @@ export default function SettingsPage() {
 }
 ```
 
+## 🆕 InterfaceSection (Sección de Interfaz)
+
+Permite a los usuarios personalizar la apariencia de la aplicación: tipografía, tema, animaciones y otros aspectos visuales.
+
+### Estructura y flujo
+
+```mermaid
+graph TD
+    SettingsView --> InterfaceSection
+    InterfaceSection --> useInterfaceSettingsStore
+    InterfaceSection --> interfacePreferencesSchema
+    useInterfaceSettingsStore --> PersistenciaLocal
+    InterfaceSection --> UI[Controles de UI]
+```
+
+### Ejemplo de uso
+
+```tsx
+import InterfaceSection from './interface-section';
+
+<InterfaceSection />
+```
+
+### Best practices
+
+- Validar siempre con Zod antes de persistir cambios.
+- Usar el store Zustand para reactividad y persistencia.
+- Documentar cualquier extensión de preferencias en los tipos y el schema.
+
+> Última actualización: 2025-06-17
+
 ## Mejores Prácticas
 
 - **Consistencia**: Mantener la consistencia visual y funcional entre todos los módulos.

@@ -28,15 +28,15 @@ interface PanelSizes {
 const PANEL_CONFIG = {
 	nav: {
 		minSize: 2,
-		maxSize: 15,
+		maxSize: 30,
 		collapsedSize: 2,
 		defaultSize: 20,
 	},
 	right: {
 		minSize: 2,
-		maxSize: 15,
+		maxSize: 30,
 		collapsedSize: 2,
-		defaultSize: 15,
+		defaultSize: 20,
 	},
 } as const;
 
@@ -62,7 +62,7 @@ const CentralPanel = React.memo(function CentralPanel({
 		// ⚠️ Es crucial mantener estas clases para que los grids virtualizados (FileBrowser, etc.) funcionen correctamente
 		<ResizablePanel
 			defaultSize={defaultSize}
-			minSize={70}
+			minSize={40}
 			className="h-full w-full min-h-0 min-w-0 flex-1 flex flex-col"
 		>
 			<div className="flex flex-col h-full w-full min-h-0 min-w-0 flex-1 overflow-hidden">

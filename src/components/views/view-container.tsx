@@ -10,6 +10,7 @@ import { FoldersView } from '../folders/views/folders-view';
 import { AlbumContentView } from './albums/album-content-view';
 import { AlbumsView } from './albums/albums-view';
 import { AllImagesView } from './all-images/all-images-view';
+import { AudioView } from './audio/audio-view';
 import { CharacterContentView } from './characters/character-content-view';
 import { CharactersView } from './characters/characters-view';
 import { CollectionContentView } from './collections/collection-content-view';
@@ -17,9 +18,12 @@ import { CollectionsView } from './collections/collections-view';
 import { ConceptContentView } from './concepts/concept-content-view';
 import { ConceptsView } from './concepts/concepts-view';
 import { DevelopmentView } from './development/development-view';
+import { DocumentsView } from './documents/documents-view';
 import { FavoritesView } from './favorites/favorites-view';
+import { File3DView } from './file3d/file3d-view';
 import { GroupContentView } from './groups/group-content-view';
 import { GroupsView } from './groups/groups-view';
+import { JsonFilesView } from './json-files/json-files-view';
 import { NoteContentView } from './notes/note-content-view';
 import { NotesView } from './notes/notes-view';
 import { PlaceContentView } from './places/place-content-view';
@@ -35,6 +39,7 @@ import type { ViewType } from './types';
 import { UploadedImagesView } from './uploaded-images/uploaded-images-view';
 import { WildcardContentView } from './wildcards/wildcard-content-view';
 import { WildcardsView } from './wildcards/wildcards-view';
+import { WorkflowsView } from './workflows/workflows-view';
 import { WorldItemContentView } from './world-items/world-item-content-view';
 import { WorldItemsView } from './world-items/world-items-view';
 
@@ -127,6 +132,16 @@ const MemoizedViewContent = memo(({ view }: { view: ViewType }) => {
 			return <WildcardsView />;
 		case 'wildcard-content':
 			return <WildcardContentView />;
+		case 'document':
+			return <DocumentsView />;
+		case 'json-file':
+			return <JsonFilesView />;
+		case 'audio':
+			return <AudioView />;
+		case 'file3d':
+			return <File3DView />;
+		case 'workflow':
+			return <WorkflowsView />;
 		default:
 			return <DevelopmentView />;
 	}

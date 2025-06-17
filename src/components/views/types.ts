@@ -52,4 +52,9 @@ export type ViewType =
 	| 'wildcards'
 	| 'wildcard-content'
 	| 'entity-cards'
-	| 'development';
+	| 'development'
+	| 'document'
+	| 'audio'
+	| 'json-file'
+	| 'workflow'
+	| 'file3d';

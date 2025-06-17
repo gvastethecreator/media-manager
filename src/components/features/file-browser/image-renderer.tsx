@@ -1,234 +1,309 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-interface ImageRendererProps {
+interface ImageRendererProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 	src: string | null;
-	alt: string;
+	alt?: string;
 	className?: string;
-	style?: React.CSSProperties;
-	width?: number;
-	height?: number;
-	quality?: number;
 	objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
-	priority?: boolean;
+	priority?: boolean; // Indica si la imagen debe cargarse con prioridad alta
+	blur?: boolean; // Aplicar efecto de desenfoque durante la carga
 	onLoad?: () => void;
 	onError?: () => void;
-	isScrolling?: boolean;
-	shouldLoad?: boolean;
 }
 
+// Caché global de imágenes para evitar recargas
+const imageCache = new Map<string, boolean>();
+// Cola de precarga de imágenes
+const preloadQueue: string[] = [];
+// Estado global de precarga
+let isPreloading = false;
+
+// Función para precargar imágenes en segundo plano
+const preloadImages = (urls: string[], highPriority = false) => {
+	// Filtrar las URLs que aún no están en caché o en la cola
+	const newUrls = urls.filter(url =>
+		url &&
+		!imageCache.has(url) &&
+		!preloadQueue.includes(url)
+	);
+
+	// Si hay prioridad alta, poner al inicio de la cola
+	if (highPriority) {
+		preloadQueue.unshift(...newUrls);
+	} else {
+		preloadQueue.push(...newUrls);
+	}
+
+	// Iniciar el proceso de precarga si no está en curso
+	if (!isPreloading) {
+		processNextPreload();
+	}
+};
+
+// Procesar el siguiente elemento de la cola de precarga
+const processNextPreload = () => {
+	if (preloadQueue.length === 0) {
+		isPreloading = false;
+		return;
+	}
+
+	isPreloading = true;
+	const url = preloadQueue.shift();
+
+	if (!url) {
+		processNextPreload();
+		return;
+	}
+
+	const img = new Image();
+	img.onload = () => {
+		imageCache.set(url, true);
+		// Procesar el siguiente después de un pequeño retraso
+		setTimeout(processNextPreload, 50);
+	};
+	img.onerror = () => {
+		imageCache.set(url, false);
+		// Procesar el siguiente inmediatamente en caso de error
+		processNextPreload();
+	};
+	img.src = url;
+};
+
 /**
- * Componente optimizado para renderizar imágenes con carga diferida
- * y cancelación de solicitudes durante el scroll
+ * 🖼️ Componente para renderizar imágenes con optimizaciones
+ *
+ * Características:
+ * - Manejo de carga y errores
+ * - Caché compartido entre instancias
+ * - Precarga inteligente
+ * - Efectos de carga progresiva
  */
-export const ImageRenderer = memo<ImageRendererProps>(function ImageRenderer({
+export function ImageRenderer({
 	src,
-	alt,
+	alt = '',
 	className,
-	style,
-	width,
-	height,
-	quality = 80,
 	objectFit = 'cover',
 	priority = false,
+	blur = true,
 	onLoad,
 	onError,
-	isScrolling = false,
-	shouldLoad = true,
-}) {
-	// Estados
-	const [loaded, setLoaded] = useState(false);
-	const [error, setError] = useState(false);
-	const [imageSrc, setImageSrc] = useState<string | null>(null);
+	...props
+}: ImageRendererProps) {
+	const [isLoaded, setIsLoaded] = useState(false);
+	const [hasError, setHasError] = useState(false);
+	const imgRef = useRef<HTMLImageElement>(null);
+	const observer = useRef<IntersectionObserver | null>(null);
 
-	// Referencias
-	const abortControllerRef = useRef<AbortController | null>(null);
-	const imageRef = useRef<HTMLImageElement>(null);
-	const observerRef = useRef<IntersectionObserver | null>(null);
-	const attemptCountRef = useRef<number>(0);
-
-	// Función para cargar la imagen
-	const loadImage = useCallback(async () => {
-		if (!src || !shouldLoad) return;
-
-		// Si está en scroll, no cargar nuevas imágenes a menos que sea prioritaria
-		if (isScrolling && !loaded && !priority) return;
-
-		// Si la imagen ya está cargada o hay error, no hacer nada
-		if (loaded || error) return;
-
-		// Crear un nuevo AbortController para poder cancelar la solicitud
-		if (abortControllerRef.current) {
-			abortControllerRef.current.abort();
+	// Filtrar props no válidas para elementos DOM
+	const filteredProps = { ...props };
+	// Eliminar props que React no reconoce en elementos DOM
+	const propsToRemove = [
+		'isScrolling',
+		'isSelected',
+		'isActive',
+		'virtualizer',
+		'index',
+		'observerRef',
+		'measureRef',
+		'resizeRef',
+		'isVisible',
+		'isInView',
+		'data-index'
+	];
+	propsToRemove.forEach(prop => {
+		if (prop in filteredProps) {
+			delete filteredProps[prop as keyof typeof filteredProps];
 		}
-		abortControllerRef.current = new AbortController();
+	});
 
-		try {
-			// Si es una URL directa, usarla
-			if (src.startsWith('data:') || src.startsWith('blob:')) {
-				setImageSrc(src);
-				return;
+	// Normalizar la URL
+	const imageUrl = useMemo(() => {
+		// Si no hay src o es null, retornar undefined para evitar el error de cadena vacía
+		if (!src) return undefined;
+
+		// Asegurarse de que la URL es absoluta
+		if (src.startsWith('/')) {
+			// Solo convertir a absoluta en el cliente
+			if (typeof window !== 'undefined') {
+				return `${window.location.origin}${src}`;
 			}
-
-			// Si es una URL http/https, cargarla directamente pero con manejo de errores
-			if (src.startsWith('http')) {
-				setImageSrc(src);
-				return;
-			}
-
-			// Si es una ruta API, hacer fetch con AbortController
-			const response = await fetch(src, {
-				signal: abortControllerRef.current?.signal,
-				headers: {
-					'Cache-Control': 'max-age=31536000',
-					'Pragma': 'no-cache', // Para evitar problemas con caché
-				},
-				// Añadir un parámetro de consulta único para evitar caché
-				cache: 'no-store',
-			});
-
-			if (!response.ok) {
-				throw new Error(`Error loading image: ${response.statusText}`);
-			}
-
-			const blob = await response.blob();
-			const url = URL.createObjectURL(blob);
-			setImageSrc(url);
-		} catch (err) {
-			// Ignorar errores de abort
-			if (err instanceof DOMException && err.name === 'AbortError') {
-				return;
-			}
-
-			// Reintentar hasta 3 veces con un retraso exponencial
-			if (attemptCountRef.current < 3) {
-				attemptCountRef.current++;
-				const delay = 2 ** attemptCountRef.current * 500;
-				setTimeout(() => loadImage(), delay);
-				return;
-			}
-
-			console.error('Error loading image:', err);
-			setError(true);
-			onError?.();
+			return src;
 		}
-	}, [src, shouldLoad, isScrolling, loaded, error, priority, onError]);
+		return src;
+	}, [src]);
 
-	// Efecto para cargar la imagen cuando sea visible
-	useEffect(() => {
-		if (!src || !shouldLoad) return;
+	// Comprobar si la imagen ya está en caché
+	const isCached = useMemo(() => {
+		return imageUrl ? imageCache.has(imageUrl) : false;
+	}, [imageUrl]);
 
-		// Resetear el contador de intentos cuando cambia la fuente
-		attemptCountRef.current = 0;
+	// Aplicar estilos según el estado de la imagen
+	const imageStyles = useMemo(() => {
+		return cn(
+			'transition-opacity duration-300',
+			objectFit && `object-${objectFit}`,
+			{
+				'opacity-0': !isLoaded && blur,
+				'opacity-100': isLoaded || !blur,
+			},
+			className
+		);
+	}, [className, objectFit, isLoaded, blur]);
 
-		// Usar IntersectionObserver para carga diferida
-		const setupIntersectionObserver = () => {
-			if (!imageRef.current || priority) return;
-
-			// Limpiar observer anterior si existe
-			observerRef.current?.disconnect();
-
-			observerRef.current = new IntersectionObserver(
-				(entries) => {
-					const [entry] = entries;
-					if (entry.isIntersecting) {
-						loadImage();
-						observerRef.current?.disconnect();
-					}
-				},
-				{
-					threshold: 0.1,
-					rootMargin: '200px', // Cargar imágenes antes de que sean visibles
-				}
-			);
-
-			observerRef.current.observe(imageRef.current);
-		};
-
-		// Si es prioritaria, cargar inmediatamente
-		if (priority) {
-			loadImage();
-		} else {
-			setupIntersectionObserver();
-		}
-
-		// Cleanup
-		return () => {
-			abortControllerRef.current?.abort();
-			observerRef.current?.disconnect();
-			// Liberar URL.createObjectURL
-			if (imageSrc && imageSrc.startsWith('blob:')) {
-				URL.revokeObjectURL(imageSrc);
-			}
-		};
-	}, [src, shouldLoad, priority, loadImage, imageSrc]);
-
-	// Manejadores de eventos
+	// Manejar la carga de la imagen
 	const handleLoad = () => {
-		setLoaded(true);
+		setIsLoaded(true);
+		setHasError(false);
+		// Agregar a caché
+		if (imageUrl) {
+			imageCache.set(imageUrl, true);
+		}
 		onLoad?.();
 	};
 
+	// Manejar errores
 	const handleError = () => {
-		// Solo marcar como error si ya hemos agotado los reintentos
-		if (attemptCountRef.current >= 3) {
-			setError(true);
-			onError?.();
-		} else {
-			// Reintentar
-			attemptCountRef.current++;
-			const delay = 2 ** attemptCountRef.current * 500;
-			setTimeout(() => loadImage(), delay);
+		setHasError(true);
+		// Marcar como fallido en caché
+		if (imageUrl) {
+			imageCache.set(imageUrl, false);
 		}
+		onError?.();
 	};
 
-	// Estilo para el object-fit
-	const imageStyle = {
-		...style,
-		objectFit,
-	};
+	// Establecer Observer para detección de visibilidad y precarga
+	useEffect(() => {
+		if (!imageUrl || priority || isCached) return;
 
-	// Renderizar placeholder si está cargando o hay error
-	if (!imageSrc || error) {
+		// Inicializar IntersectionObserver para carga lazy
+		observer.current = new IntersectionObserver(
+			(entries) => {
+				const [entry] = entries;
+				if (entry.isIntersecting) {
+					// La imagen es visible, cargarla
+					if (imgRef.current) {
+						imgRef.current.src = imageUrl;
+					}
+
+					// Desconectar observer después de cargar
+					observer.current?.disconnect();
+					observer.current = null;
+
+					// Precargar las siguientes imágenes similares (misma URL base)
+					if (imageUrl) {
+						const urlParts = imageUrl.split('/');
+						const lastPart = urlParts.pop() || '';
+						const basePath = urlParts.join('/');
+						const idMatch = lastPart.match(/(\d+)/);
+
+						if (idMatch) {
+							const currentId = parseInt(idMatch[0], 10);
+							// Precargar las próximas imágenes cercanas
+							const nextIds = [
+								currentId + 1,
+								currentId + 2,
+								currentId + 3,
+								currentId - 1,
+								currentId - 2
+							].filter(id => id > 0);
+
+							const preloadUrls = nextIds.map(id => {
+								return imageUrl.replace(/(\d+)/, id.toString());
+							});
+
+							preloadImages(preloadUrls);
+						}
+					}
+				}
+			},
+			{
+				root: null,
+				rootMargin: '100px', // Cargar cuando esté a 100px de ser visible
+				threshold: 0.1,
+			}
+		);
+
+		if (imgRef.current) {
+			observer.current.observe(imgRef.current);
+		}
+
+		return () => {
+			observer.current?.disconnect();
+		};
+	}, [imageUrl, priority, isCached]);
+
+	// Para imágenes prioritarias, cargamos inmediatamente
+	useEffect(() => {
+		if (priority && imageUrl && !isCached) {
+			if (imgRef.current) {
+				imgRef.current.src = imageUrl;
+			}
+			// Agregar a la cola de precarga con alta prioridad
+			preloadImages([imageUrl], true);
+		}
+	}, [priority, imageUrl, isCached]);
+
+	// Si la imagen ya está en caché y cargada correctamente, mostrarla directamente
+	useEffect(() => {
+		if (isCached && imageCache.get(imageUrl) === true) {
+			setIsLoaded(true);
+		}
+	}, [isCached, imageUrl]);
+
+	// Si no hay URL, mostrar un placeholder
+	if (!imageUrl) {
 		return (
 			<div
-				ref={imageRef}
 				className={cn(
-					'bg-muted/30 flex items-center justify-center',
-					error ? 'bg-red-100/10 dark:bg-red-900/10' : '',
+					'bg-muted/30 flex items-center justify-center rounded-md',
 					className
 				)}
-				style={{
-					width: width || '100%',
-					height: height || '100%',
-					...style,
-				}}
 			>
-				{error ? (
-					<span className="text-xs text-muted-foreground">Error</span>
-				) : (
-					<div className="w-6 h-6 rounded-full border-2 border-t-transparent border-primary/30 animate-spin" />
-				)}
+				<span className="text-xs text-muted-foreground">Sin imagen</span>
 			</div>
 		);
 	}
 
-	// Renderizar la imagen
 	return (
-		<img
-			ref={imageRef}
-			src={imageSrc}
-			alt={alt}
-			className={className}
-			style={imageStyle as React.CSSProperties}
-			width={width}
-			height={height}
-			loading="lazy"
-			decoding="async"
-			onLoad={handleLoad}
-			onError={handleError}
-		/>
+		<div className="relative w-full h-full overflow-hidden">
+			{/* Imagen principal */}
+			<img
+				ref={imgRef}
+				src={priority || isCached ? imageUrl : undefined} // Usar undefined en lugar de cadena vacía
+				alt={alt}
+				className={imageStyles}
+				onLoad={handleLoad}
+				onError={handleError}
+				loading={priority ? 'eager' : 'lazy'}
+				{...filteredProps}
+			/>
+
+			{/* Placeholder mientras carga */}
+			{!isLoaded && blur && (
+				<div
+					className={cn(
+						'absolute inset-0 bg-muted/20 animate-pulse flex items-center justify-center',
+						className
+					)}
+				>
+					<span className="sr-only">Cargando imagen...</span>
+				</div>
+			)}
+
+			{/* Placeholder en caso de error */}
+			{hasError && (
+				<div
+					className={cn(
+						'absolute inset-0 bg-muted/10 flex items-center justify-center',
+						className
+					)}
+				>
+					<span className="text-xs text-muted-foreground">Error al cargar</span>
+				</div>
+			)}
+		</div>
 	);
-});
+}
