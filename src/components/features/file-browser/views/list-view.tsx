@@ -1,39 +1,28 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { FileItem } from '@/types/file-item';
 import {
-	BookImage,
-	Box,
 	Calendar,
-	Camera,
 	File,
-	HardDrive,
-	Heart,
-	MapPin,
-	Maximize2,
-	Palette,
-	Share2,
-	User2,
-	Wand2,
+	Heart
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import type * as React from 'react';
-import { memo, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ContextMenuAction } from '../context-menu/context-menu';
 import { FileContextMenu } from '../context-menu/context-menu';
-import { ImageRenderer } from '../image-renderer';
+import { VirtualizerWrapper } from './virtualizer-wrapper';
 
-interface ListViewProps {
+interface ListItemProps {
 	item: FileItem;
 	isSelected?: boolean;
-	isScrolling?: boolean;
-	shouldLoad?: boolean;
-	thumbnail?: string | null;
-	onClick?: (item: FileItem) => void;
+	isActive?: boolean;
+	onClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onDoubleClick?: (item: FileItem) => void;
 	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
-	style?: React.CSSProperties;
 }
 
 const getMetadata = (metadata: string | null) => {
@@ -57,17 +46,14 @@ function formatBytes(bytes: number): string {
 	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
-export const ListView = memo(function ListView({
+export const ListItem = memo(function ListItem({
 	item,
 	isSelected,
-	isScrolling,
-	shouldLoad,
-	thumbnail,
+	isActive,
 	onClick,
 	onDoubleClick,
 	onContextAction,
-	style,
-}: ListViewProps) {
+}: ListItemProps) {
 	const metadata = getMetadata(item.metadata);
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -87,177 +73,140 @@ export const ListView = memo(function ListView({
 		}
 	}, [item]);
 
-	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter' || e.key === ' ') {
+	// Memoizamos los handlers para evitar recreaciones
+	const handleClick = useCallback(
+		(e: React.MouseEvent) => {
 			e.preventDefault();
-			onClick?.(item);
+			e.stopPropagation();
+			onClick?.(item, e);
+		},
+		[onClick, item]
+	);
+
+	const handleDoubleClick = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			onDoubleClick?.(item);
+		},
+		[onDoubleClick, item]
+	);
+
+	// Memoizamos la clase para evitar recálculos
+	const rowClassName = useMemo(() => {
+		return cn(
+			'flex items-center px-4 py-2 hover:bg-accent/50 cursor-pointer transition-colors',
+			isSelected && 'bg-primary/10 dark:bg-primary/20',
+			isActive && 'bg-secondary/10 dark:bg-secondary/20'
+		);
+	}, [isSelected, isActive]);
+
+	// Determinar el icono según el tipo de archivo
+	const getFileIcon = () => {
+		if (item.type?.startsWith('image/') || item.mimeType?.startsWith('image/')) {
+			return <Image className="h-4 w-4 text-blue-500" />;
+		}
+		if (item.type?.startsWith('video/') || item.mimeType?.startsWith('video/')) {
+			return <Video className="h-4 w-4 text-red-500" />;
+		}
+		if (item.type?.startsWith('text/') || item.mimeType?.startsWith('text/')) {
+			return <FileText className="h-4 w-4 text-yellow-500" />;
+		}
+		return <File className="h-4 w-4 text-gray-500" />;
+	};
+
+	// Formatear fecha
+	const formatDate = (dateString: string) => {
+		try {
+			const date = new Date(dateString);
+			return date.toLocaleDateString();
+		} catch (e) {
+			return 'Fecha desconocida';
 		}
 	};
 
+	// Optimizamos la acción del menú contextual para evitar recreaciones
+	const handleContextAction = useCallback(
+		(action: ContextMenuAction, data?: Record<string, unknown>) => {
+			onContextAction?.(action, item, data);
+		},
+		[onContextAction, item]
+	);
+
 	return (
-		<FileContextMenu file={item} onAction={onContextAction || (() => {})}>
-			<button
-				ref={buttonRef}
-				type="button"
-				className={cn(
-					'flex items-center gap-4 w-full hover:bg-accent/50 rounded-sm group px-2 text-left',
-					isSelected && 'bg-accent',
-					isScrolling && 'opacity-50'
-				)}
-				style={style}
-				onClick={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					console.log('Click en ListView para:', item.name);
-					onClick?.(item);
-				}}
-				onDoubleClick={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					console.log('Double click en ListView para:', item.name);
-					onDoubleClick?.(item);
-				}}
-				onKeyDown={handleKeyDown}
-				aria-pressed={isSelected}
+		<FileContextMenu file={item} onAction={handleContextAction}>
+			<motion.div
+				className={rowClassName}
+				onClick={handleClick}
+				onDoubleClick={handleDoubleClick}
+				whileHover={{ backgroundColor: 'rgba(var(--accent), 0.2)' }}
+				whileTap={{ backgroundColor: 'rgba(var(--accent), 0.3)' }}
+				layout
 			>
-				<div className="relative h-[72px] aspect-square shrink-0 overflow-hidden rounded-sm">
-					{shouldLoad && thumbnail ? (
-						<div className="relative w-full h-full">
-							<div
-								className="absolute inset-0 bg-cover bg-center blur-xs opacity-30 brightness-50"
-								style={{
-									backgroundImage: `url(${thumbnail})`,
-								}}
-							/>
-							<ImageRenderer
-								src={thumbnail}
-								alt={item.name}
-								width={72}
-								height={72}
-								className={cn('h-full w-full object-cover transition-all duration-200', 'group-hover:scale-[1.02]')}
-								quality={75}
-							/>
-						</div>
-					) : (
-						<div className="flex items-center justify-center h-full bg-muted">
-							<File className="h-4 w-4 text-muted-foreground/50" />
-						</div>
-					)}
-					<div className="absolute top-0.5 right-0.5 flex gap-0.5">
-						{item.isFavorite && (
-							<Badge variant="secondary" className="bg-red-500/20 text-red-500 h-3 w-3 p-0.5">
-								<Heart className="h-2 w-2 fill-current" />
-							</Badge>
-						)}
-						{item.isPublic && (
-							<Badge variant="secondary" className="bg-green-500/20 text-green-500 h-3 w-3 p-0.5">
-								<Share2 className="h-2 w-2" />
-							</Badge>
-						)}
+				<div className="flex items-center gap-3 flex-1">
+					<div className="flex items-center gap-2">
+						{getFileIcon()}
+						<span className="font-medium">{item.name}</span>
+						{item.isFavorite && <Heart className="h-3 w-3 text-yellow-500 fill-current" />}
 					</div>
 				</div>
-
-				<div className="flex flex-col min-w-0 flex-1 py-2 gap-1">
-					<div className="flex items-center gap-2">
-						<p className="text-sm font-medium truncate">{item.name}</p>
-						{metadata?.generation && (
-							<Badge
-								variant="outline"
-								className={cn(
-									'text-[10px] h-4 px-1 flex items-center gap-1 shrink-0',
-									metadata.generation.type === 'stable-diffusion' && 'bg-blue-500/10 text-blue-500',
-									metadata.generation.type === 'comfyui' && 'bg-green-500/10 text-green-500',
-									metadata.generation.type === 'midjourney' && 'bg-purple-500/10 text-purple-500'
-								)}
-							>
-								<Wand2 className="h-2.5 w-2.5" />
-								<span className="truncate">
-									{metadata.generation.type === 'stable-diffusion'
-										? 'SD'
-										: metadata.generation.type === 'comfyui'
-											? 'ComfyUI'
-											: metadata.generation.type === 'midjourney'
-												? 'MJ'
-												: metadata.generation.type}
-								</span>
-							</Badge>
-						)}
-					</div>
-
-					<div className="grid grid-cols-4 gap-x-4 text-xs text-muted-foreground">
-						<div className="flex items-center gap-1">
-							<HardDrive className="h-3 w-3" />
-							<span>{formatBytes(item.size)}</span>
-						</div>
-						{metadata?.dimensions && (
-							<div className="flex items-center gap-1">
-								<Maximize2 className="h-3 w-3" />
-								<span>
-									{metadata.dimensions.width} × {metadata.dimensions.height}
-								</span>
-							</div>
-						)}
-						<div className="flex items-center gap-1">
-							<Calendar className="h-3 w-3" />
-							<span>{new Date(item.createdAt).toLocaleDateString()}</span>
-						</div>
-						{metadata?.colorSpace && (
-							<div className="flex items-center gap-1">
-								<Palette className="h-3 w-3" />
-								<span>{metadata.colorSpace}</span>
-							</div>
-						)}
-					</div>
-
-					<div className="flex items-center gap-2">
-						<div className="flex flex-wrap gap-1 max-w-[50%]">
-							{item.tags?.slice(0, 2).map((tag) => (
-								<Badge key={tag.id} variant="secondary" className="text-[10px] h-4 px-1">
-									{tag.name}
-								</Badge>
-							))}
-							{item.tags?.length > 2 && (
-								<Badge variant="secondary" className="text-[10px] h-4 px-1">
-									+{item.tags.length - 2}
-								</Badge>
-							)}
-						</div>
-
-						<div className="flex items-center gap-1 ml-auto">
-							{item.collections?.length > 0 && (
-								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
-									<BookImage className="h-2.5 w-2.5" />
-									<span>{item.collections.length}</span>
-								</Badge>
-							)}
-							{item.albums?.length > 0 && (
-								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
-									<Camera className="h-2.5 w-2.5" />
-									<span>{item.albums.length}</span>
-								</Badge>
-							)}
-							{item.characters?.length > 0 && (
-								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
-									<User2 className="h-2.5 w-2.5" />
-									<span>{item.characters.length}</span>
-								</Badge>
-							)}
-							{item.places?.length > 0 && (
-								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
-									<MapPin className="h-2.5 w-2.5" />
-									<span>{item.places.length}</span>
-								</Badge>
-							)}
-							{item.worldItems?.length > 0 && (
-								<Badge variant="outline" className="text-[10px] h-4 px-1 flex items-center gap-1">
-									<Box className="h-2.5 w-2.5" />
-									<span>{item.worldItems.length}</span>
-								</Badge>
-							)}
-						</div>
+				<div className="flex items-center gap-4">
+					<span className="text-xs text-muted-foreground w-20 text-right">{formatBytes(item.size)}</span>
+					<div className="flex items-center gap-1 w-32">
+						<Calendar className="h-3 w-3 text-muted-foreground" />
+						<span className="text-xs text-muted-foreground">{formatDate(item.modifiedAt || item.createdAt)}</span>
 					</div>
 				</div>
-			</button>
+			</motion.div>
 		</FileContextMenu>
+	);
+});
+
+export interface ListViewProps {
+	items: FileItem[];
+	onItemClick?: (item: FileItem, e: React.MouseEvent) => void;
+	onItemDoubleClick?: (item: FileItem) => void;
+	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	className?: string;
+}
+
+export const ListView = memo(function ListView({
+	items,
+	onItemClick,
+	onItemDoubleClick,
+	onContextAction,
+	className,
+}: ListViewProps) {
+	const { selectedIds, activeId } = useSelectionStore();
+	const { itemSize } = useViewOptionsStore();
+
+	const renderItem = useCallback(
+		(index: number, item: FileItem) => {
+			const isSelected = selectedIds.includes(item.id);
+			const isActive = activeId === item.id;
+
+			return (
+				<ListItem
+					key={item.id}
+					item={item}
+					isSelected={isSelected}
+					isActive={isActive}
+					onClick={onItemClick}
+					onDoubleClick={onItemDoubleClick}
+					onContextAction={onContextAction}
+				/>
+			);
+		},
+		[selectedIds, activeId, onItemClick, onItemDoubleClick, onContextAction]
+	);
+
+	return (
+		<VirtualizerWrapper
+			type="list"
+			data={items}
+			itemContent={renderItem}
+			listClassName={cn('w-full h-full', className)}
+			layoutId="list-view"
+		/>
 	);
 });

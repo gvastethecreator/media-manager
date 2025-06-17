@@ -43,6 +43,7 @@ export interface FileItem {
 	errorMessage?: string;
 	createdAt: Date;
 	updatedAt: Date;
+	isFavorite?: boolean;
 }
 
 /**

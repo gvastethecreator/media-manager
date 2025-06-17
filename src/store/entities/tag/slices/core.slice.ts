@@ -23,6 +23,11 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 	error: null,
 	lastUpdated: null,
 
+	// Obtiene todos los tags
+	getTags: () => {
+		return get().items;
+	},
+
 	// Carga de tags
 	loadTags: async () => {
 		if (get().isLoading || get().items.length > 0) {

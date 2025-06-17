@@ -1,23 +1,22 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { FileItem } from '@/types/file-item';
-import { HardDrive, Heart, ImageIcon, Palette, Share2, Wand2 } from 'lucide-react';
-import type * as React from 'react';
-import { memo, useEffect, useRef } from 'react';
+import { Star } from 'lucide-react';
+import { motion } from 'motion/react';
+import * as React from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ContextMenuAction } from '../context-menu/context-menu';
 import { FileContextMenu } from '../context-menu/context-menu';
 import { ImageRenderer } from '../image-renderer';
 
-interface MasonryViewProps {
+interface MasonryItemProps {
 	item: FileItem;
 	isSelected?: boolean;
-	isScrolling?: boolean;
-	shouldLoad?: boolean;
-	thumbnail?: string | null;
-	isHovered?: boolean;
-	onClick?: (item: FileItem) => void;
+	isActive?: boolean;
+	onClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onDoubleClick?: (item: FileItem) => void;
 	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
 	style?: React.CSSProperties;
@@ -44,162 +43,164 @@ function formatBytes(bytes: number): string {
 	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
-export const MasonryView = memo(function MasonryView({
+export const MasonryItem = memo(function MasonryItem({
 	item,
 	isSelected,
-	isScrolling,
-	shouldLoad,
-	thumbnail,
-	isHovered,
+	isActive,
 	onClick,
 	onDoubleClick,
 	onContextAction,
 	style,
-}: MasonryViewProps) {
-	const metadata = getMetadata(item.metadata);
-	const buttonRef = useRef<HTMLButtonElement>(null);
-
-	// Añadir logging para depuración
-	useEffect(() => {
-		// Registrar eventos de contexto
-		const button = buttonRef.current;
-		if (button) {
-			const handleContextMenuNative = (e: MouseEvent) => {
-				console.log('Evento contextmenu nativo en MasonryView para:', item.name);
-			};
-
-			button.addEventListener('contextmenu', handleContextMenuNative);
-			return () => {
-				button.removeEventListener('contextmenu', handleContextMenuNative);
-			};
-		}
-	}, [item]);
-
-	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === 'Enter' || e.key === ' ') {
+}: MasonryItemProps) {
+	// Memoizamos los handlers para evitar recreaciones
+	const handleClick = useCallback(
+		(e: React.MouseEvent) => {
 			e.preventDefault();
-			onClick?.(item);
-		}
-	};
+			e.stopPropagation();
+			onClick?.(item, e);
+		},
+		[onClick, item]
+	);
+
+	const handleDoubleClick = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			onDoubleClick?.(item);
+		},
+		[onDoubleClick, item]
+	);
+
+	// Memoizamos la clase para evitar recálculos
+	const itemClassName = useMemo(() => {
+		return cn(
+			'relative overflow-hidden rounded-md border border-border/40 bg-card transition-all',
+			isSelected && 'ring-2 ring-primary ring-offset-2',
+			isActive && 'ring-2 ring-secondary ring-offset-1'
+		);
+	}, [isSelected, isActive]);
+
+	// Optimizamos la acción del menú contextual para evitar recreaciones
+	const handleContextAction = useCallback(
+		(action: ContextMenuAction, data?: Record<string, unknown>) => {
+			onContextAction?.(action, item, data);
+		},
+		[onContextAction, item]
+	);
+
+	const metadata = getMetadata(item.metadata);
+	const thumbnailUrl = item.thumbnail || `/api/images/${item.id}/thumbnail`;
 
 	return (
-		<FileContextMenu file={item} onAction={onContextAction || (() => {})}>
-			<button
-				ref={buttonRef}
-				type="button"
-				className={cn(
-					'relative w-full h-full overflow-hidden group text-left',
-					isSelected && 'ring-2 ring-primary ring-offset-2',
-					isScrolling && 'opacity-50'
-				)}
+		<FileContextMenu file={item} onAction={handleContextAction}>
+			<motion.div
+				className={itemClassName}
+				onClick={handleClick}
+				onDoubleClick={handleDoubleClick}
+				whileHover={{ scale: 1.02 }}
+				whileTap={{ scale: 0.98 }}
 				style={style}
-				onClick={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					console.log('Click en MasonryView para:', item.name);
-					onClick?.(item);
-				}}
-				onDoubleClick={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					console.log('Double click en MasonryView para:', item.name);
-					onDoubleClick?.(item);
-				}}
-				onKeyDown={handleKeyDown}
-				aria-pressed={isSelected}
+				layout
 			>
-				{shouldLoad && thumbnail ? (
-					<div className="relative w-full h-full">
-						<ImageRenderer
-							src={thumbnail}
-							alt={item.name}
-							width={metadata?.dimensions?.width}
-							height={metadata?.dimensions?.height}
-							className={cn(
-								'w-full h-full object-cover rounded-sm transition-all duration-200',
-								'group-hover:scale-[1.02]'
-							)}
-							quality={75}
-						/>
-						<div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-					</div>
-				) : (
-					<div className="flex items-center justify-center h-full bg-muted/50 rounded-sm">
-						<ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-					</div>
-				)}
+				{/* Imagen */}
+				<div className="w-full h-full overflow-hidden">
+					<ImageRenderer
+						src={thumbnailUrl}
+						alt={item.name}
+						className="h-full w-full object-cover transition-transform"
+						onError={() => { }}
+					/>
+				</div>
 
-				<div className="absolute top-2 right-2 flex gap-1">
+				{/* Overlay con información al pasar el mouse */}
+				<div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-colors flex flex-col justify-end p-2 opacity-0 hover:opacity-100">
+					<div className="text-white text-sm font-medium truncate">{item.name}</div>
 					{item.isFavorite && (
-						<Badge variant="secondary" className="bg-red-500/20 text-red-500">
-							<Heart className="h-3 w-3 fill-current" />
-						</Badge>
-					)}
-					{item.isPublic && (
-						<Badge variant="secondary" className="bg-green-500/20 text-green-500">
-							<Share2 className="h-3 w-3" />
-						</Badge>
-					)}
-					{metadata?.generation && (
-						<Badge
-							variant="secondary"
-							className={cn(
-								'text-[10px] h-5 px-1',
-								metadata.generation.type === 'stable-diffusion' && 'bg-blue-500/20 text-blue-500',
-								metadata.generation.type === 'comfyui' && 'bg-green-500/20 text-green-500',
-								metadata.generation.type === 'midjourney' && 'bg-purple-500/20 text-purple-500'
-							)}
-						>
-							<Wand2 className="h-3 w-3" />
-						</Badge>
-					)}
-				</div>
-
-				<div
-					className={cn(
-						'absolute inset-x-0 bottom-0 p-2 flex flex-col gap-1.5 transition-all duration-200',
-						isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-					)}
-				>
-					<div className="flex items-start justify-between gap-2">
-						<p className="text-xs text-white font-medium truncate flex-1 drop-shadow-sm">{item.name}</p>
-						{metadata?.dimensions && (
-							<span className="text-[10px] text-white/90 font-medium drop-shadow-sm">
-								{metadata.dimensions.width} × {metadata.dimensions.height}
-							</span>
-						)}
-					</div>
-
-					<div className="flex flex-wrap gap-1">
-						{item.tags?.slice(0, 3).map((tag) => (
-							<Badge key={tag.id} variant="secondary" className="text-[10px] h-4 px-1 bg-white/10 text-white/90">
-								{tag.name}
-							</Badge>
-						))}
-						{item.tags?.length > 3 && (
-							<Badge variant="secondary" className="text-[10px] h-4 px-1 bg-white/10 text-white/90">
-								+{item.tags.length - 3}
-							</Badge>
-						)}
-					</div>
-
-					<div className="flex items-center gap-1 text-[10px] text-white/70">
-						<div className="flex items-center gap-1">
-							<HardDrive className="h-2.5 w-2.5" />
-							<span>{formatBytes(item.size)}</span>
+						<div className="absolute top-2 right-2">
+							<Star className="h-4 w-4 text-yellow-500 fill-current" />
 						</div>
-						{metadata?.colorSpace && (
-							<>
-								<span>•</span>
-								<div className="flex items-center gap-1">
-									<Palette className="h-2.5 w-2.5" />
-									<span>{metadata.colorSpace}</span>
-								</div>
-							</>
-						)}
-					</div>
+					)}
 				</div>
-			</button>
+			</motion.div>
 		</FileContextMenu>
+	);
+});
+
+export interface MasonryViewProps {
+	items: FileItem[];
+	onItemClick?: (item: FileItem, e: React.MouseEvent) => void;
+	onItemDoubleClick?: (item: FileItem) => void;
+	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	className?: string;
+}
+
+export const MasonryView = memo(function MasonryView({
+	items,
+	onItemClick,
+	onItemDoubleClick,
+	onContextAction,
+	className,
+}: MasonryViewProps) {
+	const { selectedIds, activeId } = useSelectionStore();
+	const { itemSize } = useViewOptionsStore();
+	const containerRef = useRef<HTMLDivElement>(null);
+	const [columns, setColumns] = useState(3);
+
+	// Calcular el número de columnas según el ancho del contenedor
+	useEffect(() => {
+		const updateColumns = () => {
+			if (!containerRef.current) return;
+			const width = containerRef.current.clientWidth;
+			const newColumns = Math.max(1, Math.floor(width / (itemSize + 16)));
+			setColumns(newColumns);
+		};
+
+		updateColumns();
+		window.addEventListener('resize', updateColumns);
+		return () => window.removeEventListener('resize', updateColumns);
+	}, [itemSize]);
+
+	// Distribuir elementos en columnas para crear el efecto mosaico
+	const masonryColumns = useMemo(() => {
+		const cols: FileItem[][] = Array.from({ length: columns }, () => []);
+
+		items.forEach((item, index) => {
+			const columnIndex = index % columns;
+			cols[columnIndex].push(item);
+		});
+
+		return cols;
+	}, [items, columns]);
+
+	return (
+		<div ref={containerRef} className={cn('w-full h-full p-4 overflow-auto', className)}>
+			<div className="flex gap-4">
+				{masonryColumns.map((column, colIndex) => (
+					<div key={colIndex} className="flex-1 flex flex-col gap-4">
+						{column.map((item) => {
+							const isSelected = selectedIds.includes(item.id);
+							const isActive = activeId === item.id;
+
+							// Calcular altura según las dimensiones de la imagen
+							const aspectRatio = item.width && item.height ? item.width / item.height : 1;
+							const height = Math.floor(itemSize / aspectRatio);
+
+							return (
+								<MasonryItem
+									key={item.id}
+									item={item}
+									isSelected={isSelected}
+									isActive={isActive}
+									onClick={onItemClick}
+									onDoubleClick={onItemDoubleClick}
+									onContextAction={onContextAction}
+									style={{ height }}
+								/>
+							);
+						})}
+					</div>
+				))}
+			</div>
+		</div>
 	);
 });

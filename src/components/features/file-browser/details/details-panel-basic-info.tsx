@@ -1,9 +1,12 @@
 'use client';
 
+import { updateImageMetadata } from '@/app/actions/images/metadata.actions';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { Calendar, FileImage, Folder, HardDrive, ImageIcon } from 'lucide-react';
+import { useCallback } from 'react';
 import { InfoItem } from './details-panel-info-item';
 import type { BasicInfoProps } from './details-panel-types';
+import { EditableMetadata } from './editable-metadata';
 
 /**
  * Componente que muestra información básica sobre la imagen
@@ -42,8 +45,23 @@ export function BasicInfo({ item, metadata }: BasicInfoProps) {
 		}
 	};
 
+	// Función para actualizar metadatos
+	const handleUpdateMetadata = useCallback(
+		async (id: string, data: { title?: string; description?: string }) => {
+			return updateImageMetadata(id, {
+				title: data.title,
+				description: data.description,
+			});
+		},
+		[]
+	);
+
 	return (
-		<div className="space-y-1.5">
+		<div className="space-y-3">
+			{/* Título y descripción editables */}
+			<EditableMetadata item={item} onUpdate={handleUpdateMetadata} />
+
+			{/* Información técnica */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
 				{item.path && (
 					<InfoItem icon={<Folder className="h-3 w-3 text-blue-400" />} label="Ubicación" value={item.path} />
