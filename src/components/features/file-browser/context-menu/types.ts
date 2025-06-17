@@ -47,8 +47,8 @@ export interface ContextMenuActionData {
 export interface FileContextMenuProps {
 	/** Archivo asociado al menú */
 	file: FileItem;
-	/** Contenido a envolver con el menú contextual */
-	children: ReactNode;
+	/** Contenido a envolver con el menú contextual (opcional en la nueva implementación) */
+	children?: ReactNode;
 	/** Manejador de acciones del menú */
 	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
 }

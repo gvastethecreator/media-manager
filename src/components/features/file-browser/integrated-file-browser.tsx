@@ -2,7 +2,7 @@
 
 import type { FileItem } from '@/types/file-item';
 import { memo, useMemo } from 'react';
-import { FileBrowserV2 } from './file-browser-v2';
+import { FileBrowser } from './file-browser';
 import { FilterDefinition } from './filters/filter-panel';
 import { FileBrowserToolbar } from './toolbar/file-browser-toolbar';
 
@@ -12,6 +12,9 @@ export interface IntegratedFileBrowserProps {
 	onItemDoubleClick?: (item: FileItem) => void;
 	className?: string;
 	isLoading?: boolean;
+	isReindexing?: boolean;
+	reindexProgress?: number;
+	loadMoreItems?: () => void;
 	showSearch?: boolean;
 	showFilters?: boolean;
 	showDetailsToggle?: boolean;
@@ -20,6 +23,21 @@ export interface IntegratedFileBrowserProps {
 
 /**
  * Componente integrado que combina el FileBrowser con la barra de herramientas
+ *
+ * Este componente proporciona una experiencia de navegación de archivos completa
+ * con barra de herramientas, filtros, y soporte para todas las operaciones avanzadas
+ * del FileBrowser (selección, vista, ordenación, etc).
+ *
+ * @example
+ * ```tsx
+ * <IntegratedFileBrowser
+ *   items={images}
+ *   isLoading={isLoading}
+ *   isReindexing={isReindexing}
+ *   reindexProgress={progress}
+ *   loadMoreItems={handleLoadMore}
+ * />
+ * ```
  */
 export const IntegratedFileBrowser = memo<IntegratedFileBrowserProps>(function IntegratedFileBrowser({
 	items,
@@ -27,6 +45,9 @@ export const IntegratedFileBrowser = memo<IntegratedFileBrowserProps>(function I
 	onItemDoubleClick,
 	className,
 	isLoading = false,
+	isReindexing = false,
+	reindexProgress = 0,
+	loadMoreItems,
 	showSearch = true,
 	showFilters = true,
 	showDetailsToggle = true,
@@ -77,12 +98,15 @@ export const IntegratedFileBrowser = memo<IntegratedFileBrowserProps>(function I
 
 			{/* Navegador de archivos */}
 			<div className="flex-1 overflow-hidden">
-				<FileBrowserV2
+				<FileBrowser
 					items={items}
 					onItemSelect={onItemSelect}
 					onItemDoubleClick={onItemDoubleClick}
 					className={className}
 					isLoading={isLoading}
+					isReindexing={isReindexing}
+					reindexProgress={reindexProgress}
+					loadMoreItems={loadMoreItems}
 				/>
 			</div>
 		</div>

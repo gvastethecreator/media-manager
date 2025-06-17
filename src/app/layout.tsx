@@ -3,8 +3,9 @@ import { GlobalErrorHandler } from '@/components/core/global-error-handler';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { ServerInitializer } from '@/components/server/server-initializer';
 import { ThemeProvider } from '@/components/ui/theme-provider';
+import { ToastProvider } from '@/components/ui/toast';
+import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Toaster } from '@/components/ui/use-toast';
 import { ReactScanProvider } from '@/lib/react-scan';
 import { cn } from '@/lib/utils';
 import { AppProvider } from '@/providers/app-provider';
@@ -35,22 +36,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 					'selection:bg-primary selection:text-primary-foreground'
 				)}
 			>
-				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-					{/* Restaurado con manejo mejorado de errores y reintentos */}
-					<ServerInitializer />
+				<ToastProvider>
+					<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+						{/* Restaurado con manejo mejorado de errores y reintentos */}
+						<ServerInitializer />
 
-					<AppProvider>
-						<ReactScanProvider>
-							<TooltipProvider>
-								<div className="relative min-h-screen w-full">
-									<GlobalErrorHandler>{children}</GlobalErrorHandler>
-								</div>
-							</TooltipProvider>
-						</ReactScanProvider>
-					</AppProvider>
-					<Toaster />
-					<FileViewer />
-				</ThemeProvider>
+						<AppProvider>
+							<ReactScanProvider>
+								<TooltipProvider>
+									<div className="relative min-h-screen w-full">
+										<GlobalErrorHandler>{children}</GlobalErrorHandler>
+									</div>
+								</TooltipProvider>
+							</ReactScanProvider>
+						</AppProvider>
+						<Toaster />
+						<FileViewer />
+					</ThemeProvider>
+				</ToastProvider>
 			</body>
 		</html>
 	);
