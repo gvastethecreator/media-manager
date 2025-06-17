@@ -1,12 +1,15 @@
 'use client';
 
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { CustomScrollArea } from './custom-scroll-area';
+
+// Tipos para mejorar la tipificación
+type ViewType = 'list' | 'grid' | 'masonry';
 
 interface VirtualizerWrapperProps<T> {
-	type: 'list' | 'grid' | 'masonry';
+	type: ViewType;
 	data: T[];
 	itemContent: (index: number, item: T) => React.ReactNode;
 	itemSize?: number;
@@ -22,27 +25,39 @@ interface VirtualizerWrapperProps<T> {
 	onVisibilityChange?: (indices: number[]) => void;
 }
 
-// Configuración para mejorar el rendimiento y caching
+// Configuración optimizada para rendimiento
 const VIRTUALIZER_CONFIG = {
 	// Mayor overscan significa más elementos en caché, pero mayor uso de memoria
 	overscan: {
-		list: 10,     // Elementos adicionales renderizados arriba/abajo en listas
-		grid: 8,      // Filas adicionales en cuadrículas
-		masonry: 5    // Elementos adicionales en masonry
+		list: 20,     // Elementos adicionales renderizados arriba/abajo en listas
+		grid: 15,     // Filas adicionales en cuadrículas
+		masonry: 10   // Elementos adicionales en masonry
 	},
 	// Tamaño de caché para elementos pre-renderizados
-	cacheSize: 500,   // Número máximo de elementos a mantener en caché (aumentado de 200 a 500)
+	cacheSize: 1000,  // Número máximo de elementos a mantener en caché
 	// Configuración para carga suave
 	sequential: {
-		batchSize: 30,      // Cuántos elementos cargar por lote (aumentado de 20 a 30)
-		delayBetweenBatches: 50,  // Milisegundos entre lotes para UI responsiva (reducido de 100 a 50)
-		maxRequestsPerSession: 15, // Limitar el número de solicitudes de carga secuencial por sesión de scroll
-		initialLoadDelay: 100 // Tiempo de espera antes de cargar el primer lote
+		batchSize: 50,             // Cuántos elementos cargar por lote
+		delayBetweenBatches: 30,   // Milisegundos entre lotes para UI responsiva
+		maxRequestsPerSession: 30, // Límite de solicitudes por sesión de scroll
+		initialLoadDelay: 50       // Tiempo de espera antes de cargar el primer lote
+	},
+	// Umbrales por tipo de vista para determinar cuándo cargar más
+	scrollThresholds: {
+		grid: 0.65,    // Más agresivo para grid (carga antes)
+		list: 0.7,     // Valor medio para lista
+		masonry: 0.6   // Muy agresivo para masonry (carga mucho antes)
+	},
+	// Umbrales en pixels para detectar el final del scroll por tipo
+	pixelThresholds: {
+		grid: 500,
+		list: 400,
+		masonry: 600
 	},
 	// Configuración por defecto de la cuadrícula
 	grid: {
-		gap: 16,       // Gap por defecto (será reemplazado si se proporciona gridGap)
-		aspectRatio: 1 // Relación de aspecto por defecto (será reemplazado si se proporciona aspectRatio)
+		gap: 16,       // Gap por defecto
+		aspectRatio: 1 // Relación de aspecto por defecto
 	}
 };
 
@@ -84,6 +99,13 @@ export function VirtualizerWrapper<T>({
 	const isLoadingRef = useRef<boolean>(false);
 	// Último tamaño conocido de datos para comparar
 	const lastDataLengthRef = useRef<number>(data.length);
+
+	// Función para obtener el elemento scrollable (viewport de ScrollArea)
+	const getScrollElement = useCallback(() => {
+		if (!scrollRef.current) return null;
+		const viewport = scrollRef.current.closest('[data-slot="scroll-area-viewport"]') as HTMLElement;
+		return viewport || scrollRef.current;
+	}, []);
 
 	// Función para cargar elementos secuencialmente
 	const loadItemsSequentially = useCallback(() => {
@@ -138,7 +160,7 @@ export function VirtualizerWrapper<T>({
 
 					// Si todavía no hemos alcanzado el límite y el usuario está cerca del final,
 					// cargar otro lote automáticamente
-					const scrollableElement = scrollRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement;
+					const scrollableElement = getScrollElement();
 					if (scrollableElement) {
 						const scrollPosition = scrollableElement.scrollTop + scrollableElement.clientHeight;
 						const scrollRatio = scrollPosition / scrollableElement.scrollHeight;
@@ -155,7 +177,7 @@ export function VirtualizerWrapper<T>({
 				}, VIRTUALIZER_CONFIG.sequential.delayBetweenBatches);
 			}
 		}, VIRTUALIZER_CONFIG.sequential.delayBetweenBatches);
-	}, [data.length, loadedItems]);
+	}, [data.length, loadedItems, getScrollElement]);
 
 	// Función memoizada para obtener contenido con caché
 	const getCachedContent = useCallback((index: number, item: T) => {
@@ -190,6 +212,87 @@ export function VirtualizerWrapper<T>({
 		);
 	}, [itemContent, loadedItems]);
 
+	// Configuración de la virtualización para lista
+	const listVirtualizer = useVirtualizer({
+		count: data.length,
+		getScrollElement,
+		estimateSize: () => itemSize,
+		overscan: VIRTUALIZER_CONFIG.overscan.list,
+		scrollMargin: scrollRef.current?.offsetTop || 0
+	});
+
+	// Configuración de la virtualización para cuadrícula
+	const gridVirtualizer = useVirtualizer({
+		count: Math.ceil(data.length / columnCount),
+		getScrollElement,
+		estimateSize: () => {
+			// Si tenemos aspectRatio, ajustar la altura según el ancho real
+			if (aspectRatio) {
+				// Calcular el ancho del item basado en el ancho del contenedor y el número de columnas
+				const containerWidth = scrollRef.current?.clientWidth || 0;
+				const availableWidth = containerWidth - gridGap * (columnCount + 1);
+				const itemWidth = availableWidth / columnCount;
+				// Calcular altura basada en relación de aspecto (width / height = aspectRatio)
+				return itemWidth / aspectRatio + gridGap;
+			}
+			// Si no hay aspectRatio, usar itemSize + gap
+			return itemSize + gridGap;
+		},
+		overscan: VIRTUALIZER_CONFIG.overscan.grid * 2,
+		getItemKey: (index) => `grid-row-${index}`,
+		scrollMargin: scrollRef.current?.offsetTop || 0
+	});
+
+	// Función para actualizar los elementos visibles
+	const updateVisibleIndices = useCallback(() => {
+		// Lista para acumular índices visibles
+		const newVisibleIndices: number[] = [];
+
+		// Obtener elemento scrollable
+		const scrollElement = getScrollElement();
+		if (!scrollElement) return;
+
+		// Obtener dimensiones del viewport
+		const containerHeight = scrollElement.clientHeight;
+		const scrollPosition = scrollElement.scrollTop;
+
+		if (type === 'grid') {
+			// Para cuadrícula, calcular índices por filas/columnas
+			const itemHeight = gridVirtualizer.options.estimateSize();
+			const itemWidth = (scrollElement.clientWidth - gridGap * (columnCount + 1)) / columnCount;
+
+			if (itemHeight && itemWidth) {
+				const firstVisibleRow = Math.floor(scrollPosition / itemHeight);
+				const lastVisibleRow = Math.ceil((scrollPosition + containerHeight) / itemHeight);
+
+				// Para cada fila visible
+				for (let row = firstVisibleRow; row <= lastVisibleRow; row++) {
+					for (let col = 0; col < columnCount; col++) {
+						const itemIndex = row * columnCount + col;
+						if (itemIndex < data.length) {
+							newVisibleIndices.push(itemIndex);
+						}
+					}
+				}
+			}
+		} else if (type === 'list') {
+			// Para lista, usar virtualizer para determinar items visibles
+			const items = listVirtualizer.getVirtualItems();
+			newVisibleIndices.push(...items.map(item => item.index));
+		}
+
+		// Actualizamos directamente
+		setVisibleIndices(newVisibleIndices);
+		onVisibilityChange?.(newVisibleIndices);
+
+		// Si estamos cerca del límite de elementos cargados, cargar más
+		const maxIndex = newVisibleIndices.length > 0 ? Math.max(...newVisibleIndices) : 0;
+		if (maxIndex + 10 > loadedItems && loadedItems < data.length) {
+			loadItemsSequentially();
+		}
+	}, [type, data.length, columnCount, gridVirtualizer, listVirtualizer, getScrollElement,
+		loadedItems, loadItemsSequentially, onVisibilityChange, itemSize, gridGap]);
+
 	// Calcular el número de columnas para la cuadrícula
 	useEffect(() => {
 		if (!scrollRef.current) return;
@@ -200,14 +303,27 @@ export function VirtualizerWrapper<T>({
 			const effectiveItemSize = itemSize + gridGap;
 			// Asegurar que al menos hay una columna
 			const columns = Math.max(1, Math.floor((containerWidth - gridGap) / effectiveItemSize));
-			setColumnCount(columns);
+			if (columns !== columnCount) {
+				setColumnCount(columns);
+			}
 		};
 
 		// Actualizar inmediatamente
 		updateColumnCount();
 
 		// Actualizar cuando cambie el tamaño de la ventana
-		const resizeObserver = new ResizeObserver(updateColumnCount);
+		const resizeObserver = new ResizeObserver(() => {
+			updateColumnCount();
+			// Forzar recálculo del virtualizer para grid
+			if (type === 'grid') {
+				gridVirtualizer.measure();
+			}
+			// Actualizar índices visibles tras el resize, pero con debounce
+			setTimeout(() => {
+				updateVisibleIndices();
+			}, 50);
+		});
+
 		resizeObserver.observe(scrollRef.current);
 
 		return () => {
@@ -216,7 +332,7 @@ export function VirtualizerWrapper<T>({
 			}
 			resizeObserver.disconnect();
 		};
-	}, [itemSize, gridGap, scrollRef]);
+	}, [itemSize, gridGap, type, gridVirtualizer, updateVisibleIndices, columnCount]);
 
 	// Efecto para cargar elementos iniciales y cuando cambian los datos
 	useEffect(() => {
@@ -240,7 +356,7 @@ export function VirtualizerWrapper<T>({
 			// Comenzar carga secuencial después de un breve retraso
 			setTimeout(() => {
 				// Asegurar que el elemento de scroll esté al inicio
-				const scrollElement = scrollRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement;
+				const scrollElement = getScrollElement();
 				if (scrollElement) {
 					scrollElement.scrollTop = 0;
 				}
@@ -248,172 +364,20 @@ export function VirtualizerWrapper<T>({
 				loadItemsSequentially();
 			}, VIRTUALIZER_CONFIG.sequential.initialLoadDelay);
 		}
-	}, [data, loadItemsSequentially]);
+	}, [data, loadItemsSequentially, getScrollElement]);
 
-	// Después de montar el componente, hacer scroll al inicio
-	useEffect(() => {
-		const scrollElement = scrollRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement;
-		if (scrollElement) {
-			scrollElement.scrollTop = 0;
-		}
-	}, []);
-
-	// Función para obtener el elemento scrollable
-	const getScrollElement = useCallback(() => {
-		if (!scrollRef.current) return null;
-		const viewport = scrollRef.current.closest('[data-slot="scroll-area-viewport"]') as HTMLElement;
-		return viewport || scrollRef.current;
-	}, []);
-
-	// Configuración de la virtualización para lista
-	const listVirtualizer = useVirtualizer({
-		count: data.length,
-		getScrollElement,
-		estimateSize: () => itemSize,
-		overscan: VIRTUALIZER_CONFIG.overscan.list, // Mayor número de elementos en caché
-		scrollMargin: scrollRef.current?.offsetTop || 0
-	});
-
-	// Configuración de la virtualización para cuadrícula
-	const gridVirtualizer = useVirtualizer({
-		count: Math.ceil(data.length / columnCount),
-		getScrollElement,
-		estimateSize: () => {
-			// Si tenemos aspectRatio, ajustar la altura según el ancho real
-			if (aspectRatio) {
-				// Calcular el ancho del item basado en el ancho del contenedor y el número de columnas
-				const containerWidth = scrollRef.current?.clientWidth || 0;
-				const availableWidth = containerWidth - gridGap * (columnCount + 1);
-				const itemWidth = availableWidth / columnCount;
-				// Calcular altura basada en relación de aspecto (width / height = aspectRatio)
-				return itemWidth / aspectRatio + gridGap;
-			}
-			// Si no hay aspectRatio, usar itemSize + gap
-			return itemSize + gridGap;
-		},
-		overscan: VIRTUALIZER_CONFIG.overscan.grid * 2, // Mayor overscan para cuadrículas (duplicado)
-		getItemKey: (index) => `grid-row-${index}`,
-		scrollMargin: scrollRef.current?.offsetTop || 0
-	});
-
-	// Función para actualizar los elementos visibles
-	const updateVisibleIndices = useCallback(() => {
-		// Lista para acumular índices visibles
-		const newVisibleIndices: number[] = [];
-
-		if (type === 'grid') {
-			// Para grid, calcular qué filas son visibles y multiplicar por columnCount
-			const visibleRows = gridVirtualizer.getVirtualItems();
-
-			// Si no hay filas visibles pero tenemos datos, probablemente estamos esperando que se midan
-			if (visibleRows.length === 0 && data.length > 0) {
-				// Usar los primeros elementos como visibles temporalmente
-				const initialVisible = Math.min(20, data.length);
-				for (let i = 0; i < initialVisible; i++) {
-					newVisibleIndices.push(i);
-				}
-			} else {
-				visibleRows.forEach((row: VirtualItem) => {
-					for (let col = 0; col < columnCount; col++) {
-						const itemIndex = row.index * columnCount + col;
-						if (itemIndex < data.length) {
-							newVisibleIndices.push(itemIndex);
-						}
-					}
-				});
-			}
-
-			// Después de actualizar los índices visibles, comprobar si necesitamos cargar más
-			if (visibleRows.length > 0) {
-				const lastRowIndex = visibleRows[visibleRows.length - 1].index;
-				const totalRows = Math.ceil(data.length / columnCount);
-
-				// Si estamos viendo las últimas filas y no estamos cargando, cargar más
-				if (lastRowIndex >= totalRows - 3 && !isLoadingRef.current && loadedItems < data.length) {
-					loadItemsSequentially();
-				}
-			}
-		} else if (type === 'list') {
-			// Para lista, usar directamente los índices virtuales
-			const visibleItems = listVirtualizer.getVirtualItems();
-			visibleItems.forEach((item: VirtualItem) => {
-				if (item.index < data.length) {
-					newVisibleIndices.push(item.index);
-				}
-			});
-		} else if (type === 'masonry') {
-			// Para masonry, tenemos que calcular manualmente
-			// pero no es trivial determinar qué elementos están visibles
-			// así que asumimos que todos los elementos de las primeras N filas lo están
-			const containerHeight = scrollRef.current?.clientHeight || 0;
-			const scrollPosition = scrollRef.current?.scrollTop || 0;
-			const itemHeight = itemSize; // Aproximado
-
-			// Rango visible: desde scrollPosition hasta scrollPosition + containerHeight
-			const firstVisibleRow = Math.floor(scrollPosition / itemHeight);
-			const lastVisibleRow = Math.ceil((scrollPosition + containerHeight) / itemHeight);
-
-			// Para cada fila visible
-			for (let row = firstVisibleRow; row <= lastVisibleRow; row++) {
-				for (let col = 0; col < columnCount; col++) {
-					const itemIndex = row * columnCount + col;
-					if (itemIndex < data.length) {
-						newVisibleIndices.push(itemIndex);
-					}
-				}
-			}
-		}
-
-		// Actualizar el estado y notificar a través del callback
-		setVisibleIndices(newVisibleIndices);
-		onVisibilityChange?.(newVisibleIndices);
-	}, [type, data.length, columnCount, onVisibilityChange, gridVirtualizer, listVirtualizer, loadedItems, loadItemsSequentially, isLoadingRef]);
-
-	// Efecto para actualizar visibles cuando cambia el scrollTop
+	// Efecto para configurar event listeners para scroll
 	useEffect(() => {
 		if (!scrollRef.current) return;
 
-		// Función para obtener el elemento scrollable
-		const getScrollableElement = () => {
-			const viewport = scrollRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement;
-			return viewport || scrollRef.current;
-		};
+		const scrollElement = getScrollElement();
+		if (!scrollElement) return;
 
 		const handleScroll = () => {
 			// Throttle para evitar demasiadas actualizaciones durante desplazamiento rápido
 			if (visibilityUpdateTimeoutRef.current) {
 				clearTimeout(visibilityUpdateTimeoutRef.current);
 			}
-
-			visibilityUpdateTimeoutRef.current = setTimeout(() => {
-				updateVisibleIndices();
-				visibilityUpdateTimeoutRef.current = null;
-			}, 100);
-		};
-
-		const scrollElement = getScrollableElement();
-		if (scrollElement) {
-			scrollElement.addEventListener('scroll', handleScroll);
-		}
-
-		// Actualizar inmediatamente al montar
-		updateVisibleIndices();
-
-		return () => {
-			if (scrollElement) {
-				scrollElement.removeEventListener('scroll', handleScroll);
-			}
-			if (visibilityUpdateTimeoutRef.current) {
-				clearTimeout(visibilityUpdateTimeoutRef.current);
-			}
-		};
-	}, [updateVisibleIndices]);
-
-	// Manejador de eventos de scroll con debounce
-	const handleScroll = useCallback(
-		(e: React.UIEvent<HTMLDivElement>) => {
-			// Este manejador ya no necesita hacer mucho, ya que el scrollElement real ahora es el Viewport
-			// del ScrollArea, y hemos configurado event listeners directamente en ese elemento.
 
 			// Activar el estado de scroll
 			if (!isScrolling) {
@@ -423,6 +387,12 @@ export function VirtualizerWrapper<T>({
 				sequentialRequestsRef.current = 0;
 			}
 
+			// Delay para actualizar índices visibles
+			visibilityUpdateTimeoutRef.current = setTimeout(() => {
+				updateVisibleIndices();
+				visibilityUpdateTimeoutRef.current = null;
+			}, 100);
+
 			// Debounce para detectar cuando se detiene el scroll
 			clearTimeout((window as any).scrollTimeout);
 			(window as any).scrollTimeout = setTimeout(() => {
@@ -431,65 +401,94 @@ export function VirtualizerWrapper<T>({
 
 				// Solo cargar más si no estamos cargando actualmente
 				if (!isLoadingRef.current) {
-					// Cargar más elementos cuando el usuario se detiene
 					loadItemsSequentially();
 				}
 
-				// Actualizar los elementos visibles
+				// Actualizar índices visibles al final
 				updateVisibleIndices();
-			}, 200);
+			}, 150);
 
-			// El scrollElement real ahora es el viewport del ScrollArea
-			const scrollableElement = scrollRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement;
-			if (!scrollableElement) return;
+			// Algoritmo para detectar fin de scroll y cargar más
+			const scrollPosition = scrollElement.scrollTop + scrollElement.clientHeight;
+			const scrollHeight = scrollElement.scrollHeight;
+			const scrollRatio = scrollPosition / scrollHeight;
 
-			// Algoritmo mejorado para detectar el final del scroll
-			// Considera un margen de error y la altura real del contenido
-			const scrollPosition = scrollableElement.scrollTop + scrollableElement.clientHeight;
-			const scrollRatio = scrollPosition / scrollableElement.scrollHeight;
+			// Usar thresholds específicos por tipo de vista
+			const threshold = VIRTUALIZER_CONFIG.scrollThresholds[type];
+			const pixelThreshold = VIRTUALIZER_CONFIG.pixelThresholds[type];
 
-			// Detectar si estamos cerca del final del scroll (75% del scroll o menos de 400px para llegar al final)
-			// Se reduce el umbral para grids que pueden tener elementos más altos
-			const isNearBottom = (type === 'grid' ? scrollRatio > 0.7 : scrollRatio > 0.75) ||
-				(scrollableElement.scrollHeight - scrollPosition) < (type === 'grid' ? 400 : 300);
+			// Detectar si estamos cerca del final del scroll
+			const isNearBottom = scrollRatio > threshold ||
+				(scrollHeight - scrollPosition) < pixelThreshold;
 
-			// Solo intentar cargar más en el fondo si estamos cerca del fondo Y no estamos cargando
+			// Cargar más elementos si estamos cerca del final
 			if (isNearBottom && !isLoadingRef.current &&
 				loadedItems < data.length &&
 				sequentialRequestsRef.current < VIRTUALIZER_CONFIG.sequential.maxRequestsPerSession) {
-
-				console.debug(`Cerca del fondo (${type}), cargando más elementos`);
-				onScrollEnd?.();
-				// Asegurarse de cargar más elementos al llegar al final
+				console.debug(`Cerca del fondo (${type} - ${scrollRatio.toFixed(2)}), cargando más`);
 				loadItemsSequentially();
 			}
-		},
-		[isScrolling, onScrollStart, onScrollEnd, loadItemsSequentially, updateVisibleIndices,
-			data.length, loadedItems, type]
-	);
+
+			// Carga especial cuando estamos muy cerca del final
+			if ((scrollHeight - scrollPosition) < 100 &&
+				!isLoadingRef.current && loadedItems < data.length) {
+				console.debug("Extremadamente cerca del final, forzando carga");
+				loadItemsSequentially();
+			}
+		};
+
+		// Agregar event listener
+		scrollElement.addEventListener('scroll', handleScroll);
+
+		// Actualizar índices visibles inicialmente
+		updateVisibleIndices();
+
+		// Limpiar event listener al desmontar
+		return () => {
+			scrollElement.removeEventListener('scroll', handleScroll);
+			if (visibilityUpdateTimeoutRef.current) {
+				clearTimeout(visibilityUpdateTimeoutRef.current);
+			}
+			if ((window as any).scrollTimeout) {
+				clearTimeout((window as any).scrollTimeout);
+			}
+		};
+	}, [getScrollElement, isScrolling, onScrollStart, onScrollEnd,
+		loadItemsSequentially, updateVisibleIndices, data.length, loadedItems, type]);
 
 	// Renderizado para modo masonry
 	if (type === 'masonry') {
-		// Para masonry, usamos una implementación más eficiente con carga limitada por columna
 		return (
-			<ScrollArea
+			<CustomScrollArea
 				className={cn('h-full w-full', gridClassName)}
+				onWheel={(e) => {
+					// Detectar scroll manual con rueda
+					const scrollElement = getScrollElement();
+					if (scrollElement) {
+						const scrollPosition = scrollElement.scrollTop + scrollElement.clientHeight;
+						const scrollHeight = scrollElement.scrollHeight;
+
+						// Si estamos cerca del final, cargar más
+						if (scrollHeight - scrollPosition < 400 && !isLoadingRef.current) {
+							loadItemsSequentially();
+						}
+					}
+				}}
 			>
 				<div
 					ref={scrollRef}
 					className="p-4 h-full"
-					onScroll={handleScroll}
 					style={{ scrollBehavior: 'smooth' }}
 				>
 					<div className="flex" style={{ gap: `${gridGap}px`, minHeight: '100%' }}>
 						{/* Crear columnas */}
 						{Array.from({ length: columnCount }).map((_, colIndex) => {
-							// Determinar cuántos elementos cargar por columna
-							const itemsPerColumn = Math.ceil(loadedItems / columnCount);
-							// Filtrar elementos que van en esta columna
+							// Más elementos por columna para masonry
+							const itemsPerColumn = Math.ceil(loadedItems / columnCount) + 5;
+							// Filtrar elementos para esta columna
 							const columnItems = data
 								.filter((_, index) => index % columnCount === colIndex)
-								.slice(0, itemsPerColumn); // Limitar el número de elementos por columna
+								.slice(0, itemsPerColumn);
 
 							return (
 								<div
@@ -499,8 +498,33 @@ export function VirtualizerWrapper<T>({
 								>
 									{columnItems.map((item, idx) => {
 										const originalIndex = colIndex + idx * columnCount;
+
+										// Obtener metadatos para calcular aspect ratio real
+										let width = 0, height = 0;
+										try {
+											if ((item as any).metadata && typeof (item as any).metadata === 'string') {
+												const metadata = JSON.parse((item as any).metadata);
+												width = (item as any).width || metadata?.dimensions?.width || metadata?.width;
+												height = (item as any).height || metadata?.dimensions?.height || metadata?.height;
+											} else {
+												width = (item as any).width || 200;
+												height = (item as any).height || 200;
+											}
+										} catch (e) {
+											width = 200;
+											height = 200;
+										}
+
+										// Calcular aspect ratio real
+										const itemAspectRatio = (width && height) ? width / height : 1;
+										const calculatedHeight = itemAspectRatio ? `${Math.floor(200 / itemAspectRatio)}px` : 'auto';
+
 										return (
-											<div key={`masonry-item-${originalIndex}`} className="w-full">
+											<div
+												key={`masonry-item-${originalIndex}`}
+												className="w-full"
+												style={{ height: calculatedHeight }}
+											>
 												{getCachedContent(originalIndex, item)}
 											</div>
 										);
@@ -516,8 +540,18 @@ export function VirtualizerWrapper<T>({
 							);
 						})}
 					</div>
+
+					{/* Indicador de carga para masonry */}
+					{loadedItems < data.length && (
+						<div className="w-full py-4 flex justify-center mt-4">
+							<div className="flex items-center gap-2 text-sm text-muted-foreground">
+								<div className="w-4 h-4 rounded-full border-2 border-t-transparent border-primary/30 animate-spin" />
+								<span>Cargando más elementos...</span>
+							</div>
+						</div>
+					)}
 				</div>
-			</ScrollArea>
+			</CustomScrollArea>
 		);
 	}
 
@@ -527,18 +561,17 @@ export function VirtualizerWrapper<T>({
 		const rowVirtualItems = gridVirtualizer.getVirtualItems();
 
 		return (
-			<ScrollArea
+			<CustomScrollArea
 				className={cn('h-full w-full', gridClassName)}
 				onWheel={(e) => {
-					// Detectar eventos de scroll manual mediante rueda del ratón
-					// Esto es útil porque algunos eventos de scroll no se capturan correctamente
-					const scrollableElement = scrollRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement;
-					if (scrollableElement) {
-						const scrollPosition = scrollableElement.scrollTop + scrollableElement.clientHeight;
-						const scrollHeight = scrollableElement.scrollHeight;
+					// Detectar scroll manual con rueda
+					const scrollElement = getScrollElement();
+					if (scrollElement) {
+						const scrollPosition = scrollElement.scrollTop + scrollElement.clientHeight;
+						const scrollHeight = scrollElement.scrollHeight;
 
-						// Si estamos a menos de 300px del final, intentar cargar más
-						if (scrollHeight - scrollPosition < 300 && !isLoadingRef.current) {
+						// Si estamos cerca del final, cargar más
+						if (scrollHeight - scrollPosition < 500 && !isLoadingRef.current) {
 							loadItemsSequentially();
 						}
 					}
@@ -547,7 +580,6 @@ export function VirtualizerWrapper<T>({
 				<div
 					ref={scrollRef}
 					className="h-full"
-					onScroll={handleScroll}
 					style={{ scrollBehavior: 'smooth' }}
 				>
 					<div
@@ -556,7 +588,7 @@ export function VirtualizerWrapper<T>({
 							width: '100%',
 							position: 'relative',
 							padding: `${gridGap}px`,
-							paddingTop: `${gridGap}px`, // Asegurar padding superior correcto
+							paddingTop: `${gridGap}px`,
 							minHeight: '100%'
 						}}
 					>
@@ -581,7 +613,7 @@ export function VirtualizerWrapper<T>({
 										top: 0,
 										left: 0,
 										width: '100%',
-										height: `${virtualRow.size - gridGap}px`, // Restar el gap para evitar espacio extra
+										height: `${virtualRow.size - gridGap}px`,
 										transform: `translateY(${virtualRow.start}px)`,
 										gap: `${gridGap}px`
 									}}
@@ -591,8 +623,6 @@ export function VirtualizerWrapper<T>({
 										if (itemIndex >= data.length) return null;
 
 										const item = data[itemIndex];
-
-										// Calcular el ancho del elemento considerando el gap
 										const itemWidth = `calc((100% - ${(columnCount - 1) * gridGap}px) / ${columnCount})`;
 
 										return (
@@ -600,7 +630,6 @@ export function VirtualizerWrapper<T>({
 												key={`grid-item-${itemIndex}`}
 												style={{
 													width: itemWidth,
-													// La altura se calcula automáticamente si es aspect-square
 													aspectRatio: String(aspectRatio),
 												}}
 											>
@@ -612,7 +641,7 @@ export function VirtualizerWrapper<T>({
 							);
 						})}
 
-						{/* Indicador de carga para la vista Grid */}
+						{/* Indicador de carga para grid */}
 						{loadedItems < data.length && (
 							<div
 								className="w-full py-4 flex justify-center"
@@ -630,19 +659,18 @@ export function VirtualizerWrapper<T>({
 						)}
 					</div>
 				</div>
-			</ScrollArea>
+			</CustomScrollArea>
 		);
 	}
 
 	// Renderizado para modo lista
 	return (
-		<ScrollArea
+		<CustomScrollArea
 			className={cn('h-full w-full', listClassName)}
 		>
 			<div
 				ref={scrollRef}
 				className="h-full"
-				onScroll={handleScroll}
 				style={{ scrollBehavior: 'smooth' }}
 			>
 				<div
@@ -651,7 +679,7 @@ export function VirtualizerWrapper<T>({
 						width: '100%',
 						position: 'relative',
 						padding: '16px',
-						paddingTop: '16px', // Asegurar padding superior correcto
+						paddingTop: '16px',
 						minHeight: '100%'
 					}}
 				>
@@ -681,6 +709,12 @@ export function VirtualizerWrapper<T>({
 					})}
 				</div>
 			</div>
-		</ScrollArea>
+		</CustomScrollArea>
 	);
 }
+
+// Función auxiliar para comparar arrays
+const areArraysEqual = (a: number[], b: number[]): boolean => {
+	if (a.length !== b.length) return false;
+	return a.every((item, index) => item === b[index]);
+};

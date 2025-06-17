@@ -303,6 +303,16 @@ export async function seedTags(prisma: PrismaClient): Promise<void> {
 					featuredImage: null,
 					isFavorite: false,
 				},
+				{
+					name: 'Arte Digital',
+					emoji: '🖌️',
+					color: '#6366f1',
+					description: 'Obras creadas digitalmente',
+					shortcut: 'digital',
+					category: 'técnica',
+					featuredImage: null,
+					isFavorite: false,
+				},
 			],
 		});
 

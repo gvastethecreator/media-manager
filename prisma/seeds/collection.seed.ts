@@ -219,6 +219,16 @@ export async function seedCollections(prisma: PrismaClient): Promise<void> {
 					featuredImage: null,
 					isFavorite: false,
 				},
+				{
+					name: 'Bestiario Fantástico',
+					description: 'Colección de criaturas y monstruos legendarios.',
+					emoji: '🐉',
+					color: '#22d3ee',
+					category: 'bestiario',
+					filters: JSON.stringify({ tags: ['criaturas', 'monstruos'] }),
+					featuredImage: null,
+					isFavorite: false,
+				},
 			];
 
 			for (const collection of collections) {

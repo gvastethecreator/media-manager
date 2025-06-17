@@ -492,6 +492,16 @@ Isolda la Nacida del Hielo es una de las guerreras más respetadas entre los cla
 					featuredImage: null,
 					isFavorite: false,
 				},
+				{
+					name: 'Religión Antigua',
+					emoji: '⛩️',
+					color: '#fbbf24',
+					description: 'Creencias y rituales de la civilización perdida',
+					content: 'Descripción de la religión y sus dioses.',
+					category: 'historia',
+					featuredImage: null,
+					isFavorite: false,
+				},
 			];
 
 			for (const concept of conceptsData) {

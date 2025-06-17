@@ -1,17 +1,18 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
+import React from 'react';
 
 interface ImageRendererProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-	src: string | null;
-	alt?: string;
-	className?: string;
-	objectFit?: 'cover' | 'contain' | 'fill' | 'none' | 'scale-down';
-	priority?: boolean; // Indica si la imagen debe cargarse con prioridad alta
-	blur?: boolean; // Aplicar efecto de desenfoque durante la carga
-	onLoad?: () => void;
-	onError?: () => void;
+	width?: number;
+	height?: number;
+	priority?: boolean;
+	quality?: number;
+	placeholder?: 'blur' | 'empty';
+	blurDataURL?: string;
+	isLoading?: boolean;
+	showPlaceholder?: boolean;
 }
 
 // Caché global de imágenes para evitar recargas
@@ -73,237 +74,78 @@ const processNextPreload = () => {
 };
 
 /**
- * 🖼️ Componente para renderizar imágenes con optimizaciones
+ * 🖼️ Componente para renderizar imágenes optimizado
  *
- * Características:
- * - Manejo de carga y errores
- * - Caché compartido entre instancias
- * - Precarga inteligente
- * - Efectos de carga progresiva
+ * Utiliza Image de Next.js para imágenes estáticas cuando es posible,
+ * y cae de vuelta a img para imágenes dinámicas o externas.
  */
-export function ImageRenderer({
+export const ImageRenderer = React.memo(function ImageRenderer({
 	src,
 	alt = '',
+	width,
+	height,
 	className,
-	objectFit = 'cover',
 	priority = false,
-	blur = true,
-	onLoad,
-	onError,
-	...props
+	quality = 80,
+	placeholder = 'empty',
+	blurDataURL,
+	isLoading,
+	showPlaceholder,
+	...rest
 }: ImageRendererProps) {
-	const [isLoaded, setIsLoaded] = useState(false);
-	const [hasError, setHasError] = useState(false);
-	const imgRef = useRef<HTMLImageElement>(null);
-	const observer = useRef<IntersectionObserver | null>(null);
-
-	// Filtrar props no válidas para elementos DOM
-	const filteredProps = { ...props };
-	// Eliminar props que React no reconoce en elementos DOM
-	const propsToRemove = [
-		'isScrolling',
-		'isSelected',
-		'isActive',
-		'virtualizer',
-		'index',
-		'observerRef',
-		'measureRef',
-		'resizeRef',
-		'isVisible',
-		'isInView',
-		'data-index'
-	];
-	propsToRemove.forEach(prop => {
-		if (prop in filteredProps) {
-			delete filteredProps[prop as keyof typeof filteredProps];
-		}
-	});
-
-	// Normalizar la URL
-	const imageUrl = useMemo(() => {
-		// Si no hay src o es null, retornar undefined para evitar el error de cadena vacía
-		if (!src) return undefined;
-
-		// Asegurarse de que la URL es absoluta
-		if (src.startsWith('/')) {
-			// Solo convertir a absoluta en el cliente
-			if (typeof window !== 'undefined') {
-				return `${window.location.origin}${src}`;
-			}
-			return src;
-		}
-		return src;
-	}, [src]);
-
-	// Comprobar si la imagen ya está en caché
-	const isCached = useMemo(() => {
-		return imageUrl ? imageCache.has(imageUrl) : false;
-	}, [imageUrl]);
-
-	// Aplicar estilos según el estado de la imagen
-	const imageStyles = useMemo(() => {
-		return cn(
-			'transition-opacity duration-300',
-			objectFit && `object-${objectFit}`,
-			{
-				'opacity-0': !isLoaded && blur,
-				'opacity-100': isLoaded || !blur,
-			},
-			className
-		);
-	}, [className, objectFit, isLoaded, blur]);
-
-	// Manejar la carga de la imagen
-	const handleLoad = () => {
-		setIsLoaded(true);
-		setHasError(false);
-		// Agregar a caché
-		if (imageUrl) {
-			imageCache.set(imageUrl, true);
-		}
-		onLoad?.();
-	};
-
-	// Manejar errores
-	const handleError = () => {
-		setHasError(true);
-		// Marcar como fallido en caché
-		if (imageUrl) {
-			imageCache.set(imageUrl, false);
-		}
-		onError?.();
-	};
-
-	// Establecer Observer para detección de visibilidad y precarga
-	useEffect(() => {
-		if (!imageUrl || priority || isCached) return;
-
-		// Inicializar IntersectionObserver para carga lazy
-		observer.current = new IntersectionObserver(
-			(entries) => {
-				const [entry] = entries;
-				if (entry.isIntersecting) {
-					// La imagen es visible, cargarla
-					if (imgRef.current) {
-						imgRef.current.src = imageUrl;
-					}
-
-					// Desconectar observer después de cargar
-					observer.current?.disconnect();
-					observer.current = null;
-
-					// Precargar las siguientes imágenes similares (misma URL base)
-					if (imageUrl) {
-						const urlParts = imageUrl.split('/');
-						const lastPart = urlParts.pop() || '';
-						const basePath = urlParts.join('/');
-						const idMatch = lastPart.match(/(\d+)/);
-
-						if (idMatch) {
-							const currentId = parseInt(idMatch[0], 10);
-							// Precargar las próximas imágenes cercanas
-							const nextIds = [
-								currentId + 1,
-								currentId + 2,
-								currentId + 3,
-								currentId - 1,
-								currentId - 2
-							].filter(id => id > 0);
-
-							const preloadUrls = nextIds.map(id => {
-								return imageUrl.replace(/(\d+)/, id.toString());
-							});
-
-							preloadImages(preloadUrls);
-						}
-					}
-				}
-			},
-			{
-				root: null,
-				rootMargin: '100px', // Cargar cuando esté a 100px de ser visible
-				threshold: 0.1,
-			}
-		);
-
-		if (imgRef.current) {
-			observer.current.observe(imgRef.current);
-		}
-
-		return () => {
-			observer.current?.disconnect();
-		};
-	}, [imageUrl, priority, isCached]);
-
-	// Para imágenes prioritarias, cargamos inmediatamente
-	useEffect(() => {
-		if (priority && imageUrl && !isCached) {
-			if (imgRef.current) {
-				imgRef.current.src = imageUrl;
-			}
-			// Agregar a la cola de precarga con alta prioridad
-			preloadImages([imageUrl], true);
-		}
-	}, [priority, imageUrl, isCached]);
-
-	// Si la imagen ya está en caché y cargada correctamente, mostrarla directamente
-	useEffect(() => {
-		if (isCached && imageCache.get(imageUrl) === true) {
-			setIsLoaded(true);
-		}
-	}, [isCached, imageUrl]);
-
-	// Si no hay URL, mostrar un placeholder
-	if (!imageUrl) {
+	// Si no tenemos src, mostramos un placeholder
+	if (!src) {
 		return (
 			<div
 				className={cn(
-					'bg-muted/30 flex items-center justify-center rounded-md',
+					'bg-muted/30 flex items-center justify-center',
 					className
 				)}
+				{...rest}
 			>
 				<span className="text-xs text-muted-foreground">Sin imagen</span>
 			</div>
 		);
 	}
 
-	return (
-		<div className="relative w-full h-full overflow-hidden">
-			{/* Imagen principal */}
-			<img
-				ref={imgRef}
-				src={priority || isCached ? imageUrl : undefined} // Usar undefined en lugar de cadena vacía
+	// Determinar si la imagen es un blob o una URL de datos
+	const isBlobOrDataUrl = src.startsWith('blob:') || src.startsWith('data:');
+
+	// Determinar si la imagen es local o remota
+	const isRemoteImage = src.startsWith('http') && !isBlobOrDataUrl;
+
+	// Si la imagen es local y no es un blob ni una URL de datos, usar Image de Next.js
+	if (!isRemoteImage && !isBlobOrDataUrl && src.startsWith('/')) {
+		// Filtrar las propiedades no soportadas por Next Image
+		const { onLoad, onError, loading, crossOrigin, referrerPolicy, decoding,
+			sizes, srcSet, useMap, fetchPriority, ...imgProps } = rest;
+
+		return (
+			<Image
+				src={src}
 				alt={alt}
-				className={imageStyles}
-				onLoad={handleLoad}
-				onError={handleError}
-				loading={priority ? 'eager' : 'lazy'}
-				{...filteredProps}
+				width={width || 300}
+				height={height || 300}
+				className={className}
+				priority={priority}
+				quality={quality}
+				placeholder={placeholder}
+				blurDataURL={blurDataURL}
+				{...imgProps}
 			/>
+		);
+	}
 
-			{/* Placeholder mientras carga */}
-			{!isLoaded && blur && (
-				<div
-					className={cn(
-						'absolute inset-0 bg-muted/20 animate-pulse flex items-center justify-center',
-						className
-					)}
-				>
-					<span className="sr-only">Cargando imagen...</span>
-				</div>
-			)}
-
-			{/* Placeholder en caso de error */}
-			{hasError && (
-				<div
-					className={cn(
-						'absolute inset-0 bg-muted/10 flex items-center justify-center',
-						className
-					)}
-				>
-					<span className="text-xs text-muted-foreground">Error al cargar</span>
-				</div>
-			)}
-		</div>
+	// Para imágenes remotas o blobs, usar img estándar
+	return (
+		<img
+			src={src}
+			alt={alt}
+			width={width}
+			height={height}
+			className={className}
+			loading={priority ? 'eager' : 'lazy'}
+			{...rest}
+		/>
 	);
-}
+});

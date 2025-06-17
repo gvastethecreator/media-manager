@@ -162,6 +162,20 @@ TÍTULO: "ECOS DEL MAÑANA"`,
 					featuredImage: null,
 					isFavorite: false,
 				},
+				{
+					title: 'Checklist de lanzamiento',
+					content: `# Checklist de lanzamiento
+
+- [ ] Revisar arte final
+- [ ] Validar metadatos
+- [ ] Publicar en la galería
+- [ ] Anunciar en redes sociales`,
+					category: 'tareas',
+					priority: 2,
+					status: 'pending',
+					featuredImage: null,
+					isFavorite: false,
+				},
 			],
 		});
 		seedLogger.info('✅ Notas creadas correctamente');

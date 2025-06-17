@@ -34,7 +34,7 @@ export async function seedProfiles(prisma: PrismaClient): Promise<void> {
 					{
 						id: 'demo-profile-id',
 						name: 'Demo',
-						emoji: '🐱',
+						emoji: '🦁',
 						color: '#f59e0b',
 						description: 'Perfil de demostración',
 						isActive: false,
@@ -42,9 +42,17 @@ export async function seedProfiles(prisma: PrismaClient): Promise<void> {
 					{
 						id: 'guest-profile-id',
 						name: 'Guest',
-						emoji: '👤',
+						emoji: '🦉',
 						color: '#3b82f6',
 						description: 'Perfil invitado',
+						isActive: false,
+					},
+					{
+						id: 'writer-profile-id',
+						name: 'Writer',
+						emoji: '✍️',
+						color: '#10b981',
+						description: 'Perfil para escritura creativa',
 						isActive: false,
 					},
 				];

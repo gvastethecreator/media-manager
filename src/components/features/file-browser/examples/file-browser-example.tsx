@@ -9,6 +9,8 @@ const generateMockFiles = (count: number): FileItem[] => {
 	const fileTypes = ['image/jpeg', 'image/png', 'video/mp4', 'application/pdf', 'text/plain'];
 	const files: FileItem[] = [];
 
+	console.log('[generateMockFiles] Generando', count, 'archivos de ejemplo');
+
 	for (let i = 1; i <= count; i++) {
 		const isImage = Math.random() > 0.3;
 		const fileType = fileTypes[Math.floor(Math.random() * fileTypes.length)];
@@ -17,6 +19,10 @@ const generateMockFiles = (count: number): FileItem[] => {
 
 		const width = isImage ? Math.floor(Math.random() * 1000) + 800 : 0;
 		const height = isImage ? Math.floor(Math.random() * 800) + 600 : 0;
+
+		// Asegurar que tenemos una miniatura válida
+		const imageId = (i % 85) + 10; // Picsum tiene un rango limitado de IDs
+		const thumbnail = isImage ? `https://picsum.photos/id/${imageId}/200/150` : null;
 
 		files.push({
 			id: `file-${i}`,
@@ -56,10 +62,12 @@ const generateMockFiles = (count: number): FileItem[] => {
 			characters: Math.random() > 0.8 ? [{ id: 'character-1', name: 'Personaje' }] : [],
 			places: Math.random() > 0.9 ? [{ id: 'place-1', name: 'Madrid' }] : [],
 			worldItems: Math.random() > 0.95 ? [{ id: 'item-1', name: 'Objeto' }] : [],
-			thumbnail: isImage ? `https://picsum.photos/id/${i + 10}/200/150` : null
+			thumbnail: thumbnail,
+			src: isImage ? `https://picsum.photos/id/${imageId}/800/600` : null
 		});
 	}
 
+	console.log('[generateMockFiles] Generados', files.length, 'archivos de ejemplo');
 	return files;
 };
 
