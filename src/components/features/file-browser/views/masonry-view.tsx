@@ -7,8 +7,9 @@ import type { FileItem } from '@/types/file-item';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { ImageRenderer } from '../image-renderer';
+import { VirtualizerWrapper } from './virtualizer-wrapper';
 
 interface MasonryItemProps {
 	item: FileItem;
@@ -90,6 +91,14 @@ export const MasonryItem = memo(function MasonryItem({
 	const metadata = getMetadata(item.metadata);
 	const thumbnailUrl = item.thumbnail || `/api/images/${item.id}/thumbnail`;
 
+	// Calcular altura según las dimensiones de la imagen
+	const aspectRatio = item.width && item.height ? item.width / item.height : 1;
+	const calculatedStyle = {
+		...style,
+		// Si no hay un estilo de altura definido, calculamos uno basado en el aspect ratio
+		height: style?.height || `${Math.floor(200 / aspectRatio)}px`,
+	};
+
 	return (
 		<motion.div
 			className={itemClassName}
@@ -98,7 +107,7 @@ export const MasonryItem = memo(function MasonryItem({
 			onContextMenu={handleContextMenu}
 			whileHover={{ scale: 1.02 }}
 			whileTap={{ scale: 0.98 }}
-			style={style}
+			style={calculatedStyle}
 			layout
 		>
 			{/* Imagen */}
@@ -141,64 +150,36 @@ export const MasonryView = memo(function MasonryView({
 }: MasonryViewProps) {
 	const { selectedIds, activeId } = useSelectionStore();
 	const { itemSize } = useViewOptionsStore();
-	const containerRef = useRef<HTMLDivElement>(null);
-	const [columns, setColumns] = useState(3);
 
-	// Calcular el número de columnas según el ancho del contenedor
-	useEffect(() => {
-		const updateColumns = () => {
-			if (!containerRef.current) return;
-			const width = containerRef.current.clientWidth;
-			const newColumns = Math.max(1, Math.floor(width / (itemSize + 16)));
-			setColumns(newColumns);
-		};
+	// Renderizar un elemento de la lista
+	const renderItem = useCallback(
+		(index: number, item: FileItem) => {
+			const isSelected = selectedIds.includes(item.id);
+			const isActive = activeId === item.id;
 
-		updateColumns();
-		window.addEventListener('resize', updateColumns);
-		return () => window.removeEventListener('resize', updateColumns);
-	}, [itemSize]);
-
-	// Distribuir elementos en columnas para crear el efecto mosaico
-	const masonryColumns = useMemo(() => {
-		const cols: FileItem[][] = Array.from({ length: columns }, () => []);
-
-		items.forEach((item, index) => {
-			const columnIndex = index % columns;
-			cols[columnIndex].push(item);
-		});
-
-		return cols;
-	}, [items, columns]);
+			return (
+				<MasonryItem
+					key={item.id}
+					item={item}
+					isSelected={isSelected}
+					isActive={isActive}
+					onClick={onItemClick}
+					onDoubleClick={onItemDoubleClick}
+					onContextMenu={onContextMenu}
+				/>
+			);
+		},
+		[selectedIds, activeId, onItemClick, onItemDoubleClick, onContextMenu]
+	);
 
 	return (
-		<div ref={containerRef} className={cn('w-full h-full p-4 overflow-auto', className)}>
-			<div className="flex gap-4">
-				{masonryColumns.map((column, colIndex) => (
-					<div key={`column-${colIndex}-${column.length}`} className="flex-1 flex flex-col gap-4">
-						{column.map((item) => {
-							const isSelected = selectedIds.includes(item.id);
-							const isActive = activeId === item.id;
-
-							// Calcular altura según las dimensiones de la imagen
-							const aspectRatio = item.width && item.height ? item.width / item.height : 1;
-							const height = Math.floor(itemSize / aspectRatio);
-
-							return (
-								<MasonryItem
-									key={item.id}
-									item={item}
-									isSelected={isSelected}
-									isActive={isActive}
-									onClick={onItemClick}
-									onDoubleClick={onItemDoubleClick}
-									onContextMenu={onContextMenu}
-									style={{ height }}
-								/>
-							);
-						})}
-					</div>
-				))}
-			</div>
-		</div>
+		<VirtualizerWrapper
+			type="masonry"
+			data={items}
+			itemContent={renderItem}
+			itemSize={itemSize}
+			gridClassName={cn('w-full h-full p-4', className)}
+			layoutId="masonry-view"
+		/>
 	);
 });
