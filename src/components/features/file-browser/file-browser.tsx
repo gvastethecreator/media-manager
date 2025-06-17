@@ -1,11 +1,13 @@
 'use client';
 
-import { AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { EmptyState } from '@/components/core/data-display';
-import { FileViewer, type ImageItem } from '@/components/features/file-viewer/file-viewer';
+import { type ImageItem } from '@/components/features/file-viewer/file-viewer';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
@@ -21,9 +23,16 @@ import { useFilteredData } from './hooks/use-filtered-data';
 import { ImageRenderer } from './image-renderer';
 import { fileItemsToImageItems } from './utils/file-converters';
 import { CardsView } from './views/cards-view';
-import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
+import { SimpleGridView } from './views/simple-grid-view';
+
+// Componentes placeholder para los controles que faltan
+const FileBrowserActions = () => <div>Acciones</div>;
+const SelectionActions = ({ items }: { items: any[] }) => <div>Selección ({items?.length || 0})</div>;
+const SortTypeSelector = () => <div>Ordenar</div>;
+const StatusBar = () => <div className="border-t p-2 text-xs text-muted-foreground">Estado: {new Date().toLocaleTimeString()}</div>;
+const ViewTypeSelector = () => <div>Vista</div>;
 
 // Configuración del cache y carga secuencial
 const BROWSER_CONFIG = {
@@ -105,6 +114,18 @@ const formatFileSize = (bytes: number): string => {
 	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 };
 
+// Interfaz para el menú contextual
+interface ContextMenuProps {
+	open: boolean;
+	[key: string]: any;
+}
+
+// Componente simple para el menú contextual
+const ContextMenu = ({ open, ...props }: ContextMenuProps) => {
+	if (!open) return null;
+	return <div className="context-menu" {...props} />;
+};
+
 export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	items,
 	onItemSelect,
@@ -115,6 +136,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	reindexProgress = 0,
 	loadMoreItems,
 }) {
+	// Log para debuggear los items
+	console.log('[FileBrowser] Props recibidas:', {
+		items: items?.length || 0,
+		isLoading,
+		isReindexing
+	});
+
 	// 📊 Estados mínimos - Solo lo esencial
 	const [containerWidth, setContainerWidth] = useState<number>(0);
 	const [isViewerOpen, setIsViewerOpen] = useState(false);
@@ -136,9 +164,24 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
 	// 🔍 Opciones de vista globales
+	const viewStore = useViewOptionsStore();
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
 	const itemSize = useViewOptionsStore((state) => state.itemSize);
-	const { searchTerm, sortBy, sortDirection, filterFavorites } = useViewOptionsStore();
+	const { searchQuery, sortOptions, filterOptions } = useViewOptionsStore();
+	const setSearchQuery = useViewOptionsStore(state => state.setSearchQuery);
+
+	// Asegurarnos de tener un valor para viewMode
+	console.log("[FileBrowser] ViewStore:", {
+		viewMode,
+		itemSize,
+		searchQuery,
+		sortOptions,
+		filterOptions
+	});
+
+	// Acceso a más opciones de vista para EmptyState
+	const viewOptions = useViewOptionsStore();
+	const searchInput = viewOptions.searchQuery || '';
 
 	// 📐 Refs para medición directa
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -161,6 +204,19 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			}
 			return newFavorites;
 		});
+	}, []);
+
+	// 🔍 Manejador para el menú contextual
+	const handleContextMenu = useCallback((file: FileItem, e?: React.MouseEvent) => {
+		// Deshabilitado temporalmente
+		/*
+		if (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			setContextMenuPosition({ x: e.clientX, y: e.clientY });
+		}
+		setContextMenuFile(file);
+		*/
 	}, []);
 
 	// Seleccionar solo la versión del store para forzar re-renders cuando las miniaturas cambien
@@ -289,8 +345,20 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Limitar los elementos visibles para carga progresiva
 	const visibleItems = useMemo(() => {
-		return processedItems.slice(0, visibleItemCount);
-	}, [processedItems, visibleItemCount]);
+		const result = processedItems.slice(0, visibleItemCount);
+		console.log('[FileBrowser] Datos:', {
+			totalItems: items.length,
+			processedItems: processedItems.length,
+			visibleItemCount,
+			visibleItems: result.length,
+			viewMode,
+			viewType: viewOptions.viewType || 'grid'
+		});
+		return result;
+	}, [processedItems, visibleItemCount, items.length, viewMode, viewOptions.viewType]);
+
+	// Referencia a los elementos actuales para la vista (para selectionActions)
+	const currentViewItems = visibleItems;
 
 	// Resetear conteo visible cuando cambian los elementos
 	useEffect(() => {
@@ -300,6 +368,24 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		));
 		loadingMoreRef.current = false;
 	}, [items]);
+
+	// Definir la función handleResetView para el EmptyState
+	const handleResetView = useCallback(() => {
+		// Limpiar filtros y búsqueda
+		useViewOptionsStore.setState({
+			searchQuery: '',
+			filterOptions: [],
+			viewMode: 'grid' // resetear a la vista por defecto
+		});
+	}, []);
+
+	// Definir el objeto contextMenu de forma más simple sin depender de handleCloseContextMenu
+	const contextMenu = useMemo(() => ({
+		open: !!contextMenuFile,
+		file: contextMenuFile,
+		position: contextMenuPosition,
+		onClose: () => setContextMenuFile(null)
+	}), [contextMenuFile, contextMenuPosition]);
 
 	// 🔍 Manejador de selección de elementos - ESTABILIZADO con getState()
 	// Esta es la clave: la función no se recrea cuando la selección cambia.
@@ -343,36 +429,16 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		onItemDoubleClick?.(item);
 	}, [processedItems, onItemDoubleClick]);
 
-	// 🔍 Manejador para el menú contextual
-	const handleContextMenu = useCallback((file: FileItem, e?: React.MouseEvent) => {
-		// Deshabilitado temporalmente
-		/*
-		if (e) {
-			e.preventDefault();
-			e.stopPropagation();
-			setContextMenuPosition({ x: e.clientX, y: e.clientY });
-		}
-		setContextMenuFile(file);
-		*/
-	}, []);
-
-	// 🔍 Manejador para cerrar el menú contextual
-	const handleCloseContextMenu = useCallback(() => {
-		// Deshabilitado temporalmente
-		/*
-		setContextMenuFile(null);
-		setContextMenuPosition(null);
-		*/
-	}, []);
-
 	// 🔍 Manejador de acciones del menú contextual
 	const handleContextMenuAction = useCallback((action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
 		// Deshabilitado temporalmente
 		/*
 		handleContextAction(action, item, data);
-		handleCloseContextMenu(); // Cerrar el menú después de la acción
+		// Cerrar el menú después de la acción
+		setContextMenuFile(null);
+		setContextMenuPosition(null);
 		*/
-	}, [handleCloseContextMenu]);
+	}, []);
 
 	// 🔄 Actualizar el panel de detalles cuando cambie la selección
 	useEffect(() => {
@@ -461,7 +527,9 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				// Verificar si el clic fue fuera del menú contextual
 				const contextMenuElement = document.getElementById('file-context-menu');
 				if (contextMenuElement && !contextMenuElement.contains(e.target as Node)) {
-					handleCloseContextMenu();
+					// Cerrar el menú
+					setContextMenuFile(null);
+					setContextMenuPosition(null);
 				}
 			}
 		};
@@ -473,7 +541,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		return () => {
 			document.removeEventListener('click', handleGlobalClick);
 		};
-	}, [contextMenuFile, handleCloseContextMenu]);
+	}, [contextMenuFile]);
 
 	// 🎨 Memoizamos el contenido renderizado para evitar re-cálculos
 	const renderedContent = useMemo(() => {
@@ -487,7 +555,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					icon={FileTextIcon}
 					title="No files found"
 					description={
-						filterFavorites
+						filterOptions
 							? 'No favorite files match your search.'
 							: 'No files match your current search or filter.'
 					}
@@ -504,7 +572,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		switch (viewMode) {
 			case 'grid':
-				return <GridView {...viewProps} />;
+				return <SimpleGridView {...viewProps} />;
 			case 'list':
 				return <ListView {...viewProps} />;
 			case 'masonry':
@@ -512,58 +580,147 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			case 'cards':
 				return <CardsView {...viewProps} />;
 			default:
-				return <GridView {...viewProps} />;
+				return <SimpleGridView {...viewProps} />;
 		}
-	}, [visibleItems, isLoading, viewMode, handleItemClick, handleItemDoubleClick, handleContextMenu, filterFavorites]);
+	}, [visibleItems, isLoading, viewMode, handleItemClick, handleItemDoubleClick, handleContextMenu, filterOptions]);
+
+	// Referencia al contenedor principal para manejar el foco
+	const mainRef = useRef<HTMLDivElement>(null);
+
+	// Manejador de eventos de teclado para navegación
+	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+		// Si el foco no está en este componente, no hacer nada
+		if (!mainRef.current?.contains(document.activeElement)) return;
+
+		switch (e.key) {
+			case 'a':
+				// Ctrl+A: Seleccionar todo
+				if (e.ctrlKey || e.metaKey) {
+					e.preventDefault();
+					const allIds = processedItems.map(item => item.id);
+					setSelectedIds(allIds);
+				}
+				break;
+
+			case 'Escape':
+				// Escape: Deseleccionar todo
+				e.preventDefault();
+				clearSelection();
+				break;
+
+			case 'Delete':
+				// Delete: Podría implementar funcionalidad para eliminar elementos seleccionados
+				// (Comentado porque requeriría implementación adicional)
+				// if (selectedIds.length > 0) {
+				//   e.preventDefault();
+				//   // handleDeleteSelected();
+				// }
+				break;
+
+			// Puedes añadir más atajos de teclado según necesites
+		}
+	}, [processedItems, setSelectedIds, clearSelection]);
 
 	return (
 		<div
-			ref={containerCallbackRef}
-			className={cn('relative h-full w-full', className)}
+			className={cn(
+				"h-full w-full bg-background flex flex-col",
+				className
+			)}
+			onKeyDown={handleKeyDown}
+			tabIndex={0}
+			ref={mainRef}
 		>
-			<AnimatePresence mode="wait">
-				{renderedContent}
-			</AnimatePresence>
-
-			{/* Indicador de carga de más elementos */}
-			{visibleItemCount < processedItems.length && (
-				<div className="w-full py-4 flex justify-center items-center">
-					<div className="flex items-center gap-2 text-sm text-muted-foreground">
-						<div className="w-4 h-4 rounded-full border-2 border-t-transparent border-primary/30 animate-spin" />
-						<span>Cargando más elementos...</span>
-					</div>
+			{/* Barra de herramientas */}
+			<div className="border-b p-2 flex items-center space-x-2">
+				<div className="flex space-x-1">
+					<ViewTypeSelector />
+					<SortTypeSelector />
 				</div>
-			)}
 
-			{isViewerOpen && (
-				<FileViewer
-					images={viewerImages}
-					initialIndex={viewerInitialIndex}
-					onClose={() => setIsViewerOpen(false)}
-				/>
-			)}
-
-			{/* Menú contextual personalizado usando portal - Deshabilitado temporalmente */}
-			{/*
-			{contextMenuFile && contextMenuPosition && typeof window !== 'undefined' && createPortal(
-				<div
-					id="file-context-menu"
-					className="fixed z-50 bg-popover text-popover-foreground rounded-md shadow-md border border-border overflow-hidden"
-					style={{
-						top: `${contextMenuPosition.y}px`,
-						left: `${contextMenuPosition.x}px`,
-						maxHeight: '80vh',
-						overflowY: 'auto'
-					}}
-				>
-					<FileContextMenu
-						file={contextMenuFile}
-						onAction={handleContextMenuAction}
+				<div className="flex-1 min-w-0">
+					<Input
+						placeholder="Buscar archivos..."
+						value={searchInput}
+						onChange={(e) => setSearchQuery(e.target.value)}
+						className="max-w-sm"
 					/>
-				</div>,
-				document.body
+				</div>
+
+				<div className="flex space-x-1">
+					<SelectionActions items={currentViewItems} />
+					<FileBrowserActions />
+				</div>
+			</div>
+
+			<div className="relative flex-1 min-h-0">
+				{/* Vista principal de archivos */}
+				<div className="absolute inset-0">
+					{isLoading && (
+						<div className="h-full w-full flex items-center justify-center">
+							<Spinner size="lg" className="text-primary" />
+						</div>
+					)}
+
+					{!isLoading && (
+						<>
+							{currentViewItems.length === 0 ? (
+								<EmptyState
+									searchQuery={searchInput}
+									directory={viewOptions.directory}
+									onReset={handleResetView}
+								/>
+							) : (
+								<div className="h-full w-full">
+									{viewMode === 'list' && (
+										<ListView
+											items={currentViewItems}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											onContextMenu={handleContextMenu}
+										/>
+									)}
+
+									{viewMode === 'grid' && (
+										<SimpleGridView
+											items={currentViewItems}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											onContextMenu={handleContextMenu}
+										/>
+									)}
+
+									{viewMode === 'masonry' && (
+										<MasonryView
+											items={currentViewItems}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											onContextMenu={handleContextMenu}
+										/>
+									)}
+
+									{(!viewMode || (viewMode !== 'list' && viewMode !== 'grid' && viewMode !== 'masonry')) && (
+										<SimpleGridView
+											items={currentViewItems}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											onContextMenu={handleContextMenu}
+										/>
+									)}
+								</div>
+							)}
+						</>
+					)}
+				</div>
+			</div>
+
+			{/* Barra de estado */}
+			<StatusBar />
+
+			{/* Menú contextual */}
+			{contextMenu.open && (
+				<ContextMenu {...contextMenu} />
 			)}
-			*/}
 		</div>
 	);
 });
