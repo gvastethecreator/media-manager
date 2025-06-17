@@ -19,11 +19,13 @@
 - **Extraído `GridItem` a archivo separado**: Reducido el tamaño del archivo principal
 - **Agregadas transiciones**: Implementadas con `framer-motion` y `AnimatePresence`
 - **Mejorada accesibilidad**: Agregado `role="application"` y `aria-label`
+- **Integración con ViewToolbar**: Reemplazada toolbar básica con ViewToolbar completo del sistema
+- **Nuevo componente FileBrowserWithToolbar**: Integración completa con stores de Zustand
 
 ### 🔄 En progreso
 
-- Refactorización del componente principal `FileBrowser.tsx` (reducido de 865 a ~770 líneas)
-- Corrección de errores de tipos TypeScript pendientes
+- Refactorización del componente principal `FileBrowser.tsx` (reducido de 865 a ~750 líneas)
+- Verificación de funcionalidades del ViewToolbar integrado
 
 ### ⏱️ Pendiente
 

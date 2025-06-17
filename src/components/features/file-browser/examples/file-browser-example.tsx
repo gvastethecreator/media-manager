@@ -2,7 +2,7 @@
 
 import type { FileItem } from '@/types/file-item';
 import { useEffect, useState } from 'react';
-import { IntegratedFileBrowser } from '../integrated-file-browser';
+import { FileBrowser } from '../file-browser';
 
 // Datos de ejemplo para mostrar en el navegador de archivos
 const generateMockFiles = (count: number): FileItem[] => {
@@ -96,8 +96,7 @@ export function FileBrowserExample() {
 	};
 
 	return (
-		<div className="h-[calc(100vh-4rem)] border rounded-md overflow-hidden">
-			<IntegratedFileBrowser
+		<div className="h-[calc(100vh-4rem)] border rounded-md overflow-hidden">			<FileBrowser
 				items={files}
 				isLoading={isLoading}
 				onItemSelect={handleItemSelect}
