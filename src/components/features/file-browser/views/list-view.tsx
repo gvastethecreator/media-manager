@@ -15,6 +15,7 @@ import {
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { memo, useCallback, useMemo, useRef } from 'react';
+import { ImageRenderer } from '../image-renderer';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
 
 interface ListItemProps {
@@ -95,9 +96,15 @@ export const ListItem = memo(function ListItem({
 		);
 	}, [isSelected, isActive]);
 
+	// Obtener URL de la miniatura
+	const thumbnailUrl = item.thumbnail || item.src || `/api/images/${item.id}/thumbnail`;
+
+	// Determinar si es una imagen
+	const isImage = item.type?.startsWith('image/') || item.type === 'image' || item.mimeType?.startsWith('image/') || false;
+
 	// Determinar el icono según el tipo de archivo
 	const getFileIcon = () => {
-		if (item.type?.startsWith('image/') || item.mimeType?.startsWith('image/')) {
+		if (isImage) {
 			return <Image className="h-4 w-4 text-blue-500" />;
 		}
 		if (item.type?.startsWith('video/') || item.mimeType?.startsWith('video/')) {
@@ -129,9 +136,24 @@ export const ListItem = memo(function ListItem({
 			whileTap={{ backgroundColor: 'rgba(var(--accent), 0.3)' }}
 			layout
 		>
+			{/* Miniatura para imágenes */}
+			{isImage ? (
+				<div className="w-10 h-10 mr-3 rounded-md overflow-hidden flex-shrink-0">
+					<ImageRenderer
+						src={thumbnailUrl}
+						alt={item.name}
+						className="h-full w-full object-cover"
+						onError={() => { }}
+					/>
+				</div>
+			) : (
+				<div className="w-10 h-10 mr-3 flex items-center justify-center flex-shrink-0">
+					{getFileIcon()}
+				</div>
+			)}
+
 			<div className="flex items-center gap-3 flex-1">
 				<div className="flex items-center gap-2">
-					{getFileIcon()}
 					<span className="font-medium">{item.name}</span>
 					{item.isFavorite && <Heart className="h-3 w-3 text-yellow-500 fill-current" />}
 				</div>
@@ -140,7 +162,9 @@ export const ListItem = memo(function ListItem({
 				<span className="text-xs text-muted-foreground w-20 text-right">{formatBytes(item.size)}</span>
 				<div className="flex items-center gap-1 w-32">
 					<Calendar className="h-3 w-3 text-muted-foreground" />
-					<span className="text-xs text-muted-foreground">{formatDate(item.modifiedAt || item.createdAt)}</span>
+					<span className="text-xs text-muted-foreground">
+						{formatDate(item.modifiedAt || (item.updatedAt instanceof Date ? item.updatedAt.toISOString() : item.updatedAt) || (item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt))}
+					</span>
 				</div>
 			</div>
 		</motion.div>

@@ -78,8 +78,14 @@ const GridItem = memo(function GridItem({
 
 	// Determinar si es una imagen
 	const isImage = useMemo(() => {
-		return item.type?.startsWith('image/') || false;
-	}, [item.type]);
+		return item.type?.startsWith('image/') || item.type === 'image' || item.mimeType?.startsWith('image/') || false;
+	}, [item.type, item.mimeType]);
+
+	// Obtener la URL de la miniatura o imagen
+	const imageUrl = useMemo(() => {
+		// Orden de prioridad: thumbnail, src, API thumbnail
+		return item.thumbnail || item.src || `/api/images/${item.id}/thumbnail`;
+	}, [item.thumbnail, item.src, item.id]);
 
 	// Renderizar el elemento
 	return (
@@ -106,9 +112,9 @@ const GridItem = memo(function GridItem({
 			{/* Renderizar imagen o icono según el tipo */}
 			{isImage ? (
 				<ImageRenderer
-					src={item.thumbnail || item.src || null}
+					src={imageUrl}
 					alt={item.name}
-					className="w-full h-full"
+					className="w-full h-full object-cover"
 					objectFit="cover"
 				/>
 			) : (
