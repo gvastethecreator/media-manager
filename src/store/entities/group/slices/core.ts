@@ -3,6 +3,7 @@
  * @module store/entities/group/slices/core
  */
 
+import type { StateCreator } from 'zustand';
 import {
 	createGroup as createGroupAction,
 	deleteGroup as deleteGroupAction,
@@ -13,7 +14,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendGroup, toPrismaGroup } from '@/transformers/group/serializers';
 import type { CreateGroupData, Group, GroupBase, UpdateGroupData } from '@/types/entities/group';
-import type { StateCreator } from 'zustand';
 import type { GroupState } from '../types';
 
 const groupLogger = clientLogger.withContext('GroupStore');

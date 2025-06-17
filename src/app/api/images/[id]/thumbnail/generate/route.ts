@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { generateThumbnailWithForce } from '@/app/actions/images';
 import { normalizeQuality } from '@/lib/config/thumbnail.config';
 

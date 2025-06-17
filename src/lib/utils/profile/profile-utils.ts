@@ -1,3 +1,4 @@
+import type { Profile } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
@@ -8,7 +9,6 @@ import {
 	type ProfilePreferences,
 	ThemeMode,
 } from '@/types/entities/profile/types';
-import type { Profile } from '@prisma/client';
 
 /**
  * Construye una consulta Prisma para Profile con filtros

@@ -1,14 +1,5 @@
 'use client';
 
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import { useDetailsPanel } from '@/store/details-panel.store';
-import { useSelectionStore } from '@/store/ui/selection.slice';
-import { useViewOptionsStore, ViewMode } from '@/store/ui/view-options.slice';
-import type { ViewType } from '@/types/file-item';
 import {
 	Archive,
 	ArrowDown,
@@ -43,8 +34,15 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback } from 'react';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
+import { useDetailsPanel } from '@/store/details-panel.store';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { ViewBreadcrumbs } from '../navigation/breadcrumbs';
-import { EntityDetails } from './entity-details';
 
 export interface ViewToolbarProps {
 	isRightPanelCollapsed?: boolean;
@@ -133,12 +131,12 @@ export function ViewToolbar({
 	// 🔄 Manejador de ordenación
 	const handleSort = useCallback(
 		(field: string) => {
-			const currentSortOption = sortOptions.find(option => option.field === field);
+			const currentSortOption = sortOptions.find((option) => option.field === field);
 			if (currentSortOption) {
 				// Cambiar dirección si ya existe
 				addSortOption({
 					field,
-					direction: currentSortOption.direction === 'asc' ? 'desc' : 'asc'
+					direction: currentSortOption.direction === 'asc' ? 'desc' : 'asc',
 				});
 			} else {
 				// Añadir nueva opción de ordenación
@@ -158,9 +156,12 @@ export function ViewToolbar({
 	}, [invertSelection, allItemIds]);
 
 	// 🔄 Manejador de cambio de tamaño
-	const handleSizeChange = useCallback((delta: number) => {
-		setItemSize(Math.max(50, Math.min(300, itemSize + delta)));
-	}, [itemSize, setItemSize]);
+	const handleSizeChange = useCallback(
+		(delta: number) => {
+			setItemSize(Math.max(50, Math.min(300, itemSize + delta)));
+		},
+		[itemSize, setItemSize]
+	);
 
 	const renderSortButtons = () => (
 		<div className="flex items-center gap-0.5">
@@ -170,12 +171,12 @@ export function ViewToolbar({
 				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por nombre"
 				onClick={() => handleSort('name')}
-				data-active={sortOptions.some(opt => opt.field === 'name')}
+				data-active={sortOptions.some((opt) => opt.field === 'name')}
 			>
-				<FileText className={cn('h-3.5 w-3.5', sortOptions.some(opt => opt.field === 'name') && 'text-primary')} />
-				{sortOptions.some(opt => opt.field === 'name') && (
+				<FileText className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'name') && 'text-primary')} />
+				{sortOptions.some((opt) => opt.field === 'name') && (
 					<span className="ml-0.5">
-						{sortOptions.find(opt => opt.field === 'name')?.direction === 'asc' ? (
+						{sortOptions.find((opt) => opt.field === 'name')?.direction === 'asc' ? (
 							<ArrowUp className="h-2.5 w-2.5 text-primary" />
 						) : (
 							<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -189,12 +190,12 @@ export function ViewToolbar({
 				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por fecha de modificación"
 				onClick={() => handleSort('modifiedAt')}
-				data-active={sortOptions.some(opt => opt.field === 'modifiedAt')}
+				data-active={sortOptions.some((opt) => opt.field === 'modifiedAt')}
 			>
-				<Clock className={cn('h-3.5 w-3.5', sortOptions.some(opt => opt.field === 'modifiedAt') && 'text-primary')} />
-				{sortOptions.some(opt => opt.field === 'modifiedAt') && (
+				<Clock className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'modifiedAt') && 'text-primary')} />
+				{sortOptions.some((opt) => opt.field === 'modifiedAt') && (
 					<span className="ml-0.5">
-						{sortOptions.find(opt => opt.field === 'modifiedAt')?.direction === 'asc' ? (
+						{sortOptions.find((opt) => opt.field === 'modifiedAt')?.direction === 'asc' ? (
 							<ArrowUp className="h-2.5 w-2.5 text-primary" />
 						) : (
 							<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -208,12 +209,14 @@ export function ViewToolbar({
 				className="h-7 w-7 hover:bg-accent"
 				title="Ordenar por fecha de creación"
 				onClick={() => handleSort('createdAt')}
-				data-active={sortOptions.some(opt => opt.field === 'createdAt')}
+				data-active={sortOptions.some((opt) => opt.field === 'createdAt')}
 			>
-				<Calendar className={cn('h-3.5 w-3.5', sortOptions.some(opt => opt.field === 'createdAt') && 'text-primary')} />
-				{sortOptions.some(opt => opt.field === 'createdAt') && (
+				<Calendar
+					className={cn('h-3.5 w-3.5', sortOptions.some((opt) => opt.field === 'createdAt') && 'text-primary')}
+				/>
+				{sortOptions.some((opt) => opt.field === 'createdAt') && (
 					<span className="ml-0.5">
-						{sortOptions.find(opt => opt.field === 'createdAt')?.direction === 'asc' ? (
+						{sortOptions.find((opt) => opt.field === 'createdAt')?.direction === 'asc' ? (
 							<ArrowUp className="h-2.5 w-2.5 text-primary" />
 						) : (
 							<ArrowDown className="h-2.5 w-2.5 text-primary" />
@@ -439,7 +442,7 @@ export function ViewToolbar({
 		}
 	};
 
-	const renderIcon = () => {
+	const _renderIcon = () => {
 		switch (currentView) {
 			case 'all-images':
 				return <ImageIcon className="h-4 w-4 mr-2 text-primary" />;
@@ -464,7 +467,7 @@ export function ViewToolbar({
 		}
 	};
 
-	const item = getCurrentItem();
+	const _item = getCurrentItem();
 
 	return (
 		<div className="flex items-center justify-between h-10 px-2 border-b">
@@ -500,11 +503,7 @@ export function ViewToolbar({
 						onClick={toggleRightPanelCollapse}
 						title={isRightPanelCollapsed ? 'Expandir panel' : 'Colapsar panel'}
 					>
-						{isRightPanelCollapsed ? (
-							<ArrowLeft className="h-3.5 w-3.5" />
-						) : (
-							<ArrowRight className="h-3.5 w-3.5" />
-						)}
+						{isRightPanelCollapsed ? <ArrowLeft className="h-3.5 w-3.5" /> : <ArrowRight className="h-3.5 w-3.5" />}
 					</Button>
 				)}
 			</div>

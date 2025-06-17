@@ -1,5 +1,5 @@
-import { createProfile, getProfiles } from '@/app/actions/profiles/profile.actions';
 import { NextResponse } from 'next/server';
+import { createProfile, getProfiles } from '@/app/actions/profiles/profile.actions';
 
 export async function GET() {
 	try {

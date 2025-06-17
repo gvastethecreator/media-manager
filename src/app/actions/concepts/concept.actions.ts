@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { EventType } from '@/lib/server/events.server';
 import { emit } from '@/lib/server/events.server';
@@ -13,7 +14,6 @@ import {
 } from '@/transformers/concept';
 import type { ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept/base';
 import type { ConceptSearchOptions, ConceptSearchResult } from '@/types/entities/concept/types';
-import { revalidatePath } from 'next/cache';
 
 const conceptLogger = serverLogger.withContext('ConceptActions');
 const REVALIDATE_PATHS = ['/settings', '/concepts', '/concepts/[id]'] as const;
@@ -162,7 +162,7 @@ export async function deleteConcept(id: string): Promise<{ success: boolean }> {
 /**
  * ➕ Asocia una imagen a un concepto (STUB)
  */
-export async function addImageToConcept(conceptId: string, imageId: string): Promise<{ success: boolean }> {
+export async function addImageToConcept(conceptId: string, _imageId: string): Promise<{ success: boolean }> {
 	conceptLogger.warn('⚠️ Función addImageToConcept no implementada');
 	// Aquí iría la lógica para llamar a prisma.concept.update connect image
 	await notifyConceptChange('update', conceptId); // Asumir que notifica cambio

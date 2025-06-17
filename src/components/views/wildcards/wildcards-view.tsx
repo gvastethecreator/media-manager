@@ -1,5 +1,9 @@
 'use client';
 
+import { WandSparkles } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -8,10 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useWildcardStore } from '@/store/entities/wildcard';
-import { WandSparkles } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 import { WildcardCard } from './wildcard-card';
 
@@ -36,13 +36,7 @@ const viewLogger = clientLogger.withContext('WildcardsView');
 
 // Componente memoizado para cada tarjeta de comodín
 const MemoizedWildcardCard = React.memo(
-	({
-		wildcard,
-		onWildcardClick,
-	}: {
-		wildcard: WildcardWithStats;
-		onWildcardClick: () => void;
-	}) => {
+	({ wildcard, onWildcardClick }: { wildcard: WildcardWithStats; onWildcardClick: () => void }) => {
 		return <WildcardCard wildcard={wildcard} onClick={onWildcardClick} className="h-full" />;
 	},
 	(prevProps, nextProps) => {

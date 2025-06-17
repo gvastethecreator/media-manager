@@ -4,11 +4,11 @@
  */
 
 import type {
-    WorldItem,
-    WorldItemProperty,
-    WorldItemRarity,
-    WorldItemStats,
-    WorldItemType
+	WorldItem,
+	WorldItemProperty,
+	WorldItemRarity,
+	WorldItemStats,
+	WorldItemType,
 } from '../../types/entities/world-item';
 
 /**

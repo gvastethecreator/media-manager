@@ -3,6 +3,7 @@
  * @module transformers/world-item/server
  */
 
+import { Prisma } from '@prisma/client';
 import { createLogger } from '@/lib/logger';
 import { WorldItemSchema } from '@/types/entities/world-item/schema';
 import type {
@@ -16,7 +17,6 @@ import type {
 	WorldItemStat,
 } from '@/types/entities/world-item/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
-import { Prisma } from '@prisma/client';
 import {
 	serializeAttributes,
 	serializeEffects,
@@ -36,7 +36,7 @@ const logger = createLogger('WorldItemTransformer:Server');
  */
 export function validateWorldItem(worldItem: WorldItemBase): WorldItemBase {
 	try {
-		const result = WorldItemSchema.parse(worldItem);
+		const _result = WorldItemSchema.parse(worldItem);
 		return worldItem;
 	} catch (error) {
 		logger.error('Error validando WorldItem:', error);

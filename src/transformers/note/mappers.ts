@@ -3,6 +3,7 @@
  * @module transformers/note/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	NoteComplete,
@@ -12,7 +13,6 @@ import type {
 	NoteUpdateInput,
 	RelatedNote,
 } from '@/types/entities/note/types';
-import type { Prisma } from '@prisma/client';
 import { toPrismaNote } from './serializers';
 
 // Logger específico para el transformer de Note

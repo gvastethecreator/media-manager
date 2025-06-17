@@ -1,7 +1,7 @@
+import { create } from 'zustand';
 import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { ThumbnailStats } from '@/types/thumbnails';
-import { create } from 'zustand';
 
 export interface ProcessStatus {
 	status: string;
@@ -103,14 +103,14 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 			// Intentar obtener estadísticas con reintentos
 			let retries = 3;
 			let stats = null;
-			let lastError = null;
+			let _lastError = null;
 
 			while (retries > 0 && !stats) {
 				try {
 					stats = await thumbnailActions.getThumbnailStats();
 					break;
 				} catch (error) {
-					lastError = error;
+					_lastError = error;
 					retries--;
 					// Esperar antes de reintentar
 					if (retries > 0) {

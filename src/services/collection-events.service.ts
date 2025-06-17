@@ -1,6 +1,6 @@
+import type { Collection } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import type { Collection } from '@prisma/client';
 
 const collectionEventsLogger = serverLogger.withContext('CollectionEventsService');
 

@@ -1,8 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
 import { ImageGallery } from './image-gallery';
 
 // Datos de ejemplo para la galería
@@ -31,7 +31,7 @@ const mockImageIds = [
  */
 export default function ImageGalleryExample() {
 	const [selectedImages, setSelectedImages] = useState<string[]>([]);
-	const [selectedVariant, setSelectedVariant] = useState<string>('default');
+	const [selectedVariant, _setSelectedVariant] = useState<string>('default');
 
 	// Simulación de carga de más imágenes
 	const handleLoadMore = async () => {

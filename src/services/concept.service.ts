@@ -1,9 +1,8 @@
+import type { Concept, Prisma } from '@prisma/client';
 import type { ConceptCreate } from '@/app/actions/concepts/concept.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
-import type { Concept } from '@prisma/client';
-import type { Prisma } from '@prisma/client';
 
 const conceptLogger = serverLogger.withContext('ConceptService');
 

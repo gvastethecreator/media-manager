@@ -1,20 +1,20 @@
+import {
+	BookImage,
+	Box,
+	Camera,
+	Database,
+	FolderIcon,
+	FolderKanban,
+	Lightbulb,
+	MapPin,
+	StickyNote,
+	TagIcon,
+	Terminal,
+	User2,
+	WandSparkles,
+} from 'lucide-react';
 import type { CategoryItem } from '@/components/navigation/types';
 import type { ViewType } from '@/types/file-item';
-import {
-    BookImage,
-    Box,
-    Camera,
-    Database,
-    FolderIcon,
-    FolderKanban,
-    Lightbulb,
-    MapPin,
-    StickyNote,
-    TagIcon,
-    Terminal,
-    User2,
-    WandSparkles,
-} from 'lucide-react';
 
 /**
  * Definición de las categorías principales del panel de navegación

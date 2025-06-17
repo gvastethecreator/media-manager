@@ -1,8 +1,8 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface MousePosition {
 	x: number;
@@ -120,15 +120,15 @@ const Particles: React.FC<ParticlesProps> = ({
 			}
 			window.removeEventListener('resize', handleResize);
 		};
-	}, []);
+	}, [animate, initCanvas]);
 
 	useEffect(() => {
 		onMouseMove();
-	}, []);
+	}, [onMouseMove]);
 
 	useEffect(() => {
 		initCanvas();
-	}, []);
+	}, [initCanvas]);
 
 	const initCanvas = () => {
 		resizeCanvas();

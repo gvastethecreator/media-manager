@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, type UseInViewOptions, type Variants, motion, useInView } from 'motion/react';
+import { AnimatePresence, motion, type UseInViewOptions, useInView, type Variants } from 'motion/react';
 import type * as React from 'react';
 import { useRef } from 'react';
 

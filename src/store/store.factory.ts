@@ -1,5 +1,5 @@
-import { StateCreator, create } from 'zustand';
-import { DevtoolsOptions, PersistOptions, devtools, persist } from 'zustand/middleware';
+import { create, StateCreator } from 'zustand';
+import { DevtoolsOptions, devtools, PersistOptions, persist } from 'zustand/middleware';
 import { clientLogger } from '../lib/logger/client-logger';
 import type { BaseEntity, BaseStore, ExtendedStore, StoreHook } from './types';
 

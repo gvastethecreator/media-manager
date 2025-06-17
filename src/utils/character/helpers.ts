@@ -3,6 +3,7 @@
  * @module utils/character/helpers
  */
 
+import { v4 as uuidv4 } from 'uuid';
 // Importación comentada porque las funciones no existen actualmente
 // import { getSuggestedAppearance, serializeObject } from '@/transformers/character';
 import {
@@ -16,7 +17,6 @@ import {
 	CharacterSummary,
 } from '@/types/entities/character';
 import { CharacterRelationshipType } from '@/types/entities/character/enums';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Genera un ID único para un nuevo personaje

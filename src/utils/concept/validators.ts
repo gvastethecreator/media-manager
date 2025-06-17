@@ -1,6 +1,6 @@
+import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { ConceptCategory } from '@/types/entities/concept';
-import { z } from 'zod';
 
 const validatorsLogger = serverLogger.withContext('ConceptValidators');
 

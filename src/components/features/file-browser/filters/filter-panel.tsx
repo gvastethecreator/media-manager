@@ -1,5 +1,7 @@
 'use client';
 
+import { CalendarIcon, Filter, RotateCcw, SlidersHorizontal } from 'lucide-react';
+import { memo, useCallback, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -11,8 +13,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { CalendarIcon, Filter, RotateCcw, SlidersHorizontal } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
 
 export type FilterType = 'text' | 'select' | 'checkbox' | 'radio' | 'date' | 'boolean';
 
@@ -52,166 +52,172 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 	const activeFiltersCount = filterOptions.length;
 
 	// Función para aplicar un filtro
-	const applyFilter = useCallback((id: string, value: any, operator = 'eq') => {
-		if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
-			removeFilterOption(id);
-		} else {
-			addFilterOption({ field: id, value, operator });
-		}
-	}, [addFilterOption, removeFilterOption]);
+	const applyFilter = useCallback(
+		(id: string, value: any, operator = 'eq') => {
+			if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
+				removeFilterOption(id);
+			} else {
+				addFilterOption({ field: id, value, operator });
+			}
+		},
+		[addFilterOption, removeFilterOption]
+	);
 
 	// Obtener el valor actual de un filtro
-	const getFilterValue = useCallback((id: string) => {
-		const filter = filterOptions.find(opt => opt.field === id);
-		return filter ? filter.value : undefined;
-	}, [filterOptions]);
+	const getFilterValue = useCallback(
+		(id: string) => {
+			const filter = filterOptions.find((opt) => opt.field === id);
+			return filter ? filter.value : undefined;
+		},
+		[filterOptions]
+	);
 
 	// Renderizar un filtro según su tipo
-	const renderFilter = useCallback((filter: FilterDefinition) => {
-		const currentValue = getFilterValue(filter.id);
+	const renderFilter = useCallback(
+		(filter: FilterDefinition) => {
+			const currentValue = getFilterValue(filter.id);
 
-		switch (filter.type) {
-			case 'text':
-				return (
-					<div className="space-y-2" key={filter.id}>
-						<Label htmlFor={filter.id}>{filter.label}</Label>
-						<Input
-							id={filter.id}
-							value={currentValue || ''}
-							onChange={(e) => applyFilter(filter.id, e.target.value, 'contains')}
-							placeholder={filter.placeholder}
-						/>
-					</div>
-				);
-
-			case 'select':
-				return (
-					<div className="space-y-2" key={filter.id}>
-						<Label htmlFor={filter.id}>{filter.label}</Label>
-						<Select
-							value={currentValue?.toString() || ''}
-							onValueChange={(value) => applyFilter(filter.id, value)}
-						>
-							<SelectTrigger id={filter.id}>
-								<SelectValue placeholder={filter.placeholder || `Seleccionar ${filter.label.toLowerCase()}`} />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectItem value="">Todos</SelectItem>
-								{filter.options?.map((option) => (
-									<SelectItem key={String(option.value)} value={String(option.value)}>
-										{option.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-					</div>
-				);
-
-			case 'checkbox':
-				return (
-					<div className="space-y-2" key={filter.id}>
-						<Label>{filter.label}</Label>
-						<div className="space-y-2">
-							{filter.options?.map((option) => (
-								<div className="flex items-center space-x-2" key={String(option.value)}>
-									<Checkbox
-										id={`${filter.id}-${option.value}`}
-										checked={Array.isArray(currentValue) && currentValue?.includes(option.value)}
-										onCheckedChange={(checked) => {
-											const values = Array.isArray(currentValue) ? [...currentValue] : [];
-											if (checked) {
-												applyFilter(filter.id, [...values, option.value]);
-											} else {
-												applyFilter(
-													filter.id,
-													values.filter((v) => v !== option.value)
-												);
-											}
-										}}
-									/>
-									<Label htmlFor={`${filter.id}-${option.value}`} className="cursor-pointer">
-										{option.label}
-									</Label>
-								</div>
-							))}
+			switch (filter.type) {
+				case 'text':
+					return (
+						<div className="space-y-2" key={filter.id}>
+							<Label htmlFor={filter.id}>{filter.label}</Label>
+							<Input
+								id={filter.id}
+								value={currentValue || ''}
+								onChange={(e) => applyFilter(filter.id, e.target.value, 'contains')}
+								placeholder={filter.placeholder}
+							/>
 						</div>
-					</div>
-				);
+					);
 
-			case 'radio':
-				return (
-					<div className="space-y-2" key={filter.id}>
-						<Label>{filter.label}</Label>
-						<RadioGroup
-							value={currentValue?.toString() || ''}
-							onValueChange={(value) => applyFilter(filter.id, value)}
-						>
+				case 'select':
+					return (
+						<div className="space-y-2" key={filter.id}>
+							<Label htmlFor={filter.id}>{filter.label}</Label>
+							<Select value={currentValue?.toString() || ''} onValueChange={(value) => applyFilter(filter.id, value)}>
+								<SelectTrigger id={filter.id}>
+									<SelectValue placeholder={filter.placeholder || `Seleccionar ${filter.label.toLowerCase()}`} />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="">Todos</SelectItem>
+									{filter.options?.map((option) => (
+										<SelectItem key={String(option.value)} value={String(option.value)}>
+											{option.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					);
+
+				case 'checkbox':
+					return (
+						<div className="space-y-2" key={filter.id}>
+							<Label>{filter.label}</Label>
 							<div className="space-y-2">
 								{filter.options?.map((option) => (
 									<div className="flex items-center space-x-2" key={String(option.value)}>
-										<RadioGroupItem value={String(option.value)} id={`${filter.id}-${option.value}`} />
+										<Checkbox
+											id={`${filter.id}-${option.value}`}
+											checked={Array.isArray(currentValue) && currentValue?.includes(option.value)}
+											onCheckedChange={(checked) => {
+												const values = Array.isArray(currentValue) ? [...currentValue] : [];
+												if (checked) {
+													applyFilter(filter.id, [...values, option.value]);
+												} else {
+													applyFilter(
+														filter.id,
+														values.filter((v) => v !== option.value)
+													);
+												}
+											}}
+										/>
 										<Label htmlFor={`${filter.id}-${option.value}`} className="cursor-pointer">
 											{option.label}
 										</Label>
 									</div>
 								))}
 							</div>
-						</RadioGroup>
-					</div>
-				);
+						</div>
+					);
 
-			case 'date':
-				return (
-					<div className="space-y-2" key={filter.id}>
-						<Label htmlFor={filter.id}>{filter.label}</Label>
-						<Popover>
-							<PopoverTrigger asChild>
-								<Button
-									id={filter.id}
-									variant="outline"
-									className={cn(
-										'w-full justify-start text-left font-normal',
-										!currentValue && 'text-muted-foreground'
-									)}
-								>
-									<CalendarIcon className="mr-2 h-4 w-4" />
-									{currentValue
-										? currentValue instanceof Date
-											? currentValue.toLocaleDateString()
-											: new Date(currentValue).toLocaleDateString()
-										: filter.placeholder || 'Seleccionar fecha'}
-								</Button>
-							</PopoverTrigger>
-							<PopoverContent className="w-auto p-0">
-								<Calendar
-									mode="single"
-									selected={currentValue ? new Date(currentValue) : undefined}
-									onSelect={(date) => applyFilter(filter.id, date)}
-									initialFocus
-								/>
-							</PopoverContent>
-						</Popover>
-					</div>
-				);
+				case 'radio':
+					return (
+						<div className="space-y-2" key={filter.id}>
+							<Label>{filter.label}</Label>
+							<RadioGroup
+								value={currentValue?.toString() || ''}
+								onValueChange={(value) => applyFilter(filter.id, value)}
+							>
+								<div className="space-y-2">
+									{filter.options?.map((option) => (
+										<div className="flex items-center space-x-2" key={String(option.value)}>
+											<RadioGroupItem value={String(option.value)} id={`${filter.id}-${option.value}`} />
+											<Label htmlFor={`${filter.id}-${option.value}`} className="cursor-pointer">
+												{option.label}
+											</Label>
+										</div>
+									))}
+								</div>
+							</RadioGroup>
+						</div>
+					);
 
-			case 'boolean':
-				return (
-					<div className="flex items-center space-x-2" key={filter.id}>
-						<Checkbox
-							id={filter.id}
-							checked={!!currentValue}
-							onCheckedChange={(checked) => applyFilter(filter.id, Boolean(checked))}
-						/>
-						<Label htmlFor={filter.id} className="cursor-pointer">
-							{filter.label}
-						</Label>
-					</div>
-				);
+				case 'date':
+					return (
+						<div className="space-y-2" key={filter.id}>
+							<Label htmlFor={filter.id}>{filter.label}</Label>
+							<Popover>
+								<PopoverTrigger asChild>
+									<Button
+										id={filter.id}
+										variant="outline"
+										className={cn(
+											'w-full justify-start text-left font-normal',
+											!currentValue && 'text-muted-foreground'
+										)}
+									>
+										<CalendarIcon className="mr-2 h-4 w-4" />
+										{currentValue
+											? currentValue instanceof Date
+												? currentValue.toLocaleDateString()
+												: new Date(currentValue).toLocaleDateString()
+											: filter.placeholder || 'Seleccionar fecha'}
+									</Button>
+								</PopoverTrigger>
+								<PopoverContent className="w-auto p-0">
+									<Calendar
+										mode="single"
+										selected={currentValue ? new Date(currentValue) : undefined}
+										onSelect={(date) => applyFilter(filter.id, date)}
+										initialFocus
+									/>
+								</PopoverContent>
+							</Popover>
+						</div>
+					);
 
-			default:
-				return null;
-		}
-	}, [applyFilter, getFilterValue]);
+				case 'boolean':
+					return (
+						<div className="flex items-center space-x-2" key={filter.id}>
+							<Checkbox
+								id={filter.id}
+								checked={!!currentValue}
+								onCheckedChange={(checked) => applyFilter(filter.id, Boolean(checked))}
+							/>
+							<Label htmlFor={filter.id} className="cursor-pointer">
+								{filter.label}
+							</Label>
+						</div>
+					);
+
+				default:
+					return null;
+			}
+		},
+		[applyFilter, getFilterValue]
+	);
 
 	return (
 		<div className={cn('flex items-center', className)}>
@@ -244,9 +250,7 @@ export const FilterPanel = memo<FilterPanelProps>(function FilterPanel({ filters
 						</div>
 
 						{/* Grid de filtros */}
-						<div className="grid gap-4 grid-cols-1">
-							{filters.map(renderFilter)}
-						</div>
+						<div className="grid gap-4 grid-cols-1">{filters.map(renderFilter)}</div>
 
 						{/* Botones de acción */}
 						<div className="flex justify-end gap-2 pt-2">

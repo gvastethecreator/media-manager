@@ -3,8 +3,8 @@
  * @module types/favorites
  */
 
-import type { EntityId } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { EntityId } from '@/utils/types/utility-types';
 
 /**
  * Tipo de entidad favorita

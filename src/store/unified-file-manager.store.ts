@@ -15,11 +15,7 @@
  * ✅ Selección multi-item eficiente
  */
 
-import type { ViewMode } from '@/components/navigation/types';
-import { clientLogger } from '@/lib/logger/client-logger';
-import type { FileItem } from '@/types/file-item';
 import { create } from 'zustand';
-
 import { getAlbumImages } from '@/app/actions/albums/album.actions';
 import { getCharacterImages } from '@/app/actions/characters/character.actions';
 import { getCollectionImages } from '@/app/actions/collections';
@@ -29,16 +25,18 @@ import { getImages } from '@/app/actions/images/image-crud.actions';
 // 🚀 Importaciones de acciones optimizadas - CORREGIDAS
 import { getTagImages } from '@/app/actions/tags/query.actions';
 import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
-
+import type { ViewMode } from '@/components/navigation/types';
 // 🎯 Cache y throttling optimizados
 import { throttleEvent } from '@/lib/event-throttler';
 import { folderResponseCache as folderCache } from '@/lib/folder-cache';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { FileItem } from '@/types/file-item';
 
 const fileManagerLogger = clientLogger.withContext('UnifiedFileManager');
 
 // 📊 Constantes de configuración
 const ITEMS_PER_BATCH = 100; // 🚀 Aumentado de 50 para mejor performance
-const DEBOUNCE_DELAY = 150; // ⚡ Optimizado para responsividad
+const _DEBOUNCE_DELAY = 150; // ⚡ Optimizado para responsividad
 const MAX_OPERATION_QUEUE = 10; // 🔄 Límite de operaciones concurrentes
 
 // 🏗️ Tipos de entidades

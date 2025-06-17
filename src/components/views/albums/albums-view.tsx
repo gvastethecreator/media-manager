@@ -1,5 +1,9 @@
 'use client';
 
+import { Album as AlbumIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
 import { type AlbumWithStats, getAlbums } from '@/app/actions/albums/album.actions';
 import { AlbumCard } from '@/components/cards/album-card';
 import { EmptyState } from '@/components/core/data-display';
@@ -9,10 +13,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
-import { Album as AlbumIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AlbumsView');
@@ -29,13 +29,7 @@ interface AlbumDetails {
 
 // Componente memoizado para cada tarjeta de álbum
 const MemoizedAlbumCard = React.memo(
-	({
-		album,
-		onAlbumClick,
-	}: {
-		album: AlbumWithStats;
-		onAlbumClick: () => void;
-	}) => {
+	({ album, onAlbumClick }: { album: AlbumWithStats; onAlbumClick: () => void }) => {
 		// Asegurarse de que el álbum tenga todas las propiedades requeridas
 		const completeAlbum = {
 			...album,
@@ -61,7 +55,7 @@ MemoizedAlbumCard.displayName = 'MemoizedAlbumCard';
 export function AlbumsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { selectAlbum, openViewer } = useAlbumStore();
-	const router = useRouter();
+	const _router = useRouter();
 	const [albums, setAlbums] = useState<AlbumWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);

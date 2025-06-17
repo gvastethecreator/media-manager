@@ -37,7 +37,7 @@ export function calculateAspectRatio(width: number, height: number): string {
  * @param image Objeto imagen que puede contener información de color dominante
  * @returns Color dominante en formato hex o undefined si no está disponible
  */
-export function calculateDominantColor(image: Image): string | undefined {
+export function calculateDominantColor(_image: Image): string | undefined {
 	// Actualmente la metadata no incluye color dominante
 	return undefined;
 }

@@ -1,5 +1,5 @@
-import type { GroupWithStats } from '@/types/entities/group/types';
 import { useState } from 'react';
+import type { GroupWithStats } from '@/types/entities/group/types';
 
 interface UseGroupFiltersProps {
 	groups: GroupWithStats[];

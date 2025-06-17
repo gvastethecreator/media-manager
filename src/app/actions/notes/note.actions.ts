@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
@@ -8,7 +9,6 @@ import { fromPrismaNote, toCreateNoteData, toUpdateNoteData } from '@/transforme
 import type { CreateNoteData, NoteBase, NoteComplete, NoteWithStats } from '@/types/entities/note';
 import type { FileItem } from '@/types/file-item';
 import { createNoteSchema, updateNoteSchema } from '@/utils/note/validators';
-import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
 const noteLogger = serverLogger.withContext('NoteActions');

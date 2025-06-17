@@ -1,5 +1,5 @@
-import { activateProfile, getActiveProfile as getActiveProfileAction } from '@/app/actions/profiles/profile.actions';
 import { NextResponse } from 'next/server';
+import { activateProfile, getActiveProfile as getActiveProfileAction } from '@/app/actions/profiles/profile.actions';
 
 // GET /api/profile/active - Obtener el perfil activo
 export async function GET() {

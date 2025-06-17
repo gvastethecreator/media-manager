@@ -1,13 +1,13 @@
 'use client';
 
+import { Terminal } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { getPromptImages } from '@/app/actions/prompts/prompt.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePromptStore } from '@/store/entities/prompt/store';
-import { Terminal } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
 
 const viewLogger = clientLogger.withContext('PromptContentView');
 

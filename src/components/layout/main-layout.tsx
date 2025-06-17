@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { getNavigationData } from '@/components/navigation/actions/navigation.actions';
 import { NavPanel } from '@/components/navigation/navigation-panel';
@@ -11,7 +12,6 @@ import { useLocalStorage } from '@/lib/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageViewer } from '@/store/image-viewer.store';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 // Estilos para el panel colapsado
 import './nav-panel-collapsed.css';
@@ -41,7 +41,7 @@ const PANEL_CONFIG = {
 } as const;
 
 // Estilos estáticos memoizados fuera del componente
-const RESIZING_OVERLAY_STYLE = {
+const _RESIZING_OVERLAY_STYLE = {
 	backdropFilter: 'blur(2px)',
 	WebkitBackdropFilter: 'blur(2px)',
 };
@@ -81,7 +81,7 @@ const CentralPanel = React.memo(function CentralPanel({
 });
 
 // Componente memoizado para manejar el panel de navegación
-const NavigationPanel = React.memo(function NavigationPanel({
+const _NavigationPanel = React.memo(function NavigationPanel({
 	panelRef,
 	defaultSize,
 	minSize,
@@ -149,8 +149,8 @@ export function MainLayout() {
 	const [isResizing, setIsResizing] = useState(false);
 	const { isOpen, images, currentIndex, closeViewer } = useImageViewer();
 	const [navData, setNavData] = useState<Awaited<ReturnType<typeof getNavigationData>> | null>(null);
-	const navPanelRef = useRef(null);
-	const rightPanelRef = useRef(null);
+	const _navPanelRef = useRef(null);
+	const _rightPanelRef = useRef(null);
 	const { isVisible } = useDetailsPanel();
 
 	// Estado para los paneles colapsables
@@ -353,7 +353,7 @@ export function MainLayout() {
 	const handleLayout = useCallback(
 		(sizes: number[]) => {
 			// Persistir los tamaños al cambiar el layout
-			const [nav, content, right] = sizes;
+			const [nav, _content, right] = sizes;
 			if (nav && !isNavPanelCollapsed) {
 				// Lotes las actualizaciones para reducir rerenderiazados
 				requestAnimationFrame(() => {

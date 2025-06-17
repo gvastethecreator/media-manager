@@ -1,5 +1,7 @@
 'use client';
 
+import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { deleteConcept, getConcepts } from '@/app/actions/concepts/concept.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,8 +15,6 @@ import toastService from '@/services/toast.service';
 import type { ConceptExtended } from '@/types/entities/concept';
 import type { ConceptWithStats } from '@/types/entities/concept/base';
 import { calculateConceptsStats } from '@/utils/concept/helpers';
-import { Filter, Info, LightbulbIcon, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateConceptForm } from './create-concept-form';
 
 export function ConceptsSettings() {
@@ -111,7 +111,7 @@ export function ConceptsSettings() {
 	}, []);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const handleDeleteButtonClick = useCallback(
+	const _handleDeleteButtonClick = useCallback(
 		(e: React.MouseEvent<HTMLButtonElement>, id: string) => {
 			e.stopPropagation();
 			handleDeleteConcept(id);

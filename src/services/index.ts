@@ -10,32 +10,29 @@
  * @description Exporta todos los servicios del sistema para su uso centralizado
  */
 
-// Entidades base - Solo las que existen
-export * from './folder/index';
-export * from './image/index';
-export * from './tag/index';
-export * from './video/index';
-
 // Entidades organizacionales - Solo las que existen
 export * from './album/index';
 export * from './collection/index';
-export * from './favorite.service';
-export * from './group/index';
-
 // Servicios individuales que existen
 export * from './concept.service';
+export * from './favorite.service';
 export * from './favorites.service';
+// Servicios del sistema - Solo los que existen
+export * from './file/index';
+// Entidades base - Solo las que existen
+export * from './folder/index';
+export * from './group/index';
+export * from './image/index';
 export * from './note.service';
+export * from './profile/index';
 export * from './prompt.service';
+export * from './settings/index';
 export * from './stats.service';
+export * from './tag/index';
 export * from './task.service';
 // export * from './thumbnail.service'; // ❌ DISABLED: Conflicto con ./image/index - usar image/index
 export * from './toast.service';
-
-// Servicios del sistema - Solo los que existen
-export * from './file/index';
-export * from './profile/index';
-export * from './settings/index';
+export * from './video/index';
 // export * from './stats/index'; // ❌ DISABLED: archivo no existe
 
 /**

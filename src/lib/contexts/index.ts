@@ -4,14 +4,14 @@
  */
 
 // Exportaciones del contexto de archivos
-export { FileProvider, useFiles, type FileItem } from './file-context';
+export { type FileItem, FileProvider, useFiles } from './file-context';
 
 // Exportaciones del contexto de configuración
 export {
+	type Settings,
 	SettingsProvider,
-	useSettings,
-	useTheme,
 	useCollectionTagContext,
 	useProfileContext,
-	type Settings,
+	useSettings,
+	useTheme,
 } from './settings-context';

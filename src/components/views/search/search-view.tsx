@@ -1,5 +1,7 @@
 'use client';
 
+import { Search } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
@@ -10,8 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFileStore } from '@/store/entities/file';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { FileItem } from '@/types/file-item';
-import { Search } from 'lucide-react';
-import { useCallback, useState } from 'react';
 import type { ViewProps } from '../types';
 
 interface SearchFilters {

@@ -1,9 +1,9 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { folderService } from '@/services/folder-service-export';
 import type { FolderStats } from '@/types/entities/folder';
-import { useCallback, useState } from 'react';
 import { type ExtendedFolder, initialStats } from '../folder-types';
 
 const stateLogger = clientLogger.withContext('FoldersState');

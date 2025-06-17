@@ -5,10 +5,10 @@
  * @module app/actions/tasks/query.actions
  */
 
+import { unstable_cache } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type ScheduledTask, type TaskStatus, type TaskType } from '@/types/tasks';
-import { unstable_cache } from 'next/cache';
 
 // Logger específico para acciones de consulta
 const taskLogger = serverLogger.withContext('TaskQueryActions');

@@ -11,8 +11,8 @@ import * as ImageCrudActions from './image-crud.actions';
 import * as ImageProcessingActions from './image-processing.actions';
 import {
 	generateThumbnail as generateThumbnailFromAction,
-	getThumbnail as getThumbnailFromAction,
 	generateThumbnailWithForce as generateThumbnailWithForceFromAction,
+	getThumbnail as getThumbnailFromAction,
 } from './image-thumbnails.actions';
 import * as ImagesRandomAction from './images-random.action';
 

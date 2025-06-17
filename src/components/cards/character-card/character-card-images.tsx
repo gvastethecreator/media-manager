@@ -1,9 +1,9 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 // Imágenes con thumbnails para el componente de galería
 export interface ThumbnailImage {

@@ -30,12 +30,12 @@ import {
 // Importar el transformador principal y sus funciones asociadas
 import {
 	transformAlbum as transformAlbumMain,
+	transformAlbums as transformAlbumsMain,
 	transformAlbumToExtended,
 	transformAlbumToWithStats,
-	transformAlbums as transformAlbumsMain,
 } from './transformer';
 
-const logger = serverLogger.withContext('AlbumTransformer');
+const _logger = serverLogger.withContext('AlbumTransformer');
 
 // Exportar el transformador principal y sus variantes
 export const transformAlbum = transformAlbumMain;
@@ -145,7 +145,7 @@ export async function createAlbum(data: AlbumCreateInput): Promise<AlbumComplete
 		await validateAlbum(data);
 
 		// Serializar datos para Prisma
-		const prismaData = toPrismaAlbum(data);
+		const _prismaData = toPrismaAlbum(data);
 
 		// Mapear datos a formato Prisma
 		const createData = mapCreateAlbumDataToPrisma(data);
@@ -186,7 +186,7 @@ export async function updateAlbum(id: string, data: AlbumUpdateInput): Promise<A
 		await validateAlbum(data);
 
 		// Serializar datos para Prisma
-		const prismaData = toPrismaAlbum(data);
+		const _prismaData = toPrismaAlbum(data);
 
 		// Mapear datos a formato Prisma
 		const updateData = mapUpdateAlbumDataToPrisma(data);

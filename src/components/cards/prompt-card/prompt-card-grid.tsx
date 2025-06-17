@@ -1,10 +1,10 @@
 'use client';
 
+import { Search } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { debounce } from '@/lib/utils';
-import { Search } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
 import { MemoizedPromptCard } from './prompt-card';
 import type { PromptCardData } from './prompt-server-actions';
 import { searchPrompts } from './prompt-server-actions';
@@ -88,7 +88,7 @@ export function PromptCardGrid({
 
 	// Renderizar esqueletos de carga
 	const renderSkeletons = () => {
-		return Array.from({ length: 6 }).map((_, index) => (
+		return Array.from({ length: 6 }).map((_, _index) => (
 			<div
 				key={`prompt-skeleton-${Math.random().toString(36).substring(2)}`}
 				className="w-[300px] md:w-[320px] h-[400px]"

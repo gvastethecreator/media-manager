@@ -1,6 +1,5 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
 	Area,
 	AreaChart,
@@ -17,6 +16,7 @@ import {
 	XAxis,
 	YAxis,
 } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function FileDistributionChart() {
 	const data = [

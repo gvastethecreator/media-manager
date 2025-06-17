@@ -3,8 +3,8 @@
  * @module types/errors
  */
 
-import type { JSONString } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { JSONString } from '@/utils/types/utility-types';
 
 /**
  * Códigos de error por categoría

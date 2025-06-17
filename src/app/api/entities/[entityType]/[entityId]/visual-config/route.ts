@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import {
+	deleteEntityVisualConfig,
 	getEntityVisualConfig,
 	upsertEntityVisualConfig,
-	deleteEntityVisualConfig,
 } from '@/app/actions/visual-config.actions';
 
 export async function GET(_request: Request, { params }: { params: { entityType: string; entityId: string } }) {

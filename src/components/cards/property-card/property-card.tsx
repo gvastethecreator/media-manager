@@ -1,11 +1,11 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import type { Property } from '@/types/prisma';
 import { Microscope } from 'lucide-react';
 import Link from 'next/link';
 import React, { useMemo } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import type { Property } from '@/types/prisma';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
@@ -47,7 +47,7 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 			const darkerB = Math.floor(b * darkenFactor);
 
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			return '#2563eb';
 		}
 	}, [property.color]);

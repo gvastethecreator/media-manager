@@ -1,5 +1,8 @@
 'use client';
 
+import { Bug, FileImage, Loader2 } from 'lucide-react';
+import * as React from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getImageMetadataById } from '@/app/actions/metadata';
 import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
 import { Button } from '@/components/ui/button';
@@ -7,9 +10,6 @@ import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import type { FileMetadata } from '@/types/metadata.types';
-import { Bug, FileImage, Loader2 } from 'lucide-react';
-import * as React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AIGenerationInfo } from './details-panel-ai-generation-info';
 import { BasicInfo } from './details-panel-basic-info';
 import { ImagePreview } from './details-panel-image-preview';
@@ -194,7 +194,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	// Efecto para limpiar el caché periódicamente
 	useEffect(() => {
 		const cleanupInterval = setInterval(() => {
-			const now = Date.now();
+			const _now = Date.now();
 			let entriesRemoved = 0;
 
 			for (const [key, promise] of metadataRequestCache.entries()) {
@@ -309,7 +309,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	}, [item, toast]);
 
 	// Determina el tipo de generador de IA a partir de los metadatos - memoizado
-	const getGeneratorType = useCallback((generation: unknown) => {
+	const _getGeneratorType = useCallback((generation: unknown) => {
 		const gen = generation as Record<string, unknown>;
 		if (!gen || !gen.type) {
 			return 'unknown';

@@ -1,6 +1,6 @@
+import Link from 'next/link';
 import { getAllFolders } from '@/app/actions/folder';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 
 export default async function FoldersPage() {
 	const { success, data: folders, error } = await getAllFolders();

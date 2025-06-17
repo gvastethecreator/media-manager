@@ -1,9 +1,9 @@
 'use client';
 
-import { clientLogger } from '@/lib/logger/client-logger';
-import { useImageResources } from '@/store/image-resources.store';
 import type * as React from 'react';
 import { useCallback, useEffect, useRef } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { useImageResources } from '@/store/image-resources.store';
 
 const thumbnailLogger = clientLogger.withContext('ThumbnailLoader');
 

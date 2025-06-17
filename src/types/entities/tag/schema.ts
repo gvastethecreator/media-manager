@@ -3,8 +3,8 @@
  * @module types/entities/tag/schema
  */
 
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 
 /**
  * 🔍 Esquema para filtros de búsqueda de tags

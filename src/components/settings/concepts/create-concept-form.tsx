@@ -1,5 +1,10 @@
 'use client';
 
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { HexColorPicker } from 'react-colorful';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { createConcept, updateConcept } from '@/app/actions/concepts/concept.actions';
 import { Button } from '@/components/ui/button';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
@@ -13,11 +18,6 @@ import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
 import type { ConceptBase, ConceptExtended } from '@/types/entities/concept';
 import { ConceptCategory } from '@/types/entities/concept/enums';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
-import { HexColorPicker } from 'react-colorful';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 // Esquema de validación con Zod
 const conceptSchema = z.object({
@@ -50,7 +50,7 @@ export function CreateConceptForm({
 	onCancel,
 	onPreview,
 }: CreateConceptFormProps) {
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [_isSubmitting, setIsSubmitting] = useState(false);
 
 	// Configurar react-hook-form
 	const form = useForm<ConceptForm>({

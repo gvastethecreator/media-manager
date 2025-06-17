@@ -3,12 +3,12 @@
  * @module transformers/queue-job
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '@/types/entities/queue-job';
-import { deserializeJsonField, serializeJsonField } from '@/utils/transformers/common';
 import type { QueueJob } from '@prisma/client';
 import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '@/types/entities/queue-job';
+import { deserializeJsonField, serializeJsonField } from '@/utils/transformers/common';
 
 const logger = serverLogger.withContext('QueueJobTransformer');
 

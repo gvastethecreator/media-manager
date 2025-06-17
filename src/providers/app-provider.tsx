@@ -1,11 +1,11 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { FileProvider, SettingsProvider } from '@/lib/contexts';
 import { CacheProvider } from '@/providers/cache-provider';
 import { QueryProvider } from '@/providers/query-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
-import type { ReactNode } from 'react';
 
 export function AppProvider({ children }: { children: ReactNode }) {
 	return (

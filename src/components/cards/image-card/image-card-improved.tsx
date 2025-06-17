@@ -1,9 +1,5 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { formatDate } from '@/lib/format';
-import { cn } from '@/lib/utils';
 import {
 	CalendarIcon,
 	CameraIcon,
@@ -18,7 +14,11 @@ import { motion } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { type ImageCardData, getImageCardData } from './image-server-actions';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { formatDate } from '@/lib/format';
+import { cn } from '@/lib/utils';
+import { getImageCardData, type ImageCardData } from './image-server-actions';
 
 interface ImageCardProps {
 	imageId: string;

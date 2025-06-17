@@ -1,10 +1,10 @@
 'use server';
 
+import { revalidatePath, unstable_cache } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { MOCK_STATS, USE_MOCK_STATS } from '@/lib/mock/stats.mock';
 import { prisma } from '@/lib/prisma';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
-import { revalidatePath, unstable_cache } from 'next/cache';
 
 // Constantes para caché
 const STATS_CACHE_TAG = 'stats';
@@ -210,7 +210,7 @@ export interface ExtendedStats {
 }
 
 // Extender getSystemStats para incluir nuevas entidades
-export async function getSystemStatsExtended(): Promise<GeneralStats & ExtendedStats | null> {
+export async function getSystemStatsExtended(): Promise<(GeneralStats & ExtendedStats) | null> {
 	const base = await getSystemStats();
 	if (!base) return null;
 	// TODO: Reemplazar por queries reales a Prisma/Drizzle

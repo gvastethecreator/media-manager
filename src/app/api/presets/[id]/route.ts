@@ -12,7 +12,7 @@ const paramsSchema = z.object({
  *
  * Retorna un preset visual por ID
  */
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, { params }: { params: { id: string } }) {
 	try {
 		// Validar el ID usando Zod - el params ya es un objeto, no una promesa
 		const { id } = params;

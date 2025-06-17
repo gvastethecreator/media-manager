@@ -1,15 +1,14 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import React, { useCallback, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+// Importar tipos correctos de entities
+import type { CollectionWithRelations } from '@/types/entities/collection/types';
 import { CollectionCardContent } from './collection-card-content';
 import { CollectionCardFooter } from './collection-card-footer';
 import { CollectionCardHeader } from './collection-card-header';
 import { CollectionCardImages } from './collection-card-images';
-
-// Importar tipos correctos de entities
-import type { CollectionWithRelations } from '@/types/entities/collection/types';
 
 export interface CollectionCardProps {
 	collection: CollectionWithRelations;
@@ -77,7 +76,7 @@ export function CollectionCard({
 
 			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			// Si hay algún error, volver al valor por defecto
 			return '#059669';
 		}
@@ -95,11 +94,11 @@ export function CollectionCard({
 	);
 
 	// Parsear los filtros si están almacenados como JSON string
-	const filters = useMemo(() => {
+	const _filters = useMemo(() => {
 		if (typeof collection.filters === 'string' && collection.filters !== 'empty_array') {
 			try {
 				return JSON.parse(collection.filters);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}
@@ -111,7 +110,7 @@ export function CollectionCard({
 		if (typeof collection.editions === 'string' && collection.editions !== 'empty_array') {
 			try {
 				return JSON.parse(collection.editions);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}

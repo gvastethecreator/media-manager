@@ -1,5 +1,9 @@
 'use client';
 
+import { LightbulbIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import type { ConceptWithStats } from '@/app/actions/concepts/concept.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
 import { MemoizedConceptCard } from '@/components/cards/concept-card';
@@ -10,10 +14,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useConceptStore } from '@/store/entities/concept';
-import { LightbulbIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('ConceptsView');
@@ -59,7 +59,7 @@ export function ConceptsView(_props: ViewProps) {
 		[setCurrentView, selectConcept]
 	);
 
-	const handleEditConcept = useCallback(
+	const _handleEditConcept = useCallback(
 		(concept: ConceptWithStats) => {
 			viewLogger.info('⚙️ Editando concepto:', concept.name);
 			router.push(`/settings/concepts?id=${concept.id}`);
@@ -67,7 +67,7 @@ export function ConceptsView(_props: ViewProps) {
 		[router]
 	);
 
-	const handleDeleteConcept = useCallback((id: string) => {
+	const _handleDeleteConcept = useCallback((id: string) => {
 		viewLogger.info('🗑️ Eliminando concepto:', id);
 		// Implementar lógica de eliminación
 	}, []);

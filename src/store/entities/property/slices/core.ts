@@ -3,12 +3,12 @@
  * @module store/entities/property/slices/core
  */
 
+import type { StateCreator } from 'zustand';
 import { getProperties, getProperty } from '@/app/actions/properties/property.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendProperties, extendProperty } from '@/transformers/property/serializers';
 import type { CreatePropertyData, Property, PropertyBase, UpdatePropertyData } from '@/types/entities/property';
-import type { StateCreator } from 'zustand';
 import type { PropertyState } from '../types';
 
 const propertyLogger = clientLogger.withContext('PropertyStore');

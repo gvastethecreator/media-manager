@@ -1,9 +1,9 @@
 'use client';
 
+import { Search, X } from 'lucide-react';
+import { memo, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Search, X } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
 
 interface SubmenuSearchProps {
 	searchTerm: string;
@@ -38,12 +38,7 @@ export const SubmenuSearch = memo<SubmenuSearchProps>(function SubmenuSearch({
 		<div className={cn('relative', className)}>
 			<Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
-			<Input
-				value={searchTerm}
-				onChange={handleChange}
-				placeholder={placeholder}
-				className="h-8 pl-8 pr-8 text-sm"
-			/>
+			<Input value={searchTerm} onChange={handleChange} placeholder={placeholder} className="h-8 pl-8 pr-8 text-sm" />
 
 			{searchTerm && (
 				<button

@@ -9,7 +9,6 @@ import type {
 	NoteBase,
 	NoteComplete,
 	NoteCreateInput,
-	NoteTags,
 	NoteTransformerOptions,
 	NoteUpdateInput,
 } from '@/types/entities/note/types';

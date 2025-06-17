@@ -3,9 +3,9 @@
  * @module app/api/system/settings
  */
 
-import { getSystemSettings, updateSystemSettings } from '@/app/actions/system';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { getSystemSettings, updateSystemSettings } from '@/app/actions/system';
 
 /**
  * Manejador para GET - Obtiene la configuración global del sistema

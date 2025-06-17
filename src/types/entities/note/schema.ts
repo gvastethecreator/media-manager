@@ -3,8 +3,8 @@
  * @module types/entities/note/schema
  */
 
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { NoteSortCriteria } from './types';
 
 /**

@@ -16,7 +16,9 @@ export function MarkdownEditor({ initialValue, onSave }: { initialValue: string;
 		<Card className="p-4 w-full max-w-2xl mx-auto mt-6">
 			<SimpleMDE value={value} onChange={setValue} options={{ spellChecker: false, status: false }} />
 			<div className="flex justify-end mt-2">
-				<Button onClick={() => onSave?.(value)} variant="default" size="sm">Guardar</Button>
+				<Button onClick={() => onSave?.(value)} variant="default" size="sm">
+					Guardar
+				</Button>
 			</div>
 		</Card>
 	);

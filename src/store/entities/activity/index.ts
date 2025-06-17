@@ -4,10 +4,10 @@
  * @description Implementación del store de Zustand para la gestión de actividades del sistema
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
-import { ActivitySortCriteria } from '@/types/entities/activity';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { ActivitySortCriteria } from '@/types/entities/activity';
 import { type ActivityCoreSlice, createActivityCoreSlice } from './slices/core';
 import { type ActivityFiltersSlice, createActivityFiltersSlice } from './slices/filters';
 import { type ActivityUISlice, createActivityUISlice } from './slices/ui';
@@ -20,7 +20,7 @@ const storeLogger = clientLogger.withContext('ActivityStore');
 export type ActivityStore = ActivityCoreSlice & ActivityUISlice & ActivityFiltersSlice;
 
 // Estado inicial para cada parte del store
-const initialState: ActivityState = {
+const _initialState: ActivityState = {
 	// Estado core: Datos principales de actividades
 	core: {
 		activities: {},
@@ -93,13 +93,12 @@ export const useActivityStore = create<ActivityStore>()(
 	)
 );
 
-// Exportar todo desde types para facilitar el uso
-export * from './types';
+// Exportar selectores útiles
+export * from './selectors';
 
 // Exportar slices para poder extenderlos si es necesario
 export { createActivityCoreSlice } from './slices/core';
 export { createActivityFiltersSlice } from './slices/filters';
 export { createActivityUISlice } from './slices/ui';
-
-// Exportar selectores útiles
-export * from './selectors';
+// Exportar todo desde types para facilitar el uso
+export * from './types';

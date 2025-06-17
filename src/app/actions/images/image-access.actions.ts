@@ -7,7 +7,7 @@ import { ThumbnailQuality } from '@/types/thumbnails';
 import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 
 const SERVER_ACTION_NAME = 'ImageAccess';
-const imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
+const _imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
 
 // Caché de URLs para evitar llamadas redundantes
 const urlCache = new Map<string, string>();

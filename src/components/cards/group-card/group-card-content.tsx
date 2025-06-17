@@ -1,8 +1,8 @@
 'use client';
 
+import { FilterIcon, FunctionSquareIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { FilterIcon, FunctionSquareIcon } from 'lucide-react';
 
 interface GroupCardContentProps {
 	description?: string;
@@ -64,7 +64,7 @@ export function GroupCardContent({
 	const totalEntities = Object.values(entityCounts).reduce((sum, count) => sum + (count || 0), 0);
 
 	// Calcular colores para elementos de UI basados en el color primario
-	const tagColor = `${primaryColor}70`;
+	const _tagColor = `${primaryColor}70`;
 	const borderColor = `${primaryColor}30`;
 
 	return (

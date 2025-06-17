@@ -76,10 +76,9 @@ export const useAlbumStore = create<AlbumStore>()(
 	)
 );
 
-// Exportar todo desde types
-export * from './types';
-
 // Exportar slices para poder extenderlos
 export { createAlbumCoreSlice } from './slices/core';
 export { createAlbumFiltersSlice } from './slices/filters';
 export { createAlbumUISlice } from './slices/ui';
+// Exportar todo desde types
+export * from './types';

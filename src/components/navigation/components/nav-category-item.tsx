@@ -1,13 +1,13 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
-import type { ViewType } from '@/types/file-item';
 import { ChevronRight, Grid, List, type LucideIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { memo, useCallback, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import type { ViewType } from '@/types/file-item';
 
 // Componente memoizado para el indicador de colapso
 const CollapseIndicator = memo(function CollapseIndicator({
@@ -180,7 +180,7 @@ export const NavCategoryItem = memo(function NavCategoryItem({
 		[showLabel, isCurrent]
 	);
 
-	const handleViewModeToggle = useCallback(
+	const _handleViewModeToggle = useCallback(
 		(e: React.MouseEvent) => {
 			e.stopPropagation();
 			onToggleViewMode?.();

@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
 import { Dices, Gem, Globe, Star } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CollectionCardHeaderProps {
 	name: string;

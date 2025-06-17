@@ -7,7 +7,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
+import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service';
 import type { Tag } from '@/types/entities/tag';
 import type { TagBase } from '@/types/entities/tag/types';
 import type { FileItem } from '@/types/file-item';
@@ -67,7 +67,7 @@ const createTagError = (message: string, code: TagErrorCode = TagErrorCode.OPERA
 };
 
 // Funciones auxiliares
-function formatBytes(bytes: number): string {
+function _formatBytes(bytes: number): string {
 	if (bytes === 0) {
 		return '0 B';
 	}

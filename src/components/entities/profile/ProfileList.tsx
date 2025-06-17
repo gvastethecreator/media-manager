@@ -3,10 +3,10 @@
  * @module components/entities/profile/ProfileList
  */
 
-import { useProfileStore } from '@/store/entities/profile';
-import type { ProfileExtended } from '@/types/entities/profile';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useCallback } from 'react';
+import { useProfileStore } from '@/store/entities/profile';
+import type { ProfileExtended } from '@/types/entities/profile';
 import { ProfileCard } from './ProfileCard';
 
 export interface ProfileListProps {

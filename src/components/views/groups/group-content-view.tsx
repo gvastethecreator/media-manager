@@ -1,5 +1,8 @@
 'use client';
 
+import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { getGroup } from '@/app/actions/groups/group.actions';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -7,9 +10,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
-import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
-import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const logger = clientLogger.withContext('GroupContentView');

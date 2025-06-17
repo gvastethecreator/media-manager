@@ -1,5 +1,7 @@
 'use client';
 
+import { Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import {
 	type CardOptions,
 	getCharacterVisualConfig,
@@ -9,8 +11,6 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 interface OptionsSectionProps {
 	title: string;

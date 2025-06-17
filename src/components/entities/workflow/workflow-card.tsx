@@ -1,6 +1,7 @@
 // Card para Workflow
-import { Card } from '@/components/ui/card';
+
 import { Lightbulb } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 export function WorkflowCard({ name }: { name: string }) {
 	return (

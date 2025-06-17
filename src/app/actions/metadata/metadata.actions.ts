@@ -1,10 +1,10 @@
 'use server';
 
+import type { Image } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import type { Image } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
 import { createMetadataError as createMetadataErrorAction } from './index';
 import type { ImageMetadata, ImageWithMetadata, UpdateMetadataInput } from './metadata-types.actions';
 
@@ -20,7 +20,7 @@ enum MetadataErrorCode {
 }
 
 // Función creadora de errores
-const createMetadataError = (
+const _createMetadataError = (
 	message: string,
 	code: MetadataErrorCode = MetadataErrorCode.OPERATION_FAILED,
 	cause?: unknown

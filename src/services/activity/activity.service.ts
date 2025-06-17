@@ -4,9 +4,9 @@
  * @description Implementación del servicio para gestionar actividades del sistema
  */
 
+import { PrismaClient } from '@prisma/client';
 import { mapActivityFiltersToPrisma, mapCreateActivityDataToPrisma } from '@/transformers/activity';
 import type { Activity, ActivityFilters, ActivityListResponse, CreateActivityData } from '@/types/entities/activity';
-import { PrismaClient } from '@prisma/client';
 
 /**
  * Interfaz para el servicio de Activity

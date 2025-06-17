@@ -1,9 +1,9 @@
 'use client';
 
-import { useNavigationStore } from '@/components/navigation/navigation.store';
-import { SettingsView } from '@/components/settings/settings-view';
 import { AnimatePresence, motion } from 'motion/react';
 import { memo, useEffect, useRef, useState } from 'react';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
+import { SettingsView } from '@/components/settings/settings-view';
 import { EntityPreloader } from '../features/file-browser/entity-preloader';
 import { FolderContentView } from '../folders/views/folder-content-view';
 import { FoldersView } from '../folders/views/folders-view';
@@ -43,7 +43,7 @@ import { WorkflowsView } from './workflows/workflows-view';
 import { WorldItemContentView } from './world-items/world-item-content-view';
 import { WorldItemsView } from './world-items/world-items-view';
 
-const variants = {
+const _variants = {
 	enter: (direction: number) => ({
 		x: direction > 0 ? 800 : -800,
 		opacity: 0,

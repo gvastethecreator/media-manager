@@ -1,10 +1,10 @@
 'use server';
 
 import { existsSync } from 'fs';
+import sharp from 'sharp';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { createEntityNotFoundError, createFileNotFoundError, toServiceError } from '@/utils/errors/service-errors';
-import sharp from 'sharp';
 import type { ImageProcessingOptions } from './image-types.actions';
 
 const SERVER_ACTION_NAME = 'ImageProcessing';

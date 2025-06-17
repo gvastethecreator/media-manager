@@ -1,13 +1,13 @@
 'use client';
 
+import { ImageIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { getImages } from '@/app/actions/images/image-crud.actions';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { useFiles } from '@/lib/contexts';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { ImageIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 const viewLogger = clientLogger.withContext('AllImagesView');
 
@@ -34,7 +34,7 @@ export function AllImagesView() {
 					// Transformar las imágenes al formato FileItem del contexto
 					const fileItems = result.images.map((image: any) => {
 						// Convertir thumbnail si existe
-						let thumbnailStr: string | undefined = undefined;
+						let thumbnailStr: string | undefined;
 						if (image.thumbnail) {
 							thumbnailStr = `data:image/webp;base64,${Buffer.from(image.thumbnail).toString('base64')}`;
 						}

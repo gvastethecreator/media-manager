@@ -3,8 +3,8 @@
  * @module store/entities/metadata/slices/core
  */
 
-import { MetadataExtended } from '@/types/entities/metadata/extended';
 import { StateCreator } from 'zustand';
+import { MetadataExtended } from '@/types/entities/metadata/extended';
 import { MetadataStore } from '..';
 
 // Estado

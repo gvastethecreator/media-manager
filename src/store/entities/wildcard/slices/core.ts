@@ -3,12 +3,12 @@
  * @module store/entities/wildcard/slices/core
  */
 
+import type { StateCreator } from 'zustand';
 import { getWildcard, getWildcards } from '@/app/actions/wildcards/wildcard.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendWildcard, extendWildcards } from '@/transformers/wildcard/serializers';
 import type { CreateWildcardData, UpdateWildcardData, Wildcard, WildcardBase } from '@/types/entities/wildcard';
-import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
 
 const wildcardLogger = clientLogger.withContext('WildcardStore');

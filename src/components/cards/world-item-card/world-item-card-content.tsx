@@ -1,5 +1,8 @@
 'use client';
 
+import { nanoid } from 'nanoid';
+import { useTheme } from 'next-themes';
+import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type {
 	WorldItemEffect,
@@ -7,9 +10,6 @@ import type {
 	WorldItemRequirement,
 	WorldItemStats,
 } from '@/types/entities/world-item/stats-types';
-import { nanoid } from 'nanoid';
-import { useTheme } from 'next-themes';
-import React, { useMemo } from 'react';
 
 interface WorldItemCardContentProps {
 	description?: string | null;
@@ -49,7 +49,7 @@ export function WorldItemCardContent({
 		if (typeof properties === 'string' && properties) {
 			try {
 				return JSON.parse(properties);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}
@@ -61,7 +61,7 @@ export function WorldItemCardContent({
 		if (typeof requirements === 'string' && requirements) {
 			try {
 				return JSON.parse(requirements);
-			} catch (e) {
+			} catch (_e) {
 				return {};
 			}
 		}
@@ -73,7 +73,7 @@ export function WorldItemCardContent({
 		if (typeof attributes === 'string' && attributes) {
 			try {
 				return JSON.parse(attributes);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}
@@ -85,7 +85,7 @@ export function WorldItemCardContent({
 		if (typeof effects === 'string' && effects) {
 			try {
 				return JSON.parse(effects);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}
@@ -97,7 +97,7 @@ export function WorldItemCardContent({
 		if (typeof stats === 'string' && stats) {
 			try {
 				return JSON.parse(stats);
-			} catch (e) {
+			} catch (_e) {
 				return {};
 			}
 		}
@@ -119,7 +119,7 @@ export function WorldItemCardContent({
 			{/* Atributos */}
 			{parsedAttributes && parsedAttributes.length > 0 && (
 				<div className="flex flex-wrap gap-1">
-					{parsedAttributes.map((attr: string, index: number) => (
+					{parsedAttributes.map((attr: string, _index: number) => (
 						<span
 							key={`attr-${renderKey}-${attr}`}
 							className="rounded-sm px-1.5 py-0.5 text-[10px] font-medium"

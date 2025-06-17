@@ -3,6 +3,8 @@
  * @module transformers/metadata
  */
 
+import type { MetadataBase } from '@/types/entities/metadata/base';
+import type { MetadataExtended } from '@/types/entities/metadata/extended';
 import {
 	extendMetadata,
 	formatBytes,
@@ -11,9 +13,6 @@ import {
 	toMetadataCard,
 	toMetadataListItem,
 } from './mappers';
-
-import type { MetadataBase } from '@/types/entities/metadata/base';
-import type { MetadataExtended } from '@/types/entities/metadata/extended';
 
 /**
  * Transforma un objeto Metadata a su versión extendida con propiedades calculadas

@@ -40,7 +40,7 @@ module.exports = (path, options) => {
 			return require.resolve(path, {
 				paths: [options.basedir, process.cwd(), ...(options.moduleDirectory || [])],
 			});
-		} catch (finalError) {
+		} catch (_finalError) {
 			// 🚨 Lanzar el error original si no se puede resolver
 			throw error;
 		}

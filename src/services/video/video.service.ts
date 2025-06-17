@@ -4,6 +4,7 @@
  * @description Implementación del servicio de gestión de videos
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { transformVideo, transformVideos } from '@/transformers/video';
@@ -17,7 +18,6 @@ import type {
 	VideoStats,
 } from '@/types/entities/video/types';
 import { getPaginationInfo } from '@/utils/pagination';
-import type { Prisma } from '@prisma/client';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('VideoService');

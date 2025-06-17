@@ -1,8 +1,8 @@
 'use client';
 
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ALL_ENTITIES, PRIORITY_ENTITIES } from '@/constants/entities';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useEffect, useMemo, useRef, useState } from 'react';
 import { useEntityLoader } from './context-menu/hooks/use-entity-loader';
 
 // Logger específico para el componente

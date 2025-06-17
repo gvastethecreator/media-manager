@@ -1,5 +1,5 @@
-import { getCollectionImages } from '@/app/actions/collections';
 import { type NextRequest, NextResponse } from 'next/server';
+import { getCollectionImages } from '@/app/actions/collections';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

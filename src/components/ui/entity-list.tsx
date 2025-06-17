@@ -20,14 +20,14 @@
  * ```
  */
 
+import { ChevronLeft, ChevronRight, LayoutGrid, List as ListIcon, Rows, Search, SlidersHorizontal } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { EntityCard, EntityCardProps } from '@/components/ui/entity-card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, LayoutGrid, List as ListIcon, Rows, Search, SlidersHorizontal } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useMemo, useState } from 'react';
 import { Badge } from './badge';
 
 export type EntityItem = Omit<EntityCardProps, 'onClick' | 'href'> & {

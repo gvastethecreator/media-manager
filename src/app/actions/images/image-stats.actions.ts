@@ -1,8 +1,8 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
 
 const imageLogger = serverLogger.withContext('ImageStats');
 

@@ -1,5 +1,5 @@
+import { screen } from '@testing-library/react';
 import { renderWithProviders } from '@/tests/helpers/test-utils';
-import { render, screen, waitFor } from '@testing-library/react';
 import { CharactersView } from './characters-view';
 
 beforeAll(() => {

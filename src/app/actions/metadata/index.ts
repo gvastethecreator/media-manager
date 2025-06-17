@@ -8,12 +8,12 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { FileMetadata } from '@/types/metadata.types';
+import * as MetadataActions from './metadata.actions';
 import * as MetadataErrorsActions from './metadata-errors.actions';
 import * as MetadataExtractorsActions from './metadata-extractors.actions';
 import * as MetadataParsersActions from './metadata-parsers.actions';
 import { parseMetadataString as parseMetadataStringInternal } from './metadata-parsers.actions';
 import * as MetadataUtilsActions from './metadata-utils.actions';
-import * as MetadataActions from './metadata.actions';
 
 // Logger para funciones de este archivo
 const metadataLogger = serverLogger.withContext('MetadataIndexActions');

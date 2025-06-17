@@ -1,5 +1,8 @@
 'use client';
 
+import { Box } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import { getWorldItemVisualConfig } from '@/app/actions/visual-config.actions';
 import type { WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
@@ -11,9 +14,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useWorldItemStore } from '@/store/entities/world-item';
-import { Box } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('WorldItemsView');
@@ -30,7 +30,7 @@ export function WorldItemsView(_props: ViewProps) {
 	const [worldItems, setWorldItems] = useState<WorldItemWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_WORLD_ITEM_OPTIONS);
+	const [_visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_WORLD_ITEM_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticWorldItems, _addEvent] = clientEvents.useEvents<WorldItemWithStats[]>(worldItems);
@@ -80,12 +80,12 @@ export function WorldItemsView(_props: ViewProps) {
 		[setCurrentView, selectWorldItem]
 	);
 
-	const handleEditWorldItem = useCallback((worldItem: WorldItemWithStats) => {
+	const _handleEditWorldItem = useCallback((worldItem: WorldItemWithStats) => {
 		viewLogger.info('✏️ Editando objeto del mundo:', worldItem.name);
 		// Implementar lógica de edición
 	}, []);
 
-	const handleDeleteWorldItem = useCallback((id: string) => {
+	const _handleDeleteWorldItem = useCallback((id: string) => {
 		viewLogger.info('🗑️ Eliminando objeto del mundo:', id);
 		// Implementar lógica de eliminación
 	}, []);

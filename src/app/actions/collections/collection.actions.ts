@@ -1,9 +1,10 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
-import { type ServerImage, convertServerImageToFileItem } from '@/services/image-converter.service';
+import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 // Importaciones actualizadas usando nuevos tipos y transformers
 import {
@@ -19,7 +20,6 @@ import type {
 	UpdateCollectionData,
 } from '@/types/entities/collection';
 import type { FileItem } from '@/types/file-item';
-import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
 const collectionLogger = serverLogger.withContext('CollectionActions');

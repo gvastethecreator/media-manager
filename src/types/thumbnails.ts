@@ -3,8 +3,8 @@
  * @module types/thumbnails
  */
 
-import type { JSONString } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { JSONString } from '@/utils/types/utility-types';
 
 /**
  * Calidad de thumbnail

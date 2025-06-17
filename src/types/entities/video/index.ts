@@ -5,29 +5,22 @@
 
 // Exportar enums y constantes
 export * from './enums';
-
-// Exportar tipos base
-export * from './types';
-
 // Reexportar enums explícitamente para evitar problemas de importación
 export { VideoFormat, VideoPrivacyLevel, VideoQuality, VideoType } from './enums';
-
 // Tipos base para estructuras de datos
-export type {
-	VideoBase,
-	VideoChapter,
-	VideoMetadata,
-	VideoPlaybackState,
-	VideoVisualConfig,
-} from './types';
-
 // Tipos extendidos para UI y visualización
+// 🎯 Alias principal para el tipo Video
 export type {
 	RelatedVideo,
+	VideoBase,
+	VideoChapter,
 	VideoComplete,
+	VideoComplete as Video,
 	VideoCounts,
 	VideoCreateInput,
 	VideoFilters,
+	VideoMetadata,
+	VideoPlaybackState,
 	VideoRelations,
 	VideoSearchOptions,
 	VideoSearchResult,
@@ -35,8 +28,8 @@ export type {
 	VideoUI,
 	VideoUpdateInput,
 	VideoValidated,
+	VideoVisualConfig,
 	VideoVisualConfigComplete,
 } from './types';
-
-// 🎯 Alias principal para el tipo Video
-export type { VideoComplete as Video } from './types';
+// Exportar tipos base
+export * from './types';

@@ -4,8 +4,6 @@
  */
 
 // Importar y reexportar el store principal y los slices si es necesario desde store.ts
-export { useFolderStore } from './store';
-
 // Exportar los selectores directamente para que puedan ser importados
 export {
 	selectActiveOnly,
@@ -32,6 +30,7 @@ export {
 	selectSortBy,
 	selectSortDirection,
 	selectViewMode,
+	useFolderStore,
 } from './store';
 
 // Mantener los hooks selectores existentes, que usan useFolderStore internamente

@@ -1,8 +1,8 @@
+import type { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: 'Prueba de API Logger',
@@ -46,8 +46,8 @@ export default function ApiLoggerTestPage() {
 
 									fetch(url)
 										.then((response) => response.json())
-										.then((data) => {})
-										.catch((error) => {});
+										.then((_data) => {})
+										.catch((_error) => {});
 								}}
 							>
 								Enviar GET
@@ -108,8 +108,8 @@ export default function ApiLoggerTestPage() {
 									body: JSON.stringify(jsonData),
 								})
 									.then((response) => response.json())
-									.then((data) => {})
-									.catch((error) => {});
+									.then((_data) => {})
+									.catch((_error) => {});
 							}}
 						>
 							Enviar POST

@@ -5,13 +5,13 @@
  * @module app/actions/tags/crud.actions
  */
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { mapCreateTagDataToPrisma, mapUpdateTagDataToPrisma } from '@/transformers/tag';
 import type { TagCreate as CreateTagData, Tag, TagUpdate as UpdateTagData } from '@/types/entities/tag';
-import { revalidatePath } from 'next/cache';
 
 // Configuración y logging
 const tagLogger = serverLogger.withContext('TagCrudActions');

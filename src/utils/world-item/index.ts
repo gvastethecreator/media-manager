@@ -4,8 +4,6 @@
  */
 
 export * from './helpers';
-export * from './validators';
-
 // Reexportar funciones específicas para facilitar el acceso
 export {
 	// Helpers
@@ -15,6 +13,7 @@ export {
 	findPropertyValue,
 	meetsRequirements,
 } from './helpers';
+export * from './validators';
 
 export {
 	// Validators

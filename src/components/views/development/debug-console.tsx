@@ -1,12 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LogViewer, useLogViewer } from '@/components/ui/log-viewer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useConsoleCapture } from '@/lib/hooks/use-console-capture';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useEffect, useState } from 'react';
 
 // Crear un logger específico para este componente
 const debugLogger = clientLogger.withContext('DebugConsole');

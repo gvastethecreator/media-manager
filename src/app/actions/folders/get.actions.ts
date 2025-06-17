@@ -128,12 +128,7 @@ export async function getFolderById(id: string) {
  * 🚀 OPTIMIZACIÓN: Obtiene carpetas con filtros y paginación
  */
 export async function getFoldersWithFilter(
-	filters: {
-		parentId?: string | null;
-		status?: string;
-		limit?: number;
-		offset?: number;
-	} = {}
+	filters: { parentId?: string | null; status?: string; limit?: number; offset?: number } = {}
 ) {
 	try {
 		folderLogger.info('📂 Obteniendo carpetas con filtros:', filters);

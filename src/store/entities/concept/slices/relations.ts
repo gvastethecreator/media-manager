@@ -1,6 +1,6 @@
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { EntityType } from '@/types/entities/entities';
-import type { StateCreator } from 'zustand';
 import type { ConceptStore } from '../types';
 
 const relationsLogger = clientLogger.withContext('ConceptStore:Relations');
@@ -13,11 +13,11 @@ export interface RelationsSlice {
 
 // Acciones mock para desarrollo (se reemplazarán con server actions)
 const mockRelationsApi = {
-	addConceptToEntity: async (conceptId: string, entityId: string, entityType: EntityType): Promise<void> => {
+	addConceptToEntity: async (_conceptId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 
-	removeConceptFromEntity: async (conceptId: string, entityId: string, entityType: EntityType): Promise<void> => {
+	removeConceptFromEntity: async (_conceptId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 };

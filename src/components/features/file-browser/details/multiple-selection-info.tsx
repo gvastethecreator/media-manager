@@ -1,9 +1,5 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import type { ImageItem } from '@/types/image-item';
 import {
 	BookImage,
 	Calendar,
@@ -19,9 +15,13 @@ import {
 	Tag,
 	Trash2,
 	User2,
-	Video
+	Video,
 } from 'lucide-react';
 import { memo, useMemo } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import type { ImageItem } from '@/types/image-item';
 import { BulkMetadataEditor } from './bulk-metadata-editor';
 
 export interface MultipleSelectionInfoProps {
@@ -119,7 +119,7 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 			places: Array.from(places.entries()),
 			worldItems: Array.from(worldItems.entries()),
 			oldestDate,
-			newestDate
+			newestDate,
 		};
 	}, [items]);
 
@@ -153,7 +153,9 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 					{stats.types.map(([type, count]) => (
 						<Badge key={type} variant="outline" className="flex items-center gap-1">
 							{getTypeIcon(type)}
-							<span>{count} {type}</span>
+							<span>
+								{count} {type}
+							</span>
 						</Badge>
 					))}
 					<Badge variant="outline" className="flex items-center gap-1">
@@ -232,7 +234,9 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 							<div className="flex items-center gap-1.5">
 								<Calendar className="h-3.5 w-3.5 text-muted-foreground" />
 								<span className="text-muted-foreground">Creados entre:</span>
-								<span>{stats.oldestDate.toLocaleDateString()} - {stats.newestDate.toLocaleDateString()}</span>
+								<span>
+									{stats.oldestDate.toLocaleDateString()} - {stats.newestDate.toLocaleDateString()}
+								</span>
 							</div>
 						</div>
 					</div>

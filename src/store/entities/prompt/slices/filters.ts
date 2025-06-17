@@ -1,7 +1,7 @@
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { PromptSortOption } from '@/types/entities/prompt/enums';
 import type { PromptFilters } from '@/types/entities/prompt/extended';
-import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
 const filtersLogger = clientLogger.withContext('PromptStore:Filters');

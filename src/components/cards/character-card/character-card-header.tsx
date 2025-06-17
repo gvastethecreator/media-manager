@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { Heart, Shield, Sparkles, Sword, Wand } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CharacterCardHeaderProps {
 	/** Nombre del personaje */

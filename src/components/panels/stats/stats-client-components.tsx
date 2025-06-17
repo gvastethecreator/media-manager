@@ -1,10 +1,10 @@
 'use client';
 
+import { AlertCircle, BarChart, Clock, Tag } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import type { GeneralStats } from '@/app/actions/stats/stats.actions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { AlertCircle, BarChart, Clock, Tag } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { Activity } from './components/activity';
 import { StatCard } from './components/stat-card';
 import { TagUsage } from './components/tag-usage';

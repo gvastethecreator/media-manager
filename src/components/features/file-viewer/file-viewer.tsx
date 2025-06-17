@@ -58,7 +58,6 @@ const THUMBNAIL_SIZES = {
 
 const THUMBNAIL_ANIMATION = {
 	duration: 0.2,
-	ease: 'easeOut',
 };
 
 // Función auxiliar memoizada
@@ -248,11 +247,7 @@ const ThumbnailNavigation = memo(function ThumbnailNavigation({
 });
 
 // Componente principal del visor de archivos - memoizado
-export const FileViewer = memo(function FileViewer({
-	triggerRef,
-}: {
-	triggerRef?: React.RefObject<HTMLElement>;
-}) {
+export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?: React.RefObject<HTMLElement> }) {
 	// Usar el store en lugar de props
 	const {
 		isOpen,
@@ -261,7 +256,7 @@ export const FileViewer = memo(function FileViewer({
 		closeViewer: onClose,
 		setCurrentIndex,
 		nextItem,
-		previousItem
+		previousItem,
 	} = useFileViewerStore();
 
 	const [urls, setUrls] = useState<Record<string, string>>({});
@@ -270,9 +265,9 @@ export const FileViewer = memo(function FileViewer({
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
 	const [scale, setScale] = useState(1);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
-	const [isDragging, setIsDragging] = useState(false);
-	const dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
-	const [announceMessage, setAnnounceMessage] = useState('');
+	const [_isDragging, _setIsDragging] = useState(false);
+	const _dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
+	const [_announceMessage, setAnnounceMessage] = useState('');
 	const previouslyFocusedElement = useRef<HTMLElement | null>(null);
 
 	// Memoizar la imagen actual
@@ -300,6 +295,12 @@ export const FileViewer = memo(function FileViewer({
 		}
 	}, [isOpen, triggerRef]);
 
+	// Resetear posición y escala
+	const resetView = useCallback(() => {
+		setScale(1);
+		setPosition({ x: 0, y: 0 });
+	}, []);
+
 	// Reset state when opening viewer
 	useEffect(() => {
 		if (isOpen) {
@@ -307,7 +308,7 @@ export const FileViewer = memo(function FileViewer({
 			resetView();
 			setIsLoading(true);
 		}
-	}, [isOpen, setCurrentIndex]);
+	}, [isOpen, setCurrentIndex, resetView]);
 
 	// Validate images and index
 	useEffect(() => {
@@ -379,12 +380,6 @@ export const FileViewer = memo(function FileViewer({
 
 		loadInitialUrls();
 	}, [isOpen, images, urls, loadImageUrl, indicesToLoad]);
-
-	// Resetear posición y escala
-	const resetView = useCallback(() => {
-		setScale(1);
-		setPosition({ x: 0, y: 0 });
-	}, []);
 
 	// Manejar zoom con la rueda
 	const handleWheel = useCallback(
@@ -535,10 +530,18 @@ export const FileViewer = memo(function FileViewer({
 	}
 
 	// Función para seleccionar una imagen específica
-	const handleSelectImage = useCallback((index: number) => {
-		setCurrentIndex(index);
-		resetView();
-	}, [setCurrentIndex, resetView]);
+	const handleSelectImage = useCallback(
+		(index: number) => {
+			setCurrentIndex(index);
+			resetView();
+		},
+		[setCurrentIndex, resetView]
+	);
+
+	// Función vacía para drag (placeholder)
+	const handleDragStart = () => {
+		// TODO: Implementar drag si es necesario
+	};
 
 	return (
 		<dialog
@@ -564,23 +567,13 @@ export const FileViewer = memo(function FileViewer({
 					if (e.key === 'Escape') {
 						onClose();
 					} else if (e.key === 'ArrowLeft') {
-						setCurrentIndex((prev) => {
-							const newIndex = prev > 0 ? prev - 1 : images.length - 1;
-							// Announce for screen readers
-							if (images[newIndex]) {
-								setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
-							}
-							return newIndex;
-						});
+						const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
+						setCurrentIndex(newIndex);
+						setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
 					} else if (e.key === 'ArrowRight') {
-						setCurrentIndex((prev) => {
-							const newIndex = prev < images.length - 1 ? prev + 1 : 0;
-							// Announce for screen readers
-							if (images[newIndex]) {
-								setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
-							}
-							return newIndex;
-						});
+						const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
+						setCurrentIndex(newIndex);
+						setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
 					} else if (e.key === '0' || e.key === 'r') {
 						resetView();
 						setAnnounceMessage('Vista restablecida');

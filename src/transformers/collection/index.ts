@@ -23,12 +23,12 @@ import { fromPrismaCollection, parseCollectionFilters, toPrismaCollection, valid
 // Importar el transformador principal y sus funciones asociadas
 import {
 	transformCollection as transformCollectionMain,
+	transformCollections as transformCollectionsMain,
 	transformCollectionToExtended,
 	transformCollectionToWithStats,
-	transformCollections as transformCollectionsMain,
 } from './transformer';
 
-const logger = serverLogger.withContext('CollectionTransformer');
+const _logger = serverLogger.withContext('CollectionTransformer');
 
 // Exportar el transformador principal y sus variantes
 export const transformCollection = transformCollectionMain;
@@ -108,7 +108,7 @@ export async function createCollection(data: CollectionCreateInput): Promise<Col
 		await validateCollection(data);
 
 		// Serializar datos para Prisma
-		const prismaData = toPrismaCollection(data);
+		const _prismaData = toPrismaCollection(data);
 
 		// Mapear datos a formato Prisma
 		const createData = mapCreateCollectionDataToPrisma(data);
@@ -149,7 +149,7 @@ export async function updateCollection(id: string, data: CollectionUpdateInput):
 		await validateCollection(data);
 
 		// Serializar datos para Prisma
-		const prismaData = toPrismaCollection(data);
+		const _prismaData = toPrismaCollection(data);
 
 		// Mapear datos a formato Prisma
 		const updateData = mapUpdateCollectionDataToPrisma(data);

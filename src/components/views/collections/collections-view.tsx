@@ -1,5 +1,8 @@
 'use client';
 
+import { BookMarked } from 'lucide-react';
+import { motion } from 'motion/react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { getCollections } from '@/app/actions/collections/collection.actions';
 import { CollectionCard } from '@/components/cards/collection-card';
 import { EmptyState } from '@/components/core/data-display';
@@ -10,9 +13,6 @@ import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
 import type { Collection } from '@/types/entities/collections';
-import { BookMarked } from 'lucide-react';
-import { motion } from 'motion/react';
-import { memo, useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('CollectionsView');
@@ -69,7 +69,10 @@ export function CollectionsView(_props: ViewProps) {
 			// Cargar desde el servidor solo si no están en el store
 			loadCollections();
 		}
-	}, [storeCollections]);
+	}, [
+		storeCollections, // Cargar desde el servidor solo si no están en el store
+		loadCollections,
+	]);
 
 	const loadCollections = useCallback(async () => {
 		try {

@@ -3,10 +3,10 @@
  * @module components/ui/page-heading
  */
 
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface PageHeadingProps {
 	title: string;

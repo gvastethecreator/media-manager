@@ -5,12 +5,12 @@
 
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { deserializeSettings, mergeSettings, serializeSettings } from '@/transformers/settings';
 import type { Settings } from '@/types/settings';
 import { settingsSchema } from '@/types/settings';
-import { revalidatePath } from 'next/cache';
 import { createSettingsError, isSettingsError } from './settings.errors';
 
 // Logger específico para acciones de configuración
@@ -30,7 +30,7 @@ const revalidateAllPaths = async () => {
 };
 
 // Esquema de validación para actualización parcial
-const updateSettingsSchema = settingsSchema.partial();
+const _updateSettingsSchema = settingsSchema.partial();
 
 /**
  * Respuesta estándar para operaciones de configuración
@@ -154,7 +154,7 @@ export async function updateSystemSettings(data: Partial<Settings>): Promise<Set
 		const serializedData = serializeSettings(updatedSettings);
 
 		// Actualizar en la base de datos
-		const result = await prisma.settings.upsert({
+		const _result = await prisma.settings.upsert({
 			where: { id: 'default' },
 			update: {
 				data: serializedData,
@@ -296,7 +296,7 @@ export async function updateProfileSettings(profileId: string, data: Partial<Set
 		const serializedData = serializeSettings(newSettings);
 
 		// Actualizar en la base de datos
-		const result = await prisma.settings.upsert({
+		const _result = await prisma.settings.upsert({
 			where: { id: profileId },
 			update: {
 				data: serializedData,

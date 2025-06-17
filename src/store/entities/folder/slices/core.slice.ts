@@ -3,6 +3,7 @@
  * @module store/entities/folder/slices/core.slice
  */
 
+import { StateCreator } from 'zustand';
 import {
 	createFolder as apiCreateFolder,
 	deleteFolder as apiDeleteFolder,
@@ -17,7 +18,6 @@ import type {
 	FolderSearchOptions,
 	FolderStore,
 } from '@/types/entities/folder/types';
-import { StateCreator } from 'zustand';
 
 const logger = new Logger('FolderCoreSlice');
 

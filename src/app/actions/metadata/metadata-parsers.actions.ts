@@ -1,17 +1,10 @@
 'use server';
 
+import ExifReader from 'exifreader';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FileMetadata } from '@/types/metadata';
-import ExifReader, { type ExpandedTags, type Tags } from 'exifreader';
-import sharp from 'sharp';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
-import type {
-	ExifTags,
-	ExtendedFileMetadata,
-	ImageFormat,
-	MetadataWithCamera,
-	SharpColourspaceEnum,
-} from './metadata-types.actions';
+import type { ExtendedFileMetadata, ImageFormat, MetadataWithCamera } from './metadata-types.actions';
 import { withRetry } from './metadata-utils.actions';
 import { extractAIGenerationInfo } from './parsers';
 
@@ -117,8 +110,8 @@ export async function parseExifData(buffer: Buffer, path: string): Promise<Parti
 				const gpsLongitude = exifData.GPSLongitude?.description || '';
 
 				// La referencia de latitud (N/S) podría estar en GPS.GPSLatitudeRef
-				let gpsLatitudeRef: string | undefined = undefined;
-				let gpsLongitudeRef: string | undefined = undefined;
+				let gpsLatitudeRef: string | undefined;
+				let gpsLongitudeRef: string | undefined;
 
 				// Buscar en GPS.GPSLatitudeRef si existe
 				if ('GPS' in exifData && exifData.GPS) {
@@ -261,7 +254,7 @@ function convertDMSToDecimal(dmsValue: string, ref?: string): number {
 			const minutes = minuteMatch ? Number.parseFloat(minuteMatch[1]) : 0;
 
 			// Extraer segundos
-			const secondMatch = cleanDMS.match(/(\d+(\.\d+)?)\"/);
+			const secondMatch = cleanDMS.match(/(\d+(\.\d+)?)"/);
 			const seconds = secondMatch ? Number.parseFloat(secondMatch[1]) : 0;
 
 			parts = [degrees, minutes, seconds];

@@ -1,5 +1,9 @@
 'use client';
 
+import { Group as GroupIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
 import { type GroupWithStats, getGroups } from '@/app/actions/groups/group.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -8,10 +12,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
-import { Group as GroupIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 import { GroupCard } from './group-card';
 
@@ -19,13 +19,7 @@ const viewLogger = clientLogger.withContext('GroupsView');
 
 // Componente memoizado para cada tarjeta de grupo
 const MemoizedGroupCard = React.memo(
-	({
-		group,
-		onGroupClick,
-	}: {
-		group: GroupWithStats;
-		onGroupClick: () => void;
-	}) => {
+	({ group, onGroupClick }: { group: GroupWithStats; onGroupClick: () => void }) => {
 		// Asegurarse de que el grupo tenga todas las propiedades requeridas
 		const completeGroup = {
 			...group,

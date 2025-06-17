@@ -1,8 +1,8 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface ImageRendererProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 	width?: number;
@@ -23,13 +23,9 @@ const preloadQueue: string[] = [];
 let isPreloading = false;
 
 // Función para precargar imágenes en segundo plano
-const preloadImages = (urls: string[], highPriority = false) => {
+const _preloadImages = (urls: string[], highPriority = false) => {
 	// Filtrar las URLs que aún no están en caché o en la cola
-	const newUrls = urls.filter(url =>
-		url &&
-		!imageCache.has(url) &&
-		!preloadQueue.includes(url)
-	);
+	const newUrls = urls.filter((url) => url && !imageCache.has(url) && !preloadQueue.includes(url));
 
 	// Si hay prioridad alta, poner al inicio de la cola
 	if (highPriority) {
@@ -96,13 +92,7 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 	// Si no tenemos src o src es un objeto (error común), mostramos un placeholder
 	if (!src || typeof src === 'object') {
 		return (
-			<div
-				className={cn(
-					'bg-muted/30 flex items-center justify-center',
-					className
-				)}
-				{...rest}
-			>
+			<div className={cn('bg-muted/30 flex items-center justify-center', className)} {...rest}>
 				<span className="text-xs text-muted-foreground">
 					{typeof src === 'object' ? 'Error de formato' : 'Sin imagen'}
 				</span>
@@ -119,8 +109,19 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 	// Si la imagen es local y no es un blob ni una URL de datos, usar Image de Next.js
 	if (!isRemoteImage && !isBlobOrDataUrl && src.startsWith('/')) {
 		// Filtrar las propiedades no soportadas por Next Image
-		const { onLoad, onError, loading, crossOrigin, referrerPolicy, decoding,
-			sizes, srcSet, useMap, fetchPriority, ...imgProps } = rest;
+		const {
+			onLoad,
+			onError,
+			loading,
+			crossOrigin,
+			referrerPolicy,
+			decoding,
+			sizes,
+			srcSet,
+			useMap,
+			fetchPriority,
+			...imgProps
+		} = rest;
 
 		return (
 			<Image

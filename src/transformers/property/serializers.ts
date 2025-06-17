@@ -32,7 +32,7 @@ export interface PropertyTransformOptions {
  */
 export function validateProperty(property: Partial<PropertyBase>): PropertyBase {
 	try {
-		const result = PropertySchema.parse(property);
+		const _result = PropertySchema.parse(property);
 		return property as PropertyBase;
 	} catch (error) {
 		logger.error('Error validando Property:', error);

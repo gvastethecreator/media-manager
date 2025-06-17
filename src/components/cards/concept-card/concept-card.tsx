@@ -1,10 +1,10 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import type { ConceptComplete, ConceptWithStats } from '@/types/entities/concept';
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import type { ConceptComplete, ConceptWithStats } from '@/types/entities/concept';
 import { CardHeader } from '../card-header';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
@@ -160,7 +160,7 @@ export function ConceptCard({ concept, onClick, className, style, tcgMode = true
 
 			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			// Si hay algún error, volver al valor por defecto
 			return '#1e40af';
 		}
@@ -186,7 +186,7 @@ export function ConceptCard({ concept, onClick, className, style, tcgMode = true
 			if (typeof conceptTags === 'string' && conceptTags) {
 				try {
 					return JSON.parse(conceptTags);
-				} catch (e) {
+				} catch (_e) {
 					return [];
 				}
 			}

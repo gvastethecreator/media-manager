@@ -1,5 +1,3 @@
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import {
 	BarChart4,
 	BookMarked,
@@ -16,7 +14,9 @@ import {
 } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
-import { type NoteRelationCounts, getNoteCounts } from './note-server-actions';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { getNoteCounts, type NoteRelationCounts } from './note-server-actions';
 
 interface NoteCardContentProps {
 	content?: string | null;
@@ -139,7 +139,7 @@ export function NoteCardContent({
 						<span>Etiquetas</span>
 					</div>
 					<div className="flex flex-wrap gap-1">
-						{tags.slice(0, 5).map((tag: string, index: number) => (
+						{tags.slice(0, 5).map((tag: string, _index: number) => (
 							<Badge
 								key={`tag-${renderKey}-${tag}`}
 								variant="outline"

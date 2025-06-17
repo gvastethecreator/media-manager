@@ -3,8 +3,8 @@
  * @module store/entities/character/slices/ui
  */
 
-import type { CharacterViewConfig } from '@/types/entities/character';
 import type { StateCreator } from 'zustand';
+import type { CharacterViewConfig } from '@/types/entities/character';
 import type { CharacterState, CharacterUISlice } from '../types';
 
 /**

@@ -3,6 +3,7 @@
  * @module transformers/property/v2/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	type CreatePropertyData,
@@ -16,7 +17,6 @@ import {
 	type PropertyUpdateInput,
 } from '@/types/entities/property/types';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 import { fromPrismaProperty, generatePropertyColor, generatePropertyEmoji } from './serializers';
 
 // Logger específico para este módulo

@@ -3,8 +3,8 @@
  * @module types/uploaded-files
  */
 
-import type { EntityId, JSONString } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { EntityId, JSONString } from '@/utils/types/utility-types';
 import type { UploadedImageType as EntityUploadedImageType } from './entities/uploaded-image';
 import type { MediaMetadata } from './metadata.types';
 

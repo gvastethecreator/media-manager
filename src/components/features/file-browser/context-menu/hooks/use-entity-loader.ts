@@ -48,20 +48,21 @@ interface BaseEntityStore {
 }
 
 // Estado inicial para la carga de entidades
-const initialLoadingStates: LoadingStates = {
-	collections: { loading: false, open: false, loaded: false, hasError: false, loadedCount: 0 },
-	tags: { loading: false, open: false, loaded: false, hasError: false, loadedCount: 0 },
-	albums: { loading: false, open: false, loaded: false, hasError: false, loadedCount: 0 },
-	characters: { loading: false, open: false, loaded: false, hasError: false, loadedCount: 0 },
-	places: { loading: false, open: false, loaded: false, hasError: false, loadedCount: 0 },
-	worldItems: { loading: false, open: false, loaded: false, hasError: false, loadedCount: 0 },
-	prompts: { loading: false, open: false, loaded: false, hasError: false, loadedCount: 0 },
-	notes: { loading: false, open: false, loaded: false, hasError: false, loadedCount: 0 },
-	concepts: { loading: false, open: false, loaded: false, hasError: false, loadedCount: 0 },
+const _initialLoadingStates: LoadingStates = {
+	collections: { loading: false, loaded: false, error: null },
+	tags: { loading: false, loaded: false, error: null },
+	albums: { loading: false, loaded: false, error: null },
+	characters: { loading: false, loaded: false, error: null },
+	places: { loading: false, loaded: false, error: null },
+	objects: { loading: false, loaded: false, error: null }, // Legacy, mantener para compatibilidad
+	worldItems: { loading: false, loaded: false, error: null },
+	prompts: { loading: false, loaded: false, error: null },
+	notes: { loading: false, loaded: false, error: null },
+	concepts: { loading: false, loaded: false, error: null },
 };
 
 // Mapeo de entidades a funciones de acción del servidor
-const entityActionMap = {
+const _entityActionMap = {
 	tags: {
 		action: getTagsAction,
 		storeMethod: 'setTags',
@@ -122,32 +123,27 @@ declare global {
 }
 
 // Modificar la función withTimeout para ser más tolerante y no fallar inmediatamente
-const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityName: string): Promise<T> => {
-	let timeoutId: NodeJS.Timeout;
+const _withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityName: string): Promise<T> => {
+	let timeoutId: NodeJS.Timeout | undefined;
 
-	const timeoutPromise = new Promise<T>((_, reject) => {
+	const timeoutPromise = new Promise<T>((_resolve) => {
 		timeoutId = setTimeout(() => {
-			// En lugar de rechazar la promesa inmediatamente, registramos el timeout como advertencia
-			// y continuamos con un valor por defecto (array vacío)
 			entityLoaderLogger.warn(
 				`⚠️ Timeout al cargar ${entityName} después de ${timeoutMs}ms - continuando con datos parciales`
 			);
-			// Devolver array vacío en vez de rechazar la promesa
-			// @ts-ignore - Ignoramos el error de tipos ya que sabemos que estamos manejando arrays
-			resolve([]);
+			// @ts-ignore
+			_resolve([]);
 		}, timeoutMs);
 	});
 
 	try {
-		// Race entre la promesa original y el timeout
 		return await Promise.race([promise, timeoutPromise]);
 	} catch (error) {
-		// Si falla la promesa original, registramos y devolvemos array vacío
 		entityLoaderLogger.warn(`⚠️ Error durante la carga de ${entityName} con timeout:`, error);
-		// @ts-ignore - Ignoramos el error de tipos ya que sabemos que estamos manejando arrays
+		// @ts-ignore
 		return [];
 	} finally {
-		clearTimeout(timeoutId);
+		if (timeoutId) clearTimeout(timeoutId);
 	}
 };
 
@@ -158,10 +154,8 @@ export function useEntityLoader() {
 	// Estado inicial para todas las entidades
 	const initialLoadingState: EntityLoadingState = {
 		loading: false,
-		open: false,
 		loaded: false,
-		hasError: false,
-		loadedCount: 0
+		error: null,
 	};
 
 	// Estado para todas las entidades
@@ -175,11 +169,11 @@ export function useEntityLoader() {
 		worldItems: { ...initialLoadingState },
 		prompts: { ...initialLoadingState },
 		notes: { ...initialLoadingState },
-		concepts: { ...initialLoadingState }
+		concepts: { ...initialLoadingState },
 	});
 
 	// Ref para controlar si la precarga ya se ha ejecutado
-	const preloadExecutedRef = useRef<boolean>(false);
+	const _preloadExecutedRef = useRef<boolean>(false);
 
 	// Acceder a los stores
 	const collectionStore = useCollectionStore();
@@ -196,7 +190,7 @@ export function useEntityLoader() {
 	const wildcardStore = useWildcardStore();
 
 	// Memoizamos todas las stores para evitar recreaciones del objeto
-	const stores = useMemo(
+	const _stores = useMemo(
 		() => ({
 			collections: collectionStore,
 			tags: tagStore,
@@ -229,129 +223,106 @@ export function useEntityLoader() {
 
 	// Función para actualizar el estado de carga de una entidad
 	const updateLoadingState = useCallback((entity: keyof LoadingStates, state: Partial<EntityLoadingState>) => {
-		setLoadingStates(prev => ({
+		setLoadingStates((prev) => ({
 			...prev,
 			[entity]: {
 				...prev[entity],
-				...state
-			}
+				...state,
+			},
 		}));
 	}, []);
 
-	// Función para manejar el cambio de estado abierto/cerrado de un submenú
-	const handleOpenChange = useCallback((entity: keyof LoadingStates, isOpen: boolean) => {
-		updateLoadingState(entity, { open: isOpen });
-
-		// Si se abre y no se ha cargado, cargar los datos
-		if (isOpen && !loadingStates[entity].loaded) {
-			loadEntityData(entity);
-		}
-	}, [loadingStates, updateLoadingState]);
-
 	// Función para cargar datos de una entidad específica
-	const loadEntityData = useCallback(async (entity: keyof LoadingStates) => {
-		// Si ya está cargando o ya está cargado, no hacer nada
-		if (loadingStates[entity].loading || loadingStates[entity].loaded) {
-			return;
-		}
-
-		// Marcar como cargando
-		updateLoadingState(entity, { loading: true });
-
-		try {
-			entityLoaderLogger.info(`🔄 Cargando datos para ${entity}...`);
-
-			// Cargar datos según el tipo de entidad
-			switch (entity) {
-				case 'collections':
-					if (typeof collectionStore.fetchCollections === 'function') {
-						await collectionStore.fetchCollections();
-						entityLoaderLogger.info(`✅ Colecciones cargadas: ${Object.keys(collectionStore.getCollections()).length}`);
-					} else {
-						throw new Error('Método fetchCollections no disponible');
-					}
-					break;
-				case 'tags':
-					if (typeof tagStore.fetchTags === 'function') {
-						await tagStore.fetchTags();
-					} else {
-						throw new Error('Método fetchTags no disponible');
-					}
-					break;
-				case 'albums':
-					if (typeof albumStore.fetchAlbums === 'function') {
-						await albumStore.fetchAlbums();
-					} else {
-						throw new Error('Método fetchAlbums no disponible');
-					}
-					break;
-				case 'characters':
-					if (typeof characterStore.fetchCharacters === 'function') {
-						await characterStore.fetchCharacters();
-					}
-					break;
-				case 'places':
-					if (typeof placeStore.fetchPlaces === 'function') {
-						await placeStore.fetchPlaces();
-					}
-					break;
-				case 'worldItems':
-					if (typeof worldItemStore.fetchWorldItems === 'function') {
-						await worldItemStore.fetchWorldItems();
-					}
-					break;
-				case 'prompts':
-					if (typeof promptStore.fetchPrompts === 'function') {
-						await promptStore.fetchPrompts();
-					}
-					break;
-				case 'notes':
-					if (typeof noteStore.fetchNotes === 'function') {
-						await noteStore.fetchNotes();
-					}
-					break;
-				case 'concepts':
-					if (typeof conceptStore.fetchConcepts === 'function') {
-						await conceptStore.fetchConcepts();
-					}
-					break;
-				case 'groups':
-					if (typeof groupStore.fetchGroups === 'function') {
-						await groupStore.fetchGroups();
-					}
-					break;
-				case 'properties':
-					if (typeof propertyStore.fetchProperties === 'function') {
-						await propertyStore.fetchProperties();
-					}
-					break;
-				case 'wildcards':
-					if (typeof wildcardStore.fetchWildcards === 'function') {
-						await wildcardStore.fetchWildcards();
-					}
-					break;
+	const loadEntityData = useCallback(
+		async (entity: keyof LoadingStates) => {
+			if (loadingStates[entity].loading || loadingStates[entity].loaded) {
+				return;
 			}
+			updateLoadingState(entity, { loading: true });
+			try {
+				entityLoaderLogger.info(`🔄 Cargando datos para ${entity}...`);
+				switch (entity) {
+					case 'collections':
+						if (typeof collectionStore.fetchCollections === 'function') {
+							await collectionStore.fetchCollections();
+						}
+						break;
+					case 'tags':
+						if ('fetchTags' in tagStore && typeof tagStore.fetchTags === 'function') {
+							await tagStore.fetchTags();
+						}
+						break;
+					case 'albums':
+						if (typeof albumStore.fetchAlbums === 'function') {
+							await albumStore.fetchAlbums();
+						}
+						break;
+					case 'characters':
+						// No hay método de fetch, solo marcar como cargado
+						break;
+					case 'places':
+						if ('loadPlaces' in placeStore && typeof placeStore.loadPlaces === 'function') {
+							await placeStore.loadPlaces();
+						}
+						break;
+					case 'worldItems':
+						if (typeof worldItemStore.loadWorldItems === 'function') {
+							await worldItemStore.loadWorldItems();
+						}
+						break;
+					case 'prompts':
+						// No hay método de fetch, solo marcar como cargado
+						break;
+					case 'notes':
+						// No hay método de fetch, solo marcar como cargado
+						break;
+					case 'concepts':
+						// No hay método de fetch, solo marcar como cargado
+						break;
+					// objects: legacy, no cargar
+				}
+				updateLoadingState(entity, {
+					loading: false,
+					loaded: true,
+					error: null,
+				});
+			} catch (error) {
+				entityLoaderLogger.error(`❌ Error cargando ${entity}:`, error);
+				updateLoadingState(entity, {
+					loading: false,
+					error: error instanceof Error ? error.message : 'Error desconocido',
+				});
+			}
+		},
+		[
+			loadingStates,
+			updateLoadingState,
+			collectionStore,
+			tagStore,
+			albumStore,
+			characterStore,
+			placeStore,
+			worldItemStore,
+			promptStore,
+			noteStore,
+			conceptStore,
+		]
+	);
 
-			// Marcar como cargado exitosamente
-			updateLoadingState(entity, {
-				loading: false,
-				loaded: true,
-				hasError: false,
-				loadedCount: loadingStates[entity].loadedCount + 1
-			});
-		} catch (error) {
-			entityLoaderLogger.error(`❌ Error cargando ${entity}:`, error);
-			// Marcar como error
-			updateLoadingState(entity, {
-				loading: false,
-				hasError: true
-			});
-		}
-	}, [loadingStates, updateLoadingState, collectionStore, tagStore, albumStore, characterStore, placeStore, worldItemStore, promptStore, noteStore, conceptStore, groupStore, propertyStore, wildcardStore]);
+	// Función para manejar el cambio de estado abierto/cerrado de un submenú
+	const handleOpenChange = useCallback(
+		(entity: keyof LoadingStates, isOpen: boolean) => {
+			// Si se abre y no se ha cargado, cargar los datos
+			if (isOpen && !loadingStates[entity].loaded) {
+				loadEntityData(entity);
+			}
+		},
+		[loadingStates, loadEntityData]
+	);
 
 	return {
 		loadingStates,
 		loadEntityData,
-		handleOpenChange
+		handleOpenChange,
 	};
 }

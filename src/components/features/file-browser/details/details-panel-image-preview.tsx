@@ -1,11 +1,11 @@
 'use client';
 
-import { getImageUrl } from '@/app/actions/images';
-import { cn } from '@/lib/utils';
-import { useImageViewer } from '@/store/image-viewer.store';
 import { Loader2, XCircle } from 'lucide-react';
 // No importamos Image de Next.js ya que está causando problemas
 import * as React from 'react';
+import { getImageUrl } from '@/app/actions/images';
+import { cn } from '@/lib/utils';
+import { useImageViewer } from '@/store/image-viewer.store';
 import type { ItemComponentProps } from './details-panel-types';
 
 /**
@@ -140,7 +140,7 @@ export function ImagePreview({ item }: ItemComponentProps) {
 		}
 
 		// Iniciar carga directamente desde aquí
-		loadImage(1).catch((err) => {
+		loadImage(1).catch((_err) => {
 			if (isMountedRef.current) {
 				setError('Error iniciando carga de imagen');
 				setIsLoading(false);

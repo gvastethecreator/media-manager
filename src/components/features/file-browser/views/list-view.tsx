@@ -1,20 +1,13 @@
 'use client';
 
+import { Calendar, File, FileText, Heart, Image, Video } from 'lucide-react';
+import { motion } from 'motion/react';
+import type * as React from 'react';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { FileItem } from '@/types/file-item';
-import {
-	Calendar,
-	File,
-	FileText,
-	Heart,
-	Image,
-	Video
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import type * as React from 'react';
-import { memo, useCallback, useMemo, useRef } from 'react';
 import { ImageRenderer } from '../image-renderer';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
 
@@ -56,8 +49,8 @@ export const ListItem = memo(function ListItem({
 	onDoubleClick,
 	onContextMenu,
 }: ListItemProps) {
-	const metadata = getMetadata(item.metadata);
-	const buttonRef = useRef<HTMLButtonElement>(null);
+	const _metadata = getMetadata(item.metadata);
+	const _buttonRef = useRef<HTMLButtonElement>(null);
 
 	// Memoizamos los handlers para evitar recreaciones
 	const handleClick = useCallback(
@@ -100,7 +93,8 @@ export const ListItem = memo(function ListItem({
 	const thumbnailUrl = item.thumbnail || item.src || `/api/images/${item.id}/thumbnail`;
 
 	// Determinar si es una imagen
-	const isImage = item.type?.startsWith('image/') || item.type === 'image' || item.mimeType?.startsWith('image/') || false;
+	const isImage =
+		item.type?.startsWith('image/') || item.type === 'image' || item.mimeType?.startsWith('image/') || false;
 
 	// Determinar el icono según el tipo de archivo
 	const getFileIcon = () => {
@@ -121,7 +115,7 @@ export const ListItem = memo(function ListItem({
 		try {
 			const date = new Date(dateString);
 			return date.toLocaleDateString();
-		} catch (e) {
+		} catch (_e) {
 			return 'Fecha desconocida';
 		}
 	};
@@ -139,16 +133,10 @@ export const ListItem = memo(function ListItem({
 			{/* Miniatura para imágenes */}
 			{isImage ? (
 				<div className="w-10 h-10 mr-3 rounded-md overflow-hidden flex-shrink-0">
-					<ImageRenderer
-						src={thumbnailUrl}
-						alt={item.name}
-						className="h-full w-full object-cover"
-					/>
+					<ImageRenderer src={thumbnailUrl} alt={item.name} className="h-full w-full object-cover" />
 				</div>
 			) : (
-				<div className="w-10 h-10 mr-3 flex items-center justify-center flex-shrink-0">
-					{getFileIcon()}
-				</div>
+				<div className="w-10 h-10 mr-3 flex items-center justify-center flex-shrink-0">{getFileIcon()}</div>
 			)}
 
 			<div className="flex items-center gap-3 flex-1">
@@ -162,7 +150,11 @@ export const ListItem = memo(function ListItem({
 				<div className="flex items-center gap-1 w-32">
 					<Calendar className="h-3 w-3 text-muted-foreground" />
 					<span className="text-xs text-muted-foreground">
-						{formatDate(item.modifiedAt || (item.updatedAt instanceof Date ? item.updatedAt.toISOString() : item.updatedAt) || (item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt))}
+						{formatDate(
+							item.modifiedAt ||
+								(item.updatedAt instanceof Date ? item.updatedAt.toISOString() : item.updatedAt) ||
+								(item.createdAt instanceof Date ? item.createdAt.toISOString() : item.createdAt)
+						)}
 					</span>
 				</div>
 			</div>
@@ -189,7 +181,7 @@ export const ListView = memo(function ListView({
 	const { itemSize } = useViewOptionsStore();
 
 	const renderItem = useCallback(
-		(index: number, item: FileItem) => {
+		(_index: number, item: FileItem) => {
 			const isSelected = selectedIds.includes(item.id);
 			const isActive = activeId === item.id;
 

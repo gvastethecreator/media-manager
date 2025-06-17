@@ -185,7 +185,7 @@ export async function getNoteCounts(noteId: string): Promise<NoteRelationCounts>
 export async function getNoteStatuses(): Promise<string[]> {
 	try {
 		return Object.values(NoteStatus);
-	} catch (error) {
+	} catch (_error) {
 		return ['active', 'archived', 'completed', 'draft', 'pending'];
 	}
 }

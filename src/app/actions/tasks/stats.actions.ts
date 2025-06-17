@@ -5,10 +5,10 @@
  * @module app/actions/tasks/stats.actions
  */
 
+import { unstable_cache } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type TaskType } from '@/types/tasks';
-import { unstable_cache } from 'next/cache';
 
 // Logger for stats actions
 const taskLogger = serverLogger.withContext('TaskStatsActions');

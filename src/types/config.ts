@@ -3,8 +3,8 @@
  * @module types/config
  */
 
-import type { JSONString } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { JSONString } from '@/utils/types/utility-types';
 import { CacheExpirationPolicy } from './cache';
 import { LogLevel } from './logging';
 import { ThumbnailQuality } from './thumbnails';

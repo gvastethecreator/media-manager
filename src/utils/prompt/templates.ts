@@ -271,7 +271,7 @@ export function convertPromptToTemplate(
 			} else if (Array.isArray(prompt.tags)) {
 				tags = prompt.tags;
 			}
-		} catch (e) {
+		} catch (_e) {
 			tags = [];
 		}
 

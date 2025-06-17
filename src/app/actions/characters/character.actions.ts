@@ -1,6 +1,7 @@
 'use server';
 
-import { EntityErrorCode, type SerializableError, createEntityErrorObject } from '@/lib/errors';
+import { revalidatePath } from 'next/cache';
+import { createEntityErrorObject, EntityErrorCode, type SerializableError } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
@@ -18,7 +19,6 @@ import type {
 	CharacterSearchOptions,
 	CharacterUpdateInput,
 } from '@/types/entities/character/types';
-import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
 const characterLogger = serverLogger.withContext('CharacterActions');
@@ -180,7 +180,7 @@ export async function updateCharacter(id: string, data: CharacterUpdateInput) {
 export async function deleteCharacter(id: string): Promise<{ id: string }> {
 	try {
 		characterLogger.info('🗑️ Eliminando personaje', { id });
-		const character = await deleteCharacterTransformer(id);
+		const _character = await deleteCharacterTransformer(id);
 		await revalidateAllPaths();
 		await notifyCharacterChange('delete', { id });
 		characterLogger.info('✅ Personaje eliminado', { id });

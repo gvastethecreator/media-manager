@@ -3,17 +3,17 @@
  * @module store/entities/favorite/slices/api
  */
 
+import { StateCreator } from 'zustand';
 import { toggleFavorite as toggleFavoriteAction } from '@/app/actions/favorites/favorite.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { FavoriteEntityType } from '@/types/entities/favorite';
-import { StateCreator } from 'zustand';
 import { FavoriteStore } from '..';
 
 // Logger específico para este slice
 const logger = clientLogger.withContext('FavoriteStore.ApiSlice');
 
 // Estado
-export type ApiState = Record<string, unknown>
+export type ApiState = Record<string, unknown>;
 
 // Acciones
 export interface ApiActions {
@@ -22,7 +22,7 @@ export interface ApiActions {
 }
 
 // Slice del store para API
-export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiActions> = (set, get) => ({
+export const createApiSlice: StateCreator<FavoriteStore, [], [], ApiState & ApiActions> = (_set, get) => ({
 	// Gestión de favoritos
 	toggleFavorite: async (imageId: string) => {
 		try {

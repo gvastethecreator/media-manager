@@ -3,8 +3,8 @@
  * @module app/api/system/settings/reset
  */
 
-import { resetSystemSettings } from '@/app/actions/system';
 import { NextResponse } from 'next/server';
+import { resetSystemSettings } from '@/app/actions/system';
 
 /**
  * Manejador para POST - Restablece la configuración global del sistema

@@ -1,6 +1,6 @@
+import { NextResponse } from 'next/server';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { appMonitor } from '@/lib/server/app-monitor';
-import { NextResponse } from 'next/server';
 
 // Logger específico para esta ruta
 const logger = serverLogger.withContext('AppStatsAPI');

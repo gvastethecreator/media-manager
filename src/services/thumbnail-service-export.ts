@@ -8,8 +8,8 @@
 import {
 	type ProcessOptions,
 	type ProcessStatus,
-	type ThumbnailError,
 	thumbnailService as service,
+	type ThumbnailError,
 } from './thumbnail.service';
 
 // Exportar todo del servicio

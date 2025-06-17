@@ -245,7 +245,7 @@ export async function getPromptById(id: string): Promise<PromptCardData | null> 
 /**
  * Parsea un campo JSON
  */
-function parseJsonField<T>(jsonString?: string | null): T | null {
+function _parseJsonField<T>(jsonString?: string | null): T | null {
 	if (!jsonString) return null;
 
 	try {

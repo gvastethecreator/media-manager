@@ -1,8 +1,8 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { CardContainer } from '../card-container';
 import { PlaceCardContent } from './place-card-content';
 import { PlaceCardFooter } from './place-card-footer';
@@ -112,7 +112,7 @@ export function PlaceCard({
 
 			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			// Si hay algún error, volver al valor por defecto
 			return '#064e3b';
 		}

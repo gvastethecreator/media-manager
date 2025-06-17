@@ -5,10 +5,10 @@
  * @module app/actions/folders/stats.actions
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import type { Image, Video } from '@prisma/client'; // Importar tipos de Prisma
 import { revalidateTag, unstable_cache } from 'next/cache';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { prisma } from '@/lib/prisma';
 import { FOLDER_ERROR_CODES } from './folder-types';
 
 // Logger for stats actions
@@ -208,10 +208,10 @@ export async function getFolderStorageStats(): Promise<FolderStorageStatsRespons
 					// Distribución por tipo de archivo (esta consulta es simulada, ajusta según tu esquema)
 					// Comentado porque Image no tiene mimeType y la consulta raw fallaría
 					// prisma.$queryRaw`SELECT
-          //   SUM(CASE WHEN i.mimeType LIKE 'image/%' THEN 1 ELSE 0 END) as images,
-          //   SUM(CASE WHEN i.mimeType LIKE 'video/%' THEN 1 ELSE 0 END) as videos,
-          //   SUM(CASE WHEN i.mimeType NOT LIKE 'image/%' AND i.mimeType NOT LIKE 'video/%' THEN 1 ELSE 0 END) as others
-          //   FROM Image i`,
+					//   SUM(CASE WHEN i.mimeType LIKE 'image/%' THEN 1 ELSE 0 END) as images,
+					//   SUM(CASE WHEN i.mimeType LIKE 'video/%' THEN 1 ELSE 0 END) as videos,
+					//   SUM(CASE WHEN i.mimeType NOT LIKE 'image/%' AND i.mimeType NOT LIKE 'video/%' THEN 1 ELSE 0 END) as others
+					//   FROM Image i`,
 				]);
 
 				// let fileTypeDistributionData: Record<string, number> | undefined = undefined;
@@ -223,7 +223,6 @@ export async function getFolderStorageStats(): Promise<FolderStorageStatsRespons
 				//     others: Number(dist.others) || 0,
 				//   };
 				// }
-
 
 				const stats: FolderStorageStatsResponse = {
 					totalSize: totalSizeAggregate._sum.totalSize || 0,
@@ -342,36 +341,36 @@ type SelectedVideo = Pick<Video, 'id' | 'size' | 'metadata'>;
 
 // Interfaz para las estadísticas detalladas de una carpeta
 export interface DetailedFolderStats {
-  totalFiles: number;
-  totalSize: number;
-  lastIndexed: Date | null;
-  fileDistribution: {
-    images: number;
-    videos: number;
-    other: number;
-  };
-  sizeDistribution: {
-    images: number;
-    videos: number;
-    other: number;
-  };
-  metadataStats: {
-    processed: number;
-    pending: number;
-    failed: number;
-  };
-  processingStats: { // Estos campos pueden necesitar más lógica o datos que no están disponibles actualmente
-    lastProcessingTime: number;
-    averageProcessingTime: number;
-    processingStatus: string;
-  };
+	totalFiles: number;
+	totalSize: number;
+	lastIndexed: Date | null;
+	fileDistribution: {
+		images: number;
+		videos: number;
+		other: number;
+	};
+	sizeDistribution: {
+		images: number;
+		videos: number;
+		other: number;
+	};
+	metadataStats: {
+		processed: number;
+		pending: number;
+		failed: number;
+	};
+	processingStats: {
+		// Estos campos pueden necesitar más lógica o datos que no están disponibles actualmente
+		lastProcessingTime: number;
+		averageProcessingTime: number;
+		processingStatus: string;
+	};
 	// Añadir cualquier otro campo que devuelva la función
 	id: string;
 	name: string;
 	path: string;
 	// ... otros campos del modelo Folder que se quieran exponer
 }
-
 
 /**
  * Gets detailed statistics for a specific folder

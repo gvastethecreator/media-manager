@@ -1,12 +1,8 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Cpu, Database, Gauge, HardDrive, Loader2 } from 'lucide-react';
+import { Cpu, Database, HardDrive, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
 	Area,
@@ -18,13 +14,15 @@ import {
 	Legend,
 	Line,
 	LineChart,
-	Pie,
-	PieChart,
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,
 	YAxis,
 } from 'recharts';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTechMetrics } from '../hooks/use-tech-metrics';
 
 // Formateador para números

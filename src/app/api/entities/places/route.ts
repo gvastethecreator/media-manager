@@ -1,5 +1,5 @@
-import { serverLogger } from '@/lib/logger/server-logger';
 import { NextResponse } from 'next/server';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 // Logger específico para la API de lugares
 const placesApiLogger = serverLogger.withContext('PlacesApi');

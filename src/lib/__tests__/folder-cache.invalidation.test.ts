@@ -1,9 +1,9 @@
 import {
-	folderResponseCache,
 	folderListCache,
+	folderResponseCache,
 	getFolderCacheKey,
-	invalidateFolderCache,
 	invalidateAllFolderCache,
+	invalidateFolderCache,
 } from '../folder-cache';
 
 describe('folder cache invalidation', () => {

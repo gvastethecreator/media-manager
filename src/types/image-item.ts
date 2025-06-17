@@ -3,8 +3,8 @@
  * @module types/image-item
  */
 
-import type { JSONString } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { JSONString } from '@/utils/types/utility-types';
 import type { MediaMetadata } from './metadata.types';
 import type { BaseEntity } from './store.types';
 

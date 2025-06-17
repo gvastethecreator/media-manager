@@ -1,5 +1,7 @@
 'use client';
 
+import { Users } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { getCharacterImages } from '@/app/actions/characters/character.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
@@ -7,8 +9,6 @@ import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCharacterStore } from '@/store/entities/character';
 import type { FileItem } from '@/types/file-item';
-import { Users } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 
 const viewLogger = clientLogger.withContext('CharacterContentView');
 

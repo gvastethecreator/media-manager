@@ -1,5 +1,5 @@
-import type { FileItem } from '@/types/file-item';
 import { create } from 'zustand';
+import type { FileItem } from '@/types/file-item';
 
 interface FileSelectionState {
 	selectedItems: FileItem[];

@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AlbumCard } from './album-card';
-import { getAlbumStats, getRecentAlbumImages } from './album-server-actions';
 
 // Mock de las acciones del servidor
 jest.mock('./album-server-actions', () => ({

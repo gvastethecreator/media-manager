@@ -4,8 +4,8 @@
  * @description Implementación del slice de UI para la gestión de trabajos en cola
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
 import type { StateCreator } from 'zustand';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { QueueJobState } from '../types';
 
 // Logger para el slice

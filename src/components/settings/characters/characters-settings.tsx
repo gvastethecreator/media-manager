@@ -1,5 +1,7 @@
 'use client';
 
+import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { type CharacterWithStats, deleteCharacter, searchCharacters } from '@/app/actions/characters/character.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,8 +14,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import toastService from '@/services/toast.service';
 import type { CharacterBase as Character } from '@/types/entities/character/base';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
-import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreateCharacterForm } from './create-character-form';
 
 // Eliminar la referencia a avatar (ya arreglado) y actualizar la sección traits
@@ -137,7 +137,7 @@ export function CharactersSettings() {
 	}, []);
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const handleDeleteButtonClick = useCallback(
+	const _handleDeleteButtonClick = useCallback(
 		(e: React.MouseEvent<HTMLButtonElement>, id: string) => {
 			e.stopPropagation();
 			handleDeleteCharacter(id);
@@ -535,7 +535,7 @@ export function CharactersSettings() {
 }
 
 // Corregir función para generar colores de categoría
-function generateCategoryColor(category: CharacterCategory): string {
+function _generateCategoryColor(category: CharacterCategory): string {
 	switch (category) {
 		case CharacterCategory.PROTAGONIST:
 			return 'bg-blue-500';
@@ -567,7 +567,7 @@ function generateCategoryColor(category: CharacterCategory): string {
 }
 
 // Corregir función para generar colores de clase
-function generateClassColor(characterClass: CharacterClass): string {
+function _generateClassColor(characterClass: CharacterClass): string {
 	switch (characterClass) {
 		case CharacterClass.WARRIOR:
 			return 'bg-red-600';

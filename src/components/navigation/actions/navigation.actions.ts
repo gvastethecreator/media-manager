@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { getAlbums } from '@/app/actions/albums/album.actions';
 import { searchCharacters } from '@/app/actions/characters/character.actions';
 import { getCollections } from '@/app/actions/collections/collection.actions';
@@ -15,7 +16,6 @@ import { getTagsAction } from '@/app/actions/tags';
 import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { revalidatePath } from 'next/cache';
 
 const navLogger = serverLogger.withContext('NavActions');
 

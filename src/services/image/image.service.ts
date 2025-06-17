@@ -50,10 +50,10 @@ import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
-	ServiceErrorCode,
 	createEntityNotFoundError,
 	createFileNotFoundError,
 	createServiceError,
+	ServiceErrorCode,
 	toServiceError,
 } from '@/utils/errors/service-errors';
 import { statsService } from '../stats.service';
@@ -429,7 +429,7 @@ class ImageService {
 
 			try {
 				return await fs.readFile(image.path);
-			} catch (error) {
+			} catch (_error) {
 				throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
 			}
 		} catch (error) {
@@ -470,7 +470,7 @@ class ImageService {
 			// Verificar si el archivo existe
 			try {
 				await fs.access(image.path);
-			} catch (error) {
+			} catch (_error) {
 				throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
 			}
 

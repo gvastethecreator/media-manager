@@ -5,10 +5,10 @@
  * @module app/actions/queue/stats.actions
  */
 
+import { unstable_cache } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import * as QueueJobService from '@/services/queue-job.service';
 import type { QueueStats } from '@/types/entities/queue-job';
-import { unstable_cache } from 'next/cache';
 
 // Logger específico para acciones de estadísticas
 const logger = serverLogger.withContext('QueueActions:stats');

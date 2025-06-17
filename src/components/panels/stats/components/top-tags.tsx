@@ -1,6 +1,6 @@
+import { AlertCircle, Tag } from 'lucide-react';
 import { getSystemStats } from '@/app/actions/stats/stats.actions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Tag } from 'lucide-react';
 import { TagUsage } from './tag-usage';
 
 export async function TopTags() {

@@ -86,7 +86,7 @@ export const parseVisualConfig = (configJson: string): ParsedWorldItemVisualConf
 			expandedWorldItemIds: parsed.expandedWorldItemIds || [],
 			selectedWorldItemIds: parsed.selectedWorldItemIds || [],
 		};
-	} catch (error) {
+	} catch (_error) {
 		return {
 			view: 'grid',
 			sortBy: 'name_asc',
@@ -106,7 +106,7 @@ export const parseVisualConfig = (configJson: string): ParsedWorldItemVisualConf
 export const stringifyVisualConfig = (config: ParsedWorldItemVisualConfig): string => {
 	try {
 		return JSON.stringify(config);
-	} catch (error) {
+	} catch (_error) {
 		return '{}';
 	}
 };

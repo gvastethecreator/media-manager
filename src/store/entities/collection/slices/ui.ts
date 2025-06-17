@@ -3,8 +3,8 @@
  * @module store/entities/collection/slices/ui
  */
 
-import type { CollectionViewConfig } from '@/types/entities/collection';
 import type { StateCreator } from 'zustand';
+import type { CollectionViewConfig } from '@/types/entities/collection';
 import type { CollectionState } from '../types';
 
 /**

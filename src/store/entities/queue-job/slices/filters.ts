@@ -4,8 +4,8 @@
  * @description Implementación del slice de filtros para la gestión de trabajos en cola
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
 import type { StateCreator } from 'zustand';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { QueueJobSortField, QueueJobSortOrder, QueueJobState, QueueJobStatus, QueueJobType } from '../types';
 
 // Logger para el slice

@@ -385,7 +385,7 @@ export async function deleteGroup(
  */
 export function toRelatedGroup(
 	group: Record<string, any>,
-	options: {
+	_options: {
 		includeDetails?: boolean;
 	} = {}
 ): Record<string, any> {

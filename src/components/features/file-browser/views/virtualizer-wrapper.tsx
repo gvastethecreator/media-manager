@@ -1,8 +1,8 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { CustomScrollArea } from './custom-scroll-area';
 
 // Tipos para mejorar la tipificación
@@ -29,36 +29,36 @@ interface VirtualizerWrapperProps<T> {
 const VIRTUALIZER_CONFIG = {
 	// Mayor overscan significa más elementos en caché, pero mayor uso de memoria
 	overscan: {
-		list: 20,     // Elementos adicionales renderizados arriba/abajo en listas
-		grid: 15,     // Filas adicionales en cuadrículas
-		masonry: 10   // Elementos adicionales en masonry
+		list: 20, // Elementos adicionales renderizados arriba/abajo en listas
+		grid: 15, // Filas adicionales en cuadrículas
+		masonry: 10, // Elementos adicionales en masonry
 	},
 	// Tamaño de caché para elementos pre-renderizados
-	cacheSize: 1000,  // Número máximo de elementos a mantener en caché
+	cacheSize: 1000, // Número máximo de elementos a mantener en caché
 	// Configuración para carga suave
 	sequential: {
-		batchSize: 50,             // Cuántos elementos cargar por lote
-		delayBetweenBatches: 30,   // Milisegundos entre lotes para UI responsiva
+		batchSize: 50, // Cuántos elementos cargar por lote
+		delayBetweenBatches: 30, // Milisegundos entre lotes para UI responsiva
 		maxRequestsPerSession: 30, // Límite de solicitudes por sesión de scroll
-		initialLoadDelay: 50       // Tiempo de espera antes de cargar el primer lote
+		initialLoadDelay: 50, // Tiempo de espera antes de cargar el primer lote
 	},
 	// Umbrales por tipo de vista para determinar cuándo cargar más
 	scrollThresholds: {
-		grid: 0.65,    // Más agresivo para grid (carga antes)
-		list: 0.7,     // Valor medio para lista
-		masonry: 0.6   // Muy agresivo para masonry (carga mucho antes)
+		grid: 0.65, // Más agresivo para grid (carga antes)
+		list: 0.7, // Valor medio para lista
+		masonry: 0.6, // Muy agresivo para masonry (carga mucho antes)
 	},
 	// Umbrales en pixels para detectar el final del scroll por tipo
 	pixelThresholds: {
 		grid: 500,
 		list: 400,
-		masonry: 600
+		masonry: 600,
 	},
 	// Configuración por defecto de la cuadrícula
 	grid: {
-		gap: 16,       // Gap por defecto
-		aspectRatio: 1 // Relación de aspecto por defecto
-	}
+		gap: 16, // Gap por defecto
+		aspectRatio: 1, // Relación de aspecto por defecto
+	},
 };
 
 /**
@@ -86,7 +86,7 @@ export function VirtualizerWrapper<T>({
 	const [columnCount, setColumnCount] = useState(4); // Default a 4 columnas
 	const [isScrolling, setIsScrolling] = useState(false);
 	// Lista de índices actualmente visibles
-	const [visibleIndices, setVisibleIndices] = useState<number[]>([]);
+	const [_visibleIndices, setVisibleIndices] = useState<number[]>([]);
 
 	// Caché de elementos para carga secuencial
 	const renderedItemsCache = useRef<Map<number, React.ReactNode>>(new Map());
@@ -122,7 +122,7 @@ export function VirtualizerWrapper<T>({
 
 		// Limitar el número de solicitudes secuenciales por sesión
 		if (sequentialRequestsRef.current >= VIRTUALIZER_CONFIG.sequential.maxRequestsPerSession) {
-			console.debug("Límite de solicitudes secuenciales alcanzado, reiniciando contador");
+			console.debug('Límite de solicitudes secuenciales alcanzado, reiniciando contador');
 			// Reiniciar el contador después de un tiempo
 			setTimeout(() => {
 				sequentialRequestsRef.current = 0;
@@ -147,7 +147,9 @@ export function VirtualizerWrapper<T>({
 			return;
 		}
 
-		console.debug(`Cargando secuencialmente: ${loadedItems} → ${targetCount} (solicitud #${sequentialRequestsRef.current})`);
+		console.debug(
+			`Cargando secuencialmente: ${loadedItems} → ${targetCount} (solicitud #${sequentialRequestsRef.current})`
+		);
 
 		// Cargar el siguiente lote con un pequeño retraso para mantener la UI receptiva
 		setTimeout(() => {
@@ -180,37 +182,40 @@ export function VirtualizerWrapper<T>({
 	}, [data.length, loadedItems, getScrollElement]);
 
 	// Función memoizada para obtener contenido con caché
-	const getCachedContent = useCallback((index: number, item: T) => {
-		// Verificar si ya está en caché
-		if (renderedItemsCache.current.has(index)) {
-			return renderedItemsCache.current.get(index);
-		}
-
-		// Renderizar solo si está dentro de los elementos cargados
-		if (index < loadedItems) {
-			try {
-				const content = itemContent(index, item);
-				// Guardar en caché
-				renderedItemsCache.current.set(index, content);
-				return content;
-			} catch (error) {
-				console.error(`Error al renderizar elemento ${index}:`, error);
-				// Devolver un placeholder de error como fallback
-				return (
-					<div className="bg-red-100/20 w-full h-full rounded-md flex items-center justify-center">
-						<span className="text-xs text-red-500">Error al renderizar</span>
-					</div>
-				);
+	const getCachedContent = useCallback(
+		(index: number, item: T) => {
+			// Verificar si ya está en caché
+			if (renderedItemsCache.current.has(index)) {
+				return renderedItemsCache.current.get(index);
 			}
-		}
 
-		// Placeholder para elementos aún no cargados
-		return (
-			<div className="animate-pulse bg-muted/20 w-full h-full rounded-md flex items-center justify-center">
-				<span className="text-xs text-muted-foreground">Cargando...</span>
-			</div>
-		);
-	}, [itemContent, loadedItems]);
+			// Renderizar solo si está dentro de los elementos cargados
+			if (index < loadedItems) {
+				try {
+					const content = itemContent(index, item);
+					// Guardar en caché
+					renderedItemsCache.current.set(index, content);
+					return content;
+				} catch (error) {
+					console.error(`Error al renderizar elemento ${index}:`, error);
+					// Devolver un placeholder de error como fallback
+					return (
+						<div className="bg-red-100/20 w-full h-full rounded-md flex items-center justify-center">
+							<span className="text-xs text-red-500">Error al renderizar</span>
+						</div>
+					);
+				}
+			}
+
+			// Placeholder para elementos aún no cargados
+			return (
+				<div className="animate-pulse bg-muted/20 w-full h-full rounded-md flex items-center justify-center">
+					<span className="text-xs text-muted-foreground">Cargando...</span>
+				</div>
+			);
+		},
+		[itemContent, loadedItems]
+	);
 
 	// Configuración de la virtualización para lista
 	const listVirtualizer = useVirtualizer({
@@ -218,7 +223,7 @@ export function VirtualizerWrapper<T>({
 		getScrollElement,
 		estimateSize: () => itemSize,
 		overscan: VIRTUALIZER_CONFIG.overscan.list,
-		scrollMargin: scrollRef.current?.offsetTop || 0
+		scrollMargin: scrollRef.current?.offsetTop || 0,
 	});
 
 	// Configuración de la virtualización para cuadrícula
@@ -240,7 +245,7 @@ export function VirtualizerWrapper<T>({
 		},
 		overscan: VIRTUALIZER_CONFIG.overscan.grid * 2,
 		getItemKey: (index) => `grid-row-${index}`,
-		scrollMargin: scrollRef.current?.offsetTop || 0
+		scrollMargin: scrollRef.current?.offsetTop || 0,
 	});
 
 	// Función para actualizar los elementos visibles
@@ -278,7 +283,7 @@ export function VirtualizerWrapper<T>({
 		} else if (type === 'list') {
 			// Para lista, usar virtualizer para determinar items visibles
 			const items = listVirtualizer.getVirtualItems();
-			newVisibleIndices.push(...items.map(item => item.index));
+			newVisibleIndices.push(...items.map((item) => item.index));
 		}
 
 		// Actualizamos directamente
@@ -290,8 +295,18 @@ export function VirtualizerWrapper<T>({
 		if (maxIndex + 10 > loadedItems && loadedItems < data.length) {
 			loadItemsSequentially();
 		}
-	}, [type, data.length, columnCount, gridVirtualizer, listVirtualizer, getScrollElement,
-		loadedItems, loadItemsSequentially, onVisibilityChange, itemSize, gridGap]);
+	}, [
+		type,
+		data.length,
+		columnCount,
+		gridVirtualizer,
+		listVirtualizer,
+		getScrollElement,
+		loadedItems,
+		loadItemsSequentially,
+		onVisibilityChange,
+		gridGap,
+	]);
 
 	// Calcular el número de columnas para la cuadrícula
 	useEffect(() => {
@@ -418,21 +433,22 @@ export function VirtualizerWrapper<T>({
 			const pixelThreshold = VIRTUALIZER_CONFIG.pixelThresholds[type];
 
 			// Detectar si estamos cerca del final del scroll
-			const isNearBottom = scrollRatio > threshold ||
-				(scrollHeight - scrollPosition) < pixelThreshold;
+			const isNearBottom = scrollRatio > threshold || scrollHeight - scrollPosition < pixelThreshold;
 
 			// Cargar más elementos si estamos cerca del final
-			if (isNearBottom && !isLoadingRef.current &&
+			if (
+				isNearBottom &&
+				!isLoadingRef.current &&
 				loadedItems < data.length &&
-				sequentialRequestsRef.current < VIRTUALIZER_CONFIG.sequential.maxRequestsPerSession) {
+				sequentialRequestsRef.current < VIRTUALIZER_CONFIG.sequential.maxRequestsPerSession
+			) {
 				console.debug(`Cerca del fondo (${type} - ${scrollRatio.toFixed(2)}), cargando más`);
 				loadItemsSequentially();
 			}
 
 			// Carga especial cuando estamos muy cerca del final
-			if ((scrollHeight - scrollPosition) < 100 &&
-				!isLoadingRef.current && loadedItems < data.length) {
-				console.debug("Extremadamente cerca del final, forzando carga");
+			if (scrollHeight - scrollPosition < 100 && !isLoadingRef.current && loadedItems < data.length) {
+				console.debug('Extremadamente cerca del final, forzando carga');
 				loadItemsSequentially();
 			}
 		};
@@ -453,15 +469,24 @@ export function VirtualizerWrapper<T>({
 				clearTimeout((window as any).scrollTimeout);
 			}
 		};
-	}, [getScrollElement, isScrolling, onScrollStart, onScrollEnd,
-		loadItemsSequentially, updateVisibleIndices, data.length, loadedItems, type]);
+	}, [
+		getScrollElement,
+		isScrolling,
+		onScrollStart,
+		onScrollEnd,
+		loadItemsSequentially,
+		updateVisibleIndices,
+		data.length,
+		loadedItems,
+		type,
+	]);
 
 	// Renderizado para modo masonry
 	if (type === 'masonry') {
 		return (
 			<CustomScrollArea
 				className={cn('h-full w-full', gridClassName)}
-				onWheel={(e) => {
+				onWheel={(_e) => {
 					// Detectar scroll manual con rueda
 					const scrollElement = getScrollElement();
 					if (scrollElement) {
@@ -475,32 +500,23 @@ export function VirtualizerWrapper<T>({
 					}
 				}}
 			>
-				<div
-					ref={scrollRef}
-					className="p-4 h-full"
-					style={{ scrollBehavior: 'smooth' }}
-				>
+				<div ref={scrollRef} className="p-4 h-full" style={{ scrollBehavior: 'smooth' }}>
 					<div className="flex" style={{ gap: `${gridGap}px`, minHeight: '100%' }}>
 						{/* Crear columnas */}
 						{Array.from({ length: columnCount }).map((_, colIndex) => {
 							// Más elementos por columna para masonry
 							const itemsPerColumn = Math.ceil(loadedItems / columnCount) + 5;
 							// Filtrar elementos para esta columna
-							const columnItems = data
-								.filter((_, index) => index % columnCount === colIndex)
-								.slice(0, itemsPerColumn);
+							const columnItems = data.filter((_, index) => index % columnCount === colIndex).slice(0, itemsPerColumn);
 
 							return (
-								<div
-									key={`masonry-col-${colIndex}`}
-									className="flex-1 flex flex-col"
-									style={{ gap: `${gridGap}px` }}
-								>
+								<div key={`masonry-col-${colIndex}`} className="flex-1 flex flex-col" style={{ gap: `${gridGap}px` }}>
 									{columnItems.map((item, idx) => {
 										const originalIndex = colIndex + idx * columnCount;
 
 										// Obtener metadatos para calcular aspect ratio real
-										let width = 0, height = 0;
+										let width = 0;
+										let height = 0;
 										try {
 											if ((item as any).metadata && typeof (item as any).metadata === 'string') {
 												const metadata = JSON.parse((item as any).metadata);
@@ -510,13 +526,13 @@ export function VirtualizerWrapper<T>({
 												width = (item as any).width || 200;
 												height = (item as any).height || 200;
 											}
-										} catch (e) {
+										} catch (_e) {
 											width = 200;
 											height = 200;
 										}
 
 										// Calcular aspect ratio real
-										const itemAspectRatio = (width && height) ? width / height : 1;
+										const itemAspectRatio = width && height ? width / height : 1;
 										const calculatedHeight = itemAspectRatio ? `${Math.floor(200 / itemAspectRatio)}px` : 'auto';
 
 										return (
@@ -563,7 +579,7 @@ export function VirtualizerWrapper<T>({
 		return (
 			<CustomScrollArea
 				className={cn('h-full w-full', gridClassName)}
-				onWheel={(e) => {
+				onWheel={(_e) => {
 					// Detectar scroll manual con rueda
 					const scrollElement = getScrollElement();
 					if (scrollElement) {
@@ -577,11 +593,7 @@ export function VirtualizerWrapper<T>({
 					}
 				}}
 			>
-				<div
-					ref={scrollRef}
-					className="h-full"
-					style={{ scrollBehavior: 'smooth' }}
-				>
+				<div ref={scrollRef} className="h-full" style={{ scrollBehavior: 'smooth' }}>
 					<div
 						style={{
 							height: `${gridVirtualizer.getTotalSize()}px`,
@@ -589,7 +601,7 @@ export function VirtualizerWrapper<T>({
 							position: 'relative',
 							padding: `${gridGap}px`,
 							paddingTop: `${gridGap}px`,
-							minHeight: '100%'
+							minHeight: '100%',
 						}}
 					>
 						{rowVirtualItems.length === 0 && data.length > 0 && (
@@ -615,7 +627,7 @@ export function VirtualizerWrapper<T>({
 										width: '100%',
 										height: `${virtualRow.size - gridGap}px`,
 										transform: `translateY(${virtualRow.start}px)`,
-										gap: `${gridGap}px`
+										gap: `${gridGap}px`,
 									}}
 								>
 									{Array.from({ length: columnCount }).map((_, colIndex) => {
@@ -648,7 +660,7 @@ export function VirtualizerWrapper<T>({
 								style={{
 									position: 'absolute',
 									bottom: 0,
-									left: 0
+									left: 0,
 								}}
 							>
 								<div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -665,14 +677,8 @@ export function VirtualizerWrapper<T>({
 
 	// Renderizado para modo lista
 	return (
-		<CustomScrollArea
-			className={cn('h-full w-full', listClassName)}
-		>
-			<div
-				ref={scrollRef}
-				className="h-full"
-				style={{ scrollBehavior: 'smooth' }}
-			>
+		<CustomScrollArea className={cn('h-full w-full', listClassName)}>
+			<div ref={scrollRef} className="h-full" style={{ scrollBehavior: 'smooth' }}>
 				<div
 					style={{
 						height: `${listVirtualizer.getTotalSize()}px`,
@@ -680,33 +686,34 @@ export function VirtualizerWrapper<T>({
 						position: 'relative',
 						padding: '16px',
 						paddingTop: '16px',
-						minHeight: '100%'
+						minHeight: '100%',
 					}}
 				>
-					{data.length > 0 && listVirtualizer.getVirtualItems().map((virtualItem) => {
-						const itemIndex = virtualItem.index;
-						if (itemIndex >= data.length) return null;
+					{data.length > 0 &&
+						listVirtualizer.getVirtualItems().map((virtualItem) => {
+							const itemIndex = virtualItem.index;
+							if (itemIndex >= data.length) return null;
 
-						const item = data[itemIndex];
+							const item = data[itemIndex];
 
-						return (
-							<div
-								key={virtualItem.key}
-								data-index={itemIndex}
-								style={{
-									position: 'absolute',
-									top: 0,
-									left: 0,
-									width: '100%',
-									height: `${virtualItem.size}px`,
-									transform: `translateY(${virtualItem.start}px)`,
-									padding: '0 16px',
-								}}
-							>
-								{getCachedContent(itemIndex, item)}
-							</div>
-						);
-					})}
+							return (
+								<div
+									key={virtualItem.key}
+									data-index={itemIndex}
+									style={{
+										position: 'absolute',
+										top: 0,
+										left: 0,
+										width: '100%',
+										height: `${virtualItem.size}px`,
+										transform: `translateY(${virtualItem.start}px)`,
+										padding: '0 16px',
+									}}
+								>
+									{getCachedContent(itemIndex, item)}
+								</div>
+							);
+						})}
 				</div>
 			</div>
 		</CustomScrollArea>
@@ -714,7 +721,7 @@ export function VirtualizerWrapper<T>({
 }
 
 // Función auxiliar para comparar arrays
-const areArraysEqual = (a: number[], b: number[]): boolean => {
+const _areArraysEqual = (a: number[], b: number[]): boolean => {
 	if (a.length !== b.length) return false;
 	return a.every((item, index) => item === b[index]);
 };

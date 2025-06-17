@@ -5,6 +5,7 @@
  * @module app/actions/queue/query.actions
  */
 
+import { unstable_cache } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import * as QueueJobService from '@/services/queue-job.service';
 import {
@@ -13,7 +14,6 @@ import {
 	type QueueJobFilters,
 	type QueueJobPaginationOptions,
 } from '@/types/entities/queue-job';
-import { unstable_cache } from 'next/cache';
 
 // Logger específico para acciones de consulta
 const logger = serverLogger.withContext('QueueActions:query');

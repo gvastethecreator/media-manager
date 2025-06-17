@@ -33,7 +33,7 @@ export interface TagTransformOptions {
  */
 export function validateTag(tag: Partial<TagBase>): TagBase {
 	try {
-		const result = TagSchema.parse(tag);
+		const _result = TagSchema.parse(tag);
 		return tag as TagBase;
 	} catch (error) {
 		logger.error('Error validando Tag', { error });

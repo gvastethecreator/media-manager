@@ -1,6 +1,6 @@
 'use client';
 
-import { Circle, CircleDashed, Diameter, Loader, LoaderPinwheel } from 'lucide-react';
+import { CircleDashed } from 'lucide-react';
 import { motion } from 'motion/react';
 
 interface LoadingScreenProps {
