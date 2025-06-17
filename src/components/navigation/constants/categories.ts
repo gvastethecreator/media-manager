@@ -1,19 +1,19 @@
 import type { CategoryItem } from '@/components/navigation/types';
 import type { ViewType } from '@/types/file-item';
 import {
-	BookImage,
-	Box,
-	Camera,
-	Database,
-	FolderIcon,
-	FolderKanban,
-	Lightbulb,
-	MapPin,
-	StickyNote,
-	TagIcon,
-	Terminal,
-	User2,
-	WandSparkles,
+    BookImage,
+    Box,
+    Camera,
+    Database,
+    FolderIcon,
+    FolderKanban,
+    Lightbulb,
+    MapPin,
+    StickyNote,
+    TagIcon,
+    Terminal,
+    User2,
+    WandSparkles,
 } from 'lucide-react';
 
 /**
@@ -98,5 +98,35 @@ export const NAVIGATION_CATEGORIES: CategoryItem[] = [
 		icon: WandSparkles,
 		label: 'Comodines',
 		color: '#a855f7',
+	},
+	{
+		id: 'document' as ViewType,
+		icon: BookImage,
+		label: 'Documentos',
+		color: '#fbbf24',
+	},
+	{
+		id: 'audio' as ViewType,
+		icon: WandSparkles,
+		label: 'Audio',
+		color: '#38bdf8',
+	},
+	{
+		id: 'json-file' as ViewType,
+		icon: Database,
+		label: 'JSON',
+		color: '#f472b6',
+	},
+	{
+		id: 'workflow' as ViewType,
+		icon: Lightbulb,
+		label: 'Workflows',
+		color: '#a3e635',
+	},
+	{
+		id: 'file3d' as ViewType,
+		icon: Box,
+		label: '3D',
+		color: '#818cf8',
 	},
 ];

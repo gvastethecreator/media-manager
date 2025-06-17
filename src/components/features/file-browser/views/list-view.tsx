@@ -143,7 +143,6 @@ export const ListItem = memo(function ListItem({
 						src={thumbnailUrl}
 						alt={item.name}
 						className="h-full w-full object-cover"
-						onError={() => { }}
 					/>
 				</div>
 			) : (

@@ -150,8 +150,7 @@ export const CardItem = memo(function CardItem({
 					alt={item.name}
 					className="w-full h-full rounded-md"
 					objectFit="cover"
-					isScrolling={isScrolling}
-					shouldLoad={shouldLoad}
+					priority={!isScrolling && shouldLoad}
 				/>
 			</div>
 		);
