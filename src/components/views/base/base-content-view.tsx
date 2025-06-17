@@ -2,7 +2,7 @@
 
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { IntegratedFileBrowser } from '@/components/features/file-browser';
 import BlurFade from '@/components/ui/blur-fade';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageViewer } from '@/store/image-viewer.store';
@@ -189,7 +189,7 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 		<div className={`h-full w-full flex overflow-hidden ${className || ''}`}>
 			<div className="h-full w-full overflow-auto">
 				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>
-					<FileBrowser
+					<IntegratedFileBrowser
 						items={items}
 						onItemClick={handleItemClick}
 						onItemDoubleClick={handleItemDoubleClick}

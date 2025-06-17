@@ -7,13 +7,14 @@ import type { FileItem } from '@/types/file-item';
 import {
 	Calendar,
 	File,
-	Heart
+	FileText,
+	Heart,
+	Image,
+	Video
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import type * as React from 'react';
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
-import type { ContextMenuAction } from '../context-menu/context-menu';
-import { FileContextMenu } from '../context-menu/context-menu';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
 
 interface ListItemProps {
@@ -22,7 +23,7 @@ interface ListItemProps {
 	isActive?: boolean;
 	onClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onDoubleClick?: (item: FileItem) => void;
-	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	onContextMenu?: (item: FileItem, e: React.MouseEvent) => void;
 }
 
 const getMetadata = (metadata: string | null) => {
@@ -52,26 +53,10 @@ export const ListItem = memo(function ListItem({
 	isActive,
 	onClick,
 	onDoubleClick,
-	onContextAction,
+	onContextMenu,
 }: ListItemProps) {
 	const metadata = getMetadata(item.metadata);
 	const buttonRef = useRef<HTMLButtonElement>(null);
-
-	// Añadir logging para depuración
-	useEffect(() => {
-		// Registrar eventos de contexto
-		const button = buttonRef.current;
-		if (button) {
-			const handleContextMenuNative = (e: MouseEvent) => {
-				console.log('Evento contextmenu nativo en ListView para:', item.name);
-			};
-
-			button.addEventListener('contextmenu', handleContextMenuNative);
-			return () => {
-				button.removeEventListener('contextmenu', handleContextMenuNative);
-			};
-		}
-	}, [item]);
 
 	// Memoizamos los handlers para evitar recreaciones
 	const handleClick = useCallback(
@@ -90,6 +75,15 @@ export const ListItem = memo(function ListItem({
 			onDoubleClick?.(item);
 		},
 		[onDoubleClick, item]
+	);
+
+	const handleContextMenu = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			onContextMenu?.(item, e);
+		},
+		[onContextMenu, item]
 	);
 
 	// Memoizamos la clase para evitar recálculos
@@ -125,40 +119,31 @@ export const ListItem = memo(function ListItem({
 		}
 	};
 
-	// Optimizamos la acción del menú contextual para evitar recreaciones
-	const handleContextAction = useCallback(
-		(action: ContextMenuAction, data?: Record<string, unknown>) => {
-			onContextAction?.(action, item, data);
-		},
-		[onContextAction, item]
-	);
-
 	return (
-		<FileContextMenu file={item} onAction={handleContextAction}>
-			<motion.div
-				className={rowClassName}
-				onClick={handleClick}
-				onDoubleClick={handleDoubleClick}
-				whileHover={{ backgroundColor: 'rgba(var(--accent), 0.2)' }}
-				whileTap={{ backgroundColor: 'rgba(var(--accent), 0.3)' }}
-				layout
-			>
-				<div className="flex items-center gap-3 flex-1">
-					<div className="flex items-center gap-2">
-						{getFileIcon()}
-						<span className="font-medium">{item.name}</span>
-						{item.isFavorite && <Heart className="h-3 w-3 text-yellow-500 fill-current" />}
-					</div>
+		<motion.div
+			className={rowClassName}
+			onClick={handleClick}
+			onDoubleClick={handleDoubleClick}
+			onContextMenu={handleContextMenu}
+			whileHover={{ backgroundColor: 'rgba(var(--accent), 0.2)' }}
+			whileTap={{ backgroundColor: 'rgba(var(--accent), 0.3)' }}
+			layout
+		>
+			<div className="flex items-center gap-3 flex-1">
+				<div className="flex items-center gap-2">
+					{getFileIcon()}
+					<span className="font-medium">{item.name}</span>
+					{item.isFavorite && <Heart className="h-3 w-3 text-yellow-500 fill-current" />}
 				</div>
-				<div className="flex items-center gap-4">
-					<span className="text-xs text-muted-foreground w-20 text-right">{formatBytes(item.size)}</span>
-					<div className="flex items-center gap-1 w-32">
-						<Calendar className="h-3 w-3 text-muted-foreground" />
-						<span className="text-xs text-muted-foreground">{formatDate(item.modifiedAt || item.createdAt)}</span>
-					</div>
+			</div>
+			<div className="flex items-center gap-4">
+				<span className="text-xs text-muted-foreground w-20 text-right">{formatBytes(item.size)}</span>
+				<div className="flex items-center gap-1 w-32">
+					<Calendar className="h-3 w-3 text-muted-foreground" />
+					<span className="text-xs text-muted-foreground">{formatDate(item.modifiedAt || item.createdAt)}</span>
 				</div>
-			</motion.div>
-		</FileContextMenu>
+			</div>
+		</motion.div>
 	);
 });
 
@@ -166,7 +151,7 @@ export interface ListViewProps {
 	items: FileItem[];
 	onItemClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
-	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	onContextMenu?: (item: FileItem, e: React.MouseEvent) => void;
 	className?: string;
 }
 
@@ -174,7 +159,7 @@ export const ListView = memo(function ListView({
 	items,
 	onItemClick,
 	onItemDoubleClick,
-	onContextAction,
+	onContextMenu,
 	className,
 }: ListViewProps) {
 	const { selectedIds, activeId } = useSelectionStore();
@@ -193,11 +178,11 @@ export const ListView = memo(function ListView({
 					isActive={isActive}
 					onClick={onItemClick}
 					onDoubleClick={onItemDoubleClick}
-					onContextAction={onContextAction}
+					onContextMenu={onContextMenu}
 				/>
 			);
 		},
-		[selectedIds, activeId, onItemClick, onItemDoubleClick, onContextAction]
+		[selectedIds, activeId, onItemClick, onItemDoubleClick, onContextMenu]
 	);
 
 	return (

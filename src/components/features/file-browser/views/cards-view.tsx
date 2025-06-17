@@ -19,11 +19,9 @@ import {
 	User2,
 	Wand2
 } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion } from 'motion/react';
 import type * as React from 'react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ContextMenuAction } from '../context-menu/context-menu';
-import { FileContextMenu } from '../context-menu/context-menu';
+import { memo, useCallback, useMemo, useRef } from 'react';
 import { ImageRenderer } from '../image-renderer';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
 
@@ -35,7 +33,7 @@ interface CardItemProps {
 	shouldLoad?: boolean;
 	onClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onDoubleClick?: (item: FileItem) => void;
-	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	onContextMenu?: (item: FileItem, e: React.MouseEvent) => void;
 }
 
 const getMetadata = (metadata: string | null) => {
@@ -67,7 +65,7 @@ export const CardItem = memo(function CardItem({
 	shouldLoad = true,
 	onClick,
 	onDoubleClick,
-	onContextAction,
+	onContextMenu,
 }: CardItemProps) {
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -108,11 +106,13 @@ export const CardItem = memo(function CardItem({
 		[onDoubleClick, item]
 	);
 
-	const handleContextAction = useCallback(
-		(action: ContextMenuAction, data?: Record<string, unknown>) => {
-			onContextAction?.(action, item, data);
+	const handleContextMenu = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			onContextMenu?.(item, e);
 		},
-		[onContextAction, item]
+		[onContextMenu, item]
 	);
 
 	const buttonClassName = useMemo(
@@ -281,39 +281,36 @@ export const CardItem = memo(function CardItem({
 	);
 
 	return (
-		<FileContextMenu file={item} onAction={handleContextAction}>
-			<motion.div
-				ref={buttonRef}
-				className={buttonClassName}
-				onClick={handleClick}
-				onDoubleClick={handleDoubleClick}
-				onKeyDown={handleKeyDown}
-				whileHover={{ scale: 1.02 }}
-				whileTap={{ scale: 0.98 }}
-				layout
-			>
-				<div className="flex flex-col h-full">
-					<div className="relative overflow-hidden" style={{ height: imageHeight }}>
-						{ImageContent}
-						{StatusBadges}
+		<motion.div
+			ref={buttonRef}
+			className={buttonClassName}
+			onClick={handleClick}
+			onDoubleClick={handleDoubleClick}
+			onContextMenu={handleContextMenu}
+			whileHover={{ scale: 1.01 }}
+			whileTap={{ scale: 0.99 }}
+		>
+			<div className="flex flex-col h-full">
+				<div className="relative overflow-hidden" style={{ height: imageHeight }}>
+					{ImageContent}
+					{StatusBadges}
+				</div>
+
+				<div className="flex flex-col flex-1 p-3 gap-2">
+					<div className="flex items-start justify-between gap-2">
+						<h3 className="text-sm font-medium leading-tight truncate">{item.name}</h3>
+						{GenerationBadge}
 					</div>
 
-					<div className="flex flex-col flex-1 p-3 gap-2">
-						<div className="flex items-start justify-between gap-2">
-							<h3 className="text-sm font-medium leading-tight truncate">{item.name}</h3>
-							{GenerationBadge}
-						</div>
+					{MetadataInfo}
 
-						{MetadataInfo}
-
-						<div className="flex flex-col gap-1.5 mt-auto">
-							{TagsDisplay}
-							{CollectionBadges}
-						</div>
+					<div className="flex flex-col gap-1.5 mt-auto">
+						{TagsDisplay}
+						{CollectionBadges}
 					</div>
 				</div>
-			</motion.div>
-		</FileContextMenu>
+			</div>
+		</motion.div>
 	);
 });
 
@@ -321,7 +318,7 @@ export interface CardsViewProps {
 	items: FileItem[];
 	onItemClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
-	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	onContextMenu?: (item: FileItem, e: React.MouseEvent) => void;
 	className?: string;
 }
 
@@ -329,51 +326,16 @@ export const CardsView = memo(function CardsView({
 	items,
 	onItemClick,
 	onItemDoubleClick,
-	onContextAction,
+	onContextMenu,
 	className,
 }: CardsViewProps) {
-	// Estados y referencias
-	const [isScrolling, setIsScrolling] = useState(false);
-	const scrollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-	// Stores
 	const { selectedIds, activeId } = useSelectionStore();
 	const { itemSize } = useViewOptionsStore();
 
-	// Manejar eventos de scroll
-	const handleScrollStart = useCallback(() => {
-		setIsScrolling(true);
-	}, []);
-
-	const handleScrollEnd = useCallback(() => {
-		// Usar un timeout para evitar cambios de estado frecuentes
-		if (scrollingTimeoutRef.current) {
-			clearTimeout(scrollingTimeoutRef.current);
-		}
-
-		scrollingTimeoutRef.current = setTimeout(() => {
-			setIsScrolling(false);
-			scrollingTimeoutRef.current = null;
-		}, 150);
-	}, []);
-
-	// Limpiar timeout al desmontar
-	useEffect(() => {
-		return () => {
-			if (scrollingTimeoutRef.current) {
-				clearTimeout(scrollingTimeoutRef.current);
-			}
-		};
-	}, []);
-
-	// Renderizar un elemento de la lista
 	const renderItem = useCallback(
 		(index: number, item: FileItem) => {
 			const isSelected = selectedIds.includes(item.id);
 			const isActive = activeId === item.id;
-
-			// Calcular si el elemento debe cargarse (para optimizar rendimiento)
-			const shouldLoad = !isScrolling || index < 20;
 
 			return (
 				<CardItem
@@ -381,29 +343,23 @@ export const CardsView = memo(function CardsView({
 					item={item}
 					isSelected={isSelected}
 					isActive={isActive}
-					isScrolling={isScrolling}
-					shouldLoad={shouldLoad}
 					onClick={onItemClick}
 					onDoubleClick={onItemDoubleClick}
-					onContextAction={onContextAction}
+					onContextMenu={onContextMenu}
 				/>
 			);
 		},
-		[selectedIds, activeId, isScrolling, onItemClick, onItemDoubleClick, onContextAction]
+		[selectedIds, activeId, onItemClick, onItemDoubleClick, onContextMenu]
 	);
 
 	return (
-		<AnimatePresence mode="wait">
-			<VirtualizerWrapper
-				type="grid"
-				data={items}
-				itemContent={renderItem}
-				itemSize={itemSize}
-				gridClassName={cn('w-full h-full p-4', className)}
-				layoutId="cards-view"
-				onScrollStart={handleScrollStart}
-				onScrollEnd={handleScrollEnd}
-			/>
-		</AnimatePresence>
+		<VirtualizerWrapper
+			type="grid"
+			data={items}
+			itemContent={renderItem}
+			itemSize={itemSize}
+			gridClassName={cn('w-full h-full p-4', className)}
+			layoutId="cards-view"
+		/>
 	);
 });
