@@ -1,19 +1,19 @@
 'use server';
 
-import path from 'path';
-import { z } from 'zod';
 import { getThumbnail } from '@/app/actions/images/image-thumbnails.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
-	RelatedAlbum,
-	RelatedCharacter,
-	RelatedCollection,
-	RelatedPlace,
-	RelatedTag,
-	RelatedWorldItem,
+    RelatedAlbum,
+    RelatedCharacter,
+    RelatedCollection,
+    RelatedPlace,
+    RelatedTag,
+    RelatedWorldItem,
 } from '@/types/file-item';
 import { ThumbnailQuality } from '@/types/thumbnails';
+import path from 'path';
+import { z } from 'zod';
 
 const imagesActionsLogger = serverLogger.withContext('FolderImagesActions');
 
@@ -210,17 +210,23 @@ const apiResponseFileItemSchema = z.object({
  * objetos binarios (Buffer/Uint8Array) u otros tipos no serializables.
  *
  * @param folderId ID de la carpeta
- * @returns Objeto con items (imágenes) y metadata de carpeta, 100% serializable
+ * @param options Opciones de paginación
+ * @returns Objeto con items (imágenes), metadata de carpeta y paginación, 100% serializable
  */
-export async function getFolderImages(folderId: string) {
+export async function getFolderImages(folderId: string, options: { skip?: number; take?: number } = {}) {
 	try {
-		imagesActionsLogger.info('⚡ Server Action: getFolderImages', { folderId });
+		imagesActionsLogger.info('⚡ Server Action: getFolderImages', { folderId, options });
 
-		// Paso 1: Obtener datos de Prisma
+		// 📊 Configuración de paginación con valores por defecto
+		const { skip = 0, take = 100 } = options;
+
+		// Paso 1: Obtener datos de Prisma con paginación
 		const folderData = await prisma.folder.findUnique({
 			where: { id: folderId },
 			include: {
 				images: {
+					skip,
+					take,
 					orderBy: { name: 'asc' },
 					include: {
 						stats: true,
@@ -234,14 +240,25 @@ export async function getFolderImages(folderId: string) {
 		// Paso 2: Validar existencia de la carpeta
 		if (!folderData) {
 			imagesActionsLogger.error('❌ Carpeta no encontrada:', { folderId });
-			return { error: 'Carpeta no encontrada', status: 404, items: [], folder: null };
+			return { error: 'Carpeta no encontrada', status: 404, items: [], folder: null, pagination: { hasMore: false, total: 0, currentPage: 0 } };
 		}
+
+		// Paso 3: Obtener el total de imágenes para calcular hasMore
+		const totalImages = await prisma.image.count({
+			where: { folderId }
+		});
+
+		const hasMore = skip + take < totalImages;
+		const currentPage = Math.floor(skip / take);
 
 		imagesActionsLogger.info('✅ Carpeta encontrada:', {
 			id: folderData.id,
 			name: folderData.name,
 			imageCount: folderData.images.length,
-		}); // Paso 3: Transformar cada imagen a formato seguro
+			totalImages,
+			hasMore,
+			currentPage,
+		});// Paso 3: Transformar cada imagen a formato seguro
 		const safeFiles: ApiResponseFileItem[] = await Promise.all(
 			folderData.images.map(async (imgRecord) => {
 				// 📊 Procesar metadata como string JSON
@@ -355,7 +372,6 @@ export async function getFolderImages(folderId: string) {
 				return safeFileItem;
 			})
 		);
-
 		// Paso 4: Crear respuesta final con carpeta segura para serialización
 		const initialResponse = {
 			items: safeFiles,
@@ -365,6 +381,13 @@ export async function getFolderImages(folderId: string) {
 				path: folderData.path,
 				totalFiles: folderData.totalFiles || 0,
 				totalSize: folderData.totalSize || 0,
+			},
+			pagination: {
+				hasMore,
+				total: totalImages,
+				currentPage,
+				skip,
+				take,
 			},
 			status: 200,
 		};
@@ -409,7 +432,6 @@ export async function getFolderImages(folderId: string) {
 				}
 			}
 		}
-
 		return safeResponse;
 	} catch (error) {
 		imagesActionsLogger.error('❌ Error obteniendo imágenes de carpeta:', error);
@@ -418,6 +440,7 @@ export async function getFolderImages(folderId: string) {
 			status: 500,
 			items: [],
 			folder: null,
+			pagination: { hasMore: false, total: 0, currentPage: 0 },
 		};
 	}
 }

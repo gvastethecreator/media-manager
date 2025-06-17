@@ -26,13 +26,13 @@ import { SimpleGridView } from './views/simple-grid-view';
 // Configuración del cache y carga secuencial
 const BROWSER_CONFIG = {
 	// Tamaño máximo del caché (cuántos elementos mantener en memoria)
-	cacheSize: 500,
-	// Configuración para carga secuencial
+	cacheSize: 1000,
+	// Configuración para carga secuencial (DESHABILITADA - ahora usamos paginación del servidor)
 	sequential: {
-		initialBatchSize: 50, // Cuántos elementos cargar inicialmente
-		additionalBatchSize: 30, // Cuántos elementos cargar en cada lote adicional
-		loadThreshold: 0.7, // Porcentaje de scroll para cargar más (0-1)
-		scrollLoadDelay: 200, // Tiempo de espera tras detener scroll antes de cargar más
+		initialBatchSize: 100, // Aumentado para mejor UX inicial
+		additionalBatchSize: 50, // Cuántos elementos cargar en cada lote adicional
+		loadThreshold: 0.8, // Porcentaje de scroll para cargar más (0-1)
+		scrollLoadDelay: 100, // Tiempo de espera tras detener scroll antes de cargar más
 	},
 };
 
@@ -132,9 +132,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
 	// ✅ Usar una ref para el seguimiento no causa re-renders
 	const lastSelectedItemIndexRef = useRef<number | null>(null);
-
-	// Control de carga progresiva
-	const [visibleItemCount, setVisibleItemCount] = useState<number>(BROWSER_CONFIG.sequential.initialBatchSize);
+	// Control de carga progresiva (DESHABILITADO - ahora manejado por el store)
+	const [visibleItemCount, setVisibleItemCount] = useState<number>(items.length);
 	const _scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const loadingMoreRef = useRef<boolean>(false);
 
@@ -200,35 +199,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Seleccionar solo la versión del store para forzar re-renders cuando las miniaturas cambien
 	const _imageResourcesVersion = useImageResources((state) => state.version);
-
-	// Cargar más elementos de forma controlada
+	// Cargar más elementos de forma controlada (DESHABILITADO - usamos loadMoreItems del store)
 	const _loadMoreItemsSequentially = useCallback(() => {
-		if (loadingMoreRef.current) return;
-
-		// Marcar como cargando
-		loadingMoreRef.current = true;
-		logger.debug(
-			`[FileBrowser] Cargando más elementos secuencialmente: ${visibleItemCount} → ${visibleItemCount + BROWSER_CONFIG.sequential.additionalBatchSize}`
-		);
-
-		// Usar setTimeout para dar tiempo a la UI para responder
-		setTimeout(() => {
-			setVisibleItemCount((prev) => {
-				// Limitar al número máximo de elementos o al tamaño del caché
-				const newCount = Math.min(
-					prev + BROWSER_CONFIG.sequential.additionalBatchSize,
-					items.length,
-					BROWSER_CONFIG.cacheSize
-				);
-				return newCount;
-			});
-
-			// Desmarcar como cargando después de un breve retraso
-			setTimeout(() => {
-				loadingMoreRef.current = false;
-			}, 100);
-		}, 50);
-	}, [items.length, visibleItemCount]);
+		// Esta función ahora está deshabilitada, usamos loadMoreItems del store
+		if (loadMoreItems && !isLoading) {
+			logger.debug('[FileBrowser] Activando loadMoreItems del store');
+			loadMoreItems();
+		}
+	}, [loadMoreItems, isLoading]);
 
 	// 🔧 **Sistema de medición progresivo**
 	// Estrategia: inmediato → RAF → timeout → fallback fijo
@@ -335,27 +313,25 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			};
 		});
 	}, [filteredItems]);
-
-	// Limitar los elementos visibles para carga progresiva
+	// Limitar los elementos visibles para carga progresiva (DESHABILITADO - mostramos todos)
 	const visibleItems = useMemo(() => {
-		const result = processedItems.slice(0, visibleItemCount);
+		// Ahora mostramos todos los items del store, la paginación se maneja a nivel de servidor
+		const result = processedItems;
 		console.log('[FileBrowser] Datos:', {
 			totalItems: items.length,
 			processedItems: processedItems.length,
-			visibleItemCount,
 			visibleItems: result.length,
 			viewMode,
 			viewType: viewMode || 'grid',
 		});
 		return result;
-	}, [processedItems, visibleItemCount, items.length, viewMode]);
+	}, [processedItems, items.length, viewMode]);
 
 	// Referencia a los elementos actuales para la vista (para selectionActions)
 	const currentViewItems = visibleItems;
-
-	// Resetear conteo visible cuando cambian los elementos
+	// Resetear conteo visible cuando cambian los elementos (DESHABILITADO)
 	useEffect(() => {
-		setVisibleItemCount(Math.min(BROWSER_CONFIG.sequential.initialBatchSize, items.length));
+		// Ya no necesitamos resetear visibleItemCount porque mostramos todos los items
 		loadingMoreRef.current = false;
 	}, [items]);
 
@@ -501,8 +477,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			setDetailsPanelVisible(true);
 		}
 	}, [selectedIds, processedItems, items, setDetailsPanelItems, setDetailsPanelVisible]);
-
-	// Efecto para el scroll infinito
+	// Efecto para el scroll infinito mejorado
 	useEffect(() => {
 		if (!loadMoreItems || !loadMoreRef.current) return;
 
@@ -510,11 +485,15 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			(entries) => {
 				const [entry] = entries;
 				if (entry.isIntersecting && !isLoading && !isReindexing) {
+					logger.debug('[FileBrowser] 🔄 Trigger scroll infinito detectado');
 					loadMoreItems();
 				}
 				setLoadMoreVisible(entry.isIntersecting);
 			},
-			{ threshold: 0.5 }
+			{
+				threshold: 0.1, // Trigger cuando el elemento está 10% visible
+				rootMargin: '50px' // Trigger 50px antes de que sea completamente visible
+			}
 		);
 
 		observer.observe(loadMoreRef.current);
@@ -678,10 +657,23 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 							</AnimatePresence>
 						))}
 				</div>
-			</div>
-
-			{/* Barra de estado */}
+			</div>			{/* Barra de estado */}
 			<StatusBar items={currentViewItems} />
+
+			{/* Elemento para scroll infinito - solo si hay función loadMoreItems */}
+			{loadMoreItems && (
+				<div
+					ref={loadMoreRef}
+					className="h-4 w-full flex items-center justify-center"
+					style={{ minHeight: '16px' }}
+				>
+					{isLoading && (
+						<div className="text-sm text-muted-foreground">
+							Cargando más elementos...
+						</div>
+					)}
+				</div>
+			)}
 
 			{/* Menú contextual */}
 			{contextMenu.open && <ContextMenu {...contextMenu} />}
