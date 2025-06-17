@@ -1,5 +1,5 @@
-import type { FileItem } from '@/types/file-item';
 import type { LucideIcon } from 'lucide-react';
+import type { FileItem } from '@/types/file-item';
 
 /**
  * Props base para todas las vistas de contenido

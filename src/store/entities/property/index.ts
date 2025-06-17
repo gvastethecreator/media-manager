@@ -6,9 +6,9 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { PropertySortCriteria, PropertyViewMode } from '../../../types/entities/property';
-import { type PropertyCoreSlice, createPropertyCoreSlice } from './slices/core';
-import { type PropertyFiltersSlice, createPropertyFiltersSlice } from './slices/filters';
-import { type PropertyUISlice, createPropertyUISlice } from './slices/ui';
+import { createPropertyCoreSlice, type PropertyCoreSlice } from './slices/core';
+import { createPropertyFiltersSlice, type PropertyFiltersSlice } from './slices/filters';
+import { createPropertyUISlice, type PropertyUISlice } from './slices/ui';
 import type { PropertyState } from './types';
 
 // Combinación de todos los slices

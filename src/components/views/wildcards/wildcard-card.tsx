@@ -1,10 +1,10 @@
 'use client';
 
+import { Sparkles, WandSparkles } from 'lucide-react';
+import { useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Sparkles, WandSparkles } from 'lucide-react';
-import { useCallback } from 'react';
 import type { WildcardWithStats } from './wildcards-view';
 
 export interface WildcardCardProps {

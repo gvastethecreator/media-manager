@@ -3,9 +3,9 @@
  * @module store/entities/folder/store
  */
 
-import type { FolderExtended } from '@/types/entities/folder';
 import { createSelector } from 'reselect';
 import { create } from 'zustand';
+import type { FolderExtended } from '@/types/entities/folder';
 import { createCoreSlice } from './slices/core';
 import { createFiltersSlice } from './slices/filters';
 import { createUISlice } from './slices/ui';

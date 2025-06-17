@@ -3,11 +3,11 @@
  * @module transformers/prompt/transformer
  */
 
+import type { Prompt } from '@prisma/client';
 import { Logger } from '@/lib/logger';
 import { PromptSchema } from '@/types/entities/prompt/schema';
 import type { PromptComplete, PromptExtended, PromptWithStats } from '@/types/entities/prompt/types';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prompt } from '@prisma/client';
 import { deserializeParameters, deserializeTags, toExtendedPrompt } from './serializers';
 
 const logger = new Logger('PromptTransformer');

@@ -1,4 +1,4 @@
-import { ALL_ENTITIES, ENTITY_DISPLAY_NAMES, type EntityType } from '@/constants/entities';
+import { ENTITY_DISPLAY_NAMES, type EntityType } from '@/constants/entities';
 import { serverLogger } from './logger/server-logger';
 
 // Logger para las utilidades de entidades

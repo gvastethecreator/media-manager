@@ -3,13 +3,13 @@
  * @module store/settings
  */
 
+import { create } from 'zustand';
+import { devtools, persist as zustandPersist } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { settingsService } from '@/services/settings-service-export';
 import type { Settings, SettingsUpdate } from '@/types/settings';
 import { createSelectors } from '@/utils/store-selectors';
-import { create } from 'zustand';
-import { devtools, persist as zustandPersist } from 'zustand/middleware';
-import { immer } from 'zustand/middleware/immer';
 
 // Logger para el store
 const logger = clientLogger.withContext('SettingsStore');

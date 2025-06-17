@@ -1,10 +1,10 @@
 'use client';
 
+import { motion } from 'motion/react';
+import Link from 'next/link';
 import { EntityStats, type StatItem } from '@/components/ui/entity-stats';
 import { ShineButton } from '@/components/ui/shine-border';
 import { cn } from '@/lib/utils';
-import { motion } from 'motion/react';
-import Link from 'next/link';
 import { CardContainer } from './card-container';
 import { CardHeader } from './card-header';
 
@@ -119,7 +119,7 @@ export function EntityCard({
 	const baseHeight = compact ? 'h-[120px]' : 'h-[200px]';
 
 	// Determinar si se debe usar Link o button
-	const isClickable = href || onClick;
+	const _isClickable = href || onClick;
 
 	// Contenido de la tarjeta
 	const cardContent = (
@@ -268,7 +268,7 @@ function generateSecondaryColor(primaryColor: string): string {
 		const darkerB = Math.floor(b * darkenFactor);
 
 		return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-	} catch (e) {
+	} catch (_e) {
 		return '#2563eb';
 	}
 }

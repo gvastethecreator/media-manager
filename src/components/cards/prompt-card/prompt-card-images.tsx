@@ -1,8 +1,8 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { ImageIcon } from 'lucide-react';
 import { Suspense, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface PromptCardImagesProps {
 	/** Imagen principal a mostrar */

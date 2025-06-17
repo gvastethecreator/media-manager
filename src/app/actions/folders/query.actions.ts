@@ -7,11 +7,11 @@
  *              así como la obtención de la estructura de árbol de carpetas y estadísticas.
  */
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { mapFolderFiltersToPrisma, transformFolderToExtended } from '@/transformers/folder';
 import { type FolderFilters } from '@/types/entities/folder';
-import { revalidatePath } from 'next/cache';
 
 // Logger para acciones de consulta
 const queryLogger = serverLogger.withContext('FolderQueryActions');

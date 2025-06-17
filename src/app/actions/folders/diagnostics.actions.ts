@@ -369,7 +369,7 @@ export async function checkFolderConsistency(id: string): Promise<FolderDiagnost
 					recommendation: 'Considerar dividir la carpeta en subcarpetas o mover a almacenamiento más rápido',
 				});
 			}
-		} catch (error) {
+		} catch (_error) {
 			issues.push({
 				type: 'path',
 				severity: 'critical',

@@ -1,9 +1,9 @@
 'use client';
 
+import { AlertCircle, Database, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { AlertCircle, Database, RefreshCw } from 'lucide-react';
 
 interface ThumbnailErrorProps {
 	error: Error | string;

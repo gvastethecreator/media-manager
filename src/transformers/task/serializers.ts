@@ -44,7 +44,7 @@ export function fromPrismaTask(prismaTask: any): TaskBase {
 /**
  * Convierte un objeto TaskBase a Extended con propiedades UI
  */
-export function toExtendedTask(task: Partial<TaskBase>, options: TransformTaskOptions = {}): TaskExtended {
+export function toExtendedTask(task: Partial<TaskBase>, _options: TransformTaskOptions = {}): TaskExtended {
 	try {
 		// Asegurarse de que tenemos un TaskBase válido
 		if (!task.id || !task.name || !task.handler) {
@@ -96,7 +96,7 @@ export function toExtendedTask(task: Partial<TaskBase>, options: TransformTaskOp
 		// Calcular próxima ejecución si hay un horario programado
 		if (task.schedule && task.status !== TaskStatus.COMPLETED) {
 			// Simplificado: en un caso real, habría que interpretar la expresión cron
-			extendedTask.nextRunAt = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); // +1 día
+			extendedTask.nextRunAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // +1 día
 		}
 
 		// Asignar propiedades visuales

@@ -1,5 +1,7 @@
 'use client';
 
+import { Album } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { getAlbumImages } from '@/app/actions/albums/album.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
@@ -7,8 +9,6 @@ import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import type { FileItem } from '@/types/file-item';
-import { Album } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 
 const viewLogger = clientLogger.withContext('AlbumContentView');
 

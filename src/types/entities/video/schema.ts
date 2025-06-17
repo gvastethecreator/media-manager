@@ -3,8 +3,8 @@
  * @module types/entities/video/schema
  */
 
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { VideoCodec, VideoFormat, VideoPrivacyLevel, VideoQuality, VideoType } from './enums';
 
 /**

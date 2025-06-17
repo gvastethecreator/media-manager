@@ -4,7 +4,15 @@
  */
 
 export * from './schema';
-export * from './types';
+// Re-exportar esquemas Zod para validación
+export {
+	createProfileSchema,
+	profileFiltersSchema,
+	profilePaginationSchema,
+	profilePreferencesSchema,
+	updateProfilePreferencesSchema,
+	updateProfileSchema,
+} from './schema';
 
 // Re-exportar tipos específicos para conveniencia
 export type {
@@ -17,13 +25,4 @@ export type {
 	UpdateProfileInput,
 	UpdateProfilePreferencesInput,
 } from './types';
-
-// Re-exportar esquemas Zod para validación
-export {
-	createProfileSchema,
-	profileFiltersSchema,
-	profilePaginationSchema,
-	profilePreferencesSchema,
-	updateProfilePreferencesSchema,
-	updateProfileSchema,
-} from './schema';
+export * from './types';

@@ -1,5 +1,5 @@
-import { createStream } from '@/lib/stream';
 import { type NextRequest, NextResponse } from 'next/server';
+import { createStream } from '@/lib/stream';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;

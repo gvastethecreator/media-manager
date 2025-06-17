@@ -3,9 +3,9 @@
  * @module store/entities/group/slices/ui
  */
 
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { GroupDisplayState, GroupViewMode } from '@/types/entities/group';
-import type { StateCreator } from 'zustand';
 import type { GroupState } from '../types';
 
 const groupLogger = clientLogger.withContext('GroupUI');
@@ -195,7 +195,7 @@ export const createGroupUISlice: StateCreator<GroupState, [], [], GroupUISlice> 
 	},
 
 	// Estado de visualización
-	setGroupDisplayState: (id, state) => {
+	setGroupDisplayState: (id, _state) => {
 		set((state) => ({
 			ui: {
 				...state.ui,

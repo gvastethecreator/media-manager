@@ -3,21 +3,21 @@
  * @module services/profile
  */
 
+import type { Profile } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
 	type CreateProfileInput,
+	createProfileSchema,
 	type ProfileExtended,
 	type ProfileFilters,
 	type ProfilePaginationOptions,
-	type UpdateProfileInput,
-	createProfileSchema,
 	profileFiltersSchema,
 	profilePaginationSchema,
+	type UpdateProfileInput,
 	updateProfileSchema,
 } from '@/types/entities/profile';
 import { toServiceError } from '@/utils/errors/service-errors';
-import type { Profile } from '@prisma/client';
 import { BaseService } from '../base.service';
 
 const SERVICE_NAME = 'ProfileService';

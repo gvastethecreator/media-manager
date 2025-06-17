@@ -1,13 +1,13 @@
 'use client';
 
+import { Lightbulb } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { getConceptImages } from '@/app/actions/concepts/concept.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { selectSelectedConcept, useConceptStore } from '@/store/entities/concept';
-import { Lightbulb } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
 
 const viewLogger = clientLogger.withContext('ConceptContentView');
 

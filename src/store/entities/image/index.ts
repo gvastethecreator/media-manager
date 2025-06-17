@@ -6,16 +6,16 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { ImageSortCriteria, ImageViewMode } from '../../../types/entities/image';
-import { type ImageCoreSlice, createImageCoreSlice } from './slices/core';
-import { type ImageFiltersSlice, createImageFiltersSlice } from './slices/filters';
-import { type ImageUISlice, createImageUISlice } from './slices/ui';
+import { createImageCoreSlice, type ImageCoreSlice } from './slices/core';
+import { createImageFiltersSlice, type ImageFiltersSlice } from './slices/filters';
+import { createImageUISlice, type ImageUISlice } from './slices/ui';
 import type { ImageState } from './types';
 
 // Tipo del store completo
 export type ImageStore = ImageCoreSlice & ImageUISlice & ImageFiltersSlice;
 
 // Estado inicial
-const initialState: ImageState = {
+const _initialState: ImageState = {
 	core: {
 		images: {},
 		isLoading: false,
@@ -70,10 +70,9 @@ export const useImageStore = create<ImageStore>()(
 	)
 );
 
-// Exportar todo desde types
-export * from './types';
-
 // Exportar slices para poder extenderlos
 export { createImageCoreSlice } from './slices/core';
 export { createImageFiltersSlice } from './slices/filters';
 export { createImageUISlice } from './slices/ui';
+// Exportar todo desde types
+export * from './types';

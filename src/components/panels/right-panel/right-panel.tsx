@@ -1,14 +1,14 @@
 'use client';
 
+import { PanelRightClose, X } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { memo, Suspense, useCallback, useEffect, useState } from 'react';
 import { DetailsPanel } from '@/components/features/file-browser/details/details-panel';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import type { ImageItem } from '@/types/image-item';
-import { PanelRightClose, X } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { Suspense, memo, useCallback, useEffect, useState } from 'react';
 
 // Lazy load del StatsPanel para reducir carga inicial
 const StatsPanel = dynamic(() => import('../stats/stats-panel'), {

@@ -1,6 +1,6 @@
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { PromptExecutionParams, PromptExecutionResult } from '@/types/entities/prompt';
-import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
 const executionLogger = clientLogger.withContext('PromptStore:Execution');

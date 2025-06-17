@@ -1,11 +1,5 @@
 'use client';
 
-import { useEntityLoader } from '@/components/features/file-browser/context-menu/hooks/use-entity-loader';
-import { Separator } from '@/components/ui/separator';
-import { useAlbumStore } from '@/store/entities/album';
-import { useCollectionStore } from '@/store/entities/collection';
-import { useTagStore } from '@/store/entities/tag';
-import type { Tag as TagType } from '@/types/entities/tag';
 import {
 	Album,
 	BookImage,
@@ -17,9 +11,15 @@ import {
 	Loader2,
 	Star,
 	Tag,
-	Trash
+	Trash,
 } from 'lucide-react';
 import { memo, useState } from 'react';
+import { useEntityLoader } from '@/components/features/file-browser/context-menu/hooks/use-entity-loader';
+import { Separator } from '@/components/ui/separator';
+import { useAlbumStore } from '@/store/entities/album';
+import { useCollectionStore } from '@/store/entities/collection';
+import { useTagStore } from '@/store/entities/tag';
+import type { Tag as TagType } from '@/types/entities/tag';
 import { EnhancedSubmenu } from './components/enhanced-submenu';
 import type { ContextMenuAction, FileContextMenuProps } from './types';
 
@@ -36,9 +36,9 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 
 	// Obtener datos de los stores - Ahora esto solo ocurre una vez por renderizado del GridView
 	// en lugar de una vez por cada elemento de la cuadrícula
-	const collections = useCollectionStore(state => state.collections);
-	const tags = useTagStore(state => state.tags || []);
-	const albums = useAlbumStore(state => state.albums);
+	const collections = useCollectionStore((state) => state.collections);
+	const tags = useTagStore((state) => state.tags || []);
+	const albums = useAlbumStore((state) => state.albums);
 
 	// Manejador de acciones con indicador de carga
 	const handleAction = async (action: ContextMenuAction, data?: Record<string, unknown>) => {
@@ -51,7 +51,8 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 	};
 
 	// Estilo para los elementos del menú
-	const menuItemStyle = "flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer";
+	const menuItemStyle =
+		'flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground cursor-pointer';
 
 	// Ahora renderizamos un menú contextual personalizado
 	return (
@@ -111,10 +112,10 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 			<EnhancedSubmenu
 				title="Colecciones"
 				icon={<BookImage className="h-4 w-4" />}
-				items={collections.map(c => ({
+				items={collections.map((c) => ({
 					...c,
 					isFavorite: Boolean(c.isFavorite),
-					isRecent: Boolean(c.isRecent)
+					isRecent: Boolean(c.isRecent),
 				}))}
 				isLoading={loadingStates.collections.loading}
 				file={file}
@@ -131,7 +132,7 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 					id: t.id,
 					name: t.name,
 					isFavorite: false,
-					isRecent: false
+					isRecent: false,
 				}))}
 				isLoading={loadingStates.tags.loading}
 				file={file}
@@ -146,10 +147,10 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 			<EnhancedSubmenu
 				title="Álbumes"
 				icon={<Album className="h-4 w-4" />}
-				items={albums.map(a => ({
+				items={albums.map((a) => ({
 					...a,
 					isFavorite: Boolean(a.isFavorite),
-					isRecent: Boolean(a.isRecent)
+					isRecent: Boolean(a.isRecent),
 				}))}
 				isLoading={loadingStates.albums.loading}
 				file={file}
@@ -239,4 +240,3 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 		</div>
 	);
 });
-

@@ -1,7 +1,6 @@
 'use client';
 
 import { Camera, FileImage, HardDrive, MapPin, Tag, User2 } from 'lucide-react';
-import * as React from 'react';
 import { InfoItem } from './details-panel-info-item';
 import type { ItemComponentProps } from './details-panel-types';
 

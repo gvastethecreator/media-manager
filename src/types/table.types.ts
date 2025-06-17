@@ -3,8 +3,8 @@
  * @module types/table
  */
 
-import type { EntityId } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { EntityId } from '@/utils/types/utility-types';
 
 /**
  * Alineación de columna

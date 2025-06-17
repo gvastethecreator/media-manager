@@ -3,6 +3,29 @@
  * @module types/entities/character
  */
 
+export {
+	CharacterFiltersSchema,
+	CharacterRelationsSchema,
+	CharacterSchema,
+	CreateCharacterSchema,
+	UpdateCharacterSchema,
+} from './base';
+export {
+	CharacterCategory,
+	CharacterClass,
+	CharacterRace,
+} from './enums';
+
+export type {
+	CharacterAttributes,
+	CharacterCard,
+	CharacterExtended,
+	CharacterInventoryItem,
+	CharacterListItem,
+	CharacterSummary,
+	CharacterViewConfig,
+} from './extended';
+// Alias común para el tipo principal
 export type {
 	CharacterBase,
 	CharacterComplete,
@@ -17,38 +40,11 @@ export type {
 	CharacterTransformerOptions,
 	CharacterUpdateInput,
 	CharacterWithRelations,
+	CharacterWithRelations as Character,
 	CreateCharacterData,
 	UpdateCharacterData,
 } from './types';
-
 export {
 	CHARACTER_SORT_PROPERTY_MAP,
 	CharacterSortCriteria,
 } from './types';
-
-export type {
-	CharacterAttributes,
-	CharacterCard,
-	CharacterExtended,
-	CharacterInventoryItem,
-	CharacterListItem,
-	CharacterSummary,
-	CharacterViewConfig,
-} from './extended';
-
-export {
-	CharacterFiltersSchema,
-	CharacterRelationsSchema,
-	CharacterSchema,
-	CreateCharacterSchema,
-	UpdateCharacterSchema,
-} from './base';
-
-export {
-	CharacterCategory,
-	CharacterClass,
-	CharacterRace,
-} from './enums';
-
-// Alias común para el tipo principal
-export type { CharacterWithRelations as Character } from './types';

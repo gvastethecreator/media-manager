@@ -1,5 +1,7 @@
 'use client';
 
+import { Box } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { getWorldItemImages } from '@/app/actions/world-items/world-item.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
@@ -8,8 +10,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useWorldItemStore } from '@/store/entities/world-item';
 import { useSelectionStore } from '@/store/selection.store';
 import type { FileItem } from '@/types/file-item';
-import { Box } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 
 const viewLogger = clientLogger.withContext('WorldItemContentView');
 

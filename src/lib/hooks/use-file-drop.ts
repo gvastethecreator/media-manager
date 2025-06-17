@@ -1,6 +1,6 @@
-import { useFiles } from '@/lib/contexts/file-context';
-import { useCallback, useState } from 'react';
 import type { DragEvent } from 'react';
+import { useCallback, useState } from 'react';
+import { useFiles } from '@/lib/contexts/file-context';
 
 export function useFileDrop() {
 	const { uploadFiles } = useFiles();

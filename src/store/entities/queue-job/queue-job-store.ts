@@ -4,15 +4,15 @@
  * @description Implementación del store de Zustand para trabajos en cola
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { createQueueJobCoreSlice } from './slices/core';
 import { createQueueJobFiltersSlice } from './slices/filters';
 import { queueJobSelectors } from './slices/selectors';
 import { createQueueJobUISlice } from './slices/ui';
-import { QueueJobState, initialQueueJobState } from './types';
+import { initialQueueJobState, QueueJobState } from './types';
 
 // Logger para el store
 const logger = clientLogger.withContext('QueueJobStore');

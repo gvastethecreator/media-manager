@@ -3,9 +3,9 @@
  * @module store/entities/profile/actions
  */
 
+import type { StateCreator } from 'zustand';
 import { getActiveProfile, getProfiles } from '@/app/actions/profiles';
 import type { ProfileExtended, ProfileFilters, ProfilePaginationOptions } from '@/types/entities/profile';
-import type { StateCreator } from 'zustand';
 import type { ProfileStoreState } from './types';
 
 /**
@@ -74,7 +74,7 @@ export const createProfileActions: StateCreator<ProfileStoreState & ProfileActio
 		}
 	},
 	setActiveProfile: (profile) => set({ activeProfile: profile }),
-	setIsLoadingActive: (isLoading) => set({ isLoadingActive }),
+	setIsLoadingActive: (_isLoading) => set({ isLoadingActive }),
 	setActiveProfileError: (error) => set({ activeProfileError: error }),
 
 	// Acciones para la lista de perfiles

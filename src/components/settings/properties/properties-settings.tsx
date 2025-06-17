@@ -1,5 +1,9 @@
 'use client';
 
+import type { Property } from '@prisma/client';
+import { FilterIcon, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { z } from 'zod';
 import {
 	createProperty,
 	deleteProperty,
@@ -17,10 +21,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Toggle } from '@/components/ui/toggle';
 import type { createPropertySchema, propertyFiltersSchema } from '@/lib/validations/property';
 import toastService from '@/services/toast.service';
-import type { Property } from '@prisma/client';
-import { FilterIcon, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { z } from 'zod';
 import { CreatePropertyForm } from './create-property-form';
 
 type PropertyCategory = z.infer<typeof createPropertySchema>['category'];
@@ -51,7 +51,7 @@ export type { PropertyWithStats }; // Exportamos el tipo para el PropertyPreview
 export function PropertiesSettings() {
 	const [properties, setProperties] = useState<PropertyWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const [_error, setError] = useState<string | null>(null);
 	const [selectedProperty, setSelectedProperty] = useState<PropertyWithStats | null>(null);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
@@ -70,7 +70,7 @@ export function PropertiesSettings() {
 
 	useEffect(() => {
 		loadProperties();
-	}, []);
+	}, [loadProperties]);
 
 	const loadProperties = async () => {
 		try {

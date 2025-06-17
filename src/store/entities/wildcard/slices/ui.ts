@@ -3,9 +3,9 @@
  * @module store/entities/wildcard/slices/ui
  */
 
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { WildcardViewMode } from '@/types/entities/wildcard';
-import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
 
 const uiLogger = clientLogger.withContext('WildcardStore:UI');
@@ -185,7 +185,7 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 	},
 
 	// Estados visuales
-	setWildcardDisplayState: (wildcardId, state) => {
+	setWildcardDisplayState: (wildcardId, _state) => {
 		uiLogger.info('🎨 Actualizando estado visual para comodín:', wildcardId);
 		set((state) => ({
 			ui: {

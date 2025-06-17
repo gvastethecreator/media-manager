@@ -5,18 +5,21 @@
 ### 🗑️ Archivos eliminados
 
 #### Componentes obsoletos de toolbar
+
 - `src/components/features/file-browser/toolbar/file-browser-toolbar.tsx` (reemplazado por ViewToolbar en layout)
 - `src/components/features/file-browser/toolbar/view-type-selector.tsx` (ya no existe)
-- `src/components/features/file-browser/toolbar/sort-type-selector.tsx` (ya no existe)  
+- `src/components/features/file-browser/toolbar/sort-type-selector.tsx` (ya no existe)
 - `src/components/features/file-browser/toolbar/selection-actions.tsx` (ya no existe)
 - `src/components/features/file-browser/toolbar/file-browser-actions.tsx` (ya no existe)
 
 #### Wrappers innecesarios
+
 - `src/components/features/file-browser/integrated-file-browser.tsx` (eliminado, se usa FileBrowser directamente)
 
 ### 🔧 Archivos modificados
 
 #### Simplificación de integración
+
 - `src/components/features/file-browser/file-browser.tsx`
   - ✅ **StatusBar funcional agregado**: Barra de estado al final del componente
   - ✅ **Compatibilidad con FileItem**: Type assertion para aceptar FileItem estándar
@@ -38,12 +41,14 @@
 ### ✨ Resultado de la integración
 
 #### 🏗️ Arquitectura simplificada
+
 - **Un solo FileBrowser**: Sin wrappers ni duplicación de funcionalidad
 - **ViewToolbar en layout**: Centralizado en MainLayout, no duplicado por componente
 - **StatusBar funcional**: Mantiene información de estado del explorador
 - **Comunicación desacoplada**: Vía stores Zustand compartidos
 
 #### 🔄 Flujo de integración perfecto
+
 ```
 MainLayout (ViewToolbar) ↔ Stores ↔ FileBrowser + StatusBar
 ```
@@ -56,7 +61,7 @@ MainLayout (ViewToolbar) ↔ Stores ↔ FileBrowser + StatusBar
 
 2. **FileBrowser** (componente puro):
    - Renderizado de archivos
-   - Selección y navegación  
+   - Selección y navegación
    - Menú contextual
    - Visor integrado
 
@@ -66,13 +71,15 @@ MainLayout (ViewToolbar) ↔ Stores ↔ FileBrowser + StatusBar
    - Estado de carga
 
 #### 🎯 Stores que conectan todo
+
 - ✅ **useViewOptionsStore**: Modo vista, búsqueda, filtros, ordenación
-- ✅ **useSelectionStore**: Selección múltiple de elementos  
+- ✅ **useSelectionStore**: Selección múltiple de elementos
 - ✅ **useDetailsPanel**: Panel de detalles sincronizado
 
 ### 📊 Impacto de la limpieza
 
 #### Beneficios logrados
+
 - ✅ **Menos código**: Eliminados ~5 archivos de toolbar duplicada
 - ✅ **Arquitectura clara**: Un componente, una responsabilidad
 - ✅ **Mejor UX**: Sin duplicación de controles
@@ -80,6 +87,7 @@ MainLayout (ViewToolbar) ↔ Stores ↔ FileBrowser + StatusBar
 - ✅ **Compatibilidad**: FileBrowser acepta FileItem estándar
 
 #### Funcionalidades preservadas
+
 - ✅ **Todas las vistas**: Grid, List, Masonry funcionan perfectamente
 - ✅ **Búsqueda y filtros**: Controlados desde ViewToolbar
 - ✅ **Selección múltiple**: Sincronizada entre toolbar y browser
@@ -89,6 +97,7 @@ MainLayout (ViewToolbar) ↔ Stores ↔ FileBrowser + StatusBar
 ### 🎯 Estado final
 
 **FileBrowser** es ahora un componente puro y enfocado que:
+
 - ✅ Se integra perfectamente con ViewToolbar vía stores
 - ✅ Mantiene StatusBar funcional para información contextual
 - ✅ No duplica funcionalidad del layout principal

@@ -1,6 +1,5 @@
 'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
 	AlbumIcon,
 	BookIcon,
@@ -20,6 +19,7 @@ import {
 	WandIcon,
 } from 'lucide-react';
 import * as React from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { cn } from '@/lib/utils';
 import { AlbumsSettings } from './albums/albums-settings';

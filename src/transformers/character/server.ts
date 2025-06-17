@@ -3,6 +3,7 @@
  * @module transformers/character
  */
 
+import type { Character, Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { CharacterSchema } from '@/types/entities/character/schema';
@@ -15,7 +16,6 @@ import type {
 	TransformCharacterOptions,
 } from '@/types/entities/character/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
-import type { Character, Prisma } from '@prisma/client';
 import {
 	deserializeArray,
 	deserializeFilters,
@@ -43,7 +43,7 @@ import {
 	sortCharacters,
 } from './mappers';
 
-const logger = serverLogger.withContext('CharacterTransformer');
+const _logger = serverLogger.withContext('CharacterTransformer');
 
 /**
  * 🔄 Transforma un objeto de Prisma a CharacterComplete
@@ -266,7 +266,7 @@ export async function createCharacter(data: CharacterCreateInput): Promise<Chara
 		await validateCharacter(data);
 
 		// Serializar datos para Prisma
-		const prismaData = toPrismaCharacter(data);
+		const _prismaData = toPrismaCharacter(data);
 
 		// Mapear datos a formato Prisma
 		const createData = mapCreateCharacterDataToPrisma(data);
@@ -309,7 +309,7 @@ export async function updateCharacter(id: string, data: CharacterUpdateInput): P
 		await validateCharacter(data);
 
 		// Serializar datos para Prisma
-		const prismaData = toPrismaCharacter(data);
+		const _prismaData = toPrismaCharacter(data);
 
 		// Mapear datos a formato Prisma
 		const updateData = mapUpdateCharacterDataToPrisma(data);

@@ -1,14 +1,13 @@
 'use client';
 
+import { Bug, Calendar, Code2, FileDigit, FileImage, HardDrive, Palette, Settings2 } from 'lucide-react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { type AIGenerationInfo as AIGenerationInfoType, determineGeneratorType } from '@/lib/parsers';
 import { cn } from '@/lib/utils';
-import { Bug, Calendar, Code2, FileDigit, FileImage, HardDrive, Palette, Settings2 } from 'lucide-react';
-import * as React from 'react';
-import { useState } from 'react';
-import { aiLogger, getExtraParam, safeStr } from './details-panel-ai-generation-utils';
+import { safeStr } from './details-panel-ai-generation-utils';
 import { InfoItem } from './details-panel-info-item';
 import { truncateText } from './details-panel-utils';
 

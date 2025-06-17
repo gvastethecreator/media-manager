@@ -3,8 +3,8 @@
  * @module store/entities/tag/slices/ui
  */
 
-import { TagViewMode } from '@/types/entities/tag/enums';
 import type { StateCreator } from 'zustand';
+import { TagViewMode } from '@/types/entities/tag/enums';
 import type { TagState, TagUIState } from '../types';
 
 export interface TagUISlice {
@@ -35,7 +35,7 @@ export interface TagUISlice {
 	setViewMode: (mode: TagViewMode) => void;
 }
 
-export const createTagUISlice: StateCreator<TagState & TagUISlice, [], [], TagUISlice> = (set, get) => ({
+export const createTagUISlice: StateCreator<TagState & TagUISlice, [], [], TagUISlice> = (set, _get) => ({
 	ui: {
 		selectedId: null,
 		selectedIds: [],

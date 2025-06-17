@@ -442,7 +442,7 @@ function getRegionPath(region: string | null): string[] {
 	if (!region) return [];
 
 	// Separar por '/' o '>' para crear la jerarquía
-	return region.split(/[\/|>]/).map((r) => r.trim());
+	return region.split(/[/|>]/).map((r) => r.trim());
 }
 
 // Exportar funciones obsoletas con alias para mantener compatibilidad

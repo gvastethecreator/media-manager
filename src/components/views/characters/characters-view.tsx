@@ -1,5 +1,8 @@
 'use client';
 
+import { Users } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import { type CharacterWithStats, searchCharacters } from '@/app/actions/characters/character.actions';
 import { getCharacterVisualConfig } from '@/app/actions/visual-config.actions';
 import { CharacterCard } from '@/components/cards/character-card';
@@ -10,9 +13,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCharacterStore } from '@/store/entities/character';
-import { Users } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('CharactersView');
@@ -29,7 +29,7 @@ export function CharactersView(_props: ViewProps) {
 	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_CHARACTER_OPTIONS);
+	const [_visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_CHARACTER_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticCharacters, _addEvent] = clientEvents.useEvents<CharacterWithStats[]>(characters);

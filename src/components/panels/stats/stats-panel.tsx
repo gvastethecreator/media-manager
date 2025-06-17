@@ -7,10 +7,9 @@
 'use client';
 
 import { memo } from 'react';
-import StatsClientWrapper from './stats-client';
-
 // Importamos el wrapper de estadísticas de manera estática ya que ahora es un componente cliente
 import StatsWrapper from './components/stats-wrapper';
+import StatsClientWrapper from './stats-client';
 
 // Componente optimizado con memo para estadísticas
 const StatsPanel = memo(function StatsPanel() {

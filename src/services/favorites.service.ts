@@ -5,8 +5,6 @@ import type { EntityType } from '@/types/entities/entities';
 import type {
 	AddFavoriteParams,
 	FavoriteEntity,
-	FavoriteEvents,
-	FavoriteFilters,
 	FavoriteResult,
 	FavoriteResults,
 	FavoriteStats,

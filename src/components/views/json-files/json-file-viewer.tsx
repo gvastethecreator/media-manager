@@ -1,9 +1,10 @@
 // Visor avanzado para archivos JSON
+
+import { useState } from 'react';
+import { JsonView } from 'react-json-view-lite';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useState } from 'react';
-import { JsonView } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
 
 /**
@@ -50,16 +51,18 @@ export function JsonFileViewer({ json, name }: { json: any; name: string }) {
 				<TabsContent value="raw">
 					<div className="flex justify-between items-center mb-2">
 						<span className="text-xs text-muted-foreground">JSON formateado</span>
-						<Button size="sm" variant="outline" onClick={() => handleCopy('raw')}>Copiar</Button>
+						<Button size="sm" variant="outline" onClick={() => handleCopy('raw')}>
+							Copiar
+						</Button>
 					</div>
-					<pre className="bg-muted p-2 rounded text-xs overflow-x-auto max-h-96">
-						{JSON.stringify(json, null, 2)}
-					</pre>
+					<pre className="bg-muted p-2 rounded text-xs overflow-x-auto max-h-96">{JSON.stringify(json, null, 2)}</pre>
 				</TabsContent>
 				<TabsContent value="tree">
 					<div className="flex justify-between items-center mb-2">
 						<span className="text-xs text-muted-foreground">Vista objeto</span>
-						<Button size="sm" variant="outline" onClick={() => handleCopy('tree')}>Copiar</Button>
+						<Button size="sm" variant="outline" onClick={() => handleCopy('tree')}>
+							Copiar
+						</Button>
 					</div>
 					<div className="bg-muted p-2 rounded text-xs overflow-x-auto max-h-96">
 						<JsonView data={json} />

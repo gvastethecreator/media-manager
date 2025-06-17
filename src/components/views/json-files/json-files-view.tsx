@@ -8,10 +8,7 @@ import { JsonFileViewer } from './json-file-viewer';
  */
 export function JsonFilesView() {
 	// Ejemplo de datos mock
-	const files = [
-		{ name: 'config.json' },
-		{ name: 'data.json' },
-	];
+	const files = [{ name: 'config.json' }, { name: 'data.json' }];
 
 	// Datos de ejemplo para el visor
 	const exampleJson = {

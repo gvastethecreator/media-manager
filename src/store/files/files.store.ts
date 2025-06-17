@@ -1,3 +1,4 @@
+import { create } from 'zustand';
 import { getCollectionImages, getCollections } from '@/app/actions/collections';
 import { getFolderImages, getFolders } from '@/app/actions/folders';
 import { getFavoriteImages, getImages } from '@/app/actions/images/image-crud.actions';
@@ -5,7 +6,6 @@ import { getTagImages, getTags } from '@/app/actions/tags';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { Collection } from '@/types/entities/collection';
 import type { FileItem, RelatedTag } from '@/types/file-item';
-import { create } from 'zustand';
 
 const ITEMS_PER_BATCH = 50;
 const filesLogger = clientLogger.withContext('FilesStore');

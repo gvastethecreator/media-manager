@@ -1,17 +1,16 @@
-import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast.service';
-import { fromPrismaNote } from '@/transformers/note/serializers';
-import { transformNoteToWithStats } from '@/transformers/note/transformer';
-import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import { StateCreator } from 'zustand';
-import type { NoteStore } from '../types';
-
 import {
 	createNote as createNoteAction,
 	deleteNote as deleteNoteAction,
 	getNotes as getNotesAction,
 	updateNote as updateNoteAction,
 } from '@/app/actions/notes';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/services/toast.service';
+import { fromPrismaNote } from '@/transformers/note/serializers';
+import { transformNoteToWithStats } from '@/transformers/note/transformer';
+import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import type { NoteStore } from '../types';
 
 const coreLogger = clientLogger.withContext('NoteStore:Core');
 
@@ -32,7 +31,7 @@ export interface CoreSlice {
 	reset: () => void;
 }
 
-export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set, get) => ({
+export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set, _get) => ({
 	// Estado inicial
 	notes: [],
 	selectedNote: null,

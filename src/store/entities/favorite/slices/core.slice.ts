@@ -3,9 +3,9 @@
  * @module store/entities/favorite/slices/core
  */
 
+import { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { FavoriteExtended } from '@/types/entities/favorite';
-import { StateCreator } from 'zustand';
 import { FavoriteStore } from '..';
 
 // Logger específico para este slice

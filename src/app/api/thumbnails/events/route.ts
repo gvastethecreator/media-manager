@@ -1,6 +1,6 @@
+import type { NextRequest } from 'next/server';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type ProcessStatus, type ThumbnailError, thumbnailService } from '@/services/thumbnail-service-export';
-import type { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';

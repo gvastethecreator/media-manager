@@ -1,7 +1,7 @@
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toPromptWithStats } from '@/transformers/prompt';
 import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
-import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('PromptStore:Core');
@@ -49,7 +49,7 @@ const mockApi = {
 		};
 	},
 
-	updatePrompt: async (id: string, prompt: PromptUpdateInput): Promise<PromptBase> => {
+	updatePrompt: async (_id: string, prompt: PromptUpdateInput): Promise<PromptBase> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 		const basePrompt: PromptBase = {
 			id: prompt.id || `prompt-${Date.now()}`,
@@ -69,7 +69,7 @@ const mockApi = {
 		return basePrompt;
 	},
 
-	deletePrompt: async (id: string): Promise<void> => {
+	deletePrompt: async (_id: string): Promise<void> => {
 		await new Promise((resolve) => setTimeout(resolve, 500));
 	},
 };

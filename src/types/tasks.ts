@@ -3,8 +3,8 @@
  * @module types/tasks
  */
 
-import type { EntityId, JSONString } from '@/utils/types/utility-types';
 import { z } from 'zod';
+import type { EntityId, JSONString } from '@/utils/types/utility-types';
 
 /**
  * Tipo de tarea

@@ -1,6 +1,6 @@
+import { NextResponse } from 'next/server';
 import { updateProfile } from '@/app/actions/profiles/profile.actions';
 import { validateProfilePreferences } from '@/lib/utils/profile/profile-utils';
-import { NextResponse } from 'next/server';
 
 // PATCH /api/profile/[id]/preferences - Actualizar preferencias de un perfil
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {

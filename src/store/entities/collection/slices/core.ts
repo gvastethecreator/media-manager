@@ -3,8 +3,8 @@
  * @module store/entities/collection/slices/core
  */
 
-import type { CollectionExtended } from '@/types/entities/collection';
 import type { StateCreator } from 'zustand';
+import type { CollectionExtended } from '@/types/entities/collection';
 import {
 	createCollection,
 	deleteCollection,

@@ -45,19 +45,19 @@ export const imageTransformer = {
 	/**
 	 * Transform domain entity to client result with additional data
 	 */
-	toClient: (entity: ImageBase, options?: { includes?: { folder?: any } }): ImageResult => {
+	toClient: (entity: ImageBase, _options?: { includes?: { folder?: any } }): ImageResult => {
 		// Parse metadata if available
 		const metadata = entity.metadata ? JSON.parse(entity.metadata as string) : null;
 
 		// Calculate thumbnail URL if available
 		const hasThumbnail = false; // Lógica real debe ir aquí si aplica
-		const thumbnailUrl = hasThumbnail ? `/api/images/${entity.id}/thumbnail` : null;
+		const _thumbnailUrl = hasThumbnail ? `/api/images/${entity.id}/thumbnail` : null;
 
 		// Calculate full image URL
-		const fullUrl = `/api/images/${entity.id}`;
+		const _fullUrl = `/api/images/${entity.id}`;
 
 		// Calculate aspect ratio
-		const aspectRatio = entity.width && entity.height ? entity.width / entity.height : 1;
+		const _aspectRatio = entity.width && entity.height ? entity.width / entity.height : 1;
 
 		return {
 			...entity,

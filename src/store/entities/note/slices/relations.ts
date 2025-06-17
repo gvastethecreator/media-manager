@@ -1,6 +1,6 @@
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { EntityType } from '@/types/entities/entities';
-import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const relationsLogger = clientLogger.withContext('NoteStore:Relations');
@@ -13,12 +13,12 @@ export interface RelationsSlice {
 
 // API mock para simular llamadas a server actions
 const mockRelationsApi = {
-	addNoteToEntity: async (noteId: string, entityId: string, entityType: EntityType): Promise<void> => {
+	addNoteToEntity: async (_noteId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
 		return new Promise((resolve) => {
 			setTimeout(() => resolve(), 500);
 		});
 	},
-	removeNoteFromEntity: async (noteId: string, entityId: string, entityType: EntityType): Promise<void> => {
+	removeNoteFromEntity: async (_noteId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
 		return new Promise((resolve) => {
 			setTimeout(() => resolve(), 500);
 		});
@@ -28,7 +28,7 @@ const mockRelationsApi = {
 export const createRelationsSlice: StateCreator<NoteStore, [], [], RelationsSlice> = (set, get) => ({
 	addNoteToEntity: async (noteId, entityId, entityType) => {
 		try {
-			set((state) => ({ isLoading: true, error: null }));
+			set((_state) => ({ isLoading: true, error: null }));
 			relationsLogger.info('🔄 Añadiendo nota a entidad', {
 				noteId,
 				entityId,
@@ -55,7 +55,7 @@ export const createRelationsSlice: StateCreator<NoteStore, [], [], RelationsSlic
 
 	removeNoteFromEntity: async (noteId, entityId, entityType) => {
 		try {
-			set((state) => ({ isLoading: true, error: null }));
+			set((_state) => ({ isLoading: true, error: null }));
 			relationsLogger.info('🔄 Eliminando nota de entidad', {
 				noteId,
 				entityId,

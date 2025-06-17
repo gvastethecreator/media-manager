@@ -1,11 +1,7 @@
 'use client';
 
-import { AnimatePresence, motion } from 'motion/react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-
 import { EmptyState } from '@/components/core/data-display';
 import { type ImageItem } from '@/components/features/file-viewer/file-viewer';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
@@ -15,6 +11,8 @@ import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { FileItem } from '@/types/file-item';
 import { FileTextIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ContextMenuAction } from './context-menu/types';
 import { useFilteredData } from './hooks/use-filtered-data';
 import './styles/scrollbar.css';
@@ -31,11 +29,11 @@ const BROWSER_CONFIG = {
 	cacheSize: 500,
 	// Configuración para carga secuencial
 	sequential: {
-		initialBatchSize: 50,    // Cuántos elementos cargar inicialmente
+		initialBatchSize: 50, // Cuántos elementos cargar inicialmente
 		additionalBatchSize: 30, // Cuántos elementos cargar en cada lote adicional
-		loadThreshold: 0.7,      // Porcentaje de scroll para cargar más (0-1)
-		scrollLoadDelay: 200     // Tiempo de espera tras detener scroll antes de cargar más
-	}
+		loadThreshold: 0.7, // Porcentaje de scroll para cargar más (0-1)
+		scrollLoadDelay: 200, // Tiempo de espera tras detener scroll antes de cargar más
+	},
 };
 
 // 📊 Logger específico para FileBrowser
@@ -90,10 +88,10 @@ interface FileBrowserProps {
 	loadMoreItems?: () => void;
 }
 
-const FALLBACK_WIDTH = 1200;
-const ITEM_HEIGHT = 220;
-const ITEM_WIDTH = 200;
-const GAP = 16;
+const _FALLBACK_WIDTH = 1200;
+const _ITEM_HEIGHT = 220;
+const _ITEM_WIDTH = 200;
+const _GAP = 16;
 
 // Interfaz para el menú contextual
 interface ContextMenuProps {
@@ -121,15 +119,15 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	console.log('[FileBrowser] Props recibidas:', {
 		items: items?.length || 0,
 		isLoading,
-		isReindexing
+		isReindexing,
 	});
 
 	// 📊 Estados mínimos - Solo lo esencial
-	const [containerWidth, setContainerWidth] = useState<number>(0);
-	const [isViewerOpen, setIsViewerOpen] = useState(false);
-	const [viewerImages, setViewerImages] = useState<ImageItem[]>([]);
-	const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
-	const [loadMoreVisible, setLoadMoreVisible] = useState(false);
+	const [_containerWidth, setContainerWidth] = useState<number>(0);
+	const [_isViewerOpen, setIsViewerOpen] = useState(false);
+	const [_viewerImages, setViewerImages] = useState<ImageItem[]>([]);
+	const [_viewerInitialIndex, setViewerInitialIndex] = useState(0);
+	const [_loadMoreVisible, setLoadMoreVisible] = useState(false);
 	// Estado local para favoritos como solución temporal
 	const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
 	// ✅ Usar una ref para el seguimiento no causa re-renders
@@ -137,7 +135,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Control de carga progresiva
 	const [visibleItemCount, setVisibleItemCount] = useState<number>(BROWSER_CONFIG.sequential.initialBatchSize);
-	const scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
+	const _scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const loadingMoreRef = useRef<boolean>(false);
 
 	// Estado para el menú contextual personalizado
@@ -145,19 +143,19 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
 	// 🔍 Opciones de vista globales
-	const viewStore = useViewOptionsStore();
+	const _viewStore = useViewOptionsStore();
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
 	const itemSize = useViewOptionsStore((state) => state.itemSize);
 	const { searchQuery, sortOptions, filterOptions } = useViewOptionsStore();
-	const setSearchQuery = useViewOptionsStore(state => state.setSearchQuery);
+	const _setSearchQuery = useViewOptionsStore((state) => state.setSearchQuery);
 
 	// Asegurarnos de tener un valor para viewMode
-	console.log("[FileBrowser] ViewStore:", {
+	console.log('[FileBrowser] ViewStore:', {
 		viewMode,
 		itemSize,
 		searchQuery,
 		sortOptions,
-		filterOptions
+		filterOptions,
 	});
 
 	// Acceso a más opciones de vista para EmptyState
@@ -170,13 +168,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const measurementAttemptsRef = useRef(0);
 
 	// 🏪 Stores
-	const { selectedIds, activeId, setActiveId, setSelectedIds, toggleSelectedId, clearSelection } = useSelectionStore();
+	const { selectedIds, setSelectedIds, clearSelection } = useSelectionStore();
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
 
 	// Funciones para gestionar favoritos localmente
-	const isFavorited = useCallback((id: string) => favoriteIds.has(id), [favoriteIds]);
-	const toggleFavorite = useCallback((id: string) => {
-		setFavoriteIds(prev => {
+	const _isFavorited = useCallback((id: string) => favoriteIds.has(id), [favoriteIds]);
+	const _toggleFavorite = useCallback((id: string) => {
+		setFavoriteIds((prev) => {
 			const newFavorites = new Set(prev);
 			if (newFavorites.has(id)) {
 				newFavorites.delete(id);
@@ -188,7 +186,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	}, []);
 
 	// 🔍 Manejador para el menú contextual
-	const handleContextMenu = useCallback((file: FileItem, e?: React.MouseEvent) => {
+	const handleContextMenu = useCallback((_file: FileItem, _e?: React.MouseEvent) => {
 		// Deshabilitado temporalmente
 		/*
 		if (e) {
@@ -201,19 +199,21 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	}, []);
 
 	// Seleccionar solo la versión del store para forzar re-renders cuando las miniaturas cambien
-	const imageResourcesVersion = useImageResources((state) => state.version);
+	const _imageResourcesVersion = useImageResources((state) => state.version);
 
 	// Cargar más elementos de forma controlada
-	const loadMoreItemsSequentially = useCallback(() => {
+	const _loadMoreItemsSequentially = useCallback(() => {
 		if (loadingMoreRef.current) return;
 
 		// Marcar como cargando
 		loadingMoreRef.current = true;
-		logger.debug(`[FileBrowser] Cargando más elementos secuencialmente: ${visibleItemCount} → ${visibleItemCount + BROWSER_CONFIG.sequential.additionalBatchSize}`);
+		logger.debug(
+			`[FileBrowser] Cargando más elementos secuencialmente: ${visibleItemCount} → ${visibleItemCount + BROWSER_CONFIG.sequential.additionalBatchSize}`
+		);
 
 		// Usar setTimeout para dar tiempo a la UI para responder
 		setTimeout(() => {
-			setVisibleItemCount(prev => {
+			setVisibleItemCount((prev) => {
 				// Limitar al número máximo de elementos o al tamaño del caché
 				const newCount = Math.min(
 					prev + BROWSER_CONFIG.sequential.additionalBatchSize,
@@ -232,7 +232,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// 🔧 **Sistema de medición progresivo**
 	// Estrategia: inmediato → RAF → timeout → fallback fijo
-	const measureContainer = useCallback((element: HTMLDivElement) => {
+	const _measureContainer = useCallback((element: HTMLDivElement) => {
 		const attempt = ++measurementAttemptsRef.current;
 		logger.debug(`[FileBrowser] Intento medición ${attempt}`);
 
@@ -260,16 +260,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				if (measure()) return;
 
 				// Estrategia 4: Fallback fijo (no más intentos)
-				logger.warn(
-					`[FileBrowser] ⚠️ Falló medición después de ${attempt} intentos, usando fallback: ${1200}px`
-				);
+				logger.warn(`[FileBrowser] ⚠️ Falló medición después de ${attempt} intentos, usando fallback: ${1200}px`);
 				setContainerWidth(1200);
 			}, 100);
 		});
 	}, []);
 
 	// 📎 Callback ref para medición del contenedor
-	const containerCallbackRef = useCallback(
+	const _containerCallbackRef = useCallback(
 		(element: HTMLDivElement | null) => {
 			if (element && containerRef.current !== element) {
 				containerRef.current = element;
@@ -293,33 +291,39 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// 🔄 Preprocesar los elementos para asegurar que tengan todos los campos necesarios
 	const processedItems = useMemo(() => {
-		return filteredItems.map(item => {
+		return filteredItems.map((item) => {
 			let metadata = null;
 			try {
 				if (item.metadata && typeof item.metadata === 'string') {
 					metadata = JSON.parse(item.metadata);
 				}
-			} catch (error) {
+			} catch (_error) {
 				logger.warn(`Error al parsear metadata para el item ${item.id}`);
 			}
 
 			// Extraer propiedades de las dimensiones desde metadata si existen
-			const width = item.width || (metadata?.dimensions?.width) || (metadata?.width) || undefined;
-			const height = item.height || (metadata?.dimensions?.height) || (metadata?.height) || undefined;
+			const width = item.width || metadata?.dimensions?.width || metadata?.width || undefined;
+			const height = item.height || metadata?.dimensions?.height || metadata?.height || undefined;
 
 			// Asegurarse de que thumbnail sea una string válida
-			const thumbnail = typeof item.thumbnail === 'string'
-				? item.thumbnail
-				: typeof item.src === 'string'
-					? item.src
-					: `/api/images/${item.id}/thumbnail`;
+			const thumbnail =
+				item.id === 'folder-stats'
+					? undefined
+					: typeof item.thumbnail === 'string'
+						? item.thumbnail
+						: typeof item.src === 'string'
+							? item.src
+							: `/api/images/${item.id}/thumbnail`;
 
 			// Asegurarse de que src sea una string válida
-			const src = typeof item.src === 'string'
-				? item.src
-				: typeof item.thumbnail === 'string'
-					? item.thumbnail
-					: `/api/images/${item.id}`;
+			const src =
+				item.id === 'folder-stats'
+					? undefined
+					: typeof item.src === 'string'
+						? item.src
+						: typeof item.thumbnail === 'string'
+							? item.thumbnail
+							: `/api/images/${item.id}`;
 
 			// Retornar el ítem con las propiedades adicionales
 			return {
@@ -327,7 +331,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				width,
 				height,
 				thumbnail,
-				src
+				src,
 			};
 		});
 	}, [filteredItems]);
@@ -341,7 +345,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			visibleItemCount,
 			visibleItems: result.length,
 			viewMode,
-			viewType: viewMode || 'grid'
+			viewType: viewMode || 'grid',
 		});
 		return result;
 	}, [processedItems, visibleItemCount, items.length, viewMode]);
@@ -351,83 +355,92 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Resetear conteo visible cuando cambian los elementos
 	useEffect(() => {
-		setVisibleItemCount(Math.min(
-			BROWSER_CONFIG.sequential.initialBatchSize,
-			items.length
-		));
+		setVisibleItemCount(Math.min(BROWSER_CONFIG.sequential.initialBatchSize, items.length));
 		loadingMoreRef.current = false;
 	}, [items]);
 
 	// Definir la función handleResetView para el EmptyState
-	const handleResetView = useCallback(() => {
+	const _handleResetView = useCallback(() => {
 		// Limpiar filtros y búsqueda
 		useViewOptionsStore.setState({
 			searchQuery: '',
 			filterOptions: [],
-			viewMode: 'grid' // resetear a la vista por defecto
+			viewMode: 'grid', // resetear a la vista por defecto
 		});
 	}, []);
 
 	// Definir el objeto contextMenu de forma más simple sin depender de handleCloseContextMenu
-	const contextMenu = useMemo(() => ({
-		open: !!contextMenuFile,
-		file: contextMenuFile,
-		position: contextMenuPosition,
-		onClose: () => setContextMenuFile(null)
-	}), [contextMenuFile, contextMenuPosition]);
+	const contextMenu = useMemo(
+		() => ({
+			open: !!contextMenuFile,
+			file: contextMenuFile,
+			position: contextMenuPosition,
+			onClose: () => setContextMenuFile(null),
+		}),
+		[contextMenuFile, contextMenuPosition]
+	);
 
 	// 🔍 Manejador de selección de elementos - ESTABILIZADO con getState()
 	// Esta es la clave: la función no se recrea cuando la selección cambia.
-	const handleItemClick = useCallback((clickedItem: FileItem, e: React.MouseEvent) => {
-		const { ctrlKey, metaKey, shiftKey } = e;
-		const { selectedIds, setSelectedIds, toggleSelectedId, clearSelection } = useSelectionStore.getState();
+	const handleItemClick = useCallback(
+		(clickedItem: FileItem, e: React.MouseEvent) => {
+			const { ctrlKey, metaKey, shiftKey } = e;
+			const { selectedIds, setSelectedIds, toggleSelectedId, clearSelection } = useSelectionStore.getState();
 
-		const currentIndex = filteredItems.findIndex(i => i.id === clickedItem.id);
-		if (currentIndex === -1) return;
+			const currentIndex = filteredItems.findIndex((i) => i.id === clickedItem.id);
+			if (currentIndex === -1) return;
 
-		// La lógica de selección permanece igual, pero ahora usa el estado más reciente del store
-		if (shiftKey && lastSelectedItemIndexRef.current !== null) {
-			const start = Math.min(lastSelectedItemIndexRef.current, currentIndex);
-			const end = Math.max(lastSelectedItemIndexRef.current, currentIndex);
-			const idsToSelect = filteredItems.slice(start, end + 1).map(i => i.id);
-			setSelectedIds(idsToSelect);
-		} else if (ctrlKey || metaKey) {
-			toggleSelectedId(clickedItem.id);
-			lastSelectedItemIndexRef.current = currentIndex;
-		} else {
-			if (selectedIds.length === 1 && selectedIds[0] === clickedItem.id) {
-				clearSelection();
-				lastSelectedItemIndexRef.current = null;
-			} else {
-				setSelectedIds([clickedItem.id]);
+			// La lógica de selección permanece igual, pero ahora usa el estado más reciente del store
+			if (shiftKey && lastSelectedItemIndexRef.current !== null) {
+				const start = Math.min(lastSelectedItemIndexRef.current, currentIndex);
+				const end = Math.max(lastSelectedItemIndexRef.current, currentIndex);
+				const idsToSelect = filteredItems.slice(start, end + 1).map((i) => i.id);
+				setSelectedIds(idsToSelect);
+			} else if (ctrlKey || metaKey) {
+				toggleSelectedId(clickedItem.id);
 				lastSelectedItemIndexRef.current = currentIndex;
+			} else {
+				if (selectedIds.length === 1 && selectedIds[0] === clickedItem.id) {
+					clearSelection();
+					lastSelectedItemIndexRef.current = null;
+				} else {
+					setSelectedIds([clickedItem.id]);
+					lastSelectedItemIndexRef.current = currentIndex;
+				}
 			}
-		}
-		onItemSelect?.(clickedItem);
-	}, [filteredItems, onItemSelect]); // Se eliminan las dependencias del store de selección
+			onItemSelect?.(clickedItem);
+		},
+		[filteredItems, onItemSelect]
+	); // Se eliminan las dependencias del store de selección
 
 	// 🔍 Manejador de doble click (abrir visor) - ESTABILIZADO
-	const handleItemDoubleClick = useCallback((item: FileItem) => {
-		const images = fileItemsToImageItems(processedItems);
-		const index = processedItems.findIndex(file => file.id === item.id);
-		if (index !== -1) {
-			setViewerImages(images);
-			setViewerInitialIndex(index);
-			setIsViewerOpen(true);
-		}
-		onItemDoubleClick?.(item);
-	}, [processedItems, onItemDoubleClick]);
+	const handleItemDoubleClick = useCallback(
+		(item: FileItem) => {
+			const images = fileItemsToImageItems(processedItems);
+			const index = processedItems.findIndex((file) => file.id === item.id);
+			if (index !== -1) {
+				setViewerImages(images);
+				setViewerInitialIndex(index);
+				setIsViewerOpen(true);
+			}
+			onItemDoubleClick?.(item);
+		},
+		[processedItems, onItemDoubleClick]
+	);
 
 	// 🔍 Manejador de acciones del menú contextual
-	const handleContextMenuAction = useCallback((action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
-		// Deshabilitado temporalmente
-		/*
+	const _handleContextMenuAction = useCallback(
+		(_action: ContextMenuAction, _item: FileItem, _data?: Record<string, unknown>) => {
+			// Deshabilitado temporalmente
+			/*
 		handleContextAction(action, item, data);
 		// Cerrar el menú después de la acción
 		setContextMenuFile(null);
 		setContextMenuPosition(null);
 		*/
-	}, []);
+		},
+		[]
+	);
 
 	// 🔄 Actualizar el panel de detalles cuando cambie la selección
 	useEffect(() => {
@@ -436,7 +449,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		// Si hay elementos seleccionados
 		if (selectedIds.length > 0) {
-			const selectedItems = processedItems.filter(item => selectedIds.includes(item.id));
+			const selectedItems = processedItems.filter((item) => selectedIds.includes(item.id));
 			if (selectedItems.length > 0) {
 				// Convertir a ImageItems para el panel de detalles
 				const detailItems = fileItemsToImageItems(selectedItems);
@@ -445,13 +458,11 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				const currentItems = detailsState.selectedItems;
 
 				// Comparar IDs para determinar si realmente necesitamos actualizar
-				const currentIds = new Set(currentItems.map(item => item.id));
-				const newIds = new Set(detailItems.map(item => item.id));
+				const currentIds = new Set(currentItems.map((item) => item.id));
+				const newIds = new Set(detailItems.map((item) => item.id));
 
 				// Solo actualizar si los IDs han cambiado
-				const needsUpdate =
-					currentIds.size !== newIds.size ||
-					![...currentIds].every(id => newIds.has(id));
+				const needsUpdate = currentIds.size !== newIds.size || ![...currentIds].every((id) => newIds.has(id));
 
 				if (needsUpdate) {
 					// Usar type assertion para compatibilidad temporal
@@ -472,10 +483,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				metadata: JSON.stringify({
 					totalItems: items.length,
 					totalSize: items.reduce((total, item) => total + item.size, 0),
-					imageCount: items.filter(item => item.type?.startsWith('image/')).length,
-					videoCount: items.filter(item => item.type?.startsWith('video/')).length,
-					documentCount: items.filter(item => item.type?.startsWith('text/')).length,
-					otherCount: items.filter(item => !item.type?.startsWith('image/') && !item.type?.startsWith('video/') && !item.type?.startsWith('text/')).length,
+					imageCount: items.filter((item) => item.type?.startsWith('image/')).length,
+					videoCount: items.filter((item) => item.type?.startsWith('video/')).length,
+					documentCount: items.filter((item) => item.type?.startsWith('text/')).length,
+					otherCount: items.filter(
+						(item) =>
+							!item.type?.startsWith('image/') && !item.type?.startsWith('video/') && !item.type?.startsWith('text/')
+					).length,
 				}),
 			};
 
@@ -539,48 +553,48 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const mainRef = useRef<HTMLDivElement>(null);
 
 	// Manejador de eventos de teclado para navegación
-	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-		// Si el foco no está en este componente, no hacer nada
-		if (!mainRef.current?.contains(document.activeElement)) return;
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			// Si el foco no está en este componente, no hacer nada
+			if (!mainRef.current?.contains(document.activeElement)) return;
 
-		switch (e.key) {
-			case 'a':
-				// Ctrl+A: Seleccionar todo
-				if (e.ctrlKey || e.metaKey) {
+			switch (e.key) {
+				case 'a':
+					// Ctrl+A: Seleccionar todo
+					if (e.ctrlKey || e.metaKey) {
+						e.preventDefault();
+						const allIds = processedItems.map((item) => item.id);
+						setSelectedIds(allIds);
+					}
+					break;
+
+				case 'Escape':
+					// Escape: Deseleccionar todo
 					e.preventDefault();
-					const allIds = processedItems.map(item => item.id);
-					setSelectedIds(allIds);
-				}
-				break;
+					clearSelection();
+					break;
 
-			case 'Escape':
-				// Escape: Deseleccionar todo
-				e.preventDefault();
-				clearSelection();
-				break;
+				case 'Delete':
+					// Delete: Podría implementar funcionalidad para eliminar elementos seleccionados
+					// (Comentado porque requeriría implementación adicional)
+					// if (selectedIds.length > 0) {
+					//   e.preventDefault();
+					//   // handleDeleteSelected();
+					// }
+					break;
 
-			case 'Delete':
-				// Delete: Podría implementar funcionalidad para eliminar elementos seleccionados
-				// (Comentado porque requeriría implementación adicional)
-				// if (selectedIds.length > 0) {
-				//   e.preventDefault();
-				//   // handleDeleteSelected();
-				// }
-				break;
-
-			// Puedes añadir más atajos de teclado según necesites
-		}
-	}, [processedItems, setSelectedIds, clearSelection]);
+				// Puedes añadir más atajos de teclado según necesites
+			}
+		},
+		[processedItems, setSelectedIds, clearSelection]
+	);
 
 	// 🔄 Usar items directamente con type assertion para compatibilidad
-	const transformedItems = items as FileBrowserFileItem[];
+	const _transformedItems = items as FileBrowserFileItem[];
 
 	return (
 		<div
-			className={cn(
-				"h-full w-full bg-background flex flex-col custom-scrollbar",
-				className
-			)}
+			className={cn('h-full w-full bg-background flex flex-col custom-scrollbar', className)}
 			onKeyDown={handleKeyDown}
 			role="application"
 			aria-label="Explorador de archivos"
@@ -596,12 +610,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 						</div>
 					)}
 
-					{!isLoading && (
-						currentViewItems.length === 0 ? (
+					{!isLoading &&
+						(currentViewItems.length === 0 ? (
 							<EmptyState
 								icon={FileTextIcon}
 								title="No se encontraron archivos"
-								description={searchInput ? `No hay archivos que coincidan con "${searchInput}"` : "Esta carpeta está vacía"}
+								description={
+									searchInput ? `No hay archivos que coincidan con "${searchInput}"` : 'Esta carpeta está vacía'
+								}
 							/>
 						) : (
 							<AnimatePresence mode="wait">
@@ -649,18 +665,18 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 										/>
 									)}
 
-									{(!viewMode || (viewMode !== 'list' && viewMode !== 'grid' && viewMode !== 'masonry' && viewMode !== 'cards')) && (
-										<SimpleGridView
-											items={currentViewItems}
-											onItemClick={handleItemClick}
-											onItemDoubleClick={handleItemDoubleClick}
-											onContextMenu={handleContextMenu}
-										/>
-									)}
+									{(!viewMode ||
+										(viewMode !== 'list' && viewMode !== 'grid' && viewMode !== 'masonry' && viewMode !== 'cards')) && (
+											<SimpleGridView
+												items={currentViewItems}
+												onItemClick={handleItemClick}
+												onItemDoubleClick={handleItemDoubleClick}
+												onContextMenu={handleContextMenu}
+											/>
+										)}
 								</motion.div>
 							</AnimatePresence>
-						)
-					)}
+						))}
 				</div>
 			</div>
 
@@ -668,9 +684,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			<StatusBar items={currentViewItems} />
 
 			{/* Menú contextual */}
-			{contextMenu.open && (
-				<ContextMenu {...contextMenu} />
-			)}
+			{contextMenu.open && <ContextMenu {...contextMenu} />}
 		</div>
 	);
 });

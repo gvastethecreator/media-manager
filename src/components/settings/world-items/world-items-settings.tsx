@@ -1,6 +1,8 @@
 'use client';
 
-import { type WorldItemWithStats, deleteWorldItem, getWorldItems } from '@/app/actions/world-items/world-item.actions';
+import { Filter, Info, Loader2, Package, PlusCircle, Trash, X } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { deleteWorldItem, getWorldItems, type WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,8 +15,6 @@ import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
 import type { WorldItem } from '@/types/entities/world-item';
 import { formatBytes } from '@/utils/file/helpers';
-import { Filter, Info, Loader2, Package, PlusCircle, Trash, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateWorldItemForm } from './create-world-item-form';
 
 export function WorldItemsSettings() {

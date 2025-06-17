@@ -83,7 +83,7 @@ export const parseVisualConfig = (configJson: string): ParsedPlaceVisualConfig =
 			expandedPlaceIds: parsed.expandedPlaceIds || [],
 			selectedPlaceIds: parsed.selectedPlaceIds || [],
 		};
-	} catch (error) {
+	} catch (_error) {
 		return {
 			view: 'grid',
 			sortBy: 'name_asc',
@@ -103,7 +103,7 @@ export const parseVisualConfig = (configJson: string): ParsedPlaceVisualConfig =
 export const stringifyVisualConfig = (config: ParsedPlaceVisualConfig): string => {
 	try {
 		return JSON.stringify(config);
-	} catch (error) {
+	} catch (_error) {
 		return '{}';
 	}
 };
@@ -114,7 +114,7 @@ export const stringifyVisualConfig = (config: ParsedPlaceVisualConfig): string =
  * @returns Lugar procesado
  */
 export const processPlace = (place: Place): Place => {
-	const stats = parsePlaceStats(place.stats);
+	const _stats = parsePlaceStats(place.stats);
 
 	// Formatear población para visualización
 	const displayPopulation = place.population ? place.population.toLocaleString() : 'Desconocida';

@@ -3,8 +3,8 @@
  * @module store/entities/folder/types
  */
 
-import type { CreateFolderData, FolderWithRelations, UpdateFolderData } from '@/types/entities/folder/types';
 import type { StateCreator } from 'zustand';
+import type { CreateFolderData, FolderWithRelations, UpdateFolderData } from '@/types/entities/folder/types';
 
 /**
  * Estado base del store

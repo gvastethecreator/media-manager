@@ -3,6 +3,7 @@
  * @module transformers/tag/v2/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	TagBase,
@@ -15,7 +16,6 @@ import type {
 } from '@/types/entities/tag/types';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '@/utils/transformers/constants';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 import { fromPrismaTag } from './serializers';
 
 // Logger específico para este módulo

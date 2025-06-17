@@ -1,6 +1,8 @@
 'use client';
 
-import { type PlaceWithStats, deletePlace, getPlaces } from '@/app/actions/places/place.actions';
+import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { deletePlace, getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +14,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import toastService from '@/services/toast.service';
 import type { Place } from '@/types/entities/place';
 import { ClimateType, PlaceType } from '@/types/entities/place/enums';
-import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreatePlaceForm } from './create-place-form';
 
 // Agregar type para manejar el onClick
@@ -506,7 +506,7 @@ export function PlacesSettings() {
 }
 
 // Función auxiliar para generar colores basados en tipo de lugar
-function generateTypeColor(placeType: PlaceType): string {
+function _generateTypeColor(placeType: PlaceType): string {
 	switch (placeType) {
 		case PlaceType.CITY:
 			return 'bg-blue-500';
@@ -538,7 +538,7 @@ function generateTypeColor(placeType: PlaceType): string {
 }
 
 // Función auxiliar para generar colores basados en tipo de clima
-function generateClimateColor(climate: ClimateType): string {
+function _generateClimateColor(climate: ClimateType): string {
 	switch (climate) {
 		case ClimateType.TROPICAL:
 			return 'bg-red-400';

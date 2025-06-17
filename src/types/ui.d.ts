@@ -1,7 +1,6 @@
 import type { FileItem } from '@/types/file-item';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { HTMLAttributes, RefAttributes } from 'react';
 
 declare module '@/components/ui/label' {
 	export interface LabelProps {

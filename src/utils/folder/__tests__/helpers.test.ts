@@ -6,6 +6,7 @@ import {
 	getFolderEmoji,
 	isFolderAncestor,
 } from '../helpers';
+
 jest.mock('@/types/entities/folder', () => ({
 	FOLDER_DEFAULT_COLORS: { DEFAULT: '#000', FAVORITE: '#f00', SYSTEM: '#00f' },
 	FOLDER_DEFAULT_EMOJIS: { DEFAULT: '📁', FAVORITE: '⭐', PHOTOS: '📸', VIDEOS: '🎞', DOWNLOADS: '⬇' },

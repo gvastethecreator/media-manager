@@ -1,3 +1,4 @@
+import { NextResponse } from 'next/server';
 import {
 	activateProfile,
 	createProfile,
@@ -8,7 +9,6 @@ import {
 	updateProfile,
 } from '@/app/actions/profiles/profile.actions';
 import { validateProfilePreferences } from '@/lib/utils/profile/profile-utils';
-import { NextResponse } from 'next/server';
 
 // GET /api/profile - Obtener todos los perfiles
 export async function GET() {
@@ -61,7 +61,7 @@ export async function PUT_active(request: Request) {
 }
 
 // GET /api/profile/[id] - Obtener un perfil específico
-export async function GET_id(request: Request, { params }: { params: { id: string } }) {
+export async function GET_id(_request: Request, { params }: { params: { id: string } }) {
 	const id = params.id;
 
 	try {
@@ -88,7 +88,7 @@ export async function PUT_id(request: Request, { params }: { params: { id: strin
 }
 
 // DELETE /api/profile/[id] - Eliminar un perfil
-export async function DELETE_id(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE_id(_request: Request, { params }: { params: { id: string } }) {
 	const id = params.id;
 
 	try {

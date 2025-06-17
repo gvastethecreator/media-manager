@@ -3,10 +3,10 @@
  * @module store/entities/folder/slices/ui.slice
  */
 
+import { StateCreator } from 'zustand';
 import { Logger } from '@/lib/logger';
 import { FolderViewMode } from '@/types/entities/folder/enums';
 import type { FolderStore, FolderUIActions, FolderUIState } from '@/types/entities/folder/types';
-import { StateCreator } from 'zustand';
 
 const logger = new Logger({ context: 'FolderUISlice' });
 

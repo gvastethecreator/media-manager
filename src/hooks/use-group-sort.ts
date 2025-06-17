@@ -1,5 +1,5 @@
-import type { GroupSortKey, GroupWithStats } from '@/types/group.types';
 import { useState } from 'react';
+import type { GroupSortKey, GroupWithStats } from '@/types/group.types';
 
 interface UseGroupSortProps {
 	groups: GroupWithStats[];

@@ -1,6 +1,6 @@
+import type { LucideIcon } from 'lucide-react';
 import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
 import type { ViewType } from '@/types/file-item';
-import type { LucideIcon } from 'lucide-react';
 
 /**
  * Representa un elemento de categoría en el panel de navegación

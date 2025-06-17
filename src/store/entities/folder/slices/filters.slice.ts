@@ -3,10 +3,10 @@
  * @module store/entities/folder/slices/filters.slice
  */
 
+import { StateCreator } from 'zustand';
 import { Logger } from '@/lib/logger';
 import { FolderSortBy } from '@/types/entities/folder/enums';
 import type { FolderFilterActions, FolderFilters, FolderStore } from '@/types/entities/folder/types';
-import { StateCreator } from 'zustand';
 
 const logger = new Logger('FolderFiltersSlice');
 

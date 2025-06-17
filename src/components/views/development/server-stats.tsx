@@ -1,5 +1,7 @@
 'use client';
 
+import { RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { getAppStats, getSystemStats } from '@/app/actions/debug/debug-stats.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,8 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 
 // Logger específico para este componente
 const logger = clientLogger.withContext('ServerStats');

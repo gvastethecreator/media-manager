@@ -1,12 +1,12 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import { type TagCategory, TagRarity } from '@/types/entities/tag/enums';
-import type { TagWithRelations } from '@/types/entities/tag/types';
 import { Sparkles, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import { type TagCategory, TagRarity } from '@/types/entities/tag/enums';
+import type { TagWithRelations } from '@/types/entities/tag/types';
 import { TagCardContent } from './tag-card-content';
 import { TagCardFooter } from './tag-card-footer';
 import { TagCardHeader } from './tag-card-header';
@@ -149,7 +149,7 @@ export function TagCard({
 
 			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			// Si hay algún error, volver al valor por defecto
 			return '#be185d';
 		}

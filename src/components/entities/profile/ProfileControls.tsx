@@ -3,12 +3,12 @@
  * @module components/entities/profile/ProfileControls
  */
 
+import { Grid2x2, Grid3x3, Layers, LayoutGrid, List, Search, SortAsc, SortDesc } from 'lucide-react';
+import { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProfileStore } from '@/store/entities/profile';
-import { Grid2x2, Grid3x3, Layers, LayoutGrid, List, Search, SortAsc, SortDesc } from 'lucide-react';
-import { useCallback } from 'react';
 
 export interface ProfileControlsProps {
 	className?: string;

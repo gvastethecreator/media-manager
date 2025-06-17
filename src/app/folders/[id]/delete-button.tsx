@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { deleteFolder } from '@/app/actions/folders';
 import {
 	AlertDialog,
@@ -13,8 +15,6 @@ import {
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 
 interface DeleteFolderButtonProps {
 	id: string;

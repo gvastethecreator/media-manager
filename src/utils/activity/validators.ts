@@ -92,7 +92,7 @@ export function validateActivityTypes(types: string[]): boolean {
 	try {
 		activityTypesSchema.parse(types);
 		return true;
-	} catch (error) {
+	} catch (_error) {
 		return false;
 	}
 }

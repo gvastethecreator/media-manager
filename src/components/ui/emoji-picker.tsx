@@ -1,11 +1,11 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import { Search, Smile } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Input } from './input';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';

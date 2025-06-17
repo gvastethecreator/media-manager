@@ -1,6 +1,5 @@
-import { useFiles } from '@/lib/contexts/file-context';
-import type { FileItem } from '@/lib/contexts/file-context';
 import { useCallback, useMemo, useState } from 'react';
+import { useFiles } from '@/lib/contexts/file-context';
 
 export function useFileList() {
 	const { files, sortBy, sortOrder, setSortBy, setSortOrder } = useFiles();

@@ -3,11 +3,11 @@
  * @module transformers/profile
  */
 
-import { profilePreferencesSchema } from '@/types/entities/profile/schema';
-import { Language, type ProfileExtended, type ProfilePreferences, ThemeMode } from '@/types/entities/profile/types';
 import type { Profile } from '@prisma/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { profilePreferencesSchema } from '@/types/entities/profile/schema';
+import { Language, type ProfileExtended, type ProfilePreferences, ThemeMode } from '@/types/entities/profile/types';
 
 /**
  * Obtiene el texto descriptivo para un tema

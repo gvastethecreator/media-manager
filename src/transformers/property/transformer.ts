@@ -9,6 +9,7 @@
 	}former
  */
 
+import type { Property } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { PropertySchema } from '@/types/entities/property/schema';
 import type {
@@ -19,7 +20,6 @@ import type {
 	PropertyWithStats,
 } from '@/types/entities/property/types';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Property } from '@prisma/client';
 import { fromPrismaProperty } from './serializers';
 
 // Logger específico para este módulo

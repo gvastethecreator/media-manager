@@ -155,7 +155,7 @@ export function validateUpdateAlbumData(data: unknown) {
  */
 export function isValidAlbumSlug(slug: string): boolean {
 	// Un slug válido contiene solo letras minúsculas, números, guiones y tiene al menos 3 caracteres
-	const slugRegex = /^[a-z0-9][a-z0-9\-]{2,}[a-z0-9]$/;
+	const slugRegex = /^[a-z0-9][a-z0-9-]{2,}[a-z0-9]$/;
 	return slugRegex.test(slug);
 }
 

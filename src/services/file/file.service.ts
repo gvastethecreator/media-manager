@@ -23,7 +23,7 @@ const logger = serverLogger.withContext('FileService');
  * @param options - Opciones de filtrado
  * @returns Resultado de la lectura
  */
-export async function readDirectory(directoryPath: string, options?: FileFilterOptions): Promise<DirectoryReadResult> {
+export async function readDirectory(directoryPath: string, _options?: FileFilterOptions): Promise<DirectoryReadResult> {
 	try {
 		logger.info(`Leyendo directorio: ${directoryPath}`);
 
@@ -157,7 +157,7 @@ export async function createDirectory(directoryPath: string): Promise<FileOperat
  */
 export async function deleteFileOrDirectory(
 	path: string,
-	options?: FileOperationOptions
+	_options?: FileOperationOptions
 ): Promise<FileOperationResult> {
 	try {
 		const isDirectory = (await getFileInfo(path))?.isDirectory || false;
@@ -195,7 +195,7 @@ export async function deleteFileOrDirectory(
 export async function copyFileOrDirectory(
 	sourcePath: string,
 	destinationPath: string,
-	options?: FileOperationOptions
+	_options?: FileOperationOptions
 ): Promise<FileCopyMoveResult> {
 	try {
 		const isDirectory = (await getFileInfo(sourcePath))?.isDirectory || false;
@@ -235,7 +235,7 @@ export async function copyFileOrDirectory(
 export async function moveFileOrDirectory(
 	sourcePath: string,
 	destinationPath: string,
-	options?: FileOperationOptions
+	_options?: FileOperationOptions
 ): Promise<FileCopyMoveResult> {
 	try {
 		const isDirectory = (await getFileInfo(sourcePath))?.isDirectory || false;

@@ -182,7 +182,7 @@ export const extractNumberFromStats = (statsJson: string, key: string): number |
 		const stats = JSON.parse(statsJson);
 		const value = stats[key];
 		return typeof value === 'number' ? value : undefined;
-	} catch (error) {
+	} catch (_error) {
 		return undefined;
 	}
 };
@@ -195,7 +195,7 @@ export const extractNumberFromStats = (statsJson: string, key: string): number |
 export const parseWorldItemStats = (statsJson: string): Record<string, any> => {
 	try {
 		return JSON.parse(statsJson);
-	} catch (error) {
+	} catch (_error) {
 		return {};
 	}
 };
@@ -208,7 +208,7 @@ export const parseWorldItemStats = (statsJson: string): Record<string, any> => {
 export const stringifyWorldItemStats = (stats: Record<string, any>): string => {
 	try {
 		return JSON.stringify(stats);
-	} catch (error) {
+	} catch (_error) {
 		return '{}';
 	}
 };

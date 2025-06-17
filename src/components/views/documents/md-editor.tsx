@@ -1,8 +1,9 @@
 // Editor minimalista para Markdown usando @uiw/react-md-editor
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 // Import dinámico para evitar problemas SSR
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
@@ -20,7 +21,9 @@ export function MdEditor({ initialValue, onSave }: { initialValue: string; onSav
 				<MDEditor value={value} onChange={setValue} height={300} />
 			</div>
 			<div className="flex justify-end mt-2">
-				<Button onClick={() => onSave?.(value)} variant="default" size="sm">Guardar</Button>
+				<Button onClick={() => onSave?.(value)} variant="default" size="sm">
+					Guardar
+				</Button>
 			</div>
 		</Card>
 	);

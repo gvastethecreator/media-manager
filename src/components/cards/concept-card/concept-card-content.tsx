@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
 import { BookText, Globe, Image, MessageSquare, Package, Tag, UserSquare, VideoIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { getConceptCounts } from './concept-server-actions';
 
 interface ConceptCardContentProps {
@@ -160,7 +160,7 @@ export function ConceptCardContent({
 			{parsedTags.length > 0 && (
 				<div className="mb-3">
 					<div className="flex flex-wrap gap-1">
-						{parsedTags.slice(0, 5).map((tag: string, index: number) => (
+						{parsedTags.slice(0, 5).map((tag: string, _index: number) => (
 							<span
 								key={`tag-${renderKey}-${tag}`}
 								className={`text-xs px-1.5 py-0.5 rounded-sm ${tcgMode ? 'border border-white/10' : 'bg-primary/10'}`}
@@ -312,17 +312,7 @@ function StatCounter({
 }
 
 // Componente para barras de estadísticas tipo TCG
-function StatBar({
-	label,
-	value,
-	color,
-	max,
-}: {
-	label: string;
-	value: number;
-	color: string;
-	max: number;
-}) {
+function StatBar({ label, value, color, max }: { label: string; value: number; color: string; max: number }) {
 	// Calcular porcentaje pero limitar entre 0 y 100
 	const percentage = Math.min(100, Math.max(0, (value / max) * 100));
 

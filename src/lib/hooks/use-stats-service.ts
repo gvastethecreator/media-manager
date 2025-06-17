@@ -1,8 +1,8 @@
 'use client';
 
+import { useEffect } from 'react';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { statsEventEmitter } from '@/services/stats.service';
-import { useEffect } from 'react';
 
 const statsLogger = serverLogger.withContext('StatsHook');
 

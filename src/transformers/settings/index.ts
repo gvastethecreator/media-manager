@@ -8,7 +8,7 @@ import type { Language, Settings, ThemeMode } from '@/types/settings';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { mappers, serializers } from './internal';
 
-const logger = serverLogger.withContext('SettingsTransformer');
+const _logger = serverLogger.withContext('SettingsTransformer');
 
 /**
  * Transforma los datos raw de configuración a una estructura tipada

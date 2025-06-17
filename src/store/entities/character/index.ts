@@ -3,10 +3,10 @@
  * @module store/entities/character
  */
 
-import type { CharacterExtended, CharacterSortOption, CharacterViewConfig } from '@/types/entities/character';
-import { CHARACTER_KEY_PREFIX } from '@/utils/character';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import type { CharacterExtended, CharacterSortOption, CharacterViewConfig } from '@/types/entities/character';
+import { CHARACTER_KEY_PREFIX } from '@/utils/character';
 import { createCharacterCoreSlice } from './slices/core';
 import { createCharacterFiltersSlice } from './slices/filters';
 import { createCharacterUISlice } from './slices/ui';

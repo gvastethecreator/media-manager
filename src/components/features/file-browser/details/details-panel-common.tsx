@@ -1,8 +1,8 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { truncateText } from '@/lib/utils';
 import type { FileMetadata } from '@/types/metadata.types';
-import type { ReactNode } from 'react';
 
 /**
  * Propiedades para el componente InfoItem

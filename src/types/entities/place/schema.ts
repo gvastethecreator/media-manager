@@ -3,8 +3,8 @@
  * @module types/entities/place/schema
  */
 
-import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { PlaceCategory, PlaceClimate, PlaceType } from './types';
 
 /**

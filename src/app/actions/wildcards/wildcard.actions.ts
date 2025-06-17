@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
@@ -8,7 +9,6 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { mapCreateWildcardDataToPrisma, mapUpdateWildcardDataToPrisma } from '@/transformers/wildcard';
 import type { CreateWildcardData, UpdateWildcardData } from '@/types/entities/wildcard';
 import type { FileItem } from '@/types/file-item';
-import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
 const wildcardLogger = serverLogger.withContext('WildcardActions');
@@ -592,7 +592,7 @@ export async function getRootWildcards() {
 /**
  * Función auxiliar para validar que no se cree un ciclo en la jerarquía
  */
-async function validateParentHierarchy(wildcardId: string | null, parentId: string) {
+async function _validateParentHierarchy(wildcardId: string | null, parentId: string) {
 	// No se puede asignar un comodín como su propio padre
 	if (wildcardId === parentId) {
 		throw new Error('Un comodín no puede ser su propio padre');

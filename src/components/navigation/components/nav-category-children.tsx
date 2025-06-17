@@ -1,12 +1,12 @@
 'use client';
 
+import { CornerDownRight, Lightbulb, MessageSquare, StickyNote } from 'lucide-react';
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import type { ViewMode } from '@/components/navigation/types';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import type { ViewType } from '@/types/file-item';
-import { CornerDownRight, Lightbulb, MessageSquare, StickyNote } from 'lucide-react';
-import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 
 export type CategoryChild = {
 	id: string;
@@ -157,7 +157,7 @@ const CategoryItems = memo(
 		const stableOnItemClick = useCallback(onItemClick, []);
 
 		// Memoizamos los handlers para cada ítem para evitar recreaciones
-		const getItemClickHandler = useCallback(
+		const _getItemClickHandler = useCallback(
 			(itemId: string) => {
 				return () => stableOnItemClick(itemId);
 			},

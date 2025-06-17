@@ -1,6 +1,6 @@
-import type { ImageItem } from '@/types/image-item';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { ImageItem } from '@/types/image-item';
 
 interface DetailsPanelState {
 	isVisible: boolean;
@@ -49,11 +49,10 @@ export const useDetailsPanel = create<DetailsPanelState>()(
 					return;
 				}
 
-				const currentIds = new Set(currentItems.map(item => item.id));
-				const newIds = new Set(items.map(item => item.id));
+				const currentIds = new Set(currentItems.map((item) => item.id));
+				const newIds = new Set(items.map((item) => item.id));
 
-				if (currentIds.size !== newIds.size ||
-					![...currentIds].every(id => newIds.has(id))) {
+				if (currentIds.size !== newIds.size || ![...currentIds].every((id) => newIds.has(id))) {
 					set({ selectedItems: items });
 				}
 			},

@@ -15,6 +15,7 @@ const FOLDER_DEFAULT_EMOJIS = {
 	VIDEOS: '🎞',
 	DOWNLOADS: '⬇',
 };
+
 import { z } from 'zod';
 
 /**

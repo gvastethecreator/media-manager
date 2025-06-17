@@ -5,6 +5,7 @@
  * @module app/actions/queue/crud
  */
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import * as QueueJobService from '@/services/queue-job.service';
 import {
@@ -21,7 +22,6 @@ import {
 	queueJobPaginationSchema,
 	updateQueueJobSchema,
 } from '@/types/entities/queue-job/schema';
-import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('QueueActions:crud');
 

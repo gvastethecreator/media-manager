@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { Badge } from './badge';
 import { Button } from './button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './card';

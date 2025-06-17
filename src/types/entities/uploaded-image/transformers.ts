@@ -62,7 +62,7 @@ export const uploadedImageTransformer: Transformer<UploadedImageDBRecord, Upload
 	/**
 	 * Transform domain entity to client result with additional data
 	 */
-	toClient: (entity, options): UploadedImageResult => {
+	toClient: (entity, _options): UploadedImageResult => {
 		// Calculate dimensions with aspect ratio
 		const dimensions: UploadedImageDimensions = {
 			width: entity.width,
@@ -75,7 +75,7 @@ export const uploadedImageTransformer: Transformer<UploadedImageDBRecord, Upload
 		const thumbnailUrl = `/api/images/thumbnails/${encodeURIComponent(entity.path)}`;
 
 		// Parse metadata if available
-		const parsedMetadata = entity.metadata ? (JSON.parse(entity.metadata) as MediaMetadata) : null;
+		const _parsedMetadata = entity.metadata ? (JSON.parse(entity.metadata) as MediaMetadata) : null;
 
 		return {
 			...entity,

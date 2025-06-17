@@ -1,8 +1,8 @@
 'use client';
 
+import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { Folder } from '@/types/entities/folder';
-import { memo, useCallback, useMemo } from 'react';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';
@@ -103,7 +103,7 @@ export const FolderCard = memo(function FolderCard({
 	}, [onClick, interactive]);
 
 	// Establecer la URL base del enlace
-	const baseHref = href || `/dashboard/folders/${folderData.id}`;
+	const _baseHref = href || `/dashboard/folders/${folderData.id}`;
 
 	// Componente de la carta
 	const cardContent = (

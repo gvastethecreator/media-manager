@@ -1,9 +1,9 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { MessageSquareQuote, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { CardContainer } from '../card-container';
 import { PromptCardContent } from './prompt-card-content';
 import { PromptCardFooter } from './prompt-card-footer';
@@ -75,9 +75,9 @@ function PromptCardComponent({
 	const conceptsCount = _count?.concepts || 0;
 	const notesCount = _count?.notes || 0;
 	const charactersCount = _count?.characters || 0;
-	const propertiesCount = _count?.properties || 0;
-	const wildcardsCount = _count?.wildcards || 0;
-	const groupsCount = _count?.groups || 0;
+	const _propertiesCount = _count?.properties || 0;
+	const _wildcardsCount = _count?.wildcards || 0;
+	const _groupsCount = _count?.groups || 0;
 
 	// Relaciones para mostrar en el contenido
 	const relationCounts = {
@@ -111,7 +111,7 @@ function PromptCardComponent({
 
 			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			// Si hay algún error, volver al valor por defecto
 			return '#0369a1';
 		}

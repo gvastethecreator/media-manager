@@ -3,15 +3,15 @@
  * @module app/api/profiles/[id]/settings/reset
  */
 
-import { resetProfileSettings } from '@/app/actions/system';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { resetProfileSettings } from '@/app/actions/system';
 
 /**
  * Manejador para POST - Restablece la configuración de un perfil
  * a los valores globales
  */
-export async function POST(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
+export async function POST(_request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
 	try {
 		const profileId = params.id;
 

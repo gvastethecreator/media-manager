@@ -3,9 +3,9 @@
  * @module store/entities/property/slices/ui
  */
 
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { PropertyViewMode } from '@/types/entities/property';
-import type { StateCreator } from 'zustand';
 import type { PropertyState } from '../types';
 
 const uiLogger = clientLogger.withContext('PropertyStore:UI');
@@ -181,7 +181,7 @@ export const createPropertyUISlice: StateCreator<PropertyState, [], [], Property
 	},
 
 	// Estados visuales
-	setPropertyDisplayState: (propertyId, state) => {
+	setPropertyDisplayState: (propertyId, _state) => {
 		uiLogger.info('🎨 Actualizando estado visual para propiedad:', propertyId);
 		set((state) => ({
 			ui: {

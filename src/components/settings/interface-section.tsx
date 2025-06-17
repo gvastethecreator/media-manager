@@ -2,20 +2,14 @@
 // Sección de interfaz para controlar tipografía, tema, animaciones y otros aspectos visuales
 // 🛠️ Cumple con los lineamientos de arquitectura y stack del proyecto
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
-import { useInterfaceSettingsStore } from "@/store/entities/settings/store";
-import React from "react";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
 
 /**
  * InterfaceSection
@@ -26,9 +20,7 @@ import React from "react";
 const InterfaceSection: React.FC = () => {
 	// Acceso a preferencias y setter desde Zustand
 	const preferences = useInterfaceSettingsStore((s) => s.preferences);
-	const setPreferences = useInterfaceSettingsStore((s: any) =>
-		s.setPreferences ? s.setPreferences : () => { }
-	);
+	const setPreferences = useInterfaceSettingsStore((s: any) => (s.setPreferences ? s.setPreferences : () => {}));
 
 	return (
 		<Card className="bg-muted/30 rounded-sm border-none">
@@ -43,10 +35,7 @@ const InterfaceSection: React.FC = () => {
 					{/* Selector de tipografía */}
 					<div className="flex flex-col gap-1">
 						<Label htmlFor="fontFamily">Tipografía</Label>
-						<Select
-							value={preferences.fontFamily}
-							onValueChange={(v) => setPreferences({ fontFamily: v })}
-						>
+						<Select value={preferences.fontFamily} onValueChange={(v) => setPreferences({ fontFamily: v })}>
 							<SelectTrigger className="w-full">
 								<SelectValue />
 							</SelectTrigger>
@@ -61,10 +50,7 @@ const InterfaceSection: React.FC = () => {
 					{/* Selector de tamaño de fuente */}
 					<div className="flex flex-col gap-1">
 						<Label htmlFor="fontSize">Tamaño de fuente</Label>
-						<Select
-							value={preferences.fontSize}
-							onValueChange={(v) => setPreferences({ fontSize: v })}
-						>
+						<Select value={preferences.fontSize} onValueChange={(v) => setPreferences({ fontSize: v })}>
 							<SelectTrigger className="w-full">
 								<SelectValue />
 							</SelectTrigger>
@@ -78,10 +64,7 @@ const InterfaceSection: React.FC = () => {
 					{/* Selector de tema */}
 					<div className="flex flex-col gap-1">
 						<Label htmlFor="theme">Tema</Label>
-						<Select
-							value={preferences.theme}
-							onValueChange={(v) => setPreferences({ theme: v })}
-						>
+						<Select value={preferences.theme} onValueChange={(v) => setPreferences({ theme: v })}>
 							<SelectTrigger className="w-full">
 								<SelectValue />
 							</SelectTrigger>
@@ -120,7 +103,11 @@ const InterfaceSection: React.FC = () => {
 								min={0}
 								max={32}
 								value={preferences.thumbnailsBorderRadius.grid}
-								onChange={e => setPreferences({ thumbnailsBorderRadius: { ...preferences.thumbnailsBorderRadius, grid: Number(e.target.value) } })}
+								onChange={(e) =>
+									setPreferences({
+										thumbnailsBorderRadius: { ...preferences.thumbnailsBorderRadius, grid: Number(e.target.value) },
+									})
+								}
 								className="w-16"
 							/>
 							<span className="text-xs text-muted-foreground w-12">Card</span>
@@ -129,7 +116,11 @@ const InterfaceSection: React.FC = () => {
 								min={0}
 								max={32}
 								value={preferences.thumbnailsBorderRadius.card}
-								onChange={e => setPreferences({ thumbnailsBorderRadius: { ...preferences.thumbnailsBorderRadius, card: Number(e.target.value) } })}
+								onChange={(e) =>
+									setPreferences({
+										thumbnailsBorderRadius: { ...preferences.thumbnailsBorderRadius, card: Number(e.target.value) },
+									})
+								}
 								className="w-16"
 							/>
 							<span className="text-xs text-muted-foreground w-12">Mosaico</span>
@@ -138,7 +129,11 @@ const InterfaceSection: React.FC = () => {
 								min={0}
 								max={32}
 								value={preferences.thumbnailsBorderRadius.mosaic}
-								onChange={e => setPreferences({ thumbnailsBorderRadius: { ...preferences.thumbnailsBorderRadius, mosaic: Number(e.target.value) } })}
+								onChange={(e) =>
+									setPreferences({
+										thumbnailsBorderRadius: { ...preferences.thumbnailsBorderRadius, mosaic: Number(e.target.value) },
+									})
+								}
 								className="w-16"
 							/>
 						</div>

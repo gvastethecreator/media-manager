@@ -1,11 +1,11 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import type { Wildcard } from '@/types/prisma';
 import { Shuffle } from 'lucide-react';
 import Link from 'next/link';
 import React, { useMemo } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import type { Wildcard } from '@/types/prisma';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
@@ -44,7 +44,7 @@ export function WildcardCard({ wildcard, onClick, className, showBadges = true }
 			const darkerB = Math.floor(b * darkenFactor);
 
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			return '#2563eb';
 		}
 	}, [wildcard.color]);
@@ -72,7 +72,7 @@ export function WildcardCard({ wildcard, onClick, className, showBadges = true }
 		if (typeof wildcard.children === 'string' && wildcard.children !== 'empty_array') {
 			try {
 				return JSON.parse(wildcard.children);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}

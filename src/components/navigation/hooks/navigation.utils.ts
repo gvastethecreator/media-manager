@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
@@ -11,7 +12,6 @@ import { useTagStore } from '@/store/entities/tag';
 import { useWorldItemStore } from '@/store/entities/world-item';
 import { useNavigationStore } from '@/store/navigation.store';
 import type { ViewType } from '@/types/file-item';
-import { useCallback } from 'react';
 
 const navLogger = clientLogger.withContext('NavigationUtils');
 

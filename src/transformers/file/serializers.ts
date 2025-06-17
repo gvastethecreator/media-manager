@@ -138,7 +138,7 @@ export function deserializeImageMetadata(metadataStr?: string): unknown {
 export function pathsToTreeStructure(paths: string[]): any[] {
 	try {
 		const tree: any[] = [];
-		const pathMap: Record<string, any> = {};
+		const _pathMap: Record<string, any> = {};
 
 		// Construir el árbol
 		for (const fullPath of paths) {

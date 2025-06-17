@@ -3,14 +3,14 @@
  * @module store/entities/task
  */
 
-import { createSelectors } from '@/utils/store-selectors';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+import { createSelectors } from '@/utils/store-selectors';
 
 // Importar slices
 import { CoreActions, CoreState, createCoreSlice } from './slices/core.slice';
-import { FiltersActions, FiltersState, createFiltersSlice } from './slices/filters.slice';
-import { UIActions, UIState, createUISlice } from './slices/ui.slice';
+import { createFiltersSlice, FiltersActions, FiltersState } from './slices/filters.slice';
+import { createUISlice, UIActions, UIState } from './slices/ui.slice';
 
 // Tipo del store completo
 export type TaskStore = CoreState & CoreActions & UIState & UIActions & FiltersState & FiltersActions;

@@ -1,5 +1,7 @@
 'use client';
 
+import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { createGroup, deleteGroup, getGroups, updateGroup } from '@/app/actions/groups/group.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +13,6 @@ import { Toggle } from '@/components/ui/toggle';
 import toastService from '@/services/toast.service';
 import type { GroupWithStats } from '@/types/entities/group/types';
 import { GroupSortCriteria } from '@/types/entities/group/types';
-import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
 
@@ -24,21 +24,21 @@ const SORT_OPTIONS = [
 
 export function GroupsSettings() {
 	const [groups, setGroups] = useState<GroupWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const [_isLoading, setIsLoading] = useState(true);
+	const [_error, setError] = useState<string | null>(null);
 	const [selectedGroup, setSelectedGroup] = useState<GroupWithStats | null>(null);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 
 	// Filtros y ordenamiento
 	const [searchQuery, setSearchQuery] = useState('');
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [selectedCategories, _setSelectedCategories] = useState<string[]>([]);
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
 	const [sortBy, setSortBy] = useState<GroupSortCriteria>(GroupSortCriteria.NAME_ASC);
 
 	useEffect(() => {
 		loadGroups();
-	}, []);
+	}, [loadGroups]);
 
 	const loadGroups = async () => {
 		try {
@@ -91,7 +91,7 @@ export function GroupsSettings() {
 	});
 
 	// Estadísticas
-	const stats = {
+	const _stats = {
 		totalGroups: groups.length,
 		totalElements: groups.reduce((acc, group) => {
 			return acc + Object.values(group._count).reduce((a, b) => a + b, 0);

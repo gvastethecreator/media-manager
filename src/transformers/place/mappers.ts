@@ -3,6 +3,7 @@
  * @module transformers/place/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { createLogger } from '@/lib/logger';
 import type {
 	PlaceComplete,
@@ -12,7 +13,6 @@ import type {
 	PlaceUpdateInput,
 	RelatedPlace,
 } from '@/types/entities/place/types';
-import type { Prisma } from '@prisma/client';
 import { toPrismaPlace } from './serializers';
 
 // Logger específico para el transformer de Place
@@ -580,7 +580,7 @@ export function suggestPlaceEmoji(type?: string | null, category?: string | null
 export function getCompleteLocationName(name: string, region?: string | null): string {
 	if (!region) return name;
 
-	const regionParts = region.split(/[\/|>]/).map((r) => r.trim());
+	const regionParts = region.split(/[/|>]/).map((r) => r.trim());
 	const lastRegion = regionParts[regionParts.length - 1];
 
 	return `${name}, ${lastRegion}`;

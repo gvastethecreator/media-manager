@@ -1,10 +1,10 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import type { Note } from '@/types/entities/note/types';
 import { BookOpen, ScrollText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
+import { cn } from '@/lib/utils';
+import type { Note } from '@/types/entities/note/types';
 import { CardHeader } from '../card-header';
 import { NoteCardContent } from './note-card-content';
 import { NoteCardFooter } from './note-card-footer';
@@ -73,7 +73,7 @@ export function NoteCard({ note, onClick, className, style, tcgMode = true }: No
 
 			// Convertir de vuelta a hex
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			// Si hay algún error, volver al valor por defecto
 			return '#db2777';
 		}
@@ -95,7 +95,7 @@ export function NoteCard({ note, onClick, className, style, tcgMode = true }: No
 		if (typeof note.tags === 'string' && note.tags) {
 			try {
 				return JSON.parse(note.tags);
-			} catch (e) {
+			} catch (_e) {
 				return [];
 			}
 		}

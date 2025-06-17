@@ -1,13 +1,13 @@
 'use client';
 
+import { ScrollText } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { getNoteImages } from '@/app/actions/notes/note.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useNoteStore } from '@/store/entities/note';
-import { ScrollText } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
 
 const viewLogger = clientLogger.withContext('NoteContentView');
 

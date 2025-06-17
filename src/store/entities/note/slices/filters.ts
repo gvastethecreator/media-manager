@@ -1,7 +1,7 @@
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { NoteSortOption } from '@/types/entities/note';
 import type { NoteFilters } from '@/types/entities/note/extended';
-import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const filtersLogger = clientLogger.withContext('NoteStore:Filters');

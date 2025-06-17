@@ -1,12 +1,12 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { extendPlace, mapCreatePlaceDataToPrisma, mapUpdatePlaceDataToPrisma } from '@/transformers/place';
 import type { CreatePlaceData, PlaceBase, PlaceExtendedComplete, UpdatePlaceData } from '@/types/entities/place';
-import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
 const placeLogger = serverLogger.withContext('PlaceActions');

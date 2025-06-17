@@ -1,5 +1,8 @@
 'use client';
 
+import { Grid2X2Icon, Grid3X3Icon, ListIcon, RefreshCw, SortAsc, SortDesc } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -9,9 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { Grid2X2Icon, Grid3X3Icon, ListIcon, RefreshCw, SortAsc, SortDesc } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ImageCardImproved } from './image-card-improved';
 import { type ImageCardData } from './image-server-actions';
 
@@ -69,7 +69,7 @@ export function ImageGallery({
 	const [layout, setLayout] = useState(defaultLayout);
 	const [selectedImages, setSelectedImages] = useState<string[]>([]);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
-	const [imagesData, setImagesData] = useState<ImageCardData[]>([]);
+	const [_imagesData, setImagesData] = useState<ImageCardData[]>([]);
 
 	// Convertir IDs de imágenes a array de ImageCardData si es necesario
 	useEffect(() => {

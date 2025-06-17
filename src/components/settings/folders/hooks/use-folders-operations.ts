@@ -1,10 +1,10 @@
 'use client';
 
+import { useCallback } from 'react';
 import { createFolder, deleteFolder, reindexFolder, updateFolderAutoReindex } from '@/app/actions/folders';
 import { clearMetadataCache } from '@/app/actions/metadata';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { useCallback } from 'react';
 
 const operationsLogger = clientLogger.withContext('FoldersOperations');
 

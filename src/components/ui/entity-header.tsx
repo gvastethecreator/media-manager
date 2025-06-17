@@ -1,5 +1,8 @@
 'use client';
 
+import { ChevronLeft, MoreHorizontal, PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import Link from 'next/link';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -16,9 +19,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { EntityStats, StatItem } from '@/components/ui/entity-stats';
 import { cn } from '@/lib/utils';
-import { ChevronLeft, MoreHorizontal, PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import Link from 'next/link';
 
 export interface EntityHeaderAction {
 	/**
@@ -198,14 +198,14 @@ export function EntityHeader({
 	};
 
 	// Acciones predefinidas comunes
-	const editAction: EntityHeaderAction = {
+	const _editAction: EntityHeaderAction = {
 		label: 'Editar',
 		icon: <PencilIcon className="h-4 w-4" />,
 		variant: 'outline',
 		order: 10,
 	};
 
-	const deleteAction: EntityHeaderAction = {
+	const _deleteAction: EntityHeaderAction = {
 		label: 'Eliminar',
 		icon: <TrashIcon className="h-4 w-4" />,
 		variant: 'destructive',

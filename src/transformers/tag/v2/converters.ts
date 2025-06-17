@@ -17,7 +17,7 @@ const logger = new Logger('TagConverters');
 export function mapTagToComplete(tag: any): TagComplete {
 	try {
 		// Si ya es un TagComplete, retornarlo directamente
-		if (Object.prototype.hasOwnProperty.call(tag, '_count')) {
+		if (Object.hasOwn(tag, '_count')) {
 			return tag as TagComplete;
 		}
 

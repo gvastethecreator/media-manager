@@ -4,9 +4,6 @@
  */
 
 import type { z } from 'zod';
-import type { VideoFormat, VideoPrivacyLevel } from './enums';
-import type { VideoSchema } from './schema';
-
 // Importación de tipos para relaciones
 import type { Album } from '../album/types';
 import type { Character } from '../character/types';
@@ -21,6 +18,8 @@ import type { Property } from '../property/types';
 import type { Tag } from '../tag/types';
 import type { Wildcard } from '../wildcard/types';
 import type { WorldItem } from '../world-item/types';
+import type { VideoFormat, VideoPrivacyLevel } from './enums';
+import type { VideoSchema } from './schema';
 
 /**
  * 🎥 Metadatos del video

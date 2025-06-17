@@ -5,11 +5,11 @@
  * @module app/actions/tags/relation.actions
  */
 
+import { revalidatePath } from 'next/cache';
 // import { notifyStatChange } from '@/lib/events'; // Comentado, usar serverEmit
 import { emit as serverEmit } from '@/lib/events/server'; // Importar serverEmit
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
 
 const tagLogger = serverLogger.withContext('TagRelationActions');
 

@@ -3,6 +3,7 @@
  * @module transformers/group/mappers
  */
 
+import type { Group, Prisma } from '@prisma/client';
 import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
@@ -12,7 +13,6 @@ import type {
 	GroupListProps,
 	GroupSearchParams,
 } from '@/types/entities/group';
-import type { Group, Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('GroupMappers');
 

@@ -1,7 +1,7 @@
+import { AlertCircle, BarChart } from 'lucide-react';
 import { getSystemStatsExtended } from '@/app/actions/stats/stats.actions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { AlertCircle, BarChart } from 'lucide-react';
 import { StatCard } from './stat-card';
 
 export async function GeneralStats() {

@@ -3,11 +3,11 @@
  * @module store/entities/character/slices/core
  */
 
+import type { StateCreator } from 'zustand';
 import { serializeArray, serializeStats } from '@/transformers/character/serializers';
 import { transformCharacterToExtended } from '@/transformers/character/transformer';
 import type { CharacterBase, CharacterExtended } from '@/types/entities/character';
 import { generateCharacterId } from '@/utils/character';
-import type { StateCreator } from 'zustand';
 import type { CharacterCoreSlice, CharacterState } from '../types';
 
 /**
@@ -335,7 +335,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 				if (typeof character.relationships === 'string') {
 					try {
 						relationships = JSON.parse(character.relationships);
-					} catch (e) {
+					} catch (_e) {
 						relationships = [];
 					}
 				} else {
@@ -386,7 +386,7 @@ export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCo
 				if (typeof character.relationships === 'string') {
 					try {
 						relationships = JSON.parse(character.relationships);
-					} catch (e) {
+					} catch (_e) {
 						relationships = [];
 					}
 				} else {

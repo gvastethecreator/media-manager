@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import type { Transformer } from '@/types/common/transformer';
 import type { FileItem } from '@/types/file-item';
 import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
-import { type ServerImage, imageConverterService } from './image-converter.service';
+import { imageConverterService, type ServerImage } from './image-converter.service';
 
 const SERVICE_NAME = 'BaseService';
 const baseLogger = serverLogger.withContext(SERVICE_NAME);

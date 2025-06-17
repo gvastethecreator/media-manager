@@ -1,10 +1,10 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import type { Group } from '@/types/prisma';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { Group } from '@/types/prisma';
 import { GroupCardContent } from './group-card-content';
 import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
@@ -38,7 +38,7 @@ export function GroupCard({
 
 	// Calcular colores
 	const primaryColor = useMemo(() => group.color || '#3b82f6', [group.color]);
-	const secondaryColor = useMemo(() => {
+	const _secondaryColor = useMemo(() => {
 		if (!group.color) return '#2563eb';
 
 		try {
@@ -53,13 +53,13 @@ export function GroupCard({
 			const darkerB = Math.floor(b * darkenFactor);
 
 			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (e) {
+		} catch (_e) {
 			return '#2563eb';
 		}
 	}, [group.color]);
 
 	// Preparar media para la galería
-	const allMedia = useMemo(() => {
+	const _allMedia = useMemo(() => {
 		return [...(group.recentImages || []), ...(group.recentVideos || [])];
 	}, [group.recentImages, group.recentVideos]);
 

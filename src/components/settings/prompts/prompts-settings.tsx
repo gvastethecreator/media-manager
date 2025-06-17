@@ -1,5 +1,7 @@
 'use client';
 
+import { Check, Delete, Edit, Plus, Search, Star, X } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { deletePrompt, getPrompts } from '@/app/actions/prompts/prompt.actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,8 +19,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import toastService from '@/services/toast.service';
 import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory } from '@/types/entities/prompt/enums';
-import { Check, Delete, Edit, Plus, Search, Star, X } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreatePromptForm } from './create-prompt-form';
 
 // Interfaz para PropntWithNullable que funciona como adaptador para el componente CreatePromptForm

@@ -33,7 +33,7 @@ export interface WildcardTransformOptions {
  */
 export function validateWildcard(wildcard: Partial<WildcardBase>): WildcardBase {
 	try {
-		const result = WildcardSchema.parse(wildcard);
+		const _result = WildcardSchema.parse(wildcard);
 		return wildcard as WildcardBase;
 	} catch (error) {
 		logger.error('Error validando Wildcard', { error });

@@ -3,14 +3,14 @@
  * @module app/api/profiles/[id]/settings
  */
 
-import { getProfileSettings, updateProfileSettings } from '@/app/actions/system';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { getProfileSettings, updateProfileSettings } from '@/app/actions/system';
 
 /**
  * Obtiene la configuración de un perfil específico
  */
-export async function GET(request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }): Promise<NextResponse> {
 	try {
 		const profileId = params.id;
 

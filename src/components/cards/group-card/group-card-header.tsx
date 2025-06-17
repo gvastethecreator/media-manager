@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { FolderIcon, FolderTreeIcon, LibraryBigIcon, PackageOpenIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface GroupCardHeaderProps {
 	name: string;

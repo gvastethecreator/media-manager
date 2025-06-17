@@ -3,11 +3,11 @@
  * @module transformers/image/serializers
  */
 
+import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { ImageComplete } from '@/types/entities/image/types';
 import { ImageSchema } from '@/types/entities/image/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
-import { z } from 'zod';
 
 const logger = serverLogger.withContext('ImageSerializer');
 
@@ -77,7 +77,7 @@ export function validateImage(data: unknown): ImageComplete {
  */
 export function extendImage(
 	image: ImageComplete,
-	options: {
+	_options: {
 		includeStats?: boolean;
 		includeRelations?: boolean;
 	} = {}

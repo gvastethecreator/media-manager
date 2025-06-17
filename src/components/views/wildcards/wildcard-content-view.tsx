@@ -1,13 +1,13 @@
 'use client';
 
+import { AlertCircle, Check, Edit3, Filter, Globe, Hash, Plus, Search, Star, Trash2, X } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, Check, Edit3, Filter, Globe, Hash, Plus, Search, Star, Trash2, X } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useState } from 'react';
 
 // 🎯 Mock data para wildcards - en implementación real vendría del store
 const mockWildcards = [
@@ -53,7 +53,7 @@ const mockWildcards = [
 export function WildcardContentView() {
 	const [isEditing, setIsEditing] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
-	const [selectedWildcard, setSelectedWildcard] = useState(mockWildcards[0]);
+	const [selectedWildcard, _setSelectedWildcard] = useState(mockWildcards[0]);
 
 	// 🎨 Función para obtener el color de prioridad
 	const getPriorityColor = (priority: number) => {

@@ -1,7 +1,7 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { memo } from 'react';
+import { Badge } from '@/components/ui/badge';
 
 interface TagUsageProps {
 	tag: {

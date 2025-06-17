@@ -1,5 +1,5 @@
-import { useCallback, useEffect } from 'react';
 import type * as React from 'react';
+import { useCallback, useEffect } from 'react';
 
 /**
  * Hook optimizado para manejar el efecto de brillo en las tarjetas

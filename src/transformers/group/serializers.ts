@@ -3,6 +3,7 @@
  * @module transformers/group/serializers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	type GroupBase,
@@ -22,7 +23,6 @@ import { DEFAULT_UI_VALUES } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { getRelationCounts, preparePrismaRelations, validateEntityRelations } from '@/utils/transformers/relations';
 import { validateBaseEntity, validateMetadataFields, validateUIFields } from '@/utils/transformers/validation';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('GroupSerializer');
 

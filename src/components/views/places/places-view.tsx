@@ -1,6 +1,9 @@
 'use client';
 
-import { type PlaceWithStats, getPlaces } from '@/app/actions/places/place.actions';
+import { LandPlot } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
+import { getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
 import { getPlaceVisualConfig } from '@/app/actions/visual-config.actions';
 import { MemoizedPlaceCard } from '@/components/cards/place-card';
 import { EmptyState } from '@/components/core/data-display';
@@ -10,9 +13,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePlaceStore } from '@/store/entities/place';
-import { LandPlot } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('PlacesView');
@@ -29,7 +29,7 @@ export function PlacesView(_props: ViewProps) {
 	const [places, setPlaces] = useState<PlaceWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_PLACE_OPTIONS);
+	const [_visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_PLACE_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticPlaces, _addEvent] = clientEvents.useEvents<PlaceWithStats[]>(places);

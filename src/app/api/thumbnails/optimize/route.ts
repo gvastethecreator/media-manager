@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { optimizeThumbnails } from '@/app/actions/thumbnails/thumbnails.actions';
 
 export const dynamic = 'force-dynamic';

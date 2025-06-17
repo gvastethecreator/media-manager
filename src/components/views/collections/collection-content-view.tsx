@@ -1,13 +1,13 @@
 'use client';
 
+import { Library } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { getCollectionImages, removeImageFromCollection } from '@/app/actions/collections/collection.actions';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
 import type { FileItem } from '@/types/file-item';
-import { Library } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 
 const logger = clientLogger.withContext('CollectionContentView');
 

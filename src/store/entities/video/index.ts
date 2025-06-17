@@ -6,17 +6,17 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { VideoPlayState, VideoSortCriteria, VideoViewMode } from '../../../types/entities/video';
-import { type VideoCoreSlice, createVideoCoreSlice } from './slices/core';
-import { type VideoFiltersSlice, createVideoFiltersSlice } from './slices/filters';
-import { type VideoPlayerSlice, createVideoPlayerSlice } from './slices/player';
-import { type VideoUISlice, createVideoUISlice } from './slices/ui';
+import { createVideoCoreSlice, type VideoCoreSlice } from './slices/core';
+import { createVideoFiltersSlice, type VideoFiltersSlice } from './slices/filters';
+import { createVideoPlayerSlice, type VideoPlayerSlice } from './slices/player';
+import { createVideoUISlice, type VideoUISlice } from './slices/ui';
 import type { VideoState } from './types';
 
 // Tipo del store completo
 export type VideoStore = VideoCoreSlice & VideoUISlice & VideoFiltersSlice & VideoPlayerSlice;
 
 // Estado inicial
-const initialState: VideoState = {
+const _initialState: VideoState = {
 	core: {
 		videos: {},
 		isLoading: false,
@@ -92,11 +92,10 @@ export const useVideoStore = create<VideoStore>()(
 	)
 );
 
-// Exportar todo desde types
-export * from './types';
-
 // Exportar slices para poder extenderlos
 export { createVideoCoreSlice } from './slices/core';
 export { createVideoFiltersSlice } from './slices/filters';
 export { createVideoPlayerSlice } from './slices/player';
 export { createVideoUISlice } from './slices/ui';
+// Exportar todo desde types
+export * from './types';

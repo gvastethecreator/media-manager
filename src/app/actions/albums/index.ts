@@ -5,8 +5,8 @@
  * @module app/actions/albums
  */
 
-import * as AlbumImagesActions from './album-images.actions';
 import * as AlbumActions from './album.actions';
+import * as AlbumImagesActions from './album-images.actions';
 
 // Re-exportar tipos
 export type { AlbumWithStats } from './album.actions';

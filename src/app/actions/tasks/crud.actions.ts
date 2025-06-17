@@ -5,10 +5,10 @@
  * @module app/actions/tasks/crud.actions
  */
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type ScheduledTask } from '@/types/tasks';
-import { revalidatePath } from 'next/cache';
 
 // Logger específico para acciones de tareas
 const taskLogger = serverLogger.withContext('TaskCrudActions');

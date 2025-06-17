@@ -1,8 +1,7 @@
 'use client';
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import { useOptimistic } from 'react';
-import type { EventType } from '../server/events.server';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { EventData } from '../server/events.server';
 
 const eventsLogger = serverLogger.withContext('ClientEvents');

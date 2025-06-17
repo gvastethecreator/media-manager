@@ -1,6 +1,6 @@
+import { BookOpen, Heart, Sparkles, Tag as TagIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { type TagCategory, TagRarity } from '@/types/entities/tag/enums';
-import { BookOpen, Heart, Sparkles, Tag as TagIcon } from 'lucide-react';
 
 export interface TagCardHeaderProps {
 	name: string;

@@ -1,5 +1,7 @@
 'use client';
 
+import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 import {
 	charactersCache,
 	metadataCache,
@@ -10,8 +12,6 @@ import {
 	worldItemsCache,
 } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ReactNode } from 'react';
-import { useEffect } from 'react';
 
 const cacheProviderLogger = serverLogger.withContext('CacheProvider');
 

@@ -1,5 +1,7 @@
 'use client';
 
+import { Check, Smile, UserCog, UserPlus, Users, UserX } from 'lucide-react';
+import { CompactPicker } from 'react-color';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
@@ -9,8 +11,6 @@ import { Separator } from '@/components/ui/separator';
 import { useProfileContext } from '@/lib/contexts';
 import { cn } from '@/lib/utils';
 import type { ProfileUpdate } from '@/services/profile-service-export';
-import { Check, Smile, UserCog, UserPlus, UserX, Users } from 'lucide-react';
-import { CompactPicker } from 'react-color';
 
 export function ProfilesSettings() {
 	const { settings, updateProfile, setActiveProfile, deleteProfile } = useProfileContext();

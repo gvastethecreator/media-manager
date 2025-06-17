@@ -5,9 +5,9 @@
  */
 
 import albumService, {
-	addImageToAlbumService,
 	ALBUM_EVENTS,
 	AlbumErrorCode,
+	addImageToAlbumService,
 	createAlbumError,
 	createAlbumService,
 	deleteAlbumService,

@@ -1,3 +1,6 @@
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
 import { getActiveProfile, getPaginatedProfiles, setActiveProfile } from '@/lib/utils/profile/profile-utils';
 import { transformProfile } from '@/transformers/profile/profile-transformers';
 import {
@@ -8,9 +11,6 @@ import {
 	type ProfilePreferences,
 	ThemeMode,
 } from '@/types/entities/profile/types';
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
-import { immer } from 'zustand/middleware/immer';
 
 // Estado inicial
 const initialState = {

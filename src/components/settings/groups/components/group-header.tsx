@@ -1,6 +1,6 @@
+import { EditIcon, StarIcon, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CardHeader, CardTitle } from '@/components/ui/card';
-import { EditIcon, StarIcon, Trash } from 'lucide-react';
 
 interface GroupHeaderProps {
 	emoji: string;

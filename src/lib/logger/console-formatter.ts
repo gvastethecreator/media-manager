@@ -135,7 +135,7 @@ export function formatConsoleMessage(
 			} else {
 				contextData = JSON.stringify(context, null, 2);
 			}
-		} catch (e) {
+		} catch (_e) {
 			contextData = String(context);
 		}
 	}
@@ -196,7 +196,7 @@ export function formatCustomMessage(
 			} else {
 				contextData = JSON.stringify(context, null, 2);
 			}
-		} catch (e) {
+		} catch (_e) {
 			contextData = String(context);
 		}
 	}

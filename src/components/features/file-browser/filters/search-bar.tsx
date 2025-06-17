@@ -1,11 +1,11 @@
 'use client';
 
+import { Search, X } from 'lucide-react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { Search, X } from 'lucide-react';
-import { memo, useCallback, useEffect, useState } from 'react';
 
 export interface SearchBarProps {
 	placeholder?: string;
@@ -36,7 +36,7 @@ export const SearchBar = memo<SearchBarProps>(function SearchBar({
 		if (searchQuery !== inputValue) {
 			setInputValue(searchQuery);
 		}
-	}, [searchQuery]);
+	}, [searchQuery, inputValue]);
 
 	// Aplicar debounce a la búsqueda
 	useEffect(() => {

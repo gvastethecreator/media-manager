@@ -1,6 +1,7 @@
 // Card para Audio
-import { Card } from '@/components/ui/card';
+
 import { WandSparkles } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 
 export function AudioCard({ name, format }: { name: string; format: string }) {
 	return (

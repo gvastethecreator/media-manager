@@ -1,8 +1,8 @@
 'use client';
 
+import type { ComponentType } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import type { ComponentType } from 'react';
 
 export interface ProcessingMetric {
 	name: string;

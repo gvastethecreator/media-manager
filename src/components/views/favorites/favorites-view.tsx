@@ -1,5 +1,7 @@
 'use client';
 
+import { Star } from 'lucide-react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { getFavorites } from '@/app/actions/favorites/favorite.actions';
 import type { BaseContentProps } from '@/components/views/base';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
@@ -8,8 +10,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
 import type { FileItem } from '@/types/file-item';
-import { Star } from 'lucide-react';
-import { useCallback, useEffect, useMemo } from 'react';
 
 const viewLogger = clientLogger.withContext('FavoritesView');
 

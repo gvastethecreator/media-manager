@@ -11,13 +11,13 @@ import {
 	toFavoriteExtended,
 } from './mappers';
 
-import { toFavoriteWithImage, toFavoritesWithImages, transformImageToFileItem } from './serializers';
+import { toFavoritesWithImages, toFavoriteWithImage, transformImageToFileItem } from './serializers';
 
 import {
 	calculateFavoriteStats, // Renombrar si es necesario
 	transformFavorite,
-	transformFavoriteToExtended,
 	transformFavorites,
+	transformFavoriteToExtended,
 } from './transformer';
 
 // Re-exportar explícitamente para controlar qué se expone

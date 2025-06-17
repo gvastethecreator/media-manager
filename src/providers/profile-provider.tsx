@@ -1,9 +1,9 @@
 'use client';
 
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 import { getActiveProfile } from '@/app/actions/profiles';
 import { selectIsDarkMode, useProfileStore } from '@/store/entities/profile/profile-store';
 import { type ProfileExtended, ThemeMode } from '@/types/entities/profile/types';
-import { type ReactNode, createContext, useContext, useEffect, useState } from 'react';
 
 // Contexto para acceso síncrono al perfil
 interface ProfileContextType {
@@ -26,7 +26,7 @@ export const useProfile = () => useContext(ProfileContext);
 
 // Componente Provider
 export function ProfileProvider({ children }: { children: ReactNode }) {
-	const [isInitialized, setIsInitialized] = useState(false);
+	const [_isInitialized, setIsInitialized] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -64,7 +64,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 		if (activeProfile?.theme) {
 			applyTheme(activeProfile.theme);
 		}
-	}, [activeProfile?.theme]);
+	}, [activeProfile?.theme, applyTheme]);
 
 	// Escuchar cambios en la preferencia del sistema cuando el tema es SYSTEM
 	useEffect(() => {

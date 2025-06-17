@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
 import type { Folder } from '@prisma/client';
 import { Folder as FolderIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 
 interface FolderCardFooterProps {
 	folder: Pick<Folder, 'id' | 'name' | 'color'>;

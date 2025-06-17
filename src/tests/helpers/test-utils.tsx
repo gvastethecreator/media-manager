@@ -114,9 +114,8 @@ export const mockImage = {
 // 🧪 Utilidad para esperar async operations
 export const waitForAsync = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-// 📏 Helpers para testing de hooks
-export { renderHook } from '@testing-library/react';
-
 // 🎯 Matchers personalizados exportados
 export * from '@testing-library/jest-dom';
 export * from '@testing-library/react';
+// 📏 Helpers para testing de hooks
+export { renderHook } from '@testing-library/react';

@@ -3,7 +3,6 @@
  * @module utils/place/helpers
  */
 
-import { deserializePlaceDangers } from '../../transformers/place';
 import { PLACE_SORT_PROPERTY_MAP, type Place, type PlaceFilters, PlaceSortCriteria } from '../../types/entities/place';
 
 /**

@@ -5,10 +5,10 @@
  * Incluye selección individual, múltiple, rangos y keyboard shortcuts
  */
 
+import { useCallback, useEffect } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
 import type { FileItem } from '@/types/file-item';
-import { useCallback, useEffect } from 'react';
 
 const selectionLogger = clientLogger.withContext('SelectionHooks');
 

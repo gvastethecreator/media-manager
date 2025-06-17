@@ -1,5 +1,7 @@
 'use client';
 
+import { FolderIcon } from 'lucide-react';
+import { useCallback, useEffect, useRef } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser';
@@ -7,8 +9,6 @@ import BlurFade from '@/components/ui/blur-fade';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { FileItem } from '@/types/file-item';
-import { FolderIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef } from 'react';
 import { useContentView } from './content-view-provider';
 
 const baseLogger = clientLogger.withContext('BaseContentView');
@@ -188,7 +188,9 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 	return (
 		<div className={`h-full w-full flex overflow-hidden ${className || ''}`}>
 			<div className="h-full w-full overflow-auto">
-				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>					<FileBrowser
+				<BlurFade className="h-full w-full overflow-auto" delay={0.5} inView={true}>
+					{' '}
+					<FileBrowser
 						items={items}
 						onItemSelect={handleItemClick}
 						onItemDoubleClick={handleItemDoubleClick}

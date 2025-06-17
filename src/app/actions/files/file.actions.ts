@@ -1,5 +1,7 @@
 'use server';
 
+import fs, { stat } from 'fs/promises';
+import { revalidatePath } from 'next/cache';
 import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
@@ -22,8 +24,6 @@ import {
 	type FileOperationResult,
 	FileType,
 } from '@/types/entities/file';
-import fs, { stat } from 'fs/promises';
-import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
 const fileLogger = serverLogger.withContext('FileActions');
@@ -219,7 +219,7 @@ export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadRe
 				try {
 					const fileStats = await stat(entryPath);
 					return mapStatsToFileInfo(entryPath, fileStats);
-				} catch (error) {
+				} catch (_error) {
 					// Si hay error al obtener información, crear un ítem básico
 					const extension = isDirectory ? '' : path.extname(entry.name);
 					return {
@@ -334,7 +334,7 @@ export async function renameFile(
 		// Verificar que la ruta origen existe
 		try {
 			await stat(normalizedOldPath);
-		} catch (error) {
+		} catch (_error) {
 			throw createFileError('El archivo o directorio de origen no existe', FileErrorCode.NOT_FOUND);
 		}
 

@@ -1,7 +1,5 @@
 'use client';
 
-import type { AIGenerationInfo } from '@/lib/parsers';
-
 /**
  * Convierte cualquier valor a string de forma segura
  */

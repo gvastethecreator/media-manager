@@ -1,5 +1,6 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
@@ -17,7 +18,6 @@ import {
 	FavoriteEventType,
 	type FavoriteWithImage,
 } from '@/types/entities/favorite';
-import { revalidatePath } from 'next/cache';
 
 // Configuración y utilidades
 const favoriteLogger = serverLogger.withContext('FavoriteActions');

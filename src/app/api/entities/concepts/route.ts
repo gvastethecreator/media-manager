@@ -1,5 +1,5 @@
-import { serverLogger } from '@/lib/logger/server-logger';
 import { type NextRequest, NextResponse } from 'next/server';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 // Logger específico para la API de conceptos
 const conceptsApiLogger = serverLogger.withContext('ConceptsAPI');
@@ -67,7 +67,7 @@ const testConcepts = [
  * GET /api/entities/concepts
  * Recupera la lista de conceptos
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
 	try {
 		conceptsApiLogger.info('📥 Petición GET recibida para obtener conceptos');
 

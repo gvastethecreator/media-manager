@@ -7,7 +7,6 @@
 
 import {
 	CONSOLE_COLORS,
-	type LogType,
 	createConsoleTable,
 	createElapsedTime,
 	createProgressBar,
@@ -15,6 +14,7 @@ import {
 	createSeparatorEnd,
 	createTextBlock,
 	formatConsoleMessage,
+	type LogType,
 } from './console-formatter';
 import { type LogLevel, loggerConfig } from './logger.config';
 
@@ -50,7 +50,7 @@ const SERVER_COLORS = {
 };
 
 // Estilos para diferentes tipos de logs del servidor
-const SERVER_LOG_STYLES = {
+const _SERVER_LOG_STYLES = {
 	debug: {
 		icon: '🔍',
 		label: 'DEBUG',

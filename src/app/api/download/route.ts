@@ -1,8 +1,8 @@
-import { getFileInfo } from '@/app/actions/files/file.actions';
-import { serverLogger } from '@/lib/logger/server-logger';
 import fs from 'fs/promises';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { getFileInfo } from '@/app/actions/files/file.actions';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const downloadLogger = serverLogger.withContext('DownloadAPI');
 

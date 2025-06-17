@@ -1,5 +1,8 @@
 'use client';
 
+import { Activity, AlertCircle, Database, HardDrive, RefreshCw, Trash2 } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useState } from 'react';
 import { getSystemStats, repairSystem, resetDatabase } from '@/app/actions/system';
 import {
 	AlertDialog,
@@ -18,9 +21,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import toastService from '@/services/toast.service';
-import { Activity, AlertCircle, Database, HardDrive, RefreshCw, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useState } from 'react';
 
 // Tipo para estadísticas del sistema
 interface SystemData {
