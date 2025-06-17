@@ -1,13 +1,13 @@
 'use client';
 
+import { FileItem } from '@/types/file-item';
+import clsx from 'clsx';
+import { Star } from 'lucide-react';
+import { motion } from 'motion/react';
+import { memo, useCallback } from 'react';
 import { FileContextMenu } from '../context-menu/context-menu';
 import type { ContextMenuAction } from '../context-menu/types';
 import { ImageRenderer } from '../image-renderer';
-import { FileItem } from '@/types/file-item';
-import { motion } from 'motion/react';
-import { memo, useCallback } from 'react';
-import { Star } from 'lucide-react';
-import clsx from 'clsx';
 
 // 📝 Tipo local para FileBrowser que soporta miniaturas serializables
 type FileBrowserFileItem = FileItem & {
@@ -39,7 +39,7 @@ interface GridItemProps {
 
 /**
  * 🧩 **GridItem con menú contextual**
- * 
+ *
  * Componente individual para mostrar un elemento en la vista de cuadrícula.
  * Incluye soporte para:
  * - Miniatura de la imagen
