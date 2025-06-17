@@ -9,6 +9,7 @@ import { motion } from 'motion/react';
 import * as React from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { ImageRenderer } from '../image-renderer';
+import '../styles/scrollbar.css';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
 
 interface MasonryItemProps {
@@ -100,7 +101,11 @@ export const MasonryItem = memo(function MasonryItem({
 	const height = item.height || metadata?.dimensions?.height || metadata?.height || 200;
 
 	// Obtener URL de la miniatura
-	const thumbnailUrl = item.thumbnail || item.src || `/api/images/${item.id}/thumbnail`;
+	const thumbnailUrl = typeof item.thumbnail === 'string'
+		? item.thumbnail
+		: typeof item.src === 'string'
+			? item.src
+			: `/api/images/${item.id}/thumbnail`;
 
 	// Calcular altura según las dimensiones de la imagen
 	const aspectRatio = width && height ? width / height : 1;
@@ -221,7 +226,7 @@ export const MasonryView = memo(function MasonryView({
 			data={items}
 			itemContent={renderItem}
 			itemSize={itemSize}
-			gridClassName={cn('w-full h-full p-4', className)}
+			gridClassName={cn('w-full h-full p-4 custom-scrollbar', className)}
 			layoutId="masonry-view"
 		/>
 	);
