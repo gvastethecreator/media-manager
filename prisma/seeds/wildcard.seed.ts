@@ -110,6 +110,18 @@ export async function seedWildcards(prisma: PrismaClient): Promise<void> {
 					isFavorite: false,
 					parentId: null, // Se actualizará después
 				},
+				{
+					name: 'Sketch',
+					emoji: '✏️',
+					color: '#64748b',
+					description: 'Bocetos y dibujos rápidos',
+					shortcut: 'sketch',
+					category: 'estilos',
+					children: JSON.stringify([]),
+					featuredImage: null,
+					isFavorite: false,
+					parentId: null,
+				},
 
 				// Wildcards para colores dominantes
 				{
