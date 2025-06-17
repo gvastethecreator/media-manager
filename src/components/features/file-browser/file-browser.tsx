@@ -1,26 +1,28 @@
 'use client';
 
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { clsx } from 'clsx';
-import { motion } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { EmptyState } from '@/components/core/data-display';
-import { useToolbarActions } from '@/components/features/file-browser/toolbar-integration';
 import { FileViewer, type ImageItem } from '@/components/features/file-viewer/file-viewer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { useFileStoreBase } from '@/store/entities/file';
 import { useImageResources } from '@/store/image-resources.store';
+import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { FileItem } from '@/types/file-item';
-import { FileText as FileTextIcon, Star } from 'lucide-react';
+import { FileTextIcon, Star } from 'lucide-react';
 import { handleContextAction } from './context-menu/context-action-handler';
 import { FileContextMenu } from './context-menu/context-menu';
 import type { ContextMenuAction } from './context-menu/types';
 import { useFilteredData } from './hooks/use-filtered-data';
 import { ImageRenderer } from './image-renderer';
+import { fileItemsToImageItems } from './utils/file-converters';
+import { CardsView } from './views/cards-view';
+import { GridView } from './views/grid-view';
+import { ListView } from './views/list-view';
+import { MasonryView } from './views/masonry-view';
 
 // 📊 Logger específico para FileBrowser
 const logger = clientLogger.withContext('FileBrowser');
@@ -112,6 +114,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// 🔍 Opciones de vista globales
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
+	const itemSize = useViewOptionsStore((state) => state.itemSize);
 
 	// 📐 Refs para medición directa
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -119,14 +122,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const measurementAttemptsRef = useRef(0);
 
 	// 🏪 Stores
-	const selectedFileIds = useFileStoreBase((state) => state.selectedFileIds);
-	const selectFile = useFileStoreBase((state) => state.selectFile);
-	const toggleSelectFile = useFileStoreBase((state) => state.toggleSelectFile);
-	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
+	const { selectedIds, setSelectedIds, toggleSelectedId, clearSelection } = useSelectionStore();
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
-
-	// 🔄 Integración con la barra de herramientas
-	const toolbarActions = useToolbarActions();
 
 	// Funciones para gestionar favoritos localmente
 	const isFavorited = useCallback((id: string) => favoriteIds.has(id), [favoriteIds]);
@@ -176,9 +173,9 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 				// Estrategia 4: Fallback fijo (no más intentos)
 				logger.warn(
-					`[FileBrowser] ⚠️ Falló medición después de ${attempt} intentos, usando fallback: ${FALLBACK_WIDTH}px`
+					`[FileBrowser] ⚠️ Falló medición después de ${attempt} intentos, usando fallback: ${1200}px`
 				);
-				setContainerWidth(FALLBACK_WIDTH);
+				setContainerWidth(1200);
 			}, 100);
 		});
 	}, []);
@@ -195,22 +192,11 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		[measureContainer]
 	);
 
+	// 🔄 Filtrar y ordenar los datos según las opciones de vista
 	const filteredItems = useFilteredData(items);
 
-	// 📊 Cálculo del grid
-	const itemsPerRow = containerWidth > 0 ? Math.floor((containerWidth + GAP) / (ITEM_WIDTH + GAP)) : 0;
-	const totalRows = itemsPerRow > 0 ? Math.ceil(filteredItems.length / itemsPerRow) : 0;
-
-	// 🎮 Virtualización simple
-	const virtualizer = useVirtualizer({
-		count: totalRows,
-		getScrollElement: () => containerRef.current,
-		estimateSize: () => ITEM_HEIGHT + GAP,
-		overscan: 2,
-	});
-
 	// 🔍 Manejador de selección de elementos
-	const handleSelectItem = useCallback((item: FileItem, index: number, e?: React.MouseEvent) => {
+	const handleItemClick = useCallback((item: FileItem, e: React.MouseEvent) => {
 		if (!item || !item.id) return;
 
 		// Usar el evento para detectar teclas modificadoras
@@ -219,242 +205,76 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		// Opción 1: Selección múltiple con Ctrl/Cmd
 		if (ctrlKey) {
-			toggleSelectFile(item.id);
-			setLastSelectedItemIndex(index);
+			toggleSelectedId(item.id);
+			setLastSelectedItemIndex(filteredItems.findIndex(i => i.id === item.id));
 		}
 		// Opción 2: Selección de rango con Shift
 		else if (shiftKey && lastSelectedItemIndex !== null) {
-			// Determinar el rango de selección
-			const startIdx = Math.min(lastSelectedItemIndex, index);
-			const endIdx = Math.max(lastSelectedItemIndex, index);
+			const currentIndex = filteredItems.findIndex(i => i.id === item.id);
 
-			// Seleccionar todos los elementos en el rango
-			for (let i = startIdx; i <= endIdx; i++) {
-				if (i < filteredItems.length && filteredItems[i].id) {
-					selectFile(filteredItems[i].id);
-				}
+			if (currentIndex !== -1) {
+				const start = Math.min(lastSelectedItemIndex, currentIndex);
+				const end = Math.max(lastSelectedItemIndex, currentIndex);
+
+				const idsToSelect = filteredItems.slice(start, end + 1).map(i => i.id);
+				setSelectedIds(idsToSelect);
 			}
 		}
 		// Opción 3: Selección simple (reemplazar selección existente)
 		else {
 			// Si ya está seleccionado y es el único, deseleccionar
-			if (selectedFileIds.length === 1 && selectedFileIds[0] === item.id) {
-				deselectAllFiles();
+			if (selectedIds.length === 1 && selectedIds[0] === item.id) {
+				clearSelection();
 				setLastSelectedItemIndex(null);
 			} else {
-				// Deseleccionar todo primero
-				deselectAllFiles();
-				// Luego seleccionar el nuevo item
-				selectFile(item.id);
-				setLastSelectedItemIndex(index);
+				// Deseleccionar todo primero y seleccionar solo este item
+				setSelectedIds([item.id]);
+				setLastSelectedItemIndex(filteredItems.findIndex(i => i.id === item.id));
 			}
 		}
 
-		// Actualizar panel de detalles
-		const selectedItems = filteredItems
-			.filter((i) => i.id && selectedFileIds.includes(i.id))
-			.map((i) => ({
-				id: i.id,
-				name: i.name,
-				path: i.path,
-				type: i.type,
-				size: i.size,
-				mimeType: i.mimeType,
-				metadata: i.metadata,
-				thumbnail: i.thumbnail || null,
-				src: `/api/images/${i.id}/content`,
-				alt: i.name,
-				width: null,
-				height: null,
-				parsedMetadata: undefined,
-				url: `/api/images/${i.id}/content`,
-			} as unknown as ImageItem));
-
-		if (selectedItems.length > 0) {
-			// @ts-ignore - Ignoring type mismatch between different ImageItem types
-			setDetailsPanelItems(selectedItems);
-			setDetailsPanelVisible(true);
-		} else {
-			setDetailsPanelVisible(false);
-		}
-
-		// Callback personalizado si existe
+		// Propagar el evento si es necesario
 		onItemSelect?.(item);
-	}, [selectedFileIds, toggleSelectFile, selectFile, deselectAllFiles, onItemSelect, setDetailsPanelItems, setDetailsPanelVisible, lastSelectedItemIndex, filteredItems]);
+	}, [filteredItems, selectedIds, toggleSelectedId, clearSelection, setSelectedIds, lastSelectedItemIndex, onItemSelect]);
 
-	// 🔍 Manejador de doble clic
-	const handleDoubleClick = useCallback((item: FileItem) => {
-		// Si es un directorio, no abrir el visor
-		if ('isDirectory' in item && item.isDirectory === true) {
-			onItemDoubleClick?.(item);
-			return;
-		}
+	// 🔍 Manejador de doble click (abrir visor)
+	const handleItemDoubleClick = useCallback((item: FileItem) => {
+		if (!item || !item.id) return;
 
-		// Abrir el visor de imágenes
-		const validItems = filteredItems.filter((i) =>
-			(i.type?.startsWith('image/') || i.mimeType?.startsWith('image/'))
-		);
-		const index = validItems.findIndex((i) => i.id === item.id);
+		// Convertir FileItems a ImageItems usando la utilidad
+		const images = fileItemsToImageItems(filteredItems);
 
+		// Encontrar el índice del elemento actual
+		const index = filteredItems.findIndex(file => file.id === item.id);
 		if (index !== -1) {
-			const imageItems = validItems.map((i) => ({
-				id: i.id,
-				name: i.name,
-				path: i.path,
-				type: i.type,
-				size: i.size,
-				mimeType: i.mimeType,
-				metadata: i.metadata,
-				thumbnail: i.thumbnail || null,
-				src: `/api/images/${i.id}/content`,
-				alt: i.name,
-				width: null,
-				height: null,
-				parsedMetadata: undefined,
-				url: `/api/images/${i.id}/content`,
-			} as unknown as ImageItem));
-
-			// @ts-ignore - Ignoring type mismatch between different ImageItem types
-			setViewerImages(imageItems);
+			setViewerImages(images);
 			setViewerInitialIndex(index);
 			setIsViewerOpen(true);
 		}
 
+		// Propagar el evento si es necesario
 		onItemDoubleClick?.(item);
 	}, [filteredItems, onItemDoubleClick]);
 
-	// 🖱️ Manejador de acciones de contexto
-	const handleItemContextAction = useCallback(async (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
-		// Integrar con acciones de la barra de herramientas
-		switch (action) {
-			case 'delete':
-				await toolbarActions.handleDeleteSelected();
-				break;
-			case 'download':
-				await toolbarActions.handleDownloadSelected();
-				break;
-			case 'copy':
-				await toolbarActions.handleCopySelected();
-				break;
-			default:
-				// Para otras acciones, usar el handler existente
-				await handleContextAction(action, item, data);
-				break;
-		}
-	}, [toolbarActions]);
-
-	// Función memoizada para mapear FileItem a ImageItem
-	const mapFileItemToImageItem = useCallback((fileItem: FileBrowserFileItem): ImageItem => {
-		// Obtener dimensiones del resource store si están disponibles
-		const resource = useImageResources.getState().resources.get(fileItem.id);
-
-		let width = resource?.dimensions?.width;
-		let height = resource?.dimensions?.height;
-
-		// Si no hay dimensiones en resource, intentar desde metadata
-		if ((!width || !height) && fileItem.metadata) {
-			try {
-				const metadataObj = typeof fileItem.metadata === 'string' ? JSON.parse(fileItem.metadata) : fileItem.metadata;
-				if (metadataObj?.dimensions) {
-					width = metadataObj.dimensions.width;
-					height = metadataObj.dimensions.height;
-				}
-			} catch (error) {
-				// Ignorar errores de parsing de metadata
-			}
-		}
-
-		// Determinar la URL de la miniatura en orden de prioridad
-		let thumbnailUrl: string | null = null;
-
-		// 1. Usar thumbnail del resource store si está disponible
-		if (resource?.thumbnail && typeof resource.thumbnail === 'string') {
-			thumbnailUrl = resource.thumbnail;
-		}
-		// 2. Usar thumbnail del item si está disponible
-		else if (fileItem.thumbnail && typeof fileItem.thumbnail === 'string') {
-			thumbnailUrl = fileItem.thumbnail;
-		}
-		// 3. Construir URL de API si tenemos el path
-		else if (fileItem.path) {
-			thumbnailUrl = `/api/images/${fileItem.id}/thumbnail`;
-		}
-
-		// Crear un objeto ImageItem compatible con FileViewer
-		return {
-			id: fileItem.id,
-			name: fileItem.name,
-			src: thumbnailUrl || `/api/images/${fileItem.id}/thumbnail`,
-			width: width || 0,
-			height: height || 0,
-			thumbnail: thumbnailUrl,
-			type: fileItem.type || 'image',
-			path: fileItem.path || '',
-			size: fileItem.size || 0,
-			url: thumbnailUrl || undefined,
-			alt: fileItem.name,
-			mimeType: fileItem.mimeType,
-			metadata: fileItem.metadata,
-			parsedMetadata: fileItem.metadata
-				? (() => {
-					try {
-						const parsed = typeof fileItem.metadata === 'string' ? JSON.parse(fileItem.metadata) : fileItem.metadata;
-						return {
-							dimensions: parsed?.dimensions || { width: width || 0, height: height || 0 },
-							mimeType: fileItem.mimeType,
-							isLocal: true,
-						};
-					} catch {
-						return {
-							dimensions: { width: width || 0, height: height || 0 },
-							mimeType: fileItem.mimeType,
-							isLocal: true,
-						};
-					}
-				})()
-				: undefined,
-		} as ImageItem;
+	// 🔍 Manejador de acciones del menú contextual
+	const handleContextMenuAction = useCallback((action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
+		handleContextAction(action, item, data);
 	}, []);
 
-	// Efecto para actualizar el panel de detalles cuando cambian los items seleccionados
+	// 🔄 Actualizar el panel de detalles cuando cambie la selección
 	useEffect(() => {
-		const selectedItems = filteredItems.filter(item => selectedFileIds.includes(item.id));
-
-		if (selectedItems.length > 0) {
-			// Mostrar el panel de detalles
-			setDetailsPanelVisible(true);
-
-			// Convertir los items a objetos compatibles con ImageItem para el panel de detalles
-			const detailsItems = selectedItems.map((item) => ({
-				id: item.id,
-				name: item.name,
-				type: item.type || 'image',
-				path: item.path || '',
-				size: item.size || 0,
-				width: null,
-				height: null,
-				url: item.thumbnail || `/api/images/${item.id}/thumbnail`,
-				src: item.thumbnail || `/api/images/${item.id}/thumbnail`,
-				alt: item.name,
-				thumbnail: item.thumbnail || null,
-				metadata: item.metadata,
-				parsedMetadata: undefined,
-				originalPath: item.path || '',
-				format: '',
-				mimeType: item.mimeType
-			} as ImageItem));
-
-			// Actualizar el panel de detalles con los items seleccionados
-			setDetailsPanelItems(detailsItems as any);
-
-			// Log para depuración
-			logger.debug(`[FileBrowser] 🔍 ${selectedItems.length} items seleccionados, panel de detalles actualizado`);
+		if (selectedIds.length > 0) {
+			const selectedItems = filteredItems.filter(item => selectedIds.includes(item.id));
+			if (selectedItems.length > 0) {
+				// Convertir a ImageItems para el panel de detalles
+				const detailItems = fileItemsToImageItems(selectedItems);
+				setDetailsPanelItems(detailItems);
+				setDetailsPanelVisible(true);
+			}
 		} else {
-			// Ocultar el panel de detalles si no hay selección
 			setDetailsPanelVisible(false);
-			setDetailsPanelItems([]);
 		}
-	}, [filteredItems, selectedFileIds, setDetailsPanelVisible, setDetailsPanelItems]);
+	}, [selectedIds, filteredItems, setDetailsPanelItems, setDetailsPanelVisible]);
 
 	// Efecto para el scroll infinito
 	useEffect(() => {
@@ -478,15 +298,52 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		};
 	}, [loadMoreItems, isLoading, isReindexing]);
 
-	// Manejador de scroll para virtualización
-	const handleScroll = useCallback(() => {
-		// Implementación mínima para compatibilidad
-	}, []);
+	// 🔄 Renderizado condicional basado en el modo de vista
+	const renderContent = () => {
+		if (isLoading) {
+			return (
+				<div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+					{Array.from({ length: 12 }).map((_, index) => (
+						<div key={index} className="aspect-square">
+							<Skeleton className="h-full w-full" />
+						</div>
+					))}
+				</div>
+			);
+		}
+
+		if (filteredItems.length === 0) {
+			return (
+				<EmptyState
+					title="No hay archivos"
+					description="No se encontraron archivos que coincidan con los criterios de búsqueda."
+					icon={FileTextIcon}
+				/>
+			);
+		}
+
+		const viewProps = {
+			items: filteredItems,
+			onItemClick: handleItemClick,
+			onItemDoubleClick: handleItemDoubleClick,
+			onContextAction: handleContextMenuAction,
+			className: className,
+		};
+
+		return (
+			<AnimatePresence mode="wait">
+				{viewMode === 'grid' && <GridView key="grid-view" {...viewProps} />}
+				{viewMode === 'list' && <ListView key="list-view" {...viewProps} />}
+				{viewMode === 'cards' && <CardsView key="cards-view" {...viewProps} />}
+				{viewMode === 'masonry' && <MasonryView key="masonry-view" {...viewProps} />}
+			</AnimatePresence>
+		);
+	};
 
 	// 🔄 Fallback durante medición o loading/reindex
 	if (containerWidth === 0 || isLoading || isReindexing) {
 		return (
-			<div ref={containerCallbackRef} className={clsx('flex-1 h-full w-full overflow-hidden relative', className)}>
+			<div ref={containerCallbackRef} className={`flex-1 h-full w-full overflow-hidden relative ${className}`}>
 				<div className="flex flex-col items-center justify-center h-full">
 					<Skeleton className="w-full h-40 mb-4" />
 					<div className="text-sm text-muted-foreground">
@@ -506,106 +363,53 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 						)}
 					</div>
 				</div>
-				{/* Overlay visual si está reindexando */}
-				{isReindexing && (
-					<div className="absolute inset-0 bg-white/70 flex flex-col items-center justify-center z-10">
-						<span className="text-blue-500 animate-spin text-3xl mb-2">🔄</span>
-						<span className="text-xs text-blue-700">Reindexando carpeta...</span>
-					</div>
-				)}
 			</div>
 		);
 	}
 
-	// 🛡️ Validaciones de seguridad antes del render
-	if (!filteredItems || filteredItems.length === 0) {
-		return (
-			<EmptyState
-				icon={FileTextIcon}
-				title="No hay archivos para mostrar"
-				description="Parece que no hay archivos en esta ubicación o no se encontraron resultados para tu búsqueda."
-			/>
-		);
-	}
-
-	logger.debug(
-		`[FileBrowser] 🎯 Renderizando grid: ${itemsPerRow} items/fila, ${totalRows} filas, ${filteredItems.length} items`
-	);
-
 	return (
-		<>
-			{/* Visor de imágenes */}
+		<div className="relative h-full w-full overflow-hidden" ref={containerCallbackRef}>
+			{renderContent()}
+
 			{isViewerOpen && (
 				<FileViewer
 					isOpen={isViewerOpen}
-					images={viewerImages as any}
+					images={viewerImages}
 					initialIndex={viewerInitialIndex}
 					onClose={() => setIsViewerOpen(false)}
 				/>
 			)}
 
-			<div
-				ref={containerCallbackRef}
-				className={clsx('flex-1 h-full w-full overflow-auto', className)}
-				onScroll={handleScroll}
-			>
-				<div
-					style={{
-						height: virtualizer.getTotalSize(),
-						width: '100%',
-						position: 'relative',
-					}}
-				>
-					{virtualizer.getVirtualItems().map((virtualRow) => (
-						<div
-							key={virtualRow.index}
-							style={{
-								position: 'absolute',
-								top: 0,
-								left: 0,
-								width: '100%',
-								height: virtualRow.size,
-								transform: `translateY(${virtualRow.start}px)`,
-							}}
-						>
-							<div
-								className="flex flex-wrap gap-4 p-4"
-								style={{
-									justifyContent: 'flex-start',
-								}}
-							>
-								{Array.from({ length: itemsPerRow }, (_, colIndex) => {
-									const itemIndex = virtualRow.index * itemsPerRow + colIndex;
-									const item = filteredItems[itemIndex];
-
-									if (!item) return null;
-
-									return (
-										<GridItem
-											key={item.id}
-											item={item}
-											isSelected={selectedFileIds.includes(item.id)}
-											isFavorite={isFavorited(item.id)}
-											onClick={(e) => handleSelectItem(item, itemIndex, e)}
-											onDoubleClick={() => handleDoubleClick(item)}
-											onContextMenu={() => handleItemContextAction('preview', item)}
-											onContextAction={handleItemContextAction}
-										/>
-									);
-								})}
-							</div>
-						</div>
-					))}
+			{isReindexing && (
+				<div className="absolute bottom-0 left-0 right-0 bg-background/80 p-2 flex items-center justify-between">
+					<div className="text-sm font-medium">Reindexando archivos...</div>
+					<div className="text-sm">{Math.round(reindexProgress)}%</div>
 				</div>
+			)}
 
-				{/* Elemento para scroll infinito */}
-				{loadMoreItems && <div ref={loadMoreRef} className="h-16 flex items-center justify-center">
-					{loadMoreVisible && !isLoading && !isReindexing && (
-						<div className="text-sm text-muted-foreground">Cargando más elementos...</div>
-					)}
-				</div>}
-			</div>
-		</>
+			{loadMoreItems && loadMoreVisible && (
+				<div
+					ref={loadMoreRef}
+					className="w-full py-4 flex items-center justify-center"
+					onClick={loadMoreItems}
+					onKeyDown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							loadMoreItems();
+						}
+					}}
+					tabIndex={0}
+					role="button"
+				>
+					<button
+						type="button"
+						className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-colors"
+					>
+						Cargar más
+					</button>
+				</div>
+			)}
+		</div>
 	);
 });
 

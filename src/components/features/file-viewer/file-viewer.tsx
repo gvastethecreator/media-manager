@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { toastService } from '@/services/toast.service';
 import { useImageResources } from '@/store/image-resources.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { Copy, Download, Image as ImageIcon, RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type React from 'react';
@@ -248,13 +249,21 @@ const ThumbnailNavigation = memo(function ThumbnailNavigation({
 
 // Componente principal del visor de archivos - memoizado
 export const FileViewer = memo(function FileViewer({
-	images,
-	initialIndex = 0,
-	isOpen,
-	onClose,
 	triggerRef,
-}: FileViewerProps) {
-	const [currentIndex, setCurrentIndex] = useState(initialIndex);
+}: {
+	triggerRef?: React.RefObject<HTMLElement>;
+}) {
+	// Usar el store en lugar de props
+	const {
+		isOpen,
+		items: images,
+		currentIndex,
+		closeViewer: onClose,
+		setCurrentIndex,
+		nextItem,
+		previousItem
+	} = useFileViewerStore();
+
 	const [urls, setUrls] = useState<Record<string, string>>({});
 	const [isLoading, setIsLoading] = useState(true);
 	const imageContainerRef = useRef<HTMLDivElement>(null);
@@ -294,11 +303,11 @@ export const FileViewer = memo(function FileViewer({
 	// Reset state when opening viewer
 	useEffect(() => {
 		if (isOpen) {
-			setCurrentIndex(initialIndex);
+			setCurrentIndex(0);
 			resetView();
 			setIsLoading(true);
 		}
-	}, [isOpen, initialIndex]);
+	}, [isOpen, setCurrentIndex]);
 
 	// Validate images and index
 	useEffect(() => {
@@ -309,7 +318,7 @@ export const FileViewer = memo(function FileViewer({
 		if (currentIndex < 0 || currentIndex >= images.length) {
 			setCurrentIndex(0);
 		}
-	}, [images, currentIndex]);
+	}, [images, currentIndex, setCurrentIndex]);
 
 	// Función memoizada para cargar URL de imagen
 	const loadImageUrl = useCallback(async (imageId: string): Promise<string> => {
@@ -465,11 +474,6 @@ export const FileViewer = memo(function FileViewer({
 		}
 	}, [currentImage, urls, loadImageUrl]);
 
-	// Función memoizada para seleccionar una imagen
-	const handleSelectImage = useCallback((index: number) => {
-		setCurrentIndex(index);
-	}, []);
-
 	// Keyboard navigation
 	useEffect(() => {
 		if (!isOpen) return;
@@ -483,23 +487,17 @@ export const FileViewer = memo(function FileViewer({
 			if (e.key === 'Escape') {
 				onClose();
 			} else if (e.key === 'ArrowLeft') {
-				setCurrentIndex((prev) => {
-					const newIndex = prev > 0 ? prev - 1 : images.length - 1;
-					// Anunciar para lectores de pantalla
-					if (images[newIndex]) {
-						setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
-					}
-					return newIndex;
-				});
+				previousItem();
+				// Anunciar para lectores de pantalla
+				if (images[currentIndex - 1]) {
+					setAnnounceMessage(`Imagen ${currentIndex} de ${images.length}: ${images[currentIndex - 1].name}`);
+				}
 			} else if (e.key === 'ArrowRight') {
-				setCurrentIndex((prev) => {
-					const newIndex = prev < images.length - 1 ? prev + 1 : 0;
-					// Anunciar para lectores de pantalla
-					if (images[newIndex]) {
-						setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
-					}
-					return newIndex;
-				});
+				nextItem();
+				// Anunciar para lectores de pantalla
+				if (images[currentIndex + 1]) {
+					setAnnounceMessage(`Imagen ${currentIndex + 2} de ${images.length}: ${images[currentIndex + 1].name}`);
+				}
 			} else if (e.key === '0' || e.key === 'r') {
 				resetView();
 				setAnnounceMessage('Vista restablecida');
@@ -514,7 +512,7 @@ export const FileViewer = memo(function FileViewer({
 
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
-	}, [isOpen, images, onClose, resetView, handleZoom]);
+	}, [isOpen, images, onClose, resetView, handleZoom, previousItem, nextItem, currentIndex]);
 
 	// Resetear posición y escala cuando cambia la imagen seleccionada
 	useEffect(() => {
@@ -535,6 +533,12 @@ export const FileViewer = memo(function FileViewer({
 	if (!isOpen || !images?.length || !currentImage) {
 		return null;
 	}
+
+	// Función para seleccionar una imagen específica
+	const handleSelectImage = useCallback((index: number) => {
+		setCurrentIndex(index);
+		resetView();
+	}, [setCurrentIndex, resetView]);
 
 	return (
 		<dialog

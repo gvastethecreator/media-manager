@@ -5,11 +5,11 @@ import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { FileItem } from '@/types/file-item';
 import { Meh, Star } from 'lucide-react';
-import { AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import type * as React from 'react';
-import { memo, useCallback, useMemo, useRef } from 'react';
-import type { ContextMenuAction } from '../context-menu/context-menu';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FileContextMenu } from '../context-menu/context-menu';
+import type { ContextMenuAction } from '../context-menu/types';
 import { ImageRenderer } from '../image-renderer';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
 
@@ -19,129 +19,133 @@ interface GridItemProps {
 	isActive?: boolean;
 	isScrolling?: boolean;
 	shouldLoad?: boolean;
-	thumbnail?: string | null;
 	onClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onDoubleClick?: (item: FileItem) => void;
 	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
 	style?: React.CSSProperties;
 }
 
-export const GridItem = memo(function GridItem({
+/**
+ * Componente para renderizar un elemento en la vista de cuadrícula
+ */
+const GridItem = memo<GridItemProps>(function GridItem({
 	item,
 	isSelected,
 	isActive,
-	isScrolling,
-	shouldLoad,
-	thumbnail,
+	isScrolling = false,
+	shouldLoad = true,
 	onClick,
 	onDoubleClick,
 	onContextAction,
 	style,
-}: GridItemProps) {
-	// Usamos un ref para capturar el botón
-	const buttonRef = useRef<HTMLButtonElement>(null);
+}) {
+	// Referencias
+	const itemRef = useRef<HTMLDivElement>(null);
 
-	// Memoizamos los handlers para evitar recreaciones
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			if (e.key === 'Enter' || e.key === ' ') {
-				e.preventDefault();
-				onClick?.(item, e as any);
-			}
-		},
-		[onClick, item]
+	// Memoizar clases
+	const itemClassName = useMemo(
+		() =>
+			cn(
+				'relative aspect-square overflow-hidden rounded-md transition-all border',
+				'group hover:ring-2 hover:ring-primary/30 hover:border-primary/30',
+				isSelected
+					? 'ring-2 ring-primary border-primary'
+					: 'ring-0 border-border',
+				isActive && 'ring-2 ring-primary/70 border-primary/70'
+			),
+		[isSelected, isActive]
 	);
 
-	// Simplificamos la función de manejo de mouse
+	// Memoizar manejadores de eventos
 	const handleClick = useCallback(
 		(e: React.MouseEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-			onClick?.(item, e);
+			if (onClick) {
+				onClick(item, e);
+			}
 		},
-		[onClick, item]
+		[item, onClick]
 	);
 
-	const handleDoubleClick = useCallback(
-		(e: React.MouseEvent) => {
-			e.preventDefault();
-			e.stopPropagation();
-			onDoubleClick?.(item);
-		},
-		[onDoubleClick, item]
-	);
+	const handleDoubleClick = useCallback(() => {
+		if (onDoubleClick) {
+			onDoubleClick(item);
+		}
+	}, [item, onDoubleClick]);
 
-	// Memoizamos la clase para evitar recálculos
-	const buttonClassName = useMemo(() => {
-		return cn(
-			'relative w-full h-full overflow-hidden group text-left',
-			isSelected && 'ring-2 ring-primary ring-offset-2',
-			isActive && 'ring-2 ring-secondary ring-offset-1',
-			isScrolling && 'opacity-50'
-		);
-	}, [isSelected, isActive, isScrolling]);
-
-	// Memoizamos el elemento interno para evitar renderizados innecesarios
-	const ButtonContent = useMemo(() => {
-		// Calculamos si debemos mostrar el contenido real
-		const shouldShowContent = shouldLoad && thumbnail;
-
-		return (
-			<div className="w-full h-full bg-muted/30 cursor-pointer">
-				{shouldShowContent ? (
-					<div className="relative w-full h-full p-2">
-						<div
-							className="absolute inset-0 bg-cover bg-center blur-lg opacity-80 brightness-20"
-							style={{
-								backgroundImage: `url(${thumbnail})`,
-							}}
-						/>
-						<div className="absolute inset-0 scale-80 w-auto h-auto group-hover:scale-90 transition-all duration-100 ease-out">
-							<ImageRenderer
-								src={thumbnail}
-								alt={item.name}
-								objectFit="contain"
-								className="h-full w-full rounded-sm transition-all duration-200 ease-out"
-							/>
-						</div>
-					</div>
-				) : (
-					<div className="flex items-center justify-center h-full">
-						<Meh className="h-12 w-12 text-muted-foreground/50 animate-spin" />
-					</div>
-				)}
-
-				{item.isFavorite && (
-					<div className="absolute top-2 right-2">
-						<Star className="h-4 w-4 text-yellow-500 fill-current drop-shadow-lg shadow-black" />
-					</div>
-				)}
-			</div>
-		);
-	}, [shouldLoad, thumbnail, item.name, item.isFavorite]);
-
-	// Optimizamos la acción del menú contextual para evitar recreaciones
 	const handleContextAction = useCallback(
-		(action: ContextMenuAction, data?: Record<string, unknown>) => {
-			onContextAction?.(action, item, data);
+		(action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => {
+			if (onContextAction) {
+				onContextAction(action, file, data);
+			}
 		},
-		[onContextAction, item]
+		[onContextAction]
 	);
 
+	// Determinar si es una imagen
+	const isImage = useMemo(() => {
+		return item.type?.startsWith('image/') || false;
+	}, [item.type]);
+
+	// Renderizar el elemento
 	return (
 		<FileContextMenu file={item} onAction={handleContextAction}>
-			<button
-				ref={buttonRef}
-				type="button"
-				className={buttonClassName}
-				style={style}
+			<div
+				ref={itemRef}
+				className={itemClassName}
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
-				onKeyDown={handleKeyDown}
-				aria-pressed={isSelected}
+				onKeyDown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault();
+						handleClick(e as unknown as React.MouseEvent);
+					}
+				}}
+				style={style}
+				data-selected={isSelected}
+				data-active={isActive}
+				aria-selected={isSelected}
+				tabIndex={0}
+				role="button"
 			>
-				{ButtonContent}
-			</button>
+				{/* Renderizar imagen o icono según el tipo */}
+				{isImage ? (
+					<ImageRenderer
+						src={item.thumbnail || item.src || null}
+						alt={item.name}
+						className="w-full h-full"
+						isScrolling={isScrolling}
+						shouldLoad={shouldLoad}
+						objectFit="cover"
+					/>
+				) : (
+					<div className="w-full h-full flex items-center justify-center bg-muted/30">
+						<Meh className="h-10 w-10 text-muted-foreground/50" />
+					</div>
+				)}
+
+				{/* Indicador de favorito */}
+				{item.isFavorite && (
+					<div className="absolute top-1 right-1 bg-background/80 rounded-full p-0.5">
+						<Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+					</div>
+				)}
+
+				{/* Nombre del archivo */}
+				<div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-2 pt-6 text-white">
+					<div className="truncate text-xs">{item.name}</div>
+				</div>
+
+				{/* Overlay de selección */}
+				{isSelected && (
+					<motion.div
+						className="absolute inset-0 bg-primary/10"
+						initial={{ opacity: 0 }}
+						animate={{ opacity: 1 }}
+						exit={{ opacity: 0 }}
+						transition={{ duration: 0.2 }}
+					/>
+				)}
+			</div>
 		</FileContextMenu>
 	);
 });
@@ -154,50 +158,58 @@ interface GridViewProps {
 	className?: string;
 }
 
-export const GridView = memo(function GridView({
+/**
+ * Vista de cuadrícula para mostrar archivos
+ */
+export const GridView = memo<GridViewProps>(function GridView({
 	items,
 	onItemClick,
 	onItemDoubleClick,
 	onContextAction,
 	className,
-}: GridViewProps) {
-	const { selectedIds, activeId, toggleSelectedId, addSelectedId, setSelectedIds } = useSelectionStore();
+}) {
+	// Estados y referencias
+	const [isScrolling, setIsScrolling] = useState(false);
+	const scrollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+	// Stores
+	const { selectedIds, activeId } = useSelectionStore();
 	const { itemSize } = useViewOptionsStore();
 
-	const handleItemClick = useCallback(
-		(item: FileItem, e: React.MouseEvent) => {
-			// Si se mantiene presionada la tecla Ctrl, toggle la selección
-			if (e.ctrlKey || e.metaKey) {
-				toggleSelectedId(item.id);
+	// Manejar eventos de scroll
+	const handleScrollStart = useCallback(() => {
+		setIsScrolling(true);
+	}, []);
+
+	const handleScrollEnd = useCallback(() => {
+		// Usar un timeout para evitar cambios de estado frecuentes
+		if (scrollingTimeoutRef.current) {
+			clearTimeout(scrollingTimeoutRef.current);
+		}
+
+		scrollingTimeoutRef.current = setTimeout(() => {
+			setIsScrolling(false);
+			scrollingTimeoutRef.current = null;
+		}, 150);
+	}, []);
+
+	// Limpiar timeout al desmontar
+	useEffect(() => {
+		return () => {
+			if (scrollingTimeoutRef.current) {
+				clearTimeout(scrollingTimeoutRef.current);
 			}
-			// Si se mantiene presionada la tecla Shift, seleccionar rango
-			else if (e.shiftKey && activeId) {
-				const activeIndex = items.findIndex((i) => i.id === activeId);
-				const clickedIndex = items.findIndex((i) => i.id === item.id);
+		};
+	}, []);
 
-				if (activeIndex !== -1 && clickedIndex !== -1) {
-					const start = Math.min(activeIndex, clickedIndex);
-					const end = Math.max(activeIndex, clickedIndex);
-
-					const idsToSelect = items.slice(start, end + 1).map((i) => i.id);
-					setSelectedIds(idsToSelect);
-				}
-			}
-			// Caso normal: limpiar selección y seleccionar solo este item
-			else {
-				setSelectedIds([item.id]);
-			}
-
-			// Propagar el evento si es necesario
-			onItemClick?.(item, e);
-		},
-		[items, activeId, toggleSelectedId, setSelectedIds, onItemClick, addSelectedId]
-	);
-
+	// Renderizar un elemento de la lista
 	const renderItem = useCallback(
 		(index: number, item: FileItem) => {
 			const isSelected = selectedIds.includes(item.id);
 			const isActive = activeId === item.id;
+
+			// Calcular si el elemento debe cargarse (para optimizar rendimiento)
+			const shouldLoad = !isScrolling || index < 20;
 
 			return (
 				<GridItem
@@ -205,15 +217,15 @@ export const GridView = memo(function GridView({
 					item={item}
 					isSelected={isSelected}
 					isActive={isActive}
-					shouldLoad={true}
-					thumbnail={item.thumbnail}
-					onClick={handleItemClick}
+					isScrolling={isScrolling}
+					shouldLoad={shouldLoad}
+					onClick={onItemClick}
 					onDoubleClick={onItemDoubleClick}
 					onContextAction={onContextAction}
 				/>
 			);
 		},
-		[selectedIds, activeId, handleItemClick, onItemDoubleClick, onContextAction]
+		[selectedIds, activeId, isScrolling, onItemClick, onItemDoubleClick, onContextAction]
 	);
 
 	return (
@@ -225,6 +237,8 @@ export const GridView = memo(function GridView({
 				itemSize={itemSize}
 				gridClassName={cn('w-full h-full p-4', className)}
 				layoutId="grid-view"
+				onScrollStart={handleScrollStart}
+				onScrollEnd={handleScrollEnd}
 			/>
 		</AnimatePresence>
 	);

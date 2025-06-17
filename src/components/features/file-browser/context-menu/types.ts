@@ -1,30 +1,38 @@
 import type { FileItem } from '@/types/file-item';
-import type * as React from 'react';
+import type { ReactNode } from 'react';
 
 /**
  * Tipos de acciones disponibles en el menú contextual
  */
 export type ContextMenuAction =
-	| 'mark-toggle'
-	| 'favorite-toggle'
-	| 'add-to-collection'
-	| 'add-tag'
-	| 'add-to-album'
-	| 'collection-create'
-	| 'tag-create'
-	| 'album-create'
-	| 'character-create'
-	| 'place-create'
-	| 'world-item-create'
-	| 'object-create' // Legacy
-	| 'object-add' // Legacy
-	| 'world-item-add'
+	// Acciones principales
 	| 'preview'
 	| 'open'
 	| 'download'
 	| 'copy'
 	| 'copy-path'
-	| 'delete';
+	| 'delete'
+	| 'favorite-toggle'
+	| 'mark-toggle'
+	// Acciones de entidades
+	| 'add-to-collection'
+	| 'collection-create'
+	| 'add-tag'
+	| 'tag-create'
+	| 'add-to-album'
+	| 'album-create'
+	| 'add-to-character'
+	| 'character-create'
+	| 'add-to-place'
+	| 'place-create'
+	| 'add-to-world-item'
+	| 'world-item-create'
+	| 'add-to-concept'
+	| 'concept-create'
+	| 'add-to-prompt'
+	| 'prompt-create'
+	| 'add-to-note'
+	| 'note-create';
 
 // Tipo para la data adicional en acciones de menú contextual
 export interface ContextMenuActionData {
@@ -34,12 +42,15 @@ export interface ContextMenuActionData {
 }
 
 /**
- * Props para el menú contextual de archivos
+ * Props para el componente FileContextMenu
  */
 export interface FileContextMenuProps {
+	/** Archivo asociado al menú */
 	file: FileItem;
-	children: React.ReactNode;
-	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void | Promise<void>;
+	/** Contenido a envolver con el menú contextual */
+	children: ReactNode;
+	/** Manejador de acciones del menú */
+	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
 }
 
 /**
@@ -52,12 +63,39 @@ export interface SubmenuProps {
 }
 
 /**
- * Estado de carga para cada tipo de entidad
+ * Tipo para el estado de carga de entidades
  */
 export interface EntityLoadingState {
 	loading: boolean;
-	open: boolean;
 	loaded: boolean;
+	error: string | null;
+}
+
+/**
+ * Tipo para el estado de carga de todas las entidades
+ */
+export interface EntitiesLoadingState {
+	collections: EntityLoadingState;
+	tags: EntityLoadingState;
+	albums: EntityLoadingState;
+	characters: EntityLoadingState;
+	places: EntityLoadingState;
+	worldItems: EntityLoadingState;
+	concepts: EntityLoadingState;
+	prompts: EntityLoadingState;
+	notes: EntityLoadingState;
+}
+
+/**
+ * Tipo para un elemento genérico de submenú
+ */
+export interface SubmenuItem {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+	isFavorite?: boolean;
+	isRecent?: boolean;
 }
 
 /**

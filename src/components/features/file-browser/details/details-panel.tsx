@@ -16,6 +16,7 @@ import { ImagePreview } from './details-panel-image-preview';
 import { TechnicalInfo } from './details-panel-metadata-sections';
 import type { DetailsPanelProps } from './details-panel-types';
 import { getMetadata } from './details-panel-utils';
+import { MultipleSelectionInfo } from './multiple-selection-info';
 
 // Logger para el panel de detalles
 const detailsLogger = {
@@ -119,26 +120,6 @@ async function parseMetadataDirectly(rawMetadata: string | null): Promise<FileMe
 		return null;
 	}
 }
-
-// Componente para mostrar múltiples imágenes seleccionadas
-const MultipleSelectionInfo = React.memo(({ items }: { items: ImageItem[] }) => {
-	return (
-		<div className="p-4 space-y-2">
-			<div className="flex items-center justify-between">
-				<span className="text-sm font-medium">{items.length} imágenes seleccionadas</span>
-			</div>
-			<div className="grid grid-cols-2 gap-2">
-				{items.map((item) => (
-					<div key={item.id} className="relative aspect-square">
-						<img src={item.url || item.src} alt={item.name} className="w-full h-full object-cover rounded-md" />
-					</div>
-				))}
-			</div>
-		</div>
-	);
-});
-
-MultipleSelectionInfo.displayName = 'MultipleSelectionInfo';
 
 /**
  * Panel de detalles para mostrar información de imágenes seleccionadas

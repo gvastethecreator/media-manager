@@ -76,6 +76,11 @@ export interface AlbumComplete extends Omit<Album, 'filters' | 'sortBy'> {
 	 * Criterio de ordenación deserializado
 	 */
 	sortBy: AlbumSortCriteria;
+
+	/**
+	 * Indica si el álbum ha sido usado recientemente
+	 */
+	isRecent?: boolean;
 }
 
 /**

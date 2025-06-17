@@ -17,6 +17,8 @@ export interface CollectionExtended extends CollectionBase {
 	isOpen?: boolean;
 	isLoading?: boolean;
 	hasError?: boolean;
+	isFavorite?: boolean;
+	isRecent?: boolean;
 
 	// Calculados/runtime
 	parsedFilters?: CollectionFilter[];
