@@ -8,7 +8,8 @@
 import { deleteFile } from '@/app/actions/files/file.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { useFileStoreBase } from '@/store/entities/file';
+import { useSelectionStore } from '@/store/selection.store';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { FileItem } from '@/types/file-item';
 
 // Logger para la integración con la barra de herramientas
@@ -18,21 +19,13 @@ const toolbarLogger = clientLogger.withContext('ToolbarIntegration');
  * Hook para proporcionar acciones de la barra de herramientas al FileBrowser
  */
 export function useToolbarActions() {
-	// Acceder al store de archivos
-	const selectedFileIds = useFileStoreBase((state) => state.selectedFileIds);
-	const files = useFileStoreBase((state) => state.files);
-	const deselectAllFiles = useFileStoreBase((state) => state.deselectAllFiles);
-	const viewMode = useFileStoreBase((state) => state.viewMode);
-	const setViewMode = useFileStoreBase((state) => state.setViewMode);
-	const sortBy = useFileStoreBase((state) => state.sortBy);
-	const setSortBy = useFileStoreBase((state) => state.setSortBy);
-	const sortDirection = useFileStoreBase((state) => state.sortDirection);
-	const setSortDirection = useFileStoreBase((state) => state.setSortDirection);
+        const selectedItems = useSelectionStore((state) => state.selectedItems);
+        const clearSelection = useSelectionStore((state) => state.clearSelection);
 
-	// Obtener elementos seleccionados
-	const selectedItems = selectedFileIds
-		.map((id) => files.find(file => file.id === id))
-		.filter(Boolean) as FileItem[];
+        const viewMode = useViewOptionsStore((state) => state.viewMode);
+        const setViewMode = useViewOptionsStore((state) => state.setViewMode);
+        const sort = useViewOptionsStore((state) => state.sort);
+        const setSort = useViewOptionsStore((state) => state.setSort);
 
 	/**
 	 * Maneja la eliminación de los archivos seleccionados
@@ -64,8 +57,8 @@ export function useToolbarActions() {
 				toastService.error(`No se pudieron eliminar ${errorCount} archivo(s)`);
 			}
 
-			// Limpiar selección
-			deselectAllFiles();
+                        // Limpiar selección
+                        clearSelection();
 		}
 	};
 
@@ -185,21 +178,19 @@ export function useToolbarActions() {
 	/**
 	 * Maneja el cambio de orden
 	 */
-	const handleSortChange = (field: 'name' | 'createdAt' | 'modifiedAt') => {
-		if (sortBy === field) {
-			setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-		} else {
-			setSortBy(field);
-			setSortDirection('asc');
-		}
-	};
+        const handleSortChange = (field: 'name' | 'createdAt' | 'modifiedAt') => {
+                if (sort.field === field) {
+                        setSort({ direction: sort.direction === 'asc' ? 'desc' : 'asc' });
+                } else {
+                        setSort({ field, direction: 'asc' });
+                }
+        };
 
 	return {
 		// Estado
 		selectedItems,
 		viewMode,
-		sortBy,
-		sortDirection,
+                sort,
 
 		// Acciones
 		handleDeleteSelected,

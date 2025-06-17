@@ -1,31 +1,35 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { FileItem } from '@/types/file-item';
 import { Meh, Star } from 'lucide-react';
+import { AnimatePresence } from 'motion/react';
 import type * as React from 'react';
 import { memo, useCallback, useMemo, useRef } from 'react';
 import type { ContextMenuAction } from '../context-menu/context-menu';
 import { FileContextMenu } from '../context-menu/context-menu';
 import { ImageRenderer } from '../image-renderer';
+import { VirtualizerWrapper } from './virtualizer-wrapper';
 
-interface GridViewProps {
+interface GridItemProps {
 	item: FileItem;
-	itemSize: number;
 	isSelected?: boolean;
+	isActive?: boolean;
 	isScrolling?: boolean;
 	shouldLoad?: boolean;
 	thumbnail?: string | null;
-	onClick?: (item: FileItem) => void;
+	onClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onDoubleClick?: (item: FileItem) => void;
 	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
 	style?: React.CSSProperties;
 }
 
-export const GridView = memo(function GridView({
+export const GridItem = memo(function GridItem({
 	item,
-	// itemSize no se está utilizando actualmente
 	isSelected,
+	isActive,
 	isScrolling,
 	shouldLoad,
 	thumbnail,
@@ -33,7 +37,7 @@ export const GridView = memo(function GridView({
 	onDoubleClick,
 	onContextAction,
 	style,
-}: GridViewProps) {
+}: GridItemProps) {
 	// Usamos un ref para capturar el botón
 	const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -42,7 +46,7 @@ export const GridView = memo(function GridView({
 		(e: React.KeyboardEvent) => {
 			if (e.key === 'Enter' || e.key === ' ') {
 				e.preventDefault();
-				onClick?.(item);
+				onClick?.(item, e as any);
 			}
 		},
 		[onClick, item]
@@ -53,7 +57,7 @@ export const GridView = memo(function GridView({
 		(e: React.MouseEvent) => {
 			e.preventDefault();
 			e.stopPropagation();
-			onClick?.(item);
+			onClick?.(item, e);
 		},
 		[onClick, item]
 	);
@@ -72,9 +76,10 @@ export const GridView = memo(function GridView({
 		return cn(
 			'relative w-full h-full overflow-hidden group text-left',
 			isSelected && 'ring-2 ring-primary ring-offset-2',
+			isActive && 'ring-2 ring-secondary ring-offset-1',
 			isScrolling && 'opacity-50'
 		);
-	}, [isSelected, isScrolling]);
+	}, [isSelected, isActive, isScrolling]);
 
 	// Memoizamos el elemento interno para evitar renderizados innecesarios
 	const ButtonContent = useMemo(() => {
@@ -138,5 +143,89 @@ export const GridView = memo(function GridView({
 				{ButtonContent}
 			</button>
 		</FileContextMenu>
+	);
+});
+
+interface GridViewProps {
+	items: FileItem[];
+	onItemClick?: (item: FileItem, e: React.MouseEvent) => void;
+	onItemDoubleClick?: (item: FileItem) => void;
+	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	className?: string;
+}
+
+export const GridView = memo(function GridView({
+	items,
+	onItemClick,
+	onItemDoubleClick,
+	onContextAction,
+	className,
+}: GridViewProps) {
+	const { selectedIds, activeId, toggleSelectedId, addSelectedId, setSelectedIds } = useSelectionStore();
+	const { itemSize } = useViewOptionsStore();
+
+	const handleItemClick = useCallback(
+		(item: FileItem, e: React.MouseEvent) => {
+			// Si se mantiene presionada la tecla Ctrl, toggle la selección
+			if (e.ctrlKey || e.metaKey) {
+				toggleSelectedId(item.id);
+			}
+			// Si se mantiene presionada la tecla Shift, seleccionar rango
+			else if (e.shiftKey && activeId) {
+				const activeIndex = items.findIndex((i) => i.id === activeId);
+				const clickedIndex = items.findIndex((i) => i.id === item.id);
+
+				if (activeIndex !== -1 && clickedIndex !== -1) {
+					const start = Math.min(activeIndex, clickedIndex);
+					const end = Math.max(activeIndex, clickedIndex);
+
+					const idsToSelect = items.slice(start, end + 1).map((i) => i.id);
+					setSelectedIds(idsToSelect);
+				}
+			}
+			// Caso normal: limpiar selección y seleccionar solo este item
+			else {
+				setSelectedIds([item.id]);
+			}
+
+			// Propagar el evento si es necesario
+			onItemClick?.(item, e);
+		},
+		[items, activeId, toggleSelectedId, setSelectedIds, onItemClick, addSelectedId]
+	);
+
+	const renderItem = useCallback(
+		(index: number, item: FileItem) => {
+			const isSelected = selectedIds.includes(item.id);
+			const isActive = activeId === item.id;
+
+			return (
+				<GridItem
+					key={item.id}
+					item={item}
+					isSelected={isSelected}
+					isActive={isActive}
+					shouldLoad={true}
+					thumbnail={item.thumbnail}
+					onClick={handleItemClick}
+					onDoubleClick={onItemDoubleClick}
+					onContextAction={onContextAction}
+				/>
+			);
+		},
+		[selectedIds, activeId, handleItemClick, onItemDoubleClick, onContextAction]
+	);
+
+	return (
+		<AnimatePresence mode="wait">
+			<VirtualizerWrapper
+				type="grid"
+				data={items}
+				itemContent={renderItem}
+				itemSize={itemSize}
+				gridClassName={cn('w-full h-full p-4', className)}
+				layoutId="grid-view"
+			/>
+		</AnimatePresence>
 	);
 });

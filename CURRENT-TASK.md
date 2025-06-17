@@ -21,6 +21,8 @@
 - [x] Implementación de funciones para añadir/eliminar imágenes a colecciones
 - [x] Implementación de funciones para añadir/eliminar etiquetas a imágenes
 - [x] Corrección de errores de tipos en varios archivos del sistema
+- [x] Creación del slice `view-options` para la UI del explorador
+- [x] Conexión de MainToolbar al estado global
 
 ---
 
@@ -39,7 +41,7 @@
 - **Complejidad:** Media.
 - **Nota:** Este store es la piedra angular para desacoplar la toolbar, el file browser y otros componentes. Debe ser la única fuente de verdad para las opciones de visualización.
 
-#### 1.2. Integración de `FileBrowser` con el store de vistas
+- [x] **1.2. Integración de `FileBrowser` con el store de vistas**
 - **Tarea:** Refactorizar `FileBrowser` para que utilice el store de vistas.
 - **Subtareas:**
     - `FileBrowser` leerá `viewMode` del store para renderizar la vista activa (`GridView`, `ListView`, etc.).
@@ -73,7 +75,7 @@
 **Prioridad Funcional:** Alta
 **Nota General:** La barra de herramientas (`MainToolbar`) debe ser el principal punto de control para la manipulación de la vista del `FileBrowser`. Actualmente, su integración es básica o inexistente. Debe reaccionar y modificar el estado global, no comunicarse directamente con el `FileBrowser`.
 
-#### 2.1. Conexión de `MainToolbar` al Estado Global
+#### 2.1. Conexión de `MainToolbar` al Estado Global ✅
 - **Tarea:** Conectar `MainToolbar` a los stores de Zustand (`viewOptionsSlice`, `selectionSlice`).
 - **Subtareas:**
     - Los controles de cambio de vista (grid, list, etc.) en la toolbar deben leer y escribir en `viewOptionsSlice`.
