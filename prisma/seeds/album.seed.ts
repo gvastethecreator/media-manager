@@ -126,6 +126,18 @@ export async function seedAlbums(prisma: PrismaClient): Promise<void> {
 					isFavorite: false,
 					featuredImage: null,
 				},
+				{
+					name: 'Fotografía Urbana',
+					emoji: '🏙️',
+					color: '#6366f1',
+					description: 'Álbum de fotos urbanas y arquitectura',
+					shortcut: 'urbano',
+					sortBy: 'createdAt',
+					filters: JSON.stringify(['tag:urbano']),
+					category: 'temático',
+					isFavorite: false,
+					featuredImage: null,
+				},
 
 				// Álbumes técnicos
 				{

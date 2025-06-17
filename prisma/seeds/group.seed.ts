@@ -163,6 +163,18 @@ export async function seedGroups(prisma: PrismaClient): Promise<void> {
 					featuredImage: null,
 					isFavorite: true,
 				},
+				{
+					name: 'Círculo de Sabios',
+					emoji: '🧙‍♂️',
+					color: '#fbbf24',
+					description: 'Consejo de magos y eruditos',
+					shortcut: 'sabios',
+					category: 'personajes',
+					sortBy: 'name',
+					filters: JSON.stringify(['character:Elyra la Cenicienta']),
+					featuredImage: null,
+					isFavorite: false,
+				},
 			];
 
 			for (const group of groupsData) {

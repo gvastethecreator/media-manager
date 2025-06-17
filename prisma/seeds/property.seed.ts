@@ -99,6 +99,15 @@ export async function seedProperties(prisma: PrismaClient): Promise<void> {
 					category: 'management',
 					isFavorite: true,
 				},
+				{
+					name: 'Resolución',
+					emoji: '🖼️',
+					color: '#00BFFF',
+					description: 'Resolución de la imagen',
+					shortcut: 'res',
+					category: 'technical',
+					isFavorite: false,
+				},
 			];
 
 			// Crear propiedades
