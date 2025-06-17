@@ -72,10 +72,20 @@ export const CardItem = memo(function CardItem({
 	const metadata = useMemo(() => getMetadata(item.metadata), [item.metadata]);
 
 	const imageHeight = useMemo(() => {
-		if (metadata?.dimensions) {
-			return Math.min(item.itemSize / (metadata.dimensions.width / metadata.dimensions.height), item.itemSize * 0.6);
+		const itemSize = item.itemSize || 200;
+
+		if (metadata?.dimensions?.width && metadata?.dimensions?.height) {
+			const width = Number(metadata.dimensions.width);
+			const height = Number(metadata.dimensions.height);
+
+			if (!isNaN(width) && !isNaN(height) && width > 0 && height > 0) {
+				const aspectRatio = width / height;
+				if (isFinite(aspectRatio) && aspectRatio > 0) {
+					return Math.min(itemSize / aspectRatio, itemSize * 0.6);
+				}
+			}
 		}
-		return item.itemSize * 0.5;
+		return itemSize * 0.5;
 	}, [metadata, item.itemSize]);
 
 	const handleKeyDown = useCallback(
@@ -129,7 +139,12 @@ export const CardItem = memo(function CardItem({
 	const ImageContent = useMemo(() => {
 		const thumbnailUrl = item.thumbnail || `/api/images/${item.id}/thumbnail`;
 		return (
-			<div className="relative w-full h-full">
+			<div
+				className="relative w-full"
+				style={{
+					height: `${imageHeight}px`
+				}}
+			>
 				<ImageRenderer
 					src={thumbnailUrl}
 					alt={item.name}
@@ -140,7 +155,7 @@ export const CardItem = memo(function CardItem({
 				/>
 			</div>
 		);
-	}, [item.thumbnail, item.id, item.name, isScrolling, shouldLoad]);
+	}, [item.thumbnail, item.id, item.name, isScrolling, shouldLoad, imageHeight]);
 
 	const StatusBadges = useMemo(
 		() => (
@@ -291,7 +306,7 @@ export const CardItem = memo(function CardItem({
 			whileTap={{ scale: 0.99 }}
 		>
 			<div className="flex flex-col h-full">
-				<div className="relative overflow-hidden" style={{ height: imageHeight }}>
+				<div className="relative overflow-hidden" style={{ height: `${imageHeight}px` }}>
 					{ImageContent}
 					{StatusBadges}
 				</div>
