@@ -1,67 +1,73 @@
 'use client';
 
-import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { reindexFolder, scanFolderAction } from '@/app/actions/folders';
+import { reindexFolder } from '@/app/actions/folders';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-// Usar el hook del store de carpetas para mantener consistencia con FoldersView
-import { useFolder } from '@/hooks/folder/use-folder';
-import { useFolderImages } from '@/hooks/use-folder-images';
+import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+// Usar el hook del store unificado para mejor integración con paginación
 import { folderResponseCache } from '@/lib/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { FileItem, FileProcessingStatus, FileType } from '@/types/file-item';
+import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
+import { FileItem } from '@/types/file-item';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
 
-// 🔄 Función para convertir ApiResponseFileItem a FileItem
-function mapApiFileToFileItem(apiFile: any): FileItem {
-	return {
-		id: apiFile.id,
-		name: apiFile.name,
-		path: apiFile.path,
-		type: (apiFile.type as FileType) || FileType.OTHER,
-		size: apiFile.size || 0,
-		mimeType: apiFile.mimeType || 'application/octet-stream',
-		metadata: apiFile.metadata || '{}',
-		processingStatus: FileProcessingStatus.COMPLETED,
-		errorMessage: apiFile.errorMessage || undefined,
-		createdAt: new Date(apiFile.createdAt || Date.now()),
-		updatedAt: new Date(apiFile.updatedAt || Date.now()),
-	};
-}
-
 export function FolderContentView() {
-	// 📂 Usar el hook especializado para carpetas (solo para obtener el ID y metadatos)
-	const { currentFolder, setCurrentFolder, isLoading: folderLoading } = useFolder();
-	const currentFolderId = currentFolder?.id || null;
+	// 📂 Obtener información de la carpeta actual desde navigation store
+	const { currentItem } = useNavigationStore();
+	const currentFolderId = currentItem?.id || null;
+
+	// 📂 Usar el store unificado para manejo completo de archivos y paginación
+	const {
+		currentItems,
+		displayedItems,
+		isLoading,
+		isLoadingMore,
+		hasMoreItems,
+		error,
+		currentFolder,
+		setCurrentFolder,
+		loadMoreItems,
+		refreshCurrentContext,
+	} = useUnifiedFileManager();
 
 	// Estado para controlar la recarga manual
 	const [isManuallyRefreshing, setIsManuallyRefreshing] = useState(false);
 	const [_retryCount, setRetryCount] = useState(0);
 	const [scanResults, setScanResults] = useState<any>(null);
 
-	// Usar el hook personalizado para obtener las imágenes
-	const { data: imagesResponse, isLoading, isError, error, refetch } = useFolderImages(currentFolderId);
+	// 🚀 Inicializar carpeta cuando cambie currentFolderId
+	useEffect(() => {
+		if (currentFolderId) {
+			logger.info(`🔄 Inicializando carpeta: ${currentFolderId}`);
+			setCurrentFolder(currentFolderId);
+		}
+	}, [currentFolderId, setCurrentFolder]);
 
-	// Acceder al array de imágenes desde la respuesta de manera segura y mapearlo
+	// 🛡️ Validación: verificar que hay una carpeta seleccionada
+	if (!currentFolderId) {
+		logger.warn('⚠️ No hay carpeta seleccionada');
+		return (
+			<div className="flex flex-col items-center justify-center h-full gap-4">
+				<EmptyState
+					icon={Folder}
+					title="No hay carpeta seleccionada"
+					description="Selecciona una carpeta desde la vista de carpetas para ver su contenido."
+				/>
+			</div>
+		);
+	}
+
+	// 📂 Los archivos ahora vienen directamente del store unificado
 	const images: FileItem[] = useMemo(() => {
-		if (!imagesResponse) {
-			return [];
-		}
-
-		// Verificar que tenemos la propiedad items
-		if (!imagesResponse.items || !Array.isArray(imagesResponse.items)) {
-			logger.warn('⚠️ imagesResponse.items no es un array válido');
-			return [];
-		}
-
-		// Mapear ApiResponseFileItem a FileItem
-		return imagesResponse.items.map(mapApiFileToFileItem);
-	}, [imagesResponse]);
+		// Los items ya están transformados en el store
+		return displayedItems || [];
+	}, [displayedItems]);
 
 	// Log simple para depuración sin acceder a propiedades internas que puedan causar problemas
 	logger.debug(`🖼️ Renderizando FileBrowser2 con ${images.length} imágenes`);
@@ -94,52 +100,21 @@ export function FolderContentView() {
 			logger.info('🔄 Recargando imágenes después de reindexar');
 			// Limpiar caché para esta carpeta
 			folderResponseCache.delete(`folder:${currentFolderId}`);
-			await refetch();
+			await refreshCurrentContext();
 		} catch (error) {
 			logger.error('❌ Error al reindexar la carpeta:', error);
 		} finally {
 			setIsManuallyRefreshing(false);
 		}
-	}, [currentFolderId, refetch]);
+	}, [currentFolderId, refreshCurrentContext]);
 
 	// Función para escanear directamente la carpeta
 	const handleScanFolder = useCallback(async () => {
-		if (!currentFolder?.path) return;
-
-		try {
-			logger.info(`🔍 Escaneando directamente la carpeta: ${currentFolder.path}`);
-			setIsManuallyRefreshing(true);
-			setScanResults(null);
-
-			// Escanear la carpeta usando la acción del servidor
-			const result = await scanFolderAction(currentFolder.path, {
-				recursive: true,
-				includeHidden: false,
-			});
-
-			// Guardar y mostrar los resultados
-			setScanResults(result);
-
-			logger.info('✅ Escaneo directo completado:', {
-				path: currentFolder.path,
-				totalFiles: result.totalFiles,
-				images: result.images.length,
-				videos: result.videos.length,
-				others: result.others.length,
-			});
-
-			// Si hay imágenes pero no están en la base de datos, sugerir reindexar
-			if (result.images.length > 0 && (!images || images.length === 0)) {
-				logger.warn(
-					`⚠️ Se encontraron ${result.images.length} imágenes en el sistema de archivos pero ninguna en la base de datos. Se recomienda reindexar.`
-				);
-			}
-		} catch (error) {
-			logger.error('❌ Error al escanear directamente la carpeta:', error);
-		} finally {
-			setIsManuallyRefreshing(false);
-		}
-	}, [currentFolder?.path, images]);
+		// Por ahora deshabilitamos esta función ya que no tenemos acceso al path
+		// TODO: Implementar cuando tengamos acceso completo a la información de la carpeta
+		logger.warn('⚠️ Función de escaneo directo temporalmente deshabilitada');
+		setScanResults(null);
+	}, []);
 
 	// Función para forzar la recarga de imágenes
 	const handleForceRefresh = useCallback(async () => {
@@ -155,16 +130,16 @@ export function FolderContentView() {
 			}
 
 			// Recargar imágenes
-			await refetch();
+			await refreshCurrentContext();
 		} catch (refreshError) {
 			logger.error('❌ Error al forzar recarga:', refreshError);
 		} finally {
 			setIsManuallyRefreshing(false);
 		}
-	}, [refetch, currentFolderId]);
+	}, [refreshCurrentContext, currentFolderId]);
 
 	// Mostrar estado de carga
-	if (isLoading || folderLoading || isManuallyRefreshing) {
+	if (isLoading || isManuallyRefreshing) {
 		logger.debug('⏳ Mostrando estado de carga');
 		return (
 			<div className="flex items-center justify-center h-full">
@@ -174,17 +149,17 @@ export function FolderContentView() {
 	}
 
 	// Mostrar estado de error
-	if (isError) {
+	if (error) {
 		logger.error('❌ Error al cargar imágenes:', error);
 		return (
 			<div className="flex flex-col items-center justify-center h-full gap-4">
 				<EmptyState
 					icon={Folder}
 					title="Error al cargar imágenes"
-					description={`Ha ocurrido un error al cargar las imágenes. ${error instanceof Error ? error.message : ''}`}
+					description={`Ha ocurrido un error al cargar las imágenes. ${typeof error === 'string' ? error : 'Error desconocido'}`}
 				/>
 				<div className="flex gap-2">
-					<Button variant="outline" size="sm" onClick={() => refetch()}>
+					<Button variant="outline" size="sm" onClick={handleForceRefresh}>
 						<RefreshCw className="h-4 w-4 mr-2" />
 						Reintentar
 					</Button>
@@ -202,7 +177,7 @@ export function FolderContentView() {
 	}
 
 	// Mostrar estado vacío si no hay imágenes
-	if (!imagesResponse || !imagesResponse.items || imagesResponse.items.length === 0) {
+	if (!images || images.length === 0) {
 		logger.debug('📭 Mostrando estado vacío - No hay imágenes');
 		return (
 			<div className="flex flex-col items-center justify-center h-full gap-4">
@@ -266,7 +241,7 @@ export function FolderContentView() {
 		);
 	}
 
-	// Renderizar el navegador de archivos con las imágenes sin procesamiento adicional
+	// Renderizar el navegador de archivos con las imágenes y scroll infinito
 	return (
 		<div className="relative h-full w-full min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden">
 			<div className="absolute top-2 right-2 z-10 flex gap-2">
@@ -290,6 +265,9 @@ export function FolderContentView() {
 					onItemDoubleClick={(item: FileItem) => {
 						logger.debug('🖱️🖱️ Doble click en item:', item.id);
 					}}
+					// 🚀 Conectar scroll infinito
+					loadMoreItems={hasMoreItems ? loadMoreItems : undefined}
+					isLoading={isLoadingMore}
 				/>
 			</div>
 		</div>

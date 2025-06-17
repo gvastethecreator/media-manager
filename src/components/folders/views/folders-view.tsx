@@ -1,9 +1,5 @@
 'use client';
 
-import { DatabaseIcon, FolderIcon, RefreshCcw, XCircle } from 'lucide-react';
-import { motion } from 'motion/react';
-import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
 import { FolderCard } from '@/components/cards/folder-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -16,6 +12,10 @@ import { folderService } from '@/services/folder-service-export';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
 import type { Folder } from '@/types/entities/folder';
+import { DatabaseIcon, FolderIcon, RefreshCcw, XCircle } from 'lucide-react';
+import { motion } from 'motion/react';
+import Link from 'next/link';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../../views/types';
 
 const viewLogger = clientLogger.withContext('FoldersView');
@@ -53,7 +53,7 @@ const MemoizedFolderCard = React.memo(
 MemoizedFolderCard.displayName = 'MemoizedFolderCard';
 
 export function FoldersView(_props: ViewProps) {
-	const { setCurrentView } = useNavigationStore();
+	const { setCurrentView, setCurrentItem } = useNavigationStore();
 
 	// 🆕 Usar los nuevos stores específicos
 	const {
@@ -183,7 +183,24 @@ export function FoldersView(_props: ViewProps) {
 				setCurrentFolderId(folder.id);
 				viewLogger.debug(`✅ setCurrentFolderId llamado con ID: ${folder.id}`); // Nuevo log
 
-				viewLogger.debug('📍 Actualizando la vista de navegación (setCurrentView)...'); // Nuevo log
+				viewLogger.debug('� Estableciendo elemento actual en navigation store...'); // Nuevo log
+				// 📋 Establecer el elemento actual en el navigation store
+				setCurrentItem({
+					id: folder.id,
+					name: folder.name,
+					path: folder.path,
+					description: folder.description || undefined,
+					color: folder.color || undefined,
+					emoji: folder.emoji || undefined,
+					count: folder._count?.images || 0,
+					totalSize: folder.totalSize,
+					lastIndexed: folder.lastIndexed || undefined,
+					createdAt: folder.createdAt,
+					itemType: 'folder',
+				});
+				viewLogger.debug('✅ setCurrentItem llamado con datos de carpeta.'); // Nuevo log
+
+				viewLogger.debug('�📍 Actualizando la vista de navegación (setCurrentView)...'); // Nuevo log
 				// 📍 Actualizar la vista de navegación
 				setCurrentView('folder-content');
 				viewLogger.debug('✅ setCurrentView llamado a folder-content.'); // Nuevo log
@@ -193,7 +210,7 @@ export function FoldersView(_props: ViewProps) {
 				viewLogger.error('❌ Error al cambiar a la carpeta:', error); // Descomentado
 			}
 		},
-		[setCurrentView, deselectAllFiles, setCurrentFolderId]
+		[setCurrentView, setCurrentItem, deselectAllFiles, setCurrentFolderId]
 	);
 
 	if (error) {
