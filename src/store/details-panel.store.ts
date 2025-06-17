@@ -18,7 +18,7 @@ interface DetailsPanelState {
 
 export const useDetailsPanel = create<DetailsPanelState>()(
 	persist(
-		(set) => ({
+		(set, get) => ({
 			isVisible: true,
 			isFixed: false,
 			showStatsWhenEmpty: true,
@@ -26,10 +26,37 @@ export const useDetailsPanel = create<DetailsPanelState>()(
 			toggleVisibility: () => set((state) => ({ isVisible: !state.isVisible })),
 			toggleFixed: () => set((state) => ({ isFixed: !state.isFixed })),
 			toggleShowStatsWhenEmpty: () => set((state) => ({ showStatsWhenEmpty: !state.showStatsWhenEmpty })),
-			setVisible: (visible: boolean) => set({ isVisible: visible }),
-			setFixed: (fixed: boolean) => set({ isFixed: fixed }),
-			setShowStatsWhenEmpty: (show: boolean) => set({ showStatsWhenEmpty: show }),
-			setSelectedItems: (items: ImageItem[]) => set({ selectedItems: items }),
+			setVisible: (visible: boolean) => {
+				if (get().isVisible !== visible) {
+					set({ isVisible: visible });
+				}
+			},
+			setFixed: (fixed: boolean) => {
+				if (get().isFixed !== fixed) {
+					set({ isFixed: fixed });
+				}
+			},
+			setShowStatsWhenEmpty: (show: boolean) => {
+				if (get().showStatsWhenEmpty !== show) {
+					set({ showStatsWhenEmpty: show });
+				}
+			},
+			setSelectedItems: (items: ImageItem[]) => {
+				const currentItems = get().selectedItems;
+
+				if (currentItems.length !== items.length) {
+					set({ selectedItems: items });
+					return;
+				}
+
+				const currentIds = new Set(currentItems.map(item => item.id));
+				const newIds = new Set(items.map(item => item.id));
+
+				if (currentIds.size !== newIds.size ||
+					![...currentIds].every(id => newIds.has(id))) {
+					set({ selectedItems: items });
+				}
+			},
 		}),
 		{
 			name: 'details-panel-storage',

@@ -1,9 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Virtuoso, VirtuosoGrid } from 'react-virtuoso';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface VirtualizerWrapperProps<T> {
 	type: 'list' | 'grid';
@@ -12,14 +11,17 @@ interface VirtualizerWrapperProps<T> {
 	itemSize?: number;
 	gridClassName?: string;
 	listClassName?: string;
-	layoutId?: string;
+	layoutId?: string; // Mantenerla para compatibilidad con la API
 	onScrollStart?: () => void;
 	onScrollEnd?: () => void;
 }
 
 /**
- * Componente wrapper para virtualización de listas y grids
- * Soporta diferentes tipos de visualización y eventos de scroll
+ * 🖼️ Componente de visualización de datos con virtualización usando TanStack Virtual
+ *
+ * Esta implementación utiliza @tanstack/react-virtual para renderizar
+ * solo los elementos visibles en el viewport, mejorando significativamente
+ * el rendimiento con conjuntos de datos grandes.
  */
 export function VirtualizerWrapper<T>({
 	type,
@@ -28,132 +30,187 @@ export function VirtualizerWrapper<T>({
 	itemSize = 200,
 	gridClassName,
 	listClassName,
-	layoutId,
 	onScrollStart,
 	onScrollEnd,
 }: VirtualizerWrapperProps<T>) {
-	// Referencias
-	const virtuosoRef = useRef<any>(null);
-	const isScrollingRef = useRef(false);
-	const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	// Referencia al contenedor de desplazamiento
+	const scrollRef = useRef<HTMLDivElement>(null);
+	const [columnCount, setColumnCount] = useState(4); // Default a 4 columnas
+	const [isScrolling, setIsScrolling] = useState(false);
 
-	// Estados
-	const [isInitialized, setIsInitialized] = useState(false);
-	const [columnsCount, setColumnsCount] = useState(4);
-
-	// Calcular el número de columnas basado en el tamaño del contenedor
-	const calculateColumns = useCallback((element: HTMLElement) => {
-		if (!element) return;
-
-		const containerWidth = element.offsetWidth;
-		const gap = 16; // Gap entre elementos
-		const availableWidth = containerWidth - gap;
-		const columns = Math.max(1, Math.floor(availableWidth / (itemSize + gap)));
-
-		setColumnsCount(columns);
-	}, [itemSize]);
-
-	// Manejador de eventos de scroll
-	const handleScroll = useCallback(() => {
-		if (!isScrollingRef.current) {
-			isScrollingRef.current = true;
-			onScrollStart?.();
-		}
-
-		// Reiniciar el timeout en cada evento de scroll
-		if (scrollTimeoutRef.current) {
-			clearTimeout(scrollTimeoutRef.current);
-		}
-
-		// Establecer un nuevo timeout para detectar cuando el scroll termina
-		scrollTimeoutRef.current = setTimeout(() => {
-			isScrollingRef.current = false;
-			onScrollEnd?.();
-			scrollTimeoutRef.current = null;
-		}, 150);
-	}, [onScrollStart, onScrollEnd]);
-
-	// Efecto para limpiar timeouts al desmontar
+	// Calcular el número de columnas para la cuadrícula
 	useEffect(() => {
-		return () => {
-			if (scrollTimeoutRef.current) {
-				clearTimeout(scrollTimeoutRef.current);
-			}
+		if (!scrollRef.current) return;
+
+		const updateColumnCount = () => {
+			const containerWidth = scrollRef.current?.clientWidth || 0;
+			const gap = 16; // 1rem gap
+			const effectiveItemSize = itemSize + gap;
+			const columns = Math.max(1, Math.floor((containerWidth - gap) / effectiveItemSize));
+			setColumnCount(columns);
 		};
-	}, []);
 
-	// Efecto para inicializar después del primer render
-	useEffect(() => {
-		setIsInitialized(true);
-	}, []);
+		// Actualizar inmediatamente
+		updateColumnCount();
 
-	// Renderizar el virtualizador según el tipo
+		// Actualizar cuando cambie el tamaño de la ventana
+		const resizeObserver = new ResizeObserver(updateColumnCount);
+		resizeObserver.observe(scrollRef.current);
+
+		return () => {
+			if (scrollRef.current) {
+				resizeObserver.unobserve(scrollRef.current);
+			}
+			resizeObserver.disconnect();
+		};
+	}, [itemSize, scrollRef]);
+
+	// Configuración de la virtualización para lista
+	const listVirtualizer = useVirtualizer({
+		count: data.length,
+		getScrollElement: () => scrollRef.current,
+		estimateSize: () => itemSize,
+		overscan: 5, // Número de elementos a renderizar fuera del viewport
+		scrollMargin: scrollRef.current?.offsetTop || 0,
+	});
+
+	// Configuración de la virtualización para cuadrícula
+	const gridVirtualizer = useVirtualizer({
+		count: data.length,
+		getScrollElement: () => scrollRef.current,
+		estimateSize: () => Math.ceil(data.length / columnCount) * (itemSize + 16),
+		overscan: 10, // Mayor overscan para cuadrículas
+		getItemKey: (index) => (data[index] as any)?.id || `grid-${index}`,
+		scrollMargin: scrollRef.current?.offsetTop || 0,
+	});
+
+	// Manejador de eventos de scroll con debounce
+	const handleScroll = React.useCallback(
+		(e: React.UIEvent<HTMLDivElement>) => {
+			// Activar el estado de scroll
+			if (!isScrolling) {
+				setIsScrolling(true);
+				onScrollStart?.();
+			}
+
+			// Debounce para detectar cuando se detiene el scroll
+			clearTimeout((window as any).scrollTimeout);
+			(window as any).scrollTimeout = setTimeout(() => {
+				setIsScrolling(false);
+				onScrollEnd?.();
+			}, 200);
+
+			// Detectar inicio y fin de scroll
+			const target = e.currentTarget;
+			const isAtTop = target.scrollTop === 0;
+			const isAtBottom =
+				Math.abs(
+					target.scrollHeight - target.scrollTop - target.clientHeight
+				) < 20;
+
+			if (isAtBottom) {
+				onScrollEnd?.();
+			}
+		},
+		[isScrolling, onScrollStart, onScrollEnd]
+	);
+
+	// Renderizado para modo cuadrícula
 	if (type === 'grid') {
+		// Calcular el número total de filas
+		const totalRows = Math.ceil(data.length / columnCount);
+		const rowHeight = itemSize + 16; // altura + gap
+
 		return (
-			<motion.div
-				className="h-full w-full"
-				layoutId={layoutId}
-				initial={!isInitialized ? { opacity: 0 } : false}
-				animate={{ opacity: 1 }}
-				exit={{ opacity: 0 }}
-				transition={{ duration: 0.2 }}
+			<div
+				ref={scrollRef}
+				className={cn('h-full w-full overflow-auto p-4', gridClassName)}
+				onScroll={handleScroll}
+				style={{ scrollBehavior: 'smooth' }}
 			>
-				<VirtuosoGrid
-					ref={virtuosoRef}
-					totalCount={data.length}
-					overscan={500}
-					className={cn('h-full', gridClassName)}
-					listClassName="grid gap-4 p-4"
-					itemClassName="overflow-hidden"
-					computeItemKey={(index) => data[index]?.id || index.toString()}
-					itemContent={(index) => itemContent(index, data[index])}
-					style={{ height: '100%', width: '100%' }}
-					onScroll={handleScroll}
-					listStyle={{
-						display: 'grid',
-						gridTemplateColumns: `repeat(auto-fill, minmax(${itemSize}px, 1fr))`,
-						gap: '1rem',
+				<div
+					style={{
+						height: `${totalRows * rowHeight}px`,
+						width: '100%',
+						position: 'relative',
 					}}
-					components={{
-						ScrollSeekPlaceholder: ({ height, width, index }) => (
+				>
+					{data.length > 0 && gridVirtualizer.getVirtualItems().map((virtualItem) => {
+						const itemIndex = virtualItem.index;
+						if (itemIndex >= data.length) return null;
+
+						const item = data[itemIndex];
+
+						// Calcular posición en la cuadrícula
+						const row = Math.floor(itemIndex / columnCount);
+						const col = itemIndex % columnCount;
+
+						// Calcular posición absoluta
+						const left = `${(col * (itemSize + 16))}px`;
+						const top = `${(row * rowHeight)}px`;
+
+						return (
 							<div
-								className="bg-muted/30 rounded-md animate-pulse"
-								style={{ height: `${itemSize}px`, width: '100%' }}
-							/>
-						),
-					}}
-				/>
-			</motion.div>
+								key={virtualItem.key}
+								data-index={itemIndex}
+								style={{
+									position: 'absolute',
+									top,
+									left,
+									width: `${itemSize}px`,
+									height: `${itemSize}px`,
+									padding: '0',
+									transform: 'translate3d(0, 0, 0)',
+								}}
+							>
+								{itemContent(itemIndex, item)}
+							</div>
+						);
+					})}
+				</div>
+			</div>
 		);
 	}
 
-	// Renderizar lista virtualizada
+	// Renderizado para modo lista
 	return (
-		<motion.div
-			className="h-full w-full"
-			layoutId={layoutId}
-			initial={!isInitialized ? { opacity: 0 } : false}
-			animate={{ opacity: 1 }}
-			exit={{ opacity: 0 }}
-			transition={{ duration: 0.2 }}
+		<div
+			ref={scrollRef}
+			className={cn('h-full w-full overflow-auto p-4', listClassName)}
+			onScroll={handleScroll}
+			style={{ scrollBehavior: 'smooth' }}
 		>
-			<Virtuoso
-				ref={virtuosoRef}
-				totalCount={data.length}
-				overscan={200}
-				className={cn('h-full', listClassName)}
-				itemContent={(index) => itemContent(index, data[index])}
-				style={{ height: '100%', width: '100%' }}
-				onScroll={handleScroll}
-				components={{
-					ScrollSeekPlaceholder: ({ height, index }) => (
-						<div
-							className="bg-muted/30 rounded-md animate-pulse m-2 p-2"
-							style={{ height: `${height}px` }}
-						/>
-					),
+			<div
+				style={{
+					height: `${listVirtualizer.getTotalSize()}px`,
+					width: '100%',
+					position: 'relative',
 				}}
-			/>
-		</motion.div>
+			>
+				{data.length > 0 && listVirtualizer.getVirtualItems().map((virtualItem) => {
+					const itemIndex = virtualItem.index;
+					if (itemIndex >= data.length) return null;
+
+					const item = data[itemIndex];
+
+					return (
+						<div
+							key={virtualItem.key}
+							data-index={itemIndex}
+							style={{
+								position: 'absolute',
+								top: 0,
+								left: 0,
+								width: '100%',
+								height: `${virtualItem.size}px`,
+								transform: `translateY(${virtualItem.start}px)`,
+							}}
+						>
+							{itemContent(itemIndex, item)}
+						</div>
+					);
+				})}
+			</div>
+		</div>
 	);
 }

@@ -1,31 +1,146 @@
-# FileBrowser
+# 🗂️ FileBrowser Component
 
-Componente principal para explorar archivos y carpetas con soporte de virtualización y precarga de entidades.
+## Descripción
 
-## Estructura general
+El componente `FileBrowser` es un explorador de archivos completo con soporte para:
 
-```mermaid
-flowchart TD
-    A[file-browser.tsx]
-    A --> B[hooks/]
-    A --> C[context-menu/]
-    A --> D[details/]
-    A --> E[config/]
-    A --> F[docs/]
+- 🖼️ Múltiples vistas (Grid, List, Cards, Masonry)
+- 🔍 Selección múltiple con Ctrl/Shift
+- 🌟 Marcado de favoritos
+- 📋 Menú contextual con acciones avanzadas
+- 📊 Panel de detalles integrado
+- 🔍 Visor de archivos integrado
+- 📱 Diseño responsivo con virtualización optimizada
+- ⚡ Carga diferida y scroll infinito
+
+## Estructura
+
+```
+src/components/features/file-browser/
+├── context-menu/         # Menú contextual y acciones
+├── details/             # Panel de detalles
+├── filters/             # Filtros y búsqueda
+├── hooks/               # Hooks personalizados
+├── toolbar/             # Barra de herramientas
+├── utils/               # Utilidades y helpers
+├── views/               # Vistas (Grid, List, Cards, Masonry)
+├── file-browser.tsx     # Componente principal
+├── image-renderer.tsx   # Renderizador optimizado de imágenes
+├── integrated-file-browser.tsx # Integración con toolbar
+├── types.tsx            # Tipos compartidos
+└── README.md            # Documentación
 ```
 
-- **entity-preloader.tsx**: Coordinación de precarga de entidades.
-- **hooks/**: Lógica de manejo de scroll, grid y transiciones.
-- **context-menu/** y **details/**: Componentes auxiliares.
-- **docs/**: Documentos técnicos sobre el layout y precarga.
+## Componentes principales
 
-Para un análisis detallado del flujo de precarga consulta `docs/entity-preloader-integration.md`.
+### `FileBrowser`
 
-## Integración con `view-options`
+Componente principal para mostrar y manipular archivos. Gestiona:
 
-El modo de visualización y las preferencias de orden se obtienen del slice
-`view-options` de Zustand. Esto permite que la toolbar y otros componentes
-compartan estado de manera reactiva y persistente.
+- Selección de archivos
+- Virtualización y renderizado eficiente
+- Integración con el menú contextual
+- Integración con el panel de detalles
+- Integración con el visor de archivos
+
+```tsx
+<FileBrowser
+  items={files}
+  isLoading={isLoading}
+  isReindexing={isReindexing}
+  reindexProgress={progress}
+  loadMoreItems={handleLoadMore}
+  onItemSelect={handleSelect}
+  onItemDoubleClick={handleDoubleClick}
+/>
+```
+
+### `IntegratedFileBrowser`
+
+Componente de nivel superior que integra `FileBrowser` con `FileBrowserToolbar`. Proporciona una experiencia completa:
+
+```tsx
+<IntegratedFileBrowser
+  items={files}
+  isLoading={isLoading}
+  isReindexing={isReindexing}
+  reindexProgress={progress}
+  loadMoreItems={handleLoadMore}
+  showSearch={true}
+  showFilters={true}
+  showDetailsToggle={true}
+/>
+```
+
+## Flujo de datos
+
+Este componente sigue el patrón de "estado global" con Zustand:
+
+1. `viewOptionsSlice`: Gestiona el modo de vista, tamaño de items, ordenación y filtros
+2. `selectionSlice`: Gestiona la selección de archivos
+3. `detailsPanelStore`: Controla el panel de detalles
+4. `fileViewerStore`: Gestiona el visor de archivos
+
+## Optimizaciones
+
+El `FileBrowser` incluye varias optimizaciones:
+
+- **Virtualización**: Solo renderiza los elementos visibles en pantalla
+- **Carga diferida**: Las imágenes se cargan solo cuando son visibles
+- **Memoización**: Uso extensivo de `memo`, `useCallback` y `useMemo`
+- **Cancelación de solicitudes**: Cancelación de peticiones de imágenes durante scroll
+- **Transiciones suaves**: Animaciones optimizadas con motion/react
+
+## Integraciones
+
+- **Toolbar**: Integraciones con filtros, búsqueda y acciones masivas
+- **Panel de detalles**: Actualización automática según la selección
+- **Visor de archivos**: Apertura con doble clic y navegación
+- **Menú contextual**: Acciones contextuales por archivo
+
+## Uso
+
+### Básico
+
+```tsx
+import { FileBrowser } from '@/components/features/file-browser';
+
+export default function MyPage() {
+  return (
+    <FileBrowser
+      items={myFiles}
+      isLoading={isLoading}
+    />
+  );
+}
+```
+
+### Integrado con Toolbar
+
+```tsx
+import { IntegratedFileBrowser } from '@/components/features/file-browser';
+
+export default function MyPage() {
+  return (
+    <IntegratedFileBrowser
+      items={myFiles}
+      isLoading={isLoading}
+      showSearch={true}
+      showFilters={true}
+    />
+  );
+}
+```
+
+## Estado del desarrollo
+
+✅ Completado según las tareas definidas en CURRENT-TASK.md, incluyendo:
+
+- Integración con menú contextual, panel de detalles y visor de archivos
+- Selección múltiple con Ctrl/Shift
+- Ordenación y filtrado
+- Optimizaciones de rendimiento
+- Documentación completa
 
 # FileBrowser: Fallback visual y robustez de layout
 

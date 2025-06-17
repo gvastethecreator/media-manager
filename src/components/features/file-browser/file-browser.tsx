@@ -1,19 +1,20 @@
 'use client';
 
 import { AnimatePresence } from 'motion/react';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { EmptyState } from '@/components/core/data-display';
 import { FileViewer, type ImageItem } from '@/components/features/file-viewer/file-viewer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageResources } from '@/store/image-resources.store';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { FileItem } from '@/types/file-item';
+import clsx from 'clsx';
 import { FileTextIcon, Star } from 'lucide-react';
-import { handleContextAction } from './context-menu/context-action-handler';
 import { FileContextMenu } from './context-menu/context-menu';
 import type { ContextMenuAction } from './context-menu/types';
 import { useFilteredData } from './hooks/use-filtered-data';
@@ -109,12 +110,17 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const [loadMoreVisible, setLoadMoreVisible] = useState(false);
 	// Estado local para favoritos como solución temporal
 	const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
-	// Último elemento seleccionado para soportar selección con Shift
-	const [lastSelectedItemIndex, setLastSelectedItemIndex] = useState<number | null>(null);
+	// ✅ Usar una ref para el seguimiento no causa re-renders
+	const lastSelectedItemIndexRef = useRef<number | null>(null);
+
+	// Estado para el menú contextual personalizado
+	const [contextMenuFile, setContextMenuFile] = useState<FileItem | null>(null);
+	const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
 	// 🔍 Opciones de vista globales
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
 	const itemSize = useViewOptionsStore((state) => state.itemSize);
+	const { searchTerm, sortBy, sortDirection, filterFavorites } = useViewOptionsStore();
 
 	// 📐 Refs para medición directa
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -122,7 +128,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const measurementAttemptsRef = useRef(0);
 
 	// 🏪 Stores
-	const { selectedIds, setSelectedIds, toggleSelectedId, clearSelection } = useSelectionStore();
+	const { selectedIds, activeId, setActiveId, setSelectedIds, toggleSelectedId, clearSelection } = useSelectionStore();
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
 
 	// Funciones para gestionar favoritos localmente
@@ -183,98 +189,156 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// 📎 Callback ref para medición del contenedor
 	const containerCallbackRef = useCallback(
 		(element: HTMLDivElement | null) => {
-			if (element && element !== containerRef.current) {
+			if (element && containerRef.current !== element) {
 				containerRef.current = element;
-				logger.debug('[FileBrowser] 📎 Nuevo contenedor detectado, iniciando medición');
-				measureContainer(element);
+				// Lógica de medición (asumimos que ya está optimizada)
+				const width = element.offsetWidth;
+				if (width > 0) {
+					setContainerWidth(width);
+				} else {
+					// Fallback
+					setContainerWidth(1200);
+				}
 			}
 		},
-		[measureContainer]
+		[] // Sin dependencias
 	);
 
 	// 🔄 Filtrar y ordenar los datos según las opciones de vista
+	// `useFilteredData` ya está memoizado internamente, por lo que `filteredItems` es estable
+	// si `items` y las opciones de vista no cambian.
 	const filteredItems = useFilteredData(items);
 
-	// 🔍 Manejador de selección de elementos
-	const handleItemClick = useCallback((item: FileItem, e: React.MouseEvent) => {
-		if (!item || !item.id) return;
+	// 🔍 Manejador de selección de elementos - ESTABILIZADO con getState()
+	// Esta es la clave: la función no se recrea cuando la selección cambia.
+	const handleItemClick = useCallback((clickedItem: FileItem, e: React.MouseEvent) => {
+		const { ctrlKey, metaKey, shiftKey } = e;
+		const { selectedIds, setSelectedIds, toggleSelectedId, clearSelection } = useSelectionStore.getState();
 
-		// Usar el evento para detectar teclas modificadoras
-		const ctrlKey = e?.ctrlKey || e?.metaKey || false;
-		const shiftKey = e?.shiftKey || false;
+		const currentIndex = filteredItems.findIndex(i => i.id === clickedItem.id);
+		if (currentIndex === -1) return;
 
-		// Opción 1: Selección múltiple con Ctrl/Cmd
-		if (ctrlKey) {
-			toggleSelectedId(item.id);
-			setLastSelectedItemIndex(filteredItems.findIndex(i => i.id === item.id));
-		}
-		// Opción 2: Selección de rango con Shift
-		else if (shiftKey && lastSelectedItemIndex !== null) {
-			const currentIndex = filteredItems.findIndex(i => i.id === item.id);
-
-			if (currentIndex !== -1) {
-				const start = Math.min(lastSelectedItemIndex, currentIndex);
-				const end = Math.max(lastSelectedItemIndex, currentIndex);
-
-				const idsToSelect = filteredItems.slice(start, end + 1).map(i => i.id);
-				setSelectedIds(idsToSelect);
-			}
-		}
-		// Opción 3: Selección simple (reemplazar selección existente)
-		else {
-			// Si ya está seleccionado y es el único, deseleccionar
-			if (selectedIds.length === 1 && selectedIds[0] === item.id) {
+		// La lógica de selección permanece igual, pero ahora usa el estado más reciente del store
+		if (shiftKey && lastSelectedItemIndexRef.current !== null) {
+			const start = Math.min(lastSelectedItemIndexRef.current, currentIndex);
+			const end = Math.max(lastSelectedItemIndexRef.current, currentIndex);
+			const idsToSelect = filteredItems.slice(start, end + 1).map(i => i.id);
+			setSelectedIds(idsToSelect);
+		} else if (ctrlKey || metaKey) {
+			toggleSelectedId(clickedItem.id);
+			lastSelectedItemIndexRef.current = currentIndex;
+		} else {
+			if (selectedIds.length === 1 && selectedIds[0] === clickedItem.id) {
 				clearSelection();
-				setLastSelectedItemIndex(null);
+				lastSelectedItemIndexRef.current = null;
 			} else {
-				// Deseleccionar todo primero y seleccionar solo este item
-				setSelectedIds([item.id]);
-				setLastSelectedItemIndex(filteredItems.findIndex(i => i.id === item.id));
+				setSelectedIds([clickedItem.id]);
+				lastSelectedItemIndexRef.current = currentIndex;
 			}
 		}
+		onItemSelect?.(clickedItem);
+	}, [filteredItems, onItemSelect]); // Se eliminan las dependencias del store de selección
 
-		// Propagar el evento si es necesario
-		onItemSelect?.(item);
-	}, [filteredItems, selectedIds, toggleSelectedId, clearSelection, setSelectedIds, lastSelectedItemIndex, onItemSelect]);
-
-	// 🔍 Manejador de doble click (abrir visor)
+	// 🔍 Manejador de doble click (abrir visor) - ESTABILIZADO
 	const handleItemDoubleClick = useCallback((item: FileItem) => {
-		if (!item || !item.id) return;
-
-		// Convertir FileItems a ImageItems usando la utilidad
 		const images = fileItemsToImageItems(filteredItems);
-
-		// Encontrar el índice del elemento actual
 		const index = filteredItems.findIndex(file => file.id === item.id);
 		if (index !== -1) {
 			setViewerImages(images);
 			setViewerInitialIndex(index);
 			setIsViewerOpen(true);
 		}
-
-		// Propagar el evento si es necesario
 		onItemDoubleClick?.(item);
 	}, [filteredItems, onItemDoubleClick]);
 
+	// 🔍 Manejador para el menú contextual
+	const handleContextMenu = useCallback((file: FileItem, e?: React.MouseEvent) => {
+		// Deshabilitado temporalmente
+		/*
+		if (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			setContextMenuPosition({ x: e.clientX, y: e.clientY });
+		}
+		setContextMenuFile(file);
+		*/
+	}, []);
+
+	// 🔍 Manejador para cerrar el menú contextual
+	const handleCloseContextMenu = useCallback(() => {
+		// Deshabilitado temporalmente
+		/*
+		setContextMenuFile(null);
+		setContextMenuPosition(null);
+		*/
+	}, []);
+
 	// 🔍 Manejador de acciones del menú contextual
 	const handleContextMenuAction = useCallback((action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => {
+		// Deshabilitado temporalmente
+		/*
 		handleContextAction(action, item, data);
-	}, []);
+		handleCloseContextMenu(); // Cerrar el menú después de la acción
+		*/
+	}, [handleCloseContextMenu]);
 
 	// 🔄 Actualizar el panel de detalles cuando cambie la selección
 	useEffect(() => {
+		// Asegurarse de que el panel siempre esté visible
+		const detailsState = useDetailsPanel.getState();
+
+		// Si hay elementos seleccionados
 		if (selectedIds.length > 0) {
 			const selectedItems = filteredItems.filter(item => selectedIds.includes(item.id));
 			if (selectedItems.length > 0) {
 				// Convertir a ImageItems para el panel de detalles
 				const detailItems = fileItemsToImageItems(selectedItems);
-				setDetailsPanelItems(detailItems);
-				setDetailsPanelVisible(true);
+
+				// Verificar si los elementos seleccionados han cambiado realmente
+				const currentItems = detailsState.selectedItems;
+
+				// Comparar IDs para determinar si realmente necesitamos actualizar
+				const currentIds = new Set(currentItems.map(item => item.id));
+				const newIds = new Set(detailItems.map(item => item.id));
+
+				// Solo actualizar si los IDs han cambiado
+				const needsUpdate =
+					currentIds.size !== newIds.size ||
+					![...currentIds].every(id => newIds.has(id));
+
+				if (needsUpdate) {
+					setDetailsPanelItems(detailItems);
+				}
 			}
 		} else {
-			setDetailsPanelVisible(false);
+			// Si no hay elementos seleccionados, mostrar estadísticas de la carpeta
+			// Crear un elemento "stats" para mostrar información de la carpeta
+			const folderStats = {
+				id: 'folder-stats',
+				name: 'Folder Statistics',
+				src: null,
+				size: items.reduce((total, item) => total + item.size, 0),
+				width: 0,
+				height: 0,
+				type: 'folder/stats',
+				metadata: JSON.stringify({
+					totalItems: items.length,
+					totalSize: items.reduce((total, item) => total + item.size, 0),
+					imageCount: items.filter(item => item.type?.startsWith('image/')).length,
+					videoCount: items.filter(item => item.type?.startsWith('video/')).length,
+					documentCount: items.filter(item => item.type?.startsWith('text/')).length,
+					otherCount: items.filter(item => !item.type?.startsWith('image/') && !item.type?.startsWith('video/') && !item.type?.startsWith('text/')).length,
+				}),
+			};
+
+			setDetailsPanelItems([folderStats as unknown as ImageItem]);
 		}
-	}, [selectedIds, filteredItems, setDetailsPanelItems, setDetailsPanelVisible]);
+
+		// Asegurarse de que el panel esté visible
+		if (!detailsState.isVisible) {
+			setDetailsPanelVisible(true);
+		}
+	}, [selectedIds, filteredItems, items, setDetailsPanelItems, setDetailsPanelVisible]);
 
 	// Efecto para el scroll infinito
 	useEffect(() => {
@@ -298,26 +362,43 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		};
 	}, [loadMoreItems, isLoading, isReindexing]);
 
-	// 🔄 Renderizado condicional basado en el modo de vista
-	const renderContent = () => {
+	// Efecto para cerrar el menú contextual al hacer clic fuera de él
+	useEffect(() => {
+		const handleGlobalClick = (e: MouseEvent) => {
+			if (contextMenuFile) {
+				// Verificar si el clic fue fuera del menú contextual
+				const contextMenuElement = document.getElementById('file-context-menu');
+				if (contextMenuElement && !contextMenuElement.contains(e.target as Node)) {
+					handleCloseContextMenu();
+				}
+			}
+		};
+
+		// Agregar manejador de eventos global
+		document.addEventListener('click', handleGlobalClick);
+
+		// Limpiar al desmontar
+		return () => {
+			document.removeEventListener('click', handleGlobalClick);
+		};
+	}, [contextMenuFile, handleCloseContextMenu]);
+
+	// 🎨 Memoizamos el contenido renderizado para evitar re-cálculos
+	const renderedContent = useMemo(() => {
 		if (isLoading) {
-			return (
-				<div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-					{Array.from({ length: 12 }).map((_, index) => (
-						<div key={index} className="aspect-square">
-							<Skeleton className="h-full w-full" />
-						</div>
-					))}
-				</div>
-			);
+			return <Skeleton className="w-full h-full" />;
 		}
 
-		if (filteredItems.length === 0) {
+		if (!filteredItems || filteredItems.length === 0) {
 			return (
 				<EmptyState
-					title="No hay archivos"
-					description="No se encontraron archivos que coincidan con los criterios de búsqueda."
 					icon={FileTextIcon}
+					title="No files found"
+					description={
+						filterFavorites
+							? 'No favorite files match your search.'
+							: 'No files match your current search or filter.'
+					}
 				/>
 			);
 		}
@@ -326,89 +407,58 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			items: filteredItems,
 			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
-			onContextAction: handleContextMenuAction,
-			className: className,
+			onContextMenu: handleContextMenu, // Pasamos el manejador de menú contextual
 		};
 
-		return (
-			<AnimatePresence mode="wait">
-				{viewMode === 'grid' && <GridView key="grid-view" {...viewProps} />}
-				{viewMode === 'list' && <ListView key="list-view" {...viewProps} />}
-				{viewMode === 'cards' && <CardsView key="cards-view" {...viewProps} />}
-				{viewMode === 'masonry' && <MasonryView key="masonry-view" {...viewProps} />}
-			</AnimatePresence>
-		);
-	};
-
-	// 🔄 Fallback durante medición o loading/reindex
-	if (containerWidth === 0 || isLoading || isReindexing) {
-		return (
-			<div ref={containerCallbackRef} className={`flex-1 h-full w-full overflow-hidden relative ${className}`}>
-				<div className="flex flex-col items-center justify-center h-full">
-					<Skeleton className="w-full h-40 mb-4" />
-					<div className="text-sm text-muted-foreground">
-						{isReindexing ? (
-							<>
-								<span className="block mb-2">Reindexando carpeta...</span>
-								<div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-									<div
-										className="bg-primary h-full transition-all duration-300 ease-in-out"
-										style={{ width: `${Math.round(reindexProgress)}%` }}
-									/>
-								</div>
-								<span className="text-xs mt-2 text-muted-foreground">{Math.round(reindexProgress)}%</span>
-							</>
-						) : (
-							'Calculando dimensiones del contenedor...'
-						)}
-					</div>
-				</div>
-			</div>
-		);
-	}
+		switch (viewMode) {
+			case 'grid':
+				return <GridView {...viewProps} />;
+			case 'list':
+				return <ListView {...viewProps} />;
+			case 'masonry':
+				return <MasonryView {...viewProps} />;
+			case 'cards':
+				return <CardsView {...viewProps} />;
+			default:
+				return <GridView {...viewProps} />;
+		}
+	}, [filteredItems, isLoading, viewMode, handleItemClick, handleItemDoubleClick, handleContextMenu, filterFavorites]);
 
 	return (
-		<div className="relative h-full w-full overflow-hidden" ref={containerCallbackRef}>
-			{renderContent()}
+		<div ref={containerCallbackRef} className={cn('relative h-full w-full', className)}>
+			<AnimatePresence mode="wait">
+				{renderedContent}
+			</AnimatePresence>
 
 			{isViewerOpen && (
 				<FileViewer
-					isOpen={isViewerOpen}
 					images={viewerImages}
 					initialIndex={viewerInitialIndex}
 					onClose={() => setIsViewerOpen(false)}
 				/>
 			)}
 
-			{isReindexing && (
-				<div className="absolute bottom-0 left-0 right-0 bg-background/80 p-2 flex items-center justify-between">
-					<div className="text-sm font-medium">Reindexando archivos...</div>
-					<div className="text-sm">{Math.round(reindexProgress)}%</div>
-				</div>
-			)}
-
-			{loadMoreItems && loadMoreVisible && (
+			{/* Menú contextual personalizado usando portal - Deshabilitado temporalmente */}
+			{/*
+			{contextMenuFile && contextMenuPosition && typeof window !== 'undefined' && createPortal(
 				<div
-					ref={loadMoreRef}
-					className="w-full py-4 flex items-center justify-center"
-					onClick={loadMoreItems}
-					onKeyDown={(e) => {
-						if (e.key === 'Enter' || e.key === ' ') {
-							e.preventDefault();
-							loadMoreItems();
-						}
+					id="file-context-menu"
+					className="fixed z-50 bg-popover text-popover-foreground rounded-md shadow-md border border-border overflow-hidden"
+					style={{
+						top: `${contextMenuPosition.y}px`,
+						left: `${contextMenuPosition.x}px`,
+						maxHeight: '80vh',
+						overflowY: 'auto'
 					}}
-					tabIndex={0}
-					role="button"
 				>
-					<button
-						type="button"
-						className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-colors"
-					>
-						Cargar más
-					</button>
-				</div>
+					<FileContextMenu
+						file={contextMenuFile}
+						onAction={handleContextMenuAction}
+					/>
+				</div>,
+				document.body
 			)}
+			*/}
 		</div>
 	);
 });

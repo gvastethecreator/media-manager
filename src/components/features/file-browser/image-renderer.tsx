@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 
 interface ImageRendererProps {
 	src: string | null;
@@ -47,13 +47,17 @@ export const ImageRenderer = memo<ImageRendererProps>(function ImageRenderer({
 	const abortControllerRef = useRef<AbortController | null>(null);
 	const imageRef = useRef<HTMLImageElement>(null);
 	const observerRef = useRef<IntersectionObserver | null>(null);
+	const attemptCountRef = useRef<number>(0);
 
-	// Efecto para cargar la imagen cuando sea visible
-	useEffect(() => {
+	// Función para cargar la imagen
+	const loadImage = useCallback(async () => {
 		if (!src || !shouldLoad) return;
 
-		// Si está en scroll, no cargar nuevas imágenes
-		if (isScrolling && !loaded) return;
+		// Si está en scroll, no cargar nuevas imágenes a menos que sea prioritaria
+		if (isScrolling && !loaded && !priority) return;
+
+		// Si la imagen ya está cargada o hay error, no hacer nada
+		if (loaded || error) return;
 
 		// Crear un nuevo AbortController para poder cancelar la solicitud
 		if (abortControllerRef.current) {
@@ -61,51 +65,70 @@ export const ImageRenderer = memo<ImageRendererProps>(function ImageRenderer({
 		}
 		abortControllerRef.current = new AbortController();
 
-		// Si la imagen ya está cargada o hay error, no hacer nada
-		if (loaded || error) return;
-
-		// Función para cargar la imagen
-		const loadImage = async () => {
-			try {
-				// Si es una URL directa, usarla
-				if (src.startsWith('data:') || src.startsWith('blob:') || src.startsWith('http')) {
-					setImageSrc(src);
-					return;
-				}
-
-				// Si es una ruta API, hacer fetch con AbortController
-				const response = await fetch(src, {
-					signal: abortControllerRef.current?.signal,
-					headers: {
-						'Cache-Control': 'max-age=31536000',
-					},
-				});
-
-				if (!response.ok) {
-					throw new Error(`Error loading image: ${response.statusText}`);
-				}
-
-				const blob = await response.blob();
-				const url = URL.createObjectURL(blob);
-				setImageSrc(url);
-			} catch (err) {
-				// Ignorar errores de abort
-				if (err instanceof DOMException && err.name === 'AbortError') {
-					return;
-				}
-				setError(true);
-				onError?.();
+		try {
+			// Si es una URL directa, usarla
+			if (src.startsWith('data:') || src.startsWith('blob:')) {
+				setImageSrc(src);
+				return;
 			}
-		};
+
+			// Si es una URL http/https, cargarla directamente pero con manejo de errores
+			if (src.startsWith('http')) {
+				setImageSrc(src);
+				return;
+			}
+
+			// Si es una ruta API, hacer fetch con AbortController
+			const response = await fetch(src, {
+				signal: abortControllerRef.current?.signal,
+				headers: {
+					'Cache-Control': 'max-age=31536000',
+					'Pragma': 'no-cache', // Para evitar problemas con caché
+				},
+				// Añadir un parámetro de consulta único para evitar caché
+				cache: 'no-store',
+			});
+
+			if (!response.ok) {
+				throw new Error(`Error loading image: ${response.statusText}`);
+			}
+
+			const blob = await response.blob();
+			const url = URL.createObjectURL(blob);
+			setImageSrc(url);
+		} catch (err) {
+			// Ignorar errores de abort
+			if (err instanceof DOMException && err.name === 'AbortError') {
+				return;
+			}
+
+			// Reintentar hasta 3 veces con un retraso exponencial
+			if (attemptCountRef.current < 3) {
+				attemptCountRef.current++;
+				const delay = 2 ** attemptCountRef.current * 500;
+				setTimeout(() => loadImage(), delay);
+				return;
+			}
+
+			console.error('Error loading image:', err);
+			setError(true);
+			onError?.();
+		}
+	}, [src, shouldLoad, isScrolling, loaded, error, priority, onError]);
+
+	// Efecto para cargar la imagen cuando sea visible
+	useEffect(() => {
+		if (!src || !shouldLoad) return;
+
+		// Resetear el contador de intentos cuando cambia la fuente
+		attemptCountRef.current = 0;
 
 		// Usar IntersectionObserver para carga diferida
 		const setupIntersectionObserver = () => {
 			if (!imageRef.current || priority) return;
 
 			// Limpiar observer anterior si existe
-			if (observerRef.current) {
-				observerRef.current.disconnect();
-			}
+			observerRef.current?.disconnect();
 
 			observerRef.current = new IntersectionObserver(
 				(entries) => {
@@ -115,7 +138,10 @@ export const ImageRenderer = memo<ImageRendererProps>(function ImageRenderer({
 						observerRef.current?.disconnect();
 					}
 				},
-				{ threshold: 0.1 }
+				{
+					threshold: 0.1,
+					rootMargin: '200px', // Cargar imágenes antes de que sean visibles
+				}
 			);
 
 			observerRef.current.observe(imageRef.current);
@@ -130,14 +156,14 @@ export const ImageRenderer = memo<ImageRendererProps>(function ImageRenderer({
 
 		// Cleanup
 		return () => {
-			if (abortControllerRef.current) {
-				abortControllerRef.current.abort();
-			}
-			if (observerRef.current) {
-				observerRef.current.disconnect();
+			abortControllerRef.current?.abort();
+			observerRef.current?.disconnect();
+			// Liberar URL.createObjectURL
+			if (imageSrc && imageSrc.startsWith('blob:')) {
+				URL.revokeObjectURL(imageSrc);
 			}
 		};
-	}, [src, shouldLoad, isScrolling, loaded, error, priority, onError]);
+	}, [src, shouldLoad, priority, loadImage, imageSrc]);
 
 	// Manejadores de eventos
 	const handleLoad = () => {
@@ -146,8 +172,16 @@ export const ImageRenderer = memo<ImageRendererProps>(function ImageRenderer({
 	};
 
 	const handleError = () => {
-		setError(true);
-		onError?.();
+		// Solo marcar como error si ya hemos agotado los reintentos
+		if (attemptCountRef.current >= 3) {
+			setError(true);
+			onError?.();
+		} else {
+			// Reintentar
+			attemptCountRef.current++;
+			const delay = 2 ** attemptCountRef.current * 500;
+			setTimeout(() => loadImage(), delay);
+		}
 	};
 
 	// Estilo para el object-fit
@@ -175,7 +209,7 @@ export const ImageRenderer = memo<ImageRendererProps>(function ImageRenderer({
 				{error ? (
 					<span className="text-xs text-muted-foreground">Error</span>
 				) : (
-					<div className="w-8 h-8 rounded-full border-2 border-t-transparent border-primary/30 animate-spin" />
+					<div className="w-6 h-6 rounded-full border-2 border-t-transparent border-primary/30 animate-spin" />
 				)}
 			</div>
 		);
@@ -191,6 +225,8 @@ export const ImageRenderer = memo<ImageRendererProps>(function ImageRenderer({
 			style={imageStyle as React.CSSProperties}
 			width={width}
 			height={height}
+			loading="lazy"
+			decoding="async"
 			onLoad={handleLoad}
 			onError={handleError}
 		/>

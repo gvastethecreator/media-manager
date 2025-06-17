@@ -8,8 +8,6 @@ import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { ContextMenuAction } from '../context-menu/context-menu';
-import { FileContextMenu } from '../context-menu/context-menu';
 import { ImageRenderer } from '../image-renderer';
 
 interface MasonryItemProps {
@@ -18,7 +16,7 @@ interface MasonryItemProps {
 	isActive?: boolean;
 	onClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onDoubleClick?: (item: FileItem) => void;
-	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	onContextMenu?: (item: FileItem, e: React.MouseEvent) => void;
 	style?: React.CSSProperties;
 }
 
@@ -49,7 +47,7 @@ export const MasonryItem = memo(function MasonryItem({
 	isActive,
 	onClick,
 	onDoubleClick,
-	onContextAction,
+	onContextMenu,
 	style,
 }: MasonryItemProps) {
 	// Memoizamos los handlers para evitar recreaciones
@@ -71,6 +69,15 @@ export const MasonryItem = memo(function MasonryItem({
 		[onDoubleClick, item]
 	);
 
+	const handleContextMenu = useCallback(
+		(e: React.MouseEvent) => {
+			e.preventDefault();
+			e.stopPropagation();
+			onContextMenu?.(item, e);
+		},
+		[onContextMenu, item]
+	);
+
 	// Memoizamos la clase para evitar recálculos
 	const itemClassName = useMemo(() => {
 		return cn(
@@ -80,49 +87,40 @@ export const MasonryItem = memo(function MasonryItem({
 		);
 	}, [isSelected, isActive]);
 
-	// Optimizamos la acción del menú contextual para evitar recreaciones
-	const handleContextAction = useCallback(
-		(action: ContextMenuAction, data?: Record<string, unknown>) => {
-			onContextAction?.(action, item, data);
-		},
-		[onContextAction, item]
-	);
-
 	const metadata = getMetadata(item.metadata);
 	const thumbnailUrl = item.thumbnail || `/api/images/${item.id}/thumbnail`;
 
 	return (
-		<FileContextMenu file={item} onAction={handleContextAction}>
-			<motion.div
-				className={itemClassName}
-				onClick={handleClick}
-				onDoubleClick={handleDoubleClick}
-				whileHover={{ scale: 1.02 }}
-				whileTap={{ scale: 0.98 }}
-				style={style}
-				layout
-			>
-				{/* Imagen */}
-				<div className="w-full h-full overflow-hidden">
-					<ImageRenderer
-						src={thumbnailUrl}
-						alt={item.name}
-						className="h-full w-full object-cover transition-transform"
-						onError={() => { }}
-					/>
-				</div>
+		<motion.div
+			className={itemClassName}
+			onClick={handleClick}
+			onDoubleClick={handleDoubleClick}
+			onContextMenu={handleContextMenu}
+			whileHover={{ scale: 1.02 }}
+			whileTap={{ scale: 0.98 }}
+			style={style}
+			layout
+		>
+			{/* Imagen */}
+			<div className="w-full h-full overflow-hidden">
+				<ImageRenderer
+					src={thumbnailUrl}
+					alt={item.name}
+					className="h-full w-full object-cover transition-transform"
+					onError={() => { }}
+				/>
+			</div>
 
-				{/* Overlay con información al pasar el mouse */}
-				<div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-colors flex flex-col justify-end p-2 opacity-0 hover:opacity-100">
-					<div className="text-white text-sm font-medium truncate">{item.name}</div>
-					{item.isFavorite && (
-						<div className="absolute top-2 right-2">
-							<Star className="h-4 w-4 text-yellow-500 fill-current" />
-						</div>
-					)}
-				</div>
-			</motion.div>
-		</FileContextMenu>
+			{/* Overlay con información al pasar el mouse */}
+			<div className="absolute inset-0 bg-black/0 hover:bg-black/50 transition-colors flex flex-col justify-end p-2 opacity-0 hover:opacity-100">
+				<div className="text-white text-sm font-medium truncate">{item.name}</div>
+				{item.isFavorite && (
+					<div className="absolute top-2 right-2">
+						<Star className="h-4 w-4 text-yellow-500 fill-current" />
+					</div>
+				)}
+			</div>
+		</motion.div>
 	);
 });
 
@@ -130,7 +128,7 @@ export interface MasonryViewProps {
 	items: FileItem[];
 	onItemClick?: (item: FileItem, e: React.MouseEvent) => void;
 	onItemDoubleClick?: (item: FileItem) => void;
-	onContextAction?: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
+	onContextMenu?: (item: FileItem, e: React.MouseEvent) => void;
 	className?: string;
 }
 
@@ -138,7 +136,7 @@ export const MasonryView = memo(function MasonryView({
 	items,
 	onItemClick,
 	onItemDoubleClick,
-	onContextAction,
+	onContextMenu,
 	className,
 }: MasonryViewProps) {
 	const { selectedIds, activeId } = useSelectionStore();
@@ -176,7 +174,7 @@ export const MasonryView = memo(function MasonryView({
 		<div ref={containerRef} className={cn('w-full h-full p-4 overflow-auto', className)}>
 			<div className="flex gap-4">
 				{masonryColumns.map((column, colIndex) => (
-					<div key={colIndex} className="flex-1 flex flex-col gap-4">
+					<div key={`column-${colIndex}-${column.length}`} className="flex-1 flex flex-col gap-4">
 						{column.map((item) => {
 							const isSelected = selectedIds.includes(item.id);
 							const isActive = activeId === item.id;
@@ -193,7 +191,7 @@ export const MasonryView = memo(function MasonryView({
 									isActive={isActive}
 									onClick={onItemClick}
 									onDoubleClick={onItemDoubleClick}
-									onContextAction={onContextAction}
+									onContextMenu={onContextMenu}
 									style={{ height }}
 								/>
 							);
