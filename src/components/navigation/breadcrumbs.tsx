@@ -9,7 +9,7 @@ import {
 	BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import type { ViewType } from '@/types/file-item';
+import type { ViewType } from '@/components/views/types';
 import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
@@ -131,10 +131,10 @@ const formatDate = (date: Date): string => {
 
 export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) {
 	const { navigateToHome, navigateToMainFromContent } = useNavigationStore();
-	const config = BREADCRUMB_CONFIG[currentView];
-	const isContentView = currentView.endsWith('-content');
+	const config = currentView ? BREADCRUMB_CONFIG[currentView] : undefined;
+	const isContentView = currentView ? currentView.endsWith('-content') : false;
 
-	if (!config) {
+	if (!config || !currentView) {
 		return (
 			<Breadcrumb>
 				<BreadcrumbList>
