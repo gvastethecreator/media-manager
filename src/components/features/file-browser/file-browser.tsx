@@ -239,17 +239,50 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		onItemSelect?.(clickedItem);
 	}, [filteredItems, onItemSelect]); // Se eliminan las dependencias del store de selección
 
+	// 🔄 Preprocesar los elementos para asegurar que tengan todos los campos necesarios
+	const processedItems = useMemo(() => {
+		return filteredItems.map(item => {
+			let metadata = null;
+			try {
+				if (item.metadata && typeof item.metadata === 'string') {
+					metadata = JSON.parse(item.metadata);
+				}
+			} catch (error) {
+				logger.warn(`Error al parsear metadata para el item ${item.id}`);
+			}
+
+			// Extraer propiedades de las dimensiones desde metadata si existen
+			const width = item.width || (metadata?.dimensions?.width) || (metadata?.width) || undefined;
+			const height = item.height || (metadata?.dimensions?.height) || (metadata?.height) || undefined;
+
+			// Asegurarse de que thumbnail esté presente
+			const thumbnail = item.thumbnail || item.src || `/api/images/${item.id}/thumbnail`;
+
+			// Asegurarse de que src esté presente
+			const src = item.src || item.thumbnail || `/api/images/${item.id}`;
+
+			// Retornar el ítem con las propiedades adicionales
+			return {
+				...item,
+				width,
+				height,
+				thumbnail,
+				src
+			};
+		});
+	}, [filteredItems]);
+
 	// 🔍 Manejador de doble click (abrir visor) - ESTABILIZADO
 	const handleItemDoubleClick = useCallback((item: FileItem) => {
-		const images = fileItemsToImageItems(filteredItems);
-		const index = filteredItems.findIndex(file => file.id === item.id);
+		const images = fileItemsToImageItems(processedItems);
+		const index = processedItems.findIndex(file => file.id === item.id);
 		if (index !== -1) {
 			setViewerImages(images);
 			setViewerInitialIndex(index);
 			setIsViewerOpen(true);
 		}
 		onItemDoubleClick?.(item);
-	}, [filteredItems, onItemDoubleClick]);
+	}, [processedItems, onItemDoubleClick]);
 
 	// 🔍 Manejador para el menú contextual
 	const handleContextMenu = useCallback((file: FileItem, e?: React.MouseEvent) => {
@@ -289,7 +322,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		// Si hay elementos seleccionados
 		if (selectedIds.length > 0) {
-			const selectedItems = filteredItems.filter(item => selectedIds.includes(item.id));
+			const selectedItems = processedItems.filter(item => selectedIds.includes(item.id));
 			if (selectedItems.length > 0) {
 				// Convertir a ImageItems para el panel de detalles
 				const detailItems = fileItemsToImageItems(selectedItems);
@@ -338,7 +371,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		if (!detailsState.isVisible) {
 			setDetailsPanelVisible(true);
 		}
-	}, [selectedIds, filteredItems, items, setDetailsPanelItems, setDetailsPanelVisible]);
+	}, [selectedIds, processedItems, items, setDetailsPanelItems, setDetailsPanelVisible]);
 
 	// Efecto para el scroll infinito
 	useEffect(() => {
@@ -389,7 +422,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			return <Skeleton className="w-full h-full" />;
 		}
 
-		if (!filteredItems || filteredItems.length === 0) {
+		if (!processedItems || processedItems.length === 0) {
 			return (
 				<EmptyState
 					icon={FileTextIcon}
@@ -404,7 +437,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		const viewProps = {
-			items: filteredItems,
+			items: processedItems,
 			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
 			onContextMenu: handleContextMenu, // Pasamos el manejador de menú contextual
@@ -422,7 +455,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			default:
 				return <GridView {...viewProps} />;
 		}
-	}, [filteredItems, isLoading, viewMode, handleItemClick, handleItemDoubleClick, handleContextMenu, filterFavorites]);
+	}, [processedItems, isLoading, viewMode, handleItemClick, handleItemDoubleClick, handleContextMenu, filterFavorites]);
 
 	return (
 		<div ref={containerCallbackRef} className={cn('relative h-full w-full', className)}>
