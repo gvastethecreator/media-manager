@@ -5,7 +5,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import React, { useEffect, useRef, useState } from 'react';
 
 interface VirtualizerWrapperProps<T> {
-	type: 'list' | 'grid';
+	type: 'list' | 'grid' | 'masonry';
 	data: T[];
 	itemContent: (index: number, item: T) => React.ReactNode;
 	itemSize?: number;
@@ -76,11 +76,11 @@ export function VirtualizerWrapper<T>({
 
 	// Configuración de la virtualización para cuadrícula
 	const gridVirtualizer = useVirtualizer({
-		count: data.length,
+		count: Math.ceil(data.length / columnCount),
 		getScrollElement: () => scrollRef.current,
-		estimateSize: () => Math.ceil(data.length / columnCount) * (itemSize + 16),
-		overscan: 10, // Mayor overscan para cuadrículas
-		getItemKey: (index) => (data[index] as any)?.id || `grid-${index}`,
+		estimateSize: () => itemSize + 16, // Altura de fila + gap
+		overscan: 3, // Mayor overscan para cuadrículas
+		getItemKey: (index) => `grid-row-${index}`,
 		scrollMargin: scrollRef.current?.offsetTop || 0,
 	});
 
@@ -115,12 +115,10 @@ export function VirtualizerWrapper<T>({
 		[isScrolling, onScrollStart, onScrollEnd]
 	);
 
-	// Renderizado para modo cuadrícula
-	if (type === 'grid') {
-		// Calcular el número total de filas
-		const totalRows = Math.ceil(data.length / columnCount);
-		const rowHeight = itemSize + 16; // altura + gap
-
+	// Renderizado para modo masonry
+	if (type === 'masonry') {
+		// Para masonry, usamos una implementación más simple sin virtualización completa
+		// ya que la altura de los elementos es variable
 		return (
 			<div
 				ref={scrollRef}
@@ -128,42 +126,84 @@ export function VirtualizerWrapper<T>({
 				onScroll={handleScroll}
 				style={{ scrollBehavior: 'smooth' }}
 			>
+				<div className="flex gap-4">
+					{/* Crear columnas */}
+					{Array.from({ length: columnCount }).map((_, colIndex) => (
+						<div key={`masonry-col-${colIndex}`} className="flex-1 flex flex-col gap-4">
+							{/* Filtrar elementos que van en esta columna */}
+							{data
+								.filter((_, index) => index % columnCount === colIndex)
+								.map((item, idx) => {
+									const originalIndex = colIndex + idx * columnCount;
+									return (
+										<div key={`masonry-item-${originalIndex}`} className="w-full">
+											{itemContent(originalIndex, item)}
+										</div>
+									);
+								})}
+						</div>
+					))}
+				</div>
+			</div>
+		);
+	}
+
+	// Renderizado para modo cuadrícula
+	if (type === 'grid') {
+		// Calcular el número total de filas
+		const rowVirtualItems = gridVirtualizer.getVirtualItems();
+		const gap = 16; // 1rem gap
+
+		return (
+			<div
+				ref={scrollRef}
+				className={cn('h-full w-full overflow-auto', gridClassName)}
+				onScroll={handleScroll}
+				style={{ scrollBehavior: 'smooth' }}
+			>
 				<div
 					style={{
-						height: `${totalRows * rowHeight}px`,
+						height: `${gridVirtualizer.getTotalSize()}px`,
 						width: '100%',
 						position: 'relative',
+						padding: `${gap}px`,
 					}}
 				>
-					{data.length > 0 && gridVirtualizer.getVirtualItems().map((virtualItem) => {
-						const itemIndex = virtualItem.index;
-						if (itemIndex >= data.length) return null;
-
-						const item = data[itemIndex];
-
-						// Calcular posición en la cuadrícula
-						const row = Math.floor(itemIndex / columnCount);
-						const col = itemIndex % columnCount;
-
-						// Calcular posición absoluta
-						const left = `${(col * (itemSize + 16))}px`;
-						const top = `${(row * rowHeight)}px`;
+					{rowVirtualItems.map((virtualRow) => {
+						const rowIndex = virtualRow.index;
 
 						return (
 							<div
-								key={virtualItem.key}
-								data-index={itemIndex}
+								key={virtualRow.key}
+								data-index={rowIndex}
+								className="flex gap-4"
 								style={{
 									position: 'absolute',
-									top,
-									left,
-									width: `${itemSize}px`,
+									top: 0,
+									left: 0,
+									width: '100%',
 									height: `${itemSize}px`,
-									padding: '0',
-									transform: 'translate3d(0, 0, 0)',
+									transform: `translateY(${virtualRow.start}px)`,
 								}}
 							>
-								{itemContent(itemIndex, item)}
+								{Array.from({ length: columnCount }).map((_, colIndex) => {
+									const itemIndex = rowIndex * columnCount + colIndex;
+									if (itemIndex >= data.length) return null;
+
+									const item = data[itemIndex];
+
+									return (
+										<div
+											key={`grid-item-${itemIndex}`}
+											style={{
+												width: `calc((100% - ${(columnCount - 1) * gap}px) / ${columnCount})`,
+												height: `${itemSize}px`,
+											}}
+										>
+											{itemContent(itemIndex, item)}
+										</div>
+									);
+								})}
 							</div>
 						);
 					})}
@@ -176,7 +216,7 @@ export function VirtualizerWrapper<T>({
 	return (
 		<div
 			ref={scrollRef}
-			className={cn('h-full w-full overflow-auto p-4', listClassName)}
+			className={cn('h-full w-full overflow-auto', listClassName)}
 			onScroll={handleScroll}
 			style={{ scrollBehavior: 'smooth' }}
 		>
@@ -185,6 +225,7 @@ export function VirtualizerWrapper<T>({
 					height: `${listVirtualizer.getTotalSize()}px`,
 					width: '100%',
 					position: 'relative',
+					padding: '16px',
 				}}
 			>
 				{data.length > 0 && listVirtualizer.getVirtualItems().map((virtualItem) => {
@@ -204,6 +245,7 @@ export function VirtualizerWrapper<T>({
 								width: '100%',
 								height: `${virtualItem.size}px`,
 								transform: `translateY(${virtualItem.start}px)`,
+								padding: '0 16px',
 							}}
 						>
 							{itemContent(itemIndex, item)}
