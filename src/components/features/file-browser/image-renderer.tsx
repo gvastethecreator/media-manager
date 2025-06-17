@@ -93,8 +93,8 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 	showPlaceholder,
 	...rest
 }: ImageRendererProps) {
-	// Si no tenemos src, mostramos un placeholder
-	if (!src) {
+	// Si no tenemos src o src es un objeto (error común), mostramos un placeholder
+	if (!src || typeof src === 'object') {
 		return (
 			<div
 				className={cn(
@@ -103,7 +103,9 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 				)}
 				{...rest}
 			>
-				<span className="text-xs text-muted-foreground">Sin imagen</span>
+				<span className="text-xs text-muted-foreground">
+					{typeof src === 'object' ? 'Error de formato' : 'Sin imagen'}
+				</span>
 			</div>
 		);
 	}

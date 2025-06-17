@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { EmptyState } from '@/components/core/data-display';
@@ -19,20 +19,16 @@ import clsx from 'clsx';
 import { FileTextIcon, Star } from 'lucide-react';
 import { FileContextMenu } from './context-menu/context-menu';
 import type { ContextMenuAction } from './context-menu/types';
+import { GridItem } from './components/grid-item';
 import { useFilteredData } from './hooks/use-filtered-data';
 import { ImageRenderer } from './image-renderer';
+import './styles/scrollbar.css';
+import { FileBrowserActions, SelectionActions, SortTypeSelector, StatusBar, ViewTypeSelector } from './toolbar';
 import { fileItemsToImageItems } from './utils/file-converters';
 import { CardsView } from './views/cards-view';
 import { ListView } from './views/list-view';
 import { MasonryView } from './views/masonry-view';
 import { SimpleGridView } from './views/simple-grid-view';
-
-// Componentes placeholder para los controles que faltan
-const FileBrowserActions = () => <div>Acciones</div>;
-const SelectionActions = ({ items }: { items: any[] }) => <div>Selección ({items?.length || 0})</div>;
-const SortTypeSelector = () => <div>Ordenar</div>;
-const StatusBar = () => <div className="border-t p-2 text-xs text-muted-foreground">Estado: {new Date().toLocaleTimeString()}</div>;
-const ViewTypeSelector = () => <div>Vista</div>;
 
 // Configuración del cache y carga secuencial
 const BROWSER_CONFIG = {
@@ -103,16 +99,6 @@ const FALLBACK_WIDTH = 1200;
 const ITEM_HEIGHT = 220;
 const ITEM_WIDTH = 200;
 const GAP = 16;
-
-// Añadir una función interna para formatear tamaños de archivo
-// ya que la importación está causando problemas
-const formatFileSize = (bytes: number): string => {
-	if (bytes === 0) return '0 Bytes';
-	const k = 1024;
-	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
-};
 
 // Interfaz para el menú contextual
 interface ContextMenuProps {
@@ -326,11 +312,19 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			const width = item.width || (metadata?.dimensions?.width) || (metadata?.width) || undefined;
 			const height = item.height || (metadata?.dimensions?.height) || (metadata?.height) || undefined;
 
-			// Asegurarse de que thumbnail esté presente
-			const thumbnail = item.thumbnail || item.src || `/api/images/${item.id}/thumbnail`;
+			// Asegurarse de que thumbnail sea una string válida
+			const thumbnail = typeof item.thumbnail === 'string'
+				? item.thumbnail
+				: typeof item.src === 'string'
+					? item.src
+					: `/api/images/${item.id}/thumbnail`;
 
-			// Asegurarse de que src esté presente
-			const src = item.src || item.thumbnail || `/api/images/${item.id}`;
+			// Asegurarse de que src sea una string válida
+			const src = typeof item.src === 'string'
+				? item.src
+				: typeof item.thumbnail === 'string'
+					? item.thumbnail
+					: `/api/images/${item.id}`;
 
 			// Retornar el ítem con las propiedades adicionales
 			return {
@@ -352,10 +346,10 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			visibleItemCount,
 			visibleItems: result.length,
 			viewMode,
-			viewType: viewOptions.viewType || 'grid'
+			viewType: viewMode || 'grid'
 		});
 		return result;
-	}, [processedItems, visibleItemCount, items.length, viewMode, viewOptions.viewType]);
+	}, [processedItems, visibleItemCount, items.length, viewMode]);
 
 	// Referencia a los elementos actuales para la vista (para selectionActions)
 	const currentViewItems = visibleItems;
@@ -545,6 +539,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// 🎨 Memoizamos el contenido renderizado para evitar re-cálculos
 	const renderedContent = useMemo(() => {
+		console.log("[FileBrowser] Renderizando contenido:", {
+			viewMode,
+			itemsCount: visibleItems?.length || 0,
+			isLoading,
+			filterOptions,
+			hasData: visibleItems && visibleItems.length > 0
+		});
+
 		if (isLoading) {
 			return <Skeleton className="w-full h-full" />;
 		}
@@ -624,12 +626,15 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	return (
 		<div
 			className={cn(
-				"h-full w-full bg-background flex flex-col",
+				"h-full w-full bg-background flex flex-col custom-scrollbar",
 				className
 			)}
 			onKeyDown={handleKeyDown}
 			tabIndex={0}
+			role="application"
+			aria-label="Explorador de archivos"
 			ref={mainRef}
+			style={{ userSelect: 'none' }}
 		>
 			{/* Barra de herramientas */}
 			<div className="border-b p-2 flex items-center space-x-2">
@@ -663,145 +668,72 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					)}
 
 					{!isLoading && (
-						<>
-							{currentViewItems.length === 0 ? (
-								<EmptyState
-									searchQuery={searchInput}
-									directory={viewOptions.directory}
-									onReset={handleResetView}
-								/>
-							) : (
-								<div className="h-full w-full">
-									{viewMode === 'list' && (
-										<ListView
-											items={currentViewItems}
-											onItemClick={handleItemClick}
-											onItemDoubleClick={handleItemDoubleClick}
-											onContextMenu={handleContextMenu}
-										/>
-									)}
+						currentViewItems.length === 0 ? (
+							<EmptyState
+								icon={FileTextIcon}
+								title="No se encontraron archivos"
+								description={searchInput ? `No hay archivos que coincidan con "${searchInput}"` : "Esta carpeta está vacía"}
+							/>
+						) : (
+							<AnimatePresence mode="wait">
+									<motion.div 
+										key={viewMode}
+										className="h-full w-full"
+										initial={{ opacity: 0, y: 10 }}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0, y: -10 }}
+										transition={{ duration: 0.2 }}
+									>
+										{viewMode === 'list' && (
+											<ListView
+												items={currentViewItems}
+												onItemClick={handleItemClick}
+												onItemDoubleClick={handleItemDoubleClick}
+												onContextMenu={handleContextMenu}
+											/>
+										)}
 
-									{viewMode === 'grid' && (
-										<SimpleGridView
-											items={currentViewItems}
-											onItemClick={handleItemClick}
-											onItemDoubleClick={handleItemDoubleClick}
-											onContextMenu={handleContextMenu}
-										/>
-									)}
+										{viewMode === 'grid' && (
+											<SimpleGridView
+												items={currentViewItems}
+												onItemClick={handleItemClick}
+												onItemDoubleClick={handleItemDoubleClick}
+												onContextMenu={handleContextMenu}
+											/>
+										)}
 
-									{viewMode === 'masonry' && (
-										<MasonryView
-											items={currentViewItems}
-											onItemClick={handleItemClick}
-											onItemDoubleClick={handleItemDoubleClick}
-											onContextMenu={handleContextMenu}
-										/>
-									)}
+										{viewMode === 'masonry' && (
+											<MasonryView
+												items={currentViewItems}
+												onItemClick={handleItemClick}
+												onItemDoubleClick={handleItemDoubleClick}
+												onContextMenu={handleContextMenu}
+											/>
+										)}
 
-									{(!viewMode || (viewMode !== 'list' && viewMode !== 'grid' && viewMode !== 'masonry')) && (
-										<SimpleGridView
-											items={currentViewItems}
-											onItemClick={handleItemClick}
-											onItemDoubleClick={handleItemDoubleClick}
-											onContextMenu={handleContextMenu}
-										/>
-									)}
-								</div>
-							)}
-						</>
+										{(!viewMode || (viewMode !== 'list' && viewMode !== 'grid' && viewMode !== 'masonry')) && (
+											<SimpleGridView
+												items={currentViewItems}
+												onItemClick={handleItemClick}
+												onItemDoubleClick={handleItemDoubleClick}
+												onContextMenu={handleContextMenu}
+											/>
+										)}
+									</motion.div>
+								</AnimatePresence>
+						)
 					)}
 				</div>
 			</div>
 
 			{/* Barra de estado */}
-			<StatusBar />
+			<StatusBar items={currentViewItems} />
 
 			{/* Menú contextual */}
 			{contextMenu.open && (
 				<ContextMenu {...contextMenu} />
 			)}
 		</div>
-	);
-});
-
-// 🧩 **GridItem con menú contextual**
-interface GridItemProps {
-	item: FileBrowserFileItem;
-	isSelected: boolean;
-	isFavorite: boolean;
-	onClick: (e?: React.MouseEvent) => void;
-	onDoubleClick: () => void;
-	onContextMenu: () => void;
-	onContextAction: (action: ContextMenuAction, item: FileItem, data?: Record<string, unknown>) => void;
-}
-
-const GridItem = memo<GridItemProps>(function GridItem({
-	item,
-	isSelected,
-	isFavorite,
-	onClick,
-	onDoubleClick,
-	onContextMenu,
-	onContextAction
-}) {
-	// Función para manejar las acciones del menú contextual
-	const handleAction = useCallback(
-		(action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => {
-			onContextAction(action, file, data);
-		},
-		[onContextAction]
-	);
-
-	const thumbnailUrl = item.thumbnail || `/api/images/${item.id}/thumbnail`;
-
-	return (
-		<FileContextMenu file={item} onAction={handleAction}>
-			<motion.div
-				whileHover={{ scale: 1.02 }}
-				whileTap={{ scale: 0.98 }}
-				className={clsx(
-					'relative overflow-hidden rounded-md border transition-colors',
-					isSelected
-						? 'border-primary bg-primary/10 shadow-sm dark:bg-primary/20'
-						: 'border-border/40 bg-card hover:border-border/80'
-				)}
-				onClick={(e) => {
-					e.stopPropagation();
-					onClick(e);
-				}}
-				onDoubleClick={(e) => {
-					e.stopPropagation();
-					onDoubleClick();
-				}}
-				onContextMenu={(e) => {
-					e.stopPropagation();
-					onContextMenu();
-				}}
-			>
-				{/* Imagen */}
-				<div className="aspect-[3/2] w-full overflow-hidden bg-muted">
-					<ImageRenderer
-						src={thumbnailUrl}
-						alt={item.name}
-						className="h-full w-full object-cover transition-transform"
-					/>
-				</div>
-
-				{/* Información */}
-				<div className="p-2 text-xs">
-					<div className="truncate font-medium">{item.name}</div>
-					<div className="text-muted-foreground">{formatFileSize(item.size)}</div>
-				</div>
-
-				{/* Indicadores */}
-				{isFavorite && (
-					<div className="absolute top-1 right-1 rounded-full bg-primary p-0.5 text-primary-foreground">
-						<Star className="h-3 w-3" />
-					</div>
-				)}
-			</motion.div>
-		</FileContextMenu>
 	);
 });
 

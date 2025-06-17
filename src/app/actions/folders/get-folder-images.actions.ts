@@ -74,11 +74,14 @@ function ensureThumbnailIsStringOrNull(thumbnail: unknown, mimeType = 'image/web
 		// Si es un Uint8Array o Buffer, convertirlo a URL data base64
 		if (
 			localThumbnail instanceof Uint8Array ||
-			(typeof Buffer !== 'undefined' && localThumbnail instanceof Buffer) ||
+			(typeof Buffer !== 'undefined' && Buffer.isBuffer(localThumbnail)) ||
 			(localThumbnail && typeof localThumbnail === 'object' && 'byteLength' in localThumbnail) // ArrayBuffer o similar
 		) {
 			try {
-				const buffer = Buffer.from(localThumbnail as any);
+				// Asegurarnos de que estamos trabajando con un Buffer válido
+				const buffer = Buffer.isBuffer(localThumbnail)
+					? localThumbnail
+					: Buffer.from(localThumbnail as any);
 				return `data:${mimeType};base64,${buffer.toString('base64')}`;
 			} catch (e) {
 				imagesActionsLogger.warn('⚠️ Error al convertir binario a base64:', e);
@@ -285,30 +288,12 @@ export async function getFolderImages(folderId: string) {
 				// 🏞️ Determinar valor final del thumbnail (siempre string o null)
 				let safeThumbnail: string | null = null;
 
-				// ⚠️ Workaround: Prisma puede inferir never, forzamos string | null
-				const thumbnailValue = (typeof imgRecord.thumbnail === 'string' ? imgRecord.thumbnail : null) as string | null;
-
 				if (thumbnailUrl) {
 					// Caso 1: Tenemos URL directa (mejor opción)
 					safeThumbnail = thumbnailUrl;
-				} else if (thumbnailValue) {
-					// Caso 2: Tenemos string, verificar si es URL o base64
-					if ((thumbnailValue as string).startsWith('data:') || (thumbnailValue as string).startsWith('http')) {
-						safeThumbnail = thumbnailValue;
-					} else {
-						// Intentar usar como base64
-						safeThumbnail = `data:${safeMetadata.mimeType};base64,${thumbnailValue}`;
-					}
-				} else if (imgRecord.thumbnail instanceof Uint8Array || Buffer.isBuffer(imgRecord.thumbnail)) {
-					// Convertir directamente desde buffer
-					const buffer = Buffer.from(imgRecord.thumbnail);
-					safeThumbnail = `data:${safeMetadata.mimeType};base64,${buffer.toString('base64')}`;
 				} else if (imgRecord.thumbnail) {
-					// Caso especial, intentar extraer datos binarios de algún objeto
-					imagesActionsLogger.warn(
-						`⚠️ Thumbnail con tipo inesperado: ${typeof imgRecord.thumbnail} para imagen ${imgRecord.id}`
-					);
-					safeThumbnail = null;
+					// Caso 2: Tenemos un thumbnail en el registro, convertirlo a string
+					safeThumbnail = ensureThumbnailIsStringOrNull(imgRecord.thumbnail, safeMetadata.mimeType || 'image/webp');
 				}
 
 				// Garantizar que el thumbnail sea null o string (doble verificación)
@@ -389,7 +374,7 @@ export async function getFolderImages(folderId: string) {
 			...initialResponse,
 			items: initialResponse.items.map((item) => {
 				// Si el thumbnail sigue siendo un objeto binario (a pesar de nuestros esfuerzos), forzar su conversión
-				if (item.thumbnail && typeof item.thumbnail !== 'string') {
+				if (item.thumbnail !== null && typeof item.thumbnail !== 'string') {
 					imagesActionsLogger.warn(`⚠️ Forzando conversión de thumbnail en PASO FINAL para imagen ${item.id}`);
 					return {
 						...item,
