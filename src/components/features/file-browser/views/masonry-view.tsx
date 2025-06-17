@@ -88,14 +88,24 @@ export const MasonryItem = memo(function MasonryItem({
 		);
 	}, [isSelected, isActive]);
 
+	// Obtener metadatos y propiedades de la imagen
 	const metadata = getMetadata(item.metadata);
-	const thumbnailUrl = item.thumbnail || `/api/images/${item.id}/thumbnail`;
+
+	// Obtener dimensiones de la imagen (de múltiples fuentes posibles)
+	const width = item.width || metadata?.dimensions?.width || metadata?.width || 200;
+	const height = item.height || metadata?.dimensions?.height || metadata?.height || 200;
+
+	// Obtener URL de la miniatura
+	const thumbnailUrl = item.thumbnail || item.src || `/api/images/${item.id}/thumbnail`;
 
 	// Calcular altura según las dimensiones de la imagen
-	const aspectRatio = item.width && item.height ? item.width / item.height : 1;
+	const aspectRatio = width && height ? width / height : 1;
+
+	// Si no hay un estilo de altura definido, calculamos uno basado en el aspect ratio
+	// Para el modo masonry necesitamos respetar la relación de aspecto original
 	const calculatedStyle = {
 		...style,
-		// Si no hay un estilo de altura definido, calculamos uno basado en el aspect ratio
+		// Establecer una altura que mantenga la relación de aspecto
 		height: style?.height || `${Math.floor(200 / aspectRatio)}px`,
 	};
 

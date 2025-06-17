@@ -44,6 +44,14 @@ export interface FileItem {
 	createdAt: Date;
 	updatedAt: Date;
 	isFavorite?: boolean;
+	// 📊 Propiedades para visualización de imágenes
+	width?: number;
+	height?: number;
+	thumbnail?: string;
+	// 🔗 Propiedad para acceso directo a la imagen
+	src?: string;
+	modifiedAt?: string; // Para compatibilidad con FileBrowser
+	accessedAt?: string; // Para compatibilidad con FileBrowser
 }
 
 /**
