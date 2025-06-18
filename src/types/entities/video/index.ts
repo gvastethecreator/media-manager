@@ -1,35 +1,16 @@
 /**
  * @file Tipos para la entidad Video
  * @module types/entities/video
+ *
+ * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types' y enums desde './enums'.
+ * Legacy eliminado.
  */
 
-// Exportar enums y constantes
 export * from './enums';
-// Reexportar enums explícitamente para evitar problemas de importación
-export { VideoFormat, VideoPrivacyLevel, VideoQuality, VideoType } from './enums';
-// Tipos base para estructuras de datos
-// Tipos extendidos para UI y visualización
-// 🎯 Alias principal para el tipo Video
+export { VideoSchema } from './types';
 export type {
-	RelatedVideo,
-	VideoBase,
-	VideoChapter,
-	VideoComplete,
-	VideoComplete as Video,
-	VideoCounts,
-	VideoCreateInput,
-	VideoFilters,
-	VideoMetadata,
-	VideoPlaybackState,
-	VideoRelations,
-	VideoSearchOptions,
-	VideoSearchResult,
-	VideoTransformerOptions,
-	VideoUI,
-	VideoUpdateInput,
-	VideoValidated,
-	VideoVisualConfig,
-	VideoVisualConfigComplete,
+    VideoBase, VideoComplete, VideoCreateInput, VideoMetadata, VideoRelations,
+    VideoUI, VideoUpdateInput
 } from './types';
-// Exportar tipos base
-export * from './types';
+
+// 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

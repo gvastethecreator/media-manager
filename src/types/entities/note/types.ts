@@ -1,30 +1,16 @@
 /**
- * @file Tipos para la entidad Note
+ * @file Tipos canónicos para la entidad Note
  * @module types/entities/note/types
+ * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
+ * @description Estructura unificada y validada para Note. Todos los campos clave son obligatorios.
+ * Última migración: 2025-06-18
  */
 
 import type { z } from 'zod';
-// Importación de tipos para relaciones
 import type { NoteSchema } from './schema';
 
 /**
- * 📝 Tipos canónicos para la entidad Note
- *
- * - Este archivo contiene todos los tipos base, relaciones e inputs para Note.
- * - Usar SIEMPRE estos tipos en transformers, services y server actions.
- * - No usar ni importar tipos de base.ts (eliminado).
- *
- * Estructura:
- * - NoteBase: tipo canónico principal
- * - NoteRelations: relaciones con otras entidades (any[] si no existen tipos canónicos)
- * - NoteCreateInput, NoteUpdateInput: inputs para mutaciones
- *
- * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
- * 📝 Documenta cualquier cambio relevante aquí.
- */
-
-/**
- * 🔄 Tipo base para Note
+ * 📝 Tipo base canónico para Note
  */
 export interface NoteBase {
 	id: string;
@@ -41,16 +27,8 @@ export interface NoteBase {
 }
 
 /**
- * 📝 Interfaz para tags de nota
+ * 🔗 Relaciones de Note (solo como any[] si no existen tipos canónicos)
  */
-export interface NoteTags {
-	items: string[];
-}
-
-/**
- * 🔗 Relaciones de Note
- */
-// ⚠️ Limpieza: relaciones solo como any[] para evitar errores de tipos inexistentes
 export interface NoteRelations {
 	albums?: any[];
 	characters?: any[];
@@ -89,49 +67,26 @@ export interface NoteCounts {
 }
 
 /**
- * 🔄 UI y campos extendidos
+ * 🖥️ Propiedades de UI y datos derivados
  */
 export interface NoteUI {
-	// Propiedades de UI
 	isSelected?: boolean;
 	isEditing?: boolean;
 	isExpanded?: boolean;
 	isHovered?: boolean;
 	isNew?: boolean;
-
-	// Datos derivados
 	excerpt?: string;
 	wordCount?: number;
 	formattedDate?: string;
 }
 
 /**
- * 🔄 Campos deserializados de Note
+ * 📝 Note completo con todas las relaciones y campos extendidos
  */
-export type NoteDeserialized = Record<string, unknown>;
+export interface NoteComplete extends NoteBase, NoteRelations, NoteCounts, NoteUI {}
 
 /**
- * 🔍 Interfaz para filtros de búsqueda de notas
- */
-export interface NoteFilters {
-	searchQuery?: string;
-	categories?: string[];
-	priorities?: number[];
-	statuses?: string[];
-	onlyFavorites?: boolean;
-	contentContains?: string;
-	hasTags?: boolean;
-	hasImages?: boolean;
-	hasVideos?: boolean;
-}
-
-/**
- * 🔄 Note completo con todas las relaciones
- */
-export interface NoteComplete extends NoteBase, NoteRelations, NoteCounts, NoteUI, NoteDeserialized {}
-
-/**
- * 📝 Datos para crear un Note
+ * 🆕 Datos para crear un Note
  */
 export interface NoteCreateInput {
 	title: string;
@@ -139,11 +94,9 @@ export interface NoteCreateInput {
 	category?: string;
 	priority?: number;
 	status?: string;
-	// UI
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
-	// Relaciones
 	images?: string[] | { id: string }[];
 	videos?: string[] | { id: string }[];
 	albums?: string[] | { id: string }[];
@@ -168,11 +121,9 @@ export interface NoteUpdateInput {
 	category?: string;
 	priority?: number;
 	status?: string;
-	// UI
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
-	// Relaciones
 	images?: string[] | { id: string }[];
 	videos?: string[] | { id: string }[];
 	albums?: string[] | { id: string }[];
@@ -189,7 +140,22 @@ export interface NoteUpdateInput {
 }
 
 /**
- * 🔍 Opciones de búsqueda para Note
+ * 🔎 Filtros de búsqueda para Note
+ */
+export interface NoteFilters {
+	searchQuery?: string;
+	categories?: string[];
+	priorities?: number[];
+	statuses?: string[];
+	onlyFavorites?: boolean;
+	contentContains?: string;
+	hasTags?: boolean;
+	hasImages?: boolean;
+	hasVideos?: boolean;
+}
+
+/**
+ * 🔎 Opciones de búsqueda para Note
  */
 export interface NoteSearchOptions {
 	skip?: number;
@@ -226,7 +192,7 @@ export interface NoteSearchResult {
 }
 
 /**
- * 🎯 Opciones para el transformer de Note
+ * 🛠️ Opciones para el transformer de Note
  */
 export interface NoteTransformerOptions {
 	includeRelations?: boolean;
@@ -250,8 +216,37 @@ export interface RelatedNote {
 }
 
 /**
- * Enumeración para criterios de ordenación
+ * 🏷️ Enumeraciones y tipos auxiliares
  */
+export enum NoteStatus {
+	ACTIVE = 'active',
+	ARCHIVED = 'archived',
+	COMPLETED = 'completed',
+	DRAFT = 'draft',
+	PENDING = 'pending',
+}
+
+export enum NoteCategory {
+	GENERAL = 'general',
+	STORY = 'story',
+	LORE = 'lore',
+	MECHANICS = 'mechanics',
+	CHARACTER = 'character',
+	PLACE = 'place',
+	WORLD_ITEM = 'world_item',
+	PROMPT = 'prompt',
+	IDEA = 'idea',
+	TODO = 'todo',
+}
+
+export enum NotePriority {
+	LOWEST = 0,
+	LOW = 1,
+	MEDIUM = 2,
+	HIGH = 3,
+	HIGHEST = 4,
+}
+
 export enum NoteSortCriteria {
 	TITLE_ASC = 'title:asc',
 	TITLE_DESC = 'title:desc',
@@ -265,9 +260,6 @@ export enum NoteSortCriteria {
 	UPDATED_DESC = 'updated:desc',
 }
 
-/**
- * Mapa de propiedades para ordenación
- */
 export const NOTE_SORT_PROPERTY_MAP: Record<NoteSortCriteria, string> = {
 	[NoteSortCriteria.TITLE_ASC]: 'title',
 	[NoteSortCriteria.TITLE_DESC]: 'title',
