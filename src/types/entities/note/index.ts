@@ -1,12 +1,9 @@
 /**
  * @file Exportaciones principales de tipos para la entidad Note
  * @module types/entities/note
+ * @warning ⚠️ SOLO exportar tipos canónicos desde './types'.
+ * @description Este barrel ha sido limpiado para evitar dependencias legacy. Usar únicamente '@/types/entities/note/types'.
  */
 
-export * from './base';
-export * from './complete';
-export * from './enums';
-export * from './extended';
-// Alias común para el tipo principal
-export type { NoteWithRelations as Note } from './types';
 export * from './types';
+
