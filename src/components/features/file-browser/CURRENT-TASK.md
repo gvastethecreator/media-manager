@@ -62,3 +62,63 @@ Los componentes de la barra de herramientas han sido implementados como componen
 - El componente `FileBrowser.tsx` es bastante grande (862 líneas) y podría beneficiarse de una refactorización
 - Hay componentes placeholder internos que deberían ser extraídos a archivos separados
 - La gestión de estado podría ser mejorada utilizando hooks personalizados
+
+# 🧹 Limpieza del Sistema de Tipos
+
+## Progreso actual
+
+### ✅ Completado
+
+- **Migración a tipos canónicos basados en Prisma**
+  - ✅ `Place`: Completado
+  - ✅ `Property`: Completado
+  - ✅ `WorldItem`: Completado
+  - ✅ `Album`: Completado
+  - ✅ `Tag`: Completado
+- Creada guía de migración MIGRATION-GUIDE.md para documentar el proceso
+- Resueltos errores de TypeScript relacionados con estas entidades
+- Simplificación de la jerarquía de tipos
+
+### 🔄 En progreso
+
+- Migración de tipos canónicos para el resto de entidades
+- Actualización de componentes para usar los nuevos tipos
+
+### ⏱️ Pendiente
+
+- Migrar el resto de las entidades siguiendo el patrón establecido
+- Actualizar la documentación por módulo
+- Crear tests para validar los tipos
+
+## Decisiones tomadas
+
+### Tipos canónicos basados en Prisma
+
+Se ha decidido utilizar los tipos de Prisma como base canónica para todas las entidades porque:
+
+- Proporciona una fuente única de verdad para la estructura de datos
+- Elimina la duplicación de tipos
+- Simplifica la jerarquía de tipos y reduce la complejidad
+- Mejora la inferencia de tipos en TypeScript
+
+### Estructura de tipos
+
+Cada entidad tiene ahora:
+- Tipo base que extiende directamente de Prisma
+- Interfaces para relaciones con otras entidades
+- Interfaces para contadores de relaciones
+- Interfaces para inputs de creación y actualización
+- Alias de tipos para mantener compatibilidad con código existente
+
+## Próximos pasos
+
+1. Continuar con la migración del resto de entidades
+2. Actualizar server actions para usar los nuevos tipos
+3. Actualizar transformadores para trabajar con los tipos canónicos
+4. Aplicar limpieza de código similar a otros módulos del sistema
+
+## Notas adicionales
+
+- El enfoque de tipos canónicos simplificará el mantenimiento futuro
+- Los tipos ahora están mejor alineados con la estructura real de la base de datos
+- La guía de migración facilitará que otros desarrolladores continúen con el proceso

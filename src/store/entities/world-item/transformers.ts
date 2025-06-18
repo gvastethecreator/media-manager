@@ -1,23 +1,25 @@
 /**
  * @file Transformadores para la entidad WorldItem
  * @module store/entities/world-item/transformers
+ * @description Funciones para transformar datos de WorldItem
+ * @updated 2025-06-20
  */
 
 import type {
-	CreateWorldItemData,
-	ParsedWorldItemVisualConfig,
-	UpdateWorldItemData,
 	WorldItem,
+	WorldItemCreateInput,
 	WorldItemFilters,
-} from '../../../types/entities/world-item';
+	WorldItemUpdateInput,
+	ParsedWorldItemVisualConfig
+} from '@/types/entities/world-item';
 import { generateWorldItemId, parseWorldItemStats } from './utils';
 
 /**
- * Transforma los datos para crear un objeto del mundo en una entidad completa
+ * 🏗️ Transforma los datos para crear un objeto del mundo en una entidad completa
  * @param data Datos para crear el objeto
  * @returns Objeto del mundo
  */
-export const createWorldItemFromData = (data: CreateWorldItemData): WorldItem => {
+export const createWorldItemFromData = (data: WorldItemCreateInput): WorldItem => {
 	const now = new Date();
 
 	return {
@@ -29,39 +31,39 @@ export const createWorldItemFromData = (data: CreateWorldItemData): WorldItem =>
 		shortcut: data.shortcut || null,
 		type: data.type || 'misc',
 		rarity: data.rarity || 'common',
-		properties: data.properties || '{}',
-		requirements: data.requirements || '{}',
+		size: data.size || 'medium',
+		properties: data.properties?.toString() || '{}',
+		requirements: data.requirements?.toString() || '{}',
 		origin: data.origin || 'unknown',
-		stats: data.stats || '{}',
+		stats: data.stats?.toString() || '{}',
+		attributes: data.attributes?.toString() || '[]',
+		effects: data.effects?.toString() || '[]',
+		filters: data.filters?.toString() || '{}',
 		sortBy: data.sortBy || 'name_asc',
-		filters: data.filters || '{}',
+		category: data.category || 'general',
 		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
-		category: data.category || null,
 		createdAt: now,
 		updatedAt: now,
 
-		// Contadores de relaciones
-		imagesCount: 0,
-		notesCount: 0,
-		conceptsCount: 0,
-		promptsCount: 0,
-
-		// Estado UI
-		isSelected: false,
-		isExpanded: false,
-		isEditing: false,
-		isHighlighted: false,
+		// Campos deserializados para UI
+		attributesList: [],
+		effectsList: [],
+		requirementsList: [],
+		statsList: [],
+		propertiesList: [],
+		filtersList: [],
+		tagsList: [],
 	};
 };
 
 /**
- * Aplica actualizaciones parciales a un objeto del mundo
+ * 🔄 Aplica actualizaciones parciales a un objeto del mundo
  * @param item Objeto del mundo original
  * @param updates Actualizaciones a aplicar
  * @returns Objeto actualizado
  */
-export const updateWorldItem = (item: WorldItem, updates: Partial<WorldItem> | UpdateWorldItemData): WorldItem => {
+export const updateWorldItem = (item: WorldItem, updates: Partial<WorldItem> | WorldItemUpdateInput): WorldItem => {
 	return {
 		...item,
 		...updates,
@@ -70,7 +72,7 @@ export const updateWorldItem = (item: WorldItem, updates: Partial<WorldItem> | U
 };
 
 /**
- * Analiza la configuración visual desde formato JSON
+ * 📊 Analiza la configuración visual desde formato JSON
  * @param configJson Configuración visual en formato JSON
  * @returns Configuración analizada
  */
@@ -82,24 +84,24 @@ export const parseVisualConfig = (configJson: string): ParsedWorldItemVisualConf
 			view: parsed.view || 'grid',
 			sortBy: parsed.sortBy || 'name_asc',
 			filters: parsed.filters || {},
-			lastViewedWorldItemId: parsed.lastViewedWorldItemId || null,
-			expandedWorldItemIds: parsed.expandedWorldItemIds || [],
-			selectedWorldItemIds: parsed.selectedWorldItemIds || [],
+			lastViewedId: parsed.lastViewedId || null,
+			expandedIds: parsed.expandedIds || [],
+			selectedIds: parsed.selectedIds || [],
 		};
 	} catch (_error) {
 		return {
 			view: 'grid',
 			sortBy: 'name_asc',
 			filters: {},
-			lastViewedWorldItemId: null,
-			expandedWorldItemIds: [],
-			selectedWorldItemIds: [],
+			lastViewedId: null,
+			expandedIds: [],
+			selectedIds: [],
 		};
 	}
 };
 
 /**
- * Convierte la configuración visual a formato JSON
+ * 💾 Convierte la configuración visual a formato JSON
  * @param config Configuración visual
  * @returns Configuración en formato JSON
  */
@@ -112,7 +114,7 @@ export const stringifyVisualConfig = (config: ParsedWorldItemVisualConfig): stri
 };
 
 /**
- * Procesa un objeto para su visualización, añadiendo propiedades derivadas
+ * 🎨 Procesa un objeto para su visualización, añadiendo propiedades derivadas
  * @param item Objeto del mundo
  * @returns Objeto del mundo procesado
  */
@@ -137,11 +139,11 @@ export const processWorldItem = (item: WorldItem): WorldItem => {
 		displayValue,
 		displayLevel,
 		rarityClass,
-	};
+	} as WorldItem;
 };
 
 /**
- * Procesa una lista de objetos del mundo para su visualización
+ * 🔄 Procesa una lista de objetos del mundo para su visualización
  * @param items Lista de objetos del mundo
  * @returns Lista procesada
  */
@@ -150,7 +152,7 @@ export const processWorldItems = (items: WorldItem[]): WorldItem[] => {
 };
 
 /**
- * Convierte filtros de entidad UI a formato para API
+ * 🔄 Convierte filtros de entidad UI a formato para API
  * @param filters Filtros UI
  * @returns Filtros para API
  */
@@ -171,7 +173,7 @@ export const convertFiltersToApiParams = (filters: WorldItemFilters): Record<str
 	}
 
 	// Convertir booleanos y números
-	if (filters.onlyFavorites) {
+	if (filters.isFavorite) {
 		params.isFavorite = 'true';
 	}
 
@@ -194,18 +196,6 @@ export const convertFiltersToApiParams = (filters: WorldItemFilters): Record<str
 	// Filtros de relaciones
 	if (filters.hasImages) {
 		params.hasImages = 'true';
-	}
-
-	if (filters.hasNotes) {
-		params.hasNotes = 'true';
-	}
-
-	if (filters.hasConcepts) {
-		params.hasConcepts = 'true';
-	}
-
-	if (filters.hasPrompts) {
-		params.hasPrompts = 'true';
 	}
 
 	return params;

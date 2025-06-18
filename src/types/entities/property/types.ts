@@ -6,6 +6,7 @@
  * Última migración: 2025-06-18
  */
 
+import type { Property as PrismaProperty } from '@prisma/client';
 import { z } from 'zod';
 
 /**
@@ -34,20 +35,11 @@ export enum PropertyViewMode {
 
 /**
  * Tipo base canónico para Property
+ * Heredando directamente del tipo de Prisma
  */
-export interface PropertyBase {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
-	featuredImage?: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-}
+export type PropertyBase = PrismaProperty & {
+    isFavorite: boolean;  // Remapeo de 'favorite' a 'isFavorite'
+};
 
 /**
  * Input para creación
@@ -107,6 +99,90 @@ export interface PropertyRelations {
  * Property con sus relaciones
  */
 export interface PropertyWithRelations extends PropertyBase, PropertyRelations {}
+
+/**
+ * Tipo para Property con conteos de relaciones
+ */
+export interface PropertyWithCounts extends PropertyBase {
+    _count: {
+        images: number;
+        videos: number;
+        albums: number;
+        collections: number;
+        characters: number;
+        places: number;
+        worldItems: number;
+        concepts: number;
+        prompts: number;
+        notes: number;
+        wildcards: number;
+        groups: number;
+    };
+}
+
+/**
+ * Tipo completo de Property con relaciones y conteos
+ */
+export type PropertyComplete = PropertyWithRelations & PropertyWithCounts;
+
+/**
+ * Filtros para búsqueda de propiedades
+ */
+export interface PropertyFilters {
+    searchQuery?: string;
+    categories?: string[];
+    onlyFavorites?: boolean;
+}
+
+/**
+ * Opciones de búsqueda para propiedades
+ */
+export interface PropertySearchOptions {
+    page?: number;
+    pageSize?: number;
+    sortBy?: PropertySortCriteria;
+    filters?: PropertyFilters;
+    include?: {
+        images?: boolean;
+        videos?: boolean;
+        albums?: boolean;
+        collections?: boolean;
+        tags?: boolean;
+        characters?: boolean;
+        places?: boolean;
+        worldItems?: boolean;
+        concepts?: boolean;
+        prompts?: boolean;
+        notes?: boolean;
+        wildcards?: boolean;
+        groups?: boolean;
+    };
+}
+
+/**
+ * Resultado de búsqueda para propiedades
+ */
+export interface PropertySearchResult {
+    items: PropertyWithRelations[];
+    total: number;
+    totalPages: number;
+    page: number;
+    pageSize: number;
+}
+
+/**
+ * Mapeo de criterios de ordenación a campos
+ */
+export const PROPERTY_SORT_PROPERTY_MAP: { [key in PropertySortCriteria]: string } = {
+	[PropertySortCriteria.NAME_ASC]: 'name',
+	[PropertySortCriteria.NAME_DESC]: 'name',
+	[PropertySortCriteria.USAGE_ASC]: 'usage',
+	[PropertySortCriteria.USAGE_DESC]: 'usage',
+	[PropertySortCriteria.CREATED_ASC]: 'createdAt',
+	[PropertySortCriteria.CREATED_DESC]: 'createdAt',
+	[PropertySortCriteria.UPDATED_ASC]: 'updatedAt',
+	[PropertySortCriteria.UPDATED_DESC]: 'updatedAt',
+};
 
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.

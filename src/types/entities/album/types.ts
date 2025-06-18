@@ -6,68 +6,111 @@
  * Última migración: 2025-06-18
  */
 
-import { z } from 'zod';
+import type { Album as PrismaAlbum } from '@prisma/client';
+import type { Image } from '../image';
+import type { Video } from '../video';
 
 /**
- * Tipo base canónico para Album
+ * 📝 Tipo base para Album - hereda directamente del tipo Prisma
  */
-export interface AlbumBase {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description?: string | null;
-	shortcut?: string | null;
-	category: string;
-	sortBy: string;
-	filters: string;
-	featuredImage?: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
+export type AlbumBase = PrismaAlbum;
+
+/**
+ * 🔗 Relaciones de un álbum con otras entidades
+ */
+export interface AlbumRelations {
+	images?: Image[];
+	videos?: Video[];
 }
 
 /**
- * Input para creación
+ * 🔢 Contadores de relaciones
+ */
+export interface AlbumCounts {
+	images?: number;
+	videos?: number;
+	collections?: number;
+	tags?: number;
+	characters?: number;
+	places?: number;
+	worldItems?: number;
+	concepts?: number;
+	prompts?: number;
+	notes?: number;
+	wildcards?: number;
+	properties?: number;
+	groups?: number;
+}
+
+/**
+ * 🌟 Album con relaciones y conteos
+ */
+export interface AlbumWithRelations extends AlbumBase, AlbumRelations {
+	_count?: AlbumCounts;
+}
+
+/**
+ * 🔍 Filtros para búsqueda de álbumes
+ */
+export interface AlbumFilters {
+	query?: string;
+	types?: string[];
+	categories?: string[];
+	hasImages?: boolean;
+	hasVideos?: boolean;
+	isFavorite?: boolean;
+	dateRange?: {
+		from?: Date;
+		to?: Date;
+	};
+}
+
+/**
+ * ➕ Input para crear un nuevo álbum
  */
 export interface AlbumCreateInput {
 	name: string;
-	emoji: string;
-	color: string;
+	emoji?: string;
+	color?: string;
 	description?: string | null;
 	shortcut?: string | null;
-	category: string;
+	category?: string;
 	sortBy?: string;
 	filters?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	images?: { connect: { id: string }[] };
+	videos?: { connect: { id: string }[] };
 }
 
 /**
- * Input para actualización
+ * 🔄 Input para actualizar un álbum
  */
-export type AlbumUpdateInput = Partial<Omit<AlbumBase, 'id' | 'createdAt' | 'updatedAt'>>;
+export interface AlbumUpdateInput {
+	name?: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string;
+	sortBy?: string;
+	filters?: string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	images?: { set?: { id: string }[] };
+	videos?: { set?: { id: string }[] };
+}
+
+// 🟢 Documentación
+// - Se utiliza el tipo Prisma como base canónica
+// - Se extiende con interfaces para relaciones y operaciones
+// - Todas las modificaciones deben validarse antes de persistir
 
 /**
- * Esquema Zod para validación de Album
+ * 📊 Tipo principal compuesto para Album
+ * Usamos AlbumBase (PrismaAlbum) como núcleo y extendemos según necesidades
  */
-export const AlbumSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	emoji: z.string(),
-	color: z.string(),
-	description: z.string().nullable().optional(),
-	shortcut: z.string().nullable().optional(),
-	category: z.string(),
-	sortBy: z.string(),
-	filters: z.string(),
-	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
-});
+export type Album = AlbumBase;
 
-// 🟢 Documentación y advertencia:
-// - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
-// - Validar siempre con AlbumSchema antes de persistir.
+/* Exportación de tipos adicionales para retrocompatibilidad */
+export type { AlbumCreateInput as CreateAlbumData, AlbumUpdateInput as UpdateAlbumData };

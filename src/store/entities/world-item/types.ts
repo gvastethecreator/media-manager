@@ -1,52 +1,74 @@
 /**
  * @file Tipos para el store de WorldItem
  * @module store/entities/world-item/types
+ * @description Define los tipos para el store de zustand de WorldItem
+ * @updated 2025-06-20
  */
 
 import type {
-	CreateWorldItemData,
-	ParsedWorldItemVisualConfig,
-	UpdateWorldItemData,
-	WorldItem,
-	WorldItemFilters,
-	WorldItemViewMode,
-} from '../../../types/entities/world-item';
-import type { WorldItemCoreSlice } from './slices/core';
-import type { WorldItemFiltersSlice } from './slices/filters';
-import type { WorldItemUISlice } from './slices/ui';
+    WorldItemCreateInput as CreateWorldItemData,
+    WorldItemUpdateInput as UpdateWorldItemData,
+    WorldItem,
+    WorldItemFilters,
+    WorldItemViewMode
+} from '@/types/entities/world-item';
 
 /**
- * Estado global del store
+ * 📊 Estado global del store
  */
 export interface WorldItemState {
-	// Datos
+	// 📋 Datos principales
 	worldItems: WorldItem[];
 	isLoading: boolean;
 	error: string | null;
 
-	// UI y configuración
-	visualConfig: ParsedWorldItemVisualConfig | null;
-	viewMode: WorldItemViewMode;
-	sortBy: string;
-	filters: WorldItemFilters;
-	expandedIds: string[];
-	selectedIds: string[];
-	currentItemId: string | null;
-	searchQuery: string;
-
-	// Estados UI
-	isCreatingItem: boolean;
-	isEditingItem: boolean;
-	isProcessingAction: boolean;
-
-	// Nuevo estado para el store de WorldItem basado en Prisma
+	// 🎨 UI y configuración visual
 	ui: WorldItemUIState;
+	filters: WorldItemFilters;
+
+	// 🔍 Selectores y getters
+	getWorldItemById: (id: string) => WorldItem | undefined;
+	getFilteredWorldItems: () => WorldItem[];
+	getSortedWorldItems: () => WorldItem[];
 }
 
 /**
- * Tipo completo del store
+ * 🎮 Estado de UI del store
  */
-export type WorldItemStore = WorldItemCoreSlice & WorldItemUISlice & WorldItemFiltersSlice & WorldItemActions;
+export interface WorldItemUIState {
+	selectedId: string | null;
+	editingId: string | null;
+	highlightedId: string | null;
+	viewMode: WorldItemViewMode;
+}
+
+/**
+ * 🔄 Acciones disponibles en el store
+ */
+export interface WorldItemActions {
+	// 📥 Carga de datos
+	loadWorldItems: () => Promise<void>;
+
+	// 📝 Gestión de items
+	createWorldItem: (item: CreateWorldItemData) => Promise<void>;
+	updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
+	deleteWorldItem: (id: string) => Promise<void>;
+
+	// 🎮 Acciones de UI
+	selectWorldItem: (id: string | null) => void;
+	startEditing: (id: string | null) => void;
+	highlightWorldItem: (id: string | null) => void;
+	setViewMode: (mode: WorldItemViewMode) => void;
+
+	// 🔍 Filtros
+	updateFilters: (filters: Partial<WorldItemFilters>) => void;
+	clearFilters: () => void;
+}
+
+/**
+ * 🏗️ Tipo completo del store
+ */
+export type WorldItemStore = WorldItemState & WorldItemActions;
 
 /**
  * Opciones para el servicio de API para la entidad WorldItem
@@ -131,40 +153,6 @@ export interface WorldItemBatchOptions {
 	 * Datos para la operación (solo para update, changeType, changeCategory)
 	 */
 	data?: Partial<WorldItem> | { [key: string]: any };
-}
-
-// 🎯 Estado de UI
-export interface WorldItemUIState {
-	selectedId: string | null;
-	editingId: string | null;
-	highlightedId: string | null;
-	viewMode: WorldItemViewMode;
-}
-
-// 🔄 Acciones del store
-export interface WorldItemActions {
-	// Carga de items
-	loadWorldItems: () => Promise<void>;
-
-	// Gestión de items
-	createWorldItem: (item: CreateWorldItemData) => Promise<void>;
-	updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
-	deleteWorldItem: (id: string) => Promise<void>;
-
-	// Acciones de UI
-	selectWorldItem: (id: string | null) => void;
-	startEditing: (id: string | null) => void;
-	highlightWorldItem: (id: string | null) => void;
-	setViewMode: (mode: WorldItemViewMode) => void;
-
-	// Filtros
-	updateFilters: (filters: Partial<WorldItemFilters>) => void;
-	clearFilters: () => void;
-
-	// Selectores
-	getWorldItemById: (id: string) => WorldItem | undefined;
-	getFilteredWorldItems: () => WorldItem[];
-	getSortedWorldItems: () => WorldItem[];
 }
 
 // 📊 Enum para ordenamiento

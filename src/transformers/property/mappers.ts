@@ -5,68 +5,27 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    CreatePropertySchema,
-    PropertyFiltersSchema,
-    PropertySearchOptionsSchema,
-    UpdatePropertySchema,
-} from '@/types/entities/property/schema';
-import type { Prisma } from '@prisma/client';
-import { z } from 'zod';
-
-import {
-    PropertyBase,
-    PropertySortCriteria,
-    PropertyWithRelations,
+    PROPERTY_SORT_PROPERTY_MAP,
+    PropertyCreateInput,
+    PropertyFilters,
+    PropertySearchOptions,
+    PropertySearchResult,
+    PropertyUpdateInput,
+    PropertyWithRelations
 } from '@/types/entities/property';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 import { fromPrismaProperty, generatePropertyColor, generatePropertyEmoji } from './serializers';
 
-// Infer types from Zod schemas
-export type CreatePropertyData = z.infer<typeof CreatePropertySchema>;
-export type PropertyUpdateInput = z.infer<typeof UpdatePropertySchema>;
-export type PropertyFilters = z.infer<typeof PropertyFiltersSchema>;
-export type PropertySearchOptions = z.infer<typeof PropertySearchOptionsSchema>;
-
-/**
- * Generic search result type
- */
-export interface SearchResult<T> {
-	items: T[];
-	total: number;
-	totalPages: number;
-	page: number;
-	pageSize: number;
-}
-
-/**
- * Property search result type
- */
-export type PropertySearchResult = SearchResult<PropertyWithRelations>;
-
-/**
- * Map for sorting criteria
- * NOTE: 'usage' is not a direct field in PropertyBase and will require special handling in the service.
- */
-export const PROPERTY_SORT_PROPERTY_MAP: { [key in PropertySortCriteria]: string } = {
-	[PropertySortCriteria.NAME_ASC]: 'name',
-	[PropertySortCriteria.NAME_DESC]: 'name',
-	[PropertySortCriteria.USAGE_ASC]: 'usage', // Placeholder
-	[PropertySortCriteria.USAGE_DESC]: 'usage', // Placeholder
-	[PropertySortCriteria.CREATED_ASC]: 'createdAt',
-	[PropertySortCriteria.CREATED_DESC]: 'createdAt',
-	[PropertySortCriteria.UPDATED_ASC]: 'updatedAt',
-	[PropertySortCriteria.UPDATED_DESC]: 'updatedAt',
-};
-
 // Logger específico para este módulo
-const logger = serverLogger.child({ module: 'PropertyTransformer:Mappers' });
+const logger = serverLogger.withContext('PropertyTransformer:Mappers');
 
 /**
  * Mapea datos de creación de propiedad a formato compatible con Prisma
  * @param data Datos de creación de propiedad
  * @returns Objeto formateado para Prisma
  */
-export function toCreatePropertyData(data: CreatePropertyData): Prisma.PropertyCreateInput {
+export function toCreatePropertyData(data: PropertyCreateInput): Prisma.PropertyCreateInput {
 	try {
 		return {
 			name: data.name,
@@ -123,7 +82,7 @@ export function toSearchOptions(options: PropertySearchOptions = {}): {
 	include?: any;
 } {
 	try {
-		const { page = 1, pageSize = 20, sortBy = PropertySortCriteria.NAME_ASC, filters = {}, include = {} } = options;
+		const { page = 1, pageSize = 20, sortBy, filters = {}, include = {} } = options;
 
 		// Calcular paginación
 		const skip = (page - 1) * pageSize;
@@ -133,9 +92,12 @@ export function toSearchOptions(options: PropertySearchOptions = {}): {
 		const where = toSearchFilters(filters);
 
 		// Mapear ordenación
-		const orderByProperty = PROPERTY_SORT_PROPERTY_MAP[sortBy];
-		const orderByDirection = sortBy.endsWith(':desc') ? 'desc' : 'asc';
-		const orderBy = { [orderByProperty]: orderByDirection };
+		let orderBy = { name: 'asc' };
+		if (sortBy) {
+			const orderByProperty = PROPERTY_SORT_PROPERTY_MAP[sortBy];
+			const orderByDirection = sortBy.endsWith(':desc') ? 'desc' : 'asc';
+			orderBy = { [orderByProperty]: orderByDirection };
+		}
 
 		// Mapear inclusiones
 		const includeOptions: any = {};
@@ -216,7 +178,7 @@ export function toSearchFilters(filters: PropertyFilters): any {
  * @returns Resultado de búsqueda formateado
  */
 export function toSearchResult(
-	properties: (PropertyBase & { _count?: any })[],
+	properties: any[],
 	total: number,
 	options: PropertySearchOptions = {}
 ): PropertySearchResult {
@@ -248,25 +210,36 @@ export function toSearchResult(
 
 /**
  * Convierte una propiedad a formato simplificado para relaciones
- * @param property Propiedad con posibles conteos
- * @returns Propiedad formateada para relaciones
+ * @param property Propiedad base
+ * @returns Propiedad simplificada para relaciones
  */
-export function toRelatedProperty(property: PropertyBase & { _count?: any }): {
+export function toRelatedProperty(property: any): {
 	id: string;
 	name: string;
 	color: string;
 	emoji: string;
 	itemCount: number;
 } {
-	const itemCount = property._count
-		? Object.values(property._count).reduce((acc: number, count: any) => acc + (count as number), 0)
-		: 0;
+	try {
+		const itemCount = property._count
+			? Object.values(property._count).reduce((total: number, count: any) => total + (count as number), 0)
+			: 0;
 
-	return {
-		id: property.id,
-		name: property.name,
-		color: property.color,
-		emoji: property.emoji,
-		itemCount,
-	};
+		return {
+			id: property.id,
+			name: property.name,
+			color: property.color || '#3b82f6',
+			emoji: property.emoji || '🔍',
+			itemCount,
+		};
+	} catch (error) {
+		logger.error('Error mapeando propiedad relacionada', { error });
+		return {
+			id: property.id || 'unknown',
+			name: property.name || 'Unknown Property',
+			color: '#3b82f6',
+			emoji: '🔍',
+			itemCount: 0,
+		};
+	}
 }

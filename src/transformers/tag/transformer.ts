@@ -1,15 +1,17 @@
 /**
  * @file Transformador principal para la entidad Tag
  * @module transformers/tag/transformer
- * @description Contiene la lógica para convertir un objeto Tag de Prisma a nuestro tipo canónico TagComplete.
+ * @description Contiene la lógica para convertir un objeto Tag de Prisma a nuestro tipo canónico.
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { TagComplete } from '@/types/entities/tag';
+import type { TagWithRelations } from '@/types/entities/tag';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 
-// Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
+const logger = serverLogger.withContext('TagTransformer');
+
+// Define el tipo de payload de Prisma que esperamos, con las relaciones y conteos.
 type TagFromPrisma = Prisma.TagGetPayload<{
 	include: {
 		images: true;
@@ -46,15 +48,15 @@ type TagFromPrisma = Prisma.TagGetPayload<{
 }>;
 
 /**
- * 🔄 Transforma un objeto Tag de Prisma a nuestro tipo canónico TagComplete.
+ * 🔄 Transforma un objeto Tag de Prisma a nuestro tipo canónico TagWithRelations.
  *
- * @param prismaTag - El objeto Tag obtenido de Prisma, que debe incluir relaciones y conteos.
- * @returns Un objeto TagComplete compatible con nuestra aplicación.
+ * @param prismaTag - El objeto Tag obtenido de Prisma.
+ * @returns Un objeto TagWithRelations compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function fromPrismaTag(prismaTag: TagFromPrisma | null): TagComplete {
+export function fromPrismaTag(prismaTag: TagFromPrisma | null): TagWithRelations {
 	if (!prismaTag) {
-		throw new TransformerError('El objeto de etiqueta de Prisma no puede ser nulo.');
+		throw new TransformerError('El objeto de tag de Prisma no puede ser nulo.');
 	}
 
 	try {
@@ -62,9 +64,6 @@ export function fromPrismaTag(prismaTag: TagFromPrisma | null): TagComplete {
 
 		return {
 			...baseData,
-			description: baseData.description ?? null,
-			shortcut: baseData.shortcut ?? null,
-			featuredImage: baseData.featuredImage ?? null,
 			images: baseData.images ?? [],
 			videos: baseData.videos ?? [],
 			albums: baseData.albums ?? [],
@@ -95,22 +94,22 @@ export function fromPrismaTag(prismaTag: TagFromPrisma | null): TagComplete {
 			},
 		};
 	} catch (error) {
-		serverLogger.error('Error transformando etiqueta desde Prisma', {
+		logger.error('Error transformando tag desde Prisma', {
 			error,
 			tagId: prismaTag.id,
 		});
 		throw new TransformerError(
-			`Error al transformar la etiqueta: ${(error as Error).message}`
+			`Error al transformar el tag: ${(error as Error).message}`
 		);
 	}
 }
 
 /**
- * 🔄 Transforma una lista de etiquetas de Prisma a una lista de TagComplete.
+ * 🔄 Transforma una lista de tags de Prisma a una lista de TagWithRelations.
  *
  * @param prismaTags - Un array de objetos Tag de Prisma.
- * @returns Un array de objetos TagComplete.
+ * @returns Un array de objetos TagWithRelations.
  */
-export function fromPrismaTags(prismaTags: TagFromPrisma[]): TagComplete[] {
+export function fromPrismaTags(prismaTags: TagFromPrisma[]): TagWithRelations[] {
 	return prismaTags.map(fromPrismaTag);
 }
