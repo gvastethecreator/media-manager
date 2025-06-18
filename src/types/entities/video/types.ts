@@ -1,47 +1,35 @@
 /**
- * @file Tipos de datos para la entidad Video
+ * @file Tipos canónicos para la entidad Video
  * @module types/entities/video/types
+ * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
+ * @description Estructura unificada y validada para Video.
+ * Última migración: 2025-06-18
  */
 
-import type { z } from 'zod';
-// Importación de tipos para relaciones
-import type { Album } from '../album/types';
-import type { Character } from '../character/types';
-import type { Collection } from '../collection/types';
-import type { Concept } from '../concept/types';
-import type { Folder } from '../folder/base';
-import type { Group } from '../group/types';
-import type { Note } from '../note/types';
-import type { Place } from '../place/types';
-import type { Prompt } from '../prompt/types';
-import type { Property } from '../property/types';
-import type { Tag } from '../tag/types';
-import type { Wildcard } from '../wildcard/types';
-import type { WorldItem } from '../world-item/types';
-import type { VideoFormat, VideoPrivacyLevel } from './enums';
-import type { VideoSchema } from './schema';
+import { z } from 'zod';
+import { VideoFormat } from './enums';
 
 /**
- * 🎥 Metadatos del video
+ * Metadatos del video
  */
 export interface VideoMetadata {
-	duration: number; // Duración en segundos
-	width: number; // Ancho en píxeles
-	height: number; // Alto en píxeles
+	duration: number;
+	width: number;
+	height: number;
 	format: VideoFormat;
-	size: number; // Tamaño en bytes
+	size: number;
 	codec?: string;
-	bitrate?: number; // Bits por segundo
-	frameRate?: number; // Frames por segundo
-	aspectRatio?: string; // Ejemplo: "16:9"
+	bitrate?: number;
+	frameRate?: number;
+	aspectRatio?: string;
 	audioCodec?: string;
 	audioChannels?: number;
 	audioSampleRate?: number;
-	rotation?: number; // Rotación en grados
+	rotation?: number;
 	hasAudio?: boolean;
-	subtitleLanguages?: string[]; // Códigos de idioma ISO
-	audioLanguages?: string[]; // Códigos de idioma ISO
-	creationDate?: Date | string;
+	subtitleLanguages?: string[];
+	audioLanguages?: string[];
+	creationDate?: Date;
 	location?: {
 		latitude: number;
 		longitude: number;
@@ -55,29 +43,7 @@ export interface VideoMetadata {
 }
 
 /**
- * 📺 Capítulo de video
- */
-export interface VideoChapter {
-	id: string;
-	title: string;
-	startTime: number; // Tiempo en segundos
-	endTime: number; // Tiempo en segundos
-	thumbnailPath?: string;
-}
-
-/**
- * ⏯️ Estado de reproducción de video
- */
-export interface VideoPlaybackState {
-	position: number; // Posición actual en segundos
-	lastPlayed: Date | string;
-	completed: boolean;
-	favorite: boolean;
-	watchCount: number;
-}
-
-/**
- * 🔄 Tipo base para Video
+ * Tipo base canónico para Video
  */
 export interface VideoBase {
 	id: string;
@@ -102,196 +68,72 @@ export interface VideoBase {
 }
 
 /**
- * 🔗 Relaciones de Video
+ * Relaciones principales (solo ids o any[] para evitar dependencias cruzadas)
  */
 export interface VideoRelations {
-	folder?: Folder;
-	albums?: Album[];
-	collections?: Collection[];
-	tags?: Tag[];
-	characters?: Character[];
-	places?: Place[];
-	worldItems?: WorldItem[];
-	concepts?: Concept[];
-	prompts?: Prompt[];
-	notes?: Note[];
-	wildcards?: Wildcard[];
-	properties?: Property[];
-	groups?: Group[];
+	albums?: any[];
+	collections?: any[];
+	tags?: any[];
+	characters?: any[];
+	places?: any[];
+	worldItems?: any[];
+	concepts?: any[];
+	prompts?: any[];
+	notes?: any[];
+	wildcards?: any[];
+	properties?: any[];
+	groups?: any[];
 }
 
 /**
- * 📊 Conteos de relaciones de Video
- */
-export interface VideoCounts {
-	_count?: {
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
-
-/**
- * 🔄 UI y metadatos adicionales
+ * UI y metadatos adicionales
  */
 export interface VideoUI {
 	thumbnailUrl?: string;
-	playState?: VideoPlaybackState;
-	chapters?: VideoChapter[];
-	privacyLevel?: VideoPrivacyLevel;
-	sharedWith?: string[];
 	isSelected?: boolean;
 }
 
 /**
- * 🎯 Filtros específicos para Video
+ * Video completo
  */
-export interface VideoFilters {
-	search?: string;
-	duration?: {
-		min?: number;
-		max?: number;
-	};
-	resolution?: {
-		min?: number; // altura mínima en píxeles
-		max?: number; // altura máxima en píxeles
-	};
-	formats?: VideoFormat[];
-	hasAudio?: boolean;
-	isPublic?: boolean;
-	isFavorite?: boolean;
-	folderId?: string;
-	tags?: string[];
-	albums?: string[];
-	collections?: string[];
-	dateRange?: {
-		start?: Date;
-		end?: Date;
-	};
-}
+export interface VideoComplete extends VideoBase, VideoRelations, VideoUI {}
 
 /**
- * 🔄 Video completo con todas las relaciones
+ * Input para creación
  */
-export interface VideoComplete extends VideoBase, VideoRelations, VideoCounts, VideoUI {}
+export type VideoCreateInput = Omit<VideoBase, 'id' | 'createdAt' | 'updatedAt'> & Partial<VideoRelations>;
 
 /**
- * 📝 Datos para crear un Video
+ * Input para actualización
  */
-export type VideoCreateInput = Omit<VideoBase, 'id' | 'createdAt' | 'updatedAt'> & {
-	metadata?: VideoMetadata | string;
-} & Partial<VideoRelations>;
+export type VideoUpdateInput = Partial<Omit<VideoBase, 'id'>> & Partial<VideoRelations> & Partial<VideoUI>;
 
 /**
- * 📝 Datos para actualizar un Video
+ * Esquema Zod para validación de Video
  */
-export type VideoUpdateInput = Partial<Omit<VideoBase, 'id'>> & {
-	metadata?: VideoMetadata | string;
-} & Partial<VideoRelations> &
-	Partial<VideoUI>;
+export const VideoSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	description: z.string().nullable(),
+	path: z.string(),
+	hash: z.string(),
+	size: z.number(),
+	duration: z.number(),
+	width: z.number().nullable(),
+	height: z.number().nullable(),
+	metadata: z.string().nullable(),
+	thumbnail: z.any().nullable(),
+	thumbnailSize: z.number().nullable(),
+	thumbnailWidth: z.number().nullable(),
+	thumbnailHeight: z.number().nullable(),
+	isPublic: z.boolean(),
+	isFavorite: z.boolean(),
+	folderId: z.string(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-/**
- * 🔍 Opciones de búsqueda para Video
- */
-export interface VideoSearchOptions {
-	skip?: number;
-	take?: number;
-	orderBy?: {
-		[key in keyof VideoBase]?: 'asc' | 'desc';
-	};
-	where?: VideoFilters;
-	include?: {
-		folder?: boolean;
-		albums?: boolean;
-		collections?: boolean;
-		tags?: boolean;
-		characters?: boolean;
-		places?: boolean;
-		worldItems?: boolean;
-		concepts?: boolean;
-		prompts?: boolean;
-		notes?: boolean;
-		wildcards?: boolean;
-		properties?: boolean;
-		groups?: boolean;
-		_count?: boolean;
-	};
-}
-
-/**
- * 📊 Resultado de búsqueda de Videos
- */
-export interface VideoSearchResult {
-	items: VideoComplete[];
-	total: number;
-	hasMore: boolean;
-}
-
-/**
- * 🎯 Opciones para el transformer de Video
- */
-export interface VideoTransformerOptions {
-	includeRelations?: boolean;
-	includeCount?: boolean;
-	validateFields?: boolean;
-	includeFolder?: boolean;
-	includePlayState?: boolean;
-	includeChapters?: boolean;
-	deserializeMetadata?: boolean;
-	customFields?: (keyof VideoComplete)[];
-}
-
-/**
- * 🔗 Interfaz para videos relacionados
- */
-export interface RelatedVideo {
-	id: string;
-	name: string;
-	thumbnailUrl?: string;
-	duration: number;
-	count: number;
-	strength: number;
-}
-
-/**
- * 📊 Interfaz para la configuración visual de un video
- */
-export interface VideoVisualConfig {
-	id: string;
-	videoId: string;
-	enable3DEffect: boolean;
-	designSystem: string;
-	enableHolographicEffect: boolean;
-	enableGlowEffect: boolean;
-	enableAnimatedBorder: boolean;
-	enableLightHalo: boolean;
-	// Campos JSON serializados como string
-	layerSystem: string;
-	effects: string;
-	performance: string;
-	states: string;
-	presetId: string | null;
-}
-
-/**
- * 📊 Interfaz para la configuración visual deserializada de un video
- */
-export interface VideoVisualConfigComplete extends VideoVisualConfig {
-	// Campos deserializados
-	layersConfig?: any;
-	effectsConfig?: any;
-	performanceConfig?: any;
-	statesConfig?: any;
-}
-
-// Tipos inferidos de Zod
-export type VideoValidated = z.infer<typeof VideoSchema>;
+// 🟢 Documentación y advertencia:
+// - Usar solo estos tipos en transformers, server actions y validaciones.
+// - No importar tipos de Prisma ni de archivos legacy.
+// - Validar siempre con VideoSchema antes de persistir.

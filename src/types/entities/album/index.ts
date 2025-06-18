@@ -1,36 +1,27 @@
 /**
  * @file Índice de tipos para la entidad Album
  * @module types/entities/album
+ *
+ * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types', extendidos desde './extended', estadísticos desde './stats-types' y enums desde './enums'.
+ * Legacy eliminado.
  */
 
-// Exportar desde enumeraciones
 export {
-	AlbumDisplayState,
-	AlbumPrivacyLevel,
-	AlbumSortCriteria,
-	AlbumType,
-	AlbumViewMode,
+    AlbumSortCriteria, AlbumType,
+    AlbumViewMode
 } from './enums';
-// Exportar desde definiciones extendidas
-// 🎯 Alias principal para el tipo Album
 export type {
-	AlbumComplete,
-	AlbumComplete as Album,
-	AlbumWithStats,
-	FolderDistribution,
-	ParsedAlbum,
-	ParsedAlbumWithRelations,
+    AlbumComplete, AlbumWithStats, FolderDistribution, ParsedAlbum,
+    ParsedAlbumWithRelations
 } from './extended';
-// Exportar desde archivo base
-export * from './extended';
-// Exportar tipos estadísticos
 export type {
-	AlbumDateDistribution,
-	AlbumItemDistribution,
-	AlbumLocationDistribution,
-	AlbumStats,
-	AlbumStatsOverview,
-	AlbumTimeRange,
+    AlbumDateDistribution, AlbumItemDistribution,
+    AlbumLocationDistribution, AlbumStats, AlbumStatsOverview, AlbumTimeRange
 } from './stats-types';
-export * from './stats-types';
-export * from './types';
+export type {
+    AlbumBase,
+    AlbumCreateInput,
+    AlbumUpdateInput
+} from './types';
+
+// 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

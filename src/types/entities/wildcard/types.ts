@@ -1,279 +1,73 @@
 /**
- * @file Tipos para la entidad Wildcard
+ * @file Tipos canónicos para la entidad Wildcard
  * @module types/entities/wildcard/types
+ * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
+ * @description Estructura unificada y validada para Wildcard.
+ * Última migración: 2025-06-18
  */
 
-// Importar tipos principales usando los alias de índice para evitar errores de importación y mantener consistencia
-import type { AlbumComplete } from '../album/extended';
-import type { CharacterWithRelations as Character } from '../character';
-import type { CollectionWithRelations as Collection } from '../collection';
-import type { Concept } from '../concept';
-import type { Group } from '../group';
-import type { Image } from '../image';
-import type { Note } from '../note';
-import type { Place } from '../place';
-import type { Prompt } from '../prompt';
-import type { Property } from '../property';
-import type { Tag } from '../tag';
-import type { Video } from '../video';
-import type { WorldItem } from '../world-item';
+import { z } from 'zod';
 
 /**
- * Interfaz para un hijo de wildcard
- */
-export interface WildcardChild {
-	id?: string;
-	name: string;
-	emoji?: string;
-	color?: string;
-	shortcut?: string | null;
-	children?: WildcardChild[];
-}
-
-/**
- * Interfaz base para comodín
+ * Tipo base canónico para Wildcard
  */
 export interface WildcardBase {
 	id: string;
 	name: string;
 	emoji: string;
 	color: string;
-	description: string | null;
-	shortcut: string | null;
-	category: string | null;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
 	children: string; // JSON string de hijos
-	featuredImage: string | null;
+	featuredImage?: string | null;
 	isFavorite: boolean;
-	parentId: string | null;
+	parentId?: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
 
 /**
- * Interfaz para relaciones de Wildcard
+ * Input para creación
  */
-export interface WildcardRelations {
-	// Relaciones jerárquicas
-	parent?: WildcardBase | null;
-	childWildcards?: WildcardBase[];
-
-	// Otras relaciones
-	images?: Image[];
-	videos?: Video[];
-	albums?: AlbumComplete[];
-	collections?: Collection[];
-	tags?: Tag[];
-	characters?: Character[];
-	places?: Place[];
-	worldItems?: WorldItem[];
-	concepts?: Concept[];
-	prompts?: Prompt[];
-	notes?: Note[];
-	properties?: Property[];
-	groups?: Group[];
-}
-
-/**
- * Interfaz para conteos de relaciones
- */
-export interface WildcardCounts {
-	childWildcards?: number;
-	images?: number;
-	videos?: number;
-	albums?: number;
-	collections?: number;
-	tags?: number;
-	characters?: number;
-	places?: number;
-	worldItems?: number;
-	concepts?: number;
-	prompts?: number;
-	notes?: number;
-	properties?: number;
-	groups?: number;
-}
-
-/**
- * Interfaz para campos UI calculados
- */
-export interface WildcardUI {
-	hasParent: boolean;
-	hasChildren: boolean;
-	itemCount: number;
-	parsedChildren: WildcardChild[];
-	lastUpdated: Date;
-}
-
-/**
- * Interfaz para datos deserializados
- */
-export interface WildcardDeserialized extends WildcardBase {
-	parsedChildren?: WildcardChild[];
-	_relations?: WildcardRelations;
-	_count?: WildcardCounts;
-	_ui?: WildcardUI;
-}
-
-/**
- * Interfaz extendida que incluye relaciones
- */
-export interface WildcardWithRelations extends WildcardBase {
-	_relations: WildcardRelations;
-	childrenData?: WildcardChild[];
-}
-
-/**
- * Interfaz completa que incluye todos los campos y relaciones
- */
-export interface WildcardComplete extends WildcardBase {
-	parsedChildren: WildcardChild[];
-	_relations?: WildcardRelations;
-	_count?: WildcardCounts;
-	_ui: WildcardUI;
-}
-
-/**
- * Interfaz extendida para Wildcard con propiedades adicionales para UI
- */
-export interface WildcardExtended extends WildcardComplete {
-	// Puedes agregar aquí propiedades adicionales para la UI si es necesario
-	// Ejemplo: isSelected, isEditing, etc.
-	isSelected?: boolean;
-	isEditing?: boolean;
-	isExpanded?: boolean;
-	isLoading?: boolean;
-	isDropTarget?: boolean;
-	isDragging?: boolean;
-	isHighlighted?: boolean;
-	hasError?: boolean;
-}
-
-/**
- * Interfaz para Wildcard con estadísticas calculadas
- */
-export interface WildcardWithStats extends WildcardComplete {
-	stats?: {
-		childCount?: number;
-		depth?: number;
-		[item: string]: number | undefined;
-	};
-}
-
-/**
- * Interfaz para crear un comodín
- */
-export interface CreateWildcardData {
+export interface WildcardCreateInput {
 	name: string;
 	emoji?: string;
 	color?: string;
 	description?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
-	children?: string | WildcardChild[];
+	children?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	parentId?: string | null;
 }
 
 /**
- * Interfaz para actualizar un comodín
+ * Input para actualización
  */
-export interface UpdateWildcardData {
-	name?: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
-	children?: string | WildcardChild[];
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	parentId?: string | null;
-}
+export type WildcardUpdateInput = Partial<Omit<WildcardBase, 'id' | 'createdAt' | 'updatedAt'>>;
 
 /**
- * Alias para mantener compatibilidad con la API actual
+ * Esquema Zod para validación de Wildcard
  */
-export type WildcardUpdateInput = UpdateWildcardData;
+export const WildcardSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	emoji: z.string(),
+	color: z.string(),
+	description: z.string().nullable().optional(),
+	shortcut: z.string().nullable().optional(),
+	category: z.string().nullable().optional(),
+	children: z.string(),
+	featuredImage: z.string().nullable().optional(),
+	isFavorite: z.boolean(),
+	parentId: z.string().nullable().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-/**
- * Interfaz para filtros de búsqueda de comodines
- */
-export interface WildcardFilters {
-	searchQuery?: string;
-	categories?: string[];
-	onlyFavorites?: boolean;
-	parentId?: string | null;
-	hasChildren?: boolean;
-}
-
-/**
- * Interfaz para opciones de búsqueda de comodines
- */
-export interface WildcardSearchOptions {
-	page?: number;
-	pageSize?: number;
-	sortBy?: WildcardSortCriteria;
-	filters?: WildcardFilters;
-	include?: {
-		parent?: boolean;
-		childWildcards?: boolean;
-		images?: boolean;
-		videos?: boolean;
-		albums?: boolean;
-		collections?: boolean;
-		tags?: boolean;
-		characters?: boolean;
-		places?: boolean;
-		worldItems?: boolean;
-		concepts?: boolean;
-		prompts?: boolean;
-		notes?: boolean;
-		properties?: boolean;
-		groups?: boolean;
-	};
-}
-
-/**
- * Interfaz para resultados de búsqueda de comodines
- */
-export interface WildcardSearchResult {
-	items: WildcardComplete[];
-	total: number;
-	totalPages: number;
-}
-
-/**
- * Enumeración para criterios de ordenación
- */
-export enum WildcardSortCriteria {
-	NAME_ASC = 'name:asc',
-	NAME_DESC = 'name:desc',
-	CREATED_ASC = 'created:asc',
-	CREATED_DESC = 'created:desc',
-	UPDATED_ASC = 'updated:asc',
-	UPDATED_DESC = 'updated:desc',
-}
-
-/**
- * Enumeración para modos de visualización
- */
-export enum WildcardViewMode {
-	GRID = 'grid',
-	LIST = 'list',
-	CARDS = 'cards',
-	TREE = 'tree',
-	DETAILS = 'details',
-}
-
-/**
- * Mapa de propiedades para ordenación
- */
-export const WILDCARD_SORT_PROPERTY_MAP: Record<WildcardSortCriteria, string> = {
-	[WildcardSortCriteria.NAME_ASC]: 'name',
-	[WildcardSortCriteria.NAME_DESC]: 'name',
-	[WildcardSortCriteria.CREATED_ASC]: 'createdAt',
-	[WildcardSortCriteria.CREATED_DESC]: 'createdAt',
-	[WildcardSortCriteria.UPDATED_ASC]: 'updatedAt',
-	[WildcardSortCriteria.UPDATED_DESC]: 'updatedAt',
-};
+// 🟢 Documentación y advertencia:
+// - Usar solo estos tipos en transformers, server actions y validaciones.
+// - No importar tipos de Prisma ni de archivos legacy.
+// - Validar siempre con WildcardSchema antes de persistir.

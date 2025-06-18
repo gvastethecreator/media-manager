@@ -1,24 +1,20 @@
 /**
  * @file Archivo de índice para exportar tipos de la entidad Folder
  * @module types/entities/folder
+ *
+ * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types' y enums desde './enums'.
+ * Legacy eliminado.
  */
 
-// Alias para compatibilidad con código existente
+export {
+	FolderSortBy,
+	FolderType,
+	FolderViewMode
+} from './enums';
 export type {
-	CreateFolderData,
 	FolderBase,
-	FolderComplete,
-	FolderExtended,
-	FolderExtendedComplete,
-	FolderExtendedComplete as Folder,
-	FolderFilters,
-	FolderSummary,
-	FolderTreeItem,
-	UpdateFolderData,
+	FolderCreateInput,
+	FolderUpdateInput
 } from './types';
-export { FOLDER_SORT_PROPERTY_MAP, FolderSortCriteria } from './types';
 
-// Ya no exportamos los archivos obsoletos
-// export * from './base';
-// export * from './enums';
-// export * from './extended';
+// 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

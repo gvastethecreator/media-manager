@@ -1,26 +1,25 @@
 /**
- * @file Tipos base para perfiles de usuario
- * @module types/entities/profile
+ * @file Tipos canónicos para la entidad Profile
+ * @module types/entities/profile/types
+ * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
+ * @description Estructura unificada y validada para Profile.
+ * Última migración: 2025-06-18
  */
 
-import type { Profile } from '@prisma/client';
-import type {
-	CreateProfileSchemaType,
-	ProfileFiltersSchemaType,
-	ProfilePaginationSchemaType,
-	ProfilePreferencesSchemaType,
-	UpdateProfilePreferencesSchemaType,
-	UpdateProfileSchemaType,
-} from './schema';
+import { z } from 'zod';
 
-// Enums para temas
+/**
+ * Enum para el tema del perfil
+ */
 export enum ThemeMode {
 	SYSTEM = 'system',
 	LIGHT = 'light',
 	DARK = 'dark',
 }
 
-// Enums para idiomas
+/**
+ * Enum para el idioma del perfil
+ */
 export enum Language {
 	SPANISH = 'es',
 	ENGLISH = 'en',
@@ -28,41 +27,57 @@ export enum Language {
 	FRENCH = 'fr',
 }
 
-// Re-exportar tipos inferidos de Zod
-export type ProfilePreferences = ProfilePreferencesSchemaType;
-export type CreateProfileInput = CreateProfileSchemaType;
-export type UpdateProfileInput = UpdateProfileSchemaType;
-export type UpdateProfilePreferencesInput = UpdateProfilePreferencesSchemaType;
-export type ProfileFilters = ProfileFiltersSchemaType;
-export type ProfilePaginationOptions = ProfilePaginationSchemaType;
-
 /**
- * Interfaz extendida para Profile con campos adicionales para UI
- * @extends Profile - Modelo base de Prisma
+ * Tipo base canónico para Profile
  */
-export interface ProfileExtended extends Profile {
-	/** Preferencias parseadas del perfil */
-	parsedPreferences?: ProfilePreferences;
-	/** Fecha de creación formateada */
-	formattedCreatedAt?: string;
-	/** Fecha de actualización formateada */
-	formattedUpdatedAt?: string;
-	/** Indica si es el perfil actual del usuario */
-	isCurrentProfile?: boolean;
+export interface ProfileBase {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description?: string | null;
+	isActive: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	settingsId?: string | null;
+	imageId?: string | null;
 }
 
 /**
- * Tipo para resultados paginados de perfiles
+ * Input para creación
  */
-export interface PaginatedProfiles {
-	/** Lista de perfiles */
-	items: ProfileExtended[];
-	/** Total de perfiles */
-	total: number;
-	/** Página actual */
-	page: number;
-	/** Límite de items por página */
-	limit: number;
-	/** Total de páginas */
-	totalPages: number;
+export interface ProfileCreateInput {
+	name: string;
+	emoji?: string;
+	color?: string;
+	theme?: ThemeMode;
+	language?: Language;
+	description?: string;
+	isActive?: boolean;
 }
+
+/**
+ * Input para actualización
+ */
+export type ProfileUpdateInput = Partial<Omit<ProfileBase, 'id' | 'createdAt' | 'updatedAt'>>;
+
+/**
+ * Esquema Zod para validación de Profile
+ */
+export const ProfileSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	emoji: z.string(),
+	color: z.string(),
+	description: z.string().nullable().optional(),
+	isActive: z.boolean(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+	settingsId: z.string().nullable().optional(),
+	imageId: z.string().nullable().optional(),
+});
+
+// 🟢 Documentación y advertencia:
+// - Usar solo estos tipos en transformers, server actions y validaciones.
+// - No importar tipos de Prisma ni de archivos legacy.
+// - Validar siempre con ProfileSchema antes de persistir.
