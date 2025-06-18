@@ -1,23 +1,15 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
-import { HexColorPicker } from 'react-colorful';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { createConcept, updateConcept } from '@/app/actions/concepts/concept.actions';
-import { Button } from '@/components/ui/button';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
 import type { ConceptBase, ConceptExtended } from '@/types/entities/concept';
-import { ConceptCategory } from '@/types/entities/concept/enums';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod
 const conceptSchema = z.object({
@@ -127,191 +119,50 @@ export function CreateConceptForm({
 		}
 	};
 
+	const optionalFields = [
+		{
+			name: 'emoji',
+			label: 'Emoji',
+			render: ({ value, onChange }: any) => (
+				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
+			),
+		},
+		{
+			name: 'color',
+			label: 'Color',
+			render: ({ value, onChange }: any) => (
+				<ColorPicker value={value} onChange={onChange} compact showLabel={false} />
+			),
+		},
+		{
+			name: 'description',
+			label: 'Descripción',
+			render: ({ value, onChange }: any) => (
+				<textarea
+					placeholder="Descripción del concepto..."
+					value={value || ''}
+					onChange={(e) => onChange(e.target.value)}
+					rows={3}
+					className="text-xs resize-none w-full border rounded p-2"
+				/>
+			),
+		},
+		// ...agregar más campos opcionales si es necesario...
+	];
+
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} id="concept-form" className="space-y-4">
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<FormField
-						control={form.control}
-						name="name"
-						render={({ field }) => (
-							<FormItem className="space-y-2">
-								<FormLabel>Nombre</FormLabel>
-								<FormControl>
-									<Input
-										placeholder="Nombre del concepto"
-										{...field}
-										className={cn(form.formState.errors.name && 'border-destructive')}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="category"
-						render={({ field }) => (
-							<FormItem className="space-y-2">
-								<FormLabel>Categoría</FormLabel>
-								<Select onValueChange={field.onChange} defaultValue={field.value}>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Seleccionar categoría" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Object.values(ConceptCategory).map((category) => (
-											<SelectItem key={category} value={category}>
-												{category.replace('_', ' ')}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem className="space-y-2">
-							<FormLabel>Descripción</FormLabel>
-							<FormControl>
-								<Textarea placeholder="Descripción breve del concepto" {...field} value={field.value || ''} rows={2} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="content"
-					render={({ field }) => (
-						<FormItem className="space-y-2">
-							<FormLabel>Contenido</FormLabel>
-							<FormControl>
-								<Textarea
-									placeholder="Contenido detallado del concepto"
-									{...field}
-									value={field.value || ''}
-									rows={5}
-								/>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<FormField
-						control={form.control}
-						name="color"
-						render={({ field }) => (
-							<FormItem className="space-y-2">
-								<FormLabel>Color</FormLabel>
-								<div className="flex items-center gap-2">
-									<Popover>
-										<PopoverTrigger asChild>
-											<Button
-												type="button"
-												variant="outline"
-												className="h-10 w-10 p-0"
-												style={{ backgroundColor: field.value }}
-											>
-												<span className="sr-only">Seleccionar color</span>
-											</Button>
-										</PopoverTrigger>
-										<PopoverContent side="right" className="w-auto p-0 border-none">
-											<FormControl>
-												<HexColorPicker color={field.value} onChange={field.onChange} />
-											</FormControl>
-										</PopoverContent>
-									</Popover>
-									<FormControl>
-										<Input value={field.value} onChange={(e) => field.onChange(e.target.value)} className="flex-1" />
-									</FormControl>
-								</div>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="emoji"
-						render={({ field }) => (
-							<FormItem className="space-y-2">
-								<FormLabel>Emoji</FormLabel>
-								<div className="flex items-center gap-2">
-									<Popover>
-										<PopoverTrigger asChild>
-											<Button type="button" variant="outline" className="h-10 w-10 p-0">
-												<span className="text-xl">{field.value}</span>
-											</Button>
-										</PopoverTrigger>
-										<PopoverContent side="right" className="w-auto p-0">
-											<FormControl>
-												<EmojiPicker onEmojiSelect={field.onChange} value={field.value} />
-											</FormControl>
-										</PopoverContent>
-									</Popover>
-									<FormControl>
-										<Input value={field.value} onChange={(e) => field.onChange(e.target.value)} className="flex-1" />
-									</FormControl>
-								</div>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="tags"
-					render={({ field }) => (
-						<FormItem className="space-y-2">
-							<FormLabel>Etiquetas (separadas por coma)</FormLabel>
-							<FormControl>
-								<Input
-									placeholder="Ej: teoría, personaje, mundo"
-									value={field.value !== '[]' && field.value ? JSON.parse(field.value).join(', ') : ''}
-									onChange={(e) => {
-										// Convertir texto separado por comas a formato JSON
-										const tagsArray = e.target.value
-											.split(',')
-											.map((tag) => tag.trim())
-											.filter(Boolean);
-										field.onChange(JSON.stringify(tagsArray));
-									}}
-								/>
-							</FormControl>
-							<FormMessage />
-							<p className="text-xs text-muted-foreground">
-								Las etiquetas te ayudan a organizar y encontrar tus conceptos más fácilmente.
-							</p>
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="isFavorite"
-					render={({ field }) => (
-						<FormItem className="flex items-center space-x-2">
-							<FormControl>
-								<Switch checked={field.value} onCheckedChange={field.onChange} id="isFavorite" />
-							</FormControl>
-							<FormLabel htmlFor="isFavorite">Marcar como favorito</FormLabel>
-						</FormItem>
-					)}
-				/>
-			</form>
-		</Form>
+		<DynamicCreateForm
+			optionalFields={optionalFields}
+			onSubmit={async (data) => {
+				if (isEditing && concept) {
+					await updateConcept(concept.id, data);
+					onUpdated?.({ ...concept, ...data });
+				} else {
+					const created = await createConcept(data);
+					onCreated?.(created);
+				}
+			}}
+			submitLabel={isEditing ? 'Guardar cambios' : 'Crear concepto'}
+		/>
 	);
 }

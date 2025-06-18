@@ -1,23 +1,19 @@
 'use client';
 
+import { createTagAction, updateTagAction } from '@/app/actions/tags';
+import { ColorPicker } from '@/components/ui/color-picker';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import toastService from '@/services/toast.service';
+import { generateTagColor, generateTagEmoji } from '@/transformers/tag/serializers';
+import type { TagUpdate } from '@/types/entities/tag';
+import { TagCategory } from '@/types/entities/tag';
+import type { TagBase as UITag } from '@/types/entities/tag/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { createTagAction, updateTagAction } from '@/app/actions/tags';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ColorPicker } from '@/components/ui/color-picker';
-import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import toastService from '@/services/toast.service';
-import { generateTagColor, generateTagEmoji } from '@/transformers/tag/serializers';
-import type { TagUpdate } from '@/types/entities/tag';
-import { TagCategory } from '@/types/entities/tag/enums';
-import type { Tag as UITag } from '@/types/entities/tag/types';
+import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación
 const createTagSchema = z.object({
@@ -174,155 +170,62 @@ export function CreateTagForm({
 		return () => subscription.unsubscribe();
 	}, [form, onPreview]);
 
+	const optionalFields = [
+		{
+			name: 'emoji',
+			label: 'Emoji',
+			render: ({ value, onChange }: any) => <EmojiPicker value={value} onChange={onChange} />,
+		},
+		{
+			name: 'color',
+			label: 'Color',
+			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} />,
+		},
+		{
+			name: 'description',
+			label: 'Descripción',
+			render: ({ value, onChange }: any) => (
+				<textarea
+					placeholder="Descripción de la etiqueta..."
+					value={value || ''}
+					onChange={(e) => onChange(e.target.value)}
+					rows={3}
+					className="text-xs resize-none w-full border rounded p-2"
+				/>
+			),
+		},
+		{
+			name: 'category',
+			label: 'Categoría',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger>
+						<SelectValue placeholder="Selecciona una categoría" />
+					</SelectTrigger>
+					<SelectContent>
+						{/* Aquí deberías mapear las categorías reales de TagCategory */}
+						<SelectItem value="general">General</SelectItem>
+						<SelectItem value="temporal">Temporal</SelectItem>
+						<SelectItem value="importante">Importante</SelectItem>
+					</SelectContent>
+				</Select>
+			),
+		},
+	];
+
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-				<FormField
-					control={form.control}
-					name="name"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Nombre</FormLabel>
-							<FormControl>
-								<Input
-									placeholder="Nombre de la etiqueta"
-									{...field}
-									onChange={(e) => {
-										field.onChange(e);
-										// Solo generar sugerencias si no estamos editando o si el usuario no ha modificado manualmente
-										if (!isEditing) {
-											generateSuggestions();
-										}
-									}}
-								/>
-							</FormControl>
-							<FormDescription>El nombre de la etiqueta, visible en listados e imágenes.</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Descripción (Opcional)</FormLabel>
-							<FormControl>
-								<Textarea placeholder="Describe brevemente esta etiqueta" {...field} value={field.value || ''} />
-							</FormControl>
-							<FormDescription>Una descripción breve para entender el propósito de esta etiqueta.</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<FormField
-						control={form.control}
-						name="emoji"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Emoji</FormLabel>
-								<FormControl>
-									<EmojiPicker value={field.value} onChange={(emoji) => field.onChange(emoji)} />
-								</FormControl>
-								<FormDescription>Selecciona un emoji representativo.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="color"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Color</FormLabel>
-								<FormControl>
-									<ColorPicker value={field.value} onChange={(color) => field.onChange(color)} />
-								</FormControl>
-								<FormDescription>Color para identificar visualmente la etiqueta.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="category"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Categoría (Opcional)</FormLabel>
-							<Select
-								onValueChange={(value) => {
-									field.onChange(value || undefined);
-									// Generar emoji sugerido basado en categoría
-									if (value) {
-										const name = form.getValues('name');
-										const emoji = generateTagEmoji(name, value);
-										form.setValue('emoji', emoji);
-									}
-								}}
-								value={field.value}
-							>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Selecciona una categoría" />
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									{Object.entries(TagCategory).map(([key, value]) => (
-										<SelectItem key={key} value={value}>
-											{value}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<FormDescription>Agrupa etiquetas del mismo tipo para una mejor organización.</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="isFavorite"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-							<FormControl>
-								<Checkbox
-									checked={field.value}
-									onCheckedChange={(checked) => {
-										field.onChange(checked === true);
-									}}
-								/>
-							</FormControl>
-							<div className="space-y-1 leading-none">
-								<FormLabel>Marcar como favorita</FormLabel>
-								<FormDescription>
-									Las etiquetas favoritas aparecerán destacadas y tendrán prioridad en los listados.
-								</FormDescription>
-							</div>
-						</FormItem>
-					)}
-				/>
-
-				<div className="flex justify-end gap-2">
-					{onCancel && (
-						<Button type="button" variant="outline" onClick={onCancel}>
-							Cancelar
-						</Button>
-					)}
-					<Button type="button" variant="outline" onClick={generateSuggestions}>
-						Generar sugerencias
-					</Button>
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
-					</Button>
-				</div>
-			</form>
-		</Form>
+		<DynamicCreateForm
+			optionalFields={optionalFields}
+			onSubmit={async (data) => {
+				if (isEditing && tag) {
+					await updateTagAction(tag.id, data);
+					onUpdated?.({ ...tag, ...data });
+				} else {
+					const created = await createTagAction(data);
+					onCreated?.(created);
+				}
+			}}
+			submitLabel={isEditing ? 'Guardar cambios' : 'Crear etiqueta'}
+		/>
 	);
 }

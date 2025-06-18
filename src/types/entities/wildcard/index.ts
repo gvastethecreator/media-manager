@@ -1,39 +1,49 @@
 /**
- * @file Exportación de tipos para la entidad Wildcard
+ * @file Exportaciones principales de tipos para la entidad Wildcard
  * @module types/entities/wildcard
  */
 
+// Exportar los tipos principales
+export type {
+	WildcardBase,
+	WildcardCreateInput,
+	WildcardUpdateInput,
+	WildcardChild,
+	WildcardRelations,
+	WildcardCounts,
+	WildcardFilters,
+	WildcardUI,
+	WildcardComplete,
+	WildcardSearchOptions,
+	WildcardSearchResult
+} from './types';
+
+// Exportar los enums y constantes
 export {
-	CreateWildcardSchema,
-	UpdateWildcardSchema,
-	WildcardChildSchema,
+	WildcardSortCriteria,
+	WildcardViewMode,
+	WILDCARD_SORT_PROPERTY_MAP
+} from './types';
+
+// Exportar el esquema de validación
+export { WildcardSchema } from './types';
+
+// Exportar esquemas adicionales de validación
+export {
 	WildcardFiltersSchema,
-	WildcardRelationsSchema,
-	WildcardSchema,
 	WildcardStatsSchema,
+	WildcardRelationsSchema,
+	WildcardChildSchema,
+	CreateWildcardSchema,
+	UpdateWildcardSchema
 } from './schema';
-// Alias común para el tipo principal
+
+// Exportar tipos de compatibilidad (legados)
 export type {
 	CreateWildcardData,
 	UpdateWildcardData,
-	WildcardBase,
-	WildcardChild,
-	WildcardComplete,
-	WildcardComplete as Wildcard,
-	WildcardCounts,
-	WildcardDeserialized,
 	WildcardExtended,
-	WildcardFilters,
-	WildcardRelations,
-	WildcardSearchOptions,
-	WildcardSearchResult,
-	WildcardUI,
-	WildcardUpdateInput,
 	WildcardWithRelations,
 	WildcardWithStats,
-} from './types';
-export {
-	WILDCARD_SORT_PROPERTY_MAP,
-	WildcardSortCriteria,
-	WildcardViewMode,
+	WildcardDeserialized
 } from './types';

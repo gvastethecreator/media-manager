@@ -1,18 +1,9 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { createCharacter, updateCharacter } from '@/app/actions/characters/character.actions';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
 import type { CharacterBase as Character, CreateCharacterData } from '@/types/entities/character/base';
 import {
@@ -23,6 +14,11 @@ import {
 	CharacterClass,
 	CharacterRace,
 } from '@/types/entities/character/enums';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación
 const createCharacterSchema = z.object({
@@ -236,317 +232,68 @@ export function CreateCharacterForm({
 		}
 	};
 
+	const optionalFields = [
+		{
+			name: 'emoji',
+			label: 'Emoji',
+			render: ({ value, onChange }: any) => (
+				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
+			),
+		},
+		{
+			name: 'color',
+			label: 'Color',
+			render: ({ value, onChange }: any) => (
+				<ColorPicker value={value} onChange={onChange} compact showLabel={false} />
+			),
+		},
+		{
+			name: 'description',
+			label: 'Descripción',
+			render: ({ value, onChange }: any) => (
+				<textarea
+					placeholder="Descripción del personaje..."
+					value={value || ''}
+					onChange={(e) => onChange(e.target.value)}
+					rows={3}
+					className="text-xs resize-none w-full border rounded p-2"
+				/>
+			),
+		},
+		{
+			name: 'class',
+			label: 'Clase',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger className="h-8 text-xs w-full">
+						<SelectValue placeholder="Seleccionar clase" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="warrior">Guerrero</SelectItem>
+						<SelectItem value="mage">Mago</SelectItem>
+						<SelectItem value="rogue">Ladrón</SelectItem>
+						<SelectItem value="cleric">Clérigo</SelectItem>
+						<SelectItem value="ranger">Explorador</SelectItem>
+					</SelectContent>
+				</Select>
+			),
+		},
+		// ...agregar más campos opcionales si es necesario...
+	];
+
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-				<FormField
-					control={form.control}
-					name="name"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Nombre</FormLabel>
-							<FormControl>
-								<Input
-									placeholder="Nombre del personaje"
-									{...field}
-									onChange={(e) => {
-										field.onChange(e);
-										// Solo generar sugerencias si no estamos editando o si el usuario no ha modificado manualmente
-										if (!isEditing) {
-											generateSuggestions();
-										}
-									}}
-								/>
-							</FormControl>
-							<FormDescription>El nombre del personaje, visible en listados e imágenes.</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Descripción (Opcional)</FormLabel>
-							<FormControl>
-								<Textarea placeholder="Describe brevemente este personaje" {...field} value={field.value || ''} />
-							</FormControl>
-							<FormDescription>Una descripción breve para entender quién es este personaje.</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<FormField
-						control={form.control}
-						name="emoji"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Emoji</FormLabel>
-								<FormControl>
-									<EmojiPicker value={field.value} onEmojiSelect={(emoji) => field.onChange(emoji)} />
-								</FormControl>
-								<FormDescription>Selecciona un emoji representativo.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="color"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Color</FormLabel>
-								<FormControl>
-									<ColorPicker value={field.value} onChange={(color) => field.onChange(color)} />
-								</FormControl>
-								<FormDescription>Color para identificar visualmente al personaje.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<FormField
-						control={form.control}
-						name="class"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Clase</FormLabel>
-								<Select
-									onValueChange={(value) => {
-										field.onChange(value || CharacterClass.UNKNOWN);
-										// Generar sugerencias basadas en clase
-										if (value) {
-											generateSuggestions();
-										}
-									}}
-									value={field.value}
-								>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Selecciona una clase" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Object.entries(CharacterClass).map(([key, value]) => (
-											<SelectItem key={key} value={value}>
-												{value.charAt(0).toUpperCase() + value.slice(1)}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<FormDescription>Clase o profesión del personaje.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="race"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Raza</FormLabel>
-								<Select onValueChange={(value) => field.onChange(value || CharacterRace.UNKNOWN)} value={field.value}>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Selecciona una raza" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Object.entries(CharacterRace).map(([key, value]) => (
-											<SelectItem key={key} value={value}>
-												{value.charAt(0).toUpperCase() + value.slice(1)}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<FormDescription>Raza o especie del personaje.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<FormField
-						control={form.control}
-						name="alignment"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Alineamiento</FormLabel>
-								<Select
-									onValueChange={(value) => field.onChange(value || CharacterAlignment.NEUTRAL)}
-									value={field.value}
-								>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Selecciona un alineamiento" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Object.entries(CharacterAlignment).map(([key, value]) => (
-											<SelectItem key={key} value={value}>
-												{value
-													.replace('-', ' ')
-													.split(' ')
-													.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-													.join(' ')}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<FormDescription>Alineamiento moral y ético del personaje.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="level"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Nivel</FormLabel>
-								<FormControl>
-									<Input
-										type="number"
-										placeholder="1"
-										min={1}
-										max={100}
-										{...field}
-										onChange={(e) => field.onChange(Number(e.target.value) || 1)}
-										value={field.value || 1}
-									/>
-								</FormControl>
-								<FormDescription>Nivel de experiencia o poder (1-100).</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="backstory"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Historia (Opcional)</FormLabel>
-							<FormControl>
-								<Textarea
-									placeholder="Cuenta la historia de este personaje"
-									{...field}
-									value={field.value || ''}
-									className="min-h-[120px]"
-								/>
-							</FormControl>
-							<FormDescription>Trasfondo o historia de origen del personaje.</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<FormField
-						control={form.control}
-						name="psychologicalProfile"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Perfil Psicológico (Opcional)</FormLabel>
-								<FormControl>
-									<Textarea placeholder="Rasgos psicológicos del personaje" {...field} value={field.value || ''} />
-								</FormControl>
-								<FormDescription>Personalidad, motivaciones, temores, etc.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="socialProfile"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Perfil Social (Opcional)</FormLabel>
-								<FormControl>
-									<Textarea placeholder="Relaciones sociales del personaje" {...field} value={field.value || ''} />
-								</FormControl>
-								<FormDescription>Relaciones, status social, amistades y enemistades.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="category"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Categoría (Opcional)</FormLabel>
-							<Select onValueChange={(value) => field.onChange(value || undefined)} value={field.value}>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Selecciona una categoría" />
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									{Object.entries(CharacterCategory).map(([key, value]) => (
-										<SelectItem key={key} value={value}>
-											{value.charAt(0).toUpperCase() + value.slice(1)}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<FormDescription>Categoría o rol del personaje (protagonista, antagonista, etc.).</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="isFavorite"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-							<FormControl>
-								<Checkbox
-									checked={field.value}
-									onCheckedChange={(checked) => {
-										field.onChange(checked === true);
-									}}
-								/>
-							</FormControl>
-							<div className="space-y-1 leading-none">
-								<FormLabel>Marcar como favorito</FormLabel>
-								<FormDescription>
-									Los personajes favoritos aparecerán destacados y tendrán prioridad en los listados.
-								</FormDescription>
-							</div>
-						</FormItem>
-					)}
-				/>
-
-				<div className="flex justify-end gap-2">
-					{onCancel && (
-						<Button type="button" variant="outline" onClick={onCancel}>
-							Cancelar
-						</Button>
-					)}
-					<Button type="button" variant="outline" onClick={generateSuggestions}>
-						Generar sugerencias
-					</Button>
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
-					</Button>
-				</div>
-			</form>
-		</Form>
+		<DynamicCreateForm
+			optionalFields={optionalFields}
+			onSubmit={async (data) => {
+				if (isEditing && character) {
+					await updateCharacter(character.id, data);
+					onUpdated?.({ ...character, ...data });
+				} else {
+					const created = await createCharacter(data);
+					onCreated?.(created);
+				}
+			}}
+			submitLabel={isEditing ? 'Guardar cambios' : 'Crear personaje'}
+		/>
 	);
 }

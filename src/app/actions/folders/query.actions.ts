@@ -7,180 +7,108 @@
  *              así como la obtención de la estructura de árbol de carpetas y estadísticas.
  */
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { mapFolderFiltersToPrisma, transformFolderToExtended } from '@/transformers/folder';
-import { type FolderFilters } from '@/types/entities/folder';
+import {
+	fromPrismaFolders,
+	mapFolderSearchOptionsToPrisma,
+} from '@/transformers/folder';
+import type { FolderComplete, FolderSearchOptions } from '@/types/entities/folder';
+import { revalidatePath } from 'next/cache';
 
 // Logger para acciones de consulta
 const queryLogger = serverLogger.withContext('FolderQueryActions');
 
 /**
- * Busca carpetas según filtros
- * @param filters Filtros para la búsqueda
- * @param options Opciones adicionales
- * @returns Lista de carpetas que coinciden con los filtros
+ * Busca carpetas en la base de datos según los criterios proporcionados.
  */
-export async function searchFolders(
-	filters: FolderFilters,
-	options: {
-		page?: number;
-		limit?: number;
-		sort?: string;
-		includeStats?: boolean;
-		includeImages?: boolean;
-		includeVideos?: boolean;
-		includeParent?: boolean;
-		includeChildren?: boolean;
-	} = {}
-) {
-	try {
-		const {
-			page = 1,
-			limit = 50,
-			sort = 'updatedAt:desc',
-			includeStats = false,
-			includeImages = false,
-			includeVideos = false,
-			includeParent = true,
-			includeChildren = false,
-		} = options;
+export async function searchFolders(options: FolderSearchOptions): Promise<{
+	data: FolderComplete[];
+	total: number;
+}> {
+	queryLogger.info('🔍 Searching folders with options:', options);
 
-		queryLogger.info('🔍 Buscando carpetas con filtros:', { filters, options });
+	const prismaOptions = mapFolderSearchOptionsToPrisma(options);
 
-		// Convertir filtros a prisma con el transformador
-		const prismaFilters = mapFolderFiltersToPrisma(filters);
-
-		// Determinar orden
-		const [sortField, sortDirection] = sort.split(':');
-		const orderBy: Record<string, 'asc' | 'desc'> = {};
-		orderBy[sortField || 'updatedAt'] = sortDirection === 'asc' ? 'asc' : 'desc';
-
-		// Calcular paginación
-		const skip = (page - 1) * limit;
-
-		// Construir includes dinámicamente
-		const include: any = {
-			_count: {
-				select: {
-					images: true,
-					videos: true,
-					children: true,
-				},
-			},
-		};
-
-		if (includeParent) include.parent = true;
-		if (includeChildren) include.children = true;
-		if (includeImages) include.images = { take: 5 }; // Limitar para evitar queries pesadas
-		if (includeVideos) include.videos = { take: 5 }; // Limitar para evitar queries pesadas
-
-		// Realizar búsqueda
-		const [folders, totalCount] = await Promise.all([
-			prisma.folder.findMany({
-				where: prismaFilters,
-				include,
-				orderBy,
-				skip,
-				take: limit,
-			}),
-			prisma.folder.count({
-				where: prismaFilters,
-			}),
-		]);
-
-		// Transformar resultados
-		const transformedFolders = folders.map((folder) => transformFolderToExtended(folder));
-
-		queryLogger.info(`✅ Búsqueda completada: ${transformedFolders.length} de ${totalCount} carpetas`);
-
-		return {
-			data: transformedFolders,
-			pagination: {
-				page,
-				limit,
-				total: totalCount,
-				pages: Math.ceil(totalCount / limit),
-			},
-		};
-	} catch (error) {
-		queryLogger.error('❌ Error buscando carpetas:', error);
-		throw new Error(`Error al buscar carpetas: ${error instanceof Error ? error.message : String(error)}`);
-	}
-}
-
-/**
- * Obtiene carpetas para la vista de árbol
- * Optimizado para navegación jerárquica
- */
-export async function getFolderTree() {
-	try {
-		queryLogger.info('🌳 Obteniendo árbol de carpetas');
-
-		// Optimizar query para árbol
-		const folders = await prisma.folder.findMany({
-			select: {
-				id: true,
-				name: true,
-				path: true,
-				parentId: true,
-				emoji: true,
-				color: true,
-				totalFiles: true,
+	const [folders, total] = await prisma.$transaction([
+		prisma.folder.findMany({
+			...prismaOptions,
+			include: {
+				parent: true,
+				children: true,
+				images: true,
 				_count: {
 					select: {
-						children: true,
 						images: true,
-						videos: true,
+						children: true,
 					},
 				},
 			},
-			orderBy: {
-				name: 'asc',
+		}),
+		prisma.folder.count({ where: prismaOptions.where }),
+	]);
+
+	queryLogger.info(`✅ Found ${folders.length} of ${total} folders.`);
+
+	return {
+		data: fromPrismaFolders(folders),
+		total,
+	};
+}
+
+/**
+ * Representa un nodo en el árbol de carpetas.
+ */
+interface FolderTreeNode {
+	id: string;
+	name: string;
+	parentId: string | null;
+	emoji: string | null;
+	children: FolderTreeNode[];
+	_count: {
+		children: number;
+		images: number;
+	};
+}
+
+/**
+ * Obtiene la estructura de árbol de carpetas, optimizada para UI.
+ */
+export async function getFolderTree(): Promise<FolderTreeNode[]> {
+	queryLogger.info('🌳 Getting folder tree');
+
+	const folders = await prisma.folder.findMany({
+		select: {
+			id: true,
+			name: true,
+			parentId: true,
+			emoji: true,
+			_count: {
+				select: { children: true, images: true },
 			},
+		},
+		orderBy: { name: 'asc' },
+	});
+
+	const folderMap = new Map<string, FolderTreeNode>();
+	folders.forEach((folder) => {
+		folderMap.set(folder.id, {
+			...folder,
+			children: [],
 		});
+	});
 
-		// Construir estructura de árbol
-		const folderMap = new Map();
-
-		// Poblar el mapa usando for...of
-		for (const folder of folders) {
-			folderMap.set(folder.id, {
-				...folder,
-				children: [],
-				level: 0,
-				isOpen: false,
-				isSelected: false,
-				hasChildren: folder._count.children > 0,
-				totalItems: (folder._count.images || 0) + (folder._count.videos || 0),
-			});
+	const tree: FolderTreeNode[] = [];
+	folders.forEach((folder) => {
+		if (folder.parentId && folderMap.has(folder.parentId)) {
+			folderMap.get(folder.parentId)?.children.push(folderMap.get(folder.id)!);
+		} else {
+			tree.push(folderMap.get(folder.id)!);
 		}
+	});
 
-		// Construir jerarquía de carpetas
-		const rootFolders: any[] = [];
-
-		// Construir relaciones padre-hijo usando for...of
-		for (const folder of folders) {
-			const folderWithMeta = folderMap.get(folder.id);
-
-			if (folder.parentId && folderMap.has(folder.parentId)) {
-				// Es una carpeta hija
-				const parent = folderMap.get(folder.parentId);
-				folderWithMeta.level = parent.level + 1;
-				parent.children.push(folderWithMeta);
-			} else {
-				// Es una carpeta raíz
-				rootFolders.push(folderWithMeta);
-			}
-		}
-
-		queryLogger.info(`✅ Árbol de carpetas obtenido con ${rootFolders.length} carpetas raíz`);
-		return rootFolders;
-	} catch (error) {
-		queryLogger.error('❌ Error obteniendo árbol de carpetas:', error);
-		throw new Error(`Error al obtener árbol de carpetas: ${error instanceof Error ? error.message : String(error)}`);
-	}
+	queryLogger.info(`✅ Folder tree constructed with ${tree.length} root folders.`);
+	return tree;
 }
 
 /**

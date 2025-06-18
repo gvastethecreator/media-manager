@@ -1,9 +1,9 @@
 'use server';
 
 import { getPrismaClient } from '@/lib/db';
-import type { Character } from '@/types/entities/character';
+import type { CharacterBase } from '@/types/entities/character';
 
-export interface CharacterCardData extends Character {
+export interface CharacterCardData extends CharacterBase {
 	_count: {
 		images: number;
 		videos: number;

@@ -3,10 +3,14 @@
  * @module adapters/folder
  */
 
-import type { FolderResponse, ProcessStatus } from '@/app/actions/folders/folder-types';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { transformFolderToExtended } from '@/transformers/folder';
-import type { CreateFolderData, FolderComplete, FolderExtended, UpdateFolderData } from '@/types/entities/folder';
+import type {
+    CreateFolderData,
+    FolderComplete,
+    FolderExtended,
+    UpdateFolderData,
+} from '@/types/entities/folder';
 
 const adapterLogger = serverLogger.withContext('FolderAdapter');
 
@@ -21,11 +25,13 @@ export interface ActionResponse<T = any> {
 }
 
 /**
- * Adapta el formato antiguo de respuesta al nuevo formato estandarizado
- * @param folderResponse Respuesta del server action antiguo
- * @returns Respuesta en el nuevo formato
+ * Adapta la respuesta de una carpeta a una respuesta de acción con datos extendidos.
+ * @param folderResponse Respuesta del server action que devuelve una carpeta completa.
+ * @returns Respuesta en el nuevo formato ActionResponse<FolderExtended>.
  */
-export function adaptFolderResponse(folderResponse: FolderResponse | null): ActionResponse<FolderExtended> {
+export function adaptFolderResponse(
+	folderResponse: FolderComplete | null
+): ActionResponse<FolderExtended> {
 	if (!folderResponse) {
 		return {
 			success: false,
@@ -34,39 +40,7 @@ export function adaptFolderResponse(folderResponse: FolderResponse | null): Acti
 	}
 
 	try {
-		// Primero convertir FolderResponse a un formato compatible
-		const folderData = {
-			id: folderResponse.id,
-			name: folderResponse.name,
-			path: folderResponse.path,
-			description: null, // FolderResponse no tiene description
-			parentId: null,
-			presetId: null,
-			emoji: '📁',
-			color: '#3b82f6',
-			featuredImage: null,
-			isFavorite: false,
-			totalFiles: folderResponse.totalFiles || 0,
-			totalSize: folderResponse.totalSize || 0,
-			autoReindex: folderResponse.autoReindex || false,
-			lastIndexed: folderResponse.lastIndexed ? new Date(folderResponse.lastIndexed) : null,
-			createdAt: folderResponse.createdAt ? new Date(folderResponse.createdAt) : new Date(),
-			updatedAt: folderResponse.updatedAt ? new Date(folderResponse.updatedAt) : new Date(),
-			children: [],
-			parent: null,
-			metadata: {},
-			stats: null,
-			_count: {
-				children: 0,
-				images: folderResponse._count?.images || 0,
-				videos: 0,
-				uploadedImages: 0,
-				tags: 0,
-			},
-		};
-
-		// Usar el transformador para convertir al nuevo formato
-		const transformedFolder = transformFolderToExtended(folderData as unknown as FolderComplete);
+		const transformedFolder = transformFolderToExtended(folderResponse);
 
 		return {
 			success: true,
@@ -84,116 +58,25 @@ export function adaptFolderResponse(folderResponse: FolderResponse | null): Acti
 }
 
 /**
- * Adapta un arreglo de carpetas al formato estándar
- * @param foldersResponse Respuesta con múltiples carpetas
- * @returns Respuesta en formato estándar
+ * Adapta un arreglo de carpetas al formato estándar de ActionResponse.
+ * @param foldersResponse Un array de carpetas completas.
+ * @returns Respuesta en formato ActionResponse<FolderExtended[]>.
  */
 export function adaptFoldersArray(
-	foldersResponse: FolderResponse[] | null | undefined
+	foldersResponse: FolderComplete[] | null | undefined
 ): ActionResponse<FolderExtended[]> {
 	try {
-		// Validación básica para evitar errores
-		if (!foldersResponse || !Array.isArray(foldersResponse)) {
-			adapterLogger.warn('⚠️ Recibiendo datos de carpetas en formato incorrecto:', foldersResponse);
+		if (!foldersResponse || foldersResponse.length === 0) {
 			return {
 				success: true,
 				message: 'No hay carpetas disponibles',
-				data: [], // Devolver array vacío en lugar de undefined
-			};
-		}
-
-		// Si no hay carpetas, devolver array vacío
-		if (foldersResponse.length === 0) {
-			return {
-				success: true,
-				message: 'No se encontraron carpetas',
 				data: [],
 			};
 		}
 
-		const transformedFolders = foldersResponse.map((folder) => {
-			try {
-				// 🔄 Convertir FolderResponse a formato compatible antes de transformar
-				const folderData = {
-					id: folder.id,
-					name: folder.name,
-					path: folder.path,
-					description: null, // FolderResponse no tiene description
-					parentId: null,
-					presetId: null,
-					emoji: '📁',
-					color: '#3b82f6',
-					featuredImage: null,
-					isFavorite: false,
-					totalFiles: folder.totalFiles || 0,
-					totalSize: folder.totalSize || 0,
-					autoReindex: folder.autoReindex || false,
-					lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null,
-					createdAt: folder.createdAt ? new Date(folder.createdAt) : new Date(),
-					updatedAt: folder.updatedAt ? new Date(folder.updatedAt) : new Date(),
-					children: [],
-					parent: null,
-					metadata: {},
-					stats: null,
-					_count: {
-						children: 0,
-						images: folder._count?.images || 0,
-						videos: 0,
-						uploadedImages: 0,
-						tags: 0,
-					},
-				};
-
-				return transformFolderToExtended(folderData as unknown as FolderComplete);
-			} catch (folderError) {
-				adapterLogger.error(
-					`❌ Error transformando carpeta individual (ID: ${folder?.id || 'desconocido'}):`,
-					folderError
-				);
-				// 🛠️ Devolver objeto completo FolderExtended en caso de error
-				return {
-					// Campos básicos
-					id: folder?.id || 'error',
-					name: folder?.name || 'Error en carpeta',
-					path: folder?.path || '/',
-					description: null,
-					parentId: null,
-					presetId: null,
-
-					// Propiedades visuales
-					emoji: '❌',
-					color: '#ef4444',
-					featuredImage: null,
-					isFavorite: false,
-
-					// Propiedades de sistema
-					totalFiles: 0,
-					totalSize: 0,
-					autoReindex: false,
-					lastIndexed: null,
-
-					// Fechas
-					createdAt: new Date(),
-					updatedAt: new Date(),
-
-					// Relaciones
-					children: [],
-					parent: null,
-					metadata: {},
-					stats: null,
-					_count: { children: 0, images: 0, videos: 0, uploadedImages: 0, tags: 0 },
-
-					// Propiedades UI (específicas de FolderExtended)
-					isSelected: false,
-					isOpen: false,
-					isLoading: false,
-					hasError: true,
-					isDragging: false,
-					isDropTarget: false,
-					level: 0,
-				} as unknown as FolderExtended;
-			}
-		});
+		const transformedFolders = foldersResponse.map((folder) =>
+			transformFolderToExtended(folder)
+		);
 
 		return {
 			success: true,
@@ -201,104 +84,80 @@ export function adaptFoldersArray(
 			data: transformedFolders,
 		};
 	} catch (error) {
-		adapterLogger.error('❌ Error adaptando respuesta de carpetas:', error);
+		adapterLogger.error('❌ Error adaptando array de carpetas:', error);
 		return {
 			success: false,
-			message: 'Error al procesar datos de carpetas',
+			message: 'Error al procesar la lista de carpetas',
 			errors: error instanceof Error ? error.message : String(error),
-			data: [], // Siempre devolver un array vacío para evitar errores en el cliente
 		};
 	}
 }
 
 /**
- * Adapta los datos de creación al formato esperado por el server action
- * @param createData Datos para crear carpeta en nuevo formato
- * @returns Datos en formato esperado por el server action
+ * Adapta los datos de creación de carpeta. Por ahora, parece que solo devuelve el ID.
+ * Esta función podría necesitar revisión dependiendo del caso de uso.
+ * @param createData - Datos para crear la carpeta.
+ * @returns El ID de la carpeta creada (aparentemente).
  */
-export function adaptCreateFolderData(createData: CreateFolderData): string {
-	// El server action actual solo requiere la ruta como parámetro
-	return createData.path;
+export function adaptCreateFolderData(createData: CreateFolderData): CreateFolderData {
+	// Actualmente, esta función no parece adaptar nada, solo pasa los datos.
+	// Se mantiene por consistencia, pero podría ser eliminada o refactorizada.
+	adapterLogger.info('Adaptando datos de creación de carpeta...', { createData });
+	return createData;
 }
 
 /**
- * Adapta los datos de actualización al formato esperado por el server action
- * @param id ID de la carpeta
- * @param updateData Datos para actualizar en el nuevo formato
- * @returns Datos en formato esperado por el server action
+ * Adapta los datos de actualización de carpeta.
+ * @param id - El ID de la carpeta a actualizar.
+ * @param updateData - Los datos para actualizar.
+ * @returns Un objeto con el ID y los datos de actualización.
  */
-export function adaptUpdateFolderData(id: string, updateData: UpdateFolderData): { id: string; data: any } {
-	// Adaptar al formato actual del server action
+export function adaptUpdateFolderData(
+	id: string,
+	updateData: UpdateFolderData
+): { id: string; data: UpdateFolderData } {
+	adapterLogger.info(`Adaptando datos de actualización para la carpeta ${id}`, {
+		updateData,
+	});
+	return { id, data: updateData };
+}
+
+/**
+ * Interfaz genérica para el estado de un proceso.
+ */
+export interface ProcessStatus {
+	status: 'processing' | 'completed' | 'failed';
+	message: string;
+	progress?: number;
+}
+
+/**
+ * Adapta el estado de un proceso a una respuesta de acción.
+ * @param status - El estado del proceso.
+ * @returns Una respuesta de acción.
+ */
+export function adaptProcessStatus(status: ProcessStatus): ActionResponse<ProcessStatus> {
+	adapterLogger.info('Adaptando estado del proceso:', { status });
 	return {
-		id,
-		data: {
-			name: updateData.name,
-			description: updateData.description,
-			emoji: updateData.emoji,
-			color: updateData.color,
-			isFavorite: updateData.isFavorite,
-			autoReindex: updateData.autoReindex,
-			// Otros campos según sea necesario
-		},
+		success: status.status !== 'failed',
+		message: status.message,
+		data: status,
 	};
 }
 
 /**
- * Adapta el estado de procesamiento del formato antiguo al nuevo
- * @param status Estado de procesamiento en formato antiguo
- * @returns Estado en formato estandarizado
- */
-export function adaptProcessStatus(status: ProcessStatus): any {
-	return {
-		status: status.status || 'unknown',
-		progress: status.progress || 0,
-		currentFile: status.currentFile,
-		phase: status.phase || 'unknown',
-		filesProcessed: status.filesProcessed || 0,
-		totalFiles: status.totalFiles || 0,
-		startTime: status.startTime,
-		endTime: status.endTime,
-		processingSpeed: status.processingSpeed,
-		estimatedTimeRemaining: status.estimatedTimeRemaining,
-		errors: status.errors || [],
-	};
-}
-
-/**
- * Maneja errores de forma estándar para los server actions de carpetas
- * @param error Error capturado
- * @returns Respuesta de error estandarizada
+ * Maneja errores de las acciones de carpeta y devuelve una respuesta estandarizada.
+ * @param error - El error capturado.
+ * @returns Una respuesta de acción de error.
  */
 export function handleFolderActionError(error: unknown): ActionResponse {
-	adapterLogger.error('❌ Error en acción de carpeta:', error);
-
-	let message = 'Error desconocido al procesar la carpeta';
-
-	if (error instanceof Error) {
-		message = error.message;
-
-		// Manejo específico según el tipo de error
-		if (error.name === 'FolderError') {
-			switch (message) {
-				case 'PATH_REQUIRED':
-					message = 'Se requiere una ruta para la carpeta';
-					break;
-				case 'PATH_NOT_FOUND':
-					message = 'La ruta especificada no existe';
-					break;
-				case 'FOLDER_EXISTS':
-					message = 'La carpeta ya está registrada en el sistema';
-					break;
-				default:
-					// Mantener el mensaje original
-					break;
-			}
-		}
-	}
+	const errorMessage =
+		error instanceof Error ? error.message : 'Ocurrió un error desconocido.';
+	adapterLogger.error('❌ Error en la acción de carpeta:', { error });
 
 	return {
 		success: false,
-		message,
-		errors: error, // <- Revertido al original
+		message: errorMessage,
+		errors: error,
 	};
 }

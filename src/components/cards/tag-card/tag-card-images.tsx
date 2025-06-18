@@ -1,9 +1,10 @@
+import { TagRarity } from '@/types/entities/tag';
 'use client';
 
 import { ImageIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { TagRarity } from '@/types/entities/tag/enums';
+;
 import { getRecentTagImages } from './tag-server-actions';
 
 interface TagCardImagesProps {

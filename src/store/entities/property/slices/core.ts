@@ -3,15 +3,23 @@
  * @module store/entities/property/slices/core
  */
 
-import type { StateCreator } from 'zustand';
-import { getProperties, getProperty } from '@/app/actions/properties/property.actions';
+import { createProperty as createPropertyAction, deleteProperty as deletePropertyAction, getProperties, getProperty } from '@/app/actions/properties/property.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { extendProperties, extendProperty } from '@/transformers/property/serializers';
-import type { CreatePropertyData, Property, PropertyBase, UpdatePropertyData } from '@/types/entities/property';
+import { extendProperties, extendProperty, fromPrismaProperty } from '@/transformers/property/serializers';
+import { CreatePropertySchema, UpdatePropertySchema } from '@/types/entities/property/schema';
+import { z } from 'zod';
+import type { StateCreator } from 'zustand';
 import type { PropertyState } from '../types';
 
 const propertyLogger = clientLogger.withContext('PropertyStore');
+
+// Types inferred from Zod schemas
+export type CreatePropertyData = z.infer<typeof CreatePropertySchema>;
+export type UpdatePropertyData = z.infer<typeof UpdatePropertySchema>;
+
+// The canonical Property type for the store is now in types.ts
+// export type Property = ReturnType<typeof extendProperty>;
 
 // Slice para operaciones CRUD básicas
 export interface PropertyCoreSlice {
@@ -21,8 +29,8 @@ export interface PropertyCoreSlice {
 	getPropertyItems: (propertyId: string) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
 
 	// Operaciones
-	addProperty: (property: PropertyBase) => void;
-	addProperties: (properties: PropertyBase[]) => void;
+	addProperty: (property: Property) => void;
+	addProperties: (properties: Property[]) => void;
 	updateProperty: (id: string, data: UpdatePropertyData) => void;
 	deleteProperty: (id: string) => void;
 
@@ -66,7 +74,7 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 				...state.core,
 				properties: {
 					...state.core.properties,
-					[property.id]: extendProperty(property),
+					[property.id]: property,
 				},
 				lastUpdated: new Date(),
 			},
@@ -75,7 +83,10 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 
 	addProperties: (properties) => {
 		propertyLogger.info('✅ Añadiendo múltiples propiedades al store', properties.length);
-		const propertiesMap = propertiesToMap(properties);
+		const propertiesMap = properties.reduce((acc, property) => {
+			acc[property.id] = property;
+			return acc;
+		}, {} as Record<string, Property>);
 
 		set((state) => ({
 			core: {
@@ -212,7 +223,8 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 		try {
 			const property = await getProperty(id);
 			if (property) {
-				const extendedProperty = extendProperty(property as PropertyBase);
+				const canonicalProperty = fromPrismaProperty(property);
+				const extendedProperty = extendProperty(canonicalProperty);
 				get().addProperty(extendedProperty);
 				return extendedProperty;
 			}
@@ -249,9 +261,13 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 
 		try {
 			const properties = await getProperties();
-			const extendedProperties = extendProperties(properties);
-			get().addProperties(extendedProperties);
-			return extendedProperties;
+			if (properties) {
+				const canonicalProperties = properties.map(fromPrismaProperty);
+				const extendedProperties = extendProperties(canonicalProperties);
+				get().addProperties(extendedProperties);
+				return extendedProperties;
+			}
+			return [];
 		} catch (error) {
 			propertyLogger.error('❌ Error al obtener propiedades:', error);
 			set((state) => ({
@@ -273,7 +289,7 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 	},
 
 	createProperty: async (data) => {
-		propertyLogger.info('📝 Creando nueva propiedad:', data.name);
+		propertyLogger.info('✨ Creando nueva propiedad:', data.name);
 		set((state) => ({
 			core: {
 				...state.core,
@@ -283,11 +299,12 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 		}));
 
 		try {
-			const property = await createProperty(data);
-			if (property) {
-				const extendedProperty = extendProperty(property);
+			const newProperty = await createPropertyAction(data);
+			if (newProperty) {
+				const canonicalProperty = fromPrismaProperty(newProperty);
+				const extendedProperty = extendProperty(canonicalProperty);
 				get().addProperty(extendedProperty);
-				toastService.success('Propiedad creada con éxito');
+				toastService.success(`Propiedad "${extendedProperty.name}" creada`);
 				return extendedProperty;
 			}
 			return undefined;
@@ -317,17 +334,17 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 			core: {
 				...state.core,
 				isLoading: true,
-				error: null,
 			},
 		}));
-
 		try {
-			await deleteProperty(id);
-			get().deleteProperty(id);
-			toastService.success('Propiedad eliminada con éxito');
-			return true;
+			const success = await deletePropertyAction(id);
+			if (success) {
+				get().deleteProperty(id);
+				toastService.info('Propiedad eliminada');
+			}
+			return success;
 		} catch (error) {
-			propertyLogger.error('❌ Error al eliminar propiedad:', error);
+			propertyLogger.error('❌ Error al eliminar la propiedad:', error);
 			set((state) => ({
 				core: {
 					...state.core,
@@ -347,17 +364,13 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 	},
 });
 
-/**
- * Convierte un array de propiedades a un mapa por ID
- * @param properties Array de propiedades
- * @returns Mapa de propiedades por ID
- */
-function propertiesToMap(properties: PropertyBase[]): Record<string, PropertyWithRelations> {
-	const propertiesMap: Record<string, PropertyWithRelations> = {};
-
-	for (const property of properties) {
-		propertiesMap[property.id] = extendProperty(property);
-	}
-
-	return propertiesMap;
+// Función de utilidad para convertir un array de propiedades a un mapa
+function propertiesToMap(properties: Property[]): Record<string, Property> {
+	return properties.reduce(
+		(acc, property) => {
+			acc[property.id] = property;
+			return acc;
+		},
+		{} as Record<string, Property>
+	);
 }

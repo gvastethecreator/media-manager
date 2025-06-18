@@ -1,20 +1,16 @@
 'use client';
 
+import { createAlbum, updateAlbum } from '@/app/actions/albums/album.actions';
+import { ColorPicker } from '@/components/ui/color-picker';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import toastService from '@/services/toast.service';
+import type { Album } from '@/types/entities/album';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Bookmark, ClipboardList, Gem, Loader2, PaintBucket, Pencil, Save, TextCursor } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { createAlbum, updateAlbum } from '@/app/actions/albums/album.actions';
-import { Button } from '@/components/ui/button';
-import { ColorPicker } from '@/components/ui/color-picker';
-import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import toastService from '@/services/toast.service';
-import type { Album } from '@/types/entities/album';
+import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación
 const createAlbumSchema = z.object({
@@ -127,185 +123,89 @@ export function CreateAlbumForm({
 		[isEditing, album, onCreated, onUpdated, form]
 	);
 
-	// Botón de guardar/crear que aparecerá en la parte superior
-	const _saveButton = (
-		<Button type="submit" className="h-8 text-xs" disabled={isSubmitting} onClick={form.handleSubmit(onSubmit)}>
-			{isSubmitting && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
-			<Save className="h-3 w-3 mr-1" />
-			{isEditing ? 'Guardar cambios' : 'Crear álbum'}
-		</Button>
-	);
+	// Campos opcionales para el formulario dinámico
+	const optionalFields = [
+		{
+			name: 'emoji',
+			label: 'Emoji',
+			render: ({ value, onChange }: any) => (
+				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
+			),
+		},
+		{
+			name: 'color',
+			label: 'Color',
+			render: ({ value, onChange }: any) => (
+				<ColorPicker value={value} onChange={onChange} compact showLabel={false} />
+			),
+		},
+		{
+			name: 'description',
+			label: 'Descripción',
+			render: ({ value, onChange }: any) => (
+				<textarea
+					placeholder="Descripción del álbum..."
+					value={value || ''}
+					onChange={(e) => onChange(e.target.value)}
+					rows={3}
+					className="text-xs resize-none w-full border rounded p-2"
+				/>
+			),
+		},
+		{
+			name: 'category',
+			label: 'Categoría',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger className="h-8 text-xs w-full">
+						<SelectValue placeholder="Seleccionar" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="personal" className="text-xs">Personal</SelectItem>
+						<SelectItem value="trabajo" className="text-xs">Trabajo</SelectItem>
+						<SelectItem value="viajes" className="text-xs">Viajes</SelectItem>
+						<SelectItem value="eventos" className="text-xs">Eventos</SelectItem>
+						<SelectItem value="proyectos" className="text-xs">Proyectos</SelectItem>
+						<SelectItem value="otro" className="text-xs">Otro</SelectItem>
+					</SelectContent>
+				</Select>
+			),
+		},
+		{
+			name: 'rarity',
+			label: 'Rareza',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger className="h-8 text-xs w-full">
+						<SelectValue placeholder="Seleccionar" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="common" className="text-xs">Común</SelectItem>
+						<SelectItem value="uncommon" className="text-xs">Poco común</SelectItem>
+						<SelectItem value="rare" className="text-xs">Raro</SelectItem>
+						<SelectItem value="epic" className="text-xs">Épico</SelectItem>
+						<SelectItem value="legendary" className="text-xs">Legendario</SelectItem>
+					</SelectContent>
+				</Select>
+			),
+		},
+		// ...agregar más campos opcionales si es necesario...
+	];
 
 	return (
-		<Form {...form}>
-			<form id="album-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-				<div className="grid grid-cols-2 gap-3">
-					{/* Nombre */}
-					<FormField
-						control={form.control}
-						name="name"
-						render={({ field }) => (
-							<FormItem className="col-span-2">
-								<FormLabel className="text-xs flex items-center gap-1">
-									<TextCursor className="h-3 w-3" />
-									Nombre
-								</FormLabel>
-								<FormControl>
-									<Input placeholder="Mi álbum" {...field} className="h-8 text-xs" />
-								</FormControl>
-								<FormMessage className="text-[10px]" />
-							</FormItem>
-						)}
-					/>
-
-					{/* Emoji */}
-					<FormField
-						control={form.control}
-						name="emoji"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="text-xs flex items-center gap-1">
-									<Bookmark className="h-3 w-3" />
-									Emoji
-								</FormLabel>
-								<FormControl>
-									<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
-								</FormControl>
-								<FormMessage className="text-[10px]" />
-							</FormItem>
-						)}
-					/>
-
-					{/* Color */}
-					<FormField
-						control={form.control}
-						name="color"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="text-xs flex items-center gap-1">
-									<PaintBucket className="h-3 w-3" />
-									Color
-								</FormLabel>
-								<FormControl>
-									<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
-								</FormControl>
-								<FormMessage className="text-[10px]" />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				{/* Descripción */}
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel className="text-xs flex items-center gap-1">
-								<Pencil className="h-3 w-3" />
-								Descripción
-							</FormLabel>
-							<FormControl>
-								<Textarea
-									placeholder="Descripción del álbum..."
-									{...field}
-									value={field.value || ''}
-									rows={3}
-									className="text-xs resize-none"
-								/>
-							</FormControl>
-							<FormMessage className="text-[10px]" />
-						</FormItem>
-					)}
-				/>
-
-				<div className="grid grid-cols-2 gap-3">
-					{/* Categoría */}
-					<FormField
-						control={form.control}
-						name="category"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="text-xs flex items-center gap-1">
-									<ClipboardList className="h-3 w-3" />
-									Categoría
-								</FormLabel>
-								<Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
-									<FormControl>
-										<SelectTrigger className="h-8 text-xs">
-											<SelectValue placeholder="Seleccionar" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										<SelectGroup>
-											<SelectItem value="personal" className="text-xs">
-												Personal
-											</SelectItem>
-											<SelectItem value="trabajo" className="text-xs">
-												Trabajo
-											</SelectItem>
-											<SelectItem value="viajes" className="text-xs">
-												Viajes
-											</SelectItem>
-											<SelectItem value="eventos" className="text-xs">
-												Eventos
-											</SelectItem>
-											<SelectItem value="proyectos" className="text-xs">
-												Proyectos
-											</SelectItem>
-											<SelectItem value="otro" className="text-xs">
-												Otro
-											</SelectItem>
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-								<FormMessage className="text-[10px]" />
-							</FormItem>
-						)}
-					/>
-
-					{/* Rareza */}
-					<FormField
-						control={form.control}
-						name="rarity"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel className="text-xs flex items-center gap-1">
-									<Gem className="h-3 w-3" />
-									Rareza
-								</FormLabel>
-								<Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
-									<FormControl>
-										<SelectTrigger className="h-8 text-xs">
-											<SelectValue placeholder="Seleccionar" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										<SelectGroup>
-											<SelectItem value="common" className="text-xs">
-												Común
-											</SelectItem>
-											<SelectItem value="uncommon" className="text-xs">
-												Poco común
-											</SelectItem>
-											<SelectItem value="rare" className="text-xs">
-												Raro
-											</SelectItem>
-											<SelectItem value="epic" className="text-xs">
-												Épico
-											</SelectItem>
-											<SelectItem value="legendary" className="text-xs">
-												Legendario
-											</SelectItem>
-										</SelectGroup>
-									</SelectContent>
-								</Select>
-								<FormMessage className="text-[10px]" />
-							</FormItem>
-						)}
-					/>
-				</div>
-			</form>
-		</Form>
+		<DynamicCreateForm
+			optionalFields={optionalFields}
+			onSubmit={async (data) => {
+				// Aquí puedes adaptar la lógica de creación/edición según sea necesario
+				if (isEditing && album) {
+					const updatedAlbum = await updateAlbum(album.id, data);
+					onUpdated?.(updatedAlbum);
+				} else {
+					const newAlbum = await createAlbum(data);
+					onCreated?.(newAlbum);
+				}
+			}}
+			submitLabel={isEditing ? 'Guardar cambios' : 'Crear álbum'}
+		/>
 	);
 }

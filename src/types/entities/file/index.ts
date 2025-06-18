@@ -6,13 +6,8 @@
  * Legacy eliminado.
  */
 
-export {
-    FileErrorCode,
-    FileEventType, FileType
-} from './enums';
+export * from './enums';
 export * from './extended';
-export type {
-    FileBase, FileCreateInput, FileRelations, FileUpdateInput
-} from './types';
+export * from './types';
 
 // 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

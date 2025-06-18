@@ -1,184 +1,125 @@
 /**
- * @file Transformadores principales para la entidad Place
+ * @file Transformador principal para la entidad Place.
  * @module transformers/place/transformer
+ * @description Contiene la lógica para convertir un objeto Place de Prisma a nuestro tipo canónico.
  */
-
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { Place, PlaceExtended, PlaceWithStats } from '@/types/entities/place/types';
+import type { PlaceComplete } from '@/types/entities/place';
 import { TransformerError } from '@/utils/transformers/errors';
-import { extendPlace, fromPrismaPlace } from './serializers';
+import type { Prisma } from '@prisma/client';
+import {
+    deserializePlaceDangers,
+    deserializePlaceFilters,
+    deserializePlaceResources,
+    deserializePlaceStats,
+} from './serializers';
 
 const logger = serverLogger.withContext('PlaceTransformer');
 
+// Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
+type PlaceFromPrisma = Prisma.PlaceGetPayload<{
+	include: {
+		images: true;
+		videos: true;
+		albums: true;
+		collections: true;
+		tags: true;
+		characters: true;
+		worldItems: true;
+		concepts: true;
+		prompts: true;
+		notes: true;
+		wildcards: true;
+		properties: true;
+		groups: true;
+		_count: {
+			select: {
+				images: true;
+				videos: true;
+				albums: true;
+				collections: true;
+				tags: true;
+				characters: true;
+				worldItems: true;
+				concepts: true;
+				prompts: true;
+				notes: true;
+				wildcards: true;
+				properties: true;
+				groups: true;
+			};
+		};
+	};
+}>;
+
 /**
- * 🔄 Transforma un objeto a Place, validando su estructura
- * @param place Objeto a transformar
- * @returns Place validado y estructurado
- * @throws TransformerError si la validación falla
+ * 🔄 Transforma un objeto Place de Prisma a nuestro tipo canónico PlaceComplete.
+ *
+ * @param prismaPlace - El objeto Place obtenido de Prisma.
+ * @returns Un objeto PlaceComplete compatible con nuestra aplicación.
+ * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function transformPlace(place: unknown): Place {
-	try {
-		if (!place) {
-			throw new Error('El objeto de lugar es nulo o indefinido');
-		}
-
-		// Si el lugar viene de Prisma, transformarlo
-		if ('images' in (place as any) && 'videos' in (place as any)) {
-			return fromPrismaPlace(place as any);
-		}
-
-		// Si es un objeto simple, extenderlo
-		return extendPlace(place as any);
-	} catch (error) {
-		logger.error('Error transformando lugar:', { error });
-		throw new TransformerError('Error al transformar lugar');
+export function fromPrismaPlace(prismaPlace: PlaceFromPrisma | null): PlaceComplete {
+	if (!prismaPlace) {
+		throw new TransformerError('El objeto de lugar de Prisma no puede ser nulo.');
 	}
-}
 
-/**
- * 🔄 Transforma una lista de objetos a Places
- * @param places Array de objetos a transformar
- * @returns Array de Places validados
- * @throws TransformerError si la validación falla para algún elemento
- */
-export function transformPlaces(places: unknown[]): Place[] {
 	try {
-		if (!Array.isArray(places)) {
-			throw new Error('El parámetro no es un array');
-		}
+		const { _count, ...baseData } = prismaPlace;
 
-		return places.map((place) => transformPlace(place));
-	} catch (error) {
-		logger.error('Error transformando lista de lugares:', { error });
-		throw new TransformerError('Error al transformar lista de lugares');
-	}
-}
-
-/**
- * 🔄 Transforma un Place a su versión extendida con propiedades para UI
- * @param place Place base a extender
- * @returns Place extendido con propiedades adicionales
- */
-export function transformPlaceToExtended(place: Place): PlaceExtended {
-	try {
-		const basePlace = transformPlace(place);
-
-		// Extender el lugar con propiedades para UI
 		return {
-			...basePlace,
-			isSelected: false,
-			isHighlighted: false,
-			isEditing: false,
-			isExpanded: false,
-			displayOrder: 0,
-			// Propiedades calculadas para UI
-			dangersArray:
-				typeof basePlace.dangers === 'string' ? JSON.parse(basePlace.dangers || '[]') : basePlace.dangers || [],
-			resourcesArray:
-				typeof basePlace.resources === 'string' ? JSON.parse(basePlace.resources || '[]') : basePlace.resources || [],
-			statsObject: typeof basePlace.stats === 'string' ? JSON.parse(basePlace.stats || '{}') : basePlace.stats || {},
+			...baseData,
+			// Deserializar campos JSON
+			dangers: deserializePlaceDangers(baseData.dangers),
+			resources: deserializePlaceResources(baseData.resources),
+			stats: deserializePlaceStats(baseData.stats),
+			filters: deserializePlaceFilters(baseData.filters),
+			// Asegurar que las relaciones opcionales no sean undefined
+			images: baseData.images ?? [],
+			videos: baseData.videos ?? [],
+			albums: baseData.albums ?? [],
+			collections: baseData.collections ?? [],
+			tags: baseData.tags ?? [],
+			characters: baseData.characters ?? [],
+			worldItems: baseData.worldItems ?? [],
+			concepts: baseData.concepts ?? [],
+			prompts: baseData.prompts ?? [],
+			notes: baseData.notes ?? [],
+			wildcards: baseData.wildcards ?? [],
+			properties: baseData.properties ?? [],
+			groups: baseData.groups ?? [],
+			// Asignar el conteo de forma segura
+			_count: {
+				images: _count?.images ?? 0,
+				videos: _count?.videos ?? 0,
+				albums: _count?.albums ?? 0,
+				collections: _count?.collections ?? 0,
+				tags: _count?.tags ?? 0,
+				characters: _count?.characters ?? 0,
+				worldItems: _count?.worldItems ?? 0,
+				concepts: _count?.concepts ?? 0,
+				prompts: _count?.prompts ?? 0,
+				notes: _count?.notes ?? 0,
+				wildcards: _count?.wildcards ?? 0,
+				properties: _count?.properties ?? 0,
+				groups: _count?.groups ?? 0,
+			},
 		};
 	} catch (error) {
-		logger.error('Error transformando lugar a versión extendida:', { error, placeId: (place as any)?.id });
-		throw new TransformerError('Error al transformar lugar a versión extendida');
+		logger.error('Error transformando lugar desde Prisma', {
+			error,
+			placeId: prismaPlace.id,
+		});
+		throw new TransformerError(`Error al transformar el lugar: ${(error as Error).message}`);
 	}
 }
 
 /**
- * 🔄 Transforma un Place a su versión con estadísticas
- * @param place Place base
- * @returns Place con estadísticas calculadas
+ * 🔄 Transforma una lista de lugares de Prisma a una lista de PlaceComplete.
+ *
+ * @param prismaPlaces - Un array de objetos Place de Prisma.
+ * @returns Un array de objetos PlaceComplete.
  */
-export function transformPlaceToWithStats(place: Place): PlaceWithStats {
-	try {
-		const basePlace = transformPlace(place);
-
-		// Calcular totales para las estadísticas
-		const counts = basePlace._count || {
-			images: 0,
-			videos: 0,
-			collections: 0,
-			albums: 0,
-			tags: 0,
-			characters: 0,
-			worldItems: 0,
-			concepts: 0,
-			prompts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
-		};
-
-		// Determinar la última actualización
-		const lastUpdated = basePlace.updatedAt || new Date();
-
-		// Calcular nivel de importancia basado en relaciones
-		const importanceLevel = calculateImportanceLevel(basePlace, counts);
-
-		// Construir y devolver el objeto extendido
-		return {
-			...basePlace,
-			lastUpdated,
-			imageCount: counts.images,
-			videoCount: counts.videos,
-			albumCount: counts.albums,
-			tagCount: counts.tags,
-			characterCount: counts.characters,
-			worldItemCount: counts.worldItems,
-			importanceLevel,
-			statsDisplay: generateStatsDisplay(basePlace),
-			distribution: [
-				{ name: 'images', count: counts.images },
-				{ name: 'videos', count: counts.videos },
-				{ name: 'characters', count: counts.characters },
-				{ name: 'items', count: counts.worldItems },
-			],
-		};
-	} catch (error) {
-		logger.error('Error transformando lugar a versión con estadísticas:', { error, placeId: (place as any)?.id });
-		throw new TransformerError('Error al transformar lugar a versión con estadísticas');
-	}
-}
-
-/**
- * Calcula el nivel de importancia de un lugar basado en sus relaciones y atributos
- * @private
- */
-function calculateImportanceLevel(place: Place, counts: Record<string, number>): number {
-	try {
-		// Base: población + contenido asociado
-		const populationFactor = place.population ? Math.min(place.population / 10000, 10) : 0;
-		const relationsFactor = Object.values(counts).reduce((sum, count) => sum + count, 0) * 0.2;
-
-		// Factores de importancia narrativa (lore, historia)
-		const loreFactor = place.lore ? Math.min(place.lore.length / 100, 5) : 0;
-		const historyFactor = place.history ? Math.min(place.history.length / 100, 5) : 0;
-
-		// Importancia general
-		return Math.round(populationFactor + relationsFactor + loreFactor + historyFactor);
-	} catch (error) {
-		logger.warn('Error calculando nivel de importancia, usando valor por defecto:', error);
-		return 1; // Valor por defecto
-	}
-}
-
-/**
- * Genera presentación de estadísticas del lugar para visualización
- * @private
- */
-function generateStatsDisplay(place: Place): Array<{ name: string; value: number }> {
-	try {
-		// Si ya tenemos stats como objeto, usar eso directamente
-		const stats = typeof place.stats === 'string' ? JSON.parse(place.stats || '{}') : place.stats || {};
-
-		// Convertir a formato para gráfico
-		return Object.entries(stats).map(([name, value]) => ({
-			name,
-			value: typeof value === 'number' ? value : 0,
-		}));
-	} catch (error) {
-		logger.warn('Error generando datos de estadísticas, devolviendo array vacío:', error);
-		return []; // Valor por defecto
-	}
+export function fromPrismaPlaces(prismaPlaces: PlaceFromPrisma[]): PlaceComplete[] {
+	return prismaPlaces.map(fromPrismaPlace);
 }

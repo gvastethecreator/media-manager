@@ -6,72 +6,114 @@
  * Última migración: 2025-06-18
  */
 
-import { z } from 'zod';
+import type { Prisma } from '@prisma/client';
 
 /**
- * Tipo base canónico para Folder
+ * 📁 Tipo base para una carpeta.
  */
 export interface FolderBase {
 	id: string;
 	name: string;
-	description?: string | null;
+	description: string | null;
 	path: string;
-	emoji?: string | null;
-	color?: string | null;
-	featuredImage?: string | null;
+	emoji: string | null;
+	color: string | null;
+	featuredImage: string | null;
 	isFavorite: boolean;
 	autoReindex: boolean;
 	totalFiles: number;
 	totalSize: number;
-	lastIndexed?: Date | null;
-	parentId?: string | null;
-	presetId?: string | null;
+	lastIndexed: Date | null;
+	parentId: string | null;
+	presetId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
 
 /**
- * Input para creación
+ * 📁 Input para crear una nueva carpeta.
  */
-export interface FolderCreateInput {
-	name: string;
-	description?: string | null;
-	path: string;
-	emoji?: string | null;
-	color?: string | null;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	autoReindex?: boolean;
-	parentId?: string | null;
-	presetId?: string | null;
+export interface FolderCreateInput extends Omit<FolderBase, 'id' | 'createdAt' | 'updatedAt' | 'totalFiles' | 'totalSize' | 'lastIndexed'> {}
+
+/**
+ * 📁 Input para actualizar una carpeta existente.
+ */
+export interface FolderUpdateInput extends Partial<FolderCreateInput> {}
+
+/**
+ * 📁 Relaciones de una carpeta.
+ */
+export interface FolderRelations {
+	images?: unknown[];
+	parent?: FolderBase | null;
+	children?: FolderBase[];
 }
 
 /**
- * Input para actualización
+ * 📁 Conteos de las relaciones.
  */
-export type FolderUpdateInput = Partial<Omit<FolderBase, 'id' | 'createdAt' | 'updatedAt'>>;
+export interface FolderCounts {
+	_count?: {
+		images?: number;
+		children?: number;
+	};
+}
 
 /**
- * Esquema Zod para validación de Folder
+ * 📁 Tipo completo de una carpeta con relaciones y conteos.
  */
-export const FolderSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	description: z.string().nullable().optional(),
-	path: z.string(),
-	emoji: z.string().nullable().optional(),
-	color: z.string().nullable().optional(),
-	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean(),
-	autoReindex: z.boolean(),
-	totalFiles: z.number(),
-	totalSize: z.number(),
-	lastIndexed: z.date().nullable().optional(),
-	parentId: z.string().nullable().optional(),
-	presetId: z.string().nullable().optional(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
-});
+export interface FolderComplete extends FolderBase, FolderRelations, FolderCounts {}
+
+/**
+ * 📁 Propiedades de UI para una carpeta.
+ */
+export interface FolderUIProps {
+	isSelected?: boolean;
+	isOpen?: boolean;
+	isLoading?: boolean;
+	hasError?: boolean;
+	isDragging?: boolean;
+	isDropTarget?: boolean;
+	level?: number;
+}
+
+/**
+ * 📁 Tipo extendido con estado de UI.
+ */
+export interface FolderExtended extends FolderComplete, FolderUIProps {}
+
+/**
+ * 📁 Tipo extendido y completo, con hijos también extendidos.
+ */
+export interface FolderExtendedComplete extends FolderExtended {
+	children?: FolderExtendedComplete[];
+}
+
+// Alias
+export type CreateFolderData = FolderCreateInput;
+export type UpdateFolderData = FolderUpdateInput;
+export type FolderWithRelations = FolderComplete;
+
+/**
+ * 📁 Filtros para buscar carpetas.
+ */
+export interface FolderFilters {
+	search?: string;
+	isFavorite?: boolean;
+	parentId?: string | null;
+	hasImages?: boolean;
+}
+
+/**
+ * 📁 Opciones para las consultas de búsqueda de carpetas.
+ */
+export interface FolderSearchOptions {
+	skip?: number;
+	take?: number;
+	orderBy?: Prisma.FolderOrderByWithRelationInput;
+	filters?: FolderFilters;
+	include?: Prisma.FolderInclude;
+}
 
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.

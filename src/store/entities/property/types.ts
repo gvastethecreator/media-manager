@@ -4,11 +4,30 @@
  */
 
 import type {
-	Property,
-	PropertyDisplayState,
-	PropertySortCriteria,
-	PropertyViewMode,
-} from '../../../types/entities/property';
+    PropertySortCriteria,
+    PropertyViewMode,
+    PropertyWithRelations,
+} from '@/types/entities/property';
+
+/**
+ * Define el estado de visualización para una propiedad individual.
+ */
+export interface PropertyDisplayState {
+	isHovering?: boolean;
+	isActive?: boolean;
+	isSelected?: boolean;
+	isExpanded?: boolean;
+}
+
+/**
+ * El tipo canónico para una propiedad en el store, incluyendo relaciones y estado de UI
+ */
+export type Property = PropertyWithRelations & {
+	_ui: {
+		lastUpdated: Date;
+		itemCount: number;
+	};
+};
 
 /**
  * Estado del core para el store de propiedades

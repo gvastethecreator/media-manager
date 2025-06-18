@@ -3,12 +3,22 @@
  * @module store/entities/property/slices/ui
  */
 
-import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { PropertyViewMode } from '@/types/entities/property';
-import type { PropertyState } from '../types';
+import { PropertyViewMode } from '@/types/entities/property';
+import type { StateCreator } from 'zustand';
+import type { PropertyDisplayState, PropertyState } from '../types';
 
 const uiLogger = clientLogger.withContext('PropertyStore:UI');
+
+/**
+ * Define el estado de visualización para una propiedad individual.
+ */
+// export interface PropertyDisplayState {
+// 	isHovering?: boolean;
+// 	isActive?: boolean;
+// 	isSelected?: boolean;
+// 	isExpanded?: boolean;
+// }
 
 // Slice para operaciones de UI
 export interface PropertyUISlice {
@@ -29,7 +39,7 @@ export interface PropertyUISlice {
 	setViewMode: (mode: PropertyViewMode) => void;
 
 	// Estados visuales
-	setPropertyDisplayState: (propertyId: string, state: Partial<any>) => void;
+	setPropertyDisplayState: (propertyId: string, state: Partial<PropertyDisplayState>) => void;
 	resetPropertyDisplayState: (propertyId: string) => void;
 
 	// Drag & drop
@@ -181,7 +191,7 @@ export const createPropertyUISlice: StateCreator<PropertyState, [], [], Property
 	},
 
 	// Estados visuales
-	setPropertyDisplayState: (propertyId, _state) => {
+	setPropertyDisplayState: (propertyId, displayState) => {
 		uiLogger.info('🎨 Actualizando estado visual para propiedad:', propertyId);
 		set((state) => ({
 			ui: {
@@ -189,8 +199,8 @@ export const createPropertyUISlice: StateCreator<PropertyState, [], [], Property
 				displayState: {
 					...state.ui.displayState,
 					[propertyId]: {
-						...state.ui.displayState[propertyId],
-						...state,
+						...(state.ui.displayState?.[propertyId] || {}),
+						...displayState,
 					},
 				},
 			},

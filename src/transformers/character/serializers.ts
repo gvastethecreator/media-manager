@@ -1,191 +1,126 @@
 /**
- * @file Funciones de serialización para la entidad Character
+ * @file Funciones de serialización para la entidad Character.
  * @module transformers/character/serializers
+ * @description Contiene funciones para manejar la serialización de campos complejos (JSON) de la entidad Character.
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { TransformerError } from '@/utils/transformers/errors';
+
+const logger = serverLogger.withContext('CharacterSerializers');
 
 /**
- * 🔍 Valida un objeto como Character
- * @param input Objeto a validar
- * @returns El objeto validado
- * @throws TransformerError si la validación falla
- * @deprecated Usar validateCharacter de ./server.ts para evitar duplicación
+ * 🔄 Deserializa un string JSON a un objeto.
+ * @param jsonString El string a deserializar.
+ * @param fieldName El nombre del campo para logging de errores.
+ * @returns El objeto deserializado.
+ * @throws {TransformerError} si el JSON es inválido.
  */
-// export function validateCharacter<T>(input: T): T {
-// 	try {
-// 		const result = CharacterSchema.safeParse(input);
-// 		if (!result.success) {
-// 			throw new TransformerError(`Validación de character fallida: ${result.error.message}`);
-// 		}
-// 		return input;
-// 	} catch (error) {
-// 		serverLogger.error(`Error validando character: ${error}`);
-// 		if (error instanceof TransformerError) {
-// 			throw error;
-// 		}
-// 		throw new TransformerError(`Error validando character: ${(error as Error).message}`);
-// 	}
-// }
-
-/**
- * 🔄 Deserializa un string JSON de estadísticas a objeto
- * @param stats String JSON o objeto de estadísticas
- * @returns Objeto de estadísticas
- */
-export function deserializeStats(stats: string | Record<string, any> | undefined): Record<string, any> {
-	if (typeof stats === 'string') {
-		try {
-			if (stats === 'empty_object' || stats === '') {
-				return {};
-			}
-			return JSON.parse(stats);
-		} catch (error) {
-			serverLogger.warn(`Error deserializando stats, usando objeto vacío: ${error}`);
-			return {};
-		}
-	}
-	return stats || {};
-}
-
-/**
- * 🔄 Serializa un objeto de estadísticas a string JSON
- * @param stats Objeto de estadísticas o string JSON
- * @returns String JSON de estadísticas
- */
-export function serializeStats(stats: Record<string, any> | string | undefined): string {
-	if (typeof stats === 'string') {
-		return stats;
-	}
-	if (!stats || Object.keys(stats).length === 0) {
-		return 'empty_object';
+function deserializeObject(jsonString: string | null | undefined, fieldName: string): object {
+	if (!jsonString || jsonString === '{}') {
+		return {};
 	}
 	try {
-		return JSON.stringify(stats);
+		const parsed = JSON.parse(jsonString);
+		return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) ? parsed : {};
 	} catch (error) {
-		serverLogger.warn(`Error serializando stats, usando objeto vacío: ${error}`);
-		return 'empty_object';
+		logger.error(`Error deserializando el campo '${fieldName}'`, { error, jsonString });
+		throw new TransformerError(`El formato del campo '${fieldName}' es inválido.`);
 	}
 }
 
 /**
- * 🔄 Deserializa un string JSON de relaciones a array
- * @param relationships String JSON o array de relaciones
- * @returns Array de relaciones
+ * 🔄 Serializa un objeto a un string JSON.
+ * @param data El objeto a serializar.
+ * @param fieldName El nombre del campo para logging de errores.
+ * @returns El string JSON.
+ * @throws {TransformerError} si la serialización falla.
  */
-export function deserializeRelationships(relationships: string | any[] | undefined): any[] {
-	if (typeof relationships === 'string') {
-		try {
-			// Eliminado soporte a 'empty_array', solo se acepta '[]' como array vacío
-			if (relationships === '' || relationships === '[]') {
-				return [];
-			}
-			return JSON.parse(relationships);
-		} catch (error) {
-			serverLogger.warn(`Error deserializando relationships, usando array vacío: ${error}`);
-			return [];
-		}
+function serializeObject(data: object | null | undefined, fieldName: string): string {
+	if (!data || Object.keys(data).length === 0) {
+		return '{}';
 	}
-	return relationships || [];
+	try {
+		return JSON.stringify(data);
+	} catch (error) {
+		logger.error(`Error serializando el campo '${fieldName}'`, { error, data });
+		throw new TransformerError(`No se pudo serializar el campo '${fieldName}'.`);
+	}
 }
 
 /**
- * 🔄 Serializa un array de relaciones a string JSON
- * @param relationships Array de relaciones o string JSON
- * @returns String JSON de relaciones
+ * 🔄 Deserializa un string JSON a un array.
+ * @param jsonString El string a deserializar.
+ * @param fieldName El nombre del campo para logging de errores.
+ * @returns El array deserializado.
+ * @throws {TransformerError} si el JSON es inválido.
  */
-export function serializeRelationships(relationships: any[] | string | undefined): string {
-	if (typeof relationships === 'string') {
-		return relationships;
+function deserializeArray(jsonString: string | null | undefined, fieldName: string): unknown[] {
+	if (!jsonString || jsonString === '[]') {
+		return [];
 	}
-	if (!relationships || relationships.length === 0) {
+	try {
+		const parsed = JSON.parse(jsonString);
+		return Array.isArray(parsed) ? parsed : [];
+	} catch (error) {
+		logger.error(`Error deserializando el campo '${fieldName}'`, { error, jsonString });
+		throw new TransformerError(`El formato del campo '${fieldName}' es inválido.`);
+	}
+}
+
+/**
+ * 🔄 Serializa un array a un string JSON.
+ * @param data El array a serializar.
+ * @param fieldName El nombre del campo para logging de errores.
+ * @returns El string JSON.
+ * @throws {TransformerError} si la serialización falla.
+ */
+function serializeArray(data: unknown[] | null | undefined, fieldName: string): string {
+	if (!data || data.length === 0) {
 		return '[]';
 	}
 	try {
-		return JSON.stringify(relationships);
+		return JSON.stringify(data);
 	} catch (error) {
-		serverLogger.warn(`Error serializando relationships, usando array vacío: ${error}`);
-		return '[]';
+		logger.error(`Error serializando el campo '${fieldName}'`, { error, data });
+		throw new TransformerError(`No se pudo serializar el campo '${fieldName}'.`);
 	}
 }
 
-/**
- * 🔄 Deserializa un string JSON de array a array
- * @param array String JSON o array
- * @returns Array de elementos
- */
-export function deserializeArray(array: string | any[] | undefined): any[] {
-	if (typeof array === 'string') {
-		try {
-			// Eliminado soporte a 'empty_array', solo se acepta '[]' como array vacío
-			if (array === '' || array === '[]') {
-				return [];
-			}
-			return JSON.parse(array);
-		} catch (error) {
-			serverLogger.warn(`Error deserializando array, usando array vacío: ${error}`);
-			return [];
-		}
-	}
-	return array || [];
-}
+// --- Exportaciones específicas para cada campo ---
 
-/**
- * 🔄 Serializa un array a string JSON
- * @param array Array o string JSON
- * @returns String JSON de array
- */
-export function serializeArray(array: any[] | string | undefined): string {
-	if (typeof array === 'string') {
-		return array;
-	}
-	if (!array || array.length === 0) {
-		return '[]';
-	}
-	try {
-		return JSON.stringify(array);
-	} catch (error) {
-		serverLogger.warn(`Error serializando array, usando array vacío: ${error}`);
-		return '[]';
-	}
-}
+// Stats
+export const deserializeStats = (json: string | null | undefined) => deserializeObject(json, 'stats');
+export const serializeStats = (data: object | null | undefined) => serializeObject(data, 'stats');
 
-/**
- * 🔄 Deserializa un string JSON de filtros a objeto
- * @param filters String JSON o objeto de filtros
- * @returns Objeto de filtros
- */
-export function deserializeFilters(filters: string | Record<string, any> | undefined): Record<string, any> {
-	if (typeof filters === 'string') {
-		try {
-			if (filters === 'empty_object' || filters === '') {
-				return {};
-			}
-			return JSON.parse(filters);
-		} catch (error) {
-			serverLogger.warn(`Error deserializando filters, usando objeto vacío: ${error}`);
-			return {};
-		}
-	}
-	return filters || {};
-}
+// Relationships
+export const deserializeRelationships = (json: string | null | undefined) => deserializeArray(json, 'relationships');
+export const serializeRelationships = (data: unknown[] | null | undefined) => serializeArray(data, 'relationships');
 
-/**
- * 🔄 Serializa un objeto de filtros a string JSON
- * @param filters Objeto de filtros o string JSON
- * @returns String JSON de filtros
- */
-export function serializeFilters(filters: Record<string, any> | string | undefined): string {
-	if (typeof filters === 'string') {
-		return filters;
-	}
-	if (!filters || Object.keys(filters).length === 0) {
-		return 'empty_object';
-	}
-	try {
-		return JSON.stringify(filters);
-	} catch (error) {
-		serverLogger.warn(`Error serializando filters, usando objeto vacío: ${error}`);
-		return 'empty_object';
-	}
-}
+// Goals
+export const deserializeGoals = (json: string | null | undefined) => deserializeArray(json, 'goals');
+export const serializeGoals = (data: unknown[] | null | undefined) => serializeArray(data, 'goals');
+
+// Fears
+export const deserializeFears = (json: string | null | undefined) => deserializeArray(json, 'fears');
+export const serializeFears = (data: unknown[] | null | undefined) => serializeArray(data, 'fears');
+
+// Beliefs
+export const deserializeBeliefs = (json: string | null | undefined) => deserializeArray(json, 'beliefs');
+export const serializeBeliefs = (data: unknown[] | null | undefined) => serializeArray(data, 'beliefs');
+
+// Personality Traits
+export const deserializePersonality = (json: string | null | undefined) => deserializeArray(json, 'personality');
+export const serializePersonality = (data: unknown[] | null | undefined) => serializeArray(data, 'personality');
+
+// Skills
+export const deserializeSkills = (json: string | null | undefined) => deserializeObject(json, 'skills');
+export const serializeSkills = (data: object | null | undefined) => serializeObject(data, 'skills');
+
+// Abilities
+export const deserializeAbilities = (json: string | null | undefined) => deserializeArray(json, 'abilities');
+export const serializeAbilities = (data: unknown[] | null | undefined) => serializeArray(data, 'abilities');
+
+// Filters
+export const deserializeFilters = (json: string | null | undefined) => deserializeObject(json, 'filters');
+export const serializeFilters = (data: object | null | undefined) => serializeObject(data, 'filters');

@@ -3,11 +3,11 @@
  * @module transformers/prompt/transformer
  */
 
-import type { Prompt } from '@prisma/client';
 import { Logger } from '@/lib/logger';
+import type { PromptBase, PromptComplete, PromptWithRelations } from '@/types/entities/prompt';
 import { PromptSchema } from '@/types/entities/prompt/schema';
-import type { PromptComplete, PromptExtended, PromptWithStats } from '@/types/entities/prompt/types';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prompt } from '@prisma/client';
 import { deserializeParameters, deserializeTags, toExtendedPrompt } from './serializers';
 
 const logger = new Logger('PromptTransformer');
@@ -29,59 +29,46 @@ export interface TransformPromptOptions {
 }
 
 /**
- * 🔄 Transforma un objeto a Prompt
- * @param input Objeto a transformar a Prompt
+ * 🔄 Transforma un objeto a PromptComplete, validando y deserializando campos
+ * @param prompt Objeto a transformar
  * @param options Opciones de transformación
- * @returns Prompt transformado
+ * @returns PromptComplete transformado
  * @throws TransformerError si hay errores en la validación o transformación
  */
-export function transformPrompt<T extends Partial<PromptComplete> | Prompt | unknown>(
-	input: T,
+export function transformPrompt<T extends Partial<PromptBase> | Prompt | unknown>(
+	prompt: T,
 	options: TransformPromptOptions = {}
 ): PromptComplete {
 	try {
-		// Validar que input no sea nulo o indefinido
-		if (input === null || input === undefined) {
-			throw new TransformerError('El objeto a transformar es nulo o indefinido');
+		if (!prompt) {
+			throw new Error('El objeto prompt es nulo o undefined');
 		}
 
-		// Si el input es un objeto Prisma, transformamos sus campos JSON
-		if (typeof input === 'object' && 'id' in input && 'name' in input) {
-			const prompt = input as any;
+		// Opciones por defecto
+		const { validateFields = true, deserializeFields = true } = options;
 
-			// Deserializar campos JSON si es necesario
-			if (options.deserializeFields) {
-				return {
-					...prompt,
-					parameters: deserializeParameters(prompt.parameters),
-					tags: deserializeTags(prompt.tags),
-				} as PromptComplete;
+		// Validar el schema si está habilitado
+		let validatedPrompt = prompt as PromptBase;
+		if (validateFields) {
+			const result = PromptSchema.safeParse(prompt);
+			if (!result.success) {
+				throw new Error(`Validación fallida: ${result.error.message}`);
 			}
-
-			return prompt as PromptComplete;
+			validatedPrompt = result.data;
 		}
 
-		// Validar con Zod si es necesario
-		if (options.validateFields) {
-			const parsed = PromptSchema.safeParse(input);
-			if (!parsed.success) {
-				throw new TransformerError(`Validación fallida: ${parsed.error.message}`);
-			}
-		}
-
-		// Convertir a PromptComplete
-		const basePrompt = input as Prompt;
-
-		// Deserializar campos JSON si es necesario
-		if (options.deserializeFields) {
+		// Si deserializeFields está habilitado, convertir campos JSON
+		if (deserializeFields) {
+			// Deserializar parameters y tags
 			return {
-				...basePrompt,
-				parameters: deserializeParameters(basePrompt.parameters),
-				tags: deserializeTags(basePrompt.tags),
+				...validatedPrompt,
+				parameters: deserializeParameters(validatedPrompt.parameters),
+				tags: deserializeTags(validatedPrompt.tags || '[]'),
 			} as PromptComplete;
 		}
 
-		return basePrompt as PromptComplete;
+		// Devolver sin deserializar
+		return validatedPrompt as unknown as PromptComplete;
 	} catch (error) {
 		logger.error(`Error transformando prompt: ${error}`);
 		if (error instanceof TransformerError) {
@@ -92,24 +79,22 @@ export function transformPrompt<T extends Partial<PromptComplete> | Prompt | unk
 }
 
 /**
- * 🔄 Transforma una array de objetos a Prompts
- * @param inputs Array de objetos a transformar
+ * 🔄 Transforma un array de objetos a PromptComplete[]
+ * @param prompts Array de objetos a transformar
  * @param options Opciones de transformación
- * @returns Array de Prompts transformados
- * @throws TransformerError si hay errores en la validación o transformación
+ * @returns Array de PromptComplete transformados
+ * @throws TransformerError si hay errores en la transformación de algún elemento
  */
-export function transformPrompts<T extends Partial<PromptComplete> | Prompt | unknown>(
-	inputs: T[],
+export function transformPrompts<T extends Array<Partial<PromptBase> | Prompt | unknown>>(
+	prompts: T,
 	options: TransformPromptOptions = {}
 ): PromptComplete[] {
 	try {
-		// Validar que sea un array
-		if (!Array.isArray(inputs)) {
-			throw new TransformerError('El valor proporcionado no es un array');
+		if (!Array.isArray(prompts)) {
+			throw new Error('El parámetro no es un array');
 		}
 
-		// Transformar cada elemento
-		return inputs.map((input) => transformPrompt(input, options));
+		return prompts.map((prompt) => transformPrompt(prompt, options));
 	} catch (error) {
 		logger.error(`Error transformando array de prompts: ${error}`);
 		if (error instanceof TransformerError) {
@@ -122,12 +107,12 @@ export function transformPrompts<T extends Partial<PromptComplete> | Prompt | un
 /**
  * 🔄 Transforma un Prompt a su versión extendida para UI
  * @param prompt Prompt a transformar
- * @returns PromptExtended con propiedades adicionales para UI
+ * @returns PromptWithRelations con propiedades adicionales para UI
  * @throws TransformerError si hay errores en la transformación
  */
 export function transformPromptToExtended<T extends Partial<PromptComplete> | Prompt | unknown>(
 	prompt: T
-): PromptExtended {
+): PromptWithRelations {
 	try {
 		// Primero transformamos a PromptComplete
 		const promptComplete = transformPrompt(prompt, { deserializeFields: true });
@@ -154,12 +139,12 @@ export function transformPromptToExtended<T extends Partial<PromptComplete> | Pr
 /**
  * 🔄 Transforma un Prompt a su versión con estadísticas
  * @param prompt Prompt a transformar
- * @returns PromptWithStats con estadísticas calculadas
+ * @returns PromptWithRelations con estadísticas calculadas
  * @throws TransformerError si hay errores en la transformación
  */
 export function transformPromptToWithStats<T extends Partial<PromptComplete> | Prompt | unknown>(
 	prompt: T
-): PromptWithStats {
+): PromptWithRelations {
 	try {
 		// Primero transformamos a PromptComplete
 		const promptComplete = transformPrompt(prompt, { includeRelations: true });
@@ -171,7 +156,7 @@ export function transformPromptToWithStats<T extends Partial<PromptComplete> | P
 				imageCount: promptComplete._count?.images ?? 0,
 				videoCount: promptComplete._count?.videos ?? 0,
 				albumCount: promptComplete._count?.albums ?? 0,
-				tagCount: promptComplete._count?.tags ?? 0,
+				tagCount: promptComplete._count?.tagEntities ?? 0,
 				noteCount: promptComplete._count?.notes ?? 0,
 				conceptCount: promptComplete._count?.concepts ?? 0,
 				characterCount: promptComplete._count?.characters ?? 0,
@@ -193,69 +178,49 @@ export function transformPromptToWithStats<T extends Partial<PromptComplete> | P
 }
 
 /**
- * Calcula el nivel de importancia de un prompt basado en su uso y relaciones
- * @param prompt Prompt a analizar
- * @returns Valor numérico de importancia (1-10)
+ * Calcula la importancia de un prompt basado en su uso y relaciones
+ * @param prompt Prompt completo
+ * @returns Valor de importancia (1-5)
  */
 function calculateImportance(prompt: PromptComplete): number {
-	let importance = 5; // Valor base
+	// Implementación simple
+	const relationsCount =
+		(prompt._count?.images ?? 0) +
+		(prompt._count?.videos ?? 0) +
+		(prompt._count?.concepts ?? 0) +
+		(prompt._count?.characters ?? 0);
 
-	// Si tiene contenido extenso
-	if (prompt.content && prompt.content.length > 500) {
-		importance += 1;
-	}
-
-	// Si tiene descripción
-	if (prompt.description) {
-		importance += 1;
-	}
-
-	// Si tiene imagen destacada
-	if (prompt.featuredImage) {
-		importance += 1;
-	}
-
-	// Si es favorito
-	if (prompt.isFavorite) {
-		importance += 2;
-	}
-
-	// Si tiene propósito definido
-	if (prompt.purpose && prompt.purpose.length > 100) {
-		importance += 1;
-	}
-
-	// Si tiene parámetros configurados
-	if (prompt.parameters && prompt.parameters !== '{}' && prompt.parameters !== 'empty_object') {
-		importance += 1;
-	}
-
-	// Límites
-	return Math.max(1, Math.min(10, importance));
+	if (relationsCount > 50) return 5;
+	if (relationsCount > 20) return 4;
+	if (relationsCount > 10) return 3;
+	if (relationsCount > 5) return 2;
+	return 1;
 }
 
 /**
- * Calcula el total de elementos de contenido relacionados con el prompt
- * @param prompt Prompt a analizar
+ * Calcula el total de contenido relacionado con un prompt
+ * @param prompt Prompt completo
  * @returns Total de elementos de contenido
  */
 function calculateTotalContent(prompt: PromptComplete): number {
 	return (
 		(prompt._count?.images ?? 0) +
 		(prompt._count?.videos ?? 0) +
-		(prompt._count?.albums ?? 0) +
-		(prompt._count?.collections ?? 0) +
-		(prompt._count?.notes ?? 0)
+		(prompt._count?.concepts ?? 0) +
+		(prompt._count?.notes ?? 0) +
+		(prompt._count?.characters ?? 0) +
+		(prompt._count?.places ?? 0) +
+		(prompt._count?.worldItems ?? 0)
 	);
 }
 
 /**
- * Determina la última vez que se usó el prompt basado en contenido relacionado
- * @param prompt Prompt a analizar
- * @returns Fecha de último uso o la fecha de actualización si no hay uso
+ * Determina la última fecha de uso de un prompt
+ * @param prompt Prompt completo
+ * @returns Última fecha de uso o fecha de actualización
  */
 function calculateLastUsed(prompt: PromptComplete): Date {
-	// En una implementación real, se buscaría la fecha más reciente de contenido generado
-	// usando este prompt. Para este ejemplo, usamos updatedAt como aproximación.
+	// Por ahora solo usamos la fecha de actualización
+	// En futuras versiones, podríamos rastrear el uso real
 	return prompt.updatedAt;
 }
