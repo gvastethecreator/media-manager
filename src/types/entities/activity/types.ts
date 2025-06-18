@@ -1,78 +1,70 @@
 /**
- * @file Tipos para la entidad Activity
+ * @file Tipos canónicos para la entidad Activity
  * @module types/entities/activity/types
+ * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
+ * @description Estructura unificada y validada para Activity.
+ * Última migración: 2025-06-18
  */
 
+import { z } from 'zod';
+
 /**
- * Interfaz base para actividades
+ * Interfaz base canónica para Activity
  */
 export interface ActivityBase {
 	id: string;
 	type: string;
 	description: string;
 	imageId?: string | null;
-	createdAt: Date | string;
+	createdAt: Date;
 }
 
 /**
- * Interfaz para actividades con relación a imágenes
- */
-export interface ActivityWithImage extends ActivityBase {
-	imageId: string;
-	image?: {
-		id: string;
-		name: string;
-		path: string;
-		thumbnail?: string | null;
-	};
-}
-
-/**
- * Interfaz extendida para actividades con información adicional
+ * Interfaz extendida para Activity (con info de imagen y UI)
  */
 export interface Activity extends ActivityBase {
-	// Información relacionada cuando esté disponible
 	image?: {
 		id: string;
 		name: string;
 		path: string;
 		thumbnail?: string | null;
 	} | null;
-
-	// Campos extendidos para UI
 	iconEmoji?: string;
 	iconColor?: string;
 	category?: string;
-
-	// Campos para estado en UI
 	isSelected?: boolean;
 	isExpanded?: boolean;
 }
 
 /**
- * Interfaz para la creación de actividades
+ * Input para creación
  */
-export interface CreateActivityData {
+export interface ActivityCreateInput {
 	type: string;
 	description: string;
 	imageId?: string;
 }
 
 /**
+ * Input para actualización
+ */
+export type ActivityUpdateInput = Partial<Omit<ActivityBase, 'id' | 'createdAt'>>;
+
+/**
  * Filtros para búsqueda de actividades
  */
 export interface ActivityFilters {
-	types?: string[]; // Tipos de actividad a incluir
-	startDate?: Date | string; // Fecha de inicio
-	endDate?: Date | string; // Fecha de fin
-	imageId?: string; // Filtrar por imagen
-	searchQuery?: string; // Búsqueda en la descripción
-	limit?: number; // Límite de resultados
-	offset?: number; // Desplazamiento para paginación
+	types?: string[];
+	startDate?: Date;
+	endDate?: Date;
+	imageId?: string;
+	searchQuery?: string;
+	limit?: number;
+	offset?: number;
 }
 
 /**
- * Datos de respuesta para listado de actividades
+ * Respuesta para listado de actividades
  */
 export interface ActivityListResponse {
 	activities: Activity[];
@@ -81,8 +73,17 @@ export interface ActivityListResponse {
 }
 
 /**
- * Metadatos adicionales para actividades específicas
+ * Esquema Zod para validación de Activity
  */
-export interface ActivityMetadata {
-	[key: string]: any;
-}
+export const ActivitySchema = z.object({
+	id: z.string(),
+	type: z.string(),
+	description: z.string(),
+	imageId: z.string().nullable().optional(),
+	createdAt: z.date(),
+});
+
+// 🟢 Documentación y advertencia:
+// - Usar solo estos tipos en transformers, server actions y validaciones.
+// - No importar tipos de Prisma ni de archivos legacy.
+// - Validar siempre con ActivitySchema antes de persistir.

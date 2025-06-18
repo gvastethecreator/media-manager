@@ -1,91 +1,84 @@
 /**
- * @file Tipos base para trabajos en cola
- * @module types/entities/queue-job
+ * @file Tipos canónicos para la entidad QueueJob
+ * @module types/entities/queue-job/types
+ * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
+ * @description Estructura unificada y validada para QueueJob.
+ * Última migración: 2025-06-18
  */
 
-import type { QueueJob } from '@prisma/client';
-import type {
-	CreateQueueJobSchemaType,
-	QueueJobFiltersSchemaType,
-	QueueJobMetadataSchemaType,
-	QueueJobPaginationSchemaType,
-	UpdateQueueJobSchemaType,
-} from './schema';
-
-// Re-exportar tipos inferidos de Zod
-export type QueueJobMetadata = QueueJobMetadataSchemaType;
-export type CreateQueueJobInput = CreateQueueJobSchemaType;
-export type UpdateQueueJobInput = UpdateQueueJobSchemaType;
-export type QueueJobFilters = QueueJobFiltersSchemaType;
-export type QueueJobPaginationOptions = QueueJobPaginationSchemaType;
+import { z } from 'zod';
 
 /**
- * Interfaz extendida para QueueJob con campos adicionales para UI
- * @extends QueueJob - Modelo base de Prisma
+ * Enum para el estado del trabajo en cola
  */
-export interface QueueJobExtended extends QueueJob {
-	/** Metadata parseada del trabajo */
-	parsedMetadata?: QueueJobMetadata;
-	/** Fecha de creación formateada */
-	formattedCreatedAt?: string;
-	/** Fecha de actualización formateada */
-	formattedUpdatedAt?: string;
-	/** Fecha de inicio formateada */
-	formattedStartedAt?: string;
-	/** Fecha de finalización formateada */
-	formattedFinishedAt?: string;
-	/** Fecha de próximo reintento formateada */
-	formattedRetryAt?: string;
-	/** Tiempo transcurrido desde la creación */
-	elapsedTime?: string;
-	/** Tiempo restante estimado */
-	estimatedTimeRemaining?: string;
-	/** Indica si el trabajo está activo */
-	isActive?: boolean;
-	/** Indica si el trabajo puede ser reintentado */
-	canRetry?: boolean;
-	/** Indica si el trabajo puede ser cancelado */
-	canCancel?: boolean;
+export enum QueueJobStatus {
+	PENDING = 'pending',
+	PROCESSING = 'processing',
+	COMPLETED = 'completed',
+	FAILED = 'failed',
+	RETRYING = 'retrying',
+	CANCELLED = 'cancelled',
 }
 
 /**
- * Tipo para resultados paginados de trabajos
+ * Tipo base canónico para QueueJob
  */
-export interface PaginatedQueueJobs {
-	/** Lista de trabajos */
-	items: QueueJobExtended[];
-	/** Total de trabajos */
-	total: number;
-	/** Página actual */
-	page: number;
-	/** Límite de items por página */
-	limit: number;
-	/** Total de páginas */
-	totalPages: number;
+export interface QueueJobBase {
+	id: string;
+	queue: string;
+	data: string;
+	status: QueueJobStatus;
+	attempts: number;
+	maxAttempts: number;
+	error?: string | null;
+	progress: number;
+	startedAt?: Date | null;
+	finishedAt?: Date | null;
+	createdAt: Date;
+	updatedAt: Date;
+	priority: number;
+	metadata?: string | null;
+	retryAt?: Date | null;
 }
 
 /**
- * Tipo para estadísticas de cola
+ * Input para creación
  */
-export interface QueueStats {
-	/** Total de trabajos */
-	total: number;
-	/** Trabajos pendientes */
-	pending: number;
-	/** Trabajos en proceso */
-	processing: number;
-	/** Trabajos completados */
-	completed: number;
-	/** Trabajos fallidos */
-	failed: number;
-	/** Trabajos en reintento */
-	retrying: number;
-	/** Trabajos cancelados */
-	cancelled: number;
-	/** Tiempo promedio de procesamiento */
-	averageProcessingTime?: number;
-	/** Tasa de éxito */
-	successRate?: number;
-	/** Tasa de fallos */
-	failureRate?: number;
+export interface QueueJobCreateInput {
+	queue: string;
+	data: string;
+	maxAttempts?: number;
+	priority?: number;
+	metadata?: string;
 }
+
+/**
+ * Input para actualización
+ */
+export type QueueJobUpdateInput = Partial<Omit<QueueJobBase, 'id' | 'createdAt' | 'updatedAt'>>;
+
+/**
+ * Esquema Zod para validación de QueueJob
+ */
+export const QueueJobSchema = z.object({
+	id: z.string(),
+	queue: z.string(),
+	data: z.string(),
+	status: z.nativeEnum(QueueJobStatus),
+	attempts: z.number(),
+	maxAttempts: z.number(),
+	error: z.string().nullable().optional(),
+	progress: z.number(),
+	startedAt: z.date().nullable().optional(),
+	finishedAt: z.date().nullable().optional(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+	priority: z.number(),
+	metadata: z.string().nullable().optional(),
+	retryAt: z.date().nullable().optional(),
+});
+
+// 🟢 Documentación y advertencia:
+// - Usar solo estos tipos en transformers, server actions y validaciones.
+// - No importar tipos de Prisma ni de archivos legacy.
+// - Validar siempre con QueueJobSchema antes de persistir.

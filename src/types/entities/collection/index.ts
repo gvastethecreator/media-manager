@@ -1,11 +1,21 @@
 /**
  * @file Exportaciones principales de tipos para la entidad Collection
  * @module types/entities/collection
+ *
+ * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types', extendidos desde './extended' y enums desde './enums'.
+ * Legacy eliminado.
  */
 
-export * from './base';
-export * from './enums';
-export * from './extended';
-// Alias común para el tipo principal
-export type { CollectionWithRelations as Collection } from './types';
-export * from './types';
+export {
+    CollectionCategory, CollectionPlatform, CollectionRarity
+} from './enums';
+export type {
+    CollectionCard, CollectionExtended, CollectionListItem, CollectionStats, CollectionViewConfig
+} from './extended';
+export type {
+    CollectionBase,
+    CollectionCreateInput,
+    CollectionUpdateInput
+} from './types';
+
+// 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

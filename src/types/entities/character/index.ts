@@ -1,20 +1,10 @@
 /**
  * @file Exportaciones principales de tipos para la entidad Character
  * @module types/entities/character
+ *
+ * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types' y extendidos desde './extended'.
+ * Legacy de './base' y './enums' eliminado.
  */
-
-export {
-	CharacterFiltersSchema,
-	CharacterRelationsSchema,
-	CharacterSchema,
-	CreateCharacterSchema,
-	UpdateCharacterSchema,
-} from './base';
-export {
-	CharacterCategory,
-	CharacterClass,
-	CharacterRace,
-} from './enums';
 
 export type {
 	CharacterAttributes,
@@ -23,11 +13,15 @@ export type {
 	CharacterInventoryItem,
 	CharacterListItem,
 	CharacterSummary,
-	CharacterViewConfig,
+	CharacterViewConfig
 } from './extended';
 // Alias común para el tipo principal
+export {
+	CHARACTER_SORT_PROPERTY_MAP,
+	CharacterSortCriteria
+} from './types';
 export type {
-	CharacterBase,
+	CharacterWithRelations as Character, CharacterBase,
 	CharacterComplete,
 	CharacterCount,
 	CharacterCounts,
@@ -39,12 +33,8 @@ export type {
 	CharacterSearchResult,
 	CharacterTransformerOptions,
 	CharacterUpdateInput,
-	CharacterWithRelations,
-	CharacterWithRelations as Character,
-	CreateCharacterData,
-	UpdateCharacterData,
+	CharacterWithRelations, CreateCharacterData,
+	UpdateCharacterData
 } from './types';
-export {
-	CHARACTER_SORT_PROPERTY_MAP,
-	CharacterSortCriteria,
-} from './types';
+
+// 📝 Documentación: Solo tipos canónicos y extendidos. Legacy removido.

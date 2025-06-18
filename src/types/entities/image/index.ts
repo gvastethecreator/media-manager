@@ -1,17 +1,28 @@
 /**
  * @file Exportaciones principales de tipos para la entidad Image
  * @module types/entities/image
+ *
+ * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types'.
+ * Legacy eliminado.
  */
 
-// Exportar tipos base
-export * from './base';
-// Alias común para el tipo principal - usando el tipo extendido para mantener consistencia
-export type { ImageWithRelationsExtendedComplete as Image } from './complete';
+export type {
+	ImageBase,
+	ImageCreateInput,
+	ImageUpdateInput,
+	ImageComplete,
+	ImageExtended,
+	ImageFilters,
+	ImageSearchOptions,
+	ImageSearchResult,
+	ImageTransformerOptions,
+	ImageMetadata,
+	ImageStatsBase,
+	ImageVisualConfigBase,
+	ImageAIMetadata,
+	CreateImageData,
+	UpdateImageData,
+} from './types';
+export { ImageSchema } from './types';
 
-// Exportar tipos completos (con campos JSON deserializados)
-export * from './complete';
-
-// Exportar todos los enums y constantes
-export * from './enums';
-// Exportar tipos extendidos para UI y visualización
-export * from './extended';
+// 📝 Documentación: Solo tipos canónicos. Legacy removido.
