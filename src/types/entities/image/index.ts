@@ -6,23 +6,11 @@
  * Legacy eliminado.
  */
 
-export type {
-	ImageBase,
-	ImageCreateInput,
-	ImageUpdateInput,
-	ImageComplete,
-	ImageExtended,
-	ImageFilters,
-	ImageSearchOptions,
-	ImageSearchResult,
-	ImageTransformerOptions,
-	ImageMetadata,
-	ImageStatsBase,
-	ImageVisualConfigBase,
-	ImageAIMetadata,
-	CreateImageData,
-	UpdateImageData,
-} from './types';
 export { ImageSchema } from './types';
+export type {
+	CreateImageData, ImageAIMetadata, ImageBase, ImageComplete, ImageCreateInput, ImageExtended,
+	ImageFilters, ImageMetadata, ImageSearchOptions,
+	ImageSearchResult, ImageStatsBase, ImageTransformerOptions, ImageUpdateInput, ImageVisualConfigBase, UpdateImageData
+} from './types';
 
 // 📝 Documentación: Solo tipos canónicos. Legacy removido.
