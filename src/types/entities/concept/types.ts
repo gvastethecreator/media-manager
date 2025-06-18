@@ -1,30 +1,15 @@
 /**
- * 💡 Tipos canónicos para la entidad Concept
- *
- * - Este archivo contiene todos los tipos base, relaciones e inputs para Concept.
- * - Usar SIEMPRE estos tipos en transformers, services y server actions.
- * - No usar ni importar tipos de base.ts (eliminado).
- *
- * Estructura:
- * - ConceptBase: tipo canónico principal
- * - ConceptRelations: relaciones con otras entidades
- * - ConceptCreateInput, ConceptUpdateInput: inputs para mutaciones
- *
- * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
- * 📝 Documenta cualquier cambio relevante aquí.
- */
-
-/**
- * @file Tipos para la entidad Concept
+ * @file Tipos canónicos para la entidad Concept
  * @module types/entities/concept/types
+ * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
+ * @description Estructura unificada y validada para Concept.
+ * Última migración: 2025-06-18
  */
 
-import type { z } from 'zod';
-import type { ConceptFilters } from './extended';
-import type { ConceptSchema } from './schema';
+import { z } from 'zod';
 
 /**
- * Interfaz base para Concept derivada del schema de Prisma
+ * Tipo base canónico para Concept
  */
 export interface ConceptBase {
 	id: string;
@@ -41,110 +26,42 @@ export interface ConceptBase {
 }
 
 /**
- * Relaciones de un concepto con otras entidades
+ * Input para creación
  */
-export interface ConceptRelations {
-	images?: any[];
-	videos?: any[];
-	albums?: any[];
-	collections?: any[];
-	tagEntities?: any[];
-	characters?: any[];
-	places?: any[];
-	worldItems?: any[];
-	prompts?: any[];
-	notes?: any[];
-	wildcards?: any[];
-	properties?: any[];
-	groups?: any[];
+export interface ConceptCreateInput {
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	content: string;
+	category?: string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
 }
 
 /**
- * Conteo de entidades relacionadas con un concepto
+ * Input para actualización
  */
-export interface ConceptCounts {
-	images?: number;
-	videos?: number;
-	albums?: number;
-	collections?: number;
-	characters?: number;
-	places?: number;
-	worldItems?: number;
-	prompts?: number;
-	notes?: number;
-	wildcards?: number;
-	properties?: number;
-	groups?: number;
-}
+export type ConceptUpdateInput = Partial<Omit<ConceptBase, 'id' | 'createdAt' | 'updatedAt'>>;
 
 /**
- * Propiedades adicionales para UI
+ * Esquema Zod para validación de Concept
  */
-export interface ConceptUI {
-	previewContent?: string;
-	lastUpdated?: Date;
-}
+export const ConceptSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	emoji: z.string(),
+	color: z.string(),
+	description: z.string().nullable(),
+	content: z.string(),
+	category: z.string(),
+	featuredImage: z.string().nullable(),
+	isFavorite: z.boolean(),
+	createdAt: z.date(),
+	updatedAt: z.date(),
+});
 
-/**
- * Concepto completo con todos los campos y relaciones
- */
-export interface ConceptComplete extends ConceptBase {
-	_count?: ConceptCounts;
-	_relations?: ConceptRelations;
-	_ui?: ConceptUI;
-}
-
-/**
- * Opciones para buscar conceptos
- */
-export interface ConceptSearchOptions {
-	filters?: ConceptFilters;
-	sortBy?: ConceptSortCriteria;
-	page?: number;
-	pageSize?: number;
-	includeRelations?: boolean;
-	includeStats?: boolean;
-}
-
-/**
- * Respuesta de búsqueda de conceptos
- */
-export interface ConceptSearchResult {
-	items: ConceptComplete[];
-	total: number;
-	totalPages: number;
-}
-
-/**
- * Criterios de ordenación para conceptos
- */
-export enum ConceptSortCriteria {
-	NAME_ASC = 'name:asc',
-	NAME_DESC = 'name:desc',
-	CREATED_ASC = 'created:asc',
-	CREATED_DESC = 'created:desc',
-	UPDATED_ASC = 'updated:asc',
-	UPDATED_DESC = 'updated:desc',
-}
-
-/**
- * Mapa de propiedades para ordenación
- */
-export const CONCEPT_SORT_PROPERTY_MAP: Record<ConceptSortCriteria, string> = {
-	[ConceptSortCriteria.NAME_ASC]: 'name',
-	[ConceptSortCriteria.NAME_DESC]: 'name',
-	[ConceptSortCriteria.CREATED_ASC]: 'createdAt',
-	[ConceptSortCriteria.CREATED_DESC]: 'createdAt',
-	[ConceptSortCriteria.UPDATED_ASC]: 'updatedAt',
-	[ConceptSortCriteria.UPDATED_DESC]: 'updatedAt',
-};
-
-/**
- * Alias para opciones de ordenación
- */
-export type ConceptSortOption = keyof typeof CONCEPT_SORT_PROPERTY_MAP | string;
-
-/**
- * Tipo para validación con Zod
- */
-export type ConceptValidation = z.infer<typeof ConceptSchema>;
+// 🟢 Documentación y advertencia:
+// - Usar solo estos tipos en transformers, server actions y validaciones.
+// - No importar tipos de Prisma ni de archivos legacy.
+// - Validar siempre con ConceptSchema antes de persistir.

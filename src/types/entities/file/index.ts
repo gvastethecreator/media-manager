@@ -1,18 +1,18 @@
 /**
  * @file Re-exportación de tipos para la entidad File
  * @module types/entities/file
+ *
+ * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types', extendidos desde './extended' y enums desde './enums'.
+ * Legacy eliminado.
  */
 
-export * from './base';
-export * from './enums';
-// Re-exportar enums específicos para facilitar su uso
 export {
-	CommonMimeType,
-	FILE_EXTENSION_GROUPS,
-	FileErrorCode,
-	FileEventType,
-	FilePermission,
-	FileSortOption,
-	FileType,
+    FileErrorCode,
+    FileEventType, FileType
 } from './enums';
 export * from './extended';
+export type {
+    FileBase, FileCreateInput, FileRelations, FileUpdateInput
+} from './types';
+
+// 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

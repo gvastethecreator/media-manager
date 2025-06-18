@@ -1,10 +1,17 @@
 /**
  * @file Transformadores para la entidad Favorite
  * @module transformers/favorite/transformer
+ * @description 🚨 Migración: Todos los tipos y enums se importan desde '@/types/entities/favorite/types'.
+ * No usar ni importar tipos de base.ts o extended.ts (eliminados).
  */
 
-import { FavoriteBase, FavoriteEntityType } from '@/types/entities/favorite/base';
-import { FavoriteExtended, FavoriteStats, FavoritesByType } from '@/types/entities/favorite/extended';
+import {
+    FavoriteBase,
+    FavoriteEntityType,
+    FavoriteExtended,
+    FavoritesByType,
+    FavoriteStats
+} from '@/types/entities/favorite/types';
 
 // Mapa de iconos por tipo de entidad
 const ENTITY_ICONS: Record<string, string> = {

@@ -1,19 +1,19 @@
 /**
  * @file Exportaciones para la entidad Activity
  * @module types/entities/activity
+ *
+ * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types' y enums desde './enums'.
+ * Legacy eliminado.
  */
 
-export * from './enums';
-// Reexportar enums explícitamente para evitar problemas de importación
-export { ActivityCategory, ActivitySortCriteria, ActivityType } from './enums';
-// Reexportar tipos explícitamente
+export {
+	ActivityType
+} from './enums';
 export type {
 	Activity,
 	ActivityBase,
-	ActivityFilters,
-	ActivityListResponse,
-	ActivityMetadata,
-	ActivityWithImage,
-	CreateActivityData,
+	ActivityCreateInput, ActivityFilters,
+	ActivityListResponse, ActivityUpdateInput
 } from './types';
-export * from './types';
+
+// 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

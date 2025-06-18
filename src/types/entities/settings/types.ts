@@ -3,14 +3,34 @@
 // 📝 Documentado según lineamientos del proyecto
 
 /**
- * Preferencias de interfaz de usuario
- * - tipografía: familia y tamaño
- * - theme: claro/oscuro/sistema
- * - animaciones: on/off
- * - otros: futuros flags visuales
+ * ⚙️ Tipos canónicos para la entidad Settings
+ * - Usar SIEMPRE estos tipos en transformers, services y server actions.
+ * - Validar con Zod antes de persistir datos.
+ * - No usar ni importar tipos legacy.
+ *
+ * Nota: Los tipos InterfacePreferences e InterfaceSettingsState son auxiliares para UI y no forman parte del modelo de BD.
+ */
+
+export interface SettingsBase {
+  id: string;
+  theme: string;
+  language: string;
+  data: unknown; // Json
+  profileId: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export type SettingsCreateInput = Omit<SettingsBase, 'id' | 'createdAt' | 'updatedAt'>;
+export type SettingsUpdateInput = Partial<Omit<SettingsBase, 'id'>>;
+
+// --- Tipos auxiliares para UI (no usar en lógica de negocio principal) ---
+
+/**
+ * Preferencias de interfaz de usuario (UI)
  */
 export interface InterfacePreferences {
-	/** Familia tipográfica seleccionada */
+  /** Familia tipográfica seleccionada */
 	fontFamily: 'system' | 'serif' | 'mono' | 'rounded';
 	/** Tamaño base de fuente */
 	fontSize: 'sm' | 'md' | 'lg';
@@ -34,9 +54,6 @@ export interface InterfacePreferences {
 	[key: string]: unknown;
 }
 
-/**
- * Estado de settings de interfaz (persistente)
- */
 export interface InterfaceSettingsState {
 	preferences: InterfacePreferences;
 	updatedAt: number;

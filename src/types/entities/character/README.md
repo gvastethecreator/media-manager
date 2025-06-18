@@ -1,8 +1,6 @@
-# 🧑‍🎤 Character: Tipos y Esquemas Zod
+# 🧑‍🎤 Character: Tipos y Esquemas Canónicos
 
-## 📄 Descripción
-
-Este módulo define los **tipos base** y **esquemas de validación Zod** para la entidad `Character`, alineados con el modelo de dominio y las reglas del proyecto.
+Este módulo define los **tipos canónicos** y **esquemas de validación Zod** para la entidad `Character`, alineados con el modelo de dominio y las reglas del proyecto.
 
 ## 📦 Estructura
 
@@ -12,56 +10,42 @@ graph TD
     CharacterBase --> CreateCharacterData
     CharacterBase --> UpdateCharacterData
     CharacterBase --> CharacterSummary
-    CharacterBase --> CharacterStats
+    CharacterBase --> CharacterAttributes
     CharacterBase --> CharacterFilter
     CharacterBase --> CharacterRelationship
-    CharacterSchema --> CreateCharacterSchema
-    CharacterSchema --> UpdateCharacterSchema
-    CharacterSchema --> CharacterFiltersSchema
-    CharacterBase --> CharacterRelationsSchema
+    CharacterBase --> CharacterRelations
+    CharacterBase --> CharacterWithRelations
+    CharacterBase --> CharacterComplete
+    CharacterBase --> CharacterExtended
+    CharacterBase --> CharacterCard
+    CharacterBase --> CharacterListItem
+    CharacterBase --> CharacterViewConfig
 ```
-
-## 🏗️ Tipos principales
 
 - `CharacterBase`: Tipo canónico alineado a la base de datos.
-- `CreateCharacterData` / `UpdateCharacterData`: Tipos para operaciones CRUD.
-- `CharacterSummary`, `CharacterStats`, `CharacterFilter`, `CharacterRelationship`: Tipos auxiliares para listados, stats y relaciones.
+- `CharacterComplete`, `CharacterWithRelations`: Tipos enriquecidos con relaciones y conteos.
+- `CharacterExtended`: Versión deserializada para UI.
+- `CreateCharacterData`, `UpdateCharacterData`: Inputs para mutaciones.
+- `CharacterSchema`: Esquema Zod para validación.
 
-## 🛡️ Esquemas Zod
+## 🚨 Notas de migración
 
-- `CharacterSchema`: Esquema principal de validación.
-- `CharacterRelationsSchema`: Esquema para relaciones entre personajes.
-- `CreateCharacterSchema`: Esquema para creación (omite campos de sistema).
-- `UpdateCharacterSchema`: Esquema para actualización parcial.
-- `CharacterFiltersSchema`: Esquema para filtros de búsqueda.
+- **Legacy eliminado:** Todos los tipos legacy (`base.ts`, `extended.ts`, enums locales) han sido eliminados.
+- **Solo tipos canónicos:** Usar siempre los tipos de `types.ts` y `extended.ts`.
+- **No importar tipos de Prisma en cliente.**
+- **Transformers, server actions y esquemas usan solo tipos canónicos.**
 
-## 📚 Ejemplo de uso
+## 📝 Ejemplo de uso
 
-```typescript
-import {
-  CharacterSchema,
-  CreateCharacterSchema,
-  UpdateCharacterSchema,
-  CharacterRelationsSchema,
-  CharacterFiltersSchema
-} from './base';
+```ts
+import type { CharacterComplete, CreateCharacterData } from '@/types/entities/character';
+import { CharacterSchema } from '@/types/entities/character/schema';
 
-// Validar datos de creación
-const result = CreateCharacterSchema.safeParse({ name: 'Alicia', class: 'Maga' });
-if (!result.success) {
-  // ⚠️ Manejar errores de validación
-  console.error(result.error);
-}
+const nuevo: CreateCharacterData = { name: 'Ayla', class: 'Guerrera', ... };
+const validado = CharacterSchema.parse(nuevo);
 ```
-
-## ⚠️ Notas y Best Practices
-
-- **No modificar los tipos canónicos sin actualizar los esquemas y la documentación.**
-- **Toda mutación debe validarse con Zod antes de persistir.**
-- **No importar tipos de Prisma en archivos cliente.**
-- **Mantener consistencia entre los tipos y los esquemas.**
 
 ---
 
-> Última actualización: 2025-06-11
-> Responsable: GitHub Copilot
+> Última actualización: 2025-06-18
+> Responsable: migración y limpieza de tipos canónicos
