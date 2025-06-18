@@ -1,6 +1,9 @@
 /**
- * @file Tipos para la entidad Tag
+ * @file Tipos canónicos para la entidad Tag
  * @module types/entities/tag/types
+ * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
+ * @description Estructura unificada y validada para Tag.
+ * Última migración: 2025-06-18
  */
 
 import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
@@ -22,20 +25,58 @@ export const TagSchema = z.object({
 });
 
 /**
- * 🏷️ Tipos canónicos para la entidad Tag
- *
- * - Este archivo contiene todos los tipos base, relaciones e inputs para Tag.
- * - Usar SIEMPRE estos tipos en transformers, services y server actions.
- * - No usar ni importar tipos de base.ts (eliminado).
- *
- * Estructura:
- * - TagBase: tipo canónico principal
- * - TagRelations: relaciones con otras entidades
- * - TagCreateInput, TagUpdateInput: inputs para mutaciones
- *
- * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
- * 📝 Documenta cualquier cambio relevante aquí.
+ * Categorías de etiquetas
  */
+export enum TagCategory {
+	GENERAL = 'general',
+	SUBJECT = 'subject',
+	STYLE = 'style',
+	COLOR = 'color',
+	QUALITY = 'quality',
+	TECHNIQUE = 'technique',
+	COMPOSITION = 'composition',
+	CONTENT = 'content',
+	EMOTION = 'emotion',
+	THEME = 'theme',
+	GENRE = 'genre',
+	CUSTOM = 'custom',
+	OTHER = 'other',
+}
+
+/**
+ * Rareza de etiquetas
+ */
+export enum TagRarity {
+	COMMON = 'common',
+	UNCOMMON = 'uncommon',
+	RARE = 'rare',
+	VERY_RARE = 'very_rare',
+	LEGENDARY = 'legendary',
+}
+
+/**
+ * Criterios de ordenación para etiquetas
+ */
+export enum TagSortCriteria {
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	USAGE_ASC = 'usage:asc',
+	USAGE_DESC = 'usage:desc',
+	CREATED_ASC = 'createdAt:asc',
+	CREATED_DESC = 'createdAt:desc',
+	UPDATED_ASC = 'updatedAt:desc',
+	UPDATED_DESC = 'updatedAt:desc',
+}
+
+/**
+ * Modos de visualización para etiquetas
+ */
+export enum TagViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+	CLOUD = 'cloud',
+	HIERARCHY = 'hierarchy',
+}
 
 /**
  * 🔄 Tipo base para Tag
@@ -187,3 +228,8 @@ export interface TagImageRelationResponse {
 
 // Tipos inferidos de Zod
 export type TagValidated = z.infer<typeof TagSchema>;
+
+// 🟢 Documentación y advertencia:
+// - Usar solo estos tipos en transformers, server actions y validaciones.
+// - No importar tipos de Prisma ni de archivos legacy.
+// - Validar siempre con TagSchema antes de persistir.

@@ -3,8 +3,8 @@
  * @module store/entities/tag/types
  */
 
-import { TagCategory, TagRarity, TagSortCriteria, TagViewMode } from '@/types/entities/tag/enums';
-import type { Tag, TagComplete } from '@/types/entities/tag/types';
+import type { TagBase, TagComplete } from '@/types/entities/tag';
+import { TagCategory, TagRarity, TagSortCriteria, TagViewMode } from '@/types/entities/tag';
 
 /**
  * 🎨 Estado de UI para tags
@@ -67,9 +67,9 @@ export interface TagCoreActions {
 	/** Obtiene todos los tags */
 	getTags: () => TagComplete[];
 	/** Crea un nuevo tag */
-	createTag: (tag: Partial<Tag>) => Promise<TagComplete | null>;
+	createTag: (tag: Partial<TagBase>) => Promise<TagComplete | null>;
 	/** Actualiza un tag existente */
-	updateTag: (id: string, tag: Partial<Tag>) => Promise<void>;
+	updateTag: (id: string, tag: Partial<TagBase>) => Promise<void>;
 	/** Elimina un tag */
 	deleteTag: (id: string) => Promise<void>;
 	/** Obtiene un tag por su ID */

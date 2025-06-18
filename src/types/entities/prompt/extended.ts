@@ -1,11 +1,16 @@
-import type { PromptBase, PromptStats } from './base';
+/**
+ * @file Tipos extendidos para la entidad Prompt
+ * @module types/entities/prompt/extended
+ */
+
+import type { PromptBase, PromptParameter } from './types';
 
 /**
  * Interfaz extendida para prompt con propiedades adicionales para UI
  */
 export interface PromptExtended extends PromptBase {
 	parsedTags?: string[];
-	parsedParameters?: Record<string, any>;
+	parsedParameters?: Record<string, PromptParameter>;
 	previewContent?: string;
 	lastUpdated?: Date;
 	stats?: PromptStats;
@@ -65,4 +70,16 @@ export interface PromptExecutionResult {
 	model?: string;
 	executionTime?: number;
 	timestamp: Date;
+}
+
+/**
+ * Estadísticas de uso de un prompt
+ */
+export interface PromptStats {
+	usageCount: number;
+	successRate: number;
+	averageExecutionTime: number;
+	lastExecuted?: Date;
+	popularity: number;
+	rating?: number;
 }

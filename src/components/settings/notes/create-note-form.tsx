@@ -1,21 +1,16 @@
 'use client';
 
+import { createNote, updateNote } from '@/app/actions/notes/note.actions';
+import { ColorPicker } from '@/components/ui/color-picker';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import toastService from '@/services/toast.service';
+import { NoteCategory } from '@/types/entities/note/enums';
+import type { Note } from '@/types/entities/notes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { createNote, updateNote } from '@/app/actions/notes/note.actions';
-import { Button } from '@/components/ui/button';
-import { ColorPicker } from '@/components/ui/color-picker';
-import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import toastService from '@/services/toast.service';
-import { NoteCategory } from '@/types/entities/note/enums';
-import type { Note } from '@/types/entities/notes';
+import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod
 const noteSchema = z.object({
@@ -132,174 +127,50 @@ export function CreateNoteForm({
 		}
 	};
 
+	const optionalFields = [
+		{
+			name: 'emoji',
+			label: 'Emoji',
+			render: ({ value, onChange }: any) => (
+				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
+			),
+		},
+		{
+			name: 'color',
+			label: 'Color',
+			render: ({ value, onChange }: any) => (
+				<ColorPicker value={value} onChange={onChange} compact showLabel={false} />
+			),
+		},
+		{
+			name: 'description',
+			label: 'Descripción',
+			render: ({ value, onChange }: any) => (
+				<textarea
+					placeholder="Descripción de la nota..."
+					value={value || ''}
+					onChange={(e) => onChange(e.target.value)}
+					rows={3}
+					className="text-xs resize-none w-full border rounded p-2"
+				/>
+			),
+		},
+		// ...agregar más campos opcionales si es necesario...
+	];
+
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} id="note-form" className="space-y-4">
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<FormField
-						control={form.control}
-						name="title"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Título</FormLabel>
-								<FormControl>
-									<Input placeholder="Título de la nota" {...field} />
-								</FormControl>
-								<FormDescription>Un título descriptivo para identificar esta nota</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="category"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Categoría</FormLabel>
-								<Select onValueChange={field.onChange} defaultValue={field.value}>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Seleccionar categoría" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Object.values(NoteCategory).map((category) => (
-											<SelectItem key={category} value={category}>
-												{category}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<FormDescription>La categoría ayuda a organizar tus notas</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="summary"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Resumen</FormLabel>
-							<FormControl>
-								<Textarea
-									placeholder="Breve resumen o descripción de la nota"
-									{...field}
-									value={field.value || ''}
-									rows={2}
-								/>
-							</FormControl>
-							<FormDescription>Un resumen corto para entender rápidamente el contenido</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="content"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Contenido</FormLabel>
-							<FormControl>
-								<Textarea placeholder="Contenido detallado de la nota" {...field} value={field.value || ''} rows={8} />
-							</FormControl>
-							<FormDescription>El contenido principal de la nota</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<FormField
-						control={form.control}
-						name="emoji"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Emoji</FormLabel>
-								<FormControl>
-									<EmojiPicker value={field.value} onChange={field.onChange} onEmojiSelect={field.onChange} />
-								</FormControl>
-								<FormDescription>Un emoji representativo</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="color"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Color</FormLabel>
-								<FormControl>
-									<ColorPicker value={field.value} onChange={field.onChange} />
-								</FormControl>
-								<FormDescription>Color para identificar visualmente</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="tags"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Etiquetas (separadas por coma)</FormLabel>
-							<FormControl>
-								<Input
-									placeholder="Ej: importante, investigación, idea"
-									value={field.value !== '[]' ? JSON.parse(field.value || '[]').join(', ') : ''}
-									onChange={(e) => {
-										// Convertir texto separado por comas a formato JSON
-										const tagsArray = e.target.value
-											.split(',')
-											.map((tag) => tag.trim())
-											.filter(Boolean);
-										field.onChange(JSON.stringify(tagsArray));
-									}}
-								/>
-							</FormControl>
-							<FormDescription>
-								Las etiquetas te ayudan a organizar y encontrar tus notas más fácilmente
-							</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="isFavorite"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-							<FormControl>
-								<Switch checked={field.value} onCheckedChange={field.onChange} />
-							</FormControl>
-							<div className="space-y-1 leading-none">
-								<FormLabel>Marcar como favorita</FormLabel>
-								<FormDescription>Las notas favoritas aparecerán destacadas en los listados</FormDescription>
-							</div>
-						</FormItem>
-					)}
-				/>
-
-				<div className="flex justify-end gap-2">
-					{onCancel && (
-						<Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-							Cancelar
-						</Button>
-					)}
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
-					</Button>
-				</div>
-			</form>
-		</Form>
+		<DynamicCreateForm
+			optionalFields={optionalFields}
+			onSubmit={async (data) => {
+				if (isEditing && note) {
+					await updateNote(note.id, data);
+					onUpdated?.({ ...note, ...data });
+				} else {
+					const created = await createNote(data);
+					onCreated?.(created);
+				}
+			}}
+			submitLabel={isEditing ? 'Guardar cambios' : 'Crear nota'}
+		/>
 	);
 }

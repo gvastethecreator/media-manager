@@ -1,5 +1,5 @@
 /**
- * @file Core slice para el store de Tag
+ * @file Core slice para el store de TagBase
  * @module store/entities/tag/slices/core.slice
  */
 
@@ -7,13 +7,13 @@ import { StateCreator } from 'zustand';
 import { createTagAction, deleteTagAction, getTagsAction, updateTagAction } from '@/app/actions/tags';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import type { Tag } from '@/types/entities/tag/types';
+import type { TagBase } from '@/types/entities/tag/types';
 import type { TagCoreActions, TagCoreState, TagStore } from '../types';
 
 const logger = clientLogger.withContext('TagCoreSlice');
 
 /**
- * 📦 Creador del slice core para el store de Tag
+ * 📦 Creador del slice core para el store de TagBase
  */
 export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & TagCoreActions> = (set, get) => ({
 	// Estado inicial
@@ -65,7 +65,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 	},
 
 	// Crea un nuevo tag
-	createTag: async (data: Partial<Tag>) => {
+	createTag: async (data: Partial<TagBase>) => {
 		try {
 			set({ isLoading: true, error: null });
 			logger.info('➕ Creando tag:', data);
@@ -78,8 +78,8 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 				lastUpdated: Date.now(),
 			}));
 
-			logger.info('✅ Tag creado correctamente:', newTag.id);
-			toastService.system.success('Tag creado correctamente');
+			logger.info('✅ TagBase creado correctamente:', newTag.id);
+			toastService.system.success('TagBase creado correctamente');
 			return newTag;
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
@@ -91,7 +91,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 	},
 
 	// Actualiza un tag existente
-	updateTag: async (id: string, data: Partial<Tag>) => {
+	updateTag: async (id: string, data: Partial<TagBase>) => {
 		try {
 			set({ isLoading: true, error: null });
 			logger.info('🔄 Actualizando tag:', { id, data });
@@ -104,8 +104,8 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 				lastUpdated: Date.now(),
 			}));
 
-			logger.info('✅ Tag actualizado correctamente:', id);
-			toastService.system.success('Tag actualizado correctamente');
+			logger.info('✅ TagBase actualizado correctamente:', id);
+			toastService.system.success('TagBase actualizado correctamente');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			logger.error('❌ Error al actualizar tag:', error);
@@ -128,8 +128,8 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 				lastUpdated: Date.now(),
 			}));
 
-			logger.info('✅ Tag eliminado correctamente:', id);
-			toastService.system.success('Tag eliminado correctamente');
+			logger.info('✅ TagBase eliminado correctamente:', id);
+			toastService.system.success('TagBase eliminado correctamente');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			logger.error('❌ Error al eliminar tag:', error);

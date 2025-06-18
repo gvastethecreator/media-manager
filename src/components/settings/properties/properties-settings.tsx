@@ -1,9 +1,5 @@
 'use client';
 
-import type { Property } from '@prisma/client';
-import { FilterIcon, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { z } from 'zod';
 import {
 	createProperty,
 	deleteProperty,
@@ -19,30 +15,20 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
-import type { createPropertySchema, propertyFiltersSchema } from '@/lib/validations/property';
 import toastService from '@/services/toast.service';
+import { fromPrismaProperty } from '@/transformers/property/serializers';
+import type { PropertyWithRelations } from '@/types/entities/property';
+import { CreatePropertySchema, PropertyFiltersSchema } from '@/types/entities/property/schema';
+import { FilterIcon, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { z } from 'zod';
 import { CreatePropertyForm } from './create-property-form';
 
-type PropertyCategory = z.infer<typeof createPropertySchema>['category'];
-type PropertyFormData = z.infer<typeof createPropertySchema>;
-type PropertyFilters = z.infer<typeof propertyFiltersSchema>;
+type PropertyCategory = z.infer<typeof CreatePropertySchema>['category'];
+type PropertyFormData = z.infer<typeof CreatePropertySchema>;
+type PropertyFilters = z.infer<typeof PropertyFiltersSchema>;
 
-interface PropertyWithStats extends Property {
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		groups: number;
-	};
+interface PropertyWithStats extends PropertyWithRelations {
 	totalAssociations: number;
 }
 
@@ -70,16 +56,19 @@ export function PropertiesSettings() {
 
 	useEffect(() => {
 		loadProperties();
-	}, [loadProperties]);
+	}, []);
 
 	const loadProperties = async () => {
 		try {
 			setIsLoading(true);
 			const data = await getProperties();
-			const propertiesWithStats = data.map((property) => ({
-				...property,
-				totalAssociations: Object.values(property._count).reduce((a, b) => a + b, 0),
-			})) as PropertyWithStats[];
+			const propertiesWithStats = data.map((property) => {
+				const canonical = fromPrismaProperty(property);
+				return {
+					...canonical,
+					totalAssociations: Object.values(property._count || {}).reduce((a, b) => a + b, 0),
+				};
+			}) as PropertyWithStats[];
 			setProperties(propertiesWithStats);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -148,10 +137,13 @@ export function PropertiesSettings() {
 	const handleCreateProperty = async (data: PropertyFormData) => {
 		try {
 			const newProperty = await createProperty(data);
-			setProperties((prev) => [
-				...prev,
-				{ ...newProperty, _count: emptyCount, totalAssociations: 0 } as PropertyWithStats,
-			]);
+			if (newProperty) {
+				const canonical = fromPrismaProperty(newProperty);
+				setProperties((prev) => [
+					...prev,
+					{ ...canonical, totalAssociations: 0 } as PropertyWithStats,
+				]);
+			}
 			setIsCreateDialogOpen(false);
 			toastService.success('Propiedad creada correctamente');
 		} catch (err) {
@@ -165,7 +157,10 @@ export function PropertiesSettings() {
 	const handleUpdateProperty = async (id: string, data: PropertyFormData) => {
 		try {
 			const updatedProperty = await updateProperty(id, data);
-			setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...updatedProperty } : p)));
+			if (updatedProperty) {
+				const canonical = fromPrismaProperty(updatedProperty);
+				setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...canonical } : p)));
+			}
 			setSelectedProperty(null);
 			setIsEditMode(false);
 			toastService.success('Propiedad actualizada correctamente');

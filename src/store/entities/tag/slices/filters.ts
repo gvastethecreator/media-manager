@@ -3,9 +3,9 @@
  * @module store/entities/tag/slices/filters
  */
 
-import type { StateCreator } from 'zustand';
-import { TagCategory, TagRarity, TagSortCriteria } from '@/types/entities/tag/enums';
+import { TagCategory, TagRarity, TagSortCriteria } from '@/types/entities/tag';
 import { searchTags, sortTags } from '@/utils/tag/helpers';
+import type { StateCreator } from 'zustand';
 import type { TagFiltersState, TagState } from '../types';
 
 export interface TagFiltersSlice {

@@ -4,10 +4,10 @@
  */
 
 // Re-exportar todos los tipos desde los módulos correspondientes
-export * from './base';
 export * from './enums';
 export * from './extended';
 export * from './schema';
 // Alias común para el tipo principal
-export type { PromptWithRelations as Prompt } from './types';
 export * from './types';
+export type { PromptComplete as Prompt } from './types';
+

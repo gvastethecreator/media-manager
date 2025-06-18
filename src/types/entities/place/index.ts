@@ -1,30 +1,10 @@
 /**
- * @file Índice de tipos para la entidad Place
+ * @file Re-exportación de tipos para la entidad Place.
  * @module types/entities/place
+ * @description Se re-exportan todos los tipos y interfaces canónicas desde `types.ts`
+ * para mantener un punto de entrada único y consistente al módulo de tipos de Place.
+ * Los tipos legacy, extendidos y de validación han sido eliminados en favor de una única fuente de verdad.
  */
 
-// Exportar desde archivo base
-// Exportar tipo principal
-export type {
-	CreatePlaceData,
-	PlaceBase,
-	PlaceComplete,
-	PlaceDanger,
-	PlaceExtended,
-	PlaceExtendedComplete,
-	PlaceExtendedComplete as Place,
-	PlaceFilters,
-	PlaceResource,
-	PlaceStat,
-	PlaceStats,
-	PlaceWithRelations,
-	UpdatePlaceData,
-} from './types';
-// Exportar desde enumeraciones
-export {
-	PLACE_SORT_PROPERTY_MAP,
-	PlaceCategory,
-	PlaceClimate,
-	PlaceSortCriteria,
-	PlaceType,
-} from './types';
+export * from './types';
+
