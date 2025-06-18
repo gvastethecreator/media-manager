@@ -11,6 +11,8 @@
 - [x] File: tipos canónicos migrados, legacy eliminado, documentación y diagrama actualizados.
 - [x] Folder: tipos canónicos migrados, legacy eliminado, documentación y diagrama actualizados.
 - [x] Group: tipos canónicos migrados, legacy eliminado, documentación y diagrama actualizados.
+- [x] Image: tipos canónicos migrados, legacy eliminado, documentación y diagrama actualizados.
+- [x] Video: tipos canónicos migrados, legacy eliminado, documentación y diagrama actualizados.
 
 ---
 
