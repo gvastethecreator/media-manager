@@ -1,45 +1,46 @@
 /**
  * @file Índice de tipos para la entidad WorldItem
  * @module types/entities/world-item
+ * @description Exportaciones centralizadas para WorldItem
+ * @updated 2025-06-20
  */
 
-// Exportar tipos canónicos desde types.ts
-export type {
-    WorldItemAttribute, WorldItemBase, WorldItemComplete,
-    WorldItemCounts, WorldItemCreateInput, WorldItemDeserialized,
-    WorldItemDeserializedFields, WorldItemEffect, WorldItemFilter,
-    WorldItemFilters, WorldItemProperty, WorldItemRelations, WorldItemRequirement, WorldItemSearchOptions, WorldItemStat, WorldItemTags,
-    WorldItemUI, WorldItemUpdateInput
-} from './types';
+// Exportar todos los tipos canónicos
+export * from './types';
 
 // Exportar enumeraciones y constantes
 export * from './enums';
-// Exportar enumeraciones explícitamente para mejor claridad
-export {
-    WORLD_ITEM_SORT_PROPERTY_MAP,
-    WorldItemCategory,
-    WorldItemRarity,
-    WorldItemRelationshipType,
-    WorldItemSize,
-    WorldItemSortCriteria,
-    WorldItemType,
-    WorldItemViewMode
-} from './enums';
 
-// Exportar tipos estadísticos explícitamente
+// Exportar tipos estadísticos
 export * from './stats-types';
-export type {
-    WorldItemAttributes,
-    WorldItemDistribution,
-    WorldItemStats,
-    WorldItemStatsOverview
-} from './stats-types';
+
+// Re-exportación explícita para compatibilidad con código existente
+// Tipo principal para WorldItem (alias)
+export type { WorldItemDeserialized as WorldItem } from './types';
+
+// Configuración visual (para compatibilidad)
+export interface WorldItemVisualConfig {
+  view: string;
+  sortBy: string;
+  filters: string;
+  lastViewedId: string | null;
+  expandedIds: string[];
+  selectedIds: string[];
+}
+
+export interface ParsedWorldItemVisualConfig {
+  view: string;
+  sortBy: string;
+  filters: Record<string, unknown>;
+  lastViewedId: string | null;
+  expandedIds: string[];
+  selectedIds: string[];
+}
 
 // Exportar tipos extendidos explícitamente
 // 🎯 Alias principal para el tipo WorldItem
 export type {
     ParsedWorldItem,
-    ParsedWorldItemVisualConfig,
-    ParsedWorldItemWithRelations, WorldItemExtended as WorldItem, WorldItemExtended, WorldItemVisualConfig
+    ParsedWorldItemWithRelations, WorldItemExtended as WorldItemExtended, WorldItemVisualConfig
 } from './extended';
 

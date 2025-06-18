@@ -8,6 +8,9 @@
 
 import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import type { Tag as PrismaTag } from '@prisma/client';
+import type { Image } from '../image';
+import type { Video } from '../video';
 
 /**
  * 🔍 Esquema de validación para Tag
@@ -23,6 +26,11 @@ export const TagSchema = z.object({
 	featuredImage: z.string().nullable(),
 	isFavorite: z.boolean().default(false),
 });
+
+/**
+ * 📝 Tipo base para Tag - hereda directamente del tipo Prisma
+ */
+export type TagBase = PrismaTag;
 
 /**
  * Categorías de etiquetas
@@ -79,28 +87,11 @@ export enum TagViewMode {
 }
 
 /**
- * 🔄 Tipo base para Tag
- */
-export interface TagBase {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description?: string | null;
-	shortcut?: string | null;
-	category: string;
-	featuredImage?: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-/**
  * 🔗 Relaciones de Tag
  */
 export interface TagRelations {
-	images?: { id: string }[];
-	videos?: { id: string }[];
+	images?: Image[];
+	videos?: Video[];
 	albums?: { id: string }[];
 	collections?: { id: string }[];
 	characters?: { id: string }[];
@@ -115,28 +106,33 @@ export interface TagRelations {
 }
 
 /**
- * 📊 Conteos de relaciones de Tag
+ * 🔢 Contadores de relaciones
  */
 export interface TagCounts {
-	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		collections?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
+	images?: number;
+	videos?: number;
+	albums?: number;
+	collections?: number;
+	characters?: number;
+	places?: number;
+	worldItems?: number;
+	concepts?: number;
+	prompts?: number;
+	notes?: number;
+	wildcards?: number;
+	properties?: number;
+	groups?: number;
 }
 
 /**
- * 🎯 Filtros específicos para Tag
+ * 🌟 Tag con relaciones y conteos
+ */
+export interface TagWithRelations extends TagBase, TagRelations {
+	_count?: TagCounts;
+}
+
+/**
+ * 🔍 Filtros para búsqueda de etiquetas
  */
 export interface TagFilters {
 	search?: string;
@@ -155,19 +151,36 @@ export interface TagFilters {
 }
 
 /**
- * 🔄 Tag completo con todas las relaciones
+ * ➕ Input para crear una nueva etiqueta
  */
-export interface TagComplete extends TagBase, TagRelations, TagCounts {}
+export interface TagCreateInput {
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	images?: { connect: { id: string }[] };
+	videos?: { connect: { id: string }[] };
+}
 
 /**
- * 📝 Datos para crear un Tag
+ * 🔄 Input para actualizar una etiqueta
  */
-export type TagCreateInput = Omit<TagBase, 'id' | 'createdAt' | 'updatedAt'> & Partial<TagRelations>;
-
-/**
- * 📝 Datos para actualizar un Tag
- */
-export type TagUpdateInput = Partial<Omit<TagBase, 'id'>> & Partial<TagRelations>;
+export interface TagUpdateInput {
+	name?: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+	images?: { set?: { id: string }[] };
+	videos?: { set?: { id: string }[] };
+}
 
 /**
  * 🔍 Opciones de búsqueda para Tag
@@ -188,7 +201,7 @@ export interface TagSearchOptions {
  * 📊 Resultado de búsqueda de Tags
  */
 export interface TagSearchResult {
-	items: TagComplete[];
+	items: Tag[];
 	total: number;
 	hasMore: boolean;
 }
@@ -228,6 +241,14 @@ export interface TagImageRelationResponse {
 
 // Tipos inferidos de Zod
 export type TagValidated = z.infer<typeof TagSchema>;
+
+/**
+ * 📊 Tipo principal para Tag
+ */
+export type Tag = TagBase;
+
+/* Exportación de tipos adicionales para retrocompatibilidad */
+export type { TagCreateInput as CreateTagData, TagUpdateInput as UpdateTagData };
 
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.

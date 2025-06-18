@@ -9,15 +9,11 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import {
-    fromPrismaTag,
-    toCreateTagData,
-    toUpdateTagData,
-} from '@/transformers/tag';
+import { fromPrismaTag } from '@/transformers/tag';
 import type {
-    TagComplete,
     TagCreateInput,
     TagUpdateInput,
+    TagWithRelations,
 } from '@/types/entities/tag';
 import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
@@ -87,7 +83,7 @@ const tagInclude = {
 // Notificar cambios en etiquetas
 const notifyTagChange = async (
 	action: 'create' | 'update' | 'delete',
-	tag: TagComplete | { id: string }
+	tag: TagWithRelations | { id: string }
 ) => {
 	// Emitir eventos usando el sistema del servidor
 	await emit({
@@ -102,16 +98,13 @@ const notifyTagChange = async (
 /**
  * Crea un nuevo tag en la base de datos
  */
-export async function createTag(data: TagCreateInput): Promise<TagComplete> {
+export async function createTag(data: TagCreateInput): Promise<TagWithRelations> {
 	try {
 		tagLogger.info('📝 Creando etiqueta:', data.name);
 
-		// Usar el transformer para mapear datos
-		const prismaData = toCreateTagData(data);
-
 		// Crear la etiqueta
 		const tag = await prisma.tag.create({
-			data: prismaData,
+			data,
 			include: tagInclude,
 		});
 
@@ -139,7 +132,7 @@ export async function createTag(data: TagCreateInput): Promise<TagComplete> {
 export async function updateTag(
 	id: string,
 	data: TagUpdateInput
-): Promise<TagComplete> {
+): Promise<TagWithRelations> {
 	try {
 		tagLogger.info('📝 Actualizando etiqueta:', { tagId: id, ...data });
 
@@ -153,13 +146,10 @@ export async function updateTag(
 			throw createTagError(`Etiqueta no encontrada: ${id}`, TagErrorCode.NOT_FOUND);
 		}
 
-		// Usar el transformer para mapear datos
-		const prismaData = toUpdateTagData(data);
-
 		// Actualizar la etiqueta
 		const tag = await prisma.tag.update({
 			where: { id },
-			data: prismaData,
+			data,
 			include: tagInclude,
 		});
 

@@ -1,39 +1,43 @@
 /**
  * @file Tipos para el store de álbumes
  * @module store/entities/album/types
+ * @description Define los tipos para el store Zustand de álbumes
+ * @updated 2025-06-21
  */
 
 import type {
 	Album,
+	AlbumCreateInput as CreateAlbumData,
 	AlbumDisplayState,
+	AlbumFilters,
 	AlbumSortCriteria,
 	AlbumType,
+	AlbumUpdateInput as UpdateAlbumData,
 	AlbumViewMode,
-} from '../../../types/entities/album';
+} from '@/types/entities/album';
 
 /**
- * Estado principal del store de álbumes
+ * 📊 Estado principal del store de álbumes
  */
 export interface AlbumState {
-	// Slices de estado
-	core: AlbumCoreState;
-	ui: AlbumUIState;
-	filters: AlbumFiltersState;
-}
-
-/**
- * Estado del slice core
- */
-export interface AlbumCoreState {
-	albums: Record<string, Album>;
-	albumItems: Record<string, Array<{ id: string; type: 'image' | 'video' }>>;
+	// 📋 Datos principales
+	albums: Album[];
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;
+
+	// 🎮 UI y configuración
+	ui: AlbumUIState;
+	filters: AlbumFiltersState;
+
+	// 🔍 Selectores y getters
+	getAlbumById: (id: string) => Album | undefined;
+	getFilteredAlbums: () => Album[];
+	getSortedAlbums: () => Album[];
 }
 
 /**
- * Estado del slice UI
+ * 🎮 Estado de UI del store
  */
 export interface AlbumUIState {
 	selectedIds: string[];
@@ -48,9 +52,9 @@ export interface AlbumUIState {
 }
 
 /**
- * Estado del slice de filtros
+ * 🔍 Estado de filtros del store
  */
-export interface AlbumFiltersState {
+export interface AlbumFiltersState extends AlbumFilters {
 	sortBy: AlbumSortCriteria;
 	searchQuery: string;
 	filterByType: AlbumType | null;
@@ -63,3 +67,37 @@ export interface AlbumFiltersState {
 		to: Date | null;
 	};
 }
+
+/**
+ * 🔄 Acciones disponibles en el store
+ */
+export interface AlbumActions {
+	// 📥 Carga de datos
+	loadAlbums: () => Promise<void>;
+	loadAlbumById: (id: string) => Promise<Album | undefined>;
+
+	// 📝 Gestión de álbumes
+	createAlbum: (album: CreateAlbumData) => Promise<void>;
+	updateAlbum: (id: string, album: UpdateAlbumData) => Promise<void>;
+	deleteAlbum: (id: string) => Promise<void>;
+
+	// 🎮 Acciones UI
+	selectAlbum: (id: string | null) => void;
+	selectMultipleAlbums: (ids: string[]) => void;
+	toggleSelection: (id: string) => void;
+	clearSelection: () => void;
+
+	// 🖼️ Acciones de imágenes
+	addImageToAlbum: (albumId: string, imageId: string) => Promise<void>;
+	removeImageFromAlbum: (albumId: string, imageId: string) => Promise<void>;
+
+	// 🔍 Filtros
+	updateFilters: (filters: Partial<AlbumFiltersState>) => void;
+	clearFilters: () => void;
+	setSearchQuery: (query: string) => void;
+}
+
+/**
+ * 🏗️ Tipo completo del store
+ */
+export type AlbumStore = AlbumState & AlbumActions;

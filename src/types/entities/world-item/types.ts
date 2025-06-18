@@ -1,39 +1,29 @@
 /**
  * 🌍 Tipos canónicos para la entidad WorldItem
- *
- * - Este archivo contiene todos los tipos base, relaciones e inputs para WorldItem.
- * - Usar SIEMPRE estos tipos en transformers, services y server actions.
- * - No usar ni importar tipos de base.ts (eliminado).
- *
- * Estructura:
- * - WorldItemBase: tipo canónico principal
- * - WorldItemRelations: relaciones con otras entidades (any[] si no existen tipos canónicos)
- * - WorldItemCreateInput, WorldItemUpdateInput: inputs para mutaciones
- *
- * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
- * 📝 Documenta cualquier cambio relevante aquí.
- */
-
-/**
  * @file Tipos unificados para la entidad WorldItem
  * @module types/entities/world-item/types
+ * @description Definición de tipos canónicos basados en Prisma para WorldItem
+ * @updated 2025-06-20
  */
 
-import type { BaseEntity, BaseRelationCounts } from '@/types/common/transformer';
-import type { UIFields } from '@/utils/transformers/common';
+import type { WorldItem as PrismaWorldItem } from '@prisma/client';
 import type { Image } from '../image';
-import {
-    WORLD_ITEM_SORT_PROPERTY_MAP,
-    type WorldItemCategory,
-    type WorldItemRarity,
-    type WorldItemRelationshipType,
+import type {
+    WorldItemCategory,
+    WorldItemRarity,
+    WorldItemRelationshipType,
     WorldItemSortCriteria,
-    type WorldItemType,
-    type WorldItemViewMode,
+    WorldItemType,
+    WorldItemViewMode
 } from './enums';
 
 /**
- * Interfaz para atributos de objetos del mundo
+ * 📝 Tipo base para WorldItem - hereda directamente del tipo Prisma
+ */
+export type WorldItemBase = PrismaWorldItem;
+
+/**
+ * 🔧 Interfaces para estructuras de datos serializadas
  */
 export interface WorldItemAttribute {
 	name: string;
@@ -42,7 +32,7 @@ export interface WorldItemAttribute {
 }
 
 /**
- * Interfaz para efectos de objetos del mundo
+ * 💫 Efectos que puede tener un objeto del mundo
  */
 export interface WorldItemEffect {
 	name: string;
@@ -52,7 +42,7 @@ export interface WorldItemEffect {
 }
 
 /**
- * Interfaz para requisitos de objetos del mundo
+ * 📋 Requisitos para usar un objeto del mundo
  */
 export interface WorldItemRequirement {
 	name: string;
@@ -61,7 +51,7 @@ export interface WorldItemRequirement {
 }
 
 /**
- * Interfaz para estadísticas de objetos del mundo
+ * 📊 Estadísticas de un objeto del mundo
  */
 export interface WorldItemStat {
 	name: string;
@@ -70,7 +60,7 @@ export interface WorldItemStat {
 }
 
 /**
- * Interfaz para propiedades de objetos del mundo
+ * 🏷️ Propiedades de un objeto del mundo
  */
 export interface WorldItemProperty {
 	name: string;
@@ -79,7 +69,7 @@ export interface WorldItemProperty {
 }
 
 /**
- * Interfaz para filtros de objetos del mundo
+ * 🔍 Filtro para objetos del mundo
  */
 export interface WorldItemFilter {
 	type: 'tag' | 'character' | 'place' | 'concept' | 'worldItem';
@@ -89,14 +79,14 @@ export interface WorldItemFilter {
 }
 
 /**
- * Etiquetas del objeto del mundo
+ * 🏷️ Etiquetas para objetos del mundo
  */
 export interface WorldItemTags {
 	tags: string[];
 }
 
 /**
- * Relaciones del objeto del mundo
+ * 🔗 Relaciones de un objeto del mundo con otras entidades
  */
 export interface WorldItemRelations {
 	images?: Image[];
@@ -105,25 +95,27 @@ export interface WorldItemRelations {
 }
 
 /**
- * Contadores del objeto del mundo
+ * 🔢 Contadores de relaciones
  */
-export interface WorldItemCounts extends BaseRelationCounts {
+export interface WorldItemCounts {
 	images?: number;
+	videos?: number;
+	albums?: number;
+	collections?: number;
+	tags?: number;
+	characters?: number;
+	places?: number;
+	concepts?: number;
+	prompts?: number;
+	notes?: number;
+	wildcards?: number;
+	properties?: number;
+	groups?: number;
 	relatedItems?: number;
 }
 
 /**
- * Datos de UI para el objeto del mundo
- */
-export interface WorldItemUI extends UIFields {
-	emoji: string;
-	color: string;
-	viewMode?: WorldItemViewMode;
-	formattedDate?: string; // 📅 Fecha formateada para mostrar en UI
-}
-
-/**
- * Filtros para búsqueda de objetos del mundo
+ * 🔍 Filtros para búsqueda de objetos del mundo
  */
 export interface WorldItemFilters {
 	query?: string;
@@ -137,10 +129,13 @@ export interface WorldItemFilters {
 	isFavorite?: boolean;
 	hasImages?: boolean;
 	hasFiles?: boolean;
+	hasNotes?: boolean;
+	hasConcepts?: boolean;
+	hasPrompts?: boolean;
 }
 
 /**
- * Opciones para búsqueda de objetos del mundo
+ * 🔍 Opciones para búsqueda de objetos del mundo
  */
 export interface WorldItemSearchOptions {
 	filters?: WorldItemFilters;
@@ -149,35 +144,11 @@ export interface WorldItemSearchOptions {
 	pageSize?: number;
 	includeImages?: boolean;
 	includeStats?: boolean;
+	includeRelations?: boolean;
 }
 
 /**
- * Entidad base para WorldItem
- */
-export interface WorldItemBase extends BaseEntity {
-	name: string;
-	description: string | null;
-	shortcut: string | null;
-	category: string;
-	type: string;
-	rarity: string;
-	size: string;
-	origin: string;
-	attributes: string;
-	effects: string;
-	requirements: string;
-	stats: string;
-	properties: string;
-	filters: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	emoji: string;
-	color: string;
-	sortBy: string;
-}
-
-/**
- * Campos serializados/deserializados para WorldItem
+ * 🔄 Campos deserializados de JSON para WorldItem
  */
 export interface WorldItemDeserializedFields {
 	attributesList: WorldItemAttribute[];
@@ -190,21 +161,43 @@ export interface WorldItemDeserializedFields {
 }
 
 /**
- * Objeto del mundo con campos deserializados
+ * 📝 WorldItem con campos JSON deserializados
  */
 export interface WorldItemDeserialized extends WorldItemBase, WorldItemDeserializedFields {}
 
 /**
- * Objeto del mundo completo con todas sus relaciones y campos
+ * 🌟 WorldItem completo con todas sus relaciones y campos
  */
 export interface WorldItemComplete extends WorldItemDeserialized {
-	ui: WorldItemUI;
 	relations: WorldItemRelations;
 	counts: WorldItemCounts;
 }
 
 /**
- * Datos para crear un nuevo objeto del mundo
+ * 🌟 WorldItem con relaciones y conteos
+ */
+export interface WorldItemWithRelations extends WorldItemBase, WorldItemRelations {
+	_count?: WorldItemCounts;
+}
+
+/**
+ * 📊 Datos UI para visualización de WorldItem
+ */
+export interface WorldItemUI {
+	viewMode?: WorldItemViewMode;
+	formattedDate?: string;
+	displayRarity?: string;
+	displayValue?: string;
+	displayLevel?: string;
+	rarityClass?: string;
+	isSelected?: boolean;
+	isExpanded?: boolean;
+	isEditing?: boolean;
+	isHighlighted?: boolean;
+}
+
+/**
+ * ➕ Input para crear un nuevo objeto del mundo
  */
 export interface WorldItemCreateInput {
 	name: string;
@@ -231,7 +224,7 @@ export interface WorldItemCreateInput {
 }
 
 /**
- * Datos para actualizar un objeto del mundo existente
+ * 🔄 Input para actualizar un objeto del mundo
  */
 export interface WorldItemUpdateInput {
 	name?: string;

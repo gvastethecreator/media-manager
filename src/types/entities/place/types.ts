@@ -13,6 +13,7 @@ import type {
     Image,
     Note,
     Prisma,
+    Place as PrismaPlace,
     Prompt,
     Property,
     Tag,
@@ -25,7 +26,7 @@ import type {
  * 🗺️ Tipo base para un lugar.
  * Contiene todos los campos escalares y datos JSON del modelo Prisma.
  */
-export type Place = Prisma.Place;
+export type Place = PrismaPlace;
 
 /**
  * 🛠️ Relaciones que puede tener un Lugar.
@@ -77,6 +78,8 @@ export interface PlaceUpdateInput extends Partial<Omit<Place, 'id' | 'createdAt'
 export interface PlaceFilters {
 	search?: string;
 	category?: string;
+	type?: string;
+	region?: string;
 	isFavorite?: boolean;
 	tags?: string[];
 	characters?: string[];
@@ -139,3 +142,74 @@ export type PlaceWithCounts = Place & {
  * 🌟 Tipo completo de un lugar, con relaciones y conteos.
  */
 export type PlaceComplete = PlaceWithRelations & PlaceWithCounts;
+
+/**
+ * Tipo para configuración visual de lugares en el cliente
+ */
+export interface PlaceVisualConfig {
+	sortBy: string;
+	sortOrder: 'asc' | 'desc';
+	groupBy: string | null;
+	filterBy: PlaceFilters | null;
+}
+
+/**
+ * Tipos JSON utilizados en campos de lugar
+ */
+export interface PlaceDanger {
+	name: string;
+	description?: string;
+	level: number;
+	type: string;
+}
+
+export interface PlaceResource {
+	name: string;
+	description?: string;
+	quantity: number;
+	value: number;
+	renewable: boolean;
+}
+
+export interface PlaceStats {
+	economy: number;
+	safety: number;
+	culture: number;
+	technology: number;
+	magic?: number;
+	influence?: number;
+}
+
+// Re-exportar enums si es necesario
+export enum PlaceCategory {
+	CIVILIZATION = 'civilization',
+	NATURE = 'nature',
+	MYSTICAL = 'mystical',
+	HISTORICAL = 'historical',
+	OTHER = 'other',
+}
+
+export enum PlaceType {
+	CITY = 'city',
+	TOWN = 'town',
+	VILLAGE = 'village',
+	FOREST = 'forest',
+	MOUNTAIN = 'mountain',
+	DESERT = 'desert',
+	OCEAN = 'ocean',
+	LAKE = 'lake',
+	RIVER = 'river',
+	ISLAND = 'island',
+	CAVE = 'cave',
+	RUIN = 'ruin',
+	TEMPLE = 'temple',
+	CASTLE = 'castle',
+	OTHER = 'other',
+}
+
+export enum PlaceViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+	MAP = 'map',
+	CARD = 'card',
+}

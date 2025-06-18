@@ -1,10 +1,13 @@
 'use server';
 
 import { getPrismaClient } from '@/lib/db';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
-import type { Album } from '@/types/entities/album';
+import type { AlbumWithRelations } from '@/types/entities/album';
 
-export interface AlbumCardData extends Album {
+const albumLogger = serverLogger.withContext('AlbumServerActions');
+
+export interface AlbumCardData extends AlbumWithRelations {
 	_count: {
 		images: number;
 		videos: number;
