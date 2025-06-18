@@ -3,7 +3,11 @@
  * @module types/entities/file/extended
  */
 
-import type { DirectoryInfo, FileInfo, ImageFileInfo } from './base';
+import type {
+    DirectoryInfo,
+    FileInfo,
+    ImageFileInfo
+} from '@/transformers/file/mappers';
 import type { FileType } from './enums';
 
 /**

@@ -3,8 +3,8 @@
  * @module store/entities/tag/slices/ui
  */
 
+import { TagViewMode } from '@/types/entities/tag';
 import type { StateCreator } from 'zustand';
-import { TagViewMode } from '@/types/entities/tag/enums';
 import type { TagState, TagUIState } from '../types';
 
 export interface TagUISlice {

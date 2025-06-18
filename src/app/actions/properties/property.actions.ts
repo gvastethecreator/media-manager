@@ -3,9 +3,16 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { toCreatePropertyData, toUpdatePropertyData } from '@/transformers/property';
-import type { CreatePropertyData, UpdatePropertyData } from '@/types/entities/property';
+import {
+    CreatePropertySchema,
+    UpdatePropertySchema,
+} from '@/types/entities/property/schema';
+import { z } from 'zod';
 
 const logger = serverLogger.withContext('PropertyActions');
+
+type CreatePropertyData = z.infer<typeof CreatePropertySchema>;
+type UpdatePropertyData = z.infer<typeof UpdatePropertySchema>;
 
 /**
  * Obtiene todas las propiedades con sus estadísticas
@@ -170,7 +177,7 @@ export async function togglePropertyFavorite(id: string) {
 		// Obtener el estado actual
 		const property = await prisma.property.findUnique({
 			where: { id },
-			select: { isFavorite: true },
+			select: { favorite: true },
 		});
 
 		if (!property) {
@@ -180,7 +187,7 @@ export async function togglePropertyFavorite(id: string) {
 		// Invertir el estado
 		const updatedProperty = await prisma.property.update({
 			where: { id },
-			data: { isFavorite: !property.isFavorite },
+			data: { favorite: !property.favorite },
 			include: {
 				_count: {
 					select: {
@@ -203,7 +210,7 @@ export async function togglePropertyFavorite(id: string) {
 		});
 
 		logger.info(
-			`✅ Propiedad ${updatedProperty.isFavorite ? 'marcada' : 'desmarcada'} como favorita:`,
+			`✅ Propiedad ${updatedProperty.favorite ? 'marcada' : 'desmarcada'} como favorita:`,
 			updatedProperty.name
 		);
 		return updatedProperty;

@@ -12,37 +12,49 @@ graph TD
     A --> C[Transformers]
     A --> D[Documentación]
     B --> B1[types.ts]
-    B --> B2[base.ts]
+    B --> B2[index.ts]
     B --> B3[extended.ts]
-    C --> C1[mappers.ts]
-    C --> C2[serializers.ts]
-    C --> C3[transformer.ts]
+    B --> B4[stats-types.ts]
+    B --> B5[enums.ts]
+    B --> B6[schema.ts]
+    C --> C1[transformers]
     D --> D1[documentation.md]
 ```
 
 ## Tipos principales
 
-- `WorldItemBase`, `WorldItemComplete`, `WorldItemCreateInput`, `WorldItemUpdateInput`
-- Filtros: `WorldItemFilters`, `WorldItemSearchOptions`, `WorldItemSearchResult`
-
-### Campos principales
-
-- **id**: identificador único del objeto
-- **name**: nombre descriptivo
-- **type**: categoría del objeto (`weapon`, `tool`, `artifact`, ...)
-- **rarity**: rareza (`COMMON`, `RARE`, etc.)
-- **stats**: objeto con estadísticas numéricas y efectos
-- **properties**: lista de `WorldItemProperty`
-- **createdAt** y **updatedAt**: timestamps de auditoría
+- `WorldItemBase`: Tipo base con campos fundamentales
+- `WorldItemComplete`: Tipo completo con relaciones, conteos y campos deserializados
+- `WorldItemCreateInput`, `WorldItemUpdateInput`: Inputs para mutaciones
+- Filtros: `WorldItemFilters`, `WorldItemSearchOptions`
+- Enumeraciones: `WorldItemType`, `WorldItemRarity`, `WorldItemCategory`
 
 ## Ejemplo de uso
 
 ```typescript
 import { createWorldItem, updateWorldItem, searchWorldItems } from '@/transformers/world-item';
 
-const nuevoItem = await createWorldItem({ name: 'Espada legendaria', type: 'arma' });
-const items = await searchWorldItems({ filters: { search: 'Espada' } });
-await updateWorldItem(nuevoItem.id, { description: 'Una espada con poderes mágicos.' });
+// Crear un nuevo objeto del mundo
+const nuevoItem = await createWorldItem({
+  name: 'Espada legendaria',
+  type: 'weapon',
+  rarity: 'legendary',
+  description: 'Una espada forjada con metales antiguos',
+  effects: [{ name: 'Llamas eternas', description: 'Causa daño por fuego adicional' }]
+});
+
+// Buscar objetos
+const items = await searchWorldItems({
+  filters: {
+    query: 'Espada',
+    rarities: ['legendary']
+  }
+});
+
+// Actualizar un objeto existente
+await updateWorldItem(nuevoItem.id, {
+  properties: [{ name: 'Durabilidad', value: 100 }]
+});
 ```
 
 ## Flujo de datos
@@ -64,18 +76,25 @@ sequenceDiagram
 ## Mejores prácticas
 
 - Usar siempre los tipos canónicos (`WorldItemCreateInput`, `WorldItemUpdateInput`, `WorldItemComplete`).
-- Validar los datos antes de crear/actualizar (`validateWorldItem`).
-- Usar los mapeadores para relaciones complejas.
+- Validar los datos antes de crear/actualizar con ZodSchema.
+- Usar los transformadores para manejar la serialización/deserialización de JSON.
 - Mantener la documentación y diagramas actualizados.
 
 ## Integración
 
 Los WorldItems pueden asociarse a:
 
-- Personajes, lugares, notas, imágenes, álbumes, conceptos, prompts, grupos, etc.
+- Personajes, lugares
+- Imágenes, videos
+- Notas, conceptos
+- Prompts, tags
+- Colecciones, álbumes
+- Grupos, propiedades
 
-Al eliminar un WorldItem, revisar las relaciones para evitar referencias huérfanas.
+## Migración a tipos canónicos
+
+✅ Tipos canónicos migrados, legacy eliminado, documentación y diagrama actualizados.
 
 ---
 
-> Última actualización: 2025-06-11
+> Última actualización: 2025-06-18

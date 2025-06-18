@@ -12,27 +12,57 @@ graph TD
     A --> C[Transformers]
     A --> D[Documentación]
     B --> B1[types.ts]
-    B --> B2[base.ts]
+    B --> B2[index.ts]
     B --> B3[extended.ts]
-    C --> C1[mappers.ts]
-    C --> C2[serializers.ts]
-    C --> C3[transformer.ts]
+    B --> B4[enums.ts]
+    B --> B5[schema.ts]
+    C --> C1[prompt.ts]
     D --> D1[documentation.md]
 ```
 
 ## Tipos principales
 
-- `PromptBase`, `PromptComplete`, `PromptCreateInput`, `PromptUpdateInput`
-- Filtros: `PromptFilters`, `PromptSearchOptions`, `PromptSearchResult`
+- `PromptBase`: Tipo base con campos fundamentales
+- `PromptComplete`: Tipo completo con relaciones, conteos y campos deserializados
+- `CreatePromptData`, `UpdatePromptData`: Inputs para mutaciones
+- `PromptParameter`: Parámetros de configuración
+- `PromptExecutionParams`: Parámetros para ejecutar prompts
 
 ## Ejemplo de uso
 
 ```typescript
-import { createPrompt, updatePrompt, searchPrompts } from '@/transformers/prompt';
+import { createPrompt, updatePrompt, searchPrompts, executePrompt } from '@/transformers/prompt';
 
-const nuevoPrompt = await createPrompt({ text: 'Describe un bosque mágico', type: 'escritura' });
-const prompts = await searchPrompts({ filters: { search: 'bosque' } });
-await updatePrompt(nuevoPrompt.id, { text: 'Describe un bosque encantado' });
+// Crear un nuevo prompt
+const nuevoPrompt = await createPrompt({
+  name: 'Paisaje fantástico',
+  content: 'Un paisaje fantástico con montañas flotantes, cascadas de luz y criaturas místicas',
+  purpose: 'Generación de imágenes',
+  category: 'image',
+  parameters: {
+    width: { type: 'number', value: 1024, description: 'Ancho de la imagen' },
+    style: { type: 'select', value: 'fantástico', options: ['realista', 'fantástico', 'abstracto'] }
+  }
+});
+
+// Buscar prompts
+const prompts = await searchPrompts({
+  filters: {
+    query: 'paisaje',
+    categories: ['image']
+  }
+});
+
+// Actualizar un prompt existente
+await updatePrompt(nuevoPrompt.id, {
+  content: 'Un paisaje onírico con montañas flotantes...'
+});
+
+// Ejecutar un prompt con parámetros
+const resultado = await executePrompt({
+  promptId: nuevoPrompt.id,
+  variables: { style: 'acuarela' }
+});
 ```
 
 ## Flujo de datos
@@ -53,19 +83,25 @@ sequenceDiagram
 
 ## Mejores prácticas
 
-- Usar siempre los tipos canónicos (`PromptCreateInput`, `PromptUpdateInput`, `PromptComplete`).
-- Validar los datos antes de crear/actualizar (`validatePrompt`).
-- Usar los mapeadores para relaciones complejas.
+- Usar siempre los tipos canónicos (`CreatePromptData`, `UpdatePromptData`, `PromptComplete`).
+- Validar los datos antes de crear/actualizar con ZodSchema.
+- Serializar/deserializar correctamente los campos JSON (parameters, tags).
 - Mantener la documentación y diagramas actualizados.
 
 ## Integración
 
 Los prompts pueden asociarse a:
 
-- Imágenes, notas, álbumes, personajes, conceptos, grupos, etc.
+- Imágenes, videos
+- Notas, conceptos
+- Personajes, lugares, objetos
+- Colecciones, álbumes
+- Tags, propiedades
 
-Al eliminar un prompt, revisar las relaciones para evitar referencias huérfanas.
+## Migración a tipos canónicos
+
+✅ Tipos canónicos migrados, legacy eliminado, documentación y diagrama actualizados.
 
 ---
 
-> Última actualización: 2025-06-10
+> Última actualización: 2025-06-18

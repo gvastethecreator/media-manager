@@ -12,27 +12,38 @@ graph TD
     A --> C[Transformers]
     A --> D[Documentación]
     B --> B1[types.ts]
-    B --> B2[base.ts]
-    B --> B3[extended.ts]
-    C --> C1[mappers.ts]
-    C --> C2[serializers.ts]
-    C --> C3[transformer.ts]
+    B --> B2[index.ts]
+    B --> B3[schema.ts]
+    C --> C1[place.ts]
     D --> D1[documentation.md]
 ```
 
 ## Tipos principales
 
-- `PlaceBase`, `PlaceComplete`, `PlaceCreateInput`, `PlaceUpdateInput`
+- `PlaceBase`: Tipo base con campos fundamentales
+- `PlaceComplete`: Tipo completo con relaciones, conteos y datos deserializados
+- `PlaceCreateInput`, `PlaceUpdateInput`: Inputs para mutaciones
 - Filtros: `PlaceFilters`, `PlaceSearchOptions`, `PlaceSearchResult`
+- Enumeraciones: `PlaceCategory`, `PlaceType`, `PlaceClimate`, `PlaceSortCriteria`
 
 ## Ejemplo de uso
 
 ```typescript
 import { createPlace, updatePlace, searchPlaces } from '@/transformers/place';
 
-const nuevoLugar = await createPlace({ name: 'Bosque Encantado', type: 'bosque' });
-const lugares = await searchPlaces({ filters: { search: 'Bosque' } });
-await updatePlace(nuevoLugar.id, { description: 'Un bosque lleno de magia.' });
+const nuevoLugar = await createPlace({
+  name: 'Bosque Encantado',
+  type: 'forest',
+  description: 'Un bosque mágico lleno de criaturas míticas'
+});
+
+const lugares = await searchPlaces({
+  where: { searchQuery: 'Bosque' }
+});
+
+await updatePlace(nuevoLugar.id, {
+  resources: [{ name: 'Flores mágicas', description: 'Plantas con propiedades curativas' }]
+});
 ```
 
 ## Flujo de datos
@@ -54,17 +65,24 @@ sequenceDiagram
 ## Mejores prácticas
 
 - Usar siempre los tipos canónicos (`PlaceCreateInput`, `PlaceUpdateInput`, `PlaceComplete`).
-- Validar los datos antes de crear/actualizar (`validatePlace`).
-- Usar los mapeadores para relaciones complejas.
+- Validar los datos antes de crear/actualizar con ZodSchema.
+- Usar los transformadores para manejar relaciones complejas.
 - Mantener la documentación y diagramas actualizados.
 
 ## Integración
 
 Los lugares pueden asociarse a:
 
-- Imágenes, notas, álbumes, personajes, conceptos, prompts, grupos, etc.
+- Imágenes, videos
+- Álbumes, colecciones
+- Personajes, conceptos
+- Notas, prompts
+- Tags, propiedades
+- Grupos, world-items
 
-Al eliminar un lugar, revisar las relaciones para evitar referencias huérfanas.
+## Migración a tipos canónicos
+
+✅ Tipos canónicos migrados, legacy eliminado, documentación y diagrama actualizados.
 
 ---
 

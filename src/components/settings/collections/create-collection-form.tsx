@@ -1,18 +1,9 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { createCollection, updateCollection } from '@/app/actions/collections/collection.actions';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import toastService from '@/services/toast.service';
 import type { CollectionBase as Collection, CreateCollectionData } from '@/types/entities/collection/base';
 import {
@@ -22,6 +13,11 @@ import {
 	CollectionPlatform,
 	CollectionRarity,
 } from '@/types/entities/collection/enums';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación
 const createCollectionSchema = z.object({
@@ -112,7 +108,7 @@ export function CreateCollectionForm({
 	}, [form, isEditing, collection]);
 
 	// Generar color y emoji basados en la categoría
-	const generateSuggestions = useCallback(() => {
+	const generateSuggestions = () => {
 		const category = form.getValues('category');
 		const name = form.getValues('name');
 
@@ -174,7 +170,7 @@ export function CreateCollectionForm({
 
 			form.setValue('emoji', chosenEmoji);
 		}
-	}, [form]);
+	};
 
 	// Manejar envío del formulario
 	const onSubmit = async (data: FormValues) => {
@@ -221,245 +217,83 @@ export function CreateCollectionForm({
 		return value !== '' ? Number.parseFloat(value) : undefined;
 	};
 
+	const optionalFields = [
+		{
+			name: 'emoji',
+			label: 'Emoji',
+			render: ({ value, onChange }: any) => (
+				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
+			),
+		},
+		{
+			name: 'color',
+			label: 'Color',
+			render: ({ value, onChange }: any) => (
+				<ColorPicker value={value} onChange={onChange} compact showLabel={false} />
+			),
+		},
+		{
+			name: 'description',
+			label: 'Descripción',
+			render: ({ value, onChange }: any) => (
+				<textarea
+					placeholder="Descripción de la colección..."
+					value={value || ''}
+					onChange={(e) => onChange(e.target.value)}
+					rows={3}
+					className="text-xs resize-none w-full border rounded p-2"
+				/>
+			),
+		},
+		{
+			name: 'category',
+			label: 'Categoría',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger className="h-8 text-xs w-full">
+						<SelectValue placeholder="Seleccionar" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="arte">Arte</SelectItem>
+						<SelectItem value="foto">Foto</SelectItem>
+						<SelectItem value="libros">Libros</SelectItem>
+						<SelectItem value="otro">Otro</SelectItem>
+					</SelectContent>
+				</Select>
+			),
+		},
+		{
+			name: 'rarity',
+			label: 'Rareza',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger className="h-8 text-xs w-full">
+						<SelectValue placeholder="Seleccionar" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="common">Común</SelectItem>
+						<SelectItem value="rare">Raro</SelectItem>
+						<SelectItem value="epic">Épico</SelectItem>
+					</SelectContent>
+				</Select>
+			),
+		},
+		// ...agregar más campos opcionales si es necesario...
+	];
+
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-				<FormField
-					control={form.control}
-					name="name"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Nombre</FormLabel>
-							<FormControl>
-								<Input
-									placeholder="Nombre de la colección"
-									{...field}
-									onChange={(e) => {
-										field.onChange(e);
-										// Solo generar sugerencias si no estamos editando o si el usuario no ha modificado manualmente
-										if (!isEditing) {
-											generateSuggestions();
-										}
-									}}
-								/>
-							</FormControl>
-							<FormDescription>El nombre de la colección, visible en listados e imágenes.</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Descripción (Opcional)</FormLabel>
-							<FormControl>
-								<Textarea placeholder="Describe brevemente esta colección" {...field} value={field.value || ''} />
-							</FormControl>
-							<FormDescription>Una descripción breve para entender el propósito de esta colección.</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<FormField
-						control={form.control}
-						name="emoji"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Emoji</FormLabel>
-								<FormControl>
-									<EmojiPicker value={field.value} onEmojiSelect={(emoji) => field.onChange(emoji)} />
-								</FormControl>
-								<FormDescription>Selecciona un emoji representativo.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="color"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Color</FormLabel>
-								<FormControl>
-									<ColorPicker value={field.value} onChange={(color) => field.onChange(color)} />
-								</FormControl>
-								<FormDescription>Color para identificar visualmente la colección.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="category"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Categoría (Opcional)</FormLabel>
-							<Select
-								onValueChange={(value) => {
-									field.onChange(value || undefined);
-									// Generar sugerencias basadas en categoría
-									if (value) {
-										generateSuggestions();
-									}
-								}}
-								value={field.value}
-							>
-								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Selecciona una categoría" />
-									</SelectTrigger>
-								</FormControl>
-								<SelectContent>
-									{Object.entries(CollectionCategory).map(([key, value]) => (
-										<SelectItem key={key} value={value}>
-											{value}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<FormDescription>Agrupa colecciones del mismo tipo para una mejor organización.</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<FormField
-						control={form.control}
-						name="rarity"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Rareza (Opcional)</FormLabel>
-								<Select onValueChange={(value) => field.onChange(value || undefined)} value={field.value}>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Selecciona rareza" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Object.entries(CollectionRarity).map(([key, value]) => (
-											<SelectItem key={key} value={value}>
-												{value}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<FormDescription>Indica qué tan exclusiva es esta colección.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="platform"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Plataforma (Opcional)</FormLabel>
-								<Select onValueChange={(value) => field.onChange(value || undefined)} value={field.value}>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Selecciona plataforma" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Object.entries(CollectionPlatform).map(([key, value]) => (
-											<SelectItem key={key} value={value}>
-												{value}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<FormDescription>Indica de qué plataforma proviene la colección.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<FormField
-						control={form.control}
-						name="url"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>URL (Opcional)</FormLabel>
-								<FormControl>
-									<Input placeholder="https://ejemplo.com/coleccion" {...field} />
-								</FormControl>
-								<FormDescription>Enlace principal a la colección.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="price"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Precio (Opcional)</FormLabel>
-								<FormControl>
-									<Input
-										type="number"
-										placeholder="0.00"
-										{...field}
-										onChange={(e) => field.onChange(formatPrice(e.target.value))}
-										value={field.value || ''}
-									/>
-								</FormControl>
-								<FormDescription>Valor estimado o costo de la colección.</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="isFavorite"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-							<FormControl>
-								<Checkbox
-									checked={field.value}
-									onCheckedChange={(checked) => {
-										field.onChange(checked === true);
-									}}
-								/>
-							</FormControl>
-							<div className="space-y-1 leading-none">
-								<FormLabel>Marcar como favorita</FormLabel>
-								<FormDescription>
-									Las colecciones favoritas aparecerán destacadas y tendrán prioridad en los listados.
-								</FormDescription>
-							</div>
-						</FormItem>
-					)}
-				/>
-
-				<div className="flex justify-end gap-2">
-					{onCancel && (
-						<Button type="button" variant="outline" onClick={onCancel}>
-							Cancelar
-						</Button>
-					)}
-					<Button type="button" variant="outline" onClick={generateSuggestions}>
-						Generar sugerencias
-					</Button>
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
-					</Button>
-				</div>
-			</form>
-		</Form>
+		<DynamicCreateForm
+			optionalFields={optionalFields}
+			onSubmit={async (data) => {
+				if (isEditing && collection) {
+					await updateCollection(collection.id, data);
+					onUpdated?.({ ...collection, ...data });
+				} else {
+					const created = await createCollection(data);
+					onCreated?.(created);
+				}
+			}}
+			submitLabel={isEditing ? 'Guardar cambios' : 'Crear colección'}
+		/>
 	);
 }

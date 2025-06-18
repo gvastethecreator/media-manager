@@ -3,303 +3,103 @@
  * @module transformers/folder/mappers
  */
 
-import { Logger } from '@/lib/logger';
-import { FolderSortBy } from '@/types/entities/folder/enums';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	Folder,
-	FolderComplete,
-	FolderCreateInput,
-	FolderFilter,
-	FolderSearchOptions,
-	FolderUpdateInput,
-} from '@/types/entities/folder/types';
+    Folder,
+    FolderComplete,
+    FolderCreateInput,
+    FolderFilters,
+    FolderSearchOptions,
+    FolderUpdateInput
+} from '@/types/entities/folder';
+import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 import { normalizeFolderPath } from './serializers';
 
-const logger = new Logger('FolderMappers');
+const logger = serverLogger.withContext('FolderMappers');
 
 /**
- * 🔍 Crea un objeto de filtro para consultas de Prisma
- *
- * @param filter Filtro de carpeta
- * @returns Objeto de filtro para Prisma
+ * 🔄 Mapea un `FolderCreateInput` a un `Prisma.FolderCreateInput`.
+ * Normaliza la ruta y establece valores por defecto.
  */
-export function createFolderFilter(filter: FolderFilter = {}): any {
+export function mapCreateFolderDataToPrisma(data: FolderCreateInput): Prisma.FolderCreateInput {
 	try {
-		const prismaFilter: any = {};
-
-		// Filtrado por ID
-		if (filter.id) {
-			prismaFilter.id = filter.id;
-		}
-
-		// Filtrado por nombre (insensible a mayúsculas/minúsculas)
-		if (filter.name) {
-			prismaFilter.name = {
-				contains: filter.name,
-				mode: 'insensitive',
-			};
-		}
-
-		// Filtrado por path
-		if (filter.path) {
-			prismaFilter.path = {
-				contains: filter.path,
-			};
-		}
-
-		// Filtrado por ID de padre
-		if (filter.parentId !== undefined) {
-			prismaFilter.parentId = filter.parentId;
-		}
-
-		// Filtrado por fecha de creación
-		if (filter.createdAt) {
-			prismaFilter.createdAt = filter.createdAt;
-		}
-
-		// Filtrado por fecha de actualización
-		if (filter.updatedAt) {
-			prismaFilter.updatedAt = filter.updatedAt;
-		}
-
-		return prismaFilter;
+		return {
+			...data,
+			path: data.path.replace(/\\/g, '/'), // Normalizar a slashes
+			isFavorite: data.isFavorite ?? false,
+			autoReindex: data.autoReindex ?? true,
+		};
 	} catch (error) {
-		logger.error('Error creando filtro de folder para Prisma:', error);
-		return {};
+		logger.error('Error mapeando datos de creación de carpeta', { error, data });
+		throw new TransformerError('Error al mapear datos de creación de carpeta.');
 	}
 }
 
 /**
- * 📊 Crea un objeto de ordenación para consultas de Prisma
- *
- * @param sortBy Criterio de ordenación
- * @returns Objeto de ordenación para Prisma
+ * 🔄 Mapea un `FolderUpdateInput` a un `Prisma.FolderUpdateInput`.
+ * Normaliza la ruta si se proporciona.
  */
-export function createFolderOrderBy(sortBy: FolderSortBy = FolderSortBy.NAME_ASC): any {
+export function mapUpdateFolderDataToPrisma(data: FolderUpdateInput): Prisma.FolderUpdateInput {
 	try {
-		switch (sortBy) {
-			case FolderSortBy.NAME_ASC:
-				return { name: 'asc' };
-
-			case FolderSortBy.NAME_DESC:
-				return { name: 'desc' };
-
-			case FolderSortBy.CREATED_ASC:
-				return { createdAt: 'asc' };
-
-			case FolderSortBy.CREATED_DESC:
-				return { createdAt: 'desc' };
-
-			case FolderSortBy.UPDATED_ASC:
-				return { updatedAt: 'asc' };
-
-			case FolderSortBy.UPDATED_DESC:
-				return { updatedAt: 'desc' };
-
-			case FolderSortBy.PATH_ASC:
-				return { path: 'asc' };
-
-			case FolderSortBy.PATH_DESC:
-				return { path: 'desc' };
-
-			default:
-				return { name: 'asc' };
-		}
-	} catch (error) {
-		logger.error('Error creando orden de folder para Prisma:', error);
-		return { name: 'asc' };
-	}
-}
-
-/**
- * 🔄 Mapea opciones de búsqueda a parámetros de Prisma
- *
- * @param options Opciones de búsqueda
- * @returns Opciones de búsqueda para Prisma
- */
-export function mapFolderSearchOptionsToPrisma(options: FolderSearchOptions = {}): any {
-	try {
-		const prismaOptions: any = {};
-
-		// Mapear filtros
-		if (options.filter) {
-			prismaOptions.where = createFolderFilter(options.filter);
-		}
-
-		// Mapear ordenación
-		prismaOptions.orderBy = createFolderOrderBy(options.sortBy);
-
-		// Mapear paginación
-		if (options.skip !== undefined) {
-			prismaOptions.skip = options.skip;
-		}
-
-		if (options.take !== undefined) {
-			prismaOptions.take = options.take;
-		}
-
-		// Mapear relaciones a incluir
-		if (options.include) {
-			prismaOptions.include = {};
-
-			if (options.include.parent) {
-				prismaOptions.include.parent = true;
-			}
-
-			if (options.include.children) {
-				prismaOptions.include.children = true;
-			}
-
-			if (options.include.images) {
-				prismaOptions.include.images = true;
-			}
-
-			if (options.include.count) {
-				prismaOptions.include._count = {
-					select: {
-						children: true,
-						images: true,
-						uploadedImages: true,
-						tags: true,
-					},
-				};
-			}
-		}
-
-		return prismaOptions;
-	} catch (error) {
-		logger.error('Error mapeando opciones de búsqueda de folder para Prisma:', error);
-		return {};
-	}
-}
-
-/**
- * 🔄 Mapea filtros a parámetros de Prisma
- *
- * @param filters Filtros de carpeta
- * @returns Filtros para Prisma
- */
-export function mapFolderFiltersToPrisma(filters: Record<string, any> = {}): any {
-	try {
-		const prismaFilters: any = {};
-
-		// Mapear filtros comunes
-		if (filters.id) {
-			prismaFilters.id = filters.id;
-		}
-
-		if (filters.name) {
-			prismaFilters.name = {
-				contains: filters.name,
-				mode: 'insensitive',
-			};
-		}
-
-		if (filters.path) {
-			prismaFilters.path = {
-				contains: filters.path,
-			};
-		}
-
-		if (filters.parentId !== undefined) {
-			prismaFilters.parentId = filters.parentId === 'null' ? null : filters.parentId;
-		}
-
-		// Fechas
-		if (filters.createdBefore) {
-			prismaFilters.createdAt = {
-				...(prismaFilters.createdAt || {}),
-				lt: new Date(filters.createdBefore),
-			};
-		}
-
-		if (filters.createdAfter) {
-			prismaFilters.createdAt = {
-				...(prismaFilters.createdAt || {}),
-				gt: new Date(filters.createdAfter),
-			};
-		}
-
-		if (filters.updatedBefore) {
-			prismaFilters.updatedAt = {
-				...(prismaFilters.updatedAt || {}),
-				lt: new Date(filters.updatedBefore),
-			};
-		}
-
-		if (filters.updatedAfter) {
-			prismaFilters.updatedAt = {
-				...(prismaFilters.updatedAt || {}),
-				gt: new Date(filters.updatedAfter),
-			};
-		}
-
-		return prismaFilters;
-	} catch (error) {
-		logger.error('Error mapeando filtros de folder para Prisma:', error);
-		return {};
-	}
-}
-
-/**
- * 🔄 Mapea datos para creación a formato Prisma
- *
- * @param data Datos para crear carpeta
- * @returns Datos para Prisma
- */
-export function mapCreateFolderDataToPrisma(data: FolderCreateInput): any {
-	try {
-		const prismaData: any = { ...data };
-
-		// Normalizar path
+		const prismaData: Prisma.FolderUpdateInput = { ...data };
 		if (data.path) {
-			prismaData.path = normalizeFolderPath(data.path);
+			prismaData.path = data.path.replace(/\\/g, '/');
 		}
-
-		// Si no hay path pero hay nombre y parentId, generarlo
-		if (!data.path && data.name && data.parentId) {
-			// En un caso real, buscaríamos el path del padre
-			// y concatenaríamos el nombre
-			prismaData.path = `/parent-path/${data.name}`;
-		}
-
-		// Manejar objetos complejos como metadata
-		if (data.metadata && typeof data.metadata === 'object') {
-			prismaData.metadata = data.metadata;
-		}
-
 		return prismaData;
 	} catch (error) {
-		logger.error('Error mapeando datos de creación de folder para Prisma:', error);
-		return data;
+		logger.error('Error mapeando datos de actualización de carpeta', { error, data });
+		throw new TransformerError('Error al mapear datos de actualización de carpeta.');
 	}
 }
 
 /**
- * 🔄 Mapea datos para actualización a formato Prisma
- *
- * @param data Datos para actualizar carpeta
- * @returns Datos para Prisma
+ * 🔄 Mapea `FolderSearchOptions` a `Prisma.FolderFindManyArgs`.
  */
-export function mapUpdateFolderDataToPrisma(data: FolderUpdateInput): any {
-	try {
-		const prismaData: any = { ...data };
+export function mapFolderSearchOptionsToPrisma(
+	options: FolderSearchOptions
+): Prisma.FolderFindManyArgs {
+	const { skip, take, orderBy, filters, include } = options;
+	const args: Prisma.FolderFindManyArgs = {
+		skip,
+		take,
+		orderBy,
+		include,
+	};
 
-		// Normalizar path si existe
-		if (data.path) {
-			prismaData.path = normalizeFolderPath(data.path);
-		}
-
-		// Manejar objetos complejos como metadata
-		if (data.metadata && typeof data.metadata === 'object') {
-			prismaData.metadata = data.metadata;
-		}
-
-		return prismaData;
-	} catch (error) {
-		logger.error('Error mapeando datos de actualización de folder para Prisma:', error);
-		return data;
+	if (filters) {
+		args.where = mapFolderFiltersToPrisma(filters);
 	}
+
+	return args;
+}
+
+/**
+ * 🔄 Mapea `FolderFilters` a `Prisma.FolderWhereInput`.
+ */
+function mapFolderFiltersToPrisma(filters: FolderFilters): Prisma.FolderWhereInput {
+	const where: Prisma.FolderWhereInput = {};
+
+	if (filters.search) {
+		where.OR = [
+			{ name: { contains: filters.search, mode: 'insensitive' } },
+			{ description: { contains: filters.search, mode: 'insensitive' } },
+		];
+	}
+
+	if (filters.isFavorite !== undefined) {
+		where.isFavorite = filters.isFavorite;
+	}
+
+	if (filters.parentId !== undefined) {
+		where.parentId = filters.parentId;
+	}
+
+	if (filters.hasImages) {
+		where.images = { some: {} };
+	}
+
+	return where;
 }
 
 /**

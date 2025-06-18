@@ -1,270 +1,231 @@
+/**
+ * @file Funciones de mapeo para la entidad Prompt
+ * @module transformers/prompt/mappers
+ */
+
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	PromptBase,
-	PromptExtended,
-	PromptFilters,
-	PromptSortOption,
-	PromptWithStats,
+    CreatePromptData,
+    PromptBase,
+    PromptFilters,
+    PromptSortCriteria,
+    PromptWithRelations,
+    UpdatePromptData
 } from '@/types/entities/prompt';
-import { toExtendedPrompt } from './serializers';
+import type { Prisma } from '@prisma/client';
+import { serializeParameters, serializeTags } from './serializers';
 
-const mappersLogger = serverLogger.withContext('PromptMappers');
-
-/**
- * Mapea datos de creación de prompt a formato Prisma
- * @param data Datos para crear un prompt
- * @returns Objeto con formato para Prisma
- */
-export function mapCreatePromptDataToPrisma(data: any): any {
-	return {
-		name: data.name,
-		emoji: data.emoji || null,
-		color: data.color || null,
-		description: data.description || null,
-		content: data.content || '',
-		purpose: data.purpose || 'general',
-		category: data.category || 'general',
-		parameters: data.parameters || '[]',
-		featuredImage: data.featuredImage || null,
-		isFavorite: data.isFavorite || false,
-		// Conexión con grupos si existen
-		groups: data.groupIds
-			? {
-					connect: data.groupIds.map((id: string) => ({ id })),
-				}
-			: undefined,
-		// Conexión con propiedades si existen
-		properties: data.propertyIds
-			? {
-					connect: data.propertyIds.map((id: string) => ({ id })),
-				}
-			: undefined,
-		// Conexión con comodines si existen
-		wildcards: data.wildcardIds
-			? {
-					connect: data.wildcardIds.map((id: string) => ({ id })),
-				}
-			: undefined,
-	};
-}
+const logger = serverLogger.withContext('PromptMappers');
 
 /**
- * Mapea datos de actualización de prompt a formato Prisma
- * @param data Datos para actualizar un prompt
- * @returns Objeto con formato para Prisma
+ * 🔄 Mapea datos de creación de Prompt a formato Prisma
+ * @param data Datos de creación
+ * @returns Objeto compatible con Prisma.PromptCreateInput
  */
-export function mapUpdatePromptDataToPrisma(data: any): any {
-	const updateData: Record<string, any> = {};
+export function mapCreatePromptDataToPrisma(data: CreatePromptData): Prisma.PromptCreateInput {
+	try {
+		// Serializar arrays y objetos a JSON si es necesario
+		const parameters = typeof data.parameters === 'string' ? data.parameters : serializeParameters(data.parameters);
+		const tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags);
 
-	// Solo incluir campos que estén presentes en los datos
-	if (data.name !== undefined) updateData.name = data.name;
-	if (data.emoji !== undefined) updateData.emoji = data.emoji;
-	if (data.color !== undefined) updateData.color = data.color;
-	if (data.description !== undefined) updateData.description = data.description;
-	if (data.content !== undefined) updateData.content = data.content;
-	if (data.purpose !== undefined) updateData.purpose = data.purpose;
-	if (data.category !== undefined) updateData.category = data.category;
-	if (data.parameters !== undefined) updateData.parameters = data.parameters;
-	if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-	if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-
-	// Gestionar relaciones con grupos
-	if (data.groupIds !== undefined) {
-		updateData.groups = {
-			set: data.groupIds.map((id: string) => ({ id })),
+		// Crear objeto base
+		const promptData: Prisma.PromptCreateInput = {
+			name: data.name,
+			emoji: data.emoji || '💬',
+			color: data.color || '#3b82f6',
+			description: data.description || null,
+			content: data.content || '',
+			purpose: data.purpose || 'general',
+			category: data.category || 'general',
+			parameters,
+			tags,
+			featuredImage: data.featuredImage || null,
+			isFavorite: data.isFavorite || false,
 		};
-	}
 
-	// Gestionar relaciones con propiedades
-	if (data.propertyIds !== undefined) {
-		updateData.properties = {
-			set: data.propertyIds.map((id: string) => ({ id })),
-		};
-	}
+		// Agregar relaciones si existen
+		if (data.groupIds && data.groupIds.length > 0) {
+			promptData.groups = {
+				connect: data.groupIds.map((id) => ({ id })),
+			};
+		}
 
-	// Gestionar relaciones con comodines
-	if (data.wildcardIds !== undefined) {
-		updateData.wildcards = {
-			set: data.wildcardIds.map((id: string) => ({ id })),
-		};
-	}
+		if (data.propertyIds && data.propertyIds.length > 0) {
+			promptData.properties = {
+				connect: data.propertyIds.map((id) => ({ id })),
+			};
+		}
 
-	return updateData;
+		if (data.wildcardIds && data.wildcardIds.length > 0) {
+			promptData.wildcards = {
+				connect: data.wildcardIds.map((id) => ({ id })),
+			};
+		}
+
+		if (data.tagIds && data.tagIds.length > 0) {
+			promptData.tagEntities = {
+				connect: data.tagIds.map((id) => ({ id })),
+			};
+		}
+
+		return promptData;
+	} catch (error) {
+		logger.error('Error mapeando datos de creación:', error);
+		throw new Error(`Error al mapear datos de creación de prompt: ${error instanceof Error ? error.message : String(error)}`);
+	}
 }
 
 /**
- * Transforma un prompt de Prisma a un prompt con estadísticas
- * @param prompt Prompt base con datos de conteo
- * @returns Prompt con estadísticas
+ * 🔄 Mapea datos de actualización de Prompt a formato Prisma
+ * @param id ID del prompt a actualizar
+ * @param data Datos de actualización
+ * @returns Objeto compatible con Prisma.PromptUpdateArgs
  */
-export function toPromptWithStats(prompt: any): PromptWithStats {
-	// Asegurar que _count existe y tiene la estructura correcta
-	const _count = prompt._count || {};
+export function mapUpdatePromptDataToPrisma(id: string, data: UpdatePromptData): Prisma.PromptUpdateArgs {
+	try {
+		// Preparar datos base (solo incluir campos proporcionados)
+		const updateData: Prisma.PromptUpdateInput = {};
 
-	return {
-		...prompt,
-		_count: {
-			characters: _count.characters || 0,
-			places: _count.places || 0,
-			worldItems: _count.worldItems || 0,
-			notes: _count.notes || 0,
-			concepts: _count.concepts || 0,
-			images: _count.images || 0,
-			groups: _count.groups || 0,
-			properties: _count.properties || 0,
-			wildcards: _count.wildcards || 0,
-		},
-	};
+		// Asignar campos simples si están definidos
+		if (data.name !== undefined) updateData.name = data.name;
+		if (data.emoji !== undefined) updateData.emoji = data.emoji;
+		if (data.color !== undefined) updateData.color = data.color;
+		if (data.description !== undefined) updateData.description = data.description;
+		if (data.content !== undefined) updateData.content = data.content;
+		if (data.purpose !== undefined) updateData.purpose = data.purpose;
+		if (data.category !== undefined) updateData.category = data.category;
+		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
+		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+
+		// Serializar campos complejos si están definidos
+		if (data.parameters !== undefined) {
+			updateData.parameters = typeof data.parameters === 'string' ? data.parameters : serializeParameters(data.parameters);
+		}
+		if (data.tags !== undefined) {
+			updateData.tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags);
+		}
+
+		// Actualizar relaciones si están definidas
+		if (data.groupIds !== undefined) {
+			updateData.groups = {
+				set: data.groupIds.map((id) => ({ id })),
+			};
+		}
+
+		if (data.propertyIds !== undefined) {
+			updateData.properties = {
+				set: data.propertyIds.map((id) => ({ id })),
+			};
+		}
+
+		if (data.wildcardIds !== undefined) {
+			updateData.wildcards = {
+				set: data.wildcardIds.map((id) => ({ id })),
+			};
+		}
+
+		if (data.tagIds !== undefined) {
+			updateData.tagEntities = {
+				set: data.tagIds.map((id) => ({ id })),
+			};
+		}
+
+		return {
+			where: { id },
+			data: updateData,
+		};
+	} catch (error) {
+		logger.error('Error mapeando datos de actualización:', error);
+		throw new Error(`Error al mapear datos de actualización de prompt: ${error instanceof Error ? error.message : String(error)}`);
+	}
 }
 
 /**
- * Filtra una lista de prompts según criterios
- * @param prompts Lista de prompts
- * @param filters Criterios de filtrado
- * @returns Lista filtrada de prompts
+ * 🔄 Mapea filtros de Prompt a condiciones where de Prisma
+ * @param filters Filtros para consultar prompts
+ * @returns Objeto compatible con Prisma.PromptWhereInput
  */
-export function filterPrompts(prompts: PromptBase[], filters: PromptFilters = {}): PromptBase[] {
-	mappersLogger.info('🔍 Filtrando prompts con criterios:', filters);
+export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): Prisma.PromptWhereInput {
+	try {
+		const where: Prisma.PromptWhereInput = {};
 
-	return prompts.filter((prompt) => {
-		// Filtro por búsqueda
-		if (filters.search) {
-			const searchLower = filters.search.toLowerCase();
-			const nameMatch = prompt.name.toLowerCase().includes(searchLower);
-			const descMatch = prompt.description?.toLowerCase().includes(searchLower) || false;
-			const contentMatch = prompt.content?.toLowerCase().includes(searchLower) || false;
-
-			if (!nameMatch && !descMatch && !contentMatch) {
-				return false;
-			}
+		// Búsqueda por texto
+		if (filters.searchQuery) {
+			where.OR = [
+				{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
+				{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
+				{ content: { contains: filters.searchQuery, mode: 'insensitive' } },
+			];
 		}
 
-		// Filtro por categoría
-		if (filters.category && prompt.category !== filters.category) {
-			return false;
+		// Filtrar por categorías
+		if (filters.categories && filters.categories.length > 0) {
+			where.category = { in: filters.categories };
 		}
 
-		// Filtro por tags - Esta entidad no tiene una propiedad 'tags' directa,
-		// por lo que omitiremos este filtro o se puede implementar de otra manera
-		// si se relaciona con Tags en una relación muchos a muchos
-		if (filters.tags && filters.tags.length > 0) {
-			// Este filtrado debería hacerse a nivel de consulta de base de datos
-			// ya que requiere consultar las relaciones con Tags
-			// Para propósitos de ejemplo, asumimos que no hay match si hay filtro de tags
-			return false;
+		// Filtrar por propósitos
+		if (filters.purposes && filters.purposes.length > 0) {
+			where.purpose = { in: filters.purposes };
 		}
 
-		// Filtro por favoritos
-		if (filters.onlyFavorites && !prompt.isFavorite) {
-			return false;
+		// Filtrar por favoritos
+		if (filters.onlyFavorites) {
+			where.isFavorite = true;
 		}
 
-		// Filtro por fecha de creación
-		if (filters.startDate) {
-			const promptDate = new Date(prompt.createdAt);
-			if (promptDate < filters.startDate) {
-				return false;
-			}
+		// Filtrar por contenido específico
+		if (filters.contentContains) {
+			where.content = { contains: filters.contentContains, mode: 'insensitive' };
 		}
 
-		if (filters.endDate) {
-			const promptDate = new Date(prompt.createdAt);
-			if (promptDate > filters.endDate) {
-				return false;
-			}
-		}
-
-		return true;
-	});
+		return where;
+	} catch (error) {
+		logger.error('Error mapeando filtros:', error);
+		return {}; // Devolver objeto vacío en caso de error
+	}
 }
 
 /**
- * Ordena una lista de prompts según el criterio especificado
- * @param prompts Lista de prompts
+ * 🔄 Mapea criterios de ordenación a formato Prisma
  * @param sortBy Criterio de ordenación
- * @returns Lista ordenada de prompts
+ * @returns Objeto compatible con Prisma.PromptOrderByWithRelationInput
  */
-export function sortPrompts(prompts: PromptBase[], sortBy: PromptSortOption = 'name_asc'): PromptBase[] {
-	mappersLogger.info('⏬ Ordenando prompts por:', sortBy);
+export function mapPromptSortCriteriaToPrisma(sortBy: PromptSortCriteria = PromptSortCriteria.UPDATED_DESC): Prisma.PromptOrderByWithRelationInput {
+	// Extraer campo y dirección del criterio
+	const [field, direction] = sortBy.split(':');
+	const sortDirection = direction === 'asc' ? 'asc' : 'desc';
 
-	const promptsCopy = [...prompts];
-
-	switch (sortBy) {
-		case 'name_asc':
-			return promptsCopy.sort((a, b) => a.name.localeCompare(b.name));
-		case 'name_desc':
-			return promptsCopy.sort((a, b) => b.name.localeCompare(a.name));
-		case 'created_asc':
-			return promptsCopy.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-		case 'created_desc':
-			return promptsCopy.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-		case 'updated_asc':
-			return promptsCopy.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
-		case 'updated_desc':
-			return promptsCopy.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-		case 'category_asc':
-			return promptsCopy.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
-		case 'category_desc':
-			return promptsCopy.sort((a, b) => (b.category || '').localeCompare(a.category || ''));
-		case 'favorites_first':
-			return promptsCopy.sort((a, b) => {
-				if (a.isFavorite === b.isFavorite) {
-					return a.name.localeCompare(b.name);
-				}
-				return a.isFavorite ? -1 : 1;
-			});
+	// Mapear campo a propiedad de Prisma
+	switch (field) {
+		case 'name':
+			return { name: sortDirection };
+		case 'created':
+			return { createdAt: sortDirection };
+		case 'updated':
 		default:
-			return promptsCopy;
+			return { updatedAt: sortDirection };
 	}
 }
 
 /**
- * Aplica paginación a una lista de prompts
- * @param prompts Lista de prompts
- * @param page Número de página
- * @param pageSize Tamaño de página
- * @returns Lista paginada de prompts
+ * 🔄 Mapea un Prompt a formato simplificado para relaciones
+ * @param prompt Prompt completo
+ * @returns Prompt simplificado para relaciones
  */
-export function paginatePrompts(prompts: PromptBase[], page = 1, pageSize = 20): PromptBase[] {
-	const startIndex = (page - 1) * pageSize;
-	return prompts.slice(startIndex, startIndex + pageSize);
+export function mapPromptToRelated(prompt: PromptBase | PromptWithRelations): Pick<PromptBase, 'id' | 'name' | 'emoji' | 'color'> {
+	return {
+		id: prompt.id,
+		name: prompt.name,
+		emoji: prompt.emoji,
+		color: prompt.color,
+	};
 }
 
 /**
- * Procesa una lista de prompts aplicando filtrado, ordenación y paginación
- * @param prompts Lista de prompts
- * @param filters Criterios de filtrado
- * @param sortBy Criterio de ordenación
- * @param page Número de página
- * @param pageSize Tamaño de página
- * @returns Lista procesada de prompts extendidos
+ * 🔄 Mapea un array de Prompts a formato simplificado para relaciones
+ * @param prompts Array de prompts
+ * @returns Array de prompts simplificados
  */
-export function processPrompts(
-	prompts: PromptBase[],
-	filters: PromptFilters = {},
-	sortBy: PromptSortOption = 'name_asc',
-	page = 1,
-	pageSize = 20
-): { items: PromptExtended[]; total: number; totalPages: number } {
-	// Aplicar filtros
-	const filteredPrompts = filterPrompts(prompts, filters);
-
-	// Aplicar ordenación
-	const sortedPrompts = sortPrompts(filteredPrompts, sortBy);
-
-	// Calcular total y páginas
-	const total = sortedPrompts.length;
-	const totalPages = Math.ceil(total / pageSize);
-
-	// Aplicar paginación
-	const paginatedPrompts = paginatePrompts(sortedPrompts, page, pageSize);
-
-	// Transformar a prompts extendidos
-	const extendedPrompts = paginatedPrompts.map(toExtendedPrompt);
-
-	return {
-		items: extendedPrompts,
-		total,
-		totalPages,
-	};
+export function mapPromptsToRelated(prompts: Array<PromptBase | PromptWithRelations>): Array<Pick<PromptBase, 'id' | 'name' | 'emoji' | 'color'>> {
+	return prompts.map(mapPromptToRelated);
 }

@@ -3,12 +3,14 @@
  * @module transformers/property/serializers
  */
 
-import { createLogger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
+import type { PropertyBase, PropertyWithRelations } from '@/types/entities/property';
 import { PropertySchema } from '@/types/entities/property/schema';
-import type { PropertyBase, PropertyComplete, PropertyDeserialized } from '@/types/entities/property/types';
+import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma, Property } from '@prisma/client';
 
 // Logger específico para este módulo
-const logger = createLogger('PropertyTransformer:Serializers');
+const logger = serverLogger.child({ module: 'PropertyTransformer:Serializers' });
 
 // Constantes para valores por defecto
 export const DEFAULT_PROPERTY_EMOJI = '🔍';
@@ -35,8 +37,8 @@ export function validateProperty(property: Partial<PropertyBase>): PropertyBase 
 		const _result = PropertySchema.parse(property);
 		return property as PropertyBase;
 	} catch (error) {
-		logger.error('Error validando Property:', error);
-		throw new Error(`Datos de Property inválidos: ${error instanceof Error ? error.message : String(error)}`);
+		logger.error('Error validando Property', { error });
+		throw new TransformerError('Datos de Property inválidos');
 	}
 }
 
@@ -142,7 +144,10 @@ export function generatePropertyColor(name: string): string {
  * @param options Opciones de transformación
  * @returns Propiedad con campos serializados para Prisma
  */
-export function toPrismaProperty(property: Partial<PropertyComplete>, options: PropertyTransformOptions = {}): any {
+export function toPrismaProperty(
+	property: Partial<PropertyWithRelations>,
+	options: PropertyTransformOptions = {}
+): Prisma.PropertyUpdateInput {
 	try {
 		const { validateFields = true } = options;
 
@@ -151,18 +156,27 @@ export function toPrismaProperty(property: Partial<PropertyComplete>, options: P
 			validateProperty(property as PropertyBase);
 		}
 
-		// Datos base
-		const result: any = { ...property };
+		// Crear objeto con solo propiedades válidas para Prisma
+		const result: Prisma.PropertyUpdateInput = {
+			id: property.id,
+			name: property.name,
+			emoji: property.emoji,
+			color: property.color,
+			description: property.description,
+			shortcut: property.shortcut,
+			category: property.category,
+			featuredImage: property.featuredImage,
+		};
 
-		// Eliminar campos que no van a la base de datos
-		result._count = undefined;
-		result._relations = undefined;
-		result._ui = undefined;
+		// Manejar la conversión de isFavorite a favorite si está presente
+		if ('isFavorite' in property) {
+			result.favorite = property.isFavorite;
+		}
 
 		return result;
 	} catch (error) {
-		logger.error('Error serializando property:', error);
-		throw new Error(`Error serializando property: ${error instanceof Error ? error.message : String(error)}`);
+		logger.error('Error serializando property', { error });
+		throw new TransformerError('Error serializando property');
 	}
 }
 
@@ -172,46 +186,67 @@ export function toPrismaProperty(property: Partial<PropertyComplete>, options: P
  * @param options Opciones de transformación
  * @returns Propiedad con campos deserializados
  */
-export function fromPrismaProperty<T extends PropertyBase>(
+export function fromPrismaProperty<
+	T extends Property & { _relations?: any; _count?: any }
+>(
 	property: T,
 	options: PropertyTransformOptions = {}
-): T & PropertyDeserialized & Partial<Record<'_relations' | '_count' | '_ui', any>> {
+): PropertyWithRelations & { _relations?: any; _count?: any; _ui?: any } {
 	try {
 		const { includeRelations = false, includeUI = false, includeStats = false } = options;
 
 		// Crear resultado base
-		const result = {
+		const result: PropertyWithRelations & {
+			_relations?: any;
+			_count?: any;
+			_ui?: any;
+		} = {
 			...property,
-		} as T & PropertyDeserialized;
+			isFavorite: property.favorite,
+			createdAt: new Date(property.createdAt),
+			updatedAt: new Date(property.updatedAt),
+		};
 
 		// Agregar relaciones si están presentes y se solicitan
-		if (includeRelations && (property as any)._relations) {
-			result._relations = (property as any)._relations;
+		if (includeRelations && property._relations) {
+			result._relations = property._relations;
 		}
 
-		// Agregar conteos si están presentes y se solicitan
-		if (includeStats && (property as any)._count) {
-			result._count = (property as any)._count;
+		// Agregar conteos si están presentes y se solicitan estadísticas
+		if (includeStats && property._count) {
+			result._count = property._count;
 		}
 
-		// Agregar campos UI si se solicitan
+		// Agregar propiedades de UI si se solicitan
 		if (includeUI) {
 			result._ui = {
-				lastUpdated: property.updatedAt instanceof Date ? property.updatedAt : new Date(property.updatedAt),
+				lastUpdated: property.updatedAt || new Date(),
+				itemCount: calculateItemCount(property),
 			};
 		}
 
 		return result;
 	} catch (error) {
-		logger.error('Error deserializando property:', error);
-		throw new Error(`Error deserializando property: ${error instanceof Error ? error.message : String(error)}`);
+		logger.error('Error deserializando property', { error });
+		throw new TransformerError('Error deserializando property');
 	}
 }
 
 /**
- * Extiende una propiedad con campos UI adicionales
- * @param property Propiedad base de la base de datos
- * @returns Propiedad extendida con propiedades calculadas
+ * Calcula el número total de elementos vinculados a una propiedad
+ * @param property Propiedad con posibles conteos
+ * @returns Número total de elementos
+ */
+function calculateItemCount(property: Property & { _count?: any }): number {
+	if (!property._count) return 0;
+
+	return Object.values(property._count).reduce((total: number, count: any) => total + (count as number), 0);
+}
+
+/**
+ * Extiende una propiedad con datos de interfaz de usuario
+ * @param property Propiedad base
+ * @returns Propiedad extendida con datos UI
  */
 export function extendProperty<T extends PropertyBase>(
 	property: T
@@ -221,58 +256,28 @@ export function extendProperty<T extends PropertyBase>(
 		itemCount: number;
 	};
 } {
-	if (!property) return null as any;
-
-	try {
-		return {
-			...property,
-			_ui: {
-				// Asegurar que las fechas sean instancias de Date
-				lastUpdated: property.updatedAt instanceof Date ? property.updatedAt : new Date(property.updatedAt),
-				// Calcular contadores de elementos relacionados si están disponibles
-				itemCount: (property as any)._count
-					? ((property as any)._count.images || 0) +
-						((property as any)._count.videos || 0) +
-						((property as any)._count.albums || 0) +
-						((property as any)._count.collections || 0) +
-						((property as any)._count.tags || 0) +
-						((property as any)._count.characters || 0) +
-						((property as any)._count.places || 0) +
-						((property as any)._count.worldItems || 0) +
-						((property as any)._count.concepts || 0) +
-						((property as any)._count.prompts || 0) +
-						((property as any)._count.notes || 0) +
-						((property as any)._count.wildcards || 0) +
-						((property as any)._count.groups || 0)
-					: 0,
-			},
-		};
-	} catch (error) {
-		logger.error('Error extendiendo property:', error);
-		return {
-			...property,
-			_ui: {
-				lastUpdated: new Date(),
-				itemCount: 0,
-			},
-		};
-	}
+	return {
+		...property,
+		_ui: {
+			lastUpdated: property.updatedAt,
+			itemCount: calculateItemCount(property as any),
+		},
+	};
 }
 
 /**
- * Extiende un array de propiedades con propiedades calculadas
- * @param properties Array de propiedades de la base de datos
- * @returns Array de propiedades extendidas
+ * Extiende un array de propiedades con datos de interfaz de usuario
+ * @param properties Propiedades a extender
+ * @returns Propiedades extendidas
  */
 export function extendProperties(properties: PropertyBase[]): Array<ReturnType<typeof extendProperty>> {
-	if (!properties || !Array.isArray(properties)) return [];
-	return properties.map((property) => extendProperty(property));
+	return properties.map(extendProperty);
 }
 
 /**
- * Convierte una propiedad completa a formato simple para relaciones
- * @param property Propiedad completa
- * @returns Propiedad simplificada para relaciones
+ * Convierte una propiedad a formato simplificado para relaciones
+ * @param property Propiedad con posibles conteos
+ * @returns Propiedad formateada para relaciones
  */
 export function toRelatedProperty(property: PropertyBase & { _count?: any }): {
 	id: string;
@@ -286,20 +291,6 @@ export function toRelatedProperty(property: PropertyBase & { _count?: any }): {
 		name: property.name,
 		emoji: property.emoji,
 		color: property.color,
-		itemCount: property._count
-			? (property._count.images || 0) +
-				(property._count.videos || 0) +
-				(property._count.albums || 0) +
-				(property._count.collections || 0) +
-				(property._count.tags || 0) +
-				(property._count.characters || 0) +
-				(property._count.places || 0) +
-				(property._count.worldItems || 0) +
-				(property._count.concepts || 0) +
-				(property._count.prompts || 0) +
-				(property._count.notes || 0) +
-				(property._count.wildcards || 0) +
-				(property._count.groups || 0)
-			: 0,
+		itemCount: calculateItemCount(property as any),
 	};
 }

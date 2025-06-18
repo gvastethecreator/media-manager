@@ -1,7 +1,5 @@
 'use client';
 
-import { Filter, Info, Loader2, PlusCircle, Save, Tag as TagIcon, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { deleteTagAction, getTagsAction, type TagWithStats as ServerTagWithStats } from '@/app/actions/tags';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,8 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import { TagCategory } from '@/types/entities/tag/enums';
-import type { Tag } from '@/types/entities/tag/types';
+import { TagCategory } from '@/types/entities/tag';
+import type { TagBase } from '@/types/entities/tag/types';
+import { Filter, Info, Loader2, PlusCircle, Save, TagBase as TagIcon, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { CreateTagForm } from './create-tag-form';
 
 // Definir tipo para el manejador de eventos del botón
@@ -36,7 +36,7 @@ export function TagsSettings() {
 	const [tags, setTags] = useState<TagWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedTag, setSelectedTag] = useState<Tag | null>(null);
+	const [selectedTag, setSelectedTag] = useState<TagBase | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -141,8 +141,8 @@ export function TagsSettings() {
 
 	// Manejar edición de etiqueta
 	const handleEditTag = useCallback((tag: TagWithStats) => {
-		// Convertir TagWithStats a Tag (UI) para edición
-		const uiTag: Tag = {
+		// Convertir TagWithStats a TagBase (UI) para edición
+		const uiTag: TagBase = {
 			id: tag.id,
 			name: tag.name,
 			description: tag.description,
@@ -159,8 +159,8 @@ export function TagsSettings() {
 	}, []);
 
 	// Manejar creación exitosa
-	const handleTagCreated = useCallback((newTag: Tag) => {
-		// Convertir Tag (UI) a TagWithStats para la lista
+	const handleTagCreated = useCallback((newTag: TagBase) => {
+		// Convertir TagBase (UI) a TagWithStats para la lista
 		const statsTag: TagWithStats = {
 			id: newTag.id,
 			name: newTag.name,
@@ -182,19 +182,19 @@ export function TagsSettings() {
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleTagUpdated = useCallback((updatedTag: Tag) => {
+	const handleTagUpdated = useCallback((updatedTag: TagBase) => {
 		setTags((prev) =>
 			prev.map((tag) =>
 				tag.id === updatedTag.id
 					? ({
-							...tag,
-							name: updatedTag.name,
-							description: updatedTag.description,
-							color: updatedTag.color,
-							emoji: updatedTag.emoji || tag.emoji,
-							category: updatedTag.category,
-							isFavorite: updatedTag.isFavorite,
-						} as TagWithStats)
+						...tag,
+						name: updatedTag.name,
+						description: updatedTag.description,
+						color: updatedTag.color,
+						emoji: updatedTag.emoji || tag.emoji,
+						category: updatedTag.category,
+						isFavorite: updatedTag.isFavorite,
+					} as TagWithStats)
 					: tag
 			)
 		);

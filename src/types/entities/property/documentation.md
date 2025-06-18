@@ -1,8 +1,8 @@
-# 🏷️ Entidad Property
+# 🔍 Entidad Property
 
 ## Descripción
 
-La entidad `Property` representa atributos, características o propiedades que pueden asociarse a imágenes, notas, personajes, conceptos, world items y más. Permite modelar metadatos, atributos personalizados, etc.
+La entidad `Property` representa atributos, características o propiedades que pueden asociarse a imágenes, notas, personajes, conceptos, world items y más. Permite modelar metadatos, atributos personalizados y características configurables.
 
 ## Estructura
 
@@ -12,25 +12,46 @@ graph TD
     A --> C[Transformers]
     A --> D[Documentación]
     B --> B1[types.ts]
-    C --> C1[mappers.ts]
-    C --> C2[serializers.ts]
-    C --> C3[transformer.ts]
+    B --> B2[index.ts]
+    B --> B3[schema.ts]
+    C --> C1[transformers]
     D --> D1[documentation.md]
 ```
 
 ## Tipos principales
 
-- `PropertyBase`, `PropertyComplete`, `PropertyCreateInput`, `PropertyUpdateInput`
-- Filtros: `PropertyFilters`, `PropertySearchOptions`, `PropertySearchResult`
+- `PropertyBase`: Tipo base con campos fundamentales
+- `PropertyCreateInput`: Input para creación de propiedades
+- `PropertyUpdateInput`: Input para actualización de propiedades
+- `PropertyRelations`: Relaciones con otras entidades
+- `PropertyWithRelations`: Propiedad con todas sus relaciones
+- `PropertySortCriteria`: Enum para criterios de ordenación
+- `PropertyViewMode`: Enum para modos de visualización
 
 ## Ejemplo de uso
 
 ```typescript
-import { createProperty, updateProperty, searchProperties } from '@/transformers/property';
+import { createProperty, updateProperty, getProperty } from '@/transformers/property';
+import { PropertySortCriteria } from '@/types/entities/property';
 
-const nuevaProp = await createProperty({ name: 'Rareza', value: 'Épica' });
-const props = await searchProperties({ filters: { search: 'Rareza' } });
-await updateProperty(nuevaProp.id, { value: 'Legendaria' });
+// Crear una nueva propiedad
+const nuevaPropiedad = await createProperty({
+  name: 'Potencia',
+  emoji: '⚡',
+  color: '#fbbf24',
+  category: 'stats',
+  description: 'Nivel de potencia del elemento'
+});
+
+// Obtener una propiedad existente
+const propiedad = await getProperty(nuevaPropiedad.id);
+
+// Actualizar una propiedad existente
+await updateProperty(nuevaPropiedad.id, {
+  emoji: '💪',
+  color: '#ef4444',
+  isFavorite: true
+});
 ```
 
 ## Flujo de datos
@@ -46,24 +67,31 @@ sequenceDiagram
     Transformer->>DB: prisma.property.create()
     DB-->>Transformer: Property
     Transformer-->>API: transformProperty()
-    API-->>Client: PropertyComplete
+    API-->>Client: PropertyWithRelations
 ```
 
 ## Mejores prácticas
 
-- Usar siempre los tipos canónicos (`PropertyCreateInput`, `PropertyUpdateInput`, `PropertyComplete`).
-- Validar los datos antes de crear/actualizar (`validateProperty`).
-- Usar los mapeadores para relaciones complejas.
-- Mantener la documentación y diagramas actualizados.
+- Usar siempre los tipos canónicos (`PropertyBase`, `PropertyCreateInput`, `PropertyUpdateInput`, `PropertyWithRelations`).
+- Validar los datos antes de crear/actualizar con `PropertySchema`, `CreatePropertySchema` o `UpdatePropertySchema`.
+- Utilizar los enums `PropertySortCriteria` y `PropertyViewMode` para garantizar valores válidos.
+- Categorizar propiedades para facilitar su organización y búsqueda.
+- Asignar colores y emojis descriptivos para mejorar la experiencia visual.
 
 ## Integración
 
-Las propiedades pueden asociarse a:
+Las propiedades pueden integrarse con:
 
-- Imágenes, notas, álbumes, personajes, conceptos, world items, prompts, grupos, etc.
+- Imágenes, videos, álbumes y colecciones
+- Notas, prompts, conceptos y personajes
+- Lugares, world items y wildcards
+- Filtros avanzados y búsquedas personalizadas
+- Personalización de UI y visualización de datos
 
-Al eliminar una propiedad, revisar las relaciones para evitar referencias huérfanas.
+## Migración a tipos canónicos
+
+✅ Tipos canónicos migrados, documentación y diagrama actualizados.
 
 ---
 
-> Última actualización: 2025-06-10
+> Última actualización: 2025-06-18
