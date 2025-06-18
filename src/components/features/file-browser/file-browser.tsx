@@ -481,12 +481,21 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	useEffect(() => {
 		if (!loadMoreItems || !loadMoreRef.current) return;
 
+		let isRequesting = false;
 		const observer = new IntersectionObserver(
 			(entries) => {
 				const [entry] = entries;
-				if (entry.isIntersecting && !isLoading && !isReindexing) {
+				if (
+					entry.isIntersecting &&
+					!isLoading &&
+					!isReindexing &&
+					!isRequesting
+				) {
 					logger.debug('[FileBrowser] 🔄 Trigger scroll infinito detectado');
-					loadMoreItems();
+					isRequesting = true;
+					Promise.resolve(loadMoreItems()).finally(() => {
+						isRequesting = false;
+					});
 				}
 				setLoadMoreVisible(entry.isIntersecting);
 			},

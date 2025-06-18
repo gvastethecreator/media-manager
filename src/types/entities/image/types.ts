@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { type BaseEntity, BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
+import { z } from 'zod';
 
 /**
  * 🔍 Esquema de validación para Image
@@ -38,6 +38,7 @@ export interface ImageBase extends BaseEntity {
 	height: number;
 	metadata?: string | null;
 	isFavorite: boolean;
+	folderId: string | null; // Debe ser null si no hay folder
 	addedAt: Date;
 	sortBy: string;
 	filters: string;
@@ -176,4 +177,88 @@ export interface ImageTransformerOptions {
 	includeThumbnail?: boolean;
 	validateFields?: boolean;
 	customFields?: (keyof ImageComplete)[];
+}
+
+/**
+ * 🖼️ Metadatos de la imagen
+ */
+export interface ImageMetadata {
+	format?: string;
+	exif?: Record<string, unknown>;
+	iptc?: Record<string, unknown>;
+	xmp?: Record<string, unknown>;
+	icc?: Record<string, unknown>;
+	ai?: ImageAIMetadata;
+}
+
+/**
+ * 📊 Estadísticas básicas de la imagen
+ */
+export interface ImageStatsBase {
+	id: string;
+	imageId: string;
+	views: number;
+	likes: number;
+	downloads: number;
+}
+
+/**
+ * 🎨 Configuración visual de la imagen
+ */
+export interface ImageVisualConfigBase {
+	id: string;
+	imageId: string;
+	config: string;
+}
+
+/**
+ * 🧠 Metadatos de IA de la imagen
+ */
+export interface ImageAIMetadata {
+	model?: string;
+	prompt?: string;
+	negativePrompt?: string;
+	seed?: number;
+	samplingSteps?: number;
+	cfgScale?: number;
+	samplingMethod?: string;
+	extraParameters?: Record<string, unknown>;
+}
+
+export interface CreateImageData {
+	name: string;
+	path: string;
+	folderId: string;
+	hash: string;
+	size: number;
+	width: number;
+	height: number;
+	description?: string;
+	metadata?: string;
+	presetId?: string | null;
+}
+
+export interface UpdateImageData {
+	name?: string;
+	description?: string;
+	presetId?: string | null;
+	isFavorite?: boolean;
+}
+
+export interface ImageExtended extends ImageBase {
+	// Relaciones extendidas y campos enriquecidos
+	tags?: any[];
+	collections?: any[];
+	albums?: any[];
+	characters?: any[];
+	places?: any[];
+	worldItems?: any[];
+	concepts?: any[];
+	prompts?: any[];
+	notes?: any[];
+	wildcards?: any[];
+	properties?: any[];
+	groups?: any[];
+	stats?: any;
+	folder?: any;
 }

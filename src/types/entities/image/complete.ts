@@ -7,7 +7,6 @@ import type { Album } from '../album';
 import type { Character } from '../character';
 import type { Collection } from '../collection';
 import type { Concept } from '../concept';
-import type { FolderExtended } from '../folder/extended';
 import type { Group } from '../group';
 import type { Note } from '../note';
 import type { Place } from '../place';
@@ -16,7 +15,7 @@ import type { Property } from '../property';
 import type { Tag } from '../tag';
 import type { Wildcard } from '../wildcard';
 import type { WorldItem } from '../world-item';
-import type { ImageBase, ImageMetadata, ImageStatsBase, ImageVisualConfigBase } from './base';
+import type { ImageBase, ImageMetadata, ImageStatsBase, ImageVisualConfigBase } from './types';
 
 /**
  * Interfaz para Image con campos JSON deserializados
@@ -36,7 +35,7 @@ export interface ImageComplete extends Omit<ImageBase, 'metadata'> {
  */
 export interface ImageWithRelationsComplete extends ImageComplete {
 	// Relaciones cargadas
-	folder?: FolderExtended;
+	folder?: any;
 	visualConfig?: ImageVisualConfigComplete | null;
 	stats?: ImageStatsComplete | null;
 

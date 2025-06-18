@@ -1,11 +1,11 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { revalidatePath } from 'next/cache';
 // Importamos tipos necesarios
-import type { CreateImageData, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image';
+import type { CreateImageData, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image/types';
 // Importamos el transformer y utilities de errores
 import { imageTransformer } from '@/types/entities/image/transformer';
 import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
@@ -22,47 +22,20 @@ export async function getImage(id: string): Promise<ImageExtended | null> {
 		const image = await prisma.image.findUnique({
 			where: { id },
 			include: {
-				tags: {
-					select: { id: true, name: true, color: true },
-				},
-				collections: {
-					select: { id: true, name: true, color: true, emoji: true },
-				},
-				albums: {
-					select: { id: true, name: true, emoji: true },
-				},
-				characters: {
-					select: { id: true, name: true, emoji: true },
-				},
-				places: {
-					select: { id: true, name: true, emoji: true },
-				},
-				worldItems: {
-					select: { id: true, name: true, emoji: true },
-				},
-				concepts: {
-					select: { id: true, name: true, emoji: true },
-				},
-				prompts: {
-					select: { id: true, name: true, emoji: true },
-				},
-				notes: {
-					select: { id: true, name: true, emoji: true },
-				},
-				wildcards: {
-					select: { id: true, name: true, emoji: true, color: true },
-				},
-				properties: {
-					select: { id: true, name: true, emoji: true, color: true },
-				},
-				groups: {
-					select: { id: true, name: true, emoji: true, color: true },
-				},
+				tags: { select: { id: true, name: true, color: true } },
+				collections: { select: { id: true, name: true, color: true, emoji: true } },
+				albums: { select: { id: true, name: true, emoji: true } },
+				characters: { select: { id: true, name: true, emoji: true } },
+				places: { select: { id: true, name: true, emoji: true } },
+				worldItems: { select: { id: true, name: true, emoji: true } },
+				concepts: { select: { id: true, name: true, emoji: true } },
+				prompts: { select: { id: true, name: true, emoji: true } },
+				notes: { select: { id: true, title: true } }, // emoji eliminado
+				wildcards: { select: { id: true, name: true, emoji: true, color: true } },
+				properties: { select: { id: true, name: true, emoji: true, color: true } },
+				groups: { select: { id: true, name: true, emoji: true, color: true } },
 				stats: true,
-				folder: {
-					select: { id: true, name: true, path: true },
-				},
-				visualConfig: true,
+				folder: { select: { id: true, name: true, path: true } },
 			},
 		});
 
@@ -70,8 +43,23 @@ export async function getImage(id: string): Promise<ImageExtended | null> {
 			return null;
 		}
 
-		// Transformar imagen utilizando el transformer
-		const baseImage = imageTransformer.fromDB(image);
+		// Mapear campos estrictos para el transformer
+		const baseImage = imageTransformer.fromDB({
+			id: image.id,
+			name: image.name ?? 'Sin nombre',
+			description: image.description ?? null,
+			path: image.path ?? '',
+			hash: image.hash ?? '',
+			size: image.size ?? 0,
+			width: image.width ?? 0,
+			height: image.height ?? 0,
+			metadata: image.metadata ?? null,
+			isFavorite: image.isFavorite ?? false,
+			folderId: image.folderId ?? (image.folder?.id ?? ''),
+			addedAt: image.addedAt ?? image.createdAt ?? new Date(),
+			sortBy: (image as any).sortBy ?? 'createdAt',
+			filters: (image as any).filters ?? '[]',
+		});
 		const result = imageTransformer.toClient(baseImage, { includes: { folder: image.folder } }) as ImageExtended;
 
 		return result;
@@ -88,29 +76,48 @@ export async function getImage(id: string): Promise<ImageExtended | null> {
  */
 export async function createImage(data: CreateImageData): Promise<ImageBase> {
 	try {
+		// Validar que name siempre sea string
+		const safeName = data.name ?? 'Sin nombre';
 		// Preparar datos para Prisma usando el transformer
-		const prismaData = imageTransformer.toDB(data);
+		const prismaData = imageTransformer.toDB({ ...data, name: safeName });
 
+		// Eliminar folderId si se usará folder.connect
+		if (data.folderId) {
+			(prismaData as any).folderId = undefined;
+		}
+		// Forzar folderId a undefined explícitamente si se usa folder.connect
+		const prismaDataFinal = {
+			...prismaData,
+			folderId: data.folderId ? undefined : prismaData.folderId,
+		};
+
+		// Construir el objeto de datos para Prisma sin folder por defecto
+		const prismaImageData: any = {
+			path: data.path,
+			hash: data.hash,
+			size: data.size,
+			width: data.width,
+			height: data.height,
+			description: data.description ?? null,
+			metadata: data.metadata ?? null,
+			isFavorite: false,
+			name: safeName,
+		};
+		if (data.folderId) {
+			prismaImageData.folder = { connect: { id: data.folderId } };
+		}
 		const image = await prisma.image.create({
-			data: {
-				...prismaData,
-				folder: data.folderId
-					? {
-							connect: { id: data.folderId },
-						}
-					: undefined,
-			},
+			data: prismaImageData,
 			include: {
 				tags: true,
 			},
 		});
 
-		// Crear estadísticas iniciales
+		// Crear estadísticas iniciales (sin downloads)
 		await prisma.imageStats.create({
 			data: {
 				imageId: image.id,
 				views: 0,
-				downloads: 0,
 			},
 		});
 
@@ -118,7 +125,24 @@ export async function createImage(data: CreateImageData): Promise<ImageBase> {
 		statsEventEmitter.emit(STATS_EVENTS.FILES_CHANGE);
 		revalidatePath('/');
 
-		return imageTransformer.fromDB(image);
+		return imageTransformer.fromDB({
+			id: image.id,
+			name: image.name ?? 'Sin nombre',
+			description: image.description ?? null,
+			path: image.path ?? '',
+			hash: image.hash ?? '',
+			size: image.size ?? 0,
+			width: image.width ?? 0,
+			height: image.height ?? 0,
+			metadata: image.metadata ?? null,
+			isFavorite: image.isFavorite ?? false,
+			folderId: image.folderId ?? '',
+			addedAt: image.addedAt ?? image.createdAt ?? new Date(),
+			createdAt: image.createdAt ?? new Date(),
+			updatedAt: image.updatedAt ?? new Date(),
+			sortBy: (image as any).sortBy ?? 'createdAt',
+			filters: (image as any).filters ?? '[]',
+		});
 	} catch (error) {
 		throw toServiceError(error, {
 			serviceName: SERVER_ACTION_NAME,
@@ -141,19 +165,44 @@ export async function updateImage(id: string, data: UpdateImageData): Promise<Im
 			throw createEntityNotFoundError('Imagen', id, SERVER_ACTION_NAME);
 		}
 
+		// Validar que name siempre sea string
+		const safeName = data.name ?? existingImage.name ?? 'Sin nombre';
 		// Preparar datos para Prisma usando el transformer
-		const prismaData = imageTransformer.toDB(data);
-
+		const prismaData = imageTransformer.toDB({ ...data, name: safeName });
 		const updated = await prisma.image.update({
 			where: { id },
-			data: prismaData,
+			data: Object.fromEntries(
+				Object.entries(prismaData).filter(
+					([key, value]) =>
+						key !== 'id' &&
+						key !== 'createdAt' &&
+						key !== 'updatedAt'
+				)
+			),
 		});
 
 		// Revalidar rutas
 		revalidatePath('/');
 		revalidatePath(`/images/${id}`);
 
-		return imageTransformer.fromDB(updated);
+		return imageTransformer.fromDB({
+			id: updated.id,
+			name: updated.name ?? 'Sin nombre',
+			description: updated.description ?? null,
+			path: updated.path ?? '',
+			hash: updated.hash ?? '',
+			size: updated.size ?? 0,
+			width: updated.width ?? 0,
+			height: updated.height ?? 0,
+			metadata: updated.metadata ?? null,
+			isFavorite: updated.isFavorite ?? false,
+			folderId: updated.folderId ?? '',
+			addedAt: updated.addedAt ?? updated.createdAt ?? new Date(),
+			createdAt: updated.createdAt ?? new Date(),
+			updatedAt: updated.updatedAt ?? new Date(),
+			sortBy: (updated as any).sortBy ?? 'createdAt',
+			filters: (updated as any).filters ?? '[]',
+		});
 	} catch (error) {
 		throw toServiceError(error, {
 			serviceName: SERVER_ACTION_NAME,
@@ -209,50 +258,40 @@ export async function getFavoriteImages(): Promise<ImageExtended[]> {
 			where: { isFavorite: true },
 			orderBy: { updatedAt: 'desc' },
 			include: {
-				tags: {
-					select: { id: true, name: true, color: true },
-				},
-				collections: {
-					select: { id: true, name: true, color: true, emoji: true },
-				},
-				albums: {
-					select: { id: true, name: true, emoji: true },
-				},
-				characters: {
-					select: { id: true, name: true, emoji: true },
-				},
-				places: {
-					select: { id: true, name: true, emoji: true },
-				},
-				worldItems: {
-					select: { id: true, name: true, emoji: true },
-				},
-				concepts: {
-					select: { id: true, name: true, emoji: true },
-				},
-				prompts: {
-					select: { id: true, name: true, emoji: true },
-				},
-				notes: {
-					select: { id: true, name: true, emoji: true },
-				},
-				wildcards: {
-					select: { id: true, name: true, emoji: true, color: true },
-				},
-				properties: {
-					select: { id: true, name: true, emoji: true, color: true },
-				},
-				groups: {
-					select: { id: true, name: true, emoji: true, color: true },
-				},
+				tags: { select: { id: true, name: true, color: true } },
+				collections: { select: { id: true, name: true, color: true, emoji: true } },
+				albums: { select: { id: true, name: true, emoji: true } },
+				characters: { select: { id: true, name: true, emoji: true } },
+				places: { select: { id: true, name: true, emoji: true } },
+				worldItems: { select: { id: true, name: true, emoji: true } },
+				concepts: { select: { id: true, name: true, emoji: true } },
+				prompts: { select: { id: true, name: true, emoji: true } },
+				notes: { select: { id: true, title: true } }, // emoji eliminado
+				wildcards: { select: { id: true, name: true, emoji: true, color: true } },
+				properties: { select: { id: true, name: true, emoji: true, color: true } },
+				groups: { select: { id: true, name: true, emoji: true, color: true } },
 				stats: true,
-				visualConfig: true,
 			},
 		});
 
 		// Transformar imágenes utilizando el transformer
 		return favorites.map((img) => {
-			const baseImage = imageTransformer.fromDB(img);
+			const baseImage = imageTransformer.fromDB({
+				id: img.id,
+				name: img.name ?? 'Sin nombre',
+				description: img.description ?? null,
+				path: img.path ?? '',
+				hash: img.hash ?? '',
+				size: img.size ?? 0,
+				width: img.width ?? 0,
+				height: img.height ?? 0,
+				metadata: img.metadata ?? null,
+				isFavorite: img.isFavorite ?? false,
+				folderId: img.folderId ?? '',
+				addedAt: img.addedAt ?? img.createdAt ?? new Date(),
+				sortBy: (img as any).sortBy ?? 'createdAt',
+				filters: (img as any).filters ?? '[]',
+			});
 			return imageTransformer.toClient(baseImage) as ImageExtended;
 		});
 	} catch (error) {
@@ -335,32 +374,34 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 			skip,
 			take: pageSize,
 			include: {
-				tags: {
-					select: { id: true, name: true, color: true },
-				},
-				collections: {
-					select: { id: true, name: true, color: true, emoji: true },
-				},
-				albums: {
-					select: { id: true, name: true, emoji: true },
-				},
-				characters: {
-					select: { id: true, name: true, emoji: true },
-				},
-				places: {
-					select: { id: true, name: true, emoji: true },
-				},
-				worldItems: {
-					select: { id: true, name: true, emoji: true },
-				},
+				tags: { select: { id: true, name: true, color: true } },
+				collections: { select: { id: true, name: true, color: true, emoji: true } },
+				albums: { select: { id: true, name: true, emoji: true } },
+				characters: { select: { id: true, name: true, emoji: true } },
+				places: { select: { id: true, name: true, emoji: true } },
+				worldItems: { select: { id: true, name: true, emoji: true } },
 				stats: true,
-				visualConfig: true,
 			},
 		});
 
 		// Transformar imágenes utilizando el transformer
 		const processedImages = images.map((img) => {
-			const baseImage = imageTransformer.fromDB(img);
+			const baseImage = imageTransformer.fromDB({
+				id: img.id,
+				name: img.name ?? 'Sin nombre',
+				description: img.description ?? null,
+				path: img.path ?? '',
+				hash: img.hash ?? '',
+				size: img.size ?? 0,
+				width: img.width ?? 0,
+				height: img.height ?? 0,
+				metadata: img.metadata ?? null,
+				isFavorite: img.isFavorite ?? false,
+				folderId: img.folderId ?? '',
+				addedAt: img.addedAt ?? img.createdAt ?? new Date(),
+				sortBy: (img as any).sortBy ?? 'createdAt',
+				filters: (img as any).filters ?? '[]',
+			});
 			return imageTransformer.toClient(baseImage) as ImageResult;
 		});
 

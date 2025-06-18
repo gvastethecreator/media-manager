@@ -48,4 +48,4 @@ export interface TagUpdateInput {
 	isFavorite?: boolean;
 }
 
-// ✅ TagBase ahora es seguro y serializable para frontend/backend.
+// Archivo eliminado: tipos base migrados a types.ts. Usar solo '@/types/entities/tag/types'.

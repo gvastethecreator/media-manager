@@ -1,4 +1,20 @@
 /**
+ * 💬 Tipos canónicos para la entidad Prompt
+ *
+ * - Este archivo contiene todos los tipos base, relaciones e inputs para Prompt.
+ * - Usar SIEMPRE estos tipos en transformers, services y server actions.
+ * - No usar ni importar tipos de base.ts (eliminado).
+ *
+ * Estructura:
+ * - PromptBase: tipo canónico principal
+ * - PromptRelations: relaciones con otras entidades (any[] si no existen tipos canónicos)
+ * - PromptCreateInput, PromptUpdateInput: inputs para mutaciones
+ *
+ * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
+ * 📝 Documenta cualquier cambio relevante aquí.
+ */
+
+/**
  * @file Tipos para la entidad Prompt
  * @module types/entities/prompt/prompt-types
  */
