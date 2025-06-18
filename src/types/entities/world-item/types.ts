@@ -1,4 +1,20 @@
 /**
+ * 🌍 Tipos canónicos para la entidad WorldItem
+ *
+ * - Este archivo contiene todos los tipos base, relaciones e inputs para WorldItem.
+ * - Usar SIEMPRE estos tipos en transformers, services y server actions.
+ * - No usar ni importar tipos de base.ts (eliminado).
+ *
+ * Estructura:
+ * - WorldItemBase: tipo canónico principal
+ * - WorldItemRelations: relaciones con otras entidades (any[] si no existen tipos canónicos)
+ * - WorldItemCreateInput, WorldItemUpdateInput: inputs para mutaciones
+ *
+ * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
+ * 📝 Documenta cualquier cambio relevante aquí.
+ */
+
+/**
  * @file Tipos unificados para la entidad WorldItem
  * @module types/entities/world-item/types
  */
@@ -7,13 +23,13 @@ import type { BaseEntity, BaseRelationCounts } from '@/types/common/transformer'
 import type { UIFields } from '@/utils/transformers/common';
 import type { Image } from '../image';
 import {
-	WORLD_ITEM_SORT_PROPERTY_MAP,
-	type WorldItemCategory,
-	type WorldItemRarity,
-	type WorldItemRelationshipType,
-	WorldItemSortCriteria,
-	type WorldItemType,
-	type WorldItemViewMode,
+    WORLD_ITEM_SORT_PROPERTY_MAP,
+    type WorldItemCategory,
+    type WorldItemRarity,
+    type WorldItemRelationshipType,
+    WorldItemSortCriteria,
+    type WorldItemType,
+    type WorldItemViewMode,
 } from './enums';
 
 /**
@@ -243,15 +259,16 @@ export interface WorldItemUpdateInput {
 
 /* Exportación de tipos adicionales para retrocompatibilidad */
 export type {
-	WorldItemCreateInput as CreateWorldItemData,
-	WorldItemUpdateInput as UpdateWorldItemData,
-	WorldItemDeserialized as WorldItem,
-	WorldItemAttribute as WorldItemAttributes,
-	WorldItemEffect as WorldItemEffects,
-	WorldItemFilter as WorldItemFilterType,
-	WorldItemProperty as WorldItemProperties,
-	WorldItemRequirement as WorldItemRequirements,
-	WorldItemStat as WorldItemStats,
+    WorldItemCreateInput as CreateWorldItemData,
+    WorldItemUpdateInput as UpdateWorldItemData,
+    WorldItemDeserialized as WorldItem,
+    WorldItemAttribute as WorldItemAttributes,
+    WorldItemEffect as WorldItemEffects,
+    WorldItemFilter as WorldItemFilterType,
+    WorldItemProperty as WorldItemProperties,
+    WorldItemRequirement as WorldItemRequirements,
+    WorldItemStat as WorldItemStats
 };
 
-export { WORLD_ITEM_SORT_PROPERTY_MAP, WorldItemSortCriteria };
+    export { WORLD_ITEM_SORT_PROPERTY_MAP, WorldItemSortCriteria };
+
