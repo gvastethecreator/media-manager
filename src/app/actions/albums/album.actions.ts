@@ -10,16 +10,18 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from '@/transformers/album/mappers';
 import { fromPrismaAlbum, fromPrismaAlbums } from '@/transformers/album/transformer';
-import type { AlbumBase, AlbumComplete, AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
+import type { Album, AlbumCreateInput, AlbumUpdateInput, AlbumWithRelations } from '@/types/entities/album';
 import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('AlbumActions');
 
 const ALBUM_INCLUDE = {
 	images: true,
+	videos: true,
 	_count: {
 		select: {
 			images: true,
+			videos: true,
 		},
 	},
 };
@@ -27,7 +29,7 @@ const ALBUM_INCLUDE = {
 /**
  * Obtiene todos los álbumes.
  */
-export async function getAlbums(): Promise<AlbumComplete[]> {
+export async function getAlbums(): Promise<AlbumWithRelations[]> {
 	logger.info('🎞️ Obteniendo todos los álbumes');
 	const albums = await prisma.album.findMany({ include: ALBUM_INCLUDE });
 	return fromPrismaAlbums(albums);
@@ -36,7 +38,7 @@ export async function getAlbums(): Promise<AlbumComplete[]> {
 /**
  * Obtiene un único álbum por su ID.
  */
-export async function getAlbum(id: string): Promise<AlbumComplete | null> {
+export async function getAlbum(id: string): Promise<AlbumWithRelations | null> {
 	logger.info(`🔍 Obteniendo álbum por ID: ${id}`);
 	const album = await prisma.album.findUnique({
 		where: { id },
@@ -52,7 +54,7 @@ export async function getAlbum(id: string): Promise<AlbumComplete | null> {
 /**
  * Crea un nuevo álbum.
  */
-export async function createAlbum(data: AlbumCreateInput): Promise<AlbumBase> {
+export async function createAlbum(data: AlbumCreateInput): Promise<Album> {
 	logger.info('📝 Creando nuevo álbum:', { name: data.name });
 	const prismaData = mapCreateAlbumDataToPrisma(data);
 	const newAlbum = await prisma.album.create({ data: prismaData });
@@ -63,7 +65,7 @@ export async function createAlbum(data: AlbumCreateInput): Promise<AlbumBase> {
 /**
  * Actualiza un álbum existente.
  */
-export async function updateAlbum(id: string, data: AlbumUpdateInput): Promise<AlbumBase> {
+export async function updateAlbum(id: string, data: AlbumUpdateInput): Promise<Album> {
 	logger.info(`🔄 Actualizando álbum: ${id}`);
 	const prismaData = mapUpdateAlbumDataToPrisma(data);
 	const updatedAlbum = await prisma.album.update({

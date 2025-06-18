@@ -2,7 +2,7 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { WorldItemWithRelations } from '@/types/entities/world-item/types';
+import type { WorldItem } from '@/types/entities/world-item';
 
 // Logger específico para acciones de WorldItemCard
 const worldItemCardLogger = serverLogger.withContext('WorldItemCardActions');
@@ -85,7 +85,7 @@ export async function getRecentWorldItemImages(worldItemId: string, limit = 6): 
  * @param worldItemId ID del objeto del mundo
  * @returns Objeto del mundo con relaciones o null si no existe
  */
-export async function getWorldItemWithRelations(worldItemId: string): Promise<WorldItemWithRelations | null> {
+export async function getWorldItemWithRelations(worldItemId: string): Promise<WorldItem | null> {
 	try {
 		worldItemCardLogger.info('🎯 Obteniendo objeto del mundo con relaciones:', worldItemId);
 		const prisma = await getPrismaClient();
@@ -186,7 +186,7 @@ export async function getWorldItemWithRelations(worldItemId: string): Promise<Wo
 					? JSON.parse(worldItem.requirements)
 					: worldItem.requirements,
 			stats: typeof worldItem.stats === 'string' && worldItem.stats ? JSON.parse(worldItem.stats) : worldItem.stats,
-		} as unknown as WorldItemWithRelations;
+		} as unknown as WorldItem;
 
 		worldItemCardLogger.info('✅ Objeto del mundo obtenido con éxito:', worldItem.name);
 		return worldItemWithRelations;
@@ -204,7 +204,7 @@ export async function getWorldItemWithRelations(worldItemId: string): Promise<Wo
  * @param limit Límite de resultados
  * @returns Array de objetos del mundo
  */
-export async function searchWorldItems(query = '', limit = 100): Promise<WorldItemWithRelations[]> {
+export async function searchWorldItems(query = '', limit = 100): Promise<WorldItem[]> {
 	try {
 		worldItemCardLogger.info('🔍 Buscando objetos del mundo con query:', query);
 		const prisma = await getPrismaClient();
@@ -250,7 +250,7 @@ export async function searchWorldItems(query = '', limit = 100): Promise<WorldIt
 			requirements:
 				typeof item.requirements === 'string' && item.requirements ? JSON.parse(item.requirements) : item.requirements,
 			stats: typeof item.stats === 'string' && item.stats ? JSON.parse(item.stats) : item.stats,
-		})) as unknown as WorldItemWithRelations[];
+		})) as unknown as WorldItem[];
 
 		worldItemCardLogger.info('✅ Objetos del mundo encontrados:', worldItems.length);
 		return worldItemsWithRelations;

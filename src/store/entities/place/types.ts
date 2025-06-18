@@ -4,8 +4,13 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { Place, PlaceFilters } from '../../../types/entities/place';
-import type { PlaceCategory, PlaceType, PlaceViewMode } from '../../../types/entities/place/enums';
+import type {
+    Place,
+    PlaceCategory,
+    PlaceFilters,
+    PlaceType,
+    PlaceViewMode
+} from '../../../types/entities/place/types';
 
 /**
  * Estado base del store de Place
@@ -15,6 +20,17 @@ export interface PlaceState {
 	places: Place[];
 	isLoading: boolean;
 	error: string | null;
+
+	// Configuración de visualización
+	viewConfig: {
+		sortBy: string;
+		sortOrder: string;
+		groupBy: null | string;
+		filterBy: null | PlaceFilters;
+	};
+
+	// Selección actual
+	selectedPlaceId: string | null;
 }
 
 /**
@@ -66,6 +82,17 @@ export interface PlaceUISlice {
 	// Acciones de expansión
 	toggleExpanded: (id: string) => void;
 	setCurrentPlaceId: (id: string | null) => void;
+
+	// Configuración de visualización
+	setViewConfig: (config: {
+		sortBy?: string;
+		sortOrder?: string;
+		groupBy?: string | null;
+		filterBy?: PlaceFilters | null;
+	}) => void;
+
+	// Acciones de selección
+	selectPlaceId: (placeId: string | null) => void;
 }
 
 /**

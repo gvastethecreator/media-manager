@@ -1,9 +1,8 @@
 /**
  * @file Punto de entrada para los transformadores de la entidad Tag.
  * @module transformers/tag
+ * @description Exporta de forma controlada las funciones de transformación para la entidad Tag.
  */
 
-export * from './converters';
-export * from './mappers';
-export * from './serializers';
-export * from './transformer';
+export { fromPrismaTag, fromPrismaTags } from './transformer';
+

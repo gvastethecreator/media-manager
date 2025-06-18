@@ -4,15 +4,18 @@ import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from '
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
-import type { WorldItemWithRelations } from '@/types/entities/world-item/types';
+import type {
+	WorldItem,
+	WorldItemRarity,
+	WorldItemType
+} from '@/types/entities/world-item';
 import { CardHeader } from '../card-header';
 import { WorldItemCardContent } from './world-item-card-content';
 import { WorldItemCardFooter } from './world-item-card-footer';
 import { WorldItemCardImages } from './world-item-card-images';
 
 export interface WorldItemCardProps {
-	worldItem: WorldItemWithRelations;
+	worldItem: WorldItem;
 	onClick?: () => void;
 	className?: string;
 	style?: React.CSSProperties;
@@ -66,19 +69,19 @@ export function WorldItemCard({
 	} = worldItem;
 
 	// Calcular valores derivados
-	const imagesCount = worldItem._count?.images || 0;
-	const videosCount = worldItem._count?.videos || 0;
-	const albumsCount = worldItem._count?.albums || 0;
-	const collectionsCount = worldItem._count?.collections || 0;
-	const tagsCount = worldItem._count?.tags || 0;
-	const charactersCount = worldItem._count?.characters || 0;
-	const placesCount = worldItem._count?.places || 0;
-	const conceptsCount = worldItem._count?.concepts || 0;
-	const promptsCount = worldItem._count?.prompts || 0;
-	const notesCount = worldItem._count?.notes || 0;
-	const wildcardsCount = worldItem._count?.wildcards || 0;
-	const propertiesCount = worldItem._count?.properties || 0;
-	const groupsCount = worldItem._count?.groups || 0;
+	const imagesCount = (worldItem as any)?._count?.images || 0;
+	const videosCount = (worldItem as any)?._count?.videos || 0;
+	const albumsCount = (worldItem as any)?._count?.albums || 0;
+	const collectionsCount = (worldItem as any)?._count?.collections || 0;
+	const tagsCount = (worldItem as any)?._count?.tags || 0;
+	const charactersCount = (worldItem as any)?._count?.characters || 0;
+	const placesCount = (worldItem as any)?._count?.places || 0;
+	const conceptsCount = (worldItem as any)?._count?.concepts || 0;
+	const promptsCount = (worldItem as any)?._count?.prompts || 0;
+	const notesCount = (worldItem as any)?._count?.notes || 0;
+	const wildcardsCount = (worldItem as any)?._count?.wildcards || 0;
+	const propertiesCount = (worldItem as any)?._count?.properties || 0;
+	const groupsCount = (worldItem as any)?._count?.groups || 0;
 
 	// Calcular total de relaciones para efectos visuales
 	const _totalRelations =

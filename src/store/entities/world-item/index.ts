@@ -1,32 +1,33 @@
 /**
  * @file Store principal para la entidad WorldItem
  * @module store/entities/world-item
+ * @description Define el store de zustand para WorldItem
+ * @updated 2025-06-20
  */
 
-import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
 import {
-	createWorldItem as createServerWorldItem,
-	deleteWorldItem as deleteServerWorldItem,
-	getWorldItems,
-	updateWorldItem as updateServerWorldItem,
+    createWorldItem as createServerWorldItem,
+    deleteWorldItem as deleteServerWorldItem,
+    getWorldItems,
+    updateWorldItem as updateServerWorldItem,
 } from '@/app/actions/world-items/world-item.actions';
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { WorldItemSortCriteria, WorldItemViewMode } from '@/types/entities/world-item/enums';
+import { WorldItemSortCriteria, WorldItemViewMode } from '@/types/entities/world-item';
 import type { WorldItemStore } from './types';
 
+// Logger específico para el store
 const worldItemLogger = clientLogger.withContext('WorldItemStore');
 
 // Re-exportar desde otros archivos
 export * from './constants';
 export * from './hooks';
 export * from './selectors';
-export * from './transformers';
 export * from './types';
-export * from './utils';
 
 // 🏗️ Crear el store con persistencia
 export const useWorldItemStore = create<WorldItemStore>()(
@@ -155,13 +156,13 @@ export const useWorldItemStore = create<WorldItemStore>()(
 							return a.name.localeCompare(b.name);
 						case WorldItemSortCriteria.NAME_DESC:
 							return b.name.localeCompare(a.name);
-						case WorldItemSortCriteria.CREATED_AT_ASC:
+						case WorldItemSortCriteria.CREATED_ASC:
 							return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-						case WorldItemSortCriteria.CREATED_AT_DESC:
+						case WorldItemSortCriteria.CREATED_DESC:
 							return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-						case WorldItemSortCriteria.UPDATED_AT_ASC:
+						case WorldItemSortCriteria.UPDATED_ASC:
 							return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-						case WorldItemSortCriteria.UPDATED_AT_DESC:
+						case WorldItemSortCriteria.UPDATED_DESC:
 							return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
 						case WorldItemSortCriteria.RARITY_ASC:
 							return (a.rarity || '').localeCompare(b.rarity || '');
