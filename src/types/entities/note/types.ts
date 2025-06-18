@@ -5,20 +5,23 @@
 
 import type { z } from 'zod';
 // Importación de tipos para relaciones
-import type { Album } from '../album/types';
-import type { Character } from '../character/types';
-import type { Collection } from '../collection/types';
-import type { Concept } from '../concept/types';
-import type { Group } from '../group/types';
-import type { Image } from '../image/types';
-import type { Place } from '../place/types';
-import type { Prompt } from '../prompt/types';
-import type { Property } from '../property/types';
-import type { Tag } from '../tag/types';
-import type { Video } from '../video/types';
-import type { Wildcard } from '../wildcard/types';
-import type { WorldItem } from '../world-item/types';
 import type { NoteSchema } from './schema';
+
+/**
+ * 📝 Tipos canónicos para la entidad Note
+ *
+ * - Este archivo contiene todos los tipos base, relaciones e inputs para Note.
+ * - Usar SIEMPRE estos tipos en transformers, services y server actions.
+ * - No usar ni importar tipos de base.ts (eliminado).
+ *
+ * Estructura:
+ * - NoteBase: tipo canónico principal
+ * - NoteRelations: relaciones con otras entidades (any[] si no existen tipos canónicos)
+ * - NoteCreateInput, NoteUpdateInput: inputs para mutaciones
+ *
+ * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
+ * 📝 Documenta cualquier cambio relevante aquí.
+ */
 
 /**
  * 🔄 Tipo base para Note
@@ -47,20 +50,21 @@ export interface NoteTags {
 /**
  * 🔗 Relaciones de Note
  */
+// ⚠️ Limpieza: relaciones solo como any[] para evitar errores de tipos inexistentes
 export interface NoteRelations {
-	images?: Image[];
-	videos?: Video[];
-	albums?: Album[];
-	collections?: Collection[];
-	tags?: Tag[];
-	characters?: Character[];
-	places?: Place[];
-	worldItems?: WorldItem[];
-	concepts?: Concept[];
-	prompts?: Prompt[];
-	wildcards?: Wildcard[];
-	properties?: Property[];
-	groups?: Group[];
+	albums?: any[];
+	characters?: any[];
+	collections?: any[];
+	concepts?: any[];
+	groups?: any[];
+	images?: any[];
+	places?: any[];
+	prompts?: any[];
+	properties?: any[];
+	tags?: any[];
+	videos?: any[];
+	wildcards?: any[];
+	worldItems?: any[];
 }
 
 /**

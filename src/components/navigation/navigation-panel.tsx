@@ -1,9 +1,10 @@
 'use client';
 
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import type { ViewType } from '@/types/file-item';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type CategoryChildrenRef, NavCategoryChildren } from './components/nav-category-children';
 import { NavCategoryItem } from './components/nav-category-item';
 import { NavMainNavigation } from './components/nav-main-navigation';
@@ -35,7 +36,7 @@ const CategoryWithChildren = memo(function CategoryWithChildren({
 	currentView,
 	childrenRefs,
 }: {
-	id: string;
+	id: ViewType;
 	label: string;
 	color: string;
 	icon: any;
@@ -45,12 +46,12 @@ const CategoryWithChildren = memo(function CategoryWithChildren({
 	imageCount: number;
 	isNavCollapsed: boolean;
 	viewMode: 'list' | 'grid';
-	getCategoryItems: (id: string) => any[];
+	getCategoryItems: (id: ViewType) => any[];
 	onToggleCollapse: (e: React.MouseEvent) => void;
 	onCategoryClick: () => void;
 	onToggleViewMode: (mode: 'list' | 'grid') => void;
-	getSelectedChildId: (id: string) => string | null;
-	getItemClickHandler: (id: string) => (childId: string) => void;
+	getSelectedChildId: (id: ViewType) => string | null;
+	getItemClickHandler: (id: ViewType) => (childId: string) => void;
 	currentView: string;
 	childrenRefs: React.MutableRefObject<Record<string, CategoryChildrenRef | null>>;
 }) {
@@ -163,18 +164,18 @@ export const NavPanel = memo(function NavPanel({ initialData, isCollapsed = fals
 
 	// Memoizar los handlers para cada categoría
 	const getCategoryClickHandler = useCallback(
-		(id: string) => {
+		(id: ViewType) => {
 			return () => {
-				// Expandir la categoría al hacer click en ella
-				expandCategory(id);
+				// Navegación principal: solo cambiar la vista y limpiar selecciones
 				handleCategoryClick(id);
+				expandCategory(id);
 			};
 		},
 		[handleCategoryClick, expandCategory]
 	);
 
 	const getCollapseToggleHandler = useCallback(
-		(id: string) => {
+		(id: ViewType) => {
 			return (e: React.MouseEvent) => handleCollapseToggle(id, e);
 		},
 		[handleCollapseToggle]

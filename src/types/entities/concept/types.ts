@@ -1,4 +1,20 @@
 /**
+ * 💡 Tipos canónicos para la entidad Concept
+ *
+ * - Este archivo contiene todos los tipos base, relaciones e inputs para Concept.
+ * - Usar SIEMPRE estos tipos en transformers, services y server actions.
+ * - No usar ni importar tipos de base.ts (eliminado).
+ *
+ * Estructura:
+ * - ConceptBase: tipo canónico principal
+ * - ConceptRelations: relaciones con otras entidades
+ * - ConceptCreateInput, ConceptUpdateInput: inputs para mutaciones
+ *
+ * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
+ * 📝 Documenta cualquier cambio relevante aquí.
+ */
+
+/**
  * @file Tipos para la entidad Concept
  * @module types/entities/concept/types
  */
