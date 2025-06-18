@@ -1,25 +1,4 @@
-/**
- * 🖼️ Tipo base para Image, solo campos canónicos y serializables
- */
-export interface ImageBase {
-	id: string;
-	name: string;
-	description?: string | null;
-	path: string;
-	hash: string;
-	size: number;
-	width: number;
-	height: number;
-	metadata?: string | null;
-	isFavorite: boolean;
-	isPublic: boolean;
-	folderId: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-	addedAt: Date;
-	sortBy: string;
-	filters: string;
-}
+// ELIMINADO: interface ImageBase duplicada aquí. Usar solo la de types.ts
 
 /**
  * 🎨 Configuración visual asociada a una imagen
@@ -65,7 +44,6 @@ export interface UpdateImageData {
 	description?: string;
 	presetId?: string | null;
 	isFavorite?: boolean;
-	isPublic?: boolean;
 }
 
 /**

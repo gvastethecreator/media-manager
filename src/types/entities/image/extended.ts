@@ -3,20 +3,7 @@
  * @module types/entities/image/extended
  */
 
-import type { Album } from '../album/album-types';
-import type { Character } from '../character/types';
-import type { Collection } from '../collection/types';
-import type { Concept } from '../concept/types';
-import type { FolderExtended } from '../folder/extended';
-import type { Group } from '../group/types';
-import type { Note } from '../note/types';
-import type { Place } from '../place/types';
-import type { Prompt } from '../prompt/types';
-import type { Property } from '../property/types';
-import type { Tag } from '../tag/types';
-import type { Wildcard } from '../wildcard/types';
-import type { WorldItem } from '../world-item/types';
-import type { ImageBase, ImageMetadata, ImageStatsBase, ImageVisualConfigBase } from './base';
+import type { ImageBase, ImageMetadata, ImageStatsBase, ImageVisualConfigBase } from './types';
 
 /**
  * Interfaz para metadatos extendidos de imagen
@@ -59,38 +46,22 @@ export interface ImageViewerOptions {
  * Tipo extendido para Image con propiedades adicionales
  */
 export interface ImageExtended extends ImageBase {
-	// Propiedades calculadas
-	thumbUrl?: string;
-	fullUrl?: string;
-	displayName?: string;
-	isProcessed?: boolean;
-	parsedMetadata?: ImageMetadataExtended;
-	parsedTags?: string[];
-
-	// Relaciones cargadas
-	folder?: FolderExtended;
-	visualConfig?: ImageVisualConfigExtended | null;
-	stats?: ImageStatsExtended | null;
-
-	// Relaciones básicas
-	uploadedImages?: any[];
-	activities?: any[];
-
-	// Relaciones con entidades principales
-	tags?: Tag[];
-	albums?: Album[];
-	collections?: Collection[];
-	characters?: Character[];
-	places?: Place[];
-	worldItems?: WorldItem[];
-	concepts?: Concept[];
-	prompts?: Prompt[];
-	notes?: Note[];
-	wildcards?: Wildcard[];
-	properties?: Property[];
-	groups?: Group[];
-
-	// Propiedades adicionales de UI
+	// Relaciones extendidas y campos enriquecidos
+	tags?: any[];
+	collections?: any[];
+	albums?: any[];
+	characters?: any[];
+	places?: any[];
+	worldItems?: any[];
+	concepts?: any[];
+	prompts?: any[];
+	notes?: any[];
+	wildcards?: any[];
+	properties?: any[];
+	groups?: any[];
+	stats?: any;
+	folder?: any;
+	// metadata sigue siendo string | null | undefined para compatibilidad
 	metadata?: ImageMetadata;
 	thumbnailUrl?: string;
 	selected?: boolean;

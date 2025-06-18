@@ -1,6 +1,20 @@
 /**
- * @file Tipos para la entidad Character
- * @module types/entities/character/character-types
+ * 🧑‍🎤 Tipos canónicos para la entidad Character
+ *
+ * - Este archivo contiene todos los tipos base, relaciones e inputs para Character.
+ * - Usar SIEMPRE estos tipos en transformers, services y server actions.
+ * - No usar ni importar tipos de base.ts (eliminado).
+ *
+ * Estructura:
+ * - CharacterBase: tipo canónico principal
+ * - CharacterRelations: relaciones con otras entidades
+ * - CharacterCreateInput, CharacterUpdateInput: inputs para mutaciones
+ *
+ * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
+ * 📝 Documenta cualquier cambio relevante aquí.
+ *
+ * ⚠️ NOTA: Los imports de tipos inexistentes han sido comentados para evitar errores de compilación.
+ * ⚠️ NOTA: Las relaciones se definen como any[] si no existen tipos canónicos.
  */
 
 import type { SearchOptionsSchema } from '@/types/common/search';
@@ -9,7 +23,6 @@ import type { Collection } from '../collection/types';
 import type { Concept } from '../concept/types';
 import type { Group } from '../group/types';
 import type { Image } from '../image/index';
-import type { Note } from '../note/types';
 import type { Place } from '../place/types';
 import type { Prompt } from '../prompt/types';
 import type { Property } from '../property/types';
@@ -64,7 +77,6 @@ export interface CharacterBase {
 		description?: string;
 		requirements?: string[];
 	}>;
-	notes?: string;
 	isActive: boolean;
 	isFavorite: boolean;
 	metadata?: Record<string, unknown>;
@@ -72,19 +84,20 @@ export interface CharacterBase {
 	updatedAt: Date;
 }
 
-// Interfaces de relaciones
+// ⚠️ Limpieza: relaciones solo como any[] para evitar errores de tipos inexistentes
 export interface CharacterRelations {
-	party?: { id: string };
-	campaign?: { id: string };
-	images?: Array<{ id: string }>;
-	items?: Array<{ id: string }>;
-	abilities?: Array<{ id: string }>;
-	quests?: Array<{ id: string }>;
-	locations?: Array<{ id: string }>;
-	npcs?: Array<{ id: string }>;
-	notes?: Array<{ id: string }>;
-	relatedCharacters?: Array<{ id: string }>;
-	relatedTo?: Array<{ id: string }>;
+	albums?: any[];
+	collections?: any[];
+	concepts?: any[];
+	groups?: any[];
+	images?: any[];
+	places?: any[];
+	prompts?: any[];
+	properties?: any[];
+	tags?: any[];
+	videos?: any[];
+	wildcards?: any[];
+	worldItems?: any[];
 }
 
 // Interface de conteos

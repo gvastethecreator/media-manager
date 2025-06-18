@@ -550,6 +550,21 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 			}
 		}
 
+		// 🧹 Limpieza de estado relevante al cambiar de carpeta
+		set({
+			currentItems: [],
+			displayedItems: [],
+			selectedItem: null,
+			selectedItems: [],
+			lastSelectedItem: null,
+			currentPage: 0,
+			hasMoreItems: false,
+			totalItems: 0,
+			isLoading: true,
+			isLoadingMore: false,
+			error: null,
+		});
+
 		set({
 			currentContext: 'folder',
 			currentFolderId: id,

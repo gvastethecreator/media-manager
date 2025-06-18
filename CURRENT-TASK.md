@@ -475,3 +475,38 @@ graph TD
 - [ ] Crear/actualizar store Zustand para settings/interfaz
 - [ ] Integrar InterfaceSection en settings-view
 - [ ] Documentar en README.md y actualizar diagramas
+
+---
+
+# 🚧 MIGRACIÓN TIPOS CANÓNICOS ENTIDADES (2025-06-18)
+
+**Responsable:** GitHub Copilot
+**Estado:** EN PROGRESO
+
+## Objetivo
+
+Unificar y migrar todos los tipos base de entidades a un único archivo `types.ts` por entidad, eliminando `base.ts` y asegurando que:
+
+- Todos los campos clave (`id`, `createdAt`, `updatedAt`) sean obligatorios.
+- Los transformers y server actions usen solo los tipos canónicos.
+- Se eliminen imports de tipos inexistentes y se documente la migración.
+
+## Progreso
+
+- [x] Tag: migrado y documentado
+- [x] Concept: migrado y documentado
+- [x] Collection: migrado, limpiado y documentado
+- [ ] Character
+- [ ] Place
+- [ ] Note
+- [ ] Favorite
+- [ ] File
+- [ ] (Resto de entidades...)
+
+## Notas
+
+- Cada migración incluye bloque de documentación y comentarios en el archivo.
+- Se reemplazan relaciones por `any[]` si no existen tipos canónicos.
+- Se documentan advertencias y TODOs en los encabezados.
+
+---

@@ -3,8 +3,8 @@
  * @module types/entities/tag/types
  */
 
-import { z } from 'zod';
 import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
+import { z } from 'zod';
 
 /**
  * 🔍 Esquema de validación para Tag
@@ -20,6 +20,22 @@ export const TagSchema = z.object({
 	featuredImage: z.string().nullable(),
 	isFavorite: z.boolean().default(false),
 });
+
+/**
+ * 🏷️ Tipos canónicos para la entidad Tag
+ *
+ * - Este archivo contiene todos los tipos base, relaciones e inputs para Tag.
+ * - Usar SIEMPRE estos tipos en transformers, services y server actions.
+ * - No usar ni importar tipos de base.ts (eliminado).
+ *
+ * Estructura:
+ * - TagBase: tipo canónico principal
+ * - TagRelations: relaciones con otras entidades
+ * - TagCreateInput, TagUpdateInput: inputs para mutaciones
+ *
+ * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
+ * 📝 Documenta cualquier cambio relevante aquí.
+ */
 
 /**
  * 🔄 Tipo base para Tag
