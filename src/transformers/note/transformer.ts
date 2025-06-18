@@ -4,24 +4,22 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { Note, NoteExtended } from '@/types/entities/note';
-import type { NoteWithStats } from '@/types/entities/note/base';
-import type { NoteComplete } from '@/types/entities/note/complete';
+import type { NoteComplete, NoteWithStats } from '@/types/entities/note';
 import { TransformerError } from '@/utils/transformers/errors';
 import { extendNote, fromPrismaNote } from './serializers';
 
 const logger = serverLogger.withContext('NoteTransformer');
 
 /**
- * 🔄 Transforma un objeto a Note, validando su estructura
+ * 🔄 Transforma un objeto a NoteBase, validando su estructura
  * @param note Objeto a transformar
- * @returns Note validado y estructurado
+ * @returns NoteBase validado y estructurado
  * @throws TransformerError si la validación falla
  */
-export function transformNote(note: unknown): Note {
+export function transformNote(note: unknown): NoteBase {
 	try {
 		if (!note) {
-			throw new Error('El objeto Note es nulo o indefinido');
+			throw new Error('El objeto NoteBase es nulo o indefinido');
 		}
 
 		// Si la nota viene de Prisma, transformarla
@@ -38,12 +36,12 @@ export function transformNote(note: unknown): Note {
 }
 
 /**
- * 🔄 Transforma una lista de objetos a Notes
+ * 🔄 Transforma una lista de objetos a NotesBase
  * @param notes Array de objetos a transformar
- * @returns Array de Notes validados
+ * @returns Array de NoteBase validados
  * @throws TransformerError si la validación falla para algún elemento
  */
-export function transformNotes(notes: unknown[]): Note[] {
+export function transformNotes(notes: unknown[]): NoteBase[] {
 	try {
 		if (!Array.isArray(notes)) {
 			throw new Error('El parámetro no es un array');
@@ -57,11 +55,11 @@ export function transformNotes(notes: unknown[]): Note[] {
 }
 
 /**
- * 🔄 Transforma un Note a su versión extendida con propiedades para UI
- * @param note Note base a extender
- * @returns Note extendido con propiedades adicionales
+ * 🔄 Transforma un NoteBase a su versión extendida con propiedades para UI
+ * @param note NoteBase a extender
+ * @returns NoteWithRelations extendido con propiedades adicionales
  */
-export function transformNoteToExtended(note: Note): NoteExtended {
+export function transformNoteToExtended(note: NoteBase): NoteWithRelations {
 	try {
 		const baseNote = transformNote(note);
 
@@ -85,11 +83,11 @@ export function transformNoteToExtended(note: Note): NoteExtended {
 }
 
 /**
- * 🔄 Transforma un Note a su versión con estadísticas
- * @param note Note base o NoteComplete
- * @returns Note con estadísticas calculadas
+ * 🔄 Transforma un NoteBase a su versión con estadísticas
+ * @param note NoteBase o NoteComplete
+ * @returns NoteWithStats con estadísticas calculadas
  */
-export function transformNoteToWithStats(note: Note | NoteComplete): NoteWithStats {
+export function transformNoteToWithStats(note: NoteBase | NoteComplete): NoteWithStats {
 	try {
 		const baseNote = transformNote(note);
 
@@ -146,7 +144,7 @@ export function transformNoteToWithStats(note: Note | NoteComplete): NoteWithSta
  * Calcula el nivel de importancia de una nota basado en prioridad y relaciones
  * @private
  */
-function calculateImportanceLevel(note: Note, counts: Record<string, number>): number {
+function calculateImportanceLevel(note: NoteBase, counts: Record<string, number>): number {
 	try {
 		// Base: prioridad (0-10) + contenido asociado
 		const priorityFactor = note.priority || 0;

@@ -1,22 +1,17 @@
 'use client';
 
+import { createPrompt, updatePrompt } from '@/app/actions/prompts/prompt.actions';
+import { ColorPicker } from '@/components/ui/color-picker';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import toastService from '@/services/toast.service';
+import type { PromptBase } from '@/types/entities/prompt/base';
+import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { createPrompt, updatePrompt } from '@/app/actions/prompts/prompt.actions';
-import { Button } from '@/components/ui/button';
-import { ColorPicker } from '@/components/ui/color-picker';
-import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import toastService from '@/services/toast.service';
-import type { PromptBase } from '@/types/entities/prompt/base';
-import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
+import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Función para formatear los nombres de modelos para mostrar
 const formatModelName = (model: string): string => {
@@ -137,179 +132,77 @@ export function CreatePromptForm({
 		}
 	};
 
+	const optionalFields = [
+		{
+			name: 'emoji',
+			label: 'Emoji',
+			render: ({ value, onChange }: any) => <EmojiPicker value={value} onEmojiSelect={onChange} />,
+		},
+		{
+			name: 'color',
+			label: 'Color',
+			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} />,
+		},
+		{
+			name: 'description',
+			label: 'Descripción',
+			render: ({ value, onChange }: any) => (
+				<textarea
+					placeholder="Descripción del prompt..."
+					value={value || ''}
+					onChange={(e) => onChange(e.target.value)}
+					rows={3}
+					className="text-xs resize-none w-full border rounded p-2"
+				/>
+			),
+		},
+		{
+			name: 'category',
+			label: 'Categoría',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger>
+						<SelectValue placeholder="Seleccionar categoría" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="general">General</SelectItem>
+						<SelectItem value="creatividad">Creatividad</SelectItem>
+						<SelectItem value="análisis">Análisis</SelectItem>
+					</SelectContent>
+				</Select>
+			),
+		},
+		{
+			name: 'model',
+			label: 'Modelo',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger>
+						<SelectValue placeholder="Seleccionar modelo" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="gpt-3.5-turbo">gpt-3.5-turbo</SelectItem>
+						<SelectItem value="gpt-4">gpt-4</SelectItem>
+					</SelectContent>
+				</Select>
+			),
+		},
+		// ...agregar más campos opcionales si es necesario...
+	];
+
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} id="prompt-form" className="space-y-4">
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<FormField
-						control={form.control}
-						name="name"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Nombre</FormLabel>
-								<FormControl>
-									<Input placeholder="Nombre del prompt" {...field} />
-								</FormControl>
-								<FormDescription>Un nombre descriptivo para identificar este prompt</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="category"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Categoría</FormLabel>
-								<Select onValueChange={field.onChange} defaultValue={field.value}>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Seleccionar categoría" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{Object.values(PromptCategory).map((category) => (
-											<SelectItem key={category} value={category}>
-												{category}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<FormDescription>La categoría ayuda a organizar tus prompts</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="description"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Descripción</FormLabel>
-							<FormControl>
-								<Textarea placeholder="Descripción breve del prompt" {...field} value={field.value || ''} rows={2} />
-							</FormControl>
-							<FormDescription>Una descripción que explique el propósito de este prompt</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<FormField
-					control={form.control}
-					name="content"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Contenido</FormLabel>
-							<FormControl>
-								<Textarea
-									placeholder="Contenido del prompt"
-									{...field}
-									value={field.value || ''}
-									rows={8}
-									className="font-mono text-sm"
-								/>
-							</FormControl>
-							<FormDescription>El texto del prompt que se utilizará para generar contenido</FormDescription>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				<Separator />
-
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-					<FormField
-						control={form.control}
-						name="emoji"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Emoji</FormLabel>
-								<FormControl>
-									<EmojiPicker value={field.value} onEmojiSelect={field.onChange} />
-								</FormControl>
-								<FormDescription>Un emoji representativo</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="color"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Color</FormLabel>
-								<FormControl>
-									<ColorPicker value={field.value} onChange={field.onChange} />
-								</FormControl>
-								<FormDescription>Color para identificar visualmente</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="model"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Modelo</FormLabel>
-								<Select onValueChange={field.onChange} defaultValue={field.value}>
-									<FormControl>
-										<SelectTrigger>
-											<SelectValue placeholder="Seleccionar modelo" />
-										</SelectTrigger>
-									</FormControl>
-									<SelectContent>
-										{PromptModel && typeof PromptModel === 'object' ? (
-											Object.values(PromptModel).map((model) => (
-												<SelectItem key={model} value={model}>
-													{formatModelName(model)}
-												</SelectItem>
-											))
-										) : (
-											<SelectItem value="gpt-3.5-turbo">gpt-3.5-turbo</SelectItem>
-										)}
-									</SelectContent>
-								</Select>
-								<FormDescription>Modelo de IA recomendado</FormDescription>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<FormField
-					control={form.control}
-					name="isFavorite"
-					render={({ field }) => (
-						<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-							<FormControl>
-								<Switch checked={field.value} onCheckedChange={field.onChange} />
-							</FormControl>
-							<div className="space-y-1 leading-none">
-								<FormLabel>Marcar como favorito</FormLabel>
-								<FormDescription>Los prompts favoritos aparecerán destacados en los listados</FormDescription>
-							</div>
-						</FormItem>
-					)}
-				/>
-
-				<div className="flex justify-end gap-2">
-					{onCancel && (
-						<Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-							Cancelar
-						</Button>
-					)}
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? 'Guardando...' : isEditing ? 'Actualizar' : 'Crear'}
-					</Button>
-				</div>
-			</form>
-		</Form>
+		<DynamicCreateForm
+			optionalFields={optionalFields}
+			onSubmit={async (data) => {
+				if (isEditing && prompt) {
+					await updatePrompt(prompt.id, data);
+					onUpdated?.({ ...prompt, ...data });
+				} else {
+					const created = await createPrompt(data);
+					onCreated?.(created);
+				}
+			}}
+			submitLabel={isEditing ? 'Guardar cambios' : 'Crear prompt'}
+		/>
 	);
 }

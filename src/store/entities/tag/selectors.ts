@@ -3,8 +3,8 @@
  * @module store/entities/tag/selectors
  */
 
-import { TagSortCriteria } from '@/types/entities/tag/enums';
-import type { TagComplete } from '@/types/entities/tag/types';
+import type { TagComplete } from '@/types/entities/tag';
+import { TagSortCriteria } from '@/types/entities/tag';
 import { createTagsGroupedByCategory } from '@/utils/sort';
 import { useTagStore } from './index';
 

@@ -3,11 +3,11 @@
  * @module transformers/profile
  */
 
+import { Language, ThemeMode, type ProfileBase, type ProfilePreferencesSchemaType } from '@/types/entities/profile';
+import { profilePreferencesSchema } from '@/types/entities/profile/schema';
 import type { Profile } from '@prisma/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { profilePreferencesSchema } from '@/types/entities/profile/schema';
-import { Language, type ProfileExtended, type ProfilePreferences, ThemeMode } from '@/types/entities/profile/types';
 
 /**
  * Obtiene el texto descriptivo para un tema
@@ -53,7 +53,8 @@ export function getLanguageText(language: Language): string {
  * @returns Fecha formateada
  */
 export function formatProfileDate(date: Date): string {
-	return format(date, 'dd/MM/yyyy HH:mm:ss', { locale: es });
+	if (!date) return '';
+	return format(new Date(date), 'PPP', { locale: es });
 }
 
 /**
@@ -62,7 +63,7 @@ export function formatProfileDate(date: Date): string {
  * @returns Preferencias validadas y con valores por defecto
  * @throws Error si la validación falla
  */
-export function parseProfilePreferences(profile: Profile): ProfilePreferences {
+export function parseProfilePreferences(profile: Profile): ProfilePreferencesSchemaType {
 	let rawPreferences: any = {}; // Initialize as empty object
 	try {
 		// Intentar parsear las preferencias desde profile.settings si existe
@@ -114,7 +115,7 @@ export function parseProfilePreferences(profile: Profile): ProfilePreferences {
  * @param profile - Perfil de Prisma
  * @returns Perfil extendido con datos adicionales para UI
  */
-export function transformProfile(profile: Profile): ProfileExtended {
+export function transformProfile(profile: Profile): ProfileBase {
 	const createdAt = new Date(profile.createdAt);
 	const updatedAt = new Date(profile.updatedAt);
 
@@ -131,7 +132,7 @@ export function transformProfile(profile: Profile): ProfileExtended {
  * @param profiles - Lista de perfiles de Prisma
  * @returns Lista de perfiles extendidos
  */
-export function transformProfiles(profiles: Profile[]): ProfileExtended[] {
+export function transformProfiles(profiles: Profile[]): ProfileBase[] {
 	return profiles.map(transformProfile);
 }
 

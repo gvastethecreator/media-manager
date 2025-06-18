@@ -1,25 +1,44 @@
 'use client';
 
-import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 import { getActiveProfile } from '@/app/actions/profiles';
 import { selectIsDarkMode, useProfileStore } from '@/store/entities/profile/profile-store';
-import { type ProfileExtended, ThemeMode } from '@/types/entities/profile/types';
+import { ThemeMode, type ProfileBase } from '@/types/entities/profile';
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 
 // Contexto para acceso síncrono al perfil
-interface ProfileContextType {
-	isDarkMode: boolean;
+export interface ProfileContextValue {
+	/**
+	 * Perfil activo - puede ser null si aún no se ha cargado
+	 */
+	profile: ProfileBase | null;
+
+	/**
+	 * Indicador de carga del perfil
+	 */
 	isLoading: boolean;
-	profile: ProfileExtended | null;
+
+	/**
+	 * Modo oscuro actual (true = oscuro, false = claro)
+	 */
+	isDarkMode: boolean;
+
+	/**
+	 * Error asociado al perfil
+	 */
 	error: string | null;
+
+	/**
+	 * Función para aplicar un tema
+	 */
 	applyTheme: (theme: ThemeMode) => void;
 }
 
-const ProfileContext = createContext<ProfileContextType>({
+const ProfileContext = createContext<ProfileContextValue>({
 	isDarkMode: false,
 	isLoading: true,
 	profile: null,
 	error: null,
-	applyTheme: () => {},
+	applyTheme: () => { },
 });
 
 export const useProfile = () => useContext(ProfileContext);
@@ -35,6 +54,31 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
 	// Calcular si está en modo oscuro usando el selector
 	const isDarkMode = useProfileStore(selectIsDarkMode);
+
+	// Función para aplicar un tema (memoizada para useEffect)
+	const applyTheme = useCallback((theme: ThemeMode) => {
+		if (theme === ThemeMode.DARK) {
+			document.documentElement.classList.add('dark');
+			document.documentElement.classList.remove('light');
+		} else if (theme === ThemeMode.LIGHT) {
+			document.documentElement.classList.add('light');
+			document.documentElement.classList.remove('dark');
+		} else {
+			// SYSTEM: Aplicar según preferencia del sistema
+			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+			if (prefersDark) {
+				document.documentElement.classList.add('dark');
+				document.documentElement.classList.remove('light');
+			} else {
+				document.documentElement.classList.add('light');
+				document.documentElement.classList.remove('dark');
+			}
+		}
+
+		// Actualizar también en el store
+		updateTheme(theme);
+	}, [updateTheme]);
 
 	// Inicializar y asegurar que existe un perfil por defecto
 	useEffect(() => {
@@ -90,33 +134,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 		};
 	}, [activeProfile]);
 
-	// Función para aplicar un tema
-	const applyTheme = (theme: ThemeMode) => {
-		if (theme === ThemeMode.DARK) {
-			document.documentElement.classList.add('dark');
-			document.documentElement.classList.remove('light');
-		} else if (theme === ThemeMode.LIGHT) {
-			document.documentElement.classList.add('light');
-			document.documentElement.classList.remove('dark');
-		} else {
-			// SYSTEM: Aplicar según preferencia del sistema
-			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-			if (prefersDark) {
-				document.documentElement.classList.add('dark');
-				document.documentElement.classList.remove('light');
-			} else {
-				document.documentElement.classList.add('light');
-				document.documentElement.classList.remove('dark');
-			}
-		}
-
-		// Actualizar también en el store
-		updateTheme(theme);
-	};
-
 	// Valor del contexto
-	const contextValue: ProfileContextType = {
+	const contextValue: ProfileContextValue = {
 		isDarkMode,
 		isLoading: isLoading || isLoadingActive,
 		profile: activeProfile,

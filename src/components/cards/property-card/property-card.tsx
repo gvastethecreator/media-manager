@@ -1,18 +1,18 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import type { PropertyWithRelations } from '@/types/entities/property';
 import { Microscope } from 'lucide-react';
 import Link from 'next/link';
 import React, { useMemo } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import type { Property } from '@/types/prisma';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 export interface PropertyCardProps {
-	property: Property & {
+	property: PropertyWithRelations & {
 		_count?: {
-			images: number;
+			images?: number;
 			videos?: number;
 			notes?: number;
 			concepts?: number;
@@ -20,7 +20,7 @@ export interface PropertyCardProps {
 			wildcards?: number;
 		};
 	};
-	onClick?: (property: Property) => void;
+	onClick?: (property: PropertyWithRelations) => void;
 	className?: string;
 	showBadges?: boolean;
 }

@@ -1,28 +1,32 @@
 /**
- * @file Exportaciones de tipos para perfiles de usuario
+ * @file Exportaciones principales de tipos para la entidad Profile
  * @module types/entities/profile
  */
 
-export * from './schema';
-// Re-exportar esquemas Zod para validación
+// Exportar los tipos principales
+export type {
+    Language, ProfileBase,
+    ProfileCreateInput,
+    ProfileUpdateInput,
+    ThemeMode
+} from './types';
+
+// Exportar el esquema de validación
+export { ProfileSchema } from './types';
+
+// Exportar esquemas adicionales de validación
 export {
-	createProfileSchema,
-	profileFiltersSchema,
-	profilePaginationSchema,
-	profilePreferencesSchema,
-	updateProfilePreferencesSchema,
-	updateProfileSchema,
+    createProfileSchema,
+    profileFiltersSchema,
+    profilePaginationSchema,
+    profilePreferencesSchema,
+    updateProfilePreferencesSchema,
+    updateProfileSchema
 } from './schema';
 
-// Re-exportar tipos específicos para conveniencia
+// Exportar tipos inferidos de esquemas
 export type {
-	CreateProfileInput,
-	PaginatedProfiles,
-	ProfileExtended,
-	ProfileFilters,
-	ProfilePaginationOptions,
-	ProfilePreferences,
-	UpdateProfileInput,
-	UpdateProfilePreferencesInput,
-} from './types';
-export * from './types';
+    CreateProfileSchemaType, ProfileFiltersSchemaType,
+    ProfilePaginationSchemaType, ProfilePreferencesSchemaType, UpdateProfilePreferencesSchemaType, UpdateProfileSchemaType
+} from './schema';
+

@@ -1,9 +1,5 @@
 'use client';
 
-import { Variable } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
 import { getProperties } from '@/app/actions/properties/property.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -12,37 +8,19 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { usePropertyStore } from '@/store/entities/property';
+import { fromPrismaProperty } from '@/transformers/property/serializers';
+import type { PropertyWithRelations } from '@/types/entities/property';
+import { Variable } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 import { PropertyCard } from './property-card';
 
 // Definir el tipo para propiedades con estadísticas
-export interface PropertyWithStats {
-	id: string;
-	name: string;
-	key: string;
-	type: string;
-	description: string | null;
-	defaultValue: string | null;
-	required: boolean;
-	options: string[] | null;
-	validation: string | null;
-	createdAt: Date;
-	updatedAt: Date;
-	_count?: {
-		groups: number;
-		images: number;
-		albums: number;
-		characters: number;
-		collections: number;
-		concepts: number;
-		notes: number;
-		places: number;
-		prompts: number;
-		tags: number;
-		worldItems: number;
-	};
+export type PropertyWithStats = PropertyWithRelations & {
 	totalAssociations: number;
-}
+};
 
 const viewLogger = clientLogger.withContext('PropertiesView');
 
@@ -83,16 +61,17 @@ export function PropertiesView(_props: ViewProps) {
 
 			// Calcular total de asociaciones para cada propiedad
 			const propertiesWithStats = data.map((property) => {
+				const canonical = fromPrismaProperty(property);
 				const totalAssociations = Object.values(property._count || {}).reduce((sum, count) => sum + (count || 0), 0);
 				return {
-					...property,
+					...canonical,
 					totalAssociations,
 				};
 			});
 
 			setProperties(propertiesWithStats);
 			// Actualizar el store con las propiedades obtenidas
-			addProperties(data);
+			addProperties(propertiesWithStats.map(p => ({ ...p, _ui: { itemCount: p.totalAssociations, lastUpdated: p.updatedAt } })));
 			viewLogger.info(`✅ ${data.length} propiedades cargadas`);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -113,7 +92,7 @@ export function PropertiesView(_props: ViewProps) {
 			viewLogger.info('🖱️ Click en propiedad:', property.name);
 			setCurrentView('property-detail');
 			// Actualizar la información de la propiedad en el store
-			addProperty(property);
+			addProperty({ ...property, _ui: { itemCount: property.totalAssociations, lastUpdated: property.updatedAt } });
 			// Navegar a la vista de detalle de la propiedad
 			router.push(`/properties/${property.id}`);
 		},

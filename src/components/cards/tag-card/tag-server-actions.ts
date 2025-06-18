@@ -2,7 +2,7 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { TagWithRelations } from '@/types/entities/tag/types';
+import type { TagWithRelations } from '@/types/entities/tag';
 
 // Logger específico para acciones de TagCard
 const tagCardLogger = serverLogger.withContext('TagCardActions');

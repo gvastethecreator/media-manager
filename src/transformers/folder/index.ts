@@ -1,48 +1,10 @@
 /**
- * @file Punto de entrada para todos los transformadores de Folder
+ * @file Punto de entrada para los transformadores de la entidad Folder.
  * @module transformers/folder
+ * @description Exporta de forma controlada las funciones de mapeo, serialización y transformación para la entidad Folder.
  */
 
-// Importar explícitamente para evitar conflictos y controlar exportaciones
-import { mapFolderToFolder, toPrismaFolder } from './converters';
-import { mapCreateFolderDataToPrisma, mapFolderFiltersToPrisma, mapUpdateFolderDataToPrisma } from './mappers';
-import {
-	extendFolder,
-	fromFolderComplete,
-	fromPrismaFolder,
-	generateFolderColor,
-	generateFolderEmoji,
-	normalizeFolderPath,
-	normalizeFolderType,
-	parseFolderFilters,
-	toRelatedFolder,
-	validateFolder,
-	withFolderStats,
-} from './serializers';
-import { transformFolderBase, transformFolderToExtended } from './transformer';
+export * from './mappers';
+export * from './serializers';
+export * from './transformer';
 
-// --- Re-exportaciones controladas --- //
-
-// De converters.ts (excluimos toFolderComplete original)
-export { mapFolderToFolder, toPrismaFolder };
-
-// De serializers.ts
-export {
-	extendFolder,
-	fromFolderComplete,
-	fromPrismaFolder,
-	generateFolderColor,
-	generateFolderEmoji,
-	normalizeFolderPath,
-	normalizeFolderType,
-	parseFolderFilters,
-	toRelatedFolder,
-	validateFolder,
-	withFolderStats,
-};
-
-// De mappers.ts
-export { mapCreateFolderDataToPrisma, mapFolderFiltersToPrisma, mapUpdateFolderDataToPrisma };
-
-// De transformer.ts (exportamos transformFolderBase como transformFolder)
-export { transformFolderBase as transformFolder, transformFolderToExtended };

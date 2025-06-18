@@ -14,7 +14,7 @@ import {
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { transformTag } from '@/transformers/tag';
-import type { TagComplete, TagCreateInput, TagUpdateInput } from '@/types/entities/tag/types';
+import type { TagComplete, TagCreateInput, TagUpdateInput } from '@/types/entities/tag';
 
 // Logger específico para el servicio de etiquetas
 const tagLogger = serverLogger.withContext('TagService');

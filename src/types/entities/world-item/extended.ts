@@ -5,7 +5,7 @@
 
 import type { WorldItemSortCriteria, WorldItemViewMode } from './enums';
 import type { WorldItemEffect, WorldItemProperty, WorldItemRequirement, WorldItemStats } from './stats-types';
-import type { WorldItemBase, WorldItemFilters, WorldItemWithRelations } from './types';
+import type { WorldItemBase, WorldItemFilters, WorldItemRelations } from './types';
 
 /**
  * Configuración visual para la entidad WorldItem
@@ -48,7 +48,7 @@ export interface ParsedWorldItem
  * Datos completos de objeto del mundo con relaciones y campos parseados
  */
 export interface ParsedWorldItemWithRelations
-	extends Omit<WorldItemWithRelations, keyof ParsedWorldItem>,
+	extends Omit<WorldItemRelations, keyof ParsedWorldItem>,
 		ParsedWorldItem {}
 
 /**

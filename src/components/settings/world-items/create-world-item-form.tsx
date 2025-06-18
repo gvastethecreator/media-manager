@@ -1,36 +1,34 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { HexColorPicker } from 'react-colorful';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+// 🛠️ Refactor: DynamicCreateForm para WorldItem
+// Ahora solo el campo "name" es obligatorio, el resto se agrega dinámicamente.
+// Validación y tipos corregidos para compatibilidad con el patrón reusable.
+
 import { createWorldItem, updateWorldItem } from '@/app/actions/world-items/world-item.actions';
-import { Button } from '@/components/ui/button';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
-import type { WorldItem } from '@/types/entities/world-item';
-import { RarityLevel, WorldItemCategory, WorldItemType } from '@/types/entities/world-item/enums';
+import type { WorldItem, WorldItemCreateInput } from '@/types/entities/world-item';
+import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { DynamicCreateForm } from '../common/dynamic-create-form';
 
-// Esquema de validación con Zod
+// Esquema de validación con Zod (solo name requerido, el resto opcional)
 const worldItemSchema = z.object({
 	name: z.string().min(1, 'El nombre es requerido').max(100, 'El nombre es demasiado largo'),
 	description: z.string().optional(),
-	color: z.string().min(1, 'El color es requerido'),
-	emoji: z.string().min(1, 'El emoji es requerido'),
+	color: z.string().optional(),
+	emoji: z.string().optional(),
 	type: z.string().optional(),
 	category: z.string().optional(),
 	rarity: z.string().optional(),
 	origin: z.string().optional(),
-	isFavorite: z.boolean().default(false),
+	isFavorite: z.boolean().optional(),
 });
 
 type WorldItemForm = z.infer<typeof worldItemSchema>;
@@ -134,227 +132,124 @@ export function CreateWorldItemForm({
 		}
 	};
 
+	// Campos opcionales para el formulario dinámico
+	const optionalFields = [
+		{
+			name: 'emoji',
+			label: 'Emoji',
+			render: ({ value, onChange }: any) => (
+				<EmojiPicker value={value} onEmojiSelect={onChange} />
+			),
+		},
+		{
+			name: 'color',
+			label: 'Color',
+			render: ({ value, onChange }: any) => (
+				<ColorPicker value={value} onChange={onChange} />
+			),
+		},
+		{
+			name: 'description',
+			label: 'Descripción',
+			render: ({ value, onChange }: any) => (
+				<textarea
+					placeholder="Descripción del objeto..."
+					value={value || ''}
+					onChange={(e) => onChange(e.target.value)}
+					rows={3}
+					className="text-xs resize-none w-full border rounded p-2"
+				/>
+			),
+		},
+		{
+			name: 'type',
+			label: 'Tipo',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger>
+						<SelectValue placeholder="Seleccionar tipo" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="">Ninguno</SelectItem>
+						{Object.values(WorldItemType).map((type) => (
+							<SelectItem key={type} value={String(type)}>{String(type)}</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			),
+		},
+		{
+			name: 'category',
+			label: 'Categoría',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger>
+						<SelectValue placeholder="Seleccionar categoría" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="">Ninguna</SelectItem>
+						{Object.values(WorldItemCategory).map((cat) => (
+							<SelectItem key={cat} value={String(cat)}>{String(cat)}</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			),
+		},
+		{
+			name: 'rarity',
+			label: 'Rareza',
+			render: ({ value, onChange }: any) => (
+				<Select onValueChange={onChange} value={value || undefined}>
+					<SelectTrigger>
+						<SelectValue placeholder="Seleccionar rareza" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="">Ninguna</SelectItem>
+						{Object.values(WorldItemRarity).map((rarity) => (
+							<SelectItem key={rarity} value={String(rarity)}>{String(rarity)}</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			),
+		},
+		{
+			name: 'origin',
+			label: 'Origen',
+			render: ({ value, onChange }: any) => (
+				<input type="text" value={value || ''} onChange={(e) => onChange(e.target.value)} className="w-full border rounded p-2 text-xs" placeholder="Origen del objeto" />
+			),
+		},
+		{
+			name: 'isFavorite',
+			label: 'Favorito',
+			render: ({ value, onChange }: any) => (
+				<Switch checked={!!value} onCheckedChange={onChange} />
+			),
+		},
+	];
+
 	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-				<div className="space-y-4">
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-						<FormField
-							control={form.control}
-							name="name"
-							render={({ field }) => (
-								<FormItem className="space-y-2">
-									<FormLabel>Nombre</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="Nombre del objeto"
-											{...field}
-											className={cn(form.formState.errors.name && 'border-destructive')}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="origin"
-							render={({ field }) => (
-								<FormItem className="space-y-2">
-									<FormLabel>Origen</FormLabel>
-									<FormControl>
-										<Input placeholder="Origen del objeto" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					</div>
-
-					<FormField
-						control={form.control}
-						name="description"
-						render={({ field }) => (
-							<FormItem className="space-y-2">
-								<FormLabel>Descripción</FormLabel>
-								<FormControl>
-									<Textarea placeholder="Descripción del objeto" {...field} value={field.value || ''} rows={3} />
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-						<FormField
-							control={form.control}
-							name="color"
-							render={({ field }) => (
-								<FormItem className="space-y-2">
-									<FormLabel>Color</FormLabel>
-									<div className="flex items-center gap-2">
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button
-													variant="outline"
-													className="h-10 w-10 p-0"
-													type="button"
-													style={{ backgroundColor: field.value }}
-												>
-													<span className="sr-only">Seleccionar color</span>
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent side="right" className="w-auto p-0 border-none">
-												<FormControl>
-													<HexColorPicker color={field.value} onChange={field.onChange} />
-												</FormControl>
-											</PopoverContent>
-										</Popover>
-										<FormControl>
-											<Input value={field.value} onChange={(e) => field.onChange(e.target.value)} className="flex-1" />
-										</FormControl>
-									</div>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="emoji"
-							render={({ field }) => (
-								<FormItem className="space-y-2">
-									<FormLabel>Emoji</FormLabel>
-									<div className="flex items-center gap-2">
-										<Popover>
-											<PopoverTrigger asChild>
-												<Button type="button" variant="outline" className="h-10 w-10 p-0">
-													<span className="text-xl">{field.value}</span>
-												</Button>
-											</PopoverTrigger>
-											<PopoverContent side="right" className="w-auto p-0">
-												<FormControl>
-													<EmojiPicker onEmojiSelect={field.onChange} value={field.value} />
-												</FormControl>
-											</PopoverContent>
-										</Popover>
-										<FormControl>
-											<Input value={field.value} onChange={(e) => field.onChange(e.target.value)} className="flex-1" />
-										</FormControl>
-									</div>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					</div>
-
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-						<FormField
-							control={form.control}
-							name="type"
-							render={({ field }) => (
-								<FormItem className="space-y-2">
-									<FormLabel>Tipo</FormLabel>
-									<Select onValueChange={field.onChange} defaultValue={field.value}>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Seleccionar tipo" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											<SelectItem value="none">Ninguno</SelectItem>
-											{Object.values(WorldItemType).map((type) => (
-												<SelectItem key={type} value={type}>
-													{type}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="category"
-							render={({ field }) => (
-								<FormItem className="space-y-2">
-									<FormLabel>Categoría</FormLabel>
-									<Select onValueChange={field.onChange} defaultValue={field.value}>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Seleccionar categoría" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											<SelectItem value="none">Ninguna</SelectItem>
-											{Object.values(WorldItemCategory).map((category) => (
-												<SelectItem key={category} value={category}>
-													{category}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="rarity"
-							render={({ field }) => (
-								<FormItem className="space-y-2">
-									<FormLabel>Rareza</FormLabel>
-									<Select onValueChange={field.onChange} defaultValue={field.value}>
-										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Seleccionar rareza" />
-											</SelectTrigger>
-										</FormControl>
-										<SelectContent>
-											<SelectItem value="none">Ninguna</SelectItem>
-											{Object.values(RarityLevel).map((rarity) => (
-												<SelectItem key={rarity} value={rarity}>
-													{rarity}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-					</div>
-
-					<FormField
-						control={form.control}
-						name="isFavorite"
-						render={({ field }) => (
-							<FormItem className="flex items-center space-x-2 pt-2">
-								<FormControl>
-									<Switch checked={field.value} onCheckedChange={field.onChange} id="isFavorite" />
-								</FormControl>
-								<FormLabel htmlFor="isFavorite">Marcar como favorito</FormLabel>
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				<div className="flex gap-2 justify-end">
-					{isEditing && (
-						<Button type="button" variant="outline" onClick={handleCancel}>
-							Cancelar
-						</Button>
-					)}
-					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-						{isEditing ? 'Actualizar' : 'Crear'} Objeto
-					</Button>
-				</div>
-			</form>
-		</Form>
+		<DynamicCreateForm<WorldItemCreateInput>
+			optionalFields={optionalFields as any}
+			onSubmit={async (data) => {
+				if (isEditing && worldItem) {
+					await updateWorldItem(worldItem.id, data);
+					onUpdated?.({ ...worldItem, ...data });
+				} else {
+					const created = await createWorldItem(data);
+					onCreated?.(created);
+				}
+			}}
+			submitLabel={isEditing ? 'Guardar cambios' : 'Crear objeto'}
+		/>
 	);
 }
+
+/**
+ * 📝 Documentación: Formulario de creación dinámica para WorldItem
+ * - Solo el campo "name" es obligatorio inicialmente.
+ * - Los campos opcionales se agregan uno a uno desde un selector.
+ * - Compatible con el patrón DynamicCreateForm reusable.
+ * - Validación con Zod y tipos canónicos.
+ * - Ejemplo de uso y props en el README de common/dynamic-create-form.
+ */

@@ -9,6 +9,44 @@
 import { z } from 'zod';
 
 /**
+ * Criterios de ordenación para wildcards
+ */
+export enum WildcardSortCriteria {
+    NAME_ASC = 'name:asc',
+    NAME_DESC = 'name:desc',
+    USAGE_ASC = 'usage:asc',
+    USAGE_DESC = 'usage:desc',
+    CREATED_ASC = 'createdAt:asc',
+    CREATED_DESC = 'createdAt:desc',
+    UPDATED_ASC = 'updatedAt:asc',
+    UPDATED_DESC = 'updatedAt:desc',
+}
+
+/**
+ * Modos de visualización para wildcards
+ */
+export enum WildcardViewMode {
+    GRID = 'grid',
+    LIST = 'list',
+    TREE = 'tree', // Vista jerárquica
+    COMPACT = 'compact',
+}
+
+/**
+ * Mapa de propiedades para ordenación
+ */
+export const WILDCARD_SORT_PROPERTY_MAP: Record<WildcardSortCriteria, string> = {
+    [WildcardSortCriteria.NAME_ASC]: 'name',
+    [WildcardSortCriteria.NAME_DESC]: 'name',
+    [WildcardSortCriteria.USAGE_ASC]: 'usage',
+    [WildcardSortCriteria.USAGE_DESC]: 'usage',
+    [WildcardSortCriteria.CREATED_ASC]: 'createdAt',
+    [WildcardSortCriteria.CREATED_DESC]: 'createdAt',
+    [WildcardSortCriteria.UPDATED_ASC]: 'updatedAt',
+    [WildcardSortCriteria.UPDATED_DESC]: 'updatedAt',
+};
+
+/**
  * Tipo base canónico para Wildcard
  */
 export interface WildcardBase {
@@ -49,6 +87,90 @@ export interface WildcardCreateInput {
 export type WildcardUpdateInput = Partial<Omit<WildcardBase, 'id' | 'createdAt' | 'updatedAt'>>;
 
 /**
+ * Estructura de un hijo de wildcard
+ */
+export interface WildcardChild {
+    id: string;
+    name: string;
+}
+
+/**
+ * Relaciones de wildcard con otras entidades
+ */
+export interface WildcardRelations {
+    parent?: {
+        id: string;
+        name: string;
+    } | null;
+    childWildcards?: WildcardChild[];
+}
+
+/**
+ * Conteos de relaciones de wildcard
+ */
+export interface WildcardCounts {
+    _count?: {
+        childWildcards?: number;
+        images?: number;
+        videos?: number;
+        albums?: number;
+        collections?: number;
+        tags?: number;
+        characters?: number;
+        places?: number;
+        worldItems?: number;
+        concepts?: number;
+        prompts?: number;
+        notes?: number;
+        properties?: number;
+        groups?: number;
+    };
+}
+
+/**
+ * Filtros para búsqueda de wildcards
+ */
+export interface WildcardFilters {
+    searchQuery?: string;
+    categories?: string[];
+    onlyFavorites?: boolean;
+    parentId?: string | null;
+    hasChildren?: boolean;
+}
+
+/**
+ * Opciones UI para wildcards
+ */
+export interface WildcardUI {
+    sortBy?: WildcardSortCriteria;
+    viewMode?: WildcardViewMode;
+}
+
+/**
+ * Wildcard completo con todas sus relaciones
+ */
+export interface WildcardComplete extends WildcardBase, WildcardRelations, WildcardCounts {}
+
+/**
+ * Opciones de búsqueda para wildcards
+ */
+export interface WildcardSearchOptions {
+    skip?: number;
+    take?: number;
+    sortBy?: WildcardSortCriteria;
+    filters?: WildcardFilters;
+}
+
+/**
+ * Resultado de búsqueda de wildcards
+ */
+export interface WildcardSearchResult {
+    items: WildcardComplete[];
+    total: number;
+    hasMore: boolean;
+}
+
+/**
  * Esquema Zod para validación de Wildcard
  */
 export const WildcardSchema = z.object({
@@ -66,6 +188,14 @@ export const WildcardSchema = z.object({
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
+
+// Alias para compatibilidad
+export type CreateWildcardData = WildcardCreateInput;
+export type UpdateWildcardData = WildcardUpdateInput;
+export type WildcardExtended = WildcardComplete;
+export type WildcardWithRelations = WildcardComplete;
+export type WildcardWithStats = WildcardComplete;
+export type WildcardDeserialized = WildcardComplete;
 
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.

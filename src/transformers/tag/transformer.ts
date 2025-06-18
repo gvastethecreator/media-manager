@@ -1,196 +1,116 @@
 /**
  * @file Transformador principal para la entidad Tag
  * @module transformers/tag/transformer
+ * @description Contiene la lógica para convertir un objeto Tag de Prisma a nuestro tipo canónico TagComplete.
  */
 
-import { Logger } from '@/lib/logger';
-import type { Tag, TagComplete, TagExtended, TagWithStats } from '@/types/entities/tag/types';
-import { handleTransformerError } from '@/utils/transformers/errors';
-import { extendTag } from './serializers';
-import { mapTagToComplete } from './v2/converters';
+import { serverLogger } from '@/lib/logger/server-logger';
+import type { TagComplete } from '@/types/entities/tag';
+import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 
-const logger = new Logger('TagTransformer');
-
-/**
- * Opciones para la transformación de tags
- */
-export interface TransformTagOptions {
-	includeRelations?: boolean;
-	includeCount?: boolean;
-	customFields?: string[];
-}
-
-/**
- * 🏷️ Transformador principal para la entidad Tag
- * Punto de entrada unificado para transformar objetos Tag a diferentes formatos
- *
- * @param tag Objeto Tag a transformar (puede ser de Prisma, parcial, etc)
- * @returns Objeto TagComplete con todas las propiedades
- * @throws Error si el tag es inválido o no se puede transformar
- */
-export function transformTag(tag: any): TagComplete {
-	if (!tag || typeof tag !== 'object') {
-		logger.warn('⚠️ Intentando transformar un objeto Tag inválido:', tag);
-		throw new Error('Invalid tag object');
-	}
-
-	try {
-		// Convertir a formato completo
-		const tagComplete = mapTagToComplete(tag);
-
-		// Extender con propiedades adicionales
-		return extendTag(tagComplete);
-	} catch (error) {
-		logger.error('❌ Error transformando Tag:', error);
-		throw handleTransformerError(error);
-	}
-}
-
-/**
- * 🔄 Transforma un Tag a la versión extendida para UI
- *
- * @param tag Objeto Tag a transformar
- * @param options Opciones adicionales de transformación
- * @returns Objeto TagExtended con propiedades de UI
- * @throws Error si hay un problema en la transformación
- */
-export function transformTagToExtended(
-	tag: Tag | TagComplete,
-	options: {
-		isSelected?: boolean;
-		isHighlighted?: boolean;
-		isEditing?: boolean;
-		isExpanded?: boolean;
-		isLoading?: boolean;
-		hasError?: boolean;
-		isDragging?: boolean;
-		isDropTarget?: boolean;
-	} = {}
-): TagExtended {
-	try {
-		// Primero asegurar que tenemos un TagComplete
-		const tagComplete = '_count' in tag ? tag : transformTag(tag);
-
-		// Opciones con valores por defecto
-		const {
-			isSelected = false,
-			isHighlighted = false,
-			isEditing = false,
-			isExpanded = false,
-			isLoading = false,
-			hasError = false,
-			isDragging = false,
-			isDropTarget = false,
-		} = options;
-
-		// Extender con propiedades de UI
-		return {
-			...tagComplete,
-			isSelected,
-			isHighlighted,
-			isEditing,
-			isExpanded,
-			isLoading,
-			hasError,
-			isDragging,
-			isDropTarget,
+// Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
+type TagFromPrisma = Prisma.TagGetPayload<{
+	include: {
+		images: true;
+		videos: true;
+		albums: true;
+		collections: true;
+		characters: true;
+		places: true;
+		worldItems: true;
+		concepts: true;
+		prompts: true;
+		notes: true;
+		wildcards: true;
+		properties: true;
+		groups: true;
+		_count: {
+			select: {
+				images: true;
+				videos: true;
+				albums: true;
+				collections: true;
+				characters: true;
+				places: true;
+				worldItems: true;
+				concepts: true;
+				prompts: true;
+				notes: true;
+				wildcards: true;
+				properties: true;
+				groups: true;
+			};
 		};
-	} catch (error) {
-		logger.error('❌ Error transformando Tag a Extended:', error);
-		throw handleTransformerError(error);
-	}
-}
+	};
+}>;
 
 /**
- * 📊 Transforma un Tag a la versión con estadísticas
+ * 🔄 Transforma un objeto Tag de Prisma a nuestro tipo canónico TagComplete.
  *
- * @param tag Objeto Tag a transformar
- * @returns Objeto TagWithStats con estadísticas adicionales
- * @throws Error si hay un problema en la transformación
+ * @param prismaTag - El objeto Tag obtenido de Prisma, que debe incluir relaciones y conteos.
+ * @returns Un objeto TagComplete compatible con nuestra aplicación.
+ * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function transformTagToWithStats(tag: Tag | TagComplete): TagWithStats {
+export function fromPrismaTag(prismaTag: TagFromPrisma | null): TagComplete {
+	if (!prismaTag) {
+		throw new TransformerError('El objeto de etiqueta de Prisma no puede ser nulo.');
+	}
+
 	try {
-		// Primero asegurar que tenemos un TagComplete
-		const tagComplete = '_count' in tag ? tag : transformTag(tag);
+		const { _count, ...baseData } = prismaTag;
 
-		// Calcular estadísticas
-		const totalImages = tagComplete._count?.images || 0;
-		const totalVideos = tagComplete._count?.videos || 0;
-		const totalAlbums = tagComplete._count?.albums || 0;
-		const totalCollections = tagComplete._count?.collections || 0;
-		const totalCharacters = tagComplete._count?.characters || 0;
-		const totalPlaces = tagComplete._count?.places || 0;
-		const totalWorldItems = tagComplete._count?.worldItems || 0;
-		const totalConcepts = tagComplete._count?.concepts || 0;
-		const totalPrompts = tagComplete._count?.prompts || 0;
-		const totalNotes = tagComplete._count?.notes || 0;
-		const totalWildcards = tagComplete._count?.wildcards || 0;
-		const totalProperties = tagComplete._count?.properties || 0;
-		const totalGroups = tagComplete._count?.groups || 0;
-
-		const totalItems =
-			totalImages +
-			totalVideos +
-			totalAlbums +
-			totalCollections +
-			totalCharacters +
-			totalPlaces +
-			totalWorldItems +
-			totalConcepts +
-			totalPrompts +
-			totalNotes +
-			totalWildcards +
-			totalProperties +
-			totalGroups;
-
-		// Devolver con estadísticas
 		return {
-			...tagComplete,
-			stats: {
-				totalItems,
-				totalImages,
-				totalVideos,
-				totalAlbums,
-				totalCollections,
-				totalCharacters,
-				totalPlaces,
-				totalWorldItems,
-				totalConcepts,
-				totalPrompts,
-				totalNotes,
-				totalWildcards,
-				totalProperties,
-				totalGroups,
-				lastUsed: null, // Esto podría calcularse con lógica adicional
+			...baseData,
+			description: baseData.description ?? null,
+			shortcut: baseData.shortcut ?? null,
+			featuredImage: baseData.featuredImage ?? null,
+			images: baseData.images ?? [],
+			videos: baseData.videos ?? [],
+			albums: baseData.albums ?? [],
+			collections: baseData.collections ?? [],
+			characters: baseData.characters ?? [],
+			places: baseData.places ?? [],
+			worldItems: baseData.worldItems ?? [],
+			concepts: baseData.concepts ?? [],
+			prompts: baseData.prompts ?? [],
+			notes: baseData.notes ?? [],
+			wildcards: baseData.wildcards ?? [],
+			properties: baseData.properties ?? [],
+			groups: baseData.groups ?? [],
+			_count: {
+				images: _count?.images ?? 0,
+				videos: _count?.videos ?? 0,
+				albums: _count?.albums ?? 0,
+				collections: _count?.collections ?? 0,
+				characters: _count?.characters ?? 0,
+				places: _count?.places ?? 0,
+				worldItems: _count?.worldItems ?? 0,
+				concepts: _count?.concepts ?? 0,
+				prompts: _count?.prompts ?? 0,
+				notes: _count?.notes ?? 0,
+				wildcards: _count?.wildcards ?? 0,
+				properties: _count?.properties ?? 0,
+				groups: _count?.groups ?? 0,
 			},
 		};
 	} catch (error) {
-		logger.error('❌ Error transformando Tag a WithStats:', error);
-		throw handleTransformerError(error);
+		serverLogger.error('Error transformando etiqueta desde Prisma', {
+			error,
+			tagId: prismaTag.id,
+		});
+		throw new TransformerError(
+			`Error al transformar la etiqueta: ${(error as Error).message}`
+		);
 	}
 }
 
 /**
- * 🔖 Transforma múltiples tags
- * Función de utilidad para transformar arrays de tags
+ * 🔄 Transforma una lista de etiquetas de Prisma a una lista de TagComplete.
  *
- * @param tags Array de tags a transformar
- * @returns Array de tags transformados
+ * @param prismaTags - Un array de objetos Tag de Prisma.
+ * @returns Un array de objetos TagComplete.
  */
-export function transformTags(tags: any[]): TagComplete[] {
-	if (!Array.isArray(tags)) {
-		logger.warn('⚠️ Intentando transformar un array no válido:', tags);
-		return [];
-	}
-
-	return tags
-		.map((tag) => {
-			try {
-				return transformTag(tag);
-			} catch (error) {
-				logger.error(`❌ Error transformando tag ${tag?.id || 'desconocido'}:`, error);
-				return null;
-			}
-		})
-		.filter((tag): tag is TagComplete => tag !== null);
+export function fromPrismaTags(prismaTags: TagFromPrisma[]): TagComplete[] {
+	return prismaTags.map(fromPrismaTag);
 }

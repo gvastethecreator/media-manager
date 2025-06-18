@@ -3,35 +3,46 @@
  * @module transformers/property
  */
 
-// Mappers
+// Exportar mappers
 export {
-	toCreatePropertyData,
-	toRelatedProperty,
-	toSearchFilters,
-	toSearchOptions,
-	toSearchResult,
-	toUpdatePropertyData,
+    toCreatePropertyData,
+    toRelatedProperty,
+    toSearchFilters,
+    toSearchOptions,
+    toSearchResult,
+    toUpdatePropertyData
 } from './mappers';
-
-// Serializadores
+// Exportar serializadores
 export {
-	DEFAULT_PROPERTY_COLOR,
-	DEFAULT_PROPERTY_EMOJI,
-	extendProperties,
-	extendProperty,
+    DEFAULT_PROPERTY_COLOR,
+    DEFAULT_PROPERTY_EMOJI, PropertyTransformOptions, extendProperties,
+    extendProperty,
+    fromPrismaProperty,
+    generatePropertyColor,
+    generatePropertyEmoji, toPrismaProperty,
+    validateProperty
+} from './serializers';
+
+// Objeto para mantener compatibilidad con código existente
+const PropertyTransformer = {
+	// Serializadores
 	fromPrismaProperty,
+	toPrismaProperty,
+	validateProperty,
+	extendProperty,
+	extendProperties,
 	generatePropertyColor,
 	generatePropertyEmoji,
-	type PropertyTransformOptions,
-	toPrismaProperty,
-	toRelatedProperty as toPropertyRelated,
-	validateProperty,
-} from './serializers';
-// Transformadores principales
-export {
-	type TransformPropertyOptions,
-	transformProperties,
-	transformProperty,
-	transformPropertyToExtended,
-	transformPropertyToWithStats,
-} from './transformer';
+	DEFAULT_PROPERTY_COLOR,
+	DEFAULT_PROPERTY_EMOJI,
+
+	// Mappers
+	toCreatePropertyData,
+	toUpdatePropertyData,
+	toSearchOptions,
+	toSearchFilters,
+	toSearchResult,
+	toRelatedProperty,
+};
+
+export default PropertyTransformer;

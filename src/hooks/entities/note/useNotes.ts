@@ -1,260 +1,110 @@
-import { useCallback, useMemo } from 'react';
-import { shallow } from 'zustand/shallow';
+/**
+ * @file Hooks para interactuar con la entidad Note.
+ * @module hooks/entities/note/useNotes
+ * @description
+ * Este archivo proporciona hooks para desacoplar la lógica de acceso a datos y acciones
+ * de los componentes de la UI, siguiendo un patrón más granular y performante que el anterior "god hook".
+ * Se utiliza React Query para la gestión del estado del servidor (fetching, caching, etc.).
+ */
 
-import { useNoteStore } from '@/store/entities/note';
-import type { NoteViewMode } from '@/types/entities/note/enums';
-import type { NoteFilters } from '@/types/entities/note/extended';
+import { createNote, deleteNote, getNotes, updateNote } from '@/app/actions/notes/note.actions';
+import { useToast } from '@/hooks/use-toast';
+import type { NoteBase, NoteCreateInput, NoteUpdateInput } from '@/types/entities/note';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+const NOTE_QUERY_KEY = 'notes';
 
 /**
- * Hook para acceder al estado y acciones relacionadas con las notas
- * Proporciona una interfaz simplificada y optimizada al store de notas
+ * 훅 para obtener todas las notas.
+ * Gestiona el fetching, caching, y el estado de carga/error usando React Query.
+ *
+ * @returns Un objeto con la lista de notas y el estado de la consulta.
  */
-export const useNotes = () => {
-	// Seleccionar solo lo que necesitamos del store para evitar rerenderizados
-	const {
-		// Estado de Core
-		notes,
-		loading,
-		error,
+export function useNotes() {
+	return useQuery<NoteBase[], Error>({
+		queryKey: [NOTE_QUERY_KEY],
+		queryFn: () => getNotes(),
+	});
+}
 
-		// Acciones de Core
-		fetchNotes,
-		createNote,
-		updateNote,
-		deleteNote,
+/**
+ * 훅 para obtener una única nota por su ID.
+ * Utiliza los datos cacheados por `useNotes` para una respuesta instantánea.
+ *
+ * @param noteId El ID de la nota a obtener.
+ * @returns El objeto de la nota si se encuentra, y el estado de la consulta.
+ */
+export function useNote(noteId: string | null) {
+	const { data: notes, ...rest } = useNotes();
 
-		// Estado de Filters
-		filters,
-		sortBy,
-		page,
-		pageSize,
+	const note = noteId ? notes?.find((n) => n.id === noteId) ?? null : null;
 
-		// Acciones de Filters
-		setFilters,
-		setSortBy,
-		setPage,
-		setPageSize,
-		resetFilters,
+	return { note, ...rest };
+}
 
-		// Estado de Selection
-		selectedNoteId,
-		selectedNoteIds,
-		isMultiSelectMode,
+/**
+ * 훅 que proporciona las acciones de mutación para las notas (crear, actualizar, eliminar).
+ * Gestiona la invalidación de caché de React Query para mantener los datos sincronizados.
+ */
+export function useNoteActions() {
+	const queryClient = useQueryClient();
+	const { toast } = useToast();
 
-		// Acciones de Selection
-		selectNote,
-		unselectNote,
-		toggleMultiSelectMode,
-		toggleNoteSelection,
-		selectAllNotes,
-		clearSelection,
+	const invalidateNotesCache = () => {
+		return queryClient.invalidateQueries({ queryKey: [NOTE_QUERY_KEY] });
+	};
 
-		// Estado de UI
-		isCreateModalOpen,
-		isEditModalOpen,
-		isDeleteDialogOpen,
-		isDetailsDrawerOpen,
-		viewMode,
-
-		// Acciones de UI
-		openCreateModal,
-		closeCreateModal,
-		openEditModal,
-		closeEditModal,
-		openDeleteDialog,
-		closeDeleteDialog,
-		openDetailsDrawer,
-		closeDetailsDrawer,
-		setViewMode,
-	} = useNoteStore(
-		(state) => ({
-			// Core
-			notes: state.notes,
-			loading: state.loading,
-			error: state.error,
-			fetchNotes: state.fetchNotes,
-			createNote: state.createNote,
-			updateNote: state.updateNote,
-			deleteNote: state.deleteNote,
-
-			// Filters
-			filters: state.filters,
-			sortBy: state.sortBy,
-			page: state.page,
-			pageSize: state.pageSize,
-			setFilters: state.setFilters,
-			setSortBy: state.setSortBy,
-			setPage: state.setPage,
-			setPageSize: state.setPageSize,
-			resetFilters: state.resetFilters,
-
-			// Selection
-			selectedNoteId: state.selectedNoteId,
-			selectedNoteIds: state.selectedNoteIds,
-			isMultiSelectMode: state.isMultiSelectMode,
-			selectNote: state.selectNote,
-			unselectNote: state.unselectNote,
-			toggleMultiSelectMode: state.toggleMultiSelectMode,
-			toggleNoteSelection: state.toggleNoteSelection,
-			selectAllNotes: state.selectAllNotes,
-			clearSelection: state.clearSelection,
-
-			// UI
-			isCreateModalOpen: state.isCreateModalOpen,
-			isEditModalOpen: state.isEditModalOpen,
-			isDeleteDialogOpen: state.isDeleteDialogOpen,
-			isDetailsDrawerOpen: state.isDetailsDrawerOpen,
-			viewMode: state.viewMode,
-			openCreateModal: state.openCreateModal,
-			closeCreateModal: state.closeCreateModal,
-			openEditModal: state.openEditModal,
-			closeEditModal: state.closeEditModal,
-			openDeleteDialog: state.openDeleteDialog,
-			closeDeleteDialog: state.closeDeleteDialog,
-			openDetailsDrawer: state.openDetailsDrawer,
-			closeDetailsDrawer: state.closeDetailsDrawer,
-			setViewMode: state.setViewMode,
-		}),
-		shallow // Comparar superficialmente para evitar rerenders innecesarios
-	);
-
-	// Memoizar la nota seleccionada para evitar recálculos
-	const selectedNote = useMemo(() => {
-		if (!selectedNoteId) return null;
-		return notes.find((note) => note.id === selectedNoteId) || null;
-	}, [notes, selectedNoteId]);
-
-	// Memoizar las notas seleccionadas
-	const selectedNotes = useMemo(() => {
-		if (selectedNoteIds.length === 0) return [];
-		return notes.filter((note) => selectedNoteIds.includes(note.id));
-	}, [notes, selectedNoteIds]);
-
-	// Manejador para filtros combinados
-	const handleFilterChange = useCallback(
-		(newFilters: Partial<NoteFilters>) => {
-			// Mezclamos los filtros actuales con los nuevos
-			setFilters({ ...filters, ...newFilters });
-			// Volvemos a la primera página cuando cambian los filtros
-			setPage(1);
+	const { mutate: create, isPending: isCreating } = useMutation({
+		mutationFn: (data: NoteCreateInput) => createNote(data),
+		onSuccess: (newNote) => {
+			toast({ title: 'Nota Creada', description: `La nota "${newNote.title}" ha sido creada.` });
+			return invalidateNotesCache();
 		},
-		[filters, setFilters, setPage]
-	);
-
-	// Manejador para cambio de vista
-	const handleViewModeChange = useCallback(
-		(mode: NoteViewMode) => {
-			setViewMode(mode);
+		onError: (error) => {
+			toast({
+				variant: 'destructive',
+				title: 'Error al Crear',
+				description: error.message,
+			});
 		},
-		[setViewMode]
-	);
+	});
 
-	// Manejador de selección que controla tanto selección individual como múltiple
-	const handleNoteSelect = useCallback(
-		(id: string) => {
-			if (isMultiSelectMode) {
-				toggleNoteSelection(id);
-			} else {
-				selectNote(id);
-			}
+	const { mutate: update, isPending: isUpdating } = useMutation({
+		mutationFn: ({ id, data }: { id: string; data: NoteUpdateInput }) => updateNote(id, data),
+		onSuccess: (updatedNote) => {
+			toast({ title: 'Nota Actualizada', description: `La nota "${updatedNote.title}" ha sido actualizada.` });
+			return invalidateNotesCache();
 		},
-		[isMultiSelectMode, toggleNoteSelection, selectNote]
-	);
-
-	// Manejador para seleccionar y abrir detalles
-	const handleViewNoteDetails = useCallback(
-		(id: string) => {
-			selectNote(id);
-			openDetailsDrawer();
+		onError: (error) => {
+			toast({
+				variant: 'destructive',
+				title: 'Error al Actualizar',
+				description: error.message,
+			});
 		},
-		[selectNote, openDetailsDrawer]
-	);
+	});
 
-	// Manejador para editar una nota
-	const handleEditNote = useCallback(
-		(id: string) => {
-			selectNote(id);
-			openEditModal();
+	const { mutate: remove, isPending: isDeleting } = useMutation({
+		mutationFn: (id: string) => deleteNote(id),
+		onSuccess: (_data, id) => {
+			toast({ title: 'Nota Eliminada', description: `La nota ha sido eliminada.` });
+			return invalidateNotesCache();
 		},
-		[selectNote, openEditModal]
-	);
-
-	// Manejador para confirmar eliminación
-	const handleConfirmDelete = useCallback(
-		(id: string) => {
-			selectNote(id);
-			openDeleteDialog();
+		onError: (error) => {
+			toast({
+				variant: 'destructive',
+				title: 'Error al Eliminar',
+				description: error.message,
+			});
 		},
-		[selectNote, openDeleteDialog]
-	);
-
-	// Manejador para eliminación de múltiples notas
-	const handleBulkDelete = useCallback(async () => {
-		// Eliminar todas las notas seleccionadas
-		const deletePromises = selectedNoteIds.map((id) => deleteNote(id));
-		await Promise.all(deletePromises);
-		clearSelection();
-	}, [selectedNoteIds, deleteNote, clearSelection]);
+	});
 
 	return {
-		// Estado
-		notes,
-		loading,
-		error,
-		filters,
-		sortBy,
-		page,
-		pageSize,
-		selectedNote,
-		selectedNoteId,
-		selectedNotes,
-		selectedNoteIds,
-		isMultiSelectMode,
-		isCreateModalOpen,
-		isEditModalOpen,
-		isDeleteDialogOpen,
-		isDetailsDrawerOpen,
-		viewMode,
-
-		// Acciones básicas
-		fetchNotes,
-		createNote,
-		updateNote,
-		deleteNote,
-
-		// Filtros
-		setFilters: handleFilterChange,
-		setSortBy,
-		setPage,
-		setPageSize,
-		resetFilters,
-
-		// Selección
-		selectNote,
-		unselectNote,
-		toggleMultiSelectMode,
-		toggleNoteSelection,
-		selectAllNotes,
-		clearSelection,
-
-		// UI - Modales y drawers
-		openCreateModal,
-		closeCreateModal,
-		openEditModal,
-		closeEditModal,
-		openDeleteDialog,
-		closeDeleteDialog,
-		openDetailsDrawer,
-		closeDetailsDrawer,
-
-		// UI - Vista
-		setViewMode: handleViewModeChange,
-
-		// Acciones compuestas
-		handleNoteSelect,
-		handleViewNoteDetails,
-		handleEditNote,
-		handleConfirmDelete,
-		handleBulkDelete,
+		create,
+		isCreating,
+		update,
+		isUpdating,
+		remove,
+		isDeleting,
 	};
-};
+}

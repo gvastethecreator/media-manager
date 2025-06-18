@@ -1,15 +1,16 @@
 /**
- * @file Re-exportaciones para entidad Favorite
+ * @file Re-exportaciones para la entidad Favorite
  * @module types/entities/favorite
- *
- * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types' y extendidos desde './extended'.
- * Legacy eliminado.
+ * @description Exporta únicamente los tipos canónicos y validados para la entidad Favorite.
+ * No se deben exportar tipos legacy o específicos de UI desde aquí.
  */
 
-export * from './extended';
 export type {
-    FavoriteBase, FavoriteCreateInput, FavoriteEntityType,
-    FavoriteExtended, FavoriteRelations, FavoriteStats, FavoriteUpdateInput, FavoritesByType
+    CreateFavoriteData, FavoriteBase,
+    FavoriteComplete,
+    FavoriteCreateInput,
+    FavoriteRelations
 } from './types';
 
-// 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.
+export { FavoriteEntityType } from './types';
+

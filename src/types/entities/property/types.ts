@@ -9,6 +9,30 @@
 import { z } from 'zod';
 
 /**
+ * Criterios de ordenación para propiedades
+ */
+export enum PropertySortCriteria {
+    NAME_ASC = 'name:asc',
+    NAME_DESC = 'name:desc',
+    USAGE_ASC = 'usage:asc',
+    USAGE_DESC = 'usage:desc',
+    CREATED_ASC = 'createdAt:asc',
+    CREATED_DESC = 'createdAt:desc',
+    UPDATED_ASC = 'updatedAt:asc',
+    UPDATED_DESC = 'updatedAt:desc',
+}
+
+/**
+ * Modos de visualización para propiedades
+ */
+export enum PropertyViewMode {
+    GRID = 'grid',
+    LIST = 'list',
+    DETAIL = 'detail',
+    COMPACT = 'compact',
+}
+
+/**
  * Tipo base canónico para Property
  */
 export interface PropertyBase {
@@ -60,6 +84,29 @@ export const PropertySchema = z.object({
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
+
+/**
+ * Relaciones de la propiedad con otras entidades
+ */
+export interface PropertyRelations {
+	images?: { id: string }[];
+	videos?: { id: string }[];
+	albums?: { id: string }[];
+	collections?: { id: string }[];
+	characters?: { id: string }[];
+	places?: { id: string }[];
+	worldItems?: { id: string }[];
+	concepts?: { id: string }[];
+	prompts?: { id: string }[];
+	notes?: { id: string }[];
+	wildcards?: { id: string }[];
+	groups?: { id: string }[];
+}
+
+/**
+ * Property con sus relaciones
+ */
+export interface PropertyWithRelations extends PropertyBase, PropertyRelations {}
 
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
