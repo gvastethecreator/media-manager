@@ -2,8 +2,7 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { Place } from '@/types/entities/place';
-import type { PlaceDanger, PlaceResource } from '@/types/entities/place/types';
+import type { Place, PlaceDanger, PlaceResource } from '@/types/entities/place';
 
 // Logger específico para acciones de PlaceCard
 const placeCardLogger = serverLogger.withContext('PlaceCardActions');

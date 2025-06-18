@@ -5,12 +5,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { PropertyBase, PropertyWithRelations } from '@/types/entities/property';
-import { PropertySchema } from '@/types/entities/property/schema';
+import { PropertySchema } from '@/types/entities/property';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma, Property } from '@prisma/client';
 
 // Logger específico para este módulo
-const logger = serverLogger.child({ module: 'PropertyTransformer:Serializers' });
+const logger = serverLogger.withContext('PropertyTransformer:Serializers');
 
 // Constantes para valores por defecto
 export const DEFAULT_PROPERTY_EMOJI = '🔍';
@@ -48,7 +48,7 @@ export function validateProperty(property: Partial<PropertyBase>): PropertyBase 
  * @param category Categoría de la propiedad
  * @returns Emoji adecuado para la propiedad
  */
-export function generatePropertyEmoji(name: string, category?: string): string {
+export function generatePropertyEmoji(name: string, category?: string | null): string {
 	// Normalizar nombre y categoría para búsqueda
 	const normalizedName = name.toLowerCase();
 	const normalizedCategory = category?.toLowerCase() || '';
@@ -260,18 +260,18 @@ export function extendProperty<T extends PropertyBase>(
 		...property,
 		_ui: {
 			lastUpdated: property.updatedAt,
-			itemCount: calculateItemCount(property as any),
+			itemCount: 0, // Se requeriría acceso al campo _count para un valor real
 		},
 	};
 }
 
 /**
- * Extiende un array de propiedades con datos de interfaz de usuario
- * @param properties Propiedades a extender
- * @returns Propiedades extendidas
+ * Extiende múltiples propiedades con datos de interfaz de usuario
+ * @param properties Lista de propiedades
+ * @returns Lista de propiedades con datos UI
  */
 export function extendProperties(properties: PropertyBase[]): Array<ReturnType<typeof extendProperty>> {
-	return properties.map(extendProperty);
+	return properties.map((property) => extendProperty(property));
 }
 
 /**
