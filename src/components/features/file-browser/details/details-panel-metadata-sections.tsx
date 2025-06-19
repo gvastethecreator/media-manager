@@ -1,10 +1,10 @@
 'use client';
 
-import { Calendar, Camera, Copy, CopyCheck, ImageIcon, Info, MapPin } from 'lucide-react';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBytes } from '@/lib/utils/format.utils';
+import { Calendar, Camera, Copy, CopyCheck, ImageIcon, Info, MapPin } from 'lucide-react';
+import { useState } from 'react';
 import { InfoItem } from './details-panel-info-item';
 import type { InfoItemData, MetadataComponentProps } from './details-panel-types';
 
@@ -36,26 +36,31 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 	const infoItems: (InfoItemData | null)[] = [
 		{
 			label: 'Creador',
-			value: xmp.creator,
+			value: String(xmp.creator || ''),
 			icon: <Info className="h-3.5 w-3.5 text-blue-500" />,
 			condition: !!xmp.creator,
 		},
-		{ label: 'Título', value: xmp.title, icon: <Info className="h-3.5 w-3.5 text-blue-500" />, condition: !!xmp.title },
+		{
+			label: 'Título',
+			value: String(xmp.title || ''),
+			icon: <Info className="h-3.5 w-3.5 text-blue-500" />,
+			condition: !!xmp.title
+		},
 		{
 			label: 'Descripción',
-			value: xmp.description,
+			value: String(xmp.description || ''),
 			icon: <Info className="h-3.5 w-3.5 text-blue-500" />,
 			condition: !!xmp.description,
 		},
 		{
 			label: 'Derechos',
-			value: xmp.rights,
+			value: String(xmp.rights || ''),
 			icon: <Copy className="h-3.5 w-3.5 text-red-500" />,
 			condition: !!xmp.rights,
 		},
 		{
 			label: 'Toolkit',
-			value: xmp.toolkit,
+			value: String(xmp.toolkit || ''),
 			icon: <Info className="h-3.5 w-3.5 text-purple-500" />,
 			condition: !!xmp.toolkit,
 		},
@@ -424,27 +429,27 @@ export function TechnicalInfo({ metadata }: MetadataComponentProps) {
 		},
 		{
 			label: 'Perfil de color',
-			value: metadata.colorProfile,
+			value: (metadata as any).colorProfile || null,
 			icon: <Info className="h-3.5 w-3.5" />,
-			condition: !!metadata.colorProfile,
+			condition: !!(metadata as any).colorProfile,
 		},
 		{
 			label: 'Canal Alfa',
-			value: metadata.hasAlpha === undefined ? null : metadata.hasAlpha ? 'Sí' : 'No',
+			value: (metadata as any).hasAlpha === undefined ? null : (metadata as any).hasAlpha ? 'Sí' : 'No',
 			icon: <Info className="h-3.5 w-3.5" />,
-			condition: metadata.hasAlpha !== undefined,
+			condition: (metadata as any).hasAlpha !== undefined,
 		},
 		{
 			label: 'Orientación',
-			value: metadata.orientation,
+			value: (metadata as any).orientation || null,
 			icon: <Info className="h-3.5 w-3.5" />,
-			condition: !!metadata.orientation,
+			condition: !!(metadata as any).orientation,
 		},
 		{
 			label: 'Densidad',
-			value: metadata.density ? `${metadata.density} dpi` : null,
+			value: (metadata as any).density ? `${(metadata as any).density} dpi` : null,
 			icon: <Info className="h-3.5 w-3.5" />,
-			condition: !!metadata.density,
+			condition: !!(metadata as any).density,
 		},
 	];
 

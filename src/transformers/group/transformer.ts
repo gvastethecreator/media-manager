@@ -121,13 +121,13 @@ export function transformGroupToWithStats(group: Group | GroupComplete): GroupWi
 		// Primero asegurar que tenemos un GroupComplete
 		const groupComplete = '_count' in group ? group : transformGroup(group);
 
-		// Calcular estadísticas
+		// Calcular estadísticas (solo usando propiedades disponibles en _count según Prisma)
 		const totalImages = groupComplete._count?.images || 0;
-		const totalVideos = groupComplete._count?.videos || 0;
-		const totalAlbums = groupComplete._count?.albums || 0;
+		const totalVideos = 0; // ❌ ELIMINADO - videos no existe en _count de Group
+		const totalAlbums = 0; // ❌ ELIMINADO - albums no existe en _count de Group
 		const totalCollections = groupComplete._count?.collections || 0;
 		const totalTags = groupComplete._count?.tags || 0;
-		const totalCharacters = groupComplete._count?.characters || 0;
+		const totalCharacters = 0; // ❌ ELIMINADO - characters no existe en _count de Group
 		const totalPlaces = groupComplete._count?.places || 0;
 		const totalWorldItems = groupComplete._count?.worldItems || 0;
 		const totalConcepts = groupComplete._count?.concepts || 0;
@@ -138,11 +138,11 @@ export function transformGroupToWithStats(group: Group | GroupComplete): GroupWi
 
 		const totalItems =
 			totalImages +
-			totalVideos +
-			totalAlbums +
+			// totalVideos + // ❌ ELIMINADO - No incluir en total
+			// totalAlbums + // ❌ ELIMINADO - No incluir en total
 			totalCollections +
 			totalTags +
-			totalCharacters +
+			// totalCharacters + // ❌ ELIMINADO - No incluir en total
 			totalPlaces +
 			totalWorldItems +
 			totalConcepts +

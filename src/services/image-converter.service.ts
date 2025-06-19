@@ -139,9 +139,9 @@ export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
 			height: image.height ?? 0,
 			metadata: image.metadata,
 			thumbnail,
-			thumbnailSize: image.thumbnailSize,
-			thumbnailWidth: image.thumbnailWidth,
-			thumbnailHeight: image.thumbnailHeight,
+			thumbnailSize: image.thumbnailSize ?? undefined,
+			thumbnailWidth: image.thumbnailWidth ?? undefined,
+			thumbnailHeight: image.thumbnailHeight ?? undefined,
 			thumbnailError: null,
 			thumbnailErrorAt: null,
 			thumbnailOptimizedAt: null,
@@ -163,7 +163,8 @@ export const convertServerImageToFileItem = (image: ServerImage): FileItem => {
 			properties: image.properties ?? [],
 			wildcards: image.wildcards ?? [],
 			hash: '',
-			stats: null,
+			src: image.path,
+			stats: undefined,
 		};
 	} catch (error) {
 		converterLogger.error('❌ Error al convertir imagen del servidor:', { error, image });

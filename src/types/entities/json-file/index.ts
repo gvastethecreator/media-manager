@@ -5,6 +5,7 @@
 
 // Exportar el esquema de validación
 export { jsonFileSchema } from './json-file.schema';
+
 // Exportar los tipos principales
 export type {
     JsonFileBase,
@@ -12,4 +13,7 @@ export type {
     JsonFileCreateInput,
     JsonFileUpdateInput
 } from './types';
+
+// Alias para retrocompatibilidad
+export type { JsonFileComplete as JsonFile } from './types';
 

@@ -3,11 +3,11 @@
  * @module transformers/prompt/transformer
  */
 
-import type { Prompt } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { PromptBase, PromptComplete, PromptWithRelations } from '@/types/entities/prompt';
 import { PromptSchema } from '@/types/entities/prompt/schema';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prompt } from '@prisma/client';
 import { deserializeParameters, deserializeTags, toExtendedPrompt } from './serializers';
 
 const logger = serverLogger.withContext('PromptTransformer');
@@ -149,17 +149,17 @@ export function transformPromptToWithStats<T extends Partial<PromptComplete> | P
 		// Primero transformamos a PromptComplete
 		const promptComplete = transformPrompt(prompt, { includeRelations: true });
 
-		// Calculamos estadísticas
+		// Calculamos estadísticas (solo usando propiedades disponibles en _count según Prisma)
 		return {
 			...promptComplete,
 			stats: {
 				imageCount: promptComplete._count?.images ?? 0,
-				videoCount: promptComplete._count?.videos ?? 0,
-				albumCount: promptComplete._count?.albums ?? 0,
-				tagCount: promptComplete._count?.tagEntities ?? 0,
+				videoCount: 0, // ❌ ELIMINADO - videos no existe en _count de Prompt
+				albumCount: 0, // ❌ ELIMINADO - albums no existe en _count de Prompt
+				tagCount: promptComplete._count?.tags ?? 0,
 				noteCount: promptComplete._count?.notes ?? 0,
 				conceptCount: promptComplete._count?.concepts ?? 0,
-				characterCount: promptComplete._count?.characters ?? 0,
+				characterCount: 0, // ❌ ELIMINADO - characters no existe en _count de Prompt
 				placeCount: promptComplete._count?.places ?? 0,
 				worldItemCount: promptComplete._count?.worldItems ?? 0,
 				wildcardCount: promptComplete._count?.wildcards ?? 0,
@@ -183,12 +183,13 @@ export function transformPromptToWithStats<T extends Partial<PromptComplete> | P
  * @returns Valor de importancia (1-5)
  */
 function calculateImportance(prompt: PromptComplete): number {
-	// Implementación simple
+	// Implementación simple usando solo propiedades disponibles en _count
 	const relationsCount =
 		(prompt._count?.images ?? 0) +
-		(prompt._count?.videos ?? 0) +
+		// (prompt._count?.videos ?? 0) + // ❌ ELIMINADO - No existe en _count de Prompt
 		(prompt._count?.concepts ?? 0) +
-		(prompt._count?.characters ?? 0);
+		// (prompt._count?.characters ?? 0); // ❌ ELIMINADO - No existe en _count de Prompt
+		(prompt._count?.notes ?? 0);
 
 	if (relationsCount > 50) return 5;
 	if (relationsCount > 20) return 4;
@@ -203,14 +204,17 @@ function calculateImportance(prompt: PromptComplete): number {
  * @returns Total de elementos de contenido
  */
 function calculateTotalContent(prompt: PromptComplete): number {
+	// Solo usar propiedades que realmente existen en _count según el esquema Prisma
 	return (
 		(prompt._count?.images ?? 0) +
-		(prompt._count?.videos ?? 0) +
+		// (prompt._count?.videos ?? 0) + // ❌ ELIMINADO - No existe en _count de Prompt
 		(prompt._count?.concepts ?? 0) +
 		(prompt._count?.notes ?? 0) +
-		(prompt._count?.characters ?? 0) +
+		// (prompt._count?.characters ?? 0) + // ❌ ELIMINADO - No existe en _count de Prompt
 		(prompt._count?.places ?? 0) +
-		(prompt._count?.worldItems ?? 0)
+		(prompt._count?.worldItems ?? 0) +
+		(prompt._count?.tags ?? 0) + // ✅ Agregar tags que sí existe
+		(prompt._count?.wildcards ?? 0) // ✅ Agregar wildcards que sí existe
 	);
 }
 

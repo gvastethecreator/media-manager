@@ -6,14 +6,38 @@
  * @updated 2025-06-20
  */
 
-import type { WorldItem as PrismaWorldItem } from '@prisma/client';
 import type { ImageComplete as Image } from '../image/types';
 import type { WorldItemRelationshipType, WorldItemSortCriteria, WorldItemViewMode } from './enums';
 
 /**
- * 📝 Tipo base para WorldItem - hereda directamente del tipo Prisma
+ * 📝 Tipo base canónico para WorldItem - CORREGIDO para coincidir exactamente con Prisma
  */
-export type WorldItemBase = PrismaWorldItem;
+export interface WorldItemBase {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	sortBy: string;
+	filters: string;
+	// Atributos del objeto
+	type: string;
+	rarity: string;
+	attributes: string; // JSON serializado
+	effects: string; // JSON serializado
+	size: string;
+	// Características detalladas
+	requirements: string;
+	origin: string;
+	stats: string;
+	// Propiedades de visualización
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 /**
  * 🔧 Interfaces para estructuras de datos serializadas

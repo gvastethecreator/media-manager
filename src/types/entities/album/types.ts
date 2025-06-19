@@ -35,8 +35,7 @@ export interface AlbumBase {
 	isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-	// Propiedades de jerarquía
-	parentId?: string | null;
+	// ELIMINADO: parentId no existe en el modelo Album de Prisma
 	// Metadatos opcionales
 	metadata?: AlbumMetadata;
 }

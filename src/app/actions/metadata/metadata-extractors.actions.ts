@@ -2,7 +2,7 @@
 
 import { CacheManager } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { AIMetadata, FileMetadata, MediaMetadata } from '@/types/metadata.types';
+import type { AIMetadata, MediaMetadata } from '@/types/metadata.types';
 import { type Stats } from 'fs';
 import * as fs from 'fs/promises';
 import sharp from 'sharp';
@@ -12,7 +12,7 @@ import { METADATA_RETRY_CONFIG, type MetadataOptions } from './metadata-types.ac
 import { getImageFormat, isSupportedImageFormat, withRetry } from './metadata-utils.actions';
 
 const extractorLogger = serverLogger.withContext('MetadataExtractors');
-const metadataCache = new CacheManager<FileMetadata>({
+const metadataCache = new CacheManager<MediaMetadata>({
 	name: 'metadata',
 	ttl: 60 * 60 * 1000, // 1 hora
 	maxSize: 100,
@@ -58,7 +58,7 @@ const normalizePathForCache = (path: string): string => {
 /**
  * Extrae metadatos de un archivo
  */
-export async function extractMetadata(path: string, options?: MetadataOptions): Promise<FileMetadata> {
+export async function extractMetadata(path: string, options?: MetadataOptions): Promise<MediaMetadata> {
 	extractorLogger.info('Extrayendo metadatos de:', path);
 	const normalizedPath = normalizePathForCache(path);
 
@@ -82,8 +82,8 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 		accessed: stats.atime.toISOString(),
 	};
 
-	// Inicializar con valores por defecto requeridos por FileMetadata
-	const metadata: Partial<FileMetadata> = {
+	// Inicializar con valores por defecto requeridos por MediaMetadata
+	const metadata: Partial<MediaMetadata> = {
 		totalSize: Number(stats.size),
 		itemCount: 1,
 		lastModified: stats.mtime,
@@ -135,13 +135,12 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	if (!metadata.width) metadata.width = 800;
 	if (!metadata.height) metadata.height = 600;
 
-	// Convertir a MediaMetadata para poder agregar los campos especializados
-	const mediaMetadata: Partial<MediaMetadata> = { ...metadata };
+	// Los metadatos ya son MediaMetadata, no necesitamos conversión
 
 	if (!options?.skipExif) {
 		try {
 			const exifData = await parseExifData(buffer, path);
-			mediaMetadata.exif = exifData;
+			metadata.exif = exifData;
 		} catch (error) {
 			extractorLogger.warn('No se pudieron extraer metadatos EXIF', { path });
 		}
@@ -150,7 +149,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	if (!options?.skipIptc) {
 		try {
 			// Los metadatos IPTC se extraerán del buffer usando sharp si están disponibles
-			mediaMetadata.iptc = {};
+			metadata.iptc = {};
 		} catch (error) {
 			extractorLogger.warn('No se pudieron extraer metadatos IPTC', { path });
 		}
@@ -159,18 +158,18 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	if (!options?.skipXmp) {
 		try {
 			// Los metadatos XMP se extraerán del buffer usando sharp si están disponibles
-			mediaMetadata.xmp = {};
+			metadata.xmp = {};
 		} catch (error) {
 			extractorLogger.warn('No se pudieron extraer metadatos XMP', { path });
 		}
 	}
 
 	// Obtener metadatos de IA
-	const aiMetadata: AIMetadata = getAIGenerationInfo(mediaMetadata as MediaMetadata);
-	mediaMetadata.ai = aiMetadata;
+	const aiMetadata: AIMetadata = getAIGenerationInfo(metadata as Record<string, unknown>);
+	metadata.ai = aiMetadata;
 
-	// Asegurar que el resultado sea compatible con FileMetadata
-	const finalMetadata = mediaMetadata as FileMetadata;
+	// El resultado ya es MediaMetadata
+	const finalMetadata = metadata as MediaMetadata;
 
 	await metadataCache.set(normalizedPath, finalMetadata);
 	return finalMetadata;

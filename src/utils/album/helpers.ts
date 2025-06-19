@@ -74,9 +74,11 @@ export function isAlbumEmpty(album: Album): boolean {
  * Determina si un álbum tiene sub-álbumes
  * @param album Álbum a verificar
  * @returns true si tiene sub-álbumes
+ * @deprecated Album no tiene jerarquía en el modelo actual
  */
 export function hasSubAlbums(album: Album): boolean {
-	return !!album.children && album.children.length > 0;
+	// TODO: Album no tiene relación parent/children en el modelo actual
+	return false;
 }
 
 /**
@@ -84,21 +86,11 @@ export function hasSubAlbums(album: Album): boolean {
  * @param album Álbum actual
  * @param allAlbums Todos los álbumes disponibles
  * @returns Array con la ruta jerárquica completa
+ * @deprecated Album no tiene jerarquía en el modelo actual
  */
 export function getAlbumPath(album: Album, allAlbums: Record<string, Album>): Album[] {
-	const path: Album[] = [album];
-	let currentAlbum = album;
-
-	// Recorrer hacia arriba en la jerarquía
-	while (currentAlbum.parentId) {
-		const parentAlbum = allAlbums[currentAlbum.parentId];
-		if (!parentAlbum) break;
-
-		path.unshift(parentAlbum);
-		currentAlbum = parentAlbum;
-	}
-
-	return path;
+	// TODO: Album no tiene relación parent/children en el modelo actual
+	return [album];
 }
 
 /**
@@ -115,23 +107,11 @@ export function formatAlbumBreadcrumb(albumPath: Album[]): string {
  * @param albumId ID del álbum
  * @param allAlbums Todos los álbumes disponibles
  * @returns Array con todos los álbumes descendientes
+ * @deprecated Album no tiene jerarquía en el modelo actual
  */
 export function getAllDescendants(albumId: string, allAlbums: Record<string, Album>): Album[] {
-	const result: Album[] = [];
-	const albums = Object.values(allAlbums);
-
-	// Función recursiva para encontrar descendientes
-	function findChildren(id: string) {
-		const children = albums.filter((album) => album.parentId === id);
-
-		for (const child of children) {
-			result.push(child);
-			findChildren(child.id);
-		}
-	}
-
-	findChildren(albumId);
-	return result;
+	// TODO: Album no tiene relación parent/children en el modelo actual
+	return [];
 }
 
 /**
@@ -152,9 +132,9 @@ export function calculateAlbumStats(albums: Album[]): {
 	let emptyAlbums = 0;
 
 	for (const album of albums) {
-		if (!album.parentId) {
-			rootAlbums++;
-		}
+		// TODO: Album no tiene parentId en el modelo actual
+		// Todos los albums son considerados root por ahora
+		rootAlbums++;
 
 		if (isAlbumEmpty(album)) {
 			emptyAlbums++;

@@ -4,10 +4,10 @@
  * @description Contiene la lógica para convertir un objeto Tag de Prisma a nuestro tipo canónico.
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { TagWithRelations } from '@/types/entities/tag';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('TagTransformer');
 
@@ -15,10 +15,10 @@ const logger = serverLogger.withContext('TagTransformer');
 type TagFromPrisma = Prisma.TagGetPayload<{
 	include: {
 		images: true;
-		videos: true;
-		albums: true;
+		// videos: true; // ❌ ELIMINADO - No existe relación Tag-Video en Prisma
+		// albums: true; // ❌ ELIMINADO - No existe relación Tag-Album en Prisma
 		collections: true;
-		characters: true;
+		// characters: true; // ❌ ELIMINADO - No existe relación Tag-Character en Prisma
 		places: true;
 		worldItems: true;
 		concepts: true;
@@ -30,10 +30,10 @@ type TagFromPrisma = Prisma.TagGetPayload<{
 		_count: {
 			select: {
 				images: true;
-				videos: true;
-				albums: true;
+				// videos: true; // ❌ ELIMINADO - No existe relación Tag-Video en Prisma
+				// albums: true; // ❌ ELIMINADO - No existe relación Tag-Album en Prisma
 				collections: true;
-				characters: true;
+				// characters: true; // ❌ ELIMINADO - No existe relación Tag-Character en Prisma
 				places: true;
 				worldItems: true;
 				concepts: true;
@@ -60,15 +60,15 @@ export function fromPrismaTag(prismaTag: TagFromPrisma | null): TagWithRelations
 	}
 
 	try {
-		const { _count, ...baseData } = prismaTag;
+		const { _count, sortBy, filters, ...baseData } = prismaTag;
 
 		return {
 			...baseData,
 			images: baseData.images ?? [],
-			videos: baseData.videos ?? [],
-			albums: baseData.albums ?? [],
+			// videos: baseData.videos ?? [], // ❌ ELIMINADO - No existe relación Tag-Video en Prisma
+			// albums: baseData.albums ?? [], // ❌ ELIMINADO - No existe relación Tag-Album en Prisma
 			collections: baseData.collections ?? [],
-			characters: baseData.characters ?? [],
+			// characters: baseData.characters ?? [], // ❌ ELIMINADO - No existe relación Tag-Character en Prisma
 			places: baseData.places ?? [],
 			worldItems: baseData.worldItems ?? [],
 			concepts: baseData.concepts ?? [],
@@ -79,10 +79,10 @@ export function fromPrismaTag(prismaTag: TagFromPrisma | null): TagWithRelations
 			groups: baseData.groups ?? [],
 			_count: {
 				images: _count?.images ?? 0,
-				videos: _count?.videos ?? 0,
-				albums: _count?.albums ?? 0,
+				// videos: _count?.videos ?? 0, // ❌ ELIMINADO - No existe en esquema Prisma Tag
+				// albums: _count?.albums ?? 0, // ❌ ELIMINADO - No existe en esquema Prisma Tag
 				collections: _count?.collections ?? 0,
-				characters: _count?.characters ?? 0,
+				// characters: _count?.characters ?? 0, // ❌ ELIMINADO - No existe en esquema Prisma Tag
 				places: _count?.places ?? 0,
 				worldItems: _count?.worldItems ?? 0,
 				concepts: _count?.concepts ?? 0,

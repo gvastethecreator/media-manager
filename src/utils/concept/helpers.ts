@@ -97,7 +97,6 @@ export function calculateConceptsStats(concepts: ConceptBase[]): {
 				}
 
 				if (
-					(count?.characters && count.characters > 0) ||
 					(count?.places && count.places > 0) ||
 					(count?.worldItems && count.worldItems > 0) ||
 					(count?.notes && count.notes > 0) ||

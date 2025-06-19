@@ -117,13 +117,11 @@ export function fromPrismaAlbum(prismaAlbum: AlbumComplete): AlbumComplete {
 			return 0;
 		};
 
-		// 🛡️ Garantizar estructura de conteos con fallbacks seguros
+		// 🛡️ Garantizar estructura de conteos con fallbacks seguros (solo relaciones existentes)
 		const safeCounts = {
 			images: getSafeCount((countsData as any)?.images),
-			videos: getSafeCount((countsData as any)?.videos),
 			collections: getSafeCount((countsData as any)?.collections),
 			tags: getSafeCount((countsData as any)?.tags),
-			characters: getSafeCount((countsData as any)?.characters),
 			places: getSafeCount((countsData as any)?.places),
 			worldItems: getSafeCount((countsData as any)?.worldItems),
 			concepts: getSafeCount((countsData as any)?.concepts),
@@ -250,7 +248,6 @@ export function fromPrismaAlbum(prismaAlbum: AlbumComplete): AlbumComplete {
 			videos: safeMapRelation(prismaAlbum.videos, 'videos'),
 			collections: safeMapRelation(prismaAlbum.collections, 'collections'),
 			tags: safeMapRelation(prismaAlbum.tags, 'tags'),
-			characters: safeMapRelation(prismaAlbum.characters, 'characters'),
 			places: safeMapRelation(prismaAlbum.places, 'places'),
 			worldItems: safeMapRelation(prismaAlbum.worldItems, 'worldItems'),
 			concepts: safeMapRelation(prismaAlbum.concepts, 'concepts'),

@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import { type BaseEntity, BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
+import { z } from 'zod';
 
 /**
  * 🔍 Esquema de validación para Image
@@ -40,8 +40,7 @@ export interface ImageBase extends BaseEntity {
 	isFavorite: boolean;
 	folderId: string | null; // Debe ser null si no hay folder
 	addedAt: Date;
-	sortBy: string;
-	filters: string;
+	// ELIMINADO: sortBy y filters no existen en el modelo Image de Prisma
 }
 
 /**
@@ -193,13 +192,14 @@ export interface ImageMetadata {
 
 /**
  * 📊 Estadísticas básicas de la imagen
+ * NOTA: Campo downloads eliminado - no existe en el esquema Prisma ImageStats
  */
 export interface ImageStatsBase {
 	id: string;
 	imageId: string;
 	views: number;
 	likes: number;
-	downloads: number;
+	// downloads: number; // ❌ ELIMINADO - No existe en esquema Prisma
 }
 
 /**

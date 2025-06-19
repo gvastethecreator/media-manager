@@ -257,10 +257,38 @@ function imageToFileItem(image: ImageComplete): FileItem {
 		name: image.name || 'Untitled',
 		type: 'image',
 		path: image.path,
-		createdAt: image.createdAt,
-		updatedAt: image.updatedAt,
-		tags: image.tags?.map(t => ({ id: t.id, name: t.name, color: t.color || '#94a3b8' })) || [],
-		isFavorite: image.isFavorite,
-		// Añadir más propiedades si es necesario
+		size: image.size || 0,
+		width: image.width || 0,
+		height: image.height || 0,
+		metadata: image.metadata || '',
+		thumbnail: image.thumbnail || null,
+		thumbnailSize: image.thumbnailSize || undefined,
+		thumbnailWidth: image.thumbnailWidth || undefined,
+		thumbnailHeight: image.thumbnailHeight || undefined,
+		thumbnailError: image.thumbnailError || null,
+		thumbnailErrorAt: image.thumbnailErrorAt || null,
+		thumbnailOptimizedAt: image.thumbnailOptimizedAt || null,
+		isPublic: false, // TODO: Implementar isPublic si es necesario
+		isFavorite: image.isFavorite || false,
+		folderId: image.folderId,
+		createdAt: image.addedAt, // ImageBase usa addedAt en lugar de createdAt
+		updatedAt: image.addedAt, // TODO: Implementar updatedAt en ImageBase si es necesario
+		modifiedAt: image.addedAt, // Usar addedAt como modifiedAt
+		accessedAt: image.addedAt, // Usar addedAt como accessedAt
+		hash: image.hash || '',
+		src: image.path, // Usar path como src
+		// Las relaciones en ImageComplete son solo { id: string }[], no tienen name/color
+		// Por ahora retornamos arrays vacíos hasta que se implemente correctamente
+		collections: [],
+		tags: [],
+		places: [],
+		worldItems: [],
+		concepts: [],
+		prompts: [],
+		notes: [],
+		groups: [],
+		properties: [],
+		wildcards: [],
+		stats: undefined, // TODO: Implementar stats
 	};
 }
