@@ -12,7 +12,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useTagStore } from '@/store/entities/tag';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import type { ContextMenuAction, LoadingStates } from '../types';
 
 // Logger para el componente

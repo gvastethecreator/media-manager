@@ -14,7 +14,7 @@ import {
 	WandSparkles,
 } from 'lucide-react';
 import type { CategoryItem } from '@/components/navigation/types';
-import type { ViewType } from '@/types/file-item';
+import type { ViewType } from '@/types/files';
 
 /**
  * Definición de las categorías principales del panel de navegación

@@ -1,4 +1,4 @@
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import type { ImageItem } from '@/types/image-item';
 import type { FileMetadata } from '@/types/metadata.types';
 import type * as React from 'react';

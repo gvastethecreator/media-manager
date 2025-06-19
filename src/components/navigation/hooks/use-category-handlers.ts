@@ -13,7 +13,7 @@ import { usePropertyStore } from '@/store/entities/property';
 import { useTagStore } from '@/store/entities/tag';
 import { useWildcardStore } from '@/store/entities/wildcard';
 import { useWorldItemStore } from '@/store/entities/world-item';
-import type { ViewType } from '@/types/file-item';
+import type { ViewType } from '@/types/files';
 
 /**
  * Hook que proporciona manejadores para las interacciones con categorías

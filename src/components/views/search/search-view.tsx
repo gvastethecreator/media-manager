@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFileStore } from '@/store/entities/file';
 import { useImageViewer } from '@/store/image-viewer.store';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import type { ViewProps } from '../types';
 
 interface SearchFilters {
