@@ -13,7 +13,7 @@ type ToastProps = React.ComponentProps<'div'> &
 		onOpenChange?: (open: boolean) => void;
 	};
 
-interface ToastActionElement extends React.ReactElement { }
+interface ToastActionElement extends React.ReactElement {}
 
 // Provider y context
 type ToastContextValue = {
@@ -75,7 +75,9 @@ const ToastProvider = React.forwardRef<HTMLDivElement, React.PropsWithChildren<R
 			};
 		};
 
-		return <ToastContext.Provider value={{ toasts, toast, dismiss }}>{children as React.ReactNode}</ToastContext.Provider>;
+		return (
+			<ToastContext.Provider value={{ toasts, toast, dismiss }}>{children as React.ReactNode}</ToastContext.Provider>
+		);
 	}
 );
 ToastProvider.displayName = 'ToastProvider';
@@ -164,6 +166,5 @@ export {
 	ToastViewport,
 	useToast,
 	type ToastActionElement,
-	type ToastProps
+	type ToastProps,
 };
-

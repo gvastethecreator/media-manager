@@ -4,18 +4,13 @@
  */
 
 import {
-    createActivity as createActivityAction,
-    deleteActivity as deleteActivityAction,
-    getActivityById,
-    getFilteredActivities,
+	createActivity as createActivityAction,
+	deleteActivity as deleteActivityAction,
+	getActivityById,
+	getFilteredActivities,
 } from '@/app/actions/activity';
 import { extendActivities, extendActivity } from '@/transformers/activity';
-import type {
-    Activity,
-    ActivityBase,
-    ActivityFilters,
-    ActivityListResponse
-} from '@/types/entities/activity';
+import type { Activity, ActivityBase, ActivityFilters, ActivityListResponse } from '@/types/entities/activity';
 import type { StateCreator } from 'zustand';
 import type { ActivityState } from '../types';
 
@@ -39,7 +34,12 @@ export interface ActivityCoreSlice {
 	// Acciones asíncronas
 	fetchActivity: (id: string) => Promise<Activity | undefined>;
 	fetchActivities: (filters?: ActivityFilters) => Promise<ActivityListResponse | undefined>;
-	createActivity: (data: { type: string; description?: string; imageId?: string; metadata?: Record<string, any> }) => Promise<Activity | undefined>;
+	createActivity: (data: {
+		type: string;
+		description?: string;
+		imageId?: string;
+		metadata?: Record<string, any>;
+	}) => Promise<Activity | undefined>;
 	removeActivity: (id: string) => Promise<boolean>;
 }
 
@@ -176,16 +176,17 @@ export const createActivityCoreSlice: StateCreator<ActivityState, [], [], Activi
 		}
 	},
 
-	createActivity: async (data: { type: string; description?: string; imageId?: string; metadata?: Record<string, any> }) => {
+	createActivity: async (data: {
+		type: string;
+		description?: string;
+		imageId?: string;
+		metadata?: Record<string, any>;
+	}) => {
 		const { setLoading, setError, addActivity } = get();
 		try {
 			setLoading(true);
 			// Llamamos a la acción del servidor con los parámetros esperados
-			const createdActivity = await createActivityAction(
-				data.type,
-				data.metadata ?? {},
-				data.imageId
-			);
+			const createdActivity = await createActivityAction(data.type, data.metadata ?? {}, data.imageId);
 			addActivity(createdActivity);
 			return createdActivity;
 		} catch (error) {

@@ -6,18 +6,15 @@
  */
 
 import {
-    createAlbum as createServerAlbum,
-    deleteAlbum as deleteServerAlbum,
-    getAlbums,
-    updateAlbum as updateServerAlbum,
+	createAlbum as createServerAlbum,
+	deleteAlbum as deleteServerAlbum,
+	getAlbums,
+	updateAlbum as updateServerAlbum,
 } from '@/app/actions/albums/album.actions';
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import {
-    AlbumSortCriteria,
-    AlbumViewMode
-} from '@/types/entities/album';
+import { AlbumSortCriteria, AlbumViewMode } from '@/types/entities/album';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { AlbumStore } from './types';
@@ -168,8 +165,7 @@ export const useAlbumStore = create<AlbumStore>()(
 			},
 
 			// 🔍 Filtros
-			updateFilters: (newFilters) =>
-				set((state) => ({ filters: { ...state.filters, ...newFilters } })),
+			updateFilters: (newFilters) => set((state) => ({ filters: { ...state.filters, ...newFilters } })),
 			clearFilters: () =>
 				set({
 					filters: {

@@ -124,9 +124,7 @@ export function NotesSettings() {
 
 	// Manejar actualización exitosa
 	const handleNoteUpdated = useCallback((updatedNote: NoteComplete) => {
-		setNotes((prev) =>
-			prev.map((note) => (note.id === updatedNote.id ? { ...note, ...updatedNote } : note))
-		);
+		setNotes((prev) => prev.map((note) => (note.id === updatedNote.id ? { ...note, ...updatedNote } : note)));
 		toastService.success('Nota actualizada');
 	}, []);
 

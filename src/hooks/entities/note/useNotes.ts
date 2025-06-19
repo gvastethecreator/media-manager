@@ -37,7 +37,7 @@ export function useNotes() {
 export function useNote(noteId: string | null) {
 	const { data: notes, ...rest } = useNotes();
 
-	const note = noteId ? notes?.find((n) => n.id === noteId) ?? null : null;
+	const note = noteId ? (notes?.find((n) => n.id === noteId) ?? null) : null;
 
 	return { note, ...rest };
 }

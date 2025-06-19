@@ -5,9 +5,9 @@
 
 // Exportar los tipos principales
 export type {
-    File3DBase,
-    File3DCreateInput,
-    File3DUpdateInput
+	File3DBase,
+	File3DCreateInput,
+	File3DUpdateInput,
 } from './types';
 
 // Exportar el esquema de validación

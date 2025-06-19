@@ -99,7 +99,7 @@ export const TagsSubmenu = memo(function TagsSubmenu({
 	handleOpenChange,
 }: SubmenuProps) {
 	// Obtener las etiquetas del store
-	const tags = useTagStore((state) => Array.isArray(state.tags) ? state.tags : Object.values(state.core?.tags ?? {}));
+	const tags = useTagStore((state) => (Array.isArray(state.tags) ? state.tags : Object.values(state.core?.tags ?? {})));
 
 	// Manejar apertura del submenú
 	const handleSubMenuOpenChange = useCallback(

@@ -5,9 +5,9 @@
 
 // Exportar los tipos principales
 export type {
-    WorkflowBase,
-    WorkflowCreateInput,
-    WorkflowUpdateInput
+	WorkflowBase,
+	WorkflowCreateInput,
+	WorkflowUpdateInput,
 } from './types';
 
 // Exportar el esquema de validación

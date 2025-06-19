@@ -33,7 +33,8 @@ export interface FolderBase {
 /**
  * 📁 Input para crear una nueva carpeta.
  */
-export interface FolderCreateInput extends Omit<FolderBase, 'id' | 'createdAt' | 'updatedAt' | 'totalFiles' | 'totalSize' | 'lastIndexed'> {}
+export interface FolderCreateInput
+	extends Omit<FolderBase, 'id' | 'createdAt' | 'updatedAt' | 'totalFiles' | 'totalSize' | 'lastIndexed'> {}
 
 /**
  * 📁 Input para actualizar una carpeta existente.

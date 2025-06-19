@@ -112,7 +112,8 @@ class OperationQueue {
 }
 
 // 🎯 Estado principal del store
-interface UnifiedFileManagerState {	// 📂 Estado de items
+interface UnifiedFileManagerState {
+	// 📂 Estado de items
 	currentItems: FileItem[];
 	displayedItems: FileItem[];
 	isLoading: boolean;
@@ -249,7 +250,7 @@ const transformToFileItem = (rawItem: any): FileItem => {
 		// ✅ Validación de tipos básicos
 		if (!rawItem.id || typeof rawItem.id !== 'string') {
 			throw new Error('ID requerido y debe ser string');
-		}		// 🎯 Transformación optimizada
+		} // 🎯 Transformación optimizada
 		const fileItem: FileItem = {
 			id: rawItem.id,
 			name: rawItem.name || 'Archivo sin nombre',
@@ -272,7 +273,8 @@ const transformToFileItem = (rawItem: any): FileItem => {
 			createdAt: rawItem.createdAt instanceof Date ? rawItem.createdAt : new Date(rawItem.createdAt),
 			updatedAt: rawItem.updatedAt instanceof Date ? rawItem.updatedAt : new Date(rawItem.updatedAt),
 			modifiedAt: rawItem.modifiedAt || rawItem.updatedAt,
-			accessedAt: rawItem.accessedAt || rawItem.updatedAt,		};
+			accessedAt: rawItem.accessedAt || rawItem.updatedAt,
+		};
 
 		return fileItem;
 	} catch (error) {
@@ -286,7 +288,8 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 	...initialState,
 
 	// 🔄 Inicialización con cache
-	initialize: async () => {		try {
+	initialize: async () => {
+		try {
 			fileManagerLogger.info('🚀 Inicializando Unified File Manager');
 			set({ isLoading: true, error: null });
 
@@ -335,7 +338,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 					lastUpdate: Date.now(),
 				});
 				return;
-			}			// 🔄 Usar operation queue para evitar race conditions
+			} // 🔄 Usar operation queue para evitar race conditions
 			await state.operationQueue.add(async () => {
 				set({ isLoading: true, error: null });
 
@@ -365,7 +368,6 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 
 								fileManagerLogger.debug(`✅ Obtenidas ${rawResponse.items.length} imágenes para carpeta ${id}`);
 								fileManagerLogger.debug('� Paginación:', rawResponse.pagination);
-
 							} catch (folderError) {
 								fileManagerLogger.error(`❌ Error obteniendo imágenes de carpeta ${id}:`, folderError);
 								rawResponse = { items: [], pagination: { hasMore: false, total: 0, currentPage: 0 } };

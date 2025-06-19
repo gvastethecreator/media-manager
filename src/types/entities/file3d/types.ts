@@ -6,13 +6,13 @@
  */
 
 export interface File3DBase {
-  id: string;
-  name: string;
-  filePath: string;
-  format: string;
-  size: number;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	filePath: string;
+	format: string;
+	size: number;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export type File3DCreateInput = Omit<File3DBase, 'id' | 'createdAt' | 'updatedAt'>;

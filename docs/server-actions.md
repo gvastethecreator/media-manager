@@ -42,6 +42,57 @@ flowchart TD
     B --> R
 ```
 
+## 🚀 Patrón de Respuesta Estandarizado
+
+> **IMPORTANTE**: A partir de junio 2025, todas las Server Actions utilizan un patrón de respuesta directo sin objetos wrapper.
+
+Las Server Actions ahora **devuelven directamente** los datos transformados, sin envolverlos en objetos con propiedades `success`, `data` o `error`. Este enfoque simplifica el consumo de las respuestas y utiliza el manejo nativo de errores de JavaScript.
+
+### ✅ Patrón correcto (actual)
+
+```typescript
+// En la Server Action
+export async function getEntity(id: string): Promise<Entity | null> {
+  try {
+    const entity = await prisma.entity.findUnique({ where: { id } });
+    if (!entity) return null;
+    return fromPrismaEntity(entity);
+  } catch (error) {
+    logger.error('Error fetching entity', { error });
+    throw new Error('Failed to fetch entity');
+  }
+}
+
+// En el consumidor (store, componente, etc.)
+try {
+  const entity = await getEntity(id);
+  if (entity) {
+    // Procesar la entidad directamente
+  } else {
+    // Manejar caso de entidad no encontrada
+  }
+} catch (error) {
+  // Manejar errores de la acción
+}
+```
+
+### ❌ Patrón obsoleto (no usar)
+
+```typescript
+// NO USAR ESTE FORMATO
+export async function getEntity(id: string): Promise<{ success: boolean; data?: Entity; error?: string }> {
+  // ...
+}
+
+// Consumidor con patrón antiguo - NO USAR
+const response = await getEntity(id);
+if (response.success && response.data) {
+  // ...
+}
+```
+
+Para más información sobre la migración de código y ejemplos detallados, consulta la [Guía de Patrones de Respuesta](./server-actions-response-patterns.md).
+
 ## 📚 Módulos Documentados Completamente
 
 ### 🔴 **Core del Sistema** ✅

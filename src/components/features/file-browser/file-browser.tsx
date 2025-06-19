@@ -485,12 +485,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		const observer = new IntersectionObserver(
 			(entries) => {
 				const [entry] = entries;
-				if (
-					entry.isIntersecting &&
-					!isLoading &&
-					!isReindexing &&
-					!isRequesting
-				) {
+				if (entry.isIntersecting && !isLoading && !isReindexing && !isRequesting) {
 					logger.debug('[FileBrowser] 🔄 Trigger scroll infinito detectado');
 					isRequesting = true;
 					Promise.resolve(loadMoreItems()).finally(() => {
@@ -501,7 +496,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			},
 			{
 				threshold: 0.1, // Trigger cuando el elemento está 10% visible
-				rootMargin: '50px' // Trigger 50px antes de que sea completamente visible
+				rootMargin: '50px', // Trigger 50px antes de que sea completamente visible
 			}
 		);
 
@@ -655,35 +650,26 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 									{(!viewMode ||
 										(viewMode !== 'list' && viewMode !== 'grid' && viewMode !== 'masonry' && viewMode !== 'cards')) && (
-											<SimpleGridView
-												items={currentViewItems}
-												onItemClick={handleItemClick}
-												onItemDoubleClick={handleItemDoubleClick}
-												onContextMenu={handleContextMenu}
-											/>
-										)}
+										<SimpleGridView
+											items={currentViewItems}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											onContextMenu={handleContextMenu}
+										/>
+									)}
 								</motion.div>
 							</AnimatePresence>
 						))}
 				</div>
-			</div>			{/* Barra de estado */}
+			</div>{' '}
+			{/* Barra de estado */}
 			<StatusBar items={currentViewItems} />
-
 			{/* Elemento para scroll infinito - solo si hay función loadMoreItems */}
 			{loadMoreItems && (
-				<div
-					ref={loadMoreRef}
-					className="h-4 w-full flex items-center justify-center"
-					style={{ minHeight: '16px' }}
-				>
-					{isLoading && (
-						<div className="text-sm text-muted-foreground">
-							Cargando más elementos...
-						</div>
-					)}
+				<div ref={loadMoreRef} className="h-4 w-full flex items-center justify-center" style={{ minHeight: '16px' }}>
+					{isLoading && <div className="text-sm text-muted-foreground">Cargando más elementos...</div>}
 				</div>
 			)}
-
 			{/* Menú contextual */}
 			{contextMenu.open && <ContextMenu {...contextMenu} />}
 		</div>

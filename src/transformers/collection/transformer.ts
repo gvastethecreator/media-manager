@@ -70,9 +70,7 @@ export function fromPrismaCollection(prismaCollection: CollectionFromPrisma | nu
 			error,
 			collectionId: prismaCollection.id,
 		});
-		throw new TransformerError(
-			`Error al transformar la colección: ${(error as Error).message}`
-		);
+		throw new TransformerError(`Error al transformar la colección: ${(error as Error).message}`);
 	}
 }
 
@@ -82,8 +80,6 @@ export function fromPrismaCollection(prismaCollection: CollectionFromPrisma | nu
  * @param prismaCollections - Un array de objetos Collection de Prisma.
  * @returns Un array de objetos CollectionComplete.
  */
-export function fromPrismaCollections(
-	prismaCollections: CollectionFromPrisma[]
-): CollectionComplete[] {
+export function fromPrismaCollections(prismaCollections: CollectionFromPrisma[]): CollectionComplete[] {
 	return prismaCollections.map(fromPrismaCollection);
 }

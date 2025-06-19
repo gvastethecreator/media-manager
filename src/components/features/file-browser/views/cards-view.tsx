@@ -33,21 +33,21 @@ export const CardsView: FC<CardsViewProps> = memo(function CardsView({
 		(item: AnyEntity) => (e: React.MouseEvent) => {
 			onItemClick?.(item, e);
 		},
-		[onItemClick],
+		[onItemClick]
 	);
 
 	const handleItemDoubleClick = useCallback(
 		(item: AnyEntity) => () => {
 			onItemDoubleClick?.(item);
 		},
-		[onItemDoubleClick],
+		[onItemDoubleClick]
 	);
 
 	const handleContextMenu = useCallback(
 		(item: AnyEntity) => (e: React.MouseEvent) => {
 			onContextMenu?.(item, e);
 		},
-		[onContextMenu],
+		[onContextMenu]
 	);
 
 	return (

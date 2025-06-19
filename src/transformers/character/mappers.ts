@@ -5,10 +5,10 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    CharacterCreateInput,
-    CharacterFilters,
-    CharacterSearchOptions,
-    CharacterUpdateInput,
+	CharacterCreateInput,
+	CharacterFilters,
+	CharacterSearchOptions,
+	CharacterUpdateInput,
 } from '@/types/entities/character';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -16,9 +16,7 @@ import type { Prisma } from '@prisma/client';
 /**
  * 🔄 Mapea un `CharacterCreateInput` a un `Prisma.CharacterCreateInput`.
  */
-export function mapCreateCharacterDataToPrisma(
-	data: CharacterCreateInput
-): Prisma.CharacterCreateInput {
+export function mapCreateCharacterDataToPrisma(data: CharacterCreateInput): Prisma.CharacterCreateInput {
 	try {
 		const { imageIds, tagIds, groupIds, propertyIds, ...rest } = data;
 		const prismaData: Prisma.CharacterCreateInput = {
@@ -56,9 +54,7 @@ export function mapCreateCharacterDataToPrisma(
  * Esta función no maneja desconexiones, solo actualizaciones y conexiones.
  * La lógica de desconexión debe ser manejada en la capa de servicio si es necesario.
  */
-export function mapUpdateCharacterDataToPrisma(
-	data: CharacterUpdateInput
-): Prisma.CharacterUpdateInput {
+export function mapUpdateCharacterDataToPrisma(data: CharacterUpdateInput): Prisma.CharacterUpdateInput {
 	try {
 		const { imageIds, tagIds, groupIds, propertyIds, ...rest } = data;
 		const prismaData: Prisma.CharacterUpdateInput = { ...rest };
@@ -85,9 +81,7 @@ export function mapUpdateCharacterDataToPrisma(
 /**
  * 🔄 Mapea `CharacterSearchOptions` a `Prisma.CharacterFindManyArgs`.
  */
-export function mapCharacterSearchOptionsToPrisma(
-	options: CharacterSearchOptions
-): Prisma.CharacterFindManyArgs {
+export function mapCharacterSearchOptionsToPrisma(options: CharacterSearchOptions): Prisma.CharacterFindManyArgs {
 	const { filters, ...rest } = options;
 	return {
 		...rest,

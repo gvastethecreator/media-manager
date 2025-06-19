@@ -16,10 +16,10 @@ graph TD
     Wildcard --> Store[Store]
     Wildcard --> Actions[Actions]
 
-    Transformers --> T1[transformWildcard]
-    Transformers --> T2[transformWildcards]
-    Transformers --> T3[transformWildcardToExtended]
-    Transformers --> T4[transformWildcardToWithStats]
+    Transformers --> T1[fromPrismaWildcard]
+    Transformers --> T2[fromPrismaWildcards]
+    Transformers --> T3[extendWildcard]
+    Transformers --> T4[extendWildcards]
     Transformers --> T5[Serializers]
     Transformers --> T6[Mappers]
 
@@ -52,27 +52,34 @@ graph TD
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Actions
-    participant Service
-    participant Transformer
     participant Store
+    participant Actions
+    participant Transformer
     participant DB as Base de Datos
 
-    Client->>Actions: Solicitud de wildcards jerárquicos
+    Client->>Store: Solicitar wildcards
+    Store->>Actions: fetchWildcards()
     Actions->>DB: Consultar wildcards
     DB-->>Actions: Datos de wildcards
-    Actions->>Transformer: Transformar con deserializeChildren
+    Actions->>Transformer: fromPrismaWildcards()
     Transformer-->>Actions: Wildcards transformados
-    Actions->>Service: Construir jerarquía
-    Service-->>Actions: Jerarquía de wildcards
-    Actions-->>Client: Devolver jerarquía
-    Actions->>Store: Actualizar estado
+    Actions-->>Store: Devolver wildcards
+    Store->>Transformer: extendWildcards()
+    Transformer-->>Store: Wildcards extendidos
+    Store->>Client: Actualizar UI
 
-    Client->>Actions: Ejecutar wildcard
-    Actions->>Service: Resolver wildcard
-    Service->>Service: Procesar valores aleatorios
-    Service-->>Actions: Valor resuelto
-    Actions-->>Client: Devolver resultado
+    Client->>Store: Crear/editar/eliminar wildcards
+    Store->>Actions: createWildcard/updateWildcard/deleteWildcard
+    Actions->>Transformer: Validación y mapeo
+    Transformer-->>Actions: Datos validados
+    Actions->>DB: Persistir cambios
+    DB-->>Actions: Confirmación
+    Actions->>Transformer: fromPrismaWildcard()
+    Transformer-->>Actions: Wildcard transformado
+    Actions-->>Store: Devolver wildcard
+    Store->>Transformer: extendWildcard()
+    Transformer-->>Store: Wildcard extendido
+    Store-->>Client: Actualizar UI
 ```
 
 ## Tipos Principales
@@ -169,12 +176,14 @@ Transforma un array de objetos a `WildcardComplete[]`.
 ### `transformWildcardToExtended`
 
 Transforma un wildcard a su versión extendida para UI.
+
 - **Entrada**: Objeto wildcard.
 - **Salida**: `WildcardExtended` con propiedades adicionales para UI.
 
 ### `transformWildcardToWithStats`
 
 Transforma un wildcard a su versión con estadísticas.
+
 - **Entrada**: Objeto wildcard.
 - **Salida**: `WildcardWithStats` con estadísticas calculadas.
 

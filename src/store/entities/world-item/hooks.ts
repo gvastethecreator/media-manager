@@ -4,29 +4,40 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { WorldItem } from '../../../types/entities/world-item';
 import { WORLD_ITEM_SORT_OPTIONS } from './constants';
 import { useWorldItemStore } from './index';
+import type { WorldItemUpdateData } from './types';
 
 /**
  * Hook para acceder a todos los objetos del mundo, con filtrado y ordenamiento
  * @returns Lista filtrada y ordenada de objetos del mundo
  */
 export const useWorldItems = () => {
-	const store = useWorldItemStore();
+	const {
+		worldItems,
+		isLoading,
+		error,
+		getFilteredWorldItems,
+		getSortedWorldItems,
+		loadWorldItems,
+		clearFilters,
+		updateFilters,
+	} = useWorldItemStore();
 
 	return {
 		// Datos
-		worldItems: store.worldItems,
-		filteredItems: store.getFilteredWorldItems(),
-		sortedItems: store.getSortedWorldItems(),
+		worldItems,
+		filteredItems: getFilteredWorldItems(),
+		sortedItems: getSortedWorldItems(),
 
 		// Estado
-		isLoading: store.isLoading,
-		error: store.error,
+		isLoading,
+		error,
 
 		// Acciones
-		loadWorldItems: store.loadWorldItems,
+		loadWorldItems,
+		clearFilters,
+		updateFilters,
 	};
 };
 
@@ -35,9 +46,7 @@ export const useWorldItems = () => {
  * @returns Estado y acciones para filtrado
  */
 export const useWorldItemFilters = () => {
-	const store = useWorldItemStore();
-
-	const filters = useMemo(() => store.filters, [store.filters]);
+	const { filters, updateFilters, clearFilters, getFilteredWorldItems } = useWorldItemStore();
 
 	return {
 		// Estado
@@ -45,11 +54,11 @@ export const useWorldItemFilters = () => {
 		sortOptions: WORLD_ITEM_SORT_OPTIONS,
 
 		// Acciones
-		updateFilters: store.updateFilters,
-		clearFilters: store.clearFilters,
+		updateFilters,
+		clearFilters,
 
 		// Selectors
-		getFilteredItems: store.getFilteredWorldItems,
+		getFilteredItems: getFilteredWorldItems,
 	};
 };
 
@@ -58,16 +67,16 @@ export const useWorldItemFilters = () => {
  * @returns Estado y acciones para la visualización
  */
 export const useWorldItemView = () => {
-	const store = useWorldItemStore();
+	const { ui, setViewMode, startEditing, highlightWorldItem } = useWorldItemStore();
 
 	const viewState = useMemo(
 		() => ({
-			viewMode: store.ui.viewMode,
-			selectedId: store.ui.selectedId,
-			editingId: store.ui.editingId,
-			highlightedId: store.ui.highlightedId,
+			viewMode: ui.viewMode,
+			editingId: ui.editingId,
+			selectedId: ui.selectedId,
+			highlightedId: ui.highlightedId,
 		}),
-		[store.ui.viewMode, store.ui.selectedId, store.ui.editingId, store.ui.highlightedId]
+		[ui],
 	);
 
 	return {
@@ -75,10 +84,9 @@ export const useWorldItemView = () => {
 		...viewState,
 
 		// Acciones
-		setViewMode: store.setViewMode,
-		selectWorldItem: store.selectWorldItem,
-		startEditing: store.startEditing,
-		highlightWorldItem: store.highlightWorldItem,
+		setViewMode,
+		startEditing,
+		highlightWorldItem,
 	};
 };
 
@@ -87,33 +95,31 @@ export const useWorldItemView = () => {
  * @returns Estado y acciones para la selección
  */
 export const useWorldItemSelection = () => {
-	const selectedId = useWorldItemStore((state) => state.ui.selectedId);
-	const editingId = useWorldItemStore((state) => state.ui.editingId);
-	const highlightedId = useWorldItemStore((state) => state.ui.highlightedId);
-	const { selectWorldItem, startEditing, highlightWorldItem } = useWorldItemStore();
+	const {
+		ui: { selectedId },
+		worldItems,
+		selectWorldItem,
+	} = useWorldItemStore();
 
 	const selectedItem = useMemo(() => {
-		if (!selectedId) return null;
-		const items = useWorldItemStore.getState().worldItems;
-		return items.find((item) => item.id === selectedId) || null;
-	}, [selectedId]);
+		return worldItems.find((item) => item.id === selectedId);
+	}, [selectedId, worldItems]);
+
+	const clearSelection = useCallback(() => {
+		selectWorldItem(null);
+	}, [selectWorldItem]);
 
 	return {
 		// Estado de selección
 		selectedId,
 		selectedItem,
-		editingId,
-		highlightedId,
 
 		// Acciones
 		selectWorldItem,
-		startEditing,
-		highlightWorldItem,
+		clearSelection,
 
 		// Métodos derivados
 		isSelected: useCallback((id: string) => selectedId === id, [selectedId]),
-		isEditing: useCallback((id: string) => editingId === id, [editingId]),
-		isHighlighted: useCallback((id: string) => highlightedId === id, [highlightedId]),
 	};
 };
 
@@ -130,16 +136,10 @@ export const useWorldItem = (id: string | null) => {
 	return {
 		item,
 		update: useCallback(
-			(data: Partial<WorldItem>) => {
-				if (id && data.category !== null) {
-					// Filtramos nulls para evitar conflictos con el tipo
-					const updateData = Object.fromEntries(
-						Object.entries(data).filter(([, value]) => value !== null)
-					);
-					updateWorldItem(id, updateData);
-				}
+			(data: WorldItemUpdateData) => {
+				if (id) updateWorldItem(id, data);
 			},
-			[id, updateWorldItem]
+			[id, updateWorldItem],
 		),
 		remove: useCallback(() => {
 			if (id) deleteWorldItem(id);
@@ -152,47 +152,42 @@ export const useWorldItem = (id: string | null) => {
  * @returns Acciones para gestionar objetos del mundo
  */
 export const useWorldItemActions = () => {
-	const store = useWorldItemStore();
+	const { createWorldItem, updateWorldItem, deleteWorldItem, getWorldItemById } = useWorldItemStore();
 
 	return {
 		// Acciones CRUD
-		createWorldItem: store.createWorldItem,
-		updateWorldItem: store.updateWorldItem,
-		deleteWorldItem: store.deleteWorldItem,
+		createWorldItem,
+		updateWorldItem,
+		deleteWorldItem,
 
 		// Acciones por lotes
 		updateMultiple: useCallback(
-			(ids: string[], data: Partial<WorldItem>) => {
+			(ids: string[], data: WorldItemUpdateData) => {
 				for (const id of ids) {
-					// Filtramos nulls para evitar conflictos con el tipo
-					const updateData = Object.fromEntries(
-						Object.entries(data).filter(([, value]) => value !== null)
-					);
-					store.updateWorldItem(id, updateData);
+					updateWorldItem(id, data);
 				}
 			},
-			[store]
+			[updateWorldItem],
 		),
 
-		deleteMultiple: useCallback(
+		removeMultiple: useCallback(
 			(ids: string[]) => {
 				for (const id of ids) {
-					store.deleteWorldItem(id);
+					deleteWorldItem(id);
 				}
 			},
-			[store]
+			[deleteWorldItem],
 		),
 
 		// Acciones comunes
 		toggleFavorite: useCallback(
 			(id: string) => {
-				const item = store.getWorldItemById(id);
-				if (item && 'isFavorite' in item) {
-					const updateData = { isFavorite: !item.isFavorite };
-					store.updateWorldItem(id, updateData);
+				const item = getWorldItemById(id);
+				if (item) {
+					updateWorldItem(id, { isFavorite: !item.isFavorite });
 				}
 			},
-			[store]
+			[getWorldItemById, updateWorldItem],
 		),
 	};
 };

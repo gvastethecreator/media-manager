@@ -6,4 +6,3 @@
 
 // Exportar todos los tipos y enums desde el archivo types.ts
 export * from './types';
-

@@ -12,16 +12,8 @@ import {
 } from '@/app/actions/wildcards/wildcard.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import {
-    extendWildcard,
-    extendWildcards,
-} from '@/transformers/wildcard/serializers';
-import type {
-    CreateWildcardData,
-    UpdateWildcardData,
-    Wildcard,
-    WildcardBase,
-} from '@/types/entities/wildcard';
+import { extendWildcard, extendWildcards } from '@/transformers/wildcard/serializers';
+import type { CreateWildcardData, UpdateWildcardData, Wildcard, WildcardBase } from '@/types/entities/wildcard';
 import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
 
@@ -31,9 +23,7 @@ export interface WildcardCoreSlice {
 	// Getters
 	getWildcard: (id: string) => Wildcard | undefined;
 	getWildcards: () => Wildcard[];
-	getWildcardItems: (
-		wildcardId: string,
-	) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
+	getWildcardItems: (wildcardId: string) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
 	getChildWildcards: (parentId: string | null) => Wildcard[];
 	getWildcardHierarchy: () => Record<string | 'root', string[]>;
 
@@ -44,11 +34,7 @@ export interface WildcardCoreSlice {
 	deleteWildcard: (id: string) => void;
 
 	// Gestión de elementos
-	addItemToWildcard: (
-		wildcardId: string,
-		itemId: string,
-		itemType: 'image' | 'video' | 'note' | 'tag',
-	) => void;
+	addItemToWildcard: (wildcardId: string, itemId: string, itemType: 'image' | 'video' | 'note' | 'tag') => void;
 	removeItemFromWildcard: (wildcardId: string, itemId: string) => void;
 	clearWildcardItems: (wildcardId: string) => void;
 
@@ -59,23 +45,16 @@ export interface WildcardCoreSlice {
 	// Acciones asíncronas
 	fetchWildcard: (id: string) => Promise<Wildcard | undefined>;
 	fetchWildcards: () => Promise<Wildcard[]>;
-	createWildcard: (
-		data: CreateWildcardData,
-	) => Promise<Wildcard | undefined>;
-	updateWildcard: (
-		id: string,
-		data: UpdateWildcardData,
-	) => Promise<Wildcard | undefined>;
+	createWildcard: (data: CreateWildcardData) => Promise<Wildcard | undefined>;
+	updateWildcard: (id: string, data: UpdateWildcardData) => Promise<Wildcard | undefined>;
 	removeWildcard: (id: string) => Promise<boolean>;
 	moveWildcard: (id: string, newParentId: string | null) => Promise<boolean>;
 }
 
-export const createWildcardCoreSlice: StateCreator<
-	WildcardState & WildcardCoreSlice,
-	[],
-	[],
-	WildcardCoreSlice
-> = (set, get) => ({
+export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreSlice, [], [], WildcardCoreSlice> = (
+	set,
+	get
+) => ({
 	// --- Getters ---
 	getWildcard: (id) => get().core.wildcards[id],
 	getWildcards: () => Object.values(get().core.wildcards),
@@ -115,7 +94,7 @@ export const createWildcardCoreSlice: StateCreator<
 				acc[w.id] = w;
 				return acc;
 			},
-			{} as Record<string, Wildcard>,
+			{} as Record<string, Wildcard>
 		);
 		set((state) => ({
 			core: {
@@ -184,24 +163,24 @@ export const createWildcardCoreSlice: StateCreator<
 	},
 
 	// --- Estado de Carga ---
-	setLoading: (isLoading) =>
-		set((state) => ({ core: { ...state.core, isLoading } })),
+	setLoading: (isLoading) => set((state) => ({ core: { ...state.core, isLoading } })),
 	setError: (error) => set((state) => ({ core: { ...state.core, error } })),
 
 	// --- Acciones Asíncronas ---
 	fetchWildcard: async (id) => {
 		get().setLoading(true);
 		try {
-			const response = await getWildcardAction(id);
-			if (response.success && response.data) {
-				const wildcard = extendWildcard(response.data as WildcardBase);
+			const wildcardData = await getWildcardAction(id);
+			if (wildcardData) {
+				const wildcard = extendWildcard(wildcardData as WildcardBase);
 				get().addWildcard(wildcard);
 				return wildcard;
 			}
-			get().setError(response.error ?? 'Error fetching wildcard');
 			return undefined;
 		} catch (e) {
+			const errorMsg = e instanceof Error ? e.message : 'Error fetching wildcard';
 			wildcardLogger.error('Failed to fetch wildcard', { error: e });
+			get().setError(errorMsg);
 			return undefined;
 		} finally {
 			get().setLoading(false);
@@ -210,16 +189,14 @@ export const createWildcardCoreSlice: StateCreator<
 	fetchWildcards: async () => {
 		get().setLoading(true);
 		try {
-			const response = await getWildcardsAction();
-			if (response.success && response.data) {
-				const wildcards = extendWildcards(response.data as WildcardBase[]);
-				get().addWildcards(wildcards);
-				return wildcards;
-			}
-			get().setError(response.error ?? 'Error fetching wildcards');
-			return [];
+			const wildcardsData = await getWildcardsAction();
+			const wildcards = extendWildcards(wildcardsData as WildcardBase[]);
+			get().addWildcards(wildcards);
+			return wildcards;
 		} catch (e) {
+			const errorMsg = e instanceof Error ? e.message : 'Error fetching wildcards';
 			wildcardLogger.error('Failed to fetch wildcards', { error: e });
+			get().setError(errorMsg);
 			return [];
 		} finally {
 			get().setLoading(false);
@@ -228,17 +205,15 @@ export const createWildcardCoreSlice: StateCreator<
 	createWildcard: async (data) => {
 		get().setLoading(true);
 		try {
-			const response = await createWildcardAction(data);
-			if (response.success && response.data) {
-				const wildcard = extendWildcard(response.data as WildcardBase);
-				get().addWildcard(wildcard);
-				toastService.success('Wildcard creado');
-				return wildcard;
-			}
-			toastService.error(response.error ?? 'Error creating wildcard');
-			return undefined;
+			const newWildcardData = await createWildcardAction(data);
+			const wildcard = extendWildcard(newWildcardData as WildcardBase);
+			get().addWildcard(wildcard);
+			toastService.success('Wildcard creado');
+			return wildcard;
 		} catch (e) {
+			const errorMsg = e instanceof Error ? e.message : 'Error creating wildcard';
 			wildcardLogger.error('Failed to create wildcard', { error: e });
+			toastService.error(errorMsg);
 			return undefined;
 		} finally {
 			get().setLoading(false);
@@ -247,17 +222,15 @@ export const createWildcardCoreSlice: StateCreator<
 	updateWildcard: async (id, data) => {
 		get().setLoading(true);
 		try {
-			const response = await updateWildcardAction(id, data);
-			if (response.success && response.data) {
-				const wildcard = extendWildcard(response.data as WildcardBase);
-				get().addWildcard(wildcard);
-				toastService.success('Wildcard actualizado');
-				return wildcard;
-			}
-			toastService.error(response.error ?? 'Error updating wildcard');
-			return undefined;
+			const updatedWildcardData = await updateWildcardAction(id, data);
+			const wildcard = extendWildcard(updatedWildcardData as WildcardBase);
+			get().addWildcard(wildcard);
+			toastService.success('Wildcard actualizado');
+			return wildcard;
 		} catch (e) {
+			const errorMsg = e instanceof Error ? e.message : 'Error updating wildcard';
 			wildcardLogger.error('Failed to update wildcard', { error: e });
+			toastService.error(errorMsg);
 			return undefined;
 		} finally {
 			get().setLoading(false);
@@ -266,16 +239,14 @@ export const createWildcardCoreSlice: StateCreator<
 	removeWildcard: async (id) => {
 		get().setLoading(true);
 		try {
-			const response = await deleteWildcardAction(id);
-			if (response.success) {
-				get().deleteWildcard(id);
-				toastService.success('Wildcard eliminado');
-				return true;
-			}
-			toastService.error(response.error ?? 'Error removing wildcard');
-			return false;
+			await deleteWildcardAction(id);
+			get().deleteWildcard(id);
+			toastService.success('Wildcard eliminado');
+			return true;
 		} catch (e) {
+			const errorMsg = e instanceof Error ? e.message : 'Error removing wildcard';
 			wildcardLogger.error('Failed to remove wildcard', { error: e });
+			toastService.error(errorMsg);
 			return false;
 		} finally {
 			get().setLoading(false);

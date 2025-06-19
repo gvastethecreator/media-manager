@@ -202,7 +202,7 @@ export function FoldersSettings() {
 						</DialogDescription>
 					</DialogHeader>
 					<div className="flex items-center space-x-2 py-4">
-						<Switch id="clear-cache" checked={false} onCheckedChange={() => { }} />
+						<Switch id="clear-cache" checked={false} onCheckedChange={() => {}} />
 						<Label htmlFor="clear-cache" className="text-sm font-normal cursor-pointer">
 							Limpiar caché de metadatos (recomendado si hay problemas)
 						</Label>

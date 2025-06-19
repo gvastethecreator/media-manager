@@ -6,10 +6,10 @@
 
 // De mappers.ts
 export {
-    mapCharacterSearchOptionsToPrisma, mapCreateCharacterDataToPrisma,
-    mapUpdateCharacterDataToPrisma
+	mapCharacterSearchOptionsToPrisma,
+	mapCreateCharacterDataToPrisma,
+	mapUpdateCharacterDataToPrisma,
 } from './mappers';
 
 // De transformer.ts
 export { fromPrismaCharacter, fromPrismaCharacters } from './transformer';
-

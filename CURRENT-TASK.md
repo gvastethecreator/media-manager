@@ -1,16 +1,48 @@
-# Plan de Acción: Corrección Masiva de Errores de TypeScript
+# Plan de Acción: Corrección Masiva de Errores de TypeScript y Actualización de Documentación
 
-## 🎯 Objetivo Principal
+## 🎯 Objetivos Principales
 
-Reducir a cero los **2252 errores de TypeScript** reportados en **529 archivos**, siguiendo un enfoque sistemático y priorizado para restaurar la salud del codebase y asegurar la estabilidad del proyecto.
+1. Reducir a cero los **errores de TypeScript** reportados, siguiendo un enfoque sistemático y priorizado.
+2. Actualizar la documentación técnica para reflejar los cambios recientes en el patrón de respuesta de Server Actions y la estandarización de transformers.
 
 ## 📊 Resumen del Estado Actual
 
 - **Total de Errores:** 1894 (reducido desde 2293)
 - **Archivos Afectados:** 500 (reducido desde 533)
 - **Error Más Común:** Incompatibilidad de tipos, props faltantes, y uso de `any` implícito tras refactorizaciones.
+- **Documentación Desactualizada:** Varios documentos aún referenciaban el patrón antiguo de respuesta con `.success`, `.data`, `.error`.
 
-## 📜 Estrategia General
+## 📝 Actualización de Documentación Técnica
+
+### ✅ Documentos Actualizados (Junio 2025)
+
+| Documento | Ubicación | Estado |
+|-----------|-----------|--------|
+| Server Actions | `/docs/server-actions.md` | ✅ Actualizado |
+| Transformers | `/docs/transformers.md` | ✅ Actualizado |
+| Guía de Migración | `/docs/migration-guide-server-actions.md` | ✅ Creado |
+| Transformer de Image | `/src/transformers/image/documentation.md` | ✅ Actualizado |
+| Server Actions de Images | `/src/app/actions/images/README.md` | ✅ Actualizado |
+| Resumen de actualizaciones | `/docs/actualizacion-documentacion-junio-2025.md` | ✅ Creado |
+
+### 🔄 Cambios Realizados
+
+- Documentada la nueva estructura de respuesta de Server Actions (sin objetos wrapper)
+- Especificadas las funciones estándar que deben implementar los transformers
+- Creada guía detallada para migrar código legacy al nuevo patrón
+- Actualizados ejemplos en documentación existente
+- Creado documento de resumen con estado de la migración
+
+```mermaid
+graph TD
+    A[Análisis de documentación] --> B[Identificación de inconsistencias]
+    B --> C[Actualización de documentos core]
+    C --> D[Actualización de ejemplos específicos]
+    D --> E[Creación de guía de migración]
+    E --> F[Creación de documento resumen]
+```
+
+## 📜 Estrategia General para Corrección de Errores TypeScript
 
 La corrección se realizará en fases, atacando los problemas desde el núcleo de datos hacia la capa de presentación. Esto asegura que las correcciones en capas inferiores (como transformers y stores) resuelvan errores en cascada en las capas superiores (componentes).
 
@@ -43,6 +75,11 @@ graph TD
 
     subgraph "Fase 5: Validación Final"
         I --> J{tsc --noEmit == 0 Errores}
+    end
+
+    subgraph "Fase 6: Documentación"
+        J --> K[Actualizar docs técnica]
+        K --> L[Validar ejemplos de código]
     end
 
     A --> B
@@ -136,16 +173,16 @@ graph TD
 | ...     | (Resto de `settings`)                 | ...      | 🟢 Completado |
 
 - **Sub-Fase 4.3: Cards y Vistas (`src/components/cards/`, `src/components/views/`)**
-    - Se abordarán después de los componentes de features, ya que dependen de ellos.
+  - Se abordarán después de los componentes de features, ya que dependen de ellos.
 
 ### Fase 5: Servicios, Utils y Limpieza Final
 
 - **Justificación:** Abordar el resto de errores en capas de soporte y archivos dispersos.
 - **Archivos Prioritarios:**
-    - `src/services/` (folder.service.ts, task.service.ts, profile.service.ts)
-    - `src/utils/` (prompt/*.ts, world-item/helpers.ts)
-    - `src/hooks/`
-    - Archivos raíz y de configuración.
+  - `src/services/` (folder.service.ts, task.service.ts, profile.service.ts)
+  - `src/utils/` (prompt/*.ts, world-item/helpers.ts)
+  - `src/hooks/`
+  - Archivos raíz y de configuración.
 
 ---
 
@@ -179,6 +216,7 @@ graph TD
 20. **Nombres de funciones inconsistentes:** Se corrigieron nombres de funciones para mantener consistencia, como en `world-item.actions.ts` donde se usaban alias como `createWorldItemFilter` en lugar del nombre real `mapWorldItemFiltersToPrisma`.
 
 **Próximos pasos:**
+
 1. Continuar con la Fase 4: Componentes, abordando `places/create-place-form.tsx` con 19 errores.
 2. Regenerar el cliente Prisma para resolver errores relacionados con modelos como `Audio`, `Document`, `File3D`.
 3. Actualizar los tipos canónicos para entidades como `Image`, `Video`, `Note`, etc.

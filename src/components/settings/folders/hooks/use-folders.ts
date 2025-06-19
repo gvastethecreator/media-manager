@@ -2,11 +2,11 @@
 
 import { reindexAllFolders } from '@/app/actions/folders';
 import type {
-    ErrorResponse,
-    FolderResponse,
-    ProcessStatus,
-    ReindexAllCompleteData,
-    ReindexAllProgressData,
+	ErrorResponse,
+	FolderResponse,
+	ProcessStatus,
+	ReindexAllCompleteData,
+	ReindexAllProgressData,
 } from '@/app/actions/folders/folder-types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';

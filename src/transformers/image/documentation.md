@@ -10,65 +10,110 @@ Los transformadores de **Image** permiten mapear, serializar, deserializar y ext
 
 ```mermaid
 flowchart TD
-    A[Image (Prisma/Raw)] --> B[serializers.ts]
-    B -->|toPrismaImage| C[Prisma.ImageCreateInput]
-    B -->|fromPrismaImage| D[ImageComplete]
-    B -->|extendImage| E[ImageComplete]
-    B -->|validateImage| F[Validación Zod]
-    B -->|toExtendedImage| G[ImageComplete]
-    A --> H[mappers.ts]
-    H -->|toImageListItem| I[ImageListItem]
-    H -->|toImageCard| J[ImageCard]
-    H -->|parseImageSearchParams| K[Prisma.ImageWhereInput]
-    A --> L[transformer.ts]
-    L -->|transformImage| D
-    L -->|transformImageToWithStats| M[ImageWithStats]
-    L -->|transformImageToExtended| N[ImageExtended]
+    A[Image (Prisma/Raw)] --> B[mappers.ts]
+    B -->|fromPrismaImage| C[Image]
+    B -->|fromPrismaImages| D[Image[]]
+    B -->|toPrismaImage| E[PrismaImageCreateInput]
+
+    F[Image] --> G[serializers.ts]
+    G -->|extendImage| H[ImageExtended]
+    G -->|extendImages| I[ImageExtended[]]
+    G -->|validateImage| J[Validada con Zod]
+
+    K[Raw Data] --> L[transformer.ts]
+    L -->|transformImage| M[Image]
+    L -->|transformImageToWithStats| N[ImageWithStats]
+
+    O[index.ts] --> P[Exportación controlada]
+    P --> B
+    P --> G
+    P --> L
 ```
 
 ---
 
-## Estructura y Relaciones
+## Funciones Principales
 
-- **mappers.ts**: Mapeo a formatos de UI y búsqueda.
-- **serializers.ts**: Serialización/deserialización, validación y extensión.
-- **transformer.ts**: Transformador principal, entrada unificada para conversión y extensión.
-- **index.ts**: Barrel limpio, solo exporta funciones y tipos canónicos.
+### Mappers (`mappers.ts`)
 
----
-
-## Ejemplo de Uso
+Conversión entre formatos de datos internos y externos:
 
 ```typescript
-import { transformImage, transformImageToWithStats } from '@/transformers/image/transformer';
-import { toImageListItem } from '@/transformers/image/mappers';
-import { toPrismaImage } from '@/transformers/image/serializers';
+// De Prisma a dominio
+export function fromPrismaImage(prismaImage: PrismaImage): Image;
+export function fromPrismaImages(prismaImages: PrismaImage[]): Image[];
 
-const image = transformImage(rawImage);
-const imageStats = transformImageToWithStats(image);
-const listItem = toImageListItem(image);
-const prismaInput = toPrismaImage(image);
+// De dominio a Prisma (para operaciones de creación/actualización)
+export function toPrismaImage(image: ImageCreateInput): PrismaImageCreateInput;
+export function toPrismaImageUpdate(image: ImageUpdateInput): PrismaImageUpdateInput;
+
+// Mapeos específicos para UI
+export function toImageListItem(image: Image): ImageListItem;
+export function toImageCard(image: ImageExtended): ImageCard;
 ```
+
+### Serializers (`serializers.ts`)
+
+Extensión y validación de entidades:
+
+```typescript
+// Extensión con propiedades calculadas
+export function extendImage(image: Image): ImageExtended;
+export function extendImages(images: Image[]): ImageExtended[];
+
+// Validación estructurada
+export function validateImage(data: unknown): Image;
+export function validateImageInput(data: unknown): ImageCreateInput;
+```
+
+### Transformer (`transformer.ts`)
+
+Transformación completa de datos crudos:
+
+```typescript
+export function transformImage(data: unknown): Image;
+export function transformImageToWithStats(image: Image, stats: ImageStats): ImageWithStats;
+```
+
+---
+
+## Integración con Server Actions
+
+Las Server Actions utilizan estos transformers para procesar datos antes de devolverlos al cliente:
+
+```typescript
+// En src/app/actions/images/crud.actions.ts
+export async function getImage(id: string): Promise<Image | null> {
+  const prismaImage = await prisma.image.findUnique({ where: { id } });
+  if (!prismaImage) return null;
+  return fromPrismaImage(prismaImage);
+}
+
+// En un componente/hook cliente
+const image = await getImage(id);
+if (image) {
+  const extendedImage = extendImage(image);
+  // Usar extendedImage en la UI
+}
+```
+
+---
+
+## Tipos utilizados
+
+- `Image`: Tipo base con propiedades fundamentales
+- `ImageExtended`: Image + propiedades calculadas para UI
+- `ImageWithStats`: Image + estadísticas de uso
+- `ImageCreateInput`: Datos para crear una nueva imagen
+- `ImageUpdateInput`: Datos para actualizar una imagen existente
 
 ---
 
 ## Buenas Prácticas
 
-- Usar **solo** los tipos y funciones canónicas exportadas.
-- No modificar los tipos base ni duplicar lógica de transformación.
-- Validar siempre los datos con los esquemas y funciones provistas.
-- Mantener el barrel (`index.ts`) limpio y sin duplicados.
+1. **Nunca** importar tipos de Prisma en archivos que puedan ser usados por el cliente
+2. Usar funciones de **extensión** (`extendImage`) para agregar propiedades calculadas
+3. Validar siempre los datos de entrada con Zod antes de procesarlos
+4. Mantener la consistencia en el nombrado de funciones: `fromPrisma*`, `extend*`, etc.
 
----
-
-## Notas
-
-- Todos los mapeos y serializaciones gestionan errores y validaciones de forma robusta.
-- No existen tipos legacy ni duplicados en este módulo.
-
----
-
-## Última revisión
-
-- Fecha: 2025-06-10
-- Estado: ✅ Auditado, sin errores TS, documentación y diagramas actualizados.
+Para más detalles sobre la implementación, consulta los archivos específicos en `src/transformers/image/`.

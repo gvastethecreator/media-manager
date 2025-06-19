@@ -9,4 +9,3 @@ export { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from './mapper
 
 // De transformer.ts
 export { fromPrismaAlbum, fromPrismaAlbums } from './transformer';
-

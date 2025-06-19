@@ -58,53 +58,53 @@ export function CharactersSettings() {
 	// Calcular estadísticas generales - 📊 Verificar que characters sea un array válido
 	const stats = Array.isArray(characters)
 		? {
-			totalCharacters: characters.length,
-			totalImages: characters.reduce((acc, character) => acc + (character._count?.images || 0), 0),
-			totalSize: characters.reduce((acc, character) => acc + (character.totalSize || 0), 0),
-			unusedCharacters: characters.filter((character) => (character._count?.images || 0) === 0).length,
-			favoriteCharacters: characters.filter((character) => character.isFavorite).length,
-		}
+				totalCharacters: characters.length,
+				totalImages: characters.reduce((acc, character) => acc + (character._count?.images || 0), 0),
+				totalSize: characters.reduce((acc, character) => acc + (character.totalSize || 0), 0),
+				unusedCharacters: characters.filter((character) => (character._count?.images || 0) === 0).length,
+				favoriteCharacters: characters.filter((character) => character.isFavorite).length,
+			}
 		: {
-			totalCharacters: 0,
-			totalImages: 0,
-			totalSize: 0,
-			unusedCharacters: 0,
-			favoriteCharacters: 0,
-		};
+				totalCharacters: 0,
+				totalImages: 0,
+				totalSize: 0,
+				unusedCharacters: 0,
+				favoriteCharacters: 0,
+			};
 
 	// Filtrar personajes basados en los criterios seleccionados - 🔍 Verificar que characters sea un array
 	const filteredCharacters = Array.isArray(characters)
 		? characters.filter((character) => {
-			let matches = true;
+				let matches = true;
 
-			// Filtrar por búsqueda
-			if (searchQuery) {
-				const normalizedQuery = searchQuery.toLowerCase();
-				matches =
-					matches &&
-					Boolean(
-						character.name.toLowerCase().includes(normalizedQuery) ||
-						character.description?.toLowerCase().includes(normalizedQuery)
-					);
-			}
+				// Filtrar por búsqueda
+				if (searchQuery) {
+					const normalizedQuery = searchQuery.toLowerCase();
+					matches =
+						matches &&
+						Boolean(
+							character.name.toLowerCase().includes(normalizedQuery) ||
+								character.description?.toLowerCase().includes(normalizedQuery)
+						);
+				}
 
-			// Filtrar por categorías
-			if (selectedCategories.length > 0) {
-				matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
-			}
+				// Filtrar por categorías
+				if (selectedCategories.length > 0) {
+					matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
+				}
 
-			// Filtrar por clases
-			if (selectedClasses.length > 0) {
-				matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
-			}
+				// Filtrar por clases
+				if (selectedClasses.length > 0) {
+					matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
+				}
 
-			// Filtrar por favoritos
-			if (onlyFavorites) {
-				matches = matches && !!character.isFavorite;
-			}
+				// Filtrar por favoritos
+				if (onlyFavorites) {
+					matches = matches && !!character.isFavorite;
+				}
 
-			return matches;
-		})
+				return matches;
+			})
 		: [];
 
 	// Manejar eliminación de personaje
