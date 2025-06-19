@@ -1,8 +1,6 @@
 'use client';
 
-import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { type CharacterWithStats, deleteCharacter, searchCharacters } from '@/app/actions/characters/character.actions';
+import { deleteCharacter, searchCharacters } from '@/app/actions/characters/character.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import type { CharacterBase as Character } from '@/types/entities/character/base';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
+import type { CharacterComplete } from '@/types/entities/character/extended';
+import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { CreateCharacterForm } from './create-character-form';
 
 // Eliminar la referencia a avatar (ya arreglado) y actualizar la sección traits
@@ -21,10 +21,10 @@ import { CreateCharacterForm } from './create-character-form';
 type ReactEventHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 export function CharactersSettings() {
-	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
+	const [characters, setCharacters] = useState<CharacterComplete[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+	const [selectedCharacter, setSelectedCharacter] = useState<CharacterComplete | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -40,14 +40,7 @@ export function CharactersSettings() {
 			try {
 				setIsLoading(true);
 				const data = await searchCharacters({});
-				// 🔧 Fix: data es CharacterSearchResult, necesitamos extraer items y transformar a CharacterWithStats
-				const charactersList = Array.isArray(data) ? data : data.items || [];
-				const charactersWithStats = charactersList.map((character) => ({
-					...character,
-					totalSize: 0,
-					imageCount: character._count?.images || 0,
-				})) as CharacterWithStats[];
-				setCharacters(charactersWithStats);
+				setCharacters(data);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
@@ -65,53 +58,53 @@ export function CharactersSettings() {
 	// Calcular estadísticas generales - 📊 Verificar que characters sea un array válido
 	const stats = Array.isArray(characters)
 		? {
-				totalCharacters: characters.length,
-				totalImages: characters.reduce((acc, character) => acc + (character._count?.images || 0), 0),
-				totalSize: characters.reduce((acc, character) => acc + (character.totalSize || 0), 0),
-				unusedCharacters: characters.filter((character) => (character._count?.images || 0) === 0).length,
-				favoriteCharacters: characters.filter((character) => character.isFavorite).length,
-			}
+			totalCharacters: characters.length,
+			totalImages: characters.reduce((acc, character) => acc + (character._count?.images || 0), 0),
+			totalSize: characters.reduce((acc, character) => acc + (character.totalSize || 0), 0),
+			unusedCharacters: characters.filter((character) => (character._count?.images || 0) === 0).length,
+			favoriteCharacters: characters.filter((character) => character.isFavorite).length,
+		}
 		: {
-				totalCharacters: 0,
-				totalImages: 0,
-				totalSize: 0,
-				unusedCharacters: 0,
-				favoriteCharacters: 0,
-			};
+			totalCharacters: 0,
+			totalImages: 0,
+			totalSize: 0,
+			unusedCharacters: 0,
+			favoriteCharacters: 0,
+		};
 
 	// Filtrar personajes basados en los criterios seleccionados - 🔍 Verificar que characters sea un array
 	const filteredCharacters = Array.isArray(characters)
 		? characters.filter((character) => {
-				let matches = true;
+			let matches = true;
 
-				// Filtrar por búsqueda
-				if (searchQuery) {
-					const normalizedQuery = searchQuery.toLowerCase();
-					matches =
-						matches &&
-						Boolean(
-							character.name.toLowerCase().includes(normalizedQuery) ||
-								character.description?.toLowerCase().includes(normalizedQuery)
-						);
-				}
+			// Filtrar por búsqueda
+			if (searchQuery) {
+				const normalizedQuery = searchQuery.toLowerCase();
+				matches =
+					matches &&
+					Boolean(
+						character.name.toLowerCase().includes(normalizedQuery) ||
+						character.description?.toLowerCase().includes(normalizedQuery)
+					);
+			}
 
-				// Filtrar por categorías
-				if (selectedCategories.length > 0) {
-					matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
-				}
+			// Filtrar por categorías
+			if (selectedCategories.length > 0) {
+				matches = matches && (character.category ? selectedCategories.includes(character.category) : false);
+			}
 
-				// Filtrar por clases
-				if (selectedClasses.length > 0) {
-					matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
-				}
+			// Filtrar por clases
+			if (selectedClasses.length > 0) {
+				matches = matches && (character.class ? selectedClasses.includes(character.class) : false);
+			}
 
-				// Filtrar por favoritos
-				if (onlyFavorites) {
-					matches = matches && !!character.isFavorite;
-				}
+			// Filtrar por favoritos
+			if (onlyFavorites) {
+				matches = matches && !!character.isFavorite;
+			}
 
-				return matches;
-			})
+			return matches;
+		})
 		: [];
 
 	// Manejar eliminación de personaje
@@ -131,7 +124,7 @@ export function CharactersSettings() {
 	}, []);
 
 	// Manejar edición de personaje
-	const handleEditCharacter = useCallback((character: Character) => {
+	const handleEditCharacter = useCallback((character: CharacterComplete) => {
 		setSelectedCharacter(character);
 		setIsEditing(true);
 	}, []);
@@ -146,16 +139,16 @@ export function CharactersSettings() {
 	);
 
 	// Manejar creación exitosa
-	const handleCharacterCreated = useCallback((newCharacter: Character) => {
-		setCharacters((prev) => [...prev, newCharacter as unknown as CharacterWithStats]);
+	const handleCharacterCreated = useCallback((newCharacter: CharacterComplete) => {
+		setCharacters((prev) => [...prev, newCharacter]);
 		toastService.success('Personaje creado');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleCharacterUpdated = useCallback((updatedCharacter: Character) => {
+	const handleCharacterUpdated = useCallback((updatedCharacter: CharacterComplete) => {
 		setCharacters((prev) =>
 			prev.map((character) =>
-				character.id === updatedCharacter.id ? ({ ...character, ...updatedCharacter } as CharacterWithStats) : character
+				character.id === updatedCharacter.id ? { ...character, ...updatedCharacter } : character
 			)
 		);
 		toastService.success('Personaje actualizado');

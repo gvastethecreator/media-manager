@@ -1,15 +1,15 @@
 'use client';
 
-import { Bug, FileImage, Loader2 } from 'lucide-react';
-import * as React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getImageMetadataById } from '@/app/actions/metadata';
 import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
+import { getImageMetadataById } from '@/app/actions/metadata/metadata.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
-import type { FileMetadata } from '@/types/metadata.types';
+import type { FileMetadata } from '@/types/entities/metadata/types';
+import { Bug, FileImage, Loader2 } from 'lucide-react';
+import * as React from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AIGenerationInfo } from './details-panel-ai-generation-info';
 import { BasicInfo } from './details-panel-basic-info';
 import { ImagePreview } from './details-panel-image-preview';
@@ -236,13 +236,13 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 
 			try {
 				// Intentar usar metadata pre-parseada si existe
-				if (item.parsedMetadata) {
-					setMetadata(item.parsedMetadata as FileMetadata);
+				if (item.metadata) {
+					setMetadata(item.metadata as FileMetadata);
 					setIsProcessing(false);
 					return;
 				}
 
-				const result = await fetchMetadata(item.id, item.metadata);
+				const result = await fetchMetadata(item.id, item.rawMetadata);
 
 				if (!isMounted) return;
 
@@ -292,12 +292,12 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	// Función memoizada para depuración
 	const handleDebug = useCallback(() => {
 		console.group('🔍 Depuración de Metadata');
-		if (item?.metadata) {
+		if (item?.rawMetadata) {
 			try {
-				const metadataObj = typeof item.metadata === 'string' ? JSON.parse(item.metadata) : item.metadata;
+				const metadataObj = typeof item.rawMetadata === 'string' ? JSON.parse(item.rawMetadata) : item.rawMetadata;
 				console.table(metadataObj);
 			} catch (_error) {
-				console.error('Error al analizar metadata:', item.metadata);
+				console.error('Error al analizar metadata:', item.rawMetadata);
 			}
 		}
 		console.groupEnd();

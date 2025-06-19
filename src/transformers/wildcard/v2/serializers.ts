@@ -4,8 +4,13 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { WildcardSchema } from '@/types/entities/wildcard/schema';
-import type { WildcardBase, WildcardComplete, WildcardDeserialized } from '@/types/entities/wildcard/types';
+import type {
+    WildcardBase,
+    WildcardChild,
+    WildcardComplete,
+    WildcardDeserialized
+} from '@/types/entities/wildcard';
+import { WildcardSchema } from '@/types/entities/wildcard';
 import { TransformerError } from '@/utils/transformers/errors';
 
 // Logger específico para este módulo
@@ -24,6 +29,24 @@ export interface WildcardTransformOptions {
 	includeRelations?: boolean;
 	includeUI?: boolean;
 	includeStats?: boolean;
+}
+
+/**
+ * Interfaz para los datos UI de un wildcard
+ */
+export interface WildcardUIData {
+	lastUpdated: Date;
+	hasParent: boolean;
+	hasChildren: boolean;
+	parsedChildren: WildcardChild[];
+	itemCount: number;
+}
+
+/**
+ * Interfaz para un wildcard con datos UI
+ */
+export interface WildcardWithUI extends WildcardBase {
+	_ui: WildcardUIData;
 }
 
 /**
@@ -47,9 +70,12 @@ export function validateWildcard(wildcard: Partial<WildcardBase>): WildcardBase 
  * @param options Opciones de transformación
  * @returns Wildcard con campos serializados para Prisma
  */
-export function toPrismaWildcard(wildcard: Partial<WildcardComplete>, options: WildcardTransformOptions = {}): any {
+export function toPrismaWildcard(
+	wildcard: Partial<WildcardComplete>,
+	options: WildcardTransformOptions = {}
+): Record<string, any> {
 	try {
-		const { validateFields = true, deserializeChildren = true } = options;
+		const { validateFields = true } = options;
 
 		// Validar datos si se solicita
 		if (validateFields && Object.keys(wildcard).length > 1) {
@@ -57,7 +83,7 @@ export function toPrismaWildcard(wildcard: Partial<WildcardComplete>, options: W
 		}
 
 		// Crear objeto con solo propiedades válidas para Prisma
-		const result = {
+		const result: Record<string, any> = {
 			id: wildcard.id,
 			name: wildcard.name,
 			emoji: wildcard.emoji || DEFAULT_WILDCARD_EMOJI,
@@ -71,26 +97,24 @@ export function toPrismaWildcard(wildcard: Partial<WildcardComplete>, options: W
 
 		// Manejar la conversión de isFavorite a favorite si está presente
 		if ('isFavorite' in wildcard) {
-			// @ts-ignore - Ignorar error de tipo ya que estamos adaptando el campo
 			result.favorite = wildcard.isFavorite;
 		} else if ('favorite' in wildcard) {
-			// @ts-ignore - Ignorar error de tipo ya que estamos adaptando el campo
-			result.favorite = wildcard.favorite;
+			result.favorite = (wildcard as any).favorite;
 		}
 
 		// Serializar el array children a string si existe
 		if (wildcard.children !== undefined) {
 			if (typeof wildcard.children === 'string') {
 				result.children = wildcard.children;
-			} else if (wildcard.parsedChildren) {
-				result.children = JSON.stringify(wildcard.parsedChildren);
+			} else if ((wildcard as any).parsedChildren) {
+				result.children = JSON.stringify((wildcard as any).parsedChildren);
 			} else if (Array.isArray(wildcard.children)) {
 				result.children = JSON.stringify(wildcard.children);
 			} else {
 				result.children = '[]';
 			}
-		} else if (wildcard.parsedChildren) {
-			result.children = JSON.stringify(wildcard.parsedChildren);
+		} else if ((wildcard as any).parsedChildren) {
+			result.children = JSON.stringify((wildcard as any).parsedChildren);
 		}
 
 		return result;
@@ -125,24 +149,23 @@ export function fromPrismaWildcard<T extends WildcardBase>(
 
 		// Convertir favorite a isFavorite para mantener compatibilidad
 		if ('favorite' in wildcard) {
-			// @ts-ignore - Ignorar error de tipo ya que estamos adaptando el campo
-			result.isFavorite = wildcard.favorite;
+			result.isFavorite = (wildcard as any).favorite;
 		}
 
 		// Deserializar children si existe y se solicita
 		if (deserializeChildren && wildcard.children) {
 			try {
 				if (wildcard.children === '[]') {
-					result.parsedChildren = [];
+					(result as any).parsedChildren = [];
 				} else {
-					result.parsedChildren = JSON.parse(wildcard.children);
+					(result as any).parsedChildren = JSON.parse(wildcard.children);
 				}
 			} catch (e) {
 				logger.warn('No se pudo deserializar los hijos del wildcard', {
 					wildcardId: wildcard.id,
 					error: e,
 				});
-				result.parsedChildren = [];
+				(result as any).parsedChildren = [];
 			}
 		}
 
@@ -158,11 +181,11 @@ export function fromPrismaWildcard<T extends WildcardBase>(
 
 		// Agregar propiedades de UI si se solicitan
 		if (includeUI) {
-			result._ui = {
+			(result as any)._ui = {
 				lastUpdated: (wildcard as any).updatedAt || new Date(),
 				hasParent: !!wildcard.parentId,
-				hasChildren: Array.isArray(result.parsedChildren) ? result.parsedChildren.length > 0 : false,
-				parsedChildren: result.parsedChildren || [],
+				hasChildren: Array.isArray((result as any).parsedChildren) ? (result as any).parsedChildren.length > 0 : false,
+				parsedChildren: (result as any).parsedChildren || [],
 				itemCount: calculateItemCount(wildcard as any),
 			};
 		}
@@ -179,7 +202,7 @@ export function fromPrismaWildcard<T extends WildcardBase>(
  * @param wildcard Wildcard con posibles conteos
  * @returns Número total de elementos
  */
-function calculateItemCount(wildcard: WildcardBase & { _count?: any }): number {
+function calculateItemCount(wildcard: WildcardBase & { _count?: Record<string, number> }): number {
 	if (!wildcard._count) return 0;
 
 	// Sumar todos los conteos excepto childWildcards para evitar duplicidades
@@ -199,18 +222,8 @@ function calculateItemCount(wildcard: WildcardBase & { _count?: any }): number {
  * @param wildcard Wildcard base
  * @returns Wildcard extendido con datos UI
  */
-export function extendWildcard<T extends WildcardBase>(
-	wildcard: T
-): T & {
-	_ui: {
-		lastUpdated: Date;
-		hasParent: boolean;
-		hasChildren: boolean;
-		parsedChildren: any[];
-		itemCount: number;
-	};
-} {
-	return fromPrismaWildcard(wildcard, { includeUI: true }) as any;
+export function extendWildcard<T extends WildcardBase>(wildcard: T): T & WildcardWithUI {
+	return fromPrismaWildcard(wildcard, { includeUI: true }) as T & WildcardWithUI;
 }
 
 /**
@@ -218,7 +231,7 @@ export function extendWildcard<T extends WildcardBase>(
  * @param wildcards Array de wildcards
  * @returns Array de wildcards extendidos
  */
-export function extendWildcards(wildcards: WildcardBase[]): Array<ReturnType<typeof extendWildcard>> {
+export function extendWildcards<T extends WildcardBase>(wildcards: T[]): Array<T & WildcardWithUI> {
 	return wildcards.map((wildcard) => extendWildcard(wildcard));
 }
 
@@ -227,7 +240,7 @@ export function extendWildcards(wildcards: WildcardBase[]): Array<ReturnType<typ
  * @param children children como string o ya como array
  * @returns children deserializados
  */
-export function parseChildren(children: string | any[] | null): any[] {
+export function parseChildren(children: string | WildcardChild[] | null): WildcardChild[] {
 	if (!children) return [];
 
 	if (typeof children === 'string') {

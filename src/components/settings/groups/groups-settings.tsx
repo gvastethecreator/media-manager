@@ -1,7 +1,5 @@
 'use client';
 
-import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { createGroup, deleteGroup, getGroups, updateGroup } from '@/app/actions/groups/group.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +9,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import toastService from '@/services/toast.service';
-import type { GroupWithStats } from '@/types/entities/group/types';
+import type { GroupComplete } from '@/types/entities/group/extended';
 import { GroupSortCriteria } from '@/types/entities/group/types';
+import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
 
@@ -23,10 +23,10 @@ const SORT_OPTIONS = [
 ] as const;
 
 export function GroupsSettings() {
-	const [groups, setGroups] = useState<GroupWithStats[]>([]);
+	const [groups, setGroups] = useState<GroupComplete[]>([]);
 	const [_isLoading, setIsLoading] = useState(true);
 	const [_error, setError] = useState<string | null>(null);
-	const [selectedGroup, setSelectedGroup] = useState<GroupWithStats | null>(null);
+	const [selectedGroup, setSelectedGroup] = useState<GroupComplete | null>(null);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 
@@ -44,7 +44,7 @@ export function GroupsSettings() {
 		try {
 			setIsLoading(true);
 			const data = await getGroups();
-			setGroups(data as GroupWithStats[]);
+			setGroups(data as GroupComplete[]);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 			setError(errorMessage);
@@ -104,10 +104,10 @@ export function GroupsSettings() {
 	};
 
 	// Manejadores
-	const handleCreateGroup = async (data: Partial<Group>) => {
+	const handleCreateGroup = async (data: Partial<GroupComplete>) => {
 		try {
 			const newGroup = await createGroup(data);
-			setGroups((prev) => [...prev, newGroup as GroupWithStats]);
+			setGroups((prev) => [...prev, newGroup as GroupComplete]);
 			setIsCreateDialogOpen(false);
 			toastService.success('Grupo creado correctamente');
 		} catch (err) {
@@ -118,7 +118,7 @@ export function GroupsSettings() {
 		}
 	};
 
-	const handleUpdateGroup = async (id: string, data: Partial<Group>) => {
+	const handleUpdateGroup = async (id: string, data: Partial<GroupComplete>) => {
 		try {
 			const updatedGroup = await updateGroup(id, data);
 			setGroups((prev) => prev.map((g) => (g.id === id ? { ...g, ...updatedGroup } : g)));
@@ -240,7 +240,7 @@ export function GroupsSettings() {
 								onCancel={() => setIsEditMode(false)}
 							/>
 						) : (
-							<GroupPreview group={selectedGroup as GroupWithStats} onEdit={() => setIsEditMode(true)} />
+							<GroupPreview group={selectedGroup as GroupComplete} onEdit={() => setIsEditMode(true)} />
 						)
 					) : (
 						<div className="flex flex-col items-center justify-center h-full">

@@ -3,67 +3,85 @@
  * @module store/entities/video/slices/core
  */
 
-import type { StateCreator } from 'zustand';
 import {
-	createVideo as createServerVideo,
-	deleteVideo as deleteServerVideo,
-	findVideos,
-	getVideo as getServerVideo,
-} from '@/app/actions/videos/video.actions';
-import {
-	getVideoVisualConfig,
-	updateVideoVisualConfig as updateVideoVisualConfigAction,
+    getVideoVisualConfig,
+    updateVideoVisualConfig as updateVideoVisualConfigAction,
 } from '@/app/actions/videos/video-visual-config.actions';
-import { mapVideoVisualConfigCompleteUpdateToPrisma } from '../../../../transformers/video/mappers';
 import {
-	transformVideo,
-	transformVideos,
-	transformVideosWithStats,
-	transformVideoWithStats,
-} from '../../../../transformers/video/serializers';
+    createVideo as createServerVideo,
+    deleteVideo as deleteServerVideo,
+    findVideos,
+    getVideo as getServerVideo,
+} from '@/app/actions/videos/video.actions';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/services/toast.service';
+import { mapVideoVisualConfigCompleteUpdateToPrisma } from '@/transformers/video/mappers';
+import {
+    transformVideo,
+    transformVideos,
+} from '@/transformers/video/serializers';
 import type {
-	CreateVideoData,
-	UpdateVideoData,
-	Video,
-	VideoBase,
-	VideoComplete,
-	VideoFilters,
-	VideoVisualConfig,
-} from '../../../../types/entities/video';
+    CreateVideoData,
+    UpdateVideoData,
+    Video,
+    VideoBase,
+    VideoFilters,
+    VideoVisualConfig,
+} from '@/types/entities/video';
+import type { StateCreator } from 'zustand';
 import type { VideoState } from '../types';
 
-// Slice para operaciones CRUD básicas
+const videoLogger = clientLogger.withContext('VideoStore');
+
+// --- Helper Functions ---
+
+/**
+ * Aplica filtros a una lista de videos.
+ * @param videos - Array de videos a filtrar.
+ * @param filters - Objeto de filtros a aplicar.
+ * @returns Un nuevo array con los videos filtrados.
+ */
+function applyVideoFilters(
+	videos: Video[],
+	filters: Partial<VideoFilters>,
+): Video[] {
+	let filteredVideos = videos;
+	if (filters.folderId) {
+		filteredVideos = filteredVideos.filter(
+			(v) => v.folderId === filters.folderId,
+		);
+	}
+	if (filters.isFavorite !== undefined) {
+		filteredVideos = filteredVideos.filter(
+			(v) => v.isFavorite === filters.isFavorite,
+		);
+	}
+	// Añadir más lógicas de filtro aquí
+	return filteredVideos;
+}
+
+// --- Slice Interface ---
+
 export interface VideoCoreSlice {
-	// Getters básicos
+	// Getters
 	getVideo: (id: string) => Video | undefined;
 	getVideos: () => Video[];
 	getVideosByFolder: (folderId: string) => Video[];
 
 	// Selectores avanzados
 	selectVideos: (options?: {
-		withStats?: boolean;
-		filters?: VideoFilters;
-		sortBy?: keyof VideoComplete;
+		filters?: Partial<VideoFilters>;
+		sortBy?: keyof Video;
 		sortDirection?: 'asc' | 'desc';
 	}) => Video[];
-	selectVideosByFolder: (
-		folderId: string,
-		options?: {
-			withStats?: boolean;
-			filters?: VideoFilters;
-			sortBy?: keyof VideoComplete;
-			sortDirection?: 'asc' | 'desc';
-		}
-	) => Video[];
-	selectVideoById: (id: string, options?: { withStats?: boolean }) => Video | undefined;
 
-	// Operaciones
-	addVideo: (video: VideoBase) => void;
-	addVideos: (videos: VideoBase[]) => void;
+	// Operaciones síncronas
+	addVideo: (video: Video) => void;
+	addVideos: (videos: Video[]) => void;
 	updateVideo: (id: string, data: UpdateVideoData) => void;
 	deleteVideo: (id: string) => void;
 
-	// Estado de carga
+	// Estado de carga y errores
 	setLoading: (isLoading: boolean) => void;
 	setError: (error: string | null) => void;
 
@@ -76,344 +94,243 @@ export interface VideoCoreSlice {
 	// Visual Config
 	updateVideoVisualConfig: (
 		videoId: string,
-		config: Partial<VideoVisualConfig>
+		config: Partial<VideoVisualConfig>,
 	) => Promise<VideoVisualConfig | undefined>;
-	fetchVideoVisualConfig: (videoId: string) => Promise<VideoVisualConfig | undefined>;
+	fetchVideoVisualConfig: (
+		videoId: string,
+	) => Promise<VideoVisualConfig | undefined>;
 }
 
-// Creador del slice
-export const createVideoCoreSlice: StateCreator<VideoState, [], [], VideoCoreSlice> = (set, get) => ({
-	// Getters básicos
-	getVideo: (id: string) => {
-		return get().core.videos[id];
-	},
+// --- Slice Implementation ---
 
-	getVideos: () => {
-		return Object.values(get().core.videos);
-	},
+export const createVideoCoreSlice: StateCreator<
+	VideoState & VideoCoreSlice,
+	[],
+	[],
+	VideoCoreSlice
+> = (set, get) => ({
+	// --- Getters ---
+	getVideo: (id) => get().core.videos[id],
+	getVideos: () => Object.values(get().core.videos),
+	getVideosByFolder: (folderId) =>
+		Object.values(get().core.videos).filter(
+			(video) => video.folderId === folderId,
+		),
 
-	getVideosByFolder: (folderId: string) => {
-		return Object.values(get().core.videos).filter((video) => video.folderId === folderId);
-	},
-
-	// Selectores avanzados
+	// --- Selectores avanzados ---
 	selectVideos: (options = {}) => {
-		const { withStats = false, filters = {}, sortBy = 'updatedAt', sortDirection = 'desc' } = options;
+		const {
+			filters = {},
+			sortBy = 'createdAt',
+			sortDirection = 'desc',
+		} = options;
 		let videos = Object.values(get().core.videos);
 
-		// Aplicar filtros
-		if (filters) {
-			videos = applyVideoFilters(videos, filters);
-		}
+		videos = applyVideoFilters(videos, filters);
 
-		// Ordenar
-		videos = videos.sort((a, b) => {
-			const valueA = a[sortBy as keyof Video];
-			const valueB = b[sortBy as keyof Video];
+		videos.sort((a, b) => {
+			const valueA = a[sortBy];
+			const valueB = b[sortBy];
+
+			if (valueA === valueB) return 0;
+			if (valueA === null || valueA === undefined) return 1;
+			if (valueB === null || valueB === undefined) return -1;
 
 			if (typeof valueA === 'string' && typeof valueB === 'string') {
-				return sortDirection === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+				return sortDirection === 'asc'
+					? valueA.localeCompare(valueB)
+					: valueB.localeCompare(valueA);
 			}
 
-			// Para fechas y números
-			return sortDirection === 'asc' ? (valueA < valueB ? -1 : 1) : valueA > valueB ? -1 : 1;
-		});
+			const numA =
+				valueA instanceof Date ? valueA.getTime() : (valueA as number);
+			const numB =
+				valueB instanceof Date ? valueB.getTime() : (valueB as number);
 
-		// Aplicar estadísticas si se requiere
-		if (withStats) {
-			return transformVideosWithStats(videos, { safe: true, defaultValue: [] });
-		}
+			return sortDirection === 'asc' ? numA - numB : numB - numA;
+		});
 
 		return videos;
 	},
 
-	selectVideosByFolder: (folderId, options = {}) => {
-		const { withStats = false, filters = {}, sortBy = 'updatedAt', sortDirection = 'desc' } = options;
-
-		// Filtrar por carpeta
-		const folderFilters = { ...filters, folderId };
-		return get().selectVideos({ withStats, filters: folderFilters, sortBy, sortDirection });
-	},
-
-	selectVideoById: (id, options = {}) => {
-		const { withStats = false } = options;
-		const video = get().core.videos[id];
-
-		if (!video) return undefined;
-
-		if (withStats) {
-			return transformVideoWithStats(video, { safe: true, defaultValue: undefined });
-		}
-
-		return video;
-	},
-
-	// Operaciones síncronas
-	addVideo: (video: VideoBase) => {
-		try {
-			const extendedVideo = transformVideo(video, { safe: true });
-			if (!extendedVideo) return;
-
-			set((state) => ({
-				core: {
-					...state.core,
-					videos: {
-						...state.core.videos,
-						[video.id]: extendedVideo,
-					},
-					lastUpdated: Date.now(),
+	// --- Operaciones síncronas ---
+	addVideo: (video) => {
+		set((state) => ({
+			core: {
+				...state.core,
+				videos: {
+					...state.core.videos,
+					[video.id]: video,
 				},
-			}));
-		} catch (error) {
-			console.error('Error al añadir video al store:', error);
+			},
+		}));
+	},
+
+	addVideos: (videos) => {
+		const videosMap = videos.reduce(
+			(acc, video) => {
+				acc[video.id] = video;
+				return acc;
+			},
+			{} as Record<string, Video>,
+		);
+		set((state) => ({
+			core: {
+				...state.core,
+				videos: {
+					...state.core.videos,
+					...videosMap,
+				},
+			},
+		}));
+	},
+
+	updateVideo: (id, data) => {
+		const existingVideo = get().getVideo(id);
+		if (existingVideo) {
+			get().addVideo({ ...existingVideo, ...data, updatedAt: new Date() });
 		}
 	},
 
-	addVideos: (videos: VideoBase[]) => {
-		try {
-			const extendedVideos = transformVideos(videos, { safe: true });
-			if (!extendedVideos.length) return;
-
-			const videosMap = extendedVideos.reduce(
-				(acc, video) => {
-					if (video?.id) {
-						acc[video.id] = video;
-					}
-					return acc;
-				},
-				{} as Record<string, Video>
-			);
-
-			set((state) => ({
-				core: {
-					...state.core,
-					videos: {
-						...state.core.videos,
-						...videosMap,
-					},
-					lastUpdated: Date.now(),
-				},
-			}));
-		} catch (error) {
-			console.error('Error al añadir múltiples videos al store:', error);
-		}
-	},
-
-	updateVideo: (id: string, data: UpdateVideoData) => {
+	deleteVideo: (id) => {
 		set((state) => {
-			const video = state.core.videos[id];
-			if (!video) return state;
-
+			const { [id]: _, ...remaining } = state.core.videos;
 			return {
 				core: {
 					...state.core,
-					videos: {
-						...state.core.videos,
-						[id]: {
-							...video,
-							...data,
-						},
-					},
-					lastUpdated: Date.now(),
+					videos: remaining,
 				},
 			};
 		});
 	},
 
-	deleteVideo: (id: string) => {
-		set((state) => {
-			const newVideos = { ...state.core.videos };
-			delete newVideos[id];
+	// --- Estado de carga y errores ---
+	setLoading: (isLoading) =>
+		set((state) => ({ core: { ...state.core, isLoading } })),
+	setError: (error) => set((state) => ({ core: { ...state.core, error } })),
 
-			return {
-				core: {
-					...state.core,
-					videos: newVideos,
-					lastUpdated: Date.now(),
-				},
-			};
-		});
-	},
-
-	// Estado de carga
-	setLoading: (isLoading: boolean) => {
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading,
-			},
-		}));
-	},
-
-	setError: (error: string | null) => {
-		set((state) => ({
-			core: {
-				...state.core,
-				error,
-			},
-		}));
-	},
-
-	// Operaciones asíncronas (simuladas, se implementarán con llamadas reales a la API)
-	fetchVideo: async (id: string) => {
-		const { setLoading, setError, addVideo } = get();
+	// --- Acciones Asíncronas ---
+	fetchVideo: async (id) => {
+		get().setLoading(true);
 		try {
-			setLoading(true);
-			const video = await getServerVideo(id);
-			if (video) {
-				addVideo(video);
+			const response = await getServerVideo(id);
+			if (response.success && response.data) {
+				const video = transformVideo(response.data as VideoBase);
+				if (video) get().addVideo(video);
+				return video;
 			}
-			return get().core.videos[id];
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			get().setError(response.error ?? 'Error fetching video');
+			return undefined;
+		} catch (e) {
+			videoLogger.error('Failed to fetch video', { error: e });
+			get().setError('Failed to fetch video');
 			return undefined;
 		} finally {
-			setLoading(false);
+			get().setLoading(false);
 		}
 	},
 
-	fetchVideos: async (folderIds?: string[]) => {
-		const { setLoading, setError, addVideos } = get();
+	fetchVideos: async (folderIds) => {
+		get().setLoading(true);
 		try {
-			setLoading(true);
-			const filters = folderIds && folderIds.length > 0 ? { folderId: folderIds[0] } : {};
-			const result = await findVideos(filters);
-			addVideos(result.data);
-			return Object.values(get().core.videos);
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			const response = await findVideos({ folderIds });
+			if (response.success && response.data) {
+				const videos = transformVideos(response.data as VideoBase[]);
+				get().addVideos(videos);
+				return videos;
+			}
+			get().setError(response.error ?? 'Error fetching videos');
+			return [];
+		} catch (e) {
+			videoLogger.error('Failed to fetch videos', { error: e });
+			get().setError('Failed to fetch videos');
 			return [];
 		} finally {
-			setLoading(false);
+			get().setLoading(false);
 		}
 	},
 
-	createVideo: async (data: CreateVideoData) => {
-		const { setLoading, setError, addVideo } = get();
+	createVideo: async (data) => {
+		get().setLoading(true);
 		try {
-			setLoading(true);
-			const createdVideo = await createServerVideo(data);
-			addVideo(createdVideo);
-			return get().core.videos[createdVideo.id];
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			const response = await createServerVideo(data);
+			if (response.success && response.data) {
+				const video = transformVideo(response.data as VideoBase);
+				if (video) {
+					get().addVideo(video);
+					toastService.success('Video creado');
+				}
+				return video;
+			}
+			toastService.error(response.error ?? 'Error creating video');
+			get().setError(response.error ?? 'Error creating video');
+			return undefined;
+		} catch (e) {
+			videoLogger.error('Failed to create video', { error: e });
+			get().setError('Failed to create video');
 			return undefined;
 		} finally {
-			setLoading(false);
+			get().setLoading(false);
 		}
 	},
 
-	removeVideo: async (id: string) => {
-		const { setLoading, setError, deleteVideo } = get();
+	removeVideo: async (id) => {
+		get().setLoading(true);
 		try {
-			setLoading(true);
-			await deleteServerVideo(id);
-			deleteVideo(id);
-			return true;
-		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Error desconocido');
+			const response = await deleteServerVideo(id);
+			if (response.success) {
+				get().deleteVideo(id);
+				toastService.success('Video eliminado');
+				return true;
+			}
+			toastService.error(response.error ?? 'Error deleting video');
+			get().setError(response.error ?? 'Error deleting video');
+			return false;
+		} catch (e) {
+			videoLogger.error('Failed to remove video', { error: e });
+			get().setError('Failed to remove video');
 			return false;
 		} finally {
-			setLoading(false);
+			get().setLoading(false);
 		}
 	},
 
-	updateVideoVisualConfig: async (videoId: string, config: Partial<VideoVisualConfig>) => {
+	// --- Visual Config ---
+	updateVideoVisualConfig: async (videoId, config) => {
 		try {
 			const prismaData = mapVideoVisualConfigCompleteUpdateToPrisma(config);
-			const updated = await updateVideoVisualConfigAction(videoId, prismaData);
-			return updated;
-		} catch (error) {
-			console.error('Error al actualizar configuración visual:', error);
+			const response = await updateVideoVisualConfigAction(
+				videoId,
+				prismaData,
+			);
+
+			if (response.success && response.data) {
+				get().updateVideo(videoId, { visualConfig: response.data });
+				toastService.success('Configuración visual actualizada');
+				return response.data;
+			}
+			toastService.error(
+				response.error ?? 'Error updating visual config',
+			);
+			return undefined;
+		} catch (e) {
+			videoLogger.error('Failed to update visual config', { error: e });
+			toastService.error('Failed to update visual config');
 			return undefined;
 		}
 	},
 
-	fetchVideoVisualConfig: async (videoId: string) => {
+	fetchVideoVisualConfig: async (videoId) => {
 		try {
-			const result = await getVideoVisualConfig(videoId);
-			return result;
-		} catch (error) {
-			console.error('Error al obtener configuración visual:', error);
+			const response = await getVideoVisualConfig(videoId);
+			if (response.success && response.data) {
+				get().updateVideo(videoId, { visualConfig: response.data });
+				return response.data;
+			}
+			return undefined;
+		} catch (e) {
+			videoLogger.error('Failed to fetch visual config', { error: e });
 			return undefined;
 		}
 	},
 });
-
-/**
- * 🔍 Aplica filtros a un array de videos
- * @param videos Array de videos a filtrar
- * @param filters Filtros a aplicar
- * @returns Videos filtrados
- */
-function applyVideoFilters(videos: Video[], filters: VideoFilters): Video[] {
-	let filtered = [...videos];
-
-	// Filtro por búsqueda
-	if (filters.search) {
-		const searchTerm = filters.search.toLowerCase();
-		filtered = filtered.filter(
-			(video) =>
-				video.name.toLowerCase().includes(searchTerm) || video.description?.toLowerCase().includes(searchTerm) || false
-		);
-	}
-
-	// Filtro por carpeta
-	if (filters.folderId) {
-		filtered = filtered.filter((video) => video.folderId === filters.folderId);
-	}
-
-	// Filtro por favoritos
-	if (filters.isFavorite !== undefined) {
-		filtered = filtered.filter((video) => video.isFavorite === filters.isFavorite);
-	}
-
-	// Filtro por visibilidad
-	if (filters.isPublic !== undefined) {
-		filtered = filtered.filter((video) => video.isPublic === filters.isPublic);
-	}
-
-	// Filtro por duración
-	if (filters.duration) {
-		if (filters.duration.min !== undefined) {
-			filtered = filtered.filter((video) => video.duration >= filters.duration?.min || 0);
-		}
-		if (filters.duration.max !== undefined) {
-			filtered = filtered.filter((video) => video.duration <= (filters.duration?.max || Number.POSITIVE_INFINITY));
-		}
-	}
-
-	// Filtro por resolución
-	if (filters.resolution) {
-		if (filters.resolution.min !== undefined && filters.resolution.min > 0) {
-			filtered = filtered.filter((video) => video.height !== null && video.height >= (filters.resolution?.min || 0));
-		}
-		if (filters.resolution.max !== undefined) {
-			filtered = filtered.filter(
-				(video) => video.height !== null && video.height <= (filters.resolution?.max || Number.POSITIVE_INFINITY)
-			);
-		}
-	}
-
-	// Filtro por etiquetas
-	if (filters.tags && filters.tags.length > 0) {
-		filtered = filtered.filter((video) => {
-			if (!video.tags) return false;
-			return filters.tags?.some((tagId) => video.tags?.some((tag) => tag.id === tagId)) || false;
-		});
-	}
-
-	// Filtro por rango de fechas
-	if (filters.dateRange) {
-		if (filters.dateRange.start) {
-			const startDate = new Date(filters.dateRange.start);
-			filtered = filtered.filter((video) => new Date(video.createdAt) >= startDate);
-		}
-		if (filters.dateRange.end) {
-			const endDate = new Date(filters.dateRange.end);
-			filtered = filtered.filter((video) => new Date(video.createdAt) <= endDate);
-		}
-	}
-
-	return filtered;
-}

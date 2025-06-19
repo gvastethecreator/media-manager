@@ -5,10 +5,10 @@
  * @module app/actions/tasks/process.actions
  */
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type ScheduledTask } from '@/types/tasks';
+import { revalidatePath } from 'next/cache';
 
 // Logger for process actions
 const taskLogger = serverLogger.withContext('TaskProcessActions');
@@ -123,7 +123,7 @@ export async function completeTask(id: string, result?: unknown): Promise<Schedu
 				status: nextRunAt ? 'SCHEDULED' : 'COMPLETED',
 				completedAt: new Date(),
 				nextRunAt,
-				result: result ? JSON.stringify(result) : null,
+				result: result ? JSON.stringify(result, null, 2) : null,
 				error: null,
 				lastRunAt: new Date(),
 			},
@@ -170,7 +170,10 @@ export async function failTask(id: string, error: Error | string): Promise<Sched
 			where: { id },
 			data: {
 				status: nextRunAt ? 'SCHEDULED' : 'FAILED',
-				error: error instanceof Error ? error.message : error,
+				error:
+					error instanceof Error
+						? JSON.stringify({ message: error.message, name: error.name, stack: error.stack }, null, 2)
+						: error,
 				nextRunAt,
 				lastRunAt: new Date(),
 				retryCount: {
@@ -264,7 +267,7 @@ export async function resumeTask(id: string): Promise<ScheduledTask> {
 
 		await revalidateTaskPaths();
 		taskLogger.info('✅ Task resumed:', { id });
-		return updatedTask;
+		return { ...updatedTask, result: updatedTask.result ? JSON.parse(updatedTask.result) : null };
 	} catch (error) {
 		taskLogger.error('❌ Error resuming task:', error);
 
@@ -306,7 +309,7 @@ export async function rescheduleTask(id: string, nextRunAt: Date): Promise<Sched
 
 		await revalidateTaskPaths();
 		taskLogger.info('✅ Task rescheduled:', { id, nextRunAt });
-		return updatedTask;
+		return { ...updatedTask, result: updatedTask.result ? JSON.parse(updatedTask.result) : null };
 	} catch (error) {
 		taskLogger.error('❌ Error rescheduling task:', error);
 

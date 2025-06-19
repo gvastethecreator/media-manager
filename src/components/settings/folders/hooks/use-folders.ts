@@ -1,17 +1,18 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
 import { reindexAllFolders } from '@/app/actions/folders';
 import type {
-	ErrorResponse,
-	FolderResponse,
-	ProcessStatus,
-	ReindexAllCompleteData,
-	ReindexAllProgressData,
+    ErrorResponse,
+    FolderResponse,
+    ProcessStatus,
+    ReindexAllCompleteData,
+    ReindexAllProgressData,
 } from '@/app/actions/folders/folder-types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { type ExtendedFolder, initialGlobalReindexStatus } from '../folder-types';
+import type { FolderComplete } from '@/types/entities/folder/types';
+import { useCallback, useEffect, useState } from 'react';
+import { initialGlobalReindexStatus } from '../folder-types';
 import { useFoldersEvents } from './use-folders-events';
 import { useFoldersOperations } from './use-folders-operations';
 import { useFoldersPolling } from './use-folders-polling';
@@ -230,7 +231,7 @@ export function useFolders() {
 			// Actualizar carpetas con resultado
 			if (data?.id) {
 				// Convertir fechas string a objetos Date
-				const folderUpdate: Partial<ExtendedFolder> = {
+				const folderUpdate: Partial<FolderComplete> = {
 					...data,
 					_count: {
 						images: data.stats?.total || 0,

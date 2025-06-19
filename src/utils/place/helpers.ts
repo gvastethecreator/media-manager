@@ -17,8 +17,8 @@ export function sortPlaces(places: Place[], sortBy = 'name_asc'): Place[] {
 	const isDesc = sortOrder === 'desc';
 
 	sortedPlaces.sort((a, b) => {
-		let valueA = a[sortProperty];
-		let valueB = b[sortProperty];
+		const valueA = a[sortProperty];
+		const valueB = b[sortProperty];
 
 		// Manejar valores nulos o indefinidos
 		if (valueA === null || valueA === undefined) return 1;

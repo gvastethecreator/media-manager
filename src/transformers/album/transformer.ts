@@ -6,23 +6,32 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AlbumWithRelations } from '@/types/entities/album';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('AlbumTransformer');
 
 // Define el tipo de payload de Prisma que esperamos, con las relaciones y conteos.
-type AlbumFromPrisma = Prisma.AlbumGetPayload<{
-	include: {
-		images: true;
-		videos: true;
-		_count: {
-			select: {
-				images: true;
-				videos: true;
-			};
-		};
+interface AlbumFromPrisma {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string;
+	sortBy: string;
+	filters: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	// Relaciones
+	images: any[];
+	videos: any[];
+	_count?: {
+		images?: number;
+		videos?: number;
 	};
-}>;
+}
 
 /**
  * 🔄 Transforma un objeto Album de Prisma a nuestro tipo canónico AlbumWithRelations.

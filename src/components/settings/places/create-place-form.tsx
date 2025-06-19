@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import type { PlaceBase, PlaceCreateInput, PlaceUpdateInput } from '@/types/entities/place/types';
+import type { PlaceComplete, PlaceCreateInput, PlaceUpdateInput } from '@/types/entities/place/types';
 
 // Opciones para los selects que antes eran enums
 const placeTypes = ['CITY', 'TOWN', 'VILLAGE', 'REGION', 'PLANET', 'OTHER'] as const;
@@ -45,9 +45,15 @@ const placeFormSchema = z.object({
 
 type PlaceFormValues = z.infer<typeof placeFormSchema>;
 
+/**
+ * Props para el formulario de creación/edición de lugares
+ * @param place Lugar a editar (PlaceComplete), si existe
+ * @param onSuccess Callback al crear/editar exitosamente (PlaceComplete)
+ * @param onCancel Callback para cancelar
+ */
 interface CreatePlaceFormProps {
-	place?: PlaceBase;
-	onSuccess?: (place: PlaceBase) => void;
+	place?: PlaceComplete;
+	onSuccess?: (place: PlaceComplete) => void;
 	onCancel?: () => void;
 }
 
@@ -87,7 +93,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 
 	const onSubmit = async (values: PlaceFormValues) => {
 		try {
-			let result: PlaceBase;
+			let result: PlaceComplete;
 
 			if (isEditing && place) {
 				const updateData: PlaceUpdateInput = values;

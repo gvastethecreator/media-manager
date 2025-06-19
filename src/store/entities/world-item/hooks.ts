@@ -26,9 +26,7 @@ export const useWorldItems = () => {
 		error: store.error,
 
 		// Acciones
-		setWorldItems: store.setWorldItems,
-		resetStore: store.resetStore,
-		sortItems: store.setSortBy,
+		loadWorldItems: store.loadWorldItems,
 	};
 };
 
@@ -40,20 +38,15 @@ export const useWorldItemFilters = () => {
 	const store = useWorldItemStore();
 
 	const filters = useMemo(() => store.filters, [store.filters]);
-	const searchQuery = store.searchQuery;
 
 	return {
 		// Estado
 		filters,
-		searchQuery,
-		sortBy: store.sortBy,
 		sortOptions: WORLD_ITEM_SORT_OPTIONS,
 
 		// Acciones
-		setFilters: store.setFilters,
-		resetFilters: store.resetFilters,
-		setSortBy: store.setSortBy,
-		setSearchQuery: store.setSearchQuery,
+		updateFilters: store.updateFilters,
+		clearFilters: store.clearFilters,
 
 		// Selectors
 		getFilteredItems: store.getFilteredWorldItems,
@@ -69,12 +62,12 @@ export const useWorldItemView = () => {
 
 	const viewState = useMemo(
 		() => ({
-			viewMode: store.viewMode,
-			isCreatingItem: store.isCreatingItem,
-			isEditingItem: store.isEditingItem,
-			isProcessingAction: store.isProcessingAction,
+			viewMode: store.ui.viewMode,
+			selectedId: store.ui.selectedId,
+			editingId: store.ui.editingId,
+			highlightedId: store.ui.highlightedId,
 		}),
-		[store.viewMode, store.isCreatingItem, store.isEditingItem, store.isProcessingAction]
+		[store.ui.viewMode, store.ui.selectedId, store.ui.editingId, store.ui.highlightedId]
 	);
 
 	return {
@@ -83,10 +76,9 @@ export const useWorldItemView = () => {
 
 		// Acciones
 		setViewMode: store.setViewMode,
-		setIsCreatingItem: store.setIsCreatingItem,
-		setIsEditingItem: store.setIsEditingItem,
-		setIsProcessingAction: store.setIsProcessingAction,
-		toggleExpanded: store.toggleExpanded,
+		selectWorldItem: store.selectWorldItem,
+		startEditing: store.startEditing,
+		highlightWorldItem: store.highlightWorldItem,
 	};
 };
 
@@ -95,33 +87,33 @@ export const useWorldItemView = () => {
  * @returns Estado y acciones para la selección
  */
 export const useWorldItemSelection = () => {
-	const selectedIds = useWorldItemStore((state) => state.selectedIds);
-	const currentItemId = useWorldItemStore((state) => state.currentItemId);
-	const expandedIds = useWorldItemStore((state) => state.expandedIds);
-	const { toggleSelected, clearSelection, selectItems, toggleExpanded, setCurrentItemId } = useWorldItemStore();
+	const selectedId = useWorldItemStore((state) => state.ui.selectedId);
+	const editingId = useWorldItemStore((state) => state.ui.editingId);
+	const highlightedId = useWorldItemStore((state) => state.ui.highlightedId);
+	const { selectWorldItem, startEditing, highlightWorldItem } = useWorldItemStore();
 
-	const selectedItems = useMemo(() => {
+	const selectedItem = useMemo(() => {
+		if (!selectedId) return null;
 		const items = useWorldItemStore.getState().worldItems;
-		return items.filter((item) => selectedIds.includes(item.id));
-	}, [selectedIds]);
+		return items.find((item) => item.id === selectedId) || null;
+	}, [selectedId]);
 
 	return {
 		// Estado de selección
-		selectedIds,
-		selectedItems,
-		currentItemId,
-		expandedIds,
+		selectedId,
+		selectedItem,
+		editingId,
+		highlightedId,
 
 		// Acciones
-		toggleSelected,
-		clearSelection,
-		selectItems,
-		toggleExpanded,
-		setCurrentItemId,
+		selectWorldItem,
+		startEditing,
+		highlightWorldItem,
 
 		// Métodos derivados
-		isSelected: useCallback((id: string) => selectedIds.includes(id), [selectedIds]),
-		isExpanded: useCallback((id: string) => expandedIds.includes(id), [expandedIds]),
+		isSelected: useCallback((id: string) => selectedId === id, [selectedId]),
+		isEditing: useCallback((id: string) => editingId === id, [editingId]),
+		isHighlighted: useCallback((id: string) => highlightedId === id, [highlightedId]),
 	};
 };
 
@@ -133,19 +125,25 @@ export const useWorldItemSelection = () => {
 export const useWorldItem = (id: string | null) => {
 	const item = useWorldItemStore((state) => (id ? state.getWorldItemById(id) : null));
 
-	const { updateWorldItem, removeWorldItem } = useWorldItemStore();
+	const { updateWorldItem, deleteWorldItem } = useWorldItemStore();
 
 	return {
 		item,
 		update: useCallback(
 			(data: Partial<WorldItem>) => {
-				if (id) updateWorldItem(id, data);
+				if (id && data.category !== null) {
+					// Filtramos nulls para evitar conflictos con el tipo
+					const updateData = Object.fromEntries(
+						Object.entries(data).filter(([, value]) => value !== null)
+					);
+					updateWorldItem(id, updateData);
+				}
 			},
 			[id, updateWorldItem]
 		),
 		remove: useCallback(() => {
-			if (id) removeWorldItem(id);
-		}, [id, removeWorldItem]),
+			if (id) deleteWorldItem(id);
+		}, [id, deleteWorldItem]),
 	};
 };
 
@@ -158,24 +156,28 @@ export const useWorldItemActions = () => {
 
 	return {
 		// Acciones CRUD
-		addWorldItem: store.addWorldItem,
+		createWorldItem: store.createWorldItem,
 		updateWorldItem: store.updateWorldItem,
-		removeWorldItem: store.removeWorldItem,
+		deleteWorldItem: store.deleteWorldItem,
 
 		// Acciones por lotes
 		updateMultiple: useCallback(
 			(ids: string[], data: Partial<WorldItem>) => {
 				for (const id of ids) {
-					store.updateWorldItem(id, data);
+					// Filtramos nulls para evitar conflictos con el tipo
+					const updateData = Object.fromEntries(
+						Object.entries(data).filter(([, value]) => value !== null)
+					);
+					store.updateWorldItem(id, updateData);
 				}
 			},
 			[store]
 		),
 
-		removeMultiple: useCallback(
+		deleteMultiple: useCallback(
 			(ids: string[]) => {
 				for (const id of ids) {
-					store.removeWorldItem(id);
+					store.deleteWorldItem(id);
 				}
 			},
 			[store]
@@ -185,8 +187,9 @@ export const useWorldItemActions = () => {
 		toggleFavorite: useCallback(
 			(id: string) => {
 				const item = store.getWorldItemById(id);
-				if (item) {
-					store.updateWorldItem(id, { isFavorite: !item.isFavorite });
+				if (item && 'isFavorite' in item) {
+					const updateData = { isFavorite: !item.isFavorite };
+					store.updateWorldItem(id, updateData);
 				}
 			},
 			[store]

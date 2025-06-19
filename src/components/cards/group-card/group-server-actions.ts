@@ -1,9 +1,9 @@
 'use server';
 
 import { getPrismaClient } from '@/lib/db';
-import type { Group } from '@/types/prisma';
+import type { GroupBase } from '@/types/entities/group/types';
 
-export interface GroupCardData extends Group {
+export interface GroupCardData extends Omit<GroupBase, 'filters'> {
 	_count: {
 		images: number;
 		videos: number;
@@ -21,7 +21,7 @@ export interface GroupCardData extends Group {
 	};
 	recentImages?: string[];
 	recentVideos?: string[];
-	filters?: any[]; // Representación JSON de filters
+	filters?: any[]; // Representación JSON de filters parseados
 
 	// Campos de metadatos para el TCG
 	power: number;
@@ -107,7 +107,7 @@ export async function getGroupCardData(groupId: string): Promise<GroupCardData> 
 		},
 		select: {
 			id: true,
-			thumbnailPath: true,
+			thumbnail: true,
 		},
 		orderBy: {
 			updatedAt: 'desc',
@@ -115,8 +115,7 @@ export async function getGroupCardData(groupId: string): Promise<GroupCardData> 
 		take: 2,
 	});
 
-	const recentVideoPaths = recentVideos.map((video: { id: string; thumbnailPath: string | null }) => {
-		if (!video.thumbnailPath) return `/api/thumbnails/${video.id}`;
+	const recentVideoPaths = recentVideos.map((video) => {
 		return `/api/thumbnails/${video.id}`;
 	});
 
@@ -205,7 +204,7 @@ function calculateRarityLevel(totalEntities: number, filtersCount: number): numb
 /**
  * Calcula el poder de un grupo basado en sus atributos
  */
-function calculateGroupPower(group: Group, totalEntities: number, filtersCount: number): number {
+function calculateGroupPower(group: GroupBase, totalEntities: number, filtersCount: number): number {
 	// Base de poder
 	let power = 50;
 

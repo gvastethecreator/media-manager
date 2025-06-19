@@ -5,14 +5,14 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	CreateWildcardData,
-	UpdateWildcardData,
-	WildcardBase,
-	WildcardBulkUpdateData,
-	WildcardRelated,
-	WildcardSearchFilters,
-	WildcardSearchOptions,
-} from '@/types/entities/wildcard/types';
+    CreateWildcardData,
+    UpdateWildcardData,
+    WildcardBase,
+    WildcardBulkUpdateData,
+    WildcardRelated,
+    WildcardSearchFilters,
+    WildcardSearchOptions,
+} from '@/types/entities/wildcard';
 import { TransformerError } from '@/utils/transformers/errors';
 import { DEFAULT_WILDCARD_COLOR, DEFAULT_WILDCARD_EMOJI } from './serializers';
 
@@ -24,7 +24,7 @@ const logger = serverLogger.child({ module: 'WildcardTransformer:Mappers' });
  * @param data Datos de creación
  * @returns Datos formateados para Prisma
  */
-export function toCreateWildcardData(data: CreateWildcardData): any {
+export function toCreateWildcardData(data: CreateWildcardData): Record<string, any> {
 	try {
 		const result: Record<string, any> = {
 			id: data.id,
@@ -37,7 +37,9 @@ export function toCreateWildcardData(data: CreateWildcardData): any {
 			parentId: data.parentId || null,
 			favorite: data.isFavorite || false,
 			featuredImage: data.featuredImage || null,
-			children: data.children ? JSON.stringify(data.children) : '[]',
+			children: Array.isArray(data.children)
+				? JSON.stringify(data.children)
+				: (data.children || '[]'),
 		};
 
 		return result;
@@ -52,7 +54,7 @@ export function toCreateWildcardData(data: CreateWildcardData): any {
  * @param data Datos de actualización
  * @returns Datos formateados para Prisma
  */
-export function toUpdateWildcardData(data: UpdateWildcardData): any {
+export function toUpdateWildcardData(data: UpdateWildcardData): Record<string, any> {
 	try {
 		const result: Record<string, any> = {};
 
@@ -73,7 +75,9 @@ export function toUpdateWildcardData(data: UpdateWildcardData): any {
 
 		// Serializar children si está presente
 		if (data.children !== undefined) {
-			result.children = JSON.stringify(data.children);
+			result.children = typeof data.children === 'string'
+				? data.children
+				: JSON.stringify(data.children);
 		}
 
 		return result;
@@ -88,7 +92,7 @@ export function toUpdateWildcardData(data: UpdateWildcardData): any {
  * @param data Datos de actualización en lote
  * @returns Datos formateados para Prisma
  */
-export function toBulkUpdateWildcardData(data: WildcardBulkUpdateData): any {
+export function toBulkUpdateWildcardData(data: WildcardBulkUpdateData): Record<string, any> {
 	try {
 		const result: Record<string, any> = {};
 
@@ -117,7 +121,7 @@ export function toWildcardRelated(wildcard: WildcardBase): WildcardRelated {
 		color: wildcard.color || DEFAULT_WILDCARD_COLOR,
 		category: wildcard.category || 'general',
 		parentId: wildcard.parentId,
-		isFavorite: 'favorite' in wildcard ? (wildcard as any).favorite : (wildcard as any).isFavorite || false,
+		isFavorite: 'favorite' in wildcard ? (wildcard as any).favorite : wildcard.isFavorite || false,
 	};
 }
 
@@ -126,7 +130,7 @@ export function toWildcardRelated(wildcard: WildcardBase): WildcardRelated {
  * @param options Opciones de búsqueda
  * @returns Opciones formateadas para Prisma
  */
-export function toSearchOptions(options: WildcardSearchOptions = {}): any {
+export function toSearchOptions(options: WildcardSearchOptions = {}): Record<string, any> {
 	try {
 		const {
 			page = 1,
@@ -247,61 +251,18 @@ function applyFilters(where: Record<string, any>, filters: WildcardSearchFilters
 	}
 
 	// Filtrar por fecha de creación
-	if (filters.createdAfter) {
+	if (filters.createdAfter || filters.createdBefore) {
 		where.createdAt = {
-			...where.createdAt,
-			gte: new Date(filters.createdAfter),
-		};
-	}
-
-	if (filters.createdBefore) {
-		where.createdAt = {
-			...where.createdAt,
-			lte: new Date(filters.createdBefore),
+			...(filters.createdAfter ? { gte: filters.createdAfter } : {}),
+			...(filters.createdBefore ? { lte: filters.createdBefore } : {}),
 		};
 	}
 
 	// Filtrar por fecha de actualización
-	if (filters.updatedAfter) {
+	if (filters.updatedAfter || filters.updatedBefore) {
 		where.updatedAt = {
-			...where.updatedAt,
-			gte: new Date(filters.updatedAfter),
+			...(filters.updatedAfter ? { gte: filters.updatedAfter } : {}),
+			...(filters.updatedBefore ? { lte: filters.updatedBefore } : {}),
 		};
-	}
-
-	if (filters.updatedBefore) {
-		where.updatedAt = {
-			...where.updatedAt,
-			lte: new Date(filters.updatedBefore),
-		};
-	}
-
-	// Filtrar por elementos relacionados
-	if (filters.hasImages !== undefined) {
-		where.images = filters.hasImages ? { some: {} } : { none: {} };
-	}
-
-	if (filters.hasVideos !== undefined) {
-		where.videos = filters.hasVideos ? { some: {} } : { none: {} };
-	}
-
-	if (filters.hasAlbums !== undefined) {
-		where.albums = filters.hasAlbums ? { some: {} } : { none: {} };
-	}
-
-	if (filters.hasTags !== undefined) {
-		where.tags = filters.hasTags ? { some: {} } : { none: {} };
-	}
-
-	// Filtrar por presencia de hijos
-	if (filters.hasChildren !== undefined) {
-		if (filters.hasChildren) {
-			where.NOT = {
-				...where.NOT,
-				children: { in: ['[]', null] },
-			};
-		} else {
-			where.OR = [{ children: { in: ['[]'] } }, { children: null }];
-		}
 	}
 }

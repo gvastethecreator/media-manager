@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import { CollectionCategory, CollectionRarity } from './enums';
 
 /**
  * Tipo base canónico para Collection
@@ -37,6 +38,8 @@ export interface CollectionBase {
  */
 export interface CollectionCreateInput extends Omit<CollectionBase, 'id' | 'createdAt' | 'updatedAt'> {
 	// Relaciones opcionales por ids
+	imageIds?: string[];
+	tagIds?: string[];
 	groupIds?: string[];
 	propertyIds?: string[];
 	wildcardIds?: string[];
@@ -45,7 +48,75 @@ export interface CollectionCreateInput extends Omit<CollectionBase, 'id' | 'crea
 /**
  * Input para actualización
  */
-export type CollectionUpdateInput = Partial<Omit<CollectionBase, 'id' | 'createdAt' | 'updatedAt'>>;
+export type CollectionUpdateInput = Partial<Omit<CollectionBase, 'id' | 'createdAt' | 'updatedAt'>> & {
+	imageIds?: string[];
+	tagIds?: string[];
+	groupIds?: string[];
+	propertyIds?: string[];
+	wildcardIds?: string[];
+};
+
+/**
+ * Filtros para búsqueda de colecciones
+ */
+export interface CollectionFilters {
+	search?: string;
+	isFavorite?: boolean;
+	category?: CollectionCategory[];
+	rarity?: CollectionRarity[];
+	tagIds?: string[];
+	imageCount?: {
+		min?: number;
+		max?: number;
+	};
+	dateRange?: {
+		start?: Date;
+		end?: Date;
+	};
+}
+
+/**
+ * Opciones de búsqueda para colecciones
+ */
+export interface CollectionSearchOptions {
+	filters?: CollectionFilters;
+	skip?: number;
+	take?: number;
+	orderBy?: {
+		[key: string]: 'asc' | 'desc';
+	};
+	include?: {
+		images?: boolean;
+		tags?: boolean;
+		groups?: boolean;
+		properties?: boolean;
+		wildcards?: boolean;
+	};
+}
+
+/**
+ * Información de ordenación para colecciones
+ */
+export interface CollectionSortBy {
+	field: string;
+	direction: 'asc' | 'desc';
+	priority?: number;
+}
+
+/**
+ * Información de una edición de colección
+ */
+export interface CollectionEdition {
+	id: string;
+	name: string;
+	number: number;
+	totalItems: number;
+	releaseDate?: Date;
+	isLimited: boolean;
+	price?: number;
+	currency?: string;
+	description?: string;
+}
 
 /**
  * Esquema Zod para validación de Collection
@@ -72,6 +143,15 @@ export const CollectionSchema = z.object({
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
+
+/**
+ * Filtro para colecciones (usado en CollectionExtended)
+ */
+export interface CollectionFilter {
+	field: string;
+	operator: 'equals' | 'contains' | 'gt' | 'lt' | 'between';
+	value: string | number | boolean | Date | string[] | number[];
+}
 
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.

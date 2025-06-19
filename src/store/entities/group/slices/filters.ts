@@ -3,9 +3,10 @@
  * @module store/entities/group/slices/filters
  */
 
-import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { Group, GroupSortCriteria, GroupType } from '@/types/entities/group';
+import type { Group, GroupType } from '@/types/entities/group';
+import { GroupSortCriteria } from '@/types/entities/group';
+import type { StateCreator } from 'zustand';
 import type { GroupState } from '../types';
 
 const groupLogger = clientLogger.withContext('GroupFilters');
@@ -109,6 +110,7 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 		set((state) => ({
 			filters: {
 				...state.filters,
+				sortBy: GroupSortCriteria.DATE_CREATED_DESC,
 				searchQuery: '',
 				filterByType: null,
 				filterByCategory: null,
@@ -124,6 +126,7 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 
 	// Obtener grupos filtrados
 	getFilteredGroups: () => {
+		// @ts-expect-error - getGroups no existe en el tipo `GroupState` directamente, pero sí en el store combinado.
 		const groups = get().getGroups();
 		return get().applySort(get().applyFilters(groups));
 	},
@@ -136,7 +139,7 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 			if (
 				searchQuery &&
 				!group.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-				!group.description?.toLowerCase().includes(searchQuery.toLowerCase())
+				!(group.description || '').toLowerCase().includes(searchQuery.toLowerCase())
 			) {
 				return false;
 			}
