@@ -1,9 +1,9 @@
 'use client';
 
+import { getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
 import { LandPlot } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
-import { getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
 
 import { MemoizedPlaceCard } from '@/components/cards/place-card';
 import { EmptyState } from '@/components/core/data-display';

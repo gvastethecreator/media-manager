@@ -1,9 +1,9 @@
 'use client';
 
+import { type CharacterWithStats, searchCharacters } from '@/app/actions/characters/character.actions';
 import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
-import { type CharacterWithStats, searchCharacters } from '@/app/actions/characters/character.actions';
 
 import { CharacterCard } from '@/components/cards/character-card';
 import { EmptyState } from '@/components/core/data-display';

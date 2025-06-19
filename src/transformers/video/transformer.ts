@@ -4,10 +4,10 @@
  * @description Contiene la lógica para convertir un objeto Video de Prisma a nuestro tipo canónico.
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoComplete } from '@/types/entities/video';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 import { deserializeVideoMetadata } from './serializers';
 
 const logger = serverLogger.withContext('VideoTransformer');
