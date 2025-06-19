@@ -4,7 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptBase, PromptWithRelations } from '@/types/entities/prompt';
+import type { PromptBase, PromptWithRelations } from '@/types/entities/prompt/types';
 
 const logger = serverLogger.withContext('PromptSerializers');
 
@@ -92,13 +92,23 @@ export function serializeTags(tags: string[] | string | null | undefined): strin
 }
 
 /**
+ * Tipo extendido para prompt con propiedades adicionales para UI
+ */
+export interface ExtendedPrompt extends PromptWithRelations {
+	parsedTags?: string;
+	parsedParameters?: string;
+	previewContent?: string;
+	lastUpdated?: Date;
+}
+
+/**
  * Transforma un prompt base a un prompt extendido con propiedades para UI
  * Deserializa campos JSON almacenados como strings a sus tipos correspondientes
  *
  * @param prompt Prompt base
  * @returns Prompt extendido con campos parseados y propiedades adicionales
  */
-export function toExtendedPrompt(prompt: PromptBase): PromptWithRelations {
+export function toExtendedPrompt(prompt: PromptBase): ExtendedPrompt {
 	return {
 		...prompt,
 		parsedTags: serializeTags(prompt.tags),

@@ -31,13 +31,13 @@ interface PlaceFromPrisma {
 	isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-	// Relaciones
+	// Relaciones (solo las que realmente existen en Prisma)
 	images: any[];
-	videos: any[];
-	albums: any[];
+	// videos: any[]; // ❌ ELIMINADO - No existe relación Place-Video en Prisma
+	// albums: any[]; // ❌ ELIMINADO - No existe relación Place-Album en Prisma
 	collections: any[];
 	tags: any[];
-	characters: any[];
+	// characters: any[]; // ❌ ELIMINADO - No existe relación Place-Character en Prisma
 	worldItems: any[];
 	concepts: any[];
 	prompts: any[];
@@ -47,11 +47,11 @@ interface PlaceFromPrisma {
 	groups: any[];
 	_count: {
 		images?: number;
-		videos?: number;
-		albums?: number;
+		// videos?: number; // ❌ ELIMINADO - No existe relación Place-Video en Prisma
+		// albums?: number; // ❌ ELIMINADO - No existe relación Place-Album en Prisma
 		collections?: number;
 		tags?: number;
-		characters?: number;
+		// characters?: number; // ❌ ELIMINADO - No existe relación Place-Character en Prisma
 		worldItems?: number;
 		concepts?: number;
 		prompts?: number;
@@ -86,11 +86,11 @@ export function fromPrismaPlace(prismaPlace: PlaceFromPrisma | null): PlaceCompl
 			filters: deserializePlaceFilters(baseData.filters),
 			// Asegurar que las relaciones opcionales no sean undefined
 			images: baseData.images ?? [],
-			videos: baseData.videos ?? [],
-			albums: baseData.albums ?? [],
+			// videos: baseData.videos ?? [],
+			// albums: baseData.albums ?? [],
 			collections: baseData.collections ?? [],
 			tags: baseData.tags ?? [],
-			characters: baseData.characters ?? [],
+			// characters: baseData.characters ?? [],
 			worldItems: baseData.worldItems ?? [],
 			concepts: baseData.concepts ?? [],
 			prompts: baseData.prompts ?? [],
@@ -101,11 +101,11 @@ export function fromPrismaPlace(prismaPlace: PlaceFromPrisma | null): PlaceCompl
 			// Asignar el conteo de forma segura
 			_count: {
 				images: _count?.images ?? 0,
-				videos: _count?.videos ?? 0,
-				albums: _count?.albums ?? 0,
+				// videos: _count?.videos ?? 0,
+				// albums: _count?.albums ?? 0,
 				collections: _count?.collections ?? 0,
 				tags: _count?.tags ?? 0,
-				characters: _count?.characters ?? 0,
+				// characters: _count?.characters ?? 0,
 				worldItems: _count?.worldItems ?? 0,
 				concepts: _count?.concepts ?? 0,
 				prompts: _count?.prompts ?? 0,

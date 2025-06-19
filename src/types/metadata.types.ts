@@ -79,6 +79,24 @@ export interface MediaMetadata extends FileMetadata {
 	xmp?: Record<string, unknown>;
 	icc?: Record<string, unknown>;
 	ai?: AIMetadata;
+	gps?: {
+		latitude?: number;
+		longitude?: number;
+		altitude?: number;
+	};
+	// Propiedades adicionales para compatibilidad
+	colorSpace?: string;
+	colorProfile?: string;
+	hasAlpha?: boolean;
+	orientation?: number;
+	density?: number;
+	isAnimated?: boolean;
+	sizeInBytes?: number;
+	dimensions?: {
+		width: number;
+		height: number;
+	};
+	lastModified?: Date;
 }
 
 // Validadores Zod

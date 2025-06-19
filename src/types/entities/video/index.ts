@@ -9,9 +9,11 @@
 export * from './enums';
 export { VideoSchema } from './types';
 export type {
+    CreateVideoData,
+    UpdateVideoData,
     // Alias para retrocompatibilidad
-    VideoComplete as Video, VideoBase,
-    VideoComplete, VideoCreateInput,
+    VideoComplete as Video, VideoBase, VideoComplete, VideoCreateInput,
+    VideoFilters,
     VideoMetadata,
     VideoRelations,
     VideoUI,

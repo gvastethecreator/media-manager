@@ -4,25 +4,35 @@
  * @description Mapea los tipos de datos de la aplicación a los tipos de datos de Prisma para la entidad Video.
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { VideoCreateInput, VideoFilters, VideoSearchOptions, VideoUpdateInput } from '@/types/entities/video';
+import type { VideoFilters } from '@/types/entities/video/types';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('VideoMapper');
 
 /**
- * 🔄 Mapea un `VideoCreateInput` a un `Prisma.VideoCreateInput`.
+ * 🔄 Mapea un `CreateVideoData` a un `Prisma.VideoCreateInput`.
  */
-export function mapCreateVideoDataToPrisma(input: VideoCreateInput): Prisma.VideoCreateInput {
+export function mapCreateVideoDataToPrisma(input: CreateVideoData): Prisma.VideoCreateInput {
 	try {
-		const { folderId, albumIds, collectionIds, tagIds, ...rest } = input;
 		return {
-			...rest,
-			folder: { connect: { id: folderId } },
-			albums: albumIds ? { connect: albumIds.map((id) => ({ id })) } : undefined,
-			collections: collectionIds ? { connect: collectionIds.map((id) => ({ id })) } : undefined,
-			tags: tagIds ? { connect: tagIds.map((id) => ({ id })) } : undefined,
+			name: input.name,
+			path: input.path,
+			hash: input.hash,
+			size: input.size,
+			duration: input.duration,
+			width: input.width || null,
+			height: input.height || null,
+			description: input.description || null,
+			metadata: input.metadata || null,
+			thumbnail: null,
+			thumbnailSize: null,
+			thumbnailWidth: null,
+			thumbnailHeight: null,
+			isPublic: false,
+			isFavorite: false,
+			folder: { connect: { id: input.folderId } },
 		};
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de video', { error, input });
@@ -31,18 +41,18 @@ export function mapCreateVideoDataToPrisma(input: VideoCreateInput): Prisma.Vide
 }
 
 /**
- * 🔄 Mapea un `VideoUpdateInput` a un `Prisma.VideoUpdateInput`.
+ * 🔄 Mapea un `UpdateVideoData` a un `Prisma.VideoUpdateInput`.
  */
-export function mapUpdateVideoDataToPrisma(input: VideoUpdateInput): Prisma.VideoUpdateInput {
+export function mapUpdateVideoDataToPrisma(input: UpdateVideoData): Prisma.VideoUpdateInput {
 	try {
-		const { folderId, albumIds, collectionIds, tagIds, ...rest } = input;
-		return {
-			...rest,
-			folder: folderId ? { connect: { id: folderId } } : undefined,
-			albums: albumIds ? { set: albumIds.map((id) => ({ id })) } : undefined,
-			collections: collectionIds ? { set: collectionIds.map((id) => ({ id })) } : undefined,
-			tags: tagIds ? { set: tagIds.map((id) => ({ id })) } : undefined,
-		};
+		const updateData: Prisma.VideoUpdateInput = {};
+
+		if (input.name !== undefined) updateData.name = input.name;
+		if (input.description !== undefined) updateData.description = input.description;
+		if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
+		if (input.isPublic !== undefined) updateData.isPublic = input.isPublic;
+
+		return updateData;
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de video', { error, input });
 		throw new TransformerError('Error al mapear datos de actualización de video.');
@@ -50,13 +60,11 @@ export function mapUpdateVideoDataToPrisma(input: VideoUpdateInput): Prisma.Vide
 }
 
 /**
- * 🔄 Mapea `VideoSearchOptions` a `Prisma.VideoFindManyArgs`.
+ * 🔄 Mapea filtros de video a argumentos de búsqueda de Prisma.
  */
-export function mapVideoSearchOptionsToPrisma(options: VideoSearchOptions): Prisma.VideoFindManyArgs {
-	const { filters, ...rest } = options;
+export function mapVideoFiltersToPrismaArgs(filters: VideoFilters): Prisma.VideoFindManyArgs {
 	return {
-		...rest,
-		where: filters ? mapVideoFiltersToPrisma(filters) : undefined,
+		where: mapVideoFiltersToPrisma(filters),
 	};
 }
 
@@ -72,32 +80,78 @@ function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWhereInput 
 			{ description: { contains: filters.search } },
 		];
 	}
+
 	if (filters.isFavorite !== undefined) {
 		where.isFavorite = filters.isFavorite;
 	}
-	if (filters.folderId) {
-		where.folderId = filters.folderId;
+
+	if (filters.folders?.length) {
+		where.folderId = { in: filters.folders };
 	}
-	if (filters.tagIds?.length) {
-		where.tags = { some: { id: { in: filters.tagIds } } };
+
+	if (filters.tags?.length) {
+		where.tags = { some: { id: { in: filters.tags } } };
 	}
-	if (filters.albumIds?.length) {
-		where.albums = { some: { id: { in: filters.albumIds } } };
+
+	if (filters.dateRange) {
+		const dateFilter: any = {};
+		if (filters.dateRange.start) {
+			dateFilter.gte = filters.dateRange.start;
+		}
+		if (filters.dateRange.end) {
+			dateFilter.lte = filters.dateRange.end;
+		}
+		if (Object.keys(dateFilter).length > 0) {
+			where.createdAt = dateFilter;
+		}
 	}
-	if (filters.collectionIds?.length) {
-		where.collections = { some: { id: { in: filters.collectionIds } } };
+
+	if (filters.minDuration !== undefined || filters.maxDuration !== undefined) {
+		where.duration = {};
+		if (filters.minDuration !== undefined) {
+			where.duration.gte = filters.minDuration;
+		}
+		if (filters.maxDuration !== undefined) {
+			where.duration.lte = filters.maxDuration;
+		}
 	}
-	if (filters.duration) {
-		where.duration = {
-			gte: filters.duration.min,
-			lte: filters.duration.max,
-		};
+
+	if (filters.minWidth !== undefined || filters.maxWidth !== undefined) {
+		where.width = {};
+		if (filters.minWidth !== undefined) {
+			where.width.gte = filters.minWidth;
+		}
+		if (filters.maxWidth !== undefined) {
+			where.width.lte = filters.maxWidth;
+		}
 	}
-	if (filters.size) {
-		where.size = {
-			gte: filters.size.min,
-			lte: filters.size.max,
-		};
+
+	if (filters.minHeight !== undefined || filters.maxHeight !== undefined) {
+		where.height = {};
+		if (filters.minHeight !== undefined) {
+			where.height.gte = filters.minHeight;
+		}
+		if (filters.maxHeight !== undefined) {
+			where.height.lte = filters.maxHeight;
+		}
+	}
+
+	if (filters.minSize !== undefined || filters.maxSize !== undefined) {
+		where.size = {};
+		if (filters.minSize !== undefined) {
+			where.size.gte = filters.minSize;
+		}
+		if (filters.maxSize !== undefined) {
+			where.size.lte = filters.maxSize;
+		}
+	}
+
+	if (filters.hasMetadata !== undefined) {
+		where.metadata = filters.hasMetadata ? { not: null } : null;
+	}
+
+	if (filters.hasThumbnail !== undefined) {
+		where.thumbnail = filters.hasThumbnail ? { not: null } : null;
 	}
 
 	return where;

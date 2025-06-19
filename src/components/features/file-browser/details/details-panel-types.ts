@@ -1,7 +1,7 @@
-import type * as React from 'react';
 import type { FileItem } from '@/types/files';
 import type { ImageItem } from '@/types/image-item';
-import type { FileMetadata } from '@/types/metadata.types';
+import type { MediaMetadata } from '@/types/metadata.types';
+import type * as React from 'react';
 
 /**
  * Props para el componente InfoItem que muestra información en formato etiqueta-valor
@@ -25,7 +25,7 @@ export interface DetailsPanelProps {
  * Props para componentes que muestran metadatos específicos
  */
 export interface MetadataComponentProps {
-	metadata: FileMetadata | null;
+	metadata: MediaMetadata | null;
 }
 
 /**
@@ -33,7 +33,7 @@ export interface MetadataComponentProps {
  */
 export interface ItemWithMetadataProps {
 	item: FileItem;
-	metadata: FileMetadata | null;
+	metadata: MediaMetadata | null;
 }
 
 /**
@@ -48,7 +48,7 @@ export interface ItemComponentProps {
  */
 export interface BasicInfoProps {
 	item: ImageItem;
-	metadata: FileMetadata | null;
+	metadata: MediaMetadata | null;
 }
 
 /**

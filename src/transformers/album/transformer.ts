@@ -24,12 +24,34 @@ export interface AlbumFromPrisma {
 	isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-	// Relaciones
+	// Relaciones (solo las que realmente existen en Prisma)
 	images: any[];
-	videos: any[];
+	// videos: any[]; // ❌ ELIMINADO - No existe relación Album-Video en Prisma
+	collections: any[];
+	tags: any[];
+	// characters: any[]; // ❌ ELIMINADO - No existe relación Album-Character en Prisma
+	places: any[];
+	worldItems: any[];
+	concepts: any[];
+	prompts: any[];
+	notes: any[];
+	wildcards: any[];
+	properties: any[];
+	groups: any[];
 	_count?: {
 		images?: number;
-		videos?: number;
+		// videos?: number; // ❌ ELIMINADO - No existe relación Album-Video en Prisma
+		collections?: number;
+		tags?: number;
+		// characters?: number; // ❌ ELIMINADO - No existe relación Album-Character en Prisma
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
 	};
 }
 
@@ -52,10 +74,32 @@ export function fromPrismaAlbum(prismaAlbum: AlbumFromPrisma | null): AlbumWithR
 			...baseData,
 			category: baseData.category ?? 'general',
 			images: baseData.images ?? [],
-			videos: baseData.videos ?? [],
+			// videos: baseData.videos ?? [], // ❌ ELIMINADO - No existe relación Album-Video en Prisma
+			collections: baseData.collections ?? [],
+			tags: baseData.tags ?? [],
+			// characters: baseData.characters ?? [], // ❌ ELIMINADO - No existe relación Album-Character en Prisma
+			places: baseData.places ?? [],
+			worldItems: baseData.worldItems ?? [],
+			concepts: baseData.concepts ?? [],
+			prompts: baseData.prompts ?? [],
+			notes: baseData.notes ?? [],
+			wildcards: baseData.wildcards ?? [],
+			properties: baseData.properties ?? [],
+			groups: baseData.groups ?? [],
 			_count: {
 				images: _count?.images ?? 0,
-				videos: _count?.videos ?? 0,
+				// videos: _count?.videos ?? 0, // ❌ ELIMINADO - No existe en esquema Prisma Album
+				collections: _count?.collections ?? 0,
+				tags: _count?.tags ?? 0,
+				// characters: _count?.characters ?? 0, // ❌ ELIMINADO - No existe en esquema Prisma Album
+				places: _count?.places ?? 0,
+				worldItems: _count?.worldItems ?? 0,
+				concepts: _count?.concepts ?? 0,
+				prompts: _count?.prompts ?? 0,
+				notes: _count?.notes ?? 0,
+				wildcards: _count?.wildcards ?? 0,
+				properties: _count?.properties ?? 0,
+				groups: _count?.groups ?? 0,
 			},
 		};
 	} catch (error) {

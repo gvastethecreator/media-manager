@@ -1,6 +1,6 @@
+import type { AIMetadata, FileMetadata } from '@/types/metadata';
 import type { ImageComplete as Image } from '@prisma/client';
 import type sharp from 'sharp';
-import type { AIMetadata, FileMetadata } from '@/types/metadata';
 
 // Configuración de retry
 export interface RetryConfig {
@@ -54,12 +54,7 @@ export interface MetadataOptions {
 	retry?: RetryConfig;
 }
 
-// Extensión de FileMetadata para incluir formato
-export interface ExtendedFileMetadata extends FileMetadata {
-	format?: ImageFormat;
-	colorSpace?: string;
-	hasAlpha?: boolean;
-}
+// ELIMINADO: ExtendedFileMetadata - Usar directamente FileMetadata con campos adicionales según sea necesario
 
 // Interfaz para manejar metadatos de cámara y ubicación
 export interface MetadataWithCamera extends Partial<FileMetadata> {
