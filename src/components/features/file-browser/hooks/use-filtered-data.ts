@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 /**
  * Hook personalizado para filtrar y ordenar datos según las opciones de vista globales

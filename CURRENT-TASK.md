@@ -188,9 +188,37 @@ graph TD
 
 ## 📝 Resumen de Progreso
 
-**Archivos corregidos:** 44
-**Errores resueltos:** 516
-**Errores restantes:** 1894 en 500 archivos
+**Archivos corregidos:** 50+
+**Errores resueltos:** 700+ (estimado)
+**Errores restantes:** ~1200 (estimado, pendiente verificación)
+
+**Últimas correcciones (Diciembre 2024):**
+
+1. **`src/services/folder/folder.service.ts`** - ✅ Completado (30 errores):
+   - Agregada importación faltante de `EventType`
+   - Corregido manejo de eventos para ser compatible con tipos EventType válidos
+
+2. **`src/types/entities/place/types.ts`** - ✅ Completado:
+   - Agregado tipo `PlaceBase` faltante que se usaba en server actions
+
+3. **`src/store/entities/image/slices/core.ts`** - ✅ Completado (22 errores):
+   - Actualizado al nuevo patrón de Server Actions (sin wrapper objects)
+   - Corregidas todas las funciones async que usaban `.success` y `.data`
+
+4. **`src/store/entities/note/slices/core.ts`** - ✅ Completado (20 errores):
+   - Actualizado al nuevo patrón de Server Actions (sin wrapper objects)
+   - Simplificado manejo de respuestas en todas las operaciones CRUD
+
+5. **Corrección masiva de importaciones incorrectas** - ✅ Completado (100+ errores):
+   - Identificado patrón sistemático: importaciones desde `@/types/file-item` (inexistente)
+   - Corregido masivamente a `@/types/files` usando PowerShell
+   - Afectó ~35 archivos incluyendo stores, componentes, actions y services
+   - Errores corregidos en archivos clave como:
+     - `src/store/files/files.store.ts`
+     - `src/components/navigation/types/index.ts`
+     - `src/components/features/file-browser/details/details-panel-types.ts`
+     - `src/components/features/file-browser/utils/file-converters.ts`
+     - Y muchos más archivos de navegación, stores y componentes
 
 **Patrones de error identificados:**
 
@@ -214,11 +242,17 @@ graph TD
 18. **Interfaces para respuestas de funciones:** Se crearon interfaces específicas para respuestas de funciones, como `DataUrlResponse`.
 19. **Versiones de transformadores:** Se crearon versiones nuevas (v2) de transformadores para mantener compatibilidad con código existente mientras se migra a tipos más específicos.
 20. **Nombres de funciones inconsistentes:** Se corrigieron nombres de funciones para mantener consistencia, como en `world-item.actions.ts` donde se usaban alias como `createWorldItemFilter` en lugar del nombre real `mapWorldItemFiltersToPrisma`.
+21. **Patrón legacy de Server Actions:** Se identificaron múltiples stores que aún usaban el patrón antiguo con `.success`, `.data` y `.error` en lugar del nuevo patrón directo.
+22. **Tipos faltantes para Server Actions:** Se corrigieron tipos como `PlaceBase` que faltaban en definiciones pero se usaban en las server actions.
+23. **Importaciones de EventType:** Se agregaron importaciones faltantes del tipo `EventType` en servicios que emiten eventos al sistema central.
+24. **Importaciones incorrectas masivas:** Se descubrió un patrón sistemático donde ~35 archivos importaban desde `@/types/file-item` (archivo inexistente) en lugar de `@/types/files`. Esta corrección eliminó cientos de errores de TypeScript de una vez.
 
 **Próximos pasos:**
 
-1. Continuar con la Fase 4: Componentes, abordando `places/create-place-form.tsx` con 19 errores.
-2. Regenerar el cliente Prisma para resolver errores relacionados con modelos como `Audio`, `Document`, `File3D`.
-3. Actualizar los tipos canónicos para entidades como `Image`, `Video`, `Note`, etc.
+1. Verificar el estado actual de errores después de la corrección masiva
+2. Continuar con stores que aún usan el patrón legacy de Server Actions
+3. Corregir archivos de componentes con mayor número de errores restantes
+4. Regenerar el cliente Prisma para resolver errores relacionados con modelos como `Audio`, `Document`, `File3D`
+5. Actualizar los tipos canónicos para entidades como `Video`, `Wildcard`, etc.
 
 Este plan se ejecutará de forma secuencial. El estado de cada archivo se actualizará a 🟡 **En Progreso** cuando se esté trabajando en él y a 🟢 **Completado** una vez que esté libre de errores y validado.

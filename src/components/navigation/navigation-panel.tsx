@@ -3,7 +3,7 @@
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import type { ViewType } from '@/types/file-item';
+import type { ViewType } from '@/types/files';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type CategoryChildrenRef, NavCategoryChildren } from './components/nav-category-children';
 import { NavCategoryItem } from './components/nav-category-item';

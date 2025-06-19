@@ -11,7 +11,7 @@ import { usePromptStore } from '@/store/entities/prompt/store';
 import { useTagStore } from '@/store/entities/tag';
 import { useWorldItemStore } from '@/store/entities/world-item';
 import { useNavigationStore } from '@/store/navigation.store';
-import type { ViewType } from '@/types/file-item';
+import type { ViewType } from '@/types/files';
 
 const navLogger = clientLogger.withContext('NavigationUtils');
 

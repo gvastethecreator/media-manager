@@ -7,7 +7,7 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 const logger = clientLogger.withContext('CollectionContentView');
 
