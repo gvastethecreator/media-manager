@@ -5,21 +5,21 @@
  */
 
 import type {
-	Album,
-	Character,
-	Collection,
-	Concept,
-	Group,
-	Image,
-	Note,
-	Prisma,
-	Place as PrismaPlace,
-	Prompt,
-	Property,
-	Tag,
-	Video,
-	Wildcard,
-	WorldItem,
+    Album,
+    Character,
+    Collection,
+    Concept,
+    Group,
+    Image,
+    Note,
+    Prisma,
+    Place as PrismaPlace,
+    Prompt,
+    Property,
+    Tag,
+    Video,
+    Wildcard,
+    WorldItem,
 } from '@prisma/client';
 
 /**

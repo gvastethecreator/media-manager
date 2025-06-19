@@ -7,6 +7,13 @@
 
 // Exportar enumeraciones y constantes
 export * from './enums';
+// Exportar tipos extendidos explícitamente
+// 🎯 Alias principal para el tipo WorldItem
+export type {
+    ParsedWorldItem,
+    ParsedWorldItemWithRelations,
+    WorldItemExtended
+} from './extended';
 // Exportar tipos estadísticos
 export * from './stats-types';
 // Re-exportación explícita para compatibilidad con código existente
@@ -15,10 +22,3 @@ export type { WorldItemDeserialized as WorldItem } from './types';
 // Exportar todos los tipos canónicos
 export * from './types';
 
-// Exportar tipos extendidos explícitamente
-// 🎯 Alias principal para el tipo WorldItem
-export type {
-	ParsedWorldItem,
-	ParsedWorldItemWithRelations,
-	WorldItemExtended,
-} from './extended';

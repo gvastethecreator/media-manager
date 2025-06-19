@@ -9,11 +9,11 @@
 export * from './enums';
 // Re-exportación de tipos extendidos (para compatibilidad con código existente)
 export type {
-	AlbumComplete,
-	AlbumWithStats,
-	FolderDistribution,
-	ParsedAlbum,
-	ParsedAlbumWithRelations,
+    AlbumComplete,
+    AlbumWithStats,
+    FolderDistribution,
+    ParsedAlbum,
+    ParsedAlbumWithRelations
 } from './extended';
 
 // Exportar tipos estadísticos
