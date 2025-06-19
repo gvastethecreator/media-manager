@@ -18,14 +18,13 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import {
-    WorldItemSortCriteria,
     WorldItemViewMode
 } from '@/types/entities/world-item/enums';
 import type {
-    WorldItemDeserialized,
     WorldItemCreateInput,
-    WorldItemUpdateInput,
-    WorldItemFilters
+    WorldItemDeserialized,
+    WorldItemFilters,
+    WorldItemUpdateInput
 } from '@/types/entities/world-item/types';
 import type { WorldItemStore } from './types';
 
