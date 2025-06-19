@@ -8,7 +8,7 @@
 import * as CollectionActions from './collection.actions';
 
 // Re-exportamos cada función como asíncrona para cumplir con las restricciones de 'use server'
-export const getCollections = CollectionActions.getCollections;
+export const searchCollections = CollectionActions.searchCollections;
 export const getCollection = CollectionActions.getCollection;
 export const createCollection = CollectionActions.createCollection;
 export const updateCollection = CollectionActions.updateCollection;

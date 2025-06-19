@@ -5,19 +5,18 @@
 
 // Exportar los tipos principales
 export type {
-    InterfacePreferences,
-    InterfaceSettingsState, SettingsBase,
-    SettingsCreateInput,
-    SettingsUpdateInput
+	InterfacePreferences,
+	InterfaceSettingsState,
+	SettingsBase,
+	SettingsCreateInput,
+	SettingsUpdateInput,
 } from './types';
 
 // Exportar el esquema de validación
-export {
-    interfacePreferencesSchema
-} from './interface.schema';
+export { interfacePreferencesSchema } from './interface.schema';
 
 // Exportar tipos inferidos de esquemas
 export type {
-    InterfacePreferencesInput,
-    InterfacePreferencesOutput
+	InterfacePreferencesInput,
+	InterfacePreferencesOutput,
 } from './interface.schema';

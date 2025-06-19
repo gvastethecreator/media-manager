@@ -7,65 +7,65 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import type { PlaceComplete } from '@/types/entities/place';
 import { TransformerError } from '@/utils/transformers/errors';
 import {
-    deserializePlaceDangers,
-    deserializePlaceFilters,
-    deserializePlaceResources,
-    deserializePlaceStats,
+	deserializePlaceDangers,
+	deserializePlaceFilters,
+	deserializePlaceResources,
+	deserializePlaceStats,
 } from './serializers';
 
 const logger = serverLogger.withContext('PlaceTransformer');
 
 // Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
 interface PlaceFromPrisma {
-    id: string;
-    name: string;
-    description: string | null;
-    category: string;
-    type: string;
-    region: string | null;
-    location: string | null;
-    history: string | null;
-    climate: string | null;
-    culture: string | null;
-    government: string | null;
-    economy: string | null;
-    dangers: string;
-    resources: string;
-    stats: string;
-    filters: string;
-    featuredImage: string | null;
-    isFavorite: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-    // Relaciones
-    images: any[];
-    videos: any[];
-    albums: any[];
-    collections: any[];
-    tags: any[];
-    characters: any[];
-    worldItems: any[];
-    concepts: any[];
-    prompts: any[];
-    notes: any[];
-    wildcards: any[];
-    properties: any[];
-    groups: any[];
-    _count: {
-        images?: number;
-        videos?: number;
-        albums?: number;
-        collections?: number;
-        tags?: number;
-        characters?: number;
-        worldItems?: number;
-        concepts?: number;
-        prompts?: number;
-        notes?: number;
-        wildcards?: number;
-        properties?: number;
-        groups?: number;
-    };
+	id: string;
+	name: string;
+	description: string | null;
+	category: string;
+	type: string;
+	region: string | null;
+	location: string | null;
+	history: string | null;
+	climate: string | null;
+	culture: string | null;
+	government: string | null;
+	economy: string | null;
+	dangers: string;
+	resources: string;
+	stats: string;
+	filters: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	// Relaciones
+	images: any[];
+	videos: any[];
+	albums: any[];
+	collections: any[];
+	tags: any[];
+	characters: any[];
+	worldItems: any[];
+	concepts: any[];
+	prompts: any[];
+	notes: any[];
+	wildcards: any[];
+	properties: any[];
+	groups: any[];
+	_count: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }
 
 /**

@@ -5,12 +5,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    VideoCreateInput,
-    VideoFilters,
-    VideoSearchOptions,
-    VideoUpdateInput,
-} from '@/types/entities/video';
+import type { VideoCreateInput, VideoFilters, VideoSearchOptions, VideoUpdateInput } from '@/types/entities/video';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 
@@ -57,9 +52,7 @@ export function mapUpdateVideoDataToPrisma(input: VideoUpdateInput): Prisma.Vide
 /**
  * 🔄 Mapea `VideoSearchOptions` a `Prisma.VideoFindManyArgs`.
  */
-export function mapVideoSearchOptionsToPrisma(
-	options: VideoSearchOptions
-): Prisma.VideoFindManyArgs {
+export function mapVideoSearchOptionsToPrisma(options: VideoSearchOptions): Prisma.VideoFindManyArgs {
 	const { filters, ...rest } = options;
 	return {
 		...rest,

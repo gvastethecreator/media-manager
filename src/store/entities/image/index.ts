@@ -57,4 +57,3 @@ export { createImageCoreSlice } from './slices/core';
 export { createImageUISlice } from './slices/ui';
 // Exportar todo desde types
 export * from './types';
-

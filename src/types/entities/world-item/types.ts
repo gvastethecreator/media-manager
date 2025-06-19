@@ -7,13 +7,10 @@
  */
 
 import type { WorldItem as PrismaWorldItem } from '@prisma/client';
-import type { Image } from '../image';
+import type { Image } from '../image/types';
 import type {
-    WorldItemCategory,
-    WorldItemRarity,
     WorldItemRelationshipType,
     WorldItemSortCriteria,
-    WorldItemType,
     WorldItemViewMode
 } from './enums';
 
@@ -118,10 +115,11 @@ export interface WorldItemCounts {
  * 🔍 Filtros para búsqueda de objetos del mundo
  */
 export interface WorldItemFilters {
-	query?: string;
-	types?: WorldItemType[];
-	categories?: WorldItemCategory[];
-	rarities?: WorldItemRarity[];
+	sortBy: WorldItemSortCriteria;
+	searchTerm: string | null;
+	type: string | null;
+	category: string | null;
+	rarity: string | null;
 	minLevel?: number;
 	maxLevel?: number;
 	minValue?: number;

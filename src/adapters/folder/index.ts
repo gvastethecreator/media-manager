@@ -5,12 +5,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { transformFolderToExtended } from '@/transformers/folder';
-import type {
-    CreateFolderData,
-    FolderComplete,
-    FolderExtended,
-    UpdateFolderData,
-} from '@/types/entities/folder';
+import type { CreateFolderData, FolderComplete, FolderExtended, UpdateFolderData } from '@/types/entities/folder';
 
 const adapterLogger = serverLogger.withContext('FolderAdapter');
 
@@ -29,9 +24,7 @@ export interface ActionResponse<T = any> {
  * @param folderResponse Respuesta del server action que devuelve una carpeta completa.
  * @returns Respuesta en el nuevo formato ActionResponse<FolderExtended>.
  */
-export function adaptFolderResponse(
-	folderResponse: FolderComplete | null
-): ActionResponse<FolderExtended> {
+export function adaptFolderResponse(folderResponse: FolderComplete | null): ActionResponse<FolderExtended> {
 	if (!folderResponse) {
 		return {
 			success: false,
@@ -74,9 +67,7 @@ export function adaptFoldersArray(
 			};
 		}
 
-		const transformedFolders = foldersResponse.map((folder) =>
-			transformFolderToExtended(folder)
-		);
+		const transformedFolders = foldersResponse.map((folder) => transformFolderToExtended(folder));
 
 		return {
 			success: true,
@@ -151,8 +142,7 @@ export function adaptProcessStatus(status: ProcessStatus): ActionResponse<Proces
  * @returns Una respuesta de acción de error.
  */
 export function handleFolderActionError(error: unknown): ActionResponse {
-	const errorMessage =
-		error instanceof Error ? error.message : 'Ocurrió un error desconocido.';
+	const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error desconocido.';
 	adapterLogger.error('❌ Error en la acción de carpeta:', { error });
 
 	return {

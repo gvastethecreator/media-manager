@@ -5,9 +5,9 @@
 
 // Exportar los tipos principales
 export type {
-    AudioBase,
-    AudioCreateInput,
-    AudioUpdateInput
+	AudioBase,
+	AudioCreateInput,
+	AudioUpdateInput,
 } from './types';
 
 // Exportar el esquema de validación

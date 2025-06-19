@@ -120,7 +120,7 @@ export function GroupCard({
 				borderRadius: tcgMode ? '0.5rem' : '0.375rem',
 				boxShadow: tcgMode ? `0 0 0 1px ${primaryColor}30, 0 2px 10px ${primaryColor}20` : undefined,
 				backgroundColor: tcgMode ? '#1a1a1a' : undefined,
-				...(isSelected && { '--tw-ring-color': primaryColor } as React.CSSProperties),
+				...(isSelected && ({ '--tw-ring-color': primaryColor } as React.CSSProperties)),
 			}}
 		>
 			{/* Encabezado */}
@@ -211,9 +211,9 @@ export function GroupCard({
 				onMouseEnter={() => setIsHovered(true)}
 				onMouseLeave={() => setIsHovered(false)}
 				className={cn(
-					"cursor-pointer text-left p-0 m-0 w-full border-0 bg-transparent focus:outline-none focus:ring-2 focus:ring-offset-2",
-					!disabled && "hover:opacity-100",
-					disabled && "cursor-not-allowed"
+					'cursor-pointer text-left p-0 m-0 w-full border-0 bg-transparent focus:outline-none focus:ring-2 focus:ring-offset-2',
+					!disabled && 'hover:opacity-100',
+					disabled && 'cursor-not-allowed'
 				)}
 				type="button"
 				disabled={disabled}

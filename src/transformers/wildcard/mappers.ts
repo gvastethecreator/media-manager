@@ -5,10 +5,10 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    WildcardCreateInput,
-    WildcardFilters,
-    WildcardSearchOptions,
-    WildcardUpdateInput,
+	WildcardCreateInput,
+	WildcardFilters,
+	WildcardSearchOptions,
+	WildcardUpdateInput,
 } from '@/types/entities/wildcard';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -56,9 +56,7 @@ export function mapUpdateWildcardDataToPrisma(input: WildcardUpdateInput): Prism
 /**
  * 🔄 Mapea `WildcardSearchOptions` a `Prisma.WildcardFindManyArgs`.
  */
-export function mapWildcardSearchOptionsToPrisma(
-	options: WildcardSearchOptions
-): Prisma.WildcardFindManyArgs {
+export function mapWildcardSearchOptionsToPrisma(options: WildcardSearchOptions): Prisma.WildcardFindManyArgs {
 	const { filters, ...rest } = options;
 	return {
 		...rest,

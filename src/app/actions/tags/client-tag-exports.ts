@@ -10,30 +10,27 @@
  * Constantes y funciones que se exportan desde los transformadores de tag
  */
 export {
-    // Constantes
-    DEFAULT_TAG_COLOR,
-    DEFAULT_TAG_EMOJI,
-    // Funciones de extensión
-    extendTag,
-    extendTags,
-    // Transformadores principales
-    fromPrismaTag,
-    fromPrismaTags,
-    // Funciones de mapeo
-    mapCompleteToTag,
-    mapTagToComplete,
-    tagToDisplayObject,
-
-    // Funciones de conversión
-    toCreateTagData,
-    toPrismaTag,
-    toRelatedTag,
-    toSearchFilters,
-    toSearchOptions,
-    toSearchResult,
-    toUpdateTagData,
-
-    // Validación
-    validateTag
+	// Constantes
+	DEFAULT_TAG_COLOR,
+	DEFAULT_TAG_EMOJI,
+	// Funciones de extensión
+	extendTag,
+	extendTags,
+	// Transformadores principales
+	fromPrismaTag,
+	fromPrismaTags,
+	// Funciones de mapeo
+	mapCompleteToTag,
+	mapTagToComplete,
+	tagToDisplayObject,
+	// Funciones de conversión
+	toCreateTagData,
+	toPrismaTag,
+	toRelatedTag,
+	toSearchFilters,
+	toSearchOptions,
+	toSearchResult,
+	toUpdateTagData,
+	// Validación
+	validateTag,
 } from '@/transformers/tag/v2';
-

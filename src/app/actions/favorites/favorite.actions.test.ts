@@ -1,4 +1,3 @@
-
 // 🧪 Tests para acciones de favoritos (server actions)
 describe('Favorite Actions', () => {
 	it('debe agregar y eliminar favoritos correctamente (mock)', async () => {

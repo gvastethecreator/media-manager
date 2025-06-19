@@ -8,20 +8,13 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import {
-    fromPrismaFolder,
-    fromPrismaFolders,
-    mapCreateFolderDataToPrisma,
-    mapUpdateFolderDataToPrisma,
+	fromPrismaFolder,
+	fromPrismaFolders,
+	mapCreateFolderDataToPrisma,
+	mapUpdateFolderDataToPrisma,
 } from '@/transformers/folder';
-import type {
-    FolderComplete,
-    FolderCreateInput,
-    FolderUpdateInput,
-} from '@/types/entities/folder';
-import {
-    CreateFolderSchema,
-    UpdateFolderSchema,
-} from '@/types/entities/folder/schema';
+import type { FolderComplete, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder';
+import { CreateFolderSchema, UpdateFolderSchema } from '@/types/entities/folder/schema';
 import fs from 'fs/promises';
 import { revalidatePath } from 'next/cache';
 
@@ -43,9 +36,7 @@ const folderWithRelations = {
 /**
  * Crea una nueva carpeta en la base de datos.
  */
-export async function createFolder(
-	input: FolderCreateInput
-): Promise<FolderComplete> {
+export async function createFolder(input: FolderCreateInput): Promise<FolderComplete> {
 	crudLogger.info('📁 Creating new folder:', input);
 	const validatedInput = CreateFolderSchema.parse(input);
 
@@ -64,9 +55,7 @@ export async function createFolder(
 			throw new Error(`La ruta '${validatedInput.path}' no es un directorio válido.`);
 		}
 	} catch (error) {
-		throw new Error(
-			`La carpeta no existe o no es accesible en la ruta: '${validatedInput.path}'.`
-		);
+		throw new Error(`La carpeta no existe o no es accesible en la ruta: '${validatedInput.path}'.`);
 	}
 
 	// 3. Mapear y crear en la base de datos
@@ -84,10 +73,7 @@ export async function createFolder(
 /**
  * Actualiza una carpeta existente.
  */
-export async function updateFolder(
-	id: string,
-	input: FolderUpdateInput
-): Promise<FolderComplete> {
+export async function updateFolder(id: string, input: FolderUpdateInput): Promise<FolderComplete> {
 	crudLogger.info(`📝 Updating folder ${id}:`, input);
 	const validatedInput = UpdateFolderSchema.parse(input);
 
@@ -96,9 +82,7 @@ export async function updateFolder(
 			where: { path: validatedInput.path, id: { not: id } },
 		});
 		if (existing) {
-			throw new Error(
-				`La ruta de la carpeta '${validatedInput.path}' ya está en uso por otra carpeta.`
-			);
+			throw new Error(`La ruta de la carpeta '${validatedInput.path}' ya está en uso por otra carpeta.`);
 		}
 	}
 

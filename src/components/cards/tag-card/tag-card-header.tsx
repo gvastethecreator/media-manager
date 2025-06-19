@@ -2,7 +2,6 @@ import type { type TagCategory } from '@/types/entities/tag';
 import { TagRarity } from '@/types/entities/tag';
 import { BookOpen, Heart, Sparkles, TagBase as TagIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-;
 
 export interface TagCardHeaderProps {
 	name: string;

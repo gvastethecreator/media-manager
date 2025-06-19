@@ -4,29 +4,26 @@
  */
 
 import {
-    getVideoVisualConfig,
-    updateVideoVisualConfig as updateVideoVisualConfigAction,
+	getVideoVisualConfig,
+	updateVideoVisualConfig as updateVideoVisualConfigAction,
 } from '@/app/actions/videos/video-visual-config.actions';
 import {
-    createVideo as createServerVideo,
-    deleteVideo as deleteServerVideo,
-    findVideos,
-    getVideo as getServerVideo,
+	createVideo as createServerVideo,
+	deleteVideo as deleteServerVideo,
+	findVideos,
+	getVideo as getServerVideo,
 } from '@/app/actions/videos/video.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { mapVideoVisualConfigCompleteUpdateToPrisma } from '@/transformers/video/mappers';
-import {
-    transformVideo,
-    transformVideos,
-} from '@/transformers/video/serializers';
+import { transformVideo, transformVideos } from '@/transformers/video/serializers';
 import type {
-    CreateVideoData,
-    UpdateVideoData,
-    Video,
-    VideoBase,
-    VideoFilters,
-    VideoVisualConfig,
+	CreateVideoData,
+	UpdateVideoData,
+	Video,
+	VideoBase,
+	VideoFilters,
+	VideoVisualConfig,
 } from '@/types/entities/video';
 import type { StateCreator } from 'zustand';
 import type { VideoState } from '../types';
@@ -41,20 +38,13 @@ const videoLogger = clientLogger.withContext('VideoStore');
  * @param filters - Objeto de filtros a aplicar.
  * @returns Un nuevo array con los videos filtrados.
  */
-function applyVideoFilters(
-	videos: Video[],
-	filters: Partial<VideoFilters>,
-): Video[] {
+function applyVideoFilters(videos: Video[], filters: Partial<VideoFilters>): Video[] {
 	let filteredVideos = videos;
 	if (filters.folderId) {
-		filteredVideos = filteredVideos.filter(
-			(v) => v.folderId === filters.folderId,
-		);
+		filteredVideos = filteredVideos.filter((v) => v.folderId === filters.folderId);
 	}
 	if (filters.isFavorite !== undefined) {
-		filteredVideos = filteredVideos.filter(
-			(v) => v.isFavorite === filters.isFavorite,
-		);
+		filteredVideos = filteredVideos.filter((v) => v.isFavorite === filters.isFavorite);
 	}
 	// Añadir más lógicas de filtro aquí
 	return filteredVideos;
@@ -94,36 +84,22 @@ export interface VideoCoreSlice {
 	// Visual Config
 	updateVideoVisualConfig: (
 		videoId: string,
-		config: Partial<VideoVisualConfig>,
+		config: Partial<VideoVisualConfig>
 	) => Promise<VideoVisualConfig | undefined>;
-	fetchVideoVisualConfig: (
-		videoId: string,
-	) => Promise<VideoVisualConfig | undefined>;
+	fetchVideoVisualConfig: (videoId: string) => Promise<VideoVisualConfig | undefined>;
 }
 
 // --- Slice Implementation ---
 
-export const createVideoCoreSlice: StateCreator<
-	VideoState & VideoCoreSlice,
-	[],
-	[],
-	VideoCoreSlice
-> = (set, get) => ({
+export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [], [], VideoCoreSlice> = (set, get) => ({
 	// --- Getters ---
 	getVideo: (id) => get().core.videos[id],
 	getVideos: () => Object.values(get().core.videos),
-	getVideosByFolder: (folderId) =>
-		Object.values(get().core.videos).filter(
-			(video) => video.folderId === folderId,
-		),
+	getVideosByFolder: (folderId) => Object.values(get().core.videos).filter((video) => video.folderId === folderId),
 
 	// --- Selectores avanzados ---
 	selectVideos: (options = {}) => {
-		const {
-			filters = {},
-			sortBy = 'createdAt',
-			sortDirection = 'desc',
-		} = options;
+		const { filters = {}, sortBy = 'createdAt', sortDirection = 'desc' } = options;
 		let videos = Object.values(get().core.videos);
 
 		videos = applyVideoFilters(videos, filters);
@@ -137,15 +113,11 @@ export const createVideoCoreSlice: StateCreator<
 			if (valueB === null || valueB === undefined) return -1;
 
 			if (typeof valueA === 'string' && typeof valueB === 'string') {
-				return sortDirection === 'asc'
-					? valueA.localeCompare(valueB)
-					: valueB.localeCompare(valueA);
+				return sortDirection === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
 			}
 
-			const numA =
-				valueA instanceof Date ? valueA.getTime() : (valueA as number);
-			const numB =
-				valueB instanceof Date ? valueB.getTime() : (valueB as number);
+			const numA = valueA instanceof Date ? valueA.getTime() : (valueA as number);
+			const numB = valueB instanceof Date ? valueB.getTime() : (valueB as number);
 
 			return sortDirection === 'asc' ? numA - numB : numB - numA;
 		});
@@ -172,7 +144,7 @@ export const createVideoCoreSlice: StateCreator<
 				acc[video.id] = video;
 				return acc;
 			},
-			{} as Record<string, Video>,
+			{} as Record<string, Video>
 		);
 		set((state) => ({
 			core: {
@@ -205,8 +177,7 @@ export const createVideoCoreSlice: StateCreator<
 	},
 
 	// --- Estado de carga y errores ---
-	setLoading: (isLoading) =>
-		set((state) => ({ core: { ...state.core, isLoading } })),
+	setLoading: (isLoading) => set((state) => ({ core: { ...state.core, isLoading } })),
 	setError: (error) => set((state) => ({ core: { ...state.core, error } })),
 
 	// --- Acciones Asíncronas ---
@@ -299,19 +270,14 @@ export const createVideoCoreSlice: StateCreator<
 	updateVideoVisualConfig: async (videoId, config) => {
 		try {
 			const prismaData = mapVideoVisualConfigCompleteUpdateToPrisma(config);
-			const response = await updateVideoVisualConfigAction(
-				videoId,
-				prismaData,
-			);
+			const response = await updateVideoVisualConfigAction(videoId, prismaData);
 
 			if (response.success && response.data) {
 				get().updateVideo(videoId, { visualConfig: response.data });
 				toastService.success('Configuración visual actualizada');
 				return response.data;
 			}
-			toastService.error(
-				response.error ?? 'Error updating visual config',
-			);
+			toastService.error(response.error ?? 'Error updating visual config');
 			return undefined;
 		} catch (e) {
 			videoLogger.error('Failed to update visual config', { error: e });

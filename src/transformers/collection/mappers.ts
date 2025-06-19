@@ -5,10 +5,10 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    CollectionCreateInput,
-    CollectionFilters,
-    CollectionSearchOptions,
-    CollectionUpdateInput,
+	CollectionCreateInput,
+	CollectionFilters,
+	CollectionSearchOptions,
+	CollectionUpdateInput,
 } from '@/types/entities/collection';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -18,9 +18,7 @@ const logger = serverLogger.withContext('CollectionMapper');
 /**
  * 🔄 Mapea un `CollectionCreateInput` a un `Prisma.CollectionCreateInput`.
  */
-export function mapCreateCollectionDataToPrisma(
-	input: CollectionCreateInput
-): Prisma.CollectionCreateInput {
+export function mapCreateCollectionDataToPrisma(input: CollectionCreateInput): Prisma.CollectionCreateInput {
 	try {
 		const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = input;
 
@@ -41,9 +39,7 @@ export function mapCreateCollectionDataToPrisma(
 /**
  * 🔄 Mapea un `CollectionUpdateInput` a un `Prisma.CollectionUpdateInput`.
  */
-export function mapUpdateCollectionDataToPrisma(
-	input: CollectionUpdateInput
-): Prisma.CollectionUpdateInput {
+export function mapUpdateCollectionDataToPrisma(input: CollectionUpdateInput): Prisma.CollectionUpdateInput {
 	try {
 		const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = input;
 
@@ -64,9 +60,7 @@ export function mapUpdateCollectionDataToPrisma(
 /**
  * 🔄 Mapea `CollectionSearchOptions` a `Prisma.CollectionFindManyArgs`.
  */
-export function mapCollectionSearchOptionsToPrisma(
-	options: CollectionSearchOptions
-): Prisma.CollectionFindManyArgs {
+export function mapCollectionSearchOptionsToPrisma(options: CollectionSearchOptions): Prisma.CollectionFindManyArgs {
 	const { filters, skip, take, orderBy, include } = options;
 
 	return {
@@ -74,13 +68,15 @@ export function mapCollectionSearchOptionsToPrisma(
 		skip,
 		take,
 		orderBy,
-		include: include ? {
-			images: include.images || false,
-			tags: include.tags || false,
-			groups: include.groups || false,
-			properties: include.properties || false,
-			wildcards: include.wildcards || false,
-		} : undefined,
+		include: include
+			? {
+					images: include.images || false,
+					tags: include.tags || false,
+					groups: include.groups || false,
+					properties: include.properties || false,
+					wildcards: include.wildcards || false,
+				}
+			: undefined,
 	};
 }
 
@@ -113,11 +109,11 @@ function mapCollectionFiltersToPrisma(filters: CollectionFilters): Prisma.Collec
 			...(where.images || {}),
 			...(filters.imageCount.min !== undefined || filters.imageCount.max !== undefined
 				? {
-					_count: {
-						...(filters.imageCount.min !== undefined ? { gte: filters.imageCount.min } : {}),
-						...(filters.imageCount.max !== undefined ? { lte: filters.imageCount.max } : {}),
-					},
-				}
+						_count: {
+							...(filters.imageCount.min !== undefined ? { gte: filters.imageCount.min } : {}),
+							...(filters.imageCount.max !== undefined ? { lte: filters.imageCount.max } : {}),
+						},
+					}
 				: {}),
 		};
 	}

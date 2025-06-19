@@ -3,23 +3,23 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import {
-    determineFileType,
-    determineMimeType,
-    generateFileId,
-    mapStatsToFileInfo,
-    serializeDirectoryContents,
-    serializeFileOperationResult,
+	determineFileType,
+	determineMimeType,
+	generateFileId,
+	mapStatsToFileInfo,
+	serializeDirectoryContents,
+	serializeFileOperationResult,
 } from '@/transformers/file';
 import {
-    type DirectoryReadResult,
-    type FileBase,
-    type FileCopyMoveResult,
-    FileErrorCode,
-    FileEventType,
-    type FileInfo,
-    type FileOperationOptions,
-    type FileOperationResult,
-    FileType,
+	type DirectoryReadResult,
+	type FileBase,
+	type FileCopyMoveResult,
+	FileErrorCode,
+	FileEventType,
+	type FileInfo,
+	type FileOperationOptions,
+	type FileOperationResult,
+	FileType,
 } from '@/types/entities/file';
 import fs, { stat } from 'fs/promises';
 import { revalidatePath } from 'next/cache';
@@ -46,7 +46,11 @@ const revalidateAllPaths = async (): Promise<void> => {
 };
 
 // Función creadora de errores (enfoque funcional)
-const createFileError = (message: string, code: FileErrorCode = FileErrorCode.OPERATION_FAILED, cause?: unknown): Error & { code: FileErrorCode; cause?: unknown } => {
+const createFileError = (
+	message: string,
+	code: FileErrorCode = FileErrorCode.OPERATION_FAILED,
+	cause?: unknown
+): Error & { code: FileErrorCode; cause?: unknown } => {
 	const error = new Error(message);
 	error.name = 'FileError';
 	return Object.assign(error, { code, cause });
@@ -343,10 +347,7 @@ export async function renameFile(
 		try {
 			await stat(normalizedNewPath);
 			if (!options?.overwrite) {
-				throw createFileError(
-					'El archivo o directorio de destino ya existe',
-					FileErrorCode.ALREADY_EXISTS
-				);
+				throw createFileError('El archivo o directorio de destino ya existe', FileErrorCode.ALREADY_EXISTS);
 			}
 		} catch (error: any) {
 			// Si el error es que no existe, continuamos con el renombrado
@@ -403,10 +404,7 @@ export async function copyFile(
 		try {
 			await stat(normalizedDestPath);
 			if (!options?.overwrite) {
-				throw createFileError(
-					'El archivo o directorio de destino ya existe',
-					FileErrorCode.ALREADY_EXISTS
-				);
+				throw createFileError('El archivo o directorio de destino ya existe', FileErrorCode.ALREADY_EXISTS);
 			}
 		} catch (error: any) {
 			// Si el error es que no existe, continuamos con la copia
@@ -491,10 +489,7 @@ export async function moveFile(
 		try {
 			await stat(normalizedDestPath);
 			if (!options?.overwrite) {
-				throw createFileError(
-					'El archivo o directorio de destino ya existe',
-					FileErrorCode.ALREADY_EXISTS
-				);
+				throw createFileError('El archivo o directorio de destino ya existe', FileErrorCode.ALREADY_EXISTS);
 			}
 		} catch (error: any) {
 			// Si el error es que no existe, continuamos con el movimiento

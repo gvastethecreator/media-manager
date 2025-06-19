@@ -74,8 +74,8 @@ export function PlacesSettings() {
 				matches &&
 				Boolean(
 					place.name.toLowerCase().includes(normalizedQuery) ||
-					place.description?.toLowerCase().includes(normalizedQuery) ||
-					place.region?.toLowerCase().includes(normalizedQuery)
+						place.description?.toLowerCase().includes(normalizedQuery) ||
+						place.region?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 
@@ -126,9 +126,7 @@ export function PlacesSettings() {
 
 	// Manejar actualización exitosa
 	const handlePlaceUpdated = useCallback((updatedPlace: PlaceComplete) => {
-		setPlaces((prev) =>
-			prev.map((place) => (place.id === updatedPlace.id ? { ...place, ...updatedPlace } : place))
-		);
+		setPlaces((prev) => prev.map((place) => (place.id === updatedPlace.id ? { ...place, ...updatedPlace } : place)));
 		toastService.success('Lugar actualizado');
 	}, []);
 

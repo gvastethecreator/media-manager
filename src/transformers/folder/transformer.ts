@@ -5,11 +5,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    FolderComplete,
-    FolderExtended,
-    FolderExtendedComplete,
-} from '@/types/entities/folder';
+import type { FolderComplete, FolderExtended, FolderExtendedComplete } from '@/types/entities/folder';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
 
@@ -63,9 +59,7 @@ export function fromPrismaFolder(prismaFolder: FolderFromPrisma | null): FolderC
 			error,
 			folderId: prismaFolder.id,
 		});
-		throw new TransformerError(
-			`Error al transformar la carpeta: ${(error as Error).message}`
-		);
+		throw new TransformerError(`Error al transformar la carpeta: ${(error as Error).message}`);
 	}
 }
 
@@ -79,10 +73,7 @@ export function fromPrismaFolders(prismaFolders: FolderFromPrisma[]): FolderComp
 	return prismaFolders.map(fromPrismaFolder);
 }
 
-export function transformFolderToExtended(
-	folder: FolderComplete,
-	level = 0
-): FolderExtended {
+export function transformFolderToExtended(folder: FolderComplete, level = 0): FolderExtended {
 	const extendedFolder: FolderExtended = {
 		...folder,
 		isSelected: false,
@@ -98,8 +89,7 @@ export function transformFolderToExtended(
 		// Aquí asumimos que los hijos ya son `FolderComplete`.
 		// Si necesitamos que los hijos también sean `FolderExtended`, se requiere un mapeo recursivo.
 		(extendedFolder as FolderExtendedComplete).children = folder.children.map(
-			(child) =>
-				transformFolderToExtended(child as FolderComplete, level + 1) as FolderExtendedComplete
+			(child) => transformFolderToExtended(child as FolderComplete, level + 1) as FolderExtendedComplete
 		);
 	}
 

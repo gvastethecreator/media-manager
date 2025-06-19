@@ -5,13 +5,13 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    PROPERTY_SORT_PROPERTY_MAP,
-    PropertyCreateInput,
-    PropertyFilters,
-    PropertySearchOptions,
-    PropertySearchResult,
-    PropertyUpdateInput,
-    PropertyWithRelations
+	PROPERTY_SORT_PROPERTY_MAP,
+	PropertyCreateInput,
+	PropertyFilters,
+	PropertySearchOptions,
+	PropertySearchResult,
+	PropertyUpdateInput,
+	PropertyWithRelations,
 } from '@/types/entities/property';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';

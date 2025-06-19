@@ -6,12 +6,12 @@
  */
 
 export interface DocumentBase {
-  id: string;
-  name: string;
-  filePath: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	filePath: string;
+	content: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export type DocumentCreateInput = Omit<DocumentBase, 'id' | 'createdAt' | 'updatedAt'>;

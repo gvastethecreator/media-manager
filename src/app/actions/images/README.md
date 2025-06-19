@@ -48,280 +48,116 @@ graph TD
     K --> L
     L --> M
     M --> N
-
-    B --> O
-    O --> P
-    P --> Q
-    Q --> R
 ```
 
-## 📋 Server Actions Disponibles
+## 🧩 Patrón de Respuesta
 
-### 🏗️ CRUD Básico (image-crud.actions.ts)
+> **IMPORTANTE**: Todas las Server Actions devuelven directamente las entidades transformadas sin objetos wrapper.
 
-#### `createImageAction(data: CreateImageData): Promise<ImageResult>`
-
-- **Descripción**: Crea un nuevo registro de imagen en la base de datos
-- **Parámetros**: `data` - Datos de la imagen (path, folderId, metadata, etc.)
-- **Retorna**: Imagen creada con ID generado y relaciones
-- **Proceso**: Valida archivo, extrae metadatos básicos, crea registro
-- **Efectos**: Revalida cache de carpeta y actualiza estadísticas
-
-#### `updateImageAction(id: string, data: UpdateImageData): Promise<ImageResult>`
-
-- **Descripción**: Actualiza metadatos de una imagen existente
-- **Parámetros**:
-  - `id` - UUID de la imagen
-  - `data` - Datos a actualizar (name, description, tags, etc.)
-- **Retorna**: Imagen actualizada con cambios aplicados
-- **Validaciones**: Verifica existencia y permisos antes de actualizar
-
-#### `deleteImageAction(id: string): Promise<void>`
-
-- **Descripción**: Elimina una imagen del sistema
-- **Parámetros**: `id` - UUID de la imagen a eliminar
-- **Comportamiento**: Eliminación en cascada de relaciones y thumbnails
-- **Seguridad**: Solo elimina registro de BD, archivos físicos requieren acción manual
-
-#### `setImageFavoriteAction(id: string, favorite: boolean): Promise<ImageResult>`
-
-- **Descripción**: Marca/desmarca una imagen como favorita
-- **Parámetros**:
-  - `id` - UUID de la imagen
-  - `favorite` - Boolean para establecer estado de favorito
-- **Retorna**: Imagen con estado actualizado
-- **Uso**: Para sistemas de favoritos y collections especiales
-
-### 🔗 Acceso y URLs (image-access.actions.ts)
-
-#### `getImageUrl(id: string, options?: ImageUrlOptions): Promise<string>`
-
-- **Descripción**: Genera URL segura para acceder a una imagen
-- **Parámetros**:
-  - `id` - UUID de la imagen
-  - `options` - Configuraciones de tamaño, calidad, formato
-- **Retorna**: URL firmada para acceso directo
-- **Seguridad**: URLs temporales con tokens de acceso
-- **Optimización**: Cache inteligente basado en parámetros
-
-#### `getOriginalImage(id: string): Promise<ImageResult>`
-
-- **Descripción**: Obtiene información completa de imagen original
-- **Parámetros**: `id` - UUID de la imagen
-- **Retorna**: Objeto completo con metadatos, path y relaciones
-- **Uso**: Para editores que requieren acceso a archivo original
-- **Cache**: Utiliza cache para metadatos frecuentemente accedidos
-
-### 🔄 Procesamiento (image-processing.actions.ts)
-
-#### `processImageAction(id: string, options?: ProcessingOptions): Promise<ProcessingResult>`
-
-- **Descripción**: Procesa una imagen para extraer metadatos completos
-- **Parámetros**:
-  - `id` - UUID de la imagen
-  - `options` - Configuraciones de procesamiento (force, extractAI, etc.)
-- **Retorna**: Resultado del procesamiento con metadatos extraídos
-- **Proceso**: EXIF, dimensiones, hash, color analysis, AI tags opcionales
-- **Optimización**: Procesamiento incremental para evitar re-trabajo
-
-### 🖼️ Thumbnails (image-thumbnails.actions.ts)
-
-#### `getThumbnail(id: string, size?: ThumbnailSize): Promise<string>`
-
-- **Descripción**: Obtiene URL de thumbnail para una imagen
-- **Parámetros**:
-  - `id` - UUID de la imagen
-  - `size` - Tamaño del thumbnail (small, medium, large)
-- **Retorna**: URL del thumbnail generado
-- **Cache**: Sistema de cache para thumbnails generados
-- **Fallback**: Genera thumbnail si no existe
-
-#### `generateThumbnail(id: string, size: ThumbnailSize, force?: boolean): Promise<string>`
-
-- **Descripción**: Genera thumbnail específico para una imagen
-- **Parámetros**:
-  - `id` - UUID de la imagen
-  - `size` - Tamaño específico a generar
-  - `force` - Boolean para forzar re-generación
-- **Retorna**: URL del thumbnail generado
-- **Algoritmo**: Sharp para optimización y calidad
-- **Storage**: Almacenamiento optimizado por tamaño
-
-### 📁 Imágenes de Carpeta (folder-images.action.ts)
-
-#### `getLatestFolderImagesAction(folderId: string, limit?: number): Promise<ImageResult[]>`
-
-- **Descripción**: Obtiene las imágenes más recientes de una carpeta específica
-- **Parámetros**:
-  - `folderId` - UUID de la carpeta
-  - `limit` - Número máximo de imágenes (default: 20)
-- **Retorna**: Array de imágenes ordenadas por fecha de adición
-- **Uso**: Para dashboards y vistas de actividad reciente
-- **Optimización**: Query optimizada con índices por fecha
-
-### 🎲 Utilidades (images-random.action.ts)
-
-#### `getRandomImagesForEntityAction(entityType: string, entityId: string, count?: number): Promise<ImageResult[]>`
-
-- **Descripción**: Obtiene imágenes aleatorias asociadas a una entidad específica
-- **Parámetros**:
-  - `entityType` - Tipo de entidad (album, character, place, etc.)
-  - `entityId` - UUID de la entidad
-  - `count` - Número de imágenes aleatorias (default: 5)
-- **Retorna**: Array de imágenes seleccionadas aleatoriamente
-- **Uso**: Para previews, carousels, y muestras representativas
-- **Algoritmo**: Distribución uniforme con seed opcional para consistencia
-
-## 🔗 Relaciones y Dependencias
-
-### 📦 Servicios Utilizados
-
-- **prisma**: ORM para acceso a base de datos
-- **sharp**: Procesamiento y optimización de imágenes
-- **serverLogger**: Sistema de logging contextual
-- **image-converter.service**: Conversión entre formatos de imagen
-- **stats.service**: Actualización de estadísticas de uso
-- **server/events**: Sistema de eventos para notificaciones
-
-### 🔄 Transformers
-
-- **transformImageToResult**: Convierte datos de Prisma a tipos de dominio
-- **mapCreateImageDataToPrisma**: Mapea datos de creación a esquema BD
-- **mapUpdateImageDataToPrisma**: Mapea datos de actualización a esquema BD
-- **convertServerImageToFileItem**: Convierte para uso en UI
-
-### 🏗️ Tipos Principales
-
-- **ImageResult**: Tipo principal de imagen para respuestas
-- **CreateImageData, UpdateImageData**: DTOs para operaciones CRUD
-- **GetImagesOptions, GetImagesResult**: Configuraciones de consulta
-- **ProcessingOptions, ProcessingResult**: Para operaciones de procesamiento
-- **ThumbnailSize**: Enumeración de tamaños de thumbnail
-- **ImageUrlOptions**: Configuraciones para generación de URLs
-
-## 💡 Ejemplos de Uso
-
-### 🏗️ Crear y procesar imagen
+Todas las Server Actions de este módulo utilizan el patrón estandarizado en junio 2025:
 
 ```typescript
-import {
-  createImageAction,
-  processImageAction,
-  generateThumbnail
-} from '@/app/actions/images';
-
-// Crear nueva imagen
-const newImage = await createImageAction({
-  path: '/ruta/a/imagen.jpg',
-  folderId: 'folder-uuid',
-  name: 'Mi Foto',
-  description: 'Descripción de la imagen'
-});
-
-// Procesar para extraer metadatos completos
-const processed = await processImageAction(newImage.id, {
-  extractAI: true,
-  force: false
-});
-
-// Generar thumbnails
-const thumbnailUrl = await generateThumbnail(newImage.id, 'medium');
-console.log('Thumbnail generado:', thumbnailUrl);
+// Ejemplo: Obtener una imagen por ID
+export async function getImage(id: string): Promise<Image | null> {
+  try {
+    const image = await prisma.image.findUnique({ where: { id } });
+    if (!image) return null;
+    return fromPrismaImage(image);
+  } catch (error) {
+    logger.error('Error fetching image', { id, error });
+    throw new Error('Failed to fetch image');
+  }
+}
 ```
 
-### 🔗 Acceso y URLs
+Las acciones **NO** devuelven objetos con propiedades `success`, `data` o `error`. En su lugar:
+
+- Devuelven directamente el dato solicitado
+- Devuelven `null` para elementos no encontrados
+- Lanzan excepciones para manejar errores
+
+## 📋 Funciones Disponibles
+
+### crud.actions.ts
+
+Operaciones básicas de crear, leer, actualizar y eliminar imágenes:
 
 ```typescript
-import { getImageUrl, getOriginalImage } from '@/app/actions/images';
+// Todas estas funciones devuelven directamente las entidades o null
 
-// Obtener URL segura para mostrar imagen
-const imageUrl = await getImageUrl('image-uuid', {
-  width: 800,
-  height: 600,
-  quality: 85,
-  format: 'webp'
-});
-
-// Acceder a imagen original con metadatos completos
-const originalImage = await getOriginalImage('image-uuid');
-console.log(`Imagen: ${originalImage.name}, Tamaño: ${originalImage.fileSize} bytes`);
+export async function getImage(id: string): Promise<Image | null>;
+export async function getImages(params?: GetImagesParams): Promise<Image[]>;
+export async function createImage(data: CreateImageInput): Promise<Image>;
+export async function updateImage(id: string, data: UpdateImageInput): Promise<Image>;
+export async function deleteImage(id: string): Promise<boolean>;
 ```
 
-### 📁 Imágenes de carpeta y aleatorias
+### stats.actions.ts
+
+Estadísticas y métricas sobre imágenes:
 
 ```typescript
-import {
-  getLatestFolderImagesAction,
-  getRandomImagesForEntityAction
-} from '@/app/actions/images';
-
-// Obtener imágenes recientes de carpeta
-const recentImages = await getLatestFolderImagesAction('folder-uuid', 10);
-console.log(`${recentImages.length} imágenes recientes encontradas`);
-
-// Obtener imágenes aleatorias de álbum
-const randomImages = await getRandomImagesForEntityAction(
-  'album',
-  'album-uuid',
-  3
-);
-console.log('Imágenes aleatorias para preview:', randomImages);
+export async function getImageStats(id: string): Promise<ImageStats | null>;
+export async function getImagesCountByType(): Promise<{ [type: string]: number }>;
+export async function getRecentImageActivity(): Promise<Activity[]>;
 ```
 
-### 👍 Gestión de favoritos
+### thumbnails.actions.ts
+
+Generación y gestión de miniaturas:
 
 ```typescript
-import { setImageFavoriteAction } from '@/app/actions/images';
-
-// Marcar como favorita
-await setImageFavoriteAction('image-uuid', true);
-
-// Desmarcar favorita
-await setImageFavoriteAction('image-uuid', false);
+export async function generateThumbnail(imageId: string): Promise<string>;
+export async function getThumbnailUrl(imageId: string): Promise<string | null>;
+export async function regenerateAllThumbnails(): Promise<number>;
 ```
 
-## 🧪 Testing
+## 🔄 Ejemplo de Consumo
 
-Los tests para este módulo cubren:
+### En un componente de cliente
 
-- ✅ Operaciones CRUD completas
-- ✅ Procesamiento de diferentes formatos de imagen
-- ✅ Generación y cache de thumbnails
-- ✅ URLs seguras y tokens de acceso
-- ✅ Extracción de metadatos EXIF
-- ✅ Manejo de errores y archivos corruptos
-- ✅ Performance con imágenes grandes
-- ✅ Integración con sistema de favoritos
+```typescript
+"use client";
+import { useState, useEffect } from 'react';
+import { getImage, updateImage } from '@/app/actions/images/crud.actions';
+import { extendImage } from '@/transformers/image';
 
-## ⚠️ Consideraciones Importantes
+export function ImageEditor({ imageId }) {
+  const [image, setImage] = useState(null);
+  const [error, setError] = useState(null);
 
-### 🚀 Rendimiento
+  useEffect(() => {
+    async function loadImage() {
+      try {
+        // La acción devuelve directamente la imagen o null
+        const imageData = await getImage(imageId);
 
-- **Lazy Loading**: Thumbnails generados bajo demanda
-- **Cache Strategy**: Cache multi-nivel para metadatos y thumbnails
-- **Processing Queue**: Procesamiento asíncrono para operaciones pesadas
-- **Memory Management**: Gestión cuidadosa de memoria para imágenes grandes
+        if (imageData) {
+          // Extendemos la imagen para UI
+          const extendedImage = extendImage(imageData);
+          setImage(extendedImage);
+        } else {
+          setError('Imagen no encontrada');
+        }
+      } catch (error) {
+        setError(`Error cargando la imagen: ${error.message}`);
+      }
+    }
 
-### 🔒 Seguridad
+    loadImage();
+  }, [imageId]);
 
-- **Path Validation**: Validación estricta de rutas de archivo
-- **File Type Validation**: Verificación de tipos MIME y extensiones
-- **URL Signing**: URLs firmadas para acceso controlado
-- **Input Sanitization**: Sanitización de metadatos de entrada
+  async function handleUpdate(data) {
+    try {
+      const updatedImage = await updateImage(imageId, data);
+      const extendedImage = extendImage(updatedImage);
+      setImage(extendedImage);
+      // Mostrar mensaje de éxito
+    } catch (error) {
+      setError(`Error actualizando imagen: ${error.message}`);
+    }
+  }
 
-### 🖼️ Calidad
-
-- **Format Support**: Soporte para JPEG, PNG, WebP, AVIF, TIFF
-- **Color Management**: Preservación de perfiles de color
-- **Quality Optimization**: Compresión inteligente basada en contenido
-- **Progressive Loading**: Soporte para imágenes progresivas
-
-### 💾 Storage
-
-- **Efficient Storage**: Organización optimizada de thumbnails
-- **Cleanup Processes**: Limpieza automática de archivos huérfanos
-- **Backup Considerations**: Estrategias para respaldo de metadatos
-- **Migration Support**: Herramientas para migración de formatos
-
-## Funciones disponibles
-
+  // ... resto del componente
+}
+```

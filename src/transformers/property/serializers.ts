@@ -186,9 +186,7 @@ export function toPrismaProperty(
  * @param options Opciones de transformación
  * @returns Propiedad con campos deserializados
  */
-export function fromPrismaProperty<
-	T extends Property & { _relations?: any; _count?: any }
->(
+export function fromPrismaProperty<T extends Property & { _relations?: any; _count?: any }>(
 	property: T,
 	options: PropertyTransformOptions = {}
 ): PropertyWithRelations & { _relations?: any; _count?: any; _ui?: any } {

@@ -16,51 +16,51 @@ export { mapCompleteToTag, mapTagToComplete, tagToDisplayObject } from '../conve
 
 // Funciones de extensión (placeholders)
 export function extendTag(tag: any, options?: any): any {
-  return tag;
+	return tag;
 }
 
 export function extendTags(tags: any[], options?: any): any[] {
-  return tags;
+	return tags;
 }
 
 // Funciones de conversión (placeholders)
 export function toCreateTagData(data: any): any {
-  return data;
+	return data;
 }
 
 export function toPrismaTag(data: any): any {
-  return data;
+	return data;
 }
 
 export function toRelatedTag(tag: any, count?: number): any {
-  return {
-    ...tag,
-    count: count || 0,
-    strength: 1.0
-  };
+	return {
+		...tag,
+		count: count || 0,
+		strength: 1.0,
+	};
 }
 
 export function toSearchFilters(filters: any): any {
-  return filters;
+	return filters;
 }
 
 export function toSearchOptions(options: any): any {
-  return options;
+	return options;
 }
 
 export function toSearchResult(items: any[], total: number): any {
-  return {
-    items,
-    total,
-    hasMore: items.length < total
-  };
+	return {
+		items,
+		total,
+		hasMore: items.length < total,
+	};
 }
 
 export function toUpdateTagData(data: any): any {
-  return data;
+	return data;
 }
 
 // Validación (placeholder)
 export function validateTag(tag: any): any {
-  return tag;
+	return tag;
 }

@@ -1,117 +1,83 @@
 /**
- * @file Slice de filtros para el store de WorldItem
+ * @file Slice para los filtros del store de WorldItem
  * @module store/entities/world-item/slices/filters
  */
 
+import { WorldItemSortCriteria } from '@/types/entities/world-item/enums';
+import type { WorldItemFilters } from '@/types/entities/world-item/types';
 import type { StateCreator } from 'zustand';
-import type { WorldItem } from '../../../../types/entities/world-item';
-import { compareWorldItems, filterWorldItems } from '../../../../utils/world-item';
-import type { WorldItemStore } from '../index';
+import type { WorldItemActions, WorldItemState } from '../types';
 
 export interface WorldItemFiltersSlice {
-	// Propiedades computadas
-	filteredWorldItems: WorldItem[];
-
-	// Acciones de filtrado
-	setTypeFilter: (types: string[] | null) => void;
-	setCategoryFilter: (categories: string[] | null) => void;
-	setRarityFilter: (rarities: string[] | null) => void;
-	setFavoritesFilter: (onlyFavorites: boolean) => void;
-	setLevelFilter: (min?: number, max?: number) => void;
-	setValueFilter: (min?: number, max?: number) => void;
-	setRelationsFilter: (options: {
-		hasImages?: boolean;
-		hasNotes?: boolean;
-		hasConcepts?: boolean;
-		hasPrompts?: boolean;
-	}) => void;
-
-	// Getters para items filtrados y ordenados
-	getFilteredWorldItems: () => WorldItem[];
-	getSortedWorldItems: () => WorldItem[];
+	filters: WorldItemFilters;
+	updateFilters: (filters: Partial<WorldItemFilters>) => void;
+	clearFilters: () => void;
+	getFilteredWorldItems: () => any[];
+	getSortedWorldItems: () => any[];
 }
 
-export const createWorldItemFiltersSlice: StateCreator<WorldItemStore, [], [], WorldItemFiltersSlice> = (set, get) => ({
-	// Propiedad computada
-	get filteredWorldItems() {
-		return filterWorldItems(get().worldItems, get().filters);
+export const createWorldItemFiltersSlice: StateCreator<
+	WorldItemState & WorldItemActions,
+	[],
+	[],
+	WorldItemFiltersSlice
+> = (set, get) => ({
+	filters: {
+		sortBy: WorldItemSortCriteria.NAME_ASC,
+		searchTerm: '',
+		category: null,
+		rarity: null,
+		type: null,
 	},
-
-	// Acciones de filtrado
-	setTypeFilter: (types) => {
-		set((state) => ({
+	updateFilters: (filters) => set((state) => ({ filters: { ...state.filters, ...filters } })),
+	clearFilters: () =>
+		set({
 			filters: {
-				...state.filters,
-				types: types || undefined,
+				sortBy: WorldItemSortCriteria.NAME_ASC,
+				searchTerm: '',
+				category: null,
+				rarity: null,
+				type: null,
 			},
-		}));
-	},
-
-	setCategoryFilter: (categories) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				categories: categories || undefined,
-			},
-		}));
-	},
-
-	setRarityFilter: (rarities) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				rarities: rarities || undefined,
-			},
-		}));
-	},
-
-	setFavoritesFilter: (onlyFavorites) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				onlyFavorites,
-			},
-		}));
-	},
-
-	setLevelFilter: (min, max) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				minLevel: min,
-				maxLevel: max,
-			},
-		}));
-	},
-
-	setValueFilter: (min, max) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				minValue: min,
-				maxValue: max,
-			},
-		}));
-	},
-
-	setRelationsFilter: (options) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				...options,
-			},
-		}));
-	},
-
-	// Getters para items filtrados/ordenados
+		}),
 	getFilteredWorldItems: () => {
-		return filterWorldItems(get().worldItems, get().filters);
+		const { worldItems, filters } = get();
+		const { searchTerm, category, rarity, type } = filters;
+		return worldItems.filter((item) => {
+			const nameMatch =
+				!searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase());
+			const categoryMatch = !category || item.category === category;
+			const rarityMatch = !rarity || item.rarity === rarity;
+			const typeMatch = !type || item.type === type;
+			return nameMatch && categoryMatch && rarityMatch && typeMatch;
+		});
 	},
-
 	getSortedWorldItems: () => {
-		const filteredItems = get().getFilteredWorldItems();
-		const sortBy = get().sortBy;
-
-		return [...filteredItems].sort((a, b) => compareWorldItems(a, b, sortBy));
+		const {
+			filters: { sortBy },
+		} = get();
+		const filtered = get().getFilteredWorldItems();
+		return [...filtered].sort((a, b) => {
+			switch (sortBy) {
+				case WorldItemSortCriteria.NAME_ASC:
+					return a.name.localeCompare(b.name);
+				case WorldItemSortCriteria.NAME_DESC:
+					return b.name.localeCompare(a.name);
+				case WorldItemSortCriteria.CREATED_ASC:
+					return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+				case WorldItemSortCriteria.CREATED_DESC:
+					return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+				case WorldItemSortCriteria.UPDATED_ASC:
+					return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
+				case WorldItemSortCriteria.UPDATED_DESC:
+					return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+				case WorldItemSortCriteria.RARITY_ASC:
+					return (a.rarity || '').localeCompare(b.rarity || '');
+				case WorldItemSortCriteria.RARITY_DESC:
+					return (b.rarity || '').localeCompare(a.rarity || '');
+				default:
+					return 0;
+			}
+		});
 	},
 });

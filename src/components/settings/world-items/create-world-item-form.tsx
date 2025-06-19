@@ -138,16 +138,12 @@ export function CreateWorldItemForm({
 		{
 			name: 'emoji',
 			label: 'Emoji',
-			render: ({ value, onChange }: any) => (
-				<EmojiPicker value={value} onEmojiSelect={onChange} />
-			),
+			render: ({ value, onChange }: any) => <EmojiPicker value={value} onEmojiSelect={onChange} />,
 		},
 		{
 			name: 'color',
 			label: 'Color',
-			render: ({ value, onChange }: any) => (
-				<ColorPicker value={value} onChange={onChange} />
-			),
+			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} />,
 		},
 		{
 			name: 'description',
@@ -173,7 +169,9 @@ export function CreateWorldItemForm({
 					<SelectContent>
 						<SelectItem value="">Ninguno</SelectItem>
 						{Object.values(WorldItemType).map((type) => (
-							<SelectItem key={type} value={String(type)}>{String(type)}</SelectItem>
+							<SelectItem key={type} value={String(type)}>
+								{String(type)}
+							</SelectItem>
 						))}
 					</SelectContent>
 				</Select>
@@ -190,7 +188,9 @@ export function CreateWorldItemForm({
 					<SelectContent>
 						<SelectItem value="">Ninguna</SelectItem>
 						{Object.values(WorldItemCategory).map((cat) => (
-							<SelectItem key={cat} value={String(cat)}>{String(cat)}</SelectItem>
+							<SelectItem key={cat} value={String(cat)}>
+								{String(cat)}
+							</SelectItem>
 						))}
 					</SelectContent>
 				</Select>
@@ -207,7 +207,9 @@ export function CreateWorldItemForm({
 					<SelectContent>
 						<SelectItem value="">Ninguna</SelectItem>
 						{Object.values(WorldItemRarity).map((rarity) => (
-							<SelectItem key={rarity} value={String(rarity)}>{String(rarity)}</SelectItem>
+							<SelectItem key={rarity} value={String(rarity)}>
+								{String(rarity)}
+							</SelectItem>
 						))}
 					</SelectContent>
 				</Select>
@@ -217,15 +219,19 @@ export function CreateWorldItemForm({
 			name: 'origin',
 			label: 'Origen',
 			render: ({ value, onChange }: any) => (
-				<input type="text" value={value || ''} onChange={(e) => onChange(e.target.value)} className="w-full border rounded p-2 text-xs" placeholder="Origen del objeto" />
+				<input
+					type="text"
+					value={value || ''}
+					onChange={(e) => onChange(e.target.value)}
+					className="w-full border rounded p-2 text-xs"
+					placeholder="Origen del objeto"
+				/>
 			),
 		},
 		{
 			name: 'isFavorite',
 			label: 'Favorito',
-			render: ({ value, onChange }: any) => (
-				<Switch checked={!!value} onCheckedChange={onChange} />
-			),
+			render: ({ value, onChange }: any) => <Switch checked={!!value} onCheckedChange={onChange} />,
 		},
 	];
 

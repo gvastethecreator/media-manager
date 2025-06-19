@@ -20,7 +20,10 @@ import path from 'path';
 const mappersLogger = serverLogger.withContext('File:Mappers');
 
 export function generateFileId(filePath: string): string {
-	const normalizedPath = path.normalize(filePath).replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+	const normalizedPath = path
+		.normalize(filePath)
+		.replace(/\\/g, '/')
+		.replace(/^\/+|\/+$/g, '');
 	return Buffer.from(normalizedPath).toString('base64');
 }
 
@@ -37,15 +40,34 @@ export function determineFileType(extension: string): FileType {
 
 export function determineMimeType(extension: string): string {
 	const mimeTypes: Record<string, string> = {
-		'.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif',
-		'.webp': 'image/webp', '.svg': 'image/svg+xml', '.pdf': 'application/pdf', '.doc': 'application/msword',
-		'.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.xls': 'application/vnd.ms-excel',
-		'.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.ppt': 'application/vnd.ms-powerpoint',
-		'.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation', '.txt': 'text/plain',
-		'.md': 'text/markdown', '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript',
-		'.json': 'application/json', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.mp4': 'video/mp4',
-		'.avi': 'video/x-msvideo', '.mov': 'video/quicktime', '.zip': 'application/zip', '.rar': 'application/vnd.rar',
-		'.tar': 'application/x-tar', '.gz': 'application/gzip',
+		'.jpg': 'image/jpeg',
+		'.jpeg': 'image/jpeg',
+		'.png': 'image/png',
+		'.gif': 'image/gif',
+		'.webp': 'image/webp',
+		'.svg': 'image/svg+xml',
+		'.pdf': 'application/pdf',
+		'.doc': 'application/msword',
+		'.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+		'.xls': 'application/vnd.ms-excel',
+		'.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		'.ppt': 'application/vnd.ms-powerpoint',
+		'.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+		'.txt': 'text/plain',
+		'.md': 'text/markdown',
+		'.html': 'text/html',
+		'.css': 'text/css',
+		'.js': 'application/javascript',
+		'.json': 'application/json',
+		'.mp3': 'audio/mpeg',
+		'.wav': 'audio/wav',
+		'.mp4': 'video/mp4',
+		'.avi': 'video/x-msvideo',
+		'.mov': 'video/quicktime',
+		'.zip': 'application/zip',
+		'.rar': 'application/vnd.rar',
+		'.tar': 'application/x-tar',
+		'.gz': 'application/gzip',
 	};
 	return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
 }
@@ -91,22 +113,42 @@ export function toFileListItem(fileInfo: FileInfo): FileListItem {
 
 export function getIconForFileType(fileType: string, extension = ''): string {
 	const iconMap: Record<string, string> = {
-		[FileType.DIRECTORY]: '📁', [FileType.FILE]: '📄', [FileType.IMAGE]: '🖼️',
-		[FileType.VIDEO]: '🎬', [FileType.AUDIO]: '🎵', [FileType.DOCUMENT]: '📝',
-		[FileType.ARCHIVE]: '🗄️', [FileType.OTHER]: '❓',
+		[FileType.DIRECTORY]: '📁',
+		[FileType.FILE]: '📄',
+		[FileType.IMAGE]: '🖼️',
+		[FileType.VIDEO]: '🎬',
+		[FileType.AUDIO]: '🎵',
+		[FileType.DOCUMENT]: '📝',
+		[FileType.ARCHIVE]: '🗄️',
+		[FileType.OTHER]: '❓',
 	};
 	const extensionIconMap: Record<string, string> = {
-		'.pdf': '📑', '.doc': '📘', '.docx': '📘', '.xls': '📊', '.xlsx': '📊', '.ppt': '📽️',
-		'.pptx': '📽️', '.txt': '📃', '.md': '📝', '.json': '🔍', '.zip': '📦', '.rar': '📦',
+		'.pdf': '📑',
+		'.doc': '📘',
+		'.docx': '📘',
+		'.xls': '📊',
+		'.xlsx': '📊',
+		'.ppt': '📽️',
+		'.pptx': '📽️',
+		'.txt': '📃',
+		'.md': '📝',
+		'.json': '🔍',
+		'.zip': '📦',
+		'.rar': '📦',
 	};
 	return extensionIconMap[extension] || iconMap[fileType] || iconMap[FileType.OTHER];
 }
 
 export function getColorForFileType(fileType: string): string {
 	const colorMap: Record<string, string> = {
-		[FileType.DIRECTORY]: '#3b82f6', [FileType.FILE]: '#64748b', [FileType.IMAGE]: '#10b981',
-		[FileType.VIDEO]: '#f97316', [FileType.AUDIO]: '#8b5cf6', [FileType.DOCUMENT]: '#0ea5e9',
-		[FileType.ARCHIVE]: '#f59e0b', [FileType.OTHER]: '#6b7280',
+		[FileType.DIRECTORY]: '#3b82f6',
+		[FileType.FILE]: '#64748b',
+		[FileType.IMAGE]: '#10b981',
+		[FileType.VIDEO]: '#f97316',
+		[FileType.AUDIO]: '#8b5cf6',
+		[FileType.DOCUMENT]: '#0ea5e9',
+		[FileType.ARCHIVE]: '#f59e0b',
+		[FileType.OTHER]: '#6b7280',
 	};
 	return colorMap[fileType] || colorMap[FileType.OTHER];
 }
@@ -157,25 +199,25 @@ export function applyFileFilters(files: FileBase[], options: FileFilterOptions):
 	let filteredFiles = files;
 	if (options.searchTerm) {
 		const searchTerm = options.searchTerm.toLowerCase();
-		filteredFiles = filteredFiles.filter(f => f.name.toLowerCase().includes(searchTerm));
+		filteredFiles = filteredFiles.filter((f) => f.name.toLowerCase().includes(searchTerm));
 	}
 	if (options.fileTypes?.length) {
-		filteredFiles = filteredFiles.filter(f => options.fileTypes!.includes(f.type as FileType));
+		filteredFiles = filteredFiles.filter((f) => options.fileTypes!.includes(f.type as FileType));
 	}
 	if (options.extensions?.length) {
-		filteredFiles = filteredFiles.filter(f => f.extension && options.extensions!.includes(f.extension.toLowerCase()));
+		filteredFiles = filteredFiles.filter((f) => f.extension && options.extensions!.includes(f.extension.toLowerCase()));
 	}
 	if (options.minSize) {
-		filteredFiles = filteredFiles.filter(f => f.size >= options.minSize!);
+		filteredFiles = filteredFiles.filter((f) => f.size >= options.minSize!);
 	}
 	if (options.maxSize) {
-		filteredFiles = filteredFiles.filter(f => f.size <= options.maxSize!);
+		filteredFiles = filteredFiles.filter((f) => f.size <= options.maxSize!);
 	}
 	if (options.modifiedAfter) {
-		filteredFiles = filteredFiles.filter(f => new Date(f.modifiedAt) > new Date(options.modifiedAfter!));
+		filteredFiles = filteredFiles.filter((f) => new Date(f.modifiedAt) > new Date(options.modifiedAfter!));
 	}
 	if (options.modifiedBefore) {
-		filteredFiles = filteredFiles.filter(f => new Date(f.modifiedAt) < new Date(options.modifiedBefore!));
+		filteredFiles = filteredFiles.filter((f) => new Date(f.modifiedAt) < new Date(options.modifiedBefore!));
 	}
 	if (options.sortBy) {
 		filteredFiles.sort((a, b) => {

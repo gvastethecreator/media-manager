@@ -57,9 +57,7 @@ export function fromPrismaWildcard(prismaWildcard: WildcardFromPrisma | null): W
 			error,
 			wildcardId: prismaWildcard.id,
 		});
-		throw new TransformerError(
-			`Error al transformar el wildcard: ${(error as Error).message}`
-		);
+		throw new TransformerError(`Error al transformar el wildcard: ${(error as Error).message}`);
 	}
 }
 

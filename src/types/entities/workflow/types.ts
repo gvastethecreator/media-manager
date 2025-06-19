@@ -6,12 +6,12 @@
  */
 
 export interface WorkflowBase {
-  id: string;
-  name: string;
-  filePath: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	filePath: string;
+	content: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export type WorkflowCreateInput = Omit<WorkflowBase, 'id' | 'createdAt' | 'updatedAt'>;

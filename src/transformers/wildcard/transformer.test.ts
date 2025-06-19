@@ -1,5 +1,7 @@
 import { transformWildcard } from './transformer';
 
+// ✅ Test actualizado: usa asserts directos y patrón moderno, sin wrappers legacy
+
 describe('transformWildcard', () => {
 	it('lanza error si el input es nulo', () => {
 		expect(() => transformWildcard(null as any)).toThrow('El objeto a transformar es nulo o indefinido');
@@ -11,3 +13,5 @@ describe('transformWildcard', () => {
 		expect(result).toHaveProperty('name', 'Test wildcard');
 	});
 });
+
+// 📝 Mantener tipado estricto y asserts claros en todos los tests de transformers

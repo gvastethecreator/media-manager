@@ -5,10 +5,11 @@
 
 // Exportar los tipos principales
 export type {
-    Language, ProfileBase,
-    ProfileCreateInput,
-    ProfileUpdateInput,
-    ThemeMode
+	Language,
+	ProfileBase,
+	ProfileCreateInput,
+	ProfileUpdateInput,
+	ThemeMode,
 } from './types';
 
 // Exportar el esquema de validación
@@ -16,17 +17,20 @@ export { ProfileSchema } from './types';
 
 // Exportar esquemas adicionales de validación
 export {
-    createProfileSchema,
-    profileFiltersSchema,
-    profilePaginationSchema,
-    profilePreferencesSchema,
-    updateProfilePreferencesSchema,
-    updateProfileSchema
+	createProfileSchema,
+	profileFiltersSchema,
+	profilePaginationSchema,
+	profilePreferencesSchema,
+	updateProfilePreferencesSchema,
+	updateProfileSchema,
 } from './schema';
 
 // Exportar tipos inferidos de esquemas
 export type {
-    CreateProfileSchemaType, ProfileFiltersSchemaType,
-    ProfilePaginationSchemaType, ProfilePreferencesSchemaType, UpdateProfilePreferencesSchemaType, UpdateProfileSchemaType
+	CreateProfileSchemaType,
+	ProfileFiltersSchemaType,
+	ProfilePaginationSchemaType,
+	ProfilePreferencesSchemaType,
+	UpdateProfilePreferencesSchemaType,
+	UpdateProfileSchemaType,
 } from './schema';
-

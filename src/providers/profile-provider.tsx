@@ -38,7 +38,7 @@ const ProfileContext = createContext<ProfileContextValue>({
 	isLoading: true,
 	profile: null,
 	error: null,
-	applyTheme: () => { },
+	applyTheme: () => {},
 });
 
 export const useProfile = () => useContext(ProfileContext);
@@ -56,29 +56,32 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 	const isDarkMode = useProfileStore(selectIsDarkMode);
 
 	// Función para aplicar un tema (memoizada para useEffect)
-	const applyTheme = useCallback((theme: ThemeMode) => {
-		if (theme === ThemeMode.DARK) {
-			document.documentElement.classList.add('dark');
-			document.documentElement.classList.remove('light');
-		} else if (theme === ThemeMode.LIGHT) {
-			document.documentElement.classList.add('light');
-			document.documentElement.classList.remove('dark');
-		} else {
-			// SYSTEM: Aplicar según preferencia del sistema
-			const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-			if (prefersDark) {
+	const applyTheme = useCallback(
+		(theme: ThemeMode) => {
+			if (theme === ThemeMode.DARK) {
 				document.documentElement.classList.add('dark');
 				document.documentElement.classList.remove('light');
-			} else {
+			} else if (theme === ThemeMode.LIGHT) {
 				document.documentElement.classList.add('light');
 				document.documentElement.classList.remove('dark');
-			}
-		}
+			} else {
+				// SYSTEM: Aplicar según preferencia del sistema
+				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-		// Actualizar también en el store
-		updateTheme(theme);
-	}, [updateTheme]);
+				if (prefersDark) {
+					document.documentElement.classList.add('dark');
+					document.documentElement.classList.remove('light');
+				} else {
+					document.documentElement.classList.add('light');
+					document.documentElement.classList.remove('dark');
+				}
+			}
+
+			// Actualizar también en el store
+			updateTheme(theme);
+		},
+		[updateTheme]
+	);
 
 	// Inicializar y asegurar que existe un perfil por defecto
 	useEffect(() => {

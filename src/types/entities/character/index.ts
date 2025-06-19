@@ -13,15 +13,16 @@ export type {
 	CharacterInventoryItem,
 	CharacterListItem,
 	CharacterSummary,
-	CharacterViewConfig
+	CharacterViewConfig,
 } from './extended';
 // Alias común para el tipo principal
 export {
 	CHARACTER_SORT_PROPERTY_MAP,
-	CharacterSortCriteria
+	CharacterSortCriteria,
 } from './types';
 export type {
-	CharacterWithRelations as Character, CharacterBase,
+	CharacterWithRelations as Character,
+	CharacterBase,
 	CharacterComplete,
 	CharacterCount,
 	CharacterCounts,
@@ -33,8 +34,9 @@ export type {
 	CharacterSearchResult,
 	CharacterTransformerOptions,
 	CharacterUpdateInput,
-	CharacterWithRelations, CreateCharacterData,
-	UpdateCharacterData
+	CharacterWithRelations,
+	CreateCharacterData,
+	UpdateCharacterData,
 } from './types';
 
 // 📝 Documentación: Solo tipos canónicos y extendidos. Legacy removido.

@@ -10,4 +10,3 @@ export * from './schema';
 // Alias común para el tipo principal
 export * from './types';
 export type { PromptComplete as Prompt } from './types';
-

@@ -16,11 +16,11 @@ export * from './stats-types';
 
 // Re-exportación de tipos extendidos (para compatibilidad con código existente)
 export type {
-    AlbumComplete,
-    AlbumWithStats,
-    FolderDistribution,
-    ParsedAlbum,
-    ParsedAlbumWithRelations
+	AlbumComplete,
+	AlbumWithStats,
+	FolderDistribution,
+	ParsedAlbum,
+	ParsedAlbumWithRelations,
 } from './extended';
 
 // Tipo principal para Album (para compatibilidad con código legacy)
@@ -31,10 +31,10 @@ export type { Album } from './types';
  * Para compatibilidad con código existente
  */
 export interface AlbumVisualConfig {
-  view: string;
-  sortBy: string;
-  filters: string;
-  lastViewedId: string | null;
-  expandedIds: string[];
-  selectedIds: string[];
+	view: string;
+	sortBy: string;
+	filters: string;
+	lastViewedId: string | null;
+	expandedIds: string[];
+	selectedIds: string[];
 }

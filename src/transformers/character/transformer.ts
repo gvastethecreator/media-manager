@@ -8,80 +8,80 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterComplete } from '@/types/entities/character';
 import { TransformerError } from '@/utils/transformers/errors';
 import {
-    deserializeAbilities,
-    deserializeBeliefs,
-    deserializeFears,
-    deserializeFilters,
-    deserializeGoals,
-    deserializePersonality,
-    deserializeRelationships,
-    deserializeSkills,
-    deserializeStats,
+	deserializeAbilities,
+	deserializeBeliefs,
+	deserializeFears,
+	deserializeFilters,
+	deserializeGoals,
+	deserializePersonality,
+	deserializeRelationships,
+	deserializeSkills,
+	deserializeStats,
 } from './serializers';
 
 const logger = serverLogger.withContext('CharacterTransformer');
 
 // Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
 interface CharacterFromPrisma {
-    id: string;
-    name: string;
-    description: string | null;
-    level: number;
-    class: string;
-    race: string;
-    alignment: string;
-    backstory: string | null;
-    stats: string;
-    skills: string;
-    inventory: any;
-    spells: any;
-    feats: any;
-    isActive: boolean;
-    isFavorite: boolean;
-    metadata: any;
-    createdAt: Date;
-    updatedAt: Date;
-    // Campos adicionales específicos
-    relationships: string;
-    goals: string;
-    fears: string;
-    beliefs: string;
-    personality: string;
-    abilities: string;
-    filters: string;
-    // Relaciones
-    images: any[];
-    videos: any[];
-    tags: any[];
-    groups: any[];
-    properties: any[];
-    collections: any[];
-    albums: any[];
-    places: any[];
-    worldItems: any[];
-    concepts: any[];
-    prompts: any[];
-    notes: any[];
-    wildcards: any[];
-    relatedCharacters: any[];
-    relatedTo: any[];
-    _count: {
-        images?: number;
-        videos?: number;
-        tags?: number;
-        groups?: number;
-        properties?: number;
-        collections?: number;
-        albums?: number;
-        places?: number;
-        worldItems?: number;
-        concepts?: number;
-        prompts?: number;
-        notes?: number;
-        wildcards?: number;
-        relatedCharacters?: number;
-        relatedTo?: number;
-    };
+	id: string;
+	name: string;
+	description: string | null;
+	level: number;
+	class: string;
+	race: string;
+	alignment: string;
+	backstory: string | null;
+	stats: string;
+	skills: string;
+	inventory: any;
+	spells: any;
+	feats: any;
+	isActive: boolean;
+	isFavorite: boolean;
+	metadata: any;
+	createdAt: Date;
+	updatedAt: Date;
+	// Campos adicionales específicos
+	relationships: string;
+	goals: string;
+	fears: string;
+	beliefs: string;
+	personality: string;
+	abilities: string;
+	filters: string;
+	// Relaciones
+	images: any[];
+	videos: any[];
+	tags: any[];
+	groups: any[];
+	properties: any[];
+	collections: any[];
+	albums: any[];
+	places: any[];
+	worldItems: any[];
+	concepts: any[];
+	prompts: any[];
+	notes: any[];
+	wildcards: any[];
+	relatedCharacters: any[];
+	relatedTo: any[];
+	_count: {
+		images?: number;
+		videos?: number;
+		tags?: number;
+		groups?: number;
+		properties?: number;
+		collections?: number;
+		albums?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		relatedCharacters?: number;
+		relatedTo?: number;
+	};
 }
 
 /**
@@ -145,9 +145,7 @@ export function fromPrismaCharacter(prismaCharacter: CharacterFromPrisma | null)
 			error,
 			characterId: prismaCharacter.id,
 		});
-		throw new TransformerError(
-			`Error al transformar el personaje: ${(error as Error).message}`
-		);
+		throw new TransformerError(`Error al transformar el personaje: ${(error as Error).message}`);
 	}
 }
 
@@ -157,8 +155,6 @@ export function fromPrismaCharacter(prismaCharacter: CharacterFromPrisma | null)
  * @param prismaCharacters - Un array de objetos Character de Prisma.
  * @returns Un array de objetos CharacterComplete.
  */
-export function fromPrismaCharacters(
-	prismaCharacters: CharacterFromPrisma[]
-): CharacterComplete[] {
+export function fromPrismaCharacters(prismaCharacters: CharacterFromPrisma[]): CharacterComplete[] {
 	return prismaCharacters.map(fromPrismaCharacter);
 }

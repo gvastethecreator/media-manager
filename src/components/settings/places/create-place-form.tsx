@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import type { PlaceComplete, PlaceCreateInput, PlaceUpdateInput } from '@/types/entities/place/types';
+import type { Place, PlaceComplete, PlaceCreateInput, PlaceUpdateInput } from '@/types/entities/place';
 
 // Opciones para los selects que antes eran enums
 const placeTypes = ['CITY', 'TOWN', 'VILLAGE', 'REGION', 'PLANET', 'OTHER'] as const;
@@ -48,12 +48,12 @@ type PlaceFormValues = z.infer<typeof placeFormSchema>;
 /**
  * Props para el formulario de creación/edición de lugares
  * @param place Lugar a editar (PlaceComplete), si existe
- * @param onSuccess Callback al crear/editar exitosamente (PlaceComplete)
+ * @param onSuccess Callback al crear/editar exitosamente (Place)
  * @param onCancel Callback para cancelar
  */
 interface CreatePlaceFormProps {
 	place?: PlaceComplete;
-	onSuccess?: (place: PlaceComplete) => void;
+	onSuccess?: (place: Place) => void;
 	onCancel?: () => void;
 }
 
@@ -65,44 +65,73 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 		resolver: zodResolver(placeFormSchema),
 		defaultValues: {
 			name: '',
-			description: '',
+			description: null,
 			emoji: '📍',
 			color: '#6b7280',
-			category: '',
-			region: '',
-			type: '',
-			climate: '',
+			category: null,
+			region: null,
+			type: null,
+			climate: null,
 			population: 0,
-			government: '',
-			lore: '',
-			history: '',
+			government: null,
+			lore: null,
+			history: null,
 			isFavorite: false,
-			featuredImage: '',
-			shortcut: '',
+			featuredImage: null,
+			shortcut: null,
 		},
 	});
 
 	useEffect(() => {
 		if (isEditing && place) {
 			form.reset({
-				...place,
-				population: place.population ?? 0,
+				name: place.name,
+				description: place.description,
+				emoji: place.emoji,
+				color: place.color,
+				category: place.category,
+				region: place.region,
+				type: place.type,
+				climate: place.climate,
+				population: place.population,
+				government: place.government,
+				lore: place.lore,
+				history: place.history,
+				isFavorite: place.isFavorite,
+				featuredImage: place.featuredImage,
+				shortcut: place.shortcut,
 			});
 		}
 	}, [form, isEditing, place]);
 
 	const onSubmit = async (values: PlaceFormValues) => {
 		try {
-			let result: PlaceComplete;
+			let result: Place;
 
 			if (isEditing && place) {
-				const updateData: PlaceUpdateInput = values;
+				const updateData: PlaceUpdateInput = {
+					name: values.name,
+					description: values.description,
+					emoji: values.emoji,
+					color: values.color,
+					category: values.category,
+					region: values.region,
+					type: values.type,
+					climate: values.climate,
+					population: values.population,
+					government: values.government,
+					lore: values.lore,
+					history: values.history,
+					isFavorite: values.isFavorite,
+					featuredImage: values.featuredImage,
+					shortcut: values.shortcut,
+				};
 				result = await updatePlace(place.id, updateData);
 				toast({ title: 'Lugar actualizado', description: `Se ha actualizado "${result.name}".` });
 			} else {
 				const createData: PlaceCreateInput = {
 					...values,
-					population: values.population || null, // Asegurar que sea null si es 0 o undefined
+					population: values.population || null,
 				};
 				result = await createPlace(createData);
 				toast({ title: 'Lugar creado', description: `Se ha creado "${result.name}".` });
@@ -337,7 +366,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 											))}
 										</SelectContent>
 									</Select>
-									<FormDescription>Forma de gobierno del lugar</FormDescription>
+									<FormDescription>Tipo de gobierno o sistema político</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
@@ -355,12 +384,13 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 								<FormLabel>Lore</FormLabel>
 								<FormControl>
 									<Textarea
-										placeholder="Historia, mitos y leyendas del lugar..."
+										placeholder="Lore e historias del lugar..."
 										className="min-h-32 resize-none"
 										{...field}
 										value={field.value ?? ''}
 									/>
 								</FormControl>
+								<FormDescription>Detalles sobre la cultura, mitos y leyendas</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -375,12 +405,31 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 								<FormLabel>Historia</FormLabel>
 								<FormControl>
 									<Textarea
-										placeholder="Hechos históricos y cronología..."
+										placeholder="Historia del lugar..."
 										className="min-h-32 resize-none"
 										{...field}
 										value={field.value ?? ''}
 									/>
 								</FormControl>
+								<FormDescription>Eventos históricos importantes</FormDescription>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					{/* Atajo (Shortcut) */}
+					<FormField
+						control={form.control}
+						name="shortcut"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Atajo</FormLabel>
+								<FormControl>
+									<Input placeholder="Ej: @nombre-lugar" {...field} value={field.value ?? ''} />
+								</FormControl>
+								<FormDescription>
+									Atajo rápido para referenciar el lugar en otras entidades.
+								</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -393,9 +442,9 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 								<div className="space-y-0.5">
-									<FormLabel>Marcar como favorito</FormLabel>
+									<FormLabel className="text-base">Marcar como favorito</FormLabel>
 									<FormDescription>
-										Los lugares favoritos aparecen destacados en algunas vistas.
+										Los lugares favoritos aparecen primero en las búsquedas.
 									</FormDescription>
 								</div>
 								<FormControl>
@@ -411,7 +460,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 							Cancelar
 						</Button>
 					)}
-					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear lugar'}</Button>
+					<Button type="submit">{isEditing ? 'Guardar Cambios' : 'Crear Lugar'}</Button>
 				</div>
 			</form>
 		</Form>

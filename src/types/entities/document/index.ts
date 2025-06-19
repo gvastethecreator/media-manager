@@ -5,9 +5,9 @@
 
 // Exportar los tipos principales
 export type {
-    DocumentBase,
-    DocumentCreateInput,
-    DocumentUpdateInput
+	DocumentBase,
+	DocumentCreateInput,
+	DocumentUpdateInput,
 } from './types';
 
 // Exportar el esquema de validación

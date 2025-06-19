@@ -12,13 +12,13 @@
  */
 
 export interface SettingsBase {
-  id: string;
-  theme: string;
-  language: string;
-  data: unknown; // Json
-  profileId: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+	id: string;
+	theme: string;
+	language: string;
+	data: unknown; // Json
+	profileId: string;
+	createdAt?: Date;
+	updatedAt?: Date;
 }
 
 export type SettingsCreateInput = Omit<SettingsBase, 'id' | 'createdAt' | 'updatedAt'>;
@@ -30,7 +30,7 @@ export type SettingsUpdateInput = Partial<Omit<SettingsBase, 'id'>>;
  * Preferencias de interfaz de usuario (UI)
  */
 export interface InterfacePreferences {
-  /** Familia tipográfica seleccionada */
+	/** Familia tipográfica seleccionada */
 	fontFamily: 'system' | 'serif' | 'mono' | 'rounded';
 	/** Tamaño base de fuente */
 	fontSize: 'sm' | 'md' | 'lg';

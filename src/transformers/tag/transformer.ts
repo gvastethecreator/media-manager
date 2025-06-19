@@ -98,9 +98,7 @@ export function fromPrismaTag(prismaTag: TagFromPrisma | null): TagWithRelations
 			error,
 			tagId: prismaTag.id,
 		});
-		throw new TransformerError(
-			`Error al transformar el tag: ${(error as Error).message}`
-		);
+		throw new TransformerError(`Error al transformar el tag: ${(error as Error).message}`);
 	}
 }
 

@@ -3,11 +3,7 @@
  * @module store/entities/property/types
  */
 
-import type {
-    PropertySortCriteria,
-    PropertyViewMode,
-    PropertyWithRelations,
-} from '@/types/entities/property';
+import type { PropertySortCriteria, PropertyViewMode, PropertyWithRelations } from '@/types/entities/property';
 
 /**
  * Define el estado de visualización para una propiedad individual.

@@ -3,10 +3,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { toCreatePropertyData, toUpdatePropertyData } from '@/transformers/property';
-import {
-    CreatePropertySchema,
-    UpdatePropertySchema,
-} from '@/types/entities/property/schema';
+import { CreatePropertySchema, UpdatePropertySchema } from '@/types/entities/property/schema';
 import { z } from 'zod';
 
 const logger = serverLogger.withContext('PropertyActions');

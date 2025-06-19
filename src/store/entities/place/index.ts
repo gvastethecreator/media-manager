@@ -29,19 +29,21 @@ export const usePlaceStore = create<PlaceStore>()(
 			// Implementación del CoreSlice
 			setPlaces: (places) => set({ places }),
 			addPlace: (place) => set((state) => ({ places: [...state.places, place] })),
-			updatePlace: (id, data) => set((state) => ({
-				places: state.places.map((p) => (p.id === id ? { ...p, ...data } : p))
-			})),
-			removePlace: (id) => set((state) => ({
-				places: state.places.filter((p) => p.id !== id)
-			})),
+			updatePlace: (id, data) =>
+				set((state) => ({
+					places: state.places.map((p) => (p.id === id ? { ...p, ...data } : p)),
+				})),
+			removePlace: (id) =>
+				set((state) => ({
+					places: state.places.filter((p) => p.id !== id),
+				})),
 			resetStore: () => set({ places: [], error: null }),
 			setLoading: (isLoading) => set({ isLoading }),
 			setError: (error) => set({ error }),
 			getPlaceById: (id) => get().places.find((place) => place.id === id) || null,
 			getPlacesByIds: (ids) => {
 				const idSet = new Set(ids);
-				return get().places.filter(p => idSet.has(p.id));
+				return get().places.filter((p) => idSet.has(p.id));
 			},
 
 			// Implementación del UISlice
@@ -56,28 +58,27 @@ export const usePlaceStore = create<PlaceStore>()(
 			setIsCreatingPlace: (value) => set({ isCreatingPlace: value }),
 			setIsEditingPlace: (value) => set({ isEditingPlace: value }),
 			setIsProcessingAction: (value) => set({ isProcessingAction: value }),
-			toggleSelected: (id) => set((state) => {
-				const isSelected = state.selectedIds.includes(id);
-				return {
-					selectedIds: isSelected
-						? state.selectedIds.filter((i) => i !== id)
-						: [...state.selectedIds, id]
-				};
-			}),
+			toggleSelected: (id) =>
+				set((state) => {
+					const isSelected = state.selectedIds.includes(id);
+					return {
+						selectedIds: isSelected ? state.selectedIds.filter((i) => i !== id) : [...state.selectedIds, id],
+					};
+				}),
 			selectPlaces: (ids) => set({ selectedIds: ids }),
 			clearSelection: () => set({ selectedIds: [] }),
-			toggleExpanded: (id) => set((state) => {
-				const isExpanded = state.expandedIds.includes(id);
-				return {
-					expandedIds: isExpanded
-						? state.expandedIds.filter((i) => i !== id)
-						: [...state.expandedIds, id]
-				};
-			}),
+			toggleExpanded: (id) =>
+				set((state) => {
+					const isExpanded = state.expandedIds.includes(id);
+					return {
+						expandedIds: isExpanded ? state.expandedIds.filter((i) => i !== id) : [...state.expandedIds, id],
+					};
+				}),
 			setCurrentPlaceId: (id) => set({ currentPlaceId: id }),
-			setViewConfig: (config) => set((state) => ({
-				viewConfig: { ...state.viewConfig, ...config }
-			})),
+			setViewConfig: (config) =>
+				set((state) => ({
+					viewConfig: { ...state.viewConfig, ...config },
+				})),
 			selectPlaceId: (placeId) => set({ selectedPlaceId: placeId }),
 
 			// Implementación del FiltersSlice
@@ -88,34 +89,40 @@ export const usePlaceStore = create<PlaceStore>()(
 			resetFilters: () => set({ filters: {} }),
 			setSortBy: (sortBy) => set({ sortBy }),
 			setSearchQuery: (query) => set({ searchQuery: query }),
-			setTypeFilter: (type) => set((state) => ({
-				filters: { ...state.filters, type: type || undefined }
-			})),
-			setCategoryFilter: (category) => set((state) => ({
-				filters: { ...state.filters, category: category || undefined }
-			})),
-			setRegionFilter: (region) => set((state) => ({
-				filters: { ...state.filters, region: region || undefined }
-			})),
-			setFavoritesFilter: (onlyFavorites) => set((state) => ({
-				filters: { ...state.filters, isFavorite: onlyFavorites }
-			})),
-			setPopulationFilter: (min, max) => set((state) => ({
-				filters: {
-					...state.filters,
-					minPopulation: min,
-					maxPopulation: max
-				}
-			})),
-			setRelationsFilter: (relations) => set((state) => ({
-				filters: { ...state.filters, ...relations }
-			})),
+			setTypeFilter: (type) =>
+				set((state) => ({
+					filters: { ...state.filters, type: type || undefined },
+				})),
+			setCategoryFilter: (category) =>
+				set((state) => ({
+					filters: { ...state.filters, category: category || undefined },
+				})),
+			setRegionFilter: (region) =>
+				set((state) => ({
+					filters: { ...state.filters, region: region || undefined },
+				})),
+			setFavoritesFilter: (onlyFavorites) =>
+				set((state) => ({
+					filters: { ...state.filters, isFavorite: onlyFavorites },
+				})),
+			setPopulationFilter: (min, max) =>
+				set((state) => ({
+					filters: {
+						...state.filters,
+						minPopulation: min,
+						maxPopulation: max,
+					},
+				})),
+			setRelationsFilter: (relations) =>
+				set((state) => ({
+					filters: { ...state.filters, ...relations },
+				})),
 			getFilteredPlaces: () => {
 				// Por implementar lógica de filtrado completa
 				const { places, filters, searchQuery } = get();
 				if (!filters && !searchQuery) return places;
 
-				return places.filter(place => {
+				return places.filter((place) => {
 					// Filtro por búsqueda básica
 					if (searchQuery && !place.name.toLowerCase().includes(searchQuery.toLowerCase())) {
 						return false;
@@ -135,8 +142,8 @@ export const usePlaceStore = create<PlaceStore>()(
 						// @ts-ignore - Ignoramos el error de tipo temporalmente
 						return a[field] > b[field] ? 1 : -1;
 					}
-						// @ts-ignore - Ignoramos el error de tipo temporalmente
-						return a[field] < b[field] ? 1 : -1;
+					// @ts-ignore - Ignoramos el error de tipo temporalmente
+					return a[field] < b[field] ? 1 : -1;
 				});
 			},
 
@@ -199,4 +206,3 @@ export const usePlaceStore = create<PlaceStore>()(
 // Re-exportar tipos y constantes
 export * from './constants';
 export * from './types';
-

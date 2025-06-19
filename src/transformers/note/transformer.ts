@@ -4,12 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    NoteBase,
-    NoteComplete,
-    NoteCounts,
-    NoteWithStats
-} from '@/types/entities/note';
+import type { NoteBase, NoteComplete, NoteCounts, NoteWithStats } from '@/types/entities/note';
 import { TransformerError } from '@/utils/transformers/errors';
 import { extendNote, fromPrismaNote } from './serializers';
 
@@ -145,7 +140,10 @@ export function transformNoteToWithStats(note: NoteBase | NoteComplete): NoteWit
 			conceptCount: counts.concepts || 0,
 			importanceLevel,
 			contentLength: baseNote.content ? baseNote.content.length : 0,
-			relatedItemsCount: Object.values(counts || {}).reduce((sum: number, count: number | undefined) => sum + (count || 0), 0),
+			relatedItemsCount: Object.values(counts || {}).reduce(
+				(sum: number, count: number | undefined) => sum + (count || 0),
+				0
+			),
 			distribution: [
 				{ name: 'images', count: counts.images || 0 },
 				{ name: 'videos', count: counts.videos || 0 },
@@ -154,7 +152,10 @@ export function transformNoteToWithStats(note: NoteBase | NoteComplete): NoteWit
 			],
 		};
 	} catch (error) {
-		logger.error('Error transformando nota a versión con estadísticas:', { error, noteId: (note as Record<string, any>)?.id });
+		logger.error('Error transformando nota a versión con estadísticas:', {
+			error,
+			noteId: (note as Record<string, any>)?.id,
+		});
 		throw new TransformerError('Error al transformar nota a versión con estadísticas');
 	}
 }
