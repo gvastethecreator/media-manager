@@ -1,16 +1,16 @@
+import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { createHash } from 'crypto';
 import { existsSync, promises as fs } from 'fs';
 import { extname, join } from 'path';
 import sharp from 'sharp';
-import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { serverLogger } from '@/lib/logger/server-logger';
 import type { ImageFormat } from './image';
 import { formatBytes } from './utils/format.utils';
 
 const thumbLogger = serverLogger.withContext('Thumbnail');
 
 // Configuración de caché
-const CACHE_DIR = '.thumbnail-cache';
+const CACHE_DIR = join(process.cwd(), '.image-cache', 'thumbnails');
 
 export interface ThumbnailOptions {
 	quality: ThumbnailQuality;
@@ -358,6 +358,7 @@ export async function generateThumbnail(
  */
 export async function clearThumbnailCache(): Promise<void> {
 	try {
+		await fs.mkdir(CACHE_DIR, { recursive: true }); // Asegurarse de que existe
 		const files = await fs.readdir(CACHE_DIR);
 		await Promise.all(files.map((file) => fs.unlink(join(CACHE_DIR, file))));
 		thumbLogger.info('Caché de thumbnails limpiada');

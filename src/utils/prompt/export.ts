@@ -71,18 +71,14 @@ export interface PromptExportResult {
  * @param includeMetadata Si se incluyen metadatos adicionales
  * @returns Prompt en formato JSON
  */
+// Cambios: title -> name, model -> purpose (según tipos canónicos)
 function exportPromptToJSON(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		// Preparar el prompt para mostrar (con propiedades serializadas)
 		const displayPrompt = 'parsedTags' in prompt ? prompt : preparePromptForDisplay(prompt);
-
-		// Si no queremos metadatos, filtrar solo propiedades esenciales
 		if (!includeMetadata) {
-			const { id, title, content, category, model, parameters } = displayPrompt;
-			return JSON.stringify({ id, title, content, category, model, parameters }, null, 2);
+			const { id, name, content, category, purpose, parameters } = displayPrompt;
+			return JSON.stringify({ id, name, content, category, purpose, parameters }, null, 2);
 		}
-
-		// Devolver el prompt completo serializado
 		return JSON.stringify(displayPrompt, null, 2);
 	} catch (error) {
 		exportLogger.error('❌ Error al exportar prompt a JSON:', error);
@@ -98,16 +94,11 @@ function exportPromptToJSON(prompt: PromptBase | PromptExtended, includeMetadata
  */
 function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		// Preparar el prompt para mostrar
 		const displayPrompt = 'parsedTags' in prompt ? prompt : preparePromptForDisplay(prompt);
-
-		// Construir documento Markdown
-		let md = `# ${displayPrompt.title}\n\n`;
-
-		// Añadir metadatos si se solicitan
+		let md = `# ${displayPrompt.name}\n\n`;
 		if (includeMetadata) {
 			md += `**Categoría:** ${displayPrompt.category}\n`;
-			md += `**Modelo:** ${displayPrompt.model}\n`;
+			md += `**Propósito:** ${displayPrompt.purpose}\n`;
 
 			// Añadir tags si existen
 			const tags: string[] = displayPrompt.parsedTags || [];
@@ -142,7 +133,7 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
 		return md;
 	} catch (error) {
 		exportLogger.error('❌ Error al exportar prompt a Markdown:', error);
-		return `# Error al exportar ${prompt.title}`;
+		return `# Error al exportar ${prompt.name}`;
 	}
 }
 
@@ -154,16 +145,11 @@ function exportPromptToMarkdown(prompt: PromptBase | PromptExtended, includeMeta
  */
 function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		// Preparar el prompt para mostrar
 		const displayPrompt = 'parsedTags' in prompt ? prompt : preparePromptForDisplay(prompt);
-
-		// Construir texto
-		let text = `${displayPrompt.title}\n\n`;
-
-		// Añadir metadatos si se solicitan
+		let text = `${displayPrompt.name}\n\n`;
 		if (includeMetadata) {
 			text += `Categoría: ${displayPrompt.category}\n`;
-			text += `Modelo: ${displayPrompt.model}\n`;
+			text += `Propósito: ${displayPrompt.purpose}\n`;
 
 			// Añadir tags si existen
 			const tags = displayPrompt.parsedTags || [];
@@ -173,14 +159,11 @@ function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata
 
 			text += '\n-----------------\n\n';
 		}
-
-		// Añadir contenido
 		text += `${displayPrompt.content}\n`;
-
 		return text;
 	} catch (error) {
 		exportLogger.error('❌ Error al exportar prompt a texto:', error);
-		return `Error al exportar ${prompt.title}`;
+		return `Error al exportar ${prompt.name}`;
 	}
 }
 
@@ -192,10 +175,7 @@ function exportPromptToText(prompt: PromptBase | PromptExtended, includeMetadata
  */
 function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata = true): string {
 	try {
-		// Preparar el prompt para mostrar
 		const displayPrompt = 'parsedTags' in prompt ? prompt : preparePromptForDisplay(prompt);
-
-		// Escapar HTML para evitar inyección
 		const escapeHtml = (text: string) => {
 			return text
 				.replace(/&/g, '&amp;')
@@ -204,13 +184,11 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
 				.replace(/"/g, '&quot;')
 				.replace(/'/g, '&#039;');
 		};
-
-		// Construir HTML
 		let html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>${escapeHtml(displayPrompt.title)}</title>
+  <title>${escapeHtml(displayPrompt.name)}</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 1rem; }
     h1 { color: #333; }
@@ -221,14 +199,14 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
   </style>
 </head>
 <body>
-  <h1>${escapeHtml(displayPrompt.title)}</h1>`;
+  <h1>${escapeHtml(displayPrompt.name)}</h1>`;
 
 		// Añadir metadatos si se solicitan
 		if (includeMetadata) {
 			html += `
   <div class="metadata">
     <p><strong>Categoría:</strong> ${escapeHtml(displayPrompt.category)}</p>
-    <p><strong>Modelo:</strong> ${escapeHtml(displayPrompt.model)}</p>`;
+    <p><strong>Propósito:</strong> ${escapeHtml(displayPrompt.purpose)}</p>`;
 
 			// Añadir tags si existen
 			const tags: string[] = displayPrompt.parsedTags || [];
@@ -278,7 +256,7 @@ function exportPromptToHTML(prompt: PromptBase | PromptExtended, includeMetadata
 		return html;
 	} catch (error) {
 		exportLogger.error('❌ Error al exportar prompt a HTML:', error);
-		return `<html><body><h1>Error al exportar ${prompt.title}</h1></body></html>`;
+		return `<html><body><h1>Error al exportar ${prompt.name}</h1></body></html>`;
 	}
 }
 
@@ -324,10 +302,10 @@ export function exportPrompt(prompt: PromptBase | PromptExtended, config: Prompt
 
 			case PromptExportFormat.CSV: {
 				// Implementación simplificada para CSV (solo una fila)
-				const fields = [prompt.id, prompt.title, prompt.content, prompt.category, prompt.model];
+				const fields = [prompt.id, prompt.name, prompt.content, prompt.category, prompt.purpose];
 				content = includeMetadata
-					? `id,title,content,category,model\n"${fields.join('","')}"`
-					: `"${prompt.title}","${prompt.content}"`;
+					? `id,name,content,category,purpose\n"${fields.join('","')}"`
+					: `"${prompt.name}","${prompt.content}"`;
 				mimeType = 'text/csv';
 				fileExtension = 'csv';
 				break;
@@ -372,8 +350,8 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 		const parsed = JSON.parse(content);
 
 		// Verificar campos mínimos requeridos
-		if (!parsed.title || !parsed.content) {
-			throw new Error('El JSON no contiene un prompt válido (faltan title o content)');
+		if (!parsed.name || !parsed.content) {
+			throw new Error('El JSON no contiene un prompt válido (faltan name o content)');
 		}
 
 		// Asignar ID nuevo si no tiene o para evitar colisiones
@@ -382,15 +360,17 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 		// Crear objeto prompt con valores por defecto para campos faltantes
 		const prompt: PromptBase = {
 			id,
-			title: parsed.title,
-			content: parsed.content,
-			category: parsed.category || 'GENERAL',
-			model: parsed.model || 'GPT_3_5',
-			parameters: parsed.parameters || '{}',
-			tags: parsed.tags || '[]',
-			isFavorite: false,
+			name: parsed.name,
 			emoji: parsed.emoji || '📝',
 			color: parsed.color || '#3b82f6',
+			description: parsed.description || null,
+			content: parsed.content,
+			purpose: parsed.purpose || '',
+			category: parsed.category || 'GENERAL',
+			parameters: parsed.parameters || '{}',
+			tags: parsed.tags || '[]',
+			featuredImage: parsed.featuredImage || null,
+			isFavorite: false,
 			createdAt: new Date(),
 			updatedAt: new Date(),
 		};

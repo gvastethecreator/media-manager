@@ -1,9 +1,10 @@
-import { createHmac } from 'crypto';
-import fs from 'fs/promises';
 import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
 import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { createHmac } from 'crypto';
+import fs from 'fs/promises';
+import path from 'path';
 
 const thumbLogger = serverLogger.withContext('ThumbnailService');
 
@@ -218,9 +219,14 @@ class ThumbnailService {
 
 	private async handleProcess(endpoint: string, callbacks?: ProcessOptions): Promise<void> {
 		if (this.isProcessing) {
-			const error = new Error('Ya hay un proceso en ejecución');
+			const error: ThumbnailError = {
+				imageId: 'N/A',
+				imagePath: endpoint,
+				error: 'Ya hay un proceso en ejecución',
+				timestamp: new Date(),
+			};
 			await this.emitEvent(EVENTS.ERROR, error);
-			throw error;
+			throw new Error(error.error);
 		}
 
 		this.isProcessing = true;
@@ -380,44 +386,53 @@ class ThumbnailService {
 	}
 
 	async verifySignedToken(token: string): Promise<{ buffer: Buffer; mimeType: string }> {
-		try {
-			thumbLogger.info('🔄 Verificando token firmado:', token);
-
-			// Decodificar el token
-			const [signature, payload] = token.split('.');
-			if (!signature || !payload) {
-				throw new Error('Token inválido');
-			}
-
-			// Decodificar el payload
-			const decodedPayload = Buffer.from(payload, 'base64').toString('utf-8');
-			const data = JSON.parse(decodedPayload);
-
-			// Verificar que el token no haya expirado
-			if (data.exp && Date.now() > data.exp) {
-				throw new Error('Token expirado');
-			}
-
-			// Generar firma para comparar
-			const hmac = createHmac('sha256', this.SECRET_KEY);
-			hmac.update(payload);
-			const expectedSignature = hmac.digest('base64url');
-
-			// Verificar firma
-			if (signature !== expectedSignature) {
-				throw new Error('Firma inválida');
-			}
-
-			// Obtener la imagen original
-			const imageBuffer = await fs.readFile(data.path);
-			const mimeType = data.mimeType || 'image/jpeg';
-
-			thumbLogger.info('✅ Token verificado correctamente');
-			return { buffer: imageBuffer, mimeType };
-		} catch (error) {
-			thumbLogger.error('❌ Error verificando token:', error);
-			throw new Error('Token inválido o expirado');
+		const [id, quality, expires, signature] = token.split(':');
+		if (!id || !quality || !expires || !signature) {
+			throw new Error('Token de thumbnail inválido');
 		}
+
+		const expiresTs = Number.parseInt(expires, 10);
+		if (Number.isNaN(expiresTs) || Date.now() > expiresTs) {
+			throw new Error('Token de thumbnail expirado o inválido');
+		}
+
+		const expectedSignature = this.generateSignature(id, quality, expires);
+		if (signature !== expectedSignature) {
+			throw new Error('Firma de thumbnail inválida');
+		}
+
+		// La caché es ahora la fuente de verdad para los thumbnails firmados
+		const image = await this.getThumbnailFromCache(id, quality as ThumbnailQuality);
+		if (!image) {
+			throw new Error('Thumbnail no encontrado en la cache');
+		}
+
+		return { buffer: image.buffer, mimeType: 'image/jpeg' };
+	}
+
+	private async getThumbnailFromCache(
+		id: string,
+		quality: ThumbnailQuality,
+	): Promise<{ buffer: Buffer; mimeType: string } | null> {
+		const cachePath = path.join(process.cwd(), '.image-cache', 'thumbnails', `${id}-${quality}.jpg`);
+		try {
+			const buffer = await fs.readFile(cachePath);
+			return { buffer, mimeType: 'image/jpeg' };
+		} catch (error: any) {
+			if (error.code === 'ENOENT') {
+				thumbLogger.warn(`Thumbnail no encontrado en cache: ${cachePath}`);
+				return null;
+			}
+			thumbLogger.error(`Error al leer thumbnail de la cache: ${cachePath}`, error);
+			throw error;
+		}
+	}
+
+	private generateSignature(id: string, quality: ThumbnailQuality, expires: string): string {
+		const payload = `${id}:${quality}:${expires}`;
+		const hmac = createHmac('sha256', this.SECRET_KEY);
+		hmac.update(payload);
+		return hmac.digest('base64url');
 	}
 }
 

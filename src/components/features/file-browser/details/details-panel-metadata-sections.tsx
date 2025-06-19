@@ -12,7 +12,9 @@ import type { InfoItemData, MetadataComponentProps } from './details-panel-types
 function renderInfoItems(items: (InfoItemData | null | undefined)[]) {
 	return items
 		.filter((item): item is InfoItemData => !!item && (item.condition === undefined || item.condition))
-		.map((item) => <InfoItem key={item.label} label={item.label} value={item.value} icon={item.icon} />);
+		.map((item) => (
+			<InfoItem key={item.label} label={item.label} value={item.value || 'N/A'} icon={item.icon} />
+		));
 }
 
 /**
@@ -20,12 +22,11 @@ function renderInfoItems(items: (InfoItemData | null | undefined)[]) {
  */
 export function XMPInfo({ metadata }: MetadataComponentProps) {
 	const [copied, setCopied] = useState(false);
+	const xmp = metadata?.xmp;
 
-	if (!metadata?.xmp) {
+	if (!xmp) {
 		return <div className="text-xs text-muted-foreground">No hay datos XMP disponibles</div>;
 	}
-
-	const { xmp } = metadata;
 
 	const copyToClipboard = (text: string) => {
 		navigator.clipboard.writeText(text).then(() => {
@@ -63,20 +64,20 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 	];
 
 	const hasAnyInfo =
-		infoItems.some((item) => item?.condition) || (xmp.subject && xmp.subject.length > 0) || xmp.rawData;
+		infoItems.some((item) => item?.condition) || (xmp.subject && Array.isArray(xmp.subject) && xmp.subject.length > 0) || xmp.rawData;
 
 	return (
 		<div className="space-y-3">
 			{renderInfoItems(infoItems)}
 
-			{xmp.subject && xmp.subject.length > 0 && (
+			{xmp.subject && Array.isArray(xmp.subject) && xmp.subject.length > 0 && (
 				<div>
 					<InfoItem
 						label="Etiquetas"
 						icon={<Info className="h-3.5 w-3.5 text-green-500" />}
 						value={
 							<div className="flex flex-wrap gap-1 justify-end">
-								{xmp.subject.map((tag) => (
+								{xmp.subject.map((tag: string) => (
 									<button
 										key={`xmp-tag-${tag}`}
 										className="text-xs rounded-full bg-muted px-2 py-0.5 hover:bg-muted/80"
@@ -148,11 +149,11 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
  * Componente para metadata IPTC
  */
 export function IPTCInfo({ metadata }: MetadataComponentProps) {
-	if (!metadata?.iptc) {
+	const iptc = metadata?.iptc;
+
+	if (!iptc) {
 		return <div className="text-xs text-muted-foreground">No hay datos IPTC disponibles</div>;
 	}
-
-	const { iptc } = metadata;
 
 	const infoItems: (InfoItemData | null)[] = [
 		{
@@ -187,19 +188,20 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
 		},
 	];
 
-	const hasAnyInfo = infoItems.some((item) => item?.condition) || (iptc.keywords && iptc.keywords.length > 0);
+	const hasAnyInfo =
+		infoItems.some((item) => item?.condition) || (iptc.keywords && Array.isArray(iptc.keywords) && iptc.keywords.length > 0);
 
 	return (
 		<div className="space-y-3">
 			{renderInfoItems(infoItems)}
 
-			{iptc.keywords && iptc.keywords.length > 0 && (
+			{iptc.keywords && Array.isArray(iptc.keywords) && iptc.keywords.length > 0 && (
 				<InfoItem
 					label="Palabras clave"
 					icon={<Info className="h-3.5 w-3.5 text-green-500" />}
 					value={
 						<div className="flex flex-wrap gap-1 justify-end">
-							{iptc.keywords.map((keyword) => (
+							{iptc.keywords.map((keyword: string) => (
 								<div key={`iptc-keyword-${keyword}`} className="text-xs rounded-full bg-muted px-2 py-0.5">
 									{keyword}
 								</div>
@@ -222,11 +224,11 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
  * Componente para metadata EXIF
  */
 export function ExifInfo({ metadata }: MetadataComponentProps) {
-	if (!metadata?.exif) {
+	const exif = metadata?.exif;
+
+	if (!exif) {
 		return <div className="text-xs text-muted-foreground">No hay datos EXIF disponibles</div>;
 	}
-
-	const { exif } = metadata;
 
 	const formatExifDate = (dateStr?: string | Date) => {
 		if (!dateStr) return 'No disponible';

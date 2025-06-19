@@ -7,7 +7,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { type ScheduledTask } from '@/types/tasks';
+import { type ScheduledTask, TaskStatus } from '@/types/tasks';
 import { revalidatePath } from 'next/cache';
 
 // Logger for process actions
@@ -63,14 +63,14 @@ export async function startTask(id: string): Promise<ScheduledTask> {
 			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
 		}
 
-		if (task.status === 'RUNNING') {
+		if (task.status === TaskStatus.RUNNING) {
 			throw createTaskProcessError('Task is already running', 'TASK_RUNNING');
 		}
 
 		const updatedTask = await prisma.scheduledTask.update({
 			where: { id },
 			data: {
-				status: 'RUNNING',
+				status: TaskStatus.RUNNING,
 				startedAt: new Date(),
 				error: null,
 			},
@@ -78,13 +78,13 @@ export async function startTask(id: string): Promise<ScheduledTask> {
 
 		await revalidateTaskPaths();
 		taskLogger.info('✅ Task started:', { id });
-		return updatedTask;
+		return updatedTask as unknown as ScheduledTask;
 	} catch (error) {
 		taskLogger.error('❌ Error starting task:', error);
 
 		// Reenviar el error si ya es un TaskProcessError
 		if (error && typeof error === 'object' && 'name' in error && error.name === 'TaskProcessError') {
-			throw error;
+			throw error as TaskProcessErrorData;
 		}
 
 		throw createTaskProcessError('Failed to start task', 'START_FAILED', error);
@@ -106,7 +106,7 @@ export async function completeTask(id: string, result?: unknown): Promise<Schedu
 			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
 		}
 
-		if (task.status !== 'RUNNING') {
+		if (task.status !== TaskStatus.RUNNING) {
 			throw createTaskProcessError('Task is not running', 'TASK_NOT_RUNNING');
 		}
 
@@ -120,7 +120,7 @@ export async function completeTask(id: string, result?: unknown): Promise<Schedu
 		const updatedTask = await prisma.scheduledTask.update({
 			where: { id },
 			data: {
-				status: nextRunAt ? 'SCHEDULED' : 'COMPLETED',
+				status: nextRunAt ? TaskStatus.SCHEDULED : TaskStatus.COMPLETED,
 				completedAt: new Date(),
 				nextRunAt,
 				result: result ? JSON.stringify(result, null, 2) : null,
@@ -131,13 +131,13 @@ export async function completeTask(id: string, result?: unknown): Promise<Schedu
 
 		await revalidateTaskPaths();
 		taskLogger.info('✅ Task completed:', { id, nextRunAt });
-		return updatedTask;
+		return updatedTask as unknown as ScheduledTask;
 	} catch (error) {
 		taskLogger.error('❌ Error completing task:', error);
 
 		// Reenviar el error si ya es un TaskProcessError
 		if (error && typeof error === 'object' && 'name' in error && error.name === 'TaskProcessError') {
-			throw error;
+			throw error as TaskProcessErrorData;
 		}
 
 		throw createTaskProcessError('Failed to complete task', 'COMPLETE_FAILED', error);
@@ -169,7 +169,7 @@ export async function failTask(id: string, error: Error | string): Promise<Sched
 		const updatedTask = await prisma.scheduledTask.update({
 			where: { id },
 			data: {
-				status: nextRunAt ? 'SCHEDULED' : 'FAILED',
+				status: nextRunAt ? TaskStatus.SCHEDULED : TaskStatus.FAILED,
 				error:
 					error instanceof Error
 						? JSON.stringify({ message: error.message, name: error.name, stack: error.stack }, null, 2)
@@ -184,13 +184,13 @@ export async function failTask(id: string, error: Error | string): Promise<Sched
 
 		await revalidateTaskPaths();
 		taskLogger.info('✅ Task marked as failed:', { id, nextRunAt });
-		return updatedTask;
+		return updatedTask as unknown as ScheduledTask;
 	} catch (error) {
 		taskLogger.error('❌ Error marking task as failed:', error);
 
 		// Reenviar el error si ya es un TaskProcessError
 		if (error && typeof error === 'object' && 'name' in error && error.name === 'TaskProcessError') {
-			throw error;
+			throw error as TaskProcessErrorData;
 		}
 
 		throw createTaskProcessError('Failed to mark task as failed', 'FAIL_FAILED', error);
@@ -212,26 +212,26 @@ export async function pauseTask(id: string): Promise<ScheduledTask> {
 			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
 		}
 
-		if (task.status !== 'RUNNING' && task.status !== 'SCHEDULED') {
+		if (task.status !== TaskStatus.RUNNING && task.status !== TaskStatus.SCHEDULED) {
 			throw createTaskProcessError('Task cannot be paused', 'TASK_NOT_PAUSABLE');
 		}
 
 		const updatedTask = await prisma.scheduledTask.update({
 			where: { id },
 			data: {
-				status: 'PAUSED',
+				status: TaskStatus.PAUSED,
 			},
 		});
 
 		await revalidateTaskPaths();
 		taskLogger.info('✅ Task paused:', { id });
-		return updatedTask;
+		return updatedTask as unknown as ScheduledTask;
 	} catch (error) {
 		taskLogger.error('❌ Error pausing task:', error);
 
 		// Reenviar el error si ya es un TaskProcessError
 		if (error && typeof error === 'object' && 'name' in error && error.name === 'TaskProcessError') {
-			throw error;
+			throw error as TaskProcessErrorData;
 		}
 
 		throw createTaskProcessError('Failed to pause task', 'PAUSE_FAILED', error);
@@ -253,14 +253,14 @@ export async function resumeTask(id: string): Promise<ScheduledTask> {
 			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
 		}
 
-		if (task.status !== 'PAUSED') {
+		if (task.status !== TaskStatus.PAUSED) {
 			throw createTaskProcessError('Task is not paused', 'TASK_NOT_PAUSED');
 		}
 
 		const updatedTask = await prisma.scheduledTask.update({
 			where: { id },
 			data: {
-				status: 'SCHEDULED',
+				status: TaskStatus.SCHEDULED,
 				nextRunAt: new Date(),
 			},
 		});
@@ -295,14 +295,14 @@ export async function rescheduleTask(id: string, nextRunAt: Date): Promise<Sched
 			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
 		}
 
-		if (task.status === 'RUNNING') {
+		if (task.status === TaskStatus.RUNNING) {
 			throw createTaskProcessError('Cannot reschedule running task', 'TASK_RUNNING');
 		}
 
 		const updatedTask = await prisma.scheduledTask.update({
 			where: { id },
 			data: {
-				status: 'SCHEDULED',
+				status: TaskStatus.SCHEDULED,
 				nextRunAt,
 			},
 		});
