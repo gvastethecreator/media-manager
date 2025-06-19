@@ -5,16 +5,16 @@ import { type EventType, emit } from '@/lib/server/events.server';
 import { fromDB, transformUploadedImage } from '@/transformers/uploaded-image';
 import type { UploadedImageType } from '@/types/entities/uploaded-image';
 import type {
-	CreateUploadedImageParams,
-	GetUploadedImagesParams,
-	UpdateUploadedImageParams,
-	UploadedImageDimensions,
-	UploadedImageEvents,
-	UploadedImageMetadata,
-	UploadedImageProcessingOptions,
-	UploadedImageResult,
-	UploadedImageResults,
-	UploadedImageStats,
+    CreateUploadedImageParams,
+    GetUploadedImagesParams,
+    UpdateUploadedImageParams,
+    UploadedImageDimensions,
+    UploadedImageEvents,
+    UploadedImageMetadata,
+    UploadedImageProcessingOptions,
+    UploadedImageResult,
+    UploadedImageResults,
+    UploadedImageStats,
 } from '@/types/uploaded-images';
 import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/utils/errors/service-errors';
 
@@ -249,106 +249,61 @@ class UploadedImagesService {
 
 	public async getImages(params: GetUploadedImagesParams = {}): Promise<UploadedImageResults> {
 		try {
-			const { filters = {}, includeDimensions = true, includeThumbnails = true, targetDimensions } = params;
+			const { page = 1, limit = 20, type, category, size, width, height, query } = params;
 
-			const {
-				type,
-				category,
-				minWidth,
-				maxWidth,
-				minHeight,
-				maxHeight,
-				minSize,
-				maxSize,
-				search,
-				sortBy = 'createdAt',
-				sortOrder = 'desc',
-				page = 1,
-				pageSize = 20,
-			} = filters;
-
-			// Construir la cláusula where para el filtrado
 			const where: WhereClause = {};
+			if (type) where.type = type;
+			if (category) where.category = category;
 
-			if (type) {
-				where.type = type;
+			if (size) {
+				where.size = {
+					...(size.min && { gte: size.min }),
+					...(size.max && { lte: size.max }),
+				};
+			}
+			if (width) {
+				where.width = {
+					...(width.min && { gte: width.min }),
+					...(width.max && { lte: width.max }),
+				};
+			}
+			if (height) {
+				where.height = {
+					...(height.min && { gte: height.min }),
+					...(height.max && { lte: height.max }),
+				};
 			}
 
-			if (category) {
-				where.category = category;
-			}
-
-			// Filtrar por tamaño
-			if (minSize || maxSize) {
-				where.size = {};
-				if (minSize) {
-					where.size.gte = minSize;
-				}
-				if (maxSize) {
-					where.size.lte = maxSize;
-				}
-			}
-
-			// Filtrar por dimensiones
-			if (minWidth || maxWidth) {
-				where.width = {};
-				if (minWidth) {
-					where.width.gte = minWidth;
-				}
-				if (maxWidth) {
-					where.width.lte = maxWidth;
-				}
-			}
-
-			if (minHeight || maxHeight) {
-				where.height = {};
-				if (minHeight) {
-					where.height.gte = minHeight;
-				}
-				if (maxHeight) {
-					where.height.lte = maxHeight;
-				}
-			}
-
-			// Búsqueda por nombre o categoría
-			if (search) {
+			if (query) {
 				where.OR = [
-					{
-						name: { contains: search, mode: 'insensitive' },
-					},
-					{
-						category: { contains: search, mode: 'insensitive' },
-					},
+					{ name: { contains: query, mode: 'insensitive' } },
+					{ category: { contains: query, mode: 'insensitive' } },
 				];
 			}
 
-			// Calcular el número total de imágenes que coinciden con los filtros
 			const total = await prisma.uploadedImage.count({ where });
 
-			// Obtener las imágenes paginadas
 			const rawImages = await prisma.uploadedImage.findMany({
 				where,
 				orderBy: {
-					[sortBy]: sortOrder,
+					createdAt: 'desc',
 				},
-				skip: (page - 1) * pageSize,
-				take: pageSize,
+				skip: (page - 1) * limit,
+				take: limit,
 			});
 
-			// Transformar los resultados usando el transformer
 			const items = rawImages.map((image) => {
 				const entity = fromDB(image);
 				return transformUploadedImage(entity);
 			});
 
-			// Obtener estadísticas si se incluyen en la respuesta
 			const stats = await this.getImageStats();
 
 			return {
 				items,
 				total,
 				page,
-				pageSize,
+				pageSize: limit,
 				stats,
 			};
 		} catch (error) {
@@ -384,7 +339,9 @@ class UploadedImagesService {
 			const stats: Record<UploadedImageType, number> = {} as Record<UploadedImageType, number>;
 
 			for (const item of byType) {
-				stats[item.type as UploadedImageType] = item._count.type;
+				if (item.type) {
+					stats[item.type] = item._count.type;
+				}
 			}
 
 			return {

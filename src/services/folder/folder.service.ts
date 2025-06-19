@@ -1,6 +1,5 @@
 import type { ErrorResponse, FolderResponse, IndexCallbacks, ProcessStatus } from '@/app/actions/folders';
 import { createFolder as createFolderAction, deleteFolder as deleteFolderAction } from '@/app/actions/folders';
-import { clientEvents } from '@/lib/client/events.client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats-service-export';
@@ -202,90 +201,42 @@ class FolderServiceClass {
 			}
 
 			// Mapeo de eventos locales a eventos del sistema central
-			let serverEventType: EventType | null = null;
-			switch (event) {
-				case FOLDER_EVENTS.PROGRESS:
-					serverEventType = 'folder:progress';
-					break;
-				case FOLDER_EVENTS.ERROR:
-					serverEventType = 'folder:error';
-					break;
-				case FOLDER_EVENTS.COMPLETE:
-					serverEventType = 'folder:complete';
-					break;
-				case FOLDER_EVENTS.STATS:
-					serverEventType = 'folder:stats';
-					break;
-				case FOLDER_EVENTS.FOLDER_ADDED:
-					serverEventType = 'folders:modified';
-					break;
-				case FOLDER_EVENTS.FOLDER_DELETED:
-					serverEventType = 'folders:modified';
-					break;
-				case FOLDER_EVENTS.FOLDER_MODIFIED:
-					serverEventType = 'folders:modified';
-					break;
-				case FOLDER_EVENTS.INDEXING_START:
-					serverEventType = 'folder:progress';
-					break;
-				case FOLDER_EVENTS.INDEXING_COMPLETE:
-					serverEventType = 'folder:complete';
-					break;
-				case FOLDER_EVENTS.REINDEX_ALL_START:
-					serverEventType = 'folder:reindexAll:start';
-					break;
-				case FOLDER_EVENTS.REINDEX_ALL_PROGRESS:
-					serverEventType = 'folder:reindexAll:progress';
-					break;
-				case FOLDER_EVENTS.REINDEX_ALL_COMPLETE:
-					serverEventType = 'folder:reindexAll:complete';
-					break;
-				default:
-					serverEventType = null;
-			}
+			const serverEventType = event as EventType;
+			const allowedServerEvents = Object.values(FOLDER_EVENTS);
 
-			// Emitir al sistema central si hay mapeo
-			if (serverEventType) {
+			if (allowedServerEvents.includes(serverEventType as FOLDER_EVENTS)) {
 				try {
 					await emit({
 						type: serverEventType,
 						data: args[0],
 					});
-					folderLogger.debug(`Evento ${event} emitido al sistema central como ${serverEventType}`);
 				} catch (emitError) {
 					folderLogger.error(`Error al emitir evento ${event} al sistema central:`, emitError);
 				}
 			}
 		} catch (error) {
-			folderLogger.error(`Error emitiendo evento ${event}:`, error);
+			folderLogger.error(`Error fatal en emitEvent para ${event}:`, error);
 		}
 	}
 
 	// Control de concurrencia mejorado
 	private async withConcurrencyControl<T>(operation: string, fn: () => Promise<T>): Promise<T> {
-		// Si ya hay una operación en progreso, reutilizamos la promesa existente en vez de lanzar un error
 		if (this.operationsInProgress.get(operation)) {
-			folderLogger.debug(`🔄 Operación ${operation} en progreso, reutilizando promesa existente`);
-			// Retornamos la promesa existente si está disponible
-			const existingPromise = this.operationPromises.get(operation);
-			if (existingPromise) {
-				return existingPromise as Promise<T>;
-			}
+			folderLogger.warn(`La operación "${operation}" ya está en progreso.`);
+			// Devolver la promesa existente para que el llamante pueda esperar a que termine
+			return this.operationPromises.get(operation) as Promise<T>;
 		}
 
-		// Marcar operación como en progreso
 		this.operationsInProgress.set(operation, true);
+		const promise = fn();
+		this.operationPromises.set(operation, promise);
 
-		// Crear promesa para la operación
-		const operationPromise = fn().finally(() => {
-			this.operationsInProgress.delete(operation);
+		try {
+			return await promise;
+		} finally {
+			this.operationsInProgress.set(operation, false);
 			this.operationPromises.delete(operation);
-		});
-
-		// Guardar la promesa para futuras llamadas concurrentes
-		this.operationPromises.set(operation, operationPromise);
-
-		return operationPromise;
+		}
 	}
 
 	// Métodos públicos
@@ -326,56 +277,47 @@ class FolderServiceClass {
 	}
 
 	async addFolder(path: string, callbacks?: IndexCallbacks) {
-		return this.withConcurrencyControl('addFolder', async () => {
+		return this.withConcurrencyControl(`addFolder:${path}`, async () => {
+			if (callbacks?.onStart) callbacks.onStart({ status: 'starting' });
+			await this.emitEvent(FOLDER_EVENTS.INDEXING_START, { path });
+
 			try {
-				folderLogger.info('📁 Agregando nueva carpeta:', path);
+				const response = await createFolderAction(path);
 
-				const folder = await createFolderAction(path);
-				folderLogger.info('✅ Carpeta creada:', folder);
-
-				if (!folder || !folder.id) {
-					throw { message: 'Respuesta inválida al crear carpeta' };
+				if ('error' in response) {
+					await this.emitEvent(FOLDER_EVENTS.ERROR, response);
+					if (callbacks?.onError) callbacks.onError(response);
+					return;
 				}
 
-				// Emitir eventos con el nuevo sistema
-				await this.emitEvent(FOLDER_EVENTS.FOLDER_ADDED, folder);
-				statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
-				statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['FOLDER_CHANGE']);
+				await this.emitEvent(FOLDER_EVENTS.FOLDER_ADDED, response);
+				await this.emitEvent(FOLDER_EVENTS.COMPLETE, response);
 
-				// Iniciar indexación
-				return this.indexFolder(folder.id, callbacks);
+				if (response.data) {
+					statsEventEmitter.emit(STATS_EVENTS.REQUEST_STATS_UPDATE, ['folders']);
+					await this.indexFolder(response.data.id, callbacks);
+				}
+
+				return response.data;
 			} catch (error) {
-				const errorResponse: ErrorResponse = {
-					message: error instanceof Error ? error.message : 'Error agregando carpeta',
-					details: error instanceof Error ? error.stack : String(error),
-					timestamp: Date.now(),
-				};
-				folderLogger.error('❌ Error adding folder:', errorResponse);
+				const errorResponse =
+					error instanceof Error ? { message: error.message } : { message: 'Error desconocido' };
 				await this.emitEvent(FOLDER_EVENTS.ERROR, errorResponse);
-				throw errorResponse;
+				if (callbacks?.onError) callbacks.onError(errorResponse);
 			}
 		});
 	}
 
 	private updateProgress(folderId: string, status: Partial<ProcessStatus>) {
-		try {
-			// Obtener estado actual
-			const currentStatus = this.globalProgress.get(folderId) || {};
-
-			// Actualizar estado
-			const updatedStatus: ProcessStatus = {
-				...currentStatus,
-				...status,
-				folderId,
-				timestamp: Date.now(),
-			};
-
-			// Guardar en la memoria
-			this.globalProgress.set(folderId, updatedStatus);
-			this.emitEvent(FOLDER_EVENTS.PROGRESS, updatedStatus);
-		} catch (error) {
-			console.error('Error actualizando progreso:', error);
-		}
+		const currentStatus = this.globalProgress.get(folderId) || {
+			status: 'idle',
+			progress: 0,
+			total: 0,
+			current: 0,
+		};
+		const newStatus = { ...currentStatus, ...status, folderId };
+		this.globalProgress.set(folderId, newStatus);
+		this.emitEvent(FOLDER_EVENTS.PROGRESS, newStatus);
 	}
 
 	private clearProgress(folderId: string) {
@@ -384,414 +326,227 @@ class FolderServiceClass {
 	}
 
 	async indexFolder(id: string, callbacks?: IndexCallbacks) {
-		return this.withConcurrencyControl(`indexFolder:${id}`, async () => {
-			try {
-				this.startTimes.set(id, Date.now());
+		return this.withConcurrencyControl(`index:${id}`, async () => {
+			const { getFolder: getFolderAction, indexFile: indexFileAction } = await import(
+				'@/app/actions/folders'
+			);
+			const response = await getFolderAction(id);
+			if ('error' in response || !response.data) {
+				const error = 'error' in response ? response : { message: 'Carpeta no encontrada' };
+				await this.emitEvent(FOLDER_EVENTS.ERROR, error);
+				if (callbacks?.onError) callbacks.onError(error);
+				this.clearProgress(id);
+				return;
+			}
 
-				const initialStatus: ProcessStatus = {
-					status: 'Iniciando indexación...',
-					progress: 0,
-					current: 0,
-					total: 0,
-					folderId: id,
-					phase: 'scanning',
-					startTime: Date.now(),
-				};
+			const folder = response.data;
+			const total = folder.imageCount ?? 0;
+			this.startTimes.set(id, Date.now());
 
-				await this.emitEvent(FOLDER_EVENTS.INDEXING_START, initialStatus);
-				this.updateProgress(id, initialStatus);
-				callbacks?.onProgress?.(initialStatus);
+			if (callbacks?.onStart) callbacks.onStart({ total });
+			this.updateProgress(id, {
+				status: 'Iniciando indexación...',
+				total,
+				current: 0,
+				progress: 0,
+			});
 
-				const { indexFolder } = await import('@/app/actions/folders/process.actions');
-				const result: FolderResponse = await this.withConcurrencyControl(`index-${id}`, () =>
-					indexFolder(id, {
-						...callbacks,
-						onProgress: (status) => this.updateProgress(id, status),
-					})
+			const BATCH_SIZE = 10;
+			let processedCount = 0;
+			const images = folder.images || [];
+
+			for (let i = 0; i < images.length; i += BATCH_SIZE) {
+				const batch = images.slice(i, i + BATCH_SIZE);
+				const promises = batch.map((image) =>
+					indexFileAction(image.id).then((result) => {
+						processedCount++;
+						this.updateProgress(id, {
+							status: `Indexando ${processedCount}/${total}...`,
+							current: processedCount,
+							progress: (processedCount / total) * 100,
+							currentFile: image.path,
+						});
+						if (callbacks?.onFile) callbacks.onFile(image.path, 'indexed');
+						return result;
+					}),
 				);
 
-				// Emitir eventos relevantes con el nuevo sistema
-				await this.emitEvent(FOLDER_EVENTS.INDEXING_COMPLETE, result);
-				await this.emitEvent(FOLDER_EVENTS.COMPLETE, {
-					id: result.id,
-					name: result.name,
-					path: result.path,
-					totalFiles: result.totalFiles,
-					totalSize: result.totalSize,
-					lastIndexed: new Date(),
-					createdAt: new Date(),
-					updatedAt: new Date(),
-					autoReindex: result.autoReindex || false,
-					stats: result.stats,
-				});
-				await emit({
-					type: 'files:modified',
-					data: { action: 'index', folderId: id },
-				});
-				await emit({
-					type: 'folders:modified',
-					data: {
-						action: 'index',
-						folder: {
-							id: result.id,
-							name: result.name,
-							path: result.path,
-							totalFiles: result.totalFiles,
-							totalSize: result.totalSize,
-							lastIndexed: new Date(),
-							createdAt: new Date(),
-							updatedAt: new Date(),
-							autoReindex: result.autoReindex || false,
-						},
-					},
-				});
-
-				this.clearProgress(id);
-				callbacks?.onComplete?.(result);
-				return result;
-			} catch (error) {
-				const errorResponse: ErrorResponse = {
-					message: error instanceof Error ? error.message : 'Error indexando carpeta',
-					details: error instanceof Error ? error.stack : String(error),
-					timestamp: Date.now(),
-				};
-				folderLogger.error('❌ Error indexing folder:', errorResponse);
-
-				await this.emitEvent(FOLDER_EVENTS.ERROR, errorResponse);
-				callbacks?.onError?.(errorResponse);
-
-				this.clearProgress(id);
-				throw errorResponse;
+				await Promise.all(promises);
 			}
+
+			const duration = (Date.now() - (this.startTimes.get(id) || Date.now())) / 1000;
+			const finalStatus: ProcessStatus = {
+				status: 'Completado',
+				progress: 100,
+				total,
+				current: total,
+				duration,
+			};
+
+			this.updateProgress(id, finalStatus);
+			await this.emitEvent(FOLDER_EVENTS.INDEXING_COMPLETE, { folderId: id, ...finalStatus });
+
+			if (callbacks?.onComplete) callbacks.onComplete({ ...folder, status: 'indexed' });
+			statsEventEmitter.emit(STATS_EVENTS.REQUEST_STATS_UPDATE, ['folders', 'images']);
+
+			this.clearProgress(id);
 		});
 	}
 
 	async reindexFolder(id: string, callbacks?: IndexCallbacks) {
-		return this.withConcurrencyControl(`reindexFolder:${id}`, async () => {
+		return this.withConcurrencyControl(`reindex:${id}`, async () => {
+			const { reindexFolder: reindexFolderAction } = await import('@/app/actions/folders');
+			this.updateProgress(id, { status: 'starting' });
 			try {
-				folderLogger.info('🔄 Reindexando carpeta:', id);
-				this.startTimes.set(id, Date.now());
+				const response = await reindexFolderAction(id);
 
-				// Notificar inicio del proceso
-				const initialStatus: ProcessStatus = {
-					status: 'Iniciando reindexación...',
-					progress: 0,
-					current: 0,
-					total: 0,
-					folderId: id,
-					phase: 'starting',
-					startTime: Date.now(),
-				};
-
-				this.emitEvent(FOLDER_EVENTS.PROGRESS, initialStatus);
-				this.updateProgress(id, initialStatus);
-				callbacks?.onProgress?.(initialStatus);
-
-				// Nos suscribimos a eventos de progreso para esta operación específica
-				const progressHandler = (status: ProcessStatus) => {
-					if (status.folderId === id) {
-						folderLogger.debug('📊 Progreso de reindexación:', {
-							folderId: id,
-							progress: status.progress,
-							status: status.status,
-							phase: status.phase,
-						});
-
-						// Retransmitir el evento
-						this.emitEvent(FOLDER_EVENTS.PROGRESS, status);
-						this.updateProgress(id, status);
-						callbacks?.onProgress?.(status);
-					}
-				};
-
-				// Registramos el manejador de progreso específico para esta operación
-				clientEvents.on('folder:progress', progressHandler);
-
-				const { reindexFolder } = await import('@/app/actions/folders/process.actions');
-				let result: FolderResponse;
-				try {
-					// Intentar obtener el resultado
-					result = await this.withConcurrencyControl(`reindex-${id}`, () =>
-						reindexFolder(id, {
-							...callbacks,
-							onProgress: (status) => this.updateProgress(id, status),
-						})
-					);
-				} catch (actionError) {
-					// Si hay un error, crear un resultado de error
-					result = {
-						id: id,
-						name: 'Error',
-						path: '',
-						success: false,
-						error: actionError instanceof Error ? actionError.message : 'Error desconocido',
-					} as FolderResponse;
-				} finally {
-					// Siempre limpiamos el manejador de eventos
-					clientEvents.off('folder:progress', progressHandler);
+				if ('error' in response) {
+					await this.emitEvent(FOLDER_EVENTS.ERROR, response);
+					if (callbacks?.onError) callbacks.onError(response);
+					return;
 				}
 
-				// Solo emitir eventos si la operación fue exitosa
-				if (result.success) {
-					// Emitir eventos relevantes
-					// Crear un objeto compatible con FolderResponse
-					const folderResponse: FolderResponse = {
-						id: result.id,
-						name: result.name || '',
-						path: result.path || '',
-						totalFiles: result.totalFiles || 0,
-						totalSize: result.totalSize || 0,
-						lastIndexed: new Date().toISOString(),
-						createdAt: new Date().toISOString(),
-						updatedAt: new Date().toISOString(),
-						autoReindex: false,
-						stats: {
-							processed: 0,
-							total: 0,
-							totalSize: 0,
-						},
-					};
-
-					// Emitir evento de finalización
-					const finalStatus: ProcessStatus = {
-						status: 'Reindexación completada',
-						progress: 100,
-						folderId: id,
-						phase: 'metadata',
-						filesProcessed: result.totalFiles || 0,
-						totalFiles: result.totalFiles || 0,
-						startTime: this.startTimes.get(id) || 0,
-						endTime: Date.now(),
-					};
-					this.emitEvent(FOLDER_EVENTS.PROGRESS, finalStatus);
-					this.emitEvent(FOLDER_EVENTS.COMPLETE, folderResponse);
-
-					await emit({
-						type: 'files:modified',
-						data: { action: 'reindex', folderId: id },
-					});
-					await emit({
-						type: 'folders:modified',
-						data: {
-							action: 'reindex',
-							folder: {
-								id: result.id,
-								name: result.name || '',
-								path: result.path || '',
-								totalFiles: result.totalFiles || 0,
-								totalSize: result.totalSize || 0,
-								lastIndexed: new Date().toISOString(),
-								createdAt: new Date().toISOString(),
-								updatedAt: new Date().toISOString(),
-								autoReindex: false,
-							},
-						},
-					});
-
-					this.clearProgress(id);
-					callbacks?.onComplete?.(folderResponse);
-					return result;
+				if (response.data) {
+					await this.listenToReindexingEvents(response.data.id, callbacks);
 				}
-				// Si hay un error en el resultado
-				throw new Error(result.error || 'Error desconocido');
 			} catch (error) {
-				const errorResponse: ErrorResponse = {
-					message: error instanceof Error ? error.message : 'Error reindexando carpeta',
-					details: error instanceof Error ? error.stack : String(error),
-					timestamp: Date.now(),
-					folderId: id,
-				};
-				folderLogger.error('❌ Error reindexing folder:', errorResponse);
-
-				// Emitir evento de error
-				this.emitEvent(FOLDER_EVENTS.ERROR, errorResponse);
-				callbacks?.onError?.(errorResponse);
-
-				// Limpiar progreso
-				this.clearProgress(id);
-
-				throw error;
-			} finally {
-				// Limpiar tiempo de inicio
-				this.startTimes.delete(id);
+				const errorResponse =
+					error instanceof Error ? { message: error.message } : { message: 'Error desconocido' };
+				await this.emitEvent(FOLDER_EVENTS.ERROR, errorResponse);
+				if (callbacks?.onError) callbacks.onError(errorResponse);
 			}
 		});
 	}
 
-	async deleteFolder(id: string) {
-		return this.withConcurrencyControl(`deleteFolder:${id}`, async () => {
+	private async listenToReindexingEvents(folderId: string, callbacks?: IndexCallbacks) {
+		const endpoint = `/api/folders/reindex/${folderId}/events`;
+		const eventSource = new EventSource(endpoint);
+
+		const progressHandler = (status: ProcessStatus) => {
+			this.updateProgress(folderId, status);
+			if (callbacks?.onProgress) callbacks.onProgress(status);
+		};
+
+		const errorHandler = (error: ErrorResponse) => {
+			this.emitEvent(FOLDER_EVENTS.ERROR, error);
+			if (callbacks?.onError) callbacks.onError(error);
+			eventSource.close();
+			this.clearProgress(folderId);
+		};
+
+		const completeHandler = (data: FolderResponse) => {
+			this.emitEvent(FOLDER_EVENTS.COMPLETE, data);
+			if (callbacks?.onComplete) callbacks.onComplete(data);
+			eventSource.close();
+			this.clearProgress(folderId);
+			statsEventEmitter.emit(STATS_EVENTS.REQUEST_STATS_UPDATE, ['folders', 'images']);
+		};
+
+		eventSource.addEventListener('progress', (event) => {
 			try {
-				folderLogger.info('🗑️ Eliminando carpeta:', id);
-				await deleteFolderAction(id);
+				const data = JSON.parse(event.data);
+				progressHandler(data);
+			} catch (e) {
+				folderLogger.error('Error parseando evento de progreso', e);
+			}
+		});
 
-				// Emitir eventos
+		eventSource.addEventListener('error', (event) => {
+			try {
+				const data = JSON.parse(event.data);
+				errorHandler(data);
+			} catch (e) {
+				folderLogger.error('Error parseando evento de error', e);
+				errorHandler({ message: 'Error de comunicación con el servidor' });
+			}
+		});
+
+		eventSource.addEventListener('complete', (event) => {
+			try {
+				const data = JSON.parse(event.data);
+				completeHandler(data);
+			} catch (e) {
+				folderLogger.error('Error parseando evento de completado', e);
+				errorHandler({ message: 'Error de comunicación al finalizar' });
+			}
+		});
+
+		eventSource.onerror = () => {
+			errorHandler({ message: 'Conexión perdida con el servidor de eventos' });
+		};
+
+		if (callbacks?.onStart) {
+			callbacks.onStart({ status: 'Reindexación iniciada...' });
+		}
+	}
+
+	async deleteFolder(id: string) {
+		return this.withConcurrencyControl(`delete:${id}`, async () => {
+			folderLogger.info(`Eliminando carpeta con ID: ${id}`);
+			try {
+				const response = await deleteFolderAction(id);
+
+				if ('error' in response) {
+					await this.emitEvent(FOLDER_EVENTS.ERROR, response);
+					return response;
+				}
+
 				await this.emitEvent(FOLDER_EVENTS.FOLDER_DELETED, { id });
-				await emit({
-					type: 'files:modified',
-					data: { action: 'delete', folderId: id },
-				});
-				await emit({
-					type: 'folders:modified',
-					data: { action: 'delete', folder: { id } },
-				});
-				statsEventEmitter.emit(STATS_EVENTS.FOLDER_CHANGE);
-				statsEventEmitter.emit(STATS_EVENTS.STATS_UPDATE_NEEDED, ['FOLDER_CHANGE']);
+				statsEventEmitter.emit(STATS_EVENTS.REQUEST_STATS_UPDATE, ['folders']);
 
-				folderLogger.info('✅ Carpeta eliminada correctamente', { folderId: id });
+				folderLogger.info(`Carpeta ${id} eliminada correctamente`);
+				return { success: true };
 			} catch (error) {
-				const errorResponse: ErrorResponse = {
-					message: error instanceof Error ? error.message : 'Error eliminando carpeta',
-					details: error instanceof Error ? error.stack : String(error),
-					timestamp: Date.now(),
+				const errorResponse = {
+					message: error instanceof Error ? error.message : 'Error desconocido al eliminar carpeta',
 				};
-				folderLogger.error('❌ Error deleting folder:', errorResponse);
 				await this.emitEvent(FOLDER_EVENTS.ERROR, errorResponse);
-				throw errorResponse;
+				return { error: errorResponse };
 			}
 		});
 	}
 
 	async reindexAll() {
 		return this.withConcurrencyControl('reindexAll', async () => {
+			const { reindexAllFolders } = await import('@/app/actions/folders');
+			folderLogger.info('Iniciando reindexación de todas las carpetas');
 			try {
-				folderLogger.info('🔄 Iniciando reindexación de todas las carpetas');
-				const folders = await this.getFolders();
-				const totalFolders = folders.length;
-
-				if (totalFolders === 0) {
-					folderLogger.info('⚠️ No hay carpetas para reindexar');
-					const emptyResult = {
-						success: true,
-						processedFolders: 0,
-						totalFolders: 0,
-						errors: [],
-					};
-					this.emitEvent(FOLDER_EVENTS.REINDEX_ALL_COMPLETE, emptyResult);
-					return emptyResult;
-				}
-
-				// Notificar inicio de proceso
-				folderLogger.info(`🔄 Reindexando ${totalFolders} carpetas`);
-				this.emitEvent(FOLDER_EVENTS.REINDEX_ALL_START, { totalFolders });
-
-				let processedFolders = 0;
-				const errors: Array<{ folderId: string; error: string }> = [];
-				const startTime = Date.now();
-
-				for (const folder of folders) {
-					const folderStartTime = Date.now();
-					try {
-						folderLogger.info(`🔄 Reindexando carpeta: ${folder.name} (${processedFolders + 1}/${totalFolders})`);
-
-						// Emisión de progreso global
-						const progressStatus = {
-							current: processedFolders,
-							total: totalFolders,
-							progress: Math.round((processedFolders / totalFolders) * 100),
-							currentFolder: folder.name,
-							phase: 'scanning',
-							status: `Reindexando ${folder.name}...`,
-							timestamp: Date.now(),
-							elapsedTime: Date.now() - startTime,
-						};
-
-						this.emitEvent(FOLDER_EVENTS.REINDEX_ALL_PROGRESS, progressStatus);
-
-						// Reindexar carpeta individual con callbacks
-						await this.reindexFolder(folder.id, {
-							onProgress: (status) => {
-								// Crear un estado combinado con progreso global y local
-								const updatedStatus = {
-									...status,
-									globalProgress: {
-										current: processedFolders,
-										total: totalFolders,
-										progress: Math.round((processedFolders / totalFolders) * 100),
-										elapsedTime: Date.now() - startTime,
-									},
-								};
-
-								// Emisión de progreso detallado para la carpeta actual
-								this.emitEvent(FOLDER_EVENTS.PROGRESS, updatedStatus);
-
-								// Actualizar también el progreso global con detalles de la fase actual
-								this.emitEvent(FOLDER_EVENTS.REINDEX_ALL_PROGRESS, {
-									...progressStatus,
-									phase: status.phase,
-									status: status.status,
-									progress: Math.min(
-										99,
-										Math.round((processedFolders / totalFolders) * 100) +
-											((status.progress || 0) / 100) * (100 / totalFolders)
-									),
-								});
-
-								this.updateProgress(folder.id, updatedStatus);
-							},
-							onError: (error) => {
-								folderLogger.error(`❌ Error en carpeta ${folder.name}:`, error);
-								errors.push({
-									folderId: folder.id,
-									error: error.message,
-								});
-							},
-							onComplete: (result) => {
-								folderLogger.info(
-									`✅ Carpeta ${folder.name} reindexada en ${Math.round((Date.now() - folderStartTime) / 1000)}s`
-								);
-								folderLogger.debug('Resultados:', result);
-							},
-						});
-
-						processedFolders++;
-					} catch (error) {
-						folderLogger.error(`❌ Error reindexando carpeta ${folder.name}:`, error);
-						errors.push({
-							folderId: folder.id,
-							error: error instanceof Error ? error.message : 'Error desconocido',
-						});
-					}
-				}
-
-				const totalTime = Math.round((Date.now() - startTime) / 1000);
-				const completionStatus = {
-					processedFolders,
-					totalFolders,
-					errors,
-					progress: 100,
-					status:
-						errors.length > 0
-							? `Completado con ${errors.length} errores en ${totalTime}s`
-							: `Completado exitosamente en ${totalTime}s`,
-					timestamp: Date.now(),
-					elapsedTime: Date.now() - startTime,
-				};
-
-				folderLogger.info(
-					`✅ Reindexación global completada: ${processedFolders}/${totalFolders} carpetas procesadas en ${totalTime}s`
-				);
-				if (errors.length > 0) {
-					folderLogger.warn(`⚠️ Ocurrieron ${errors.length} errores durante la reindexación`);
-				}
-
-				this.emitEvent(FOLDER_EVENTS.REINDEX_ALL_COMPLETE, completionStatus);
-
-				return {
-					success: processedFolders === totalFolders && errors.length === 0,
-					processedFolders,
-					totalFolders,
-					errors,
-					elapsedTime: Date.now() - startTime,
-				};
+				const response = await reindexAllFolders();
+				this.emitEvent(FOLDER_EVENTS.REINDEX_ALL_START, {});
+				return response;
 			} catch (error) {
-				folderLogger.error('❌ Error en el proceso global de reindexación:', error);
-				const errorResponse: ErrorResponse = {
-					message: error instanceof Error ? error.message : 'Error reindexando todas las carpetas',
-					details: error instanceof Error ? error.stack : String(error),
-					timestamp: Date.now(),
+				const errorResponse = {
+					message: error instanceof Error ? error.message : 'Error desconocido al reindexar todo',
+				};
+				this.emitEvent(FOLDER_EVENTS.ERROR, errorResponse);
+				throw error;
+			}
+		});
+	}
+
+	async updateFolder(id: string, data: Partial<import('@/types/entities/folder').Folder>) {
+		return this.withConcurrencyControl(`update:${id}`, async () => {
+			const { updateFolder: updateFolderAction } = await import('@/app/actions/folders');
+			folderLogger.info(`Actualizando carpeta con ID: ${id}`);
+			try {
+				const response = await updateFolderAction(id, data);
+
+				if ('error' in response) {
+					await this.emitEvent(FOLDER_EVENTS.ERROR, response);
+					return response;
+				}
+
+				await this.emitEvent(FOLDER_EVENTS.FOLDER_MODIFIED, response);
+				statsEventEmitter.emit(STATS_EVENTS.REQUEST_STATS_UPDATE, ['folders']);
+
+				folderLogger.info(`Carpeta ${id} actualizada correctamente`);
+				return response;
+			} catch (error) {
+				const errorResponse = {
+					message: error instanceof Error ? error.message : 'Error desconocido al actualizar carpeta',
 				};
 				await this.emitEvent(FOLDER_EVENTS.ERROR, errorResponse);
-				throw errorResponse;
+				return { error: errorResponse };
 			}
 		});
 	}

@@ -29,9 +29,6 @@ const revalidateAllPaths = async () => {
 	logger.info('🔄 Rutas relacionadas con configuración revalidadas');
 };
 
-// Esquema de validación para actualización parcial
-const _updateSettingsSchema = settingsSchema.partial();
-
 /**
  * Respuesta estándar para operaciones de configuración
  */
@@ -82,24 +79,29 @@ async function createDefaultSettings(): Promise<Settings> {
  */
 export async function createDefaultSettingsData(): Promise<Record<string, unknown>> {
 	return {
-		theme: 'system',
-		fontSize: 16,
-		language: 'es',
-		reducedAnimations: false,
-		highContrast: false,
-
-		notificationsEnabled: true,
-		emailNotifications: false,
-		desktopNotifications: true,
-		notificationFrequency: 'daily',
-
-		shareUsageData: false,
-		storeCookies: true,
-		storeHistory: true,
-
-		apiKey: null,
-		devMode: false,
-		experimentalFeatures: false,
+		appearance: {
+			theme: 'system',
+			fontSize: 16,
+			language: 'es',
+			reducedAnimations: false,
+			highContrast: false,
+		},
+		notifications: {
+			enabled: true,
+			email: false,
+			desktop: true,
+			frequency: 'daily',
+		},
+		privacy: {
+			shareUsageData: false,
+			storeCookies: true,
+			storeHistory: true,
+		},
+		advanced: {
+			apiKey: null,
+			devMode: false,
+			experimentalFeatures: false,
+		},
 	};
 }
 
@@ -115,7 +117,7 @@ export async function getSystemSettings(): Promise<Settings> {
 			where: { id: 'default' },
 		});
 
-		if (!settings) {
+		if (!settings || !settings.data) {
 			logger.info('ℹ️ No se encontró configuración global, creando valores predeterminados');
 			// Si no existe, crear una configuración por defecto
 			return createDefaultSettings();
@@ -151,10 +153,10 @@ export async function updateSystemSettings(data: Partial<Settings>): Promise<Set
 		}
 
 		// Serializar para almacenamiento
-		const serializedData = serializeSettings(updatedSettings);
+		const serializedData = serializeSettings(validationResult.data);
 
 		// Actualizar en la base de datos
-		const _result = await prisma.settings.upsert({
+		await prisma.settings.upsert({
 			where: { id: 'default' },
 			update: {
 				data: serializedData,
@@ -172,7 +174,7 @@ export async function updateSystemSettings(data: Partial<Settings>): Promise<Set
 		logger.info('✅ Configuración global actualizada correctamente');
 
 		// Devolver la configuración actualizada
-		return updatedSettings;
+		return validationResult.data;
 	} catch (error) {
 		logger.error('❌ Error al actualizar la configuración global:', error);
 

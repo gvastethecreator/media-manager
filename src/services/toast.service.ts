@@ -66,7 +66,7 @@ const TOAST_TYPES = {
  * @param type Tipo de notificación
  * @returns La instancia de la notificación
  */
-const showToast = (title: string, options?: ToastOptions, type: ToastType = 'default'): void => {
+const showToast = (title: string, options?: ToastOptions, type: ToastType = 'default'): string | number => {
 	const { description, ...restOptions } = options || {};
 
 	// Convertir las opciones al formato que espera sonner
@@ -77,20 +77,15 @@ const showToast = (title: string, options?: ToastOptions, type: ToastType = 'def
 
 	switch (type) {
 		case 'success':
-			toast.success(title, toastOptions);
-			break;
+			return toast.success(title, toastOptions);
 		case 'error':
-			toast.error(title, toastOptions);
-			break;
+			return toast.error(title, toastOptions);
 		case 'info':
-			toast.info(title, toastOptions);
-			break;
+			return toast.info(title, toastOptions);
 		case 'warning':
-			toast.warning(title, toastOptions);
-			break;
+			return toast.warning(title, toastOptions);
 		default:
-			toast(title, toastOptions);
-			break;
+			return toast(title, toastOptions);
 	}
 };
 

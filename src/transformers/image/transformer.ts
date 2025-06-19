@@ -9,7 +9,7 @@ import { pathToUrl } from '@/lib/url-utils';
 import { BaseImageSchema, CompleteImageSchema, ExtendedImageSchema } from '@/lib/validators/image-validators';
 import type { ImageBase, ImageComplete, ImageExtended } from '@/types/entities/image/types';
 import { createTransformerError, TransformerErrorCode } from '@/utils/errors/transformer-errors';
-import { calculateAspectRatio, generateThumbnailUrl } from '@/utils/image-utils';
+import { calculateAspectRatio, formatFileSize, generateThumbnailUrl } from '@/utils/image-utils';
 import type { Album, Character, Concept, Group, Note, Place, Image as PrismaImage, Prompt, Property, Tag, Wildcard, WorldItem } from '@prisma/client';
 
 const logger = serverLogger.withContext('ImageTransformer');
@@ -27,17 +27,17 @@ type ImageWithRelations = PrismaImage & {
 	properties?: Property[];
 	groups?: Group[];
 	_count?: {
-		tags: number;
-		albums: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
+		tags?: number;
+		albums?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
 	};
 };
 
@@ -325,87 +325,127 @@ export const transformImagesToComplete = (images: ImageWithRelations[]): ImageCo
 };
 
 /**
- * Transforma un objeto de imagen al formato extendido de la aplicación
- * @param image Objeto de imagen
- * @returns Imagen en formato extendido
+ * Transforma una imagen de Prisma (con relaciones) al formato extendido de la aplicación.
+ * @param image - El objeto de imagen de Prisma, incluyendo relaciones opcionales.
+ * @returns La imagen transformada al formato `ImageExtended`.
+ * @throws {TransformerError} Si la imagen de entrada es nula o la transformación falla.
  */
 export const transformImageToExtended = (image: ImageWithRelations): ImageExtended => {
 	if (!image) {
-		logger.error('Intento de transformar a formato extendido una imagen nula');
+		logger.error('Intento de transformar una imagen nula o indefinida');
 		throw createTransformerError({
 			code: TransformerErrorCode.NULL_INPUT,
-			message: 'No se puede transformar a formato extendido una imagen nula',
-			context: { input: image },
+			message: 'No se puede transformar una imagen nula o indefinida.',
 		});
 	}
 
 	try {
-		const completeImage = transformImageToComplete(image);
-		const extendedImage: ImageExtended = {
-			...completeImage,
+		const { width, height, path, size } = image;
+
+		const transformed: ImageExtended = {
+			...image,
+			// Campos base
+			name: image.name ?? 'Imagen sin nombre',
+			description: image.description ?? '',
+			isFavorite: image.isFavorite ?? false,
+			addedAt: image.addedAt ?? new Date(),
+			// Campos generados dinámicamente
+			url: pathToUrl(path),
+			aspectRatio: calculateAspectRatio(width, height),
+			thumbnails: {
+				small: generateThumbnailUrl(image.id, 'small'),
+				medium: generateThumbnailUrl(image.id, 'medium'),
+				large: generateThumbnailUrl(image.id, 'large'),
+			},
+			// UI-related fields with defaults
 			isSelected: false,
 			isHighlighted: false,
 			isVisible: true,
-			isNew: false,
-			dominantColor: completeImage.visualConfig?.dominantColor || '#333333',
-			displaySize: formatFileSize(completeImage.size),
-			displayDimensions: `${completeImage.width}×${completeImage.height}`,
-			tags: image.tags || [],
-			albums: image.albums || [],
-			characters: image.characters || [],
-			places: image.places || [],
-			worldItems: image.worldItems || [],
-			concepts: image.concepts || [],
-			prompts: image.prompts || [],
-			notes: image.notes || [],
-			wildcards: image.wildcards || [],
-			properties: image.properties || [],
-			groups: image.groups || [],
+			isNew: Date.now() - new Date(image.createdAt).getTime() < 24 * 60 * 60 * 1000,
+			displaySize: formatFileSize(size),
+			displayDimensions: `${width}x${height}`,
+			// Relaciones (asegurando que no sean nulas)
+			tags: image.tags ?? [],
+			albums: image.albums ?? [],
+			characters: image.characters ?? [],
+			places: image.places ?? [],
+			worldItems: image.worldItems ?? [],
+			concepts: image.concepts ?? [],
+			prompts: image.prompts ?? [],
+			notes: image.notes ?? [],
+			wildcards: image.wildcards ?? [],
+			properties: image.properties ?? [],
+			groups: image.groups ?? [],
+			// Conteo de relaciones
+			_count: {
+				tags: image._count?.tags ?? 0,
+				albums: image._count?.albums ?? 0,
+				characters: image._count?.characters ?? 0,
+				places: image._count?.places ?? 0,
+				worldItems: image._count?.worldItems ?? 0,
+				concepts: image._count?.concepts ?? 0,
+				prompts: image._count?.prompts ?? 0,
+				notes: image._count?.notes ?? 0,
+				wildcards: image._count?.wildcards ?? 0,
+				properties: image._count?.properties ?? 0,
+				groups: image._count?.groups ?? 0,
+			},
 		};
 
-		const validation = ExtendedImageSchema.safeParse(extendedImage);
+		// Validar el resultado final con Zod
+		const validation = ExtendedImageSchema.safeParse(transformed);
 		if (!validation.success) {
-			logger.warn('Transformación a imagen extendida falló validación:', { error: validation.error, image });
-			return extendedImage;
+			logger.warn('La transformación de imagen extendida falló la validación', {
+				errors: validation.error.flatten().fieldErrors,
+				image: { id: image.id },
+			});
+			// Devolver el objeto transformado pero no validado para evitar un fallo completo
+			return transformed;
 		}
 
 		return validation.data;
 	} catch (error) {
-		logger.error('Error en transformImageToExtended:', { error, image });
+		logger.error('Error catastrófico en transformImageToExtended', {
+			error: error instanceof Error ? error.message : String(error),
+			imageId: image.id,
+		});
 		throw createTransformerError({
 			code: TransformerErrorCode.TRANSFORM_FAILED,
-			message: 'Error transformando imagen a formato extendido',
+			message: `Error transformando imagen a formato extendido: ${image.id}`,
 			cause: error instanceof Error ? error : new Error(String(error)),
-			context: { input: image },
+			context: { imageId: image.id },
 		});
 	}
 };
 
 /**
- * Transforma un array de imágenes al formato extendido
- * @param images Array de objetos de imagen
- * @returns Array de imágenes en formato extendido
+ * Transforma un array de imágenes al formato extendido, filtrando las que fallan.
+ * @param images - Array de imágenes de Prisma con relaciones.
+ * @returns Array de imágenes transformadas al formato `ImageExtended`.
  */
 export const transformImagesToExtended = (images: ImageWithRelations[]): ImageExtended[] => {
 	if (!Array.isArray(images)) {
-		logger.error('Intento de transformar un valor no array a extendido:', typeof images);
+		logger.warn('Se esperaba un array para transformImagesToExtended, se recibió:', typeof images);
 		return [];
 	}
 
 	return images
-		.map((image, idx) => {
-			if (!image || typeof image !== 'object') {
-				logger.warn(`Elemento excluido en posición ${idx}: nulo o tipo inválido`, { image });
+		.map((image, index) => {
+			if (!image) {
+				logger.warn(`Elemento nulo en el array de imágenes en el índice ${index}`);
 				return null;
 			}
 			try {
 				return transformImageToExtended(image);
 			} catch (error) {
-				logger.warn(`Error transformando imagen a extendida en array en posición ${idx}:`, { error, image });
+				logger.error(`Falló la transformación para la imagen en el índice ${index}`, {
+					imageId: image.id,
+					error: error instanceof Error ? error.message : String(error),
+				});
 				return null;
 			}
 		})
-		.filter((img): img is ImageExtended => !!img);
+		.filter((image): image is ImageExtended => image !== null);
 };
 
 /**

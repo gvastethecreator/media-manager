@@ -48,20 +48,20 @@ class Database {
 		});
 
 		// Configurar eventos de logging
-		this.client.$on('error' as never, (e: Prisma.LogEvent) => {
+		this.client.$on('error', (e: Prisma.LogEvent) => {
 			this.lastError = e instanceof Error ? e : new Error(String(e));
 			serverLogger.error('Error de base de datos:', e);
 		});
 
-		this.client.$on('warn' as never, (e: Prisma.LogEvent) => {
+		this.client.$on('warn', (e: Prisma.LogEvent) => {
 			serverLogger.warn('Advertencia de base de datos:', e);
 		});
 
-		this.client.$on('info' as never, (e: Prisma.LogEvent) => {
+		this.client.$on('info', (e: Prisma.LogEvent) => {
 			serverLogger.info('Info de base de datos:', e);
 		});
 
-		this.client.$on('query' as never, (e: Prisma.QueryEvent) => {
+		this.client.$on('query', (e: Prisma.QueryEvent) => {
 			serverLogger.debug('Query ejecutada:', {
 				query: e.query,
 				params: e.params,
@@ -246,19 +246,20 @@ export async function getDatabaseStatus() {
 		const result = await client.$queryRaw`SELECT 1+1 as test`;
 
 		// Definir un tipo para el resultado de la consulta
-		interface TestResult {
-			test: number;
+		type TestResult = {
+			test: number | bigint;
+		};
+		const firstResult = (result as TestResult[])?.[0];
+
+		if (firstResult && firstResult.test === 2) {
+			return {
+				status: 'connected',
+				message: 'Conexión a la base de datos exitosa',
+			};
 		}
-
-		const testValue = Number((result as TestResult[])[0].test);
-
-		if (Number.isNaN(testValue)) {
-			throw new Error('Error en la verificación de la base de datos');
-		}
-
 		return {
-			status: 'connected',
-			message: 'Base de datos conectada y funcionando',
+			status: 'error',
+			message: 'La consulta de prueba a la base de datos falló',
 		};
 	} catch (error) {
 		const lastError = db.getLastError();

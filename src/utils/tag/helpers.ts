@@ -3,8 +3,18 @@
  * @module utils/tag/helpers
  */
 
-import { generateTagColor, generateTagEmoji } from '@/transformers/tag/serializers';
-import { type Tag, TagCategory, TagRarity, TagSortCriteria } from '../../types/entities/tag';
+import { type Tag, TagCategory, TagSortCriteria } from '../../types/entities/tag';
+import { generateTagColor, generateTagEmoji } from '../string-utils';
+
+/**
+ * Tipo local para etiquetas que incluyen el conteo de relaciones de Prisma.
+ * @dev Se usa para evitar contaminar el tipo canónico `Tag` con propiedades de ORM.
+ */
+type TagWithCount = Tag & {
+	_count?: {
+		images?: number;
+	};
+};
 
 /**
  * Busca etiquetas que coincidan con un término de búsqueda
@@ -27,7 +37,7 @@ export function searchTags(tags: Tag[], searchTerm: string): Tag[] {
  * @param sortBy Criterio de ordenación
  * @returns Lista de etiquetas ordenadas
  */
-export function sortTags(tags: Tag[], sortBy: TagSortCriteria): Tag[] {
+export function sortTags(tags: TagWithCount[], sortBy: TagSortCriteria): TagWithCount[] {
 	const tagsCopy = [...tags];
 
 	switch (sortBy) {
@@ -91,7 +101,7 @@ export function groupTagsByCategory(tags: Tag[]): Record<string, Tag[]> {
  * @param limit Límite de etiquetas a devolver
  * @returns Lista de etiquetas más usadas
  */
-export function getMostUsedTags(tags: Tag[], limit = 10): Tag[] {
+export function getMostUsedTags(tags: TagWithCount[], limit = 10): TagWithCount[] {
 	return [...tags].sort((a, b) => (b._count?.images || 0) - (a._count?.images || 0)).slice(0, limit);
 }
 
@@ -115,6 +125,8 @@ export function isValidTagName(name: string, existingTags: Tag[] = []): boolean 
  * @returns Nueva etiqueta temporal
  */
 export function createTemporaryTag(name: string, category?: string): Tag {
+	// 🎨 Genera una etiqueta temporal para la UI, sin persistencia.
+	// No se incluyen campos como rarity o estados de UI que no están en el tipo canónico.
 	return {
 		id: `temp-${Date.now()}`,
 		name,
@@ -127,12 +139,6 @@ export function createTemporaryTag(name: string, category?: string): Tag {
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		category: category || null,
-		rarity: TagRarity.COMMON,
-		texture: null,
-		isSelected: false,
-		isExpanded: false,
-		isEditing: true,
-		isHighlighted: true,
 	};
 }
 

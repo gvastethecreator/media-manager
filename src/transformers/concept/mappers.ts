@@ -176,7 +176,6 @@ export function toSearchOptions(options: ConceptSearchOptions = {}): Prisma.Conc
  */
 export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhereInput {
 	try {
-		const result: Prisma.ConceptWhereInput = {};
 		const conditions: Prisma.ConceptWhereInput[] = [];
 
 		if (filters.search) {
@@ -193,11 +192,11 @@ export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhe
 		}
 
 		if (filters.category) {
-			conditions.push({ category: filters.category });
+			conditions.push({ category: { equals: filters.category } });
 		}
 
 		if (filters.tags && filters.tags.length > 0) {
-			const tagsConditions = filters.tags.map((tag: string) => ({
+			const tagsConditions: Prisma.ConceptWhereInput[] = filters.tags.map((tag: string) => ({
 				tags: { contains: tag, mode: 'insensitive' },
 			}));
 			conditions.push({ OR: tagsConditions });
@@ -208,10 +207,10 @@ export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhe
 		}
 
 		if (conditions.length > 0) {
-			result.AND = conditions;
+			return { AND: conditions };
 		}
 
-		return result;
+		return {};
 	} catch (error) {
 		logger.error('Error en toSearchFilters:', error);
 		throw new Error(`Error al mapear filtros de búsqueda: ${(error as Error).message}`);
