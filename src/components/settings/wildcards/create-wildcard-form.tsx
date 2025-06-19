@@ -10,49 +10,40 @@ import { ImagePicker } from '@/components/ui/image-picker';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createWildcardSchema } from '@/lib/validations/wildcard';
-import type { WildcardBase } from '@/types/entities/wildcard/types';
+import type { WildcardBase } from '@/types/entities/wildcard';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-// Definir el tipo para el formulario
-type FormValues = {
-	name: string;
-	emoji: string;
-	color: string;
-	description?: string;
-	shortcut?: string;
-	category: string;
-	children: string[];
-	parentId?: string | null;
-	featuredImage?: string;
-	isFavorite: boolean;
-};
+// Esquema Zod adaptado para el formulario
+const formSchema = createWildcardSchema.extend({
+	children: z.array(z.object({ value: z.string() })),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface CreateWildcardFormProps {
 	wildcard?: WildcardBase;
 	parentWildcards?: WildcardBase[];
-	onSubmit: (data: FormValues) => void;
+	onSubmit: (data: any) => void;
 	onCancel: () => void;
 }
 
 export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, onCancel }: CreateWildcardFormProps) {
-	// Parsear el array de children almacenado como JSON
-	const parseChildren = (childrenJson: string): string[] => {
-		if (!childrenJson || childrenJson === 'empty_array') {
-			return [];
-		}
+	const parseChildren = (childrenJson: string | undefined): { value: string }[] => {
+		if (!childrenJson || childrenJson === 'empty_array') return [];
 		try {
-			return JSON.parse(childrenJson);
+			const parsed = JSON.parse(childrenJson);
+			return Array.isArray(parsed) ? parsed.map((value: string) => ({ value })) : [];
 		} catch (e) {
 			console.error('Error al parsear children:', e);
 			return [];
 		}
 	};
 
-	// Inicializar el formulario
 	const form = useForm<FormValues>({
-		resolver: zodResolver(createWildcardSchema),
+		resolver: zodResolver(formSchema),
 		defaultValues: {
 			name: wildcard?.name || '',
 			emoji: wildcard?.emoji || '✨',
@@ -60,23 +51,26 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 			description: wildcard?.description || '',
 			shortcut: wildcard?.shortcut || '',
 			category: wildcard?.category || 'general',
-			children: wildcard ? parseChildren(wildcard.children) : [],
+			children: parseChildren(wildcard?.children),
 			parentId: wildcard?.parentId || null,
 			featuredImage: wildcard?.featuredImage || '',
 			isFavorite: wildcard?.isFavorite || false,
 		},
 	});
 
-	// Configurar field array para manejar dinámicamente los valores de children
-	const { fields, append, remove } = useFieldArray<FormValues>({
+	const { fields, append, remove } = useFieldArray({
 		control: form.control,
 		name: 'children',
-		rules: {
-			required: false,
-		},
 	});
 
-	// Filtrar los posibles padres para evitar ciclos (no permitir seleccionar a sí mismo o a sus hijos)
+	const handleSubmit = (data: FormValues) => {
+		const transformedData = {
+			...data,
+			children: JSON.stringify(data.children.map((c) => c.value)),
+		};
+		onSubmit(transformedData);
+	};
+
 	const eligibleParents = parentWildcards.filter((parent) => parent.id !== wildcard?.id);
 
 	return (
@@ -91,9 +85,8 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 			</CardHeader>
 
 			<Form {...form}>
-				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+				<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
 					<CardContent className="space-y-4 px-6">
-						{/* Nombre */}
 						<FormField
 							control={form.control}
 							name="name"
@@ -108,7 +101,6 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 							)}
 						/>
 
-						{/* Emoji y Color */}
 						<div className="grid grid-cols-2 gap-4">
 							<FormField
 								control={form.control}
@@ -137,7 +129,6 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 							/>
 						</div>
 
-						{/* Descripción */}
 						<FormField
 							control={form.control}
 							name="description"
@@ -151,7 +142,6 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 							)}
 						/>
 
-						{/* Atajo */}
 						<FormField
 							control={form.control}
 							name="shortcut"
@@ -165,7 +155,6 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 							)}
 						/>
 
-						{/* Categoría */}
 						<FormField
 							control={form.control}
 							name="category"
@@ -190,7 +179,6 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 							)}
 						/>
 
-						{/* Comodín padre */}
 						<FormField
 							control={form.control}
 							name="parentId"
@@ -220,7 +208,6 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 							)}
 						/>
 
-						{/* Valores */}
 						<div className="space-y-2">
 							<FormLabel>Valores</FormLabel>
 							<FormDescription>Los valores son opciones predefinidas para este comodín</FormDescription>
@@ -229,7 +216,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<div key={field.id} className="flex items-center gap-2">
 									<FormField
 										control={form.control}
-										name={`children.${index}`}
+										name={`children.${index}.value`}
 										render={({ field }) => (
 											<FormItem className="flex-1">
 												<FormControl>
@@ -244,13 +231,18 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								</div>
 							))}
 
-							<Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append('')}>
+							<Button
+								type="button"
+								variant="outline"
+								size="sm"
+								className="mt-2"
+								onClick={() => append({ value: '' })}
+							>
 								<PlusIcon className="h-4 w-4 mr-2" />
 								Añadir valor
 							</Button>
 						</div>
 
-						{/* Imagen destacada */}
 						<FormField
 							control={form.control}
 							name="featuredImage"
@@ -263,32 +255,24 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								</FormItem>
 							)}
 						/>
-
-						{/* Favorito */}
 						<FormField
 							control={form.control}
 							name="isFavorite"
 							render={({ field }) => (
-								<FormItem className="flex flex-row items-start space-x-3 space-y-0">
+								<FormItem className="flex items-center gap-2">
 									<FormControl>
-										<Checkbox checked={field.value} onCheckedChange={field.onChange} />
+										<Checkbox checked={field.checked} onCheckedChange={field.onChange} />
 									</FormControl>
-									<div className="space-y-1 leading-none">
-										<FormLabel>Marcar como favorito</FormLabel>
-										<FormDescription>Este comodín aparecerá en la lista de favoritos</FormDescription>
-									</div>
+									<FormLabel>Marcar como favorito</FormLabel>
 								</FormItem>
 							)}
 						/>
 					</CardContent>
-
-					<CardFooter className="px-6">
-						<div className="flex justify-end gap-4 w-full">
-							<Button type="button" variant="outline" onClick={onCancel}>
-								Cancelar
-							</Button>
-							<Button type="submit">{wildcard ? 'Guardar' : 'Crear'}</Button>
-						</div>
+					<CardFooter className="flex justify-end gap-2 px-6">
+						<Button type="button" variant="outline" onClick={onCancel}>
+							Cancelar
+						</Button>
+						<Button type="submit">{wildcard ? 'Guardar cambios' : 'Crear comodín'}</Button>
 					</CardFooter>
 				</form>
 			</Form>
