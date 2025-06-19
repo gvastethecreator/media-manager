@@ -134,10 +134,9 @@ export const usePlaceStore = create<PlaceStore>()(
 					if (order === 'asc') {
 						// @ts-ignore - Ignoramos el error de tipo temporalmente
 						return a[field] > b[field] ? 1 : -1;
-					} else {
+					}
 						// @ts-ignore - Ignoramos el error de tipo temporalmente
 						return a[field] < b[field] ? 1 : -1;
-					}
 				});
 			},
 

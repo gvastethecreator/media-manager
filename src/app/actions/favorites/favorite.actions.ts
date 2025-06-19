@@ -118,8 +118,7 @@ export async function toggleFavorite(entityId: string, entityType: FavoriteEntit
 	if (isCurrentlyFavorite) {
 		await removeFavorite(entityId, entityType);
 		return false;
-	} else {
+	}
 		await addFavorite({ entityId, entityType, userId: user.id });
 		return true;
-	}
 }

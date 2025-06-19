@@ -18,10 +18,16 @@ import type { ContextMenuAction, LoadingStates } from '../types';
 // Logger para el componente
 const _submenuLogger = clientLogger.withContext('ContextSubmenu');
 
+/**
+ * Props para todos los submenús del context menu
+ * @param file Archivo sobre el que se actúa
+ * @param onAction Callback para acciones
+ * @param loadingStates Estado de carga de cada entidad
+ * @param handleOpenChange Callback para apertura/cierre del submenú
+ */
 interface SubmenuProps {
 	file: FileItem;
 	onAction: (action: ContextMenuAction, file: FileItem, data?: Record<string, unknown>) => void;
-	loadEntityData: (entity: keyof LoadingStates) => Promise<void>;
 	loadingStates: LoadingStates;
 	handleOpenChange: (entity: keyof LoadingStates, isOpen: boolean) => void;
 }
@@ -93,7 +99,7 @@ export const TagsSubmenu = memo(function TagsSubmenu({
 	handleOpenChange,
 }: SubmenuProps) {
 	// Obtener las etiquetas del store
-	const tags = useTagStore((state) => Object.values(state.core.tags));
+	const tags = useTagStore((state) => Array.isArray(state.tags) ? state.tags : Object.values(state.core?.tags ?? {}));
 
 	// Manejar apertura del submenú
 	const handleSubMenuOpenChange = useCallback(
@@ -326,7 +332,17 @@ export const PromptsSubmenu = memo(function PromptsSubmenu({
 	loadingStates,
 	handleOpenChange,
 }: SubmenuProps) {
-	return null;
+	return (
+		<ContextMenuSub>
+			<ContextMenuSubTrigger>
+				<Box className="mr-2 h-4 w-4" />
+				<span>Prompts</span>
+			</ContextMenuSubTrigger>
+			<ContextMenuSubContent className="w-48">
+				<ContextMenuItem disabled>Funcionalidad en desarrollo</ContextMenuItem>
+			</ContextMenuSubContent>
+		</ContextMenuSub>
+	);
 });
 
 // Componente para el submenú de notas
@@ -336,7 +352,17 @@ export const NotesSubmenu = memo(function NotesSubmenu({
 	loadingStates,
 	handleOpenChange,
 }: SubmenuProps) {
-	return null;
+	return (
+		<ContextMenuSub>
+			<ContextMenuSubTrigger>
+				<Box className="mr-2 h-4 w-4" />
+				<span>Notas</span>
+			</ContextMenuSubTrigger>
+			<ContextMenuSubContent className="w-48">
+				<ContextMenuItem disabled>Funcionalidad en desarrollo</ContextMenuItem>
+			</ContextMenuSubContent>
+		</ContextMenuSub>
+	);
 });
 
 // Componente para el submenú de conceptos
@@ -346,5 +372,15 @@ export const ConceptsSubmenu = memo(function ConceptsSubmenu({
 	loadingStates,
 	handleOpenChange,
 }: SubmenuProps) {
-	return null;
+	return (
+		<ContextMenuSub>
+			<ContextMenuSubTrigger>
+				<Box className="mr-2 h-4 w-4" />
+				<span>Conceptos</span>
+			</ContextMenuSubTrigger>
+			<ContextMenuSubContent className="w-48">
+				<ContextMenuItem disabled>Funcionalidad en desarrollo</ContextMenuItem>
+			</ContextMenuSubContent>
+		</ContextMenuSub>
+	);
 });

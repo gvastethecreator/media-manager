@@ -1,8 +1,6 @@
 'use client';
 
-import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { deletePlace, getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
+import { deletePlace, getPlaces } from '@/app/actions/places/place.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,18 +10,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import type { Place } from '@/types/entities/place';
 import { ClimateType, PlaceType } from '@/types/entities/place/enums';
+import type { PlaceComplete } from '@/types/entities/place/extended';
+import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { CreatePlaceForm } from './create-place-form';
 
 // Agregar type para manejar el onClick
 type ReactEventHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 export function PlacesSettings() {
-	const [places, setPlaces] = useState<PlaceWithStats[]>([]);
+	const [places, setPlaces] = useState<PlaceComplete[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
+	const [selectedPlace, setSelectedPlace] = useState<PlaceComplete | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -74,8 +74,8 @@ export function PlacesSettings() {
 				matches &&
 				Boolean(
 					place.name.toLowerCase().includes(normalizedQuery) ||
-						place.description?.toLowerCase().includes(normalizedQuery) ||
-						place.region?.toLowerCase().includes(normalizedQuery)
+					place.description?.toLowerCase().includes(normalizedQuery) ||
+					place.region?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 
@@ -114,21 +114,20 @@ export function PlacesSettings() {
 	}, []);
 
 	// Manejar edición de lugar
-	const handleEditPlace = useCallback((place: Place) => {
+	const handleEditPlace = useCallback((place: PlaceComplete) => {
 		setSelectedPlace(place);
-		setIsEditing(true);
 	}, []);
 
 	// Manejar creación exitosa
-	const handlePlaceCreated = useCallback((newPlace: Place) => {
-		setPlaces((prev) => [...prev, newPlace as unknown as PlaceWithStats]);
+	const handlePlaceCreated = useCallback((newPlace: PlaceComplete) => {
+		setPlaces((prev) => [...prev, newPlace]);
 		toastService.success('Lugar creado');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handlePlaceUpdated = useCallback((updatedPlace: Place) => {
+	const handlePlaceUpdated = useCallback((updatedPlace: PlaceComplete) => {
 		setPlaces((prev) =>
-			prev.map((place) => (place.id === updatedPlace.id ? ({ ...place, ...updatedPlace } as PlaceWithStats) : place))
+			prev.map((place) => (place.id === updatedPlace.id ? { ...place, ...updatedPlace } : place))
 		);
 		toastService.success('Lugar actualizado');
 	}, []);
@@ -341,7 +340,7 @@ export function PlacesSettings() {
 										<button
 											key={place.id}
 											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedPlace?.id === place.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditPlace(place as unknown as Place)}
+											onClick={() => handleEditPlace(place)}
 											type="button"
 											aria-pressed={selectedPlace?.id === place.id}
 										>

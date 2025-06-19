@@ -18,10 +18,17 @@ export type MetadataBase = {
   id: string;
   createdAt: Date;
   updatedAt: Date;
+  format: string;
+  width: number;
+  height: number;
+  size: number;
+  colorSpace: string | null;
+  hasAlpha: boolean;
   // otros campos base
 };
 
 export type MetadataRelations = {
+  image: { id: string; path: string } | null;
   // relaciones con otras entidades
   // si no existen tipos canónicos, usar any[]
 };

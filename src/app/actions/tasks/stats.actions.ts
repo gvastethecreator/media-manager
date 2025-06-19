@@ -5,10 +5,10 @@
  * @module app/actions/tasks/stats.actions
  */
 
-import { unstable_cache } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type TaskType } from '@/types/tasks';
+import { unstable_cache } from 'next/cache';
 
 // Logger for stats actions
 const taskLogger = serverLogger.withContext('TaskStatsActions');
@@ -27,6 +27,68 @@ export interface TaskStatsErrorData {
 }
 
 /**
+ * Interfaces para las respuestas de estadísticas
+ */
+export interface TaskStatusStats {
+	[key: string]: number;
+}
+
+export interface TaskTypeStats {
+	[key: string]: number;
+}
+
+export interface TaskCompletionStats {
+	completed: number;
+	averageCompletionTime: number;
+	successRate: number;
+}
+
+export interface TaskStats {
+	total: number;
+	byStatus: TaskStatusStats;
+	byType: TaskTypeStats;
+	last24Hours: TaskCompletionStats;
+}
+
+export interface TaskTypeMetrics {
+	type: TaskType;
+	total: number;
+	last24Hours: {
+		completed: number;
+		failed: number;
+		successRate: number;
+		averageCompletionTime: number;
+	};
+}
+
+export interface TaskErrorGroup {
+	count: number;
+	errorMessages: string[];
+	avgRetryCount: number;
+	maxRetryCount: number;
+}
+
+export interface TaskFailureAnalysis {
+	totalFailures: number;
+	byType: Record<string, {
+		count: number;
+		percentage: number;
+		errorGroups: Record<string, TaskErrorGroup>;
+	}>;
+	mostCommonErrors: Array<{
+		message: string;
+		count: number;
+		types: string[];
+	}>;
+	retryAnalysis: {
+		avgRetries: number;
+		maxRetries: number;
+		retriedTasks: number;
+		retriedPercentage: number;
+	};
+}
+
+/**
  * Función para crear errores de estadísticas de tareas (enfoque funcional)
  */
 function createTaskStatsError(message: string, code?: string, cause?: unknown): TaskStatsErrorData {
@@ -41,7 +103,7 @@ function createTaskStatsError(message: string, code?: string, cause?: unknown): 
 /**
  * Gets overall task statistics
  */
-export async function getTaskStats() {
+export async function getTaskStats(): Promise<TaskStats> {
 	const getCachedStats = unstable_cache(
 		async () => {
 			try {
@@ -79,10 +141,14 @@ export async function getTaskStats() {
 				]);
 
 				// Process status counts
-				const statusStats = Object.fromEntries(statusCounts.map(({ status, _count }) => [status, _count]));
+				const statusStats = Object.fromEntries(
+					statusCounts.map(({ status, _count }) => [status, _count._all])
+				);
 
 				// Process type counts
-				const typeStats = Object.fromEntries(typeCounts.map(({ type, _count }) => [type, _count]));
+				const typeStats = Object.fromEntries(
+					typeCounts.map(({ type, _count }) => [type, _count._all])
+				);
 
 				// Calculate completion statistics
 				const completedTasks = completionStats.filter(
@@ -98,14 +164,14 @@ export async function getTaskStats() {
 							}, 0) / completedTasks.length
 						: 0;
 
-				const stats = {
+				const stats: TaskStats = {
 					total: totalTasks,
 					byStatus: statusStats,
 					byType: typeStats,
 					last24Hours: {
 						completed: completedTasks.length,
 						averageCompletionTime,
-						successRate: completedTasks.length / completionStats.length || 0,
+						successRate: completionStats.length > 0 ? completedTasks.length / completionStats.length : 0,
 					},
 				};
 
@@ -129,7 +195,7 @@ export async function getTaskStats() {
 /**
  * Gets performance metrics for a specific task type
  */
-export async function getTaskTypeMetrics(type: TaskType) {
+export async function getTaskTypeMetrics(type: TaskType): Promise<TaskTypeMetrics> {
 	const getCachedMetrics = unstable_cache(
 		async () => {
 			try {
@@ -190,13 +256,13 @@ export async function getTaskTypeMetrics(type: TaskType) {
 							}, 0) / averageTime.length
 						: 0;
 
-				const metrics = {
+				const metrics: TaskTypeMetrics = {
 					type,
 					total: totalTasks,
 					last24Hours: {
 						completed: completedTasks,
 						failed: failedTasks,
-						successRate: completedTasks / (completedTasks + failedTasks) || 0,
+						successRate: completedTasks + failedTasks > 0 ? completedTasks / (completedTasks + failedTasks) : 0,
 						averageCompletionTime: avgTime,
 					},
 				};
@@ -221,7 +287,7 @@ export async function getTaskTypeMetrics(type: TaskType) {
 /**
  * Gets failure analysis for tasks
  */
-export async function getTaskFailureAnalysis() {
+export async function getTaskFailureAnalysis(): Promise<TaskFailureAnalysis> {
 	const getCachedAnalysis = unstable_cache(
 		async () => {
 			try {
@@ -243,59 +309,113 @@ export async function getTaskFailureAnalysis() {
 				});
 
 				// Group failures by type
-				const failuresByType = failedTasks.reduce(
-					(acc, task) => {
-						const type = task.type;
-						if (!acc[type]) {
-							acc[type] = {
-								count: 0,
-								errors: {},
-								avgRetries: 0,
-								totalTasks: 0,
-							};
-						}
+				const failuresByType: Record<string, {
+					count: number;
+					percentage: number;
+					errorGroups: Record<string, TaskErrorGroup>;
+				}> = {};
 
-						acc[type].count++;
-						acc[type].totalTasks++;
-						acc[type].avgRetries += task.retryCount;
+				// Track most common errors
+				const errorCounts: Record<string, { count: number; types: Set<string> }> = {};
 
-						const error = task.error || 'Unknown error';
-						acc[type].errors[error] = (acc[type].errors[error] || 0) + 1;
+				// Retry metrics
+				let totalRetries = 0;
+				let maxRetries = 0;
+				let retriedTasks = 0;
 
-						return acc;
-					},
-					{} as Record<
-						string,
-						{
-							count: number;
-							errors: Record<string, number>;
-							avgRetries: number;
-							totalTasks: number;
-						}
-					>
-				);
+				// Process each failed task
+				for (const task of failedTasks) {
+					// Skip if no error
+					if (!task.error) continue;
 
-				// Calculate averages and sort errors
-				for (const type in failuresByType) {
-					const typeStats = failuresByType[type];
-					typeStats.avgRetries = typeStats.avgRetries / typeStats.totalTasks;
+					// Get error message
+					const errorMessage = typeof task.error === 'string'
+						? task.error
+						: JSON.stringify(task.error);
 
-					// Sort errors by frequency
-					const sortedErrors = Object.entries(typeStats.errors)
-						.sort(([, a], [, b]) => b - a)
-						.reduce(
-							(obj, [key, value]) => {
-								obj[key] = value;
-								return obj;
-							},
-							{} as Record<string, number>
-						);
+					// Get error code (first part of error message before colon)
+					const errorCode = errorMessage.split(':')[0].trim();
 
-					typeStats.errors = sortedErrors;
+					// Track by type
+					if (!failuresByType[task.type]) {
+						failuresByType[task.type] = {
+							count: 0,
+							percentage: 0,
+							errorGroups: {},
+						};
+					}
+
+					failuresByType[task.type].count++;
+
+					// Track by error code within type
+					if (!failuresByType[task.type].errorGroups[errorCode]) {
+						failuresByType[task.type].errorGroups[errorCode] = {
+							count: 0,
+							errorMessages: [],
+							avgRetryCount: 0,
+							maxRetryCount: 0,
+						};
+					}
+
+					const errorGroup = failuresByType[task.type].errorGroups[errorCode];
+					errorGroup.count++;
+
+					// Only add unique error messages
+					if (!errorGroup.errorMessages.includes(errorMessage)) {
+						errorGroup.errorMessages.push(errorMessage);
+					}
+
+					// Update retry stats for this error group
+					const retryCount = task.retryCount || 0;
+					errorGroup.avgRetryCount =
+						(errorGroup.avgRetryCount * (errorGroup.count - 1) + retryCount) / errorGroup.count;
+					errorGroup.maxRetryCount = Math.max(errorGroup.maxRetryCount, retryCount);
+
+					// Track most common errors across all types
+					if (!errorCounts[errorCode]) {
+						errorCounts[errorCode] = { count: 0, types: new Set() };
+					}
+					errorCounts[errorCode].count++;
+					errorCounts[errorCode].types.add(task.type);
+
+					// Update overall retry metrics
+					totalRetries += retryCount;
+					maxRetries = Math.max(maxRetries, retryCount);
+					if (retryCount > 0) retriedTasks++;
 				}
 
+				// Calculate percentages
+				const totalFailures = failedTasks.length;
+				for (const type of Object.keys(failuresByType)) {
+					failuresByType[type].percentage = totalFailures > 0
+						? failuresByType[type].count / totalFailures
+						: 0;
+				}
+
+				// Get most common errors
+				const mostCommonErrors = Object.entries(errorCounts)
+					.map(([message, { count, types }]) => ({
+						message,
+						count,
+						types: Array.from(types),
+					}))
+					.sort((a, b) => b.count - a.count)
+					.slice(0, 10);
+
+				const analysis: TaskFailureAnalysis = {
+					totalFailures,
+					byType: failuresByType,
+					mostCommonErrors,
+					retryAnalysis: {
+						avgRetries: totalFailures > 0 ? totalRetries / totalFailures : 0,
+						maxRetries,
+						retriedTasks,
+						retriedPercentage: totalFailures > 0 ? retriedTasks / totalFailures : 0,
+					},
+				};
+
 				taskLogger.info('✅ Task failure analysis completed');
-				return failuresByType;
+				return analysis;
 			} catch (error) {
 				taskLogger.error('❌ Error analyzing task failures:', error);
 				throw createTaskStatsError('Failed to analyze task failures', 'ANALYSIS_FAILED', error);

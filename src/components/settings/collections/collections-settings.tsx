@@ -1,11 +1,8 @@
 'use client';
 
-import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import {
-	type CollectionWithStats,
 	deleteCollection,
-	getCollections,
+	searchCollections
 } from '@/app/actions/collections/collection.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,32 +13,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import type { CollectionBase as Collection } from '@/types/entities/collection/base';
-import { CollectionCategory } from '@/types/entities/collection/enums';
+import { COLLECTION_CATEGORY_COLORS, COLLECTION_CATEGORY_EMOJIS, CollectionCategory } from '@/types/entities/collection/enums';
+import type { CollectionComplete } from '@/types/entities/collection/extended';
+import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { CreateCollectionForm } from './create-collection-form';
-
-// Tipo ampliado para Collection que incluye _count
-interface CollectionWithUI extends Collection {
-	_count?: {
-		images: number;
-	};
-}
 
 // Definir tipo para el event handler
 type ButtonClickHandler = React.MouseEventHandler<HTMLButtonElement>;
 
 export function CollectionsSettings() {
-	const [collections, setCollections] = useState<CollectionWithStats[]>([]);
+	const [collections, setCollections] = useState<CollectionComplete[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedCollection, setSelectedCollection] = useState<CollectionWithUI | null>(null);
+	const [selectedCollection, setSelectedCollection] = useState<CollectionComplete | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
 	// Filtros
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-	const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
 
 	// Cargar colecciones al montar el componente
@@ -49,7 +40,7 @@ export function CollectionsSettings() {
 		const loadCollections = async () => {
 			try {
 				setIsLoading(true);
-				const data = await getCollections();
+				const data = await searchCollections({});
 				setCollections(data);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -69,7 +60,6 @@ export function CollectionsSettings() {
 	const stats = {
 		totalCollections: collections.length,
 		totalImages: collections.reduce((acc, collection) => acc + (collection._count?.images || 0), 0),
-		totalSize: collections.reduce((acc, collection) => acc + (collection.totalSize || 0), 0),
 		emptyCollections: collections.filter((collection) => (collection._count?.images || 0) === 0).length,
 		favoriteCollections: collections.filter((collection) => collection.isFavorite).length,
 	};
@@ -85,18 +75,13 @@ export function CollectionsSettings() {
 				matches &&
 				Boolean(
 					collection.name.toLowerCase().includes(normalizedQuery) ||
-						collection.description?.toLowerCase().includes(normalizedQuery)
+					collection.description?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 
 		// Filtrar por categorías
 		if (selectedCategories.length > 0) {
 			matches = matches && (collection.category ? selectedCategories.includes(collection.category) : false);
-		}
-
-		// Filtrar por plataformas
-		if (selectedPlatforms.length > 0) {
-			matches = matches && (collection.platform ? selectedPlatforms.includes(collection.platform) : false);
 		}
 
 		// Filtrar por favoritos
@@ -124,23 +109,23 @@ export function CollectionsSettings() {
 	}, []);
 
 	// Manejar edición de colección
-	const handleEditCollection = useCallback((collection: CollectionWithStats) => {
-		setSelectedCollection(collection as unknown as CollectionWithUI);
+	const handleEditCollection = useCallback((collection: CollectionComplete) => {
+		setSelectedCollection(collection);
 		setIsEditing(true);
 	}, []);
 
 	// Manejar creación exitosa
-	const handleCollectionCreated = useCallback((newCollection: Collection) => {
-		setCollections((prev) => [...prev, newCollection as unknown as CollectionWithStats]);
+	const handleCollectionCreated = useCallback((newCollection: CollectionComplete) => {
+		setCollections((prev) => [...prev, newCollection]);
 		toastService.success('Colección creada');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleCollectionUpdated = useCallback((updatedCollection: Collection) => {
+	const handleCollectionUpdated = useCallback((updatedCollection: CollectionComplete) => {
 		setCollections((prev) =>
 			prev.map((collection) =>
 				collection.id === updatedCollection.id
-					? ({ ...collection, ...updatedCollection } as CollectionWithStats)
+					? ({ ...collection, ...updatedCollection } as CollectionComplete)
 					: collection
 			)
 		);
@@ -162,16 +147,12 @@ export function CollectionsSettings() {
 	const clearFilters = useCallback(() => {
 		setSearchQuery('');
 		setSelectedCategories([]);
-		setSelectedPlatforms([]);
 		setOnlyFavorites(false);
 	}, []);
 
-	// Extraer categorías y plataformas únicas de las colecciones
+	// Extraer categorías únicas de las colecciones
 	const uniqueCategories = Array.from(
 		new Set(collections.map((collection) => collection.category).filter(Boolean))
-	) as string[];
-	const uniquePlatforms = Array.from(
-		new Set(collections.map((collection) => collection.platform).filter(Boolean))
 	) as string[];
 
 	// Manejar la eliminación desde el botón con detención de propagación de eventos
@@ -276,30 +257,6 @@ export function CollectionsSettings() {
 												</div>
 											</div>
 
-											<div className="space-y-2">
-												<Label>Plataformas</Label>
-												<div className="grid grid-cols-2 gap-2">
-													{uniquePlatforms.map((platform) => (
-														<div key={platform} className="flex items-center space-x-2">
-															<Checkbox
-																id={`platform-${platform}`}
-																checked={selectedPlatforms.includes(platform)}
-																onCheckedChange={(checked) => {
-																	if (checked) {
-																		setSelectedPlatforms((prev) => [...prev, platform]);
-																	} else {
-																		setSelectedPlatforms((prev) => prev.filter((p) => p !== platform));
-																	}
-																}}
-															/>
-															<Label htmlFor={`platform-${platform}`} className="text-xs">
-																{platform}
-															</Label>
-														</div>
-													))}
-												</div>
-											</div>
-
 											<div className="flex items-center space-x-2">
 												<Checkbox
 													id="favorites"
@@ -380,20 +337,14 @@ export function CollectionsSettings() {
 										>
 											<div
 												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
-												style={{ backgroundColor: collection.color }}
+												style={{ backgroundColor: COLLECTION_CATEGORY_COLORS[collection.category as CollectionCategory] || '#3b82f6' }}
 											>
-												{collection.emoji}
+												{COLLECTION_CATEGORY_EMOJIS[collection.category as CollectionCategory] || '📚'}
 											</div>
 											<div className="flex-1 min-w-0">
 												<h4 className="text-xs font-medium truncate">{collection.name}</h4>
 												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
 													{collection.category && <span>{collection.category}</span>}
-													{collection.platform && (
-														<>
-															<span>•</span>
-															<span>{collection.platform}</span>
-														</>
-													)}
 													{(collection._count?.images || 0) > 0 && (
 														<>
 															<span>•</span>
@@ -489,9 +440,9 @@ export function CollectionsSettings() {
 											<div className="flex flex-col p-4 border rounded-lg bg-background">
 												<div
 													className="w-full aspect-video mb-3 rounded-md flex items-center justify-center bg-muted"
-													style={{ backgroundColor: previewData?.color || selectedCollection?.color || '#3b82f6' }}
+													style={{ backgroundColor: COLLECTION_CATEGORY_COLORS[(previewData?.category || selectedCollection?.category) as CollectionCategory] || '#3b82f6' }}
 												>
-													<span className="text-4xl">{previewData?.emoji || selectedCollection?.emoji || '📚'}</span>
+													<span className="text-4xl">{COLLECTION_CATEGORY_EMOJIS[(previewData?.category || selectedCollection?.category) as CollectionCategory] || '📚'}</span>
 												</div>
 												<h3 className="text-lg font-medium">
 													{previewData?.name || selectedCollection?.name || 'Nueva Colección'}
@@ -506,11 +457,6 @@ export function CollectionsSettings() {
 															{previewData?.category || selectedCollection?.category}
 														</Badge>
 													)}
-													{(previewData?.platform || selectedCollection?.platform) && (
-														<Badge variant="outline" className="text-xs">
-															{previewData?.platform || selectedCollection?.platform}
-														</Badge>
-													)}
 													{(previewData?.isFavorite || selectedCollection?.isFavorite) && (
 														<Badge variant="outline" className="text-xs">
 															Favorito
@@ -518,11 +464,11 @@ export function CollectionsSettings() {
 													)}
 												</div>
 
-												{selectedCollection?._count && selectedCollection._count.images > 0 && (
+												{selectedCollection?._count?.images ? (
 													<p className="mt-4 text-xs text-muted-foreground">
 														{selectedCollection._count.images} imágenes asociadas
 													</p>
-												)}
+												) : null}
 											</div>
 										) : (
 											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">

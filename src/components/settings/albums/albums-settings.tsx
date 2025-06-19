@@ -1,8 +1,6 @@
 'use client';
 
-import { Album as AlbumIcon, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { deleteAlbum, getAlbums } from '@/app/actions/albums/album.actions';
+import { deleteAlbum, searchAlbums } from '@/app/actions/albums/album.actions';
 import { AlbumCard } from '@/components/cards/album-card/album-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +8,10 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import toastService from '@/services/toast.service';
 import type { Album } from '@/types/entities/album';
-import type { AlbumWithStats } from '@/types/entities/album/extended';
+import type { AlbumComplete } from '@/types/entities/album/extended';
 import { formatBytes } from '@/utils/file/helpers';
+import { Album as AlbumIcon, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { CreateAlbumForm } from './create-album-form';
 
 // Extender el tipo Album para añadir las propiedades que faltan
@@ -24,10 +24,10 @@ interface AlbumWithUI extends Album {
 type ReactEventHandler = (e: React.MouseEvent<HTMLButtonElement>) => void;
 
 export function AlbumsSettings() {
-	const [albums, setAlbums] = useState<AlbumWithStats[]>([]);
+	const [albums, setAlbums] = useState<AlbumComplete[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedAlbum, setSelectedAlbum] = useState<Album | null>(null);
+	const [selectedAlbum, setSelectedAlbum] = useState<AlbumComplete | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -36,9 +36,8 @@ export function AlbumsSettings() {
 		const loadAlbums = async () => {
 			try {
 				setIsLoading(true);
-				const data = await getAlbums();
-				// Añadir type assertion para evitar error
-				setAlbums(data as unknown as AlbumWithStats[]);
+				const data = await searchAlbums({});
+				setAlbums(data);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
@@ -78,7 +77,7 @@ export function AlbumsSettings() {
 	}, []);
 
 	// Manejar edición de álbum
-	const handleEditAlbum = useCallback((album: Album) => {
+	const handleEditAlbum = useCallback((album: AlbumComplete) => {
 		setSelectedAlbum(album);
 		setIsEditing(true);
 	}, []);
@@ -93,15 +92,17 @@ export function AlbumsSettings() {
 	);
 
 	// Manejar creación exitosa
-	const handleAlbumCreated = useCallback((newAlbum: Album) => {
-		setAlbums((prev) => [...prev, newAlbum as unknown as AlbumWithStats]);
+	const handleAlbumCreated = useCallback((newAlbum: AlbumComplete) => {
+		setAlbums((prev) => [...prev, newAlbum]);
 		toastService.success('Álbum creado');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleAlbumUpdated = useCallback((updatedAlbum: Album) => {
+	const handleAlbumUpdated = useCallback((updatedAlbum: AlbumComplete) => {
 		setAlbums((prev) =>
-			prev.map((album) => (album.id === updatedAlbum.id ? ({ ...album, ...updatedAlbum } as AlbumWithStats) : album))
+			prev.map((album) =>
+				album.id === updatedAlbum.id ? { ...album, ...updatedAlbum } : album
+			)
 		);
 		toastService.success('Álbum actualizado');
 	}, []);
@@ -187,7 +188,7 @@ export function AlbumsSettings() {
 										<button
 											key={album.id}
 											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedAlbum?.id === album.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditAlbum(album as unknown as Album)}
+											onClick={() => handleEditAlbum(album as unknown as AlbumComplete)}
 											aria-pressed={selectedAlbum?.id === album.id}
 											type="button"
 										>

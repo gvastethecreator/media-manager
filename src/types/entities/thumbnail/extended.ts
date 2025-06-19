@@ -4,7 +4,7 @@
  */
 
 import { z } from 'zod';
-import { ThumbnailBase, ThumbnailMetadata, thumbnailBaseSchema } from './base';
+import { ThumbnailBase, ThumbnailMetadata, thumbnailBaseSchema } from './types';
 
 /**
  * Interfaz completa para Thumbnail con información adicional

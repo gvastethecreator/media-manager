@@ -4,7 +4,12 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { NoteComplete, NoteWithStats } from '@/types/entities/note';
+import type {
+    NoteBase,
+    NoteComplete,
+    NoteCounts,
+    NoteWithStats
+} from '@/types/entities/note';
 import { TransformerError } from '@/utils/transformers/errors';
 import { extendNote, fromPrismaNote } from './serializers';
 
@@ -23,12 +28,12 @@ export function transformNote(note: unknown): NoteBase {
 		}
 
 		// Si la nota viene de Prisma, transformarla
-		if ('tags' in (note as any) && 'title' in (note as any)) {
-			return fromPrismaNote(note as any);
+		if ('tags' in (note as Record<string, any>) && 'title' in (note as Record<string, any>)) {
+			return fromPrismaNote(note as Record<string, any>);
 		}
 
 		// Si es un objeto simple, extenderlo
-		return extendNote(note as any);
+		return extendNote(note as Record<string, any>);
 	} catch (error) {
 		logger.error('Error transformando nota:', { error });
 		throw new TransformerError('Error al transformar nota');
@@ -55,6 +60,20 @@ export function transformNotes(notes: unknown[]): NoteBase[] {
 }
 
 /**
+ * Interfaz para notas con relaciones y propiedades UI
+ */
+export interface NoteWithRelations extends NoteBase {
+	isSelected: boolean;
+	isHighlighted: boolean;
+	isEditing: boolean;
+	isExpanded: boolean;
+	displayOrder: number;
+	tagsArray: string[];
+	statusDisplay: { label: string; color: string };
+	priorityLevel: { label: string; color: string };
+}
+
+/**
  * 🔄 Transforma un NoteBase a su versión extendida con propiedades para UI
  * @param note NoteBase a extender
  * @returns NoteWithRelations extendido con propiedades adicionales
@@ -77,7 +96,7 @@ export function transformNoteToExtended(note: NoteBase): NoteWithRelations {
 			priorityLevel: getPriorityLevel(baseNote.priority),
 		};
 	} catch (error) {
-		logger.error('Error transformando nota a versión extendida:', { error, noteId: (note as any)?.id });
+		logger.error('Error transformando nota a versión extendida:', { error, noteId: (note as Record<string, any>)?.id });
 		throw new TransformerError('Error al transformar nota a versión extendida');
 	}
 }
@@ -92,7 +111,7 @@ export function transformNoteToWithStats(note: NoteBase | NoteComplete): NoteWit
 		const baseNote = transformNote(note);
 
 		// Calcular totales para las estadísticas
-		const counts: Record<string, number> = baseNote._count || {
+		const counts: NoteCounts['_count'] = (baseNote as NoteComplete)._count || {
 			images: 0,
 			videos: 0,
 			collections: 0,
@@ -118,24 +137,24 @@ export function transformNoteToWithStats(note: NoteBase | NoteComplete): NoteWit
 		return {
 			...baseNote,
 			lastUpdated,
-			imageCount: counts.images,
-			videoCount: counts.videos,
-			albumCount: counts.albums,
-			tagCount: counts.tags,
-			characterCount: counts.characters,
-			conceptCount: counts.concepts,
+			imageCount: counts.images || 0,
+			videoCount: counts.videos || 0,
+			albumCount: counts.albums || 0,
+			tagCount: counts.tags || 0,
+			characterCount: counts.characters || 0,
+			conceptCount: counts.concepts || 0,
 			importanceLevel,
 			contentLength: baseNote.content ? baseNote.content.length : 0,
-			relatedItemsCount: Object.values(counts).reduce((sum: number, count: number) => sum + count, 0),
+			relatedItemsCount: Object.values(counts || {}).reduce((sum: number, count: number | undefined) => sum + (count || 0), 0),
 			distribution: [
-				{ name: 'images', count: counts.images },
-				{ name: 'videos', count: counts.videos },
-				{ name: 'concepts', count: counts.concepts },
-				{ name: 'characters', count: counts.characters },
+				{ name: 'images', count: counts.images || 0 },
+				{ name: 'videos', count: counts.videos || 0 },
+				{ name: 'concepts', count: counts.concepts || 0 },
+				{ name: 'characters', count: counts.characters || 0 },
 			],
 		};
 	} catch (error) {
-		logger.error('Error transformando nota a versión con estadísticas:', { error, noteId: (note as any)?.id });
+		logger.error('Error transformando nota a versión con estadísticas:', { error, noteId: (note as Record<string, any>)?.id });
 		throw new TransformerError('Error al transformar nota a versión con estadísticas');
 	}
 }
@@ -144,12 +163,12 @@ export function transformNoteToWithStats(note: NoteBase | NoteComplete): NoteWit
  * Calcula el nivel de importancia de una nota basado en prioridad y relaciones
  * @private
  */
-function calculateImportanceLevel(note: NoteBase, counts: Record<string, number>): number {
+function calculateImportanceLevel(note: NoteBase, counts: Record<string, number | undefined>): number {
 	try {
 		// Base: prioridad (0-10) + contenido asociado
 		const priorityFactor = note.priority || 0;
 		const contentLengthFactor = note.content ? Math.min(note.content.length / 1000, 5) : 0;
-		const relationsFactor = Object.values(counts).reduce((sum, count) => sum + count, 0) * 0.2;
+		const relationsFactor = Object.values(counts).reduce((sum, count) => sum + (count || 0), 0) * 0.2;
 
 		// Importancia general (máximo 20)
 		return Math.min(Math.round(priorityFactor + contentLengthFactor + relationsFactor), 20);
