@@ -1,5 +1,8 @@
 'use client';
 
+import { FilterIcon, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import type { z } from 'zod';
 import {
 	createProperty,
 	deleteProperty,
@@ -20,9 +23,6 @@ import { fromPrismaProperty } from '@/transformers/property/serializers';
 import type { PropertyWithRelations } from '@/types/entities/property';
 import type { PropertyComplete } from '@/types/entities/property/extended';
 import { CreatePropertySchema, PropertyFiltersSchema } from '@/types/entities/property/schema';
-import { FilterIcon, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import type { z } from 'zod';
 import { CreatePropertyForm } from './create-property-form';
 
 type PropertyCategory = z.infer<typeof CreatePropertySchema>['category'];

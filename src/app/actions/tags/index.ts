@@ -8,6 +8,7 @@
 import * as CrudActions from './crud.actions';
 import * as QueryActions from './query.actions';
 import * as RelationActions from './relation.actions'; // Importar todas las acciones de relación
+import * as TagImagesActions from './tag-images.actions'; // Importar acciones de tag-images
 
 // Re-exportamos cada función como asíncrona para cumplir con las restricciones de 'use server'
 
@@ -48,6 +49,20 @@ export async function removeTagFromImages(...args: Parameters<typeof RelationAct
 }
 export async function updateImageTags(...args: Parameters<typeof RelationActions.updateImageTags>) {
 	return RelationActions.updateImageTags(...args);
+}
+
+// Exportaciones de tag-images.actions
+export async function getTagImages(...args: Parameters<typeof TagImagesActions.getTagImages>) {
+	return TagImagesActions.getTagImages(...args);
+}
+export async function getImageTags(...args: Parameters<typeof TagImagesActions.getImageTags>) {
+	return TagImagesActions.getImageTags(...args);
+}
+export async function addTagToImage(...args: Parameters<typeof TagImagesActions.addTagToImage>) {
+	return TagImagesActions.addTagToImage(...args);
+}
+export async function removeTagFromImage(...args: Parameters<typeof TagImagesActions.removeTagFromImage>) {
+	return TagImagesActions.removeTagFromImage(...args);
 }
 
 // NOTA: Los transformadores de tags ya no pueden exportarse desde este archivo debido a las

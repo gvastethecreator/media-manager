@@ -37,7 +37,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { toastService } from '@/services/toast.service';
 import { UploadedImageResult } from '@/transformers/uploaded-image/transformer';
-import type { UploadedImageType } from '@/types/entities/uploaded-image/types';
+import { UploadedImageType } from '@/types/entities/uploaded-image/types';
 import type { FileItem } from '@/types/files';
 import { FileProcessingStatus, FileType } from '@/types/files';
 import type { EntityId, JSONString } from '@/utils/types/utility-types';

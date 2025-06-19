@@ -2,7 +2,7 @@
 
 import type { Feature } from '../cards/feature-card';
 import type { Issue } from '../cards/issue-card';
-import type { ServiceStatus } from '../cards/service-card';
+import { ServiceStatus } from '../cards/service-card';
 
 /**
  * Obtiene la lista de features

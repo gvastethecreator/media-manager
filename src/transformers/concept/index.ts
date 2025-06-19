@@ -6,19 +6,19 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
-	ConceptComplete,
-	ConceptCreateInput,
-	ConceptFilters,
-	ConceptSearchOptions,
-	ConceptSearchResult,
-	ConceptUpdateInput,
+    ConceptComplete,
+    ConceptCreateInput,
+    ConceptFilters,
+    ConceptSearchOptions,
+    ConceptSearchResult,
+    ConceptUpdateInput,
 } from '@/types/entities/concept/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
 
 import { toCreateConceptData, toSearchOptions, toSearchResult, toUpdateConceptData } from './mappers';
 
 // Importar funciones de serialización
-import * as serializers from './serializers';
+import { fromPrismaConcept, fromPrismaConcepts, validateConcept } from './serializers';
 
 // Re-exportar todo desde los módulos principales
 export * from './mappers';
@@ -32,6 +32,8 @@ const logger = serverLogger.withContext('ConceptTransformer');
  */
 export async function searchConcepts(options: ConceptSearchOptions = {}): Promise<ConceptSearchResult> {
 	try {
+		logger.info('🔍 Buscando conceptos con opciones:', options);
+
 		// Mapear opciones de búsqueda a formato Prisma
 		const prismaOptions = toSearchOptions(options);
 
@@ -43,7 +45,7 @@ export async function searchConcepts(options: ConceptSearchOptions = {}): Promis
 
 		// Deserializar resultados
 		const concepts = items.map((item) =>
-			serializers.fromPrismaConcept(item, {
+			fromPrismaConcept(item, {
 				includeStats: options.includeCount,
 				includeRelations: options.includeRelations,
 				includeUI: true,
@@ -51,9 +53,12 @@ export async function searchConcepts(options: ConceptSearchOptions = {}): Promis
 		);
 
 		// Usar toSearchResult con los parámetros correctos
-		return toSearchResult(concepts, total, options);
+		const result = toSearchResult(concepts, total, options);
+		logger.info(`✅ Encontrados ${result.items.length} conceptos`);
+
+		return result;
 	} catch (error) {
-		throw handleTransformerError(error);
+		return handleTransformerError(error, 'Error al buscar conceptos', logger);
 	}
 }
 
@@ -73,7 +78,7 @@ export async function getConceptById(id: string): Promise<ConceptComplete | null
 			return null;
 		}
 
-		return serializers.fromPrismaConcept(concept, {
+		return fromPrismaConcept(concept, {
 			includeRelations: false,
 			includeStats: true,
 			includeUI: true,
@@ -89,7 +94,7 @@ export async function getConceptById(id: string): Promise<ConceptComplete | null
 export async function createConcept(data: ConceptCreateInput): Promise<ConceptComplete> {
 	try {
 		// Validar datos de entrada
-		serializers.validateConcept(data);
+		validateConcept(data);
 
 		// Mapear datos a formato Prisma
 		const createData = toCreateConceptData(data);
@@ -102,7 +107,7 @@ export async function createConcept(data: ConceptCreateInput): Promise<ConceptCo
 			},
 		});
 
-		return serializers.fromPrismaConcept(concept, {
+		return fromPrismaConcept(concept, {
 			includeRelations: false,
 			includeStats: true,
 			includeUI: true,
@@ -118,7 +123,7 @@ export async function createConcept(data: ConceptCreateInput): Promise<ConceptCo
 export async function updateConcept(id: string, data: ConceptUpdateInput): Promise<ConceptComplete> {
 	try {
 		// Validar datos de entrada
-		serializers.validateConcept(data);
+		validateConcept(data);
 
 		// Mapear datos a formato Prisma
 		const updateData = toUpdateConceptData(data);
@@ -132,7 +137,7 @@ export async function updateConcept(id: string, data: ConceptUpdateInput): Promi
 			},
 		});
 
-		return serializers.fromPrismaConcept(concept, {
+		return fromPrismaConcept(concept, {
 			includeRelations: false,
 			includeStats: true,
 			includeUI: true,
@@ -170,7 +175,7 @@ export async function getConceptsByIds(ids: string[]): Promise<ConceptComplete[]
 		});
 
 		return concepts.map((concept) =>
-			serializers.fromPrismaConcept(concept, {
+			fromPrismaConcept(concept, {
 				includeRelations: false,
 				includeStats: true,
 				includeUI: true,
@@ -193,6 +198,15 @@ export function parseConceptFilters(filtersStr: string): ConceptFilters {
 	}
 }
 
+/**
+ * Transforma un concepto de Prisma a un ConceptComplete
+ * Esta función es un alias para fromPrismaConcept para mantener compatibilidad
+ * con código existente que espera toConceptComplete
+ */
+export function toConceptComplete(concept: any): ConceptComplete {
+	return fromPrismaConcept(concept);
+}
+
 // Objeto de compatibilidad para mantener la API pública actual
 export default {
 	// Funciones principales
@@ -205,12 +219,9 @@ export default {
 	parseConceptFilters,
 
 	// Serializers
-	fromPrismaConcept: serializers.fromPrismaConcept,
-	toPrismaConcept: serializers.toPrismaConcept,
-	serializeTags: serializers.serializeTags,
-	deserializeTags: serializers.deserializeTags,
-	validateConcept: serializers.validateConcept,
-	extendConcept: serializers.extendConcept,
+	fromPrismaConcept,
+	fromPrismaConcepts,
+	validateConcept,
 
 	// Mappers
 	toCreateConceptData,

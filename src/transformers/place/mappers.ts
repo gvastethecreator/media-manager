@@ -6,11 +6,11 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	PlaceCreateInput,
-	PlaceFilters,
-	PlaceRelationInput,
-	PlaceSearchOptions,
-	PlaceUpdateInput,
+    PlaceCreateInput,
+    PlaceFilters,
+    PlaceRelationInput,
+    PlaceSearchOptions,
+    PlaceUpdateInput,
 } from '@/types/entities/place';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -37,11 +37,20 @@ export function mapCreatePlaceDataToPrisma(input: PlaceCreateInput): Prisma.Plac
 			wildcards,
 			properties,
 			groups,
+			dangers,
+			resources,
+			stats,
+			filters,
 			...rest
 		} = input;
 
 		const prismaData: Prisma.PlaceCreateInput = {
 			...rest,
+			// Campos JSON serializados como strings
+			dangers: dangers ? JSON.stringify(dangers) : undefined,
+			resources: resources ? JSON.stringify(resources) : undefined,
+			stats: stats ? JSON.stringify(stats) : undefined,
+			filters: filters ? JSON.stringify(filters) : rest.filters,
 		};
 
 		// Mapeo de relaciones
@@ -127,8 +136,8 @@ function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWhereInput 
 
 	if (filters.search) {
 		where.OR = [
-			{ name: { contains: filters.search, mode: 'insensitive' } },
-			{ description: { contains: filters.search, mode: 'insensitive' } },
+			{ name: { contains: filters.search } },
+			{ description: { contains: filters.search } },
 		];
 	}
 
@@ -146,13 +155,6 @@ function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWhereInput 
 
 	if (filters.characters && filters.characters.length > 0) {
 		where.characters = { some: { id: { in: filters.characters } } };
-	}
-
-	if (filters.minImageCount && filters.minImageCount > 0) {
-		where._count = {
-			...where._count,
-			images: { gte: filters.minImageCount },
-		};
 	}
 
 	return where;

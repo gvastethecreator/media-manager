@@ -1,10 +1,10 @@
 'use client';
 
+import { Calendar, Camera, Copy, CopyCheck, ImageIcon, Info, MapPin } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBytes } from '@/lib/utils/format.utils';
-import { Calendar, Camera, Copy, CopyCheck, ImageIcon, Info, MapPin } from 'lucide-react';
-import { useState } from 'react';
 import { InfoItem } from './details-panel-info-item';
 import type { InfoItemData, MetadataComponentProps } from './details-panel-types';
 
@@ -12,9 +12,7 @@ import type { InfoItemData, MetadataComponentProps } from './details-panel-types
 function renderInfoItems(items: (InfoItemData | null | undefined)[]) {
 	return items
 		.filter((item): item is InfoItemData => !!item && (item.condition === undefined || item.condition))
-		.map((item) => (
-			<InfoItem key={item.label} label={item.label} value={item.value || 'N/A'} icon={item.icon} />
-		));
+		.map((item) => <InfoItem key={item.label} label={item.label} value={item.value || 'N/A'} icon={item.icon} />);
 }
 
 /**
@@ -64,7 +62,9 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 	];
 
 	const hasAnyInfo =
-		infoItems.some((item) => item?.condition) || (xmp.subject && Array.isArray(xmp.subject) && xmp.subject.length > 0) || xmp.rawData;
+		infoItems.some((item) => item?.condition) ||
+		(xmp.subject && Array.isArray(xmp.subject) && xmp.subject.length > 0) ||
+		xmp.rawData;
 
 	return (
 		<div className="space-y-3">
@@ -189,7 +189,8 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
 	];
 
 	const hasAnyInfo =
-		infoItems.some((item) => item?.condition) || (iptc.keywords && Array.isArray(iptc.keywords) && iptc.keywords.length > 0);
+		infoItems.some((item) => item?.condition) ||
+		(iptc.keywords && Array.isArray(iptc.keywords) && iptc.keywords.length > 0);
 
 	return (
 		<div className="space-y-3">

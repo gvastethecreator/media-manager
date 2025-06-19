@@ -6,21 +6,48 @@
  * Última migración: 2025-06-18
  */
 
-import type { Album as PrismaAlbum } from '@prisma/client';
-import type { Image } from '../image';
-import type { Video } from '../video';
+import type { ImageComplete } from '../image';
+import type { VideoComplete } from '../video';
 
 /**
- * 📝 Tipo base para Album - hereda directamente del tipo Prisma
+ * 📝 Metadatos de un álbum
  */
-export type AlbumBase = PrismaAlbum;
+export interface AlbumMetadata {
+	itemCount?: number;
+	totalSize?: number;
+	[key: string]: any;
+}
+
+/**
+ * 📝 Tipo base para Album - definición canónica sin dependencias de Prisma
+ */
+export interface AlbumBase {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	sortBy: string;
+	filters: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	// Propiedades de jerarquía
+	parentId?: string | null;
+	// Metadatos opcionales
+	metadata?: AlbumMetadata;
+}
 
 /**
  * 🔗 Relaciones de un álbum con otras entidades
  */
 export interface AlbumRelations {
-	images?: Image[];
-	videos?: Video[];
+	images?: ImageComplete[];
+	videos?: VideoComplete[];
+	children?: AlbumBase[];
 }
 
 /**
@@ -114,3 +141,4 @@ export type Album = AlbumBase;
 
 /* Exportación de tipos adicionales para retrocompatibilidad */
 export type { AlbumCreateInput as CreateAlbumData, AlbumUpdateInput as UpdateAlbumData };
+

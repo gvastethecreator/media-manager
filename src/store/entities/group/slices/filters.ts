@@ -4,8 +4,7 @@
  */
 
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { Group, GroupType } from '@/types/entities/group';
-import { GroupSortCriteria } from '@/types/entities/group';
+import { Group, GroupSortCriteria, GroupType } from '@/types/entities/group';
 import type { StateCreator } from 'zustand';
 import type { GroupState } from '../types';
 
@@ -19,7 +18,6 @@ export interface GroupFiltersSlice {
 	setFilterByType: (type: GroupType | null) => void;
 	setFilterByCategory: (category: string | null) => void;
 	setFilterFavorites: (onlyFavorites: boolean) => void;
-	setFilterShared: (onlyShared: boolean) => void;
 	setDateRange: (from: Date | null, to: Date | null) => void;
 	resetFilters: () => void;
 
@@ -82,15 +80,7 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 		}));
 	},
 
-	setFilterShared: (onlyShared) => {
-		groupLogger.info('🔗 Filtrando compartidos:', onlyShared);
-		set((state) => ({
-			filters: {
-				...state.filters,
-				filterShared: onlyShared,
-			},
-		}));
-	},
+
 
 	setDateRange: (from, to) => {
 		groupLogger.info('📅 Estableciendo rango de fechas:', { from, to });
@@ -115,7 +105,6 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 				filterByType: null,
 				filterByCategory: null,
 				filterFavorites: false,
-				filterShared: false,
 				dateRange: {
 					from: null,
 					to: null,
@@ -132,7 +121,7 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 	},
 
 	applyFilters: (groups) => {
-		const { searchQuery, filterByType, filterByCategory, filterFavorites, filterShared, dateRange } = get().filters;
+		const { searchQuery, filterByType, filterByCategory, filterFavorites, dateRange } = get().filters;
 
 		return groups.filter((group) => {
 			// Filtro por búsqueda
@@ -144,10 +133,10 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 				return false;
 			}
 
-			// Filtro por tipo
-			if (filterByType && group.type !== filterByType) {
-				return false;
-			}
+			// Filtro por tipo - campo eliminado del esquema
+			// if (filterByType && group.type !== filterByType) {
+			//	return false;
+			// }
 
 			// Filtro por categoría
 			if (filterByCategory && group.category !== filterByCategory) {
@@ -159,10 +148,7 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 				return false;
 			}
 
-			// Filtro por compartidos
-			if (filterShared && !group.isShared) {
-				return false;
-			}
+
 
 			// Filtro por rango de fechas
 			if (dateRange.from && new Date(group.createdAt) < dateRange.from) {

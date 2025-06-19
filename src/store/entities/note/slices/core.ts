@@ -1,14 +1,14 @@
+import { StateCreator } from 'zustand';
 import {
-    createNote as createNoteAction,
-    deleteNote as deleteNoteAction,
-    getNotes as getNotesAction,
-    updateNote as updateNoteAction,
+	createNote as createNoteAction,
+	deleteNote as deleteNoteAction,
+	getNotes as getNotesAction,
+	updateNote as updateNoteAction,
 } from '@/app/actions/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { transformNoteToWithStats } from '@/transformers/note/transformer';
 import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
-import { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const coreLogger = clientLogger.withContext('NoteStore:Core');
@@ -44,7 +44,7 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set)
 					acc[note.id] = note;
 					return acc;
 				},
-				{} as Record<string, NoteWithStats>,
+				{} as Record<string, NoteWithStats>
 			);
 
 			set({ notes: notesRecord, isLoading: false });

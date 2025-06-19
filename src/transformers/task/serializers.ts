@@ -9,7 +9,7 @@ import { TransformerError } from '@/utils/transformers/errors';
 import { TransformTaskOptions } from './transformer';
 
 // Logger específico para este módulo
-const logger = serverLogger.child({ module: 'TaskSerializers' });
+const logger = serverLogger.withContext({ module: 'TaskSerializers' });
 
 /**
  * Convierte un objeto de Prisma a TaskBase

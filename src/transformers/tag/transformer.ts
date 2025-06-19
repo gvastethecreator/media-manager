@@ -4,10 +4,10 @@
  * @description Contiene la lógica para convertir un objeto Tag de Prisma a nuestro tipo canónico.
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { TagWithRelations } from '@/types/entities/tag';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('TagTransformer');
 

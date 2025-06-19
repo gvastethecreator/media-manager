@@ -71,7 +71,7 @@ export async function getRecentConceptImages(conceptId: string, limit = 6): Prom
 	} catch (error) {
 		conceptCardLogger.error('❌ Error obteniendo imágenes para ConceptCard:', error);
 		throw new Error(
-			`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+			`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`
 		);
 	}
 }

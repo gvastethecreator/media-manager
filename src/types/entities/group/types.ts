@@ -18,7 +18,7 @@ export enum GroupViewMode {
 
 /**
  * Tipos de grupos
- * @placeholder Definición inicial
+ * @deprecated Este enum no se usa en el esquema actual de Prisma
  */
 export enum GroupType {
 	COLLECTION = 'collection',
@@ -60,12 +60,10 @@ export interface GroupBase {
 	description?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
-	type: GroupType;
 	sortBy: string;
 	filters: string;
 	featuredImage?: string | null;
 	isFavorite: boolean;
-	isShared: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -87,12 +85,10 @@ export interface GroupCreateInput {
 	description?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
-	type?: GroupType;
 	sortBy?: string;
 	filters?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
-	isShared?: boolean;
 }
 
 /**
@@ -111,12 +107,10 @@ export const GroupSchema = z.object({
 	description: z.string().nullable().optional(),
 	shortcut: z.string().nullable().optional(),
 	category: z.string().nullable().optional(),
-	type: z.nativeEnum(GroupType).default(GroupType.DEFAULT),
 	sortBy: z.string(),
 	filters: z.string(),
 	featuredImage: z.string().nullable().optional(),
 	isFavorite: z.boolean(),
-	isShared: z.boolean(),
 	createdAt: z.date(),
 	updatedAt: z.date(),
 });
@@ -159,6 +153,10 @@ export type GroupWithStats = GroupBase & {
 		lastUpdated: Date;
 	};
 };
+
+// Alias para compatibilidad con código existente
+export type CreateGroupData = GroupCreateInput;
+export type UpdateGroupData = GroupUpdateInput;
 
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.

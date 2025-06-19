@@ -1,13 +1,13 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { revalidatePath } from 'next/cache';
-// Importamos tipos necesarios
-import type { CreateImageData, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image/types';
 // Importamos el transformer y utilities de errores
 import { imageTransformer } from '@/types/entities/image/transformer';
+// Importamos tipos necesarios
+import type { CreateImageData, ImageBase, ImageExtended, UpdateImageData } from '@/types/entities/image/types';
 import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 import type { GetImagesOptions, GetImagesResult, ImageResult } from './image-types.actions';
 
@@ -354,8 +354,8 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 
 		if (search) {
 			where.OR = [
-				{ name: { contains: search, mode: 'insensitive' } },
-				{ path: { contains: search, mode: 'insensitive' } },
+				{ name: { contains: search } },
+				{ path: { contains: search } },
 			];
 		}
 

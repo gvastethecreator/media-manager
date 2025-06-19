@@ -1,19 +1,23 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { EventType } from '@/lib/server/events.server';
-import { emit } from '@/lib/server/events.server';
+import { EventType, emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import {
-	createConcept as createConceptTransformer,
-	deleteConcept as deleteConceptTransformer,
-	getConceptById as getConceptByIdTransformer,
-	searchConcepts as searchConceptsTransformer,
-	updateConcept as updateConceptTransformer,
+    createConcept as createConceptTransformer,
+    deleteConcept as deleteConceptTransformer,
+    getConceptById as getConceptByIdTransformer,
+    searchConcepts as searchConceptsTransformer,
+    updateConcept as updateConceptTransformer
 } from '@/transformers/concept';
-import type { ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept/base';
-import type { ConceptSearchOptions, ConceptSearchResult } from '@/types/entities/concept/types';
+import type {
+    ConceptComplete,
+    ConceptCreateInput,
+    ConceptSearchOptions,
+    ConceptSearchResult,
+    ConceptUpdateInput,
+} from '@/types/entities/concept/types';
+import { revalidatePath } from 'next/cache';
 
 const conceptLogger = serverLogger.withContext('ConceptActions');
 const REVALIDATE_PATHS = ['/settings', '/concepts', '/concepts/[id]'] as const;
@@ -81,7 +85,7 @@ export async function searchConcepts(options?: ConceptSearchOptions): Promise<Co
  * @param id ID del concepto
  * @returns Concepto completo o null si no se encuentra
  */
-export async function getConceptById(id: string) {
+export async function getConceptById(id: string): Promise<ConceptComplete> {
 	conceptLogger.info(`🔍 Obteniendo concepto con ID: ${id}`);
 	try {
 		// Usar la función getConceptByIdTransformer importada del transformer
@@ -104,7 +108,7 @@ export async function getConceptById(id: string) {
  * @param data Datos para crear el concepto
  * @returns Concepto creado
  */
-export async function createConcept(data: ConceptCreateInput) {
+export async function createConcept(data: ConceptCreateInput): Promise<ConceptComplete> {
 	conceptLogger.info('✨ Creando nuevo concepto...', data.name);
 	try {
 		const newConcept = await createConceptTransformer(data);
@@ -124,7 +128,7 @@ export async function createConcept(data: ConceptCreateInput) {
  * @param data Datos para actualizar
  * @returns Concepto actualizado
  */
-export async function updateConcept(id: string, data: ConceptUpdateInput) {
+export async function updateConcept(id: string, data: ConceptUpdateInput): Promise<ConceptComplete> {
 	conceptLogger.info(`📝 Actualizando concepto: ${id}`, data);
 	try {
 		const updatedConcept = await updateConceptTransformer(id, data);

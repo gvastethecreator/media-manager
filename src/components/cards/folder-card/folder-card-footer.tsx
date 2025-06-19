@@ -1,4 +1,4 @@
-import type { Folder } from '@prisma/client';
+import type { FolderComplete as Folder } from '@prisma/client';
 import { Folder as FolderIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';

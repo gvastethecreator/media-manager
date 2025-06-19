@@ -1,13 +1,13 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { worldItemsCache } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import type { EventType } from '@/lib/server/events.server';
+import { EventType } from '@/lib/server/events.server';
 import { emit } from '@/lib/server/events.server';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { revalidatePath } from 'next/cache';
 // Importar tipos y transformers
 import {
 	fromPrismaWorldItem,

@@ -1,4 +1,5 @@
 import { TagRarity } from '@/types/entities/tag';
+
 ('use client');
 
 import { ImageIcon } from 'lucide-react';

@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { EntityType } from '@/types/entities/entities';
+import { EntityType } from '@/types/entities/entities';
 import type { PromptStore } from '../types';
 
 const relationsLogger = clientLogger.withContext('PromptStore:Relations');

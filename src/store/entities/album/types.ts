@@ -7,13 +7,13 @@
 
 import type {
 	Album,
-	AlbumCreateInput as CreateAlbumData,
 	AlbumDisplayState,
 	AlbumFilters,
 	AlbumSortCriteria,
 	AlbumType,
-	AlbumUpdateInput as UpdateAlbumData,
 	AlbumViewMode,
+	AlbumCreateInput as CreateAlbumData,
+	AlbumUpdateInput as UpdateAlbumData,
 } from '@/types/entities/album';
 
 /**

@@ -6,8 +6,6 @@
  * Legacy eliminado.
  */
 
-export { GroupSchema, GroupSortCriteria, GroupType, GroupViewMode } from './types';
-
 export type {
 	Group,
 	GroupBase,
@@ -15,5 +13,6 @@ export type {
 	GroupDisplayState,
 	GroupUpdateInput,
 } from './types';
+export { GroupSchema, GroupSortCriteria, GroupType, GroupViewMode } from './types';
 
 // 📝 Documentación: Solo tipos canónicos. Legacy removido.

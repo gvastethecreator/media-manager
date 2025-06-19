@@ -6,12 +6,11 @@
  */
 
 import {
-	FavoriteBase,
-	FavoriteEntityType,
-	FavoriteExtended,
-	FavoritesByType,
-	FavoriteStats,
-} from '@/types/entities/favorite/types';
+    FavoriteComplete,
+    FavoriteEntityType,
+    FavoriteStats,
+    FavoritesByType
+} from '@/types/entities/favorite';
 
 // Mapa de iconos por tipo de entidad
 const ENTITY_ICONS: Record<string, string> = {
@@ -65,7 +64,7 @@ interface TransformFavoriteOptions {
 export function transformFavorite<T extends Record<string, any>>(
 	favorite: T,
 	options: TransformFavoriteOptions = {}
-): FavoriteBase {
+): FavoriteComplete {
 	// Valores por defecto para opciones
 	const { includeEntityDetails = false } = options;
 
@@ -102,7 +101,7 @@ export function transformFavorite<T extends Record<string, any>>(
 export function transformFavorites<T extends Record<string, any>>(
 	favorites: T[],
 	options?: TransformFavoriteOptions
-): FavoriteBase[] {
+): FavoriteComplete[] {
 	return favorites.map((favorite) => transformFavorite(favorite, options));
 }
 
@@ -112,7 +111,7 @@ export function transformFavorites<T extends Record<string, any>>(
 export function transformFavoriteToExtended<T extends Record<string, any>>(
 	favorite: T,
 	entityDetails?: Record<string, any>
-): FavoriteExtended {
+): FavoriteComplete {
 	// Transformar primero a la versión base
 	const baseFavorite = transformFavorite(favorite);
 
@@ -153,9 +152,9 @@ export function transformFavoriteToExtended<T extends Record<string, any>>(
 /**
  * Agrupa favoritos por tipo de entidad
  */
-export function groupFavoritesByType(favorites: FavoriteExtended[]): FavoritesByType[] {
+export function groupFavoritesByType(favorites: FavoriteComplete[]): FavoritesByType[] {
 	// Crear mapa para agrupar por tipo
-	const groupsMap: Record<string, FavoriteExtended[]> = {};
+	const groupsMap: Record<string, FavoriteComplete[]> = {};
 
 	// Agrupar los favoritos por tipo
 	for (const favorite of favorites) {
@@ -182,7 +181,7 @@ export function groupFavoritesByType(favorites: FavoriteExtended[]): FavoritesBy
 /**
  * Calcula estadísticas para favoritos
  */
-export function calculateFavoriteStats(favorites: FavoriteExtended[], recentLimit = 5): FavoriteStats {
+export function calculateFavoriteStats(favorites: FavoriteComplete[], recentLimit = 5): FavoriteStats {
 	// Contar por tipo
 	const byType: Record<string, number> = {};
 

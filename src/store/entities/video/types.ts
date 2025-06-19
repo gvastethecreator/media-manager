@@ -3,7 +3,7 @@
  * @module store/entities/video/types
  */
 
-import type { Video, VideoPlayState, VideoSortCriteria, VideoViewMode } from '../../../types/entities/video';
+import type { VideoComplete, VideoPlayState, VideoSortCriteria, VideoViewMode } from '../../../types/entities/video';
 
 /**
  * Estado principal del store de videos
@@ -20,7 +20,7 @@ export interface VideoState {
  * Estado del slice core
  */
 export interface VideoCoreState {
-	videos: Record<string, Video>;
+	videos: Record<string, VideoComplete>;
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;

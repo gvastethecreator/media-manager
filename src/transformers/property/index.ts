@@ -29,6 +29,14 @@ export {
 	validateProperty,
 } from './serializers';
 
+import {
+	toCreatePropertyData,
+	toRelatedProperty,
+	toSearchFilters,
+	toSearchOptions,
+	toSearchResult,
+	toUpdatePropertyData,
+} from './mappers';
 // Objeto para mantener compatibilidad con código existente
 import {
 	DEFAULT_PROPERTY_COLOR,
@@ -41,15 +49,6 @@ import {
 	toPrismaProperty,
 	validateProperty,
 } from './serializers';
-
-import {
-	toCreatePropertyData,
-	toRelatedProperty,
-	toSearchFilters,
-	toSearchOptions,
-	toSearchResult,
-	toUpdatePropertyData,
-} from './mappers';
 
 const PropertyTransformer = {
 	// Serializadores

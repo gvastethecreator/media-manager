@@ -3,8 +3,8 @@
  * @module store/entities/world-item/slices/ui
  */
 
-import { WorldItemViewMode } from '@/types/entities/world-item';
 import type { StateCreator } from 'zustand';
+import { WorldItemViewMode } from '@/types/entities/world-item';
 import type { WorldItemActions, WorldItemState, WorldItemUIState } from '../types';
 
 export interface WorldItemUISlice {
@@ -15,12 +15,9 @@ export interface WorldItemUISlice {
 	setViewMode: (mode: WorldItemViewMode) => void;
 }
 
-export const createWorldItemUISlice: StateCreator<
-	WorldItemState & WorldItemActions,
-	[],
-	[],
-	WorldItemUISlice
-> = (set) => ({
+export const createWorldItemUISlice: StateCreator<WorldItemState & WorldItemActions, [], [], WorldItemUISlice> = (
+	set
+) => ({
 	ui: {
 		selectedId: null,
 		editingId: null,

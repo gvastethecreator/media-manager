@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
-import type { Property } from '@/store/entities/property/types';
+import type { PropertyComplete as Property } from '@/store/entities/property/types';
 import { fromPrismaProperty } from '@/transformers/property/serializers';
 import { CreatePropertySchema } from '@/types/entities/property/schema';
 import { DynamicCreateForm } from '../common/dynamic-create-form';

@@ -3,6 +3,8 @@
  * @module transformers/file/mappers
  */
 
+import type { Stats } from 'fs';
+import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	DirectoryInfo,
@@ -14,8 +16,6 @@ import type {
 	ImageFileInfo,
 } from '@/types/entities/file';
 import { FILE_EXTENSION_GROUPS, FileType } from '@/types/entities/file/enums';
-import type { Stats } from 'fs';
-import path from 'path';
 
 const mappersLogger = serverLogger.withContext('File:Mappers');
 

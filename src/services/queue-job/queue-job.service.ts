@@ -3,21 +3,21 @@
  * @module services/queue-job
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { serializeQueueJobMetadata, transformQueueJob, transformQueueJobs } from '@/transformers/queue-job';
-import type {
-	CreateQueueJobInput,
-	PaginatedQueueJobs,
-	QueueJobExtended,
-	QueueJobFilters,
-	QueueJobPaginationOptions,
-	QueueStats,
-	UpdateQueueJobInput,
+import {
+    QueueJobStatus,
+    type CreateQueueJobInput,
+    type PaginatedQueueJobs,
+    type QueueJobExtended,
+    type QueueJobFilters,
+    type QueueJobPaginationOptions,
+    type QueueStats,
+    type UpdateQueueJobInput,
 } from '@/types/entities/queue-job';
-import { QueueJobStatus } from '@/types/entities/queue-job/schema';
 import { getPaginationInfo } from '@/utils/pagination';
+import type { Prisma } from '@prisma/client';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('QueueJobService');
@@ -368,22 +368,22 @@ export async function getQueueStats(): Promise<QueueStats> {
 			stats.total += count;
 
 			switch (item.status) {
-				case QueueJobStatus.PENDING:
+				case "QueueJobStatus".PENDING:
 					stats.pending = count;
 					break;
-				case QueueJobStatus.PROCESSING:
+				case "QueueJobStatus".PROCESSING:
 					stats.processing = count;
 					break;
-				case QueueJobStatus.COMPLETED:
+				case "QueueJobStatus".COMPLETED:
 					stats.completed = count;
 					break;
-				case QueueJobStatus.FAILED:
+				case "QueueJobStatus".FAILED:
 					stats.failed = count;
 					break;
-				case QueueJobStatus.RETRYING:
+				case "QueueJobStatus".RETRYING:
 					stats.retrying = count;
 					break;
-				case QueueJobStatus.CANCELLED:
+				case "QueueJobStatus".CANCELLED:
 					stats.cancelled = count;
 					break;
 			}
@@ -557,22 +557,22 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
 			stats.total += count;
 
 			switch (item.status) {
-				case QueueJobStatus.PENDING:
+				case "QueueJobStatus".PENDING:
 					stats.pending = count;
 					break;
-				case QueueJobStatus.PROCESSING:
+				case "QueueJobStatus".PROCESSING:
 					stats.processing = count;
 					break;
-				case QueueJobStatus.COMPLETED:
+				case "QueueJobStatus".COMPLETED:
 					stats.completed = count;
 					break;
-				case QueueJobStatus.FAILED:
+				case "QueueJobStatus".FAILED:
 					stats.failed = count;
 					break;
-				case QueueJobStatus.RETRYING:
+				case "QueueJobStatus".RETRYING:
 					stats.retrying = count;
 					break;
-				case QueueJobStatus.CANCELLED:
+				case "QueueJobStatus".CANCELLED:
 					stats.cancelled = count;
 					break;
 			}

@@ -1,4 +1,4 @@
-import type { EntityType } from '@/types/entities/entities';
+import { EntityType } from '@/types/entities/entities';
 import type {
 	NoteCreateInput,
 	NoteFilters,

@@ -4,10 +4,10 @@
  */
 
 import type {
-	Wildcard,
-	WildcardDisplayState,
-	WildcardSortCriteria,
-	WildcardViewMode,
+    WildcardComplete,
+    WildcardDisplayState,
+    WildcardSortCriteria,
+    WildcardViewMode,
 } from '../../../types/entities/wildcard';
 
 /**
@@ -15,7 +15,7 @@ import type {
  */
 export interface WildcardCoreState {
 	/** Mapa de comodines indexados por ID */
-	wildcards: Record<string, Wildcard>;
+	wildcards: Record<string, WildcardComplete>;
 	/** Items asociados a cada comodín */
 	wildcardItems: Record<string, Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>>;
 	/** Estado de carga */

@@ -5,7 +5,7 @@
 
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { PropertySortCriteria } from '@/types/entities/property';
+import { PropertySortCriteria } from '@/types/entities/property';
 import type { PropertyState } from '../types';
 
 const filtersLogger = clientLogger.withContext('PropertyStore:Filters');

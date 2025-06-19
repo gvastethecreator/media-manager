@@ -1,7 +1,7 @@
-import type { ProcessStatus } from '@/app/actions/folders/folder-types';
+import { ProcessStatus } from '@/app/actions/folders/folder-types';
 import type { FOLDER_EVENTS } from '@/services/folder-service-export';
 
-export type { ProcessStatus };
+export { ProcessStatus };
 
 export interface ExtendedProcessStatus extends ProcessStatus {
 	globalProgress?: {

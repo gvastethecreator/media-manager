@@ -6,7 +6,7 @@
 import type { Transformer } from '@/types/common/transformer';
 import type { MediaMetadata } from '@/types/metadata.types';
 import type { JSONString } from '@/utils/types/utility-types';
-import type { UploadedImageBase, UploadedImageDimensions, UploadedImageExtended, UploadedImageType } from './types';
+import { UploadedImageBase, UploadedImageDimensions, UploadedImageExtended, UploadedImageType } from './types';
 
 /**
  * Type for database uploaded image record

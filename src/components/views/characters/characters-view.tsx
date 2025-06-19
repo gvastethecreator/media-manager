@@ -4,7 +4,7 @@ import { Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { type CharacterWithStats, searchCharacters } from '@/app/actions/characters/character.actions';
-import { getCharacterVisualConfig } from '@/app/actions/visual-config.actions';
+
 import { CharacterCard } from '@/components/cards/character-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -17,19 +17,12 @@ import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('CharactersView');
 
-// Configuración visual simplificada para personajes
-const DEFAULT_CHARACTER_OPTIONS: CardOptions = {
-	primaryColor: '#f59e0b',
-	secondaryColor: '#ef4444',
-};
-
 export function CharactersView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { selectCharacter } = useCharacterStore();
 	const [characters, setCharacters] = useState<CharacterWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [_visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_CHARACTER_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticCharacters, _addEvent] = clientEvents.useEvents<CharacterWithStats[]>(characters);
@@ -53,23 +46,6 @@ export function CharactersView(_props: ViewProps) {
 	useEffect(() => {
 		loadCharacters();
 	}, [loadCharacters]);
-
-	useEffect(() => {
-		const loadVisualConfig = async () => {
-			try {
-				const config = await getCharacterVisualConfig();
-				setVisualConfig({
-					...DEFAULT_CHARACTER_OPTIONS,
-					...config,
-				});
-			} catch (error) {
-				console.error('Error al cargar la configuración visual:', error);
-				// Si hay un error, mantenemos la configuración predeterminada
-			}
-		};
-
-		loadVisualConfig();
-	}, []);
 
 	const handleCharacterClick = useCallback(
 		(character: CharacterWithStats) => {

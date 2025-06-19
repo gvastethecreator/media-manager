@@ -9,8 +9,21 @@ import { pathToUrl } from '@/lib/url-utils';
 import { BaseImageSchema, CompleteImageSchema, ExtendedImageSchema } from '@/lib/validators/image-validators';
 import type { ImageBase, ImageComplete, ImageExtended } from '@/types/entities/image/types';
 import { createTransformerError, TransformerErrorCode } from '@/utils/errors/transformer-errors';
-import { calculateAspectRatio, formatFileSize, generateThumbnailUrl } from '@/utils/image-utils';
-import type { Album, Character, Concept, Group, Note, Place, Image as PrismaImage, Prompt, Property, Tag, Wildcard, WorldItem } from '@prisma/client';
+import { calculateAspectRatio, calculateDominantColor, formatFileSize, generateThumbnailUrl } from '@/utils/image-utils';
+import type {
+    Album,
+    Character,
+    Concept,
+    Group,
+    Note,
+    Place,
+    Image as PrismaImage,
+    Prompt,
+    Property,
+    Tag,
+    Wildcard,
+    WorldItem,
+} from '@prisma/client';
 
 const logger = serverLogger.withContext('ImageTransformer');
 
@@ -108,11 +121,6 @@ function mapImageToComplete(image: ImageMapper, baseImage: ImageBase): ImageComp
 			favorites: image.stats?.favorites || 0,
 			lastAccessed: image.stats?.lastAccessed || null,
 		},
-		visualConfig: {
-			isHidden: image.visualConfig?.isHidden || false,
-			isPinned: image.visualConfig?.isPinned || false,
-			dominantColor: calculateDominantColor(image) || '#333333',
-		},
 		isPublic: image.isPublic || false,
 		// Relaciones
 		folder: image.folder || { id: baseImage.folderId || '' },
@@ -142,7 +150,7 @@ function mapImageToExtended(image: ImageMapper, completeImage: ImageComplete): I
 		isHighlighted: false,
 		isVisible: true,
 		isNew: false,
-		dominantColor: completeImage.visualConfig?.dominantColor || '#333333',
+		dominantColor: calculateDominantColor(image) || '#333333',
 		displaySize: formatFileSize(completeImage.size),
 		displayDimensions: `${completeImage.width}×${completeImage.height}`,
 		tags: image.tags || [],
@@ -189,9 +197,6 @@ export const transformImage = (image: PrismaImage): ImageBase => {
 			description: image.description,
 			isFavorite: image.isFavorite,
 			addedAt: image.addedAt,
-			// Estos campos no existen en el modelo de Prisma, se asignan valores por defecto.
-			sortBy: 'name',
-			filters: '{}',
 		};
 
 		const validation = BaseImageSchema.safeParse(baseImage);
@@ -266,8 +271,8 @@ export const transformImageToComplete = (image: ImageWithRelations): ImageComple
 				'600': generateThumbnailUrl(image.id, 600),
 			},
 			metadata: typeof image.metadata === 'object' ? image.metadata : {},
-			stats: typeof image.stats === 'object' ? image.stats : { views: 0, downloads: 0, favorites: 0, lastAccessed: null },
-			visualConfig: typeof image.visualConfig === 'object' ? image.visualConfig : { isHidden: false, isPinned: false, dominantColor: '#333333' },
+			stats:
+				typeof image.stats === 'object' ? image.stats : { views: 0, downloads: 0, favorites: 0, lastAccessed: null },
 			isPublic: image.isPublic,
 			folder: image.folder,
 			thumbnail: image.thumbnail,

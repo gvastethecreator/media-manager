@@ -1,29 +1,26 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+/**
+ * @file Acciones para presets visuales - DESHABILITADO
+ * @module app/actions/presets/presets.actions
+ *
+ * ⚠️ ARCHIVO DESHABILITADO - El modelo 'visualPreset' no existe en el esquema de Prisma
+ * TODO: Crear el modelo VisualPreset en prisma/schema.prisma o eliminar esta funcionalidad
+ */
 
-export interface PresetQueryOptions {
-	isDefault?: boolean;
-	isPublic?: boolean;
-	limit?: number;
+// Funciones mock temporales para evitar errores de importación
+export async function getVisualPreset() {
+	throw new Error('Visual preset functionality disabled - VisualPreset model not implemented');
 }
 
-export async function getVisualPreset(id: string) {
-	return prisma.visualPreset.findUnique({ where: { id } });
+export async function updateVisualPreset() {
+	throw new Error('Visual preset functionality disabled - VisualPreset model not implemented');
 }
 
-export async function updateVisualPreset(id: string, data: Record<string, unknown>) {
-	return prisma.visualPreset.update({ where: { id }, data });
+export async function getPresetsByEntity() {
+	throw new Error('Visual preset functionality disabled - VisualPreset model not implemented');
 }
 
-export async function getPresetsByType(type: string, options: PresetQueryOptions = {}) {
-	const { isDefault, isPublic, limit = 10 } = options;
-	const where: any = {
-		OR: [{ category: `type:${type}` }, { category: type }, { [`${type}Config`]: { not: null } }],
-	};
-	if (isDefault !== undefined) where.isDefault = isDefault;
-	if (isPublic !== undefined) where.isPublic = isPublic;
-	const presets = await prisma.visualPreset.findMany({ where, orderBy: { isDefault: 'desc' }, take: limit });
-	if (isDefault) return presets[0] || null;
-	return presets;
+export async function getPresetsByType() {
+	throw new Error('Visual preset functionality disabled - VisualPreset model not implemented');
 }

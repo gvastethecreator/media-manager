@@ -4,10 +4,10 @@
  * @description Contiene la lógica para convertir un objeto Collection de Prisma a nuestro tipo canónico.
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CollectionComplete } from '@/types/entities/collection';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 import { deserializeEditions, deserializeFilters, deserializeSortBy } from './serializers';
 
 const logger = serverLogger.withContext('CollectionTransformer');

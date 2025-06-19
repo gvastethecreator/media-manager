@@ -5,15 +5,8 @@
  * @updated 2025-06-21
  */
 
-// Exportar todos los tipos canónicos
-export * from './types';
-
 // Exportar enumeraciones
 export * from './enums';
-
-// Exportar tipos estadísticos
-export * from './stats-types';
-
 // Re-exportación de tipos extendidos (para compatibilidad con código existente)
 export type {
 	AlbumComplete,
@@ -23,18 +16,11 @@ export type {
 	ParsedAlbumWithRelations,
 } from './extended';
 
+// Exportar tipos estadísticos
+export * from './stats-types';
 // Tipo principal para Album (para compatibilidad con código legacy)
 export type { Album } from './types';
+// Exportar todos los tipos canónicos
+export * from './types';
 
-/**
- * 📊 Configuración visual de álbum
- * Para compatibilidad con código existente
- */
-export interface AlbumVisualConfig {
-	view: string;
-	sortBy: string;
-	filters: string;
-	lastViewedId: string | null;
-	expandedIds: string[];
-	selectedIds: string[];
-}
+

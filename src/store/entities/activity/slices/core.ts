@@ -4,22 +4,22 @@
  */
 
 import {
-	createActivity as createActivityAction,
-	deleteActivity as deleteActivityAction,
-	getActivityById,
-	getFilteredActivities,
+    createActivity as createActivityAction,
+    deleteActivity as deleteActivityAction,
+    getActivityById,
+    getFilteredActivities,
 } from '@/app/actions/activity';
 import { extendActivities, extendActivity } from '@/transformers/activity';
-import type { Activity, ActivityBase, ActivityFilters, ActivityListResponse } from '@/types/entities/activity';
+import type { ActivityBase, ActivityComplete, ActivityFilters, ActivityListResponse } from '@/types/entities/activity';
 import type { StateCreator } from 'zustand';
 import type { ActivityState } from '../types';
 
 // Slice para operaciones CRUD básicas
 export interface ActivityCoreSlice {
 	// Getters
-	getActivity: (id: string) => Activity | undefined;
-	getActivities: () => Activity[];
-	getActivitiesByImageId: (imageId: string) => Activity[];
+	getActivity: (id: string) => ActivityComplete | undefined;
+	getActivities: () => ActivityComplete[];
+	getActivitiesByImageId: (imageId: string) => ActivityComplete[];
 
 	// Operaciones
 	addActivity: (activity: ActivityBase) => void;
@@ -32,14 +32,14 @@ export interface ActivityCoreSlice {
 	setError: (error: string | null) => void;
 
 	// Acciones asíncronas
-	fetchActivity: (id: string) => Promise<Activity | undefined>;
+	fetchActivity: (id: string) => Promise<ActivityComplete | undefined>;
 	fetchActivities: (filters?: ActivityFilters) => Promise<ActivityListResponse | undefined>;
 	createActivity: (data: {
 		type: string;
 		description?: string;
 		imageId?: string;
 		metadata?: Record<string, any>;
-	}) => Promise<Activity | undefined>;
+	}) => Promise<ActivityComplete | undefined>;
 	removeActivity: (id: string) => Promise<boolean>;
 }
 
@@ -80,7 +80,7 @@ export const createActivityCoreSlice: StateCreator<ActivityState, [], [], Activi
 				acc[activity.id] = activity;
 				return acc;
 			},
-			{} as Record<string, Activity>
+			{} as Record<string, ActivityComplete>
 		);
 
 		set((state) => ({

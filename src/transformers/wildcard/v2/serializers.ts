@@ -9,7 +9,7 @@ import { WildcardSchema } from '@/types/entities/wildcard';
 import { TransformerError } from '@/utils/transformers/errors';
 
 // Logger específico para este módulo
-const logger = serverLogger.child({ module: 'WildcardTransformer:Serializers' });
+const logger = serverLogger.withContext({ module: 'WildcardTransformer:Serializers' });
 
 // Constantes para valores por defecto
 export const DEFAULT_WILDCARD_EMOJI = '🎭';
@@ -92,9 +92,9 @@ export function toPrismaWildcard(
 
 		// Manejar la conversión de isFavorite a favorite si está presente
 		if ('isFavorite' in wildcard) {
-			result.favorite = wildcard.isFavorite;
+			result.isFavorite = wildcard.isFavorite;
 		} else if ('favorite' in wildcard) {
-			result.favorite = (wildcard as any).favorite;
+			result.isFavorite = (wildcard as any).isFavorite;
 		}
 
 		// Serializar el array children a string si existe
@@ -144,7 +144,7 @@ export function fromPrismaWildcard<T extends WildcardBase>(
 
 		// Convertir favorite a isFavorite para mantener compatibilidad
 		if ('favorite' in wildcard) {
-			result.isFavorite = (wildcard as any).favorite;
+			result.isFavorite = (wildcard as any).isFavorite;
 		}
 
 		// Deserializar children si existe y se solicita

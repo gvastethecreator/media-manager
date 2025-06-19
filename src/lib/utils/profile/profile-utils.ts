@@ -19,8 +19,8 @@ export function buildProfileQuery(filters: ProfileFilters = {}) {
 	// Filtro por búsqueda de texto
 	if (filters.search) {
 		query.OR = [
-			{ name: { contains: filters.search, mode: 'insensitive' } },
-			{ description: { contains: filters.search, mode: 'insensitive' } },
+			{ name: { contains: filters.search } },
+			{ description: { contains: filters.search } },
 		];
 	}
 

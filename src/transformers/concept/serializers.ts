@@ -1,141 +1,117 @@
 /**
- * @file Funciones de serialización para la entidad Concept
+ * @file Serializadores para la entidad Concept
  * @module transformers/concept/serializers
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { ConceptSchema } from '@/types/entities/concept/schema';
-import type {
-	ConceptBase,
-	ConceptComplete,
-	ConceptCounts,
-	ConceptDeserialized,
-	ConceptRelations,
-	ConceptUI,
-} from '@/types/entities/concept/types';
+import type { ConceptBase, ConceptComplete } from '@/types/entities/concept/types';
+import { ConceptSchema } from '@/types/entities/concept/types';
+import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 
-const logger = serverLogger.withContext('ConceptSerializer');
+const logger = serverLogger.withContext('ConceptSerializers');
+
+// Define el tipo de payload de Prisma que esperamos
+export type ConceptFromPrisma = Prisma.ConceptGetPayload<{
+	include: {
+		_count: true;
+	};
+}>;
 
 /**
- * Opciones para transformación de concept
+ * Opciones para la función fromPrismaConcept
  */
-export interface ConceptTransformOptions {
-	validateFields?: boolean;
-	deserializeFields?: boolean;
+export interface FromPrismaConceptOptions {
 	includeRelations?: boolean;
-	includeUI?: boolean;
 	includeStats?: boolean;
+	includeUI?: boolean;
 }
 
 /**
- * Serializa un concepto para Prisma
- * @param concept Concepto con campos JSON deserializados
- * @param options Opciones de transformación
- * @returns Concepto con campos serializados para Prisma
- */
-export function toPrismaConcept(
-	concept: Partial<ConceptComplete>,
-	options: ConceptTransformOptions = {}
-): Prisma.ConceptCreateInput | Prisma.ConceptUpdateInput {
-	try {
-		const { validateFields = true } = options;
-
-		// Validar datos si se solicita
-		if (validateFields) {
-			validateConcept(concept);
-		}
-
-		// Filtrar campos que no van a la base de datos
-		const fieldsToExclude = ['_count', '_relations', '_ui'];
-
-		// Crear objeto limpio sin los campos excluidos
-		const filteredConcept = Object.fromEntries(
-			Object.entries(concept).filter(([key]) => !fieldsToExclude.includes(key))
-		);
-
-		// Serializar tags si están presentes
-		const result: Record<string, any> = { ...filteredConcept };
-		if (Array.isArray(concept.tags)) {
-			result.tags = serializeTags(concept.tags);
-		}
-
-		return result as Prisma.ConceptCreateInput | Prisma.ConceptUpdateInput;
-	} catch (error) {
-		logger.error('Error serializando concept:', error);
-		throw new Error(`Error serializando concept: ${(error as Error).message}`);
-	}
-}
-
-/**
- * Deserializa un concepto desde Prisma
- * @param concept Concepto con campos serializados de Prisma
- * @param options Opciones de transformación
- * @returns Concepto con campos deserializados
+ * 🔄 Transforma un objeto Concept de Prisma a nuestro tipo canónico ConceptComplete.
+ *
+ * @param prismaConcept - El objeto Concept obtenido de Prisma.
+ * @param options - Opciones de transformación.
+ * @returns Un objeto ConceptComplete compatible con nuestra aplicación.
+ * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
 export function fromPrismaConcept<T extends ConceptBase>(
-	concept: T,
-	options: ConceptTransformOptions = {}
-): T & ConceptDeserialized & Partial<Record<'_relations' | '_count' | '_ui', any>> {
+	prismaConcept: ConceptFromPrisma | null,
+	options: FromPrismaConceptOptions = {}
+): ConceptComplete {
+	if (!prismaConcept) {
+		throw new TransformerError('El objeto de concepto de Prisma no puede ser nulo.');
+	}
+
 	try {
-		const { includeRelations = false, includeUI = false, includeStats = false } = options;
+		const { _count, ...baseData } = prismaConcept;
 
-		// Deserializar campos JSON
-		const result = {
-			...concept,
-			tags: deserializeTags(concept.tags),
-		} as T & ConceptDeserialized;
-
-		// Agregar relaciones si están presentes y se solicitan
-		if (includeRelations && (concept as any)._relations) {
-			result._relations = (concept as any)._relations as ConceptRelations;
-		}
-
-		// Agregar conteos si están presentes y se solicitan
-		if (includeStats && (concept as any)._count) {
-			result._count = (concept as any)._count as ConceptCounts;
-		}
-
-		// Agregar campos UI si se solicitan
-		if (includeUI) {
-			result._ui = {
-				previewContent: concept.content ? getPreviewContent(concept.content) : undefined,
-				lastUpdated: concept.updatedAt instanceof Date ? concept.updatedAt : new Date(concept.updatedAt),
-			} as ConceptUI;
-		}
-
-		return result;
+		return {
+			...baseData,
+			_count: options.includeStats ? _count : undefined,
+		};
 	} catch (error) {
-		logger.error('Error deserializando concept:', error);
-		throw new Error(`Error deserializando concept: ${(error as Error).message}`);
+		logger.error('Error transformando concepto desde Prisma', {
+			error,
+			conceptId: prismaConcept.id,
+		});
+		throw new TransformerError(`Error al transformar el concepto: ${(error as Error).message}`);
 	}
 }
 
 /**
- * Serializa un array de tags a formato JSON
- * @param tags Array de tags
- * @returns String JSON con los tags
+ * 🔄 Transforma una lista de conceptos de Prisma a una lista de ConceptComplete.
+ *
+ * @param prismaConcepts - Un array de objetos Concept de Prisma.
+ * @param options - Opciones de transformación.
+ * @returns Un array de objetos ConceptComplete.
+ */
+export function fromPrismaConcepts(
+	prismaConcepts: ConceptFromPrisma[],
+	options: FromPrismaConceptOptions = {}
+): ConceptComplete[] {
+	return prismaConcepts.map((concept) => fromPrismaConcept(concept, options));
+}
+
+/**
+ * 🔄 Valida un objeto Concept usando Zod.
+ *
+ * @param data - Los datos a validar.
+ * @returns Los datos validados.
+ * @throws {TransformerError} Si los datos son inválidos.
+ */
+export function validateConcept(data: Partial<ConceptBase>): Partial<ConceptBase> {
+	try {
+		// Para validación parcial, solo validamos los campos presentes
+		const presentFields = Object.keys(data);
+		const partialSchema = ConceptSchema.pick(
+			presentFields.reduce((acc, field) => {
+				acc[field as keyof ConceptBase] = true;
+				return acc;
+			}, {} as Record<keyof ConceptBase, true>)
+		);
+
+		return partialSchema.parse(data);
+	} catch (error) {
+		logger.error('Error validando concepto:', error);
+		throw new TransformerError(`Error de validación: ${(error as Error).message}`);
+	}
+}
+
+/**
+ * 🔄 Serializa tags para almacenamiento.
  */
 export function serializeTags(tags: string[]): string {
-	try {
-		return tags && tags.length > 0 ? JSON.stringify(tags) : '[]';
-	} catch (error) {
-		logger.error('Error serializando tags:', error);
-		return '[]';
-	}
+	return JSON.stringify(tags);
 }
 
 /**
- * Deserializa tags desde un string JSON
- * @param tagsString String JSON con tags
- * @returns Array de strings con los tags
+ * 🔄 Deserializa tags desde almacenamiento.
  */
-export function deserializeTags(tagsString?: string | null): string[] {
-	if (!tagsString) return [];
-
+export function deserializeTags(tagsJson: string | null): string[] {
+	if (!tagsJson) return [];
 	try {
-		if (tagsString === '[]') return [];
-		const parsed = JSON.parse(tagsString);
+		const parsed = JSON.parse(tagsJson);
 		return Array.isArray(parsed) ? parsed : [];
 	} catch (error) {
 		logger.error('Error deserializando tags:', error);
@@ -144,134 +120,38 @@ export function deserializeTags(tagsString?: string | null): string[] {
 }
 
 /**
- * Valida un concepto contra el schema
- * @param concept Concepto a validar
- * @throws Error si la validación falla
+ * 🔄 Extiende un concepto con propiedades adicionales para UI.
  */
-export function validateConcept(concept: unknown): void {
-	try {
-		ConceptSchema.parse(concept);
-	} catch (error) {
-		logger.error('Error validando concept:', error);
-		throw new Error(`Validación de concept fallida: ${(error as Error).message}`);
+export function extendConcept<T extends ConceptBase>(
+	concept: T,
+	options: { includePreview?: boolean } = {}
+): T & { previewContent?: string } {
+	const extended = { ...concept };
+
+	if (options.includePreview && concept.content) {
+		// Generar una vista previa del contenido (primeros 150 caracteres)
+		extended.previewContent = concept.content.substring(0, 150) + (concept.content.length > 150 ? '...' : '');
 	}
+
+	return extended;
 }
 
 /**
- * Extiende un concepto con campos UI adicionales
- * @param concept Concepto base
- * @returns Concepto con campos UI adicionales
+ * 🔄 Prepara un objeto Concept para envío a Prisma.
  */
-export function extendConcept<T extends ConceptBase | ConceptComplete>(
-	concept: T
-): T & {
-	_ui: ConceptUI;
-} {
-	try {
-		return {
-			...concept,
-			_ui: {
-				previewContent: concept.content ? getPreviewContent(concept.content) : undefined,
-				lastUpdated: concept.updatedAt instanceof Date ? concept.updatedAt : new Date(concept.updatedAt),
-			},
-		};
-	} catch (error) {
-		logger.error('Error extendiendo concept:', error);
-		return {
-			...concept,
-			_ui: {
-				lastUpdated: new Date(),
-			},
-		};
-	}
-}
+export function toPrismaConcept(data: Partial<ConceptBase>): Prisma.ConceptCreateInput {
+	// Validar datos
+	validateConcept(data);
 
-/**
- * Extiende múltiples conceptos con campos UI adicionales
- * @param concepts Array de conceptos
- * @returns Array de conceptos extendidos
- */
-export function extendConcepts<T extends ConceptBase | ConceptComplete>(
-	concepts: T[]
-): ReturnType<typeof extendConcept<T>>[] {
-	return concepts.map((concept) => extendConcept(concept));
-}
-
-/**
- * Obtiene una versión truncada del contenido para previsualización
- * @param content Contenido completo
- * @param maxLength Longitud máxima para la previsualización
- * @returns Contenido truncado para previsualización
- */
-function getPreviewContent(content: string, maxLength = 150): string {
-	if (!content) return '';
-	return content.length > maxLength ? `${content.substring(0, maxLength).trim()}...` : content;
-}
-
-/**
- * Convierte un concepto base a concepto completo
- */
-export function toConceptComplete<T extends ConceptBase>(concept: T): T & ConceptDeserialized {
-	return fromPrismaConcept(concept, {
-		deserializeFields: true,
-	});
-}
-
-/**
- * Convierte un concepto a concepto con relaciones completas
- */
-export function toConceptWithRelationsComplete(concept: ConceptBase): ConceptComplete {
-	return fromPrismaConcept(concept, {
-		deserializeFields: true,
-		includeRelations: true,
-	}) as ConceptComplete;
-}
-
-/**
- * Convierte un concepto completo a concepto serializado
- */
-export function fromConceptComplete<T extends ConceptComplete>(
-	concept: T
-): Prisma.ConceptCreateInput | Prisma.ConceptUpdateInput {
-	return toPrismaConcept(concept);
-}
-
-/**
- * Convierte un concepto base a concepto extendido
- */
-export function toExtendedConcept(concept: ConceptBase): ConceptBase & {
-	_ui: ConceptUI;
-} {
-	return extendConcept(concept);
-}
-
-/**
- * Convierte un concepto a concepto extendido completo
- */
-export function toConceptExtendedComplete(concept: ConceptBase): ConceptBase &
-	ConceptDeserialized & {
-		_ui: ConceptUI;
-	} {
-	return extendConcept(toConceptComplete(concept));
-}
-
-/**
- * Convierte un concepto a concepto con relaciones extendido completo
- */
-export function toConceptWithRelationsExtendedComplete(concept: ConceptBase): ConceptComplete & {
-	_ui: ConceptUI;
-} {
-	return extendConcept(toConceptWithRelationsComplete(concept)) as ConceptComplete & {
-		_ui: ConceptUI;
+	// Mapear a formato Prisma
+	return {
+		name: data.name || '',
+		emoji: data.emoji || '📝',
+		color: data.color || '#4A5568',
+		description: data.description || null,
+		content: data.content || '',
+		category: data.category || 'general',
+		featuredImage: data.featuredImage || null,
+		isFavorite: data.isFavorite || false,
 	};
-}
-
-/**
- * Convierte un concepto a concepto con estadísticas completo
- */
-export function toConceptWithStatsComplete(concept: ConceptBase): ConceptComplete {
-	return fromPrismaConcept(concept, {
-		deserializeFields: true,
-		includeStats: true,
-	}) as ConceptComplete;
 }

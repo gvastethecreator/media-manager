@@ -3,11 +3,11 @@
  * @module transformers/property/serializers
  */
 
+import type { Prisma, Property } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { PropertyBase, PropertyWithRelations } from '@/types/entities/property';
 import { PropertySchema } from '@/types/entities/property';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma, Property } from '@prisma/client';
 
 // Logger específico para este módulo
 const logger = serverLogger.withContext('PropertyTransformer:Serializers');
@@ -170,7 +170,7 @@ export function toPrismaProperty(
 
 		// Manejar la conversión de isFavorite a favorite si está presente
 		if ('isFavorite' in property) {
-			result.favorite = property.isFavorite;
+			result.isFavorite = property.isFavorite;
 		}
 
 		return result;
@@ -200,7 +200,7 @@ export function fromPrismaProperty<T extends Property & { _relations?: any; _cou
 			_ui?: any;
 		} = {
 			...property,
-			isFavorite: property.favorite,
+			isFavorite: property.isFavorite,
 			createdAt: new Date(property.createdAt),
 			updatedAt: new Date(property.updatedAt),
 		};

@@ -9,7 +9,7 @@ import { FavoriteStore } from '..';
 import { FavoriteSortCriteria, FavoriteViewMode } from '../types';
 
 // Logger específico para este slice
-const logger = clientLogger.child({ module: 'FavoriteStore.UISlice' });
+const logger = clientLogger.withContext({ module: 'FavoriteStore.UISlice' });
 
 // Estado
 export interface UIState {

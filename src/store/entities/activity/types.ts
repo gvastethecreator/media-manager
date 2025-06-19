@@ -3,7 +3,7 @@
  * @module store/entities/activity/types
  */
 
-import type { Activity, ActivityCategory, ActivitySortCriteria } from '../../../types/entities/activity';
+import { ActivityCategory, ActivityComplete, ActivitySortCriteria } from '../../../types/entities/activity';
 
 /**
  * Estado principal del store de actividades
@@ -19,7 +19,7 @@ export interface ActivityState {
  * Estado del slice core
  */
 export interface ActivityCoreState {
-	activities: Record<string, Activity>;
+	activities: Record<string, ActivityComplete>;
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;

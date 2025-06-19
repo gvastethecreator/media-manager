@@ -8,10 +8,8 @@ import { persist } from 'zustand/middleware';
 
 import { extendPlace, extendPlaces } from '../../transformers/place';
 import type {
-	ParsedPlaceVisualConfig,
 	Place,
 	PlaceFilters,
-	PlaceVisualConfigUpdateData,
 } from '../../types/entities/place';
 import { PlaceSortCriteria, PlaceViewMode } from '../../types/entities/place';
 import { filterPlaces, findPlaceById, findPlacesByIds, sortPlaces } from '../../utils/place';
@@ -64,7 +62,6 @@ interface PlacesState {
 
 	// Acciones: configuración
 	setConfigId: (id: string) => void;
-	setVisualConfig: (config: ParsedPlaceVisualConfig) => void;
 
 	// Acciones: carga y estado
 	setIsLoading: (isLoading: boolean) => void;
@@ -76,9 +73,6 @@ interface PlacesState {
 	getSortedAndFilteredPlaces: () => Place[];
 	isPlaceSelected: (id: string) => boolean;
 	isPlaceExpanded: (id: string) => boolean;
-
-	// Selectores avanzados
-	getVisualConfigUpdateData: () => PlaceVisualConfigUpdateData;
 }
 
 /**
@@ -214,17 +208,6 @@ export const usePlacesStore = create<PlacesState>()(
 					configId: id,
 				}),
 
-			setVisualConfig: (config) =>
-				set({
-					view: config.view,
-					sortBy: config.sortBy,
-					filters: config.filtersObject,
-					lastViewedPlaceId: config.lastViewedPlaceId,
-					expandedPlaceIds: config.expandedPlaceIds,
-					selectedPlaceIds: config.selectedPlaceIds,
-					configId: config.id,
-				}),
-
 			// Acciones: carga y estado
 			setIsLoading: (isLoading) =>
 				set({
@@ -255,18 +238,6 @@ export const usePlacesStore = create<PlacesState>()(
 
 			isPlaceExpanded: (id) => {
 				return get().expandedPlaceIds.includes(id);
-			},
-
-			// Selectores avanzados
-			getVisualConfigUpdateData: () => {
-				return {
-					view: get().view,
-					sortBy: get().sortBy,
-					filters: get().filters,
-					lastViewedPlaceId: get().lastViewedPlaceId,
-					expandedPlaceIds: get().expandedPlaceIds,
-					selectedPlaceIds: get().selectedPlaceIds,
-				};
 			},
 		}),
 		{

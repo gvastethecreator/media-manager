@@ -6,11 +6,11 @@
  */
 
 import type {
+	ParsedWorldItemVisualConfig,
 	WorldItem,
 	WorldItemCreateInput,
 	WorldItemFilters,
 	WorldItemUpdateInput,
-	ParsedWorldItemVisualConfig,
 } from '@/types/entities/world-item';
 import { generateWorldItemId, parseWorldItemStats } from './utils';
 

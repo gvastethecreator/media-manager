@@ -21,16 +21,16 @@
 
 import type { Album } from '../album';
 import type { Character } from '../character';
-import type { Collection } from '../collection';
+import type { CollectionComplete as Collection } from '../collection';
 import type { Concept } from '../concept';
 import type { Group } from '../group';
-import type { Image } from '../image';
-import type { Note } from '../note';
+import type { ImageComplete as Image } from '../image';
+import type { NoteComplete as Note } from '../note';
 import type { Place } from '../place';
-import type { Property } from '../property';
+import type { PropertyComplete as Property } from '../property';
 import type { Tag } from '../tag';
-import type { Video } from '../video';
-import type { Wildcard } from '../wildcard';
+import type { VideoComplete as Video } from '../video';
+import type { WildcardComplete as Wildcard } from '../wildcard';
 import type { WorldItem } from '../world-item';
 
 /**

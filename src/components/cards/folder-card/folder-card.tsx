@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import type { Folder } from '@/types/entities/folder';
+import type { FolderComplete as FolderComplete } from '@/types/entities/folder';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';

@@ -27,7 +27,7 @@ export class Logger {
 	}
 
 	withContext(context: string): Logger {
-		const newLogger = new Logger();
+		const newLogger = serverLogger.withContext();
 		// Crear una nueva instancia con el contexto
 		newLogger.enhancedLogger = new EnhancedLogger({
 			context,
@@ -42,7 +42,7 @@ export class Logger {
 	}
 
 	withOptions(options: Record<string, unknown>): Logger {
-		const newLogger = new Logger();
+		const newLogger = serverLogger.withContext();
 		// Crear una nueva instancia con las opciones combinadas
 		newLogger.enhancedLogger = new EnhancedLogger({
 			context: options.context || this.enhancedLogger.context,
@@ -105,7 +105,7 @@ export class Logger {
 }
 
 // Exportar una instancia global del logger para compatibilidad
-export const logger = new Logger();
+export const logger = serverLogger.withContext();
 
 // Función para crear loggers específicos para servicios
 export function createServerServiceLogger(serviceName: string): Logger {

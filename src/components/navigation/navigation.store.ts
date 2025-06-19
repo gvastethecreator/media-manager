@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ViewType } from '@/components/views/types';
+import { ViewType } from '@/components/views/types';
 
 // Definición del tipo para el item actual
 export interface NavigationItem {

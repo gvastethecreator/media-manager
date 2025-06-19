@@ -1,323 +1,34 @@
 'use server';
 
 /**
- * @file Process actions for scheduled tasks
+ * @file Acciones de procesamiento para tareas programadas - DESHABILITADO
  * @module app/actions/tasks/process.actions
+ *
+ * ⚠️ ARCHIVO DESHABILITADO - El modelo 'scheduledTask' no existe en el esquema de Prisma
+ * TODO: Crear el modelo ScheduledTask en prisma/schema.prisma o eliminar esta funcionalidad
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
-import { type ScheduledTask, TaskStatus } from '@/types/tasks';
-import { revalidatePath } from 'next/cache';
-
-// Logger for process actions
-const taskLogger = serverLogger.withContext('TaskProcessActions');
-
-// Paths to revalidate when task state changes
-const REVALIDATE_PATHS = ['/tasks', '/dashboard', '/settings/tasks'];
-
-/**
- * Revalidates all paths affected by task changes
- */
-async function revalidateTaskPaths() {
-	for (const path of REVALIDATE_PATHS) {
-		revalidatePath(path);
-		taskLogger.info('🔄 Revalidated path:', path);
-	}
+// Funciones mock temporales para evitar errores de importación
+export async function startTask() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
 
-/**
- * Interfaz para errores de procesamiento de tareas
- */
-export interface TaskProcessErrorData {
-	name: string;
-	message: string;
-	code?: string;
-	cause?: unknown;
+export async function stopTask() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
 
-/**
- * Función para crear errores de procesamiento de tareas (enfoque funcional)
- */
-function createTaskProcessError(message: string, code?: string, cause?: unknown): TaskProcessErrorData {
-	return {
-		name: 'TaskProcessError',
-		message,
-		code,
-		cause,
-	};
+export async function pauseTask() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
 
-/**
- * Starts execution of a task
- */
-export async function startTask(id: string): Promise<ScheduledTask> {
-	try {
-		taskLogger.info('▶️ Starting task execution:', id);
-
-		const task = await prisma.scheduledTask.findUnique({
-			where: { id },
-		});
-
-		if (!task) {
-			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
-		}
-
-		if (task.status === TaskStatus.RUNNING) {
-			throw createTaskProcessError('Task is already running', 'TASK_RUNNING');
-		}
-
-		const updatedTask = await prisma.scheduledTask.update({
-			where: { id },
-			data: {
-				status: TaskStatus.RUNNING,
-				startedAt: new Date(),
-				error: null,
-			},
-		});
-
-		await revalidateTaskPaths();
-		taskLogger.info('✅ Task started:', { id });
-		return updatedTask as unknown as ScheduledTask;
-	} catch (error) {
-		taskLogger.error('❌ Error starting task:', error);
-
-		// Reenviar el error si ya es un TaskProcessError
-		if (error && typeof error === 'object' && 'name' in error && error.name === 'TaskProcessError') {
-			throw error as TaskProcessErrorData;
-		}
-
-		throw createTaskProcessError('Failed to start task', 'START_FAILED', error);
-	}
+export async function resumeTask() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
 
-/**
- * Completes a task execution
- */
-export async function completeTask(id: string, result?: unknown): Promise<ScheduledTask> {
-	try {
-		taskLogger.info('🏁 Completing task:', id);
-
-		const task = await prisma.scheduledTask.findUnique({
-			where: { id },
-		});
-
-		if (!task) {
-			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
-		}
-
-		if (task.status !== TaskStatus.RUNNING) {
-			throw createTaskProcessError('Task is not running', 'TASK_NOT_RUNNING');
-		}
-
-		// Calculate next run time for recurring tasks
-		let nextRunAt: Date | null = null;
-		if (task.recurring && task.interval) {
-			nextRunAt = new Date();
-			nextRunAt.setSeconds(nextRunAt.getSeconds() + task.interval);
-		}
-
-		const updatedTask = await prisma.scheduledTask.update({
-			where: { id },
-			data: {
-				status: nextRunAt ? TaskStatus.SCHEDULED : TaskStatus.COMPLETED,
-				completedAt: new Date(),
-				nextRunAt,
-				result: result ? JSON.stringify(result, null, 2) : null,
-				error: null,
-				lastRunAt: new Date(),
-			},
-		});
-
-		await revalidateTaskPaths();
-		taskLogger.info('✅ Task completed:', { id, nextRunAt });
-		return updatedTask as unknown as ScheduledTask;
-	} catch (error) {
-		taskLogger.error('❌ Error completing task:', error);
-
-		// Reenviar el error si ya es un TaskProcessError
-		if (error && typeof error === 'object' && 'name' in error && error.name === 'TaskProcessError') {
-			throw error as TaskProcessErrorData;
-		}
-
-		throw createTaskProcessError('Failed to complete task', 'COMPLETE_FAILED', error);
-	}
+export async function retryTask() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
 
-/**
- * Marks a task as failed
- */
-export async function failTask(id: string, error: Error | string): Promise<ScheduledTask> {
-	try {
-		taskLogger.info('❌ Marking task as failed:', id);
-
-		const task = await prisma.scheduledTask.findUnique({
-			where: { id },
-		});
-
-		if (!task) {
-			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
-		}
-
-		// Calculate next run time for recurring tasks with retry
-		let nextRunAt: Date | null = null;
-		if (task.recurring && task.interval && task.retryCount < task.maxRetries) {
-			nextRunAt = new Date();
-			nextRunAt.setSeconds(nextRunAt.getSeconds() + task.interval);
-		}
-
-		const updatedTask = await prisma.scheduledTask.update({
-			where: { id },
-			data: {
-				status: nextRunAt ? TaskStatus.SCHEDULED : TaskStatus.FAILED,
-				error:
-					error instanceof Error
-						? JSON.stringify({ message: error.message, name: error.name, stack: error.stack }, null, 2)
-						: error,
-				nextRunAt,
-				lastRunAt: new Date(),
-				retryCount: {
-					increment: 1,
-				},
-			},
-		});
-
-		await revalidateTaskPaths();
-		taskLogger.info('✅ Task marked as failed:', { id, nextRunAt });
-		return updatedTask as unknown as ScheduledTask;
-	} catch (error) {
-		taskLogger.error('❌ Error marking task as failed:', error);
-
-		// Reenviar el error si ya es un TaskProcessError
-		if (error && typeof error === 'object' && 'name' in error && error.name === 'TaskProcessError') {
-			throw error as TaskProcessErrorData;
-		}
-
-		throw createTaskProcessError('Failed to mark task as failed', 'FAIL_FAILED', error);
-	}
-}
-
-/**
- * Pauses a running task
- */
-export async function pauseTask(id: string): Promise<ScheduledTask> {
-	try {
-		taskLogger.info('⏸️ Pausing task:', id);
-
-		const task = await prisma.scheduledTask.findUnique({
-			where: { id },
-		});
-
-		if (!task) {
-			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
-		}
-
-		if (task.status !== TaskStatus.RUNNING && task.status !== TaskStatus.SCHEDULED) {
-			throw createTaskProcessError('Task cannot be paused', 'TASK_NOT_PAUSABLE');
-		}
-
-		const updatedTask = await prisma.scheduledTask.update({
-			where: { id },
-			data: {
-				status: TaskStatus.PAUSED,
-			},
-		});
-
-		await revalidateTaskPaths();
-		taskLogger.info('✅ Task paused:', { id });
-		return updatedTask as unknown as ScheduledTask;
-	} catch (error) {
-		taskLogger.error('❌ Error pausing task:', error);
-
-		// Reenviar el error si ya es un TaskProcessError
-		if (error && typeof error === 'object' && 'name' in error && error.name === 'TaskProcessError') {
-			throw error as TaskProcessErrorData;
-		}
-
-		throw createTaskProcessError('Failed to pause task', 'PAUSE_FAILED', error);
-	}
-}
-
-/**
- * Resumes a paused task
- */
-export async function resumeTask(id: string): Promise<ScheduledTask> {
-	try {
-		taskLogger.info('▶️ Resuming task:', id);
-
-		const task = await prisma.scheduledTask.findUnique({
-			where: { id },
-		});
-
-		if (!task) {
-			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
-		}
-
-		if (task.status !== TaskStatus.PAUSED) {
-			throw createTaskProcessError('Task is not paused', 'TASK_NOT_PAUSED');
-		}
-
-		const updatedTask = await prisma.scheduledTask.update({
-			where: { id },
-			data: {
-				status: TaskStatus.SCHEDULED,
-				nextRunAt: new Date(),
-			},
-		});
-
-		await revalidateTaskPaths();
-		taskLogger.info('✅ Task resumed:', { id });
-		return { ...updatedTask, result: updatedTask.result ? JSON.parse(updatedTask.result) : null };
-	} catch (error) {
-		taskLogger.error('❌ Error resuming task:', error);
-
-		// Reenviar el error si ya es un TaskProcessError
-		if (error && typeof error === 'object' && 'name' in error && error.name === 'TaskProcessError') {
-			throw error;
-		}
-
-		throw createTaskProcessError('Failed to resume task', 'RESUME_FAILED', error);
-	}
-}
-
-/**
- * Reschedules a task
- */
-export async function rescheduleTask(id: string, nextRunAt: Date): Promise<ScheduledTask> {
-	try {
-		taskLogger.info('🕒 Rescheduling task:', { id, nextRunAt });
-
-		const task = await prisma.scheduledTask.findUnique({
-			where: { id },
-		});
-
-		if (!task) {
-			throw createTaskProcessError('Task not found', 'TASK_NOT_FOUND');
-		}
-
-		if (task.status === TaskStatus.RUNNING) {
-			throw createTaskProcessError('Cannot reschedule running task', 'TASK_RUNNING');
-		}
-
-		const updatedTask = await prisma.scheduledTask.update({
-			where: { id },
-			data: {
-				status: TaskStatus.SCHEDULED,
-				nextRunAt,
-			},
-		});
-
-		await revalidateTaskPaths();
-		taskLogger.info('✅ Task rescheduled:', { id, nextRunAt });
-		return { ...updatedTask, result: updatedTask.result ? JSON.parse(updatedTask.result) : null };
-	} catch (error) {
-		taskLogger.error('❌ Error rescheduling task:', error);
-
-		// Reenviar el error si ya es un TaskProcessError
-		if (error && typeof error === 'object' && 'name' in error && error.name === 'TaskProcessError') {
-			throw error;
-		}
-
-		throw createTaskProcessError('Failed to reschedule task', 'RESCHEDULE_FAILED', error);
-	}
+export async function executeTask() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }

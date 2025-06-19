@@ -1,11 +1,11 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import type { PropertyWithRelations } from '@/types/entities/property';
 import { Microscope } from 'lucide-react';
 import Link from 'next/link';
 import React, { useMemo } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import type { PropertyWithRelations } from '@/types/entities/property';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 

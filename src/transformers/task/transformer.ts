@@ -9,7 +9,7 @@ import { TransformerError } from '@/utils/transformers/errors';
 import { fromPrismaTask, toExtendedTask } from './serializers';
 
 // Logger específico para este módulo
-const logger = serverLogger.child({ module: 'TaskTransformer' });
+const logger = serverLogger.withContext({ module: 'TaskTransformer' });
 
 /**
  * Opciones para la transformación de tareas

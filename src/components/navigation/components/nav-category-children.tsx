@@ -6,7 +6,7 @@ import type { ViewMode } from '@/components/navigation/types';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import type { ViewType } from '@/types/files';
+import { ViewType } from '@/types/files';
 
 export type CategoryChild = {
 	id: string;

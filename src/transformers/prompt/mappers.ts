@@ -87,14 +87,14 @@ export interface PrismaPromptUpdateArgs {
  */
 export interface PrismaPromptWhereInput {
 	OR?: Array<{
-		name?: { contains: string; mode: 'insensitive' };
-		description?: { contains: string; mode: 'insensitive' };
-		content?: { contains: string; mode: 'insensitive' };
+		name?: { contains: string; };
+		description?: { contains: string; };
+		content?: { contains: string; };
 	}>;
 	category?: { in: string[] };
 	purpose?: { in: string[] };
 	isFavorite?: boolean;
-	content?: { contains: string; mode: 'insensitive' };
+	content?: { contains: string; };
 }
 
 /**
@@ -246,9 +246,9 @@ export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): PrismaPro
 		// Búsqueda por texto
 		if (filters.searchQuery) {
 			where.OR = [
-				{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
-				{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
-				{ content: { contains: filters.searchQuery, mode: 'insensitive' } },
+				{ name: { contains: filters.searchQuery } },
+				{ description: { contains: filters.searchQuery } },
+				{ content: { contains: filters.searchQuery } },
 			];
 		}
 
@@ -269,7 +269,7 @@ export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): PrismaPro
 
 		// Filtrar por contenido específico
 		if (filters.contentContains) {
-			where.content = { contains: filters.contentContains, mode: 'insensitive' };
+			where.content = { contains: filters.contentContains };
 		}
 
 		return where;

@@ -1,5 +1,7 @@
 'use client';
 
+import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { deleteCollection, searchCollections } from '@/app/actions/collections/collection.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,8 +18,6 @@ import {
 	CollectionCategory,
 } from '@/types/entities/collection/enums';
 import type { CollectionComplete } from '@/types/entities/collection/extended';
-import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreateCollectionForm } from './create-collection-form';
 
 // Definir tipo para el event handler

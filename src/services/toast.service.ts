@@ -36,7 +36,7 @@ const TOAST_TYPES = {
 		addImage: '🏷️ Etiqueta agregada a la imagen',
 		removeImage: '🚫 Etiqueta eliminada de la imagen',
 	},
-	favorite: {
+	isFavorite: {
 		add: '⭐ Imagen agregada a favoritos',
 		remove: '💔 Imagen eliminada de favoritos',
 	},
@@ -214,10 +214,10 @@ export const toastService = {
 			),
 		error: (title: string, options?: ToastOptions) => showToast(title, options, 'error'),
 	},
-	favorite: {
+	isFavorite: {
 		added: () =>
 			showToast(
-				TOAST_TYPES.favorite.add,
+				TOAST_TYPES.isFavorite.add,
 				{
 					description: 'Imagen agregada a favoritos',
 				},
@@ -225,7 +225,7 @@ export const toastService = {
 			),
 		removed: () =>
 			showToast(
-				TOAST_TYPES.favorite.remove,
+				TOAST_TYPES.isFavorite.remove,
 				{
 					description: 'Imagen eliminada de favoritos',
 				},

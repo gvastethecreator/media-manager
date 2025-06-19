@@ -37,7 +37,7 @@ export function formDataToBase<T extends BaseEntity>(data: BaseFormData, id?: st
 export interface BaseStats {
 	total: number;
 	active: number;
-	favorite: number;
+	isFavorite: number;
 	archived: number;
 }
 
@@ -75,7 +75,7 @@ export function calculateStats<T extends BaseEntity>(
 	const basicStats = {
 		total: items.length,
 		active: items.filter((item) => !(item as EntityWithStats).isArchived).length,
-		favorite: items.filter((item) => (item as EntityWithStats).isFavorite).length,
+		isFavorite: items.filter((item) => (item as EntityWithStats).isFavorite).length,
 		archived: items.filter((item) => (item as EntityWithStats).isArchived).length,
 	};
 

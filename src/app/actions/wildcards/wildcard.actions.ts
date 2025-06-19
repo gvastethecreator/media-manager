@@ -6,6 +6,7 @@
  * @description Acciones CRUD y de gestión de relaciones para los Wildcards.
  */
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import {
@@ -20,7 +21,6 @@ import type {
 	WildcardCreateInput,
 	WildcardUpdateInput,
 } from '@/types/entities/wildcard';
-import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('WildcardActions');
 

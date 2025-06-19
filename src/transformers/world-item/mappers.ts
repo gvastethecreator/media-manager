@@ -3,28 +3,28 @@
  * @module transformers/world-item/mappers
  */
 
-import { createLogger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { WorldItemCategory, WorldItemType } from '@/types/entities/world-item/enums';
 import {
-	WORLD_ITEM_SORT_PROPERTY_MAP,
-	type WorldItemCreateInput,
-	type WorldItemFilters,
-	type WorldItemSearchOptions,
-	type WorldItemSortCriteria,
-	type WorldItemUpdateInput,
+    WORLD_ITEM_SORT_PROPERTY_MAP,
+    type WorldItemCreateInput,
+    type WorldItemFilters,
+    type WorldItemSearchOptions,
+    type WorldItemSortCriteria,
+    type WorldItemUpdateInput,
 } from '@/types/entities/world-item/types';
 import {
-	serializeAttributes,
-	serializeEffects,
-	serializeFilters,
-	serializeProperties,
-	serializeRequirements,
-	serializeStats,
-	serializeTags,
+    serializeAttributes,
+    serializeEffects,
+    serializeFilters,
+    serializeProperties,
+    serializeRequirements,
+    serializeStats,
+    serializeTags,
 } from './serializers';
 
 // Logger específico para este módulo
-const logger = createLogger('WorldItemTransformer:Mappers');
+const logger = serverLogger.withContext('WorldItemTransformer:Mappers');
 
 /**
  * Interfaces para los tipos de Prisma que necesitamos
@@ -97,8 +97,8 @@ export interface PrismaWorldItemWhereInput {
 	AND?: PrismaWorldItemWhereInput[];
 	OR?: PrismaWorldItemWhereInput[];
 	NOT?: PrismaWorldItemWhereInput[];
-	name?: { contains: string; mode: 'insensitive' };
-	description?: { contains: string; mode: 'insensitive' };
+	name?: { contains: string };
+	description?: { contains: string };
 	type?: { in: string[] };
 	category?: { in: string[] };
 	rarity?: { in: string[] };
@@ -460,8 +460,8 @@ export function createFilter(filters: WorldItemFilters = {}): PrismaWorldItemWhe
 		if (filters.query) {
 			conditions.push({
 				OR: [
-					{ name: { contains: filters.query, mode: 'insensitive' } },
-					{ description: { contains: filters.query, mode: 'insensitive' } },
+					{ name: { contains: filters.query } },
+					{ description: { contains: filters.query } },
 				],
 			});
 		}

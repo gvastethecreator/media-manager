@@ -3,6 +3,7 @@
  * @module transformers/wildcard/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	WildcardCreateInput,
@@ -11,7 +12,6 @@ import type {
 	WildcardUpdateInput,
 } from '@/types/entities/wildcard';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('WildcardMappers');
 
@@ -72,8 +72,8 @@ function mapWildcardFiltersToPrisma(filters: WildcardFilters): Prisma.WildcardWh
 
 	if (filters.search) {
 		where.OR = [
-			{ name: { contains: filters.search, mode: 'insensitive' } },
-			{ description: { contains: filters.search, mode: 'insensitive' } },
+			{ name: { contains: filters.search } },
+			{ description: { contains: filters.search } },
 		];
 	}
 

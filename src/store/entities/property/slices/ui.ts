@@ -3,9 +3,9 @@
  * @module store/entities/property/slices/ui
  */
 
+import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { PropertyViewMode } from '@/types/entities/property';
-import type { StateCreator } from 'zustand';
 import type { PropertyDisplayState, PropertyState } from '../types';
 
 const uiLogger = clientLogger.withContext('PropertyStore:UI');

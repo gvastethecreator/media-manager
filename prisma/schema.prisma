@@ -52,8 +52,9 @@ model Profile {
   isActive    Boolean @default(false)
 
   // Relaciones
-  settings      Settings? @relation(fields: [settingsId], references: [id])
-  featuredImage Image?    @relation(fields: [imageId], references: [id])
+  settings      Settings?  @relation(fields: [settingsId], references: [id])
+  featuredImage Image?     @relation(fields: [imageId], references: [id])
+  favorites     Favorite[] // Relación con favoritos
 
   // Metadata
   createdAt DateTime @default(now())
@@ -1030,4 +1031,28 @@ model Audio {
   size      Int // Tamaño en bytes
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Modelo para favoritos - Sistema multi-perfil local
+model Favorite {
+  // Identificación
+  id String @id @default(cuid())
+
+  // Relación con el perfil
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  profileId String
+
+  // Entidad favorita
+  entityId   String
+  entityType String // 'image', 'album', 'character', 'collection', etc.
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Índices para optimización
+  @@unique([profileId, entityId, entityType])
+  @@index([profileId])
+  @@index([entityType])
+  @@index([createdAt])
 }

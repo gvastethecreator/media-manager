@@ -1,7 +1,7 @@
 'use server';
 
 import { getPrismaClient } from '@/lib/db';
-import type { Property } from '@/types/prisma';
+import type { PropertyComplete as Property } from '@/types/prisma';
 
 export interface PropertyCardData extends Property {
 	_count: {

@@ -43,7 +43,7 @@ export function toPrismaNote(
 
 		// Convertir isFavorite a favorite si está presente
 		if (isFavorite !== undefined) {
-			prismaData.favorite = isFavorite;
+			prismaData.isFavorite = isFavorite;
 		}
 
 		// Filtrar propiedades que no pertenecen al modelo Prisma
@@ -95,7 +95,7 @@ export function fromPrismaNote(
 
 		// Convertir favorite a isFavorite para mantener consistencia
 		if ('favorite' in prismaNote) {
-			noteComplete.isFavorite = prismaNote.favorite;
+			noteComplete.isFavorite = prismaNote.isFavorite;
 		}
 
 		// No hay campos JSON adicionales que deserializar

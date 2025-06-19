@@ -1,7 +1,7 @@
 import type { ConceptBase, ConceptWithStats } from '@/types/entities/concept/base';
 import type { ConceptSortOption, ConceptViewMode } from '@/types/entities/concept/enums';
 import type { ConceptFilters } from '@/types/entities/concept/extended';
-import type { EntityType } from '@/types/entities/entities';
+import { EntityType } from '@/types/entities/entities';
 
 /**
  * Store completo de Conceptos combinando todas las slices

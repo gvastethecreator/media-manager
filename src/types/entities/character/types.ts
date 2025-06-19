@@ -4,30 +4,43 @@
  * @description Estructura unificada y validada para Character, siguiendo las mejores prácticas.
  */
 
-import type { Prisma } from '@prisma/client';
-
 /**
  * 🧑‍🎤 Tipo base para un personaje.
  * Contiene todos los campos primitivos y datos serializados en JSON.
+ * ⚠️ Definición canónica sin dependencias de Prisma
  */
 export interface CharacterBase {
 	id: string;
 	name: string;
 	description: string | null;
+	emoji: string;
+	color: string;
+	shortcut: string | null;
+	category: string | null;
 	level: number;
 	class: string;
 	race: string;
+	type: string | null;
 	alignment: string;
-	backstory: string | null;
-	// Campos JSON: Prisma maneja la serialización/deserialización
-	stats: Prisma.JsonValue;
-	skills: Prisma.JsonValue;
-	inventory: Prisma.JsonValue;
-	spells: Prisma.JsonValue;
-	feats: Prisma.JsonValue;
-	isActive: boolean;
+	backstory: string;
+	// Campos JSON serializados como strings en Prisma
+	stats: string;
+	psychologicalProfile: string;
+	socialProfile: string;
+	relationships: string;
+	goals: string;
+	fears: string;
+	beliefs: string;
+	personality: string;
+	skills: string;
+	abilities: string;
+	// Configuración
+	sortBy: string;
+	filters: string;
+	// Propiedades de visualización
+	featuredImage: string | null;
 	isFavorite: boolean;
-	metadata: Prisma.JsonValue;
+	// Timestamps
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -36,17 +49,37 @@ export interface CharacterBase {
  * 🧑‍🎤 Input para crear un nuevo personaje.
  * Las relaciones se especifican mediante arrays de IDs.
  */
-export interface CharacterCreateInput
-	extends Omit<
-		CharacterBase,
-		'id' | 'createdAt' | 'updatedAt' | 'stats' | 'skills' | 'inventory' | 'spells' | 'feats' | 'metadata'
-	> {
-	stats?: Record<string, any>;
-	skills?: Record<string, any>;
-	inventory?: any[];
-	spells?: any[];
-	feats?: any[];
-	metadata?: Record<string, any>;
+export interface CharacterCreateInput {
+	// Campos requeridos
+	name: string;
+	emoji: string;
+	color: string;
+	level: number;
+	class: string;
+	race: string;
+	alignment: string;
+	backstory: string;
+	stats: string;
+	psychologicalProfile: string;
+	socialProfile: string;
+	relationships: string;
+	goals: string;
+	fears: string;
+	beliefs: string;
+	personality: string;
+	skills: string;
+	abilities: string;
+	sortBy: string;
+	filters: string;
+
+	// Campos opcionales
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	type?: string | null;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+
 	// IDs de relaciones
 	imageIds?: string[];
 	tagIds?: string[];
@@ -114,7 +147,9 @@ export interface CharacterFilters {
 export interface CharacterSearchOptions {
 	skip?: number;
 	take?: number;
-	orderBy?: Prisma.CharacterOrderByWithRelationInput;
+	// Ordenamiento - se pueden usar propiedades básicas
+	orderBy?: Record<string, 'asc' | 'desc'>;
 	filters?: CharacterFilters;
-	include?: Prisma.CharacterInclude;
+	// Inclusión - se pueden especificar relaciones a incluir
+	include?: Record<string, boolean>;
 }

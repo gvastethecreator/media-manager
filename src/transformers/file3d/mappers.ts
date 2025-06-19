@@ -1,5 +1,5 @@
 // Mappers para File3D
-import type { File3D } from '@/types/entities/file3d/types';
+import type { File3D } from '@/types/entities/file3d';
 
 export function fromPrismaFile3D(prisma: any): File3D {
 	return {

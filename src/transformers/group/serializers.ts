@@ -5,18 +5,18 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	type GroupBase,
-	type GroupComplete,
-	type GroupCreateInput,
-	GroupSchema,
-	type GroupTransformerOptions,
-	type GroupUpdateInput,
+    type GroupBase,
+    type GroupComplete,
+    type GroupCreateInput,
+    GroupSchema,
+    type GroupTransformerOptions,
+    type GroupUpdateInput
 } from '@/types/entities/group/types';
 import {
-	deserializeJsonField,
-	serializeJsonField,
-	validateFieldType,
-	validateRequiredFields,
+    deserializeJsonField,
+    serializeJsonField,
+    validateFieldType,
+    validateRequiredFields,
 } from '@/utils/transformers/common';
 import { DEFAULT_UI_VALUES } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
@@ -40,12 +40,10 @@ export interface PrismaGroupCreateInput {
 	description?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
-	type?: string;
 	sortBy?: string;
 	filters?: string;
 	featuredImage?: string | null;
-	favorite?: boolean;
-	isShared?: boolean;
+	isFavorite?: boolean;
 	createdAt?: Date;
 	updatedAt?: Date;
 	images?: Record<string, any>;
@@ -70,12 +68,10 @@ export interface PrismaGroupUpdateInput {
 	description?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
-	type?: string;
 	sortBy?: string;
 	filters?: string;
 	featuredImage?: string | null;
-	favorite?: boolean;
-	isShared?: boolean;
+	isFavorite?: boolean;
 	updatedAt?: Date;
 	images?: Record<string, any>;
 	videos?: Record<string, any>;
@@ -95,17 +91,15 @@ export interface PrismaGroupUpdateInput {
 export interface PrismaGroupGetPayload {
 	id: string;
 	name: string;
-	emoji: string | null;
-	color: string | null;
+	emoji: string;
+	color: string;
 	description: string | null;
 	shortcut: string | null;
 	category: string | null;
-	type: string;
-	sortBy: string | null;
+	sortBy: string;
 	filters: string;
 	featuredImage: string | null;
-	favorite: boolean;
-	isShared: boolean;
+	isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 	images?: Array<{ id: string }>;
@@ -145,52 +139,90 @@ export interface PrismaGroupWhereInput {
 	name?: { contains: string; mode: string };
 	description?: { contains: string; mode: string };
 	category?: string;
-	favorite?: boolean;
-	isShared?: boolean;
-	type?: { in: string[] };
+	isFavorite?: boolean;
 }
 
 /**
- * 🔄 Serializa un Group para Prisma
+ * 🔄 Serializa un Group para crear en Prisma
  */
-export function toPrismaGroup(
-	data: GroupCreateInput | GroupUpdateInput
-): PrismaGroupCreateInput | PrismaGroupUpdateInput {
+export function toPrismaGroupCreate(data: GroupCreateInput): PrismaGroupCreateInput {
 	try {
 		// Validar campos requeridos para creación
-		if (!('id' in data)) {
-			validateRequiredFields(data, ['name']);
-		}
+		validateRequiredFields(data, ['name']);
 
 		// Validar tipos de datos
 		validateFieldType(data.name, 'string', 'name');
-		validateFieldType(data.emoji, 'string', 'emoji');
-		validateFieldType(data.color, 'string', 'color');
 
 		// Serializar campos JSON
 		const filters = serializeJsonField(data.filters, '[]');
 
-		// Preparar resultado con copia para evitar mutar el original
-		const { isFavorite, ...otherProps } = data;
-
 		// Definir el resultado con los valores correctos
-		const result: Record<string, any> = {
-			...otherProps,
+		const result: PrismaGroupCreateInput = {
+			name: data.name,
+			emoji: data.emoji || DEFAULT_GROUP_EMOJI,
+			color: data.color || DEFAULT_GROUP_COLOR,
+			description: data.description ?? null,
+			shortcut: data.shortcut ?? null,
+			category: data.category ?? null,
+			sortBy: data.sortBy || 'name',
 			filters,
+			featuredImage: data.featuredImage ?? null,
+			isFavorite: data.isFavorite ?? false,
 		};
-
-		// Convertir isFavorite a favorite si está presente
-		if (isFavorite !== undefined) {
-			result.favorite = isFavorite;
-		}
 
 		// Preparar relaciones para Prisma
 		const relations = preparePrismaRelations('Group', data);
 		Object.assign(result, relations);
 
-		return result as PrismaGroupCreateInput | PrismaGroupUpdateInput;
+		return result;
 	} catch (error) {
 		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Serializa un Group para actualizar en Prisma
+ */
+export function toPrismaGroupUpdate(data: GroupUpdateInput): PrismaGroupUpdateInput {
+	try {
+		// Serializar campos JSON
+		const filters = data.filters ? serializeJsonField(data.filters, '[]') : undefined;
+
+		// Definir el resultado con los valores correctos
+		const result: PrismaGroupUpdateInput = {
+			name: data.name,
+			emoji: data.emoji,
+			color: data.color,
+			description: data.description,
+			shortcut: data.shortcut,
+			category: data.category,
+			sortBy: data.sortBy,
+			filters,
+			featuredImage: data.featuredImage,
+			isFavorite: data.isFavorite,
+		};
+
+		// Preparar relaciones para Prisma
+		const relations = preparePrismaRelations('Group', data);
+		Object.assign(result, relations);
+
+		return result;
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Serializa un Group para Prisma (legacy)
+ * @deprecated Usar toPrismaGroupCreate o toPrismaGroupUpdate
+ */
+export function toPrismaGroup(
+	data: GroupCreateInput | GroupUpdateInput
+): PrismaGroupCreateInput | PrismaGroupUpdateInput {
+	if ('id' in data && data.id) {
+		return toPrismaGroupUpdate(data as GroupUpdateInput);
+	} else {
+		return toPrismaGroupCreate(data as GroupCreateInput);
 	}
 }
 
@@ -214,12 +246,10 @@ export function fromPrismaGroup(prismaGroup: PrismaGroupGetPayload): GroupComple
 			description: prismaGroup.description,
 			shortcut: prismaGroup.shortcut,
 			category: prismaGroup.category || 'general',
-			type: prismaGroup.type as any, // Convertir string a enum
 			sortBy: prismaGroup.sortBy || 'name',
 			filters,
 			featuredImage: prismaGroup.featuredImage,
-			isFavorite: prismaGroup.favorite || false,
-			isShared: prismaGroup.isShared || false,
+			isFavorite: prismaGroup.isFavorite || false,
 			createdAt: prismaGroup.createdAt,
 			updatedAt: prismaGroup.updatedAt,
 		};
@@ -340,8 +370,8 @@ export function parseGroupFilterObject(filters: unknown): PrismaGroupWhereInput 
 		// Procesar filtros específicos de Group
 		if (typedFilters.search) {
 			parsed.OR = [
-				{ name: { contains: String(typedFilters.search), mode: 'insensitive' } },
-				{ description: { contains: String(typedFilters.search), mode: 'insensitive' } },
+				{ name: { contains: String(typedFilters.search) } },
+				{ description: { contains: String(typedFilters.search) } },
 			];
 		}
 
@@ -352,16 +382,7 @@ export function parseGroupFilterObject(filters: unknown): PrismaGroupWhereInput 
 
 		// Filtros booleanos
 		if (typedFilters.isFavorite !== undefined) {
-			parsed.favorite = Boolean(typedFilters.isFavorite);
-		}
-
-		if (typedFilters.isShared !== undefined) {
-			parsed.isShared = Boolean(typedFilters.isShared);
-		}
-
-		// Filtros de array
-		if (typedFilters.types && Array.isArray(typedFilters.types) && typedFilters.types.length > 0) {
-			parsed.type = { in: typedFilters.types.map(String) };
+			parsed.isFavorite = Boolean(typedFilters.isFavorite);
 		}
 
 		return parsed;
@@ -458,11 +479,6 @@ export function toExtendedGroup(group: any): GroupComplete {
 		// Convertir favorite a isFavorite si es necesario
 		if ('favorite' in group && !('isFavorite' in group)) {
 			group.isFavorite = group.favorite;
-		}
-
-		// Asegurar que isShared esté presente
-		if (!('isShared' in group)) {
-			group.isShared = false;
 		}
 
 		// Deserializar campos JSON si son strings

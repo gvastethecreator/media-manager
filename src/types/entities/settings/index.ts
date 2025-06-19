@@ -3,6 +3,14 @@
  * @module types/entities/settings
  */
 
+// Exportar tipos inferidos de esquemas
+export type {
+	InterfacePreferencesInput,
+	InterfacePreferencesOutput,
+} from './interface.schema';
+
+// Exportar el esquema de validación
+export { interfacePreferencesSchema } from './interface.schema';
 // Exportar los tipos principales
 export type {
 	InterfacePreferences,
@@ -11,12 +19,3 @@ export type {
 	SettingsCreateInput,
 	SettingsUpdateInput,
 } from './types';
-
-// Exportar el esquema de validación
-export { interfacePreferencesSchema } from './interface.schema';
-
-// Exportar tipos inferidos de esquemas
-export type {
-	InterfacePreferencesInput,
-	InterfacePreferencesOutput,
-} from './interface.schema';

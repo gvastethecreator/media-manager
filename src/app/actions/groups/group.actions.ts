@@ -1,17 +1,17 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { validateName } from '@/lib/validations';
 import { fromPrismaGroup, toPrismaGroup, validateGroup } from '@/transformers/group/serializers';
 import type { CreateGroupData, GroupWithStats, UpdateGroupData } from '@/types/entities/group/types';
+import { revalidatePath } from 'next/cache';
 
 /**
  * Obtiene todos los grupos con sus estadísticas
  */
 export async function getGroups(): Promise<GroupWithStats[]> {
 	try {
-		return await prisma.group.findMany({
+		const groups = await prisma.group.findMany({
 			include: {
 				_count: {
 					select: {
@@ -35,6 +35,8 @@ export async function getGroups(): Promise<GroupWithStats[]> {
 				createdAt: 'desc',
 			},
 		});
+
+		return groups.map(group => fromPrismaGroup(group));
 	} catch (error) {
 		console.error('Error al obtener grupos:', error);
 		throw new Error('No se pudieron obtener los grupos');
@@ -214,7 +216,7 @@ export async function toggleGroupFavorite(id: string): Promise<GroupWithStats> {
 		revalidatePath('/settings');
 		return fromPrismaGroup(updatedGroup);
 	} catch (error) {
-		console.error('Error al actualizar favorito:', error);
-		throw error;
+		console.error('Error al cambiar favorito:', error);
+		throw new Error('No se pudo actualizar el estado de favorito');
 	}
 }

@@ -76,7 +76,7 @@ export const useWorldItemView = () => {
 			selectedId: ui.selectedId,
 			highlightedId: ui.highlightedId,
 		}),
-		[ui],
+		[ui]
 	);
 
 	return {
@@ -139,7 +139,7 @@ export const useWorldItem = (id: string | null) => {
 			(data: WorldItemUpdateData) => {
 				if (id) updateWorldItem(id, data);
 			},
-			[id, updateWorldItem],
+			[id, updateWorldItem]
 		),
 		remove: useCallback(() => {
 			if (id) deleteWorldItem(id);
@@ -167,7 +167,7 @@ export const useWorldItemActions = () => {
 					updateWorldItem(id, data);
 				}
 			},
-			[updateWorldItem],
+			[updateWorldItem]
 		),
 
 		removeMultiple: useCallback(
@@ -176,7 +176,7 @@ export const useWorldItemActions = () => {
 					deleteWorldItem(id);
 				}
 			},
-			[deleteWorldItem],
+			[deleteWorldItem]
 		),
 
 		// Acciones comunes
@@ -187,7 +187,7 @@ export const useWorldItemActions = () => {
 					updateWorldItem(id, { isFavorite: !item.isFavorite });
 				}
 			},
-			[getWorldItemById, updateWorldItem],
+			[getWorldItemById, updateWorldItem]
 		),
 	};
 };

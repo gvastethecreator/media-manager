@@ -107,7 +107,7 @@ export function parseImageFilters(filters: unknown): Record<string, unknown> {
 				type: z.enum(['ORIGINAL', 'GENERATED', 'EDITED', 'VARIANT', 'UPSCALED']).optional(),
 				status: z.enum(['PENDING', 'PROCESSING', 'READY', 'ERROR']).optional(),
 				sensitive: z.boolean().optional(),
-				favorite: z.boolean().optional(),
+				isFavorite: z.boolean().optional(),
 				published: z.boolean().optional(),
 				folderId: z.string().optional(),
 				dateRange: z
