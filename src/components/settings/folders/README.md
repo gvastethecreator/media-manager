@@ -132,3 +132,37 @@ const handleScanFolder = async (folderId: string) => {
 - Se implementa gestión de errores robusta para problemas de acceso a archivos
 - El componente proporciona feedback visual durante operaciones largas
 - Las estadísticas se actualizan automáticamente tras cada operación
+
+# 📄 Settings de Carpetas (`folders-settings.tsx`)
+
+## 📁 Migración a Tipos Canónicos
+Este módulo y sus hooks han sido migrados en junio 2024 para usar exclusivamente el tipo canónico `FolderComplete`, eliminando cualquier referencia legacy a `ExtendedFolder`. Esto garantiza consistencia, type safety y compatibilidad futura.
+
+## 📚 Estructura y Flujo Principal
+- **Carga de carpetas:** Se obtienen todas las carpetas usando el hook `useFolders` y se almacenan en el estado como `FolderComplete[]`.
+- **Selección y edición:** Al seleccionar una carpeta, se muestra el detalle y se puede editar usando el formulario canónico.
+- **Creación y actualización:** Los handlers usan siempre `FolderComplete` y actualizan el estado global tras cada operación.
+- **Eliminación y reindexado:** Los handlers eliminan o reindexan carpetas y actualizan el estado.
+
+## 🔗 Diagrama de Relaciones
+```mermaid
+graph TD
+    A[folders-settings.tsx] -->|usa| B(FolderComplete)
+    A -->|usa| C(useFolders)
+    A -->|renderiza| D(FolderForm)
+    A -->|renderiza| E(FolderCard)
+    B -->|define| F(Propiedades extendidas)
+```
+
+## 🧩 Ejemplo de Uso
+```tsx
+<FoldersSettings />
+```
+
+## 🚦 Notas
+- Todos los datos y props usan `FolderComplete`.
+- Se eliminó cualquier import o type assertion legacy.
+- Documentación y migración conforme a las reglas del workspace.
+
+---
+_Actualizado: junio 2024_

@@ -3,38 +3,54 @@
  * @module store/entities/wildcard/slices/core
  */
 
-import type { StateCreator } from 'zustand';
-import { getWildcard, getWildcards } from '@/app/actions/wildcards/wildcard.actions';
+import {
+    createWildcard as createWildcardAction,
+    deleteWildcard as deleteWildcardAction,
+    getWildcard as getWildcardAction,
+    getWildcards as getWildcardsAction,
+    updateWildcard as updateWildcardAction,
+} from '@/app/actions/wildcards/wildcard.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { extendWildcard, extendWildcards } from '@/transformers/wildcard/serializers';
-import type { CreateWildcardData, UpdateWildcardData, Wildcard, WildcardBase } from '@/types/entities/wildcard';
+import {
+    extendWildcard,
+    extendWildcards,
+} from '@/transformers/wildcard/serializers';
+import type {
+    CreateWildcardData,
+    UpdateWildcardData,
+    Wildcard,
+    WildcardBase,
+} from '@/types/entities/wildcard';
+import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
 
 const wildcardLogger = clientLogger.withContext('WildcardStore');
 
-// Slice para operaciones CRUD básicas
 export interface WildcardCoreSlice {
 	// Getters
 	getWildcard: (id: string) => Wildcard | undefined;
 	getWildcards: () => Wildcard[];
-	getWildcardItems: (wildcardId: string) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
+	getWildcardItems: (
+		wildcardId: string,
+	) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
 	getChildWildcards: (parentId: string | null) => Wildcard[];
 	getWildcardHierarchy: () => Record<string | 'root', string[]>;
 
-	// Operaciones
-	addWildcard: (wildcard: WildcardBase) => void;
-	addWildcards: (wildcards: WildcardBase[]) => void;
-	updateWildcard: (id: string, data: UpdateWildcardData) => void;
+	// Operaciones síncronas
+	addWildcard: (wildcard: Wildcard) => void;
+	addWildcards: (wildcards: Wildcard[]) => void;
+	_updateWildcard: (id: string, data: Partial<Wildcard>) => void;
 	deleteWildcard: (id: string) => void;
 
 	// Gestión de elementos
-	addItemToWildcard: (wildcardId: string, itemId: string, itemType: 'image' | 'video' | 'note' | 'tag') => void;
+	addItemToWildcard: (
+		wildcardId: string,
+		itemId: string,
+		itemType: 'image' | 'video' | 'note' | 'tag',
+	) => void;
 	removeItemFromWildcard: (wildcardId: string, itemId: string) => void;
 	clearWildcardItems: (wildcardId: string) => void;
-
-	// Gestión de jerarquía
-	moveWildcard: (id: string, newParentId: string | null) => Promise<boolean>;
 
 	// Estado de carga
 	setLoading: (isLoading: boolean) => void;
@@ -43,408 +59,250 @@ export interface WildcardCoreSlice {
 	// Acciones asíncronas
 	fetchWildcard: (id: string) => Promise<Wildcard | undefined>;
 	fetchWildcards: () => Promise<Wildcard[]>;
-	createWildcard: (data: CreateWildcardData) => Promise<Wildcard | undefined>;
+	createWildcard: (
+		data: CreateWildcardData,
+	) => Promise<Wildcard | undefined>;
+	updateWildcard: (
+		id: string,
+		data: UpdateWildcardData,
+	) => Promise<Wildcard | undefined>;
 	removeWildcard: (id: string) => Promise<boolean>;
+	moveWildcard: (id: string, newParentId: string | null) => Promise<boolean>;
 }
 
-// Creador del slice
-export const createWildcardCoreSlice: StateCreator<WildcardState, [], [], WildcardCoreSlice> = (set, get) => ({
-	// Getters
-	getWildcard: (id) => {
-		return get().core.wildcards[id];
-	},
-
-	getWildcards: () => {
-		const { wildcards } = get().core;
-		return Object.values(wildcards);
-	},
-
-	getWildcardItems: (wildcardId) => {
-		return get().core.wildcardItems[wildcardId] || [];
-	},
-
-	getChildWildcards: (parentId) => {
-		return get()
+export const createWildcardCoreSlice: StateCreator<
+	WildcardState & WildcardCoreSlice,
+	[],
+	[],
+	WildcardCoreSlice
+> = (set, get) => ({
+	// --- Getters ---
+	getWildcard: (id) => get().core.wildcards[id],
+	getWildcards: () => Object.values(get().core.wildcards),
+	getWildcardItems: (wildcardId) => get().core.wildcardItems[wildcardId] || [],
+	getChildWildcards: (parentId) =>
+		get()
 			.getWildcards()
-			.filter((wildcard) => wildcard.parentId === parentId);
-	},
-
+			.filter((wildcard) => wildcard.parentId === parentId),
 	getWildcardHierarchy: () => {
 		const hierarchy: Record<string | 'root', string[]> = { root: [] };
 		const wildcards = get().getWildcards();
-
-		// Primero inicializa todos los arrays de hijos
 		for (const wildcard of wildcards) {
 			hierarchy[wildcard.id] = [];
 		}
-
-		// Luego asigna los hijos a sus respectivos padres
 		for (const wildcard of wildcards) {
-			if (wildcard.parentId) {
-				// Si tiene padre, lo agrega a los hijos del padre
-				if (hierarchy[wildcard.parentId]) {
-					hierarchy[wildcard.parentId].push(wildcard.id);
-				}
+			if (wildcard.parentId && hierarchy[wildcard.parentId]) {
+				hierarchy[wildcard.parentId].push(wildcard.id);
 			} else {
-				// Si no tiene padre, es un comodín de nivel raíz
 				hierarchy.root.push(wildcard.id);
 			}
 		}
-
 		return hierarchy;
 	},
 
-	// Operaciones
+	// --- Operaciones Síncronas ---
 	addWildcard: (wildcard) => {
-		wildcardLogger.info('✅ Añadiendo comodín al store:', wildcard.name);
 		set((state) => ({
 			core: {
 				...state.core,
-				wildcards: {
-					...state.core.wildcards,
-					[wildcard.id]: extendWildcard(wildcard),
-				},
-				lastUpdated: new Date(),
+				wildcards: { ...state.core.wildcards, [wildcard.id]: wildcard },
 			},
 		}));
 	},
-
 	addWildcards: (wildcards) => {
-		wildcardLogger.info('✅ Añadiendo múltiples comodines al store', wildcards.length);
-
-		// Crear un objeto con los nuevos wildcards indexados por ID
 		const wildcardsMap = wildcards.reduce(
-			(acc, wildcard) => {
-				acc[wildcard.id] = extendWildcard(wildcard);
+			(acc, w) => {
+				acc[w.id] = w;
 				return acc;
 			},
-			{} as Record<string, Wildcard>
+			{} as Record<string, Wildcard>,
 		);
-
 		set((state) => ({
 			core: {
 				...state.core,
-				wildcards: {
-					...state.core.wildcards,
-					...wildcardsMap,
-				},
-				lastUpdated: new Date(),
+				wildcards: { ...state.core.wildcards, ...wildcardsMap },
 			},
 		}));
 	},
-
-	updateWildcard: (id, data) => {
-		const wildcard = get().core.wildcards[id];
-		if (!wildcard) {
-			wildcardLogger.warn('⚠️ Intento de actualizar comodín inexistente:', id);
-			return;
+	_updateWildcard: (id, data) => {
+		const existing = get().getWildcard(id);
+		if (existing) {
+			get().addWildcard({ ...existing, ...data, updatedAt: new Date() });
 		}
-
-		wildcardLogger.info('🔄 Actualizando comodín en el store:', id);
-		set((state) => ({
-			core: {
-				...state.core,
-				wildcards: {
-					...state.core.wildcards,
-					[id]: {
-						...wildcard,
-						...data,
-						updatedAt: new Date(),
-					},
-				},
-				lastUpdated: new Date(),
-			},
-		}));
 	},
-
 	deleteWildcard: (id) => {
-		wildcardLogger.info('🗑️ Eliminando comodín del store:', id);
 		set((state) => {
 			const { [id]: _, ...restWildcards } = state.core.wildcards;
-			const { [id]: __, ...restWildcardItems } = state.core.wildcardItems;
-
+			const { [id]: __, ...restItems } = state.core.wildcardItems;
 			return {
 				core: {
 					...state.core,
 					wildcards: restWildcards,
-					wildcardItems: restWildcardItems,
-					lastUpdated: new Date(),
+					wildcardItems: restItems,
 				},
 			};
 		});
 	},
 
-	// Gestión de elementos
+	// --- Gestión de elementos ---
 	addItemToWildcard: (wildcardId, itemId, itemType) => {
-		wildcardLogger.info('➕ Añadiendo item al comodín:', { wildcardId, itemId, itemType });
 		set((state) => {
-			const currentItems = state.core.wildcardItems[wildcardId] || [];
-			const existingItem = currentItems.find((item) => item.id === itemId);
-
-			if (existingItem) {
-				return state; // El item ya existe
-			}
-
+			const items = state.core.wildcardItems[wildcardId] || [];
+			if (items.some((item) => item.id === itemId)) return state;
 			return {
 				core: {
 					...state.core,
 					wildcardItems: {
 						...state.core.wildcardItems,
-						[wildcardId]: [...currentItems, { id: itemId, type: itemType }],
+						[wildcardId]: [...items, { id: itemId, type: itemType }],
 					},
 				},
 			};
 		});
 	},
-
 	removeItemFromWildcard: (wildcardId, itemId) => {
-		wildcardLogger.info('➖ Quitando item del comodín:', { wildcardId, itemId });
 		set((state) => {
-			const currentItems = state.core.wildcardItems[wildcardId] || [];
+			const items = state.core.wildcardItems[wildcardId] || [];
 			return {
 				core: {
 					...state.core,
 					wildcardItems: {
 						...state.core.wildcardItems,
-						[wildcardId]: currentItems.filter((item) => item.id !== itemId),
+						[wildcardId]: items.filter((item) => item.id !== itemId),
 					},
 				},
 			};
 		});
 	},
-
 	clearWildcardItems: (wildcardId) => {
-		wildcardLogger.info('🧹 Limpiando items del comodín:', wildcardId);
 		set((state) => ({
 			core: {
 				...state.core,
-				wildcardItems: {
-					...state.core.wildcardItems,
-					[wildcardId]: [],
-				},
+				wildcardItems: { ...state.core.wildcardItems, [wildcardId]: [] },
 			},
 		}));
 	},
 
-	// Gestión de jerarquía
-	moveWildcard: async (id, newParentId) => {
-		wildcardLogger.info('🔄 Moviendo comodín:', { id, newParentId });
+	// --- Estado de Carga ---
+	setLoading: (isLoading) =>
+		set((state) => ({ core: { ...state.core, isLoading } })),
+	setError: (error) => set((state) => ({ core: { ...state.core, error } })),
 
-		try {
-			// Verificar que el comodín a mover existe
-			const wildcard = get().getWildcard(id);
-			if (!wildcard) {
-				wildcardLogger.error('❌ No se encontró el comodín a mover:', id);
-				toastService.error('No se encontró el comodín a mover');
-				return false;
-			}
-
-			// Verificar que el nuevo padre existe (si no es null)
-			if (newParentId && !get().getWildcard(newParentId)) {
-				wildcardLogger.error('❌ No se encontró el comodín padre:', newParentId);
-				toastService.error('No se encontró el comodín padre');
-				return false;
-			}
-
-			// Evitar que un comodín sea su propio padre
-			if (id === newParentId) {
-				wildcardLogger.error('❌ Un comodín no puede ser su propio padre');
-				toastService.error('Un comodín no puede ser su propio padre');
-				return false;
-			}
-
-			// Evitar ciclos (verificar que el nuevo padre no sea descendiente del comodín)
-			if (newParentId) {
-				let currentParent = get().getWildcard(newParentId);
-				while (currentParent?.parentId) {
-					if (currentParent.parentId === id) {
-						wildcardLogger.error('❌ Mover causaría un ciclo en la jerarquía');
-						toastService.error('No se puede crear un ciclo en la jerarquía');
-						return false;
-					}
-					currentParent = get().getWildcard(currentParent.parentId);
-				}
-			}
-
-			// Actualizar el parentId del comodín
-			await updateWildcard(id, { parentId: newParentId });
-
-			// Actualizar en el store
-			get().updateWildcard(id, { parentId: newParentId });
-
-			toastService.success('Comodín movido con éxito');
-			return true;
-		} catch (error) {
-			wildcardLogger.error('❌ Error al mover comodín:', error);
-			toastService.error('Error al mover el comodín');
-			return false;
-		}
-	},
-
-	// Estado de carga
-	setLoading: (isLoading) => {
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading,
-			},
-		}));
-	},
-
-	setError: (error) => {
-		set((state) => ({
-			core: {
-				...state.core,
-				error,
-			},
-		}));
-	},
-
-	// Acciones asíncronas
+	// --- Acciones Asíncronas ---
 	fetchWildcard: async (id) => {
-		wildcardLogger.info('🔍 Obteniendo comodín:', id);
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
-
+		get().setLoading(true);
 		try {
-			const wildcard = await getWildcard(id);
-			if (wildcard) {
-				const extendedWildcard = extendWildcard(wildcard as WildcardBase);
-				get().addWildcard(extendedWildcard);
-				return extendedWildcard;
+			const response = await getWildcardAction(id);
+			if (response.success && response.data) {
+				const wildcard = extendWildcard(response.data as WildcardBase);
+				get().addWildcard(wildcard);
+				return wildcard;
 			}
+			get().setError(response.error ?? 'Error fetching wildcard');
 			return undefined;
-		} catch (error) {
-			wildcardLogger.error('❌ Error al obtener comodín:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al obtener el comodín',
-				},
-			}));
-			toastService.error('No se pudo cargar el comodín');
+		} catch (e) {
+			wildcardLogger.error('Failed to fetch wildcard', { error: e });
 			return undefined;
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
 		}
 	},
-
 	fetchWildcards: async () => {
-		wildcardLogger.info('🔍 Obteniendo todos los comodines');
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
-
+		get().setLoading(true);
 		try {
-			const wildcards = await getWildcards();
-			const extendedWildcards = extendWildcards(wildcards);
-			get().addWildcards(extendedWildcards);
-			return extendedWildcards;
-		} catch (error) {
-			wildcardLogger.error('❌ Error al obtener comodines:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al obtener los comodines',
-				},
-			}));
-			toastService.error('No se pudieron cargar los comodines');
+			const response = await getWildcardsAction();
+			if (response.success && response.data) {
+				const wildcards = extendWildcards(response.data as WildcardBase[]);
+				get().addWildcards(wildcards);
+				return wildcards;
+			}
+			get().setError(response.error ?? 'Error fetching wildcards');
+			return [];
+		} catch (e) {
+			wildcardLogger.error('Failed to fetch wildcards', { error: e });
 			return [];
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
 		}
 	},
-
 	createWildcard: async (data) => {
-		wildcardLogger.info('📝 Creando nuevo comodín:', data.name);
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
-
+		get().setLoading(true);
 		try {
-			const wildcard = await createWildcard(data);
-			if (wildcard) {
-				const extendedWildcard = extendWildcard(wildcard);
-				get().addWildcard(extendedWildcard);
-				toastService.success('Comodín creado con éxito');
-				return extendedWildcard;
+			const response = await createWildcardAction(data);
+			if (response.success && response.data) {
+				const wildcard = extendWildcard(response.data as WildcardBase);
+				get().addWildcard(wildcard);
+				toastService.success('Wildcard creado');
+				return wildcard;
 			}
+			toastService.error(response.error ?? 'Error creating wildcard');
 			return undefined;
-		} catch (error) {
-			wildcardLogger.error('❌ Error al crear comodín:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al crear el comodín',
-				},
-			}));
-			toastService.error('No se pudo crear el comodín');
+		} catch (e) {
+			wildcardLogger.error('Failed to create wildcard', { error: e });
 			return undefined;
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
 		}
 	},
-
-	removeWildcard: async (id) => {
-		wildcardLogger.info('🗑️ Eliminando comodín:', id);
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
-
+	updateWildcard: async (id, data) => {
+		get().setLoading(true);
 		try {
-			await deleteWildcard(id);
-			get().deleteWildcard(id);
-			toastService.success('Comodín eliminado con éxito');
-			return true;
-		} catch (error) {
-			wildcardLogger.error('❌ Error al eliminar comodín:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al eliminar el comodín',
-				},
-			}));
-			toastService.error('No se pudo eliminar el comodín');
+			const response = await updateWildcardAction(id, data);
+			if (response.success && response.data) {
+				const wildcard = extendWildcard(response.data as WildcardBase);
+				get().addWildcard(wildcard);
+				toastService.success('Wildcard actualizado');
+				return wildcard;
+			}
+			toastService.error(response.error ?? 'Error updating wildcard');
+			return undefined;
+		} catch (e) {
+			wildcardLogger.error('Failed to update wildcard', { error: e });
+			return undefined;
+		} finally {
+			get().setLoading(false);
+		}
+	},
+	removeWildcard: async (id) => {
+		get().setLoading(true);
+		try {
+			const response = await deleteWildcardAction(id);
+			if (response.success) {
+				get().deleteWildcard(id);
+				toastService.success('Wildcard eliminado');
+				return true;
+			}
+			toastService.error(response.error ?? 'Error removing wildcard');
+			return false;
+		} catch (e) {
+			wildcardLogger.error('Failed to remove wildcard', { error: e });
 			return false;
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
+		}
+	},
+	moveWildcard: async (id, newParentId) => {
+		const wildcard = get().getWildcard(id);
+		if (!wildcard) return false;
+		// Optimistic update
+		get()._updateWildcard(id, { parentId: newParentId });
+		try {
+			const response = await updateWildcardAction(id, { parentId: newParentId });
+			if (response.success && response.data) {
+				const updatedWildcard = extendWildcard(response.data as WildcardBase);
+				get().addWildcard(updatedWildcard);
+				toastService.success('Wildcard movido');
+				return true;
+			}
+			// Revert on failure
+			get()._updateWildcard(id, { parentId: wildcard.parentId });
+			toastService.error(response.error ?? 'Error moving wildcard');
+			return false;
+		} catch (e) {
+			wildcardLogger.error('Failed to move wildcard', { error: e });
+			// Revert on failure
+			get()._updateWildcard(id, { parentId: wildcard.parentId });
+			return false;
 		}
 	},
 });

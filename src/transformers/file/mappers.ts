@@ -89,7 +89,7 @@ export function toFileListItem(fileInfo: FileInfo): FileListItem {
 	};
 }
 
-export function getIconForFileType(fileType: string, extension: string = ''): string {
+export function getIconForFileType(fileType: string, extension = ''): string {
 	const iconMap: Record<string, string> = {
 		[FileType.DIRECTORY]: '📁', [FileType.FILE]: '📄', [FileType.IMAGE]: '🖼️',
 		[FileType.VIDEO]: '🎬', [FileType.AUDIO]: '🎵', [FileType.DOCUMENT]: '📝',

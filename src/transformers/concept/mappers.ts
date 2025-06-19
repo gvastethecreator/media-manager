@@ -3,20 +3,82 @@
  * @module transformers/concept/mappers
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept/base';
-import type { ConceptFilters } from '@/types/entities/concept/extended';
 import {
-	CONCEPT_SORT_PROPERTY_MAP,
-	ConceptBase,
-	ConceptSearchOptions as ConceptSearchOptionsType,
-	ConceptSearchResult,
-	ConceptSortCriteria,
-} from '@/types/entities/concept/types';
+    ConceptBase,
+    type ConceptSearchOptions,
+    type ConceptSearchResult
+} from '@/types/entities/concept';
+import type { ConceptFilters } from '@/types/entities/concept/extended';
+import type { ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept/types';
 import { deserializeTags } from './serializers';
 
 const logger = serverLogger.withContext('ConceptMapper');
+
+/**
+ * Interfaces para los tipos de Prisma que necesitamos
+ */
+export interface PrismaConceptCreateInput {
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	content?: string;
+	category?: string;
+	tags?: string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+}
+
+export interface PrismaConceptUpdateInput {
+	name?: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	content?: string;
+	category?: string;
+	tags?: string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+}
+
+export interface PrismaConceptFindManyArgs {
+	where?: PrismaConceptWhereInput;
+	orderBy?: PrismaConceptOrderByInput;
+	skip?: number;
+	take?: number;
+	include?: Record<string, boolean>;
+}
+
+export interface PrismaConceptWhereInput {
+	AND?: PrismaConceptWhereInput[];
+	OR?: PrismaConceptWhereInput[];
+	name?: { contains: string; mode: string };
+	description?: { contains: string; mode: string };
+	content?: { contains: string; mode: string };
+	category?: string;
+	tags?: { contains: string; mode: string };
+	isFavorite?: boolean;
+}
+
+export interface PrismaConceptOrderByInput {
+	name?: 'asc' | 'desc';
+	createdAt?: 'asc' | 'desc';
+	updatedAt?: 'asc' | 'desc';
+	category?: 'asc' | 'desc';
+}
+
+// Mapa de propiedades para ordenación
+export const CONCEPT_SORT_PROPERTY_MAP: Record<string, string> = {
+	'NAME_ASC': 'name',
+	'NAME_DESC': 'name',
+	'CREATED_ASC': 'createdAt',
+	'CREATED_DESC': 'createdAt',
+	'UPDATED_ASC': 'updatedAt',
+	'UPDATED_DESC': 'updatedAt',
+	'CATEGORY_ASC': 'category',
+	'CATEGORY_DESC': 'category'
+};
 
 /**
  * Opciones para operaciones de concepto
@@ -33,10 +95,8 @@ export interface ConceptOperationOptions {
  * @param data Datos para crear el concepto
  * @returns Datos formateados para Prisma
  */
-// NOTA: Prisma espera que 'tags' sea un string serializado, no una relación ni objeto.
-export function toCreateConceptData(data: ConceptCreateInput): Prisma.ConceptCreateInput {
-	// Prisma.ConceptCreateInput no reconoce 'tags' por typing, pero el modelo sí lo espera
-	const result = {
+export function toCreateConceptData(data: ConceptCreateInput): PrismaConceptCreateInput {
+	const result: PrismaConceptCreateInput = {
 		name: data.name,
 		emoji: data.emoji || '💡',
 		color: data.color || '#3b82f6',
@@ -47,7 +107,7 @@ export function toCreateConceptData(data: ConceptCreateInput): Prisma.ConceptCre
 		featuredImage: data.featuredImage || null,
 		isFavorite: data.isFavorite || false,
 	};
-	return result as any; // 👈 Forzamos el tipo para evitar el error de typing
+	return result;
 }
 
 /**
@@ -55,8 +115,8 @@ export function toCreateConceptData(data: ConceptCreateInput): Prisma.ConceptCre
  * @param data Datos para actualizar el concepto
  * @returns Datos formateados para Prisma
  */
-export function toUpdateConceptData(data: ConceptUpdateInput): Prisma.ConceptUpdateInput {
-	const result: any = {};
+export function toUpdateConceptData(data: ConceptUpdateInput): PrismaConceptUpdateInput {
+	const result: PrismaConceptUpdateInput = {};
 	if (data.name !== undefined) result.name = data.name;
 	if (data.emoji !== undefined) result.emoji = data.emoji;
 	if (data.color !== undefined) result.color = data.color;
@@ -71,45 +131,37 @@ export function toUpdateConceptData(data: ConceptUpdateInput): Prisma.ConceptUpd
 			: typeof data.tags === 'string'
 				? data.tags
 				: '[]';
-	return result as Prisma.ConceptUpdateInput;
+	return result;
 }
 
-// --- Corrección de toSearchOptions y toSearchFilters para tipos y nombres válidos ---
 /**
  * Mapea opciones de búsqueda al formato necesario para Prisma
  * @param options Opciones de búsqueda
  * @returns Opciones formateadas para Prisma
  */
-export function toSearchOptions(options: ConceptSearchOptionsType = {}): {
-	where: any;
-	orderBy: any;
-	skip?: number;
-	take?: number;
-	include?: any;
-} {
+export function toSearchOptions(options: ConceptSearchOptions = {}): PrismaConceptFindManyArgs {
 	try {
 		const where = toSearchFilters(options.filters || {});
-		const orderBy: any = {};
-		const sortBy = options.sortBy || ConceptSortCriteria.NAME_ASC;
+		const sortBy = options.sortBy || 'NAME_ASC';
 		const propertyName = CONCEPT_SORT_PROPERTY_MAP[sortBy] || 'name';
 		const direction = sortBy.includes('DESC') ? 'desc' : 'asc';
-		orderBy[propertyName] = direction;
-		const result: {
-			where: any;
-			orderBy: any;
-			skip?: number;
-			take?: number;
-			include?: any;
-		} = {
+
+		const orderBy: PrismaConceptOrderByInput = {
+			[propertyName]: direction as 'asc' | 'desc'
+		};
+
+		const result: PrismaConceptFindManyArgs = {
 			where,
 			orderBy,
 		};
+
 		if (options.page !== undefined && options.pageSize !== undefined) {
 			const page = Math.max(1, options.page);
 			const pageSize = Math.max(1, options.pageSize);
 			result.skip = (page - 1) * pageSize;
 			result.take = pageSize;
 		}
+
 		if (options.includeRelations) {
 			result.include = {
 				images: true,
@@ -127,6 +179,7 @@ export function toSearchOptions(options: ConceptSearchOptionsType = {}): {
 				notes: true,
 			};
 		}
+
 		return result;
 	} catch (error) {
 		logger.error('Error en toSearchOptions:', error);
@@ -139,10 +192,10 @@ export function toSearchOptions(options: ConceptSearchOptionsType = {}): {
  * @param filters Filtros de búsqueda
  * @returns Filtros formateados para Prisma
  */
-export function toSearchFilters(filters: ConceptFilters = {}): any {
+export function toSearchFilters(filters: ConceptFilters = {}): PrismaConceptWhereInput {
 	try {
-		const result: any = {};
-		const conditions: any[] = [];
+		const result: PrismaConceptWhereInput = {};
+		const conditions: PrismaConceptWhereInput[] = [];
 
 		// Filtro por texto (nombre, descripción, contenido)
 		if (filters.search) {
@@ -192,11 +245,17 @@ export function toSearchFilters(filters: ConceptFilters = {}): any {
 	}
 }
 
-// --- Corrección de paginación y resultado de búsqueda ---
+/**
+ * Convierte resultados de búsqueda al formato de respuesta
+ * @param concepts Conceptos encontrados
+ * @param total Total de conceptos
+ * @param options Opciones de búsqueda
+ * @returns Resultado formateado
+ */
 export function toSearchResult(
 	concepts: ConceptBase[],
 	total: number,
-	options: ConceptSearchOptionsType = {}
+	options: ConceptSearchOptions = {}
 ): ConceptSearchResult {
 	try {
 		const pageSize = options.pageSize ?? 20;
@@ -217,7 +276,7 @@ export function toSearchResult(
  * @param concept Concepto original
  * @returns Concepto en formato plano
  */
-export function toPlainConcept(concept: ConceptBase): any {
+export function toPlainConcept(concept: ConceptBase): Record<string, any> {
 	try {
 		return {
 			id: concept.id,
@@ -227,7 +286,7 @@ export function toPlainConcept(concept: ConceptBase): any {
 			description: concept.description,
 			content: concept.content,
 			category: concept.category,
-			tags: Array.isArray(concept.tags) ? concept.tags : deserializeTags(concept.tags as any),
+			tags: Array.isArray(concept.tags) ? concept.tags : deserializeTags(concept.tags as string),
 			featuredImage: concept.featuredImage,
 			isFavorite: concept.isFavorite,
 			createdAt: concept.createdAt,
@@ -253,52 +312,47 @@ export function toPlainConcept(concept: ConceptBase): any {
 }
 
 /**
- * Filtra una lista de conceptos según los criterios especificados
- * @param concepts Lista de conceptos a filtrar
+ * Filtra conceptos según criterios
+ * @param concepts Lista de conceptos
  * @param filters Filtros a aplicar
- * @returns Lista de conceptos filtrada
+ * @returns Lista filtrada de conceptos
  */
 export function filterConcepts(concepts: ConceptBase[], filters: ConceptFilters = {}): ConceptBase[] {
 	try {
 		let result = [...concepts];
 
-		// 🔍 Filtrar por texto (search)
-		if (filters.search && typeof filters.search === 'string') {
-			const textFilter = filters.search.toLowerCase().trim();
-			if (textFilter) {
-				result = result.filter(
-					(concept) =>
-						concept.name.toLowerCase().includes(textFilter) ||
-						concept.description?.toLowerCase().includes(textFilter) ||
-						concept.content.toLowerCase().includes(textFilter)
-				);
-			}
+		// Filtro por texto
+		if (filters.search) {
+			const searchLower = filters.search.toLowerCase();
+			result = result.filter(
+				(c) =>
+					c.name.toLowerCase().includes(searchLower) ||
+					(c.description && c.description.toLowerCase().includes(searchLower)) ||
+					c.content.toLowerCase().includes(searchLower)
+			);
 		}
 
-		// 🏷️ Filtrar por categoría
+		// Filtro por categoría
 		if (filters.category) {
-			result = result.filter((concept) => concept.category === filters.category);
+			result = result.filter((c) => c.category === filters.category);
 		}
 
-		// 🏷️ Filtrar por tags (en string serializado)
-		if (filters.tags?.length) {
-			result = result.filter((concept) => {
-				const conceptTags: string[] = Array.isArray(concept.tags) ? concept.tags : deserializeTags(concept.tags as any);
-				return filters.tags?.some((tag: string) => conceptTags.includes(tag));
+		// Filtro por tags
+		if (filters.tags && filters.tags.length > 0) {
+			result = result.filter((c) => {
+				const conceptTags = Array.isArray(c.tags) ? c.tags : deserializeTags(c.tags as string);
+				return filters.tags!.some((tag) => conceptTags.includes(tag));
 			});
 		}
 
-		// ⭐ Filtrar por favoritos (onlyFavorites)
-		if (typeof filters.onlyFavorites === 'boolean') {
-			result = result.filter((concept) => !!concept.isFavorite === filters.onlyFavorites);
+		// Filtro por favoritos
+		if (filters.onlyFavorites) {
+			result = result.filter((c) => c.isFavorite);
 		}
 
 		return result;
 	} catch (error) {
-		logger.error('Error en filterConcepts:', error); // 🐞 Logging robusto
-		return concepts; // Devuelve la lista original si hay error
+		logger.error('Error en filterConcepts:', error);
+		return concepts;
 	}
 }
-
-// --- FIN DEL ARCHIVO ---
-// Solo se exportan funciones canónicas y actualizadas. Legacy y duplicados han sido eliminados.

@@ -122,3 +122,36 @@ Cada entidad tiene ahora:
 - El enfoque de tipos canónicos simplificará el mantenimiento futuro
 - Los tipos ahora están mejor alineados con la estructura real de la base de datos
 - La guía de migración facilitará que otros desarrolladores continúen con el proceso
+
+# 🚨 Corrección masiva de errores TypeScript tras migraciones y refactorizaciones
+
+## Objetivo
+Corregir los 2360 errores de TypeScript reportados tras las migraciones recientes, priorizando tipos canónicos, transformers y acciones, asegurando consistencia, validación y documentación inmediata.
+
+## Estrategia
+
+```mermaid
+graph TD
+    A[Errores en types/] --> B[Errores en transformers/]
+    B --> C[Errores en services/]
+    C --> D[Errores en store/]
+    D --> E[Errores en actions/]
+    E --> F[Errores en componentes]
+    F --> G[Validación y testing]
+    G --> H[Limpieza de legacy]
+```
+
+## Pasos inmediatos
+1. Analizar patrones de error y priorizar archivos críticos.
+2. Corregir tipos canónicos y transformers base.
+3. Validar y testear tras cada bloque de correcciones.
+4. Documentar cambios y actualizar diagramas.
+5. Limpiar legacy y duplicados.
+
+## Reglas activas
+- Tipos canónicos, sin duplicados ni legacy.
+- Validación con Zod antes de persistir datos.
+- Prohibido importar tipos de Prisma en cliente.
+- Documentar cada corrección y actualizar diagramas.
+- Usar Server Actions para mutaciones.
+- Mantener consistencia en naming y estructura.

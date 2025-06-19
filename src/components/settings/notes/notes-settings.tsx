@@ -1,8 +1,6 @@
 'use client';
 
-import { FileText, Filter, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { deleteNote, getNotes } from '@/app/actions/notes/note.actions';
+import { deleteNote, searchNotes } from '@/app/actions/notes/note.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,29 +11,16 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import toastService from '@/services/toast.service';
-import type { Note } from '@/types/entities/notes';
+import type { NoteComplete } from '@/types/entities/note/extended';
+import { FileText, Filter, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateNoteForm } from './create-note-form';
 
-// Actualizar el tipo Note para incluir propiedades auxiliares
-interface ExtendedNote extends Note {
-	color?: string;
-	emoji?: string;
-	summary?: string;
-	_count?: {
-		images?: number;
-		concepts?: number;
-		prompts?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-	};
-}
-
 export function NotesSettings() {
-	const [notes, setNotes] = useState<ExtendedNote[]>([]);
+	const [notes, setNotes] = useState<NoteComplete[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedNote, setSelectedNote] = useState<ExtendedNote | null>(null);
+	const [selectedNote, setSelectedNote] = useState<NoteComplete | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -49,7 +34,7 @@ export function NotesSettings() {
 		const loadNotes = async () => {
 			try {
 				setIsLoading(true);
-				const data = await getNotes();
+				const data = await searchNotes({});
 				setNotes(data);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -126,34 +111,21 @@ export function NotesSettings() {
 	}, []);
 
 	// Manejar edición de nota
-	const handleEditNote = useCallback((note: ExtendedNote) => {
+	const handleEditNote = useCallback((note: NoteComplete) => {
 		setSelectedNote(note);
 		setIsEditing(true);
 	}, []);
 
 	// Manejar creación exitosa
-	const handleNoteCreated = useCallback((newNote: ExtendedNote) => {
-		setNotes((prev) => [
-			{
-				...newNote,
-				_count: {
-					images: 0,
-					concepts: 0,
-					prompts: 0,
-					characters: 0,
-					places: 0,
-					worldItems: 0,
-				},
-			} as ExtendedNote,
-			...prev,
-		]);
+	const handleNoteCreated = useCallback((newNote: NoteComplete) => {
+		setNotes((prev) => [newNote, ...prev]);
 		toastService.success('Nota creada');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleNoteUpdated = useCallback((updatedNote: ExtendedNote) => {
+	const handleNoteUpdated = useCallback((updatedNote: NoteComplete) => {
 		setNotes((prev) =>
-			prev.map((note) => (note.id === updatedNote.id ? ({ ...note, ...updatedNote } as ExtendedNote) : note))
+			prev.map((note) => (note.id === updatedNote.id ? { ...note, ...updatedNote } : note))
 		);
 		toastService.success('Nota actualizada');
 	}, []);
@@ -359,7 +331,7 @@ export function NotesSettings() {
 										<button
 											key={note.id}
 											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedNote?.id === note.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditNote(note as ExtendedNote)}
+											onClick={() => handleEditNote(note)}
 											type="button"
 											aria-pressed={selectedNote?.id === note.id}
 										>
@@ -453,10 +425,10 @@ export function NotesSettings() {
 													<div
 														className="w-10 h-10 rounded-md flex items-center justify-center text-xl"
 														style={{
-															backgroundColor: previewData?.color || (selectedNote as ExtendedNote)?.color || '#3b82f6',
+															backgroundColor: previewData?.color || (selectedNote as NoteComplete)?.color || '#3b82f6',
 														}}
 													>
-														{previewData?.emoji || (selectedNote as ExtendedNote)?.emoji || '📝'}
+														{previewData?.emoji || (selectedNote as NoteComplete)?.emoji || '📝'}
 													</div>
 													<div className="flex-1">
 														<h3 className="text-md font-medium">
@@ -470,9 +442,9 @@ export function NotesSettings() {
 													</div>
 												</div>
 
-												{(previewData?.summary || (selectedNote as ExtendedNote)?.summary) && (
+												{(previewData?.summary || (selectedNote as NoteComplete)?.summary) && (
 													<p className="text-muted-foreground text-sm mb-3">
-														{previewData?.summary || (selectedNote as ExtendedNote)?.summary}
+														{previewData?.summary || (selectedNote as NoteComplete)?.summary}
 													</p>
 												)}
 

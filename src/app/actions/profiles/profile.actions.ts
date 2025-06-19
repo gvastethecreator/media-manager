@@ -5,17 +5,17 @@
 
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { createEntityErrorObject } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { profileService } from '@/services/profile-service-export';
 import {
-	type CreateProfileInput,
-	type ProfileExtended,
-	type ProfileFilters,
-	type ProfilePaginationOptions,
-	type UpdateProfileInput,
+    type CreateProfileInput,
+    type ProfileExtended,
+    type ProfileFilters,
+    type ProfilePaginationOptions,
+    type UpdateProfileInput,
 } from '@/types/entities/profile';
+import { revalidatePath } from 'next/cache';
 
 // Logger específico para acciones de perfil
 const profileLogger = serverLogger.withContext('ProfileActions');
@@ -24,12 +24,27 @@ const profileLogger = serverLogger.withContext('ProfileActions');
 const REVALIDATE_PATHS = ['/settings', '/profiles', '/profiles/[id]', '/'] as const;
 
 /**
+ * Interfaz para errores formateados
+ */
+interface FormattedError {
+	message: string;
+	name: string;
+	stack?: string;
+	code?: string;
+	cause?: {
+		message?: string;
+		name?: string;
+		info?: string;
+	};
+}
+
+/**
  * Función auxiliar para formatear errores sin causar recursión
  */
-function formatError(error: unknown) {
+function formatError(error: unknown): FormattedError | { message: string; type: string } {
 	if (error instanceof Error) {
 		// Extraer solo lo esencial del error para evitar recursión
-		const formattedError = {
+		const formattedError: FormattedError = {
 			message: error.message,
 			name: error.name,
 			stack: error.stack?.split('\n').slice(0, 3).join('\n'), // Solo las primeras 3 líneas del stack
@@ -37,26 +52,24 @@ function formatError(error: unknown) {
 
 		// Añadir código si existe
 		if ('code' in error && error.code) {
-			Object.assign(formattedError, { code: error.code });
+			formattedError.code = String(error.code);
 		}
 
 		// Si hay una causa simple, añadirla (sin profundizar)
 		if ('cause' in error && error.cause) {
 			if (error.cause instanceof Error) {
-				Object.assign(formattedError, {
-					cause: {
-						message: error.cause.message,
-						name: error.cause.name,
-					},
-				});
+				formattedError.cause = {
+					message: error.cause.message,
+					name: error.cause.name,
+				};
 			} else if (typeof error.cause === 'object') {
-				Object.assign(formattedError, {
-					cause: { info: 'Causa del error (objeto simplificado)' },
-				});
+				formattedError.cause = {
+					info: 'Causa del error (objeto simplificado)',
+				};
 			} else {
-				Object.assign(formattedError, {
-					cause: { info: String(error.cause) },
-				});
+				formattedError.cause = {
+					info: String(error.cause),
+				};
 			}
 		}
 
@@ -69,7 +82,7 @@ function formatError(error: unknown) {
 /**
  * Revalida todas las rutas relevantes cuando cambian los perfiles
  */
-const revalidateAllPaths = async () => {
+const revalidateAllPaths = async (): Promise<void> => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
 	}

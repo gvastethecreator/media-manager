@@ -15,6 +15,8 @@ import type { TagBase } from '@/types/entities/tag/types';
 import { Filter, Info, Loader2, PlusCircle, Save, TagBase as TagIcon, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreateTagForm } from './create-tag-form';
+import type { TagComplete } from '@/types/entities/tag/extended';
+import { searchTags, deleteTag } from '@/app/actions/tags/tag.actions';
 
 // Definir tipo para el manejador de eventos del botón
 type ButtonClickHandler = React.MouseEventHandler<HTMLButtonElement>;
@@ -33,10 +35,10 @@ interface TagWithStats
 }
 
 export function TagsSettings() {
-	const [tags, setTags] = useState<TagWithStats[]>([]);
+	const [tags, setTags] = useState<TagComplete[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedTag, setSelectedTag] = useState<TagBase | null>(null);
+	const [selectedTag, setSelectedTag] = useState<TagComplete | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -50,17 +52,8 @@ export function TagsSettings() {
 		const loadTags = async () => {
 			try {
 				setIsLoading(true);
-				const data = await getTagsAction();
-				// Convertir los datos para que coincidan con nuestra interfaz
-				const formattedTags = data.map((tag) => ({
-					...tag,
-					emoji: tag.emoji || null,
-					createdAt: new Date(tag.createdAt),
-					updatedAt: new Date(tag.updatedAt),
-					lastUpdated: new Date(tag.lastUpdated),
-				})) as TagWithStats[];
-
-				setTags(formattedTags);
+				const data = await searchTags({});
+				setTags(data);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
@@ -113,7 +106,7 @@ export function TagsSettings() {
 	const handleDeleteTag = useCallback(async (id: string) => {
 		if (window.confirm('¿Estás seguro de que quieres eliminar esta etiqueta?')) {
 			try {
-				await deleteTagAction(id);
+				await deleteTag(id);
 				setTags((prev) => prev.filter((tag) => tag.id !== id));
 				setSelectedTag(null);
 				setIsEditing(false);
@@ -140,62 +133,22 @@ export function TagsSettings() {
 	);
 
 	// Manejar edición de etiqueta
-	const handleEditTag = useCallback((tag: TagWithStats) => {
-		// Convertir TagWithStats a TagBase (UI) para edición
-		const uiTag: TagBase = {
-			id: tag.id,
-			name: tag.name,
-			description: tag.description,
-			color: tag.color,
-			emoji: tag.emoji || '🏷️',
-			category: tag.category || undefined,
-			isFavorite: tag.isFavorite || false,
-			createdAt: tag.createdAt,
-			updatedAt: tag.updatedAt,
-			_count: tag._count,
-		};
-		setSelectedTag(uiTag);
+	const handleEditTag = useCallback((tag: TagComplete) => {
+		setSelectedTag(tag);
 		setIsEditing(true);
 	}, []);
 
 	// Manejar creación exitosa
-	const handleTagCreated = useCallback((newTag: TagBase) => {
-		// Convertir TagBase (UI) a TagWithStats para la lista
-		const statsTag: TagWithStats = {
-			id: newTag.id,
-			name: newTag.name,
-			color: newTag.color,
-			description: newTag.description || null,
-			createdAt: new Date(newTag.createdAt),
-			updatedAt: new Date(newTag.updatedAt),
-			emoji: newTag.emoji || '🏷️',
-			_count: { images: 0 },
-			totalSize: 0,
-			lastUpdated: new Date(),
-			category: newTag.category || null,
-			isFavorite: newTag.isFavorite || false,
-			shortcut: newTag.shortcut || null,
-		};
-
-		setTags((prev) => [...prev, statsTag]);
+	const handleTagCreated = useCallback((newTag: TagComplete) => {
+		setTags((prev) => [...prev, newTag]);
 		toastService.success('Etiqueta creada');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleTagUpdated = useCallback((updatedTag: TagBase) => {
+	const handleTagUpdated = useCallback((updatedTag: TagComplete) => {
 		setTags((prev) =>
 			prev.map((tag) =>
-				tag.id === updatedTag.id
-					? ({
-						...tag,
-						name: updatedTag.name,
-						description: updatedTag.description,
-						color: updatedTag.color,
-						emoji: updatedTag.emoji || tag.emoji,
-						category: updatedTag.category,
-						isFavorite: updatedTag.isFavorite,
-					} as TagWithStats)
-					: tag
+				tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag
 			)
 		);
 		toastService.success('Etiqueta actualizada');

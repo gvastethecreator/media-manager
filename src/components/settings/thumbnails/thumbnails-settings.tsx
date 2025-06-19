@@ -1,9 +1,5 @@
 'use client';
 
-import { AlertCircle, Settings2, Trash2, Zap } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import Image from 'next/image';
-import * as React from 'react';
 import * as thumbnailActions from '@/app/actions/thumbnails/thumbnails.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,6 +19,10 @@ import type { ProcessOptions } from '@/services/thumbnail-service-export';
 import { toastService } from '@/services/toast-service-export';
 import { useThumbnailStore } from '@/store/thumbnails.store';
 import type { LastProcessedThumbnail, ThumbnailCallbacks } from '@/types/thumbnails';
+import { AlertCircle, Settings2, Trash2, Zap } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import Image from 'next/image';
+import * as React from 'react';
 import { ThumbnailError } from './thumbnail-error';
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [

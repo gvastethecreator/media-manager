@@ -1,9 +1,5 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import type { Wildcard } from '@prisma/client';
-import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
-import { useFieldArray, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -14,6 +10,10 @@ import { ImagePicker } from '@/components/ui/image-picker';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createWildcardSchema } from '@/lib/validations/wildcard';
+import type { WildcardBase } from '@/types/entities/wildcard/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
+import { useFieldArray, useForm } from 'react-hook-form';
 
 // Definir el tipo para el formulario
 type FormValues = {
@@ -30,8 +30,8 @@ type FormValues = {
 };
 
 interface CreateWildcardFormProps {
-	wildcard?: Wildcard;
-	parentWildcards?: Wildcard[];
+	wildcard?: WildcardBase;
+	parentWildcards?: WildcardBase[];
 	onSubmit: (data: FormValues) => void;
 	onCancel: () => void;
 }

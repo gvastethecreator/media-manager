@@ -6,7 +6,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { PlaceComplete } from '@/types/entities/place';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 import {
     deserializePlaceDangers,
     deserializePlaceFilters,
@@ -17,40 +16,57 @@ import {
 const logger = serverLogger.withContext('PlaceTransformer');
 
 // Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
-type PlaceFromPrisma = Prisma.PlaceGetPayload<{
-	include: {
-		images: true;
-		videos: true;
-		albums: true;
-		collections: true;
-		tags: true;
-		characters: true;
-		worldItems: true;
-		concepts: true;
-		prompts: true;
-		notes: true;
-		wildcards: true;
-		properties: true;
-		groups: true;
-		_count: {
-			select: {
-				images: true;
-				videos: true;
-				albums: true;
-				collections: true;
-				tags: true;
-				characters: true;
-				worldItems: true;
-				concepts: true;
-				prompts: true;
-				notes: true;
-				wildcards: true;
-				properties: true;
-				groups: true;
-			};
-		};
-	};
-}>;
+interface PlaceFromPrisma {
+    id: string;
+    name: string;
+    description: string | null;
+    category: string;
+    type: string;
+    region: string | null;
+    location: string | null;
+    history: string | null;
+    climate: string | null;
+    culture: string | null;
+    government: string | null;
+    economy: string | null;
+    dangers: string;
+    resources: string;
+    stats: string;
+    filters: string;
+    featuredImage: string | null;
+    isFavorite: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    // Relaciones
+    images: any[];
+    videos: any[];
+    albums: any[];
+    collections: any[];
+    tags: any[];
+    characters: any[];
+    worldItems: any[];
+    concepts: any[];
+    prompts: any[];
+    notes: any[];
+    wildcards: any[];
+    properties: any[];
+    groups: any[];
+    _count: {
+        images?: number;
+        videos?: number;
+        albums?: number;
+        collections?: number;
+        tags?: number;
+        characters?: number;
+        worldItems?: number;
+        concepts?: number;
+        prompts?: number;
+        notes?: number;
+        wildcards?: number;
+        properties?: number;
+        groups?: number;
+    };
+}
 
 /**
  * 🔄 Transforma un objeto Place de Prisma a nuestro tipo canónico PlaceComplete.

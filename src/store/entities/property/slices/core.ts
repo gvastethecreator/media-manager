@@ -3,70 +3,93 @@
  * @module store/entities/property/slices/core
  */
 
-import { createProperty as createPropertyAction, deleteProperty as deletePropertyAction, getProperties, getProperty } from '@/app/actions/properties/property.actions';
+import {
+    createProperty as createPropertyAction,
+    deleteProperty as deletePropertyAction,
+    getProperties as fetchPropertiesAction,
+    getProperty as fetchPropertyAction,
+    updateProperty as updatePropertyAction,
+} from '@/app/actions/properties/property.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { extendProperties, extendProperty, fromPrismaProperty } from '@/transformers/property/serializers';
-import { CreatePropertySchema, UpdatePropertySchema } from '@/types/entities/property/schema';
+import {
+    extendProperties,
+    extendProperty,
+} from '@/transformers/property/serializers';
+import {
+    CreatePropertySchema,
+    UpdatePropertySchema,
+} from '@/types/entities/property/schema';
 import { z } from 'zod';
 import type { StateCreator } from 'zustand';
-import type { PropertyState } from '../types';
+import type { Property, PropertyState } from '../types';
 
 const propertyLogger = clientLogger.withContext('PropertyStore');
 
-// Types inferred from Zod schemas
+// Tipos inferidos de Zod para una validación robusta
 export type CreatePropertyData = z.infer<typeof CreatePropertySchema>;
 export type UpdatePropertyData = z.infer<typeof UpdatePropertySchema>;
 
-// The canonical Property type for the store is now in types.ts
-// export type Property = ReturnType<typeof extendProperty>;
-
-// Slice para operaciones CRUD básicas
+/**
+ * @interface PropertyCoreSlice
+ * @description Define la API del slice principal para la gestión de propiedades.
+ * Incluye getters, operaciones síncronas y acciones asíncronas para interactuar
+ * con el backend.
+ */
 export interface PropertyCoreSlice {
-	// Getters
+	// --- Getters ---
 	getProperty: (id: string) => Property | undefined;
 	getProperties: () => Property[];
-	getPropertyItems: (propertyId: string) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
+	getPropertyItems: (
+		propertyId: string,
+	) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
 
-	// Operaciones
+	// --- Operaciones Síncronas ---
 	addProperty: (property: Property) => void;
 	addProperties: (properties: Property[]) => void;
-	updateProperty: (id: string, data: UpdatePropertyData) => void;
+	_updateProperty: (id: string, data: Partial<Property>) => void;
 	deleteProperty: (id: string) => void;
 
-	// Gestión de elementos
-	addItemToProperty: (propertyId: string, itemId: string, itemType: 'image' | 'video' | 'note' | 'tag') => void;
+	// --- Gestión de Elementos Asociados ---
+	addItemToProperty: (
+		propertyId: string,
+		itemId: string,
+		itemType: 'image' | 'video' | 'note' | 'tag',
+	) => void;
 	removeItemFromProperty: (propertyId: string, itemId: string) => void;
 	clearPropertyItems: (propertyId: string) => void;
 
-	// Estado de carga
+	// --- Estado de Carga y Errores ---
 	setLoading: (isLoading: boolean) => void;
 	setError: (error: string | null) => void;
 
-	// Acciones asíncronas
+	// --- Acciones Asíncronas ---
 	fetchProperty: (id: string) => Promise<Property | undefined>;
 	fetchProperties: () => Promise<Property[]>;
 	createProperty: (data: CreatePropertyData) => Promise<Property | undefined>;
+	updateProperty: (
+		id: string,
+		data: UpdatePropertyData,
+	) => Promise<Property | undefined>;
 	removeProperty: (id: string) => Promise<boolean>;
 }
 
-// Creador del slice
-export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], PropertyCoreSlice> = (set, get) => ({
-	// Getters
-	getProperty: (id) => {
-		return get().core.properties[id];
-	},
+/**
+ * @function createPropertyCoreSlice
+ * @description Implementación del slice de Zustand para la entidad Property.
+ */
+export const createPropertyCoreSlice: StateCreator<
+	PropertyState & PropertyCoreSlice,
+	[],
+	[],
+	PropertyCoreSlice
+> = (set, get) => ({
+	// --- Getters ---
+	getProperty: (id) => get().core.properties[id],
+	getProperties: () => Object.values(get().core.properties),
+	getPropertyItems: (propertyId) => get().core.propertyItems[propertyId] || [],
 
-	getProperties: () => {
-		const { properties } = get().core;
-		return Object.values(properties);
-	},
-
-	getPropertyItems: (propertyId) => {
-		return get().core.propertyItems[propertyId] || [];
-	},
-
-	// Operaciones
+	// --- Operaciones Síncronas ---
 	addProperty: (property) => {
 		propertyLogger.info('✅ Añadiendo propiedad al store:', property.name);
 		set((state) => ({
@@ -82,103 +105,93 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 	},
 
 	addProperties: (properties) => {
-		propertyLogger.info('✅ Añadiendo múltiples propiedades al store', properties.length);
-		const propertiesMap = properties.reduce((acc, property) => {
-			acc[property.id] = property;
-			return acc;
-		}, {} as Record<string, Property>);
-
-		set((state) => ({
-			core: {
-				...state.core,
-				properties: propertiesMap,
-				lastUpdated: new Date(),
+		propertyLogger.info(
+			`✅ Añadiendo ${properties.length} propiedades al store`,
+		);
+		const newProperties = properties.reduce(
+			(acc, prop) => {
+				acc[prop.id] = prop;
+				return acc;
 			},
-		}));
-	},
-
-	updateProperty: (id, data) => {
-		const property = get().core.properties[id];
-		if (!property) {
-			propertyLogger.warn('⚠️ Intento de actualizar propiedad inexistente:', id);
-			return;
-		}
-
-		propertyLogger.info('🔄 Actualizando propiedad en el store:', id);
+			{} as Record<string, Property>,
+		);
 		set((state) => ({
 			core: {
 				...state.core,
 				properties: {
 					...state.core.properties,
-					[id]: {
-						...property,
-						...data,
-						updatedAt: new Date(),
-					},
+					...newProperties,
 				},
 				lastUpdated: new Date(),
 			},
 		}));
 	},
 
+	_updateProperty: (id, data) => {
+		const existingProperty = get().getProperty(id);
+		if (!existingProperty) {
+			propertyLogger.warn(`⚠️ No se encontró la propiedad con ID: ${id}`);
+			return;
+		}
+		const updatedProperty = {
+			...existingProperty,
+			...data,
+			updatedAt: new Date(),
+		};
+		get().addProperty(updatedProperty);
+	},
+
 	deleteProperty: (id) => {
-		propertyLogger.info('🗑️ Eliminando propiedad del store:', id);
-		set((state) => {
-			const { [id]: _, ...restProperties } = state.core.properties;
-			const { [id]: __, ...restPropertyItems } = state.core.propertyItems;
-
-			return {
-				core: {
-					...state.core,
-					properties: restProperties,
-					propertyItems: restPropertyItems,
-					lastUpdated: new Date(),
-				},
-			};
-		});
+		const { [id]: _, ...remaining } = get().core.properties;
+		set((state) => ({
+			core: {
+				...state.core,
+				properties: remaining,
+				lastUpdated: new Date(),
+			},
+		}));
+		// También eliminamos los items asociados para evitar datos huérfanos
+		const { [id]: __, ...remainingItems } = get().core.propertyItems;
+		set((state) => ({
+			core: {
+				...state.core,
+				propertyItems: remainingItems,
+			},
+		}));
 	},
 
-	// Gestión de elementos
+	// --- Gestión de Elementos Asociados ---
 	addItemToProperty: (propertyId, itemId, itemType) => {
-		propertyLogger.info('➕ Añadiendo item a la propiedad:', { propertyId, itemId, itemType });
 		set((state) => {
-			const currentItems = state.core.propertyItems[propertyId] || [];
-			const existingItem = currentItems.find((item) => item.id === itemId);
-
-			if (existingItem) {
-				return state; // El item ya existe
-			}
+			const items = state.core.propertyItems[propertyId] || [];
+			if (items.some((item) => item.id === itemId)) return state;
 
 			return {
 				core: {
 					...state.core,
 					propertyItems: {
 						...state.core.propertyItems,
-						[propertyId]: [...currentItems, { id: itemId, type: itemType }],
+						[propertyId]: [...items, { id: itemId, type: itemType }],
 					},
 				},
 			};
 		});
 	},
-
 	removeItemFromProperty: (propertyId, itemId) => {
-		propertyLogger.info('➖ Quitando item de la propiedad:', { propertyId, itemId });
 		set((state) => {
-			const currentItems = state.core.propertyItems[propertyId] || [];
+			const items = state.core.propertyItems[propertyId] || [];
 			return {
 				core: {
 					...state.core,
 					propertyItems: {
 						...state.core.propertyItems,
-						[propertyId]: currentItems.filter((item) => item.id !== itemId),
+						[propertyId]: items.filter((item) => item.id !== itemId),
 					},
 				},
 			};
 		});
 	},
-
 	clearPropertyItems: (propertyId) => {
-		propertyLogger.info('🧹 Limpiando items de la propiedad:', propertyId);
 		set((state) => ({
 			core: {
 				...state.core,
@@ -190,187 +203,146 @@ export const createPropertyCoreSlice: StateCreator<PropertyState, [], [], Proper
 		}));
 	},
 
-	// Estado de carga
-	setLoading: (isLoading) => {
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading,
-			},
-		}));
-	},
+	// --- Estado de Carga y Errores ---
+	setLoading: (isLoading) =>
+		set((state) => ({ core: { ...state.core, isLoading } })),
+	setError: (error) => set((state) => ({ core: { ...state.core, error } })),
 
-	setError: (error) => {
-		set((state) => ({
-			core: {
-				...state.core,
-				error,
-			},
-		}));
-	},
-
-	// Acciones asíncronas
+	// --- Acciones Asíncronas ---
 	fetchProperty: async (id) => {
-		propertyLogger.info('🔍 Obteniendo propiedad:', id);
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
-
+		get().setLoading(true);
+		get().setError(null);
 		try {
-			const property = await getProperty(id);
-			if (property) {
-				const canonicalProperty = fromPrismaProperty(property);
-				const extendedProperty = extendProperty(canonicalProperty);
+			const response = await fetchPropertyAction(id);
+			if (response.success && response.data) {
+				const extendedProperty = extendProperty(response.data);
 				get().addProperty(extendedProperty);
 				return extendedProperty;
 			}
+			const errorMsg =
+				response.error || '❌ Error desconocido al buscar la propiedad.';
+			get().setError(errorMsg);
+			toastService.error(errorMsg);
 			return undefined;
 		} catch (error) {
-			propertyLogger.error('❌ Error al obtener propiedad:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al obtener la propiedad',
-				},
-			}));
-			toastService.error('No se pudo cargar la propiedad');
+			const errorMsg = '❌ Error fatal al buscar la propiedad.';
+			propertyLogger.error(errorMsg, { error });
+			get().setError(errorMsg);
+			toastService.error(errorMsg);
 			return undefined;
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
 		}
 	},
 
 	fetchProperties: async () => {
-		propertyLogger.info('🔍 Obteniendo todas las propiedades');
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
-
+		get().setLoading(true);
+		get().setError(null);
 		try {
-			const properties = await getProperties();
-			if (properties) {
-				const canonicalProperties = properties.map(fromPrismaProperty);
-				const extendedProperties = extendProperties(canonicalProperties);
+			const response = await fetchPropertiesAction();
+			if (response.success && response.data) {
+				const extendedProperties = extendProperties(response.data);
 				get().addProperties(extendedProperties);
 				return extendedProperties;
 			}
+			const errorMsg =
+				response.error || '❌ Error desconocido al obtener las propiedades.';
+			get().setError(errorMsg);
+			toastService.error(errorMsg);
 			return [];
 		} catch (error) {
-			propertyLogger.error('❌ Error al obtener propiedades:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al obtener las propiedades',
-				},
-			}));
-			toastService.error('No se pudieron cargar las propiedades');
+			const errorMsg = '❌ Error fatal al obtener las propiedades.';
+			propertyLogger.error(errorMsg, { error });
+			get().setError(errorMsg);
+			toastService.error(errorMsg);
 			return [];
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
 		}
 	},
 
 	createProperty: async (data) => {
-		propertyLogger.info('✨ Creando nueva propiedad:', data.name);
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
-
+		get().setLoading(true);
+		get().setError(null);
 		try {
-			const newProperty = await createPropertyAction(data);
-			if (newProperty) {
-				const canonicalProperty = fromPrismaProperty(newProperty);
-				const extendedProperty = extendProperty(canonicalProperty);
+			const response = await createPropertyAction(data);
+			if (response.success && response.data) {
+				const extendedProperty = extendProperty(response.data);
 				get().addProperty(extendedProperty);
-				toastService.success(`Propiedad "${extendedProperty.name}" creada`);
+				toastService.success(
+					`La propiedad "${extendedProperty.name}" se ha creado.`,
+				);
 				return extendedProperty;
 			}
+			const errorMsg =
+				response.error || '❌ Error desconocido al crear la propiedad.';
+			get().setError(errorMsg);
+			toastService.error(errorMsg);
 			return undefined;
 		} catch (error) {
-			propertyLogger.error('❌ Error al crear propiedad:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al crear la propiedad',
-				},
-			}));
-			toastService.error('No se pudo crear la propiedad');
+			const errorMsg = '❌ Error fatal al crear la propiedad.';
+			propertyLogger.error(errorMsg, { error });
+			get().setError(errorMsg);
+			toastService.error(errorMsg);
 			return undefined;
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
+		}
+	},
+
+	updateProperty: async (id, data) => {
+		get().setLoading(true);
+		get().setError(null);
+		try {
+			const response = await updatePropertyAction(id, data);
+			if (response.success && response.data) {
+				const extendedProperty = extendProperty(response.data);
+				get().addProperty(extendedProperty);
+				toastService.success(
+					`La propiedad "${extendedProperty.name}" se ha actualizado.`,
+				);
+				return extendedProperty;
+			}
+			const errorMsg =
+				response.error || '❌ Error desconocido al actualizar la propiedad.';
+			get().setError(errorMsg);
+			toastService.error(errorMsg);
+			return undefined;
+		} catch (error) {
+			const errorMsg = '❌ Error fatal al actualizar la propiedad.';
+			propertyLogger.error(errorMsg, { error });
+			get().setError(errorMsg);
+			toastService.error(errorMsg);
+			return undefined;
+		} finally {
+			get().setLoading(false);
 		}
 	},
 
 	removeProperty: async (id) => {
-		propertyLogger.info('🗑️ Eliminando propiedad:', id);
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-			},
-		}));
+		get().setLoading(true);
+		get().setError(null);
 		try {
-			const success = await deletePropertyAction(id);
-			if (success) {
+			const propertyName = get().getProperty(id)?.name || id;
+			const response = await deletePropertyAction(id);
+			if (response.success) {
 				get().deleteProperty(id);
-				toastService.info('Propiedad eliminada');
+				toastService.success(`La propiedad "${propertyName}" se ha eliminado.`);
+				return true;
 			}
-			return success;
+			const errorMsg =
+				response.error || '❌ Error desconocido al eliminar la propiedad.';
+			get().setError(errorMsg);
+			toastService.error(errorMsg);
+			return false;
 		} catch (error) {
-			propertyLogger.error('❌ Error al eliminar la propiedad:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al eliminar la propiedad',
-				},
-			}));
-			toastService.error('No se pudo eliminar la propiedad');
+			const errorMsg = '❌ Error fatal al eliminar la propiedad.';
+			propertyLogger.error(errorMsg, { error });
+			get().setError(errorMsg);
+			toastService.error(errorMsg);
 			return false;
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
 		}
 	},
 });
-
-// Función de utilidad para convertir un array de propiedades a un mapa
-function propertiesToMap(properties: Property[]): Record<string, Property> {
-	return properties.reduce(
-		(acc, property) => {
-			acc[property.id] = property;
-			return acc;
-		},
-		{} as Record<string, Property>
-	);
-}

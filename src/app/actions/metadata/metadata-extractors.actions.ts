@@ -1,17 +1,17 @@
 'use server';
 
-import { type Stats, statSync } from 'fs';
-import * as fs from 'fs/promises';
-import sharp from 'sharp';
 import { CacheManager } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AIMetadata, FileMetadata } from '@/types/metadata';
+import { type Stats } from 'fs';
+import * as fs from 'fs/promises';
+import sharp from 'sharp';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
 import {
-	getAIGenerationInfo,
-	parseExifData,
-	parseMetadataString,
-	parseSharpMetadata,
+    getAIGenerationInfo,
+    parseExifData,
+    parseMetadataString,
+    parseSharpMetadata,
 } from './metadata-parsers.actions';
 import { type ExtendedFileMetadata, METADATA_RETRY_CONFIG, type MetadataOptions } from './metadata-types.actions';
 import { getImageFormat, isSupportedImageFormat, withRetry } from './metadata-utils.actions';
@@ -94,7 +94,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 		}
 
 		// Obtener estadísticas básicas del archivo
-		const stats = await withRetry<Stats>(() => statSync(path), options?.retry || METADATA_RETRY_CONFIG);
+		const stats = await withRetry<Stats>(() => fs.stat(path), options?.retry || METADATA_RETRY_CONFIG);
 
 		const fileSystemInfo = {
 			size: Number(stats.size),
@@ -131,7 +131,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 					// El formato ya lo manejamos correctamente con nuestro propio tipo
 					if (['jpeg', 'png', 'gif', 'webp', 'tiff', 'svg', 'avif', 'jpg', 'tif'].includes(extendedData.format)) {
 						// Este es solo para diagnóstico, no lo usamos directamente en sharp
-						sharpMetadata.format = extendedData.format as unknown as keyof sharp.FormatEnum;
+						sharpMetadata.format = extendedData.format as keyof typeof sharp.format;
 					}
 				}
 
@@ -141,7 +141,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 					const colorSpace = parsedSharpData.colorSpace.toLowerCase();
 
 					if (validSpaces.some((space) => space === colorSpace)) {
-						sharpMetadata.space = colorSpace as keyof sharp.ColourspaceEnum;
+						sharpMetadata.space = colorSpace as keyof typeof sharp.space;
 					}
 				}
 

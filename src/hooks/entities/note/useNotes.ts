@@ -87,7 +87,7 @@ export function useNoteActions() {
 	const { mutate: remove, isPending: isDeleting } = useMutation({
 		mutationFn: (id: string) => deleteNote(id),
 		onSuccess: (_data, id) => {
-			toast({ title: 'Nota Eliminada', description: `La nota ha sido eliminada.` });
+			toast({ title: 'Nota Eliminada', description: 'La nota ha sido eliminada.' });
 			return invalidateNotesCache();
 		},
 		onError: (error) => {
