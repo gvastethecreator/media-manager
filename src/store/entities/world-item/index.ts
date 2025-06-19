@@ -17,7 +17,16 @@ import { toastService } from '@/services/toast.service';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { WorldItemSortCriteria, WorldItemViewMode } from '@/types/entities/world-item';
+import {
+    WorldItemSortCriteria,
+    WorldItemViewMode
+} from '@/types/entities/world-item/enums';
+import type {
+    WorldItemDeserialized,
+    WorldItemCreateInput,
+    WorldItemUpdateInput,
+    WorldItemFilters
+} from '@/types/entities/world-item/types';
 import type { WorldItemStore } from './types';
 
 // Logger específico para el store
@@ -29,181 +38,144 @@ export * from './hooks';
 export * from './selectors';
 export * from './types';
 
+// Transformer temporal para mapear datos a WorldItemDeserialized
+function toWorldItemDeserialized(item: any): WorldItemDeserialized {
+    return {
+        ...item,
+        attributesList: item.attributesList || [],
+        effectsList: item.effectsList || [],
+        requirementsList: item.requirementsList || [],
+        statsList: item.statsList || [],
+        propertiesList: item.propertiesList || [],
+        filtersList: item.filtersList || [],
+        tagsList: item.tagsList || [],
+    };
+}
+
 // 🏗️ Crear el store con persistencia
 export const useWorldItemStore = create<WorldItemStore>()(
-	persist(
-		(set, get) => ({
-			// 📊 Estado inicial
-			worldItems: [],
-			ui: {
-				selectedId: null,
-				editingId: null,
-				highlightedId: null,
-				viewMode: WorldItemViewMode.LIST,
-			},
-			filters: {
-				sortBy: WorldItemSortCriteria.NAME_ASC,
-				searchTerm: '',
-				category: null,
-				rarity: null,
-				type: null,
-			},
-			isLoading: false,
-			error: null,
-
-			// 🔄 Acciones de carga
-			loadWorldItems: async () => {
-				try {
-					set({ isLoading: true, error: null });
-					worldItemLogger.info('🔄 Cargando objetos del mundo...');
-
-					const items = await getWorldItems();
-					set({ worldItems: items, isLoading: false });
-					worldItemLogger.info('✅ Objetos del mundo cargados correctamente');
-				} catch (error) {
-					worldItemLogger.error('❌ Error al cargar objetos del mundo:', error);
-					set({ error: 'Error al cargar objetos del mundo', isLoading: false });
-					toastService.system.error('Error al cargar objetos del mundo');
-				}
-			},
-
-			// 🎯 Gestión de items
-			createWorldItem: async (item) => {
-				try {
-					worldItemLogger.info('➕ Creando objeto del mundo:', item);
-					const newItem = await createServerWorldItem(item);
-					set((state) => ({ worldItems: [...state.worldItems, newItem] }));
-					worldItemLogger.info('✅ Objeto del mundo creado correctamente');
-					toastService.system.success('Objeto del mundo creado correctamente');
-				} catch (error) {
-					worldItemLogger.error('❌ Error al crear objeto del mundo:', error);
-					toastService.system.error('Error al crear objeto del mundo');
-				}
-			},
-
-			updateWorldItem: async (id, item) => {
-				try {
-					worldItemLogger.info('🔄 Actualizando objeto del mundo:', { id, item });
-					const updatedItem = await updateServerWorldItem(id, item);
-					set((state) => ({
-						worldItems: state.worldItems.map((i) => (i.id === id ? updatedItem : i)),
-					}));
-					worldItemLogger.info('✅ Objeto del mundo actualizado correctamente');
-					toastService.system.success('Objeto del mundo actualizado correctamente');
-				} catch (error) {
-					worldItemLogger.error('❌ Error al actualizar objeto del mundo:', error);
-					toastService.system.error('Error al actualizar objeto del mundo');
-				}
-			},
-
-			deleteWorldItem: async (id) => {
-				try {
-					worldItemLogger.info('🗑️ Eliminando objeto del mundo:', id);
-					await deleteServerWorldItem(id);
-
-					set((state) => ({
-						worldItems: state.worldItems.filter((i) => i.id !== id),
-					}));
-					worldItemLogger.info('✅ Objeto del mundo eliminado correctamente');
-					toastService.system.success('Objeto del mundo eliminado correctamente');
-				} catch (error) {
-					worldItemLogger.error('❌ Error al eliminar objeto del mundo:', error);
-					toastService.system.error('Error al eliminar objeto del mundo');
-				}
-			},
-
-			// 🎯 Acciones de UI
-			selectWorldItem: (id) => set((state) => ({ ui: { ...state.ui, selectedId: id } })),
-			startEditing: (id) => set((state) => ({ ui: { ...state.ui, editingId: id } })),
-			highlightWorldItem: (id) => set((state) => ({ ui: { ...state.ui, highlightedId: id } })),
-			setViewMode: (mode) => set((state) => ({ ui: { ...state.ui, viewMode: mode } })),
-
-			// 🔍 Filtros
-			updateFilters: (filters) => set((state) => ({ filters: { ...state.filters, ...filters } })),
-			clearFilters: () =>
-				set((_state) => ({
-					filters: {
-						sortBy: WorldItemSortCriteria.NAME_ASC,
-						searchTerm: '',
-						category: null,
-						rarity: null,
-						type: null,
-					},
-				})),
-
-			// 🎯 Selectores
-			getWorldItemById: (id) => get().worldItems.find((item) => item.id === id),
-			getFilteredWorldItems: () => {
-				const { worldItems, filters } = get();
-				const { searchTerm, category, rarity, type } = filters;
-
-				return worldItems.filter((item) => {
-					const matchesSearch = searchTerm ? item.name.toLowerCase().includes(searchTerm.toLowerCase()) : true;
-					const matchesCategory = category ? item.category === category : true;
-					const matchesRarity = rarity ? item.rarity === rarity : true;
-					const matchesType = type ? item.type === type : true;
-
-					return matchesSearch && matchesCategory && matchesRarity && matchesType;
-				});
-			},
-			getSortedWorldItems: () => {
-				const { filters } = get();
-				const filteredItems = get().getFilteredWorldItems();
-
-				return [...filteredItems].sort((a, b) => {
-					switch (filters.sortBy) {
-						case WorldItemSortCriteria.NAME_ASC:
-							return a.name.localeCompare(b.name);
-						case WorldItemSortCriteria.NAME_DESC:
-							return b.name.localeCompare(a.name);
-						case WorldItemSortCriteria.CREATED_ASC:
-							return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-						case WorldItemSortCriteria.CREATED_DESC:
-							return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-						case WorldItemSortCriteria.UPDATED_ASC:
-							return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-						case WorldItemSortCriteria.UPDATED_DESC:
-							return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-						case WorldItemSortCriteria.RARITY_ASC:
-							return (a.rarity || '').localeCompare(b.rarity || '');
-						case WorldItemSortCriteria.RARITY_DESC:
-							return (b.rarity || '').localeCompare(a.rarity || '');
-						default:
-							return 0;
-					}
-				});
-			},
-		}),
-		{
-			name: 'world-item-store',
-			storage: createJSONStorage(() => localStorage),
-			version: Number.parseInt(VERSIONING.STORE),
-		}
-	)
+    persist(
+        (set, get) => ({
+            worldItems: [],
+            ui: {
+                selectedId: null,
+                editingId: null,
+                highlightedId: null,
+                viewMode: WorldItemViewMode.LIST,
+            },
+            filters: {
+                query: '',
+                types: [],
+                categories: [],
+                rarities: [],
+            },
+            isLoading: false,
+            error: null,
+            loadWorldItems: async (): Promise<void> => {
+                try {
+                    set({ isLoading: true, error: null });
+                    worldItemLogger.info('🔄 Cargando objetos del mundo...');
+                    const items = await getWorldItems();
+                    set({ worldItems: (items as any[]).map(toWorldItemDeserialized), isLoading: false });
+                    worldItemLogger.info('✅ Objetos del mundo cargados correctamente');
+                } catch (error) {
+                    worldItemLogger.error('❌ Error al cargar objetos del mundo:', error);
+                    set({ error: 'Error al cargar objetos del mundo', isLoading: false });
+                    toastService.system.error('Error al cargar objetos del mundo');
+                }
+            },
+            createWorldItem: async (item: WorldItemCreateInput): Promise<void> => {
+                try {
+                    worldItemLogger.info('➕ Creando objeto del mundo:', item);
+                    const newItem = await createServerWorldItem(item);
+                    set((state: WorldItemStore) => ({ worldItems: [...state.worldItems, toWorldItemDeserialized(newItem)] }));
+                    worldItemLogger.info('✅ Objeto del mundo creado correctamente');
+                    toastService.system.success('Objeto del mundo creado correctamente');
+                } catch (error) {
+                    worldItemLogger.error('❌ Error al crear objeto del mundo:', error);
+                    toastService.system.error('Error al crear objeto del mundo');
+                }
+            },
+            updateWorldItem: async (id: string, item: WorldItemUpdateInput): Promise<void> => {
+                try {
+                    worldItemLogger.info('🔄 Actualizando objeto del mundo:', { id, item });
+                    const updatedItem = await updateServerWorldItem(id, item);
+                    set((state: WorldItemStore) => ({
+                        worldItems: state.worldItems.map((i: WorldItemDeserialized) => (i.id === id ? toWorldItemDeserialized(updatedItem) : i)),
+                    }));
+                    worldItemLogger.info('✅ Objeto del mundo actualizado correctamente');
+                    toastService.system.success('Objeto del mundo actualizado correctamente');
+                } catch (error) {
+                    worldItemLogger.error('❌ Error al actualizar objeto del mundo:', error);
+                    toastService.system.error('Error al actualizar objeto del mundo');
+                }
+            },
+            deleteWorldItem: async (id: string): Promise<void> => {
+                try {
+                    worldItemLogger.info('🗑️ Eliminando objeto del mundo:', id);
+                    await deleteServerWorldItem(id);
+                    set((state: WorldItemStore) => ({
+                        worldItems: state.worldItems.filter((i: WorldItemDeserialized) => i.id !== id),
+                    }));
+                    worldItemLogger.info('✅ Objeto del mundo eliminado correctamente');
+                    toastService.system.success('Objeto del mundo eliminado correctamente');
+                } catch (error) {
+                    worldItemLogger.error('❌ Error al eliminar objeto del mundo:', error);
+                    toastService.system.error('Error al eliminar objeto del mundo');
+                }
+            },
+            selectWorldItem: (id: string | null) => set((state: WorldItemStore) => ({ ui: { ...state.ui, selectedId: id } })),
+            startEditing: (id: string | null) => set((state: WorldItemStore) => ({ ui: { ...state.ui, editingId: id } })),
+            highlightWorldItem: (id: string | null) => set((state: WorldItemStore) => ({ ui: { ...state.ui, highlightedId: id } })),
+            setViewMode: (mode: WorldItemViewMode) => set((state: WorldItemStore) => ({ ui: { ...state.ui, viewMode: mode } })),
+            updateFilters: (filters: Partial<WorldItemFilters>) => set((state: WorldItemStore) => ({ filters: { ...state.filters, ...filters } })),
+            clearFilters: () => set((_state: WorldItemStore) => ({
+                filters: {
+                    query: '',
+                    types: [],
+                    categories: [],
+                    rarities: [],
+                },
+            })),
+            getWorldItemById: (id: string) => get().worldItems.find((item) => item.id === id),
+            getFilteredWorldItems: () => {
+                const { worldItems, filters } = get();
+                const { query, types, categories, rarities } = filters;
+                return worldItems.filter((item) => {
+                    const matchesQuery = query ? item.name.toLowerCase().includes(query.toLowerCase()) : true;
+                    const matchesType = types && types.length > 0 ? types.includes(item.type as any) : true;
+                    const matchesCategory = categories && categories.length > 0 ? categories.includes(item.category as any) : true;
+                    const matchesRarity = rarities && rarities.length > 0 ? rarities.includes(item.rarity as any) : true;
+                    return matchesQuery && matchesType && matchesCategory && matchesRarity;
+                });
+            },
+            getSortedWorldItems: () => {
+                const filteredItems = get().getFilteredWorldItems();
+                // Por defecto, ordena por nombre ascendente
+                return [...filteredItems].sort((a, b) => a.name.localeCompare(b.name));
+            },
+        }),
+        {
+            name: 'world-item-store',
+            storage: createJSONStorage(() => localStorage),
+            version: Number.parseInt(VERSIONING.STORE),
+        }
+    )
 );
 
-// Re-export API from store
+// Re-export API desde el store
 export const worldItemApi = {
-	// Core
-	setWorldItems: (worldItems: any[]) => useWorldItemStore.getState().setWorldItems(worldItems),
-	addWorldItem: (worldItem: any) => useWorldItemStore.getState().addWorldItem(worldItem),
-	updateWorldItem: (id: string, data: any) => useWorldItemStore.getState().updateWorldItem(id, data),
-	removeWorldItem: (id: string) => useWorldItemStore.getState().deleteWorldItem(id),
-	resetStore: () => useWorldItemStore.getState().resetStore(),
-
-	// UI
-	setViewMode: (mode: any) => useWorldItemStore.getState().setViewMode(mode),
-	setFilters: (filters: any) => useWorldItemStore.getState().updateFilters(filters),
-	resetFilters: () => useWorldItemStore.getState().clearFilters(),
-	setSearchQuery: (query: string) => useWorldItemStore.getState().setSearchQuery(query),
-
-	// Selección
-	toggleSelected: (id: string) => useWorldItemStore.getState().selectWorldItem(id),
-	clearSelection: () => useWorldItemStore.getState().clearSelection(),
-
-	// Estado actual
-	getWorldItemById: (id: string) => useWorldItemStore.getState().getWorldItemById(id),
-	getFilteredWorldItems: () => useWorldItemStore.getState().getFilteredWorldItems(),
-	getSortedWorldItems: () => useWorldItemStore.getState().getSortedWorldItems(),
-	setError: (error: string | null) => useWorldItemStore.getState().setError(error),
+    // Core
+    loadWorldItems: () => useWorldItemStore.getState().loadWorldItems(),
+    createWorldItem: (data: WorldItemCreateInput) => useWorldItemStore.getState().createWorldItem(data),
+    updateWorldItem: (id: string, data: WorldItemUpdateInput) => useWorldItemStore.getState().updateWorldItem(id, data),
+    deleteWorldItem: (id: string) => useWorldItemStore.getState().deleteWorldItem(id),
+    // UI
+    setViewMode: (mode: WorldItemViewMode) => useWorldItemStore.getState().setViewMode(mode),
+    updateFilters: (filters: Partial<WorldItemFilters>) => useWorldItemStore.getState().updateFilters(filters),
+    clearFilters: () => useWorldItemStore.getState().clearFilters(),
+    // Selectores
+    getWorldItemById: (id: string) => useWorldItemStore.getState().getWorldItemById(id),
+    getFilteredWorldItems: () => useWorldItemStore.getState().getFilteredWorldItems(),
+    getSortedWorldItems: () => useWorldItemStore.getState().getSortedWorldItems(),
 };
