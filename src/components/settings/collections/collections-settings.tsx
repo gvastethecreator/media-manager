@@ -1,9 +1,6 @@
 'use client';
 
-import {
-	deleteCollection,
-	searchCollections
-} from '@/app/actions/collections/collection.actions';
+import { deleteCollection, searchCollections } from '@/app/actions/collections/collection.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import { COLLECTION_CATEGORY_COLORS, COLLECTION_CATEGORY_EMOJIS, CollectionCategory } from '@/types/entities/collection/enums';
+import {
+	COLLECTION_CATEGORY_COLORS,
+	COLLECTION_CATEGORY_EMOJIS,
+	CollectionCategory,
+} from '@/types/entities/collection/enums';
 import type { CollectionComplete } from '@/types/entities/collection/extended';
 import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -75,7 +76,7 @@ export function CollectionsSettings() {
 				matches &&
 				Boolean(
 					collection.name.toLowerCase().includes(normalizedQuery) ||
-					collection.description?.toLowerCase().includes(normalizedQuery)
+						collection.description?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 
@@ -337,7 +338,10 @@ export function CollectionsSettings() {
 										>
 											<div
 												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
-												style={{ backgroundColor: COLLECTION_CATEGORY_COLORS[collection.category as CollectionCategory] || '#3b82f6' }}
+												style={{
+													backgroundColor:
+														COLLECTION_CATEGORY_COLORS[collection.category as CollectionCategory] || '#3b82f6',
+												}}
 											>
 												{COLLECTION_CATEGORY_EMOJIS[collection.category as CollectionCategory] || '📚'}
 											</div>
@@ -440,9 +444,18 @@ export function CollectionsSettings() {
 											<div className="flex flex-col p-4 border rounded-lg bg-background">
 												<div
 													className="w-full aspect-video mb-3 rounded-md flex items-center justify-center bg-muted"
-													style={{ backgroundColor: COLLECTION_CATEGORY_COLORS[(previewData?.category || selectedCollection?.category) as CollectionCategory] || '#3b82f6' }}
+													style={{
+														backgroundColor:
+															COLLECTION_CATEGORY_COLORS[
+																(previewData?.category || selectedCollection?.category) as CollectionCategory
+															] || '#3b82f6',
+													}}
 												>
-													<span className="text-4xl">{COLLECTION_CATEGORY_EMOJIS[(previewData?.category || selectedCollection?.category) as CollectionCategory] || '📚'}</span>
+													<span className="text-4xl">
+														{COLLECTION_CATEGORY_EMOJIS[
+															(previewData?.category || selectedCollection?.category) as CollectionCategory
+														] || '📚'}
+													</span>
 												</div>
 												<h3 className="text-lg font-medium">
 													{previewData?.name || selectedCollection?.name || 'Nueva Colección'}

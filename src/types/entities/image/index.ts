@@ -8,9 +8,21 @@
 
 export { ImageSchema } from './types';
 export type {
-	CreateImageData, ImageAIMetadata, ImageBase, ImageComplete, ImageCreateInput, ImageExtended,
-	ImageFilters, ImageMetadata, ImageSearchOptions,
-	ImageSearchResult, ImageStatsBase, ImageTransformerOptions, ImageUpdateInput, ImageVisualConfigBase, UpdateImageData
+	CreateImageData,
+	ImageAIMetadata,
+	ImageBase,
+	ImageComplete,
+	ImageCreateInput,
+	ImageExtended,
+	ImageFilters,
+	ImageMetadata,
+	ImageSearchOptions,
+	ImageSearchResult,
+	ImageStatsBase,
+	ImageTransformerOptions,
+	ImageUpdateInput,
+	ImageVisualConfigBase,
+	UpdateImageData,
 } from './types';
 
 // 📝 Documentación: Solo tipos canónicos. Legacy removido.

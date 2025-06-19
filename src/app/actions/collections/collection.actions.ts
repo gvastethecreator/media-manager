@@ -9,18 +9,18 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import {
-    fromPrismaCollection,
-    fromPrismaCollections,
-    mapCollectionSearchOptionsToPrisma,
-    mapCreateCollectionDataToPrisma,
-    mapUpdateCollectionDataToPrisma,
+	fromPrismaCollection,
+	fromPrismaCollections,
+	mapCollectionSearchOptionsToPrisma,
+	mapCreateCollectionDataToPrisma,
+	mapUpdateCollectionDataToPrisma,
 } from '@/transformers/collection';
 import type {
-    CollectionBase,
-    CollectionComplete,
-    CollectionCreateInput,
-    CollectionSearchOptions,
-    CollectionUpdateInput,
+	CollectionBase,
+	CollectionComplete,
+	CollectionCreateInput,
+	CollectionSearchOptions,
+	CollectionUpdateInput,
 } from '@/types/entities/collection';
 import { revalidatePath } from 'next/cache';
 

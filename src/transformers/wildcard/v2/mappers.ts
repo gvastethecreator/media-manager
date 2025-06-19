@@ -5,13 +5,13 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    CreateWildcardData,
-    UpdateWildcardData,
-    WildcardBase,
-    WildcardBulkUpdateData,
-    WildcardRelated,
-    WildcardSearchFilters,
-    WildcardSearchOptions,
+	CreateWildcardData,
+	UpdateWildcardData,
+	WildcardBase,
+	WildcardBulkUpdateData,
+	WildcardRelated,
+	WildcardSearchFilters,
+	WildcardSearchOptions,
 } from '@/types/entities/wildcard';
 import { TransformerError } from '@/utils/transformers/errors';
 import { DEFAULT_WILDCARD_COLOR, DEFAULT_WILDCARD_EMOJI } from './serializers';
@@ -37,9 +37,7 @@ export function toCreateWildcardData(data: CreateWildcardData): Record<string, a
 			parentId: data.parentId || null,
 			favorite: data.isFavorite || false,
 			featuredImage: data.featuredImage || null,
-			children: Array.isArray(data.children)
-				? JSON.stringify(data.children)
-				: (data.children || '[]'),
+			children: Array.isArray(data.children) ? JSON.stringify(data.children) : data.children || '[]',
 		};
 
 		return result;
@@ -75,9 +73,7 @@ export function toUpdateWildcardData(data: UpdateWildcardData): Record<string, a
 
 		// Serializar children si está presente
 		if (data.children !== undefined) {
-			result.children = typeof data.children === 'string'
-				? data.children
-				: JSON.stringify(data.children);
+			result.children = typeof data.children === 'string' ? data.children : JSON.stringify(data.children);
 		}
 
 		return result;

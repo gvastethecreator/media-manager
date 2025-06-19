@@ -10,8 +10,14 @@ import type {
     WorldItemUpdateInput as UpdateWorldItemData,
     WorldItem,
     WorldItemFilters,
-    WorldItemViewMode
+    WorldItemViewMode,
 } from '@/types/entities/world-item';
+
+/**
+ * Datos para actualizar un WorldItem desde la UI.
+ * Es un Partial de WorldItem, pero asegura la compatibilidad con UpdateWorldItemData.
+ */
+export type WorldItemUpdateData = Partial<Omit<WorldItem, 'id' | 'createdAt' | 'updatedAt' | 'category'> & { category: string }>;
 
 /**
  * 📊 Estado global del store

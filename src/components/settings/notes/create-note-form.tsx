@@ -138,9 +138,7 @@ export function CreateNoteForm({
 		{
 			name: 'color',
 			label: 'Color',
-			render: ({ value, onChange }: any) => (
-				<ColorPicker value={value} onChange={onChange} compact showLabel={false} />
-			),
+			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} compact showLabel={false} />,
 		},
 		{
 			name: 'description',

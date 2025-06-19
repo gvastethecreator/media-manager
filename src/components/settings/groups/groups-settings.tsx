@@ -8,11 +8,11 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
-import toastService from '@/services/toast.service';
-import type { GroupComplete } from '@/types/entities/group/extended';
+import { toastService } from '@/services/toast.service';
+import type { Group, GroupComplete } from '@/types/entities/group';
 import { GroupSortCriteria } from '@/types/entities/group/types';
 import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
 
@@ -36,15 +36,11 @@ export function GroupsSettings() {
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
 	const [sortBy, setSortBy] = useState<GroupSortCriteria>(GroupSortCriteria.NAME_ASC);
 
-	useEffect(() => {
-		loadGroups();
-	}, [loadGroups]);
-
-	const loadGroups = async () => {
+	const loadGroups = useCallback(async () => {
 		try {
 			setIsLoading(true);
 			const data = await getGroups();
-			setGroups(data as GroupComplete[]);
+			setGroups(data);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 			setError(errorMessage);
@@ -54,60 +50,84 @@ export function GroupsSettings() {
 		} finally {
 			setIsLoading(false);
 		}
-	};
+	}, []);
+
+	useEffect(() => {
+		loadGroups();
+	}, [loadGroups]);
 
 	// Filtrar grupos basados en los criterios seleccionados
-	const filteredGroups = groups.filter((group) => {
-		let matches = true;
-		if (searchQuery) {
-			const normalizedQuery = searchQuery.toLowerCase();
-			matches =
-				matches &&
-				(group.name.toLowerCase().includes(normalizedQuery) ||
-					group.description?.toLowerCase().includes(normalizedQuery) ||
-					false);
-		}
-		if (selectedCategories.length > 0) {
-			matches = matches && (group.category ? selectedCategories.includes(group.category) : false);
-		}
-		if (onlyFavorites) {
-			matches = matches && group.isFavorite;
-		}
-		return matches;
-	});
+	const filteredGroups = useMemo(
+		() =>
+			groups.filter((group) => {
+				let matches = true;
+				if (searchQuery) {
+					const normalizedQuery = searchQuery.toLowerCase();
+					matches =
+						matches &&
+						(group.name.toLowerCase().includes(normalizedQuery) ||
+							(group.description && group.description.toLowerCase().includes(normalizedQuery)) ||
+							false);
+				}
+				if (selectedCategories.length > 0) {
+					matches = matches && (group.category ? selectedCategories.includes(group.category) : false);
+				}
+				if (onlyFavorites) {
+					matches = matches && group.isFavorite;
+				}
+				return matches;
+			}),
+		[groups, searchQuery, selectedCategories, onlyFavorites],
+	);
 
 	// Ordenar grupos
-	const sortedGroups = [...filteredGroups].sort((a, b) => {
-		switch (sortBy) {
-			case GroupSortCriteria.NAME_ASC:
-				return a.name.localeCompare(b.name);
-			case GroupSortCriteria.CREATED_ASC:
-				return (a.category || '').localeCompare(b.category || '');
-			case GroupSortCriteria.CREATED_DESC:
-				return b.createdAt.getTime() - a.createdAt.getTime();
-			default:
-				return 0;
-		}
-	});
+	const sortedGroups = useMemo(
+		() =>
+			[...filteredGroups].sort((a, b) => {
+				switch (sortBy) {
+					case GroupSortCriteria.NAME_ASC:
+						return a.name.localeCompare(b.name);
+					case GroupSortCriteria.CREATED_ASC:
+						return (a.category || '').localeCompare(b.category || '');
+					case GroupSortCriteria.CREATED_DESC:
+						return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+					default:
+						return 0;
+				}
+			}),
+		[filteredGroups, sortBy],
+	);
 
 	// Estadísticas
-	const _stats = {
-		totalGroups: groups.length,
-		totalElements: groups.reduce((acc, group) => {
-			return acc + Object.values(group._count).reduce((a, b) => a + b, 0);
-		}, 0),
-		totalRelationTypes: groups.reduce((acc, group) => {
-			return acc + Object.values(group._count).filter((count) => count > 0).length;
-		}, 0),
-		emptyGroups: groups.filter((group) => Object.values(group._count).reduce((a, b) => a + b, 0) === 0).length,
-		favoriteGroups: groups.filter((group) => group.isFavorite).length,
-	};
+	const _stats = useMemo(() => {
+		const totalElements = groups.reduce((acc, group) => {
+			const groupCount = group._count ? Object.values(group._count).reduce((a, b) => a + b, 0) : 0;
+			return acc + groupCount;
+		}, 0);
+		const totalRelationTypes = groups.reduce((acc, group) => {
+			const groupRelationCount = group._count
+				? Object.values(group._count).filter((count) => count > 0).length
+				: 0;
+			return acc + groupRelationCount;
+		}, 0);
+		const emptyGroups = groups.filter(
+			(group) => (group._count ? Object.values(group._count).reduce((a, b) => a + b, 0) : 0) === 0,
+		).length;
+
+		return {
+			totalGroups: groups.length,
+			totalElements,
+			totalRelationTypes,
+			emptyGroups,
+			favoriteGroups: groups.filter((group) => group.isFavorite).length,
+		};
+	}, [groups]);
 
 	// Manejadores
-	const handleCreateGroup = async (data: Partial<GroupComplete>) => {
+	const handleCreateGroup = async (data: Partial<Group>) => {
 		try {
 			const newGroup = await createGroup(data);
-			setGroups((prev) => [...prev, newGroup as GroupComplete]);
+			setGroups((prev) => [...prev, newGroup]);
 			setIsCreateDialogOpen(false);
 			toastService.success('Grupo creado correctamente');
 		} catch (err) {
@@ -118,7 +138,7 @@ export function GroupsSettings() {
 		}
 	};
 
-	const handleUpdateGroup = async (id: string, data: Partial<GroupComplete>) => {
+	const handleUpdateGroup = async (id: string, data: Partial<Group>) => {
 		try {
 			const updatedGroup = await updateGroup(id, data);
 			setGroups((prev) => prev.map((g) => (g.id === id ? { ...g, ...updatedGroup } : g)));
@@ -205,7 +225,8 @@ export function GroupsSettings() {
 											<div className="flex flex-col items-start">
 												<span className="font-medium">{group.name}</span>
 												<span className="text-xs opacity-50">
-													{Object.values(group._count).reduce((a, b) => a + b, 0)} elementos
+													{(group._count ? Object.values(group._count).reduce((a, b) => a + b, 0) : 0)}{' '}
+													elementos
 												</span>
 											</div>
 										</div>
@@ -240,7 +261,7 @@ export function GroupsSettings() {
 								onCancel={() => setIsEditMode(false)}
 							/>
 						) : (
-							<GroupPreview group={selectedGroup as GroupComplete} onEdit={() => setIsEditMode(true)} />
+							<GroupPreview group={selectedGroup} onEdit={() => setIsEditMode(true)} />
 						)
 					) : (
 						<div className="flex flex-col items-center justify-center h-full">
@@ -250,10 +271,13 @@ export function GroupsSettings() {
 					)}
 				</Card>
 			</div>
-
-			{/* Dialog para crear nuevo grupo */}
 			<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-				<CreateGroupForm onSubmit={handleCreateGroup} onCancel={() => setIsCreateDialogOpen(false)} />
+				<CreateGroupForm
+					onSubmit={(data) => {
+						handleCreateGroup(data);
+						setIsCreateDialogOpen(false);
+					}}
+				/>
 			</Dialog>
 		</div>
 	);

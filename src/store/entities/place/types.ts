@@ -4,13 +4,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type {
-    Place,
-    PlaceCategory,
-    PlaceFilters,
-    PlaceType,
-    PlaceViewMode
-} from '../../../types/entities/place/types';
+import type { Place, PlaceCategory, PlaceFilters, PlaceType, PlaceViewMode } from '../../../types/entities/place/types';
 
 /**
  * Estado base del store de Place

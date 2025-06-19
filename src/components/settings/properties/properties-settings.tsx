@@ -140,10 +140,9 @@ export function PropertiesSettings() {
 			const newProperty = await createProperty(data);
 			if (newProperty) {
 				const canonical = fromPrismaProperty(newProperty);
-				setProperties((prev) => [
-					...prev,
-					{ ...canonical, totalAssociations: 0 } as PropertyWithStats,
-				] as PropertyComplete);
+				setProperties(
+					(prev) => [...prev, { ...canonical, totalAssociations: 0 } as PropertyWithStats] as PropertyComplete
+				);
 			}
 			setIsCreateDialogOpen(false);
 			toastService.success('Propiedad creada correctamente');
@@ -193,7 +192,9 @@ export function PropertiesSettings() {
 	const handleToggleFavorite = async (property: PropertyComplete) => {
 		try {
 			await togglePropertyFavorite(property.id);
-			setProperties((prev) => prev.map((p) => (p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p)) as PropertyComplete);
+			setProperties(
+				(prev) => prev.map((p) => (p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p)) as PropertyComplete
+			);
 
 			if (selectedProperty?.id === property.id) {
 				setSelectedProperty((prev) => (prev ? { ...prev, isFavorite: !prev.isFavorite } : null));

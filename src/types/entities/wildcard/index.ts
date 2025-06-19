@@ -15,14 +15,14 @@ export type {
 	WildcardUI,
 	WildcardComplete,
 	WildcardSearchOptions,
-	WildcardSearchResult
+	WildcardSearchResult,
 } from './types';
 
 // Exportar los enums y constantes
 export {
 	WildcardSortCriteria,
 	WildcardViewMode,
-	WILDCARD_SORT_PROPERTY_MAP
+	WILDCARD_SORT_PROPERTY_MAP,
 } from './types';
 
 // Exportar el esquema de validación
@@ -35,7 +35,7 @@ export {
 	WildcardRelationsSchema,
 	WildcardChildSchema,
 	CreateWildcardSchema,
-	UpdateWildcardSchema
+	UpdateWildcardSchema,
 } from './schema';
 
 // Exportar tipos de compatibilidad (legados)
@@ -45,5 +45,5 @@ export type {
 	WildcardExtended,
 	WildcardWithRelations,
 	WildcardWithStats,
-	WildcardDeserialized
+	WildcardDeserialized,
 } from './types';

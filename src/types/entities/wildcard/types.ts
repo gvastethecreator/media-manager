@@ -12,38 +12,38 @@ import { z } from 'zod';
  * Criterios de ordenación para wildcards
  */
 export enum WildcardSortCriteria {
-    NAME_ASC = 'name:asc',
-    NAME_DESC = 'name:desc',
-    USAGE_ASC = 'usage:asc',
-    USAGE_DESC = 'usage:desc',
-    CREATED_ASC = 'createdAt:asc',
-    CREATED_DESC = 'createdAt:desc',
-    UPDATED_ASC = 'updatedAt:asc',
-    UPDATED_DESC = 'updatedAt:desc',
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	USAGE_ASC = 'usage:asc',
+	USAGE_DESC = 'usage:desc',
+	CREATED_ASC = 'createdAt:asc',
+	CREATED_DESC = 'createdAt:desc',
+	UPDATED_ASC = 'updatedAt:asc',
+	UPDATED_DESC = 'updatedAt:desc',
 }
 
 /**
  * Modos de visualización para wildcards
  */
 export enum WildcardViewMode {
-    GRID = 'grid',
-    LIST = 'list',
-    TREE = 'tree', // Vista jerárquica
-    COMPACT = 'compact',
+	GRID = 'grid',
+	LIST = 'list',
+	TREE = 'tree', // Vista jerárquica
+	COMPACT = 'compact',
 }
 
 /**
  * Mapa de propiedades para ordenación
  */
 export const WILDCARD_SORT_PROPERTY_MAP: Record<WildcardSortCriteria, string> = {
-    [WildcardSortCriteria.NAME_ASC]: 'name',
-    [WildcardSortCriteria.NAME_DESC]: 'name',
-    [WildcardSortCriteria.USAGE_ASC]: 'usage',
-    [WildcardSortCriteria.USAGE_DESC]: 'usage',
-    [WildcardSortCriteria.CREATED_ASC]: 'createdAt',
-    [WildcardSortCriteria.CREATED_DESC]: 'createdAt',
-    [WildcardSortCriteria.UPDATED_ASC]: 'updatedAt',
-    [WildcardSortCriteria.UPDATED_DESC]: 'updatedAt',
+	[WildcardSortCriteria.NAME_ASC]: 'name',
+	[WildcardSortCriteria.NAME_DESC]: 'name',
+	[WildcardSortCriteria.USAGE_ASC]: 'usage',
+	[WildcardSortCriteria.USAGE_DESC]: 'usage',
+	[WildcardSortCriteria.CREATED_ASC]: 'createdAt',
+	[WildcardSortCriteria.CREATED_DESC]: 'createdAt',
+	[WildcardSortCriteria.UPDATED_ASC]: 'updatedAt',
+	[WildcardSortCriteria.UPDATED_DESC]: 'updatedAt',
 };
 
 /**
@@ -113,75 +113,75 @@ export interface WildcardRelated {
  * Estructura de un hijo de wildcard
  */
 export interface WildcardChild {
-    id: string;
-    name: string;
+	id: string;
+	name: string;
 }
 
 /**
  * Relaciones de wildcard con otras entidades
  */
 export interface WildcardRelations {
-    parent?: {
-        id: string;
-        name: string;
-    } | null;
-    childWildcards?: WildcardChild[];
+	parent?: {
+		id: string;
+		name: string;
+	} | null;
+	childWildcards?: WildcardChild[];
 }
 
 /**
  * Conteos de relaciones de wildcard
  */
 export interface WildcardCounts {
-    _count?: {
-        childWildcards?: number;
-        images?: number;
-        videos?: number;
-        albums?: number;
-        collections?: number;
-        tags?: number;
-        characters?: number;
-        places?: number;
-        worldItems?: number;
-        concepts?: number;
-        prompts?: number;
-        notes?: number;
-        properties?: number;
-        groups?: number;
-    };
+	_count?: {
+		childWildcards?: number;
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		properties?: number;
+		groups?: number;
+	};
 }
 
 /**
  * Filtros para búsqueda de wildcards
  */
 export interface WildcardFilters {
-    searchQuery?: string;
-    categories?: string[];
-    onlyFavorites?: boolean;
-    parentId?: string | null;
-    hasChildren?: boolean;
+	searchQuery?: string;
+	categories?: string[];
+	onlyFavorites?: boolean;
+	parentId?: string | null;
+	hasChildren?: boolean;
 }
 
 /**
  * Filtros avanzados para búsqueda de wildcards
  */
 export interface WildcardSearchFilters {
-    category?: string;
-    parentId?: string | null;
-    isFavorite?: boolean;
-    ids?: string[];
-    excludeIds?: string[];
-    createdAfter?: Date;
-    createdBefore?: Date;
-    updatedAfter?: Date;
-    updatedBefore?: Date;
+	category?: string;
+	parentId?: string | null;
+	isFavorite?: boolean;
+	ids?: string[];
+	excludeIds?: string[];
+	createdAfter?: Date;
+	createdBefore?: Date;
+	updatedAfter?: Date;
+	updatedBefore?: Date;
 }
 
 /**
  * Opciones UI para wildcards
  */
 export interface WildcardUI {
-    sortBy?: WildcardSortCriteria;
-    viewMode?: WildcardViewMode;
+	sortBy?: WildcardSortCriteria;
+	viewMode?: WildcardViewMode;
 }
 
 /**
@@ -193,29 +193,29 @@ export interface WildcardComplete extends WildcardBase, WildcardRelations, Wildc
  * Opciones de búsqueda para wildcards
  */
 export interface WildcardSearchOptions {
-    skip?: number;
-    take?: number;
-    page?: number;
-    limit?: number;
-    sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
-    searchQuery?: string;
-    filters?: WildcardSearchFilters;
-    includeStats?: boolean;
-    includeImages?: boolean;
-    includeVideos?: boolean;
-    includeAlbums?: boolean;
-    includeTags?: boolean;
-    includeParent?: boolean;
+	skip?: number;
+	take?: number;
+	page?: number;
+	limit?: number;
+	sortBy?: string;
+	sortOrder?: 'asc' | 'desc';
+	searchQuery?: string;
+	filters?: WildcardSearchFilters;
+	includeStats?: boolean;
+	includeImages?: boolean;
+	includeVideos?: boolean;
+	includeAlbums?: boolean;
+	includeTags?: boolean;
+	includeParent?: boolean;
 }
 
 /**
  * Resultado de búsqueda de wildcards
  */
 export interface WildcardSearchResult {
-    items: WildcardComplete[];
-    total: number;
-    hasMore: boolean;
+	items: WildcardComplete[];
+	total: number;
+	hasMore: boolean;
 }
 
 /**

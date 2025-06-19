@@ -55,7 +55,7 @@ export async function getImage(id: string): Promise<ImageExtended | null> {
 			height: image.height ?? 0,
 			metadata: image.metadata ?? null,
 			isFavorite: image.isFavorite ?? false,
-			folderId: image.folderId ?? (image.folder?.id ?? ''),
+			folderId: image.folderId ?? image.folder?.id ?? '',
 			addedAt: image.addedAt ?? image.createdAt ?? new Date(),
 			sortBy: (image as any).sortBy ?? 'createdAt',
 			filters: (image as any).filters ?? '[]',
@@ -172,12 +172,7 @@ export async function updateImage(id: string, data: UpdateImageData): Promise<Im
 		const updated = await prisma.image.update({
 			where: { id },
 			data: Object.fromEntries(
-				Object.entries(prismaData).filter(
-					([key, value]) =>
-						key !== 'id' &&
-						key !== 'createdAt' &&
-						key !== 'updatedAt'
-				)
+				Object.entries(prismaData).filter(([key, value]) => key !== 'id' && key !== 'createdAt' && key !== 'updatedAt')
 			),
 		});
 

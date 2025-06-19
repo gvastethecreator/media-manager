@@ -9,16 +9,18 @@
 export {
 	ConceptCategory,
 	ConceptStatus,
-	ConceptViewMode
+	ConceptViewMode,
 } from './enums';
 export type {
 	ConceptExtended,
-	ConceptExtendedComplete, ConceptFilters, ConceptWithRelationsExtendedComplete
+	ConceptExtendedComplete,
+	ConceptFilters,
+	ConceptWithRelationsExtendedComplete,
 } from './extended';
 export type {
 	ConceptBase,
 	ConceptCreateInput,
-	ConceptUpdateInput
+	ConceptUpdateInput,
 } from './types';
 
 // 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

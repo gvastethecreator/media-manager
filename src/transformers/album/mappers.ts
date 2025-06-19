@@ -4,11 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    AlbumBase,
-    AlbumCreateInput,
-    AlbumUpdateInput,
-} from '@/types/entities/album';
+import type { AlbumBase, AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
 import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('AlbumMappers');
@@ -72,23 +68,23 @@ export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): Prisma.Album
  * @returns Un objeto compatible con AlbumBase.
  */
 export function fromPrismaAlbum(album: Prisma.AlbumGetPayload<null>): AlbumBase {
-    if (!album) {
-        throw new Error("Se requiere un objeto de álbum de Prisma para la transformación.");
-    }
+	if (!album) {
+		throw new Error('Se requiere un objeto de álbum de Prisma para la transformación.');
+	}
 
-    return {
-        id: album.id,
-        name: album.name,
-        emoji: album.emoji,
-        color: album.color,
-        description: album.description,
-        shortcut: album.shortcut,
-        category: album.category,
-        sortBy: album.sortBy,
-        filters: album.filters,
-        featuredImage: album.featuredImage,
-        isFavorite: album.isFavorite,
-        createdAt: album.createdAt,
-        updatedAt: album.updatedAt,
-    };
+	return {
+		id: album.id,
+		name: album.name,
+		emoji: album.emoji,
+		color: album.color,
+		description: album.description,
+		shortcut: album.shortcut,
+		category: album.category,
+		sortBy: album.sortBy,
+		filters: album.filters,
+		featuredImage: album.featuredImage,
+		isFavorite: album.isFavorite,
+		createdAt: album.createdAt,
+		updatedAt: album.updatedAt,
+	};
 }

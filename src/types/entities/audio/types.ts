@@ -6,14 +6,14 @@
  */
 
 export interface AudioBase {
-  id: string;
-  name: string;
-  filePath: string;
-  format: string;
-  duration?: number | null;
-  size: number;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	name: string;
+	filePath: string;
+	format: string;
+	duration?: number | null;
+	size: number;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export type AudioCreateInput = Omit<AudioBase, 'id' | 'createdAt' | 'updatedAt'>;

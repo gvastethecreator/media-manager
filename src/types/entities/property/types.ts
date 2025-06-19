@@ -13,24 +13,24 @@ import { z } from 'zod';
  * Criterios de ordenación para propiedades
  */
 export enum PropertySortCriteria {
-    NAME_ASC = 'name:asc',
-    NAME_DESC = 'name:desc',
-    USAGE_ASC = 'usage:asc',
-    USAGE_DESC = 'usage:desc',
-    CREATED_ASC = 'createdAt:asc',
-    CREATED_DESC = 'createdAt:desc',
-    UPDATED_ASC = 'updatedAt:asc',
-    UPDATED_DESC = 'updatedAt:desc',
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	USAGE_ASC = 'usage:asc',
+	USAGE_DESC = 'usage:desc',
+	CREATED_ASC = 'createdAt:asc',
+	CREATED_DESC = 'createdAt:desc',
+	UPDATED_ASC = 'updatedAt:asc',
+	UPDATED_DESC = 'updatedAt:desc',
 }
 
 /**
  * Modos de visualización para propiedades
  */
 export enum PropertyViewMode {
-    GRID = 'grid',
-    LIST = 'list',
-    DETAIL = 'detail',
-    COMPACT = 'compact',
+	GRID = 'grid',
+	LIST = 'list',
+	DETAIL = 'detail',
+	COMPACT = 'compact',
 }
 
 /**
@@ -38,7 +38,7 @@ export enum PropertyViewMode {
  * Heredando directamente del tipo de Prisma
  */
 export type PropertyBase = PrismaProperty & {
-    isFavorite: boolean;  // Remapeo de 'favorite' a 'isFavorite'
+	isFavorite: boolean; // Remapeo de 'favorite' a 'isFavorite'
 };
 
 /**
@@ -104,20 +104,20 @@ export interface PropertyWithRelations extends PropertyBase, PropertyRelations {
  * Tipo para Property con conteos de relaciones
  */
 export interface PropertyWithCounts extends PropertyBase {
-    _count: {
-        images: number;
-        videos: number;
-        albums: number;
-        collections: number;
-        characters: number;
-        places: number;
-        worldItems: number;
-        concepts: number;
-        prompts: number;
-        notes: number;
-        wildcards: number;
-        groups: number;
-    };
+	_count: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		groups: number;
+	};
 }
 
 /**
@@ -129,45 +129,45 @@ export type PropertyComplete = PropertyWithRelations & PropertyWithCounts;
  * Filtros para búsqueda de propiedades
  */
 export interface PropertyFilters {
-    searchQuery?: string;
-    categories?: string[];
-    onlyFavorites?: boolean;
+	searchQuery?: string;
+	categories?: string[];
+	onlyFavorites?: boolean;
 }
 
 /**
  * Opciones de búsqueda para propiedades
  */
 export interface PropertySearchOptions {
-    page?: number;
-    pageSize?: number;
-    sortBy?: PropertySortCriteria;
-    filters?: PropertyFilters;
-    include?: {
-        images?: boolean;
-        videos?: boolean;
-        albums?: boolean;
-        collections?: boolean;
-        tags?: boolean;
-        characters?: boolean;
-        places?: boolean;
-        worldItems?: boolean;
-        concepts?: boolean;
-        prompts?: boolean;
-        notes?: boolean;
-        wildcards?: boolean;
-        groups?: boolean;
-    };
+	page?: number;
+	pageSize?: number;
+	sortBy?: PropertySortCriteria;
+	filters?: PropertyFilters;
+	include?: {
+		images?: boolean;
+		videos?: boolean;
+		albums?: boolean;
+		collections?: boolean;
+		tags?: boolean;
+		characters?: boolean;
+		places?: boolean;
+		worldItems?: boolean;
+		concepts?: boolean;
+		prompts?: boolean;
+		notes?: boolean;
+		wildcards?: boolean;
+		groups?: boolean;
+	};
 }
 
 /**
  * Resultado de búsqueda para propiedades
  */
 export interface PropertySearchResult {
-    items: PropertyWithRelations[];
-    total: number;
-    totalPages: number;
-    page: number;
-    pageSize: number;
+	items: PropertyWithRelations[];
+	total: number;
+	totalPages: number;
+	page: number;
+	pageSize: number;
 }
 
 /**

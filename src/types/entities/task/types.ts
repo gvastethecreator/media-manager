@@ -15,14 +15,14 @@
  */
 
 export type TaskBase = {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date;
-  // otros campos base
+	id: string;
+	createdAt: Date;
+	updatedAt: Date;
+	// otros campos base
 };
 
 export type TaskRelations = {
-  // relaciones con otras entidades
+	// relaciones con otras entidades
 };
 
 export type TaskCreateInput = Omit<TaskBase, 'id' | 'createdAt' | 'updatedAt'>;

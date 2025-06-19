@@ -6,11 +6,10 @@
 
 // De mappers.ts
 export {
-    mapCreateWildcardDataToPrisma,
-    mapUpdateWildcardDataToPrisma,
-    mapWildcardSearchOptionsToPrisma
+	mapCreateWildcardDataToPrisma,
+	mapUpdateWildcardDataToPrisma,
+	mapWildcardSearchOptionsToPrisma,
 } from './mappers';
 
 // De transformer.ts
 export { fromPrismaWildcard, fromPrismaWildcards } from './transformer';
-

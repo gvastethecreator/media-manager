@@ -9,7 +9,8 @@ import { getTaskById, getTasks, getTasksByStatus } from '@/app/actions/tasks/que
 import { getTaskStats } from '@/app/actions/tasks/stats.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { transformTask, transformTasks } from '@/transformers/task';
-import { TaskCreateInput, TaskPriority, TaskStatus, TaskType } from '@/types/entities/task';
+import type { TaskCreateInput, TaskUpdateInput } from '@/types/entities/task';
+import { TaskPriority, TaskStatus, TaskType } from '@/types/entities/task/enums';
 
 // Logger específico para este servicio
 const logger = serverLogger.child({ module: 'TaskService' });
@@ -27,7 +28,7 @@ export async function getAllTasks(filters?: {
 		logger.info('📥 Obteniendo todas las tareas');
 
 		const tasksData = await getTasks(filters);
-		const tasks = transformTasks(tasksData);
+		const tasks = transformTasks(tasksData as any);
 
 		logger.info('✅ Tareas obtenidas correctamente', { count: tasks.length });
 		return tasks;
@@ -50,7 +51,7 @@ export async function getTask(id: string) {
 			throw new Error(`Tarea con ID ${id} no encontrada`);
 		}
 
-		const task = transformTask(taskData);
+		const task = transformTask(taskData as any);
 
 		logger.info('✅ Tarea obtenida correctamente:', { id });
 		return task;
@@ -68,7 +69,7 @@ export async function getTasksByStatusFilter(status: TaskStatus) {
 		logger.info('📥 Obteniendo tareas por estado:', status);
 
 		const tasksData = await getTasksByStatus(status);
-		const tasks = transformTasks(tasksData);
+		const tasks = transformTasks(tasksData as any);
 
 		logger.info('✅ Tareas por estado obtenidas correctamente', {
 			status,
@@ -89,15 +90,8 @@ export async function createNewTask(taskData: TaskCreateInput) {
 	try {
 		logger.info('➕ Creando nueva tarea:', taskData);
 
-		// Normalizar los datos de entrada
-		const normalizedData = {
-			...taskData,
-			status: taskData.status || TaskStatus.PENDING,
-			priority: taskData.priority || TaskPriority.NORMAL,
-		};
-
-		const taskResult = await createTask(normalizedData);
-		const task = transformTask(taskResult);
+		const taskResult = await createTask(taskData);
+		const task = transformTask(taskResult as any);
 
 		logger.info('✅ Tarea creada correctamente', { id: task.id });
 		return task;
@@ -110,12 +104,12 @@ export async function createNewTask(taskData: TaskCreateInput) {
 /**
  * Actualiza una tarea existente
  */
-export async function updateExistingTask(id: string, taskData: Partial<TaskCreateInput>) {
+export async function updateExistingTask(id: string, taskData: TaskUpdateInput) {
 	try {
 		logger.info('📝 Actualizando tarea:', { id, data: taskData });
 
 		const taskResult = await updateTask(id, taskData);
-		const task = transformTask(taskResult);
+		const task = transformTask(taskResult as any);
 
 		logger.info('✅ Tarea actualizada correctamente', { id: task.id });
 		return task;
@@ -150,7 +144,7 @@ export async function runTask(id: string, params?: Record<string, any>) {
 		logger.info('▶️ Ejecutando tarea:', { id, params });
 
 		const taskResult = await executeTask(id, params);
-		const task = transformTask(taskResult);
+		const task = transformTask(taskResult as any);
 
 		logger.info('✅ Tarea iniciada correctamente', { id: task.id });
 		return task;
@@ -168,7 +162,7 @@ export async function pauseRunningTask(id: string) {
 		logger.info('⏸️ Pausando tarea:', id);
 
 		const taskResult = await pauseTask(id);
-		const task = transformTask(taskResult);
+		const task = transformTask(taskResult as any);
 
 		logger.info('✅ Tarea pausada correctamente', { id: task.id });
 		return task;
@@ -186,7 +180,7 @@ export async function resumePausedTask(id: string) {
 		logger.info('▶️ Reanudando tarea:', id);
 
 		const taskResult = await resumeTask(id);
-		const task = transformTask(taskResult);
+		const task = transformTask(taskResult as any);
 
 		logger.info('✅ Tarea reanudada correctamente', { id: task.id });
 		return task;
@@ -204,7 +198,7 @@ export async function cancelRunningTask(id: string) {
 		logger.info('⏹️ Cancelando tarea:', id);
 
 		const taskResult = await cancelTask(id);
-		const task = transformTask(taskResult);
+		const task = transformTask(taskResult as any);
 
 		logger.info('✅ Tarea cancelada correctamente', { id: task.id });
 		return task;

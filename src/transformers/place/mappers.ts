@@ -6,11 +6,11 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    PlaceCreateInput,
-    PlaceFilters,
-    PlaceRelationInput,
-    PlaceSearchOptions,
-    PlaceUpdateInput,
+	PlaceCreateInput,
+	PlaceFilters,
+	PlaceRelationInput,
+	PlaceSearchOptions,
+	PlaceUpdateInput,
 } from '@/types/entities/place';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -75,10 +75,9 @@ export function mapUpdatePlaceDataToPrisma(input: PlaceUpdateInput): Prisma.Plac
 		const { connect, disconnect, ...rest } = input;
 		const prismaData: Prisma.PlaceUpdateInput = { ...rest };
 
-		const allRelationKeys = new Set([
-			...Object.keys(connect || {}),
-			...Object.keys(disconnect || {}),
-		]) as Set<keyof PlaceRelationInput>;
+		const allRelationKeys = new Set([...Object.keys(connect || {}), ...Object.keys(disconnect || {})]) as Set<
+			keyof PlaceRelationInput
+		>;
 
 		for (const relationKey of allRelationKeys) {
 			const toConnect = connect?.[relationKey];
@@ -112,9 +111,7 @@ export function mapUpdatePlaceDataToPrisma(input: PlaceUpdateInput): Prisma.Plac
 /**
  * 🔄 Mapea `PlaceSearchOptions` a `Prisma.PlaceFindManyArgs`.
  */
-export function mapPlaceSearchOptionsToPrisma(
-	options: PlaceSearchOptions,
-): Prisma.PlaceFindManyArgs {
+export function mapPlaceSearchOptionsToPrisma(options: PlaceSearchOptions): Prisma.PlaceFindManyArgs {
 	const { filters, ...rest } = options;
 	return {
 		...rest,

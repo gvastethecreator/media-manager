@@ -10,7 +10,7 @@ import type {
 	WorldItemCreateInput,
 	WorldItemFilters,
 	WorldItemUpdateInput,
-	ParsedWorldItemVisualConfig
+	ParsedWorldItemVisualConfig,
 } from '@/types/entities/world-item';
 import { generateWorldItemId, parseWorldItemStats } from './utils';
 

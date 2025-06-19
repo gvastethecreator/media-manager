@@ -1,15 +1,17 @@
-import type * as React from 'react';
 import type { FileItem } from '@/types/file-item';
 import type { ImageItem } from '@/types/image-item';
 import type { FileMetadata } from '@/types/metadata.types';
+import type * as React from 'react';
 
 /**
  * Props para el componente InfoItem que muestra información en formato etiqueta-valor
  */
 export interface InfoItemProps {
-	icon: React.ReactNode;
+	icon?: React.ReactNode;
 	label: string;
-	value: string | number | boolean | undefined | null | Record<string, unknown>;
+	value: React.ReactNode;
+	className?: string;
+	maxLength?: number;
 }
 
 /**
@@ -47,4 +49,15 @@ export interface ItemComponentProps {
 export interface BasicInfoProps {
 	item: ImageItem;
 	metadata: FileMetadata | null;
+}
+
+/**
+ * Estructura de datos para definir un item de información a ser renderizado.
+ * Se utiliza para construir listas de metadatos de forma dinámica.
+ */
+export interface InfoItemData {
+	label: string;
+	value: React.ReactNode;
+	icon: React.ReactNode;
+	condition?: boolean;
 }

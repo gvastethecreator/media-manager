@@ -356,7 +356,8 @@ export async function resetProfileSettings(profileId: string): Promise<void> {
 			})
 			.catch((err) => {
 				// Si no existe, ignorar el error
-				if (err.code !== 'P2025') { // P2025 is Prisma's code for "record to delete does not exist"
+				if (err.code !== 'P2025') {
+					// P2025 is Prisma's code for "record to delete does not exist"
 					throw err;
 				}
 			});

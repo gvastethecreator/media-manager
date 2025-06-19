@@ -3,7 +3,6 @@
  * @module types/entities/favorite/types
  */
 
-
 /**
  * ⭐ Enum para los tipos de entidades que pueden ser marcadas como favoritas.
  * Se utiliza tanto para validación de tipos como para valores en tiempo de ejecución.
@@ -43,7 +42,7 @@ export type FavoriteCreateInput = Omit<FavoriteBase, 'id' | 'createdAt' | 'updat
  * ⭐ Relaciones de un favorito.
  * Por ahora, un favorito no tiene relaciones directas complejas.
  */
-export type FavoriteRelations = {}
+export type FavoriteRelations = {};
 
 /**
  * ⭐ Tipo completo de un favorito con sus relaciones.

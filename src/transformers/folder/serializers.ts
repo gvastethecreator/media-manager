@@ -43,9 +43,13 @@ export function normalizeFolderPath(path: string): string {
  * @param folder El objeto FolderBase a simplificar.
  * @returns Un objeto con solo los campos esenciales para mostrar una relación.
  */
-export function toRelatedFolder(
-	folder: FolderBase
-): { id: string; name: string; path: string; emoji: string | null; color: string | null } {
+export function toRelatedFolder(folder: FolderBase): {
+	id: string;
+	name: string;
+	path: string;
+	emoji: string | null;
+	color: string | null;
+} {
 	if (!folder) {
 		// Retornar un objeto nulo o por defecto podría ser una opción
 		throw new Error('Se requiere una carpeta para la transformación a "related folder".');

@@ -6,11 +6,11 @@
  */
 
 import {
-    FavoriteBase,
-    FavoriteEntityType,
-    FavoriteExtended,
-    FavoritesByType,
-    FavoriteStats
+	FavoriteBase,
+	FavoriteEntityType,
+	FavoriteExtended,
+	FavoritesByType,
+	FavoriteStats,
 } from '@/types/entities/favorite/types';
 
 // Mapa de iconos por tipo de entidad

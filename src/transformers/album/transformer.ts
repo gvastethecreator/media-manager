@@ -62,9 +62,7 @@ export function fromPrismaAlbum(prismaAlbum: AlbumFromPrisma | null): AlbumWithR
 			error,
 			albumId: prismaAlbum.id,
 		});
-		throw new TransformerError(
-			`Error al transformar el álbum: ${(error as Error).message}`
-		);
+		throw new TransformerError(`Error al transformar el álbum: ${(error as Error).message}`);
 	}
 }
 

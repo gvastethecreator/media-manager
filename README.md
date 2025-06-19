@@ -14,7 +14,22 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 - **Zustand** - Gestión de estado
 - **Server Actions** - Acciones del servidor para operaciones CRUD
 - **Motion** - Animaciones fluidas
+- **Biome** - Linter y formateador unificado
+
+## Actualizaciones Importantes (Junio 2025)
+
+- **Documentación Técnica Actualizada** - Nuevas guías y patrones estandarizados
+- **Nuevo Patrón de Server Actions** - Respuesta directa sin objetos wrapper legacy
+- **Estandarización de Transformers** - Funciones consistentes para todas las entidades
+- **Guía de Migración** - Instrucciones para actualizar código legacy
+- **Correcciones de Tipos** - Refactorización continua de errores de TypeScript
+
+## Arquitectura
+
 - **Stores** consumen directamente las Server Actions eliminando llamadas a la API REST
+- **Server Actions** devuelven directamente entidades transformadas y utilizan excepciones estándar
+- **Transformers** implementan funciones estandarizadas (`fromPrismaEntity`, `extendEntity`, etc.)
+- **Tipos** definidos en módulos canónicos separados de la implementación Prisma
 - **PlaceStore** usa `getPlaces` y `getPlace` para cargar datos sin `fetch`
 - **VisualConfig** y estadísticas de debug se obtienen ahora mediante Server Actions
 - **Videos** gestionan su configuración visual con Server Actions
@@ -23,9 +38,7 @@ Sistema completo para la gestión y organización de activos digitales, incluyen
 - **ImageStore** ahora usa getImage y getImages directamente desde Server Actions
 - **Stores** ya no importan tipos de Prisma, previniendo errores de bundler en el cliente
 - **Entities Cards** permite ajustar efectos de tarjetas para personajes, lugares y objetos
-- **Todas las configuraciones fueron auditadas y funcionan con Server Actions**
-- **EntityPreloader** carga todas las entidades exclusivamente a través de Server Actions, sin recurrir a rutas REST
-- **Biome** - Linter y formateador unificado
+- **EntityPreloader** carga todas las entidades exclusivamente a través de Server Actions
 
 ## Características Principales
 
@@ -105,12 +118,15 @@ DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/image_manager"
 ```bash
 pnpm prisma migrate dev
 ```
+
 5. Cargar datos de ejemplo:
+
 ```bash
 pnpm prisma db seed
 ```
 
 6. Iniciar el servidor de desarrollo:
+
 ```bash
 pnpm dev
 ```

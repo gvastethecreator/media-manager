@@ -6,21 +6,21 @@
 import { createLogger } from '@/lib/logger';
 import { WorldItemCategory, WorldItemType } from '@/types/entities/world-item/enums';
 import {
-    WORLD_ITEM_SORT_PROPERTY_MAP,
-    type WorldItemCreateInput,
-    type WorldItemFilters,
-    type WorldItemSearchOptions,
-    type WorldItemSortCriteria,
-    type WorldItemUpdateInput,
+	WORLD_ITEM_SORT_PROPERTY_MAP,
+	type WorldItemCreateInput,
+	type WorldItemFilters,
+	type WorldItemSearchOptions,
+	type WorldItemSortCriteria,
+	type WorldItemUpdateInput,
 } from '@/types/entities/world-item/types';
 import {
-    serializeAttributes,
-    serializeEffects,
-    serializeFilters,
-    serializeProperties,
-    serializeRequirements,
-    serializeStats,
-    serializeTags,
+	serializeAttributes,
+	serializeEffects,
+	serializeFilters,
+	serializeProperties,
+	serializeRequirements,
+	serializeStats,
+	serializeTags,
 } from './serializers';
 
 // Logger específico para este módulo

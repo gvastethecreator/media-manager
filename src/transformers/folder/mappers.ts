@@ -5,12 +5,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    Folder,
-    FolderComplete,
-    FolderCreateInput,
-    FolderFilters,
-    FolderSearchOptions,
-    FolderUpdateInput
+	Folder,
+	FolderComplete,
+	FolderCreateInput,
+	FolderFilters,
+	FolderSearchOptions,
+	FolderUpdateInput,
 } from '@/types/entities/folder';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -56,9 +56,7 @@ export function mapUpdateFolderDataToPrisma(data: FolderUpdateInput): Prisma.Fol
 /**
  * 🔄 Mapea `FolderSearchOptions` a `Prisma.FolderFindManyArgs`.
  */
-export function mapFolderSearchOptionsToPrisma(
-	options: FolderSearchOptions
-): Prisma.FolderFindManyArgs {
+export function mapFolderSearchOptionsToPrisma(options: FolderSearchOptions): Prisma.FolderFindManyArgs {
 	const { skip, take, orderBy, filters, include } = options;
 	const args: Prisma.FolderFindManyArgs = {
 		skip,

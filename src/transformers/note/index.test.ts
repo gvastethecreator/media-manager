@@ -39,8 +39,11 @@ describe('searchNotes', () => {
 		(prisma.note.count as jest.Mock).mockResolvedValue(1);
 
 		const result = await searchNotes({}, { page: 1, pageSize: 1 });
+		expect(Array.isArray(result.items)).toBe(true);
 		expect(result.items).toHaveLength(1);
 		expect(result.total).toBe(1);
 		expect(result.hasMore).toBe(false);
 	});
 });
+
+// 📝 Test compatible con el patrón moderno: asserts directos, mocks claros, sin wrappers legacy

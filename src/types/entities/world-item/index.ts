@@ -20,27 +20,28 @@ export type { WorldItemDeserialized as WorldItem } from './types';
 
 // Configuración visual (para compatibilidad)
 export interface WorldItemVisualConfig {
-  view: string;
-  sortBy: string;
-  filters: string;
-  lastViewedId: string | null;
-  expandedIds: string[];
-  selectedIds: string[];
+	view: string;
+	sortBy: string;
+	filters: string;
+	lastViewedId: string | null;
+	expandedIds: string[];
+	selectedIds: string[];
 }
 
 export interface ParsedWorldItemVisualConfig {
-  view: string;
-  sortBy: string;
-  filters: Record<string, unknown>;
-  lastViewedId: string | null;
-  expandedIds: string[];
-  selectedIds: string[];
+	view: string;
+	sortBy: string;
+	filters: Record<string, unknown>;
+	lastViewedId: string | null;
+	expandedIds: string[];
+	selectedIds: string[];
 }
 
 // Exportar tipos extendidos explícitamente
 // 🎯 Alias principal para el tipo WorldItem
 export type {
-    ParsedWorldItem,
-    ParsedWorldItemWithRelations, WorldItemExtended , WorldItemVisualConfig
+	ParsedWorldItem,
+	ParsedWorldItemWithRelations,
+	WorldItemExtended,
+	WorldItemVisualConfig,
 } from './extended';
-

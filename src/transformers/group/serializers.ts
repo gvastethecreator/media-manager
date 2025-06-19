@@ -5,18 +5,18 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    type GroupBase,
-    type GroupComplete,
-    type GroupCreateInput,
-    GroupSchema,
-    type GroupTransformerOptions,
-    type GroupUpdateInput,
+	type GroupBase,
+	type GroupComplete,
+	type GroupCreateInput,
+	GroupSchema,
+	type GroupTransformerOptions,
+	type GroupUpdateInput,
 } from '@/types/entities/group/types';
 import {
-    deserializeJsonField,
-    serializeJsonField,
-    validateFieldType,
-    validateRequiredFields,
+	deserializeJsonField,
+	serializeJsonField,
+	validateFieldType,
+	validateRequiredFields,
 } from '@/utils/transformers/common';
 import { DEFAULT_UI_VALUES } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';

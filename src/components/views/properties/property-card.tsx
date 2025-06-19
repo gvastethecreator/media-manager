@@ -70,9 +70,7 @@ export function PropertyCard({ property, onClick, className }: PropertyCardProps
 								{property.category}
 							</Badge>
 						)}
-						{property.shortcut && (
-							<code className="text-xs text-muted-foreground truncate">{property.shortcut}</code>
-						)}
+						{property.shortcut && <code className="text-xs text-muted-foreground truncate">{property.shortcut}</code>}
 					</div>
 				</div>
 			</div>

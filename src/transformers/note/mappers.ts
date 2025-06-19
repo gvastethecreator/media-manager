@@ -4,13 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    NoteBase,
-    NoteCreateInput,
-    NoteFilters,
-    NoteSearchOptions,
-    NoteUpdateInput,
-} from '@/types/entities/note';
+import type { NoteBase, NoteCreateInput, NoteFilters, NoteSearchOptions, NoteUpdateInput } from '@/types/entities/note';
 import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('NoteMappers');

@@ -156,6 +156,12 @@ Componente para mostrar listas de entidades con opciones avanzadas de búsqueda,
 | `onItemClick` | `(id: string) => void` | `undefined` | Función a llamar al hacer clic en un ítem |
 | `tcgMode` | `boolean` | `false` | Usar modo de tarjeta de trading para EntityCards |
 
+### TagInput
+
+Un componente avanzado para la entrada de etiquetas, con soporte para autocompletado, validación y personalización.
+
+[Ver documentación y ejemplos de TagInput](./tag/README.md)
+
 ## Integración con Sistema de Diseño
 
 Estos componentes se integran perfectamente con el sistema de diseño de la aplicación:
@@ -275,6 +281,7 @@ graph TD
 Tarjeta genérica para mostrar información de entidades con soporte para diferentes modos de visualización.
 
 **Características principales:**
+
 - Soporte para modo compacto
 - Modo TCG (Trading Card Game)
 - Animaciones configurables
@@ -285,6 +292,7 @@ Tarjeta genérica para mostrar información de entidades con soporte para difere
 Componente para mostrar listas o grids de entidades con capacidades avanzadas.
 
 **Características principales:**
+
 - Múltiples modos de vista (grid, lista, compacto)
 - Búsqueda y filtrado
 - Ordenación configurable
@@ -296,6 +304,7 @@ Componente para mostrar listas o grids de entidades con capacidades avanzadas.
 Componente para mostrar estadísticas de entidades en diferentes formatos.
 
 **Características principales:**
+
 - Formato de badges o lista
 - Animaciones de números
 - Personalización de colores
@@ -306,6 +315,7 @@ Componente para mostrar estadísticas de entidades en diferentes formatos.
 Formulario dinámico para la creación y edición de entidades con validación avanzada.
 
 **Características principales:**
+
 - Generación dinámica de formularios
 - Validación con Zod
 - Múltiples tipos de campos
@@ -314,6 +324,7 @@ Formulario dinámico para la creación y edición de entidades con validación a
 - Integración con toast
 
 **Tipos de campos soportados:**
+
 - `text` - Campos de texto simples
 - `textarea` - Áreas de texto
 - `select` - Selector de opciones
@@ -376,6 +387,7 @@ function MyForm() {
 Componente de encabezado para páginas de entidades, que incluye título, descripción, breadcrumbs, acciones y estadísticas.
 
 **Características principales:**
+
 - Breadcrumbs integrados
 - Acciones principales y secundarias (en menú desplegable)
 - Integración con estadísticas
@@ -428,6 +440,7 @@ function EntityDetailPage() {
 Componente avanzado para filtros complejos de entidades, con soporte para guardado y reutilización de filtros.
 
 **Características principales:**
+
 - Múltiples tipos de filtros
 - Búsqueda rápida
 - Guardado de filtros personalizados
@@ -435,6 +448,7 @@ Componente avanzado para filtros complejos de entidades, con soporte para guarda
 - UI adaptable (compacta o normal)
 
 **Tipos de filtros soportados:**
+
 - `text` - Búsqueda por texto
 - `select` - Selector de opciones
 - `multiselect` - Selector múltiple

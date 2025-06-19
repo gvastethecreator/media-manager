@@ -155,7 +155,7 @@ export function transformProfile(profile: ProfileFromPrisma): ProfileExtended {
 		createdAt,
 		updatedAt,
 		settingsId: profile.settingsId,
-		imageId: profile.imageId
+		imageId: profile.imageId,
 	};
 
 	return {
