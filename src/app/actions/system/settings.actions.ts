@@ -5,12 +5,12 @@
 
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { deserializeSettings, mergeSettings, serializeSettings } from '@/transformers/settings';
 import type { Settings } from '@/types/settings';
 import { settingsSchema } from '@/types/settings';
+import { revalidatePath } from 'next/cache';
 import { createSettingsError, isSettingsError } from './settings.errors';
 
 // Logger específico para acciones de configuración
@@ -112,7 +112,7 @@ export async function getSystemSettings(): Promise<Settings> {
 	try {
 		// Intentar obtener la configuración existente
 		const settings = await prisma.settings.findUnique({
-			where: { userId: null },
+			where: { id: 'default' },
 		});
 
 		if (!settings) {
@@ -240,7 +240,7 @@ export async function getProfileSettings(profileId: string): Promise<Settings | 
 
 		// Buscar configuración específica del perfil
 		const settings = await prisma.settings.findUnique({
-			where: { userId: profileId },
+			where: { id: profileId },
 		});
 
 		if (!settings) {
@@ -304,6 +304,7 @@ export async function updateProfileSettings(profileId: string, data: Partial<Set
 			},
 			create: {
 				id: profileId,
+				userId: profileId,
 				data: serializedData,
 			},
 		});
@@ -355,7 +356,7 @@ export async function resetProfileSettings(profileId: string): Promise<void> {
 			})
 			.catch((err) => {
 				// Si no existe, ignorar el error
-				if (!err.message.includes('Record to delete does not exist')) {
+				if (err.code !== 'P2025') { // P2025 is Prisma's code for "record to delete does not exist"
 					throw err;
 				}
 			});

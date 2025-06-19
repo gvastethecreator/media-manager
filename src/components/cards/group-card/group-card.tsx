@@ -1,10 +1,9 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { Group } from '@/types/prisma';
 import { GroupCardContent } from './group-card-content';
 import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
@@ -13,7 +12,7 @@ import type { GroupCardData } from './group-server-actions';
 
 export interface GroupCardProps {
 	group: GroupCardData;
-	onClick?: (group: Group) => void;
+	onClick?: (group: GroupCardData) => void;
 	className?: string;
 	tcgMode?: boolean;
 	compact?: boolean;
@@ -108,12 +107,10 @@ export function GroupCard({
 	// Construir la tarjeta
 	const cardContent = (
 		<div
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
 			className={cn(
 				'relative rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm transition-all',
 				isHovered && !disabled && 'shadow-md scale-[1.01]',
-				disabled && 'opacity-70 cursor-not-allowed',
+				disabled && 'opacity-70',
 				isSelected && 'ring-2',
 				className
 			)}
@@ -123,7 +120,7 @@ export function GroupCard({
 				borderRadius: tcgMode ? '0.5rem' : '0.375rem',
 				boxShadow: tcgMode ? `0 0 0 1px ${primaryColor}30, 0 2px 10px ${primaryColor}20` : undefined,
 				backgroundColor: tcgMode ? '#1a1a1a' : undefined,
-				ringColor: isSelected ? primaryColor : undefined,
+				...(isSelected && { '--tw-ring-color': primaryColor } as React.CSSProperties),
 			}}
 		>
 			{/* Encabezado */}
@@ -211,7 +208,13 @@ export function GroupCard({
 			<button
 				onClick={handleClick}
 				onKeyDown={handleKeyDown}
-				className="cursor-pointer text-left p-0 m-0 w-full border-0 bg-transparent"
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+				className={cn(
+					"cursor-pointer text-left p-0 m-0 w-full border-0 bg-transparent focus:outline-none focus:ring-2 focus:ring-offset-2",
+					!disabled && "hover:opacity-100",
+					disabled && "cursor-not-allowed"
+				)}
 				type="button"
 				disabled={disabled}
 				aria-pressed={isSelected}
@@ -223,7 +226,12 @@ export function GroupCard({
 
 	// Si no hay onClick, lo envolvemos en un Link para navegar a la página del grupo
 	return (
-		<Link href={`/dashboard/groups/${group.id}`} className="block">
+		<Link
+			href={`/dashboard/groups/${group.id}`}
+			className="block"
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+		>
 			{cardContent}
 		</Link>
 	);

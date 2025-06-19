@@ -1,6 +1,5 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { worldItemsCache } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
@@ -8,23 +7,24 @@ import type { EventType } from '@/lib/server/events.server';
 import { emit } from '@/lib/server/events.server';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { revalidatePath } from 'next/cache';
 // Importar tipos y transformers
 import {
-	mapWorldItemFiltersToPrisma as createWorldItemFilter,
-	mapWorldItemOrderByToPrisma as createWorldItemOrderBy,
-	fromPrismaWorldItem,
-	mapCreateWorldItemDataToPrisma,
-	mapUpdateWorldItemDataToPrisma,
-	transformWorldItemToExtended as toExtendedWorldItem,
+    fromPrismaWorldItem,
+    mapCreateWorldItemDataToPrisma,
+    mapUpdateWorldItemDataToPrisma,
+    mapWorldItemFiltersToPrisma,
+    mapWorldItemOrderByToPrisma,
+    transformWorldItemToExtended,
 } from '@/transformers/world-item';
 import type {
-	CreateWorldItemData,
-	UpdateWorldItemData,
-	WorldItem,
-	WorldItemBase,
-	WorldItemExtended,
-	WorldItemFilters,
-	WorldItemSortCriteria,
+    CreateWorldItemData,
+    UpdateWorldItemData,
+    WorldItem,
+    WorldItemBase,
+    WorldItemExtended,
+    WorldItemFilters,
+    WorldItemSortCriteria,
 } from '@/types/entities/world-item';
 import type { FileItem } from '@/types/file-item';
 
@@ -160,10 +160,10 @@ export async function getWorldItems(
 		worldItemLogger.info('🔍 Obteniendo objetos del mundo (simplificado)');
 
 		// Crear el filtro y el ordenamiento con los nuevos transformadores
-		const whereCondition = createWorldItemFilter(filters);
+		const whereCondition = mapWorldItemFiltersToPrisma(filters);
 		// Cambiar el orderBy por defecto: Eliminar ordenación por _count de relación
 		const defaultOrderBy = { updatedAt: 'desc' } as const; // Ordenar por fecha de actualización por defecto
-		const orderByCondition = sortBy ? createWorldItemOrderBy(sortBy) : defaultOrderBy;
+		const orderByCondition = sortBy ? mapWorldItemOrderByToPrisma(sortBy) : defaultOrderBy;
 
 		// DEBUG: Log de condiciones (ya presente, pero aseguramos que esté activo)
 		worldItemLogger.debug('🔍 Prisma findMany - Where:', JSON.stringify(whereCondition, null, 2));
@@ -198,8 +198,8 @@ export async function getWorldItems(
 		// Mapear resultados llamando directamente a los transformadores
 		const processedItems = worldItems.map((worldItem) => {
 			// Ahora que fromPrismaWorldItem es robusto y parsea JSON,
-			// podemos llamar a toExtendedWorldItem directamente.
-			const extendedItem = toExtendedWorldItem(fromPrismaWorldItem(worldItem));
+			// podemos llamar a transformWorldItemToExtended directamente.
+			const extendedItem = transformWorldItemToExtended(fromPrismaWorldItem(worldItem));
 
 			return {
 				...extendedItem,
@@ -297,7 +297,7 @@ export async function getWorldItemById(id: string): Promise<WorldItemExtended> {
 		worldItemLogger.info('✅ Objeto del mundo obtenido:', worldItem.name);
 
 		// Transformar con los nuevos transformadores para deserializar correctamente los campos JSON
-		return toExtendedWorldItem(worldItem);
+		return transformWorldItemToExtended(fromPrismaWorldItem(worldItem));
 	} catch (error) {
 		worldItemLogger.error('❌ Error al obtener objeto del mundo', { id, error });
 		// Preservar el código de error si ya es un WorldItemError
@@ -348,7 +348,7 @@ export async function createWorldItem(data: CreateWorldItemData): Promise<WorldI
 		worldItemLogger.info('✅ Objeto del mundo creado:', worldItem.name);
 
 		// Transformar con los nuevos transformadores
-		return toExtendedWorldItem(worldItem);
+		return transformWorldItemToExtended(fromPrismaWorldItem(worldItem));
 	} catch (error) {
 		worldItemLogger.error('❌ Error al crear objeto del mundo', error);
 		throw createWorldItemError('No se pudo crear el objeto del mundo', WorldItemErrorCode.OPERATION_FAILED, error);
@@ -407,7 +407,7 @@ export async function updateWorldItem(id: string, data: UpdateWorldItemData): Pr
 		worldItemLogger.info('✅ Objeto del mundo actualizado:', updated.name);
 
 		// Transformar con los nuevos transformadores
-		return toExtendedWorldItem(updated);
+		return transformWorldItemToExtended(fromPrismaWorldItem(updated));
 	} catch (error) {
 		worldItemLogger.error('❌ Error al actualizar objeto del mundo', { id, error });
 		// Preservar el código de error si ya es un WorldItemError

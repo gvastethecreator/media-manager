@@ -4,18 +4,27 @@
  * @description Implementa operaciones CRUD básicas y gestión de estado para imágenes
  */
 
-import type { StateCreator } from 'zustand';
 import {
-	createImage as createServerImage,
-	deleteImage,
-	getImage,
-	getImages,
+    createImage as createServerImage,
+    deleteImage as deleteServerImage,
+    getImage,
+    getImages,
+    updateImage as updateServerImage,
 } from '@/app/actions/images/image-crud.actions';
-import { extendImage } from '@/transformers/image/serializers';
-import type { CreateImageData, Image, ImageExtended, UpdateImageData } from '@/types/entities/image';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/services/toast.service';
+import { extendImage, extendImages } from '@/transformers/image/serializers';
+import type {
+    CreateImageData,
+    Image,
+    ImageBase,
+    UpdateImageData
+} from '@/types/entities/image';
+import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
-// Slice para operaciones CRUD básicas
+const imageLogger = clientLogger.withContext('ImageStore');
+
 export interface ImageCoreSlice {
 	// Getters
 	getImage: (id: string) => Image | undefined;
@@ -23,10 +32,10 @@ export interface ImageCoreSlice {
 	getImagesByFolder: (folderId: string) => Image[];
 	getImageByPath: (path: string) => Image | undefined;
 
-	// Operaciones
-	addImage: (image: ImageExtended) => void;
-	addImages: (images: ImageExtended[]) => void;
-	updateImage: (id: string, data: UpdateImageData) => void;
+	// Operaciones síncronas
+	addImage: (image: Image) => void;
+	addImages: (images: Image[]) => void;
+	_updateImage: (id: string, data: Partial<Image>) => void;
 	deleteImage: (id: string) => void;
 	clearImages: () => void;
 	clearFolderImages: (folderId: string) => void;
@@ -36,239 +45,194 @@ export interface ImageCoreSlice {
 	setError: (error: string | null) => void;
 
 	// Acciones asíncronas
-	fetchImage: (id: string) => Promise<ImageExtended | undefined>;
-	fetchImages: (options?: { folderIds?: string[]; refresh?: boolean }) => Promise<ImageExtended[]>;
-	createImage: (data: CreateImageData) => Promise<ImageExtended | undefined>;
+	fetchImage: (id: string) => Promise<Image | undefined>;
+	fetchImages: (options?: {
+		folderIds?: string[];
+		refresh?: boolean;
+	}) => Promise<Image[]>;
+	createImage: (data: CreateImageData) => Promise<Image | undefined>;
+	updateImage: (
+		id: string,
+		data: UpdateImageData,
+	) => Promise<Image | undefined>;
 	removeImage: (id: string) => Promise<boolean>;
 }
 
-// Creador del slice
-export const createImageCoreSlice: StateCreator<ImageState, [], [], ImageCoreSlice> = (set, get) => ({
-	// Getters
-	getImage: (id: string) => {
-		return get().core.images[id];
-	},
+export const createImageCoreSlice: StateCreator<
+	ImageState & ImageCoreSlice,
+	[],
+	[],
+	ImageCoreSlice
+> = (set, get) => ({
+	// --- Getters ---
+	getImage: (id) => get().core.images[id],
+	getImages: () => Object.values(get().core.images),
+	getImagesByFolder: (folderId) =>
+		get()
+			.getImages()
+			.filter((image) => image.folderId === folderId),
+	getImageByPath: (path) =>
+		get()
+			.getImages()
+			.find((image) => image.path === path),
 
-	getImages: () => {
-		return Object.values(get().core.images);
-	},
-
-	getImagesByFolder: (folderId: string) => {
-		return Object.values(get().core.images).filter((image) => image.folderId === folderId);
-	},
-
-	getImageByPath: (path: string) => {
-		return Object.values(get().core.images).find((image) => image.path === path);
-	},
-
-	// Operaciones síncronas
-	addImage: (image: ImageExtended) => {
+	// --- Operaciones síncronas ---
+	addImage: (image) => {
 		set((state) => ({
 			core: {
 				...state.core,
-				images: {
-					...state.core.images,
-					[image.id]: image,
-				},
-				lastUpdated: Date.now(),
+				images: { ...state.core.images, [image.id]: image },
 			},
 		}));
 	},
-
-	addImages: (images: ImageExtended[]) => {
-		// 🛡️ Robustez: filtrar nulos, promesas y tipos inválidos antes de agregar al store
-		const validImages = images.filter((img, idx) => {
-			const isValid = img && typeof img === 'object' && typeof (img as any).then !== 'function';
-			if (!isValid) {
-				console.warn(`🛡️ Imagen excluida en posición ${idx}: nulo, promesa o tipo inválido`, { img });
-			}
-			return isValid;
-		});
-		const imagesMap = validImages.reduce(
-			(acc, image) => {
-				if (image?.id) {
-					acc[image.id] = image;
-				}
+	addImages: (images) => {
+		const imagesMap = images.reduce(
+			(acc, img) => {
+				acc[img.id] = img;
 				return acc;
 			},
-			{} as Record<string, Image>
+			{} as Record<string, Image>,
 		);
-
 		set((state) => ({
 			core: {
 				...state.core,
-				images: {
-					...state.core.images,
-					...imagesMap,
-				},
-				lastUpdated: Date.now(),
+				images: { ...state.core.images, ...imagesMap },
 			},
 		}));
 	},
-
-	updateImage: (id: string, data: UpdateImageData) => {
-		set((state) => {
-			const image = state.core.images[id];
-			if (!image) {
-				return state;
-			}
-
-			const updatedImage = { ...image, ...data } as Image;
-			return {
-				core: {
-					...state.core,
-					images: {
-						...state.core.images,
-						[id]: updatedImage,
-					},
-					lastUpdated: Date.now(),
-				},
-			};
-		});
-	},
-
-	deleteImage: (id: string) => {
-		set((state) => {
-			const newImages = { ...state.core.images };
-			if (id in newImages) {
-				delete newImages[id];
-			}
-
-			return {
-				core: {
-					...state.core,
-					images: newImages,
-					lastUpdated: Date.now(),
-				},
-			};
-		});
-	},
-
-	clearImages: () => {
-		set((state) => ({
-			core: {
-				...state.core,
-				images: {},
-				lastUpdated: Date.now(),
-			},
-		}));
-	},
-
-	clearFolderImages: (folderId: string) => {
-		set((state) => {
-			const newImages = { ...state.core.images };
-			let _count = 0;
-
-			// Usar for...of en lugar de forEach
-			for (const imageId of Object.keys(newImages)) {
-				if (newImages[imageId].folderId === folderId) {
-					delete newImages[imageId];
-					_count++;
-				}
-			}
-
-			return {
-				core: {
-					...state.core,
-					images: newImages,
-					lastUpdated: Date.now(),
-				},
-			};
-		});
-	},
-
-	// Estado de carga
-	setLoading: (isLoading: boolean) => {
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading,
-			},
-		}));
-	},
-
-	setError: (error: string | null) => {
-		set((state) => ({
-			core: {
-				...state.core,
-				error,
-			},
-		}));
-	},
-
-	// Operaciones asíncronas con Server Actions
-	fetchImage: async (id: string) => {
-		const { setLoading, setError, addImage } = get();
-		try {
-			setLoading(true);
-			const image = await getImage(id);
-			if (image) {
-				addImage(image);
-			}
-			return image ?? undefined;
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			setError(errorMessage);
-			return undefined;
-		} finally {
-			setLoading(false);
+	_updateImage: (id, data) => {
+		const existing = get().getImage(id);
+		if (existing) {
+			get().addImage({ ...existing, ...data, updatedAt: new Date() });
 		}
 	},
+	deleteImage: (id) => {
+		set((state) => {
+			const { [id]: _, ...remaining } = state.core.images;
+			return { core: { ...state.core, images: remaining } };
+		});
+	},
+	clearImages: () => {
+		set((state) => ({ core: { ...state.core, images: {} } }));
+	},
+	clearFolderImages: (folderId) => {
+		const images = get().getImages();
+		const imagesToKeep = images.filter((img) => img.folderId !== folderId);
+		const imagesMap = imagesToKeep.reduce(
+			(acc, img) => {
+				acc[img.id] = img;
+				return acc;
+			},
+			{} as Record<string, Image>,
+		);
+		set((state) => ({ core: { ...state.core, images: imagesMap } }));
+	},
 
-	fetchImages: async (options = {}) => {
-		const { setLoading, setError, addImages, clearImages } = get();
-		const { refresh = false } = options;
+	// --- Estado de carga y errores ---
+	setLoading: (isLoading) =>
+		set((state) => ({ core: { ...state.core, isLoading } })),
+	setError: (error) => set((state) => ({ core: { ...state.core, error } })),
 
+	// --- Acciones Asíncronas ---
+	fetchImage: async (id) => {
+		get().setLoading(true);
 		try {
-			setLoading(true);
-
-			if (refresh) {
-				clearImages();
+			const response = await getImage(id);
+			if (response.success && response.data) {
+				const image = extendImage(response.data as ImageBase);
+				get().addImage(image);
+				return image;
 			}
-
-			const result = await getImages(options);
-			addImages(result.images);
-			return Object.values(get().core.images);
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			setError(errorMessage);
+			get().setError(response.error ?? 'Error fetching image');
+			return undefined;
+		} catch (e) {
+			imageLogger.error('Failed to fetch image', { error: e });
+			get().setError('Failed to fetch image');
+			return undefined;
+		} finally {
+			get().setLoading(false);
+		}
+	},
+	fetchImages: async (options = {}) => {
+		get().setLoading(true);
+		try {
+			if (options.refresh) get().clearImages();
+			const response = await getImages(options);
+			if (response.success && response.data) {
+				const images = extendImages(response.data as ImageBase[]);
+				get().addImages(images);
+				return images;
+			}
+			get().setError(response.error ?? 'Error fetching images');
+			return [];
+		} catch (e) {
+			imageLogger.error('Failed to fetch images', { error: e });
+			get().setError('Failed to fetch images');
 			return [];
 		} finally {
-			setLoading(false);
+			get().setLoading(false);
 		}
 	},
-
-	createImage: async (data: CreateImageData) => {
-		const { setLoading, setError, addImage } = get();
+	createImage: async (data) => {
+		get().setLoading(true);
 		try {
-			setLoading(true);
-
-			const newImageBase = await createServerImage(data);
-			const extended = extendImage(newImageBase);
-			addImage(extended);
-			return get().core.images[newImageBase.id];
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			setError(errorMessage);
+			const response = await createServerImage(data);
+			if (response.success && response.data) {
+				const image = extendImage(response.data as ImageBase);
+				get().addImage(image);
+				toastService.success('Imagen creada');
+				return image;
+			}
+			get().setError(response.error ?? 'Error creating image');
+			toastService.error(response.error ?? 'Error creating image');
+			return undefined;
+		} catch (e) {
+			imageLogger.error('Failed to create image', { error: e });
+			get().setError('Failed to create image');
 			return undefined;
 		} finally {
-			setLoading(false);
+			get().setLoading(false);
 		}
 	},
-
-	removeImage: async (id: string) => {
-		const { setLoading, setError, deleteImage: removeLocal } = get();
+	updateImage: async (id, data) => {
+		get().setLoading(true);
 		try {
-			setLoading(true);
-			await deleteImage(id);
-			removeLocal(id);
-			return true;
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			setError(errorMessage);
+			const response = await updateServerImage(id, data);
+			if (response.success && response.data) {
+				const image = extendImage(response.data as ImageBase);
+				get().addImage(image);
+				toastService.success('Imagen actualizada');
+				return image;
+			}
+			get().setError(response.error ?? 'Error updating image');
+			toastService.error(response.error ?? 'Error updating image');
+			return undefined;
+		} catch (e) {
+			imageLogger.error('Failed to update image', { error: e });
+			get().setError('Failed to update image');
+			return undefined;
+		} finally {
+			get().setLoading(false);
+		}
+	},
+	removeImage: async (id) => {
+		get().setLoading(true);
+		try {
+			const response = await deleteServerImage(id);
+			if (response.success) {
+				get().deleteImage(id);
+				toastService.success('Imagen eliminada');
+				return true;
+			}
+			get().setError(response.error ?? 'Error removing image');
+			toastService.error(response.error ?? 'Error removing image');
+			return false;
+		} catch (e) {
+			imageLogger.error('Failed to remove image', { error: e });
+			get().setError('Failed to remove image');
 			return false;
 		} finally {
-			setLoading(false);
+			get().setLoading(false);
 		}
 	},
 });

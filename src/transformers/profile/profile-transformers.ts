@@ -5,9 +5,34 @@
 
 import { Language, ThemeMode, type ProfileBase, type ProfilePreferencesSchemaType } from '@/types/entities/profile';
 import { profilePreferencesSchema } from '@/types/entities/profile/schema';
-import type { Profile } from '@prisma/client';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+/**
+ * Tipo para representar un perfil de Prisma
+ */
+export interface ProfileFromPrisma {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description?: string | null;
+	isActive: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	settingsId?: string | null;
+	imageId?: string | null;
+	settings?: string | Record<string, any> | null;
+}
+
+/**
+ * Tipo para el perfil extendido con datos adicionales
+ */
+export interface ProfileExtended extends ProfileBase {
+	parsedPreferences: ProfilePreferencesSchemaType;
+	formattedCreatedAt: string;
+	formattedUpdatedAt: string;
+}
 
 /**
  * Obtiene el texto descriptivo para un tema
@@ -63,8 +88,8 @@ export function formatProfileDate(date: Date): string {
  * @returns Preferencias validadas y con valores por defecto
  * @throws Error si la validación falla
  */
-export function parseProfilePreferences(profile: Profile): ProfilePreferencesSchemaType {
-	let rawPreferences: any = {}; // Initialize as empty object
+export function parseProfilePreferences(profile: ProfileFromPrisma): ProfilePreferencesSchemaType {
+	let rawPreferences: Record<string, any> = {}; // Initialize as empty object
 	try {
 		// Intentar parsear las preferencias desde profile.settings si existe
 		if (profile.settings && typeof profile.settings === 'string') {
@@ -82,7 +107,7 @@ export function parseProfilePreferences(profile: Profile): ProfilePreferencesSch
 			}
 		} else if (profile.settings && typeof profile.settings === 'object') {
 			// Si ya es un objeto (e.g., desde una actualización previa)
-			rawPreferences = profile.settings;
+			rawPreferences = profile.settings as Record<string, any>;
 		} else {
 			// If profile.settings is null, undefined, or other type, start with empty object
 			rawPreferences = {};
@@ -93,11 +118,11 @@ export function parseProfilePreferences(profile: Profile): ProfilePreferencesSch
 			const colorRegex = /^#[0-9A-Fa-f]{6}$/;
 			if (!colorRegex.test(rawPreferences.color)) {
 				console.warn(`[Profile Transformer] Invalid color format '${rawPreferences.color}' found. Using default.`);
-				rawPreferences.color = profilePreferencesSchema.shape.color._def.defaultValue; // Use schema default
+				rawPreferences.color = profilePreferencesSchema.shape.color._def.defaultValue(); // Use schema default
 			}
 		} else if ('color' in rawPreferences && typeof rawPreferences.color !== 'string') {
 			console.warn(`[Profile Transformer] Invalid type for color ('${typeof rawPreferences.color}'). Using default.`);
-			rawPreferences.color = profilePreferencesSchema.shape.color._def.defaultValue;
+			rawPreferences.color = profilePreferencesSchema.shape.color._def.defaultValue();
 		} // No else needed, if color is missing, Zod default applies
 
 		// Validar y parsear con Zod (ahora con rawPreferences más seguro)
@@ -115,12 +140,26 @@ export function parseProfilePreferences(profile: Profile): ProfilePreferencesSch
  * @param profile - Perfil de Prisma
  * @returns Perfil extendido con datos adicionales para UI
  */
-export function transformProfile(profile: Profile): ProfileBase {
+export function transformProfile(profile: ProfileFromPrisma): ProfileExtended {
 	const createdAt = new Date(profile.createdAt);
 	const updatedAt = new Date(profile.updatedAt);
 
+	// Extraemos solo las propiedades de ProfileBase
+	const baseProfile: ProfileBase = {
+		id: profile.id,
+		name: profile.name,
+		emoji: profile.emoji,
+		color: profile.color,
+		description: profile.description,
+		isActive: profile.isActive,
+		createdAt,
+		updatedAt,
+		settingsId: profile.settingsId,
+		imageId: profile.imageId
+	};
+
 	return {
-		...profile,
+		...baseProfile,
 		parsedPreferences: parseProfilePreferences(profile),
 		formattedCreatedAt: formatProfileDate(createdAt),
 		formattedUpdatedAt: formatProfileDate(updatedAt),
@@ -132,7 +171,7 @@ export function transformProfile(profile: Profile): ProfileBase {
  * @param profiles - Lista de perfiles de Prisma
  * @returns Lista de perfiles extendidos
  */
-export function transformProfiles(profiles: Profile[]): ProfileBase[] {
+export function transformProfiles(profiles: ProfileFromPrisma[]): ProfileExtended[] {
 	return profiles.map(transformProfile);
 }
 

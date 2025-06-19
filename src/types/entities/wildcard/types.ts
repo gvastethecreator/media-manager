@@ -69,13 +69,14 @@ export interface WildcardBase {
  * Input para creación
  */
 export interface WildcardCreateInput {
+	id?: string;
 	name: string;
 	emoji?: string;
 	color?: string;
 	description?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
-	children?: string;
+	children?: string | WildcardChild[];
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	parentId?: string | null;
@@ -85,6 +86,28 @@ export interface WildcardCreateInput {
  * Input para actualización
  */
 export type WildcardUpdateInput = Partial<Omit<WildcardBase, 'id' | 'createdAt' | 'updatedAt'>>;
+
+/**
+ * Input para actualización en lote
+ */
+export interface WildcardBulkUpdateData {
+	parentId?: string | null;
+	category?: string | null;
+	isFavorite?: boolean;
+}
+
+/**
+ * Versión simplificada de Wildcard para relaciones
+ */
+export interface WildcardRelated {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	category?: string | null;
+	parentId?: string | null;
+	isFavorite: boolean;
+}
 
 /**
  * Estructura de un hijo de wildcard
@@ -139,6 +162,21 @@ export interface WildcardFilters {
 }
 
 /**
+ * Filtros avanzados para búsqueda de wildcards
+ */
+export interface WildcardSearchFilters {
+    category?: string;
+    parentId?: string | null;
+    isFavorite?: boolean;
+    ids?: string[];
+    excludeIds?: string[];
+    createdAfter?: Date;
+    createdBefore?: Date;
+    updatedAfter?: Date;
+    updatedBefore?: Date;
+}
+
+/**
  * Opciones UI para wildcards
  */
 export interface WildcardUI {
@@ -157,8 +195,18 @@ export interface WildcardComplete extends WildcardBase, WildcardRelations, Wildc
 export interface WildcardSearchOptions {
     skip?: number;
     take?: number;
-    sortBy?: WildcardSortCriteria;
-    filters?: WildcardFilters;
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    searchQuery?: string;
+    filters?: WildcardSearchFilters;
+    includeStats?: boolean;
+    includeImages?: boolean;
+    includeVideos?: boolean;
+    includeAlbums?: boolean;
+    includeTags?: boolean;
+    includeParent?: boolean;
 }
 
 /**

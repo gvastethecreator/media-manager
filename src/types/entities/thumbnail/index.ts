@@ -3,7 +3,25 @@
  * @module types/entities/thumbnail
  */
 
-export * from './base';
-export * from './extended';
+export {
+    ThumbnailFormat,
+    ThumbnailQuality,
+    thumbnailBaseSchema
+} from './types';
+
+export type {
+    ThumbnailBase,
+    ThumbnailCreateInput,
+    ThumbnailMetadata,
+    ThumbnailRelations,
+    ThumbnailUpdateInput
+} from './types';
+
+export type {
+    ThumbnailComplete,
+    ThumbnailExtended,
+    ThumbnailStats,
+    ThumbnailWithStats
+} from './extended';
 
 // Añadir aquí exportaciones adicionales si es necesario

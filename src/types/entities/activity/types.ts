@@ -39,7 +39,7 @@ export interface Activity extends ActivityBase {
 /**
  * Input para creación
  */
-export interface ActivityCreateInput {
+export interface CreateActivityData {
 	type: string;
 	description: string;
 	imageId?: string;

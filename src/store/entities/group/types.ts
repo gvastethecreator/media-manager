@@ -3,13 +3,8 @@
  * @module store/entities/group/types
  */
 
-import type {
-	Group,
-	GroupDisplayState,
-	GroupSortCriteria,
-	GroupType,
-	GroupViewMode,
-} from '@/types/entities/group/types';
+import type { Group, GroupDisplayState } from '@/types/entities/group';
+import { GroupSortCriteria, GroupType, GroupViewMode } from '@/types/entities/group';
 
 /**
  * Estado del core para el store de grupos

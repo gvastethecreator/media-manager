@@ -67,10 +67,20 @@ export function mapUpdateCollectionDataToPrisma(
 export function mapCollectionSearchOptionsToPrisma(
 	options: CollectionSearchOptions
 ): Prisma.CollectionFindManyArgs {
-	const { filters, ...rest } = options;
+	const { filters, skip, take, orderBy, include } = options;
+
 	return {
-		...rest,
 		where: filters ? mapCollectionFiltersToPrisma(filters) : undefined,
+		skip,
+		take,
+		orderBy,
+		include: include ? {
+			images: include.images || false,
+			tags: include.tags || false,
+			groups: include.groups || false,
+			properties: include.properties || false,
+			wildcards: include.wildcards || false,
+		} : undefined,
 	};
 }
 
@@ -100,11 +110,24 @@ function mapCollectionFiltersToPrisma(filters: CollectionFilters): Prisma.Collec
 	}
 	if (filters.imageCount) {
 		where.images = {
-			_count: {
-				gte: filters.imageCount.min,
-				lte: filters.imageCount.max,
-			},
+			...(where.images || {}),
+			...(filters.imageCount.min !== undefined || filters.imageCount.max !== undefined
+				? {
+					_count: {
+						...(filters.imageCount.min !== undefined ? { gte: filters.imageCount.min } : {}),
+						...(filters.imageCount.max !== undefined ? { lte: filters.imageCount.max } : {}),
+					},
+				}
+				: {}),
 		};
+	}
+	if (filters.dateRange) {
+		if (filters.dateRange.start || filters.dateRange.end) {
+			where.createdAt = {
+				...(filters.dateRange.start ? { gte: filters.dateRange.start } : {}),
+				...(filters.dateRange.end ? { lte: filters.dateRange.end } : {}),
+			};
+		}
 	}
 
 	return where;

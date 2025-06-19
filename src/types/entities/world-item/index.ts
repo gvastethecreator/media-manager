@@ -41,6 +41,6 @@ export interface ParsedWorldItemVisualConfig {
 // 🎯 Alias principal para el tipo WorldItem
 export type {
     ParsedWorldItem,
-    ParsedWorldItemWithRelations, WorldItemExtended as WorldItemExtended, WorldItemVisualConfig
+    ParsedWorldItemWithRelations, WorldItemExtended , WorldItemVisualConfig
 } from './extended';
 

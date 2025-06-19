@@ -7,7 +7,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterComplete } from '@/types/entities/character';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 import {
     deserializeAbilities,
     deserializeBeliefs,
@@ -23,26 +22,67 @@ import {
 const logger = serverLogger.withContext('CharacterTransformer');
 
 // Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
-type CharacterFromPrisma = Prisma.CharacterGetPayload<{
-	include: {
-		images: true;
-		videos: true;
-		tags: true;
-		groups: true;
-		properties: true;
-		collections: true;
-		albums: true;
-		places: true;
-		worldItems: true;
-		concepts: true;
-		prompts: true;
-		notes: true;
-		wildcards: true;
-		relatedCharacters: true;
-		relatedTo: true;
-		_count: true;
-	};
-}>;
+interface CharacterFromPrisma {
+    id: string;
+    name: string;
+    description: string | null;
+    level: number;
+    class: string;
+    race: string;
+    alignment: string;
+    backstory: string | null;
+    stats: string;
+    skills: string;
+    inventory: any;
+    spells: any;
+    feats: any;
+    isActive: boolean;
+    isFavorite: boolean;
+    metadata: any;
+    createdAt: Date;
+    updatedAt: Date;
+    // Campos adicionales específicos
+    relationships: string;
+    goals: string;
+    fears: string;
+    beliefs: string;
+    personality: string;
+    abilities: string;
+    filters: string;
+    // Relaciones
+    images: any[];
+    videos: any[];
+    tags: any[];
+    groups: any[];
+    properties: any[];
+    collections: any[];
+    albums: any[];
+    places: any[];
+    worldItems: any[];
+    concepts: any[];
+    prompts: any[];
+    notes: any[];
+    wildcards: any[];
+    relatedCharacters: any[];
+    relatedTo: any[];
+    _count: {
+        images?: number;
+        videos?: number;
+        tags?: number;
+        groups?: number;
+        properties?: number;
+        collections?: number;
+        albums?: number;
+        places?: number;
+        worldItems?: number;
+        concepts?: number;
+        prompts?: number;
+        notes?: number;
+        wildcards?: number;
+        relatedCharacters?: number;
+        relatedTo?: number;
+    };
+}
 
 /**
  * 🔄 Transforma un objeto Character de Prisma a nuestro tipo canónico CharacterComplete.

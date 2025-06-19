@@ -7,14 +7,19 @@
  */
 
 export {
-    CollectionCategory, CollectionPlatform, CollectionRarity
+    CollectionCategory, CollectionPlatform, CollectionRarity, CollectionSortOption
 } from './enums';
 export type {
-    CollectionCard, CollectionExtended, CollectionListItem, CollectionStats, CollectionViewConfig
+    CollectionCard, CollectionComplete, CollectionExtended, CollectionListItem, CollectionStats, CollectionViewConfig
 } from './extended';
 export type {
     CollectionBase,
     CollectionCreateInput,
+    CollectionEdition,
+    CollectionFilter,
+    CollectionFilters,
+    CollectionSearchOptions,
+    CollectionSortBy,
     CollectionUpdateInput
 } from './types';
 

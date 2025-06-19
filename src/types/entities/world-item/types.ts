@@ -263,5 +263,5 @@ export type {
     WorldItemStat as WorldItemStats
 };
 
-    export { WORLD_ITEM_SORT_PROPERTY_MAP, WorldItemSortCriteria };
+    export type { WORLD_ITEM_SORT_PROPERTY_MAP, WorldItemSortCriteria };
 

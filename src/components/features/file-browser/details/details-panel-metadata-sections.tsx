@@ -1,10 +1,10 @@
 'use client';
 
-import { Calendar, Camera, Copy, CopyCheck, ImageIcon, Info, MapPin } from 'lucide-react';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatBytes } from '@/lib/utils/format.utils';
+import { Calendar, Camera, Copy, CopyCheck, ImageIcon, Info, MapPin } from 'lucide-react';
+import { useState } from 'react';
 import { InfoItem } from './details-panel-info-item';
 import type { MetadataComponentProps } from './details-panel-types';
 
@@ -57,7 +57,7 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 					<div className="flex flex-wrap gap-1">
 						{xmp.subject.map((tag) => (
 							<button
-								key={`tag-${tag}`}
+								key={`xmp-tag-${tag}`}
 								className="text-xs rounded-full bg-muted px-2 py-0.5 hover:bg-muted/80"
 								onClick={() => copyToClipboard(tag)}
 								type="button"
@@ -165,7 +165,7 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
 					</div>
 					<div className="flex flex-wrap gap-1">
 						{iptc.keywords.map((keyword) => (
-							<div key={`keyword-${keyword}`} className="text-xs rounded-full bg-muted px-2 py-0.5">
+							<div key={`iptc-keyword-${keyword}`} className="text-xs rounded-full bg-muted px-2 py-0.5">
 								{keyword}
 							</div>
 						))}
@@ -205,7 +205,7 @@ export function ExifInfo({ metadata }: MetadataComponentProps) {
 
 		try {
 			// Intentar parsear la fecha si es string o usar directamente si es Date
-			const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+			const date = typeof dateStr === 'string' ? new Date(dateStr.replace(/(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3')) : dateStr;
 
 			if (Number.isNaN(date.getTime())) {
 				// Si la fecha no es válida, mostrar como string
@@ -442,7 +442,7 @@ export function TechnicalInfo({ metadata }: MetadataComponentProps) {
 
 			{!metadata.dimensions &&
 				!metadata.mimeType &&
-				!metadata.fileSize &&
+				metadata.fileSize === undefined &&
 				!metadata.colorSpace &&
 				metadata.hasAlpha === undefined &&
 				metadata.isAnimated === undefined && (

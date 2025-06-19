@@ -3,9 +3,7 @@
  * @module types/entities/collection/extended
  */
 
-import type { Image } from '@prisma/client';
-import type { CollectionBase } from './base';
-import type { CollectionFilter } from './types';
+import type { CollectionBase, CollectionEdition, CollectionFilter, CollectionSortBy } from './types';
 
 /**
  * Tipo extendido para Collection con propiedades adicionales de UI
@@ -17,7 +15,6 @@ export interface CollectionExtended extends CollectionBase {
 	isOpen?: boolean;
 	isLoading?: boolean;
 	hasError?: boolean;
-	isFavorite?: boolean;
 	isRecent?: boolean;
 
 	// Calculados/runtime
@@ -26,7 +23,40 @@ export interface CollectionExtended extends CollectionBase {
 	totalValue?: number;
 
 	// Relaciones expandidas
-	images?: Image[];
+	images?: Array<{ id: string; name: string; path: string }>;
+}
+
+/**
+ * Tipo completo para Collection con todas las relaciones y datos
+ */
+export interface CollectionComplete extends CollectionBase {
+	// Campos serializados deserializados
+	filters: CollectionFilter[];
+	sortBy: CollectionSortBy | null;
+	editions: CollectionEdition[];
+
+	// Relaciones completas
+	images: Array<{ id: string; name: string; path: string }>;
+	videos: Array<{ id: string; name: string; path: string }>;
+	tags: Array<{ id: string; name: string; color: string; emoji: string }>;
+	groups: Array<{ id: string; name: string; color: string; emoji: string }>;
+	properties: Array<{ id: string; name: string; type: string }>;
+	wildcards: Array<{ id: string; name: string; pattern: string }>;
+	parent: { id: string; name: string } | null;
+	children: Array<{ id: string; name: string }>;
+	albums: Array<{ id: string; name: string }>;
+
+	// Conteos
+	_count: {
+		images?: number;
+		videos?: number;
+		tags?: number;
+		groups?: number;
+		properties?: number;
+		wildcards?: number;
+		children?: number;
+		albums?: number;
+	};
 }
 
 /**

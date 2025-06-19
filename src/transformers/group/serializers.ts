@@ -3,21 +3,20 @@
  * @module transformers/group/serializers
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	type GroupBase,
-	type GroupComplete,
-	type GroupCreateInput,
-	GroupSchema,
-	type GroupTransformerOptions,
-	type GroupUpdateInput,
+    type GroupBase,
+    type GroupComplete,
+    type GroupCreateInput,
+    GroupSchema,
+    type GroupTransformerOptions,
+    type GroupUpdateInput,
 } from '@/types/entities/group/types';
 import {
-	deserializeJsonField,
-	serializeJsonField,
-	validateFieldType,
-	validateRequiredFields,
+    deserializeJsonField,
+    serializeJsonField,
+    validateFieldType,
+    validateRequiredFields,
 } from '@/utils/transformers/common';
 import { DEFAULT_UI_VALUES } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
@@ -31,11 +30,132 @@ export const DEFAULT_GROUP_EMOJI = '📂';
 export const DEFAULT_GROUP_COLOR = '#3b82f6';
 
 /**
+ * Interfaces para los tipos de Prisma que necesitamos
+ */
+export interface PrismaGroupCreateInput {
+	id?: string;
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	type?: string;
+	sortBy?: string;
+	filters?: string;
+	featuredImage?: string | null;
+	favorite?: boolean;
+	isShared?: boolean;
+	createdAt?: Date;
+	updatedAt?: Date;
+	images?: Record<string, any>;
+	videos?: Record<string, any>;
+	albums?: Record<string, any>;
+	collections?: Record<string, any>;
+	tags?: Record<string, any>;
+	characters?: Record<string, any>;
+	places?: Record<string, any>;
+	worldItems?: Record<string, any>;
+	concepts?: Record<string, any>;
+	prompts?: Record<string, any>;
+	notes?: Record<string, any>;
+	wildcards?: Record<string, any>;
+	properties?: Record<string, any>;
+}
+
+export interface PrismaGroupUpdateInput {
+	name?: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	type?: string;
+	sortBy?: string;
+	filters?: string;
+	featuredImage?: string | null;
+	favorite?: boolean;
+	isShared?: boolean;
+	updatedAt?: Date;
+	images?: Record<string, any>;
+	videos?: Record<string, any>;
+	albums?: Record<string, any>;
+	collections?: Record<string, any>;
+	tags?: Record<string, any>;
+	characters?: Record<string, any>;
+	places?: Record<string, any>;
+	worldItems?: Record<string, any>;
+	concepts?: Record<string, any>;
+	prompts?: Record<string, any>;
+	notes?: Record<string, any>;
+	wildcards?: Record<string, any>;
+	properties?: Record<string, any>;
+}
+
+export interface PrismaGroupGetPayload {
+	id: string;
+	name: string;
+	emoji: string | null;
+	color: string | null;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	type: string;
+	sortBy: string | null;
+	filters: string;
+	featuredImage: string | null;
+	favorite: boolean;
+	isShared: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+	images?: Array<{ id: string }>;
+	videos?: Array<{ id: string }>;
+	albums?: Array<{ id: string }>;
+	collections?: Array<{ id: string }>;
+	tags?: Array<{ id: string }>;
+	characters?: Array<{ id: string }>;
+	places?: Array<{ id: string }>;
+	worldItems?: Array<{ id: string }>;
+	concepts?: Array<{ id: string }>;
+	prompts?: Array<{ id: string }>;
+	notes?: Array<{ id: string }>;
+	wildcards?: Array<{ id: string }>;
+	properties?: Array<{ id: string }>;
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+	};
+}
+
+export interface PrismaGroupWhereInput {
+	AND?: PrismaGroupWhereInput[];
+	OR?: PrismaGroupWhereInput[];
+	NOT?: PrismaGroupWhereInput[];
+	name?: { contains: string; mode: string };
+	description?: { contains: string; mode: string };
+	category?: string;
+	favorite?: boolean;
+	isShared?: boolean;
+	type?: { in: string[] };
+}
+
+/**
  * 🔄 Serializa un Group para Prisma
  */
 export function toPrismaGroup(
 	data: GroupCreateInput | GroupUpdateInput
-): Prisma.GroupCreateInput | Prisma.GroupUpdateInput {
+): PrismaGroupCreateInput | PrismaGroupUpdateInput {
 	try {
 		// Validar campos requeridos para creación
 		if (!('id' in data)) {
@@ -68,7 +188,7 @@ export function toPrismaGroup(
 		const relations = preparePrismaRelations('Group', data);
 		Object.assign(result, relations);
 
-		return result as Prisma.GroupCreateInput | Prisma.GroupUpdateInput;
+		return result as PrismaGroupCreateInput | PrismaGroupUpdateInput;
 	} catch (error) {
 		throw handleTransformerError(error);
 	}
@@ -77,26 +197,7 @@ export function toPrismaGroup(
 /**
  * 🔄 Deserializa un Group desde Prisma
  */
-export function fromPrismaGroup(
-	prismaGroup: Prisma.GroupGetPayload<{
-		include: {
-			images: true;
-			videos: true;
-			albums: true;
-			collections: true;
-			tags: true;
-			characters: true;
-			places: true;
-			worldItems: true;
-			concepts: true;
-			prompts: true;
-			notes: true;
-			wildcards: true;
-			properties: true;
-			_count: true;
-		};
-	}>
-): GroupComplete {
+export function fromPrismaGroup(prismaGroup: PrismaGroupGetPayload): GroupComplete {
 	try {
 		// Deserializar campos JSON
 		const filters = deserializeJsonField(prismaGroup.filters, []);
@@ -113,10 +214,12 @@ export function fromPrismaGroup(
 			description: prismaGroup.description,
 			shortcut: prismaGroup.shortcut,
 			category: prismaGroup.category || 'general',
+			type: prismaGroup.type as any, // Convertir string a enum
 			sortBy: prismaGroup.sortBy || 'name',
 			filters,
 			featuredImage: prismaGroup.featuredImage,
 			isFavorite: prismaGroup.favorite || false,
+			isShared: prismaGroup.isShared || false,
 			createdAt: prismaGroup.createdAt,
 			updatedAt: prismaGroup.updatedAt,
 		};
@@ -225,13 +328,13 @@ export function extendGroup(group: GroupBase, options: GroupTransformerOptions =
 /**
  * 🔍 Parsea filtros de Group
  */
-export function parseGroupFilterObject(filters: unknown): Prisma.GroupWhereInput {
+export function parseGroupFilterObject(filters: unknown): PrismaGroupWhereInput {
 	try {
 		if (!filters || typeof filters !== 'object') {
 			return {};
 		}
 
-		const parsed: Prisma.GroupWhereInput = {};
+		const parsed: PrismaGroupWhereInput = {};
 		const typedFilters = filters as Record<string, unknown>;
 
 		// Procesar filtros específicos de Group
@@ -250,8 +353,15 @@ export function parseGroupFilterObject(filters: unknown): Prisma.GroupWhereInput
 		// Filtros booleanos
 		if (typedFilters.isFavorite !== undefined) {
 			parsed.favorite = Boolean(typedFilters.isFavorite);
-		} else if (typedFilters.favorite !== undefined) {
-			parsed.favorite = Boolean(typedFilters.favorite);
+		}
+
+		if (typedFilters.isShared !== undefined) {
+			parsed.isShared = Boolean(typedFilters.isShared);
+		}
+
+		// Filtros de array
+		if (typedFilters.types && Array.isArray(typedFilters.types) && typedFilters.types.length > 0) {
+			parsed.type = { in: typedFilters.types.map(String) };
 		}
 
 		return parsed;
@@ -266,46 +376,35 @@ export function parseGroupFilterObject(filters: unknown): Prisma.GroupWhereInput
  */
 export function generateGroupEmoji(name: string, category?: string): string {
 	try {
-		// Si hay categoría, intentar basarse en ella primero
-		if (category) {
-			const lowerCategory = category.toLowerCase();
+		// Emojis por categoría
+		const categoryEmojis: Record<string, string[]> = {
+			general: ['📁', '📂', '📋', '📑', '📌', '📎', '🗂️', '🗄️', '📚'],
+			personal: ['👤', '👨‍💼', '👩‍💼', '🏠', '👪', '👫', '🧑‍🤝‍🧑'],
+			work: ['💼', '👔', '🏢', '💻', '📊', '📈', '📉', '📝'],
+			project: ['🚀', '⚙️', '🔧', '🔨', '🛠️', '📐', '📏', '✏️'],
+			media: ['🎬', '🎥', '📷', '📸', '🎵', '🎹', '🎧', '🎨'],
+			travel: ['✈️', '🚆', '🚗', '🏖️', '🏔️', '🏙️', '🗺️', '🧳'],
+			food: ['🍽️', '🍕', '🍣', '🍰', '🍷', '🍹', '🥂', '🍳'],
+			education: ['📚', '🎓', '✏️', '📝', '📖', '🧠', '🔬', '🧪'],
+			health: ['💪', '🏋️‍♀️', '🧘‍♂️', '🏃‍♀️', '🥗', '🍎', '💊', '🩺'],
+			finance: ['💰', '💵', '💳', '📊', '📈', '🏦', '💹', '💲'],
+		};
 
-			// Mapeo de categorías comunes a emojis
-			const categoryEmojis: Record<string, string> = {
-				general: '📂',
-				arte: '🎨',
-				musica: '🎵',
-				viajes: '✈️',
-				comida: '🍽️',
-				personas: '👥',
-				eventos: '🎉',
-				naturaleza: '🌿',
-				tecnologia: '💻',
-				deportes: '⚽',
-			};
+		// Determinar la categoría a usar
+		const resolvedCategory = category?.toLowerCase() || 'general';
+		const emojis = categoryEmojis[resolvedCategory] || categoryEmojis.general;
 
-			if (categoryEmojis[lowerCategory]) {
-				return categoryEmojis[lowerCategory];
-			}
+		// Generar un índice basado en el nombre
+		let hash = 0;
+		for (const char of name) {
+			hash = (hash << 5) - hash + char.charCodeAt(0);
+			hash |= 0; // Convertir a entero de 32 bits
 		}
+		const index = Math.abs(hash) % emojis.length;
 
-		// Si no hay categoría o no se encontró un emoji para ella,
-		// usar el nombre para generar un emoji simple
-		const lowerName = name.toLowerCase();
-
-		// Algunos emojis basados en palabras clave comunes
-		if (lowerName.includes('foto') || lowerName.includes('imag')) return '📸';
-		if (lowerName.includes('video')) return '🎬';
-		if (lowerName.includes('fav')) return '⭐';
-		if (lowerName.includes('trabajo') || lowerName.includes('job')) return '💼';
-		if (lowerName.includes('viaje')) return '✈️';
-		if (lowerName.includes('familia')) return '👨‍👩‍👧‍👦';
-		if (lowerName.includes('mascota') || lowerName.includes('animal')) return '🐾';
-
-		// Emoji por defecto si no coincide con ninguna palabra clave
-		return DEFAULT_GROUP_EMOJI;
+		return emojis[index];
 	} catch (error) {
-		logger.error('Error generando emoji para grupo:', error);
+		logger.error('Error generando emoji para Group:', error);
 		return DEFAULT_GROUP_EMOJI;
 	}
 }
@@ -315,110 +414,103 @@ export function generateGroupEmoji(name: string, category?: string): string {
  */
 export function generateGroupColor(name: string): string {
 	try {
-		// Lista de colores predefinidos para grupos
+		// Paleta de colores para grupos
 		const colors = [
-			'#3b82f6', // azul
-			'#10b981', // verde
-			'#f59e0b', // amarillo
-			'#ef4444', // rojo
-			'#8b5cf6', // púrpura
-			'#ec4899', // rosa
-			'#06b6d4', // cian
-			'#f97316', // naranja
-			'#6366f1', // indigo
-			'#14b8a6', // verde azulado
+			'#3b82f6', // Azul
+			'#ef4444', // Rojo
+			'#10b981', // Verde
+			'#f59e0b', // Ámbar
+			'#8b5cf6', // Violeta
+			'#ec4899', // Rosa
+			'#06b6d4', // Cyan
+			'#f97316', // Naranja
+			'#14b8a6', // Teal
+			'#6366f1', // Índigo
+			'#d946ef', // Fucsia
+			'#84cc16', // Lima
 		];
 
-		// Usar una función hash simple basada en el nombre
+		// Generar un índice basado en el nombre
 		let hash = 0;
-		for (let i = 0; i < name.length; i++) {
-			hash = name.charCodeAt(i) + ((hash << 5) - hash);
+		for (const char of name) {
+			hash = (hash << 5) - hash + char.charCodeAt(0);
+			hash |= 0; // Convertir a entero de 32 bits
 		}
-
-		// Obtener un índice dentro del rango de colores
 		const index = Math.abs(hash) % colors.length;
 
 		return colors[index];
 	} catch (error) {
-		logger.error('Error generando color para grupo:', error);
+		logger.error('Error generando color para Group:', error);
 		return DEFAULT_GROUP_COLOR;
 	}
 }
 
 /**
- * 🔄 Transforma un grupo de la base de datos a una versión extendida
+ * 🔄 Transforma un objeto Group a formato extendido
  */
 export function toExtendedGroup(group: any): GroupComplete {
 	try {
-		if (!group) {
-			throw new Error('Se requiere un objeto grupo válido');
+		// Validar que sea un objeto
+		if (!group || typeof group !== 'object') {
+			throw new Error('Input inválido para toExtendedGroup');
 		}
 
-		// Si el grupo ya tiene la propiedad isFavorite, convertirla a favorite
-		let isFavorite = false;
-		if (group.favorite !== undefined) {
-			isFavorite = Boolean(group.favorite);
-		} else if (group.isFavorite !== undefined) {
-			isFavorite = Boolean(group.isFavorite);
+		// Convertir favorite a isFavorite si es necesario
+		if ('favorite' in group && !('isFavorite' in group)) {
+			group.isFavorite = group.favorite;
 		}
 
-		// Deserializar campos JSON
-		const filters = deserializeJsonField(group.filters, []);
+		// Asegurar que isShared esté presente
+		if (!('isShared' in group)) {
+			group.isShared = false;
+		}
 
-		// Construir objeto base con formato correcto
-		const baseGroup: GroupBase = {
-			id: group.id,
-			name: group.name,
-			emoji: group.emoji || DEFAULT_GROUP_EMOJI,
-			color: group.color || DEFAULT_GROUP_COLOR,
-			description: group.description || '',
-			shortcut: group.shortcut || null,
-			category: group.category || 'general',
-			sortBy: group.sortBy || 'name',
-			filters,
-			featuredImage: group.featuredImage || null,
-			isFavorite,
-			createdAt: group.createdAt,
-			updatedAt: group.updatedAt,
-		};
+		// Deserializar campos JSON si son strings
+		if (typeof group.filters === 'string') {
+			group.filters = deserializeJsonField(group.filters, []);
+		}
 
-		// Si tiene contadores, agregarlos
-		const counts = group._count || {};
+		// Asegurar que las propiedades de UI tengan valores por defecto
+		if (!group.emoji) group.emoji = DEFAULT_GROUP_EMOJI;
+		if (!group.color) group.color = DEFAULT_GROUP_COLOR;
+		if (!group.category) group.category = 'general';
+		if (!group.sortBy) group.sortBy = 'name';
 
-		// Construir objeto completo con relaciones
-		return {
-			...baseGroup,
-			images: Array.isArray(group.images) ? group.images.map((img: any) => ({ id: img.id })) : [],
-			videos: Array.isArray(group.videos) ? group.videos.map((vid: any) => ({ id: vid.id })) : [],
-			albums: Array.isArray(group.albums) ? group.albums.map((alb: any) => ({ id: alb.id })) : [],
-			collections: Array.isArray(group.collections) ? group.collections.map((col: any) => ({ id: col.id })) : [],
-			tags: Array.isArray(group.tags) ? group.tags.map((tag: any) => ({ id: tag.id })) : [],
-			characters: Array.isArray(group.characters) ? group.characters.map((char: any) => ({ id: char.id })) : [],
-			places: Array.isArray(group.places) ? group.places.map((place: any) => ({ id: place.id })) : [],
-			worldItems: Array.isArray(group.worldItems) ? group.worldItems.map((item: any) => ({ id: item.id })) : [],
-			concepts: Array.isArray(group.concepts) ? group.concepts.map((con: any) => ({ id: con.id })) : [],
-			prompts: Array.isArray(group.prompts) ? group.prompts.map((prompt: any) => ({ id: prompt.id })) : [],
-			notes: Array.isArray(group.notes) ? group.notes.map((note: any) => ({ id: note.id })) : [],
-			wildcards: Array.isArray(group.wildcards) ? group.wildcards.map((wild: any) => ({ id: wild.id })) : [],
-			properties: Array.isArray(group.properties) ? group.properties.map((prop: any) => ({ id: prop.id })) : [],
-			_count: {
-				images: counts.images || 0,
-				videos: counts.videos || 0,
-				albums: counts.albums || 0,
-				collections: counts.collections || 0,
-				tags: counts.tags || 0,
-				characters: counts.characters || 0,
-				places: counts.places || 0,
-				worldItems: counts.worldItems || 0,
-				concepts: counts.concepts || 0,
-				prompts: counts.prompts || 0,
-				notes: counts.notes || 0,
-				wildcards: counts.wildcards || 0,
-				properties: counts.properties || 0,
+		// Inicializar relaciones vacías
+		const extended = {
+			...group,
+			images: group.images || [],
+			videos: group.videos || [],
+			albums: group.albums || [],
+			collections: group.collections || [],
+			tags: group.tags || [],
+			characters: group.characters || [],
+			places: group.places || [],
+			worldItems: group.worldItems || [],
+			concepts: group.concepts || [],
+			prompts: group.prompts || [],
+			notes: group.notes || [],
+			wildcards: group.wildcards || [],
+			properties: group.properties || [],
+			_count: group._count || {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
 			},
 		};
+
+		return extended;
 	} catch (error) {
-		logger.error('Error transformando grupo extendido:', error);
 		throw handleTransformerError(error);
 	}
 }

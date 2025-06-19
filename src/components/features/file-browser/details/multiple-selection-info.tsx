@@ -1,5 +1,9 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import type { FileItem } from '@/types/file-item';
 import {
 	BookImage,
 	Calendar,
@@ -18,14 +22,10 @@ import {
 	Video,
 } from 'lucide-react';
 import { memo, useMemo } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import type { ImageItem } from '@/types/image-item';
 import { BulkMetadataEditor } from './bulk-metadata-editor';
 
 export interface MultipleSelectionInfoProps {
-	items: ImageItem[];
+	items: FileItem[];
 }
 
 /**
@@ -125,7 +125,7 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 
 	// Formatear tamaño de archivo
 	const formatFileSize = (bytes: number): string => {
-		if (bytes === 0) return '0 Bytes';
+		if (bytes <= 0) return '0 Bytes';
 		const k = 1024;
 		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -210,7 +210,7 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 							{items.slice(0, 9).map((item, index) => (
 								<div key={item.id} className="relative aspect-square bg-muted/30 rounded-md overflow-hidden">
 									<img
-										src={item.thumbnail || item.url || item.src}
+										src={item.thumbnailUrl || item.url || ''}
 										alt={item.name || `Item ${index + 1}`}
 										className="w-full h-full object-cover"
 									/>

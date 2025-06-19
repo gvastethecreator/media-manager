@@ -18,6 +18,7 @@ import { Toggle } from '@/components/ui/toggle';
 import toastService from '@/services/toast.service';
 import { fromPrismaProperty } from '@/transformers/property/serializers';
 import type { PropertyWithRelations } from '@/types/entities/property';
+import type { PropertyComplete } from '@/types/entities/property/extended';
 import { CreatePropertySchema, PropertyFiltersSchema } from '@/types/entities/property/schema';
 import { FilterIcon, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -35,10 +36,10 @@ interface PropertyWithStats extends PropertyWithRelations {
 export type { PropertyWithStats }; // Exportamos el tipo para el PropertyPreview
 
 export function PropertiesSettings() {
-	const [properties, setProperties] = useState<PropertyWithStats[]>([]);
+	const [properties, setProperties] = useState<PropertyComplete[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [_error, setError] = useState<string | null>(null);
-	const [selectedProperty, setSelectedProperty] = useState<PropertyWithStats | null>(null);
+	const [selectedProperty, setSelectedProperty] = useState<PropertyComplete | null>(null);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
@@ -69,7 +70,7 @@ export function PropertiesSettings() {
 					totalAssociations: Object.values(property._count || {}).reduce((a, b) => a + b, 0),
 				};
 			}) as PropertyWithStats[];
-			setProperties(propertiesWithStats);
+			setProperties(propertiesWithStats as PropertyComplete[]);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 			setError(errorMessage);
@@ -142,7 +143,7 @@ export function PropertiesSettings() {
 				setProperties((prev) => [
 					...prev,
 					{ ...canonical, totalAssociations: 0 } as PropertyWithStats,
-				]);
+				] as PropertyComplete);
 			}
 			setIsCreateDialogOpen(false);
 			toastService.success('Propiedad creada correctamente');
@@ -159,7 +160,7 @@ export function PropertiesSettings() {
 			const updatedProperty = await updateProperty(id, data);
 			if (updatedProperty) {
 				const canonical = fromPrismaProperty(updatedProperty);
-				setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...canonical } : p)));
+				setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...canonical } : p)) as PropertyComplete);
 			}
 			setSelectedProperty(null);
 			setIsEditMode(false);
@@ -176,7 +177,7 @@ export function PropertiesSettings() {
 		try {
 			setIsDeleting(true);
 			await deleteProperty(id);
-			setProperties((prev) => prev.filter((p) => p.id !== id));
+			setProperties((prev) => prev.filter((p) => p.id !== id) as PropertyComplete);
 			setSelectedProperty(null);
 			toastService.success('Propiedad eliminada correctamente');
 		} catch (err) {
@@ -189,10 +190,10 @@ export function PropertiesSettings() {
 		}
 	};
 
-	const handleToggleFavorite = async (property: PropertyWithStats) => {
+	const handleToggleFavorite = async (property: PropertyComplete) => {
 		try {
 			await togglePropertyFavorite(property.id);
-			setProperties((prev) => prev.map((p) => (p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p)));
+			setProperties((prev) => prev.map((p) => (p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p)) as PropertyComplete);
 
 			if (selectedProperty?.id === property.id) {
 				setSelectedProperty((prev) => (prev ? { ...prev, isFavorite: !prev.isFavorite } : null));

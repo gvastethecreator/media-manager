@@ -10,8 +10,9 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import toastService from '@/services/toast.service';
-import type { WorldItem, WorldItemCreateInput } from '@/types/entities/world-item';
+import type { WorldItemCreateInput } from '@/types/entities/world-item';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
+import type { WorldItemComplete } from '@/types/entities/world-item/extended';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -34,12 +35,12 @@ const worldItemSchema = z.object({
 type WorldItemForm = z.infer<typeof worldItemSchema>;
 
 interface CreateWorldItemFormProps {
-	worldItem?: WorldItem | null;
+	worldItem?: WorldItemComplete | null;
 	isEditing?: boolean;
-	onCreated?: (item: WorldItem) => void;
-	onUpdated?: (item: WorldItem) => void;
+	onCreated?: (item: WorldItemComplete) => void;
+	onUpdated?: (item: WorldItemComplete) => void;
 	onCancel?: () => void;
-	onPreview?: (item: WorldItem) => void;
+	onPreview?: (item: WorldItemComplete) => void;
 }
 
 export function CreateWorldItemForm({
@@ -72,7 +73,7 @@ export function CreateWorldItemForm({
 	useEffect(() => {
 		if (onPreview) {
 			const subscription = form.watch((data) => {
-				onPreview(data as WorldItem);
+				onPreview(data as WorldItemComplete);
 			});
 			return () => subscription.unsubscribe();
 		}
