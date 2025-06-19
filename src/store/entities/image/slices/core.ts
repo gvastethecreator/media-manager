@@ -14,36 +14,36 @@ import {
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendImage, extendImages } from '@/transformers/image/serializers';
-import type { CreateImageData, Image, UpdateImageData } from '@/types/entities/image';
+import type { CreateImageData, ImageComplete, UpdateImageData } from '@/types/entities/image';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
 const imageLogger = clientLogger.withContext('ImageStore');
 
 export interface ImageCoreSlice {
-	images: Record<string, Image>;
+	images: Record<string, ImageComplete>;
 	isLoading: boolean;
 	error: string | null;
 
 	// Getters
-	getImage: (id: string) => Image | undefined;
-	getImages: () => Image[];
-	getImagesByFolder: (folderId: string) => Image[];
-	getImageByPath: (path: string) => Image | undefined;
+	getImage: (id: string) => ImageComplete | undefined;
+	getImages: () => ImageComplete[];
+	getImagesByFolder: (folderId: string) => ImageComplete[];
+	getImageByPath: (path: string) => ImageComplete | undefined;
 
 	// Operaciones síncronas
-	addImage: (image: Image) => void;
-	addImages: (images: Image[]) => void;
-	_updateImage: (id: string, data: Partial<Image>) => void;
+	addImage: (image: ImageComplete) => void;
+	addImages: (images: ImageComplete[]) => void;
+	_updateImage: (id: string, data: Partial<ImageComplete>) => void;
 	deleteImage: (id: string) => void;
 	clearImages: () => void;
 	clearFolderImages: (folderId: string) => void;
 
 	// Acciones asíncronas
-	fetchImage: (id: string) => Promise<Image | undefined>;
-	fetchImages: (options?: { folderIds?: string[]; refresh?: boolean }) => Promise<Image[]>;
-	createImage: (data: CreateImageData) => Promise<Image | undefined>;
-	updateImage: (id: string, data: UpdateImageData) => Promise<Image | undefined>;
+	fetchImage: (id: string) => Promise<ImageComplete | undefined>;
+	fetchImages: (options?: { folderIds?: string[]; refresh?: boolean }) => Promise<ImageComplete[]>;
+	createImage: (data: CreateImageData) => Promise<ImageComplete | undefined>;
+	updateImage: (id: string, data: UpdateImageData) => Promise<ImageComplete | undefined>;
 	removeImage: (id: string) => Promise<boolean>;
 }
 
@@ -55,8 +55,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 	// --- Getters ---
 	getImage: (id) => get().images[id],
 	getImages: () => Object.values(get().images),
-	getImagesByFolder: (folderId) =>
-		Object.values(get().images).filter((image) => image.folderId === folderId),
+	getImagesByFolder: (folderId) => Object.values(get().images).filter((image) => image.folderId === folderId),
 	getImageByPath: (path) => Object.values(get().images).find((image) => image.path === path),
 
 	// --- Operaciones síncronas ---
@@ -72,15 +71,12 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 			return;
 		}
 
-		const imagesMap = images.reduce<Record<string, Image>>(
-			(acc, img) => {
-				if (img && img.id) {
-					acc[img.id] = img;
-				}
-				return acc;
-			},
-			{}
-		);
+		const imagesMap = images.reduce<Record<string, ImageComplete>>((acc, img) => {
+			if (img && img.id) {
+				acc[img.id] = img;
+			}
+			return acc;
+		}, {});
 
 		set((state) => ({ images: { ...state.images, ...imagesMap } }));
 	},
@@ -101,7 +97,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 	},
 	clearFolderImages: (folderId) => {
 		set((state) => {
-			const newImages: Record<string, Image> = {};
+			const newImages: Record<string, ImageComplete> = {};
 
 			for (const img of Object.values(state.images)) {
 				if (img.folderId !== folderId) {

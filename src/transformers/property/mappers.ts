@@ -3,6 +3,7 @@
  * @module transformers/property/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	PROPERTY_SORT_PROPERTY_MAP,
@@ -14,7 +15,6 @@ import {
 	PropertyWithRelations,
 } from '@/types/entities/property';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 import { fromPrismaProperty, generatePropertyColor, generatePropertyEmoji } from './serializers';
 
 // Logger específico para este módulo
@@ -35,7 +35,7 @@ export function toCreatePropertyData(data: PropertyCreateInput): Prisma.Property
 			shortcut: data.shortcut || null,
 			category: data.category || 'general',
 			featuredImage: data.featuredImage || null,
-			favorite: data.isFavorite || false,
+			isFavorite: data.isFavorite || false,
 		};
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de Property', { error });
@@ -60,7 +60,7 @@ export function toUpdatePropertyData(data: PropertyUpdateInput): Prisma.Property
 		if (data.shortcut !== undefined) prismaData.shortcut = data.shortcut;
 		if (data.category !== undefined) prismaData.category = data.category;
 		if (data.featuredImage !== undefined) prismaData.featuredImage = data.featuredImage;
-		if (data.isFavorite !== undefined) prismaData.favorite = data.isFavorite;
+		if (data.isFavorite !== undefined) prismaData.isFavorite = data.isFavorite;
 
 		return prismaData;
 	} catch (error) {
@@ -148,8 +148,8 @@ export function toSearchFilters(filters: PropertyFilters): any {
 		// Filtrar por término de búsqueda
 		if (filters.searchQuery) {
 			where.OR = [
-				{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
-				{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
+				{ name: { contains: filters.searchQuery } },
+				{ description: { contains: filters.searchQuery } },
 			];
 		}
 
@@ -160,7 +160,7 @@ export function toSearchFilters(filters: PropertyFilters): any {
 
 		// Filtrar favoritos
 		if (filters.onlyFavorites) {
-			where.favorite = true;
+			where.isFavorite = true;
 		}
 
 		return where;

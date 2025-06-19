@@ -14,5 +14,16 @@ export interface JsonFileBase {
 	updatedAt: Date;
 }
 
+/**
+ * 🟫 JsonFile con todas sus relaciones y metadatos adicionales
+ */
+export interface JsonFileComplete extends JsonFileBase {
+	metadata?: Record<string, unknown>;
+	tags?: Array<{ id: string; name: string }>;
+	_count?: {
+		tags: number;
+	};
+}
+
 export type JsonFileCreateInput = Omit<JsonFileBase, 'id' | 'createdAt' | 'updatedAt'>;
 export type JsonFileUpdateInput = Partial<Omit<JsonFileBase, 'id'>>;

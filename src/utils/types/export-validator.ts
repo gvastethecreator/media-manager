@@ -9,18 +9,18 @@
 // Importar todos los tipos para verificar que están correctamente exportados
 import type { Album } from '@/types/entities/album';
 import type { Character } from '@/types/entities/character';
-import type { Collection } from '@/types/entities/collection';
+import type { CollectionComplete as CollectionComplete } from '@/types/entities/collection';
 import type { Concept } from '@/types/entities/concept';
-import type { Folder } from '@/types/entities/folder';
+import type { FolderComplete as FolderComplete } from '@/types/entities/folder';
 import type { Group } from '@/types/entities/group';
-import type { Image } from '@/types/entities/image';
-import type { Note } from '@/types/entities/note';
+import type { ImageComplete as ImageComplete } from '@/types/entities/image';
+import type { NoteComplete as NoteComplete } from '@/types/entities/note';
 import type { Place } from '@/types/entities/place';
 import type { Prompt } from '@/types/entities/prompt';
-import type { Property } from '@/types/entities/property';
+import type { PropertyComplete as PropertyComplete } from '@/types/entities/property';
 import type { Tag } from '@/types/entities/tag';
-import type { Video } from '@/types/entities/video';
-import type { Wildcard } from '@/types/entities/wildcard';
+import type { VideoComplete as VideoComplete } from '@/types/entities/video';
+import type { WildcardComplete as WildcardComplete } from '@/types/entities/wildcard';
 import type { WorldItem } from '@/types/entities/world-item';
 
 // Tipo que representa una entidad con ID

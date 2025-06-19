@@ -8,11 +8,10 @@
 export const DEFAULT_TAG_COLOR = '#3b82f6';
 export const DEFAULT_TAG_EMOJI = '🏷️';
 
-// Re-exportar funciones del transformer principal
-export { fromPrismaTag, fromPrismaTags } from '../transformer';
-
 // Re-exportar funciones de converters
 export { mapCompleteToTag, mapTagToComplete, tagToDisplayObject } from '../converters';
+// Re-exportar funciones del transformer principal
+export { fromPrismaTag, fromPrismaTags } from '../transformer';
 
 // Funciones de extensión (placeholders)
 export function extendTag(tag: any, options?: any): any {

@@ -9,13 +9,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome lint --max-diagnostics=50 .",
-    "lint:fix": "biome lint --max-diagnostics=50 --write .",
+    "lint": "biome lint --max-diagnostics=500 .",
+    "lint:fix": "biome lint --max-diagnostics=500 --write .",
     "format": "biome format --write .",
     "format:check": "biome format --check .",
-    "check": "biome check --max-diagnostics=50 .",
-    "check:fix": "biome check --max-diagnostics=50 --write .",
-    "biome:ci": "biome ci --max-diagnostics=50 .",
+    "check": "biome check --max-diagnostics=500 .",
+    "check:fix": "biome check --max-diagnostics=500 --write .",
+    "biome:ci": "biome ci --max-diagnostics=500 .",
     "analyze": "node scripts/analyze/index.mjs",
     "db:full-reset": "node scripts/db/reset.js",
     "db:check": "node scripts/db/check.js",
@@ -23,7 +23,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "fix:lint": "biome check --max-diagnostics=999 --apply --verbose --no-errors-on-warn --no-errors-on-unmatched --log-level=debug ."
+    "fix:lint": "biome check --max-diagnostics=999 --apply --verbose --no-errors-on-warn --no-errors-on-unmatched --log-level=debug .",
+    "tsc": "npx tsc --noEmit --pretty > tsc-errors.log 2>&1"
   },
   "dependencies": {
     "@bull-board/api": "^6.10.1",

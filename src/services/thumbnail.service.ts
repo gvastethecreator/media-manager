@@ -1,10 +1,10 @@
+import { createHmac } from 'crypto';
+import fs from 'fs/promises';
+import path from 'path';
 import { getThumbnail } from '@/app/actions/thumbnails/thumbnails.actions';
 import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { createHmac } from 'crypto';
-import fs from 'fs/promises';
-import path from 'path';
 
 const thumbLogger = serverLogger.withContext('ThumbnailService');
 
@@ -412,7 +412,7 @@ class ThumbnailService {
 
 	private async getThumbnailFromCache(
 		id: string,
-		quality: ThumbnailQuality,
+		quality: ThumbnailQuality
 	): Promise<{ buffer: Buffer; mimeType: string } | null> {
 		const cachePath = path.join(process.cwd(), '.image-cache', 'thumbnails', `${id}-${quality}.jpg`);
 		try {

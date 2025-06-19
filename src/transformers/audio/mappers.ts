@@ -1,5 +1,5 @@
 // Mappers para Audio
-import type { Audio } from '@/types/entities/audio/types';
+import type { Audio } from '@/types/entities/audio';
 
 export function fromPrismaAudio(prisma: any): Audio {
 	return {

@@ -5,17 +5,17 @@
 
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { createActionError, createEntityErrorObject } from '@/lib/errors/server-errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { profileService } from '@/services/profile/profile.service';
 import type {
-    CreateProfileInput,
-    ProfileExtended,
-    ProfileFilters,
-    ProfilePaginationOptions,
-    UpdateProfileInput,
+	CreateProfileInput,
+	ProfileExtended,
+	ProfileFilters,
+	ProfilePaginationOptions,
+	UpdateProfileInput,
 } from '@/types/entities/profile';
-import { revalidatePath } from 'next/cache';
 
 const profileLogger = serverLogger.withContext('ProfileActions');
 const REVALIDATE_PATHS = ['/settings', '/profiles', '/profiles/[id]', '/'] as const;
@@ -27,7 +27,7 @@ const revalidateProfilePaths = async () => {
 
 export async function getProfiles(
 	filters?: ProfileFilters,
-	pagination?: ProfilePaginationOptions,
+	pagination?: ProfilePaginationOptions
 ): Promise<ProfileExtended[]> {
 	try {
 		profileLogger.info('👥 Obteniendo perfiles', { filters, pagination });

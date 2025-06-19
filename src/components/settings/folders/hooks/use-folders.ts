@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useEffect, useState } from 'react';
 import { reindexAllFolders } from '@/app/actions/folders';
 import type {
 	ErrorResponse,
@@ -11,7 +12,6 @@ import type {
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import type { FolderComplete } from '@/types/entities/folder/types';
-import { useCallback, useEffect, useState } from 'react';
 import { initialGlobalReindexStatus } from '../folder-types';
 import { useFoldersEvents } from './use-folders-events';
 import { useFoldersOperations } from './use-folders-operations';

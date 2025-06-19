@@ -3,14 +3,14 @@
  * @module transformers/prompt/transformer
  */
 
-import { Logger } from '@/lib/logger';
+import type { Prompt } from '@prisma/client';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { PromptBase, PromptComplete, PromptWithRelations } from '@/types/entities/prompt';
 import { PromptSchema } from '@/types/entities/prompt/schema';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prompt } from '@prisma/client';
 import { deserializeParameters, deserializeTags, toExtendedPrompt } from './serializers';
 
-const logger = new Logger('PromptTransformer');
+const logger = serverLogger.withContext('PromptTransformer');
 
 /**
  * Opciones para la transformación de prompts

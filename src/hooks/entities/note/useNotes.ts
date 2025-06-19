@@ -7,10 +7,10 @@
  * Se utiliza React Query para la gestión del estado del servidor (fetching, caching, etc.).
  */
 
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createNote, deleteNote, getNotes, updateNote } from '@/app/actions/notes/note.actions';
 import { useToast } from '@/hooks/use-toast';
 import type { NoteBase, NoteCreateInput, NoteUpdateInput } from '@/types/entities/note';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const NOTE_QUERY_KEY = 'notes';
 

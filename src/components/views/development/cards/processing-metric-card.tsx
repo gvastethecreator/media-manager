@@ -1,6 +1,6 @@
 'use client';
 
-import type { ComponentType } from 'react';
+import { ComponentType } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 

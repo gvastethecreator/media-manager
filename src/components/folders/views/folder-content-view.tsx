@@ -1,13 +1,13 @@
 'use client';
 
+import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { reindexFolder } from '@/app/actions/folders';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Folder, FolderSearch, RefreshCw } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 // Usar el hook del store unificado para mejor integración con paginación
 import { folderResponseCache } from '@/lib/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';

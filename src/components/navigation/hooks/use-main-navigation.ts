@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { useUIStore } from '@/store/ui.store';
-import type { ViewType } from '@/types/files';
+import { ViewType } from '@/types/files';
 
 /**
  * Hook que proporciona funciones para la navegación principal

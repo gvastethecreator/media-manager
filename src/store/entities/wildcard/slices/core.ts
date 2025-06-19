@@ -13,7 +13,7 @@ import {
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendWildcard, extendWildcards } from '@/transformers/wildcard/serializers';
-import type { CreateWildcardData, UpdateWildcardData, Wildcard, WildcardBase } from '@/types/entities/wildcard';
+import type { CreateWildcardData, UpdateWildcardData, WildcardBase, WildcardComplete } from '@/types/entities/wildcard';
 import type { StateCreator } from 'zustand';
 import type { WildcardState } from '../types';
 
@@ -21,16 +21,16 @@ const wildcardLogger = clientLogger.withContext('WildcardStore');
 
 export interface WildcardCoreSlice {
 	// Getters
-	getWildcard: (id: string) => Wildcard | undefined;
-	getWildcards: () => Wildcard[];
+	getWildcard: (id: string) => WildcardComplete | undefined;
+	getWildcards: () => WildcardComplete[];
 	getWildcardItems: (wildcardId: string) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
-	getChildWildcards: (parentId: string | null) => Wildcard[];
+	getChildWildcards: (parentId: string | null) => WildcardComplete[];
 	getWildcardHierarchy: () => Record<string | 'root', string[]>;
 
 	// Operaciones síncronas
-	addWildcard: (wildcard: Wildcard) => void;
-	addWildcards: (wildcards: Wildcard[]) => void;
-	_updateWildcard: (id: string, data: Partial<Wildcard>) => void;
+	addWildcard: (wildcard: WildcardComplete) => void;
+	addWildcards: (wildcards: WildcardComplete[]) => void;
+	_updateWildcard: (id: string, data: Partial<WildcardComplete>) => void;
 	deleteWildcard: (id: string) => void;
 
 	// Gestión de elementos
@@ -43,10 +43,10 @@ export interface WildcardCoreSlice {
 	setError: (error: string | null) => void;
 
 	// Acciones asíncronas
-	fetchWildcard: (id: string) => Promise<Wildcard | undefined>;
-	fetchWildcards: () => Promise<Wildcard[]>;
-	createWildcard: (data: CreateWildcardData) => Promise<Wildcard | undefined>;
-	updateWildcard: (id: string, data: UpdateWildcardData) => Promise<Wildcard | undefined>;
+	fetchWildcard: (id: string) => Promise<WildcardComplete | undefined>;
+	fetchWildcards: () => Promise<WildcardComplete[]>;
+	createWildcard: (data: CreateWildcardData) => Promise<WildcardComplete | undefined>;
+	updateWildcard: (id: string, data: UpdateWildcardData) => Promise<WildcardComplete | undefined>;
 	removeWildcard: (id: string) => Promise<boolean>;
 	moveWildcard: (id: string, newParentId: string | null) => Promise<boolean>;
 }
@@ -94,7 +94,7 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 				acc[w.id] = w;
 				return acc;
 			},
-			{} as Record<string, Wildcard>
+			{} as Record<string, WildcardComplete>
 		);
 		set((state) => ({
 			core: {

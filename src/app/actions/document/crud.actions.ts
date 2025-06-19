@@ -1,6 +1,8 @@
+'use server';
+
 // Server Actions para Document
 import { validateDocument } from '@/transformers/document/serializers';
-import type { Document } from '@/types/entities/document/types';
+import type { DocumentComplete as Document } from '@/types/entities/document';
 
 export async function createDocument(input: unknown): Promise<Document> {
 	const doc = validateDocument(input);

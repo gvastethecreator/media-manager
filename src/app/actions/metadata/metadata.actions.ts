@@ -1,6 +1,6 @@
 'use server';
 
-import type { Image } from '@prisma/client';
+import type { ImageComplete as Image } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';

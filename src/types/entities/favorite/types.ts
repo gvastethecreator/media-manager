@@ -28,7 +28,7 @@ export interface FavoriteBase {
 	id: string;
 	entityId: string;
 	entityType: FavoriteEntityType;
-	userId: string;
+	profileId: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -36,7 +36,7 @@ export interface FavoriteBase {
 /**
  * ⭐ Input para crear un nuevo favorito.
  */
-export type FavoriteCreateInput = Omit<FavoriteBase, 'id' | 'createdAt' | 'updatedAt'>;
+export type FavoriteCreateInput = Omit<FavoriteBase, 'id' | 'createdAt' | 'updatedAt' | 'profileId'>;
 
 /**
  * ⭐ Relaciones de un favorito.

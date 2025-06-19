@@ -3,9 +3,9 @@
  * @module store/entities/favorite/slices/core
  */
 
-import { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { FavoriteExtended } from '@/types/entities/favorite';
+import { StateCreator } from 'zustand';
 import { FavoriteStore } from '..';
 
 // Logger específico para este slice
@@ -26,7 +26,7 @@ export interface CoreActions {
 	setError: (error: string | null) => void;
 
 	// Gestión de favoritos
-	addFavorite: (favorite: FavoriteExtended) => void;
+	addFavorite: (isFavorite: FavoriteExtended) => void;
 	removeFavorite: (id: string) => void;
 	updateFavorite: (id: string, data: Partial<FavoriteExtended>) => void;
 	clearFavorites: () => void;

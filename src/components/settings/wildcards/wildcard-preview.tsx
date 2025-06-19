@@ -1,4 +1,4 @@
-import type { Wildcard } from '@prisma/client';
+import type { WildcardComplete as Wildcard } from '@prisma/client';
 import { ChevronRight, EditIcon, StarIcon, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';

@@ -1,12 +1,12 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import type { TagWithRelations } from '@/types/entities/tag';
-import { type TagCategory, TagRarity } from '@/types/entities/tag';
 import { Sparkles, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { TagWithRelations } from '@/types/entities/tag';
+import { type TagCategory, TagRarity } from '@/types/entities/tag';
 import { TagCardContent } from './tag-card-content';
 import { TagCardFooter } from './tag-card-footer';
 import { TagCardHeader } from './tag-card-header';

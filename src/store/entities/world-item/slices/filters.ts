@@ -3,9 +3,9 @@
  * @module store/entities/world-item/slices/filters
  */
 
+import type { StateCreator } from 'zustand';
 import { WorldItemSortCriteria } from '@/types/entities/world-item/enums';
 import type { WorldItemFilters } from '@/types/entities/world-item/types';
-import type { StateCreator } from 'zustand';
 import type { WorldItemActions, WorldItemState } from '../types';
 
 export interface WorldItemFiltersSlice {
@@ -44,8 +44,7 @@ export const createWorldItemFiltersSlice: StateCreator<
 		const { worldItems, filters } = get();
 		const { searchTerm, category, rarity, type } = filters;
 		return worldItems.filter((item) => {
-			const nameMatch =
-				!searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase());
+			const nameMatch = !searchTerm || item.name.toLowerCase().includes(searchTerm.toLowerCase());
 			const categoryMatch = !category || item.category === category;
 			const rarityMatch = !rarity || item.rarity === rarity;
 			const typeMatch = !type || item.type === type;

@@ -1,10 +1,10 @@
 'use server';
 
+import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { toCreatePropertyData, toUpdatePropertyData } from '@/transformers/property';
 import { CreatePropertySchema, UpdatePropertySchema } from '@/types/entities/property/schema';
-import { z } from 'zod';
 
 const logger = serverLogger.withContext('PropertyActions');
 
@@ -174,7 +174,7 @@ export async function togglePropertyFavorite(id: string) {
 		// Obtener el estado actual
 		const property = await prisma.property.findUnique({
 			where: { id },
-			select: { favorite: true },
+			select: { isFavorite: true },
 		});
 
 		if (!property) {
@@ -184,7 +184,7 @@ export async function togglePropertyFavorite(id: string) {
 		// Invertir el estado
 		const updatedProperty = await prisma.property.update({
 			where: { id },
-			data: { favorite: !property.favorite },
+			data: { isFavorite: !property.isFavorite },
 			include: {
 				_count: {
 					select: {
@@ -207,7 +207,7 @@ export async function togglePropertyFavorite(id: string) {
 		});
 
 		logger.info(
-			`✅ Propiedad ${updatedProperty.favorite ? 'marcada' : 'desmarcada'} como favorita:`,
+			`✅ Propiedad ${updatedProperty.isFavorite ? 'marcada' : 'desmarcada'} como favorita:`,
 			updatedProperty.name
 		);
 		return updatedProperty;

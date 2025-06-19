@@ -50,7 +50,7 @@ export const services = {
 	album: require('./album/index'),
 	collection: require('./collection/index'),
 	group: require('./group/index'),
-	favorite: require('./favorite.service'),
+	isFavorite: require('./favorite.service'),
 
 	// Servicios individuales
 	concept: require('./concept.service'),

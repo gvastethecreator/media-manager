@@ -3,18 +3,18 @@
  * @module store/entities/property/slices/core
  */
 
+import { z } from 'zod';
+import type { StateCreator } from 'zustand';
 import {
-    createProperty as createPropertyAction,
-    deleteProperty as deletePropertyAction,
-    getProperties as fetchPropertiesAction,
-    getProperty as fetchPropertyAction,
-    updateProperty as updatePropertyAction,
+	createProperty as createPropertyAction,
+	deleteProperty as deletePropertyAction,
+	getProperties as fetchPropertiesAction,
+	getProperty as fetchPropertyAction,
+	updateProperty as updatePropertyAction,
 } from '@/app/actions/properties/property.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { CreatePropertySchema, UpdatePropertySchema } from '@/types/entities/property/schema';
-import { z } from 'zod';
-import type { StateCreator } from 'zustand';
 import type { Property, PropertyState } from '../types';
 
 const propertyLogger = clientLogger.withContext('PropertyStore');

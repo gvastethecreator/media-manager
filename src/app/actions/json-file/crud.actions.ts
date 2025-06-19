@@ -1,6 +1,8 @@
+'use server';
+
 // Server Actions para JsonFile
 import { validateJsonFile } from '@/transformers/json-file/serializers';
-import type { JsonFile } from '@/types/entities/json-file/types';
+import type { JsonFileComplete as JsonFile } from '@/types/entities/json-file';
 
 export async function createJsonFile(input: unknown): Promise<JsonFile> {
 	const json = validateJsonFile(input);

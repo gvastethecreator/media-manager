@@ -1,12 +1,12 @@
 'use client';
 
+import { Group as GroupIcon, Heart, Image as ImageIcon, Tags, Users, Video } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useMemo } from 'react';
 import type { GroupWithStats } from '@/app/actions/groups/group.actions';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Group as GroupIcon, Heart, Image as ImageIcon, Tags, Users, Video } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useMemo } from 'react';
 
 interface GroupCardProps {
 	/** 📊 Grupo con estadísticas para mostrar */

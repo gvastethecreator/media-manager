@@ -85,8 +85,8 @@ export function transformNoteToExtended(note: NoteBase): NoteWithRelations {
 			isEditing: false,
 			isExpanded: false,
 			displayOrder: 0,
-			// Propiedades calculadas para UI
-			tagsArray: typeof baseNote.tags === 'string' ? JSON.parse(baseNote.tags || '[]') : baseNote.tags || [],
+			// Propiedades calculadas para UI - tags debe venir de las relaciones
+			tagsArray: [], // Se llenará desde las relaciones si están disponibles
 			statusDisplay: getStatusDisplay(baseNote.status),
 			priorityLevel: getPriorityLevel(baseNote.priority),
 		};
@@ -169,7 +169,9 @@ function calculateImportanceLevel(note: NoteBase, counts: Record<string, number 
 		// Base: prioridad (0-10) + contenido asociado
 		const priorityFactor = note.priority || 0;
 		const contentLengthFactor = note.content ? Math.min(note.content.length / 1000, 5) : 0;
-		const relationsFactor = Object.values(counts).reduce((sum, count) => sum + (count || 0), 0) * 0.2;
+		const relationsFactor = Object.values(counts || {}).reduce((sum: number, count: number | undefined) => {
+			return sum + (count || 0);
+		}, 0) * 0.2;
 
 		// Importancia general (máximo 20)
 		return Math.min(Math.round(priorityFactor + contentLengthFactor + relationsFactor), 20);

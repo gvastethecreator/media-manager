@@ -1,15 +1,16 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 const imageLogger = serverLogger.withContext('ImageStats');
 
 /**
- * Actualiza las estadísticas de visualización o descarga de una imagen
+ * Actualiza las estadísticas de visualización de una imagen
+ * Nota: El campo 'downloads' no existe en el esquema actual de ImageStats
  */
-export async function updateImageStats(imageId: string, type: 'view' | 'download'): Promise<void> {
+export async function updateImageStats(imageId: string, type: 'view'): Promise<void> {
 	try {
 		const stats = await prisma.imageStats.findUnique({
 			where: { imageId },
@@ -19,8 +20,7 @@ export async function updateImageStats(imageId: string, type: 'view' | 'download
 			await prisma.imageStats.update({
 				where: { imageId },
 				data: {
-					views: type === 'view' ? stats.views + 1 : stats.views,
-					downloads: type === 'download' ? stats.downloads + 1 : stats.downloads,
+					views: stats.views + 1,
 					lastViewed: new Date(),
 				},
 			});
@@ -28,8 +28,7 @@ export async function updateImageStats(imageId: string, type: 'view' | 'download
 			await prisma.imageStats.create({
 				data: {
 					imageId,
-					views: type === 'view' ? 1 : 0,
-					downloads: type === 'download' ? 1 : 0,
+					views: 1,
 				},
 			});
 		}

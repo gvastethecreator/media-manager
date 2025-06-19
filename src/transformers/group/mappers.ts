@@ -44,7 +44,7 @@ export function toGroupListItem(
 			emoji: group.emoji || '📂',
 			color: group.color || '#3b82f6',
 			category: group.category || 'general',
-			isFavorite: group.favorite || false,
+			isFavorite: group.isFavorite || false,
 			selected,
 			images: mappedImages,
 			imageCount,
@@ -96,7 +96,7 @@ export function toGroupCard(
 			color: group.color || '#3b82f6',
 			category: group.category || 'general',
 			description: group.description || '',
-			isFavorite: group.favorite || false,
+			isFavorite: group.isFavorite || false,
 			selected,
 			imageUrl,
 			imageCount,
@@ -178,8 +178,8 @@ export function parseGroupSearchParams(params: GroupSearchParams): {
 		// Filtro de búsqueda por texto
 		if (params.search) {
 			where.OR = [
-				{ name: { contains: params.search, mode: 'insensitive' } },
-				{ description: { contains: params.search, mode: 'insensitive' } },
+				{ name: { contains: params.search } },
+				{ description: { contains: params.search } },
 			];
 		}
 
@@ -189,8 +189,8 @@ export function parseGroupSearchParams(params: GroupSearchParams): {
 		}
 
 		// Filtros booleanos
-		if (params.favorite !== undefined) {
-			where.favorite = params.favorite;
+		if (params.isFavorite !== undefined) {
+			where.isFavorite = params.isFavorite;
 		}
 
 		// Ordenación
@@ -221,7 +221,7 @@ export function toGroupSearchFilters(params: GroupSearchParams): Record<string, 
 		// Filtros aplicados
 		if (params.search) filters.search = params.search;
 		if (params.category) filters.category = params.category;
-		if (params.favorite !== undefined) filters.favorite = params.favorite;
+		if (params.isFavorite !== undefined) filters.isFavorite = params.isFavorite;
 
 		return filters;
 	} catch (error) {

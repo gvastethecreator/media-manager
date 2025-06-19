@@ -3,6 +3,7 @@
  * @module transformers/activity/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { type ActivityFilters, ActivityType, type CreateActivityData } from '../../types/entities/activity/index';
 
 /**
@@ -23,8 +24,8 @@ export function mapCreateActivityDataToPrisma(data: CreateActivityData) {
  * @param filters Filtros de actividad
  * @returns Objeto de condiciones para Prisma
  */
-export function mapActivityFiltersToPrisma(filters: ActivityFilters) {
-	const where: Record<string, any> = {};
+export function mapActivityFiltersToPrisma(filters: ActivityFilters): Prisma.ActivityFindManyArgs {
+	const where: Prisma.ActivityWhereInput = {};
 
 	// Filtrar por tipos de actividad
 	if (filters.types && filters.types.length > 0) {
@@ -53,8 +54,7 @@ export function mapActivityFiltersToPrisma(filters: ActivityFilters) {
 	if (filters.searchQuery) {
 		where.description = {
 			contains: filters.searchQuery,
-			mode: 'insensitive',
-		};
+			};
 	}
 
 	return {
@@ -62,7 +62,7 @@ export function mapActivityFiltersToPrisma(filters: ActivityFilters) {
 		take: filters.limit || 20,
 		skip: filters.offset || 0,
 		orderBy: {
-			createdAt: 'desc',
+			createdAt: filters.sortDirection || 'desc' as Prisma.SortOrder,
 		},
 		include: {
 			image: {

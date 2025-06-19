@@ -335,8 +335,8 @@ export function parseAlbumFilters(filters: unknown): Record<string, unknown> {
 		// Procesar filtros específicos de Album
 		if (typedFilters.search) {
 			parsed.OR = [
-				{ name: { contains: typedFilters.search as string, mode: 'insensitive' } },
-				{ description: { contains: typedFilters.search as string, mode: 'insensitive' } },
+				{ name: { contains: typedFilters.search as string } },
+				{ description: { contains: typedFilters.search as string } },
 			];
 		}
 

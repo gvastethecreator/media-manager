@@ -1,6 +1,6 @@
 'use client';
 
-import type { Wildcard } from '@prisma/client';
+import type { WildcardComplete as Wildcard } from '@prisma/client';
 import { ChevronRight, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash, WandIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useState } from 'react';

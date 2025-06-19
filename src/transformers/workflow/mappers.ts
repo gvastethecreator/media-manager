@@ -1,5 +1,5 @@
 // Mappers para Workflow
-import type { Workflow } from '@/types/entities/workflow/types';
+import type { Workflow } from '@/types/entities/workflow';
 
 export function fromPrismaWorkflow(prisma: any): Workflow {
 	return {

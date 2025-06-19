@@ -16,11 +16,10 @@ import {
 	mapUpdateCollectionDataToPrisma,
 } from '@/transformers/collection';
 import type {
-	CollectionBase,
 	CollectionComplete,
 	CollectionCreateInput,
 	CollectionSearchOptions,
-	CollectionUpdateInput,
+	CollectionUpdateInput
 } from '@/types/entities/collection';
 import { revalidatePath } from 'next/cache';
 
@@ -80,27 +79,31 @@ export async function getCollection(id: string): Promise<CollectionComplete | nu
 /**
  * Crea una nueva colección.
  */
-export async function createCollection(data: CollectionCreateInput): Promise<CollectionBase> {
+export async function createCollection(data: CollectionCreateInput): Promise<CollectionComplete> {
 	logger.info('➕ Creando nueva colección:', { name: data.name });
 	const prismaData = mapCreateCollectionDataToPrisma(data);
-	const newCollection = await prisma.collection.create({ data: prismaData });
+	const newCollection = await prisma.collection.create({
+		data: prismaData,
+		include: COLLECTION_INCLUDE
+	});
 	await revalidateCollectionPaths();
-	return newCollection;
+	return fromPrismaCollection(newCollection);
 }
 
 /**
  * Actualiza una colección existente.
  */
-export async function updateCollection(id: string, data: CollectionUpdateInput): Promise<CollectionBase> {
+export async function updateCollection(id: string, data: CollectionUpdateInput): Promise<CollectionComplete> {
 	logger.info(`🔄 Actualizando colección: ${id}`);
 	const prismaData = mapUpdateCollectionDataToPrisma(data);
 	const updatedCollection = await prisma.collection.update({
 		where: { id },
 		data: prismaData,
+		include: COLLECTION_INCLUDE
 	});
 	await revalidateCollectionPaths();
 	revalidatePath(`/collections/${id}`);
-	return updatedCollection;
+	return fromPrismaCollection(updatedCollection);
 }
 
 /**
@@ -133,5 +136,53 @@ export async function removeImageFromCollection(collectionId: string, imageId: s
 		where: { id: collectionId },
 		data: { images: { disconnect: { id: imageId } } },
 	});
+	revalidatePath(`/collections/${collectionId}`);
+}
+
+/**
+ * Obtiene las imágenes de una colección específica.
+ */
+export async function getCollectionImages(collectionId: string): Promise<Array<{ id: string; name: string; path: string }>> {
+	logger.info(`🖼️ Obteniendo imágenes de la colección: ${collectionId}`);
+	const collection = await prisma.collection.findUnique({
+		where: { id: collectionId },
+		include: {
+			images: {
+				orderBy: { createdAt: 'desc' },
+			},
+		},
+	});
+
+	if (!collection) {
+		logger.warn(`Colección no encontrada: ${collectionId}`);
+		return [];
+	}
+
+	return collection.images;
+}
+
+/**
+ * Añade una colección a una imagen (relación inversa).
+ */
+export async function addCollectionToImage(imageId: string, collectionId: string): Promise<void> {
+	logger.info(`🖼️ Añadiendo colección ${collectionId} a imagen ${imageId}`);
+	await prisma.image.update({
+		where: { id: imageId },
+		data: { collections: { connect: { id: collectionId } } },
+	});
+	revalidatePath(`/images/${imageId}`);
+	revalidatePath(`/collections/${collectionId}`);
+}
+
+/**
+ * Elimina una colección de una imagen (relación inversa).
+ */
+export async function removeCollectionFromImage(imageId: string, collectionId: string): Promise<void> {
+	logger.info(`🖼️ Eliminando colección ${collectionId} de imagen ${imageId}`);
+	await prisma.image.update({
+		where: { id: imageId },
+		data: { collections: { disconnect: { id: collectionId } } },
+	});
+	revalidatePath(`/images/${imageId}`);
 	revalidatePath(`/collections/${collectionId}`);
 }

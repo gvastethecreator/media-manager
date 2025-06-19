@@ -8,9 +8,8 @@
 
 import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
-import type { Tag as PrismaTag } from '@prisma/client';
-import type { Image } from '../image';
-import type { Video } from '../video';
+import type { ImageComplete as Image } from '../image';
+import type { VideoComplete as Video } from '../video';
 
 /**
  * 🔍 Esquema de validación para Tag
@@ -28,9 +27,23 @@ export const TagSchema = z.object({
 });
 
 /**
- * 📝 Tipo base para Tag - hereda directamente del tipo Prisma
+ * 📝 Tipo base para Tag - definición canónica sin dependencias de Prisma
  */
-export type TagBase = PrismaTag;
+export interface TagBase {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string;
+	sortBy: string;
+	filters: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 /**
  * Categorías de etiquetas
@@ -249,6 +262,9 @@ export type Tag = TagBase;
 
 /* Exportación de tipos adicionales para retrocompatibilidad */
 export type { TagCreateInput as CreateTagData, TagUpdateInput as UpdateTagData };
+
+// Alias para compatibilidad
+export type TagComplete = TagWithRelations;
 
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.

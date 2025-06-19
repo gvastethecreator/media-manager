@@ -1,6 +1,8 @@
+'use server';
+
 // Server Actions para File3D
 import { validateFile3D } from '@/transformers/file3d/serializers';
-import type { File3D } from '@/types/entities/file3d/types';
+import type { File3DComplete as File3D } from '@/types/entities/file3d';
 
 export async function createFile3D(input: unknown): Promise<File3D> {
 	const file = validateFile3D(input);

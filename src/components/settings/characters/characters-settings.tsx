@@ -1,5 +1,7 @@
 'use client';
 
+import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { deleteCharacter, searchCharacters } from '@/app/actions/characters/character.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,8 +14,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import toastService from '@/services/toast.service';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
 import type { CharacterComplete } from '@/types/entities/character/extended';
-import { Filter, Info, Loader2, PlusCircle, Save, Trash, Users } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { CreateCharacterForm } from './create-character-form';
 
 // Eliminar la referencia a avatar (ya arreglado) y actualizar la sección traits

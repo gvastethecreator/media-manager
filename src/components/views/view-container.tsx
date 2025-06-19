@@ -35,7 +35,7 @@ import { PropertyContentView } from './properties/property-content-view';
 import { SearchView } from './search/search-view';
 import { TagContentView } from './tags/tag-content-view';
 import { TagsView } from './tags/tags-view';
-import type { ViewType } from './types';
+import { ViewType } from './types';
 import { UploadedImagesView } from './uploaded-images/uploaded-images-view';
 import { WildcardContentView } from './wildcards/wildcard-content-view';
 import { WildcardsView } from './wildcards/wildcards-view';

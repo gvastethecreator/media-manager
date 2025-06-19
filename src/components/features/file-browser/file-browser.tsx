@@ -1,5 +1,8 @@
 'use client';
 
+import { FileTextIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { type ImageItem } from '@/components/features/file-viewer/file-viewer';
 import { Spinner } from '@/components/ui/spinner';
@@ -10,9 +13,6 @@ import { useImageResources } from '@/store/image-resources.store';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { FileItem } from '@/types/files';
-import { FileTextIcon } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ContextMenuAction } from './context-menu/types';
 import { useFilteredData } from './hooks/use-filtered-data';
 import './styles/scrollbar.css';

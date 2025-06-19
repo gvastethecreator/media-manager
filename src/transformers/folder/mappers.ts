@@ -5,12 +5,11 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	Folder,
-	FolderComplete,
-	FolderCreateInput,
-	FolderFilters,
-	FolderSearchOptions,
-	FolderUpdateInput,
+    FolderComplete,
+    FolderCreateInput,
+    FolderFilters,
+    FolderSearchOptions,
+    FolderUpdateInput
 } from '@/types/entities/folder';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -25,10 +24,19 @@ const logger = serverLogger.withContext('FolderMappers');
 export function mapCreateFolderDataToPrisma(data: FolderCreateInput): Prisma.FolderCreateInput {
 	try {
 		return {
-			...data,
+			name: data.name,
 			path: data.path.replace(/\\/g, '/'), // Normalizar a slashes
+			autoReindex: data.autoReindex,
+			description: data.description ?? null,
+			emoji: data.emoji ?? null,
+			color: data.color ?? null,
+			parentId: data.parentId ?? null,
+			presetId: data.presetId ?? null,
 			isFavorite: data.isFavorite ?? false,
-			autoReindex: data.autoReindex ?? true,
+			featuredImage: data.featuredImage ?? null,
+			totalFiles: 0,
+			totalSize: 0,
+			lastIndexed: null,
 		};
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de carpeta', { error, data });
@@ -80,8 +88,8 @@ function mapFolderFiltersToPrisma(filters: FolderFilters): Prisma.FolderWhereInp
 
 	if (filters.search) {
 		where.OR = [
-			{ name: { contains: filters.search, mode: 'insensitive' } },
-			{ description: { contains: filters.search, mode: 'insensitive' } },
+			{ name: { contains: filters.search } },
+			{ description: { contains: filters.search } },
 		];
 	}
 

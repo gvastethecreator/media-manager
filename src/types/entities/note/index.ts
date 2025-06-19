@@ -5,4 +5,26 @@
  * @description Este barrel ha sido limpiado para evitar dependencias legacy. Usar únicamente '@/types/entities/note/types'.
  */
 
-export * from './types';
+export type {
+    // Alias para retrocompatibilidad
+    NoteComplete as Note, NoteBase,
+    NoteComplete, NoteCounts,
+    NoteCreateInput,
+    NoteFilters,
+    NoteRelations,
+    NoteSearchOptions,
+    NoteSearchResult,
+    NoteTransformerOptions,
+    NoteUI,
+    NoteUpdateInput,
+    NoteValidated,
+    RelatedNote
+} from './types';
+
+export {
+    NoteCategory,
+    NotePriority,
+    NoteSortCriteria,
+    NoteStatus
+} from './types';
+

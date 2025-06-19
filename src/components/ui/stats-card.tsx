@@ -15,7 +15,7 @@ export interface StatsCardProps {
 		// Campos básicos
 		total: number;
 		active: number;
-		favorite: number;
+		isFavorite: number;
 		archived: number;
 		// Campos extendidos
 		totalItems?: number;
@@ -91,7 +91,7 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 								<span className="text-xs text-muted-foreground">Activos</span>
 							</div>
 							<div className="flex flex-col items-center justify-center p-4 rounded-sm bg-muted/50">
-								<span className="text-2xl font-bold">{stats.favorite}</span>
+								<span className="text-2xl font-bold">{stats.isFavorite}</span>
 								<span className="text-xs text-muted-foreground">Favoritos</span>
 							</div>
 							<div className="flex flex-col items-center justify-center p-4 rounded-sm bg-muted/50">

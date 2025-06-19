@@ -5,9 +5,9 @@
  * @module app/actions/tags/tag-images.actions
  */
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('tag-images.actions');
 
@@ -170,6 +170,39 @@ export async function getImageTags(imageId: string) {
 		return tagData;
 	} catch (error) {
 		logger.error('Error al obtener etiquetas de la imagen:', error);
+		// Devolver un array vacío en caso de error
+		return [];
+	}
+}
+
+/**
+ * Obtiene todas las imágenes asociadas a una etiqueta
+ * @param tagId ID de la etiqueta
+ * @returns Lista de imágenes asociadas a la etiqueta
+ */
+export async function getTagImages(tagId: string) {
+	try {
+		logger.info(`Obteniendo imágenes para la etiqueta ${tagId}`);
+
+		// Verificar que la etiqueta existe
+		const tag = await prisma.tag.findUnique({
+			where: { id: tagId },
+			include: {
+				images: {
+					orderBy: { createdAt: 'desc' },
+				},
+			},
+		});
+
+		if (!tag) {
+			logger.warn(`No se encontró la etiqueta con ID ${tagId}`);
+			return [];
+		}
+
+		logger.info(`Se encontraron ${tag.images.length} imágenes para la etiqueta ${tagId}`);
+		return tag.images;
+	} catch (error) {
+		logger.error('Error al obtener imágenes de la etiqueta:', error);
 		// Devolver un array vacío en caso de error
 		return [];
 	}

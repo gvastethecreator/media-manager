@@ -5,12 +5,12 @@
 
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { deserializeSettings, mergeSettings, serializeSettings } from '@/transformers/settings';
 import type { Settings } from '@/types/settings';
 import { settingsSchema } from '@/types/settings';
-import { revalidatePath } from 'next/cache';
 import { createSettingsError, isSettingsError } from './settings.errors';
 
 // Logger específico para acciones de configuración

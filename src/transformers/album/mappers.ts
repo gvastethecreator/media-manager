@@ -67,7 +67,7 @@ export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): Prisma.Album
  * @param album - El objeto Album de Prisma.
  * @returns Un objeto compatible con AlbumBase.
  */
-export function fromPrismaAlbum(album: Prisma.AlbumGetPayload<null>): AlbumBase {
+export function fromPrismaAlbum(album: any): AlbumBase {
 	if (!album) {
 		throw new Error('Se requiere un objeto de álbum de Prisma para la transformación.');
 	}
@@ -79,7 +79,7 @@ export function fromPrismaAlbum(album: Prisma.AlbumGetPayload<null>): AlbumBase 
 		color: album.color,
 		description: album.description,
 		shortcut: album.shortcut,
-		category: album.category,
+		category: album.category ?? 'default',
 		sortBy: album.sortBy,
 		filters: album.filters,
 		featuredImage: album.featuredImage,
@@ -87,4 +87,16 @@ export function fromPrismaAlbum(album: Prisma.AlbumGetPayload<null>): AlbumBase 
 		createdAt: album.createdAt,
 		updatedAt: album.updatedAt,
 	};
+}
+
+/**
+ * 🔄 Mapea un array de Album de Prisma a un array de nuestro tipo canónico AlbumBase.
+ * @param albums - El array de objetos Album de Prisma.
+ * @returns Un array de objetos compatibles con AlbumBase.
+ */
+export function fromPrismaAlbums(albums: any[]): AlbumBase[] {
+	if (!Array.isArray(albums)) {
+		return [];
+	}
+	return albums.map(fromPrismaAlbum);
 }

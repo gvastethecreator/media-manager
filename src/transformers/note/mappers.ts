@@ -3,9 +3,9 @@
  * @module transformers/note/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { NoteBase, NoteCreateInput, NoteFilters, NoteSearchOptions, NoteUpdateInput } from '@/types/entities/note';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('NoteMappers');
 
@@ -103,8 +103,8 @@ function mapNoteFiltersToPrisma(filters: NoteFilters): Prisma.NoteWhereInput {
 
 	if (filters.searchQuery) {
 		where.OR = [
-			{ title: { contains: filters.searchQuery, mode: 'insensitive' } },
-			{ content: { contains: filters.searchQuery, mode: 'insensitive' } },
+			{ title: { contains: filters.searchQuery } },
+			{ content: { contains: filters.searchQuery } },
 		];
 	}
 

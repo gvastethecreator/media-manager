@@ -1,7 +1,7 @@
 /**
  * 📁 Tipos canónicos para la entidad File
  */
-import type { FileType } from './enums';
+import { FileType } from './enums';
 
 export type FileBase = {
 	id: string;
@@ -52,4 +52,50 @@ export type FileFilterOptions = {
 	modifiedBefore?: Date;
 	sortBy?: keyof FileBase;
 	sortOrder?: 'asc' | 'desc';
+};
+
+/**
+ * Resultado de la lectura de un directorio
+ */
+export type DirectoryReadResult = {
+	path: string;
+	files: FileInfo[];
+	directories: DirectoryInfo[];
+	totalCount: number;
+	totalSize: number;
+};
+
+/**
+ * Resultado de operaciones de copia o movimiento de archivos
+ */
+export type FileCopyMoveResult = {
+	success: boolean;
+	sourcePath: string;
+	destPath: string;
+	isDirectory: boolean;
+	sourceInfo: FileInfo;
+	destInfo: FileInfo;
+	timestamp: Date;
+	error?: string;
+};
+
+/**
+ * Opciones para operaciones de archivo
+ */
+export type FileOperationOptions = {
+	overwrite?: boolean;
+	recursive?: boolean;
+	preserveTimestamps?: boolean;
+	filter?: (path: string) => boolean;
+};
+
+/**
+ * Resultado de operaciones generales de archivo
+ */
+export type FileOperationResult = {
+	success: boolean;
+	path: string;
+	operation: 'create' | 'read' | 'update' | 'delete' | 'copy' | 'move' | 'rename';
+	file?: FileInfo;
+	error?: string;
 };

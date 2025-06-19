@@ -3,6 +3,7 @@
  * @module transformers/collection/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	CollectionCreateInput,
@@ -11,7 +12,6 @@ import type {
 	CollectionUpdateInput,
 } from '@/types/entities/collection';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('CollectionMapper');
 
@@ -88,8 +88,8 @@ function mapCollectionFiltersToPrisma(filters: CollectionFilters): Prisma.Collec
 
 	if (filters.search) {
 		where.OR = [
-			{ name: { contains: filters.search, mode: 'insensitive' } },
-			{ description: { contains: filters.search, mode: 'insensitive' } },
+			{ name: { contains: filters.search } },
+			{ description: { contains: filters.search } },
 		];
 	}
 	if (filters.isFavorite !== undefined) {

@@ -1,6 +1,8 @@
+'use server';
+
 // Server Actions para Audio
 import { validateAudio } from '@/transformers/audio/serializers';
-import type { Audio } from '@/types/entities/audio/types';
+import type { AudioComplete as Audio } from '@/types/entities/audio';
 
 export async function createAudio(input: unknown): Promise<Audio> {
 	const audio = validateAudio(input);

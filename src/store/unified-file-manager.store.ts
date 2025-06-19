@@ -15,15 +15,15 @@
  * ✅ Selección multi-item eficiente
  */
 
-import { getFolderImages } from '@/app/actions/folders';
 import { create } from 'zustand';
+import { getFolderImages } from '@/app/actions/folders';
 // 🚀 Importaciones de acciones optimizadas - CORREGIDAS
 import type { ViewMode } from '@/components/navigation/types';
 // 🎯 Cache y throttling optimizados
 import { throttleEvent } from '@/lib/event-throttler';
 import { folderResponseCache as folderCache } from '@/lib/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { FileProcessingStatus, FileType, type FileItem } from '@/types/files';
+import { type FileItem, FileProcessingStatus, FileType } from '@/types/files';
 
 const fileManagerLogger = clientLogger.withContext('UnifiedFileManager');
 

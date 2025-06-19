@@ -4,10 +4,10 @@
  * @description Funciones para convertir entre diferentes formatos de Tag
  */
 
-import { Logger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { TagBase, TagComplete } from '@/types/entities/tag';
 
-const logger = new Logger('TagConverters');
+const logger = serverLogger.withContext('TagConverters');
 
 /**
  * Convierte cualquier objeto de tag a una versión TagComplete completa

@@ -3,7 +3,7 @@
  * @module store/entities/world-item/utils
  */
 
-import type { WorldItem, WorldItemFilters } from '../../../types/entities/world-item';
+import type { WorldItemComplete, WorldItemFilters } from '../../../types/entities/world-item';
 import { WORLD_ITEM_ID_PREFIX, WORLD_ITEM_RARITY_COLORS } from './constants';
 
 /**
@@ -21,7 +21,7 @@ export const generateWorldItemId = (): string => {
  * @param searchQuery Consulta de búsqueda
  * @returns Lista filtrada de objetos del mundo
  */
-export const filterWorldItems = (items: WorldItem[], filters: WorldItemFilters, searchQuery = ''): WorldItem[] => {
+export const filterWorldItems = (items: WorldItemComplete[], filters: WorldItemFilters, searchQuery = ''): WorldItemComplete[] => {
 	if (!items || items.length === 0) return [];
 
 	// Si no hay filtros ni consulta, devolver todos los items
@@ -84,10 +84,10 @@ export const filterWorldItems = (items: WorldItem[], filters: WorldItemFilters, 
 			}
 
 			// Filtros por relaciones
-			if (filters.hasImages && (!item.imagesCount || item.imagesCount === 0)) return false;
-			if (filters.hasNotes && (!item.notesCount || item.notesCount === 0)) return false;
-			if (filters.hasConcepts && (!item.conceptsCount || item.conceptsCount === 0)) return false;
-			if (filters.hasPrompts && (!item.promptsCount || item.promptsCount === 0)) return false;
+			if (filters.hasImages && (!item.counts?.images || item.counts.images === 0)) return false;
+			if (filters.hasNotes && (!item.counts?.notes || item.counts.notes === 0)) return false;
+			if (filters.hasConcepts && (!item.counts?.concepts || item.counts.concepts === 0)) return false;
+			if (filters.hasPrompts && (!item.counts?.prompts || item.counts.prompts === 0)) return false;
 		}
 
 		return true;
@@ -100,7 +100,7 @@ export const filterWorldItems = (items: WorldItem[], filters: WorldItemFilters, 
  * @param sortBy Criterio de ordenamiento
  * @returns Lista ordenada de objetos del mundo
  */
-export const sortWorldItems = (items: WorldItem[], sortBy: string): WorldItem[] => {
+export const sortWorldItems = (items: WorldItemComplete[], sortBy: string): WorldItemComplete[] => {
 	if (!items || items.length === 0) return [];
 
 	const sortedItems = [...items];

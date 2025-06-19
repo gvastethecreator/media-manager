@@ -64,8 +64,8 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 			const where: any = {};
 			if (search) {
 				where.OR = [
-					{ name: { contains: search, mode: 'insensitive' } },
-					{ description: { contains: search, mode: 'insensitive' } },
+					{ name: { contains: search } },
+					{ description: { contains: search } },
 				];
 			}
 			if (typeof isActive === 'boolean') where.isActive = isActive;

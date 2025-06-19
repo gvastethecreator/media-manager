@@ -3,7 +3,7 @@
  * @module types/entities/album/extended
  */
 
-import type { AlbumSortCriteria } from './enums';
+import { AlbumSortCriteria } from './enums';
 import type { Album, AlbumBase, AlbumFilters } from './types';
 
 /**

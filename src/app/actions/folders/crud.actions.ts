@@ -8,27 +8,27 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import {
-	fromPrismaFolder,
-	fromPrismaFolders,
-	mapCreateFolderDataToPrisma,
-	mapUpdateFolderDataToPrisma,
+    fromPrismaFolder,
+    fromPrismaFolders,
+    mapCreateFolderDataToPrisma,
+    mapUpdateFolderDataToPrisma,
 } from '@/transformers/folder';
 import type { FolderComplete, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder';
 import { CreateFolderSchema, UpdateFolderSchema } from '@/types/entities/folder/schema';
 import fs from 'fs/promises';
 import { revalidatePath } from 'next/cache';
 
-const crudLogger = serverLogger.withContext('FolderCrudActions');
+const logger = serverLogger.withContext('FolderActions');
 
-const folderWithRelations = {
-	include: {
-		parent: true,
-		children: true,
-		_count: {
-			select: {
-				images: true,
-				children: true,
-			},
+// Objeto de inclusión para obtener una carpeta completa con todas sus relaciones.
+const FOLDER_INCLUDE = {
+	images: true,
+	parent: true,
+	children: true,
+	_count: {
+		select: {
+			images: true,
+			children: true,
 		},
 	},
 };
@@ -37,7 +37,7 @@ const folderWithRelations = {
  * Crea una nueva carpeta en la base de datos.
  */
 export async function createFolder(input: FolderCreateInput): Promise<FolderComplete> {
-	crudLogger.info('📁 Creating new folder:', input);
+	logger.info('📁 Creating new folder:', input);
 	const validatedInput = CreateFolderSchema.parse(input);
 
 	// 1. Validar que la ruta no esté duplicada
@@ -62,11 +62,11 @@ export async function createFolder(input: FolderCreateInput): Promise<FolderComp
 	const prismaData = mapCreateFolderDataToPrisma(validatedInput);
 	const folder = await prisma.folder.create({
 		data: prismaData,
-		...folderWithRelations,
+		include: FOLDER_INCLUDE,
 	});
 
 	revalidatePath('/folders');
-	crudLogger.info('✅ Folder created successfully:', folder);
+	logger.info('✅ Folder created successfully:', folder);
 	return fromPrismaFolder(folder);
 }
 
@@ -74,7 +74,7 @@ export async function createFolder(input: FolderCreateInput): Promise<FolderComp
  * Actualiza una carpeta existente.
  */
 export async function updateFolder(id: string, input: FolderUpdateInput): Promise<FolderComplete> {
-	crudLogger.info(`📝 Updating folder ${id}:`, input);
+	logger.info(`📝 Updating folder ${id}:`, input);
 	const validatedInput = UpdateFolderSchema.parse(input);
 
 	if (validatedInput.path) {
@@ -90,12 +90,12 @@ export async function updateFolder(id: string, input: FolderUpdateInput): Promis
 	const updatedFolder = await prisma.folder.update({
 		where: { id },
 		data: prismaData,
-		...folderWithRelations,
+		include: FOLDER_INCLUDE,
 	});
 
 	revalidatePath('/folders');
 	revalidatePath(`/folders/${id}`);
-	crudLogger.info(`✅ Folder ${id} updated successfully.`);
+	logger.info(`✅ Folder ${id} updated successfully.`);
 	return fromPrismaFolder(updatedFolder);
 }
 
@@ -103,7 +103,7 @@ export async function updateFolder(id: string, input: FolderUpdateInput): Promis
  * Elimina una carpeta.
  */
 export async function deleteFolder(id: string): Promise<void> {
-	crudLogger.warn(`🗑️ Deleting folder ${id}`);
+	logger.warn(`🗑️ Deleting folder ${id}`);
 
 	// 1. Verificar que no tenga subcarpetas
 	const childrenCount = await prisma.folder.count({ where: { parentId: id } });
@@ -115,17 +115,17 @@ export async function deleteFolder(id: string): Promise<void> {
 	await prisma.folder.delete({ where: { id } });
 
 	revalidatePath('/folders');
-	crudLogger.info(`✅ Folder ${id} deleted successfully.`);
+	logger.info(`✅ Folder ${id} deleted successfully.`);
 }
 
 /**
  * Obtiene una carpeta por su ID.
  */
 export async function getFolder(id: string): Promise<FolderComplete | null> {
-	crudLogger.info(`🔍 Getting folder ${id}`);
+	logger.info(`🔍 Getting folder ${id}`);
 	const folder = await prisma.folder.findUnique({
 		where: { id },
-		...folderWithRelations,
+		include: FOLDER_INCLUDE,
 	});
 	return folder ? fromPrismaFolder(folder) : null;
 }
@@ -134,10 +134,10 @@ export async function getFolder(id: string): Promise<FolderComplete | null> {
  * Obtiene todas las carpetas.
  */
 export async function getAllFolders(): Promise<FolderComplete[]> {
-	crudLogger.info('📂 Getting all folders');
+	logger.info('📂 Getting all folders');
 	const folders = await prisma.folder.findMany({
 		orderBy: { name: 'asc' },
-		...folderWithRelations,
+		include: FOLDER_INCLUDE,
 	});
 	return fromPrismaFolders(folders);
 }

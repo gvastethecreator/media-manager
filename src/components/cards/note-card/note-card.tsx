@@ -4,7 +4,7 @@ import { BookOpen, ScrollText } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import type { Note } from '@/types/entities/note/types';
+import type { NoteComplete as Note } from '@/types/entities/note/types';
 import { CardHeader } from '../card-header';
 import { NoteCardContent } from './note-card-content';
 import { NoteCardFooter } from './note-card-footer';

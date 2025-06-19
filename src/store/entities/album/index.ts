@@ -6,15 +6,15 @@
  */
 
 import {
-	createAlbum as createServerAlbum,
-	deleteAlbum as deleteServerAlbum,
-	getAlbums,
-	updateAlbum as updateServerAlbum,
+    createAlbum as createServerAlbum,
+    deleteAlbum as deleteServerAlbum,
+    getAlbums,
+    updateAlbum as updateServerAlbum,
 } from '@/app/actions/albums/album.actions';
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { AlbumSortCriteria, AlbumViewMode } from '@/types/entities/album';
+import { AlbumComplete, AlbumCreateInput, AlbumSortCriteria, AlbumUpdateInput, AlbumViewMode } from '@/types/entities/album';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { AlbumStore } from './types';
@@ -30,7 +30,7 @@ export const useAlbumStore = create<AlbumStore>()(
 	persist(
 		(set, get) => ({
 			// 📋 Estado inicial de datos
-			albums: [],
+			albums: [] as AlbumComplete[],
 			isLoading: false,
 			error: null,
 			lastUpdated: null,
@@ -83,7 +83,6 @@ export const useAlbumStore = create<AlbumStore>()(
 			},
 
 			loadAlbumById: async (id: string) => {
-				// Esta función puede requerir una server action `getAlbum(id)`
 				const album = get().albums.find((a) => a.id === id);
 				if (!album) {
 					albumLogger.warn(`Album con id ${id} no encontrado en el store.`);
@@ -92,7 +91,7 @@ export const useAlbumStore = create<AlbumStore>()(
 			},
 
 			// 📝 Gestión de álbumes
-			createAlbum: async (albumData) => {
+			createAlbum: async (albumData: AlbumCreateInput) => {
 				try {
 					albumLogger.info('➕ Creando álbum:', albumData.name);
 					const newAlbum = await createServerAlbum(albumData);
@@ -106,7 +105,7 @@ export const useAlbumStore = create<AlbumStore>()(
 				}
 			},
 
-			updateAlbum: async (id, albumData) => {
+			updateAlbum: async (id: string, albumData: AlbumUpdateInput) => {
 				try {
 					albumLogger.info('🔄 Actualizando álbum:', id);
 					const updatedAlbum = await updateServerAlbum(id, albumData);
@@ -122,7 +121,7 @@ export const useAlbumStore = create<AlbumStore>()(
 				}
 			},
 
-			deleteAlbum: async (id) => {
+			deleteAlbum: async (id: string) => {
 				try {
 					albumLogger.info('🗑️ Eliminando álbum:', id);
 					await deleteServerAlbum(id);

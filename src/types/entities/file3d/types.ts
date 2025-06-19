@@ -15,5 +15,16 @@ export interface File3DBase {
 	updatedAt: Date;
 }
 
+/**
+ * 🗂️ File3D con todas sus relaciones y metadatos adicionales
+ */
+export interface File3DComplete extends File3DBase {
+	metadata?: Record<string, unknown>;
+	tags?: Array<{ id: string; name: string }>;
+	_count?: {
+		tags: number;
+	};
+}
+
 export type File3DCreateInput = Omit<File3DBase, 'id' | 'createdAt' | 'updatedAt'>;
 export type File3DUpdateInput = Partial<Omit<File3DBase, 'id'>>;

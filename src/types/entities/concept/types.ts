@@ -26,6 +26,17 @@ export interface ConceptBase {
 }
 
 /**
+ * Tipo completo para Concept con todas las relaciones y datos
+ */
+export interface ConceptComplete extends ConceptBase {
+	_count?: {
+		images?: number;
+		notes?: number;
+		tags?: number;
+	};
+}
+
+/**
  * Input para creación
  */
 export interface ConceptCreateInput {
@@ -43,6 +54,36 @@ export interface ConceptCreateInput {
  * Input para actualización
  */
 export type ConceptUpdateInput = Partial<Omit<ConceptBase, 'id' | 'createdAt' | 'updatedAt'>>;
+
+/**
+ * Opciones de búsqueda para conceptos
+ */
+export interface ConceptSearchOptions {
+	filters?: {
+		search?: string;
+		category?: string | string[];
+		tags?: string[];
+		onlyFavorites?: boolean;
+	};
+	skip?: number;
+	take?: number;
+	orderBy?: {
+		[key: string]: 'asc' | 'desc';
+	};
+	includeCount?: boolean;
+	includeRelations?: boolean;
+}
+
+/**
+ * Resultado de búsqueda de conceptos
+ */
+export interface ConceptSearchResult {
+	items: ConceptComplete[];
+	total: number;
+	page: number;
+	pageSize: number;
+	totalPages: number;
+}
 
 /**
  * Esquema Zod para validación de Concept

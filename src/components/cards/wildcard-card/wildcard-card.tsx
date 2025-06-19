@@ -5,7 +5,7 @@ import Link from 'next/link';
 import React, { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { Wildcard } from '@/types/prisma';
+import type { WildcardComplete as Wildcard } from '@/types/prisma';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
