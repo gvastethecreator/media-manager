@@ -4,10 +4,10 @@
  * @description Contiene la lógica para convertir un objeto Wildcard de Prisma a nuestro tipo canónico.
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { WildcardComplete } from '@/types/entities/wildcard';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 import { deserializeWildcardChildren } from './serializers';
 
 const logger = serverLogger.withContext('WildcardTransformer');

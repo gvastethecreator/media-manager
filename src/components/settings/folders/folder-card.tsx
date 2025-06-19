@@ -12,7 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
-import type { ExtendedProcessStatus } from '@/types/process';
+import { ExtendedProcessStatus } from '@/types/process';
 import { FolderIndexStatusBadge, type IndexStatus } from './folder-index-status-badge';
 import { FolderProgressDetails } from './folder-progress-details';
 import type { ExtendedFolder } from './folder-types';

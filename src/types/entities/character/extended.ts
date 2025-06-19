@@ -4,8 +4,8 @@
  */
 
 import type { Concept } from '../concept/types';
-import type { Image } from '../image/types';
-import type { Note } from '../note/types';
+import type { ImageComplete as Image } from '../image/types';
+import type { NoteComplete as Note } from '../note/types';
 import type { Prompt } from '../prompt/types';
 import type { CharacterFilter, CharacterRelationship, CharacterStats } from './base';
 import type { CharacterComplete, CharacterWithRelations } from './types';

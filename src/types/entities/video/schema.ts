@@ -62,7 +62,7 @@ export const VideoPlaybackStateSchema = z.object({
 	position: z.number(),
 	lastPlayed: z.union([z.date(), z.string()]),
 	completed: z.boolean(),
-	favorite: z.boolean(),
+	isFavorite: z.boolean(),
 	watchCount: z.number(),
 });
 

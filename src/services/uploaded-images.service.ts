@@ -3,18 +3,18 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { fromDB, transformUploadedImage } from '@/transformers/uploaded-image';
-import type { UploadedImageType } from '@/types/entities/uploaded-image';
+import { UploadedImageType } from '@/types/entities/uploaded-image';
 import type {
-    CreateUploadedImageParams,
-    GetUploadedImagesParams,
-    UpdateUploadedImageParams,
-    UploadedImageDimensions,
-    UploadedImageEvents,
-    UploadedImageMetadata,
-    UploadedImageProcessingOptions,
-    UploadedImageResult,
-    UploadedImageResults,
-    UploadedImageStats,
+	CreateUploadedImageParams,
+	GetUploadedImagesParams,
+	UpdateUploadedImageParams,
+	UploadedImageDimensions,
+	UploadedImageEvents,
+	UploadedImageMetadata,
+	UploadedImageProcessingOptions,
+	UploadedImageResult,
+	UploadedImageResults,
+	UploadedImageStats,
 } from '@/types/uploaded-images';
 import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/utils/errors/service-errors';
 
@@ -38,10 +38,10 @@ interface WhereClause {
 	};
 	OR?: Array<
 		| {
-				name: { contains: string; mode: 'insensitive' };
+				name: { contains: string; };
 		  }
 		| {
-				category: { contains: string; mode: 'insensitive' };
+				category: { contains: string; };
 		  }
 	>;
 }
@@ -276,8 +276,8 @@ class UploadedImagesService {
 
 			if (query) {
 				where.OR = [
-					{ name: { contains: query, mode: 'insensitive' } },
-					{ category: { contains: query, mode: 'insensitive' } },
+					{ name: { contains: query } },
+					{ category: { contains: query } },
 				];
 			}
 

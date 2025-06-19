@@ -4,7 +4,7 @@
  * @description Funciones selectoras para acceder al estado de manera optimizada
  */
 
-import type { Activity, ActivityCategory } from '@/types/entities/activity';
+import { Activity, ActivityCategory } from '@/types/entities/activity';
 import { groupBy } from '@/utils/array';
 import type { ActivityState } from './types';
 

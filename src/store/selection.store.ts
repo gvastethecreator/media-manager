@@ -1,7 +1,7 @@
-import { clientLogger } from '@/lib/logger/client-logger';
-import type { FileItem } from '@/types/files';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { FileItem } from '@/types/files';
 
 const selectionLogger = clientLogger.withContext('SelectionStore');
 

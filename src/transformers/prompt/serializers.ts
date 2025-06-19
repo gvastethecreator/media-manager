@@ -3,10 +3,10 @@
  * @module transformers/prompt/serializers
  */
 
-import { Logger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { PromptBase, PromptWithRelations } from '@/types/entities/prompt';
 
-const logger = new Logger('PromptSerializers');
+const logger = serverLogger.withContext('PromptSerializers');
 
 /**
  * Deserializa el campo de parámetros de un prompt

@@ -10,21 +10,21 @@
  * @returns Un código de color en formato hexadecimal.
  */
 export function generateTagColor(name: string): string {
-  if (!name) return '#3b82f6'; // Color por defecto
+	if (!name) return '#3b82f6'; // Color por defecto
 
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    hash |= 0; // Convertir a 32bit integer
-  }
+	let hash = 0;
+	for (let i = 0; i < name.length; i++) {
+		hash = name.charCodeAt(i) + ((hash << 5) - hash);
+		hash |= 0; // Convertir a 32bit integer
+	}
 
-  let color = '#';
-  for (let i = 0; i < 3; i++) {
-    const value = (hash >> (i * 8)) & 0xFF;
-    color += ('00' + value.toString(16)).substr(-2);
-  }
+	let color = '#';
+	for (let i = 0; i < 3; i++) {
+		const value = (hash >> (i * 8)) & 0xff;
+		color += ('00' + value.toString(16)).substr(-2);
+	}
 
-  return color;
+	return color;
 }
 
 /**
@@ -34,11 +34,11 @@ export function generateTagColor(name: string): string {
  * @returns Un emoji.
  */
 export function generateTagEmoji(name: string, category?: string): string {
-  // Lógica simple por ahora, se puede expandir
-  if (!name) return '🏷️';
+	// Lógica simple por ahora, se puede expandir
+	if (!name) return '🏷️';
 
-  const emojis = ['🎨', '💡', '🚀', '⭐', '🔧', '📁', '👤', '🌍', '📚', '⚙️'];
-  const charCodeSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+	const emojis = ['🎨', '💡', '🚀', '⭐', '🔧', '📁', '👤', '🌍', '📚', '⚙️'];
+	const charCodeSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
-  return emojis[charCodeSum % emojis.length];
+	return emojis[charCodeSum % emojis.length];
 }

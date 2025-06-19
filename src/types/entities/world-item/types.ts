@@ -7,12 +7,8 @@
  */
 
 import type { WorldItem as PrismaWorldItem } from '@prisma/client';
-import type { Image } from '../image/types';
-import type {
-    WorldItemRelationshipType,
-    WorldItemSortCriteria,
-    WorldItemViewMode
-} from './enums';
+import type { ImageComplete as Image } from '../image/types';
+import type { WorldItemRelationshipType, WorldItemSortCriteria, WorldItemViewMode } from './enums';
 
 /**
  * 📝 Tipo base para WorldItem - hereda directamente del tipo Prisma
@@ -261,5 +257,6 @@ export type {
     WorldItemStat as WorldItemStats
 };
 
-    export type { WORLD_ITEM_SORT_PROPERTY_MAP, WorldItemSortCriteria };
+// Re-exportaciones desde enums
+    export { WORLD_ITEM_SORT_PROPERTY_MAP, WorldItemSortCriteria } from './enums';
 

@@ -10,14 +10,14 @@ import { TransformerError } from '@/utils/transformers/errors';
 const logger = serverLogger.withContext('AlbumTransformer');
 
 // Define el tipo de payload de Prisma que esperamos, con las relaciones y conteos.
-interface AlbumFromPrisma {
+export interface AlbumFromPrisma {
 	id: string;
 	name: string;
 	emoji: string;
 	color: string;
 	description: string | null;
 	shortcut: string | null;
-	category: string;
+	category: string | null;
 	sortBy: string;
 	filters: string;
 	featuredImage: string | null;
@@ -50,6 +50,7 @@ export function fromPrismaAlbum(prismaAlbum: AlbumFromPrisma | null): AlbumWithR
 
 		return {
 			...baseData,
+			category: baseData.category ?? 'general',
 			images: baseData.images ?? [],
 			videos: baseData.videos ?? [],
 			_count: {

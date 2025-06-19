@@ -10,8 +10,11 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from '@/transformers/album/mappers';
 import { fromPrismaAlbum, fromPrismaAlbums } from '@/transformers/album/transformer';
-import type { Album, AlbumCreateInput, AlbumUpdateInput, AlbumWithRelations } from '@/types/entities/album';
+import type { AlbumCreateInput, AlbumUpdateInput, AlbumWithRelations } from '@/types/entities/album';
 import { revalidatePath } from 'next/cache';
+
+// Re-exportar el tipo para que esté disponible para importación
+export type { AlbumWithStats } from '@/types/entities/album/extended';
 
 const logger = serverLogger.withContext('AlbumActions');
 
@@ -54,27 +57,31 @@ export async function getAlbum(id: string): Promise<AlbumWithRelations | null> {
 /**
  * Crea un nuevo álbum.
  */
-export async function createAlbum(data: AlbumCreateInput): Promise<Album> {
+export async function createAlbum(data: AlbumCreateInput): Promise<AlbumWithRelations> {
 	logger.info('📝 Creando nuevo álbum:', { name: data.name });
 	const prismaData = mapCreateAlbumDataToPrisma(data);
-	const newAlbum = await prisma.album.create({ data: prismaData });
+	const newAlbum = await prisma.album.create({
+		data: prismaData,
+		include: ALBUM_INCLUDE
+	});
 	revalidatePath('/albums');
-	return newAlbum;
+	return fromPrismaAlbum(newAlbum);
 }
 
 /**
  * Actualiza un álbum existente.
  */
-export async function updateAlbum(id: string, data: AlbumUpdateInput): Promise<Album> {
+export async function updateAlbum(id: string, data: AlbumUpdateInput): Promise<AlbumWithRelations> {
 	logger.info(`🔄 Actualizando álbum: ${id}`);
 	const prismaData = mapUpdateAlbumDataToPrisma(data);
 	const updatedAlbum = await prisma.album.update({
 		where: { id },
 		data: prismaData,
+		include: ALBUM_INCLUDE
 	});
 	revalidatePath('/albums');
 	revalidatePath(`/albums/${id}`);
-	return updatedAlbum;
+	return fromPrismaAlbum(updatedAlbum);
 }
 
 /**
@@ -116,4 +123,26 @@ export async function removeImageFromAlbum(albumId: string, imageId: string): Pr
 		},
 	});
 	revalidatePath(`/albums/${albumId}`);
+}
+
+/**
+ * Obtiene las imágenes de un álbum específico.
+ */
+export async function getAlbumImages(albumId: string): Promise<Array<{ id: string; name: string; path: string }>> {
+	logger.info(`🖼️ Obteniendo imágenes del álbum: ${albumId}`);
+	const album = await prisma.album.findUnique({
+		where: { id: albumId },
+		include: {
+			images: {
+				orderBy: { createdAt: 'desc' },
+			},
+		},
+	});
+
+	if (!album) {
+		logger.warn(`Álbum no encontrado: ${albumId}`);
+		return [];
+	}
+
+	return album.images;
 }

@@ -6,7 +6,7 @@
 
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { QueueJobSortField, QueueJobSortOrder, QueueJobState, QueueJobStatus, QueueJobType } from '../types';
+import { QueueJobSortField, QueueJobSortOrder, QueueJobState, QueueJobStatus, QueueJobType } from '../types';
 
 // Logger para el slice
 const filtersLogger = clientLogger.withContext('QueueJobStore:Filters');

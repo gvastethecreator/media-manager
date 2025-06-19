@@ -1,5 +1,8 @@
 'use client';
 
+import { BookMarked } from 'lucide-react';
+import { motion } from 'motion/react';
+import { memo, useCallback, useEffect } from 'react';
 import { CollectionCard } from '@/components/cards/collection-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -8,9 +11,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
 import type { CollectionComplete } from '@/types/entities/collection';
-import { BookMarked } from 'lucide-react';
-import { motion } from 'motion/react';
-import { memo, useCallback, useEffect } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('CollectionsView');
@@ -34,7 +34,7 @@ export function CollectionsView(_props: ViewProps) {
 			selectCollection(collection.id);
 			setCurrentView('collection-content');
 		},
-		[setCurrentView, selectCollection],
+		[setCurrentView, selectCollection]
 	);
 
 	if (error) {

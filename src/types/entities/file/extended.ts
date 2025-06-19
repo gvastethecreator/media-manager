@@ -4,7 +4,7 @@
  */
 
 import type { DirectoryInfo, FileInfo, ImageFileInfo } from '@/transformers/file/mappers';
-import type { FileType } from './enums';
+import { FileType } from './enums';
 
 /**
  * Interfaz extendida para archivos de imagen con metadatos enriquecidos

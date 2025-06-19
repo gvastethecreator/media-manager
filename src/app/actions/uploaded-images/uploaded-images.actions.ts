@@ -6,7 +6,7 @@ import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { uploadedImagesService } from '@/services/uploaded-images';
-import type { UploadedImageCreateInput, UploadedImageType } from '@/types/entities/uploaded-image';
+import { UploadedImageCreateInput, UploadedImageType } from '@/types/entities/uploaded-image';
 import type { UploadedImageFilters } from '@/types/uploaded-images';
 
 const actionLogger = serverLogger.withContext('ServerAction:UploadedImages');

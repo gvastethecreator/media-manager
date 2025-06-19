@@ -1,5 +1,9 @@
 'use client';
 
+import { Variable } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getProperties } from '@/app/actions/properties/property.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -10,10 +14,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { usePropertyStore } from '@/store/entities/property';
 import { fromPrismaProperty } from '@/transformers/property/serializers';
 import type { PropertyWithRelations } from '@/types/entities/property';
-import { Variable } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 import { PropertyCard } from './property-card';
 

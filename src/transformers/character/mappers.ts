@@ -3,6 +3,7 @@
  * @module transformers/character/mappers
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	CharacterCreateInput,
@@ -11,7 +12,6 @@ import type {
 	CharacterUpdateInput,
 } from '@/types/entities/character';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 /**
  * 🔄 Mapea un `CharacterCreateInput` a un `Prisma.CharacterCreateInput`.
@@ -94,9 +94,9 @@ function mapCharacterFiltersToPrisma(filters: CharacterFilters): Prisma.Characte
 
 	if (filters.search) {
 		where.OR = [
-			{ name: { contains: filters.search, mode: 'insensitive' } },
-			{ description: { contains: filters.search, mode: 'insensitive' } },
-			{ backstory: { contains: filters.search, mode: 'insensitive' } },
+			{ name: { contains: filters.search } },
+			{ description: { contains: filters.search } },
+			{ backstory: { contains: filters.search } },
 		];
 	}
 

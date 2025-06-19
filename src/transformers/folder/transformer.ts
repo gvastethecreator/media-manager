@@ -4,10 +4,10 @@
  * @description Contiene la lógica para convertir un objeto Folder de Prisma a nuestro tipo canónico.
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FolderComplete, FolderExtended, FolderExtendedComplete } from '@/types/entities/folder';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 // Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
 type FolderFromPrisma = Prisma.FolderGetPayload<{

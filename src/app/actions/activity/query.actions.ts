@@ -10,10 +10,10 @@ import { prisma } from '@/lib/prisma';
 
 import { extendActivities, extendActivity, mapActivityFiltersToPrisma } from '@/transformers/activity';
 import {
-	type Activity,
-	type ActivityFilters,
-	type ActivityListResponse,
-	type ActivityType,
+    type Activity,
+    type ActivityFilters,
+    type ActivityListResponse,
+    type ActivityType,
 } from '@/types/entities/activity';
 
 const activityLogger = serverLogger.withContext('ActivityQueryActions');
@@ -133,6 +133,7 @@ export async function getFilteredActivities(filters: ActivityFilters): Promise<A
 		activityLogger.info('📥 Obteniendo actividades filtradas:', filters);
 
 		// Convertir filtros a formato Prisma
+		// TEST: Añadiendo comentario para forzar la recarga del archivo
 		const prismaQuery = mapActivityFiltersToPrisma(filters);
 
 		// Ejecutar consulta principal

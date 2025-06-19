@@ -4,7 +4,8 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { Video, VideoSortCriteria } from '../../../../types/entities/video';
+import type { VideoComplete } from '../../../../types/entities/video';
+import { VideoSortCriteria } from '../../../../types/entities/video/enums';
 import type { VideoState } from '../types';
 
 // Slice para filtrado y ordenación
@@ -21,9 +22,9 @@ export interface VideoFiltersSlice {
 	resetFilters: () => void;
 
 	// Obtener videos filtrados
-	getFilteredVideos: () => Video[];
-	applySort: (videos: Video[]) => Video[];
-	applyFilters: (videos: Video[]) => Video[];
+	getFilteredVideos: () => VideoComplete[];
+	applySort: (videos: VideoComplete[]) => VideoComplete[];
+	applyFilters: (videos: VideoComplete[]) => VideoComplete[];
 }
 
 // Creador del slice
@@ -123,7 +124,7 @@ export const createVideoFiltersSlice: StateCreator<VideoState, [], [], VideoFilt
 		return get().applySort(get().applyFilters(videos));
 	},
 
-	applyFilters: (videos: Video[]) => {
+	applyFilters: (videos: VideoComplete[]) => {
 		const {
 			searchQuery,
 			filterByFolderId,
@@ -160,32 +161,32 @@ export const createVideoFiltersSlice: StateCreator<VideoState, [], [], VideoFilt
 			}
 
 			// Filtrado por duración
-			if (video.metadata?.duration) {
-				if (filterByDuration.min !== null && video.metadata.duration < filterByDuration.min) {
+			if (video.duration) {
+				if (filterByDuration.min !== null && video.duration < filterByDuration.min) {
 					return false;
 				}
-				if (filterByDuration.max !== null && video.metadata.duration > filterByDuration.max) {
+				if (filterByDuration.max !== null && video.duration > filterByDuration.max) {
 					return false;
 				}
 			}
 
 			// Filtrado por resolución
-			if (filterByResolution && video.metadata?.height) {
+			if (filterByResolution && video.height) {
 				switch (filterByResolution) {
 					case '4k':
-						if (video.metadata.height < 2160) return false;
+						if (video.height < 2160) return false;
 						break;
 					case '2k':
-						if (video.metadata.height < 1440 || video.metadata.height >= 2160) return false;
+						if (video.height < 1440 || video.height >= 2160) return false;
 						break;
 					case 'fullhd':
-						if (video.metadata.height < 1080 || video.metadata.height >= 1440) return false;
+						if (video.height < 1080 || video.height >= 1440) return false;
 						break;
 					case 'hd':
-						if (video.metadata.height < 720 || video.metadata.height >= 1080) return false;
+						if (video.height < 720 || video.height >= 1080) return false;
 						break;
 					case 'sd':
-						if (video.metadata.height >= 720) return false;
+						if (video.height >= 720) return false;
 						break;
 				}
 			}
@@ -208,8 +209,9 @@ export const createVideoFiltersSlice: StateCreator<VideoState, [], [], VideoFilt
 		});
 	},
 
-	applySort: (videos: Video[]) => {
+	applySort: (videos: VideoComplete[]) => {
 		const { sortBy } = get().filters;
+		if (!sortBy) return videos;
 
 		return [...videos].sort((a, b) => {
 			switch (sortBy) {
@@ -222,20 +224,20 @@ export const createVideoFiltersSlice: StateCreator<VideoState, [], [], VideoFilt
 				case 'date_desc':
 					return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 				case 'size_asc':
-					return (a.metadata?.size || 0) - (b.metadata?.size || 0);
+					return (a.size || 0) - (b.size || 0);
 				case 'size_desc':
-					return (b.metadata?.size || 0) - (a.metadata?.size || 0);
+					return (b.size || 0) - (a.size || 0);
 				case 'duration_asc':
-					return (a.metadata?.duration || 0) - (b.metadata?.duration || 0);
+					return (a.duration || 0) - (b.duration || 0);
 				case 'duration_desc':
-					return (b.metadata?.duration || 0) - (a.metadata?.duration || 0);
+					return (b.duration || 0) - (a.duration || 0);
 				case 'resolution_asc':
 					return (
-						(a.metadata?.width || 0) * (a.metadata?.height || 0) - (b.metadata?.width || 0) * (b.metadata?.height || 0)
+						(a.width || 0) * (a.height || 0) - (b.width || 0) * (b.height || 0)
 					);
 				case 'resolution_desc':
 					return (
-						(b.metadata?.width || 0) * (b.metadata?.height || 0) - (a.metadata?.width || 0) * (a.metadata?.height || 0)
+						(b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0)
 					);
 				default:
 					return 0;

@@ -1,8 +1,8 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ProcessStatus } from '@/types/process';
+import { ProcessStatus } from '@/types/process';
+import { revalidatePath } from 'next/cache';
 
 const eventsLogger = serverLogger.withContext('ServerEvents');
 
@@ -17,6 +17,7 @@ const EVENT_PATHS: Record<EventType, string[]> = {
 	'tags:modified': ['/tags'],
 	'albums:modified': ['/albums'],
 	'prompts:modified': ['/prompts', '/prompts/[id]'],
+	'prompts:relation': ['/prompts', '/prompts/[id]'],
 	'notes:modified': ['/notes', '/notes/[id]'],
 	'characters:modified': ['/characters'],
 	'places:modified': ['/places'],
@@ -37,6 +38,21 @@ const EVENT_PATHS: Record<EventType, string[]> = {
 	'uploaded-image:updated': ['/uploads', '/images'],
 	'uploaded-image:deleted': ['/uploads', '/images'],
 	'uploaded-images:changed': ['/uploads', '/images'],
+	// Activity events
+	'activity.created': ['/activities', '/settings'],
+	'activity.updated': ['/activities', '/settings'],
+	'activity.deleted': ['/activities', '/settings'],
+	'activity.modified': ['/activities', '/settings'],
+	'activity.cleared': ['/activities', '/settings'],
+	// File events
+	'file:created': ['/files', '/folders'],
+	'file:modified': ['/files', '/folders'],
+	'file:deleted': ['/files', '/folders'],
+	'file:moved': ['/files', '/folders'],
+	'file:copied': ['/files', '/folders'],
+	'file:renamed': ['/files', '/folders'],
+	'directory:created': ['/files', '/folders'],
+	'directory:deleted': ['/files', '/folders'],
 };
 
 export type EventType =
@@ -49,6 +65,7 @@ export type EventType =
 	| 'tags:modified'
 	| 'albums:modified'
 	| 'prompts:modified'
+	| 'prompts:relation'
 	| 'notes:modified'
 	| 'characters:modified'
 	| 'places:modified'
@@ -68,7 +85,22 @@ export type EventType =
 	| 'uploaded-image:created'
 	| 'uploaded-image:updated'
 	| 'uploaded-image:deleted'
-	| 'uploaded-images:changed';
+	| 'uploaded-images:changed'
+	// Activity events
+	| 'activity.created'
+	| 'activity.updated'
+	| 'activity.deleted'
+	| 'activity.modified'
+	| 'activity.cleared'
+	// File events
+	| 'file:created'
+	| 'file:modified'
+	| 'file:deleted'
+	| 'file:moved'
+	| 'file:copied'
+	| 'file:renamed'
+	| 'directory:created'
+	| 'directory:deleted';
 
 export interface EventData<T = unknown> {
 	type: EventType;

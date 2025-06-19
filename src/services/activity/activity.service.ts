@@ -225,8 +225,8 @@ export class ActivityServiceImpl implements ActivityService {
 			image_share: '🔗',
 			image_tag: '🏷️',
 			image_untag: '✂️',
-			image_favorite: '⭐',
-			image_unfavorite: '☆',
+			image_isFavorite: '⭐',
+			image_unisFavorite: '☆',
 			// Podemos seguir con más mapeos
 		};
 

@@ -4,7 +4,7 @@ import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from '
 import { motion } from 'motion/react';
 import { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { WorldItem, WorldItemRarity, WorldItemType } from '@/types/entities/world-item';
+import { WorldItem, WorldItemRarity, WorldItemType } from '@/types/entities/world-item';
 import { CardHeader } from '../card-header';
 import { WorldItemCardContent } from './world-item-card-content';
 import { WorldItemCardFooter } from './world-item-card-footer';

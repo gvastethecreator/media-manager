@@ -32,9 +32,33 @@ export interface FolderBase {
 
 /**
  * 📁 Input para crear una nueva carpeta.
+ * Hacemos opcionales los campos que pueden no estar presentes en la creación.
  */
 export interface FolderCreateInput
-	extends Omit<FolderBase, 'id' | 'createdAt' | 'updatedAt' | 'totalFiles' | 'totalSize' | 'lastIndexed'> {}
+	extends Omit<
+		FolderBase,
+		| 'id'
+		| 'createdAt'
+		| 'updatedAt'
+		| 'totalFiles'
+		| 'totalSize'
+		| 'lastIndexed'
+		| 'isFavorite'
+		| 'featuredImage'
+		| 'description'
+		| 'emoji'
+		| 'color'
+		| 'parentId'
+		| 'presetId'
+	> {
+	description?: string | null;
+	emoji?: string | null;
+	color?: string | null;
+	parentId?: string | null;
+	presetId?: string | null;
+	isFavorite?: boolean;
+	featuredImage?: string | null;
+}
 
 /**
  * 📁 Input para actualizar una carpeta existente.
@@ -58,6 +82,18 @@ export interface FolderCounts {
 		images?: number;
 		children?: number;
 	};
+}
+
+/**
+ * 📁 Estadísticas de una carpeta.
+ */
+export interface FolderStats {
+	totalSize: number;
+	totalFiles: number;
+	lastModified: Date;
+	imageCount: number;
+	videoCount: number;
+	directoryCount: number;
 }
 
 /**

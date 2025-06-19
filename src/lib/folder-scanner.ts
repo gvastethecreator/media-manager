@@ -37,18 +37,7 @@ const DEFAULT_SUPPORTED_EXTENSIONS = [
 ];
 
 // 🚀 Extensiones para clasificación rápida
-const IMAGE_EXTENSIONS = new Set([
-	'.jpg',
-	'.jpeg',
-	'.png',
-	'.gif',
-	'.webp',
-	'.avif',
-	'.bmp',
-	'.tiff',
-	'.tif',
-	'.svg',
-]);
+const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif', '.bmp', '.tiff', '.tif', '.svg']);
 const VIDEO_EXTENSIONS = new Set(['.mp4', '.webm', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.m4v']);
 
 /**

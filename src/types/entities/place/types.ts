@@ -5,21 +5,21 @@
  */
 
 import type {
-    Album,
-    Character,
-    Collection,
-    Concept,
-    Group,
-    Image,
-    Note,
-    Prisma,
-    Place as PrismaPlace,
-    Prompt,
-    Property,
-    Tag,
-    Video,
-    Wildcard,
-    WorldItem,
+	Album,
+	Character,
+	Collection,
+	Concept,
+	Group,
+	Image,
+	Note,
+	Prisma,
+	Place as PrismaPlace,
+	Prompt,
+	Property,
+	Tag,
+	Video,
+	Wildcard,
+	WorldItem,
 } from '@prisma/client';
 
 /**
@@ -147,15 +147,6 @@ export type PlaceWithCounts = Place & {
 export type PlaceComplete = PlaceWithRelations & PlaceWithCounts;
 
 /**
- * Tipo para configuración visual de lugares en el cliente
- */
-export interface PlaceVisualConfig {
-	sortBy: string;
-	sortOrder: 'asc' | 'desc';
-	groupBy: string | null;
-	filterBy: PlaceFilters | null;
-}
-
 /**
  * Tipos JSON utilizados en campos de lugar
  */

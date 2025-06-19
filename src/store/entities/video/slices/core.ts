@@ -4,26 +4,18 @@
  */
 
 import {
-	getVideoVisualConfig,
-	updateVideoVisualConfig as updateVideoVisualConfigAction,
-} from '@/app/actions/videos/video-visual-config.actions';
-import {
-	createVideo as createServerVideo,
-	deleteVideo as deleteServerVideo,
-	findVideos,
-	getVideo as getServerVideo,
+    createVideo as createServerVideo,
+    deleteVideo as deleteServerVideo,
+    findVideos,
+    getVideo as getServerVideo,
 } from '@/app/actions/videos/video.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { mapVideoVisualConfigCompleteUpdateToPrisma } from '@/transformers/video/mappers';
-import { transformVideo, transformVideos } from '@/transformers/video/serializers';
 import type {
-	CreateVideoData,
-	UpdateVideoData,
-	Video,
-	VideoBase,
-	VideoFilters,
-	VideoVisualConfig,
+    CreateVideoData,
+    UpdateVideoData,
+    VideoComplete,
+    VideoFilters
 } from '@/types/entities/video';
 import type { StateCreator } from 'zustand';
 import type { VideoState } from '../types';
@@ -38,7 +30,7 @@ const videoLogger = clientLogger.withContext('VideoStore');
  * @param filters - Objeto de filtros a aplicar.
  * @returns Un nuevo array con los videos filtrados.
  */
-function applyVideoFilters(videos: Video[], filters: Partial<VideoFilters>): Video[] {
+function applyVideoFilters(videos: VideoComplete[], filters: Partial<VideoFilters>): VideoComplete[] {
 	let filteredVideos = videos;
 	if (filters.folderId) {
 		filteredVideos = filteredVideos.filter((v) => v.folderId === filters.folderId);
@@ -54,20 +46,20 @@ function applyVideoFilters(videos: Video[], filters: Partial<VideoFilters>): Vid
 
 export interface VideoCoreSlice {
 	// Getters
-	getVideo: (id: string) => Video | undefined;
-	getVideos: () => Video[];
-	getVideosByFolder: (folderId: string) => Video[];
+	getVideo: (id: string) => VideoComplete | undefined;
+	getVideos: () => VideoComplete[];
+	getVideosByFolder: (folderId: string) => VideoComplete[];
 
 	// Selectores avanzados
 	selectVideos: (options?: {
 		filters?: Partial<VideoFilters>;
-		sortBy?: keyof Video;
+		sortBy?: keyof VideoComplete;
 		sortDirection?: 'asc' | 'desc';
-	}) => Video[];
+	}) => VideoComplete[];
 
 	// Operaciones síncronas
-	addVideo: (video: Video) => void;
-	addVideos: (videos: Video[]) => void;
+	addVideo: (video: VideoComplete) => void;
+	addVideos: (videos: VideoComplete[]) => void;
 	updateVideo: (id: string, data: UpdateVideoData) => void;
 	deleteVideo: (id: string) => void;
 
@@ -76,17 +68,10 @@ export interface VideoCoreSlice {
 	setError: (error: string | null) => void;
 
 	// Acciones asíncronas
-	fetchVideo: (id: string) => Promise<Video | undefined>;
-	fetchVideos: (folderIds?: string[]) => Promise<Video[]>;
-	createVideo: (data: CreateVideoData) => Promise<Video | undefined>;
+	fetchVideo: (id: string) => Promise<VideoComplete | undefined>;
+	fetchVideos: (folderIds?: string[]) => Promise<VideoComplete[]>;
+	createVideo: (data: CreateVideoData) => Promise<VideoComplete | undefined>;
 	removeVideo: (id: string) => Promise<boolean>;
-
-	// Visual Config
-	updateVideoVisualConfig: (
-		videoId: string,
-		config: Partial<VideoVisualConfig>
-	) => Promise<VideoVisualConfig | undefined>;
-	fetchVideoVisualConfig: (videoId: string) => Promise<VideoVisualConfig | undefined>;
 }
 
 // --- Slice Implementation ---
@@ -144,7 +129,7 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 				acc[video.id] = video;
 				return acc;
 			},
-			{} as Record<string, Video>
+			{} as Record<string, VideoComplete>
 		);
 		set((state) => ({
 			core: {
@@ -186,7 +171,7 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 		try {
 			const response = await getServerVideo(id);
 			if (response.success && response.data) {
-				const video = transformVideo(response.data as VideoBase);
+				const video = fromPrismaVideo(response.data as any);
 				if (video) get().addVideo(video);
 				return video;
 			}
@@ -206,7 +191,7 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 		try {
 			const response = await findVideos({ folderIds });
 			if (response.success && response.data) {
-				const videos = transformVideos(response.data as VideoBase[]);
+				const videos = fromPrismaVideos(response.data as any[]);
 				get().addVideos(videos);
 				return videos;
 			}
@@ -226,7 +211,7 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 		try {
 			const response = await createServerVideo(data);
 			if (response.success && response.data) {
-				const video = transformVideo(response.data as VideoBase);
+				const video = fromPrismaVideo(response.data as any);
 				if (video) {
 					get().addVideo(video);
 					toastService.success('Video creado');

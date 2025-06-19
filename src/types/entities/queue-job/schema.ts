@@ -4,16 +4,7 @@
  */
 
 import { z } from 'zod';
-
-// Enums para estados de trabajo
-export const QueueJobStatus = {
-	PENDING: 'pending',
-	PROCESSING: 'processing',
-	COMPLETED: 'completed',
-	FAILED: 'failed',
-	RETRYING: 'retrying',
-	CANCELLED: 'cancelled',
-} as const;
+import { QueueJobStatus } from './types';
 
 // Esquema para metadata de trabajo
 export const queueJobMetadataSchema = z

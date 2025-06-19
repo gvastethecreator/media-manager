@@ -4,7 +4,7 @@ import { LandPlot } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { getPlaces, type PlaceWithStats } from '@/app/actions/places/place.actions';
-import { getPlaceVisualConfig } from '@/app/actions/visual-config.actions';
+
 import { MemoizedPlaceCard } from '@/components/cards/place-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -17,19 +17,12 @@ import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('PlacesView');
 
-// Configuración visual simplificada para lugares
-const DEFAULT_PLACE_OPTIONS: CardOptions = {
-	primaryColor: '#10b981',
-	secondaryColor: '#0ea5e9',
-};
-
 export function PlacesView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { selectPlace } = usePlaceStore();
 	const [places, setPlaces] = useState<PlaceWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [_visualConfig, setVisualConfig] = useState<CardOptions>(DEFAULT_PLACE_OPTIONS);
 
 	// Usar el hook de eventos optimistas del cliente
 	const [optimisticPlaces, _addEvent] = clientEvents.useEvents<PlaceWithStats[]>(places);
@@ -60,23 +53,6 @@ export function PlacesView(_props: ViewProps) {
 	useEffect(() => {
 		loadPlaces();
 	}, [loadPlaces]);
-
-	useEffect(() => {
-		const loadVisualConfig = async () => {
-			try {
-				const config = await getPlaceVisualConfig();
-				setVisualConfig({
-					...DEFAULT_PLACE_OPTIONS,
-					...config,
-				});
-			} catch (error) {
-				console.error('Error al cargar la configuración visual:', error);
-				// Si hay un error, mantenemos la configuración predeterminada
-			}
-		};
-
-		loadVisualConfig();
-	}, []);
 
 	const handlePlaceClick = useCallback(
 		(place: PlaceWithStats) => {

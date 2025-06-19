@@ -6,12 +6,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { PlaceComplete } from '@/types/entities/place';
 import { TransformerError } from '@/utils/transformers/errors';
-import {
-	deserializePlaceDangers,
-	deserializePlaceFilters,
-	deserializePlaceResources,
-	deserializePlaceStats,
-} from './serializers';
 
 const logger = serverLogger.withContext('PlaceTransformer');
 

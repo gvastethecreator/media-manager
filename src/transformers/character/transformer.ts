@@ -7,17 +7,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterComplete } from '@/types/entities/character';
 import { TransformerError } from '@/utils/transformers/errors';
-import {
-	deserializeAbilities,
-	deserializeBeliefs,
-	deserializeFears,
-	deserializeFilters,
-	deserializeGoals,
-	deserializePersonality,
-	deserializeRelationships,
-	deserializeSkills,
-	deserializeStats,
-} from './serializers';
 
 const logger = serverLogger.withContext('CharacterTransformer');
 
@@ -26,29 +15,36 @@ interface CharacterFromPrisma {
 	id: string;
 	name: string;
 	description: string | null;
+	emoji: string;
+	color: string;
+	shortcut: string | null;
+	category: string | null;
 	level: number;
 	class: string;
 	race: string;
+	type: string | null;
 	alignment: string;
-	backstory: string | null;
+	backstory: string;
+	// Campos JSON serializados como strings
 	stats: string;
-	skills: string;
-	inventory: any;
-	spells: any;
-	feats: any;
-	isActive: boolean;
-	isFavorite: boolean;
-	metadata: any;
-	createdAt: Date;
-	updatedAt: Date;
-	// Campos adicionales específicos
+	psychologicalProfile: string;
+	socialProfile: string;
 	relationships: string;
 	goals: string;
 	fears: string;
 	beliefs: string;
 	personality: string;
+	skills: string;
 	abilities: string;
+	// Configuración
+	sortBy: string;
 	filters: string;
+	// Propiedades de visualización
+	featuredImage: string | null;
+	isFavorite: boolean;
+	// Timestamps
+	createdAt: Date;
+	updatedAt: Date;
 	// Relaciones
 	images: any[];
 	videos: any[];
@@ -99,26 +95,23 @@ export function fromPrismaCharacter(prismaCharacter: CharacterFromPrisma | null)
 	try {
 		const { _count, ...baseData } = prismaCharacter;
 
-		// Aquí es donde transformamos los datos crudos de Prisma al tipo de la aplicación
+		// Transformamos los datos crudos de Prisma al tipo de la aplicación
 		return {
 			...baseData,
 
-			// Deserializar todos los campos JSON
-			stats: deserializeStats(baseData.stats),
-			skills: deserializeSkills(baseData.skills),
-			relationships: deserializeRelationships(baseData.relationships),
-			goals: deserializeGoals(baseData.goals),
-			fears: deserializeFears(baseData.fears),
-			beliefs: deserializeBeliefs(baseData.beliefs),
-			personality: deserializePersonality(baseData.personality),
-			abilities: deserializeAbilities(baseData.abilities),
-			filters: deserializeFilters(baseData.filters),
-
-			// Asegurar que los campos opcionales no sean nulos
-			inventory: baseData.inventory ?? [],
-			spells: baseData.spells ?? [],
-			feats: baseData.feats ?? [],
-			metadata: baseData.metadata ?? {},
+			// Los campos JSON ya vienen como strings desde Prisma, los mantenemos así
+			// Si necesitamos deserializarlos, lo haremos en capas superiores
+			stats: baseData.stats || '{}',
+			skills: baseData.skills || '[]',
+			relationships: baseData.relationships || '[]',
+			goals: baseData.goals || '[]',
+			fears: baseData.fears || '[]',
+			beliefs: baseData.beliefs || '[]',
+			personality: baseData.personality || '[]',
+			abilities: baseData.abilities || '[]',
+			filters: baseData.filters || '[]',
+			psychologicalProfile: baseData.psychologicalProfile || '',
+			socialProfile: baseData.socialProfile || '',
 
 			// Asegurar que las relaciones no sean nulas
 			images: baseData.images ?? [],
@@ -137,15 +130,12 @@ export function fromPrismaCharacter(prismaCharacter: CharacterFromPrisma | null)
 			relatedCharacters: baseData.relatedCharacters ?? [],
 			relatedTo: baseData.relatedTo ?? [],
 
-			// El conteo se asigna directamente y se asegura de que no sea nulo
+			// Agregar conteos
 			_count: _count ?? {},
 		};
 	} catch (error) {
-		logger.error('Error transformando personaje desde Prisma', {
-			error,
-			characterId: prismaCharacter.id,
-		});
-		throw new TransformerError(`Error al transformar el personaje: ${(error as Error).message}`);
+		logger.error('Error al transformar personaje de Prisma', { error, prismaCharacter });
+		throw new TransformerError('Error al transformar personaje de Prisma.');
 	}
 }
 

@@ -2,7 +2,7 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { Collection } from '@/types/entities/collection/base';
+import type { CollectionComplete as Collection } from '@/types/entities/collection/base';
 import type { CollectionWithRelations } from '@/types/entities/collection/types';
 
 // Logger específico para acciones de CollectionCard

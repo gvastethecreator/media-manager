@@ -156,7 +156,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			if (item.worldItems?.length) {
 				addEvent({ type: 'world-items:modified', data: { item } });
 			}
-			if (item.isFavorite || item.favorite) {
+			if (item.isFavorite || item.isFavorite) {
 				addEvent({ type: 'favorites:modified', data: { item } });
 			}
 		},
@@ -171,7 +171,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 					if (file.id === fileId) {
 						const newFile = {
 							...file,
-							favorite: !file.favorite,
+							isFavorite: !file.isFavorite,
 							isFavorite: !file.isFavorite,
 						};
 						addEvent({ type: 'favorites:modified', data: { item: newFile } });

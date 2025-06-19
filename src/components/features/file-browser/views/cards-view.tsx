@@ -5,11 +5,11 @@
  */
 'use client';
 
+import type { FC } from 'react';
+import { memo, useCallback } from 'react';
 import { EntityCard } from '@/components/cards/entity-card';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { AnyEntity } from '@/types/entities';
-import type { FC } from 'react';
-import { memo, useCallback } from 'react';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
 
 interface CardsViewProps {
