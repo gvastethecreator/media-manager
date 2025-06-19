@@ -9,7 +9,7 @@ import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 const viewLogger = clientLogger.withContext('FavoritesView');
 

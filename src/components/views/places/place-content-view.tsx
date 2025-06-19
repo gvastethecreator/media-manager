@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { getPlaceImages } from '@/app/actions/places/place.actions';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { usePlaceStore } from '@/store/entities/place';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import { BaseContentView } from '../base/base-content-view';
 import { ContentViewProvider } from '../base/content-view-provider';
 

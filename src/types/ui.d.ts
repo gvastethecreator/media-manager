@@ -1,4 +1,4 @@
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 

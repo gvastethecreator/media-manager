@@ -9,7 +9,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service';
 import type { TagBase } from '@/types/entities/tag';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 const tagLogger = serverLogger.withContext('TagQueryActions');
 

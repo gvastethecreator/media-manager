@@ -5,21 +5,21 @@
  */
 
 import type {
-	Album,
-	Character,
-	Collection,
-	Concept,
-	Group,
-	Image,
-	Note,
-	Prisma,
-	Place as PrismaPlace,
-	Prompt,
-	Property,
-	Tag,
-	Video,
-	Wildcard,
-	WorldItem,
+    Album,
+    Character,
+    Collection,
+    Concept,
+    Group,
+    Image,
+    Note,
+    Prisma,
+    Place as PrismaPlace,
+    Prompt,
+    Property,
+    Tag,
+    Video,
+    Wildcard,
+    WorldItem,
 } from '@prisma/client';
 
 /**
@@ -27,6 +27,12 @@ import type {
  * Contiene todos los campos escalares y datos JSON del modelo Prisma.
  */
 export type Place = PrismaPlace;
+
+/**
+ * 🎯 Tipo base para un lugar sin relaciones.
+ * Representa solo los datos escalares del modelo Prisma.
+ */
+export type PlaceBase = Place;
 
 /**
  * 🛠️ Relaciones que puede tener un Lugar.

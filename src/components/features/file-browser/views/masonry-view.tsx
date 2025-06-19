@@ -7,7 +7,7 @@ import { memo, useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import { ImageRenderer } from '../image-renderer';
 import '../styles/scrollbar.css';
 import { VirtualizerWrapper } from './virtualizer-wrapper';

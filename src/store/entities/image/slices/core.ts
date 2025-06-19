@@ -117,16 +117,13 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 	fetchImage: async (id) => {
 		set({ isLoading: true, error: null });
 		try {
-			const response = await getImage(id);
-
-			if (!response || !response.success || !response.data) {
-				const errorMsg = response?.error ?? 'Error fetching image';
-				throw new Error(errorMsg);
+			const image = await getImage(id);
+			if (image) {
+				const extendedImage = extendImage(image);
+				get().addImage(extendedImage);
+				return extendedImage;
 			}
-
-			const image = extendImage(response.data);
-			get().addImage(image);
-			return image;
+			return undefined;
 		} catch (e: unknown) {
 			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch image';
 			imageLogger.error(errorMessage, { error: e });
@@ -143,16 +140,10 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 				get().clearImages();
 			}
 
-			const response = await getImages(options);
-
-			if (!response || !response.success || !response.data) {
-				const errorMsg = response?.error ?? 'Error fetching images';
-				throw new Error(errorMsg);
-			}
-
-			const images = extendImages(response.data);
-			get().addImages(images);
-			return images;
+			const images = await getImages(options);
+			const extendedImages = extendImages(images);
+			get().addImages(extendedImages);
+			return extendedImages;
 		} catch (e: unknown) {
 			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch images';
 			imageLogger.error(errorMessage, { error: e });
@@ -165,17 +156,11 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 	createImage: async (data) => {
 		set({ isLoading: true, error: null });
 		try {
-			const response = await createServerImage(data);
-
-			if (!response || !response.success || !response.data) {
-				const errorMsg = response?.error ?? 'Error creating image';
-				throw new Error(errorMsg);
-			}
-
-			const image = extendImage(response.data);
-			get().addImage(image);
+			const image = await createServerImage(data);
+			const extendedImage = extendImage(image);
+			get().addImage(extendedImage);
 			toastService.success('Imagen creada');
-			return image;
+			return extendedImage;
 		} catch (e: unknown) {
 			const errorMessage = e instanceof Error ? e.message : 'Failed to create image';
 			imageLogger.error(errorMessage, { error: e });
@@ -189,17 +174,11 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 	updateImage: async (id, data) => {
 		set({ isLoading: true, error: null });
 		try {
-			const response = await updateServerImage(id, data);
-
-			if (!response || !response.success || !response.data) {
-				const errorMsg = response?.error ?? 'Error updating image';
-				throw new Error(errorMsg);
-			}
-
-			const image = extendImage(response.data);
-			get().addImage(image);
+			const image = await updateServerImage(id, data);
+			const extendedImage = extendImage(image);
+			get().addImage(extendedImage);
 			toastService.success('Imagen actualizada');
-			return image;
+			return extendedImage;
 		} catch (e: unknown) {
 			const errorMessage = e instanceof Error ? e.message : 'Failed to update image';
 			imageLogger.error(errorMessage, { error: e });
@@ -213,13 +192,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 	removeImage: async (id) => {
 		set({ isLoading: true, error: null });
 		try {
-			const response = await deleteServerImage(id);
-
-			if (!response || !response.success) {
-				const errorMsg = response?.error ?? 'Error removing image';
-				throw new Error(errorMsg);
-			}
-
+			await deleteServerImage(id);
 			get().deleteImage(id);
 			toastService.success('Imagen eliminada');
 			return true;

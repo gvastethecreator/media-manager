@@ -26,7 +26,7 @@ import type {
 	WorldItemFilters,
 	WorldItemSortCriteria,
 } from '@/types/entities/world-item';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 // Configuración y utilidades
 const worldItemLogger = serverLogger.withContext('WorldItemActions');

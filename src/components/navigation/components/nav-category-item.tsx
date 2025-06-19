@@ -7,7 +7,7 @@ import { memo, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import type { ViewType } from '@/types/file-item';
+import type { ViewType } from '@/types/files';
 
 // Componente memoizado para el indicador de colapso
 const CollapseIndicator = memo(function CollapseIndicator({

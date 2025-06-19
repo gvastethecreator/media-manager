@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 /**
  * Tipos de acciones disponibles en el menú contextual

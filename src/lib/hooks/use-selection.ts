@@ -8,7 +8,7 @@
 import { useCallback, useEffect } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 const selectionLogger = clientLogger.withContext('SelectionHooks');
 

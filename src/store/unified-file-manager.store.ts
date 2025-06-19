@@ -23,7 +23,7 @@ import type { ViewMode } from '@/components/navigation/types';
 import { throttleEvent } from '@/lib/event-throttler';
 import { folderResponseCache as folderCache } from '@/lib/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { FileProcessingStatus, FileType, type FileItem } from '@/types/file-item';
+import { FileProcessingStatus, FileType, type FileItem } from '@/types/files';
 
 const fileManagerLogger = clientLogger.withContext('UnifiedFileManager');
 

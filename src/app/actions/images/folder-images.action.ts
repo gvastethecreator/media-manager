@@ -2,7 +2,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import { toServiceError } from '@/utils/errors/service-errors';
 
 const SERVER_ACTION_NAME = 'FolderImages';

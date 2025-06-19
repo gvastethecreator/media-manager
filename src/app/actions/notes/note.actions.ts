@@ -7,7 +7,7 @@ import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { fromPrismaNote, toCreateNoteData, toUpdateNoteData } from '@/transformers/note';
 import type { CreateNoteData, NoteBase, NoteComplete, NoteWithStats } from '@/types/entities/note';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import { createNoteSchema, updateNoteSchema } from '@/utils/note/validators';
 
 // Utilidades y logging

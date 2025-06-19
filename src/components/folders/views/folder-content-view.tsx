@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { folderResponseCache } from '@/lib/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
-import { FileItem } from '@/types/file-item';
+import { FileItem } from '@/types/files';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');

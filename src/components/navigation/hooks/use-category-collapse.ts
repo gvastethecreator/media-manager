@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import type { ViewType } from '@/types/file-item';
+import type { ViewType } from '@/types/files';
 
 /**
  * Hook que maneja el estado de colapso de las categorías en el panel de navegación

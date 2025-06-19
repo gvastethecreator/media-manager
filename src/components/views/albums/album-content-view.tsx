@@ -8,7 +8,7 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 const viewLogger = clientLogger.withContext('AlbumContentView');
 

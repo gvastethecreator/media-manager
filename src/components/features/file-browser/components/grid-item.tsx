@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback } from 'react';
-import { FileItem } from '@/types/file-item';
+import { FileItem } from '@/types/files';
 import { FileContextMenu } from '../context-menu/context-menu';
 import type { ContextMenuAction } from '../context-menu/types';
 import { ImageRenderer } from '../image-renderer';

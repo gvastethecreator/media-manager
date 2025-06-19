@@ -5,7 +5,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FavoriteWithImage } from '@/types/entities/favorite';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 const serializersLogger = serverLogger.withContext('Favorite:Serializers');
 
