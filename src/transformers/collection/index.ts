@@ -6,10 +6,10 @@
 
 // De mappers.ts
 export {
-    mapCollectionSearchOptionsToPrisma, mapCreateCollectionDataToPrisma,
-    mapUpdateCollectionDataToPrisma
+	mapCollectionSearchOptionsToPrisma,
+	mapCreateCollectionDataToPrisma,
+	mapUpdateCollectionDataToPrisma,
 } from './mappers';
 
 // De transformer.ts
 export { fromPrismaCollection, fromPrismaCollections } from './transformer';
-

@@ -1,7 +1,7 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { prisma } from '@/lib/prisma';
 
 // Logger específico para acciones de ConceptCard
 const conceptCardLogger = serverLogger.withContext('ConceptCardActions');
@@ -23,7 +23,6 @@ interface ThumbnailImage {
 export async function getRecentConceptImages(conceptId: string, limit = 6): Promise<ThumbnailImage[]> {
 	try {
 		conceptCardLogger.info('🖼️ Obteniendo imágenes recientes para ConceptCard:', conceptId);
-		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!conceptId) {
@@ -44,9 +43,6 @@ export async function getRecentConceptImages(conceptId: string, limit = 6): Prom
 				id: true,
 				name: true,
 				thumbnail: true,
-				thumbnailWidth: true,
-				thumbnailHeight: true,
-				thumbnailSize: true,
 				isFavorite: true,
 			},
 			orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
@@ -58,7 +54,7 @@ export async function getRecentConceptImages(conceptId: string, limit = 6): Prom
 			let thumbnailUrl = '';
 
 			// Verificar si tenemos un thumbnail válido
-			if (image.thumbnail && image.thumbnailSize && image.thumbnailSize < 100000) {
+			if (image.thumbnail) {
 				thumbnailUrl = `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`;
 			}
 
@@ -75,7 +71,7 @@ export async function getRecentConceptImages(conceptId: string, limit = 6): Prom
 	} catch (error) {
 		conceptCardLogger.error('❌ Error obteniendo imágenes para ConceptCard:', error);
 		throw new Error(
-			`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`
+			`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`,
 		);
 	}
 }
@@ -87,22 +83,10 @@ export async function getRecentConceptImages(conceptId: string, limit = 6): Prom
  */
 export async function getConceptCounts(conceptId: string): Promise<{
 	images: number;
-	videos: number;
-	albums: number;
-	collections: number;
 	tags: number;
-	characters: number;
-	places: number;
-	worldItems: number;
-	prompts: number;
-	notes: number;
-	wildcards: number;
-	properties: number;
-	groups: number;
 }> {
 	try {
 		conceptCardLogger.info('🔢 Obteniendo recuentos para ConceptCard:', conceptId);
-		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!conceptId) {
@@ -115,26 +99,8 @@ export async function getConceptCounts(conceptId: string): Promise<{
 			select: {
 				_count: {
 					select: {
-						// Contenido multimedia
 						images: true,
-						videos: true,
-
-						// Entidades organizativas
-						albums: true,
-						collections: true,
-						tags: true,
-
-						// Entidades de mundo
-						characters: true,
-						places: true,
-						worldItems: true,
-
-						// Entidades utilitarias
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
+						Tag: true,
 					},
 				},
 			},
@@ -146,26 +112,8 @@ export async function getConceptCounts(conceptId: string): Promise<{
 
 		// Devolver resultado estructurado
 		const result = {
-			// Contenido multimedia
-			images: counts._count.images,
-			videos: counts._count.videos,
-
-			// Entidades organizativas
-			albums: counts._count.albums,
-			collections: counts._count.collections,
-			tags: counts._count.tags,
-
-			// Entidades de mundo
-			characters: counts._count.characters,
-			places: counts._count.places,
-			worldItems: counts._count.worldItems,
-
-			// Entidades utilitarias
-			prompts: counts._count.prompts,
-			notes: counts._count.notes,
-			wildcards: counts._count.wildcards,
-			properties: counts._count.properties,
-			groups: counts._count.groups,
+			images: counts._count?.images || 0,
+			tags: counts._count?.Tag || 0,
 		};
 
 		conceptCardLogger.info('✅ Recuentos obtenidos para ConceptCard');
@@ -175,18 +123,7 @@ export async function getConceptCounts(conceptId: string): Promise<{
 		// Devolver objeto con valores por defecto en caso de error
 		return {
 			images: 0,
-			videos: 0,
-			albums: 0,
-			collections: 0,
 			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			prompts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
 		};
 	}
 }
@@ -199,7 +136,6 @@ export async function getConceptCounts(conceptId: string): Promise<{
 export async function getConceptWithRelations(conceptId: string) {
 	try {
 		conceptCardLogger.info('📚 Obteniendo concepto con relaciones:', conceptId);
-		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!conceptId) {
@@ -213,18 +149,7 @@ export async function getConceptWithRelations(conceptId: string) {
 				_count: {
 					select: {
 						images: true,
-						videos: true,
-						albums: true,
-						collections: true,
-						tags: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-						groups: true,
+						Tag: true,
 					},
 				},
 			},
@@ -237,8 +162,6 @@ export async function getConceptWithRelations(conceptId: string) {
 		// Procesar cualquier campo JSON si es necesario
 		const parsedConcept = {
 			...concept,
-			// Solo intentar parsear tags si la propiedad existe y es un string
-			// usando el operador de acceso seguro ? para evitar errores
 			tags: typeof concept?.tags === 'string' && concept.tags ? JSON.parse(concept.tags) : concept?.tags || [],
 		};
 

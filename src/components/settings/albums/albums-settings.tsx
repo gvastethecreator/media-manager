@@ -99,11 +99,7 @@ export function AlbumsSettings() {
 
 	// Manejar actualización exitosa
 	const handleAlbumUpdated = useCallback((updatedAlbum: AlbumComplete) => {
-		setAlbums((prev) =>
-			prev.map((album) =>
-				album.id === updatedAlbum.id ? { ...album, ...updatedAlbum } : album
-			)
-		);
+		setAlbums((prev) => prev.map((album) => (album.id === updatedAlbum.id ? { ...album, ...updatedAlbum } : album)));
 		toastService.success('Álbum actualizado');
 	}, []);
 

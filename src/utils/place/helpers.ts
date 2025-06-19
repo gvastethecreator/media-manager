@@ -87,7 +87,7 @@ export function filterPlaces(places: PlaceWithCounts[], filters: PlaceFilters): 
 		}
 
 		// Filtrar por conteo mínimo de imágenes
-		if (filters.minImageCount && (place._count.images < filters.minImageCount)) {
+		if (filters.minImageCount && place._count.images < filters.minImageCount) {
 			return false;
 		}
 
@@ -165,22 +165,25 @@ export function calculatePlaceStats(places: Place[]) {
 		byType: countByProperty(places, 'type'),
 		byClimate: countByProperty(places, 'climate'),
 		averagePopulation: calculateAveragePopulation(places),
-		favorites: places.filter(p => p.isFavorite).length,
+		favorites: places.filter((p) => p.isFavorite).length,
 	};
 }
 
 function countByProperty(places: Place[], property: keyof Place): Record<string, number> {
-	return places.reduce((acc, place) => {
-		const key = place[property];
-		if (typeof key === 'string' && key) {
-			acc[key] = (acc[key] || 0) + 1;
-		}
-		return acc;
-	}, {} as Record<string, number>);
+	return places.reduce(
+		(acc, place) => {
+			const key = place[property];
+			if (typeof key === 'string' && key) {
+				acc[key] = (acc[key] || 0) + 1;
+			}
+			return acc;
+		},
+		{} as Record<string, number>
+	);
 }
 
 function calculateAveragePopulation(places: Place[]): number {
-	const populatedPlaces = places.filter(p => typeof p.population === 'number');
+	const populatedPlaces = places.filter((p) => typeof p.population === 'number');
 	if (populatedPlaces.length === 0) return 0;
 	const totalPopulation = populatedPlaces.reduce((sum, p) => sum + (p.population || 0), 0);
 	return totalPopulation / populatedPlaces.length;

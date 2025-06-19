@@ -7,9 +7,10 @@
 
 // De mappers.ts
 export {
-    mapCreatePlaceDataToPrisma, mapPlaceSearchOptionsToPrisma, mapUpdatePlaceDataToPrisma
+	mapCreatePlaceDataToPrisma,
+	mapPlaceSearchOptionsToPrisma,
+	mapUpdatePlaceDataToPrisma,
 } from './mappers';
 
 // De transformer.ts
 export { fromPrismaPlace, fromPrismaPlaces } from './transformer';
-

@@ -6,12 +6,12 @@
  */
 
 export interface ImageStatsBase {
-  id: string;
-  views: number;
-  lastViewed: Date;
-  imageId: string;
-  createdAt: Date;
-  updatedAt: Date;
+	id: string;
+	views: number;
+	lastViewed: Date;
+	imageId: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 export type ImageStatsCreateInput = Omit<ImageStatsBase, 'id' | 'createdAt' | 'updatedAt'>;

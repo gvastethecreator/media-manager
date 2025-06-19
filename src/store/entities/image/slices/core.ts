@@ -14,12 +14,7 @@ import {
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendImage, extendImages } from '@/transformers/image/serializers';
-import type {
-    CreateImageData,
-    Image,
-    ImageBase,
-    UpdateImageData
-} from '@/types/entities/image';
+import type { CreateImageData, Image, ImageBase, UpdateImageData } from '@/types/entities/image';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
@@ -46,24 +41,13 @@ export interface ImageCoreSlice {
 
 	// Acciones asíncronas
 	fetchImage: (id: string) => Promise<Image | undefined>;
-	fetchImages: (options?: {
-		folderIds?: string[];
-		refresh?: boolean;
-	}) => Promise<Image[]>;
+	fetchImages: (options?: { folderIds?: string[]; refresh?: boolean }) => Promise<Image[]>;
 	createImage: (data: CreateImageData) => Promise<Image | undefined>;
-	updateImage: (
-		id: string,
-		data: UpdateImageData,
-	) => Promise<Image | undefined>;
+	updateImage: (id: string, data: UpdateImageData) => Promise<Image | undefined>;
 	removeImage: (id: string) => Promise<boolean>;
 }
 
-export const createImageCoreSlice: StateCreator<
-	ImageState & ImageCoreSlice,
-	[],
-	[],
-	ImageCoreSlice
-> = (set, get) => ({
+export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [], [], ImageCoreSlice> = (set, get) => ({
 	// --- Getters ---
 	getImage: (id) => get().core.images[id],
 	getImages: () => Object.values(get().core.images),
@@ -91,7 +75,7 @@ export const createImageCoreSlice: StateCreator<
 				acc[img.id] = img;
 				return acc;
 			},
-			{} as Record<string, Image>,
+			{} as Record<string, Image>
 		);
 		set((state) => ({
 			core: {
@@ -123,14 +107,13 @@ export const createImageCoreSlice: StateCreator<
 				acc[img.id] = img;
 				return acc;
 			},
-			{} as Record<string, Image>,
+			{} as Record<string, Image>
 		);
 		set((state) => ({ core: { ...state.core, images: imagesMap } }));
 	},
 
 	// --- Estado de carga y errores ---
-	setLoading: (isLoading) =>
-		set((state) => ({ core: { ...state.core, isLoading } })),
+	setLoading: (isLoading) => set((state) => ({ core: { ...state.core, isLoading } })),
 	setError: (error) => set((state) => ({ core: { ...state.core, error } })),
 
 	// --- Acciones Asíncronas ---

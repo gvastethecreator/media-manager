@@ -4,12 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    WildcardBase,
-    WildcardChild,
-    WildcardComplete,
-    WildcardDeserialized
-} from '@/types/entities/wildcard';
+import type { WildcardBase, WildcardChild, WildcardComplete, WildcardDeserialized } from '@/types/entities/wildcard';
 import { WildcardSchema } from '@/types/entities/wildcard';
 import { TransformerError } from '@/utils/transformers/errors';
 

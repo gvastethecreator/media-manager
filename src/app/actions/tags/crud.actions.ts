@@ -10,11 +10,7 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { fromPrismaTag } from '@/transformers/tag';
-import type {
-    TagCreateInput,
-    TagUpdateInput,
-    TagWithRelations,
-} from '@/types/entities/tag';
+import type { TagCreateInput, TagUpdateInput, TagWithRelations } from '@/types/entities/tag';
 import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
@@ -22,12 +18,7 @@ import { revalidatePath } from 'next/cache';
 const tagLogger = serverLogger.withContext('TagCrudActions');
 
 // Rutas para revalidar después de operaciones
-const REVALIDATE_PATHS = [
-	'/dashboard/tags',
-	'/dashboard/images',
-	'/dashboard/stats',
-	'/api/tags',
-];
+const REVALIDATE_PATHS = ['/dashboard/tags', '/dashboard/images', '/dashboard/stats', '/api/tags'];
 
 // Manejo de errores - enfoque funcional
 enum TagErrorCode {
@@ -36,11 +27,7 @@ enum TagErrorCode {
 	OPERATION_FAILED = 'OPERATION_FAILED',
 }
 
-const createTagError = (
-	message: string,
-	code: TagErrorCode = TagErrorCode.OPERATION_FAILED,
-	cause?: unknown
-) => {
+const createTagError = (message: string, code: TagErrorCode = TagErrorCode.OPERATION_FAILED, cause?: unknown) => {
 	const error = new Error(message);
 	error.name = 'TagError';
 	Object.assign(error, { code, cause });
@@ -81,10 +68,7 @@ const tagInclude = {
 } satisfies Prisma.TagInclude;
 
 // Notificar cambios en etiquetas
-const notifyTagChange = async (
-	action: 'create' | 'update' | 'delete',
-	tag: TagWithRelations | { id: string }
-) => {
+const notifyTagChange = async (action: 'create' | 'update' | 'delete', tag: TagWithRelations | { id: string }) => {
 	// Emitir eventos usando el sistema del servidor
 	await emit({
 		type: 'tags:modified',
@@ -118,21 +102,14 @@ export async function createTag(data: TagCreateInput): Promise<TagWithRelations>
 		return fromPrismaTag(tag);
 	} catch (error) {
 		tagLogger.error('❌ Error al crear etiqueta:', { data, error });
-		throw createTagError(
-			'No se pudo crear la etiqueta',
-			TagErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createTagError('No se pudo crear la etiqueta', TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
 /**
  * Actualiza un tag existente
  */
-export async function updateTag(
-	id: string,
-	data: TagUpdateInput
-): Promise<TagWithRelations> {
+export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWithRelations> {
 	try {
 		tagLogger.info('📝 Actualizando etiqueta:', { tagId: id, ...data });
 
@@ -169,11 +146,7 @@ export async function updateTag(
 			throw error;
 		}
 
-		throw createTagError(
-			`No se pudo actualizar la etiqueta: ${id}`,
-			TagErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createTagError(`No se pudo actualizar la etiqueta: ${id}`, TagErrorCode.OPERATION_FAILED, error);
 	}
 }
 
@@ -213,10 +186,6 @@ export async function deleteTag(id: string): Promise<void> {
 			throw error;
 		}
 
-		throw createTagError(
-			`No se pudo eliminar la etiqueta: ${id}`,
-			TagErrorCode.OPERATION_FAILED,
-			error
-		);
+		throw createTagError(`No se pudo eliminar la etiqueta: ${id}`, TagErrorCode.OPERATION_FAILED, error);
 	}
 }

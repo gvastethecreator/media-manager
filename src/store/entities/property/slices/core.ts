@@ -12,14 +12,7 @@ import {
 } from '@/app/actions/properties/property.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import {
-    extendProperties,
-    extendProperty,
-} from '@/transformers/property/serializers';
-import {
-    CreatePropertySchema,
-    UpdatePropertySchema,
-} from '@/types/entities/property/schema';
+import { CreatePropertySchema, UpdatePropertySchema } from '@/types/entities/property/schema';
 import { z } from 'zod';
 import type { StateCreator } from 'zustand';
 import type { Property, PropertyState } from '../types';
@@ -40,9 +33,7 @@ export interface PropertyCoreSlice {
 	// --- Getters ---
 	getProperty: (id: string) => Property | undefined;
 	getProperties: () => Property[];
-	getPropertyItems: (
-		propertyId: string,
-	) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
+	getPropertyItems: (propertyId: string) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
 
 	// --- Operaciones Síncronas ---
 	addProperty: (property: Property) => void;
@@ -51,11 +42,7 @@ export interface PropertyCoreSlice {
 	deleteProperty: (id: string) => void;
 
 	// --- Gestión de Elementos Asociados ---
-	addItemToProperty: (
-		propertyId: string,
-		itemId: string,
-		itemType: 'image' | 'video' | 'note' | 'tag',
-	) => void;
+	addItemToProperty: (propertyId: string, itemId: string, itemType: 'image' | 'video' | 'note' | 'tag') => void;
 	removeItemFromProperty: (propertyId: string, itemId: string) => void;
 	clearPropertyItems: (propertyId: string) => void;
 
@@ -67,10 +54,7 @@ export interface PropertyCoreSlice {
 	fetchProperty: (id: string) => Promise<Property | undefined>;
 	fetchProperties: () => Promise<Property[]>;
 	createProperty: (data: CreatePropertyData) => Promise<Property | undefined>;
-	updateProperty: (
-		id: string,
-		data: UpdatePropertyData,
-	) => Promise<Property | undefined>;
+	updateProperty: (id: string, data: UpdatePropertyData) => Promise<Property | undefined>;
 	removeProperty: (id: string) => Promise<boolean>;
 }
 
@@ -78,12 +62,10 @@ export interface PropertyCoreSlice {
  * @function createPropertyCoreSlice
  * @description Implementación del slice de Zustand para la entidad Property.
  */
-export const createPropertyCoreSlice: StateCreator<
-	PropertyState & PropertyCoreSlice,
-	[],
-	[],
-	PropertyCoreSlice
-> = (set, get) => ({
+export const createPropertyCoreSlice: StateCreator<PropertyState & PropertyCoreSlice, [], [], PropertyCoreSlice> = (
+	set,
+	get
+) => ({
 	// --- Getters ---
 	getProperty: (id) => get().core.properties[id],
 	getProperties: () => Object.values(get().core.properties),
@@ -105,15 +87,13 @@ export const createPropertyCoreSlice: StateCreator<
 	},
 
 	addProperties: (properties) => {
-		propertyLogger.info(
-			`✅ Añadiendo ${properties.length} propiedades al store`,
-		);
+		propertyLogger.info(`✅ Añadiendo ${properties.length} propiedades al store`);
 		const newProperties = properties.reduce(
 			(acc, prop) => {
 				acc[prop.id] = prop;
 				return acc;
 			},
-			{} as Record<string, Property>,
+			{} as Record<string, Property>
 		);
 		set((state) => ({
 			core: {
@@ -204,8 +184,7 @@ export const createPropertyCoreSlice: StateCreator<
 	},
 
 	// --- Estado de Carga y Errores ---
-	setLoading: (isLoading) =>
-		set((state) => ({ core: { ...state.core, isLoading } })),
+	setLoading: (isLoading) => set((state) => ({ core: { ...state.core, isLoading } })),
 	setError: (error) => set((state) => ({ core: { ...state.core, error } })),
 
 	// --- Acciones Asíncronas ---
@@ -213,19 +192,11 @@ export const createPropertyCoreSlice: StateCreator<
 		get().setLoading(true);
 		get().setError(null);
 		try {
-			const response = await fetchPropertyAction(id);
-			if (response.success && response.data) {
-				const extendedProperty = extendProperty(response.data);
-				get().addProperty(extendedProperty);
-				return extendedProperty;
-			}
-			const errorMsg =
-				response.error || '❌ Error desconocido al buscar la propiedad.';
-			get().setError(errorMsg);
-			toastService.error(errorMsg);
-			return undefined;
+			const propertyData = await fetchPropertyAction(id);
+			get().addProperty(propertyData as unknown as Property);
+			return propertyData as unknown as Property;
 		} catch (error) {
-			const errorMsg = '❌ Error fatal al buscar la propiedad.';
+			const errorMsg = error instanceof Error ? error.message : '❌ Error fatal al buscar la propiedad.';
 			propertyLogger.error(errorMsg, { error });
 			get().setError(errorMsg);
 			toastService.error(errorMsg);
@@ -239,19 +210,11 @@ export const createPropertyCoreSlice: StateCreator<
 		get().setLoading(true);
 		get().setError(null);
 		try {
-			const response = await fetchPropertiesAction();
-			if (response.success && response.data) {
-				const extendedProperties = extendProperties(response.data);
-				get().addProperties(extendedProperties);
-				return extendedProperties;
-			}
-			const errorMsg =
-				response.error || '❌ Error desconocido al obtener las propiedades.';
-			get().setError(errorMsg);
-			toastService.error(errorMsg);
-			return [];
+			const propertiesData = await fetchPropertiesAction();
+			get().addProperties(propertiesData as unknown as Property[]);
+			return propertiesData as unknown as Property[];
 		} catch (error) {
-			const errorMsg = '❌ Error fatal al obtener las propiedades.';
+			const errorMsg = error instanceof Error ? error.message : '❌ Error fatal al obtener las propiedades.';
 			propertyLogger.error(errorMsg, { error });
 			get().setError(errorMsg);
 			toastService.error(errorMsg);
@@ -265,23 +228,13 @@ export const createPropertyCoreSlice: StateCreator<
 		get().setLoading(true);
 		get().setError(null);
 		try {
-			const response = await createPropertyAction(data);
-			if (response.success && response.data) {
-				const extendedProperty = extendProperty(response.data);
-				get().addProperty(extendedProperty);
-				toastService.success(
-					`La propiedad "${extendedProperty.name}" se ha creado.`,
-				);
-				return extendedProperty;
-			}
-			const errorMsg =
-				response.error || '❌ Error desconocido al crear la propiedad.';
-			get().setError(errorMsg);
-			toastService.error(errorMsg);
-			return undefined;
+			const newPropertyData = await createPropertyAction(data);
+			get().addProperty(newPropertyData as unknown as Property);
+			toastService.success(`La propiedad "${newPropertyData.name}" se ha creado.`);
+			return newPropertyData as unknown as Property;
 		} catch (error) {
-			const errorMsg = '❌ Error fatal al crear la propiedad.';
-			propertyLogger.error(errorMsg, { error });
+			const errorMsg = error instanceof Error ? error.message : '❌ Error fatal al crear la propiedad.';
+			propertyLogger.error(errorMsg, { data, error });
 			get().setError(errorMsg);
 			toastService.error(errorMsg);
 			return undefined;
@@ -294,23 +247,13 @@ export const createPropertyCoreSlice: StateCreator<
 		get().setLoading(true);
 		get().setError(null);
 		try {
-			const response = await updatePropertyAction(id, data);
-			if (response.success && response.data) {
-				const extendedProperty = extendProperty(response.data);
-				get().addProperty(extendedProperty);
-				toastService.success(
-					`La propiedad "${extendedProperty.name}" se ha actualizado.`,
-				);
-				return extendedProperty;
-			}
-			const errorMsg =
-				response.error || '❌ Error desconocido al actualizar la propiedad.';
-			get().setError(errorMsg);
-			toastService.error(errorMsg);
-			return undefined;
+			const updatedPropertyData = await updatePropertyAction(id, data);
+			get().addProperty(updatedPropertyData as unknown as Property);
+			toastService.success(`La propiedad "${updatedPropertyData.name}" se ha actualizado.`);
+			return updatedPropertyData as unknown as Property;
 		} catch (error) {
-			const errorMsg = '❌ Error fatal al actualizar la propiedad.';
-			propertyLogger.error(errorMsg, { error });
+			const errorMsg = error instanceof Error ? error.message : '❌ Error fatal al actualizar la propiedad.';
+			propertyLogger.error(errorMsg, { id, data, error });
 			get().setError(errorMsg);
 			toastService.error(errorMsg);
 			return undefined;
@@ -323,21 +266,13 @@ export const createPropertyCoreSlice: StateCreator<
 		get().setLoading(true);
 		get().setError(null);
 		try {
-			const propertyName = get().getProperty(id)?.name || id;
-			const response = await deletePropertyAction(id);
-			if (response.success) {
-				get().deleteProperty(id);
-				toastService.success(`La propiedad "${propertyName}" se ha eliminado.`);
-				return true;
-			}
-			const errorMsg =
-				response.error || '❌ Error desconocido al eliminar la propiedad.';
-			get().setError(errorMsg);
-			toastService.error(errorMsg);
-			return false;
+			await deletePropertyAction(id);
+			get().deleteProperty(id);
+			toastService.success('La propiedad se ha eliminado.');
+			return true;
 		} catch (error) {
-			const errorMsg = '❌ Error fatal al eliminar la propiedad.';
-			propertyLogger.error(errorMsg, { error });
+			const errorMsg = error instanceof Error ? error.message : '❌ Error fatal al eliminar la propiedad.';
+			propertyLogger.error(errorMsg, { id, error });
 			get().setError(errorMsg);
 			toastService.error(errorMsg);
 			return false;

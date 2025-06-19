@@ -8,8 +8,18 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { fromPrismaWildcard, fromPrismaWildcards, mapCreateWildcardDataToPrisma, mapUpdateWildcardDataToPrisma } from '@/transformers/wildcard';
-import type { WildcardBase, WildcardComplete, WildcardCreateInput, WildcardUpdateInput } from '@/types/entities/wildcard';
+import {
+	fromPrismaWildcard,
+	fromPrismaWildcards,
+	mapCreateWildcardDataToPrisma,
+	mapUpdateWildcardDataToPrisma,
+} from '@/transformers/wildcard';
+import type {
+	WildcardBase,
+	WildcardComplete,
+	WildcardCreateInput,
+	WildcardUpdateInput,
+} from '@/types/entities/wildcard';
 import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('WildcardActions');
@@ -103,28 +113,27 @@ export async function updateWildcard(id: string, data: WildcardUpdateInput): Pro
 export async function deleteWildcard(id: string): Promise<void> {
 	logger.warn(`🗑️ Eliminando wildcard: ${id}`);
 
-    const wildcard = await prisma.wildcard.findUnique({
-        where: { id },
-        include: { childWildcards: { select: { id: true } } },
-    });
+	const wildcard = await prisma.wildcard.findUnique({
+		where: { id },
+		include: { childWildcards: { select: { id: true } } },
+	});
 
-    if (!wildcard) {
-        logger.warn(`Wildcard a eliminar no encontrado: ${id}`);
-        return;
-    }
+	if (!wildcard) {
+		logger.warn(`Wildcard a eliminar no encontrado: ${id}`);
+		return;
+	}
 
-    // Reasignar hijos al padre del wildcard eliminado (o a null si no tiene padre)
-    if (wildcard.childWildcards.length > 0) {
-        await prisma.wildcard.updateMany({
-            where: { parentId: id },
-            data: { parentId: wildcard.parentId },
-        });
-    }
+	// Reasignar hijos al padre del wildcard eliminado (o a null si no tiene padre)
+	if (wildcard.childWildcards.length > 0) {
+		await prisma.wildcard.updateMany({
+			where: { parentId: id },
+			data: { parentId: wildcard.parentId },
+		});
+	}
 
 	await prisma.wildcard.delete({ where: { id } });
 	await revalidateWildcardPaths();
 }
-
 
 /**
  * Verifica si asignar un padre a un wildcard crearía una referencia circular.

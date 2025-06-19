@@ -5,9 +5,9 @@
 
 // Exportar los tipos principales
 export type {
-    JsonFileBase,
-    JsonFileCreateInput,
-    JsonFileUpdateInput
+	JsonFileBase,
+	JsonFileCreateInput,
+	JsonFileUpdateInput,
 } from './types';
 
 // Exportar el esquema de validación

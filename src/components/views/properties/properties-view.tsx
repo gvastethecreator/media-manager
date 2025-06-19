@@ -71,7 +71,9 @@ export function PropertiesView(_props: ViewProps) {
 
 			setProperties(propertiesWithStats);
 			// Actualizar el store con las propiedades obtenidas
-			addProperties(propertiesWithStats.map(p => ({ ...p, _ui: { itemCount: p.totalAssociations, lastUpdated: p.updatedAt } })));
+			addProperties(
+				propertiesWithStats.map((p) => ({ ...p, _ui: { itemCount: p.totalAssociations, lastUpdated: p.updatedAt } }))
+			);
 			viewLogger.info(`✅ ${data.length} propiedades cargadas`);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';

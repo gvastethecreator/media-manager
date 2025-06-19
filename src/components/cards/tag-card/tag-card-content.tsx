@@ -1,6 +1,5 @@
 import { TagRarity } from '@/types/entities/tag';
 import { cn } from '@/lib/utils';
-;
 import {
 	Album,
 	BookOpen,

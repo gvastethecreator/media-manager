@@ -5,4 +5,3 @@
  */
 
 export { fromPrismaTag, fromPrismaTags } from './transformer';
-

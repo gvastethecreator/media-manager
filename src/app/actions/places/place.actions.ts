@@ -8,7 +8,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { fromPrismaPlace, fromPrismaPlaces, mapCreatePlaceDataToPrisma, mapUpdatePlaceDataToPrisma } from '@/transformers/place';
+import {
+	fromPrismaPlace,
+	fromPrismaPlaces,
+	mapCreatePlaceDataToPrisma,
+	mapUpdatePlaceDataToPrisma,
+} from '@/transformers/place';
 import type { PlaceBase, PlaceComplete, PlaceCreateInput, PlaceUpdateInput } from '@/types/entities/place';
 import { revalidatePath } from 'next/cache';
 
@@ -137,15 +142,15 @@ export async function addImageToPlace(placeId: string, imageId: string): Promise
 /**
  * Elimina una imagen de un lugar.
  */
-export async function removeImageFromPlace(placeId: string, imageId:string): Promise<void> {
-    logger.info(`🖼️➖ Eliminando imagen ${imageId} del lugar ${placeId}`);
-    await prisma.place.update({
-        where: { id: placeId },
-        data: {
-            images: {
-                disconnect: { id: imageId },
-            },
-        },
-    });
-    revalidatePath(`/places/${placeId}`);
+export async function removeImageFromPlace(placeId: string, imageId: string): Promise<void> {
+	logger.info(`🖼️➖ Eliminando imagen ${imageId} del lugar ${placeId}`);
+	await prisma.place.update({
+		where: { id: placeId },
+		data: {
+			images: {
+				disconnect: { id: imageId },
+			},
+		},
+	});
+	revalidatePath(`/places/${placeId}`);
 }

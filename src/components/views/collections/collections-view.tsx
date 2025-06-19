@@ -1,139 +1,40 @@
 'use client';
 
-import { BookMarked } from 'lucide-react';
-import { motion } from 'motion/react';
-import { memo, useCallback, useEffect, useState } from 'react';
-import { getCollections } from '@/app/actions/collections/collection.actions';
 import { CollectionCard } from '@/components/cards/collection-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
-import type { Collection } from '@/types/entities/collections';
+import type { CollectionComplete } from '@/types/entities/collection';
+import { BookMarked } from 'lucide-react';
+import { motion } from 'motion/react';
+import { memo, useCallback, useEffect } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('CollectionsView');
 
-// Definir la interfaz para colecciones con datos adicionales
-interface CollectionWithDetails extends Collection {
-	_count?: { images: number };
-	totalSize?: number;
-	recentImages?: string[];
-}
-
-// Crear un componente de tarjeta memorizada para optimizar
-const MemoizedCollectionCard = memo(
-	({ collection, onClick }: { collection: CollectionWithDetails; onClick: () => void }) => (
-		<CollectionCard collection={collection} onClick={onClick} />
-	),
-	(prevProps, nextProps) => {
-		// Solo re-renderizar si cambian estos valores
-		return (
-			prevProps.collection.id === nextProps.collection.id &&
-			prevProps.collection.updatedAt === nextProps.collection.updatedAt &&
-			prevProps.collection._count?.images === nextProps.collection._count?.images
-		);
-	}
-);
-MemoizedCollectionCard.displayName = 'MemoizedCollectionCard';
+const MemoizedCollectionCard = memo(CollectionCard);
 
 export function CollectionsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { collections: storeCollections, isLoading: storeLoading, selectCollection } = useCollectionStore();
+	const { collections, isLoading, error, fetchCollections, selectCollection } = useCollectionStore();
 
-	const [collections, setCollections] = useState<CollectionWithDetails[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticCollections, _addEvent] = clientEvents.useEvents<CollectionWithDetails[]>(collections);
-
-	// Usar colecciones del store global si están disponibles
 	useEffect(() => {
-		if (storeCollections && storeCollections.length > 0) {
-			viewLogger.info(`✅ Usando ${storeCollections.length} colecciones desde store centralizado`);
-
-			// Transformar las colecciones al formato esperado
-			const transformedData = storeCollections.map((collection) => ({
-				...collection,
-				_count: { images: collection.imageCount || 0 },
-				recentImages: collection.recentImages || [],
-			}));
-
-			setCollections(transformedData);
-			setIsLoading(false);
-		} else {
-			// Cargar desde el servidor solo si no están en el store
-			loadCollections();
+		if (!collections.length) {
+			viewLogger.info('🔄 No hay colecciones en el store, cargando desde el servidor...');
+			fetchCollections();
 		}
-	}, [
-		storeCollections, // Cargar desde el servidor solo si no están en el store
-		loadCollections,
-	]);
-
-	const loadCollections = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando colecciones desde servidor (respaldo)...');
-			const data = await getCollections();
-			const transformedData = data.map((collectionData: any) => {
-				// Filtrar valores nulos en recentImages
-				const recentImages = collectionData.recentImages
-					? collectionData.recentImages.filter((img: unknown): img is string => typeof img === 'string' && img !== null)
-					: [];
-
-				// Crear un objeto explícito para evitar errores de tipo
-				const collection: CollectionWithDetails = {
-					id: collectionData.id,
-					name: collectionData.name,
-					emoji: collectionData.emoji || '📚',
-					description: collectionData.description,
-					color: collectionData.color || '#10b981',
-					shortcut: collectionData.shortcut,
-					sortBy: collectionData.sortBy,
-					filters: collectionData.filters,
-					url: collectionData.url,
-					alternativeUrl: collectionData.alternativeUrl,
-					sourceImage: collectionData.sourceImage,
-					platform: collectionData.platform,
-					price: collectionData.price,
-					editions: collectionData.editions,
-					featuredImage: collectionData.featuredImage,
-					isFavorite: collectionData.isFavorite || false,
-					createdAt: new Date(collectionData.createdAt),
-					updatedAt: new Date(collectionData.updatedAt),
-					category: collectionData.category,
-					rarity: collectionData.rarity,
-					texture: collectionData.texture,
-					_count: collectionData._count || { images: 0 },
-					totalSize: collectionData.totalSize,
-					recentImages,
-				};
-
-				return collection;
-			});
-
-			setCollections(transformedData);
-			viewLogger.info(`✅ ${data.length} colecciones cargadas desde servidor`);
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando colecciones:', error);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
+	}, [collections, fetchCollections]);
 
 	const handleCollectionClick = useCallback(
-		(collection: CollectionWithDetails) => {
+		(collection: CollectionComplete) => {
 			viewLogger.info('🖱️ Click en colección:', collection.name);
-			setCurrentView('collection-content');
 			selectCollection(collection.id);
+			setCurrentView('collection-content');
 		},
-		[setCurrentView, selectCollection]
+		[setCurrentView, selectCollection],
 	);
 
 	if (error) {
@@ -144,11 +45,11 @@ export function CollectionsView(_props: ViewProps) {
 		);
 	}
 
-	if (isLoading) {
+	if (isLoading && collections.length === 0) {
 		return <LoadingScreen />;
 	}
 
-	if (!optimisticCollections || optimisticCollections.length === 0) {
+	if (!collections || collections.length === 0) {
 		return (
 			<EmptyState
 				icon={BookMarked}
@@ -162,16 +63,14 @@ export function CollectionsView(_props: ViewProps) {
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticCollections.map((collection, index) => (
+					{collections.map((collection, index) => (
 						<motion.div
 							key={collection.id}
 							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							{collection.id && (
-								<MemoizedCollectionCard collection={collection} onClick={() => handleCollectionClick(collection)} />
-							)}
+							<MemoizedCollectionCard collection={collection} onClick={() => handleCollectionClick(collection)} />
 						</motion.div>
 					))}
 				</div>

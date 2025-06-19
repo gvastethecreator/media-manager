@@ -5,21 +5,21 @@
  */
 
 import type {
-    Album,
-    Character,
-    Collection,
-    Concept,
-    Group,
-    Image,
-    Note,
-    Prisma,
-    Place as PrismaPlace,
-    Prompt,
-    Property,
-    Tag,
-    Video,
-    Wildcard,
-    WorldItem,
+	Album,
+	Character,
+	Collection,
+	Concept,
+	Group,
+	Image,
+	Note,
+	Prisma,
+	Place as PrismaPlace,
+	Prompt,
+	Property,
+	Tag,
+	Video,
+	Wildcard,
+	WorldItem,
 } from '@prisma/client';
 
 /**
@@ -53,11 +53,8 @@ export interface PlaceRelationInput {
  * Hereda los campos escalares y añade las relaciones opcionales.
  */
 export interface PlaceCreateInput
-	extends Omit<
-		Place,
-		'id' | 'createdAt' | 'updatedAt' | 'dangers' | 'resources' | 'stats'
-	>,
-	PlaceRelationInput {
+	extends Omit<Place, 'id' | 'createdAt' | 'updatedAt' | 'dangers' | 'resources' | 'stats'>,
+		PlaceRelationInput {
 	dangers?: Prisma.InputJsonValue;
 	resources?: Prisma.InputJsonValue;
 	stats?: Prisma.InputJsonValue;

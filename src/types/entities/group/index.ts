@@ -9,7 +9,11 @@
 export { GroupSchema, GroupSortCriteria, GroupType, GroupViewMode } from './types';
 
 export type {
-    Group, GroupBase, GroupCreateInput, GroupDisplayState, GroupUpdateInput
+	Group,
+	GroupBase,
+	GroupCreateInput,
+	GroupDisplayState,
+	GroupUpdateInput,
 } from './types';
 
 // 📝 Documentación: Solo tipos canónicos. Legacy removido.

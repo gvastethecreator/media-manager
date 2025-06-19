@@ -1,104 +1,96 @@
 /**
- * @file Slice core para el store de WorldItem
+ * @file Slice para el estado principal del store de WorldItem
  * @module store/entities/world-item/slices/core
  */
 
+import {
+    createWorldItem as createServerWorldItem,
+    deleteWorldItem as deleteServerWorldItem,
+    getWorldItems,
+    updateWorldItem as updateServerWorldItem,
+} from '@/app/actions/world-items/world-item.actions';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/services/toast.service';
+import type {
+    CreateWorldItemData,
+    UpdateWorldItemData,
+    WorldItem
+} from '@/types/entities/world-item';
 import type { StateCreator } from 'zustand';
-import { extendWorldItem, extendWorldItems } from '../../../../transformers/world-item';
-import type { WorldItem } from '../../../../types/entities/world-item';
-import type { WorldItemStore } from '../index';
+import type { WorldItemActions, WorldItemState } from '../types';
+
+const worldItemLogger = clientLogger.withContext('WorldItemStoreCore');
 
 export interface WorldItemCoreSlice {
-	// Estado
 	worldItems: WorldItem[];
 	isLoading: boolean;
 	error: string | null;
-
-	// Acciones
-	setWorldItems: (worldItems: WorldItem[]) => void;
-	addWorldItem: (worldItem: WorldItem) => void;
-	updateWorldItem: (id: string, data: Partial<WorldItem>) => void;
-	removeWorldItem: (id: string) => void;
-	setLoading: (isLoading: boolean) => void;
-	setError: (error: string | null) => void;
-	resetStore: () => void;
-
-	// Selectors
+	loadWorldItems: () => Promise<void>;
+	createWorldItem: (item: CreateWorldItemData) => Promise<void>;
+	updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
+	deleteWorldItem: (id: string) => Promise<void>;
 	getWorldItemById: (id: string) => WorldItem | undefined;
-	getWorldItemsByIds: (ids: string[]) => WorldItem[];
-	getWorldItemsByCategory: (category: string) => WorldItem[];
-	getWorldItemsByType: (type: string) => WorldItem[];
-	getWorldItemsByRarity: (rarity: string) => WorldItem[];
-	getFavoriteWorldItems: () => WorldItem[];
 }
 
-export const createWorldItemCoreSlice: StateCreator<WorldItemStore, [], [], WorldItemCoreSlice> = (set, get) => ({
-	// Estado inicial
+export const createWorldItemCoreSlice: StateCreator<
+	WorldItemState & WorldItemActions,
+	[],
+	[],
+	WorldItemCoreSlice
+> = (set, get) => ({
 	worldItems: [],
 	isLoading: false,
 	error: null,
-
-	// Acciones
-	setWorldItems: (worldItems) => {
-		set({ worldItems: extendWorldItems(worldItems) });
+	loadWorldItems: async () => {
+		try {
+			set({ isLoading: true, error: null });
+			worldItemLogger.info('🔄 Cargando objetos del mundo...');
+			const items = await getWorldItems();
+			set({ worldItems: items as unknown as WorldItem[], isLoading: false });
+			worldItemLogger.info('✅ Objetos del mundo cargados');
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error al cargar objetos del mundo';
+			worldItemLogger.error('❌ Error al cargar objetos del mundo:', error);
+			set({ error: errorMessage, isLoading: false });
+			toastService.system.error(errorMessage);
+		}
 	},
-
-	addWorldItem: (worldItem) => {
-		set((state) => ({
-			worldItems: [...state.worldItems, extendWorldItem(worldItem)],
-		}));
+	createWorldItem: async (item) => {
+		try {
+			worldItemLogger.info('➕ Creando objeto del mundo:', item);
+			const newItem = await createServerWorldItem(item);
+			set((state) => ({ worldItems: [...state.worldItems, newItem as unknown as WorldItem] }));
+			toastService.system.success('Objeto del mundo creado');
+		} catch (error) {
+			worldItemLogger.error('❌ Error al crear objeto del mundo:', error);
+			toastService.system.error('Error al crear objeto del mundo');
+		}
 	},
-
-	updateWorldItem: (id, data) => {
-		set((state) => ({
-			worldItems: state.worldItems.map((item) => (item.id === id ? { ...item, ...data } : item)),
-		}));
+	updateWorldItem: async (id, item) => {
+		try {
+			worldItemLogger.info('🔄 Actualizando objeto del mundo:', { id, ...item });
+			const updatedItem = await updateServerWorldItem(id, item);
+			set((state) => ({
+				worldItems: state.worldItems.map((i) => (i.id === id ? (updatedItem as unknown as WorldItem) : i)),
+			}));
+			toastService.system.success('Objeto del mundo actualizado');
+		} catch (error) {
+			worldItemLogger.error('❌ Error al actualizar objeto del mundo:', error);
+			toastService.system.error('Error al actualizar objeto del mundo');
+		}
 	},
-
-	removeWorldItem: (id) => {
-		set((state) => ({
-			worldItems: state.worldItems.filter((item) => item.id !== id),
-		}));
+	deleteWorldItem: async (id) => {
+		try {
+			worldItemLogger.info('🗑️ Eliminando objeto del mundo:', id);
+			await deleteServerWorldItem(id);
+			set((state) => ({
+				worldItems: state.worldItems.filter((i) => i.id !== id),
+			}));
+			toastService.system.success('Objeto del mundo eliminado');
+		} catch (error) {
+			worldItemLogger.error('❌ Error al eliminar objeto del mundo:', error);
+			toastService.system.error('Error al eliminar objeto del mundo');
+		}
 	},
-
-	setLoading: (isLoading) => {
-		set({ isLoading });
-	},
-
-	setError: (error) => {
-		set({ error });
-	},
-
-	resetStore: () => {
-		set({
-			worldItems: [],
-			isLoading: false,
-			error: null,
-		});
-	},
-
-	// Selectors
-	getWorldItemById: (id) => {
-		return get().worldItems.find((item) => item.id === id);
-	},
-
-	getWorldItemsByIds: (ids) => {
-		return get().worldItems.filter((item) => ids.includes(item.id));
-	},
-
-	getWorldItemsByCategory: (category) => {
-		return get().worldItems.filter((item) => item.category === category);
-	},
-
-	getWorldItemsByType: (type) => {
-		return get().worldItems.filter((item) => item.type === type);
-	},
-
-	getWorldItemsByRarity: (rarity) => {
-		return get().worldItems.filter((item) => item.rarity === rarity);
-	},
-
-	getFavoriteWorldItems: () => {
-		return get().worldItems.filter((item) => item.isFavorite);
-	},
+	getWorldItemById: (id) => get().worldItems.find((item) => item.id === id),
 });

@@ -146,11 +146,7 @@ export function TagsSettings() {
 
 	// Manejar actualización exitosa
 	const handleTagUpdated = useCallback((updatedTag: TagComplete) => {
-		setTags((prev) =>
-			prev.map((tag) =>
-				tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag
-			)
-		);
+		setTags((prev) => prev.map((tag) => (tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag)));
 		toastService.success('Etiqueta actualizada');
 	}, []);
 

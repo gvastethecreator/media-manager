@@ -65,7 +65,9 @@ export type UploadedImageCreateInput = Omit<UploadedImageBase, 'id' | 'createdAt
 /**
  * Input para actualización
  */
-export type UploadedImageUpdateInput = Partial<Omit<UploadedImageBase, 'id' | 'createdAt' | 'updatedAt' | 'hash' | 'imageId'>>;
+export type UploadedImageUpdateInput = Partial<
+	Omit<UploadedImageBase, 'id' | 'createdAt' | 'updatedAt' | 'hash' | 'imageId'>
+>;
 
 /**
  * Esquema Zod para validación de UploadedImage

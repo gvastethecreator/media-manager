@@ -135,9 +135,7 @@ export function CreateAlbumForm({
 		{
 			name: 'color',
 			label: 'Color',
-			render: ({ value, onChange }: any) => (
-				<ColorPicker value={value} onChange={onChange} compact showLabel={false} />
-			),
+			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} compact showLabel={false} />,
 		},
 		{
 			name: 'description',
@@ -161,12 +159,24 @@ export function CreateAlbumForm({
 						<SelectValue placeholder="Seleccionar" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="personal" className="text-xs">Personal</SelectItem>
-						<SelectItem value="trabajo" className="text-xs">Trabajo</SelectItem>
-						<SelectItem value="viajes" className="text-xs">Viajes</SelectItem>
-						<SelectItem value="eventos" className="text-xs">Eventos</SelectItem>
-						<SelectItem value="proyectos" className="text-xs">Proyectos</SelectItem>
-						<SelectItem value="otro" className="text-xs">Otro</SelectItem>
+						<SelectItem value="personal" className="text-xs">
+							Personal
+						</SelectItem>
+						<SelectItem value="trabajo" className="text-xs">
+							Trabajo
+						</SelectItem>
+						<SelectItem value="viajes" className="text-xs">
+							Viajes
+						</SelectItem>
+						<SelectItem value="eventos" className="text-xs">
+							Eventos
+						</SelectItem>
+						<SelectItem value="proyectos" className="text-xs">
+							Proyectos
+						</SelectItem>
+						<SelectItem value="otro" className="text-xs">
+							Otro
+						</SelectItem>
 					</SelectContent>
 				</Select>
 			),
@@ -180,11 +190,21 @@ export function CreateAlbumForm({
 						<SelectValue placeholder="Seleccionar" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="common" className="text-xs">Común</SelectItem>
-						<SelectItem value="uncommon" className="text-xs">Poco común</SelectItem>
-						<SelectItem value="rare" className="text-xs">Raro</SelectItem>
-						<SelectItem value="epic" className="text-xs">Épico</SelectItem>
-						<SelectItem value="legendary" className="text-xs">Legendario</SelectItem>
+						<SelectItem value="common" className="text-xs">
+							Común
+						</SelectItem>
+						<SelectItem value="uncommon" className="text-xs">
+							Poco común
+						</SelectItem>
+						<SelectItem value="rare" className="text-xs">
+							Raro
+						</SelectItem>
+						<SelectItem value="epic" className="text-xs">
+							Épico
+						</SelectItem>
+						<SelectItem value="legendary" className="text-xs">
+							Legendario
+						</SelectItem>
 					</SelectContent>
 				</Select>
 			),

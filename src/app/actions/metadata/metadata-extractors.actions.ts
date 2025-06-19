@@ -8,10 +8,10 @@ import * as fs from 'fs/promises';
 import sharp from 'sharp';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
 import {
-    getAIGenerationInfo,
-    parseExifData,
-    parseMetadataString,
-    parseSharpMetadata,
+	getAIGenerationInfo,
+	parseExifData,
+	parseMetadataString,
+	parseSharpMetadata,
 } from './metadata-parsers.actions';
 import { type ExtendedFileMetadata, METADATA_RETRY_CONFIG, type MetadataOptions } from './metadata-types.actions';
 import { getImageFormat, isSupportedImageFormat, withRetry } from './metadata-utils.actions';

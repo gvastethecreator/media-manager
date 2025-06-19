@@ -6,11 +6,11 @@
  */
 
 export type {
-    CreateFavoriteData, FavoriteBase,
-    FavoriteComplete,
-    FavoriteCreateInput,
-    FavoriteRelations
+	CreateFavoriteData,
+	FavoriteBase,
+	FavoriteComplete,
+	FavoriteCreateInput,
+	FavoriteRelations,
 } from './types';
 
 export { FavoriteEntityType } from './types';
-

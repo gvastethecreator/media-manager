@@ -36,7 +36,11 @@ export interface CharacterBase {
  * 🧑‍🎤 Input para crear un nuevo personaje.
  * Las relaciones se especifican mediante arrays de IDs.
  */
-export interface CharacterCreateInput extends Omit<CharacterBase, 'id' | 'createdAt' | 'updatedAt' | 'stats' | 'skills' | 'inventory' | 'spells' | 'feats' | 'metadata'> {
+export interface CharacterCreateInput
+	extends Omit<
+		CharacterBase,
+		'id' | 'createdAt' | 'updatedAt' | 'stats' | 'skills' | 'inventory' | 'spells' | 'feats' | 'metadata'
+	> {
 	stats?: Record<string, any>;
 	skills?: Record<string, any>;
 	inventory?: any[];

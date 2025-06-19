@@ -19,11 +19,10 @@ export * from './schema';
  * Para compatibilidad con código existente
  */
 export interface TagVisualConfig {
-  view: string;
-  sortBy: string;
-  filters: string;
-  lastViewedId: string | null;
-  expandedIds: string[];
-  selectedIds: string[];
+	view: string;
+	sortBy: string;
+	filters: string;
+	lastViewedId: string | null;
+	expandedIds: string[];
+	selectedIds: string[];
 }
-
