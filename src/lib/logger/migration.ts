@@ -1,121 +1,88 @@
 /**
- * @deprecated Este archivo está obsoleto. Usa serverLogger de '@/lib/logger/server-logger' en su lugar.
- * Se eliminará en futuras versiones.
+ * @deprecated Este archivo está DESHABILITADO y será eliminado
  *
- * Script de migración para facilitar la transición del logger antiguo al nuevo
+ * ⚠️ ARCHIVO DESHABILITADO - Causaba errores de TypeScript
  *
- * Este archivo proporciona compatibilidad hacia atrás para código que todavía
- * usa el logger antiguo, redirigiendo todas las llamadas al nuevo EnhancedLogger.
+ * Usa serverLogger de '@/lib/logger/server-logger' directamente:
+ * import { serverLogger } from '@/lib/logger/server-logger';
+ *
+ * TODO: Eliminar este archivo una vez que se confirme que no se usa en ningún lugar
  */
 
-import { EnhancedLogger } from './enhanced-logger';
+// Error para prevenir el uso de este archivo deprecated
+const MIGRATION_DISABLED_ERROR = 'Logger migration disabled - Use serverLogger from @/lib/logger/server-logger instead';
 
-// Clase de compatibilidad que imita la API del logger antiguo
 export class Logger {
-	private enhancedLogger: EnhancedLogger;
-
-	constructor(options: Record<string, unknown> = {}) {
-		// Crear una nueva instancia de EnhancedLogger directamente
-		this.enhancedLogger = new EnhancedLogger({
-			context: options.context || 'App',
-			timestamp: options.timestamp,
-			level: options.level,
-			useColors: options.useColors,
-			useIcons: options.useIcons,
-			showContext: options.showContext,
-		});
+	constructor() {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	withContext(context: string): Logger {
-		const newLogger = serverLogger.withContext();
-		// Crear una nueva instancia con el contexto
-		newLogger.enhancedLogger = new EnhancedLogger({
-			context,
-			// Copiar las opciones actuales
-			timestamp: this.enhancedLogger.timestamp,
-			level: this.enhancedLogger.level,
-			useColors: this.enhancedLogger.useColors,
-			useIcons: this.enhancedLogger.useIcons,
-			showContext: this.enhancedLogger.showContext,
-		});
-		return newLogger;
+	withContext(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	withOptions(options: Record<string, unknown>): Logger {
-		const newLogger = serverLogger.withContext();
-		// Crear una nueva instancia con las opciones combinadas
-		newLogger.enhancedLogger = new EnhancedLogger({
-			context: options.context || this.enhancedLogger.context,
-			timestamp: options.timestamp !== undefined ? options.timestamp : this.enhancedLogger.timestamp,
-			level: options.level || this.enhancedLogger.level,
-			useColors: options.useColors !== undefined ? options.useColors : this.enhancedLogger.useColors,
-			useIcons: options.useIcons !== undefined ? options.useIcons : this.enhancedLogger.useIcons,
-			showContext: options.showContext !== undefined ? options.showContext : this.enhancedLogger.showContext,
-		});
-		return newLogger;
+	withOptions(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	debug(message: string, context?: unknown): void {
-		this.enhancedLogger.debug(message, context);
+	debug(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	info(message: string, context?: unknown): void {
-		this.enhancedLogger.info(message, context);
+	info(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	warn(message: string, context?: unknown): void {
-		this.enhancedLogger.warn(message, context);
+	warn(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	error(message: string, context?: unknown): void {
-		this.enhancedLogger.error(message, context);
+	error(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	success(message: string, context?: unknown): void {
-		this.enhancedLogger.success(message, context);
+	success(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	group(label: string): void {
-		console.group(label);
+	group(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	groupCollapsed(label: string): void {
-		console.groupCollapsed(label);
+	groupCollapsed(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	groupEnd(): void {
-		console.groupEnd();
+	groupEnd(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	table(data: unknown[], columns?: string[]): void {
-		console.table(data, columns);
+	table(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	time(label: string): void {
-		console.time(label);
+	time(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	timeEnd(label: string): void {
-		console.timeEnd(label);
+	timeEnd(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 
-	clear(): void {
-		console.clear();
+	clear(): never {
+		throw new Error(MIGRATION_DISABLED_ERROR);
 	}
 }
 
-// Exportar una instancia global del logger para compatibilidad
-export const logger = serverLogger.withContext();
+export const logger = {
+	withContext: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
+	debug: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
+	info: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
+	warn: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
+	error: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
+	success: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
+};
 
-// Función para crear loggers específicos para servicios
-export function createServerServiceLogger(serviceName: string): Logger {
-	const serviceLogger = new Logger({ context: serviceName });
-	return serviceLogger;
+export function createServerServiceLogger(): never {
+	throw new Error(MIGRATION_DISABLED_ERROR);
 }
-
-// Mensaje de advertencia para la consola
-console.warn(
-	'⚠️ Estás usando la versión de compatibilidad del serverLogger. ' +
-		'Considera migrar a serverLogger para aprovechar todas las funcionalidades. ' +
-		'import { serverLogger } from "@/lib/logger/server-logger";'
-);

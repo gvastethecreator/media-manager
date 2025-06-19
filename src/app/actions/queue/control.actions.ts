@@ -5,12 +5,12 @@
  * @module app/actions/queue/control.actions
  */
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import * as QueueJobService from '@/services/queue-job.service';
 import { type QueueJobExtended } from '@/types/entities/queue-job';
-import { QueueJobStatus } from '@/types/entities/queue-job/schema';
+import { QueueJobStatus } from '@/types/entities/queue-job/types';
+import { revalidatePath } from 'next/cache';
 
 // Logger específico para acciones de control
 const logger = serverLogger.withContext('QueueActions:control');

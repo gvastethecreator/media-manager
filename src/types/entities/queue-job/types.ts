@@ -18,6 +18,7 @@ export enum QueueJobStatus {
 	FAILED = 'failed',
 	RETRYING = 'retrying',
 	CANCELLED = 'cancelled',
+	PAUSED = 'paused',
 }
 
 /**
@@ -142,6 +143,11 @@ export interface QueueStats {
 	failed: number;
 	retrying: number;
 	cancelled: number;
+	paused: number;
+	queue?: string; // Opcional para estadísticas específicas de cola
+	successRate?: number; // Porcentaje de éxito
+	failureRate?: number; // Porcentaje de fallo
+	averageProcessingTime?: number; // Tiempo promedio de procesamiento en ms
 }
 
 // 🟢 Documentación y advertencia:

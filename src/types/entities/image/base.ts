@@ -11,13 +11,14 @@ export interface ImageVisualConfigBase {
 
 /**
  * 📊 Estadísticas base de una imagen
+ * NOTA: Campo downloads eliminado - no existe en el esquema Prisma ImageStats
  */
 export interface ImageStatsBase {
 	id: string;
 	imageId: string;
 	views: number;
 	likes: number;
-	downloads: number;
+	// downloads: number; // ❌ ELIMINADO - No existe en esquema Prisma
 }
 
 /**

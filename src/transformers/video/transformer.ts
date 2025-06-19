@@ -8,7 +8,6 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoComplete } from '@/types/entities/video';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
-import { deserializeVideoMetadata } from './serializers';
 
 const logger = serverLogger.withContext('VideoTransformer');
 
@@ -31,11 +30,12 @@ type VideoFromPrisma = Prisma.VideoGetPayload<{
  */
 export function fromPrismaVideo(videoFromPrisma: VideoFromPrisma): VideoComplete {
 	try {
-		const { metadata, ...rest } = videoFromPrisma;
-
 		return {
-			...rest,
-			metadata: deserializeVideoMetadata(metadata),
+			...videoFromPrisma,
+			// Mantener metadata como string tal como viene de Prisma
+			metadata: videoFromPrisma.metadata || null,
+			// Convertir Uint8Array a Buffer si es necesario
+			thumbnail: videoFromPrisma.thumbnail ? Buffer.from(videoFromPrisma.thumbnail) : null,
 		};
 	} catch (error) {
 		logger.error(`Error transformando video desde Prisma: ${videoFromPrisma.id}`, {

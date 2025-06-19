@@ -1,30 +1,29 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { worldItemsCache } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { EventType } from '@/lib/server/events.server';
-import { emit } from '@/lib/server/events.server';
+import { emit, EventType } from '@/lib/server/events.server';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { revalidatePath } from 'next/cache';
 // Importar tipos y transformers
 import {
-	fromPrismaWorldItem,
-	mapCreateWorldItemDataToPrisma,
-	mapUpdateWorldItemDataToPrisma,
-	mapWorldItemFiltersToPrisma,
-	mapWorldItemOrderByToPrisma,
-	transformWorldItemToExtended,
+    fromPrismaWorldItem,
+    mapCreateWorldItemDataToPrisma,
+    mapUpdateWorldItemDataToPrisma,
+    mapWorldItemFiltersToPrisma,
+    mapWorldItemOrderByToPrisma,
+    transformWorldItemToExtended,
 } from '@/transformers/world-item';
 import type {
-	CreateWorldItemData,
-	UpdateWorldItemData,
-	WorldItem,
-	WorldItemBase,
-	WorldItemExtended,
-	WorldItemFilters,
-	WorldItemSortCriteria,
+    CreateWorldItemData,
+    UpdateWorldItemData,
+    WorldItem,
+    WorldItemBase,
+    WorldItemExtended,
+    WorldItemFilters,
+    WorldItemSortCriteria,
 } from '@/types/entities/world-item';
 import type { FileItem } from '@/types/files';
 
@@ -281,7 +280,7 @@ export async function getWorldItemById(id: string): Promise<WorldItemExtended> {
 						name: true,
 					},
 				},
-				tagEntities: {
+				tags: {
 					select: {
 						id: true,
 						name: true,
@@ -332,13 +331,13 @@ export async function createWorldItem(data: CreateWorldItemData): Promise<WorldI
 						groups: true,
 						properties: true,
 						wildcards: true,
-						tagEntities: true,
+						tags: true,
 					},
 				},
 				groups: true,
 				properties: true,
 				wildcards: true,
-				tagEntities: true,
+				tags: true,
 			},
 		});
 
@@ -391,13 +390,13 @@ export async function updateWorldItem(id: string, data: UpdateWorldItemData): Pr
 						groups: true,
 						properties: true,
 						wildcards: true,
-						tagEntities: true,
+						tags: true,
 					},
 				},
 				groups: true,
 				properties: true,
 				wildcards: true,
-				tagEntities: true,
+				tags: true,
 			},
 		});
 

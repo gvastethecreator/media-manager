@@ -360,6 +360,7 @@ export async function getQueueStats(): Promise<QueueStats> {
 			failed: 0,
 			retrying: 0,
 			cancelled: 0,
+			paused: 0,
 		};
 
 		// Calcular total y conteo por estado usando for...of en lugar de forEach
@@ -368,23 +369,26 @@ export async function getQueueStats(): Promise<QueueStats> {
 			stats.total += count;
 
 			switch (item.status) {
-				case "QueueJobStatus".PENDING:
+				case QueueJobStatus.PENDING:
 					stats.pending = count;
 					break;
-				case "QueueJobStatus".PROCESSING:
+				case QueueJobStatus.PROCESSING:
 					stats.processing = count;
 					break;
-				case "QueueJobStatus".COMPLETED:
+				case QueueJobStatus.COMPLETED:
 					stats.completed = count;
 					break;
-				case "QueueJobStatus".FAILED:
+				case QueueJobStatus.FAILED:
 					stats.failed = count;
 					break;
-				case "QueueJobStatus".RETRYING:
+				case QueueJobStatus.RETRYING:
 					stats.retrying = count;
 					break;
-				case "QueueJobStatus".CANCELLED:
+				case QueueJobStatus.CANCELLED:
 					stats.cancelled = count;
+					break;
+				case QueueJobStatus.PAUSED:
+					stats.paused = count;
 					break;
 			}
 		}
@@ -548,6 +552,7 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
 			failed: 0,
 			retrying: 0,
 			cancelled: 0,
+			paused: 0,
 			queue,
 		};
 
@@ -557,23 +562,26 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
 			stats.total += count;
 
 			switch (item.status) {
-				case "QueueJobStatus".PENDING:
+				case QueueJobStatus.PENDING:
 					stats.pending = count;
 					break;
-				case "QueueJobStatus".PROCESSING:
+				case QueueJobStatus.PROCESSING:
 					stats.processing = count;
 					break;
-				case "QueueJobStatus".COMPLETED:
+				case QueueJobStatus.COMPLETED:
 					stats.completed = count;
 					break;
-				case "QueueJobStatus".FAILED:
+				case QueueJobStatus.FAILED:
 					stats.failed = count;
 					break;
-				case "QueueJobStatus".RETRYING:
+				case QueueJobStatus.RETRYING:
 					stats.retrying = count;
 					break;
-				case "QueueJobStatus".CANCELLED:
+				case QueueJobStatus.CANCELLED:
 					stats.cancelled = count;
+					break;
+				case QueueJobStatus.PAUSED:
+					stats.paused = count;
 					break;
 			}
 		}

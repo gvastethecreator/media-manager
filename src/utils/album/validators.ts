@@ -78,7 +78,7 @@ export const createAlbumSchema = z.object({
 	description: z.string().optional(),
 	coverImageId: z.string().optional(),
 	type: z.nativeEnum(AlbumType).optional(),
-	parentId: z.string().nullable().optional(),
+	// parentId: z.string().nullable().optional(), // ELIMINADO: no existe en modelo Album
 	privacyLevel: z.nativeEnum(AlbumPrivacyLevel).optional(),
 	items: z
 		.array(
@@ -99,7 +99,7 @@ export const updateAlbumSchema = z.object({
 	description: z.string().optional(),
 	coverImageId: z.string().nullable().optional(),
 	type: z.nativeEnum(AlbumType).optional(),
-	parentId: z.string().nullable().optional(),
+	// parentId: z.string().nullable().optional(), // ELIMINADO: no existe en modelo Album
 	privacyLevel: z.nativeEnum(AlbumPrivacyLevel).optional(),
 	isArchived: z.boolean().optional(),
 	viewConfig: albumViewConfigSchema.partial().optional(),
@@ -174,20 +174,9 @@ export function isValidAlbumName(name: string): boolean {
  * @param newParentId ID del nuevo padre
  * @param allAlbums Todos los álbumes disponibles
  * @returns true si la operación es válida (no crea ciclos), false en caso contrario
+ * @deprecated Album no tiene jerarquía en el modelo actual
  */
 export function isValidAlbumHierarchy(albumId: string, newParentId: string, allAlbums: Record<string, Album>): boolean {
-	// No se puede mover un álbum a sí mismo
-	if (albumId === newParentId) return false;
-
-	// Función recursiva para detectar ciclos
-	function wouldCreateCycle(currentParentId: string, targetId: string): boolean {
-		if (currentParentId === targetId) return true;
-
-		const parent = allAlbums[currentParentId];
-		if (!parent || !parent.parentId) return false;
-
-		return wouldCreateCycle(parent.parentId, targetId);
-	}
-
-	return !wouldCreateCycle(newParentId, albumId);
+	// TODO: Album no tiene relación parent/children en el modelo actual
+	return true; // Siempre válido ya que no hay jerarquía
 }

@@ -4,10 +4,10 @@
  * @description Contiene la lógica para convertir un objeto Collection de Prisma a nuestro tipo canónico.
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CollectionComplete } from '@/types/entities/collection';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 import { deserializeEditions, deserializeFilters, deserializeSortBy } from './serializers';
 
 const logger = serverLogger.withContext('CollectionTransformer');
@@ -17,13 +17,17 @@ type CollectionFromPrisma = Prisma.CollectionGetPayload<{
 	include: {
 		images: true;
 		videos: true;
-		tags: true;
-		groups: true;
-		properties: true;
-		wildcards: true;
-		parent: true;
-		children: true;
 		albums: true;
+		tags: true;
+		characters: true;
+		places: true;
+		worldItems: true;
+		concepts: true;
+		prompts: true;
+		notes: true;
+		wildcards: true;
+		properties: true;
+		groups: true;
 		_count: true;
 	};
 }>;
@@ -54,13 +58,17 @@ export function fromPrismaCollection(prismaCollection: CollectionFromPrisma | nu
 			// Asegurar que las relaciones no sean nulas
 			images: baseData.images ?? [],
 			videos: baseData.videos ?? [],
-			tags: baseData.tags ?? [],
-			groups: baseData.groups ?? [],
-			properties: baseData.properties ?? [],
-			wildcards: baseData.wildcards ?? [],
-			parent: baseData.parent ?? null,
-			children: baseData.children ?? [],
 			albums: baseData.albums ?? [],
+			tags: baseData.tags ?? [],
+			characters: baseData.characters ?? [],
+			places: baseData.places ?? [],
+			worldItems: baseData.worldItems ?? [],
+			concepts: baseData.concepts ?? [],
+			prompts: baseData.prompts ?? [],
+			notes: baseData.notes ?? [],
+			wildcards: baseData.wildcards ?? [],
+			properties: baseData.properties ?? [],
+			groups: baseData.groups ?? [],
 
 			// Asignar conteo de forma segura
 			_count: _count ?? {},

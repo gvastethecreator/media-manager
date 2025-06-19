@@ -5,17 +5,24 @@
 
 import {
     createVideo as createServerVideo,
-    deleteVideo as deleteServerVideo,
+    deleteVideo as delet		try {
+			const response = await findVideos({ folders: folderIds });
+			if (response.success && response.data) {
+				const videos = response.data as VideoComplete[];
+				get().setVideos(videos);
+				return videos;
+			}Video,
     findVideos,
     getVideo as getServerVideo,
 } from '@/app/actions/videos/video.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import type {
+    VideoBase,
+    VideoComplete,
+    VideoFilters,
     CreateVideoData,
     UpdateVideoData,
-    VideoComplete,
-    VideoFilters
 } from '@/types/entities/video';
 import type { StateCreator } from 'zustand';
 import type { VideoState } from '../types';
@@ -32,8 +39,8 @@ const videoLogger = clientLogger.withContext('VideoStore');
  */
 function applyVideoFilters(videos: VideoComplete[], filters: Partial<VideoFilters>): VideoComplete[] {
 	let filteredVideos = videos;
-	if (filters.folderId) {
-		filteredVideos = filteredVideos.filter((v) => v.folderId === filters.folderId);
+	if (filters.folders && filters.folders.length > 0) {
+		filteredVideos = filteredVideos.filter((v) => filters.folders?.includes(v.folderId));
 	}
 	if (filters.isFavorite !== undefined) {
 		filteredVideos = filteredVideos.filter((v) => v.isFavorite === filters.isFavorite);
@@ -171,7 +178,7 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 		try {
 			const response = await getServerVideo(id);
 			if (response.success && response.data) {
-				const video = fromPrismaVideo(response.data as any);
+				const video = response.data as VideoComplete;
 				if (video) get().addVideo(video);
 				return video;
 			}
@@ -191,7 +198,7 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 		try {
 			const response = await findVideos({ folderIds });
 			if (response.success && response.data) {
-				const videos = fromPrismaVideos(response.data as any[]);
+				const videos = transformVideos(response.data as VideoBase[]);
 				get().addVideos(videos);
 				return videos;
 			}
@@ -211,7 +218,7 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 		try {
 			const response = await createServerVideo(data);
 			if (response.success && response.data) {
-				const video = fromPrismaVideo(response.data as any);
+				const video = transformVideo(response.data as VideoBase);
 				if (video) {
 					get().addVideo(video);
 					toastService.success('Video creado');
@@ -248,40 +255,6 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 			return false;
 		} finally {
 			get().setLoading(false);
-		}
-	},
-
-	// --- Visual Config ---
-	updateVideoVisualConfig: async (videoId, config) => {
-		try {
-			const prismaData = mapVideoVisualConfigCompleteUpdateToPrisma(config);
-			const response = await updateVideoVisualConfigAction(videoId, prismaData);
-
-			if (response.success && response.data) {
-				get().updateVideo(videoId, { visualConfig: response.data });
-				toastService.success('Configuración visual actualizada');
-				return response.data;
-			}
-			toastService.error(response.error ?? 'Error updating visual config');
-			return undefined;
-		} catch (e) {
-			videoLogger.error('Failed to update visual config', { error: e });
-			toastService.error('Failed to update visual config');
-			return undefined;
-		}
-	},
-
-	fetchVideoVisualConfig: async (videoId) => {
-		try {
-			const response = await getVideoVisualConfig(videoId);
-			if (response.success && response.data) {
-				get().updateVideo(videoId, { visualConfig: response.data });
-				return response.data;
-			}
-			return undefined;
-		} catch (e) {
-			videoLogger.error('Failed to fetch visual config', { error: e });
-			return undefined;
 		}
 	},
 });

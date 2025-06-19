@@ -67,7 +67,7 @@ export interface PromptWithRelations extends PromptBase {
 	// Relaciones con entidades principales
 	albums?: Album[];
 	collections?: Collection[];
-	tagEntities?: Tag[]; // Relación con entidades Tag (renombrado para evitar conflicto)
+	tags?: Tag[]; // Relación con entidades Tag
 	characters?: Character[];
 	places?: Place[];
 	worldItems?: WorldItem[];
@@ -83,7 +83,7 @@ export interface PromptWithRelations extends PromptBase {
 		videos?: number;
 		albums?: number;
 		collections?: number;
-		tagEntities?: number; // Renombrado para mantener consistencia
+		tags?: number; // Conteo de tags relacionados
 		characters?: number;
 		places?: number;
 		worldItems?: number;

@@ -3,11 +3,11 @@
  * @module transformers/concept/transformer
  */
 
-import type { Concept } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { ConceptSchema } from '@/types/entities/concept/schema';
 import type { ConceptComplete, ConceptExtended, ConceptWithStats } from '@/types/entities/concept/types';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Concept } from '@prisma/client';
 import { fromPrismaConcept } from './serializers';
 
 /**
@@ -151,18 +151,18 @@ export function transformConceptToWithStats<T extends Partial<ConceptComplete> |
 		// Primero transformamos a ConceptComplete
 		const conceptComplete = transformConcept(concept, { includeRelations: true });
 
-		// Calculamos estadísticas
+		// Calculamos estadísticas (solo usando las propiedades disponibles en _count según Prisma)
 		return {
 			...conceptComplete,
 			stats: {
 				imageCount: conceptComplete._count?.images ?? 0,
-				videoCount: conceptComplete._count?.videos ?? 0,
-				albumCount: conceptComplete._count?.albums ?? 0,
+				videoCount: 0, // ❌ ELIMINADO - videos no existe en _count de Concept
+				albumCount: 0, // ❌ ELIMINADO - albums no existe en _count de Concept
 				tagCount: conceptComplete._count?.tags ?? 0,
 				noteCount: conceptComplete._count?.notes ?? 0,
-				relatedCharacters: conceptComplete._count?.characters ?? 0,
-				relatedPlaces: conceptComplete._count?.places ?? 0,
-				relatedWorldItems: conceptComplete._count?.worldItems ?? 0,
+				relatedCharacters: 0, // ❌ ELIMINADO - characters no existe en _count de Concept
+				relatedPlaces: 0, // ❌ ELIMINADO - places no existe en _count de Concept
+				relatedWorldItems: 0, // ❌ ELIMINADO - worldItems no existe en _count de Concept
 				totalContentItems: calculateTotalContent(conceptComplete),
 				lastUpdated: conceptComplete.updatedAt,
 			},
@@ -214,11 +214,13 @@ function calculateImportance(concept: ConceptComplete): number {
  * @returns Total de elementos de contenido
  */
 function calculateTotalContent(concept: ConceptComplete): number {
+	// Solo usar propiedades que realmente existen en _count según el esquema Prisma
 	return (
 		(concept._count?.images ?? 0) +
-		(concept._count?.videos ?? 0) +
-		(concept._count?.albums ?? 0) +
-		(concept._count?.collections ?? 0) +
-		(concept._count?.notes ?? 0)
+		// (concept._count?.videos ?? 0) + // ❌ ELIMINADO - No existe en esquema Prisma Concept
+		// (concept._count?.albums ?? 0) + // ❌ ELIMINADO - No existe en esquema Prisma Concept
+		// (concept._count?.collections ?? 0) + // ❌ ELIMINADO - No existe en esquema Prisma Concept
+		(concept._count?.notes ?? 0) +
+		(concept._count?.tags ?? 0) // ✅ Usar tags que sí existe
 	);
 }

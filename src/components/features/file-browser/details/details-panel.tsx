@@ -1,15 +1,15 @@
 'use client';
 
-import { Bug, FileImage, Loader2 } from 'lucide-react';
-import * as React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getImageMetadataById } from '@/app/actions/metadata/metadata.actions';
 import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
+import { getImageMetadataById } from '@/app/actions/metadata/metadata.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
-import type { FileMetadata } from '@/types/entities/metadata/types';
+import type { MediaMetadata } from '@/types/metadata.types';
+import { Bug, FileImage, Loader2 } from 'lucide-react';
+import * as React from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AIGenerationInfo } from './details-panel-ai-generation-info';
 import { BasicInfo } from './details-panel-basic-info';
 import { ImagePreview } from './details-panel-image-preview';
@@ -42,13 +42,13 @@ const MemoizedAIGenerationInfo = React.memo(AIGenerationInfo);
 const MemoizedRelatedEntities = React.memo(RelatedEntities);
 
 // Cache para evitar múltiples llamadas a parseMetadata
-const metadataRequestCache = new Map<string, Promise<FileMetadata | null>>();
+const metadataRequestCache = new Map<string, Promise<MediaMetadata | null>>();
 const METADATA_CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
 /**
  * Analiza un objeto de metadatos para extraer información útil
  */
-async function parseMetadataDirectly(rawMetadata: string | null): Promise<FileMetadata | null> {
+async function parseMetadataDirectly(rawMetadata: string | null): Promise<MediaMetadata | null> {
 	if (!rawMetadata) {
 		return null;
 	}
@@ -58,7 +58,7 @@ async function parseMetadataDirectly(rawMetadata: string | null): Promise<FileMe
 		const parsed = JSON.parse(rawMetadata);
 
 		// Construir objeto resultado
-		const result: Partial<FileMetadata> = {};
+		const result: Partial<MediaMetadata> = {};
 
 		// Copiar propiedades básicas
 		if (parsed.dimensions) {
@@ -104,7 +104,7 @@ async function parseMetadataDirectly(rawMetadata: string | null): Promise<FileMe
 				});
 				result.generation = aiGenerationInfo;
 			} else {
-				detailsLogger.warn('No se pudo extrair información de generación AI con parsers especializados');
+				detailsLogger.warn('No se pudo extraer información de generación AI con parsers especializados');
 			}
 		} catch (error) {
 			detailsLogger.error(
@@ -114,19 +114,46 @@ async function parseMetadataDirectly(rawMetadata: string | null): Promise<FileMe
 		}
 
 		// Si no hay propiedades, retornar null
-		return Object.keys(result).length > 0 ? (result as FileMetadata) : null;
+		return Object.keys(result).length > 0 ? (result as MediaMetadata) : null;
 	} catch (error) {
 		console.error('Error en parseMetadataDirectly:', error);
 		return null;
 	}
 }
 
+// Función adaptadora para convertir ImageItem a FileItem
+const adaptImageItemToFileItem = (imageItem: any): any => {
+	return {
+		...imageItem,
+		type: 'image',
+		src: imageItem.path,
+		tags: imageItem.tags || [],
+		collections: imageItem.collections || [],
+		modifiedAt: imageItem.updatedAt || new Date(),
+		accessedAt: imageItem.updatedAt || new Date(),
+		hash: imageItem.hash || '',
+		thumbnailError: null,
+		thumbnailErrorAt: null,
+		thumbnailOptimizedAt: null,
+		isPublic: imageItem.isPublic || false,
+		stats: undefined,
+		places: [],
+		worldItems: [],
+		concepts: [],
+		prompts: [],
+		notes: [],
+		groups: [],
+		properties: [],
+		wildcards: [],
+	};
+};
+
 /**
  * Panel de detalles para mostrar información de imágenes seleccionadas
  */
 export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	// Estados y refs
-	const [metadata, setMetadata] = useState<FileMetadata | null>(null);
+	const [metadata, setMetadata] = useState<MediaMetadata | null>(null);
 	const [isProcessing, setIsProcessing] = useState(false);
 	const { toast } = useToast();
 	const prevItemRef = useRef<string | null>(null);
@@ -142,7 +169,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 			// Si ya tenemos metadata parseada en el item, usarla directamente
 			if (itemMetadata && typeof itemMetadata === 'object') {
 				detailsLogger.info('Usando metadata pre-parseada del item');
-				return itemMetadata as FileMetadata;
+				return itemMetadata as MediaMetadata;
 			}
 
 			// Generar clave de caché única
@@ -237,12 +264,12 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 			try {
 				// Intentar usar metadata pre-parseada si existe
 				if (item.metadata) {
-					setMetadata(item.metadata as FileMetadata);
+					setMetadata(item.metadata as MediaMetadata);
 					setIsProcessing(false);
 					return;
 				}
 
-				const result = await fetchMetadata(item.id, item.rawMetadata);
+				const result = await fetchMetadata(item.id, item.metadata);
 
 				if (!isMounted) return;
 
@@ -292,12 +319,12 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 	// Función memoizada para depuración
 	const handleDebug = useCallback(() => {
 		console.group('🔍 Depuración de Metadata');
-		if (item?.rawMetadata) {
+		if (item?.metadata) {
 			try {
-				const metadataObj = typeof item.rawMetadata === 'string' ? JSON.parse(item.rawMetadata) : item.rawMetadata;
+				const metadataObj = typeof item.metadata === 'string' ? JSON.parse(item.metadata) : item.metadata;
 				console.table(metadataObj);
 			} catch (_error) {
-				console.error('Error al analizar metadata:', item.rawMetadata);
+				console.error('Error al analizar metadata:', item.metadata);
 			}
 		}
 		console.groupEnd();
@@ -354,7 +381,31 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 		}
 
 		if (hasMultipleSelection) {
-			return <MultipleSelectionInfo items={selectedItems} />;
+			// Adaptar ImageItem[] a FileItem[] para compatibilidad
+			const adaptedItems = selectedItems.map((item: any) => ({
+				...item,
+				type: 'image' as const,
+				src: item.path,
+				tags: item.tags || [],
+				collections: item.collections || [],
+				modifiedAt: item.updatedAt || new Date(),
+				accessedAt: item.updatedAt || new Date(),
+				hash: item.hash || '',
+				thumbnailError: null,
+				thumbnailErrorAt: null,
+				thumbnailOptimizedAt: null,
+				isPublic: item.isPublic || false,
+				stats: undefined,
+				places: [],
+				worldItems: [],
+				concepts: [],
+				prompts: [],
+				notes: [],
+				groups: [],
+				properties: [],
+				wildcards: [],
+			}));
+			return <MultipleSelectionInfo items={adaptedItems} />;
 		}
 
 		if (isProcessing) {

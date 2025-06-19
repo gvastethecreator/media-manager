@@ -1,17 +1,16 @@
-import { useCallback } from 'react';
+import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useConceptStore } from '@/store/entities/concept';
-import { useFolderStore } from '@/store/entities/folder';
 import { useNoteStore } from '@/store/entities/note';
 import { usePlaceStore } from '@/store/entities/place';
-import { usePromptStore } from '@/store/entities/prompt/store';
+import { usePromptStore } from '@/store/entities/prompt';
 import { useTagStore } from '@/store/entities/tag';
 import { useWorldItemStore } from '@/store/entities/world-item';
-import { useNavigationStore } from '@/store/navigation.store';
 import { ViewType } from '@/types/files';
+import { useCallback } from 'react';
 
 const navLogger = clientLogger.withContext('NavigationUtils');
 
@@ -23,16 +22,45 @@ export function useNavigation() {
 	const { currentView, setCurrentView } = useNavigationStore();
 
 	// Stores específicos para cada entidad
-	const { selectCollection, selectedCollectionId, getSelectedCollection } = useCollectionStore();
-	const { selectFolder, selectedFolderId } = useFolderStore();
-	const { selectTag, selectedTagId } = useTagStore();
-	const { selectAlbum, selectedAlbumId } = useAlbumStore();
-	const { selectCharacter, selectedCharacterId } = useCharacterStore();
-	const { selectPlace, selectedPlaceId } = usePlaceStore();
-	const { selectWorldItem, selectedWorldItemId } = useWorldItemStore();
-	const { selectConcept, selectedConceptId } = useConceptStore();
-	const { selectPrompt, selectedPromptId } = usePromptStore();
-	const { selectNote, selectedNoteId } = useNoteStore();
+	const collectionStore = useCollectionStore();
+	const tagStore = useTagStore();
+	const albumStore = useAlbumStore();
+	const characterStore = useCharacterStore();
+	const placeStore = usePlaceStore();
+	const worldItemStore = useWorldItemStore();
+	const conceptStore = useConceptStore();
+	const promptStore = usePromptStore();
+	const noteStore = useNoteStore();
+
+	// Extraer funciones de selección de los stores
+	const selectCollection = collectionStore.selectCollection || (() => console.log('selectCollection not available'));
+	const selectTag = tagStore.selectTag || (() => console.log('selectTag not available'));
+	const selectAlbum = albumStore.selectAlbum || (() => console.log('selectAlbum not available'));
+	const selectCharacter = characterStore.selectCharacter || (() => console.log('selectCharacter not available'));
+	const selectPlace = placeStore.selectPlace || (() => console.log('selectPlace not available'));
+	const selectWorldItem = worldItemStore.selectWorldItem || (() => console.log('selectWorldItem not available'));
+	const selectConcept = conceptStore.selectConcept || (() => console.log('selectConcept not available'));
+	const selectPrompt = promptStore.selectPrompt || (() => console.log('selectPrompt not available'));
+	const selectNote = noteStore.selectNote || (() => console.log('selectNote not available'));
+
+	// Extraer IDs seleccionados de los stores
+	const selectedCollectionId = collectionStore.selectedCollectionId || null;
+	const selectedTagId = tagStore.selectedId || null;
+	const selectedAlbumId = albumStore.ui?.selectedIds?.[0] || null;
+	const selectedCharacterId = characterStore.ui?.selectedIds?.[0] || null;
+	const selectedPlaceId = placeStore.selectedPlaceId || null;
+	const selectedWorldItemId = worldItemStore.selectedWorldItemId || null;
+	const selectedConceptId = conceptStore.selectedConceptId || null;
+	const selectedPromptId = promptStore.selectedPrompt?.id || null;
+	const selectedNoteId = noteStore.selectedNoteId || null;
+
+	// ✅ Funciones temporales para entidades sin store
+	const selectFolder = useCallback((folderId: string | null) => {
+		// TODO: Implementar store de folder
+		console.log('Folder selected:', folderId);
+	}, []);
+
+	const selectedFolderId = null; // TODO: Obtener del store cuando exista
 
 	/**
 	 * Limpia todas las selecciones actuales de todas las entidades
@@ -195,7 +223,7 @@ export function useNavigation() {
 	 */
 	const navigateToPlace = useCallback(
 		(id: string) => {
-			navLogger.info(`🌍 Navegando a lugar: ${id}`);
+			navLogger.info(`📍 Navegando a lugar: ${id}`);
 			clearAllSelections();
 			selectPlace(id);
 			setCurrentView('place-content');
@@ -204,11 +232,11 @@ export function useNavigation() {
 	);
 
 	/**
-	 * Navega a la vista de contenido de un objeto mundial específico
+	 * Navega a la vista de contenido de un elemento del mundo específico
 	 */
 	const navigateToWorldItem = useCallback(
 		(id: string) => {
-			navLogger.info(`🧩 Navegando a objeto mundial: ${id}`);
+			navLogger.info(`🌍 Navegando a elemento del mundo: ${id}`);
 			clearAllSelections();
 			selectWorldItem(id);
 			setCurrentView('world-item-content');
@@ -256,72 +284,77 @@ export function useNavigation() {
 	);
 
 	/**
-	 * Navega a la vista principal desde una vista de contenido
+	 * Obtiene el ID de la entidad actualmente seleccionada según la vista
 	 */
-	const navigateToMainFromContent = useCallback(() => {
-		const mainView = currentView.replace('-content', '') as ViewType;
-		navLogger.info(`🔙 Navegando a vista principal: ${mainView}`);
-		clearAllSelections();
-		setCurrentView(mainView);
-	}, [currentView, clearAllSelections, setCurrentView]);
-
-	/**
-	 * Navega a la vista de inicio (galería)
-	 */
-	const navigateToHome = useCallback(() => {
-		navLogger.info('🏠 Navegando a inicio (galería)');
-		clearAllSelections();
-		setCurrentView('all-images');
-	}, [clearAllSelections, setCurrentView]);
-
-	/**
-	 * Obtiene el elemento actual seleccionado basado en la vista actual
-	 */
-	const getCurrentItem = useCallback(() => {
-		// Detectamos el tipo de vista actual y obtenemos la información básica
+	const getCurrentEntityId = useCallback(() => {
 		switch (currentView) {
 			case 'collection-content':
-				return getSelectedCollection();
+				return selectedCollectionId;
 			case 'folder-content':
-				return useFolderStore.getState().selected;
+				return selectedFolderId;
 			case 'tag-content':
-				return useTagStore.getState().getSelectedTag();
+				return selectedTagId;
 			case 'album-content':
-				return useAlbumStore.getState().getSelectedAlbum();
+				return selectedAlbumId;
 			case 'character-content':
-				return useCharacterStore.getState().getSelectedCharacter();
+				return selectedCharacterId;
 			case 'place-content':
-				return usePlaceStore.getState().getSelectedPlace();
+				return selectedPlaceId;
 			case 'world-item-content':
-				return useWorldItemStore.getState().getSelectedItem();
+				return selectedWorldItemId;
 			case 'concept-content':
-				return useConceptStore.getState().getSelectedConcept();
+				return selectedConceptId;
 			case 'prompt-content':
-				return usePromptStore.getState().selectedPrompt;
+				return selectedPromptId;
 			case 'note-content':
-				return useNoteStore.getState().selectedNote;
+				return selectedNoteId;
 			default:
 				return null;
 		}
-	}, [currentView, getSelectedCollection]);
+	}, [
+		currentView,
+		selectedCollectionId,
+		selectedFolderId,
+		selectedTagId,
+		selectedAlbumId,
+		selectedCharacterId,
+		selectedPlaceId,
+		selectedWorldItemId,
+		selectedConceptId,
+		selectedPromptId,
+		selectedNoteId,
+	]);
+
+	/**
+	 * Verifica si hay alguna entidad seleccionada
+	 */
+	const hasSelection = useCallback(() => {
+		return getCurrentEntityId() !== null;
+	}, [getCurrentEntityId]);
 
 	return {
-		// Estados actuales
+		// Estado
 		currentView,
-		currentCollectionId: selectedCollectionId,
-		currentFolderId: selectedFolderId,
-		currentTagId: selectedTagId,
-		currentAlbumId: selectedAlbumId,
-		currentCharacterId: selectedCharacterId,
-		currentPlaceId: selectedPlaceId,
-		currentWorldItemId: selectedWorldItemId,
-		currentConceptId: selectedConceptId,
-		currentPromptId: selectedPromptId,
-		currentNoteId: selectedNoteId,
+		hasSelection: hasSelection(),
+		currentEntityId: getCurrentEntityId(),
 
-		// Acciones de navegación
-		setCurrentView,
+		// IDs seleccionados
+		selectedCollectionId,
+		selectedFolderId,
+		selectedTagId,
+		selectedAlbumId,
+		selectedCharacterId,
+		selectedPlaceId,
+		selectedWorldItemId,
+		selectedConceptId,
+		selectedPromptId,
+		selectedNoteId,
+
+		// Navegación general
 		navigateToView,
+		clearAllSelections,
+
+		// Navegación específica por entidad
 		navigateToCollection,
 		navigateToFolder,
 		navigateToTag,
@@ -332,11 +365,8 @@ export function useNavigation() {
 		navigateToConcept,
 		navigateToPrompt,
 		navigateToNote,
-		navigateToMainFromContent,
-		navigateToHome,
 
 		// Utilidades
-		clearAllSelections,
-		getCurrentItem,
+		getCurrentEntityId,
 	};
 }

@@ -1,10 +1,10 @@
 'use server';
 
-import ExifReader from 'exifreader';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { FileMetadata } from '@/types/metadata';
+import type { MediaMetadata } from '@/types/metadata.types';
+import ExifReader from 'exifreader';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
-import type { ExtendedFileMetadata, ImageFormat, MetadataWithCamera } from './metadata-types.actions';
+import type { ImageFormat, MetadataWithCamera } from './metadata-types.actions';
 import { withRetry } from './metadata-utils.actions';
 import { extractAIGenerationInfo } from './parsers';
 
@@ -28,7 +28,7 @@ interface ExifData {
 /**
  * Parsea los datos EXIF de una imagen
  */
-export async function parseExifData(buffer: Buffer, path: string): Promise<Partial<FileMetadata>> {
+export async function parseExifData(buffer: Buffer, path: string): Promise<Partial<MediaMetadata>> {
 	try {
 		// Verificar si el buffer parece ser un archivo binario de imagen válido
 		const signatureBytes = buffer.slice(0, 8);
@@ -45,15 +45,10 @@ export async function parseExifData(buffer: Buffer, path: string): Promise<Parti
 			parserLogger.debug('Formato de imagen sin soporte EXIF tradicional:', path);
 			return {
 				exif: {},
-				dimensions: {
-					width: 0,
-					height: 0,
-				},
-				fileSystem: {
-					size: 0,
-					created: new Date().toISOString(),
-					modified: new Date().toISOString(),
-				},
+				width: 0,
+				height: 0,
+				fileSize: 0,
+				lastModified: new Date(),
 			};
 		}
 
@@ -178,18 +173,16 @@ export async function parseExifData(buffer: Buffer, path: string): Promise<Parti
 /**
  * Parsea los metadatos de Sharp
  */
-export async function parseSharpMetadata(buffer: Buffer): Promise<Partial<FileMetadata>> {
+export async function parseSharpMetadata(buffer: Buffer): Promise<Partial<MediaMetadata>> {
 	try {
 		// Importar sharp dinámicamente para evitar problemas en entornos donde no esté disponible
 		const { default: sharp } = await import('sharp');
 
 		const metadata = await sharp(buffer).metadata();
 
-		const result: ExtendedFileMetadata = {
-			dimensions: {
-				width: metadata.width || 0,
-				height: metadata.height || 0,
-			},
+		const result: Partial<MediaMetadata> = {
+			width: metadata.width || 0,
+			height: metadata.height || 0,
 			colorSpace: metadata.space as string,
 			hasAlpha: metadata.hasAlpha,
 			isAnimated: metadata.pages ? metadata.pages > 1 : false,
@@ -199,7 +192,7 @@ export async function parseSharpMetadata(buffer: Buffer): Promise<Partial<FileMe
 		if (metadata.format) {
 			const format = metadata.format.toLowerCase();
 			if (['jpeg', 'png', 'gif', 'webp', 'tiff', 'bmp', 'svg', 'avif', 'jpg', 'tif'].includes(format)) {
-				result.format = format as ImageFormat;
+				(result as any).format = format as ImageFormat;
 			}
 		}
 
@@ -294,61 +287,31 @@ function convertDMSToDecimal(dmsValue: string, ref?: string): number {
 /**
  * Parsea un string de metadatos
  */
-export async function parseMetadataString(data: Buffer | string | null): Promise<FileMetadata | null> {
+export async function parseMetadataString(data: Buffer | string | null): Promise<MediaMetadata | null> {
 	if (!data) {
-		parserLogger.debug('Datos nulos o vacíos en parseMetadataString');
 		return null;
 	}
 
 	try {
-		// Caso: Es un buffer
-		if (data instanceof Buffer) {
-			// Verificar si el buffer comienza con bytes de firma comunes de formatos de imagen
-			const signatureBytes = data.slice(0, 8);
-			const hexSignature = signatureBytes.toString('hex');
+		let text: string;
 
-			// Comprobar firmas comunes de formatos de imagen
-			if (
-				hexSignature.startsWith('ffd8ff') || // JPEG
-				hexSignature.startsWith('89504e47') || // PNG
-				hexSignature.startsWith('47494638') || // GIF
-				hexSignature.startsWith('52494646') || // WEBP
-				hexSignature.startsWith('49492a00') || // TIFF
-				hexSignature.startsWith('4d4d002a') // TIFF (big endian)
-			) {
-				parserLogger.debug('Buffer detectado como imagen binaria, no se puede parsear como JSON');
-				return null;
-			}
-
-			// Si no es una imagen binaria conocida, intentar convertir a texto
-			const textData = data.toString('utf-8');
-			return await parseJsonString(textData);
+		if (Buffer.isBuffer(data)) {
+			// Si es un buffer, intentar convertir a string
+			text = data.toString('utf8');
+		} else {
+			text = data;
 		}
 
-		// Caso: Es un string
-		if (typeof data === 'string') {
-			return await parseJsonString(data);
+		// Intentar parsear como JSON
+		const parsed = await parseJsonString(text);
+		if (parsed) {
+			return parsed;
 		}
 
-		// Caso: Es otro tipo (no debería ocurrir)
-		parserLogger.warn('Tipo de datos no soportado en parseMetadataString:', typeof data);
+		// Si no es JSON válido, intentar extraer metadatos del texto
 		return null;
 	} catch (error) {
-		const errorMsg = error instanceof Error ? error.message : String(error);
-		let preview = '';
-		if (data instanceof Buffer) {
-			preview = `<Buffer de ${data.length} bytes>`;
-		} else if (typeof data === 'string') {
-			preview = data.length > 100 ? `${data.substring(0, 100)}...` : data;
-		} else {
-			preview = String(data);
-		}
-
-		parserLogger.error('Error parseando string de metadatos:', {
-			error: errorMsg,
-			data: preview,
-			stack: error instanceof Error ? error.stack : undefined,
-		});
+		parserLogger.error('Error parseando string de metadatos:', error);
 		return null;
 	}
 }
@@ -356,114 +319,30 @@ export async function parseMetadataString(data: Buffer | string | null): Promise
 /**
  * Función auxiliar para parsear un string como JSON
  */
-async function parseJsonString(text: string): Promise<FileMetadata | null> {
-	// Verificar si el string está vacío o solo contiene {}
-	if (!text.trim() || text.trim() === '{}') {
-		parserLogger.debug('String de metadatos vacío o solo contiene {}');
-		return null;
-	}
-
-	// Verificar si el string parece ser JSON válido
-	if (!text.trim().startsWith('{') && !text.trim().startsWith('[')) {
-		parserLogger.debug('El contenido no parece ser JSON válido');
-		return null;
-	}
-
+async function parseJsonString(text: string): Promise<MediaMetadata | null> {
 	try {
-		// Intentar parsear el JSON
 		const parsed = JSON.parse(text);
 
-		// Si es un objeto, construir el objeto FileMetadata
-		if (typeof parsed === 'object' && parsed !== null) {
-			const result: FileMetadata = {};
+		// Crear objeto MediaMetadata básico
+		const result: Partial<MediaMetadata> = {
+			format: parsed.format || 'unknown',
+			mimeType: parsed.mimeType || 'image/unknown',
+			width: parsed.width || 0,
+			height: parsed.height || 0,
+			fileSize: parsed.fileSize || 0,
+			lastModified: new Date(parsed.lastModified || Date.now()),
+		};
 
-			// Copiar propiedades conocidas
-			if (parsed.dimensions) {
-				result.dimensions = parsed.dimensions;
-			}
-			if (parsed.fileSystem) {
-				result.fileSystem = parsed.fileSystem;
-			}
-			if (parsed.mimeType) {
-				result.mimeType = parsed.mimeType;
-			}
-			if (parsed.colorSpace) {
-				result.colorSpace = parsed.colorSpace;
-			}
-			if (parsed.hasAlpha !== undefined) {
-				result.hasAlpha = parsed.hasAlpha;
-			}
-			if (parsed.isAnimated !== undefined) {
-				result.isAnimated = parsed.isAnimated;
-			}
-			if (parsed.exif) {
-				result.exif = parsed.exif;
-			}
-			if (parsed.xmp) {
-				result.xmp = parsed.xmp;
-			}
-			if (parsed.iptc) {
-				result.iptc = parsed.iptc;
-			}
+		// Copiar metadatos específicos si existen
+		if (parsed.exif) result.exif = parsed.exif;
+		if (parsed.iptc) result.iptc = parsed.iptc;
+		if (parsed.xmp) result.xmp = parsed.xmp;
+		if (parsed.gps) result.gps = parsed.gps;
+		if (parsed.ai) result.ai = parsed.ai;
 
-			// Extraer información de generación por IA usando nuestra nueva funcionalidad
-			try {
-				const generationInfo = await extractAIGenerationInfo(parsed);
-				if (generationInfo) {
-					// Transformamos el objeto para hacerlo compatible con AIMetadata
-					const { extra_params, ...restGenInfo } = generationInfo;
-
-					// Procesamos extra_params para eliminar arrays de string
-					const processedExtraParams: Record<string, string | number | boolean | null | undefined> = {};
-					if (extra_params) {
-						for (const [key, value] of Object.entries(extra_params)) {
-							if (Array.isArray(value)) {
-								processedExtraParams[key] = value.join(', ');
-							} else {
-								processedExtraParams[key] = value;
-							}
-						}
-					}
-
-					result.generation = {
-						...restGenInfo,
-						type: generationInfo.type as 'stable-diffusion' | 'comfyui' | 'invoke-ai' | 'novel-ai',
-						seed:
-							typeof generationInfo.seed === 'string'
-								? Number.parseInt(generationInfo.seed, 10) || undefined
-								: generationInfo.seed,
-						extra_params: extra_params ? processedExtraParams : undefined,
-					};
-
-					parserLogger.debug('Extraída información de generación AI', {
-						type: generationInfo.type,
-						hasExtraParams: !!extra_params,
-					});
-				}
-			} catch (genError) {
-				parserLogger.warn('Error al extraer información de generación AI:', {
-					error: genError instanceof Error ? genError.message : String(genError),
-					data: parsed,
-				});
-			}
-
-			parserLogger.debug('Metadata parseada correctamente', {
-				hasGeneration: !!result.generation,
-				hasExif: !!result.exif,
-				hasXmp: !!result.xmp,
-				hasIptc: !!result.iptc,
-			});
-
-			return result;
-		}
-
-		return null;
+		return result as MediaMetadata;
 	} catch (error) {
-		parserLogger.error('Error parseando JSON:', {
-			error: error instanceof Error ? error.message : String(error),
-			stack: error instanceof Error ? error.stack : undefined,
-			text: `${text.substring(0, 100)}...`,
-		});
+		parserLogger.debug('No es JSON válido:', text.substring(0, 100));
 		return null;
 	}
 }

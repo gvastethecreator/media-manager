@@ -2,7 +2,7 @@
 
 import { getImages } from '@/app/actions/images/image-crud.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { convertServerImageToFileItem } from '@/services/image-converter.service';
+import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service';
 import type { FileItem } from '@/types/files';
 
 const log = serverLogger.withContext('SearchActions');
