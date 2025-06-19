@@ -62,7 +62,7 @@ export function AllImagesView() {
 							groups: image.groups?.map((group: any) => group.name) || [],
 							properties: image.properties?.map((property: any) => property.name) || [],
 							wildcards: image.wildcards?.map((wildcard: any) => wildcard.name) || [],
-							favorite: image.isFavorite,
+							isFavorite: image.isFavorite,
 							isFavorite: image.isFavorite,
 							thumbnail: thumbnailStr,
 						};

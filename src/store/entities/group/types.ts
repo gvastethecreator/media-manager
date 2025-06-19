@@ -60,8 +60,6 @@ export interface GroupFiltersState {
 	filterByCategory: string | null;
 	/** Filtro de favoritos */
 	filterFavorites: boolean;
-	/** Filtro de compartidos */
-	filterShared: boolean;
 	/** Rango de fechas */
 	dateRange: {
 		from: Date | null;

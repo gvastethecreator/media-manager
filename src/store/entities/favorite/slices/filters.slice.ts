@@ -11,7 +11,7 @@ import { DEFAULT_FILTERS } from '../constants';
 import { FavoriteFilters } from '../types';
 
 // Logger específico para este slice
-const logger = clientLogger.child({ module: 'FavoriteStore.FiltersSlice' });
+const logger = clientLogger.withContext({ module: 'FavoriteStore.FiltersSlice' });
 
 // Estado
 export interface FiltersState {

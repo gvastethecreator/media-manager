@@ -1,5 +1,7 @@
 'use client';
 
+import { FileText, Filter, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { deleteNote, searchNotes } from '@/app/actions/notes/note.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,8 +14,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import toastService from '@/services/toast.service';
 import type { NoteComplete } from '@/types/entities/note/extended';
-import { FileText, Filter, Info, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateNoteForm } from './create-note-form';
 
 export function NotesSettings() {

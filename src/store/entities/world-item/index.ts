@@ -5,10 +5,10 @@
  * @updated 2025-06-20
  */
 
-import { VERSIONING } from '@/lib/constants';
-import { clientLogger } from '@/lib/logger/client-logger';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { VERSIONING } from '@/lib/constants';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { createWorldItemCoreSlice } from './slices/core';
 import { createWorldItemFiltersSlice } from './slices/filters';
 import { createWorldItemUISlice } from './slices/ui';
@@ -40,8 +40,8 @@ export const useWorldItemStore = create<WorldItemStore>()(
 				ui: state.ui,
 				filters: state.filters,
 			}),
-		},
-	),
+		}
+	)
 );
 
 // Re-export API from store

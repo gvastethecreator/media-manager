@@ -1,5 +1,5 @@
 // Mappers para JsonFile
-import type { JsonFile } from '@/types/entities/json-file/types';
+import type { JsonFile } from '@/types/entities/json-file';
 
 export function fromPrismaJsonFile(prisma: any): JsonFile {
 	return {

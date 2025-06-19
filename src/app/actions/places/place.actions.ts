@@ -6,6 +6,7 @@
  * @description Acciones CRUD y de gestión de relaciones para los Lugares.
  */
 
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import {
@@ -15,7 +16,6 @@ import {
 	mapUpdatePlaceDataToPrisma,
 } from '@/transformers/place';
 import type { PlaceBase, PlaceComplete, PlaceCreateInput, PlaceUpdateInput } from '@/types/entities/place';
-import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('PlaceActions');
 

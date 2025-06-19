@@ -3,7 +3,8 @@
  * @module utils/album/helpers
  */
 
-import type { Album, AlbumMetadata, AlbumType } from '../../types/entities/album';
+import { AlbumWithRelations as Album, AlbumMetadata } from '../../types/entities/album';
+import { AlbumType } from '../../types/entities/album/enums';
 import { formatImageSize } from '../image/helpers';
 
 /**

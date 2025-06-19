@@ -12,7 +12,7 @@ import {
 	BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import type { ViewType } from '@/components/views/types';
+import { ViewType } from '@/components/views/types';
 
 interface BreadcrumbsProps {
 	currentView: ViewType;

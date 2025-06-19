@@ -14,5 +14,16 @@ export interface DocumentBase {
 	updatedAt: Date;
 }
 
+/**
+ * 📄 Document con todas sus relaciones y metadatos adicionales
+ */
+export interface DocumentComplete extends DocumentBase {
+	metadata?: Record<string, unknown>;
+	tags?: Array<{ id: string; name: string }>;
+	_count?: {
+		tags: number;
+	};
+}
+
 export type DocumentCreateInput = Omit<DocumentBase, 'id' | 'createdAt' | 'updatedAt'>;
 export type DocumentUpdateInput = Partial<Omit<DocumentBase, 'id'>>;

@@ -1,10 +1,10 @@
 'use client';
 
+import { X } from 'lucide-react';
+import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { X } from 'lucide-react';
-import * as React from 'react';
 
 interface TagInputContextValue {
 	tags: string[];
@@ -38,13 +38,7 @@ export interface TagInputProps extends React.PropsWithChildren<{}> {
 	disabled?: boolean;
 }
 
-function TagInputProvider({
-	children,
-	value,
-	defaultValue = [],
-	onChange,
-	disabled = false,
-}: TagInputProps) {
+function TagInputProvider({ children, value, defaultValue = [], onChange, disabled = false }: TagInputProps) {
 	const [tags, setTags] = React.useState<string[]>(value || defaultValue);
 	const [input, setInput] = React.useState('');
 	const [isFocused, setIsFocused] = React.useState(false);
@@ -113,12 +107,12 @@ const TagInputRoot = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
 					'flex flex-wrap items-center gap-2 rounded-md border border-input bg-background p-2 ring-offset-background',
 					isFocused && 'outline-none ring-2 ring-ring ring-offset-2',
 					disabled && 'cursor-not-allowed opacity-50',
-					className,
+					className
 				)}
 				{...props}
 			/>
 		);
-	},
+	}
 );
 TagInputRoot.displayName = 'TagInputRoot';
 
@@ -148,7 +142,7 @@ const TagList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEle
 				))}
 			</div>
 		);
-	},
+	}
 );
 TagList.displayName = 'TagList';
 
@@ -156,14 +150,7 @@ const TagInput = React.forwardRef<
 	HTMLInputElement,
 	Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onKeyDown'>
 >(({ className, placeholder, ...props }, ref) => {
-	const {
-		input,
-		handleInputChange,
-		handleInputKeyDown,
-		handleInputFocus,
-		handleInputBlur,
-		disabled,
-	} = useTagInput();
+	const { input, handleInputChange, handleInputKeyDown, handleInputFocus, handleInputBlur, disabled } = useTagInput();
 
 	return (
 		<Input

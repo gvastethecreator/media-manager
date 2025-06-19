@@ -9,18 +9,18 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import {
-	fromPrismaCharacter,
-	fromPrismaCharacters,
-	mapCharacterSearchOptionsToPrisma,
-	mapCreateCharacterDataToPrisma,
-	mapUpdateCharacterDataToPrisma,
+    fromPrismaCharacter,
+    fromPrismaCharacters,
+    mapCharacterSearchOptionsToPrisma,
+    mapCreateCharacterDataToPrisma,
+    mapUpdateCharacterDataToPrisma,
 } from '@/transformers/character';
 import type {
-	CharacterBase,
-	CharacterComplete,
-	CharacterCreateInput,
-	CharacterSearchOptions,
-	CharacterUpdateInput,
+    CharacterBase,
+    CharacterComplete,
+    CharacterCreateInput,
+    CharacterSearchOptions,
+    CharacterUpdateInput,
 } from '@/types/entities/character';
 import { revalidatePath } from 'next/cache';
 
@@ -45,6 +45,10 @@ const CHARACTER_INCLUDE = {
 	relatedTo: true,
 	_count: true,
 };
+
+// Re-exportar tipos extendidos para compatibilidad
+export type CharacterWithImages = CharacterComplete;
+export type CharacterWithStats = CharacterComplete;
 
 /**
  * Revalida las rutas de caché relacionadas con los personajes.
@@ -81,6 +85,33 @@ export async function getCharacter(id: string): Promise<CharacterComplete | null
 		return null;
 	}
 	return fromPrismaCharacter(character);
+}
+
+/**
+ * Alias para getCharacter - para compatibilidad
+ */
+export const getCharacterById = getCharacter;
+
+/**
+ * Obtiene las imágenes de un personaje específico.
+ */
+export async function getCharacterImages(characterId: string): Promise<any[]> {
+	logger.info(`🖼️ Obteniendo imágenes del personaje: ${characterId}`);
+	const character = await prisma.character.findUnique({
+		where: { id: characterId },
+		include: {
+			images: {
+				orderBy: { createdAt: 'desc' },
+			},
+		},
+	});
+
+	if (!character) {
+		logger.warn(`Personaje no encontrado: ${characterId}`);
+		return [];
+	}
+
+	return character.images;
 }
 
 /**

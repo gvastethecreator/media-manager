@@ -1,7 +1,7 @@
 // Mappers para Document
 // Aquí se definen funciones para mapear entre Prisma, dominio y UI
 
-import type { Document } from '@/types/entities/document/types';
+import type { Document } from '@/types/entities/document';
 
 export function fromPrismaDocument(prisma: any): Document {
 	return {

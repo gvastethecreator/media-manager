@@ -1,15 +1,15 @@
 'use client';
 
-import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
+import { Bug, FileImage, Loader2 } from 'lucide-react';
+import * as React from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getImageMetadataById } from '@/app/actions/metadata/metadata.actions';
+import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import type { FileMetadata } from '@/types/entities/metadata/types';
-import { Bug, FileImage, Loader2 } from 'lucide-react';
-import * as React from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AIGenerationInfo } from './details-panel-ai-generation-info';
 import { BasicInfo } from './details-panel-basic-info';
 import { ImagePreview } from './details-panel-image-preview';

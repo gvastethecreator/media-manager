@@ -210,7 +210,7 @@ export const MultipleSelectionInfo = memo<MultipleSelectionInfoProps>(function M
 							{items.slice(0, 9).map((item, index) => (
 								<div key={item.id} className="relative aspect-square bg-muted/30 rounded-md overflow-hidden">
 									<img
-										src={item.thumbnailUrl || item.url || ''}
+										src={item.thumbnail || item.url || ''}
 										alt={item.name || `Item ${index + 1}`}
 										className="w-full h-full object-cover"
 									/>

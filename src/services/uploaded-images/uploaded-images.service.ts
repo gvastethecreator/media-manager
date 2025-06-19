@@ -3,7 +3,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { fromDB, transformUploadedImage } from '@/transformers/uploaded-image';
-import type { UploadedImageType } from '@/types/entities/uploaded-image';
+import { UploadedImageType } from '@/types/entities/uploaded-image';
 import type {
 	CreateUploadedImageParams,
 	GetUploadedImagesParams,
@@ -38,10 +38,10 @@ interface WhereClause {
 	};
 	OR?: Array<
 		| {
-				name: { contains: string; mode: 'insensitive' };
+				name: { contains: string; };
 		  }
 		| {
-				category: { contains: string; mode: 'insensitive' };
+				category: { contains: string; };
 		  }
 	>;
 }
@@ -314,10 +314,10 @@ class UploadedImagesService {
 			if (search) {
 				where.OR = [
 					{
-						name: { contains: search, mode: 'insensitive' },
+						name: { contains: search },
 					},
 					{
-						category: { contains: search, mode: 'insensitive' },
+						category: { contains: search },
 					},
 				];
 			}

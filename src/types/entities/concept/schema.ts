@@ -3,9 +3,8 @@
  * @module types/entities/concept/schema
  */
 
-import { z } from 'zod';
 import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
-import { ConceptSortCriteria } from './types';
+import { z } from 'zod';
 
 /**
  * 🏷️ Esquema para tags de concepto
@@ -68,5 +67,8 @@ export const ConceptSchema = z.object({
 	tags: z.union([z.string(), z.array(z.string())]).optional(),
 	featuredImage: z.string().nullable(),
 	isFavorite: z.boolean().default(false),
-	sortBy: z.nativeEnum(ConceptSortCriteria).optional(),
+	sortBy: z.string().optional(),
 });
+
+// Tipos inferidos de los esquemas
+export type ConceptStats = z.infer<typeof ConceptStatsSchema>;

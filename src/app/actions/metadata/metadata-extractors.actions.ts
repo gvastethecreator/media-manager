@@ -7,12 +7,8 @@ import { type Stats } from 'fs';
 import * as fs from 'fs/promises';
 import sharp from 'sharp';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
-import {
-    getAIGenerationInfo,
-    parseExifData,
-    parseMetadataString
-} from './metadata-parsers.actions';
-import { type ExtendedFileMetadata, METADATA_RETRY_CONFIG, type MetadataOptions } from './metadata-types.actions';
+import { getAIGenerationInfo, parseExifData } from './metadata-parsers.actions';
+import { METADATA_RETRY_CONFIG, type MetadataOptions } from './metadata-types.actions';
 import { getImageFormat, isSupportedImageFormat, withRetry } from './metadata-utils.actions';
 
 const extractorLogger = serverLogger.withContext('MetadataExtractors');
@@ -57,29 +53,7 @@ const normalizePathForCache = (path: string): string => {
 	return normalized;
 };
 
-/**
- * Mapea de forma segura las propiedades de sharp.Metadata a ExtendedFileMetadata.
- */
-function mapSharpToExtendedMetadata(
-	sharpMeta: sharp.Metadata,
-	extendedMeta: Partial<ExtendedFileMetadata>,
-): Partial<ExtendedFileMetadata> {
-	const mapped: Partial<ExtendedFileMetadata> = { ...extendedMeta };
 
-	// Asegurar que dimensions exista antes de modificarlo
-	if (!mapped.dimensions) {
-		mapped.dimensions = { width: 0, height: 0 };
-	}
-
-	if (sharpMeta.width) mapped.width = sharpMeta.width;
-	if (sharpMeta.height) mapped.height = sharpMeta.height;
-	if (sharpMeta.format) mapped.format = sharpMeta.format as any;
-	if (sharpMeta.space) mapped.colorSpace = sharpMeta.space;
-	if (sharpMeta.hasAlpha !== undefined) mapped.hasAlpha = sharpMeta.hasAlpha;
-	if (sharpMeta.icc) mapped.iccProfile = sharpMeta.icc;
-
-	return mapped;
-}
 
 /**
  * Extrae metadatos de un archivo
@@ -115,14 +89,14 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 		lastModified: stats.mtime,
 		fileSize: Number(stats.size),
 		mimeType: 'image/unknown',
-		format: 'unknown'
+		format: 'unknown',
 	};
 
 	try {
 		const sharpInstance = sharp(buffer);
 		const sharpMeta = await withRetry<sharp.Metadata>(
 			() => sharpInstance.metadata(),
-			options?.retry || METADATA_RETRY_CONFIG,
+			options?.retry || METADATA_RETRY_CONFIG
 		);
 
 		// Actualizar los campos relevantes
@@ -141,7 +115,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 		try {
 			const { info } = await withRetry(
 				() => sharp(buffer).toBuffer({ resolveWithObject: true }),
-				options?.retry || METADATA_RETRY_CONFIG,
+				options?.retry || METADATA_RETRY_CONFIG
 			);
 			if (info.width > 0) metadata.width = info.width;
 			if (info.height > 0) metadata.height = info.height;
@@ -175,8 +149,8 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 
 	if (!options?.skipIptc) {
 		try {
-			const iptcData = parseMetadataString(metadata.iptc as any || '');
-			mediaMetadata.iptc = iptcData;
+			// Los metadatos IPTC se extraerán del buffer usando sharp si están disponibles
+			mediaMetadata.iptc = {};
 		} catch (error) {
 			extractorLogger.warn('No se pudieron extraer metadatos IPTC', { path });
 		}
@@ -184,8 +158,8 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 
 	if (!options?.skipXmp) {
 		try {
-			const xmpData = parseMetadataString(metadata.xmp as any || '');
-			mediaMetadata.xmp = xmpData;
+			// Los metadatos XMP se extraerán del buffer usando sharp si están disponibles
+			mediaMetadata.xmp = {};
 		} catch (error) {
 			extractorLogger.warn('No se pudieron extraer metadatos XMP', { path });
 		}

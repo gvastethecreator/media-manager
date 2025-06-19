@@ -7,36 +7,24 @@
  */
 
 export type {
-	CharacterAttributes,
-	CharacterCard,
-	CharacterExtended,
-	CharacterInventoryItem,
-	CharacterListItem,
-	CharacterSummary,
-	CharacterViewConfig,
+    CharacterAttributes,
+    CharacterCard,
+    CharacterExtended,
+    CharacterInventoryItem,
+    CharacterListItem,
+    CharacterSummary,
+    CharacterViewConfig
 } from './extended';
-// Alias común para el tipo principal
-export {
-	CHARACTER_SORT_PROPERTY_MAP,
-	CharacterSortCriteria,
-} from './types';
 export type {
-	CharacterWithRelations as Character,
-	CharacterBase,
-	CharacterComplete,
-	CharacterCount,
-	CharacterCounts,
-	CharacterCreateInput,
-	CharacterFilters,
-	CharacterIncludes,
-	CharacterRelations,
-	CharacterSearchOptions,
-	CharacterSearchResult,
-	CharacterTransformerOptions,
-	CharacterUpdateInput,
-	CharacterWithRelations,
-	CreateCharacterData,
-	UpdateCharacterData,
+    CharacterWithRelations as Character, CharacterBase,
+    CharacterComplete,
+    CharacterCounts,
+    CharacterCreateInput,
+    CharacterFilters,
+    CharacterRelations,
+    CharacterSearchOptions,
+    CharacterUpdateInput, CharacterWithRelations,
+    CreateCharacterData,
+    UpdateCharacterData
 } from './types';
-
 // 📝 Documentación: Solo tipos canónicos y extendidos. Legacy removido.

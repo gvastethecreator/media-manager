@@ -16,5 +16,16 @@ export interface AudioBase {
 	updatedAt: Date;
 }
 
+/**
+ * 🎵 Audio con todas sus relaciones y metadatos adicionales
+ */
+export interface AudioComplete extends AudioBase {
+	metadata?: Record<string, unknown>;
+	tags?: Array<{ id: string; name: string }>;
+	_count?: {
+		tags: number;
+	};
+}
+
 export type AudioCreateInput = Omit<AudioBase, 'id' | 'createdAt' | 'updatedAt'>;
 export type AudioUpdateInput = Partial<Omit<AudioBase, 'id'>>;

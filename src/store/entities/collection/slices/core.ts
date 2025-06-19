@@ -3,14 +3,14 @@
  * @module store/entities/collection/slices/core
  */
 
+import type { CollectionComplete, CollectionCreateInput, CollectionUpdateInput } from '@/types/entities/collection';
 import type { StateCreator } from 'zustand';
-import type { CollectionExtended } from '@/types/entities/collection';
 import {
-	createCollection,
-	deleteCollection,
-	getCollection,
-	getCollections,
-	updateCollection,
+    createCollection,
+    deleteCollection,
+    getCollection,
+    getCollections,
+    updateCollection,
 } from '../../../../app/actions/collections/collection.actions';
 import type { CollectionState } from '../types';
 
@@ -19,14 +19,14 @@ import type { CollectionState } from '../types';
  */
 export interface CollectionCoreSlice {
 	// Operaciones de consulta
-	getCollectionById: (id: string) => CollectionExtended | undefined;
-	getCollections: () => CollectionExtended[];
-	getSelectedCollection: () => CollectionExtended | undefined;
+	getCollectionById: (id: string) => CollectionComplete | undefined;
+	getCollections: () => CollectionComplete[];
+	getSelectedCollection: () => CollectionComplete | undefined;
 
 	// Operaciones de mutación
-	setCollections: (collections: CollectionExtended[]) => void;
-	addCollection: (collection: CollectionExtended) => void;
-	updateCollection: (id: string, data: Partial<CollectionExtended>) => void;
+	setCollections: (collections: CollectionComplete[]) => void;
+	addCollection: (collection: CollectionComplete) => void;
+	updateCollection: (id: string, data: Partial<CollectionComplete>) => void;
 	removeCollection: (id: string) => void;
 	selectCollection: (id: string | null) => void;
 
@@ -35,10 +35,10 @@ export interface CollectionCoreSlice {
 	setError: (error: string | null) => void;
 
 	// Acciones asíncronas con Server Actions
-	fetchCollection: (id: string) => Promise<CollectionExtended | undefined>;
-	fetchCollections: () => Promise<CollectionExtended[]>;
-	createCollectionServer: (data: any) => Promise<CollectionExtended | undefined>;
-	updateCollectionServer: (id: string, data: Partial<CollectionExtended>) => Promise<CollectionExtended | undefined>;
+	fetchCollection: (id: string) => Promise<CollectionComplete | undefined>;
+	fetchCollections: () => Promise<CollectionComplete[]>;
+	createCollectionServer: (data: CollectionCreateInput) => Promise<CollectionComplete | undefined>;
+	updateCollectionServer: (id: string, data: Partial<CollectionUpdateInput>) => Promise<CollectionComplete | undefined>;
 	removeCollectionServer: (id: string) => Promise<boolean>;
 }
 
@@ -67,17 +67,17 @@ export const createCollectionCoreSlice: StateCreator<
 	},
 
 	// Operaciones de mutación
-	setCollections: (collections: CollectionExtended[]) => {
+	setCollections: (collections: CollectionComplete[]) => {
 		set({ collections });
 	},
 
-	addCollection: (collection: CollectionExtended) => {
+	addCollection: (collection: CollectionComplete) => {
 		set((state) => ({
 			collections: [...state.collections, collection],
 		}));
 	},
 
-	updateCollection: (id: string, data: Partial<CollectionExtended>) => {
+	updateCollection: (id: string, data: Partial<CollectionComplete>) => {
 		set((state) => ({
 			collections: state.collections.map((collection) =>
 				collection.id === id ? { ...collection, ...data } : collection
@@ -140,7 +140,7 @@ export const createCollectionCoreSlice: StateCreator<
 		}
 	},
 
-	createCollectionServer: async (data: any) => {
+	createCollectionServer: async (data: CollectionCreateInput) => {
 		set({ isLoading: true, error: null });
 		try {
 			const newCollection = await createCollection(data);
@@ -157,7 +157,7 @@ export const createCollectionCoreSlice: StateCreator<
 		}
 	},
 
-	updateCollectionServer: async (id: string, data: Partial<CollectionExtended>) => {
+	updateCollectionServer: async (id: string, data: Partial<CollectionUpdateInput>) => {
 		set({ isLoading: true, error: null });
 		try {
 			const updatedCollection = await updateCollection(id, data);

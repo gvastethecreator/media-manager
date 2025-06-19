@@ -4,10 +4,10 @@
  * @description Mapea los tipos de datos de la aplicación a los tipos de datos de Prisma para la entidad Video.
  */
 
+import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoCreateInput, VideoFilters, VideoSearchOptions, VideoUpdateInput } from '@/types/entities/video';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('VideoMapper');
 
@@ -68,8 +68,8 @@ function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWhereInput 
 
 	if (filters.search) {
 		where.OR = [
-			{ name: { contains: filters.search, mode: 'insensitive' } },
-			{ description: { contains: filters.search, mode: 'insensitive' } },
+			{ name: { contains: filters.search } },
+			{ description: { contains: filters.search } },
 		];
 	}
 	if (filters.isFavorite !== undefined) {

@@ -1,6 +1,9 @@
 'use client';
 
+import { Filter, Info, Loader2, PlusCircle, Save, TagBase as TagIcon, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { deleteTagAction, getTagsAction, type TagWithStats as ServerTagWithStats } from '@/app/actions/tags';
+import { deleteTag, searchTags } from '@/app/actions/tags/tag.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,12 +14,9 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
 import { TagCategory } from '@/types/entities/tag';
-import type { TagBase } from '@/types/entities/tag/types';
-import { Filter, Info, Loader2, PlusCircle, Save, TagBase as TagIcon, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { CreateTagForm } from './create-tag-form';
 import type { TagComplete } from '@/types/entities/tag/extended';
-import { searchTags, deleteTag } from '@/app/actions/tags/tag.actions';
+import type { TagBase } from '@/types/entities/tag/types';
+import { CreateTagForm } from './create-tag-form';
 
 // Definir tipo para el manejador de eventos del botón
 type ButtonClickHandler = React.MouseEventHandler<HTMLButtonElement>;

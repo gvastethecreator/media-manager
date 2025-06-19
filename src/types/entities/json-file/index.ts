@@ -3,12 +3,13 @@
  * @module types/entities/json-file
  */
 
-// Exportar los tipos principales
-export type {
-	JsonFileBase,
-	JsonFileCreateInput,
-	JsonFileUpdateInput,
-} from './types';
-
 // Exportar el esquema de validación
 export { jsonFileSchema } from './json-file.schema';
+// Exportar los tipos principales
+export type {
+    JsonFileBase,
+    JsonFileComplete,
+    JsonFileCreateInput,
+    JsonFileUpdateInput
+} from './types';
+

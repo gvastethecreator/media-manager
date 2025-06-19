@@ -17,7 +17,7 @@ import { TransformerError } from '@/utils/transformers/errors';
 import { DEFAULT_WILDCARD_COLOR, DEFAULT_WILDCARD_EMOJI } from './serializers';
 
 // Logger específico para este módulo
-const logger = serverLogger.child({ module: 'WildcardTransformer:Mappers' });
+const logger = serverLogger.withContext({ module: 'WildcardTransformer:Mappers' });
 
 /**
  * Mapea datos de creación de wildcard a formato Prisma
@@ -35,7 +35,7 @@ export function toCreateWildcardData(data: CreateWildcardData): Record<string, a
 			shortcut: data.shortcut || '',
 			category: data.category || 'general',
 			parentId: data.parentId || null,
-			favorite: data.isFavorite || false,
+			isFavorite: data.isFavorite || false,
 			featuredImage: data.featuredImage || null,
 			children: Array.isArray(data.children) ? JSON.stringify(data.children) : data.children || '[]',
 		};
@@ -68,7 +68,7 @@ export function toUpdateWildcardData(data: UpdateWildcardData): Record<string, a
 
 		// Manejar conversión de isFavorite a favorite
 		if (data.isFavorite !== undefined) {
-			result.favorite = data.isFavorite;
+			result.isFavorite = data.isFavorite;
 		}
 
 		// Serializar children si está presente
@@ -95,7 +95,7 @@ export function toBulkUpdateWildcardData(data: WildcardBulkUpdateData): Record<s
 		// Solo incluir campos que están presentes en los datos de entrada
 		if (data.parentId !== undefined) result.parentId = data.parentId;
 		if (data.category !== undefined) result.category = data.category;
-		if (data.isFavorite !== undefined) result.favorite = data.isFavorite;
+		if (data.isFavorite !== undefined) result.isFavorite = data.isFavorite;
 
 		return result;
 	} catch (error) {
@@ -117,7 +117,7 @@ export function toWildcardRelated(wildcard: WildcardBase): WildcardRelated {
 		color: wildcard.color || DEFAULT_WILDCARD_COLOR,
 		category: wildcard.category || 'general',
 		parentId: wildcard.parentId,
-		isFavorite: 'favorite' in wildcard ? (wildcard as any).favorite : wildcard.isFavorite || false,
+		isFavorite: 'favorite' in wildcard ? (wildcard as any).isFavorite : wildcard.isFavorite || false,
 	};
 }
 
@@ -163,8 +163,8 @@ export function toSearchOptions(options: WildcardSearchOptions = {}): Record<str
 		// Aplicar búsqueda por texto
 		if (searchQuery) {
 			where.OR = [
-				{ name: { contains: searchQuery, mode: 'insensitive' } },
-				{ description: { contains: searchQuery, mode: 'insensitive' } },
+				{ name: { contains: searchQuery } },
+				{ description: { contains: searchQuery } },
 			];
 		}
 
@@ -230,7 +230,7 @@ function applyFilters(where: Record<string, any>, filters: WildcardSearchFilters
 
 	// Filtrar por favoritos
 	if (filters.isFavorite !== undefined) {
-		where.favorite = filters.isFavorite;
+		where.isFavorite = filters.isFavorite;
 	}
 
 	// Filtrar por IDs específicos

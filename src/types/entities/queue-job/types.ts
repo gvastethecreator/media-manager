@@ -78,6 +78,72 @@ export const QueueJobSchema = z.object({
 	retryAt: z.date().nullable().optional(),
 });
 
+/**
+ * Input para creación (alias para compatibilidad)
+ */
+export type CreateQueueJobInput = QueueJobCreateInput;
+
+/**
+ * Input para actualización (alias para compatibilidad)
+ */
+export type UpdateQueueJobInput = QueueJobUpdateInput;
+
+/**
+ * Queue job extendido con relaciones
+ */
+export interface QueueJobExtended extends QueueJobBase {
+	// Propiedades adicionales para UI
+	duration?: number;
+	executionTime?: number;
+}
+
+/**
+ * Filtros para búsqueda de queue jobs
+ */
+export interface QueueJobFilters {
+	queue?: string;
+	status?: QueueJobStatus;
+	priority?: number;
+	createdAfter?: Date;
+	createdBefore?: Date;
+}
+
+/**
+ * Opciones de paginación para queue jobs
+ */
+export interface QueueJobPaginationOptions {
+	page?: number;
+	limit?: number;
+	sortBy?: 'createdAt' | 'priority' | 'status' | 'queue';
+	sortDirection?: 'asc' | 'desc';
+}
+
+/**
+ * Resultado paginado de queue jobs
+ */
+export interface PaginatedQueueJobs {
+	items: QueueJobBase[];
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+	};
+}
+
+/**
+ * Estadísticas de la cola
+ */
+export interface QueueStats {
+	total: number;
+	pending: number;
+	processing: number;
+	completed: number;
+	failed: number;
+	retrying: number;
+	cancelled: number;
+}
+
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
 // - No importar tipos de Prisma ni de archivos legacy.

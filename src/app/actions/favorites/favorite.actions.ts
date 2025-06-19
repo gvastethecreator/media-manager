@@ -1,124 +1,113 @@
 'use server';
 
+/**
+ * @file Server Actions para la entidad Favorite
+ * @module app/actions/favorites/favorite.actions
+ * @description Acciones para gestionar favoritos de diversas entidades.
+ */
+
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUser } from '@/lib/server/auth';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import type { FavoriteBase, FavoriteCreateInput } from '@/types/entities/favorite';
-import { FavoriteEntityType } from '@/types/entities/favorite';
+import { fromPrismaFavorites } from '@/transformers/favorite';
+import { type FavoriteComplete, FavoriteEntityType } from '@/types/entities/favorite';
 import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
 
 const logger = serverLogger.withContext('FavoriteActions');
 
-const createFavoriteSchema = z.object({
-	entityId: z.string().min(1),
-	entityType: z.nativeEnum(FavoriteEntityType),
-});
-
 /**
- * Agrega una entidad a favoritos para el usuario actual.
+ * Revalida las rutas de caché relacionadas con los favoritos.
+ * @param entityType - El tipo de entidad.
+ * @param entityId - El ID de la entidad.
  */
-export async function addFavorite(input: FavoriteCreateInput): Promise<FavoriteBase> {
-	const user = await getCurrentUser();
-	if (!user) throw new Error('Not authenticated');
-
-	const { entityId, entityType } = createFavoriteSchema.parse(input);
-
-	logger.info(`⭐ User ${user.id} adding favorite`, { entityId, entityType });
-
-	const existing = await prisma.favorite.findFirst({
-		where: { userId: user.id, entityId, entityType },
-	});
-
-	if (existing) {
-		logger.warn(`Favorite already exists for user ${user.id}`, { entityId, entityType });
-		return existing;
-	}
-
-	const favorite = await prisma.favorite.create({
-		data: {
-			userId: user.id,
-			entityId,
-			entityType,
-		},
-	});
-
-	statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE, { action: 'add', entityType });
+async function revalidateFavoritePaths(entityType: FavoriteEntityType, entityId: string) {
 	revalidatePath('/favorites');
-
-	return favorite;
-}
-
-/**
- * Elimina una entidad de favoritos para el usuario actual.
- */
-export async function removeFavorite(entityId: string, entityType: FavoriteEntityType): Promise<void> {
-	const user = await getCurrentUser();
-	if (!user) throw new Error('Not authenticated');
-
-	logger.info(`🗑️ User ${user.id} removing favorite`, { entityId, entityType });
-
-	await prisma.favorite.deleteMany({
-		where: {
-			userId: user.id,
-			entityId,
-			entityType,
-		},
-	});
-
-	statsEventEmitter.emit(STATS_EVENTS.FAVORITE_CHANGE, { action: 'remove', entityType });
-	revalidatePath('/favorites');
-}
-
-/**
- * Obtiene todos los favoritos para el usuario actual.
- */
-export async function getFavorites(): Promise<FavoriteBase[]> {
-	const user = await getCurrentUser();
-	if (!user) return [];
-
-	logger.info(`📥 Getting favorites for user ${user.id}`);
-
-	const favorites = await prisma.favorite.findMany({
-		where: { userId: user.id },
-		orderBy: { createdAt: 'desc' },
-	});
-
-	return favorites;
-}
-
-/**
- * Verifica si una entidad es favorita para el usuario actual.
- */
-export async function isFavorite(entityId: string, entityType: FavoriteEntityType): Promise<boolean> {
-	const user = await getCurrentUser();
-	if (!user) return false;
-
-	const count = await prisma.favorite.count({
-		where: {
-			userId: user.id,
-			entityId,
-			entityType,
-		},
-	});
-
-	return count > 0;
+	// Opcionalmente, revalidar la página de la entidad específica
+	// revalidatePath(`/${entityType.toLowerCase()}s/${entityId}`);
 }
 
 /**
  * Alterna el estado de favorito de una entidad.
+ * Devuelve `true` si la entidad ahora es favorita, `false` si no lo es.
  */
-export async function toggleFavorite(entityId: string, entityType: FavoriteEntityType): Promise<boolean> {
-	const user = await getCurrentUser();
-	if (!user) throw new Error('Not authenticated');
+export async function toggleFavorite(
+	entityType: FavoriteEntityType,
+	entityId: string,
+): Promise<boolean> {
+	logger.info(`❤️ Alternando favorito para ${entityType}:${entityId}`);
+	const existing = await prisma.favorite.findFirst({
+		where: { entityType, entityId },
+	});
 
-	const isCurrentlyFavorite = await isFavorite(entityId, entityType);
-
-	if (isCurrentlyFavorite) {
-		await removeFavorite(entityId, entityType);
+	if (existing) {
+		await prisma.favorite.delete({ where: { id: existing.id } });
+		logger.info(`💔 Favorito eliminado para ${entityType}:${entityId}`);
+		await revalidateFavoritePaths(entityType, entityId);
 		return false;
 	}
-	await addFavorite({ entityId, entityType, userId: user.id });
+
+	// Obtener el perfil activo (asumimos que hay un perfil por defecto)
+	const defaultProfile = await prisma.profile.findFirst({
+		where: { isActive: true },
+		select: { id: true }
+	});
+
+	if (!defaultProfile) {
+		logger.error('No se encontró un perfil activo para crear el favorito');
+		throw new Error('No se encontró un perfil activo para crear el favorito');
+	}
+
+	const favorite = await prisma.favorite.create({
+		data: {
+			entityType,
+			entityId,
+			profile: { connect: { id: defaultProfile.id } }
+		},
+	});
+	logger.info(`💖 Favorito añadido para ${entityType}:${entityId}`, favorite);
+	await revalidateFavoritePaths(entityType, entityId);
 	return true;
 }
+
+/**
+ * Elimina un favorito específico.
+ */
+export async function deleteFavorite(entityType: FavoriteEntityType, entityId: string): Promise<void> {
+	logger.warn(`🗑️ Eliminando favorito para ${entityType}:${entityId}`);
+	await prisma.favorite.deleteMany({
+		where: { entityType, entityId },
+	});
+	await revalidateFavoritePaths(entityType, entityId);
+}
+
+/**
+ * Obtiene todos los favoritos, opcionalmente filtrados por tipo de entidad.
+ */
+export async function getFavorites(entityType?: FavoriteEntityType): Promise<FavoriteComplete[]> {
+	logger.info('❤️ Obteniendo todos los favoritos', { entityType });
+	const favorites = await prisma.favorite.findMany({
+		where: entityType ? { entityType } : {},
+	});
+	return fromPrismaFavorites(favorites as any);
+}
+
+/**
+ * Verifica si una entidad es favorita.
+ */
+export async function isFavorite(entityType: FavoriteEntityType, entityId: string): Promise<boolean> {
+	const count = await prisma.favorite.count({
+		where: { entityType, entityId },
+	});
+	return count > 0;
+}
+
+/**
+ * Cuenta el número de favoritos, opcionalmente por tipo de entidad.
+ */
+export async function countFavorites(entityType?: FavoriteEntityType): Promise<number> {
+	logger.info('❤️ Contando favoritos', { entityType });
+	const count = await prisma.favorite.count({
+		where: entityType ? { entityType } : {},
+	});
+	return count;
+}
+

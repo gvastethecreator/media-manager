@@ -1,5 +1,7 @@
 'use client';
 
+import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { createGroup, deleteGroup, getGroups, updateGroup } from '@/app/actions/groups/group.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,8 +13,6 @@ import { Toggle } from '@/components/ui/toggle';
 import { toastService } from '@/services/toast.service';
 import type { CreateGroupInput, GroupWithStats } from '@/types/entities/group/types';
 import { GroupSortCriteria } from '@/types/entities/group/types';
-import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
 
@@ -129,13 +129,14 @@ export function GroupsSettings() {
 					(group.description && group.description.toLowerCase().includes(query));
 
 				const matchesCategory =
-					state.selectedCategories.length === 0 || (group.category && state.selectedCategories.includes(group.category));
+					state.selectedCategories.length === 0 ||
+					(group.category && state.selectedCategories.includes(group.category));
 
 				const matchesFavorites = !state.onlyFavorites || group.isFavorite;
 
 				return matchesQuery && matchesCategory && matchesFavorites;
 			}),
-		[state.groups, state.searchQuery, state.selectedCategories, state.onlyFavorites],
+		[state.groups, state.searchQuery, state.selectedCategories, state.onlyFavorites]
 	);
 
 	const sortedGroups = useMemo(
@@ -152,7 +153,7 @@ export function GroupsSettings() {
 						return 0;
 				}
 			}),
-		[filteredGroups, state.sortBy],
+		[filteredGroups, state.sortBy]
 	);
 
 	const stats = useMemo(() => {
@@ -162,7 +163,7 @@ export function GroupsSettings() {
 		}, 0);
 
 		const emptyGroups = state.groups.filter(
-			(group) => !group._count || Object.values(group._count).every((count) => count === 0),
+			(group) => !group._count || Object.values(group._count).every((count) => count === 0)
 		).length;
 
 		return {
@@ -245,10 +246,7 @@ export function GroupsSettings() {
 							</div>
 						</div>
 						<div className="flex gap-2">
-							<Select
-								value={state.sortBy}
-								onValueChange={(value: GroupSortCriteria) => setFilter('sortBy', value)}
-							>
+							<Select value={state.sortBy} onValueChange={(value: GroupSortCriteria) => setFilter('sortBy', value)}>
 								<SelectTrigger className="h-8">
 									<SelectValue placeholder="Ordenar por..." />
 								</SelectTrigger>
@@ -286,8 +284,7 @@ export function GroupsSettings() {
 											<div className="flex flex-col items-start">
 												<span className="font-medium">{group.name}</span>
 												<span className="text-xs opacity-50">
-													{group._count ? Object.values(group._count).reduce((a, b) => a + (b ?? 0), 0) : 0}{' '}
-													elementos
+													{group._count ? Object.values(group._count).reduce((a, b) => a + (b ?? 0), 0) : 0} elementos
 												</span>
 											</div>
 										</div>
@@ -329,16 +326,17 @@ export function GroupsSettings() {
 					<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col items-center justify-center">
 						<div className="text-center">
 							<FolderIcon className="mx-auto h-12 w-12 text-gray-400" />
-							<h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-								Selecciona un grupo
-							</h3>
+							<h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Selecciona un grupo</h3>
 							<p className="mt-1 text-sm text-gray-500">O crea uno nuevo para empezar a organizarte</p>
 						</div>
 					</Card>
 				)}
 			</div>
 
-			<Dialog open={state.isCreateDialogOpen} onOpenChange={(isOpen) => dispatch({ type: 'SET_CREATE_DIALOG', payload: isOpen })}>
+			<Dialog
+				open={state.isCreateDialogOpen}
+				onOpenChange={(isOpen) => dispatch({ type: 'SET_CREATE_DIALOG', payload: isOpen })}
+			>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Crear Nuevo Grupo</DialogTitle>

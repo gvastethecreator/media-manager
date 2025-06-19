@@ -1,9 +1,12 @@
-import { getCollectionImages, getCollections } from '@/app/actions/collections';
-import { getFolderImages, getFolders } from '@/app/actions/folders';
 import { getFavoriteImages, getImages } from '@/app/actions/images/image-crud.actions';
-import { getTagImages, getTags } from '@/app/actions/tags';
+import { getTags } from '@/app/actions/tags/tag.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { Collection } from '@/types/entities/collection';
+import { getCollections } from '@/services/collection/collection.service';
+import { getFolders } from '@/services/folder/folder.service';
+import type { CollectionComplete } from '@/types/entities/collection';
+import type { FolderComplete } from '@/types/entities/folder';
+import type { ImageComplete } from '@/types/entities/image';
+import type { TagComplete } from '@/types/entities/tag';
 import type { FileItem, RelatedTag } from '@/types/files';
 import { create } from 'zustand';
 
@@ -38,20 +41,15 @@ interface TagMapping {
 }
 
 // Interfaces para datos recibidos del servidor
-interface ServerCollection extends Collection {
+interface ServerCollection extends CollectionComplete {
 	_count?: { images: number };
 }
 
-interface ServerFolder {
-	id: string;
-	name: string;
+interface ServerFolder extends FolderComplete {
 	_count?: { images: number };
 }
 
-interface ServerTag {
-	id: string;
-	name: string;
-	color: string;
+interface ServerTag extends TagComplete {
 	_count?: { images: number };
 }
 
@@ -71,6 +69,10 @@ export interface FilesState {
 	isProcessingThumbnails: boolean;
 	initialize: () => Promise<void>;
 	loadAllImages: () => Promise<void>;
+	loadFavorites: () => Promise<void>;
+	selectItem: (item: FileItem) => void;
+	deselectItem: (id: string) => void;
+	handleSelectFolder: (id: string) => Promise<void>;
 	handleSelectCollection: (id: string) => Promise<void>;
 	handleSelectTag: (id: string) => Promise<void>;
 	loadMoreItems: () => void;
@@ -143,10 +145,10 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 	loadFavorites: async () => {
 		try {
 			set({ isLoading: true });
-			const items = await getFavoriteImages();
+			const items: ImageComplete[] = await getFavoriteImages();
 			set({
-				currentItems: items,
-				displayedItems: items.slice(0, ITEMS_PER_BATCH),
+				currentItems: items.map(imageToFileItem),
+				displayedItems: items.slice(0, ITEMS_PER_BATCH).map(imageToFileItem),
 				isProcessingThumbnails: true,
 			});
 		} catch (error) {
@@ -173,8 +175,10 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 	handleSelectFolder: async (id: string) => {
 		try {
 			set({ isLoading: true, currentFolderId: id });
-			const response = await getFolderImages(id);
-			const items = response.items || [];
+			// Importar dinámicamente la función de folder images
+			const { getLatestFolderImages } = await import('@/app/actions/images/folder-images.action');
+			const response = await getLatestFolderImages(id, 1000); // Obtener hasta 1000 imágenes
+			const items = (response.data || []);
 			set({
 				currentItems: items,
 				displayedItems: items.slice(0, ITEMS_PER_BATCH),
@@ -187,13 +191,14 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 		}
 	},
 
-	handleSelectCollection: async (id) => {
+	handleSelectCollection: async (id: string) => {
 		try {
 			set({ isLoading: true, currentCollectionId: id });
-			const items = await getCollectionImages(id);
+			const { getCollectionImages } = await import('@/app/actions/collections/collection.actions');
+			const items: ImageComplete[] = await getCollectionImages(id);
 			set({
-				currentItems: items,
-				displayedItems: items.slice(0, ITEMS_PER_BATCH),
+				currentItems: items.map(imageToFileItem),
+				displayedItems: items.slice(0, ITEMS_PER_BATCH).map(imageToFileItem),
 				isProcessingThumbnails: true,
 			});
 		} catch (error) {
@@ -203,9 +208,10 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 		}
 	},
 
-	handleSelectTag: async (id) => {
+	handleSelectTag: async (id: string) => {
 		try {
 			set({ isLoading: true, currentTagId: id });
+			const { getTagImages } = await import('@/app/actions/tags/tag.actions');
 			const rawItems = await getTagImages(id);
 
 			const items = rawItems.map((item) => {
@@ -243,3 +249,18 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 		});
 	},
 }));
+
+// Transformer simple para convertir Image a FileItem (debería estar en un archivo transformer)
+function imageToFileItem(image: ImageComplete): FileItem {
+	return {
+		id: image.id,
+		name: image.name || 'Untitled',
+		type: 'image',
+		path: image.path,
+		createdAt: image.createdAt,
+		updatedAt: image.updatedAt,
+		tags: image.tags?.map(t => ({ id: t.id, name: t.name, color: t.color || '#94a3b8' })) || [],
+		isFavorite: image.isFavorite,
+		// Añadir más propiedades si es necesario
+	};
+}

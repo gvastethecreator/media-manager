@@ -89,7 +89,7 @@ export const favoriteFiltersSchema = z.object({
 export const toggleFavoriteResultSchema = z.object({
 	success: z.boolean(),
 	added: z.boolean(),
-	favorite: favoriteSchema.optional(),
+	isFavorite: favoriteSchema.optional(),
 	error: z.instanceof(Error).optional(),
 });
 
