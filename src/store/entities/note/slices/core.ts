@@ -1,155 +1,155 @@
-import { StateCreator } from 'zustand';
 import {
-	createNote as createNoteAction,
-	deleteNote as deleteNoteAction,
-	getNotes as getNotesAction,
-	updateNote as updateNoteAction,
+    createNote as createNoteAction,
+    deleteNote as deleteNoteAction,
+    getNotes as getNotesAction,
+    updateNote as updateNoteAction,
 } from '@/app/actions/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { fromPrismaNote } from '@/transformers/note/serializers';
 import { transformNoteToWithStats } from '@/transformers/note/transformer';
 import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const coreLogger = clientLogger.withContext('NoteStore:Core');
 
 export interface CoreSlice {
-	// Estado
-	notes: NoteWithStats[];
-	selectedNote: NoteWithStats | null;
+	notes: Record<string, NoteWithStats>;
+	selectedNoteId: string | null;
 	isLoading: boolean;
 	error: string | null;
 
-	// Acciones
-	loadNotes: () => Promise<NoteWithStats[]>;
-	setNotes: (notes: NoteWithStats[]) => void;
-	createNote: (note: NoteCreateInput) => Promise<NoteWithStats | null>;
+	loadNotes: () => Promise<void>;
+	createNote: (note: NoteCreateInput) => Promise<string | null>;
 	updateNote: (id: string, note: NoteUpdateInput) => Promise<void>;
 	deleteNote: (id: string) => Promise<void>;
-	selectNote: (note: NoteWithStats | null) => void;
+	selectNote: (noteId: string | null) => void;
 	reset: () => void;
 }
 
-export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set, _get) => ({
-	// Estado inicial
-	notes: [],
-	selectedNote: null,
+export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set) => ({
+	notes: {},
+	selectedNoteId: null,
 	isLoading: false,
 	error: null,
 
-	// Acciones
 	loadNotes: async () => {
+		set({ isLoading: true, error: null });
 		try {
-			set({ isLoading: true, error: null });
 			coreLogger.info('🔄 Cargando notas');
+			const response = await getNotesAction();
 
-			const result = await getNotesAction();
-			// 🔄 Transformar cada NoteComplete a NoteWithStats usando el transformer
-			const notes = result.map((noteWithBasicStats) => {
-				// Convertir a Note completo primero
-				const noteComplete = fromPrismaNote(noteWithBasicStats);
-				// Luego transformar a NoteWithStats
-				return transformNoteToWithStats(noteComplete);
-			});
+			if (!response.success || !response.data) {
+				throw new Error(response.error || 'No se pudieron cargar las notas.');
+			}
+			const notesWithStats = response.data.map(transformNoteToWithStats);
+			const notesRecord = notesWithStats.reduce(
+				(acc, note) => {
+					acc[note.id] = note;
+					return acc;
+				},
+				{} as Record<string, NoteWithStats>,
+			);
 
-			set({ notes, isLoading: false });
-			coreLogger.info('✅ Notas cargadas:', notes.length);
-			return notes;
+			set({ notes: notesRecord, isLoading: false });
+			coreLogger.info('✅ Notas cargadas:', Object.keys(notesRecord).length);
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			coreLogger.error('❌ Error al cargar notas:', error);
+			coreLogger.error('❌ Error al cargar notas:', errorMessage);
 			set({ error: errorMessage, isLoading: false });
-			toastService.system.error('Error al cargar notas');
-			return [];
+			toastService.error('Error al cargar notas', { description: errorMessage });
 		}
 	},
 
-	setNotes: (notes) => {
-		coreLogger.info('📥 Estableciendo notas manualmente:', { count: notes.length });
-		set({ notes, isLoading: false });
-	},
-
 	createNote: async (note) => {
+		set({ isLoading: true, error: null });
 		try {
-			set({ isLoading: true, error: null });
 			coreLogger.info('✨ Creando nota:', note);
+			const response = await createNoteAction(note);
 
-			const noteComplete = await createNoteAction(note);
-			// 🔄 Transformar NoteComplete a NoteWithStats
-			const newNote = transformNoteToWithStats(noteComplete);
+			if (!response.success || !response.data) {
+				throw new Error(response.error || 'No se pudo crear la nota.');
+			}
+			const newNote = transformNoteToWithStats(response.data);
 
 			set((state) => ({
-				notes: [...state.notes, newNote],
+				notes: { ...state.notes, [newNote.id]: newNote },
 				isLoading: false,
 			}));
 
 			coreLogger.info('✅ Nota creada correctamente:', newNote.id);
-			toastService.system.success('Nota creada correctamente');
-			return newNote;
+			toastService.success('Nota creada correctamente');
+
+			return newNote.id;
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			coreLogger.error('❌ Error al crear nota:', error);
+			coreLogger.error('❌ Error al crear nota:', errorMessage);
 			set({ error: errorMessage, isLoading: false });
-			toastService.system.error('Error al crear nota');
+			toastService.error('Error al crear nota', { description: errorMessage });
 			return null;
 		}
 	},
 
 	updateNote: async (id, noteData) => {
+		set({ isLoading: true, error: null });
 		try {
-			set({ isLoading: true, error: null });
 			coreLogger.info('🔄 Actualizando nota:', { id, noteData });
+			const response = await updateNoteAction(id, noteData);
 
-			const noteComplete = await updateNoteAction(id, noteData);
-			// 🔄 Transformar NoteComplete a NoteWithStats
-			const updatedNote = transformNoteToWithStats(noteComplete);
+			if (!response.success || !response.data) {
+				throw new Error(response.error || 'No se pudo actualizar la nota.');
+			}
+			const updatedNote = transformNoteToWithStats(response.data);
 
 			set((state) => ({
-				notes: state.notes.map((n) => (n.id === id ? updatedNote : n)),
+				notes: { ...state.notes, [id]: updatedNote },
 				isLoading: false,
 			}));
 
 			coreLogger.info('✅ Nota actualizada correctamente:', id);
-			toastService.system.success('Nota actualizada correctamente');
+			toastService.success('Nota actualizada correctamente');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			coreLogger.error('❌ Error al actualizar nota:', error);
+			coreLogger.error('❌ Error al actualizar nota:', errorMessage);
 			set({ error: errorMessage, isLoading: false });
-			toastService.system.error('Error al actualizar nota');
+			toastService.error('Error al actualizar nota', { description: errorMessage });
 		}
 	},
 
 	deleteNote: async (id) => {
+		set({ isLoading: true, error: null });
 		try {
-			set({ isLoading: true, error: null });
 			coreLogger.info('🗑️ Eliminando nota:', id);
+			const response = await deleteNoteAction(id);
 
-			await deleteNoteAction(id);
+			if (!response.success) {
+				throw new Error(response.error || 'No se pudo eliminar la nota.');
+			}
 
-			set((state) => ({
-				notes: state.notes.filter((note) => note.id !== id),
-				isLoading: false,
-			}));
+			set((state) => {
+				const newNotes = { ...state.notes };
+				delete newNotes[id];
+				return { notes: newNotes, isLoading: false };
+			});
 
 			coreLogger.info('✅ Nota eliminada correctamente:', id);
-			toastService.system.success('Nota eliminada correctamente');
+			toastService.success('Nota eliminada correctamente');
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			coreLogger.error('❌ Error al eliminar nota:', error);
+			coreLogger.error('❌ Error al eliminar nota:', errorMessage);
 			set({ error: errorMessage, isLoading: false });
-			toastService.system.error('Error al eliminar nota');
+			toastService.error('Error al eliminar nota', { description: errorMessage });
 		}
 	},
 
-	selectNote: (note) => {
-		set({ selectedNote: note });
+	selectNote: (noteId) => {
+		set({ selectedNoteId: noteId });
 	},
 
 	reset: () => {
 		set({
-			notes: [],
-			selectedNote: null,
+			notes: {},
+			selectedNoteId: null,
 			isLoading: false,
 			error: null,
 		});

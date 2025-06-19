@@ -36,6 +36,21 @@ const DEFAULT_SUPPORTED_EXTENSIONS = [
 	'.m4v',
 ];
 
+// 🚀 Extensiones para clasificación rápida
+const IMAGE_EXTENSIONS = new Set([
+	'.jpg',
+	'.jpeg',
+	'.png',
+	'.gif',
+	'.webp',
+	'.avif',
+	'.bmp',
+	'.tiff',
+	'.tif',
+	'.svg',
+]);
+const VIDEO_EXTENSIONS = new Set(['.mp4', '.webm', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.m4v']);
+
 /**
  * Interfaz para los resultados del escaneo de carpetas - OPTIMIZADA ⚡
  */
@@ -48,8 +63,7 @@ export interface FolderScanResult {
 	totalSize: number; // Tamaño total en bytes
 	scannedAt: Date; // Fecha y hora del escaneo
 	error?: string; // Error si ocurrió alguno
-	// 🚀 NUEVAS PROPIEDADES OPTIMIZADAS
-	stats?: ScanStats; // Estadísticas clasificadas de archivos
+	// 🚀 PROPIEDADES OPTIMIZADAS
 	images: FileInfo[]; // Archivos de imagen (acceso directo)
 	videos: FileInfo[]; // Archivos de video (acceso directo)
 	others: FileInfo[]; // Otros archivos (acceso directo)
@@ -321,15 +335,10 @@ export function extractScanStats(files: FileInfo[]): ScanStats {
 		others: [],
 	};
 
-	// Extensiones de imágenes y videos para clasificación rápida
-	const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif', '.bmp', '.tiff', '.tif', '.svg']);
-	const videoExtensions = new Set(['.mp4', '.webm', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.m4v']);
-
 	for (const file of files) {
-		const ext = file.extension.toLowerCase();
-		if (imageExtensions.has(ext)) {
+		if (IMAGE_EXTENSIONS.has(file.extension.toLowerCase())) {
 			stats.images.push(file);
-		} else if (videoExtensions.has(ext)) {
+		} else if (VIDEO_EXTENSIONS.has(file.extension.toLowerCase())) {
 			stats.videos.push(file);
 		} else {
 			stats.others.push(file);
@@ -397,23 +406,9 @@ async function processFileEntry(
 			result.totalSize += stats.size;
 
 			// 🚀 OPTIMIZACIÓN: Clasificar archivos durante el escaneo
-			const imageExtensions = new Set([
-				'.jpg',
-				'.jpeg',
-				'.png',
-				'.gif',
-				'.webp',
-				'.avif',
-				'.bmp',
-				'.tiff',
-				'.tif',
-				'.svg',
-			]);
-			const videoExtensions = new Set(['.mp4', '.webm', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.m4v']);
-
-			if (imageExtensions.has(extension)) {
+			if (IMAGE_EXTENSIONS.has(extension)) {
 				result.images.push(fileInfo);
-			} else if (videoExtensions.has(extension)) {
+			} else if (VIDEO_EXTENSIONS.has(extension)) {
 				result.videos.push(fileInfo);
 			} else {
 				result.others.push(fileInfo);
