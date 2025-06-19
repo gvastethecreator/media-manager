@@ -2,7 +2,7 @@
 
 import type React from 'react';
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import type { BaseContentProps } from './types';
 
 type ContentViewContextProps = BaseContentProps;

@@ -37,12 +37,8 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set)
 		set({ isLoading: true, error: null });
 		try {
 			coreLogger.info('🔄 Cargando notas');
-			const response = await getNotesAction();
-
-			if (!response.success || !response.data) {
-				throw new Error(response.error || 'No se pudieron cargar las notas.');
-			}
-			const notesWithStats = response.data.map(transformNoteToWithStats);
+			const notes = await getNotesAction();
+			const notesWithStats = notes.map(transformNoteToWithStats);
 			const notesRecord = notesWithStats.reduce(
 				(acc, note) => {
 					acc[note.id] = note;
@@ -65,12 +61,8 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set)
 		set({ isLoading: true, error: null });
 		try {
 			coreLogger.info('✨ Creando nota:', note);
-			const response = await createNoteAction(note);
-
-			if (!response.success || !response.data) {
-				throw new Error(response.error || 'No se pudo crear la nota.');
-			}
-			const newNote = transformNoteToWithStats(response.data);
+			const noteData = await createNoteAction(note);
+			const newNote = transformNoteToWithStats(noteData);
 
 			set((state) => ({
 				notes: { ...state.notes, [newNote.id]: newNote },
@@ -94,12 +86,8 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set)
 		set({ isLoading: true, error: null });
 		try {
 			coreLogger.info('🔄 Actualizando nota:', { id, noteData });
-			const response = await updateNoteAction(id, noteData);
-
-			if (!response.success || !response.data) {
-				throw new Error(response.error || 'No se pudo actualizar la nota.');
-			}
-			const updatedNote = transformNoteToWithStats(response.data);
+			const updatedNoteData = await updateNoteAction(id, noteData);
+			const updatedNote = transformNoteToWithStats(updatedNoteData);
 
 			set((state) => ({
 				notes: { ...state.notes, [id]: updatedNote },
@@ -120,11 +108,7 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set)
 		set({ isLoading: true, error: null });
 		try {
 			coreLogger.info('🗑️ Eliminando nota:', id);
-			const response = await deleteNoteAction(id);
-
-			if (!response.success) {
-				throw new Error(response.error || 'No se pudo eliminar la nota.');
-			}
+			await deleteNoteAction(id);
 
 			set((state) => {
 				const newNotes = { ...state.notes };

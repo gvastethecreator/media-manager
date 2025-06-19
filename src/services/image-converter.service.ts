@@ -1,5 +1,5 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 const converterLogger = serverLogger.withContext('ImageConverter');
 

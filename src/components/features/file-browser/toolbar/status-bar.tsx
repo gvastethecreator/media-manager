@@ -4,7 +4,7 @@ import { memo, useMemo } from 'react';
 import { formatFileSize } from '@/lib/utils/format';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { FileItem } from '@/types/file-item';
+import { FileItem } from '@/types/files';
 
 interface StatusBarProps {
 	items: FileItem[];

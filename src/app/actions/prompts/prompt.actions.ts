@@ -20,7 +20,7 @@ import type {
 	PromptUpdateInput,
 	PromptWithStats,
 } from '@/types/entities/prompt';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 const promptLogger = serverLogger.withContext('PromptActions');
 

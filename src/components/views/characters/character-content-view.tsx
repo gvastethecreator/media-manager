@@ -8,7 +8,7 @@ import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCharacterStore } from '@/store/entities/character';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 const viewLogger = clientLogger.withContext('CharacterContentView');
 

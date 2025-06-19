@@ -24,7 +24,7 @@ import type {
 	CreateCollectionData,
 	UpdateCollectionData,
 } from '@/types/entities/collection';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CollectionService');

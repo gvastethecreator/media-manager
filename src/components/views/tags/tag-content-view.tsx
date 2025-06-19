@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 // import { getTagImages } from '@/app/actions/tags'; // Función no encontrada, comentada
 import { useTagStore } from '@/store/entities/tag';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 /**
  * 🏷️ Vista de contenido de etiquetas

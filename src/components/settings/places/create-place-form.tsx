@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import type { Place, PlaceComplete, PlaceCreateInput, PlaceUpdateInput } from '@/types/entities/place';
+import type { Place, PlaceBase, PlaceComplete, PlaceCreateInput, PlaceUpdateInput } from '@/types/entities/place';
 
 // Opciones para los selects que antes eran enums
 const placeTypes = ['CITY', 'TOWN', 'VILLAGE', 'REGION', 'PLANET', 'OTHER'] as const;
@@ -48,12 +48,12 @@ type PlaceFormValues = z.infer<typeof placeFormSchema>;
 /**
  * Props para el formulario de creación/edición de lugares
  * @param place Lugar a editar (PlaceComplete), si existe
- * @param onSuccess Callback al crear/editar exitosamente (Place)
+ * @param onSuccess Callback al crear/editar exitosamente (PlaceBase)
  * @param onCancel Callback para cancelar
  */
 interface CreatePlaceFormProps {
 	place?: PlaceComplete;
-	onSuccess?: (place: Place) => void;
+	onSuccess?: (place: PlaceBase) => void;
 	onCancel?: () => void;
 }
 
@@ -106,7 +106,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 
 	const onSubmit = async (values: PlaceFormValues) => {
 		try {
-			let result: Place;
+			let result: PlaceBase;
 
 			if (isEditing && place) {
 				const updateData: PlaceUpdateInput = {
@@ -222,7 +222,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 									<FormMessage />
 								</FormItem>
 							)}
-						/>
+						)}
 					</div>
 
 					<Separator />
@@ -280,7 +280,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 									<FormMessage />
 								</FormItem>
 							)}
-						/>
+						)}
 					</div>
 
 					<div className="grid grid-cols-2 gap-4">
@@ -298,7 +298,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 									<FormMessage />
 								</FormItem>
 							)}
-						/>
+						)}
 
 						{/* Clima */}
 						<FormField
@@ -325,7 +325,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 									<FormMessage />
 								</FormItem>
 							)}
-						/>
+						)}
 					</div>
 
 					<div className="grid grid-cols-2 gap-4">
@@ -343,7 +343,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 									<FormMessage />
 								</FormItem>
 							)}
-						/>
+						)}
 
 						{/* Gobierno */}
 						<FormField
@@ -370,7 +370,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 									<FormMessage />
 								</FormItem>
 							)}
-						/>
+						)}
 					</div>
 
 					<Separator />
@@ -394,7 +394,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 								<FormMessage />
 							</FormItem>
 						)}
-					/>
+					)}
 
 					{/* Historia */}
 					<FormField
@@ -415,7 +415,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 								<FormMessage />
 							</FormItem>
 						)}
-					/>
+					)}
 
 					{/* Atajo (Shortcut) */}
 					<FormField
@@ -433,7 +433,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 								<FormMessage />
 							</FormItem>
 						)}
-					/>
+					)}
 
 					{/* Favorito */}
 					<FormField
@@ -452,7 +452,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 								</FormControl>
 							</FormItem>
 						)}
-					/>
+					)}
 				</div>
 				<div className="flex justify-end gap-2">
 					{onCancel && (

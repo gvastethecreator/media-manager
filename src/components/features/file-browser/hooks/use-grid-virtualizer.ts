@@ -2,7 +2,7 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { type RefObject, useCallback, useMemo, useRef } from 'react';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import type { ViewMode } from '@/types/settings';
 import { type BaseGridConfig, GRID_CONFIG, getMetadata } from '../config/grid-config';
 

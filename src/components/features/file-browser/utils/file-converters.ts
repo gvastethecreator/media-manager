@@ -1,5 +1,5 @@
 import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 /**
  * Convierte un FileItem a un ImageItem compatible con el FileViewer

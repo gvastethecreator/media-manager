@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import {
 	BookImage,
 	Calendar,

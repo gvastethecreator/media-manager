@@ -9,7 +9,7 @@ import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useWorldItemStore } from '@/store/entities/world-item';
 import { useSelectionStore } from '@/store/selection.store';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 
 const viewLogger = clientLogger.withContext('WorldItemContentView');
 

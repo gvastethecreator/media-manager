@@ -8,7 +8,7 @@ import { FileBrowser } from '@/components/features/file-browser';
 import BlurFade from '@/components/ui/blur-fade';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageViewer } from '@/store/image-viewer.store';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import { useContentView } from './content-view-provider';
 
 const baseLogger = clientLogger.withContext('BaseContentView');

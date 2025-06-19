@@ -13,7 +13,7 @@ import { toast } from '@/services/toast.service';
 import { deleteFile as deleteFileAction } from '@/app/actions/files/file.actions';
 
 // Importar el tipo local en lugar del tipo global
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import type { ContextMenuAction } from './types';
 
 const actionLogger = clientLogger.withContext('ContextActionHandler');

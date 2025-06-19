@@ -1,7 +1,7 @@
 import type { ErrorResponse, FolderResponse, IndexCallbacks, ProcessStatus } from '@/app/actions/folders';
 import { createFolder as createFolderAction, deleteFolder as deleteFolderAction } from '@/app/actions/folders';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { emit } from '@/lib/server/events.server';
+import { type EventType, emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats-service-export';
 import type { FolderStats } from '@/types/entities/folder';
 
@@ -202,9 +202,43 @@ class FolderServiceClass {
 
 			// Mapeo de eventos locales a eventos del sistema central
 			const serverEventType = event as EventType;
-			const allowedServerEvents = Object.values(FOLDER_EVENTS);
+			const allowedServerEvents = Object.values(FOLDER_EVENTS) as string[];
 
-			if (allowedServerEvents.includes(serverEventType as FOLDER_EVENTS)) {
+			// Verificar si el evento es compatible con EventType
+			const eventTypeValues: EventType[] = [
+				'create',
+				'update',
+				'delete',
+				'addImage',
+				'removeImage',
+				'collections:modified',
+				'tags:modified',
+				'albums:modified',
+				'prompts:modified',
+				'notes:modified',
+				'characters:modified',
+				'places:modified',
+				'objects:modified',
+				'world-items:modified',
+				'favorites:modified',
+				'images:modified',
+				'files:modified',
+				'folders:modified',
+				'folder:progress',
+				'folder:error',
+				'folder:complete',
+				'folder:stats',
+				'folder:reindexAll:start',
+				'folder:reindexAll:progress',
+				'folder:reindexAll:complete',
+				'uploaded-image:created',
+				'uploaded-image:updated',
+				'uploaded-image:deleted',
+				'uploaded-images:changed',
+			];
+
+			// Solo emitir si el evento es un EventType válido
+			if (eventTypeValues.includes(serverEventType)) {
 				try {
 					await emit({
 						type: serverEventType,

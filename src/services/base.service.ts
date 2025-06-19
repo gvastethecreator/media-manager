@@ -1,7 +1,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type { Transformer } from '@/types/common/transformer';
-import type { FileItem } from '@/types/file-item';
+import type { FileItem } from '@/types/files';
 import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 import { imageConverterService, type ServerImage } from './image-converter.service';
 
