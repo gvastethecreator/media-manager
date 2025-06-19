@@ -133,6 +133,56 @@ export const VideoSchema = z.object({
 	updatedAt: z.date(),
 });
 
+/**
+ * Filtros para búsqueda de videos
+ */
+export interface VideoFilters {
+	search?: string;
+	folders?: string[];
+	tags?: string[];
+	dateRange?: {
+		start?: Date;
+		end?: Date;
+	};
+	isFavorite?: boolean;
+	minDuration?: number;
+	maxDuration?: number;
+	minWidth?: number;
+	maxWidth?: number;
+	minHeight?: number;
+	maxHeight?: number;
+	minSize?: number;
+	maxSize?: number;
+	hasMetadata?: boolean;
+	hasThumbnail?: boolean;
+}
+
+/**
+ * Datos para crear un video
+ */
+export interface CreateVideoData {
+	name: string;
+	path: string;
+	folderId: string;
+	hash: string;
+	size: number;
+	duration: number;
+	width?: number;
+	height?: number;
+	description?: string;
+	metadata?: string;
+}
+
+/**
+ * Datos para actualizar un video
+ */
+export interface UpdateVideoData {
+	name?: string;
+	description?: string;
+	isFavorite?: boolean;
+	isPublic?: boolean;
+}
+
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
 // - No importar tipos de Prisma ni de archivos legacy.

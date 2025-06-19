@@ -6,7 +6,6 @@
  * Última migración: 2025-06-18
  */
 
-import type { Property as PrismaProperty } from '@prisma/client';
 import { z } from 'zod';
 
 /**
@@ -34,12 +33,21 @@ export enum PropertyViewMode {
 }
 
 /**
- * Tipo base canónico para Property
- * Heredando directamente del tipo de Prisma
+ * Tipo base canónico para Property - CORREGIDO para coincidir exactamente con Prisma
  */
-export type PropertyBase = PrismaProperty & {
-	isFavorite: boolean; // Remapeo de 'favorite' a 'isFavorite'
-};
+export interface PropertyBase {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 /**
  * Input para creación

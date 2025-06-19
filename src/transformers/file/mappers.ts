@@ -3,19 +3,19 @@
  * @module transformers/file/mappers
  */
 
-import type { Stats } from 'fs';
-import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	DirectoryInfo,
-	EnhancedDirectory,
-	EnhancedImageFile,
-	FileBase,
-	FileFilterOptions,
-	FileInfo,
-	ImageFileInfo,
+    DirectoryInfo,
+    EnhancedDirectory,
+    EnhancedImageFile,
+    FileBase,
+    FileFilterOptions,
+    FileInfo,
+    ImageFileInfo,
 } from '@/types/entities/file';
 import { FILE_EXTENSION_GROUPS, FileType } from '@/types/entities/file/enums';
+import type { Stats } from 'fs';
+import path from 'path';
 
 const mappersLogger = serverLogger.withContext('File:Mappers');
 
@@ -95,7 +95,7 @@ export function mapStatsToFileInfo(filePath: string, stats: Stats): FileInfo {
 	};
 }
 
-export function toFileListItem(fileInfo: FileInfo): FileListItem {
+export function toFileListItem(fileInfo: FileInfo): any {
 	return {
 		id: fileInfo.id,
 		path: fileInfo.path,
@@ -180,17 +180,14 @@ export function toEnhancedDirectory(fileInfo: FileInfo, childItems: FileBase[] =
 		...(fileInfo as DirectoryInfo),
 		stats,
 		contentSummary,
-		childCount: childItems.length,
 		level: fileInfo.path.split('/').length,
 	};
 }
 
-export function toEnhancedImageFile(fileInfo: FileInfo, imageMetadata: ImageMetadata = {}): EnhancedImageFile | null {
+export function toEnhancedImageFile(fileInfo: FileInfo, imageMetadata: Record<string, unknown> = {}): EnhancedImageFile | null {
 	if (fileInfo.type !== FileType.IMAGE) return null;
 	return {
 		...(fileInfo as ImageFileInfo),
-		width: imageMetadata.width,
-		height: imageMetadata.height,
 		metadata: imageMetadata,
 	};
 }

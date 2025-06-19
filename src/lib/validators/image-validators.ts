@@ -23,10 +23,11 @@ export const BaseImageSchema = z.object({
 
 /**
  * Esquema para validar un objeto de estadísticas de imagen
+ * NOTA: Campo downloads eliminado - no existe en el esquema Prisma ImageStats
  */
 export const ImageStatsSchema = z.object({
 	views: z.number().int().nonnegative().default(0),
-	downloads: z.number().int().nonnegative().default(0),
+	// downloads: z.number().int().nonnegative().default(0), // ❌ ELIMINADO - No existe en esquema Prisma
 	favorites: z.number().int().nonnegative().default(0),
 	lastAccessed: z.date().nullable().optional(),
 });
@@ -64,7 +65,7 @@ export const CompleteImageSchema = BaseImageSchema.extend({
 	aspectRatio: z.number().positive(),
 	thumbnails: z.record(z.string(), ImageThumbnailSchema).default({}),
 	metadata: z.record(z.string(), z.any()).default({}),
-	stats: ImageStatsSchema.default({ views: 0, downloads: 0, favorites: 0, lastAccessed: null }),
+	stats: ImageStatsSchema.default({ views: 0, favorites: 0, lastAccessed: null }),
 	visualConfig: ImageVisualConfigSchema.default({ isHidden: false, isPinned: false, dominantColor: '#333333' }),
 	isPublic: z.boolean().default(false),
 });

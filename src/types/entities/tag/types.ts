@@ -37,8 +37,7 @@ export interface TagBase {
 	description: string | null;
 	shortcut: string | null;
 	category: string;
-	sortBy: string;
-	filters: string;
+	// ELIMINADO: sortBy y filters no existen en el modelo Tag de Prisma
 	featuredImage: string | null;
 	isFavorite: boolean;
 	createdAt: Date;

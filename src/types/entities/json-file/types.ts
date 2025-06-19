@@ -27,3 +27,6 @@ export interface JsonFileComplete extends JsonFileBase {
 
 export type JsonFileCreateInput = Omit<JsonFileBase, 'id' | 'createdAt' | 'updatedAt'>;
 export type JsonFileUpdateInput = Partial<Omit<JsonFileBase, 'id'>>;
+
+// Alias para retrocompatibilidad
+export type JsonFile = JsonFileComplete;

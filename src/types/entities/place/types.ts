@@ -4,35 +4,42 @@
  * @description Define las estructuras de datos, inputs de creación/actualización y filtros para la entidad Place.
  */
 
-import type {
-    Album,
-    Character,
-    Collection,
-    Concept,
-    Group,
-    Image,
-    Note,
-    Prisma,
-    Place as PrismaPlace,
-    Prompt,
-    Property,
-    Tag,
-    Video,
-    Wildcard,
-    WorldItem,
-} from '@prisma/client';
+/**
+ * 🗺️ Tipo base canónico para Place - CORREGIDO para coincidir exactamente con Prisma
+ */
+export interface PlaceBase {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	sortBy: string;
+	filters: string;
+	// Atributos del lugar
+	region: string;
+	type: string;
+	climate: string;
+	population: number;
+	government: string;
+	// Características detalladas (JSON serializado)
+	dangers: string;
+	resources: string;
+	lore: string;
+	history: string;
+	stats: string;
+	// Propiedades de visualización
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 /**
- * 🗺️ Tipo base para un lugar.
- * Contiene todos los campos escalares y datos JSON del modelo Prisma.
+ * 🎯 Alias para compatibilidad
  */
-export type Place = PrismaPlace;
-
-/**
- * 🎯 Tipo base para un lugar sin relaciones.
- * Representa solo los datos escalares del modelo Prisma.
- */
-export type PlaceBase = Place;
+export type Place = PlaceBase;
 
 /**
  * 🛠️ Relaciones que puede tener un Lugar.
@@ -61,9 +68,9 @@ export interface PlaceRelationInput {
 export interface PlaceCreateInput
 	extends Omit<Place, 'id' | 'createdAt' | 'updatedAt' | 'dangers' | 'resources' | 'stats'>,
 		PlaceRelationInput {
-	dangers?: Prisma.InputJsonValue;
-	resources?: Prisma.InputJsonValue;
-	stats?: Prisma.InputJsonValue;
+	dangers?: string;
+	resources?: string;
+	stats?: string;
 }
 
 /**
@@ -96,28 +103,28 @@ export interface PlaceFilters {
 export interface PlaceSearchOptions {
 	skip?: number;
 	take?: number;
-	orderBy?: Prisma.PlaceOrderByWithRelationInput;
+	orderBy?: Record<string, 'asc' | 'desc'>;
 	filters?: PlaceFilters;
-	include?: Prisma.PlaceInclude;
+	include?: Record<string, boolean>;
 }
 
 /**
  * ✨ Tipo de un lugar con todas sus relaciones anidadas.
  */
 export type PlaceWithRelations = Place & {
-	images?: Image[];
-	videos?: Video[];
-	albums?: Album[];
-	collections?: Collection[];
-	tags?: Tag[];
-	characters?: Character[];
-	worldItems?: WorldItem[];
-	concepts?: Concept[];
-	prompts?: Prompt[];
-	notes?: Note[];
-	wildcards?: Wildcard[];
-	properties?: Property[];
-	groups?: Group[];
+	images?: { id: string }[];
+	videos?: { id: string }[];
+	albums?: { id: string }[];
+	collections?: { id: string }[];
+	tags?: { id: string }[];
+	characters?: { id: string }[];
+	worldItems?: { id: string }[];
+	concepts?: { id: string }[];
+	prompts?: { id: string }[];
+	notes?: { id: string }[];
+	wildcards?: { id: string }[];
+	properties?: { id: string }[];
+	groups?: { id: string }[];
 };
 
 /**

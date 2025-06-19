@@ -6,10 +6,11 @@
  */
 
 export type {
+    NoteCreateInput as CreateNoteData,
     // Alias para retrocompatibilidad
     NoteComplete as Note, NoteBase,
     NoteComplete, NoteCounts,
-    NoteCreateInput,
+    NoteCreateInput, // Alias para retrocompatibilidad
     NoteFilters,
     NoteRelations,
     NoteSearchOptions,
@@ -17,8 +18,8 @@ export type {
     NoteTransformerOptions,
     NoteUI,
     NoteUpdateInput,
-    NoteValidated,
-    RelatedNote
+    NoteValidated, // Alias para retrocompatibilidad
+    NoteComplete as NoteWithStats, RelatedNote
 } from './types';
 
 export {

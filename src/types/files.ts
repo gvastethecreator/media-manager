@@ -1,3 +1,18 @@
+/**
+ * Tipo de vista para archivos
+ */
+export type ViewType = 'grid' | 'list' | 'masonry';
+
+/**
+ * Etiqueta relacionada para archivos
+ */
+export interface RelatedTag {
+	id: string;
+	name: string;
+	color: string;
+	count?: number;
+}
+
 export interface FileItem {
 	id: string;
 	name: string;
@@ -82,7 +97,7 @@ export interface FileItem {
 	updatedAt: Date;
 	stats?: {
 		views: number;
-		downloads: number;
+		// downloads: number; // ❌ ELIMINADO - No existe en esquema Prisma ImageStats
 		lastViewed: Date;
 	};
 }

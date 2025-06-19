@@ -5,10 +5,10 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	type DirectoryReadResult,
-	type FileBase,
-	type FileListItem,
-	type FileOperationResult,
+    type DirectoryReadResult,
+    type FileBase,
+    type FileListItem,
+    type FileOperationResult,
 } from '@/types/entities/file';
 import { toFileListItem } from './mappers';
 
@@ -48,8 +48,8 @@ export function serializeDirectoryContents(path: string, items: FileBase[]): Dir
 			items,
 			totalItems: items.length,
 			hasMore: false, // Este valor se actualizaría si hay paginación
-			directories: directoryCount,
-			files: fileCount,
+			directories: items.filter((item) => item.isDirectory), // Array de DirectoryInfo
+			files: items.filter((item) => !item.isDirectory), // Array de FileInfo
 		};
 
 		return result;
@@ -61,8 +61,8 @@ export function serializeDirectoryContents(path: string, items: FileBase[]): Dir
 			items: [],
 			totalItems: 0,
 			hasMore: false,
-			directories: 0,
-			files: 0,
+			directories: [], // Array vacío de DirectoryInfo
+			files: [], // Array vacío de FileInfo
 		};
 	}
 }
@@ -138,15 +138,15 @@ export function deserializeImageMetadata(metadataStr?: string): unknown {
 export function pathsToTreeStructure(paths: string[]): any[] {
 	try {
 		const tree: any[] = [];
-		const _pathMap: Record<string, any> = {};
+		// const _pathMap: Record<string, any> = {}; // ❌ ELIMINADO - No usado
 
 		// Construir el árbol
 		for (const fullPath of paths) {
 			// Dividir la ruta en segmentos
 			const segments = fullPath.split('/').filter(Boolean);
 
-			// Comenzar desde la raíz
-			let currentNode = tree;
+			// Comenzar desde la raíz del árbol (que tiene children implícito)
+			let currentLevel = tree;
 
 			// Construir la ruta segmento por segmento
 			for (let i = 0; i < segments.length; i++) {
@@ -154,13 +154,13 @@ export function pathsToTreeStructure(paths: string[]): any[] {
 				const isFile = i === segments.length - 1 && !fullPath.endsWith('/');
 				const currentPath = segments.slice(0, i + 1).join('/');
 
-				// Buscar si el nodo ya existe
-				let node = currentNode.children.find((child) => child.name === segment);
+				// Buscar si el nodo ya existe en el nivel actual
+				let node = currentLevel.find((child) => child.name === segment);
 
 				if (!node) {
 					// Crear nuevo nodo
 					node = {
-						id: generateFileId(currentPath),
+						id: `file-${currentPath}`, // Generar ID simple
 						name: segment,
 						path: currentPath,
 						isDirectory: !isFile,
@@ -170,19 +170,15 @@ export function pathsToTreeStructure(paths: string[]): any[] {
 						createdAt: new Date(),
 					};
 
-					// Añadir al nodo actual
-					currentNode.children.push(node);
+					// Añadir al nivel actual
+					currentLevel.push(node);
 				}
 
 				// Si es el último segmento y es un archivo, actualizar propiedades
-				if (isFile && i === segments.length - 1) {
-					if (fileInfoMap[fullPath]) {
-						node = { ...node, ...fileInfoMap[fullPath] };
-					}
-				}
+				// (fileInfoMap eliminado - no está definido)
 
-				// Actualizar el nodo actual para la siguiente iteración
-				currentNode = node;
+				// Actualizar el nivel actual para la siguiente iteración
+				currentLevel = node.children;
 			}
 		}
 
