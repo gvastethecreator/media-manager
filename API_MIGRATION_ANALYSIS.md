@@ -3,8 +3,9 @@
 ## 📋 Estado Actual de Endpoints API
 
 ### 🎯 Criterios para Mantener API Routes
+
 - **✅ Mantener**: Streaming de archivos, thumbnails, downloads
-- **✅ Mantener**: Webhooks externos o integraciones públicas  
+- **✅ Mantener**: Webhooks externos o integraciones públicas
 - **✅ Mantener**: Control específico de headers/cache
 - **❌ Migrar**: CRUD operations → Server Actions
 - **❌ Migrar**: Lógica de negocio → Server Actions
@@ -12,6 +13,7 @@
 ### 📊 Análisis por Categoría
 
 #### 🖼️ **IMÁGENES** - `/api/images/`
+
 | Endpoint | Estado | Acción | Razón |
 |----------|--------|--------|-------|
 | `images/[id]/thumbnail` | ✅ **MANTENER** | N/A | Streaming de archivos binarios + headers cache |
@@ -19,18 +21,21 @@
 | `images/[id]/download` | ✅ **MANTENER** | N/A | Streaming de archivos + headers download |
 
 #### 📂 **CARPETAS** - `/api/folders/`
+
 | Endpoint | Estado | Acción | Razón |
 |----------|--------|--------|-------|
 | `folders/reindex/[id]` | ❌ **MIGRAR** | → `reindexFolder()` | Operación de negocio |
 | `folders/[id]/stats` | ❌ **MIGRAR** | → `getFolderStats()` | Ya existe Server Action |
 
 #### ⚙️ **SISTEMA** - `/api/system/`
+
 | Endpoint | Estado | Acción | Razón |
 |----------|--------|--------|-------|
 | `system/settings` | ❌ **MIGRAR** | → `getSystemSettings()`, `updateSystemSettings()` | Ya existen Server Actions |
 | `system/settings/reset` | ❌ **MIGRAR** | → `resetSystemSettings()` | Operación de negocio |
 
 #### 👤 **PERFILES** - `/api/profiles/`
+
 | Endpoint | Estado | Acción | Razón |
 |----------|--------|--------|-------|
 | `profiles` | ❌ **MIGRAR** | → `getProfiles()`, `createProfile()` | CRUD operations |
@@ -39,12 +44,14 @@
 | `profiles/[id]/settings` | ❌ **MIGRAR** | → `getProfileSettings()`, `updateProfileSettings()` | Ya existen Server Actions |
 
 #### 🎨 **PRESETS** - `/api/presets/`
+
 | Endpoint | Estado | Acción | Razón |
 |----------|--------|--------|-------|
 | `presets/[id]` | ❌ **MIGRAR** | → `getPreset()`, `updatePreset()`, `deletePreset()` | CRUD operations |
 | `presets/entity/[type]` | ❌ **MIGRAR** | → `getEntityPresets()` | Query operation |
 
 #### 🖼️ **THUMBNAILS** - `/api/thumbnails/`
+
 | Endpoint | Estado | Acción | Razón |
 |----------|--------|--------|-------|
 | `thumbnails/cleanup` | ❌ **MIGRAR** | → `cleanupThumbnails()` | Ya existe Server Action |
@@ -53,22 +60,26 @@
 | `thumbnails/events` | 🤔 **EVALUAR** | Webhook? | ¿Es para eventos externos? |
 
 #### 📥 **DOWNLOAD** - `/api/download/`
+
 | Endpoint | Estado | Acción | Razón |
 |----------|--------|--------|-------|
 | `download` | ✅ **MANTENER** | N/A | Streaming de archivos + headers download |
 
 #### 🗂️ **CACHE** - `/api/cache/`
+
 | Endpoint | Estado | Acción | Razón |
 |----------|--------|--------|-------|
 | `cache/clear` | ❌ **MIGRAR** | → `clearCache()` | Operación de sistema |
 
 #### 🐛 **DEBUG** - `/api/debug/`
+
 | Endpoint | Estado | Acción | Razón |
 |----------|--------|--------|-------|
 | `debug/app-stats` | 🤔 **EVALUAR** | Monitoring? | ¿Es para monitoreo externo? |
 | `debug/system-stats` | 🤔 **EVALUAR** | Monitoring? | ¿Es para monitoreo externo? |
 
 #### 🏗️ **OTROS**
+
 | Endpoint | Estado | Acción | Razón |
 |----------|--------|--------|-------|
 | `entities/[entityType]/[entityId]/visual-config` | ✅ **ELIMINADO** | → Funcionalidad obsoleta | Eliminado completamente del proyecto |
@@ -79,6 +90,7 @@
 ## 🎯 Plan de Acción
 
 ### Fase 1: Eliminar APIs Redundantes (Prioridad Alta)
+
 ```bash
 # Endpoints que ya tienen Server Actions equivalentes
 - /api/system/settings → getSystemSettings(), updateSystemSettings()
@@ -89,6 +101,7 @@
 ```
 
 ### Fase 2: Migrar CRUD Operations (Prioridad Media)
+
 ```bash
 # Endpoints que son operaciones CRUD puras
 - /api/presets/* → presets.actions.ts
@@ -97,6 +110,7 @@
 ```
 
 ### Fase 3: Evaluar Casos Especiales (Prioridad Baja)
+
 ```bash
 # Endpoints que necesitan evaluación individual
 - /api/debug/* (¿monitoreo externo?)
@@ -105,6 +119,7 @@
 ```
 
 ### ✅ Mantener Definitivamente
+
 ```bash
 # Endpoints que DEBEN mantenerse como API Routes
 - /api/images/[id]/thumbnail (streaming binarios)
@@ -115,7 +130,7 @@
 ## 📝 Próximos Pasos
 
 1. **Verificar Server Actions existentes** para cada endpoint marcado para migrar
-2. **Actualizar llamadas en componentes** de API Routes → Server Actions  
+2. **Actualizar llamadas en componentes** de API Routes → Server Actions
 3. **Eliminar API Routes redundantes** progresivamente
 4. **Actualizar documentación** y examples
 
@@ -131,6 +146,7 @@ grep -r "/api/thumbnails/cleanup" src/
 ## 🗑️ Funcionalidades Eliminadas Completamente
 
 ### Visual Config (ELIMINADO)
+
 - **Descripción**: Sistema de configuración visual obsoleto para entidades
 - **Motivo**: Funcionalidad no utilizada y reemplazada por stores locales
 - **Eliminado**:
