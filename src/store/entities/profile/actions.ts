@@ -3,9 +3,9 @@
  * @module store/entities/profile/actions
  */
 
-import type { StateCreator } from 'zustand';
 import { getActiveProfile, getProfiles } from '@/app/actions/profiles';
 import type { ProfileExtended, ProfileFilters, ProfilePaginationOptions } from '@/types/entities/profile';
+import type { StateCreator } from 'zustand';
 import type { ProfileStoreState } from './types';
 
 /**
@@ -74,7 +74,7 @@ export const createProfileActions: StateCreator<ProfileStoreState & ProfileActio
 		}
 	},
 	setActiveProfile: (profile) => set({ activeProfile: profile }),
-	setIsLoadingActive: (_isLoading) => set({ isLoadingActive }),
+	setIsLoadingActive: (isLoading) => set({ isLoadingActive: isLoading }),
 	setActiveProfileError: (error) => set({ activeProfileError: error }),
 
 	// Acciones para la lista de perfiles
@@ -82,8 +82,8 @@ export const createProfileActions: StateCreator<ProfileStoreState & ProfileActio
 		set({ isLoadingProfiles: true, profilesError: null });
 		try {
 			const { filters, pagination } = get();
-			const { profiles, total } = await getProfiles({ filters, pagination });
-			set({ profiles, totalProfiles: total, isLoadingProfiles: false });
+			const profiles = await getProfiles();
+			set({ profiles, totalProfiles: profiles.length, isLoadingProfiles: false });
 		} catch (error) {
 			set({
 				profilesError: error instanceof Error ? error.message : 'Error al obtener los perfiles',

@@ -3,7 +3,7 @@
  * @module transformers/world-item/mappers
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
+import { createLogger } from '@/lib/logger';
 import { WorldItemCategory, WorldItemType } from '@/types/entities/world-item/enums';
 import {
     WORLD_ITEM_SORT_PROPERTY_MAP,
@@ -24,12 +24,12 @@ import {
 } from './serializers';
 
 // Logger específico para este módulo
-const logger = serverLogger.withContext('WorldItemTransformer:Mappers');
+const logger = createLogger('WorldItemTransformer:Mappers');
 
 /**
- * Interfaces para los tipos de Prisma que necesitamos
+ * Tipos simplificados para mapeo - compatibles con cualquier implementación
  */
-export interface PrismaWorldItemCreateInput {
+interface SimpleWorldItemCreateInput {
 	id?: string;
 	name: string;
 	description?: string | null;
@@ -56,7 +56,7 @@ export interface PrismaWorldItemCreateInput {
 	};
 }
 
-export interface PrismaWorldItemUpdateInput {
+interface SimpleWorldItemUpdateInput {
 	name?: string;
 	description?: string | null;
 	shortcut?: string | null;
@@ -82,23 +82,12 @@ export interface PrismaWorldItemUpdateInput {
 	};
 }
 
-export interface PrismaWorldItemFindManyArgs {
-	where?: PrismaWorldItemWhereInput;
-	orderBy?: PrismaWorldItemOrderByWithRelationInput;
-	skip?: number;
-	take?: number;
-	include?: {
-		images?: boolean;
-		_count?: boolean;
-	};
-}
-
-export interface PrismaWorldItemWhereInput {
-	AND?: PrismaWorldItemWhereInput[];
-	OR?: PrismaWorldItemWhereInput[];
-	NOT?: PrismaWorldItemWhereInput[];
-	name?: { contains: string };
-	description?: { contains: string };
+interface SimpleWorldItemWhereInput {
+	AND?: SimpleWorldItemWhereInput[];
+	OR?: SimpleWorldItemWhereInput[];
+	NOT?: SimpleWorldItemWhereInput[];
+	name?: { contains: string; mode: 'insensitive' };
+	description?: { contains: string; mode: 'insensitive' };
 	type?: { in: string[] };
 	category?: { in: string[] };
 	rarity?: { in: string[] };
@@ -106,7 +95,7 @@ export interface PrismaWorldItemWhereInput {
 	images?: { some: Record<string, any> };
 }
 
-export interface PrismaWorldItemOrderByWithRelationInput {
+interface SimpleWorldItemOrderByInput {
 	name?: 'asc' | 'desc';
 	type?: 'asc' | 'desc';
 	rarity?: 'asc' | 'desc';
@@ -271,10 +260,9 @@ export function generateEmoji(type: string, name?: string): string {
  * @param data - Datos de creación
  * @returns Objeto formateado para Prisma
  */
-export function toCreateData(data: WorldItemCreateInput): PrismaWorldItemCreateInput {
+export function toCreateData(data: WorldItemCreateInput): any {
 	try {
-		const serializedData: PrismaWorldItemCreateInput = {
-			id: data.id,
+		const serializedData: any = {
 			name: data.name,
 			description: data.description ?? null,
 			shortcut: data.shortcut ?? null,
@@ -338,9 +326,9 @@ export function toCreateData(data: WorldItemCreateInput): PrismaWorldItemCreateI
  * @param data - Datos de actualización
  * @returns Objeto formateado para Prisma
  */
-export function toUpdateData(data: WorldItemUpdateInput): PrismaWorldItemUpdateInput {
+export function toUpdateData(data: WorldItemUpdateInput): any {
 	try {
-		const updateData: PrismaWorldItemUpdateInput = {};
+		const updateData: any = {};
 
 		// Copiar campos simples si están presentes
 		if (data.name !== undefined) updateData.name = data.name;
@@ -405,12 +393,12 @@ export function toUpdateData(data: WorldItemUpdateInput): PrismaWorldItemUpdateI
  * @param options - Opciones de búsqueda
  * @returns Argumentos de búsqueda para Prisma
  */
-export function toSearchOptions(options: WorldItemSearchOptions = {}): PrismaWorldItemFindManyArgs {
+export function toSearchOptions(options: WorldItemSearchOptions = {}): SimpleWorldItemWhereInput {
 	try {
 		const { filters, sortBy, page = 1, pageSize = 20, includeImages = false, includeStats = false } = options;
 
 		// Crear objeto de opciones
-		const findOptions: PrismaWorldItemFindManyArgs = {};
+		const findOptions: SimpleWorldItemWhereInput = {};
 
 		// Aplicar paginación
 		findOptions.skip = (page - 1) * pageSize;
@@ -451,39 +439,39 @@ export function toSearchOptions(options: WorldItemSearchOptions = {}): PrismaWor
  * @param filters - Filtros de WorldItem
  * @returns Filtro para Prisma
  */
-export function createFilter(filters: WorldItemFilters = {}): PrismaWorldItemWhereInput {
+export function createFilter(filters: WorldItemFilters = {}): any {
 	try {
-		const where: PrismaWorldItemWhereInput = {};
-		const conditions: PrismaWorldItemWhereInput[] = [];
+		const where: any = {};
+		const conditions: any[] = [];
 
 		// Búsqueda por texto
-		if (filters.query) {
+		if (filters.searchTerm) {
 			conditions.push({
 				OR: [
-					{ name: { contains: filters.query } },
-					{ description: { contains: filters.query } },
+					{ name: { contains: filters.searchTerm, mode: 'insensitive' } },
+					{ description: { contains: filters.searchTerm, mode: 'insensitive' } },
 				],
 			});
 		}
 
 		// Filtrar por tipos
-		if (filters.types && filters.types.length > 0) {
+		if (filters.type) {
 			conditions.push({
-				type: { in: filters.types },
+				type: { equals: filters.type },
 			});
 		}
 
 		// Filtrar por categorías
-		if (filters.categories && filters.categories.length > 0) {
+		if (filters.category) {
 			conditions.push({
-				category: { in: filters.categories },
+				category: { equals: filters.category },
 			});
 		}
 
 		// Filtrar por rareza
-		if (filters.rarities && filters.rarities.length > 0) {
+		if (filters.rarity) {
 			conditions.push({
-				rarity: { in: filters.rarities },
+				rarity: { equals: filters.rarity },
 			});
 		}
 
@@ -518,7 +506,7 @@ export function createFilter(filters: WorldItemFilters = {}): PrismaWorldItemWhe
  * @param sortBy - Criterio de ordenación
  * @returns Objeto de ordenación para Prisma
  */
-export function createOrderBy(sortBy?: WorldItemSortCriteria): PrismaWorldItemOrderByWithRelationInput {
+export function createOrderBy(sortBy?: WorldItemSortCriteria): any {
 	try {
 		if (!sortBy) {
 			return { updatedAt: 'desc' }; // Ordenación por defecto
@@ -529,7 +517,7 @@ export function createOrderBy(sortBy?: WorldItemSortCriteria): PrismaWorldItemOr
 		const order = direction === 'asc' ? 'asc' : 'desc';
 
 		// Crear objeto de ordenación
-		return { [property]: order } as PrismaWorldItemOrderByWithRelationInput;
+		return { [property]: order };
 	} catch (error) {
 		logger.error('Error creando ordenación de WorldItem', error);
 		return { updatedAt: 'desc' }; // Ordenación por defecto

@@ -69,7 +69,7 @@ describe('Profile Store Actions', () => {
 
 		mockSet = jest.fn();
 		mockGet = jest.fn(() => mockState);
-		actions = createProfileActions(mockSet, mockGet);
+		actions = createProfileActions(mockSet, mockGet, {} as any);
 
 		// Limpiar los mocks
 		jest.clearAllMocks();
@@ -107,16 +107,13 @@ describe('Profile Store Actions', () => {
 
 	describe('Profiles List Actions', () => {
 		it('should fetch profiles successfully', async () => {
-			const response = { profiles: [mockProfile], total: 1 };
-			(getProfiles as jest.Mock).mockResolvedValue(response);
+			const profiles = [mockProfile];
+			(getProfiles as jest.Mock).mockResolvedValue(profiles);
 
 			await actions.fetchProfiles();
 
 			expect(mockSet).toHaveBeenCalledWith({ isLoadingProfiles: true, profilesError: null });
-			expect(getProfiles).toHaveBeenCalledWith({
-				filters: mockState.filters,
-				pagination: mockState.pagination,
-			});
+			expect(getProfiles).toHaveBeenCalled();
 			expect(mockSet).toHaveBeenCalledWith({
 				profiles: [mockProfile],
 				totalProfiles: 1,

@@ -28,3 +28,11 @@ export async function getTasksByType() {
 export async function getTaskHistory() {
 	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
+
+export async function getTasks() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
+}
+
+export async function getPendingTasks() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
+}

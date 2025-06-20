@@ -20,3 +20,7 @@ export async function getTaskMetrics() {
 export async function getTaskPerformance() {
 	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
+
+export async function getTaskCounts() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
+}

@@ -1,9 +1,6 @@
 'use client';
 
-import { Filter, Info, Loader2, PlusCircle, Save, TagBase as TagIcon, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { type TagWithStats as ServerTagWithStats } from '@/app/actions/tags';
-import { deleteTag, searchTags } from '@/app/actions/tags/tag.actions';
+import { searchTags, deleteTag as tagActionsDeleteTag } from '@/app/actions/tags/tag.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,24 +10,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
+import type { TagBase } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag';
 import type { TagComplete } from '@/types/entities/tag/extended';
+import { Filter, Info, Loader2, PlusCircle, Save, TagBase as TagIcon, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { CreateTagForm } from './create-tag-form';
 
 // Definir tipo para el manejador de eventos del botón
 type ButtonClickHandler = React.MouseEventHandler<HTMLButtonElement>;
 
-// Extender la interfaz TagWithStats para incluir los campos que necesitamos
-interface TagWithStats
-	extends Omit<ServerTagWithStats, 'emoji' | 'lastUpdated' | 'createdAt' | 'updatedAt' | 'description' | 'shortcut'> {
-	emoji: string | null;
-	category?: string | null;
-	isFavorite?: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	lastUpdated: Date;
-	description: string | null;
-	shortcut: string | null;
+// Definir el tipo localmente ya que no está exportado
+interface TagWithStats extends TagBase {
+	totalAssociations: number;
 }
 
 export function TagsSettings() {
@@ -105,7 +97,7 @@ export function TagsSettings() {
 	const handleDeleteTag = useCallback(async (id: string) => {
 		if (window.confirm('¿Estás seguro de que quieres eliminar esta etiqueta?')) {
 			try {
-				await deleteTag(id);
+				await tagActionsDeleteTag(id);
 				setTags((prev) => prev.filter((tag) => tag.id !== id));
 				setSelectedTag(null);
 				setIsEditing(false);

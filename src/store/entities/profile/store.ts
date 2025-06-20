@@ -68,9 +68,9 @@ const initialState: ProfileStoreState = {
 export const useProfileStore = create<ProfileStoreState & ProfileActions>()(
 	devtools(
 		persist(
-			(set, get) => ({
+			(set, get, store) => ({
 				...initialState,
-				...createProfileActions(set, get),
+				...createProfileActions(set, get, store),
 			}),
 			{
 				name: 'profile-store',

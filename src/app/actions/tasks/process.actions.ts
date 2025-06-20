@@ -32,3 +32,11 @@ export async function retryTask() {
 export async function executeTask() {
 	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
+
+export async function processNextTask() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
+}
+
+export async function processTaskById() {
+	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
+}

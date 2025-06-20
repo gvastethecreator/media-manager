@@ -5,41 +5,46 @@
  * @module app/actions/profiles
  */
 
+import type {
+    ProfileBase,
+    ProfileCreateInput,
+    ProfileUpdateInput
+} from '@/types/entities/profile/types';
 import {
-	activateProfile as activateProfileAction,
-	createProfile as createProfileAction,
-	deleteProfile as deleteProfileAction,
-	getActiveProfile as getActiveProfileAction,
-	getProfile as getProfileAction,
-	getProfiles as getProfilesAction,
-	updateProfile as updateProfileAction,
+    activateProfile as activateProfileAction,
+    createProfile as createProfileAction,
+    deleteProfile as deleteProfileAction,
+    getActiveProfile as getActiveProfileAction,
+    getProfile as getProfileAction,
+    getProfiles as getProfilesAction,
+    updateProfile as updateProfileAction,
 } from './profile.actions';
 
-// Re-exportar funciones como funciones async
-export async function activateProfile(id: string) {
+// Re-exportar funciones como funciones async con tipos apropiados
+export async function activateProfile(id: string): Promise<void> {
 	return activateProfileAction(id);
 }
 
-export async function createProfile(data: any) {
+export async function createProfile(data: ProfileCreateInput): Promise<ProfileBase> {
 	return createProfileAction(data);
 }
 
-export async function deleteProfile(id: string) {
+export async function deleteProfile(id: string): Promise<void> {
 	return deleteProfileAction(id);
 }
 
-export async function getActiveProfile() {
+export async function getActiveProfile(): Promise<ProfileBase | null> {
 	return getActiveProfileAction();
 }
 
-export async function getProfile(id: string) {
+export async function getProfile(id: string): Promise<ProfileBase> {
 	return getProfileAction(id);
 }
 
-export async function getProfiles(filters?: any, pagination?: any) {
-	return getProfilesAction(filters, pagination);
+export async function getProfiles(): Promise<ProfileBase[]> {
+	return getProfilesAction();
 }
 
-export async function updateProfile(id: string, data: any) {
+export async function updateProfile(id: string, data: ProfileUpdateInput): Promise<ProfileBase> {
 	return updateProfileAction(id, data);
 }

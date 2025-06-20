@@ -4,17 +4,40 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-	ConceptComplete,
-	ConceptCreateInput,
-	ConceptSearchOptions,
-	ConceptSearchResult,
-	ConceptUpdateInput
-} from '@/types/entities/concept/types';
-import { ConceptFilters } from '@/types/entities/concept/extended';
+import type { ConceptBase } from '@/types/entities/concept';
+import type { ConceptFilters } from '@/types/entities/concept/extended';
 import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('ConceptMapper');
+
+/**
+ * Interfaces para búsqueda de conceptos
+ */
+export interface ConceptSearchOptions {
+	filters?: ConceptFilters;
+	sortBy?: string;
+	page?: number;
+	pageSize?: number;
+	includeRelations?: boolean;
+}
+
+export interface ConceptSearchResult {
+	items: ConceptBase[];
+	total: number;
+	totalPages: number;
+}
+
+// Enum para criterios de ordenación
+export enum ConceptSortCriteria {
+	NAME_ASC = 'NAME_ASC',
+	NAME_DESC = 'NAME_DESC',
+	CREATED_AT_ASC = 'CREATED_AT_ASC',
+	CREATED_AT_DESC = 'CREATED_AT_DESC',
+	UPDATED_AT_ASC = 'UPDATED_AT_ASC',
+	UPDATED_AT_DESC = 'UPDATED_AT_DESC',
+	CATEGORY_ASC = 'CATEGORY_ASC',
+	CATEGORY_DESC = 'CATEGORY_DESC',
+}
 
 /**
  * Interfaces para los tipos de Prisma que necesitamos
@@ -69,17 +92,6 @@ export interface PrismaConceptOrderByInput {
 	category?: 'asc' | 'desc';
 }
 
-// Definir el tipo de criterio de ordenación
-export type ConceptSortCriteria =
-	| 'NAME_ASC'
-	| 'NAME_DESC'
-	| 'CREATED_AT_ASC'
-	| 'CREATED_AT_DESC'
-	| 'UPDATED_AT_ASC'
-	| 'UPDATED_AT_DESC'
-	| 'CATEGORY_ASC'
-	| 'CATEGORY_DESC';
-
 // Mapa de propiedades para ordenación
 export const CONCEPT_SORT_PROPERTY_MAP: Record<ConceptSortCriteria, keyof Prisma.ConceptOrderByWithRelationInput> = {
 	NAME_ASC: 'name',
@@ -107,7 +119,7 @@ export interface ConceptOperationOptions {
  * @param data Datos para crear el concepto
  * @returns Datos formateados para Prisma
  */
-export function toCreateConceptData(data: ConceptCreateInput): Prisma.ConceptCreateInput {
+export function toCreateConceptData(data: Partial<ConceptBase>): Prisma.ConceptCreateInput {
 	return {
 		name: data.name || 'Nuevo Concepto',
 		emoji: data.emoji || '💡',
@@ -125,7 +137,7 @@ export function toCreateConceptData(data: ConceptCreateInput): Prisma.ConceptCre
  * @param data Datos para actualizar el concepto
  * @returns Datos formateados para Prisma
  */
-export function toUpdateConceptData(data: ConceptUpdateInput): Prisma.ConceptUpdateInput {
+export function toUpdateConceptData(data: Partial<ConceptBase>): Prisma.ConceptUpdateInput {
 	const result: Prisma.ConceptUpdateInput = {};
 	if (data.name !== undefined) result.name = data.name;
 	if (data.emoji !== undefined) result.emoji = data.emoji;
@@ -146,31 +158,34 @@ export function toUpdateConceptData(data: ConceptUpdateInput): Prisma.ConceptUpd
 export function toSearchOptions(options: ConceptSearchOptions = {}): Prisma.ConceptFindManyArgs {
 	try {
 		const where = toSearchFilters(options.filters || {});
-		const orderBy: Prisma.ConceptOrderByWithRelationInput = {};
+		const sortBy = options.sortBy || 'NAME_ASC';
+		const propertyName = CONCEPT_SORT_PROPERTY_MAP[sortBy] || 'name';
+		const direction = sortBy.includes('DESC') ? 'desc' : 'asc';
 
-        if (options.orderBy) {
-            const [field, direction] = Object.entries(options.orderBy)[0];
-            orderBy[field as keyof Prisma.ConceptOrderByWithRelationInput] = direction;
-        } else {
-            orderBy.name = 'asc';
-        }
+		const orderBy: Prisma.ConceptOrderByWithRelationInput = {
+			[propertyName]: direction,
+		};
 
 		const result: Prisma.ConceptFindManyArgs = {
 			where,
 			orderBy,
 		};
 
-		if (options.skip !== undefined) {
-			result.skip = options.skip;
+		if (options.page !== undefined && options.pageSize !== undefined) {
+			const page = Math.max(1, options.page);
+			const pageSize = Math.max(1, options.pageSize);
+			result.skip = (page - 1) * pageSize;
+			result.take = pageSize;
 		}
-
-        if (options.take !== undefined) {
-            result.take = options.take;
-        }
 
 		if (options.includeRelations) {
 			result.include = {
-				_count: true
+				images: true,
+				_count: {
+					select: {
+						images: true,
+					},
+				},
 			};
 		}
 
@@ -204,7 +219,14 @@ export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhe
 		}
 
 		if (filters.category) {
-			conditions.push({ category: filters.category });
+			conditions.push({ category: { equals: filters.category } });
+		}
+
+		if (filters.tags && filters.tags.length > 0) {
+			const tagsConditions: Prisma.ConceptWhereInput[] = filters.tags.map((tag: string) => ({
+				tags: { contains: tag, mode: 'insensitive' },
+			}));
+			conditions.push({ OR: tagsConditions });
 		}
 
 		if (filters.onlyFavorites !== undefined) {
@@ -230,43 +252,22 @@ export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhe
  * @returns Resultado formateado
  */
 export function toSearchResult(
-	concepts: ConceptComplete[],
+	concepts: ConceptBase[],
 	total: number,
-	options: ConceptSearchOptions = {}
+	options: ConceptSearchOptions = {},
 ): ConceptSearchResult {
 	try {
-		const pageSize = options.take ?? 20;
-        const page = options.skip ? Math.floor(options.skip / pageSize) + 1 : 1;
+		const pageSize = options.pageSize ?? 20;
 		const totalPages = Math.ceil(total / pageSize);
-
-        return {
+		return {
 			items: concepts,
 			total,
-			page,
-			pageSize,
 			totalPages,
 		};
 	} catch (error) {
 		logger.error('Error en toSearchResult:', error);
-		throw new Error(`Error al formatear resultados de búsqueda: ${(error as Error).message}`);
+		throw new Error(`Error al mapear resultado de búsqueda: ${(error as Error).message}`);
 	}
-}
-
-/**
- * Deserializa el campo `tags` de un concepto si es una cadena JSON.
- * @param concept - El concepto a procesar.
- * @returns El concepto con el campo `tags` como un array de strings.
- */
-function deserializeConceptTags(concept: ConceptComplete): ConceptComplete {
-	if (typeof concept.tags === 'string') {
-		try {
-			return { ...concept, tags: JSON.parse(concept.tags) };
-		} catch (_error) {
-			logger.warn(`Error al deserializar tags para el concepto ${concept.id}. Se devolverá un array vacío.`);
-			return { ...concept, tags: [] };
-		}
-	}
-	return concept;
 }
 
 /**
@@ -274,22 +275,20 @@ function deserializeConceptTags(concept: ConceptComplete): ConceptComplete {
  * @param concept Concepto original
  * @returns Concepto en formato plano
  */
-export function toPlainConcept(concept: ConceptComplete): Record<string, any> {
+export function toPlainConcept(concept: ConceptBase): Record<string, any> {
 	try {
-		const deserializedConcept = deserializeConceptTags(concept);
 		return {
-			id: deserializedConcept.id,
-			name: deserializedConcept.name,
-			emoji: deserializedConcept.emoji,
-			color: deserializedConcept.color,
-			description: deserializedConcept.description,
-			content: deserializedConcept.content,
-			category: deserializedConcept.category,
-			tags: deserializedConcept.tags,
-			featuredImage: deserializedConcept.featuredImage,
-			isFavorite: deserializedConcept.isFavorite,
-			createdAt: deserializedConcept.createdAt,
-			updatedAt: deserializedConcept.updatedAt,
+			id: concept.id,
+			name: concept.name,
+			emoji: concept.emoji,
+			color: concept.color,
+			description: concept.description,
+			content: concept.content,
+			category: concept.category,
+			featuredImage: concept.featuredImage,
+			isFavorite: concept.isFavorite,
+			createdAt: concept.createdAt,
+			updatedAt: concept.updatedAt,
 		};
 	} catch (error) {
 		logger.error('Error en toPlainConcept:', error);
@@ -301,7 +300,6 @@ export function toPlainConcept(concept: ConceptComplete): Record<string, any> {
 			description: concept.description,
 			content: concept.content,
 			category: concept.category,
-			tags: [],
 			featuredImage: null,
 			isFavorite: false,
 			createdAt: new Date(),
@@ -316,29 +314,22 @@ export function toPlainConcept(concept: ConceptComplete): Record<string, any> {
  * @param filters Filtros a aplicar
  * @returns Lista filtrada de conceptos
  */
-export function filterConcepts(concepts: ConceptComplete[], filters: ConceptFilters = {}): ConceptComplete[] {
+export function filterConcepts(concepts: ConceptBase[], filters: ConceptFilters = {}): ConceptBase[] {
 	try {
-		let result = concepts.map(deserializeConceptTags);
+		let result = concepts;
 
 		if (filters.search) {
 			const searchLower = filters.search.toLowerCase();
 			result = result.filter(
 				(c) =>
 					c.name.toLowerCase().includes(searchLower) ||
-					(c.description?.toLowerCase().includes(searchLower)) ||
-					(c.content?.toLowerCase().includes(searchLower))
+					(c.description && c.description.toLowerCase().includes(searchLower)) ||
+					(c.content && c.content.toLowerCase().includes(searchLower)),
 			);
 		}
 
 		if (filters.category) {
 			result = result.filter((c) => c.category === filters.category);
-		}
-
-		if (filters.tags && filters.tags.length > 0) {
-			result = result.filter((c) => {
-				const conceptTags = Array.isArray(c.tags) ? c.tags : [];
-				return filters.tags?.some((tag) => conceptTags.includes(tag));
-			});
 		}
 
 		if (filters.onlyFavorites) {
