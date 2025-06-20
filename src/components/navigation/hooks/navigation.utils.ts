@@ -312,17 +312,16 @@ export function useNavigation() {
 				return null;
 		}
 	}, [
-		currentView,
-		selectedCollectionId,
-		selectedFolderId,
-		selectedTagId,
-		selectedAlbumId,
-		selectedCharacterId,
-		selectedPlaceId,
-		selectedWorldItemId,
-		selectedConceptId,
-		selectedPromptId,
-		selectedNoteId,
+		currentView, 
+		selectedCollectionId, 
+		selectedTagId, 
+		selectedAlbumId, 
+		selectedCharacterId, 
+		selectedPlaceId, 
+		selectedWorldItemId, 
+		selectedConceptId, 
+		selectedPromptId, 
+		selectedNoteId
 	]);
 
 	/**

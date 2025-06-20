@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 
 const logger = new Logger({ context: 'TransformerValidation' });

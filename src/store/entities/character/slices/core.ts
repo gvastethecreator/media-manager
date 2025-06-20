@@ -31,8 +31,8 @@ import type { CharacterCoreSlice, CharacterState } from '../types';
  * @see La nota en la cabecera del archivo.
  */
 export const createCharacterCoreSlice: StateCreator<CharacterState & CharacterCoreSlice, [], [], CharacterCoreSlice> = (
-	set,
-	get
+	_set,
+	_get
 ) => ({
 	// La lógica CRUD ha sido eliminada. Usar React Query y Server Actions en su lugar.
 	addCharacter: () => {},

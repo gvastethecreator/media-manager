@@ -1,7 +1,7 @@
 'use server';
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 
 // Logger específico para acciones de ConceptCard
 const conceptCardLogger = serverLogger.withContext('ConceptCardActions');
@@ -23,6 +23,7 @@ interface ThumbnailImage {
 export async function getRecentConceptImages(conceptId: string, limit = 6): Promise<ThumbnailImage[]> {
 	try {
 		conceptCardLogger.info('🖼️ Obteniendo imágenes recientes para ConceptCard:', conceptId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!conceptId) {
@@ -87,6 +88,7 @@ export async function getConceptCounts(conceptId: string): Promise<{
 }> {
 	try {
 		conceptCardLogger.info('🔢 Obteniendo recuentos para ConceptCard:', conceptId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!conceptId) {
@@ -100,7 +102,7 @@ export async function getConceptCounts(conceptId: string): Promise<{
 				_count: {
 					select: {
 						images: true,
-						Tag: true,
+						tags: true,
 					},
 				},
 			},
@@ -113,7 +115,7 @@ export async function getConceptCounts(conceptId: string): Promise<{
 		// Devolver resultado estructurado
 		const result = {
 			images: counts._count?.images || 0,
-			tags: counts._count?.Tag || 0,
+			tags: counts._count?.tags || 0,
 		};
 
 		conceptCardLogger.info('✅ Recuentos obtenidos para ConceptCard');
@@ -136,6 +138,7 @@ export async function getConceptCounts(conceptId: string): Promise<{
 export async function getConceptWithRelations(conceptId: string) {
 	try {
 		conceptCardLogger.info('📚 Obteniendo concepto con relaciones:', conceptId);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el ID es válido
 		if (!conceptId) {
@@ -149,7 +152,7 @@ export async function getConceptWithRelations(conceptId: string) {
 				_count: {
 					select: {
 						images: true,
-						Tag: true,
+						tags: true,
 					},
 				},
 			},

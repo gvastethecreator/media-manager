@@ -72,7 +72,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 		}
 
 		const imagesMap = images.reduce<Record<string, ImageComplete>>((acc, img) => {
-			if (img && img.id) {
+			if (img?.id) {
 				acc[img.id] = img;
 			}
 			return acc;

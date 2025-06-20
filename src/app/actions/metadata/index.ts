@@ -6,7 +6,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
+import { getPrismaClient } from '@/lib/db';
 import type { FileMetadata } from '@/types/metadata.types';
 import * as MetadataActions from './metadata.actions';
 import * as MetadataErrorsActions from './metadata-errors.actions';
@@ -71,6 +71,7 @@ export async function getImageMetadataById(imageId: string): Promise<FileMetadat
 	try {
 		metadataLogger.info(`Consultando metadatos para imagen: ${imageId}`);
 
+		const prisma = await getPrismaClient();
 		const image = await prisma.image.findUnique({
 			where: { id: imageId },
 			select: { metadata: true },

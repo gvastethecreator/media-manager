@@ -54,7 +54,7 @@ export async function createFolder(input: FolderCreateInput): Promise<FolderComp
 		if (!stats.isDirectory()) {
 			throw new Error(`La ruta '${validatedInput.path}' no es un directorio válido.`);
 		}
-	} catch (error) {
+	} catch (_error) {
 		throw new Error(`La carpeta no existe o no es accesible en la ruta: '${validatedInput.path}'.`);
 	}
 

@@ -110,6 +110,7 @@ export interface PlaceSearchOptions {
 
 /**
  * ✨ Tipo de un lugar con todas sus relaciones anidadas.
+ * CORREGIDO: Solo incluye relaciones que existen en el esquema Prisma.
  */
 export type PlaceWithRelations = Place & {
 	images?: { id: string }[];

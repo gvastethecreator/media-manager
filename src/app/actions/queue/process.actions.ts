@@ -5,10 +5,10 @@
 
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
-import * as QueueJobService from '@/services/queue-job.service';
+import { cancelQueueJob as cancelQueueJobService, retryQueueJob as retryQueueJobService } from '@/services/queue-job/queue-job.service';
 import type { QueueJobExtended } from '@/types/entities/queue-job';
+import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('QueueActions:process');
 
@@ -22,7 +22,7 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
 		logger.debug('🔄 Reintentando trabajo en cola', { id });
 
 		// Reintentar trabajo
-		const job = await QueueJobService.retryQueueJob(id);
+		const job = await retryQueueJobService(id);
 
 		// Revalidar rutas
 		revalidatePath('/queue');
@@ -46,7 +46,7 @@ export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
 		logger.debug('⏹️ Cancelando trabajo en cola', { id });
 
 		// Cancelar trabajo
-		const job = await QueueJobService.cancelQueueJob(id);
+		const job = await cancelQueueJobService(id);
 
 		// Revalidar rutas
 		revalidatePath('/queue');

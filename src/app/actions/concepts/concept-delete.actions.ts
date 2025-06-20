@@ -1,11 +1,11 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { getPrismaClient } from '@/lib/db';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
+import { revalidatePath } from 'next/cache';
 
 // Logger dedicado
 const conceptDeleteLogger = serverLogger.withContext('ConceptDeleteActions');
@@ -44,6 +44,7 @@ const notifyConceptChange = async (id: string) => {
 export async function deleteConcept(id: string): Promise<{ id: string }> {
 	try {
 		conceptDeleteLogger.info('🗑️ Eliminando concepto:', id);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el concepto exista
 		const concept = await prisma.concept.findUnique({

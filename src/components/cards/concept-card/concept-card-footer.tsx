@@ -1,7 +1,7 @@
+import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { BookOpen, Calendar, Clock, Lightbulb, Star } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface ConceptCardFooterProps {
 	createdAt: Date | string;
@@ -77,9 +77,9 @@ export function ConceptCardFooter({
 	// Calcular nivel de "poder" para cartas TCG (mayor valor = carta más poderosa)
 	const powerLevel = tcgMode
 		? Math.min(
-				99,
-				Math.floor(imagesCount * 2 + videosCount * 3 + promptsCount * 2 + notesCount * 1 + totalRelations * 0.5)
-			)
+			99,
+			Math.floor(imagesCount * 2 + videosCount * 3 + promptsCount * 2 + notesCount * 1 + totalRelations * 0.5)
+		)
 		: 0;
 
 	return (
@@ -192,7 +192,7 @@ export function ConceptCardFooter({
 			{/* Sello de copyright al estilo TCG */}
 			{tcgMode && (
 				<div className="mt-1 pt-1 text-[0.6rem] text-center opacity-60 border-t border-white/10">
-					™ & © {new Date().getFullYear()} IdeaVault · {category.toUpperCase()} · #{collectionId}
+					™ & © {new Date().getFullYear()} IdeaVault · {(category || 'CONCEPTO').toUpperCase()} · #{collectionId}
 				</div>
 			)}
 		</div>

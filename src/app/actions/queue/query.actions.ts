@@ -5,15 +5,20 @@
  * @module app/actions/queue/query.actions
  */
 
-import { unstable_cache } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
-import * as QueueJobService from '@/services/queue-job.service';
 import {
-	type PaginatedQueueJobs,
-	type QueueJobExtended,
-	type QueueJobFilters,
-	type QueueJobPaginationOptions,
+    findQueueJobs,
+    findQueueJobsByStatus,
+    findRecentQueueJobs,
+    getQueueJobById
+} from '@/services/queue-job/queue-job.service';
+import {
+    type PaginatedQueueJobs,
+    type QueueJobExtended,
+    type QueueJobFilters,
+    type QueueJobPaginationOptions,
 } from '@/types/entities/queue-job';
+import { unstable_cache } from 'next/cache';
 
 // Logger específico para acciones de consulta
 const logger = serverLogger.withContext('QueueActions:query');
@@ -53,7 +58,7 @@ export async function getQueueJob(id: string): Promise<QueueJobExtended | null> 
 		async () => {
 			try {
 				logger.debug('🔍 Buscando trabajo en cola por ID', { id });
-				return await QueueJobService.getQueueJobById(id);
+				return await getQueueJobById(id);
 			} catch (error) {
 				logger.error('❌ Error al buscar trabajo en cola:', error);
 				throw error;
@@ -83,7 +88,7 @@ export async function getQueueJobs(
 		async () => {
 			try {
 				logger.debug('📋 Obteniendo lista de trabajos en cola', { filters, pagination });
-				return await QueueJobService.findQueueJobs(filters, pagination);
+				return await findQueueJobs(filters, pagination);
 			} catch (error) {
 				logger.error('❌ Error al obtener lista de trabajos en cola:', error);
 				throw error;
@@ -108,7 +113,7 @@ export async function getRecentQueueJobs(limit = 10): Promise<QueueJobExtended[]
 			try {
 				logger.info('📥 Obteniendo trabajos recientes');
 
-				const jobs = await QueueJobService.findRecentQueueJobs(limit);
+				const jobs = await findRecentQueueJobs(limit);
 
 				logger.info('✅ Trabajos recientes obtenidos:', { count: jobs.length });
 				return jobs;
@@ -136,7 +141,7 @@ export async function getQueueJobsByStatus(status: string, limit = 10): Promise<
 			try {
 				logger.info('📥 Obteniendo trabajos por estado:', status);
 
-				const jobs = await QueueJobService.findQueueJobsByStatus(status, limit);
+				const jobs = await findQueueJobsByStatus(status, limit);
 
 				logger.info('✅ Trabajos por estado obtenidos:', { status, count: jobs.length });
 				return jobs;

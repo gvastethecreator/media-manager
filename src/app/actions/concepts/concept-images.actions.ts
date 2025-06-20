@@ -1,11 +1,11 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { getPrismaClient } from '@/lib/db';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { toConceptComplete } from '@/transformers/concept';
 import type { ConceptComplete } from '@/types/entities/concept';
+import { revalidatePath } from 'next/cache';
 
 // Logger dedicado
 const conceptImagesLogger = serverLogger.withContext('ConceptImagesActions');
@@ -29,6 +29,7 @@ const REVALIDATE_PATHS = ['/concepts', '/concepts/[id]', '/gallery'] as const;
 export async function addConceptImage(conceptId: string, imageId: string): Promise<ConceptComplete> {
 	try {
 		conceptImagesLogger.info(`🖼️ Añadiendo imagen ${imageId} al concepto ${conceptId}`);
+		const prisma = await getPrismaClient();
 
 		// Verificar que ambos existan
 		const concept = await prisma.concept.findUnique({
@@ -81,6 +82,7 @@ export async function addConceptImage(conceptId: string, imageId: string): Promi
 export async function removeConceptImage(conceptId: string, imageId: string): Promise<ConceptComplete> {
 	try {
 		conceptImagesLogger.info(`🗑️ Eliminando imagen ${imageId} del concepto ${conceptId}`);
+		const prisma = await getPrismaClient();
 
 		// Verificar que el concepto exista
 		const concept = await prisma.concept.findUnique({
@@ -128,6 +130,7 @@ export async function removeConceptImage(conceptId: string, imageId: string): Pr
 export async function getConceptImages(conceptId: string) {
 	try {
 		conceptImagesLogger.info(`🔍 Obteniendo imágenes del concepto ${conceptId}`);
+		const prisma = await getPrismaClient();
 
 		const result = await prisma.concept.findUnique({
 			where: { id: conceptId },
