@@ -80,8 +80,6 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 		}));
 	},
 
-
-
 	setDateRange: (from, to) => {
 		groupLogger.info('📅 Estableciendo rango de fechas:', { from, to });
 		set((state) => ({
@@ -115,9 +113,10 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 
 	// Obtener grupos filtrados
 	getFilteredGroups: () => {
-		// @ts-expect-error - getGroups no existe en el tipo `GroupState` directamente, pero sí en el store combinado.
-		const groups = get().getGroups();
-		return get().applySort(get().applyFilters(groups));
+		// Obtener grupos directamente del estado
+		const groups = Object.values(get().core.groups);
+		const filtered = get().applyFilters(groups);
+		return get().applySort(filtered);
 	},
 
 	applyFilters: (groups) => {
@@ -147,8 +146,6 @@ export const createGroupFiltersSlice: StateCreator<GroupState, [], [], GroupFilt
 			if (filterFavorites && !group.isFavorite) {
 				return false;
 			}
-
-
 
 			// Filtro por rango de fechas
 			if (dateRange.from && new Date(group.createdAt) < dateRange.from) {

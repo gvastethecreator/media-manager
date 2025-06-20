@@ -6,13 +6,27 @@
  * Legacy eliminado.
  */
 
-export type {
-	Group,
-	GroupBase,
-	GroupCreateInput,
-	GroupDisplayState,
-	GroupUpdateInput,
-} from './types';
 export { GroupSchema, GroupSortCriteria, GroupType, GroupViewMode } from './types';
+export type {
+    CreateGroupData,
+    Group,
+    GroupBase,
+    GroupCard,
+    GroupComplete,
+    GroupCreateInput,
+    GroupDisplayState,
+    GroupExtended,
+    GroupFilters,
+    GroupListItem,
+    GroupListItemImage,
+    GroupListProps,
+    GroupRelations,
+    GroupSearchParams,
+    GroupSearchResult,
+    GroupTransformerOptions,
+    GroupUpdateInput,
+    GroupWithStats,
+    UpdateGroupData
+} from './types';
 
 // 📝 Documentación: Solo tipos canónicos. Legacy removido.

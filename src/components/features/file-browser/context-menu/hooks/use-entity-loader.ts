@@ -294,15 +294,7 @@ export function useEntityLoader() {
 				});
 			}
 		},
-		[
-			loadingStates, 
-			updateLoadingState, 
-			collectionStore, 
-			tagStore, 
-			albumStore, 
-			placeStore, 
-			worldItemStore
-		]
+		[loadingStates, updateLoadingState, collectionStore, tagStore, albumStore, placeStore, worldItemStore]
 	);
 
 	// Función para manejar el cambio de estado abierto/cerrado de un submenú

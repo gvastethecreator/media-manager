@@ -81,3 +81,64 @@ export const transformPrompt = fromPrismaPrompt;
 export const transformPrompts = fromPrismaPrompts;
 export const toExtendedPrompt = fromPrismaPrompt;
 export const toPromptWithStats = fromPrismaPrompt;
+
+/**
+ * Opciones para transformar prompts
+ */
+export interface TransformPromptOptions {
+	includeRelations?: boolean;
+	includeCounts?: boolean;
+	includeExtended?: boolean;
+}
+
+/**
+ * 🔄 Transforma un prompt a formato extendido con propiedades adicionales
+ * @param prompt Prompt base o completo
+ * @param options Opciones de transformación
+ * @returns Prompt transformado a formato extendido
+ */
+export function transformPromptToExtended(prompt: any, options: TransformPromptOptions = {}): PromptComplete {
+	try {
+		// Primero transformar desde Prisma si es necesario
+		const basePrompt = fromPrismaPrompt(prompt);
+
+		// Aplicar opciones adicionales si están especificadas
+		if (options.includeExtended) {
+			// Agregar propiedades extendidas como parsedTags, parsedParameters, etc.
+			return {
+				...basePrompt,
+				// Estas propiedades se pueden agregar según necesidades específicas
+			};
+		}
+
+		return basePrompt;
+	} catch (error) {
+		logger.error('Error transformando prompt a extendido', {
+			error,
+			promptId: prompt?.id,
+		});
+		throw new TransformerError(`Error al transformar prompt a extendido: ${(error as Error).message}`);
+	}
+}
+
+/**
+ * 🔄 Transforma un prompt a formato con estadísticas
+ * @param prompt Prompt base o completo
+ * @param options Opciones de transformación
+ * @returns Prompt transformado con estadísticas
+ */
+export function transformPromptToWithStats(prompt: any, options: TransformPromptOptions = {}): PromptComplete {
+	try {
+		// Primero transformar desde Prisma
+		const basePrompt = fromPrismaPrompt(prompt);
+
+		// Las estadísticas ya están incluidas en _count desde fromPrismaPrompt
+		return basePrompt;
+	} catch (error) {
+		logger.error('Error transformando prompt con estadísticas', {
+			error,
+			promptId: prompt?.id,
+		});
+		throw new TransformerError(`Error al transformar prompt con estadísticas: ${(error as Error).message}`);
+	}
+}

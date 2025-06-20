@@ -50,7 +50,7 @@ export function mapCreatePlaceDataToPrisma(input: PlaceCreateInput): Prisma.Plac
 			dangers: dangers ? JSON.stringify(dangers) : undefined,
 			resources: resources ? JSON.stringify(resources) : undefined,
 			stats: stats ? JSON.stringify(stats) : undefined,
-			filters: filters ? JSON.stringify(filters) : rest.filters,
+			filters: filters ? JSON.stringify(filters) : '{}',
 		};
 
 		// Mapeo de relaciones
@@ -135,10 +135,7 @@ function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWhereInput 
 	const where: Prisma.PlaceWhereInput = {};
 
 	if (filters.search) {
-		where.OR = [
-			{ name: { contains: filters.search } },
-			{ description: { contains: filters.search } },
-		];
+		where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
 	}
 
 	if (filters.category) {

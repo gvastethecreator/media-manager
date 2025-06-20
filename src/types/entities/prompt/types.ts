@@ -22,6 +22,18 @@
 import type { BaseEntity } from '@/types/entities/base';
 
 /**
+ * Interfaz para parámetros de un prompt
+ */
+export interface PromptParameter {
+	name: string;
+	type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+	description?: string;
+	required?: boolean;
+	defaultValue?: any;
+	options?: string[];
+}
+
+/**
  * Interfaz base para prompt extendiendo BaseEntity
  */
 export interface PromptBase extends BaseEntity {

@@ -42,6 +42,28 @@ export interface CollectionBase {
 }
 
 /**
+ * 📚 Tipo extendido para una colección con datos adicionales de UI.
+ * Incluye propiedades que no se persisten en la base de datos.
+ */
+export interface CollectionExtended extends CollectionBase {
+	// Estados de UI (no persistidos)
+	isHovered?: boolean;
+	isOpen?: boolean;
+	isLoading?: boolean;
+	hasError?: boolean;
+	// Datos calculados
+	imageCount?: number;
+	videoCount?: number;
+	tagCount?: number;
+	groupCount?: number;
+	propertyCount?: number;
+	// Filtros parseados para UI
+	parsedFilters?: CollectionFilter[];
+	// Propiedad de rareza (derivada de category o metadatos)
+	rarity?: string;
+}
+
+/**
  * Collection con relaciones completas
  */
 export interface CollectionComplete extends CollectionBase {
@@ -78,6 +100,21 @@ export interface CollectionComplete extends CollectionBase {
 		properties?: number;
 		groups?: number;
 	};
+}
+
+/**
+ * 📚 Configuración de visualización para colecciones.
+ */
+export interface CollectionViewConfig {
+	mode: 'grid' | 'list' | 'table';
+	gridColumns: number;
+	cardSize: 'small' | 'medium' | 'large';
+	showStats: boolean;
+	showDescription: boolean;
+	defaultView: 'cards' | 'details' | 'compact';
+	sortBy: string;
+	sortDirection: 'asc' | 'desc';
+	groupBy: 'category' | 'rarity' | 'platform' | null;
 }
 
 /**
@@ -197,11 +234,11 @@ export const CollectionSchema = z.object({
 });
 
 /**
- * Filtro para colecciones (usado en CollectionExtended)
+ * 📚 Estructura de un filtro para colecciones - CORREGIDO con operadores completos.
  */
 export interface CollectionFilter {
 	field: string;
-	operator: 'equals' | 'contains' | 'gt' | 'lt' | 'between';
+	operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'gte' | 'lt' | 'lte' | 'between';
 	value: string | number | boolean | Date | string[] | number[];
 }
 

@@ -5,16 +5,16 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { ImageViewMode } from '../../../types/entities/image';
+import { ImageViewMode } from '../../../types/entities/image/types';
 import { createImageCoreSlice, type ImageCoreSlice } from './slices/core';
 import { createImageUISlice, type ImageUISlice } from './slices/ui';
 import type { ImageState } from './types';
 
 // Tipo del store completo
-export type ImageStore = ImageCoreSlice & ImageUISlice;
+export type ImageStore = ImageState & ImageCoreSlice & ImageUISlice;
 
 // Estado inicial
-const _initialState: ImageState = {
+const initialState: ImageState = {
 	core: {
 		images: {},
 		isLoading: false,
@@ -23,11 +23,51 @@ const _initialState: ImageState = {
 	},
 	ui: {
 		selectedIds: [],
-		viewMode: ImageViewMode.GRID,
+		viewMode: 'grid' as ImageViewMode,
 		isViewerOpen: false,
 		currentImageId: null,
 		highlightedId: null,
 		expandedIds: [],
+	},
+	filters: {
+		sortBy: 'date_desc',
+		searchQuery: '',
+		filterByTag: [],
+		filterByAlbum: [],
+		filterByFolderId: null,
+		filterFavorites: false,
+		filterPublic: false,
+		dateRange: {
+			from: null,
+			to: null,
+		},
+	},
+	grouping: {
+		groupBy: null,
+		sortCriteria: 'date_desc',
+		groupedImages: [],
+		filteredImages: [],
+		stats: {
+			totalImages: 0,
+			totalSize: 0,
+			averageSize: 0,
+			byFolder: {},
+			byTag: {},
+			byMonth: {},
+			byResolution: {},
+			favorites: 0,
+			public: 0,
+			private: 0,
+			withThumbnails: 0,
+			withoutThumbnails: 0,
+			largest: null,
+			smallest: null,
+			newest: null,
+			oldest: null,
+		},
+		selection: {
+			selectedIds: [],
+		},
 	},
 };
 
@@ -35,9 +75,10 @@ const _initialState: ImageState = {
 export const useImageStore = create<ImageStore>()(
 	devtools(
 		persist(
-			(...a) => ({
-				...createImageCoreSlice(...a),
-				...createImageUISlice(...a),
+			(set, get, api) => ({
+				...initialState,
+				...createImageCoreSlice(set, get, api),
+				...createImageUISlice(set, get, api),
 			}),
 			{
 				name: 'image-store',

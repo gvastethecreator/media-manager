@@ -7,7 +7,10 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { cancelQueueJob as cancelQueueJobService, retryQueueJob as retryQueueJobService } from '@/services/queue-job/queue-job.service';
+import {
+	cancelQueueJob as cancelQueueJobService,
+	retryQueueJob as retryQueueJobService,
+} from '@/services/queue-job/queue-job.service';
 import type { QueueJobExtended } from '@/types/entities/queue-job';
 import { QueueJobStatus } from '@/types/entities/queue-job/types';
 import { revalidatePath } from 'next/cache';

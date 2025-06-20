@@ -4,6 +4,7 @@
  */
 
 import { type Activity, type ActivityFilters, type CreateActivityData } from '../../types/entities/activity';
+import type { ActivityFiltersSchemaType, ActivitySchemaType, CreateActivitySchemaType } from './schema';
 import { activityFiltersSchema, activitySchema, activityTypeSchema, createActivitySchema } from './schema';
 
 /**
@@ -13,7 +14,7 @@ import { activityFiltersSchema, activitySchema, activityTypeSchema, createActivi
  */
 export function validateCreateActivityData(
 	data: CreateActivityData
-): { success: true; data: CreateActivityData } | { success: false; error: string } {
+): { success: true; data: CreateActivitySchemaType } | { success: false; error: string } {
 	try {
 		const result = createActivitySchema.parse(data);
 		return { success: true, data: result };
@@ -33,9 +34,15 @@ export function validateCreateActivityData(
  */
 export function validateActivity(
 	activity: Activity
-): { success: true; data: Activity } | { success: false; error: string } {
+): { success: true; data: ActivitySchemaType } | { success: false; error: string } {
 	try {
-		const result = activitySchema.parse(activity);
+		// Transformar createdAt a string si es Date para la validación
+		const activityForValidation = {
+			...activity,
+			createdAt: activity.createdAt instanceof Date ? activity.createdAt.toISOString() : activity.createdAt,
+		};
+
+		const result = activitySchema.parse(activityForValidation);
 		return { success: true, data: result };
 	} catch (error) {
 		if (error instanceof Error) {
@@ -52,9 +59,16 @@ export function validateActivity(
  */
 export function validateActivityFilters(
 	filters: ActivityFilters
-): { success: true; data: ActivityFilters } | { success: false; error: string } {
+): { success: true; data: ActivityFiltersSchemaType } | { success: false; error: string } {
 	try {
-		const result = activityFiltersSchema.parse(filters);
+		// Transformar fechas a strings si son Date para la validación
+		const filtersForValidation = {
+			...filters,
+			startDate: filters.startDate instanceof Date ? filters.startDate.toISOString() : filters.startDate,
+			endDate: filters.endDate instanceof Date ? filters.endDate.toISOString() : filters.endDate,
+		};
+
+		const result = activityFiltersSchema.parse(filtersForValidation);
 		return { success: true, data: result };
 	} catch (error) {
 		if (error instanceof Error) {

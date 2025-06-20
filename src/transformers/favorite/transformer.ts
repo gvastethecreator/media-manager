@@ -5,12 +5,7 @@
  * No usar ni importar tipos de base.ts o extended.ts (eliminados).
  */
 
-import {
-    FavoriteComplete,
-    FavoriteEntityType,
-    FavoriteStats,
-    FavoritesByType
-} from '@/types/entities/favorite';
+import { FavoriteComplete, FavoriteEntityType, FavoriteStats, FavoritesByType } from '@/types/entities/favorite';
 
 // Mapa de iconos por tipo de entidad
 const ENTITY_ICONS: Record<string, string> = {

@@ -3,17 +3,19 @@
  * @module store/entities/character/slices/filters
  */
 
-import type { StateCreator } from 'zustand';
 import type {
-	CharacterAlignment,
-	CharacterCategory,
-	CharacterClass,
-	CharacterExtended,
-	CharacterFilter,
-	CharacterRace,
-	CharacterSortOption,
+    CharacterExtended,
+    CharacterFilterItem,
+} from '@/types/entities/character';
+import {
+    CharacterAlignment,
+    CharacterCategory,
+    CharacterClass,
+    CharacterRace,
+    CharacterSortOption,
 } from '@/types/entities/character';
 import { compareCharacters, getCharacterLevelAsNumber, matchesCharacterSearch } from '@/utils/character';
+import type { StateCreator } from 'zustand';
 import type { CharacterFiltersSlice, CharacterState } from '../types';
 
 /**
@@ -35,19 +37,18 @@ export const createCharacterFiltersSlice: StateCreator<
 			// Si characterClass es null, eliminamos el filtro de clase
 			if (characterClass === null) {
 				return {
-					activeFilters: state.activeFilters.filter((filter) => filter.field !== 'class'),
+					activeFilters: state.activeFilters.filter((filter) => filter.query !== 'class'),
 				};
 			}
 
 			// Creamos o actualizamos el filtro de clase
-			const classFilter: CharacterFilter = {
-				field: 'class',
-				operator: 'equals',
+			const classFilter: CharacterFilterItem = {
+				query: 'class',
 				value: characterClass,
 			};
 
 			// Reemplazamos el filtro existente o añadimos uno nuevo
-			const existingIndex = state.activeFilters.findIndex((filter) => filter.field === 'class');
+			const existingIndex = state.activeFilters.findIndex((filter) => filter.query === 'class');
 
 			const newFilters = [...state.activeFilters];
 
@@ -70,19 +71,18 @@ export const createCharacterFiltersSlice: StateCreator<
 			// Si race es null, eliminamos el filtro de raza
 			if (race === null) {
 				return {
-					activeFilters: state.activeFilters.filter((filter) => filter.field !== 'race'),
+					activeFilters: state.activeFilters.filter((filter) => filter.query !== 'race'),
 				};
 			}
 
 			// Creamos o actualizamos el filtro de raza
-			const raceFilter: CharacterFilter = {
-				field: 'race',
-				operator: 'equals',
+			const raceFilter: CharacterFilterItem = {
+				query: 'race',
 				value: race,
 			};
 
 			// Reemplazamos el filtro existente o añadimos uno nuevo
-			const existingIndex = state.activeFilters.findIndex((filter) => filter.field === 'race');
+			const existingIndex = state.activeFilters.findIndex((filter) => filter.query === 'race');
 
 			const newFilters = [...state.activeFilters];
 
@@ -106,26 +106,27 @@ export const createCharacterFiltersSlice: StateCreator<
 			// Si ambos son null, eliminamos los filtros de nivel
 			if (minLevel === null && maxLevel === null) {
 				return {
-					activeFilters: state.activeFilters.filter((filter) => filter.field !== 'level'),
+					activeFilters: state.activeFilters.filter((filter) => filter.query !== 'level'),
 				};
 			}
 
 			// Creamos los filtros necesarios
-			const newFilters = state.activeFilters.filter((filter) => filter.field !== 'level');
+			const newFilters = state.activeFilters.filter((filter) => filter.query !== 'level');
 
-			if (minLevel !== null) {
+			if (minLevel !== null && maxLevel !== null) {
 				newFilters.push({
-					field: 'level',
-					operator: 'gte',
-					value: minLevel,
+					query: 'level',
+					value: `${minLevel}-${maxLevel}`,
 				});
-			}
-
-			if (maxLevel !== null) {
+			} else if (minLevel !== null) {
 				newFilters.push({
-					field: 'level',
-					operator: 'lte',
-					value: maxLevel,
+					query: 'level',
+					value: `${minLevel}+`,
+				});
+			} else if (maxLevel !== null) {
+				newFilters.push({
+					query: 'level',
+					value: `<${maxLevel}`,
 				});
 			}
 
@@ -142,19 +143,18 @@ export const createCharacterFiltersSlice: StateCreator<
 			// Si category es null, eliminamos el filtro
 			if (category === null) {
 				return {
-					activeFilters: state.activeFilters.filter((filter) => filter.field !== 'category'),
+					activeFilters: state.activeFilters.filter((filter) => filter.query !== 'category'),
 				};
 			}
 
 			// Creamos o actualizamos el filtro de categoría
-			const categoryFilter: CharacterFilter = {
-				field: 'category',
-				operator: 'equals',
+			const categoryFilter: CharacterFilterItem = {
+				query: 'category',
 				value: category,
 			};
 
 			// Reemplazamos el filtro existente o añadimos uno nuevo
-			const existingIndex = state.activeFilters.findIndex((filter) => filter.field === 'category');
+			const existingIndex = state.activeFilters.findIndex((filter) => filter.query === 'category');
 
 			const newFilters = [...state.activeFilters];
 
@@ -177,19 +177,18 @@ export const createCharacterFiltersSlice: StateCreator<
 			// Si alignment es null, eliminamos el filtro
 			if (alignment === null) {
 				return {
-					activeFilters: state.activeFilters.filter((filter) => filter.field !== 'alignment'),
+					activeFilters: state.activeFilters.filter((filter) => filter.query !== 'alignment'),
 				};
 			}
 
 			// Creamos o actualizamos el filtro de alineamiento
-			const alignmentFilter: CharacterFilter = {
-				field: 'alignment',
-				operator: 'equals',
+			const alignmentFilter: CharacterFilterItem = {
+				query: 'alignment',
 				value: alignment,
 			};
 
 			// Reemplazamos el filtro existente o añadimos uno nuevo
-			const existingIndex = state.activeFilters.findIndex((filter) => filter.field === 'alignment');
+			const existingIndex = state.activeFilters.findIndex((filter) => filter.query === 'alignment');
 
 			const newFilters = [...state.activeFilters];
 
@@ -220,19 +219,18 @@ export const createCharacterFiltersSlice: StateCreator<
 			// Si onlyFavorites es false, eliminamos el filtro
 			if (!onlyFavorites) {
 				return {
-					activeFilters: state.activeFilters.filter((filter) => filter.field !== 'isFavorite'),
+					activeFilters: state.activeFilters.filter((filter) => filter.query !== 'isFavorite'),
 				};
 			}
 
 			// Creamos o actualizamos el filtro de favoritos
-			const favoritesFilter: CharacterFilter = {
-				field: 'isFavorite',
-				operator: 'equals',
+			const favoritesFilter: CharacterFilterItem = {
+				query: 'isFavorite',
 				value: true,
 			};
 
 			// Reemplazamos el filtro existente o añadimos uno nuevo
-			const existingIndex = state.activeFilters.findIndex((filter) => filter.field === 'isFavorite');
+			const existingIndex = state.activeFilters.findIndex((filter) => filter.query === 'isFavorite');
 
 			const newFilters = [...state.activeFilters];
 
@@ -327,7 +325,7 @@ export const createCharacterFiltersSlice: StateCreator<
 		return characters.filter((character) => {
 			// Aplicar filtros
 			for (const filter of activeFilters) {
-				switch (filter.field) {
+				switch (filter.query) {
 					case 'class':
 						if (character.class !== filter.value) return false;
 						break;
@@ -380,11 +378,11 @@ export const createCharacterFiltersSlice: StateCreator<
 	 * Agrega un filtro personalizado
 	 * @param filter Filtro a agregar
 	 */
-	addFilter: (filter: CharacterFilter) => {
+	addFilter: (filter: CharacterFilterItem) => {
 		set((state) => {
 			// Comprobar si ya existe un filtro con el mismo campo y operador
 			const existingIndex = state.activeFilters.findIndex(
-				(f) => f.field === filter.field && f.operator === filter.operator
+				(f) => f.query === filter.query && f.value === filter.value
 			);
 
 			if (existingIndex >= 0) {
@@ -406,7 +404,7 @@ export const createCharacterFiltersSlice: StateCreator<
 	 */
 	removeFilter: (filterId: string) => {
 		set((state) => ({
-			activeFilters: state.activeFilters.filter((f) => f.field !== filterId),
+			activeFilters: state.activeFilters.filter((f) => f.query !== filterId),
 		}));
 	},
 
@@ -424,7 +422,7 @@ export const createCharacterFiltersSlice: StateCreator<
 	 * Aplica un conjunto de filtros, reemplazando los existentes
 	 * @param filters Filtros a aplicar
 	 */
-	applyFilters: (filters: CharacterFilter[]) => {
+	applyFilters: (filters: CharacterFilterItem[]) => {
 		set({ activeFilters: filters });
 	},
 

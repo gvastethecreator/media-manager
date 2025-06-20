@@ -75,10 +75,7 @@ function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWhereInput 
 	const where: Prisma.VideoWhereInput = {};
 
 	if (filters.search) {
-		where.OR = [
-			{ name: { contains: filters.search } },
-			{ description: { contains: filters.search } },
-		];
+		where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
 	}
 
 	if (filters.isFavorite !== undefined) {

@@ -68,7 +68,7 @@ export function DynamicCreateForm<T extends { name: string }>({
 	// Manejar submit
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		if (!formData.name || (validateName?.(formData.name))) {
+		if (!formData.name || validateName?.(formData.name)) {
 			setError(validateName ? validateName(formData.name as string) : 'El nombre es obligatorio');
 			return;
 		}

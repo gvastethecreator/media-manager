@@ -5,45 +5,45 @@
  */
 
 import {
-    createImage as createServerImage,
-    deleteImage as deleteServerImage,
-    getImage,
-    getImages,
-    updateImage as updateServerImage,
+	createImage as createServerImage,
+	deleteImage as deleteServerImage,
+	getImage,
+	getImages,
+	updateImage as updateServerImage,
 } from '@/app/actions/images/image-crud.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { extendImage, extendImages } from '@/transformers/image/serializers';
-import type { CreateImageData, ImageComplete, UpdateImageData } from '@/types/entities/image';
+import { extendImage } from '@/transformers/image/serializers';
+import type { CreateImageData, ImageExtended, UpdateImageData } from '@/types/entities/image/types';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
 const imageLogger = clientLogger.withContext('ImageStore');
 
 export interface ImageCoreSlice {
-	images: Record<string, ImageComplete>;
+	images: Record<string, ImageExtended>;
 	isLoading: boolean;
 	error: string | null;
 
 	// Getters
-	getImage: (id: string) => ImageComplete | undefined;
-	getImages: () => ImageComplete[];
-	getImagesByFolder: (folderId: string) => ImageComplete[];
-	getImageByPath: (path: string) => ImageComplete | undefined;
+	getImage: (id: string) => ImageExtended | undefined;
+	getImages: () => ImageExtended[];
+	getImagesByFolder: (folderId: string) => ImageExtended[];
+	getImageByPath: (path: string) => ImageExtended | undefined;
 
 	// Operaciones síncronas
-	addImage: (image: ImageComplete) => void;
-	addImages: (images: ImageComplete[]) => void;
-	_updateImage: (id: string, data: Partial<ImageComplete>) => void;
+	addImage: (image: ImageExtended) => void;
+	addImages: (images: ImageExtended[]) => void;
+	_updateImage: (id: string, data: Partial<ImageExtended>) => void;
 	deleteImage: (id: string) => void;
 	clearImages: () => void;
 	clearFolderImages: (folderId: string) => void;
 
 	// Acciones asíncronas
-	fetchImage: (id: string) => Promise<ImageComplete | undefined>;
-	fetchImages: (options?: { folderIds?: string[]; refresh?: boolean }) => Promise<ImageComplete[]>;
-	createImage: (data: CreateImageData) => Promise<ImageComplete | undefined>;
-	updateImage: (id: string, data: UpdateImageData) => Promise<ImageComplete | undefined>;
+	fetchImage: (id: string) => Promise<ImageExtended | undefined>;
+	fetchImages: (options?: { folderIds?: string[]; refresh?: boolean }) => Promise<ImageExtended[]>;
+	createImage: (data: CreateImageData) => Promise<ImageExtended | undefined>;
+	updateImage: (id: string, data: UpdateImageData) => Promise<ImageExtended | undefined>;
 	removeImage: (id: string) => Promise<boolean>;
 }
 
@@ -71,7 +71,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 			return;
 		}
 
-		const imagesMap = images.reduce<Record<string, ImageComplete>>((acc, img) => {
+		const imagesMap = images.reduce<Record<string, ImageExtended>>((acc, img) => {
 			if (img?.id) {
 				acc[img.id] = img;
 			}
@@ -97,7 +97,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 	},
 	clearFolderImages: (folderId) => {
 		set((state) => {
-			const newImages: Record<string, ImageComplete> = {};
+			const newImages: Record<string, ImageExtended> = {};
 
 			for (const img of Object.values(state.images)) {
 				if (img.folderId !== folderId) {
@@ -137,7 +137,8 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [],
 			}
 
 			const images = await getImages(options);
-			const extendedImages = extendImages(images);
+			// Convertir cada imagen individualmente usando extendImage
+			const extendedImages = images.map((image) => extendImage(image));
 			get().addImages(extendedImages);
 			return extendedImages;
 		} catch (e: unknown) {

@@ -8,18 +8,13 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
 // Importar tipos y transformers actualizados
 import {
-    mapCreatePromptDataToPrisma,
-    mapUpdatePromptDataToPrisma,
-    toExtendedPrompt,
-    toPromptWithStats,
+	mapCreatePromptDataToPrisma,
+	mapUpdatePromptDataToPrisma,
+	toExtendedPrompt,
+	toPromptWithStats,
 } from '@/transformers/prompt';
 import { type ExtendedPrompt } from '@/transformers/prompt/serializers';
-import type {
-    PromptBase,
-    PromptCreateInput,
-    PromptUpdateInput,
-    PromptWithStats,
-} from '@/types/entities/prompt';
+import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
 import type { FileItem } from '@/types/files';
 
 const promptLogger = serverLogger.withContext('PromptActions');
@@ -249,12 +244,12 @@ export async function updatePrompt(id: string, data: PromptUpdateInput): Promise
 		promptLogger.info('📝 Actualizando prompt:', id);
 
 		// Usar el mapper para preparar los datos
-		const updateData = mapUpdatePromptDataToPrisma(data);
+		const updateData = mapUpdatePromptDataToPrisma(id, data);
 
 		const prisma = await getPrismaClient();
 		const prompt = await prisma.prompt.update({
 			where: { id },
-			data: updateData,
+			data: updateData.data,
 		});
 
 		await emit({
@@ -435,10 +430,7 @@ export async function linkEntityToPrompt(
 				});
 				break;
 			default:
-				throw createPromptError(
-					`Tipo de entidad no soportado: ${entityType}`,
-					EntityErrorCode.VALIDATION_ERROR
-				);
+				throw createPromptError(`Tipo de entidad no soportado: ${entityType}`, EntityErrorCode.VALIDATION_ERROR);
 		}
 
 		await emit({
@@ -560,10 +552,7 @@ export async function unlinkEntityFromPrompt(
 				});
 				break;
 			default:
-				throw createPromptError(
-					`Tipo de entidad no soportado: ${entityType}`,
-					EntityErrorCode.VALIDATION_ERROR
-				);
+				throw createPromptError(`Tipo de entidad no soportado: ${entityType}`, EntityErrorCode.VALIDATION_ERROR);
 		}
 
 		await emit({
@@ -618,14 +607,17 @@ export async function getPromptImages(promptId: string): Promise<{ images: FileI
 			id: image.id,
 			name: image.name,
 			path: image.path,
-			type: 'image',
+			type: 'image' as const,
 			size: image.size,
-			width: image.width,
-			height: image.height,
+			width: image.width || 0,
+			height: image.height || 0,
 			src: `/api/images/${image.id}/thumbnail`,
 			createdAt: image.createdAt,
 			updatedAt: image.updatedAt,
 			tags: [],
+			metadata: image.metadata || {},
+			isSelected: false,
+			isVisible: true,
 		}));
 
 		promptLogger.info('✅ Imágenes del prompt obtenidas:', { promptId, count: images.length });

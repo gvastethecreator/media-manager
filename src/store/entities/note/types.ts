@@ -6,17 +6,22 @@ import type {
 	NoteUpdateInput,
 	NoteViewMode,
 	NoteWithStats,
-} from '@/types/entities/note';
+} from '@/types/entities/note/types';
 
 /**
  * Store completo de Notas combinando todas las slices
  */
 export interface NoteStore {
 	// Estado - CoreSlice
-	notes: NoteWithStats[];
+	notes: Record<string, NoteWithStats>;
 	selectedNote: NoteWithStats | null;
+	selectedNoteId: string | null;
+	selectedNoteIds: string[];
+	isMultiSelectMode: boolean;
 	isLoading: boolean;
+	loading: boolean; // Alias para compatibilidad
 	error: string | null;
+	version: string;
 
 	// Acciones - CoreSlice
 	loadNotes: () => Promise<void>;
@@ -27,7 +32,7 @@ export interface NoteStore {
 	reset: () => void;
 
 	// Estado - FiltersSlice
-	filters: NoteFilters;
+	filters: NoteFilters & { search?: string };
 	sortBy: NoteSortOption;
 	page: number;
 	pageSize: number;

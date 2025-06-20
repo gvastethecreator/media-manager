@@ -57,7 +57,9 @@ export function CreatePropertyForm({
 		{
 			name: 'color' as const,
 			label: 'Color',
-			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => <ColorPicker value={value} onChange={onChange} compact showLabel={false} />,
+			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
+				<ColorPicker value={value} onChange={onChange} compact showLabel={false} />
+			),
 		},
 		{
 			name: 'description' as const,

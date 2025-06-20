@@ -3,17 +3,9 @@
  * @module utils/world-item/helpers
  */
 
-import type {
-    WorldItemRarity,
-    WorldItemType,
-} from '../../types/entities/world-item/enums';
-import type {
-    WorldItemExtended as WorldItem,
-} from '../../types/entities/world-item/extended';
-import type {
-    WorldItemProperty,
-    WorldItemStats,
-} from '../../types/entities/world-item/stats-types';
+import type { WorldItemRarity, WorldItemType } from '../../types/entities/world-item/enums';
+import type { WorldItemExtended as WorldItem } from '../../types/entities/world-item/extended';
+import type { WorldItemProperty, WorldItemStats } from '../../types/entities/world-item/stats-types';
 
 /**
  * Calcula el nivel de potencia de un objeto basado en sus estadísticas

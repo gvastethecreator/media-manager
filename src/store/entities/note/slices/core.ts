@@ -1,4 +1,3 @@
-import { StateCreator } from 'zustand';
 import {
 	createNote as createNoteAction,
 	deleteNote as deleteNoteAction,
@@ -7,11 +6,33 @@ import {
 } from '@/app/actions/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { transformNoteToWithStats } from '@/transformers/note/transformer';
-import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note/types';
+import { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const coreLogger = clientLogger.withContext('NoteStore:Core');
+
+// Función temporal para transformar Note a NoteWithStats
+const transformNoteToWithStats = (note: any): NoteWithStats => ({
+	...note,
+	stats: {
+		totalItems: 0,
+		totalImages: note._count?.images || 0,
+		totalVideos: note._count?.videos || 0,
+		totalAlbums: note._count?.albums || 0,
+		totalCollections: note._count?.collections || 0,
+		totalTags: note._count?.tags || 0,
+		totalCharacters: note._count?.characters || 0,
+		totalPlaces: note._count?.places || 0,
+		totalWorldItems: note._count?.worldItems || 0,
+		totalConcepts: note._count?.concepts || 0,
+		totalPrompts: note._count?.prompts || 0,
+		totalWildcards: note._count?.wildcards || 0,
+		totalProperties: note._count?.properties || 0,
+		totalGroups: note._count?.groups || 0,
+		lastUpdated: note.updatedAt,
+	},
+});
 
 export interface CoreSlice {
 	notes: Record<string, NoteWithStats>;
@@ -38,9 +59,9 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set)
 		try {
 			coreLogger.info('🔄 Cargando notas');
 			const notes = await getNotesAction();
-			const notesWithStats = notes.map(transformNoteToWithStats);
+			const notesWithStats = notes.map((note: any) => transformNoteToWithStats(note));
 			const notesRecord = notesWithStats.reduce(
-				(acc, note) => {
+				(acc: Record<string, NoteWithStats>, note: NoteWithStats) => {
 					acc[note.id] = note;
 					return acc;
 				},

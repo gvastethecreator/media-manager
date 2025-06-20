@@ -38,7 +38,7 @@ describe('searchNotes', () => {
 		]);
 		(prisma.note.count as jest.Mock).mockResolvedValue(1);
 
-		const result = await searchNotes({}, { page: 1, pageSize: 1 });
+		const result = await searchNotes({}, { skip: 0, take: 1 });
 		expect(Array.isArray(result.items)).toBe(true);
 		expect(result.items).toHaveLength(1);
 		expect(result.total).toBe(1);

@@ -159,7 +159,7 @@ export function toSearchOptions(options: ConceptSearchOptions = {}): Prisma.Conc
 	try {
 		const where = toSearchFilters(options.filters || {});
 		const sortBy = options.sortBy || 'NAME_ASC';
-		const propertyName = CONCEPT_SORT_PROPERTY_MAP[sortBy] || 'name';
+		const propertyName = CONCEPT_SORT_PROPERTY_MAP[sortBy as ConceptSortCriteria] || 'name';
 		const direction = sortBy.includes('DESC') ? 'desc' : 'asc';
 
 		const orderBy: Prisma.ConceptOrderByWithRelationInput = {
@@ -210,9 +210,9 @@ export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhe
 			if (textFilter) {
 				conditions.push({
 					OR: [
-						{ name: { contains: textFilter, mode: 'insensitive' } },
-						{ description: { contains: textFilter, mode: 'insensitive' } },
-						{ content: { contains: textFilter, mode: 'insensitive' } },
+						{ name: { contains: textFilter, mode: Prisma.QueryMode.insensitive } },
+						{ description: { contains: textFilter, mode: Prisma.QueryMode.insensitive } },
+						{ content: { contains: textFilter, mode: Prisma.QueryMode.insensitive } },
 					],
 				});
 			}
@@ -224,7 +224,7 @@ export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhe
 
 		if (filters.tags && filters.tags.length > 0) {
 			const tagsConditions: Prisma.ConceptWhereInput[] = filters.tags.map((tag: string) => ({
-				tags: { contains: tag, mode: 'insensitive' },
+				tags: { contains: tag, mode: Prisma.QueryMode.insensitive },
 			}));
 			conditions.push({ OR: tagsConditions });
 		}
@@ -252,16 +252,19 @@ export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhe
  * @returns Resultado formateado
  */
 export function toSearchResult(
-	concepts: ConceptBase[],
+	concepts: ConceptComplete[],
 	total: number,
-	options: ConceptSearchOptions = {},
+	options: ConceptSearchOptions = {}
 ): ConceptSearchResult {
 	try {
 		const pageSize = options.pageSize ?? 20;
+		const page = options.page ?? 1;
 		const totalPages = Math.ceil(total / pageSize);
 		return {
 			items: concepts,
 			total,
+			page,
+			pageSize,
 			totalPages,
 		};
 	} catch (error) {
@@ -324,7 +327,7 @@ export function filterConcepts(concepts: ConceptBase[], filters: ConceptFilters 
 				(c) =>
 					c.name.toLowerCase().includes(searchLower) ||
 					(c.description && c.description.toLowerCase().includes(searchLower)) ||
-					(c.content && c.content.toLowerCase().includes(searchLower)),
+					(c.content && c.content.toLowerCase().includes(searchLower))
 			);
 		}
 

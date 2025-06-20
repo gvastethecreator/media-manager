@@ -1,5 +1,5 @@
-import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
+import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const selectionLogger = clientLogger.withContext('NoteStore:Selection');
@@ -67,7 +67,7 @@ export const createSelectionSlice: StateCreator<NoteStore, [], [], SelectionSlic
 		}
 	},
 
-	toggleNoteSelection: (id) => {
+	toggleNoteSelection: (id: string) => {
 		const { selectedNoteIds } = get();
 		const isSelected = selectedNoteIds.includes(id);
 
@@ -76,7 +76,7 @@ export const createSelectionSlice: StateCreator<NoteStore, [], [], SelectionSlic
 		if (isSelected) {
 			// Quitar de la selección
 			set({
-				selectedNoteIds: selectedNoteIds.filter((noteId) => noteId !== id),
+				selectedNoteIds: selectedNoteIds.filter((noteId: string) => noteId !== id),
 			});
 		} else {
 			// Añadir a la selección
@@ -88,7 +88,7 @@ export const createSelectionSlice: StateCreator<NoteStore, [], [], SelectionSlic
 
 	selectAllNotes: () => {
 		const { notes } = get();
-		const allNoteIds = notes.map((note) => note.id);
+		const allNoteIds = Object.keys(notes);
 
 		selectionLogger.info('🔍 Seleccionando todas las notas', { count: allNoteIds.length });
 
