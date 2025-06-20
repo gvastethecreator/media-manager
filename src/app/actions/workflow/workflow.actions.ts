@@ -3,8 +3,17 @@
 import { getPrismaClient } from '@/lib/db';
 import { fromPrismaWorkflow, fromPrismaWorkflows } from '@/transformers/workflow/transformer';
 import type { WorkflowFormData } from '@/types/entities/workflow/types';
-import { handlePrismaError } from '@/utils/errors/prisma-errors';
+import { toServiceError } from '@/utils/errors/service-errors';
 import { revalidatePath } from 'next/cache';
+
+// Función auxiliar para manejar errores de Prisma
+function handlePrismaError(error: unknown, defaultMessage: string): never {
+	const serviceError = toServiceError(error, {
+		message: defaultMessage,
+		serviceName: 'WorkflowActions',
+	});
+	throw serviceError;
+}
 
 // GET
 export async function getWorkflows() {
@@ -15,7 +24,7 @@ export async function getWorkflows() {
 		});
 		return fromPrismaWorkflows(workflows);
 	} catch (error) {
-		throw handlePrismaError(error, 'Error al obtener los workflows');
+		handlePrismaError(error, 'Error al obtener los workflows');
 	}
 }
 
@@ -30,7 +39,7 @@ export async function getWorkflowById(id: string) {
 		}
 		return fromPrismaWorkflow(workflow);
 	} catch (error) {
-		throw handlePrismaError(error, `Error al obtener el workflow con ID ${id}`);
+		handlePrismaError(error, `Error al obtener el workflow con ID ${id}`);
 	}
 }
 
@@ -40,15 +49,15 @@ export async function createWorkflow(data: WorkflowFormData) {
 		const prisma = await getPrismaClient();
 		const newWorkflow = await prisma.workflow.create({
 			data: {
-				name: data.name,
-				filePath: data.filePath,
-				content: data.content,
+				name: data.name || 'Workflow sin nombre',
+				filePath: data.filePath || '',
+				content: data.content || '',
 			},
 		});
 		revalidatePath('/workflow');
 		return fromPrismaWorkflow(newWorkflow);
 	} catch (error) {
-		throw handlePrismaError(error, 'Error al crear el workflow');
+		handlePrismaError(error, 'Error al crear el workflow');
 	}
 }
 
@@ -59,16 +68,16 @@ export async function updateWorkflow(id: string, data: WorkflowFormData) {
 		const updatedWorkflow = await prisma.workflow.update({
 			where: { id },
 			data: {
-				name: data.name,
-				filePath: data.filePath,
-				content: data.content,
+				name: data.name || 'Workflow sin nombre',
+				filePath: data.filePath || '',
+				content: data.content || '',
 			},
 		});
 		revalidatePath('/workflow');
 		revalidatePath(`/workflow/${id}`);
 		return fromPrismaWorkflow(updatedWorkflow);
 	} catch (error) {
-		throw handlePrismaError(error, `Error al actualizar el workflow con ID ${id}`);
+		handlePrismaError(error, `Error al actualizar el workflow con ID ${id}`);
 	}
 }
 
@@ -82,6 +91,6 @@ export async function deleteWorkflow(id: string) {
 		revalidatePath('/workflow');
 		return { success: true };
 	} catch (error) {
-		throw handlePrismaError(error, `Error al eliminar el workflow con ID ${id}`);
+		handlePrismaError(error, `Error al eliminar el workflow con ID ${id}`);
 	}
 }

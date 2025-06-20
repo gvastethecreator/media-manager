@@ -1,18 +1,18 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { createTagAction, updateTagAction } from '@/app/actions/tags';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import toastService from '@/services/toast.service';
 import { generateTagColor, generateTagEmoji } from '@/transformers/tag/serializers';
-import type { TagUpdate } from '@/types/entities/tag';
+import type { TagUpdateInput } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag';
 import type { TagBase as UITag } from '@/types/entities/tag/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación
@@ -60,7 +60,7 @@ export function CreateTagForm({
 	onCancel,
 	onPreview,
 }: CreateTagFormProps) {
-	const [_isSubmitting, setIsSubmitting] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
 
 	// Inicializar formulario con valores por defecto
 	const form = useForm<FormValues>({
@@ -90,7 +90,7 @@ export function CreateTagForm({
 	}, [form, isEditing, tag]);
 
 	// Generar color y emoji basados en el nombre
-	const _generateSuggestions = useCallback(() => {
+	const generateSuggestions = useCallback(() => {
 		const name = form.getValues('name');
 		const category = form.getValues('category');
 
@@ -104,7 +104,7 @@ export function CreateTagForm({
 	}, [form]);
 
 	// Manejar envío del formulario
-	const _onSubmit = async (data: FormValues) => {
+	const onSubmit = async (data: FormValues) => {
 		try {
 			setIsSubmitting(true);
 
@@ -120,8 +120,7 @@ export function CreateTagForm({
 			// Crear o actualizar etiqueta
 			if (isEditing && tag) {
 				// Añadir el id para actualizar
-				const updateData: TagUpdate = {
-					id: tag.id,
+				const updateData: TagUpdateInput = {
 					...tagData,
 				};
 
