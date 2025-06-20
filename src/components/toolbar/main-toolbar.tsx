@@ -472,7 +472,7 @@ export function ViewToolbar({
 	return (
 		<div className="flex items-center justify-between h-10 px-2 border-b">
 			<div className="flex items-center">
-				<ViewBreadcrumbs />
+				<ViewBreadcrumbs currentView={currentView} />
 				{renderSelectionActions()}
 			</div>
 

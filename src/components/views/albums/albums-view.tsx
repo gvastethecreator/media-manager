@@ -54,7 +54,7 @@ MemoizedAlbumCard.displayName = 'MemoizedAlbumCard';
 
 export function AlbumsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { selectAlbum, openViewer } = useAlbumStore();
+	const { selectAlbum } = useAlbumStore();
 	const _router = useRouter();
 	const [albums, setAlbums] = useState<AlbumWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -92,9 +92,8 @@ export function AlbumsView(_props: ViewProps) {
 			viewLogger.info('🖱️ Click en álbum:', albumData.name);
 			setCurrentView('album-content');
 
-			// Seleccionar el álbum y abrir el visor
+			// Seleccionar el álbum
 			selectAlbum(albumData.id);
-			openViewer(albumData.id);
 		},
 		[setCurrentView, selectAlbum, openViewer]
 	);

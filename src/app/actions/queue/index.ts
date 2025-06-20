@@ -19,9 +19,9 @@ export const pauseQueue = ControlActions.pauseQueue;
 export const resumeQueue = ControlActions.resumeQueue;
 
 // De crud.actions
-export const createJob = CrudActions.createJob;
-export const updateJob = CrudActions.updateJob;
-export const deleteJob = CrudActions.deleteJob;
+export const createQueueJob = CrudActions.createQueueJob;
+export const updateQueueJob = CrudActions.updateQueueJob;
+export const deleteQueueJob = CrudActions.deleteQueueJob;
 
 // De process.actions
 export const processJob = ProcessActions.processJob;

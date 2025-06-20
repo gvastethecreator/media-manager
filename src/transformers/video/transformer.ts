@@ -1,30 +1,21 @@
 /**
  * @file Transformador principal para la entidad Video.
  * @module transformers/video/transformer
- * @description Contiene la lógica para convertir un objeto Video de Prisma a nuestro tipo canónico.
+ * @description Convierte objetos Video de la base de datos a nuestro tipo canónico.
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoComplete } from '@/types/entities/video';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('VideoTransformer');
 
-// Define el tipo de payload de Prisma que esperamos, con todas las relaciones.
-type VideoFromPrisma = Prisma.VideoGetPayload<{
-	include: {
-		folder: true;
-		tags: true;
-		albums: true;
-		collections: true;
-		// Añade aquí otras relaciones que necesites en el tipo completo
-	};
-}>;
+// Tipo genérico del payload proveniente de la BD ✅
+type VideoFromPrisma = Record<string, any>;
 
 /**
- * 🔄 Transforma un objeto Video de Prisma a nuestro tipo canónico VideoComplete.
- * @param videoFromPrisma - El objeto de video obtenido de Prisma.
+ * 🔄 Transforma un registro de video de la BD a `VideoComplete`.
+ * @param videoFromPrisma - El objeto de video obtenido de la BD.
  * @returns Un objeto VideoComplete.
  * @throws {TransformerError} si la transformación falla.
  */
@@ -38,7 +29,7 @@ export function fromPrismaVideo(videoFromPrisma: VideoFromPrisma): VideoComplete
 			thumbnail: videoFromPrisma.thumbnail ? Buffer.from(videoFromPrisma.thumbnail) : null,
 		};
 	} catch (error) {
-		logger.error(`Error transformando video desde Prisma: ${videoFromPrisma.id}`, {
+                logger.error(`Error transformando video desde la BD: ${videoFromPrisma.id}`, {
 			error,
 			videoId: videoFromPrisma.id,
 		});
@@ -47,8 +38,8 @@ export function fromPrismaVideo(videoFromPrisma: VideoFromPrisma): VideoComplete
 }
 
 /**
- * 🔄 Transforma un array de videos de Prisma a un array de VideoComplete.
- * @param videos - El array de videos de Prisma.
+ * 🔄 Transforma un array de registros de video a `VideoComplete`.
+ * @param videos - El array de videos recibido de la BD.
  * @returns Un array de VideoComplete.
  */
 export function fromPrismaVideos(videos: VideoFromPrisma[]): VideoComplete[] {

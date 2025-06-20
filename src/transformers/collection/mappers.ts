@@ -3,7 +3,7 @@
  * @module transformers/collection/mappers
  */
 
-import type { Prisma } from '@prisma/client';
+// ⚠️ Evitamos importar tipos de Prisma para mantener el código desacoplado
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	CollectionCreateInput,
@@ -16,20 +16,22 @@ import { TransformerError } from '@/utils/transformers/errors';
 const logger = serverLogger.withContext('CollectionMapper');
 
 /**
- * 🔄 Mapea un `CollectionCreateInput` a un `Prisma.CollectionCreateInput`.
+ * 🔄 Mapea un `CollectionCreateInput` a un objeto compatible con Prisma.
  */
-export function mapCreateCollectionDataToPrisma(input: CollectionCreateInput): Prisma.CollectionCreateInput {
+export function mapCreateCollectionDataToPrisma(input: CollectionCreateInput): Record<string, any> {
 	try {
 		const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = input;
 
-		return {
-			...rest,
+               const prismaData: Record<string, any> = {
+                       ...rest,
 			images: imageIds ? { connect: imageIds.map((id) => ({ id })) } : undefined,
 			tags: tagIds ? { connect: tagIds.map((id) => ({ id })) } : undefined,
 			groups: groupIds ? { connect: groupIds.map((id) => ({ id })) } : undefined,
 			properties: propertyIds ? { connect: propertyIds.map((id) => ({ id })) } : undefined,
 			wildcards: wildcardIds ? { connect: wildcardIds.map((id) => ({ id })) } : undefined,
-		};
+               };
+
+               return prismaData;
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de colección', { error, input });
 		throw new TransformerError('Error al mapear datos de creación de colección.');
@@ -37,20 +39,22 @@ export function mapCreateCollectionDataToPrisma(input: CollectionCreateInput): P
 }
 
 /**
- * 🔄 Mapea un `CollectionUpdateInput` a un `Prisma.CollectionUpdateInput`.
+ * 🔄 Mapea un `CollectionUpdateInput` a un objeto compatible con Prisma.
  */
-export function mapUpdateCollectionDataToPrisma(input: CollectionUpdateInput): Prisma.CollectionUpdateInput {
+export function mapUpdateCollectionDataToPrisma(input: CollectionUpdateInput): Record<string, any> {
 	try {
 		const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = input;
 
-		return {
-			...rest,
+               const prismaData: Record<string, any> = {
+                       ...rest,
 			images: imageIds ? { set: imageIds.map((id) => ({ id })) } : undefined,
 			tags: tagIds ? { set: tagIds.map((id) => ({ id })) } : undefined,
 			groups: groupIds ? { set: groupIds.map((id) => ({ id })) } : undefined,
 			properties: propertyIds ? { set: propertyIds.map((id) => ({ id })) } : undefined,
 			wildcards: wildcardIds ? { set: wildcardIds.map((id) => ({ id })) } : undefined,
-		};
+               };
+
+               return prismaData;
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de colección', { error, input });
 		throw new TransformerError('Error al mapear datos de actualización de colección.');
@@ -58,16 +62,16 @@ export function mapUpdateCollectionDataToPrisma(input: CollectionUpdateInput): P
 }
 
 /**
- * 🔄 Mapea `CollectionSearchOptions` a `Prisma.CollectionFindManyArgs`.
+ * 🔄 Mapea `CollectionSearchOptions` a un objeto de búsqueda compatible con Prisma.
  */
-export function mapCollectionSearchOptionsToPrisma(options: CollectionSearchOptions): Prisma.CollectionFindManyArgs {
+export function mapCollectionSearchOptionsToPrisma(options: CollectionSearchOptions): Record<string, any> {
 	const { filters, skip, take, orderBy, include } = options;
 
 	return {
-		where: filters ? mapCollectionFiltersToPrisma(filters) : undefined,
-		skip,
-		take,
-		orderBy,
+               where: filters ? mapCollectionFiltersToPrisma(filters) : undefined,
+               skip,
+               take,
+               orderBy,
 		include: include
 			? {
 					images: include.images || false,
@@ -81,10 +85,10 @@ export function mapCollectionSearchOptionsToPrisma(options: CollectionSearchOpti
 }
 
 /**
- * 🔄 Mapea `CollectionFilters` a `Prisma.CollectionWhereInput`.
+ * 🔄 Mapea `CollectionFilters` a un objeto `where` compatible con Prisma.
  */
-function mapCollectionFiltersToPrisma(filters: CollectionFilters): Prisma.CollectionWhereInput {
-	const where: Prisma.CollectionWhereInput = {};
+function mapCollectionFiltersToPrisma(filters: CollectionFilters): Record<string, any> {
+       const where: Record<string, any> = {};
 
 	if (filters.search) {
 		where.OR = [

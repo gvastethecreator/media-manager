@@ -16,7 +16,7 @@ import { Switch } from '@/components/ui/switch';
 import toastService from '@/services/toast.service';
 import type { WorldItemCreateInput } from '@/types/entities/world-item';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
-import type { WorldItemComplete } from '@/types/entities/world-item/extended';
+import type { WorldItemComplete } from '@/types/entities/world-item';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación con Zod (solo name requerido, el resto opcional)

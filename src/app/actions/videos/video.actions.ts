@@ -3,7 +3,7 @@
  * @module app/actions/videos
  */
 
-import { revalidatePathClient } from '@/app/actions/revalidate';
+import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { videoService } from '@/services/video-service-export';
 import type {
@@ -67,8 +67,8 @@ export async function createVideo(data: CreateVideoInput): Promise<VideoExtended
 		const video = await videoService.createVideo(data);
 
 		// Revalidar rutas
-		await revalidatePathClient('/videos');
-		await revalidatePathClient(`/folders/${data.folderId}`);
+		await revalidatePath('/videos');
+		await revalidatePath(`/folders/${data.folderId}`);
 
 		return video;
 	} catch (error) {
@@ -89,10 +89,10 @@ export async function updateVideo(id: string, data: UpdateVideoInput): Promise<V
 		const video = await videoService.updateVideo(id, data);
 
 		// Revalidar rutas
-		await revalidatePathClient('/videos');
-		await revalidatePathClient(`/videos/${id}`);
+		await revalidatePath('/videos');
+		await revalidatePath(`/videos/${id}`);
 		if (data.folderId) {
-			await revalidatePathClient(`/folders/${data.folderId}`);
+			await revalidatePath(`/folders/${data.folderId}`);
 		}
 
 		return video;
@@ -118,9 +118,9 @@ export async function deleteVideo(id: string): Promise<boolean> {
 		const result = await videoService.deleteVideo(id);
 
 		// Revalidar rutas
-		await revalidatePathClient('/videos');
+		await revalidatePath('/videos');
 		if (folderId) {
-			await revalidatePathClient(`/folders/${folderId}`);
+			await revalidatePath(`/folders/${folderId}`);
 		}
 
 		return result;
@@ -142,9 +142,9 @@ export async function toggleVideoFavorite(id: string, isFavorite: boolean): Prom
 		const video = await videoService.toggleVideoFavorite(id, isFavorite);
 
 		// Revalidar rutas
-		await revalidatePathClient('/videos');
-		await revalidatePathClient(`/videos/${id}`);
-		await revalidatePathClient('/favorites');
+		await revalidatePath('/videos');
+		await revalidatePath(`/videos/${id}`);
+		await revalidatePath('/favorites');
 
 		return video;
 	} catch (error) {
@@ -165,8 +165,8 @@ export async function setVideoVisibility(id: string, isPublic: boolean): Promise
 		const video = await videoService.setVideoVisibility(id, isPublic);
 
 		// Revalidar rutas
-		await revalidatePathClient('/videos');
-		await revalidatePathClient(`/videos/${id}`);
+		await revalidatePath('/videos');
+		await revalidatePath(`/videos/${id}`);
 
 		return video;
 	} catch (error) {
@@ -192,12 +192,12 @@ export async function moveVideoToFolder(id: string, folderId: string): Promise<V
 		const video = await videoService.moveVideoToFolder(id, folderId);
 
 		// Revalidar rutas
-		await revalidatePathClient('/videos');
-		await revalidatePathClient(`/videos/${id}`);
+		await revalidatePath('/videos');
+		await revalidatePath(`/videos/${id}`);
 		if (oldFolderId) {
-			await revalidatePathClient(`/folders/${oldFolderId}`);
+			await revalidatePath(`/folders/${oldFolderId}`);
 		}
-		await revalidatePathClient(`/folders/${folderId}`);
+		await revalidatePath(`/folders/${folderId}`);
 
 		return video;
 	} catch (error) {

@@ -13,9 +13,9 @@ const viewLogger = clientLogger.withContext('ConceptContentView');
 
 export function ConceptContentView() {
 	const selectedConcept = useConceptStore(selectSelectedConcept);
-	const [items, setItems] = useState([]);
+	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState(null);
+	const [error, setError] = useState<string | null>(null);
 
 	const loadConceptImages = useCallback(async () => {
 		if (!selectedConcept) {
@@ -43,7 +43,7 @@ export function ConceptContentView() {
 		loadConceptImages();
 	}, [loadConceptImages]);
 
-	const toggleItemSelection = useCallback((item) => {
+	const toggleItemSelection = useCallback((item: FileItem) => {
 		// Implementar la lógica de selección de items si es necesaria
 		viewLogger.info('🔄 Toggle selección de item:', item?.id);
 	}, []);
@@ -55,7 +55,7 @@ export function ConceptContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedConcept?.id ?? null,
 		containerName: selectedConcept?.name ?? null,
-		setCurrentContainer: () => {}, // No es necesario en el nuevo enfoque
+		setCurrentContainer: async () => {}, // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: Lightbulb,
 			title: 'Concepto vacío',

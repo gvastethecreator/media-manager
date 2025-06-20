@@ -4,8 +4,8 @@ import { LightbulbIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import type { ConceptWithStats } from '@/app/actions/concepts/concept.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
+import type { ConceptComplete } from '@/types/entities/concept';
 import { MemoizedConceptCard } from '@/components/cards/concept-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -22,12 +22,12 @@ export function ConceptsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
 	const { selectConcept } = useConceptStore();
 	const router = useRouter();
-	const [concepts, setConcepts] = useState<ConceptWithStats[]>([]);
+	const [concepts, setConcepts] = useState<ConceptComplete[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el hook de eventos optimistas del cliente
-	const [optimisticConcepts, _addEvent] = clientEvents.useEvents<ConceptWithStats[]>(concepts);
+	const [optimisticConcepts, _addEvent] = clientEvents.useEvents<ConceptComplete[]>(concepts);
 
 	const fetchConcepts = useCallback(async () => {
 		try {
@@ -51,7 +51,7 @@ export function ConceptsView(_props: ViewProps) {
 	}, [fetchConcepts]);
 
 	const handleConceptClick = useCallback(
-		(concept: ConceptWithStats) => {
+		(concept: ConceptComplete) => {
 			viewLogger.info('🖱️ Click en concepto:', concept.name);
 			setCurrentView('concept-content');
 			selectConcept(concept);

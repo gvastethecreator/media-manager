@@ -48,10 +48,13 @@ export type ImageFormat = 'jpeg' | 'png' | 'gif' | 'webp' | 'tiff' | 'svg' | 'av
 
 // Tipos para la extracción de metadata
 export interface MetadataOptions {
-	skipExif?: boolean;
-	skipSharp?: boolean;
-	skipParser?: boolean;
-	retry?: RetryConfig;
+        skipExif?: boolean;
+        // Opciones adicionales para ignorar IPTC y XMP 📷
+        skipIptc?: boolean;
+        skipXmp?: boolean;
+        skipSharp?: boolean;
+        skipParser?: boolean;
+        retry?: RetryConfig;
 }
 
 // ELIMINADO: ExtendedFileMetadata - Usar directamente FileMetadata con campos adicionales según sea necesario

@@ -6,7 +6,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { ConceptBase } from '@/types/entities/concept';
 import type { ConceptFilters } from '@/types/entities/concept/extended';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('ConceptMapper');
 
@@ -40,9 +39,9 @@ export enum ConceptSortCriteria {
 }
 
 /**
- * Interfaces para los tipos de Prisma que necesitamos
+ * Tipos internos simplificados para manipular datos sin depender de Prisma
  */
-export interface PrismaConceptCreateInput {
+export interface SimpleConceptCreateInput {
 	name: string;
 	emoji?: string;
 	color?: string;
@@ -54,7 +53,7 @@ export interface PrismaConceptCreateInput {
 	isFavorite?: boolean;
 }
 
-export interface PrismaConceptUpdateInput {
+export interface SimpleConceptUpdateInput {
 	name?: string;
 	emoji?: string;
 	color?: string;
@@ -66,17 +65,17 @@ export interface PrismaConceptUpdateInput {
 	isFavorite?: boolean;
 }
 
-export interface PrismaConceptFindManyArgs {
-	where?: PrismaConceptWhereInput;
-	orderBy?: PrismaConceptOrderByInput;
+export interface SimpleConceptFindManyArgs {
+	where?: SimpleConceptWhereInput;
+	orderBy?: SimpleConceptOrderByInput;
 	skip?: number;
 	take?: number;
 	include?: Record<string, boolean>;
 }
 
-export interface PrismaConceptWhereInput {
-	AND?: PrismaConceptWhereInput[];
-	OR?: PrismaConceptWhereInput[];
+export interface SimpleConceptWhereInput {
+	AND?: SimpleConceptWhereInput[];
+	OR?: SimpleConceptWhereInput[];
 	name?: { contains: string; mode: string };
 	description?: { contains: string; mode: string };
 	content?: { contains: string; mode: string };
@@ -85,7 +84,7 @@ export interface PrismaConceptWhereInput {
 	isFavorite?: boolean;
 }
 
-export interface PrismaConceptOrderByInput {
+export interface SimpleConceptOrderByInput {
 	name?: 'asc' | 'desc';
 	createdAt?: 'asc' | 'desc';
 	updatedAt?: 'asc' | 'desc';
@@ -93,7 +92,7 @@ export interface PrismaConceptOrderByInput {
 }
 
 // Mapa de propiedades para ordenación
-export const CONCEPT_SORT_PROPERTY_MAP: Record<ConceptSortCriteria, keyof Prisma.ConceptOrderByWithRelationInput> = {
+export const CONCEPT_SORT_PROPERTY_MAP: Record<ConceptSortCriteria, string> = {
 	NAME_ASC: 'name',
 	NAME_DESC: 'name',
 	CREATED_AT_ASC: 'createdAt',
@@ -119,7 +118,7 @@ export interface ConceptOperationOptions {
  * @param data Datos para crear el concepto
  * @returns Datos formateados para Prisma
  */
-export function toCreateConceptData(data: Partial<ConceptBase>): Prisma.ConceptCreateInput {
+export function toCreateConceptData(data: Partial<ConceptBase>): Record<string, any> {
 	return {
 		name: data.name || 'Nuevo Concepto',
 		emoji: data.emoji || '💡',
@@ -137,8 +136,8 @@ export function toCreateConceptData(data: Partial<ConceptBase>): Prisma.ConceptC
  * @param data Datos para actualizar el concepto
  * @returns Datos formateados para Prisma
  */
-export function toUpdateConceptData(data: Partial<ConceptBase>): Prisma.ConceptUpdateInput {
-	const result: Prisma.ConceptUpdateInput = {};
+export function toUpdateConceptData(data: Partial<ConceptBase>): Record<string, any> {
+	const result: Record<string, any> = {};
 	if (data.name !== undefined) result.name = data.name;
 	if (data.emoji !== undefined) result.emoji = data.emoji;
 	if (data.color !== undefined) result.color = data.color;
@@ -155,18 +154,18 @@ export function toUpdateConceptData(data: Partial<ConceptBase>): Prisma.ConceptU
  * @param options Opciones de búsqueda
  * @returns Opciones formateadas para Prisma
  */
-export function toSearchOptions(options: ConceptSearchOptions = {}): Prisma.ConceptFindManyArgs {
+export function toSearchOptions(options: ConceptSearchOptions = {}): SimpleConceptFindManyArgs {
 	try {
 		const where = toSearchFilters(options.filters || {});
 		const sortBy = options.sortBy || 'NAME_ASC';
 		const propertyName = CONCEPT_SORT_PROPERTY_MAP[sortBy] || 'name';
 		const direction = sortBy.includes('DESC') ? 'desc' : 'asc';
 
-		const orderBy: Prisma.ConceptOrderByWithRelationInput = {
+		const orderBy: SimpleConceptOrderByInput = {
 			[propertyName]: direction,
 		};
 
-		const result: Prisma.ConceptFindManyArgs = {
+		const result: SimpleConceptFindManyArgs = {
 			where,
 			orderBy,
 		};
@@ -201,9 +200,9 @@ export function toSearchOptions(options: ConceptSearchOptions = {}): Prisma.Conc
  * @param filters Filtros de búsqueda
  * @returns Filtros formateados para Prisma
  */
-export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhereInput {
+export function toSearchFilters(filters: ConceptFilters = {}): SimpleConceptWhereInput {
 	try {
-		const conditions: Prisma.ConceptWhereInput[] = [];
+		const conditions: SimpleConceptWhereInput[] = [];
 
 		if (filters.search) {
 			const textFilter = filters.search.trim();
@@ -223,7 +222,7 @@ export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhe
 		}
 
 		if (filters.tags && filters.tags.length > 0) {
-			const tagsConditions: Prisma.ConceptWhereInput[] = filters.tags.map((tag: string) => ({
+			const tagsConditions: SimpleConceptWhereInput[] = filters.tags.map((tag: string) => ({
 				tags: { contains: tag, mode: 'insensitive' },
 			}));
 			conditions.push({ OR: tagsConditions });
@@ -254,7 +253,7 @@ export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhe
 export function toSearchResult(
 	concepts: ConceptBase[],
 	total: number,
-	options: ConceptSearchOptions = {},
+	options: ConceptSearchOptions = {}
 ): ConceptSearchResult {
 	try {
 		const pageSize = options.pageSize ?? 20;
@@ -324,7 +323,7 @@ export function filterConcepts(concepts: ConceptBase[], filters: ConceptFilters 
 				(c) =>
 					c.name.toLowerCase().includes(searchLower) ||
 					(c.description && c.description.toLowerCase().includes(searchLower)) ||
-					(c.content && c.content.toLowerCase().includes(searchLower)),
+					(c.content && c.content.toLowerCase().includes(searchLower))
 			);
 		}
 

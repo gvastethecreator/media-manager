@@ -17,7 +17,7 @@ export async function GET() {
 		logger.info('Solicitud de estadísticas del sistema recibida');
 
 		// Obtener estadísticas del sistema
-		const stats = systemMonitor.getStats();
+                const stats = systemMonitor.getSystemStats();
 
 		// Formatear estadísticas para la API
 		const formattedStats = {

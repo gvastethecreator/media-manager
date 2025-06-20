@@ -20,7 +20,8 @@ import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('PlaceActions');
 
-const PLACE_INCLUDE = {
+// Configuración de relaciones a incluir 🗺️
+const PLACE_INCLUDE: Record<string, any> = {
 	images: {
 		select: { id: true },
 		take: 10,
@@ -98,8 +99,8 @@ export async function getPlaces(): Promise<PlaceComplete[]> {
 	try {
 		logger.info('🏙️ Obteniendo todos los lugares');
 		const prisma = await getPrismaClient();
-		const places = await prisma.place.findMany({
-			include: PLACE_INCLUDE,
+                const places = await prisma.place.findMany({
+                        include: PLACE_INCLUDE as any,
 			orderBy: { name: 'asc' },
 		});
 		return fromPrismaPlaces(places);
@@ -116,9 +117,9 @@ export async function getPlace(id: string): Promise<PlaceComplete | null> {
 	try {
 		logger.info(`🔍 Obteniendo lugar por ID: ${id}`);
 		const prisma = await getPrismaClient();
-		const place = await prisma.place.findUnique({
-			where: { id },
-			include: PLACE_INCLUDE,
+                const place = await prisma.place.findUnique({
+                        where: { id },
+                        include: PLACE_INCLUDE as any,
 		});
 		if (!place) {
 			logger.warn(`Lugar no encontrado: ${id}`);

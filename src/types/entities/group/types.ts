@@ -72,8 +72,73 @@ export interface GroupBase {
  * Tipo extendido que incluye contador de items
  */
 export type Group = GroupBase & {
-	itemsCount?: number;
+        itemsCount?: number;
 };
+
+/**
+ * Relaciones asociadas a un Group 📎
+ */
+export interface GroupRelations {
+        images?: Array<{ id: string }>;
+        videos?: Array<{ id: string }>;
+        albums?: Array<{ id: string }>;
+        collections?: Array<{ id: string }>;
+        tags?: Array<{ id: string }>;
+        characters?: Array<{ id: string }>;
+        places?: Array<{ id: string }>;
+        worldItems?: Array<{ id: string }>;
+        concepts?: Array<{ id: string }>;
+        prompts?: Array<{ id: string }>;
+        notes?: Array<{ id: string }>;
+        wildcards?: Array<{ id: string }>;
+        properties?: Array<{ id: string }>;
+}
+
+/**
+ * Conteos de relaciones de un Group 🔢
+ */
+export interface GroupCounts {
+        images?: number;
+        videos?: number;
+        albums?: number;
+        collections?: number;
+        tags?: number;
+        characters?: number;
+        places?: number;
+        worldItems?: number;
+        concepts?: number;
+        prompts?: number;
+        notes?: number;
+        wildcards?: number;
+        properties?: number;
+}
+
+/**
+ * Grupo completo con relaciones y conteos 🌟
+ */
+export type GroupComplete = GroupBase & GroupRelations & { _count: GroupCounts };
+
+/**
+ * Opciones para el transformador de grupos ⚙️
+ */
+export interface GroupTransformerOptions {
+        includeRelations?: boolean;
+        includeCount?: boolean;
+}
+
+/**
+ * Versión extendida de Group para la UI ✨
+ */
+export interface GroupExtended extends GroupComplete {
+        isSelected?: boolean;
+        isHighlighted?: boolean;
+        isEditing?: boolean;
+        isExpanded?: boolean;
+        isLoading?: boolean;
+        hasError?: boolean;
+        isDragging?: boolean;
+        isDropTarget?: boolean;
+}
 
 /**
  * Input para creación
@@ -153,6 +218,80 @@ export type GroupWithStats = GroupBase & {
 		lastUpdated: Date;
 	};
 };
+
+/** Imagen para un elemento de lista de grupos 🖼️ */
+export interface GroupListItemImage {
+        url: string;
+}
+
+/** Elemento de lista para la vista de grupos */
+export interface GroupListItem {
+        id: string;
+        name: string;
+        emoji: string;
+        color: string;
+        category: string;
+        isFavorite: boolean;
+        selected: boolean;
+        images: GroupListItemImage[];
+        imageCount: number;
+        videoCount: number;
+        createdAt: Date;
+        updatedAt: Date;
+}
+
+/** Tarjeta individual de grupo */
+export interface GroupCard {
+        id: string;
+        name: string;
+        emoji: string;
+        color: string;
+        category: string;
+        description: string | null;
+        isFavorite: boolean;
+        selected: boolean;
+        imageUrl: string;
+        imageCount: number;
+        videoCount: number;
+        createdAt: Date;
+        updatedAt: Date;
+}
+
+/** Parámetros de búsqueda para grupos */
+export interface GroupSearchParams {
+        search?: string;
+        category?: string;
+        isFavorite?: boolean;
+        page?: number;
+        pageSize?: number;
+        sortBy?: string;
+        sortDirection?: 'asc' | 'desc';
+}
+
+/** Resultado de búsqueda de grupos */
+export interface GroupSearchResult {
+        items: GroupListItem[];
+        pagination: {
+                page: number;
+                pageSize: number;
+                totalItems: number;
+                totalPages: number;
+                hasMore: boolean;
+        };
+}
+
+/** Props para listado de grupos */
+export interface GroupListProps {
+        items: GroupListItem[];
+        filters: Record<string, any>;
+        pagination: {
+                page: number;
+                pageSize: number;
+                totalItems: number;
+                totalPages: number;
+                hasMore: boolean;
+        };
+}
 
 // Alias para compatibilidad con código existente
 export type CreateGroupData = GroupCreateInput;

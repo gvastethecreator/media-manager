@@ -113,7 +113,7 @@ export function LogViewer({
 						className="h-8 text-sm"
 					/>
 					<div className="flex items-center space-x-2">
-						<Switch id="show-timestamp" checked={showTimestamp} onCheckedChange={setShowTimestamp} size="sm" />
+						<Switch id="show-timestamp" checked={showTimestamp} onCheckedChange={setShowTimestamp} />
 						<Label htmlFor="show-timestamp" className="text-xs">
 							Timestamp
 						</Label>
@@ -168,7 +168,7 @@ export function LogViewer({
 									<span className="mr-1">{LOG_ICONS[log.level]}</span>
 									{log.context && <span className="font-semibold mr-1">[{log.context}]</span>}
 									<span>{log.message}</span>
-									{log.data && (
+									{Boolean(log.data) && (
 										<pre className="mt-1 text-xs overflow-x-auto">
 											{typeof log.data === 'string' ? log.data : JSON.stringify(log.data, null, 2)}
 										</pre>

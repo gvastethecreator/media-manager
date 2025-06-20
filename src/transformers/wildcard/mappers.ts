@@ -3,7 +3,6 @@
  * @module transformers/wildcard/mappers
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
 	WildcardCreateInput,
@@ -16,9 +15,9 @@ import { TransformerError } from '@/utils/transformers/errors';
 const logger = serverLogger.withContext('WildcardMappers');
 
 /**
- * 🔄 Mapea un `WildcardCreateInput` a un `Prisma.WildcardCreateInput`.
+ * 🔄 Mapea un `WildcardCreateInput` a un objeto compatible con la BD.
  */
-export function mapCreateWildcardDataToPrisma(input: WildcardCreateInput): Prisma.WildcardCreateInput {
+export function mapCreateWildcardDataToPrisma(input: WildcardCreateInput): Record<string, any> {
 	try {
 		const { parentId, children, ...rest } = input;
 		return {
@@ -33,12 +32,12 @@ export function mapCreateWildcardDataToPrisma(input: WildcardCreateInput): Prism
 }
 
 /**
- * 🔄 Mapea un `WildcardUpdateInput` a un `Prisma.WildcardUpdateInput`.
+ * 🔄 Mapea `WildcardUpdateInput` para actualizar en la BD.
  */
-export function mapUpdateWildcardDataToPrisma(input: WildcardUpdateInput): Prisma.WildcardUpdateInput {
+export function mapUpdateWildcardDataToPrisma(input: WildcardUpdateInput): Record<string, any> {
 	try {
 		const { parentId, children, ...rest } = input;
-		const prismaData: Prisma.WildcardUpdateInput = { ...rest };
+		const prismaData: Record<string, any> = { ...rest };
 
 		if (parentId !== undefined) {
 			prismaData.parent = parentId ? { connect: { id: parentId } } : { disconnect: true };
@@ -54,9 +53,9 @@ export function mapUpdateWildcardDataToPrisma(input: WildcardUpdateInput): Prism
 }
 
 /**
- * 🔄 Mapea `WildcardSearchOptions` a `Prisma.WildcardFindManyArgs`.
+ * 🔄 Mapea `WildcardSearchOptions` a argumentos de busqueda.
  */
-export function mapWildcardSearchOptionsToPrisma(options: WildcardSearchOptions): Prisma.WildcardFindManyArgs {
+export function mapWildcardSearchOptionsToPrisma(options: WildcardSearchOptions): Record<string, any> {
 	const { filters, ...rest } = options;
 	return {
 		...rest,
@@ -65,10 +64,10 @@ export function mapWildcardSearchOptionsToPrisma(options: WildcardSearchOptions)
 }
 
 /**
- * 🔄 Mapea `WildcardFilters` a `Prisma.WildcardWhereInput`.
+ * 🔄 Mapea `WildcardFilters` a condiciones de busqueda.
  */
-function mapWildcardFiltersToPrisma(filters: WildcardFilters): Prisma.WildcardWhereInput {
-	const where: Prisma.WildcardWhereInput = {};
+function mapWildcardFiltersToPrisma(filters: WildcardFilters): Record<string, any> {
+	const where: Record<string, any> = {};
 
 	if (filters.search) {
 		where.OR = [

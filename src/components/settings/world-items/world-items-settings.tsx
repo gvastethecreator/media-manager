@@ -2,7 +2,8 @@
 
 import { Filter, Info, Loader2, Package, PlusCircle, Trash, X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { deleteWorldItem, getWorldItems, type WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
+import { deleteWorldItem, getWorldItems } from '@/app/actions/world-items/world-item.actions';
+import type { WorldItemExtended } from '@/types/entities/world-item';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,11 +15,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
 import type { WorldItem } from '@/types/entities/world-item';
+
+type WorldItemStatsItem = WorldItemExtended & {
+	totalSize: number;
+	imageCount?: number;
+	recentImages?: string[];
+};
 import { formatBytes } from '@/utils/file/helpers';
 import { CreateWorldItemForm } from './create-world-item-form';
 
 export function WorldItemsSettings() {
-	const [worldItems, setWorldItems] = useState<WorldItemWithStats[]>([]);
+	const [worldItems, setWorldItems] = useState<WorldItemStatsItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [selectedItem, setSelectedItem] = useState<WorldItem | null>(null);
@@ -37,7 +44,7 @@ export function WorldItemsSettings() {
 			try {
 				setIsLoading(true);
 				const data = await getWorldItems();
-				setWorldItems(data);
+				setWorldItems(data as WorldItemStatsItem[]);
 			} catch (err) {
 				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				setError(errorMessage);
@@ -148,7 +155,7 @@ export function WorldItemsSettings() {
 
 	// Manejar creación exitosa
 	const handleItemCreated = useCallback((newItem: WorldItem) => {
-		setWorldItems((prev) => [...prev, newItem as unknown as WorldItemWithStats]);
+		setWorldItems((prev) => [...prev, newItem as unknown as WorldItemStatsItem]);
 		toastService.worldItem.created();
 		setPreviewData(null);
 	}, []);
@@ -156,7 +163,7 @@ export function WorldItemsSettings() {
 	// Manejar actualización exitosa
 	const handleItemUpdated = useCallback((updatedItem: WorldItem) => {
 		setWorldItems((prev) =>
-			prev.map((item) => (item.id === updatedItem.id ? ({ ...item, ...updatedItem } as WorldItemWithStats) : item))
+			prev.map((item) => (item.id === updatedItem.id ? ({ ...item, ...updatedItem } as WorldItemStatsItem) : item))
 		);
 		setIsEditing(false);
 		setSelectedItem(null);

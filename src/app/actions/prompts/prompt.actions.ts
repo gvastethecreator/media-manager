@@ -13,6 +13,7 @@ import {
     toExtendedPrompt,
     toPromptWithStats,
 } from '@/transformers/prompt';
+import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service';
 import { type ExtendedPrompt } from '@/transformers/prompt/serializers';
 import type {
     PromptBase,
@@ -249,7 +250,7 @@ export async function updatePrompt(id: string, data: PromptUpdateInput): Promise
 		promptLogger.info('📝 Actualizando prompt:', id);
 
 		// Usar el mapper para preparar los datos
-		const updateData = mapUpdatePromptDataToPrisma(data);
+                const updateData = mapUpdatePromptDataToPrisma(id, data);
 
 		const prisma = await getPrismaClient();
 		const prompt = await prisma.prompt.update({
@@ -614,19 +615,9 @@ export async function getPromptImages(promptId: string): Promise<{ images: FileI
 		}
 
 		// Transformar a FileItem[]
-		const images: FileItem[] = prompt.images.map((image) => ({
-			id: image.id,
-			name: image.name,
-			path: image.path,
-			type: 'image',
-			size: image.size,
-			width: image.width,
-			height: image.height,
-			src: `/api/images/${image.id}/thumbnail`,
-			createdAt: image.createdAt,
-			updatedAt: image.updatedAt,
-			tags: [],
-		}));
+                const images: FileItem[] = prompt.images.map((image) =>
+                        convertServerImageToFileItem(image as unknown as ServerImage)
+                );
 
 		promptLogger.info('✅ Imágenes del prompt obtenidas:', { promptId, count: images.length });
 		return { images };

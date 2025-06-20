@@ -16,7 +16,7 @@ export async function GET() {
 		logger.info('Solicitud de estadísticas de la aplicación recibida');
 
 		// Obtener estadísticas de la aplicación
-		const rawStats = appMonitor.getStats();
+                const rawStats = appMonitor.getAppStats();
 
 		// Formatear estadísticas para la API
 		const stats = {

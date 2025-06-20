@@ -46,7 +46,7 @@ export async function getProfiles(): Promise<ProfileBase[]> {
 export async function getProfile(id: string): Promise<ProfileBase> {
 	try {
 		profileLogger.info(`🔍 Obteniendo perfil: ${id}`);
-		const profile = await profileService.getById(id);
+                const profile = await profileService.getProfileById(id);
 		if (!profile) {
 			throw new Error(`Perfil con ID ${id} no encontrado`);
 		}
@@ -81,7 +81,7 @@ export async function updateProfile(id: string, data: ProfileUpdateInput): Promi
 export async function deleteProfile(id: string): Promise<void> {
 	try {
 		profileLogger.info(`🗑️ Eliminando perfil: ${id}`);
-		await profileService.delete(id);
+                await profileService.deleteProfile(id);
 		await revalidateProfilePaths();
 	} catch (error) {
 		handleProfileError(error, `No se pudo eliminar el perfil ${id}`);

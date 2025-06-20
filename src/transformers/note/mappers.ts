@@ -3,7 +3,6 @@
  * @module transformers/note/mappers
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { NoteBase, NoteCreateInput, NoteFilters, NoteSearchOptions, NoteUpdateInput } from '@/types/entities/note';
 
@@ -13,7 +12,7 @@ const logger = serverLogger.withContext('NoteMappers');
  * 🔄 Mapea datos de creación de nota a formato compatible con Prisma.
  * Las relaciones (IDs) se deben gestionar en la capa de servicio.
  */
-export function mapCreateNoteDataToPrisma(data: NoteCreateInput): Prisma.NoteCreateInput {
+export function mapCreateNoteDataToPrisma(data: NoteCreateInput): Record<string, any> {
 	try {
 		const {
 			images,
@@ -50,7 +49,7 @@ export function mapCreateNoteDataToPrisma(data: NoteCreateInput): Prisma.NoteCre
  * 🔄 Mapea datos de actualización de nota a formato compatible con Prisma.
  * Las relaciones (IDs) se deben gestionar en la capa de servicio.
  */
-export function mapUpdateNoteDataToPrisma(data: NoteUpdateInput): Prisma.NoteUpdateInput {
+export function mapUpdateNoteDataToPrisma(data: NoteUpdateInput): Record<string, any> {
 	try {
 		const {
 			images,
@@ -78,7 +77,7 @@ export function mapUpdateNoteDataToPrisma(data: NoteUpdateInput): Prisma.NoteUpd
 /**
  * 🔄 Mapea un objeto Note de Prisma a nuestro tipo canónico NoteBase.
  */
-export function fromPrismaNote(note: Prisma.NoteGetPayload<null>): NoteBase {
+export function fromPrismaNote(note: any): NoteBase {
 	if (!note) {
 		throw new Error('Se requiere un objeto de nota de Prisma para la transformación.');
 	}
@@ -88,7 +87,7 @@ export function fromPrismaNote(note: Prisma.NoteGetPayload<null>): NoteBase {
 /**
  * 🔄 Mapea opciones de búsqueda de Note a formato Prisma.
  */
-export function mapNoteSearchOptionsToPrisma(options: NoteSearchOptions): Prisma.NoteFindManyArgs {
+export function mapNoteSearchOptionsToPrisma(options: NoteSearchOptions): Record<string, any> {
 	const { where, include, ...rest } = options;
 
 	return {
@@ -98,14 +97,11 @@ export function mapNoteSearchOptionsToPrisma(options: NoteSearchOptions): Prisma
 	};
 }
 
-function mapNoteFiltersToPrisma(filters: NoteFilters): Prisma.NoteWhereInput {
-	const where: Prisma.NoteWhereInput = {};
+function mapNoteFiltersToPrisma(filters: NoteFilters): Record<string, any> {
+	const where: Record<string, any> = {};
 
 	if (filters.searchQuery) {
-		where.OR = [
-			{ title: { contains: filters.searchQuery } },
-			{ content: { contains: filters.searchQuery } },
-		];
+		where.OR = [{ title: { contains: filters.searchQuery } }, { content: { contains: filters.searchQuery } }];
 	}
 
 	if (filters.categories?.length) {

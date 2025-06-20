@@ -51,14 +51,14 @@ async function createDefaultSettings(): Promise<Settings> {
 
 		// Guardar en la base de datos
 		const prisma = await getPrismaClient();
-		await prisma.settings.upsert({
-			where: { id: 'default' },
-			update: {},
-			create: {
-				id: 'default',
-				data: defaultData,
-			},
-		});
+                await prisma.settings.upsert({
+                        where: { id: 'default' },
+                        update: {},
+                        create: {
+                                id: 'default',
+                                data: serializeSettings(defaultData),
+                        },
+                });
 
 		// Deserializar y devolver
 		return deserializeSettings(defaultData);
@@ -202,17 +202,17 @@ export async function resetSystemSettings(): Promise<Settings> {
 
 		// Actualizar en la base de datos
 		const prisma = await getPrismaClient();
-		await prisma.settings.upsert({
-			where: { id: 'default' },
-			update: {
-				data: defaultSettings,
-				updatedAt: new Date(),
-			},
-			create: {
-				id: 'default',
-				data: defaultSettings,
-			},
-		});
+                await prisma.settings.upsert({
+                        where: { id: 'default' },
+                        update: {
+                                data: serializeSettings(defaultSettings),
+                                updatedAt: new Date(),
+                        },
+                        create: {
+                                id: 'default',
+                                data: serializeSettings(defaultSettings),
+                        },
+                });
 
 		// Revalidar rutas
 		await revalidateAllPaths();

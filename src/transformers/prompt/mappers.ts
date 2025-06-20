@@ -16,109 +16,29 @@ import { serializeParameters, serializeTags } from './serializers';
 
 const logger = serverLogger.withContext('PromptMappers');
 
-/**
- * Tipo para Prisma.PromptCreateInput
- */
-export interface PrismaPromptCreateInput {
-	name: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	content?: string;
-	purpose?: string;
-	category?: string;
-	parameters?: string;
-	tags?: string;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	groups?: {
-		connect: Array<{ id: string }>;
-	};
-	properties?: {
-		connect: Array<{ id: string }>;
-	};
-	wildcards?: {
-		connect: Array<{ id: string }>;
-	};
-	tagEntities?: {
-		connect: Array<{ id: string }>;
-	};
-}
-
-/**
- * Tipo para Prisma.PromptUpdateInput
- */
-export interface PrismaPromptUpdateInput {
-	name?: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	content?: string;
-	purpose?: string;
-	category?: string;
-	parameters?: string;
-	tags?: string;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	groups?: {
-		set: Array<{ id: string }>;
-	};
-	properties?: {
-		set: Array<{ id: string }>;
-	};
-	wildcards?: {
-		set: Array<{ id: string }>;
-	};
-	tagEntities?: {
-		set: Array<{ id: string }>;
-	};
-}
-
-/**
- * Tipo para Prisma.PromptUpdateArgs
- */
+// Tipos genéricos para no depender de Prisma directamente 🪄
+export type PrismaPromptCreateInput = Record<string, any>;
+export type PrismaPromptUpdateInput = Record<string, any>;
 export interface PrismaPromptUpdateArgs {
 	where: { id: string };
-	data: PrismaPromptUpdateInput;
+	data: Record<string, any>;
 }
-
-/**
- * Tipo para Prisma.PromptWhereInput
- */
-export interface PrismaPromptWhereInput {
-	OR?: Array<{
-		name?: { contains: string; mode: 'insensitive' };
-		description?: { contains: string; mode: 'insensitive' };
-		content?: { contains: string; mode: 'insensitive' };
-	}>;
-	category?: { in: string[] };
-	purpose?: { in: string[] };
-	isFavorite?: boolean;
-	content?: { contains: string; mode: 'insensitive' };
-}
-
-/**
- * Tipo para Prisma.PromptOrderByWithRelationInput
- */
-export interface PrismaPromptOrderByWithRelationInput {
-	name?: 'asc' | 'desc';
-	createdAt?: 'asc' | 'desc';
-	updatedAt?: 'asc' | 'desc';
-}
+export type PrismaPromptWhereInput = Record<string, any>;
+export type PrismaPromptOrderByWithRelationInput = Record<string, any>;
 
 /**
  * 🔄 Mapea datos de creación de Prompt a formato Prisma
  * @param data Datos de creación
  * @returns Objeto compatible con Prisma.PromptCreateInput
  */
-export function mapCreatePromptDataToPrisma(data: CreatePromptData): PrismaPromptCreateInput {
+export function mapCreatePromptDataToPrisma(data: CreatePromptData): Record<string, any> {
 	try {
 		// Serializar arrays y objetos a JSON si es necesario
 		const parameters = typeof data.parameters === 'string' ? data.parameters : serializeParameters(data.parameters);
 		const tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags);
 
 		// Crear objeto base
-		const promptData: PrismaPromptCreateInput = {
+		const promptData: Record<string, any> = {
 			name: data.name,
 			emoji: data.emoji || '💬',
 			color: data.color || '#3b82f6',
@@ -175,7 +95,7 @@ export function mapCreatePromptDataToPrisma(data: CreatePromptData): PrismaPromp
 export function mapUpdatePromptDataToPrisma(id: string, data: UpdatePromptData): PrismaPromptUpdateArgs {
 	try {
 		// Preparar datos base (solo incluir campos proporcionados)
-		const updateData: PrismaPromptUpdateInput = {};
+		const updateData: Record<string, any> = {};
 
 		// Asignar campos simples si están definidos
 		if (data.name !== undefined) updateData.name = data.name;
@@ -239,9 +159,9 @@ export function mapUpdatePromptDataToPrisma(id: string, data: UpdatePromptData):
  * @param filters Filtros para consultar prompts
  * @returns Objeto compatible con Prisma.PromptWhereInput
  */
-export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): PrismaPromptWhereInput {
+export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): Record<string, any> {
 	try {
-		const where: PrismaPromptWhereInput = {};
+		const where: Record<string, any> = {};
 
 		// Búsqueda por texto
 		if (filters.searchQuery) {
@@ -286,7 +206,7 @@ export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): PrismaPro
  */
 export function mapPromptSortCriteriaToPrisma(
 	sortBy: PromptSortCriteria = PromptSortCriteria.UPDATED_DESC
-): PrismaPromptOrderByWithRelationInput {
+): Record<string, any> {
 	// Extraer campo y dirección del criterio
 	const [field, direction] = sortBy.split(':');
 	const sortDirection = direction === 'asc' ? 'asc' : 'desc';

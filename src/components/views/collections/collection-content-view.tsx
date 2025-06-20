@@ -2,7 +2,11 @@
 
 import { Library } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { getCollectionImages, removeImageFromCollection } from '@/app/actions/collections/collection.actions';
+import {
+	addImageToCollection,
+	getCollectionImages,
+	removeImageFromCollection,
+} from '@/app/actions/collections/collection.actions';
 import { BaseContentView, ContentViewProvider } from '@/components/views/base';
 import type { CollectionContentProps } from '@/components/views/base/types';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -12,8 +16,7 @@ import type { FileItem } from '@/types/files';
 const logger = clientLogger.withContext('CollectionContentView');
 
 export function CollectionContentView() {
-	const { selectedCollectionId, getSelectedCollection, addImageToCollection, selectCollection, isLoading } =
-		useCollectionStore();
+	const { selectedCollectionId, getSelectedCollection, selectCollection, isLoading } = useCollectionStore();
 
 	const currentCollection = getSelectedCollection();
 
@@ -32,7 +35,7 @@ export function CollectionContentView() {
 				setLoadingImages(true);
 				logger.info(`🔄 Cargando imágenes para colección: ${selectedCollectionId}`);
 				const images = await getCollectionImages(selectedCollectionId);
-				setCollectionImages(images);
+				setCollectionImages(images as unknown as FileItem[]);
 				setError(null);
 				logger.info(`✅ ${images.length} imágenes cargadas para colección`);
 			} catch (error) {
@@ -69,14 +72,14 @@ export function CollectionContentView() {
 
 				// Recargar imágenes después de la operación
 				const updatedImages = await getCollectionImages(selectedCollectionId);
-				setCollectionImages(updatedImages);
+				setCollectionImages(updatedImages as unknown as FileItem[]);
 				logger.info('✅ Colección actualizada correctamente');
 			} catch (error) {
 				logger.error('❌ Error al modificar colección:', error);
 				setError('Error al modificar la colección');
 			}
 		},
-		[selectedCollectionId, collectionImages, addImageToCollection]
+		[selectedCollectionId, collectionImages]
 	);
 
 	const contentProps: CollectionContentProps = {

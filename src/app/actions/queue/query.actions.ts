@@ -17,6 +17,7 @@ import {
     type QueueJobExtended,
     type QueueJobFilters,
     type QueueJobPaginationOptions,
+    QueueJobStatus,
 } from '@/types/entities/queue-job';
 import { unstable_cache } from 'next/cache';
 
@@ -135,13 +136,13 @@ export async function getRecentQueueJobs(limit = 10): Promise<QueueJobExtended[]
 /**
  * Obtiene trabajos por estado
  */
-export async function getQueueJobsByStatus(status: string, limit = 10): Promise<QueueJobExtended[]> {
+export async function getQueueJobsByStatus(status: QueueJobStatus, limit = 10): Promise<QueueJobExtended[]> {
 	const getCachedJobsByStatus = unstable_cache(
 		async () => {
 			try {
 				logger.info('📥 Obteniendo trabajos por estado:', status);
 
-				const jobs = await findQueueJobsByStatus(status, limit);
+                                const jobs = await findQueueJobsByStatus(status, limit);
 
 				logger.info('✅ Trabajos por estado obtenidos:', { status, count: jobs.length });
 				return jobs;

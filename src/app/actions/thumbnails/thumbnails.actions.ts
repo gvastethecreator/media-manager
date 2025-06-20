@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma';
 import { generateThumbnail } from '@/lib/thumbnail';
 import type { ProcessOptions } from '@/services/thumbnail-service-export';
 import { thumbnailService } from '@/services/thumbnail-service-export';
-import type { LastProcessedThumbnail, ThumbnailStats } from '@/types/thumbnails';
+// Tipos obsoletos eliminados: LastProcessedThumbnail, ThumbnailStats
 
 const thumbLogger = serverLogger.withContext('ThumbnailActions');
 
@@ -207,7 +207,7 @@ export async function cleanThumbnails(options?: ProcessOptions) {
 	}
 }
 
-export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcessedThumbnail[]> {
+export async function getLastProcessedThumbnails(limit = 9): Promise<Record<string, unknown>[]> {
 	try {
 		thumbLogger.info('🔄 Obteniendo últimas miniaturas procesadas:', { limit });
 
@@ -240,7 +240,7 @@ export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcess
 	}
 }
 
-export async function getThumbnailStats(): Promise<ThumbnailStats> {
+export async function getThumbnailStats(): Promise<Record<string, unknown>> {
 	try {
 		thumbLogger.info('🔄 Obteniendo estadísticas de thumbnails');
 

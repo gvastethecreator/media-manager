@@ -7,11 +7,23 @@
  */
 
 export type {
-	Group,
-	GroupBase,
-	GroupCreateInput,
-	GroupDisplayState,
-	GroupUpdateInput,
+        Group,
+        GroupBase,
+        GroupComplete,
+        GroupExtended,
+        GroupWithStats,
+        GroupCounts,
+        GroupRelations,
+        GroupTransformerOptions,
+        GroupCard,
+        GroupListItem,
+        GroupListItemImage,
+        GroupListProps,
+        GroupSearchParams,
+        GroupSearchResult,
+        GroupCreateInput,
+        GroupDisplayState,
+        GroupUpdateInput,
 } from './types';
 export { GroupSchema, GroupSortCriteria, GroupType, GroupViewMode } from './types';
 

@@ -154,19 +154,50 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 	/**
 	 * Obtiene el perfil activo actual
 	 */
-	async getActiveProfile(): Promise<ProfileExtended | null> {
-		try {
-			const profile = await this.model.findFirst({
-				where: { isActive: true },
-			});
-			return profile ? this.transformer?.toEntity(profile) || profile : null;
-		} catch (error) {
-			throw toServiceError(error, {
-				serviceName: SERVICE_NAME,
-				message: 'Error al obtener perfil activo',
-			});
-		}
-	}
+        async getActiveProfile(): Promise<ProfileExtended | null> {
+                try {
+                        const profile = await this.model.findFirst({
+                                where: { isActive: true },
+                        });
+                        return profile ? this.transformer?.toEntity(profile) || profile : null;
+                } catch (error) {
+                        throw toServiceError(error, {
+                                serviceName: SERVICE_NAME,
+                                message: 'Error al obtener perfil activo',
+                        });
+                }
+        }
+
+        /**
+         * Obtiene un perfil por su ID
+         */
+        async getProfileById(id: string): Promise<ProfileExtended | null> {
+                try {
+                        const profile = await this.model.findUnique({ where: { id } });
+                        return profile ? this.transformer?.toEntity(profile) || profile : null;
+                } catch (error) {
+                        throw toServiceError(error, {
+                                serviceName: SERVICE_NAME,
+                                message: 'Error al obtener perfil',
+                                context: { id },
+                        });
+                }
+        }
+
+        /**
+         * Elimina un perfil
+         */
+        async deleteProfile(id: string): Promise<void> {
+                try {
+                        await this.model.delete({ where: { id } });
+                } catch (error) {
+                        throw toServiceError(error, {
+                                serviceName: SERVICE_NAME,
+                                message: 'Error al eliminar perfil',
+                                context: { id },
+                        });
+                }
+        }
 }
 
 // Exportar instancia única del servicio

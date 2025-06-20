@@ -50,8 +50,8 @@ export function Card3D({
 
 	// Obtener valores de configuración o usar valores predeterminados
 	const enable3DEffect = options.enable3DEffect !== undefined ? options.enable3DEffect : true;
-	const maxRotation = options.maxRotation || 5;
-	const hoverLiftHeight = options.hoverLiftHeight || 5;
+	const maxRotation = typeof options.maxRotation === 'number' ? options.maxRotation : 5;
+	const hoverLiftHeight = typeof options.hoverLiftHeight === 'number' ? options.hoverLiftHeight : 5;
 
 	// Manejar movimiento del ratón
 	const handleMouseMove = useCallback(

@@ -141,18 +141,18 @@ export async function getWorldItems(
 			worldItemLogger.info('✅ Objetos del mundo obtenidos de caché');
 
 			// Convertir los datos del caché al formato esperado
-			return cached.map((item) => ({
-				...item,
-				createdAt: new Date(item.createdAt as string),
-				updatedAt: new Date(item.updatedAt as string),
-				// Asegurar que los campos JSON estén correctamente deserializados
-				attributes: Array.isArray(item.attributes) ? item.attributes : [],
-				effects: Array.isArray(item.effects) ? item.effects : [],
-				requirements: typeof item.requirements === 'object' ? item.requirements : {},
-				stats: typeof item.stats === 'object' ? item.stats : {},
-				tags: Array.isArray(item.tags) ? item.tags : [],
-				filters: typeof item.filters === 'object' ? item.filters : {},
-			}));
+                        return cached.map((item) => ({
+                                ...item,
+                                createdAt: new Date(item.createdAt as string),
+                                updatedAt: new Date(item.updatedAt as string),
+                                // Asegurar que los campos JSON estén correctamente deserializados
+                                attributes: Array.isArray(item.attributes) ? item.attributes : [],
+                                effects: Array.isArray(item.effects) ? item.effects : [],
+                                requirements: typeof item.requirements === 'object' ? item.requirements : {},
+                                stats: typeof item.stats === 'object' ? item.stats : {},
+                                tags: Array.isArray(item.tags) ? item.tags : [],
+                                filters: typeof item.filters === 'object' ? item.filters : {},
+                        })) as unknown as (WorldItemExtended & { totalSize: number; imageCount?: number; recentImages?: string[] })[];
 		}
 	}
 

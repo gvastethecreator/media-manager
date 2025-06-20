@@ -2,7 +2,7 @@
 
 // Server Actions para Workflow
 import { validateWorkflow } from '@/transformers/workflow/serializers';
-import type { WorkflowComplete as Workflow } from '@/types/entities/workflow';
+import type { WorkflowComplete as Workflow } from '@/types/entities/workflow/types';
 
 export async function createWorkflow(input: unknown): Promise<Workflow> {
 	const workflow = validateWorkflow(input);

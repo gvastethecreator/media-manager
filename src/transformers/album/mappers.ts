@@ -5,18 +5,18 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AlbumBase, AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
-import type { Prisma } from '@prisma/client';
+// ⚠️ No se deben importar tipos de Prisma para evitar acoplamientos
 
 const logger = serverLogger.withContext('AlbumMappers');
 
 /**
- * 🔄 Mapea un AlbumCreateInput a un Prisma.AlbumCreateInput.
+ * 🔄 Mapea un AlbumCreateInput a un objeto compatible con Prisma.
  * Establece valores por defecto y maneja la conexión de imágenes.
  */
-export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): Prisma.AlbumCreateInput {
+export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): Record<string, any> {
 	try {
 		const { images, ...rest } = data;
-		const prismaData: Prisma.AlbumCreateInput = {
+		const prismaData: Record<string, any> = {
 			...rest,
 			isFavorite: data.isFavorite ?? false,
 			sortBy: data.sortBy ?? 'createdAt',
@@ -37,13 +37,13 @@ export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): Prisma.Album
 }
 
 /**
- * 🔄 Mapea un AlbumUpdateInput a un Prisma.AlbumUpdateInput.
+ * 🔄 Mapea un AlbumUpdateInput a un objeto compatible con Prisma.
  * Maneja la lógica de conexión/desconexión de imágenes.
  */
-export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): Prisma.AlbumUpdateInput {
+export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): Record<string, any> {
 	try {
 		const { imagesToConnect, imagesToDisconnect, ...rest } = data;
-		const prismaData: Prisma.AlbumUpdateInput = { ...rest };
+		const prismaData: Record<string, any> = { ...rest };
 
 		if (imagesToConnect || imagesToDisconnect) {
 			prismaData.images = {};

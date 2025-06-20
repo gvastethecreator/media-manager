@@ -210,7 +210,7 @@ export async function togglePropertyFavorite(id: string) {
 			},
 		});
 
-		logger.info('✅ Favorito de propiedad actualizado:', property.name, property.isFavorite);
+                logger.info('✅ Favorito de propiedad actualizado:', property.name, String(property.isFavorite));
 		return property;
 	} catch (error) {
 		logger.error('❌ Error al actualizar favorito de propiedad:', error);

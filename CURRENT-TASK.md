@@ -516,3 +516,68 @@ const prisma = await getPrismaClient();
 **Estado:** ⚡ **EN PROGRESO ACELERADO** - Patrón establecido, aplicación masiva
 **Metodología:** 🎯 **EFECTIVA** - Transformación sistemática por categorías
 **Próximo paso:** 🔄 **Transformers Masivos** - Aplicar patrón a todos los transformers
+
+## 🚧 Avance Actual: Tipos de Group
+
+- Se detectó ausencia de tipos canónicos para **Group** (GroupComplete, Extended, etc.)
+- Se añadieron definiciones completas y se limpiaron imports de Prisma en los mappers.
+- Se corrigió `group-service-export.ts` para usar las funciones reales del servicio.
+
+```mermaid
+graph TD
+    A[GroupBase] --> B[GroupRelations]
+    A --> C[GroupCounts]
+    B --> D[GroupComplete]
+    D --> E[GroupExtended]
+    D --> F[GroupWithStats]
+```
+
+## 🚧 Avance Actual: Note Mappers
+
+- Se eliminaron los imports de **Prisma** en `note/mappers.ts`.
+- Las funciones ahora devuelven `Record<string, any>` para evitar tipos acoplados.
+- Formateo y estilo actualizado con **Biome**.
+
+## 🚧 Avance Actual: Prompt Mappers
+
+- Simplificadas las funciones de mapeo de Prompt para no depender de tipos de Prisma.
+- Se usan objetos genéricos `Record<string, any>` en `mapCreatePromptDataToPrisma` y demás utilidades.
+- Facilita la migración futura a Drizzle y reduce errores de tipo.
+
+## 🚧 Avance Actual: Tag Transformer
+
+- Eliminados los imports de **Prisma** en `tag/transformer.ts`.
+- Tipo `TagFromPrisma` ahora es `Record<string, any>` para evitar acoplamientos.
+- Descartados campos obsoletos `sortBy` y `filters` en la transformación.
+
+## 🚧 Avance Actual: Album Mappers
+
+- Se eliminaron los imports de **Prisma** en `album/mappers.ts`.
+- Funciones de mapeo ahora devuelven `Record<string, any>` para mayor flexibilidad.
+- Documentación actualizada y formateo con **Biome**.
+
+## 🚧 Avance Actual: Collection Mappers
+
+- Eliminados los imports de **Prisma** en `collection/mappers.ts`.
+- Las funciones de mapeo ahora retornan `Record<string, any>` para mayor flexibilidad.
+- Comentarios actualizados y variables intermedias `prismaData` para claridad.
+
+## 🚧 Avance Actual: Concept Mappers
+
+- Se eliminaron los tipos de **Prisma** en `concept/mappers.ts` para evitar acoplamientos.
+- Se definieron interfaces `SimpleConcept*` y ahora las funciones devuelven objetos genéricos.
+- Constante `CONCEPT_SORT_PROPERTY_MAP` simplificada a strings.
+- Formateo aplicado con **Biome** para mantener consistencia.
+
+## 🚧 Avance Actual: Video Mappers
+
+- Eliminados los imports de **Prisma** en `video/mappers.ts` y `video/transformer.ts`.
+- Funciones de mapeo devuelven `Record<string, any>` para facilitar la migración a Drizzle.
+- Se corrigió el index para exportar `mapVideoFiltersToPrismaArgs`.
+
+## 🚧 Avance Actual: Wildcard Mappers
+
+- Se limpiaron referencias a **Prisma** en `wildcard/mappers.ts` y `wildcard/transformer.ts`.
+- Mapeadores ahora utilizan objetos genéricos sin tipos del ORM.
+- Comentarios actualizados y logs más claros.
+

@@ -74,8 +74,8 @@ export async function getQueueStats(): Promise<QueueStats> {
 /**
  * Obtiene estadísticas por cola específica
  */
-export async function getQueueStatsByQueue(queue: string): Promise<Record<string, number>> {
-	const getCachedQueueStats = unstable_cache(
+export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
+        const getCachedQueueStats = unstable_cache(
 		async () => {
 			try {
 				logger.info('📊 Obteniendo estadísticas de cola:', queue);

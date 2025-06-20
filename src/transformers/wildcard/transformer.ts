@@ -1,10 +1,9 @@
 /**
  * @file Transformador principal para la entidad Wildcard.
  * @module transformers/wildcard/transformer
- * @description Contiene la lógica para convertir un objeto Wildcard de Prisma a nuestro tipo canónico.
+ * @description Convierte objetos Wildcard de la base de datos a nuestro tipo canónico.
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { WildcardComplete } from '@/types/entities/wildcard';
 import { TransformerError } from '@/utils/transformers/errors';
@@ -12,29 +11,19 @@ import { deserializeWildcardChildren } from './serializers';
 
 const logger = serverLogger.withContext('WildcardTransformer');
 
-// Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
-type WildcardFromPrisma = Prisma.WildcardGetPayload<{
-	include: {
-		parent: true;
-		childWildcards: true;
-		_count: {
-			select: {
-				childWildcards: true;
-			};
-		};
-	};
-}>;
+// Tipo genérico proveniente de la BD ✅
+type WildcardFromPrisma = Record<string, any>;
 
 /**
- * 🔄 Transforma un objeto Wildcard de Prisma a nuestro tipo canónico WildcardComplete.
+ * 🔄 Transforma un registro Wildcard de la BD a `WildcardComplete`.
  *
- * @param prismaWildcard - El objeto Wildcard obtenido de Prisma.
+ * @param prismaWildcard - El objeto Wildcard obtenido de la BD.
  * @returns Un objeto WildcardComplete compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
 export function fromPrismaWildcard(prismaWildcard: WildcardFromPrisma | null): WildcardComplete {
 	if (!prismaWildcard) {
-		throw new TransformerError('El objeto de wildcard de Prisma no puede ser nulo.');
+                throw new TransformerError('El objeto de wildcard no puede ser nulo.');
 	}
 
 	try {
@@ -53,7 +42,7 @@ export function fromPrismaWildcard(prismaWildcard: WildcardFromPrisma | null): W
 			},
 		};
 	} catch (error) {
-		logger.error('Error transformando wildcard desde Prisma', {
+                logger.error('Error transformando wildcard desde la BD', {
 			error,
 			wildcardId: prismaWildcard.id,
 		});
@@ -62,9 +51,9 @@ export function fromPrismaWildcard(prismaWildcard: WildcardFromPrisma | null): W
 }
 
 /**
- * 🔄 Transforma una lista de wildcards de Prisma a una lista de WildcardComplete.
+ * 🔄 Transforma una lista de registros de Wildcard a `WildcardComplete`.
  *
- * @param prismaWildcards - Un array de objetos Wildcard de Prisma.
+ * @param prismaWildcards - Un array de objetos Wildcard obtenidos de la BD.
  * @returns Un array de objetos WildcardComplete.
  */
 export function fromPrismaWildcards(prismaWildcards: WildcardFromPrisma[]): WildcardComplete[] {

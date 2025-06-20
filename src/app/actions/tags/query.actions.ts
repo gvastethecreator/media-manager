@@ -8,6 +8,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image-converter.service';
+import { fromPrismaTag, fromPrismaTags } from '@/transformers/tag';
 import type { TagBase } from '@/types/entities/tag';
 import type { FileItem } from '@/types/files';
 
@@ -191,16 +192,16 @@ export async function getTag(id: string): Promise<TagBase> {
 	try {
 		tagLogger.info('🔍 Obteniendo etiqueta por ID:', id);
 
-		const tag = await prisma.tag.findUnique({
-			where: { id },
-			include: {
-				_count: {
-					select: {
-						images: true,
-					},
-				},
-			},
-		});
+                const tag = await prisma.tag.findUnique({
+                        where: { id },
+                        include: {
+                                _count: {
+                                        select: {
+                                                images: true,
+                                        },
+                                },
+                        },
+                });
 
 		if (!tag) {
 			tagLogger.warn('⚠️ Etiqueta no encontrada:', id);
@@ -209,7 +210,7 @@ export async function getTag(id: string): Promise<TagBase> {
 
 		tagLogger.info('✅ Etiqueta obtenida:', { tagId: tag.id, name: tag.name });
 
-		return tag;
+                return fromPrismaTag(tag);
 	} catch (error) {
 		tagLogger.error('❌ Error al obtener etiqueta:', { id, error });
 
@@ -304,9 +305,9 @@ export async function searchTags(query?: string, category?: string, limit = 10):
 			where.category = category;
 		}
 
-		const tags = await prisma.tag.findMany({
-			where,
-			take: limit,
+                const tags = await prisma.tag.findMany({
+                        where,
+                        take: limit,
 			orderBy: {
 				name: 'asc',
 			},
@@ -319,9 +320,9 @@ export async function searchTags(query?: string, category?: string, limit = 10):
 			},
 		});
 
-		tagLogger.info('✅ Etiquetas encontradas:', { count: tags.length });
+                tagLogger.info('✅ Etiquetas encontradas:', { count: tags.length });
 
-		return tags;
+                return fromPrismaTags(tags);
 	} catch (error) {
 		tagLogger.error('❌ Error al buscar etiquetas:', { query, category, error });
 		throw createTagError('No se pudieron buscar etiquetas', TagErrorCode.OPERATION_FAILED, error);

@@ -3,7 +3,6 @@
  * @module transformers/world-item/server
  */
 
-import { Prisma } from '@prisma/client';
 import { createLogger } from '@/lib/logger';
 import { WorldItemSchema } from '@/types/entities/world-item/schema';
 import type {
@@ -47,24 +46,7 @@ export function validateWorldItem(worldItem: WorldItemBase): WorldItemBase {
 /**
  * 🔄 Deserializa un WorldItem desde Prisma, manejando campos JSON y relaciones
  */
-export function fromPrismaWorldItem(
-	prismaItem: Partial<
-		Prisma.WorldItemGetPayload<{
-			include: {
-				images: true;
-				videos: true;
-				notes: true;
-				concepts: true;
-				prompts: true;
-				groups: true;
-				properties: true;
-				wildcards: true;
-				tags: true;
-				_count: true;
-			};
-		}>
-	>
-): WorldItemDeserialized {
+export function fromPrismaWorldItem(prismaItem: Record<string, any>): WorldItemDeserialized {
 	try {
 		// ✅ Validar campos esenciales
 		if (!prismaItem || !prismaItem.id || typeof prismaItem.name !== 'string') {

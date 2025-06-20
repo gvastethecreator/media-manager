@@ -14,7 +14,7 @@ const viewLogger = clientLogger.withContext('AlbumContentView');
 
 export function AlbumContentView() {
 	const currentAlbumId = useAlbumStore((state) => state.ui.currentAlbumId);
-	const album = useAlbumStore((state) => (currentAlbumId ? state.core.albums[currentAlbumId] : null));
+	const album = useAlbumStore((state) => (currentAlbumId ? state.getAlbumById(currentAlbumId) : null));
 
 	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);

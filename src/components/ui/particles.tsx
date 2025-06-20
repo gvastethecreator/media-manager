@@ -91,7 +91,7 @@ const Particles: React.FC<ParticlesProps> = ({
 	const canvasSize = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
 	const dpr = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
 	const rafID = useRef<number | null>(null);
-	const resizeTimeout = useRef<NodeJS.Timeout>();
+	const resizeTimeout = useRef<NodeJS.Timeout | null>(null);
 
 	useEffect(() => {
 		if (canvasRef.current) {
@@ -130,12 +130,12 @@ const Particles: React.FC<ParticlesProps> = ({
 		initCanvas();
 	}, [initCanvas]);
 
-	const initCanvas = () => {
+	function initCanvas() {
 		resizeCanvas();
 		drawParticles();
-	};
+	}
 
-	const onMouseMove = () => {
+	function onMouseMove() {
 		if (canvasRef.current) {
 			const rect = canvasRef.current.getBoundingClientRect();
 			const { w, h } = canvasSize.current;
@@ -147,7 +147,7 @@ const Particles: React.FC<ParticlesProps> = ({
 				mouse.current.y = y;
 			}
 		}
-	};
+	}
 
 	const resizeCanvas = () => {
 		if (canvasContainerRef.current && canvasRef.current && context.current) {
@@ -232,7 +232,7 @@ const Particles: React.FC<ParticlesProps> = ({
 		return remapped > 0 ? remapped : 0;
 	};
 
-	const animate = () => {
+	function animate() {
 		clearContext();
 		circles.current.forEach((circle: Circle, i: number) => {
 			// Handle the alpha value
@@ -274,7 +274,7 @@ const Particles: React.FC<ParticlesProps> = ({
 			}
 		});
 		rafID.current = window.requestAnimationFrame(animate);
-	};
+	}
 
 	return (
 		<div className={cn('pointer-events-none', className)} ref={canvasContainerRef} aria-hidden="true">

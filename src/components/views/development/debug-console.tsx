@@ -14,7 +14,9 @@ const debugLogger = clientLogger.withContext('DebugConsole');
 export function DebugConsole() {
 	const [activeTab, setActiveTab] = useState('console');
 	const { logs, addLog, clearLogs, debug, info, warn, error, success } = useLogViewer();
-	const { startCapture, stopCapture, isCapturing } = useConsoleCapture(addLog);
+	const { startCapture, stopCapture, isCapturing } = useConsoleCapture((log) =>
+		addLog(log.level, log.message, log.context, log.data)
+	);
 
 	// Iniciar captura al montar el componente
 	useEffect(() => {

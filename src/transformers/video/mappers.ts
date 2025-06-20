@@ -1,20 +1,23 @@
 /**
  * @file Funciones de mapeo para la entidad Video.
  * @module transformers/video/mappers
- * @description Mapea los tipos de datos de la aplicación a los tipos de datos de Prisma para la entidad Video.
+ * @description Mapea los tipos de datos de la aplicación a un formato compatible con la base de datos para la entidad Video.
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { VideoFilters } from '@/types/entities/video/types';
+import type {
+  CreateVideoData,
+  UpdateVideoData,
+  VideoFilters,
+} from '@/types/entities/video';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('VideoMapper');
 
 /**
- * 🔄 Mapea un `CreateVideoData` a un `Prisma.VideoCreateInput`.
+ * 🔄 Mapea `CreateVideoData` a un objeto compatible con la BD.
  */
-export function mapCreateVideoDataToPrisma(input: CreateVideoData): Prisma.VideoCreateInput {
+export function mapCreateVideoDataToPrisma(input: CreateVideoData): Record<string, any> {
 	try {
 		return {
 			name: input.name,
@@ -41,11 +44,11 @@ export function mapCreateVideoDataToPrisma(input: CreateVideoData): Prisma.Video
 }
 
 /**
- * 🔄 Mapea un `UpdateVideoData` a un `Prisma.VideoUpdateInput`.
+ * 🔄 Mapea `UpdateVideoData` para actualizar en la BD.
  */
-export function mapUpdateVideoDataToPrisma(input: UpdateVideoData): Prisma.VideoUpdateInput {
-	try {
-		const updateData: Prisma.VideoUpdateInput = {};
+export function mapUpdateVideoDataToPrisma(input: UpdateVideoData): Record<string, any> {
+        try {
+                const updateData: Record<string, any> = {};
 
 		if (input.name !== undefined) updateData.name = input.name;
 		if (input.description !== undefined) updateData.description = input.description;
@@ -60,19 +63,19 @@ export function mapUpdateVideoDataToPrisma(input: UpdateVideoData): Prisma.Video
 }
 
 /**
- * 🔄 Mapea filtros de video a argumentos de búsqueda de Prisma.
+ * 🔄 Mapea filtros de video a argumentos de búsqueda genéricos.
  */
-export function mapVideoFiltersToPrismaArgs(filters: VideoFilters): Prisma.VideoFindManyArgs {
+export function mapVideoFiltersToPrismaArgs(filters: VideoFilters): Record<string, any> {
 	return {
 		where: mapVideoFiltersToPrisma(filters),
 	};
 }
 
 /**
- * 🔄 Mapea `VideoFilters` a `Prisma.VideoWhereInput`.
+ * 🔄 Convierte `VideoFilters` en condiciones de búsqueda.
  */
-function mapVideoFiltersToPrisma(filters: VideoFilters): Prisma.VideoWhereInput {
-	const where: Prisma.VideoWhereInput = {};
+function mapVideoFiltersToPrisma(filters: VideoFilters): Record<string, any> {
+        const where: Record<string, any> = {};
 
 	if (filters.search) {
 		where.OR = [

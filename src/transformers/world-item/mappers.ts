@@ -83,16 +83,21 @@ interface SimpleWorldItemUpdateInput {
 }
 
 interface SimpleWorldItemWhereInput {
-	AND?: SimpleWorldItemWhereInput[];
-	OR?: SimpleWorldItemWhereInput[];
-	NOT?: SimpleWorldItemWhereInput[];
-	name?: { contains: string; mode: 'insensitive' };
-	description?: { contains: string; mode: 'insensitive' };
-	type?: { in: string[] };
-	category?: { in: string[] };
-	rarity?: { in: string[] };
-	isFavorite?: boolean;
-	images?: { some: Record<string, any> };
+        skip?: number;
+        take?: number;
+        orderBy?: SimpleWorldItemOrderByInput | SimpleWorldItemOrderByInput[];
+        where?: Record<string, any>;
+        include?: Record<string, any>;
+        AND?: SimpleWorldItemWhereInput[];
+        OR?: SimpleWorldItemWhereInput[];
+        NOT?: SimpleWorldItemWhereInput[];
+        name?: { contains: string; mode: 'insensitive' };
+        description?: { contains: string; mode: 'insensitive' };
+        type?: { in: string[] };
+        category?: { in: string[] };
+        rarity?: { in: string[] };
+        isFavorite?: boolean;
+        images?: { some: Record<string, any> };
 }
 
 interface SimpleWorldItemOrderByInput {

@@ -3,7 +3,7 @@
  * @module transformers/group/mappers
  */
 
-import type { Group, Prisma } from '@prisma/client';
+import type { Group } from '@/types/entities/group';
 import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
@@ -159,10 +159,10 @@ export function toGroupReference(group: Group): {
  * Parsea opciones de búsqueda para Group
  */
 export function parseGroupSearchParams(params: GroupSearchParams): {
-	where: Prisma.GroupWhereInput;
-	orderBy: Prisma.GroupOrderByWithRelationInput;
-	skip: number;
-	take: number;
+        where: any;
+        orderBy: any;
+        skip: number;
+        take: number;
 } {
 	try {
 		// Parsear parámetros de paginación
@@ -173,7 +173,7 @@ export function parseGroupSearchParams(params: GroupSearchParams): {
 		const take = Math.min(pageSize, 100); // Usar 100 como máximo si MAX_PAGE_SIZE no existe
 
 		// Construir condiciones de búsqueda
-		const where: Prisma.GroupWhereInput = {};
+                const where: any = {};
 
 		// Filtro de búsqueda por texto
 		if (params.search) {

@@ -28,7 +28,7 @@ interface SystemStats {
 	};
 	uptime: string;
 	platform: string;
-	nodeVersion: string;
+	nodeVersion?: string;
 	network: {
 		interface: string;
 		address: string;

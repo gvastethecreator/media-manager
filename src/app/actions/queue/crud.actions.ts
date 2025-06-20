@@ -12,6 +12,7 @@ import {
     findQueueJobs,
     updateQueueJob as updateQueueJobService
 } from '@/services/queue-job/queue-job.service';
+import { serializeQueueJobMetadata } from '@/transformers/queue-job';
 import {
     type CreateQueueJobInput,
     type PaginatedQueueJobs,
@@ -71,10 +72,15 @@ export async function createQueueJob(input: CreateQueueJobInput): Promise<QueueJ
 		logger.debug('➕ Creando trabajo en cola', input);
 
 		// Validar input
-		const validatedInput = createQueueJobSchema.parse(input);
+                const validatedInput = createQueueJobSchema.parse(input);
 
-		// Crear trabajo
-		const job = await createQueueJobService(validatedInput);
+                // Crear trabajo (serializando metadata si existe)
+                const job = await createQueueJobService({
+                        ...validatedInput,
+                        metadata: validatedInput.metadata
+                                ? serializeQueueJobMetadata(validatedInput.metadata)
+                                : undefined,
+                });
 
 		// Revalidar rutas
 		revalidatePath('/queue');
@@ -98,10 +104,15 @@ export async function updateQueueJob(id: string, input: UpdateQueueJobInput): Pr
 		logger.debug('✏️ Actualizando trabajo en cola', { id, input });
 
 		// Validar input
-		const validatedInput = updateQueueJobSchema.parse(input);
+                const validatedInput = updateQueueJobSchema.parse(input);
 
-		// Actualizar trabajo
-		const job = await updateQueueJobService(id, validatedInput);
+                // Actualizar trabajo
+                const job = await updateQueueJobService(id, {
+                        ...validatedInput,
+                        metadata: validatedInput.metadata
+                                ? serializeQueueJobMetadata(validatedInput.metadata)
+                                : undefined,
+                });
 
 		// Revalidar rutas
 		revalidatePath('/queue');

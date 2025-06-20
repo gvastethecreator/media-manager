@@ -70,7 +70,10 @@ export function CollectionsView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<MemoizedCollectionCard collection={collection} onClick={() => handleCollectionClick(collection)} />
+							<MemoizedCollectionCard
+								collection={collection as unknown as CollectionComplete}
+								onClick={() => handleCollectionClick(collection as CollectionComplete)}
+							/>
 						</motion.div>
 					))}
 				</div>

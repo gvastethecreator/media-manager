@@ -97,7 +97,7 @@ export function AllImagesView() {
 				<div className="flex h-full w-full">
 					{/* Contenido del FileBrowser */}
 					{items && items.length > 0 ? (
-						<FileBrowser items={items as any} onItemClick={handleSelectItem as any} />
+						<FileBrowser items={items as any} onItemSelect={handleSelectItem as any} />
 					) : (
 						<EmptyState
 							icon={ImageIcon}

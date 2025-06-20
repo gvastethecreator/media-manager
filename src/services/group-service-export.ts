@@ -12,14 +12,13 @@ export default groupService;
 
 // Exportar funciones individuales para uso específico
 export const {
-	getGroups,
-	getGroupById,
-	createGroup,
-	updateGroup,
-	deleteGroup,
-	addItemToGroup,
-	removeItemFromGroup,
-	getGroupItems,
-	getGroupStats,
-	searchGroups,
+        get: getGroup,
+        getMany: getGroups,
+        create: createGroup,
+        update: updateGroup,
+        delete: deleteGroup,
+        addItem: addItemToGroup,
+        removeItem: removeItemFromGroup,
+        getStats: getGroupStats,
+        search: searchGroups,
 } = groupService;

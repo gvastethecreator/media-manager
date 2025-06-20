@@ -139,10 +139,10 @@ export function BaseContentView({ className }: BaseContentViewProps) {
 			}
 
 			try {
-				const metadata = getMetadata(item.metadata);
+				const metadata = typeof item.metadata === 'string' ? getMetadata(item.metadata) : item.metadata;
 				if (item.type === 'image' || metadata?.mimeType?.startsWith('image/')) {
 					const imageItems = items.filter((i) => {
-						const meta = getMetadata(i.metadata);
+						const meta = typeof i.metadata === 'string' ? getMetadata(i.metadata) : i.metadata;
 						return i.type === 'image' || meta?.mimeType?.startsWith('image/');
 					});
 					const currentIndex = imageItems.findIndex((i) => i.id === item.id);

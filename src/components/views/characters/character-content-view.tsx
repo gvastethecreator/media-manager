@@ -13,8 +13,8 @@ import type { FileItem } from '@/types/files';
 const viewLogger = clientLogger.withContext('CharacterContentView');
 
 export function CharacterContentView() {
-	const { selectedCharacterId, getSelectedCharacter } = useCharacterStore();
-	const currentCharacter = getSelectedCharacter();
+	const { selectedCharacterId, characters } = useCharacterStore();
+	const currentCharacter = selectedCharacterId ? characters[selectedCharacterId] : null;
 
 	const [items, setItems] = useState<FileItem[]>([]);
 	const [isLoading, setIsLoading] = useState(true);

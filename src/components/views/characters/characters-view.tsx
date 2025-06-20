@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 
 import { CharacterCard } from '@/components/cards/character-card';
+import type { CharacterCardData } from '@/components/cards/character-card/character-server-actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -89,7 +90,11 @@ export function CharactersView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<CharacterCard character={character} onClick={() => handleCharacterClick(character)} className="h-full" />
+							<CharacterCard
+								character={character as unknown as CharacterCardData}
+								onClick={() => handleCharacterClick(character)}
+								className="h-full"
+							/>
 						</motion.div>
 					))}
 				</div>

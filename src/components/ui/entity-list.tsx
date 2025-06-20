@@ -24,7 +24,7 @@ import { ChevronLeft, ChevronRight, LayoutGrid, List as ListIcon, Rows, Search, 
 import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { EntityCard, EntityCardProps } from '@/components/ui/entity-card';
+import { EntityCard, type EntityCardProps } from '@/components/cards/entity-card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';

@@ -7,45 +7,13 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { TagWithRelations } from '@/types/entities/tag';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
+// ⚠️ No debemos importar tipos de Prisma para evitar acoplamientos
 
 const logger = serverLogger.withContext('TagTransformer');
 
-// Define el tipo de payload de Prisma que esperamos, con las relaciones y conteos.
-type TagFromPrisma = Prisma.TagGetPayload<{
-	include: {
-		images: true;
-		// videos: true; // ❌ ELIMINADO - No existe relación Tag-Video en Prisma
-		// albums: true; // ❌ ELIMINADO - No existe relación Tag-Album en Prisma
-		collections: true;
-		// characters: true; // ❌ ELIMINADO - No existe relación Tag-Character en Prisma
-		places: true;
-		worldItems: true;
-		concepts: true;
-		prompts: true;
-		notes: true;
-		wildcards: true;
-		properties: true;
-		groups: true;
-		_count: {
-			select: {
-				images: true;
-				// videos: true; // ❌ ELIMINADO - No existe relación Tag-Video en Prisma
-				// albums: true; // ❌ ELIMINADO - No existe relación Tag-Album en Prisma
-				collections: true;
-				// characters: true; // ❌ ELIMINADO - No existe relación Tag-Character en Prisma
-				places: true;
-				worldItems: true;
-				concepts: true;
-				prompts: true;
-				notes: true;
-				wildcards: true;
-				properties: true;
-				groups: true;
-			};
-		};
-	};
-}>;
+// Define un tipo flexible para aceptar cualquier payload desde Prisma
+// evitando así dependencias directas con el cliente de ORM 🟢
+type TagFromPrisma = Record<string, any>;
 
 /**
  * 🔄 Transforma un objeto Tag de Prisma a nuestro tipo canónico TagWithRelations.
@@ -60,7 +28,8 @@ export function fromPrismaTag(prismaTag: TagFromPrisma | null): TagWithRelations
 	}
 
 	try {
-		const { _count, sortBy, filters, ...baseData } = prismaTag;
+		// `sortBy` y `filters` ya no existen en el modelo. Ignoramos esos campos 🧹
+		const { _count, ...baseData } = prismaTag;
 
 		return {
 			...baseData,
