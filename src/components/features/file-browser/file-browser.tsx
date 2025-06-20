@@ -24,7 +24,7 @@ import { MasonryView } from './views/masonry-view';
 import { SimpleGridView } from './views/simple-grid-view';
 
 // Configuración del cache y carga secuencial
-const BROWSER_CONFIG = {
+const _BROWSER_CONFIG = {
 	// Tamaño máximo del caché (cuántos elementos mantener en memoria)
 	cacheSize: 1000,
 	// Configuración para carga secuencial (DESHABILITADA - ahora usamos paginación del servidor)
@@ -133,7 +133,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// ✅ Usar una ref para el seguimiento no causa re-renders
 	const lastSelectedItemIndexRef = useRef<number | null>(null);
 	// Control de carga progresiva (DESHABILITADO - ahora manejado por el store)
-	const [visibleItemCount, setVisibleItemCount] = useState<number>(items.length);
+	const [_visibleItemCount, _setVisibleItemCount] = useState<number>(items.length);
 	const _scrollTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const loadingMoreRef = useRef<boolean>(false);
 
@@ -333,7 +333,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	useEffect(() => {
 		// Ya no necesitamos resetear visibleItemCount porque mostramos todos los items
 		loadingMoreRef.current = false;
-	}, [items]);
+	}, []);
 
 	// Definir la función handleResetView para el EmptyState
 	const _handleResetView = useCallback(() => {

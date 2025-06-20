@@ -1,7 +1,7 @@
+import { cn } from '@/lib/utils';
 import { BookText, Globe, Image, MessageSquare, Package, Tag, UserSquare, VideoIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
 import { getConceptCounts } from './concept-server-actions';
 
 interface ConceptCardContentProps {
@@ -67,7 +67,7 @@ export function ConceptCardContent({
 		const loadCounts = async () => {
 			try {
 				const counts = await getConceptCounts(conceptId);
-				setRelationCounts(counts);
+				setRelationCounts(prev => ({ ...prev, ...counts }));
 			} catch (error) {
 				console.error('Error cargando recuentos:', error);
 			}
@@ -89,11 +89,11 @@ export function ConceptCardContent({
 			style={
 				tcgMode
 					? {
-							backgroundImage: `
+						backgroundImage: `
 					radial-gradient(circle at 15% 50%, ${primaryColor}10 0%, transparent 25%),
 					radial-gradient(circle at 85% 30%, ${secColor}10 0%, transparent 25%)
 				`,
-						}
+					}
 					: {}
 			}
 		>

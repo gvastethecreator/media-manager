@@ -1,0 +1,15 @@
+src/app/actions/audio/audio.actions.ts(16,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/audio/audio.actions.ts(30,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/audio/audio.actions.ts(71,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/audio/audio.actions.ts(111,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/document/document.actions.ts(16,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/document/document.actions.ts(30,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/document/document.actions.ts(72,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/document/document.actions.ts(113,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/file3d/file-3d.actions.ts(16,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/file3d/file-3d.actions.ts(30,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/file3d/file-3d.actions.ts(70,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/file3d/file-3d.actions.ts(109,4): error TS2322: Type '{}' is not assignable to type 'never'.
+src/app/actions/groups/group.actions.ts(95,4): error TS2322: Type 'PrismaGroupCreateInput | PrismaGroupUpdateInput' is not assignable to type '(Without<GroupCreateInput, GroupUncheckedCreateInput> & GroupUncheckedCreateInput) | (Without<...> & GroupCreateInput)'.
+  Type 'PrismaGroupUpdateInput' is not assignable to type '(Without<GroupCreateInput, GroupUncheckedCreateInput> & GroupUncheckedCreateInput) | (Without<...> & GroupCreateInput)'.
+    Type 'PrismaGroupUpdateInput' is not assignable to type 'Without<GroupUncheckedCreateInput, GroupCreateInput> & GroupCreateInput'.

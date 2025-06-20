@@ -15,7 +15,6 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { folderService } from '@/services/folder-service-export';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
-import type { FolderComplete as FolderComplete } from '@/types/entities/folder';
 import type { ViewProps } from '../../views/types';
 
 const viewLogger = clientLogger.withContext('FoldersView');

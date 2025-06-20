@@ -13,7 +13,7 @@ import {
 // Re-exportar funciones y tipos
 export const emit = serverEmit;
 export const emitProgress = serverEmitProgress;
-export { EventData, EventType };
+export type { EventData, EventType };
 
 // Objeto de compatibilidad para el sistema anterior
 export const serverEvents = {

@@ -20,7 +20,7 @@ function renderInfoItems(items: (InfoItemData | null | undefined)[]) {
  */
 export function XMPInfo({ metadata }: MetadataComponentProps) {
 	const [copied, setCopied] = useState(false);
-	const xmp = metadata?.xmp;
+	const xmp = metadata?.xmp as Record<string, any> | undefined;
 
 	if (!xmp) {
 		return <div className="text-xs text-muted-foreground">No hay datos XMP disponibles</div>;
@@ -154,7 +154,7 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
  * Componente para metadata IPTC
  */
 export function IPTCInfo({ metadata }: MetadataComponentProps) {
-	const iptc = metadata?.iptc;
+	const iptc = metadata?.iptc as Record<string, any> | undefined;
 
 	if (!iptc) {
 		return <div className="text-xs text-muted-foreground">No hay datos IPTC disponibles</div>;
@@ -163,31 +163,31 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
 	const infoItems: (InfoItemData | null)[] = [
 		{
 			label: 'Creador',
-			value: iptc.creator?.join(', '),
+			value: Array.isArray(iptc.creator) ? iptc.creator.join(', ') : String(iptc.creator || ''),
 			icon: <Info className="h-3.5 w-3.5 text-blue-500" />,
-			condition: !!(iptc.creator && iptc.creator.length > 0),
+			condition: !!(iptc.creator && (Array.isArray(iptc.creator) ? iptc.creator.length > 0 : true)),
 		},
 		{
 			label: 'Titular',
-			value: iptc.headline,
+			value: String(iptc.headline || ''),
 			icon: <Info className="h-3.5 w-3.5 text-amber-500" />,
 			condition: !!iptc.headline,
 		},
 		{
 			label: 'Leyenda',
-			value: iptc.caption,
+			value: String(iptc.caption || ''),
 			icon: <Info className="h-3.5 w-3.5 text-purple-500" />,
 			condition: !!iptc.caption,
 		},
 		{
 			label: 'Copyright',
-			value: iptc.copyright,
+			value: String(iptc.copyright || ''),
 			icon: <Copy className="h-3.5 w-3.5 text-red-500" />,
 			condition: !!iptc.copyright,
 		},
 		{
 			label: 'Fuente',
-			value: iptc.source,
+			value: String(iptc.source || ''),
 			icon: <Info className="h-3.5 w-3.5 text-green-500" />,
 			condition: !!iptc.source,
 		},
@@ -230,7 +230,7 @@ export function IPTCInfo({ metadata }: MetadataComponentProps) {
  * Componente para metadata EXIF
  */
 export function ExifInfo({ metadata }: MetadataComponentProps) {
-	const exif = metadata?.exif;
+	const exif = metadata?.exif as Record<string, any> | undefined;
 
 	if (!exif) {
 		return <div className="text-xs text-muted-foreground">No hay datos EXIF disponibles</div>;

@@ -10,7 +10,7 @@ const imageLogger = serverLogger.withContext('ImageStats');
  * Actualiza las estadísticas de visualización de una imagen
  * Nota: El campo 'downloads' no existe en el esquema actual de ImageStats
  */
-export async function updateImageStats(imageId: string, type: 'view'): Promise<void> {
+export async function updateImageStats(imageId: string, _type: 'view'): Promise<void> {
 	try {
 		const stats = await prisma.imageStats.findUnique({
 			where: { imageId },

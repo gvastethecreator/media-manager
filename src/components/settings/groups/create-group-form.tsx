@@ -42,7 +42,7 @@ export function CreateGroupForm({
 	onPreview,
 }: CreateGroupFormProps) {
 	// Inicializar el formulario con el tipo correcto
-	const form = useForm<FormData>({
+	const _form = useForm<FormData>({
 		resolver: zodResolver(groupFormSchema),
 		defaultValues: {
 			name: group?.name ?? '',

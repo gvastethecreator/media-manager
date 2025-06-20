@@ -9,52 +9,6 @@ import { TransformerError } from '@/utils/transformers/errors';
 
 const logger = serverLogger.withContext('AlbumTransformer');
 
-// Define el tipo de payload de Prisma que esperamos, con las relaciones y conteos.
-export interface AlbumFromPrisma {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	shortcut: string | null;
-	category: string | null;
-	sortBy: string;
-	filters: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	// Relaciones (solo las que realmente existen en Prisma)
-	images: any[];
-	// videos: any[]; // ❌ ELIMINADO - No existe relación Album-Video en Prisma
-	collections: any[];
-	tags: any[];
-	// characters: any[]; // ❌ ELIMINADO - No existe relación Album-Character en Prisma
-	places: any[];
-	worldItems: any[];
-	concepts: any[];
-	prompts: any[];
-	notes: any[];
-	wildcards: any[];
-	properties: any[];
-	groups: any[];
-	_count?: {
-		images?: number;
-		// videos?: number; // ❌ ELIMINADO - No existe relación Album-Video en Prisma
-		collections?: number;
-		tags?: number;
-		// characters?: number; // ❌ ELIMINADO - No existe relación Album-Character en Prisma
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
-
 /**
  * 🔄 Transforma un objeto Album de Prisma a nuestro tipo canónico AlbumWithRelations.
  *
@@ -62,7 +16,7 @@ export interface AlbumFromPrisma {
  * @returns Un objeto AlbumWithRelations compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function fromPrismaAlbum(prismaAlbum: AlbumFromPrisma | null): AlbumWithRelations {
+export function fromPrismaAlbum(prismaAlbum: any): AlbumWithRelations {
 	if (!prismaAlbum) {
 		throw new TransformerError('El objeto de álbum de Prisma no puede ser nulo.');
 	}
@@ -73,11 +27,12 @@ export function fromPrismaAlbum(prismaAlbum: AlbumFromPrisma | null): AlbumWithR
 		return {
 			...baseData,
 			category: baseData.category ?? 'general',
+			// Asegurar que las relaciones opcionales no sean undefined
 			images: baseData.images ?? [],
-			// videos: baseData.videos ?? [], // ❌ ELIMINADO - No existe relación Album-Video en Prisma
+			videos: baseData.videos ?? [],
 			collections: baseData.collections ?? [],
 			tags: baseData.tags ?? [],
-			// characters: baseData.characters ?? [], // ❌ ELIMINADO - No existe relación Album-Character en Prisma
+			characters: baseData.characters ?? [],
 			places: baseData.places ?? [],
 			worldItems: baseData.worldItems ?? [],
 			concepts: baseData.concepts ?? [],
@@ -86,12 +41,13 @@ export function fromPrismaAlbum(prismaAlbum: AlbumFromPrisma | null): AlbumWithR
 			wildcards: baseData.wildcards ?? [],
 			properties: baseData.properties ?? [],
 			groups: baseData.groups ?? [],
+			// Asignar el conteo de forma segura
 			_count: {
 				images: _count?.images ?? 0,
-				// videos: _count?.videos ?? 0, // ❌ ELIMINADO - No existe en esquema Prisma Album
+				videos: _count?.videos ?? 0,
 				collections: _count?.collections ?? 0,
 				tags: _count?.tags ?? 0,
-				// characters: _count?.characters ?? 0, // ❌ ELIMINADO - No existe en esquema Prisma Album
+				characters: _count?.characters ?? 0,
 				places: _count?.places ?? 0,
 				worldItems: _count?.worldItems ?? 0,
 				concepts: _count?.concepts ?? 0,
@@ -105,7 +61,7 @@ export function fromPrismaAlbum(prismaAlbum: AlbumFromPrisma | null): AlbumWithR
 	} catch (error) {
 		logger.error('Error transformando álbum desde Prisma', {
 			error,
-			albumId: prismaAlbum.id,
+			albumId: prismaAlbum?.id,
 		});
 		throw new TransformerError(`Error al transformar el álbum: ${(error as Error).message}`);
 	}
@@ -117,6 +73,6 @@ export function fromPrismaAlbum(prismaAlbum: AlbumFromPrisma | null): AlbumWithR
  * @param prismaAlbums - Un array de objetos Album de Prisma.
  * @returns Un array de objetos AlbumWithRelations.
  */
-export function fromPrismaAlbums(prismaAlbums: AlbumFromPrisma[]): AlbumWithRelations[] {
+export function fromPrismaAlbums(prismaAlbums: any[]): AlbumWithRelations[] {
 	return prismaAlbums.map(fromPrismaAlbum);
 }

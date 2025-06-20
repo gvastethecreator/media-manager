@@ -5,17 +5,17 @@
  * @module app/actions/activity/log.actions
  */
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
+import { revalidatePath } from 'next/cache';
 
 import { extendActivity, generateActivityDescription, mapCreateActivityDataToPrisma } from '@/transformers/activity';
 import {
-	type Activity,
-	ActivityEventType,
-	type ActivityType,
-	type CreateActivityData,
+    type Activity,
+    ActivityEventType,
+    ActivityType,
+    type CreateActivityData,
 } from '@/types/entities/activity';
 
 const activityLogger = serverLogger.withContext('ActivityLogActions');

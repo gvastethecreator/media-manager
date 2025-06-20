@@ -6,7 +6,14 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import * as QueueJobService from '@/services/queue-job.service';
+import {
+    countCompletedJobs,
+    countFailedJobs,
+    countTotalJobs,
+    findQueueJobsByStatus,
+    getQueueStatsByQueue as getQueueStatsByQueueService,
+    getQueueStats as getQueueStatsService
+} from '@/services/queue-job/queue-job.service';
 import type { QueueStats } from '@/types/entities/queue-job';
 import { QueueJobStatus } from '@/types/entities/queue-job';
 import { unstable_cache } from 'next/cache';
@@ -48,7 +55,7 @@ export async function getQueueStats(): Promise<QueueStats> {
 		async () => {
 			try {
 				logger.debug('📊 Obteniendo estadísticas de cola');
-				return await QueueJobService.getQueueStats();
+				return await getQueueStatsService();
 			} catch (error) {
 				logger.error('❌ Error al obtener estadísticas de cola:', error);
 				throw error;
@@ -74,7 +81,7 @@ export async function getQueueStatsByQueue(queue: string): Promise<Record<string
 				logger.info('📊 Obteniendo estadísticas de cola:', queue);
 
 				// Obtener conteo por estado para la cola específica
-				const stats = await QueueJobService.getQueueStatsByQueue(queue);
+				const stats = await getQueueStatsByQueueService(queue);
 
 				// Asegurar que todos los estados tengan un valor
 				for (const status of Object.values(QueueJobStatus)) {
@@ -119,19 +126,19 @@ export async function getQueuePerformanceStats(): Promise<{
 
 				const [completedJobs, failedJobs, totalJobs, processingTimes] = await Promise.all([
 					// Trabajos completados
-					QueueJobService.countCompletedJobs(oneHourAgo),
+					countCompletedJobs(oneHourAgo),
 					// Trabajos fallidos
-					QueueJobService.countFailedJobs(oneHourAgo),
+					countFailedJobs(oneHourAgo),
 					// Total de trabajos procesados
-					QueueJobService.countTotalJobs(oneHourAgo),
+					countTotalJobs(oneHourAgo),
 					// Tiempos de procesamiento
-					QueueJobService.findProcessingTimes(oneHourAgo),
+					findQueueJobsByStatus(QueueJobStatus.COMPLETED),
 				]);
 
 				// Calcular tiempo promedio de procesamiento
 				const totalProcessingTime = processingTimes.reduce((acc, job) => {
-					if (job.startedAt && job.completedAt) {
-						return acc + (job.completedAt.getTime() - job.startedAt.getTime());
+					if (job.startedAt && job.finishedAt) {
+						return acc + (job.finishedAt.getTime() - job.startedAt.getTime());
 					}
 					return acc;
 				}, 0);

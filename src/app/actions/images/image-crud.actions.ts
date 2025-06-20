@@ -86,7 +86,7 @@ export async function createImage(data: CreateImageData): Promise<ImageBase> {
 			(prismaData as any).folderId = undefined;
 		}
 		// Forzar folderId a undefined explícitamente si se usa folder.connect
-		const prismaDataFinal = {
+		const _prismaDataFinal = {
 			...prismaData,
 			folderId: data.folderId ? undefined : prismaData.folderId,
 		};
@@ -172,7 +172,7 @@ export async function updateImage(id: string, data: UpdateImageData): Promise<Im
 		const updated = await prisma.image.update({
 			where: { id },
 			data: Object.fromEntries(
-				Object.entries(prismaData).filter(([key, value]) => key !== 'id' && key !== 'createdAt' && key !== 'updatedAt')
+				Object.entries(prismaData).filter(([key, _value]) => key !== 'id' && key !== 'createdAt' && key !== 'updatedAt')
 			),
 		});
 
