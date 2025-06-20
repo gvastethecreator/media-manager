@@ -4,53 +4,76 @@
  * @description Implementación del store de Zustand para la gestión de actividades del sistema
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
+import { ActivityComplete, ActivitySortCriteria } from '@/types/entities/activity';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { ActivitySortCriteria } from '@/types/entities/activity';
 import { type ActivityCoreSlice, createActivityCoreSlice } from './slices/core';
 import { type ActivityFiltersSlice, createActivityFiltersSlice } from './slices/filters';
 import { type ActivityUISlice, createActivityUISlice } from './slices/ui';
-import type { ActivityState } from './types';
 
 // Logger para el store
 const storeLogger = clientLogger.withContext('ActivityStore');
 
+/**
+ * Estado completo del store de Activity (sin estructura anidada)
+ */
+export interface ActivityState {
+	// Datos principales
+	activities: Record<string, ActivityComplete>;
+	isLoading: boolean;
+	error: string | null;
+	lastUpdated: number | null;
+
+	// Estado UI
+	selectedIds: string[];
+	expandedIds: string[];
+	highlightedId: string | null;
+	detailActivityId: string | null;
+	isDetailModalOpen: boolean;
+	groupByDate: boolean;
+
+	// Estado de filtros
+	sortBy: ActivitySortCriteria;
+	searchQuery: string;
+	selectedCategories: string[];
+	onlyAlerts: boolean;
+	dateRange: {
+		from: Date | null;
+		to: Date | null;
+	};
+	filterByImageId: string | null;
+}
+
 // Tipo del store completo que combina todos los slices
-export type ActivityStore = ActivityCoreSlice & ActivityUISlice & ActivityFiltersSlice;
+export type ActivityStore = ActivityState & ActivityCoreSlice & ActivityUISlice & ActivityFiltersSlice;
 
-// Estado inicial para cada parte del store
-const _initialState: ActivityState = {
-	// Estado core: Datos principales de actividades
-	core: {
-		activities: {},
-		isLoading: false,
-		error: null,
-		lastUpdated: null,
-	},
+// Estado inicial para el store
+const initialState: ActivityState = {
+	// Datos principales
+	activities: {},
+	isLoading: false,
+	error: null,
+	lastUpdated: null,
 
-	// Estado UI: Controla la interfaz de usuario
-	ui: {
-		selectedIds: [],
-		expandedIds: [],
-		highlightedId: null,
-		detailActivityId: null,
-		isDetailModalOpen: false,
-		groupByDate: true,
-	},
+	// Estado UI
+	selectedIds: [],
+	expandedIds: [],
+	highlightedId: null,
+	detailActivityId: null,
+	isDetailModalOpen: false,
+	groupByDate: true,
 
-	// Estado de filtros: Controla criterios de filtrado y búsqueda
-	filters: {
-		sortBy: ActivitySortCriteria.DATE_DESC,
-		searchQuery: '',
-		selectedCategories: [],
-		onlyAlerts: false,
-		dateRange: {
-			from: null,
-			to: null,
-		},
-		filterByImageId: null,
+	// Estado de filtros
+	sortBy: ActivitySortCriteria.DATE_DESC,
+	searchQuery: '',
+	selectedCategories: [],
+	onlyAlerts: false,
+	dateRange: {
+		from: null,
+		to: null,
 	},
+	filterByImageId: null,
 };
 
 /**
@@ -62,27 +85,28 @@ const _initialState: ActivityState = {
 export const useActivityStore = create<ActivityStore>()(
 	devtools(
 		persist(
-			(...args) => {
+			(set, get, api) => {
 				storeLogger.info('🏗️ Inicializando ActivityStore');
 
 				// Combinar todos los slices en un solo store
+				const coreSlice = createActivityCoreSlice(set, get, api);
+				const uiSlice = createActivityUISlice(set, get, api);
+				const filtersSlice = createActivityFiltersSlice(set, get, api);
+
 				return {
-					...createActivityCoreSlice(...args),
-					...createActivityUISlice(...args),
-					...createActivityFiltersSlice(...args),
+					...initialState,
+					...coreSlice,
+					...uiSlice,
+					...filtersSlice,
 				};
 			},
 			{
 				name: 'activity-store',
 				// Solo persistir configuraciones de usuario, no los datos de actividades
 				partialize: (state) => ({
-					ui: {
-						groupByDate: state.ui.groupByDate,
-					},
-					filters: {
-						sortBy: state.filters.sortBy,
-						onlyAlerts: state.filters.onlyAlerts,
-					},
+					groupByDate: state.groupByDate,
+					sortBy: state.sortBy,
+					onlyAlerts: state.onlyAlerts,
 				}),
 			}
 		),
@@ -102,3 +126,4 @@ export { createActivityFiltersSlice } from './slices/filters';
 export { createActivityUISlice } from './slices/ui';
 // Exportar todo desde types para facilitar el uso
 export * from './types';
+

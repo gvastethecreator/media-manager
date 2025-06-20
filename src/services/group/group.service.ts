@@ -22,7 +22,7 @@ import type {
 	GroupSearchResult,
 	GroupUpdateInput,
 	GroupWithStats,
-} from '@/types/entities/group';
+} from '@/types/entities/group/types';
 
 // Logger específico para el servicio de grupos
 const logger = serverLogger.withContext('GroupService');

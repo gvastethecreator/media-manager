@@ -232,13 +232,9 @@ export const createVideoFiltersSlice: StateCreator<VideoState, [], [], VideoFilt
 				case 'duration_desc':
 					return (b.duration || 0) - (a.duration || 0);
 				case 'resolution_asc':
-					return (
-						(a.width || 0) * (a.height || 0) - (b.width || 0) * (b.height || 0)
-					);
+					return (a.width || 0) * (a.height || 0) - (b.width || 0) * (b.height || 0);
 				case 'resolution_desc':
-					return (
-						(b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0)
-					);
+					return (b.width || 0) * (b.height || 0) - (a.width || 0) * (a.height || 0);
 				default:
 					return 0;
 			}

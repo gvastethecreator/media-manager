@@ -147,10 +147,7 @@ export function toSearchFilters(filters: PropertyFilters): any {
 
 		// Filtrar por término de búsqueda
 		if (filters.searchQuery) {
-			where.OR = [
-				{ name: { contains: filters.searchQuery } },
-				{ description: { contains: filters.searchQuery } },
-			];
+			where.OR = [{ name: { contains: filters.searchQuery } }, { description: { contains: filters.searchQuery } }];
 		}
 
 		// Filtrar por categorías

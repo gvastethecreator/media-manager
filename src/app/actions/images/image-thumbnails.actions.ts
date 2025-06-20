@@ -14,10 +14,10 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { imageService } from '@/services/image-service-export';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
-    createEntityNotFoundError,
-    createServiceError,
-    ServiceErrorCode,
-    toServiceError,
+	createEntityNotFoundError,
+	createServiceError,
+	ServiceErrorCode,
+	toServiceError,
 } from '@/utils/errors/service-errors';
 import fs from 'fs/promises';
 import { revalidatePath } from 'next/cache';

@@ -1,7 +1,12 @@
-import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { transformConceptToWithStats } from '@/transformers/concept/transformer';
-import type { ConceptBase, ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept';
+import type {
+	ConceptBase,
+	ConceptCreateInput,
+	ConceptUpdateInput,
+	ConceptWithStats,
+} from '@/types/entities/concept/types';
+import type { StateCreator } from 'zustand';
 import {
 	createConcept,
 	deleteConcept,
@@ -44,7 +49,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 
 			// Llamar a server action para obtener conceptos
 			const results = await searchConcepts();
-			const concepts = results.data; // Asumiendo que searchConcepts devuelve un objeto con una propiedad 'data'
+			const concepts = results.items; // ConceptSearchResult tiene una propiedad 'items'
 
 			// Transformar resultados con la función correcta
 			const transformedConcepts = concepts.map(transformConceptToWithStats);

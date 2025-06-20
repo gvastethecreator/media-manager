@@ -54,7 +54,7 @@ export function mapActivityFiltersToPrisma(filters: ActivityFilters): Prisma.Act
 	if (filters.searchQuery) {
 		where.description = {
 			contains: filters.searchQuery,
-			};
+		};
 	}
 
 	return {

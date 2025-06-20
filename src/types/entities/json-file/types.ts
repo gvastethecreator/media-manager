@@ -67,10 +67,25 @@ export type JsonFileFormData = Omit<JsonFile, 'id' | 'createdAt' | 'updatedAt'> 
 /**
  * 🔗 Datos de relación para input (legacy, se mantiene para compatibilidad)
  */
-export type JsonFileRelationInput = Pick<JsonFileFormData,
-	'images' | 'videos' | 'audio' | 'file3d' | 'documents' | 'albums' | 'collections' |
-	'tags' | 'characters' | 'places' | 'worldItems' | 'concepts' | 'prompts' |
-	'notes' | 'wildcards' | 'properties' | 'groups'
+export type JsonFileRelationInput = Pick<
+	JsonFileFormData,
+	| 'images'
+	| 'videos'
+	| 'audio'
+	| 'file3d'
+	| 'documents'
+	| 'albums'
+	| 'collections'
+	| 'tags'
+	| 'characters'
+	| 'places'
+	| 'worldItems'
+	| 'concepts'
+	| 'prompts'
+	| 'notes'
+	| 'wildcards'
+	| 'properties'
+	| 'groups'
 >;
 
 /**

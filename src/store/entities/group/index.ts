@@ -40,7 +40,6 @@ const initialState: GroupState = {
 		filterByType: null,
 		filterByCategory: null,
 		filterFavorites: false,
-		filterShared: false,
 		dateRange: {
 			from: null,
 			to: null,

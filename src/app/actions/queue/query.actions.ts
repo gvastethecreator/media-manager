@@ -7,16 +7,16 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    findQueueJobs,
-    findQueueJobsByStatus,
-    findRecentQueueJobs,
-    getQueueJobById
+	findQueueJobs,
+	findQueueJobsByStatus,
+	findRecentQueueJobs,
+	getQueueJobById,
 } from '@/services/queue-job/queue-job.service';
 import {
-    type PaginatedQueueJobs,
-    type QueueJobExtended,
-    type QueueJobFilters,
-    type QueueJobPaginationOptions,
+	type PaginatedQueueJobs,
+	type QueueJobExtended,
+	type QueueJobFilters,
+	type QueueJobPaginationOptions,
 } from '@/types/entities/queue-job';
 import { unstable_cache } from 'next/cache';
 

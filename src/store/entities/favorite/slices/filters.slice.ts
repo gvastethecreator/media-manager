@@ -3,9 +3,9 @@
  * @module store/entities/favorite/slices/filters
  */
 
-import { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { FavoriteExtended } from '@/types/entities/favorite';
+import { StateCreator } from 'zustand';
 import { FavoriteStore } from '..';
 import { DEFAULT_FILTERS } from '../constants';
 import { FavoriteFilters } from '../types';
@@ -67,7 +67,9 @@ const applyFilters = (favorites: FavoriteExtended[], filters: FavoriteFilters): 
 		// Filtro por búsqueda
 		if (filters.search && filters.search.trim() !== '') {
 			const searchLower = filters.search.toLowerCase();
-			const nameMatch = favorite.entityName?.toLowerCase().includes(searchLower);
+			// Usar el cast a FavoriteExtended para acceder a entityName
+			const favoriteExtended = favorite as any;
+			const nameMatch = favoriteExtended.entityName?.toLowerCase().includes(searchLower);
 			const typeMatch = favorite.entityType.toLowerCase().includes(searchLower);
 
 			if (!nameMatch && !typeMatch) {

@@ -4,12 +4,7 @@
  * @description Store Zustand para gestionar el estado de workflows
  */
 
-import {
-    createWorkflow,
-    deleteWorkflow,
-    getWorkflows,
-    updateWorkflow,
-} from '@/app/actions/workflow/workflow.actions';
+import { createWorkflow, deleteWorkflow, getWorkflows, updateWorkflow } from '@/app/actions/workflow/workflow.actions';
 import type { WorkflowComplete, WorkflowFilters, WorkflowFormData } from '@/types/entities/workflow/types';
 import { createSelectors } from '@/utils/store/create-selectors';
 import { create } from 'zustand';

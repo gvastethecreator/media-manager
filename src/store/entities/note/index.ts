@@ -32,6 +32,7 @@ export const useNoteStore = create<NoteStore>()(
 					const {
 						// Excluir de la persistencia
 						notes,
+						isLoading,
 						loading,
 						error,
 						// El resto se persiste
@@ -43,7 +44,7 @@ export const useNoteStore = create<NoteStore>()(
 					return {
 						...rest,
 						// Añadir versión para control de migraciones
-						version: VERSIONING.CURRENT_STORE_VERSION,
+						version: VERSIONING.STORE,
 					};
 				},
 				onRehydrateStorage: () => (state) => {
@@ -53,10 +54,10 @@ export const useNoteStore = create<NoteStore>()(
 						storeLogger.info('♻️ Rehidratando store', { version });
 
 						// Añadir migración si se necesita en el futuro
-						if (version < VERSIONING.CURRENT_STORE_VERSION) {
+						if (version < VERSIONING.STORE) {
 							storeLogger.warn('⚠️ Versión de store obsoleta, puede requerir migración', {
 								storeVersion: version,
-								currentVersion: VERSIONING.CURRENT_STORE_VERSION,
+								currentVersion: VERSIONING.STORE,
 							});
 						}
 					}

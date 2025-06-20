@@ -517,250 +517,117 @@ const prisma = await getPrismaClient();
 **Metodología:** 🎯 **EFECTIVA** - Transformación sistemática por categorías
 **Próximo paso:** 🔄 **Transformers Masivos** - Aplicar patrón a todos los transformers
 
-# 🎯 TAREA ACTUAL: Migración de Emoji-mart a Frimousse
+# 🎯 TAREA ACTUAL: Corrección Sistemática de Errores TypeScript
 
-## ✅ COMPLETADO - Migración Exitosa
+## 📊 Estado General
 
-### 📋 Resumen de la Migración
+- **Total de errores**: ~1380 errores en ~410 archivos (estimado actualizado)
+- **Enfoque**: Corrección entidad por entidad (tipos, stores, actions, components, services, transformers)
+- **Metodología**: Completar todos los aspectos de cada entidad antes de pasar a la siguiente
 
-Se completó exitosamente la migración de `emoji-mart` a `frimousse` en el proyecto de gestión de imágenes.
+## ✅ Entidades Completamente Corregidas
 
-### 🔄 Cambios Realizados
+### 1. 🎭 **Character** (38 errores) - ✅ COMPLETADA
 
-#### 1. Dependencias
+- **Tipos**: Agregados `CharacterFilterItem`, `CharacterRelationship`, `CharacterStats`, `CharacterFilter`
+- **Store**: Corregidas referencias a propiedades UI inexistentes
+- **Funciones**: Actualizadas funciones de comparación y agrupamiento
+- **Estado**: Sin errores TypeScript
 
-- ✅ **Removidas**: `@emoji-mart/data`, `@emoji-mart/react`, `emoji-mart`, `emoji-picker-react`
-- ✅ **Agregada**: `frimousse@^0.2.0`
-- ✅ **Reducción de bundle**: ~90% menor tamaño
+### 2. 👥 **Group** (22+ errores) - ✅ COMPLETADA
 
-#### 2. Componentes Migrados
+- **Tipos**: Exportados `GroupComplete`, `GroupExtended`, `GroupListItem`
+- **Constantes**: Definido `DEFAULT_GROUP_COLOR = '#3B82F6'`
+- **Mappers**: Corregidas validaciones y funciones de paginación
+- **Estado**: Sin errores TypeScript
 
-- ✅ `src/components/ui/emoji-picker.tsx` - Componente principal
-- ✅ `src/components/forms/emoji-picker.tsx` - Versión para formularios
-- ✅ `src/components/core/emojis/emoji-picker.tsx` - Nuevo componente core
-- ✅ `src/components/core/emojis/example.tsx` - Ejemplo de uso
+### 3. 💬 **Prompt** (33+ errores) - ✅ COMPLETADA
 
-#### 3. Compatibilidad
+- **Tipos**: Agregado `PromptParameter`, corregido `ExtendedPrompt` con `_count`
+- **Mappers**: Corregidas referencias a propiedades inexistentes y serialización
+- **Serializers**: Eliminadas redeclaraciones, agregada función `getPreviewContent`
+- **Estado**: Sin errores TypeScript
 
-- ✅ **API backward-compatible**: No requiere cambios en código existente
-- ✅ **15+ formularios** funcionando sin modificaciones
-- ✅ **Todas las props** mantienen la misma funcionalidad
+### 4. 📝 **Note** (7+ errores) - ✅ COMPLETADA
 
-#### 4. Mejoras Implementadas
+- **Mappers**: Agregada exportación de `mapNoteFiltersToPrisma` faltante
+- **Tests**: Corregido uso de `page/pageSize` por `skip/take` en `NoteSearchOptions`
+- **Utils**: Agregada importación faltante de Logger en `transformers/common.ts`
+- **Estado**: Sin errores TypeScript
 
-- ✅ **Emojis frecuentes curados** para gestión de imágenes
-- ✅ **Modo compacto mejorado** para formularios
-- ✅ **Búsqueda en tiempo real** más eficiente
-- ✅ **Mejor accesibilidad** (a11y)
-- ✅ **Compatible con React 19** y Next.js 15
+### 5. 🗺️ **Place** (8+ errores) - ✅ COMPLETADA
 
-#### 5. Documentación
+- **Mappers**: Corregido error de sintaxis y referencia a `rest.filters`
+- **Actions**: Simplificado `PLACE_INCLUDE` para compatibilidad con Prisma
+- **Tipos**: Agregada propiedad `abundance` a `PlaceResource`
+- **Components**: Corregida conversión de `description` null → undefined
+- **Store**: Agregadas funciones `selectPlace` y `getSelectedPlace`
+- **Estado**: Sin errores TypeScript
 
-- ✅ `src/components/core/emojis/README.md` - Guía de uso
-- ✅ `EMOJI_MIGRATION.md` - Documentación completa de migración
-- ✅ Ejemplos de uso y casos de prueba
+## 🔄 Próximas Entidades en Cola
 
-### 🎨 Características Nuevas
+### 6. 🌟 **Concept** (Próxima - estimado 15+ errores)
 
-#### Emojis Frecuentes
+- Errores identificados en transformers y types
+- Problemas con relaciones y mappers
+- Falta de exportaciones en index files
 
-```typescript
-const frequentEmojis = [
-  '📦', '🗃️', '🧰', '💎', '🏆', '🎁', '🔮', '⚔️', '🛡️', '📚',
-  '🧙‍♂️', '🧝‍♀️', '🧪', '🧬', '🔍', '🔑', '💰', '🪙', '🧿', '🏺',
-  // ... más emojis específicos para el proyecto
-];
-```
+### 7. 🏷️ **Tag** (estimado 12+ errores)
 
-#### Modos de Uso
+- Problemas con serializers y transformers
+- Errores en componentes de UI
+- Inconsistencias en tipos
 
-1. **Compacto**: Ideal para formularios
-2. **Completo**: Para selección detallada
-3. **Híbrido**: Categorías + búsqueda avanzada
+### 8. 🎯 **World-Item** (estimado 10+ errores)
 
-### 📊 Métricas de Mejora
+- Errores en transformers y mappers
+- Problemas con tipos extendidos
+- Inconsistencias en serialización
 
-| Aspecto | Antes (emoji-mart) | Después (frimousse) | Mejora |
-|---------|-------------------|-------------------|---------|
-| Bundle Size | ~500KB | ~50KB | 90% ↓ |
-| Tiempo de Carga | ~2-3s | ~0.5s | 80% ↓ |
-| Memoria | ~50MB | ~5MB | 90% ↓ |
-| Compatibilidad | React 18 | React 19 | ✅ |
+## 📈 Progreso Acumulado
 
-### 🧪 Testing Realizado
+- **Entidades corregidas**: 5/~25 (20% completado)
+- **Errores resueltos**: ~113+ errores (estimado 8% del total)
+- **Archivos corregidos**: ~20 archivos principales
+- **Tiempo invertido**: Enfoque sistemático y metodológico
 
-- ✅ Compilación sin errores
-- ✅ Tipos TypeScript correctos
-- ✅ Componentes renderizando correctamente
-- ✅ Callbacks funcionando
-- ✅ Formularios existentes sin cambios
-- ✅ Servidor de desarrollo iniciado exitosamente
+## 🎯 Metodología Aplicada
 
-### 📁 Archivos Principales
+1. **Análisis**: Búsqueda de errores específicos por entidad
+2. **Priorización**: Corrección de tipos base antes que componentes
+3. **Validación**: Compilación incremental para verificar correcciones
+4. **Documentación**: Actualización inmediata de README por entidad
+5. **Consistencia**: Aplicación de patrones uniformes
 
-#### Componentes Core
+## 🔧 Patrones de Corrección Identificados
 
-```
-src/components/
-├── ui/emoji-picker.tsx          # Componente principal migrado
-├── forms/emoji-picker.tsx       # Versión para formularios
-└── core/emojis/
-    ├── emoji-picker.tsx         # Componente específico core
-    ├── example.tsx              # Ejemplos de uso
-    └── README.md                # Documentación
-```
+### Errores Comunes
 
-#### Documentación
+- **Tipos faltantes**: Interfaces no exportadas o no definidas
+- **Propiedades inexistentes**: Referencias a campos que no existen en tipos
+- **Incompatibilidad null/undefined**: Conversiones de tipos necesarias
+- **Imports circulares**: Reorganización de exportaciones
+- **Prisma compatibility**: Simplificación de queries complejas
 
-```
-├── EMOJI_MIGRATION.md           # Guía completa de migración
-└── CURRENT-TASK.md             # Este archivo
-```
+### Soluciones Aplicadas
 
-### 🚀 Estado Actual
+- **Exportaciones centralizadas** en archivos index.ts
+- **Tipos canónicos** consistentes en toda la aplicación
+- **Conversiones de tipo explícitas** para null/undefined
+- **Simplificación de Prisma includes** para mejor rendimiento
+- **Documentación actualizada** con diagramas mermaid
 
-- ✅ **Migración completada al 100%**
-- ✅ **Todos los componentes funcionando**
-- ✅ **Documentación actualizada**
-- ✅ **Servidor de desarrollo ejecutándose**
-- ✅ **Listo para producción**
+## 🚀 Siguiente Paso
 
-### 🎯 Próximos Pasos Sugeridos
+**Iniciar corrección de entidad Concept** - aplicando la metodología establecida:
 
-1. [ ] Verificar funcionamiento en producción
-2. [ ] Agregar tests automatizados específicos
-3. [ ] Considerar agregar favoritos de usuario
-4. [ ] Implementar shortcuts de teclado
-5. [ ] Optimizar emojis frecuentes basado en uso real
+1. Análisis de errores específicos
+2. Corrección de tipos base
+3. Actualización de transformers
+4. Validación de componentes
+5. Documentación completa
 
 ---
 
-## 🎉 MIGRACIÓN EXITOSA
-
-La migración de `emoji-mart` a `frimousse` se completó exitosamente con:
-
-- **100% compatibilidad** con código existente
-- **90% reducción** en bundle size
-- **Mejor rendimiento** y accesibilidad
-- **Futuro-compatible** con React 19 y Next.js 15
-
-El proyecto ahora usa una biblioteca moderna, ligera y mantenible para la gestión de emojis.
-
-# CURRENT TASK 📋
-
-## 🎯 Estado Actual: COMPLETADO - Configuración FileBrowser en Interface Settings
-
-### ✅ Migración emoji-mart → Frimousse (COMPLETADO)
-
-- [x] Dependencias actualizadas (emoji-mart → frimousse)
-- [x] 3 componentes EmojiPicker migrados con backward compatibility
-- [x] Documentación completa creada
-- [x] Bundle size reducido 90% (500KB → 50KB)
-- [x] Servidor funcionando correctamente
-
-### ✅ Configuración FileBrowser Interface (COMPLETADO)
-
-- [x] **Tipos extendidos** - FileBrowserConfig con 4 vistas + configuraciones generales
-- [x] **Schema Zod** - Validación completa para todas las configuraciones
-- [x] **Store actualizado** - Valores por defecto optimizados para gestión de imágenes
-- [x] **InterfaceSection extendido** - UI completa con 6 tabs de configuración
-- [x] **Documentación completa** - README con casos de uso y arquitectura
-
-#### 🎛️ Configuraciones Implementadas
-
-##### 📋 **Tab General**
-
-- Vista por defecto (Grid/Cards/Mosaico/Lista)
-- Elementos por lote (10-200)
-- Carga progresiva, transiciones, selección múltiple
-- Drag & drop, contador, tamaño total
-
-##### 🔲 **Tab Grid**
-
-- Columnas min/max, tamaño elemento, espaciado
-- Relación de aspecto, info hover, animaciones
-
-##### 🗃️ **Tab Cards**
-
-- Dimensiones tarjetas, espaciado
-- Metadatos, info técnica, badges
-- Tamaño preview (S/M/L)
-
-##### 🧱 **Tab Masonry**
-
-- Columnas y dimensiones configurables
-- Gaps, alturas min/max
-- Aspect ratio, balanceo automático
-
-##### 📋 **Tab List**
-
-- Altura filas, thumbnails
-- 7 columnas visibles configurables
-- Líneas zebra, modo compacto
-
-##### ⚡ **Tab Performance**
-
-- Virtualización, pre-carga
-- Cache thumbnails, calidad
-- Optimizaciones específicas
-
-### 🎨 **Características Destacadas**
-
-- **6 tabs organizados** con iconografía clara
-- **Validación Zod en tiempo real** con rangos seguros
-- **IDs únicos** generados con useId() (sin errores linter)
-- **Helpers especializados** para cada tipo de configuración
-- **Valores por defecto optimizados** para gestión de imágenes
-- **Documentación exhaustiva** con casos de uso específicos
-
-### 🔧 **Arquitectura Técnica**
-
-- **Store Zustand** con persistencia automática
-- **Tipos TypeScript** canónicos y validados
-- **UI/UX consistente** con el sistema de diseño
-- **Performance** optimizada para configuraciones complejas
-
-### 📊 **Configuraciones por Perfil de Usuario**
-
-- **Fotógrafo**: Grid 6-8 cols, metadatos completos, alta calidad
-- **Diseñador**: Masonry natural, badges, animaciones
-- **Gestor**: List completo, virtualización, carga rápida
-
----
-
-## 🚀 **Próximos Pasos Sugeridos**
-
-### 1. **Integración con FileBrowser** 🔗
-
-- Conectar configuraciones con componentes de vista
-- Implementar cambios dinámicos en tiempo real
-- Validar comportamiento en cada vista
-
-### 2. **Presets de Usuario** 👤
-
-- Configuraciones predefinidas por tipo
-- Exportar/importar settings
-- Perfiles de configuración
-
-### 3. **Optimizaciones Avanzadas** ⚡
-
-- Cache inteligente de configuraciones
-- Shortcuts de teclado configurables
-- Vista híbrida experimental
-
----
-
-## 📈 **Progreso General del Proyecto**
-
-| Componente | Estado | Progreso |
-|------------|--------|----------|
-| Emoji Migration | ✅ | 100% |
-| FileBrowser Config | ✅ | 100% |
-| Interface Settings | ✅ | 100% |
-| Documentación | ✅ | 100% |
-| Testing | ⏳ | Pendiente |
-| Integration | ⏳ | Siguiente |
-
----
-
-*Última actualización: Configuración completa del FileBrowser implementada con 6 tabs, validación Zod y documentación exhaustiva* 🎯
+**Última actualización**: Entidad Place completamente corregida
+**Siguiente objetivo**: Entidad Concept

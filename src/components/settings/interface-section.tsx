@@ -21,7 +21,7 @@ import React, { useId, useState } from 'react';
 const InterfaceSection: React.FC = () => {
 	// Acceso a preferencias y setter desde Zustand
 	const preferences = useInterfaceSettingsStore((s) => s.preferences);
-	const setPreferences = useInterfaceSettingsStore((s: any) => (s.setPreferences ? s.setPreferences : () => { }));
+	const setPreferences = useInterfaceSettingsStore((s: any) => (s.setPreferences ? s.setPreferences : () => {}));
 
 	// Estado para el tab activo del FileBrowser
 	const [activeFileBrowserTab, setActiveFileBrowserTab] = useState('general');
@@ -706,13 +706,21 @@ const InterfaceSection: React.FC = () => {
 													id={`column-${column}`}
 												/>
 												<Label htmlFor={`column-${column}`} className="text-xs capitalize">
-													{column === 'dateModified' ? 'Fecha Mod.' :
-														column === 'dateCreated' ? 'Fecha Creación' :
-															column === 'name' ? 'Nombre' :
-																column === 'size' ? 'Tamaño' :
-																	column === 'type' ? 'Tipo' :
-																		column === 'dimensions' ? 'Dimensiones' :
-																			column === 'tags' ? 'Etiquetas' : column}
+													{column === 'dateModified'
+														? 'Fecha Mod.'
+														: column === 'dateCreated'
+															? 'Fecha Creación'
+															: column === 'name'
+																? 'Nombre'
+																: column === 'size'
+																	? 'Tamaño'
+																	: column === 'type'
+																		? 'Tipo'
+																		: column === 'dimensions'
+																			? 'Dimensiones'
+																			: column === 'tags'
+																				? 'Etiquetas'
+																				: column}
 												</Label>
 											</div>
 										))}
@@ -760,7 +768,9 @@ const InterfaceSection: React.FC = () => {
 											min={50}
 											max={1000}
 											value={preferences.fileBrowser.performance.thumbnailCacheLimit}
-											onChange={(e) => updateFileBrowserConfig('performance', 'thumbnailCacheLimit', Number(e.target.value))}
+											onChange={(e) =>
+												updateFileBrowserConfig('performance', 'thumbnailCacheLimit', Number(e.target.value))
+											}
 										/>
 									</div>
 								</div>

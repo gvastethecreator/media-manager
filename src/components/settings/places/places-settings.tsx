@@ -72,8 +72,8 @@ export function PlacesSettings() {
 				matches &&
 				Boolean(
 					place.name.toLowerCase().includes(normalizedQuery) ||
-					place.description?.toLowerCase().includes(normalizedQuery) ||
-					place.region?.toLowerCase().includes(normalizedQuery)
+						place.description?.toLowerCase().includes(normalizedQuery) ||
+						place.region?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 

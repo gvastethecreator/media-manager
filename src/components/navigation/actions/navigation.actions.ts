@@ -239,13 +239,16 @@ export async function getNavigationData(): Promise<NavigationData> {
 							totalDownloads: stats.value.totalDownloads,
 							// Nuevas entidades - usar longitud de arrays como fallback
 							totalAudios: stats.value.totalAudios || (audios.status === 'fulfilled' ? audios.value.length : 0),
-							totalDocuments: stats.value.totalDocuments || (documents.status === 'fulfilled' ? documents.value.length : 0),
-							totalJsonFiles: stats.value.totalJsonFiles || (jsonFiles.status === 'fulfilled' ? jsonFiles.value.length : 0),
+							totalDocuments:
+								stats.value.totalDocuments || (documents.status === 'fulfilled' ? documents.value.length : 0),
+							totalJsonFiles:
+								stats.value.totalJsonFiles || (jsonFiles.status === 'fulfilled' ? jsonFiles.value.length : 0),
 							totalFile3Ds: stats.value.totalFile3Ds || (file3ds.status === 'fulfilled' ? file3ds.value.length : 0),
-							totalWorkflows: stats.value.totalWorkflows || (workflows.status === 'fulfilled' ? workflows.value.length : 0),
+							totalWorkflows:
+								stats.value.totalWorkflows || (workflows.status === 'fulfilled' ? workflows.value.length : 0),
 							topTags: stats.value.topTags,
 							recentActivity: stats.value.recentActivity,
-					  }
+						}
 					: defaultStats,
 		};
 	} catch (error) {

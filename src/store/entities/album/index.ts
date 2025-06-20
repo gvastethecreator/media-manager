@@ -6,15 +6,21 @@
  */
 
 import {
-    createAlbum as createServerAlbum,
-    deleteAlbum as deleteServerAlbum,
-    getAlbums,
-    updateAlbum as updateServerAlbum,
+	createAlbum as createServerAlbum,
+	deleteAlbum as deleteServerAlbum,
+	getAlbums,
+	updateAlbum as updateServerAlbum,
 } from '@/app/actions/albums/album.actions';
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { AlbumComplete, AlbumCreateInput, AlbumSortCriteria, AlbumUpdateInput, AlbumViewMode } from '@/types/entities/album';
+import {
+	AlbumComplete,
+	AlbumCreateInput,
+	AlbumSortCriteria,
+	AlbumUpdateInput,
+	AlbumViewMode,
+} from '@/types/entities/album';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { AlbumStore } from './types';
@@ -50,18 +56,22 @@ export const useAlbumStore = create<AlbumStore>()(
 
 			// 🔍 Estado inicial de filtros
 			filters: {
-				sortBy: AlbumSortCriteria.DATE_CREATED_DESC,
+				query: '',
 				searchQuery: '',
+				sortBy: AlbumSortCriteria.DATE_CREATED_DESC,
 				filterByType: null,
 				filterByParentId: null,
 				filterFavorites: false,
 				filterShared: false,
 				filterArchived: false,
+				hasImages: undefined,
+				hasVideos: undefined,
+				categories: [],
+				types: [],
 				dateRange: {
 					from: null,
 					to: null,
 				},
-				query: '', // para compatibilidad con AlbumFilters
 			},
 
 			// 🔄 --- ACCIONES --- 🔄
@@ -168,18 +178,29 @@ export const useAlbumStore = create<AlbumStore>()(
 			clearFilters: () =>
 				set({
 					filters: {
-						sortBy: AlbumSortCriteria.DATE_CREATED_DESC,
+						query: '',
 						searchQuery: '',
+						sortBy: AlbumSortCriteria.DATE_CREATED_DESC,
 						filterByType: null,
 						filterByParentId: null,
 						filterFavorites: false,
 						filterShared: false,
 						filterArchived: false,
+						hasImages: undefined,
+						hasVideos: undefined,
+						categories: [],
+						types: [],
 						dateRange: { from: null, to: null },
-						query: '',
 					},
 				}),
-			setSearchQuery: (query) => set((state) => ({ filters: { ...state.filters, searchQuery: query } })),
+			setSearchQuery: (query) =>
+				set((state) => ({
+					filters: {
+						...state.filters,
+						searchQuery: query,
+						query: query, // Mantener ambos sincronizados
+					},
+				})),
 
 			// --- SELECTORES ---
 

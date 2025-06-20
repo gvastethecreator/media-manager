@@ -3,7 +3,6 @@
  * @module utils/image-utils
  */
 
-
 /**
  * Calcula la relación de aspecto de una imagen
  * @param width Ancho de la imagen

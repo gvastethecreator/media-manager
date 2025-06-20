@@ -79,7 +79,7 @@ export function transformImageToFileItem(image: any): FileItem {
  * @param favorite Favorito base con imagen incluida
  * @returns Favorito con imagen transformada
  */
-export function toFavoriteWithImage(isFavorite: any): FavoriteWithImage {
+export function toFavoriteWithImage(favorite: any): FavoriteWithImage {
 	try {
 		return {
 			id: favorite.id,
@@ -93,7 +93,7 @@ export function toFavoriteWithImage(isFavorite: any): FavoriteWithImage {
 	} catch (error) {
 		serializersLogger.error('Error convirtiendo a favorito con imagen:', error);
 		return {
-			...isFavorite,
+			...favorite,
 			image: transformImageToFileItem(favorite.image || {}),
 		} as FavoriteWithImage;
 	}

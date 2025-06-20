@@ -30,23 +30,25 @@ const climateTypes = ['TEMPERATE', 'TROPICAL', 'ARID', 'POLAR', 'CONTINENTAL'] a
 const governmentTypes = ['DEMOCRACY', 'MONARCHY', 'DICTATORSHIP', 'ANARCHY', 'OTHER'] as const;
 
 // 📝 Esquema de validación Zod: todos los campos string son obligatorios y nunca undefined
-const placeFormSchema = z.object({
-	name: z.string().min(1, 'El nombre es obligatorio').max(100).default('').catch(''),
-	description: z.string().max(1000).default('').catch(''),
-	emoji: z.string().min(1, 'El emoji es obligatorio').default('📍').catch('📍'),
-	color: z.string().min(1, 'El color es obligatorio').default('#6b7280').catch('#6b7280'),
-	category: z.string().default('general').catch('general'),
-	region: z.string().default('unknown').catch('unknown'),
-	type: z.string().default('unknown').catch('unknown'),
-	climate: z.string().default('temperate').catch('temperate'),
-	population: z.coerce.number().default(0),
-	government: z.string().default('unknown').catch('unknown'),
-	lore: z.string().default('').catch(''),
-	history: z.string().default('').catch(''),
-	isFavorite: z.boolean().default(false),
-	featuredImage: z.string().default('').catch(''),
-	shortcut: z.string().default('').catch(''),
-}).strict();
+const placeFormSchema = z
+	.object({
+		name: z.string().min(1, 'El nombre es obligatorio').max(100).default('').catch(''),
+		description: z.string().max(1000).default('').catch(''),
+		emoji: z.string().min(1, 'El emoji es obligatorio').default('📍').catch('📍'),
+		color: z.string().min(1, 'El color es obligatorio').default('#6b7280').catch('#6b7280'),
+		category: z.string().default('general').catch('general'),
+		region: z.string().default('unknown').catch('unknown'),
+		type: z.string().default('unknown').catch('unknown'),
+		climate: z.string().default('temperate').catch('temperate'),
+		population: z.coerce.number().default(0),
+		government: z.string().default('unknown').catch('unknown'),
+		lore: z.string().default('').catch(''),
+		history: z.string().default('').catch(''),
+		isFavorite: z.boolean().default(false),
+		featuredImage: z.string().default('').catch(''),
+		shortcut: z.string().default('').catch(''),
+	})
+	.strict();
 
 type PlaceFormValues = z.infer<typeof placeFormSchema>;
 
@@ -421,9 +423,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 								<FormControl>
 									<Input placeholder="Ej: @nombre-lugar" {...field} value={field.value ?? ''} />
 								</FormControl>
-								<FormDescription>
-									Atajo rápido para referenciar el lugar en otras entidades.
-								</FormDescription>
+								<FormDescription>Atajo rápido para referenciar el lugar en otras entidades.</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -437,9 +437,7 @@ export function CreatePlaceForm({ place, onSuccess, onCancel }: CreatePlaceFormP
 							<FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
 								<div className="space-y-0.5">
 									<FormLabel className="text-base">Marcar como favorito</FormLabel>
-									<FormDescription>
-										Los lugares favoritos aparecen primero en las búsquedas.
-									</FormDescription>
+									<FormDescription>Los lugares favoritos aparecen primero en las búsquedas.</FormDescription>
 								</div>
 								<FormControl>
 									<Checkbox checked={field.value} onCheckedChange={field.onChange} />

@@ -3,8 +3,8 @@
  * @module store/entities/character/slices/ui
  */
 
-import type { StateCreator } from 'zustand';
 import type { CharacterViewConfig } from '@/types/entities/character';
+import type { StateCreator } from 'zustand';
 import type { CharacterState, CharacterUISlice } from '../types';
 
 /**
@@ -76,33 +76,6 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 	 */
 	hoverCharacter: (characterId: string | null) => {
 		set({ hoveredCharacterId: characterId });
-
-		// También actualizar el estado isHovered en cada personaje
-		if (characterId !== get().hoveredCharacterId) {
-			set((state) => {
-				const updatedCharacters = { ...state.characters };
-
-				// Resetear todos los personajes con hover
-				for (const id of Object.keys(updatedCharacters)) {
-					if (updatedCharacters[id].isHovered) {
-						updatedCharacters[id] = {
-							...updatedCharacters[id],
-							isHovered: false,
-						};
-					}
-				}
-
-				// Establecer hover en el personaje seleccionado
-				if (characterId && updatedCharacters[characterId]) {
-					updatedCharacters[characterId] = {
-						...updatedCharacters[characterId],
-						isHovered: true,
-					};
-				}
-
-				return { characters: updatedCharacters };
-			});
-		}
 	},
 
 	/**
@@ -118,16 +91,8 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 				? state.expandedCharacterIds.filter((id) => id !== characterId)
 				: [...state.expandedCharacterIds, characterId];
 
-			// Actualizar estado isOpen en el personaje
-			const characters = { ...state.characters };
-			if (characters[characterId]) {
-				characters[characterId] = {
-					...characters[characterId],
-					isOpen: !isCurrentlyExpanded,
-				};
-			}
-
-			return { expandedCharacterIds, characters };
+			// El estado expandido se maneja solo en expandedCharacterIds
+			return { expandedCharacterIds };
 		});
 	},
 
@@ -145,16 +110,8 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 			// Actualizar array de IDs expandidos
 			const expandedCharacterIds = [...state.expandedCharacterIds, characterId];
 
-			// Actualizar estado isOpen en el personaje
-			const characters = { ...state.characters };
-			if (characters[characterId]) {
-				characters[characterId] = {
-					...characters[characterId],
-					isOpen: true,
-				};
-			}
-
-			return { expandedCharacterIds, characters };
+			// El estado expandido se maneja solo en expandedCharacterIds
+			return { expandedCharacterIds };
 		});
 	},
 
@@ -172,16 +129,8 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 			// Actualizar array de IDs expandidos
 			const expandedCharacterIds = state.expandedCharacterIds.filter((id) => id !== characterId);
 
-			// Actualizar estado isOpen en el personaje
-			const characters = { ...state.characters };
-			if (characters[characterId]) {
-				characters[characterId] = {
-					...characters[characterId],
-					isOpen: false,
-				};
-			}
-
-			return { expandedCharacterIds, characters };
+			// El estado expandido se maneja solo en expandedCharacterIds
+			return { expandedCharacterIds };
 		});
 	},
 
@@ -192,18 +141,9 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 		set((state) => {
 			const characterIds = Object.keys(state.characters);
 
-			// Actualizar cada personaje
-			const updatedCharacters = { ...state.characters };
-			for (const id of characterIds) {
-				updatedCharacters[id] = {
-					...updatedCharacters[id],
-					isOpen: true,
-				};
-			}
-
+			// El estado expandido se maneja solo en expandedCharacterIds
 			return {
 				expandedCharacterIds: characterIds,
-				characters: updatedCharacters,
 			};
 		});
 	},
@@ -212,19 +152,10 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 	 * Colapsa todos los personajes
 	 */
 	collapseAllCharacters: () => {
-		set((state) => {
-			// Actualizar cada personaje
-			const updatedCharacters = { ...state.characters };
-			for (const id of Object.keys(updatedCharacters)) {
-				updatedCharacters[id] = {
-					...updatedCharacters[id],
-					isExpanded: false,
-				};
-			}
-
+		set(() => {
+			// El estado expandido se maneja solo en expandedCharacterIds
 			return {
 				expandedCharacterIds: [],
-				characters: updatedCharacters,
 			};
 		});
 	},
@@ -235,23 +166,9 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 	 * @param isLoading Estado de carga
 	 */
 	setCharacterLoading: (characterId: string, isLoading: boolean) => {
-		set((state) => {
-			const character = state.characters[characterId];
-
-			if (!character) {
-				return state;
-			}
-
-			return {
-				characters: {
-					...state.characters,
-					[characterId]: {
-						...character,
-						isLoading,
-					},
-				},
-			};
-		});
+		// El estado de carga se maneja en el estado general del store
+		// Los componentes pueden verificar isLoading del estado general
+		set({ isLoading });
 	},
 
 	/**
@@ -260,47 +177,20 @@ export const createCharacterUISlice: StateCreator<CharacterState & CharacterUISl
 	 * @param hasError Indica si hay error
 	 */
 	setCharacterError: (characterId: string, hasError: boolean) => {
-		set((state) => {
-			const character = state.characters[characterId];
-
-			if (!character) {
-				return state;
-			}
-
-			return {
-				characters: {
-					...state.characters,
-					[characterId]: {
-						...character,
-						hasError,
-					},
-				},
-			};
-		});
+		// El estado de error se maneja en el estado general del store
+		set({ error: hasError ? 'Error en el personaje' : null });
 	},
 
 	/**
 	 * Restablece el estado de la UI
 	 */
 	resetUIState: () => {
-		set((state) => {
-			// Resetear estados de UI en cada personaje
-			const updatedCharacters = { ...state.characters };
-			for (const id of Object.keys(updatedCharacters)) {
-				updatedCharacters[id] = {
-					...updatedCharacters[id],
-					isSelected: false,
-					isExpanded: false,
-					isEditing: false,
-				};
-			}
-
-			return {
-				selectedCharacterId: null,
-				hoveredCharacterId: null,
-				expandedCharacterIds: [],
-				characters: updatedCharacters,
-			};
+		set({
+			selectedCharacterId: null,
+			hoveredCharacterId: null,
+			expandedCharacterIds: [],
+			isLoading: false,
+			error: null,
 		});
 	},
 });

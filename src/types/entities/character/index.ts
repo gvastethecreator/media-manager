@@ -6,6 +6,13 @@
  * Legacy de './base' y './enums' eliminado.
  */
 
+export {
+    CharacterAlignment,
+    CharacterCategory,
+    CharacterClass,
+    CharacterRace,
+    CharacterSortOption
+} from './enums';
 export type {
     CharacterAttributes,
     CharacterCard,
@@ -20,9 +27,13 @@ export type {
     CharacterComplete,
     CharacterCounts,
     CharacterCreateInput,
+    CharacterFilter,
+    CharacterFilterItem,
     CharacterFilters,
     CharacterRelations,
+    CharacterRelationship,
     CharacterSearchOptions,
+    CharacterStats,
     CharacterUpdateInput, CharacterWithRelations,
     CreateCharacterData,
     UpdateCharacterData

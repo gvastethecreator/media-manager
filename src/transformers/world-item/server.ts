@@ -3,7 +3,6 @@
  * @module transformers/world-item/server
  */
 
-import { Prisma } from '@prisma/client';
 import { createLogger } from '@/lib/logger';
 import { WorldItemSchema } from '@/types/entities/world-item/schema';
 import type {
@@ -17,11 +16,11 @@ import type {
 	WorldItemStat,
 } from '@/types/entities/world-item/types';
 import { handleTransformerError } from '@/utils/transformers/errors';
+import { Prisma } from '@prisma/client';
 import {
 	serializeAttributes,
 	serializeEffects,
 	serializeFilters,
-	serializeProperties,
 	serializeRequirements,
 	serializeStats,
 	serializeTags,
@@ -202,8 +201,6 @@ export function fromPrismaWorldItem(
 					? prismaItem.requirements
 					: JSON.stringify(prismaItem.requirements || {}),
 			stats: typeof prismaItem.stats === 'string' ? prismaItem.stats : JSON.stringify(prismaItem.stats || []),
-			properties:
-				typeof prismaItem.properties === 'string' ? prismaItem.properties : JSON.stringify(prismaItem.properties || []),
 			filters: typeof prismaItem.filters === 'string' ? prismaItem.filters : JSON.stringify(prismaItem.filters || []),
 
 			// ✅ Otros campos
@@ -224,7 +221,7 @@ export function fromPrismaWorldItem(
 			effectsList: parseJsonField(baseItem.effects, [] as WorldItemEffect[]),
 			requirementsList: parseJsonField(baseItem.requirements, [] as WorldItemRequirement[]),
 			statsList: parseJsonField(baseItem.stats, [] as WorldItemStat[]),
-			propertiesList: parseJsonField(baseItem.properties, [] as WorldItemProperty[]),
+			propertiesList: parseJsonField('[]', [] as WorldItemProperty[]),
 			filtersList: parseJsonField(baseItem.filters, [] as WorldItemFilter[]),
 			tagsList: parseJsonField(JSON.stringify(prismaItem.tags?.map((t) => t.name) || []), [] as string[]),
 		};
@@ -264,7 +261,6 @@ export function toPrismaWorldItem(worldItem: Partial<WorldItemDeserialized>): Pa
 			...(effectsList && { effects: serializeEffects(effectsList) }),
 			...(requirementsList && { requirements: serializeRequirements(requirementsList) }),
 			...(statsList && { stats: serializeStats(statsList) }),
-			...(propertiesList && { properties: serializeProperties(propertiesList) }),
 			...(filtersList && { filters: serializeFilters(filtersList) }),
 			...(tagsList && { tags: serializeTags(tagsList) }),
 		};

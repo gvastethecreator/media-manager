@@ -192,9 +192,7 @@ export async function getRandomImagesForEntity(
 			case 'folder': {
 				const [folderId, count] = entityType.split(':');
 				// Buscar imágenes de una carpeta específica
-				const whereClause = folderId
-					? { folderId: folderId }
-					: { folderId: { not: null } };
+				const whereClause = folderId ? { folderId: folderId } : { folderId: { not: null } };
 
 				imagesData = (await prisma.image.findMany({
 					where: whereClause,

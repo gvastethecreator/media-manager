@@ -6,13 +6,24 @@
  */
 
 import type {
-	ParsedWorldItemVisualConfig,
 	WorldItem,
 	WorldItemCreateInput,
 	WorldItemFilters,
 	WorldItemUpdateInput,
 } from '@/types/entities/world-item';
 import { generateWorldItemId, parseWorldItemStats } from './utils';
+
+/**
+ * Configuración visual para WorldItem
+ */
+export interface ParsedWorldItemVisualConfig {
+	view: string;
+	sortBy: string;
+	filters: Record<string, any>;
+	lastViewedId: string | null;
+	expandedIds: string[];
+	selectedIds: string[];
+}
 
 /**
  * 🏗️ Transforma los datos para crear un objeto del mundo en una entidad completa
@@ -32,7 +43,6 @@ export const createWorldItemFromData = (data: WorldItemCreateInput): WorldItem =
 		type: data.type || 'misc',
 		rarity: data.rarity || 'common',
 		size: data.size || 'medium',
-		properties: data.properties?.toString() || '{}',
 		requirements: data.requirements?.toString() || '{}',
 		origin: data.origin || 'unknown',
 		stats: data.stats?.toString() || '{}',
@@ -45,15 +55,6 @@ export const createWorldItemFromData = (data: WorldItemCreateInput): WorldItem =
 		isFavorite: data.isFavorite || false,
 		createdAt: now,
 		updatedAt: now,
-
-		// Campos deserializados para UI
-		attributesList: [],
-		effectsList: [],
-		requirementsList: [],
-		statsList: [],
-		propertiesList: [],
-		filtersList: [],
-		tagsList: [],
 	};
 };
 
@@ -124,14 +125,14 @@ export const processWorldItem = (item: WorldItem): WorldItem => {
 	const value = stats.value || 0;
 
 	// Clases CSS según rareza
-	const rarityClass = `rarity-${item.rarity.toLowerCase()}`;
+	const rarityClass = `rarity-${item.rarity?.toLowerCase() || 'common'}`;
 
 	// Formato de valores para visualización
 	const displayLevel = level ? `Nivel ${level}` : '';
 	const displayValue = value ? `${value} monedas` : '';
 
 	// Formatear nombre de rareza
-	const displayRarity = item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1);
+	const displayRarity = item.rarity ? item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1) : 'Común';
 
 	return {
 		...item,
@@ -159,17 +160,19 @@ export const processWorldItems = (items: WorldItem[]): WorldItem[] => {
 export const convertFiltersToApiParams = (filters: WorldItemFilters): Record<string, string> => {
 	const params: Record<string, string> = {};
 
-	// Convertir arrays a strings separados por comas
-	if (filters.types && filters.types.length > 0) {
-		params.types = filters.types.join(',');
+	// Convertir tipo a string
+	if (filters.type) {
+		params.type = filters.type;
 	}
 
-	if (filters.categories && filters.categories.length > 0) {
-		params.categories = filters.categories.join(',');
+	// Convertir categoría a string
+	if (filters.category) {
+		params.category = filters.category;
 	}
 
-	if (filters.rarities && filters.rarities.length > 0) {
-		params.rarities = filters.rarities.join(',');
+	// Convertir rareza a string
+	if (filters.rarity) {
+		params.rarity = filters.rarity;
 	}
 
 	// Convertir booleanos y números
@@ -196,6 +199,32 @@ export const convertFiltersToApiParams = (filters: WorldItemFilters): Record<str
 	// Filtros de relaciones
 	if (filters.hasImages) {
 		params.hasImages = 'true';
+	}
+
+	if (filters.hasFiles) {
+		params.hasFiles = 'true';
+	}
+
+	if (filters.hasNotes) {
+		params.hasNotes = 'true';
+	}
+
+	if (filters.hasConcepts) {
+		params.hasConcepts = 'true';
+	}
+
+	if (filters.hasPrompts) {
+		params.hasPrompts = 'true';
+	}
+
+	// Término de búsqueda
+	if (filters.searchTerm) {
+		params.searchTerm = filters.searchTerm;
+	}
+
+	// Criterio de ordenación
+	if (filters.sortBy) {
+		params.sortBy = filters.sortBy.toString();
 	}
 
 	return params;

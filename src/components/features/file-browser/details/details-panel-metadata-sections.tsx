@@ -44,7 +44,7 @@ export function XMPInfo({ metadata }: MetadataComponentProps) {
 			label: 'Título',
 			value: String(xmp.title || ''),
 			icon: <Info className="h-3.5 w-3.5 text-blue-500" />,
-			condition: !!xmp.title
+			condition: !!xmp.title,
 		},
 		{
 			label: 'Descripción',

@@ -3,16 +3,16 @@
  * @module transformers/group/mappers
  */
 
-import type { Group, Prisma } from '@prisma/client';
-import { DEFAULT_VIEW_CONFIG } from '@/lib/constants';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	GroupCard,
-	GroupListItem,
-	GroupListItemImage,
-	GroupListProps,
-	GroupSearchParams,
+    Group,
+    GroupCard,
+    GroupListItem,
+    GroupListItemImage,
+    GroupListProps,
+    GroupSearchParams,
 } from '@/types/entities/group';
+import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('GroupMappers');
 
@@ -166,7 +166,7 @@ export function parseGroupSearchParams(params: GroupSearchParams): {
 } {
 	try {
 		// Parsear parámetros de paginación
-		const { page = 1, pageSize = DEFAULT_VIEW_CONFIG.pageSize } = params;
+		const { page = 1, pageSize = 20 } = params;
 
 		// Calcular skip y take para paginación
 		const skip = (page - 1) * pageSize;
@@ -177,10 +177,7 @@ export function parseGroupSearchParams(params: GroupSearchParams): {
 
 		// Filtro de búsqueda por texto
 		if (params.search) {
-			where.OR = [
-				{ name: { contains: params.search } },
-				{ description: { contains: params.search } },
-			];
+			where.OR = [{ name: { contains: params.search } }, { description: { contains: params.search } }];
 		}
 
 		// Filtros de igualdad exacta
@@ -206,7 +203,7 @@ export function parseGroupSearchParams(params: GroupSearchParams): {
 			where: {},
 			orderBy: { name: 'asc' },
 			skip: 0,
-			take: DEFAULT_VIEW_CONFIG.pageSize,
+			take: 20,
 		};
 	}
 }
@@ -235,40 +232,18 @@ export function toGroupSearchFilters(params: GroupSearchParams): Record<string, 
  */
 export function toGroupListProps(groups: Group[], params: GroupSearchParams, totalCount: number): GroupListProps {
 	try {
-		// Calcular metadatos de paginación
-		const { page = 1, pageSize = DEFAULT_VIEW_CONFIG.pageSize } = params;
-		const totalPages = Math.ceil(totalCount / pageSize);
-		const hasMore = page < totalPages;
-
 		// Mapear grupos para listado
-		const items = groups.map((group) => toGroupListItem(group));
-
-		// Generar filtros aplicados
-		const filters = toGroupSearchFilters(params);
+		const groupItems = groups.map((group) => toGroupListItem(group));
 
 		return {
-			items,
-			filters,
-			pagination: {
-				page,
-				pageSize,
-				totalItems: totalCount,
-				totalPages,
-				hasMore,
-			},
+			groups: groupItems,
+			loading: false,
 		};
 	} catch (error) {
 		logger.error('Error generando props para listado:', error);
 		return {
-			items: [],
-			filters: {},
-			pagination: {
-				page: 1,
-				pageSize: DEFAULT_VIEW_CONFIG.pageSize,
-				totalItems: 0,
-				totalPages: 0,
-				hasMore: false,
-			},
+			groups: [],
+			loading: false,
 		};
 	}
 }

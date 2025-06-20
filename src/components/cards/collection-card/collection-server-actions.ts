@@ -2,8 +2,7 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { CollectionComplete as Collection } from '@/types/entities/collection/base';
-import type { CollectionWithRelations } from '@/types/entities/collection/types';
+import type { CollectionComplete as Collection, CollectionExtended } from '@/types/entities/collection/types';
 
 // Logger específico para acciones de CollectionCard
 const collectionCardLogger = serverLogger.withContext('CollectionCardActions');
@@ -37,6 +36,13 @@ export interface CollectionCardData extends Collection {
 		cardId: string;
 		totalItems: number;
 	};
+}
+
+interface ThumbnailImage {
+	id: string;
+	name?: string | null;
+	thumbnailUrl: string;
+	url?: string;
 }
 
 interface ThumbnailMedia {
@@ -80,7 +86,7 @@ export async function getRecentCollectionImages(collectionId: string): Promise<T
 		});
 
 		// Convertir los thumbnails a URLs de datos
-		const thumbnails: ThumbnailImage[] = images.map((image) => {
+		const thumbnails: ThumbnailImage[] = images.map((image: any) => {
 			let thumbnailUrl = '';
 
 			// Verificar si tenemos un thumbnail válido
@@ -110,7 +116,7 @@ export async function getRecentCollectionImages(collectionId: string): Promise<T
  * @param collectionId ID de la colección
  * @returns Objeto completo de colección con relaciones
  */
-export async function getCollectionForCard(collectionId: string): Promise<CollectionWithRelations> {
+export async function getCollectionForCard(collectionId: string): Promise<CollectionExtended> {
 	try {
 		collectionCardLogger.info('📁 Obteniendo colección completa para CollectionCard:', collectionId);
 		const prisma = await getPrismaClient();
@@ -152,8 +158,8 @@ export async function getCollectionForCard(collectionId: string): Promise<Collec
 
 		collectionCardLogger.info('✅ Colección obtenida para CollectionCard');
 
-		// Convertir a tipo CollectionWithRelations
-		return collection as unknown as CollectionWithRelations;
+		// Convertir a tipo CollectionExtended
+		return collection as unknown as CollectionExtended;
 	} catch (error) {
 		collectionCardLogger.error('❌ Error obteniendo colección completa para CollectionCard:', error);
 		throw new Error(`No se pudo obtener la colección: ${error instanceof Error ? error.message : 'Error desconocido'}`);
@@ -236,7 +242,7 @@ export async function getCollectionCardData(collectionId: string, includeRelated
 		take: 4,
 	});
 
-	const recentImagePaths = recentImages.map((img) => {
+	const recentImagePaths = recentImages.map((img: any) => {
 		// Convertir la ruta del sistema a una URL para el navegador
 		const imagePath = `/api/thumbnails/${img.id}`;
 		return imagePath;
@@ -261,7 +267,7 @@ export async function getCollectionCardData(collectionId: string, includeRelated
 		take: 2,
 	});
 
-	const recentVideoPaths = recentVideos.map((video) => {
+	const recentVideoPaths = recentVideos.map((video: any) => {
 		// Convertir la ruta del sistema a una URL para el navegador
 		const videoPath = `/api/video-thumbnails/${video.id}`;
 		return videoPath;
@@ -371,7 +377,7 @@ export async function getCollectionsForCards(options: {
 	// Si se solicitan estadísticas adicionales, procesarlas para cada colección
 	if (includeStats) {
 		const collectionsWithStats = await Promise.all(
-			collections.map(async (collection) => {
+			collections.map(async (collection: any) => {
 				// Obtener imágenes y videos recientes
 				const recentMedia = await getRecentCollectionMedia(collection.id, 4);
 				const recentImagePaths = recentMedia.filter((media) => !media.isVideo).map((media) => media.thumbnailUrl);
@@ -458,7 +464,7 @@ export async function getRecentCollectionMedia(collectionId: string, limit = 6):
 	});
 
 	// Combinar y formatear los resultados
-	const imageResults: ThumbnailMedia[] = recentImages.map((img) => ({
+	const imageResults: ThumbnailMedia[] = recentImages.map((img: any) => ({
 		id: img.id,
 		name: img.name,
 		thumbnailUrl: `/api/thumbnails/${img.id}`,
@@ -466,7 +472,7 @@ export async function getRecentCollectionMedia(collectionId: string, limit = 6):
 		isVideo: false,
 	}));
 
-	const videoResults: ThumbnailMedia[] = recentVideos.map((video) => ({
+	const videoResults: ThumbnailMedia[] = recentVideos.map((video: any) => ({
 		id: video.id,
 		name: video.name,
 		thumbnailUrl: `/api/video-thumbnails/${video.id}`,

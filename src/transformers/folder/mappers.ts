@@ -5,11 +5,11 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    FolderComplete,
-    FolderCreateInput,
-    FolderFilters,
-    FolderSearchOptions,
-    FolderUpdateInput
+	FolderComplete,
+	FolderCreateInput,
+	FolderFilters,
+	FolderSearchOptions,
+	FolderUpdateInput,
 } from '@/types/entities/folder';
 import { TransformerError } from '@/utils/transformers/errors';
 import type { Prisma } from '@prisma/client';
@@ -87,10 +87,7 @@ function mapFolderFiltersToPrisma(filters: FolderFilters): Prisma.FolderWhereInp
 	const where: Prisma.FolderWhereInput = {};
 
 	if (filters.search) {
-		where.OR = [
-			{ name: { contains: filters.search } },
-			{ description: { contains: filters.search } },
-		];
+		where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
 	}
 
 	if (filters.isFavorite !== undefined) {

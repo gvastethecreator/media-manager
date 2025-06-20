@@ -19,7 +19,9 @@ export function formatBytes(bytes: number, decimals = 2): string {
 }
 
 // Mapear datos de Prisma a nuestro tipo extendido (ejemplo, se necesitará un tipo MetadataExtended)
-export function fromPrismaMetadata(metadata: Metadata): Metadata & { aspectRatio: number; formattedSize: string; dimensions: string } {
+export function fromPrismaMetadata(
+	metadata: Metadata
+): Metadata & { aspectRatio: number; formattedSize: string; dimensions: string } {
 	const aspectRatio = metadata.width && metadata.height ? metadata.width / metadata.height : 0;
 	const formattedSize = formatBytes(metadata.size || 0);
 	const dimensions = `${metadata.width || 0}x${metadata.height || 0}`;
