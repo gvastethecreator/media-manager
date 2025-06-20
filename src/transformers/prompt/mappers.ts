@@ -5,14 +5,14 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    CreatePromptData,
-    PromptBase,
-    PromptFilters,
-    PromptSortCriteria,
-    PromptWithRelations,
-    UpdatePromptData,
-} from '@/types/entities/prompt/types';
-import { serializeParameters } from './serializers';
+	CreatePromptData,
+	PromptBase,
+	PromptFilters,
+	PromptWithRelations,
+	UpdatePromptData,
+} from '@/types/entities/prompt';
+import { PromptSortCriteria } from '@/types/entities/prompt';
+import { serializeParameters, serializeTags } from './serializers';
 
 const logger = serverLogger.withContext('PromptMappers');
 
@@ -28,6 +28,7 @@ export interface PrismaPromptCreateInput {
 	purpose?: string;
 	category?: string;
 	parameters?: string;
+	tags?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	groups?: {
@@ -39,7 +40,7 @@ export interface PrismaPromptCreateInput {
 	wildcards?: {
 		connect: Array<{ id: string }>;
 	};
-	tags?: {
+	tagEntities?: {
 		connect: Array<{ id: string }>;
 	};
 }
@@ -56,6 +57,7 @@ export interface PrismaPromptUpdateInput {
 	purpose?: string;
 	category?: string;
 	parameters?: string;
+	tags?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	groups?: {
@@ -67,7 +69,7 @@ export interface PrismaPromptUpdateInput {
 	wildcards?: {
 		set: Array<{ id: string }>;
 	};
-	tags?: {
+	tagEntities?: {
 		set: Array<{ id: string }>;
 	};
 }
@@ -85,14 +87,14 @@ export interface PrismaPromptUpdateArgs {
  */
 export interface PrismaPromptWhereInput {
 	OR?: Array<{
-		name?: { contains: string; };
-		description?: { contains: string; };
-		content?: { contains: string; };
+		name?: { contains: string; mode: 'insensitive' };
+		description?: { contains: string; mode: 'insensitive' };
+		content?: { contains: string; mode: 'insensitive' };
 	}>;
 	category?: { in: string[] };
 	purpose?: { in: string[] };
 	isFavorite?: boolean;
-	content?: { contains: string; };
+	content?: { contains: string; mode: 'insensitive' };
 }
 
 /**
@@ -105,50 +107,6 @@ export interface PrismaPromptOrderByWithRelationInput {
 }
 
 /**
- * Tipo que representa un Prompt como viene de Prisma con todas sus relaciones
- */
-export interface PromptFromPrisma extends PromptBase {
-	// Relaciones como vienen de Prisma
-	images?: Array<{ id: string; name: string; path: string }>;
-	videos?: Array<{ id: string; name: string; path: string }>;
-	albums?: Array<{ id: string; name: string; emoji: string; color: string }>;
-	collections?: Array<{ id: string; name: string; emoji: string; color: string }>;
-	tags?: Array<{ id: string; name: string; color: string }>; // Cambio de tagEntities a tags
-	characters?: Array<{ id: string; name: string; emoji: string; color: string }>;
-	places?: Array<{ id: string; name: string; emoji: string; color: string }>;
-	worldItems?: Array<{ id: string; name: string; emoji: string; color: string }>;
-	concepts?: Array<{ id: string; name: string; emoji: string; color: string }>;
-	notes?: Array<{ id: string; title: string; content: string }>;
-	wildcards?: Array<{ id: string; name: string; emoji: string; color: string }>;
-	properties?: Array<{ id: string; name: string; value: string }>;
-	groups?: Array<{ id: string; name: string; emoji: string; color: string }>;
-
-	// Conteos como vienen de Prisma
-	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		collections?: number;
-		tags?: number; // Cambio de tagEntities a tags
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
-
-/**
- * Tipo que representa un Prompt completo con todas sus relaciones mapeadas
- */
-export interface PromptComplete extends PromptWithRelations {
-	// Ya hereda todo de PromptWithRelations
-}
-
-/**
  * 🔄 Mapea datos de creación de Prompt a formato Prisma
  * @param data Datos de creación
  * @returns Objeto compatible con Prisma.PromptCreateInput
@@ -157,7 +115,7 @@ export function mapCreatePromptDataToPrisma(data: CreatePromptData): PrismaPromp
 	try {
 		// Serializar arrays y objetos a JSON si es necesario
 		const parameters = typeof data.parameters === 'string' ? data.parameters : serializeParameters(data.parameters);
-		// const tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags); // ❌ ELIMINADO - Usar solo relaciones
+		const tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags);
 
 		// Crear objeto base
 		const promptData: PrismaPromptCreateInput = {
@@ -169,7 +127,7 @@ export function mapCreatePromptDataToPrisma(data: CreatePromptData): PrismaPromp
 			purpose: data.purpose || 'general',
 			category: data.category || 'general',
 			parameters,
-			// tags, // ❌ ELIMINADO - Usar solo relaciones
+			tags,
 			featuredImage: data.featuredImage || null,
 			isFavorite: data.isFavorite || false,
 		};
@@ -194,7 +152,7 @@ export function mapCreatePromptDataToPrisma(data: CreatePromptData): PrismaPromp
 		}
 
 		if (data.tagIds && data.tagIds.length > 0) {
-			promptData.tags = {
+			promptData.tagEntities = {
 				connect: data.tagIds.map((id) => ({ id })),
 			};
 		}
@@ -235,9 +193,9 @@ export function mapUpdatePromptDataToPrisma(id: string, data: UpdatePromptData):
 			updateData.parameters =
 				typeof data.parameters === 'string' ? data.parameters : serializeParameters(data.parameters);
 		}
-		// if (data.tags !== undefined) { // ❌ ELIMINADO - Usar solo relaciones
-		//	updateData.tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags);
-		// }
+		if (data.tags !== undefined) {
+			updateData.tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags);
+		}
 
 		// Actualizar relaciones si están definidas
 		if (data.groupIds !== undefined) {
@@ -259,7 +217,7 @@ export function mapUpdatePromptDataToPrisma(id: string, data: UpdatePromptData):
 		}
 
 		if (data.tagIds !== undefined) {
-			updateData.tags = {
+			updateData.tagEntities = {
 				set: data.tagIds.map((id) => ({ id })),
 			};
 		}
@@ -288,9 +246,9 @@ export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): PrismaPro
 		// Búsqueda por texto
 		if (filters.searchQuery) {
 			where.OR = [
-				{ name: { contains: filters.searchQuery } },
-				{ description: { contains: filters.searchQuery } },
-				{ content: { contains: filters.searchQuery } },
+				{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
+				{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
+				{ content: { contains: filters.searchQuery, mode: 'insensitive' } },
 			];
 		}
 
@@ -311,7 +269,7 @@ export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): PrismaPro
 
 		// Filtrar por contenido específico
 		if (filters.contentContains) {
-			where.content = { contains: filters.contentContains };
+			where.content = { contains: filters.contentContains, mode: 'insensitive' };
 		}
 
 		return where;
@@ -339,6 +297,7 @@ export function mapPromptSortCriteriaToPrisma(
 			return { name: sortDirection };
 		case 'created':
 			return { createdAt: sortDirection };
+		case 'updated':
 		default:
 			return { updatedAt: sortDirection };
 	}
@@ -369,109 +328,4 @@ export function mapPromptsToRelated(
 	prompts: Array<PromptBase | PromptWithRelations>
 ): Array<Pick<PromptBase, 'id' | 'name' | 'emoji' | 'color'>> {
 	return prompts.map(mapPromptToRelated);
-}
-
-/**
- * 🔄 Mapea `PromptFromPrisma` a `PromptComplete`
- */
-export function mapPromptFromPrisma(prisma: PromptFromPrisma): PromptComplete {
-	return {
-		id: prisma.id,
-		title: prisma.title,
-		content: prisma.content,
-		category: prisma.category,
-		type: prisma.type,
-		model: prisma.model,
-		parameters: prisma.parameters,
-		isTemplate: prisma.isTemplate,
-		isFavorite: prisma.isFavorite,
-		presetId: prisma.presetId,
-		createdAt: prisma.createdAt,
-		updatedAt: prisma.updatedAt,
-
-		// Mapear relaciones
-		images: prisma.images?.map(mapRelatedImage) || [],
-		videos: prisma.videos?.map(mapRelatedVideo) || [],
-		albums: prisma.albums?.map(mapRelatedAlbum) || [],
-		collections: prisma.collections?.map(mapRelatedCollection) || [],
-		tags: prisma.tags?.map(mapRelatedTag) || [],
-		characters: prisma.characters?.map(mapRelatedCharacter) || [],
-		places: prisma.places?.map(mapRelatedPlace) || [],
-		worldItems: prisma.worldItems?.map(mapRelatedWorldItem) || [],
-		concepts: prisma.concepts?.map(mapRelatedConcept) || [],
-		notes: prisma.notes?.map(mapRelatedNote) || [],
-		wildcards: prisma.wildcards?.map(mapRelatedWildcard) || [],
-		properties: prisma.properties?.map(mapRelatedProperty) || [],
-		groups: prisma.groups?.map(mapRelatedGroup) || [],
-
-		// Mapear conteos
-		_count: {
-			images: prisma._count?.images || 0,
-			videos: prisma._count?.videos || 0,
-			albums: prisma._count?.albums || 0,
-			collections: prisma._count?.collections || 0,
-			tags: prisma._count?.tags || 0,
-			characters: prisma._count?.characters || 0,
-			places: prisma._count?.places || 0,
-			worldItems: prisma._count?.worldItems || 0,
-			concepts: prisma._count?.concepts || 0,
-			notes: prisma._count?.notes || 0,
-			wildcards: prisma._count?.wildcards || 0,
-			properties: prisma._count?.properties || 0,
-			groups: prisma._count?.groups || 0,
-		},
-	};
-}
-
-// Funciones auxiliares para mapear relaciones
-function mapRelatedImage(image: { id: string; name: string; path: string }) {
-	return { id: image.id, name: image.name, path: image.path };
-}
-
-function mapRelatedVideo(video: { id: string; name: string; path: string }) {
-	return { id: video.id, name: video.name, path: video.path };
-}
-
-function mapRelatedAlbum(album: { id: string; name: string; emoji: string; color: string }) {
-	return { id: album.id, name: album.name, emoji: album.emoji, color: album.color };
-}
-
-function mapRelatedCollection(collection: { id: string; name: string; emoji: string; color: string }) {
-	return { id: collection.id, name: collection.name, emoji: collection.emoji, color: collection.color };
-}
-
-function mapRelatedTag(tag: { id: string; name: string; color: string }) {
-	return { id: tag.id, name: tag.name, color: tag.color };
-}
-
-function mapRelatedCharacter(character: { id: string; name: string; emoji: string; color: string }) {
-	return { id: character.id, name: character.name, emoji: character.emoji, color: character.color };
-}
-
-function mapRelatedPlace(place: { id: string; name: string; emoji: string; color: string }) {
-	return { id: place.id, name: place.name, emoji: place.emoji, color: place.color };
-}
-
-function mapRelatedWorldItem(worldItem: { id: string; name: string; emoji: string; color: string }) {
-	return { id: worldItem.id, name: worldItem.name, emoji: worldItem.emoji, color: worldItem.color };
-}
-
-function mapRelatedConcept(concept: { id: string; name: string; emoji: string; color: string }) {
-	return { id: concept.id, name: concept.name, emoji: concept.emoji, color: concept.color };
-}
-
-function mapRelatedNote(note: { id: string; title: string; content: string }) {
-	return { id: note.id, title: note.title, content: note.content };
-}
-
-function mapRelatedWildcard(wildcard: { id: string; name: string; emoji: string; color: string }) {
-	return { id: wildcard.id, name: wildcard.name, emoji: wildcard.emoji, color: wildcard.color };
-}
-
-function mapRelatedProperty(property: { id: string; name: string; value: string }) {
-	return { id: property.id, name: property.name, value: property.value };
-}
-
-function mapRelatedGroup(group: { id: string; name: string; emoji: string; color: string }) {
-	return { id: group.id, name: group.name, emoji: group.emoji, color: group.color };
 }

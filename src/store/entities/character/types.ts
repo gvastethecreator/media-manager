@@ -1,19 +1,21 @@
 /**
- * @file Tipos para el store de la entidad Character
+ * @file Tipos específicos para el store de Character
  * @module store/entities/character/types
  */
 
 import type {
-	CharacterAlignment,
 	CharacterBase,
-	CharacterCategory,
-	CharacterClass,
 	CharacterExtended,
-	CharacterFilter,
-	CharacterRace,
-	CharacterSortOption,
-	CharacterViewConfig,
+	CharacterViewConfig
 } from '@/types/entities/character';
+
+// Definir tipos locales para los que no están disponibles
+export type CharacterSortOption = 'name' | 'created' | 'updated' | 'category';
+export type CharacterFilter = any;
+export type CharacterClass = string;
+export type CharacterRace = string;
+export type CharacterCategory = string;
+export type CharacterAlignment = string;
 
 /**
  * Estado base para el store de Character

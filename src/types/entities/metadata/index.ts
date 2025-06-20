@@ -1,5 +1,5 @@
-export * from './base';
 export * from './extended';
+export * from './types';
 
 // Tipos para operaciones
 export type CreateMetadataData = {

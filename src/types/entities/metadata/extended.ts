@@ -1,10 +1,13 @@
-import type { MetadataBase } from './base';
+import type { MetadataBase } from './types';
 
 // Tipo extendido para UI con información adicional
 export interface MetadataExtended extends MetadataBase {
+	// Propiedades calculadas adicionales
 	aspectRatio: number;
 	formattedSize: string;
 	dimensions: string;
+
+	// Datos EXIF opcionales
 	exif?: {
 		make?: string;
 		model?: string;
@@ -38,3 +41,20 @@ export interface MetadataListItem {
 	formattedSize: string;
 	updatedAt: Date;
 }
+
+// Tipo para filtros numéricos
+export interface MetadataNumericFilter {
+	width: number;
+	height: number;
+	size: number;
+}
+
+// Tipo para verificar que MetadataExtended tiene todas las propiedades necesarias
+export interface MetadataComplete extends MetadataBase {
+	aspectRatio: number;
+	formattedSize: string;
+	dimensions: string;
+}
+
+// Asegurar que MetadataExtended implementa MetadataComplete
+export type MetadataExtendedVerified = MetadataExtended & MetadataComplete;

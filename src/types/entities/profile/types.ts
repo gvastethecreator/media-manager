@@ -62,6 +62,71 @@ export interface ProfileCreateInput {
 export type ProfileUpdateInput = Partial<Omit<ProfileBase, 'id' | 'createdAt' | 'updatedAt'>>;
 
 /**
+ * Tipo extendido para UI con información adicional
+ */
+export interface ProfileExtended extends ProfileBase {
+	// Estadísticas adicionales
+	imageCount?: number;
+	albumCount?: number;
+	lastAccessed?: Date | null;
+	// Preferencias del perfil
+	preferences?: ProfilePreferences;
+}
+
+/**
+ * Preferencias del perfil
+ */
+export interface ProfilePreferences {
+	theme: ThemeMode;
+	color: string;
+	emoji: string;
+	language: Language;
+	enableAnimations: boolean;
+	enableSounds: boolean;
+	enableHaptics: boolean;
+	enableNotifications: boolean;
+	defaultView: 'grid' | 'list' | 'gallery' | 'compact';
+	defaultSort: 'name' | 'date' | 'size' | 'type';
+	itemsPerPage: number;
+	showHiddenFiles: boolean;
+	highContrast: boolean;
+	reducedMotion: boolean;
+	fontSize: 'small' | 'medium' | 'large';
+	outlineElements: boolean;
+}
+
+/**
+ * Filtros para búsqueda de perfiles
+ */
+export interface ProfileFilters {
+	search?: string;
+	isActive?: boolean;
+	theme?: ThemeMode;
+	language?: Language;
+}
+
+/**
+ * Opciones de paginación para perfiles
+ */
+export interface ProfilePaginationOptions {
+	page?: number;
+	limit?: number;
+	sortBy?: 'name' | 'createdAt' | 'updatedAt';
+	sortDirection?: 'asc' | 'desc';
+}
+
+/**
+ * Respuesta paginada de perfiles
+ */
+export interface PaginatedProfiles {
+	profiles: ProfileExtended[];
+	total: number;
+	page: number;
+	limit: number;
+	totalPages: number;
+}
+
+/**
  * Esquema Zod para validación de Profile
  */
 export const ProfileSchema = z.object({
