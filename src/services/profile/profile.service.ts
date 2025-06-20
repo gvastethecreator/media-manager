@@ -63,10 +63,7 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 			// Construir where clause
 			const where: any = {};
 			if (search) {
-				where.OR = [
-					{ name: { contains: search } },
-					{ description: { contains: search } },
-				];
+				where.OR = [{ name: { contains: search } }, { description: { contains: search } }];
 			}
 			if (typeof isActive === 'boolean') where.isActive = isActive;
 			if (theme) where.theme = theme;

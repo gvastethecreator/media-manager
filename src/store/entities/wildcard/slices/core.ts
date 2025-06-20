@@ -4,11 +4,11 @@
  */
 
 import {
-    createWildcard as createWildcardAction,
-    deleteWildcard as deleteWildcardAction,
-    getWildcard as getWildcardAction,
-    getWildcards as getWildcardsAction,
-    updateWildcard as updateWildcardAction,
+	createWildcard as createWildcardAction,
+	deleteWildcard as deleteWildcardAction,
+	getWildcard as getWildcardAction,
+	getWildcards as getWildcardsAction,
+	updateWildcard as updateWildcardAction,
 } from '@/app/actions/wildcards/wildcard.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
@@ -258,21 +258,17 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 		// Optimistic update
 		get()._updateWildcard(id, { parentId: newParentId });
 		try {
-			const response = await updateWildcardAction(id, { parentId: newParentId });
-			if (response.success && response.data) {
-				const updatedWildcard = extendWildcard(response.data as WildcardBase);
-				get().addWildcard(updatedWildcard);
-				toastService.success('Wildcard movido');
-				return true;
-			}
-			// Revert on failure
-			get()._updateWildcard(id, { parentId: wildcard.parentId });
-			toastService.error(response.error ?? 'Error moving wildcard');
-			return false;
+			const updatedWildcardData = await updateWildcardAction(id, { parentId: newParentId });
+			const updatedWildcard = extendWildcard(updatedWildcardData as WildcardBase);
+			get().addWildcard(updatedWildcard);
+			toastService.success('Wildcard movido');
+			return true;
 		} catch (e) {
 			wildcardLogger.error('Failed to move wildcard', { error: e });
 			// Revert on failure
 			get()._updateWildcard(id, { parentId: wildcard.parentId });
+			const errorMsg = e instanceof Error ? e.message : 'Error moving wildcard';
+			toastService.error(errorMsg);
 			return false;
 		}
 	},

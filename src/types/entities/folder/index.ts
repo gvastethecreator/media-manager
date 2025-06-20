@@ -7,25 +7,28 @@
  */
 
 export {
-    FolderSortBy,
-    FolderType,
-    FolderViewMode
+	FolderSortBy,
+	FolderType,
+	FolderViewMode,
 } from './enums';
 export type {
-    CreateFolderData,
-    // Alias para retrocompatibilidad
-    FolderComplete as Folder, FolderBase, FolderComplete, FolderCounts,
-    FolderCreateInput,
-    FolderExtended,
-    FolderExtendedComplete,
-    FolderFilters,
-    FolderRelations,
-    FolderSearchOptions,
-    FolderStats,
-    FolderUIProps,
-    FolderUpdateInput,
-    FolderWithRelations,
-    UpdateFolderData
+	CreateFolderData,
+	// Alias para retrocompatibilidad
+	FolderComplete as Folder,
+	FolderBase,
+	FolderComplete,
+	FolderCounts,
+	FolderCreateInput,
+	FolderExtended,
+	FolderExtendedComplete,
+	FolderFilters,
+	FolderRelations,
+	FolderSearchOptions,
+	FolderStats,
+	FolderUIProps,
+	FolderUpdateInput,
+	FolderWithRelations,
+	UpdateFolderData,
 } from './types';
 
 // 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

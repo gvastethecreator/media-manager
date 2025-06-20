@@ -46,6 +46,23 @@ export interface CharacterBase {
 }
 
 /**
+ * 🧑‍🎤 Tipo extendido para un personaje con datos adicionales de UI.
+ * Incluye propiedades que no se persisten en la base de datos.
+ */
+export interface CharacterExtended extends CharacterBase {
+	// Estados de UI (no persistidos)
+	isHovered?: boolean;
+	isOpen?: boolean;
+	isLoading?: boolean;
+	hasError?: boolean;
+	// Datos calculados
+	imageCount?: number;
+	tagCount?: number;
+	groupCount?: number;
+	propertyCount?: number;
+}
+
+/**
  * 🧑‍🎤 Input para crear un nuevo personaje.
  * Las relaciones se especifican mediante arrays de IDs.
  */
@@ -129,6 +146,104 @@ export type CreateCharacterData = CharacterCreateInput;
 export type UpdateCharacterData = CharacterUpdateInput;
 
 /**
+ * 🧑‍🎤 Opciones de ordenamiento para personajes.
+ */
+export type CharacterSortOption =
+	| 'name_asc'
+	| 'name_desc'
+	| 'created_asc'
+	| 'created_desc'
+	| 'updated_asc'
+	| 'updated_desc'
+	| 'level_asc'
+	| 'level_desc'
+	| 'category_asc'
+	| 'category_desc';
+
+/**
+ * 🧑‍🎤 Tipos de alineamiento para personajes.
+ */
+export type CharacterAlignment =
+	| 'lawful_good'
+	| 'neutral_good'
+	| 'chaotic_good'
+	| 'lawful_neutral'
+	| 'true_neutral'
+	| 'chaotic_neutral'
+	| 'lawful_evil'
+	| 'neutral_evil'
+	| 'chaotic_evil';
+
+/**
+ * 🧑‍🎤 Tipos de categoría para personajes.
+ */
+export type CharacterCategory =
+	| 'hero'
+	| 'villain'
+	| 'neutral'
+	| 'ally'
+	| 'enemy'
+	| 'npc'
+	| 'main'
+	| 'secondary'
+	| 'background';
+
+/**
+ * 🧑‍🎤 Tipos de clase para personajes.
+ */
+export type CharacterClass =
+	| 'warrior'
+	| 'mage'
+	| 'rogue'
+	| 'cleric'
+	| 'ranger'
+	| 'paladin'
+	| 'barbarian'
+	| 'bard'
+	| 'druid'
+	| 'monk'
+	| 'sorcerer'
+	| 'warlock'
+	| 'wizard'
+	| 'artificer'
+	| 'other';
+
+/**
+ * 🧑‍🎤 Tipos de raza para personajes.
+ */
+export type CharacterRace =
+	| 'human'
+	| 'elf'
+	| 'dwarf'
+	| 'halfling'
+	| 'dragonborn'
+	| 'gnome'
+	| 'half_elf'
+	| 'half_orc'
+	| 'tiefling'
+	| 'orc'
+	| 'goblin'
+	| 'kobold'
+	| 'other';
+
+/**
+ * 🧑‍🎤 Estructura de un filtro para personajes.
+ */
+export interface CharacterFilter {
+	field: string;
+	operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'notIn';
+	value: unknown;
+}
+
+/**
+ * 🧑‍🎤 Estructura de un filtro individual para personajes (usado en el store).
+ */
+export interface CharacterFilterItem {
+	query: 'class' | 'race' | 'category' | 'alignment' | 'isFavorite' | 'level' | 'level_min' | 'level_max';
+	value: string | number | boolean;
+}
+
+/**
  * 🧑‍🎤 Filtros para buscar personajes.
  */
 export interface CharacterFilters {
@@ -137,8 +252,21 @@ export interface CharacterFilters {
 	class?: string[];
 	race?: string[];
 	alignment?: string[];
+	category?: string[];
 	isFavorite?: boolean;
 	tagIds?: string[];
+}
+
+/**
+ * 🧑‍🎤 Configuración de visualización para personajes.
+ */
+export interface CharacterViewConfig {
+	mode: 'grid' | 'list' | 'table';
+	gridColumns: number;
+	cardSize: 'small' | 'medium' | 'large';
+	showStats: boolean;
+	showDescription: boolean;
+	defaultView: 'cards' | 'details' | 'compact';
 }
 
 /**
@@ -152,4 +280,29 @@ export interface CharacterSearchOptions {
 	filters?: CharacterFilters;
 	// Inclusión - se pueden especificar relaciones a incluir
 	include?: Record<string, boolean>;
+}
+
+/**
+ * 🧑‍🎤 Estructura de una relación entre personajes.
+ */
+export interface CharacterRelationship {
+	id: string;
+	targetId: string;
+	targetName: string;
+	type: string;
+	strength: number;
+	description?: string;
+}
+
+/**
+ * 🧑‍🎤 Estadísticas de un personaje.
+ */
+export interface CharacterStats {
+	strength?: number;
+	dexterity?: number;
+	constitution?: number;
+	intelligence?: number;
+	wisdom?: number;
+	charisma?: number;
+	[key: string]: number | undefined;
 }

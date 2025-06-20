@@ -3,7 +3,6 @@
  * @module store/entities/world-item/slices/core
  */
 
-import type { StateCreator } from 'zustand';
 import {
 	createWorldItem as createServerWorldItem,
 	deleteWorldItem as deleteServerWorldItem,
@@ -13,6 +12,7 @@ import {
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import type { CreateWorldItemData, UpdateWorldItemData, WorldItem } from '@/types/entities/world-item';
+import type { StateCreator } from 'zustand';
 import type { WorldItemActions, WorldItemState } from '../types';
 
 const worldItemLogger = clientLogger.withContext('WorldItemStoreCore');
@@ -26,6 +26,10 @@ export interface WorldItemCoreSlice {
 	updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
 	deleteWorldItem: (id: string) => Promise<void>;
 	getWorldItemById: (id: string) => WorldItem | undefined;
+	setWorldItems: (worldItems: WorldItem[]) => void;
+	addWorldItem: (worldItem: WorldItem) => void;
+	resetStore: () => void;
+	setError: (error: string | null) => void;
 }
 
 export const createWorldItemCoreSlice: StateCreator<WorldItemState & WorldItemActions, [], [], WorldItemCoreSlice> = (
@@ -87,4 +91,8 @@ export const createWorldItemCoreSlice: StateCreator<WorldItemState & WorldItemAc
 		}
 	},
 	getWorldItemById: (id) => get().worldItems.find((item) => item.id === id),
+	setWorldItems: (worldItems) => set({ worldItems }),
+	addWorldItem: (worldItem) => set((state) => ({ worldItems: [...state.worldItems, worldItem] })),
+	resetStore: () => set({ worldItems: [], isLoading: false, error: null }),
+	setError: (error) => set({ error }),
 });

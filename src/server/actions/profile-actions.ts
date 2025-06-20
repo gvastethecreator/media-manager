@@ -22,10 +22,7 @@ export async function getProfiles(
 		const where: Record<string, unknown> = {};
 
 		if (filters.search) {
-			where.OR = [
-				{ name: { contains: filters.search } },
-				{ description: { contains: filters.search } },
-			];
+			where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
 		}
 
 		if (filters.isActive !== undefined) {

@@ -4,12 +4,7 @@
  * @description Store Zustand para gestionar el estado de archivos 3D
  */
 
-import {
-    createFile3D,
-    deleteFile3D,
-    getFile3Ds,
-    updateFile3D,
-} from '@/app/actions/file3d/file-3d.actions';
+import { createFile3D, deleteFile3D, getFile3Ds, updateFile3D } from '@/app/actions/file3d/file-3d.actions';
 import type { File3DComplete, File3DFilters, File3DFormData } from '@/types/entities/file-3d/types';
 import { createSelectors } from '@/utils/store/create-selectors';
 import { create } from 'zustand';

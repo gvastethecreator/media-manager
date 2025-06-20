@@ -3,7 +3,18 @@
  * @module store/entities/world-item/selectors
  */
 
+import type { WorldItem } from '@/types/entities/world-item';
 import { useWorldItemStore } from './index';
+
+/**
+ * Tipos para estadísticas de WorldItem
+ */
+export interface WorldItemStats {
+	total: number;
+	byType: Record<string, number>;
+	byCategory: Record<string, number>;
+	favorites: number;
+}
 
 /**
  * Selector para visualizar/filtrar por rareza
@@ -42,10 +53,14 @@ export const selectWorldItemStats = () => {
 
 	for (const item of worldItems) {
 		// Contar por tipo
-		typeCount[item.type] = (typeCount[item.type] || 0) + 1;
+		if (item.type) {
+			typeCount[item.type] = (typeCount[item.type] || 0) + 1;
+		}
 
 		// Contar por rareza
-		rarityCount[item.rarity] = (rarityCount[item.rarity] || 0) + 1;
+		if (item.rarity) {
+			rarityCount[item.rarity] = (rarityCount[item.rarity] || 0) + 1;
+		}
 
 		// Contar por categoría (si existe)
 		if (item.category) {
@@ -69,12 +84,25 @@ export const selectWorldItemStats = () => {
 export const selectWorldItemSummary = () => {
 	const { worldItems } = useWorldItemStore.getState();
 
+	// Calcular elementos con imágenes y notas usando _count si está disponible
+	const withImages = worldItems.filter((item) => {
+		// Si tiene _count, usar eso; si no, asumir 0
+		const imageCount = (item as any)?._count?.images || 0;
+		return imageCount > 0;
+	}).length;
+
+	const withNotes = worldItems.filter((item) => {
+		// Si tiene _count, usar eso; si no, asumir 0
+		const noteCount = (item as any)?._count?.notes || 0;
+		return noteCount > 0;
+	}).length;
+
 	return {
 		total: worldItems.length,
 		favorites: worldItems.filter((item) => item.isFavorite).length,
-		withImages: worldItems.filter((item) => item.imagesCount && item.imagesCount > 0).length,
-		withNotes: worldItems.filter((item) => item.notesCount && item.notesCount > 0).length,
-		types: [...new Set(worldItems.map((item) => item.type))].length,
+		withImages,
+		withNotes,
+		types: [...new Set(worldItems.map((item) => item.type).filter(Boolean))].length,
 		categories: [...new Set(worldItems.filter((item) => item.category).map((item) => item.category))].length,
 	};
 };

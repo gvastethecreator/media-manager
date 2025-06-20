@@ -8,7 +8,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import { fromPrismaFolder, fromPrismaFolders, mapCreateFolderDataToPrisma, mapUpdateFolderDataToPrisma } from '@/transformers/folder';
+import {
+	fromPrismaFolder,
+	fromPrismaFolders,
+	mapCreateFolderDataToPrisma,
+	mapUpdateFolderDataToPrisma,
+} from '@/transformers/folder';
 import type { FolderComplete, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder';
 import { revalidatePath } from 'next/cache';
 

@@ -7,28 +7,30 @@
  */
 
 export {
-    CollectionCategory,
-    CollectionPlatform,
-    CollectionRarity,
-    CollectionSortOption
+	CollectionCategory,
+	CollectionPlatform,
+	CollectionRarity,
+	CollectionSortOption,
 } from './enums';
 export type {
-    // Alias para retrocompatibilidad
-    CollectionComplete as Collection, CollectionCard,
-    CollectionComplete, CollectionExtended,
-    CollectionListItem,
-    CollectionStats,
-    CollectionViewConfig
+	// Alias para retrocompatibilidad
+	CollectionComplete as Collection,
+	CollectionCard,
+	CollectionComplete,
+	CollectionExtended,
+	CollectionListItem,
+	CollectionStats,
+	CollectionViewConfig,
 } from './extended';
 export type {
-    CollectionBase,
-    CollectionCreateInput,
-    CollectionEdition,
-    CollectionFilter,
-    CollectionFilters,
-    CollectionSearchOptions,
-    CollectionSortBy,
-    CollectionUpdateInput
+	CollectionBase,
+	CollectionCreateInput,
+	CollectionEdition,
+	CollectionFilter,
+	CollectionFilters,
+	CollectionSearchOptions,
+	CollectionSortBy,
+	CollectionUpdateInput,
 } from './types';
 
 // 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

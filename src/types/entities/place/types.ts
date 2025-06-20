@@ -169,6 +169,7 @@ export interface PlaceResource {
 	name: string;
 	description?: string;
 	quantity: number;
+	abundance: number;
 	value: number;
 	renewable: boolean;
 }

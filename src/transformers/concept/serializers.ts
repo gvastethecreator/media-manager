@@ -85,10 +85,13 @@ export function validateConcept(data: Partial<ConceptBase>): Partial<ConceptBase
 		// Para validación parcial, solo validamos los campos presentes
 		const presentFields = Object.keys(data);
 		const partialSchema = ConceptSchema.pick(
-			presentFields.reduce((acc, field) => {
-				acc[field as keyof ConceptBase] = true;
-				return acc;
-			}, {} as Record<keyof ConceptBase, true>)
+			presentFields.reduce(
+				(acc, field) => {
+					acc[field as keyof ConceptBase] = true;
+					return acc;
+				},
+				{} as Record<keyof ConceptBase, true>
+			)
 		);
 
 		return partialSchema.parse(data);
@@ -126,7 +129,7 @@ export function extendConcept<T extends ConceptBase>(
 	concept: T,
 	options: { includePreview?: boolean } = {}
 ): T & { previewContent?: string } {
-	const extended = { ...concept };
+	const extended: T & { previewContent?: string } = { ...concept };
 
 	if (options.includePreview && concept.content) {
 		// Generar una vista previa del contenido (primeros 150 caracteres)

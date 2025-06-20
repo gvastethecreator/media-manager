@@ -10,7 +10,7 @@ import {
     type GroupCreateInput,
     GroupSchema,
     type GroupTransformerOptions,
-    type GroupUpdateInput
+    type GroupUpdateInput,
 } from '@/types/entities/group/types';
 import {
     deserializeJsonField,
@@ -18,7 +18,6 @@ import {
     validateFieldType,
     validateRequiredFields,
 } from '@/utils/transformers/common';
-import { DEFAULT_UI_VALUES } from '@/utils/transformers/constants';
 import { handleTransformerError } from '@/utils/transformers/errors';
 import { getRelationCounts, preparePrismaRelations, validateEntityRelations } from '@/utils/transformers/relations';
 import { validateBaseEntity, validateMetadataFields, validateUIFields } from '@/utils/transformers/validation';
@@ -27,7 +26,7 @@ const logger = serverLogger.withContext('GroupSerializer');
 
 // Constantes para valores por defecto
 export const DEFAULT_GROUP_EMOJI = '📂';
-export const DEFAULT_GROUP_COLOR = '#3b82f6';
+export const DEFAULT_GROUP_COLOR = '#3B82F6';
 
 /**
  * Interfaces para los tipos de Prisma que necesitamos
@@ -148,7 +147,7 @@ export interface PrismaGroupWhereInput {
 export function toPrismaGroupCreate(data: GroupCreateInput): PrismaGroupCreateInput {
 	try {
 		// Validar campos requeridos para creación
-		validateRequiredFields(data, ['name']);
+		validateRequiredFields(data as Record<string, unknown>, ['name']);
 
 		// Validar tipos de datos
 		validateFieldType(data.name, 'string', 'name');
@@ -171,7 +170,7 @@ export function toPrismaGroupCreate(data: GroupCreateInput): PrismaGroupCreateIn
 		};
 
 		// Preparar relaciones para Prisma
-		const relations = preparePrismaRelations('Group', data);
+		const relations = preparePrismaRelations('Group', data as Record<string, unknown>);
 		Object.assign(result, relations);
 
 		return result;
@@ -222,7 +221,7 @@ export function toPrismaGroup(
 	if ('id' in data && data.id) {
 		return toPrismaGroupUpdate(data as GroupUpdateInput);
 	}
-		return toPrismaGroupCreate(data as GroupCreateInput);
+	return toPrismaGroupCreate(data as GroupCreateInput);
 }
 
 /**
@@ -240,13 +239,13 @@ export function fromPrismaGroup(prismaGroup: PrismaGroupGetPayload): GroupComple
 		const baseGroup: GroupBase = {
 			id: prismaGroup.id,
 			name: prismaGroup.name,
-			emoji: prismaGroup.emoji || DEFAULT_UI_VALUES.emoji,
-			color: prismaGroup.color || DEFAULT_UI_VALUES.color,
+			emoji: prismaGroup.emoji || DEFAULT_GROUP_EMOJI,
+			color: prismaGroup.color || DEFAULT_GROUP_COLOR,
 			description: prismaGroup.description,
 			shortcut: prismaGroup.shortcut,
 			category: prismaGroup.category || 'general',
 			sortBy: prismaGroup.sortBy || 'name',
-			filters,
+			filters: typeof filters === 'string' ? filters : JSON.stringify(filters),
 			featuredImage: prismaGroup.featuredImage,
 			isFavorite: prismaGroup.isFavorite || false,
 			createdAt: prismaGroup.createdAt,
@@ -369,8 +368,8 @@ export function parseGroupFilterObject(filters: unknown): PrismaGroupWhereInput 
 		// Procesar filtros específicos de Group
 		if (typedFilters.search) {
 			parsed.OR = [
-				{ name: { contains: String(typedFilters.search) } },
-				{ description: { contains: String(typedFilters.search) } },
+				{ name: { contains: String(typedFilters.search), mode: 'insensitive' } },
+				{ description: { contains: String(typedFilters.search), mode: 'insensitive' } },
 			];
 		}
 

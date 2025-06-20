@@ -4,11 +4,32 @@
  */
 
 import type {
-    WildcardComplete,
-    WildcardDisplayState,
-    WildcardSortCriteria,
-    WildcardViewMode,
+	WildcardComplete,
+	WildcardSortCriteria,
+	WildcardViewMode,
 } from '../../../types/entities/wildcard';
+
+/**
+ * Estado de visualización para un wildcard individual
+ */
+export interface WildcardDisplayState {
+	/** Si está siendo mostrado */
+	isVisible?: boolean;
+	/** Si está resaltado */
+	isHighlighted?: boolean;
+	/** Si está en modo de edición */
+	isEditing?: boolean;
+	/** Si está expandido */
+	isExpanded?: boolean;
+	/** Posición en la vista */
+	position?: { x: number; y: number };
+	/** Tamaño en la vista */
+	size?: { width: number; height: number };
+	/** Opacidad */
+	opacity?: number;
+	/** Z-index */
+	zIndex?: number;
+}
 
 /**
  * Estado del core para el store de comodines

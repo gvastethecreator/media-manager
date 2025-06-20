@@ -7,20 +7,20 @@
  */
 
 export {
-    ActivityCategory,
-    ActivityEventType,
-    ActivitySortCriteria,
-    ActivityType
+	ActivityCategory,
+	ActivityEventType,
+	ActivitySortCriteria,
+	ActivityType,
 } from './enums';
 export type {
-    Activity,
-    ActivityBase,
-    ActivityComplete,
-    ActivityFilters,
-    ActivityListResponse,
-    ActivityMetadata,
-    ActivityUpdateInput,
-    CreateActivityData
+	Activity,
+	ActivityBase,
+	ActivityComplete,
+	ActivityFilters,
+	ActivityListResponse,
+	ActivityMetadata,
+	ActivityUpdateInput,
+	CreateActivityData,
 } from './types';
 
 // 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.

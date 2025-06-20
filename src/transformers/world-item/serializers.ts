@@ -254,15 +254,13 @@ export function deserializeTags(tagsString?: string | null): string[] {
 }
 
 /**
- * Extiende un WorldItem deserializado para incluir propiedades de UI y relaciones,
- * usando los campos deserializados y asignando relaciones vacías por defecto.
+ * Extiende un WorldItem deserializado a un WorldItem completo con relaciones.
  * @param worldItem - El WorldItem deserializado a extender.
- * @returns Un WorldItem completo con propiedades de UI y relaciones.
+ * @returns El WorldItem completo.
  */
 export function extendWorldItem(worldItem: WorldItemDeserialized): WorldItemComplete {
 	return {
 		...worldItem,
-		// Asignar campos deserializados a los nombres esperados por WorldItemComplete
 		attributesList: worldItem.attributesList,
 		effectsList: worldItem.effectsList,
 		requirementsList: worldItem.requirementsList,
@@ -270,11 +268,7 @@ export function extendWorldItem(worldItem: WorldItemDeserialized): WorldItemComp
 		propertiesList: worldItem.propertiesList,
 		filtersList: worldItem.filtersList,
 		tagsList: worldItem.tagsList,
-		// UI y relaciones vacías por defecto
-		ui: {
-			emoji: worldItem.emoji,
-			color: worldItem.color,
-		},
+		// Relaciones y conteos vacíos por defecto
 		relations: {},
 		counts: {},
 	};
@@ -538,11 +532,40 @@ export function serializeWorldItemTags(tags: string[] | string): string {
 }
 
 /**
- * Convierte un WorldItemComplete a WorldItemBase.
+ * Convierte un WorldItemComplete de vuelta a un WorldItemBase para persistencia.
  * @param worldItem - El WorldItemComplete a convertir.
- * @returns El WorldItemBase.
+ * @returns El WorldItemBase serializado.
  */
 export function fromExtendedWorldItem(worldItem: WorldItemComplete): WorldItemBase {
-	const { ui, relations, counts, ...base } = worldItem;
-	return base;
+	// Serializar campos que necesitan ser strings JSON
+	const serializedAttributes = serializeAttributes(worldItem.attributesList);
+	const serializedEffects = serializeEffects(worldItem.effectsList);
+	const serializedRequirements = serializeRequirements(worldItem.requirementsList);
+	const serializedStats = serializeStats(worldItem.statsList);
+	const serializedFilters = serializeFilters(worldItem.filtersList);
+	const serializedTags = serializeTags(worldItem.tagsList);
+
+	// Crear el WorldItemBase sin la propiedad ui y con campos serializados
+	const {
+		relations,
+		counts,
+		attributesList,
+		effectsList,
+		requirementsList,
+		statsList,
+		propertiesList,
+		filtersList,
+		tagsList,
+		...baseWorldItem
+	} = worldItem;
+
+	return {
+		...baseWorldItem,
+		attributes: serializedAttributes,
+		effects: serializedEffects,
+		requirements: serializedRequirements,
+		stats: serializedStats,
+		filters: serializedFilters,
+		// No incluir properties ya que no existe en el tipo base
+	};
 }

@@ -10,7 +10,7 @@ export type {
 	QueueJobMetadataSchemaType,
 	QueueJobPaginationSchemaType,
 	QueueJobStatusType,
-	UpdateQueueJobSchemaType
+	UpdateQueueJobSchemaType,
 } from './schema';
 
 // Re-exportar esquemas Zod para validación
@@ -19,16 +19,21 @@ export {
 	queueJobFiltersSchema,
 	queueJobMetadataSchema,
 	queueJobPaginationSchema,
-	updateQueueJobSchema
+	updateQueueJobSchema,
 } from './schema';
 // Re-exportar tipos específicos para conveniencia
 export type {
-	CreateQueueJobInput, PaginatedQueueJobs, QueueJobBase,
-	QueueJobCreateInput, QueueJobExtended,
+	CreateQueueJobInput,
+	PaginatedQueueJobs,
+	QueueJobBase,
+	QueueJobCreateInput,
+	QueueJobExtended,
 	QueueJobFilters,
-	QueueJobPaginationOptions, QueueJobUpdateInput, QueueStats, UpdateQueueJobInput
+	QueueJobPaginationOptions,
+	QueueJobUpdateInput,
+	QueueStats,
+	UpdateQueueJobInput,
 } from './types';
 
 // Re-exportar el enum y schema
 export { QueueJobSchema, QueueJobStatus } from './types';
-

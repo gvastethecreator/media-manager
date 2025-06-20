@@ -140,4 +140,3 @@ export type Album = AlbumBase;
 
 /* Exportación de tipos adicionales para retrocompatibilidad */
 export type { AlbumCreateInput as CreateAlbumData, AlbumUpdateInput as UpdateAlbumData };
-

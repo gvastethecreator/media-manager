@@ -24,12 +24,12 @@ const mappersLogger = serverLogger.withContext('Favorite:Mappers');
  * @param favorite Favorito base
  * @returns Favorito extendido con propiedades para UI
  */
-export function toFavoriteExtended(isFavorite: FavoriteBase): FavoriteExtended {
+export function toFavoriteExtended(favorite: FavoriteBase): FavoriteExtended {
 	try {
 		const entityType = favorite.entityType.toLowerCase();
 
 		return {
-			...isFavorite,
+			...favorite,
 			entityIcon: FAVORITE_ENTITY_EMOJIS[entityType] || FAVORITE_ENTITY_EMOJIS.default,
 			entityColor: FAVORITE_ENTITY_COLORS[entityType] || FAVORITE_ENTITY_COLORS.default,
 		};

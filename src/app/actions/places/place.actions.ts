@@ -23,46 +23,42 @@ const logger = serverLogger.withContext('PlaceActions');
 const PLACE_INCLUDE = {
 	images: {
 		select: { id: true },
-		take: 10,
-		orderBy: { createdAt: 'desc' }
 	},
 	videos: {
 		select: { id: true },
-		take: 5,
-		orderBy: { createdAt: 'desc' }
 	},
 	albums: {
-		select: { id: true }
+		select: { id: true },
 	},
 	collections: {
-		select: { id: true }
+		select: { id: true },
 	},
 	tags: {
-		select: { id: true }
+		select: { id: true },
 	},
 	characters: {
-		select: { id: true }
+		select: { id: true },
 	},
 	worldItems: {
-		select: { id: true }
+		select: { id: true },
 	},
 	concepts: {
-		select: { id: true }
+		select: { id: true },
 	},
 	prompts: {
-		select: { id: true }
+		select: { id: true },
 	},
 	notes: {
-		select: { id: true }
+		select: { id: true },
 	},
 	wildcards: {
-		select: { id: true }
+		select: { id: true },
 	},
 	properties: {
-		select: { id: true }
+		select: { id: true },
 	},
 	groups: {
-		select: { id: true }
+		select: { id: true },
 	},
 	_count: {
 		select: {
@@ -81,7 +77,7 @@ const PLACE_INCLUDE = {
 			groups: true,
 		},
 	},
-};
+} as const;
 
 /**
  * Revalida las rutas de caché relacionadas con los lugares.

@@ -87,10 +87,7 @@ function mapCollectionFiltersToPrisma(filters: CollectionFilters): Prisma.Collec
 	const where: Prisma.CollectionWhereInput = {};
 
 	if (filters.search) {
-		where.OR = [
-			{ name: { contains: filters.search } },
-			{ description: { contains: filters.search } },
-		];
+		where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
 	}
 	if (filters.isFavorite !== undefined) {
 		where.isFavorite = filters.isFavorite;

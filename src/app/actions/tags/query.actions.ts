@@ -293,10 +293,7 @@ export async function searchTags(query?: string, category?: string, limit = 10):
 
 		// Filtrar por texto si se proporciona
 		if (query) {
-			where.OR = [
-				{ name: { contains: query } },
-				{ description: { contains: query } },
-			];
+			where.OR = [{ name: { contains: query } }, { description: { contains: query } }];
 		}
 
 		// Filtrar por categoría si se proporciona

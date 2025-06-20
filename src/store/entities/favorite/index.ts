@@ -3,15 +3,15 @@
  * @module store/entities/favorite
  */
 
-import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { createSelectors } from '@/utils/store-selectors';
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
 
 // Importar tipos
 
 // Importar slices
-import { ApiActions, ApiState, createApiSlice } from './api.slice';
+import { ApiActions, ApiState, createApiSlice } from './slices/api.slice';
 import { CoreActions, CoreState, createCoreSlice } from './slices/core.slice';
 import { createFiltersSlice, FiltersActions, FiltersState } from './slices/filters.slice';
 import { createUISlice, UIActions, UIState } from './slices/ui.slice';

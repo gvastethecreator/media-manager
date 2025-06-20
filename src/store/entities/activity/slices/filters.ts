@@ -42,7 +42,12 @@ export interface ActivityFiltersSlice {
 /**
  * Creador del slice de filtros
  */
-export const createActivityFiltersSlice: StateCreator<ActivityState, [], [], ActivityFiltersSlice> = (set, get) => ({
+export const createActivityFiltersSlice: StateCreator<
+	ActivityState & ActivityFiltersSlice,
+	[],
+	[],
+	ActivityFiltersSlice
+> = (set, get) => ({
 	// Ordenación
 	setSortCriteria: (criteria: ActivitySortCriteria) => {
 		set((state) => ({
@@ -205,9 +210,10 @@ export const createActivityFiltersSlice: StateCreator<ActivityState, [], [], Act
 			}
 		}
 
-		// Valores predeterminados para paginación
-		activityFilters.limit = 20;
-		activityFilters.offset = 0;
+		// Añadir límite por defecto
+		if (!activityFilters.limit) {
+			activityFilters.limit = 50;
+		}
 
 		return activityFilters;
 	},

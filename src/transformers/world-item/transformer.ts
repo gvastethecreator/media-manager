@@ -120,7 +120,6 @@ export function transformWorldItemToExtended(worldItem: WorldItemDeserialized): 
 			stats: parseJsonField(baseItem.stats, {}),
 			attributes: parseJsonField(baseItem.attributes, []),
 			effects: parseJsonField(baseItem.effects, []),
-			properties: parseJsonField(baseItem.properties, []),
 			requirements: parseJsonField(baseItem.requirements, {}),
 			filters: parseJsonField(baseItem.filters, {}),
 		};
@@ -248,5 +247,72 @@ function generateStatsDisplay(worldItem: WorldItemDeserialized): Array<{ name: s
 	} catch (error) {
 		logger.warn('Error generando datos de estadísticas, devolviendo array vacío:', error);
 		return []; // Valor por defecto
+	}
+}
+
+/**
+ * Crea un filtro Prisma a partir de filtros de WorldItem
+ * @param filters - Filtros de WorldItem
+ * @returns Filtro para Prisma
+ */
+export function createFilter(filters: WorldItemFilters): Record<string, any> {
+	try {
+		const where: Record<string, any> = {};
+		const conditions: any[] = [];
+
+		// Búsqueda por texto
+		if (filters.searchTerm) {
+			conditions.push({
+				OR: [
+					{ name: { contains: filters.searchTerm, mode: 'insensitive' } },
+					{ description: { contains: filters.searchTerm, mode: 'insensitive' } },
+				],
+			});
+		}
+
+		// Filtrar por tipos
+		if (filters.type) {
+			conditions.push({
+				type: { equals: filters.type },
+			});
+		}
+
+		// Filtrar por categorías
+		if (filters.category) {
+			conditions.push({
+				category: { equals: filters.category },
+			});
+		}
+
+		// Filtrar por rareza
+		if (filters.rarity) {
+			conditions.push({
+				rarity: { equals: filters.rarity },
+			});
+		}
+
+		// Filtrar por favoritos
+		if (filters.isFavorite !== undefined) {
+			conditions.push({
+				isFavorite: filters.isFavorite,
+			});
+		}
+
+		// Filtrar por presencia de imágenes
+		if (filters.hasImages) {
+			conditions.push({
+				images: { some: {} },
+			});
+		}
+
+		// Aplicar todos los filtros con AND
+		if (conditions.length > 0) {
+			where.AND = conditions;
+		}
+
+		return where;
+	} catch (error) {
+		logger.error('Error creando filtro de WorldItem', error);
+		return {}; // Filtro vacío por defecto
 	}
 }

@@ -3,7 +3,6 @@
  * @module store/entities/group/slices/core
  */
 
-import type { StateCreator } from 'zustand';
 import {
 	createGroup as createGroupAction,
 	deleteGroup as deleteGroupAction,
@@ -13,7 +12,8 @@ import {
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import { extendGroup, toPrismaGroup } from '@/transformers/group/serializers';
-import type { CreateGroupData, Group, GroupBase, UpdateGroupData } from '@/types/entities/group';
+import type { CreateGroupData, Group, GroupBase, UpdateGroupData } from '@/types/entities/group/types';
+import type { StateCreator } from 'zustand';
 import type { GroupState } from '../types';
 
 const groupLogger = clientLogger.withContext('GroupStore');
@@ -227,7 +227,17 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 			const group = await getGroup(id);
 			if (group) {
 				const extendedGroup = extendGroup(group as GroupBase);
-				get().addGroup(extendedGroup);
+				// Añadir directamente al store usando set
+				set((state) => ({
+					core: {
+						...state.core,
+						groups: {
+							...state.core.groups,
+							[extendedGroup.id]: extendedGroup,
+						},
+						lastUpdated: new Date(),
+					},
+				}));
 				return extendedGroup;
 			}
 			return undefined;
@@ -263,8 +273,25 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 
 		try {
 			const groups = await getGroups();
-			const extendedGroups = extendGroups(groups as GroupBase[]);
-			get().addGroups(extendedGroups);
+			const extendedGroups = groups.map((group) => extendGroup(group as GroupBase));
+			// Añadir directamente al store usando set
+			const groupsMap = extendedGroups.reduce(
+				(acc, group) => {
+					acc[group.id] = group;
+					return acc;
+				},
+				{} as Record<string, Group>
+			);
+			set((state) => ({
+				core: {
+					...state.core,
+					groups: {
+						...state.core.groups,
+						...groupsMap,
+					},
+					lastUpdated: new Date(),
+				},
+			}));
 			return extendedGroups;
 		} catch (error) {
 			groupLogger.error('❌ Error al obtener grupos:', error);
@@ -305,7 +332,16 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 
 			// Extender y añadir al store
 			const extendedGroup = extendGroup(createdGroup as GroupBase);
-			get().addGroup(extendedGroup);
+			set((state) => ({
+				core: {
+					...state.core,
+					groups: {
+						...state.core.groups,
+						[extendedGroup.id]: extendedGroup,
+					},
+					lastUpdated: new Date(),
+				},
+			}));
 
 			toastService.success(`Grupo "${data.name}" creado correctamente`);
 			return extendedGroup;
@@ -344,7 +380,18 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 			await deleteGroupAction(id);
 
 			// Eliminar del store
-			get().deleteGroup(id);
+			set((state) => {
+				const { [id]: _, ...restGroups } = state.core.groups;
+				const { [id]: __, ...restGroupItems } = state.core.groupItems;
+				return {
+					core: {
+						...state.core,
+						groups: restGroups,
+						groupItems: restGroupItems,
+						lastUpdated: new Date(),
+					},
+				};
+			});
 
 			toastService.success('Grupo eliminado correctamente');
 			return true;

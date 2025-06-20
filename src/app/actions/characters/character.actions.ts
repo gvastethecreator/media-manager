@@ -9,18 +9,18 @@
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    fromPrismaCharacter,
-    fromPrismaCharacters,
-    mapCharacterSearchOptionsToPrisma,
-    mapCreateCharacterDataToPrisma,
-    mapUpdateCharacterDataToPrisma,
+	fromPrismaCharacter,
+	fromPrismaCharacters,
+	mapCharacterSearchOptionsToPrisma,
+	mapCreateCharacterDataToPrisma,
+	mapUpdateCharacterDataToPrisma,
 } from '@/transformers/character';
 import type {
-    CharacterBase,
-    CharacterComplete,
-    CharacterCreateInput,
-    CharacterSearchOptions,
-    CharacterUpdateInput,
+	CharacterBase,
+	CharacterComplete,
+	CharacterCreateInput,
+	CharacterSearchOptions,
+	CharacterUpdateInput,
 } from '@/types/entities/character';
 import { revalidatePath } from 'next/cache';
 
@@ -29,49 +29,49 @@ const logger = serverLogger.withContext('CharacterActions');
 // Objeto de inclusión para obtener un personaje completo con todas sus relaciones y conteos.
 const CHARACTER_INCLUDE = {
 	images: {
-		select: { id: true }
+		select: { id: true },
 	},
 	videos: {
-		select: { id: true }
+		select: { id: true },
 	},
 	tags: {
-		select: { id: true }
+		select: { id: true },
 	},
 	groups: {
-		select: { id: true }
+		select: { id: true },
 	},
 	properties: {
-		select: { id: true }
+		select: { id: true },
 	},
 	collections: {
-		select: { id: true }
+		select: { id: true },
 	},
 	albums: {
-		select: { id: true }
+		select: { id: true },
 	},
 	places: {
-		select: { id: true }
+		select: { id: true },
 	},
 	worldItems: {
-		select: { id: true }
+		select: { id: true },
 	},
 	concepts: {
-		select: { id: true }
+		select: { id: true },
 	},
 	prompts: {
-		select: { id: true }
+		select: { id: true },
 	},
 	notes: {
-		select: { id: true }
+		select: { id: true },
 	},
 	wildcards: {
-		select: { id: true }
+		select: { id: true },
 	},
 	relatedCharacters: {
-		select: { id: true }
+		select: { id: true },
 	},
 	relatedTo: {
-		select: { id: true }
+		select: { id: true },
 	},
 	_count: {
 		select: {
@@ -90,7 +90,7 @@ const CHARACTER_INCLUDE = {
 			wildcards: true,
 			relatedCharacters: true,
 			relatedTo: true,
-		}
+		},
 	},
 };
 

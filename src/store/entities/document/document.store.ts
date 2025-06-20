@@ -4,12 +4,7 @@
  * @description Store Zustand para gestionar el estado de documentos
  */
 
-import {
-    createDocument,
-    deleteDocument,
-    getDocuments,
-    updateDocument,
-} from '@/app/actions/document/document.actions';
+import { createDocument, deleteDocument, getDocuments, updateDocument } from '@/app/actions/document/document.actions';
 import type { DocumentComplete, DocumentFilters, DocumentFormData } from '@/types/entities/document/types';
 import { createSelectors } from '@/utils/store/create-selectors';
 import { create } from 'zustand';

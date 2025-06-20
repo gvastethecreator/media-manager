@@ -1,6 +1,6 @@
+import { serverLogger } from '@/lib/logger/server-logger';
 
-
-const logger = new Logger({ context: 'TransformerUtils' });
+const logger = serverLogger.withContext('TransformerUtils');
 
 /**
  * 🔄 Serializa un campo a formato JSON

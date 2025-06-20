@@ -86,6 +86,61 @@ export interface ConceptSearchResult {
 }
 
 /**
+ * Filtros para búsqueda de conceptos
+ */
+export interface ConceptFilters {
+	search?: string;
+	category?: string | string[];
+	tags?: string[];
+	onlyFavorites?: boolean;
+}
+
+/**
+ * Concepto extendido con propiedades adicionales para UI
+ */
+export interface ConceptExtended extends ConceptComplete {
+	isSelected?: boolean;
+	isHighlighted?: boolean;
+	previewContent?: string;
+	lastUpdated?: Date;
+	importance?: number;
+}
+
+/**
+ * Concepto con estadísticas calculadas
+ */
+export interface ConceptWithStats extends ConceptComplete {
+	stats: {
+		imageCount: number;
+		tagCount: number;
+		noteCount: number;
+		totalContentItems: number;
+		lastUpdated: Date;
+	};
+}
+
+/**
+ * Opciones de ordenación para conceptos
+ */
+export enum ConceptSortOption {
+	NAME_ASC = 'name_asc',
+	NAME_DESC = 'name_desc',
+	CREATED_AT_ASC = 'created_at_asc',
+	CREATED_AT_DESC = 'created_at_desc',
+	UPDATED_AT_ASC = 'updated_at_asc',
+	UPDATED_AT_DESC = 'updated_at_desc',
+}
+
+/**
+ * Modos de vista para conceptos
+ */
+export enum ConceptViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+	CARDS = 'cards',
+}
+
+/**
  * Esquema Zod para validación de Concept
  */
 export const ConceptSchema = z.object({

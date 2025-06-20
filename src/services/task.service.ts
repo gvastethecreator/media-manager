@@ -17,7 +17,8 @@
 // import { TaskPriority, TaskStatus, TaskType } from '@/types/entities/task/enums';
 
 // Error estándar para funcionalidad no implementada
-const TASK_NOT_IMPLEMENTED_ERROR = 'Task functionality disabled - Task/ScheduledTask model not implemented in Prisma schema';
+const TASK_NOT_IMPLEMENTED_ERROR =
+	'Task functionality disabled - Task/ScheduledTask model not implemented in Prisma schema';
 
 /**
  * Obtiene todas las tareas con filtros opcionales - DESHABILITADO

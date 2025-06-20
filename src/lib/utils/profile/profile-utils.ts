@@ -18,10 +18,7 @@ export function buildProfileQuery(filters: ProfileFilters = {}) {
 
 	// Filtro por búsqueda de texto
 	if (filters.search) {
-		query.OR = [
-			{ name: { contains: filters.search } },
-			{ description: { contains: filters.search } },
-		];
+		query.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
 	}
 
 	// Filtro por estado activo

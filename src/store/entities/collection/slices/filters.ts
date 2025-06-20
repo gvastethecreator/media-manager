@@ -3,13 +3,13 @@
  * @module store/entities/collection/slices/filters
  */
 
-import type { StateCreator } from 'zustand';
 import type { CollectionExtended, CollectionFilter } from '@/types/entities/collection';
 import { groupCollections, sortCollections } from '@/utils/collection';
+import type { StateCreator } from 'zustand';
 import type { CollectionState } from '../types';
 
 /**
- * Slice con operaciones relacionadas con filtrado y ordenación para colecciones
+ * Slice de filtros con operaciones de filtrado y ordenamiento
  */
 export interface CollectionFiltersSlice {
 	// Operaciones de filtrado
@@ -44,21 +44,21 @@ export const createCollectionFiltersSlice: StateCreator<
 > = (set, get) => ({
 	// Operaciones de filtrado
 	filterByCategory: (category: string | null) => {
-		const { collections } = get();
+		const collections = Object.values(get().collections);
 		if (!category) return collections;
 
 		return collections.filter((collection) => collection.category === category);
 	},
 
 	filterByRarity: (rarity: string | null) => {
-		const { collections } = get();
+		const collections = Object.values(get().collections);
 		if (!rarity) return collections;
 
 		return collections.filter((collection) => collection.rarity === rarity);
 	},
 
 	filterByPrice: (minPrice: number | null, maxPrice: number | null) => {
-		const { collections } = get();
+		const collections = Object.values(get().collections);
 
 		return collections.filter((collection) => {
 			const price = collection.price || 0;
@@ -69,7 +69,7 @@ export const createCollectionFiltersSlice: StateCreator<
 	},
 
 	filterByName: (searchTerm: string) => {
-		const { collections } = get();
+		const collections = Object.values(get().collections);
 		if (!searchTerm.trim()) return collections;
 
 		const term = searchTerm.toLowerCase();
@@ -82,12 +82,14 @@ export const createCollectionFiltersSlice: StateCreator<
 	// Operaciones de ordenación
 	getSortedCollections: (sortOption?: string) => {
 		const { collections, viewConfig } = get();
+		const collectionsArray = Object.values(collections);
 		const option = sortOption || viewConfig.sortBy + (viewConfig.sortDirection === 'desc' ? '_desc' : '_asc');
-		return sortCollections(collections, option);
+		return sortCollections(collectionsArray, option);
 	},
 
 	getGroupedCollections: (groupBy?: 'category' | 'rarity' | 'platform' | null) => {
-		const { collections, viewConfig } = get();
+		const collections = Object.values(get().collections);
+		const { viewConfig } = get();
 		return groupCollections(collections, groupBy || viewConfig.groupBy || null);
 	},
 
@@ -95,15 +97,17 @@ export const createCollectionFiltersSlice: StateCreator<
 	addFilter: (filter: CollectionFilter) => {
 		set((state) => {
 			// Actualizar cada colección con sus filtros
-			const updatedCollections = state.collections.map((collection) => {
+			const updatedCollections = { ...state.collections };
+
+			for (const [id, collection] of Object.entries(updatedCollections)) {
 				if (!collection.parsedFilters) {
 					collection.parsedFilters = [];
 				}
-				return {
+				updatedCollections[id] = {
 					...collection,
 					parsedFilters: [...collection.parsedFilters, filter],
 				};
-			});
+			}
 
 			return {
 				collections: updatedCollections,
@@ -114,19 +118,21 @@ export const createCollectionFiltersSlice: StateCreator<
 	removeFilter: (index: number) => {
 		set((state) => {
 			// Actualizar cada colección quitando el filtro en el índice especificado
-			const updatedCollections = state.collections.map((collection) => {
+			const updatedCollections = { ...state.collections };
+
+			for (const [id, collection] of Object.entries(updatedCollections)) {
 				if (!collection.parsedFilters || collection.parsedFilters.length <= index) {
-					return collection;
+					continue;
 				}
 
 				const newFilters = [...collection.parsedFilters];
 				newFilters.splice(index, 1);
 
-				return {
+				updatedCollections[id] = {
 					...collection,
 					parsedFilters: newFilters,
 				};
-			});
+			}
 
 			return {
 				collections: updatedCollections,
@@ -137,10 +143,14 @@ export const createCollectionFiltersSlice: StateCreator<
 	clearFilters: () => {
 		set((state) => {
 			// Limpiar filtros de todas las colecciones
-			const updatedCollections = state.collections.map((collection) => ({
-				...collection,
-				parsedFilters: [],
-			}));
+			const updatedCollections = { ...state.collections };
+
+			for (const [id, collection] of Object.entries(updatedCollections)) {
+				updatedCollections[id] = {
+					...collection,
+					parsedFilters: [],
+				};
+			}
 
 			return {
 				collections: updatedCollections,
@@ -149,7 +159,7 @@ export const createCollectionFiltersSlice: StateCreator<
 	},
 
 	applyFilters: (filters: CollectionFilter[]) => {
-		const { collections } = get();
+		const collections = Object.values(get().collections);
 
 		if (!filters || filters.length === 0) {
 			return collections;
@@ -201,8 +211,8 @@ export const createCollectionFiltersSlice: StateCreator<
 		const parts = option.split('_');
 
 		if (parts.length === 2) {
-			const sortBy = parts[0] as CollectionState['viewConfig']['sortBy'];
-			const sortDirection = parts[1] as CollectionState['viewConfig']['sortDirection'];
+			const sortBy = parts[0];
+			const sortDirection = parts[1] as 'asc' | 'desc';
 
 			set((state) => ({
 				viewConfig: {

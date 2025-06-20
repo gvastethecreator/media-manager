@@ -10,21 +10,21 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
 // Importar tipos y transformers
 import {
-    fromPrismaWorldItem,
-    mapCreateWorldItemDataToPrisma,
-    mapUpdateWorldItemDataToPrisma,
-    mapWorldItemFiltersToPrisma,
-    mapWorldItemOrderByToPrisma,
-    transformWorldItemToExtended,
+	fromPrismaWorldItem,
+	mapCreateWorldItemDataToPrisma,
+	mapUpdateWorldItemDataToPrisma,
+	mapWorldItemFiltersToPrisma,
+	mapWorldItemOrderByToPrisma,
+	transformWorldItemToExtended,
 } from '@/transformers/world-item';
 import type {
-    CreateWorldItemData,
-    UpdateWorldItemData,
-    WorldItem,
-    WorldItemBase,
-    WorldItemExtended,
-    WorldItemFilters,
-    WorldItemSortCriteria,
+	CreateWorldItemData,
+	UpdateWorldItemData,
+	WorldItem,
+	WorldItemBase,
+	WorldItemExtended,
+	WorldItemFilters,
+	WorldItemSortCriteria,
 } from '@/types/entities/world-item';
 import type { FileItem } from '@/types/files';
 
@@ -140,19 +140,16 @@ export async function getWorldItems(
 		if (cached) {
 			worldItemLogger.info('✅ Objetos del mundo obtenidos de caché');
 
-			// Convertir los datos del caché al formato esperado
-			return cached.map((item) => ({
-				...item,
-				createdAt: new Date(item.createdAt as string),
-				updatedAt: new Date(item.updatedAt as string),
-				// Asegurar que los campos JSON estén correctamente deserializados
-				attributes: Array.isArray(item.attributes) ? item.attributes : [],
-				effects: Array.isArray(item.effects) ? item.effects : [],
-				requirements: typeof item.requirements === 'object' ? item.requirements : {},
-				stats: typeof item.stats === 'object' ? item.stats : {},
-				tags: Array.isArray(item.tags) ? item.tags : [],
-				filters: typeof item.filters === 'object' ? item.filters : {},
-			}));
+			// Convertir los datos del caché al formato esperado usando transformers
+			return cached.map((item) => {
+				const transformedItem = transformWorldItemToExtended(item as any);
+				return {
+					...transformedItem,
+					totalSize: (item as any).totalSize || 0,
+					imageCount: (item as any).imageCount || 0,
+					recentImages: (item as any).recentImages || [],
+				};
+			});
 		}
 	}
 
@@ -160,7 +157,7 @@ export async function getWorldItems(
 		worldItemLogger.info('🔍 Obteniendo objetos del mundo (simplificado)');
 
 		// Crear el filtro y el ordenamiento con los nuevos transformadores
-		const whereCondition = mapWorldItemFiltersToPrisma(filters);
+		const whereCondition = mapWorldItemFiltersToPrisma(filters || {});
 		// Cambiar el orderBy por defecto: Eliminar ordenación por _count de relación
 		const defaultOrderBy = { updatedAt: 'desc' } as const; // Ordenar por fecha de actualización por defecto
 		const orderByCondition = sortBy ? mapWorldItemOrderByToPrisma(sortBy) : defaultOrderBy;
@@ -289,7 +286,7 @@ export async function getWorldItemById(id: string): Promise<WorldItemExtended> {
 		worldItemLogger.info('✅ Objeto del mundo obtenido:', worldItem.name);
 
 		// Transformar con los nuevos transformadores para deserializar correctamente los campos JSON
-		return transformWorldItemToExtended(fromPrismaWorldItem(worldItem));
+		return transformWorldItemToExtended(fromPrismaWorldItem(worldItem as any));
 	} catch (error) {
 		worldItemLogger.error('❌ Error al obtener objeto del mundo', { id, error });
 		// Preservar el código de error si ya es un WorldItemError
@@ -338,7 +335,7 @@ export async function createWorldItem(data: CreateWorldItemData): Promise<WorldI
 		worldItemLogger.info('✅ Objeto del mundo creado:', worldItem.name);
 
 		// Transformar con los nuevos transformadores
-		return transformWorldItemToExtended(fromPrismaWorldItem(worldItem));
+		return transformWorldItemToExtended(fromPrismaWorldItem(worldItem as any));
 	} catch (error) {
 		worldItemLogger.error('❌ Error al crear objeto del mundo', error);
 		throw createWorldItemError('No se pudo crear el objeto del mundo', WorldItemErrorCode.OPERATION_FAILED, error);
@@ -395,7 +392,7 @@ export async function updateWorldItem(id: string, data: UpdateWorldItemData): Pr
 		worldItemLogger.info('✅ Objeto del mundo actualizado:', updated.name);
 
 		// Transformar con los nuevos transformadores
-		return transformWorldItemToExtended(fromPrismaWorldItem(updated));
+		return transformWorldItemToExtended(fromPrismaWorldItem(updated as any));
 	} catch (error) {
 		worldItemLogger.error('❌ Error al actualizar objeto del mundo', { id, error });
 		// Preservar el código de error si ya es un WorldItemError
@@ -482,7 +479,16 @@ export async function getWorldItemImages(id: string): Promise<FileItem[]> {
 		}
 
 		// Convertir imágenes a FileItem
-		const images = worldItem.images.map((image) => convertServerImageToFileItem(image as unknown as ServerImage));
+		const images = worldItem.images.map((image) =>
+			convertServerImageToFileItem({
+				...image,
+				metadata: image.metadata as string | null,
+				thumbnail: null, // Las imágenes de Prisma no incluyen thumbnail por defecto
+				thumbnailSize: null,
+				thumbnailWidth: null,
+				thumbnailHeight: null,
+			} as ServerImage)
+		);
 
 		worldItemLogger.info('✅ Imágenes obtenidas para objeto del mundo', { count: images.length });
 		return images;

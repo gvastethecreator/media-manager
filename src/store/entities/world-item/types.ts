@@ -6,11 +6,12 @@
  */
 
 import type {
-	WorldItemCreateInput as CreateWorldItemData,
-	WorldItemUpdateInput as UpdateWorldItemData,
-	WorldItem,
-	WorldItemFilters,
-	WorldItemViewMode,
+    WorldItemCreateInput as CreateWorldItemData,
+    WorldItemUpdateInput as UpdateWorldItemData,
+    WorldItem,
+    WorldItemFilters,
+    WorldItemSortCriteria,
+    WorldItemViewMode,
 } from '@/types/entities/world-item';
 
 /**
@@ -22,7 +23,17 @@ export type WorldItemUpdateData = Partial<
 >;
 
 /**
- * 📊 Estado global del store
+ * 🎮 Estado de UI del store
+ */
+export interface WorldItemUIState {
+	selectedId: string | null;
+	editingId: string | null;
+	highlightedId: string | null;
+	viewMode: WorldItemViewMode;
+}
+
+/**
+ * 📊 Estado global del store (solo datos, sin métodos)
  */
 export interface WorldItemState {
 	// 📋 Datos principales
@@ -33,21 +44,6 @@ export interface WorldItemState {
 	// 🎨 UI y configuración visual
 	ui: WorldItemUIState;
 	filters: WorldItemFilters;
-
-	// 🔍 Selectores y getters
-	getWorldItemById: (id: string) => WorldItem | undefined;
-	getFilteredWorldItems: () => WorldItem[];
-	getSortedWorldItems: () => WorldItem[];
-}
-
-/**
- * 🎮 Estado de UI del store
- */
-export interface WorldItemUIState {
-	selectedId: string | null;
-	editingId: string | null;
-	highlightedId: string | null;
-	viewMode: WorldItemViewMode;
 }
 
 /**
@@ -62,15 +58,28 @@ export interface WorldItemActions {
 	updateWorldItem: (id: string, item: UpdateWorldItemData) => Promise<void>;
 	deleteWorldItem: (id: string) => Promise<void>;
 
+	// 🔍 Selectores y getters
+	getWorldItemById: (id: string) => WorldItem | undefined;
+	getFilteredWorldItems: () => WorldItem[];
+	getSortedWorldItems: () => WorldItem[];
+
 	// 🎮 Acciones de UI
 	selectWorldItem: (id: string | null) => void;
 	startEditing: (id: string | null) => void;
 	highlightWorldItem: (id: string | null) => void;
 	setViewMode: (mode: WorldItemViewMode) => void;
+	clearSelection: () => void;
 
 	// 🔍 Filtros
 	updateFilters: (filters: Partial<WorldItemFilters>) => void;
 	clearFilters: () => void;
+	setSearchQuery: (query: string) => void;
+
+	// 🛠️ Utilidades del store
+	setWorldItems: (worldItems: WorldItem[]) => void;
+	addWorldItem: (worldItem: WorldItem) => void;
+	resetStore: () => void;
+	setError: (error: string | null) => void;
 }
 
 /**
@@ -163,14 +172,5 @@ export interface WorldItemBatchOptions {
 	data?: Partial<WorldItem> | { [key: string]: any };
 }
 
-// 📊 Enum para ordenamiento
-export enum WorldItemSortCriteria {
-	NAME_ASC = 'name_asc',
-	NAME_DESC = 'name_desc',
-	CREATED_AT_ASC = 'created_at_asc',
-	CREATED_AT_DESC = 'created_at_desc',
-	UPDATED_AT_ASC = 'updated_at_asc',
-	UPDATED_AT_DESC = 'updated_at_desc',
-	RARITY_ASC = 'rarity_asc',
-	RARITY_DESC = 'rarity_desc',
-}
+// Re-exportar tipos canónicos
+export type { WorldItemSortCriteria };

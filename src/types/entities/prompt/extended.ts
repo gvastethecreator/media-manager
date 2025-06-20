@@ -3,18 +3,38 @@
  * @module types/entities/prompt/extended
  */
 
-import type { PromptBase, PromptParameter } from './types';
+import type { PromptBase } from './types';
 
 /**
  * Interfaz extendida para prompt con propiedades adicionales para UI
  */
 export interface PromptExtended extends PromptBase {
+	_count: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
 	parsedTags?: string[];
-	parsedParameters?: Record<string, PromptParameter>;
+	parsedParameters?: Record<string, any>;
 	previewContent?: string;
 	lastUpdated?: Date;
 	stats?: PromptStats;
 }
+
+/**
+ * Alias para compatibilidad
+ */
+export type ExtendedPrompt = PromptExtended;
 
 /**
  * Interfaz para filtros de prompts

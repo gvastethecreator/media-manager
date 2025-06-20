@@ -298,5 +298,3 @@ export const transformImagesToExtended = (images: ImageWithRelations[]): ImageEx
 		})
 		.filter((image): image is ImageExtended => image !== null);
 };
-
-

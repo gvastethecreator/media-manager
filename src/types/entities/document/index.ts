@@ -8,8 +8,18 @@ export { documentSchema } from './document.schema';
 
 // Exportar los tipos principales
 export type {
-    Document,
-    DocumentBase, DocumentComplete, DocumentCounts, DocumentCreateInput, DocumentFilters, DocumentFormData, DocumentRelationInput, DocumentRelations, DocumentSearchOptions,
-    DocumentSearchResult, DocumentUpdateInput, DocumentWithCounts, DocumentWithRelations
+	Document,
+	DocumentBase,
+	DocumentComplete,
+	DocumentCounts,
+	DocumentCreateInput,
+	DocumentFilters,
+	DocumentFormData,
+	DocumentRelationInput,
+	DocumentRelations,
+	DocumentSearchOptions,
+	DocumentSearchResult,
+	DocumentUpdateInput,
+	DocumentWithCounts,
+	DocumentWithRelations,
 } from './types';
-

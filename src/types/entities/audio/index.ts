@@ -6,9 +6,15 @@
 
 // Exportar los tipos principales
 export type {
-    Audio,
-    AudioBase, AudioComplete, AudioCounts, AudioCreateInput, AudioFilters, AudioFormData, AudioSearchOptions,
-    AudioSearchResult, AudioUpdateInput,
-    AudioWithCounts
+	Audio,
+	AudioBase,
+	AudioComplete,
+	AudioCounts,
+	AudioCreateInput,
+	AudioFilters,
+	AudioFormData,
+	AudioSearchOptions,
+	AudioSearchResult,
+	AudioUpdateInput,
+	AudioWithCounts,
 } from './types';
-

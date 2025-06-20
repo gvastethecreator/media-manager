@@ -162,10 +162,7 @@ export function toSearchOptions(options: WildcardSearchOptions = {}): Record<str
 
 		// Aplicar búsqueda por texto
 		if (searchQuery) {
-			where.OR = [
-				{ name: { contains: searchQuery } },
-				{ description: { contains: searchQuery } },
-			];
+			where.OR = [{ name: { contains: searchQuery } }, { description: { contains: searchQuery } }];
 		}
 
 		// Configurar inclusiones de relaciones

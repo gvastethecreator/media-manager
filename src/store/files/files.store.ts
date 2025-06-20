@@ -178,7 +178,7 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 			// Importar dinámicamente la función de folder images
 			const { getLatestFolderImages } = await import('@/app/actions/images/folder-images.action');
 			const response = await getLatestFolderImages(id, 1000); // Obtener hasta 1000 imágenes
-			const items = (response.data || []);
+			const items = response.data || [];
 			set({
 				currentItems: items,
 				displayedItems: items.slice(0, ITEMS_PER_BATCH),

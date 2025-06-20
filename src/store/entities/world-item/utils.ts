@@ -1,17 +1,19 @@
 /**
- * @file Utilidades para el store de WorldItem
+ * @file Utilidades para la entidad WorldItem
  * @module store/entities/world-item/utils
+ * @description Funciones de utilidad para manipular datos de WorldItem
+ * @updated 2025-06-20
  */
 
-import type { WorldItemComplete, WorldItemFilters } from '../../../types/entities/world-item';
-import { WORLD_ITEM_ID_PREFIX, WORLD_ITEM_RARITY_COLORS } from './constants';
+import type { WorldItemComplete, WorldItemFilters } from '@/types/entities/world-item';
+import { WORLD_ITEM_RARITY_COLORS } from './constants';
 
 /**
- * Genera un ID único para un objeto del mundo
- * @returns ID único para un objeto del mundo
+ * Genera un ID único para un WorldItem
+ * @returns ID único generado
  */
 export const generateWorldItemId = (): string => {
-	return `${WORLD_ITEM_ID_PREFIX}${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+	return `world-item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
 /**
@@ -21,7 +23,11 @@ export const generateWorldItemId = (): string => {
  * @param searchQuery Consulta de búsqueda
  * @returns Lista filtrada de objetos del mundo
  */
-export const filterWorldItems = (items: WorldItemComplete[], filters: WorldItemFilters, searchQuery = ''): WorldItemComplete[] => {
+export const filterWorldItems = (
+	items: WorldItemComplete[],
+	filters: WorldItemFilters,
+	searchQuery = ''
+): WorldItemComplete[] => {
 	if (!items || items.length === 0) return [];
 
 	// Si no hay filtros ni consulta, devolver todos los items
@@ -44,22 +50,22 @@ export const filterWorldItems = (items: WorldItemComplete[], filters: WorldItemF
 		// Filtros específicos
 		if (filters) {
 			// Filtro por tipo
-			if (filters.types && filters.types.length > 0) {
-				if (!filters.types.includes(item.type)) return false;
+			if (filters.type) {
+				if (filters.type !== item.type) return false;
 			}
 
 			// Filtro por categoría
-			if (filters.categories && filters.categories.length > 0) {
-				if (!item.category || !filters.categories.includes(item.category)) return false;
+			if (filters.category) {
+				if (!item.category || filters.category !== item.category) return false;
 			}
 
 			// Filtro por rareza
-			if (filters.rarities && filters.rarities.length > 0) {
-				if (!filters.rarities.includes(item.rarity)) return false;
+			if (filters.rarity) {
+				if (filters.rarity !== item.rarity) return false;
 			}
 
 			// Filtro por favoritos
-			if (filters.onlyFavorites && !item.isFavorite) {
+			if (filters.isFavorite && !item.isFavorite) {
 				return false;
 			}
 

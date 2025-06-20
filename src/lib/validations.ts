@@ -29,7 +29,7 @@ export async function validateName(entity: string, name: string) {
 		where: {
 			name: {
 				equals: name,
-				},
+			},
 		},
 	});
 

@@ -38,10 +38,10 @@ interface WhereClause {
 	};
 	OR?: Array<
 		| {
-				name: { contains: string; };
+				name: { contains: string };
 		  }
 		| {
-				category: { contains: string; };
+				category: { contains: string };
 		  }
 	>;
 }
@@ -275,10 +275,7 @@ class UploadedImagesService {
 			}
 
 			if (query) {
-				where.OR = [
-					{ name: { contains: query } },
-					{ category: { contains: query } },
-				];
+				where.OR = [{ name: { contains: query } }, { category: { contains: query } }];
 			}
 
 			const total = await prisma.uploadedImage.count({ where });

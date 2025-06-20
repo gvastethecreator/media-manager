@@ -4,7 +4,13 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { PlaceCategory, PlaceComplete, PlaceFilters, PlaceType, PlaceViewMode } from '../../../types/entities/place/types';
+import type {
+    PlaceCategory,
+    PlaceComplete,
+    PlaceFilters,
+    PlaceType,
+    PlaceViewMode,
+} from '../../../types/entities/place/types';
 
 /**
  * Estado base del store de Place
@@ -91,7 +97,9 @@ export interface PlaceUISlice {
 	}) => void;
 
 	// Acciones de selección
+	selectPlace: (placeId: string | null) => void;
 	selectPlaceId: (placeId: string | null) => void;
+	getSelectedPlace: () => PlaceComplete | null;
 }
 
 /**

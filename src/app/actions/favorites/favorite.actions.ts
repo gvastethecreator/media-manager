@@ -29,10 +29,7 @@ async function revalidateFavoritePaths(_entityType: FavoriteEntityType, _entityI
  * Alterna el estado de favorito de una entidad.
  * Devuelve `true` si la entidad ahora es favorita, `false` si no lo es.
  */
-export async function toggleFavorite(
-	entityType: FavoriteEntityType,
-	entityId: string,
-): Promise<boolean> {
+export async function toggleFavorite(entityType: FavoriteEntityType, entityId: string): Promise<boolean> {
 	logger.info(`❤️ Alternando favorito para ${entityType}:${entityId}`);
 	const existing = await prisma.favorite.findFirst({
 		where: { entityType, entityId },
@@ -48,7 +45,7 @@ export async function toggleFavorite(
 	// Obtener el perfil activo (asumimos que hay un perfil por defecto)
 	const defaultProfile = await prisma.profile.findFirst({
 		where: { isActive: true },
-		select: { id: true }
+		select: { id: true },
 	});
 
 	if (!defaultProfile) {
@@ -60,7 +57,7 @@ export async function toggleFavorite(
 		data: {
 			entityType,
 			entityId,
-			profile: { connect: { id: defaultProfile.id } }
+			profile: { connect: { id: defaultProfile.id } },
 		},
 	});
 	logger.info(`💖 Favorito añadido para ${entityType}:${entityId}`, favorite);
@@ -110,4 +107,3 @@ export async function countFavorites(entityType?: FavoriteEntityType): Promise<n
 	});
 	return count;
 }
-

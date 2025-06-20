@@ -3,7 +3,8 @@
  * @module store/entities/character
  */
 
-import type { CharacterExtended, CharacterSortOption, CharacterViewConfig } from '@/types/entities/character';
+import type { CharacterExtended, CharacterViewConfig } from '@/types/entities/character';
+import { CharacterSortOption } from '@/types/entities/character/enums';
 import { CHARACTER_KEY_PREFIX } from '@/utils/character';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -21,12 +22,15 @@ const initialState: CharacterState = {
 
 	// Estado UI
 	viewConfig: {
-		mode: 'grid',
-		gridColumns: 3,
-		cardSize: 'medium',
+		viewType: 'grid',
+		sortBy: 'name',
+		sortDirection: 'asc',
+		showImages: true,
+		imageCount: 4,
+		enableAnimations: true,
+		groupBy: null,
 		showStats: true,
-		showDescription: true,
-		defaultView: 'cards',
+		compactView: false,
 	},
 	selectedCharacterId: null,
 	hoveredCharacterId: null,
@@ -39,8 +43,8 @@ const initialState: CharacterState = {
 	// Filtrado y ordenamiento
 	activeFilters: [],
 	searchTerm: '',
-	defaultSortOption: 'name_asc',
-	currentSortOption: 'name_asc',
+	defaultSortOption: CharacterSortOption.NAME_ASC,
+	currentSortOption: CharacterSortOption.NAME_ASC,
 
 	// Agrupamiento
 	groupBy: 'none',

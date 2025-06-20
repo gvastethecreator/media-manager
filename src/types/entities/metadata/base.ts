@@ -19,4 +19,3 @@ export interface MetadataBase {
 
 // Re-export desde types para mantener compatibilidad
 export type { MetadataBase as MetadataLegacy } from './types';
-

@@ -16,12 +16,138 @@ interface EmojiPickerProps {
 
 // 🎯 Categorías de emojis organizadas por uso en el proyecto
 const emojisByCategory = {
-	activities: ['🎨', '🎮', '🎲', '🎭', '🎪', '🎰', '🎳', '🎯', '🎱', '🎤', '🎸', '🎹', '🎺', '🎻', '🥁', '🎬', '🎭', '🎪', '🎨', '🖼️'],
-	faces: ['😀', '😎', '🤔', '🤓', '😍', '🤩', '😴', '🤯', '🤠', '🥳', '😊', '😂', '🤣', '😆', '😄', '😃', '😁', '🙂', '🤗', '🤭'],
-	nature: ['🌟', '🌙', '☀️', '🌈', '🌸', '🌺', '🌹', '🌷', '🌼', '🍀', '🌿', '🌱', '🌳', '🌲', '🍃', '🌾', '🌵', '🌴', '🏔️', '⛰️'],
-	food: ['🍎', '🍕', '🍔', '🌮', '🍦', '🍪', '🍩', '🍫', '🍿', '🥤', '🍰', '🎂', '🧁', '🍊', '🍌', '🍇', '🍓', '🥝', '🥥', '🥭'],
-	objects: ['📱', '💻', '📷', '🎥', '📚', '✏️', '📌', '🔍', '🎁', '🗂️', '📁', '📂', '🗃️', '📋', '📊', '📈', '📉', '🗒️', '📝', '📄'],
-	symbols: ['❤️', '⭐', '🔥', '✨', '💫', '💡', '💭', '🔔', '🎵', '💎', '🏆', '🎯', '⚡', '🌟', '💯', '✅', '❌', '⚠️', '🚀', '🎉'],
+	activities: [
+		'🎨',
+		'🎮',
+		'🎲',
+		'🎭',
+		'🎪',
+		'🎰',
+		'🎳',
+		'🎯',
+		'🎱',
+		'🎤',
+		'🎸',
+		'🎹',
+		'🎺',
+		'🎻',
+		'🥁',
+		'🎬',
+		'🎭',
+		'🎪',
+		'🎨',
+		'🖼️',
+	],
+	faces: [
+		'😀',
+		'😎',
+		'🤔',
+		'🤓',
+		'😍',
+		'🤩',
+		'😴',
+		'🤯',
+		'🤠',
+		'🥳',
+		'😊',
+		'😂',
+		'🤣',
+		'😆',
+		'😄',
+		'😃',
+		'😁',
+		'🙂',
+		'🤗',
+		'🤭',
+	],
+	nature: [
+		'🌟',
+		'🌙',
+		'☀️',
+		'🌈',
+		'🌸',
+		'🌺',
+		'🌹',
+		'🌷',
+		'🌼',
+		'🍀',
+		'🌿',
+		'🌱',
+		'🌳',
+		'🌲',
+		'🍃',
+		'🌾',
+		'🌵',
+		'🌴',
+		'🏔️',
+		'⛰️',
+	],
+	food: [
+		'🍎',
+		'🍕',
+		'🍔',
+		'🌮',
+		'🍦',
+		'🍪',
+		'🍩',
+		'🍫',
+		'🍿',
+		'🥤',
+		'🍰',
+		'🎂',
+		'🧁',
+		'🍊',
+		'🍌',
+		'🍇',
+		'🍓',
+		'🥝',
+		'🥥',
+		'🥭',
+	],
+	objects: [
+		'📱',
+		'💻',
+		'📷',
+		'🎥',
+		'📚',
+		'✏️',
+		'📌',
+		'🔍',
+		'🎁',
+		'🗂️',
+		'📁',
+		'📂',
+		'🗃️',
+		'📋',
+		'📊',
+		'📈',
+		'📉',
+		'🗒️',
+		'📝',
+		'📄',
+	],
+	symbols: [
+		'❤️',
+		'⭐',
+		'🔥',
+		'✨',
+		'💫',
+		'💡',
+		'💭',
+		'🔔',
+		'🎵',
+		'💎',
+		'🏆',
+		'🎯',
+		'⚡',
+		'🌟',
+		'💯',
+		'✅',
+		'❌',
+		'⚠️',
+		'🚀',
+		'🎉',
+	],
 };
 
 export function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
@@ -37,11 +163,7 @@ export function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
-				<Button
-					variant="outline"
-					type="button"
-					className={cn('w-24 justify-center', className)}
-				>
+				<Button variant="outline" type="button" className={cn('w-24 justify-center', className)}>
 					<span className="text-lg">{value || '😀'}</span>
 				</Button>
 			</PopoverTrigger>
@@ -99,10 +221,7 @@ export function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
 						{/* 🔍 Picker completo con búsqueda */}
 						<TabsContent value="search" className="m-0">
 							<div className="p-3">
-								<FrimousseEmojiPicker.Root
-									onEmojiSelect={handleFrimousseSelect}
-									className="w-full"
-								>
+								<FrimousseEmojiPicker.Root onEmojiSelect={handleFrimousseSelect} className="w-full">
 									<FrimousseEmojiPicker.Search
 										placeholder="Buscar emoji..."
 										className="w-full mb-3 px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -123,12 +242,7 @@ export function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
 
 					{/* 🔍 Botón para acceder al buscador completo */}
 					<div className="border-t p-2">
-						<Button
-							variant="ghost"
-							size="sm"
-							className="w-full text-xs"
-							onClick={() => setActiveTab('search')}
-						>
+						<Button variant="ghost" size="sm" className="w-full text-xs" onClick={() => setActiveTab('search')}>
 							🔍 Buscar más emojis
 						</Button>
 					</div>

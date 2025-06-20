@@ -353,10 +353,7 @@ export async function getImages(options: GetImagesOptions = {}): Promise<GetImag
 		}
 
 		if (search) {
-			where.OR = [
-				{ name: { contains: search } },
-				{ path: { contains: search } },
-			];
+			where.OR = [{ name: { contains: search } }, { path: { contains: search } }];
 		}
 
 		// Obtener total para la paginación

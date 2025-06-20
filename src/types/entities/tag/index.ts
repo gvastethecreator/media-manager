@@ -12,5 +12,3 @@ export * from './schema';
 export type { Tag, TagWithRelations } from './types';
 // Exportar todos los tipos canónicos
 export * from './types';
-
-

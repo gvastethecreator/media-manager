@@ -182,7 +182,8 @@ export function PropertiesSettings() {
 		try {
 			await togglePropertyFavorite(property.id);
 			setProperties(
-				(prev) => prev.map((p) => (p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p)) as PropertyComplete[]
+				(prev) =>
+					prev.map((p) => (p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p)) as PropertyComplete[]
 			);
 
 			if (selectedProperty?.id === property.id) {

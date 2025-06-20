@@ -4,18 +4,20 @@
  */
 
 import type {
-	CharacterBase,
-	CharacterExtended,
-	CharacterViewConfig
+    CharacterBase,
+    CharacterExtended,
+    CharacterFilterItem,
+    CharacterViewConfig
 } from '@/types/entities/character';
 
-// Definir tipos locales para los que no están disponibles
-export type CharacterSortOption = 'name' | 'created' | 'updated' | 'category';
-export type CharacterFilter = any;
-export type CharacterClass = string;
-export type CharacterRace = string;
-export type CharacterCategory = string;
-export type CharacterAlignment = string;
+// Importar enums desde el archivo de enums
+import {
+    CharacterAlignment,
+    CharacterCategory,
+    CharacterClass,
+    CharacterRace,
+    CharacterSortOption,
+} from '@/types/entities/character/enums';
 
 /**
  * Estado base para el store de Character
@@ -35,7 +37,7 @@ export interface CharacterState {
 	error: string | null;
 
 	// Filtrado y ordenamiento
-	activeFilters: CharacterFilter[];
+	activeFilters: CharacterFilterItem[];
 	searchTerm: string;
 	defaultSortOption: CharacterSortOption;
 	currentSortOption: CharacterSortOption;
@@ -153,10 +155,10 @@ export interface CharacterFiltersSlice {
 	getCharactersByIds: (ids: string[]) => CharacterExtended[];
 
 	// Operaciones avanzadas de filtrado
-	addFilter: (filter: CharacterFilter) => void;
+	addFilter: (filter: CharacterFilterItem) => void;
 	removeFilter: (filterId: string) => void;
 	clearFilters: () => void;
-	applyFilters: (filters: CharacterFilter[]) => void;
+	applyFilters: (filters: CharacterFilterItem[]) => void;
 
 	// Configuración de ordenamiento
 	setSortOption: (option: CharacterSortOption) => void;

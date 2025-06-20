@@ -42,7 +42,10 @@ export interface ActivityUISlice {
 /**
  * Creador del slice de UI
  */
-export const createActivityUISlice: StateCreator<ActivityState, [], [], ActivityUISlice> = (set, get) => ({
+export const createActivityUISlice: StateCreator<ActivityState & ActivityUISlice, [], [], ActivityUISlice> = (
+	set,
+	get
+) => ({
 	// Funciones de selección
 	selectActivity: (id: string | null) => {
 		// Si id es null, limpiar la selección
@@ -198,7 +201,7 @@ export const createActivityUISlice: StateCreator<ActivityState, [], [], Activity
 		}));
 	},
 
-	// Funciones de resaltado
+	// Función de resaltado
 	highlightActivity: (id: string | null) => {
 		set((state) => ({
 			ui: {
@@ -229,14 +232,12 @@ export const createActivityUISlice: StateCreator<ActivityState, [], [], Activity
 
 	// Getters
 	isActivitySelected: (id: string) => {
-		// Asegurarse de que selectedIds está inicializado
-		const selectedIds = get().ui.selectedIds || [];
-		return selectedIds.includes(id);
+		const state = get();
+		return (state.ui.selectedIds || []).includes(id);
 	},
 
 	isActivityExpanded: (id: string) => {
-		// Asegurarse de que expandedIds está inicializado
-		const expandedIds = get().ui.expandedIds || [];
-		return expandedIds.includes(id);
+		const state = get();
+		return (state.ui.expandedIds || []).includes(id);
 	},
 });

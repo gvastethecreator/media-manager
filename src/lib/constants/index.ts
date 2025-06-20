@@ -32,6 +32,11 @@ export const DEFAULT_VIEW_CONFIG = {
 	pageSize: 50,
 } as const;
 
+// 📄 Configuración de paginación
+export const DEFAULT_PAGE_SIZE = 50;
+export const MAX_PAGE_SIZE = 200;
+export const MIN_PAGE_SIZE = 10;
+
 // 🎨 Colores por defecto
 export const DEFAULT_COLORS = {
 	primary: '#3b82f6',

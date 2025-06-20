@@ -262,3 +262,50 @@ export interface ImageExtended extends ImageBase {
 	stats?: any;
 	folder?: any;
 }
+
+/**
+ * 🎯 Criterios de ordenamiento para Image
+ */
+export type ImageSortCriteria =
+	| 'name_asc'
+	| 'name_desc'
+	| 'date_asc'
+	| 'date_desc'
+	| 'size_asc'
+	| 'size_desc'
+	| 'width_asc'
+	| 'width_desc'
+	| 'height_asc'
+	| 'height_desc'
+	| 'favorite_first'
+	| 'favorite_last';
+
+/**
+ * 🖼️ Modos de visualización para Image
+ */
+export type ImageViewMode = 'grid' | 'list' | 'masonry' | 'timeline' | 'map' | 'slideshow';
+
+/**
+ * 🎛️ Configuración de vista para Image
+ */
+export interface ImageViewConfig {
+	viewMode: ImageViewMode;
+	sortBy: ImageSortCriteria;
+	sortDirection: 'asc' | 'desc';
+	gridSize: 'small' | 'medium' | 'large';
+	showMetadata: boolean;
+	showThumbnails: boolean;
+	groupBy: 'folder' | 'date' | 'tag' | 'size' | null;
+	enableAnimations: boolean;
+	autoPlay: boolean; // Para slideshow
+	showFavorites: boolean;
+}
+
+/**
+ * 🔍 Filtro avanzado para Image
+ */
+export interface ImageFilter {
+	field: keyof ImageBase | 'metadata' | 'tags' | 'folder';
+	operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'notIn';
+	value: any;
+}

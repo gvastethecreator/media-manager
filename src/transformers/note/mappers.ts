@@ -3,9 +3,9 @@
  * @module transformers/note/mappers
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { NoteBase, NoteCreateInput, NoteFilters, NoteSearchOptions, NoteUpdateInput } from '@/types/entities/note';
+import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('NoteMappers');
 
@@ -48,9 +48,12 @@ export function mapCreateNoteDataToPrisma(data: NoteCreateInput): Prisma.NoteCre
 
 /**
  * 🔄 Mapea datos de actualización de nota a formato compatible con Prisma.
- * Las relaciones (IDs) se deben gestionar en la capa de servicio.
+ * Retorna un objeto con data e include para ser usado en update
  */
-export function mapUpdateNoteDataToPrisma(data: NoteUpdateInput): Prisma.NoteUpdateInput {
+export function mapUpdateNoteDataToPrisma(id: string, data: NoteUpdateInput): {
+	data: Prisma.NoteUpdateInput;
+	include: any;
+} {
 	try {
 		const {
 			images,
@@ -68,7 +71,29 @@ export function mapUpdateNoteDataToPrisma(data: NoteUpdateInput): Prisma.NoteUpd
 			groups,
 			...rest
 		} = data;
-		return rest;
+
+		return {
+			data: rest,
+			include: {
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						albums: true,
+						collections: true,
+						tags: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						wildcards: true,
+						properties: true,
+						groups: true,
+					},
+				},
+			},
+		};
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de nota', { error, data });
 		throw new Error('Error al mapear datos de actualización de nota.');
@@ -98,14 +123,14 @@ export function mapNoteSearchOptionsToPrisma(options: NoteSearchOptions): Prisma
 	};
 }
 
-function mapNoteFiltersToPrisma(filters: NoteFilters): Prisma.NoteWhereInput {
+/**
+ * 🔄 Mapea filtros de Note a condiciones where de Prisma.
+ */
+export function mapNoteFiltersToPrisma(filters: NoteFilters): Prisma.NoteWhereInput {
 	const where: Prisma.NoteWhereInput = {};
 
 	if (filters.searchQuery) {
-		where.OR = [
-			{ title: { contains: filters.searchQuery } },
-			{ content: { contains: filters.searchQuery } },
-		];
+		where.OR = [{ title: { contains: filters.searchQuery } }, { content: { contains: filters.searchQuery } }];
 	}
 
 	if (filters.categories?.length) {
@@ -129,4 +154,20 @@ function mapNoteFiltersToPrisma(filters: NoteFilters): Prisma.NoteWhereInput {
 	// y debería ser manejado por la lógica de servicio si es necesario.
 
 	return where;
+}
+
+/**
+ * 🔄 Convierte datos de entrada a formato de creación
+ * Alias para compatibilidad con exportaciones esperadas
+ */
+export function toCreateNoteData(data: NoteCreateInput): Prisma.NoteCreateInput {
+	return mapCreateNoteDataToPrisma(data);
+}
+
+/**
+ * 🔄 Convierte datos de entrada a formato de actualización
+ * Alias para compatibilidad con exportaciones esperadas
+ */
+export function toUpdateNoteData(id: string, data: NoteUpdateInput) {
+	return mapUpdateNoteDataToPrisma(id, data);
 }

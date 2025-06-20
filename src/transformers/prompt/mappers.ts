@@ -5,11 +5,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	CreatePromptData,
-	PromptBase,
-	PromptFilters,
-	PromptWithRelations,
-	UpdatePromptData,
+    CreatePromptData,
+    PromptBase,
+    PromptComplete,
+    PromptFilters,
+    PromptWithRelations,
+    UpdatePromptData,
 } from '@/types/entities/prompt';
 import { PromptSortCriteria } from '@/types/entities/prompt';
 import { serializeParameters, serializeTags } from './serializers';
@@ -113,19 +114,19 @@ export interface PrismaPromptOrderByWithRelationInput {
  */
 export function mapCreatePromptDataToPrisma(data: CreatePromptData): PrismaPromptCreateInput {
 	try {
-		// Serializar arrays y objetos a JSON si es necesario
+		// Serializar parámetros y tags
 		const parameters = typeof data.parameters === 'string' ? data.parameters : serializeParameters(data.parameters);
-		const tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags);
+		const tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags?.map(t => t.id) || []);
 
-		// Crear objeto base
+		// Preparar datos base
 		const promptData: PrismaPromptCreateInput = {
 			name: data.name,
 			emoji: data.emoji || '💬',
-			color: data.color || '#3b82f6',
+			color: data.color || '#3B82F6',
 			description: data.description || null,
-			content: data.content || '',
-			purpose: data.purpose || 'general',
-			category: data.category || 'general',
+			content: data.content,
+			purpose: data.purpose,
+			category: data.category,
 			parameters,
 			tags,
 			featuredImage: data.featuredImage || null,
@@ -133,27 +134,27 @@ export function mapCreatePromptDataToPrisma(data: CreatePromptData): PrismaPromp
 		};
 
 		// Agregar relaciones si existen
-		if (data.groupIds && data.groupIds.length > 0) {
+		if (data.groups && data.groups.length > 0) {
 			promptData.groups = {
-				connect: data.groupIds.map((id) => ({ id })),
+				connect: data.groups.map((group) => ({ id: group.id })),
 			};
 		}
 
-		if (data.propertyIds && data.propertyIds.length > 0) {
+		if (data.properties && data.properties.length > 0) {
 			promptData.properties = {
-				connect: data.propertyIds.map((id) => ({ id })),
+				connect: data.properties.map((property) => ({ id: property.id })),
 			};
 		}
 
-		if (data.wildcardIds && data.wildcardIds.length > 0) {
+		if (data.wildcards && data.wildcards.length > 0) {
 			promptData.wildcards = {
-				connect: data.wildcardIds.map((id) => ({ id })),
+				connect: data.wildcards.map((wildcard) => ({ id: wildcard.id })),
 			};
 		}
 
-		if (data.tagIds && data.tagIds.length > 0) {
+		if (data.tags && data.tags.length > 0) {
 			promptData.tagEntities = {
-				connect: data.tagIds.map((id) => ({ id })),
+				connect: data.tags.map((tag) => ({ id: tag.id })),
 			};
 		}
 
@@ -197,28 +198,28 @@ export function mapUpdatePromptDataToPrisma(id: string, data: UpdatePromptData):
 			updateData.tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags);
 		}
 
-		// Actualizar relaciones si están definidas
-		if (data.groupIds !== undefined) {
+		// Actualizar relaciones si están definidas - usar connect/disconnect según el tipo UpdateInput
+		if (data.connect?.groups !== undefined) {
 			updateData.groups = {
-				set: data.groupIds.map((id) => ({ id })),
+				set: data.connect.groups.map((group) => ({ id: group.id })),
 			};
 		}
 
-		if (data.propertyIds !== undefined) {
+		if (data.connect?.properties !== undefined) {
 			updateData.properties = {
-				set: data.propertyIds.map((id) => ({ id })),
+				set: data.connect.properties.map((property) => ({ id: property.id })),
 			};
 		}
 
-		if (data.wildcardIds !== undefined) {
+		if (data.connect?.wildcards !== undefined) {
 			updateData.wildcards = {
-				set: data.wildcardIds.map((id) => ({ id })),
+				set: data.connect.wildcards.map((wildcard) => ({ id: wildcard.id })),
 			};
 		}
 
-		if (data.tagIds !== undefined) {
+		if (data.connect?.tags !== undefined) {
 			updateData.tagEntities = {
-				set: data.tagIds.map((id) => ({ id })),
+				set: data.connect.tags.map((tag) => ({ id: tag.id })),
 			};
 		}
 
@@ -267,9 +268,9 @@ export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): PrismaPro
 			where.isFavorite = true;
 		}
 
-		// Filtrar por contenido específico
-		if (filters.contentContains) {
-			where.content = { contains: filters.contentContains, mode: 'insensitive' };
+		// Filtrar por contenido específico - usar searchQuery como alternativa
+		if (filters.searchQuery && !where.OR) {
+			where.content = { contains: filters.searchQuery, mode: 'insensitive' };
 		}
 
 		return where;
@@ -309,8 +310,8 @@ export function mapPromptSortCriteriaToPrisma(
  * @returns Prompt simplificado para relaciones
  */
 export function mapPromptToRelated(
-	prompt: PromptBase | PromptWithRelations
-): Pick<PromptBase, 'id' | 'name' | 'emoji' | 'color'> {
+	prompt: PromptComplete | PromptWithRelations
+): Pick<PromptComplete, 'id' | 'name' | 'emoji' | 'color'> {
 	return {
 		id: prompt.id,
 		name: prompt.name,
@@ -325,7 +326,202 @@ export function mapPromptToRelated(
  * @returns Array de prompts simplificados
  */
 export function mapPromptsToRelated(
-	prompts: Array<PromptBase | PromptWithRelations>
-): Array<Pick<PromptBase, 'id' | 'name' | 'emoji' | 'color'>> {
+	prompts: Array<PromptComplete | PromptWithRelations>
+): Array<Pick<PromptComplete, 'id' | 'name' | 'emoji' | 'color'>> {
 	return prompts.map(mapPromptToRelated);
+}
+
+/**
+ * 🔍 Filtra un array de prompts según los criterios especificados
+ * @param prompts Array de prompts a filtrar
+ * @param filters Filtros a aplicar
+ * @returns Array de prompts filtrados
+ */
+export function filterPrompts(prompts: PromptBase[], filters: PromptFilters = {}): PromptBase[] {
+	let filtered = [...prompts];
+
+	// Filtrar por búsqueda de texto
+	if (filters.searchQuery) {
+		const query = filters.searchQuery.toLowerCase();
+		filtered = filtered.filter(
+			(prompt) =>
+				prompt.name.toLowerCase().includes(query) ||
+				prompt.description?.toLowerCase().includes(query) ||
+				prompt.content.toLowerCase().includes(query)
+		);
+	}
+
+	// Filtrar por categorías
+	if (filters.categories && filters.categories.length > 0) {
+		filtered = filtered.filter((prompt) => filters.categories!.includes(prompt.category));
+	}
+
+	// Filtrar por propósitos
+	if (filters.purposes && filters.purposes.length > 0) {
+		filtered = filtered.filter((prompt) => filters.purposes!.includes(prompt.purpose));
+	}
+
+	// Filtrar por favoritos
+	if (filters.onlyFavorites) {
+		filtered = filtered.filter((prompt) => prompt.isFavorite);
+	}
+
+	// Filtrar por contenido específico
+	if (filters.contentContains) {
+		const content = filters.contentContains.toLowerCase();
+		filtered = filtered.filter((prompt) => prompt.content.toLowerCase().includes(content));
+	}
+
+	return filtered;
+}
+
+/**
+ * 📄 Pagina un array de prompts
+ * @param prompts Array de prompts a paginar
+ * @param page Número de página (empezando en 1)
+ * @param limit Número de elementos por página
+ * @returns Objeto con prompts paginados y metadatos
+ */
+export function paginatePrompts(
+	prompts: PromptBase[],
+	page = 1,
+	limit = 20
+): {
+	data: PromptBase[];
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+		hasNext: boolean;
+		hasPrev: boolean;
+	};
+} {
+	const total = prompts.length;
+	const totalPages = Math.ceil(total / limit);
+	const startIndex = (page - 1) * limit;
+	const endIndex = startIndex + limit;
+	const data = prompts.slice(startIndex, endIndex);
+
+	return {
+		data,
+		pagination: {
+			page,
+			limit,
+			total,
+			totalPages,
+			hasNext: page < totalPages,
+			hasPrev: page > 1,
+		},
+	};
+}
+
+/**
+ * 🔄 Ordena un array de prompts según el criterio especificado
+ * @param prompts Array de prompts a ordenar
+ * @param sortBy Criterio de ordenación
+ * @returns Array de prompts ordenados
+ */
+export function sortPrompts(
+	prompts: PromptBase[],
+	sortBy: PromptSortCriteria = PromptSortCriteria.UPDATED_DESC
+): PromptBase[] {
+	const [field, direction] = sortBy.split(':');
+	const isAsc = direction === 'asc';
+
+	return [...prompts].sort((a, b) => {
+		let valueA: any;
+		let valueB: any;
+
+		switch (field) {
+			case 'name':
+				valueA = a.name.toLowerCase();
+				valueB = b.name.toLowerCase();
+				break;
+			case 'created':
+				valueA = new Date(a.createdAt).getTime();
+				valueB = new Date(b.createdAt).getTime();
+				break;
+			case 'updated':
+			default:
+				valueA = new Date(a.updatedAt).getTime();
+				valueB = new Date(b.updatedAt).getTime();
+				break;
+		}
+
+		if (valueA < valueB) return isAsc ? -1 : 1;
+		if (valueA > valueB) return isAsc ? 1 : -1;
+		return 0;
+	});
+}
+
+/**
+ * 🔄 Procesa un array de prompts aplicando filtros, ordenación y paginación
+ * @param prompts Array de prompts a procesar
+ * @param options Opciones de procesamiento
+ * @returns Prompts procesados con metadatos
+ */
+export function processPrompts(
+	prompts: PromptBase[],
+	options: {
+		filters?: PromptFilters;
+		sortBy?: PromptSortCriteria;
+		page?: number;
+		limit?: number;
+	} = {}
+): {
+	data: PromptBase[];
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+		hasNext: boolean;
+		hasPrev: boolean;
+	};
+} {
+	let processed = [...prompts];
+
+	// Aplicar filtros
+	if (options.filters) {
+		processed = filterPrompts(processed, options.filters);
+	}
+
+	// Aplicar ordenación
+	if (options.sortBy) {
+		processed = sortPrompts(processed, options.sortBy);
+	}
+
+	// Aplicar paginación
+	return paginatePrompts(processed, options.page, options.limit);
+}
+
+/**
+ * 📊 Convierte un prompt base a un prompt con estadísticas
+ * @param prompt Prompt base
+ * @param stats Estadísticas opcionales
+ * @returns Prompt con estadísticas
+ */
+export function toPromptWithStats(prompt: PromptBase, stats?: Partial<PromptCounts['_count']>): PromptWithStats {
+	const defaultStats: PromptCounts['_count'] = {
+		images: 0,
+		videos: 0,
+		albums: 0,
+		collections: 0,
+		tags: 0,
+		characters: 0,
+		places: 0,
+		worldItems: 0,
+		concepts: 0,
+		notes: 0,
+		wildcards: 0,
+		properties: 0,
+		groups: 0,
+		...stats,
+	};
+
+	return {
+		...prompt,
+		_count: defaultStats,
+	};
 }
