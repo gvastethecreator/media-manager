@@ -557,6 +557,11 @@ graph TD
 - Funciones de mapeo ahora devuelven `Record<string, any>` para mayor flexibilidad.
 - Documentación actualizada y formateo con **Biome**.
 
+
+## 🚧 Avance Actual: Document y File3D Actions
+- Se corrigieron variables no utilizadas en `document.actions.ts` y `file-3d.actions.ts`.
+- Se prefijaron con `_` para cumplir con las reglas de lint.
+
 ## 🚧 Avance Actual: Collection Mappers
 
 - Eliminados los imports de **Prisma** en `collection/mappers.ts`.
