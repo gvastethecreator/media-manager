@@ -3,8 +3,8 @@
  * @module store/entities/metadata/slices/filters
  */
 
-import { StateCreator } from 'zustand';
 import { MetadataExtended } from '@/types/entities/metadata/extended';
+import { StateCreator } from 'zustand';
 import { MetadataStore } from '..';
 
 // Tipos para filtros
@@ -88,14 +88,14 @@ export const createFiltersSlice: StateCreator<MetadataStore, [], [], FiltersStat
 		const { metadatas, filterOptions } = get();
 
 		return metadatas.filter((metadata) => {
-			// Formato
+			// Formato - acceder a la propiedad format de la base
 			if (filterOptions.format && filterOptions.format.length > 0) {
 				if (!filterOptions.format.includes(metadata.format)) {
 					return false;
 				}
 			}
 
-			// Dimensiones
+			// Dimensiones - acceder a las propiedades width y height de la base
 			if (filterOptions.minWidth !== undefined && metadata.width < filterOptions.minWidth) {
 				return false;
 			}
@@ -109,7 +109,7 @@ export const createFiltersSlice: StateCreator<MetadataStore, [], [], FiltersStat
 				return false;
 			}
 
-			// Tamaño
+			// Tamaño - acceder a la propiedad size de la base
 			if (filterOptions.minSize !== undefined && metadata.size < filterOptions.minSize) {
 				return false;
 			}
@@ -117,14 +117,14 @@ export const createFiltersSlice: StateCreator<MetadataStore, [], [], FiltersStat
 				return false;
 			}
 
-			// Color Space
+			// Color Space - acceder a la propiedad colorSpace de la base
 			if (filterOptions.colorSpace && filterOptions.colorSpace.length > 0) {
 				if (!metadata.colorSpace || !filterOptions.colorSpace.includes(metadata.colorSpace)) {
 					return false;
 				}
 			}
 
-			// Alpha
+			// Alpha - acceder a la propiedad hasAlpha de la base
 			if (filterOptions.hasAlpha !== undefined) {
 				if (metadata.hasAlpha !== filterOptions.hasAlpha) {
 					return false;

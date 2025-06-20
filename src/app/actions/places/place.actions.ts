@@ -185,6 +185,36 @@ export async function deletePlace(id: string): Promise<void> {
 }
 
 /**
+ * Obtiene las imágenes de un lugar específico.
+ */
+export async function getPlaceImages(placeId: string): Promise<any[]> {
+	try {
+		logger.info(`🖼️ Obteniendo imágenes del lugar: ${placeId}`);
+		const prisma = await getPrismaClient();
+		const place = await prisma.place.findUnique({
+			where: { id: placeId },
+			include: {
+				images: {
+					select: {
+						id: true,
+						path: true,
+						thumbnail: true,
+						width: true,
+						height: true,
+						createdAt: true,
+					},
+					orderBy: { createdAt: 'desc' },
+				},
+			},
+		});
+		return place?.images || [];
+	} catch (error) {
+		logger.error(`❌ Error obteniendo imágenes del lugar ${placeId}:`, error);
+		throw handlePrismaError(error);
+	}
+}
+
+/**
  * Añade una imagen a un lugar.
  */
 export async function addImageToPlace(placeId: string, imageId: string): Promise<void> {

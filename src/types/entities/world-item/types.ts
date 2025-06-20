@@ -6,38 +6,19 @@
  * @updated 2025-06-20
  */
 
-import type { ImageComplete as Image } from '../image/types';
-import type { WorldItemRelationshipType, WorldItemSortCriteria, WorldItemViewMode } from './enums';
+import type { WorldItem as PrismaWorldItem } from '@prisma/client';
+import type { Image } from '../image/types';
+import type {
+	WorldItemRelationshipType,
+	WorldItemSortCriteria,
+	WorldItemViewMode
+} from './enums';
+import { WORLD_ITEM_SORT_PROPERTY_MAP } from './enums';
 
 /**
- * 📝 Tipo base canónico para WorldItem - CORREGIDO para coincidir exactamente con Prisma
+ * 📝 Tipo base para WorldItem - hereda directamente del tipo Prisma
  */
-export interface WorldItemBase {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	shortcut: string | null;
-	category: string | null;
-	sortBy: string;
-	filters: string;
-	// Atributos del objeto
-	type: string;
-	rarity: string;
-	attributes: string; // JSON serializado
-	effects: string; // JSON serializado
-	size: string;
-	// Características detalladas
-	requirements: string;
-	origin: string;
-	stats: string;
-	// Propiedades de visualización
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-}
+export type WorldItemBase = PrismaWorldItem;
 
 /**
  * 🔧 Interfaces para estructuras de datos serializadas
@@ -270,17 +251,18 @@ export interface WorldItemUpdateInput {
 
 /* Exportación de tipos adicionales para retrocompatibilidad */
 export type {
-    WorldItemCreateInput as CreateWorldItemData,
-    WorldItemUpdateInput as UpdateWorldItemData,
-    WorldItemDeserialized as WorldItem,
-    WorldItemAttribute as WorldItemAttributes,
-    WorldItemEffect as WorldItemEffects,
-    WorldItemFilter as WorldItemFilterType,
-    WorldItemProperty as WorldItemProperties,
-    WorldItemRequirement as WorldItemRequirements,
-    WorldItemStat as WorldItemStats
+	WorldItemCreateInput as CreateWorldItemData,
+	WorldItemUpdateInput as UpdateWorldItemData,
+	WorldItemDeserialized as WorldItem,
+	WorldItemAttribute as WorldItemAttributes,
+	WorldItemEffect as WorldItemEffects,
+	WorldItemFilter as WorldItemFilterType,
+	WorldItemProperty as WorldItemProperties,
+	WorldItemRequirement as WorldItemRequirements,
+	WorldItemStat as WorldItemStats
 };
 
-// Re-exportaciones desde enums
-    export { WORLD_ITEM_SORT_PROPERTY_MAP, WorldItemSortCriteria } from './enums';
+// Exportar el mapa de propiedades y los criterios de ordenación
+	export { WORLD_ITEM_SORT_PROPERTY_MAP };
+	export type { WorldItemSortCriteria };
 

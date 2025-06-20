@@ -23,8 +23,13 @@ export {
 } from './schema';
 // Exportar los tipos principales
 export type {
+    PaginatedProfiles,
     ProfileBase,
     ProfileCreateInput,
+    ProfileExtended,
+    ProfileFilters,
+    ProfilePaginationOptions,
+    ProfilePreferences,
     ProfileUpdateInput
 } from './types';
 // Exportar enums como valores

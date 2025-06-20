@@ -1,8 +1,8 @@
 'use server';
 
 /**
- * @file Acciones de procesamiento para tareas programadas - DESHABILITADO
- * @module app/actions/tasks/process.actions
+ * @file Acciones de control para tareas programadas - DESHABILITADO
+ * @module app/actions/tasks/control.actions
  *
  * ⚠️ ARCHIVO DESHABILITADO - El modelo 'scheduledTask' no existe en el esquema de Prisma
  * TODO: Crear el modelo ScheduledTask en prisma/schema.prisma o eliminar esta funcionalidad
@@ -13,11 +13,11 @@ export async function startTask() {
 	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
 
-export async function stopTask() {
+export async function pauseTask() {
 	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
 
-export async function pauseTask() {
+export async function cancelTask() {
 	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
 
@@ -25,18 +25,10 @@ export async function resumeTask() {
 	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
 
-export async function retryTask() {
+export async function stopTask() {
 	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
 
-export async function executeTask() {
-	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
-}
-
-export async function processNextTask() {
-	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
-}
-
-export async function processTaskById() {
+export async function restartTask() {
 	throw new Error('Task functionality disabled - ScheduledTask model not implemented');
 }
