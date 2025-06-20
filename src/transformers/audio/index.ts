@@ -1,4 +1,9 @@
-// Barrel de transformers para Audio
-export * from './mappers';
-export * from './serializers';
-export * from './transformer';
+/**
+ * 🎵 Transformador de Audio - Exportaciones principales
+ * @module transformers/audio
+ */
+
+export { mapAudioFromUI, mapAudioToUI } from './mappers';
+export { deserializeAudio, serializeAudio } from './serializers';
+export { fromPrismaAudio, fromPrismaAudios } from './transformer';
+

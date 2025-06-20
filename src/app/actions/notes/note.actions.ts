@@ -1,14 +1,14 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { fromPrismaNote, toCreateNoteData, toUpdateNoteData } from '@/transformers/note';
-import type { CreateNoteData, NoteBase, NoteComplete, NoteWithStats } from '@/types/entities/note';
+import type { CreateNoteData, NoteBase, NoteComplete } from '@/types/entities/note';
 import type { FileItem } from '@/types/files';
 import { createNoteSchema, updateNoteSchema } from '@/utils/note/validators';
+import { revalidatePath } from 'next/cache';
 
 // Utilidades y logging
 const noteLogger = serverLogger.withContext('NoteActions');
@@ -41,11 +41,24 @@ export interface NoteWithImages extends NoteBase {
 	images: FileItem[];
 }
 
+// Interfaz para notas con estadísticas
+export interface NoteWithStats extends NoteComplete {
+	_count: {
+		images: number;
+		concepts: number;
+		prompts: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+	};
+	lastUpdated: Date;
+}
+
 // Funciones exportadas
 export async function getNotes(): Promise<NoteWithStats[]> {
 	try {
 		noteLogger.info('📝 Obteniendo notas con estadísticas');
-
+		const prisma = await getPrismaClient();
 		const notes = await prisma.note.findMany({
 			include: {
 				_count: {
@@ -87,6 +100,7 @@ export async function getNotes(): Promise<NoteWithStats[]> {
 export async function getNote(id: string): Promise<NoteComplete> {
 	try {
 		noteLogger.info('🔍 Obteniendo nota:', id);
+		const prisma = await getPrismaClient();
 		const note = await prisma.note.findUnique({
 			where: { id },
 			include: {
@@ -141,6 +155,7 @@ export async function createNote(data: CreateNoteData): Promise<NoteComplete> {
 		const createData = toCreateNoteData(data);
 
 		// Crear la nota
+		const prisma = await getPrismaClient();
 		const note = await prisma.note.create({
 			data: createData,
 		});
@@ -178,6 +193,7 @@ export async function updateNote(id: string, data: Partial<CreateNoteData>): Pro
 		// Preparar datos con el nuevo transformador
 		const updateData = toUpdateNoteData({ ...data, id });
 
+		const prisma = await getPrismaClient();
 		const note = await prisma.note.update({
 			where: { id },
 			data: updateData,
@@ -206,6 +222,7 @@ export async function deleteNote(id: string): Promise<void> {
 	try {
 		noteLogger.info('🗑️ Eliminando nota:', id);
 
+		const prisma = await getPrismaClient();
 		// Verificar si la nota existe
 		const note = await prisma.note.findUnique({
 			where: { id },
@@ -289,6 +306,7 @@ export async function getNoteImages(noteId: string): Promise<FileItem[]> {
 	}
 
 	try {
+		const prisma = await getPrismaClient();
 		const note = await prisma.note.findUnique({
 			where: { id: noteId },
 			include: {
@@ -297,8 +315,10 @@ export async function getNoteImages(noteId: string): Promise<FileItem[]> {
 						id: true,
 						name: true,
 						description: true,
-						url: true,
-						thumbnailUrl: true,
+						path: true,
+						size: true,
+						width: true,
+						height: true,
 						createdAt: true,
 						updatedAt: true,
 					},
@@ -314,9 +334,16 @@ export async function getNoteImages(noteId: string): Promise<FileItem[]> {
 		return note.images.map((image) => ({
 			id: image.id,
 			name: image.name || '',
-			description: image.description || '',
-			url: image.url || '',
-			thumbnailUrl: image.thumbnailUrl || '',
+			path: image.path,
+			type: 'image' as const,
+			size: image.size,
+			width: image.width,
+			height: image.height,
+			src: `/api/images/${image.id}/content`,
+			tags: [], // Las tags se cargarían por separado si es necesario
+			collections: [], // Las collections se cargarían por separado si es necesario
+			isPublic: false, // Por defecto false
+			isFavorite: false, // Por defecto false, se cargaría por separado si es necesario
 			createdAt: image.createdAt,
 			updatedAt: image.updatedAt,
 		}));
@@ -331,9 +358,10 @@ export async function getNoteImages(noteId: string): Promise<FileItem[]> {
 
 export async function addImageToNote(noteId: string, imageId: string): Promise<void> {
 	try {
-		noteLogger.info('�� Añadiendo imagen a nota:', { noteId, imageId });
+		noteLogger.info('📝 Añadiendo imagen a nota:', { noteId, imageId });
 
 		// Verificar si la nota existe
+		const prisma = await getPrismaClient();
 		const note = await prisma.note.findUnique({
 			where: { id: noteId },
 		});
@@ -381,6 +409,7 @@ export async function removeImageFromNote(noteId: string, imageId: string): Prom
 		noteLogger.info('🔄 Eliminando imagen de nota:', { noteId, imageId });
 
 		// Verificar si la nota existe
+		const prisma = await getPrismaClient();
 		const note = await prisma.note.findUnique({
 			where: { id: noteId },
 		});

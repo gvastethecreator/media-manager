@@ -1,8 +1,13 @@
 'use client';
 
-import { FilterIcon, FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Plus, Search, Star, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import type { z } from 'zod';
+
 import {
 	createProperty,
 	deleteProperty,
@@ -10,24 +15,24 @@ import {
 	togglePropertyFavorite,
 	updateProperty,
 } from '@/app/actions/properties/property.actions';
-import { PropertyPreview } from '@/components/settings/properties/property-preview';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import toastService from '@/services/toast.service';
 import { fromPrismaProperty } from '@/transformers/property/serializers';
 import type { PropertyWithRelations } from '@/types/entities/property';
-import type { PropertyComplete } from '@/types/entities/property/extended';
-import { CreatePropertySchema, PropertyFiltersSchema } from '@/types/entities/property/schema';
+import { CreatePropertySchema } from '@/types/entities/property/schema';
+import type { PropertyComplete } from '@/types/entities/property/types';
 import { CreatePropertyForm } from './create-property-form';
 
 type PropertyCategory = z.infer<typeof CreatePropertySchema>['category'];
 type PropertyFormData = z.infer<typeof CreatePropertySchema>;
-type PropertyFilters = z.infer<typeof PropertyFiltersSchema>;
+
+// Filtros simplificados sin sortBy y sortOrder
+interface PropertyFilters {
+	searchQuery?: string;
+	categories?: string[];
+	onlyFavorites?: boolean;
+}
 
 interface PropertyWithStats extends PropertyWithRelations {
 	totalAssociations: number;
@@ -44,22 +49,14 @@ export function PropertiesSettings() {
 	const [isEditMode, setIsEditMode] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	// Filtros y ordenamiento usando el esquema de Zod
+	// Filtros simplificados
 	const [filters, setFilters] = useState<PropertyFilters>({
 		searchQuery: '',
 		categories: [],
 		onlyFavorites: false,
-		sortBy: 'name',
-		sortOrder: 'asc',
-		page: 1,
-		limit: 50,
 	});
 
-	useEffect(() => {
-		loadProperties();
-	}, []);
-
-	const loadProperties = async () => {
+	const loadProperties = useCallback(async () => {
 		try {
 			setIsLoading(true);
 			const data = await getProperties();
@@ -80,7 +77,11 @@ export function PropertiesSettings() {
 		} finally {
 			setIsLoading(false);
 		}
-	};
+	}, []);
+
+	useEffect(() => {
+		loadProperties();
+	}, [loadProperties]);
 
 	// Filtrar propiedades basadas en los criterios validados
 	const filteredProperties = properties.filter((property) => {
@@ -103,26 +104,14 @@ export function PropertiesSettings() {
 		return matches;
 	});
 
-	// Ordenar propiedades
-	const sortedProperties = [...filteredProperties].sort((a, b) => {
-		const order = filters.sortOrder === 'asc' ? 1 : -1;
-		switch (filters.sortBy) {
-			case 'name':
-				return order * a.name.localeCompare(b.name);
-			case 'category':
-				return order * (a.category || '').localeCompare(b.category || '');
-			case 'createdAt':
-				return order * (b.createdAt.getTime() - a.createdAt.getTime());
-			default:
-				return 0;
-		}
-	});
+	// Ordenar propiedades por nombre
+	const sortedProperties = [...filteredProperties].sort((a, b) => a.name.localeCompare(b.name));
 
 	// Estadísticas mejoradas
 	const stats = {
 		totalProperties: properties.length,
-		totalAssociations: properties.reduce((acc, property) => acc + property.totalAssociations, 0),
-		emptyProperties: properties.filter((property) => property.totalAssociations === 0).length,
+		totalAssociations: properties.reduce((acc, property) => acc + (property as PropertyWithStats).totalAssociations, 0),
+		emptyProperties: properties.filter((property) => (property as PropertyWithStats).totalAssociations === 0).length,
 		favoriteProperties: properties.filter((property) => property.isFavorite).length,
 		byCategory: properties.reduce(
 			(acc, property) => {
@@ -141,7 +130,7 @@ export function PropertiesSettings() {
 			if (newProperty) {
 				const canonical = fromPrismaProperty(newProperty);
 				setProperties(
-					(prev) => [...prev, { ...canonical, totalAssociations: 0 } as PropertyWithStats] as PropertyComplete
+					(prev) => [...prev, { ...canonical, totalAssociations: 0 } as PropertyWithStats] as PropertyComplete[]
 				);
 			}
 			setIsCreateDialogOpen(false);
@@ -159,7 +148,7 @@ export function PropertiesSettings() {
 			const updatedProperty = await updateProperty(id, data);
 			if (updatedProperty) {
 				const canonical = fromPrismaProperty(updatedProperty);
-				setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...canonical } : p)) as PropertyComplete);
+				setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...canonical } : p)) as PropertyComplete[]);
 			}
 			setSelectedProperty(null);
 			setIsEditMode(false);
@@ -176,7 +165,7 @@ export function PropertiesSettings() {
 		try {
 			setIsDeleting(true);
 			await deleteProperty(id);
-			setProperties((prev) => prev.filter((p) => p.id !== id) as PropertyComplete);
+			setProperties((prev) => prev.filter((p) => p.id !== id) as PropertyComplete[]);
 			setSelectedProperty(null);
 			toastService.success('Propiedad eliminada correctamente');
 		} catch (err) {
@@ -193,7 +182,7 @@ export function PropertiesSettings() {
 		try {
 			await togglePropertyFavorite(property.id);
 			setProperties(
-				(prev) => prev.map((p) => (p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p)) as PropertyComplete
+				(prev) => prev.map((p) => (p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p)) as PropertyComplete[]
 			);
 
 			if (selectedProperty?.id === property.id) {
@@ -215,23 +204,6 @@ export function PropertiesSettings() {
 		handleDeleteProperty(propertyId);
 	};
 
-	// Constantes
-	const emptyCount = {
-		images: 0,
-		videos: 0,
-		albums: 0,
-		collections: 0,
-		tags: 0,
-		characters: 0,
-		places: 0,
-		worldItems: 0,
-		concepts: 0,
-		prompts: 0,
-		notes: 0,
-		wildcards: 0,
-		groups: 0,
-	};
-
 	return (
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de propiedades */}
@@ -251,13 +223,13 @@ export function PropertiesSettings() {
 								onClick={() => setIsCreateDialogOpen(true)}
 								title="Crear nueva propiedad"
 							>
-								<PlusIcon className="h-4 w-4" />
+								<Plus className="h-4 w-4" />
 							</Button>
 						</div>
 
 						<div className="flex gap-2">
 							<div className="relative w-full">
-								<SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+								<Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 								<Input
 									placeholder="Buscar propiedades..."
 									value={filters.searchQuery}
@@ -285,7 +257,7 @@ export function PropertiesSettings() {
 								onPressedChange={(pressed) => setFilters({ ...filters, onlyFavorites: pressed })}
 								size="sm"
 							>
-								<StarIcon className="h-4 w-4" />
+								<Star className="h-4 w-4" />
 							</Toggle>
 						</div>
 					</CardHeader>
@@ -298,7 +270,7 @@ export function PropertiesSettings() {
 									</div>
 								) : sortedProperties.length === 0 ? (
 									<div className="flex flex-col items-center justify-center py-8">
-										<FilterIcon className="h-8 w-8 opacity-20 mb-2" />
+										<Search className="h-8 w-8 opacity-20 mb-2" />
 										<p className="text-sm opacity-50">
 											{filters.searchQuery || filters.onlyFavorites || (filters.categories?.length ?? 0) > 0
 												? 'No se encontraron propiedades con los filtros aplicados'
@@ -325,14 +297,14 @@ export function PropertiesSettings() {
 													<span className="text-xs opacity-50">{property.totalAssociations} elementos</span>
 												</div>
 											</div>
-											{property.isFavorite && <StarIcon className="h-3 w-3 absolute right-2 top-2 text-yellow-500" />}
+											{property.isFavorite && <Star className="h-3 w-3 absolute right-2 top-2 text-yellow-500" />}
 											<Button
 												variant="ghost"
 												size="icon"
 												className="absolute right-1 opacity-0 group-hover:opacity-100"
 												onClick={() => handlePropertyDelete(property.id)}
 											>
-												<Trash className="h-4 w-4" />
+												<Trash2 className="h-4 w-4" />
 											</Button>
 										</Button>
 									))
@@ -368,7 +340,7 @@ export function PropertiesSettings() {
 						)
 					) : (
 						<div className="flex flex-col items-center justify-center h-full">
-							<FolderIcon className="h-12 w-12 opacity-20" />
+							<Search className="h-12 w-12 opacity-20" />
 							<p className="text-sm opacity-50 mt-2">Selecciona una propiedad para ver sus detalles</p>
 						</div>
 					)}

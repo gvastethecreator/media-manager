@@ -10,8 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toastService } from '@/services/toast.service';
-import { ClimateType, PlaceType } from '@/types/entities/place/enums';
-import type { PlaceComplete } from '@/types/entities/place/extended';
+import type { PlaceComplete } from '@/types/entities/place/types';
 import { Filter, Info, Loader2, MapPin, PlusCircle, Save, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { CreatePlaceForm } from './create-place-form';
@@ -58,7 +57,6 @@ export function PlacesSettings() {
 	const stats = {
 		totalPlaces: places.length,
 		totalImages: places.reduce((acc, place) => acc + (place._count?.images || 0), 0),
-		totalSize: places.reduce((acc, place) => acc + (place.totalSize || 0), 0),
 		unusedPlaces: places.filter((place) => (place._count?.images || 0) === 0).length,
 		favoritePlaces: places.filter((place) => place.isFavorite).length,
 	};
@@ -503,31 +501,27 @@ export function PlacesSettings() {
 }
 
 // Función auxiliar para generar colores basados en tipo de lugar
-function _generateTypeColor(placeType: PlaceType): string {
+function _generateTypeColor(placeType: string): string {
 	switch (placeType) {
-		case "PlaceType".CITY:
+		case 'city':
 			return 'bg-blue-500';
-		case "PlaceType".TOWN:
+		case 'town':
 			return 'bg-indigo-500';
-		case "PlaceType".VILLAGE:
+		case 'village':
 			return 'bg-teal-500';
-		case "PlaceType".FOREST:
+		case 'forest':
 			return 'bg-green-500';
-		case "PlaceType".MOUNTAIN:
+		case 'mountain':
 			return 'bg-gray-500';
-		case "PlaceType".DESERT:
+		case 'desert':
 			return 'bg-yellow-500';
-		case "PlaceType".CASTLE:
+		case 'castle':
 			return 'bg-purple-500';
-		case "PlaceType".RUIN:
+		case 'ruin':
 			return 'bg-zinc-500';
-		case "PlaceType".DUNGEON:
-			return 'bg-red-500';
-		case "PlaceType".CAVE:
+		case 'cave':
 			return 'bg-amber-500';
-		case "PlaceType".FORTRESS:
-			return 'bg-slate-500';
-		case "PlaceType".OTHER:
+		case 'other':
 			return 'bg-gray-500';
 		default:
 			return 'bg-gray-500';
@@ -535,17 +529,17 @@ function _generateTypeColor(placeType: PlaceType): string {
 }
 
 // Función auxiliar para generar colores basados en tipo de clima
-function _generateClimateColor(climate: ClimateType): string {
+function _generateClimateColor(climate: string): string {
 	switch (climate) {
-		case "ClimateType".TROPICAL:
+		case 'tropical':
 			return 'bg-red-400';
-		case "ClimateType".ARID:
+		case 'arid':
 			return 'bg-yellow-400';
-		case "ClimateType".TEMPERATE:
+		case 'temperate':
 			return 'bg-green-400';
-		case "ClimateType".CONTINENTAL:
+		case 'continental':
 			return 'bg-orange-400';
-		case "ClimateType".POLAR:
+		case 'polar':
 			return 'bg-blue-200';
 		default:
 			return 'bg-gray-400';

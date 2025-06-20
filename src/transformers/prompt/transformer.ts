@@ -4,227 +4,80 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptBase, PromptComplete, PromptWithRelations } from '@/types/entities/prompt';
-import { PromptSchema } from '@/types/entities/prompt/schema';
+import type { PromptComplete } from '@/types/entities/prompt';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prompt } from '@prisma/client';
-import { deserializeParameters, deserializeTags, toExtendedPrompt } from './serializers';
 
 const logger = serverLogger.withContext('PromptTransformer');
 
 /**
- * Opciones para la transformación de prompts
+ * 🔄 Transforma un objeto Prompt de Prisma a nuestro tipo canónico PromptComplete.
+ *
+ * @param prismaPrompt - El objeto Prompt obtenido de Prisma.
+ * @returns Un objeto PromptComplete compatible con nuestra aplicación.
+ * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export interface TransformPromptOptions {
-	/** Habilita la validación de campos */
-	validateFields?: boolean;
-	/** Deserializa campos JSON */
-	deserializeFields?: boolean;
-	/** Incluye relaciones */
-	includeRelations?: boolean;
-	/** Incluye propiedades UI */
-	includeUI?: boolean;
-	/** Incluye estadísticas calculadas */
-	includeStats?: boolean;
-}
-
-/**
- * 🔄 Transforma un objeto a PromptComplete, validando y deserializando campos
- * @param prompt Objeto a transformar
- * @param options Opciones de transformación
- * @returns PromptComplete transformado
- * @throws TransformerError si hay errores en la validación o transformación
- */
-export function transformPrompt<T extends Partial<PromptBase> | Prompt | unknown>(
-	prompt: T,
-	options: TransformPromptOptions = {}
-): PromptComplete {
-	try {
-		if (!prompt) {
-			throw new Error('El objeto prompt es nulo o undefined');
-		}
-
-		// Opciones por defecto
-		const { validateFields = true, deserializeFields = true } = options;
-
-		// Validar el schema si está habilitado
-		let validatedPrompt = prompt as PromptBase;
-		if (validateFields) {
-			const result = PromptSchema.safeParse(prompt);
-			if (!result.success) {
-				throw new Error(`Validación fallida: ${result.error.message}`);
-			}
-			validatedPrompt = result.data;
-		}
-
-		// Si deserializeFields está habilitado, convertir campos JSON
-		if (deserializeFields) {
-			// Deserializar parameters y tags
-			return {
-				...validatedPrompt,
-				parameters: deserializeParameters(validatedPrompt.parameters),
-				tags: deserializeTags(validatedPrompt.tags || '[]'),
-			} as PromptComplete;
-		}
-
-		// Devolver sin deserializar
-		return validatedPrompt as unknown as PromptComplete;
-	} catch (error) {
-		logger.error(`Error transformando prompt: ${error}`);
-		if (error instanceof TransformerError) {
-			throw error;
-		}
-		throw new TransformerError(`Error transformando prompt: ${(error as Error).message}`);
+export function fromPrismaPrompt(prismaPrompt: any): PromptComplete {
+	if (!prismaPrompt) {
+		throw new TransformerError('El objeto de prompt de Prisma no puede ser nulo.');
 	}
-}
 
-/**
- * 🔄 Transforma un array de objetos a PromptComplete[]
- * @param prompts Array de objetos a transformar
- * @param options Opciones de transformación
- * @returns Array de PromptComplete transformados
- * @throws TransformerError si hay errores en la transformación de algún elemento
- */
-export function transformPrompts<T extends Array<Partial<PromptBase> | Prompt | unknown>>(
-	prompts: T,
-	options: TransformPromptOptions = {}
-): PromptComplete[] {
 	try {
-		if (!Array.isArray(prompts)) {
-			throw new Error('El parámetro no es un array');
-		}
+		const { _count, ...baseData } = prismaPrompt;
 
-		return prompts.map((prompt) => transformPrompt(prompt, options));
-	} catch (error) {
-		logger.error(`Error transformando array de prompts: ${error}`);
-		if (error instanceof TransformerError) {
-			throw error;
-		}
-		throw new TransformerError(`Error transformando array de prompts: ${(error as Error).message}`);
-	}
-}
-
-/**
- * 🔄 Transforma un Prompt a su versión extendida para UI
- * @param prompt Prompt a transformar
- * @returns PromptWithRelations con propiedades adicionales para UI
- * @throws TransformerError si hay errores en la transformación
- */
-export function transformPromptToExtended<T extends Partial<PromptComplete> | Prompt | unknown>(
-	prompt: T
-): PromptWithRelations {
-	try {
-		// Primero transformamos a PromptComplete
-		const promptComplete = transformPrompt(prompt, { deserializeFields: true });
-
-		// Utilizamos la función existente para extender el prompt
-		const extendedPrompt = toExtendedPrompt(promptComplete);
-
-		// Añadimos propiedades adicionales para UI
 		return {
-			...extendedPrompt,
-			isSelected: false,
-			isHighlighted: false,
-			importance: calculateImportance(promptComplete),
-		};
-	} catch (error) {
-		logger.error(`Error transformando prompt a extendido: ${error}`);
-		if (error instanceof TransformerError) {
-			throw error;
-		}
-		throw new TransformerError(`Error transformando prompt a extendido: ${(error as Error).message}`);
-	}
-}
-
-/**
- * 🔄 Transforma un Prompt a su versión con estadísticas
- * @param prompt Prompt a transformar
- * @returns PromptWithRelations con estadísticas calculadas
- * @throws TransformerError si hay errores en la transformación
- */
-export function transformPromptToWithStats<T extends Partial<PromptComplete> | Prompt | unknown>(
-	prompt: T
-): PromptWithRelations {
-	try {
-		// Primero transformamos a PromptComplete
-		const promptComplete = transformPrompt(prompt, { includeRelations: true });
-
-		// Calculamos estadísticas (solo usando propiedades disponibles en _count según Prisma)
-		return {
-			...promptComplete,
-			stats: {
-				imageCount: promptComplete._count?.images ?? 0,
-				videoCount: 0, // ❌ ELIMINADO - videos no existe en _count de Prompt
-				albumCount: 0, // ❌ ELIMINADO - albums no existe en _count de Prompt
-				tagCount: promptComplete._count?.tags ?? 0,
-				noteCount: promptComplete._count?.notes ?? 0,
-				conceptCount: promptComplete._count?.concepts ?? 0,
-				characterCount: 0, // ❌ ELIMINADO - characters no existe en _count de Prompt
-				placeCount: promptComplete._count?.places ?? 0,
-				worldItemCount: promptComplete._count?.worldItems ?? 0,
-				wildcardCount: promptComplete._count?.wildcards ?? 0,
-				totalContentItems: calculateTotalContent(promptComplete),
-				lastUpdated: promptComplete.updatedAt,
-				lastUsed: calculateLastUsed(promptComplete),
+			...baseData,
+			// Asegurar que las relaciones opcionales no sean undefined
+			images: baseData.images ?? [],
+			videos: baseData.videos ?? [],
+			albums: baseData.albums ?? [],
+			collections: baseData.collections ?? [],
+			tags: baseData.tags ?? [],
+			characters: baseData.characters ?? [],
+			places: baseData.places ?? [],
+			worldItems: baseData.worldItems ?? [],
+			concepts: baseData.concepts ?? [],
+			notes: baseData.notes ?? [],
+			wildcards: baseData.wildcards ?? [],
+			properties: baseData.properties ?? [],
+			groups: baseData.groups ?? [],
+			// Asignar el conteo de forma segura
+			_count: {
+				images: _count?.images ?? 0,
+				videos: _count?.videos ?? 0,
+				albums: _count?.albums ?? 0,
+				collections: _count?.collections ?? 0,
+				tags: _count?.tags ?? 0,
+				characters: _count?.characters ?? 0,
+				places: _count?.places ?? 0,
+				worldItems: _count?.worldItems ?? 0,
+				concepts: _count?.concepts ?? 0,
+				notes: _count?.notes ?? 0,
+				wildcards: _count?.wildcards ?? 0,
+				properties: _count?.properties ?? 0,
+				groups: _count?.groups ?? 0,
 			},
 		};
 	} catch (error) {
-		logger.error(`Error transformando prompt con estadísticas: ${error}`);
-		if (error instanceof TransformerError) {
-			throw error;
-		}
-		throw new TransformerError(`Error transformando prompt con estadísticas: ${(error as Error).message}`);
+		logger.error('Error transformando prompt desde Prisma', {
+			error,
+			promptId: prismaPrompt?.id,
+		});
+		throw new TransformerError(`Error al transformar el prompt: ${(error as Error).message}`);
 	}
 }
 
 /**
- * Calcula la importancia de un prompt basado en su uso y relaciones
- * @param prompt Prompt completo
- * @returns Valor de importancia (1-5)
+ * 🔄 Transforma una lista de prompts de Prisma a una lista de PromptComplete.
+ *
+ * @param prismaPrompts - Un array de objetos Prompt de Prisma.
+ * @returns Un array de objetos PromptComplete.
  */
-function calculateImportance(prompt: PromptComplete): number {
-	// Implementación simple usando solo propiedades disponibles en _count
-	const relationsCount =
-		(prompt._count?.images ?? 0) +
-		// (prompt._count?.videos ?? 0) + // ❌ ELIMINADO - No existe en _count de Prompt
-		(prompt._count?.concepts ?? 0) +
-		// (prompt._count?.characters ?? 0); // ❌ ELIMINADO - No existe en _count de Prompt
-		(prompt._count?.notes ?? 0);
-
-	if (relationsCount > 50) return 5;
-	if (relationsCount > 20) return 4;
-	if (relationsCount > 10) return 3;
-	if (relationsCount > 5) return 2;
-	return 1;
+export function fromPrismaPrompts(prismaPrompts: any[]): PromptComplete[] {
+	return prismaPrompts.map(fromPrismaPrompt);
 }
 
-/**
- * Calcula el total de contenido relacionado con un prompt
- * @param prompt Prompt completo
- * @returns Total de elementos de contenido
- */
-function calculateTotalContent(prompt: PromptComplete): number {
-	// Solo usar propiedades que realmente existen en _count según el esquema Prisma
-	return (
-		(prompt._count?.images ?? 0) +
-		// (prompt._count?.videos ?? 0) + // ❌ ELIMINADO - No existe en _count de Prompt
-		(prompt._count?.concepts ?? 0) +
-		(prompt._count?.notes ?? 0) +
-		// (prompt._count?.characters ?? 0) + // ❌ ELIMINADO - No existe en _count de Prompt
-		(prompt._count?.places ?? 0) +
-		(prompt._count?.worldItems ?? 0) +
-		(prompt._count?.tags ?? 0) + // ✅ Agregar tags que sí existe
-		(prompt._count?.wildcards ?? 0) // ✅ Agregar wildcards que sí existe
-	);
-}
-
-/**
- * Determina la última fecha de uso de un prompt
- * @param prompt Prompt completo
- * @returns Última fecha de uso o fecha de actualización
- */
-function calculateLastUsed(prompt: PromptComplete): Date {
-	// Por ahora solo usamos la fecha de actualización
-	// En futuras versiones, podríamos rastrear el uso real
-	return prompt.updatedAt;
-}
+// Alias para compatibilidad con código existente
+export const transformPrompt = fromPrismaPrompt;
+export const transformPrompts = fromPrismaPrompts;
+export const toExtendedPrompt = fromPrismaPrompt;
+export const toPromptWithStats = fromPrismaPrompt;

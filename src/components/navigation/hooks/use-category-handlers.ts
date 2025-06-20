@@ -31,9 +31,9 @@ export function useCategoryHandlers() {
 	const conceptStore = useConceptStore();
 	const promptStore = usePromptStore();
 	const noteStore = useNoteStore();
-	const groupStore = useGroupStore();
-	const propertyStore = usePropertyStore();
-	const wildcardStore = useWildcardStore();
+	const _groupStore = useGroupStore();
+	const _propertyStore = usePropertyStore();
+	const _wildcardStore = useWildcardStore();
 
 	// Funciones de selección extraídas de los stores (usando las funciones reales)
 	const selectCollection = collectionStore.selectCollection || (() => console.log('selectCollection not available'));
@@ -306,20 +306,16 @@ export function useCategoryHandlers() {
 				return null;
 		}
 	}, [
-		currentView,
-		selectedCollectionId,
-		selectedFolderId,
-		selectedTagId,
-		selectedAlbumId,
-		selectedCharacterId,
-		selectedPlaceId,
-		selectedWorldItemId,
-		selectedConceptId,
-		selectedPromptId,
-		selectedNoteId,
-		selectedGroupId,
-		selectedPropertyId,
-		selectedWildcardId,
+		currentView, 
+		selectedCollectionId, 
+		selectedTagId, 
+		selectedAlbumId, 
+		selectedCharacterId, 
+		selectedPlaceId, 
+		selectedWorldItemId, 
+		selectedConceptId, 
+		selectedPromptId, 
+		selectedNoteId
 	]);
 
 	return {

@@ -83,7 +83,7 @@ filesToProcess.forEach((file) => {
 		// 1. Recopilar todas las importaciones
 		const imports = new Set();
 
-		content = content.replace(importRegex, (match, importGroup, importSource) => {
+		content = content.replace(importRegex, (_match, importGroup, _importSource) => {
 			if (importGroup) {
 				importGroup.split(',').forEach((imp) => {
 					const trimmed = imp.trim();

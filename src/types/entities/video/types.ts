@@ -183,6 +183,66 @@ export interface UpdateVideoData {
 	isPublic?: boolean;
 }
 
+/**
+ * Video extendido con relaciones completas
+ */
+export interface VideoExtended extends VideoComplete {
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
+
+/**
+ * Opciones de paginación para videos
+ */
+export interface VideoPaginationOptions {
+	page?: number;
+	limit?: number;
+	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'size' | 'duration';
+	sortDirection?: 'asc' | 'desc';
+}
+
+/**
+ * Resultado paginado de videos
+ */
+export interface PaginatedVideos {
+	videos: VideoExtended[];
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+		hasNextPage: boolean;
+		hasPreviousPage: boolean;
+	};
+}
+
+/**
+ * Estadísticas de videos
+ */
+export interface VideoStats {
+	total: number;
+	totalSize: number;
+	totalDuration: number;
+	averageDuration: number;
+	byFormat: Record<string, number>;
+	byFolder: Record<string, number>;
+	favorites: number;
+	public: number;
+	withThumbnails: number;
+}
+
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
 // - No importar tipos de Prisma ni de archivos legacy.

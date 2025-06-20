@@ -60,7 +60,7 @@ export function CreateTagForm({
 	onCancel,
 	onPreview,
 }: CreateTagFormProps) {
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [_isSubmitting, setIsSubmitting] = useState(false);
 
 	// Inicializar formulario con valores por defecto
 	const form = useForm<FormValues>({
@@ -90,7 +90,7 @@ export function CreateTagForm({
 	}, [form, isEditing, tag]);
 
 	// Generar color y emoji basados en el nombre
-	const generateSuggestions = useCallback(() => {
+	const _generateSuggestions = useCallback(() => {
 		const name = form.getValues('name');
 		const category = form.getValues('category');
 
@@ -104,7 +104,7 @@ export function CreateTagForm({
 	}, [form]);
 
 	// Manejar envío del formulario
-	const onSubmit = async (data: FormValues) => {
+	const _onSubmit = async (data: FormValues) => {
 		try {
 			setIsSubmitting(true);
 

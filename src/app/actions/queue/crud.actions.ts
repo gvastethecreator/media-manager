@@ -5,23 +5,28 @@
  * @module app/actions/queue/crud
  */
 
-import { revalidatePath } from 'next/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
-import * as QueueJobService from '@/services/queue-job.service';
 import {
-	type CreateQueueJobInput,
-	type PaginatedQueueJobs,
-	type QueueJobExtended,
-	type QueueJobFilters,
-	type QueueJobPaginationOptions,
-	type UpdateQueueJobInput,
+    createQueueJob as createQueueJobService,
+    deleteQueueJob as deleteQueueJobService,
+    findQueueJobs,
+    updateQueueJob as updateQueueJobService
+} from '@/services/queue-job/queue-job.service';
+import {
+    type CreateQueueJobInput,
+    type PaginatedQueueJobs,
+    type QueueJobExtended,
+    type QueueJobFilters,
+    type QueueJobPaginationOptions,
+    type UpdateQueueJobInput,
 } from '@/types/entities/queue-job';
 import {
-	createQueueJobSchema,
-	queueJobFiltersSchema,
-	queueJobPaginationSchema,
-	updateQueueJobSchema,
+    createQueueJobSchema,
+    queueJobFiltersSchema,
+    queueJobPaginationSchema,
+    updateQueueJobSchema,
 } from '@/types/entities/queue-job/schema';
+import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('QueueActions:crud');
 
@@ -43,7 +48,7 @@ export async function getQueueJobs(
 		const validatedPagination = queueJobPaginationSchema.parse(pagination);
 
 		// Obtener trabajos
-		const result = await QueueJobService.findQueueJobs(validatedFilters, validatedPagination);
+		const result = await findQueueJobs(validatedFilters, validatedPagination);
 
 		// Revalidar rutas
 		revalidatePath('/queue');
@@ -69,7 +74,7 @@ export async function createQueueJob(input: CreateQueueJobInput): Promise<QueueJ
 		const validatedInput = createQueueJobSchema.parse(input);
 
 		// Crear trabajo
-		const job = await QueueJobService.createQueueJob(validatedInput);
+		const job = await createQueueJobService(validatedInput);
 
 		// Revalidar rutas
 		revalidatePath('/queue');
@@ -96,7 +101,7 @@ export async function updateQueueJob(id: string, input: UpdateQueueJobInput): Pr
 		const validatedInput = updateQueueJobSchema.parse(input);
 
 		// Actualizar trabajo
-		const job = await QueueJobService.updateQueueJob(id, validatedInput);
+		const job = await updateQueueJobService(id, validatedInput);
 
 		// Revalidar rutas
 		revalidatePath('/queue');
@@ -119,7 +124,7 @@ export async function deleteQueueJob(id: string): Promise<void> {
 		logger.debug('🗑️ Eliminando trabajo en cola', { id });
 
 		// Eliminar trabajo
-		await QueueJobService.deleteQueueJob(id);
+		await deleteQueueJobService(id);
 
 		// Revalidar rutas
 		revalidatePath('/queue');

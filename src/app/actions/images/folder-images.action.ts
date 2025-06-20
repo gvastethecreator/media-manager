@@ -1,7 +1,7 @@
 'use server';
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import type { FileItem } from '@/types/files';
 import { toServiceError } from '@/utils/errors/service-errors';
 
@@ -18,6 +18,7 @@ export async function getLatestFolderImages(
 	limit = 6
 ): Promise<{ success: boolean; data?: FileItem[]; message?: string }> {
 	try {
+		const prisma = await getPrismaClient();
 		// Obtener las últimas imágenes de la carpeta
 		const images = await prisma.image.findMany({
 			where: {
@@ -45,13 +46,16 @@ export async function getLatestFolderImages(
 			id: image.id,
 			name: image.name || 'Untitled',
 			path: image.path,
-			type: 'image',
+			type: 'image' as const,
 			size: image.size || 0,
-			metadata: image.metadata as string,
-			dimensions: {
-				width: image.width || 0,
-				height: image.height || 0,
-			},
+			width: image.width || 0,
+			height: image.height || 0,
+			metadata: image.metadata ? JSON.parse(image.metadata) : undefined,
+			src: `/api/images/${image.id}/content`,
+			tags: [], // Las tags se cargarían por separado si es necesario
+			collections: [], // Las collections se cargarían por separado si es necesario
+			isPublic: false, // Por defecto false
+			isFavorite: false, // Por defecto false, se cargaría por separado si es necesario
 			createdAt: image.createdAt,
 			updatedAt: image.updatedAt,
 		}));

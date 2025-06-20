@@ -1,12 +1,15 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { getAlbums } from '@/app/actions/albums/album.actions';
+import { getAudios } from '@/app/actions/audio/audio.actions';
 import { searchCharacters } from '@/app/actions/characters/character.actions';
 import { getCollections } from '@/app/actions/collections/collection.actions';
 import { getConcepts } from '@/app/actions/concepts/concept.actions';
+import { getDocuments } from '@/app/actions/document/document.actions';
+import { getFile3Ds } from '@/app/actions/file3d/file-3d.actions';
 import { getFolders } from '@/app/actions/folders/';
 import { getGroups } from '@/app/actions/groups/group.actions';
+import { getJsonFiles } from '@/app/actions/json-file/json-file.actions';
 import { getNotes } from '@/app/actions/notes/note.actions';
 import { getPlaces } from '@/app/actions/places/place.actions';
 import { getPrompts } from '@/app/actions/prompts/prompt.actions';
@@ -14,8 +17,10 @@ import { getProperties } from '@/app/actions/properties/property.actions';
 import { getSystemStats } from '@/app/actions/stats/stats.actions';
 import { getTagsAction } from '@/app/actions/tags';
 import { getWildcards } from '@/app/actions/wildcards/wildcard.actions';
+import { getWorkflows } from '@/app/actions/workflow/workflow.actions';
 import { getWorldItems } from '@/app/actions/world-items/world-item.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { revalidatePath } from 'next/cache';
 
 const navLogger = serverLogger.withContext('NavActions');
 
@@ -36,6 +41,12 @@ type SystemStats = {
 	totalSize: number;
 	totalViews: number;
 	totalDownloads: number;
+	// Nuevas entidades
+	totalAudios: number;
+	totalDocuments: number;
+	totalJsonFiles: number;
+	totalFile3Ds: number;
+	totalWorkflows: number;
 	topTags: Array<{
 		id: string;
 		name: string;
@@ -68,6 +79,11 @@ const REVALIDATE_PATHS = [
 	'/groups',
 	'/properties',
 	'/wildcards',
+	'/audio',
+	'/documents',
+	'/json-files',
+	'/file-3d',
+	'/workflows',
 ] as const;
 
 export async function revalidateNavigation() {
@@ -101,6 +117,12 @@ export interface NavigationData {
 	groups: Awaited<ReturnType<typeof getGroups>>;
 	properties: Awaited<ReturnType<typeof getProperties>>;
 	wildcards: Awaited<ReturnType<typeof getWildcards>>;
+	// Nuevas entidades
+	audios: Awaited<ReturnType<typeof getAudios>>;
+	documents: Awaited<ReturnType<typeof getDocuments>>;
+	jsonFiles: Awaited<ReturnType<typeof getJsonFiles>>;
+	file3ds: Awaited<ReturnType<typeof getFile3Ds>>;
+	workflows: Awaited<ReturnType<typeof getWorkflows>>;
 	stats: SystemStats;
 }
 
@@ -122,6 +144,11 @@ export async function getNavigationData(): Promise<NavigationData> {
 			groups,
 			properties,
 			wildcards,
+			audios,
+			documents,
+			jsonFiles,
+			file3ds,
+			workflows,
 			stats,
 		] = await Promise.allSettled([
 			getFolders(),
@@ -137,6 +164,11 @@ export async function getNavigationData(): Promise<NavigationData> {
 			getGroups(),
 			getProperties(),
 			getWildcards(),
+			getAudios(),
+			getDocuments(),
+			getJsonFiles(),
+			getFile3Ds(),
+			getWorkflows(),
 			getSystemStats(),
 		]);
 
@@ -156,9 +188,12 @@ export async function getNavigationData(): Promise<NavigationData> {
 			totalWildcards: 0,
 			totalViews: 0,
 			totalDownloads: 0,
-			totalFavorites: 0,
-			totalActivities: 0,
-			totalSize: 0,
+			// Nuevas entidades
+			totalAudios: 0,
+			totalDocuments: 0,
+			totalJsonFiles: 0,
+			totalFile3Ds: 0,
+			totalWorkflows: 0,
 			topTags: [],
 			recentActivity: [],
 		};
@@ -177,6 +212,12 @@ export async function getNavigationData(): Promise<NavigationData> {
 			groups: groups.status === 'fulfilled' ? groups.value : [],
 			properties: properties.status === 'fulfilled' ? properties.value : [],
 			wildcards: wildcards.status === 'fulfilled' ? wildcards.value : [],
+			// Nuevas entidades
+			audios: audios.status === 'fulfilled' ? audios.value : [],
+			documents: documents.status === 'fulfilled' ? documents.value : [],
+			jsonFiles: jsonFiles.status === 'fulfilled' ? jsonFiles.value : [],
+			file3ds: file3ds.status === 'fulfilled' ? file3ds.value : [],
+			workflows: workflows.status === 'fulfilled' ? workflows.value : [],
 			stats:
 				stats.status === 'fulfilled' && stats.value
 					? {
@@ -196,15 +237,19 @@ export async function getNavigationData(): Promise<NavigationData> {
 							totalSize: stats.value.totalSize,
 							totalViews: stats.value.totalViews,
 							totalDownloads: stats.value.totalDownloads,
+							// Nuevas entidades - usar longitud de arrays como fallback
+							totalAudios: stats.value.totalAudios || (audios.status === 'fulfilled' ? audios.value.length : 0),
+							totalDocuments: stats.value.totalDocuments || (documents.status === 'fulfilled' ? documents.value.length : 0),
+							totalJsonFiles: stats.value.totalJsonFiles || (jsonFiles.status === 'fulfilled' ? jsonFiles.value.length : 0),
+							totalFile3Ds: stats.value.totalFile3Ds || (file3ds.status === 'fulfilled' ? file3ds.value.length : 0),
+							totalWorkflows: stats.value.totalWorkflows || (workflows.status === 'fulfilled' ? workflows.value.length : 0),
 							topTags: stats.value.topTags,
 							recentActivity: stats.value.recentActivity,
-						}
+					  }
 					: defaultStats,
 		};
 	} catch (error) {
-		navLogger.error('❌ Error obteniendo datos de navegación:', error);
-		const originalErrorMessage = error instanceof Error ? error.message : String(error);
-		console.error('--- ERROR ORIGINAL ---', error);
-		throw new Error(`No se pudieron obtener los datos de navegación: ${originalErrorMessage}`);
+		navLogger.error('❌ Error al obtener datos de navegación:', error);
+		throw new Error('No se pudieron obtener los datos de navegación');
 	}
 }

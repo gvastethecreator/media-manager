@@ -172,7 +172,6 @@ export function FileProvider({ children }: { children: ReactNode }) {
 						const newFile = {
 							...file,
 							isFavorite: !file.isFavorite,
-							isFavorite: !file.isFavorite,
 						};
 						addEvent({ type: 'favorites:modified', data: { item: newFile } });
 						return newFile;

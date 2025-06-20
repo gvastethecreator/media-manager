@@ -15,7 +15,7 @@ import { createWorldItemUISlice } from './slices/ui';
 import type { WorldItemStore } from './types';
 
 // Logger específico para el store
-const worldItemLogger = clientLogger.withContext('WorldItemStore');
+const _worldItemLogger = clientLogger.withContext('WorldItemStore');
 
 // Re-exportar desde otros archivos
 export * from './constants';

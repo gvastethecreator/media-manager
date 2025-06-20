@@ -339,7 +339,6 @@ export function mapPromptSortCriteriaToPrisma(
 			return { name: sortDirection };
 		case 'created':
 			return { createdAt: sortDirection };
-		case 'updated':
 		default:
 			return { updatedAt: sortDirection };
 	}

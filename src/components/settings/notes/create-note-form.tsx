@@ -50,7 +50,7 @@ export function CreateNoteForm({
 	onCancel,
 	onPreview,
 }: CreateNoteFormProps) {
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [_isSubmitting, setIsSubmitting] = useState(false);
 
 	// Configurar react-hook-form
 	const form = useForm<NoteForm>({
@@ -94,7 +94,7 @@ export function CreateNoteForm({
 	}, [note, isEditing, form]);
 
 	// Manejar envío del formulario
-	const onSubmit = async (data: NoteForm) => {
+	const _onSubmit = async (data: NoteForm) => {
 		try {
 			setIsSubmitting(true);
 

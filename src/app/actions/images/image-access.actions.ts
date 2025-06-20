@@ -1,7 +1,7 @@
 'use server';
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image-service-export';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
@@ -18,6 +18,7 @@ const urlCache = new Map<string, string>();
  */
 export async function getImageUrl(imageId: string): Promise<string> {
 	try {
+		const prisma = await getPrismaClient();
 		// Verificar si ya tenemos la URL en caché
 		if (urlCache.has(imageId)) {
 			const cachedUrl = urlCache.get(imageId);
@@ -55,6 +56,7 @@ export async function getImageUrl(imageId: string): Promise<string> {
  */
 export async function getOriginalImage(imageId: string): Promise<{ buffer: Buffer; mimeType: string }> {
 	try {
+		const prisma = await getPrismaClient();
 		const image = await prisma.image.findUnique({
 			where: { id: imageId },
 			select: {
@@ -99,8 +101,9 @@ export async function getImageThumbnailBuffer(
 	quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
 ): Promise<{ buffer: Buffer; mimeType: string }> {
 	try {
-		const buffer = await imageService.getThumbnail(imageId, quality);
+		const buffer = await imageService.getThumbnail(imageId);
 
+		const prisma = await getPrismaClient();
 		const meta = await prisma.image.findUnique({
 			where: { id: imageId },
 			select: { thumbnailMimeType: true },

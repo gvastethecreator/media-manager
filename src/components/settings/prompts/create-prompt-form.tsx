@@ -14,7 +14,7 @@ import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Función para formatear los nombres de modelos para mostrar
-const formatModelName = (model: string): string => {
+const _formatModelName = (model: string): string => {
 	// Eliminar prefijos y guiones, convertir a Title Case
 	return model
 		.split('-')
@@ -54,7 +54,7 @@ export function CreatePromptForm({
 	onCancel,
 	onPreview,
 }: CreatePromptFormProps) {
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [_isSubmitting, setIsSubmitting] = useState(false);
 
 	// Configurar react-hook-form
 	const form = useForm<PromptForm>({
@@ -99,7 +99,7 @@ export function CreatePromptForm({
 	}, [prompt, isEditing, form]);
 
 	// Manejar envío del formulario
-	const onSubmit = async (data: PromptForm) => {
+	const _onSubmit = async (data: PromptForm) => {
 		try {
 			setIsSubmitting(true);
 

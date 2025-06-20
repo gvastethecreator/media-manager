@@ -1,10 +1,10 @@
 'use server';
 
-import { z } from 'zod';
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { toCreatePropertyData, toUpdatePropertyData } from '@/transformers/property';
 import { CreatePropertySchema, UpdatePropertySchema } from '@/types/entities/property/schema';
+import { z } from 'zod';
 
 const logger = serverLogger.withContext('PropertyActions');
 
@@ -12,11 +12,13 @@ type CreatePropertyData = z.infer<typeof CreatePropertySchema>;
 type UpdatePropertyData = z.infer<typeof UpdatePropertySchema>;
 
 /**
- * Obtiene todas las propiedades con sus estadísticas
+ * Obtiene todas las propiedades
  */
 export async function getProperties() {
 	try {
+		const prisma = await getPrismaClient();
 		const properties = await prisma.property.findMany({
+			orderBy: { name: 'asc' },
 			include: {
 				_count: {
 					select: {
@@ -36,12 +38,9 @@ export async function getProperties() {
 					},
 				},
 			},
-			orderBy: {
-				name: 'asc',
-			},
 		});
 
-		logger.info(`✅ Se obtuvieron ${properties.length} propiedades`);
+		logger.info('✅ Propiedades obtenidas:', properties.length);
 		return properties;
 	} catch (error) {
 		logger.error('❌ Error al obtener propiedades:', error);
@@ -54,6 +53,7 @@ export async function getProperties() {
  */
 export async function getProperty(id: string) {
 	try {
+		const prisma = await getPrismaClient();
 		const property = await prisma.property.findUnique({
 			where: { id },
 			include: {
@@ -95,6 +95,7 @@ export async function getProperty(id: string) {
 export async function createProperty(data: CreatePropertyData) {
 	try {
 		const prismaData = toCreatePropertyData(data);
+		const prisma = await getPrismaClient();
 
 		const property = await prisma.property.create({
 			data: prismaData,
@@ -133,6 +134,7 @@ export async function createProperty(data: CreatePropertyData) {
 export async function updateProperty(id: string, data: UpdatePropertyData) {
 	try {
 		const prismaData = toUpdatePropertyData(data);
+		const prisma = await getPrismaClient();
 
 		const property = await prisma.property.update({
 			where: { id },
@@ -167,24 +169,26 @@ export async function updateProperty(id: string, data: UpdatePropertyData) {
 }
 
 /**
- * Marca o desmarca una propiedad como favorita
+ * Alterna el estado de favorito de una propiedad
  */
 export async function togglePropertyFavorite(id: string) {
 	try {
+		const prisma = await getPrismaClient();
+
 		// Obtener el estado actual
-		const property = await prisma.property.findUnique({
+		const current = await prisma.property.findUnique({
 			where: { id },
 			select: { isFavorite: true },
 		});
 
-		if (!property) {
+		if (!current) {
 			throw new Error(`No se encontró la propiedad con ID ${id}`);
 		}
 
-		// Invertir el estado
-		const updatedProperty = await prisma.property.update({
+		// Actualizar con el estado opuesto
+		const property = await prisma.property.update({
 			where: { id },
-			data: { isFavorite: !property.isFavorite },
+			data: { isFavorite: !current.isFavorite },
 			include: {
 				_count: {
 					select: {
@@ -206,13 +210,10 @@ export async function togglePropertyFavorite(id: string) {
 			},
 		});
 
-		logger.info(
-			`✅ Propiedad ${updatedProperty.isFavorite ? 'marcada' : 'desmarcada'} como favorita:`,
-			updatedProperty.name
-		);
-		return updatedProperty;
+		logger.info('✅ Favorito de propiedad actualizado:', property.name, property.isFavorite);
+		return property;
 	} catch (error) {
-		logger.error('❌ Error al actualizar favorito:', error);
+		logger.error('❌ Error al actualizar favorito de propiedad:', error);
 		throw error;
 	}
 }
@@ -222,6 +223,7 @@ export async function togglePropertyFavorite(id: string) {
  */
 export async function deleteProperty(id: string) {
 	try {
+		const prisma = await getPrismaClient();
 		await prisma.property.delete({
 			where: { id },
 		});

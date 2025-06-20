@@ -1,8 +1,8 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
+import { getPrismaClient } from '@/lib/db';
 import { validateName } from '@/lib/validations';
-import { fromPrismaGroup, toPrismaGroup, validateGroup } from '@/transformers/group/serializers';
+import { fromPrismaGroup, toPrismaGroupCreate, toPrismaGroupUpdate, validateGroup } from '@/transformers/group/serializers';
 import type { CreateGroupData, GroupWithStats, UpdateGroupData } from '@/types/entities/group/types';
 import { revalidatePath } from 'next/cache';
 
@@ -11,6 +11,7 @@ import { revalidatePath } from 'next/cache';
  */
 export async function getGroups(): Promise<GroupWithStats[]> {
 	try {
+		const prisma = await getPrismaClient();
 		const groups = await prisma.group.findMany({
 			include: {
 				_count: {
@@ -48,6 +49,7 @@ export async function getGroups(): Promise<GroupWithStats[]> {
  */
 export async function getGroup(id: string): Promise<GroupWithStats | null> {
 	try {
+		const prisma = await getPrismaClient();
 		const group = await prisma.group.findUnique({
 			where: { id },
 			include: {
@@ -83,11 +85,12 @@ export async function getGroup(id: string): Promise<GroupWithStats | null> {
  */
 export async function createGroup(data: CreateGroupData): Promise<GroupWithStats> {
 	try {
+		const prisma = await getPrismaClient();
 		// Validar nombre único
 		await validateName('group', data.name);
 
 		validateGroup(data);
-		const prismaData = toPrismaGroup(data);
+		const prismaData = toPrismaGroupCreate(data);
 		const group = await prisma.group.create({
 			data: prismaData,
 			include: {
@@ -124,6 +127,7 @@ export async function createGroup(data: CreateGroupData): Promise<GroupWithStats
  */
 export async function updateGroup(id: string, data: UpdateGroupData): Promise<GroupWithStats> {
 	try {
+		const prisma = await getPrismaClient();
 		// Si el nombre cambió, validar que sea único
 		const current = await prisma.group.findUnique({ where: { id } });
 		if (current && data.name && current.name !== data.name) {
@@ -131,7 +135,7 @@ export async function updateGroup(id: string, data: UpdateGroupData): Promise<Gr
 		}
 
 		validateGroup(data);
-		const prismaData = toPrismaGroup(data);
+		const prismaData = toPrismaGroupUpdate(data);
 		const group = await prisma.group.update({
 			where: { id },
 			data: prismaData,
@@ -169,6 +173,7 @@ export async function updateGroup(id: string, data: UpdateGroupData): Promise<Gr
  */
 export async function deleteGroup(id: string): Promise<boolean> {
 	try {
+		const prisma = await getPrismaClient();
 		await prisma.group.delete({
 			where: { id },
 		});
@@ -186,6 +191,7 @@ export async function deleteGroup(id: string): Promise<boolean> {
  */
 export async function toggleGroupFavorite(id: string): Promise<GroupWithStats> {
 	try {
+		const prisma = await getPrismaClient();
 		const current = await prisma.group.findUnique({ where: { id } });
 		if (!current) throw new Error('Grupo no encontrado');
 

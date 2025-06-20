@@ -4,9 +4,8 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import type { MediaMetadata } from '@/types/metadata.types';
 import ExifReader from 'exifreader';
 import { MetadataError, MetadataErrorCode } from './metadata-errors.actions';
-import type { ImageFormat, MetadataWithCamera } from './metadata-types.actions';
+import type { ImageFormat } from './metadata-types.actions';
 import { withRetry } from './metadata-utils.actions';
-import { extractAIGenerationInfo } from './parsers';
 
 const parserLogger = serverLogger.withContext('MetadataParsers');
 
@@ -57,17 +56,16 @@ export async function parseExifData(buffer: Buffer, path: string): Promise<Parti
 		const exifData = (await withRetry<unknown>(() => ExifReader.load(buffer, { expanded: true }))) as ExifData;
 
 		// Extraer información relevante de los datos EXIF
-		const metadata: MetadataWithCamera = {
+		const metadata: Partial<MediaMetadata> = {
+			width: 0,
+			height: 0,
+			fileSize: 0,
+			format: 'unknown',
+			mimeType: 'application/octet-stream',
+			lastModified: new Date(),
+			totalSize: 0,
+			itemCount: 1,
 			exif: {},
-			dimensions: {
-				width: 0,
-				height: 0,
-			},
-			fileSystem: {
-				size: 0,
-				created: new Date().toISOString(),
-				modified: new Date().toISOString(),
-			},
 		};
 
 		// Procesar datos básicos EXIF
@@ -75,25 +73,22 @@ export async function parseExifData(buffer: Buffer, path: string): Promise<Parti
 			// Ya hemos definido el tipo apropiado en ExifData
 			const imageData = exifData.Image;
 
+			if (!metadata.exif) {
+				metadata.exif = {};
+			}
+
 			if (imageData.Make) {
-				metadata.camera = {
-					make: imageData.Make.description,
-				};
+				metadata.exif.make = imageData.Make.description;
 			}
 
 			if (imageData.Model) {
-				if (!metadata.camera) {
-					metadata.camera = {};
-				}
-				metadata.camera.model = imageData.Model.description;
+				metadata.exif.model = imageData.Model.description;
 			}
 
 			// Dimensiones
 			if (imageData.XResolution && imageData.YResolution) {
-				metadata.dimensions = {
-					width: Number.parseInt(imageData.ImageWidth?.description || '0', 10),
-					height: Number.parseInt(imageData.ImageLength?.description || '0', 10),
-				};
+				metadata.width = Number.parseInt(imageData.ImageWidth?.description || '0', 10);
+				metadata.height = Number.parseInt(imageData.ImageLength?.description || '0', 10);
 			}
 		}
 
@@ -135,11 +130,11 @@ export async function parseExifData(buffer: Buffer, path: string): Promise<Parti
 				const lat = convertDMSToDecimal(gpsLatitude, gpsLatitudeRef);
 				const lng = convertDMSToDecimal(gpsLongitude, gpsLongitudeRef);
 
-				metadata.location = { latitude: lat, longitude: lng };
+				metadata.gps = { latitude: lat, longitude: lng };
 
 				if ('GPSAltitude' in exifData && exifData.GPSAltitude) {
 					const gpsAltitude = exifData.GPSAltitude.description;
-					metadata.location.altitude = Number.parseFloat(gpsAltitude);
+					metadata.gps.altitude = Number.parseFloat(gpsAltitude);
 				}
 			} catch (error) {
 				parserLogger.warn('Error parseando datos GPS:', { path, error });
@@ -155,7 +150,10 @@ export async function parseExifData(buffer: Buffer, path: string): Promise<Parti
 				const [year, month, day] = datePart.split(':').map(Number);
 				const [hour, minute, second] = timePart.split(':').map(Number);
 
-				metadata.captureDate = new Date(year, month - 1, day, hour, minute, second).toISOString();
+				if (!metadata.exif) {
+					metadata.exif = {};
+				}
+				metadata.exif.dateTimeOriginal = new Date(year, month - 1, day, hour, minute, second).toISOString();
 			} catch (error) {
 				parserLogger.warn('Error parseando fecha EXIF:', { dateStr, error });
 			}
@@ -199,7 +197,7 @@ export async function parseSharpMetadata(buffer: Buffer): Promise<Partial<MediaM
 		return result;
 	} catch (error) {
 		parserLogger.error('Error al procesar metadatos con Sharp:', { error });
-		throw new MetadataError('Error al procesar metadatos con Sharp', 'unknown', 'SHARP_ERROR', {
+		throw new MetadataError('Error al procesar metadatos con Sharp', 'unknown', MetadataErrorCode.PARSING_ERROR, {
 			originalError: error instanceof Error ? error.message : String(error),
 		});
 	}
@@ -341,18 +339,19 @@ async function parseJsonString(text: string): Promise<MediaMetadata | null> {
 		if (parsed.ai) result.ai = parsed.ai;
 
 		return result as MediaMetadata;
-	} catch (error) {
+	} catch (_error) {
 		parserLogger.debug('No es JSON válido:', text.substring(0, 100));
 		return null;
 	}
 }
 
 // Importar y exportar directamente la función de parsers
-export { extractAIGenerationInfo };
+export { extractAIGenerationInfo } from './parsers/index';
 
 // Función wrapper para compatibilidad con legacy code
 export async function getAIGenerationInfo(
 	metadata: Record<string, unknown> | null
-): Promise<import('./parsers').AIGenerationMetadata | null> {
+): Promise<import('./parsers/index').AIGenerationMetadata | null> {
+	const { extractAIGenerationInfo } = await import('./parsers/index');
 	return extractAIGenerationInfo(metadata);
 }

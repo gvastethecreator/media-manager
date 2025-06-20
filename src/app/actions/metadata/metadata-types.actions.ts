@@ -1,5 +1,5 @@
-import type { AIMetadata, FileMetadata } from '@/types/metadata';
-import type { ImageComplete as Image } from '@prisma/client';
+import type { Image } from '@prisma/client';
+import type { AIMetadata, FileMetadata } from '@/types/metadata.types';
 import type sharp from 'sharp';
 
 // Configuración de retry

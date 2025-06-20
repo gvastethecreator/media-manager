@@ -126,7 +126,7 @@ export function GroupsSettings() {
 				const matchesQuery =
 					!query ||
 					group.name.toLowerCase().includes(query) ||
-					(group.description && group.description.toLowerCase().includes(query));
+					(group.description?.toLowerCase().includes(query));
 
 				const matchesCategory =
 					state.selectedCategories.length === 0 ||
@@ -313,13 +313,13 @@ export function GroupsSettings() {
 					<GroupPreview
 						group={state.selectedGroup}
 						onEdit={() => dispatch({ type: 'SET_EDIT_MODE', payload: true })}
-						onDelete={() => handleDeleteGroup(state.selectedGroup!.id)}
+						onDelete={() => handleDeleteGroup(state.selectedGroup?.id)}
 						stats={stats}
 					/>
 				) : state.isEditMode && state.selectedGroup ? (
 					<CreateGroupForm
 						group={state.selectedGroup}
-						onSubmit={(data) => handleUpdateGroup(state.selectedGroup!.id, data)}
+						onSubmit={(data) => handleUpdateGroup(state.selectedGroup?.id, data)}
 						onCancel={() => dispatch({ type: 'SET_EDIT_MODE', payload: false })}
 					/>
 				) : (

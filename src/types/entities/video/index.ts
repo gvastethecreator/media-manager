@@ -9,13 +9,14 @@
 export * from './enums';
 export { VideoSchema } from './types';
 export type {
-    CreateVideoData,
-    UpdateVideoData,
+    CreateVideoData, PaginatedVideos, UpdateVideoData,
     // Alias para retrocompatibilidad
     VideoComplete as Video, VideoBase, VideoComplete, VideoCreateInput,
+    VideoExtended,
     VideoFilters,
     VideoMetadata,
-    VideoRelations,
+    VideoPaginationOptions, VideoRelations,
+    VideoStats,
     VideoUI,
     VideoUpdateInput
 } from './types';

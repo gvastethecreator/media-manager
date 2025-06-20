@@ -96,7 +96,6 @@ export interface MediaMetadata extends FileMetadata {
 		width: number;
 		height: number;
 	};
-	lastModified?: Date;
 }
 
 // Validadores Zod

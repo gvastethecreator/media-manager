@@ -35,7 +35,7 @@ export interface FromPrismaConceptOptions {
  * @returns Un objeto ConceptComplete compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function fromPrismaConcept<T extends ConceptBase>(
+export function fromPrismaConcept<_T extends ConceptBase>(
 	prismaConcept: ConceptFromPrisma | null,
 	options: FromPrismaConceptOptions = {}
 ): ConceptComplete {

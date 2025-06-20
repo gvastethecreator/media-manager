@@ -261,7 +261,7 @@ function deserializeConceptTags(concept: ConceptComplete): ConceptComplete {
 	if (typeof concept.tags === 'string') {
 		try {
 			return { ...concept, tags: JSON.parse(concept.tags) };
-		} catch (error) {
+		} catch (_error) {
 			logger.warn(`Error al deserializar tags para el concepto ${concept.id}. Se devolverá un array vacío.`);
 			return { ...concept, tags: [] };
 		}
@@ -325,8 +325,8 @@ export function filterConcepts(concepts: ConceptComplete[], filters: ConceptFilt
 			result = result.filter(
 				(c) =>
 					c.name.toLowerCase().includes(searchLower) ||
-					(c.description && c.description.toLowerCase().includes(searchLower)) ||
-					(c.content && c.content.toLowerCase().includes(searchLower))
+					(c.description?.toLowerCase().includes(searchLower)) ||
+					(c.content?.toLowerCase().includes(searchLower))
 			);
 		}
 
@@ -337,7 +337,7 @@ export function filterConcepts(concepts: ConceptComplete[], filters: ConceptFilt
 		if (filters.tags && filters.tags.length > 0) {
 			result = result.filter((c) => {
 				const conceptTags = Array.isArray(c.tags) ? c.tags : [];
-				return filters.tags!.some((tag) => conceptTags.includes(tag));
+				return filters.tags?.some((tag) => conceptTags.includes(tag));
 			});
 		}
 

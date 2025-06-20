@@ -2,7 +2,7 @@
 
 import { Filter, Info, Loader2, PlusCircle, Save, TagBase as TagIcon, Trash } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { deleteTagAction, getTagsAction, type TagWithStats as ServerTagWithStats } from '@/app/actions/tags';
+import { type TagWithStats as ServerTagWithStats } from '@/app/actions/tags';
 import { deleteTag, searchTags } from '@/app/actions/tags/tag.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import toastService from '@/services/toast.service';
 import { TagCategory } from '@/types/entities/tag';
 import type { TagComplete } from '@/types/entities/tag/extended';
-import type { TagBase } from '@/types/entities/tag/types';
 import { CreateTagForm } from './create-tag-form';
 
 // Definir tipo para el manejador de eventos del botón

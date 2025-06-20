@@ -71,7 +71,7 @@ export function CreateCharacterForm({
 	onUpdated,
 	onCancel,
 }: CreateCharacterFormProps) {
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [_isSubmitting, setIsSubmitting] = useState(false);
 
 	// Inicializar formulario con valores por defecto
 	const form = useForm<FormValues>({
@@ -115,7 +115,7 @@ export function CreateCharacterForm({
 	}, [form, isEditing, character]);
 
 	// Generar color y emoji basados en la clase
-	const generateSuggestions = useCallback(() => {
+	const _generateSuggestions = useCallback(() => {
 		const characterClass = form.getValues('class');
 		const name = form.getValues('name');
 
@@ -191,7 +191,7 @@ export function CreateCharacterForm({
 	}, [form]);
 
 	// Manejar envío del formulario
-	const onSubmit = async (data: FormValues) => {
+	const _onSubmit = async (data: FormValues) => {
 		try {
 			setIsSubmitting(true);
 

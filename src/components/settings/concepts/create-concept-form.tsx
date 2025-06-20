@@ -86,7 +86,7 @@ export function CreateConceptForm({
 	}, [concept, isEditing, form]);
 
 	// Manejar envío del formulario
-	const onSubmit = async (data: ConceptForm) => {
+	const _onSubmit = async (data: ConceptForm) => {
 		try {
 			setIsSubmitting(true);
 

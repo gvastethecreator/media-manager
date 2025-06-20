@@ -1,17 +1,14 @@
 /**
  * @file Exportaciones principales de tipos para la entidad Audio
  * @module types/entities/audio
+ * @description Exportaciones simplificadas basadas en el schema real de Prisma
  */
 
-// Exportar el esquema de validación
-export { audioSchema } from './audio.schema';
 // Exportar los tipos principales
-// Exportar tipo principal como Audio para compatibilidad
 export type {
-    AudioBase as Audio,
-    AudioBase,
-    AudioComplete,
-    AudioCreateInput,
-    AudioUpdateInput
+    Audio,
+    AudioBase, AudioComplete, AudioCounts, AudioCreateInput, AudioFilters, AudioFormData, AudioSearchOptions,
+    AudioSearchResult, AudioUpdateInput,
+    AudioWithCounts
 } from './types';
 

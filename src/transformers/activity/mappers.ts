@@ -62,7 +62,7 @@ export function mapActivityFiltersToPrisma(filters: ActivityFilters): Prisma.Act
 		take: filters.limit || 20,
 		skip: filters.offset || 0,
 		orderBy: {
-			createdAt: filters.sortDirection || 'desc' as Prisma.SortOrder,
+			createdAt: 'desc' as Prisma.SortOrder,
 		},
 		include: {
 			image: {

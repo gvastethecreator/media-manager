@@ -14,11 +14,11 @@ export { mapCompleteToTag, mapTagToComplete, tagToDisplayObject } from '../conve
 export { fromPrismaTag, fromPrismaTags } from '../transformer';
 
 // Funciones de extensión (placeholders)
-export function extendTag(tag: any, options?: any): any {
+export function extendTag(tag: any, _options?: any): any {
 	return tag;
 }
 
-export function extendTags(tags: any[], options?: any): any[] {
+export function extendTags(tags: any[], _options?: any): any[] {
 	return tags;
 }
 

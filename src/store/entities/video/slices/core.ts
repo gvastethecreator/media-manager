@@ -5,24 +5,17 @@
 
 import {
     createVideo as createServerVideo,
-    deleteVideo as delet		try {
-			const response = await findVideos({ folders: folderIds });
-			if (response.success && response.data) {
-				const videos = response.data as VideoComplete[];
-				get().setVideos(videos);
-				return videos;
-			}Video,
+    deleteVideo as deleteServerVideo,
     findVideos,
     getVideo as getServerVideo,
 } from '@/app/actions/videos/video.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import type {
-    VideoBase,
-    VideoComplete,
-    VideoFilters,
     CreateVideoData,
     UpdateVideoData,
+    VideoComplete,
+    VideoFilters
 } from '@/types/entities/video';
 import type { StateCreator } from 'zustand';
 import type { VideoState } from '../types';
@@ -176,17 +169,15 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 	fetchVideo: async (id) => {
 		get().setLoading(true);
 		try {
-			const response = await getServerVideo(id);
-			if (response.success && response.data) {
-				const video = response.data as VideoComplete;
-				if (video) get().addVideo(video);
-				return video;
+			const video = await getServerVideo(id);
+			if (video) {
+				get().addVideo(video);
 			}
-			get().setError(response.error ?? 'Error fetching video');
-			return undefined;
+			return video;
 		} catch (e) {
 			videoLogger.error('Failed to fetch video', { error: e });
-			get().setError('Failed to fetch video');
+			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch video';
+			get().setError(errorMessage);
 			return undefined;
 		} finally {
 			get().setLoading(false);
@@ -196,17 +187,15 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 	fetchVideos: async (folderIds) => {
 		get().setLoading(true);
 		try {
-			const response = await findVideos({ folderIds });
-			if (response.success && response.data) {
-				const videos = transformVideos(response.data as VideoBase[]);
+			const videos = await findVideos({ folderIds });
+			if (videos && videos.length > 0) {
 				get().addVideos(videos);
-				return videos;
 			}
-			get().setError(response.error ?? 'Error fetching videos');
-			return [];
+			return videos || [];
 		} catch (e) {
 			videoLogger.error('Failed to fetch videos', { error: e });
-			get().setError('Failed to fetch videos');
+			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch videos';
+			get().setError(errorMessage);
 			return [];
 		} finally {
 			get().setLoading(false);
@@ -216,21 +205,17 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 	createVideo: async (data) => {
 		get().setLoading(true);
 		try {
-			const response = await createServerVideo(data);
-			if (response.success && response.data) {
-				const video = transformVideo(response.data as VideoBase);
-				if (video) {
-					get().addVideo(video);
-					toastService.success('Video creado');
-				}
-				return video;
+			const video = await createServerVideo(data);
+			if (video) {
+				get().addVideo(video);
+				toastService.success('Video creado');
 			}
-			toastService.error(response.error ?? 'Error creating video');
-			get().setError(response.error ?? 'Error creating video');
-			return undefined;
+			return video;
 		} catch (e) {
 			videoLogger.error('Failed to create video', { error: e });
-			get().setError('Failed to create video');
+			const errorMessage = e instanceof Error ? e.message : 'Error creating video';
+			toastService.error(errorMessage);
+			get().setError(errorMessage);
 			return undefined;
 		} finally {
 			get().setLoading(false);
@@ -240,18 +225,15 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 	removeVideo: async (id) => {
 		get().setLoading(true);
 		try {
-			const response = await deleteServerVideo(id);
-			if (response.success) {
-				get().deleteVideo(id);
-				toastService.success('Video eliminado');
-				return true;
-			}
-			toastService.error(response.error ?? 'Error deleting video');
-			get().setError(response.error ?? 'Error deleting video');
-			return false;
+			await deleteServerVideo(id);
+			get().deleteVideo(id);
+			toastService.success('Video eliminado');
+			return true;
 		} catch (e) {
 			videoLogger.error('Failed to remove video', { error: e });
-			get().setError('Failed to remove video');
+			const errorMessage = e instanceof Error ? e.message : 'Error deleting video';
+			toastService.error(errorMessage);
+			get().setError(errorMessage);
 			return false;
 		} finally {
 			get().setLoading(false);

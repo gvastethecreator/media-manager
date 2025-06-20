@@ -5,7 +5,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
 import type { AlbumWithRelations } from '@/types/entities/album';
 
-const albumLogger = serverLogger.withContext('AlbumServerActions');
+const _albumLogger = serverLogger.withContext('AlbumServerActions');
 
 export interface AlbumCardData extends AlbumWithRelations {
 	_count: {

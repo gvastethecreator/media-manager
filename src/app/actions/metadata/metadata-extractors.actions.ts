@@ -2,7 +2,7 @@
 
 import { CacheManager } from '@/lib/cache';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { AIMetadata, MediaMetadata } from '@/types/metadata.types';
+import type { MediaMetadata } from '@/types/metadata.types';
 import { type Stats } from 'fs';
 import * as fs from 'fs/promises';
 import sharp from 'sharp';
@@ -75,7 +75,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	const stats = await withRetry<Stats>(() => fs.stat(path), options?.retry || METADATA_RETRY_CONFIG);
 	const buffer = await withRetry<Buffer>(() => fs.readFile(path), options?.retry || METADATA_RETRY_CONFIG);
 
-	const fileSystemInfo = {
+	const _fileSystemInfo = {
 		size: Number(stats.size),
 		created: stats.birthtime.toISOString(),
 		modified: stats.mtime.toISOString(),
@@ -140,8 +140,8 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	if (!options?.skipExif) {
 		try {
 			const exifData = await parseExifData(buffer, path);
-			metadata.exif = exifData;
-		} catch (error) {
+			metadata.exif = exifData.exif;
+		} catch (_error) {
 			extractorLogger.warn('No se pudieron extraer metadatos EXIF', { path });
 		}
 	}
@@ -150,7 +150,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 		try {
 			// Los metadatos IPTC se extraerán del buffer usando sharp si están disponibles
 			metadata.iptc = {};
-		} catch (error) {
+		} catch (_error) {
 			extractorLogger.warn('No se pudieron extraer metadatos IPTC', { path });
 		}
 	}
@@ -159,17 +159,58 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 		try {
 			// Los metadatos XMP se extraerán del buffer usando sharp si están disponibles
 			metadata.xmp = {};
-		} catch (error) {
+		} catch (_error) {
 			extractorLogger.warn('No se pudieron extraer metadatos XMP', { path });
 		}
 	}
 
 	// Obtener metadatos de IA
-	const aiMetadata: AIMetadata = getAIGenerationInfo(metadata as Record<string, unknown>);
-	metadata.ai = aiMetadata;
+	try {
+		const aiMetadata = await getAIGenerationInfo(metadata as Record<string, unknown>);
+		if (aiMetadata) {
+			// Convertir AIGenerationMetadata a AIMetadata
+			const aiMeta: import('@/types/metadata.types').AIMetadata = {
+				model: aiMetadata.model,
+				prompt: aiMetadata.prompt,
+				negativePrompt: aiMetadata.negative_prompt,
+				seed: typeof aiMetadata.seed === 'string' ? parseInt(aiMetadata.seed, 10) : aiMetadata.seed,
+				extraParameters: aiMetadata.extra_params,
+			};
+			metadata.ai = aiMeta;
+		}
+	} catch (_error) {
+		extractorLogger.warn('No se pudieron extraer metadatos de IA', { path });
+	}
 
-	// El resultado ya es MediaMetadata
-	const finalMetadata = metadata as MediaMetadata;
+	// Asegurar que todos los campos requeridos estén presentes
+	const finalMetadata: MediaMetadata = {
+		totalSize: metadata.totalSize!,
+		itemCount: metadata.itemCount!,
+		lastModified: metadata.lastModified!,
+		fileSize: metadata.fileSize!,
+		mimeType: metadata.mimeType!,
+		format: metadata.format!,
+		width: metadata.width,
+		height: metadata.height,
+		exif: metadata.exif,
+		iptc: metadata.iptc,
+		xmp: metadata.xmp,
+		icc: metadata.icc,
+		ai: metadata.ai,
+		gps: metadata.gps,
+		colorSpace: metadata.colorSpace,
+		colorProfile: metadata.colorProfile,
+		hasAlpha: metadata.hasAlpha,
+		orientation: metadata.orientation,
+		density: metadata.density,
+		isAnimated: metadata.isAnimated,
+		sizeInBytes: metadata.sizeInBytes,
+		dimensions: metadata.dimensions,
+		duration: metadata.duration,
+		encoding: metadata.encoding,
+		hash: metadata.hash,
+		customFields: metadata.customFields,
+	};
 
 	await metadataCache.set(normalizedPath, finalMetadata);
 	return finalMetadata;
