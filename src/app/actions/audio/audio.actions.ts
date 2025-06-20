@@ -36,26 +36,7 @@ export async function getAudioById(id: string) {
 
 // CREATE
 export async function createAudio(data: AudioFormData) {
-	const {
-		// Extraer relaciones que no se usan en el schema actual
-		images,
-		videos,
-		albums,
-		collections,
-		tags,
-		characters,
-		places,
-		worldItems,
-		concepts,
-		prompts,
-		notes,
-		wildcards,
-		properties,
-		groups,
-		file3d,
-		filePath,
-		...audioData
-	} = data;
+	const { filePath, ...audioData } = data;
 
 	try {
 		const prisma = await getPrismaClient();
@@ -74,26 +55,7 @@ export async function createAudio(data: AudioFormData) {
 
 // UPDATE
 export async function updateAudio(id: string, data: AudioFormData) {
-	const {
-		// Extraer relaciones que no se usan en el schema actual
-		images,
-		videos,
-		albums,
-		collections,
-		tags,
-		characters,
-		places,
-		worldItems,
-		concepts,
-		prompts,
-		notes,
-		wildcards,
-		properties,
-		groups,
-		file3d,
-		filePath,
-		...audioData
-	} = data;
+	const { filePath, ...audioData } = data;
 
 	try {
 		const prisma = await getPrismaClient();

@@ -36,27 +36,7 @@ export async function getDocumentById(id: string) {
 
 // CREATE
 export async function createDocument(data: DocumentFormData) {
-	const {
-		images,
-		videos,
-		audio,
-		file3d,
-		jsonFiles,
-		albums,
-		collections,
-		tags,
-		characters,
-                places,
-                _worldItems,
-                _concepts,
-                _prompts,
-                _notes,
-                _wildcards,
-                _properties,
-                _groups,
-		filePath,
-		...documentData
-	} = data;
+	const { filePath, ...documentData } = data;
 
 	try {
 		const prisma = await getPrismaClient();
@@ -75,27 +55,7 @@ export async function createDocument(data: DocumentFormData) {
 
 // UPDATE
 export async function updateDocument(id: string, data: DocumentFormData) {
-	const {
-		images,
-		videos,
-		audio,
-		file3d,
-		jsonFiles,
-		albums,
-		collections,
-		tags,
-		characters,
-                places,
-                _worldItems,
-                _concepts,
-                _prompts,
-                _notes,
-                _wildcards,
-                _properties,
-                _groups,
-		filePath,
-		...documentData
-	} = data;
+	const { filePath, ...documentData } = data;
 
 	try {
 		const prisma = await getPrismaClient();

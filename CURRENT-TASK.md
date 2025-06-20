@@ -562,6 +562,7 @@ graph TD
 - Se corrigieron variables no utilizadas en `document.actions.ts` y `file-3d.actions.ts`.
 - Se prefijaron con `_` para cumplir con las reglas de lint.
 
+\n## 🚧 Avance Actual: Lint fixes in actions\n- Simplificados destructuring en actions de audio, document y file3d para evitar variables sin uso\n- Prefijados parámetros opcionales con guión bajo\n- Arreglado tree building en queries de carpetas\n
 ## 🚧 Avance Actual: Collection Mappers
 
 - Eliminados los imports de **Prisma** en `collection/mappers.ts`.

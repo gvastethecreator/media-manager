@@ -14,10 +14,10 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { imageService } from '@/services/image-service-export';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
-    createEntityNotFoundError,
-    createServiceError,
-    ServiceErrorCode,
-    toServiceError,
+	createEntityNotFoundError,
+	createServiceError,
+	ServiceErrorCode,
+	toServiceError,
 } from '@/utils/errors/service-errors';
 import fs from 'fs/promises';
 import { revalidatePath } from 'next/cache';
@@ -32,7 +32,7 @@ const imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
  */
 export async function getThumbnail(
 	imageId: string,
-	quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
+	_quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
 ): Promise<Buffer> {
 	try {
 		const thumbnail = await imageService.getThumbnail(imageId);
@@ -48,7 +48,7 @@ export async function getThumbnail(
 /**
  * Genera la miniatura para una imagen
  */
-export async function generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
+export async function generateThumbnail(imageId: string, _quality: ThumbnailQuality): Promise<void> {
 	try {
 		await imageService.generateThumbnail(imageId);
 		revalidatePath(`/api/thumbnails/${imageId}`);

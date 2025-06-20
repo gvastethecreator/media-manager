@@ -36,25 +36,7 @@ export async function getFile3DById(id: string) {
 
 // CREATE
 export async function createFile3D(data: File3DFormData) {
-	const {
-		images,
-		videos,
-		audio,
-		albums,
-		collections,
-                tags,
-                characters,
-                places,
-                _worldItems,
-                _concepts,
-                _prompts,
-                _notes,
-                _wildcards,
-                _properties,
-                _groups,
-		filePath,
-		...file3dData
-	} = data;
+	const { filePath, ...file3dData } = data;
 
 	try {
 		const prisma = await getPrismaClient();
@@ -73,25 +55,7 @@ export async function createFile3D(data: File3DFormData) {
 
 // UPDATE
 export async function updateFile3D(id: string, data: File3DFormData) {
-	const {
-		images,
-		videos,
-		audio,
-		albums,
-		collections,
-		tags,
-		characters,
-		places,
-		worldItems,
-		concepts,
-		prompts,
-		notes,
-		wildcards,
-		properties,
-		groups,
-		filePath,
-		...file3dData
-	} = data;
+	const { filePath, ...file3dData } = data;
 
 	try {
 		const prisma = await getPrismaClient();

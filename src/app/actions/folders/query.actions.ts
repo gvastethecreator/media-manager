@@ -97,10 +97,14 @@ export async function getFolderTree(): Promise<FolderTreeNode[]> {
 
 	const tree: FolderTreeNode[] = [];
 	folders.forEach((folder) => {
+		const node = folderMap.get(folder.id);
+		if (!node) {
+			return;
+		}
 		if (folder.parentId && folderMap.has(folder.parentId)) {
-			folderMap.get(folder.parentId)?.children.push(folderMap.get(folder.id)!);
+			folderMap.get(folder.parentId)?.children.push(node);
 		} else {
-			tree.push(folderMap.get(folder.id)!);
+			tree.push(node);
 		}
 	});
 

@@ -98,7 +98,7 @@ export async function getOriginalImage(imageId: string): Promise<{ buffer: Buffe
  */
 export async function getImageThumbnailBuffer(
 	imageId: string,
-	quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
+	_quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
 ): Promise<{ buffer: Buffer; mimeType: string }> {
 	try {
 		const buffer = await imageService.getThumbnail(imageId);
