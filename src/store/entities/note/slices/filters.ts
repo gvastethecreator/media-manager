@@ -1,7 +1,6 @@
-import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { NoteSortOption } from '@/types/entities/note';
-import type { NoteFilters } from '@/types/entities/note/extended';
+import type { NoteFilters, NoteSortOption } from '@/types/entities/note/types';
+import type { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const filtersLogger = clientLogger.withContext('NoteStore:Filters');
@@ -30,12 +29,15 @@ export interface FiltersSlice {
 export const createFiltersSlice: StateCreator<NoteStore, [], [], FiltersSlice> = (set) => ({
 	// Estado inicial
 	filters: {
-		search: '',
-		category: undefined,
-		status: undefined,
-		priority: undefined,
-		tags: [],
+		searchQuery: '',
+		categories: [],
+		statuses: [],
+		priorities: [],
 		onlyFavorites: false,
+		contentContains: '',
+		hasTags: false,
+		hasImages: false,
+		hasVideos: false,
 	},
 	sortBy: 'updated_desc',
 	page: 1,
@@ -101,7 +103,7 @@ export const createFiltersSlice: StateCreator<NoteStore, [], [], FiltersSlice> =
 	setSearchFilter: (search) => {
 		filtersLogger.info('🔍 Filtrando por búsqueda:', search);
 		set((state: NoteStore) => ({
-			filters: { ...state.filters, search },
+			filters: { ...state.filters, searchQuery: search },
 			page: 1,
 		}));
 	},
@@ -126,12 +128,15 @@ export const createFiltersSlice: StateCreator<NoteStore, [], [], FiltersSlice> =
 		filtersLogger.info('🧹 Limpiando todos los filtros');
 		set({
 			filters: {
-				search: '',
-				category: undefined,
-				status: undefined,
-				priority: undefined,
-				tags: [],
+				searchQuery: '',
+				categories: [],
+				statuses: [],
+				priorities: [],
 				onlyFavorites: false,
+				contentContains: '',
+				hasTags: false,
+				hasImages: false,
+				hasVideos: false,
 			},
 			page: 1,
 		});

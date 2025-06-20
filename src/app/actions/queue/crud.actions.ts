@@ -7,24 +7,24 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    createQueueJob as createQueueJobService,
-    deleteQueueJob as deleteQueueJobService,
-    findQueueJobs,
-    updateQueueJob as updateQueueJobService
+	createQueueJob as createQueueJobService,
+	deleteQueueJob as deleteQueueJobService,
+	findQueueJobs,
+	updateQueueJob as updateQueueJobService,
 } from '@/services/queue-job/queue-job.service';
 import {
-    type CreateQueueJobInput,
-    type PaginatedQueueJobs,
-    type QueueJobExtended,
-    type QueueJobFilters,
-    type QueueJobPaginationOptions,
-    type UpdateQueueJobInput,
+	type CreateQueueJobInput,
+	type PaginatedQueueJobs,
+	type QueueJobExtended,
+	type QueueJobFilters,
+	type QueueJobPaginationOptions,
+	type UpdateQueueJobInput,
 } from '@/types/entities/queue-job';
 import {
-    createQueueJobSchema,
-    queueJobFiltersSchema,
-    queueJobPaginationSchema,
-    updateQueueJobSchema,
+	createQueueJobSchema,
+	queueJobFiltersSchema,
+	queueJobPaginationSchema,
+	updateQueueJobSchema,
 } from '@/types/entities/queue-job/schema';
 import { revalidatePath } from 'next/cache';
 

@@ -9,17 +9,17 @@
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    fromPrismaCollection,
-    fromPrismaCollections,
-    mapCollectionSearchOptionsToPrisma,
-    mapCreateCollectionDataToPrisma,
-    mapUpdateCollectionDataToPrisma,
+	fromPrismaCollection,
+	fromPrismaCollections,
+	mapCollectionSearchOptionsToPrisma,
+	mapCreateCollectionDataToPrisma,
+	mapUpdateCollectionDataToPrisma,
 } from '@/transformers/collection';
 import type {
-    CollectionComplete,
-    CollectionCreateInput,
-    CollectionSearchOptions,
-    CollectionUpdateInput
+	CollectionComplete,
+	CollectionCreateInput,
+	CollectionSearchOptions,
+	CollectionUpdateInput,
 } from '@/types/entities/collection';
 import { revalidatePath } from 'next/cache';
 
@@ -28,43 +28,43 @@ const logger = serverLogger.withContext('CollectionActions');
 // Objeto de inclusión para obtener una colección completa con todas sus relaciones y conteos.
 const COLLECTION_INCLUDE = {
 	images: {
-		select: { id: true }
+		select: { id: true },
 	},
 	videos: {
-		select: { id: true }
+		select: { id: true },
 	},
 	albums: {
-		select: { id: true }
+		select: { id: true },
 	},
 	tags: {
-		select: { id: true }
+		select: { id: true },
 	},
 	characters: {
-		select: { id: true }
+		select: { id: true },
 	},
 	places: {
-		select: { id: true }
+		select: { id: true },
 	},
 	worldItems: {
-		select: { id: true }
+		select: { id: true },
 	},
 	concepts: {
-		select: { id: true }
+		select: { id: true },
 	},
 	prompts: {
-		select: { id: true }
+		select: { id: true },
 	},
 	notes: {
-		select: { id: true }
+		select: { id: true },
 	},
 	wildcards: {
-		select: { id: true }
+		select: { id: true },
 	},
 	properties: {
-		select: { id: true }
+		select: { id: true },
 	},
 	groups: {
-		select: { id: true }
+		select: { id: true },
 	},
 	_count: {
 		select: {
@@ -81,7 +81,7 @@ const COLLECTION_INCLUDE = {
 			wildcards: true,
 			properties: true,
 			groups: true,
-		}
+		},
 	},
 };
 
@@ -133,7 +133,7 @@ export async function createCollection(data: CollectionCreateInput): Promise<Col
 	const prismaData = mapCreateCollectionDataToPrisma(data);
 	const newCollection = await prisma.collection.create({
 		data: prismaData,
-		include: COLLECTION_INCLUDE
+		include: COLLECTION_INCLUDE,
 	});
 	await revalidateCollectionPaths();
 	return fromPrismaCollection(newCollection);
@@ -149,7 +149,7 @@ export async function updateCollection(id: string, data: CollectionUpdateInput):
 	const updatedCollection = await prisma.collection.update({
 		where: { id },
 		data: prismaData,
-		include: COLLECTION_INCLUDE
+		include: COLLECTION_INCLUDE,
 	});
 	await revalidateCollectionPaths();
 	revalidatePath(`/collections/${id}`);
@@ -195,7 +195,9 @@ export async function removeImageFromCollection(collectionId: string, imageId: s
 /**
  * Obtiene las imágenes de una colección específica.
  */
-export async function getCollectionImages(collectionId: string): Promise<Array<{ id: string; name: string; path: string }>> {
+export async function getCollectionImages(
+	collectionId: string
+): Promise<Array<{ id: string; name: string; path: string }>> {
 	logger.info(`🖼️ Obteniendo imágenes de la colección: ${collectionId}`);
 	const prisma = await getPrismaClient();
 	const collection = await prisma.collection.findUnique({

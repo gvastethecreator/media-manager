@@ -223,7 +223,9 @@ export function AlbumsSettings() {
 					<CardHeader className="space-y-1 py-2 px-3">
 						<CardTitle className="text-sm">{isEditing ? 'Editar álbum' : 'Crear álbum'}</CardTitle>
 						<CardDescription className="text-xs">
-							{isEditing ? 'Modifica los detalles del álbum seleccionado' : 'Crea un nuevo álbum para organizar tus imágenes'}
+							{isEditing
+								? 'Modifica los detalles del álbum seleccionado'
+								: 'Crea un nuevo álbum para organizar tus imágenes'}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex-1 p-3">

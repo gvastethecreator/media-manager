@@ -7,11 +7,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { profileService } from '@/services/profile/profile.service';
-import type {
-    ProfileBase,
-    ProfileCreateInput,
-    ProfileUpdateInput
-} from '@/types/entities/profile/types';
+import type { ProfileBase, ProfileCreateInput, ProfileUpdateInput } from '@/types/entities/profile/types';
 import { toServiceError } from '@/utils/errors/service-errors';
 import { revalidatePath } from 'next/cache';
 

@@ -6,21 +6,21 @@
 import { createLogger } from '@/lib/logger';
 import { WorldItemCategory, WorldItemType } from '@/types/entities/world-item/enums';
 import {
-    WORLD_ITEM_SORT_PROPERTY_MAP,
-    type WorldItemCreateInput,
-    type WorldItemFilters,
-    type WorldItemSearchOptions,
-    type WorldItemSortCriteria,
-    type WorldItemUpdateInput,
+	WORLD_ITEM_SORT_PROPERTY_MAP,
+	type WorldItemCreateInput,
+	type WorldItemFilters,
+	type WorldItemSearchOptions,
+	type WorldItemSortCriteria,
+	type WorldItemUpdateInput,
 } from '@/types/entities/world-item/types';
 import {
-    serializeAttributes,
-    serializeEffects,
-    serializeFilters,
-    serializeProperties,
-    serializeRequirements,
-    serializeStats,
-    serializeTags,
+	serializeAttributes,
+	serializeEffects,
+	serializeFilters,
+	serializeProperties,
+	serializeRequirements,
+	serializeStats,
+	serializeTags,
 } from './serializers';
 
 // Logger específico para este módulo
@@ -82,15 +82,18 @@ interface SimpleWorldItemUpdateInput {
 	};
 }
 
+/**
+ * Interfaz simplificada para consultas WHERE de WorldItem
+ */
 interface SimpleWorldItemWhereInput {
 	AND?: SimpleWorldItemWhereInput[];
 	OR?: SimpleWorldItemWhereInput[];
 	NOT?: SimpleWorldItemWhereInput[];
 	name?: { contains: string; mode: 'insensitive' };
 	description?: { contains: string; mode: 'insensitive' };
-	type?: { in: string[] };
-	category?: { in: string[] };
-	rarity?: { in: string[] };
+	type?: { in: string[] } | { equals: string };
+	category?: { in: string[] } | { equals: string };
+	rarity?: { in: string[] } | { equals: string };
 	isFavorite?: boolean;
 	images?: { some: Record<string, any> };
 }
@@ -101,6 +104,20 @@ interface SimpleWorldItemOrderByInput {
 	rarity?: 'asc' | 'desc';
 	createdAt?: 'asc' | 'desc';
 	updatedAt?: 'asc' | 'desc';
+}
+
+/**
+ * Interfaz para opciones de búsqueda completa de WorldItem
+ */
+interface SimpleWorldItemSearchOptions {
+	skip?: number;
+	take?: number;
+	orderBy?: SimpleWorldItemOrderByInput;
+	where?: SimpleWorldItemWhereInput;
+	include?: {
+		images?: boolean;
+		_count?: boolean;
+	};
 }
 
 /**
@@ -393,12 +410,12 @@ export function toUpdateData(data: WorldItemUpdateInput): any {
  * @param options - Opciones de búsqueda
  * @returns Argumentos de búsqueda para Prisma
  */
-export function toSearchOptions(options: WorldItemSearchOptions = {}): SimpleWorldItemWhereInput {
+export function toSearchOptions(options: WorldItemSearchOptions = {}): SimpleWorldItemSearchOptions {
 	try {
 		const { filters, sortBy, page = 1, pageSize = 20, includeImages = false, includeStats = false } = options;
 
 		// Crear objeto de opciones
-		const findOptions: SimpleWorldItemWhereInput = {};
+		const findOptions: SimpleWorldItemSearchOptions = {};
 
 		// Aplicar paginación
 		findOptions.skip = (page - 1) * pageSize;
@@ -439,9 +456,9 @@ export function toSearchOptions(options: WorldItemSearchOptions = {}): SimpleWor
  * @param filters - Filtros de WorldItem
  * @returns Filtro para Prisma
  */
-export function createFilter(filters: WorldItemFilters = {}): any {
+export function createFilter(filters: WorldItemFilters): SimpleWorldItemWhereInput {
 	try {
-		const where: any = {};
+		const where: SimpleWorldItemWhereInput = {};
 		const conditions: any[] = [];
 
 		// Búsqueda por texto

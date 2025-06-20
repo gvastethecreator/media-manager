@@ -88,7 +88,7 @@ export async function createAlbum(data: AlbumCreateInput): Promise<AlbumWithRela
 	const prismaData = mapCreateAlbumDataToPrisma(data);
 	const newAlbum = await prisma.album.create({
 		data: prismaData,
-		include: ALBUM_INCLUDE
+		include: ALBUM_INCLUDE,
 	});
 	revalidatePath('/albums');
 	return fromPrismaAlbum(newAlbum);
@@ -103,7 +103,7 @@ export async function updateAlbum(id: string, data: AlbumUpdateInput): Promise<A
 	const updatedAlbum = await prisma.album.update({
 		where: { id },
 		data: prismaData,
-		include: ALBUM_INCLUDE
+		include: ALBUM_INCLUDE,
 	});
 	revalidatePath('/albums');
 	revalidatePath(`/albums/${id}`);

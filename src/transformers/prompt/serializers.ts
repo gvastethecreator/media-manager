@@ -4,9 +4,22 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PromptBase, PromptWithRelations } from '@/types/entities/prompt/types';
+import type { ExtendedPrompt } from '@/types/entities/prompt/extended';
+import type { PromptComplete } from '@/types/entities/prompt/types';
 
 const logger = serverLogger.withContext('PromptSerializers');
+
+/**
+ * Genera un preview del contenido del prompt
+ * @param content Contenido completo del prompt
+ * @returns Preview truncado del contenido
+ */
+function getPreviewContent(content: string, maxLength = 150): string {
+	if (content.length <= maxLength) {
+		return content;
+	}
+	return `${content.substring(0, maxLength).trim()}...`;
+}
 
 /**
  * Deserializa el campo de parámetros de un prompt
@@ -92,48 +105,35 @@ export function serializeTags(tags: string[] | string | null | undefined): strin
 }
 
 /**
- * Tipo extendido para prompt con propiedades adicionales para UI
- */
-export interface ExtendedPrompt extends PromptWithRelations {
-	parsedTags?: string;
-	parsedParameters?: string;
-	previewContent?: string;
-	lastUpdated?: Date;
-}
-
-/**
  * Transforma un prompt base a un prompt extendido con propiedades para UI
  * Deserializa campos JSON almacenados como strings a sus tipos correspondientes
  *
- * @param prompt Prompt base
+ * @param prompt Prompt completo
  * @returns Prompt extendido con campos parseados y propiedades adicionales
  */
-export function toExtendedPrompt(prompt: PromptBase): ExtendedPrompt {
+export function toExtendedPrompt(prompt: PromptComplete): ExtendedPrompt {
 	return {
 		...prompt,
-		parsedTags: serializeTags(prompt.tags),
-		parsedParameters: serializeParameters(prompt.parameters),
+		_count: {
+			images: 0,
+			videos: 0,
+			albums: 0,
+			collections: 0,
+			tags: 0,
+			characters: 0,
+			places: 0,
+			worldItems: 0,
+			concepts: 0,
+			notes: 0,
+			wildcards: 0,
+			properties: 0,
+			groups: 0,
+		},
+		parsedTags: typeof prompt.tags === 'string' ? deserializeTags(prompt.tags) : [],
+		parsedParameters: deserializeParameters(prompt.parameters),
 		previewContent: prompt.content ? getPreviewContent(prompt.content) : undefined,
 		lastUpdated: prompt.updatedAt instanceof Date ? prompt.updatedAt : new Date(prompt.updatedAt),
 	};
 }
 
-/**
- * Genera un texto de previsualización para el contenido de un prompt
- * @param content Contenido completo del prompt
- * @param maxLength Longitud máxima del texto de previsualización
- * @returns Texto recortado para previsualización
- */
-export function getPreviewContent(content: string, maxLength = 150): string {
-	if (!content) {
-		return '';
-	}
 
-	if (content.length <= maxLength) {
-		return content;
-	}
-
-	// Buscar el último espacio antes del límite
-	const cutPoint = content.substring(0, maxLength).lastIndexOf(' ');
-	return `${content.substring(0, cutPoint > 0 ? cutPoint : maxLength)}...`;
-}

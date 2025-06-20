@@ -6,7 +6,8 @@
 import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { WildcardViewMode } from '@/types/entities/wildcard';
-import type { WildcardState } from '../types';
+import type { WildcardState, WildcardDisplayState } from '../types';
+import type { WildcardCoreSlice } from './core';
 
 const uiLogger = clientLogger.withContext('WildcardStore:UI');
 
@@ -29,7 +30,7 @@ export interface WildcardUISlice {
 	setViewMode: (mode: WildcardViewMode) => void;
 
 	// Estados visuales
-	setWildcardDisplayState: (wildcardId: string, state: Partial<any>) => void;
+	setWildcardDisplayState: (wildcardId: string, state: Partial<WildcardDisplayState>) => void;
 	resetWildcardDisplayState: (wildcardId: string) => void;
 
 	// Drag & drop
@@ -54,26 +55,18 @@ export interface WildcardUISlice {
 	resetUI: () => void;
 }
 
-// Creador del slice
-export const createWildcardUISlice: StateCreator<WildcardState, [], [], WildcardUISlice> = (set, get) => ({
+export const createWildcardUISlice: StateCreator<
+	WildcardState & WildcardUISlice & WildcardCoreSlice,
+	[],
+	[],
+	WildcardUISlice
+> = (set, get) => ({
 	// Selección
 	selectWildcard: (id) => {
-		// Si id es null, limpiar la selección
-		if (id === null) {
-			uiLogger.info('🧹 Limpiando selección de comodines');
-			set((state) => ({
-				ui: {
-					...state.ui,
-					selectedIds: [],
-				},
-			}));
-			return;
-		}
-
-		uiLogger.info('🔍 Seleccionando comodín:', id);
+		uiLogger.info('✅ Seleccionando comodín:', id);
 		set((state) => {
-			// Asegurarse de que selectedIds está inicializado
 			const currentSelectedIds = state.ui.selectedIds || [];
+			if (currentSelectedIds.includes(id)) return state;
 
 			return {
 				ui: {
@@ -85,11 +78,9 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 	},
 
 	deselectWildcard: (id) => {
-		uiLogger.info('🔍 Deseleccionando comodín:', id);
+		uiLogger.info('❌ Deseleccionando comodín:', id);
 		set((state) => {
-			// Asegurarse de que selectedIds está inicializado
 			const currentSelectedIds = state.ui.selectedIds || [];
-
 			return {
 				ui: {
 					...state.ui,
@@ -100,7 +91,8 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 	},
 
 	toggleWildcardSelection: (id) => {
-		const isSelected = get().isWildcardSelected(id);
+		const selectedIds = get().ui.selectedIds || [];
+		const isSelected = selectedIds.includes(id);
 		uiLogger.info(`🔄 ${isSelected ? 'Deseleccionando' : 'Seleccionando'} comodín:`, id);
 
 		if (isSelected) {
@@ -113,9 +105,7 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 	selectMultipleWildcards: (ids) => {
 		uiLogger.info('🔍 Seleccionando múltiples comodines:', ids.length);
 		set((state) => {
-			// Asegurarse de que selectedIds está inicializado
 			const currentSelectedIds = state.ui.selectedIds || [];
-
 			return {
 				ui: {
 					...state.ui,
@@ -136,7 +126,6 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 	},
 
 	isWildcardSelected: (id) => {
-		// Asegurarse de que selectedIds está inicializado
 		const selectedIds = get().ui.selectedIds || [];
 		return selectedIds.includes(id);
 	},
@@ -185,7 +174,7 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 	},
 
 	// Estados visuales
-	setWildcardDisplayState: (wildcardId, _state) => {
+	setWildcardDisplayState: (wildcardId, displayState) => {
 		uiLogger.info('🎨 Actualizando estado visual para comodín:', wildcardId);
 		set((state) => ({
 			ui: {
@@ -194,7 +183,7 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 					...state.ui.displayState,
 					[wildcardId]: {
 						...state.ui.displayState[wildcardId],
-						...state,
+						...displayState,
 					},
 				},
 			},
@@ -247,7 +236,6 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 
 	// Expansión (para vistas jerárquicas)
 	toggleWildcardExpanded: (id) => {
-		// Asegurarse de que expandedIds está inicializado
 		const expandedIds = get().ui.expandedIds || [];
 		const isExpanded = expandedIds.includes(id);
 		uiLogger.info(`🔄 ${isExpanded ? 'Colapsando' : 'Expandiendo'} comodín:`, id);
@@ -262,8 +250,8 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 	expandWildcard: (id) => {
 		uiLogger.info('📂 Expandiendo comodín:', id);
 		set((state) => {
-			// Asegurarse de que expandedIds está inicializado
 			const currentExpandedIds = state.ui.expandedIds || [];
+			if (currentExpandedIds.includes(id)) return state;
 
 			return {
 				ui: {
@@ -277,9 +265,7 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 	collapseWildcard: (id) => {
 		uiLogger.info('📁 Colapsando comodín:', id);
 		set((state) => {
-			// Asegurarse de que expandedIds está inicializado
 			const currentExpandedIds = state.ui.expandedIds || [];
-
 			return {
 				ui: {
 					...state.ui,
@@ -312,72 +298,54 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 
 	// Opciones jerárquicas específicas
 	expandBranch: (id) => {
-		uiLogger.info('📂 Expandiendo rama del comodín:', id);
+		uiLogger.info('🌳 Expandiendo rama completa desde comodín:', id);
 
-		// Obtener todos los IDs en la rama
-		const wildcard = get().core.wildcards[id];
-		if (!wildcard) return;
+		const getChildrenIds = (parentId: string): string[] => {
+			const children = get().getChildWildcards(parentId);
+			let allIds = children.map(c => c.id);
 
-		// Array para almacenar todos los IDs de la rama
-		const idsToExpand = [id];
-
-		// Función recursiva para obtener todos los hijos
-		const getChildrenIds = (parentId: string) => {
-			const childWildcards = get().getChildWildcards(parentId);
-			for (const child of childWildcards) {
-				idsToExpand.push(child.id);
-				getChildrenIds(child.id);
+			for (const child of children) {
+				allIds = [...allIds, ...getChildrenIds(child.id)];
 			}
+
+			return allIds;
 		};
 
-		// Comenzar la recursión con el ID actual
-		getChildrenIds(id);
+		const branchIds = [id, ...getChildrenIds(id)];
 
-		// Establecer todos los IDs como expandidos
 		set((state) => {
-			// Asegurarse de que expandedIds está inicializado
 			const currentExpandedIds = state.ui.expandedIds || [];
-
 			return {
 				ui: {
 					...state.ui,
-					expandedIds: [...new Set([...currentExpandedIds, ...idsToExpand])],
+					expandedIds: [...new Set([...currentExpandedIds, ...branchIds])],
 				},
 			};
 		});
 	},
 
 	collapseBranch: (id) => {
-		uiLogger.info('📁 Colapsando rama del comodín:', id);
+		uiLogger.info('🌳 Colapsando rama completa desde comodín:', id);
 
-		// Obtener todos los IDs en la rama
-		const wildcard = get().core.wildcards[id];
-		if (!wildcard) return;
+		const getChildrenIds = (parentId: string): string[] => {
+			const children = get().getChildWildcards(parentId);
+			let allIds = children.map(c => c.id);
 
-		// Array para almacenar todos los IDs de la rama
-		const idsToCollapse = [id];
-
-		// Función recursiva para obtener todos los hijos
-		const getChildrenIds = (parentId: string) => {
-			const childWildcards = get().getChildWildcards(parentId);
-			for (const child of childWildcards) {
-				idsToCollapse.push(child.id);
-				getChildrenIds(child.id);
+			for (const child of children) {
+				allIds = [...allIds, ...getChildrenIds(child.id)];
 			}
+
+			return allIds;
 		};
 
-		// Comenzar la recursión con el ID actual
-		getChildrenIds(id);
+		const branchIds = [id, ...getChildrenIds(id)];
 
-		// Quitar todos los IDs de expandidos
 		set((state) => {
-			// Asegurarse de que expandedIds está inicializado
 			const currentExpandedIds = state.ui.expandedIds || [];
-
 			return {
 				ui: {
 					...state.ui,
-					expandedIds: currentExpandedIds.filter((expandedId) => !idsToCollapse.includes(expandedId)),
+					expandedIds: currentExpandedIds.filter(expandedId => !branchIds.includes(expandedId)),
 				},
 			};
 		});
@@ -385,16 +353,18 @@ export const createWildcardUISlice: StateCreator<WildcardState, [], [], Wildcard
 
 	// Reset
 	resetUI: () => {
-		uiLogger.info('🧹 Reseteando UI de comodines');
+		uiLogger.info('🔄 Reseteando estado de UI');
 		set((state) => ({
 			ui: {
 				...state.ui,
 				selectedIds: [],
 				isViewerOpen: false,
 				currentWildcardId: null,
+				displayState: {},
 				draggedWildcardId: null,
 				dropTargetWildcardId: null,
 				highlightedId: null,
+				expandedIds: [],
 			},
 		}));
 	},

@@ -5,19 +5,15 @@
  * @module app/actions/profiles
  */
 
-import type {
-    ProfileBase,
-    ProfileCreateInput,
-    ProfileUpdateInput
-} from '@/types/entities/profile/types';
+import type { ProfileBase, ProfileCreateInput, ProfileUpdateInput } from '@/types/entities/profile/types';
 import {
-    activateProfile as activateProfileAction,
-    createProfile as createProfileAction,
-    deleteProfile as deleteProfileAction,
-    getActiveProfile as getActiveProfileAction,
-    getProfile as getProfileAction,
-    getProfiles as getProfilesAction,
-    updateProfile as updateProfileAction,
+	activateProfile as activateProfileAction,
+	createProfile as createProfileAction,
+	deleteProfile as deleteProfileAction,
+	getActiveProfile as getActiveProfileAction,
+	getProfile as getProfileAction,
+	getProfiles as getProfilesAction,
+	updateProfile as updateProfileAction,
 } from './profile.actions';
 
 // Re-exportar funciones como funciones async con tipos apropiados

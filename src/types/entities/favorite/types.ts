@@ -28,7 +28,8 @@ export interface FavoriteBase {
 	id: string;
 	entityId: string;
 	entityType: FavoriteEntityType;
-	profileId: string;
+	userId?: string; // Opcional para compatibilidad
+	profileId?: string; // Opcional para compatibilidad
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -36,7 +37,7 @@ export interface FavoriteBase {
 /**
  * ⭐ Input para crear un nuevo favorito.
  */
-export type FavoriteCreateInput = Omit<FavoriteBase, 'id' | 'createdAt' | 'updatedAt' | 'profileId'>;
+export type FavoriteCreateInput = Omit<FavoriteBase, 'id' | 'createdAt' | 'updatedAt'>;
 
 /**
  * ⭐ Relaciones de un favorito.
@@ -48,6 +49,111 @@ export type FavoriteRelations = {};
  * ⭐ Tipo completo de un favorito con sus relaciones.
  */
 export interface FavoriteComplete extends FavoriteBase, FavoriteRelations {}
+
+/**
+ * ⭐ Favorito extendido con propiedades adicionales para la UI
+ */
+export interface FavoriteExtended extends FavoriteComplete {
+	entityName?: string;
+	entityPreview?: string;
+	entityIcon?: string;
+	entityColor?: string;
+	isSelected?: boolean;
+	isHovered?: boolean;
+	_count?: Record<string, number>;
+}
+
+/**
+ * ⭐ Favorito con imagen asociada
+ */
+export interface FavoriteWithImage extends FavoriteComplete {
+	image: any; // FileItem type
+}
+
+/**
+ * ⭐ Estadísticas de favoritos
+ */
+export interface FavoriteStats {
+	totalCount: number;
+	byType: Record<string, number>;
+	recentlyAdded: FavoriteComplete[];
+}
+
+/**
+ * ⭐ Agrupación de favoritos por tipo
+ */
+export interface FavoritesByType {
+	type: string;
+	displayName: string;
+	icon: string;
+	color: string;
+	count: number;
+	items: FavoriteComplete[];
+}
+
+/**
+ * ⭐ Filtros para favoritos
+ */
+export interface FavoriteFilters {
+	entityType?: string[];
+	createdAfter?: Date | null;
+	createdBefore?: Date | null;
+	search?: string;
+	limit?: number;
+	offset?: number;
+	sort?: string;
+	order?: 'asc' | 'desc';
+}
+
+/**
+ * ⭐ Input para actualizar un favorito
+ */
+export interface FavoriteUpdateInput extends Partial<FavoriteCreateInput> {
+	id: string;
+}
+
+// Constantes para mapeo de entidades
+export const FAVORITE_ENTITY_EMOJIS: Record<string, string> = {
+	[FavoriteEntityType.IMAGE]: '🖼️',
+	[FavoriteEntityType.ALBUM]: '📸',
+	[FavoriteEntityType.COLLECTION]: '🌟',
+	[FavoriteEntityType.FOLDER]: '📁',
+	[FavoriteEntityType.CHARACTER]: '👤',
+	[FavoriteEntityType.PLACE]: '📍',
+	[FavoriteEntityType.WORLD_ITEM]: '🎯',
+	[FavoriteEntityType.CONCEPT]: '💡',
+	[FavoriteEntityType.PROMPT]: '🎯',
+	[FavoriteEntityType.NOTE]: '📝',
+	default: '⭐',
+};
+
+export const FAVORITE_ENTITY_COLORS: Record<string, string> = {
+	[FavoriteEntityType.IMAGE]: '#3b82f6',
+	[FavoriteEntityType.ALBUM]: '#f97316',
+	[FavoriteEntityType.COLLECTION]: '#8b5cf6',
+	[FavoriteEntityType.FOLDER]: '#22c55e',
+	[FavoriteEntityType.CHARACTER]: '#f43f5e',
+	[FavoriteEntityType.PLACE]: '#0ea5e9',
+	[FavoriteEntityType.WORLD_ITEM]: '#d946ef',
+	[FavoriteEntityType.CONCEPT]: '#fbbf24',
+	[FavoriteEntityType.PROMPT]: '#10b981',
+	[FavoriteEntityType.NOTE]: '#ef4444',
+	default: '#3b82f6',
+};
+
+export const FAVORITE_ENTITY_DISPLAY_NAMES: Record<string, string> = {
+	[FavoriteEntityType.IMAGE]: 'Imágenes',
+	[FavoriteEntityType.ALBUM]: 'Álbumes',
+	[FavoriteEntityType.COLLECTION]: 'Colecciones',
+	[FavoriteEntityType.FOLDER]: 'Carpetas',
+	[FavoriteEntityType.CHARACTER]: 'Personajes',
+	[FavoriteEntityType.PLACE]: 'Lugares',
+	[FavoriteEntityType.WORLD_ITEM]: 'Objetos',
+	[FavoriteEntityType.CONCEPT]: 'Conceptos',
+	[FavoriteEntityType.PROMPT]: 'Prompts',
+	[FavoriteEntityType.NOTE]: 'Notas',
+	default: 'Favoritos',
+};
 
 // Alias para consistencia
 export type CreateFavoriteData = FavoriteCreateInput;

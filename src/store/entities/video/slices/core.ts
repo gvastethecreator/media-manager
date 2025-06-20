@@ -4,19 +4,14 @@
  */
 
 import {
-    createVideo as createServerVideo,
-    deleteVideo as deleteServerVideo,
-    findVideos,
-    getVideo as getServerVideo,
+	createVideo as createServerVideo,
+	deleteVideo as deleteServerVideo,
+	findVideos,
+	getVideo as getServerVideo,
 } from '@/app/actions/videos/video.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import type {
-    CreateVideoData,
-    UpdateVideoData,
-    VideoComplete,
-    VideoFilters
-} from '@/types/entities/video';
+import type { CreateVideoData, UpdateVideoData, VideoComplete, VideoFilters } from '@/types/entities/video';
 import type { StateCreator } from 'zustand';
 import type { VideoState } from '../types';
 

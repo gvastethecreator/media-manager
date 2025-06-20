@@ -77,9 +77,9 @@ export function ConceptCardFooter({
 	// Calcular nivel de "poder" para cartas TCG (mayor valor = carta más poderosa)
 	const powerLevel = tcgMode
 		? Math.min(
-			99,
-			Math.floor(imagesCount * 2 + videosCount * 3 + promptsCount * 2 + notesCount * 1 + totalRelations * 0.5)
-		)
+				99,
+				Math.floor(imagesCount * 2 + videosCount * 3 + promptsCount * 2 + notesCount * 1 + totalRelations * 0.5)
+			)
 		: 0;
 
 	return (

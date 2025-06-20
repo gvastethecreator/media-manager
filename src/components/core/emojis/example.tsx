@@ -18,28 +18,22 @@ export function EmojiPickerExample() {
 	});
 
 	const handleEmojiChange = (type: keyof typeof selectedEmojis) => (emoji: string) => {
-		setSelectedEmojis(prev => ({ ...prev, [type]: emoji }));
+		setSelectedEmojis((prev) => ({ ...prev, [type]: emoji }));
 	};
 
 	return (
 		<div className="space-y-6 p-6 max-w-4xl mx-auto">
 			<div className="text-center space-y-2">
 				<h1 className="text-3xl font-bold">🎨 EmojiPicker con Frimousse</h1>
-				<p className="text-muted-foreground">
-					Ejemplos de uso después de la migración de emoji-mart
-				</p>
+				<p className="text-muted-foreground">Ejemplos de uso después de la migración de emoji-mart</p>
 			</div>
 
 			<div className="grid gap-6 md:grid-cols-2">
 				{/* Ejemplo 1: Modo Compacto */}
 				<Card>
 					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							📱 Modo Compacto
-						</CardTitle>
-						<CardDescription>
-							Ideal para formularios y espacios reducidos
-						</CardDescription>
+						<CardTitle className="flex items-center gap-2">📱 Modo Compacto</CardTitle>
+						<CardDescription>Ideal para formularios y espacios reducidos</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-2">
@@ -56,9 +50,9 @@ export function EmojiPickerExample() {
 						/>
 
 						<div className="text-xs text-muted-foreground">
-							• Emojis frecuentes visibles<br />
-							• Búsqueda integrada<br />
-							• Optimizado para formularios
+							• Emojis frecuentes visibles
+							<br />• Búsqueda integrada
+							<br />• Optimizado para formularios
 						</div>
 					</CardContent>
 				</Card>
@@ -66,12 +60,8 @@ export function EmojiPickerExample() {
 				{/* Ejemplo 2: Modo Completo */}
 				<Card>
 					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							🖥️ Modo Completo
-						</CardTitle>
-						<CardDescription>
-							Para selección detallada con más opciones
-						</CardDescription>
+						<CardTitle className="flex items-center gap-2">🖥️ Modo Completo</CardTitle>
+						<CardDescription>Para selección detallada con más opciones</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-2">
@@ -88,9 +78,9 @@ export function EmojiPickerExample() {
 						/>
 
 						<div className="text-xs text-muted-foreground">
-							• Más emojis frecuentes<br />
-							• Búsqueda expandida<br />
-							• Mejor para desktop
+							• Más emojis frecuentes
+							<br />• Búsqueda expandida
+							<br />• Mejor para desktop
 						</div>
 					</CardContent>
 				</Card>
@@ -98,18 +88,16 @@ export function EmojiPickerExample() {
 				{/* Ejemplo 3: Uso en Formulario */}
 				<Card className="md:col-span-2">
 					<CardHeader>
-						<CardTitle className="flex items-center gap-2">
-							📝 Integración en Formulario
-						</CardTitle>
-						<CardDescription>
-							Ejemplo de uso real en un formulario de creación
-						</CardDescription>
+						<CardTitle className="flex items-center gap-2">📝 Integración en Formulario</CardTitle>
+						<CardDescription>Ejemplo de uso real en un formulario de creación</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-4">
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 								<div className="space-y-2">
-									<label htmlFor="album-name" className="text-sm font-medium">Nombre</label>
+									<label htmlFor="album-name" className="text-sm font-medium">
+										Nombre
+									</label>
 									<input
 										id="album-name"
 										className="w-full px-3 py-2 border rounded-md"
@@ -129,7 +117,9 @@ export function EmojiPickerExample() {
 								</div>
 
 								<div className="space-y-2">
-									<label htmlFor="album-category" className="text-sm font-medium">Categoría</label>
+									<label htmlFor="album-category" className="text-sm font-medium">
+										Categoría
+									</label>
 									<select id="album-category" className="w-full px-3 py-2 border rounded-md">
 										<option>Personal</option>
 										<option>Trabajo</option>

@@ -4,7 +4,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { ImageViewMode } from '../../../../types/entities/image';
+import type { ImageViewMode } from '../../../../types/entities/image/types';
 import type { ImageState } from '../types';
 
 // Slice para estado de UI

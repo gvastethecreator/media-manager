@@ -38,10 +38,10 @@ interface WhereClause {
 	};
 	OR?: Array<
 		| {
-				name: { contains: string; };
+				name: { contains: string };
 		  }
 		| {
-				category: { contains: string; };
+				category: { contains: string };
 		  }
 	>;
 }

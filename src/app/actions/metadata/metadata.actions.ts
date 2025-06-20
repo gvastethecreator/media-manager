@@ -19,7 +19,7 @@ const MetadataErrorCode = {
 	OPERATION_FAILED: 'OPERATION_FAILED',
 } as const;
 
-type MetadataErrorCodeType = typeof MetadataErrorCode[keyof typeof MetadataErrorCode];
+type MetadataErrorCodeType = (typeof MetadataErrorCode)[keyof typeof MetadataErrorCode];
 
 // Función creadora de errores
 const _createMetadataError = (

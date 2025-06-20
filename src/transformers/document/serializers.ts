@@ -7,6 +7,6 @@ export function validateDocument(input: unknown): DocumentComplete {
 	// Agregar _count vacío para convertir a DocumentComplete
 	return {
 		...document,
-		_count: {}
+		_count: {},
 	};
 }

@@ -1,6 +1,5 @@
 'use client';
 
-
 import { cn } from '@/lib/utils';
 import { TagRarity } from '@/types/entities/tag';
 import { ImageIcon } from 'lucide-react';

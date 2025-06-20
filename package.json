@@ -107,7 +107,7 @@
     "zustand": "^5.0.5"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.0.0",
+    "@biomejs/biome": "2.0.2",
     "@hookform/resolvers": "^5.1.1",
     "@jest/globals": "30.0.2",
     "@svgr/webpack": "^8.1.0",

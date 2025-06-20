@@ -3,7 +3,7 @@
  * @module store/entities/image/types
  */
 
-import type { Image, ImageExtended, ImageSortCriteria, ImageViewMode } from '../../../types/entities/image';
+import type { ImageExtended, ImageSortCriteria, ImageViewMode } from '../../../types/entities/image/types';
 
 /**
  * Tipos de agrupamiento para imágenes
@@ -26,7 +26,7 @@ export interface ImageGroup {
 	id: string;
 	label: string;
 	count: number;
-	images: Image[];
+	images: ImageExtended[];
 	subgroups?: ImageGroup[];
 }
 
@@ -45,7 +45,7 @@ export interface ImageState {
  * Estado del slice core
  */
 export interface ImageCoreState {
-	images: Record<string, Image>;
+	images: Record<string, ImageExtended>;
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;

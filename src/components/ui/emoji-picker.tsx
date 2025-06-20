@@ -19,9 +19,36 @@ interface EmojiPickerProps {
 
 // 🎯 Emojis comunes para el proyecto de gestión de imágenes
 const commonEmojis = [
-	'📦', '🗃️', '🧰', '💎', '🏆', '🎁', '🔮', '⚔️', '🛡️', '📚',
-	'🧙‍♂️', '🧝‍♀️', '🧪', '🧬', '🔍', '🔑', '💰', '🪙', '🧿', '🏺',
-	'🍄', '🌿', '🔥', '💧', '⚡', '🌪️', '❄️', '🪄', '🧠', '💀',
+	'📦',
+	'🗃️',
+	'🧰',
+	'💎',
+	'🏆',
+	'🎁',
+	'🔮',
+	'⚔️',
+	'🛡️',
+	'📚',
+	'🧙‍♂️',
+	'🧝‍♀️',
+	'🧪',
+	'🧬',
+	'🔍',
+	'🔑',
+	'💰',
+	'🪙',
+	'🧿',
+	'🏺',
+	'🍄',
+	'🌿',
+	'🔥',
+	'💧',
+	'⚡',
+	'🌪️',
+	'❄️',
+	'🪄',
+	'🧠',
+	'💀',
 ];
 
 export function EmojiPicker({
@@ -78,11 +105,7 @@ export function EmojiPicker({
 				<PopoverTrigger asChild>
 					<Button
 						variant="outline"
-						className={cn(
-							'h-8 w-full',
-							showLabel ? 'justify-between' : 'justify-center',
-							className
-						)}
+						className={cn('h-8 w-full', showLabel ? 'justify-between' : 'justify-center', className)}
 					>
 						<span className="text-base">{selectedEmoji || '😀'}</span>
 						{showLabel && <Smile className="h-3.5 w-3.5 ml-2 text-muted-foreground" />}
@@ -92,19 +115,14 @@ export function EmojiPicker({
 					<div className="emoji-picker-compact">
 						{/* 🔍 Emojis comunes para acceso rápido */}
 						<div className="px-3 pt-3 pb-2 border-b">
-							<div className="text-xs font-medium text-muted-foreground mb-2">
-								Emojis comunes
-							</div>
+							<div className="text-xs font-medium text-muted-foreground mb-2">Emojis comunes</div>
 							<div className="grid grid-cols-10 gap-1">
 								{commonEmojis.slice(0, 20).map((emoji) => (
 									<Button
 										key={emoji}
 										variant="ghost"
 										size="sm"
-										className={cn(
-											'h-6 w-6 p-0 text-sm',
-											selectedEmoji === emoji && 'bg-accent text-accent-foreground'
-										)}
+										className={cn('h-6 w-6 p-0 text-sm', selectedEmoji === emoji && 'bg-accent text-accent-foreground')}
 										onClick={() => handleQuickSelect(emoji)}
 									>
 										{emoji}
@@ -115,10 +133,7 @@ export function EmojiPicker({
 
 						{/* 🎨 Picker principal con Frimousse */}
 						<div className="p-2">
-							<FrimousseEmojiPicker.Root
-								onEmojiSelect={handleEmojiSelect}
-								className="w-full"
-							>
+							<FrimousseEmojiPicker.Root onEmojiSelect={handleEmojiSelect} className="w-full">
 								<FrimousseEmojiPicker.Search
 									placeholder="Buscar emoji..."
 									className="w-full mb-2 px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
@@ -145,19 +160,14 @@ export function EmojiPicker({
 		<div className={cn('flex flex-col w-[400px] border rounded-lg', className)}>
 			{/* 🔍 Emojis comunes */}
 			<div className="p-4 border-b">
-				<div className="text-sm font-medium text-muted-foreground mb-3">
-					Emojis comunes
-				</div>
+				<div className="text-sm font-medium text-muted-foreground mb-3">Emojis comunes</div>
 				<div className="grid grid-cols-10 gap-2">
 					{commonEmojis.map((emoji) => (
 						<Button
 							key={emoji}
 							variant="ghost"
 							size="sm"
-							className={cn(
-								'h-8 w-8 p-0',
-								selectedEmoji === emoji && 'bg-accent text-accent-foreground'
-							)}
+							className={cn('h-8 w-8 p-0', selectedEmoji === emoji && 'bg-accent text-accent-foreground')}
 							onClick={() => handleQuickSelect(emoji)}
 						>
 							{emoji}
@@ -168,10 +178,7 @@ export function EmojiPicker({
 
 			{/* 🎨 Picker principal */}
 			<div className="p-4">
-				<FrimousseEmojiPicker.Root
-					onEmojiSelect={handleEmojiSelect}
-					className="w-full"
-				>
+				<FrimousseEmojiPicker.Root onEmojiSelect={handleEmojiSelect} className="w-full">
 					<FrimousseEmojiPicker.Search
 						placeholder="Buscar emoji..."
 						className="w-full mb-4 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"

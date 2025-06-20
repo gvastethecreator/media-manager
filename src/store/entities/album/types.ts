@@ -6,9 +6,8 @@
  */
 
 import type {
-	Album,
+	AlbumComplete,
 	AlbumDisplayState,
-	AlbumFilters,
 	AlbumSortCriteria,
 	AlbumType,
 	AlbumViewMode,
@@ -21,7 +20,7 @@ import type {
  */
 export interface AlbumState {
 	// 📋 Datos principales
-	albums: Album[];
+	albums: AlbumComplete[];
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;
@@ -31,9 +30,9 @@ export interface AlbumState {
 	filters: AlbumFiltersState;
 
 	// 🔍 Selectores y getters
-	getAlbumById: (id: string) => Album | undefined;
-	getFilteredAlbums: () => Album[];
-	getSortedAlbums: () => Album[];
+	getAlbumById: (id: string) => AlbumComplete | undefined;
+	getFilteredAlbums: () => AlbumComplete[];
+	getSortedAlbums: () => AlbumComplete[];
 }
 
 /**
@@ -53,15 +52,28 @@ export interface AlbumUIState {
 
 /**
  * 🔍 Estado de filtros del store
+ * Nota: No extiende AlbumFilters para evitar conflictos de propiedades
  */
-export interface AlbumFiltersState extends AlbumFilters {
+export interface AlbumFiltersState {
+	// Filtros básicos
+	query: string;
+	searchQuery: string; // Alias para compatibilidad
+
+	// Filtros específicos
 	sortBy: AlbumSortCriteria;
-	searchQuery: string;
 	filterByType: AlbumType | null;
 	filterByParentId: string | null;
 	filterFavorites: boolean;
 	filterShared: boolean;
 	filterArchived: boolean;
+
+	// Filtros de contenido
+	hasImages?: boolean;
+	hasVideos?: boolean;
+	categories?: string[];
+	types?: string[];
+
+	// Rango de fechas
 	dateRange: {
 		from: Date | null;
 		to: Date | null;
@@ -74,7 +86,7 @@ export interface AlbumFiltersState extends AlbumFilters {
 export interface AlbumActions {
 	// 📥 Carga de datos
 	loadAlbums: () => Promise<void>;
-	loadAlbumById: (id: string) => Promise<Album | undefined>;
+	loadAlbumById: (id: string) => Promise<AlbumComplete | undefined>;
 
 	// 📝 Gestión de álbumes
 	createAlbum: (album: CreateAlbumData) => Promise<void>;

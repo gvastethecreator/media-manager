@@ -5,29 +5,35 @@
 
 // Importar explícitamente lo necesario de cada módulo
 import {
-    groupFavoritesByType as groupFavoritesByTypeMapper, // Renombrar si es necesario
-    mapCreateFavoriteDataToPrisma,
-    mapUpdateFavoriteDataToPrisma,
-    toFavoriteExtended,
+	groupFavoritesByType as groupFavoritesByTypeMapper, // Renombrar si es necesario
+	mapCreateFavoriteDataToPrisma,
+	mapUpdateFavoriteDataToPrisma,
+	toFavoriteExtended,
 } from './mappers';
 
 import { toFavoritesWithImages, toFavoriteWithImage, transformImageToFileItem } from './serializers';
 
 import {
-    calculateFavoriteStats, // Renombrar si es necesario
-    transformFavorite,
-    transformFavorites,
-    transformFavoriteToExtended,
+	calculateFavoriteStats, // Renombrar si es necesario
+	transformFavorite,
+	transformFavorites,
+	transformFavoriteToExtended,
 } from './transformer';
 
 // Re-exportar explícitamente para controlar qué se expone
 export {
-    calculateFavoriteStats,
-    // Exportar uno de los groupFavoritesByType, el que sea el principal
-    groupFavoritesByTypeMapper as groupFavoritesByType,
-    mapCreateFavoriteDataToPrisma,
-    mapUpdateFavoriteDataToPrisma,
-    toFavoriteExtended, toFavoritesWithImages, toFavoriteWithImage, transformFavorite, transformFavorites, transformFavoriteToExtended, transformImageToFileItem
+	calculateFavoriteStats,
+	// Exportar uno de los groupFavoritesByType, el que sea el principal
+	groupFavoritesByTypeMapper as groupFavoritesByType,
+	mapCreateFavoriteDataToPrisma,
+	mapUpdateFavoriteDataToPrisma,
+	toFavoriteExtended,
+	toFavoritesWithImages,
+	toFavoriteWithImage,
+	transformFavorite,
+	transformFavorites,
+	transformFavoriteToExtended,
+	transformImageToFileItem,
 };
 
 /**

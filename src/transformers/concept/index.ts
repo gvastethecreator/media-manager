@@ -6,14 +6,13 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
-    ConceptComplete,
-    ConceptCreateInput,
-    ConceptFilters,
-    ConceptSearchOptions,
-    ConceptSearchResult,
-    ConceptUpdateInput,
+	ConceptComplete,
+	ConceptCreateInput,
+	ConceptFilters,
+	ConceptSearchOptions,
+	ConceptSearchResult,
+	ConceptUpdateInput,
 } from '@/types/entities/concept/types';
-import { handleTransformerError } from '@/utils/transformers/errors';
 
 import { toCreateConceptData, toSearchOptions, toSearchResult, toUpdateConceptData } from './mappers';
 
@@ -53,12 +52,25 @@ export async function searchConcepts(options: ConceptSearchOptions = {}): Promis
 		);
 
 		// Usar toSearchResult con los parámetros correctos
-		const result = toSearchResult(concepts, total, options);
+		const result: ConceptSearchResult = {
+			items: concepts,
+			total,
+			page: options.page || 1,
+			pageSize: options.pageSize || 20,
+			totalPages: Math.ceil(total / (options.pageSize || 20)),
+		};
 		logger.info(`✅ Encontrados ${result.items.length} conceptos`);
 
 		return result;
 	} catch (error) {
-		return handleTransformerError(error, 'Error al buscar conceptos', logger);
+		logger.error('Error al buscar conceptos:', error);
+		return {
+			items: [],
+			total: 0,
+			page: 1,
+			pageSize: 20,
+			totalPages: 0,
+		};
 	}
 }
 
@@ -84,7 +96,8 @@ export async function getConceptById(id: string): Promise<ConceptComplete | null
 			includeUI: true,
 		});
 	} catch (error) {
-		throw handleTransformerError(error);
+		logger.error('Error al obtener concepto por ID:', error);
+		throw error;
 	}
 }
 
@@ -113,7 +126,8 @@ export async function createConcept(data: ConceptCreateInput): Promise<ConceptCo
 			includeUI: true,
 		});
 	} catch (error) {
-		throw handleTransformerError(error);
+		logger.error('Error al crear concepto:', error);
+		throw error;
 	}
 }
 
@@ -143,7 +157,8 @@ export async function updateConcept(id: string, data: ConceptUpdateInput): Promi
 			includeUI: true,
 		});
 	} catch (error) {
-		throw handleTransformerError(error);
+		logger.error('Error al actualizar concepto:', error);
+		throw error;
 	}
 }
 
@@ -156,7 +171,8 @@ export async function deleteConcept(id: string): Promise<void> {
 			where: { id },
 		});
 	} catch (error) {
-		throw handleTransformerError(error);
+		logger.error('Error al eliminar concepto:', error);
+		throw error;
 	}
 }
 
@@ -182,7 +198,8 @@ export async function getConceptsByIds(ids: string[]): Promise<ConceptComplete[]
 			})
 		);
 	} catch (error) {
-		throw handleTransformerError(error);
+		logger.error('Error al obtener conceptos por IDs:', error);
+		throw error;
 	}
 }
 

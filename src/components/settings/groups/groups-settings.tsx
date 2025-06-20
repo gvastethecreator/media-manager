@@ -124,9 +124,7 @@ export function GroupsSettings() {
 			state.groups.filter((group) => {
 				const query = state.searchQuery.toLowerCase();
 				const matchesQuery =
-					!query ||
-					group.name.toLowerCase().includes(query) ||
-					(group.description?.toLowerCase().includes(query));
+					!query || group.name.toLowerCase().includes(query) || group.description?.toLowerCase().includes(query);
 
 				const matchesCategory =
 					state.selectedCategories.length === 0 ||

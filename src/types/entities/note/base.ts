@@ -6,4 +6,3 @@
 
 // Re-export desde types para mantener compatibilidad
 export type { NoteBase } from './types';
-

@@ -53,8 +53,6 @@ const normalizePathForCache = (path: string): string => {
 	return normalized;
 };
 
-
-
 /**
  * Extrae metadatos de un archivo
  */
@@ -173,7 +171,7 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 				model: aiMetadata.model,
 				prompt: aiMetadata.prompt,
 				negativePrompt: aiMetadata.negative_prompt,
-				seed: typeof aiMetadata.seed === 'string' ? parseInt(aiMetadata.seed, 10) : aiMetadata.seed,
+				seed: typeof aiMetadata.seed === 'string' ? Number.parseInt(aiMetadata.seed, 10) : aiMetadata.seed,
 				extraParameters: aiMetadata.extra_params,
 			};
 			metadata.ai = aiMeta;

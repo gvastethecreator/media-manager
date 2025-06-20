@@ -8,31 +8,48 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { type CollectionCoreSlice, createCollectionCoreSlice } from './slices/core';
 import { type CollectionFiltersSlice, createCollectionFiltersSlice } from './slices/filters';
-import { type CollectionUISlice, createCollectionUISlice } from './slices/ui';
 import type { CollectionState } from './types';
 
 /**
  * Tipo completo del store combinado
  */
-export type CollectionStore = CollectionState & CollectionCoreSlice & CollectionUISlice & CollectionFiltersSlice;
+export type CollectionStore = CollectionState & CollectionCoreSlice & CollectionFiltersSlice;
 
 /**
  * Estado inicial del store
  */
 const initialState: CollectionState = {
-	collections: [],
+	// Datos principales - usando Record para mejor performance
+	collections: {},
+
+	// Estado UI
 	viewConfig: {
-		viewType: 'grid',
+		mode: 'grid',
+		gridColumns: 3,
+		cardSize: 'medium',
+		showStats: true,
+		showDescription: true,
+		defaultView: 'cards',
 		sortBy: 'name',
 		sortDirection: 'asc',
-		showImages: true,
-		imageCount: 3,
-		enableAnimations: true,
 		groupBy: null,
 	},
 	selectedCollectionId: null,
+	hoveredCollectionId: null,
+	expandedCollectionIds: [],
+
+	// Estado de carga y errores
 	isLoading: false,
 	error: null,
+
+	// Filtrado y ordenamiento
+	activeFilters: [],
+	searchTerm: '',
+	defaultSortOption: 'name_asc',
+	currentSortOption: 'name_asc',
+
+	// Agrupamiento
+	groupBy: null,
 };
 
 /**
@@ -43,15 +60,18 @@ export const useCollectionStore = create<CollectionStore>()(
 		(...a) => ({
 			...initialState,
 			...createCollectionCoreSlice(...a),
-			...createCollectionUISlice(...a),
 			...createCollectionFiltersSlice(...a),
 		}),
 		{
 			name: 'collection-store',
 			storage: createJSONStorage(() => localStorage),
 			partialize: (state) => ({
+				collections: state.collections,
 				viewConfig: state.viewConfig,
 				selectedCollectionId: state.selectedCollectionId,
+				defaultSortOption: state.defaultSortOption,
+				currentSortOption: state.currentSortOption,
+				groupBy: state.groupBy,
 			}),
 		}
 	)
@@ -66,8 +86,7 @@ export const useCollectionStore = create<CollectionStore>()(
  * @param id ID de la colección
  * @returns Función selectora para obtener la colección
  */
-export const selectCollectionById = (id: string) => (state: CollectionStore) =>
-	state.collections.find((collection) => collection.id === id);
+export const selectCollectionById = (id: string) => (state: CollectionStore) => state.collections[id];
 
 /**
  * Obtiene todas las colecciones ordenadas según la configuración actual
@@ -89,7 +108,7 @@ export const selectGroupedCollections = (state: CollectionStore) => {
  * Obtiene las colecciones favoritas
  */
 export const selectFavoriteCollections = (state: CollectionStore) => {
-	return state.collections.filter((collection) => collection.isFavorite);
+	return Object.values(state.collections).filter((collection) => collection.isFavorite);
 };
 
 /**
@@ -97,4 +116,18 @@ export const selectFavoriteCollections = (state: CollectionStore) => {
  */
 export const selectCurrentCollection = (state: CollectionStore) => {
 	return state.getSelectedCollection();
+};
+
+/**
+ * Obtiene todas las colecciones como array
+ */
+export const selectAllCollections = (state: CollectionStore) => {
+	return Object.values(state.collections);
+};
+
+/**
+ * Obtiene el número total de colecciones
+ */
+export const selectCollectionCount = (state: CollectionStore) => {
+	return Object.keys(state.collections).length;
 };

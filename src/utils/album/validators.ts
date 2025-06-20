@@ -176,7 +176,11 @@ export function isValidAlbumName(name: string): boolean {
  * @returns true si la operación es válida (no crea ciclos), false en caso contrario
  * @deprecated Album no tiene jerarquía en el modelo actual
  */
-export function isValidAlbumHierarchy(_albumId: string, _newParentId: string, _allAlbums: Record<string, Album>): boolean {
+export function isValidAlbumHierarchy(
+	_albumId: string,
+	_newParentId: string,
+	_allAlbums: Record<string, Album>
+): boolean {
 	// TODO: Album no tiene relación parent/children en el modelo actual
 	return true; // Siempre válido ya que no hay jerarquía
 }

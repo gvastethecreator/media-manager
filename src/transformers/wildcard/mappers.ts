@@ -71,10 +71,7 @@ function mapWildcardFiltersToPrisma(filters: WildcardFilters): Prisma.WildcardWh
 	const where: Prisma.WildcardWhereInput = {};
 
 	if (filters.search) {
-		where.OR = [
-			{ name: { contains: filters.search } },
-			{ description: { contains: filters.search } },
-		];
+		where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
 	}
 
 	if (filters.category) {

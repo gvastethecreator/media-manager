@@ -1,6 +1,10 @@
-import type { ConceptBase, ConceptWithStats } from '@/types/entities/concept/base';
-import type { ConceptSortOption, ConceptViewMode } from '@/types/entities/concept/enums';
-import type { ConceptFilters } from '@/types/entities/concept/extended';
+import type {
+	ConceptBase,
+	ConceptFilters,
+	ConceptSortOption,
+	ConceptViewMode,
+	ConceptWithStats,
+} from '@/types/entities/concept/types';
 import { EntityType } from '@/types/entities/entities';
 
 /**

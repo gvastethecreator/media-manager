@@ -75,12 +75,24 @@ export class Logger {
 }
 
 export const logger = {
-	withContext: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
-	debug: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
-	info: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
-	warn: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
-	error: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
-	success: () => { throw new Error(MIGRATION_DISABLED_ERROR); },
+	withContext: () => {
+		throw new Error(MIGRATION_DISABLED_ERROR);
+	},
+	debug: () => {
+		throw new Error(MIGRATION_DISABLED_ERROR);
+	},
+	info: () => {
+		throw new Error(MIGRATION_DISABLED_ERROR);
+	},
+	warn: () => {
+		throw new Error(MIGRATION_DISABLED_ERROR);
+	},
+	error: () => {
+		throw new Error(MIGRATION_DISABLED_ERROR);
+	},
+	success: () => {
+		throw new Error(MIGRATION_DISABLED_ERROR);
+	},
 };
 
 export function createServerServiceLogger(): never {

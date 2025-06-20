@@ -67,10 +67,25 @@ export type DocumentFormData = Omit<Document, 'id' | 'createdAt' | 'updatedAt'> 
 /**
  * 🔗 Datos de relación para input (legacy, se mantiene para compatibilidad)
  */
-export type DocumentRelationInput = Pick<DocumentFormData,
-	'images' | 'videos' | 'audio' | 'file3d' | 'jsonFiles' | 'albums' | 'collections' |
-	'tags' | 'characters' | 'places' | 'worldItems' | 'concepts' | 'prompts' |
-	'notes' | 'wildcards' | 'properties' | 'groups'
+export type DocumentRelationInput = Pick<
+	DocumentFormData,
+	| 'images'
+	| 'videos'
+	| 'audio'
+	| 'file3d'
+	| 'jsonFiles'
+	| 'albums'
+	| 'collections'
+	| 'tags'
+	| 'characters'
+	| 'places'
+	| 'worldItems'
+	| 'concepts'
+	| 'prompts'
+	| 'notes'
+	| 'wildcards'
+	| 'properties'
+	| 'groups'
 >;
 
 /**

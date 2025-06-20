@@ -11,12 +11,7 @@ import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from 'next/cache';
 
 import { extendActivity, generateActivityDescription, mapCreateActivityDataToPrisma } from '@/transformers/activity';
-import {
-    type Activity,
-    ActivityEventType,
-    ActivityType,
-    type CreateActivityData,
-} from '@/types/entities/activity';
+import { type Activity, ActivityEventType, ActivityType, type CreateActivityData } from '@/types/entities/activity';
 
 const activityLogger = serverLogger.withContext('ActivityLogActions');
 

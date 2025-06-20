@@ -7,16 +7,15 @@ import { v4 as uuidv4 } from 'uuid';
 // Importación comentada porque las funciones no existen actualmente
 // import { getSuggestedAppearance, serializeObject } from '@/transformers/character';
 import {
-	CharacterBase,
-	CharacterCategory,
-	CharacterClass,
-	CharacterExtended,
-	CharacterRace,
-	CharacterRelationship,
-	CharacterSortOption,
-	CharacterSummary,
+    CharacterBase,
+    CharacterCategory,
+    CharacterClass,
+    CharacterExtended,
+    CharacterRace,
+    CharacterRelationship,
+    CharacterRelationshipType,
+    CharacterSortOption
 } from '@/types/entities/character';
-import { CharacterRelationshipType } from '@/types/entities/character/enums';
 
 /**
  * Genera un ID único para un nuevo personaje
@@ -43,33 +42,35 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
 	const now = new Date();
 
 	return {
-		id: (overrides as any).id || generateCharacterId(),
-		name: (overrides as any).name || 'New Character',
-		emoji: (overrides as any).emoji || emoji,
-		color: (overrides as any).color || color,
-		description: (overrides as any).description || '',
-		shortcut: (overrides as any).shortcut || null,
-		level: (overrides as any).level || 1,
-		class: (overrides as any).class || 'warrior',
-		race: (overrides as any).race || 'human',
-		alignment: (overrides as any).alignment || 'true neutral',
-		backstory: (overrides as any).backstory || '',
-		stats: (overrides as any).stats || '{}',
-		sortBy: (overrides as any).sortBy || null,
-		filters: (overrides as any).filters || '[]',
-		psychologicalProfile: (overrides as any).psychologicalProfile || null,
-		socialProfile: (overrides as any).socialProfile || null,
-		relationships: (overrides as any).relationships || '[]',
-		goals: (overrides as any).goals || '[]',
-		fears: (overrides as any).fears || '[]',
-		beliefs: (overrides as any).beliefs || '[]',
-		personality: (overrides as any).personality || '[]',
-		featuredImage: (overrides as any).featuredImage || null,
-		isFavorite: (overrides as any).isFavorite || false,
-		createdAt: (overrides as any).createdAt || now,
-		updatedAt: (overrides as any).updatedAt || now,
-		category: (overrides as any).category || 'player',
-		presetId: (overrides as any).presetId || null,
+		id: overrides.id || generateCharacterId(),
+		name: overrides.name || 'New Character',
+		emoji: overrides.emoji || emoji,
+		color: overrides.color || color,
+		description: overrides.description || null,
+		shortcut: overrides.shortcut || null,
+		category: overrides.category || null,
+		level: overrides.level || 1,
+		class: overrides.class || 'warrior',
+		race: overrides.race || 'human',
+		type: overrides.type || null,
+		alignment: overrides.alignment || 'true neutral',
+		backstory: overrides.backstory || '',
+		stats: overrides.stats || '{}',
+		psychologicalProfile: overrides.psychologicalProfile || '',
+		socialProfile: overrides.socialProfile || '',
+		relationships: overrides.relationships || '[]',
+		goals: overrides.goals || '[]',
+		fears: overrides.fears || '[]',
+		beliefs: overrides.beliefs || '[]',
+		personality: overrides.personality || '[]',
+		skills: overrides.skills || '[]',
+		abilities: overrides.abilities || '[]',
+		sortBy: overrides.sortBy || '',
+		filters: overrides.filters || '[]',
+		featuredImage: overrides.featuredImage || null,
+		isFavorite: overrides.isFavorite || false,
+		createdAt: overrides.createdAt || now,
+		updatedAt: overrides.updatedAt || now,
 	};
 }
 
@@ -78,14 +79,14 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
  * @param character Personaje a preparar para búsqueda
  * @returns Cadena con datos normalizados para búsqueda
  */
-export function prepareCharacterSearchString(character: CharacterExtended | CharacterSummary): string {
+export function prepareCharacterSearchString(character: CharacterExtended): string {
 	return [
-		(character as any).name,
-		(character as any).class,
-		(character as any).race,
-		(character as any).alignment,
-		(character as any).category,
-		(character as any).emoji,
+		character.name,
+		character.class,
+		character.race,
+		character.alignment,
+		character.category,
+		character.emoji,
 	]
 		.filter(Boolean)
 		.join(' ')
@@ -98,7 +99,7 @@ export function prepareCharacterSearchString(character: CharacterExtended | Char
  * @param searchTerm Término de búsqueda
  * @returns true si el personaje coincide, false en caso contrario
  */
-export function matchesCharacterSearch(character: CharacterExtended | CharacterSummary, searchTerm: string): boolean {
+export function matchesCharacterSearch(character: CharacterExtended, searchTerm: string): boolean {
 	if (!searchTerm || searchTerm.trim() === '') {
 		return true;
 	}
@@ -114,7 +115,7 @@ export function matchesCharacterSearch(character: CharacterExtended | CharacterS
  * @param character Personaje del que obtener nivel
  * @returns Nivel numérico del personaje (predeterminado: 1)
  */
-export function getCharacterLevelAsNumber(character: CharacterExtended | CharacterSummary): number {
+export function getCharacterLevelAsNumber(character: CharacterExtended): number {
 	if (typeof character.level === 'number') {
 		return character.level;
 	}
@@ -135,33 +136,31 @@ export function getCharacterLevelAsNumber(character: CharacterExtended | Charact
  * @returns Número negativo, cero o positivo para ordenamiento
  */
 export function compareCharacters(
-	characterA: CharacterExtended | CharacterSummary,
-	characterB: CharacterExtended | CharacterSummary,
-	sortBy: CharacterSortOption = 'name_asc'
+	characterA: CharacterExtended,
+	characterB: CharacterExtended,
+	sortBy: CharacterSortOption = CharacterSortOption.NAME_ASC
 ): number {
 	switch (sortBy) {
-		case 'name_asc':
+		case CharacterSortOption.NAME_ASC:
 			return characterA.name.localeCompare(characterB.name);
-		case 'name_desc':
+		case CharacterSortOption.NAME_DESC:
 			return characterB.name.localeCompare(characterA.name);
-		case 'level_asc':
+		case CharacterSortOption.LEVEL_ASC:
 			return getCharacterLevelAsNumber(characterA) - getCharacterLevelAsNumber(characterB);
-		case 'level_desc':
+		case CharacterSortOption.LEVEL_DESC:
 			return getCharacterLevelAsNumber(characterB) - getCharacterLevelAsNumber(characterA);
-		case 'class_asc':
+		case CharacterSortOption.CLASS_ASC:
 			return (characterA.class || '').localeCompare(characterB.class || '');
-		case 'class_desc':
+		case CharacterSortOption.CLASS_DESC:
 			return (characterB.class || '').localeCompare(characterA.class || '');
-		case 'race_asc':
+		case CharacterSortOption.RACE_ASC:
 			return (characterA.race || '').localeCompare(characterB.race || '');
-		case 'race_desc':
+		case CharacterSortOption.RACE_DESC:
 			return (characterB.race || '').localeCompare(characterA.race || '');
-		case 'created_asc':
+		case CharacterSortOption.DATE_ASC:
 			return new Date(characterA.createdAt).getTime() - new Date(characterB.createdAt).getTime();
-		case 'created_desc':
+		case CharacterSortOption.DATE_DESC:
 			return new Date(characterB.createdAt).getTime() - new Date(characterA.createdAt).getTime();
-		case 'favorites_first':
-			return Number(characterB.isFavorite) - Number(characterA.isFavorite);
 		default:
 			return 0;
 	}
@@ -173,9 +172,9 @@ export function compareCharacters(
  * @returns Mapa con personajes agrupados por categoría
  */
 export function groupCharactersByCategory(
-	characters: (CharacterExtended | CharacterSummary)[]
-): Record<CharacterCategory, (CharacterExtended | CharacterSummary)[]> {
-	const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
+	characters: CharacterExtended[]
+): Record<string, CharacterExtended[]> {
+	const groups: Record<string, CharacterExtended[]> = {};
 
 	// Inicializar todas las categorías
 	for (const category of Object.values(CharacterCategory)) {
@@ -184,14 +183,14 @@ export function groupCharactersByCategory(
 
 	// Agrupar personajes
 	for (const character of characters) {
-		const category = (character as { category?: string }).category || 'other';
+		const category = character.category || 'other';
 		if (!groups[category]) {
 			groups[category] = [];
 		}
 		groups[category].push(character);
 	}
 
-	return groups as Record<CharacterCategory, (CharacterExtended | CharacterSummary)[]>;
+	return groups;
 }
 
 /**
@@ -200,25 +199,25 @@ export function groupCharactersByCategory(
  * @returns Mapa con personajes agrupados por clase
  */
 export function groupCharactersByClass(
-	characters: (CharacterExtended | CharacterSummary)[]
-): Record<CharacterClass, (CharacterExtended | CharacterSummary)[]> {
-	const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
+	characters: CharacterExtended[]
+): Record<string, CharacterExtended[]> {
+	const groups: Record<string, CharacterExtended[]> = {};
 
 	// Inicializar todas las clases
-	for (const characterClass of Object.values(CharacterClass) as CharacterClass[]) {
+	for (const characterClass of Object.values(CharacterClass)) {
 		groups[characterClass] = [];
 	}
 
 	// Agrupar personajes
 	for (const character of characters) {
-		const characterClass = (character as { class?: string }).class || 'unknown';
+		const characterClass = character.class || 'unknown';
 		if (!groups[characterClass]) {
 			groups[characterClass] = [];
 		}
 		groups[characterClass].push(character);
 	}
 
-	return groups as Record<CharacterClass, (CharacterExtended | CharacterSummary)[]>;
+	return groups;
 }
 
 /**
@@ -227,25 +226,25 @@ export function groupCharactersByClass(
  * @returns Mapa con personajes agrupados por raza
  */
 export function groupCharactersByRace(
-	characters: (CharacterExtended | CharacterSummary)[]
-): Record<CharacterRace, (CharacterExtended | CharacterSummary)[]> {
-	const groups: Record<string, (CharacterExtended | CharacterSummary)[]> = {};
+	characters: CharacterExtended[]
+): Record<string, CharacterExtended[]> {
+	const groups: Record<string, CharacterExtended[]> = {};
 
 	// Inicializar todas las razas
-	for (const race of Object.values(CharacterRace) as CharacterRace[]) {
+	for (const race of Object.values(CharacterRace)) {
 		groups[race] = [];
 	}
 
 	// Agrupar personajes
 	for (const character of characters) {
-		const race = (character as { race?: string }).race || 'unknown';
+		const race = character.race || 'unknown';
 		if (!groups[race]) {
 			groups[race] = [];
 		}
 		groups[race].push(character);
 	}
 
-	return groups as Record<CharacterRace, (CharacterExtended | CharacterSummary)[]>;
+	return groups;
 }
 
 /**

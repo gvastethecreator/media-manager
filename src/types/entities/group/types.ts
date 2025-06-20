@@ -76,6 +76,66 @@ export type Group = GroupBase & {
 };
 
 /**
+ * Tipo extendido con relaciones completas
+ */
+export interface GroupExtended extends GroupBase {
+	itemsCount: number;
+	tags?: Array<{ id: string; name: string; color: string }>;
+	images?: Array<{ id: string; name: string; path: string }>;
+	videos?: Array<{ id: string; name: string; path: string }>;
+	albums?: Array<{ id: string; name: string; emoji: string; color: string }>;
+	collections?: Array<{ id: string; name: string; emoji: string; color: string }>;
+	characters?: Array<{ id: string; name: string; emoji: string; color: string }>;
+	places?: Array<{ id: string; name: string; emoji: string; color: string }>;
+	worldItems?: Array<{ id: string; name: string; emoji: string; color: string }>;
+	concepts?: Array<{ id: string; name: string; emoji: string; color: string }>;
+	prompts?: Array<{ id: string; name: string; emoji: string; color: string }>;
+	notes?: Array<{ id: string; name: string; emoji: string; color: string }>;
+	wildcards?: Array<{ id: string; name: string; emoji: string; color: string }>;
+	properties?: Array<{ id: string; name: string; emoji: string; color: string }>;
+}
+
+/**
+ * Tipo completo con todas las relaciones
+ */
+export interface GroupComplete extends GroupExtended {
+	_count: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+	};
+}
+
+/**
+ * Tipo para relaciones de grupo
+ */
+export interface GroupRelations {
+	images: Array<{ id: string; name: string; path: string }>;
+	videos: Array<{ id: string; name: string; path: string }>;
+	albums: Array<{ id: string; name: string; emoji: string; color: string }>;
+	collections: Array<{ id: string; name: string; emoji: string; color: string }>;
+	tags: Array<{ id: string; name: string; color: string }>;
+	characters: Array<{ id: string; name: string; emoji: string; color: string }>;
+	places: Array<{ id: string; name: string; emoji: string; color: string }>;
+	worldItems: Array<{ id: string; name: string; emoji: string; color: string }>;
+	concepts: Array<{ id: string; name: string; emoji: string; color: string }>;
+	prompts: Array<{ id: string; name: string; emoji: string; color: string }>;
+	notes: Array<{ id: string; name: string; emoji: string; color: string }>;
+	wildcards: Array<{ id: string; name: string; emoji: string; color: string }>;
+	properties: Array<{ id: string; name: string; emoji: string; color: string }>;
+}
+
+/**
  * Input para creación
  */
 export interface GroupCreateInput {
@@ -153,6 +213,97 @@ export type GroupWithStats = GroupBase & {
 		lastUpdated: Date;
 	};
 };
+
+/**
+ * Filtros para búsqueda de grupos
+ */
+export interface GroupFilters {
+	name?: string;
+	category?: string;
+	color?: string;
+	isFavorite?: boolean;
+	hasImages?: boolean;
+	hasVideos?: boolean;
+	minItemsCount?: number;
+	maxItemsCount?: number;
+	createdAfter?: Date;
+	createdBefore?: Date;
+	updatedAfter?: Date;
+	updatedBefore?: Date;
+}
+
+/**
+ * Resultado de búsqueda de grupos
+ */
+export interface GroupSearchResult {
+	items: GroupExtended[];
+	total: number;
+	page: number;
+	limit: number;
+	hasMore: boolean;
+	filters: GroupFilters;
+	sortBy: GroupSortCriteria;
+}
+
+/**
+ * Tipos para componentes de UI
+ */
+export interface GroupCard {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description?: string;
+	itemsCount: number;
+	featuredImage?: string;
+	isFavorite: boolean;
+	updatedAt: Date;
+}
+
+export interface GroupListItem {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	itemsCount: number;
+	category?: string;
+	isFavorite: boolean;
+	images?: GroupListItemImage[];
+}
+
+export interface GroupListItemImage {
+	id: string;
+	name: string;
+	path: string;
+	thumbnailUrl?: string;
+}
+
+export interface GroupListProps {
+	groups: GroupListItem[];
+	onGroupClick?: (group: GroupListItem) => void;
+	onGroupFavorite?: (groupId: string, isFavorite: boolean) => void;
+	loading?: boolean;
+	emptyMessage?: string;
+}
+
+export interface GroupSearchParams {
+	query?: string;
+	category?: string;
+	sortBy?: GroupSortCriteria;
+	page?: number;
+	limit?: number;
+	filters?: GroupFilters;
+}
+
+/**
+ * Opciones para transformadores
+ */
+export interface GroupTransformerOptions {
+	includeRelations?: boolean;
+	includeStats?: boolean;
+	includeImages?: boolean;
+	maxImages?: number;
+}
 
 // Alias para compatibilidad con código existente
 export type CreateGroupData = GroupCreateInput;
