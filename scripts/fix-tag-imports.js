@@ -14,7 +14,7 @@ const { execSync } = require('child_process');
 // Configuración
 const baseDir = process.cwd();
 const importRegex = /import\s+(?:{([^}]*)})?\s*from\s+['"]@\/types\/entities\/tag\/(enums|base|extended|types)['"]/g;
-const typeRegex = /\bTag(?:Complete|Base|Extended|WithRelations|CreateInput|UpdateInput)\b/g;
+const _typeRegex = /\bTag(?:Complete|Base|Extended|WithRelations|CreateInput|UpdateInput)\b/g;
 
 // Define mapeos de tipos antiguos a nuevos
 const typeMap = {
@@ -46,18 +46,18 @@ filesToProcess.forEach((file) => {
 
 		// 1. Combinar múltiples importaciones
 		const imports = new Set();
-		let hasEnumImports = false;
-		let hasTypeImports = false;
+		let _hasEnumImports = false;
+		let _hasTypeImports = false;
 
-		content = content.replace(importRegex, (match, importGroup, importSource) => {
+		content = content.replace(importRegex, (_match, importGroup, _importSource) => {
 			if (importGroup) {
 				importGroup.split(',').forEach((imp) => {
 					const trimmed = imp.trim();
 					if (trimmed.includes('type')) {
-						hasTypeImports = true;
+						_hasTypeImports = true;
 						imports.add(trimmed);
 					} else if (['TagCategory', 'TagRarity', 'TagSortCriteria', 'TagViewMode'].includes(trimmed)) {
-						hasEnumImports = true;
+						_hasEnumImports = true;
 						imports.add(trimmed);
 					} else {
 						imports.add(trimmed);

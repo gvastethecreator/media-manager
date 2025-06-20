@@ -295,17 +295,13 @@ export function useEntityLoader() {
 			}
 		},
 		[
-			loadingStates,
-			updateLoadingState,
-			collectionStore,
-			tagStore,
-			albumStore,
-			characterStore,
-			placeStore,
-			worldItemStore,
-			promptStore,
-			noteStore,
-			conceptStore,
+			loadingStates, 
+			updateLoadingState, 
+			collectionStore, 
+			tagStore, 
+			albumStore, 
+			placeStore, 
+			worldItemStore
 		]
 	);
 

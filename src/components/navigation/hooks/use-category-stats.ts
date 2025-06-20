@@ -1,7 +1,6 @@
-import { useCallback } from 'react';
 import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
-import { ViewType } from '@/types/files';
-import type { CategoryChild } from '../types';
+import { useCallback } from 'react';
+import type { CategoryChild, NavigationCategory } from '../types';
 
 /**
  * Hook que proporciona funciones para calcular estadísticas de categorías
@@ -26,6 +25,12 @@ export function useCategoryStats(initialData: NavigationData) {
 			totalFavorites: 0,
 			totalActivities: 0,
 			totalSize: 0,
+			// Nuevas entidades
+			totalAudios: 0,
+			totalDocuments: 0,
+			totalJsonFiles: 0,
+			totalFile3Ds: 0,
+			totalWorkflows: 0,
 			popularImages: [],
 			topTags: [],
 			recentActivity: [],
@@ -43,6 +48,12 @@ export function useCategoryStats(initialData: NavigationData) {
 		groups = [],
 		properties = [],
 		wildcards = [],
+		// Nuevas entidades
+		audios = [],
+		documents = [],
+		jsonFiles = [],
+		file3ds = [],
+		workflows = [],
 	} = initialData || {};
 
 	/**
@@ -155,7 +166,7 @@ export function useCategoryStats(initialData: NavigationData) {
 
 	// 🔢 Función auxiliar para obtener la cantidad de ítems para cada categoría
 	const getCategoryItemCount = useCallback(
-		(categoryId: ViewType): number => {
+		(categoryId: NavigationCategory): number => {
 			switch (categoryId) {
 				case 'collections':
 					return stats?.totalCollections || getSafeArrayLength(collections) || 0;
@@ -183,6 +194,17 @@ export function useCategoryStats(initialData: NavigationData) {
 					return stats?.totalProperties || getSafeArrayLength(properties) || 0;
 				case 'wildcards':
 					return stats?.totalWildcards || getSafeArrayLength(wildcards) || 0;
+				// Nuevas entidades
+				case 'audios':
+					return stats?.totalAudios || getSafeArrayLength(audios) || 0;
+				case 'documents':
+					return stats?.totalDocuments || getSafeArrayLength(documents) || 0;
+				case 'json-files':
+					return stats?.totalJsonFiles || getSafeArrayLength(jsonFiles) || 0;
+				case 'file-3d':
+					return stats?.totalFile3Ds || getSafeArrayLength(file3ds) || 0;
+				case 'workflows':
+					return stats?.totalWorkflows || getSafeArrayLength(workflows) || 0;
 				default:
 					return 0;
 			}
@@ -203,12 +225,18 @@ export function useCategoryStats(initialData: NavigationData) {
 			groups,
 			properties,
 			wildcards,
+			// Nuevas entidades
+			audios,
+			documents,
+			jsonFiles,
+			file3ds,
+			workflows,
 		]
 	);
 
 	// 📊 Calcula y devuelve el número de imágenes para una categoría
 	const getImagesForCategory = useCallback(
-		(categoryId: ViewType): number => {
+		(categoryId: NavigationCategory): number => {
 			switch (categoryId) {
 				case 'collections':
 					return calculateTotalImages(collections);
@@ -236,6 +264,17 @@ export function useCategoryStats(initialData: NavigationData) {
 					return calculateTotalImages(properties);
 				case 'wildcards':
 					return calculateTotalImages(wildcards);
+				// Nuevas entidades
+				case 'audios':
+					return calculateTotalImages(audios);
+				case 'documents':
+					return calculateTotalImages(documents);
+				case 'json-files':
+					return calculateTotalImages(jsonFiles);
+				case 'file-3d':
+					return calculateTotalImages(file3ds);
+				case 'workflows':
+					return calculateTotalImages(workflows);
 				default:
 					return 0;
 			}
@@ -255,12 +294,18 @@ export function useCategoryStats(initialData: NavigationData) {
 			groups,
 			properties,
 			wildcards,
+			// Nuevas entidades
+			audios,
+			documents,
+			jsonFiles,
+			file3ds,
+			workflows,
 		]
 	);
 
 	// 🏷️ Función para obtener los elementos hijos de cada categoría con mapeo seguro de tipos
 	const getCategoryItems = useCallback(
-		(categoryId: ViewType): CategoryChild[] => {
+		(categoryId: NavigationCategory): CategoryChild[] => {
 			switch (categoryId) {
 				case 'collections':
 					return mapToCategoryChildren(collections);
@@ -288,6 +333,17 @@ export function useCategoryStats(initialData: NavigationData) {
 					return mapToCategoryChildren(properties);
 				case 'wildcards':
 					return mapToCategoryChildren(wildcards);
+				// Nuevas entidades
+				case 'audios':
+					return mapToCategoryChildren(audios);
+				case 'documents':
+					return mapToCategoryChildren(documents);
+				case 'json-files':
+					return mapToCategoryChildren(jsonFiles);
+				case 'file-3d':
+					return mapToCategoryChildren(file3ds);
+				case 'workflows':
+					return mapToCategoryChildren(workflows);
 				default:
 					return [];
 			}
@@ -307,6 +363,12 @@ export function useCategoryStats(initialData: NavigationData) {
 			groups,
 			properties,
 			wildcards,
+			// Nuevas entidades
+			audios,
+			documents,
+			jsonFiles,
+			file3ds,
+			workflows,
 		]
 	);
 

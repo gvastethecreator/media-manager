@@ -9,59 +9,6 @@ import { TransformerError } from '@/utils/transformers/errors';
 
 const logger = serverLogger.withContext('PlaceTransformer');
 
-// Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
-interface PlaceFromPrisma {
-	id: string;
-	name: string;
-	description: string | null;
-	category: string;
-	type: string;
-	region: string | null;
-	location: string | null;
-	history: string | null;
-	climate: string | null;
-	culture: string | null;
-	government: string | null;
-	economy: string | null;
-	dangers: string;
-	resources: string;
-	stats: string;
-	filters: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	// Relaciones (solo las que realmente existen en Prisma)
-	images: any[];
-	// videos: any[]; // ❌ ELIMINADO - No existe relación Place-Video en Prisma
-	// albums: any[]; // ❌ ELIMINADO - No existe relación Place-Album en Prisma
-	collections: any[];
-	tags: any[];
-	// characters: any[]; // ❌ ELIMINADO - No existe relación Place-Character en Prisma
-	worldItems: any[];
-	concepts: any[];
-	prompts: any[];
-	notes: any[];
-	wildcards: any[];
-	properties: any[];
-	groups: any[];
-	_count: {
-		images?: number;
-		// videos?: number; // ❌ ELIMINADO - No existe relación Place-Video en Prisma
-		// albums?: number; // ❌ ELIMINADO - No existe relación Place-Album en Prisma
-		collections?: number;
-		tags?: number;
-		// characters?: number; // ❌ ELIMINADO - No existe relación Place-Character en Prisma
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
-
 /**
  * 🔄 Transforma un objeto Place de Prisma a nuestro tipo canónico PlaceComplete.
  *
@@ -69,7 +16,7 @@ interface PlaceFromPrisma {
  * @returns Un objeto PlaceComplete compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function fromPrismaPlace(prismaPlace: PlaceFromPrisma | null): PlaceComplete {
+export function fromPrismaPlace(prismaPlace: any): PlaceComplete {
 	if (!prismaPlace) {
 		throw new TransformerError('El objeto de lugar de Prisma no puede ser nulo.');
 	}
@@ -79,18 +26,18 @@ export function fromPrismaPlace(prismaPlace: PlaceFromPrisma | null): PlaceCompl
 
 		return {
 			...baseData,
-			// Deserializar campos JSON
-			dangers: deserializePlaceDangers(baseData.dangers),
-			resources: deserializePlaceResources(baseData.resources),
-			stats: deserializePlaceStats(baseData.stats),
-			filters: deserializePlaceFilters(baseData.filters),
+			// Deserializar campos JSON si es necesario
+			dangers: typeof baseData.dangers === 'string' ? baseData.dangers : JSON.stringify(baseData.dangers || []),
+			resources: typeof baseData.resources === 'string' ? baseData.resources : JSON.stringify(baseData.resources || []),
+			stats: typeof baseData.stats === 'string' ? baseData.stats : JSON.stringify(baseData.stats || {}),
+			filters: typeof baseData.filters === 'string' ? baseData.filters : JSON.stringify(baseData.filters || {}),
 			// Asegurar que las relaciones opcionales no sean undefined
 			images: baseData.images ?? [],
-			// videos: baseData.videos ?? [],
-			// albums: baseData.albums ?? [],
+			videos: baseData.videos ?? [],
+			albums: baseData.albums ?? [],
 			collections: baseData.collections ?? [],
 			tags: baseData.tags ?? [],
-			// characters: baseData.characters ?? [],
+			characters: baseData.characters ?? [],
 			worldItems: baseData.worldItems ?? [],
 			concepts: baseData.concepts ?? [],
 			prompts: baseData.prompts ?? [],
@@ -101,11 +48,11 @@ export function fromPrismaPlace(prismaPlace: PlaceFromPrisma | null): PlaceCompl
 			// Asignar el conteo de forma segura
 			_count: {
 				images: _count?.images ?? 0,
-				// videos: _count?.videos ?? 0,
-				// albums: _count?.albums ?? 0,
+				videos: _count?.videos ?? 0,
+				albums: _count?.albums ?? 0,
 				collections: _count?.collections ?? 0,
 				tags: _count?.tags ?? 0,
-				// characters: _count?.characters ?? 0,
+				characters: _count?.characters ?? 0,
 				worldItems: _count?.worldItems ?? 0,
 				concepts: _count?.concepts ?? 0,
 				prompts: _count?.prompts ?? 0,
@@ -118,7 +65,7 @@ export function fromPrismaPlace(prismaPlace: PlaceFromPrisma | null): PlaceCompl
 	} catch (error) {
 		logger.error('Error transformando lugar desde Prisma', {
 			error,
-			placeId: prismaPlace.id,
+			placeId: prismaPlace?.id,
 		});
 		throw new TransformerError(`Error al transformar el lugar: ${(error as Error).message}`);
 	}
@@ -130,6 +77,39 @@ export function fromPrismaPlace(prismaPlace: PlaceFromPrisma | null): PlaceCompl
  * @param prismaPlaces - Un array de objetos Place de Prisma.
  * @returns Un array de objetos PlaceComplete.
  */
-export function fromPrismaPlaces(prismaPlaces: PlaceFromPrisma[]): PlaceComplete[] {
+export function fromPrismaPlaces(prismaPlaces: any[]): PlaceComplete[] {
 	return prismaPlaces.map(fromPrismaPlace);
+}
+
+// Funciones auxiliares para deserialización
+function _deserializePlaceDangers(dangers: string): string {
+	try {
+		return typeof dangers === 'string' ? dangers : JSON.stringify(dangers || []);
+	} catch {
+		return '[]';
+	}
+}
+
+function _deserializePlaceResources(resources: string): string {
+	try {
+		return typeof resources === 'string' ? resources : JSON.stringify(resources || []);
+	} catch {
+		return '[]';
+	}
+}
+
+function _deserializePlaceStats(stats: string): string {
+	try {
+		return typeof stats === 'string' ? stats : JSON.stringify(stats || {});
+	} catch {
+		return '{}';
+	}
+}
+
+function _deserializePlaceFilters(filters: string): string {
+	try {
+		return typeof filters === 'string' ? filters : JSON.stringify(filters || {});
+	} catch {
+		return '{}';
+	}
 }

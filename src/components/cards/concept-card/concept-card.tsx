@@ -1,49 +1,47 @@
 'use client';
 
+import { cn } from '@/lib/utils';
+import type { ConceptComplete } from '@/types/entities/concept';
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useMemo } from 'react';
-import { cn } from '@/lib/utils';
-import type { ConceptComplete, ConceptWithStats } from '@/types/entities/concept';
 import { CardHeader } from '../card-header';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
 import { ConceptCardImages } from './concept-card-images';
 
 interface ConceptCardProps {
-	concept:
-		| ConceptComplete
-		| (ConceptWithStats & {
-				_count?: {
-					images: number;
-					videos: number;
-					albums: number;
-					collections: number;
-					tags: number;
-					characters: number;
-					places: number;
-					worldItems: number;
-					prompts: number;
-					notes: number;
-					wildcards: number;
-					properties: number;
-					groups: number;
-				};
-				imageCount?: number;
-				promptCount?: number;
-				videoCount?: number;
-				albumCount?: number;
-				collectionCount?: number;
-				tagCount?: number;
-				characterCount?: number;
-				placeCount?: number;
-				worldItemCount?: number;
-				noteCount?: number;
-				wildcardCount?: number;
-				propertyCount?: number;
-				groupCount?: number;
-				tags?: string[] | string;
-		  });
+	concept: ConceptComplete & {
+		_count?: {
+			images: number;
+			videos: number;
+			albums: number;
+			collections: number;
+			tags: number;
+			characters: number;
+			places: number;
+			worldItems: number;
+			prompts: number;
+			notes: number;
+			wildcards: number;
+			properties: number;
+			groups: number;
+		};
+		imageCount?: number;
+		promptCount?: number;
+		videoCount?: number;
+		albumCount?: number;
+		collectionCount?: number;
+		tagCount?: number;
+		characterCount?: number;
+		placeCount?: number;
+		worldItemCount?: number;
+		noteCount?: number;
+		wildcardCount?: number;
+		propertyCount?: number;
+		groupCount?: number;
+		tags?: string[] | string;
+	};
 	onClick?: () => void;
 	className?: string;
 	style?: React.CSSProperties;

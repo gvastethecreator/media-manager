@@ -8,20 +8,20 @@
  */
 'use server';
 
-import fs from 'fs/promises';
-import { revalidatePath } from 'next/cache';
-import sharp from 'sharp';
 import { thumbnailCache } from '@/lib/cache';
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { imageService } from '@/services/image-service-export';
 import { ThumbnailQuality } from '@/types/thumbnails';
 import {
-	createEntityNotFoundError,
-	createServiceError,
-	ServiceErrorCode,
-	toServiceError,
+    createEntityNotFoundError,
+    createServiceError,
+    ServiceErrorCode,
+    toServiceError,
 } from '@/utils/errors/service-errors';
+import fs from 'fs/promises';
+import { revalidatePath } from 'next/cache';
+import sharp from 'sharp';
 import type { CleanupThumbnailsResult, ReprocessThumbnailsResult, ThumbnailStatsResult } from './image-types.actions';
 
 const SERVER_ACTION_NAME = 'ImageThumbnails';
@@ -33,9 +33,9 @@ const imageLogger = serverLogger.withContext(SERVER_ACTION_NAME);
 export async function getThumbnail(
 	imageId: string,
 	quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
-): Promise<string> {
+): Promise<Buffer> {
 	try {
-		const thumbnail = await imageService.getThumbnail(imageId, quality);
+		const thumbnail = await imageService.getThumbnail(imageId);
 		return thumbnail;
 	} catch (error) {
 		throw toServiceError(error, {
@@ -50,7 +50,7 @@ export async function getThumbnail(
  */
 export async function generateThumbnail(imageId: string, quality: ThumbnailQuality): Promise<void> {
 	try {
-		await imageService.generateThumbnail(imageId, quality);
+		await imageService.generateThumbnail(imageId);
 		revalidatePath(`/api/thumbnails/${imageId}`);
 	} catch (error) {
 		throw toServiceError(error, {
@@ -65,6 +65,7 @@ export async function generateThumbnail(imageId: string, quality: ThumbnailQuali
  */
 export async function optimizeThumbnail(imageId: string): Promise<void> {
 	try {
+		const prisma = await getPrismaClient();
 		// Obtener la imagen con su thumbnail
 		const image = await prisma.image.findUnique({
 			where: { id: imageId },
@@ -128,6 +129,7 @@ export async function cleanupThumbnails(): Promise<CleanupThumbnailsResult> {
 	let totalSize = 0;
 
 	try {
+		const prisma = await getPrismaClient();
 		// Obtener todas las imágenes con thumbnails
 		const images = await prisma.image.findMany({
 			where: {
@@ -196,6 +198,7 @@ export async function cleanupThumbnails(): Promise<CleanupThumbnailsResult> {
  */
 export async function getThumbnailStats(): Promise<ThumbnailStatsResult> {
 	try {
+		const prisma = await getPrismaClient();
 		// Contar todas las imágenes
 		const total = await prisma.image.count();
 
@@ -253,6 +256,7 @@ export async function reprocessThumbnails(
 	let errors = 0;
 
 	try {
+		const prisma = await getPrismaClient();
 		const { force = false, quality = ThumbnailQuality.MEDIUM } = options;
 
 		// Preparar consulta
@@ -316,11 +320,12 @@ export async function generateThumbnailWithForce(
 		return;
 	}
 
+	const prisma = await getPrismaClient();
 	const image = await prisma.image.findUnique({ where: { id: imageId } });
 	if (!image) {
 		throw createEntityNotFoundError('Imagen', imageId, SERVER_ACTION_NAME);
 	}
 
-	await imageService.generateThumbnail(imageId, quality);
+	await imageService.generateThumbnail(imageId);
 	revalidatePath(`/api/thumbnails/${imageId}`);
 }

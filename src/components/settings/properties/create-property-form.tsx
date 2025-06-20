@@ -48,21 +48,21 @@ export function CreatePropertyForm({
 
 	const optionalFields = [
 		{
-			name: 'emoji',
+			name: 'emoji' as const,
 			label: 'Emoji',
-			render: ({ value, onChange }: any) => (
+			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
 				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
 			),
 		},
 		{
-			name: 'color',
+			name: 'color' as const,
 			label: 'Color',
-			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} compact showLabel={false} />,
+			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => <ColorPicker value={value} onChange={onChange} compact showLabel={false} />,
 		},
 		{
-			name: 'description',
+			name: 'description' as const,
 			label: 'Descripción',
-			render: ({ value, onChange }: any) => (
+			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
 				<textarea
 					placeholder="Descripción de la propiedad..."
 					value={value || ''}
@@ -75,6 +75,25 @@ export function CreatePropertyForm({
 		// ...agregar más campos opcionales si es necesario...
 	];
 
+	const handleSubmit = async (data: FormData) => {
+		// Validar que name esté presente
+		if (!data.name) {
+			return;
+		}
+
+		if (isEditing && property) {
+			const updated = await updateProperty(property.id, data);
+			if (updated) {
+				onUpdated?.(fromPrismaProperty(updated) as Property);
+			}
+		} else {
+			const created = await createProperty(data);
+			if (created) {
+				onCreated?.(fromPrismaProperty(created) as Property);
+			}
+		}
+	};
+
 	return (
 		<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 			<DialogHeader>
@@ -84,19 +103,7 @@ export function CreatePropertyForm({
 			<DynamicCreateForm
 				optionalFields={optionalFields}
 				form={form}
-				onSubmit={async (data) => {
-					if (isEditing && property) {
-						const updated = await updateProperty(property.id, data);
-						if (updated) {
-							onUpdated?.(fromPrismaProperty(updated) as Property);
-						}
-					} else {
-						const created = await createProperty(data);
-						if (created) {
-							onCreated?.(fromPrismaProperty(created) as Property);
-						}
-					}
-				}}
+				onSubmit={handleSubmit}
 				submitLabel={isEditing ? 'Guardar cambios' : 'Crear propiedad'}
 			/>
 

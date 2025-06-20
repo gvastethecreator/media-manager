@@ -1,10 +1,10 @@
 'use server';
 
-import type { ImageComplete as Image } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
+import type { Image } from '@prisma/client';
+import { revalidatePath } from 'next/cache';
 import { createMetadataError as createMetadataErrorAction } from './index';
 import type { ImageMetadata, ImageWithMetadata, UpdateMetadataInput } from './metadata-types.actions';
 
@@ -12,17 +12,19 @@ import type { ImageMetadata, ImageWithMetadata, UpdateMetadataInput } from './me
 const metadataLogger = serverLogger.withContext('MetadataActions');
 const REVALIDATE_PATHS = ['/images', '/images/[id]'] as const;
 
-// Códigos de error
-enum MetadataErrorCode {
-	NOT_FOUND = 'NOT_FOUND',
-	VALIDATION_ERROR = 'VALIDATION_ERROR',
-	OPERATION_FAILED = 'OPERATION_FAILED',
-}
+// Códigos de error como string literals
+const MetadataErrorCode = {
+	NOT_FOUND: 'NOT_FOUND',
+	VALIDATION_ERROR: 'VALIDATION_ERROR',
+	OPERATION_FAILED: 'OPERATION_FAILED',
+} as const;
+
+type MetadataErrorCodeType = typeof MetadataErrorCode[keyof typeof MetadataErrorCode];
 
 // Función creadora de errores
 const _createMetadataError = (
 	message: string,
-	code: MetadataErrorCode = MetadataErrorCode.OPERATION_FAILED,
+	code: MetadataErrorCodeType = MetadataErrorCode.OPERATION_FAILED,
 	cause?: unknown
 ) => {
 	const error = new Error(message);
@@ -69,12 +71,13 @@ function parseImageMetadata(image: Image): ImageWithMetadata {
 export async function getImageMetadata(imageId: string): Promise<ImageWithMetadata> {
 	try {
 		metadataLogger.info('🔍 Obteniendo metadatos:', imageId);
+		const prisma = await getPrismaClient();
 		const image = await prisma.image.findUnique({
 			where: { id: imageId },
 		});
 
 		if (!image) {
-			throw await createMetadataErrorAction('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
+			throw await createMetadataErrorAction('Imagen no encontrada', '', MetadataErrorCode.NOT_FOUND);
 		}
 
 		metadataLogger.info('✅ Metadatos obtenidos');
@@ -86,7 +89,9 @@ export async function getImageMetadata(imageId: string): Promise<ImageWithMetada
 		}
 		throw await createMetadataErrorAction(
 			'No se pudieron obtener los metadatos',
+			'',
 			MetadataErrorCode.OPERATION_FAILED,
+			undefined,
 			error
 		);
 	}
@@ -95,13 +100,13 @@ export async function getImageMetadata(imageId: string): Promise<ImageWithMetada
 export async function updateImageMetadata(imageId: string, data: UpdateMetadataInput): Promise<ImageWithMetadata> {
 	try {
 		metadataLogger.info('📝 Actualizando metadatos:', imageId);
-
+		const prisma = await getPrismaClient();
 		const image = await prisma.image.findUnique({
 			where: { id: imageId },
 		});
 
 		if (!image) {
-			throw await createMetadataErrorAction('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
+			throw await createMetadataErrorAction('Imagen no encontrada', '', MetadataErrorCode.NOT_FOUND);
 		}
 
 		// Obtener los metadatos actuales
@@ -140,7 +145,9 @@ export async function updateImageMetadata(imageId: string, data: UpdateMetadataI
 		}
 		throw await createMetadataErrorAction(
 			'No se pudieron actualizar los metadatos',
+			'',
 			MetadataErrorCode.OPERATION_FAILED,
+			undefined,
 			error
 		);
 	}
@@ -149,13 +156,13 @@ export async function updateImageMetadata(imageId: string, data: UpdateMetadataI
 export async function clearImageMetadata(imageId: string): Promise<ImageWithMetadata> {
 	try {
 		metadataLogger.info('🗑️ Limpiando metadatos:', imageId);
-
+		const prisma = await getPrismaClient();
 		const image = await prisma.image.findUnique({
 			where: { id: imageId },
 		});
 
 		if (!image) {
-			throw await createMetadataErrorAction('Imagen no encontrada', MetadataErrorCode.NOT_FOUND);
+			throw await createMetadataErrorAction('Imagen no encontrada', '', MetadataErrorCode.NOT_FOUND);
 		}
 
 		// Actualizar la imagen limpiando los metadatos
@@ -178,7 +185,9 @@ export async function clearImageMetadata(imageId: string): Promise<ImageWithMeta
 		}
 		throw await createMetadataErrorAction(
 			'No se pudieron limpiar los metadatos',
+			'',
 			MetadataErrorCode.OPERATION_FAILED,
+			undefined,
 			error
 		);
 	}

@@ -4,207 +4,80 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { NoteBase, NoteComplete, NoteCounts, NoteWithStats } from '@/types/entities/note';
+import type { NoteComplete } from '@/types/entities/note';
 import { TransformerError } from '@/utils/transformers/errors';
-import { extendNote, fromPrismaNote } from './serializers';
 
 const logger = serverLogger.withContext('NoteTransformer');
 
 /**
- * 🔄 Transforma un objeto a NoteBase, validando su estructura
- * @param note Objeto a transformar
- * @returns NoteBase validado y estructurado
- * @throws TransformerError si la validación falla
+ * 🔄 Transforma un objeto Note de Prisma a nuestro tipo canónico NoteComplete.
+ *
+ * @param prismaNote - El objeto Note obtenido de Prisma.
+ * @returns Un objeto NoteComplete compatible con nuestra aplicación.
+ * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function transformNote(note: unknown): NoteBase {
-	try {
-		if (!note) {
-			throw new Error('El objeto NoteBase es nulo o indefinido');
-		}
-
-		// Si la nota viene de Prisma, transformarla
-		if ('tags' in (note as Record<string, any>) && 'title' in (note as Record<string, any>)) {
-			return fromPrismaNote(note as Record<string, any>);
-		}
-
-		// Si es un objeto simple, extenderlo
-		return extendNote(note as Record<string, any>);
-	} catch (error) {
-		logger.error('Error transformando nota:', { error });
-		throw new TransformerError('Error al transformar nota');
+export function fromPrismaNote(prismaNote: any): NoteComplete {
+	if (!prismaNote) {
+		throw new TransformerError('El objeto de nota de Prisma no puede ser nulo.');
 	}
-}
 
-/**
- * 🔄 Transforma una lista de objetos a NotesBase
- * @param notes Array de objetos a transformar
- * @returns Array de NoteBase validados
- * @throws TransformerError si la validación falla para algún elemento
- */
-export function transformNotes(notes: unknown[]): NoteBase[] {
 	try {
-		if (!Array.isArray(notes)) {
-			throw new Error('El parámetro no es un array');
-		}
+		const { _count, ...baseData } = prismaNote;
 
-		return notes.map((note) => transformNote(note));
-	} catch (error) {
-		logger.error('Error transformando lista de notas:', { error });
-		throw new TransformerError('Error al transformar lista de notas');
-	}
-}
-
-/**
- * Interfaz para notas con relaciones y propiedades UI
- */
-export interface NoteWithRelations extends NoteBase {
-	isSelected: boolean;
-	isHighlighted: boolean;
-	isEditing: boolean;
-	isExpanded: boolean;
-	displayOrder: number;
-	tagsArray: string[];
-	statusDisplay: { label: string; color: string };
-	priorityLevel: { label: string; color: string };
-}
-
-/**
- * 🔄 Transforma un NoteBase a su versión extendida con propiedades para UI
- * @param note NoteBase a extender
- * @returns NoteWithRelations extendido con propiedades adicionales
- */
-export function transformNoteToExtended(note: NoteBase): NoteWithRelations {
-	try {
-		const baseNote = transformNote(note);
-
-		// Extender la nota con propiedades para UI
 		return {
-			...baseNote,
-			isSelected: false,
-			isHighlighted: false,
-			isEditing: false,
-			isExpanded: false,
-			displayOrder: 0,
-			// Propiedades calculadas para UI - tags debe venir de las relaciones
-			tagsArray: [], // Se llenará desde las relaciones si están disponibles
-			statusDisplay: getStatusDisplay(baseNote.status),
-			priorityLevel: getPriorityLevel(baseNote.priority),
+			...baseData,
+			// Asegurar que las relaciones opcionales no sean undefined
+			images: baseData.images ?? [],
+			videos: baseData.videos ?? [],
+			albums: baseData.albums ?? [],
+			collections: baseData.collections ?? [],
+			tags: baseData.tags ?? [],
+			characters: baseData.characters ?? [],
+			places: baseData.places ?? [],
+			worldItems: baseData.worldItems ?? [],
+			concepts: baseData.concepts ?? [],
+			prompts: baseData.prompts ?? [],
+			wildcards: baseData.wildcards ?? [],
+			properties: baseData.properties ?? [],
+			groups: baseData.groups ?? [],
+			// Asignar el conteo de forma segura
+			_count: {
+				images: _count?.images ?? 0,
+				videos: _count?.videos ?? 0,
+				albums: _count?.albums ?? 0,
+				collections: _count?.collections ?? 0,
+				tags: _count?.tags ?? 0,
+				characters: _count?.characters ?? 0,
+				places: _count?.places ?? 0,
+				worldItems: _count?.worldItems ?? 0,
+				concepts: _count?.concepts ?? 0,
+				prompts: _count?.prompts ?? 0,
+				wildcards: _count?.wildcards ?? 0,
+				properties: _count?.properties ?? 0,
+				groups: _count?.groups ?? 0,
+			},
 		};
 	} catch (error) {
-		logger.error('Error transformando nota a versión extendida:', { error, noteId: (note as Record<string, any>)?.id });
-		throw new TransformerError('Error al transformar nota a versión extendida');
-	}
-}
-
-/**
- * 🔄 Transforma un NoteBase a su versión con estadísticas
- * @param note NoteBase o NoteComplete
- * @returns NoteWithStats con estadísticas calculadas
- */
-export function transformNoteToWithStats(note: NoteBase | NoteComplete): NoteWithStats {
-	try {
-		const baseNote = transformNote(note);
-
-		// Calcular totales para las estadísticas
-		const counts: NoteCounts['_count'] = (baseNote as NoteComplete)._count || {
-			images: 0,
-			videos: 0,
-			collections: 0,
-			albums: 0,
-			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			concepts: 0,
-			prompts: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
-		};
-
-		// Determinar la última actualización
-		const lastUpdated = baseNote.updatedAt || new Date();
-
-		// Calcular nivel de importancia basado en prioridad y relaciones
-		const importanceLevel = calculateImportanceLevel(baseNote, counts);
-
-		// Construir y devolver el objeto extendido
-		return {
-			...baseNote,
-			lastUpdated,
-			imageCount: counts.images || 0,
-			videoCount: counts.videos || 0,
-			albumCount: counts.albums || 0,
-			tagCount: counts.tags || 0,
-			characterCount: counts.characters || 0,
-			conceptCount: counts.concepts || 0,
-			importanceLevel,
-			contentLength: baseNote.content ? baseNote.content.length : 0,
-			relatedItemsCount: Object.values(counts || {}).reduce(
-				(sum: number, count: number | undefined) => sum + (count || 0),
-				0
-			),
-			distribution: [
-				{ name: 'images', count: counts.images || 0 },
-				{ name: 'videos', count: counts.videos || 0 },
-				{ name: 'concepts', count: counts.concepts || 0 },
-				{ name: 'characters', count: counts.characters || 0 },
-			],
-		};
-	} catch (error) {
-		logger.error('Error transformando nota a versión con estadísticas:', {
+		logger.error('Error transformando nota desde Prisma', {
 			error,
-			noteId: (note as Record<string, any>)?.id,
+			noteId: prismaNote?.id,
 		});
-		throw new TransformerError('Error al transformar nota a versión con estadísticas');
+		throw new TransformerError(`Error al transformar la nota: ${(error as Error).message}`);
 	}
 }
 
 /**
- * Calcula el nivel de importancia de una nota basado en prioridad y relaciones
- * @private
+ * 🔄 Transforma una lista de notas de Prisma a una lista de NoteComplete.
+ *
+ * @param prismaNotes - Un array de objetos Note de Prisma.
+ * @returns Un array de objetos NoteComplete.
  */
-function calculateImportanceLevel(note: NoteBase, counts: Record<string, number | undefined>): number {
-	try {
-		// Base: prioridad (0-10) + contenido asociado
-		const priorityFactor = note.priority || 0;
-		const contentLengthFactor = note.content ? Math.min(note.content.length / 1000, 5) : 0;
-		const relationsFactor = Object.values(counts || {}).reduce((sum: number, count: number | undefined) => {
-			return sum + (count || 0);
-		}, 0) * 0.2;
-
-		// Importancia general (máximo 20)
-		return Math.min(Math.round(priorityFactor + contentLengthFactor + relationsFactor), 20);
-	} catch (error) {
-		logger.warn('Error calculando nivel de importancia, usando valor por defecto:', error);
-		return note.priority || 0; // Valor por defecto es la prioridad
-	}
+export function fromPrismaNotes(prismaNotes: any[]): NoteComplete[] {
+	return prismaNotes.map(fromPrismaNote);
 }
 
-/**
- * Obtiene la representación visual del estado
- * @private
- */
-function getStatusDisplay(status: string): { label: string; color: string } {
-	const statusMap: Record<string, { label: string; color: string }> = {
-		active: { label: 'Activa', color: '#4CAF50' },
-		completed: { label: 'Completada', color: '#2196F3' },
-		archived: { label: 'Archivada', color: '#9E9E9E' },
-		pending: { label: 'Pendiente', color: '#FFC107' },
-		important: { label: 'Importante', color: '#F44336' },
-	};
-
-	return statusMap[status.toLowerCase()] || { label: status, color: '#9E9E9E' };
-}
-
-/**
- * Obtiene el nivel de prioridad
- * @private
- */
-function getPriorityLevel(priority: number): { label: string; color: string } {
-	if (priority >= 8) return { label: 'Crítica', color: '#F44336' };
-	if (priority >= 6) return { label: 'Alta', color: '#FF9800' };
-	if (priority >= 4) return { label: 'Media', color: '#2196F3' };
-	if (priority >= 2) return { label: 'Baja', color: '#4CAF50' };
-	return { label: 'Mínima', color: '#9E9E9E' };
-}
+// Alias para compatibilidad con código existente
+export const transformNote = fromPrismaNote;
+export const transformNotes = fromPrismaNotes;
+export const toCreateNoteData = (data: any) => data;
+export const toUpdateNoteData = (data: any) => data;

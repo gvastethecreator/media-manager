@@ -1,7 +1,7 @@
 'use server';
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import { toServiceError } from '@/utils/errors/service-errors';
 
 const SERVER_ACTION_NAME = 'ImagesRandom';
@@ -19,7 +19,7 @@ export interface RandomImage {
 interface ImageData {
 	id: string;
 	path: string;
-	thumbnail: Uint8Array | null;
+	thumbnail: Buffer | null;
 	width: number | null;
 	height: number | null;
 }
@@ -34,6 +34,7 @@ export async function getRandomImagesForEntity(
 	count = 6
 ): Promise<{ success: boolean; data?: RandomImage[]; message?: string }> {
 	try {
+		const prisma = await getPrismaClient();
 		let imagesData: ImageData[] = [];
 
 		// Obtener imágenes según el tipo de entidad

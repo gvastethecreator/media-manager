@@ -7,30 +7,9 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CollectionComplete } from '@/types/entities/collection';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
 import { deserializeEditions, deserializeFilters, deserializeSortBy } from './serializers';
 
 const logger = serverLogger.withContext('CollectionTransformer');
-
-// Define el tipo de payload de Prisma que esperamos, con todas las relaciones y conteos.
-type CollectionFromPrisma = Prisma.CollectionGetPayload<{
-	include: {
-		images: true;
-		videos: true;
-		albums: true;
-		tags: true;
-		characters: true;
-		places: true;
-		worldItems: true;
-		concepts: true;
-		prompts: true;
-		notes: true;
-		wildcards: true;
-		properties: true;
-		groups: true;
-		_count: true;
-	};
-}>;
 
 /**
  * 🔄 Transforma un objeto Collection de Prisma a nuestro tipo canónico CollectionComplete.
@@ -39,7 +18,7 @@ type CollectionFromPrisma = Prisma.CollectionGetPayload<{
  * @returns Un objeto CollectionComplete compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function fromPrismaCollection(prismaCollection: CollectionFromPrisma | null): CollectionComplete {
+export function fromPrismaCollection(prismaCollection: any): CollectionComplete {
 	if (!prismaCollection) {
 		throw new TransformerError('El objeto de colección de Prisma no puede ser nulo.');
 	}
@@ -76,7 +55,7 @@ export function fromPrismaCollection(prismaCollection: CollectionFromPrisma | nu
 	} catch (error) {
 		logger.error('Error transformando colección desde Prisma', {
 			error,
-			collectionId: prismaCollection.id,
+			collectionId: prismaCollection?.id,
 		});
 		throw new TransformerError(`Error al transformar la colección: ${(error as Error).message}`);
 	}
@@ -88,6 +67,6 @@ export function fromPrismaCollection(prismaCollection: CollectionFromPrisma | nu
  * @param prismaCollections - Un array de objetos Collection de Prisma.
  * @returns Un array de objetos CollectionComplete.
  */
-export function fromPrismaCollections(prismaCollections: CollectionFromPrisma[]): CollectionComplete[] {
+export function fromPrismaCollections(prismaCollections: any[]): CollectionComplete[] {
 	return prismaCollections.map(fromPrismaCollection);
 }

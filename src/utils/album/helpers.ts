@@ -76,7 +76,7 @@ export function isAlbumEmpty(album: Album): boolean {
  * @returns true si tiene sub-álbumes
  * @deprecated Album no tiene jerarquía en el modelo actual
  */
-export function hasSubAlbums(album: Album): boolean {
+export function hasSubAlbums(_album: Album): boolean {
 	// TODO: Album no tiene relación parent/children en el modelo actual
 	return false;
 }
@@ -88,7 +88,7 @@ export function hasSubAlbums(album: Album): boolean {
  * @returns Array con la ruta jerárquica completa
  * @deprecated Album no tiene jerarquía en el modelo actual
  */
-export function getAlbumPath(album: Album, allAlbums: Record<string, Album>): Album[] {
+export function getAlbumPath(album: Album, _allAlbums: Record<string, Album>): Album[] {
 	// TODO: Album no tiene relación parent/children en el modelo actual
 	return [album];
 }
@@ -109,7 +109,7 @@ export function formatAlbumBreadcrumb(albumPath: Album[]): string {
  * @returns Array con todos los álbumes descendientes
  * @deprecated Album no tiene jerarquía en el modelo actual
  */
-export function getAllDescendants(albumId: string, allAlbums: Record<string, Album>): Album[] {
+export function getAllDescendants(_albumId: string, _allAlbums: Record<string, Album>): Album[] {
 	// TODO: Album no tiene relación parent/children en el modelo actual
 	return [];
 }

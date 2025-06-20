@@ -19,7 +19,7 @@ const logger = serverLogger.withContext('FavoriteActions');
  * @param entityType - El tipo de entidad.
  * @param entityId - El ID de la entidad.
  */
-async function revalidateFavoritePaths(entityType: FavoriteEntityType, entityId: string) {
+async function revalidateFavoritePaths(_entityType: FavoriteEntityType, _entityId: string) {
 	revalidatePath('/favorites');
 	// Opcionalmente, revalidar la página de la entidad específica
 	// revalidatePath(`/${entityType.toLowerCase()}s/${entityId}`);

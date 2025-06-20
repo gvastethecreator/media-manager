@@ -1,6 +1,29 @@
-import type { LucideIcon } from 'lucide-react';
 import type { NavigationData } from '@/components/navigation/actions/navigation.actions';
-import { ViewType } from '@/types/files';
+import type { LucideIcon } from 'lucide-react';
+
+/**
+ * Tipo para las categorías de navegación disponibles
+ */
+export type NavigationCategory =
+	| 'collections'
+	| 'folders'
+	| 'tags'
+	| 'albums'
+	| 'characters'
+	| 'places'
+	| 'world-items'
+	| 'concepts'
+	| 'prompts'
+	| 'notes'
+	| 'groups'
+	| 'properties'
+	| 'wildcards'
+	// Nuevas entidades
+	| 'audios'
+	| 'documents'
+	| 'json-files'
+	| 'file-3d'
+	| 'workflows';
 
 /**
  * @description Representa una entidad que puede tener un conteo de imágenes asociadas.
@@ -17,7 +40,7 @@ export interface NavPanelProps {
 }
 
 export interface CategoryItem {
-	id: ViewType;
+	id: NavigationCategory;
 	icon: LucideIcon;
 	label: string;
 	color: string;
@@ -31,6 +54,8 @@ export interface CategoryChild {
 	color?: string;
 	path?: string;
 	description?: string;
+	totalFiles?: number;
+	totalSize?: number;
 	_count?: {
 		images: number;
 		// Otros conteos posibles

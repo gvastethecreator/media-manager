@@ -76,7 +76,7 @@ export class MetadataError extends Error {
 	constructor(
 		message: string,
 		path?: string,
-		code: MetadataErrorCode = MetadataErrorCode.UNKNOWN_ERROR,
+		code: MetadataErrorCode = MetadataErrorCode.UNKNOWN,
 		details?: Record<string, unknown>
 	) {
 		super(message);

@@ -68,7 +68,7 @@ export function CreateCollectionForm({
 	onUpdated,
 	onCancel,
 }: CreateCollectionFormProps) {
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [_isSubmitting, setIsSubmitting] = useState(false);
 
 	// Inicializar formulario con valores por defecto
 	const form = useForm<FormValues>({
@@ -108,7 +108,7 @@ export function CreateCollectionForm({
 	}, [form, isEditing, collection]);
 
 	// Generar color y emoji basados en la categoría
-	const generateSuggestions = () => {
+	const _generateSuggestions = () => {
 		const category = form.getValues('category');
 		const name = form.getValues('name');
 
@@ -173,7 +173,7 @@ export function CreateCollectionForm({
 	};
 
 	// Manejar envío del formulario
-	const onSubmit = async (data: FormValues) => {
+	const _onSubmit = async (data: FormValues) => {
 		try {
 			setIsSubmitting(true);
 
@@ -213,7 +213,7 @@ export function CreateCollectionForm({
 	};
 
 	// Formatear valor para precio
-	const formatPrice = (value: string) => {
+	const _formatPrice = (value: string) => {
 		return value !== '' ? Number.parseFloat(value) : undefined;
 	};
 

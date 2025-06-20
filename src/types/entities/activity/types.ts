@@ -20,6 +20,13 @@ export interface ActivityBase {
 }
 
 /**
+ * Metadatos adicionales para actividades
+ */
+export interface ActivityMetadata {
+	[key: string]: any;
+}
+
+/**
  * Interfaz extendida para Activity (con info de imagen y UI)
  */
 export interface Activity extends ActivityBase {
@@ -35,6 +42,12 @@ export interface Activity extends ActivityBase {
 	isSelected?: boolean;
 	isExpanded?: boolean;
 }
+
+/**
+ * Tipo completo para Activity (usado en stores y transformers)
+ * Incluye toda la información extendida y metadatos del UI
+ */
+export type ActivityComplete = Activity;
 
 /**
  * Input para creación
@@ -87,3 +100,4 @@ export const ActivitySchema = z.object({
 // - Usar solo estos tipos en transformers, server actions y validaciones.
 // - No importar tipos de Prisma ni de archivos legacy.
 // - Validar siempre con ActivitySchema antes de persistir.
+// - ActivityComplete es un alias de Activity para consistencia con otros stores.

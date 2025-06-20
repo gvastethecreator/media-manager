@@ -221,9 +221,8 @@ export function toPrismaGroup(
 ): PrismaGroupCreateInput | PrismaGroupUpdateInput {
 	if ('id' in data && data.id) {
 		return toPrismaGroupUpdate(data as GroupUpdateInput);
-	} else {
-		return toPrismaGroupCreate(data as GroupCreateInput);
 	}
+		return toPrismaGroupCreate(data as GroupCreateInput);
 }
 
 /**

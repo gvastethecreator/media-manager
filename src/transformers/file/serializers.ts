@@ -40,7 +40,7 @@ export function serializeDirectoryContents(path: string, items: FileBase[]): Dir
 	try {
 		// Contar archivos y directorios
 		const directoryCount = items.filter((item) => item.isDirectory).length;
-		const fileCount = items.length - directoryCount;
+		const _fileCount = items.length - directoryCount;
 
 		// Crear resultado de lectura
 		const result: DirectoryReadResult = {

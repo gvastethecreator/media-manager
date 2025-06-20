@@ -3,7 +3,6 @@
  * @module utils/image-utils
  */
 
-import type { ImageComplete as ImageComplete } from '@/types/entities/image';
 
 /**
  * Calcula la relación de aspecto de una imagen

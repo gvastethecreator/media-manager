@@ -6,8 +6,8 @@
  * @description Acciones CRUD y de gestión de relaciones para los Personajes.
  */
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
 import {
     fromPrismaCharacter,
     fromPrismaCharacters,
@@ -28,22 +28,70 @@ const logger = serverLogger.withContext('CharacterActions');
 
 // Objeto de inclusión para obtener un personaje completo con todas sus relaciones y conteos.
 const CHARACTER_INCLUDE = {
-	images: true,
-	videos: true,
-	tags: true,
-	groups: true,
-	properties: true,
-	collections: true,
-	albums: true,
-	places: true,
-	worldItems: true,
-	concepts: true,
-	prompts: true,
-	notes: true,
-	wildcards: true,
-	relatedCharacters: true,
-	relatedTo: true,
-	_count: true,
+	images: {
+		select: { id: true }
+	},
+	videos: {
+		select: { id: true }
+	},
+	tags: {
+		select: { id: true }
+	},
+	groups: {
+		select: { id: true }
+	},
+	properties: {
+		select: { id: true }
+	},
+	collections: {
+		select: { id: true }
+	},
+	albums: {
+		select: { id: true }
+	},
+	places: {
+		select: { id: true }
+	},
+	worldItems: {
+		select: { id: true }
+	},
+	concepts: {
+		select: { id: true }
+	},
+	prompts: {
+		select: { id: true }
+	},
+	notes: {
+		select: { id: true }
+	},
+	wildcards: {
+		select: { id: true }
+	},
+	relatedCharacters: {
+		select: { id: true }
+	},
+	relatedTo: {
+		select: { id: true }
+	},
+	_count: {
+		select: {
+			images: true,
+			videos: true,
+			tags: true,
+			groups: true,
+			properties: true,
+			collections: true,
+			albums: true,
+			places: true,
+			worldItems: true,
+			concepts: true,
+			prompts: true,
+			notes: true,
+			wildcards: true,
+			relatedCharacters: true,
+			relatedTo: true,
+		}
+	},
 };
 
 // Re-exportar tipos extendidos para compatibilidad
@@ -63,6 +111,7 @@ async function revalidateCharacterPaths() {
  */
 export async function searchCharacters(options: CharacterSearchOptions): Promise<CharacterComplete[]> {
 	logger.info('🔍 Buscando personajes', { options });
+	const prisma = await getPrismaClient();
 	const prismaOptions = mapCharacterSearchOptionsToPrisma(options);
 	const characters = await prisma.character.findMany({
 		...prismaOptions,
@@ -76,6 +125,7 @@ export async function searchCharacters(options: CharacterSearchOptions): Promise
  */
 export async function getCharacter(id: string): Promise<CharacterComplete | null> {
 	logger.info(`🔍 Obteniendo personaje por ID: ${id}`);
+	const prisma = await getPrismaClient();
 	const character = await prisma.character.findUnique({
 		where: { id },
 		include: CHARACTER_INCLUDE,
@@ -97,10 +147,16 @@ export const getCharacterById = getCharacter;
  */
 export async function getCharacterImages(characterId: string): Promise<any[]> {
 	logger.info(`🖼️ Obteniendo imágenes del personaje: ${characterId}`);
+	const prisma = await getPrismaClient();
 	const character = await prisma.character.findUnique({
 		where: { id: characterId },
 		include: {
 			images: {
+				select: {
+					id: true,
+					name: true,
+					path: true,
+				},
 				orderBy: { createdAt: 'desc' },
 			},
 		},
@@ -119,6 +175,7 @@ export async function getCharacterImages(characterId: string): Promise<any[]> {
  */
 export async function createCharacter(data: CharacterCreateInput): Promise<CharacterBase> {
 	logger.info('➕ Creando nuevo personaje:', { name: data.name });
+	const prisma = await getPrismaClient();
 	const prismaData = mapCreateCharacterDataToPrisma(data);
 	const newCharacter = await prisma.character.create({ data: prismaData });
 	await revalidateCharacterPaths();
@@ -130,6 +187,7 @@ export async function createCharacter(data: CharacterCreateInput): Promise<Chara
  */
 export async function updateCharacter(id: string, data: CharacterUpdateInput): Promise<CharacterBase> {
 	logger.info(`🔄 Actualizando personaje: ${id}`);
+	const prisma = await getPrismaClient();
 	const prismaData = mapUpdateCharacterDataToPrisma(data);
 	const updatedCharacter = await prisma.character.update({
 		where: { id },
@@ -145,6 +203,7 @@ export async function updateCharacter(id: string, data: CharacterUpdateInput): P
  */
 export async function deleteCharacter(id: string): Promise<void> {
 	logger.warn(`🗑️ Eliminando personaje: ${id}`);
+	const prisma = await getPrismaClient();
 	await prisma.character.delete({ where: { id } });
 	await revalidateCharacterPaths();
 	revalidatePath('/characters');
@@ -155,6 +214,7 @@ export async function deleteCharacter(id: string): Promise<void> {
  */
 export async function addImageToCharacter(characterId: string, imageId: string): Promise<void> {
 	logger.info(`🖼️ Añadiendo imagen ${imageId} a personaje ${characterId}`);
+	const prisma = await getPrismaClient();
 	await prisma.character.update({
 		where: { id: characterId },
 		data: { images: { connect: { id: imageId } } },
@@ -167,6 +227,7 @@ export async function addImageToCharacter(characterId: string, imageId: string):
  */
 export async function removeImageFromCharacter(characterId: string, imageId: string): Promise<void> {
 	logger.info(`🖼️ Eliminando imagen ${imageId} de personaje ${characterId}`);
+	const prisma = await getPrismaClient();
 	await prisma.character.update({
 		where: { id: characterId },
 		data: { images: { disconnect: { id: imageId } } },

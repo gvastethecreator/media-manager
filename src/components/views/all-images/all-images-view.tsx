@@ -63,7 +63,6 @@ export function AllImagesView() {
 							properties: image.properties?.map((property: any) => property.name) || [],
 							wildcards: image.wildcards?.map((wildcard: any) => wildcard.name) || [],
 							isFavorite: image.isFavorite,
-							isFavorite: image.isFavorite,
 							thumbnail: thumbnailStr,
 						};
 					});

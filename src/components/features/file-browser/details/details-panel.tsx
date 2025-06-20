@@ -122,7 +122,7 @@ async function parseMetadataDirectly(rawMetadata: string | null): Promise<MediaM
 }
 
 // Función adaptadora para convertir ImageItem a FileItem
-const adaptImageItemToFileItem = (imageItem: any): any => {
+const _adaptImageItemToFileItem = (imageItem: any): any => {
 	return {
 		...imageItem,
 		type: 'image',

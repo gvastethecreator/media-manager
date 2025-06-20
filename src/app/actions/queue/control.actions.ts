@@ -5,10 +5,10 @@
  * @module app/actions/queue/control.actions
  */
 
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
-import * as QueueJobService from '@/services/queue-job.service';
-import { type QueueJobExtended } from '@/types/entities/queue-job';
+import { cancelQueueJob as cancelQueueJobService, retryQueueJob as retryQueueJobService } from '@/services/queue-job/queue-job.service';
+import type { QueueJobExtended } from '@/types/entities/queue-job';
 import { QueueJobStatus } from '@/types/entities/queue-job/types';
 import { revalidatePath } from 'next/cache';
 
@@ -57,6 +57,7 @@ function _createQueueControlError(message: string, code?: string, cause?: unknow
  */
 export async function pauseQueue(queue: string): Promise<boolean> {
 	try {
+		const prisma = await getPrismaClient();
 		logger.debug('⏸️ Pausando cola', { queue });
 
 		// Actualizar todos los trabajos pendientes de la cola
@@ -88,6 +89,7 @@ export async function pauseQueue(queue: string): Promise<boolean> {
  */
 export async function resumeQueue(queue: string): Promise<boolean> {
 	try {
+		const prisma = await getPrismaClient();
 		logger.debug('▶️ Reanudando cola', { queue });
 
 		// Actualizar todos los trabajos pausados de la cola
@@ -119,6 +121,7 @@ export async function resumeQueue(queue: string): Promise<boolean> {
  */
 export async function clearQueue(queue: string): Promise<number> {
 	try {
+		const prisma = await getPrismaClient();
 		logger.debug('🧹 Limpiando cola', { queue });
 
 		// Eliminar trabajos completados y fallidos
@@ -152,7 +155,7 @@ export async function retryQueueJob(id: string): Promise<QueueJobExtended> {
 		logger.debug('🔄 Reintentando trabajo en cola', { id });
 
 		// Reintentar trabajo
-		const job = await QueueJobService.retryQueueJob(id);
+		const job = await retryQueueJobService(id);
 
 		// Revalidar rutas
 		await revalidateQueuePaths();
@@ -175,7 +178,7 @@ export async function cancelQueueJob(id: string): Promise<QueueJobExtended> {
 		logger.debug('⏹️ Cancelando trabajo en cola', { id });
 
 		// Cancelar trabajo
-		const job = await QueueJobService.cancelQueueJob(id);
+		const job = await cancelQueueJobService(id);
 
 		// Revalidar rutas
 		await revalidateQueuePaths();

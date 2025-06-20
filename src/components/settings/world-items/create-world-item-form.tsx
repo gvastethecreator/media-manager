@@ -51,7 +51,7 @@ export function CreateWorldItemForm({
 	onCancel,
 	onPreview,
 }: CreateWorldItemFormProps) {
-	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [_isSubmitting, setIsSubmitting] = useState(false);
 
 	// Configurar react-hook-form
 	const form = useForm<WorldItemForm>({
@@ -97,7 +97,7 @@ export function CreateWorldItemForm({
 	}, [worldItem, isEditing, form]);
 
 	// Manejar envío del formulario
-	const onSubmit = async (data: WorldItemForm) => {
+	const _onSubmit = async (data: WorldItemForm) => {
 		try {
 			setIsSubmitting(true);
 
@@ -126,7 +126,7 @@ export function CreateWorldItemForm({
 	};
 
 	// Cancelar edición
-	const handleCancel = () => {
+	const _handleCancel = () => {
 		form.reset();
 		if (onCancel) {
 			onCancel();

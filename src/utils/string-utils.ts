@@ -21,7 +21,7 @@ export function generateTagColor(name: string): string {
 	let color = '#';
 	for (let i = 0; i < 3; i++) {
 		const value = (hash >> (i * 8)) & 0xff;
-		color += ('00' + value.toString(16)).substr(-2);
+		color += (`00${value.toString(16)}`).substr(-2);
 	}
 
 	return color;
@@ -33,7 +33,7 @@ export function generateTagColor(name: string): string {
  * @param category - La categoría para acotar la selección de emojis.
  * @returns Un emoji.
  */
-export function generateTagEmoji(name: string, category?: string): string {
+export function generateTagEmoji(name: string, _category?: string): string {
 	// Lógica simple por ahora, se puede expandir
 	if (!name) return '🏷️';
 

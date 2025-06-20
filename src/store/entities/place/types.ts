@@ -4,14 +4,14 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { Place, PlaceCategory, PlaceFilters, PlaceType, PlaceViewMode } from '../../../types/entities/place/types';
+import type { PlaceCategory, PlaceComplete, PlaceFilters, PlaceType, PlaceViewMode } from '../../../types/entities/place/types';
 
 /**
  * Estado base del store de Place
  */
 export interface PlaceState {
 	// Datos principales
-	places: Place[];
+	places: PlaceComplete[];
 	isLoading: boolean;
 	error: string | null;
 
@@ -32,9 +32,9 @@ export interface PlaceState {
  */
 export interface PlaceCoreSlice extends PlaceState {
 	// Acciones CRUD
-	setPlaces: (places: Place[]) => void;
-	addPlace: (place: Place) => void;
-	updatePlace: (id: string, data: Partial<Place>) => void;
+	setPlaces: (places: PlaceComplete[]) => void;
+	addPlace: (place: PlaceComplete) => void;
+	updatePlace: (id: string, data: Partial<PlaceComplete>) => void;
 	removePlace: (id: string) => void;
 	resetStore: () => void;
 
@@ -43,8 +43,13 @@ export interface PlaceCoreSlice extends PlaceState {
 	setError: (error: string | null) => void;
 
 	// Getters
-	getPlaceById: (id: string) => Place | null;
-	getPlacesByIds: (ids: string[]) => Place[];
+	getPlaceById: (id: string) => PlaceComplete | null;
+	getPlacesByIds: (ids: string[]) => PlaceComplete[];
+
+	// Acciones de carga y gestión de relaciones
+	loadPlaces: () => Promise<void>;
+	addImageToPlace: (placeId: string, imageId: string) => Promise<void>;
+	removeImageFromPlace: (placeId: string, imageId: string) => Promise<void>;
 }
 
 /**
@@ -120,8 +125,8 @@ export interface PlaceFiltersSlice {
 	) => void;
 
 	// Getters filtrados
-	getFilteredPlaces: () => Place[];
-	getSortedPlaces: () => Place[];
+	getFilteredPlaces: () => PlaceComplete[];
+	getSortedPlaces: () => PlaceComplete[];
 }
 
 /**
@@ -157,7 +162,7 @@ export interface PlaceServiceOptions {
  * Respuesta API para consultas de lugares
  */
 export interface PlaceApiResponse {
-	data: Place[];
+	data: PlaceComplete[];
 	meta: {
 		total: number;
 		page: number;

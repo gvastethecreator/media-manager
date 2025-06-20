@@ -19,12 +19,38 @@ export type { AlbumWithStats } from '@/types/entities/album/extended';
 const logger = serverLogger.withContext('AlbumActions');
 
 const ALBUM_INCLUDE = {
-	images: true,
-	videos: true,
+	images: {
+		take: 10,
+		orderBy: { createdAt: 'desc' as const },
+	},
+	videos: {
+		take: 10,
+		orderBy: { createdAt: 'desc' as const },
+	},
+	collections: true,
+	tags: true,
+	places: true,
+	worldItems: true,
+	concepts: true,
+	prompts: true,
+	notes: true,
+	wildcards: true,
+	properties: true,
+	groups: true,
 	_count: {
 		select: {
 			images: true,
 			videos: true,
+			collections: true,
+			tags: true,
+			places: true,
+			worldItems: true,
+			concepts: true,
+			prompts: true,
+			notes: true,
+			wildcards: true,
+			properties: true,
+			groups: true,
 		},
 	},
 };

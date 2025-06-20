@@ -17,7 +17,7 @@ import { FILE_EXTENSION_GROUPS, FileType } from '@/types/entities/file/enums';
 import type { Stats } from 'fs';
 import path from 'path';
 
-const mappersLogger = serverLogger.withContext('File:Mappers');
+const _mappersLogger = serverLogger.withContext('File:Mappers');
 
 export function generateFileId(filePath: string): string {
 	const normalizedPath = path
@@ -199,10 +199,10 @@ export function applyFileFilters(files: FileBase[], options: FileFilterOptions):
 		filteredFiles = filteredFiles.filter((f) => f.name.toLowerCase().includes(searchTerm));
 	}
 	if (options.fileTypes?.length) {
-		filteredFiles = filteredFiles.filter((f) => options.fileTypes!.includes(f.type as FileType));
+		filteredFiles = filteredFiles.filter((f) => options.fileTypes?.includes(f.type as FileType));
 	}
 	if (options.extensions?.length) {
-		filteredFiles = filteredFiles.filter((f) => f.extension && options.extensions!.includes(f.extension.toLowerCase()));
+		filteredFiles = filteredFiles.filter((f) => f.extension && options.extensions?.includes(f.extension.toLowerCase()));
 	}
 	if (options.minSize) {
 		filteredFiles = filteredFiles.filter((f) => f.size >= options.minSize!);
