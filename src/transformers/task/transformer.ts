@@ -4,12 +4,26 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { TaskBase, TaskExtended, TaskStatus, TaskType, TaskWithStats } from '@/types/entities/task';
+import { ScheduledTask, TaskStatus, TaskType } from '@/types/tasks';
 import { TransformerError } from '@/utils/transformers/errors';
 import { fromPrismaTask, toExtendedTask } from './serializers';
 
 // Logger específico para este módulo
 const logger = serverLogger.withContext({ module: 'TaskTransformer' });
+
+// Tipos locales para este transformador
+type TaskExtended = ScheduledTask & { color: string; icon: string };
+type TaskWithStats = TaskExtended & {
+	stats: {
+		averageRuntime: number;
+		lastRuntime: number;
+		successCount: number;
+		failureCount: number;
+		retryCount: number;
+		averageCpuUsage: number;
+		averageMemoryUsage: number;
+	};
+};
 
 /**
  * Opciones para la transformación de tareas
@@ -34,8 +48,8 @@ export interface TransformTaskOptions {
  * @returns Task transformado
  * @throws TransformerError si hay errores en la validación o transformación
  */
-export function transformTask<T extends Partial<TaskBase> | unknown>(
-	input: T,
+export function transformTask(
+	input: Partial<ScheduledTask> | ScheduledTask,
 	options: TransformTaskOptions = {}
 ): TaskExtended {
 	try {
@@ -46,12 +60,12 @@ export function transformTask<T extends Partial<TaskBase> | unknown>(
 
 		// Si es un objeto de Prisma, primero lo transformamos al formato base
 		if ('handler' in input && typeof input.handler === 'string') {
-			const baseTask = fromPrismaTask(input);
+			const baseTask = fromPrismaTask(input as any);
 			return toExtendedTask(baseTask, options);
 		}
 
 		// Si ya es un objeto Task, simplemente extenderlo
-		return toExtendedTask(input as TaskBase, options);
+		return toExtendedTask(input as ScheduledTask, options);
 	} catch (error) {
 		logger.error('❌ Error transformando Task:', error);
 		throw new TransformerError('Error transformando tarea');
@@ -64,8 +78,8 @@ export function transformTask<T extends Partial<TaskBase> | unknown>(
  * @param options Opciones de transformación
  * @returns Array de Tasks transformados
  */
-export function transformTasks<T extends Partial<TaskBase>[] | unknown[]>(
-	input: T,
+export function transformTasks(
+	input: (Partial<ScheduledTask> | ScheduledTask)[],
 	options: TransformTaskOptions = {}
 ): TaskExtended[] {
 	if (!Array.isArray(input)) {
@@ -81,7 +95,7 @@ export function transformTasks<T extends Partial<TaskBase>[] | unknown[]>(
  * @param task Task a transformar
  * @returns TaskWithStats con estadísticas adicionales
  */
-export function transformTaskToWithStats(task: TaskBase): TaskWithStats {
+export function transformTaskToWithStats(task: ScheduledTask): TaskWithStats {
 	try {
 		// Primero transformamos a extended
 		const taskExtended = transformTask(task, { includeUI: true });
@@ -110,7 +124,7 @@ export function transformTaskToWithStats(task: TaskBase): TaskWithStats {
  * @param task Tarea a procesar
  * @returns Objeto con color e icono
  */
-export function getTaskVisualProps(task: TaskBase): { color: string; icon: string } {
+export function getTaskVisualProps(task: ScheduledTask): { color: string; icon: string } {
 	// Mapeo de tipos a iconos
 	const typeIconMap: Record<string, string> = {
 		[TaskType.MAINTENANCE]: '🔧',

@@ -3,8 +3,8 @@
  * @module store/entities/tag/types
  */
 
-import type { TagBase, TagComplete } from '@/types/entities/tag';
-import { TagCategory, TagRarity, TagSortCriteria, TagViewMode } from '@/types/entities/tag';
+import type { TagWithStats } from '@/types/entities/tag/types';
+import { TagCategory, TagRarity, TagSortCriteria, TagViewMode } from '@/types/entities/tag/types';
 
 /**
  * 🎨 Estado de UI para tags
@@ -49,7 +49,7 @@ export interface TagFilters {
  */
 export interface TagCoreState {
 	/** Lista de tags */
-	items: TagComplete[];
+	items: TagWithStats[];
 	/** Si se están cargando datos */
 	isLoading: boolean;
 	/** Mensaje de error si existe */
@@ -63,19 +63,19 @@ export interface TagCoreState {
  */
 export interface TagCoreActions {
 	/** Carga todos los tags */
-	loadTags: () => Promise<TagComplete[]>;
+	loadTags: () => Promise<TagWithStats[]>;
 	/** Obtiene todos los tags */
-	getTags: () => TagComplete[];
+	getTags: () => TagWithStats[];
 	/** Crea un nuevo tag */
-	createTag: (tag: Partial<TagBase>) => Promise<TagComplete | null>;
+	createTag: (tag: Partial<TagWithStats>) => Promise<TagWithStats | null>;
 	/** Actualiza un tag existente */
-	updateTag: (id: string, tag: Partial<TagBase>) => Promise<void>;
+	updateTag: (id: string, tag: Partial<TagWithStats>) => Promise<void>;
 	/** Elimina un tag */
 	deleteTag: (id: string) => Promise<void>;
 	/** Obtiene un tag por su ID */
-	getTagById: (id: string) => TagComplete | undefined;
+	getTagById: (id: string) => TagWithStats | undefined;
 	/** Recarga los tags forzando una nueva petición */
-	refreshTags: () => Promise<TagComplete[]>;
+	refreshTags: () => Promise<TagWithStats[]>;
 }
 
 /**
@@ -117,9 +117,9 @@ export interface TagFilterActions {
 	/** Limpia todos los filtros */
 	clearFilters: () => void;
 	/** Obtiene tags filtrados */
-	getFilteredTags: () => TagComplete[];
+	getFilteredTags: () => TagWithStats[];
 	/** Obtiene tags filtrados y ordenados */
-	getSortedTags: () => TagComplete[];
+	getSortedTags: () => TagWithStats[];
 }
 
 /**

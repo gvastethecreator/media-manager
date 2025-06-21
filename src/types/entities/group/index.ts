@@ -6,13 +6,17 @@
  * Legacy eliminado.
  */
 
-export { GroupSchema, GroupSortCriteria, GroupType, GroupViewMode } from './types';
+// Exportar desde schema.ts
+export {
+    CreateGroupSchema, GroupAdvancedFilterSchema, GroupFiltersSchema, GroupRelationsSchema, GroupSchema, GroupSearchOptionsSchema, GroupStatsSchema, UpdateGroupSchema
+} from './schema';
 export type {
     CreateGroupData,
     Group,
     GroupBase,
     GroupCard,
     GroupComplete,
+    GroupCounts,
     GroupCreateInput,
     GroupDisplayState,
     GroupExtended,
@@ -27,6 +31,12 @@ export type {
     GroupUpdateInput,
     GroupWithStats,
     UpdateGroupData
+} from './types';
+// Exportar desde types.ts (excepto GroupSchema que ya se exportó desde schema)
+export {
+    GroupSortCriteria,
+    GroupType,
+    GroupViewMode
 } from './types';
 
 // 📝 Documentación: Solo tipos canónicos. Legacy removido.

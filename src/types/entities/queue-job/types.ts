@@ -6,8 +6,6 @@
  * Última migración: 2025-06-18
  */
 
-import { z } from 'zod';
-
 /**
  * Enum para el estado del trabajo en cola
  */
@@ -43,6 +41,17 @@ export interface QueueJobBase {
 }
 
 /**
+ * Tipo para metadata del trabajo
+ */
+export interface QueueJobMetadata {
+	source?: string;
+	target?: string;
+	processId?: string;
+	tags?: string[];
+	customData?: Record<string, unknown>;
+}
+
+/**
  * Input para creación
  */
 export interface QueueJobCreateInput {
@@ -50,34 +59,15 @@ export interface QueueJobCreateInput {
 	data: string;
 	maxAttempts?: number;
 	priority?: number;
-	metadata?: string;
+	metadata?: QueueJobMetadata;
 }
 
 /**
  * Input para actualización
  */
-export type QueueJobUpdateInput = Partial<Omit<QueueJobBase, 'id' | 'createdAt' | 'updatedAt'>>;
-
-/**
- * Esquema Zod para validación de QueueJob
- */
-export const QueueJobSchema = z.object({
-	id: z.string(),
-	queue: z.string(),
-	data: z.string(),
-	status: z.nativeEnum(QueueJobStatus),
-	attempts: z.number(),
-	maxAttempts: z.number(),
-	error: z.string().nullable().optional(),
-	progress: z.number(),
-	startedAt: z.date().nullable().optional(),
-	finishedAt: z.date().nullable().optional(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
-	priority: z.number(),
-	metadata: z.string().nullable().optional(),
-	retryAt: z.date().nullable().optional(),
-});
+export interface QueueJobUpdateInput extends Partial<Omit<QueueJobBase, 'id' | 'createdAt' | 'updatedAt'>> {
+	metadata?: QueueJobMetadata;
+}
 
 /**
  * Input para creación (alias para compatibilidad)
@@ -96,6 +86,17 @@ export interface QueueJobExtended extends QueueJobBase {
 	// Propiedades adicionales para UI
 	duration?: number;
 	executionTime?: number;
+	parsedMetadata?: QueueJobMetadata;
+	formattedCreatedAt?: string;
+	formattedUpdatedAt?: string;
+	formattedStartedAt?: string;
+	formattedFinishedAt?: string;
+	formattedRetryAt?: string;
+	elapsedTime?: string;
+	estimatedTimeRemaining?: string;
+	isActive?: boolean;
+	canRetry?: boolean;
+	canCancel?: boolean;
 }
 
 /**

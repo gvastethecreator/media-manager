@@ -2,7 +2,7 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { Place, PlaceDanger, PlaceResource } from '@/types/entities/place';
+import type { PlaceBase as Place, PlaceDanger, PlaceResource } from '@/types/entities/place';
 
 // Logger específico para acciones de PlaceCard
 const placeCardLogger = serverLogger.withContext('PlaceCardActions');
@@ -152,7 +152,7 @@ export async function getPlaceCardData(placeId: string): Promise<PlaceCardData> 
 }
 
 // Función auxiliar para parsear campos JSON
-function parseJsonField<T>(jsonStr: string): T {
+function parseJsonField<T>(jsonStr: string | null | undefined): T {
 	if (!jsonStr || jsonStr === 'empty_array' || jsonStr === '[]') {
 		return [] as unknown as T;
 	}

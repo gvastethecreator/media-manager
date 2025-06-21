@@ -6,7 +6,8 @@
 export * from './helpers';
 export * from './validators';
 
-import type { AlbumComplete, AlbumSortCriteria } from '@/types/entities/album/types';
+import { AlbumSortCriteria } from '@/types/entities/album/enums';
+import type { AlbumComplete } from '@/types/entities/album/extended';
 
 /**
  * 📚 Ordena los álbumes según la opción especificada

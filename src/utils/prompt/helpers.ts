@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import { deserializeParameters, deserializeTags, serializeParameters, serializeTags } from '@/transformers/prompt';
-import type { PromptBase, PromptExtended } from '@/types/entities/prompt';
+import { deserializeParameters, deserializeTags } from '@/transformers/prompt';
+import type { PromptComplete, PromptParameter } from '@/types/entities/prompt/types';
 
 const helpersLogger = serverLogger.withContext('PromptHelpers');
 
@@ -94,20 +94,45 @@ export function replaceVariablesInContent(content: string, variables: Record<str
 }
 
 /**
+ * Tipo extendido de PromptComplete para la UI con campos adicionales
+ */
+export interface PromptExtended extends PromptComplete {
+	parsedTags: string[];
+	parsedParameters: PromptParameter[];
+	previewContent?: string;
+	lastUpdated?: Date;
+}
+
+/**
  * Convierte un prompt básico a un prompt extendido con propiedades serializadas
  * @param prompt Prompt básico
  * @returns Prompt extendido
  */
-export function preparePromptForDisplay(prompt: PromptBase): PromptExtended {
+export function preparePromptForDisplay(prompt: PromptComplete): PromptExtended {
 	try {
 		return {
 			...prompt,
-			parsedTags: serializeTags(prompt.tags),
-			parsedParameters: serializeParameters(prompt.parameters),
+			parsedTags: Array.isArray(prompt.tags)
+				? prompt.tags
+				: typeof prompt.tags === 'string'
+					? deserializeTags(prompt.tags)
+					: [],
+			parsedParameters:
+				Array.isArray(prompt.parameters)
+					? prompt.parameters
+					: typeof prompt.parameters === 'string'
+						? deserializeParameters(prompt.parameters)
+						: [],
+			previewContent: prompt.content ? prompt.content.substring(0, 100) : undefined,
+			lastUpdated: prompt.updatedAt,
 		};
 	} catch (error) {
 		helpersLogger.error('❌ Error al preparar prompt para mostrar:', error);
-		return prompt as PromptExtended;
+		return {
+			...prompt,
+			parsedTags: [],
+			parsedParameters: [],
+		};
 	}
 }
 
@@ -116,19 +141,15 @@ export function preparePromptForDisplay(prompt: PromptBase): PromptExtended {
  * @param prompt Prompt extendido desde UI
  * @returns Prompt básico para guardar
  */
-export function preparePromptForSaving(prompt: PromptExtended): PromptBase {
+export function preparePromptForSaving(prompt: PromptExtended): PromptComplete {
 	try {
-		// Extraer propiedades extendidas
-		const { parsedTags, parsedParameters, previewContent, lastUpdated, stats, ...basePrompt } = prompt;
-
-		// Serializar arrays y objetos a strings JSON
 		return {
-			...basePrompt,
-			tags: parsedTags ? deserializeTags(parsedTags) : '[]',
-			parameters: parsedParameters ? deserializeParameters(parsedParameters) : '{}',
+			...prompt,
+			tags: prompt.parsedTags || [],
+			parameters: prompt.parsedParameters || [],
 		};
 	} catch (error) {
 		helpersLogger.error('❌ Error al preparar prompt para guardar:', error);
-		return prompt as unknown as PromptBase;
+		return prompt;
 	}
 }

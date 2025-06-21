@@ -4,6 +4,20 @@
  * @description Estructura unificada y validada para Character, siguiendo las mejores prácticas.
  */
 
+import type { AlbumComplete } from '../album';
+import type { CollectionComplete } from '../collection';
+import type { ConceptComplete } from '../concept';
+import type { GroupComplete } from '../group';
+import type { ImageComplete } from '../image';
+import type { NoteComplete } from '../note';
+import type { PlaceComplete } from '../place';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
+import type { TagComplete } from '../tag';
+import type { VideoComplete } from '../video';
+import type { WildcardComplete } from '../wildcard';
+import type { WorldItemComplete } from '../world-item';
+
 /**
  * 🧑‍🎤 Tipo base para un personaje.
  * Contiene todos los campos primitivos y datos serializados en JSON.
@@ -115,12 +129,21 @@ export interface CharacterUpdateInput extends Partial<CharacterCreateInput> {}
  * Utiliza los tipos `Base` de las entidades relacionadas para evitar dependencias circulares complejas.
  */
 export interface CharacterRelations {
-	// Se deben importar los tipos Base de otras entidades aquí si es necesario
-	// Por ahora, usamos un marcador de posición para evitar errores de importación.
-	images?: unknown[];
-	tags?: unknown[];
-	groups?: unknown[];
-	properties?: unknown[];
+	images?: ImageComplete[];
+	videos?: VideoComplete[];
+	tags?: TagComplete[];
+	groups?: GroupComplete[];
+	properties?: PropertyComplete[];
+	collections?: CollectionComplete[];
+	albums?: AlbumComplete[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemComplete[];
+	concepts?: ConceptComplete[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	relatedCharacters?: CharacterBase[];
+	relatedTo?: CharacterBase[];
 }
 
 /**
@@ -129,9 +152,20 @@ export interface CharacterRelations {
 export interface CharacterCounts {
 	_count?: {
 		images?: number;
+		videos?: number;
 		tags?: number;
 		groups?: number;
 		properties?: number;
+		collections?: number;
+		albums?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		relatedCharacters?: number;
+		relatedTo?: number;
 	};
 }
 

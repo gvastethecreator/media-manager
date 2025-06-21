@@ -6,8 +6,19 @@
  * Última migración: 2025-06-18
  */
 
+import type { CharacterComplete } from '../character';
+import type { CollectionComplete } from '../collection';
+import type { ConceptComplete } from '../concept';
+import type { GroupComplete } from '../group';
 import type { ImageComplete } from '../image';
+import type { NoteComplete } from '../note';
+import type { PlaceComplete } from '../place';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
+import type { TagComplete } from '../tag';
 import type { VideoComplete } from '../video';
+import type { WildcardComplete } from '../wildcard';
+import type { WorldItemComplete } from '../world-item';
 
 /**
  * 📝 Metadatos de un álbum
@@ -46,7 +57,17 @@ export interface AlbumBase {
 export interface AlbumRelations {
 	images?: ImageComplete[];
 	videos?: VideoComplete[];
-	children?: AlbumBase[];
+	collections?: CollectionComplete[];
+	tags?: TagComplete[];
+	characters?: CharacterComplete[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemComplete[];
+	concepts?: ConceptComplete[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupComplete[];
 }
 
 /**
@@ -140,3 +161,4 @@ export type Album = AlbumBase;
 
 /* Exportación de tipos adicionales para retrocompatibilidad */
 export type { AlbumCreateInput as CreateAlbumData, AlbumUpdateInput as UpdateAlbumData };
+

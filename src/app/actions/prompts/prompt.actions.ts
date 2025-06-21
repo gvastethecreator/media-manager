@@ -8,13 +8,13 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
 // Importar tipos y transformers actualizados
 import {
-	mapCreatePromptDataToPrisma,
-	mapUpdatePromptDataToPrisma,
-	toExtendedPrompt,
-	toPromptWithStats,
+    mapCreatePromptDataToPrisma,
+    mapUpdatePromptDataToPrisma,
+    toExtendedPrompt,
+    toPromptWithStats,
 } from '@/transformers/prompt';
-import { type ExtendedPrompt } from '@/transformers/prompt/serializers';
 import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
+import type { ExtendedPrompt } from '@/types/entities/prompt/extended';
 import type { FileItem } from '@/types/files';
 
 const promptLogger = serverLogger.withContext('PromptActions');
@@ -107,7 +107,7 @@ export async function getPrompt(id: string): Promise<ExtendedPrompt> {
 		}
 
 		promptLogger.info('✅ Prompt obtenido:', prompt.name);
-		return toExtendedPrompt(prompt);
+		return toExtendedPrompt(prompt as any);
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener prompt:', error);
 		if (error instanceof PromptError) {
@@ -196,7 +196,7 @@ export async function getPromptWithRelations(id: string): Promise<ExtendedPrompt
 		}
 
 		promptLogger.info('✅ Prompt con relaciones obtenido:', prompt.name);
-		return toExtendedPrompt(prompt);
+		return toExtendedPrompt(prompt as any);
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener prompt con relaciones:', error);
 		if (error instanceof PromptError) {
@@ -615,6 +615,9 @@ export async function getPromptImages(promptId: string): Promise<{ images: FileI
 			createdAt: image.createdAt,
 			updatedAt: image.updatedAt,
 			tags: [],
+			collections: [],
+			isPublic: false,
+			isFavorite: false,
 			metadata: image.metadata || {},
 			isSelected: false,
 			isVisible: true,

@@ -3,7 +3,7 @@ import type { JsonFileComplete } from '@/types/entities/json-file';
 import { jsonFileSchema } from '@/types/entities/json-file/json-file.schema';
 
 export function validateJsonFile(input: unknown): JsonFileComplete {
-	return jsonFileSchema.parse(input);
+	return jsonFileSchema.parse(input) as JsonFileComplete;
 }
 
 export function serializeJsonFile(json: JsonFileComplete): string {

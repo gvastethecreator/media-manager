@@ -1,9 +1,8 @@
 import { getFavoriteImages, getImages } from '@/app/actions/images/image-crud.actions';
-import { getTags } from '@/app/actions/tags/tag.actions';
+import { getTags } from '@/app/actions/tags/query.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { getCollections } from '@/services/collection/collection.service';
 import { getFolders } from '@/services/folder/folder.service';
-import type { CollectionComplete } from '@/types/entities/collection';
 import type { FolderComplete } from '@/types/entities/folder';
 import type { ImageComplete } from '@/types/entities/image';
 import type { TagComplete } from '@/types/entities/tag';
@@ -41,7 +40,11 @@ interface TagMapping {
 }
 
 // Interfaces para datos recibidos del servidor
-interface ServerCollection extends CollectionComplete {
+interface ServerCollection {
+	id: string;
+	name: string;
+	emoji?: string;
+	color?: string;
 	_count?: { images: number };
 }
 
@@ -129,7 +132,7 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 		try {
 			set({ isLoading: true });
 			const result = await getImages({ pageSize: 1000 });
-			const items = result.images || [];
+			const items = (result.images || []).map(imageToFileItem);
 			set({
 				currentItems: items,
 				displayedItems: items.slice(0, ITEMS_PER_BATCH),
@@ -178,7 +181,7 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 			// Importar dinámicamente la función de folder images
 			const { getLatestFolderImages } = await import('@/app/actions/images/folder-images.action');
 			const response = await getLatestFolderImages(id, 1000); // Obtener hasta 1000 imágenes
-			const items = response.data || [];
+			const items = (response.data || []).map(imageToFileItem);
 			set({
 				currentItems: items,
 				displayedItems: items.slice(0, ITEMS_PER_BATCH),
@@ -211,10 +214,10 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 	handleSelectTag: async (id: string) => {
 		try {
 			set({ isLoading: true, currentTagId: id });
-			const { getTagImages } = await import('@/app/actions/tags/tag.actions');
+			const { getTagImages } = await import('@/app/actions/tags/query.actions');
 			const rawItems = await getTagImages(id);
 
-			const items = rawItems.map((item) => {
+			const items = rawItems.map((item: any) => {
 				const itemTags = Array.isArray(item.tags) ? item.tags : [];
 
 				const tags: RelatedTag[] = itemTags.map((t: TagMapping) => ({
@@ -251,7 +254,7 @@ export const useFilesStore = create<FilesState>((set, _get) => ({
 }));
 
 // Transformer simple para convertir Image a FileItem (debería estar en un archivo transformer)
-function imageToFileItem(image: ImageComplete): FileItem {
+function imageToFileItem(image: any): FileItem {
 	return {
 		id: image.id,
 		name: image.name || 'Untitled',

@@ -3,12 +3,12 @@
  * @module transformers/queue-job
  */
 
-import type { QueueJob } from '@prisma/client';
-import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '@/types/entities/queue-job';
 import { deserializeJsonField, serializeJsonField } from '@/utils/transformers/common';
+import type { QueueJob } from '@prisma/client';
+import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const logger = serverLogger.withContext('QueueJobTransformer');
 
@@ -33,6 +33,16 @@ export function calculateDuration(start: Date | null, end: Date | null): string 
 	const endDate = end || new Date();
 	const duration = intervalToDuration({ start, end: endDate });
 	return formatDuration(duration, { locale: es });
+}
+
+/**
+ * Serializa la metadata de un trabajo para almacenar en la base de datos
+ * @param metadata - Metadata a serializar
+ * @returns Metadata serializada como string JSON
+ */
+export function serializeQueueJobMetadata(metadata: QueueJobMetadata | undefined): string | undefined {
+	if (!metadata) return undefined;
+	return serializeJsonField(metadata, undefined);
 }
 
 /**
@@ -136,12 +146,3 @@ function calculateEstimatedTimeRemaining(job: QueueJob): string | undefined {
 	return formatDuration(duration, { locale: es });
 }
 
-/**
- * Serializa la metadata de un trabajo para almacenar en la base de datos
- * @param metadata - Metadata a serializar
- * @returns Metadata serializada como string JSON
- */
-export function serializeQueueJobMetadata(metadata: QueueJobMetadata | undefined): string | undefined {
-	if (!metadata) return undefined;
-	return serializeJsonField(metadata, undefined);
-}

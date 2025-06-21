@@ -5,32 +5,11 @@
 
 // Exportar desde helpers
 export {
-	buildPlaceTree,
-	calculatePlaceStats,
-	filterPlaces,
-	findPlaceById,
-	findPlacesByCategory,
-	findPlacesByIds,
-	findPlacesByRegion,
-	findPlacesByType,
-	preparePlaceRequest,
-	sortPlaces,
+    buildPlaceTree,
+    calculatePlaceStats,
+    filterPlaces,
+    findPlaceById,
+    findPlacesByIds,
+    sortPlaces
 } from './helpers';
 
-// Exportar desde validators
-export {
-	parseAndValidateDangers,
-	parseAndValidateFilters,
-	parseAndValidateResources,
-	parseAndValidateStats,
-	placeDangerSchema,
-	placeFiltersSchema,
-	placeResourceSchema,
-	placeSchema,
-	placeStatsSchema,
-	validatePlace,
-	validatePlaceDangers,
-	validatePlaceFilters,
-	validatePlaceResources,
-	validatePlaceStats,
-} from './validators';

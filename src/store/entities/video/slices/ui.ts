@@ -4,11 +4,29 @@
  */
 
 import type { StateCreator } from 'zustand';
+import type { VideoStore } from '..';
 import type { VideoViewMode } from '../../../../types/entities/video';
-import type { VideoState } from '../types';
+
+export interface VideoUIState {
+	selectedIds: string[];
+	viewMode: VideoViewMode;
+	isViewerOpen: boolean;
+	currentVideoId: string | null;
+	highlightedId: string | null;
+	expandedIds: string[];
+}
+
+export const initialUIState: VideoUIState = {
+	selectedIds: [],
+	viewMode: VideoViewMode.GRID,
+	isViewerOpen: false,
+	currentVideoId: null,
+	highlightedId: null,
+	expandedIds: [],
+};
 
 // Slice para estado de UI
-export interface VideoUISlice {
+export interface VideoUISlice extends VideoUIState {
 	// Selección de videos
 	selectVideo: (id: string | null) => void;
 	deselectVideo: (id: string) => void;
@@ -42,236 +60,94 @@ export interface VideoUISlice {
 }
 
 // Creador del slice
-export const createVideoUISlice: StateCreator<VideoState, [], [], VideoUISlice> = (set, get) => ({
+export const createVideoUISlice: StateCreator<VideoStore, [], [], VideoUISlice> = (set, get) => ({
+	...initialUIState,
 	// Selección de videos
-	selectVideo: (id: string | null) => {
-		// Si id es null, limpiar la selección
+	selectVideo: (id) => {
 		if (id === null) {
-			set((state) => ({
-				ui: {
-					...state.ui,
-					selectedIds: [],
-				},
-			}));
+			set({ selectedIds: [] });
 			return;
 		}
-
-		set((state) => {
-			// Asegurarse de que selectedIds está inicializado
-			const currentSelectedIds = state.ui.selectedIds || [];
-
-			return {
-				ui: {
-					...state.ui,
-					selectedIds: currentSelectedIds.includes(id) ? currentSelectedIds : [...currentSelectedIds, id],
-				},
-			};
-		});
-	},
-
-	deselectVideo: (id: string) => {
-		set((state) => {
-			// Asegurarse de que selectedIds está inicializado
-			const currentSelectedIds = state.ui.selectedIds || [];
-
-			return {
-				ui: {
-					...state.ui,
-					selectedIds: currentSelectedIds.filter((selectedId) => selectedId !== id),
-				},
-			};
-		});
-	},
-
-	toggleVideoSelection: (id: string) => {
-		set((state) => {
-			// Asegurarse de que selectedIds está inicializado
-			const currentSelectedIds = state.ui.selectedIds || [];
-
-			return {
-				ui: {
-					...state.ui,
-					selectedIds: currentSelectedIds.includes(id)
-						? currentSelectedIds.filter((selectedId) => selectedId !== id)
-						: [...currentSelectedIds, id],
-				},
-			};
-		});
-	},
-
-	selectMultipleVideos: (ids: string[]) => {
-		set((state) => {
-			// Asegurarse de que selectedIds está inicializado
-			const currentSelectedIds = state.ui.selectedIds || [];
-			const uniqueIds = [...new Set([...currentSelectedIds, ...ids])];
-
-			return {
-				ui: {
-					...state.ui,
-					selectedIds: uniqueIds,
-				},
-			};
-		});
-	},
-
-	clearSelection: () => {
 		set((state) => ({
-			ui: {
-				...state.ui,
-				selectedIds: [],
-			},
+			selectedIds: state.selectedIds.includes(id) ? state.selectedIds : [...state.selectedIds, id],
 		}));
 	},
 
-	getSelectedVideos: () => {
-		// Asegurarse de que selectedIds está inicializado
-		return get().ui.selectedIds || [];
+	deselectVideo: (id) => set((state) => ({ selectedIds: state.selectedIds.filter((selectedId) => selectedId !== id) })),
+
+	toggleVideoSelection: (id) => {
+		set((state) => ({
+			selectedIds: state.selectedIds.includes(id)
+				? state.selectedIds.filter((selectedId) => selectedId !== id)
+				: [...state.selectedIds, id],
+		}));
 	},
 
-	isVideoSelected: (id: string) => {
-		// Asegurarse de que selectedIds está inicializado
-		const selectedIds = get().ui.selectedIds || [];
-		return selectedIds.includes(id);
+	selectMultipleVideos: (ids) => {
+		set((state) => ({
+			selectedIds: [...new Set([...state.selectedIds, ...ids])],
+		}));
 	},
+
+	clearSelection: () => set({ selectedIds: [] }),
+	getSelectedVideos: () => get().selectedIds,
+	isVideoSelected: (id) => get().selectedIds.includes(id),
 
 	// Visor de videos
-	openViewer: (videoId: string) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				isViewerOpen: true,
-				currentVideoId: videoId,
-			},
-		}));
-	},
-
-	closeViewer: () => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				isViewerOpen: false,
-			},
-		}));
-	},
+	openViewer: (videoId) => set({ isViewerOpen: true, currentVideoId: videoId }),
+	closeViewer: () => set({ isViewerOpen: false }),
 
 	nextVideo: () => {
-		const state = get();
-		const videos = Object.values(state.core.videos);
-		if (videos.length === 0 || !state.ui.currentVideoId) return;
+		const { videos, currentVideoId } = get();
+		const videoArray = Object.values(videos);
+		if (videoArray.length === 0 || !currentVideoId) return;
 
-		const currentIndex = videos.findIndex((vid) => vid.id === state.ui.currentVideoId);
+		const currentIndex = videoArray.findIndex((vid) => vid.id === currentVideoId);
 		if (currentIndex === -1) return;
 
-		const nextIndex = (currentIndex + 1) % videos.length;
-		set((state) => ({
-			ui: {
-				...state.ui,
-				currentVideoId: videos[nextIndex].id,
-			},
-		}));
+		const nextIndex = (currentIndex + 1) % videoArray.length;
+		set({ currentVideoId: videoArray[nextIndex].id });
 	},
 
 	previousVideo: () => {
-		const state = get();
-		const videos = Object.values(state.core.videos);
-		if (videos.length === 0 || !state.ui.currentVideoId) return;
+		const { videos, currentVideoId } = get();
+		const videoArray = Object.values(videos);
+		if (videoArray.length === 0 || !currentVideoId) return;
 
-		const currentIndex = videos.findIndex((vid) => vid.id === state.ui.currentVideoId);
+		const currentIndex = videoArray.findIndex((vid) => vid.id === currentVideoId);
 		if (currentIndex === -1) return;
 
-		const prevIndex = (currentIndex - 1 + videos.length) % videos.length;
-		set((state) => ({
-			ui: {
-				...state.ui,
-				currentVideoId: videos[prevIndex].id,
-			},
-		}));
+		const prevIndex = (currentIndex - 1 + videoArray.length) % videoArray.length;
+		set({ currentVideoId: videoArray[prevIndex].id });
 	},
 
-	isViewerOpen: () => {
-		return get().ui.isViewerOpen;
-	},
-
-	getCurrentVideo: () => {
-		return get().ui.currentVideoId;
-	},
+	isViewerOpen: () => get().isViewerOpen,
+	getCurrentVideo: () => get().currentVideoId,
 
 	// Modo de visualización
-	setViewMode: (viewMode: VideoViewMode) => {
-		set((state) => ({
-			ui: {
-				...state.ui,
-				viewMode,
-			},
-		}));
-	},
-
-	getViewMode: () => {
-		return get().ui.viewMode;
-	},
+	setViewMode: (viewMode) => set({ viewMode }),
+	getViewMode: () => get().viewMode,
 
 	// Expansión de detalles
-	expandVideo: (id: string) => {
-		set((state) => {
-			// Asegurarse de que expandedIds está inicializado
-			const currentExpandedIds = state.ui.expandedIds || [];
-
-			return {
-				ui: {
-					...state.ui,
-					expandedIds: currentExpandedIds.includes(id) ? currentExpandedIds : [...currentExpandedIds, id],
-				},
-			};
-		});
-	},
-
-	collapseVideo: (id: string) => {
-		set((state) => {
-			// Asegurarse de que expandedIds está inicializado
-			const currentExpandedIds = state.ui.expandedIds || [];
-
-			return {
-				ui: {
-					...state.ui,
-					expandedIds: currentExpandedIds.filter((expandedId) => expandedId !== id),
-				},
-			};
-		});
-	},
-
-	toggleVideoExpansion: (id: string) => {
-		set((state) => {
-			// Asegurarse de que expandedIds está inicializado
-			const currentExpandedIds = state.ui.expandedIds || [];
-
-			return {
-				ui: {
-					...state.ui,
-					expandedIds: currentExpandedIds.includes(id)
-						? currentExpandedIds.filter((expandedId) => expandedId !== id)
-						: [...currentExpandedIds, id],
-				},
-			};
-		});
-	},
-
-	isVideoExpanded: (id: string) => {
-		// Asegurarse de que expandedIds está inicializado
-		const expandedIds = get().ui.expandedIds || [];
-		return expandedIds.includes(id);
-	},
-
-	// Resaltado
-	highlightVideo: (id: string | null) => {
+	expandVideo: (id) => {
 		set((state) => ({
-			ui: {
-				...state.ui,
-				highlightedId: id,
-			},
+			expandedIds: state.expandedIds.includes(id) ? state.expandedIds : [...state.expandedIds, id],
 		}));
 	},
 
-	getHighlightedVideo: () => {
-		return get().ui.highlightedId;
+	collapseVideo: (id) => set((state) => ({ expandedIds: state.expandedIds.filter((expandedId) => expandedId !== id) })),
+
+	toggleVideoExpansion: (id) => {
+		set((state) => ({
+			expandedIds: state.expandedIds.includes(id)
+				? state.expandedIds.filter((expandedId) => expandedId !== id)
+				: [...state.expandedIds, id],
+		}));
 	},
+
+	isVideoExpanded: (id) => get().expandedIds.includes(id),
+
+	// Resaltado
+	highlightVideo: (id) => set({ highlightedId: id }),
+	getHighlightedVideo: () => get().highlightedId,
 });

@@ -8,10 +8,11 @@ import { EntityError, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import type {
-	GroupCreateInput,
-	GroupExtended,
-	GroupSearchResult,
-	GroupUpdateInput,
+    GroupCreateInput,
+    GroupExtended,
+    GroupSearchResult,
+    GroupUpdateInput,
+    GroupComplete,
 } from '@/types/entities/group/types';
 import { TransformerError } from '@/utils/transformers/errors';
 import { toGroupListItem } from './mappers';
@@ -385,27 +386,20 @@ export async function deleteGroup(
 }
 
 /**
- * Transforma un grupo para su uso en relaciones
+ * Transforma un grupo a un formato de entidad relacionada
  */
 export function toRelatedGroup(
 	group: Record<string, any>,
 	_options: {
 		includeDetails?: boolean;
 	} = {}
-): Record<string, any> {
-	try {
-		// Mapeo simple para relaciones
-		return {
-			id: group.id,
-			name: group.name,
-			emoji: group.emoji,
-			color: group.color,
-			itemsCount: group.itemsCount || 0,
-		};
-	} catch (error) {
-		logger.error('Error transformando grupo para relación:', error);
-		throw new TransformerError('Error al transformar grupo para relación');
-	}
+): Partial<GroupComplete> {
+	return {
+		id: group.id,
+		name: group.name,
+		emoji: group.emoji,
+		color: group.color,
+	};
 }
 
 // Objeto de compatibilidad para código anterior

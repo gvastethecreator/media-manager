@@ -3,22 +3,90 @@
  * @module transformers/album/transformer
  * @description Contiene la lógica para convertir un objeto Album de Prisma a nuestro tipo canónico.
  */
+
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AlbumWithRelations } from '@/types/entities/album';
-import { TransformerError } from '@/utils/transformers/errors';
+import type { CharacterComplete } from '@/types/entities/character';
+import type { CollectionComplete } from '@/types/entities/collection';
+import type { ConceptComplete } from '@/types/entities/concept';
+import type { GroupComplete } from '@/types/entities/group';
+import type { ImageComplete } from '@/types/entities/image';
+import type { NoteComplete } from '@/types/entities/note';
+import type { PlaceComplete } from '@/types/entities/place';
+import type { PromptComplete } from '@/types/entities/prompt';
+import type { PropertyComplete } from '@/types/entities/property';
+import type { TagComplete } from '@/types/entities/tag';
+import type { VideoComplete } from '@/types/entities/video';
+import type { WildcardComplete } from '@/types/entities/wildcard';
+import type { WorldItemComplete } from '@/types/entities/world-item';
+import type { Prisma } from '@prisma/client';
+import { fromPrismaCharacter } from '../character/transformer';
+import { fromPrismaCollection } from '../collection/transformer';
+import { fromPrismaConcept } from '../concept/transformer';
+import { fromPrismaGroup } from '../group/transformer';
+import { fromPrismaImage } from '../image/transformer';
+import { fromPrismaNote } from '../note/transformer';
+import { fromPrismaPlace } from '../place/transformer';
+import { fromPrismaPrompt } from '../prompt/transformer';
+import { fromPrismaProperty } from '../property/transformer';
+import { fromPrismaTag } from '../tag/transformer';
+import { fromPrismaVideo } from '../video/transformer';
+import { fromPrismaWildcard } from '../wildcard/transformer';
+import { fromPrismaWorldItem } from '../world-item/transformer';
 
 const logger = serverLogger.withContext('AlbumTransformer');
+
+/**
+ * Tipo de Prisma para un álbum con todas sus relaciones y conteos.
+ * Esto asegura que cualquier consulta a la base de datos que use este transformador
+ * incluya todos los campos necesarios.
+ */
+type PrismaAlbumWithRelations = Prisma.AlbumGetPayload<{
+	include: {
+		images: true;
+		videos: true;
+		collections: true;
+		tags: true;
+		characters: true;
+		places: true;
+		worldItems: true;
+		concepts: true;
+		prompts: true;
+		notes: true;
+		wildcards: true;
+		properties: true;
+		groups: true;
+		_count: {
+			select: {
+				images: true;
+				videos: true;
+				collections: true;
+				tags: true;
+				characters: true;
+				places: true;
+				worldItems: true;
+				concepts: true;
+				prompts: true;
+				notes: true;
+				wildcards: true;
+				properties: true;
+				groups: true;
+			};
+		};
+	};
+}>;
 
 /**
  * 🔄 Transforma un objeto Album de Prisma a nuestro tipo canónico AlbumWithRelations.
  *
  * @param prismaAlbum - El objeto Album obtenido de Prisma.
- * @returns Un objeto AlbumWithRelations compatible con nuestra aplicación.
- * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
+ * @returns Un objeto AlbumWithRelations compatible con la aplicación, o null.
  */
-export function fromPrismaAlbum(prismaAlbum: any): AlbumWithRelations {
+export function fromPrismaAlbum(
+	prismaAlbum: PrismaAlbumWithRelations | null,
+): AlbumWithRelations | null {
 	if (!prismaAlbum) {
-		throw new TransformerError('El objeto de álbum de Prisma no puede ser nulo.');
+		return null;
 	}
 
 	try {
@@ -27,20 +95,43 @@ export function fromPrismaAlbum(prismaAlbum: any): AlbumWithRelations {
 		return {
 			...baseData,
 			category: baseData.category ?? 'general',
-			// Asegurar que las relaciones opcionales no sean undefined
-			images: baseData.images ?? [],
-			videos: baseData.videos ?? [],
-			collections: baseData.collections ?? [],
-			tags: baseData.tags ?? [],
-			characters: baseData.characters ?? [],
-			places: baseData.places ?? [],
-			worldItems: baseData.worldItems ?? [],
-			concepts: baseData.concepts ?? [],
-			prompts: baseData.prompts ?? [],
-			notes: baseData.notes ?? [],
-			wildcards: baseData.wildcards ?? [],
-			properties: baseData.properties ?? [],
-			groups: baseData.groups ?? [],
+			// Mapear relaciones para asegurar tipos correctos
+			images:
+				baseData.images?.map(fromPrismaImage).filter((i): i is ImageComplete => i !== null) || [],
+			videos:
+				baseData.videos?.map(fromPrismaVideo).filter((v): v is VideoComplete => v !== null) || [],
+			collections:
+				baseData.collections
+					?.map(fromPrismaCollection)
+					.filter((c): c is CollectionComplete => c !== null) || [],
+			tags: baseData.tags?.map(fromPrismaTag).filter((t): t is TagComplete => t !== null) || [],
+			characters:
+				baseData.characters
+					?.map(fromPrismaCharacter)
+					.filter((c): c is CharacterComplete => c !== null) || [],
+			places:
+				baseData.places?.map(fromPrismaPlace).filter((p): p is PlaceComplete => p !== null) || [],
+			worldItems:
+				baseData.worldItems
+					?.map(fromPrismaWorldItem)
+					.filter((wi): wi is WorldItemComplete => wi !== null) || [],
+			concepts:
+				baseData.concepts
+					?.map(fromPrismaConcept)
+					.filter((c): c is ConceptComplete => c !== null) || [],
+			prompts:
+				baseData.prompts?.map(fromPrismaPrompt).filter((p): p is PromptComplete => p !== null) || [],
+			notes: baseData.notes?.map(fromPrismaNote).filter((n): n is NoteComplete => n !== null) || [],
+			wildcards:
+				baseData.wildcards
+					?.map(fromPrismaWildcard)
+					.filter((w): w is WildcardComplete => w !== null) || [],
+			properties:
+				baseData.properties
+					?.map(fromPrismaProperty)
+					.filter((p): p is PropertyComplete => p !== null) || [],
+			groups:
+				baseData.groups?.map(fromPrismaGroup).filter((g): g is GroupComplete => g !== null) || [],
 			// Asignar el conteo de forma segura
 			_count: {
 				images: _count?.images ?? 0,
@@ -63,7 +154,7 @@ export function fromPrismaAlbum(prismaAlbum: any): AlbumWithRelations {
 			error,
 			albumId: prismaAlbum?.id,
 		});
-		throw new TransformerError(`Error al transformar el álbum: ${(error as Error).message}`);
+		return null;
 	}
 }
 
@@ -73,6 +164,8 @@ export function fromPrismaAlbum(prismaAlbum: any): AlbumWithRelations {
  * @param prismaAlbums - Un array de objetos Album de Prisma.
  * @returns Un array de objetos AlbumWithRelations.
  */
-export function fromPrismaAlbums(prismaAlbums: any[]): AlbumWithRelations[] {
-	return prismaAlbums.map(fromPrismaAlbum);
+export function fromPrismaAlbums(
+	prismaAlbums: PrismaAlbumWithRelations[],
+): AlbumWithRelations[] {
+	return prismaAlbums.map(fromPrismaAlbum).filter((a): a is AlbumWithRelations => a !== null);
 }

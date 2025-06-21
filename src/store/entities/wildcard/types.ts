@@ -3,11 +3,7 @@
  * @module store/entities/wildcard/types
  */
 
-import type {
-	WildcardComplete,
-	WildcardSortCriteria,
-	WildcardViewMode,
-} from '../../../types/entities/wildcard';
+import type { WildcardComplete, WildcardSortCriteria, WildcardViewMode } from '../../../types/entities/wildcard';
 
 /**
  * Estado de visualización para un wildcard individual

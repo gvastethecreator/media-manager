@@ -5,7 +5,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { WorkflowComplete } from '@/types/entities/workflow/types';
+import type { PrismaWorkflowWithCount, WorkflowComplete } from '@/types/entities/workflow/types';
 import { TransformerError } from '@/utils/transformers/errors';
 
 const logger = serverLogger.withContext('WorkflowTransformer');
@@ -17,7 +17,7 @@ const logger = serverLogger.withContext('WorkflowTransformer');
  * @returns Un objeto WorkflowComplete compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function fromPrismaWorkflow(prismaWorkflow: any): WorkflowComplete {
+export function fromPrismaWorkflow(prismaWorkflow: PrismaWorkflowWithCount): WorkflowComplete {
 	if (!prismaWorkflow) {
 		throw new TransformerError('El objeto de workflow de Prisma no puede ser nulo.');
 	}
@@ -66,6 +66,6 @@ export function fromPrismaWorkflow(prismaWorkflow: any): WorkflowComplete {
  * @param prismaWorkflows - Un array de objetos Workflow de Prisma.
  * @returns Un array de objetos WorkflowComplete.
  */
-export function fromPrismaWorkflows(prismaWorkflows: any[]): WorkflowComplete[] {
+export function fromPrismaWorkflows(prismaWorkflows: PrismaWorkflowWithCount[]): WorkflowComplete[] {
 	return prismaWorkflows.map(fromPrismaWorkflow);
 }

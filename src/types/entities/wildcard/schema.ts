@@ -54,8 +54,8 @@ export const WildcardSchema = z.object({
 	updatedAt: z.date().optional(),
 
 	// Configuración de visualización
-	sortBy: z.nativeEnum(WildcardSortCriteria).optional(),
-	viewMode: z.nativeEnum(WildcardViewMode).optional(),
+	sortBy: z.enum(Object.values(WildcardSortCriteria) as [string, ...string[]]).optional(),
+	viewMode: z.enum(Object.values(WildcardViewMode) as [string, ...string[]]).optional(),
 });
 
 /**

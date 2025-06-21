@@ -4,4 +4,5 @@
  * @description Punto de entrada para el servicio de álbumes
  */
 
-export * from './album.service';
+// TODO: Implementar album.service.ts según la documentación en README.md
+// export * from './album.service';

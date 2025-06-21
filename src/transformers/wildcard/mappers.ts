@@ -3,15 +3,15 @@
  * @module transformers/wildcard/mappers
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	WildcardCreateInput,
-	WildcardFilters,
-	WildcardSearchOptions,
-	WildcardUpdateInput,
+    WildcardCreateInput,
+    WildcardFilters,
+    WildcardSearchOptions,
+    WildcardUpdateInput,
 } from '@/types/entities/wildcard';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('WildcardMappers');
 
@@ -20,12 +20,18 @@ const logger = serverLogger.withContext('WildcardMappers');
  */
 export function mapCreateWildcardDataToPrisma(input: WildcardCreateInput): Prisma.WildcardCreateInput {
 	try {
-		const { parentId, children, ...rest } = input;
-		return {
+		const { parentId, childrenIds, ...rest } = input;
+		const prismaData: Prisma.WildcardCreateInput = {
 			...rest,
-			children: children ? JSON.stringify(children) : '[]',
+			children: '[]', // Inicializar como JSON vacío, se gestionará por relaciones
 			parent: parentId ? { connect: { id: parentId } } : undefined,
 		};
+
+		if (childrenIds) {
+			prismaData.childWildcards = { connect: childrenIds.map((id) => ({ id })) };
+		}
+
+		return prismaData;
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de wildcard.', { error, input });
 		throw new TransformerError('No se pudieron mapear los datos para crear el wildcard.');
@@ -37,14 +43,14 @@ export function mapCreateWildcardDataToPrisma(input: WildcardCreateInput): Prism
  */
 export function mapUpdateWildcardDataToPrisma(input: WildcardUpdateInput): Prisma.WildcardUpdateInput {
 	try {
-		const { parentId, children, ...rest } = input;
+		const { parentId, childrenIds, ...rest } = input;
 		const prismaData: Prisma.WildcardUpdateInput = { ...rest };
 
 		if (parentId !== undefined) {
 			prismaData.parent = parentId ? { connect: { id: parentId } } : { disconnect: true };
 		}
-		if (children) {
-			prismaData.children = JSON.stringify(children);
+		if (childrenIds) {
+			prismaData.childWildcards = { set: childrenIds.map((id) => ({ id })) };
 		}
 		return prismaData;
 	} catch (error) {
@@ -70,16 +76,19 @@ export function mapWildcardSearchOptionsToPrisma(options: WildcardSearchOptions)
 function mapWildcardFiltersToPrisma(filters: WildcardFilters): Prisma.WildcardWhereInput {
 	const where: Prisma.WildcardWhereInput = {};
 
-	if (filters.search) {
-		where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
+	if (filters.searchQuery) {
+		where.OR = [
+			{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
+			{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
+		];
 	}
 
-	if (filters.category) {
-		where.category = { equals: filters.category };
+	if (filters.categories && filters.categories.length > 0) {
+		where.category = { in: filters.categories };
 	}
 
-	if (filters.isFavorite !== undefined) {
-		where.isFavorite = filters.isFavorite;
+	if (filters.onlyFavorites !== undefined) {
+		where.isFavorite = filters.onlyFavorites;
 	}
 
 	if (filters.parentId !== undefined) {

@@ -1,226 +1,120 @@
 /**
- * @file Transformadores para la entidad Concept
+ * @file Transformador principal para la entidad Concept.
  * @module transformers/concept/transformer
+ * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import { ConceptSchema } from '@/types/entities/concept/schema';
-import type { ConceptComplete, ConceptExtended, ConceptWithStats } from '@/types/entities/concept/types';
-import { TransformerError } from '@/utils/transformers/errors';
-import type { Concept } from '@prisma/client';
-import { fromPrismaConcept } from './serializers';
+
+import type { AlbumComplete } from '@/types/entities/album';
+import type { CharacterComplete } from '@/types/entities/character';
+import type { CollectionComplete } from '@/types/entities/collection';
+import type { ConceptComplete } from '@/types/entities/concept';
+import type { GroupComplete } from '@/types/entities/group';
+import type { ImageComplete } from '@/types/entities/image';
+import type { NoteComplete } from '@/types/entities/note';
+import type { PlaceComplete } from '@/types/entities/place';
+import type { PromptComplete } from '@/types/entities/prompt';
+import type { PropertyComplete } from '@/types/entities/property';
+import type { TagComplete } from '@/types/entities/tag';
+import type { VideoComplete } from '@/types/entities/video';
+import type { WildcardComplete } from '@/types/entities/wildcard';
+import type { WorldItemComplete } from '@/types/entities/world-item';
+import type { Prisma } from '@prisma/client';
+import { fromPrismaAlbum } from '../album/transformer';
+import { fromPrismaCharacter } from '../character/transformer';
+import { fromPrismaCollection } from '../collection/transformer';
+import { fromPrismaGroup } from '../group/transformer';
+import { fromPrismaImage } from '../image/transformer';
+import { fromPrismaNote } from '../note/transformer';
+import { fromPrismaPlace } from '../place/transformer';
+import { fromPrismaPrompt } from '../prompt/transformer';
+import { fromPrismaProperty } from '../property/transformer';
+import { fromPrismaTag } from '../tag/transformer';
+import { fromPrismaVideo } from '../video/transformer';
+import { fromPrismaWildcard } from '../wildcard/transformer';
+import { fromPrismaWorldItem } from '../world-item/transformer';
+
+// --- TIPO DE PAYLOAD DE PRISMA ---
+
+export const conceptPayload = {
+	include: {
+		images: true,
+		videos: true,
+		albums: true,
+		collections: true,
+		tagEntities: true, // Usar el nombre de la relación en Prisma
+		characters: true,
+		places: true,
+		worldItems: true,
+		prompts: true,
+		notes: true,
+		wildcards: true,
+		properties: true,
+		groups: true,
+		_count: true,
+	},
+};
+
+export type ConceptFromPrisma = Prisma.ConceptGetPayload<typeof conceptPayload>;
 
 /**
- * Opciones para la transformación de conceptos
+ * 🔄 Transforma un objeto Concept de Prisma a un ConceptComplete.
+ * @param concept - El objeto Concept obtenido de Prisma.
+ * @returns Un objeto ConceptComplete o null.
  */
-export interface TransformConceptOptions {
-	/** Habilita la validación de campos */
-	validateFields?: boolean;
-	/** Deserializa campos JSON */
-	deserializeFields?: boolean;
-	/** Incluye relaciones */
-	includeRelations?: boolean;
-	/** Incluye propiedades UI */
-	includeUI?: boolean;
-	/** Incluye estadísticas calculadas */
-	includeStats?: boolean;
+export function fromPrismaConcept(concept: ConceptFromPrisma | null): ConceptComplete | null {
+	if (!concept) return null;
+
+	const { _count, tagEntities, ...baseData } = concept;
+
+	return {
+		...baseData,
+
+		// Mapeo de relaciones
+		images: concept.images?.map(fromPrismaImage).filter((i): i is ImageComplete => i !== null) || [],
+		videos: concept.videos?.map(fromPrismaVideo).filter((v): v is VideoComplete => v !== null) || [],
+		albums: concept.albums?.map(fromPrismaAlbum).filter((a): a is AlbumComplete => a !== null) || [],
+		collections:
+			concept.collections?.map(fromPrismaCollection).filter((c): c is CollectionComplete => c !== null) || [],
+		tags: tagEntities?.map(fromPrismaTag).filter((t): t is TagComplete => t !== null) || [], // Renombrar a 'tags'
+		characters:
+			concept.characters?.map(fromPrismaCharacter).filter((c): c is CharacterComplete => c !== null) || [],
+		places: concept.places?.map(fromPrismaPlace).filter((p): p is PlaceComplete => p !== null) || [],
+		worldItems:
+			concept.worldItems?.map(fromPrismaWorldItem).filter((wi): wi is WorldItemComplete => wi !== null) ||
+			[],
+		prompts: concept.prompts?.map(fromPrismaPrompt).filter((p): p is PromptComplete => p !== null) || [],
+		notes: concept.notes?.map(fromPrismaNote).filter((n): n is NoteComplete => n !== null) || [],
+		wildcards:
+			concept.wildcards?.map(fromPrismaWildcard).filter((w): w is WildcardComplete => w !== null) || [],
+		properties:
+			concept.properties?.map(fromPrismaProperty).filter((p): p is PropertyComplete => p !== null) || [],
+		groups: concept.groups?.map(fromPrismaGroup).filter((g): g is GroupComplete => g !== null) || [],
+
+		// Conteo de relaciones
+		_count: {
+			images: _count?.images ?? 0,
+			videos: _count?.videos ?? 0,
+			albums: _count?.albums ?? 0,
+			collections: _count?.collections ?? 0,
+			tags: _count?.tagEntities ?? 0,
+			characters: _count?.characters ?? 0,
+			places: _count?.places ?? 0,
+			worldItems: _count?.worldItems ?? 0,
+			prompts: _count?.prompts ?? 0,
+			notes: _count?.notes ?? 0,
+			wildcards: _count?.wildcards ?? 0,
+			properties: _count?.properties ?? 0,
+			groups: _count?.groups ?? 0,
+		},
+	};
 }
 
 /**
- * 🔄 Transforma un objeto a Concept
- * @param input Objeto a transformar a Concept
- * @param options Opciones de transformación
- * @returns Concept transformado
- * @throws TransformerError si hay errores en la validación o transformación
+ * 🔄 Transforma una lista de objetos Concept de Prisma a un array de ConceptComplete.
+ * @param concepts - Los objetos Concept obtenidos de Prisma.
+ * @returns Un array de objetos ConceptComplete.
  */
-export function transformConcept<T extends Partial<ConceptComplete> | Concept | unknown>(
-	input: T,
-	options: TransformConceptOptions = {}
-): ConceptComplete {
-	try {
-		// Validar que input no sea nulo o indefinido
-		if (input === null || input === undefined) {
-			throw new TransformerError('El objeto a transformar es nulo o indefinido');
-		}
-
-		// Si el input es un objeto Prisma, usamos el serializador existente
-		if (typeof input === 'object' && 'id' in input && 'name' in input) {
-			return fromPrismaConcept(input as Concept, {
-				validateFields: options.validateFields ?? true,
-				deserializeFields: options.deserializeFields ?? true,
-				includeRelations: options.includeRelations ?? false,
-				includeUI: options.includeUI ?? true,
-				includeStats: options.includeStats ?? false,
-			});
-		}
-
-		// Validar con Zod si es necesario
-		if (options.validateFields) {
-			const parsed = ConceptSchema.safeParse(input);
-			if (!parsed.success) {
-				throw new TransformerError(`Validación fallida: ${parsed.error.message}`);
-			}
-		}
-
-		// Convertir a ConceptComplete
-		return fromPrismaConcept(input as Concept, {
-			validateFields: options.validateFields ?? true,
-			deserializeFields: options.deserializeFields ?? true,
-			includeRelations: options.includeRelations ?? false,
-			includeUI: options.includeUI ?? true,
-			includeStats: options.includeStats ?? false,
-		});
-	} catch (error) {
-		serverLogger.error(`Error transformando concept: ${error}`);
-		if (error instanceof TransformerError) {
-			throw error;
-		}
-		throw new TransformerError(`Error transformando concept: ${(error as Error).message}`);
-	}
-}
-
-/**
- * 🔄 Transforma una array de objetos a Concepts
- * @param inputs Array de objetos a transformar
- * @param options Opciones de transformación
- * @returns Array de Concepts transformados
- * @throws TransformerError si hay errores en la validación o transformación
- */
-export function transformConcepts<T extends Partial<ConceptComplete> | Concept | unknown>(
-	inputs: T[],
-	options: TransformConceptOptions = {}
-): ConceptComplete[] {
-	try {
-		// Validar que sea un array
-		if (!Array.isArray(inputs)) {
-			throw new TransformerError('El valor proporcionado no es un array');
-		}
-
-		// Transformar cada elemento
-		return inputs.map((input) => transformConcept(input, options));
-	} catch (error) {
-		serverLogger.error(`Error transformando array de concepts: ${error}`);
-		if (error instanceof TransformerError) {
-			throw error;
-		}
-		throw new TransformerError(`Error transformando array de concepts: ${(error as Error).message}`);
-	}
-}
-
-/**
- * 🔄 Transforma un Concept a su versión extendida para UI
- * @param concept Concept a transformar
- * @returns ConceptExtended con propiedades adicionales para UI
- * @throws TransformerError si hay errores en la transformación
- */
-export function transformConceptToExtended<T extends Partial<ConceptComplete> | Concept | unknown>(
-	concept: T
-): ConceptExtended {
-	try {
-		// Primero transformamos a ConceptComplete
-		const conceptComplete = transformConcept(concept);
-
-		// Calculamos propiedades extendidas
-		return {
-			...conceptComplete,
-			isSelected: false,
-			isHighlighted: false,
-			previewContent: conceptComplete.content?.substring(0, 100) ?? '',
-			lastUpdated: conceptComplete.updatedAt,
-			importance: calculateImportance(conceptComplete),
-		};
-	} catch (error) {
-		serverLogger.error(`Error transformando concept a extendido: ${error}`);
-		if (error instanceof TransformerError) {
-			throw error;
-		}
-		throw new TransformerError(`Error transformando concept a extendido: ${(error as Error).message}`);
-	}
-}
-
-/**
- * 🔄 Transforma un Concept a su versión con estadísticas
- * @param concept Concept a transformar
- * @returns ConceptWithStats con estadísticas calculadas
- * @throws TransformerError si hay errores en la transformación
- */
-export function transformConceptToWithStats<T extends Partial<ConceptComplete> | Concept | unknown>(
-	concept: T
-): ConceptWithStats {
-	try {
-		// Primero transformamos a ConceptComplete
-		const conceptComplete = transformConcept(concept, { includeRelations: true });
-
-		// Calculamos estadísticas (solo usando las propiedades disponibles en _count según Prisma)
-		return {
-			...conceptComplete,
-			stats: {
-				imageCount: conceptComplete._count?.images ?? 0,
-				videoCount: 0, // ❌ ELIMINADO - videos no existe en _count de Concept
-				albumCount: 0, // ❌ ELIMINADO - albums no existe en _count de Concept
-				tagCount: conceptComplete._count?.tags ?? 0,
-				noteCount: conceptComplete._count?.notes ?? 0,
-				relatedCharacters: 0, // ❌ ELIMINADO - characters no existe en _count de Concept
-				relatedPlaces: 0, // ❌ ELIMINADO - places no existe en _count de Concept
-				relatedWorldItems: 0, // ❌ ELIMINADO - worldItems no existe en _count de Concept
-				totalContentItems: calculateTotalContent(conceptComplete),
-				lastUpdated: conceptComplete.updatedAt,
-			},
-		};
-	} catch (error) {
-		serverLogger.error(`Error transformando concept con estadísticas: ${error}`);
-		if (error instanceof TransformerError) {
-			throw error;
-		}
-		throw new TransformerError(`Error transformando concept con estadísticas: ${(error as Error).message}`);
-	}
-}
-
-/**
- * Calcula el nivel de importancia de un concepto basado en sus relaciones y contenido
- * @param concept Concepto a analizar
- * @returns Valor numérico de importancia (1-10)
- */
-function calculateImportance(concept: ConceptComplete): number {
-	let importance = 5; // Valor base
-
-	// Si tiene contenido extenso
-	if (concept.content && concept.content.length > 500) {
-		importance += 1;
-	}
-
-	// Si tiene descripción
-	if (concept.description) {
-		importance += 1;
-	}
-
-	// Si tiene imagen destacada
-	if (concept.featuredImage) {
-		importance += 1;
-	}
-
-	// Si es favorito
-	if (concept.isFavorite) {
-		importance += 2;
-	}
-
-	// Límites
-	return Math.max(1, Math.min(10, importance));
-}
-
-/**
- * Calcula el total de elementos de contenido relacionados con el concepto
- * @param concept Concepto a analizar
- * @returns Total de elementos de contenido
- */
-function calculateTotalContent(concept: ConceptComplete): number {
-	// Solo usar propiedades que realmente existen en _count según el esquema Prisma
-	return (
-		(concept._count?.images ?? 0) +
-		// (concept._count?.videos ?? 0) + // ❌ ELIMINADO - No existe en esquema Prisma Concept
-		// (concept._count?.albums ?? 0) + // ❌ ELIMINADO - No existe en esquema Prisma Concept
-		// (concept._count?.collections ?? 0) + // ❌ ELIMINADO - No existe en esquema Prisma Concept
-		(concept._count?.notes ?? 0) +
-		(concept._count?.tags ?? 0) // ✅ Usar tags que sí existe
-	);
+export function fromPrismaConcepts(concepts: ConceptFromPrisma[]): ConceptComplete[] {
+	return concepts.map(fromPrismaConcept).filter((c): c is ConceptComplete => c !== null);
 }

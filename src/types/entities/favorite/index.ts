@@ -5,12 +5,5 @@
  * No se deben exportar tipos legacy o específicos de UI desde aquí.
  */
 
-export type {
-	CreateFavoriteData,
-	FavoriteBase,
-	FavoriteComplete,
-	FavoriteCreateInput,
-	FavoriteRelations,
-} from './types';
+export * from './types';
 
-export { FavoriteEntityType } from './types';

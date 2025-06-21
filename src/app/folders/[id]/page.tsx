@@ -1,8 +1,8 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { getFolderById } from '@/app/actions/folder';
+import { getFolder } from '@/app/actions/folders';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import DeleteFolderButton from './delete-button';
 
 interface FolderPageProps {
@@ -13,9 +13,9 @@ interface FolderPageProps {
 
 export default async function FolderPage({ params }: FolderPageProps) {
 	const { id } = params;
-	const { success, data: folder, error } = await getFolderById(id);
+	const folder = await getFolder(id);
 
-	if (!success || !folder) {
+	if (!folder) {
 		notFound();
 	}
 

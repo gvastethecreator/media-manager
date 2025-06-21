@@ -4,7 +4,12 @@
  * @description Contiene funciones para mapear datos de Audio entre diferentes formatos.
  */
 
-import type { Audio, AudioCreateInput, AudioFormData } from '@/types/entities/audio';
+import type {
+    Audio,
+    AudioCreateInput,
+    AudioFormData,
+    AudioUIInput,
+} from '@/types/entities/audio';
 
 /**
  * 🎨 Mapea un Audio a formato UI
@@ -31,7 +36,7 @@ export function mapAudioToUI(audio: Audio) {
  * @param uiData - Datos de la UI
  * @returns Objeto AudioFormData
  */
-export function mapAudioFromUI(uiData: any): AudioFormData {
+export function mapAudioFromUI(uiData: AudioUIInput): AudioFormData {
 	return {
 		name: uiData.name || '',
 		description: uiData.description || null,

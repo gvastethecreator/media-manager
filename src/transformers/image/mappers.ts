@@ -21,8 +21,8 @@ export function mapImageToComplete(image: Partial<ImageComplete>): ImageComplete
 		metadata: image.metadata ?? null,
 		isFavorite: image.isFavorite ?? false,
 		addedAt: image.addedAt ?? new Date(),
-		sortBy: image.sortBy ?? 'name',
-		filters: image.filters ?? '{}',
+		createdAt: image.createdAt ?? new Date(),
+		updatedAt: image.updatedAt ?? new Date(),
 		// Relaciones mínimas (pueden ser null/undefined)
 		folder: image.folder ?? { id: '' },
 		stats: image.stats,

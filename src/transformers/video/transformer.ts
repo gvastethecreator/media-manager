@@ -18,7 +18,31 @@ type VideoFromPrisma = Prisma.VideoGetPayload<{
 		tags: true;
 		albums: true;
 		collections: true;
-		// Añade aquí otras relaciones que necesites en el tipo completo
+		characters: true;
+		places: true;
+		worldItems: true;
+		concepts: true;
+		prompts: true;
+		notes: true;
+		wildcards: true;
+		properties: true;
+		groups: true;
+		_count: {
+			select: {
+				albums: true;
+				collections: true;
+				tags: true;
+				characters: true;
+				places: true;
+				worldItems: true;
+				concepts: true;
+				prompts: true;
+				notes: true;
+				wildcards: true;
+				properties: true;
+				groups: true;
+			};
+		};
 	};
 }>;
 
@@ -30,12 +54,38 @@ type VideoFromPrisma = Prisma.VideoGetPayload<{
  */
 export function fromPrismaVideo(videoFromPrisma: VideoFromPrisma): VideoComplete {
 	try {
+		const { _count, ...baseData } = videoFromPrisma;
+
 		return {
-			...videoFromPrisma,
-			// Mantener metadata como string tal como viene de Prisma
-			metadata: videoFromPrisma.metadata || null,
-			// Convertir Uint8Array a Buffer si es necesario
-			thumbnail: videoFromPrisma.thumbnail ? Buffer.from(videoFromPrisma.thumbnail) : null,
+			...baseData,
+			metadata: baseData.metadata || null,
+			thumbnail: baseData.thumbnail ? Buffer.from(baseData.thumbnail) : null,
+			tags: baseData.tags ?? [],
+			albums: baseData.albums ?? [],
+			collections: baseData.collections ?? [],
+			characters: baseData.characters ?? [],
+			places: baseData.places ?? [],
+			worldItems: baseData.worldItems ?? [],
+			concepts: baseData.concepts ?? [],
+			prompts: baseData.prompts ?? [],
+			notes: baseData.notes ?? [],
+			wildcards: baseData.wildcards ?? [],
+			properties: baseData.properties ?? [],
+			groups: baseData.groups ?? [],
+			_count: {
+				albums: _count?.albums ?? 0,
+				collections: _count?.collections ?? 0,
+				tags: _count?.tags ?? 0,
+				characters: _count?.characters ?? 0,
+				places: _count?.places ?? 0,
+				worldItems: _count?.worldItems ?? 0,
+				concepts: _count?.concepts ?? 0,
+				prompts: _count?.prompts ?? 0,
+				notes: _count?.notes ?? 0,
+				wildcards: _count?.wildcards ?? 0,
+				properties: _count?.properties ?? 0,
+				groups: _count?.groups ?? 0,
+			},
 		};
 	} catch (error) {
 		logger.error(`Error transformando video desde Prisma: ${videoFromPrisma.id}`, {
