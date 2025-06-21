@@ -15,11 +15,11 @@ export type {
 // Exportar esquemas
 export * from './schema';
 // Exportar tipos de stats (estos son los que usaremos para WorldItemEffect, WorldItemProperty, WorldItemRequirement)
-export {
-    type WorldItemEffect,
-    type WorldItemProperty,
-    type WorldItemRequirement,
-    type WorldItemStats
+export type {
+    WorldItemEffect,
+    WorldItemProperty,
+    WorldItemRequirement,
+    WorldItemStats
 } from './stats-types';
 // Exportar tipos canónicos desde types.ts (excepto los conflictivos)
 export type {
