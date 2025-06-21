@@ -1,4 +1,17 @@
 // Barrel de transformers para JsonFile
-export * from './mappers';
+
+// Exportar desde mappers (renombrando la función conflictiva)
+export {
+    fromPrismaJsonFile as mapJsonFileFromPrisma,
+    toPrismaJsonFile
+} from './mappers';
+
+// Exportar desde serializers
 export * from './serializers';
-export * from './transformer';
+
+// Exportar desde transformer
+export {
+    fromPrismaJsonFile,
+    fromPrismaJsonFiles
+} from './transformer';
+

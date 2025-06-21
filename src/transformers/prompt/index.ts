@@ -7,6 +7,8 @@
 import {
     filterPrompts,
     mapCreatePromptDataToPrisma,
+    mapPromptsToRelated,
+    mapPromptToRelated,
     mapUpdatePromptDataToPrisma,
     paginatePrompts,
     processPrompts,
@@ -20,15 +22,12 @@ import {
     deserializeTags,
     serializeParameters,
     serializeTags,
-    toExtendedPrompt,
 } from './serializers';
+
 // Importar funciones del transformer
 import {
-    type TransformPromptOptions,
-    transformPrompt,
-    transformPrompts,
-    transformPromptToExtended,
-    transformPromptToWithStats,
+    fromPrismaPrompt,
+    fromPrismaPrompts
 } from './transformer';
 
 // Exportar funciones individuales
@@ -38,18 +37,15 @@ export {
     deserializeTags,
     // Mappers
     filterPrompts,
-    mapCreatePromptDataToPrisma,
-    mapUpdatePromptDataToPrisma,
+    // Transformers
+    fromPrismaPrompt,
+    fromPrismaPrompts, mapCreatePromptDataToPrisma, mapPromptsToRelated, mapPromptToRelated, mapUpdatePromptDataToPrisma,
     paginatePrompts,
     processPrompts, serializeParameters,
-    serializeTags, sortPrompts, toExtendedPrompt, toPromptWithStats,
-    // Transformers
-    transformPrompt,
-    transformPrompts,
-    transformPromptToExtended,
-    transformPromptToWithStats
+    serializeTags, sortPrompts,
+    toPromptWithStats,
+    // Aliases para compatibilidad
+    fromPrismaPrompt as transformPrompt,
+    fromPrismaPrompts as transformPrompts
 };
-
-// Exportar tipos
-    export type { TransformPromptOptions };
 

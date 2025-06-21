@@ -5,41 +5,40 @@
 
 // Exportar esquemas adicionales de validación
 export {
-	CreateWildcardSchema,
-	UpdateWildcardSchema,
-	WildcardChildSchema,
-	WildcardFiltersSchema,
-	WildcardRelationsSchema,
-	WildcardStatsSchema,
+    CreateWildcardSchema,
+    UpdateWildcardSchema,
+    WildcardChildSchema,
+    WildcardFiltersSchema,
+    WildcardRelationsSchema,
+    WildcardSchema,
+    WildcardStatsSchema
 } from './schema';
 // Exportar los tipos principales
 // Exportar tipos de compatibilidad (legados)
 export type {
-	CreateWildcardData,
-	UpdateWildcardData,
-	// Alias para retrocompatibilidad
-	WildcardComplete as Wildcard,
-	WildcardBase,
-	WildcardChild,
-	WildcardComplete,
-	WildcardCounts,
-	WildcardCreateInput,
-	WildcardDeserialized,
-	WildcardExtended,
-	WildcardFilters,
-	WildcardRelations,
-	WildcardSearchOptions,
-	WildcardSearchResult,
-	WildcardUI,
-	WildcardUpdateInput,
-	WildcardWithRelations,
-	WildcardWithStats,
+    CreateWildcardData,
+    UpdateWildcardData,
+    // Alias para retrocompatibilidad
+    WildcardComplete as Wildcard, WildcardBase,
+    WildcardChild, WildcardComplete,
+    WildcardCounts,
+    WildcardCreateInput,
+    WildcardDeserialized,
+    WildcardExtended,
+    WildcardFilters,
+    WildcardRelations,
+    WildcardSearchOptions,
+    WildcardSearchResult,
+    WildcardUI,
+    WildcardUpdateInput,
+    WildcardWithRelations,
+    WildcardWithStats
 } from './types';
 // Exportar los enums y constantes
 // Exportar el esquema de validación
 export {
-	WILDCARD_SORT_PROPERTY_MAP,
-	WildcardSchema,
-	WildcardSortCriteria,
-	WildcardViewMode,
+    WILDCARD_SORT_PROPERTY_MAP,
+    WildcardSortCriteria,
+    WildcardViewMode
 } from './types';
+

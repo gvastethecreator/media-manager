@@ -24,7 +24,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "fix:lint": "biome check --max-diagnostics=999 --apply --verbose --no-errors-on-warn --no-errors-on-unmatched --log-level=debug .",
-    "tsc": "npx tsc --noEmit --pretty > tsc-errors.log 2>&1"
+    "tsc": "npx tsc --noEmit --pretty"
   },
   "dependencies": {
     "@bull-board/api": "^6.10.1",
@@ -69,7 +69,7 @@
     "jose": "^6.0.11",
     "lodash": "^4.17.21",
     "lru-cache": "11.1.0",
-    "lucide-react": "^0.518.0",
+    "lucide-react": "^0.519.0",
     "mantine-contextmenu": "^8.1.2",
     "mime-types": "^3.0.1",
     "motion": "^12.18.1",
@@ -93,7 +93,7 @@
     "react-scan": "^0.3.4",
     "react-simplemde-editor": "^5.2.0",
     "react-virtuoso": "^4.13.0",
-    "recharts": "^2.15.3",
+    "recharts": "^2.15.4",
     "reselect": "^5.1.1",
     "rimraf": "^6.0.1",
     "setup": "^0.0.3",

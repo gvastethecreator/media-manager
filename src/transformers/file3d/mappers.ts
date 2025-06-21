@@ -1,7 +1,9 @@
 // Mappers para File3D
-import type { File3D } from '@/types/entities/file3d';
 
-export function fromPrismaFile3D(prisma: any): File3D {
+import type { File3D } from '@/types/entities/file3d';
+import type { File3D as PrismaFile3D } from '@prisma/client';
+
+export function fromPrismaFile3D(prisma: PrismaFile3D): File3D {
 	return {
 		id: prisma.id,
 		name: prisma.name,
@@ -13,7 +15,7 @@ export function fromPrismaFile3D(prisma: any): File3D {
 	};
 }
 
-export function toPrismaFile3D(file: File3D): any {
+export function toPrismaFile3D(file: File3D): PrismaFile3D {
 	return {
 		id: file.id,
 		name: file.name,

@@ -274,24 +274,8 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 		try {
 			const groups = await getGroups();
 			const extendedGroups = groups.map((group) => extendGroup(group as GroupBase));
-			// Añadir directamente al store usando set
-			const groupsMap = extendedGroups.reduce(
-				(acc, group) => {
-					acc[group.id] = group;
-					return acc;
-				},
-				{} as Record<string, Group>
-			);
-			set((state) => ({
-				core: {
-					...state.core,
-					groups: {
-						...state.core.groups,
-						...groupsMap,
-					},
-					lastUpdated: new Date(),
-				},
-			}));
+			// Usar la función addGroups del estado
+			get().addGroups(extendedGroups);
 			return extendedGroups;
 		} catch (error) {
 			groupLogger.error('❌ Error al obtener grupos:', error);
@@ -332,16 +316,9 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 
 			// Extender y añadir al store
 			const extendedGroup = extendGroup(createdGroup as GroupBase);
-			set((state) => ({
-				core: {
-					...state.core,
-					groups: {
-						...state.core.groups,
-						[extendedGroup.id]: extendedGroup,
-					},
-					lastUpdated: new Date(),
-				},
-			}));
+
+			// Usar la función addGroup del estado
+			get().addGroup(extendedGroup);
 
 			toastService.success(`Grupo "${data.name}" creado correctamente`);
 			return extendedGroup;
@@ -379,19 +356,8 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 			// Llamar al servidor
 			await deleteGroupAction(id);
 
-			// Eliminar del store
-			set((state) => {
-				const { [id]: _, ...restGroups } = state.core.groups;
-				const { [id]: __, ...restGroupItems } = state.core.groupItems;
-				return {
-					core: {
-						...state.core,
-						groups: restGroups,
-						groupItems: restGroupItems,
-						lastUpdated: new Date(),
-					},
-				};
-			});
+			// Usar la función deleteGroup del estado
+			get().deleteGroup(id);
 
 			toastService.success('Grupo eliminado correctamente');
 			return true;

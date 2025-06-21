@@ -6,60 +6,50 @@ import {
 } from '@/app/actions/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note/types';
+import type { Note, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
 const coreLogger = clientLogger.withContext('NoteStore:Core');
 
-// Función temporal para transformar Note a NoteWithStats
-const transformNoteToWithStats = (note: any): NoteWithStats => ({
-	...note,
-	stats: {
-		totalItems: 0,
-		totalImages: note._count?.images || 0,
-		totalVideos: note._count?.videos || 0,
-		totalAlbums: note._count?.albums || 0,
-		totalCollections: note._count?.collections || 0,
-		totalTags: note._count?.tags || 0,
-		totalCharacters: note._count?.characters || 0,
-		totalPlaces: note._count?.places || 0,
-		totalWorldItems: note._count?.worldItems || 0,
-		totalConcepts: note._count?.concepts || 0,
-		totalPrompts: note._count?.prompts || 0,
-		totalWildcards: note._count?.wildcards || 0,
-		totalProperties: note._count?.properties || 0,
-		totalGroups: note._count?.groups || 0,
-		lastUpdated: note.updatedAt,
-	},
-});
-
 export interface CoreSlice {
+	// Estado principal
 	notes: Record<string, NoteWithStats>;
+	selectedNote: NoteWithStats | null;
 	selectedNoteId: string | null;
+	selectedNoteIds: string[];
+	isMultiSelectMode: boolean;
 	isLoading: boolean;
+	loading: boolean; // Alias para compatibilidad
 	error: string | null;
+	version: string;
 
+	// Acciones
 	loadNotes: () => Promise<void>;
-	createNote: (note: NoteCreateInput) => Promise<string | null>;
+	createNote: (note: NoteCreateInput) => Promise<void>;
 	updateNote: (id: string, note: NoteUpdateInput) => Promise<void>;
 	deleteNote: (id: string) => Promise<void>;
-	selectNote: (noteId: string | null) => void;
+	selectNote: (note: NoteWithStats | null) => void;
 	reset: () => void;
 }
 
-export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set) => ({
+export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set, get) => ({
+	// Estado inicial
 	notes: {},
+	selectedNote: null,
 	selectedNoteId: null,
+	selectedNoteIds: [],
+	isMultiSelectMode: false,
 	isLoading: false,
+	loading: false, // Alias para compatibilidad
 	error: null,
+	version: '1.0.0',
 
 	loadNotes: async () => {
-		set({ isLoading: true, error: null });
+		set({ isLoading: true, loading: true, error: null });
 		try {
 			coreLogger.info('🔄 Cargando notas');
-			const notes = await getNotesAction();
-			const notesWithStats = notes.map((note: any) => transformNoteToWithStats(note));
+			const notesWithStats = await getNotesAction();
 			const notesRecord = notesWithStats.reduce(
 				(acc: Record<string, NoteWithStats>, note: NoteWithStats) => {
 					acc[note.id] = note;
@@ -68,51 +58,61 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set)
 				{} as Record<string, NoteWithStats>
 			);
 
-			set({ notes: notesRecord, isLoading: false });
+			set({
+				notes: notesRecord,
+				isLoading: false,
+				loading: false,
+			});
 			coreLogger.info('✅ Notas cargadas:', Object.keys(notesRecord).length);
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			coreLogger.error('❌ Error al cargar notas:', errorMessage);
-			set({ error: errorMessage, isLoading: false });
+			set({
+				error: errorMessage,
+				isLoading: false,
+				loading: false,
+			});
 			toastService.error('Error al cargar notas', { description: errorMessage });
 		}
 	},
 
 	createNote: async (note) => {
-		set({ isLoading: true, error: null });
+		set({ isLoading: true, loading: true, error: null });
 		try {
 			coreLogger.info('✨ Creando nota:', note);
-			const noteData = await createNoteAction(note);
-			const newNote = transformNoteToWithStats(noteData);
+			const newNote = await createNoteAction(note);
 
 			set((state) => ({
 				notes: { ...state.notes, [newNote.id]: newNote },
 				isLoading: false,
+				loading: false,
 			}));
 
 			coreLogger.info('✅ Nota creada correctamente:', newNote.id);
 			toastService.success('Nota creada correctamente');
-
-			return newNote.id;
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			coreLogger.error('❌ Error al crear nota:', errorMessage);
-			set({ error: errorMessage, isLoading: false });
+			set({
+				error: errorMessage,
+				isLoading: false,
+				loading: false,
+			});
 			toastService.error('Error al crear nota', { description: errorMessage });
-			return null;
 		}
 	},
 
 	updateNote: async (id, noteData) => {
-		set({ isLoading: true, error: null });
+		set({ isLoading: true, loading: true, error: null });
 		try {
 			coreLogger.info('🔄 Actualizando nota:', { id, noteData });
-			const updatedNoteData = await updateNoteAction(id, noteData);
-			const updatedNote = transformNoteToWithStats(updatedNoteData);
+			const updatedNote = await updateNoteAction(id, noteData);
 
 			set((state) => ({
 				notes: { ...state.notes, [id]: updatedNote },
+				selectedNote: state.selectedNoteId === id ? updatedNote : state.selectedNote,
 				isLoading: false,
+				loading: false,
 			}));
 
 			coreLogger.info('✅ Nota actualizada correctamente:', id);
@@ -120,13 +120,17 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set)
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			coreLogger.error('❌ Error al actualizar nota:', errorMessage);
-			set({ error: errorMessage, isLoading: false });
+			set({
+				error: errorMessage,
+				isLoading: false,
+				loading: false,
+			});
 			toastService.error('Error al actualizar nota', { description: errorMessage });
 		}
 	},
 
 	deleteNote: async (id) => {
-		set({ isLoading: true, error: null });
+		set({ isLoading: true, loading: true, error: null });
 		try {
 			coreLogger.info('🗑️ Eliminando nota:', id);
 			await deleteNoteAction(id);
@@ -134,7 +138,14 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set)
 			set((state) => {
 				const newNotes = { ...state.notes };
 				delete newNotes[id];
-				return { notes: newNotes, isLoading: false };
+				return {
+					notes: newNotes,
+					selectedNote: state.selectedNoteId === id ? null : state.selectedNote,
+					selectedNoteId: state.selectedNoteId === id ? null : state.selectedNoteId,
+					selectedNoteIds: state.selectedNoteIds.filter((noteId) => noteId !== id),
+					isLoading: false,
+					loading: false,
+				};
 			});
 
 			coreLogger.info('✅ Nota eliminada correctamente:', id);
@@ -142,20 +153,31 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set)
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			coreLogger.error('❌ Error al eliminar nota:', errorMessage);
-			set({ error: errorMessage, isLoading: false });
+			set({
+				error: errorMessage,
+				isLoading: false,
+				loading: false,
+			});
 			toastService.error('Error al eliminar nota', { description: errorMessage });
 		}
 	},
 
-	selectNote: (noteId) => {
-		set({ selectedNoteId: noteId });
+	selectNote: (note) => {
+		set({
+			selectedNote: note,
+			selectedNoteId: note?.id || null,
+		});
 	},
 
 	reset: () => {
 		set({
 			notes: {},
+			selectedNote: null,
 			selectedNoteId: null,
+			selectedNoteIds: [],
+			isMultiSelectMode: false,
 			isLoading: false,
+			loading: false,
 			error: null,
 		});
 	},

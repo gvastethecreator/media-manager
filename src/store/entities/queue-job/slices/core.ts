@@ -4,10 +4,10 @@
  * @description Implementación del slice core para la gestión de trabajos en cola
  */
 
-import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { QueueJobService } from '@/services/queue-job.service';
 import type { CreateQueueJobInput, QueueJobExtended, UpdateQueueJobInput } from '@/types/entities/queue-job';
+import type { StateCreator } from 'zustand';
 import type { QueueJobState } from '../types';
 
 // Logger para el slice
@@ -43,7 +43,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 	loadJobs: async () => {
 		try {
 			coreLogger.info('Cargando trabajos en cola');
-			set({ core: { ...get().core, isLoading: true, error: undefined } });
+			set({ core: { ...get().core, isLoading: true, error: null } });
 
 			const { filters, pagination } = get();
 			const result = await QueueJobService.getJobs(filters, pagination);
@@ -78,7 +78,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 	loadStats: async () => {
 		try {
 			coreLogger.info('Cargando estadísticas de cola');
-			set({ core: { ...get().core, isLoading: true, error: undefined } });
+			set({ core: { ...get().core, isLoading: true, error: null } });
 
 			const stats = await QueueJobService.getStats();
 
@@ -204,7 +204,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 					...core,
 					items: updatedItems,
 					total: Math.max(0, core.total - 1),
-					selectedJob: core.selectedJob?.id === id ? undefined : core.selectedJob,
+					selectedJob: core.selectedJob?.id === id ? null : core.selectedJob,
 				},
 				ui: {
 					...get().ui,
@@ -316,7 +316,7 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 	// Selecciona un trabajo en cola
 	selectJob: (job?: QueueJobExtended) => {
 		coreLogger.info('Seleccionando trabajo en cola', { jobId: job?.id });
-		set({ core: { ...get().core, selectedJob: job } });
+		set({ core: { ...get().core, selectedJob: job || null } });
 	},
 
 	// Resetea el estado de los trabajos en cola
@@ -330,9 +330,9 @@ export const createQueueJobCoreSlice: StateCreator<QueueJobState, [], [], QueueJ
 				page: 1,
 				limit: 10,
 				totalPages: 0,
-				selectedJob: undefined,
+				selectedJob: null,
 				isLoading: false,
-				error: undefined,
+				error: null,
 			},
 		});
 	},

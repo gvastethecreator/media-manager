@@ -5,10 +5,11 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	type DirectoryReadResult,
-	type FileBase,
-	type FileListItem,
-	type FileOperationResult,
+    type DirectoryReadResult,
+    type FileBase,
+    type FileInfo,
+    type FileListItem,
+    type FileOperationResult
 } from '@/types/entities/file';
 import { toFileListItem } from './mappers';
 
@@ -72,10 +73,10 @@ export function serializeDirectoryContents(path: string, items: FileBase[]): Dir
  * @param files Lista de información de archivos
  * @returns Listado formateado para la UI
  */
-export function serializeFileListForUI(files: FileBase[]): FileListItem[] {
+export function serializeFileListForUI(files: FileInfo[]): FileListItem[] {
 	try {
 		// Convertir cada archivo al formato de UI
-		return files.map((file) => toFileListItem(file as any));
+		return files.map((file) => toFileListItem(file));
 	} catch (error) {
 		serializersLogger.error('Error al serializar lista de archivos para UI:', error);
 		return [];
@@ -103,7 +104,7 @@ export function serializeFileOperationResult(success: boolean, path?: string, er
  * @param metadata Objeto de metadatos de imagen
  * @returns String JSON o undefined
  */
-export function serializeImageMetadata(metadata: unknown): string | undefined {
+export function serializeImageMetadata(metadata: Record<string, unknown>): string | undefined {
 	if (!metadata) return undefined;
 
 	try {
@@ -119,7 +120,7 @@ export function serializeImageMetadata(metadata: unknown): string | undefined {
  * @param metadataStr String JSON de metadatos
  * @returns Objeto de metadatos o undefined
  */
-export function deserializeImageMetadata(metadataStr?: string): unknown {
+export function deserializeImageMetadata(metadataStr?: string): Record<string, unknown> | undefined {
 	if (!metadataStr) return undefined;
 
 	try {
@@ -135,9 +136,9 @@ export function deserializeImageMetadata(metadataStr?: string): unknown {
  * @param paths Lista de rutas de directorio
  * @returns Estructura jerárquica para representar un árbol de directorios
  */
-export function pathsToTreeStructure(paths: string[]): any[] {
+export function pathsToTreeStructure(paths: string[]): FileListItem[] {
 	try {
-		const tree: any[] = [];
+		const tree: FileListItem[] = [];
 		// const _pathMap: Record<string, any> = {}; // ❌ ELIMINADO - No usado
 
 		// Construir el árbol

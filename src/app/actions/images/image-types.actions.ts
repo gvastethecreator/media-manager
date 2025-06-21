@@ -3,8 +3,8 @@
  * @module app/actions/images/image-types
  */
 
+import type { ImageResult } from '@/transformers/image';
 import type { CreateImageData, ImageBase, ImageExtended } from '@/types/entities/image';
-import type { ImageResult } from '@/types/entities/image/transformer';
 
 /**
  * Re-exportamos los tipos principales desde el módulo de tipos

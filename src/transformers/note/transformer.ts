@@ -6,19 +6,55 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { NoteComplete } from '@/types/entities/note';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('NoteTransformer');
+
+type PrismaNoteComplete = Prisma.NoteGetPayload<{
+	include: {
+		images: true;
+		videos: true;
+		albums: true;
+		collections: true;
+		tags: true;
+		characters: true;
+		places: true;
+		worldItems: true;
+		concepts: true;
+		prompts: true;
+		wildcards: true;
+		properties: true;
+		groups: true;
+		_count: {
+			select: {
+				images: true;
+				videos: true;
+				albums: true;
+				collections: true;
+				tags: true;
+				characters: true;
+				places: true;
+				worldItems: true;
+				concepts: true;
+				prompts: true;
+				wildcards: true;
+				properties: true;
+				groups: true;
+			};
+		};
+	};
+}>;
 
 /**
  * 🔄 Transforma un objeto Note de Prisma a nuestro tipo canónico NoteComplete.
  *
  * @param prismaNote - El objeto Note obtenido de Prisma.
- * @returns Un objeto NoteComplete compatible con nuestra aplicación.
- * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
+ * @returns Un objeto NoteComplete compatible con nuestra aplicación o null.
+ * @throws {TransformerError} Si hay un error durante la transformación.
  */
-export function fromPrismaNote(prismaNote: any): NoteComplete {
+export function fromPrismaNote(prismaNote: PrismaNoteComplete | null): NoteComplete | null {
 	if (!prismaNote) {
-		throw new TransformerError('El objeto de nota de Prisma no puede ser nulo.');
+		return null;
 	}
 
 	try {
@@ -72,8 +108,8 @@ export function fromPrismaNote(prismaNote: any): NoteComplete {
  * @param prismaNotes - Un array de objetos Note de Prisma.
  * @returns Un array de objetos NoteComplete.
  */
-export function fromPrismaNotes(prismaNotes: any[]): NoteComplete[] {
-	return prismaNotes.map(fromPrismaNote);
+export function fromPrismaNotes(prismaNotes: PrismaNoteComplete[]): NoteComplete[] {
+	return prismaNotes.map(fromPrismaNote).filter((note): note is NoteComplete => note !== null);
 }
 
 // Alias para compatibilidad con código existente

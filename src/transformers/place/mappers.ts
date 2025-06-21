@@ -1,158 +1,171 @@
 /**
- * @file Funciones de mapeo para la entidad Place.
+ * @file Funciones para mapear datos de la entidad Place a formatos de Prisma.
  * @module transformers/place/mappers
- * @description Mapea los tipos de datos de la aplicación a los tipos de datos de Prisma para la entidad Place.
+ * @description Estas funciones se encargan de transformar la entrada de la aplicación
+ * (ej. desde formularios o actions) a los tipos que Prisma espera para las operaciones de BD.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    PlaceCreateInput,
-    PlaceFilters,
-    PlaceRelationInput,
-    PlaceSearchOptions,
-    PlaceUpdateInput,
-} from '@/types/entities/place';
-import { TransformerError } from '@/utils/transformers/errors';
+import type { PlaceCreateInput, PlaceSearchOptions, PlaceUpdateInput } from '@/types/entities/place';
 import type { Prisma } from '@prisma/client';
 
-const logger = serverLogger.withContext('PlaceMappers');
-
 /**
- * 🔄 Mapea un `PlaceCreateInput` a un `Prisma.PlaceCreateInput`.
- * Transforma las relaciones para que Prisma las entienda (usando `connect`).
+ * Mapea la entrada de creación de un lugar al formato de Prisma.
+ * @param input - Los datos para crear el lugar, incluyendo IDs de relaciones.
+ * @returns Datos listos para `prisma.place.create()`.
  */
-export function mapCreatePlaceDataToPrisma(input: PlaceCreateInput): Prisma.PlaceCreateInput {
-	try {
-		const {
-			images,
-			videos,
-			albums,
-			collections,
-			tags,
-			characters,
-			worldItems,
-			concepts,
-			prompts,
-			notes,
-			wildcards,
-			properties,
-			groups,
-			dangers,
-			resources,
-			stats,
-			filters,
-			...rest
-		} = input;
+export function toCreateData(input: PlaceCreateInput): Prisma.PlaceCreateInput {
+	const {
+		imageIds,
+		videoIds,
+		albumIds,
+		collectionIds,
+		tagIds,
+		characterIds,
+		worldItemIds,
+		conceptIds,
+		promptIds,
+		noteIds,
+		wildcardIds,
+		propertyIds,
+		groupIds,
+		dangers,
+		resources,
+		stats,
+		filters,
+		...rest
+	} = input;
 
-		const prismaData: Prisma.PlaceCreateInput = {
-			...rest,
-			// Campos JSON serializados como strings
-			dangers: dangers ? JSON.stringify(dangers) : undefined,
-			resources: resources ? JSON.stringify(resources) : undefined,
-			stats: stats ? JSON.stringify(stats) : undefined,
-			filters: filters ? JSON.stringify(filters) : '{}',
-		};
-
-		// Mapeo de relaciones
-		if (images) prismaData.images = { connect: images.map((img) => ({ id: img.id })) };
-		if (videos) prismaData.videos = { connect: videos.map((vid) => ({ id: vid.id })) };
-		if (albums) prismaData.albums = { connect: albums.map((a) => ({ id: a.id })) };
-		if (collections) prismaData.collections = { connect: collections.map((c) => ({ id: c.id })) };
-		if (tags) prismaData.tags = { connect: tags.map((t) => ({ id: t.id })) };
-		if (characters) prismaData.characters = { connect: characters.map((c) => ({ id: c.id })) };
-		if (worldItems) prismaData.worldItems = { connect: worldItems.map((wi) => ({ id: wi.id })) };
-		if (concepts) prismaData.concepts = { connect: concepts.map((c) => ({ id: c.id })) };
-		if (prompts) prismaData.prompts = { connect: prompts.map((p) => ({ id: p.id })) };
-		if (notes) prismaData.notes = { connect: notes.map((n) => ({ id: n.id })) };
-		if (wildcards) prismaData.wildcards = { connect: wildcards.map((w) => ({ id: w.id })) };
-		if (properties) prismaData.properties = { connect: properties.map((p) => ({ id: p.id })) };
-		if (groups) prismaData.groups = { connect: groups.map((g) => ({ id: g.id })) };
-
-		return prismaData;
-	} catch (error) {
-		logger.error('Error mapeando datos de creación de Place', { error, input });
-		throw new TransformerError('No se pudieron mapear los datos para crear el lugar.');
-	}
-}
-
-/**
- * 🔄 Mapea un `PlaceUpdateInput` a un `Prisma.PlaceUpdateInput`.
- * Maneja la lógica de conexión/desconexión de relaciones de forma segura.
- */
-export function mapUpdatePlaceDataToPrisma(input: PlaceUpdateInput): Prisma.PlaceUpdateInput {
-	try {
-		const { connect, disconnect, ...rest } = input;
-		const prismaData: Prisma.PlaceUpdateInput = { ...rest };
-
-		const allRelationKeys = new Set([...Object.keys(connect || {}), ...Object.keys(disconnect || {})]) as Set<
-			keyof PlaceRelationInput
-		>;
-
-		for (const relationKey of allRelationKeys) {
-			const toConnect = connect?.[relationKey];
-			const toDisconnect = disconnect?.[relationKey];
-
-			const relationUpdate: {
-				connect?: { id: string }[];
-				disconnect?: { id: string }[];
-			} = {};
-
-			if (toConnect && toConnect.length > 0) {
-				relationUpdate.connect = toConnect.map((item) => ({ id: item.id }));
-			}
-			if (toDisconnect && toDisconnect.length > 0) {
-				relationUpdate.disconnect = toDisconnect.map((item) => ({ id: item.id }));
-			}
-
-			if (Object.keys(relationUpdate).length > 0) {
-				// @ts-ignore - This is a safe cast because relationKey is derived from PlaceRelationInput
-				prismaData[relationKey] = relationUpdate;
-			}
-		}
-
-		return prismaData;
-	} catch (error) {
-		logger.error('Error mapeando datos de actualización de Place', { error, input });
-		throw new TransformerError('No se pudieron mapear los datos para actualizar el lugar.');
-	}
-}
-
-/**
- * 🔄 Mapea `PlaceSearchOptions` a `Prisma.PlaceFindManyArgs`.
- */
-export function mapPlaceSearchOptionsToPrisma(options: PlaceSearchOptions): Prisma.PlaceFindManyArgs {
-	const { filters, ...rest } = options;
 	return {
 		...rest,
-		where: filters ? mapPlaceFiltersToPrisma(filters) : undefined,
+		dangers: JSON.stringify(dangers || []),
+		resources: JSON.stringify(resources || []),
+		stats: stats ? JSON.stringify(stats) : '{}',
+		filters: filters ? JSON.stringify(filters) : '{}',
+		images: imageIds ? { connect: imageIds.map(id => ({ id })) } : undefined,
+		videos: videoIds ? { connect: videoIds.map(id => ({ id })) } : undefined,
+		albums: albumIds ? { connect: albumIds.map(id => ({ id })) } : undefined,
+		collections: collectionIds ? { connect: collectionIds.map(id => ({ id })) } : undefined,
+		tags: tagIds ? { connect: tagIds.map(id => ({ id })) } : undefined,
+		characters: characterIds ? { connect: characterIds.map(id => ({ id })) } : undefined,
+		worldItems: worldItemIds ? { connect: worldItemIds.map(id => ({ id })) } : undefined,
+		concepts: conceptIds ? { connect: conceptIds.map(id => ({ id })) } : undefined,
+		prompts: promptIds ? { connect: promptIds.map(id => ({ id })) } : undefined,
+		notes: noteIds ? { connect: noteIds.map(id => ({ id })) } : undefined,
+		wildcards: wildcardIds ? { connect: wildcardIds.map(id => ({ id })) } : undefined,
+		properties: propertyIds ? { connect: propertyIds.map(id => ({ id })) } : undefined,
+		groups: groupIds ? { connect: groupIds.map(id => ({ id })) } : undefined,
 	};
 }
 
 /**
- * 🔄 Mapea `PlaceFilters` a `Prisma.PlaceWhereInput`.
+ * Mapea la entrada de actualización de un lugar al formato de Prisma.
+ * @param input - Los datos para actualizar el lugar. Puede ser parcial.
+ * @returns Datos listos para `prisma.place.update()`.
  */
-function mapPlaceFiltersToPrisma(filters: PlaceFilters): Prisma.PlaceWhereInput {
+export function toUpdateData(input: PlaceUpdateInput): Prisma.PlaceUpdateInput {
+	const {
+		imageIds,
+		videoIds,
+		albumIds,
+		collectionIds,
+		tagIds,
+		characterIds,
+		worldItemIds,
+		conceptIds,
+		promptIds,
+		noteIds,
+		wildcardIds,
+		propertyIds,
+		groupIds,
+		dangers,
+		resources,
+		stats,
+		filters,
+		...rest
+	} = input;
+
+	const data: Prisma.PlaceUpdateInput = { ...rest };
+
+	if (dangers !== undefined) data.dangers = JSON.stringify(dangers);
+	if (resources !== undefined) data.resources = JSON.stringify(resources);
+	if (stats !== undefined) data.stats = JSON.stringify(stats);
+	if (filters !== undefined) data.filters = JSON.stringify(filters);
+
+	if (imageIds !== undefined) data.images = { set: imageIds?.map(id => ({ id })) ?? [] };
+	if (videoIds !== undefined) data.videos = { set: videoIds?.map(id => ({ id })) ?? [] };
+	if (albumIds !== undefined) data.albums = { set: albumIds?.map(id => ({ id })) ?? [] };
+	if (collectionIds !== undefined) data.collections = { set: collectionIds?.map(id => ({ id })) ?? [] };
+	if (tagIds !== undefined) data.tags = { set: tagIds?.map(id => ({ id })) ?? [] };
+	if (characterIds !== undefined) data.characters = { set: characterIds?.map(id => ({ id })) ?? [] };
+	if (worldItemIds !== undefined) data.worldItems = { set: worldItemIds?.map(id => ({ id })) ?? [] };
+	if (conceptIds !== undefined) data.concepts = { set: conceptIds?.map(id => ({ id })) ?? [] };
+	if (promptIds !== undefined) data.prompts = { set: promptIds?.map(id => ({ id })) ?? [] };
+	if (noteIds !== undefined) data.notes = { set: noteIds?.map(id => ({ id })) ?? [] };
+	if (wildcardIds !== undefined) data.wildcards = { set: wildcardIds?.map(id => ({ id })) ?? [] };
+	if (propertyIds !== undefined) data.properties = { set: propertyIds?.map(id => ({ id })) ?? [] };
+	if (groupIds !== undefined) data.groups = { set: groupIds?.map(id => ({ id })) ?? [] };
+
+	return data;
+}
+
+/**
+ * Crea la cláusula `orderBy` para las consultas de Prisma.
+ * @param options - Opciones de búsqueda que contienen el `orderBy`.
+ * @returns El objeto `orderBy` para Prisma.
+ */
+export function createOrderBy(
+	options: PlaceSearchOptions = {}
+): Prisma.PlaceOrderByWithRelationInput | undefined {
+	if (options.orderBy) {
+		return options.orderBy as Prisma.PlaceOrderByWithRelationInput;
+	}
+	return { updatedAt: 'desc' };
+}
+
+/**
+ * Crea la cláusula `where` para las consultas de Prisma a partir de los filtros.
+ * @param filters - Los filtros de búsqueda de la aplicación.
+ * @returns El objeto `where` para Prisma.
+ */
+export function createFilter(filters: PlaceSearchOptions['filters'] = {}): Prisma.PlaceWhereInput {
 	const where: Prisma.PlaceWhereInput = {};
 
-	if (filters.search) {
-		where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
+	if (filters?.search) {
+		const search = filters.search.trim();
+		where.OR = [
+			{ name: { contains: search, mode: 'insensitive' } },
+			{ description: { contains: search, mode: 'insensitive' } },
+			{ lore: { contains: search, mode: 'insensitive' } },
+			{ history: { contains: search, mode: 'insensitive' } },
+		];
 	}
 
-	if (filters.category) {
-		where.category = { equals: filters.category };
-	}
+	if (filters?.category) where.category = { equals: filters.category };
+	if (filters?.type) where.type = { equals: filters.type };
+	if (filters?.region) where.region = { equals: filters.region };
+	if (filters?.isFavorite) where.isFavorite = true;
 
-	if (filters.isFavorite !== undefined) {
-		where.isFavorite = filters.isFavorite;
-	}
-
-	if (filters.tags && filters.tags.length > 0) {
+	if (filters?.tags && filters.tags.length > 0) {
 		where.tags = { some: { id: { in: filters.tags } } };
 	}
-
-	if (filters.characters && filters.characters.length > 0) {
+	if (filters?.characters && filters.characters.length > 0) {
 		where.characters = { some: { id: { in: filters.characters } } };
 	}
 
 	return where;
+}
+
+/**
+ * Mapea las opciones de búsqueda de la aplicación a los argumentos de `findMany` de Prisma.
+ * @param options - Opciones de búsqueda de la aplicación.
+ * @returns Argumentos para `prisma.place.findMany()`.
+ */
+export function toSearchOptions(options: PlaceSearchOptions = {}): Prisma.PlaceFindManyArgs {
+	return {
+		where: createFilter(options.filters),
+		orderBy: createOrderBy(options),
+		skip: options.skip,
+		take: options.take,
+		include: options.includeRelations ? { _count: true } : undefined,
+	};
 }

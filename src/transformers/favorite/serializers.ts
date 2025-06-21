@@ -6,8 +6,11 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { FavoriteWithImage } from '@/types/entities/favorite';
 import type { FileItem } from '@/types/files';
+import type { Favorite as PrismaFavorite, Image as PrismaImage } from '@prisma/client';
 
 const serializersLogger = serverLogger.withContext('Favorite:Serializers');
+
+type PrismaFavoriteWithImage = PrismaFavorite & { image: PrismaImage };
 
 interface MetadataContent {
 	dimensions: {
@@ -33,7 +36,7 @@ interface MetadataContent {
 /**
  * 🔄 Transforma una imagen en un FileItem para uso en componentes de UI
  */
-export function transformImageToFileItem(image: any): FileItem {
+export function transformImageToFileItem(image: PrismaImage): FileItem {
 	return {
 		id: image.id,
 		name: image.name || 'Untitled',
@@ -79,7 +82,7 @@ export function transformImageToFileItem(image: any): FileItem {
  * @param favorite Favorito base con imagen incluida
  * @returns Favorito con imagen transformada
  */
-export function toFavoriteWithImage(favorite: any): FavoriteWithImage {
+export function toFavoriteWithImage(favorite: PrismaFavoriteWithImage): FavoriteWithImage {
 	try {
 		return {
 			id: favorite.id,
@@ -94,7 +97,7 @@ export function toFavoriteWithImage(favorite: any): FavoriteWithImage {
 		serializersLogger.error('Error convirtiendo a favorito con imagen:', error);
 		return {
 			...favorite,
-			image: transformImageToFileItem(favorite.image || {}),
+			image: transformImageToFileItem(favorite.image || {} as PrismaImage),
 		} as FavoriteWithImage;
 	}
 }
@@ -104,6 +107,6 @@ export function toFavoriteWithImage(favorite: any): FavoriteWithImage {
  * @param favorites Lista de favoritos con imágenes
  * @returns Lista de favoritos transformados
  */
-export function toFavoritesWithImages(favorites: any[]): FavoriteWithImage[] {
+export function toFavoritesWithImages(favorites: PrismaFavoriteWithImage[]): FavoriteWithImage[] {
 	return favorites.map(toFavoriteWithImage);
 }

@@ -70,6 +70,14 @@ export interface QueueJobCoreState {
 	isLoading: boolean;
 	/** Error actual */
 	error: Error | null;
+	/** Total de elementos */
+	total: number;
+	/** Página actual */
+	page: number;
+	/** Límite por página */
+	limit: number;
+	/** Total de páginas */
+	totalPages: number;
 }
 
 /**
@@ -81,6 +89,10 @@ export const initialCoreState: QueueJobCoreState = {
 	stats: null,
 	isLoading: false,
 	error: null,
+	total: 0,
+	page: 1,
+	limit: 20,
+	totalPages: 0,
 };
 
 /**

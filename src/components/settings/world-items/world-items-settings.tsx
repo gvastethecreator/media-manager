@@ -1,7 +1,5 @@
 'use client';
 
-import { Filter, Info, Loader2, Package, PlusCircle, Trash, X } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { deleteWorldItem, getWorldItems, type WorldItemWithStats } from '@/app/actions/world-items/world-item.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,6 +13,8 @@ import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
 import type { WorldItem } from '@/types/entities/world-item';
 import { formatBytes } from '@/utils/file/helpers';
+import { Filter, Info, Loader2, Package, PlusCircle, Trash, X } from 'lucide-react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { CreateWorldItemForm } from './create-world-item-form';
 
 export function WorldItemsSettings() {
@@ -267,6 +267,8 @@ export function WorldItemsSettings() {
 		);
 	}
 
+	const idShowFavorites = useId();
+
 	return (
 		<div className="grid grid-cols-12 gap-4">
 			{/* Panel izquierdo: Lista de objetos */}
@@ -324,11 +326,11 @@ export function WorldItemsSettings() {
 											<div className="space-y-2">
 												<div className="flex items-center space-x-2">
 													<Checkbox
-														id="show-favorites"
+														id={idShowFavorites}
 														checked={showOnlyFavorites}
 														onCheckedChange={(checked) => setShowOnlyFavorites(checked === true)}
 													/>
-													<Label htmlFor="show-favorites" className="text-sm">
+													<Label htmlFor={idShowFavorites} className="text-sm">
 														Solo favoritos
 													</Label>
 												</div>

@@ -27,22 +27,20 @@ export default function CreateFolderPage() {
 		const color = formData.get('color') as string;
 
 		try {
-			const result = await createFolder({
+			await createFolder({
 				name,
 				path,
 				description: description || undefined,
 				emoji: emoji || undefined,
 				color: color || undefined,
+				autoReindex: true, // Valor por defecto
 			});
 
-			if (result.success) {
-				router.push('/folders');
-				router.refresh();
-			} else {
-				setError(result.error || 'Error al crear la carpeta');
-			}
+			// La función devuelve FolderComplete directamente si tiene éxito
+			router.push('/folders');
+			router.refresh();
 		} catch (err) {
-			setError('Error al procesar la solicitud');
+			setError('Error al crear la carpeta');
 			console.error(err);
 		} finally {
 			setIsSubmitting(false);

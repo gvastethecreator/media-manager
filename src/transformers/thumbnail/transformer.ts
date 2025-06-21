@@ -4,11 +4,11 @@
  */
 
 import {
-	ThumbnailComplete,
-	ThumbnailExtended,
-	ThumbnailQuality,
-	ThumbnailStats,
-	ThumbnailWithStats,
+    ThumbnailComplete,
+    ThumbnailExtended,
+    ThumbnailQuality,
+    ThumbnailStats,
+    ThumbnailWithStats,
 } from '@/types/entities/thumbnail';
 import { formatBytes, formatDate } from '@/utils/formatters';
 
@@ -20,8 +20,8 @@ interface TransformThumbnailOptions {
 /**
  * Transforma un objeto de thumbnail en su versión completa
  */
-export function transformThumbnail<T extends Record<string, any>>(
-	thumbnail: T,
+export function transformThumbnail(
+	thumbnail: Partial<ThumbnailComplete>,
 	options: TransformThumbnailOptions = {}
 ): ThumbnailComplete {
 	// Valores por defecto para las opciones
@@ -105,8 +105,8 @@ export function transformThumbnail<T extends Record<string, any>>(
 /**
  * Transforma un array de thumbnails
  */
-export function transformThumbnails<T extends Record<string, any>>(
-	thumbnails: T[],
+export function transformThumbnails(
+	thumbnails: Partial<ThumbnailComplete>[],
 	options?: TransformThumbnailOptions
 ): ThumbnailComplete[] {
 	return thumbnails.map((thumbnail) => transformThumbnail(thumbnail, options));

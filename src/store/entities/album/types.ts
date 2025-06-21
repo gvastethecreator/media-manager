@@ -6,13 +6,13 @@
  */
 
 import type {
-	AlbumComplete,
-	AlbumDisplayState,
-	AlbumSortCriteria,
-	AlbumType,
-	AlbumViewMode,
-	AlbumCreateInput as CreateAlbumData,
-	AlbumUpdateInput as UpdateAlbumData,
+    AlbumDisplayState,
+    AlbumSortCriteria,
+    AlbumType,
+    AlbumViewMode,
+    AlbumWithRelations,
+    AlbumCreateInput as CreateAlbumData,
+    AlbumUpdateInput as UpdateAlbumData,
 } from '@/types/entities/album';
 
 /**
@@ -20,7 +20,7 @@ import type {
  */
 export interface AlbumState {
 	// 📋 Datos principales
-	albums: AlbumComplete[];
+	albums: AlbumWithRelations[];
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;
@@ -30,9 +30,9 @@ export interface AlbumState {
 	filters: AlbumFiltersState;
 
 	// 🔍 Selectores y getters
-	getAlbumById: (id: string) => AlbumComplete | undefined;
-	getFilteredAlbums: () => AlbumComplete[];
-	getSortedAlbums: () => AlbumComplete[];
+	getAlbumById: (id: string) => AlbumWithRelations | undefined;
+	getFilteredAlbums: () => AlbumWithRelations[];
+	getSortedAlbums: () => AlbumWithRelations[];
 }
 
 /**
@@ -86,7 +86,7 @@ export interface AlbumFiltersState {
 export interface AlbumActions {
 	// 📥 Carga de datos
 	loadAlbums: () => Promise<void>;
-	loadAlbumById: (id: string) => Promise<AlbumComplete | undefined>;
+	loadAlbumById: (id: string) => Promise<AlbumWithRelations | undefined>;
 
 	// 📝 Gestión de álbumes
 	createAlbum: (album: CreateAlbumData) => Promise<void>;

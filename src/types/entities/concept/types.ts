@@ -7,6 +7,19 @@
  */
 
 import { z } from 'zod';
+import type { AlbumComplete } from '../album';
+import type { CharacterComplete } from '../character';
+import type { CollectionComplete } from '../collection';
+import type { GroupComplete } from '../group';
+import type { ImageComplete } from '../image';
+import type { NoteComplete } from '../note';
+import type { PlaceComplete } from '../place';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
+import type { TagComplete } from '../tag';
+import type { VideoComplete } from '../video';
+import type { WildcardComplete } from '../wildcard';
+import type { WorldItemComplete } from '../world-item';
 
 /**
  * Tipo base canónico para Concept
@@ -29,11 +42,47 @@ export interface ConceptBase {
  * Tipo completo para Concept con todas las relaciones y datos
  */
 export interface ConceptComplete extends ConceptBase {
+	images?: ImageComplete[];
+	videos?: VideoComplete[];
+	albums?: AlbumComplete[];
+	collections?: CollectionComplete[];
+	tags?: TagComplete[];
+	characters?: CharacterComplete[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemComplete[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupComplete[];
 	_count?: {
 		images?: number;
-		notes?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
 		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
 	};
+}
+
+/**
+ * Tipo para items en listados de conceptos
+ */
+export interface ConceptListItem {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	category: string;
+	isFavorite: boolean;
+	itemType: 'concept';
 }
 
 /**
@@ -48,12 +97,26 @@ export interface ConceptCreateInput {
 	category?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
+	// Relaciones por ID
+	imageIds?: string[];
+	videoIds?: string[];
+	albumIds?: string[];
+	collectionIds?: string[];
+	tagIds?: string[];
+	characterIds?: string[];
+	placeIds?: string[];
+	worldItemIds?: string[];
+	promptIds?: string[];
+	noteIds?: string[];
+	wildcardIds?: string[];
+	propertyIds?: string[];
+	groupIds?: string[];
 }
 
 /**
  * Input para actualización
  */
-export type ConceptUpdateInput = Partial<Omit<ConceptBase, 'id' | 'createdAt' | 'updatedAt'>>;
+export type ConceptUpdateInput = Partial<ConceptCreateInput>;
 
 /**
  * Opciones de búsqueda para conceptos

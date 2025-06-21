@@ -2,12 +2,8 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { validateName } from '@/lib/validations';
-import {
-	fromPrismaGroup,
-	toPrismaGroupCreate,
-	toPrismaGroupUpdate,
-	validateGroup,
-} from '@/transformers/group/serializers';
+import { fromPrismaGroup } from '@/transformers/group/transformer';
+import { toPrismaGroupCreate, toPrismaGroupUpdate, validateGroup } from '@/transformers/group/serializers';
 import type { CreateGroupData, GroupWithStats, UpdateGroupData } from '@/types/entities/group/types';
 import { revalidatePath } from 'next/cache';
 

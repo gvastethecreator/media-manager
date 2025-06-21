@@ -1,16 +1,23 @@
 /**
- * @file Punto de entrada para los transformadores de la entidad Place.
+ * @file Índice de transformadores para la entidad Place.
  * @module transformers/place
- * @description Exporta de forma controlada las funciones de mapeo y transformación para la entidad Place.
- * No se deben exportar serializadores de JSON, ya que son detalles de implementación interna.
+ * @description Centraliza la exportación de funciones de transformación y mapeo
+ * para la entidad Place, asegurando una interfaz consistente para el resto de la aplicación.
  */
 
-// De mappers.ts
+// --- Exportaciones de Mappers ---
+// Se renombran para seguir el patrón de nomenclatura: map[Entidad][Accion]To[Destino]
 export {
-	mapCreatePlaceDataToPrisma,
-	mapPlaceSearchOptionsToPrisma,
-	mapUpdatePlaceDataToPrisma,
+    toCreateData as mapCreatePlaceDataToPrisma, createFilter as mapPlaceFiltersToPrisma,
+    createOrderBy as mapPlaceOrderByToPrisma, toSearchOptions as mapPlaceSearchOptionsToPrisma,
+    toUpdateData as mapUpdatePlaceDataToPrisma
 } from './mappers';
 
-// De transformer.ts
-export { fromPrismaPlace, fromPrismaPlaces } from './transformer';
+// --- Exportaciones de Transformer ---
+// Proporcionan la lógica central de transformación de datos de Prisma al tipo canónico.
+export {
+    fromPrismaPlace,
+    fromPrismaPlaces,
+    placePayload
+} from './transformer';
+

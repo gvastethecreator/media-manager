@@ -7,6 +7,6 @@ export const audioSchema = z.object({
 	format: z.string().min(2),
 	duration: z.number().int().positive().optional(),
 	size: z.number().int().nonnegative(),
-	createdAt: z.string(),
-	updatedAt: z.string(),
+	createdAt: z.coerce.date(),
+	updatedAt: z.coerce.date(),
 });

@@ -3,11 +3,11 @@
  * @module transformers/property/serializers
  */
 
-import type { Prisma, Property } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { PropertyBase, PropertyWithRelations } from '@/types/entities/property';
+import type { PropertyBase, PropertyWithRelations, PropertyWithStats } from '@/types/entities/property';
 import { PropertySchema } from '@/types/entities/property';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma, Property } from '@prisma/client';
 
 // Logger específico para este módulo
 const logger = serverLogger.withContext('PropertyTransformer:Serializers');
@@ -186,44 +186,25 @@ export function toPrismaProperty(
  * @param options Opciones de transformación
  * @returns Propiedad con campos deserializados
  */
-export function fromPrismaProperty<T extends Property & { _relations?: any; _count?: any }>(
-	property: T,
-	options: PropertyTransformOptions = {}
-): PropertyWithRelations & { _relations?: any; _count?: any; _ui?: any } {
-	try {
-		const { includeRelations = false, includeUI = false, includeStats = false } = options;
+export function fromPrismaProperty<T extends Property & { _count?: any }>(
+	property: T | null
+): PropertyWithStats | null {
+	if (!property) return null;
 
-		// Crear resultado base
-		const result: PropertyWithRelations & {
-			_relations?: any;
-			_count?: any;
-			_ui?: any;
-		} = {
+	try {
+		const base = {
 			...property,
 			isFavorite: property.isFavorite,
 			createdAt: new Date(property.createdAt),
 			updatedAt: new Date(property.updatedAt),
 		};
 
-		// Agregar relaciones si están presentes y se solicitan
-		if (includeRelations && property._relations) {
-			result._relations = property._relations;
-		}
+		const totalAssociations = calculateItemCount(property);
 
-		// Agregar conteos si están presentes y se solicitan estadísticas
-		if (includeStats && property._count) {
-			result._count = property._count;
-		}
-
-		// Agregar propiedades de UI si se solicitan
-		if (includeUI) {
-			result._ui = {
-				lastUpdated: property.updatedAt || new Date(),
-				itemCount: calculateItemCount(property),
-			};
-		}
-
-		return result;
+		return {
+			...base,
+			totalAssociations,
+		};
 	} catch (error) {
 		logger.error('Error deserializando property', { error });
 		throw new TransformerError('Error deserializando property');

@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
-import type { Transformer } from '@/types/common/transformer';
+import type { BaseTransformer } from '@/types/common/transformer';
 import type { FileItem } from '@/types/files';
 import { createEntityNotFoundError, toServiceError } from '@/utils/errors/service-errors';
 import { imageConverterService, type ServerImage } from './image-converter.service';
@@ -40,9 +40,9 @@ export class BaseService<DBRecord, Entity, Result> {
 	protected model: PrismaModelOperations;
 	protected modelName: string;
 	protected serviceName: string;
-	protected transformer?: Transformer<DBRecord, Entity, Result>;
+	protected transformer?: BaseTransformer<Entity, DBRecord, Result>;
 
-	constructor(model: PrismaModelOperations, modelName: string, transformer?: Transformer<DBRecord, Entity, Result>) {
+	constructor(model: PrismaModelOperations, modelName: string, transformer?: BaseTransformer<Entity, DBRecord, Result>) {
 		this.model = model;
 		this.modelName = modelName;
 		this.serviceName = `${modelName}Service`;
@@ -234,7 +234,7 @@ export class BaseService<DBRecord, Entity, Result> {
 	 */
 	protected fromDB(record: DBRecord): Entity {
 		if (this.transformer) {
-			return this.transformer.fromDB(record);
+			return this.transformer.fromPrisma(record);
 		}
 		// Si no hay transformer, devolver registro como entidad (caso básico)
 		return record as unknown as Entity;
@@ -243,9 +243,9 @@ export class BaseService<DBRecord, Entity, Result> {
 	/**
 	 * Transforma una entidad de dominio a un resultado para API
 	 */
-	protected toClient(entity: Entity, options?: Record<string, unknown>): Result {
+	protected async toClient(entity: Entity, options?: Record<string, unknown>): Promise<Result> {
 		if (this.transformer) {
-			return this.transformer.toClient(entity, options);
+			return await this.transformer.extend(entity, options) as unknown as Result;
 		}
 		// Si no hay transformer, devolver entidad como resultado (caso básico)
 		return entity as unknown as Result;
@@ -256,7 +256,7 @@ export class BaseService<DBRecord, Entity, Result> {
 	 */
 	protected toDB(input: Partial<Entity>): Partial<DBRecord> {
 		if (this.transformer) {
-			return this.transformer.toDB(input);
+			return this.transformer.toPrisma(input) as unknown as Partial<DBRecord>;
 		}
 		// Si no hay transformer, devolver input como registro parcial (caso básico)
 		return input as unknown as Partial<DBRecord>;
@@ -282,7 +282,7 @@ export class BaseService<DBRecord, Entity, Result> {
 			}
 
 			const entity = this.fromDB(item);
-			return this.toClient(entity);
+			return await this.toClient(entity);
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: this.serviceName,

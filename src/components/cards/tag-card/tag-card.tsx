@@ -1,19 +1,19 @@
 'use client';
 
+import { cn } from '@/lib/utils';
+import { type TagCategory, TagRarity } from '@/types/entities/tag';
+import type { TagWithStats } from '@/types/entities/tag/types';
 import { Sparkles, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { cn } from '@/lib/utils';
-import type { TagWithRelations } from '@/types/entities/tag';
-import { type TagCategory, TagRarity } from '@/types/entities/tag';
 import { TagCardContent } from './tag-card-content';
 import { TagCardFooter } from './tag-card-footer';
 import { TagCardHeader } from './tag-card-header';
 import { TagCardImages } from './tag-card-images';
 
 export interface TagCardProps {
-	tag: TagWithRelations;
+	tag: TagWithStats;
 	onClick?: () => void;
 	className?: string;
 	style?: React.CSSProperties;
@@ -57,8 +57,8 @@ export function TagCard({
 		createdAt,
 		updatedAt,
 		isFavorite = false,
-		viewMode,
 		featuredImage,
+		totalAssociations,
 	} = tag;
 
 	// Calcular valores derivados
@@ -94,12 +94,10 @@ export function TagCard({
 
 	// Determinar rareza basada en relaciones
 	const determineRarity = (): TagRarity => {
-		if (tag.rarity) return tag.rarity as TagRarity;
-
-		if (totalRelations > 200) return TagRarity.LEGENDARY;
-		if (totalRelations > 100) return TagRarity.VERY_RARE;
-		if (totalRelations > 50) return TagRarity.RARE;
-		if (totalRelations > 10) return TagRarity.UNCOMMON;
+		if (totalAssociations > 200) return TagRarity.LEGENDARY;
+		if (totalAssociations > 100) return TagRarity.VERY_RARE;
+		if (totalAssociations > 50) return TagRarity.RARE;
+		if (totalAssociations > 10) return TagRarity.UNCOMMON;
 		return TagRarity.COMMON;
 	};
 

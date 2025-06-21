@@ -5,11 +5,11 @@
 
 import type { StateCreator } from 'zustand';
 import type {
-    PlaceCategory,
-    PlaceComplete,
-    PlaceFilters,
-    PlaceType,
-    PlaceViewMode,
+	PlaceCategory,
+	PlaceComplete,
+	PlaceFilters,
+	PlaceType,
+	PlaceViewMode,
 } from '../../../types/entities/place/types';
 
 /**

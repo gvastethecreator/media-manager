@@ -1,8 +1,5 @@
 'use client';
 
-import { Grid2X2Icon, Grid3X3Icon, ListIcon, RefreshCw, SortAsc, SortDesc } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -12,6 +9,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { Grid2X2Icon, Grid3X3Icon, ListIcon, RefreshCw, SortAsc, SortDesc } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ImageCardImproved } from './image-card-improved';
 import { type ImageCardData } from './image-server-actions';
 
@@ -33,7 +33,7 @@ interface ImageGalleryProps {
 	hasMoreImages?: boolean;
 }
 
-type SortOption = 'title' | 'date' | 'size' | 'width' | 'height';
+type SortOption = 'name' | 'date' | 'size' | 'dimensions';
 type SortDirection = 'asc' | 'desc';
 
 /**
@@ -85,55 +85,52 @@ export function ImageGallery({
 		// Si solo tenemos IDs, los datos se cargarán en cada tarjeta
 	}, [images]);
 
-	// Filtrar imágenes por término de búsqueda
+	// Filtrar imágenes según el término de búsqueda
 	const filteredImages = useMemo(() => {
 		if (!searchTerm) return images;
 
-		// Si tenemos objetos completos, filtrar por título y etiquetas
-		if (typeof images[0] !== 'string') {
-			return (images as ImageCardData[]).filter(
-				(image) =>
-					image.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-					image.tags?.some((tag) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
-			);
-		}
+		return images.filter((image) => {
+			if (typeof image === 'string') return true; // No podemos filtrar IDs sin datos
 
-		// Si solo tenemos IDs, no podemos filtrar
-		return images;
+			return (
+				image.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				image.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				image.tags?.some((tag) => tag.name.toLowerCase().includes(searchTerm.toLowerCase()))
+			);
+		});
 	}, [images, searchTerm]);
 
 	// Ordenar imágenes
 	const sortedImages = useMemo(() => {
-		// Solo ordenar si tenemos objetos completos
-		if (typeof filteredImages[0] === 'string') {
-			return filteredImages;
-		}
+		if (typeof filteredImages[0] === 'string') return filteredImages; // No podemos ordenar IDs sin datos
 
-		const imagesArray = [...filteredImages] as ImageCardData[];
-
-		return imagesArray.sort((a, b) => {
+		const sorted = [...(filteredImages as ImageCardData[])].sort((a, b) => {
 			let comparison = 0;
 
 			switch (sortBy) {
-				case 'title':
-					comparison = (a.title || '').localeCompare(b.title || '');
+				case 'name':
+					comparison = (a.name || '').localeCompare(b.name || '');
 					break;
 				case 'date':
-					comparison = new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+					comparison = new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
 					break;
 				case 'size':
-					comparison = (a.fileSize || 0) - (b.fileSize || 0);
+					comparison = (a.metadata?.size || 0) - (b.metadata?.size || 0);
 					break;
-				case 'width':
-					comparison = (a.width || 0) - (b.width || 0);
+				case 'dimensions': {
+					const aArea = (a.width || 0) * (a.height || 0);
+					const bArea = (b.width || 0) * (b.height || 0);
+					comparison = aArea - bArea;
 					break;
-				case 'height':
-					comparison = (a.height || 0) - (b.height || 0);
-					break;
+				}
+				default:
+					comparison = 0;
 			}
 
-			return sortDirection === 'asc' ? comparison : -comparison;
+			return sortDirection === 'desc' ? -comparison : comparison;
 		});
+
+		return sorted;
 	}, [filteredImages, sortBy, sortDirection]);
 
 	// Manejar selección de imagen
@@ -247,11 +244,10 @@ export function ImageGallery({
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end">
-									<DropdownMenuItem onClick={() => setSortBy('title')}>Por título</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setSortBy('name')}>Por nombre</DropdownMenuItem>
 									<DropdownMenuItem onClick={() => setSortBy('date')}>Por fecha</DropdownMenuItem>
 									<DropdownMenuItem onClick={() => setSortBy('size')}>Por tamaño</DropdownMenuItem>
-									<DropdownMenuItem onClick={() => setSortBy('width')}>Por ancho</DropdownMenuItem>
-									<DropdownMenuItem onClick={() => setSortBy('height')}>Por alto</DropdownMenuItem>
+									<DropdownMenuItem onClick={() => setSortBy('dimensions')}>Por área</DropdownMenuItem>
 									<DropdownMenuItem onClick={toggleSortDirection}>
 										{sortDirection === 'asc' ? 'Ascendente' : 'Descendente'}
 									</DropdownMenuItem>
