@@ -2,8 +2,9 @@
  * @file Mapeadores para la entidad Metadata, convirtiendo datos de Prisma a tipos de la aplicación.
  * @module transformers/metadata/mappers
  */
+
 import type { MetadataCreateInput, MetadataUpdateInput } from '@/types/entities/metadata';
-import type { Metadata } from '@prisma/client';
+import type { Metadata, Prisma } from '@prisma/client';
 
 // Función para formatear bytes a formato legible
 export function formatBytes(bytes: number, decimals = 2): string {
@@ -19,9 +20,7 @@ export function formatBytes(bytes: number, decimals = 2): string {
 }
 
 // Mapear datos de Prisma a nuestro tipo extendido (ejemplo, se necesitará un tipo MetadataExtended)
-export function fromPrismaMetadata(
-	metadata: Metadata
-): Metadata & { aspectRatio: number; formattedSize: string; dimensions: string } {
+export function fromPrismaMetadata(metadata: Metadata): MetadataExtended {
 	const aspectRatio = metadata.width && metadata.height ? metadata.width / metadata.height : 0;
 	const formattedSize = formatBytes(metadata.size || 0);
 	const dimensions = `${metadata.width || 0}x${metadata.height || 0}`;
@@ -35,7 +34,7 @@ export function fromPrismaMetadata(
 }
 
 // Mapear datos de creación a formato Prisma
-export function mapCreateInputToPrisma(data: MetadataCreateInput): any {
+export function mapCreateInputToPrisma(data: MetadataCreateInput): Prisma.MetadataCreateInput {
 	// Aquí debería ir la lógica para mapear MetadataCreateInput a Prisma.MetadataCreateInput
 	return {
 		...data,
@@ -43,7 +42,7 @@ export function mapCreateInputToPrisma(data: MetadataCreateInput): any {
 }
 
 // Mapear datos de actualización a formato Prisma
-export function mapUpdateInputToPrisma(data: Partial<MetadataUpdateInput>): any {
+export function mapUpdateInputToPrisma(data: Partial<MetadataUpdateInput>): Prisma.MetadataUpdateInput {
 	// Aquí debería ir la lógica para mapear MetadataUpdateInput a Prisma.MetadataUpdateInput
 	return {
 		...data,

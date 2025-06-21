@@ -79,6 +79,7 @@ export interface MediaMetadata extends FileMetadata {
 	xmp?: Record<string, unknown>;
 	icc?: Record<string, unknown>;
 	ai?: AIMetadata;
+	generation?: any; // Información de generación por IA
 	gps?: {
 		latitude?: number;
 		longitude?: number;

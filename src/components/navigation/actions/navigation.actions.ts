@@ -24,47 +24,7 @@ import { revalidatePath } from 'next/cache';
 
 const navLogger = serverLogger.withContext('NavActions');
 
-type SystemStats = {
-	totalImages: number;
-	totalFolders: number;
-	totalCollections: number;
-	totalTags: number;
-	totalAlbums: number;
-	totalCharacters: number;
-	totalPlaces: number;
-	totalObjects: number;
-	totalGroups: number;
-	totalProperties: number;
-	totalWildcards: number;
-	totalFavorites: number;
-	totalActivities: number;
-	totalSize: number;
-	totalViews: number;
-	totalDownloads: number;
-	// Nuevas entidades
-	totalAudios: number;
-	totalDocuments: number;
-	totalJsonFiles: number;
-	totalFile3Ds: number;
-	totalWorkflows: number;
-	topTags: Array<{
-		id: string;
-		name: string;
-		color: string;
-		count: number;
-	}>;
-	recentActivity: Array<{
-		id: string;
-		type: string;
-		description: string;
-		createdAt: Date;
-		image: {
-			id: string;
-			name: string;
-			thumbnail: Uint8Array | null;
-		} | null;
-	}>;
-};
+type SystemStats = NonNullable<Awaited<ReturnType<typeof getSystemStats>>>;
 
 const REVALIDATE_PATHS = [
 	'/',
@@ -89,13 +49,9 @@ const REVALIDATE_PATHS = [
 export async function revalidateNavigation() {
 	try {
 		navLogger.info('🔄 Iniciando revalidación de rutas de navegación');
-
-		await Promise.all(
-			REVALIDATE_PATHS.map(async (path) => {
-				revalidatePath(path);
-			})
-		);
-
+		for (const path of REVALIDATE_PATHS) {
+			revalidatePath(path);
+		}
 		navLogger.info('✅ Rutas de navegación revalidadas exitosamente');
 	} catch (error) {
 		navLogger.error('❌ Error al revalidar rutas de navegación:', error);
@@ -117,7 +73,6 @@ export interface NavigationData {
 	groups: Awaited<ReturnType<typeof getGroups>>;
 	properties: Awaited<ReturnType<typeof getProperties>>;
 	wildcards: Awaited<ReturnType<typeof getWildcards>>;
-	// Nuevas entidades
 	audios: Awaited<ReturnType<typeof getAudios>>;
 	documents: Awaited<ReturnType<typeof getDocuments>>;
 	jsonFiles: Awaited<ReturnType<typeof getJsonFiles>>;
@@ -126,31 +81,15 @@ export interface NavigationData {
 	stats: SystemStats;
 }
 
+function processSettledResult<T>(result: PromiseSettledResult<T>, defaultValue: T): T {
+	return result.status === 'fulfilled' ? result.value : defaultValue;
+}
+
 export async function getNavigationData(): Promise<NavigationData> {
 	try {
 		navLogger.info('🧭 Obteniendo datos de navegación');
 
-		const [
-			folders,
-			collections,
-			tags,
-			albums,
-			characters,
-			places,
-			worldItems,
-			concepts,
-			prompts,
-			notes,
-			groups,
-			properties,
-			wildcards,
-			audios,
-			documents,
-			jsonFiles,
-			file3ds,
-			workflows,
-			stats,
-		] = await Promise.allSettled([
+		const results = await Promise.allSettled([
 			getFolders(),
 			getCollections(),
 			getTagsAction(),
@@ -182,13 +121,15 @@ export async function getNavigationData(): Promise<NavigationData> {
 			totalAlbums: 0,
 			totalCharacters: 0,
 			totalPlaces: 0,
-			totalObjects: 0,
+			totalWorldItems: 0,
 			totalGroups: 0,
 			totalProperties: 0,
 			totalWildcards: 0,
+			totalFavorites: 0,
+			totalActivities: 0,
+			totalSize: 0,
 			totalViews: 0,
 			totalDownloads: 0,
-			// Nuevas entidades
 			totalAudios: 0,
 			totalDocuments: 0,
 			totalJsonFiles: 0,
@@ -199,60 +140,28 @@ export async function getNavigationData(): Promise<NavigationData> {
 		};
 
 		return {
-			folders: folders.status === 'fulfilled' ? folders.value : [],
-			collections: collections.status === 'fulfilled' ? collections.value : [],
-			tags: tags.status === 'fulfilled' ? tags.value : [],
-			albums: albums.status === 'fulfilled' ? albums.value : [],
-			characters: characters.status === 'fulfilled' ? characters.value : [],
-			places: places.status === 'fulfilled' ? places.value : [],
-			worldItems: worldItems.status === 'fulfilled' ? worldItems.value : [],
-			concepts: concepts.status === 'fulfilled' ? concepts.value : [],
-			prompts: prompts.status === 'fulfilled' ? prompts.value : [],
-			notes: notes.status === 'fulfilled' ? notes.value : [],
-			groups: groups.status === 'fulfilled' ? groups.value : [],
-			properties: properties.status === 'fulfilled' ? properties.value : [],
-			wildcards: wildcards.status === 'fulfilled' ? wildcards.value : [],
-			// Nuevas entidades
-			audios: audios.status === 'fulfilled' ? audios.value : [],
-			documents: documents.status === 'fulfilled' ? documents.value : [],
-			jsonFiles: jsonFiles.status === 'fulfilled' ? jsonFiles.value : [],
-			file3ds: file3ds.status === 'fulfilled' ? file3ds.value : [],
-			workflows: workflows.status === 'fulfilled' ? workflows.value : [],
-			stats:
-				stats.status === 'fulfilled' && stats.value
-					? {
-							totalImages: stats.value.totalImages,
-							totalFolders: stats.value.totalFolders,
-							totalCollections: stats.value.totalCollections,
-							totalTags: stats.value.totalTags,
-							totalAlbums: stats.value.totalAlbums,
-							totalCharacters: stats.value.totalCharacters,
-							totalPlaces: stats.value.totalPlaces,
-							totalObjects: stats.value.totalWorldItems,
-							totalGroups: stats.value.totalGroups || 0,
-							totalProperties: stats.value.totalProperties || 0,
-							totalWildcards: stats.value.totalWildcards || 0,
-							totalFavorites: stats.value.totalFavorites,
-							totalActivities: stats.value.totalActivities,
-							totalSize: stats.value.totalSize,
-							totalViews: stats.value.totalViews,
-							totalDownloads: stats.value.totalDownloads,
-							// Nuevas entidades - usar longitud de arrays como fallback
-							totalAudios: stats.value.totalAudios || (audios.status === 'fulfilled' ? audios.value.length : 0),
-							totalDocuments:
-								stats.value.totalDocuments || (documents.status === 'fulfilled' ? documents.value.length : 0),
-							totalJsonFiles:
-								stats.value.totalJsonFiles || (jsonFiles.status === 'fulfilled' ? jsonFiles.value.length : 0),
-							totalFile3Ds: stats.value.totalFile3Ds || (file3ds.status === 'fulfilled' ? file3ds.value.length : 0),
-							totalWorkflows:
-								stats.value.totalWorkflows || (workflows.status === 'fulfilled' ? workflows.value.length : 0),
-							topTags: stats.value.topTags,
-							recentActivity: stats.value.recentActivity,
-						}
-					: defaultStats,
+			folders: processSettledResult(results[0], []),
+			collections: processSettledResult(results[1], []),
+			tags: processSettledResult(results[2], []),
+			albums: processSettledResult(results[3], []),
+			characters: processSettledResult(results[4], []),
+			places: processSettledResult(results[5], []),
+			worldItems: processSettledResult(results[6], []),
+			concepts: processSettledResult(results[7], []),
+			prompts: processSettledResult(results[8], []),
+			notes: processSettledResult(results[9], []),
+			groups: processSettledResult(results[10], []),
+			properties: processSettledResult(results[11], []),
+			wildcards: processSettledResult(results[12], []),
+			audios: processSettledResult(results[13], []),
+			documents: processSettledResult(results[14], []),
+			jsonFiles: processSettledResult(results[15], []),
+			file3ds: processSettledResult(results[16], []),
+			workflows: processSettledResult(results[17], []),
+			stats: processSettledResult(results[18], defaultStats) as SystemStats,
 		};
 	} catch (error) {
-		navLogger.error('❌ Error al obtener datos de navegación:', error);
-		throw new Error('No se pudieron obtener los datos de navegación');
+		navLogger.error('❌ Error al obtener los datos de navegación:', error);
+		throw new Error('No se pudieron obtener los datos de navegación.');
 	}
 }

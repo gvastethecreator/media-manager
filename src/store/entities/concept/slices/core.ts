@@ -1,21 +1,33 @@
 import { clientLogger } from '@/lib/logger/client-logger';
-import { transformConceptToWithStats } from '@/transformers/concept/transformer';
 import type {
 	ConceptBase,
+	ConceptComplete,
 	ConceptCreateInput,
 	ConceptUpdateInput,
 	ConceptWithStats,
-} from '@/types/entities/concept/types';
+} from '@/types/entities/concept';
 import type { StateCreator } from 'zustand';
 import {
 	createConcept,
 	deleteConcept,
-	searchConcepts,
+	getConcepts,
 	updateConcept,
-} from '../../../../app/actions/concepts/concept.actions';
+} from '../../../../app/actions/concepts';
 import type { ConceptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('ConceptStore:Core');
+
+// Función para transformar ConceptComplete a ConceptWithStats
+const transformConceptToWithStats = (concept: ConceptComplete): ConceptWithStats => ({
+	...concept,
+	stats: {
+		imageCount: concept._count?.images ?? 0,
+		tagCount: concept._count?.tags ?? 0,
+		noteCount: concept._count?.notes ?? 0,
+		totalContentItems: (concept._count?.images ?? 0) + (concept._count?.notes ?? 0),
+		lastUpdated: concept.updatedAt,
+	},
+});
 
 export interface CoreSlice {
 	// Estado
@@ -48,8 +60,7 @@ export const createCoreSlice: StateCreator<ConceptStore, [], [], CoreSlice> = (s
 			coreLogger.info('🔄 Cargando conceptos');
 
 			// Llamar a server action para obtener conceptos
-			const results = await searchConcepts();
-			const concepts = results.items; // ConceptSearchResult tiene una propiedad 'items'
+			const concepts = await getConcepts({});
 
 			// Transformar resultados con la función correcta
 			const transformedConcepts = concepts.map(transformConceptToWithStats);

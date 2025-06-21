@@ -5,12 +5,12 @@ import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import toastService from '@/services/toast.service';
-import { generateTagColor, generateTagEmoji } from '@/transformers/tag/serializers';
+import { generateTagColor } from '@/transformers/tag/serializers';
 import type { TagUpdateInput } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag';
 import type { TagBase as UITag } from '@/types/entities/tag/types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
@@ -60,8 +60,6 @@ export function CreateTagForm({
 	onCancel,
 	onPreview,
 }: CreateTagFormProps) {
-	const [isSubmitting, setIsSubmitting] = useState(false);
-
 	// Inicializar formulario con valores por defecto
 	const form = useForm<FormValues>({
 		resolver: zodResolver(createTagSchema),
@@ -89,25 +87,9 @@ export function CreateTagForm({
 		}
 	}, [form, isEditing, tag]);
 
-	// Generar color y emoji basados en el nombre
-	const generateSuggestions = useCallback(() => {
-		const name = form.getValues('name');
-		const category = form.getValues('category');
-
-		if (name.length > 1) {
-			const color = generateTagColor(name);
-			const emoji = generateTagEmoji(name, category);
-
-			form.setValue('color', color);
-			form.setValue('emoji', emoji);
-		}
-	}, [form]);
-
 	// Manejar envío del formulario
 	const onSubmit = async (data: FormValues) => {
 		try {
-			setIsSubmitting(true);
-
 			// Crear datos comunes
 			const tagData = {
 				name: data.name,
@@ -154,8 +136,6 @@ export function CreateTagForm({
 			toastService.error(`Error al ${isEditing ? 'actualizar' : 'crear'} la etiqueta`, {
 				description: errorMessage,
 			});
-		} finally {
-			setIsSubmitting(false);
 		}
 	};
 

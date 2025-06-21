@@ -1,4 +1,17 @@
 // Barrel de transformers para File3D
-export * from './mappers';
+
+// Exportar desde mappers (renombrando la función conflictiva)
+export {
+    fromPrismaFile3D as mapFile3DFromPrisma,
+    toPrismaFile3D
+} from './mappers';
+
+// Exportar desde serializers
 export * from './serializers';
-export * from './transformer';
+
+// Exportar desde transformer
+export {
+    fromPrismaFile3D,
+    fromPrismaFile3Ds
+} from './transformer';
+

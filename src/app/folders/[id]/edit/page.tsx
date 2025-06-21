@@ -1,13 +1,13 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { getFolderById, updateFolder } from '@/app/actions/folders';
+import { type FolderComplete, getFolder, updateFolder } from '@/app/actions/folders';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface EditFolderPageProps {
 	params: {
@@ -21,16 +21,16 @@ export default function EditFolderPage({ params }: EditFolderPageProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [folder, setFolder] = useState<Folder | null>(null);
+	const [folder, setFolder] = useState<FolderComplete | null>(null);
 
 	useEffect(() => {
 		async function loadFolder() {
 			try {
-				const result = await getFolderById(id);
-				if (result.success && result.data) {
-					setFolder(result.data);
+				const folder = await getFolder(id);
+				if (folder) {
+					setFolder(folder);
 				} else {
-					setError(result.error || 'No se pudo cargar la carpeta');
+					setError('No se pudo cargar la carpeta');
 				}
 			} catch (err) {
 				setError('Error al cargar la carpeta');
@@ -56,7 +56,7 @@ export default function EditFolderPage({ params }: EditFolderPageProps) {
 		const isFavorite = formData.get('isFavorite') === 'on';
 
 		try {
-			const result = await updateFolder(id, {
+			await updateFolder(id, {
 				name,
 				description: description || undefined,
 				emoji: emoji || undefined,
@@ -64,14 +64,11 @@ export default function EditFolderPage({ params }: EditFolderPageProps) {
 				isFavorite,
 			});
 
-			if (result.success) {
-				router.push(`/folders/${id}`);
-				router.refresh();
-			} else {
-				setError(result.error || 'Error al actualizar la carpeta');
-			}
+			// Si llegamos aquí, la actualización fue exitosa
+			router.push(`/folders/${id}`);
+			router.refresh();
 		} catch (err) {
-			setError('Error al procesar la solicitud');
+			setError('Error al actualizar la carpeta');
 			console.error(err);
 		} finally {
 			setIsSubmitting(false);
@@ -91,6 +88,17 @@ export default function EditFolderPage({ params }: EditFolderPageProps) {
 			<div className="p-8 max-w-2xl mx-auto">
 				<h1 className="text-2xl font-bold mb-6">Error</h1>
 				<div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>
+				<div className="mt-4">
+					<Button onClick={() => router.back()}>Volver</Button>
+				</div>
+			</div>
+		);
+	}
+
+	if (!folder) {
+		return (
+			<div className="p-8 max-w-2xl mx-auto">
+				<h1 className="text-2xl font-bold mb-6">Carpeta no encontrada</h1>
 				<div className="mt-4">
 					<Button onClick={() => router.back()}>Volver</Button>
 				</div>

@@ -5,59 +5,20 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { VideoPlayState, VideoSortCriteria, VideoViewMode } from '../../../types/entities/video';
-import { createVideoCoreSlice, type VideoCoreSlice } from './slices/core';
-import { createVideoFiltersSlice, type VideoFiltersSlice } from './slices/filters';
-import { createVideoPlayerSlice, type VideoPlayerSlice } from './slices/player';
-import { createVideoUISlice, type VideoUISlice } from './slices/ui';
-import type { VideoState } from './types';
+import { createVideoCoreSlice, initialCoreState, type VideoCoreSlice } from './slices/core';
+import { createVideoFiltersSlice, initialFiltersState, type VideoFiltersSlice } from './slices/filters';
+import { createVideoPlayerSlice, initialPlayerState, type VideoPlayerSlice } from './slices/player';
+import { createVideoUISlice, initialUIState, type VideoUISlice } from './slices/ui';
 
 // Tipo del store completo
 export type VideoStore = VideoCoreSlice & VideoUISlice & VideoFiltersSlice & VideoPlayerSlice;
 
-// Estado inicial
-const _initialState: VideoState = {
-	core: {
-		videos: {},
-		isLoading: false,
-		error: null,
-		lastUpdated: null,
-	},
-	ui: {
-		selectedIds: [],
-		viewMode: VideoViewMode.GRID,
-		isViewerOpen: false,
-		currentVideoId: null,
-		highlightedId: null,
-		expandedIds: [],
-	},
-	filters: {
-		sortBy: VideoSortCriteria.DATE_DESC,
-		searchQuery: '',
-		filterByFolderId: null,
-		filterFavorites: false,
-		filterPublic: false,
-		filterByDuration: {
-			min: null,
-			max: null,
-		},
-		filterByResolution: null,
-		dateRange: {
-			from: null,
-			to: null,
-		},
-	},
-	player: {
-		isFullscreen: false,
-		volume: 1,
-		playbackRate: 1,
-		isMuted: false,
-		playState: VideoPlayState.STOPPED,
-		currentTime: 0,
-		duration: 0,
-		bufferedPercentage: 0,
-		quality: 'auto',
-	},
+// Estado inicial plano
+const initialState: VideoStore = {
+	...initialCoreState,
+	...initialUIState,
+	...initialFiltersState,
+	...initialPlayerState,
 };
 
 // Crear store combinando slices
@@ -65,6 +26,7 @@ export const useVideoStore = create<VideoStore>()(
 	devtools(
 		persist(
 			(...a) => ({
+				...initialState,
 				...createVideoCoreSlice(...a),
 				...createVideoUISlice(...a),
 				...createVideoFiltersSlice(...a),
@@ -73,18 +35,18 @@ export const useVideoStore = create<VideoStore>()(
 			{
 				name: 'video-store',
 				partialize: (state) => ({
-					ui: {
-						viewMode: state.ui.viewMode,
-					},
-					filters: {
-						sortBy: state.filters.sortBy,
-					},
-					player: {
-						volume: state.player.volume,
-						playbackRate: state.player.playbackRate,
-						isMuted: state.player.isMuted,
-						quality: state.player.quality,
-					},
+					// Core state no se persiste para evitar datos obsoletos
+					// Filters
+					sortBy: state.sortBy,
+					filterFavorites: state.filterFavorites,
+					filterPublic: state.filterPublic,
+					// UI
+					viewMode: state.viewMode,
+					// Player
+					volume: state.volume,
+					playbackRate: state.playbackRate,
+					isMuted: state.isMuted,
+					quality: state.quality,
 				}),
 			}
 		),
@@ -99,3 +61,4 @@ export { createVideoPlayerSlice } from './slices/player';
 export { createVideoUISlice } from './slices/ui';
 // Exportar todo desde types
 export * from './types';
+

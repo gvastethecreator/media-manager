@@ -6,8 +6,6 @@
  * Última migración: 2025-06-18
  */
 
-import { z } from 'zod';
-
 /**
  * Criterios de ordenación para wildcards
  */
@@ -76,7 +74,7 @@ export interface WildcardCreateInput {
 	description?: string | null;
 	shortcut?: string | null;
 	category?: string | null;
-	children?: string | WildcardChild[];
+	childrenIds?: string[];
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	parentId?: string | null;
@@ -121,11 +119,8 @@ export interface WildcardChild {
  * Relaciones de wildcard con otras entidades
  */
 export interface WildcardRelations {
-	parent?: {
-		id: string;
-		name: string;
-	} | null;
-	childWildcards?: WildcardChild[];
+	parent?: WildcardComplete | null;
+	childWildcards?: WildcardComplete[];
 }
 
 /**
@@ -218,25 +213,6 @@ export interface WildcardSearchResult {
 	hasMore: boolean;
 }
 
-/**
- * Esquema Zod para validación de Wildcard
- */
-export const WildcardSchema = z.object({
-	id: z.string(),
-	name: z.string(),
-	emoji: z.string(),
-	color: z.string(),
-	description: z.string().nullable().optional(),
-	shortcut: z.string().nullable().optional(),
-	category: z.string().nullable().optional(),
-	children: z.string(),
-	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean(),
-	parentId: z.string().nullable().optional(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
-});
-
 // Alias para compatibilidad
 export type CreateWildcardData = WildcardCreateInput;
 export type UpdateWildcardData = WildcardUpdateInput;
@@ -248,4 +224,3 @@ export type WildcardDeserialized = WildcardComplete;
 // 🟢 Documentación y advertencia:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
 // - No importar tipos de Prisma ni de archivos legacy.
-// - Validar siempre con WildcardSchema antes de persistir.

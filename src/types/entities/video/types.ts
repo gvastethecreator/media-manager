@@ -7,6 +7,18 @@
  */
 
 import { z } from 'zod';
+import type { AlbumComplete } from '../album';
+import type { CharacterComplete } from '../character';
+import type { CollectionComplete } from '../collection';
+import type { ConceptComplete } from '../concept';
+import type { GroupComplete } from '../group';
+import type { NoteComplete } from '../note';
+import type { PlaceComplete } from '../place';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
+import type { TagComplete } from '../tag';
+import type { WildcardComplete } from '../wildcard';
+import type { WorldItemComplete } from '../world-item';
 import { VideoFormat } from './enums';
 
 /**
@@ -71,18 +83,18 @@ export interface VideoBase {
  * Relaciones principales (solo ids o any[] para evitar dependencias cruzadas)
  */
 export interface VideoRelations {
-	albums?: any[];
-	collections?: any[];
-	tags?: any[];
-	characters?: any[];
-	places?: any[];
-	worldItems?: any[];
-	concepts?: any[];
-	prompts?: any[];
-	notes?: any[];
-	wildcards?: any[];
-	properties?: any[];
-	groups?: any[];
+	albums?: AlbumComplete[];
+	collections?: CollectionComplete[];
+	tags?: TagComplete[];
+	characters?: CharacterComplete[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemComplete[];
+	concepts?: ConceptComplete[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupComplete[];
 }
 
 /**
@@ -101,12 +113,40 @@ export interface VideoComplete extends VideoBase, VideoRelations, VideoUI {}
 /**
  * Input para creación
  */
-export type VideoCreateInput = Omit<VideoBase, 'id' | 'createdAt' | 'updatedAt'> & Partial<VideoRelations>;
+export type VideoCreateInput = Omit<VideoBase, 'id' | 'createdAt' | 'updatedAt'> & {
+	albumIds?: string[];
+	collectionIds?: string[];
+	tagIds?: string[];
+	characterIds?: string[];
+	placeIds?: string[];
+	worldItemIds?: string[];
+	conceptIds?: string[];
+	promptIds?: string[];
+	noteIds?: string[];
+	wildcardIds?: string[];
+	propertyIds?: string[];
+	groupIds?: string[];
+};
 
 /**
  * Input para actualización
  */
-export type VideoUpdateInput = Partial<Omit<VideoBase, 'id'>> & Partial<VideoRelations> & Partial<VideoUI>;
+export type VideoUpdateInput = Partial<Omit<VideoBase, 'id'>> &
+	Partial<{
+		albumIds?: string[];
+		collectionIds?: string[];
+		tagIds?: string[];
+		characterIds?: string[];
+		placeIds?: string[];
+		worldItemIds?: string[];
+		conceptIds?: string[];
+		promptIds?: string[];
+		noteIds?: string[];
+		wildcardIds?: string[];
+		propertyIds?: string[];
+		groupIds?: string[];
+	}> &
+	Partial<VideoUI>;
 
 /**
  * Esquema Zod para validación de Video

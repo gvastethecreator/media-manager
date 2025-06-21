@@ -1,9 +1,5 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
-import { useFieldArray, useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,12 +9,16 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { ImagePicker } from '@/components/ui/image-picker';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { createWildcardSchema } from '@/lib/validations/wildcard';
-import type { WildcardBase } from '@/types/entities/wildcard';
+import { createWildcardSchema } from '@/types/entities/wildcard/schema';
+import type { WildcardBase } from '@/types/entities/wildcard/types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { PlusIcon, Trash2Icon, XIcon } from 'lucide-react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 // Esquema Zod adaptado para el formulario
 const formSchema = createWildcardSchema.extend({
-	children: z.array(z.object({ value: z.string() })),
+	children: z.array(z.object({ value: z.string().min(1, 'El valor no puede estar vacío') })),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -26,22 +26,11 @@ type FormValues = z.infer<typeof formSchema>;
 interface CreateWildcardFormProps {
 	wildcard?: WildcardBase;
 	parentWildcards?: WildcardBase[];
-	onSubmit: (data: any) => void;
+	onSubmit: (data: z.infer<typeof createWildcardSchema>) => Promise<void> | void;
 	onCancel: () => void;
 }
 
 export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, onCancel }: CreateWildcardFormProps) {
-	const parseChildren = (childrenJson: string | undefined): { value: string }[] => {
-		if (!childrenJson || childrenJson === 'empty_array') return [];
-		try {
-			const parsed = JSON.parse(childrenJson);
-			return Array.isArray(parsed) ? parsed.map((value: string) => ({ value })) : [];
-		} catch (e) {
-			console.error('Error al parsear children:', e);
-			return [];
-		}
-	};
-
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -51,7 +40,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 			description: wildcard?.description || '',
 			shortcut: wildcard?.shortcut || '',
 			category: wildcard?.category || 'general',
-			children: parseChildren(wildcard?.children),
+			children: wildcard?.children?.map((c) => ({ value: c })) || [],
 			parentId: wildcard?.parentId || null,
 			featuredImage: wildcard?.featuredImage || '',
 			isFavorite: wildcard?.isFavorite || false,
@@ -64,11 +53,19 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 	});
 
 	const handleSubmit = (data: FormValues) => {
-		const transformedData = {
+		// Validar con el esquema original antes de enviar
+		const result = createWildcardSchema.safeParse({
 			...data,
-			children: JSON.stringify(data.children.map((c) => c.value)),
-		};
-		onSubmit(transformedData);
+			children: data.children.map((c) => c.value).filter(Boolean), // Enviar solo strings no vacíos
+		});
+
+		if (result.success) {
+			onSubmit(result.data);
+		} else {
+			// Opcional: manejar errores de validación final aquí, si es necesario.
+			// react-hook-form ya debería haber capturado la mayoría.
+			console.error('Error de validación final:', result.error.flatten());
+		}
 	};
 
 	const eligibleParents = parentWildcards.filter((parent) => parent.id !== wildcard?.id);

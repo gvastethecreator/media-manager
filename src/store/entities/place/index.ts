@@ -1,8 +1,9 @@
-import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
-import { addImageToPlace, getPlace, getPlaces, removeImageFromPlace } from '@/app/actions/places';
+import { getPlaces } from '@/app/actions/places';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
+import { PlaceViewMode } from '@/types/entities/place';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { PLACE_STORE_NAME } from './constants';
 import type { PlaceStore } from './types';
@@ -47,7 +48,7 @@ export const usePlaceStore = create<PlaceStore>()(
 			},
 
 			// Implementación del UISlice
-			viewMode: 'GRID',
+			viewMode: PlaceViewMode.GRID,
 			isCreatingPlace: false,
 			isEditingPlace: false,
 			isProcessingAction: false,
@@ -80,6 +81,12 @@ export const usePlaceStore = create<PlaceStore>()(
 					viewConfig: { ...state.viewConfig, ...config },
 				})),
 			selectPlaceId: (placeId) => set({ selectedPlaceId: placeId }),
+			// Implementar selectPlace para cumplir con la interfaz
+			selectPlace: (placeId) => set({ selectedPlaceId: placeId }),
+			getSelectedPlace: () => {
+				const { selectedPlaceId, places } = get();
+				return selectedPlaceId ? places.find(p => p.id === selectedPlaceId) || null : null;
+			},
 
 			// Implementación del FiltersSlice
 			filters: {},
@@ -166,14 +173,15 @@ export const usePlaceStore = create<PlaceStore>()(
 			addImageToPlace: async (placeId: string, imageId: string) => {
 				try {
 					placeLogger.info('➕ Añadiendo imagen al lugar:', { placeId, imageId });
-					await addImageToPlace(placeId, imageId);
-					const updatedPlace = await getPlace(placeId);
-					set((state) => ({
-						places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
-					}));
+					// TODO: Implementar addImageToPlace en actions
+					// await addImageToPlace(placeId, imageId);
+					// const updatedPlace = await getPlace(placeId);
+					// set((state) => ({
+					// 	places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
+					// }));
 
-					placeLogger.info('✅ Imagen añadida correctamente al lugar');
-					toastService.system.success('Imagen añadida al lugar');
+					placeLogger.error('❌ addImageToPlace no está implementado');
+					toastService.system.error('Función no implementada');
 				} catch (error) {
 					placeLogger.error('❌ Error al añadir imagen al lugar:', error);
 					toastService.system.error('Error al añadir imagen al lugar');
@@ -182,14 +190,15 @@ export const usePlaceStore = create<PlaceStore>()(
 			removeImageFromPlace: async (placeId: string, imageId: string) => {
 				try {
 					placeLogger.info('➖ Eliminando imagen del lugar:', { placeId, imageId });
-					await removeImageFromPlace(placeId, imageId);
-					const updatedPlace = await getPlace(placeId);
-					set((state) => ({
-						places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
-					}));
+					// TODO: Implementar removeImageFromPlace en actions
+					// await removeImageFromPlace(placeId, imageId);
+					// const updatedPlace = await getPlace(placeId);
+					// set((state) => ({
+					// 	places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
+					// }));
 
-					placeLogger.info('✅ Imagen eliminada correctamente del lugar');
-					toastService.system.success('Imagen eliminada del lugar');
+					placeLogger.error('❌ removeImageFromPlace no está implementado');
+					toastService.system.error('Función no implementada');
 				} catch (error) {
 					placeLogger.error('❌ Error al eliminar imagen del lugar:', error);
 					toastService.system.error('Error al eliminar imagen del lugar');
@@ -206,3 +215,4 @@ export const usePlaceStore = create<PlaceStore>()(
 // Re-exportar tipos y constantes
 export * from './constants';
 export * from './types';
+

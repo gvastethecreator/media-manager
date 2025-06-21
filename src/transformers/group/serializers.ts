@@ -1,119 +1,193 @@
 /**
- * @file Funciones para serializar y deserializar datos de grupos
+ * @file Serializadores para Group
  * @module transformers/group/serializers
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import {
-    type GroupBase,
-    type GroupComplete,
-    type GroupCreateInput,
-    GroupSchema,
-    type GroupTransformerOptions,
-    type GroupUpdateInput,
-} from '@/types/entities/group/types';
-import {
-    deserializeJsonField,
-    serializeJsonField,
-    validateFieldType,
-    validateRequiredFields,
-} from '@/utils/transformers/common';
-import { handleTransformerError } from '@/utils/transformers/errors';
-import { getRelationCounts, preparePrismaRelations, validateEntityRelations } from '@/utils/transformers/relations';
-import { validateBaseEntity, validateMetadataFields, validateUIFields } from '@/utils/transformers/validation';
+import type {
+    GroupBase,
+    GroupComplete,
+    GroupCreateInput,
+    GroupTransformerOptions,
+    GroupUpdateInput,
+    GroupWithStats,
+} from '@/types/entities/group';
+import { GroupSchema } from '@/types/entities/group';
+import type { Prisma, Group as PrismaGroup } from '@prisma/client';
 
-const logger = serverLogger.withContext('GroupSerializer');
+const logger = serverLogger.withContext('GroupSerializers');
 
-// Constantes para valores por defecto
-export const DEFAULT_GROUP_EMOJI = '📂';
-export const DEFAULT_GROUP_COLOR = '#3B82F6';
+// Constantes por defecto
+const DEFAULT_GROUP_EMOJI = '📁';
+const DEFAULT_GROUP_COLOR = '#3b82f6';
+
+// Funciones auxiliares simplificadas
+function serializeJsonField<T>(field: T | null | undefined, defaultValue = '{}'): string {
+	if (!field) return defaultValue;
+	try {
+		return JSON.stringify(field);
+	} catch (error) {
+		logger.error('Error serializando campo:', { error, field });
+		return defaultValue;
+	}
+}
+
+function deserializeJsonField<T>(field: string | null | undefined, defaultValue: T): T {
+	if (!field || field === '[]' || field === '{}') return defaultValue;
+	try {
+		return JSON.parse(field) as T;
+	} catch (error) {
+		logger.error('Error deserializando campo:', { error, field });
+		return defaultValue;
+	}
+}
+
+function validateRequiredFields(data: Record<string, unknown>, requiredFields: string[]): void {
+	for (const field of requiredFields) {
+		if (data[field] === undefined || data[field] === null) {
+			throw new Error(`Campo requerido ${field} falta o es nulo`);
+		}
+	}
+}
+
+function validateFieldType(value: unknown, type: string, fieldName: string): void {
+	if (type === 'string' && typeof value !== 'string') {
+		throw new Error(`El campo ${fieldName} debe ser de tipo string`);
+	}
+}
+
+function handleTransformerError(error: unknown): Error {
+	if (error instanceof Error) {
+		return error;
+	}
+	return new Error('Error desconocido en el transformer');
+}
 
 /**
- * Interfaces para los tipos de Prisma que necesitamos
+ * 🏷️ Serializa tags de grupo a formato JSON string
+ * @param tags Array de tags o string JSON
+ * @returns String JSON serializado
  */
-export interface PrismaGroupCreateInput {
-	id?: string;
-	name: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
-	sortBy?: string;
-	filters?: string;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	createdAt?: Date;
-	updatedAt?: Date;
-	images?: Record<string, any>;
-	videos?: Record<string, any>;
-	albums?: Record<string, any>;
-	collections?: Record<string, any>;
-	tags?: Record<string, any>;
-	characters?: Record<string, any>;
-	places?: Record<string, any>;
-	worldItems?: Record<string, any>;
-	concepts?: Record<string, any>;
-	prompts?: Record<string, any>;
-	notes?: Record<string, any>;
-	wildcards?: Record<string, any>;
-	properties?: Record<string, any>;
+export function serializeGroupTags(tags: string[] | string): string {
+	try {
+		if (typeof tags === 'string') {
+			// Ya está serializado, validar que sea JSON válido
+			JSON.parse(tags);
+			return tags;
+		}
+
+		if (Array.isArray(tags)) {
+			return JSON.stringify(tags);
+		}
+
+		return '[]'; // Array vacío por defecto
+	} catch (error) {
+		logger.error('Error serializando tags de grupo:', { error, tags });
+		return '[]';
+	}
 }
 
-export interface PrismaGroupUpdateInput {
-	name?: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
-	sortBy?: string;
-	filters?: string;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	updatedAt?: Date;
-	images?: Record<string, any>;
-	videos?: Record<string, any>;
-	albums?: Record<string, any>;
-	collections?: Record<string, any>;
-	tags?: Record<string, any>;
-	characters?: Record<string, any>;
-	places?: Record<string, any>;
-	worldItems?: Record<string, any>;
-	concepts?: Record<string, any>;
-	prompts?: Record<string, any>;
-	notes?: Record<string, any>;
-	wildcards?: Record<string, any>;
-	properties?: Record<string, any>;
+/**
+ * 🏷️ Deserializa tags de grupo desde formato JSON string
+ * @param tags String JSON o array ya deserializado
+ * @returns Array de strings
+ */
+export function deserializeGroupTags(tags: string | string[]): string[] {
+	try {
+		if (Array.isArray(tags)) {
+			return tags;
+		}
+
+		if (typeof tags === 'string') {
+			if (!tags || tags === '[]') return [];
+			return JSON.parse(tags) as string[];
+		}
+
+		return [];
+	} catch (error) {
+		logger.error('Error deserializando tags de grupo:', { error, tags });
+		return [];
+	}
 }
 
-export interface PrismaGroupGetPayload {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	shortcut: string | null;
-	category: string | null;
-	sortBy: string;
-	filters: string;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	images?: Array<{ id: string }>;
-	videos?: Array<{ id: string }>;
-	albums?: Array<{ id: string }>;
-	collections?: Array<{ id: string }>;
-	tags?: Array<{ id: string }>;
-	characters?: Array<{ id: string }>;
-	places?: Array<{ id: string }>;
-	worldItems?: Array<{ id: string }>;
-	concepts?: Array<{ id: string }>;
-	prompts?: Array<{ id: string }>;
-	notes?: Array<{ id: string }>;
-	wildcards?: Array<{ id: string }>;
-	properties?: Array<{ id: string }>;
+/**
+ * 🔄 Serializa un Group para crear en Prisma
+ */
+export function toPrismaGroupCreate(data: GroupCreateInput): Prisma.GroupCreateInput {
+	try {
+		// Validar campos requeridos para creación
+		validateRequiredFields(data as Record<string, unknown>, ['name']);
+
+		// Validar tipos de datos
+		validateFieldType(data.name, 'string', 'name');
+
+		// Serializar campos JSON
+		const filters = serializeJsonField(data.filters, '[]');
+
+		// Definir el resultado con los valores correctos
+		const result: Prisma.GroupCreateInput = {
+			name: data.name,
+			emoji: data.emoji || DEFAULT_GROUP_EMOJI,
+			color: data.color || DEFAULT_GROUP_COLOR,
+			description: data.description ?? null,
+			shortcut: data.shortcut ?? null,
+			category: data.category ?? null,
+			sortBy: data.sortBy || 'name',
+			filters,
+			featuredImage: data.featuredImage ?? null,
+			isFavorite: data.isFavorite ?? false,
+		};
+
+		return result;
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Serializa un Group para actualizar en Prisma
+ */
+export function toPrismaGroupUpdate(data: GroupUpdateInput): Prisma.GroupUpdateInput {
+	try {
+		// Serializar campos JSON
+		const filters = data.filters ? serializeJsonField(data.filters) : undefined;
+
+		// Definir el resultado con los valores correctos
+		const result: Prisma.GroupUpdateInput = {
+			name: data.name,
+			emoji: data.emoji,
+			color: data.color,
+			description: data.description,
+			shortcut: data.shortcut,
+			category: data.category,
+			sortBy: data.sortBy,
+			filters,
+			featuredImage: data.featuredImage,
+			isFavorite: data.isFavorite,
+		};
+
+		return result;
+	} catch (error) {
+		throw handleTransformerError(error);
+	}
+}
+
+/**
+ * 🔄 Serializa un Group (crear o actualizar)
+ */
+export function toPrismaGroup(
+	data: GroupCreateInput | GroupUpdateInput
+): Prisma.GroupCreateInput | Prisma.GroupUpdateInput {
+	if ('id' in data) {
+		return toPrismaGroupUpdate(data as GroupUpdateInput);
+	}
+	return toPrismaGroupCreate(data as GroupCreateInput);
+}
+
+/**
+ * Interfaz que representa el payload de Prisma para un grupo, incluyendo las relaciones contadas.
+ */
+export type PrismaGroupWithCounts = PrismaGroup & {
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -129,155 +203,71 @@ export interface PrismaGroupGetPayload {
 		wildcards?: number;
 		properties?: number;
 	};
-}
-
-export interface PrismaGroupWhereInput {
-	AND?: PrismaGroupWhereInput[];
-	OR?: PrismaGroupWhereInput[];
-	NOT?: PrismaGroupWhereInput[];
-	name?: { contains: string; mode: string };
-	description?: { contains: string; mode: string };
-	category?: string;
-	isFavorite?: boolean;
-}
+};
 
 /**
- * 🔄 Serializa un Group para crear en Prisma
+ *  transforma un objeto de grupo de Prisma a un objeto GroupWithStats,
+ * calculando todas las estadísticas necesarias.
+ *
+ * @param prismaGroup - El objeto de grupo obtenido de Prisma, con los conteos.
+ * @returns Un objeto GroupWithStats completo y seguro.
  */
-export function toPrismaGroupCreate(data: GroupCreateInput): PrismaGroupCreateInput {
-	try {
-		// Validar campos requeridos para creación
-		validateRequiredFields(data as Record<string, unknown>, ['name']);
+export function fromPrismaGroup(prismaGroup: PrismaGroupWithCounts): GroupWithStats {
+	const { _count, ...baseGroup } = prismaGroup;
+	const counts = _count || {};
 
-		// Validar tipos de datos
-		validateFieldType(data.name, 'string', 'name');
+	const stats = {
+		totalImages: counts.images || 0,
+		totalVideos: counts.videos || 0,
+		totalAlbums: counts.albums || 0,
+		totalCollections: counts.collections || 0,
+		totalTags: counts.tags || 0,
+		totalCharacters: counts.characters || 0,
+		totalPlaces: counts.places || 0,
+		totalWorldItems: counts.worldItems || 0,
+		totalConcepts: counts.concepts || 0,
+		totalPrompts: counts.prompts || 0,
+		totalNotes: counts.notes || 0,
+		totalWildcards: counts.wildcards || 0,
+		totalProperties: counts.properties || 0,
+		lastUpdated: prismaGroup.updatedAt,
+		totalItems: 0,
+	};
 
-		// Serializar campos JSON
-		const filters = serializeJsonField(data.filters, '[]');
+	stats.totalItems =
+		stats.totalImages +
+		stats.totalVideos +
+		stats.totalAlbums +
+		stats.totalCollections +
+		stats.totalTags +
+		stats.totalCharacters +
+		stats.totalPlaces +
+		stats.totalWorldItems +
+		stats.totalConcepts +
+		stats.totalPrompts +
+		stats.totalNotes +
+		stats.totalWildcards +
+		stats.totalProperties;
 
-		// Definir el resultado con los valores correctos
-		const result: PrismaGroupCreateInput = {
-			name: data.name,
-			emoji: data.emoji || DEFAULT_GROUP_EMOJI,
-			color: data.color || DEFAULT_GROUP_COLOR,
-			description: data.description ?? null,
-			shortcut: data.shortcut ?? null,
-			category: data.category ?? null,
-			sortBy: data.sortBy || 'name',
-			filters,
-			featuredImage: data.featuredImage ?? null,
-			isFavorite: data.isFavorite ?? false,
-		};
-
-		// Preparar relaciones para Prisma
-		const relations = preparePrismaRelations('Group', data as Record<string, unknown>);
-		Object.assign(result, relations);
-
-		return result;
-	} catch (error) {
-		throw handleTransformerError(error);
-	}
-}
-
-/**
- * 🔄 Serializa un Group para actualizar en Prisma
- */
-export function toPrismaGroupUpdate(data: GroupUpdateInput): PrismaGroupUpdateInput {
-	try {
-		// Serializar campos JSON
-		const filters = data.filters ? serializeJsonField(data.filters, '[]') : undefined;
-
-		// Definir el resultado con los valores correctos
-		const result: PrismaGroupUpdateInput = {
-			name: data.name,
-			emoji: data.emoji,
-			color: data.color,
-			description: data.description,
-			shortcut: data.shortcut,
-			category: data.category,
-			sortBy: data.sortBy,
-			filters,
-			featuredImage: data.featuredImage,
-			isFavorite: data.isFavorite,
-		};
-
-		// Preparar relaciones para Prisma
-		const relations = preparePrismaRelations('Group', data);
-		Object.assign(result, relations);
-
-		return result;
-	} catch (error) {
-		throw handleTransformerError(error);
-	}
-}
-
-/**
- * 🔄 Serializa un Group para Prisma (legacy)
- * @deprecated Usar toPrismaGroupCreate o toPrismaGroupUpdate
- */
-export function toPrismaGroup(
-	data: GroupCreateInput | GroupUpdateInput
-): PrismaGroupCreateInput | PrismaGroupUpdateInput {
-	if ('id' in data && data.id) {
-		return toPrismaGroupUpdate(data as GroupUpdateInput);
-	}
-	return toPrismaGroupCreate(data as GroupCreateInput);
-}
-
-/**
- * 🔄 Deserializa un Group desde Prisma
- */
-export function fromPrismaGroup(prismaGroup: PrismaGroupGetPayload): GroupComplete {
-	try {
-		// Deserializar campos JSON
-		const filters = deserializeJsonField(prismaGroup.filters, []);
-
-		// Obtener conteos de relaciones
-		const counts = getRelationCounts('Group', prismaGroup);
-
-		// Construir objeto base
-		const baseGroup: GroupBase = {
-			id: prismaGroup.id,
-			name: prismaGroup.name,
-			emoji: prismaGroup.emoji || DEFAULT_GROUP_EMOJI,
-			color: prismaGroup.color || DEFAULT_GROUP_COLOR,
-			description: prismaGroup.description,
-			shortcut: prismaGroup.shortcut,
-			category: prismaGroup.category || 'general',
-			sortBy: prismaGroup.sortBy || 'name',
-			filters: typeof filters === 'string' ? filters : JSON.stringify(filters),
-			featuredImage: prismaGroup.featuredImage,
-			isFavorite: prismaGroup.isFavorite || false,
-			createdAt: prismaGroup.createdAt,
-			updatedAt: prismaGroup.updatedAt,
-		};
-
-		// Validar objeto base
-		validateBaseEntity(baseGroup);
-		validateUIFields(baseGroup);
-		validateMetadataFields(baseGroup);
-
-		// Construir objeto completo con relaciones
-		return {
-			...baseGroup,
-			images: prismaGroup.images?.map((img) => ({ id: img.id })) || [],
-			videos: prismaGroup.videos?.map((vid) => ({ id: vid.id })) || [],
-			albums: prismaGroup.albums?.map((alb) => ({ id: alb.id })) || [],
-			collections: prismaGroup.collections?.map((col) => ({ id: col.id })) || [],
-			tags: prismaGroup.tags?.map((tag) => ({ id: tag.id })) || [],
-			characters: prismaGroup.characters?.map((char) => ({ id: char.id })) || [],
-			places: prismaGroup.places?.map((place) => ({ id: place.id })) || [],
-			worldItems: prismaGroup.worldItems?.map((item) => ({ id: item.id })) || [],
-			concepts: prismaGroup.concepts?.map((con) => ({ id: con.id })) || [],
-			prompts: prismaGroup.prompts?.map((prompt) => ({ id: prompt.id })) || [],
-			notes: prismaGroup.notes?.map((note) => ({ id: note.id })) || [],
-			wildcards: prismaGroup.wildcards?.map((wild) => ({ id: wild.id })) || [],
-			properties: prismaGroup.properties?.map((prop) => ({ id: prop.id })) || [],
-			_count: counts,
-		};
-	} catch (error) {
-		throw handleTransformerError(error);
-	}
+	return {
+		...(baseGroup as GroupBase),
+		_count: {
+			images: stats.totalImages,
+			videos: stats.totalVideos,
+			albums: stats.totalAlbums,
+			collections: stats.totalCollections,
+			tags: stats.totalTags,
+			characters: stats.totalCharacters,
+			places: stats.totalPlaces,
+			worldItems: stats.totalWorldItems,
+			concepts: stats.totalConcepts,
+			prompts: stats.totalPrompts,
+			notes: stats.totalNotes,
+			wildcards: stats.totalWildcards,
+			properties: stats.totalProperties,
+		},
+		stats,
+	};
 }
 
 /**
@@ -286,7 +276,6 @@ export function fromPrismaGroup(prismaGroup: PrismaGroupGetPayload): GroupComple
 export function validateGroup(data: unknown): GroupComplete {
 	try {
 		const validated = GroupSchema.parse(data);
-		validateEntityRelations('Group', validated);
 		return validated as GroupComplete;
 	} catch (error) {
 		throw handleTransformerError(error);
@@ -356,13 +345,13 @@ export function extendGroup(group: GroupBase, options: GroupTransformerOptions =
 /**
  * 🔍 Parsea filtros de Group
  */
-export function parseGroupFilterObject(filters: unknown): PrismaGroupWhereInput {
+export function parseGroupFilterObject(filters: unknown): Prisma.GroupWhereInput {
 	try {
 		if (!filters || typeof filters !== 'object') {
 			return {};
 		}
 
-		const parsed: PrismaGroupWhereInput = {};
+		const parsed: Prisma.GroupWhereInput = {};
 		const typedFilters = filters as Record<string, unknown>;
 
 		// Procesar filtros específicos de Group
@@ -464,81 +453,5 @@ export function generateGroupColor(name: string): string {
 	}
 }
 
-/**
- * 🔄 Transforma un objeto Group a formato extendido
- */
-export function toExtendedGroup(group: any): GroupComplete {
-	try {
-		// Validar que sea un objeto
-		if (!group || typeof group !== 'object') {
-			throw new Error('Input inválido para toExtendedGroup');
-		}
+export { extendGroup as toExtendedGroup };
 
-		// Convertir favorite a isFavorite si es necesario
-		if ('favorite' in group && !('isFavorite' in group)) {
-			group.isFavorite = group.favorite;
-		}
-
-		// Deserializar campos JSON si son strings
-		if (typeof group.filters === 'string') {
-			group.filters = deserializeJsonField(group.filters, []);
-		}
-
-		// Asegurar que las propiedades de UI tengan valores por defecto
-		if (!group.emoji) group.emoji = DEFAULT_GROUP_EMOJI;
-		if (!group.color) group.color = DEFAULT_GROUP_COLOR;
-		if (!group.category) group.category = 'general';
-		if (!group.sortBy) group.sortBy = 'name';
-
-		// Inicializar relaciones vacías
-		const extended = {
-			...group,
-			images: group.images || [],
-			videos: group.videos || [],
-			albums: group.albums || [],
-			collections: group.collections || [],
-			tags: group.tags || [],
-			characters: group.characters || [],
-			places: group.places || [],
-			worldItems: group.worldItems || [],
-			concepts: group.concepts || [],
-			prompts: group.prompts || [],
-			notes: group.notes || [],
-			wildcards: group.wildcards || [],
-			properties: group.properties || [],
-			_count: group._count || {
-				images: 0,
-				videos: 0,
-				albums: 0,
-				collections: 0,
-				tags: 0,
-				characters: 0,
-				places: 0,
-				worldItems: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-			},
-		};
-
-		return extended;
-	} catch (error) {
-		throw handleTransformerError(error);
-	}
-}
-
-// Exportación para compatibilidad
-export const GroupSerializer = {
-	toPrismaGroup,
-	fromPrismaGroup,
-	validateGroup,
-	extendGroup,
-	parseGroupFilterObject,
-	generateGroupEmoji,
-	generateGroupColor,
-	toExtendedGroup,
-};
-
-export default GroupSerializer;

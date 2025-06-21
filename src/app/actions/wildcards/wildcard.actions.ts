@@ -6,21 +6,20 @@
  * @description Acciones CRUD y de gestión de relaciones para los Wildcards.
  */
 
-import { revalidatePath } from 'next/cache';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { getPrismaClient } from '@/lib/db';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	fromPrismaWildcard,
-	fromPrismaWildcards,
-	mapCreateWildcardDataToPrisma,
-	mapUpdateWildcardDataToPrisma,
+    fromPrismaWildcard,
+    fromPrismaWildcards,
+    mapCreateWildcardDataToPrisma,
+    mapUpdateWildcardDataToPrisma,
 } from '@/transformers/wildcard';
 import type {
-	WildcardBase,
-	WildcardComplete,
-	WildcardCreateInput,
-	WildcardUpdateInput,
+    WildcardComplete,
+    WildcardCreateInput,
+    WildcardUpdateInput
 } from '@/types/entities/wildcard';
+import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('WildcardActions');
 
@@ -77,7 +76,7 @@ export async function getWildcard(id: string): Promise<WildcardComplete | null> 
 /**
  * Crea un nuevo wildcard.
  */
-export async function createWildcard(data: WildcardCreateInput): Promise<WildcardBase> {
+export async function createWildcard(data: WildcardCreateInput): Promise<WildcardComplete> {
 	logger.info('➕ Creando nuevo wildcard:', { name: data.name });
 	const prismaData = mapCreateWildcardDataToPrisma(data);
 	const prisma = await getPrismaClient();
@@ -86,13 +85,17 @@ export async function createWildcard(data: WildcardCreateInput): Promise<Wildcar
 		include: WILDCARD_INCLUDE,
 	});
 	await revalidateWildcardPaths();
-	return fromPrismaWildcard(newWildcard);
+	const transformed = fromPrismaWildcard(newWildcard);
+	if (!transformed) {
+		throw new Error('No se pudo transformar el wildcard recién creado.');
+	}
+	return transformed;
 }
 
 /**
  * Actualiza un wildcard existente.
  */
-export async function updateWildcard(id: string, data: WildcardUpdateInput): Promise<WildcardBase> {
+export async function updateWildcard(id: string, data: WildcardUpdateInput): Promise<WildcardComplete> {
 	logger.info('📝 Actualizando wildcard:', { id, changes: Object.keys(data) });
 	const prismaData = mapUpdateWildcardDataToPrisma(data);
 	const prisma = await getPrismaClient();
@@ -102,7 +105,11 @@ export async function updateWildcard(id: string, data: WildcardUpdateInput): Pro
 		include: WILDCARD_INCLUDE,
 	});
 	await revalidateWildcardPaths();
-	return fromPrismaWildcard(updatedWildcard);
+	const transformed = fromPrismaWildcard(updatedWildcard);
+	if (!transformed) {
+		throw new Error('No se pudo transformar el wildcard actualizado.');
+	}
+	return transformed;
 }
 
 /**
@@ -113,25 +120,29 @@ export async function deleteWildcard(id: string): Promise<void> {
 	logger.warn(`🗑️ Eliminando wildcard: ${id}`);
 	const prisma = await getPrismaClient();
 
-	const wildcard = await prisma.wildcard.findUnique({
-		where: { id },
-		include: { childWildcards: { select: { id: true } } },
+	// Usar una transacción para asegurar la atomicidad de la operación
+	await prisma.$transaction(async (tx) => {
+		const wildcard = await tx.wildcard.findUnique({
+			where: { id },
+			select: { parentId: true, childWildcards: { select: { id: true } } },
+		});
+
+		if (!wildcard) {
+			logger.warn(`Wildcard a eliminar no encontrado: ${id}`);
+			return;
+		}
+
+		// Reasignar hijos al padre del wildcard eliminado
+		if (wildcard.childWildcards.length > 0) {
+			await tx.wildcard.updateMany({
+				where: { parentId: id },
+				data: { parentId: wildcard.parentId },
+			});
+		}
+
+		await tx.wildcard.delete({ where: { id } });
 	});
 
-	if (!wildcard) {
-		logger.warn(`Wildcard a eliminar no encontrado: ${id}`);
-		return;
-	}
-
-	// Reasignar hijos al padre del wildcard eliminado (o a null si no tiene padre)
-	if (wildcard.childWildcards.length > 0) {
-		await prisma.wildcard.updateMany({
-			where: { parentId: id },
-			data: { parentId: wildcard.parentId },
-		});
-	}
-
-	await prisma.wildcard.delete({ where: { id } });
 	await revalidateWildcardPaths();
 }
 
@@ -152,7 +163,7 @@ export async function getRootWildcards(): Promise<WildcardComplete[]> {
 /**
  * Mueve un wildcard a un nuevo padre.
  */
-export async function moveWildcard(id: string, newParentId: string | null): Promise<WildcardBase> {
+export async function moveWildcard(id: string, newParentId: string | null): Promise<WildcardComplete> {
 	logger.info(`🔄 Moviendo wildcard ${id} a nuevo padre: ${newParentId || 'raíz'}`);
 	const prisma = await getPrismaClient();
 
@@ -187,5 +198,9 @@ export async function moveWildcard(id: string, newParentId: string | null): Prom
 	});
 
 	await revalidateWildcardPaths();
-	return fromPrismaWildcard(updatedWildcard);
+	const transformed = fromPrismaWildcard(updatedWildcard);
+	if (!transformed) {
+		throw new Error('No se pudo transformar el wildcard movido.');
+	}
+	return transformed;
 }

@@ -4,12 +4,46 @@
  */
 
 import type { StateCreator } from 'zustand';
+import type { VideoStore } from '..';
 import type { VideoComplete } from '../../../../types/entities/video';
 import { VideoSortCriteria } from '../../../../types/entities/video/enums';
-import type { VideoState } from '../types';
+
+export interface VideoFiltersState {
+	sortBy: VideoSortCriteria;
+	searchQuery: string;
+	filterByFolderId: string | null;
+	filterFavorites: boolean;
+	filterPublic: boolean;
+	filterByDuration: {
+		min: number | null;
+		max: number | null;
+	};
+	filterByResolution: string | null;
+	dateRange: {
+		from: Date | null;
+		to: Date | null;
+	};
+}
+
+export const initialFiltersState: VideoFiltersState = {
+	sortBy: VideoSortCriteria.DATE_DESC,
+	searchQuery: '',
+	filterByFolderId: null,
+	filterFavorites: false,
+	filterPublic: false,
+	filterByDuration: {
+		min: null,
+		max: null,
+	},
+	filterByResolution: null,
+	dateRange: {
+		from: null,
+		to: null,
+	},
+};
 
 // Slice para filtrado y ordenación
-export interface VideoFiltersSlice {
+export interface VideoFiltersSlice extends VideoFiltersState {
 	// Establecer filtros
 	setSortBy: (sortBy: VideoSortCriteria) => void;
 	setSearchQuery: (query: string) => void;
@@ -28,99 +62,31 @@ export interface VideoFiltersSlice {
 }
 
 // Creador del slice
-export const createVideoFiltersSlice: StateCreator<VideoState, [], [], VideoFiltersSlice> = (set, get) => ({
+export const createVideoFiltersSlice: StateCreator<VideoStore, [], [], VideoFiltersSlice> = (set, get) => ({
+	...initialFiltersState,
 	// Establecer filtros
-	setSortBy: (sortBy: VideoSortCriteria) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				sortBy,
-			},
-		}));
-	},
-
-	setSearchQuery: (query: string) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				searchQuery: query,
-			},
-		}));
-	},
-
-	setFilterByFolder: (folderId: string | null) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				filterByFolderId: folderId,
-			},
-		}));
-	},
-
-	setFilterFavorites: (onlyFavorites: boolean) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				filterFavorites: onlyFavorites,
-			},
-		}));
-	},
-
-	setFilterPublic: (onlyPublic: boolean) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				filterPublic: onlyPublic,
-			},
-		}));
-	},
-
-	setFilterByDuration: (min: number | null, max: number | null) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				filterByDuration: { min, max },
-			},
-		}));
-	},
-
-	setFilterByResolution: (resolution: string | null) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				filterByResolution: resolution,
-			},
-		}));
-	},
-
-	setDateRange: (from: Date | null, to: Date | null) => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				dateRange: { from, to },
-			},
-		}));
-	},
-
-	resetFilters: () => {
-		set((state) => ({
-			filters: {
-				...state.filters,
-				searchQuery: '',
-				filterByFolderId: null,
-				filterFavorites: false,
-				filterPublic: false,
-				filterByDuration: { min: null, max: null },
-				filterByResolution: null,
-				dateRange: { from: null, to: null },
-			},
-		}));
-	},
+	setSortBy: (sortBy) => set({ sortBy }),
+	setSearchQuery: (query) => set({ searchQuery: query }),
+	setFilterByFolder: (folderId) => set({ filterByFolderId: folderId }),
+	setFilterFavorites: (onlyFavorites) => set({ filterFavorites: onlyFavorites }),
+	setFilterPublic: (onlyPublic) => set({ filterPublic: onlyPublic }),
+	setFilterByDuration: (min, max) => set({ filterByDuration: { min, max } }),
+	setFilterByResolution: (resolution) => set({ filterByResolution: resolution }),
+	setDateRange: (from, to) => set({ dateRange: { from, to } }),
+	resetFilters: () =>
+		set({
+			searchQuery: '',
+			filterByFolderId: null,
+			filterFavorites: false,
+			filterPublic: false,
+			filterByDuration: { min: null, max: null },
+			filterByResolution: null,
+			dateRange: { from: null, to: null },
+		}),
 
 	// Funciones de filtrado
 	getFilteredVideos: () => {
-		const { getVideos } = get();
-		const videos = getVideos();
+		const videos = get().getVideos();
 		return get().applySort(get().applyFilters(videos));
 	},
 
@@ -133,7 +99,7 @@ export const createVideoFiltersSlice: StateCreator<VideoState, [], [], VideoFilt
 			filterByDuration,
 			filterByResolution,
 			dateRange,
-		} = get().filters;
+		} = get();
 
 		return videos.filter((video) => {
 			// Filtrado por búsqueda
@@ -210,7 +176,7 @@ export const createVideoFiltersSlice: StateCreator<VideoState, [], [], VideoFilt
 	},
 
 	applySort: (videos: VideoComplete[]) => {
-		const { sortBy } = get().filters;
+		const { sortBy } = get();
 		if (!sortBy) return videos;
 
 		return [...videos].sort((a, b) => {

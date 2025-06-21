@@ -67,7 +67,7 @@ export function groupCharacters(
 	groupBy: 'none' | 'class' | 'race' | 'category' | 'level' | null
 ): Record<string, CharacterExtended[]> {
 	if (!characters || characters.length === 0 || !groupBy || groupBy === 'none') {
-		return { 'Todos': characters || [] };
+		return { Todos: characters || [] };
 	}
 
 	const groups: Record<string, CharacterExtended[]> = {};
@@ -128,12 +128,13 @@ export function filterCharactersBySearch(characters: CharacterExtended[], search
 
 	const term = searchTerm.toLowerCase();
 
-	return characters.filter(character =>
-		character.name.toLowerCase().includes(term) ||
-		character.description?.toLowerCase().includes(term) ||
-		character.class?.toLowerCase().includes(term) ||
-		character.race?.toLowerCase().includes(term) ||
-		character.category?.toLowerCase().includes(term)
+	return characters.filter(
+		(character) =>
+			character.name.toLowerCase().includes(term) ||
+			character.description?.toLowerCase().includes(term) ||
+			character.class?.toLowerCase().includes(term) ||
+			character.race?.toLowerCase().includes(term) ||
+			character.category?.toLowerCase().includes(term)
 	);
 }
 
@@ -182,7 +183,8 @@ export function getCharacterStats(characters: CharacterExtended[]) {
 		// Por nivel
 		const level = character.level;
 		totalLevel += level;
-		const levelRange = level <= 5 ? '1-5' : level <= 10 ? '6-10' : level <= 15 ? '11-15' : level <= 20 ? '16-20' : '20+';
+		const levelRange =
+			level <= 5 ? '1-5' : level <= 10 ? '6-10' : level <= 15 ? '11-15' : level <= 20 ? '16-20' : '20+';
 		stats.byLevel[levelRange] = (stats.byLevel[levelRange] || 0) + 1;
 	}
 
@@ -198,17 +200,31 @@ export function getCharacterStats(characters: CharacterExtended[]) {
  * @param sortBy Criterio de comparación
  * @returns Número de comparación
  */
-export function compareCharacters(a: CharacterExtended, b: CharacterExtended, sortBy: string = 'name'): number {
+export function compareCharacters(
+	a: CharacterExtended,
+	b: CharacterExtended,
+	sortBy: CharacterSortOption = CharacterSortOption.NAME_ASC
+): number {
 	switch (sortBy) {
-		case 'name':
+		case CharacterSortOption.NAME_ASC:
 			return a.name.localeCompare(b.name);
-		case 'level':
-			return b.level - a.level; // Descendente por defecto
-		case 'class':
+		case CharacterSortOption.NAME_DESC:
+			return b.name.localeCompare(a.name);
+		case CharacterSortOption.LEVEL_ASC:
+			return a.level - b.level;
+		case CharacterSortOption.LEVEL_DESC:
+			return b.level - a.level;
+		case CharacterSortOption.CLASS_ASC:
 			return a.class.localeCompare(b.class);
-		case 'race':
+		case CharacterSortOption.CLASS_DESC:
+			return b.class.localeCompare(a.class);
+		case CharacterSortOption.RACE_ASC:
 			return a.race.localeCompare(b.race);
-		case 'date':
+		case CharacterSortOption.RACE_DESC:
+			return b.race.localeCompare(a.race);
+		case CharacterSortOption.DATE_ASC:
+			return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+		case CharacterSortOption.DATE_DESC:
 			return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 		default:
 			return 0;
@@ -236,10 +252,10 @@ export function matchesCharacterSearch(character: CharacterExtended, searchTerm:
 	const term = searchTerm.toLowerCase();
 	return (
 		character.name.toLowerCase().includes(term) ||
-		character.description?.toLowerCase().includes(term) ||
-		character.class?.toLowerCase().includes(term) ||
-		character.race?.toLowerCase().includes(term) ||
-		character.category?.toLowerCase().includes(term)
+		(!!character.description && character.description.toLowerCase().includes(term)) ||
+		(!!character.class && character.class.toLowerCase().includes(term)) ||
+		(!!character.race && character.race.toLowerCase().includes(term)) ||
+		(!!character.category && character.category.toLowerCase().includes(term))
 	);
 }
 
@@ -258,8 +274,16 @@ export function isValidCharacterName(name: string): boolean {
  */
 export function generateCharacterColor(): string {
 	const colors = [
-		'#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-		'#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+		'#FF6B6B',
+		'#4ECDC4',
+		'#45B7D1',
+		'#96CEB4',
+		'#FFEAA7',
+		'#DDA0DD',
+		'#98D8C8',
+		'#F7DC6F',
+		'#BB8FCE',
+		'#85C1E9',
 	];
 	return colors[Math.floor(Math.random() * colors.length)];
 }
@@ -270,8 +294,26 @@ export function generateCharacterColor(): string {
  */
 export function generateCharacterEmoji(): string {
 	const emojis = [
-		'🧙‍♂️', '⚔️', '🏹', '🛡️', '🗡️', '🎭', '👑', '🔮', '⚡', '🌟',
-		'🐉', '🦄', '🧝‍♀️', '🧝‍♂️', '🧚‍♀️', '🧚‍♂️', '🧞‍♂️', '🧞‍♀️', '👹', '👺'
+		'🧙‍♂️',
+		'⚔️',
+		'🏹',
+		'🛡️',
+		'🗡️',
+		'🎭',
+		'👑',
+		'🔮',
+		'⚡',
+		'🌟',
+		'🐉',
+		'🦄',
+		'🧝‍♀️',
+		'🧝‍♂️',
+		'🧚‍♀️',
+		'🧚‍♂️',
+		'🧞‍♂️',
+		'🧞‍♀️',
+		'👹',
+		'👺',
 	];
 	return emojis[Math.floor(Math.random() * emojis.length)];
 }

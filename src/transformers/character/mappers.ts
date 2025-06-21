@@ -3,15 +3,15 @@
  * @module transformers/character/mappers
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	CharacterCreateInput,
-	CharacterFilters,
-	CharacterSearchOptions,
-	CharacterUpdateInput,
+    CharacterCreateInput,
+    CharacterFilters,
+    CharacterSearchOptions,
+    CharacterUpdateInput,
 } from '@/types/entities/character';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 
 /**
  * 🔄 Mapea un `CharacterCreateInput` a un `Prisma.CharacterCreateInput`.
@@ -21,12 +21,17 @@ export function mapCreateCharacterDataToPrisma(data: CharacterCreateInput): Pris
 		const { imageIds, tagIds, groupIds, propertyIds, ...rest } = data;
 		const prismaData: Prisma.CharacterCreateInput = {
 			...rest,
-			stats: rest.stats ?? {},
-			skills: rest.skills ?? {},
-			inventory: rest.inventory ?? [],
-			spells: rest.spells ?? [],
-			feats: rest.feats ?? [],
-			metadata: rest.metadata ?? {},
+			stats: data.stats ?? '',
+			skills: data.skills ?? '[]',
+			relationships: data.relationships ?? '[]',
+			goals: data.goals ?? '[]',
+			fears: data.fears ?? '[]',
+			beliefs: data.beliefs ?? '[]',
+			personality: data.personality ?? '[]',
+			abilities: data.abilities ?? '[]',
+			backstory: data.backstory ?? '',
+			psychologicalProfile: data.psychologicalProfile ?? '',
+			socialProfile: data.socialProfile ?? '',
 		};
 
 		if (imageIds) {
@@ -101,11 +106,15 @@ function mapCharacterFiltersToPrisma(filters: CharacterFilters): Prisma.Characte
 	}
 
 	if (filters.level) {
+		const levelFilter: Prisma.IntFilter = {};
 		if (filters.level.min !== undefined) {
-			where.level = { ...where.level, gte: filters.level.min };
+			levelFilter.gte = filters.level.min;
 		}
 		if (filters.level.max !== undefined) {
-			where.level = { ...where.level, lte: filters.level.max };
+			levelFilter.lte = filters.level.max;
+		}
+		if (Object.keys(levelFilter).length > 0) {
+			where.level = levelFilter;
 		}
 	}
 

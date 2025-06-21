@@ -5,27 +5,32 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AlbumBase, AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
-import type { Prisma } from '@prisma/client';
+import type { Album, Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('AlbumMappers');
 
 /**
  * 🔄 Mapea un AlbumCreateInput a un Prisma.AlbumCreateInput.
- * Establece valores por defecto y maneja la conexión de imágenes.
+ * Establece valores por defecto y maneja la conexión de imágenes y videos.
  */
 export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): Prisma.AlbumCreateInput {
 	try {
-		const { images, ...rest } = data;
+		const { images, videos, ...rest } = data;
 		const prismaData: Prisma.AlbumCreateInput = {
 			...rest,
 			isFavorite: data.isFavorite ?? false,
 			sortBy: data.sortBy ?? 'createdAt',
-			filters: data.filters ?? '{}', // Asumiendo que `filters` es un string JSON
+			filters: data.filters ?? '{}',
 		};
 
-		if (images && images.length > 0) {
+		if (images?.connect?.length) {
 			prismaData.images = {
-				connect: images.map((img) => ({ id: img.id })),
+				connect: images.connect,
+			};
+		}
+		if (videos?.connect?.length) {
+			prismaData.videos = {
+				connect: videos.connect,
 			};
 		}
 
@@ -38,21 +43,23 @@ export function mapCreateAlbumDataToPrisma(data: AlbumCreateInput): Prisma.Album
 
 /**
  * 🔄 Mapea un AlbumUpdateInput a un Prisma.AlbumUpdateInput.
- * Maneja la lógica de conexión/desconexión de imágenes.
+ * Maneja la lógica de actualización de imágenes y videos.
  */
 export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): Prisma.AlbumUpdateInput {
 	try {
-		const { imagesToConnect, imagesToDisconnect, ...rest } = data;
+		const { images, videos, ...rest } = data;
 		const prismaData: Prisma.AlbumUpdateInput = { ...rest };
 
-		if (imagesToConnect || imagesToDisconnect) {
-			prismaData.images = {};
-			if (imagesToConnect && imagesToConnect.length > 0) {
-				prismaData.images.connect = imagesToConnect.map((img) => ({ id: img.id }));
-			}
-			if (imagesToDisconnect && imagesToDisconnect.length > 0) {
-				prismaData.images.disconnect = imagesToDisconnect.map((img) => ({ id: img.id }));
-			}
+		if (images?.set) {
+			prismaData.images = {
+				set: images.set.map((img) => ({ id: img.id })),
+			};
+		}
+
+		if (videos?.set) {
+			prismaData.videos = {
+				set: videos.set.map((vid) => ({ id: vid.id })),
+			};
 		}
 
 		return prismaData;
@@ -67,7 +74,7 @@ export function mapUpdateAlbumDataToPrisma(data: AlbumUpdateInput): Prisma.Album
  * @param album - El objeto Album de Prisma.
  * @returns Un objeto compatible con AlbumBase.
  */
-export function fromPrismaAlbum(album: any): AlbumBase {
+export function fromPrismaAlbum(album: Album): AlbumBase {
 	if (!album) {
 		throw new Error('Se requiere un objeto de álbum de Prisma para la transformación.');
 	}
@@ -94,7 +101,7 @@ export function fromPrismaAlbum(album: any): AlbumBase {
  * @param albums - El array de objetos Album de Prisma.
  * @returns Un array de objetos compatibles con AlbumBase.
  */
-export function fromPrismaAlbums(albums: any[]): AlbumBase[] {
+export function fromPrismaAlbums(albums: Album[]): AlbumBase[] {
 	if (!Array.isArray(albums)) {
 		return [];
 	}

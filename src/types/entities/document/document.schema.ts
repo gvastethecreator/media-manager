@@ -5,6 +5,6 @@ export const documentSchema = z.object({
 	name: z.string().min(1),
 	filePath: z.string().min(1),
 	content: z.string(),
-	createdAt: z.string(),
-	updatedAt: z.string(),
+	createdAt: z.coerce.date(),
+	updatedAt: z.coerce.date(),
 });

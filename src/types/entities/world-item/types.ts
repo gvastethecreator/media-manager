@@ -2,262 +2,152 @@
  * 🌍 Tipos canónicos para la entidad WorldItem
  * @file Tipos unificados para la entidad WorldItem
  * @module types/entities/world-item/types
- * @description Definición de tipos canónicos basados en Prisma para WorldItem
- * @updated 2025-06-20
+ * @description Definición de tipos canónicos para WorldItem.
+ * @updated 2025-07-01
  */
 
-import type { WorldItem as PrismaWorldItem } from '@prisma/client';
-import type { Image } from '../image/types';
-import type { WorldItemRelationshipType, WorldItemSortCriteria, WorldItemViewMode } from './enums';
-import { WORLD_ITEM_SORT_PROPERTY_MAP } from './enums';
+import type { AlbumComplete } from '../album';
+import type { CharacterComplete } from '../character';
+import type { CollectionComplete } from '../collection';
+import type { ConceptComplete } from '../concept';
+import type { GroupComplete } from '../group';
+import type { ImageComplete } from '../image';
+import type { NoteComplete } from '../note';
+import type { PlaceComplete } from '../place';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
+import type { TagComplete } from '../tag';
+import type { VideoComplete } from '../video';
+import type { WildcardComplete } from '../wildcard';
 
-/**
- * 📝 Tipo base para WorldItem - hereda directamente del tipo Prisma
- */
-export type WorldItemBase = PrismaWorldItem;
+// --- ESTRUCTURAS DE DATOS SERIALIZADAS ---
 
-/**
- * 🔧 Interfaces para estructuras de datos serializadas
- */
-export interface WorldItemAttribute {
+export interface WorldItemAttribute { name: string; value: number; maxValue?: number; }
+export interface WorldItemEffect { name: string; description: string; duration?: string; cooldown?: string; }
+export interface WorldItemRequirement { name: string; value: number; description?: string; }
+export interface WorldItemStat { name: string; value: number; modifier?: string; }
+export interface WorldItemProperty { name: string; value: string | number | boolean; description?: string; }
+export interface WorldItemFilter { type: 'tag' | 'character' | 'place' | 'concept' | 'worldItem'; operator: 'AND' | 'OR' | 'NOT'; value: string | number | boolean; field?: string; }
+
+// --- TIPOS BASE Y RELACIONES ---
+
+export interface WorldItemBase {
+	id: string;
 	name: string;
-	value: number;
-	maxValue?: number;
-}
-
-/**
- * 💫 Efectos que puede tener un objeto del mundo
- */
-export interface WorldItemEffect {
-	name: string;
-	description: string;
-	duration?: string;
-	cooldown?: string;
-}
-
-/**
- * 📋 Requisitos para usar un objeto del mundo
- */
-export interface WorldItemRequirement {
-	name: string;
-	value: number;
-	description?: string;
-}
-
-/**
- * 📊 Estadísticas de un objeto del mundo
- */
-export interface WorldItemStat {
-	name: string;
-	value: number;
-	modifier?: string;
-}
-
-/**
- * 🏷️ Propiedades de un objeto del mundo
- */
-export interface WorldItemProperty {
-	name: string;
-	value: string | number | boolean;
-	description?: string;
-}
-
-/**
- * 🔍 Filtro para objetos del mundo
- */
-export interface WorldItemFilter {
-	type: 'tag' | 'character' | 'place' | 'concept' | 'worldItem';
-	operator: 'AND' | 'OR' | 'NOT';
-	value: string | number | boolean;
-	field?: string;
-}
-
-/**
- * 🏷️ Etiquetas para objetos del mundo
- */
-export interface WorldItemTags {
-	tags: string[];
-}
-
-/**
- * 🔗 Relaciones de un objeto del mundo con otras entidades
- */
-export interface WorldItemRelations {
-	images?: Image[];
-	relatedItems?: WorldItemBase[];
-	relationType?: WorldItemRelationshipType;
-}
-
-/**
- * 🔢 Contadores de relaciones
- */
-export interface WorldItemCounts {
-	images?: number;
-	videos?: number;
-	albums?: number;
-	collections?: number;
-	tags?: number;
-	characters?: number;
-	places?: number;
-	concepts?: number;
-	prompts?: number;
-	notes?: number;
-	wildcards?: number;
-	properties?: number;
-	groups?: number;
-	relatedItems?: number;
-}
-
-/**
- * 🔍 Filtros para búsqueda de objetos del mundo
- */
-export interface WorldItemFilters {
-	sortBy: WorldItemSortCriteria;
-	searchTerm: string | null;
+	description: string | null;
 	type: string | null;
 	category: string | null;
 	rarity: string | null;
-	minLevel?: number;
-	maxLevel?: number;
-	minValue?: number;
-	maxValue?: number;
-	isFavorite?: boolean;
-	hasImages?: boolean;
-	hasFiles?: boolean;
-	hasNotes?: boolean;
-	hasConcepts?: boolean;
-	hasPrompts?: boolean;
+	size: string | null;
+	origin: string | null;
+	attributes: string; // JSON
+	effects: string; // JSON
+	requirements: string; // JSON
+	stats: string; // JSON
+	properties: string; // JSON
+	filters: string; // JSON
+	tags: string; // JSON
+	isFavorite: boolean;
+	shortcut: string | null;
+	featuredImage: string | null;
+	emoji: string;
+	color: string;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
-/**
- * 🔍 Opciones para búsqueda de objetos del mundo
- */
-export interface WorldItemSearchOptions {
-	filters?: WorldItemFilters;
-	sortBy?: WorldItemSortCriteria;
-	page?: number;
-	pageSize?: number;
-	includeImages?: boolean;
-	includeStats?: boolean;
-	includeRelations?: boolean;
+export interface WorldItemRelations {
+	images?: ImageComplete[];
+	videos?: VideoComplete[];
+	albums?: AlbumComplete[];
+	collections?: CollectionComplete[];
+	tags?: TagComplete[];
+	characters?: CharacterComplete[];
+	places?: PlaceComplete[];
+	concepts?: ConceptComplete[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupComplete[];
 }
 
-/**
- * 🔄 Campos deserializados de JSON para WorldItem
- */
-export interface WorldItemDeserializedFields {
-	attributesList: WorldItemAttribute[];
-	effectsList: WorldItemEffect[];
-	requirementsList: WorldItemRequirement[];
-	statsList: WorldItemStat[];
-	propertiesList: WorldItemProperty[];
-	filtersList: WorldItemFilter[];
-	tagsList: string[];
+export interface WorldItemCounts {
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }
 
-/**
- * 📝 WorldItem con campos JSON deserializados
- */
-export interface WorldItemDeserialized extends WorldItemBase, WorldItemDeserializedFields {}
+// Omitimos los campos JSON para reemplazarlos por su versión deserializada
+type OmittedFields = 'attributes' | 'effects' | 'requirements' | 'stats' | 'properties' | 'filters' | 'tags';
 
-/**
- * 🌟 WorldItem completo con todas sus relaciones y campos
- */
-export interface WorldItemComplete extends WorldItemDeserialized {
-	relations: WorldItemRelations;
-	counts: WorldItemCounts;
-}
+export type WorldItemComplete = Omit<WorldItemBase, OmittedFields> & {
+	attributes: WorldItemAttribute[];
+	effects: WorldItemEffect[];
+	requirements: WorldItemRequirement[];
+	stats: WorldItemStat[];
+	properties: WorldItemProperty[];
+	filters: WorldItemFilter[];
+	tags: string[];
+} & WorldItemRelations & WorldItemCounts;
 
-/**
- * 🌟 WorldItem con relaciones y conteos
- */
-export interface WorldItemWithRelations extends WorldItemBase, WorldItemRelations {
-	_count?: WorldItemCounts;
-}
 
-/**
- * 📊 Datos UI para visualización de WorldItem
- */
-export interface WorldItemUI {
-	viewMode?: WorldItemViewMode;
-	formattedDate?: string;
-	displayRarity?: string;
-	displayValue?: string;
-	displayLevel?: string;
-	rarityClass?: string;
-	isSelected?: boolean;
-	isExpanded?: boolean;
-	isEditing?: boolean;
-	isHighlighted?: boolean;
-}
+// --- INPUTS DE CREACIÓN Y ACTUALIZACIÓN ---
 
-/**
- * ➕ Input para crear un nuevo objeto del mundo
- */
-export interface WorldItemCreateInput {
-	name: string;
-	description?: string | null;
-	shortcut?: string | null;
-	category?: string;
-	type?: string;
-	rarity?: string;
-	size?: string;
-	origin?: string;
-	attributes?: string | WorldItemAttribute[];
-	effects?: string | WorldItemEffect[];
-	requirements?: string | WorldItemRequirement[];
-	stats?: string | WorldItemStat[];
-	properties?: string | WorldItemProperty[];
-	filters?: string | WorldItemFilter[];
-	tags?: string | string[];
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	emoji?: string;
-	color?: string;
-	sortBy?: string;
-	images?: { connect: { id: string }[] };
-}
-
-/**
- * 🔄 Input para actualizar un objeto del mundo
- */
-export interface WorldItemUpdateInput {
-	name?: string;
-	description?: string | null;
-	shortcut?: string | null;
-	category?: string;
-	type?: string;
-	rarity?: string;
-	size?: string;
-	origin?: string;
-	attributes?: string | WorldItemAttribute[];
-	effects?: string | WorldItemEffect[];
-	requirements?: string | WorldItemRequirement[];
-	stats?: string | WorldItemStat[];
-	properties?: string | WorldItemProperty[];
-	filters?: string | WorldItemFilter[];
-	tags?: string | string[];
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	emoji?: string;
-	color?: string;
-	sortBy?: string;
-	images?: { set: { id: string }[] };
-}
-
-/* Exportación de tipos adicionales para retrocompatibilidad */
-export type {
-	WorldItemCreateInput as CreateWorldItemData,
-	WorldItemUpdateInput as UpdateWorldItemData,
-	WorldItemDeserialized as WorldItem,
-	WorldItemAttribute as WorldItemAttributes,
-	WorldItemEffect as WorldItemEffects,
-	WorldItemFilter as WorldItemFilterType,
-	WorldItemProperty as WorldItemProperties,
-	WorldItemRequirement as WorldItemRequirements,
-	WorldItemStat as WorldItemStats,
+type WorldItemRelationInput = {
+	imageIds?: string[];
+	videoIds?: string[];
+	albumIds?: string[];
+	collectionIds?: string[];
+	tagIds?: string[];
+	characterIds?: string[];
+	placeIds?: string[];
+	conceptIds?: string[];
+	promptIds?: string[];
+	noteIds?: string[];
+	wildcardIds?: string[];
+	propertyIds?: string[];
+	groupIds?: string[];
 };
 
-// Exportar el mapa de propiedades y los criterios de ordenación
-export { WORLD_ITEM_SORT_PROPERTY_MAP };
-export type { WorldItemSortCriteria };
+export type WorldItemCreateInput = Omit<WorldItemBase, 'id' | 'createdAt' | 'updatedAt' | OmittedFields> & {
+	attributes?: WorldItemAttribute[];
+	effects?: WorldItemEffect[];
+	requirements?: WorldItemRequirement[];
+	stats?: WorldItemStat[];
+	properties?: WorldItemProperty[];
+	filters?: WorldItemFilter[];
+	tags?: string[];
+} & WorldItemRelationInput;
+
+export type WorldItemUpdateInput = Partial<WorldItemCreateInput>;
+
+// --- OTROS TIPOS ---
+
+export interface WorldItemFilters {
+	query?: string;
+	type?: string[];
+	category?: string[];
+	rarity?: string[];
+	isFavorite?: boolean;
+	hasImage?: boolean;
+}
+
+export interface WorldItemSearchOptions {
+	skip?: number;
+	take?: number;
+	filters?: WorldItemFilters;
+	sortBy?: string;
+}

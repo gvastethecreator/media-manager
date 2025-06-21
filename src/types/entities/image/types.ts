@@ -1,5 +1,21 @@
 import { type BaseEntity, BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import type { ActivityComplete } from '../activity';
+import type { AlbumComplete } from '../album';
+import type { CharacterComplete } from '../character';
+import type { CollectionComplete } from '../collection';
+import type { ConceptComplete } from '../concept';
+import type { FolderComplete } from '../folder';
+import type { GroupComplete } from '../group';
+import type { NoteComplete } from '../note';
+import type { PlaceComplete } from '../place';
+import type { ProfileComplete } from '../profile';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
+import type { TagComplete } from '../tag';
+import type { UploadedImageComplete } from '../uploaded-image';
+import type { WildcardComplete } from '../wildcard';
+import type { WorldItemComplete } from '../world-item';
 
 /**
  * 🔍 Esquema de validación para Image
@@ -40,6 +56,8 @@ export interface ImageBase extends BaseEntity {
 	isFavorite: boolean;
 	folderId: string | null; // Debe ser null si no hay folder
 	addedAt: Date;
+	createdAt: Date;
+	updatedAt: Date;
 	// ELIMINADO: sortBy y filters no existen en el modelo Image de Prisma
 }
 
@@ -60,23 +78,23 @@ export interface ImageThumbnail {
  * 🔗 Relaciones de Image
  */
 export interface ImageRelations {
-	folder: { id: string };
-	stats?: { id: string };
-	activities?: { id: string }[];
-	uploadedImages?: { id: string }[];
-	profiles?: { id: string }[];
-	albums?: { id: string }[];
-	collections?: { id: string }[];
-	tags?: { id: string }[];
-	characters?: { id: string }[];
-	places?: { id: string }[];
-	worldItems?: { id: string }[];
-	concepts?: { id: string }[];
-	prompts?: { id: string }[];
-	notes?: { id: string }[];
-	wildcards?: { id: string }[];
-	properties?: { id: string }[];
-	groups?: { id: string }[];
+	folder?: FolderComplete | null;
+	stats?: ImageStatsBase | null;
+	activities?: ActivityComplete[];
+	uploadedImages?: UploadedImageComplete[];
+	profiles?: ProfileComplete[];
+	albums?: AlbumComplete[];
+	collections?: CollectionComplete[];
+	tags?: TagComplete[];
+	characters?: CharacterComplete[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemComplete[];
+	concepts?: ConceptComplete[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupComplete[];
 }
 
 /**
@@ -128,7 +146,18 @@ export interface ImageFilters {
 /**
  * 🔄 Image completa con todas las relaciones
  */
-export interface ImageComplete extends ImageBase, ImageThumbnail, ImageRelations, ImageCounts {}
+export interface ImageComplete extends Omit<ImageBase, 'metadata'>, ImageThumbnail, ImageRelations, ImageCounts {
+	metadata: ImageMetadata | null;
+}
+
+/**
+ * 🃏 Datos de una imagen para mostrar en una tarjeta, con estadísticas calculadas.
+ */
+export interface ImageWithStats extends ImageBase, ImageRelations, ImageCounts {
+	thumbnailUrl: string;
+	metadata: ImageMetadata | null; // Metadatos parseados
+	totalAssociations: number;
+}
 
 /**
  * 📝 Datos para crear una Image

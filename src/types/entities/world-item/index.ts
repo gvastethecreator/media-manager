@@ -7,17 +7,29 @@
 
 // Exportar enumeraciones y constantes
 export * from './enums';
-// Exportar tipos extendidos explícitamente
-// 🎯 Alias principal para el tipo WorldItem
+// Exportar tipos extendidos (excepto los ya exportados)
 export type {
-	ParsedWorldItem,
-	ParsedWorldItemWithRelations,
-	WorldItemExtended,
+    ParsedWorldItemWithRelations,
+    WorldItemExtended
 } from './extended';
-// Exportar tipos estadísticos
-export * from './stats-types';
-// Re-exportación explícita para compatibilidad con código existente
-// Tipo principal para WorldItem (alias)
-export type { WorldItemDeserialized as WorldItem } from './types';
-// Exportar todos los tipos canónicos
-export * from './types';
+// Exportar esquemas
+export * from './schema';
+// Exportar tipos de stats (estos son los que usaremos para WorldItemEffect, WorldItemProperty, WorldItemRequirement)
+export {
+    type WorldItemEffect,
+    type WorldItemProperty,
+    type WorldItemRequirement,
+    type WorldItemStats
+} from './stats-types';
+// Exportar tipos canónicos desde types.ts (excepto los conflictivos)
+export type {
+    WorldItemBase,
+    WorldItemComplete,
+    WorldItemCounts,
+    WorldItemCreateInput,
+    WorldItemFilters,
+    WorldItemRelations,
+    WorldItemSearchOptions,
+    WorldItemUpdateInput
+} from './types';
+

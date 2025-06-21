@@ -7,6 +7,12 @@
 export * from './enums';
 export * from './extended';
 export * from './schema';
-export type { PromptComplete as Prompt } from './types';
-// Alias común para el tipo principal
-export * from './types';
+export type {
+	PromptComplete as Prompt,
+	PromptComplete,
+	PromptCreateInput,
+	PromptUpdateInput,
+	PromptParameter,
+	PromptSearchOptions,
+} from './types';
+

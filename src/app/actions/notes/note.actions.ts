@@ -79,7 +79,11 @@ export async function getNotes(): Promise<NoteWithStats[]> {
 		// Procesamos los campos serializados y transformamos con los nuevos transformadores
 		return notes.map((note) => {
 			// Transformar con el nuevo transformador
-			const noteComplete = fromPrismaNote(note);
+			const noteComplete = fromPrismaNote(note, {
+				includeRelations: true,
+				includeUI: true,
+				deserializeFields: true,
+			});
 
 			return {
 				...noteComplete,
@@ -127,7 +131,11 @@ export async function getNote(id: string): Promise<NoteComplete> {
 		}
 
 		// Transformar con el nuevo transformador
-		const noteComplete = fromPrismaNote(note);
+		const noteComplete = fromPrismaNote(note, {
+			includeRelations: true,
+			includeUI: true,
+			deserializeFields: true,
+		});
 
 		noteLogger.info('✅ Nota obtenida:', noteComplete.title);
 		return noteComplete;
@@ -161,7 +169,11 @@ export async function createNote(data: CreateNoteData): Promise<NoteComplete> {
 		});
 
 		// Transformar resultado
-		const noteComplete = fromPrismaNote(note);
+		const noteComplete = fromPrismaNote(note, {
+			includeRelations: true,
+			includeUI: true,
+			deserializeFields: true,
+		});
 
 		await emit({
 			type: 'notes:modified',
@@ -191,16 +203,21 @@ export async function updateNote(id: string, data: Partial<CreateNoteData>): Pro
 		}
 
 		// Preparar datos con el nuevo transformador
-		const updateData = toUpdateNoteData({ ...data, id });
+		const updateResult = toUpdateNoteData(id, data);
 
 		const prisma = await getPrismaClient();
 		const note = await prisma.note.update({
 			where: { id },
-			data: updateData,
+			data: updateResult.data,
+			include: updateResult.include,
 		});
 
 		// Transformar resultado
-		const noteComplete = fromPrismaNote(note);
+		const noteComplete = fromPrismaNote(note, {
+			includeRelations: true,
+			includeUI: true,
+			deserializeFields: true,
+		});
 
 		await emit({
 			type: 'notes:modified',

@@ -1,5 +1,5 @@
 /**
- * @file Transformador principal para la entidad Group
+ * @file Transformer para la entidad Group
  * @module transformers/group/transformer
  */
 

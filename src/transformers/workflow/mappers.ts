@@ -1,7 +1,9 @@
 // Mappers para Workflow
-import type { Workflow } from '@/types/entities/workflow';
 
-export function fromPrismaWorkflow(prisma: any): Workflow {
+import type { Workflow } from '@/types/entities/workflow';
+import type { Workflow as PrismaWorkflow } from '@prisma/client';
+
+export function fromPrismaWorkflow(prisma: PrismaWorkflow): Workflow {
 	return {
 		id: prisma.id,
 		name: prisma.name,
@@ -12,7 +14,7 @@ export function fromPrismaWorkflow(prisma: any): Workflow {
 	};
 }
 
-export function toPrismaWorkflow(workflow: Workflow): any {
+export function toPrismaWorkflow(workflow: Workflow): PrismaWorkflow {
 	return {
 		id: workflow.id,
 		name: workflow.name,

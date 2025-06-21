@@ -1,463 +1,223 @@
-import { processImage } from '@/lib/image-processing';
+/**
+ * @file Servicio para gestión de imágenes subidas
+ * @module services/uploaded-images
+ * @description Servicio completo para operaciones CRUD de imágenes subidas, usando tipos canónicos y un enfoque moderno.
+ */
+
+import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { prisma } from '@/lib/prisma';
-import { type EventType, emit } from '@/lib/server/events.server';
-import { fromDB, transformUploadedImage } from '@/transformers/uploaded-image';
-import { UploadedImageType } from '@/types/entities/uploaded-image';
+import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors';
+import { mapCreateInputToPrisma, mapUpdateInputToPrisma } from '@/transformers/uploaded-image/mappers';
+import {
+    transformToUploadedImage,
+    transformToUploadedImageWithRelations,
+} from '@/transformers/uploaded-image/transformer';
 import type {
-	CreateUploadedImageParams,
-	GetUploadedImagesParams,
-	UpdateUploadedImageParams,
-	UploadedImageDimensions,
-	UploadedImageEvents,
-	UploadedImageMetadata,
-	UploadedImageProcessingOptions,
-	UploadedImageResult,
-	UploadedImageResults,
-	UploadedImageStats,
-} from '@/types/uploaded-images';
-import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/utils/errors/service-errors';
+    GetUploadedImagesFilters,
+    UploadedImageBase,
+    UploadedImageCreateInput,
+    UploadedImageExtended,
+    UploadedImageUpdateInput,
+} from '@/types/entities/uploaded-image/types';
+import type { Prisma } from '@prisma/client';
 
 const SERVICE_NAME = 'UploadedImagesService';
-const uploadedImagesLogger = serverLogger.withContext(SERVICE_NAME);
-
-interface WhereClause {
-	type?: UploadedImageType;
-	category?: string;
-	size?: {
-		gte?: number;
-		lte?: number;
-	};
-	width?: {
-		gte?: number;
-		lte?: number;
-	};
-	height?: {
-		gte?: number;
-		lte?: number;
-	};
-	OR?: Array<
-		| {
-				name: { contains: string };
-		  }
-		| {
-				category: { contains: string };
-		  }
-	>;
-}
+const logger = serverLogger.withContext(SERVICE_NAME);
 
 class UploadedImagesService {
-	private static instance: UploadedImagesService;
-	private readonly EVENTS: UploadedImageEvents = {
-		IMAGE_CREATED: 'uploaded-image:created',
-		IMAGE_UPDATED: 'uploaded-image:updated',
-		IMAGE_DELETED: 'uploaded-image:deleted',
-		IMAGES_CHANGED: 'uploaded-images:changed',
-	};
+	private readonly prisma = getPrismaClient();
 
-	private constructor() {
-		// Private constructor to force use of getInstance()
-	}
+	// #region Métodos CRUD
 
-	public static getInstance(): UploadedImagesService {
-		if (!UploadedImagesService.instance) {
-			UploadedImagesService.instance = new UploadedImagesService();
-		}
-		return UploadedImagesService.instance;
-	}
-
-	private async emitEvent(event: string, data: unknown): Promise<void> {
+	/**
+	 * Crea una nueva imagen subida en la base de datos.
+	 * @param data - Datos para crear la imagen.
+	 * @returns La imagen creada, transformada al tipo canónico.
+	 */
+	public async createImage(data: UploadedImageCreateInput): Promise<UploadedImageBase> {
 		try {
-			await emit({
-				type: event as EventType,
-				data,
-			});
+			const imageData = mapCreateInputToPrisma(data);
+			const newImage = await this.prisma.uploadedImage.create({ data: imageData });
+
+			logger.info('🖼️ Imagen subida creada exitosamente', { id: newImage.id });
+			return transformToUploadedImage(newImage);
 		} catch (error) {
-			uploadedImagesLogger.error('Error emitiendo evento:', { event, error });
-		}
-	}
-
-	public async createImage(params: CreateUploadedImageParams): Promise<UploadedImageResult> {
-		try {
-			const { name, type, category, file, dimensions, metadata = {}, processingOptions = {} } = params;
-			const { path, size } = file;
-			const { width, height } = dimensions;
-
-			let processedMetadata: UploadedImageMetadata = metadata;
-
-			// Procesar la imagen si hay opciones de procesamiento
-			if (Object.keys(processingOptions).length > 0) {
-				const result = await this.processImage(path, processingOptions);
-				processedMetadata = {
-					...processedMetadata,
-					...result.metadata,
-				};
-			}
-
-			// Crear la imagen en la base de datos
-			const image = await prisma.uploadedImage.create({
-				data: {
-					name,
-					path,
-					type,
-					category,
-					size,
-					width,
-					height,
-					metadata: processedMetadata ? JSON.stringify(processedMetadata) : null,
-				},
-			});
-
-			// Usar el transformer para convertir el registro a la respuesta
-			const entity = fromDB(image);
-			const result = transformUploadedImage(entity);
-
-			// Emitir evento de creación
-			await this.emitEvent(this.EVENTS.IMAGE_CREATED, result);
-			await this.emitEvent(this.EVENTS.IMAGES_CHANGED, { action: 'create', image: result });
-
-			return result;
-		} catch (error) {
-			// Usar el nuevo sistema de manejo de errores
-			throw toServiceError(error, {
-				code: ServiceErrorCode.UNEXPECTED_ERROR,
-				message: 'Error al crear imagen subida',
+			throw toServiceError(error as Error, {
+				code: ServiceErrorCode.DATABASE_ERROR,
+				message: 'Error al crear la imagen subida.',
 				serviceName: SERVICE_NAME,
+				context: { data },
 			});
 		}
 	}
 
-	public async updateImage(id: string, params: UpdateUploadedImageParams): Promise<UploadedImageResult> {
+	/**
+	 * Actualiza una imagen subida existente.
+	 * @param id - El ID de la imagen a actualizar.
+	 * @param data - Los datos a actualizar.
+	 * @returns La imagen actualizada.
+	 */
+	public async updateImage(id: string, data: UploadedImageUpdateInput): Promise<UploadedImageBase> {
 		try {
-			// Verificar que la imagen existe
-			const existingImage = await prisma.uploadedImage.findUnique({
-				where: { id },
-			});
-
+			const existingImage = await this.prisma.uploadedImage.findUnique({ where: { id } });
 			if (!existingImage) {
 				throw createEntityNotFoundError('UploadedImage', id, SERVICE_NAME);
 			}
 
-			const { name, type, category, file, dimensions, metadata, processingOptions } = params;
+			const updateData = mapUpdateInputToPrisma(data);
 
-			let updatedMetadata = existingImage.metadata ? JSON.parse(existingImage.metadata) : {};
-			let imagePath = existingImage.path;
-			let imageSize = existingImage.size;
-			let imageWidth = existingImage.width;
-			let imageHeight = existingImage.height;
-
-			// Si se proporciona un nuevo archivo, procesarlo
-			if (file) {
-				// Eliminar el archivo anterior si es diferente
-				if (existingImage.path !== file.path) {
-					await this.deleteImageFile(existingImage.path);
-				}
-
-				imagePath = file.path;
-				imageSize = file.size;
-
-				// Procesar la imagen si hay opciones
-				if (processingOptions && Object.keys(processingOptions).length > 0) {
-					const result = await this.processImage(file.path, processingOptions);
-					updatedMetadata = {
-						...updatedMetadata,
-						...result.metadata,
-					};
-					imagePath = result.path;
-				}
-			}
-
-			// Actualizar dimensiones si se proporcionan
-			if (dimensions) {
-				imageWidth = dimensions.width;
-				imageHeight = dimensions.height;
-			}
-
-			// Actualizar metadatos si se proporcionan
-			if (metadata) {
-				updatedMetadata = {
-					...updatedMetadata,
-					...metadata,
-				};
-			}
-
-			// Actualizar la imagen en la base de datos
-			const image = await prisma.uploadedImage.update({
+			const updatedImage = await this.prisma.uploadedImage.update({
 				where: { id },
-				data: {
-					name: name ?? existingImage.name,
-					path: imagePath,
-					type: type ?? existingImage.type,
-					category: category ?? existingImage.category,
-					size: imageSize,
-					width: imageWidth,
-					height: imageHeight,
-					metadata: Object.keys(updatedMetadata).length > 0 ? JSON.stringify(updatedMetadata) : null,
-				},
+				data: updateData,
 			});
 
-			// Usar el transformer para convertir el registro a la respuesta
-			const entity = fromDB(image);
-			const result = transformUploadedImage(entity);
-
-			// Emitir evento de actualización
-			await this.emitEvent(this.EVENTS.IMAGE_UPDATED, result);
-			await this.emitEvent(this.EVENTS.IMAGES_CHANGED, { action: 'update', image: result });
-
-			return result;
+			logger.info('🔄 Imagen subida actualizada', { id });
+			return transformToUploadedImage(updatedImage);
 		} catch (error) {
-			throw toServiceError(error, {
-				code: ServiceErrorCode.UNEXPECTED_ERROR,
-				message: 'Error al actualizar imagen subida',
-				context: { id, params },
+			throw toServiceError(error as Error, {
+				code: ServiceErrorCode.DATABASE_ERROR,
+				message: `Error al actualizar la imagen subida con ID: ${id}`,
 				serviceName: SERVICE_NAME,
+				context: { id, data },
 			});
 		}
 	}
 
+	/**
+	 * Elimina una imagen subida por su ID.
+	 * @param id - El ID de la imagen a eliminar.
+	 */
 	public async deleteImage(id: string): Promise<void> {
 		try {
-			// Verificar que la imagen existe
-			const image = await prisma.uploadedImage.findUnique({
-				where: { id },
-			});
-
-			if (!image) {
-				throw createEntityNotFoundError('UploadedImage', id, SERVICE_NAME);
-			}
-
-			// Eliminar el archivo físico
-			await this.deleteImageFile(image.path);
-
-			// Eliminar la entrada de la base de datos
-			await prisma.uploadedImage.delete({
-				where: { id },
-			});
-
-			// Emitir evento de eliminación
-			await this.emitEvent(this.EVENTS.IMAGE_DELETED, { id });
-			await this.emitEvent(this.EVENTS.IMAGES_CHANGED, { action: 'delete', id });
+			await this.prisma.uploadedImage.delete({ where: { id } });
+			logger.warn('🗑️ Imagen subida eliminada', { id });
 		} catch (error) {
-			throw toServiceError(error, {
-				code: ServiceErrorCode.UNEXPECTED_ERROR,
-				message: 'Error al eliminar imagen subida',
-				context: { id },
+			const mappedError =
+				error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025'
+					? createEntityNotFoundError('UploadedImage', id, SERVICE_NAME)
+					: toServiceError(error as Error, {
+							code: ServiceErrorCode.DATABASE_ERROR,
+							message: `Error al eliminar la imagen subida con ID: ${id}`,
+							serviceName: SERVICE_NAME,
+							context: { id },
+						});
+			throw mappedError;
+		}
+	}
+
+	// #endregion
+
+	// #region Métodos de Búsqueda y Consulta
+
+	/**
+	 * Obtiene una imagen por su ID.
+	 * @param id - El ID de la imagen.
+	 * @returns La imagen encontrada o null.
+	 */
+	public async getImageById(id: string): Promise<UploadedImageExtended | null> {
+		try {
+			const image = await this.prisma.uploadedImage.findUnique({
+				where: { id },
+				include: { image: true },
+			});
+			return image ? transformToUploadedImageWithRelations(image) : null;
+		} catch (error) {
+			throw toServiceError(error as Error, {
+				code: ServiceErrorCode.DATABASE_ERROR,
+				message: `Error al obtener la imagen con ID: ${id}`,
 				serviceName: SERVICE_NAME,
 			});
 		}
 	}
 
-	public async getImages(params: GetUploadedImagesParams = {}): Promise<UploadedImageResults> {
+	/**
+	 * Obtiene una lista paginada de imágenes subidas con filtros.
+	 * @param params - Parámetros de paginación y filtros.
+	 * @returns Un objeto con los items y la información de paginación.
+	 */
+	public async getImages(params: GetUploadedImagesFilters = {}): Promise<{
+		items: UploadedImageBase[];
+		pagination: {
+			total: number;
+			page: number;
+			pageSize: number;
+			totalPages: number;
+		};
+	}> {
+		const { page = 1, pageSize = 20, sortBy = 'uploadedAt', sortDirection = 'desc' } = params;
+
 		try {
-			const { page = 1, limit = 20, type, category, size, width, height, query } = params;
+			const where = this.buildWhereClause(params);
+			const orderBy: Prisma.UploadedImageOrderByWithRelationInput = { [sortBy]: sortDirection };
 
-			const where: WhereClause = {};
-			if (type) where.type = type;
-			if (category) where.category = category;
+			const [total, rawImages] = await this.prisma.$transaction([
+				this.prisma.uploadedImage.count({ where }),
+				this.prisma.uploadedImage.findMany({
+					where,
+					orderBy,
+					skip: (page - 1) * pageSize,
+					take: pageSize,
+				}),
+			]);
 
-			if (size) {
-				where.size = {
-					...(size.min && { gte: size.min }),
-					...(size.max && { lte: size.max }),
-				};
-			}
-			if (width) {
-				where.width = {
-					...(width.min && { gte: width.min }),
-					...(width.max && { lte: width.max }),
-				};
-			}
-			if (height) {
-				where.height = {
-					...(height.min && { gte: height.min }),
-					...(height.max && { lte: height.max }),
-				};
-			}
-
-			if (query) {
-				where.OR = [{ name: { contains: query } }, { category: { contains: query } }];
-			}
-
-			const total = await prisma.uploadedImage.count({ where });
-
-			const rawImages = await prisma.uploadedImage.findMany({
-				where,
-				orderBy: {
-					createdAt: 'desc',
-				},
-				skip: (page - 1) * limit,
-				take: limit,
-			});
-
-			const items = rawImages.map((image) => {
-				const entity = fromDB(image);
-				return transformUploadedImage(entity);
-			});
-
-			const stats = await this.getImageStats();
+			const items = rawImages.map(transformToUploadedImage);
 
 			return {
 				items,
-				total,
-				page,
-				pageSize: limit,
-				stats,
+				pagination: {
+					total,
+					page,
+					pageSize,
+					totalPages: Math.ceil(total / pageSize),
+				},
 			};
 		} catch (error) {
-			throw toServiceError(error, {
-				code: ServiceErrorCode.UNEXPECTED_ERROR,
-				message: 'Error al obtener imágenes subidas',
+			throw toServiceError(error as Error, {
+				code: ServiceErrorCode.DATABASE_ERROR,
+				message: 'Error al obtener la lista de imágenes subidas.',
+				serviceName: SERVICE_NAME,
 				context: { params },
-				serviceName: SERVICE_NAME,
 			});
 		}
 	}
 
-	public async getImageStats(): Promise<UploadedImageStats> {
-		try {
-			// Contar el número total de imágenes
-			const total = await prisma.uploadedImage.count();
+	/**
+	 * Construye la cláusula `where` de Prisma a partir de los filtros.
+	 */
+	private buildWhereClause(filters: GetUploadedImagesFilters): Prisma.UploadedImageWhereInput {
+		const where: Prisma.UploadedImageWhereInput = {};
+		const { search, type, category, minSize, maxSize, minWidth, maxWidth, minHeight, maxHeight } = filters;
 
-			// Agrupar por tipo
-			const byType = await prisma.uploadedImage.groupBy({
-				by: ['type'],
-				_count: {
-					type: true,
-				},
-				_sum: {
-					size: true,
-				},
-			});
-
-			// Calcular el tamaño total
-			const totalSize = byType.reduce((sum, item) => sum + (item._sum?.size || 0), 0);
-
-			// Convertir a formato de respuesta
-			const stats: Record<UploadedImageType, number> = {} as Record<UploadedImageType, number>;
-
-			for (const item of byType) {
-				if (item.type) {
-					stats[item.type] = item._count.type;
-				}
-			}
-
-			return {
-				total,
-				byType: stats,
-				totalSize,
-				averageSize: total > 0 ? totalSize / total : 0,
-			};
-		} catch (error) {
-			throw toServiceError(error, {
-				code: ServiceErrorCode.UNEXPECTED_ERROR,
-				message: 'Error al obtener estadísticas de imágenes',
-				serviceName: SERVICE_NAME,
-			});
+		if (search) {
+			where.OR = [
+				{ name: { contains: search, mode: 'insensitive' } },
+				{ category: { contains: search, mode: 'insensitive' } },
+			];
 		}
+
+		if (type) where.type = type;
+		if (category) where.category = category;
+
+		if (minSize !== undefined || maxSize !== undefined) {
+			where.size = {};
+			if (minSize !== undefined) where.size.gte = minSize;
+			if (maxSize !== undefined) where.size.lte = maxSize;
+		}
+		if (minWidth !== undefined || maxWidth !== undefined) {
+			where.width = {};
+			if (minWidth !== undefined) where.width.gte = minWidth;
+			if (maxWidth !== undefined) where.width.lte = maxWidth;
+		}
+		if (minHeight !== undefined || maxHeight !== undefined) {
+			where.height = {};
+			if (minHeight !== undefined) where.height.gte = minHeight;
+			if (maxHeight !== undefined) where.height.lte = maxHeight;
+		}
+
+		return where;
 	}
 
-	// Calcular dimensiones con proporción de aspecto
-	private calculateDimensions(
-		width: number,
-		height: number,
-		targetDimensions?: UploadedImageDimensions
-	): UploadedImageDimensions {
-		// Calcular la proporción de aspecto
-		const aspectRatio = width / height;
-
-		// Si no hay dimensiones objetivo, devolver las dimensiones originales
-		if (!targetDimensions) {
-			return {
-				width,
-				height,
-				aspectRatio,
-			};
-		}
-
-		const { width: targetWidth, height: targetHeight } = targetDimensions;
-
-		// Si solo se especifica una dimensión, calcular la otra manteniendo la proporción
-		if (targetWidth && !targetHeight) {
-			return {
-				width: targetWidth,
-				height: Math.round(targetWidth / aspectRatio),
-				aspectRatio,
-			};
-		}
-
-		if (targetHeight && !targetWidth) {
-			return {
-				width: Math.round(targetHeight * aspectRatio),
-				height: targetHeight,
-				aspectRatio,
-			};
-		}
-
-		// Si se especifican ambas dimensiones, devolver esas dimensiones
-		if (targetWidth && targetHeight) {
-			return {
-				width: targetWidth,
-				height: targetHeight,
-				aspectRatio: targetWidth / targetHeight,
-			};
-		}
-
-		// Caso por defecto: devolver las dimensiones originales
-		return {
-			width,
-			height,
-			aspectRatio,
-		};
-	}
-
-	// Procesar imagen
-	private async processImage(
-		path: string,
-		options: UploadedImageProcessingOptions
-	): Promise<{ path: string; metadata: UploadedImageMetadata }> {
-		try {
-			return await processImage(path, options);
-		} catch (error) {
-			throw toServiceError(error, {
-				code: ServiceErrorCode.FILE_WRITE_ERROR,
-				message: 'Error al procesar la imagen',
-				context: { path, options },
-				serviceName: SERVICE_NAME,
-			});
-		}
-	}
-
-	// Eliminar archivo de imagen
-	private async deleteImageFile(path: string): Promise<void> {
-		try {
-			// Aquí se implementaría la lógica real para eliminar el archivo
-			// Por ahora, solo simularemos esta operación
-			uploadedImagesLogger.info('Simulando eliminación de archivo:', path);
-
-			// Si necesitáramos verificar que el archivo existe:
-			// if (!fileExists(path)) {
-			//     throw createFileNotFoundError(path, {}, SERVICE_NAME);
-			// }
-		} catch (error) {
-			throw toServiceError(error, {
-				code: ServiceErrorCode.FILE_WRITE_ERROR,
-				message: 'Error al eliminar archivo de imagen',
-				context: { path },
-				serviceName: SERVICE_NAME,
-			});
-		}
-	}
-
-	// Obtener URL de imagen
-	private getImageUrl(path: string): string {
-		// En una implementación real, esto podría ser una URL completa a un CDN o servidor de archivos
-		return `/api/images/${encodeURIComponent(path)}`;
-	}
-
-	// Obtener URL de miniatura
-	private getThumbnailUrl(path: string): string {
-		return `/api/images/thumbnails/${encodeURIComponent(path)}`;
-	}
+	// #endregion
 }
 
-export const uploadedImagesService = UploadedImagesService.getInstance();
+export const uploadedImagesService = new UploadedImagesService();

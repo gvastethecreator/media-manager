@@ -8,159 +8,84 @@ import type {
     CreatePromptData,
     PromptBase,
     PromptComplete,
+    PromptCounts,
     PromptFilters,
     PromptWithRelations,
-    UpdatePromptData,
+    PromptWithStats,
+    UpdatePromptData
 } from '@/types/entities/prompt';
 import { PromptSortCriteria } from '@/types/entities/prompt';
-import { serializeParameters, serializeTags } from './serializers';
+import type { Prisma } from '@prisma/client';
+import { deserializeParameters, serializeParameters, serializeTags } from './serializers';
 
 const logger = serverLogger.withContext('PromptMappers');
 
+// #region Tipos Internos de Prisma (Utility Types)
+// Evitan la necesidad de importar @prisma/client directamente en todo el código
+
+type ConnectInput = { connect: { id: string }[] };
+type SetInput = { set: { id: string }[] };
+type RelationObject = { id: string };
+type RelationInput = (string | RelationObject)[];
+
+// #endregion
+
+// #region Funciones de Mapeo a Prisma
+
 /**
- * Tipo para Prisma.PromptCreateInput
+ * Normaliza una relación (array de strings o de objetos con id) a un formato de objetos con id.
+ * @param relation El array de la relación a normalizar.
+ * @returns Un array de objetos con la propiedad id.
  */
-export interface PrismaPromptCreateInput {
-	name: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	content?: string;
-	purpose?: string;
-	category?: string;
-	parameters?: string;
-	tags?: string;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	groups?: {
-		connect: Array<{ id: string }>;
-	};
-	properties?: {
-		connect: Array<{ id: string }>;
-	};
-	wildcards?: {
-		connect: Array<{ id: string }>;
-	};
-	tagEntities?: {
-		connect: Array<{ id: string }>;
-	};
+function normalizeRelation(relation: RelationInput | undefined): RelationObject[] {
+	if (!relation) return [];
+	return relation.map((item) => (typeof item === 'string' ? { id: item } : { id: item.id }));
 }
 
 /**
- * Tipo para Prisma.PromptUpdateInput
+ * Crea el objeto de conexión para una relación en Prisma.
+ * @param relation El array de la relación a normalizar.
+ * @returns Un objeto para conectar la relación en Prisma, o undefined si la relación está vacía.
  */
-export interface PrismaPromptUpdateInput {
-	name?: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	content?: string;
-	purpose?: string;
-	category?: string;
-	parameters?: string;
-	tags?: string;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	groups?: {
-		set: Array<{ id: string }>;
-	};
-	properties?: {
-		set: Array<{ id: string }>;
-	};
-	wildcards?: {
-		set: Array<{ id: string }>;
-	};
-	tagEntities?: {
-		set: Array<{ id: string }>;
-	};
+function normalizeRelationToConnect(relation: RelationInput | undefined): ConnectInput | undefined {
+	if (!relation || relation.length === 0) return undefined;
+	const normalized = normalizeRelation(relation);
+	if (normalized.length === 0) return undefined;
+	return { connect: normalized };
 }
 
 /**
- * Tipo para Prisma.PromptUpdateArgs
+ * Crea el objeto para establecer (set) una relación en Prisma.
+ * @param relation El array de la relación a normalizar.
+ * @returns Un objeto para establecer la relación en Prisma, o undefined si no se proporciona relación.
  */
-export interface PrismaPromptUpdateArgs {
-	where: { id: string };
-	data: PrismaPromptUpdateInput;
+function normalizeRelationToSet(relation: RelationInput | undefined): SetInput | undefined {
+	if (relation === undefined) return undefined;
+	return { set: normalizeRelation(relation) };
 }
 
 /**
- * Tipo para Prisma.PromptWhereInput
+ * 🔄 Mapea datos de creación de Prompt a formato Prisma.
+ * @param data Datos de creación.
+ * @returns Objeto compatible con Prisma.PromptCreateInput.
  */
-export interface PrismaPromptWhereInput {
-	OR?: Array<{
-		name?: { contains: string; mode: 'insensitive' };
-		description?: { contains: string; mode: 'insensitive' };
-		content?: { contains: string; mode: 'insensitive' };
-	}>;
-	category?: { in: string[] };
-	purpose?: { in: string[] };
-	isFavorite?: boolean;
-	content?: { contains: string; mode: 'insensitive' };
-}
-
-/**
- * Tipo para Prisma.PromptOrderByWithRelationInput
- */
-export interface PrismaPromptOrderByWithRelationInput {
-	name?: 'asc' | 'desc';
-	createdAt?: 'asc' | 'desc';
-	updatedAt?: 'asc' | 'desc';
-}
-
-/**
- * 🔄 Mapea datos de creación de Prompt a formato Prisma
- * @param data Datos de creación
- * @returns Objeto compatible con Prisma.PromptCreateInput
- */
-export function mapCreatePromptDataToPrisma(data: CreatePromptData): PrismaPromptCreateInput {
+export function mapCreatePromptDataToPrisma(data: CreatePromptData): Prisma.PromptCreateInput {
 	try {
-		// Serializar parámetros y tags
-		const parameters = typeof data.parameters === 'string' ? data.parameters : serializeParameters(data.parameters);
-		const tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags?.map(t => t.id) || []);
+		const { tags, groups, properties, wildcards, ...restData } = data;
 
-		// Preparar datos base
-		const promptData: PrismaPromptCreateInput = {
-			name: data.name,
+		return {
+			...restData,
 			emoji: data.emoji || '💬',
 			color: data.color || '#3B82F6',
-			description: data.description || null,
-			content: data.content,
-			purpose: data.purpose,
-			category: data.category,
-			parameters,
-			tags,
-			featuredImage: data.featuredImage || null,
-			isFavorite: data.isFavorite || false,
+			parameters: serializeParameters(data.parameters),
+			tags: serializeTags((tags || []).map((t) => (typeof t === 'string' ? t : t.id))),
+			groups: normalizeRelationToConnect(groups),
+			properties: normalizeRelationToConnect(properties),
+			wildcards: normalizeRelationToConnect(wildcards),
+			tagEntities: normalizeRelationToConnect(tags),
 		};
-
-		// Agregar relaciones si existen
-		if (data.groups && data.groups.length > 0) {
-			promptData.groups = {
-				connect: data.groups.map((group) => ({ id: group.id })),
-			};
-		}
-
-		if (data.properties && data.properties.length > 0) {
-			promptData.properties = {
-				connect: data.properties.map((property) => ({ id: property.id })),
-			};
-		}
-
-		if (data.wildcards && data.wildcards.length > 0) {
-			promptData.wildcards = {
-				connect: data.wildcards.map((wildcard) => ({ id: wildcard.id })),
-			};
-		}
-
-		if (data.tags && data.tags.length > 0) {
-			promptData.tagEntities = {
-				connect: data.tags.map((tag) => ({ id: tag.id })),
-			};
-		}
-
-		return promptData;
 	} catch (error) {
-		logger.error('Error mapeando datos de creación:', error);
+		logger.error('Error mapeando datos de creación:', { data, error });
 		throw new Error(
 			`Error al mapear datos de creación de prompt: ${error instanceof Error ? error.message : String(error)}`
 		);
@@ -168,150 +93,96 @@ export function mapCreatePromptDataToPrisma(data: CreatePromptData): PrismaPromp
 }
 
 /**
- * 🔄 Mapea datos de actualización de Prompt a formato Prisma
- * @param id ID del prompt a actualizar
- * @param data Datos de actualización
- * @returns Objeto compatible con Prisma.PromptUpdateArgs
+ * 🔄 Mapea datos de actualización de Prompt a formato Prisma.
+ * @param id ID del prompt a actualizar.
+ * @param data Datos de actualización.
+ * @returns Objeto compatible con Prisma.PromptUpdateArgs.
  */
-export function mapUpdatePromptDataToPrisma(id: string, data: UpdatePromptData): PrismaPromptUpdateArgs {
+export function mapUpdatePromptDataToPrisma(id: string, data: UpdatePromptData): Prisma.PromptUpdateArgs {
 	try {
-		// Preparar datos base (solo incluir campos proporcionados)
-		const updateData: PrismaPromptUpdateInput = {};
+		const { tags, groups, properties, wildcards, parameters, ...restData } = data;
+		const updateData: Prisma.PromptUpdateInput = { ...restData };
 
-		// Asignar campos simples si están definidos
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.emoji !== undefined) updateData.emoji = data.emoji;
-		if (data.color !== undefined) updateData.color = data.color;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.content !== undefined) updateData.content = data.content;
-		if (data.purpose !== undefined) updateData.purpose = data.purpose;
-		if (data.category !== undefined) updateData.category = data.category;
-		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-
-		// Serializar campos complejos si están definidos
-		if (data.parameters !== undefined) {
-			updateData.parameters =
-				typeof data.parameters === 'string' ? data.parameters : serializeParameters(data.parameters);
+		if (parameters) {
+			updateData.parameters = serializeParameters(parameters);
 		}
-		if (data.tags !== undefined) {
-			updateData.tags = typeof data.tags === 'string' ? data.tags : serializeTags(data.tags);
+		if (tags) {
+			updateData.tags = serializeTags(tags.map((t) => (typeof t === 'string' ? t : t.id)));
+			updateData.tagEntities = normalizeRelationToSet(tags);
 		}
+		if (groups) updateData.groups = normalizeRelationToSet(groups);
+		if (properties) updateData.properties = normalizeRelationToSet(properties);
+		if (wildcards) updateData.wildcards = normalizeRelationToSet(wildcards);
 
-		// Actualizar relaciones si están definidas - usar connect/disconnect según el tipo UpdateInput
-		if (data.connect?.groups !== undefined) {
-			updateData.groups = {
-				set: data.connect.groups.map((group) => ({ id: group.id })),
-			};
-		}
-
-		if (data.connect?.properties !== undefined) {
-			updateData.properties = {
-				set: data.connect.properties.map((property) => ({ id: property.id })),
-			};
-		}
-
-		if (data.connect?.wildcards !== undefined) {
-			updateData.wildcards = {
-				set: data.connect.wildcards.map((wildcard) => ({ id: wildcard.id })),
-			};
-		}
-
-		if (data.connect?.tags !== undefined) {
-			updateData.tagEntities = {
-				set: data.connect.tags.map((tag) => ({ id: tag.id })),
-			};
-		}
-
-		return {
-			where: { id },
-			data: updateData,
-		};
+		return { where: { id }, data: updateData };
 	} catch (error) {
-		logger.error('Error mapeando datos de actualización:', error);
+		logger.error('Error mapeando datos de actualización:', { id, data, error });
 		throw new Error(
-			`Error al mapear datos de actualización de prompt: ${error instanceof Error ? error.message : String(error)}`
+			`Error al mapear datos de actualización: ${error instanceof Error ? error.message : String(error)}`
 		);
 	}
 }
 
+// #endregion
+
+// #region Mapeo y Procesamiento de Datos (Filtros, Ordenación, etc.)
+
 /**
- * 🔄 Mapea filtros de Prompt a condiciones where de Prisma
- * @param filters Filtros para consultar prompts
- * @returns Objeto compatible con Prisma.PromptWhereInput
+ * 🔄 Mapea filtros de Prompt a condiciones `where` de Prisma.
+ * @param filters Filtros para consultar prompts.
+ * @returns Objeto compatible con Prisma.PromptWhereInput.
  */
-export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): PrismaPromptWhereInput {
-	try {
-		const where: PrismaPromptWhereInput = {};
+export function mapPromptFiltersToPrisma(filters: PromptFilters = {}): Prisma.PromptWhereInput {
+	const where: Prisma.PromptWhereInput = {};
 
-		// Búsqueda por texto
-		if (filters.searchQuery) {
-			where.OR = [
-				{ name: { contains: filters.searchQuery, mode: 'insensitive' } },
-				{ description: { contains: filters.searchQuery, mode: 'insensitive' } },
-				{ content: { contains: filters.searchQuery, mode: 'insensitive' } },
-			];
-		}
-
-		// Filtrar por categorías
-		if (filters.categories && filters.categories.length > 0) {
-			where.category = { in: filters.categories };
-		}
-
-		// Filtrar por propósitos
-		if (filters.purposes && filters.purposes.length > 0) {
-			where.purpose = { in: filters.purposes };
-		}
-
-		// Filtrar por favoritos
-		if (filters.onlyFavorites) {
-			where.isFavorite = true;
-		}
-
-		// Filtrar por contenido específico - usar searchQuery como alternativa
-		if (filters.searchQuery && !where.OR) {
-			where.content = { contains: filters.searchQuery, mode: 'insensitive' };
-		}
-
-		return where;
-	} catch (error) {
-		logger.error('Error mapeando filtros:', error);
-		return {}; // Devolver objeto vacío en caso de error
+	if (filters.searchQuery) {
+		const query = filters.searchQuery;
+		where.OR = [
+			{ name: { contains: query, mode: 'insensitive' } },
+			{ description: { contains: query, mode: 'insensitive' } },
+			{ content: { contains: query, mode: 'insensitive' } },
+		];
 	}
+
+	if (filters.categories?.length) {
+		where.category = { in: filters.categories };
+	}
+	if (filters.purposes?.length) {
+		where.purpose = { in: filters.purposes };
+	}
+	if (filters.onlyFavorites) {
+		where.isFavorite = true;
+	}
+
+	return where;
 }
 
 /**
- * 🔄 Mapea criterios de ordenación a formato Prisma
- * @param sortBy Criterio de ordenación
- * @returns Objeto compatible con Prisma.PromptOrderByWithRelationInput
+ * 🔄 Mapea criterios de ordenación a formato Prisma.
+ * @param sortBy Criterio de ordenación.
+ * @returns Objeto compatible con Prisma.PromptOrderByWithRelationInput.
  */
 export function mapPromptSortCriteriaToPrisma(
 	sortBy: PromptSortCriteria = PromptSortCriteria.UPDATED_DESC
-): PrismaPromptOrderByWithRelationInput {
-	// Extraer campo y dirección del criterio
+): Prisma.PromptOrderByWithRelationInput {
 	const [field, direction] = sortBy.split(':');
-	const sortDirection = direction === 'asc' ? 'asc' : 'desc';
+	const sortDir = direction === 'asc' ? 'asc' : 'desc';
 
-	// Mapear campo a propiedad de Prisma
 	switch (field) {
 		case 'name':
-			return { name: sortDirection };
+			return { name: sortDir };
 		case 'created':
-			return { createdAt: sortDirection };
+			return { createdAt: sortDir };
 		case 'updated':
 		default:
-			return { updatedAt: sortDirection };
+			return { updatedAt: sortDir };
 	}
 }
 
 /**
- * 🔄 Mapea un Prompt a formato simplificado para relaciones
- * @param prompt Prompt completo
- * @returns Prompt simplificado para relaciones
+ * 🔄 Mapea un Prompt a un formato simplificado para mostrar en relaciones.
  */
-export function mapPromptToRelated(
-	prompt: PromptComplete | PromptWithRelations
-): Pick<PromptComplete, 'id' | 'name' | 'emoji' | 'color'> {
+export function mapPromptToRelated(prompt: PromptComplete | PromptWithRelations) {
 	return {
 		id: prompt.id,
 		name: prompt.name,
@@ -321,87 +192,48 @@ export function mapPromptToRelated(
 }
 
 /**
- * 🔄 Mapea un array de Prompts a formato simplificado para relaciones
- * @param prompts Array de prompts
- * @returns Array de prompts simplificados
+ * 🔄 Mapea un array de Prompts a un formato simplificado.
  */
-export function mapPromptsToRelated(
-	prompts: Array<PromptComplete | PromptWithRelations>
-): Array<Pick<PromptComplete, 'id' | 'name' | 'emoji' | 'color'>> {
+export function mapPromptsToRelated(prompts: (PromptComplete | PromptWithRelations)[]) {
 	return prompts.map(mapPromptToRelated);
 }
 
 /**
- * 🔍 Filtra un array de prompts según los criterios especificados
- * @param prompts Array de prompts a filtrar
- * @param filters Filtros a aplicar
- * @returns Array de prompts filtrados
+ * 🔍 Filtra un array de prompts en memoria.
+ * @param prompts Array de prompts a filtrar.
+ * @param filters Filtros a aplicar.
+ * @returns Array de prompts filtrados.
  */
 export function filterPrompts(prompts: PromptBase[], filters: PromptFilters = {}): PromptBase[] {
-	let filtered = [...prompts];
-
-	// Filtrar por búsqueda de texto
-	if (filters.searchQuery) {
-		const query = filters.searchQuery.toLowerCase();
-		filtered = filtered.filter(
-			(prompt) =>
-				prompt.name.toLowerCase().includes(query) ||
-				prompt.description?.toLowerCase().includes(query) ||
-				prompt.content.toLowerCase().includes(query)
-		);
-	}
-
-	// Filtrar por categorías
-	if (filters.categories && filters.categories.length > 0) {
-		filtered = filtered.filter((prompt) => filters.categories!.includes(prompt.category));
-	}
-
-	// Filtrar por propósitos
-	if (filters.purposes && filters.purposes.length > 0) {
-		filtered = filtered.filter((prompt) => filters.purposes!.includes(prompt.purpose));
-	}
-
-	// Filtrar por favoritos
-	if (filters.onlyFavorites) {
-		filtered = filtered.filter((prompt) => prompt.isFavorite);
-	}
-
-	// Filtrar por contenido específico
-	if (filters.contentContains) {
-		const content = filters.contentContains.toLowerCase();
-		filtered = filtered.filter((prompt) => prompt.content.toLowerCase().includes(content));
-	}
-
-	return filtered;
+	return prompts.filter((prompt) => {
+		if (filters.searchQuery) {
+			const query = filters.searchQuery.toLowerCase();
+			const inName = prompt.name.toLowerCase().includes(query);
+			const inDesc = prompt.description?.toLowerCase().includes(query) ?? false;
+			const inContent = prompt.content.toLowerCase().includes(query);
+			if (!inName && !inDesc && !inContent) return false;
+		}
+		if (filters.categories?.length && !filters.categories.includes(prompt.category)) {
+			return false;
+		}
+		if (filters.purposes?.length && !filters.purposes.includes(prompt.purpose)) {
+			return false;
+		}
+		if (filters.onlyFavorites && !prompt.isFavorite) {
+			return false;
+		}
+		return true;
+	});
 }
 
 /**
- * 📄 Pagina un array de prompts
- * @param prompts Array de prompts a paginar
- * @param page Número de página (empezando en 1)
- * @param limit Número de elementos por página
- * @returns Objeto con prompts paginados y metadatos
+ * 📄 Pagina un array de prompts.
  */
-export function paginatePrompts(
-	prompts: PromptBase[],
-	page = 1,
-	limit = 20
-): {
-	data: PromptBase[];
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		totalPages: number;
-		hasNext: boolean;
-		hasPrev: boolean;
-	};
-} {
-	const total = prompts.length;
+export function paginatePrompts<T>(items: T[], page = 1, limit = 20) {
+	const total = items.length;
 	const totalPages = Math.ceil(total / limit);
 	const startIndex = (page - 1) * limit;
-	const endIndex = startIndex + limit;
-	const data = prompts.slice(startIndex, endIndex);
+	const data = items.slice(startIndex, startIndex + limit);
 
 	return {
 		data,
@@ -417,10 +249,7 @@ export function paginatePrompts(
 }
 
 /**
- * 🔄 Ordena un array de prompts según el criterio especificado
- * @param prompts Array de prompts a ordenar
- * @param sortBy Criterio de ordenación
- * @returns Array de prompts ordenados
+ * 🔄 Ordena un array de prompts con seguridad de tipos.
  */
 export function sortPrompts(
 	prompts: PromptBase[],
@@ -430,8 +259,8 @@ export function sortPrompts(
 	const isAsc = direction === 'asc';
 
 	return [...prompts].sort((a, b) => {
-		let valueA: any;
-		let valueB: any;
+		let valueA: string | number;
+		let valueB: string | number;
 
 		switch (field) {
 			case 'name':
@@ -449,17 +278,15 @@ export function sortPrompts(
 				break;
 		}
 
-		if (valueA < valueB) return isAsc ? -1 : 1;
-		if (valueA > valueB) return isAsc ? 1 : -1;
-		return 0;
+		if (typeof valueA === 'string' && typeof valueB === 'string') {
+			return isAsc ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+		}
+		return isAsc ? (valueA as number) - (valueB as number) : (valueB as number) - (valueA as number);
 	});
 }
 
 /**
- * 🔄 Procesa un array de prompts aplicando filtros, ordenación y paginación
- * @param prompts Array de prompts a procesar
- * @param options Opciones de procesamiento
- * @returns Prompts procesados con metadatos
+ * 🔄 Procesa un array de prompts aplicando filtros, ordenación y paginación.
  */
 export function processPrompts(
 	prompts: PromptBase[],
@@ -469,59 +296,48 @@ export function processPrompts(
 		page?: number;
 		limit?: number;
 	} = {}
-): {
-	data: PromptBase[];
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		totalPages: number;
-		hasNext: boolean;
-		hasPrev: boolean;
-	};
-} {
-	let processed = [...prompts];
-
-	// Aplicar filtros
+) {
+	let processed = prompts;
 	if (options.filters) {
 		processed = filterPrompts(processed, options.filters);
 	}
-
-	// Aplicar ordenación
 	if (options.sortBy) {
 		processed = sortPrompts(processed, options.sortBy);
 	}
-
-	// Aplicar paginación
 	return paginatePrompts(processed, options.page, options.limit);
 }
 
 /**
- * 📊 Convierte un prompt base a un prompt con estadísticas
- * @param prompt Prompt base
- * @param stats Estadísticas opcionales
- * @returns Prompt con estadísticas
+ * 📊 Enriquece un prompt con sus estadísticas.
+ * Deserializa `parameters` y `tags` si son strings JSON.
+ * @param prompt El prompt a enriquecer.
+ * @param stats Estadísticas opcionales.
+ * @returns El prompt con estadísticas y campos deserializados.
  */
-export function toPromptWithStats(prompt: PromptBase, stats?: Partial<PromptCounts['_count']>): PromptWithStats {
-	const defaultStats: PromptCounts['_count'] = {
-		images: 0,
-		videos: 0,
-		albums: 0,
-		collections: 0,
-		tags: 0,
-		characters: 0,
-		places: 0,
-		worldItems: 0,
-		concepts: 0,
-		notes: 0,
-		wildcards: 0,
-		properties: 0,
-		groups: 0,
-		...stats,
+export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
+	const { _count, ...rest } = prompt;
+
+	const stats: PromptCounts['_count'] = {
+		images: _count?.images ?? 0,
+		videos: _count?.videos ?? 0,
+		albums: _count?.albums ?? 0,
+		collections: _count?.collections ?? 0,
+		tags: _count?.tags ?? 0,
+		characters: _count?.characters ?? 0,
+		places: _count?.places ?? 0,
+		worldItems: _count?.worldItems ?? 0,
+		concepts: _count?.concepts ?? 0,
+		notes: _count?.notes ?? 0,
+		wildcards: _count?.wildcards ?? 0,
+		properties: _count?.properties ?? 0,
+		groups: _count?.groups ?? 0,
 	};
 
 	return {
-		...prompt,
-		_count: defaultStats,
+		...rest,
+		parameters: typeof rest.parameters === 'string' ? deserializeParameters(rest.parameters) : rest.parameters,
+		tags: typeof rest.tags === 'string' ? JSON.parse(rest.tags) : rest.tags,
+		_count: stats,
 	};
 }
+// #endregion

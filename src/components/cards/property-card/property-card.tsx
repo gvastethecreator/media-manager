@@ -1,11 +1,18 @@
 'use client';
 
-import { Microscope } from 'lucide-react';
-import Link from 'next/link';
-import React, { useMemo } from 'react';
+// TODO: Refactorizar para usar el tipo canónico `PropertyWithStats`.
+// Este componente actualmente define su propio tipo extendido para la prop `property`,
+// lo que causa inconsistencias. Debería recibir una prop `property` del tipo `PropertyWithStats`
+// que ya incluya `totalAssociations` calculado. Esta refactorización está bloqueada
+// por los mismos fallos en la herramienta de edición que impiden corregir las
+// server actions de la entidad `Property`.
+
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { PropertyWithRelations } from '@/types/entities/property';
+import { Microscope } from 'lucide-react';
+import Link from 'next/link';
+import React, { useMemo } from 'react';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 

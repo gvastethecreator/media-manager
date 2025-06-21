@@ -111,3 +111,16 @@ export interface AudioSearchResult {
 	total: number;
 	hasMore: boolean;
 }
+
+/**
+ * 🎨 Datos de entrada desde la UI para un archivo de Audio.
+ */
+export interface AudioUIInput {
+	name?: string;
+	description?: string | null;
+	filePath?: string;
+	format?: string;
+	duration?: number | null;
+	size?: number;
+	isFavorite?: boolean;
+}

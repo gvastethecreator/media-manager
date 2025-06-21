@@ -1,6 +1,5 @@
-import type { Prisma } from '@prisma/client';
-import { z } from 'zod';
 import type { MetadataFields, UIFields } from '@/utils/transformers/common';
+import { z } from 'zod';
 
 /**
  * 🔍 Esquema base para validación de campos comunes
@@ -127,8 +126,8 @@ export interface TransformerOptions {
 /**
  * 🛠️ Interfaz base para transformers
  */
-export interface BaseTransformer<T, U> {
-	toPrisma(data: T): Prisma.Prisma__BaseClient;
+export interface BaseTransformer<T, U, P = any> {
+	toPrisma(data: Partial<T>): P;
 	fromPrisma(data: U): T;
 	validate(data: unknown): T;
 	extend(data: T, options?: TransformerOptions): Promise<T>;

@@ -6,12 +6,12 @@
  */
 
 import type {
-    WorldItemCreateInput as CreateWorldItemData,
-    WorldItemUpdateInput as UpdateWorldItemData,
-    WorldItem,
-    WorldItemFilters,
-    WorldItemSortCriteria,
-    WorldItemViewMode,
+	WorldItemCreateInput as CreateWorldItemData,
+	WorldItemUpdateInput as UpdateWorldItemData,
+	WorldItem,
+	WorldItemFilters,
+	WorldItemSortCriteria,
+	WorldItemViewMode,
 } from '@/types/entities/world-item';
 
 /**

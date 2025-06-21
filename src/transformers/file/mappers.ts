@@ -5,13 +5,13 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	DirectoryInfo,
-	EnhancedDirectory,
-	EnhancedImageFile,
-	FileBase,
-	FileFilterOptions,
-	FileInfo,
-	ImageFileInfo,
+    DirectoryInfo,
+    EnhancedDirectory,
+    EnhancedImageFile,
+    FileBase,
+    FileFilterOptions,
+    FileInfo,
+    ImageFileInfo,
 } from '@/types/entities/file';
 import { FILE_EXTENSION_GROUPS, FileType } from '@/types/entities/file/enums';
 import type { Stats } from 'fs';
@@ -30,11 +30,11 @@ export function generateFileId(filePath: string): string {
 export function determineFileType(extension: string): FileType {
 	if (!extension) return FileType.OTHER;
 	const ext = extension.toLowerCase();
-	if (FILE_EXTENSION_GROUPS.IMAGE.includes(ext as any)) return FileType.IMAGE;
-	if (FILE_EXTENSION_GROUPS.VIDEO.includes(ext as any)) return FileType.VIDEO;
-	if (FILE_EXTENSION_GROUPS.AUDIO.includes(ext as any)) return FileType.AUDIO;
-	if (FILE_EXTENSION_GROUPS.DOCUMENT.includes(ext as any)) return FileType.DOCUMENT;
-	if (FILE_EXTENSION_GROUPS.ARCHIVE.includes(ext as any)) return FileType.ARCHIVE;
+	if (FILE_EXTENSION_GROUPS.IMAGE.includes(ext)) return FileType.IMAGE;
+	if (FILE_EXTENSION_GROUPS.VIDEO.includes(ext)) return FileType.VIDEO;
+	if (FILE_EXTENSION_GROUPS.AUDIO.includes(ext)) return FileType.AUDIO;
+	if (FILE_EXTENSION_GROUPS.DOCUMENT.includes(ext)) return FileType.DOCUMENT;
+	if (FILE_EXTENSION_GROUPS.ARCHIVE.includes(ext)) return FileType.ARCHIVE;
 	return FileType.FILE;
 }
 
@@ -95,7 +95,7 @@ export function mapStatsToFileInfo(filePath: string, stats: Stats): FileInfo {
 	};
 }
 
-export function toFileListItem(fileInfo: FileInfo): any {
+export function toFileListItem(fileInfo: FileInfo): FileBase {
 	return {
 		id: fileInfo.id,
 		path: fileInfo.path,
@@ -220,12 +220,22 @@ export function applyFileFilters(files: FileBase[], options: FileFilterOptions):
 		filteredFiles = filteredFiles.filter((f) => new Date(f.modifiedAt) < new Date(options.modifiedBefore!));
 	}
 	if (options.sortBy) {
+		const sortBy = options.sortBy;
 		filteredFiles.sort((a, b) => {
-			const fieldA = (a as any)[options.sortBy!];
-			const fieldB = (b as any)[options.sortBy!];
+			const fieldA = a[sortBy];
+			const fieldB = b[sortBy];
 			const order = options.sortOrder === 'asc' ? 1 : -1;
-			if (fieldA < fieldB) return -1 * order;
-			if (fieldA > fieldB) return 1 * order;
+
+			if (typeof fieldA === 'string' && typeof fieldB === 'string') {
+				return fieldA.localeCompare(fieldB) * order;
+			}
+
+			if (fieldA < fieldB) {
+				return -1 * order;
+			}
+			if (fieldA > fieldB) {
+				return 1 * order;
+			}
 			return 0;
 		});
 	}

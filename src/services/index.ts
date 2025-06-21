@@ -15,8 +15,6 @@ export * from './album/index';
 export * from './collection/index';
 // Servicios individuales que existen
 export * from './concept.service';
-export * from './favorite.service';
-export * from './favorites.service';
 // Servicios del sistema - Solo los que existen
 export * from './file/index';
 // Entidades base - Solo las que existen
@@ -50,11 +48,9 @@ export const services = {
 	album: require('./album/index'),
 	collection: require('./collection/index'),
 	group: require('./group/index'),
-	isFavorite: require('./favorite.service'),
 
 	// Servicios individuales
 	concept: require('./concept.service'),
-	favorites: require('./favorites.service'),
 	note: require('./note.service'),
 	prompt: require('./prompt.service'),
 	stats: require('./stats.service'),

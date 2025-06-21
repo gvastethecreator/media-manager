@@ -3,15 +3,15 @@
  * @module transformers/collection/mappers
  */
 
-import type { Prisma } from '@prisma/client';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	CollectionCreateInput,
-	CollectionFilters,
-	CollectionSearchOptions,
-	CollectionUpdateInput,
+    CollectionCreateInput,
+    CollectionFilters,
+    CollectionSearchOptions,
+    CollectionUpdateInput,
 } from '@/types/entities/collection';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('CollectionMapper');
 
@@ -95,24 +95,8 @@ function mapCollectionFiltersToPrisma(filters: CollectionFilters): Prisma.Collec
 	if (filters.category?.length) {
 		where.category = { in: filters.category };
 	}
-	if (filters.rarity?.length) {
-		where.rarity = { in: filters.rarity };
-	}
 	if (filters.tagIds?.length) {
 		where.tags = { some: { id: { in: filters.tagIds } } };
-	}
-	if (filters.imageCount) {
-		where.images = {
-			...(where.images || {}),
-			...(filters.imageCount.min !== undefined || filters.imageCount.max !== undefined
-				? {
-						_count: {
-							...(filters.imageCount.min !== undefined ? { gte: filters.imageCount.min } : {}),
-							...(filters.imageCount.max !== undefined ? { lte: filters.imageCount.max } : {}),
-						},
-					}
-				: {}),
-		};
 	}
 	if (filters.dateRange) {
 		if (filters.dateRange.start || filters.dateRange.end) {

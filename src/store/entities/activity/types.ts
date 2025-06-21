@@ -6,41 +6,24 @@
 import { ActivityCategory, ActivityComplete, ActivitySortCriteria } from '../../../types/entities/activity';
 
 /**
- * Estado principal del store de actividades
+ * Estado principal del store de actividades (estructura plana)
  */
 export interface ActivityState {
-	// Slices de estado
-	core: ActivityCoreState;
-	ui: ActivityUIState;
-	filters: ActivityFiltersState;
-}
-
-/**
- * Estado del slice core
- */
-export interface ActivityCoreState {
+	// Datos principales
 	activities: Record<string, ActivityComplete>;
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;
-}
 
-/**
- * Estado del slice UI
- */
-export interface ActivityUIState {
+	// Estado UI
 	selectedIds: string[];
 	expandedIds: string[];
 	highlightedId: string | null;
 	detailActivityId: string | null;
 	isDetailModalOpen: boolean;
 	groupByDate: boolean;
-}
 
-/**
- * Estado del slice de filtros
- */
-export interface ActivityFiltersState {
+	// Estado de filtros
 	sortBy: ActivitySortCriteria;
 	searchQuery: string;
 	selectedCategories: ActivityCategory[];

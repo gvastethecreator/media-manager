@@ -3,16 +3,13 @@
  * @module store/entities/character/slices/filters
  */
 
-import type {
-    CharacterExtended,
-    CharacterFilterItem,
-} from '@/types/entities/character';
+import type { CharacterExtended, CharacterFilterItem } from '@/types/entities/character';
 import {
-    CharacterAlignment,
-    CharacterCategory,
-    CharacterClass,
-    CharacterRace,
-    CharacterSortOption,
+	CharacterAlignment,
+	CharacterCategory,
+	CharacterClass,
+	CharacterRace,
+	CharacterSortOption,
 } from '@/types/entities/character';
 import { compareCharacters, getCharacterLevelAsNumber, matchesCharacterSearch } from '@/utils/character';
 import type { StateCreator } from 'zustand';
@@ -381,9 +378,7 @@ export const createCharacterFiltersSlice: StateCreator<
 	addFilter: (filter: CharacterFilterItem) => {
 		set((state) => {
 			// Comprobar si ya existe un filtro con el mismo campo y operador
-			const existingIndex = state.activeFilters.findIndex(
-				(f) => f.query === filter.query && f.value === filter.value
-			);
+			const existingIndex = state.activeFilters.findIndex((f) => f.query === filter.query && f.value === filter.value);
 
 			if (existingIndex >= 0) {
 				// Actualizar filtro existente

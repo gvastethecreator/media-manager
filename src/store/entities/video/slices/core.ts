@@ -4,16 +4,30 @@
  */
 
 import {
-	createVideo as createServerVideo,
-	deleteVideo as deleteServerVideo,
-	findVideos,
-	getVideo as getServerVideo,
+    createVideo as createServerVideo,
+    deleteVideo as deleteServerVideo,
+    findVideos,
+    getVideo as getServerVideo,
 } from '@/app/actions/videos/video.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import type { CreateVideoData, UpdateVideoData, VideoComplete, VideoFilters } from '@/types/entities/video';
 import type { StateCreator } from 'zustand';
-import type { VideoState } from '../types';
+import type { VideoStore } from '..';
+
+export interface VideoCoreState {
+	videos: Record<string, VideoComplete>;
+	isLoading: boolean;
+	error: string | null;
+	lastUpdated: Date | null;
+}
+
+export const initialCoreState: VideoCoreState = {
+	videos: {},
+	isLoading: false,
+	error: null,
+	lastUpdated: null,
+};
 
 const videoLogger = clientLogger.withContext('VideoStore');
 
@@ -39,7 +53,7 @@ function applyVideoFilters(videos: VideoComplete[], filters: Partial<VideoFilter
 
 // --- Slice Interface ---
 
-export interface VideoCoreSlice {
+export interface VideoCoreSlice extends VideoCoreState {
 	// Getters
 	getVideo: (id: string) => VideoComplete | undefined;
 	getVideos: () => VideoComplete[];
@@ -71,18 +85,19 @@ export interface VideoCoreSlice {
 
 // --- Slice Implementation ---
 
-export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [], [], VideoCoreSlice> = (set, get) => ({
+export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSlice> = (set, get) => ({
+	...initialCoreState,
 	// --- Getters ---
-	getVideo: (id) => get().core.videos[id],
-	getVideos: () => Object.values(get().core.videos),
-	getVideosByFolder: (folderId) => Object.values(get().core.videos).filter((video) => video.folderId === folderId),
+	getVideo: (id) => get().videos[id],
+	getVideos: () => Object.values(get().videos),
+	getVideosByFolder: (folderId) => Object.values(get().videos).filter((video) => video.folderId === folderId),
 
 	// --- Selectores avanzados ---
 	selectVideos: (options = {}) => {
 		const { filters = {}, sortBy = 'createdAt', sortDirection = 'desc' } = options;
-		let videos = Object.values(get().core.videos);
+		let videos = Object.values(get().videos);
 
-		videos = applyVideoFilters(videos, filters);
+		videos = applyVideoFilters(videos, get().filters);
 
 		videos.sort((a, b) => {
 			const valueA = a[sortBy];
@@ -108,12 +123,9 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 	// --- Operaciones síncronas ---
 	addVideo: (video) => {
 		set((state) => ({
-			core: {
-				...state.core,
-				videos: {
-					...state.core.videos,
-					[video.id]: video,
-				},
+			videos: {
+				...state.videos,
+				[video.id]: video,
 			},
 		}));
 	},
@@ -127,12 +139,9 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 			{} as Record<string, VideoComplete>
 		);
 		set((state) => ({
-			core: {
-				...state.core,
-				videos: {
-					...state.core.videos,
-					...videosMap,
-				},
+			videos: {
+				...state.videos,
+				...videosMap,
 			},
 		}));
 	},
@@ -146,19 +155,16 @@ export const createVideoCoreSlice: StateCreator<VideoState & VideoCoreSlice, [],
 
 	deleteVideo: (id) => {
 		set((state) => {
-			const { [id]: _, ...remaining } = state.core.videos;
+			const { [id]: _, ...remaining } = state.videos;
 			return {
-				core: {
-					...state.core,
-					videos: remaining,
-				},
+				videos: remaining,
 			};
 		});
 	},
 
 	// --- Estado de carga y errores ---
-	setLoading: (isLoading) => set((state) => ({ core: { ...state.core, isLoading } })),
-	setError: (error) => set((state) => ({ core: { ...state.core, error } })),
+	setLoading: (isLoading) => set({ isLoading }),
+	setError: (error) => set({ error }),
 
 	// --- Acciones Asíncronas ---
 	fetchVideo: async (id) => {

@@ -4,7 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { NoteBase, NoteCreateInput, NoteFilters, NoteSearchOptions, NoteUpdateInput } from '@/types/entities/note';
+import type { NoteCreateInput, NoteFilters, NoteSearchOptions, NoteUpdateInput } from '@/types/entities/note';
 import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('NoteMappers');
@@ -32,7 +32,7 @@ export function mapCreateNoteDataToPrisma(data: NoteCreateInput): Prisma.NoteCre
 			...rest
 		} = data;
 
-		return {
+		const prismaData: Prisma.NoteCreateInput = {
 			...rest,
 			content: rest.content ?? '',
 			category: rest.category ?? 'general',
@@ -40,6 +40,22 @@ export function mapCreateNoteDataToPrisma(data: NoteCreateInput): Prisma.NoteCre
 			status: rest.status ?? 'draft',
 			isFavorite: rest.isFavorite ?? false,
 		};
+
+		if (images) prismaData.images = { connect: images.map((id) => ({ id })) };
+		if (videos) prismaData.videos = { connect: videos.map((id) => ({ id })) };
+		if (albums) prismaData.albums = { connect: albums.map((id) => ({ id })) };
+		if (collections) prismaData.collections = { connect: collections.map((id) => ({ id })) };
+		if (tags) prismaData.tags = { connect: tags.map((id) => ({ id })) };
+		if (characters) prismaData.characters = { connect: characters.map((id) => ({ id })) };
+		if (places) prismaData.places = { connect: places.map((id) => ({ id })) };
+		if (worldItems) prismaData.worldItems = { connect: worldItems.map((id) => ({ id })) };
+		if (concepts) prismaData.concepts = { connect: concepts.map((id) => ({ id })) };
+		if (prompts) prismaData.prompts = { connect: prompts.map((id) => ({ id })) };
+		if (wildcards) prismaData.wildcards = { connect: wildcards.map((id) => ({ id })) };
+		if (properties) prismaData.properties = { connect: properties.map((id) => ({ id })) };
+		if (groups) prismaData.groups = { connect: groups.map((id) => ({ id })) };
+
+		return prismaData;
 	} catch (error) {
 		logger.error('Error mapeando datos de creación de nota', { error, data });
 		throw new Error('Error al mapear datos de creación de nota.');
@@ -50,7 +66,10 @@ export function mapCreateNoteDataToPrisma(data: NoteCreateInput): Prisma.NoteCre
  * 🔄 Mapea datos de actualización de nota a formato compatible con Prisma.
  * Retorna un objeto con data e include para ser usado en update
  */
-export function mapUpdateNoteDataToPrisma(id: string, data: NoteUpdateInput): {
+export function mapUpdateNoteDataToPrisma(
+	id: string,
+	data: NoteUpdateInput
+): {
 	data: Prisma.NoteUpdateInput;
 	include: any;
 } {
@@ -101,16 +120,6 @@ export function mapUpdateNoteDataToPrisma(id: string, data: NoteUpdateInput): {
 }
 
 /**
- * 🔄 Mapea un objeto Note de Prisma a nuestro tipo canónico NoteBase.
- */
-export function fromPrismaNote(note: Prisma.NoteGetPayload<null>): NoteBase {
-	if (!note) {
-		throw new Error('Se requiere un objeto de nota de Prisma para la transformación.');
-	}
-	return note;
-}
-
-/**
  * 🔄 Mapea opciones de búsqueda de Note a formato Prisma.
  */
 export function mapNoteSearchOptionsToPrisma(options: NoteSearchOptions): Prisma.NoteFindManyArgs {
@@ -154,20 +163,4 @@ export function mapNoteFiltersToPrisma(filters: NoteFilters): Prisma.NoteWhereIn
 	// y debería ser manejado por la lógica de servicio si es necesario.
 
 	return where;
-}
-
-/**
- * 🔄 Convierte datos de entrada a formato de creación
- * Alias para compatibilidad con exportaciones esperadas
- */
-export function toCreateNoteData(data: NoteCreateInput): Prisma.NoteCreateInput {
-	return mapCreateNoteDataToPrisma(data);
-}
-
-/**
- * 🔄 Convierte datos de entrada a formato de actualización
- * Alias para compatibilidad con exportaciones esperadas
- */
-export function toUpdateNoteData(id: string, data: NoteUpdateInput) {
-	return mapUpdateNoteDataToPrisma(id, data);
 }

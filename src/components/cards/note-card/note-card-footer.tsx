@@ -1,7 +1,7 @@
+import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { BarChart4, Calendar, Heart, Image, LinkIcon, ListChecks, RefreshCw, Star, Video } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface NoteCardFooterProps {
 	createdAt: Date | string;
@@ -172,7 +172,7 @@ export function NoteCardFooter({
 						className="text-[0.65rem] opacity-60 tracking-wide uppercase font-medium"
 						style={{ color: primaryColor }}
 					>
-						Image Manager • Note #{(note) => note.id?.substring(0, 6)}
+						Image Manager • Note
 					</div>
 				</div>
 			)}

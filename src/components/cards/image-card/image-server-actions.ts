@@ -2,6 +2,8 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { fromPrismaImageToCardData } from '@/transformers/image/transformer';
+import type { ImageWithStats } from '@/types/entities/image/types';
 
 // Logger específico para acciones de ImageCard
 const imageCardLogger = serverLogger.withContext('ImageCardActions');
@@ -61,74 +63,26 @@ export interface ImageCardData {
 /**
  * Obtiene la información de una imagen para mostrar en la tarjeta
  * @param imageId ID de la imagen
- * @returns Datos de la imagen con su thumbnail
+ * @returns Datos de la imagen con su thumbnail y estadísticas
  */
-export async function getImageCardData(imageId: string): Promise<ImageCardData> {
+export async function getImageCardData(imageId: string): Promise<ImageWithStats | null> {
 	try {
 		imageCardLogger.info('🔍 Obteniendo información de imagen para tarjeta:', imageId);
 		const prisma = await getPrismaClient();
 
-		// Verificar que el ID es válido
 		if (!imageId) {
-			throw new Error('ID de imagen no proporcionado');
+			imageCardLogger.warn('⚠️ ID de imagen no proporcionado');
+			return null;
 		}
 
-		// Obtener la imagen con sus datos relacionados
 		const image = await prisma.image.findUnique({
-			where: {
-				id: imageId,
-			},
-			select: {
-				id: true,
-				name: true,
-				description: true,
-				thumbnail: true,
-				thumbnailWidth: true,
-				thumbnailHeight: true,
-				width: true,
-				height: true,
-				size: true,
-				metadata: true,
-				isFavorite: true,
-				hash: true,
-				folderId: true,
-				createdAt: true,
-				updatedAt: true,
-				tags: {
-					select: {
-						id: true,
-						name: true,
-						color: true,
-					},
-				},
-				albums: {
-					select: {
-						id: true,
-						name: true,
-						color: true,
-					},
-				},
-				characters: {
-					select: {
-						id: true,
-						name: true,
-						color: true,
-					},
-				},
-				places: {
-					select: {
-						id: true,
-						name: true,
-						color: true,
-					},
-				},
-				groups: {
-					select: {
-						id: true,
-						name: true,
-						color: true,
-					},
-				},
+			where: { id: imageId },
+			include: {
+				tags: true,
+				albums: true,
+				characters: true,
+				places: true,
+				groups: true,
 				_count: {
 					select: {
 						tags: true,
@@ -144,52 +98,18 @@ export async function getImageCardData(imageId: string): Promise<ImageCardData> 
 		});
 
 		if (!image) {
-			throw new Error(`Imagen no encontrada: ${imageId}`);
+			imageCardLogger.warn(`⚠️ Imagen no encontrada: ${imageId}`);
+			return null;
 		}
 
-		// Parsear metadatos si existen
-		let parsedMetadata: ImageMetadata | null = null;
-		if (image.metadata) {
-			try {
-				parsedMetadata = JSON.parse(image.metadata);
-			} catch (err) {
-				imageCardLogger.warn('⚠️ Error al parsear metadatos de imagen:', err);
-			}
-		}
-
-		// Convertir thumbnail a URL de datos
-		let thumbnailUrl = '';
-		if (image.thumbnail) {
-			thumbnailUrl = `data:image/jpeg;base64,${Buffer.from(image.thumbnail).toString('base64')}`;
-		}
-
-		const result: ImageCardData = {
-			id: image.id,
-			name: image.name,
-			description: image.description,
-			thumbnailUrl,
-			width: image.width,
-			height: image.height,
-			metadata: parsedMetadata,
-			tags: image.tags,
-			albums: image.albums,
-			characters: image.characters,
-			places: image.places,
-			groups: image.groups,
-			hash: image.hash,
-			folderId: image.folderId,
-			isFavorite: image.isFavorite,
-			createdAt: image.createdAt,
-			updatedAt: image.updatedAt,
-			_count: image._count,
-		};
-
+		// @ts-expect-error - El tipo de Prisma no coincide exactamente, pero el transformer lo maneja
+		const result = fromPrismaImageToCardData(image);
 		imageCardLogger.info('✅ Información de imagen obtenida correctamente');
 		return result;
 	} catch (error) {
 		imageCardLogger.error('❌ Error obteniendo información de imagen:', error);
-		throw new Error(
-			`Error al obtener datos de imagen: ${error instanceof Error ? error.message : 'Error desconocido'}`
-		);
+		// En lugar de lanzar un error que rompa la UI, devolvemos null
+		// El componente Card se encargará de mostrar un estado de error
+		return null;
 	}
 }

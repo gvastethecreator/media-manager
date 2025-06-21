@@ -3,21 +3,32 @@
  * @module hooks/use-settings
  */
 
+import { selectActiveProfileId, selectAdvanced, selectAppearance, selectError, selectIsInitialized, selectIsLoading, selectIsSaving, selectLanguage, selectNotifications, selectPrivacy, selectSettings, selectTheme, useSettingsStore } from '@/store/settings.store';
 import { useEffect } from 'react';
-import { useSettingsStore } from '@/store/settings.store';
 
 /**
  * Hook personalizado que proporciona acceso a la configuración global
  * y funciones para manipularla
  */
 export function useSettings() {
+	// Selectors for state
+	const settings = useSettingsStore(selectSettings);
+	const isLoading = useSettingsStore(selectIsLoading);
+	const isSaving = useSettingsStore(selectIsSaving);
+	const error = useSettingsStore(selectError);
+	const isInitialized = useSettingsStore(selectIsInitialized);
+	const activeProfileId = useSettingsStore(selectActiveProfileId);
+
+	// Selectors for derived state
+	const appearance = useSettingsStore(selectAppearance);
+	const notifications = useSettingsStore(selectNotifications);
+	const privacy = useSettingsStore(selectPrivacy);
+	const advanced = useSettingsStore(selectAdvanced);
+	const theme = useSettingsStore(selectTheme);
+	const language = useSettingsStore(selectLanguage);
+
+	// Actions
 	const {
-		settings,
-		isLoading,
-		isSaving,
-		error,
-		isInitialized,
-		activeProfileId,
 		initialize,
 		loadSystemSettings,
 		loadProfileSettings,
@@ -25,7 +36,7 @@ export function useSettings() {
 		resetSettings,
 		setActiveProfile,
 		setError,
-	} = useSettingsStore;
+	} = useSettingsStore.getState();
 
 	// Inicializar la configuración al montar el componente
 	useEffect(() => {
@@ -35,20 +46,20 @@ export function useSettings() {
 	}, [isInitialized, initialize]);
 
 	// Funciones de utilidad para trabajar con secciones específicas
-	const updateAppearance = (appearance: Record<string, unknown>) => {
-		updateSettings({ appearance });
+	const updateAppearance = (newAppearance: Record<string, unknown>) => {
+		updateSettings({ appearance: { ...appearance, ...newAppearance } });
 	};
 
-	const updateNotifications = (notifications: Record<string, unknown>) => {
-		updateSettings({ notifications });
+	const updateNotifications = (newNotifications: Record<string, unknown>) => {
+		updateSettings({ notifications: { ...notifications, ...newNotifications } });
 	};
 
-	const updatePrivacy = (privacy: Record<string, unknown>) => {
-		updateSettings({ privacy });
+	const updatePrivacy = (newPrivacy: Record<string, unknown>) => {
+		updateSettings({ privacy: { ...privacy, ...newPrivacy } });
 	};
 
-	const updateAdvanced = (advanced: Record<string, unknown>) => {
-		updateSettings({ advanced });
+	const updateAdvanced = (newAdvanced: Record<string, unknown>) => {
+		updateSettings({ advanced: { ...advanced, ...newAdvanced } });
 	};
 
 	return {
@@ -61,10 +72,10 @@ export function useSettings() {
 		activeProfileId,
 
 		// Secciones de configuración
-		appearance: settings?.appearance,
-		notifications: settings?.notifications,
-		privacy: settings?.privacy,
-		advanced: settings?.advanced,
+		appearance,
+		notifications,
+		privacy,
+		advanced,
 
 		// Acciones para toda la configuración
 		loadSystemSettings,
@@ -83,7 +94,7 @@ export function useSettings() {
 		setError,
 
 		// Valores específicos con fallback
-		theme: settings?.appearance?.theme || 'system',
-		language: settings?.appearance?.language || 'es',
+		theme,
+		language,
 	};
 }

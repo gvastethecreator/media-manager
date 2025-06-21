@@ -1,18 +1,19 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+
 import { createNote, updateNote } from '@/app/actions/notes/note.actions';
+import { DynamicCreateForm, type FormField } from '@/components/settings/common/dynamic-create-form';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import toastService from '@/services/toast.service';
 import { NoteCategory } from '@/types/entities/note/enums';
-import type { NoteComplete as Note } from '@/types/entities/notes';
-import { DynamicCreateForm } from '../common/dynamic-create-form';
+import type { NoteBase, NoteCreateInput, NoteUpdateInput } from '@/types/entities/note/types';
 
-// Esquema de validación con Zod
+// Esquema de validación con Zod, alineado con los tipos canónicos
 const noteSchema = z.object({
 	title: z.string().min(1, 'El título es requerido').max(100, 'El título es demasiado largo'),
 	summary: z.string().optional(),
@@ -20,40 +21,22 @@ const noteSchema = z.object({
 	color: z.string().min(1, 'El color es requerido'),
 	emoji: z.string().min(1, 'El emoji es requerido'),
 	category: z.nativeEnum(NoteCategory).optional(),
-	tags: z.string().optional(),
+	tags: z.array(z.string()).optional().default([]), // Manejar como array de strings
 	isFavorite: z.boolean().default(false),
 });
 
-type NoteForm = z.infer<typeof noteSchema>;
-
-// Definir una interfaz extendida para tener las propiedades adicionales
-interface ExtendedNote extends Note {
-	summary?: string;
-	color?: string;
-	emoji?: string;
-}
+// El tipo del formulario se infiere del esquema
+type NoteFormData = z.infer<typeof noteSchema>;
 
 interface CreateNoteFormProps {
-	note?: ExtendedNote | null;
+	note?: NoteBase;
 	isEditing?: boolean;
-	onCreated?: (note: Note) => void;
-	onUpdated?: (note: Note) => void;
+	onSuccess?: (note: NoteBase) => void;
 	onCancel?: () => void;
-	onPreview?: (data: any) => void;
 }
 
-export function CreateNoteForm({
-	note,
-	isEditing = false,
-	onCreated,
-	onUpdated,
-	onCancel,
-	onPreview,
-}: CreateNoteFormProps) {
-	const [_isSubmitting, setIsSubmitting] = useState(false);
-
-	// Configurar react-hook-form
-	const form = useForm<NoteForm>({
+export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel }: CreateNoteFormProps) {
+	const form = useForm<NoteFormData>({
 		resolver: zodResolver(noteSchema),
 		defaultValues: {
 			title: '',
@@ -61,114 +44,76 @@ export function CreateNoteForm({
 			content: '',
 			color: '#3b82f6',
 			emoji: '📝',
-			category: undefined,
-			tags: '[]',
+			category: NoteCategory.GENERAL,
+			tags: [],
 			isFavorite: false,
 		},
 	});
-
-	// Actualizar vista previa en tiempo real
-	useEffect(() => {
-		if (onPreview) {
-			const subscription = form.watch((data) => {
-				onPreview(data);
-			});
-			return () => subscription.unsubscribe();
-		}
-	}, [form, onPreview]);
 
 	// Cargar datos iniciales si estamos editando
 	useEffect(() => {
 		if (note && isEditing) {
 			form.reset({
-				title: note.title,
-				summary: (note as ExtendedNote).summary || '',
+				...note,
+				summary: note.summary || '',
 				content: note.content || '',
-				color: (note as ExtendedNote).color || '#3b82f6',
-				emoji: (note as ExtendedNote).emoji || '📝',
-				category: note.category as NoteCategory | undefined,
-				tags: note.tags || '[]',
-				isFavorite: note.isFavorite || false,
+				tags: Array.isArray(note.tags) ? note.tags : [],
 			});
 		}
 	}, [note, isEditing, form]);
 
-	// Manejar envío del formulario
-	const _onSubmit = async (data: NoteForm) => {
+	const onSubmit = async (data: NoteFormData) => {
 		try {
-			setIsSubmitting(true);
-
-			if (isEditing && note) {
-				// Actualizar nota existente - incluir ID como parte de la actualización
-				const updatedNote = await updateNote(note.id, {
-					...data,
-					id: note.id,
-				});
-				if (onUpdated) {
-					onUpdated(updatedNote);
-				}
+			let result: NoteBase;
+			if (isEditing && note?.id) {
+				const updateData: NoteUpdateInput = { ...data };
+				result = await updateNote(note.id, updateData);
 				toastService.success('Nota actualizada correctamente');
 			} else {
-				// Crear nueva nota
-				const newNote = await createNote(data);
-				if (onCreated) {
-					onCreated(newNote);
-				}
-				form.reset(); // Limpiar formulario después de crear
+				const createData: NoteCreateInput = { ...data };
+				result = await createNote(createData);
 				toastService.success('Nota creada correctamente');
+				form.reset(); // Limpiar el formulario después de crear
 			}
+			onSuccess?.(result);
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 			toastService.error(isEditing ? 'Error al actualizar la nota' : 'Error al crear la nota', {
 				description: errorMessage,
 			});
-		} finally {
-			setIsSubmitting(false);
 		}
 	};
 
-	const optionalFields = [
+	// Definición de campos para DynamicCreateForm
+	const fields: FormField<NoteFormData>[] = [
+		{ name: 'title', label: 'Título', placeholder: 'Título de la nota...' },
+		{ name: 'summary', label: 'Resumen', placeholder: 'Un resumen corto...' },
+		{ name: 'content', label: 'Contenido', type: 'textarea', placeholder: 'Escribe tu nota aquí...' },
+	];
+
+	const optionalFields: FormField<NoteFormData>[] = [
 		{
 			name: 'emoji',
 			label: 'Emoji',
-			render: ({ value, onChange }: any) => (
-				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
-			),
+			render: ({ field }) => <EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact />,
 		},
 		{
 			name: 'color',
 			label: 'Color',
-			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} compact showLabel={false} />,
+			render: ({ field }) => <ColorPicker value={field.value} onChange={field.onChange} compact />,
 		},
-		{
-			name: 'description',
-			label: 'Descripción',
-			render: ({ value, onChange }: any) => (
-				<textarea
-					placeholder="Descripción de la nota..."
-					value={value || ''}
-					onChange={(e) => onChange(e.target.value)}
-					rows={3}
-					className="text-xs resize-none w-full border rounded p-2"
-				/>
-			),
-		},
-		// ...agregar más campos opcionales si es necesario...
+		// Aquí puedes agregar el campo de tags si tienes un componente para ello
 	];
 
 	return (
-		<DynamicCreateForm
+		<DynamicCreateForm<NoteFormData>
+			form={form}
+			fields={fields}
 			optionalFields={optionalFields}
-			onSubmit={async (data) => {
-				if (isEditing && note) {
-					await updateNote(note.id, data);
-					onUpdated?.({ ...note, ...data });
-				} else {
-					const created = await createNote(data);
-					onCreated?.(created);
-				}
-			}}
-			submitLabel={isEditing ? 'Guardar cambios' : 'Crear nota'}
+			onSubmit={onSubmit}
+			isSubmitting={form.formState.isSubmitting}
+			submitLabel={isEditing ? 'Guardar Cambios' : 'Crear Nota'}
+			onCancel={onCancel}
 		/>
 	);
 }

@@ -14,7 +14,7 @@ const logger = serverLogger.withContext('TagConverters');
  * @param tag Objeto tag a convertir
  * @returns Una versión TagComplete del objeto
  */
-export function mapTagToComplete(tag: any): TagComplete {
+export function mapTagToComplete(tag: Partial<TagComplete>): TagComplete {
 	try {
 		// Si ya es un TagComplete, retornarlo directamente
 		if (Object.hasOwn(tag, '_count')) {
@@ -126,7 +126,10 @@ export function tagToDisplayObject(tag: TagBase | TagComplete) {
 			description: tag.description || '',
 			isFavorite: tag.isFavorite,
 			hasShortcut: !!tag.shortcut,
-			itemCount: '_count' in tag ? (tag._count.images || 0) + (tag._count.videos || 0) + (tag._count.albums || 0) : 0,
+			itemCount:
+				'_count' in tag && tag._count
+					? (tag._count.images || 0) + (tag._count.videos || 0) + (tag._count.albums || 0)
+					: 0,
 		};
 	} catch (error) {
 		logger.error('Error convirtiendo a objeto de visualización:', error);

@@ -1,5 +1,5 @@
-import type { Image } from '@prisma/client';
 import type { AIMetadata, FileMetadata } from '@/types/metadata.types';
+import type { Image } from '@prisma/client';
 import type sharp from 'sharp';
 
 // Configuración de retry
@@ -51,6 +51,8 @@ export interface MetadataOptions {
 	skipExif?: boolean;
 	skipSharp?: boolean;
 	skipParser?: boolean;
+	skipIptc?: boolean;
+	skipXmp?: boolean;
 	retry?: RetryConfig;
 }
 

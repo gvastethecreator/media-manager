@@ -7,7 +7,20 @@
  */
 
 import { z } from 'zod';
-import { CollectionCategory, CollectionRarity } from './enums';
+import type { AlbumComplete } from '../album';
+import type { CharacterComplete } from '../character';
+import type { ConceptComplete } from '../concept';
+import type { GroupComplete } from '../group';
+import type { ImageComplete } from '../image';
+import type { NoteComplete } from '../note';
+import type { PlaceComplete } from '../place';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
+import type { TagComplete } from '../tag';
+import type { VideoComplete } from '../video';
+import type { WildcardComplete } from '../wildcard';
+import type { WorldItemComplete } from '../world-item';
+import { CollectionCategory } from './enums';
 
 /**
  * Tipo base canónico para Collection - CORREGIDO para coincidir con Prisma
@@ -66,23 +79,28 @@ export interface CollectionExtended extends CollectionBase {
 /**
  * Collection con relaciones completas
  */
-export interface CollectionComplete extends CollectionBase {
+export interface CollectionComplete extends Omit<CollectionBase, 'filters' | 'sortBy' | 'editions'> {
+	// Campos deserializados
+	filters: CollectionFilter[];
+	sortBy: CollectionSortBy | null;
+	editions: CollectionEdition[];
+
 	// Relaciones con contenido
-	images?: { id: string }[];
-	videos?: { id: string }[];
+	images?: ImageComplete[];
+	videos?: VideoComplete[];
 
 	// Relaciones con entidades principales
-	albums?: { id: string }[];
-	tags?: { id: string }[];
-	characters?: { id: string }[];
-	places?: { id: string }[];
-	worldItems?: { id: string }[];
-	concepts?: { id: string }[];
-	prompts?: { id: string }[];
-	notes?: { id: string }[];
-	wildcards?: { id: string }[];
-	properties?: { id: string }[];
-	groups?: { id: string }[];
+	albums?: AlbumComplete[];
+	tags?: TagComplete[];
+	characters?: CharacterComplete[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemComplete[];
+	concepts?: ConceptComplete[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupComplete[];
 
 	// Conteos
 	_count?: {
@@ -147,7 +165,6 @@ export interface CollectionFilters {
 	search?: string;
 	isFavorite?: boolean;
 	category?: CollectionCategory[];
-	rarity?: CollectionRarity[];
 	tagIds?: string[];
 	imageCount?: {
 		min?: number;

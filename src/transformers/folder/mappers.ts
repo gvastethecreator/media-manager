@@ -5,14 +5,14 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-	FolderComplete,
-	FolderCreateInput,
-	FolderFilters,
-	FolderSearchOptions,
-	FolderUpdateInput,
+    FolderComplete,
+    FolderCreateInput,
+    FolderFilters,
+    FolderSearchOptions,
+    FolderUpdateInput,
 } from '@/types/entities/folder';
 import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
+import type { Prisma, Folder as PrismaFolder } from '@prisma/client';
 import { normalizeFolderPath } from './serializers';
 
 const logger = serverLogger.withContext('FolderMappers');
@@ -111,7 +111,7 @@ function mapFolderFiltersToPrisma(filters: FolderFilters): Prisma.FolderWhereInp
  * @param folder Objeto FolderComplete
  * @returns Datos para Prisma
  */
-export function transformCompleteFolderToPrisma(folder: FolderComplete): any {
+export function transformCompleteFolderToPrisma(folder: FolderComplete): PrismaFolder {
 	try {
 		// Extraer propiedades no persistibles
 		const { children, parent, stats, _count, metadata, ...persistableData } = folder;
@@ -136,7 +136,7 @@ export function transformCompleteFolderToPrisma(folder: FolderComplete): any {
  * @param folder Objeto Folder
  * @returns Datos para Prisma
  */
-export function transformFolderToPrisma(folder: Folder): any {
+export function transformFolderToPrisma(folder: Folder): PrismaFolder {
 	try {
 		// Extraer la propiedad _count que no es persistible
 		const { _count, ...persistableData } = folder;

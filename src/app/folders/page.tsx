@@ -1,18 +1,9 @@
-import Link from 'next/link';
-import { getAllFolders } from '@/app/actions/folder';
+import { type FolderComplete, getAllFolders } from '@/app/actions/folders';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default async function FoldersPage() {
-	const { success, data: folders, error } = await getAllFolders();
-
-	if (!success) {
-		return (
-			<div className="p-8">
-				<h1 className="text-2xl font-bold mb-4">Error al cargar carpetas</h1>
-				<p className="text-red-500">{error}</p>
-			</div>
-		);
-	}
+	const folders = await getAllFolders();
 
 	return (
 		<div className="p-8">
@@ -32,7 +23,7 @@ export default async function FoldersPage() {
 				</div>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-					{folders.map((folder) => (
+					{folders.map((folder: FolderComplete) => (
 						<Link
 							key={folder.id}
 							href={`/folders/${folder.id}`}

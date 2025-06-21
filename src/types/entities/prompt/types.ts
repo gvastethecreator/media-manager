@@ -1,42 +1,40 @@
 /**
- * 💬 Tipos canónicos para la entidad Prompt
- *
- * - Este archivo contiene todos los tipos base, relaciones e inputs para Prompt.
- * - Usar SIEMPRE estos tipos en transformers, services y server actions.
- * - No usar ni importar tipos de base.ts (eliminado).
- *
- * Estructura:
- * - PromptBase: tipo canónico principal
- * - PromptRelations: relaciones con otras entidades (any[] si no existen tipos canónicos)
- * - PromptCreateInput, PromptUpdateInput: inputs para mutaciones
- *
- * 🛡️ Todos los campos clave (id, createdAt, updatedAt) son obligatorios.
- * 📝 Documenta cualquier cambio relevante aquí.
+ * @file Tipos canónicos para la entidad Prompt
+ * @module types/entities/prompt/types
+ * @description Define las estructuras de datos, inputs y tipos para la entidad Prompt.
  */
 
-/**
- * @file Tipos para la entidad Prompt
- * @module types/entities/prompt/prompt-types
- */
+import type { AlbumComplete } from '../album';
+import type { CharacterComplete } from '../character';
+import type { CollectionComplete } from '../collection';
+import type { ConceptComplete } from '../concept';
+import type { GroupComplete } from '../group';
+import type { ImageComplete } from '../image';
+import type { NoteComplete } from '../note';
+import type { PlaceComplete } from '../place';
+import type { PropertyComplete } from '../property';
+import type { TagComplete } from '../tag';
+import type { VideoComplete } from '../video';
+import type { WildcardComplete } from '../wildcard';
+import type { WorldItemComplete } from '../world-item';
 
-import type { BaseEntity } from '@/types/entities/base';
-
 /**
- * Interfaz para parámetros de un prompt
+ * Define la estructura de un parámetro dentro de un prompt.
  */
 export interface PromptParameter {
 	name: string;
 	type: 'string' | 'number' | 'boolean' | 'array' | 'object';
 	description?: string;
 	required?: boolean;
-	defaultValue?: any;
+	defaultValue?: unknown;
 	options?: string[];
 }
 
 /**
- * Interfaz base para prompt extendiendo BaseEntity
+ * 🎯 Tipo completo para Prompt con todas las relaciones y campos JSON deserializados.
  */
-export interface PromptBase extends BaseEntity {
+export interface PromptComplete {
+	id: string;
 	name: string;
 	emoji: string;
 	color: string;
@@ -44,135 +42,102 @@ export interface PromptBase extends BaseEntity {
 	content: string;
 	purpose: string;
 	category: string;
-	parameters: string; // String JSON que representa un objeto
-	tags?: string; // String JSON que representa un array (opcional)
 	featuredImage: string | null;
 	isFavorite: boolean;
-}
+	createdAt: Date;
+	updatedAt: Date;
 
-/**
- * 🎯 Alias para compatibilidad
- */
-export type Prompt = PromptBase;
+	// Campos JSON deserializados
+	parameters: PromptParameter[];
+	tags: string[]; // El campo `tags` es un array de strings serializado
 
-/**
- * Relaciones que puede tener un Prompt (usando any[] para evitar dependencias circulares)
- */
-export interface PromptRelations {
-	images?: any[];
-	videos?: any[];
-	albums?: any[];
-	collections?: any[];
-	tags?: any[];
-	characters?: any[];
-	places?: any[];
-	worldItems?: any[];
-	concepts?: any[];
-	notes?: any[];
-	wildcards?: any[];
-	properties?: any[];
-	groups?: any[];
-}
+	// Relaciones
+	images?: ImageComplete[];
+	videos?: VideoComplete[];
+	albums?: AlbumComplete[];
+	collections?: CollectionComplete[];
+	tagEntities?: TagComplete[];
+	characters?: CharacterComplete[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemComplete[];
+	concepts?: ConceptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupComplete[];
 
-/**
- * Conteos de relaciones de un Prompt
- */
-export interface PromptCounts {
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
+	// Conteos
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tagEntities?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
 	};
 }
 
 /**
- * Tipo completo de Prompt con relaciones y conteos
+ * ➕ Input para crear un nuevo prompt.
  */
-export type PromptComplete = PromptBase & PromptRelations & PromptCounts;
+export interface PromptCreateInput {
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	content?: string;
+	purpose?: string;
+	category?: string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
 
-/**
- * Alias para compatibilidad con código existente
- */
-export type PromptWithRelations = PromptComplete;
-export type PromptExtended = PromptComplete;
-export type PromptWithStats = PromptComplete;
+	// Campos JSON
+	parameters?: PromptParameter[];
+	tags?: string[];
 
-/**
- * Interfaz para crear un prompt
- */
-export interface PromptCreateInput extends Omit<PromptBase, 'id' | 'createdAt' | 'updatedAt'> {
-	// Relaciones opcionales para conectar al crear
-	images?: { id: string }[];
-	videos?: { id: string }[];
-	albums?: { id: string }[];
-	collections?: { id: string }[];
-	tags?: { id: string }[];
-	characters?: { id: string }[];
-	places?: { id: string }[];
-	worldItems?: { id: string }[];
-	concepts?: { id: string }[];
-	notes?: { id: string }[];
-	wildcards?: { id: string }[];
-	properties?: { id: string }[];
-	groups?: { id: string }[];
+	// IDs de relaciones
+	imageIds?: string[];
+	videoIds?: string[];
+	albumIds?: string[];
+	collectionIds?: string[];
+	tagEntityIds?: string[];
+	characterIds?: string[];
+	placeIds?: string[];
+	worldItemIds?: string[];
+	conceptIds?: string[];
+	noteIds?: string[];
+	wildcardIds?: string[];
+	propertyIds?: string[];
+	groupIds?: string[];
 }
 
 /**
- * Interfaz para actualizar un prompt
+ * 🔄 Input para actualizar un prompt existente.
  */
-export interface PromptUpdateInput extends Partial<Omit<PromptBase, 'id' | 'createdAt' | 'updatedAt'>> {
-	// Relaciones para conectar/desconectar
-	connect?: Partial<PromptRelations>;
-	disconnect?: Partial<PromptRelations>;
+export type PromptUpdateInput = Partial<PromptCreateInput>;
+
+/**
+ * 🔍 Opciones para buscar y filtrar prompts.
+ */
+export interface PromptSearchOptions {
+	skip?: number;
+	take?: number;
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	filters?: {
+		search?: string;
+		category?: string[];
+		purpose?: string[];
+		onlyFavorites?: boolean;
+		tags?: string[];
+		contentContains?: string;
+	};
+	includeRelations?: boolean;
 }
 
-/**
- * Alias para compatibilidad con código existente
- */
-export type CreatePromptData = PromptCreateInput;
-export type UpdatePromptData = PromptUpdateInput;
-
-/**
- * Interfaz para filtros de búsqueda de prompts
- */
-export interface PromptFilters {
-	searchQuery?: string;
-	categories?: string[];
-	purposes?: string[];
-	onlyFavorites?: boolean;
-	contentContains?: string;
-}
-
-/**
- * Enumeración para criterios de ordenación
- */
-export enum PromptSortCriteria {
-	NAME_ASC = 'name:asc',
-	NAME_DESC = 'name:desc',
-	CREATED_ASC = 'created:asc',
-	CREATED_DESC = 'created:desc',
-	UPDATED_ASC = 'updated:asc',
-	UPDATED_DESC = 'updated:desc',
-}
-
-/**
- * Mapa de propiedades para ordenación
- */
-export const PROMPT_SORT_PROPERTY_MAP: Record<PromptSortCriteria, string> = {
-	[PromptSortCriteria.NAME_ASC]: 'name',
-	[PromptSortCriteria.NAME_DESC]: 'name',
-	[PromptSortCriteria.CREATED_ASC]: 'createdAt',
-	[PromptSortCriteria.CREATED_DESC]: 'createdAt',
-	[PromptSortCriteria.UPDATED_ASC]: 'updatedAt',
-	[PromptSortCriteria.UPDATED_DESC]: 'updatedAt',
-};

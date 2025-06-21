@@ -7,6 +7,19 @@
  */
 
 import type { z } from 'zod';
+import type { AlbumComplete } from '../album';
+import type { CharacterComplete } from '../character';
+import type { CollectionComplete } from '../collection';
+import type { ConceptComplete } from '../concept';
+import type { GroupComplete } from '../group';
+import type { ImageComplete } from '../image';
+import type { PlaceComplete } from '../place';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
+import type { TagComplete } from '../tag';
+import type { VideoComplete } from '../video';
+import type { WildcardComplete } from '../wildcard';
+import type { WorldItemComplete } from '../world-item';
 import type { NoteSchema } from './schema';
 
 /**
@@ -30,19 +43,19 @@ export interface NoteBase {
  * 🔗 Relaciones de Note (solo como any[] si no existen tipos canónicos)
  */
 export interface NoteRelations {
-	albums?: any[];
-	characters?: any[];
-	collections?: any[];
-	concepts?: any[];
-	groups?: any[];
-	images?: any[];
-	places?: any[];
-	prompts?: any[];
-	properties?: any[];
-	tags?: any[];
-	videos?: any[];
-	wildcards?: any[];
-	worldItems?: any[];
+	albums?: AlbumComplete[];
+	characters?: CharacterComplete[];
+	collections?: CollectionComplete[];
+	concepts?: ConceptComplete[];
+	groups?: GroupComplete[];
+	images?: ImageComplete[];
+	places?: PlaceComplete[];
+	prompts?: PromptComplete[];
+	properties?: PropertyComplete[];
+	tags?: TagComplete[];
+	videos?: VideoComplete[];
+	wildcards?: WildcardComplete[];
+	worldItems?: WorldItemComplete[];
 }
 
 /**
@@ -97,19 +110,19 @@ export interface NoteCreateInput {
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
-	images?: string[] | { id: string }[];
-	videos?: string[] | { id: string }[];
-	albums?: string[] | { id: string }[];
-	collections?: string[] | { id: string }[];
-	tags?: string[] | { id: string }[];
-	characters?: string[] | { id: string }[];
-	places?: string[] | { id: string }[];
-	worldItems?: string[] | { id: string }[];
-	concepts?: string[] | { id: string }[];
-	prompts?: string[] | { id: string }[];
-	wildcards?: string[] | { id: string }[];
-	properties?: string[] | { id: string }[];
-	groups?: string[] | { id: string }[];
+	images?: string[];
+	videos?: string[];
+	albums?: string[];
+	collections?: string[];
+	tags?: string[];
+	characters?: string[];
+	places?: string[];
+	worldItems?: string[];
+	concepts?: string[];
+	prompts?: string[];
+	wildcards?: string[];
+	properties?: string[];
+	groups?: string[];
 }
 
 /**
@@ -124,19 +137,19 @@ export interface NoteUpdateInput {
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
-	images?: string[] | { id: string }[];
-	videos?: string[] | { id: string }[];
-	albums?: string[] | { id: string }[];
-	collections?: string[] | { id: string }[];
-	tags?: string[] | { id: string }[];
-	characters?: string[] | { id: string }[];
-	places?: string[] | { id: string }[];
-	worldItems?: string[] | { id: string }[];
-	concepts?: string[] | { id: string }[];
-	prompts?: string[] | { id: string }[];
-	wildcards?: string[] | { id: string }[];
-	properties?: string[] | { id: string }[];
-	groups?: string[] | { id: string }[];
+	images?: string[];
+	videos?: string[];
+	albums?: string[];
+	collections?: string[];
+	tags?: string[];
+	characters?: string[];
+	places?: string[];
+	worldItems?: string[];
+	concepts?: string[];
+	prompts?: string[];
+	wildcards?: string[];
+	properties?: string[];
+	groups?: string[];
 }
 
 /**

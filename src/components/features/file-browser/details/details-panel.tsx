@@ -1,7 +1,6 @@
 'use client';
 
 import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
-import { getImageMetadataById } from '@/app/actions/metadata/metadata.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -193,7 +192,7 @@ export function DetailsPanel({ selectedItems }: DetailsPanelProps) {
 
 			// Crear nueva promesa para la petición
 			detailsLogger.info('Solicitando metadata del servidor');
-			const metadataPromise = getImageMetadataById(itemId).then((result) => {
+			const metadataPromise = getImageMetadata(itemId).then((result: any) => {
 				// Si no hay resultado del servidor pero tenemos metadata local, intentar parsearla directamente
 				if (!result && itemMetadata) {
 					detailsLogger.info('Intentando parsear metadata local directamente');

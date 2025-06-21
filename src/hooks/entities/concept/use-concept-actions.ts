@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
 import { useConceptStore } from '@/store/entities/concept';
-import type { ConceptBase } from '@/types/entities/concept/base';
+import type { ConceptCreateInput, ConceptUpdateInput } from '@/types/entities/concept/types';
 import { EntityType } from '@/types/entities/entities';
+import { useCallback } from 'react';
 
 /**
  * Hook que proporciona acciones para gestionar conceptos
@@ -32,7 +32,7 @@ export function useConceptActions() {
 
 	// Acción para crear un concepto
 	const handleCreateConcept = useCallback(
-		async (data: Omit<ConceptBase, 'id'>) => {
+		async (data: ConceptCreateInput) => {
 			try {
 				await createConcept(data);
 				return true;
@@ -46,7 +46,7 @@ export function useConceptActions() {
 
 	// Acción para actualizar un concepto
 	const handleUpdateConcept = useCallback(
-		async (id: string, data: Partial<ConceptBase>) => {
+		async (id: string, data: ConceptUpdateInput) => {
 			try {
 				await updateConcept(id, data);
 				return true;

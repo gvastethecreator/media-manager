@@ -3,9 +3,9 @@
  * @module utils/world-item/helpers
  */
 
-import type { WorldItemRarity, WorldItemType } from '../../types/entities/world-item/enums';
-import type { WorldItemExtended as WorldItem } from '../../types/entities/world-item/extended';
-import type { WorldItemProperty, WorldItemStats } from '../../types/entities/world-item/stats-types';
+import type { WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
+import type { WorldItemExtended } from '@/types/entities/world-item/extended';
+import type { WorldItemProperty, WorldItemStats } from '@/types/entities/world-item/stats-types';
 
 /**
  * Calcula el nivel de potencia de un objeto basado en sus estadísticas
@@ -38,7 +38,7 @@ export function calculatePowerLevel(stats: WorldItemStats): number {
 	}
 
 	// Añadir puntos por efectos
-	const effects = (stats as unknown as { effects?: unknown[] }).effects;
+	const effects = (stats as any).effects;
 	if (Array.isArray(effects) && effects.length > 0) {
 		powerLevel += effects.length * 5;
 		statCount++;
@@ -59,7 +59,7 @@ export function calculatePowerLevel(stats: WorldItemStats): number {
  * @param name Nombre de la propiedad
  * @returns Valor de la propiedad o null si no existe
  */
-export function findPropertyValue(properties: WorldItemProperty[], name: string): string | number | boolean | null {
+export function findPropertyValue(properties: WorldItemProperty[], name: string): string | number | null {
 	const property = properties.find((p) => p.name.toLowerCase() === name.toLowerCase());
 	return property ? property.value : null;
 }
@@ -73,7 +73,7 @@ export function findPropertyValue(properties: WorldItemProperty[], name: string)
  * @returns Verdadero si cumple con todos los requisitos
  */
 export function meetsRequirements(
-	worldItem: WorldItem,
+	worldItem: WorldItemExtended,
 	requiredLevel?: number,
 	requiredTypes?: WorldItemType[],
 	requiredRarities?: WorldItemRarity[]
@@ -109,7 +109,7 @@ export function meetsRequirements(
  * @param criteria Criterio de ordenación
  * @returns Resultado de la comparación (-1, 0, 1)
  */
-export function compareWorldItems(a: WorldItem, b: WorldItem, criteria: string): number {
+export function compareWorldItems(a: WorldItemExtended, b: WorldItemExtended, criteria: string): number {
 	// Ordenar por nombre (criterio por defecto)
 	if (!criteria || criteria === 'name_asc') {
 		return a.name.localeCompare(b.name);
@@ -121,20 +121,20 @@ export function compareWorldItems(a: WorldItem, b: WorldItem, criteria: string):
 
 	// Ordenar por fecha de creación
 	if (criteria === 'created_asc') {
-		return (a.createdAt?.getTime() ?? 0) - (b.createdAt?.getTime() ?? 0);
+		return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 	}
 
 	if (criteria === 'created_desc') {
-		return (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0);
+		return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
 	}
 
 	// Ordenar por fecha de actualización
 	if (criteria === 'updated_asc') {
-		return (a.updatedAt?.getTime() ?? 0) - (b.updatedAt?.getTime() ?? 0);
+		return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
 	}
 
 	if (criteria === 'updated_desc') {
-		return (b.updatedAt?.getTime() ?? 0) - (a.updatedAt?.getTime() ?? 0);
+		return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
 	}
 
 	// Ordenar por tipo
@@ -177,7 +177,7 @@ export function compareWorldItems(a: WorldItem, b: WorldItem, criteria: string):
  * @returns Lista filtrada de objetos
  */
 export function filterWorldItems(
-	worldItems: WorldItem[],
+	worldItems: WorldItemExtended[],
 	filters: {
 		searchQuery?: string;
 		categories?: string[];
@@ -189,7 +189,7 @@ export function filterWorldItems(
 		maxValue?: number;
 		onlyFavorites?: boolean;
 	}
-): WorldItem[] {
+): WorldItemExtended[] {
 	return worldItems.filter((item) => {
 		// Filtrar por búsqueda
 		if (filters.searchQuery) {
@@ -218,7 +218,7 @@ export function filterWorldItems(
 
 		// Filtrar por rareza
 		if (filters.rarities && filters.rarities.length > 0) {
-			if (!filters.rarities.includes(item.rarity as WorldItemRarity)) {
+			if (!filters.rarities.includes(item.rarity)) {
 				return false;
 			}
 		}

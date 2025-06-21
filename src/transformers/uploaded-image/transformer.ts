@@ -1,125 +1,56 @@
 /**
- * @file Transformer específico para UploadedImage
+ * @file Transformer for UploadedImage entity
  * @module transformers/uploaded-image/transformer
- * @description Transformadores para convertir entre diferentes representaciones de UploadedImage
+ * @description Contains functions to transform Prisma UploadedImage objects into application-level types.
  */
 
 import {
-	type UploadedImageBase,
-	type UploadedImageDimensions,
-	type UploadedImageExtended,
-	type UploadedImageType,
+    type UploadedImageBase,
+    type UploadedImageDimensions,
+    type UploadedImageExtended,
 } from '@/types/entities/uploaded-image/types';
-import type { MediaMetadata } from '@/types/metadata.types';
-import type { JSONString } from '@/utils/types/utility-types';
+import type { Prisma } from '@prisma/client';
+
+// Prisma payload for a complete uploaded image record with its relations (if any)
+type UploadedImageFromPrisma = Prisma.UploadedImageGetPayload<{
+	include: { image: true };
+}>;
+
+// Prisma payload for a basic uploaded image record
+type UploadedImageBaseFromPrisma = Prisma.UploadedImageGetPayload<{}>;
 
 /**
- * Tipo para el registro de base de datos de una imagen subida
+ * Transforms a base Prisma UploadedImage object into a canonical UploadedImageBase.
+ * @param uploadedImage - The Prisma object.
+ * @returns The canonical UploadedImageBase.
  */
-export type UploadedImageDBRecord = {
-	id: string;
-	name: string;
-	path: string;
-	type: string;
-	category: string;
-	hash: string;
-	imageId: string;
-	size: number;
-	width: number;
-	height: number;
-	metadata: string | null;
-	uploadedAt: Date;
-	createdAt: Date;
-	updatedAt: Date;
-};
-
-/**
- * Tipo para la respuesta API de una imagen subida
- */
-export type UploadedImageResult = UploadedImageExtended;
-
-/**
- * Transforma un registro de base de datos en una entidad base
- * @param record Registro de base de datos
- * @returns Entidad base de UploadedImage
- */
-export function fromDBToBase(record: UploadedImageDBRecord): UploadedImageBase {
+export function transformToUploadedImage(uploadedImage: UploadedImageBaseFromPrisma): UploadedImageBase {
+	// Metadata is already a string or null from Prisma, aligning with UploadedImageBase.
 	return {
-		id: record.id,
-		name: record.name,
-		path: record.path,
-		type: record.type as UploadedImageType,
-		category: record.category,
-		hash: record.hash,
-		imageId: record.imageId,
-		size: record.size,
-		width: record.width,
-		height: record.height,
-		metadata: record.metadata,
-		uploadedAt: record.uploadedAt,
-		createdAt: record.createdAt,
-		updatedAt: record.updatedAt,
+		...uploadedImage,
+		metadata: uploadedImage.metadata ?? null,
 	};
 }
 
 /**
- * Transforma una entidad base en una entidad extendida para cliente
- * @param entity Entidad base
- * @returns Entidad extendida con datos adicionales
+ * Transforms a Prisma UploadedImage object (with relations) into a canonical UploadedImageExtended.
+ * @param uploadedImage - The Prisma object, including relations.
+ * @returns The canonical UploadedImageExtended.
  */
-export function toExtended(entity: UploadedImageBase): UploadedImageExtended {
-	// Calcular dimensiones con aspect ratio
+export function transformToUploadedImageWithRelations(
+	uploadedImage: UploadedImageFromPrisma,
+): UploadedImageExtended {
 	const dimensions: UploadedImageDimensions = {
-		width: entity.width,
-		height: entity.height,
-		aspectRatio: entity.width / entity.height,
+		width: uploadedImage.width,
+		height: uploadedImage.height,
+		aspectRatio: uploadedImage.width / uploadedImage.height,
 	};
 
-	// Generar URLs
-	const url = `/api/images/${encodeURIComponent(entity.path)}`;
-	const thumbnailUrl = `/api/images/thumbnails/${encodeURIComponent(entity.path)}`;
-
-	// Parsear metadata si está disponible
-	const _parsedMetadata = entity.metadata ? (JSON.parse(entity.metadata) as MediaMetadata) : null;
-
 	return {
-		...entity,
+		...uploadedImage,
+		metadata: uploadedImage.metadata ?? null,
 		dimensions,
-		url,
-		thumbnailUrl,
-		metadata: entity.metadata as JSONString<MediaMetadata>,
+		url: `/uploads/${uploadedImage.name}`, // Example URL construction
+		thumbnailUrl: uploadedImage.image?.thumbnailPath, // Assuming 'image' relation has a thumbnail path
 	};
-}
-
-/**
- * Transforma una entrada de cliente a un registro de base de datos para creación
- * @param input Datos de entrada
- * @returns Datos parciales para base de datos
- */
-export function toDBRecord(input: Partial<UploadedImageBase>): Partial<UploadedImageDBRecord> {
-	const { metadata, ...rest } = input;
-
-	return {
-		...rest,
-		metadata: metadata ? (typeof metadata === 'string' ? metadata : JSON.stringify(metadata)) : null,
-	};
-}
-
-/**
- * Función de transformación completa de DB a cliente
- * @param record Registro de base de datos
- * @returns Entidad extendida
- */
-export function transformUploadedImage(record: UploadedImageDBRecord): UploadedImageExtended {
-	const base = fromDBToBase(record);
-	return toExtended(base);
-}
-
-/**
- * Función de transformación para múltiples registros
- * @param records Registros de base de datos
- * @returns Array de entidades extendidas
- */
-export function transformUploadedImages(records: UploadedImageDBRecord[]): UploadedImageExtended[] {
-	return records.map(transformUploadedImage);
 }

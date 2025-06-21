@@ -3,27 +3,11 @@
  * @module transformers/profile
  */
 
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 import { Language, type ProfileBase, type ProfilePreferencesSchemaType, ThemeMode } from '@/types/entities/profile';
 import { profilePreferencesSchema } from '@/types/entities/profile/schema';
-
-/**
- * Tipo para representar un perfil de Prisma
- */
-export interface ProfileFromPrisma {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description?: string | null;
-	isActive: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-	settingsId?: string | null;
-	imageId?: string | null;
-	settings?: string | Record<string, any> | null;
-}
+import type { Profile as ProfileFromPrisma } from '@prisma/client';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 /**
  * Tipo para el perfil extendido con datos adicionales
@@ -41,11 +25,11 @@ export interface ProfileExtended extends ProfileBase {
  */
 export function getThemeModeText(theme: ThemeMode): string {
 	switch (theme) {
-		case 'ThemeMode'.LIGHT:
+		case ThemeMode.LIGHT:
 			return 'Claro';
-		case 'ThemeMode'.DARK:
+		case ThemeMode.DARK:
 			return 'Oscuro';
-		case 'ThemeMode'.SYSTEM:
+		case ThemeMode.SYSTEM:
 			return 'Sistema';
 		default:
 			return 'Sistema';
@@ -59,13 +43,13 @@ export function getThemeModeText(theme: ThemeMode): string {
  */
 export function getLanguageText(language: Language): string {
 	switch (language) {
-		case 'Language'.SPANISH:
+		case Language.SPANISH:
 			return 'Español';
-		case 'Language'.ENGLISH:
+		case Language.ENGLISH:
 			return 'Inglés';
-		case 'Language'.PORTUGUESE:
+		case Language.PORTUGUESE:
 			return 'Portugués';
-		case 'Language'.FRENCH:
+		case Language.FRENCH:
 			return 'Francés';
 		default:
 			return 'Español';
@@ -182,11 +166,11 @@ export function transformProfiles(profiles: ProfileFromPrisma[]): ProfileExtende
  */
 export function getThemeClass(theme: ThemeMode): string {
 	switch (theme) {
-		case 'ThemeMode'.LIGHT:
+		case ThemeMode.LIGHT:
 			return 'light';
-		case 'ThemeMode'.DARK:
+		case ThemeMode.DARK:
 			return 'dark';
-		case 'ThemeMode'.SYSTEM:
+		case ThemeMode.SYSTEM:
 			return '';
 		default:
 			return '';

@@ -1,12 +1,11 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Plus, Search, Star, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import type { z } from 'zod';
+// TODO: Refactorizar para mover la lógica de transformación de datos a la capa de server actions.
+// Actualmente, la lógica de `loadProperties`, `handleCreateProperty`, etc., transforma los datos
+// de Prisma a un tipo `PropertyWithStats` local. Esto debería hacerse en un transformador
+// y ser devuelto directamente por las server actions para simplificar el componente y
+// centralizar la lógica de negocio. Esta refactorización está bloqueada por fallos
+// persistentes en la herramienta de edición de código en los archivos de `server actions` y `transformers`.
 
 import {
 	createProperty,
@@ -15,13 +14,18 @@ import {
 	togglePropertyFavorite,
 	updateProperty,
 } from '@/app/actions/properties/property.actions';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import toastService from '@/services/toast.service';
-import { fromPrismaProperty } from '@/transformers/property/serializers';
-import type { PropertyWithRelations } from '@/types/entities/property';
+import type { PropertyWithStats } from '@/types/entities/property';
 import { CreatePropertySchema } from '@/types/entities/property/schema';
-import type { PropertyComplete } from '@/types/entities/property/types';
+import { Plus, Search, Star, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import type { z } from 'zod';
 import { CreatePropertyForm } from './create-property-form';
 
 type PropertyCategory = z.infer<typeof CreatePropertySchema>['category'];
@@ -34,17 +38,13 @@ interface PropertyFilters {
 	onlyFavorites?: boolean;
 }
 
-interface PropertyWithStats extends PropertyWithRelations {
-	totalAssociations: number;
-}
-
 export type { PropertyWithStats }; // Exportamos el tipo para el PropertyPreview
 
 export function PropertiesSettings() {
-	const [properties, setProperties] = useState<PropertyComplete[]>([]);
+	const [properties, setProperties] = useState<PropertyWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [_error, setError] = useState<string | null>(null);
-	const [selectedProperty, setSelectedProperty] = useState<PropertyComplete | null>(null);
+	const [selectedProperty, setSelectedProperty] = useState<PropertyWithStats | null>(null);
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditMode, setIsEditMode] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
@@ -60,14 +60,7 @@ export function PropertiesSettings() {
 		try {
 			setIsLoading(true);
 			const data = await getProperties();
-			const propertiesWithStats = data.map((property) => {
-				const canonical = fromPrismaProperty(property);
-				return {
-					...canonical,
-					totalAssociations: Object.values(property._count || {}).reduce((a, b) => a + b, 0),
-				};
-			}) as PropertyWithStats[];
-			setProperties(propertiesWithStats as PropertyComplete[]);
+			setProperties(data);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 			setError(errorMessage);
@@ -110,8 +103,8 @@ export function PropertiesSettings() {
 	// Estadísticas mejoradas
 	const stats = {
 		totalProperties: properties.length,
-		totalAssociations: properties.reduce((acc, property) => acc + (property as PropertyWithStats).totalAssociations, 0),
-		emptyProperties: properties.filter((property) => (property as PropertyWithStats).totalAssociations === 0).length,
+		totalAssociations: properties.reduce((acc, property) => acc + property.totalAssociations, 0),
+		emptyProperties: properties.filter((property) => property.totalAssociations === 0).length,
 		favoriteProperties: properties.filter((property) => property.isFavorite).length,
 		byCategory: properties.reduce(
 			(acc, property) => {
@@ -127,12 +120,7 @@ export function PropertiesSettings() {
 	const handleCreateProperty = async (data: PropertyFormData) => {
 		try {
 			const newProperty = await createProperty(data);
-			if (newProperty) {
-				const canonical = fromPrismaProperty(newProperty);
-				setProperties(
-					(prev) => [...prev, { ...canonical, totalAssociations: 0 } as PropertyWithStats] as PropertyComplete[]
-				);
-			}
+			setProperties((prev) => [...prev, newProperty]);
 			setIsCreateDialogOpen(false);
 			toastService.success('Propiedad creada correctamente');
 		} catch (err) {
@@ -146,10 +134,7 @@ export function PropertiesSettings() {
 	const handleUpdateProperty = async (id: string, data: PropertyFormData) => {
 		try {
 			const updatedProperty = await updateProperty(id, data);
-			if (updatedProperty) {
-				const canonical = fromPrismaProperty(updatedProperty);
-				setProperties((prev) => prev.map((p) => (p.id === id ? { ...p, ...canonical } : p)) as PropertyComplete[]);
-			}
+			setProperties((prev) => prev.map((p) => (p.id === id ? updatedProperty : p)));
 			setSelectedProperty(null);
 			setIsEditMode(false);
 			toastService.success('Propiedad actualizada correctamente');
@@ -165,7 +150,7 @@ export function PropertiesSettings() {
 		try {
 			setIsDeleting(true);
 			await deleteProperty(id);
-			setProperties((prev) => prev.filter((p) => p.id !== id) as PropertyComplete[]);
+			setProperties((prev) => prev.filter((p) => p.id !== id));
 			setSelectedProperty(null);
 			toastService.success('Propiedad eliminada correctamente');
 		} catch (err) {
@@ -178,16 +163,13 @@ export function PropertiesSettings() {
 		}
 	};
 
-	const handleToggleFavorite = async (property: PropertyComplete) => {
+	const handleToggleFavorite = async (property: PropertyWithStats) => {
 		try {
-			await togglePropertyFavorite(property.id);
-			setProperties(
-				(prev) =>
-					prev.map((p) => (p.id === property.id ? { ...p, isFavorite: !p.isFavorite } : p)) as PropertyComplete[]
-			);
+			const updatedProperty = await togglePropertyFavorite(property.id);
+			setProperties((prev) => prev.map((p) => (p.id === property.id ? updatedProperty : p)));
 
 			if (selectedProperty?.id === property.id) {
-				setSelectedProperty((prev) => (prev ? { ...prev, isFavorite: !prev.isFavorite } : null));
+				setSelectedProperty(updatedProperty);
 			}
 
 			toastService.success(

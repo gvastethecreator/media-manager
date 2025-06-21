@@ -10,6 +10,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { deserializeSettings, mergeSettings, serializeSettings } from '@/transformers/settings';
 import type { Settings } from '@/types/settings';
 import { settingsSchema } from '@/types/settings';
+import type { InputJsonValue } from '@prisma/client/runtime/library';
 import { revalidatePath } from 'next/cache';
 import { createSettingsError, isSettingsError } from './settings.errors';
 
@@ -18,6 +19,13 @@ const logger = serverLogger.withContext('SettingsActions');
 
 // Rutas que deben ser revalidadas cuando las configuraciones cambian
 const REVALIDATE_PATHS = ['/settings', '/profiles', '/'] as const;
+
+/**
+ * Convierte Record<string, unknown> a InputJsonValue para Prisma
+ */
+function toInputJsonValue(data: Record<string, unknown>): InputJsonValue {
+	return JSON.parse(JSON.stringify(data)) as InputJsonValue;
+}
 
 /**
  * Revalida todas las rutas relevantes cuando cambian las configuraciones
@@ -47,16 +55,29 @@ async function createDefaultSettings(): Promise<Settings> {
 		logger.info('🔧 Creando configuración predeterminada');
 
 		// Crear datos predeterminados
-		const defaultData = await createDefaultSettingsData();
-
-		// Guardar en la base de datos
+		const defaultData = await createDefaultSettingsData(); // Guardar en la base de datos
 		const prisma = await getPrismaClient();
+
+		// Obtener el perfil activo o usar un valor por defecto
+		let profileId = 'default-profile';
+		try {
+			const activeProfile = await prisma.profile.findFirst({
+				where: { isActive: true },
+			});
+			if (activeProfile) {
+				profileId = activeProfile.id;
+			}
+		} catch {
+			logger.warn('⚠️ No se pudo obtener perfil activo, usando perfil por defecto');
+		}
+
 		await prisma.settings.upsert({
 			where: { id: 'default' },
 			update: {},
 			create: {
 				id: 'default',
-				data: defaultData,
+				data: toInputJsonValue(defaultData),
+				profileId,
 			},
 		});
 
@@ -156,18 +177,31 @@ export async function updateSystemSettings(data: Partial<Settings>): Promise<Set
 
 		// Serializar para almacenamiento
 		const serializedData = serializeSettings(validationResult.data);
-
 		// Actualizar en la base de datos
 		const prisma = await getPrismaClient();
+
+		// Obtener el perfil activo o usar un valor por defecto
+		let profileId = 'default-profile';
+		try {
+			const activeProfile = await prisma.profile.findFirst({
+				where: { isActive: true },
+			});
+			if (activeProfile) {
+				profileId = activeProfile.id;
+			}
+		} catch {
+			logger.warn('⚠️ No se pudo obtener perfil activo, usando perfil por defecto');
+		}
+
 		await prisma.settings.upsert({
 			where: { id: 'default' },
 			update: {
-				data: serializedData,
-				updatedAt: new Date(),
+				data: toInputJsonValue(serializedData),
 			},
 			create: {
 				id: 'default',
-				data: serializedData,
+				data: toInputJsonValue(serializedData),
+				profileId,
 			},
 		});
 
@@ -205,12 +239,12 @@ export async function resetSystemSettings(): Promise<Settings> {
 		await prisma.settings.upsert({
 			where: { id: 'default' },
 			update: {
-				data: defaultSettings,
-				updatedAt: new Date(),
+				data: toInputJsonValue(defaultSettings),
 			},
 			create: {
 				id: 'default',
-				data: defaultSettings,
+				data: toInputJsonValue(defaultSettings),
+				profileId: 'default-profile',
 			},
 		});
 
@@ -259,7 +293,7 @@ export async function getProfileSettings(profileId: string): Promise<Settings | 
 		// Deserializar configuración al formato de la aplicación
 		return deserializeSettings(settings.data as Record<string, unknown>);
 	} catch (error) {
-		logger.error('❌ Error al obtener la configuración del perfil:', error, { profileId });
+		logger.error('❌ Error al obtener la configuración del perfil:', error as Error);
 		throw createSettingsError(
 			`No se pudo obtener la configuración del perfil ${profileId}`,
 			'PROFILE_GET_FAILED',
@@ -307,13 +341,12 @@ export async function updateProfileSettings(profileId: string, data: Partial<Set
 		const _result = await prisma.settings.upsert({
 			where: { id: profileId },
 			update: {
-				data: serializedData,
-				updatedAt: new Date(),
+				data: toInputJsonValue(serializedData),
 			},
 			create: {
 				id: profileId,
-				userId: profileId,
-				data: serializedData,
+				profileId: profileId,
+				data: toInputJsonValue(serializedData),
 			},
 		});
 
@@ -325,7 +358,7 @@ export async function updateProfileSettings(profileId: string, data: Partial<Set
 		// Devolver la configuración actualizada
 		return newSettings;
 	} catch (error) {
-		logger.error('❌ Error al actualizar la configuración del perfil:', error, { profileId });
+		logger.error('❌ Error al actualizar la configuración del perfil:', error as Error);
 
 		// Reenviar el error si ya es un SettingsError
 		if (isSettingsError(error)) {
@@ -376,7 +409,7 @@ export async function resetProfileSettings(profileId: string): Promise<void> {
 
 		logger.info('✅ Configuración del perfil restablecida a global', { profileId });
 	} catch (error) {
-		logger.error('❌ Error al restablecer la configuración del perfil:', error, { profileId });
+		logger.error('❌ Error al restablecer la configuración del perfil:', error as Error);
 
 		// Reenviar el error si ya es un SettingsError
 		if (isSettingsError(error)) {

@@ -1,7 +1,7 @@
 /**
- * @file Re-exportaciones para los tipos de la entidad Task
+ * @file Exportaciones principales para la entidad Task
  * @module types/entities/task
  */
 
-export * from './base';
-export * from './extended';
+// Exportar todos los tipos canónicos de la entidad.
+export * from './types';
