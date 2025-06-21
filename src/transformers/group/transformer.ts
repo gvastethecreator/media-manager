@@ -3,67 +3,112 @@
  * @module transformers/group/transformer
  */
 
+'use server';
+
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { Group, GroupComplete, GroupExtended, GroupWithStats } from '@/types/entities/group/types';
+import type { GroupWithStats, PrismaGroupWithCounts } from '@/types/entities/group/types';
 import { TransformerError } from '@/utils/transformers/errors';
-import { extendGroup } from './serializers';
 
 const logger = serverLogger.withContext('GroupTransformer');
 
 /**
- * 👥 Transformador principal para la entidad Group
- * Punto de entrada unificado para transformar objetos Group a diferentes formatos
+ * 👥 Transforma un objeto de grupo de Prisma a un objeto GroupWithStats,
+ * calculando todas las estadísticas necesarias.
  *
- * @param group Objeto Group a transformar (puede ser de Prisma, parcial, etc)
- * @returns Objeto GroupComplete con todas las propiedades
- * @throws Error si el grupo es inválido o no se puede transformar
+ * @param prismaGroup - El objeto de grupo obtenido de Prisma, con los conteos.
+ * @returns Un objeto GroupWithStats completo y seguro.
  */
-export function transformGroup(group: any): GroupComplete {
-	if (!group || typeof group !== 'object') {
-		logger.error('⚠️ Intentando transformar un objeto Group inválido:', group);
-		throw new TransformerError('Error transformando grupo: objeto inválido');
+export function fromPrismaGroup(prismaGroup: PrismaGroupWithCounts | null): GroupWithStats | null {
+	if (!prismaGroup) {
+		return null;
 	}
 
-	try {
-		// Extender con propiedades adicionales
-		return extendGroup(group);
-	} catch (error) {
-		logger.error('❌ Error transformando Group:', error);
-		throw new TransformerError('Error transformando grupo');
+	const counts = prismaGroup._count || {};
+
+	const stats = {
+		totalImages: counts.images || 0,
+		totalVideos: counts.videos || 0,
+		totalAlbums: counts.albums || 0,
+		totalCollections: counts.collections || 0,
+		totalTags: counts.tags || 0,
+		totalCharacters: counts.characters || 0,
+		totalPlaces: counts.places || 0,
+		totalWorldItems: counts.worldItems || 0,
+		totalConcepts: counts.concepts || 0,
+		totalPrompts: counts.prompts || 0,
+		totalNotes: counts.notes || 0,
+		totalWildcards: counts.wildcards || 0,
+		totalProperties: counts.properties || 0,
+		lastUpdated: prismaGroup.updatedAt,
+		totalItems: 0,
+	};
+
+	stats.totalItems =
+		stats.totalImages +
+		stats.totalVideos +
+		stats.totalAlbums +
+		stats.totalCollections +
+		stats.totalTags +
+		stats.totalCharacters +
+		stats.totalPlaces +
+		stats.totalWorldItems +
+		stats.totalConcepts +
+		stats.totalPrompts +
+		stats.totalNotes +
+		stats.totalWildcards +
+		stats.totalProperties;
+
+	let parsedFilters = [];
+	if (typeof prismaGroup.filters === 'string') {
+		try {
+			const potentialFilters = JSON.parse(prismaGroup.filters);
+			if (Array.isArray(potentialFilters)) {
+				parsedFilters = potentialFilters;
+			}
+		} catch (error) {
+			logger.warn(`⚠️ JSON inválido para filtros en el grupo ${prismaGroup.id}:`, prismaGroup.filters);
+		}
 	}
+
+	return {
+		...prismaGroup,
+		filters: parsedFilters,
+		stats,
+	};
 }
 
 /**
- * 👥 Transforma múltiples grupos
+ * 👥 Transforma múltiples grupos de Prisma.
  *
- * @param groups Array de grupos a transformar
- * @returns Array de grupos transformados
- * @throws Error si hay un problema en la transformación
+ * @param groups Array de grupos de Prisma.
+ * @returns Array de grupos transformados a GroupWithStats.
  */
-export function transformGroups(groups: any[]): GroupComplete[] {
+export function fromPrismaGroups(groups: PrismaGroupWithCounts[]): GroupWithStats[] {
 	if (!Array.isArray(groups)) {
 		logger.error('⚠️ Intentando transformar un array de grupos inválido:', groups);
 		throw new TransformerError('Error transformando grupos: no es un array');
 	}
 
 	try {
-		return groups.map((group) => transformGroup(group));
+		return groups.map((group) => fromPrismaGroup(group)).filter((g): g is GroupWithStats => g !== null);
 	} catch (error) {
 		logger.error('❌ Error transformando lista de grupos:', error);
 		throw new TransformerError('Error transformando lista de grupos');
 	}
 }
 
-/**
+// 🗑️ Eliminar funciones redundantes y propensas a errores.
+// La función `fromPrismaGroup` ahora es la única fuente de verdad para la transformación.
+/*
  * 🔄 Transforma un Group a la versión extendida para UI
  *
  * @param group Objeto Group a transformar
  * @param options Opciones adicionales de transformación
  * @returns Objeto GroupExtended con propiedades de UI
  * @throws Error si hay un problema en la transformación
- */
+ *
 export function transformGroupToExtended(
-	group: Group | GroupComplete,
+	group: GroupComplete,
 	options: {
 		isSelected?: boolean;
 		isHighlighted?: boolean;
@@ -76,9 +121,6 @@ export function transformGroupToExtended(
 	} = {}
 ): GroupExtended {
 	try {
-		// Primero asegurar que tenemos un GroupComplete
-		const groupComplete = '_count' in group ? group : transformGroup(group);
-
 		// Opciones con valores por defecto
 		const {
 			isSelected = false,
@@ -93,7 +135,7 @@ export function transformGroupToExtended(
 
 		// Extender con propiedades de UI
 		return {
-			...groupComplete,
+			...group,
 			isSelected,
 			isHighlighted,
 			isEditing,
@@ -108,41 +150,32 @@ export function transformGroupToExtended(
 		throw new TransformerError('Error transformando grupo a versión extendida');
 	}
 }
+*/
 
-/**
- * 📊 Transforma un Group a la versión con estadísticas
+/*
+ * 📊 Transforma un Group a la versión con estadísticas.
  *
- * @param group Objeto Group a transformar
- * @returns Objeto GroupWithStats con estadísticas adicionales
- * @throws Error si hay un problema en la transformación
- */
-export function transformGroupToWithStats(group: Group | GroupComplete): GroupWithStats {
+ * @param group Objeto Group a transformar.
+ * @returns Objeto GroupWithStats con estadísticas adicionales.
+ * @throws Error si hay un problema en la transformación.
+ *
+export function transformGroupToWithStats(group: GroupComplete): GroupWithStats {
 	try {
-		// Primero asegurar que tenemos un GroupComplete
-		const groupComplete = '_count' in group ? group : transformGroup(group);
-
-		// Calcular estadísticas (solo usando propiedades disponibles en _count según Prisma)
-		const totalImages = groupComplete._count?.images || 0;
-		const totalVideos = 0; // ❌ ELIMINADO - videos no existe en _count de Group
-		const totalAlbums = 0; // ❌ ELIMINADO - albums no existe en _count de Group
-		const totalCollections = groupComplete._count?.collections || 0;
-		const totalTags = groupComplete._count?.tags || 0;
-		const totalCharacters = 0; // ❌ ELIMINADO - characters no existe en _count de Group
-		const totalPlaces = groupComplete._count?.places || 0;
-		const totalWorldItems = groupComplete._count?.worldItems || 0;
-		const totalConcepts = groupComplete._count?.concepts || 0;
-		const totalPrompts = groupComplete._count?.prompts || 0;
-		const totalNotes = groupComplete._count?.notes || 0;
-		const totalWildcards = groupComplete._count?.wildcards || 0;
-		const totalProperties = groupComplete._count?.properties || 0;
+		const totalImages = group._count?.images || 0;
+		const totalCollections = group._count?.collections || 0;
+		const totalTags = group._count?.tags || 0;
+		const totalPlaces = group._count?.places || 0;
+		const totalWorldItems = group._count?.worldItems || 0;
+		const totalConcepts = group._count?.concepts || 0;
+		const totalPrompts = group._count?.prompts || 0;
+		const totalNotes = group._count?.notes || 0;
+		const totalWildcards = group._count?.wildcards || 0;
+		const totalProperties = group._count?.properties || 0;
 
 		const totalItems =
 			totalImages +
-			// totalVideos + // ❌ ELIMINADO - No incluir en total
-			// totalAlbums + // ❌ ELIMINADO - No incluir en total
 			totalCollections +
 			totalTags +
-			// totalCharacters + // ❌ ELIMINADO - No incluir en total
 			totalPlaces +
 			totalWorldItems +
 			totalConcepts +
@@ -151,17 +184,16 @@ export function transformGroupToWithStats(group: Group | GroupComplete): GroupWi
 			totalWildcards +
 			totalProperties;
 
-		// Devolver con estadísticas
 		return {
-			...groupComplete,
+			...group,
 			stats: {
 				totalItems,
 				totalImages,
-				totalVideos,
-				totalAlbums,
+				totalVideos: 0, // Campo existe en el tipo, pero no en el _count de Prisma para Group
+				totalAlbums: 0, // Campo existe en el tipo, pero no en el _count de Prisma para Group
 				totalCollections,
 				totalTags,
-				totalCharacters,
+				totalCharacters: 0, // Campo existe en el tipo, pero no en el _count de Prisma para Group
 				totalPlaces,
 				totalWorldItems,
 				totalConcepts,
@@ -169,7 +201,7 @@ export function transformGroupToWithStats(group: Group | GroupComplete): GroupWi
 				totalNotes,
 				totalWildcards,
 				totalProperties,
-				lastUpdated: groupComplete.updatedAt,
+				lastUpdated: group.updatedAt,
 			},
 		};
 	} catch (error) {
@@ -177,3 +209,5 @@ export function transformGroupToWithStats(group: Group | GroupComplete): GroupWi
 		throw new TransformerError('Error transformando grupo a versión con estadísticas');
 	}
 }
+*/
+

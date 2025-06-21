@@ -10,7 +10,7 @@ export * from './helpers';
 export * from './validators';
 
 import { CharacterSortOption } from '@/types/entities/character/enums';
-import type { CharacterExtended } from '@/types/entities/character/types';
+import type { CharacterWithStats } from '@/types/entities/character/types';
 
 /**
  * 🎭 Prefijo para las claves de almacenamiento de Character
@@ -23,37 +23,33 @@ export const CHARACTER_KEY_PREFIX = 'character_';
  * @param sortOption Opción de ordenamiento
  * @returns Array de personajes ordenados
  */
-export function sortCharacters(characters: CharacterExtended[], sortOption: CharacterSortOption): CharacterExtended[] {
-	if (!characters || characters.length === 0) {
-		return [];
-	}
+export function sortCharacters(characters: CharacterWithStats[], sortOption: CharacterSortOption): CharacterWithStats[] {
+	const sortedCharacters = [...characters];
 
-	return [...characters].sort((a, b) => {
-		switch (sortOption) {
-			case CharacterSortOption.NAME_ASC:
-				return a.name.localeCompare(b.name);
-			case CharacterSortOption.NAME_DESC:
-				return b.name.localeCompare(a.name);
-			case CharacterSortOption.LEVEL_ASC:
-				return a.level - b.level;
-			case CharacterSortOption.LEVEL_DESC:
-				return b.level - a.level;
-			case CharacterSortOption.CLASS_ASC:
-				return a.class.localeCompare(b.class);
-			case CharacterSortOption.CLASS_DESC:
-				return b.class.localeCompare(a.class);
-			case CharacterSortOption.RACE_ASC:
-				return a.race.localeCompare(b.race);
-			case CharacterSortOption.RACE_DESC:
-				return b.race.localeCompare(a.race);
-			case CharacterSortOption.DATE_ASC:
-				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-			case CharacterSortOption.DATE_DESC:
-				return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-			default:
-				return a.name.localeCompare(b.name);
-		}
-	});
+	switch (sortOption) {
+		case CharacterSortOption.NAME_ASC:
+			return sortedCharacters.sort((a, b) => a.name.localeCompare(b.name));
+		case CharacterSortOption.NAME_DESC:
+			return sortedCharacters.sort((a, b) => b.name.localeCompare(a.name));
+		case CharacterSortOption.DATE_ASC:
+			return sortedCharacters.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+		case CharacterSortOption.DATE_DESC:
+			return sortedCharacters.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+		case CharacterSortOption.LEVEL_ASC:
+			return sortedCharacters.sort((a, b) => a.level - b.level);
+		case CharacterSortOption.LEVEL_DESC:
+			return sortedCharacters.sort((a, b) => b.level - a.level);
+		case CharacterSortOption.CLASS_ASC:
+			return sortedCharacters.sort((a, b) => a.class.localeCompare(b.class));
+		case CharacterSortOption.CLASS_DESC:
+			return sortedCharacters.sort((a, b) => b.class.localeCompare(a.class));
+		case CharacterSortOption.RACE_ASC:
+			return sortedCharacters.sort((a, b) => a.race.localeCompare(b.race));
+		case CharacterSortOption.RACE_DESC:
+			return sortedCharacters.sort((a, b) => b.race.localeCompare(a.race));
+		default:
+			return sortedCharacters;
+	}
 }
 
 /**
@@ -63,14 +59,14 @@ export function sortCharacters(characters: CharacterExtended[], sortOption: Char
  * @returns Objeto con grupos de personajes
  */
 export function groupCharacters(
-	characters: CharacterExtended[],
+	characters: CharacterWithStats[],
 	groupBy: 'none' | 'class' | 'race' | 'category' | 'level' | null
-): Record<string, CharacterExtended[]> {
+): Record<string, CharacterWithStats[]> {
 	if (!characters || characters.length === 0 || !groupBy || groupBy === 'none') {
 		return { Todos: characters || [] };
 	}
 
-	const groups: Record<string, CharacterExtended[]> = {};
+	const groups: Record<string, CharacterWithStats[]> = {};
 
 	for (const character of characters) {
 		let groupKey: string;
@@ -105,7 +101,7 @@ export function groupCharacters(
 	}
 
 	// Ordenar los grupos por nombre
-	const sortedGroups: Record<string, CharacterExtended[]> = {};
+	const sortedGroups: Record<string, CharacterWithStats[]> = {};
 	const sortedKeys = Object.keys(groups).sort();
 
 	for (const key of sortedKeys) {
@@ -121,20 +117,15 @@ export function groupCharacters(
  * @param searchTerm Término de búsqueda
  * @returns Array de personajes filtrados
  */
-export function filterCharactersBySearch(characters: CharacterExtended[], searchTerm: string): CharacterExtended[] {
+export function filterCharactersBySearch(characters: CharacterWithStats[], searchTerm: string): CharacterWithStats[] {
 	if (!searchTerm.trim()) {
 		return characters;
 	}
 
-	const term = searchTerm.toLowerCase();
+	const normalizedTerm = searchTerm.toLowerCase().trim();
 
-	return characters.filter(
-		(character) =>
-			character.name.toLowerCase().includes(term) ||
-			character.description?.toLowerCase().includes(term) ||
-			character.class?.toLowerCase().includes(term) ||
-			character.race?.toLowerCase().includes(term) ||
-			character.category?.toLowerCase().includes(term)
+	return characters.filter(character =>
+		matchesCharacterSearch(character, normalizedTerm)
 	);
 }
 
@@ -143,54 +134,81 @@ export function filterCharactersBySearch(characters: CharacterExtended[], search
  * @param characters Array de personajes
  * @returns Objeto con estadísticas
  */
-export function getCharacterStats(characters: CharacterExtended[]) {
-	if (!characters || characters.length === 0) {
-		return {
-			total: 0,
-			favorites: 0,
-			byClass: {},
-			byRace: {},
-			byLevel: {},
-			avgLevel: 0,
-		};
-	}
+export function getCharacterStats(characters: CharacterWithStats[]) {
+	const totalCharacters = characters.length;
+	const totalFavorites = characters.filter(c => c.isFavorite).length;
 
-	const stats = {
-		total: characters.length,
-		favorites: 0,
-		byClass: {} as Record<string, number>,
-		byRace: {} as Record<string, number>,
-		byLevel: {} as Record<string, number>,
-		avgLevel: 0,
+	// Distribución por clase
+	const classCounts: Record<string, number> = {};
+	characters.forEach(character => {
+		const characterClass = character.class || 'unknown';
+		classCounts[characterClass] = (classCounts[characterClass] || 0) + 1;
+	});
+
+	// Distribución por raza
+	const raceCounts: Record<string, number> = {};
+	characters.forEach(character => {
+		const race = character.race || 'unknown';
+		raceCounts[race] = (raceCounts[race] || 0) + 1;
+	});
+
+	// Distribución por nivel
+	const levelRanges = {
+		'1-5': 0,
+		'6-10': 0,
+		'11-15': 0,
+		'16-20': 0,
+		'20+': 0,
 	};
 
-	let totalLevel = 0;
-
-	for (const character of characters) {
-		// Favoritos
-		if (character.isFavorite) {
-			stats.favorites++;
-		}
-
-		// Por clase
-		const charClass = character.class || 'Sin clase';
-		stats.byClass[charClass] = (stats.byClass[charClass] || 0) + 1;
-
-		// Por raza
-		const race = character.race || 'Sin raza';
-		stats.byRace[race] = (stats.byRace[race] || 0) + 1;
-
-		// Por nivel
+	characters.forEach(character => {
 		const level = character.level;
-		totalLevel += level;
-		const levelRange =
-			level <= 5 ? '1-5' : level <= 10 ? '6-10' : level <= 15 ? '11-15' : level <= 20 ? '16-20' : '20+';
-		stats.byLevel[levelRange] = (stats.byLevel[levelRange] || 0) + 1;
-	}
+		if (level <= 5) levelRanges['1-5']++;
+		else if (level <= 10) levelRanges['6-10']++;
+		else if (level <= 15) levelRanges['11-15']++;
+		else if (level <= 20) levelRanges['16-20']++;
+		else levelRanges['20+']++;
+	});
 
-	stats.avgLevel = Math.round(totalLevel / characters.length);
+	// Estadísticas de asociaciones usando las estadísticas pre-calculadas
+	const totalAssociations = characters.reduce((sum, character) =>
+		sum + (character.statistics?.totalAssociations || 0), 0
+	);
 
-	return stats;
+	const avgAssociations = totalCharacters > 0 ? totalAssociations / totalCharacters : 0;
+
+	// Power level promedio
+	const avgPowerLevel = totalCharacters > 0
+		? characters.reduce((sum, character) => sum + (character.statistics?.powerLevel || 0), 0) / totalCharacters
+		: 0;
+
+	// Distribución por rareza
+	const rarityDistribution: Record<string, number> = {
+		common: 0,
+		uncommon: 0,
+		rare: 0,
+		epic: 0,
+		legendary: 0,
+	};
+
+	characters.forEach(character => {
+		const rarity = character.statistics?.rarityLevel || 'common';
+		rarityDistribution[rarity]++;
+	});
+
+	return {
+		totalCharacters,
+		totalFavorites,
+		favoritePercentage: totalCharacters > 0 ? (totalFavorites / totalCharacters) * 100 : 0,
+		classCounts,
+		raceCounts,
+		levelRanges,
+		totalAssociations,
+		avgAssociations,
+		avgPowerLevel,
+		rarityDistribution,
+		lastUpdated: new Date(),
+	};
 }
 
 /**
@@ -201,8 +219,8 @@ export function getCharacterStats(characters: CharacterExtended[]) {
  * @returns Número de comparación
  */
 export function compareCharacters(
-	a: CharacterExtended,
-	b: CharacterExtended,
+	a: CharacterWithStats,
+	b: CharacterWithStats,
 	sortBy: CharacterSortOption = CharacterSortOption.NAME_ASC
 ): number {
 	switch (sortBy) {
@@ -236,7 +254,7 @@ export function compareCharacters(
  * @param character Personaje
  * @returns Nivel numérico
  */
-export function getCharacterLevelAsNumber(character: CharacterExtended): number {
+export function getCharacterLevelAsNumber(character: CharacterWithStats): number {
 	return character.level || 1;
 }
 
@@ -246,16 +264,17 @@ export function getCharacterLevelAsNumber(character: CharacterExtended): number 
  * @param searchTerm Término de búsqueda
  * @returns true si coincide
  */
-export function matchesCharacterSearch(character: CharacterExtended, searchTerm: string): boolean {
-	if (!searchTerm.trim()) return true;
+export function matchesCharacterSearch(character: CharacterWithStats, searchTerm: string): boolean {
+	const normalizedTerm = searchTerm.toLowerCase();
 
-	const term = searchTerm.toLowerCase();
 	return (
-		character.name.toLowerCase().includes(term) ||
-		(!!character.description && character.description.toLowerCase().includes(term)) ||
-		(!!character.class && character.class.toLowerCase().includes(term)) ||
-		(!!character.race && character.race.toLowerCase().includes(term)) ||
-		(!!character.category && character.category.toLowerCase().includes(term))
+		character.name.toLowerCase().includes(normalizedTerm) ||
+		(character.description && character.description.toLowerCase().includes(normalizedTerm)) ||
+		character.class.toLowerCase().includes(normalizedTerm) ||
+		character.race.toLowerCase().includes(normalizedTerm) ||
+		character.alignment.toLowerCase().includes(normalizedTerm) ||
+		(character.category && character.category.toLowerCase().includes(normalizedTerm)) ||
+		character.backstory.toLowerCase().includes(normalizedTerm)
 	);
 }
 

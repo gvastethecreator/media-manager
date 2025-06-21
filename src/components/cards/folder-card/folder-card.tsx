@@ -1,28 +1,15 @@
 'use client';
 
-import { memo, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import type { FolderComplete, FolderWithStats } from '@/types/entities/folder';
+import { memo, useCallback, useMemo } from 'react';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';
 import { FolderCardImages } from './folder-card-images';
 
-// Tipo extendido para asegurar que tenemos los datos necesarios
-// Podrías necesitar ajustar este tipo basado en lo que realmente usa FolderCard y sus hijos
-type FolderCardData = Folder & {
-	imageCount?: number; // O _count?.images
-	// recentImageUrls?: string[]; // ❌ Eliminado temporalmente para optimización
-	featuredImage?: string | null;
-	totalFiles?: number;
-	totalSize?: number;
-	lastIndexed?: Date | null;
-	autoReindex?: boolean;
-	childrenCount?: number;
-	isFavorite?: boolean;
-};
-
 interface FolderCardProps {
-	folder: Folder | FolderCardData;
+	folder: FolderWithStats | FolderComplete;
 	onClick?: () => void;
 	href?: string;
 	className?: string;
@@ -33,6 +20,7 @@ interface FolderCardProps {
 
 /**
  * Componente para mostrar una carpeta en formato de tarjeta
+ * Optimizado para usar FolderWithStats pero compatible con FolderComplete
  */
 export const FolderCard = memo(function FolderCard({
 	folder,
@@ -49,32 +37,17 @@ export const FolderCard = memo(function FolderCard({
 		return null;
 	}
 
-	// 🖼️ Estado para thumbnails dinámicos - ❌ ELIMINADO TEMPORALMENTE
-	// const [recentImages, setRecentImages] = useState<string[]>([]);
-
-	// 🔄 Cargar imágenes al montar - ❌ ELIMINADO TEMPORALMENTE
-	// useEffect(() => {
-	// 	async function loadImages() {
-	// 		try {
-	// 			const fetchedImages = await getRecentFolderImages(folder.id, 4);
-	// 			const imageUrls = fetchedImages.map((img) => img.thumbnailUrl).filter(Boolean);
-	// 			setRecentImages(imageUrls);
-	// 		} catch (error) {
-	// 			console.error('Error loading folder images:', error);
-	// 			setRecentImages([]);
-	// 		}
-	// 	}
-	// 	loadImages();
-	// }, [folder.id]);
-
 	// Preparar datos con fallbacks
 	const folderData = useMemo(() => {
 		// Extraer conteos de _count si existen
-		const imageCount = folder._count?.images ?? folder.imageCount ?? 0;
+		const imageCount = folder._count?.images ?? 0;
+
+		// Verificar si es FolderWithStats para acceder a statistics
+		const isWithStats = 'statistics' in folder;
 
 		return {
 			...folder,
-			// Asegurar que tenemos conteo de imágenes en ambos formatos posibles
+			// Asegurar que tenemos conteo de imágenes
 			imageCount,
 			_count: {
 				...(folder._count || {}),
@@ -83,12 +56,11 @@ export const FolderCard = memo(function FolderCard({
 			// Asegurar valores por defecto para otros campos
 			totalFiles: folder.totalFiles ?? imageCount ?? 0,
 			totalSize: folder.totalSize ?? 0,
-			// recentImageUrls: recentImages, // 🖼️ Usar imágenes cargadas dinámicamente - ❌ ELIMINADO TEMPORALMENTE
-			recentImageUrls: [], // Asignar un array vacío temporalmente
-			childrenCount: 0,
+			recentImageUrls: [], // Temporalmente vacío
+			childrenCount: isWithStats ? (folder as FolderWithStats).statistics.folderCount : 0,
 			lastIndexed: folder.lastIndexed || null,
 		};
-	}, [folder]); // 🔄 Removido recentImages de dependencias
+	}, [folder]);
 
 	// Colores para personalización
 	const primaryColor = useMemo(() => folderData.color || '#3b82f6', [folderData.color]);
@@ -100,9 +72,6 @@ export const FolderCard = memo(function FolderCard({
 			onClick();
 		}
 	}, [onClick, interactive]);
-
-	// Establecer la URL base del enlace
-	const _baseHref = href || `/dashboard/folders/${folderData.id}`;
 
 	// Componente de la carta
 	const cardContent = (
@@ -116,8 +85,8 @@ export const FolderCard = memo(function FolderCard({
 			style={
 				tcgMode
 					? {
-							boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
-						}
+						boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
+					}
 					: {}
 			}
 		>
@@ -215,54 +184,35 @@ export const FolderCard = memo(function FolderCard({
 			)}
 		</div>
 	);
-	// Si es interactivo, envolver en un elemento clickeable que llame a onClick
-	if (interactive) {
-		// Usar un div o button si Link no es apropiado o si href no se usa para la interacción principal
-		// Si se usa Link, el onClick debería estar en el Link o en el div interno si Link solo navega.
-		// Aquí asumimos que onClick es la interacción principal.
-		const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-			if (event.key === 'Enter' || event.key === ' ') {
-				event.preventDefault(); // Prevenir scroll en espacio
-				if (onClick) {
-					// ✅ Verificar que onClick existe
-					onClick();
-				}
-			}
-		};
 
+	// Renderizar con o sin enlace
+	if (href && interactive) {
+		return (
+			<a href={href} className="block h-full" onClick={handleCardClick}>
+				{cardContent}
+			</a>
+		);
+	}
+
+	// Renderizar con manejador de eventos
+	if (interactive && onClick) {
 		return (
 			<button
 				type="button"
+				className="block h-full w-full text-left"
 				onClick={handleCardClick}
-				onKeyDown={handleKeyDown}
-				className="block h-full w-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary text-left p-0 border-none bg-transparent appearance-none"
+				onKeyDown={(event) => {
+					if (event.key === 'Enter' || event.key === ' ') {
+						event.preventDefault();
+						handleCardClick();
+					}
+				}}
 			>
 				{cardContent}
 			</button>
 		);
-		// Alternativa si se necesita navegación Y un onClick diferente:
-		// return (
-		//   <Link href={baseHref} className="block h-full" onClick={(e) => { /* ¿Prevenir default si onClick debe manejarlo? */ onClick(); }}>
-		//     {cardContent}
-		//   </Link>
-		// );
 	}
 
-	// Si no es interactivo, devolver solo el contenido
+	// Renderizar estático
 	return cardContent;
-});
-
-// Exportar componente memorizado para mejor rendimiento
-export const MemoizedFolderCard = memo(FolderCard, (prevProps, nextProps) => {
-	// Comparar las props relevantes, especialmente el objeto folder
-	return (
-		prevProps.folder.id === nextProps.folder.id &&
-		prevProps.folder.name === nextProps.folder.name &&
-		prevProps.folder.emoji === nextProps.folder.emoji &&
-		prevProps.folder.updatedAt === nextProps.folder.updatedAt && // Comparar fechas/timestamps si es posible
-		prevProps.folder.imageCount === nextProps.folder.imageCount &&
-		prevProps.folder.isFavorite === nextProps.folder.isFavorite &&
-		prevProps.className === nextProps.className &&
-		prevProps.tcgMode === nextProps.tcgMode
-	);
 });

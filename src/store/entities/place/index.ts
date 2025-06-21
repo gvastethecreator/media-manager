@@ -1,7 +1,7 @@
-import { getPlaces } from '@/app/actions/places';
+import { getPlaces, PlaceSearchOptions } from '@/app/actions/places';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { PlaceViewMode } from '@/types/entities/place';
+import { PlaceViewMode, PlaceWithStats } from '@/types/entities/place';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
@@ -125,42 +125,60 @@ export const usePlaceStore = create<PlaceStore>()(
 					filters: { ...state.filters, ...relations },
 				})),
 			getFilteredPlaces: () => {
-				// Por implementar lógica de filtrado completa
 				const { places, filters, searchQuery } = get();
 				if (!filters && !searchQuery) return places;
 
 				return places.filter((place) => {
-					// Filtro por búsqueda básica
 					if (searchQuery && !place.name.toLowerCase().includes(searchQuery.toLowerCase())) {
 						return false;
 					}
 
-					// Otros filtros
 					return true;
 				});
 			},
 			getSortedPlaces: () => {
-				const { places, sortBy } = get();
-				const [field, order] = sortBy.split('_');
+				const { places, viewConfig } = get();
+				const { sortBy, sortOrder } = viewConfig;
 
-				// Por implementar lógica de ordenación completa
+				type SortableKey = keyof PlaceWithStats;
+
 				return [...places].sort((a, b) => {
-					if (order === 'asc') {
-						// @ts-ignore - Ignoramos el error de tipo temporalmente
-						return a[field] > b[field] ? 1 : -1;
+					const key = sortBy as SortableKey;
+
+					const valA = a[key];
+					const valB = b[key];
+
+					if (valA === valB) return 0;
+					if (valA === null || valA === undefined) return 1;
+					if (valB === null || valB === undefined) return -1;
+
+					if (typeof valA === 'string' && typeof valB === 'string') {
+						return sortOrder === 'asc'
+							? valA.localeCompare(valB)
+							: valB.localeCompare(valA);
 					}
-					// @ts-ignore - Ignoramos el error de tipo temporalmente
-					return a[field] < b[field] ? 1 : -1;
+
+					if (typeof valA === 'number' && typeof valB === 'number') {
+						return sortOrder === 'asc' ? valA - valB : valB - valA;
+					}
+
+					if (valA instanceof Date && valB instanceof Date) {
+						return sortOrder === 'asc'
+							? valA.getTime() - valB.getTime()
+							: valB.getTime() - valA.getTime();
+					}
+
+					return 0;
 				});
 			},
 
 			// 🔄 Acciones de carga
-			loadPlaces: async () => {
+			loadPlaces: async (options?: PlaceSearchOptions) => {
 				try {
 					set({ isLoading: true, error: null });
 					placeLogger.info('🔄 Cargando lugares...');
 
-					const places = await getPlaces();
+					const places = await getPlaces(options ?? {});
 					set({ places, isLoading: false });
 					placeLogger.info('✅ Lugares cargados correctamente');
 				} catch (error) {

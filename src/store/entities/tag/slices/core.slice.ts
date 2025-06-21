@@ -3,36 +3,66 @@
  * @module store/entities/tag/slices/core.slice
  */
 
-import { createTagAction, deleteTagAction, updateTagAction } from '@/app/actions/tags/crud.actions';
+import {
+    createTag as createTagAction,
+    deleteTag as deleteTagAction,
+    updateTag as updateTagAction
+} from '@/app/actions/tags/crud.actions';
 import { getTags as getTagsAction } from '@/app/actions/tags/query.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import type { TagWithStats } from '@/types/entities/tag/types';
+import type { TagWithStats } from '@/types/entities/tag';
+import type { Prisma } from '@prisma/client';
 import { StateCreator } from 'zustand';
 import type { TagCoreActions, TagCoreState, TagStore } from '../types';
 
 const logger = clientLogger.withContext('TagCoreSlice');
 
 /**
+ * 🔄 Convierte array de tags a Record para acceso O(1)
+ * @param tags - Array de tags
+ * @returns Record de tags indexado por ID
+ */
+const tagsToRecord = (tags: TagWithStats[]): Record<string, TagWithStats> => {
+	return tags.reduce((acc, tag) => {
+		acc[tag.id] = tag;
+		return acc;
+	}, {} as Record<string, TagWithStats>);
+};
+
+/**
  * 📦 Creador del slice core para el store de Tag
  */
 export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & TagCoreActions> = (set, get) => ({
-	// Estado inicial
-	items: [],
+	// Estado inicial - Patrón Record optimizado
+	tags: {},
 	isLoading: false,
 	error: null,
 	lastUpdated: null,
 
-	// Obtiene todos los tags
+	// 📋 Obtiene todos los tags como array
 	getTags: () => {
-		return get().items;
+		return Object.values(get().tags);
 	},
 
-	// Carga de tags
+	// 🔍 Obtiene un tag por su ID - Acceso O(1)
+	getTagById: (id: string) => {
+		return get().tags[id];
+	},
+
+	// 🔄 Actualiza múltiples tags
+	setTags: (tags: TagWithStats[]) => {
+		set({
+			tags: tagsToRecord(tags),
+			lastUpdated: Date.now(),
+		});
+	},
+
+	// 📥 Carga de tags
 	loadTags: async () => {
 		if (get().isLoading) {
 			logger.info('ℹ️ Tags ya cargándose, omitiendo nueva carga');
-			return get().items;
+			return get().getTags();
 		}
 
 		try {
@@ -42,7 +72,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			const tags = await getTagsAction();
 
 			set({
-				items: tags,
+				tags: tagsToRecord(tags),
 				isLoading: false,
 				lastUpdated: Date.now(),
 			});
@@ -58,24 +88,29 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 		}
 	},
 
-	// Vuelve a cargar los tags forzando una nueva petición
+	// 🔄 Vuelve a cargar los tags forzando una nueva petición
 	refreshTags: async () => {
-		set({ items: [], isLoading: true, error: null });
+		set({ tags: {}, isLoading: true, error: null });
 		return get().loadTags();
 	},
 
-	// Crea un nuevo tag
-	createTag: async (data: Partial<TagWithStats>) => {
+	// ➕ Crea un nuevo tag
+	createTag: async (data: Prisma.TagCreateInput) => {
 		try {
 			set({ isLoading: true, error: null });
 			logger.info('➕ Creando tag:', data);
 
-			// Asegurarse de que data no contiene campos extra no válidos para la creación
-			const createData = { name: data.name, ...data }; // Simplificado, idealmente usar un mapper
-			const newTag = await createTagAction(createData);
+			const newTag = await createTagAction(data);
+
+			if (!newTag) {
+				throw new Error('La acción del servidor no devolvió una etiqueta creada.');
+			}
 
 			set((state) => ({
-				items: [...state.items, newTag],
+				tags: {
+					...state.tags,
+					[newTag.id]: newTag,
+				},
 				isLoading: false,
 				lastUpdated: Date.now(),
 			}));
@@ -92,8 +127,8 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 		}
 	},
 
-	// Actualiza un tag existente
-	updateTag: async (id: string, data: Partial<TagWithStats>) => {
+	// 🔄 Actualiza un tag existente
+	updateTag: async (id: string, data: Prisma.TagUpdateInput) => {
 		try {
 			set({ isLoading: true, error: null });
 			logger.info('🔄 Actualizando tag:', { id, data });
@@ -101,7 +136,10 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			const updatedTag = await updateTagAction(id, data);
 
 			set((state) => ({
-				items: state.items.map((tag) => (tag.id === id ? { ...tag, ...updatedTag } : tag)),
+				tags: {
+					...state.tags,
+					[id]: updatedTag,
+				},
 				isLoading: false,
 				lastUpdated: Date.now(),
 			}));
@@ -116,7 +154,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 		}
 	},
 
-	// Elimina un tag
+	// 🗑️ Elimina un tag
 	deleteTag: async (id: string) => {
 		try {
 			set({ isLoading: true, error: null });
@@ -124,11 +162,14 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 
 			await deleteTagAction(id);
 
-			set((state) => ({
-				items: state.items.filter((tag) => tag.id !== id),
-				isLoading: false,
-				lastUpdated: Date.now(),
-			}));
+			set((state) => {
+				const { [id]: deletedTag, ...remainingTags } = state.tags;
+				return {
+					tags: remainingTags,
+					isLoading: false,
+					lastUpdated: Date.now(),
+				};
+			});
 
 			logger.info('✅ Tag eliminado correctamente:', id);
 			toastService.system.success('Tag eliminado correctamente');
@@ -138,10 +179,5 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 			set({ error: errorMessage, isLoading: false });
 			toastService.system.error('Error al eliminar tag');
 		}
-	},
-
-	// Obtiene un tag por su ID
-	getTagById: (id: string) => {
-		return get().items.find((tag) => tag.id === id);
 	},
 });

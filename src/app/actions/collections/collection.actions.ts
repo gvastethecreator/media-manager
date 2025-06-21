@@ -9,63 +9,49 @@
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	fromPrismaCollection,
-	fromPrismaCollections,
-	mapCollectionSearchOptionsToPrisma,
-	mapCreateCollectionDataToPrisma,
-	mapUpdateCollectionDataToPrisma,
-} from '@/transformers/collection';
+    toPrismaCollectionCreate,
+    toPrismaCollectionUpdate,
+} from '@/transformers/collection/serializers';
+import {
+    fromPrismaCollection,
+    fromPrismaCollections,
+} from '@/transformers/collection/transformer';
 import type {
-	CollectionComplete,
-	CollectionCreateInput,
-	CollectionSearchOptions,
-	CollectionUpdateInput,
+    CollectionCreateInput,
+    CollectionSearchOptions,
+    CollectionUpdateInput,
+    CollectionWithStats,
 } from '@/types/entities/collection';
 import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('CollectionActions');
 
-// Objeto de inclusión para obtener una colección completa con todas sus relaciones y conteos.
-const COLLECTION_INCLUDE = {
-	images: {
-		select: { id: true },
-	},
-	videos: {
-		select: { id: true },
-	},
-	albums: {
-		select: { id: true },
-	},
-	tags: {
-		select: { id: true },
-	},
-	characters: {
-		select: { id: true },
-	},
-	places: {
-		select: { id: true },
-	},
-	worldItems: {
-		select: { id: true },
-	},
-	concepts: {
-		select: { id: true },
-	},
-	prompts: {
-		select: { id: true },
-	},
-	notes: {
-		select: { id: true },
-	},
-	wildcards: {
-		select: { id: true },
-	},
-	properties: {
-		select: { id: true },
-	},
-	groups: {
-		select: { id: true },
-	},
+// Selección optimizada para obtener solo los conteos
+const COLLECTION_SELECT_WITH_STATS = {
+	id: true,
+	name: true,
+	emoji: true,
+	color: true,
+	description: true,
+	shortcut: true,
+	category: true,
+	sortBy: true,
+	filters: true,
+	url: true,
+	alternativeUrl: true,
+	sourceImage: true,
+	platform: true,
+	price: true,
+	network: true,
+	tokenId: true,
+	tokenAddress: true,
+	contractAddress: true,
+	contractType: true,
+	editions: true,
+	featuredImage: true,
+	isFavorite: true,
+	createdAt: true,
+	updatedAt: true,
 	_count: {
 		select: {
 			images: true,
@@ -96,13 +82,47 @@ async function revalidateCollectionPaths() {
 /**
  * Busca y obtiene colecciones según los criterios de búsqueda.
  */
-export async function searchCollections(options: CollectionSearchOptions): Promise<CollectionComplete[]> {
+export async function searchCollections(
+	options: CollectionSearchOptions
+): Promise<CollectionWithStats[]> {
 	logger.info('🔍 Buscando colecciones', { options });
 	const prisma = await getPrismaClient();
-	const prismaOptions = mapCollectionSearchOptionsToPrisma(options);
+
+	// Construir query básica
+	const where: any = {};
+	if (options.filters?.search) {
+		where.OR = [
+			{ name: { contains: options.filters.search } },
+			{ description: { contains: options.filters.search } },
+		];
+	}
+	if (options.filters?.isFavorite !== undefined) {
+		where.isFavorite = options.filters.isFavorite;
+	}
+	if (options.filters?.category && options.filters.category.length > 0) {
+		where.category = { in: options.filters.category };
+	}
+
 	const collections = await prisma.collection.findMany({
-		...prismaOptions,
-		include: COLLECTION_INCLUDE,
+		where,
+		select: COLLECTION_SELECT_WITH_STATS,
+		skip: options.skip,
+		take: options.take,
+		orderBy: options.orderBy || { createdAt: 'desc' },
+	});
+
+	return fromPrismaCollections(collections);
+}
+
+/**
+ * Obtiene todas las colecciones.
+ */
+export async function getCollections(): Promise<CollectionWithStats[]> {
+	logger.info('📚 Obteniendo todas las colecciones');
+	const prisma = await getPrismaClient();
+	const collections = await prisma.collection.findMany({
+		select: COLLECTION_SELECT_WITH_STATS,
+		orderBy: { createdAt: 'desc' },
 	});
 	return fromPrismaCollections(collections);
 }
@@ -110,12 +130,12 @@ export async function searchCollections(options: CollectionSearchOptions): Promi
 /**
  * Obtiene una única colección por su ID.
  */
-export async function getCollection(id: string): Promise<CollectionComplete | null> {
+export async function getCollection(id: string): Promise<CollectionWithStats | null> {
 	logger.info(`🔍 Obteniendo colección por ID: ${id}`);
 	const prisma = await getPrismaClient();
 	const collection = await prisma.collection.findUnique({
 		where: { id },
-		include: COLLECTION_INCLUDE,
+		select: COLLECTION_SELECT_WITH_STATS,
 	});
 	if (!collection) {
 		logger.warn(`Colección no encontrada: ${id}`);
@@ -127,33 +147,46 @@ export async function getCollection(id: string): Promise<CollectionComplete | nu
 /**
  * Crea una nueva colección.
  */
-export async function createCollection(data: CollectionCreateInput): Promise<CollectionComplete> {
+export async function createCollection(
+	data: CollectionCreateInput
+): Promise<CollectionWithStats> {
 	logger.info('➕ Creando nueva colección:', { name: data.name });
 	const prisma = await getPrismaClient();
-	const prismaData = mapCreateCollectionDataToPrisma(data);
+	const prismaData = toPrismaCollectionCreate(data);
 	const newCollection = await prisma.collection.create({
 		data: prismaData,
-		include: COLLECTION_INCLUDE,
+		select: COLLECTION_SELECT_WITH_STATS,
 	});
 	await revalidateCollectionPaths();
-	return fromPrismaCollection(newCollection);
+	const transformed = fromPrismaCollection(newCollection);
+	if (!transformed) {
+		throw new Error('Error al transformar la colección recién creada.');
+	}
+	return transformed;
 }
 
 /**
  * Actualiza una colección existente.
  */
-export async function updateCollection(id: string, data: CollectionUpdateInput): Promise<CollectionComplete> {
+export async function updateCollection(
+	id: string,
+	data: CollectionUpdateInput
+): Promise<CollectionWithStats> {
 	logger.info(`🔄 Actualizando colección: ${id}`);
 	const prisma = await getPrismaClient();
-	const prismaData = mapUpdateCollectionDataToPrisma(data);
+	const prismaData = toPrismaCollectionUpdate(data);
 	const updatedCollection = await prisma.collection.update({
 		where: { id },
 		data: prismaData,
-		include: COLLECTION_INCLUDE,
+		select: COLLECTION_SELECT_WITH_STATS,
 	});
 	await revalidateCollectionPaths();
 	revalidatePath(`/collections/${id}`);
-	return fromPrismaCollection(updatedCollection);
+	const transformed = fromPrismaCollection(updatedCollection);
+	if (!transformed) {
+		throw new Error('Error al transformar la colección actualizada.');
+	}
+	return transformed;
 }
 
 /**
@@ -167,85 +200,31 @@ export async function deleteCollection(id: string): Promise<void> {
 }
 
 /**
- * Añade una imagen a una colección.
- */
-export async function addImageToCollection(collectionId: string, imageId: string): Promise<void> {
-	logger.info(`🖼️ Añadiendo imagen ${imageId} a colección ${collectionId}`);
-	const prisma = await getPrismaClient();
-	await prisma.collection.update({
-		where: { id: collectionId },
-		data: { images: { connect: { id: imageId } } },
-	});
-	revalidatePath(`/collections/${collectionId}`);
-}
-
-/**
- * Elimina una imagen de una colección.
- */
-export async function removeImageFromCollection(collectionId: string, imageId: string): Promise<void> {
-	logger.info(`🖼️ Eliminando imagen ${imageId} de colección ${collectionId}`);
-	const prisma = await getPrismaClient();
-	await prisma.collection.update({
-		where: { id: collectionId },
-		data: { images: { disconnect: { id: imageId } } },
-	});
-	revalidatePath(`/collections/${collectionId}`);
-}
-
-/**
- * Obtiene las imágenes de una colección específica.
+ * Obtiene las imágenes de una colección específica de forma eficiente.
  */
 export async function getCollectionImages(
 	collectionId: string
-): Promise<Array<{ id: string; name: string; path: string }>> {
+): Promise<{ id: string; name: string; path: string }[]> {
 	logger.info(`🖼️ Obteniendo imágenes de la colección: ${collectionId}`);
 	const prisma = await getPrismaClient();
-	const collection = await prisma.collection.findUnique({
-		where: { id: collectionId },
-		include: {
-			images: {
-				select: {
-					id: true,
-					name: true,
-					path: true,
+
+	const images = await prisma.image.findMany({
+		where: {
+			collections: {
+				some: {
+					id: collectionId,
 				},
-				orderBy: { createdAt: 'desc' },
 			},
+		},
+		select: {
+			id: true,
+			name: true,
+			path: true,
+		},
+		orderBy: {
+			createdAt: 'desc',
 		},
 	});
 
-	if (!collection) {
-		logger.warn(`Colección no encontrada: ${collectionId}`);
-		return [];
-	}
-
-	return collection.images;
-}
-
-/**
- * Añade una colección a una imagen (relación inversa).
- */
-export async function addCollectionToImage(imageId: string, collectionId: string): Promise<void> {
-	logger.info(`🖼️ Añadiendo colección ${collectionId} a imagen ${imageId}`);
-	const prisma = await getPrismaClient();
-	await prisma.image.update({
-		where: { id: imageId },
-		data: { collections: { connect: { id: collectionId } } },
-	});
-	revalidatePath(`/images/${imageId}`);
-	revalidatePath(`/collections/${collectionId}`);
-}
-
-/**
- * Elimina una colección de una imagen (relación inversa).
- */
-export async function removeCollectionFromImage(imageId: string, collectionId: string): Promise<void> {
-	logger.info(`🖼️ Eliminando colección ${collectionId} de imagen ${imageId}`);
-	const prisma = await getPrismaClient();
-	await prisma.image.update({
-		where: { id: imageId },
-		data: { collections: { disconnect: { id: collectionId } } },
-	});
-	revalidatePath(`/images/${imageId}`);
-	revalidatePath(`/collections/${collectionId}`);
+	return images;
 }

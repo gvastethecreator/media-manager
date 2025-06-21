@@ -1,20 +1,40 @@
 /**
- * @file Enumeraciones para la entidad Folder
+ * @file Enums para la entidad Folder
  * @module types/entities/folder/enums
+ * @description Enumeraciones para criterios de ordenación, tipos, y otros valores de Folder
  */
 
 /**
- * 📊 Criterios de ordenación para Folders
+ * 📂 Criterios de ordenación para carpetas
  */
-export enum FolderSortBy {
-	NAME_ASC = 'NAME_ASC',
-	NAME_DESC = 'NAME_DESC',
-	CREATED_ASC = 'CREATED_ASC',
-	CREATED_DESC = 'CREATED_DESC',
-	UPDATED_ASC = 'UPDATED_ASC',
-	UPDATED_DESC = 'UPDATED_DESC',
-	PATH_ASC = 'PATH_ASC',
-	PATH_DESC = 'PATH_DESC',
+export enum FolderSortCriteria {
+	// Alfabético
+	NAME_ASC = 'name_asc',
+	NAME_DESC = 'name_desc',
+
+	// Por fecha
+	DATE_ASC = 'date_asc',
+	DATE_DESC = 'date_desc',
+
+	// Por tamaño
+	SIZE_ASC = 'size_asc',
+	SIZE_DESC = 'size_desc',
+
+	// Por cantidad de archivos
+	FILES_ASC = 'files_asc',
+	FILES_DESC = 'files_desc',
+
+	// Por organización
+	ORGANIZATION_ASC = 'organization_asc',
+	ORGANIZATION_DESC = 'organization_desc',
+
+	// Por jerarquía
+	DEPTH_ASC = 'depth_asc',
+	DEPTH_DESC = 'depth_desc',
+
+	// Por actividad
+	ACTIVITY_ASC = 'activity_asc',
+	ACTIVITY_DESC = 'activity_desc',
 }
 
 /**
@@ -29,33 +49,43 @@ export enum FolderType {
 }
 
 /**
- * 👁️ Modos de visualización para Folders
+ * 📂 Modos de vista para carpetas
  */
 export enum FolderViewMode {
-	GRID = 'GRID',
-	LIST = 'LIST',
-	TREE = 'TREE',
-	DETAILS = 'DETAILS',
+	GRID = 'grid',
+	LIST = 'list',
+	TREE = 'tree',
+	CARDS = 'cards',
 }
 
 /**
- * 🚩 Estado de sincronización de un Folder
+ * 📂 Niveles de calidad de organización
  */
-export enum FolderSyncState {
-	SYNCED = 'SYNCED',
-	PENDING = 'PENDING',
-	SYNCING = 'SYNCING',
-	ERROR = 'ERROR',
-	NOT_SYNCED = 'NOT_SYNCED',
+export enum FolderQualityLevel {
+	EXCELLENT = 'excellent', // A: 85-100
+	GOOD = 'good',          // B: 70-84
+	FAIR = 'fair',          // C: 50-69
+	POOR = 'poor',          // D: 0-49
 }
 
 /**
- * 📋 Estado de indexación de un Folder
+ * 📂 Estados de indexación
  */
-export enum FolderIndexState {
-	INDEXED = 'INDEXED',
-	INDEXING = 'INDEXING',
-	PENDING = 'PENDING',
-	ERROR = 'ERROR',
-	NOT_INDEXED = 'NOT_INDEXED',
+export enum FolderIndexStatus {
+	PENDING = 'pending',
+	INDEXING = 'indexing',
+	COMPLETED = 'completed',
+	ERROR = 'error',
+	NEVER = 'never',
+}
+
+/**
+ * 📂 Tipos de contenido predominante
+ */
+export enum FolderContentType {
+	MIXED = 'mixed',
+	IMAGES = 'images',
+	VIDEOS = 'videos',
+	DOCUMENTS = 'documents',
+	EMPTY = 'empty',
 }

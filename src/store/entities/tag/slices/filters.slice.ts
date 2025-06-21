@@ -4,8 +4,8 @@
  */
 
 import { StateCreator } from 'zustand';
-import { TagSortCriteria } from '@/types/entities/tag';
 import type { TagFilterActions, TagFilters, TagStore } from '../types';
+import { TagSortCriteria } from '../types';
 
 /**
  * 🔍 Creador del slice de filtros para el store de Tag
@@ -43,10 +43,10 @@ export const createTagFiltersSlice: StateCreator<TagStore, [], [], { filters: Ta
 
 	// Obtiene tags filtrados
 	getFilteredTags: () => {
-		const { items } = get();
-		const { searchTerm, category, rarity } = get().filters;
+		const tags = Object.values(get().tags);
+		const { searchTerm, category } = get().filters;
 
-		return items.filter((tag) => {
+		return tags.filter((tag) => {
 			// Filtrar por término de búsqueda (en nombre o descripción)
 			const matchesSearch = !searchTerm
 				? true
@@ -56,11 +56,8 @@ export const createTagFiltersSlice: StateCreator<TagStore, [], [], { filters: Ta
 			// Filtrar por categoría
 			const matchesCategory = category === null || tag.category === category;
 
-			// Filtrar por rareza
-			const matchesRarity = rarity === null || tag.rarity === rarity;
-
 			// El tag debe cumplir todos los criterios
-			return matchesSearch && matchesCategory && matchesRarity;
+			return matchesSearch && matchesCategory;
 		});
 	},
 
@@ -73,28 +70,20 @@ export const createTagFiltersSlice: StateCreator<TagStore, [], [], { filters: Ta
 			switch (sortBy) {
 				case TagSortCriteria.NAME_ASC:
 					return a.name.localeCompare(b.name);
-
 				case TagSortCriteria.NAME_DESC:
 					return b.name.localeCompare(a.name);
-
 				case TagSortCriteria.CREATED_ASC:
 					return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-
 				case TagSortCriteria.CREATED_DESC:
 					return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-
 				case TagSortCriteria.UPDATED_ASC:
 					return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-
 				case TagSortCriteria.UPDATED_DESC:
 					return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-
 				case TagSortCriteria.USAGE_ASC:
-					return (a._count?.images || 0) - (b._count?.images || 0);
-
+					return a.stats.totalRelations - b.stats.totalRelations;
 				case TagSortCriteria.USAGE_DESC:
-					return (b._count?.images || 0) - (a._count?.images || 0);
-
+					return b.stats.totalRelations - a.stats.totalRelations;
 				default:
 					return 0;
 			}

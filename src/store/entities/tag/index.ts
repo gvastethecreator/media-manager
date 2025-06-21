@@ -3,9 +3,9 @@
  * @module store/entities/tag
  */
 
+import { VERSIONING } from '@/lib/constants';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import { VERSIONING } from '@/lib/constants';
 import { createTagCoreSlice } from './slices/core.slice';
 import { createTagFiltersSlice } from './slices/filters.slice';
 import { createTagUISlice } from './slices/ui.slice';
@@ -34,15 +34,15 @@ export const useTagStore = create<TagStore>()(
 				// Mantener filtros y configuración de UI pero no los datos
 				filters: state.filters,
 				viewMode: state.viewMode,
-				// No guardar datos que pueden ser grandes o cambiantes
-				items: [],
+				// No persistir el estado de la UI que debe ser transitorio
 				selectedId: null,
 				selectedIds: [],
 				expandedIds: [],
 				editingId: null,
 				highlightedId: null,
-				isLoading: false,
-				error: null,
+				isCreateModalOpen: false,
+				isEditModalOpen: false,
+				isDeleteModalOpen: false,
 			}),
 		}
 	)
@@ -50,3 +50,4 @@ export const useTagStore = create<TagStore>()(
 
 // Re-exportar tipos
 export * from './types';
+

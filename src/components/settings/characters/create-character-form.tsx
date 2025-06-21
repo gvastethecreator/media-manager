@@ -7,9 +7,15 @@ import { z } from 'zod';
 import { createCharacter, updateCharacter } from '@/app/actions/characters/character.actions';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import toastService from '@/services/toast.service';
-import type { CharacterBase as Character, CreateCharacterData } from '@/types/entities/character/base';
+import type { CharacterBase, CreateCharacterData } from '@/types/entities/character';
 import {
 	CHARACTER_CLASS_COLORS,
 	CHARACTER_CLASS_EMOJIS,
@@ -56,10 +62,10 @@ const createCharacterSchema = z.object({
 type FormValues = z.infer<typeof createCharacterSchema>;
 
 interface CreateCharacterFormProps {
-	character?: Character | null;
+	character?: CharacterBase | null;
 	isEditing?: boolean;
-	onCreated?: (character: Character) => void;
-	onUpdated?: (character: Character) => void;
+	onCreated?: (character: CharacterBase) => void;
+	onUpdated?: (character: CharacterBase) => void;
 	onCancel?: () => void;
 	onPreview?: (data: any) => void;
 }

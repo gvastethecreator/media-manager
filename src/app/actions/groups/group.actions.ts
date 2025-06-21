@@ -2,8 +2,7 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { validateName } from '@/lib/validations';
-import { fromPrismaGroup } from '@/transformers/group/transformer';
-import { toPrismaGroupCreate, toPrismaGroupUpdate, validateGroup } from '@/transformers/group/serializers';
+import { fromPrismaGroup, fromPrismaGroups, toPrismaGroupCreate, toPrismaGroupUpdate, validateGroup } from '@/transformers/group';
 import type { CreateGroupData, GroupWithStats, UpdateGroupData } from '@/types/entities/group/types';
 import { revalidatePath } from 'next/cache';
 
@@ -38,7 +37,7 @@ export async function getGroups(): Promise<GroupWithStats[]> {
 			},
 		});
 
-		return groups.map((group) => fromPrismaGroup(group));
+		return fromPrismaGroups(groups);
 	} catch (error) {
 		console.error('Error al obtener grupos:', error);
 		throw new Error('No se pudieron obtener los grupos');

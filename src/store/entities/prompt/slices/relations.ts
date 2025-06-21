@@ -1,6 +1,6 @@
-import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { EntityType } from '@/types/entities/entities';
+import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
 const relationsLogger = clientLogger.withContext('PromptStore:Relations');
@@ -23,47 +23,7 @@ export interface RelationsSlice {
 	) => Promise<void>;
 }
 
-// Acciones mock para desarrollo (se reemplazarán con server actions)
-const mockApi = {
-	addPromptToEntity: async (_promptId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-
-	removePromptFromEntity: async (_promptId: string, _entityId: string, _entityType: EntityType): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-
-	addGroupToPrompt: async (_promptId: string, _groupId: string): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-
-	removeGroupFromPrompt: async (_promptId: string, _groupId: string): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-
-	addPropertyToPrompt: async (_promptId: string, _propertyId: string): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-
-	removePropertyFromPrompt: async (_promptId: string, _propertyId: string): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-
-	addWildcardToPrompt: async (_promptId: string, _wildcardId: string): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-
-	removeWildcardFromPrompt: async (_promptId: string, _wildcardId: string): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-
-	updatePromptRelations: async (
-		_promptId: string,
-		_data: { groupIds?: string[]; propertyIds?: string[]; wildcardIds?: string[] }
-	): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-};
+// Importar las server actions reales para relaciones
 
 export const createRelationsSlice: StateCreator<PromptStore, [], [], RelationsSlice> = (set, get) => ({
 	// Acciones generales
@@ -72,7 +32,7 @@ export const createRelationsSlice: StateCreator<PromptStore, [], [], RelationsSl
 			relationsLogger.info('🔗 Asociando prompt a entidad:', { promptId, entityId, entityType });
 
 			// Llamar a server action para asociar prompt a entidad
-			await mockApi.addPromptToEntity(promptId, entityId, entityType);
+			await linkEntityToPrompt(promptId, entityId, entityType);
 
 			// Recargar prompts para actualizar las relaciones
 			await get().loadPrompts();
@@ -90,7 +50,7 @@ export const createRelationsSlice: StateCreator<PromptStore, [], [], RelationsSl
 			relationsLogger.info('🔓 Desasociando prompt de entidad:', { promptId, entityId, entityType });
 
 			// Llamar a server action para desasociar prompt de entidad
-			await mockApi.removePromptFromEntity(promptId, entityId, entityType);
+			await unlinkEntityFromPrompt(promptId, entityId, entityType);
 
 			// Recargar prompts para actualizar las relaciones
 			await get().loadPrompts();
@@ -109,7 +69,7 @@ export const createRelationsSlice: StateCreator<PromptStore, [], [], RelationsSl
 			relationsLogger.info('🔗 Asociando grupo a prompt:', { promptId, groupId });
 
 			// Llamar a server action para asociar grupo a prompt
-			await mockApi.addGroupToPrompt(promptId, groupId);
+			await linkEntityToPrompt(promptId, groupId, 'group');
 
 			// Recargar prompts para actualizar las relaciones
 			await get().loadPrompts();
@@ -127,7 +87,7 @@ export const createRelationsSlice: StateCreator<PromptStore, [], [], RelationsSl
 			relationsLogger.info('🔓 Desasociando grupo de prompt:', { promptId, groupId });
 
 			// Llamar a server action para desasociar grupo de prompt
-			await mockApi.removeGroupFromPrompt(promptId, groupId);
+			await unlinkEntityFromPrompt(promptId, groupId, 'group');
 
 			// Recargar prompts para actualizar las relaciones
 			await get().loadPrompts();
@@ -145,7 +105,7 @@ export const createRelationsSlice: StateCreator<PromptStore, [], [], RelationsSl
 			relationsLogger.info('🔗 Asociando propiedad a prompt:', { promptId, propertyId });
 
 			// Llamar a server action para asociar propiedad a prompt
-			await mockApi.addPropertyToPrompt(promptId, propertyId);
+			await linkEntityToPrompt(promptId, propertyId, 'property');
 
 			// Recargar prompts para actualizar las relaciones
 			await get().loadPrompts();
@@ -163,7 +123,7 @@ export const createRelationsSlice: StateCreator<PromptStore, [], [], RelationsSl
 			relationsLogger.info('🔓 Desasociando propiedad de prompt:', { promptId, propertyId });
 
 			// Llamar a server action para desasociar propiedad de prompt
-			await mockApi.removePropertyFromPrompt(promptId, propertyId);
+			await unlinkEntityFromPrompt(promptId, propertyId, 'property');
 
 			// Recargar prompts para actualizar las relaciones
 			await get().loadPrompts();
@@ -181,7 +141,7 @@ export const createRelationsSlice: StateCreator<PromptStore, [], [], RelationsSl
 			relationsLogger.info('🔗 Asociando comodín a prompt:', { promptId, wildcardId });
 
 			// Llamar a server action para asociar comodín a prompt
-			await mockApi.addWildcardToPrompt(promptId, wildcardId);
+			await linkEntityToPrompt(promptId, wildcardId, 'wildcard');
 
 			// Recargar prompts para actualizar las relaciones
 			await get().loadPrompts();
@@ -199,7 +159,7 @@ export const createRelationsSlice: StateCreator<PromptStore, [], [], RelationsSl
 			relationsLogger.info('🔓 Desasociando comodín de prompt:', { promptId, wildcardId });
 
 			// Llamar a server action para desasociar comodín de prompt
-			await mockApi.removeWildcardFromPrompt(promptId, wildcardId);
+			await unlinkEntityFromPrompt(promptId, wildcardId, 'wildcard');
 
 			// Recargar prompts para actualizar las relaciones
 			await get().loadPrompts();
@@ -216,8 +176,22 @@ export const createRelationsSlice: StateCreator<PromptStore, [], [], RelationsSl
 		try {
 			relationsLogger.info('🔄 Actualizando relaciones del prompt:', { promptId, ...data });
 
-			// Llamar a server action para actualizar relaciones
-			await mockApi.updatePromptRelations(promptId, data);
+			// Actualizar relaciones usando las server actions individuales
+			if (data.groupIds) {
+				for (const groupId of data.groupIds) {
+					await linkEntityToPrompt(promptId, groupId, 'group');
+				}
+			}
+			if (data.propertyIds) {
+				for (const propertyId of data.propertyIds) {
+					await linkEntityToPrompt(promptId, propertyId, 'property');
+				}
+			}
+			if (data.wildcardIds) {
+				for (const wildcardId of data.wildcardIds) {
+					await linkEntityToPrompt(promptId, wildcardId, 'wildcard');
+				}
+			}
 
 			// Recargar prompts para actualizar las relaciones
 			await get().loadPrompts();

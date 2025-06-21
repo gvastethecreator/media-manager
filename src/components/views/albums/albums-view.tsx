@@ -1,103 +1,56 @@
 'use client';
 
-import { Album as AlbumIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
-import { type AlbumWithStats, getAlbums } from '@/app/actions/albums/album.actions';
 import { AlbumCard } from '@/components/cards/album-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
+import type { AlbumWithStats } from '@/types/entities/album';
+import { Album as AlbumIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useCallback, useEffect } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AlbumsView');
 
-// Definir el tipo para álbumes con estadísticas
-interface AlbumDetails {
-	id: string;
-	name: string;
-	emoji?: string;
-	color?: string;
-	updatedAt: Date | string;
-	_count?: { images: number };
-}
-
-// Componente memoizado para cada tarjeta de álbum
 const MemoizedAlbumCard = React.memo(
-	({ album, onAlbumClick }: { album: AlbumWithStats; onAlbumClick: () => void }) => {
-		// Asegurarse de que el álbum tenga todas las propiedades requeridas
-		const completeAlbum = {
-			...album,
-			emoji: album.emoji || '📔',
-			color: album.color || '#10b981',
-		};
-
-		return <AlbumCard album={completeAlbum} onClick={onAlbumClick} className="h-full" />;
-	},
-	(prevProps, nextProps) => {
-		// Memoización personalizada para solo re-renderizar si cambian propiedades importantes
-		return (
-			prevProps.album.id === nextProps.album.id &&
-			prevProps.album.name === nextProps.album.name &&
-			prevProps.album.updatedAt === nextProps.album.updatedAt
-		);
-	}
+	({ album, onAlbumClick }: { album: AlbumWithStats; onAlbumClick: () => void }) => (
+		<AlbumCard album={album} onClick={onAlbumClick} className="h-full" />
+	),
+	(prevProps, nextProps) =>
+		prevProps.album.id === nextProps.album.id &&
+		prevProps.album.name === nextProps.album.name &&
+		prevProps.album.updatedAt === nextProps.album.updatedAt,
 );
-
-// Para evitar advertencias de displayName
 MemoizedAlbumCard.displayName = 'MemoizedAlbumCard';
 
 export function AlbumsView(_props: ViewProps) {
-	const { setCurrentView } = useNavigationStore();
-	const { selectAlbum, openViewer } = useAlbumStore();
-	const _router = useRouter();
-	const [albums, setAlbums] = useState<AlbumWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticAlbums, _addEvent] = clientEvents.useEvents<AlbumWithStats[]>(albums);
-
-	const fetchAlbums = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando álbumes...');
-			const data = await getAlbums();
-			setAlbums(data);
-			viewLogger.info(`✅ ${data.length} álbumes cargados`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando álbumes:', err);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, []);
+	const {
+		albums: albumsRecord,
+		isLoading,
+		error,
+		loadAlbums,
+		getSortedAlbums,
+	} = useAlbumStore((s) => ({
+		albums: s.albums,
+		isLoading: s.isLoading,
+		error: s.error,
+		loadAlbums: s.loadAlbums,
+		getSortedAlbums: s.getSortedAlbums,
+	}));
 
 	useEffect(() => {
-		// Cargar álbumes inicialmente
-		fetchAlbums();
-	}, [fetchAlbums]);
+		if (Object.keys(albumsRecord).length === 0) {
+			viewLogger.info('Store de álbumes vacío, cargando desde el servidor...');
+			loadAlbums();
+		}
+	}, [loadAlbums, albumsRecord]);
 
-	const handleAlbumClick = useCallback(
-		(album: AlbumWithStats) => {
-			// Usando type assertion para acceder a propiedades que sabemos que existen
-			// pero TypeScript no puede inferir del tipo
-			const albumData = album as any;
-			viewLogger.info('🖱️ Click en álbum:', albumData.name);
-			setCurrentView('album-content');
-
-			// Seleccionar el álbum y abrir el visor
-			selectAlbum(albumData.id);
-			openViewer(albumData.id);
-		},
-		[setCurrentView, selectAlbum, openViewer]
-	);
+	const handleAlbumClick = useCallback((album: AlbumWithStats) => {
+		viewLogger.info('🖱️ Click en álbum:', album.name);
+		// Lógica de navegación o apertura de visor aquí
+	}, []);
 
 	if (error) {
 		return (
@@ -107,11 +60,13 @@ export function AlbumsView(_props: ViewProps) {
 		);
 	}
 
-	if (isLoading) {
+	if (isLoading && Object.keys(albumsRecord).length === 0) {
 		return <LoadingScreen />;
 	}
 
-	if (!optimisticAlbums || optimisticAlbums.length === 0) {
+	const sortedAlbums = getSortedAlbums();
+
+	if (sortedAlbums.length === 0) {
 		return (
 			<EmptyState
 				icon={AlbumIcon}
@@ -125,19 +80,11 @@ export function AlbumsView(_props: ViewProps) {
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{optimisticAlbums.map((album, index) => {
-						// Verificar que el álbum tenga un id válido
-						if (!album || !(album as any).id) {
-							console.error('Álbum sin id válido:', album);
-							return null;
-						}
-
-						// Crear una función de clic específica para este álbum
+					{sortedAlbums.map((album, index) => {
 						const onAlbumClick = () => handleAlbumClick(album);
-
 						return (
 							<motion.div
-								key={(album as any).id}
+								key={album.id}
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ delay: index * 0.1 }}
@@ -145,7 +92,7 @@ export function AlbumsView(_props: ViewProps) {
 							>
 								<div
 									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-									data-album-id={(album as any).id}
+									data-album-id={album.id}
 								>
 									<MemoizedAlbumCard album={album} onAlbumClick={onAlbumClick} />
 								</div>

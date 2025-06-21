@@ -6,19 +6,28 @@
  * Última migración: 2025-06-18
  */
 
-import type { CharacterComplete } from '../character';
-import type { CollectionComplete } from '../collection';
-import type { ConceptComplete } from '../concept';
-import type { GroupComplete } from '../group';
-import type { ImageComplete } from '../image';
-import type { NoteComplete } from '../note';
-import type { PlaceComplete } from '../place';
-import type { PromptComplete } from '../prompt';
-import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
-import type { VideoComplete } from '../video';
-import type { WildcardComplete } from '../wildcard';
-import type { WorldItemComplete } from '../world-item';
+import type { Album as PrismaAlbum } from '@prisma/client';
+
+/**
+ * 💿 Interfaz que representa el payload de Prisma para un álbum, incluyendo las relaciones contadas.
+ */
+export type PrismaAlbumWithCounts = PrismaAlbum & {
+	_count?: {
+		images?: number;
+		videos?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+};
 
 /**
  * 📝 Metadatos de un álbum
@@ -52,48 +61,55 @@ export interface AlbumBase {
 }
 
 /**
- * 🔗 Relaciones de un álbum con otras entidades
+ * 🔗 Relaciones de un álbum con otras entidades (simplificado para evitar dependencias circulares)
  */
 export interface AlbumRelations {
-	images?: ImageComplete[];
-	videos?: VideoComplete[];
-	collections?: CollectionComplete[];
-	tags?: TagComplete[];
-	characters?: CharacterComplete[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	concepts?: ConceptComplete[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
-	properties?: PropertyComplete[];
-	groups?: GroupComplete[];
+	images?: any[];
+	videos?: any[];
+	collections?: any[];
+	tags?: any[];
+	characters?: any[];
+	places?: any[];
+	worldItems?: any[];
+	concepts?: any[];
+	prompts?: any[];
+	notes?: any[];
+	wildcards?: any[];
+	properties?: any[];
+	groups?: any[];
 }
 
 /**
  * 🔢 Contadores de relaciones
  */
 export interface AlbumCounts {
-	images?: number;
-	videos?: number;
-	collections?: number;
-	tags?: number;
-	characters?: number;
-	places?: number;
-	worldItems?: number;
-	concepts?: number;
-	prompts?: number;
-	notes?: number;
-	wildcards?: number;
-	properties?: number;
-	groups?: number;
+	images: number;
+	videos: number;
+	collections: number;
+	tags: number;
+	characters: number;
+	places: number;
+	worldItems: number;
+	concepts: number;
+	prompts: number;
+	notes: number;
+	wildcards: number;
+	properties: number;
+	groups: number;
 }
 
 /**
- * 🌟 Album con relaciones y conteos
+ * 🌟 Album con estadísticas calculadas y conteos
  */
-export interface AlbumWithRelations extends AlbumBase, AlbumRelations {
-	_count?: AlbumCounts;
+export interface AlbumWithStats extends AlbumBase {
+	_count?: Partial<AlbumCounts>;
+	relations?: Partial<AlbumRelations>;
+	stats: {
+		totalItems: number;
+		totalImages: number;
+		totalVideos: number;
+		lastUpdated: Date;
+	};
 }
 
 /**
@@ -110,6 +126,8 @@ export interface AlbumFilters {
 		from?: Date;
 		to?: Date;
 	};
+	images?: { id: string }[];
+	videos?: { id: string }[];
 }
 
 /**
@@ -126,27 +144,19 @@ export interface AlbumCreateInput {
 	filters?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
-	images?: { connect: { id: string }[] };
-	videos?: { connect: { id: string }[] };
+	images?: { id: string }[];
+	videos?: { id: string }[];
 }
 
 /**
  * 🔄 Input para actualizar un álbum
  */
-export interface AlbumUpdateInput {
-	name?: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	shortcut?: string | null;
-	category?: string;
-	sortBy?: string;
-	filters?: string;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-	images?: { set?: { id: string }[] };
-	videos?: { set?: { id: string }[] };
-}
+export type AlbumUpdateInput = Partial<
+	Omit<AlbumBase, 'id' | 'createdAt' | 'updatedAt'> & {
+		images: { id: string }[];
+		videos: { id: string }[];
+	}
+>;
 
 // 🟢 Documentación
 // - Se utiliza el tipo Prisma como base canónica

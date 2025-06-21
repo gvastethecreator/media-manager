@@ -9,18 +9,14 @@ import {
     createAlbum as createServerAlbum,
     deleteAlbum as deleteServerAlbum,
     getAlbums,
+    getAlbum as getServerAlbum,
     updateAlbum as updateServerAlbum,
 } from '@/app/actions/albums/album.actions';
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import {
-    AlbumCreateInput,
-    AlbumSortCriteria,
-    AlbumUpdateInput,
-    AlbumViewMode,
-    AlbumWithRelations
-} from '@/types/entities/album';
+import type { AlbumCreateInput, AlbumUpdateInput } from '@/types/entities/album';
+import { AlbumSortCriteria, AlbumViewMode } from '@/types/entities/album/enums';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { AlbumStore } from './types';
@@ -36,7 +32,7 @@ export const useAlbumStore = create<AlbumStore>()(
 	persist(
 		(set, get) => ({
 			// 📋 Estado inicial de datos
-			albums: [] as AlbumWithRelations[],
+			albums: {},
 			isLoading: false,
 			error: null,
 			lastUpdated: null,
@@ -81,7 +77,14 @@ export const useAlbumStore = create<AlbumStore>()(
 				try {
 					set({ isLoading: true, error: null });
 					albumLogger.info('🔄 Cargando álbumes...');
-					const albums = await getAlbums();
+					const albumsArray = await getAlbums();
+					const albums = albumsArray.reduce(
+						(acc, album) => {
+							acc[album.id] = album;
+							return acc;
+						},
+						{} as AlbumStore['albums'],
+					);
 					set({ albums, isLoading: false, lastUpdated: Date.now() });
 					albumLogger.info('✅ Álbumes cargados correctamente');
 				} catch (error) {
@@ -93,11 +96,26 @@ export const useAlbumStore = create<AlbumStore>()(
 			},
 
 			loadAlbumById: async (id: string) => {
-				const album = get().albums.find((a) => a.id === id);
-				if (!album) {
-					albumLogger.warn(`Album con id ${id} no encontrado en el store.`);
+				if (get().albums[id]) {
+					return get().albums[id];
 				}
-				return album;
+
+				try {
+					set({ isLoading: true });
+					const album = await getServerAlbum(id);
+					if (album) {
+						set((state) => ({
+							albums: { ...state.albums, [id]: album },
+							isLoading: false,
+						}));
+						return album;
+					}
+				} catch (error) {
+					albumLogger.error(`Error cargando el album ${id}`, error);
+				} finally {
+					set({ isLoading: false });
+				}
+				return undefined;
 			},
 
 			// 📝 Gestión de álbumes
@@ -105,7 +123,9 @@ export const useAlbumStore = create<AlbumStore>()(
 				try {
 					albumLogger.info('➕ Creando álbum:', albumData.name);
 					const newAlbum = await createServerAlbum(albumData);
-					set((state) => ({ albums: [...state.albums, newAlbum] }));
+					set((state) => ({
+						albums: { ...state.albums, [newAlbum.id]: newAlbum },
+					}));
 					albumLogger.info('✅ Álbum creado correctamente');
 					toastService.system.success('Álbum creado correctamente');
 				} catch (error) {
@@ -120,7 +140,7 @@ export const useAlbumStore = create<AlbumStore>()(
 					albumLogger.info('🔄 Actualizando álbum:', id);
 					const updatedAlbum = await updateServerAlbum(id, albumData);
 					set((state) => ({
-						albums: state.albums.map((a) => (a.id === id ? updatedAlbum : a)),
+						albums: { ...state.albums, [id]: updatedAlbum },
 					}));
 					albumLogger.info('✅ Álbum actualizado correctamente');
 					toastService.system.success('Álbum actualizado correctamente');
@@ -135,9 +155,10 @@ export const useAlbumStore = create<AlbumStore>()(
 				try {
 					albumLogger.info('🗑️ Eliminando álbum:', id);
 					await deleteServerAlbum(id);
-					set((state) => ({
-						albums: state.albums.filter((a) => a.id !== id),
-					}));
+					set((state) => {
+						const { [id]: _, ...rest } = state.albums;
+						return { albums: rest };
+					});
 					albumLogger.info('✅ Álbum eliminado correctamente');
 					toastService.system.success('Álbum eliminado correctamente');
 				} catch (error) {
@@ -158,20 +179,6 @@ export const useAlbumStore = create<AlbumStore>()(
 					return { ui: { ...state.ui, selectedIds } };
 				}),
 			clearSelection: () => set((state) => ({ ui: { ...state.ui, selectedIds: [] } })),
-
-			// 🖼️ Acciones de imágenes (Placeholder - requieren server actions)
-			addImageToAlbum: async (albumId, imageId) => {
-				albumLogger.info(`🖼️ Agregando imagen ${imageId} al álbum ${albumId}`);
-				// Aquí iría la llamada a la server action
-				// await addImageToAlbumAction(albumId, imageId);
-				// Y luego actualizar el estado local
-			},
-			removeImageFromAlbum: async (albumId, imageId) => {
-				albumLogger.info(`🖼️ Eliminando imagen ${imageId} del álbum ${albumId}`);
-				// Aquí iría la llamada a la server action
-				// await removeImageFromAlbumAction(albumId, imageId);
-				// Y luego actualizar el estado local
-			},
 
 			// 🔍 Filtros
 			updateFilters: (newFilters) => set((state) => ({ filters: { ...state.filters, ...newFilters } })),
@@ -198,19 +205,20 @@ export const useAlbumStore = create<AlbumStore>()(
 					filters: {
 						...state.filters,
 						searchQuery: query,
-						query: query, // Mantener ambos sincronizados
+						query: query,
 					},
 				})),
 
 			// --- SELECTORES ---
 
-			getAlbumById: (id) => get().albums.find((album) => album.id === id),
+			getAlbumById: (id) => get().albums[id],
 
 			getFilteredAlbums: () => {
 				const { albums, filters } = get();
 				const { searchQuery, filterFavorites } = filters;
+				const allAlbums = Object.values(albums);
 
-				return albums.filter((album) => {
+				return allAlbums.filter((album) => {
 					const matchesSearch = searchQuery
 						? album.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
 							album.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -250,9 +258,7 @@ export const useAlbumStore = create<AlbumStore>()(
 					viewMode: state.ui.viewMode,
 					expandedIds: state.ui.expandedIds,
 				},
-				filters: {
-					sortBy: state.filters.sortBy,
-				},
+				filters: state.filters,
 			}),
 		}
 	)

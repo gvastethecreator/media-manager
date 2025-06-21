@@ -6,21 +6,23 @@
  */
 
 import type {
+    AlbumCreateInput,
+    AlbumUpdateInput,
+    AlbumWithStats,
+} from '@/types/entities/album';
+import type {
     AlbumDisplayState,
     AlbumSortCriteria,
     AlbumType,
     AlbumViewMode,
-    AlbumWithRelations,
-    AlbumCreateInput as CreateAlbumData,
-    AlbumUpdateInput as UpdateAlbumData,
-} from '@/types/entities/album';
+} from '@/types/entities/album/enums';
 
 /**
  * 📊 Estado principal del store de álbumes
  */
 export interface AlbumState {
 	// 📋 Datos principales
-	albums: AlbumWithRelations[];
+	albums: Record<string, AlbumWithStats>;
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;
@@ -30,9 +32,9 @@ export interface AlbumState {
 	filters: AlbumFiltersState;
 
 	// 🔍 Selectores y getters
-	getAlbumById: (id: string) => AlbumWithRelations | undefined;
-	getFilteredAlbums: () => AlbumWithRelations[];
-	getSortedAlbums: () => AlbumWithRelations[];
+	getAlbumById: (id: string) => AlbumWithStats | undefined;
+	getFilteredAlbums: () => AlbumWithStats[];
+	getSortedAlbums: () => AlbumWithStats[];
 }
 
 /**
@@ -86,11 +88,11 @@ export interface AlbumFiltersState {
 export interface AlbumActions {
 	// 📥 Carga de datos
 	loadAlbums: () => Promise<void>;
-	loadAlbumById: (id: string) => Promise<AlbumWithRelations | undefined>;
+	loadAlbumById: (id: string) => Promise<AlbumWithStats | undefined>;
 
 	// 📝 Gestión de álbumes
-	createAlbum: (album: CreateAlbumData) => Promise<void>;
-	updateAlbum: (id: string, album: UpdateAlbumData) => Promise<void>;
+	createAlbum: (album: AlbumCreateInput) => Promise<void>;
+	updateAlbum: (id: string, album: AlbumUpdateInput) => Promise<void>;
 	deleteAlbum: (id: string) => Promise<void>;
 
 	// 🎮 Acciones UI
@@ -98,10 +100,6 @@ export interface AlbumActions {
 	selectMultipleAlbums: (ids: string[]) => void;
 	toggleSelection: (id: string) => void;
 	clearSelection: () => void;
-
-	// 🖼️ Acciones de imágenes
-	addImageToAlbum: (albumId: string, imageId: string) => Promise<void>;
-	removeImageFromAlbum: (albumId: string, imageId: string) => Promise<void>;
 
 	// 🔍 Filtros
 	updateFilters: (filters: Partial<AlbumFiltersState>) => void;

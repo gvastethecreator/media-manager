@@ -12,14 +12,14 @@ import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import React, { useCallback, useMemo } from 'react';
 // Importar tipos correctos de entities
-import type { CollectionWithRelations } from '@/types/entities/collection/types';
+import type { CollectionWithStats } from '@/types/entities/collection';
 import { CollectionCardContent } from './collection-card-content';
 import { CollectionCardFooter } from './collection-card-footer';
 import { CollectionCardHeader } from './collection-card-header';
 import { CollectionCardImages } from './collection-card-images';
 
 export interface CollectionCardProps {
-	collection: CollectionWithRelations;
+	collection: CollectionWithStats;
 	onClick?: () => void;
 	className?: string;
 	style?: React.CSSProperties;
@@ -44,24 +44,8 @@ export function CollectionCard({
 	showEntitiesCount = true,
 	showImagesCount = true,
 }: CollectionCardProps) {
-	// Calcular valores derivados
-	const imagesCount = collection._count?.images || 0;
-	const videosCount = collection._count?.videos || 0;
-	const totalMedia = imagesCount + videosCount;
-
-	// Calcular total de entidades relacionadas
-	const totalEntities =
-		(collection._count?.albums || 0) +
-		(collection._count?.tags || 0) +
-		(collection._count?.characters || 0) +
-		(collection._count?.places || 0) +
-		(collection._count?.worldItems || 0) +
-		(collection._count?.concepts || 0) +
-		(collection._count?.prompts || 0) +
-		(collection._count?.notes || 0) +
-		(collection._count?.wildcards || 0) +
-		(collection._count?.properties || 0) +
-		(collection._count?.groups || 0);
+	// Usar estadísticas pre-calculadas
+	const { totalMedia, totalEntities } = collection.stats;
 
 	// Calcular color primario y secundario
 	const primaryColor = useMemo(() => collection.color || '#10b981', [collection.color]);

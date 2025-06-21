@@ -1,9 +1,11 @@
 /**
  * @file Tipos para el store de imágenes
  * @module store/entities/image/types
+ * @description Tipos optimizados usando ImageWithStats y patrón Record
+ * Última actualización: 2025-01-27
  */
 
-import type { ImageExtended, ImageSortCriteria, ImageViewMode } from '../../../types/entities/image/types';
+import type { ImageSortCriteria, ImageViewMode, ImageWithStats } from '../../../types/entities/image/types';
 
 /**
  * Tipos de agrupamiento para imágenes
@@ -20,13 +22,13 @@ export enum ImageGroupType {
 }
 
 /**
- * Estructura de un grupo de imágenes
+ * Estructura optimizada de un grupo de imágenes
  */
 export interface ImageGroup {
 	id: string;
 	label: string;
 	count: number;
-	images: ImageExtended[];
+	images: ImageWithStats[];
 	subgroups?: ImageGroup[];
 }
 
@@ -34,7 +36,6 @@ export interface ImageGroup {
  * Estado principal del store de imágenes
  */
 export interface ImageState {
-	// Slices de estado
 	core: ImageCoreState;
 	ui: ImageUIState;
 	filters: ImageFiltersState;
@@ -42,10 +43,10 @@ export interface ImageState {
 }
 
 /**
- * Estado del slice core
+ * Estado del slice core (optimizado con Record)
  */
 export interface ImageCoreState {
-	images: Record<string, ImageExtended>;
+	images: Record<string, ImageWithStats>;
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;
@@ -58,7 +59,7 @@ export interface ImageGroupingState {
 	groupBy: ImageGroupType | null;
 	sortCriteria: ImageSortCriteria;
 	groupedImages: ImageGroup[];
-	filteredImages: ImageExtended[];
+	filteredImages: ImageWithStats[];
 	stats: ImageStoreStats;
 	selection: {
 		selectedIds: string[];
@@ -95,7 +96,7 @@ export interface ImageFiltersState {
 }
 
 /**
- * Estadísticas de imágenes
+ * Estadísticas optimizadas de imágenes
  */
 export interface ImageStoreStats {
 	totalImages: number;
@@ -110,8 +111,26 @@ export interface ImageStoreStats {
 	private: number;
 	withThumbnails: number;
 	withoutThumbnails: number;
-	largest: ImageExtended | null;
-	smallest: ImageExtended | null;
-	newest: ImageExtended | null;
-	oldest: ImageExtended | null;
+	largest: ImageWithStats | null;
+	smallest: ImageWithStats | null;
+	newest: ImageWithStats | null;
+	oldest: ImageWithStats | null;
+}
+
+/**
+ * 🔄 Funciones auxiliares para manipular Record de imágenes
+ */
+export function imagesToRecord(images: ImageWithStats[]): Record<string, ImageWithStats> {
+	return images.reduce((record, image) => {
+		record[image.id] = image;
+		return record;
+	}, {} as Record<string, ImageWithStats>);
+}
+
+export function getImageById(images: Record<string, ImageWithStats>, id: string): ImageWithStats | undefined {
+	return images[id];
+}
+
+export function getAllImages(images: Record<string, ImageWithStats>): ImageWithStats[] {
+	return Object.values(images);
 }

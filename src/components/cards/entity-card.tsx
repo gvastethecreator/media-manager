@@ -6,8 +6,8 @@
  */
 'use client';
 
-import type { FC } from 'react';
 import type { AnyEntity } from '@/types/entities';
+import type { FC } from 'react';
 
 import { AlbumCard } from './album-card/album-card';
 import { CharacterCard } from './character-card/character-card';
@@ -21,6 +21,7 @@ import { PlaceCard } from './place-card/place-card';
 import { PromptCard } from './prompt-card/prompt-card';
 import { PropertyCard } from './property-card/property-card';
 import { TagCard } from './tag-card/tag-card';
+import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
 
@@ -40,8 +41,7 @@ const entityCardMap: Record<AnyEntity['entityType'], FC<any>> = {
 	tag: TagCard,
 	wildcard: WildcardCard,
 	worldItem: WorldItemCard,
-	// TODO: Añadir tarjetas para Video y otras entidades si es necesario.
-	video: () => <div>Video Card Placeholder</div>,
+	video: VideoCard,
 };
 
 interface EntityCardProps {

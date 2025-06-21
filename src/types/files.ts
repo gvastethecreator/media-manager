@@ -29,7 +29,7 @@ export type ViewType = 'grid' | 'list' | 'masonry' | 'table';
  * Representa cualquier entidad que puede ser mostrada como un item en el explorador de archivos.
  * Es una unión de todos los tipos `...Complete` de las entidades principales.
  */
-export type AnyFileItem =
+export type FileItem =
 	| ImageComplete
 	| VideoComplete
 	| AlbumComplete

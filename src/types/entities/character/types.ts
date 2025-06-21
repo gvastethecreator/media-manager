@@ -4,16 +4,16 @@
  * @description Estructura unificada y validada para Character, siguiendo las mejores prácticas.
  */
 
-import type { AlbumComplete } from '../album';
-import type { CollectionComplete } from '../collection';
+import type { AlbumWithStats } from '../album';
+import type { CollectionWithStats } from '../collection';
 import type { ConceptComplete } from '../concept';
-import type { GroupComplete } from '../group';
+import type { GroupWithStats } from '../group';
 import type { ImageComplete } from '../image';
 import type { NoteComplete } from '../note';
 import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
+import type { TagWithStats } from '../tag';
 import type { VideoComplete } from '../video';
 import type { WildcardComplete } from '../wildcard';
 import type { WorldItemComplete } from '../world-item';
@@ -60,20 +60,72 @@ export interface CharacterBase {
 }
 
 /**
- * 🧑‍🎤 Tipo extendido para un personaje con datos adicionales de UI.
- * Incluye propiedades que no se persisten en la base de datos.
+ * 🧑‍🎤 Tipo de Character obtenido de Prisma con conteos optimizados.
+ * Usado internamente para transformación eficiente.
  */
-export interface CharacterExtended extends CharacterBase {
-	// Estados de UI (no persistidos)
-	isHovered?: boolean;
-	isOpen?: boolean;
-	isLoading?: boolean;
-	hasError?: boolean;
-	// Datos calculados
-	imageCount?: number;
-	tagCount?: number;
-	groupCount?: number;
-	propertyCount?: number;
+export interface PrismaCharacterWithCounts extends CharacterBase {
+	_count?: {
+		images?: number;
+		videos?: number;
+		tags?: number;
+		groups?: number;
+		properties?: number;
+		collections?: number;
+		albums?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		relatedCharacters?: number;
+		relatedTo?: number;
+	};
+}
+
+/**
+ * 🧑‍🎤 Tipo principal de Character con estadísticas pre-calculadas.
+ * Optimizado para rendimiento con conteos en lugar de relaciones completas.
+ */
+export interface CharacterWithStats extends CharacterBase {
+	_count?: {
+		images?: number;
+		videos?: number;
+		tags?: number;
+		groups?: number;
+		properties?: number;
+		collections?: number;
+		albums?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		relatedCharacters?: number;
+		relatedTo?: number;
+	};
+	statistics: {
+		totalImages: number;
+		totalVideos: number;
+		totalTags: number;
+		totalGroups: number;
+		totalProperties: number;
+		totalCollections: number;
+		totalAlbums: number;
+		totalPlaces: number;
+		totalWorldItems: number;
+		totalConcepts: number;
+		totalPrompts: number;
+		totalNotes: number;
+		totalWildcards: number;
+		totalRelatedCharacters: number;
+		totalRelatedTo: number;
+		totalAssociations: number;
+		lastUpdated: Date;
+		powerLevel: number;
+		rarityLevel: 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+	};
 }
 
 /**
@@ -126,16 +178,16 @@ export interface CharacterUpdateInput extends Partial<CharacterCreateInput> {}
 
 /**
  * 🧑‍🎤 Relaciones de un personaje con otras entidades.
- * Utiliza los tipos `Base` de las entidades relacionadas para evitar dependencias circulares complejas.
+ * Solo se usa cuando se necesitan las relaciones completas.
  */
 export interface CharacterRelations {
 	images?: ImageComplete[];
 	videos?: VideoComplete[];
-	tags?: TagComplete[];
-	groups?: GroupComplete[];
+	tags?: TagWithStats[];
+	groups?: GroupWithStats[];
 	properties?: PropertyComplete[];
-	collections?: CollectionComplete[];
-	albums?: AlbumComplete[];
+	collections?: CollectionWithStats[];
+	albums?: AlbumWithStats[];
 	places?: PlaceComplete[];
 	worldItems?: WorldItemComplete[];
 	concepts?: ConceptComplete[];
@@ -147,9 +199,10 @@ export interface CharacterRelations {
 }
 
 /**
- * 🧑‍🎤 Conteos de las relaciones de un personaje.
+ * 🧑‍🎤 Tipo completo de un personaje con relaciones completas.
+ * ⚠️ Solo usar cuando sea absolutamente necesario cargar todas las relaciones.
  */
-export interface CharacterCounts {
+export interface CharacterComplete extends CharacterBase, CharacterRelations {
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -169,13 +222,7 @@ export interface CharacterCounts {
 	};
 }
 
-/**
- * 🧑‍🎤 Tipo completo de un personaje, incluyendo relaciones y conteos.
- */
-export interface CharacterComplete extends CharacterBase, CharacterRelations, CharacterCounts {}
-
-// Alias para mantener consistencia con otros módulos
-export type CharacterWithRelations = CharacterComplete;
+// Aliases para compatibilidad y migración gradual
 export type CreateCharacterData = CharacterCreateInput;
 export type UpdateCharacterData = CharacterUpdateInput;
 
@@ -295,12 +342,15 @@ export interface CharacterFilters {
  * 🧑‍🎤 Configuración de visualización para personajes.
  */
 export interface CharacterViewConfig {
-	mode: 'grid' | 'list' | 'table';
-	gridColumns: number;
-	cardSize: 'small' | 'medium' | 'large';
+	viewType: 'grid' | 'list' | 'table';
+	sortBy: string;
+	sortDirection: 'asc' | 'desc';
+	showImages: boolean;
+	imageCount: number;
+	enableAnimations: boolean;
+	groupBy: string | null;
 	showStats: boolean;
-	showDescription: boolean;
-	defaultView: 'cards' | 'details' | 'compact';
+	compactView: boolean;
 }
 
 /**

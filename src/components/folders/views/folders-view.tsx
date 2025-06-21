@@ -1,9 +1,5 @@
 'use client';
 
-import { DatabaseIcon, FolderIcon, RefreshCcw, XCircle } from 'lucide-react';
-import { motion } from 'motion/react';
-import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
 import { FolderCard } from '@/components/cards/folder-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -15,12 +11,17 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { folderService } from '@/services/folder-service-export';
 import { useFileStoreBase } from '@/store/entities/file';
 import { useFolderStore } from '@/store/entities/folder';
+import type { FolderWithStats } from '@/types/entities/folder';
+import { DatabaseIcon, FolderIcon, RefreshCcw, XCircle } from 'lucide-react';
+import { motion } from 'motion/react';
+import Link from 'next/link';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../../views/types';
 
 const viewLogger = clientLogger.withContext('FoldersView');
 
-// Actualizar la definición de tipo para Folder para incluir _count
-type FolderWithCount = Folder & {
+// Usar FolderWithStats como tipo principal
+type FolderWithCount = FolderWithStats & {
 	_count?: {
 		images: number;
 	};
@@ -67,7 +68,7 @@ export function FoldersView(_props: ViewProps) {
 	const [error, setError] = useState<string | null>(null);
 
 	// Usar el nuevo hook de eventos optimistas del cliente
-	const [optimisticFolders, _addEvent] = clientEvents.useEvents<Folder[]>(folders);
+	const [optimisticFolders, _addEvent] = clientEvents.useEvents<FolderWithStats[]>(folders);
 	// Mantener un contador de reintentos
 	const [retryCount, setRetryCount] = useState(0);
 	const maxRetries = 3;
@@ -182,7 +183,7 @@ export function FoldersView(_props: ViewProps) {
 				setCurrentFolderId(folder.id);
 				viewLogger.debug(`✅ setCurrentFolderId llamado con ID: ${folder.id}`); // Nuevo log
 
-				viewLogger.debug('� Estableciendo elemento actual en navigation store...'); // Nuevo log
+				viewLogger.debug('📋 Estableciendo elemento actual en navigation store...'); // Nuevo log
 				// 📋 Establecer el elemento actual en el navigation store
 				setCurrentItem({
 					id: folder.id,
@@ -199,7 +200,7 @@ export function FoldersView(_props: ViewProps) {
 				});
 				viewLogger.debug('✅ setCurrentItem llamado con datos de carpeta.'); // Nuevo log
 
-				viewLogger.debug('�📍 Actualizando la vista de navegación (setCurrentView)...'); // Nuevo log
+				viewLogger.debug('📍 Actualizando la vista de navegación (setCurrentView)...'); // Nuevo log
 				// 📍 Actualizar la vista de navegación
 				setCurrentView('folder-content');
 				viewLogger.debug('✅ setCurrentView llamado a folder-content.'); // Nuevo log

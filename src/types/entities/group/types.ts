@@ -6,6 +6,7 @@
  * Última migración: 2025-06-18
  */
 
+import type { Group as PrismaGroup } from '@prisma/client';
 import { z } from 'zod';
 
 /**
@@ -48,6 +49,28 @@ export interface GroupDisplayState {
 	isExpanded: boolean;
 	isVisible: boolean;
 }
+
+/**
+ * Interfaz que representa el payload de Prisma para un grupo, incluyendo las relaciones contadas.
+ * Se usa en los transformers para asegurar que los datos de Prisma vienen con los conteos.
+ */
+export type PrismaGroupWithCounts = PrismaGroup & {
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+	};
+};
 
 /**
  * Tipo base canónico para Group

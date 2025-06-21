@@ -1,94 +1,109 @@
 /**
- * @file Tipos para el store de Property
+ * @file Definición de tipos para el store de Property
  * @module store/entities/property/types
+ * @description Tipos refactorizados siguiendo el patrón de slices.
  */
 
-import type { PropertySortCriteria, PropertyViewMode, PropertyWithRelations } from '@/types/entities/property';
+import type { PropertyWithStats } from '@/types/entities/property';
+import type { Prisma } from '@prisma/client';
+
+// --- ENUMS ESPECÍFICOS DEL STORE ---
 
 /**
- * Define el estado de visualización para una propiedad individual.
+ * Criterios de ordenación para propiedades
  */
-export interface PropertyDisplayState {
-	isHovering?: boolean;
-	isActive?: boolean;
-	isSelected?: boolean;
-	isExpanded?: boolean;
+export enum PropertySortCriteria {
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	USAGE_ASC = 'usage:asc',
+	USAGE_DESC = 'usage:desc',
+	CREATED_ASC = 'createdAt:asc',
+	CREATED_DESC = 'createdAt:desc',
+	UPDATED_ASC = 'updatedAt:asc',
+	UPDATED_DESC = 'updatedAt:desc',
 }
 
 /**
- * El tipo canónico para una propiedad en el store, incluyendo relaciones y estado de UI
+ * Modos de visualización para propiedades
  */
-export type Property = PropertyWithRelations & {
-	_ui: {
-		lastUpdated: Date;
-		itemCount: number;
-	};
-};
+export enum PropertyViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+}
+
+// --- Interfaces de Estado y Acciones por Slice ---
 
 /**
- * Estado del core para el store de propiedades
+ * 📊 Estado principal (core) del store de Property
  */
 export interface PropertyCoreState {
-	/** Mapa de propiedades indexadas por ID */
-	properties: Record<string, Property>;
-	/** Items asociados a cada propiedad */
-	propertyItems: Record<string, Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>>;
-	/** Estado de carga */
+	properties: Record<string, PropertyWithStats>;
 	isLoading: boolean;
-	/** Error si existe */
 	error: string | null;
-	/** Fecha de última actualización */
-	lastUpdated: Date | null;
+	lastUpdated: number | null;
 }
 
 /**
- * Estado de UI para el store de propiedades
+ * 🔄 Acciones del core slice
+ */
+export interface PropertyCoreActions {
+	loadProperties: () => Promise<PropertyWithStats[]>;
+	createProperty: (data: Prisma.PropertyCreateInput) => Promise<PropertyWithStats | null>;
+	updateProperty: (id: string, data: Prisma.PropertyUpdateInput) => Promise<void>;
+	deleteProperty: (id: string) => Promise<void>;
+	setProperties: (properties: PropertyWithStats[]) => void;
+}
+
+/**
+ * 🎨 Estado de UI para propiedades
  */
 export interface PropertyUIState {
-	/** IDs de propiedades seleccionadas */
-	selectedIds: string[];
-	/** Modo de visualización actual */
-	viewMode: PropertyViewMode;
-	/** Si el visor está abierto */
-	isViewerOpen: boolean;
-	/** ID de la propiedad actual en el visor */
-	currentPropertyId: string | null;
-	/** Estado de visualización por ID de propiedad */
-	displayState: Record<string, PropertyDisplayState>;
-	/** ID de la propiedad siendo arrastrada */
-	draggedPropertyId: string | null;
-	/** ID de la propiedad objetivo de soltar */
-	dropTargetPropertyId: string | null;
-	/** ID de la propiedad resaltada */
+	selectedId: string | null;
+	editingId: string | null;
 	highlightedId: string | null;
-	/** IDs de propiedades expandidas */
-	expandedIds: string[];
+	viewMode: PropertyViewMode;
+	isCreateModalOpen: boolean;
+	isEditModalOpen: boolean;
+	isDeleteModalOpen: boolean;
 }
 
 /**
- * Estado de filtros para el store de propiedades
+ * 🎯 Acciones del UI slice
  */
-export interface PropertyFiltersState {
-	/** Criterio de ordenación */
+export interface PropertyUIActions {
+	selectProperty: (id: string | null) => void;
+	startEditing: (id: string | null) => void;
+	highlightProperty: (id: string | null) => void;
+	setViewMode: (mode: PropertyViewMode) => void;
+	openCreateModal: () => void;
+	closeCreateModal: () => void;
+	openEditModal: (id: string) => void;
+	closeEditModal: () => void;
+	openDeleteModal: (id: string) => void;
+	closeDeleteModal: () => void;
+}
+
+/**
+ * 🔍 Filtros para propiedades
+ */
+export interface PropertyFilters {
 	sortBy: PropertySortCriteria;
-	/** Término de búsqueda */
-	searchQuery: string;
-	/** Filtro por categoría */
-	filterByCategory: string | null;
-	/** Filtro de favoritos */
-	filterFavorites: boolean;
-	/** Rango de fechas */
-	dateRange: {
-		from: Date | null;
-		to: Date | null;
-	};
+	searchTerm: string;
+	category: string | null;
+	onlyFavorites: boolean;
 }
 
 /**
- * Estado combinado del store de propiedades
+ * 🔍 Acciones del filter slice
  */
-export interface PropertyState {
-	core: PropertyCoreState;
-	ui: PropertyUIState;
-	filters: PropertyFiltersState;
+export interface PropertyFilterActions {
+	updateFilters: (filters: Partial<PropertyFilters>) => void;
+	clearFilters: () => void;
+}
+
+/**
+ * 📦 Tipo del store completo de Property
+ */
+export interface PropertyStore extends PropertyCoreState, PropertyCoreActions, PropertyUIState, PropertyUIActions, PropertyFilterActions {
+	filters: PropertyFilters;
 }

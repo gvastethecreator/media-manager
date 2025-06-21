@@ -2,60 +2,178 @@
  * @file Tipos canónicos para la entidad Video
  * @module types/entities/video/types
  * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
- * @description Estructura unificada y validada para Video.
- * Última migración: 2025-06-18
+ * @description Estructura unificada y optimizada para Video con patrón EntityWithStats.
+ * Última refactorización: 2025-01-27
  */
 
+import type { Video as PrismaVideo } from '@prisma/client';
 import { z } from 'zod';
-import type { AlbumComplete } from '../album';
-import type { CharacterComplete } from '../character';
-import type { CollectionComplete } from '../collection';
+
+// Imports optimizados usando tipos WithStats
+import type { AlbumWithStats } from '../album';
+import type { CharacterWithStats } from '../character';
+import type { CollectionWithStats } from '../collection';
 import type { ConceptComplete } from '../concept';
-import type { GroupComplete } from '../group';
+import type { GroupWithStats } from '../group';
 import type { NoteComplete } from '../note';
 import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
+import type { TagWithStats } from '../tag';
 import type { WildcardComplete } from '../wildcard';
 import type { WorldItemComplete } from '../world-item';
-import { VideoFormat } from './enums';
 
 /**
- * Metadatos del video
+ * 🎥 Enums para Video
  */
-export interface VideoMetadata {
-	duration: number;
-	width: number;
-	height: number;
-	format: VideoFormat;
-	size: number;
-	codec?: string;
-	bitrate?: number;
-	frameRate?: number;
-	aspectRatio?: string;
-	audioCodec?: string;
-	audioChannels?: number;
-	audioSampleRate?: number;
-	rotation?: number;
-	hasAudio?: boolean;
-	subtitleLanguages?: string[];
-	audioLanguages?: string[];
-	creationDate?: Date;
-	location?: {
-		latitude: number;
-		longitude: number;
-		name?: string;
-	};
-	camera?: {
-		make?: string;
-		model?: string;
-		software?: string;
-	};
+export enum VideoFormat {
+	MP4 = 'mp4',
+	AVI = 'avi',
+	MOV = 'mov',
+	WMV = 'wmv',
+	FLV = 'flv',
+	WEBM = 'webm',
+	MKV = 'mkv',
+	M4V = 'm4v',
+	THREE_GP = '3gp',
+	OGV = 'ogv'
+}
+
+export enum VideoCodec {
+	H264 = 'h264',
+	H265 = 'h265',
+	VP8 = 'vp8',
+	VP9 = 'vp9',
+	AV1 = 'av1',
+	XVID = 'xvid',
+	DIVX = 'divx'
+}
+
+export enum VideoQuality {
+	LOW = 'low',        // < 480p
+	MEDIUM = 'medium',  // 480p-720p
+	HIGH = 'high',      // 720p-1080p
+	ULTRA = 'ultra',    // > 1080p
+	UNKNOWN = 'unknown'
+}
+
+export enum VideoSortCriteria {
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	CREATED_ASC = 'created:asc',
+	CREATED_DESC = 'created:desc',
+	UPDATED_ASC = 'updated:asc',
+	UPDATED_DESC = 'updated:desc',
+	DURATION_ASC = 'duration:asc',
+	DURATION_DESC = 'duration:desc',
+	SIZE_ASC = 'size:asc',
+	SIZE_DESC = 'size:desc',
+	QUALITY_ASC = 'quality:asc',
+	QUALITY_DESC = 'quality:desc'
+}
+
+export enum VideoViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+	TIMELINE = 'timeline'
 }
 
 /**
- * Tipo base canónico para Video
+ * 🎬 Consulta optimizada de Prisma con conteos
+ */
+export type PrismaVideoWithCounts = PrismaVideo & {
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+};
+
+/**
+ * 🔗 Relaciones de Video optimizadas (usando tipos WithStats)
+ */
+export interface VideoRelations {
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemComplete[];
+	concepts?: ConceptComplete[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupWithStats[];
+}
+
+/**
+ * 📊 Estadísticas específicas de Video
+ */
+export interface VideoStatistics {
+	// Conteos de relaciones (12 tipos)
+	albumsCount: number;
+	collectionsCount: number;
+	tagsCount: number;
+	charactersCount: number;
+	placesCount: number;
+	worldItemsCount: number;
+	conceptsCount: number;
+	promptsCount: number;
+	notesCount: number;
+	wildcardsCount: number;
+	propertiesCount: number;
+	groupsCount: number;
+	totalRelations: number;
+
+	// Métricas técnicas de video
+	durationMinutes: number;
+	durationHours: number;
+	megabytes: number;
+	gigabytes: number;
+	aspectRatio: string;
+	resolution: string;
+	qualityLevel: VideoQuality;
+
+	// Métricas de uso
+	views: number;
+	likes: number;
+	downloads: number;
+	shares: number;
+	lastViewed: Date | null;
+
+	// Análisis de calidad técnica
+	qualityScore: number; // 0-100
+	technicalGrade: 'A' | 'B' | 'C' | 'D';
+	hasAudio: boolean;
+	hasSubtitles: boolean;
+	bitrate: number | null;
+	frameRate: number | null;
+
+	// Metadatos AI y análisis
+	aiConfidence: number; // 0-1
+	autoTags: string[];
+	duplicateStatus: 'unique' | 'duplicate' | 'similar';
+
+	// Campos derivados
+	thumbnailUrl: string | null;
+	displayName: string;
+	formattedSize: string;
+	formattedDuration: string;
+	qualityLabel: string;
+}
+
+/**
+ * 📝 Tipo base para Video - definición canónica
  */
 export interface VideoBase {
 	id: string;
@@ -80,40 +198,69 @@ export interface VideoBase {
 }
 
 /**
- * Relaciones principales (solo ids o any[] para evitar dependencias cruzadas)
+ * 🌟 Video con estadísticas calculadas y optimizado (TIPO PRINCIPAL)
  */
-export interface VideoRelations {
-	albums?: AlbumComplete[];
-	collections?: CollectionComplete[];
-	tags?: TagComplete[];
-	characters?: CharacterComplete[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	concepts?: ConceptComplete[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
-	properties?: PropertyComplete[];
-	groups?: GroupComplete[];
+export interface VideoWithStats extends VideoBase {
+	_count?: {
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
+	relations?: Partial<VideoRelations>;
+	statistics: VideoStatistics;
 }
 
 /**
- * UI y metadatos adicionales
+ * 🔍 Video completo con relaciones (solo para casos especiales)
  */
-export interface VideoUI {
-	thumbnailUrl?: string;
-	isSelected?: boolean;
+export interface VideoComplete extends VideoBase, VideoRelations {
+	_count?: {
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
 }
 
 /**
- * Video completo
+ * ➕ Input para crear un nuevo video
  */
-export interface VideoComplete extends VideoBase, VideoRelations, VideoUI {}
+export interface VideoCreateInput {
+	name: string;
+	description?: string | null;
+	path: string;
+	hash: string;
+	size: number;
+	duration: number;
+	width?: number | null;
+	height?: number | null;
+	metadata?: string | null;
+	thumbnail?: Buffer | null;
+	thumbnailSize?: number | null;
+	thumbnailWidth?: number | null;
+	thumbnailHeight?: number | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	folderId: string;
 
-/**
- * Input para creación
- */
-export type VideoCreateInput = Omit<VideoBase, 'id' | 'createdAt' | 'updatedAt'> & {
+	// Relaciones opcionales por IDs
 	albumIds?: string[];
 	collectionIds?: string[];
 	tagIds?: string[];
@@ -126,30 +273,139 @@ export type VideoCreateInput = Omit<VideoBase, 'id' | 'createdAt' | 'updatedAt'>
 	wildcardIds?: string[];
 	propertyIds?: string[];
 	groupIds?: string[];
-};
+}
 
 /**
- * Input para actualización
+ * 🔄 Input para actualizar un video
  */
-export type VideoUpdateInput = Partial<Omit<VideoBase, 'id'>> &
-	Partial<{
-		albumIds?: string[];
-		collectionIds?: string[];
-		tagIds?: string[];
-		characterIds?: string[];
-		placeIds?: string[];
-		worldItemIds?: string[];
-		conceptIds?: string[];
-		promptIds?: string[];
-		noteIds?: string[];
-		wildcardIds?: string[];
-		propertyIds?: string[];
-		groupIds?: string[];
-	}> &
-	Partial<VideoUI>;
+export interface VideoUpdateInput {
+	name?: string;
+	description?: string | null;
+	path?: string;
+	size?: number;
+	duration?: number;
+	width?: number | null;
+	height?: number | null;
+	metadata?: string | null;
+	thumbnail?: Buffer | null;
+	thumbnailSize?: number | null;
+	thumbnailWidth?: number | null;
+	thumbnailHeight?: number | null;
+	isPublic?: boolean;
+	isFavorite?: boolean;
+	folderId?: string;
+
+	// Relaciones opcionales por IDs
+	albumIds?: string[];
+	collectionIds?: string[];
+	tagIds?: string[];
+	characterIds?: string[];
+	placeIds?: string[];
+	worldItemIds?: string[];
+	conceptIds?: string[];
+	promptIds?: string[];
+	noteIds?: string[];
+	wildcardIds?: string[];
+	propertyIds?: string[];
+	groupIds?: string[];
+}
 
 /**
- * Esquema Zod para validación de Video
+ * 🔍 Filtros para búsqueda de videos
+ */
+export interface VideoFilters {
+	search?: string;
+	folders?: string[];
+	tags?: string[];
+	albums?: string[];
+	collections?: string[];
+	characters?: string[];
+	dateRange?: {
+		start?: Date;
+		end?: Date;
+	};
+	isFavorite?: boolean;
+	isPublic?: boolean;
+	qualityLevel?: VideoQuality[];
+	minDuration?: number;
+	maxDuration?: number;
+	minWidth?: number;
+	maxWidth?: number;
+	minHeight?: number;
+	maxHeight?: number;
+	minSize?: number;
+	maxSize?: number;
+	hasMetadata?: boolean;
+	hasThumbnail?: boolean;
+	hasAudio?: boolean;
+	hasSubtitles?: boolean;
+	duplicateStatus?: ('unique' | 'duplicate' | 'similar')[];
+	minQualityScore?: number;
+	technicalGrade?: ('A' | 'B' | 'C' | 'D')[];
+}
+
+/**
+ * 📄 Opciones de paginación
+ */
+export interface VideoPaginationOptions {
+	page?: number;
+	limit?: number;
+	sortBy?: VideoSortCriteria;
+	sortDirection?: 'asc' | 'desc';
+}
+
+/**
+ * 📊 Resultado paginado de búsqueda
+ */
+export interface PaginatedVideos {
+	videos: VideoWithStats[];
+	pagination: {
+		page: number;
+		limit: number;
+		total: number;
+		totalPages: number;
+		hasNextPage: boolean;
+		hasPreviousPage: boolean;
+	};
+}
+
+/**
+ * 📈 Estadísticas generales de videos
+ */
+export interface VideoStats {
+	total: number;
+	totalSize: number;
+	totalDuration: number;
+	averageDuration: number;
+	averageSize: number;
+	byFormat: Record<string, number>;
+	byQuality: Record<VideoQuality, number>;
+	byFolder: Record<string, number>;
+	favorites: number;
+	public: number;
+	withThumbnails: number;
+	withAudio: number;
+	withSubtitles: number;
+	duplicates: number;
+	highQuality: number; // Grade A+B
+	totalViews: number;
+	totalDownloads: number;
+}
+
+/**
+ * 🎮 Estado de reproducción
+ */
+export interface VideoPlayState {
+	isPlaying: boolean;
+	currentTime: number;
+	duration: number;
+	volume: number;
+	isMuted: boolean;
+	playbackRate: number;
+}
+
+/**
+ * ⚡ Esquema Zod para validación
  */
 export const VideoSchema = z.object({
 	id: z.string(),
@@ -173,117 +429,8 @@ export const VideoSchema = z.object({
 	updatedAt: z.date(),
 });
 
-/**
- * Filtros para búsqueda de videos
- */
-export interface VideoFilters {
-	search?: string;
-	folders?: string[];
-	tags?: string[];
-	dateRange?: {
-		start?: Date;
-		end?: Date;
-	};
-	isFavorite?: boolean;
-	minDuration?: number;
-	maxDuration?: number;
-	minWidth?: number;
-	maxWidth?: number;
-	minHeight?: number;
-	maxHeight?: number;
-	minSize?: number;
-	maxSize?: number;
-	hasMetadata?: boolean;
-	hasThumbnail?: boolean;
-}
-
-/**
- * Datos para crear un video
- */
-export interface CreateVideoData {
-	name: string;
-	path: string;
-	folderId: string;
-	hash: string;
-	size: number;
-	duration: number;
-	width?: number;
-	height?: number;
-	description?: string;
-	metadata?: string;
-}
-
-/**
- * Datos para actualizar un video
- */
-export interface UpdateVideoData {
-	name?: string;
-	description?: string;
-	isFavorite?: boolean;
-	isPublic?: boolean;
-}
-
-/**
- * Video extendido con relaciones completas
- */
-export interface VideoExtended extends VideoComplete {
-	_count?: {
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
-	};
-}
-
-/**
- * Opciones de paginación para videos
- */
-export interface VideoPaginationOptions {
-	page?: number;
-	limit?: number;
-	sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'size' | 'duration';
-	sortDirection?: 'asc' | 'desc';
-}
-
-/**
- * Resultado paginado de videos
- */
-export interface PaginatedVideos {
-	videos: VideoExtended[];
-	pagination: {
-		page: number;
-		limit: number;
-		total: number;
-		totalPages: number;
-		hasNextPage: boolean;
-		hasPreviousPage: boolean;
-	};
-}
-
-/**
- * Estadísticas de videos
- */
-export interface VideoStats {
-	total: number;
-	totalSize: number;
-	totalDuration: number;
-	averageDuration: number;
-	byFormat: Record<string, number>;
-	byFolder: Record<string, number>;
-	favorites: number;
-	public: number;
-	withThumbnails: number;
-}
-
 // 🟢 Documentación y advertencia:
-// - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
-// - Validar siempre con VideoSchema antes de persistir.
+// - Usar VideoWithStats como tipo principal en toda la aplicación
+// - VideoComplete solo para casos especiales que requieren relaciones completas
+// - Validar siempre con VideoSchema antes de persistir
+// - Usar PrismaVideoWithCounts para consultas optimizadas con _count

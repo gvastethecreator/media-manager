@@ -1,7 +1,5 @@
 'use client';
 
-import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
 import { deleteCollection, searchCollections } from '@/app/actions/collections/collection.actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,22 +10,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
+import type { CollectionWithStats } from '@/types/entities/collection';
 import {
 	COLLECTION_CATEGORY_COLORS,
 	COLLECTION_CATEGORY_EMOJIS,
 	CollectionCategory,
 } from '@/types/entities/collection/enums';
-import type { CollectionComplete } from '@/types/entities/collection/extended';
+import { Filter, Info, Library, Loader2, PlusCircle, Save, Trash } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import { CreateCollectionForm } from './create-collection-form';
 
 // Definir tipo para el event handler
 type ButtonClickHandler = React.MouseEventHandler<HTMLButtonElement>;
 
 export function CollectionsSettings() {
-	const [collections, setCollections] = useState<CollectionComplete[]>([]);
+	const [collections, setCollections] = useState<CollectionWithStats[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [selectedCollection, setSelectedCollection] = useState<CollectionComplete | null>(null);
+	const [selectedCollection, setSelectedCollection] = useState<CollectionWithStats | null>(null);
 	const [isEditing, setIsEditing] = useState(false);
 	const [previewData, setPreviewData] = useState<any>(null);
 
@@ -76,7 +76,7 @@ export function CollectionsSettings() {
 				matches &&
 				Boolean(
 					collection.name.toLowerCase().includes(normalizedQuery) ||
-						collection.description?.toLowerCase().includes(normalizedQuery)
+					collection.description?.toLowerCase().includes(normalizedQuery)
 				);
 		}
 
@@ -110,23 +110,23 @@ export function CollectionsSettings() {
 	}, []);
 
 	// Manejar edición de colección
-	const handleEditCollection = useCallback((collection: CollectionComplete) => {
+	const handleEditCollection = useCallback((collection: CollectionWithStats) => {
 		setSelectedCollection(collection);
 		setIsEditing(true);
 	}, []);
 
 	// Manejar creación exitosa
-	const handleCollectionCreated = useCallback((newCollection: CollectionComplete) => {
+	const handleCollectionCreated = useCallback((newCollection: CollectionWithStats) => {
 		setCollections((prev) => [...prev, newCollection]);
 		toastService.success('Colección creada');
 	}, []);
 
 	// Manejar actualización exitosa
-	const handleCollectionUpdated = useCallback((updatedCollection: CollectionComplete) => {
+	const handleCollectionUpdated = useCallback((updatedCollection: CollectionWithStats) => {
 		setCollections((prev) =>
 			prev.map((collection) =>
 				collection.id === updatedCollection.id
-					? ({ ...collection, ...updatedCollection } as CollectionComplete)
+					? ({ ...collection, ...updatedCollection } as CollectionWithStats)
 					: collection
 			)
 		);
@@ -447,7 +447,7 @@ export function CollectionsSettings() {
 													style={{
 														backgroundColor:
 															COLLECTION_CATEGORY_COLORS[
-																(previewData?.category || selectedCollection?.category) as CollectionCategory
+															(previewData?.category || selectedCollection?.category) as CollectionCategory
 															] || '#3b82f6',
 													}}
 												>

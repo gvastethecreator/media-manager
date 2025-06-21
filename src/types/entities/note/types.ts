@@ -7,16 +7,16 @@
  */
 
 import type { z } from 'zod';
-import type { AlbumComplete } from '../album';
-import type { CharacterComplete } from '../character';
-import type { CollectionComplete } from '../collection';
+import type { AlbumWithStats } from '../album';
+import type { CharacterWithStats } from '../character';
+import type { CollectionWithStats } from '../collection';
 import type { ConceptComplete } from '../concept';
-import type { GroupComplete } from '../group';
+import type { GroupWithStats } from '../group';
 import type { ImageComplete } from '../image';
 import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
+import type { TagWithStats } from '../tag';
 import type { VideoComplete } from '../video';
 import type { WildcardComplete } from '../wildcard';
 import type { WorldItemComplete } from '../world-item';
@@ -32,6 +32,8 @@ export interface NoteBase {
 	category: string;
 	priority: number;
 	status: string;
+	color?: string;
+	emoji?: string;
 	featuredImage: string | null;
 	isFavorite: boolean;
 	presetId: string | null;
@@ -40,28 +42,103 @@ export interface NoteBase {
 }
 
 /**
- * 🔗 Relaciones de Note (solo como any[] si no existen tipos canónicos)
+ * 🔗 Relaciones de Note optimizadas (usando tipos WithStats)
  */
 export interface NoteRelations {
-	albums?: AlbumComplete[];
-	characters?: CharacterComplete[];
-	collections?: CollectionComplete[];
+	albums?: AlbumWithStats[];
+	characters?: CharacterWithStats[];
+	collections?: CollectionWithStats[];
 	concepts?: ConceptComplete[];
-	groups?: GroupComplete[];
+	groups?: GroupWithStats[];
 	images?: ImageComplete[];
 	places?: PlaceComplete[];
 	prompts?: PromptComplete[];
 	properties?: PropertyComplete[];
-	tags?: TagComplete[];
+	tags?: TagWithStats[];
 	videos?: VideoComplete[];
 	wildcards?: WildcardComplete[];
 	worldItems?: WorldItemComplete[];
 }
 
 /**
- * 📊 Conteos de relaciones de Note
+ * 📊 Tipo Prisma con conteos para transformación optimizada
  */
-export interface NoteCounts {
+export interface PrismaNoteWithCounts extends NoteBase {
+	_count: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
+}
+
+/**
+ * 📊 Estadísticas pre-calculadas para Note
+ */
+export interface NoteStatistics {
+	totalItems: number;
+	totalImages: number;
+	totalVideos: number;
+	totalAlbums: number;
+	totalCollections: number;
+	totalTags: number;
+	totalCharacters: number;
+	totalPlaces: number;
+	totalWorldItems: number;
+	totalConcepts: number;
+	totalPrompts: number;
+	totalWildcards: number;
+	totalProperties: number;
+	totalGroups: number;
+	wordCount: number;
+	characterCount: number;
+	readingTime: number; // en minutos
+	completionScore: number; // 0-100 basado en contenido y relaciones
+	lastUpdated: Date;
+}
+
+/**
+ * 📝 Note optimizado con estadísticas pre-calculadas
+ */
+export interface NoteWithStats extends NoteBase {
+	statistics: NoteStatistics;
+	// Campos derivados calculados
+	excerpt: string;
+	formattedDate: string;
+	priorityLabel: string;
+	statusLabel: string;
+	categoryLabel: string;
+}
+
+/**
+ * 🖥️ Propiedades de UI para Note
+ */
+export interface NoteUI {
+	isSelected?: boolean;
+	isEditing?: boolean;
+	isExpanded?: boolean;
+	isHovered?: boolean;
+	isNew?: boolean;
+	isHighlighted?: boolean;
+	isLoading?: boolean;
+	hasError?: boolean;
+	isDragging?: boolean;
+	isDropTarget?: boolean;
+}
+
+/**
+ * 📝 Note completo con relaciones (para casos que requieren relaciones completas)
+ */
+export interface NoteComplete extends NoteBase, NoteRelations, NoteUI {
 	_count?: {
 		images?: number;
 		videos?: number;
@@ -80,25 +157,6 @@ export interface NoteCounts {
 }
 
 /**
- * 🖥️ Propiedades de UI y datos derivados
- */
-export interface NoteUI {
-	isSelected?: boolean;
-	isEditing?: boolean;
-	isExpanded?: boolean;
-	isHovered?: boolean;
-	isNew?: boolean;
-	excerpt?: string;
-	wordCount?: number;
-	formattedDate?: string;
-}
-
-/**
- * 📝 Note completo con todas las relaciones y campos extendidos
- */
-export interface NoteComplete extends NoteBase, NoteRelations, NoteCounts, NoteUI {}
-
-/**
  * 🆕 Datos para crear un Note
  */
 export interface NoteCreateInput {
@@ -107,6 +165,8 @@ export interface NoteCreateInput {
 	category?: string;
 	priority?: number;
 	status?: string;
+	color?: string;
+	emoji?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
@@ -134,6 +194,8 @@ export interface NoteUpdateInput {
 	category?: string;
 	priority?: number;
 	status?: string;
+	color?: string;
+	emoji?: string;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
 	presetId?: string | null;
@@ -297,24 +359,10 @@ export enum NoteViewMode {
 }
 
 /**
- * 📝 Note extendido con propiedades de UI
- */
-export interface NoteExtended extends NoteComplete {
-	isSelected: boolean;
-	isHighlighted: boolean;
-	isEditing: boolean;
-	isExpanded: boolean;
-	isLoading: boolean;
-	hasError: boolean;
-	isDragging: boolean;
-	isDropTarget: boolean;
-	totalItems: number;
-}
-
-/**
  * 📊 Note con estadísticas adicionales
+ * @deprecated Usar NoteWithStats en su lugar
  */
-export interface NoteWithStats extends NoteComplete {
+export interface NoteWithStatsLegacy extends NoteComplete {
 	stats: {
 		totalItems: number;
 		totalImages: number;

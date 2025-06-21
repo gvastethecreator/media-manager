@@ -1,5 +1,5 @@
 import type { FolderResponse } from '@/app/actions/folders/folder-types.actions';
-import type { FolderStats } from '@/types/entities/folder';
+import type { FolderStatistics } from '@/types/entities/folder';
 
 // Extender la interfaz Folder para incluir las propiedades adicionales
 export interface ExtendedFolder extends Omit<FolderResponse, 'lastIndexed' | 'createdAt' | 'updatedAt'> {
@@ -41,13 +41,19 @@ export interface GlobalProcessingState {
 	};
 }
 
-export const initialStats: FolderStats = {
-	totalFolders: 0,
-	totalFiles: 0,
+// Usar FolderStatistics en lugar de FolderStats legacy
+export const initialStats: FolderStatistics = {
+	folderCount: 0,
 	totalSize: 0,
+	averageSize: 0,
+	organizationScore: 0,
+	hierarchyDepth: 0,
+	indexingProgress: 0,
 	lastIndexed: null,
-	createdAt: new Date(),
-	updatedAt: new Date(),
+	isIndexing: false,
+	hasErrors: false,
+	qualityScore: 0,
+	tags: [],
 };
 
 export const initialGlobalReindexStatus: GlobalReindexStatus = {

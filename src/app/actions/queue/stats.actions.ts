@@ -7,12 +7,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	countCompletedJobs,
-	countFailedJobs,
-	countTotalJobs,
-	findQueueJobsByStatus,
-	getQueueStatsByQueue as getQueueStatsByQueueService,
-	getQueueStats as getQueueStatsService,
+    countCompletedJobs,
+    countFailedJobs,
+    countTotalJobs,
+    findQueueJobsByStatus,
+    getQueueStatsByQueue as getQueueStatsByQueueService,
+    getQueueStats as getQueueStatsService,
 } from '@/services/queue-job/queue-job.service';
 import type { QueueStats } from '@/types/entities/queue-job';
 import { QueueJobStatus } from '@/types/entities/queue-job';
@@ -74,7 +74,7 @@ export async function getQueueStats(): Promise<QueueStats> {
 /**
  * Obtiene estadísticas por cola específica
  */
-export async function getQueueStatsByQueue(queue: string): Promise<Record<string, number>> {
+export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
 	const getCachedQueueStats = unstable_cache(
 		async () => {
 			try {
@@ -85,8 +85,8 @@ export async function getQueueStatsByQueue(queue: string): Promise<Record<string
 
 				// Asegurar que todos los estados tengan un valor
 				for (const status of Object.values(QueueJobStatus)) {
-					if (!stats[status]) {
-						stats[status] = 0;
+					if (!stats[status as keyof QueueStats]) {
+						(stats as any)[status] = 0;
 					}
 				}
 

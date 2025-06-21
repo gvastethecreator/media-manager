@@ -8,11 +8,12 @@ import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import { revalidatePath } from 'next/cache';
 // Importar tipos y transformers actualizados
 import {
+    fromPrismaPrompt,
     mapCreatePromptDataToPrisma,
     mapUpdatePromptDataToPrisma,
-    toExtendedPrompt,
     toPromptWithStats,
 } from '@/transformers/prompt';
+import { deserializeParameters } from '@/transformers/prompt/serializers';
 import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
 import type { ExtendedPrompt } from '@/types/entities/prompt/extended';
 import type { FileItem } from '@/types/files';
@@ -69,7 +70,7 @@ export async function getPrompts(): Promise<PromptWithStats[]> {
 			},
 		});
 
-		return prompts.map(toPromptWithStats);
+		return prompts.map((p) => toPromptWithStats({ ...p, parameters: deserializeParameters(p.parameters) }));
 	} catch (error) {
 		promptLogger.error('Error al obtener prompts:', error);
 		throw createPromptError('Error al obtener prompts', EntityErrorCode.OPERATION_FAILED, error);
@@ -107,7 +108,7 @@ export async function getPrompt(id: string): Promise<ExtendedPrompt> {
 		}
 
 		promptLogger.info('✅ Prompt obtenido:', prompt.name);
-		return toExtendedPrompt(prompt as any);
+		return fromPrismaPrompt(prompt as any);
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener prompt:', error);
 		if (error instanceof PromptError) {
@@ -196,7 +197,7 @@ export async function getPromptWithRelations(id: string): Promise<ExtendedPrompt
 		}
 
 		promptLogger.info('✅ Prompt con relaciones obtenido:', prompt.name);
-		return toExtendedPrompt(prompt as any);
+		return fromPrismaPrompt(prompt as any);
 	} catch (error) {
 		promptLogger.error('❌ Error al obtener prompt con relaciones:', error);
 		if (error instanceof PromptError) {

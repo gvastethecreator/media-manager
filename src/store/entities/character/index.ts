@@ -3,7 +3,7 @@
  * @module store/entities/character
  */
 
-import type { CharacterExtended, CharacterViewConfig } from '@/types/entities/character';
+import type { CharacterViewConfig, CharacterWithStats } from '@/types/entities/character';
 import { CharacterSortOption } from '@/types/entities/character/enums';
 import { CHARACTER_KEY_PREFIX } from '@/utils/character';
 import { create } from 'zustand';
@@ -84,42 +84,42 @@ export const useCharacterStore = create<CharacterStore>()(
  * @param id ID del personaje
  * @returns Personaje encontrado o undefined
  */
-export const selectCharacterById = (id: string): CharacterExtended | undefined =>
+export const selectCharacterById = (id: string): CharacterWithStats | undefined =>
 	useCharacterStore((state) => state.characters[id]);
 
 /**
  * Obtiene los personajes ordenados según la opción actual
  * @returns Array de personajes ordenados
  */
-export const selectSortedCharacters = (): CharacterExtended[] =>
+export const selectSortedCharacters = (): CharacterWithStats[] =>
 	useCharacterStore((state) => state.getSortedCharacters());
 
 /**
  * Obtiene los personajes agrupados según el criterio actual
  * @returns Objeto con grupos de personajes
  */
-export const selectGroupedCharacters = (): Record<string, CharacterExtended[]> =>
+export const selectGroupedCharacters = (): Record<string, CharacterWithStats[]> =>
 	useCharacterStore((state) => state.getGroupedCharacters());
 
 /**
  * Obtiene los personajes filtrados
  * @returns Array de personajes filtrados
  */
-export const selectFilteredCharacters = (): CharacterExtended[] =>
+export const selectFilteredCharacters = (): CharacterWithStats[] =>
 	useCharacterStore((state) => state.getFilteredCharacters());
 
 /**
  * Obtiene solo los personajes favoritos
  * @returns Array de personajes favoritos
  */
-export const selectFavoriteCharacters = (): CharacterExtended[] =>
+export const selectFavoriteCharacters = (): CharacterWithStats[] =>
 	useCharacterStore((state) => Object.values(state.characters).filter((character) => character.isFavorite));
 
 /**
  * Obtiene el personaje seleccionado actualmente
  * @returns Personaje seleccionado o undefined
  */
-export const selectCurrentCharacter = (): CharacterExtended | undefined =>
+export const selectCurrentCharacter = (): CharacterWithStats | undefined =>
 	useCharacterStore((state) => {
 		const selectedId = state.selectedCharacterId;
 		return selectedId ? state.characters[selectedId] : undefined;

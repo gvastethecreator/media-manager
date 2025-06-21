@@ -5,26 +5,22 @@
  */
 
 import {
-	addImageToCollection as addImageToCollectionAction,
-	createCollection as createCollectionAction,
-	deleteCollection as deleteCollectionAction,
-	getCollection as getCollectionAction,
-	getCollectionImages as getCollectionImagesAction,
-	getCollections as getCollectionsAction,
-	removeImageFromCollection as removeImageFromCollectionAction,
-	updateCollection as updateCollectionAction,
+    createCollection as createCollectionAction,
+    deleteCollection as deleteCollectionAction,
+    getCollection as getCollectionAction,
+    getCollectionImages as getCollectionImagesAction,
+    getCollections as getCollectionsAction,
+    updateCollection as updateCollectionAction,
 } from '@/app/actions/collections/collection.actions';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import type {
-	CollectionBase,
-	CollectionComplete,
-	CollectionExtended,
-	CreateCollectionData,
-	UpdateCollectionData,
+    CollectionBase,
+    CollectionCreateInput,
+    CollectionUpdateInput,
+    CollectionWithStats,
 } from '@/types/entities/collection';
-import type { FileItem } from '@/types/files';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CollectionService');
@@ -60,7 +56,7 @@ export class CollectionServiceError extends Error {
  */
 export const notifyCollectionChange = async (
 	action: 'create' | 'update' | 'delete' | 'items:add' | 'items:remove',
-	collection: CollectionBase | CollectionComplete | { id: string }
+	collection: CollectionBase | CollectionWithStats | { id: string }
 ) => {
 	let eventType: string;
 
@@ -100,7 +96,7 @@ export const notifyCollectionChange = async (
  * Obtiene todas las colecciones
  * @returns Lista de colecciones con estadísticas
  */
-export const getCollections = async () => {
+export const getCollections = async (): Promise<CollectionWithStats[]> => {
 	try {
 		logger.info('📚 Obteniendo colecciones');
 		const collections = await getCollectionsAction();
@@ -117,7 +113,7 @@ export const getCollections = async () => {
  * @param id ID de la colección
  * @returns Detalles de la colección
  */
-export const getCollection = async (id: string): Promise<CollectionExtended> => {
+export const getCollection = async (id: string): Promise<CollectionWithStats> => {
 	try {
 		logger.info(`🔍 Buscando colección: ${id}`);
 		const collection = await getCollectionAction(id);
@@ -143,7 +139,7 @@ export const getCollection = async (id: string): Promise<CollectionExtended> => 
  * @param data Datos para la creación de la colección
  * @returns La colección creada
  */
-export const createCollection = async (data: CreateCollectionData): Promise<CollectionExtended> => {
+export const createCollection = async (data: CollectionCreateInput): Promise<CollectionWithStats> => {
 	try {
 		logger.info('✨ Creando nueva colección:', { name: data.name });
 
@@ -170,7 +166,7 @@ export const createCollection = async (data: CreateCollectionData): Promise<Coll
  * @param data Datos a actualizar
  * @returns La colección actualizada
  */
-export const updateCollection = async (id: string, data: UpdateCollectionData): Promise<CollectionExtended> => {
+export const updateCollection = async (id: string, data: CollectionUpdateInput): Promise<CollectionWithStats> => {
 	try {
 		logger.info(`📝 Actualizando colección: ${id}`);
 
@@ -220,7 +216,7 @@ export const deleteCollection = async (id: string): Promise<void> => {
  * @param id ID de la colección
  * @returns Lista de imágenes
  */
-export const getCollectionImages = async (id: string): Promise<FileItem[]> => {
+export const getCollectionImages = async (id: string): Promise<{ id: string; name: string; path: string }[]> => {
 	try {
 		logger.info(`🖼️ Obteniendo imágenes de la colección: ${id}`);
 		const images = await getCollectionImagesAction(id);
@@ -231,56 +227,6 @@ export const getCollectionImages = async (id: string): Promise<FileItem[]> => {
 		throw new CollectionServiceError(
 			`Error al obtener imágenes de la colección: ${error instanceof Error ? error.message : String(error)}`,
 			'GET_COLLECTION_IMAGES_FAILED',
-			error
-		);
-	}
-};
-
-/**
- * Añade una imagen a una colección
- * @param collectionId ID de la colección
- * @param imageId ID de la imagen
- */
-export const addImageToCollection = async (collectionId: string, imageId: string): Promise<void> => {
-	try {
-		logger.info(`➕ Añadiendo imagen ${imageId} a la colección ${collectionId}`);
-
-		await addImageToCollectionAction(collectionId, imageId);
-
-		// Notificar cambio
-		await notifyCollectionChange('items:add', { id: collectionId });
-
-		logger.info(`✅ Imagen ${imageId} añadida a la colección ${collectionId}`);
-	} catch (error) {
-		logger.error('❌ Error al añadir imagen a la colección:', { collectionId, imageId, error });
-		throw new CollectionServiceError(
-			`Error al añadir imagen a la colección: ${error instanceof Error ? error.message : String(error)}`,
-			'ADD_IMAGE_TO_COLLECTION_FAILED',
-			error
-		);
-	}
-};
-
-/**
- * Elimina una imagen de una colección
- * @param collectionId ID de la colección
- * @param imageId ID de la imagen
- */
-export const removeImageFromCollection = async (collectionId: string, imageId: string): Promise<void> => {
-	try {
-		logger.info(`➖ Eliminando imagen ${imageId} de la colección ${collectionId}`);
-
-		await removeImageFromCollectionAction(collectionId, imageId);
-
-		// Notificar cambio
-		await notifyCollectionChange('items:remove', { id: collectionId });
-
-		logger.info(`✅ Imagen ${imageId} eliminada de la colección ${collectionId}`);
-	} catch (error) {
-		logger.error('❌ Error al eliminar imagen de la colección:', { collectionId, imageId, error });
-		throw new CollectionServiceError(
-			`Error al eliminar imagen de la colección: ${error instanceof Error ? error.message : String(error)}`,
-			'REMOVE_IMAGE_FROM_COLLECTION_FAILED',
 			error
 		);
 	}
