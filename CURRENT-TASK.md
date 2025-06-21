@@ -1,633 +1,121 @@
-# ✅ TAREA COMPLETADA: Sistema de Favoritos Universal
+# ⚔️ Plan de Batalla: Cero Errores de TypeScript
 
-## 🎉 **LOGROS ALCANZADOS**
+## 🎯 Misión
 
-### ✅ **Sistema de Favoritos Completo (20 entidades)**
+El objetivo es la eliminación sistemática y completa de los 1300+ errores de TypeScript que actualmente plagan el codebase. Este documento sirve como guía central, hoja de ruta y checklist para esta iniciativa.
 
-Todas las entidades principales del sistema ahora pueden marcarse como favoritas:
+## 📜 Estrategia General
 
-1. **Folder** - ✅
-2. **Image** - ✅
-3. **Video** - ✅
-4. **Group** - ✅
-5. **Album** - ✅
-6. **Collection** - ✅
-7. **Tag** - ✅
-8. **Property** - ✅
-9. **Wildcard** - ✅
-10. **Character** - ✅
-11. **Place** - ✅
-12. **WorldItem** - ✅
-13. **Concept** - ✅
-14. **Prompt** - ✅
-15. **Note** - ✅
-16. **Workflow** - ✅ **AÑADIDO**
-17. **Document** - ✅ **AÑADIDO**
-18. **JsonFile** - ✅ **AÑADIDO**
-19. **File3D** - ✅ **AÑADIDO**
-20. **Audio** - ✅ **AÑADIDO**
+Los errores se abordarán de manera estructurada para minimizar la creación de nuevos problemas y maximizar la eficiencia. La estrategia se divide en dos ejes:
 
-### 🚫 **Entidades que correctamente NO tienen favoritos:**
+1. **Por Capas (Orden de Prioridad):** Las correcciones se realizarán desde el núcleo hacia el exterior.
+    - **Nivel 1: Tipos Base (`/types/entities`)**: Corregir las definiciones fundamentales de las entidades.
+    - **Nivel 2: Transformadores (`/transformers`)**: Asegurar que la capa de mapeo entre Prisma y los tipos de la aplicación sea robusta.
+    - **Nivel 3: Lógica de Negocio (`/app/actions`, `/services`)**: Arreglar los errores en las server actions y servicios que consumen los transformadores.
+    - **Nivel 4: Stores (`/store/entities`)**: Alinear los stores de Zustand con los tipos correctos.
+    - **Nivel 5: Componentes UI (`/components`)**: Solucionar problemas de props y estado en los componentes de React.
+    - **Nivel 6: Pruebas (`/tests`, `*.test.ts`)**: Actualizar o corregir las pruebas unitarias y de integración.
 
-- **QueueJob** - Jobs de cola temporales
-- **Profile** - Es el usuario mismo
-- **Settings** - Configuración del sistema
-- **UploadedImage** - Metadatos técnicos
-- **ImageStats** - Estadísticas
-- **Activity** - Logs de actividad
-- **Favorite** - El sistema de favoritos mismo
+2. **Por Entidad:** Dentro de cada capa, se agruparán las correcciones por entidad para mantener el contexto y la coherencia.
 
-### 🔧 **Problemas Resueltos:**
+## 🚨 Patrones de Errores Comunes Identificados
 
-- ✅ **Campos Audio duplicados** - Limpiados del esquema Prisma
-- ✅ **Cliente Prisma generado** - Sin errores de compilación
-- ✅ **Esquema consistente** - Todas las relaciones funcionan correctamente
-
-## 🎯 **Características del Sistema**
-
-### **Patrón Dual de Favoritos:**
-
-1. **`isFavorite Boolean`** - Campo directo en cada entidad para acceso rápido
-2. **Modelo `Favorite`** - Sistema multi-perfil para favoritos por usuario
-
-### **Conectividad Total:**
-
-- Todas las entidades principales pueden relacionarse entre sí
-- Todas pueden ser marcadas como favoritas
-- Relaciones many-to-many completas implementadas
-
-### **Tipos de Entidades Soportadas:**
-
-- **📁 Archivos:** Folder, Image, Video, Audio, Document, JsonFile, File3D
-- **📚 Organizadores:** Group, Album, Collection
-- **🏷️ Metadatos:** Tag, Property
-- **🎭 Creativos:** Wildcard, Character, Place, WorldItem, Concept, Prompt, Note, Workflow
-
-## 📋 **Próximos Pasos Sugeridos**
-
-### **Fase 1: Actualización de Tipos TypeScript**
-
-1. Actualizar interfaces base para incluir `isFavorite`
-2. Actualizar transformers para manejar el campo
-3. Verificar tipos canónicos en todas las entidades
-
-### **Fase 2: Server Actions**
-
-1. Implementar actions para toggle favoritos
-2. Añadir filtros por favoritos en queries
-3. Actualizar CRUD operations para incluir isFavorite
-
-### **Fase 3: UI/UX**
-
-1. Componente de botón favorito universal
-2. Filtros por favoritos en todas las vistas
-3. Sección de favoritos en la navegación
-
-### **Fase 4: Stores Zustand**
-
-1. Actualizar stores con funcionalidad de favoritos
-2. Sincronización con server state
-3. Optimistic updates para UX fluida
-
-## 📊 **Métricas del Sistema**
-
-- **20 entidades** con soporte de favoritos
-- **7 entidades** correctamente excluidas
-- **1 modelo Favorite** para sistema multi-perfil
-- **Conectividad total** entre todas las entidades
-- **0 errores** de compilación Prisma/TypeScript
+- **Desajuste de Tipos (Transformer/Prisma):** El error más común. Las funciones `fromPrisma...` devuelven objetos que no coinciden con los tipos esperados (`AlbumWithRelations`, `CharacterComplete`, etc.), usualmente por falta de propiedades o relaciones.
+- **Import/Export Rotos:** Módulos que no exponen miembros (`has no exported member`) o rutas de importación incorrectas.
+- **Problemas de Nulabilidad (`null`):** Funciones que pueden devolver `null` pero cuyo tipo de retorno no lo permite.
+- **Errores de Props en Componentes:** Pasar props con tipos incorrectos a los componentes de React.
+- **Errores de Configuración (Next.js/Prisma):** Errores en archivos generados (`.next/types`) o en consultas de Prisma (`mode: 'insensitive'`).
 
 ---
 
-**Estado:** ✅ **COMPLETADO** - Sistema de favoritos universal implementado
-**Calidad:** 🌟 **EXCELENTE** - Esquema limpio, sin errores, conectividad total
-**Impacto:** 🚀 **ALTO** - Todas las entidades principales ahora soportan favoritos
-
-**Conclusión:** El sistema de gestión de imágenes ahora tiene un **sistema de favoritos robusto y universal** que permite a los usuarios marcar cualquier entidad principal como favorita, con soporte tanto para acceso directo (`isFavorite`) como para gestión multi-perfil (modelo `Favorite`).
-
-# 🎉 MISIÓN COMPLETADA: 1751 Errores TypeScript → 0 Errores
-
-## 📊 **ESTADO FINAL: 100% EXITOSO ✅**
-
-### **🏆 RESULTADO FINAL**
-
-- **Errores TypeScript:** 1751 → **0** ✅
-- **Tiempo total:** ~3 horas
-- **Metodología:** Divide y vencerás por categorías
-- **Compilación:** **EXITOSA** sin errores
-
----
-
-## 🎯 **FASES COMPLETADAS**
-
-### **✅ FASE 1 COMPLETADA: Nuevas Entidades (100%)**
-
-**Duración:** 2 horas | **Errores corregidos:** ~400+
-
-#### **🎵 Audio Entity** ✅
-
-- Tipos canónicos definidos con BaseEntity
-- Transformer funcional con mapeos correctos
-- Server actions CRUD completas
-- Store Zustand con selectors y devtools
-
-#### **📄 Document Entity** ✅
-
-- Infraestructura completa implementada
-- Tipos consistentes con patrón establecido
-- Relaciones y conteos correctos
-
-#### **🟫 JsonFile Entity** ✅
-
-- Tipos canónicos y estructura correcta
-- Filtros específicos para archivos JSON
-- Opciones de búsqueda implementadas
-
-#### **🎲 File3D Entity** ✅
-
-- Implementación siguiendo patrón establecido
-- Campos específicos (vertices, faces, materials)
-- Filtros para archivos 3D
-
-#### **⚙️ Workflow Entity** ✅
-
-- Tipos canónicos y relaciones completas
-- Campo version para versionado
-- Integración con sistema existente
-
-### **✅ FASE 2 COMPLETADA: Navigation System (100%)**
-
-**Duración:** 1 hora | **Errores corregidos:** ~300+
-
-#### **🧭 NavigationData actualizada** ✅
-
-- Incluye todas las nuevas entidades (Audio, Document, JsonFile, File3D, Workflow)
-- SystemStats expandido con conteos de nuevas entidades
-- REVALIDATE_PATHS actualizado
-
-#### **📊 use-category-stats.ts corregido** ✅
-
-- NavigationCategory tipo creado (reemplaza ViewType incorrecto)
-- Funciones actualizadas para todas las entidades
-- Mapeo seguro de CategoryChild implementado
-
-#### **🔗 Tipos de navegación unificados** ✅
-
-- NavigationCategory con 18 categorías totales
-- CategoryChild expandido con totalFiles y totalSize
-- Compatibilidad con todas las entidades
-
-### **✅ FASE 3 COMPLETADA: Place Entity (100%)**
-
-**Duración:** 30 minutos | **Errores corregidos:** ~25+
-
-#### **🏙️ Place Actions corregidas** ✅
-
-- Import correcto de `getPrismaClient` y `handlePrismaError`
-- Patrón async/await con try-catch en todas las funciones
-- Manejo robusto de errores con logging
-
-#### **🔄 Place Transformer simplificado** ✅
-
-- Tipo de entrada simplificado a `any`
-- Eliminación de tipos complejos de Prisma
-- Manejo seguro de campos JSON y relaciones
-
-#### **📊 Place Store optimizado** ✅
-
-- Tipos actualizados a `PlaceComplete`
-- Funciones de carga y gestión de relaciones
-- Integración con selectors y devtools
-
-#### **🎨 Place Components corregidos** ✅
-
-- Imports correctos de tipos
-- Eliminación de dependencias de enums inexistentes
-- Funciones auxiliares simplificadas
-
----
-
-## 🎯 **PRÓXIMAS ENTIDADES PRIORIZADAS**
-
-### **📝 Note Entity** - Próxima (~70+ errores)
-
-- Componentes con errores en note-card y settings
-- Store con problemas de tipos
-- Transformer necesita simplificación
-
-### **🎭 Prompt Entity** - (~60+ errores)
-
-- Server actions con imports incorrectos
-- Components con tipos inexistentes
-- Mappers complejos a simplificar
-
-### **👤 Profile Entity** - (~80+ errores)
-
-- Store con tipos incorrectos
-- Actions con errores de Prisma
-- Services con problemas de tipos
-
-### **🏷️ Tag Entity** - (~60+ errores)
-
-- Components con imports incorrectos
-- Store con tipos desactualizados
-- Relations con problemas
-
-### **🌍 World-Item Entity** - (~50+ errores)
-
-- Actions con errores de tipos
-- Transformer complejo
-- Store necesita actualización
-
----
-
-## 🎯 **LOGROS TÉCNICOS PRINCIPALES**
-
-### **🏗️ Arquitectura Robusta**
-
-- **Tipos canónicos** para todas las entidades nuevas + Place
-- **Patrón consistente** BaseEntity + Relations + Counts
-- **Dependencias circulares** evitadas elegantemente
-- **Sistema de favoritos** universal implementado
-
-### **🔄 Transformers Simplificados**
-
-- Uso de `any` como tipo de entrada de Prisma
-- Manejo de errores robusto
-- Logging detallado para debugging
-- Validación de datos de entrada
-
-### **⚡ Server Actions Funcionales**
-
-- CRUD completo con manejo de errores
-- Patrón async/await consistente
-- Imports correctos (`getPrismaClient`, `handlePrismaError`)
-- Try-catch en todas las operaciones
-
-### **🏪 Stores Zustand Optimizados**
-
-- Tipos completos con relaciones y conteos
-- Selectors y devtools habilitados
-- Funciones de carga asíncrona
-- Estado de UI y filtros integrados
-
----
-
-## 🎯 **PRÓXIMOS PASOS OPCIONALES**
-
-### **🔧 Optimizaciones Potenciales:**
-
-- [ ] Implementar lazy loading para entidades grandes
-- [ ] Caché avanzado con React Query
-- [ ] Optimización de queries Prisma
-- [ ] Tests unitarios para nuevas entidades
-
-### **🎨 Mejoras de UX:**
-
-- [ ] Componentes UI para nuevas entidades
-- [ ] Formularios de creación/edición
-- [ ] Vistas especializadas (Audio player, 3D viewer, etc.)
-- [ ] Drag & drop para archivos
-
-### **📊 Analytics y Monitoring:**
-
-- [ ] Métricas de uso por entidad
-- [ ] Performance monitoring
-- [ ] Error tracking avanzado
-- [ ] Logs estructurados
-
----
-
-## 🏆 **CONCLUSIÓN**
-
-**El sistema de gestión de imágenes ahora es una plataforma completa y robusta** que soporta 20 tipos de entidades diferentes con:
-
-- ✅ **Arquitectura sólida** y escalable
-- ✅ **Tipos TypeScript** completamente seguros
-- ✅ **Sistema de favoritos** universal
-- ✅ **Navigation** intuitiva y funcional
-- ✅ **Performance** optimizada con Zustand
-- ✅ **Mantenibilidad** excepcional
-
-**Estado:** 🎉 **MISIÓN COMPLETADA** - Sistema 100% funcional
-**Calidad:** ⭐⭐⭐⭐⭐ Excelente
-**Resultado:** 1751 errores → 0 errores en tiempo récord
-
-## 🎯 PLAN DE CORRECCIÓN SISTEMÁTICA - POR ENTIDADES
-
-### 📊 **ESTADO ACTUAL: 2491 Errores → Análisis Completo ⚡**
-
-### **🏆 PROGRESO ACTUAL**
-
-- **Errores TypeScript:** 2491 errores en 462 archivos (reducidos significativamente)
-- **Tiempo transcurrido:** ~4 horas
-- **Metodología:** Entidad por entidad + Patrón establecido ✅
-- **Compilación:** Funcional con errores específicos de tipos
-
----
-
-## 🎯 **FASES COMPLETADAS**
-
-### **✅ FASE 1 COMPLETADA: Nuevas Entidades (100%)**
-
-**Duración:** 2 horas | **Errores corregidos:** ~400+
-
-#### **🎵 Audio Entity** ✅
-
-- Tipos canónicos definidos con BaseEntity
-- Transformer funcional con mapeos correctos
-- Server actions CRUD completas
-- Store Zustand con selectors y devtools
-
-#### **📄 Document Entity** ✅
-
-- Infraestructura completa implementada
-- Tipos consistentes con patrón establecido
-- Relaciones y conteos correctos
-
-#### **🟫 JsonFile Entity** ✅
-
-- Tipos canónicos y estructura correcta
-- Filtros específicos para archivos JSON
-- Opciones de búsqueda implementadas
-
-#### **🎲 File3D Entity** ✅
-
-- Implementación siguiendo patrón establecido
-- Campos específicos (vertices, faces, materials)
-- Filtros para archivos 3D
-
-#### **⚙️ Workflow Entity** ✅
-
-- Tipos canónicos y relaciones completas
-- Campo version para versionado
-- Integración con sistema existente
-
-### **✅ FASE 2 COMPLETADA: Navigation System (100%)**
-
-**Duración:** 1 hora | **Errores corregidos:** ~300+
-
-#### **🧭 NavigationData actualizada** ✅
-
-- Incluye todas las nuevas entidades (Audio, Document, JsonFile, File3D, Workflow)
-- SystemStats expandido con conteos de nuevas entidades
-- REVALIDATE_PATHS actualizado
-
-#### **📊 use-category-stats.ts corregido** ✅
-
-- NavigationCategory tipo creado (reemplaza ViewType incorrecto)
-- Funciones actualizadas para todas las entidades
-- Mapeo seguro de CategoryChild implementado
-
-#### **🔗 Tipos de navegación unificados** ✅
-
-- NavigationCategory con 18 categorías totales
-- CategoryChild expandido con totalFiles y totalSize
-- Compatibilidad con todas las entidades
-
-### **✅ FASE 3 COMPLETADA: Place Entity (100%)**
-
-**Duración:** 30 minutos | **Errores corregidos:** ~25+
-
-#### **🏙️ Place Actions corregidas** ✅
-
-- Import correcto de `getPrismaClient` y `handlePrismaError`
-- Patrón async/await con try-catch en todas las funciones
-- Manejo robusto de errores con logging
-
-#### **🔄 Place Transformer simplificado** ✅
-
-- Tipo de entrada simplificado a `any`
-- Eliminación de tipos complejos de Prisma
-- Manejo seguro de campos JSON y relaciones
-
-#### **📊 Place Store optimizado** ✅
-
-- Tipos actualizados a `PlaceComplete`
-- Funciones de carga y gestión de relaciones
-- Integración con selectors y devtools
-
-#### **🎨 Place Components corregidos** ✅
-
-- Imports correctos de tipos
-- Eliminación de dependencias de enums inexistentes
-- Funciones auxiliares simplificadas
-
----
-
-## 🎯 **ANÁLISIS DE ERRORES RESTANTES (2491)**
-
-### **📊 Categorías de Errores Identificadas:**
-
-#### **1. Transformers Complejos (~800+ errores)**
-
-- Album, Collection, Group transformers con tipos `*FromPrisma` incorrectos
-- Prompt, Note, Tag transformers necesitan simplificación
-- Video, Wildcard transformers con dependencias circulares
-
-#### **2. Server Actions con Imports Incorrectos (~600+ errores)**
-
-- Muchos actions aún usan `prisma` en lugar de `getPrismaClient`
-- Falta `handlePrismaError` en varios archivos
-- Tipos de entrada/salida incorrectos
-
-#### **3. Tipos Faltantes o Incorrectos (~500+ errores)**
-
-- Profile, Video, Queue types no exportados correctamente
-- Metadata types con problemas de estructura
-- Thumbnail, Task types faltantes
-
-#### **4. Store y State Management (~300+ errores)**
-
-- Varios stores con tipos desactualizados
-- Problemas con selectors y actions
-- State management inconsistente
-
-#### **5. Components y UI (~200+ errores)**
-
-- Settings components con imports incorrectos
-- Cards y views con tipos obsoletos
-- Filtros y búsquedas con problemas
-
-#### **6. Services y Utils (~91+ errores)**
-
-- Profile service con métodos faltantes
-- Queue service no encontrado
-- Error handling incompleto
-
----
-
-## 🎯 **ESTRATEGIA OPTIMIZADA PARA CONTINUAR**
-
-### **🚀 PRÓXIMA FASE: Transformers Masivos (Prioridad Alta)**
-
-**Objetivo:** Aplicar el patrón de simplificación establecido a TODOS los transformers
-
-#### **Patrón Establecido a Replicar:**
-
-```typescript
-// ❌ ANTES: Complejo y problemático
-export function fromPrisma<T extends ComplexPrismaType>(data: T): ComplexType
-
-// ✅ DESPUÉS: Simple y funcional
-export function fromPrisma(data: any): EntityComplete
-```
-
-#### **Transformers a Corregir (Orden de Prioridad):**
-
-1. **Album Transformer** (~100+ errores) - `AlbumFromPrisma` → `any`
-2. **Collection Transformer** (~80+ errores) - Tipos complejos → Simple
-3. **Group Transformer** (~70+ errores) - Dependencias circulares
-4. **Prompt Transformer** (~60+ errores) - Ya iniciado
-5. **Note Transformer** (~50+ errores) - Simplificar tipos
-6. **Tag Transformer** (~40+ errores) - Eliminar complejidad
-7. **Video, Wildcard** (~30+ cada uno) - Patrón simple
-
-### **🔧 SIGUIENTE FASE: Server Actions Masivos**
-
-**Objetivo:** Aplicar corrección de imports a TODOS los actions
-
-#### **Patrón de Corrección:**
-
-```typescript
-// ❌ Cambiar esto:
-import { prisma } from '@/lib/prisma';
-
-// ✅ Por esto:
-import { getPrismaClient } from '@/lib/db';
-import { handlePrismaError } from '@/lib/errors';
-
-// Y en las funciones:
-const prisma = await getPrismaClient();
-```
-
----
-
-## 📊 **MÉTRICAS DE PROGRESO REAL**
-
-- **Entidades completadas:** 6/20+ (30%)
-- **Patrón establecido:** ✅ Replicable y probado
-- **Errores críticos:** Solucionados (navegación, nuevas entidades)
-- **Tiempo estimado restante:** 4-6 horas para completar
-- **Calidad:** 🌟 Alta consistencia y robustez en lo completado
-
----
-
-**Estado:** ⚡ **EN PROGRESO ACELERADO** - Patrón establecido, aplicación masiva
-**Metodología:** 🎯 **EFECTIVA** - Transformación sistemática por categorías
-**Próximo paso:** 🔄 **Transformers Masivos** - Aplicar patrón a todos los transformers
-
-# 🎯 TAREA ACTUAL: Corrección Sistemática de Errores TypeScript
-
-## 📊 Estado General
-
-- **Total de errores**: ~1380 errores en ~410 archivos (estimado actualizado)
-- **Enfoque**: Corrección entidad por entidad (tipos, stores, actions, components, services, transformers)
-- **Metodología**: Completar todos los aspectos de cada entidad antes de pasar a la siguiente
-
-## ✅ Entidades Completamente Corregidas
-
-### 1. 🎭 **Character** (38 errores) - ✅ COMPLETADA
-
-- **Tipos**: Agregados `CharacterFilterItem`, `CharacterRelationship`, `CharacterStats`, `CharacterFilter`
-- **Store**: Corregidas referencias a propiedades UI inexistentes
-- **Funciones**: Actualizadas funciones de comparación y agrupamiento
-- **Estado**: Sin errores TypeScript
-
-### 2. 👥 **Group** (22+ errores) - ✅ COMPLETADA
-
-- **Tipos**: Exportados `GroupComplete`, `GroupExtended`, `GroupListItem`
-- **Constantes**: Definido `DEFAULT_GROUP_COLOR = '#3B82F6'`
-- **Mappers**: Corregidas validaciones y funciones de paginación
-- **Estado**: Sin errores TypeScript
-
-### 3. 💬 **Prompt** (33+ errores) - ✅ COMPLETADA
-
-- **Tipos**: Agregado `PromptParameter`, corregido `ExtendedPrompt` con `_count`
-- **Mappers**: Corregidas referencias a propiedades inexistentes y serialización
-- **Serializers**: Eliminadas redeclaraciones, agregada función `getPreviewContent`
-- **Estado**: Sin errores TypeScript
-
-### 4. 📝 **Note** (7+ errores) - ✅ COMPLETADA
-
-- **Mappers**: Agregada exportación de `mapNoteFiltersToPrisma` faltante
-- **Tests**: Corregido uso de `page/pageSize` por `skip/take` en `NoteSearchOptions`
-- **Utils**: Agregada importación faltante de Logger en `transformers/common.ts`
-- **Estado**: Sin errores TypeScript
-
-### 5. 🗺️ **Place** (8+ errores) - ✅ COMPLETADA
-
-- **Mappers**: Corregido error de sintaxis y referencia a `rest.filters`
-- **Actions**: Simplificado `PLACE_INCLUDE` para compatibilidad con Prisma
-- **Tipos**: Agregada propiedad `abundance` a `PlaceResource`
-- **Components**: Corregida conversión de `description` null → undefined
-- **Store**: Agregadas funciones `selectPlace` y `getSelectedPlace`
-- **Estado**: Sin errores TypeScript
-
-## 🔄 Próximas Entidades en Cola
-
-### 6. 🌟 **Concept** (Próxima - estimado 15+ errores)
-
-- Errores identificados en transformers y types
-- Problemas con relaciones y mappers
-- Falta de exportaciones en index files
-
-### 7. 🏷️ **Tag** (estimado 12+ errores)
-
-- Problemas con serializers y transformers
-- Errores en componentes de UI
-- Inconsistencias en tipos
-
-### 8. 🎯 **World-Item** (estimado 10+ errores)
-
-- Errores en transformers y mappers
-- Problemas con tipos extendidos
-- Inconsistencias en serialización
-
-## 📈 Progreso Acumulado
-
-- **Entidades corregidas**: 5/~25 (20% completado)
-- **Errores resueltos**: ~113+ errores (estimado 8% del total)
-- **Archivos corregidos**: ~20 archivos principales
-- **Tiempo invertido**: Enfoque sistemático y metodológico
-
-## 🎯 Metodología Aplicada
-
-1. **Análisis**: Búsqueda de errores específicos por entidad
-2. **Priorización**: Corrección de tipos base antes que componentes
-3. **Validación**: Compilación incremental para verificar correcciones
-4. **Documentación**: Actualización inmediata de README por entidad
-5. **Consistencia**: Aplicación de patrones uniformes
-
-## 🔧 Patrones de Corrección Identificados
-
-### Errores Comunes
-
-- **Tipos faltantes**: Interfaces no exportadas o no definidas
-- **Propiedades inexistentes**: Referencias a campos que no existen en tipos
-- **Incompatibilidad null/undefined**: Conversiones de tipos necesarias
-- **Imports circulares**: Reorganización de exportaciones
-- **Prisma compatibility**: Simplificación de queries complejas
-
-### Soluciones Aplicadas
-
-- **Exportaciones centralizadas** en archivos index.ts
-- **Tipos canónicos** consistentes en toda la aplicación
-- **Conversiones de tipo explícitas** para null/undefined
-- **Simplificación de Prisma includes** para mejor rendimiento
-- **Documentación actualizada** con diagramas mermaid
-
-## 🚀 Siguiente Paso
-
-**Iniciar corrección de entidad Concept** - aplicando la metodología establecida:
-
-1. Análisis de errores específicos
-2. Corrección de tipos base
-3. Actualización de transformers
-4. Validación de componentes
-5. Documentación completa
-
----
-
-**Última actualización**: Entidad Place completamente corregida
-**Siguiente objetivo**: Entidad Concept
+## ✅ Checklist de Corrección por Entidad
+
+### 📝 Entidad: General / Sistema
+
+- [ ] **API Routes (`.next/types/app/api/...`)**: Investigar los errores `ParamCheck<RouteContext>`. Probablemente se deban a una mala definición de los `params` en las props de las rutas.
+- [ ] **Module Resolution (`@/types/files`)**: El tipo `FileItem` parece faltar o estar mal exportado. Es usado en múltiples actions.
+- [ ] **Framer Motion (`framer-motion`)**: El módulo no se encuentra en `character-card-images.tsx`. Verificar instalación y dependencias.
+- [ ] **Revalidate Path (`@/app/actions/revalidate`)**: Módulo no encontrado en `video.actions.ts`.
+
+### 💿 Entidad: Album (`album.actions.ts`, `album-card*`)
+
+- [ ] **`album.actions.ts`**:
+  - [ ] Corregir el mapeo en `fromPrismaAlbums` y `fromPrismaAlbum`. Falta la propiedad `characters`.
+  - [ ] Resolver problemas de nulabilidad donde las funciones devuelven `AlbumWithRelations | null` en lugar de `AlbumWithRelations`.
+- [ ] **`album-card-footer.tsx`**: La propiedad `totalSize` no existe en `AlbumBase`. Verificar el tipo y añadirla o usar una alternativa.
+- [ ] **`album-card.test.tsx`**: El `mockAlbum` no cumple con el tipo `AlbumWithRelations`. Faltan `featuredImage` y `isFavorite`.
+- [ ] **`album-server-actions.ts`**:
+  - [ ] `AlbumCardData` extiende `AlbumWithRelations` incorrectamente (incompatibilidad en `filters`).
+  - [ ] Múltiples propiedades (`theme`, `layout`, `thumbnailSize`) no existen en el objeto `album`.
+  - [ ] El objeto `metadata` que se retorna no coincide con el tipo esperado (problema con `coverImageUrl` que puede ser `null`).
+
+### 🦸 Entidad: Character (`character.actions.ts`, `character-card*`)
+
+- [ ] **`character.actions.ts`**:
+  - [ ] `fromPrismaCharacters` y `fromPrismaCharacter` reciben un tipo con `properties` incompleto. Faltan `name`, `description`, `category`, etc.
+- [ ] **`character-card-content.tsx`**: `ProgressProps` no tiene `indicatorClassName`. Usar una alternativa o extender el componente.
+- [ ] **`character-card.tsx`**:
+  - [ ] `cardMedia` (un array de objetos) se pasa a `CharacterCardImages`, que espera `string[]`.
+  - [ ] Se pasa `backstory` a `CharacterCardContentProps`, pero no está definido en el tipo.
+  - [ ] `rarityLevel` se pasa como `string` pero se espera `number`.
+- [ ] **`character-server-actions.ts`**: El tipo `CharacterCardData[]` no es compatible con lo que se retorna. El `_count` tiene menos propiedades de las esperadas.
+
+### 📚 Entidad: Collection (`collection.actions.ts`, `collection-card*`)
+
+- [ ] **`collection.actions.ts`**: Mismo patrón que `character.actions.ts`. El tipo de entrada para los transformadores tiene `properties` incompleto.
+- [ ] **`collection-card-content.tsx`**: `edition.date` no existe en `CollectionEdition`.
+- [ ] **`collection-card.tsx`**: `CollectionWithRelations` no se exporta desde `@/types/entities/collection/types`.
+- [ ] **`collection-server-actions.ts`**: El objeto retornado no es asignable a `CollectionCardData` (incompatibilidad en `filters` y `editions`).
+
+### 💡 Entidad: Concept (`concept.actions.ts`, `concept-server-actions.ts`)
+
+- [ ] **`concept-images.actions.ts`**: `toConceptComplete` no se exporta desde `@/transformers/concept`.
+- [ ] **`concept.actions.ts`**:
+  - [ ] `prisma` no se exporta desde `@/lib/db`.
+  - [ ] Múltiples miembros no se exportan desde `@/transformers/concept` (`toCreateData`, `toSearchOptions`, `toUpdateData`).
+  - [ ] Inferencia de tipo `any` implícita en un `.filter()`.
+- [ ] **`concept-server-actions.ts`**:
+  - [ ] `tags: true` no existe en `ConceptCountOutputTypeSelect`.
+  - [ ] Propiedad `_count` no existe en el tipo base del concepto.
+  - [ ] Propiedad `tags` no existe en el objeto `concept`.
+
+### 🏷️ Entidad: Tag (`crud.actions.ts`, `query.actions.ts`)
+
+- [ ] **`crud.actions.ts`**:
+  - [ ] Problemas de nulabilidad al pasar `fromPrismaTag(tag)` a `notifyTagChange`.
+  - [ ] Las funciones retornan `TagWithStats | null` en lugar de `TagWithRelations`.
+- [ ] **`query.actions.ts`**:
+  - [ ] `tags: true` no existe en `TagCountOutputTypeSelect`.
+  - [ ] `fromPrismaTag` se usa en un `map` con un tipo incompatible (falta `_count`).
+  - [ ] `mode: 'insensitive'` se usa incorrectamente en un filtro de Prisma.
+  - [ ] `convertServerImageToFileItem` recibe un tipo `ServerImage` incompleto.
+
+### 🚀 Entidad: Prompt (`prompt.actions.ts`)
+
+- [ ] **`prompt.actions.ts`**:
+  - [ ] Múltiples importaciones rotas desde `@/transformers/prompt` y `@/types/entities/prompt`.
+  - [ ] `PromptWithStats` usado pero parece que el tipo correcto es `PromptStats`.
+  - [ ] Incompatibilidad en `.map(toPromptWithStats)` porque el tipo de `parameters` es `string` en lugar de `PromptParameter[]`.
+
+### 🌍 Entidad: WorldItem (`world-item.actions.ts`)
+
+- [ ] **`world-item.actions.ts`**:
+  - [ ] `handleTransformerError` se llama con 2 argumentos pero espera 1.
+  - [ ] El tipo de retorno `TransformerError` no es asignable a `WorldItemComplete` o `WorldItemComplete[]`.
+
+### очередь (Queue) Entidad: QueueJob (`crud.actions.ts`, `query.actions.ts`)
+
+- [ ] **`crud.actions.ts`**: El `status` se pasa como `string` pero se espera el enum `QueueJobStatus`.
+- [ ] **`query.actions.ts`**: Mismo problema con `status` y `findQueueJobsByStatus`.
+- [ ] **`stats.actions.ts`**: `getCachedQueueStats` retorna `QueueStats` que no es asignable a `Record<string, number>`.
+
+### Otros Errores Notables
+
+- [ ] **`wildcard.actions.ts`**: Errores de transformer complejos donde faltan múltiples relaciones (`properties`, `tags`, `images`, etc.).
+- [ ] **`uploaded-images.actions.ts`**:
+  - [ ] `metadata` se asigna como objeto, pero el tipo espera `string`.
+  - [ ] `imageRecord.url` no existe en `UploadedImageBase`.
+- [ ] **`video.actions.ts`**: Importaciones rotas para tipos `CreateVideoInput`, `UpdateVideoInput`.
+- [ ] **`property.actions.ts`**: Importaciones rotas desde `@/transformers/property` y `@/types/entities/property`.
+- [ ] **`folder`**: Varios errores en componentes y actions relacionados con la entidad `Folder`.
+- [ ] **`group.actions.ts`**: `fromPrismaGroup` no se exporta.
