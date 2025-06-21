@@ -10,7 +10,7 @@ import {
 	CharacterBase,
 	CharacterCategory,
 	CharacterClass,
-	CharacterExtended,
+	CharacterWithStats,
 	CharacterRace,
 	CharacterRelationship,
 	CharacterRelationshipType,
@@ -79,7 +79,7 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
  * @param character Personaje a preparar para búsqueda
  * @returns Cadena con datos normalizados para búsqueda
  */
-export function prepareCharacterSearchString(character: CharacterExtended): string {
+export function prepareCharacterSearchString(character: CharacterWithStats): string {
 	return [character.name, character.class, character.race, character.alignment, character.category, character.emoji]
 		.filter(Boolean)
 		.join(' ')
@@ -92,7 +92,7 @@ export function prepareCharacterSearchString(character: CharacterExtended): stri
  * @param searchTerm Término de búsqueda
  * @returns true si el personaje coincide, false en caso contrario
  */
-export function matchesCharacterSearch(character: CharacterExtended, searchTerm: string): boolean {
+export function matchesCharacterSearch(character: CharacterWithStats, searchTerm: string): boolean {
 	if (!searchTerm || searchTerm.trim() === '') {
 		return true;
 	}
@@ -108,7 +108,7 @@ export function matchesCharacterSearch(character: CharacterExtended, searchTerm:
  * @param character Personaje del que obtener nivel
  * @returns Nivel numérico del personaje (predeterminado: 1)
  */
-export function getCharacterLevelAsNumber(character: CharacterExtended): number {
+export function getCharacterLevelAsNumber(character: CharacterWithStats): number {
 	if (typeof character.level === 'number') {
 		return character.level;
 	}
@@ -129,8 +129,8 @@ export function getCharacterLevelAsNumber(character: CharacterExtended): number 
  * @returns Número negativo, cero o positivo para ordenamiento
  */
 export function compareCharacters(
-	characterA: CharacterExtended,
-	characterB: CharacterExtended,
+	characterA: CharacterWithStats,
+	characterB: CharacterWithStats,
 	sortBy: CharacterSortOption = CharacterSortOption.NAME_ASC
 ): number {
 	switch (sortBy) {
@@ -164,8 +164,8 @@ export function compareCharacters(
  * @param characters Personajes a agrupar
  * @returns Mapa con personajes agrupados por categoría
  */
-export function groupCharactersByCategory(characters: CharacterExtended[]): Record<string, CharacterExtended[]> {
-	const groups: Record<string, CharacterExtended[]> = {};
+export function groupCharactersByCategory(characters: CharacterWithStats[]): Record<string, CharacterWithStats[]> {
+	const groups: Record<string, CharacterWithStats[]> = {};
 
 	// Inicializar todas las categorías
 	for (const category of Object.values(CharacterCategory)) {
@@ -189,8 +189,8 @@ export function groupCharactersByCategory(characters: CharacterExtended[]): Reco
  * @param characters Personajes a agrupar
  * @returns Mapa con personajes agrupados por clase
  */
-export function groupCharactersByClass(characters: CharacterExtended[]): Record<string, CharacterExtended[]> {
-	const groups: Record<string, CharacterExtended[]> = {};
+export function groupCharactersByClass(characters: CharacterWithStats[]): Record<string, CharacterWithStats[]> {
+	const groups: Record<string, CharacterWithStats[]> = {};
 
 	// Inicializar todas las clases
 	for (const characterClass of Object.values(CharacterClass)) {
@@ -214,8 +214,8 @@ export function groupCharactersByClass(characters: CharacterExtended[]): Record<
  * @param characters Personajes a agrupar
  * @returns Mapa con personajes agrupados por raza
  */
-export function groupCharactersByRace(characters: CharacterExtended[]): Record<string, CharacterExtended[]> {
-	const groups: Record<string, CharacterExtended[]> = {};
+export function groupCharactersByRace(characters: CharacterWithStats[]): Record<string, CharacterWithStats[]> {
+	const groups: Record<string, CharacterWithStats[]> = {};
 
 	// Inicializar todas las razas
 	for (const race of Object.values(CharacterRace)) {

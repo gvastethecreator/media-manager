@@ -1,10 +1,10 @@
-import type { FolderComplete as Folder } from '@prisma/client';
+import { cn } from '@/lib/utils';
+import type { FolderBase } from '@/types/entities/folder';
 import { Folder as FolderIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
 
 interface FolderCardFooterProps {
-	folder: Pick<Folder, 'id' | 'name' | 'color'>;
+	folder: Pick<FolderBase, 'id' | 'name' | 'color'>;
 	tcgMode?: boolean;
 	children?: ReactNode;
 }

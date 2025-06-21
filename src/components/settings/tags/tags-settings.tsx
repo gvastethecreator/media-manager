@@ -10,458 +10,291 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
+import type { TagWithStats } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag';
-import type { TagComplete } from '@/types/entities/tag/extended';
-import { Filter, Info, Loader2, PlusCircle, Save, TagBase as TagIcon, Trash } from 'lucide-react';
+import { Filter, Loader2, PlusCircle, TagIcon, Trash } from 'lucide-react';
 import { useCallback, useEffect, useId, useState } from 'react';
 import { CreateTagForm } from './create-tag-form';
 
-export function TagsSettings() {
-	const [tags, setTags] = useState<TagComplete[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [selectedTag, setSelectedTag] = useState<TagComplete | null>(null);
-	const [isEditing, setIsEditing] = useState(false);
-	const [previewData, setPreviewData] = useState<any>(null);
+interface TagsSettingsProps {
+	className?: string;
+}
 
-	// Filtros
-	const [searchQuery, setSearchQuery] = useState('');
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-	const [onlyFavorites, setOnlyFavorites] = useState(false);
+export function TagsSettings({ className }: TagsSettingsProps) {
+	const [tags, setTags] = useState<TagWithStats[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [searchTerm, setSearchTerm] = useState('');
+	const [selectedCategory, setSelectedCategory] = useState<TagCategory | null>(null);
+	const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+	const [showCreateForm, setShowCreateForm] = useState(false);
+	const [deletingTagId, setDeletingTagId] = useState<string | null>(null);
 
-	// IDs para accesibilidad
-	const idSearch = useId();
-	const idFavorites = useId();
+	const formId = useId();
 
-	// Cargar etiquetas al montar el componente
-	useEffect(() => {
-		const loadTags = async () => {
-			try {
-				setIsLoading(true);
-				const data = await searchTags({});
-				setTags(data);
-			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				setError(errorMessage);
-				toastService.error('Error al cargar las etiquetas', {
-					description: errorMessage,
-				});
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		loadTags();
-	}, []);
-
-	// Calcular estadísticas generales
+	// 📊 Estadísticas calculadas
 	const stats = {
-		totalTags: tags.length,
-		totalImages: tags.reduce((acc, tag) => acc + (tag._count?.images || 0), 0),
-		totalSize: tags.reduce((acc, tag) => acc + (tag.totalSize || 0), 0),
-		unusedTags: tags.filter((tag) => (tag._count?.images || 0) === 0).length,
-		favoriteTags: tags.filter((tag) => tag.isFavorite).length,
+		total: tags.length,
+		favorites: tags.filter(tag => tag.isFavorite).length,
+		byCategory: Object.values(TagCategory).reduce((acc, category) => {
+			acc[category] = tags.filter(tag => tag.category === category).length;
+			return acc;
+		}, {} as Record<TagCategory, number>),
 	};
 
-	// Filtrar tags basados en los criterios seleccionados
-	const filteredTags = tags.filter((tag) => {
-		let matches = true;
-
-		// Filtrar por búsqueda
-		if (searchQuery) {
-			const normalizedQuery = searchQuery.toLowerCase();
-			const nameMatch = tag.name.toLowerCase().includes(normalizedQuery);
-			const descriptionMatch = tag.description?.toLowerCase().includes(normalizedQuery);
-			matches = matches && (nameMatch || Boolean(descriptionMatch));
+	// 🔄 Cargar tags
+	const loadTags = useCallback(async () => {
+		try {
+			setLoading(true);
+			const result = await searchTags('', {
+				limit: 1000,
+				includeStats: true,
+			});
+			setTags(result);
+		} catch (error) {
+			console.error('Error loading tags:', error);
+			toastService.system.error('Error al cargar etiquetas');
+		} finally {
+			setLoading(false);
 		}
+	}, []);
 
-		// Filtrar por categorías
-		if (selectedCategories.length > 0) {
-			matches = matches && (tag.category ? selectedCategories.includes(tag.category) : false);
-		}
+	// 🔍 Filtrar tags
+	const filteredTags = tags.filter(tag => {
+		const matchesSearch = !searchTerm ||
+			tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			tag.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
-		// Filtrar por favoritos
-		if (onlyFavorites) {
-			matches = matches && !!tag.isFavorite;
-		}
+		const matchesCategory = !selectedCategory || tag.category === selectedCategory;
+		const matchesFavorites = !showOnlyFavorites || tag.isFavorite;
 
-		return matches;
+		return matchesSearch && matchesCategory && matchesFavorites;
 	});
 
-	// Manejar eliminación de etiqueta
-	const handleDeleteTag = useCallback(async (id: string) => {
-		if (window.confirm('¿Estás seguro de que quieres eliminar esta etiqueta?')) {
-			try {
-				await tagActionsDeleteTag(id);
-				setTags((prev) => prev.filter((tag) => tag.id !== id));
-				setSelectedTag(null);
-				setIsEditing(false);
-				toastService.success('Etiqueta eliminada');
-			} catch (err) {
-				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-				toastService.error('Error al eliminar la etiqueta', {
-					description: errorMessage,
-				});
-			}
+	// 🗑️ Eliminar tag
+	const handleDeleteTag = async (tagId: string) => {
+		try {
+			setDeletingTagId(tagId);
+			await tagActionsDeleteTag(tagId);
+			setTags(prev => prev.filter(tag => tag.id !== tagId));
+			toastService.system.success('Etiqueta eliminada correctamente');
+		} catch (error) {
+			console.error('Error deleting tag:', error);
+			toastService.system.error('Error al eliminar etiqueta');
+		} finally {
+			setDeletingTagId(null);
 		}
-	}, []);
+	};
 
-	// Manejar la eliminación desde el botón con detención de propagación de eventos
-	const handleDeleteButtonClick = useCallback(
-		(e: React.MouseEvent<HTMLButtonElement>) => {
-			e.stopPropagation();
-			const id = (e.currentTarget as HTMLButtonElement).getAttribute('data-id');
-			if (id) {
-				handleDeleteTag(id);
-			}
-		},
-		[handleDeleteTag]
-	);
+	// 📝 Manejar creación de tag
+	const handleTagCreated = (newTag: TagWithStats) => {
+		setTags(prev => [...prev, newTag]);
+		setShowCreateForm(false);
+		toastService.system.success('Etiqueta creada correctamente');
+	};
 
-	// Manejar edición de etiqueta
-	const handleEditTag = useCallback((tag: TagComplete) => {
-		setSelectedTag(tag);
-		setIsEditing(true);
-	}, []);
+	// 🔄 Cargar tags al montar
+	useEffect(() => {
+		loadTags();
+	}, [loadTags]);
 
-	// Manejar creación exitosa
-	const handleTagCreated = useCallback((newTag: TagComplete) => {
-		setTags((prev) => [...prev, newTag]);
-		toastService.success('Etiqueta creada');
-	}, []);
-
-	// Manejar actualización exitosa
-	const handleTagUpdated = useCallback((updatedTag: TagComplete) => {
-		setTags((prev) => prev.map((tag) => (tag.id === updatedTag.id ? { ...tag, ...updatedTag } : tag)));
-		toastService.success('Etiqueta actualizada');
-	}, []);
-
-	// Resetear formulario
-	const handleReset = useCallback(() => {
-		setIsEditing(false);
-		setSelectedTag(null);
-	}, []);
-
-	// Manejar la previsualización en tiempo real
-	const handlePreview = useCallback((data: any) => {
-		setPreviewData(data);
-	}, []);
-
-	// Limpiar filtros
-	const clearFilters = useCallback(() => {
-		setSearchQuery('');
-		setSelectedCategories([]);
-		setOnlyFavorites(false);
-	}, []);
-
-	// Extraer categorías únicas de los tags
-	const uniqueCategories = Array.from(new Set(tags.map((tag) => tag.category).filter(Boolean))) as string[];
-
-	// Contenido condicional basado en estado de carga
-	if (isLoading) {
+	if (loading) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
-				<CardContent>
-					<div className="flex items-center justify-center gap-2 p-3">
-						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Cargando etiquetas...</p>
-					</div>
-				</CardContent>
-			</Card>
-		);
-	}
-
-	if (error) {
-		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
-				<CardContent>
-					<EmptyState
-						icon={Info}
-						title="Error al cargar etiquetas"
-						description={error}
-						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
-					/>
-				</CardContent>
-			</Card>
+			<div className="flex items-center justify-center p-8">
+				<Loader2 className="h-8 w-8 animate-spin" />
+				<span className="ml-2">Cargando etiquetas...</span>
+			</div>
 		);
 	}
 
 	return (
-		<div className="grid grid-cols-12 gap-3">
-			{/* Panel izquierdo: Lista de etiquetas */}
-			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
-						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm flex items-center">
-								Etiquetas ({filteredTags.length})
-								{filteredTags.length !== tags.length && (
-									<Badge variant="outline" className="ml-2 text-[10px]">
-										Filtradas
-									</Badge>
-								)}
-							</CardTitle>
-							<div className="flex items-center gap-1">
-								<Popover>
-									<PopoverTrigger asChild>
-										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
-											<Filter className="h-3.5 w-3.5" />
-										</Button>
-									</PopoverTrigger>
-									<PopoverContent className="w-72" align="end">
-										<div className="space-y-4">
-											<h4 className="font-medium text-sm">Filtrar Etiquetas</h4>
-
-											<div className="space-y-2">
-												<Label htmlFor="search">Buscar</Label>
-												<Input
-													id={idSearch}
-													placeholder="Buscar etiquetas..."
-													value={searchQuery}
-													onChange={(e) => setSearchQuery(e.target.value)}
-													className="h-8 text-xs"
-												/>
-											</div>
-
-											<div className="space-y-2">
-												<Label>Categorías</Label>
-												<div className="grid grid-cols-2 gap-2">
-													{uniqueCategories.map((category) => (
-														<div key={category} className="flex items-center space-x-2">
-															<Checkbox
-																id={`category-${category}`}
-																checked={selectedCategories.includes(category)}
-																onCheckedChange={(checked) => {
-																	if (checked) {
-																		setSelectedCategories((prev) => [...prev, category]);
-																	} else {
-																		setSelectedCategories((prev) => prev.filter((cat) => cat !== category));
-																	}
-																}}
-															/>
-															<Label htmlFor={`category-${category}`} className="text-xs">
-																{category}
-															</Label>
-														</div>
-													))}
-												</div>
-											</div>
-
-											<div className="flex items-center space-x-2">
-												<Checkbox
-													id={idFavorites}
-													checked={onlyFavorites}
-													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
-												/>
-												<Label htmlFor="favorites" className="text-xs">
-													Solo favoritos
-												</Label>
-											</div>
-
-											<div className="flex justify-between">
-												<Button size="sm" variant="outline" onClick={clearFilters} className="h-8 text-xs">
-													Limpiar filtros
-												</Button>
-												<Button size="sm" className="h-8 text-xs">
-													Aplicar
-												</Button>
-											</div>
-										</div>
-									</PopoverContent>
-								</Popover>
-								<Button
-									onClick={() => {
-										setSelectedTag(null);
-										setIsEditing(false);
-									}}
-									size="sm"
-									variant="ghost"
-									className="h-6 w-6 p-0"
-								>
-									<PlusCircle className="h-3.5 w-3.5" />
-								</Button>
-							</div>
-						</div>
-						<div className="flex gap-2 text-xs text-muted-foreground">
-							<span>{stats.totalTags} etiquetas</span>
-							<span>•</span>
-							<span>{stats.totalImages} imágenes</span>
-							{stats.favoriteTags > 0 && (
-								<>
-									<span>•</span>
-									<span>{stats.favoriteTags} favoritas</span>
-								</>
-							)}
-						</div>
+		<div className={className}>
+			{/* 📊 Estadísticas */}
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+				<Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="text-sm font-medium">Total de Etiquetas</CardTitle>
 					</CardHeader>
-					<CardContent className="flex-1 p-0">
-						<div className="h-full px-3 pb-3 overflow-auto">
-							{filteredTags.length === 0 ? (
-								<EmptyState
-									icon={TagIcon}
-									title="No hay etiquetas"
-									description={
-										tags.length > 0
-											? 'No se encontraron etiquetas con los filtros aplicados'
-											: 'Crea tu primera etiqueta'
-									}
-									className="py-6"
-									actions={
-										tags.length > 0 && (
-											<Button size="sm" variant="outline" onClick={clearFilters}>
-												Limpiar filtros
-											</Button>
-										)
-									}
-								/>
-							) : (
+					<CardContent>
+						<div className="text-2xl font-bold">{stats.total}</div>
+					</CardContent>
+				</Card>
+				<Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="text-sm font-medium">Favoritas</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="text-2xl font-bold">{stats.favorites}</div>
+					</CardContent>
+				</Card>
+				<Card>
+					<CardHeader className="pb-2">
+						<CardTitle className="text-sm font-medium">Más Usada</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<div className="text-sm">
+							{tags.length > 0 ?
+								tags.reduce((max, tag) =>
+									(tag.stats?.totalAssociations || 0) > (max.stats?.totalAssociations || 0) ? tag : max
+								).name : 'N/A'
+							}
+						</div>
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* 🔍 Controles */}
+			<div className="flex flex-col sm:flex-row gap-4 mb-6">
+				<div className="flex-1">
+					<Input
+						placeholder="Buscar etiquetas..."
+						value={searchTerm}
+						onChange={(e) => setSearchTerm(e.target.value)}
+						className="w-full"
+					/>
+				</div>
+
+				<div className="flex gap-2">
+					{/* Filtro por categoría */}
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button variant="outline" size="sm">
+								<Filter className="h-4 w-4 mr-2" />
+								{selectedCategory || 'Todas las categorías'}
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-56">
+							<div className="space-y-2">
+								<Label className="text-sm font-medium">Filtrar por categoría</Label>
 								<div className="space-y-1">
-									{filteredTags.map((tag) => (
-										<button
-											key={tag.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedTag?.id === tag.id ? 'bg-muted' : ''}`}
-											onClick={() => handleEditTag(tag)}
-											type="button"
-											aria-pressed={selectedTag?.id === tag.id}
-										>
-											<span className="text-base">{tag.emoji}</span>
-											<div className="flex-1 min-w-0">
-												<h4 className="text-xs font-medium truncate">{tag.name}</h4>
-												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-													{tag.category && <span>{tag.category}</span>}
-													{(tag._count?.images || 0) > 0 && (
-														<>
-															<span>•</span>
-															<span>{tag._count?.images || 0} imágenes</span>
-														</>
-													)}
-													{tag.isFavorite && (
-														<>
-															<span>•</span>
-															<span className="text-yellow-500">★</span>
-														</>
-													)}
-												</div>
-											</div>
-											<Button
-												variant="ghost"
-												size="icon"
-												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
-												data-id={tag.id}
-												onClick={handleDeleteButtonClick as unknown as () => void}
-											>
-												<Trash className="h-3 w-3" />
-											</Button>
-										</button>
+									<div className="flex items-center space-x-2">
+										<Checkbox
+											id="all-categories"
+											checked={!selectedCategory}
+											onCheckedChange={() => setSelectedCategory(null)}
+										/>
+										<Label htmlFor="all-categories" className="text-sm">Todas</Label>
+									</div>
+									{Object.values(TagCategory).map(category => (
+										<div key={category} className="flex items-center space-x-2">
+											<Checkbox
+												id={`category-${category}`}
+												checked={selectedCategory === category}
+												onCheckedChange={() => setSelectedCategory(
+													selectedCategory === category ? null : category
+												)}
+											/>
+											<Label htmlFor={`category-${category}`} className="text-sm">
+												{category} ({stats.byCategory[category] || 0})
+											</Label>
+										</div>
 									))}
 								</div>
-							)}
-						</div>
-					</CardContent>
-				</Card>
+							</div>
+						</PopoverContent>
+					</Popover>
+
+					{/* Filtro por favoritas */}
+					<div className="flex items-center space-x-2">
+						<Checkbox
+							id="favorites-only"
+							checked={showOnlyFavorites}
+							onCheckedChange={setShowOnlyFavorites}
+						/>
+						<Label htmlFor="favorites-only" className="text-sm">Solo favoritas</Label>
+					</div>
+
+					{/* Botón crear */}
+					<Button onClick={() => setShowCreateForm(true)} size="sm">
+						<PlusCircle className="h-4 w-4 mr-2" />
+						Nueva etiqueta
+					</Button>
+				</div>
 			</div>
 
-			{/* Panel derecho: Formulario y Preview */}
-			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="py-2 px-3">
-						<div className="flex items-center justify-between">
-							<div>
-								<CardTitle className="text-sm">{isEditing ? 'Editar Etiqueta' : 'Nueva Etiqueta'}</CardTitle>
-								<CardDescription className="text-xs">
-									{isEditing
-										? 'Modifica los detalles de la etiqueta seleccionada'
-										: 'Completa el formulario para crear una nueva etiqueta'}
-								</CardDescription>
-							</div>
-							<div className="flex gap-1">
-								{isEditing && selectedTag && (
-									<>
-										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
-											Cancelar
-										</Button>
-										<Button
-											variant="destructive"
-											size="sm"
-											className="h-7 text-xs"
-											onClick={() => handleDeleteTag(selectedTag.id)}
-										>
-											<Trash className="h-3 w-3 mr-1" />
-											Eliminar
-										</Button>
-									</>
-								)}
-								<Button type="submit" size="sm" className="h-7 text-xs" form="tag-form">
-									<Save className="h-3 w-3 mr-1" />
-									{isEditing ? 'Guardar' : 'Crear'}
-								</Button>
-							</div>
-						</div>
-					</CardHeader>
-					<CardContent className="p-3 flex-1 overflow-hidden">
-						<div className="h-full pr-3 overflow-auto">
-							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
-								<div className="space-y-3">
-									<CreateTagForm
-										key={selectedTag?.id || 'new-tag'}
-										tag={selectedTag}
-										isEditing={isEditing}
-										onCreated={handleTagCreated}
-										onUpdated={handleTagUpdated}
-										onCancel={handleReset}
-										onPreview={handlePreview}
-									/>
-								</div>
-								<div className="hidden lg:flex flex-col items-center justify-start">
-									<h3 className="text-xs font-medium mb-2">Vista Previa</h3>
-									<div className="w-[180px] transition-all duration-300">
-										{previewData || selectedTag ? (
-											<div className="flex flex-col items-center p-4 border rounded-lg bg-background">
-												<div
-													className="w-12 h-12 mb-3 rounded-full flex items-center justify-center text-2xl"
-													style={{ backgroundColor: previewData?.color || selectedTag?.color || '#3b82f6' }}
-												>
-													{previewData?.emoji || selectedTag?.emoji || '🏷️'}
-												</div>
-												<h3 className="text-lg font-medium">
-													{previewData?.name || selectedTag?.name || 'Nueva Etiqueta'}
-												</h3>
-												<p className="text-center text-muted-foreground mt-2 text-sm">
-													{previewData?.description || selectedTag?.description || 'Sin descripción'}
-												</p>
-
-												<div className="flex flex-wrap gap-2 mt-3 justify-center">
-													{(previewData?.category || selectedTag?.category) && (
-														<Badge variant="secondary" className="text-xs">
-															{previewData?.category || selectedTag?.category}
-														</Badge>
-													)}
-													{(previewData?.isFavorite || selectedTag?.isFavorite) && (
-														<Badge variant="outline" className="text-xs">
-															Favorito
-														</Badge>
-													)}
-												</div>
-
-												{(previewData?._count?.images || selectedTag?._count?.images) && (
-													<p className="mt-4 text-xs text-muted-foreground">
-														{previewData?._count?.images || selectedTag?._count?.images} imágenes asociadas
-													</p>
-												)}
-											</div>
-										) : (
-											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
-												<TagIcon className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
-											</div>
+			{/* 📋 Lista de etiquetas */}
+			{filteredTags.length === 0 ? (
+				<EmptyState
+					icon={TagIcon}
+					title="No hay etiquetas"
+					description={
+						searchTerm || selectedCategory || showOnlyFavorites
+							? "No se encontraron etiquetas que coincidan con los filtros aplicados."
+							: "Aún no has creado ninguna etiqueta. ¡Crea tu primera etiqueta!"
+					}
+					action={
+						<Button onClick={() => setShowCreateForm(true)}>
+							<PlusCircle className="h-4 w-4 mr-2" />
+							Crear primera etiqueta
+						</Button>
+					}
+				/>
+			) : (
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					{filteredTags.map(tag => (
+						<Card key={tag.id} className="hover:shadow-md transition-shadow">
+							<CardHeader className="pb-3">
+								<div className="flex items-start justify-between">
+									<div className="flex items-center gap-2">
+										<span className="text-lg">{tag.emoji}</span>
+										<div>
+											<CardTitle className="text-sm font-medium">{tag.name}</CardTitle>
+											{tag.description && (
+												<CardDescription className="text-xs mt-1">
+													{tag.description}
+												</CardDescription>
+											)}
+										</div>
+									</div>
+									<div className="flex items-center gap-1">
+										{tag.isFavorite && (
+											<Badge variant="secondary" className="text-xs">
+												Favorita
+											</Badge>
 										)}
+										<Button
+											variant="ghost"
+											size="sm"
+											onClick={() => handleDeleteTag(tag.id)}
+											disabled={deletingTagId === tag.id}
+											className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+										>
+											{deletingTagId === tag.id ? (
+												<Loader2 className="h-4 w-4 animate-spin" />
+											) : (
+												<Trash className="h-4 w-4" />
+											)}
+										</Button>
 									</div>
 								</div>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-			</div>
+							</CardHeader>
+							<CardContent className="pt-0">
+								<div className="flex items-center justify-between text-xs text-muted-foreground">
+									<div className="flex items-center gap-4">
+										<span>Asociaciones: {tag.stats?.totalAssociations || 0}</span>
+										{tag.category && (
+											<Badge variant="outline" className="text-xs">
+												{tag.category}
+											</Badge>
+										)}
+									</div>
+									<div
+										className="w-4 h-4 rounded-full border"
+										style={{ backgroundColor: tag.color }}
+									/>
+								</div>
+							</CardContent>
+						</Card>
+					))}
+				</div>
+			)}
+
+			{/* 📝 Formulario de creación */}
+			{showCreateForm && (
+				<CreateTagForm
+					onSuccess={handleTagCreated}
+					onCancel={() => setShowCreateForm(false)}
+				/>
+			)}
 		</div>
 	);
 }

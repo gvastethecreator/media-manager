@@ -1,22 +1,22 @@
 /**
- * @file Implementación del slice de filtros para Character
+ * @file Implementación del slice de filtros para Character optimizado
  * @module store/entities/character/slices/filters
  */
 
-import type { CharacterExtended, CharacterFilterItem } from '@/types/entities/character';
+import type { CharacterFilterItem, CharacterWithStats } from '@/types/entities/character';
 import {
-	CharacterAlignment,
-	CharacterCategory,
-	CharacterClass,
-	CharacterRace,
-	CharacterSortOption,
+    CharacterAlignment,
+    CharacterCategory,
+    CharacterClass,
+    CharacterRace,
+    CharacterSortOption,
 } from '@/types/entities/character';
-import { compareCharacters, getCharacterLevelAsNumber, matchesCharacterSearch } from '@/utils/character';
+import { matchesCharacterSearch, sortCharacters } from '@/utils/character';
 import type { StateCreator } from 'zustand';
 import type { CharacterFiltersSlice, CharacterState } from '../types';
 
 /**
- * Crea el slice de filtros para Character
+ * Crea el slice de filtros optimizado para Character
  * Contiene operaciones relacionadas con el filtrado y ordenamiento
  */
 export const createCharacterFiltersSlice: StateCreator<
@@ -247,11 +247,10 @@ export const createCharacterFiltersSlice: StateCreator<
 	 * @returns Array de personajes ordenados
 	 */
 	getSortedCharacters: (sortOption?: CharacterSortOption) => {
-		const state = get();
-		const characters = get().getFilteredCharacters();
-		const sortBy = sortOption || state.currentSortOption;
-
-		return [...characters].sort((a, b) => compareCharacters(a, b, sortBy));
+		const { characters, currentSortOption } = get();
+		const charactersArray = Object.values(characters);
+		const option = sortOption || currentSortOption;
+		return sortCharacters(charactersArray, option);
 	},
 
 	/**
@@ -260,46 +259,40 @@ export const createCharacterFiltersSlice: StateCreator<
 	 * @returns Objeto con grupos de personajes
 	 */
 	getGroupedCharacters: (groupBy?: 'none' | 'class' | 'race' | 'category' | 'level') => {
-		const state = get();
-		const characters = get().getSortedCharacters();
-		const groupingCriteria = groupBy || state.groupBy;
+		const { characters, groupBy: currentGroupBy } = get();
+		const charactersArray = Object.values(characters);
+		const groupByOption = groupBy || currentGroupBy;
 
-		if (groupingCriteria === 'none') {
-			return { all: characters };
+		if (groupByOption === 'none') {
+			return { all: charactersArray };
 		}
 
-		const groups: Record<string, CharacterExtended[]> = {};
+		const groups: Record<string, CharacterWithStats[]> = {};
 
-		for (const character of characters) {
-			let key = 'unknown';
+		for (const character of charactersArray) {
+			let groupKey: string;
 
-			switch (groupingCriteria) {
+			switch (groupByOption) {
 				case 'class':
-					key = character.class || 'unknown';
+					groupKey = character.class || 'unknown';
 					break;
 				case 'race':
-					key = character.race || 'unknown';
+					groupKey = character.race || 'unknown';
 					break;
 				case 'category':
-					key = character.category || 'other';
+					groupKey = character.category || 'uncategorized';
 					break;
-				case 'level': {
-					const level = getCharacterLevelAsNumber(character);
-					// Agrupar por rangos de nivel
-					if (level <= 5) key = '1-5';
-					else if (level <= 10) key = '6-10';
-					else if (level <= 15) key = '11-15';
-					else if (level <= 20) key = '16-20';
-					else key = '21+';
+				case 'level':
+					groupKey = `Level ${Math.floor(character.level / 5) * 5}-${Math.floor(character.level / 5) * 5 + 4}`;
 					break;
-				}
+				default:
+					groupKey = 'all';
 			}
 
-			if (!groups[key]) {
-				groups[key] = [];
+			if (!groups[groupKey]) {
+				groups[groupKey] = [];
 			}
-
-			groups[key].push(character);
+			groups[groupKey].push(character);
 		}
 
 		return groups;
@@ -310,54 +303,51 @@ export const createCharacterFiltersSlice: StateCreator<
 	 * @returns Array de personajes filtrados
 	 */
 	getFilteredCharacters: () => {
-		const state = get();
-		const characters = Object.values(state.characters);
-		const { activeFilters, searchTerm } = state;
+		const { characters, activeFilters, searchTerm } = get();
+		let charactersArray = Object.values(characters);
 
-		// Si no hay filtros ni término de búsqueda, devolver todos
-		if (activeFilters.length === 0 && !searchTerm) {
-			return characters;
-		}
-
-		return characters.filter((character) => {
-			// Aplicar filtros
-			for (const filter of activeFilters) {
+		// Aplicar filtros activos
+		for (const filter of activeFilters) {
+			charactersArray = charactersArray.filter((character) => {
 				switch (filter.query) {
 					case 'class':
-						if (character.class !== filter.value) return false;
-						break;
+						return character.class === filter.value;
 					case 'race':
-						if (character.race !== filter.value) return false;
-						break;
+						return character.race === filter.value;
 					case 'category':
-						if (character.category !== filter.value) return false;
-						break;
+						return character.category === filter.value;
 					case 'alignment':
-						if (character.alignment !== filter.value) return false;
-						break;
+						return character.alignment === filter.value;
 					case 'isFavorite':
-						if (character.isFavorite !== filter.value) return false;
-						break;
-					case 'level_min': {
-						const level = getCharacterLevelAsNumber(character);
-						if (level < (filter.value as number)) return false;
-						break;
+						return character.isFavorite === filter.value;
+					case 'level': {
+						const levelValue = filter.value as string;
+						if (levelValue.includes('-')) {
+							const [min, max] = levelValue.split('-').map(Number);
+							return character.level >= min && character.level <= max;
+						}if (levelValue.endsWith('+')) {
+							const min = Number(levelValue.slice(0, -1));
+							return character.level >= min;
+						}if (levelValue.startsWith('<')) {
+							const max = Number(levelValue.slice(1));
+							return character.level < max;
+						}
+						return true;
 					}
-					case 'level_max': {
-						const level = getCharacterLevelAsNumber(character);
-						if (level > (filter.value as number)) return false;
-						break;
-					}
+					default:
+						return true;
 				}
-			}
+			});
+		}
 
-			// Aplicar búsqueda de texto
-			if (searchTerm && !matchesCharacterSearch(character, searchTerm)) {
-				return false;
-			}
+		// Aplicar búsqueda por texto
+		if (searchTerm.trim()) {
+			charactersArray = charactersArray.filter((character) =>
+				matchesCharacterSearch(character, searchTerm)
+			);
+		}
 
-			return true;
-		});
+		return charactersArray;
 	},
 
 	/**
@@ -366,9 +356,8 @@ export const createCharacterFiltersSlice: StateCreator<
 	 * @returns Array de personajes correspondientes a los IDs proporcionados
 	 */
 	getCharactersByIds: (ids: string[]) => {
-		const state = get();
-
-		return ids.map((id) => state.characters[id]).filter(Boolean);
+		const { characters } = get();
+		return ids.map(id => characters[id]).filter(Boolean);
 	},
 
 	/**
@@ -376,21 +365,9 @@ export const createCharacterFiltersSlice: StateCreator<
 	 * @param filter Filtro a agregar
 	 */
 	addFilter: (filter: CharacterFilterItem) => {
-		set((state) => {
-			// Comprobar si ya existe un filtro con el mismo campo y operador
-			const existingIndex = state.activeFilters.findIndex((f) => f.query === filter.query && f.value === filter.value);
-
-			if (existingIndex >= 0) {
-				// Actualizar filtro existente
-				const newFilters = [...state.activeFilters];
-				newFilters[existingIndex] = filter;
-				return { activeFilters: newFilters };
-			}
-			// Añadir nuevo filtro
-			return {
-				activeFilters: [...state.activeFilters, filter],
-			};
-		});
+		set((state) => ({
+			activeFilters: [...state.activeFilters, filter],
+		}));
 	},
 
 	/**
@@ -399,7 +376,7 @@ export const createCharacterFiltersSlice: StateCreator<
 	 */
 	removeFilter: (filterId: string) => {
 		set((state) => ({
-			activeFilters: state.activeFilters.filter((f) => f.query !== filterId),
+			activeFilters: state.activeFilters.filter((_, index) => index.toString() !== filterId),
 		}));
 	},
 

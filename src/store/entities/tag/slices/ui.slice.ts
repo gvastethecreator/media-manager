@@ -4,8 +4,8 @@
  */
 
 import { StateCreator } from 'zustand';
-import { TagViewMode } from '@/types/entities/tag';
 import type { TagStore, TagUIActions, TagUIState } from '../types';
+import { TagViewMode } from '../types';
 
 /**
  * 🎨 Creador del slice de UI para el store de Tag

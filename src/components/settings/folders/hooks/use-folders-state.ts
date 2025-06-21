@@ -1,20 +1,21 @@
 'use client';
 
-import { useCallback, useState } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { folderService } from '@/services/folder-service-export';
-import type { FolderStats } from '@/types/entities/folder';
+import type { FolderStatistics } from '@/types/entities/folder';
+import { useCallback, useState } from 'react';
 import { type ExtendedFolder, initialStats } from '../folder-types';
 
 const stateLogger = clientLogger.withContext('FoldersState');
 
 /**
  * Hook para gestionar el estado básico de las carpetas
+ * Migrado a usar FolderStatistics para mejor rendimiento
  */
 export function useFoldersState() {
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
-	const [stats, setStats] = useState<FolderStats>(initialStats);
+	const [stats, setStats] = useState<FolderStatistics>(initialStats);
 	const [folders, setFolders] = useState<ExtendedFolder[]>([]);
 
 	// Cargar carpetas desde la API
@@ -44,14 +45,37 @@ export function useFoldersState() {
 			});
 			setFolders(transformedFolders);
 
-			// Calcular estadísticas básicas a partir de las carpetas
+			// Calcular estadísticas básicas a partir de las carpetas usando FolderStatistics
 			const totalFiles = transformedFolders.reduce((acc, f) => acc + (f.totalFiles || f._count.images || 0), 0);
 			const totalSize = transformedFolders.reduce((acc, f) => acc + (f.totalSize || 0), 0);
+			const imageCount = transformedFolders.reduce((acc, f) => acc + (f._count.images || 0), 0);
+
 			setStats({
-				totalFolders: transformedFolders.length,
-				totalFiles,
-				totalSize,
-				lastIndexed: null,
+				hierarchyDepth: 0,
+				totalDescendants: 0,
+				directChildren: transformedFolders.length,
+				contentDiversity: 0,
+				organizationScore: 0,
+				totalItems: totalFiles,
+				accessFrequency: 0,
+				lastActivity: null,
+				imageCount,
+				videoCount: 0,
+				noteCount: 0,
+				documentCount: 0,
+				folderCount: transformedFolders.length,
+				formattedSize: formatBytes(totalSize),
+				averageFileSize: totalFiles > 0 ? totalSize / totalFiles : 0,
+				largestFile: 0,
+				hasConsistentNaming: false,
+				hasDeepHierarchy: false,
+				isWellOrganized: false,
+				breadcrumbs: [],
+				fullPath: '',
+				relativePath: '',
+				autoTags: [],
+				qualityGrade: 'C',
+				totalRelations: 0,
 			});
 		} catch (error) {
 			stateLogger.error('❌ Error cargando carpetas:', error);
@@ -90,7 +114,7 @@ export function useFoldersState() {
 	}, []);
 
 	// Actualizar estadísticas
-	const updateStats = useCallback((newStats: Partial<FolderStats>) => {
+	const updateStats = useCallback((newStats: Partial<FolderStatistics>) => {
 		setStats((prevStats) => ({
 			...prevStats,
 			...newStats,
@@ -114,4 +138,13 @@ export function useFoldersState() {
 		setFolders,
 		setStats,
 	};
+}
+
+// Función auxiliar para formatear bytes
+function formatBytes(bytes: number): string {
+	if (bytes === 0) return '0 B';
+	const k = 1024;
+	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }

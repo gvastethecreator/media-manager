@@ -1,9 +1,13 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import {
+    getPrismaClient,
+    handlePrismaError,
+    handlePrismaNotFoundError,
+} from '@/lib/db-utils';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { toConceptComplete } from '@/transformers/concept';
+import { fromPrismaConcept } from '@/transformers/concept';
 import type { ConceptComplete } from '@/types/entities/concept';
 import { revalidatePath } from 'next/cache';
 
@@ -32,32 +36,19 @@ export async function addConceptImage(conceptId: string, imageId: string): Promi
 		const prisma = await getPrismaClient();
 
 		// Verificar que ambos existan
-		const concept = await prisma.concept.findUnique({
-			where: { id: conceptId },
-			select: { id: true },
-		});
-
+		const concept = await prisma.concept.findUnique({ where: { id: conceptId } });
 		if (!concept) {
-			throw createConceptImageError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
+			return handlePrismaNotFoundError(`Concepto con id ${conceptId} no encontrado.`);
 		}
-
-		const image = await prisma.image.findUnique({
-			where: { id: imageId },
-			select: { id: true },
-		});
-
+		const image = await prisma.image.findUnique({ where: { id: imageId } });
 		if (!image) {
-			throw createConceptImageError('Imagen no encontrada', EntityErrorCode.NOT_FOUND);
+			return handlePrismaNotFoundError(`Imagen con id ${imageId} no encontrada.`);
 		}
 
-		// Añadir relación
 		const updatedConcept = await prisma.concept.update({
 			where: { id: conceptId },
-			data: {
-				images: {
-					connect: { id: imageId },
-				},
-			},
+			data: { images: { connect: { id: imageId } } },
+			include: { images: true },
 		});
 
 		// Revalidar rutas relevantes
@@ -66,13 +57,9 @@ export async function addConceptImage(conceptId: string, imageId: string): Promi
 		}
 
 		conceptImagesLogger.info(`✅ Imagen ${imageId} añadida al concepto ${conceptId}`);
-		return toConceptComplete(updatedConcept);
+		return fromPrismaConcept(updatedConcept);
 	} catch (error) {
-		conceptImagesLogger.error('❌ Error al añadir imagen al concepto:', error);
-		if (error instanceof Error && error.name === 'ConceptImageError') {
-			throw error;
-		}
-		throw createConceptImageError('No se pudo añadir la imagen al concepto', EntityErrorCode.OPERATION_FAILED, error);
+		return handlePrismaError(error, `Error al añadir imagen ${imageId} a concepto ${conceptId}`);
 	}
 }
 
@@ -85,23 +72,19 @@ export async function removeConceptImage(conceptId: string, imageId: string): Pr
 		const prisma = await getPrismaClient();
 
 		// Verificar que el concepto exista
-		const concept = await prisma.concept.findUnique({
-			where: { id: conceptId },
-			select: { id: true },
-		});
-
+		const concept = await prisma.concept.findUnique({ where: { id: conceptId } });
 		if (!concept) {
-			throw createConceptImageError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
+			return handlePrismaNotFoundError(`Concepto con id ${conceptId} no encontrado.`);
+		}
+		const image = await prisma.image.findUnique({ where: { id: imageId } });
+		if (!image) {
+			return handlePrismaNotFoundError(`Imagen con id ${imageId} no encontrada.`);
 		}
 
-		// Eliminar relación
 		const updatedConcept = await prisma.concept.update({
 			where: { id: conceptId },
-			data: {
-				images: {
-					disconnect: { id: imageId },
-				},
-			},
+			data: { images: { disconnect: { id: imageId } } },
+			include: { images: true },
 		});
 
 		// Revalidar rutas relevantes
@@ -110,17 +93,9 @@ export async function removeConceptImage(conceptId: string, imageId: string): Pr
 		}
 
 		conceptImagesLogger.info(`✅ Imagen ${imageId} eliminada del concepto ${conceptId}`);
-		return toConceptComplete(updatedConcept);
+		return fromPrismaConcept(updatedConcept);
 	} catch (error) {
-		conceptImagesLogger.error('❌ Error al eliminar imagen del concepto:', error);
-		if (error instanceof Error && error.name === 'ConceptImageError') {
-			throw error;
-		}
-		throw createConceptImageError(
-			'No se pudo eliminar la imagen del concepto',
-			EntityErrorCode.OPERATION_FAILED,
-			error
-		);
+		return handlePrismaError(error, `Error al eliminar imagen ${imageId} del concepto ${conceptId}`);
 	}
 }
 
@@ -132,42 +107,23 @@ export async function getConceptImages(conceptId: string) {
 		conceptImagesLogger.info(`🔍 Obteniendo imágenes del concepto ${conceptId}`);
 		const prisma = await getPrismaClient();
 
-		const result = await prisma.concept.findUnique({
+		const concept = await prisma.concept.findUnique({
 			where: { id: conceptId },
-			include: {
-				images: {
-					select: {
-						id: true,
-						name: true,
-						path: true,
-						thumbnail: true,
-						width: true,
-						height: true,
-						createdAt: true,
-						updatedAt: true,
-					},
-					orderBy: {
-						createdAt: 'desc',
-					},
-				},
-			},
+			include: { images: { orderBy: { createdAt: 'desc' } } },
 		});
 
-		if (!result) {
-			throw createConceptImageError('Concepto no encontrado', EntityErrorCode.NOT_FOUND);
+		if (!concept) {
+			return handlePrismaNotFoundError(`Concepto con id ${conceptId} no encontrado.`);
 		}
 
-		conceptImagesLogger.info(`✅ Obtenidas ${result.images?.length || 0} imágenes del concepto ${conceptId}`);
-		return result.images || [];
-	} catch (error) {
-		conceptImagesLogger.error('❌ Error al obtener imágenes del concepto:', error);
-		if (error instanceof Error && error.name === 'ConceptImageError') {
-			throw error;
+		const transformedConcept = fromPrismaConcept(concept);
+		if (!transformedConcept) {
+			// Esto no debería ocurrir si el concepto existe, pero es un chequeo de seguridad
+			throw new Error('Error al transformar el concepto.');
 		}
-		throw createConceptImageError(
-			'No se pudieron obtener las imágenes del concepto',
-			EntityErrorCode.OPERATION_FAILED,
-			error
-		);
+
+		return transformedConcept.images ?? [];
+	} catch (error) {
+		return handlePrismaError(error, `Error al obtener imágenes para el concepto ${conceptId}`);
 	}
 }

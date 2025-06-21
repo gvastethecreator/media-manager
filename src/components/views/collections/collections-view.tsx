@@ -1,8 +1,5 @@
 'use client';
 
-import { BookMarked } from 'lucide-react';
-import { motion } from 'motion/react';
-import { memo, useCallback, useEffect } from 'react';
 import { CollectionCard } from '@/components/cards/collection-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -10,7 +7,10 @@ import { useNavigationStore } from '@/components/navigation/navigation.store';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
-import type { CollectionComplete } from '@/types/entities/collection';
+import type { CollectionWithStats } from '@/types/entities/collection';
+import { BookMarked } from 'lucide-react';
+import { motion } from 'motion/react';
+import { memo, useCallback, useEffect } from 'react';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('CollectionsView');
@@ -19,17 +19,26 @@ const MemoizedCollectionCard = memo(CollectionCard);
 
 export function CollectionsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { collections, isLoading, error, fetchCollections, selectCollection } = useCollectionStore();
+	const {
+		getCollections,
+		isLoading,
+		error,
+		fetchCollections,
+		selectCollection
+	} = useCollectionStore();
+
+	// Obtener las colecciones del store
+	const collections = getCollections();
 
 	useEffect(() => {
-		if (!collections.length) {
+		if (collections.length === 0 && !isLoading) {
 			viewLogger.info('🔄 No hay colecciones en el store, cargando desde el servidor...');
 			fetchCollections();
 		}
-	}, [collections, fetchCollections]);
+	}, [collections.length, isLoading, fetchCollections]);
 
 	const handleCollectionClick = useCallback(
-		(collection: CollectionComplete) => {
+		(collection: CollectionWithStats) => {
 			viewLogger.info('🖱️ Click en colección:', collection.name);
 			selectCollection(collection.id);
 			setCurrentView('collection-content');
@@ -49,7 +58,7 @@ export function CollectionsView(_props: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (!collections || collections.length === 0) {
+	if (collections.length === 0) {
 		return (
 			<EmptyState
 				icon={BookMarked}
@@ -70,7 +79,10 @@ export function CollectionsView(_props: ViewProps) {
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ delay: index * 0.1 }}
 						>
-							<MemoizedCollectionCard collection={collection} onClick={() => handleCollectionClick(collection)} />
+							<MemoizedCollectionCard
+								collection={collection}
+								onClick={() => handleCollectionClick(collection)}
+							/>
 						</motion.div>
 					))}
 				</div>

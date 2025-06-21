@@ -1,243 +1,340 @@
 /**
  * @file Slice principal para operaciones CRUD del store de videos
  * @module store/entities/video/slices/core
+ * @description Core slice optimizado con patrón VideoWithStats y Record
+ * Última refactorización: 2025-01-27
  */
 
 import {
-    createVideo as createServerVideo,
-    deleteVideo as deleteServerVideo,
-    findVideos,
-    getVideo as getServerVideo,
+	createVideo as createServerVideo,
+	deleteVideo as deleteServerVideo,
+	findVideos,
+	getVideo as getServerVideo,
 } from '@/app/actions/videos/video.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import type { CreateVideoData, UpdateVideoData, VideoComplete, VideoFilters } from '@/types/entities/video';
+import type {
+	VideoCreateInput,
+	VideoUpdateInput,
+	VideoWithStats,
+	VideoFilters
+} from '@/types/entities/video';
 import type { StateCreator } from 'zustand';
 import type { VideoStore } from '..';
 
 export interface VideoCoreState {
-	videos: Record<string, VideoComplete>;
+	/** 🎬 Mapa de videos indexados por ID (Record optimizado) */
+	videos: Record<string, VideoWithStats>;
+	/** 📁 Items asociados a cada folder */
+	folderVideos: Record<string, string[]>; // folderId -> videoIds[]
+	/** ⏳ Estado de carga */
 	isLoading: boolean;
+	/** ❌ Error si existe */
 	error: string | null;
+	/** 📅 Fecha de última actualización */
 	lastUpdated: Date | null;
 }
 
+// Estado inicial optimizado
 export const initialCoreState: VideoCoreState = {
 	videos: {},
+	folderVideos: {},
 	isLoading: false,
 	error: null,
 	lastUpdated: null,
 };
 
-const videoLogger = clientLogger.withContext('VideoStore');
-
-// --- Helper Functions ---
-
-/**
- * Aplica filtros a una lista de videos.
- * @param videos - Array de videos a filtrar.
- * @param filters - Objeto de filtros a aplicar.
- * @returns Un nuevo array con los videos filtrados.
- */
-function applyVideoFilters(videos: VideoComplete[], filters: Partial<VideoFilters>): VideoComplete[] {
-	let filteredVideos = videos;
-	if (filters.folders && filters.folders.length > 0) {
-		filteredVideos = filteredVideos.filter((v) => filters.folders?.includes(v.folderId));
-	}
-	if (filters.isFavorite !== undefined) {
-		filteredVideos = filteredVideos.filter((v) => v.isFavorite === filters.isFavorite);
-	}
-	// Añadir más lógicas de filtro aquí
-	return filteredVideos;
-}
+// Logger específico
+const videoLogger = clientLogger.withContext('VideoStore:Core');
 
 // --- Slice Interface ---
 
 export interface VideoCoreSlice extends VideoCoreState {
-	// Getters
-	getVideo: (id: string) => VideoComplete | undefined;
-	getVideos: () => VideoComplete[];
-	getVideosByFolder: (folderId: string) => VideoComplete[];
+	// 🔍 Getters optimizados (acceso O(1))
+	getVideo: (id: string) => VideoWithStats | undefined;
+	getVideos: () => VideoWithStats[];
+	getVideosByFolder: (folderId: string) => VideoWithStats[];
 
-	// Selectores avanzados
+	// 🎯 Selectores avanzados
 	selectVideos: (options?: {
 		filters?: Partial<VideoFilters>;
-		sortBy?: keyof VideoComplete;
+		sortBy?: keyof VideoWithStats;
 		sortDirection?: 'asc' | 'desc';
-	}) => VideoComplete[];
+	}) => VideoWithStats[];
 
-	// Operaciones síncronas
-	addVideo: (video: VideoComplete) => void;
-	addVideos: (videos: VideoComplete[]) => void;
-	updateVideo: (id: string, data: UpdateVideoData) => void;
+	// ⚡ Operaciones síncronas optimizadas
+	addVideo: (video: VideoWithStats) => void;
+	addVideos: (videos: VideoWithStats[]) => void;
+	updateVideo: (id: string, data: Partial<VideoWithStats>) => void;
 	deleteVideo: (id: string) => void;
 
-	// Estado de carga y errores
+	// 📊 Estado de carga y errores
 	setLoading: (isLoading: boolean) => void;
 	setError: (error: string | null) => void;
 
-	// Acciones asíncronas
-	fetchVideo: (id: string) => Promise<VideoComplete | undefined>;
-	fetchVideos: (folderIds?: string[]) => Promise<VideoComplete[]>;
-	createVideo: (data: CreateVideoData) => Promise<VideoComplete | undefined>;
+	// 🌐 Acciones asíncronas
+	fetchVideo: (id: string) => Promise<VideoWithStats | undefined>;
+	fetchVideos: (folderIds?: string[]) => Promise<VideoWithStats[]>;
+	createVideo: (data: VideoCreateInput) => Promise<VideoWithStats | undefined>;
 	removeVideo: (id: string) => Promise<boolean>;
 }
 
-// --- Slice Implementation ---
+// --- Implementación del Slice ---
 
-export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSlice> = (set, get) => ({
-	...initialCoreState,
-	// --- Getters ---
-	getVideo: (id) => get().videos[id],
-	getVideos: () => Object.values(get().videos),
-	getVideosByFolder: (folderId) => Object.values(get().videos).filter((video) => video.folderId === folderId),
+export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSlice> =
+	(set, get) => ({
+		...initialCoreState,
 
-	// --- Selectores avanzados ---
-	selectVideos: (options = {}) => {
-		const { filters = {}, sortBy = 'createdAt', sortDirection = 'desc' } = options;
-		let videos = Object.values(get().videos);
+		// --- Getters Optimizados ---
+		getVideo: (id) => get().videos[id],
 
-		videos = applyVideoFilters(videos, get().filters);
+		getVideos: () => Object.values(get().videos),
 
-		videos.sort((a, b) => {
-			const valueA = a[sortBy];
-			const valueB = b[sortBy];
+		getVideosByFolder: (folderId) => {
+			const videoIds = get().folderVideos[folderId] || [];
+			const videos = get().videos;
+			return videoIds.map(id => videos[id]).filter(Boolean);
+		},
 
-			if (valueA === valueB) return 0;
-			if (valueA === null || valueA === undefined) return 1;
-			if (valueB === null || valueB === undefined) return -1;
+		// --- Selectores Avanzados ---
+		selectVideos: (options = {}) => {
+			const videos = Object.values(get().videos);
+			let filtered = videos;
 
-			if (typeof valueA === 'string' && typeof valueB === 'string') {
-				return sortDirection === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+			// Aplicar filtros si se proporcionan
+			if (options.filters) {
+				const { filters } = options;
+
+				filtered = videos.filter(video => {
+					// Filtro de búsqueda
+					if (filters.search) {
+						const searchLower = filters.search.toLowerCase();
+						const matchesName = video.name.toLowerCase().includes(searchLower);
+						const matchesDescription = video.description?.toLowerCase().includes(searchLower);
+						if (!matchesName && !matchesDescription) return false;
+					}
+
+					// Filtro de favoritos
+					if (filters.isFavorite !== undefined && video.isFavorite !== filters.isFavorite) {
+						return false;
+					}
+
+					// Filtro de público/privado
+					if (filters.isPublic !== undefined && video.isPublic !== filters.isPublic) {
+						return false;
+					}
+
+					// Filtros de duración
+					if (filters.minDuration && video.duration < filters.minDuration) return false;
+					if (filters.maxDuration && video.duration > filters.maxDuration) return false;
+
+					// Filtros de tamaño
+					if (filters.minSize && video.size < filters.minSize) return false;
+					if (filters.maxSize && video.size > filters.maxSize) return false;
+
+					// Filtros de resolución
+					if (filters.minWidth && (!video.width || video.width < filters.minWidth)) return false;
+					if (filters.maxWidth && (!video.width || video.width > filters.maxWidth)) return false;
+					if (filters.minHeight && (!video.height || video.height < filters.minHeight)) return false;
+					if (filters.maxHeight && (!video.height || video.height > filters.maxHeight)) return false;
+
+					// Filtros técnicos
+					if (filters.hasMetadata !== undefined) {
+						const hasMetadata = !!video.metadata;
+						if (hasMetadata !== filters.hasMetadata) return false;
+					}
+
+					if (filters.hasThumbnail !== undefined) {
+						const hasThumbnail = !!video.thumbnail;
+						if (hasThumbnail !== filters.hasThumbnail) return false;
+					}
+
+					return true;
+				});
 			}
 
-			const numA = valueA instanceof Date ? valueA.getTime() : (valueA as number);
-			const numB = valueB instanceof Date ? valueB.getTime() : (valueB as number);
+			// Aplicar ordenación
+			if (options.sortBy) {
+				const { sortBy, sortDirection = 'asc' } = options;
+				filtered.sort((a, b) => {
+					const aVal = a[sortBy];
+					const bVal = b[sortBy];
 
-			return sortDirection === 'asc' ? numA - numB : numB - numA;
-		});
-
-		return videos;
-	},
-
-	// --- Operaciones síncronas ---
-	addVideo: (video) => {
-		set((state) => ({
-			videos: {
-				...state.videos,
-				[video.id]: video,
-			},
-		}));
-	},
-
-	addVideos: (videos) => {
-		const videosMap = videos.reduce(
-			(acc, video) => {
-				acc[video.id] = video;
-				return acc;
-			},
-			{} as Record<string, VideoComplete>
-		);
-		set((state) => ({
-			videos: {
-				...state.videos,
-				...videosMap,
-			},
-		}));
-	},
-
-	updateVideo: (id, data) => {
-		const existingVideo = get().getVideo(id);
-		if (existingVideo) {
-			get().addVideo({ ...existingVideo, ...data, updatedAt: new Date() });
-		}
-	},
-
-	deleteVideo: (id) => {
-		set((state) => {
-			const { [id]: _, ...remaining } = state.videos;
-			return {
-				videos: remaining,
-			};
-		});
-	},
-
-	// --- Estado de carga y errores ---
-	setLoading: (isLoading) => set({ isLoading }),
-	setError: (error) => set({ error }),
-
-	// --- Acciones Asíncronas ---
-	fetchVideo: async (id) => {
-		get().setLoading(true);
-		try {
-			const video = await getServerVideo(id);
-			if (video) {
-				get().addVideo(video);
+					if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+					if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+					return 0;
+				});
 			}
-			return video;
-		} catch (e) {
-			videoLogger.error('Failed to fetch video', { error: e });
-			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch video';
-			get().setError(errorMessage);
-			return undefined;
-		} finally {
-			get().setLoading(false);
-		}
-	},
 
-	fetchVideos: async (folderIds) => {
-		get().setLoading(true);
-		try {
-			const videos = await findVideos({ folderIds });
-			if (videos && videos.length > 0) {
-				get().addVideos(videos);
+			return filtered;
+		},
+
+		// --- Operaciones Síncronas ---
+		addVideo: (video) => {
+			set((state) => {
+				const newVideos = { ...state.videos, [video.id]: video };
+
+				// Actualizar índice por folder
+				const folderVideos = { ...state.folderVideos };
+				const folderId = video.folderId;
+				if (!folderVideos[folderId]) {
+					folderVideos[folderId] = [];
+				}
+				if (!folderVideos[folderId].includes(video.id)) {
+					folderVideos[folderId] = [...folderVideos[folderId], video.id];
+				}
+
+				return {
+					videos: newVideos,
+					folderVideos,
+					lastUpdated: new Date(),
+				};
+			});
+		},
+
+		addVideos: (videos) => {
+			set((state) => {
+				// Convertir array a Record optimizado
+				const newVideos: Record<string, VideoWithStats> = { ...state.videos };
+				const folderVideos = { ...state.folderVideos };
+
+				videos.forEach(video => {
+					newVideos[video.id] = video;
+
+					// Actualizar índice por folder
+					const folderId = video.folderId;
+					if (!folderVideos[folderId]) {
+						folderVideos[folderId] = [];
+					}
+					if (!folderVideos[folderId].includes(video.id)) {
+						folderVideos[folderId] = [...folderVideos[folderId], video.id];
+					}
+				});
+
+				return {
+					videos: newVideos,
+					folderVideos,
+					lastUpdated: new Date(),
+				};
+			});
+		},
+
+		updateVideo: (id, data) => {
+			set((state) => {
+				const existingVideo = state.videos[id];
+				if (!existingVideo) return state;
+
+				const updatedVideo = { ...existingVideo, ...data };
+
+				return {
+					videos: {
+						...state.videos,
+						[id]: updatedVideo,
+					},
+					lastUpdated: new Date(),
+				};
+			});
+		},
+
+		deleteVideo: (id) => {
+			set((state) => {
+				const video = state.videos[id];
+				if (!video) return state;
+
+				// Eliminar del Record principal
+				const { [id]: _, ...remainingVideos } = state.videos;
+
+				// Eliminar del índice de folder
+				const folderVideos = { ...state.folderVideos };
+				const folderId = video.folderId;
+				if (folderVideos[folderId]) {
+					folderVideos[folderId] = folderVideos[folderId].filter(videoId => videoId !== id);
+				}
+
+				return {
+					videos: remainingVideos,
+					folderVideos,
+					lastUpdated: new Date(),
+				};
+			});
+		},
+
+		// --- Estado de carga y errores ---
+		setLoading: (isLoading) => set({ isLoading }),
+		setError: (error) => set({ error }),
+
+		// --- Acciones Asíncronas ---
+		fetchVideo: async (id) => {
+			get().setLoading(true);
+			try {
+				const video = await getServerVideo(id);
+				if (video) {
+					get().addVideo(video);
+				}
+				return video;
+			} catch (e) {
+				videoLogger.error('Failed to fetch video', { error: e });
+				const errorMessage = e instanceof Error ? e.message : 'Failed to fetch video';
+				get().setError(errorMessage);
+				return undefined;
+			} finally {
+				get().setLoading(false);
 			}
-			return videos || [];
-		} catch (e) {
-			videoLogger.error('Failed to fetch videos', { error: e });
-			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch videos';
-			get().setError(errorMessage);
-			return [];
-		} finally {
-			get().setLoading(false);
-		}
-	},
+		},
 
-	createVideo: async (data) => {
-		get().setLoading(true);
-		try {
-			const video = await createServerVideo(data);
-			if (video) {
-				get().addVideo(video);
-				toastService.success('Video creado');
+		fetchVideos: async (folderIds) => {
+			get().setLoading(true);
+			try {
+				const videos = await findVideos({ folderIds });
+				if (videos && videos.length > 0) {
+					get().addVideos(videos);
+				}
+				return videos || [];
+			} catch (e) {
+				videoLogger.error('Failed to fetch videos', { error: e });
+				const errorMessage = e instanceof Error ? e.message : 'Failed to fetch videos';
+				get().setError(errorMessage);
+				return [];
+			} finally {
+				get().setLoading(false);
 			}
-			return video;
-		} catch (e) {
-			videoLogger.error('Failed to create video', { error: e });
-			const errorMessage = e instanceof Error ? e.message : 'Error creating video';
-			toastService.error(errorMessage);
-			get().setError(errorMessage);
-			return undefined;
-		} finally {
-			get().setLoading(false);
-		}
-	},
+		},
 
-	removeVideo: async (id) => {
-		get().setLoading(true);
-		try {
-			await deleteServerVideo(id);
-			get().deleteVideo(id);
-			toastService.success('Video eliminado');
-			return true;
-		} catch (e) {
-			videoLogger.error('Failed to remove video', { error: e });
-			const errorMessage = e instanceof Error ? e.message : 'Error deleting video';
-			toastService.error(errorMessage);
-			get().setError(errorMessage);
-			return false;
-		} finally {
-			get().setLoading(false);
-		}
-	},
-});
+		createVideo: async (data) => {
+			get().setLoading(true);
+			try {
+				const video = await createServerVideo(data);
+				if (video) {
+					get().addVideo(video);
+					toastService.success('Video creado');
+				}
+				return video;
+			} catch (e) {
+				videoLogger.error('Failed to create video', { error: e });
+				const errorMessage = e instanceof Error ? e.message : 'Error creating video';
+				toastService.error(errorMessage);
+				get().setError(errorMessage);
+				return undefined;
+			} finally {
+				get().setLoading(false);
+			}
+		},
+
+		removeVideo: async (id) => {
+			get().setLoading(true);
+			try {
+				await deleteServerVideo(id);
+				get().deleteVideo(id);
+				toastService.success('Video eliminado');
+				return true;
+			} catch (e) {
+				videoLogger.error('Failed to delete video', { error: e });
+				const errorMessage = e instanceof Error ? e.message : 'Error deleting video';
+				toastService.error(errorMessage);
+				get().setError(errorMessage);
+				return false;
+			} finally {
+				get().setLoading(false);
+			}
+		},
+	});

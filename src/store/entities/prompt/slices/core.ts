@@ -1,7 +1,6 @@
-import type { StateCreator } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toPromptWithStats } from '@/transformers/prompt';
 import type { PromptBase, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/types/entities/prompt';
+import type { StateCreator } from 'zustand';
 import type { PromptStore } from '../types';
 
 const coreLogger = clientLogger.withContext('PromptStore:Core');
@@ -23,56 +22,7 @@ export interface CoreSlice {
 	reset: () => void;
 }
 
-// Acciones mock para desarrollo (se reemplazarán con server actions)
-const mockApi = {
-	getPrompts: async (): Promise<PromptWithStats[]> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-		return [];
-	},
-
-	createPrompt: async (prompt: PromptCreateInput): Promise<PromptBase> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-		return {
-			id: `prompt-${Date.now()}`,
-			name: prompt.name,
-			emoji: prompt.emoji || '🎯',
-			color: prompt.color || '#3b82f6',
-			description: prompt.description || null,
-			content: prompt.content || '',
-			category: prompt.category || 'general',
-			parameters: prompt.parameters || '{}',
-			tags: prompt.tags || '[]',
-			featuredImage: prompt.featuredImage || null,
-			isFavorite: prompt.isFavorite || false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		};
-	},
-
-	updatePrompt: async (_id: string, prompt: PromptUpdateInput): Promise<PromptBase> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-		const basePrompt: PromptBase = {
-			id: prompt.id || `prompt-${Date.now()}`,
-			name: prompt.name || 'Prompt actualizado',
-			emoji: prompt.emoji || '🎯',
-			color: prompt.color || '#3b82f6',
-			description: prompt.description || null,
-			content: prompt.content || '',
-			category: prompt.category || 'general',
-			parameters: prompt.parameters || '{}',
-			tags: prompt.tags || '[]',
-			featuredImage: prompt.featuredImage || null,
-			isFavorite: prompt.isFavorite || false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		};
-		return basePrompt;
-	},
-
-	deletePrompt: async (_id: string): Promise<void> => {
-		await new Promise((resolve) => setTimeout(resolve, 500));
-	},
-};
+// Importar las server actions reales
 
 export const createCoreSlice: StateCreator<PromptStore, [], [], CoreSlice> = (set, get) => ({
 	// Estado inicial
@@ -88,10 +38,10 @@ export const createCoreSlice: StateCreator<PromptStore, [], [], CoreSlice> = (se
 			coreLogger.info('🔄 Cargando prompts');
 
 			// Llamar a server action para obtener prompts
-			const prompts = await mockApi.getPrompts();
+			const prompts = await getPrompts();
 
-			// Transformar resultados si es necesario
-			const transformedPrompts = prompts.map(toPromptWithStats);
+			// Los prompts ya vienen transformados desde la server action
+			const transformedPrompts = prompts;
 
 			set({ prompts: transformedPrompts, isLoading: false });
 			coreLogger.info('✅ Prompts cargados:', { count: transformedPrompts.length });
@@ -113,7 +63,7 @@ export const createCoreSlice: StateCreator<PromptStore, [], [], CoreSlice> = (se
 			coreLogger.info('✨ Creando prompt:', prompt);
 
 			// Llamar a server action para crear prompt
-			await mockApi.createPrompt(prompt);
+			await createPrompt(prompt);
 
 			// Recargar prompts para actualizar la lista
 			await get().loadPrompts();
@@ -132,7 +82,7 @@ export const createCoreSlice: StateCreator<PromptStore, [], [], CoreSlice> = (se
 			coreLogger.info('🔄 Actualizando prompt:', prompt);
 
 			// Llamar a server action para actualizar prompt
-			await mockApi.updatePrompt(id, prompt);
+			await updatePrompt(id, prompt);
 
 			// Recargar prompts para actualizar la lista
 			await get().loadPrompts();
@@ -151,7 +101,7 @@ export const createCoreSlice: StateCreator<PromptStore, [], [], CoreSlice> = (se
 			coreLogger.info('🗑️ Eliminando prompt:', id);
 
 			// Llamar a server action para eliminar prompt
-			await mockApi.deletePrompt(id);
+			await deletePrompt(id);
 
 			// Recargar prompts para actualizar la lista
 			await get().loadPrompts();

@@ -1,97 +1,85 @@
-# 🔍 Entidad Property
+# Documentación de la Entidad `Property`
 
-## Descripción
+**Última Actualización:** 2025-01-27
 
-La entidad `Property` representa atributos, características o propiedades que pueden asociarse a imágenes, notas, personajes, conceptos, world items y más. Permite modelar metadatos, atributos personalizados y características configurables.
+## Arquitectura de Tipos
 
-## Estructura
+La entidad `Property` sigue el patrón de arquitectura de tipos estandarizado `EntityWithStats`, diseñado para la eficiencia, consistencia y escalabilidad en toda la aplicación.
+
+### 1. Tipo Canónico: `PropertyWithStats`
+
+El tipo principal y canónico que debe usarse en componentes de React, stores de Zustand y lógica de UI es **`PropertyWithStats`**.
+
+- **Definición**: `src/types/entities/property/base.ts`
+- **Interfaz**:
+
+    ```typescript
+    interface PropertyWithStats extends PropertyBase {
+      stats: PropertyStatistics;
+    }
+    ```
+
+- **Contiene**:
+  - `PropertyBase`: El modelo `Property` base, directamente alineado con `schema.prisma`.
+  - `stats`: Un objeto `PropertyStatistics` con metadatos calculados y derivados.
+
+### 2. Estadísticas: `PropertyStatistics`
+
+Este objeto proporciona métricas clave sobre el uso y la completitud de una propiedad sin necesidad de realizar joins o queries adicionales en el cliente.
+
+- **Definición**: `src/types/entities/property/base.ts`
+- **Campos**:
+  - `totalRelations`: Suma total de todas las relaciones (imágenes, videos, tags, etc.).
+  - `usageDiversity`: Número de tipos de entidades diferentes con las que se relaciona esta propiedad.
+  - `popularity`: Un score numérico que refleja la popularidad general.
+  - `completenessScore`: Un porcentaje que indica qué tan "completo" está el perfil de la propiedad (ej. si tiene descripción, categoría, etc.).
+
+### 3. Tipos de Prisma
+
+- **`PrismaPropertyWithCounts`**: Es el tipo que se recibe directamente de las consultas de Prisma que usan el `include` de `propertyCounts`. Contiene el modelo base y un objeto `_count` con el número de relaciones.
+- **`propertyCounts`**: Objeto de configuración de Prisma (`Prisma.PropertyInclude`) exportado desde `src/types/entities/property/base.ts`. Se usa en las **Server Actions** para obtener los conteos de manera eficiente.
+
+## Flujo de Datos
+
+1. **Server Actions (`@/app/actions/properties`)**:
+    - Las funciones (`getProperties`, `getProperty`, etc.) usan `prisma.property.findMany/findUnique`.
+    - **IMPRESCINDIBLE**: Todas las consultas deben incluir el objeto `propertyCounts` para obtener los `_count` de las relaciones.
+    - **Ejemplo**: `include: propertyCounts`
+
+2. **Transformers (`@/transformers/property`)**:
+    - La función `toPropertyWithStats` (en `mappers.ts`) es la única responsable de convertir el dato de Prisma (`PrismaPropertyWithCounts`) al tipo canónico (`PropertyWithStats`).
+    - Calcula todas las `PropertyStatistics` a partir del objeto `_count`.
+
+3. **Zustand Store (`@/store/entities/property`)**:
+    - El store solo debe almacenar objetos del tipo `PropertyWithStats`.
+    - La lógica de negocio y las llamadas a las server actions están en el slice `core.ts`.
+    - El estado se normaliza en `properties: Record<string, PropertyWithStats>`.
+
+4. **Componentes de React**:
+    - Los componentes deben consumir los datos del store de Zustand.
+    - Deben usar `PropertyWithStats` para mostrar tanto los datos base como las estadísticas.
+    - Para las mutaciones (crear, actualizar), deben llamar a las acciones expuestas por el store (`createProperty`, `updateProperty`, etc.).
+
+## Diagrama de Flujo
 
 ```mermaid
 graph TD
-    A[Property Entity] --> B[Types]
-    A --> C[Transformers]
-    A --> D[Documentación]
-    B --> B1[types.ts]
-    B --> B2[index.ts]
-    B --> B3[schema.ts]
-    C --> C1[transformers]
-    D --> D1[documentation.md]
+    subgraph "Server-Side"
+        A[Prisma Schema] --> B{Server Actions};
+        B -- "query with `propertyCounts`" --> C[Prisma Client];
+        C -- "returns `PrismaPropertyWithCounts`" --> D(Transformer);
+    end
+
+    subgraph "Transformation"
+        D -- "`toPropertyWithStats`" --> E[Canonical Model: `PropertyWithStats`];
+    end
+
+    subgraph "Client-Side"
+        E --> F{Zustand Store};
+        F -- "data hooks" --> G[React Components];
+        G -- "user actions" --> F;
+    end
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style E fill:#ccf,stroke:#333,stroke-width:2px
 ```
-
-## Tipos principales
-
-- `PropertyBase`: Tipo base con campos fundamentales
-- `PropertyCreateInput`: Input para creación de propiedades
-- `PropertyUpdateInput`: Input para actualización de propiedades
-- `PropertyRelations`: Relaciones con otras entidades
-- `PropertyWithRelations`: Propiedad con todas sus relaciones
-- `PropertySortCriteria`: Enum para criterios de ordenación
-- `PropertyViewMode`: Enum para modos de visualización
-
-## Ejemplo de uso
-
-```typescript
-import { createProperty, updateProperty, getProperty } from '@/transformers/property';
-import { PropertySortCriteria } from '@/types/entities/property';
-
-// Crear una nueva propiedad
-const nuevaPropiedad = await createProperty({
-  name: 'Potencia',
-  emoji: '⚡',
-  color: '#fbbf24',
-  category: 'stats',
-  description: 'Nivel de potencia del elemento'
-});
-
-// Obtener una propiedad existente
-const propiedad = await getProperty(nuevaPropiedad.id);
-
-// Actualizar una propiedad existente
-await updateProperty(nuevaPropiedad.id, {
-  emoji: '💪',
-  color: '#ef4444',
-  isFavorite: true
-});
-```
-
-## Flujo de datos
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant API
-    participant Transformer
-    participant DB
-    Client->>API: createProperty()
-    API->>Transformer: mapCreatePropertyDataToPrisma()
-    Transformer->>DB: prisma.property.create()
-    DB-->>Transformer: Property
-    Transformer-->>API: transformProperty()
-    API-->>Client: PropertyWithRelations
-```
-
-## Mejores prácticas
-
-- Usar siempre los tipos canónicos (`PropertyBase`, `PropertyCreateInput`, `PropertyUpdateInput`, `PropertyWithRelations`).
-- Validar los datos antes de crear/actualizar con `PropertySchema`, `CreatePropertySchema` o `UpdatePropertySchema`.
-- Utilizar los enums `PropertySortCriteria` y `PropertyViewMode` para garantizar valores válidos.
-- Categorizar propiedades para facilitar su organización y búsqueda.
-- Asignar colores y emojis descriptivos para mejorar la experiencia visual.
-
-## Integración
-
-Las propiedades pueden integrarse con:
-
-- Imágenes, videos, álbumes y colecciones
-- Notas, prompts, conceptos y personajes
-- Lugares, world items y wildcards
-- Filtros avanzados y búsquedas personalizadas
-- Personalización de UI y visualización de datos
-
-## Migración a tipos canónicos
-
-✅ Tipos canónicos migrados, documentación y diagrama actualizados.
-
----
-
-> Última actualización: 2025-06-18

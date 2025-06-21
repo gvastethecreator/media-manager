@@ -5,6 +5,8 @@
  * @updated 2025-06-20
  */
 
+// Exportar tipos base
+export * from './base';
 // Exportar enumeraciones y constantes
 export * from './enums';
 // Exportar tipos extendidos (excepto los ya exportados)
@@ -23,9 +25,7 @@ export type {
 } from './stats-types';
 // Exportar tipos canónicos desde types.ts (excepto los conflictivos)
 export type {
-    WorldItemBase,
     WorldItemComplete,
-    WorldItemCounts,
     WorldItemCreateInput,
     WorldItemFilters,
     WorldItemRelations,

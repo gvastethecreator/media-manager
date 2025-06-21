@@ -10,14 +10,6 @@
 export {
     toCreateData as mapCreatePlaceDataToPrisma, createFilter as mapPlaceFiltersToPrisma,
     createOrderBy as mapPlaceOrderByToPrisma, toSearchOptions as mapPlaceSearchOptionsToPrisma,
-    toUpdateData as mapUpdatePlaceDataToPrisma
+    toUpdateData as mapUpdatePlaceDataToPrisma, toPlaceWithStats
 } from './mappers';
-
-// --- Exportaciones de Transformer ---
-// Proporcionan la lógica central de transformación de datos de Prisma al tipo canónico.
-export {
-    fromPrismaPlace,
-    fromPrismaPlaces,
-    placePayload
-} from './transformer';
 

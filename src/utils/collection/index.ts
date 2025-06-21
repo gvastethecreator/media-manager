@@ -6,7 +6,7 @@
 export * from './helpers';
 export * from './validators';
 
-import type { CollectionExtended } from '@/types/entities/collection';
+import type { CollectionWithStats } from '@/types/entities/collection';
 
 /**
  * 📚 Ordena las colecciones según la opción especificada
@@ -14,7 +14,7 @@ import type { CollectionExtended } from '@/types/entities/collection';
  * @param sortOption Opción de ordenamiento (ej: 'name_asc', 'price_desc')
  * @returns Array de colecciones ordenadas
  */
-export function sortCollections(collections: CollectionExtended[], sortOption: string): CollectionExtended[] {
+export function sortCollections(collections: CollectionWithStats[], sortOption: string): CollectionWithStats[] {
 	if (!collections || collections.length === 0) {
 		return [];
 	}
@@ -53,9 +53,9 @@ export function sortCollections(collections: CollectionExtended[], sortOption: s
 				aValue = a.platform?.toLowerCase() || '';
 				bValue = b.platform?.toLowerCase() || '';
 				break;
-			case 'rarity':
-				aValue = a.rarity?.toLowerCase() || '';
-				bValue = b.rarity?.toLowerCase() || '';
+			case 'totalItems':
+				aValue = a.stats?.totalItems || 0;
+				bValue = b.stats?.totalItems || 0;
 				break;
 			default:
 				aValue = a.name?.toLowerCase() || '';
@@ -81,14 +81,14 @@ export function sortCollections(collections: CollectionExtended[], sortOption: s
  * @returns Objeto con grupos de colecciones
  */
 export function groupCollections(
-	collections: CollectionExtended[],
+	collections: CollectionWithStats[],
 	groupBy: 'category' | 'rarity' | 'platform' | null
-): Record<string, CollectionExtended[]> {
+): Record<string, CollectionWithStats[]> {
 	if (!collections || collections.length === 0 || !groupBy) {
 		return { Todas: collections || [] };
 	}
 
-	const groups: Record<string, CollectionExtended[]> = {};
+	const groups: Record<string, CollectionWithStats[]> = {};
 
 	for (const collection of collections) {
 		let groupKey: string;
@@ -97,12 +97,18 @@ export function groupCollections(
 			case 'category':
 				groupKey = collection.category || 'Sin categoría';
 				break;
-			case 'rarity':
-				groupKey = collection.rarity || 'Sin rareza';
-				break;
 			case 'platform':
 				groupKey = collection.platform || 'Sin plataforma';
 				break;
+			case 'rarity': {
+				// Determinar rareza basada en el número de elementos
+				const totalItems = collection.stats?.totalItems || 0;
+				if (totalItems > 100) groupKey = 'Mítica';
+				else if (totalItems > 50) groupKey = 'Rara';
+				else if (totalItems > 20) groupKey = 'Poco común';
+				else groupKey = 'Común';
+				break;
+			}
 			default:
 				groupKey = 'Todas';
 		}
@@ -114,7 +120,7 @@ export function groupCollections(
 	}
 
 	// Ordenar los grupos por nombre
-	const sortedGroups: Record<string, CollectionExtended[]> = {};
+	const sortedGroups: Record<string, CollectionWithStats[]> = {};
 	const sortedKeys = Object.keys(groups).sort();
 
 	for (const key of sortedKeys) {
@@ -130,7 +136,7 @@ export function groupCollections(
  * @param searchTerm Término de búsqueda
  * @returns Array de colecciones filtradas
  */
-export function filterCollectionsBySearch(collections: CollectionExtended[], searchTerm: string): CollectionExtended[] {
+export function filterCollectionsBySearch(collections: CollectionWithStats[], searchTerm: string): CollectionWithStats[] {
 	if (!searchTerm.trim()) {
 		return collections;
 	}
@@ -151,7 +157,7 @@ export function filterCollectionsBySearch(collections: CollectionExtended[], sea
  * @param collections Array de colecciones
  * @returns Objeto con estadísticas
  */
-export function getCollectionStats(collections: CollectionExtended[]) {
+export function getCollectionStats(collections: CollectionWithStats[]) {
 	if (!collections || collections.length === 0) {
 		return {
 			total: 0,
@@ -178,8 +184,8 @@ export function getCollectionStats(collections: CollectionExtended[]) {
 			stats.favorites++;
 		}
 
-		// Con imágenes
-		if (collection.imageCount && collection.imageCount > 0) {
+		// Con imágenes (usar estadísticas pre-calculadas)
+		if (collection.stats?.totalImages && collection.stats.totalImages > 0) {
 			stats.withImages++;
 		}
 

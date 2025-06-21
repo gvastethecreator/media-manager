@@ -5,7 +5,7 @@
  * @module app/actions/tags/relation.actions
  */
 
-import { getPrismaClient } from '@/lib/db';
+import { prisma } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 // import { notifyStatChange } from '@/lib/events'; // Comentado, usar serverEmit
 import { emit as serverEmit } from '@/lib/events/server'; // Importar serverEmit correctamente
@@ -42,7 +42,6 @@ export async function assignTagToImages(tagId: string, imageIds: string[]): Prom
 		tagLogger.info('🔄 Asignando tag a imágenes:', { tagId, imageCount: imageIds.length });
 
 		// Verificar que el tag existe
-		const prisma = await getPrismaClient();
 		const tag = await prisma.tag.findUnique({
 			where: { id: tagId },
 			select: { id: true, name: true },
@@ -120,7 +119,6 @@ export async function removeTagFromImages(tagId: string, imageIds: string[]): Pr
 		tagLogger.info('🔄 Eliminando tag de imágenes:', { tagId, imageCount: imageIds.length });
 
 		// Verificar que el tag existe
-		const prisma = await getPrismaClient();
 		const tag = await prisma.tag.findUnique({
 			where: { id: tagId },
 			select: { id: true, name: true },
@@ -182,7 +180,6 @@ export async function getSuggestedTags(imageId: string, limit = 10): Promise<str
 		tagLogger.info('🧠 Obteniendo sugerencias de tags para imagen:', imageId);
 
 		// Verificar que la imagen existe
-		const prisma = await getPrismaClient();
 		const image = await prisma.image.findUnique({
 			where: { id: imageId },
 			select: { id: true, path: true },
@@ -242,7 +239,6 @@ export async function updateImageTags(imageId: string, tagIds: string[]): Promis
 		tagLogger.info('🔄 Actualizando tags de imagen:', { imageId, tagCount: tagIds.length });
 
 		// Verificar que la imagen existe
-		const prisma = await getPrismaClient();
 		const image = await prisma.image.findUnique({
 			where: { id: imageId },
 			select: { id: true },
@@ -297,7 +293,6 @@ export async function addImageToTag(tagId: string, imageId: string): Promise<voi
 		tagLogger.info('➕ Añadiendo imagen a tag:', { tagId, imageId });
 
 		// Verificar si el tag y la imagen existen
-		const prisma = await getPrismaClient();
 		const [tag, image] = await Promise.all([
 			prisma.tag.findUnique({ where: { id: tagId } }),
 			prisma.image.findUnique({ where: { id: imageId } }),

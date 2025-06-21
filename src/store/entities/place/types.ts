@@ -3,28 +3,30 @@
  * @module store/entities/place/types
  */
 
-import type { StateCreator } from 'zustand';
 import type {
-	PlaceCategory,
-	PlaceComplete,
-	PlaceFilters,
-	PlaceType,
-	PlaceViewMode,
-} from '../../../types/entities/place/types';
+    PlaceCategory,
+    PlaceSearchOptions,
+    PlaceType,
+    PlaceViewMode,
+    PlaceWithStats,
+} from '@/types/entities/place';
+import type { StateCreator } from 'zustand';
+
+type PlaceFilters = PlaceSearchOptions['filters'];
 
 /**
  * Estado base del store de Place
  */
 export interface PlaceState {
 	// Datos principales
-	places: PlaceComplete[];
+	places: PlaceWithStats[];
 	isLoading: boolean;
 	error: string | null;
 
 	// Configuración de visualización
 	viewConfig: {
 		sortBy: string;
-		sortOrder: string;
+		sortOrder: 'asc' | 'desc';
 		groupBy: null | string;
 		filterBy: null | PlaceFilters;
 	};
@@ -38,9 +40,9 @@ export interface PlaceState {
  */
 export interface PlaceCoreSlice extends PlaceState {
 	// Acciones CRUD
-	setPlaces: (places: PlaceComplete[]) => void;
-	addPlace: (place: PlaceComplete) => void;
-	updatePlace: (id: string, data: Partial<PlaceComplete>) => void;
+	setPlaces: (places: PlaceWithStats[]) => void;
+	addPlace: (place: PlaceWithStats) => void;
+	updatePlace: (id: string, data: Partial<PlaceWithStats>) => void;
 	removePlace: (id: string) => void;
 	resetStore: () => void;
 
@@ -49,11 +51,11 @@ export interface PlaceCoreSlice extends PlaceState {
 	setError: (error: string | null) => void;
 
 	// Getters
-	getPlaceById: (id: string) => PlaceComplete | null;
-	getPlacesByIds: (ids: string[]) => PlaceComplete[];
+	getPlaceById: (id: string) => PlaceWithStats | null;
+	getPlacesByIds: (ids: string[]) => PlaceWithStats[];
 
 	// Acciones de carga y gestión de relaciones
-	loadPlaces: () => Promise<void>;
+	loadPlaces: (options?: PlaceSearchOptions) => Promise<void>;
 	addImageToPlace: (placeId: string, imageId: string) => Promise<void>;
 	removeImageFromPlace: (placeId: string, imageId: string) => Promise<void>;
 }
@@ -91,7 +93,7 @@ export interface PlaceUISlice {
 	// Configuración de visualización
 	setViewConfig: (config: {
 		sortBy?: string;
-		sortOrder?: string;
+		sortOrder?: 'asc' | 'desc';
 		groupBy?: string | null;
 		filterBy?: PlaceFilters | null;
 	}) => void;
@@ -99,7 +101,7 @@ export interface PlaceUISlice {
 	// Acciones de selección
 	selectPlace: (placeId: string | null) => void;
 	selectPlaceId: (placeId: string | null) => void;
-	getSelectedPlace: () => PlaceComplete | null;
+	getSelectedPlace: () => PlaceWithStats | null;
 }
 
 /**
@@ -133,8 +135,8 @@ export interface PlaceFiltersSlice {
 	) => void;
 
 	// Getters filtrados
-	getFilteredPlaces: () => PlaceComplete[];
-	getSortedPlaces: () => PlaceComplete[];
+	getFilteredPlaces: () => PlaceWithStats[];
+	getSortedPlaces: () => PlaceWithStats[];
 }
 
 /**
@@ -170,7 +172,7 @@ export interface PlaceServiceOptions {
  * Respuesta API para consultas de lugares
  */
 export interface PlaceApiResponse {
-	data: PlaceComplete[];
+	data: PlaceWithStats[];
 	meta: {
 		total: number;
 		page: number;

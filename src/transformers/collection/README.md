@@ -5,6 +5,7 @@ Este módulo proporciona funciones para transformar y validar objetos de colecci
 ## 📋 Descripción general
 
 El transformador de colecciones maneja la conversión entre diferentes formatos de colección:
+
 - Transformación de objetos Prisma a objetos de aplicación
 - Validación y normalización de datos
 - Generación de formatos extendidos para interfaces de usuario
@@ -194,3 +195,111 @@ Las colecciones se relacionan con varias entidades del sistema:
 - **Grupos**: Las colecciones pueden ser compartidas con grupos
 
 Para operaciones que involucran estas relaciones, consulte la documentación específica de cada entidad relacionada.
+
+## 📚 Collection Transformer
+
+### Propósito
+
+Transformar datos de Collection entre diferentes capas de la aplicación:
+
+- **Prisma → CollectionWithStats**: Para uso en UI y lógica de negocio
+- **CollectionWithStats → Prisma**: Para persistencia en base de datos
+
+### Arquitectura
+
+```mermaid
+graph TD
+    A[Prisma Collection] --> B[fromPrismaCollection]
+    B --> C[CollectionWithStats]
+    C --> D[toPrismaCollection]
+    D --> E[Prisma Collection]
+
+    F[CollectionCreateInput] --> G[toPrismaCollectionCreate]
+    G --> H[Prisma Create Data]
+
+    I[CollectionUpdateInput] --> J[toPrismaCollectionUpdate]
+    J --> K[Prisma Update Data]
+```
+
+### Tipos Principales
+
+#### CollectionWithStats
+
+```typescript
+interface CollectionWithStats extends CollectionBase {
+  _count?: {
+    images: number;
+    videos: number;
+    albums: number;
+    // ... otros conteos
+  };
+  stats: {
+    totalItems: number;
+    totalImages: number;
+    totalVideos: number;
+    totalEntities: number;
+    lastUpdated: Date;
+  };
+}
+```
+
+### Funciones Principales
+
+#### `fromPrismaCollection(prismaCollection: PrismaCollectionWithCounts): CollectionWithStats`
+
+Convierte datos de Prisma a formato de aplicación con estadísticas calculadas.
+
+**Características:**
+
+- ✅ Deserializa JSON (filters, editions, sortBy)
+- ✅ Calcula estadísticas basadas en `_count`
+- ✅ Maneja valores null/undefined
+- ✅ Optimizado para performance
+
+#### `toPrismaCollection(collection: CollectionWithStats): PrismaCollection`
+
+Convierte datos de aplicación a formato Prisma para persistencia.
+
+#### `toPrismaCollectionCreate(input: CollectionCreateInput): PrismaCollectionCreateInput`
+
+Prepara datos para creación en Prisma.
+
+#### `toPrismaCollectionUpdate(input: CollectionUpdateInput): PrismaCollectionUpdateInput`
+
+Prepara datos para actualización en Prisma.
+
+### Funciones Server Actions
+
+#### `getCollectionById(id: string): Promise<CollectionWithStats | null>`
+
+Obtiene una colección por ID con estadísticas calculadas.
+
+#### `getCollections(): Promise<CollectionWithStats[]>`
+
+Obtiene todas las colecciones con estadísticas.
+
+### Optimizaciones
+
+1. **Consultas optimizadas**: Solo `_count`, no relaciones completas
+2. **Cálculo eficiente**: Estadísticas pre-calculadas en transformación
+3. **Serialización correcta**: Manejo adecuado de JSON fields
+4. **Type safety**: Tipado estricto en todas las capas
+
+### Patrones de Uso
+
+```typescript
+// ✅ Correcto - Usar CollectionWithStats
+const collections = await getCollections();
+const totalItems = collection.stats.totalItems;
+
+// ❌ Incorrecto - No usar tipos legacy
+const collection: CollectionComplete = await getCollection(id);
+```
+
+### Migración Completada
+
+- ✅ Eliminados tipos `CollectionComplete` y `CollectionExtended`
+- ✅ Implementado patrón `CollectionWithStats`
+- ✅ Optimizadas consultas de base de datos
+- ✅ Actualizados stores, components y services
+- ✅ Documentación actualizada

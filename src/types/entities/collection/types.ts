@@ -6,6 +6,7 @@
  * Última migración: 2025-06-18
  */
 
+import type { Collection as PrismaCollection } from '@prisma/client';
 import { z } from 'zod';
 import type { AlbumComplete } from '../album';
 import type { CharacterComplete } from '../character';
@@ -21,6 +22,27 @@ import type { VideoComplete } from '../video';
 import type { WildcardComplete } from '../wildcard';
 import type { WorldItemComplete } from '../world-item';
 import { CollectionCategory } from './enums';
+
+/**
+ * 📚 Interfaz que representa el payload de Prisma para una colección, incluyendo las relaciones contadas.
+ */
+export type PrismaCollectionWithCounts = PrismaCollection & {
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		tags?: number;
+		characters?: number;
+		places?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+};
 
 /**
  * Tipo base canónico para Collection - CORREGIDO para coincidir con Prisma
@@ -55,68 +77,30 @@ export interface CollectionBase {
 }
 
 /**
- * 📚 Tipo extendido para una colección con datos adicionales de UI.
- * Incluye propiedades que no se persisten en la base de datos.
+ * 📊 Collection con estadísticas calculadas y conteos
  */
-export interface CollectionExtended extends CollectionBase {
-	// Estados de UI (no persistidos)
-	isHovered?: boolean;
-	isOpen?: boolean;
-	isLoading?: boolean;
-	hasError?: boolean;
-	// Datos calculados
-	imageCount?: number;
-	videoCount?: number;
-	tagCount?: number;
-	groupCount?: number;
-	propertyCount?: number;
-	// Filtros parseados para UI
-	parsedFilters?: CollectionFilter[];
-	// Propiedad de rareza (derivada de category o metadatos)
-	rarity?: string;
-}
-
-/**
- * Collection con relaciones completas
- */
-export interface CollectionComplete extends Omit<CollectionBase, 'filters' | 'sortBy' | 'editions'> {
-	// Campos deserializados
-	filters: CollectionFilter[];
-	sortBy: CollectionSortBy | null;
-	editions: CollectionEdition[];
-
-	// Relaciones con contenido
-	images?: ImageComplete[];
-	videos?: VideoComplete[];
-
-	// Relaciones con entidades principales
-	albums?: AlbumComplete[];
-	tags?: TagComplete[];
-	characters?: CharacterComplete[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemComplete[];
-	concepts?: ConceptComplete[];
-	prompts?: PromptComplete[];
-	notes?: NoteComplete[];
-	wildcards?: WildcardComplete[];
-	properties?: PropertyComplete[];
-	groups?: GroupComplete[];
-
-	// Conteos
+export interface CollectionWithStats extends CollectionBase {
 	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-		groups?: number;
+		images: number;
+		videos: number;
+		albums: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
+	stats: {
+		totalItems: number;
+		totalImages: number;
+		totalVideos: number;
+		totalEntities: number;
+		lastUpdated: Date;
 	};
 }
 
