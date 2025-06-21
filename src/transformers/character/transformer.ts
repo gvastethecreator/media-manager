@@ -5,97 +5,59 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { AlbumComplete } from '@/types/entities/album';
-import type { CharacterComplete } from '@/types/entities/character';
-import type { CollectionComplete } from '@/types/entities/collection';
-import type { ConceptComplete } from '@/types/entities/concept';
-import type { GroupComplete } from '@/types/entities/group';
-import type { ImageComplete } from '@/types/entities/image';
-import type { NoteComplete } from '@/types/entities/note';
-import type { PlaceComplete } from '@/types/entities/place';
-import type { PromptComplete } from '@/types/entities/prompt';
-import type { PropertyComplete } from '@/types/entities/property';
-import type { TagComplete } from '@/types/entities/tag';
-import type { VideoComplete } from '@/types/entities/video';
-import type { WildcardComplete } from '@/types/entities/wildcard';
-import type { WorldItemComplete } from '@/types/entities/world-item';
+import type { CharacterWithStats, PrismaCharacterWithCounts } from '@/types/entities/character';
 import type { Prisma } from '@prisma/client';
-import { fromPrismaAlbum } from '../album/transformer';
-import { fromPrismaCollection } from '../collection/transformer';
-import { fromPrismaConcept } from '../concept/transformer';
-import { fromPrismaGroup } from '../group/transformer';
-import { fromPrismaImage } from '../image/transformer';
-import { fromPrismaNote } from '../note/transformer';
-import { fromPrismaPlace } from '../place/transformer';
-import { fromPrismaPrompt } from '../prompt/transformer';
-import { fromPrismaProperty } from '../property/transformer';
-import { fromPrismaTag } from '../tag/transformer';
-import { fromPrismaVideo } from '../video/transformer';
-import { fromPrismaWildcard } from '../wildcard/transformer';
-import { fromPrismaWorldItem } from '../world-item/transformer';
 
 const logger = serverLogger.withContext('CharacterTransformer');
 
-type PrismaCharacterWithRelations = Prisma.CharacterGetPayload<{
-	include: {
-		images: true;
-		videos: true;
-		tags: true;
-		groups: true;
-		properties: true;
-		collections: true;
-		albums: true;
-		places: true;
-		worldItems: true;
-		concepts: true;
-		prompts: true;
-		notes: true;
-		wildcards: true;
-		relatedCharacters: true;
-		relatedTo: true;
-		_count: {
-			select: {
-				images: true;
-				videos: true;
-				tags: true;
-				groups: true;
-				properties: true;
-				collections: true;
-				albums: true;
-				places: true;
-				worldItems: true;
-				concepts: true;
-				prompts: true;
-				notes: true;
-				wildcards: true;
-				relatedCharacters: true;
-				relatedTo: true;
-			};
-		};
-	};
-}>;
-
 /**
- * 🔄 Transforma un objeto Character de Prisma a nuestro tipo canónico CharacterComplete.
+ * 🔄 Transforma un Character de Prisma a CharacterWithStats (optimizado).
  *
- * @param prismaCharacter - El objeto Character obtenido de Prisma, debe incluir relaciones y conteos.
- * @returns Un objeto CharacterComplete compatible con nuestra aplicación, o null si la entrada es nula.
+ * @param prismaCharacter - Character de Prisma con conteos
+ * @returns CharacterWithStats con estadísticas pre-calculadas
  */
 export function fromPrismaCharacter(
-	prismaCharacter: PrismaCharacterWithRelations | null,
-): CharacterComplete | null {
+	prismaCharacter: PrismaCharacterWithCounts | null,
+): CharacterWithStats | null {
 	if (!prismaCharacter) {
 		return null;
 	}
 
 	try {
 		const { _count, ...baseData } = prismaCharacter;
+		const now = new Date();
 
-		// Transformamos los datos crudos de Prisma al tipo de la aplicación
+		// Calcular totales desde los conteos
+		const totalImages = _count?.images ?? 0;
+		const totalVideos = _count?.videos ?? 0;
+		const totalTags = _count?.tags ?? 0;
+		const totalGroups = _count?.groups ?? 0;
+		const totalProperties = _count?.properties ?? 0;
+		const totalCollections = _count?.collections ?? 0;
+		const totalAlbums = _count?.albums ?? 0;
+		const totalPlaces = _count?.places ?? 0;
+		const totalWorldItems = _count?.worldItems ?? 0;
+		const totalConcepts = _count?.concepts ?? 0;
+		const totalPrompts = _count?.prompts ?? 0;
+		const totalNotes = _count?.notes ?? 0;
+		const totalWildcards = _count?.wildcards ?? 0;
+		const totalRelatedCharacters = _count?.relatedCharacters ?? 0;
+		const totalRelatedTo = _count?.relatedTo ?? 0;
+
+		const totalAssociations = totalImages + totalVideos + totalTags + totalGroups +
+			totalProperties + totalCollections + totalAlbums + totalPlaces +
+			totalWorldItems + totalConcepts + totalPrompts + totalNotes +
+			totalWildcards + totalRelatedCharacters + totalRelatedTo;
+
+		// Calcular power level basado en nivel y asociaciones
+		const powerLevel = calculatePowerLevel(baseData.level, totalAssociations);
+
+		// Determinar rareza basada en power level y nivel
+		const rarityLevel = determineRarityLevel(baseData.level, powerLevel, totalAssociations);
+
 		return {
 			...baseData,
-
-			// Los campos JSON ya vienen como strings desde Prisma, los mantenemos así
+			// Asegurar campos JSON como strings
 			stats: baseData.stats || '{}',
 			skills: baseData.skills || '[]',
 			relationships: baseData.relationships || '[]',
@@ -107,85 +69,155 @@ export function fromPrismaCharacter(
 			filters: baseData.filters || '[]',
 			psychologicalProfile: baseData.psychologicalProfile || '',
 			socialProfile: baseData.socialProfile || '',
+			notes: baseData.notes?.map(fromPrismaNote).filter((n): n is any => n !== null) || [],
 
-			// Asegurar que las relaciones no sean nulas y estén transformadas
-			images:
-				baseData.images?.map(fromPrismaImage).filter((i): i is ImageComplete => i !== null) || [],
-			videos:
-				baseData.videos?.map(fromPrismaVideo).filter((v): v is VideoComplete => v !== null) || [],
-			tags: baseData.tags?.map(fromPrismaTag).filter((t): t is TagComplete => t !== null) || [],
-			groups:
-				baseData.groups?.map(fromPrismaGroup).filter((g): g is GroupComplete => g !== null) || [],
-			properties:
-				baseData.properties
-					?.map(fromPrismaProperty)
-					.filter((p): p is PropertyComplete => p !== null) || [],
-			collections:
-				baseData.collections
-					?.map(fromPrismaCollection)
-					.filter((c): c is CollectionComplete => c !== null) || [],
-			albums:
-				baseData.albums?.map(fromPrismaAlbum).filter((a): a is AlbumComplete => a !== null) || [],
-			places:
-				baseData.places?.map(fromPrismaPlace).filter((p): p is PlaceComplete => p !== null) || [],
-			worldItems:
-				baseData.worldItems
-					?.map(fromPrismaWorldItem)
-					.filter((wi): wi is WorldItemComplete => wi !== null) || [],
-			concepts:
-				baseData.concepts
-					?.map(fromPrismaConcept)
-					.filter((c): c is ConceptComplete => c !== null) || [],
-			prompts:
-				baseData.prompts?.map(fromPrismaPrompt).filter((p): p is PromptComplete => p !== null) || [],
-			notes: baseData.notes?.map(fromPrismaNote).filter((n): n is NoteComplete => n !== null) || [],
-			wildcards:
-				baseData.wildcards
-					?.map(fromPrismaWildcard)
-					.filter((w): w is WildcardComplete => w !== null) || [],
-			relatedCharacters:
-				baseData.relatedCharacters
-					?.map(fromPrismaCharacter)
-					.filter((c): c is CharacterComplete => c !== null) || [],
-			relatedTo:
-				baseData.relatedTo
-					?.map(fromPrismaCharacter)
-					.filter((c): c is CharacterComplete => c !== null) || [],
+			// Conteos originales para compatibilidad
+			_count,
 
-			// Agregar conteos
-			_count: {
-				images: _count?.images ?? 0,
-				videos: _count?.videos ?? 0,
-				tags: _count?.tags ?? 0,
-				groups: _count?.groups ?? 0,
-				properties: _count?.properties ?? 0,
-				collections: _count?.collections ?? 0,
-				albums: _count?.albums ?? 0,
-				places: _count?.places ?? 0,
-				worldItems: _count?.worldItems ?? 0,
-				concepts: _count?.concepts ?? 0,
-				prompts: _count?.prompts ?? 0,
-				notes: _count?.notes ?? 0,
-				wildcards: _count?.wildcards ?? 0,
-				relatedCharacters: _count?.relatedCharacters ?? 0,
-				relatedTo: _count?.relatedTo ?? 0,
+			// Estadísticas pre-calculadas optimizadas
+			statistics: {
+				totalImages,
+				totalVideos,
+				totalTags,
+				totalGroups,
+				totalProperties,
+				totalCollections,
+				totalAlbums,
+				totalPlaces,
+				totalWorldItems,
+				totalConcepts,
+				totalPrompts,
+				totalNotes,
+				totalWildcards,
+				totalRelatedCharacters,
+				totalRelatedTo,
+				totalAssociations,
+				lastUpdated: now,
+				powerLevel,
+				rarityLevel,
 			},
 		};
 	} catch (error) {
-		logger.error('Error al transformar personaje de Prisma', { error, prismaCharacter });
-		// Devolvemos null en caso de error para mantener consistencia
+		logger.error('Error al transformar personaje de Prisma', { error, characterId: prismaCharacter?.id });
 		return null;
 	}
 }
 
 /**
- * 🔄 Transforma una lista de personajes de Prisma a una lista de CharacterComplete.
+ * 🔄 Transforma una lista de personajes de Prisma a CharacterWithStats.
  *
- * @param prismaCharacters - Un array de objetos Character de Prisma.
- * @returns Un array de objetos CharacterComplete.
+ * @param prismaCharacters - Array de personajes de Prisma
+ * @returns Array de CharacterWithStats
  */
 export function fromPrismaCharacters(
-	prismaCharacters: PrismaCharacterWithRelations[],
-): CharacterComplete[] {
-	return prismaCharacters.map(fromPrismaCharacter).filter((c): c is CharacterComplete => c !== null);
+	prismaCharacters: PrismaCharacterWithCounts[],
+): CharacterWithStats[] {
+	return prismaCharacters
+		.map(fromPrismaCharacter)
+		.filter((c): c is CharacterWithStats => c !== null);
+}
+
+/**
+ * 🔄 Convierte CharacterWithStats a datos para Prisma (create).
+ *
+ * @param character - Character con estadísticas
+ * @returns Datos preparados para Prisma.character.create()
+ */
+export function toPrismaCharacterCreate(character: Partial<CharacterWithStats>): Prisma.CharacterCreateInput {
+	const {
+		id, // Omitir ID en create
+		_count, // Omitir conteos calculados
+		statistics, // Omitir estadísticas calculadas
+		createdAt, // Omitir timestamps
+		updatedAt,
+		...baseData
+	} = character;
+
+	return {
+		...baseData,
+		// Asegurar campos requeridos con defaults
+		name: baseData.name || 'Nuevo Personaje',
+		emoji: baseData.emoji || '👤',
+		color: baseData.color || '#CCCCCC',
+		level: baseData.level || 1,
+		class: baseData.class || 'warrior',
+		race: baseData.race || 'human',
+		alignment: baseData.alignment || 'true neutral',
+		backstory: baseData.backstory || '',
+		stats: baseData.stats || '{}',
+		psychologicalProfile: baseData.psychologicalProfile || '',
+		socialProfile: baseData.socialProfile || '',
+		relationships: baseData.relationships || '[]',
+		goals: baseData.goals || '[]',
+		fears: baseData.fears || '[]',
+		beliefs: baseData.beliefs || '[]',
+		personality: baseData.personality || '[]',
+		skills: baseData.skills || '[]',
+		abilities: baseData.abilities || '[]',
+		sortBy: baseData.sortBy || '',
+		filters: baseData.filters || '[]',
+		isFavorite: baseData.isFavorite || false,
+	};
+}
+
+/**
+ * 🔄 Convierte CharacterWithStats a datos para Prisma (update).
+ *
+ * @param character - Character con estadísticas parcial
+ * @returns Datos preparados para Prisma.character.update()
+ */
+export function toPrismaCharacterUpdate(character: Partial<CharacterWithStats>): Prisma.CharacterUpdateInput {
+	const {
+		id, // Omitir ID en update
+		_count, // Omitir conteos calculados
+		statistics, // Omitir estadísticas calculadas
+		createdAt, // Omitir createdAt
+		...updateData
+	} = character;
+
+	return updateData;
+}
+
+/**
+ * 📊 Calcula el power level de un personaje basado en nivel y asociaciones.
+ *
+ * @param level - Nivel del personaje
+ * @param totalAssociations - Total de asociaciones
+ * @returns Power level calculado
+ */
+function calculatePowerLevel(level: number, totalAssociations: number): number {
+	// Fórmula: nivel base + bonificación por asociaciones + multiplicador por nivel alto
+	const baseLevel = level * 10;
+	const associationBonus = Math.floor(totalAssociations * 2);
+	const highLevelMultiplier = level > 10 ? Math.floor((level - 10) * 5) : 0;
+
+	return baseLevel + associationBonus + highLevelMultiplier;
+}
+
+/**
+ * 🎭 Determina el nivel de rareza basado en power level y métricas.
+ *
+ * @param level - Nivel del personaje
+ * @param powerLevel - Power level calculado
+ * @param totalAssociations - Total de asociaciones
+ * @returns Nivel de rareza
+ */
+function determineRarityLevel(
+	level: number,
+	powerLevel: number,
+	totalAssociations: number
+): 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' {
+	if (level >= 20 || powerLevel >= 500 || totalAssociations >= 100) {
+		return 'legendary';
+	}
+	if (level >= 15 || powerLevel >= 300 || totalAssociations >= 50) {
+		return 'epic';
+	}
+	if (level >= 10 || powerLevel >= 200 || totalAssociations >= 25) {
+		return 'rare';
+	}
+	if (level >= 5 || powerLevel >= 100 || totalAssociations >= 10) {
+		return 'uncommon';
+	}
+	return 'common';
 }

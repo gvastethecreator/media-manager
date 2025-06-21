@@ -102,7 +102,7 @@ export async function getConceptCounts(conceptId: string): Promise<{
 				_count: {
 					select: {
 						images: true,
-						tags: true,
+						tagEntities: true,
 					},
 				},
 			},
@@ -115,7 +115,7 @@ export async function getConceptCounts(conceptId: string): Promise<{
 		// Devolver resultado estructurado
 		const result = {
 			images: counts._count?.images || 0,
-			tags: counts._count?.tags || 0,
+			tags: counts._count?.tagEntities || 0,
 		};
 
 		conceptCardLogger.info('✅ Recuentos obtenidos para ConceptCard');
@@ -149,10 +149,11 @@ export async function getConceptWithRelations(conceptId: string) {
 		const concept = await prisma.concept.findUnique({
 			where: { id: conceptId },
 			include: {
+				tagEntities: true,
 				_count: {
 					select: {
 						images: true,
-						tags: true,
+						tagEntities: true,
 					},
 				},
 			},
@@ -162,10 +163,12 @@ export async function getConceptWithRelations(conceptId: string) {
 			throw new Error('Concepto no encontrado');
 		}
 
+		const { tagEntities, ...restOfConcept } = concept;
+
 		// Procesar cualquier campo JSON si es necesario
 		const parsedConcept = {
-			...concept,
-			tags: typeof concept?.tags === 'string' && concept.tags ? JSON.parse(concept.tags) : concept?.tags || [],
+			...restOfConcept,
+			tags: tagEntities || [],
 		};
 
 		conceptCardLogger.info('✅ Concepto obtenido correctamente');

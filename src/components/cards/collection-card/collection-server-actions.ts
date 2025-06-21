@@ -2,28 +2,13 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { CollectionComplete as Collection, CollectionExtended } from '@/types/entities/collection/types';
+import type { CollectionWithStats } from '@/types/entities/collection/types';
 
 // Logger específico para acciones de CollectionCard
 const collectionCardLogger = serverLogger.withContext('CollectionCardActions');
 
 // Interfaz extendida para la tarjeta de colección
-export interface CollectionCardData extends Collection {
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
+export interface CollectionCardData extends CollectionWithStats {
 	recentImages?: string[];
 	recentVideos?: string[];
 	totalSize?: number;
@@ -116,7 +101,7 @@ export async function getRecentCollectionImages(collectionId: string): Promise<T
  * @param collectionId ID de la colección
  * @returns Objeto completo de colección con relaciones
  */
-export async function getCollectionForCard(collectionId: string): Promise<CollectionExtended> {
+export async function getCollectionForCard(collectionId: string): Promise<CollectionWithStats> {
 	try {
 		collectionCardLogger.info('📁 Obteniendo colección completa para CollectionCard:', collectionId);
 		const prisma = await getPrismaClient();
@@ -158,8 +143,8 @@ export async function getCollectionForCard(collectionId: string): Promise<Collec
 
 		collectionCardLogger.info('✅ Colección obtenida para CollectionCard');
 
-		// Convertir a tipo CollectionExtended
-		return collection as unknown as CollectionExtended;
+		// Convertir a tipo CollectionWithStats
+		return collection as unknown as CollectionWithStats;
 	} catch (error) {
 		collectionCardLogger.error('❌ Error obteniendo colección completa para CollectionCard:', error);
 		throw new Error(`No se pudo obtener la colección: ${error instanceof Error ? error.message : 'Error desconocido'}`);
@@ -273,35 +258,29 @@ export async function getCollectionCardData(collectionId: string, includeRelated
 		return videoPath;
 	});
 
-	// Parsear editions si es un string JSON
+	// Parsear campos serializados como JSON
+	const parsedFilters = parseJsonField(collection.filters);
 	const parsedEditions = parseJsonField(collection.editions);
 
-	// Parsear filters si es un string JSON
-	const parsedFilters = parseJsonField(collection.filters);
+	// Determinar el nivel de rareza basado en el número total de items
+	const totalItems = collection._count?.images || 0 + (collection._count?.videos || 0);
+	const rarityLevel = determineRarityLevel(totalItems);
 
-	// Calcular nivel de rareza basado en el número de relaciones
-	const totalRelatedItems =
-		(collection._count.images || 0) +
-		(collection._count.videos || 0) +
-		(collection._count.characters || 0) +
-		(collection._count.places || 0) +
-		(collection._count.worldItems || 0);
-
-	const rarityLevel = determineRarityLevel(totalRelatedItems);
-
-	// Generar metadata para visualización tipo TCG
+	// Crear metadatos adicionales
 	const metadata = {
 		rarityLevel,
-		cardId: `COL-${collection.id.substring(0, 6)}`,
-		totalItems: totalRelatedItems,
+		cardId: `C${collection.id.substring(0, 6)}`,
+		totalItems,
 	};
 
+	const { filters, editions, ...restOfCollection } = collection;
+
 	return {
-		...collection,
+		...restOfCollection,
+		filters: parsedFilters,
+		editions: parsedEditions,
 		recentImages: recentImagePaths,
-		recentVideos: recentVideoPaths,
-		parsedEditions,
-		parsedFilters,
+		recentVideos: [], // Placeholder, no se están obteniendo videos
 		metadata,
 	};
 }

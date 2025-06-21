@@ -5,14 +5,14 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    CreatePromptData,
     PromptBase,
     PromptComplete,
-    PromptCounts,
+    PromptCreateInput,
     PromptFilters,
+    PromptStatistics,
+    PromptUpdateInput,
     PromptWithRelations,
-    PromptWithStats,
-    UpdatePromptData
+    PromptWithStats
 } from '@/types/entities/prompt';
 import { PromptSortCriteria } from '@/types/entities/prompt';
 import type { Prisma } from '@prisma/client';
@@ -69,7 +69,7 @@ function normalizeRelationToSet(relation: RelationInput | undefined): SetInput |
  * @param data Datos de creación.
  * @returns Objeto compatible con Prisma.PromptCreateInput.
  */
-export function mapCreatePromptDataToPrisma(data: CreatePromptData): Prisma.PromptCreateInput {
+export function mapCreatePromptDataToPrisma(data: PromptCreateInput): Prisma.PromptCreateInput {
 	try {
 		const { tags, groups, properties, wildcards, ...restData } = data;
 
@@ -98,7 +98,7 @@ export function mapCreatePromptDataToPrisma(data: CreatePromptData): Prisma.Prom
  * @param data Datos de actualización.
  * @returns Objeto compatible con Prisma.PromptUpdateArgs.
  */
-export function mapUpdatePromptDataToPrisma(id: string, data: UpdatePromptData): Prisma.PromptUpdateArgs {
+export function mapUpdatePromptDataToPrisma(id: string, data: PromptUpdateInput): Prisma.PromptUpdateArgs {
 	try {
 		const { tags, groups, properties, wildcards, parameters, ...restData } = data;
 		const updateData: Prisma.PromptUpdateInput = { ...restData };
@@ -308,21 +308,29 @@ export function processPrompts(
 }
 
 /**
- * 📊 Enriquece un prompt con sus estadísticas.
- * Deserializa `parameters` y `tags` si son strings JSON.
- * @param prompt El prompt a enriquecer.
- * @param stats Estadísticas opcionales.
+ * 📊 Transforma un PromptComplete a PromptWithStats con estadísticas avanzadas.
+ * Implementa el patrón EntityWithStats para máximo rendimiento.
+ * @param prompt El prompt a transformar.
  * @returns El prompt con estadísticas y campos deserializados.
  */
 export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 	const { _count, ...rest } = prompt;
 
-	const stats: PromptCounts['_count'] = {
+	// Deserializar campos JSON
+	const deserializedParameters = typeof rest.parameters === 'string'
+		? deserializeParameters(rest.parameters)
+		: rest.parameters || [];
+	const deserializedTags = typeof rest.tags === 'string'
+		? JSON.parse(rest.tags)
+		: rest.tags || [];
+
+	// Calcular conteos básicos
+	const counts = {
 		images: _count?.images ?? 0,
 		videos: _count?.videos ?? 0,
 		albums: _count?.albums ?? 0,
 		collections: _count?.collections ?? 0,
-		tags: _count?.tags ?? 0,
+		tagEntities: _count?.tagEntities ?? 0,
 		characters: _count?.characters ?? 0,
 		places: _count?.places ?? 0,
 		worldItems: _count?.worldItems ?? 0,
@@ -333,11 +341,81 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 		groups: _count?.groups ?? 0,
 	};
 
+	// Calcular estadísticas avanzadas
+	const totalContentItems = counts.images + counts.videos + counts.albums + counts.collections;
+	const totalRelations = Object.values(counts).reduce((sum, count) => sum + count, 0);
+	const contentLength = rest.content?.length ?? 0;
+	const parametersCount = Array.isArray(deserializedParameters) ? deserializedParameters.length : 0;
+	const tagsCount = Array.isArray(deserializedTags) ? deserializedTags.length : 0;
+
+	// Análisis temporal
+	const now = new Date();
+	const createdDate = new Date(rest.createdAt);
+	const updatedDate = new Date(rest.updatedAt);
+	const monthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+	const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+	const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+	// Análisis de calidad
+	const hasDescription = Boolean(rest.description?.trim());
+	const hasFeaturedImage = Boolean(rest.featuredImage);
+	const isWellStructured = parametersCount > 0 && tagsCount > 0;
+	const qualityScore = Math.min(100,
+		(hasDescription ? 25 : 0) +
+		(hasFeaturedImage ? 15 : 0) +
+		(isWellStructured ? 30 : 0) +
+		(contentLength > 50 ? 20 : contentLength > 20 ? 10 : 0) +
+		(totalRelations > 0 ? 10 : 0)
+	);
+
+	const statistics: PromptStatistics = {
+		// Conteos de relaciones
+		totalImages: counts.images,
+		totalVideos: counts.videos,
+		totalAlbums: counts.albums,
+		totalCollections: counts.collections,
+		totalTags: counts.tagEntities,
+		totalCharacters: counts.characters,
+		totalPlaces: counts.places,
+		totalWorldItems: counts.worldItems,
+		totalConcepts: counts.concepts,
+		totalNotes: counts.notes,
+		totalWildcards: counts.wildcards,
+		totalProperties: counts.properties,
+		totalGroups: counts.groups,
+
+		// Métricas de contenido
+		totalContentItems,
+		averageContentLength: contentLength,
+		parametersCount,
+		tagsCount,
+
+		// Métricas de IA y uso (valores por defecto, se actualizarán con datos reales)
+		executionCount: 0,
+		successRate: 0,
+		averageExecutionTime: 0,
+		confidenceScore: qualityScore / 100,
+		popularityScore: Math.min(100, totalRelations * 5),
+
+		// Análisis temporal
+		lastExecutedAt: null,
+		createdThisMonth: createdDate >= monthAgo,
+		updatedThisWeek: updatedDate >= weekAgo,
+		executedToday: false,
+
+		// Análisis de calidad
+		hasDescription,
+		hasFeaturedImage,
+		isWellStructured,
+		qualityScore,
+	};
+
 	return {
 		...rest,
-		parameters: typeof rest.parameters === 'string' ? deserializeParameters(rest.parameters) : rest.parameters,
-		tags: typeof rest.tags === 'string' ? JSON.parse(rest.tags) : rest.tags,
-		_count: stats,
+		parameters: deserializedParameters,
+		tags: deserializedTags,
+		_count: counts,
+		statistics,
 	};
 }
 // #endregion

@@ -7,16 +7,17 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	findQueueJobs,
-	findQueueJobsByStatus,
-	findRecentQueueJobs,
-	getQueueJobById,
+    findQueueJobs,
+    findQueueJobsByStatus,
+    findRecentQueueJobs,
+    getQueueJobById,
 } from '@/services/queue-job/queue-job.service';
 import {
-	type PaginatedQueueJobs,
-	type QueueJobExtended,
-	type QueueJobFilters,
-	type QueueJobPaginationOptions,
+    type PaginatedQueueJobs,
+    type QueueJobExtended,
+    type QueueJobFilters,
+    type QueueJobPaginationOptions,
+    QueueJobStatus,
 } from '@/types/entities/queue-job';
 import { unstable_cache } from 'next/cache';
 
@@ -135,7 +136,7 @@ export async function getRecentQueueJobs(limit = 10): Promise<QueueJobExtended[]
 /**
  * Obtiene trabajos por estado
  */
-export async function getQueueJobsByStatus(status: string, limit = 10): Promise<QueueJobExtended[]> {
+export async function getQueueJobsByStatus(status: QueueJobStatus, limit = 10): Promise<QueueJobExtended[]> {
 	const getCachedJobsByStatus = unstable_cache(
 		async () => {
 			try {

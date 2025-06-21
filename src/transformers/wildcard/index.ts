@@ -4,12 +4,10 @@
  * @description Exporta de forma controlada las funciones de mapeo y transformación para la entidad Wildcard.
  */
 
-// De mappers.ts
 export {
-	mapCreateWildcardDataToPrisma,
-	mapUpdateWildcardDataToPrisma,
-	mapWildcardSearchOptionsToPrisma,
+    mapCreateWildcardDataToPrisma,
+    mapUpdateWildcardDataToPrisma,
+    mapWildcardSearchOptionsToPrisma,
+    toWildcardWithStats
 } from './mappers';
 
-// De transformer.ts
-export { fromPrismaWildcard, fromPrismaWildcards } from './transformer';

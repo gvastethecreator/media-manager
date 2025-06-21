@@ -6,15 +6,14 @@
 
 import type { ErrorResponse } from '@/app/actions/folders';
 import {
-	createTag as createTagAction,
-	deleteTag as deleteTagAction,
-	getTags as getTagsAction,
-	updateTag as updateTagAction,
+    createTag as createTagAction,
+    deleteTag as deleteTagAction,
+    getTags as getTagsAction,
+    updateTag as updateTagAction,
 } from '@/app/actions/tags';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { transformTag } from '@/transformers/tag';
-import type { TagComplete, TagCreateInput, TagUpdateInput } from '@/types/entities/tag';
+import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
 
 // Logger específico para el servicio de etiquetas
 const tagLogger = serverLogger.withContext('TagService');
@@ -28,46 +27,42 @@ export enum TAG_EVENTS {
 	STATS = 'tag:stats',
 }
 
-// Tipos para los callbacks
+// Tipos para callbacks
+type TagCallback = (tag: TagWithStats) => void;
+type TagsCallback = (tags: TagWithStats[]) => void;
 type ErrorCallback = (error: ErrorResponse) => void;
-type TagCallback = (tag: TagComplete) => void;
-type TagsCallback = (tags: TagComplete[]) => void;
 
-// 📊 Estado interno del servicio
-type ServiceState = {
-	operationsInProgress: Map<string, boolean>;
-	eventCallbacks: Map<string, Set<CallableFunction>>;
+// Estado interno del servicio
+const state = {
+	operationsInProgress: new Map<string, Promise<any>>(),
+	eventCallbacks: new Map<string, Set<Function>>(),
 };
-
-// Estado inicial
-const state: ServiceState = {
-	operationsInProgress: new Map(),
-	eventCallbacks: new Map(),
-};
-
-// 🛠️ Funciones auxiliares internas
 
 /**
- * Añade un callback para un evento específico
- * @param event Nombre del evento
- * @param callback Función a ejecutar cuando ocurra el evento
+ * Implementa control de concurrencia para evitar operaciones duplicadas
+ * @param operationKey Clave única para la operación
+ * @param operation Función a ejecutar
+ * @returns Resultado de la operación
  */
-const addCallback = (event: string, callback: CallableFunction): void => {
-	if (!state.eventCallbacks.has(event)) {
-		state.eventCallbacks.set(event, new Set());
+const withConcurrencyControl = async <T>(operationKey: string, operation: () => Promise<T>): Promise<T> => {
+	// Si ya hay una operación en progreso con la misma clave, esperar a que termine
+	const existingOperation = state.operationsInProgress.get(operationKey);
+	if (existingOperation) {
+		tagLogger.debug(`⏳ Esperando operación en progreso: ${operationKey}`);
+		return existingOperation;
 	}
-	state.eventCallbacks.get(event)?.add(callback);
-	tagLogger.debug(`🎧 Callback registrado para evento ${event}`);
-};
 
-/**
- * Elimina un callback para un evento específico
- * @param event Nombre del evento
- * @param callback Función a eliminar
- */
-const removeCallback = (event: string, callback: CallableFunction): void => {
-	state.eventCallbacks.get(event)?.delete(callback);
-	tagLogger.debug(`🛑 Callback eliminado para evento ${event}`);
+	// Ejecutar la operación y manejar el estado
+	const operationPromise = operation()
+		.finally(() => {
+			// Limpiar del estado cuando termine (éxito o error)
+			state.operationsInProgress.delete(operationKey);
+		});
+
+	// Guardar la promesa en el estado
+	state.operationsInProgress.set(operationKey, operationPromise);
+
+	return operationPromise;
 };
 
 /**
@@ -132,21 +127,26 @@ const emitEvent = async (event: string, ...args: unknown[]): Promise<void> => {
 };
 
 /**
- * Control de concurrencia para operaciones asíncronas
- * @param operation Identificador único de la operación
- * @param fn Función a ejecutar
- * @returns Resultado de la función
+ * Añade un callback para un evento específico
+ * @param event Nombre del evento
+ * @param callback Función callback
  */
-const withConcurrencyControl = async <T>(operation: string, fn: () => Promise<T>): Promise<T> => {
-	if (state.operationsInProgress.get(operation)) {
-		throw new Error(`Operación ${operation} en progreso`);
+const addCallback = (event: string, callback: Function): void => {
+	if (!state.eventCallbacks.has(event)) {
+		state.eventCallbacks.set(event, new Set());
 	}
+	state.eventCallbacks.get(event)!.add(callback);
+};
 
-	state.operationsInProgress.set(operation, true);
-	try {
-		return await fn();
-	} finally {
-		state.operationsInProgress.delete(operation);
+/**
+ * Elimina un callback para un evento específico
+ * @param event Nombre del evento
+ * @param callback Función callback a eliminar
+ */
+const removeCallback = (event: string, callback: Function): void => {
+	const callbacks = state.eventCallbacks.get(event);
+	if (callbacks) {
+		callbacks.delete(callback);
 	}
 };
 
@@ -154,20 +154,17 @@ const withConcurrencyControl = async <T>(operation: string, fn: () => Promise<T>
 
 /**
  * Obtiene todas las etiquetas del sistema
- * @returns Lista de etiquetas
+ * @returns Lista de etiquetas con estadísticas
  */
-export const getTags = async () => {
+export const getTags = async (): Promise<TagWithStats[]> => {
 	return withConcurrencyControl('getTags', async () => {
 		try {
 			tagLogger.info('🏷️ Obteniendo lista de etiquetas...');
 			const tags = await getTagsAction();
 
-			// Transformar los resultados usando el transformador
-			const transformedTags = tags.map(transformTag);
-
-			tagLogger.info(`✅ ${transformedTags.length} etiquetas obtenidas`);
-			await emitEvent(TAG_EVENTS.STATS, { totalTags: transformedTags.length });
-			return transformedTags;
+			tagLogger.info(`✅ ${tags.length} etiquetas obtenidas`);
+			await emitEvent(TAG_EVENTS.STATS, { totalTags: tags.length });
+			return tags;
 		} catch (error) {
 			const errorResponse: ErrorResponse = {
 				message: error instanceof Error ? error.message : 'Error obteniendo etiquetas',
@@ -184,9 +181,9 @@ export const getTags = async () => {
 /**
  * Crea una nueva etiqueta
  * @param data Datos de la etiqueta a crear
- * @returns Etiqueta creada
+ * @returns Etiqueta creada con estadísticas
  */
-export const createTag = async (data: TagCreateInput) => {
+export const createTag = async (data: TagCreateInput): Promise<TagWithStats> => {
 	return withConcurrencyControl('createTag', async () => {
 		try {
 			tagLogger.info('➕ Creando nueva etiqueta:', data);
@@ -197,13 +194,10 @@ export const createTag = async (data: TagCreateInput) => {
 				throw new Error('Respuesta inválida al crear etiqueta');
 			}
 
-			// Transformar el resultado usando el transformador
-			const transformedTag = transformTag(tag);
+			tagLogger.info('✅ Etiqueta creada:', tag);
+			await emitEvent(TAG_EVENTS.CREATED, tag);
 
-			tagLogger.info('✅ Etiqueta creada:', transformedTag);
-			await emitEvent(TAG_EVENTS.CREATED, transformedTag);
-
-			return transformedTag;
+			return tag;
 		} catch (error) {
 			const errorResponse: ErrorResponse = {
 				message: error instanceof Error ? error.message : 'Error creando etiqueta',
@@ -221,9 +215,9 @@ export const createTag = async (data: TagCreateInput) => {
  * Actualiza una etiqueta existente
  * @param id ID de la etiqueta a actualizar
  * @param data Datos a actualizar
- * @returns Etiqueta actualizada
+ * @returns Etiqueta actualizada con estadísticas
  */
-export const updateTag = async (id: string, data: TagUpdateInput) => {
+export const updateTag = async (id: string, data: TagUpdateInput): Promise<TagWithStats> => {
 	return withConcurrencyControl(`updateTag:${id}`, async () => {
 		try {
 			tagLogger.info('🔄 Actualizando etiqueta:', { id, data });
@@ -234,13 +228,10 @@ export const updateTag = async (id: string, data: TagUpdateInput) => {
 				throw new Error('Respuesta inválida al actualizar etiqueta');
 			}
 
-			// Transformar el resultado usando el transformador
-			const transformedTag = transformTag(tag);
+			tagLogger.info('✅ Etiqueta actualizada:', tag);
+			await emitEvent(TAG_EVENTS.UPDATED, tag);
 
-			tagLogger.info('✅ Etiqueta actualizada:', transformedTag);
-			await emitEvent(TAG_EVENTS.UPDATED, transformedTag);
-
-			return transformedTag;
+			return tag;
 		} catch (error) {
 			const errorResponse: ErrorResponse = {
 				message: error instanceof Error ? error.message : 'Error actualizando etiqueta',
@@ -258,26 +249,16 @@ export const updateTag = async (id: string, data: TagUpdateInput) => {
 /**
  * Elimina una etiqueta existente
  * @param id ID de la etiqueta a eliminar
- * @returns Etiqueta eliminada
  */
-export const deleteTag = async (id: string) => {
+export const deleteTag = async (id: string): Promise<void> => {
 	return withConcurrencyControl(`deleteTag:${id}`, async () => {
 		try {
 			tagLogger.info('🗑️ Eliminando etiqueta:', id);
 
-			const tag = await deleteTagAction(id);
+			await deleteTagAction(id);
 
-			if (!tag || !tag.id) {
-				throw new Error('Respuesta inválida al eliminar etiqueta');
-			}
-
-			// Transformar el resultado usando el transformador
-			const transformedTag = transformTag(tag);
-
-			tagLogger.info('✅ Etiqueta eliminada:', transformedTag);
-			await emitEvent(TAG_EVENTS.DELETED, transformedTag);
-
-			return transformedTag;
+			tagLogger.info('✅ Etiqueta eliminada:', id);
+			await emitEvent(TAG_EVENTS.DELETED, { id });
 		} catch (error) {
 			const errorResponse: ErrorResponse = {
 				message: error instanceof Error ? error.message : 'Error eliminando etiqueta',
@@ -292,51 +273,7 @@ export const deleteTag = async (id: string) => {
 	});
 };
 
-// 🔄 Gestión de eventos
-
-/**
- * Registra un callback para un evento específico
- * @param event Nombre del evento
- * @param callback Función a ejecutar cuando ocurra el evento
- */
-export const on = (event: string, callback: CallableFunction): void => {
-	addCallback(event, callback);
-};
-
-/**
- * Elimina un callback para un evento específico
- * @param event Nombre del evento
- * @param callback Función a eliminar
- */
-export const off = (event: string, callback: CallableFunction): void => {
-	removeCallback(event, callback);
-};
-
-/**
- * Elimina todos los callbacks para todos los eventos
- */
-export const offAll = (): void => {
-	state.eventCallbacks.clear();
-	tagLogger.debug('🧹 Todos los callbacks eliminados');
-};
-
-// 📌 Helpers específicos por tipo de evento
-
-/**
- * Registra un callback para errores
- * @param callback Función a ejecutar cuando ocurra un error
- */
-export const onError = (callback: ErrorCallback): void => {
-	addCallback(TAG_EVENTS.ERROR, callback);
-};
-
-/**
- * Elimina un callback para errores
- * @param callback Función a eliminar
- */
-export const offError = (callback: ErrorCallback): void => {
-	removeCallback(TAG_EVENTS.ERROR, callback);
-};
+// 🎯 Funciones de gestión de eventos
 
 /**
  * Registra un callback para cuando se crea una etiqueta
@@ -374,7 +311,7 @@ export const offUpdated = (callback: TagCallback): void => {
  * Registra un callback para cuando se elimina una etiqueta
  * @param callback Función a ejecutar cuando se elimine una etiqueta
  */
-export const onDeleted = (callback: TagCallback): void => {
+export const onDeleted = (callback: (data: { id: string }) => void): void => {
 	addCallback(TAG_EVENTS.DELETED, callback);
 };
 
@@ -382,6 +319,62 @@ export const onDeleted = (callback: TagCallback): void => {
  * Elimina un callback para cuando se elimina una etiqueta
  * @param callback Función a eliminar
  */
-export const offDeleted = (callback: TagCallback): void => {
+export const offDeleted = (callback: (data: { id: string }) => void): void => {
 	removeCallback(TAG_EVENTS.DELETED, callback);
+};
+
+/**
+ * Registra un callback para errores del servicio
+ * @param callback Función a ejecutar cuando ocurra un error
+ */
+export const onError = (callback: ErrorCallback): void => {
+	addCallback(TAG_EVENTS.ERROR, callback);
+};
+
+/**
+ * Elimina un callback para errores del servicio
+ * @param callback Función a eliminar
+ */
+export const offError = (callback: ErrorCallback): void => {
+	removeCallback(TAG_EVENTS.ERROR, callback);
+};
+
+/**
+ * Registra un callback para estadísticas del servicio
+ * @param callback Función a ejecutar cuando se actualicen las estadísticas
+ */
+export const onStats = (callback: (stats: { totalTags: number }) => void): void => {
+	addCallback(TAG_EVENTS.STATS, callback);
+};
+
+/**
+ * Elimina un callback para estadísticas del servicio
+ * @param callback Función a eliminar
+ */
+export const offStats = (callback: (stats: { totalTags: number }) => void): void => {
+	removeCallback(TAG_EVENTS.STATS, callback);
+};
+
+// 🔧 Funciones de utilidad
+
+/**
+ * Obtiene información sobre el estado actual del servicio
+ * @returns Información de estado del servicio
+ */
+export const getServiceStatus = () => {
+	return {
+		operationsInProgress: state.operationsInProgress.size,
+		registeredCallbacks: Array.from(state.eventCallbacks.entries()).map(([event, callbacks]) => ({
+			event,
+			callbackCount: callbacks.size,
+		})),
+	};
+};
+
+/**
+ * Limpia todos los callbacks registrados (útil para testing)
+ */
+export const clearAllCallbacks = (): void => {
+	state.eventCallbacks.clear();
+	tagLogger.debug('🧹 Todos los callbacks han sido limpiados');
 };

@@ -25,7 +25,7 @@ export function mapCreateFolderDataToPrisma(data: FolderCreateInput): Prisma.Fol
 	try {
 		return {
 			name: data.name,
-			path: data.path.replace(/\\/g, '/'), // Normalizar a slashes
+			path: data.path,
 			autoReindex: data.autoReindex,
 			description: data.description ?? null,
 			emoji: data.emoji ?? null,
@@ -52,8 +52,9 @@ export function mapUpdateFolderDataToPrisma(data: FolderUpdateInput): Prisma.Fol
 	try {
 		const prismaData: Prisma.FolderUpdateInput = { ...data };
 		if (data.path) {
-			prismaData.path = data.path.replace(/\\/g, '/');
+			prismaData.path = data.path;
 		}
+		prismaData.updatedAt = new Date();
 		return prismaData;
 	} catch (error) {
 		logger.error('Error mapeando datos de actualización de carpeta', { error, data });

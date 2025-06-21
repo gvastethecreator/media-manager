@@ -1,13 +1,13 @@
 'use server';
 
-import { mkdir, writeFile } from 'fs/promises';
-import { revalidatePath } from 'next/cache';
-import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { uploadedImagesService } from '@/services/uploaded-images';
 import { UploadedImageCreateInput, UploadedImageType } from '@/types/entities/uploaded-image';
 import type { UploadedImageFilters } from '@/types/uploaded-images';
+import { mkdir, writeFile } from 'fs/promises';
+import { revalidatePath } from 'next/cache';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 const actionLogger = serverLogger.withContext('ServerAction:UploadedImages');
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
@@ -94,18 +94,17 @@ export async function uploadImages(formData: FormData) {
 						size: file.size,
 					},
 					dimensions,
-					metadata: {
+					metadata: JSON.stringify({
 						originalName: file.name,
 						mimeType: file.type,
-					},
+					}),
 				});
 
-				// El service ya usa el transformer, solo agregamos el resultado
+				// El service devuelve un tipo base. La URL se construye en el cliente.
 				results.push({
 					id: imageRecord.id,
 					name: imageRecord.name,
 					path: imageRecord.path,
-					url: imageRecord.url,
 					success: true,
 				});
 			} catch (err) {

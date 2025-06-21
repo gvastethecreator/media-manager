@@ -4,15 +4,16 @@
  */
 
 // Re-exportar todos los tipos desde los módulos correspondientes
+export * from './base';
 export * from './enums';
 export * from './extended';
 export * from './schema';
 export type {
-	PromptComplete as Prompt,
-	PromptComplete,
-	PromptCreateInput,
-	PromptUpdateInput,
-	PromptParameter,
-	PromptSearchOptions,
+    PromptComplete as Prompt,
+    PromptComplete,
+    PromptCreateInput,
+    PromptParameter,
+    PromptSearchOptions,
+    PromptUpdateInput
 } from './types';
 

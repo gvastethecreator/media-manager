@@ -1,30 +1,38 @@
 /**
- * @file Tipos para la entidad Video
+ * @file Exportaciones principales para la entidad Video
  * @module types/entities/video
- *
- * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types' y enums desde './enums'.
- * Legacy eliminado.
+ * @description Barrel de exportaciones optimizado para Video con patrón EntityWithStats
  */
 
-export * from './enums';
-export { VideoSchema } from './types';
+// 🎬 Tipos principales (solo canónicos)
+// 🔄 Inputs y operaciones
+// 📊 Estadísticas y estado
 export type {
-	CreateVideoData,
-	PaginatedVideos,
-	UpdateVideoData,
-	// Alias para retrocompatibilidad
-	VideoComplete as Video,
-	VideoBase,
-	VideoComplete,
-	VideoCreateInput,
-	VideoExtended,
-	VideoFilters,
-	VideoMetadata,
-	VideoPaginationOptions,
-	VideoRelations,
-	VideoStats,
-	VideoUI,
-	VideoUpdateInput,
+    PaginatedVideos,
+    PrismaVideoWithCounts,
+    VideoBase,
+    VideoComplete,
+    VideoCreateInput,
+    VideoFilters,
+    VideoPaginationOptions,
+    VideoPlayState,
+    VideoRelations,
+    VideoStatistics,
+    VideoStats,
+    VideoUpdateInput,
+    VideoWithStats
+} from './types';
+// 🎯 Enums
+// ⚡ Validación
+export {
+    VideoCodec,
+    VideoFormat,
+    VideoQuality, VideoSchema,
+    VideoSortCriteria,
+    VideoViewMode
 } from './types';
 
-// 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.
+// 🟢 Documentación:
+// - VideoWithStats es el tipo principal para toda la aplicación
+// - VideoComplete solo para casos especiales con relaciones completas
+// - PrismaVideoWithCounts para consultas optimizadas con _count

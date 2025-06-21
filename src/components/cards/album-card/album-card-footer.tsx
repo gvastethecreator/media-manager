@@ -41,7 +41,7 @@ export function AlbumCardFooter({
 
 				<div className="flex items-center gap-1">
 					<span className="text-muted-foreground">Tamaño:</span>
-					<span>{formatSize(album.totalSize)}</span>
+					<span>{formatSize(album.metadata?.totalSize)}</span>
 				</div>
 			</div>
 

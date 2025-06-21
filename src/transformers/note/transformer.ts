@@ -1,119 +1,240 @@
 /**
- * @file Transformadores principales para la entidad Note
+ * @file Transformer optimizado para la entidad Note
  * @module transformers/note/transformer
+ * @description Transformador principal que convierte datos de Prisma a NoteWithStats optimizado
+ * 🎯 Patrón: Solo conteos, sin relaciones completas para máximo rendimiento
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { NoteComplete } from '@/types/entities/note';
-import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
+import type {
+    NoteCreateInput,
+    NoteStatistics,
+    NoteUpdateInput,
+    NoteWithStats,
+    PrismaNoteWithCounts
+} from '@/types/entities/note';
+import { NoteCategory, NotePriority, NoteStatus } from '@/types/entities/note';
 
-const logger = serverLogger.withContext('NoteTransformer');
+/**
+ * 📝 Convierte datos de Prisma con conteos a NoteWithStats optimizado
+ * @param data - Datos de Prisma con _count
+ * @returns Note optimizado con estadísticas pre-calculadas
+ */
+export function fromPrismaNoteWithCounts(data: PrismaNoteWithCounts): NoteWithStats {
+	const statistics = calculateNoteStatistics(data);
 
-type PrismaNoteComplete = Prisma.NoteGetPayload<{
-	include: {
-		images: true;
-		videos: true;
-		albums: true;
-		collections: true;
-		tags: true;
-		characters: true;
-		places: true;
-		worldItems: true;
-		concepts: true;
-		prompts: true;
-		wildcards: true;
-		properties: true;
-		groups: true;
-		_count: {
-			select: {
-				images: true;
-				videos: true;
-				albums: true;
-				collections: true;
-				tags: true;
-				characters: true;
-				places: true;
-				worldItems: true;
-				concepts: true;
-				prompts: true;
-				wildcards: true;
-				properties: true;
-				groups: true;
-			};
-		};
+	return {
+		id: data.id,
+		title: data.title,
+		content: data.content,
+		category: data.category,
+		priority: data.priority,
+		status: data.status,
+		color: data.color,
+		emoji: data.emoji,
+		featuredImage: data.featuredImage,
+		isFavorite: data.isFavorite,
+		presetId: data.presetId,
+		createdAt: data.createdAt,
+		updatedAt: data.updatedAt,
+		statistics,
+		// Campos derivados calculados
+		excerpt: generateExcerpt(data.content),
+		formattedDate: formatDate(data.updatedAt),
+		priorityLabel: getPriorityLabel(data.priority),
+		statusLabel: getStatusLabel(data.status),
+		categoryLabel: getCategoryLabel(data.category),
 	};
-}>;
+}
 
 /**
- * 🔄 Transforma un objeto Note de Prisma a nuestro tipo canónico NoteComplete.
- *
- * @param prismaNote - El objeto Note obtenido de Prisma.
- * @returns Un objeto NoteComplete compatible con nuestra aplicación o null.
- * @throws {TransformerError} Si hay un error durante la transformación.
+ * 📊 Calcula estadísticas completas para una nota
  */
-export function fromPrismaNote(prismaNote: PrismaNoteComplete | null): NoteComplete | null {
-	if (!prismaNote) {
-		return null;
-	}
+function calculateNoteStatistics(data: PrismaNoteWithCounts): NoteStatistics {
+	const totalItems = Object.values(data._count).reduce((sum, count) => sum + count, 0);
+	const wordCount = calculateWordCount(data.content);
+	const characterCount = data.content.length;
+	const readingTime = Math.ceil(wordCount / 200); // ~200 palabras por minuto
+	const completionScore = calculateCompletionScore(data, totalItems);
 
-	try {
-		const { _count, ...baseData } = prismaNote;
+	return {
+		totalItems,
+		totalImages: data._count.images,
+		totalVideos: data._count.videos,
+		totalAlbums: data._count.albums,
+		totalCollections: data._count.collections,
+		totalTags: data._count.tags,
+		totalCharacters: data._count.characters,
+		totalPlaces: data._count.places,
+		totalWorldItems: data._count.worldItems,
+		totalConcepts: data._count.concepts,
+		totalPrompts: data._count.prompts,
+		totalWildcards: data._count.wildcards,
+		totalProperties: data._count.properties,
+		totalGroups: data._count.groups,
+		wordCount,
+		characterCount,
+		readingTime,
+		completionScore,
+		lastUpdated: new Date(),
+	};
+}
 
-		return {
-			...baseData,
-			// Asegurar que las relaciones opcionales no sean undefined
-			images: baseData.images ?? [],
-			videos: baseData.videos ?? [],
-			albums: baseData.albums ?? [],
-			collections: baseData.collections ?? [],
-			tags: baseData.tags ?? [],
-			characters: baseData.characters ?? [],
-			places: baseData.places ?? [],
-			worldItems: baseData.worldItems ?? [],
-			concepts: baseData.concepts ?? [],
-			prompts: baseData.prompts ?? [],
-			wildcards: baseData.wildcards ?? [],
-			properties: baseData.properties ?? [],
-			groups: baseData.groups ?? [],
-			// Asignar el conteo de forma segura
-			_count: {
-				images: _count?.images ?? 0,
-				videos: _count?.videos ?? 0,
-				albums: _count?.albums ?? 0,
-				collections: _count?.collections ?? 0,
-				tags: _count?.tags ?? 0,
-				characters: _count?.characters ?? 0,
-				places: _count?.places ?? 0,
-				worldItems: _count?.worldItems ?? 0,
-				concepts: _count?.concepts ?? 0,
-				prompts: _count?.prompts ?? 0,
-				wildcards: _count?.wildcards ?? 0,
-				properties: _count?.properties ?? 0,
-				groups: _count?.groups ?? 0,
-			},
-		};
-	} catch (error) {
-		logger.error('Error transformando nota desde Prisma', {
-			error,
-			noteId: prismaNote?.id,
-		});
-		throw new TransformerError(`Error al transformar la nota: ${(error as Error).message}`);
+/**
+ * 📊 Calcula score de completitud de la nota (0-100)
+ */
+function calculateCompletionScore(data: PrismaNoteWithCounts, totalItems: number): number {
+	let score = 0;
+
+	// Contenido base (40 puntos)
+	if (data.title.length > 0) score += 10;
+	if (data.content.length > 50) score += 20;
+	if (data.content.length > 200) score += 10;
+
+	// Categorización (20 puntos)
+	if (data.category && data.category !== 'general') score += 10;
+	if (data.priority > 0) score += 5;
+	if (data.status !== 'draft') score += 5;
+
+	// Metadatos (20 puntos)
+	if (data.featuredImage) score += 10;
+	if (data.color) score += 5;
+	if (data.emoji) score += 5;
+
+	// Relaciones (20 puntos)
+	if (totalItems > 0) score += 10;
+	if (totalItems > 5) score += 5;
+	if (totalItems > 10) score += 5;
+
+	return Math.min(score, 100);
+}
+
+/**
+ * 📝 Genera excerpt automático del contenido
+ */
+function generateExcerpt(content: string, maxLength = 150): string {
+	if (!content) return '';
+
+	const cleaned = content.replace(/[#*_`]/g, '').trim();
+	if (cleaned.length <= maxLength) return cleaned;
+
+	const truncated = cleaned.substring(0, maxLength);
+	const lastSpace = truncated.lastIndexOf(' ');
+
+	return lastSpace > maxLength * 0.8
+		? truncated.substring(0, lastSpace) + '...'
+		: truncated + '...';
+}
+
+/**
+ * 📅 Formatea fecha para mostrar
+ */
+function formatDate(date: Date): string {
+	const now = new Date();
+	const diffMs = now.getTime() - date.getTime();
+	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+	if (diffDays === 0) return 'Hoy';
+	if (diffDays === 1) return 'Ayer';
+	if (diffDays < 7) return `Hace ${diffDays} días`;
+	if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
+
+	return date.toLocaleDateString('es-ES', {
+		year: 'numeric',
+		month: 'short',
+		day: 'numeric'
+	});
+}
+
+/**
+ * 🏷️ Obtiene etiqueta legible de prioridad
+ */
+function getPriorityLabel(priority: number): string {
+	switch (priority) {
+		case NotePriority.HIGHEST: return 'Crítica';
+		case NotePriority.HIGH: return 'Alta';
+		case NotePriority.MEDIUM: return 'Media';
+		case NotePriority.LOW: return 'Baja';
+		case NotePriority.LOWEST: return 'Mínima';
+		default: return 'Sin definir';
 	}
 }
 
 /**
- * 🔄 Transforma una lista de notas de Prisma a una lista de NoteComplete.
- *
- * @param prismaNotes - Un array de objetos Note de Prisma.
- * @returns Un array de objetos NoteComplete.
+ * 📊 Obtiene etiqueta legible de estado
  */
-export function fromPrismaNotes(prismaNotes: PrismaNoteComplete[]): NoteComplete[] {
-	return prismaNotes.map(fromPrismaNote).filter((note): note is NoteComplete => note !== null);
+function getStatusLabel(status: string): string {
+	switch (status) {
+		case NoteStatus.ACTIVE: return 'Activa';
+		case NoteStatus.DRAFT: return 'Borrador';
+		case NoteStatus.COMPLETED: return 'Completada';
+		case NoteStatus.ARCHIVED: return 'Archivada';
+		case NoteStatus.PENDING: return 'Pendiente';
+		default: return 'Sin estado';
+	}
 }
 
-// Alias para compatibilidad con código existente
-export const transformNote = fromPrismaNote;
-export const transformNotes = fromPrismaNotes;
-export const toCreateNoteData = (data: any) => data;
-export const toUpdateNoteData = (data: any) => data;
+/**
+ * 📂 Obtiene etiqueta legible de categoría
+ */
+function getCategoryLabel(category: string): string {
+	switch (category) {
+		case NoteCategory.GENERAL: return 'General';
+		case NoteCategory.STORY: return 'Historia';
+		case NoteCategory.LORE: return 'Lore';
+		case NoteCategory.MECHANICS: return 'Mecánicas';
+		case NoteCategory.CHARACTER: return 'Personaje';
+		case NoteCategory.PLACE: return 'Lugar';
+		case NoteCategory.WORLD_ITEM: return 'Objeto';
+		case NoteCategory.PROMPT: return 'Prompt';
+		case NoteCategory.IDEA: return 'Idea';
+		case NoteCategory.TODO: return 'Tarea';
+		default: return 'Sin categoría';
+	}
+}
+
+/**
+ * 📊 Calcula número de palabras en el contenido
+ */
+function calculateWordCount(content: string): number {
+	if (!content) return 0;
+	return content.trim().split(/\s+/).filter(word => word.length > 0).length;
+}
+
+/**
+ * 🔄 Convierte NoteCreateInput a formato Prisma
+ */
+export function toPrismaNoteCreate(input: NoteCreateInput) {
+	return {
+		title: input.title,
+		content: input.content || '',
+		category: input.category || NoteCategory.GENERAL,
+		priority: input.priority || NotePriority.MEDIUM,
+		status: input.status || NoteStatus.DRAFT,
+		color: input.color,
+		emoji: input.emoji,
+		featuredImage: input.featuredImage,
+		isFavorite: input.isFavorite || false,
+		presetId: input.presetId,
+		// Relaciones se manejan por separado
+	};
+}
+
+/**
+ * 🔄 Convierte NoteUpdateInput a formato Prisma
+ */
+export function toPrismaNoteUpdate(input: NoteUpdateInput) {
+	const updateData: Record<string, any> = {};
+
+	if (input.title !== undefined) updateData.title = input.title;
+	if (input.content !== undefined) updateData.content = input.content;
+	if (input.category !== undefined) updateData.category = input.category;
+	if (input.priority !== undefined) updateData.priority = input.priority;
+	if (input.status !== undefined) updateData.status = input.status;
+	if (input.color !== undefined) updateData.color = input.color;
+	if (input.emoji !== undefined) updateData.emoji = input.emoji;
+	if (input.featuredImage !== undefined) updateData.featuredImage = input.featuredImage;
+	if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
+	if (input.presetId !== undefined) updateData.presetId = input.presetId;
+
+	return updateData;
+}

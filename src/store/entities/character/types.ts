@@ -1,172 +1,149 @@
 /**
- * @file Tipos específicos para el store de Character
+ * @file Tipos para el store de Character
  * @module store/entities/character/types
  */
 
-import type {
-	CharacterBase,
-	CharacterExtended,
-	CharacterFilterItem,
-	CharacterViewConfig,
-} from '@/types/entities/character';
-
-// Importar enums desde el archivo de enums
-import {
-	CharacterAlignment,
-	CharacterCategory,
-	CharacterClass,
-	CharacterRace,
-	CharacterSortOption,
-} from '@/types/entities/character/enums';
+import type { CharacterFilterItem, CharacterViewConfig, CharacterWithStats } from '@/types/entities/character';
+import type { CharacterSortOption } from '@/types/entities/character/enums';
 
 /**
- * Estado base para el store de Character
+ * 🎭 Función de utilidad para convertir array a Record
+ * @param characters Array de personajes
+ * @returns Record con personajes indexados por ID
+ */
+export function charactersToRecord(characters: CharacterWithStats[]): Record<string, CharacterWithStats> {
+	return characters.reduce(
+		(acc, character) => {
+			acc[character.id] = character;
+			return acc;
+		},
+		{} as Record<string, CharacterWithStats>
+	);
+}
+
+/**
+ * 🎭 Función de utilidad para obtener personaje por ID
+ * @param characters Record de personajes
+ * @param id ID del personaje
+ * @returns Personaje encontrado o undefined
+ */
+export function getCharacterById(characters: Record<string, CharacterWithStats>, id: string): CharacterWithStats | undefined {
+	return characters[id];
+}
+
+/**
+ * 🎭 Función de utilidad para obtener todos los personajes como array
+ * @param characters Record de personajes
+ * @returns Array de personajes
+ */
+export function getAllCharacters(characters: Record<string, CharacterWithStats>): CharacterWithStats[] {
+	return Object.values(characters);
+}
+
+/**
+ * 🎭 Estado principal del store de Character
  */
 export interface CharacterState {
-	// Datos principales
-	characters: Record<string, CharacterExtended>;
+	// 📦 Datos principales
+	characters: Record<string, CharacterWithStats>; // 🎭 Personajes con estadísticas pre-calculadas
 
-	// Estado UI
+	// 🎨 Estado UI
 	viewConfig: CharacterViewConfig;
 	selectedCharacterId: string | null;
 	hoveredCharacterId: string | null;
 	expandedCharacterIds: string[];
 
-	// Estado de carga y errores
+	// ⏳ Estado de carga y errores
 	isLoading: boolean;
 	error: string | null;
 
-	// Filtrado y ordenamiento
+	// 🔍 Filtrado y ordenamiento
 	activeFilters: CharacterFilterItem[];
 	searchTerm: string;
 	defaultSortOption: CharacterSortOption;
 	currentSortOption: CharacterSortOption;
 
-	// Agrupamiento
-	groupBy: 'none' | 'class' | 'race' | 'category' | 'level';
+	// 📊 Agrupamiento
+	groupBy: string;
 }
 
 /**
- * Tipo para las acciones principales del store
- * (operaciones CRUD y gestión de datos)
+ * 🎭 Slice principal con operaciones CRUD
  */
 export interface CharacterCoreSlice {
-	// Operaciones principales CRUD
-	addCharacter: (character: CharacterBase | CharacterExtended) => void;
-	updateCharacter: (characterId: string, updates: Partial<CharacterBase>) => void;
-	removeCharacter: (characterId: string) => void;
+	// ➕ Operaciones de escritura
+	addCharacter: (character: CharacterWithStats) => void;
+	bulkAddCharacters: (characters: CharacterWithStats[]) => void;
+	updateCharacter: (id: string, updates: Partial<CharacterWithStats>) => void;
+	bulkUpdateCharacters: (updates: Array<{ id: string; updates: Partial<CharacterWithStats> }>) => void;
+	removeCharacter: (id: string) => void;
+	bulkRemoveCharacters: (ids: string[]) => void;
+	clearCharacters: () => void;
 
-	// Operaciones por lotes
-	bulkAddCharacters: (characters: (CharacterBase | CharacterExtended)[]) => void;
-	bulkUpdateCharacters: (updates: Array<{ id: string; data: Partial<CharacterBase> }>) => void;
-	bulkRemoveCharacters: (characterIds: string[]) => void;
+	// 📖 Operaciones de lectura
+	getCharacterById: (id: string) => CharacterWithStats | undefined;
+	getAllCharacters: () => CharacterWithStats[];
+	getCharactersByIds: (ids: string[]) => CharacterWithStats[];
 
-	// Operaciones especializadas
-	toggleFavorite: (characterId: string) => void;
-	setFeaturedImage: (characterId: string, imageId: string | null) => void;
-	incrementLevel: (characterId: string) => void;
-	decrementLevel: (characterId: string) => void;
-
-	// Gestión del estado de carga
-	setLoading: (isLoading: boolean) => void;
-	setError: (error: string | null) => void;
-	clearError: () => void;
-
-	// Operaciones avanzadas
-	addRelationship: (characterId: string, targetId: string, targetName: string, type: string, strength: number) => void;
-	removeRelationship: (characterId: string, targetId: string) => void;
-
-	// Gestión de relaciones
-	getCharacterGroups: (characterId: string) => string[];
-	getCharacterProperties: (characterId: string) => string[];
-	getCharacterWildcards: (characterId: string) => string[];
-
-	addGroupToCharacter: (characterId: string, groupId: string) => void;
-	removeGroupFromCharacter: (characterId: string, groupId: string) => void;
-
-	addPropertyToCharacter: (characterId: string, propertyId: string) => void;
-	removePropertyFromCharacter: (characterId: string, propertyId: string) => void;
-
-	addWildcardToCharacter: (characterId: string, wildcardId: string) => void;
-	removeWildcardFromCharacter: (characterId: string, wildcardId: string) => void;
-
-	updateCharacterRelations: (
-		characterId: string,
-		data: {
-			groupIds?: string[];
-			propertyIds?: string[];
-			wildcardIds?: string[];
-		}
-	) => void;
-
-	// Operaciones de restablecimiento
-	resetCharacters: () => void;
-	resetState: () => void;
+	// 🔄 Operaciones de sincronización
+	syncCharacters: (characters: CharacterWithStats[]) => void;
+	refreshCharacter: (id: string) => Promise<void>;
+	refreshAllCharacters: () => Promise<void>;
 }
 
 /**
- * Tipo para el slice que maneja la UI y el estado visual
+ * 🎨 Slice de interfaz de usuario
  */
 export interface CharacterUISlice {
-	// Configuración de vista
-	getViewConfig: () => CharacterViewConfig;
-	setViewConfig: (config: Partial<CharacterViewConfig>) => void;
-	setGridColumns: (columns: number) => void;
-	setCardSize: (size: 'small' | 'medium' | 'large') => void;
+	// 🎯 Selección
+	selectCharacter: (id: string | null) => void;
+	toggleCharacterSelection: (id: string) => void;
+	clearSelection: () => void;
 
-	// Selección, hover y expandido
-	selectCharacter: (characterId: string | null) => void;
-	hoverCharacter: (characterId: string | null) => void;
-	toggleExpandCharacter: (characterId: string) => void;
-	expandCharacter: (characterId: string) => void;
-	collapseCharacter: (characterId: string) => void;
+	// 🖱️ Hover
+	setHoveredCharacter: (id: string | null) => void;
 
-	// Estados múltiples
+	// 📂 Expansión
+	toggleCharacterExpansion: (id: string) => void;
+	expandCharacter: (id: string) => void;
+	collapseCharacter: (id: string) => void;
 	expandAllCharacters: () => void;
 	collapseAllCharacters: () => void;
 
-	// Estado de carga por personaje
-	setCharacterLoading: (characterId: string, isLoading: boolean) => void;
-	setCharacterError: (characterId: string, hasError: boolean) => void;
-
-	// Restablecimiento de UI
-	resetUIState: () => void;
+	// ⚙️ Configuración de vista
+	updateViewConfig: (config: Partial<CharacterViewConfig>) => void;
+	resetViewConfig: () => void;
 }
 
 /**
- * Tipo para el slice que maneja filtros y ordenamiento
+ * 🔍 Slice de filtrado y ordenamiento
  */
 export interface CharacterFiltersSlice {
-	// Filtros por criterios específicos
-	filterByClass: (characterClass: CharacterClass | null) => void;
-	filterByRace: (race: CharacterRace | null) => void;
-	filterByLevel: (minLevel: number | null, maxLevel: number | null) => void;
-	filterByCategory: (category: CharacterCategory | null) => void;
-	filterByAlignment: (alignment: CharacterAlignment | null) => void;
-	filterByText: (searchTerm: string) => void;
-	filterByFavorites: (onlyFavorites: boolean) => void;
+	// 🔍 Búsqueda
+	setSearchTerm: (term: string) => void;
+	clearSearch: () => void;
 
-	// Obtener caracteres filtrados/ordenados
-	getSortedCharacters: (sortOption?: CharacterSortOption) => CharacterExtended[];
-	getGroupedCharacters: (
-		groupBy?: 'none' | 'class' | 'race' | 'category' | 'level'
-	) => Record<string, CharacterExtended[]>;
-	getFilteredCharacters: () => CharacterExtended[];
-	getCharactersByIds: (ids: string[]) => CharacterExtended[];
-
-	// Operaciones avanzadas de filtrado
+	// 🏷️ Filtros
 	addFilter: (filter: CharacterFilterItem) => void;
 	removeFilter: (filterId: string) => void;
 	clearFilters: () => void;
-	applyFilters: (filters: CharacterFilterItem[]) => void;
+	toggleFilter: (filter: CharacterFilterItem) => void;
 
-	// Configuración de ordenamiento
+	// 📊 Ordenamiento
 	setSortOption: (option: CharacterSortOption) => void;
-	setDefaultSortOption: (option: CharacterSortOption) => void;
+	toggleSortDirection: () => void;
+	resetSorting: () => void;
 
-	// Configuración de agrupamiento
-	setGroupBy: (groupBy: 'none' | 'class' | 'race' | 'category' | 'level') => void;
+	// 📊 Agrupamiento
+	setGroupBy: (groupBy: string) => void;
+
+	// 📖 Getters computados
+	getFilteredCharacters: () => CharacterWithStats[];
+	getSortedCharacters: () => CharacterWithStats[];
+	getGroupedCharacters: () => Record<string, CharacterWithStats[]>;
 }
 
-// Tipo completo del store Character
-export type CharacterStore = CharacterState & CharacterCoreSlice & CharacterUISlice & CharacterFiltersSlice;
+/**
+ * 🎭 Store completo de Character
+ */
+export interface CharacterStore extends CharacterState, CharacterCoreSlice, CharacterUISlice, CharacterFiltersSlice {}

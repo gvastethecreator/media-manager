@@ -1,9 +1,9 @@
 /**
- * @file Funciones auxiliares para la entidad Collection
+ * @file Funciones auxiliares para trabajar con colecciones
  * @module utils/collection/helpers
  */
 
-import type { CollectionExtended } from '@/types/entities/collection';
+import type { CollectionWithStats } from '@/types/entities/collection';
 import { CollectionSortOption } from '@/types/entities/collection';
 
 /**
@@ -13,39 +13,39 @@ import { CollectionSortOption } from '@/types/entities/collection';
  * @returns Array ordenado de colecciones
  */
 export function sortCollections(
-	collections: CollectionExtended[],
+	collections: CollectionWithStats[],
 	sortOption: CollectionSortOption | string
-): CollectionExtended[] {
+): CollectionWithStats[] {
 	const clonedCollections = [...collections];
 
 	switch (sortOption) {
 		case CollectionSortOption.NAME_ASC:
-			return clonedCollections.sort((a, b) => (a as any).name.localeCompare((b as any).name));
+			return clonedCollections.sort((a, b) => a.name.localeCompare(b.name));
 
 		case CollectionSortOption.NAME_DESC:
-			return clonedCollections.sort((a, b) => (b as any).name.localeCompare((a as any).name));
+			return clonedCollections.sort((a, b) => b.name.localeCompare(a.name));
 
 		case CollectionSortOption.DATE_ASC:
 			return clonedCollections.sort(
-				(a, b) => new Date((a as any).createdAt).getTime() - new Date((b as any).createdAt).getTime()
+				(a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
 			);
 
 		case CollectionSortOption.DATE_DESC:
 			return clonedCollections.sort(
-				(a, b) => new Date((b as any).createdAt).getTime() - new Date((a as any).createdAt).getTime()
+				(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 			);
 
 		case CollectionSortOption.ITEMS_ASC:
-			return clonedCollections.sort((a, b) => (a.imageCount || 0) - (b.imageCount || 0));
+			return clonedCollections.sort((a, b) => (a.stats?.totalItems || 0) - (b.stats?.totalItems || 0));
 
 		case CollectionSortOption.ITEMS_DESC:
-			return clonedCollections.sort((a, b) => (b.imageCount || 0) - (a.imageCount || 0));
+			return clonedCollections.sort((a, b) => (b.stats?.totalItems || 0) - (a.stats?.totalItems || 0));
 
 		case CollectionSortOption.PRICE_ASC:
-			return clonedCollections.sort((a, b) => ((a as any).price || 0) - ((b as any).price || 0));
+			return clonedCollections.sort((a, b) => (a.price || 0) - (b.price || 0));
 
 		case CollectionSortOption.PRICE_DESC:
-			return clonedCollections.sort((a, b) => ((b as any).price || 0) - ((a as any).price || 0));
+			return clonedCollections.sort((a, b) => (b.price || 0) - (a.price || 0));
 
 		default:
 			return clonedCollections;
@@ -53,22 +53,81 @@ export function sortCollections(
 }
 
 /**
- * Agrupa colecciones por una propiedad específica
- * @param collections Array de colecciones a agrupar
- * @param groupBy Propiedad por la que agrupar
- * @returns Objeto con grupos de colecciones
+ * 📚 Filtra colecciones por múltiples criterios
+ * @param collections Array de colecciones
+ * @param filters Objeto con criterios de filtrado
+ * @returns Array de colecciones filtradas
  */
-export function groupCollections(
-	collections: CollectionExtended[],
-	groupBy: 'category' | 'rarity' | 'platform' | null
-): Record<string, CollectionExtended[]> {
-	if (!groupBy) {
-		return { all: collections };
+export function filterCollections(
+	collections: CollectionWithStats[],
+	filters: any
+): CollectionWithStats[] {
+	if (!collections || collections.length === 0) {
+		return [];
+	}
+
+	return collections.filter((collection) => {
+		// Filtrar por categoría
+		if (filters.category && collection.category !== filters.category) {
+			return false;
+		}
+
+		// Filtrar por plataforma
+		if (filters.platform && collection.platform !== filters.platform) {
+			return false;
+		}
+
+		// Filtrar por favoritos
+		if (filters.isFavorite !== undefined && collection.isFavorite !== filters.isFavorite) {
+			return false;
+		}
+
+		// Filtrar por rango de precios
+		if (filters.minPrice !== undefined && (collection.price || 0) < filters.minPrice) {
+			return false;
+		}
+
+		if (filters.maxPrice !== undefined && (collection.price || 0) > filters.maxPrice) {
+			return false;
+		}
+
+		// Filtrar por número de imágenes
+		if (filters.minImages !== undefined) {
+			const imageCount = collection.stats?.totalImages || 0;
+			if (imageCount < filters.minImages) {
+				return false;
+			}
+		}
+
+		if (filters.maxImages !== undefined) {
+			const imageCount = collection.stats?.totalImages || 0;
+			if (imageCount > filters.maxImages) {
+				return false;
+			}
+		}
+
+		return true;
+	});
+}
+
+/**
+ * 📚 Agrupa colecciones por un campo específico
+ * @param collections Array de colecciones
+ * @param groupByField Campo por el cual agrupar
+ * @returns Objeto con colecciones agrupadas
+ */
+export function groupCollectionsByField(
+	collections: CollectionWithStats[],
+	groupByField: keyof CollectionWithStats
+): Record<string, CollectionWithStats[]> {
+	if (!collections || collections.length === 0) {
+		return {};
 	}
 
 	return collections.reduce(
 		(groups, collection) => {
-			const key = ((collection as any)[groupBy] as string) || 'other';
+			const fieldValue = collection[groupByField];
+			const key = fieldValue ? String(fieldValue) : 'Sin valor';
 
 			if (!groups[key]) {
 				groups[key] = [];
@@ -77,18 +136,22 @@ export function groupCollections(
 			groups[key].push(collection);
 			return groups;
 		},
-		{} as Record<string, CollectionExtended[]>
+		{} as Record<string, CollectionWithStats[]>
 	);
 }
 
 /**
- * Calcula el valor total de todas las colecciones
+ * 📚 Calcula el valor total de las colecciones
  * @param collections Array de colecciones
  * @returns Valor total
  */
-export function calculateTotalValue(collections: CollectionExtended[]): number {
+export function calculateTotalValue(collections: CollectionWithStats[]): number {
+	if (!collections || collections.length === 0) {
+		return 0;
+	}
+
 	return collections.reduce((total, collection) => {
-		return total + ((collection as any).price || 0);
+		return total + (collection.price || 0);
 	}, 0);
 }
 

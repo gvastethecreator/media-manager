@@ -3,8 +3,64 @@
  * @module store/entities/tag/types
  */
 
-import type { TagWithStats } from '@/types/entities/tag/types';
-import { TagCategory, TagRarity, TagSortCriteria, TagViewMode } from '@/types/entities/tag/types';
+import type { TagWithStats } from '@/types/entities/tag';
+import type { Prisma } from '@prisma/client';
+
+// --- ENUMS ESPECÍFICOS DEL STORE ---
+
+/**
+ * Categorías de etiquetas
+ */
+export enum TagCategory {
+	GENERAL = 'general',
+	SUBJECT = 'subject',
+	STYLE = 'style',
+	COLOR = 'color',
+	QUALITY = 'quality',
+	TECHNIQUE = 'technique',
+	COMPOSITION = 'composition',
+	CONTENT = 'content',
+	EMOTION = 'emotion',
+	THEME = 'theme',
+	GENRE = 'genre',
+	CUSTOM = 'custom',
+	OTHER = 'other',
+}
+
+/**
+ * Rareza de etiquetas
+ */
+export enum TagRarity {
+	COMMON = 'common',
+	UNCOMMON = 'uncommon',
+	RARE = 'rare',
+	VERY_RARE = 'very_rare',
+	LEGENDARY = 'legendary',
+}
+
+/**
+ * Criterios de ordenación para etiquetas
+ */
+export enum TagSortCriteria {
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	USAGE_ASC = 'usage:asc',
+	USAGE_DESC = 'usage:desc',
+	CREATED_ASC = 'createdAt:asc',
+	CREATED_DESC = 'createdAt:desc',
+	UPDATED_ASC = 'updatedAt:desc',
+	UPDATED_DESC = 'updatedAt:desc',
+}
+
+/**
+ * Modos de visualización para etiquetas
+ */
+export enum TagViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+	CLOUD = 'cloud',
+	HIERARCHY = 'hierarchy',
+}
 
 /**
  * 🎨 Estado de UI para tags
@@ -40,16 +96,16 @@ export interface TagFilters {
 	searchTerm: string;
 	/** Filtro por categoría */
 	category: TagCategory | null;
-	/** Filtro por rareza */
-	rarity: TagRarity | null;
+	/** Filtro por rareza - @deprecated La rareza no es una propiedad del modelo de datos actual. */
+	rarity?: TagRarity | null;
 }
 
 /**
- * 📊 Estado principal (core) del store de Tag
+ * 📊 Estado principal (core) del store de Tag - Patrón Record optimizado
  */
 export interface TagCoreState {
-	/** Lista de tags */
-	items: TagWithStats[];
+	/** Tags organizados por ID para acceso O(1) */
+	tags: Record<string, TagWithStats>;
 	/** Si se están cargando datos */
 	isLoading: boolean;
 	/** Mensaje de error si existe */
@@ -64,16 +120,18 @@ export interface TagCoreState {
 export interface TagCoreActions {
 	/** Carga todos los tags */
 	loadTags: () => Promise<TagWithStats[]>;
-	/** Obtiene todos los tags */
+	/** Obtiene todos los tags como array */
 	getTags: () => TagWithStats[];
-	/** Crea un nuevo tag */
-	createTag: (tag: Partial<TagWithStats>) => Promise<TagWithStats | null>;
-	/** Actualiza un tag existente */
-	updateTag: (id: string, tag: Partial<TagWithStats>) => Promise<void>;
-	/** Elimina un tag */
-	deleteTag: (id: string) => Promise<void>;
 	/** Obtiene un tag por su ID */
 	getTagById: (id: string) => TagWithStats | undefined;
+	/** Crea un nuevo tag */
+	createTag: (data: Prisma.TagCreateInput) => Promise<TagWithStats | null>;
+	/** Actualiza un tag existente */
+	updateTag: (id: string, data: Prisma.TagUpdateInput) => Promise<void>;
+	/** Elimina un tag */
+	deleteTag: (id: string) => Promise<void>;
+	/** Actualiza múltiples tags */
+	setTags: (tags: TagWithStats[]) => void;
 	/** Recarga los tags forzando una nueva petición */
 	refreshTags: () => Promise<TagWithStats[]>;
 }

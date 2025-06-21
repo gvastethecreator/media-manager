@@ -3,14 +3,18 @@
  * @module store/entities/collection/types
  */
 
-import type { CollectionExtended, CollectionFilter, CollectionViewConfig } from '@/types/entities/collection';
+import type {
+    CollectionFilter,
+    CollectionViewConfig,
+    CollectionWithStats
+} from '@/types/entities/collection';
 
 /**
  * Estado base para el store de Collection
  */
 export interface CollectionState {
 	// Datos principales - usando Record para mejor performance
-	collections: Record<string, CollectionExtended>;
+	collections: Record<string, CollectionWithStats>;
 
 	// Estado UI
 	viewConfig: CollectionViewConfig;

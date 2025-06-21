@@ -1,31 +1,16 @@
 'use client';
 
+import { cn } from '@/lib/utils';
+import type { AlbumWithStats } from '@/types/entities/album';
 import { motion } from 'motion/react';
 import React, { useCallback, useMemo } from 'react';
-import { cn } from '@/lib/utils';
-import type { AlbumWithRelations } from '@/types/entities/album';
 import { AlbumCardContent } from './album-card-content';
 import { AlbumCardFooter } from './album-card-footer';
 import { AlbumCardHeader } from './album-card-header';
 import { AlbumCardImages } from './album-card-images';
 
 export interface AlbumCardProps {
-	album: AlbumWithRelations & {
-		_count?: {
-			images: number;
-			videos: number;
-			collections: number;
-			tags: number;
-			characters: number;
-			places: number;
-			worldItems: number;
-			concepts: number;
-			prompts: number;
-			notes: number;
-			wildcards: number;
-			properties: number;
-			groups: number;
-		};
+	album: AlbumWithStats & {
 		recentImages?: string[];
 		recentVideos?: string[];
 		totalSize?: number;

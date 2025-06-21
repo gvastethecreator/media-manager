@@ -2,7 +2,7 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { TagWithRelations } from '@/types/entities/tag';
+import type { TagWithStats } from '@/types/entities/tag';
 
 // Logger específico para acciones de TagCard
 const tagCardLogger = serverLogger.withContext('TagCardActions');
@@ -15,90 +15,62 @@ interface ThumbnailImage {
 }
 
 /**
- * Obtiene las imágenes recientes de un tag para mostrar en la tarjeta
- * @param tagId ID del tag
- * @param limit Número máximo de imágenes a obtener (por defecto 6)
- * @returns Array de imágenes con sus thumbnails
+ * 🖼️ Obtiene imágenes thumbnail para un tag específico
+ * @param tagId - ID del tag
+ * @param limit - Número máximo de imágenes a obtener
+ * @returns Array de imágenes thumbnail
  */
-export async function getRecentTagImages(tagId: string, limit = 6): Promise<ThumbnailImage[]> {
+export async function getTagThumbnails(tagId: string, limit = 6): Promise<ThumbnailImage[]> {
 	try {
-		tagCardLogger.info('🖼️ Obteniendo imágenes recientes para TagCard:', tagId);
-		const prisma = await getPrismaClient();
+		tagCardLogger.info('🔍 Obteniendo thumbnails para tag:', { tagId, limit });
 
-		// Verificar que el ID es válido
-		if (!tagId) {
-			throw new Error('ID de tag no proporcionado');
-		}
+		const prisma = getPrismaClient();
 
-		// Obtener imágenes recientes del tag
+		// Obtener imágenes asociadas al tag con información mínima
 		const images = await prisma.image.findMany({
 			where: {
 				tags: {
-					some: {
-						id: tagId,
-					},
-				},
+					some: { id: tagId }
+				}
 			},
 			select: {
 				id: true,
 				name: true,
-				thumbnail: true,
-				thumbnailWidth: true,
-				thumbnailHeight: true,
+				thumbnailUrl: true,
 			},
-			orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }],
+			orderBy: { createdAt: 'desc' },
 			take: limit,
 		});
 
-		// Convertir a formato ThumbnailImage
-		const thumbnails = images.map((image) => ({
+		const thumbnails = images.map(image => ({
 			id: image.id,
 			name: image.name,
-			thumbnailUrl: image.thumbnail ? (typeof image.thumbnail === 'string' ? image.thumbnail : '') : '',
+			thumbnailUrl: image.thumbnailUrl,
 		}));
 
-		tagCardLogger.info('✅ Imágenes obtenidas para TagCard:', thumbnails.length);
+		tagCardLogger.info('✅ Thumbnails obtenidos:', { tagId, count: thumbnails.length });
 		return thumbnails;
 	} catch (error) {
-		tagCardLogger.error('❌ Error obteniendo imágenes para TagCard:', error);
-		throw new Error(
-			`No se pudieron obtener las imágenes: ${error instanceof Error ? error.message : 'Error desconocido'}`
-		);
+		tagCardLogger.error('❌ Error obteniendo thumbnails:', { tagId, error });
+		return [];
 	}
 }
 
 /**
- * Obtiene un tag completo con todas sus relaciones
- * @param tagId ID del tag
- * @returns Tag con relaciones o null si no existe
+ * 📊 Obtiene estadísticas detalladas de un tag
+ * @param tagId - ID del tag
+ * @returns Estadísticas del tag
  */
-export async function getTagWithRelations(tagId: string): Promise<TagWithRelations | null> {
+export async function getTagStats(tagId: string) {
 	try {
-		tagCardLogger.info('🏷️ Obteniendo tag con relaciones:', tagId);
-		const prisma = await getPrismaClient();
+		tagCardLogger.info('📊 Obteniendo estadísticas para tag:', tagId);
 
-		// Verificar que el ID es válido
-		if (!tagId) {
-			throw new Error('ID de tag no proporcionado');
-		}
+		const prisma = getPrismaClient();
 
-		// Primero obtener el ID de la imagen destacada
-		const tagBasic = await prisma.tag.findUnique({
+		// Obtener conteos de todas las relaciones
+		const stats = await prisma.tag.findUnique({
 			where: { id: tagId },
 			select: {
-				featuredImage: true,
-			},
-		});
-
-		if (!tagBasic) {
-			tagCardLogger.warn('⚠️ Tag no encontrado:', tagId);
-			return null;
-		}
-
-		// Obtener tag con contadores de relaciones
-		const tag = await prisma.tag.findUnique({
-			where: { id: tagId },
-			include: {
 				_count: {
 					select: {
 						images: true,
@@ -116,79 +88,134 @@ export async function getTagWithRelations(tagId: string): Promise<TagWithRelatio
 						groups: true,
 					},
 				},
-				// Incluir imagen destacada si existe
-				images: tagBasic.featuredImage
-					? {
-							where: {
-								id: {
-									equals: tagBasic.featuredImage,
-								},
-							},
-							take: 1,
-							select: {
-								id: true,
-								name: true,
-								thumbnail: true,
-								thumbnailWidth: true,
-								thumbnailHeight: true,
-							},
-						}
-					: undefined,
+			},
+		});
+
+		if (!stats) {
+			tagCardLogger.warn('⚠️ Tag no encontrado para estadísticas:', tagId);
+			return null;
+		}
+
+		const totalAssociations = Object.values(stats._count).reduce((sum, count) => sum + count, 0);
+
+		tagCardLogger.info('✅ Estadísticas obtenidas:', { tagId, totalAssociations });
+		return {
+			...stats._count,
+			totalAssociations,
+		};
+	} catch (error) {
+		tagCardLogger.error('❌ Error obteniendo estadísticas:', { tagId, error });
+		return null;
+	}
+}
+
+/**
+ * 🏷️ Obtiene un tag con estadísticas calculadas
+ * @param tagId - ID del tag
+ * @returns Tag con estadísticas o null si no existe
+ */
+export async function getTagWithStats(tagId: string): Promise<TagWithStats | null> {
+	try {
+		tagCardLogger.info('🔍 Obteniendo tag con estadísticas:', tagId);
+
+		const prisma = getPrismaClient();
+
+		const tag = await prisma.tag.findUnique({
+			where: { id: tagId },
+			select: {
+				id: true,
+				name: true,
+				emoji: true,
+				color: true,
+				description: true,
+				shortcut: true,
+				category: true,
+				featuredImage: true,
+				isFavorite: true,
+				createdAt: true,
+				updatedAt: true,
+				_count: {
+					select: {
+						images: true,
+						videos: true,
+						albums: true,
+						collections: true,
+						characters: true,
+						places: true,
+						worldItems: true,
+						concepts: true,
+						prompts: true,
+						notes: true,
+						wildcards: true,
+						properties: true,
+						groups: true,
+					},
+				},
 			},
 		});
 
 		if (!tag) {
-			tagCardLogger.warn('⚠️ Tag no encontrado (segunda verificación):', tagId);
+			tagCardLogger.warn('⚠️ Tag no encontrado:', tagId);
 			return null;
 		}
 
-		// Procesar la imagen destacada si existe
-		let featuredImageData = null;
-		if (tag.images && tag.images.length > 0 && tag.images[0].thumbnail) {
-			const image = tag.images[0];
-			featuredImageData = {
-				id: image.id,
-				name: image.name,
-				thumbnailUrl: image.thumbnail
-					? typeof image.thumbnail === 'string'
-						? image.thumbnail
-						: `data:image/jpeg;base64,${Buffer.from(image.thumbnail as unknown as Uint8Array).toString('base64')}`
-					: '',
-				width: image.thumbnailWidth || 100,
-				height: image.thumbnailHeight || 100,
-			};
-		}
+		// Calcular estadísticas
+		const totalImages = tag._count.images;
+		const totalVideos = tag._count.videos;
+		const totalAssociations = Object.values(tag._count).reduce((sum, count) => sum + count, 0);
+		const totalEntities = totalAssociations - totalImages - totalVideos;
 
-		// Crear objeto TagWithRelations simplificado
-		const tagWithRelations = {
+		// Crear objeto TagWithStats
+		const tagWithStats: TagWithStats = {
 			...tag,
-			featuredImage: featuredImageData,
-		} as unknown as TagWithRelations;
+			stats: {
+				totalAssociations,
+				totalImages,
+				totalVideos,
+				totalEntities,
+				lastUpdated: tag.updatedAt,
+			},
+		};
 
-		tagCardLogger.info('✅ Tag obtenido con éxito:', tag.name);
-		return tagWithRelations;
+		tagCardLogger.info('✅ Tag con estadísticas obtenido:', { tagId, totalAssociations });
+		return tagWithStats;
 	} catch (error) {
-		tagCardLogger.error('❌ Error obteniendo tag con relaciones:', error);
-		throw new Error(`No se pudo obtener el tag: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		tagCardLogger.error('❌ Error obteniendo tag con estadísticas:', { tagId, error });
+		return null;
 	}
 }
 
 /**
- * Busca tags con filtros
- * @param query Texto para buscar en nombres y descripción
- * @param limit Límite de resultados
- * @returns Array de tags
+ * 🔍 Busca tags con estadísticas básicas
+ * @param query - Término de búsqueda
+ * @param limit - Número máximo de resultados
+ * @returns Array de tags con estadísticas
  */
-export async function searchTags(query = '', limit = 100): Promise<TagWithRelations[]> {
+export async function searchTags(query = '', limit = 100): Promise<TagWithStats[]> {
 	try {
-		tagCardLogger.info('🔍 Buscando tags con query:', query);
-		const prisma = await getPrismaClient();
+		tagCardLogger.info('🔍 Buscando tags:', { query, limit });
+
+		const prisma = getPrismaClient();
 
 		const tags = await prisma.tag.findMany({
-			where: {
-				OR: [{ name: { contains: query } }, { description: { contains: query } }, { category: { contains: query } }],
-			},
-			include: {
+			where: query ? {
+				OR: [
+					{ name: { contains: query, mode: 'insensitive' } },
+					{ description: { contains: query, mode: 'insensitive' } },
+				],
+			} : {},
+			select: {
+				id: true,
+				name: true,
+				emoji: true,
+				color: true,
+				description: true,
+				shortcut: true,
+				category: true,
+				featuredImage: true,
+				isFavorite: true,
+				createdAt: true,
+				updatedAt: true,
 				_count: {
 					select: {
 						images: true,
@@ -207,16 +234,36 @@ export async function searchTags(query = '', limit = 100): Promise<TagWithRelati
 					},
 				},
 			},
-			orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
+			orderBy: [
+				{ isFavorite: 'desc' },
+				{ name: 'asc' }
+			],
 			take: limit,
 		});
 
-		const tagsWithRelations = tags as unknown as TagWithRelations[];
+		// Convertir a TagWithStats
+		const tagsWithStats = tags.map(tag => {
+			const totalImages = tag._count.images;
+			const totalVideos = tag._count.videos;
+			const totalAssociations = Object.values(tag._count).reduce((sum, count) => sum + count, 0);
+			const totalEntities = totalAssociations - totalImages - totalVideos;
 
-		tagCardLogger.info('✅ Tags encontrados:', tags.length);
-		return tagsWithRelations;
+			return {
+				...tag,
+				stats: {
+					totalAssociations,
+					totalImages,
+					totalVideos,
+					totalEntities,
+					lastUpdated: tag.updatedAt,
+				},
+			} as TagWithStats;
+		});
+
+		tagCardLogger.info('✅ Tags encontrados:', { query, count: tagsWithStats.length });
+		return tagsWithStats;
 	} catch (error) {
-		tagCardLogger.error('❌ Error buscando tags:', error);
-		throw new Error(`No se pudieron buscar tags: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+		tagCardLogger.error('❌ Error buscando tags:', { query, error });
+		return [];
 	}
 }
