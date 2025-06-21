@@ -3,7 +3,11 @@
  * @module store/entities/wildcard/types
  */
 
-import type { WildcardComplete, WildcardSortCriteria, WildcardViewMode } from '../../../types/entities/wildcard';
+import type {
+    WildcardSortCriteria,
+    WildcardViewMode,
+    WildcardWithStats,
+} from '@/types/entities/wildcard';
 
 /**
  * Estado de visualización para un wildcard individual
@@ -32,7 +36,7 @@ export interface WildcardDisplayState {
  */
 export interface WildcardCoreState {
 	/** Mapa de comodines indexados por ID */
-	wildcards: Record<string, WildcardComplete>;
+	wildcards: Record<string, WildcardWithStats>;
 	/** Items asociados a cada comodín */
 	wildcardItems: Record<string, Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>>;
 	/** Estado de carga */

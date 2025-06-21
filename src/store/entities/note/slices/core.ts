@@ -1,12 +1,13 @@
 import {
-	createNote as createNoteAction,
-	deleteNote as deleteNoteAction,
-	getNotes as getNotesAction,
-	updateNote as updateNoteAction,
+    createNote as createNoteAction,
+    deleteNote as deleteNoteAction,
+    getNotes as getNotesAction,
+    updateNote as updateNoteAction,
 } from '@/app/actions/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import type { Note, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import { adaptNoteCompleteToWithStats, adaptNotesCompleteToWithStats } from '@/transformers/note/note-adapter';
+import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import { StateCreator } from 'zustand';
 import type { NoteStore } from '../types';
 
@@ -33,6 +34,44 @@ export interface CoreSlice {
 	reset: () => void;
 }
 
+function getPriorityLabel(priority: number): string {
+	switch (priority) {
+		case 4: return 'Crítica';
+		case 3: return 'Alta';
+		case 2: return 'Media';
+		case 1: return 'Baja';
+		case 0: return 'Mínima';
+		default: return 'Sin definir';
+	}
+}
+
+function getStatusLabel(status: string): string {
+	switch (status) {
+		case 'active': return 'Activa';
+		case 'draft': return 'Borrador';
+		case 'completed': return 'Completada';
+		case 'archived': return 'Archivada';
+		case 'pending': return 'Pendiente';
+		default: return 'Sin estado';
+	}
+}
+
+function getCategoryLabel(category: string): string {
+	switch (category) {
+		case 'general': return 'General';
+		case 'story': return 'Historia';
+		case 'lore': return 'Lore';
+		case 'mechanics': return 'Mecánicas';
+		case 'character': return 'Personaje';
+		case 'place': return 'Lugar';
+		case 'world_item': return 'Objeto';
+		case 'prompt': return 'Prompt';
+		case 'idea': return 'Idea';
+		case 'todo': return 'Tarea';
+		default: return 'Sin categoría';
+	}
+}
+
 export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set, get) => ({
 	// Estado inicial
 	notes: {},
@@ -49,7 +88,10 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 		set({ isLoading: true, loading: true, error: null });
 		try {
 			coreLogger.info('🔄 Cargando notas');
-			const notesWithStats = await getNotesAction();
+			const notesData = await getNotesAction();
+
+			// Convertir NoteComplete[] a NoteWithStats[] usando el adaptador
+			const notesWithStats = adaptNotesCompleteToWithStats(notesData);
 			const notesRecord = notesWithStats.reduce(
 				(acc: Record<string, NoteWithStats>, note: NoteWithStats) => {
 					acc[note.id] = note;
@@ -80,7 +122,10 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 		set({ isLoading: true, loading: true, error: null });
 		try {
 			coreLogger.info('✨ Creando nota:', note);
-			const newNote = await createNoteAction(note);
+			const newNoteData = await createNoteAction(note);
+
+			// Convertir NoteComplete a NoteWithStats usando el adaptador
+			const newNote = adaptNoteCompleteToWithStats(newNoteData);
 
 			set((state) => ({
 				notes: { ...state.notes, [newNote.id]: newNote },
@@ -106,7 +151,10 @@ export const createCoreSlice: StateCreator<NoteStore, [], [], CoreSlice> = (set,
 		set({ isLoading: true, loading: true, error: null });
 		try {
 			coreLogger.info('🔄 Actualizando nota:', { id, noteData });
-			const updatedNote = await updateNoteAction(id, noteData);
+			const updatedNoteData = await updateNoteAction(id, noteData);
+
+			// Convertir NoteComplete a NoteWithStats usando el adaptador
+			const updatedNote = adaptNoteCompleteToWithStats(updatedNoteData);
 
 			set((state) => ({
 				notes: { ...state.notes, [id]: updatedNote },

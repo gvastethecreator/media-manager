@@ -9,8 +9,8 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
-import { fromPrismaTag } from '@/transformers/tag';
-import type { TagCreateInput, TagUpdateInput, TagWithRelations } from '@/types/entities/tag';
+import { toTagWithStats } from '@/transformers/tag';
+import { TagWithStats, tagCounts } from '@/types/entities/tag';
 import { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
@@ -34,41 +34,8 @@ const createTagError = (message: string, code: TagErrorCode = TagErrorCode.OPERA
 	return error;
 };
 
-const tagInclude = {
-	images: true,
-	videos: true,
-	albums: true,
-	collections: true,
-	characters: true,
-	places: true,
-	worldItems: true,
-	concepts: true,
-	prompts: true,
-	notes: true,
-	wildcards: true,
-	properties: true,
-	groups: true,
-	_count: {
-		select: {
-			images: true,
-			videos: true,
-			albums: true,
-			collections: true,
-			characters: true,
-			places: true,
-			worldItems: true,
-			concepts: true,
-			prompts: true,
-			notes: true,
-			wildcards: true,
-			properties: true,
-			groups: true,
-		},
-	},
-} satisfies Prisma.TagInclude;
-
 // Notificar cambios en etiquetas
-const notifyTagChange = async (action: 'create' | 'update' | 'delete', tag: TagWithRelations | { id: string }) => {
+const notifyTagChange = async (action: 'create' | 'update' | 'delete', tag: TagWithStats | { id: string }) => {
 	// Emitir eventos usando el sistema del servidor
 	await emit({
 		type: 'tags:modified',
@@ -80,26 +47,82 @@ const notifyTagChange = async (action: 'create' | 'update' | 'delete', tag: TagW
 };
 
 /**
- * Crea un nuevo tag en la base de datos
+ * 📊 Obtiene un tag por ID con estadísticas calculadas
+ * @param id - ID del tag
+ * @returns Tag con estadísticas o null si no existe
  */
-export async function createTag(data: TagCreateInput): Promise<TagWithRelations> {
+export async function getTag(id: string): Promise<TagWithStats | null> {
+	try {
+		tagLogger.info('🔍 Obteniendo tag:', id);
+
+		const tag = await prisma.tag.findUnique({
+			where: { id },
+			include: tagCounts,
+		});
+
+		if (!tag) {
+			tagLogger.warn('⚠️ Tag no encontrado:', id);
+			return null;
+		}
+
+		const transformedTag = toTagWithStats(tag);
+		tagLogger.info('✅ Tag obtenido:', { id: tag.id, name: tag.name });
+		return transformedTag;
+	} catch (error) {
+		tagLogger.error('❌ Error al obtener tag:', { id, error });
+		throw createTagError(`No se pudo obtener el tag: ${id}`, TagErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * 📊 Obtiene todos los tags con estadísticas calculadas
+ * @returns Array de tags con estadísticas
+ */
+export async function getTags(): Promise<TagWithStats[]> {
+	try {
+		tagLogger.info('📋 Obteniendo todos los tags...');
+
+		const tags = await prisma.tag.findMany({
+			include: tagCounts,
+			orderBy: [
+				{ isFavorite: 'desc' },
+				{ name: 'asc' }
+			],
+		});
+
+		const transformedTags = tags.map(toTagWithStats);
+		tagLogger.info(`✅ ${transformedTags.length} tags obtenidos`);
+		return transformedTags;
+	} catch (error) {
+		tagLogger.error('❌ Error al obtener tags:', error);
+		throw createTagError('No se pudieron obtener los tags', TagErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * ➕ Crea un nuevo tag en la base de datos
+ * @param data - Datos del tag a crear, compatibles con Prisma.TagCreateInput
+ * @returns Tag creado con estadísticas
+ */
+export async function createTag(data: Prisma.TagCreateInput): Promise<TagWithStats> {
 	try {
 		tagLogger.info('📝 Creando etiqueta:', data.name);
 
-		// Crear la etiqueta
 		const tag = await prisma.tag.create({
 			data,
-			include: tagInclude,
+			include: tagCounts,
 		});
 
+		const transformedTag = toTagWithStats(tag);
+
 		// Notificar cambio y revalidar rutas
-		await notifyTagChange('create', fromPrismaTag(tag));
+		await notifyTagChange('create', transformedTag);
 		for (const path of REVALIDATE_PATHS) {
 			revalidatePath(path);
 		}
 
 		tagLogger.info('✅ Etiqueta creada:', { id: tag.id, name: tag.name });
-		return fromPrismaTag(tag);
+		return transformedTag;
 	} catch (error) {
 		tagLogger.error('❌ Error al crear etiqueta:', { data, error });
 		throw createTagError('No se pudo crear la etiqueta', TagErrorCode.OPERATION_FAILED, error);
@@ -107,15 +130,19 @@ export async function createTag(data: TagCreateInput): Promise<TagWithRelations>
 }
 
 /**
- * Actualiza un tag existente
+ * 🔄 Actualiza un tag existente
+ * @param id - ID del tag a actualizar
+ * @param data - Datos a actualizar, compatibles con Prisma.TagUpdateInput
+ * @returns Tag actualizado con estadísticas
  */
-export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWithRelations> {
+export async function updateTag(id: string, data: Prisma.TagUpdateInput): Promise<TagWithStats> {
 	try {
 		tagLogger.info('📝 Actualizando etiqueta:', { tagId: id, ...data });
 
-		// Verificar si la etiqueta existe
+		// Verificar si la etiqueta existe para evitar errores en producción.
 		const existingTag = await prisma.tag.findUnique({
 			where: { id },
+			select: { id: true },
 		});
 
 		if (!existingTag) {
@@ -123,26 +150,26 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWi
 			throw createTagError(`Etiqueta no encontrada: ${id}`, TagErrorCode.NOT_FOUND);
 		}
 
-		// Actualizar la etiqueta
 		const tag = await prisma.tag.update({
 			where: { id },
 			data,
-			include: tagInclude,
+			include: tagCounts,
 		});
 
+		const transformedTag = toTagWithStats(tag);
+
 		// Notificar cambio y revalidar rutas
-		await notifyTagChange('update', fromPrismaTag(tag));
+		await notifyTagChange('update', transformedTag);
 		for (const path of REVALIDATE_PATHS) {
 			revalidatePath(path);
 		}
 
 		tagLogger.info('✅ Etiqueta actualizada:', { id: tag.id, name: tag.name });
-		return fromPrismaTag(tag);
+		return transformedTag;
 	} catch (error) {
 		tagLogger.error('❌ Error al actualizar etiqueta:', { id, data, error });
 
-		// Manejar error específico de etiqueta no encontrada
-		if ((error as any).code === TagErrorCode.NOT_FOUND) {
+		if (error instanceof Error && error.name === 'TagError') {
 			throw error;
 		}
 
@@ -151,38 +178,40 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWi
 }
 
 /**
- * Elimina un tag existente
+ * 🗑️ Elimina un tag existente
+ * @param id - ID del tag a eliminar
  */
 export async function deleteTag(id: string): Promise<void> {
 	try {
 		tagLogger.info('🗑️ Eliminando etiqueta:', id);
 
-		// Verificar si la etiqueta existe
-		const tag = await prisma.tag.findUnique({
-			where: { id },
-			select: { id: true, name: true },
+		// Usamos una transacción para asegurar que la notificación solo ocurra si la eliminación es exitosa.
+		await prisma.$transaction(async (tx) => {
+			const tag = await tx.tag.findUnique({
+				where: { id },
+				select: { id: true, name: true },
+			});
+
+			if (!tag) {
+				tagLogger.warn('⚠️ Etiqueta no encontrada para eliminar:', id);
+				throw createTagError(`Etiqueta no encontrada: ${id}`, TagErrorCode.NOT_FOUND);
+			}
+
+			await tx.tag.delete({ where: { id } });
+
+			// Notificar cambio después de eliminar
+			await notifyTagChange('delete', { id });
 		});
 
-		if (!tag) {
-			tagLogger.warn('⚠️ Etiqueta no encontrada para eliminar:', id);
-			throw createTagError(`Etiqueta no encontrada: ${id}`, TagErrorCode.NOT_FOUND);
-		}
-
-		// Eliminar la etiqueta
-		await prisma.tag.delete({ where: { id } });
-
-		// Notificar cambio y revalidar rutas
-		await notifyTagChange('delete', { id });
 		for (const path of REVALIDATE_PATHS) {
 			revalidatePath(path);
 		}
 
-		tagLogger.info('✅ Etiqueta eliminada:', { id, name: tag.name });
+		tagLogger.info('✅ Etiqueta eliminada:', id);
 	} catch (error) {
 		tagLogger.error('❌ Error al eliminar etiqueta:', { id, error });
 
-		// Manejar error específico de etiqueta no encontrada
-		if ((error as any).code === TagErrorCode.NOT_FOUND) {
+		if (error instanceof Error && error.name === 'TagError') {
 			throw error;
 		}
 

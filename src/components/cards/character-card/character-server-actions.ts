@@ -277,63 +277,64 @@ export async function getCharactersForCards(options: {
 		take: limit,
 	});
 
-	// Si se solicitan estadísticas adicionales, procesarlas para cada personaje
-	if (includeStats) {
-		const charactersWithStats = await Promise.all(
-			characters.map(async (character) => {
-				// Obtener imágenes y videos recientes
-				const recentMedia = await getRecentCharacterMedia(character.id, 4);
-				const recentImagePaths = recentMedia.filter((media) => !media.isVideo).map((media) => media.thumbnailUrl);
-				const recentVideoPaths = recentMedia.filter((media) => media.isVideo).map((media) => media.thumbnailUrl);
-
-				// Parsear campos serializados como JSON
-				const parsedStats = parseJsonField(character.stats);
-				const parsedRelationships = parseJsonField(character.relationships);
-				const parsedGoals = parseJsonField(character.goals);
-				const parsedFears = parseJsonField(character.fears);
-				const parsedBeliefs = parseJsonField(character.beliefs);
-				const parsedPersonality = parseJsonField(character.personality);
-				const parsedSkills = parseJsonField(character.skills);
-				const parsedAbilities = parseJsonField(character.abilities);
-
-				// Calcular metadatos para TCG
-				const power = calculateCharacterPower(character.level, parsedStats);
-				const rarityLevel = determineRarityLevel(
-					character.level,
-					power,
-					parsedSkills?.length || 0,
-					parsedAbilities?.length || 0
-				);
-				const metadata = {
-					power,
-					rarityLevel,
-					cardId: `C${character.id.substring(0, 6)}-${character.level}`,
-					healthPoints: calculateHealthPoints(parsedStats?.constitution || 10, character.level),
-					manaPoints: calculateManaPoints(parsedStats?.intelligence || 10, character.level),
-					totalAttacks: parsedAbilities?.length || 0,
-				};
-
-				return {
-					...character,
-					recentImages: recentImagePaths,
-					recentVideos: recentVideoPaths,
-					parsedStats,
-					parsedRelationships,
-					parsedGoals,
-					parsedFears,
-					parsedBeliefs,
-					parsedPersonality,
-					parsedSkills,
-					parsedAbilities,
-					metadata,
-				};
-			})
-		);
-
-		return charactersWithStats;
+	// Si no se solicitan estadísticas adicionales, procesar y devolver los datos básicos
+	if (!includeStats) {
+		return characters;
 	}
 
-	return characters;
+	// Si se solicitan estadísticas adicionales, procesarlas para cada personaje
+	const charactersWithStats = await Promise.all(
+		characters.map(async (character) => {
+			// Obtener imágenes y videos recientes
+			const recentMedia = await getRecentCharacterMedia(character.id, 4);
+			const recentImagePaths = recentMedia.filter((media) => !media.isVideo).map((media) => media.thumbnailUrl);
+			const recentVideoPaths = recentMedia.filter((media) => media.isVideo).map((media) => media.thumbnailUrl);
+
+			// Parsear campos serializados como JSON
+			const parsedStats = parseJsonField(character.stats);
+			const parsedRelationships = parseJsonField(character.relationships);
+			const parsedGoals = parseJsonField(character.goals);
+			const parsedFears = parseJsonField(character.fears);
+			const parsedBeliefs = parseJsonField(character.beliefs);
+			const parsedPersonality = parseJsonField(character.personality);
+			const parsedSkills = parseJsonField(character.skills);
+			const parsedAbilities = parseJsonField(character.abilities);
+
+			// Calcular metadatos para TCG
+			const power = calculateCharacterPower(character.level, parsedStats);
+			const rarityLevel = determineRarityLevel(
+				character.level,
+				power,
+				parsedSkills?.length || 0,
+				parsedAbilities?.length || 0
+			);
+			const metadata = {
+				power,
+				rarityLevel,
+				cardId: `C${character.id.substring(0, 6)}-${character.level}`,
+				healthPoints: calculateHealthPoints(parsedStats?.constitution || 10, character.level),
+				manaPoints: calculateManaPoints(parsedStats?.intelligence || 10, character.level),
+				totalAttacks: parsedAbilities?.length || 0,
+			};
+
+			return {
+				...character,
+				recentImages: recentImagePaths,
+				recentVideos: recentVideoPaths,
+				parsedStats,
+				parsedRelationships,
+				parsedGoals,
+				parsedFears,
+				parsedBeliefs,
+				parsedPersonality,
+				parsedSkills,
+				parsedAbilities,
+				metadata,
+			};
+		})
+	);
+
+	return charactersWithStats;
 }
 
 // Función auxiliar para parsear campos JSON

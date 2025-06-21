@@ -3,26 +3,11 @@
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { OptimizedStatsService } from '@/services/stats/optimized-stats.service';
-import type { AlbumWithRelations } from '@/types/entities/album';
+import type { AlbumWithStats } from '@/types/entities/album';
 
 const _albumLogger = serverLogger.withContext('AlbumServerActions');
 
-export interface AlbumCardData extends AlbumWithRelations {
-	_count: {
-		images: number;
-		videos: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		places: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
+export interface AlbumCardData extends AlbumWithStats {
 	recentImages?: string[];
 	recentVideos?: string[];
 	totalSize?: number; // Tamaño total de los archivos
@@ -31,9 +16,10 @@ export interface AlbumCardData extends AlbumWithRelations {
 		itemCount?: number;
 		imageCount?: number;
 		videoCount?: number;
-		coverImageUrl?: string;
+		coverImageUrl?: string | null;
 		thumbnailUrls?: string[];
 		lastModified?: Date | string;
+		entitiesCount?: number;
 	};
 	viewConfig?: {
 		theme?: string;
@@ -157,9 +143,9 @@ export async function getAlbumCardData(albumId: string): Promise<AlbumCardData> 
 
 	// Crear viewConfig básico
 	const viewConfig = {
-		theme: album.theme || 'default',
-		layout: album.layout || 'grid',
-		thumbnailSize: (album.thumbnailSize as 'small' | 'medium' | 'large') || 'medium',
+		theme: 'default',
+		layout: 'grid',
+		thumbnailSize: 'medium' as 'small' | 'medium' | 'large',
 	};
 
 	return {

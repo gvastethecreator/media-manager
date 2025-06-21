@@ -1,12 +1,12 @@
 'use server';
 
-import { prisma } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import {
     conceptPayload,
     fromPrismaConcept,
-    toCreateData as mapCreateConceptDataToPrisma,
-    toSearchOptions as mapConceptSearchOptionsToPrisma,
-    toUpdateData as mapUpdateConceptDataToPrisma,
+    mapConceptSearchOptionsToPrisma,
+    mapCreateConceptDataToPrisma,
+    mapUpdateConceptDataToPrisma,
 } from '@/transformers/concept';
 import type {
     ConceptComplete,
@@ -34,7 +34,9 @@ export async function getConcepts(options: ConceptSearchOptions): Promise<Concep
 			...findOptions,
 			...conceptPayload,
 		});
-		const transformedConcepts = concepts.map(fromPrismaConcept).filter((c): c is ConceptComplete => c !== null);
+		const transformedConcepts = concepts
+			.map(fromPrismaConcept)
+			.filter((c: ConceptComplete | null): c is ConceptComplete => c !== null);
 		return transformedConcepts;
 	} catch (error) {
 		console.error('Error al obtener los conceptos:', error);

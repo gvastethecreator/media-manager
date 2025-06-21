@@ -1,74 +1,37 @@
 /**
- * @file Store principal para la entidad Property
+ * @file Store principal de Zustand para la entidad Property.
  * @module store/entities/property
+ * @description Combina los slices (core, ui, filters) en un único store.
+ *   - Usa `immer` para actualizaciones inmutables.
+ *   - Usa `devtools` para debugging.
+ *   - Usa `persist` para guardar filtros y configuraciones de UI.
  */
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { PropertySortCriteria, PropertyViewMode } from '../../../types/entities/property';
-import { createPropertyCoreSlice, type PropertyCoreSlice } from './slices/core';
-import { createPropertyFiltersSlice, type PropertyFiltersSlice } from './slices/filters';
-import { createPropertyUISlice, type PropertyUISlice } from './slices/ui';
-import type { PropertyState } from './types';
+import { immer } from 'zustand/middleware/immer';
+import { createPropertyCoreSlice } from './slices/core';
+import { createPropertyFilterSlice } from './slices/filters';
+import { createPropertyUISlice } from './slices/ui';
+import type { PropertyStore } from './types';
 
-// Combinación de todos los slices
-export type PropertyStore = PropertyState & PropertyCoreSlice & PropertyUISlice & PropertyFiltersSlice;
-
-// Estado inicial
-const initialState: PropertyState = {
-	core: {
-		properties: {},
-		propertyItems: {},
-		isLoading: false,
-		error: null,
-		lastUpdated: null,
-	},
-	ui: {
-		selectedIds: [],
-		viewMode: PropertyViewMode.GRID,
-		isViewerOpen: false,
-		currentPropertyId: null,
-		displayState: {},
-		draggedPropertyId: null,
-		dropTargetPropertyId: null,
-		highlightedId: null,
-		expandedIds: [],
-	},
-	filters: {
-		sortBy: PropertySortCriteria.NAME_ASC,
-		searchQuery: '',
-		filterByCategory: null,
-		filterFavorites: false,
-		dateRange: {
-			from: null,
-			to: null,
-		},
-	},
-};
-
-// Crear store combinando slices
 export const usePropertyStore = create<PropertyStore>()(
 	devtools(
 		persist(
-			(set, get, ...rest) => ({
-				...initialState,
-				...createPropertyCoreSlice(set, get, ...rest),
-				...createPropertyUISlice(set, get, ...rest),
-				...createPropertyFiltersSlice(set, get, ...rest),
-			}),
+			immer((...a) => ({
+				...createPropertyCoreSlice(...a),
+				...createPropertyUISlice(...a),
+				...createPropertyFilterSlice(...a),
+			})),
 			{
-				name: 'property-store',
-				partialize: (state) => ({
-					ui: {
-						viewMode: state.ui.viewMode,
-						expandedIds: state.ui.expandedIds,
-					},
-					filters: {
-						sortBy: state.filters.sortBy,
-					},
+				name: 'property-store-v2', // Versión actualizada
+				partialize: state => ({
+					// Solo persistir lo que no es dato de sesión
+					filters: state.filters,
+					viewMode: state.viewMode,
 				}),
-			}
+			},
 		),
-		{ name: 'PropertyStore' }
-	)
+		{ name: 'PropertyStore' },
+	),
 );

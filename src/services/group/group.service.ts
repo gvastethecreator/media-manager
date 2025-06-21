@@ -8,20 +8,19 @@ import { prisma } from '@/lib/prisma';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats.service';
 import {
-	createGroup,
-	deleteGroup,
-	getGroupById,
-	getGroupsByIds,
-	searchGroups,
-	updateGroup,
+    createGroup,
+    deleteGroup,
+    getGroupById,
+    getGroupsByIds,
+    searchGroups,
+    updateGroup,
 } from '@/transformers/group';
 import type {
-	GroupComplete,
-	GroupCreateInput,
-	GroupRelations,
-	GroupSearchResult,
-	GroupUpdateInput,
-	GroupWithStats,
+    GroupCreateInput,
+    GroupRelations,
+    GroupSearchResult,
+    GroupUpdateInput,
+    GroupWithStats
 } from '@/types/entities/group/types';
 
 // Logger específico para el servicio de grupos
@@ -61,7 +60,7 @@ export const GROUP_EVENTS = {
 // Notificación de cambios en grupos
 export const notifyGroupChange = async (
 	action: 'create' | 'update' | 'delete' | 'items:add' | 'items:remove',
-	group: GroupComplete | { id: string }
+	group: GroupWithStats | { id: string }
 ) => {
 	// Usar EventType válido del sistema central
 	const eventType = 'update'; // Tipo válido para grupos según EventType
@@ -81,7 +80,7 @@ export const notifyGroupChange = async (
 /**
  * Obtiene un grupo por su ID
  */
-export const getGroupService = async (id: string): Promise<GroupComplete | null> => {
+export const getGroupService = async (id: string): Promise<GroupWithStats | null> => {
 	try {
 		logger.info(`🔍 Buscando grupo con ID: ${id}`);
 		const group = await getGroupById(id, { includeRelations: true, throwIfNotFound: false });
@@ -105,7 +104,7 @@ export const getGroupService = async (id: string): Promise<GroupComplete | null>
 /**
  * Obtiene múltiples grupos por sus IDs
  */
-export const getGroupsByIdsService = async (ids: string[]): Promise<GroupComplete[]> => {
+export const getGroupsByIdsService = async (ids: string[]): Promise<GroupWithStats[]> => {
 	try {
 		logger.info(`🔍 Buscando grupos por IDs, cantidad: ${ids.length}`);
 
@@ -157,7 +156,7 @@ export const searchGroupsService = async (
 /**
  * Crea un nuevo grupo
  */
-export const createGroupService = async (data: GroupCreateInput): Promise<GroupComplete> => {
+export const createGroupService = async (data: GroupCreateInput): Promise<GroupWithStats> => {
 	try {
 		logger.info('✨ Creando nuevo grupo', { name: data.name });
 
@@ -196,7 +195,7 @@ export const createGroupService = async (data: GroupCreateInput): Promise<GroupC
 /**
  * Actualiza un grupo existente
  */
-export const updateGroupService = async (id: string, data: GroupUpdateInput): Promise<GroupComplete> => {
+export const updateGroupService = async (id: string, data: GroupUpdateInput): Promise<GroupWithStats> => {
 	try {
 		logger.info(`📝 Actualizando grupo: ${id}`);
 
@@ -287,50 +286,25 @@ export const deleteGroupService = async (id: string): Promise<void> => {
 /**
  * Obtiene estadísticas de un grupo
  */
-export const getGroupStatsService = async (id: string): Promise<GroupWithStats> => {
+export const getGroupStatsService = async (id: string): Promise<GroupWithStats | null> => {
 	try {
 		logger.info(`📊 Obteniendo estadísticas del grupo: ${id}`);
 
-		// Verificar que el grupo existe y obtener conteos usando _count
-		const groupWithCounts = await prisma.group.findUnique({
-			where: { id },
-			include: {
-				_count: {
-					select: {
-						images: true,
-						videos: true,
-						albums: true,
-						tags: true,
-						collections: true,
-						characters: true,
-						places: true,
-						worldItems: true,
-						concepts: true,
-						prompts: true,
-						notes: true,
-						wildcards: true,
-						properties: true,
-					},
-				},
-			},
-		});
+		// Reutilizar la lógica de la server action que ya hace esto.
+		const group = await getGroup(id);
 
-		if (!groupWithCounts) {
+		if (!group) {
+			// La acción 'getGroup' ya lanza un error si no lo encuentra, pero una doble verificación es segura.
 			throw createGroupError(`No se encontró el grupo con ID: ${id}`, GroupErrorCode.NOT_FOUND);
 		}
 
-		// Construir el objeto de estadísticas
-		const stats: GroupWithStats = {
-			...groupWithCounts,
-			_count: groupWithCounts._count,
-			totalEntities: Object.values(groupWithCounts._count).reduce((total, count) => total + count, 0),
-			lastUpdated: groupWithCounts.updatedAt,
-		};
-
 		logger.info(`✅ Estadísticas obtenidas para grupo: ${id}`);
-		return stats;
+		return group;
 	} catch (error) {
 		logger.error('❌ Error al obtener estadísticas del grupo', { error, groupId: id });
+		if (error instanceof Error && error.name === 'GroupServiceError') {
+			throw error;
+		}
 		throw createGroupError(
 			`Error al obtener estadísticas: ${error instanceof Error ? error.message : String(error)}`,
 			GroupErrorCode.OPERATION_FAILED,

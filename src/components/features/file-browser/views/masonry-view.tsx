@@ -1,25 +1,26 @@
 'use client';
 
+import { cn } from '@/lib/utils';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import type { AnyEntity } from '@/types/entities';
 import { Star } from 'lucide-react';
 import { motion } from 'motion/react';
 import * as React from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { useSelectionStore } from '@/store/ui/selection.slice';
-import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { FileItem } from '@/types/files';
 import { ImageRenderer } from '../image-renderer';
 import '../styles/scrollbar.css';
 import { VirtualizerWrapper } from './virtualizer-wrapper';
 
 interface MasonryItemProps {
-	item: FileItem;
+	item: AnyEntity;
 	isSelected?: boolean;
 	isActive?: boolean;
-	onClick?: (item: FileItem, e: React.MouseEvent) => void;
-	onDoubleClick?: (item: FileItem) => void;
-	onContextMenu?: (item: FileItem, e: React.MouseEvent) => void;
+	onClick?: (item: AnyEntity, index: number, e: React.MouseEvent) => void;
+	onDoubleClick?: (item: AnyEntity) => void;
+	onContextMenu?: (item: AnyEntity, e: React.MouseEvent) => void;
 	style?: React.CSSProperties;
+	index: number;
 }
 
 const getMetadata = (metadata: string | null) => {
@@ -51,6 +52,7 @@ export const MasonryItem = memo(function MasonryItem({
 	onDoubleClick,
 	onContextMenu,
 	style,
+	index,
 }: MasonryItemProps) {
 	// Estados para controlar la carga y visualización
 	const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -61,9 +63,9 @@ export const MasonryItem = memo(function MasonryItem({
 		(e: React.MouseEvent) => {
 			e.preventDefault();
 			e.stopPropagation();
-			onClick?.(item, e);
+			onClick?.(item, index, e);
 		},
-		[onClick, item]
+		[onClick, item, index]
 	);
 
 	const handleDoubleClick = useCallback(
@@ -147,7 +149,7 @@ export const MasonryItem = memo(function MasonryItem({
 				{thumbnailUrl && (
 					<ImageRenderer
 						src={thumbnailUrl}
-						alt={item.name}
+						alt={item.name || ''}
 						className="h-full w-full object-cover transition-transform"
 						onLoad={handleImageLoad}
 						onError={handleImageError}
@@ -155,7 +157,7 @@ export const MasonryItem = memo(function MasonryItem({
 				)}
 
 				{/* Mostrar placeholder durante la carga */}
-				{!isImageLoaded && !hasError && (
+				{!isImageLoaded && !hasError && item.thumbnail && (
 					<div className="w-full h-full bg-muted/20 animate-pulse flex items-center justify-center">
 						<span className="text-xs text-muted-foreground">Cargando...</span>
 					</div>
@@ -183,10 +185,10 @@ export const MasonryItem = memo(function MasonryItem({
 });
 
 export interface MasonryViewProps {
-	items: FileItem[];
-	onItemClick?: (item: FileItem, e: React.MouseEvent) => void;
-	onItemDoubleClick?: (item: FileItem) => void;
-	onContextMenu?: (item: FileItem, e: React.MouseEvent) => void;
+	items: AnyEntity[];
+	onItemClick?: (item: AnyEntity, index: number, e: React.MouseEvent) => void;
+	onItemDoubleClick?: (item: AnyEntity) => void;
+	onContextMenu?: (item: AnyEntity, e: React.MouseEvent) => void;
 	className?: string;
 }
 
@@ -202,7 +204,7 @@ export const MasonryView = memo(function MasonryView({
 
 	// Renderizar un elemento de la lista
 	const renderItem = useCallback(
-		(_index: number, item: FileItem) => {
+		(index: number, item: AnyEntity) => {
 			const isSelected = selectedIds.includes(item.id);
 			const isActive = activeId === item.id;
 
@@ -215,6 +217,7 @@ export const MasonryView = memo(function MasonryView({
 					onClick={onItemClick}
 					onDoubleClick={onItemDoubleClick}
 					onContextMenu={onContextMenu}
+					index={index}
 				/>
 			);
 		},

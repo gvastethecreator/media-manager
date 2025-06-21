@@ -3,89 +3,52 @@
  * @module transformers/album/serializers
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import type {
-    AlbumComplete,
     AlbumCreateInput,
-    AlbumRelations
+    AlbumUpdateInput,
 } from '@/types/entities/album';
-import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma, Album as PrismaAlbum } from '@prisma/client';
-
-const logger = serverLogger.withContext('AlbumSerializer');
-
-type PrismaAlbumWithRelations = PrismaAlbum & {
-	images?: { id: string }[];
-	videos?: { id: string }[];
-	children?: PrismaAlbum[];
-	_count?: {
-		images?: number;
-		videos?: number;
-		children?: number;
-	};
-};
+import type { Prisma } from '@prisma/client';
 
 /**
- * 🔄 Serializa un Album para crearlo en Prisma.
+ * 🔄 Serializa los datos para crear un álbum en Prisma.
  */
-export function toPrismaAlbum(data: AlbumCreateInput): Prisma.AlbumCreateInput {
+export function toPrismaAlbumCreate(
+	data: AlbumCreateInput,
+): Prisma.AlbumCreateInput {
 	const { images, videos, ...rest } = data;
 	const prismaData: Prisma.AlbumCreateInput = {
 		...rest,
 	};
-	if (images) {
-		prismaData.images = { connect: images.connect };
+
+	if (images && images.length > 0) {
+		prismaData.images = { connect: images.map((img) => ({ id: img.id })) };
 	}
-	if (videos) {
-		prismaData.videos = { connect: videos.connect };
+
+	if (videos && videos.length > 0) {
+		prismaData.videos = { connect: videos.map((vid) => ({ id: vid.id })) };
 	}
+
 	return prismaData;
 }
 
 /**
- * 🔄 Deserializa un Album desde Prisma.
+ * 🔄 Serializa los datos para actualizar un álbum en Prisma.
  */
-export function fromPrismaAlbum(prismaAlbum: PrismaAlbumWithRelations): AlbumComplete {
-	try {
-		const { _count, ...baseData } = prismaAlbum;
+export function toPrismaAlbumUpdate(
+	data: AlbumUpdateInput,
+): Prisma.AlbumUpdateInput {
+	const { images, videos, ...rest } = data;
+	const prismaData: Prisma.AlbumUpdateInput = {
+		...rest,
+	};
 
-		const relations: AlbumRelations = {};
-		if (baseData.images) {
-			relations.images = baseData.images;
-		}
-		if (baseData.videos) {
-			relations.videos = baseData.videos;
-		}
-
-		const completeAlbum: AlbumComplete = {
-			...baseData,
-			...relations,
-			filters: baseData.filters ? JSON.parse(baseData.filters) : {},
-			sortBy: baseData.sortBy ?? 'createdAt_desc',
-			isRecent: false,
-			_count: {
-				images: _count?.images ?? 0,
-				videos: _count?.videos ?? 0,
-				collections: 0,
-				tags: 0,
-				characters: 0,
-				places: 0,
-				worldItems: 0,
-				concepts: 0,
-				prompts: 0,
-				notes: 0,
-				wildcards: 0,
-				properties: 0,
-				groups: 0,
-			},
-		};
-
-		return completeAlbum;
-	} catch (error) {
-		logger.error('Error al transformar álbum desde Prisma', {
-			error,
-			albumId: prismaAlbum?.id,
-		});
-		throw new TransformerError(`Error al transformar el álbum: ${(error as Error).message}`);
+	if (images) {
+		prismaData.images = { set: images.map((img) => ({ id: img.id })) };
 	}
+
+	if (videos) {
+		prismaData.videos = { set: videos.map((vid) => ({ id: vid.id })) };
+	}
+
+	return prismaData;
 }

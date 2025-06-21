@@ -1,12 +1,71 @@
 /**
- * @file Funciones para mapear datos de la entidad Place a formatos de Prisma.
+ * @file Funciones para mapear y transformar datos de la entidad Place.
  * @module transformers/place/mappers
- * @description Estas funciones se encargan de transformar la entrada de la aplicación
- * (ej. desde formularios o actions) a los tipos que Prisma espera para las operaciones de BD.
+ * @description Contiene funciones para:
+ *              1. Transformar la entrada de la app (forms, actions) a tipos de Prisma (create/update).
+ *              2. Transformar los datos de Prisma a tipos enriquecidos de la app (PlaceWithStats).
  */
 
-import type { PlaceCreateInput, PlaceSearchOptions, PlaceUpdateInput } from '@/types/entities/place';
+import { safeJsonParse } from '@/lib/utils/json';
+import {
+    PlaceCreateInput,
+    PlaceUpdateInput,
+    PlaceWithStats,
+    PrismaPlaceWithCounts,
+} from '@/types/entities/place/base';
+import type { PlaceSearchOptions } from '@/types/entities/place/types';
+import { calculateCompleteness } from '@/utils/transformers/calculate-completeness';
 import type { Prisma } from '@prisma/client';
+
+/**
+ * 🗺️ Transforma un objeto Place de Prisma a un objeto PlaceWithStats enriquecido.
+ *
+ * @param place - El objeto de la base de datos, incluyendo los `_count` de relaciones.
+ * @returns Un objeto PlaceWithStats con campos JSON parseados y estadísticas calculadas.
+ */
+export function toPlaceWithStats(
+	place: PrismaPlaceWithCounts,
+): PlaceWithStats {
+	const { _count, ...rest } = place;
+
+	// Campos que contribuyen a la puntuación de completitud
+	const completenessFields = [
+		rest.description,
+		rest.region,
+		rest.type,
+		rest.climate,
+		rest.population,
+		rest.government,
+		rest.lore,
+		rest.history,
+	];
+
+	// Métricas de popularidad basadas en conteos
+	const popularity =
+		(_count?.images ?? 0) +
+		(_count?.notes ?? 0) +
+		(_count?.characters ?? 0) +
+		(_count?.collections ?? 0) +
+		(_count?.tags ?? 0);
+
+	const stats: PlaceWithStats = {
+		...rest,
+		dangers: safeJsonParse(rest.dangers, []),
+		resources: safeJsonParse(rest.resources, []),
+		stats: safeJsonParse(rest.stats, null),
+		filters: safeJsonParse(rest.filters, null),
+		_stats: {
+			popularity,
+			completenessScore: calculateCompleteness(completenessFields),
+			// TODO: Implementar lógica real para estas métricas
+			spatialRelevance: 0,
+			geoContextLevel: 0,
+		},
+		_count,
+	};
+
+	return stats;
+}
 
 /**
  * Mapea la entrada de creación de un lugar al formato de Prisma.
@@ -15,42 +74,32 @@ import type { Prisma } from '@prisma/client';
  */
 export function toCreateData(input: PlaceCreateInput): Prisma.PlaceCreateInput {
 	const {
-		imageIds,
-		videoIds,
-		albumIds,
-		collectionIds,
-		tagIds,
-		characterIds,
-		worldItemIds,
-		conceptIds,
+		images,
+		notes,
+		tags,
+		characters,
+		collections,
+		concepts,
 		promptIds,
-		noteIds,
 		wildcardIds,
 		propertyIds,
 		groupIds,
-		dangers,
-		resources,
-		stats,
-		filters,
 		...rest
-	} = input;
+	} = input as any; // Usamos 'as any' para manejar las relaciones que no están en el tipo base
 
 	return {
 		...rest,
-		dangers: JSON.stringify(dangers || []),
-		resources: JSON.stringify(resources || []),
-		stats: stats ? JSON.stringify(stats) : '{}',
-		filters: filters ? JSON.stringify(filters) : '{}',
-		images: imageIds ? { connect: imageIds.map(id => ({ id })) } : undefined,
-		videos: videoIds ? { connect: videoIds.map(id => ({ id })) } : undefined,
-		albums: albumIds ? { connect: albumIds.map(id => ({ id })) } : undefined,
-		collections: collectionIds ? { connect: collectionIds.map(id => ({ id })) } : undefined,
-		tags: tagIds ? { connect: tagIds.map(id => ({ id })) } : undefined,
-		characters: characterIds ? { connect: characterIds.map(id => ({ id })) } : undefined,
-		worldItems: worldItemIds ? { connect: worldItemIds.map(id => ({ id })) } : undefined,
-		concepts: conceptIds ? { connect: conceptIds.map(id => ({ id })) } : undefined,
+		dangers: JSON.stringify(input.dangers || []),
+		resources: JSON.stringify(input.resources || []),
+		stats: input.stats ? JSON.stringify(input.stats) : '{}',
+		filters: input.filters ? JSON.stringify(input.filters) : '{}',
+		images: images ? { connect: images.map((id: string) => ({ id })) } : undefined,
+		notes: notes ? { connect: notes.map((id: string) => ({ id })) } : undefined,
+		tags: tags ? { connect: tags.map((id: string) => ({ id })) } : undefined,
+		characters: characters ? { connect: characters.map((id: string) => ({ id })) } : undefined,
+		collections: collections ? { connect: collections.map((id: string) => ({ id })) } : undefined,
+		concepts: concepts ? { connect: concepts.map((id: string) => ({ id })) } : undefined,
 		prompts: promptIds ? { connect: promptIds.map(id => ({ id })) } : undefined,
-		notes: noteIds ? { connect: noteIds.map(id => ({ id })) } : undefined,
 		wildcards: wildcardIds ? { connect: wildcardIds.map(id => ({ id })) } : undefined,
 		properties: propertyIds ? { connect: propertyIds.map(id => ({ id })) } : undefined,
 		groups: groupIds ? { connect: groupIds.map(id => ({ id })) } : undefined,
@@ -64,43 +113,33 @@ export function toCreateData(input: PlaceCreateInput): Prisma.PlaceCreateInput {
  */
 export function toUpdateData(input: PlaceUpdateInput): Prisma.PlaceUpdateInput {
 	const {
-		imageIds,
-		videoIds,
-		albumIds,
-		collectionIds,
-		tagIds,
-		characterIds,
-		worldItemIds,
-		conceptIds,
+		images,
+		notes,
+		tags,
+		characters,
+		collections,
+		concepts,
 		promptIds,
-		noteIds,
 		wildcardIds,
 		propertyIds,
 		groupIds,
-		dangers,
-		resources,
-		stats,
-		filters,
 		...rest
-	} = input;
+	} = input as any; // Usamos 'as any' para manejar las relaciones que no están en el tipo base
 
 	const data: Prisma.PlaceUpdateInput = { ...rest };
 
-	if (dangers !== undefined) data.dangers = JSON.stringify(dangers);
-	if (resources !== undefined) data.resources = JSON.stringify(resources);
-	if (stats !== undefined) data.stats = JSON.stringify(stats);
-	if (filters !== undefined) data.filters = JSON.stringify(filters);
+	if (input.dangers !== undefined) data.dangers = JSON.stringify(input.dangers);
+	if (input.resources !== undefined) data.resources = JSON.stringify(input.resources);
+	if (input.stats !== undefined) data.stats = JSON.stringify(input.stats);
+	if (input.filters !== undefined) data.filters = JSON.stringify(input.filters);
 
-	if (imageIds !== undefined) data.images = { set: imageIds?.map(id => ({ id })) ?? [] };
-	if (videoIds !== undefined) data.videos = { set: videoIds?.map(id => ({ id })) ?? [] };
-	if (albumIds !== undefined) data.albums = { set: albumIds?.map(id => ({ id })) ?? [] };
-	if (collectionIds !== undefined) data.collections = { set: collectionIds?.map(id => ({ id })) ?? [] };
-	if (tagIds !== undefined) data.tags = { set: tagIds?.map(id => ({ id })) ?? [] };
-	if (characterIds !== undefined) data.characters = { set: characterIds?.map(id => ({ id })) ?? [] };
-	if (worldItemIds !== undefined) data.worldItems = { set: worldItemIds?.map(id => ({ id })) ?? [] };
-	if (conceptIds !== undefined) data.concepts = { set: conceptIds?.map(id => ({ id })) ?? [] };
+	if (images !== undefined) data.images = { set: images?.map((id: string) => ({ id })) ?? [] };
+	if (notes !== undefined) data.notes = { set: notes?.map((id: string) => ({ id })) ?? [] };
+	if (tags !== undefined) data.tags = { set: tags?.map((id:string) => ({ id })) ?? [] };
+	if (characters !== undefined) data.characters = { set: characters?.map((id: string) => ({ id })) ?? [] };
+	if (collections !== undefined) data.collections = { set: collections?.map((id: string) => ({ id })) ?? [] };
+	if (concepts !== undefined) data.concepts = { set: concepts?.map((id: string) => ({ id })) ?? [] };
 	if (promptIds !== undefined) data.prompts = { set: promptIds?.map(id => ({ id })) ?? [] };
-	if (noteIds !== undefined) data.notes = { set: noteIds?.map(id => ({ id })) ?? [] };
 	if (wildcardIds !== undefined) data.wildcards = { set: wildcardIds?.map(id => ({ id })) ?? [] };
 	if (propertyIds !== undefined) data.properties = { set: propertyIds?.map(id => ({ id })) ?? [] };
 	if (groupIds !== undefined) data.groups = { set: groupIds?.map(id => ({ id })) ?? [] };
@@ -166,6 +205,17 @@ export function toSearchOptions(options: PlaceSearchOptions = {}): Prisma.PlaceF
 		orderBy: createOrderBy(options),
 		skip: options.skip,
 		take: options.take,
-		include: options.includeRelations ? { _count: true } : undefined,
+		include: {
+			_count: {
+				select: {
+					images: true,
+					notes: true,
+					tags: true,
+					characters: true,
+					collections: true,
+					concepts: true,
+				},
+			},
+		},
 	};
 }

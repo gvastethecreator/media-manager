@@ -3,26 +3,44 @@
 /**
  * @file Server Actions para la entidad Place
  * @module app/actions/places/place.actions
- * @description Acciones CRUD y de gestión de relaciones para los Lugares.
+ * @description Acciones CRUD y de gestión de relaciones para los Lugares, utilizando el patrón EntityWithStats.
  */
 
 import { prisma } from '@/lib/db';
 import {
-    fromPrismaPlace,
-    toCreateData as mapCreatePlaceDataToPrisma,
-    toSearchOptions as mapPlaceSearchOptionsToPrisma,
-    toUpdateData as mapUpdatePlaceDataToPrisma,
-    placePayload,
+	toPlaceWithStats,
+	mapCreatePlaceDataToPrisma,
+	mapPlaceSearchOptionsToPrisma,
+	mapUpdatePlaceDataToPrisma,
 } from '@/transformers/place';
 import type {
-    PlaceComplete,
-    PlaceCreateInput,
-    PlaceSearchOptions,
-    PlaceUpdateInput,
+	PlaceWithStats,
+	PlaceCreateInput,
+	PlaceSearchOptions,
+	PlaceUpdateInput,
 } from '@/types/entities/place';
 import { revalidatePath } from 'next/cache';
+import { Prisma } from '@prisma/client';
 
 const REVALIDATE_PATHS = ['/settings/places', '/library/places'];
+
+// Payload para incluir los conteos necesarios para las estadísticas
+const placeIncludeWithCounts = {
+	_count: {
+		select: {
+			images: true,
+			notes: true,
+			tags: true,
+			characters: true,
+			collections: true,
+			concepts: true,
+		},
+	},
+} satisfies Prisma.PlaceInclude;
+
+type PrismaPlaceWithCounts = Prisma.PlaceGetPayload<{
+	include: typeof placeIncludeWithCounts;
+}>;
 
 async function revalidatePlacePaths(id?: string) {
 	for (const path of REVALIDATE_PATHS) {
@@ -33,67 +51,68 @@ async function revalidatePlacePaths(id?: string) {
 	}
 }
 
-export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceComplete[]> {
+export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceWithStats[]> {
 	try {
 		const findOptions = mapPlaceSearchOptionsToPrisma(options);
 		const places = await prisma.place.findMany({
 			...findOptions,
-			...placePayload,
+			include: placeIncludeWithCounts,
 		});
-		const transformedPlaces = places.map(fromPrismaPlace).filter((p): p is PlaceComplete => p !== null);
-		return transformedPlaces;
+		return places.map(toPlaceWithStats);
 	} catch (error) {
 		console.error('Error al obtener los lugares:', error);
 		throw new Error('No se pudieron obtener los lugares.');
 	}
 }
 
-export async function getPlaceById(id: string): Promise<PlaceComplete | null> {
+export async function getPlaceById(id: string): Promise<PlaceWithStats | null> {
 	try {
 		const place = await prisma.place.findUnique({
 			where: { id },
-			...placePayload,
+			include: placeIncludeWithCounts,
 		});
-		return fromPrismaPlace(place);
+		return place ? toPlaceWithStats(place as PrismaPlaceWithCounts) : null;
 	} catch (error) {
 		console.error(`Error al obtener el lugar con ID ${id}:`, error);
 		throw new Error('No se pudo obtener el lugar.');
 	}
 }
 
-export async function createPlace(input: PlaceCreateInput): Promise<PlaceComplete> {
+export async function createPlace(input: PlaceCreateInput): Promise<PlaceWithStats> {
 	try {
 		const data = mapCreatePlaceDataToPrisma(input);
-		const newPlace = await prisma.place.create({
-			data,
-			...placePayload,
-		});
+		const newPlace = await prisma.place.create({ data });
+
 		await revalidatePlacePaths();
-		const transformedPlace = fromPrismaPlace(newPlace);
-		if (!transformedPlace) {
-			throw new Error('Error al transformar el lugar creado.');
+
+		// Volvemos a buscar para obtener los _counts actualizados
+		const createdPlaceWithStats = await getPlaceById(newPlace.id);
+		if (!createdPlaceWithStats) {
+			throw new Error('No se pudo recuperar el lugar recién creado con sus estadísticas.');
 		}
-		return transformedPlace;
+		return createdPlaceWithStats;
 	} catch (error) {
 		console.error('Error al crear el lugar:', error);
 		throw new Error('No se pudo crear el lugar.');
 	}
 }
 
-export async function updatePlace(id: string, input: PlaceUpdateInput): Promise<PlaceComplete> {
+export async function updatePlace(id: string, input: PlaceUpdateInput): Promise<PlaceWithStats> {
 	try {
 		const data = mapUpdatePlaceDataToPrisma(input);
-		const updatedPlace = await prisma.place.update({
+		await prisma.place.update({
 			where: { id },
 			data,
-			...placePayload,
 		});
+
 		await revalidatePlacePaths(id);
-		const transformedPlace = fromPrismaPlace(updatedPlace);
-		if (!transformedPlace) {
-			throw new Error('Error al transformar el lugar actualizado.');
+
+		// Volvemos a buscar para obtener los _counts actualizados
+		const updatedPlaceWithStats = await getPlaceById(id);
+		if (!updatedPlaceWithStats) {
+			throw new Error('No se pudo recuperar el lugar actualizado con sus estadísticas.');
 		}
-		return transformedPlace;
+		return updatedPlaceWithStats;
 	} catch (error) {
 		console.error(`Error al actualizar el lugar con ID ${id}:`, error);
 		throw new Error('No se pudo actualizar el lugar.');

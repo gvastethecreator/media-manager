@@ -13,12 +13,11 @@ export {
     CharacterRace,
     CharacterSortOption
 } from './enums';
+
 export type {
-    CharacterWithRelations as Character, CharacterBase,
+    CharacterBase,
     CharacterComplete,
-    CharacterCounts,
     CharacterCreateInput,
-    CharacterExtended,
     CharacterFilter,
     CharacterFilterItem,
     CharacterFilters,
@@ -27,8 +26,11 @@ export type {
     CharacterSearchOptions,
     CharacterStats,
     CharacterUpdateInput,
-    CharacterViewConfig, CharacterWithRelations,
+    CharacterViewConfig,
+    CharacterWithStats,
     CreateCharacterData,
+    PrismaCharacterWithCounts,
     UpdateCharacterData
 } from './types';
+
 // 📝 Documentación: Solo tipos canónicos y extendidos. Legacy removido.

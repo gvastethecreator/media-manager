@@ -9,11 +9,10 @@ import type {
     GroupComplete,
     GroupCreateInput,
     GroupTransformerOptions,
-    GroupUpdateInput,
-    GroupWithStats,
+    GroupUpdateInput
 } from '@/types/entities/group';
 import { GroupSchema } from '@/types/entities/group';
-import type { Prisma, Group as PrismaGroup } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('GroupSerializers');
 
@@ -124,6 +123,33 @@ export function toPrismaGroupCreate(data: GroupCreateInput): Prisma.GroupCreateI
 		// Serializar campos JSON
 		const filters = serializeJsonField(data.filters, '[]');
 
+		// --- Manejo de relaciones ---
+		const relationsToConnect: Record<string, { connect: { id: string }[] }> = {};
+		const relationKeys: (keyof GroupCreateInput)[] = [
+			'images',
+			'videos',
+			'albums',
+			'collections',
+			'tags',
+			'characters',
+			'places',
+			'worldItems',
+			'concepts',
+			'prompts',
+			'notes',
+			'wildcards',
+			'properties',
+		];
+
+		for (const key of relationKeys) {
+			if (data[key] && Array.isArray(data[key]) && data[key].length > 0) {
+				relationsToConnect[key] = {
+					connect: data[key].map((item: { id: string }) => ({ id: item.id })),
+				};
+			}
+		}
+		// --- Fin del manejo de relaciones ---
+
 		// Definir el resultado con los valores correctos
 		const result: Prisma.GroupCreateInput = {
 			name: data.name,
@@ -136,6 +162,7 @@ export function toPrismaGroupCreate(data: GroupCreateInput): Prisma.GroupCreateI
 			filters,
 			featuredImage: data.featuredImage ?? null,
 			isFavorite: data.isFavorite ?? false,
+			...relationsToConnect, // Añadir las relaciones a conectar
 		};
 
 		return result;
@@ -152,6 +179,35 @@ export function toPrismaGroupUpdate(data: GroupUpdateInput): Prisma.GroupUpdateI
 		// Serializar campos JSON
 		const filters = data.filters ? serializeJsonField(data.filters) : undefined;
 
+		// --- Manejo de relaciones ---
+		const relationsToConnect: Record<string, { connect: { id: string }[] }> = {};
+		const relationKeys: (keyof GroupUpdateInput)[] = [
+			'images',
+			'videos',
+			'albums',
+			'collections',
+			'tags',
+			'characters',
+			'places',
+			'worldItems',
+			'concepts',
+			'prompts',
+			'notes',
+			'wildcards',
+			'properties',
+		];
+
+		for (const key of relationKeys) {
+			if (data[key] && Array.isArray(data[key])) {
+				// Para la actualización, podemos conectar incluso si el array está vacío (para desconectar, se usaría `disconnect`)
+				// Aquí solo manejamos la conexión.
+				relationsToConnect[key] = {
+					connect: data[key].map((item: { id: string }) => ({ id: item.id })),
+				};
+			}
+		}
+		// --- Fin del manejo de relaciones ---
+
 		// Definir el resultado con los valores correctos
 		const result: Prisma.GroupUpdateInput = {
 			name: data.name,
@@ -164,6 +220,7 @@ export function toPrismaGroupUpdate(data: GroupUpdateInput): Prisma.GroupUpdateI
 			filters,
 			featuredImage: data.featuredImage,
 			isFavorite: data.isFavorite,
+			...relationsToConnect, // Añadir las relaciones a conectar/actualizar
 		};
 
 		return result;
@@ -173,7 +230,7 @@ export function toPrismaGroupUpdate(data: GroupUpdateInput): Prisma.GroupUpdateI
 }
 
 /**
- * 🔄 Serializa un Group (crear o actualizar)
+ * �� Serializa un Group (crear o actualizar)
  */
 export function toPrismaGroup(
 	data: GroupCreateInput | GroupUpdateInput
@@ -185,98 +242,12 @@ export function toPrismaGroup(
 }
 
 /**
- * Interfaz que representa el payload de Prisma para un grupo, incluyendo las relaciones contadas.
- */
-export type PrismaGroupWithCounts = PrismaGroup & {
-	_count?: {
-		images?: number;
-		videos?: number;
-		albums?: number;
-		collections?: number;
-		tags?: number;
-		characters?: number;
-		places?: number;
-		worldItems?: number;
-		concepts?: number;
-		prompts?: number;
-		notes?: number;
-		wildcards?: number;
-		properties?: number;
-	};
-};
-
-/**
- *  transforma un objeto de grupo de Prisma a un objeto GroupWithStats,
- * calculando todas las estadísticas necesarias.
- *
- * @param prismaGroup - El objeto de grupo obtenido de Prisma, con los conteos.
- * @returns Un objeto GroupWithStats completo y seguro.
- */
-export function fromPrismaGroup(prismaGroup: PrismaGroupWithCounts): GroupWithStats {
-	const { _count, ...baseGroup } = prismaGroup;
-	const counts = _count || {};
-
-	const stats = {
-		totalImages: counts.images || 0,
-		totalVideos: counts.videos || 0,
-		totalAlbums: counts.albums || 0,
-		totalCollections: counts.collections || 0,
-		totalTags: counts.tags || 0,
-		totalCharacters: counts.characters || 0,
-		totalPlaces: counts.places || 0,
-		totalWorldItems: counts.worldItems || 0,
-		totalConcepts: counts.concepts || 0,
-		totalPrompts: counts.prompts || 0,
-		totalNotes: counts.notes || 0,
-		totalWildcards: counts.wildcards || 0,
-		totalProperties: counts.properties || 0,
-		lastUpdated: prismaGroup.updatedAt,
-		totalItems: 0,
-	};
-
-	stats.totalItems =
-		stats.totalImages +
-		stats.totalVideos +
-		stats.totalAlbums +
-		stats.totalCollections +
-		stats.totalTags +
-		stats.totalCharacters +
-		stats.totalPlaces +
-		stats.totalWorldItems +
-		stats.totalConcepts +
-		stats.totalPrompts +
-		stats.totalNotes +
-		stats.totalWildcards +
-		stats.totalProperties;
-
-	return {
-		...(baseGroup as GroupBase),
-		_count: {
-			images: stats.totalImages,
-			videos: stats.totalVideos,
-			albums: stats.totalAlbums,
-			collections: stats.totalCollections,
-			tags: stats.totalTags,
-			characters: stats.totalCharacters,
-			places: stats.totalPlaces,
-			worldItems: stats.totalWorldItems,
-			concepts: stats.totalConcepts,
-			prompts: stats.totalPrompts,
-			notes: stats.totalNotes,
-			wildcards: stats.totalWildcards,
-			properties: stats.totalProperties,
-		},
-		stats,
-	};
-}
-
-/**
  * 🔍 Valida un Group
  */
-export function validateGroup(data: unknown): GroupComplete {
+export function validateGroup(data: unknown): GroupBase {
 	try {
 		const validated = GroupSchema.parse(data);
-		return validated as GroupComplete;
+		return validated;
 	} catch (error) {
 		throw handleTransformerError(error);
 	}

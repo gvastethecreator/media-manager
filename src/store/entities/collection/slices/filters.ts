@@ -1,36 +1,39 @@
 /**
- * @file Slice de filtros del store de Collection
+ * @file Slice de filtros para el store de Collection
  * @module store/entities/collection/slices/filters
  */
 
-import type { CollectionExtended, CollectionFilter } from '@/types/entities/collection';
-import { groupCollections, sortCollections } from '@/utils/collection';
+import type { CollectionFilter, CollectionWithStats } from '@/types/entities/collection';
 import type { StateCreator } from 'zustand';
+import { filterCollectionsBySearch, groupCollections, sortCollections } from '@/utils/collection';
 import type { CollectionState } from '../types';
 
 /**
- * Slice de filtros con operaciones de filtrado y ordenamiento
+ * Slice de filtros y ordenamiento para colecciones
  */
 export interface CollectionFiltersSlice {
-	// Operaciones de filtrado
-	filterByCategory: (category: string | null) => CollectionExtended[];
-	filterByRarity: (rarity: string | null) => CollectionExtended[];
-	filterByPrice: (minPrice: number | null, maxPrice: number | null) => CollectionExtended[];
-	filterByName: (searchTerm: string) => CollectionExtended[];
+	// Filtros básicos
+	filterByCategory: (category: string | null) => CollectionWithStats[];
+	filterByRarity: (rarity: string | null) => CollectionWithStats[];
+	filterByPrice: (minPrice: number | null, maxPrice: number | null) => CollectionWithStats[];
+	filterByName: (searchTerm: string) => CollectionWithStats[];
 
-	// Operaciones de ordenación
-	getSortedCollections: (sortOption?: string) => CollectionExtended[];
-	getGroupedCollections: (groupBy?: 'category' | 'rarity' | 'platform' | null) => Record<string, CollectionExtended[]>;
+	// Ordenamiento y agrupamiento
+	getSortedCollections: (sortOption?: string) => CollectionWithStats[];
+	getGroupedCollections: (groupBy?: 'category' | 'rarity' | 'platform' | null) => Record<string, CollectionWithStats[]>;
 
-	// Operaciones avanzadas de filtrado
-	addFilter: (filter: CollectionFilter) => void;
-	removeFilter: (index: number) => void;
+	// Filtros avanzados
+	setActiveFilters: (filters: CollectionFilter[]) => void;
 	clearFilters: () => void;
-	applyFilters: (filters: CollectionFilter[]) => CollectionExtended[];
+	applyFilters: (filters: CollectionFilter[]) => CollectionWithStats[];
 
-	// Configuraciones de filtrado
-	setDefaultSortOption: (option: string) => void;
-	setDefaultGroupBy: (groupBy: 'category' | 'rarity' | 'platform' | null) => void;
+	// Búsqueda
+	setSearchTerm: (term: string) => void;
+	getFilteredCollections: () => CollectionWithStats[];
+
+	// Configuración de vista
+	setSortOption: (option: string) => void;
+	setGroupBy: (groupBy: 'category' | 'rarity' | 'platform' | null) => void;
 }
 
 /**
@@ -42,24 +45,36 @@ export const createCollectionFiltersSlice: StateCreator<
 	[],
 	CollectionFiltersSlice
 > = (set, get) => ({
-	// Operaciones de filtrado
+	// Filtros básicos
 	filterByCategory: (category: string | null) => {
-		const collections = Object.values(get().collections);
+		const collections = get().getCollections();
 		if (!category) return collections;
-
 		return collections.filter((collection) => collection.category === category);
 	},
 
 	filterByRarity: (rarity: string | null) => {
-		const collections = Object.values(get().collections);
+		const collections = get().getCollections();
 		if (!rarity) return collections;
 
-		return collections.filter((collection) => collection.rarity === rarity);
+		return collections.filter((collection) => {
+			const totalItems = collection.stats?.totalItems || 0;
+			switch (rarity) {
+				case 'Mítica':
+					return totalItems > 100;
+				case 'Rara':
+					return totalItems > 50 && totalItems <= 100;
+				case 'Poco común':
+					return totalItems > 20 && totalItems <= 50;
+				case 'Común':
+					return totalItems <= 20;
+				default:
+					return true;
+			}
+		});
 	},
 
 	filterByPrice: (minPrice: number | null, maxPrice: number | null) => {
-		const collections = Object.values(get().collections);
-
+		const collections = get().getCollections();
 		return collections.filter((collection) => {
 			const price = collection.price || 0;
 			if (minPrice !== null && price < minPrice) return false;
@@ -69,136 +84,66 @@ export const createCollectionFiltersSlice: StateCreator<
 	},
 
 	filterByName: (searchTerm: string) => {
-		const collections = Object.values(get().collections);
-		if (!searchTerm.trim()) return collections;
-
-		const term = searchTerm.toLowerCase();
-		return collections.filter(
-			(collection) =>
-				collection.name.toLowerCase().includes(term) || collection.description?.toLowerCase().includes(term)
-		);
+		const collections = get().getCollections();
+		return filterCollectionsBySearch(collections, searchTerm);
 	},
 
-	// Operaciones de ordenación
+	// Ordenamiento y agrupamiento
 	getSortedCollections: (sortOption?: string) => {
-		const { collections, viewConfig } = get();
-		const collectionsArray = Object.values(collections);
-		const option = sortOption || viewConfig.sortBy + (viewConfig.sortDirection === 'desc' ? '_desc' : '_asc');
-		return sortCollections(collectionsArray, option);
+		const collections = get().getCollections();
+		const option = sortOption || get().currentSortOption;
+		return sortCollections(collections, option);
 	},
 
 	getGroupedCollections: (groupBy?: 'category' | 'rarity' | 'platform' | null) => {
-		const collections = Object.values(get().collections);
-		const { viewConfig } = get();
-		return groupCollections(collections, groupBy || viewConfig.groupBy || null);
+		const collections = get().getCollections();
+		const groupByOption = groupBy !== undefined ? groupBy : get().groupBy;
+		return groupCollections(collections, groupByOption);
 	},
 
-	// Operaciones avanzadas de filtrado
-	addFilter: (filter: CollectionFilter) => {
-		set((state) => {
-			// Actualizar cada colección con sus filtros
-			const updatedCollections = { ...state.collections };
-
-			for (const [id, collection] of Object.entries(updatedCollections)) {
-				if (!collection.parsedFilters) {
-					collection.parsedFilters = [];
-				}
-				updatedCollections[id] = {
-					...collection,
-					parsedFilters: [...collection.parsedFilters, filter],
-				};
-			}
-
-			return {
-				collections: updatedCollections,
-			};
-		});
-	},
-
-	removeFilter: (index: number) => {
-		set((state) => {
-			// Actualizar cada colección quitando el filtro en el índice especificado
-			const updatedCollections = { ...state.collections };
-
-			for (const [id, collection] of Object.entries(updatedCollections)) {
-				if (!collection.parsedFilters || collection.parsedFilters.length <= index) {
-					continue;
-				}
-
-				const newFilters = [...collection.parsedFilters];
-				newFilters.splice(index, 1);
-
-				updatedCollections[id] = {
-					...collection,
-					parsedFilters: newFilters,
-				};
-			}
-
-			return {
-				collections: updatedCollections,
-			};
-		});
+	// Filtros avanzados
+	setActiveFilters: (filters: CollectionFilter[]) => {
+		set({ activeFilters: filters });
 	},
 
 	clearFilters: () => {
-		set((state) => {
-			// Limpiar filtros de todas las colecciones
-			const updatedCollections = { ...state.collections };
-
-			for (const [id, collection] of Object.entries(updatedCollections)) {
-				updatedCollections[id] = {
-					...collection,
-					parsedFilters: [],
-				};
-			}
-
-			return {
-				collections: updatedCollections,
-			};
+		set({
+			activeFilters: [],
+			searchTerm: '',
+			groupBy: null,
 		});
 	},
 
 	applyFilters: (filters: CollectionFilter[]) => {
-		const collections = Object.values(get().collections);
-
-		if (!filters || filters.length === 0) {
-			return collections;
-		}
+		const collections = get().getCollections();
 
 		return collections.filter((collection) => {
-			// Comprobar que se cumplen todos los filtros
 			return filters.every((filter) => {
-				const fieldValue = collection[filter.field as keyof CollectionExtended];
-
-				// Convertir los valores a strings para comparación
-				const value = fieldValue?.toString() || '';
-				const filterValue = filter.value.toString();
+				const fieldValue = collection[filter.field as keyof CollectionWithStats];
 
 				switch (filter.operator) {
 					case 'equals':
-						return value === filterValue;
-
+						return fieldValue === filter.value;
 					case 'contains':
-						return value.toLowerCase().includes(filterValue.toLowerCase());
-
+						return String(fieldValue).toLowerCase().includes(String(filter.value).toLowerCase());
 					case 'startsWith':
-						return value.toLowerCase().startsWith(filterValue.toLowerCase());
-
+						return String(fieldValue).toLowerCase().startsWith(String(filter.value).toLowerCase());
 					case 'endsWith':
-						return value.toLowerCase().endsWith(filterValue.toLowerCase());
-
+						return String(fieldValue).toLowerCase().endsWith(String(filter.value).toLowerCase());
 					case 'gt':
-						return Number(value) > Number(filterValue);
-
-					case 'lt':
-						return Number(value) < Number(filterValue);
-
+						return Number(fieldValue) > Number(filter.value);
 					case 'gte':
-						return Number(value) >= Number(filterValue);
-
+						return Number(fieldValue) >= Number(filter.value);
+					case 'lt':
+						return Number(fieldValue) < Number(filter.value);
 					case 'lte':
-						return Number(value) <= Number(filterValue);
-
+						return Number(fieldValue) <= Number(filter.value);
+					case 'between':
+						if (Array.isArray(filter.value) && filter.value.length === 2) {
+							const [min, max] = filter.value;
+							return Number(fieldValue) >= Number(min) && Number(fieldValue) <= Number(max);
+						}
+						return true;
 					default:
 						return true;
 				}
@@ -206,30 +151,34 @@ export const createCollectionFiltersSlice: StateCreator<
 		});
 	},
 
-	// Configuraciones de filtrado
-	setDefaultSortOption: (option: string) => {
-		const parts = option.split('_');
-
-		if (parts.length === 2) {
-			const sortBy = parts[0];
-			const sortDirection = parts[1] as 'asc' | 'desc';
-
-			set((state) => ({
-				viewConfig: {
-					...state.viewConfig,
-					sortBy,
-					sortDirection,
-				},
-			}));
-		}
+	// Búsqueda
+	setSearchTerm: (term: string) => {
+		set({ searchTerm: term });
 	},
 
-	setDefaultGroupBy: (groupBy: 'category' | 'rarity' | 'platform' | null) => {
-		set((state) => ({
-			viewConfig: {
-				...state.viewConfig,
-				groupBy,
-			},
-		}));
+	getFilteredCollections: () => {
+		const { searchTerm, activeFilters } = get();
+		let collections = get().getCollections();
+
+		// Aplicar búsqueda por término
+		if (searchTerm.trim()) {
+			collections = filterCollectionsBySearch(collections, searchTerm);
+		}
+
+		// Aplicar filtros activos
+		if (activeFilters.length > 0) {
+			collections = get().applyFilters(activeFilters);
+		}
+
+		return collections;
+	},
+
+	// Configuración de vista
+	setSortOption: (option: string) => {
+		set({ currentSortOption: option });
+	},
+
+	setGroupBy: (groupBy: 'category' | 'rarity' | 'platform' | null) => {
+		set({ groupBy });
 	},
 });

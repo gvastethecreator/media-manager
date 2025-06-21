@@ -14,20 +14,22 @@ export {
 } from './enums';
 
 export type {
-    // Alias para retrocompatibilidad
-    CollectionComplete as Collection,
     // Tipos base
-    CollectionBase, CollectionComplete,
+    CollectionBase,
+    // Inputs para operaciones
     CollectionCreateInput,
     CollectionEdition,
-    // Tipos extendidos
-    CollectionExtended,
     CollectionFilter,
     CollectionFilters,
     CollectionSearchOptions,
+    // Estructuras auxiliares
     CollectionSortBy,
     CollectionUpdateInput,
-    CollectionViewConfig
+    // Configuración y filtros
+    CollectionViewConfig,
+    // Tipo principal para uso en la aplicación
+    CollectionWithStats,
+    PrismaCollectionWithCounts
 } from './types';
 
-// 📝 Documentación: Solo tipos y enums canónicos. Legacy removido.
+// 📝 Documentación: Solo tipos canónicos. CollectionWithStats es el tipo principal para UI y lógica de negocio.

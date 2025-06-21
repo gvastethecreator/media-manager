@@ -1,17 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
 import { reindexAllFolders } from '@/app/actions/folders';
 import type {
-	ErrorResponse,
-	FolderResponse,
-	ProcessStatus,
-	ReindexAllCompleteData,
-	ReindexAllProgressData,
+    ErrorResponse,
+    ProcessStatus
 } from '@/app/actions/folders/folder-types';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import type { FolderComplete } from '@/types/entities/folder/types';
+import type { FolderWithStats } from '@/types/entities/folder/types';
+import { useCallback, useEffect, useState } from 'react';
 import { initialGlobalReindexStatus } from '../folder-types';
 import { useFoldersEvents } from './use-folders-events';
 import { useFoldersOperations } from './use-folders-operations';
@@ -22,6 +19,7 @@ const folderLogger = clientLogger.withContext('useFolders');
 
 /**
  * Hook principal para la gestión completa de carpetas
+ * Migrado a usar FolderWithStats para mejor rendimiento
  */
 export function useFolders() {
 	// Estados locales específicos de este hook
@@ -198,244 +196,174 @@ export function useFolders() {
 			progress: 0,
 			phase: 'starting',
 			startTime: Date.now(),
-			timestamp: Date.now(),
 		});
-		setProcessProgress(0);
 	}, []);
 
-	// Sistema de polling - AHORA ES SEGURO USARLO PORQUE LAS FUNCIONES YA ESTÁN DEFINIDAS
-	const { startPolling, stopPolling } = useFoldersPolling({
+	// Función para actualizar una carpeta específica
+	const updateSpecificFolder = useCallback(
+		(folderId: string, updates: Partial<FolderWithStats>) => {
+			updateFolder(folderId, updates);
+		},
+		[updateFolder]
+	);
+
+	// Hooks de funcionalidades específicas
+	const foldersEvents = useFoldersEvents({
 		onStatusUpdate: handleStatusUpdate,
+		onError: handleProcessError,
 		onComplete: handleProcessComplete,
 	});
 
-	// --- FIX: Validación defensiva para evitar pasar un objeto como folderId ---
-	const safeStartPolling = useCallback(
-		(folderId: string) => {
-			if (typeof folderId !== 'string') {
-				folderLogger.warn('⚠️ [FIX] startPolling llamado con folderId no string:', folderId);
-				return;
-			}
-			startPolling(folderId);
-		},
-		[startPolling]
-	);
+	const foldersOperations = useFoldersOperations({
+		startProcessing,
+		updateFolder: updateSpecificFolder,
+		loadFolders,
+		loadStats,
+	});
 
-	// Configurar eventos de servidor (respaldo)
-	useFoldersEvents({
-		onProgress: handleStatusUpdate,
-		onError: handleProcessError,
-		onComplete: (data: FolderResponse) => {
-			folderLogger.info('✅ Evento de finalización recibido:', data);
+	const foldersPolling = useFoldersPolling({
+		isProcessing,
+		onStatusUpdate: handleStatusUpdate,
+	});
 
-			// Actualizar carpetas con resultado
-			if (data?.id) {
-				// Convertir fechas string a objetos Date
-				const folderUpdate: Partial<FolderComplete> = {
-					...data,
-					_count: {
-						images: data.stats?.total || 0,
-					},
-					totalSize: data.stats?.totalSize || 0,
-					lastIndexed: new Date(),
-					// Convertir strings a Date donde sea necesario
-					createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
-					updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
-				};
+	// Función para reiniciar todas las carpetas
+	const reindexAll = useCallback(async () => {
+		folderLogger.info('🔄 Iniciando reindexación global');
 
-				updateFolder(data.id, folderUpdate);
-
-				// Actualizar estadísticas globales si hay datos
-				if (data.stats) {
-					updateStats({
-						totalFiles: data.stats.total || 0,
-						totalSize: data.stats.totalSize || 0,
-						lastIndexed: new Date(),
-					});
-				}
-
-				// Marcar proceso como completado
-				handleProcessComplete(data.id);
-			}
-		},
-		onStats: updateStats,
-		onReindexAllStart: (data: { totalFolders: number }) => {
-			folderLogger.info('🔄 Evento de inicio de reindexación global recibido:', data);
-			setGlobalReindexStatus({
+		try {
+			setGlobalReindexStatus(prev => ({
+				...prev,
 				isProcessing: true,
 				progress: 0,
 				processedFolders: 0,
-				totalFolders: data.totalFolders,
 				errors: [],
-				phase: 'preparing',
-				status: 'Preparando proceso...',
 				startTime: Date.now(),
-			});
-		},
-		onReindexAllProgress: (data: ReindexAllProgressData) => {
-			folderLogger.info('🔄 Evento de progreso de reindexación global recibido:', data);
-			setGlobalReindexStatus((prev) => ({
-				...prev,
-				processedFolders: data.processedFolders,
-				progress: data.processedFolders > 0 ? (data.processedFolders / prev.totalFolders) * 100 : prev.progress,
-				currentFolder: data.currentFolder,
-				phase: data.phase || prev.phase,
-				status: data.status || prev.status,
-				errors: [
-					...prev.errors,
-					...(data.errors || []).filter(
-						(error) => !prev.errors.some((e) => e.folderId === error.folderId && e.error === error.error)
-					),
-				],
-				lastUpdate: Date.now(),
-			}));
-		},
-		onReindexAllComplete: (data: ReindexAllCompleteData) => {
-			folderLogger.info('✅ Evento de finalización de reindexación global recibido:', data);
-			const endTime = Date.now();
-			const duration = endTime - (globalReindexStatus.startTime || endTime);
-
-			setGlobalReindexStatus((prev) => ({
-				...prev,
-				isProcessing: false,
-				progress: 100,
-				processedFolders: data.processedFolders || prev.totalFolders,
-				phase: 'complete',
-				status: 'Proceso completado',
-				endTime,
-				duration,
 			}));
 
-			// Recargar estadísticas
-			loadStats();
+			// Llamar a la server action
+			const result = await reindexAllFolders();
 
-			// Recargar carpetas después de completar
-			loadFolders().catch((error) => folderLogger.error('Error recargando carpetas:', error));
-		},
-	});
+			if (result.success) {
+				folderLogger.info('✅ Reindexación global completada');
+				toastService.success('Reindexación completada correctamente');
 
-	// Operaciones CRUD
-	const {
-		handleAddFolder,
-		handleReindexFolder,
-		handleRemoveFolder,
-		handleAutoReindexToggle,
-		handleReindexAll,
-		handleClearCache,
-	} = useFoldersOperations({
-		onStartProcessing: (folderId: string) => {
-			startProcessing(folderId);
-			safeStartPolling(folderId);
-		},
-		onLoadData: loadInitialData,
-		onError: (error) => {
-			const errorMessage = typeof error === 'string' ? error : error.message;
-			setError(errorMessage);
-			stopPolling();
-			setIsProcessing(false);
-		},
-		onReindexAllStart: () => setReindexAllDialogOpen(true),
-	});
-
-	// Manejador para establecer carpeta seleccionada (para eliminación)
-	const handleFolderClick = useCallback((folderId: string) => {
-		setSelectedFolder((prev) => (prev === folderId ? null : folderId));
-	}, []);
-
-	// Manejador para confirmar reindexación global
-	const handleConfirmReindexAll = useCallback(async () => {
-		try {
-			folderLogger.info('🔄 Confirmando reindexación global');
-
-			// Cerrar diálogos
-			setReindexAllDialogOpen(false);
-			setShowReindexDialog(false);
-
-			// Establecer estado de procesamiento global
-			setGlobalReindexStatus({
-				...initialGlobalReindexStatus,
-				isProcessing: true,
-				progress: 0,
-				phase: 'preparing',
-				status: 'Preparando reindexación global...',
-				startTime: Date.now(),
-			});
-
-			// Llamar a la acción del servidor para reindexar todas las carpetas
-			await reindexAllFolders();
-
-			// Nota: Los eventos del servidor actualizarán el estado y mostrarán el progreso
+				// Recargar datos
+				await Promise.all([loadFolders(), loadStats()]);
+			} else {
+				throw new Error(result.error || 'Error en reindexación global');
+			}
 		} catch (error) {
 			folderLogger.error('❌ Error en reindexación global:', error);
-
-			// Actualizar estado global
-			setGlobalReindexStatus({
-				...initialGlobalReindexStatus,
+			toastService.error('Error en la reindexación global');
+		} finally {
+			setGlobalReindexStatus(prev => ({
+				...prev,
 				isProcessing: false,
-				errors: [{ folderId: '', error: error instanceof Error ? error.message : 'Error desconocido' }],
-			});
-
-			// Mostrar error
-			setError(error instanceof Error ? error.message : 'Error en la reindexación global');
+				endTime: Date.now(),
+			}));
 		}
-	}, [setError]);
+	}, [loadFolders, loadStats]);
 
-	// Cargar datos iniciales
+	// Función para manejar el reindex de una carpeta específica
+	const reindexFolder = useCallback(
+		async (folderId: string) => {
+			if (typeof folderId !== 'string') {
+				folderLogger.error('❌ ID de carpeta inválido:', folderId);
+				return;
+			}
+
+			folderLogger.info(`🔄 Iniciando reindex de carpeta: ${folderId}`);
+
+			try {
+				await foldersOperations.reindexFolder(folderId);
+			} catch (error) {
+				folderLogger.error(`❌ Error en reindex de carpeta ${folderId}:`, error);
+				handleProcessError({
+					folderId,
+					message: error instanceof Error ? error.message : 'Error desconocido',
+					timestamp: Date.now(),
+				});
+			}
+		},
+		[foldersOperations, handleProcessError]
+	);
+
+	// Función para alternar el auto-reindex
+	const toggleAutoReindex = useCallback(
+		async (folderId: string, value: boolean) => {
+			try {
+				await foldersOperations.toggleAutoReindex(folderId, value);
+				updateSpecificFolder(folderId, { autoReindex: value });
+				toastService.success(`Auto-reindex ${value ? 'activado' : 'desactivado'}`);
+			} catch (error) {
+				folderLogger.error('❌ Error toggling auto-reindex:', error);
+				toastService.error('Error al cambiar configuración de auto-reindex');
+			}
+		},
+		[foldersOperations, updateSpecificFolder]
+	);
+
+	// Función para seleccionar carpeta
+	const selectFolder = useCallback((folderId: string | null) => {
+		setSelectedFolder(folderId);
+	}, []);
+
+	// Efecto para cargar datos iniciales
 	useEffect(() => {
-		loadInitialData().catch((error) => {
-			folderLogger.error('❌ Error cargando datos iniciales:', error);
-			setError(error instanceof Error ? error.message : 'Error cargando datos iniciales');
-		});
+		loadInitialData();
+	}, [loadInitialData]);
 
-		// Limpiar polling al desmontar
+	// Cleanup al desmontar
+	useEffect(() => {
 		return () => {
-			stopPolling();
+			foldersEvents.cleanup?.();
+			foldersPolling.cleanup?.();
 		};
-	}, [loadInitialData, stopPolling, setError]);
+	}, [foldersEvents, foldersPolling]);
 
-	// Gestionar polling según estado de procesamiento
-	useEffect(() => {
-		if (!isProcessing && processStatus.folderId) {
-			// Si se detiene el procesamiento pero hay una carpeta en estado, detener polling
-			stopPolling();
-		}
-	}, [isProcessing, processStatus.folderId, stopPolling]);
-
-	// Devolver interfaz pública del hook
 	return {
-		// Estado
+		// Datos
 		folders,
 		stats,
-		error,
+		selectedFolder,
+
+		// Estados de carga y error
 		isLoading,
+		error,
 		isProcessing,
 		isGloballyProcessing,
 		processProgress,
 		processStatus,
-		selectedFolder,
 		globalReindexStatus,
+
+		// Estados de UI
 		showReindexDialog,
 		reindexAllDialogOpen,
 
-		// Manejadores
-		handleAddFolder,
-		handleReindexFolder,
-		handleFolderClick,
-		handleReindexAll,
-		handleConfirmReindexAll,
-		handleAutoReindexToggle,
-		handleClearCache,
-		handleRemoveFolder,
+		// Acciones principales
+		reindexFolder,
+		reindexAll,
+		toggleAutoReindex,
+		selectFolder,
 
-		// Métodos
-		loadStats,
+		// Funciones de UI
 		setShowReindexDialog,
 		setReindexAllDialogOpen,
-		setError,
+
+		// Funciones de datos
+		loadFolders,
+		loadStats,
+		updateFolder: updateSpecificFolder,
+
+		// Funciones de utilidad
+		startProcessing,
+		handleProcessComplete,
+		handleProcessError,
+		handleStatusUpdate,
 	};
 }
 
-// Definición local para ExtendedProcessStatus
+// Tipos extendidos para este hook
 export interface ExtendedProcessStatus extends ProcessStatus {
 	globalProgress?: {
 		current: number;

@@ -4,31 +4,30 @@
  */
 
 import {
-	createGroup as createGroupAction,
-	deleteGroup as deleteGroupAction,
-	getGroup,
-	getGroups,
+    createGroup as createGroupAction,
+    deleteGroup as deleteGroupAction,
+    getGroup,
+    getGroups,
 } from '@/app/actions/groups/group.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import { extendGroup, toPrismaGroup } from '@/transformers/group/serializers';
-import type { CreateGroupData, Group, GroupBase, UpdateGroupData } from '@/types/entities/group/types';
+import type { CreateGroupData, GroupWithStats } from '@/types/entities/group/types';
 import type { StateCreator } from 'zustand';
-import type { GroupState } from '../types';
+import type { GroupStore } from '..';
 
 const groupLogger = clientLogger.withContext('GroupStore');
 
 // Slice para operaciones CRUD básicas
 export interface GroupCoreSlice {
 	// Getters
-	getGroup: (id: string) => Group | undefined;
-	getGroups: () => Group[];
+	getGroup: (id: string) => GroupWithStats | undefined;
+	getGroups: () => GroupWithStats[];
 	getGroupItems: (groupId: string) => Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>;
 
 	// Operaciones
-	addGroup: (group: GroupBase) => void;
-	addGroups: (groups: GroupBase[]) => void;
-	updateGroup: (id: string, data: UpdateGroupData) => void;
+	addGroup: (group: GroupWithStats) => void;
+	addGroups: (groups: GroupWithStats[]) => void;
+	updateGroup: (id: string, data: Partial<GroupWithStats>) => void;
 	deleteGroup: (id: string) => void;
 
 	// Gestión de elementos
@@ -41,14 +40,14 @@ export interface GroupCoreSlice {
 	setError: (error: string | null) => void;
 
 	// Acciones asíncronas
-	fetchGroup: (id: string) => Promise<Group | undefined>;
-	fetchGroups: () => Promise<Group[]>;
-	createGroup: (data: CreateGroupData) => Promise<Group | undefined>;
+	fetchGroup: (id: string) => Promise<GroupWithStats | undefined>;
+	fetchGroups: () => Promise<GroupWithStats[]>;
+	createGroup: (data: CreateGroupData) => Promise<GroupWithStats | undefined>;
 	removeGroup: (id: string) => Promise<boolean>;
 }
 
 // Creador del slice
-export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSlice> = (set, get) => ({
+export const createGroupCoreSlice: StateCreator<GroupStore, [], [], GroupCoreSlice> = (set, get) => ({
 	// Getters
 	getGroup: (id) => {
 		return get().core.groups[id];
@@ -71,7 +70,7 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 				...state.core,
 				groups: {
 					...state.core.groups,
-					[group.id]: extendGroup(group),
+					[group.id]: group,
 				},
 				lastUpdated: new Date(),
 			},
@@ -82,10 +81,10 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 		groupLogger.info('✅ Añadiendo múltiples grupos al store', groups.length);
 		const groupsMap = groups.reduce(
 			(acc, group) => {
-				acc[group.id] = extendGroup(group);
+				acc[group.id] = group;
 				return acc;
 			},
-			{} as Record<string, Group>
+			{} as Record<string, GroupWithStats>
 		);
 
 		set((state) => ({
@@ -215,169 +214,95 @@ export const createGroupCoreSlice: StateCreator<GroupState, [], [], GroupCoreSli
 	// Acciones asíncronas
 	fetchGroup: async (id) => {
 		groupLogger.info('🔍 Obteniendo grupo:', id);
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
+		get().setLoading(true);
 
 		try {
 			const group = await getGroup(id);
 			if (group) {
-				const extendedGroup = extendGroup(group as GroupBase);
-				// Añadir directamente al store usando set
-				set((state) => ({
-					core: {
-						...state.core,
-						groups: {
-							...state.core.groups,
-							[extendedGroup.id]: extendedGroup,
-						},
-						lastUpdated: new Date(),
-					},
-				}));
-				return extendedGroup;
+				get().addGroup(group);
 			}
-			return undefined;
+			return group;
 		} catch (error) {
-			groupLogger.error('❌ Error al obtener grupo:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al obtener el grupo',
-				},
-			}));
-			toastService.error('No se pudo cargar el grupo');
+			const errorMessage = error instanceof Error ? error.message : 'Error al obtener el grupo';
+			groupLogger.error('❌ Error al obtener grupo:', errorMessage);
+			get().setError(errorMessage);
 			return undefined;
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
 		}
 	},
 
 	fetchGroups: async () => {
-		groupLogger.info('📋 Obteniendo listado de grupos');
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
+		groupLogger.info('🔍 Obteniendo todos los grupos');
+		get().setLoading(true);
 
 		try {
 			const groups = await getGroups();
-			const extendedGroups = groups.map((group) => extendGroup(group as GroupBase));
-			// Usar la función addGroups del estado
-			get().addGroups(extendedGroups);
-			return extendedGroups;
+			get().addGroups(groups);
+			return groups;
 		} catch (error) {
-			groupLogger.error('❌ Error al obtener grupos:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al obtener los grupos',
-				},
-			}));
-			toastService.error('No se pudieron cargar los grupos');
+			const errorMessage = error instanceof Error ? error.message : 'Error al obtener los grupos';
+			groupLogger.error('❌ Error al obtener grupos:', errorMessage);
+			get().setError(errorMessage);
 			return [];
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
 		}
 	},
 
 	createGroup: async (data) => {
-		groupLogger.info('📝 Creando nuevo grupo:', data.name);
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
+		groupLogger.info('✨ Creando nuevo grupo:', data.name);
+		get().setLoading(true);
 
 		try {
-			// Mapear datos usando la función correcta
-			const mappedData = toPrismaGroup(data);
-
-			// Llamar al servidor
-			const createdGroup = await createGroupAction(mappedData);
-
-			// Extender y añadir al store
-			const extendedGroup = extendGroup(createdGroup as GroupBase);
-
-			// Usar la función addGroup del estado
-			get().addGroup(extendedGroup);
-
-			toastService.success(`Grupo "${data.name}" creado correctamente`);
-			return extendedGroup;
+			const newGroup = await createGroupAction(data);
+			get().addGroup(newGroup);
+			toastService.show({
+				title: 'Grupo Creado',
+				message: `El grupo "${newGroup.name}" ha sido creado con éxito.`,
+				type: 'success',
+			});
+			return newGroup;
 		} catch (error) {
-			groupLogger.error('❌ Error al crear grupo:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al crear el grupo',
-				},
-			}));
-			toastService.error('No se pudo crear el grupo');
+			const errorMessage = error instanceof Error ? error.message : 'Error al crear el grupo';
+			groupLogger.error('❌ Error al crear grupo:', errorMessage);
+			get().setError(errorMessage);
+			toastService.show({
+				title: 'Error al Crear',
+				message: errorMessage,
+				type: 'error',
+			});
 			return undefined;
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
 		}
 	},
 
 	removeGroup: async (id) => {
-		groupLogger.info('🗑️ Eliminando grupo:', id);
-		set((state) => ({
-			core: {
-				...state.core,
-				isLoading: true,
-				error: null,
-			},
-		}));
+		groupLogger.info('🗑️ Solicitando eliminar grupo:', id);
+		get().setLoading(true);
 
 		try {
-			// Llamar al servidor
 			await deleteGroupAction(id);
-
-			// Usar la función deleteGroup del estado
 			get().deleteGroup(id);
-
-			toastService.success('Grupo eliminado correctamente');
+			toastService.show({
+				title: 'Grupo Eliminado',
+				message: 'El grupo ha sido eliminado con éxito.',
+				type: 'success',
+			});
 			return true;
 		} catch (error) {
-			groupLogger.error('❌ Error al eliminar grupo:', error);
-			set((state) => ({
-				core: {
-					...state.core,
-					error: 'Error al eliminar el grupo',
-				},
-			}));
-			toastService.error('No se pudo eliminar el grupo');
+			const errorMessage = error instanceof Error ? error.message : 'Error al eliminar el grupo';
+			groupLogger.error('❌ Error al eliminar grupo:', errorMessage);
+			get().setError(errorMessage);
+			toastService.show({
+				title: 'Error al Eliminar',
+				message: errorMessage,
+				type: 'error',
+			});
 			return false;
 		} finally {
-			set((state) => ({
-				core: {
-					...state.core,
-					isLoading: false,
-				},
-			}));
+			get().setLoading(false);
 		}
 	},
 });

@@ -1,55 +1,28 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
+import { prisma } from '@/lib/prisma';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { fromPrismaProperty, toCreatePropertyData, toUpdatePropertyData } from '@/transformers/property';
-import type { PropertyWithStats } from '@/types/entities/property';
-import { CreatePropertySchema, UpdatePropertySchema } from '@/types/entities/property/schema';
-import { z } from 'zod';
+import { toPropertyWithStats } from '@/transformers/property';
+import { propertyCounts, PropertyWithStats } from '@/types/entities/property';
+import { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('PropertyActions');
-
-type CreatePropertyData = z.infer<typeof CreatePropertySchema>;
-type UpdatePropertyData = z.infer<typeof UpdatePropertySchema>;
-
-const propertyPayload = {
-	include: {
-		_count: {
-			select: {
-				images: true,
-				videos: true,
-				albums: true,
-				collections: true,
-				tags: true,
-				characters: true,
-				places: true,
-				worldItems: true,
-				concepts: true,
-				prompts: true,
-				notes: true,
-				wildcards: true,
-				groups: true,
-			},
-		},
-	},
-};
 
 /**
  * Obtiene todas las propiedades
  */
 export async function getProperties(): Promise<PropertyWithStats[]> {
 	try {
-		const prisma = await getPrismaClient();
 		const properties = await prisma.property.findMany({
 			orderBy: { name: 'asc' },
-			...propertyPayload,
+			include: propertyCounts,
 		});
 
 		logger.info('✅ Propiedades obtenidas:', properties.length);
-		return properties.map(fromPrismaProperty).filter((p): p is PropertyWithStats => p !== null);
+		return properties.map(toPropertyWithStats);
 	} catch (error) {
 		logger.error('❌ Error al obtener propiedades:', error);
-		throw error;
+		throw new Error('No se pudieron obtener las propiedades.');
 	}
 }
 
@@ -58,68 +31,58 @@ export async function getProperties(): Promise<PropertyWithStats[]> {
  */
 export async function getProperty(id: string): Promise<PropertyWithStats | null> {
 	try {
-		const prisma = await getPrismaClient();
 		const property = await prisma.property.findUnique({
 			where: { id },
-			...propertyPayload,
+			include: propertyCounts,
 		});
 
 		if (!property) {
+			logger.warn('⚠️ Propiedad no encontrada:', id);
 			return null;
 		}
 
 		logger.info('✅ Propiedad obtenida:', property.name);
-		return fromPrismaProperty(property);
+		return toPropertyWithStats(property);
 	} catch (error) {
 		logger.error('❌ Error al obtener propiedad:', error);
-		throw error;
+		throw new Error(`No se pudo obtener la propiedad: ${id}.`);
 	}
 }
 
 /**
  * Crea una nueva propiedad
  */
-export async function createProperty(data: CreatePropertyData): Promise<PropertyWithStats> {
+export async function createProperty(data: Prisma.PropertyCreateInput): Promise<PropertyWithStats> {
 	try {
-		const prismaData = toCreatePropertyData(data);
-		const prisma = await getPrismaClient();
-
 		const property = await prisma.property.create({
-			data: prismaData,
-			...propertyPayload,
+			data,
+			include: propertyCounts,
 		});
 
 		logger.info('✅ Propiedad creada:', property.name);
-		const transformed = fromPrismaProperty(property);
-		if (!transformed) throw new Error('Error al transformar la propiedad creada');
-		return transformed;
+		return toPropertyWithStats(property);
 	} catch (error) {
 		logger.error('❌ Error al crear propiedad:', error);
-		throw error;
+		throw new Error('No se pudo crear la propiedad.');
 	}
 }
 
 /**
  * Actualiza una propiedad existente
  */
-export async function updateProperty(id: string, data: UpdatePropertyData): Promise<PropertyWithStats> {
+export async function updateProperty(id: string, data: Prisma.PropertyUpdateInput): Promise<PropertyWithStats> {
 	try {
-		const prismaData = toUpdatePropertyData(data);
-		const prisma = await getPrismaClient();
-
 		const property = await prisma.property.update({
 			where: { id },
-			data: prismaData,
-			...propertyPayload,
+			data,
+			include: propertyCounts,
 		});
 
 		logger.info('✅ Propiedad actualizada:', property.name);
-		const transformed = fromPrismaProperty(property);
-		if (!transformed) throw new Error('Error al transformar la propiedad actualizada');
-		return transformed;
+		return toPropertyWithStats(property);
 	} catch (error) {
 		logger.error('❌ Error al actualizar propiedad:', error);
-		throw error;
+		throw new Error(`No se pudo actualizar la propiedad: ${id}.`);
 	}
 }
 
@@ -128,9 +91,6 @@ export async function updateProperty(id: string, data: UpdatePropertyData): Prom
  */
 export async function togglePropertyFavorite(id: string): Promise<PropertyWithStats> {
 	try {
-		const prisma = await getPrismaClient();
-
-		// Obtener el estado actual
 		const current = await prisma.property.findUnique({
 			where: { id },
 			select: { isFavorite: true },
@@ -140,37 +100,31 @@ export async function togglePropertyFavorite(id: string): Promise<PropertyWithSt
 			throw new Error(`No se encontró la propiedad con ID ${id}`);
 		}
 
-		// Actualizar con el estado opuesto
 		const property = await prisma.property.update({
 			where: { id },
 			data: { isFavorite: !current.isFavorite },
-			...propertyPayload,
+			include: propertyCounts,
 		});
 
 		logger.info('✅ Favorito de propiedad actualizado:', property.name, `isFavorite: ${property.isFavorite}`);
-		const transformed = fromPrismaProperty(property);
-		if (!transformed) throw new Error('Error al transformar la propiedad actualizada');
-		return transformed;
+		return toPropertyWithStats(property);
 	} catch (error) {
 		logger.error('❌ Error al actualizar favorito de propiedad:', error);
-		throw error;
+		throw new Error(`No se pudo actualizar el estado de favorito para la propiedad: ${id}.`);
 	}
 }
 
 /**
  * Elimina una propiedad
  */
-export async function deleteProperty(id: string): Promise<boolean> {
+export async function deleteProperty(id: string): Promise<void> {
 	try {
-		const prisma = await getPrismaClient();
 		await prisma.property.delete({
 			where: { id },
 		});
-
 		logger.info('✅ Propiedad eliminada:', id);
-		return true;
 	} catch (error) {
 		logger.error('❌ Error al eliminar propiedad:', error);
-		throw error;
+		throw new Error(`No se pudo eliminar la propiedad: ${id}.`);
 	}
 }

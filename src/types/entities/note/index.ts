@@ -6,28 +6,29 @@
  */
 
 export type {
-	NoteCreateInput as CreateNoteData,
-	// Alias para retrocompatibilidad
-	NoteComplete as Note,
-	NoteBase,
-	NoteComplete,
-	NoteCounts,
-	NoteCreateInput, // Alias para retrocompatibilidad
-	NoteFilters,
-	NoteRelations,
-	NoteSearchOptions,
-	NoteSearchResult,
-	NoteTransformerOptions,
-	NoteUI,
-	NoteUpdateInput,
-	NoteValidated, // Alias para retrocompatibilidad
-	NoteComplete as NoteWithStats,
-	RelatedNote,
+    NoteCreateInput as CreateNoteData, // Alias para retrocompatibilidad
+    // Alias para retrocompatibilidad
+    NoteWithStats as Note, NoteBase,
+    NoteComplete, NoteCreateInput, // Alias para retrocompatibilidad
+    NoteFilters,
+    NoteRelations,
+    NoteSearchOptions,
+    NoteSearchResult,
+    NoteStatistics,
+    NoteTransformerOptions,
+    NoteUI,
+    NoteUpdateInput,
+    NoteValidated, NoteWithStats,
+    PrismaNoteWithCounts,
+    RelatedNote
 } from './types';
 
 export {
-	NoteCategory,
-	NotePriority,
-	NoteSortCriteria,
-	NoteStatus,
+    NoteCategory,
+    NotePriority,
+    NoteSortCriteria,
+    NoteSortOption,
+    NoteStatus,
+    NoteViewMode
 } from './types';
+

@@ -1,19 +1,24 @@
-import { type BaseEntity, BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
-import { z } from 'zod';
-import type { ActivityComplete } from '../activity';
-import type { AlbumComplete } from '../album';
-import type { CharacterComplete } from '../character';
-import type { CollectionComplete } from '../collection';
+/**
+ * @file Tipos canónicos para la entidad Image
+ * @module types/entities/image/types
+ * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
+ * @description Estructura unificada y validada para Image. Todos los campos clave son obligatorios.
+ * Última migración: 2025-01-27
+ */
+
+import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
+import type { z } from 'zod';
+import type { AlbumWithStats } from '../album';
+import type { CharacterWithStats } from '../character';
+import type { CollectionWithStats } from '../collection';
 import type { ConceptComplete } from '../concept';
 import type { FolderComplete } from '../folder';
-import type { GroupComplete } from '../group';
+import type { GroupWithStats } from '../group';
 import type { NoteComplete } from '../note';
 import type { PlaceComplete } from '../place';
-import type { ProfileComplete } from '../profile';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
-import type { TagComplete } from '../tag';
-import type { UploadedImageComplete } from '../uploaded-image';
+import type { TagWithStats } from '../tag';
 import type { WildcardComplete } from '../wildcard';
 import type { WorldItemComplete } from '../world-item';
 
@@ -41,9 +46,9 @@ export const ImageSchema = z.object({
 });
 
 /**
- * 🔄 Tipo base para Image
+ * 🖼️ Tipo base canónico para Image
  */
-export interface ImageBase extends BaseEntity {
+export interface ImageBase {
 	id: string;
 	name: string;
 	description?: string | null;
@@ -52,13 +57,12 @@ export interface ImageBase extends BaseEntity {
 	size: number;
 	width: number;
 	height: number;
-	metadata?: string | null;
+	metadata?: string | null; // JSON string en DB
 	isFavorite: boolean;
-	folderId: string | null; // Debe ser null si no hay folder
+	folderId: string | null;
 	addedAt: Date;
 	createdAt: Date;
 	updatedAt: Date;
-	// ELIMINADO: sortBy y filters no existen en el modelo Image de Prisma
 }
 
 /**
@@ -75,18 +79,14 @@ export interface ImageThumbnail {
 }
 
 /**
- * 🔗 Relaciones de Image
+ * 🔗 Relaciones de Image optimizadas (usando tipos WithStats)
  */
 export interface ImageRelations {
 	folder?: FolderComplete | null;
-	stats?: ImageStatsBase | null;
-	activities?: ActivityComplete[];
-	uploadedImages?: UploadedImageComplete[];
-	profiles?: ProfileComplete[];
-	albums?: AlbumComplete[];
-	collections?: CollectionComplete[];
-	tags?: TagComplete[];
-	characters?: CharacterComplete[];
+	albums?: AlbumWithStats[];
+	collections?: CollectionWithStats[];
+	tags?: TagWithStats[];
+	characters?: CharacterWithStats[];
 	places?: PlaceComplete[];
 	worldItems?: WorldItemComplete[];
 	concepts?: ConceptComplete[];
@@ -94,17 +94,110 @@ export interface ImageRelations {
 	notes?: NoteComplete[];
 	wildcards?: WildcardComplete[];
 	properties?: PropertyComplete[];
-	groups?: GroupComplete[];
+	groups?: GroupWithStats[];
 }
 
 /**
- * 📊 Conteos de relaciones de Image
+ * 📊 Consulta optimizada de Prisma con conteos
  */
-export interface ImageCounts {
+export interface PrismaImageWithCounts extends ImageBase {
+	_count: {
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
+}
+
+/**
+ * 📊 Estadísticas específicas de Image
+ */
+export interface ImageStatistics {
+	// Conteos de relaciones
+	totalAlbums: number;
+	totalCollections: number;
+	totalTags: number;
+	totalCharacters: number;
+	totalPlaces: number;
+	totalWorldItems: number;
+	totalConcepts: number;
+	totalPrompts: number;
+	totalNotes: number;
+	totalWildcards: number;
+	totalProperties: number;
+	totalGroups: number;
+	totalAssociations: number;
+
+	// Métricas técnicas
+	megapixels: number;
+	aspectRatio: number;
+	fileSize: number; // En MB
+	dimensions: string; // "1920x1080"
+
+	// Métricas de uso
+	views: number;
+	likes: number;
+	downloads: number;
+	shares: number;
+
+	// Análisis de calidad
+	qualityScore: number; // 0-100
+	technicalGrade: 'A' | 'B' | 'C' | 'D';
+	colorTemperature: 'warm' | 'neutral' | 'cool';
+
+	// Metadatos AI
+	aiConfidence: number; // 0-100
+	autoTags: string[];
+	duplicateStatus: 'unique' | 'duplicate' | 'similar';
+
+	lastUpdated: Date;
+}
+
+/**
+ * 🖼️ Image con estadísticas optimizadas (tipo principal)
+ */
+export interface ImageWithStats extends ImageBase {
+	statistics: ImageStatistics;
+	// Campos derivados calculados
+	thumbnailUrl: string;
+	fullUrl: string;
+	displayName: string;
+	parsedMetadata: ImageMetadata | null;
+	formattedSize: string;
+	formattedDimensions: string;
+	aspectRatioLabel: string;
+}
+
+/**
+ * 🖥️ Propiedades de UI para Image
+ */
+export interface ImageUI {
+	isSelected?: boolean;
+	isLoading?: boolean;
+	isExpanded?: boolean;
+	isHovered?: boolean;
+	isHighlighted?: boolean;
+	isEditing?: boolean;
+	thumbnailLoading?: boolean;
+	hasError?: boolean;
+	isInViewport?: boolean;
+	isDragging?: boolean;
+	isDropTarget?: boolean;
+}
+
+/**
+ * 🖼️ Image completo con relaciones (para casos que requieren relaciones completas)
+ */
+export interface ImageComplete extends ImageBase, ImageThumbnail, ImageRelations, ImageUI {
 	_count?: {
-		activities?: number;
-		uploadedImages?: number;
-		profiles?: number;
 		albums?: number;
 		collections?: number;
 		tags?: number;
@@ -118,62 +211,100 @@ export interface ImageCounts {
 		properties?: number;
 		groups?: number;
 	};
-}
-
-/**
- * 🎯 Filtros específicos para Image
- */
-export interface ImageFilters {
-	search?: string;
-	folders?: string[];
-	tags?: string[];
-	dateRange?: {
-		start?: Date;
-		end?: Date;
-	};
-	isFavorite?: boolean;
-	minWidth?: number;
-	maxWidth?: number;
-	minHeight?: number;
-	maxHeight?: number;
-	minSize?: number;
-	maxSize?: number;
-	hasMetadata?: boolean;
-	hasThumbnail?: boolean;
-	hasError?: boolean;
-}
-
-/**
- * 🔄 Image completa con todas las relaciones
- */
-export interface ImageComplete extends Omit<ImageBase, 'metadata'>, ImageThumbnail, ImageRelations, ImageCounts {
-	metadata: ImageMetadata | null;
-}
-
-/**
- * 🃏 Datos de una imagen para mostrar en una tarjeta, con estadísticas calculadas.
- */
-export interface ImageWithStats extends ImageBase, ImageRelations, ImageCounts {
-	thumbnailUrl: string;
-	metadata: ImageMetadata | null; // Metadatos parseados
-	totalAssociations: number;
+	parsedMetadata?: ImageMetadata | null;
 }
 
 /**
  * 📝 Datos para crear una Image
  */
-export type ImageCreateInput = Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'> &
-	Partial<ImageThumbnail> &
-	Pick<ImageRelations, 'folder'> &
-	Partial<Omit<ImageRelations, 'folder'>>;
+export interface ImageCreateInput {
+	name: string;
+	description?: string | null;
+	path: string;
+	hash: string;
+	size: number;
+	width: number;
+	height: number;
+	metadata?: string | null;
+	isFavorite?: boolean;
+	folderId?: string | null;
+	// Relaciones opcionales
+	albums?: string[];
+	collections?: string[];
+	tags?: string[];
+	characters?: string[];
+	places?: string[];
+	worldItems?: string[];
+	concepts?: string[];
+	prompts?: string[];
+	notes?: string[];
+	wildcards?: string[];
+	properties?: string[];
+	groups?: string[];
+}
 
 /**
  * 📝 Datos para actualizar una Image
  */
-export type ImageUpdateInput = Partial<Omit<ImageBase, 'id'>> & Partial<ImageThumbnail> & Partial<ImageRelations>;
+export interface ImageUpdateInput {
+	name?: string;
+	description?: string | null;
+	isFavorite?: boolean;
+	folderId?: string | null;
+	metadata?: string | null;
+	// Relaciones opcionales
+	albums?: string[];
+	collections?: string[];
+	tags?: string[];
+	characters?: string[];
+	places?: string[];
+	worldItems?: string[];
+	concepts?: string[];
+	prompts?: string[];
+	notes?: string[];
+	wildcards?: string[];
+	properties?: string[];
+	groups?: string[];
+}
 
 /**
- * 🔍 Opciones de búsqueda para Image
+ * 🔎 Filtros de búsqueda para Image
+ */
+export interface ImageFilters {
+	searchQuery?: string;
+	folders?: string[];
+	tags?: string[];
+	albums?: string[];
+	collections?: string[];
+	onlyFavorites?: boolean;
+	hasMetadata?: boolean;
+	hasThumbnail?: boolean;
+	hasError?: boolean;
+	dateRange?: {
+		start?: Date;
+		end?: Date;
+	};
+	sizeRange?: {
+		min?: number;
+		max?: number;
+	};
+	dimensionRange?: {
+		minWidth?: number;
+		maxWidth?: number;
+		minHeight?: number;
+		maxHeight?: number;
+	};
+	qualityRange?: {
+		min?: number;
+		max?: number;
+	};
+	aspectRatios?: string[];
+	colorTemperatures?: ('warm' | 'neutral' | 'cool')[];
+	technicalGrades?: ('A' | 'B' | 'C' | 'D')[];
+}
+
+/**
+ * 🔎 Opciones de búsqueda para Image
  */
 export interface ImageSearchOptions {
 	skip?: number;
@@ -183,7 +314,20 @@ export interface ImageSearchOptions {
 	};
 	where?: ImageFilters;
 	include?: {
-		[key in keyof ImageRelations]?: boolean;
+		albums?: boolean;
+		collections?: boolean;
+		tags?: boolean;
+		characters?: boolean;
+		places?: boolean;
+		worldItems?: boolean;
+		concepts?: boolean;
+		prompts?: boolean;
+		notes?: boolean;
+		wildcards?: boolean;
+		properties?: boolean;
+		groups?: boolean;
+		folder?: boolean;
+		_count?: boolean;
 	};
 }
 
@@ -197,144 +341,203 @@ export interface ImageSearchResult {
 }
 
 /**
- * 🎯 Opciones para el transformer de Image
+ * 🛠️ Opciones para el transformer de Image
  */
 export interface ImageTransformerOptions {
 	includeRelations?: boolean;
 	includeCount?: boolean;
 	includeThumbnail?: boolean;
 	validateFields?: boolean;
+	deserializeMetadata?: boolean;
+	includeUI?: boolean;
 	customFields?: (keyof ImageComplete)[];
 }
 
 /**
- * 🖼️ Metadatos de la imagen
+ * 📊 Metadatos de imagen parseados
  */
 export interface ImageMetadata {
 	format?: string;
-	exif?: Record<string, unknown>;
+	compression?: string;
+	colorSpace?: string;
+	bitDepth?: number;
+	hasAlpha?: boolean;
+	orientation?: number;
+	dpi?: {
+		x: number;
+		y: number;
+	};
+	exif?: ImageEXIFData;
 	iptc?: Record<string, unknown>;
 	xmp?: Record<string, unknown>;
 	icc?: Record<string, unknown>;
 	ai?: ImageAIMetadata;
+	analysis?: ImageAnalysis;
 }
 
 /**
- * 📊 Estadísticas básicas de la imagen
- * NOTA: Campo downloads eliminado - no existe en el esquema Prisma ImageStats
+ * 📸 Datos EXIF de imagen
  */
-export interface ImageStatsBase {
-	id: string;
-	imageId: string;
-	views: number;
-	likes: number;
-	// downloads: number; // ❌ ELIMINADO - No existe en esquema Prisma
+export interface ImageEXIFData {
+	make?: string;
+	model?: string;
+	software?: string;
+	dateTime?: string;
+	dateTimeOriginal?: string;
+	dateTimeDigitized?: string;
+	exposureTime?: string;
+	fNumber?: number;
+	iso?: number;
+	focalLength?: string;
+	lensModel?: string;
+	flash?: string;
+	whiteBalance?: string;
+	gps?: {
+		latitude?: number;
+		longitude?: number;
+		altitude?: number;
+	};
+	artist?: string;
+	copyright?: string;
 }
 
 /**
- * 🎨 Configuración visual de la imagen
- */
-export interface ImageVisualConfigBase {
-	id: string;
-	imageId: string;
-	config: string;
-}
-
-/**
- * 🧠 Metadatos de IA de la imagen
+ * 🤖 Metadatos de AI
  */
 export interface ImageAIMetadata {
 	model?: string;
 	prompt?: string;
 	negativePrompt?: string;
 	seed?: number;
-	samplingSteps?: number;
+	steps?: number;
 	cfgScale?: number;
-	samplingMethod?: string;
+	sampler?: string;
+	scheduler?: string;
+	strength?: number;
+	guidance?: number;
+	clipSkip?: number;
 	extraParameters?: Record<string, unknown>;
+	generatedAt?: Date;
+	processingTime?: number;
 }
 
-export interface CreateImageData {
+/**
+ * 🔬 Análisis de imagen
+ */
+export interface ImageAnalysis {
+	dominantColors?: string[];
+	averageBrightness?: number;
+	contrast?: number;
+	sharpness?: number;
+	noise?: number;
+	faces?: number;
+	objects?: string[];
+	scenes?: string[];
+	emotions?: string[];
+	text?: string[];
+	landmarks?: string[];
+	celebrities?: string[];
+	brands?: string[];
+	safetyRating?: 'safe' | 'moderate' | 'adult';
+	confidenceScores?: Record<string, number>;
+}
+
+/**
+ * 🔗 Interfaz para imágenes relacionadas
+ */
+export interface RelatedImage {
+	id: string;
 	name: string;
-	path: string;
-	folderId: string;
-	hash: string;
-	size: number;
-	width: number;
-	height: number;
-	description?: string;
-	metadata?: string;
-	presetId?: string | null;
-}
-
-export interface UpdateImageData {
-	name?: string;
-	description?: string;
-	presetId?: string | null;
-	isFavorite?: boolean;
-}
-
-export interface ImageExtended extends ImageBase {
-	// Relaciones extendidas y campos enriquecidos
-	tags?: any[];
-	collections?: any[];
-	albums?: any[];
-	characters?: any[];
-	places?: any[];
-	worldItems?: any[];
-	concepts?: any[];
-	prompts?: any[];
-	notes?: any[];
-	wildcards?: any[];
-	properties?: any[];
-	groups?: any[];
-	stats?: any;
-	folder?: any;
+	thumbnailUrl: string;
+	similarity: number;
+	relationship: string;
 }
 
 /**
- * 🎯 Criterios de ordenamiento para Image
+ * 🏷️ Enumeraciones y tipos auxiliares
  */
-export type ImageSortCriteria =
-	| 'name_asc'
-	| 'name_desc'
-	| 'date_asc'
-	| 'date_desc'
-	| 'size_asc'
-	| 'size_desc'
-	| 'width_asc'
-	| 'width_desc'
-	| 'height_asc'
-	| 'height_desc'
-	| 'favorite_first'
-	| 'favorite_last';
+export enum ImageSortCriteria {
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	DATE_ASC = 'date:asc',
+	DATE_DESC = 'date:desc',
+	SIZE_ASC = 'size:asc',
+	SIZE_DESC = 'size:desc',
+	DIMENSIONS_ASC = 'dimensions:asc',
+	DIMENSIONS_DESC = 'dimensions:desc',
+	QUALITY_ASC = 'quality:asc',
+	QUALITY_DESC = 'quality:desc',
+	VIEWS_ASC = 'views:asc',
+	VIEWS_DESC = 'views:desc',
+	LIKES_ASC = 'likes:asc',
+	LIKES_DESC = 'likes:desc',
+}
 
 /**
- * 🖼️ Modos de visualización para Image
+ * 📋 Opciones de ordenamiento para UI
  */
-export type ImageViewMode = 'grid' | 'list' | 'masonry' | 'timeline' | 'map' | 'slideshow';
+export enum ImageSortOption {
+	NAME = 'name',
+	DATE = 'date',
+	SIZE = 'size',
+	DIMENSIONS = 'dimensions',
+	QUALITY = 'quality',
+	VIEWS = 'views',
+	LIKES = 'likes',
+	CREATED_AT = 'createdAt',
+	UPDATED_AT = 'updatedAt',
+}
 
 /**
- * 🎛️ Configuración de vista para Image
+ * 🎨 Modos de vista para Images
+ */
+export enum ImageViewMode {
+	GRID = 'grid',
+	LIST = 'list',
+	MASONRY = 'masonry',
+	TIMELINE = 'timeline',
+	MAP = 'map',
+	SLIDESHOW = 'slideshow',
+	COMPARISON = 'comparison',
+}
+
+/**
+ * 📊 Configuración de vista para Images
  */
 export interface ImageViewConfig {
 	viewMode: ImageViewMode;
-	sortBy: ImageSortCriteria;
+	sortBy: ImageSortOption;
 	sortDirection: 'asc' | 'desc';
-	gridSize: 'small' | 'medium' | 'large';
+	gridSize: 'small' | 'medium' | 'large' | 'xl';
 	showMetadata: boolean;
 	showThumbnails: boolean;
-	groupBy: 'folder' | 'date' | 'tag' | 'size' | null;
+	showFilenames: boolean;
+	showDimensions: boolean;
+	showFileSize: boolean;
+	groupBy: 'folder' | 'date' | 'tag' | 'album' | 'quality' | null;
 	enableAnimations: boolean;
-	autoPlay: boolean; // Para slideshow
+	autoPlay: boolean;
 	showFavorites: boolean;
+	enableZoom: boolean;
+	enableFullscreen: boolean;
 }
 
-/**
- * 🔍 Filtro avanzado para Image
- */
-export interface ImageFilter {
-	field: keyof ImageBase | 'metadata' | 'tags' | 'folder';
-	operator: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'notIn';
-	value: any;
-}
+export const IMAGE_SORT_PROPERTY_MAP: Record<ImageSortCriteria, string> = {
+	[ImageSortCriteria.NAME_ASC]: 'name',
+	[ImageSortCriteria.NAME_DESC]: 'name',
+	[ImageSortCriteria.DATE_ASC]: 'addedAt',
+	[ImageSortCriteria.DATE_DESC]: 'addedAt',
+	[ImageSortCriteria.SIZE_ASC]: 'size',
+	[ImageSortCriteria.SIZE_DESC]: 'size',
+	[ImageSortCriteria.DIMENSIONS_ASC]: 'width',
+	[ImageSortCriteria.DIMENSIONS_DESC]: 'width',
+	[ImageSortCriteria.QUALITY_ASC]: 'statistics.qualityScore',
+	[ImageSortCriteria.QUALITY_DESC]: 'statistics.qualityScore',
+	[ImageSortCriteria.VIEWS_ASC]: 'statistics.views',
+	[ImageSortCriteria.VIEWS_DESC]: 'statistics.views',
+	[ImageSortCriteria.LIKES_ASC]: 'statistics.likes',
+	[ImageSortCriteria.LIKES_DESC]: 'statistics.likes',
+};
+
+// Tipos inferidos de Zod
+export type ImageValidated = z.infer<typeof ImageSchema>;

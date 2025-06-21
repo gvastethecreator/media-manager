@@ -2,7 +2,7 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { fromPrismaImageToCardData } from '@/transformers/image/transformer';
+import { fromPrismaImageWithCounts } from '@/transformers/image/transformer';
 import type { ImageWithStats } from '@/types/entities/image/types';
 
 // Logger específico para acciones de ImageCard
@@ -30,7 +30,7 @@ interface ImageMetadata {
 	};
 }
 
-// Interfaz para los datos de imagen
+// Interfaz para los datos de imagen (compatible con ImageWithStats)
 export interface ImageCardData {
 	id: string;
 	name: string;
@@ -45,7 +45,7 @@ export interface ImageCardData {
 	places?: { id: string; name: string; color: string }[];
 	groups?: { id: string; name: string; color: string }[];
 	hash?: string;
-	folderId?: string;
+	folderId?: string | null;
 	isFavorite?: boolean;
 	createdAt?: Date;
 	updatedAt?: Date;
@@ -80,9 +80,17 @@ export async function getImageCardData(imageId: string): Promise<ImageWithStats 
 			include: {
 				tags: true,
 				albums: true,
+				collections: true,
 				characters: true,
 				places: true,
+				worldItems: true,
+				concepts: true,
+				prompts: true,
+				notes: true,
+				wildcards: true,
+				properties: true,
 				groups: true,
+				folder: { select: { id: true, name: true, path: true } },
 				_count: {
 					select: {
 						tags: true,
@@ -91,7 +99,12 @@ export async function getImageCardData(imageId: string): Promise<ImageWithStats 
 						characters: true,
 						places: true,
 						worldItems: true,
+						concepts: true,
+						prompts: true,
 						notes: true,
+						wildcards: true,
+						properties: true,
+						groups: true,
 					},
 				},
 			},
@@ -102,8 +115,7 @@ export async function getImageCardData(imageId: string): Promise<ImageWithStats 
 			return null;
 		}
 
-		// @ts-expect-error - El tipo de Prisma no coincide exactamente, pero el transformer lo maneja
-		const result = fromPrismaImageToCardData(image);
+		const result = fromPrismaImageWithCounts(image);
 		imageCardLogger.info('✅ Información de imagen obtenida correctamente');
 		return result;
 	} catch (error) {

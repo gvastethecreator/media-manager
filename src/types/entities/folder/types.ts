@@ -1,15 +1,15 @@
 /**
- * @file Tipos canónicos para la entidad Folder
+ * @file Tipos canónicos para la entidad Folder - Patrón EntityWithStats
  * @module types/entities/folder/types
  * @warning ⚠️ No importar tipos de Prisma ni de archivos legacy. Usar solo estos tipos en transformers, server actions y validaciones.
- * @description Estructura unificada y validada para Folder.
- * Última migración: 2025-06-18
+ * @description Estructura unificada y validada para Folder siguiendo el patrón EntityWithStats.
+ * Última migración: 2025-01-20
  */
 
 import type { Prisma } from '@prisma/client';
 
 /**
- * 📁 Tipo base para una carpeta.
+ * 📁 Tipo base para una carpeta - Campos principales
  */
 export interface FolderBase {
 	id: string;
@@ -31,8 +31,105 @@ export interface FolderBase {
 }
 
 /**
- * 📁 Input para crear una nueva carpeta.
- * Hacemos opcionales los campos que pueden no estar presentes en la creación.
+ * 📁 Consulta Prisma optimizada con conteos para Folder
+ */
+export interface PrismaFolderWithCounts extends FolderBase {
+	parent?: FolderBase | null;
+	children?: FolderBase[];
+	images?: unknown[];
+	videos?: unknown[];
+	_count: {
+		children: number;
+		images: number;
+		videos: number;
+		notes?: number;
+		documents?: number;
+	};
+}
+
+/**
+ * 📁 Estadísticas calculadas para una carpeta
+ */
+export interface FolderStatistics {
+	// Métricas de jerarquía
+	hierarchyDepth: number;
+	totalDescendants: number;
+	directChildren: number;
+
+	// Métricas de contenido
+	contentDiversity: number; // 0-100 basado en variedad de tipos
+	organizationScore: number; // 0-100 basado en estructura y nombres
+	totalItems: number;
+
+	// Métricas de uso
+	accessFrequency: number; // Frecuencia de acceso estimada
+	lastActivity: Date | null;
+
+	// Distribución de contenido
+	imageCount: number;
+	videoCount: number;
+	noteCount: number;
+	documentCount: number;
+	folderCount: number;
+
+	// Métricas de tamaño
+	formattedSize: string; // "1.2 GB", "500 MB"
+	averageFileSize: number;
+	largestFile: number;
+
+	// Análisis de nombres y organización
+	hasConsistentNaming: boolean;
+	hasDeepHierarchy: boolean; // >3 niveles
+	isWellOrganized: boolean;
+
+	// Breadcrumbs y navegación
+	breadcrumbs: Array<{ id: string; name: string; path: string }>;
+	fullPath: string;
+	relativePath: string;
+
+	// Auto-tags generados
+	autoTags: string[];
+
+	// Calidad general
+	qualityGrade: 'A' | 'B' | 'C' | 'D'; // A: Excelente, D: Necesita organización
+
+	// Relaciones
+	totalRelations: number;
+}
+
+/**
+ * 📁 Tipo principal optimizado con estadísticas (USAR ESTE)
+ */
+export interface FolderWithStats extends FolderBase {
+	statistics: FolderStatistics;
+	_count: {
+		children: number;
+		images: number;
+		videos: number;
+		notes: number;
+		documents: number;
+	};
+}
+
+/**
+ * 📁 Tipo completo para casos especiales (backward compatibility)
+ */
+export interface FolderComplete extends FolderBase {
+	parent?: FolderBase | null;
+	children?: FolderBase[];
+	images?: unknown[];
+	videos?: unknown[];
+	_count?: {
+		children?: number;
+		images?: number;
+		videos?: number;
+		notes?: number;
+		documents?: number;
+	};
+}
+
+/**
+ * 📁 Input para crear una nueva carpeta
  */
 export interface FolderCreateInput
 	extends Omit<
@@ -61,48 +158,12 @@ export interface FolderCreateInput
 }
 
 /**
- * 📁 Input para actualizar una carpeta existente.
+ * 📁 Input para actualizar una carpeta existente
  */
 export interface FolderUpdateInput extends Partial<FolderCreateInput> {}
 
 /**
- * 📁 Relaciones de una carpeta.
- */
-export interface FolderRelations {
-	images?: unknown[];
-	parent?: FolderBase | null;
-	children?: FolderBase[];
-}
-
-/**
- * 📁 Conteos de las relaciones.
- */
-export interface FolderCounts {
-	_count?: {
-		images?: number;
-		children?: number;
-	};
-}
-
-/**
- * 📁 Estadísticas de una carpeta.
- */
-export interface FolderStats {
-	totalSize: number;
-	totalFiles: number;
-	lastModified: Date;
-	imageCount: number;
-	videoCount: number;
-	directoryCount: number;
-}
-
-/**
- * 📁 Tipo completo de una carpeta con relaciones y conteos.
- */
-export interface FolderComplete extends FolderBase, FolderRelations, FolderCounts {}
-
-/**
- * 📁 Propiedades de UI para una carpeta.
+ * 📁 Propiedades de UI para una carpeta
  */
 export interface FolderUIProps {
 	isSelected?: boolean;
@@ -115,34 +176,31 @@ export interface FolderUIProps {
 }
 
 /**
- * 📁 Tipo extendido con estado de UI.
+ * 📁 Tipo extendido con estado de UI
  */
 export interface FolderExtended extends FolderComplete, FolderUIProps {}
 
 /**
- * 📁 Tipo extendido y completo, con hijos también extendidos.
+ * 📁 Tipo extendido y completo, con hijos también extendidos
  */
 export interface FolderExtendedComplete extends FolderExtended {
 	children?: FolderExtendedComplete[];
 }
 
-// Alias
-export type CreateFolderData = FolderCreateInput;
-export type UpdateFolderData = FolderUpdateInput;
-export type FolderWithRelations = FolderComplete;
-
 /**
- * 📁 Filtros para buscar carpetas.
+ * 📁 Filtros para buscar carpetas
  */
 export interface FolderFilters {
 	search?: string;
 	isFavorite?: boolean;
 	parentId?: string | null;
 	hasImages?: boolean;
+	hierarchyDepth?: number;
+	organizationScore?: { min?: number; max?: number };
 }
 
 /**
- * 📁 Opciones para las consultas de búsqueda de carpetas.
+ * 📁 Opciones para las consultas de búsqueda de carpetas
  */
 export interface FolderSearchOptions {
 	skip?: number;
@@ -152,7 +210,49 @@ export interface FolderSearchOptions {
 	include?: Prisma.FolderInclude;
 }
 
+/**
+ * 📁 Relaciones de una carpeta (para FolderComplete)
+ */
+export interface FolderRelations {
+	images?: unknown[];
+	videos?: unknown[];
+	parent?: FolderBase | null;
+	children?: FolderBase[];
+}
+
+/**
+ * 📁 Conteos de las relaciones (para FolderComplete)
+ */
+export interface FolderCounts {
+	_count?: {
+		images?: number;
+		children?: number;
+		videos?: number;
+		notes?: number;
+		documents?: number;
+	};
+}
+
+/**
+ * 📁 Estadísticas básicas de una carpeta (legacy)
+ */
+export interface FolderStats {
+	totalSize: number;
+	totalFiles: number;
+	lastModified: Date;
+	imageCount: number;
+	videoCount: number;
+	directoryCount: number;
+}
+
+// Alias para retrocompatibilidad
+export type CreateFolderData = FolderCreateInput;
+export type UpdateFolderData = FolderUpdateInput;
+export type FolderWithRelations = FolderComplete;
+export type Folder = FolderComplete; // Alias principal
+
 // 🟢 Documentación y advertencia:
-// - Usar solo estos tipos en transformers, server actions y validaciones.
-// - No importar tipos de Prisma ni de archivos legacy.
-// - Validar siempre con FolderSchema antes de persistir.
+// - USAR FolderWithStats como tipo principal en stores, componentes y lógica de negocio
+// - FolderComplete solo para casos especiales o backward compatibility
+// - Validar siempre con FolderSchema antes de persistir
+// - El patrón EntityWithStats está consolidado y optimizado

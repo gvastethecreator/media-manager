@@ -130,3 +130,30 @@ export function diff<T>(
 
 	return { added, removed, common };
 }
+
+/**
+ * Convierte un array de objetos en un objeto (récord) indexado por una clave.
+ *
+ * @template T - El tipo de los objetos en el array.
+ * @param {T[]} array - El array de objetos a convertir.
+ * @param {keyof T} key - La clave del objeto que se usará como índice.
+ * @returns {Record<string, T>} Un objeto donde las claves son los valores de la
+ *          propiedad `key` de cada objeto.
+ *
+ * @example
+ * const users = [{ id: 'a', name: 'Alice' }, { id: 'b', name: 'Bob' }];
+ * const usersById = arrayToRecord(users, 'id');
+ * // devuelve: { a: { id: 'a', name: 'Alice' }, b: { id: 'b', name: 'Bob' } }
+ */
+export function arrayToRecord<T extends { [k in K]: string | number }, K extends keyof T>(
+	array: T[],
+	key: K,
+): Record<T[K], T> {
+	return array.reduce(
+		(acc, item) => {
+			acc[item[key]] = item;
+			return acc;
+		},
+		{} as Record<T[K], T>,
+	);
+}

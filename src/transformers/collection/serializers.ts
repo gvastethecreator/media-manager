@@ -5,8 +5,15 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { CollectionEdition, CollectionFilter, CollectionSortBy } from '@/types/entities/collection';
+import type {
+    CollectionCreateInput,
+    CollectionEdition,
+    CollectionFilter,
+    CollectionSortBy,
+    CollectionUpdateInput,
+} from '@/types/entities/collection';
 import { TransformerError } from '@/utils/transformers/errors';
+import type { Prisma } from '@prisma/client';
 
 const logger = serverLogger.withContext('CollectionSerializers');
 
@@ -121,4 +128,66 @@ export function serializeEditions(data: CollectionEdition[] | null | undefined):
 		logger.error(`Error serializando 'editions'`, { error, data });
 		throw new TransformerError(`No se pudo serializar el campo 'editions'.`);
 	}
+}
+
+/**
+ * 🔄 Serializa los datos para crear una colección en Prisma.
+ */
+export function toPrismaCollectionCreate(
+	data: CollectionCreateInput,
+): Prisma.CollectionCreateInput {
+	const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = data;
+	const prismaData: Prisma.CollectionCreateInput = {
+		...rest,
+	};
+
+	// Conectar relaciones si existen
+	if (imageIds && imageIds.length > 0) {
+		prismaData.images = { connect: imageIds.map((id) => ({ id })) };
+	}
+	if (tagIds && tagIds.length > 0) {
+		prismaData.tags = { connect: tagIds.map((id) => ({ id })) };
+	}
+	if (groupIds && groupIds.length > 0) {
+		prismaData.groups = { connect: groupIds.map((id) => ({ id })) };
+	}
+	if (propertyIds && propertyIds.length > 0) {
+		prismaData.properties = { connect: propertyIds.map((id) => ({ id })) };
+	}
+	if (wildcardIds && wildcardIds.length > 0) {
+		prismaData.wildcards = { connect: wildcardIds.map((id) => ({ id })) };
+	}
+
+	return prismaData;
+}
+
+/**
+ * 🔄 Serializa los datos para actualizar una colección en Prisma.
+ */
+export function toPrismaCollectionUpdate(
+	data: CollectionUpdateInput,
+): Prisma.CollectionUpdateInput {
+	const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = data;
+	const prismaData: Prisma.CollectionUpdateInput = {
+		...rest,
+	};
+
+	// Actualizar relaciones si se proporcionan
+	if (imageIds !== undefined) {
+		prismaData.images = { set: imageIds.map((id) => ({ id })) };
+	}
+	if (tagIds !== undefined) {
+		prismaData.tags = { set: tagIds.map((id) => ({ id })) };
+	}
+	if (groupIds !== undefined) {
+		prismaData.groups = { set: groupIds.map((id) => ({ id })) };
+	}
+	if (propertyIds !== undefined) {
+		prismaData.properties = { set: propertyIds.map((id) => ({ id })) };
+	}
+	if (wildcardIds !== undefined) {
+		prismaData.wildcards = { set: wildcardIds.map((id) => ({ id })) };
+	}
+
+	return prismaData;
 }

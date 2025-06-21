@@ -1,17 +1,12 @@
-// Barrel de transformers para Workflow
+/**
+ * @file Punto de entrada para los transformadores de la entidad Workflow.
+ * @module transformers/workflow
+ * @description Exporta la función `toWorkflowWithStats` como el transformador canónico
+ *              y los tipos de agregados necesarios para el cálculo de estadísticas.
+ * @see /src/transformers/workflow/mappers.ts
+ * @updated 2025-01-27
+ */
 
-// Exportar desde mappers (renombrando la función conflictiva)
-export {
-    fromPrismaWorkflow as mapWorkflowFromPrisma,
-    toPrismaWorkflow
-} from './mappers';
-
-// Exportar desde serializers
-export * from './serializers';
-
-// Exportar desde transformer
-export {
-    fromPrismaWorkflow,
-    fromPrismaWorkflows
-} from './transformer';
+export { toWorkflowWithStats } from './mappers';
+export type { WorkflowExecutionAggregates } from './mappers';
 

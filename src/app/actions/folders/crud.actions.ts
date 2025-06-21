@@ -1,42 +1,30 @@
 'use server';
 
 /**
- * @file Acciones CRUD para carpetas
+ * @file Acciones CRUD para carpetas - Patrón EntityWithStats
  * @module app/actions/folders/crud.actions
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { prisma } from '@/lib/prisma';
 import {
-	fromPrismaFolder,
-	fromPrismaFolders,
+	fromPrismaFolderWithCounts,
+	fromPrismaFoldersWithCounts,
+	folderWithCountsPayload,
 	mapCreateFolderDataToPrisma,
 	mapUpdateFolderDataToPrisma,
 } from '@/transformers/folder';
-import type { FolderComplete, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder';
+import type { FolderWithStats, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder';
 import { CreateFolderSchema, UpdateFolderSchema } from '@/types/entities/folder/schema';
 import fs from 'fs/promises';
 import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('FolderActions');
 
-// Objeto de inclusión para obtener una carpeta completa con todas sus relaciones.
-const FOLDER_INCLUDE = {
-	images: true,
-	parent: true,
-	children: true,
-	_count: {
-		select: {
-			images: true,
-			children: true,
-		},
-	},
-};
-
 /**
- * Crea una nueva carpeta en la base de datos.
+ * 📁 Crea una nueva carpeta en la base de datos
  */
-export async function createFolder(input: FolderCreateInput): Promise<FolderComplete> {
+export async function createFolder(input: FolderCreateInput): Promise<FolderWithStats> {
 	logger.info('📁 Creating new folder:', input);
 	const validatedInput = CreateFolderSchema.parse(input);
 
@@ -62,18 +50,24 @@ export async function createFolder(input: FolderCreateInput): Promise<FolderComp
 	const prismaData = mapCreateFolderDataToPrisma(validatedInput);
 	const folder = await prisma.folder.create({
 		data: prismaData,
-		include: FOLDER_INCLUDE,
+		...folderWithCountsPayload,
 	});
 
 	revalidatePath('/folders');
 	logger.info('✅ Folder created successfully:', folder);
-	return fromPrismaFolder(folder);
+
+	const result = fromPrismaFolderWithCounts(folder);
+	if (!result) {
+		throw new Error('Error al transformar la carpeta creada');
+	}
+
+	return result;
 }
 
 /**
- * Actualiza una carpeta existente.
+ * 📁 Actualiza una carpeta existente
  */
-export async function updateFolder(id: string, input: FolderUpdateInput): Promise<FolderComplete> {
+export async function updateFolder(id: string, input: FolderUpdateInput): Promise<FolderWithStats> {
 	logger.info(`📝 Updating folder ${id}:`, input);
 	const validatedInput = UpdateFolderSchema.parse(input);
 
@@ -90,17 +84,23 @@ export async function updateFolder(id: string, input: FolderUpdateInput): Promis
 	const updatedFolder = await prisma.folder.update({
 		where: { id },
 		data: prismaData,
-		include: FOLDER_INCLUDE,
+		...folderWithCountsPayload,
 	});
 
 	revalidatePath('/folders');
 	revalidatePath(`/folders/${id}`);
 	logger.info(`✅ Folder ${id} updated successfully.`);
-	return fromPrismaFolder(updatedFolder);
+
+	const result = fromPrismaFolderWithCounts(updatedFolder);
+	if (!result) {
+		throw new Error('Error al transformar la carpeta actualizada');
+	}
+
+	return result;
 }
 
 /**
- * Elimina una carpeta.
+ * 📁 Elimina una carpeta
  */
 export async function deleteFolder(id: string): Promise<void> {
 	logger.warn(`🗑️ Deleting folder ${id}`);
@@ -119,25 +119,187 @@ export async function deleteFolder(id: string): Promise<void> {
 }
 
 /**
- * Obtiene una carpeta por su ID.
+ * 📁 Obtiene una carpeta por su ID con estadísticas
  */
-export async function getFolder(id: string): Promise<FolderComplete | null> {
+export async function getFolder(id: string): Promise<FolderWithStats | null> {
 	logger.info(`🔍 Getting folder ${id}`);
+
 	const folder = await prisma.folder.findUnique({
 		where: { id },
-		include: FOLDER_INCLUDE,
+		...folderWithCountsPayload,
 	});
-	return folder ? fromPrismaFolder(folder) : null;
+
+	return folder ? fromPrismaFolderWithCounts(folder) : null;
 }
 
 /**
- * Obtiene todas las carpetas.
+ * 📁 Obtiene todas las carpetas con estadísticas
  */
-export async function getAllFolders(): Promise<FolderComplete[]> {
+export async function getAllFolders(): Promise<FolderWithStats[]> {
 	logger.info('📂 Getting all folders');
+
 	const folders = await prisma.folder.findMany({
 		orderBy: { name: 'asc' },
-		include: FOLDER_INCLUDE,
+		...folderWithCountsPayload,
 	});
-	return fromPrismaFolders(folders);
+
+	return fromPrismaFoldersWithCounts(folders);
+}
+
+/**
+ * 📁 Busca carpetas con filtros avanzados
+ */
+export async function findFolders(options: {
+	search?: string;
+	parentId?: string | null;
+	isFavorite?: boolean;
+	skip?: number;
+	take?: number;
+	orderBy?: 'name' | 'date' | 'size' | 'organization';
+	order?: 'asc' | 'desc';
+}): Promise<{ folders: FolderWithStats[]; total: number }> {
+	logger.info('🔍 Finding folders with options:', options);
+
+	const {
+		search,
+		parentId,
+		isFavorite,
+		skip = 0,
+		take = 50,
+		orderBy = 'name',
+		order = 'asc',
+	} = options;
+
+	// Construir where clause
+	const where: any = {};
+
+	if (search) {
+		where.OR = [
+			{ name: { contains: search, mode: 'insensitive' } },
+			{ description: { contains: search, mode: 'insensitive' } },
+			{ path: { contains: search, mode: 'insensitive' } },
+		];
+	}
+
+	if (parentId !== undefined) {
+		where.parentId = parentId;
+	}
+
+	if (isFavorite !== undefined) {
+		where.isFavorite = isFavorite;
+	}
+
+	// Construir orderBy clause
+	let prismaOrderBy: any;
+	switch (orderBy) {
+		case 'name':
+			prismaOrderBy = { name: order };
+			break;
+		case 'date':
+			prismaOrderBy = { createdAt: order };
+			break;
+		case 'size':
+			prismaOrderBy = { totalSize: order };
+			break;
+		default:
+			prismaOrderBy = { name: order };
+	}
+
+	const [folders, total] = await prisma.$transaction([
+		prisma.folder.findMany({
+			where,
+			orderBy: prismaOrderBy,
+			skip,
+			take,
+			...folderWithCountsPayload,
+		}),
+		prisma.folder.count({ where }),
+	]);
+
+	logger.info(`✅ Found ${folders.length} of ${total} folders.`);
+
+	return {
+		folders: fromPrismaFoldersWithCounts(folders),
+		total,
+	};
+}
+
+/**
+ * 📁 Mueve una carpeta a un nuevo padre
+ */
+export async function moveFolder(
+	folderId: string,
+	newParentId: string | null
+): Promise<FolderWithStats> {
+	logger.info(`📁 Moving folder ${folderId} to parent ${newParentId}`);
+
+	// Validar que no se cree un ciclo
+	if (newParentId) {
+		const targetFolder = await prisma.folder.findUnique({
+			where: { id: folderId },
+			select: { id: true, path: true },
+		});
+
+		const newParent = await prisma.folder.findUnique({
+			where: { id: newParentId },
+			select: { id: true, path: true },
+		});
+
+		if (!targetFolder || !newParent) {
+			throw new Error('Carpeta origen o destino no encontrada');
+		}
+
+		// Verificar que no se mueva a una subcarpeta de sí misma
+		if (newParent.path.startsWith(targetFolder.path)) {
+			throw new Error('No se puede mover una carpeta a una subcarpeta de sí misma');
+		}
+	}
+
+	const updatedFolder = await prisma.folder.update({
+		where: { id: folderId },
+		data: { parentId: newParentId },
+		...folderWithCountsPayload,
+	});
+
+	revalidatePath('/folders');
+	logger.info(`✅ Folder ${folderId} moved successfully.`);
+
+	const result = fromPrismaFolderWithCounts(updatedFolder);
+	if (!result) {
+		throw new Error('Error al transformar la carpeta movida');
+	}
+
+	return result;
+}
+
+/**
+ * 📁 Alterna el estado de favorito de una carpeta
+ */
+export async function toggleFolderFavorite(id: string): Promise<FolderWithStats> {
+	logger.info(`⭐ Toggling favorite status for folder ${id}`);
+
+	const currentFolder = await prisma.folder.findUnique({
+		where: { id },
+		select: { isFavorite: true },
+	});
+
+	if (!currentFolder) {
+		throw new Error('Carpeta no encontrada');
+	}
+
+	const updatedFolder = await prisma.folder.update({
+		where: { id },
+		data: { isFavorite: !currentFolder.isFavorite },
+		...folderWithCountsPayload,
+	});
+
+	revalidatePath('/folders');
+	revalidatePath(`/folders/${id}`);
+
+	const result = fromPrismaFolderWithCounts(updatedFolder);
+	if (!result) {
+		throw new Error('Error al transformar la carpeta actualizada');
+	}
+
+	return result;
 }

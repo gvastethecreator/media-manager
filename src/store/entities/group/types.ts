@@ -3,7 +3,7 @@
  * @module store/entities/group/types
  */
 
-import type { Group, GroupDisplayState } from '@/types/entities/group';
+import type { GroupDisplayState, GroupWithStats } from '@/types/entities/group';
 import { GroupSortCriteria, GroupType, GroupViewMode } from '@/types/entities/group';
 
 /**
@@ -11,7 +11,7 @@ import { GroupSortCriteria, GroupType, GroupViewMode } from '@/types/entities/gr
  */
 export interface GroupCoreState {
 	/** Mapa de grupos indexados por ID */
-	groups: Record<string, Group>;
+	groups: Record<string, GroupWithStats>;
 	/** Items asociados a cada grupo */
 	groupItems: Record<string, Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>>;
 	/** Estado de carga */

@@ -1,10 +1,12 @@
 'use client';
 
+import { cn } from '@/lib/utils';
+import type { CharacterWithStats } from '@/types/entities/character';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { cn } from '@/lib/utils';
 import { CardContainer } from '../card-container';
+import { adaptCharacterWithStats, isCharacterWithStats } from './character-card-adapter';
 import { CharacterCardContent } from './character-card-content';
 import { CharacterCardFooter } from './character-card-footer';
 import { CharacterCardHeader } from './character-card-header';
@@ -13,7 +15,7 @@ import type { CharacterCardData } from './character-server-actions';
 
 export interface CharacterCardProps {
 	/** Datos del personaje a mostrar */
-	character: CharacterCardData;
+	character: CharacterCardData | CharacterWithStats;
 	/** Tamaño compacto con menos información */
 	compact?: boolean;
 	/** Modo TCG con efectos especiales de carta */
@@ -36,7 +38,7 @@ export interface CharacterCardProps {
  * y miniaturas de las imágenes contenidas.
  */
 export function CharacterCard({
-	character,
+	character: rawCharacter,
 	compact = false,
 	tcgMode = true,
 	disabled = false,
@@ -46,12 +48,22 @@ export function CharacterCard({
 }: CharacterCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
 
+	// Adaptar el personaje al formato esperado si es necesario
+	const character = useMemo(() => {
+		// Si es CharacterWithStats, adaptarlo a CharacterCardData
+		if (isCharacterWithStats(rawCharacter)) {
+			return adaptCharacterWithStats(rawCharacter);
+		}
+		// Si ya es CharacterCardData, usar tal como está
+		return rawCharacter as CharacterCardData;
+	}, [rawCharacter]);
+
 	// Preparar las imágenes para el componente de galería
 	const cardMedia = useMemo(() => {
 		const media = [];
 
-		// Añadir imágenes si están disponibles
-		if (character.recentImages?.length) {
+		// Añadir imágenes si están disponibles (CharacterCardData)
+		if ('recentImages' in character && character.recentImages?.length) {
 			media.push(
 				...character.recentImages.map((path) => ({
 					id: path,
@@ -61,8 +73,8 @@ export function CharacterCard({
 			);
 		}
 
-		// Añadir videos si están disponibles
-		if (character.recentVideos?.length) {
+		// Añadir videos si están disponibles (CharacterCardData)
+		if ('recentVideos' in character && character.recentVideos?.length) {
 			media.push(
 				...character.recentVideos.map((path) => ({
 					id: path,
@@ -73,7 +85,7 @@ export function CharacterCard({
 		}
 
 		return media;
-	}, [character.recentImages, character.recentVideos]);
+	}, [character]);
 
 	// Preparar etiquetas para el pie de la tarjeta
 	const footerTags = useMemo(() => {
@@ -89,14 +101,14 @@ export function CharacterCard({
 		// Añadir alineamiento si está disponible
 		if (character.alignment) tags.push(character.alignment);
 
-		// Añadir habilidades del personaje
-		if (character.parsedAbilities?.length) {
+		// Añadir habilidades del personaje (solo para CharacterCardData)
+		if ('parsedAbilities' in character && character.parsedAbilities?.length) {
 			// Solo las primeras 2 habilidades para no sobrecargar la tarjeta
 			tags.push(...character.parsedAbilities.slice(0, 2));
 		}
 
 		return tags;
-	}, [character.class, character.race, character.level, character.alignment, character.parsedAbilities]);
+	}, [character.class, character.race, character.level, character.alignment]);
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
@@ -150,6 +162,14 @@ export function CharacterCard({
 	const cardId = character.metadata?.cardId || `C${character.id.substring(0, 6)}-${character.level}`;
 	const healthPoints = character.metadata?.healthPoints || 100;
 	const manaPoints = character.metadata?.manaPoints || 50;
+
+	const rarityMap: Record<string, number> = {
+		Common: 1,
+		Uncommon: 2,
+		Rare: 3,
+		Mythic: 4,
+	};
+	const numericRarityLevel = rarityMap[rarityLevel] || 1;
 
 	return (
 		<motion.div
@@ -267,7 +287,7 @@ export function CharacterCard({
 					{!compact && (
 						<>
 							{/* Galería de imágenes */}
-							<CharacterCardImages images={cardMedia} emoji={character.emoji} tcgMode={tcgMode} compact={false} />
+							<CharacterCardImages images={cardMedia.map((m) => m.thumbnailUrl)} emoji={character.emoji} tcgMode={tcgMode} compact={false} />
 
 							{/* Contenido con descripción y contadores */}
 							<CharacterCardContent
@@ -289,7 +309,7 @@ export function CharacterCard({
 					<CharacterCardFooter
 						tags={footerTags}
 						cardId={cardId}
-						rarityLevel={rarityLevel}
+						rarityLevel={numericRarityLevel}
 						primaryColor={primaryColor}
 						secondaryColor={secondaryColor}
 						level={character.level}

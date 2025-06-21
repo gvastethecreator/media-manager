@@ -9,7 +9,8 @@
 export {
     mapCreateWorldItemDataToPrisma,
     mapUpdateWorldItemDataToPrisma,
-    mapWorldItemSearchOptionsToPrisma
+    mapWorldItemSearchOptionsToPrisma,
+    toWorldItemWithStats
 } from './mappers';
 // De serializers.ts (Funciones actuales)
 export {

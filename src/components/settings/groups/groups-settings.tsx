@@ -9,37 +9,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import { toastService } from '@/services/toast.service';
-import type { CreateGroupInput, GroupComplete, GroupUpdateInput, GroupWithStats } from '@/types/entities/group/types';
+import type { CreateGroupInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group/types';
 import { GroupSortCriteria } from '@/types/entities/group/types';
 import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
-
-// Helper function to transform data
-function transformGroupCompleteToGroupWithStats(group: GroupComplete): GroupWithStats {
-	const totalItems = Object.values(group._count ?? {}).reduce((sum, count) => sum + (count ?? 0), 0);
-	return {
-		...group,
-		stats: {
-			totalItems,
-			totalImages: group._count?.images ?? 0,
-			totalVideos: group._count?.videos ?? 0,
-			totalAlbums: group._count?.albums ?? 0,
-			totalCollections: group._count?.collections ?? 0,
-			totalTags: group._count?.tags ?? 0,
-			totalCharacters: group._count?.characters ?? 0,
-			totalPlaces: group._count?.places ?? 0,
-			totalWorldItems: group._count?.worldItems ?? 0,
-			totalConcepts: group._count?.concepts ?? 0,
-			totalPrompts: group._count?.prompts ?? 0,
-			totalNotes: group._count?.notes ?? 0,
-			totalWildcards: group._count?.wildcards ?? 0,
-			totalProperties: group._count?.properties ?? 0,
-			lastUpdated: group.updatedAt,
-		},
-	};
-}
 
 const SORT_OPTIONS = [
 	{ label: 'Nombre', value: GroupSortCriteria.NAME_ASC },
@@ -132,8 +107,7 @@ export function GroupsSettings() {
 			if (!data) {
 				throw new Error('Respuesta de servidor inválida');
 			}
-			const transformedData = data.map(transformGroupCompleteToGroupWithStats);
-			dispatch({ type: 'LOAD_SUCCESS', payload: transformedData });
+			dispatch({ type: 'LOAD_SUCCESS', payload: data });
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 			dispatch({ type: 'LOAD_ERROR', payload: errorMessage });
@@ -201,8 +175,7 @@ export function GroupsSettings() {
 			if (!newGroup) {
 				throw new Error('Error al crear grupo: respuesta vacía');
 			}
-			const transformedGroup = transformGroupCompleteToGroupWithStats(newGroup);
-			dispatch({ type: 'ADD_GROUP', payload: transformedGroup });
+			dispatch({ type: 'ADD_GROUP', payload: newGroup });
 			dispatch({ type: 'SET_CREATE_DIALOG', payload: false });
 			toastService.success('Grupo creado correctamente');
 		} catch (err) {
@@ -217,8 +190,7 @@ export function GroupsSettings() {
 			if (!updatedGroup) {
 				throw new Error('Error al actualizar grupo: respuesta vacía');
 			}
-			const transformedGroup = transformGroupCompleteToGroupWithStats(updatedGroup);
-			dispatch({ type: 'UPDATE_GROUP', payload: transformedGroup });
+			dispatch({ type: 'UPDATE_GROUP', payload: updatedGroup });
 			dispatch({ type: 'SELECT_GROUP', payload: null });
 			dispatch({ type: 'SET_EDIT_MODE', payload: false });
 			toastService.success('Grupo actualizado correctamente');

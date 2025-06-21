@@ -3,76 +3,63 @@
 /**
  * @file Server Actions para la entidad Character
  * @module app/actions/characters/character.actions
- * @description Acciones CRUD y de gestión de relaciones para los Personajes.
+ * @description Acciones optimizadas para Character con patrón CharacterWithStats.
  */
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	fromPrismaCharacter,
-	fromPrismaCharacters,
-	mapCharacterSearchOptionsToPrisma,
-	mapCreateCharacterDataToPrisma,
-	mapUpdateCharacterDataToPrisma,
-} from '@/transformers/character';
+    fromPrismaCharacter,
+    fromPrismaCharacters,
+    toPrismaCharacterCreate,
+    toPrismaCharacterUpdate,
+} from '@/transformers/character/transformer';
+import { mapCharacterSearchOptionsToPrisma } from '@/transformers/character/mappers';
 import type {
-	CharacterBase,
-	CharacterComplete,
-	CharacterCreateInput,
-	CharacterSearchOptions,
-	CharacterUpdateInput,
+    CharacterBase,
+    CharacterWithStats,
+    CharacterCreateInput,
+    CharacterSearchOptions,
+    CharacterUpdateInput,
 } from '@/types/entities/character';
 import { revalidatePath } from 'next/cache';
 
 const logger = serverLogger.withContext('CharacterActions');
 
-// Objeto de inclusión para obtener un personaje completo con todas sus relaciones y conteos.
-const CHARACTER_INCLUDE = {
-	images: {
-		select: { id: true },
-	},
-	videos: {
-		select: { id: true },
-	},
-	tags: {
-		select: { id: true },
-	},
-	groups: {
-		select: { id: true },
-	},
-	properties: {
-		select: { id: true },
-	},
-	collections: {
-		select: { id: true },
-	},
-	albums: {
-		select: { id: true },
-	},
-	places: {
-		select: { id: true },
-	},
-	worldItems: {
-		select: { id: true },
-	},
-	concepts: {
-		select: { id: true },
-	},
-	prompts: {
-		select: { id: true },
-	},
-	notes: {
-		select: { id: true },
-	},
-	wildcards: {
-		select: { id: true },
-	},
-	relatedCharacters: {
-		select: { id: true },
-	},
-	relatedTo: {
-		select: { id: true },
-	},
+/**
+ * 📊 Consulta optimizada para Character con conteos (sin relaciones completas).
+ * Mejora significativa de rendimiento vs include completo.
+ */
+const CHARACTER_SELECT_WITH_STATS = {
+	id: true,
+	name: true,
+	description: true,
+	emoji: true,
+	color: true,
+	shortcut: true,
+	category: true,
+	level: true,
+	class: true,
+	race: true,
+	type: true,
+	alignment: true,
+	backstory: true,
+	stats: true,
+	psychologicalProfile: true,
+	socialProfile: true,
+	relationships: true,
+	goals: true,
+	fears: true,
+	beliefs: true,
+	personality: true,
+	skills: true,
+	abilities: true,
+	sortBy: true,
+	filters: true,
+	featuredImage: true,
+	isFavorite: true,
+	createdAt: true,
+	updatedAt: true,
 	_count: {
 		select: {
 			images: true,
@@ -92,145 +79,150 @@ const CHARACTER_INCLUDE = {
 			relatedTo: true,
 		},
 	},
-};
-
-// Re-exportar tipos extendidos para compatibilidad
-export type CharacterWithImages = CharacterComplete;
-export type CharacterWithStats = CharacterComplete;
+} as const;
 
 /**
- * Revalida las rutas de caché relacionadas con los personajes.
+ * 🔍 Obtiene un personaje por ID con estadísticas optimizadas.
  */
-async function revalidateCharacterPaths() {
-	revalidatePath('/characters');
-	revalidatePath('/settings/characters');
-}
+export async function getCharacter(id: string): Promise<CharacterWithStats | null> {
+	logger.info(`🔍 Obteniendo personaje: ${id}`);
 
-/**
- * Busca y obtiene personajes según los criterios de búsqueda.
- */
-export async function searchCharacters(options: CharacterSearchOptions): Promise<CharacterComplete[]> {
-	logger.info('🔍 Buscando personajes', { options });
-	const prisma = await getPrismaClient();
-	const prismaOptions = mapCharacterSearchOptionsToPrisma(options);
-	const characters = await prisma.character.findMany({
-		...prismaOptions,
-		include: CHARACTER_INCLUDE,
-	});
-	return fromPrismaCharacters(characters);
-}
+	try {
+		const prisma = await getPrismaClient();
+		const character = await prisma.character.findUnique({
+			where: { id },
+			select: CHARACTER_SELECT_WITH_STATS,
+		});
 
-/**
- * Obtiene un único personaje por su ID.
- */
-export async function getCharacter(id: string): Promise<CharacterComplete | null> {
-	logger.info(`🔍 Obteniendo personaje por ID: ${id}`);
-	const prisma = await getPrismaClient();
-	const character = await prisma.character.findUnique({
-		where: { id },
-		include: CHARACTER_INCLUDE,
-	});
-	if (!character) {
-		logger.warn(`Personaje no encontrado: ${id}`);
-		return null;
+		if (!character) {
+			logger.warn(`❌ Personaje no encontrado: ${id}`);
+			return null;
+		}
+
+		const result = fromPrismaCharacter(character);
+		logger.info(`✅ Personaje obtenido: ${result?.name}`);
+		return result;
+	} catch (error) {
+		logger.error('❌ Error al obtener personaje', { error, id });
+		throw new Error(`Error al obtener personaje: ${error instanceof Error ? error.message : 'Error desconocido'}`);
 	}
-	return fromPrismaCharacter(character);
 }
 
 /**
- * Alias para getCharacter - para compatibilidad
+ * 🔍 Obtiene múltiples personajes con estadísticas optimizadas.
  */
-export const getCharacterById = getCharacter;
+export async function getCharacters(options: CharacterSearchOptions = {}): Promise<CharacterWithStats[]> {
+	logger.info('🔍 Obteniendo personajes', { options });
 
-/**
- * Obtiene las imágenes de un personaje específico.
- */
-export async function getCharacterImages(characterId: string): Promise<any[]> {
-	logger.info(`🖼️ Obteniendo imágenes del personaje: ${characterId}`);
-	const prisma = await getPrismaClient();
-	const character = await prisma.character.findUnique({
-		where: { id: characterId },
-		include: {
-			images: {
-				select: {
-					id: true,
-					name: true,
-					path: true,
-				},
-				orderBy: { createdAt: 'desc' },
-			},
-		},
-	});
+	try {
+		const prisma = await getPrismaClient();
+		const prismaOptions = mapCharacterSearchOptionsToPrisma(options);
 
-	if (!character) {
-		logger.warn(`Personaje no encontrado: ${characterId}`);
-		return [];
+		const characters = await prisma.character.findMany({
+			...prismaOptions,
+			select: CHARACTER_SELECT_WITH_STATS,
+		});
+
+		const results = fromPrismaCharacters(characters);
+		logger.info(`✅ ${results.length} personajes obtenidos`);
+		return results;
+	} catch (error) {
+		logger.error('❌ Error al obtener personajes', { error, options });
+		throw new Error(`Error al obtener personajes: ${error instanceof Error ? error.message : 'Error desconocido'}`);
 	}
-
-	return character.images;
 }
 
 /**
- * Crea un nuevo personaje.
+ * ➕ Crea un nuevo personaje.
  */
-export async function createCharacter(data: CharacterCreateInput): Promise<CharacterBase> {
-	logger.info('➕ Creando nuevo personaje:', { name: data.name });
-	const prisma = await getPrismaClient();
-	const prismaData = mapCreateCharacterDataToPrisma(data);
-	const newCharacter = await prisma.character.create({ data: prismaData });
-	await revalidateCharacterPaths();
-	return newCharacter;
+export async function createCharacter(data: CharacterCreateInput): Promise<CharacterWithStats> {
+	logger.info('➕ Creando personaje', { name: data.name });
+
+	try {
+		const prisma = await getPrismaClient();
+		const prismaData = toPrismaCharacterCreate(data);
+
+		const newCharacter = await prisma.character.create({
+			data: prismaData,
+			select: CHARACTER_SELECT_WITH_STATS,
+		});
+
+		const result = fromPrismaCharacter(newCharacter);
+		if (!result) {
+			throw new Error('Error al transformar personaje creado');
+		}
+
+		await revalidateCharacterPaths();
+		logger.info(`✅ Personaje creado: ${result.name} (${result.id})`);
+		return result;
+	} catch (error) {
+		logger.error('❌ Error al crear personaje', { error, data });
+		throw new Error(`Error al crear personaje: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+	}
 }
 
 /**
- * Actualiza un personaje existente.
+ * 🔄 Actualiza un personaje existente.
  */
-export async function updateCharacter(id: string, data: CharacterUpdateInput): Promise<CharacterBase> {
+export async function updateCharacter(id: string, data: CharacterUpdateInput): Promise<CharacterWithStats> {
 	logger.info(`🔄 Actualizando personaje: ${id}`);
-	const prisma = await getPrismaClient();
-	const prismaData = mapUpdateCharacterDataToPrisma(data);
-	const updatedCharacter = await prisma.character.update({
-		where: { id },
-		data: prismaData,
-	});
-	await revalidateCharacterPaths();
-	revalidatePath(`/characters/${id}`);
-	return updatedCharacter;
+
+	try {
+		const prisma = await getPrismaClient();
+		const prismaData = toPrismaCharacterUpdate(data);
+
+		const updatedCharacter = await prisma.character.update({
+			where: { id },
+			data: prismaData,
+			select: CHARACTER_SELECT_WITH_STATS,
+		});
+
+		const result = fromPrismaCharacter(updatedCharacter);
+		if (!result) {
+			throw new Error('Error al transformar personaje actualizado');
+		}
+
+		await revalidateCharacterPaths();
+		revalidatePath(`/characters/${id}`);
+		logger.info(`✅ Personaje actualizado: ${result.name}`);
+		return result;
+	} catch (error) {
+		logger.error('❌ Error al actualizar personaje', { error, id, data });
+		throw new Error(`Error al actualizar personaje: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+	}
 }
 
 /**
- * Elimina un personaje.
+ * 🗑️ Elimina un personaje.
  */
 export async function deleteCharacter(id: string): Promise<void> {
 	logger.warn(`🗑️ Eliminando personaje: ${id}`);
-	const prisma = await getPrismaClient();
-	await prisma.character.delete({ where: { id } });
-	await revalidateCharacterPaths();
-	revalidatePath('/characters');
+
+	try {
+		const prisma = await getPrismaClient();
+		await prisma.character.delete({ where: { id } });
+
+		await revalidateCharacterPaths();
+		logger.info(`✅ Personaje eliminado: ${id}`);
+	} catch (error) {
+		logger.error('❌ Error al eliminar personaje', { error, id });
+		throw new Error(`Error al eliminar personaje: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+	}
 }
 
 /**
- * Añade una imagen a un personaje.
+ * 🔄 Revalida las rutas de caché relacionadas con personajes.
  */
-export async function addImageToCharacter(characterId: string, imageId: string): Promise<void> {
-	logger.info(`🖼️ Añadiendo imagen ${imageId} a personaje ${characterId}`);
-	const prisma = await getPrismaClient();
-	await prisma.character.update({
-		where: { id: characterId },
-		data: { images: { connect: { id: imageId } } },
-	});
-	revalidatePath(`/characters/${characterId}`);
+async function revalidateCharacterPaths(): Promise<void> {
+	const paths = ['/characters', '/settings/characters'];
+
+	for (const path of paths) {
+		revalidatePath(path);
+	}
+
+	logger.info('🔄 Rutas de personajes revalidadas');
 }
 
-/**
- * Elimina una imagen de un personaje.
- */
-export async function removeImageFromCharacter(characterId: string, imageId: string): Promise<void> {
-	logger.info(`🖼️ Eliminando imagen ${imageId} de personaje ${characterId}`);
-	const prisma = await getPrismaClient();
-	await prisma.character.update({
-		where: { id: characterId },
-		data: { images: { disconnect: { id: imageId } } },
-	});
-	revalidatePath(`/characters/${characterId}`);
-}
+// Alias para compatibilidad con código existente
+export const getCharacterById = getCharacter;
+export const searchCharacters = getCharacters;

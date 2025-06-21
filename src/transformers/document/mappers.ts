@@ -1,43 +1,45 @@
-// Mappers para Document
-// Aquí se definen funciones para mapear entre Prisma, dominio y UI
+/**
+ * @file Mappers para la entidad Document.
+ * @module transformers/document/mappers
+ * @description Contiene funciones para transformar datos de la entidad Document.
+ */
+import type { Document } from '@prisma/client';
+import type { DocumentStatistics, DocumentWithStats } from '@/types/entities/document';
 
-import type { Document, DocumentComplete } from '@/types/entities/document';
-import type { Prisma, Document as PrismaDocument } from '@prisma/client';
+const WORDS_PER_MINUTE = 200;
 
-export function fromPrismaDocument(prisma: PrismaDocument): DocumentComplete {
+/**
+ * Calcula las estadísticas de un documento.
+ *
+ * @param document El objeto Document de Prisma.
+ * @returns Un objeto de tipo DocumentStatistics.
+ */
+function calculateDocumentStats(document: Document): DocumentStatistics {
+	const { wordCount, charCount } = document;
+
+	// Calcular tiempo de lectura estimado
+	const readingTime = wordCount > 0 ? Math.ceil(wordCount / WORDS_PER_MINUTE) : 0;
+
 	return {
-		// Prisma fields
-		id: prisma.id,
-		name: prisma.name,
-		filePath: prisma.filePath,
-		content: prisma.content,
-		createdAt: prisma.createdAt,
-		updatedAt: prisma.updatedAt,
-		// BaseEntity fields
-		description: null,
-		shortcut: null,
-		category: 'document',
-		sortBy: 'name',
-		filters: '{}',
-		// UIFields
-		emoji: '📄',
-		color: '#718096', // gray-500
-		featuredImage: null,
-		isFavorite: false,
-		// DocumentCounts
-		_count: {},
+		wordCount,
+		charCount,
+		readingTime,
+		versionCount: 0, // Placeholder para futuras implementaciones
 	};
 }
 
-export function fromPrismaDocuments(prismaDocuments: PrismaDocument[]): DocumentComplete[] {
-	return prismaDocuments.map(fromPrismaDocument);
-}
+/**
+ * Convierte un objeto Document de Prisma a un objeto canónico DocumentWithStats.
+ *
+ * @param document El objeto Document de Prisma.
+ * @returns Un objeto DocumentWithStats.
+ */
+export function toDocumentWithStats(document: Document): DocumentWithStats {
+	const { wordCount, charCount, ...baseDocument } = document;
+	const stats = calculateDocumentStats(document);
 
-export function toPrismaDocument(doc: Document): Prisma.DocumentCreateInput {
 	return {
-		id: doc.id,
-		name: doc.name,
-		filePath: doc.filePath,
-		content: doc.content,
+		...baseDocument,
+		stats,
 	};
 }

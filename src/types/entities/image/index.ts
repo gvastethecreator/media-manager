@@ -1,30 +1,40 @@
 /**
  * @file Exportaciones principales de tipos para la entidad Image
  * @module types/entities/image
- *
- * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types'.
- * Legacy eliminado.
+ * @warning ⚠️ SOLO exportar tipos canónicos desde './types'.
+ * @description Este barrel ha sido limpiado para evitar dependencias legacy. Usar únicamente '@/types/entities/image/types'.
  */
 
-export { ImageSchema } from './types';
 export type {
-	CreateImageData,
-	// Alias para retrocompatibilidad
-	ImageComplete as Image,
-	ImageAIMetadata,
-	ImageBase,
-	ImageComplete,
-	ImageCreateInput,
-	ImageExtended,
-	ImageFilters,
-	ImageMetadata,
-	ImageSearchOptions,
-	ImageSearchResult,
-	ImageStatsBase,
-	ImageTransformerOptions,
-	ImageUpdateInput,
-	ImageVisualConfigBase,
-	UpdateImageData,
+    ImageAIMetadata,
+    ImageAnalysis,
+    ImageBase,
+    ImageComplete,
+    ImageCreateInput,
+    ImageEXIFData,
+    ImageFilters,
+    ImageMetadata,
+    ImageRelations,
+    ImageSearchOptions,
+    ImageSearchResult,
+    ImageStatistics,
+    ImageThumbnail,
+    ImageTransformerOptions,
+    ImageUI,
+    ImageUpdateInput,
+    ImageValidated,
+    ImageViewConfig,
+    ImageWithStats,
+    PrismaImageWithCounts,
+    RelatedImage
+} from './types';
+
+export {
+    IMAGE_SORT_PROPERTY_MAP,
+    ImageSchema,
+    ImageSortCriteria,
+    ImageSortOption,
+    ImageViewMode
 } from './types';
 
 // 📝 Documentación: Solo tipos canónicos. Legacy removido.

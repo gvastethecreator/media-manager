@@ -17,7 +17,7 @@ import type { PlaceComplete } from '../place';
 import type { PromptComplete } from '../prompt';
 import type { PropertyComplete } from '../property';
 import type { TagComplete } from '../tag';
-import type { VideoComplete } from '../video';
+import type { VideoWithStats } from '../video';
 import type { WildcardComplete } from '../wildcard';
 
 // --- ESTRUCTURAS DE DATOS SERIALIZADAS ---
@@ -58,7 +58,7 @@ export interface WorldItemBase {
 
 export interface WorldItemRelations {
 	images?: ImageComplete[];
-	videos?: VideoComplete[];
+	videos?: VideoWithStats[];
 	albums?: AlbumComplete[];
 	collections?: CollectionComplete[];
 	tags?: TagComplete[];

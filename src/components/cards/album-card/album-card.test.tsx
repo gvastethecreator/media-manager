@@ -26,6 +26,8 @@ describe('AlbumCard', () => {
 		emoji: '🏖️',
 		color: '#3b82f6',
 		description: 'Fotos de las vacaciones de verano',
+		featuredImage: null,
+		isFavorite: false,
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		category: 'Viajes',

@@ -1,8 +1,8 @@
 'use client';
 
+import { Progress } from '@/components/ui/progress';
 import { ArrowUpRight, Brain, Heart, Shield, Sparkles, Star, Swords, User, Wand, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Progress } from '@/components/ui/progress';
 
 interface CharacterCardContentProps {
 	/** Descripción del personaje */
@@ -11,6 +11,8 @@ interface CharacterCardContentProps {
 	primaryColor?: string;
 	/** Color secundario para estilizar la tarjeta */
 	secondaryColor?: string;
+	/** Trasfondo o historia del personaje */
+	backstory?: string;
 	/** Estadísticas del personaje (fuerza, destreza, etc.) */
 	stats?: Record<string, number>;
 	/** Habilidades del personaje */
@@ -54,6 +56,7 @@ export function CharacterCardContent({
 	description = '',
 	primaryColor = '#8e44ad',
 	secondaryColor = '#6d28d9',
+	backstory = '',
 	stats = {},
 	abilities = [],
 	personality = [],
@@ -207,8 +210,7 @@ export function CharacterCardContent({
 							</div>
 							<Progress
 								value={100}
-								className="h-1.5 bg-red-950/30"
-								indicatorClassName="bg-gradient-to-r from-red-800 to-red-500"
+								className="h-1.5 bg-red-950/30 [&_[data-slot=progress-indicator]]:bg-gradient-to-r from-red-800 to-red-500"
 							/>
 						</div>
 					)}
@@ -223,8 +225,7 @@ export function CharacterCardContent({
 							</div>
 							<Progress
 								value={100}
-								className="h-1.5 bg-blue-950/30"
-								indicatorClassName="bg-gradient-to-r from-blue-800 to-blue-500"
+								className="h-1.5 bg-blue-950/30 [&_[data-slot=progress-indicator]]:bg-gradient-to-r from-blue-800 to-blue-500"
 							/>
 						</div>
 					)}

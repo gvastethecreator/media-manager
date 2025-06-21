@@ -5,7 +5,7 @@
 
 import type { StateCreator } from 'zustand';
 import type { VideoStore } from '..';
-import type { VideoComplete } from '../../../../types/entities/video';
+import type { VideoWithStats } from '../../../../types/entities/video';
 import { VideoSortCriteria } from '../../../../types/entities/video/enums';
 
 export interface VideoFiltersState {
@@ -56,9 +56,9 @@ export interface VideoFiltersSlice extends VideoFiltersState {
 	resetFilters: () => void;
 
 	// Obtener videos filtrados
-	getFilteredVideos: () => VideoComplete[];
-	applySort: (videos: VideoComplete[]) => VideoComplete[];
-	applyFilters: (videos: VideoComplete[]) => VideoComplete[];
+	getFilteredVideos: () => VideoWithStats[];
+	applySort: (videos: VideoWithStats[]) => VideoWithStats[];
+	applyFilters: (videos: VideoWithStats[]) => VideoWithStats[];
 }
 
 // Creador del slice
@@ -90,7 +90,7 @@ export const createVideoFiltersSlice: StateCreator<VideoStore, [], [], VideoFilt
 		return get().applySort(get().applyFilters(videos));
 	},
 
-	applyFilters: (videos: VideoComplete[]) => {
+	applyFilters: (videos: VideoWithStats[]) => {
 		const {
 			searchQuery,
 			filterByFolderId,
@@ -175,7 +175,7 @@ export const createVideoFiltersSlice: StateCreator<VideoStore, [], [], VideoFilt
 		});
 	},
 
-	applySort: (videos: VideoComplete[]) => {
+	applySort: (videos: VideoWithStats[]) => {
 		const { sortBy } = get();
 		if (!sortBy) return videos;
 

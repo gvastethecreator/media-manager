@@ -1,10 +1,6 @@
 'use client';
 
-import { Group as GroupIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
-import { type GroupWithStats, getGroups } from '@/app/actions/groups/group.actions';
+import { type GroupWithStats } from '@/app/actions/groups/group.actions';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -12,6 +8,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
+import { Group as GroupIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect } from 'react';
 import type { ViewProps } from '../types';
 import { GroupCard } from './group-card';
 
@@ -44,35 +44,23 @@ MemoizedGroupCard.displayName = 'MemoizedGroupCard';
 
 export function GroupsView(_props: ViewProps) {
 	const { setCurrentView } = useNavigationStore();
-	const { addGroup, addGroups } = useGroupStore();
 	const router = useRouter();
-	const [groups, setGroups] = useState<GroupWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
 
-	// Usar el hook de eventos optimistas del cliente
+	// Leer el estado y las acciones directamente del store de Zustand
+	const { groups, isLoading, error, fetchGroups, addGroup } = useGroupStore((state) => ({
+		groups: Object.values(state.core.groups),
+		isLoading: state.core.isLoading,
+		error: state.core.error,
+		fetchGroups: state.fetchGroups,
+		addGroup: state.addGroup,
+	}));
+
+	// Usar el hook de eventos optimistas del cliente con los datos del store
 	const [optimisticGroups, _addEvent] = clientEvents.useEvents<GroupWithStats[]>(groups);
 
-	const fetchGroups = useCallback(async () => {
-		try {
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando grupos...');
-			const data = await getGroups();
-			setGroups(data);
-			// Actualizar el store con los grupos obtenidos
-			addGroups(data);
-			viewLogger.info(`✅ ${data.length} grupos cargados`);
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			viewLogger.error('❌ Error cargando grupos:', err);
-			setError(errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [addGroups]);
-
 	useEffect(() => {
-		// Cargar grupos inicialmente
+		// Cargar grupos inicialmente a través de la acción del store.
+		// El store se encargará de manejar el estado de carga y los errores.
 		fetchGroups();
 	}, [fetchGroups]);
 
@@ -116,7 +104,7 @@ export function GroupsView(_props: ViewProps) {
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{optimisticGroups.map((group, index) => {
 						// Verificar que el grupo tenga un id válido
-						if (!group || !(group as any).id) {
+						if (!group || !group.id) {
 							console.error('Grupo sin id válido:', group);
 							return null;
 						}
@@ -126,7 +114,7 @@ export function GroupsView(_props: ViewProps) {
 
 						return (
 							<motion.div
-								key={(group as any).id}
+								key={group.id}
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
 								transition={{ delay: index * 0.1 }}
@@ -134,7 +122,7 @@ export function GroupsView(_props: ViewProps) {
 							>
 								<div
 									className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
-									data-group-id={(group as any).id}
+									data-group-id={group.id}
 								>
 									<MemoizedGroupCard group={group} onGroupClick={onGroupClick} />
 								</div>

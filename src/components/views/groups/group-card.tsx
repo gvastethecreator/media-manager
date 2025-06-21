@@ -1,12 +1,12 @@
 'use client';
 
-import { Group as GroupIcon, Heart, Image as ImageIcon, Tags, Users, Video } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useMemo } from 'react';
 import type { GroupWithStats } from '@/app/actions/groups/group.actions';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { Group as GroupIcon, Heart, Image as ImageIcon, Tags, Users, Video } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useMemo } from 'react';
 
 interface GroupCardProps {
 	/** 📊 Grupo con estadísticas para mostrar */
@@ -61,16 +61,8 @@ export function GroupCard({ group, onClick, className, showBadges = true }: Grou
 		}
 	}, [group.color]);
 
-	// 📊 Calcular estadísticas totales
-	const totalElements = useMemo(() => {
-		return (
-			(group._count?.images || 0) +
-			(group._count?.videos || 0) +
-			(group._count?.albums || 0) +
-			(group._count?.collections || 0) +
-			(group._count?.tags || 0)
-		);
-	}, [group._count]);
+	// 📊 Utilizar las estadísticas pre-calculadas del objeto GroupWithStats
+	const totalElements = group.stats?.totalItems || 0;
 
 	// 📱 Manejador de eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
