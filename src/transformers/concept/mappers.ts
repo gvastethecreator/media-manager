@@ -1,347 +1,159 @@
 /**
- * @file Funciones para transformar datos de conceptos
+ * @file Funciones para mapear datos de la entidad Concept a formatos de Prisma.
  * @module transformers/concept/mappers
+ * @description Estas funciones se encargan de transformar la entrada de la aplicación
+ * (ej. desde formularios o actions) a los tipos que Prisma espera para las operaciones de BD.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { ConceptBase } from '@/types/entities/concept';
-import type { ConceptFilters } from '@/types/entities/concept/extended';
+import type { ConceptCreateInput, ConceptSearchOptions, ConceptUpdateInput } from '@/types/entities/concept';
 import type { Prisma } from '@prisma/client';
 
-const logger = serverLogger.withContext('ConceptMapper');
-
 /**
- * Interfaces para búsqueda de conceptos
+ * Mapea la entrada de creación de un concepto al formato de Prisma.
+ * @param input - Los datos para crear el concepto, incluyendo IDs de relaciones.
+ * @returns Datos listos para `prisma.concept.create()`.
  */
-export interface ConceptSearchOptions {
-	filters?: ConceptFilters;
-	sortBy?: string;
-	page?: number;
-	pageSize?: number;
-	includeRelations?: boolean;
-}
+export function toCreateData(input: ConceptCreateInput): Prisma.ConceptCreateInput {
+	const {
+		imageIds,
+		videoIds,
+		albumIds,
+		collectionIds,
+		tagIds,
+		characterIds,
+		placeIds,
+		worldItemIds,
+		promptIds,
+		noteIds,
+		wildcardIds,
+		propertyIds,
+		groupIds,
+		...rest
+	} = input;
 
-export interface ConceptSearchResult {
-	items: ConceptBase[];
-	total: number;
-	totalPages: number;
-}
-
-// Enum para criterios de ordenación
-export enum ConceptSortCriteria {
-	NAME_ASC = 'NAME_ASC',
-	NAME_DESC = 'NAME_DESC',
-	CREATED_AT_ASC = 'CREATED_AT_ASC',
-	CREATED_AT_DESC = 'CREATED_AT_DESC',
-	UPDATED_AT_ASC = 'UPDATED_AT_ASC',
-	UPDATED_AT_DESC = 'UPDATED_AT_DESC',
-	CATEGORY_ASC = 'CATEGORY_ASC',
-	CATEGORY_DESC = 'CATEGORY_DESC',
-}
-
-/**
- * Interfaces para los tipos de Prisma que necesitamos
- */
-export interface PrismaConceptCreateInput {
-	name: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	content?: string;
-	category?: string;
-	tags?: string;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-}
-
-export interface PrismaConceptUpdateInput {
-	name?: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	content?: string;
-	category?: string;
-	tags?: string;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-}
-
-export interface PrismaConceptFindManyArgs {
-	where?: PrismaConceptWhereInput;
-	orderBy?: PrismaConceptOrderByInput;
-	skip?: number;
-	take?: number;
-	include?: Record<string, boolean>;
-}
-
-export interface PrismaConceptWhereInput {
-	AND?: PrismaConceptWhereInput[];
-	OR?: PrismaConceptWhereInput[];
-	name?: { contains: string; mode: string };
-	description?: { contains: string; mode: string };
-	content?: { contains: string; mode: string };
-	category?: string;
-	tags?: { contains: string; mode: string };
-	isFavorite?: boolean;
-}
-
-export interface PrismaConceptOrderByInput {
-	name?: 'asc' | 'desc';
-	createdAt?: 'asc' | 'desc';
-	updatedAt?: 'asc' | 'desc';
-	category?: 'asc' | 'desc';
-}
-
-// Mapa de propiedades para ordenación
-export const CONCEPT_SORT_PROPERTY_MAP: Record<ConceptSortCriteria, keyof Prisma.ConceptOrderByWithRelationInput> = {
-	NAME_ASC: 'name',
-	NAME_DESC: 'name',
-	CREATED_AT_ASC: 'createdAt',
-	CREATED_AT_DESC: 'createdAt',
-	UPDATED_AT_ASC: 'updatedAt',
-	UPDATED_AT_DESC: 'updatedAt',
-	CATEGORY_ASC: 'category',
-	CATEGORY_DESC: 'category',
-};
-
-/**
- * Opciones para operaciones de concepto
- */
-export interface ConceptOperationOptions {
-	select?: Record<string, boolean>;
-	include?: Record<string, boolean>;
-	validateFields?: boolean;
-	throwIfNotFound?: boolean;
-}
-
-/**
- * Mapea un concepto para su creación en la base de datos
- * @param data Datos para crear el concepto
- * @returns Datos formateados para Prisma
- */
-export function toCreateConceptData(data: Partial<ConceptBase>): Prisma.ConceptCreateInput {
 	return {
-		name: data.name || 'Nuevo Concepto',
-		emoji: data.emoji || '💡',
-		color: data.color || '#3b82f6',
-		description: data.description ?? null,
-		content: data.content || '',
-		category: data.category || 'general',
-		featuredImage: data.featuredImage || null,
-		isFavorite: data.isFavorite || false,
+		...rest,
+		emoji: input.emoji || '💡',
+		color: input.color || '#3b82f6',
+		category: input.category || 'general',
+		images: imageIds ? { connect: imageIds.map(id => ({ id })) } : undefined,
+		videos: videoIds ? { connect: videoIds.map(id => ({ id })) } : undefined,
+		albums: albumIds ? { connect: albumIds.map(id => ({ id })) } : undefined,
+		collections: collectionIds ? { connect: collectionIds.map(id => ({ id })) } : undefined,
+		tagEntities: tagIds ? { connect: tagIds.map(id => ({ id })) } : undefined,
+		characters: characterIds ? { connect: characterIds.map(id => ({ id })) } : undefined,
+		places: placeIds ? { connect: placeIds.map(id => ({ id })) } : undefined,
+		worldItems: worldItemIds ? { connect: worldItemIds.map(id => ({ id })) } : undefined,
+		prompts: promptIds ? { connect: promptIds.map(id => ({ id })) } : undefined,
+		notes: noteIds ? { connect: noteIds.map(id => ({ id })) } : undefined,
+		wildcards: wildcardIds ? { connect: wildcardIds.map(id => ({ id })) } : undefined,
+		properties: propertyIds ? { connect: propertyIds.map(id => ({ id })) } : undefined,
+		groups: groupIds ? { connect: groupIds.map(id => ({ id })) } : undefined,
 	};
 }
 
 /**
- * Mapea un concepto para su actualización en la base de datos
- * @param data Datos para actualizar el concepto
- * @returns Datos formateados para Prisma
+ * Mapea la entrada de actualización de un concepto al formato de Prisma.
+ * @param input - Los datos para actualizar el concepto. Puede ser parcial.
+ * @returns Datos listos para `prisma.concept.update()`.
  */
-export function toUpdateConceptData(data: Partial<ConceptBase>): Prisma.ConceptUpdateInput {
-	const result: Prisma.ConceptUpdateInput = {};
-	if (data.name !== undefined) result.name = data.name;
-	if (data.emoji !== undefined) result.emoji = data.emoji;
-	if (data.color !== undefined) result.color = data.color;
-	if (data.description !== undefined) result.description = data.description;
-	if (data.content !== undefined) result.content = data.content;
-	if (data.category !== undefined) result.category = data.category;
-	if (data.featuredImage !== undefined) result.featuredImage = data.featuredImage;
-	if (data.isFavorite !== undefined) result.isFavorite = data.isFavorite;
-	return result;
+export function toUpdateData(input: ConceptUpdateInput): Prisma.ConceptUpdateInput {
+	const {
+		imageIds,
+		videoIds,
+		albumIds,
+		collectionIds,
+		tagIds,
+		characterIds,
+		placeIds,
+		worldItemIds,
+		promptIds,
+		noteIds,
+		wildcardIds,
+		propertyIds,
+		groupIds,
+		...rest
+	} = input;
+
+	const data: Prisma.ConceptUpdateInput = { ...rest };
+
+	if (imageIds !== undefined) data.images = { set: imageIds?.map(id => ({ id })) ?? [] };
+	if (videoIds !== undefined) data.videos = { set: videoIds?.map(id => ({ id })) ?? [] };
+	if (albumIds !== undefined) data.albums = { set: albumIds?.map(id => ({ id })) ?? [] };
+	if (collectionIds !== undefined) data.collections = { set: collectionIds?.map(id => ({ id })) ?? [] };
+	if (tagIds !== undefined) data.tagEntities = { set: tagIds?.map(id => ({ id })) ?? [] };
+	if (characterIds !== undefined) data.characters = { set: characterIds?.map(id => ({ id })) ?? [] };
+	if (placeIds !== undefined) data.places = { set: placeIds?.map(id => ({ id })) ?? [] };
+	if (worldItemIds !== undefined) data.worldItems = { set: worldItemIds?.map(id => ({ id })) ?? [] };
+	if (promptIds !== undefined) data.prompts = { set: promptIds?.map(id => ({ id })) ?? [] };
+	if (noteIds !== undefined) data.notes = { set: noteIds?.map(id => ({ id })) ?? [] };
+	if (wildcardIds !== undefined) data.wildcards = { set: wildcardIds?.map(id => ({ id })) ?? [] };
+	if (propertyIds !== undefined) data.properties = { set: propertyIds?.map(id => ({ id })) ?? [] };
+	if (groupIds !== undefined) data.groups = { set: groupIds?.map(id => ({ id })) ?? [] };
+
+	return data;
 }
 
 /**
- * Mapea opciones de búsqueda al formato necesario para Prisma
- * @param options Opciones de búsqueda
- * @returns Opciones formateadas para Prisma
+ * Crea la cláusula `orderBy` para las consultas de Prisma.
+ * @param options - Opciones de búsqueda que contienen el `orderBy`.
+ * @returns El objeto `orderBy` para Prisma.
+ */
+export function createOrderBy(
+	options: ConceptSearchOptions = {}
+): Prisma.ConceptOrderByWithRelationInput | undefined {
+	if (options.orderBy) {
+		return options.orderBy as Prisma.ConceptOrderByWithRelationInput;
+	}
+	return { updatedAt: 'desc' };
+}
+
+/**
+ * Crea la cláusula `where` para las consultas de Prisma a partir de los filtros.
+ * @param filters - Los filtros de búsqueda de la aplicación.
+ * @returns El objeto `where` para Prisma.
+ */
+export function createFilter(filters: ConceptSearchOptions['filters'] = {}): Prisma.ConceptWhereInput {
+	const conditions: Prisma.ConceptWhereInput[] = [];
+
+	if (filters?.search) {
+		const search = filters.search.trim();
+		conditions.push({
+			OR: [
+				{ name: { contains: search, mode: 'insensitive' } },
+				{ description: { contains: search, mode: 'insensitive' } },
+				{ content: { contains: search, mode: 'insensitive' } },
+			],
+		});
+	}
+
+	if (filters?.category) {
+		const categories = Array.isArray(filters.category) ? filters.category : [filters.category];
+		conditions.push({ category: { in: categories } });
+	}
+
+	if (filters?.onlyFavorites) {
+		conditions.push({ isFavorite: true });
+	}
+
+	if (filters?.tags && filters.tags.length > 0) {
+		conditions.push({ tagEntities: { some: { id: { in: filters.tags } } } });
+	}
+
+	return conditions.length > 0 ? { AND: conditions } : {};
+}
+
+/**
+ * Mapea las opciones de búsqueda de la aplicación a los argumentos de `findMany` de Prisma.
+ * @param options - Opciones de búsqueda de la aplicación.
+ * @returns Argumentos para `prisma.concept.findMany()`.
  */
 export function toSearchOptions(options: ConceptSearchOptions = {}): Prisma.ConceptFindManyArgs {
-	try {
-		const where = toSearchFilters(options.filters || {});
-		const sortBy = options.sortBy || 'NAME_ASC';
-		const propertyName = CONCEPT_SORT_PROPERTY_MAP[sortBy as ConceptSortCriteria] || 'name';
-		const direction = sortBy.includes('DESC') ? 'desc' : 'asc';
-
-		const orderBy: Prisma.ConceptOrderByWithRelationInput = {
-			[propertyName]: direction,
-		};
-
-		const result: Prisma.ConceptFindManyArgs = {
-			where,
-			orderBy,
-		};
-
-		if (options.page !== undefined && options.pageSize !== undefined) {
-			const page = Math.max(1, options.page);
-			const pageSize = Math.max(1, options.pageSize);
-			result.skip = (page - 1) * pageSize;
-			result.take = pageSize;
-		}
-
-		if (options.includeRelations) {
-			result.include = {
-				images: true,
-				_count: {
-					select: {
-						images: true,
-					},
-				},
-			};
-		}
-
-		return result;
-	} catch (error) {
-		logger.error('Error en toSearchOptions:', error);
-		throw new Error(`Error al mapear opciones de búsqueda: ${(error as Error).message}`);
-	}
-}
-
-/**
- * Convierte filtros de búsqueda al formato necesario para Prisma
- * @param filters Filtros de búsqueda
- * @returns Filtros formateados para Prisma
- */
-export function toSearchFilters(filters: ConceptFilters = {}): Prisma.ConceptWhereInput {
-	try {
-		const conditions: Prisma.ConceptWhereInput[] = [];
-
-		if (filters.search) {
-			const textFilter = filters.search.trim();
-			if (textFilter) {
-				conditions.push({
-					OR: [
-						{ name: { contains: textFilter, mode: Prisma.QueryMode.insensitive } },
-						{ description: { contains: textFilter, mode: Prisma.QueryMode.insensitive } },
-						{ content: { contains: textFilter, mode: Prisma.QueryMode.insensitive } },
-					],
-				});
-			}
-		}
-
-		if (filters.category) {
-			conditions.push({ category: { equals: filters.category } });
-		}
-
-		if (filters.tags && filters.tags.length > 0) {
-			const tagsConditions: Prisma.ConceptWhereInput[] = filters.tags.map((tag: string) => ({
-				tags: { contains: tag, mode: Prisma.QueryMode.insensitive },
-			}));
-			conditions.push({ OR: tagsConditions });
-		}
-
-		if (filters.onlyFavorites !== undefined) {
-			conditions.push({ isFavorite: filters.onlyFavorites });
-		}
-
-		if (conditions.length > 0) {
-			return { AND: conditions };
-		}
-
-		return {};
-	} catch (error) {
-		logger.error('Error en toSearchFilters:', error);
-		throw new Error(`Error al mapear filtros de búsqueda: ${(error as Error).message}`);
-	}
-}
-
-/**
- * Convierte resultados de búsqueda al formato de respuesta
- * @param concepts Conceptos encontrados
- * @param total Total de conceptos
- * @param options Opciones de búsqueda
- * @returns Resultado formateado
- */
-export function toSearchResult(
-	concepts: ConceptComplete[],
-	total: number,
-	options: ConceptSearchOptions = {}
-): ConceptSearchResult {
-	try {
-		const pageSize = options.pageSize ?? 20;
-		const page = options.page ?? 1;
-		const totalPages = Math.ceil(total / pageSize);
-		return {
-			items: concepts,
-			total,
-			page,
-			pageSize,
-			totalPages,
-		};
-	} catch (error) {
-		logger.error('Error en toSearchResult:', error);
-		throw new Error(`Error al mapear resultado de búsqueda: ${(error as Error).message}`);
-	}
-}
-
-/**
- * Convierte un concepto a un formato plano para la exportación
- * @param concept Concepto original
- * @returns Concepto en formato plano
- */
-export function toPlainConcept(concept: ConceptBase): Record<string, any> {
-	try {
-		return {
-			id: concept.id,
-			name: concept.name,
-			emoji: concept.emoji,
-			color: concept.color,
-			description: concept.description,
-			content: concept.content,
-			category: concept.category,
-			featuredImage: concept.featuredImage,
-			isFavorite: concept.isFavorite,
-			createdAt: concept.createdAt,
-			updatedAt: concept.updatedAt,
-		};
-	} catch (error) {
-		logger.error('Error en toPlainConcept:', error);
-		return {
-			id: concept.id,
-			name: concept.name,
-			emoji: concept.emoji,
-			color: concept.color,
-			description: concept.description,
-			content: concept.content,
-			category: concept.category,
-			featuredImage: null,
-			isFavorite: false,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-		};
-	}
-}
-
-/**
- * Filtra conceptos según criterios
- * @param concepts Lista de conceptos
- * @param filters Filtros a aplicar
- * @returns Lista filtrada de conceptos
- */
-export function filterConcepts(concepts: ConceptBase[], filters: ConceptFilters = {}): ConceptBase[] {
-	try {
-		let result = concepts;
-
-		if (filters.search) {
-			const searchLower = filters.search.toLowerCase();
-			result = result.filter(
-				(c) =>
-					c.name.toLowerCase().includes(searchLower) ||
-					(c.description && c.description.toLowerCase().includes(searchLower)) ||
-					(c.content && c.content.toLowerCase().includes(searchLower))
-			);
-		}
-
-		if (filters.category) {
-			result = result.filter((c) => c.category === filters.category);
-		}
-
-		if (filters.onlyFavorites) {
-			result = result.filter((c) => c.isFavorite);
-		}
-
-		return result;
-	} catch (error) {
-		logger.error('Error en filterConcepts:', error);
-		return concepts;
-	}
+	return {
+		where: createFilter(options.filters),
+		orderBy: createOrderBy(options),
+		skip: options.skip,
+		take: options.take,
+		include: options.includeRelations ? { _count: true } : undefined,
+	};
 }

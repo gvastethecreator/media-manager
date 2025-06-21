@@ -19,19 +19,18 @@ export const pauseQueue = ControlActions.pauseQueue;
 export const resumeQueue = ControlActions.resumeQueue;
 
 // De crud.actions
-export const createJob = CrudActions.createJob;
-export const updateJob = CrudActions.updateJob;
-export const deleteJob = CrudActions.deleteJob;
+export const createJob = CrudActions.createQueueJob;
+export const updateJob = CrudActions.updateQueueJob;
+export const deleteJob = CrudActions.deleteQueueJob;
 
 // De process.actions
-export const processJob = ProcessActions.processJob;
-export const retryJob = ProcessActions.retryJob;
-export const cancelJob = ProcessActions.cancelJob;
+export const retryJob = ProcessActions.retryQueueJob;
+export const cancelJob = ProcessActions.cancelQueueJob;
 
 // De query.actions
-export const getJobs = QueryActions.getJobs;
-export const getJob = QueryActions.getJob;
-export const getQueueStatus = QueryActions.getQueueStatus;
+export const getJobs = QueryActions.getQueueJobs;
+export const getJob = QueryActions.getQueueJob;
+export const getJobsByStatus = QueryActions.getQueueJobsByStatus;
 
 // De stats.actions
 export const getQueueStats = StatsActions.getQueueStats;

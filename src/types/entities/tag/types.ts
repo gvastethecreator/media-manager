@@ -8,8 +8,19 @@
 
 import { BaseEntitySchema, MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 import { z } from 'zod';
+import type { AlbumComplete } from '../album';
+import type { CharacterComplete } from '../character';
+import type { CollectionComplete } from '../collection';
+import type { ConceptComplete } from '../concept';
+import type { GroupComplete } from '../group';
 import type { ImageComplete as Image } from '../image';
+import type { NoteComplete } from '../note';
+import type { PlaceComplete } from '../place';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
 import type { VideoComplete as Video } from '../video';
+import type { WildcardComplete } from '../wildcard';
+import type { WorldItemComplete } from '../world-item';
 
 /**
  * 🔍 Esquema de validación para Tag
@@ -104,17 +115,17 @@ export enum TagViewMode {
 export interface TagRelations {
 	images?: Image[];
 	videos?: Video[];
-	albums?: { id: string }[];
-	collections?: { id: string }[];
-	characters?: { id: string }[];
-	places?: { id: string }[];
-	worldItems?: { id: string }[];
-	concepts?: { id: string }[];
-	prompts?: { id: string }[];
-	notes?: { id: string }[];
-	wildcards?: { id: string }[];
-	properties?: { id: string }[];
-	groups?: { id: string }[];
+	albums?: AlbumComplete[];
+	collections?: CollectionComplete[];
+	characters?: CharacterComplete[];
+	places?: PlaceComplete[];
+	worldItems?: WorldItemComplete[];
+	concepts?: ConceptComplete[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupComplete[];
 }
 
 /**
@@ -141,6 +152,14 @@ export interface TagCounts {
  */
 export interface TagWithRelations extends TagBase, TagRelations {
 	_count?: TagCounts;
+}
+
+/**
+ * 📊 Tag con estadísticas calculadas
+ */
+export interface TagWithStats extends TagBase {
+	_count: TagCounts;
+	totalAssociations: number;
 }
 
 /**

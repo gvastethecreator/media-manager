@@ -1,139 +1,91 @@
 /**
- * @file Serializadores para la entidad Prompt
+ * @file Funciones de serialización para la entidad Prompt
  * @module transformers/prompt/serializers
+ * @description Proporciona funciones para serializar y deserializar campos complejos de la entidad Prompt,
+ * como 'parameters' y 'tags', para su almacenamiento en la base de datos como strings JSON.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { ExtendedPrompt } from '@/types/entities/prompt/extended';
-import type { PromptComplete } from '@/types/entities/prompt/types';
+import { serverLogger } from '@/lib/logger/server';
+import type { PromptParameter } from '@/types/entities/prompt';
 
 const logger = serverLogger.withContext('PromptSerializers');
 
 /**
- * Genera un preview del contenido del prompt
- * @param content Contenido completo del prompt
- * @returns Preview truncado del contenido
+ * Serializa un array de PromptParameter a un string JSON.
+ * @param parameters - El array de parámetros a serializar.
+ * @returns Un string JSON o un array vacío en formato string si hay un error.
  */
-function getPreviewContent(content: string, maxLength = 150): string {
-	if (content.length <= maxLength) {
-		return content;
-	}
-	return `${content.substring(0, maxLength).trim()}...`;
+export function serializeParameters(parameters: PromptParameter[] | undefined | null): string {
+    if (!parameters) {
+        return '[]';
+    }
+    try {
+        return JSON.stringify(parameters);
+    } catch (error) {
+        logger.error('Error serializing parameters', { error, parameters });
+        return '[]';
+    }
 }
 
 /**
- * Deserializa el campo de parámetros de un prompt
- * @param parameters Campo parameters como string JSON
- * @returns Objeto de parámetros deserializado
+ * Deserializa un string JSON a un array de PromptParameter.
+ * @param jsonString - El string JSON a deserializar.
+ * @returns Un array de PromptParameter o un array vacío si el string es inválido o hay un error.
  */
-export function deserializeParameters(parameters: string): Record<string, any> {
-	try {
-		if (!parameters || parameters === 'null' || parameters === 'undefined') {
-			return {};
-		}
-
-		return JSON.parse(parameters);
-	} catch (error) {
-		logger.warn('Error deserializando parámetros de prompt, devolviendo objeto vacío:', error);
-		return {};
-	}
+export function deserializeParameters(jsonString: string | undefined | null): PromptParameter[] {
+    if (!jsonString) {
+        return [];
+    }
+    try {
+        const parsed = JSON.parse(jsonString);
+        // Validar que el resultado es un array para seguridad
+        if (Array.isArray(parsed)) {
+            return parsed;
+        }
+		logger.warn('Deserialized parameters is not an array', { jsonString });
+        return [];
+    } catch (error) {
+        logger.error('Error deserializing parameters', { error, jsonString });
+        return [];
+    }
 }
 
 /**
- * Deserializa el campo de etiquetas de un prompt
- * @param tags Campo tags como string JSON
- * @returns Array de etiquetas deserializado
+ * Serializa un array de strings (tags) a un string JSON.
+ * @param tags - El array de tags a serializar.
+ * @returns Un string JSON o '[]' en caso de error.
  */
-export function deserializeTags(tags: string | undefined): string[] {
-	try {
-		if (!tags || tags === 'null' || tags === 'undefined') {
-			return [];
-		}
-
-		return JSON.parse(tags);
-	} catch (error) {
-		logger.warn('Error deserializando tags de prompt, devolviendo array vacío:', error);
-		return [];
-	}
+export function serializeTags(tags: string[] | undefined | null): string {
+    if (!tags) {
+        return '[]';
+    }
+    try {
+        return JSON.stringify(tags);
+    } catch (error)        {
+        logger.error('Error serializing tags', { error, tags });
+        return '[]';
+    }
 }
 
 /**
- * Serializa un objeto de parámetros a string JSON
- * @param parameters Objeto de parámetros
- * @returns String JSON
+ * Deserializa un string JSON a un array de strings (tags).
+ * @param jsonString - El string JSON a deserializar.
+ * @returns Un array de strings o un array vacío si hay errores.
  */
-export function serializeParameters(parameters: Record<string, any> | null | undefined): string {
-	try {
-		if (!parameters) {
-			return '{}';
-		}
-
-		return JSON.stringify(parameters);
-	} catch (error) {
-		logger.warn('Error serializando parámetros de prompt, devolviendo objeto vacío:', error);
-		return '{}';
-	}
+export function deserializeTags(jsonString: string | undefined | null): string[] {
+    if (!jsonString) {
+        return [];
+    }
+    try {
+        const parsed = JSON.parse(jsonString);
+        if (Array.isArray(parsed)) {
+            // Asegurarse que todos los elementos son strings
+            return parsed.map(String);
+        }
+		logger.warn('Deserialized tags is not an array', { jsonString });
+        return [];
+    } catch (error) {
+        logger.error('Error deserializing tags', { error, jsonString });
+        return [];
+    }
 }
-
-/**
- * Serializa un array de etiquetas a string JSON
- * @param tags Array de etiquetas
- * @returns String JSON
- */
-export function serializeTags(tags: string[] | string | null | undefined): string {
-	try {
-		if (typeof tags === 'string') {
-			// Si ya es un string, verificar si es JSON
-			try {
-				JSON.parse(tags);
-				return tags; // Ya es un string JSON válido
-			} catch {
-				// No es JSON, considerarlo como una etiqueta individual
-				return JSON.stringify([tags]);
-			}
-		}
-
-		if (!tags || !Array.isArray(tags)) {
-			return '[]';
-		}
-
-		return JSON.stringify(tags);
-	} catch (error) {
-		logger.warn('Error serializando tags de prompt, devolviendo array vacío:', error);
-		return '[]';
-	}
-}
-
-/**
- * Transforma un prompt base a un prompt extendido con propiedades para UI
- * Deserializa campos JSON almacenados como strings a sus tipos correspondientes
- *
- * @param prompt Prompt completo
- * @returns Prompt extendido con campos parseados y propiedades adicionales
- */
-export function toExtendedPrompt(prompt: PromptComplete): ExtendedPrompt {
-	return {
-		...prompt,
-		_count: {
-			images: 0,
-			videos: 0,
-			albums: 0,
-			collections: 0,
-			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			concepts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
-		},
-		parsedTags: typeof prompt.tags === 'string' ? deserializeTags(prompt.tags) : [],
-		parsedParameters: deserializeParameters(prompt.parameters),
-		previewContent: prompt.content ? getPreviewContent(prompt.content) : undefined,
-		lastUpdated: prompt.updatedAt instanceof Date ? prompt.updatedAt : new Date(prompt.updatedAt),
-	};
-}
-
-

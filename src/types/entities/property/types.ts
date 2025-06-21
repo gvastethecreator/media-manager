@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import { PropertySchema } from './schema';
 
 /**
  * Criterios de ordenación para propiedades
@@ -32,41 +33,17 @@ export enum PropertyViewMode {
 	COMPACT = 'compact',
 }
 
-/**
- * Tipo base canónico para Property - CORREGIDO para coincidir exactamente con Prisma
- */
-export interface PropertyBase {
-	id: string;
-	name: string;
-	emoji: string;
-	color: string;
-	description: string | null;
-	shortcut: string | null;
-	category: string | null;
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-}
+export type PropertyBase = z.infer<typeof PropertySchema>;
 
 /**
  * Input para creación
  */
-export interface PropertyCreateInput {
-	name: string;
-	emoji?: string;
-	color?: string;
-	description?: string | null;
-	shortcut?: string | null;
-	category?: string | null;
-	featuredImage?: string | null;
-	isFavorite?: boolean;
-}
+export type PropertyCreateInput = Omit<PropertyBase, 'id' | 'createdAt' | 'updatedAt' | 'isFavorite'>;
 
 /**
  * Input para actualización
  */
-export type PropertyUpdateInput = Partial<Omit<PropertyBase, 'id' | 'createdAt' | 'updatedAt'>>;
+export type PropertyUpdateInput = Partial<PropertyCreateInput>;
 
 /**
  * Esquema Zod para validación de Property
@@ -132,6 +109,28 @@ export interface PropertyWithCounts extends PropertyBase {
  * Tipo completo de Property con relaciones y conteos
  */
 export type PropertyComplete = PropertyWithRelations & PropertyWithCounts;
+
+/**
+ * Tipo para Property con conteos de relaciones y estadísticas calculadas
+ */
+export type PropertyWithStats = PropertyBase & {
+	totalAssociations: number;
+	_count: {
+		images: number;
+		videos: number;
+		albums: number;
+		collections: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		groups: number;
+	};
+};
 
 /**
  * Filtros para búsqueda de propiedades

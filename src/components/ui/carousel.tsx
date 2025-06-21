@@ -1,10 +1,10 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -114,16 +114,14 @@ function Carousel({
 				canScrollNext,
 			}}
 		>
-			<div
+			<section
 				onKeyDownCapture={handleKeyDown}
 				className={cn('relative', className)}
-				role="region"
-				aria-roledescription="carousel"
 				data-slot="carousel"
 				{...props}
 			>
 				{children}
-			</div>
+			</section>
 		</CarouselContext.Provider>
 	);
 }
@@ -212,4 +210,5 @@ function CarouselNext({
 	);
 }
 
-export { type CarouselApi, Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext };
+export { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi };
+

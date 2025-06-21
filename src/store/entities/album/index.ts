@@ -6,20 +6,20 @@
  */
 
 import {
-	createAlbum as createServerAlbum,
-	deleteAlbum as deleteServerAlbum,
-	getAlbums,
-	updateAlbum as updateServerAlbum,
+    createAlbum as createServerAlbum,
+    deleteAlbum as deleteServerAlbum,
+    getAlbums,
+    updateAlbum as updateServerAlbum,
 } from '@/app/actions/albums/album.actions';
 import { VERSIONING } from '@/lib/constants';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
 import {
-	AlbumComplete,
-	AlbumCreateInput,
-	AlbumSortCriteria,
-	AlbumUpdateInput,
-	AlbumViewMode,
+    AlbumCreateInput,
+    AlbumSortCriteria,
+    AlbumUpdateInput,
+    AlbumViewMode,
+    AlbumWithRelations
 } from '@/types/entities/album';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -36,7 +36,7 @@ export const useAlbumStore = create<AlbumStore>()(
 	persist(
 		(set, get) => ({
 			// 📋 Estado inicial de datos
-			albums: [] as AlbumComplete[],
+			albums: [] as AlbumWithRelations[],
 			isLoading: false,
 			error: null,
 			lastUpdated: null,

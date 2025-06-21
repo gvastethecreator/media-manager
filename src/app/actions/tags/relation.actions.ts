@@ -93,7 +93,7 @@ export async function assignTagToImages(tagId: string, imageIds: string[]): Prom
 		for (const path of REVALIDATE_PATHS) {
 			revalidatePath(path);
 		}
-		await serverEmit({ type: 'stats:change', data: { entity: 'tags' } }); // Usar serverEmit
+		await serverEmit({ type: 'tags:modified', data: { entity: 'tags' } }); // Usar serverEmit
 
 		tagLogger.info('✅ Tag asignado a imágenes:', {
 			tagId,
@@ -151,7 +151,7 @@ export async function removeTagFromImages(tagId: string, imageIds: string[]): Pr
 		for (const path of REVALIDATE_PATHS) {
 			revalidatePath(path);
 		}
-		await serverEmit({ type: 'stats:change', data: { entity: 'tags' } }); // Usar serverEmit
+		await serverEmit({ type: 'tags:modified', data: { entity: 'tags' } }); // Usar serverEmit
 
 		tagLogger.info('✅ Tag eliminado de imágenes:', {
 			tagId,
@@ -267,7 +267,7 @@ export async function updateImageTags(imageId: string, tagIds: string[]): Promis
 		for (const path of REVALIDATE_PATHS) {
 			revalidatePath(path);
 		}
-		await serverEmit({ type: 'stats:change', data: { entity: 'tags' } }); // Usar serverEmit
+		await serverEmit({ type: 'tags:modified', data: { entity: 'tags' } }); // Usar serverEmit
 
 		tagLogger.info('✅ Tags de imagen actualizados:', {
 			imageId,
@@ -327,7 +327,7 @@ export async function addImageToTag(tagId: string, imageId: string): Promise<voi
 		for (const path of REVALIDATE_PATHS) {
 			revalidatePath(path);
 		}
-		await serverEmit({ type: 'stats:change', data: { entity: 'tags' } }); // Usar serverEmit
+		await serverEmit({ type: 'tags:modified', data: { entity: 'tags' } }); // Usar serverEmit
 
 		tagLogger.info('✅ Imagen añadida al tag:', {
 			tagId,

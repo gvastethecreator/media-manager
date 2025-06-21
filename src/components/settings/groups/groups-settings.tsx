@@ -1,7 +1,5 @@
 'use client';
 
-import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { createGroup, deleteGroup, getGroups, updateGroup } from '@/app/actions/groups/group.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,10 +9,37 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import { toastService } from '@/services/toast.service';
-import type { CreateGroupInput, GroupWithStats } from '@/types/entities/group/types';
+import type { CreateGroupInput, GroupComplete, GroupUpdateInput, GroupWithStats } from '@/types/entities/group/types';
 import { GroupSortCriteria } from '@/types/entities/group/types';
+import { FolderIcon, PlusIcon, SearchIcon, StarIcon, Trash } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { CreateGroupForm } from './create-group-form';
 import { GroupPreview } from './group-preview';
+
+// Helper function to transform data
+function transformGroupCompleteToGroupWithStats(group: GroupComplete): GroupWithStats {
+	const totalItems = Object.values(group._count ?? {}).reduce((sum, count) => sum + (count ?? 0), 0);
+	return {
+		...group,
+		stats: {
+			totalItems,
+			totalImages: group._count?.images ?? 0,
+			totalVideos: group._count?.videos ?? 0,
+			totalAlbums: group._count?.albums ?? 0,
+			totalCollections: group._count?.collections ?? 0,
+			totalTags: group._count?.tags ?? 0,
+			totalCharacters: group._count?.characters ?? 0,
+			totalPlaces: group._count?.places ?? 0,
+			totalWorldItems: group._count?.worldItems ?? 0,
+			totalConcepts: group._count?.concepts ?? 0,
+			totalPrompts: group._count?.prompts ?? 0,
+			totalNotes: group._count?.notes ?? 0,
+			totalWildcards: group._count?.wildcards ?? 0,
+			totalProperties: group._count?.properties ?? 0,
+			lastUpdated: group.updatedAt,
+		},
+	};
+}
 
 const SORT_OPTIONS = [
 	{ label: 'Nombre', value: GroupSortCriteria.NAME_ASC },
@@ -104,10 +129,11 @@ export function GroupsSettings() {
 		dispatch({ type: 'LOAD_START' });
 		try {
 			const data = await getGroups();
-			if (!data || !Array.isArray(data)) {
+			if (!data) {
 				throw new Error('Respuesta de servidor inválida');
 			}
-			dispatch({ type: 'LOAD_SUCCESS', payload: data });
+			const transformedData = data.map(transformGroupCompleteToGroupWithStats);
+			dispatch({ type: 'LOAD_SUCCESS', payload: transformedData });
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 			dispatch({ type: 'LOAD_ERROR', payload: errorMessage });
@@ -124,7 +150,9 @@ export function GroupsSettings() {
 			state.groups.filter((group) => {
 				const query = state.searchQuery.toLowerCase();
 				const matchesQuery =
-					!query || group.name.toLowerCase().includes(query) || group.description?.toLowerCase().includes(query);
+					!query ||
+					group.name.toLowerCase().includes(query) ||
+					group.description?.toLowerCase().includes(query) === true;
 
 				const matchesCategory =
 					state.selectedCategories.length === 0 ||
@@ -134,7 +162,7 @@ export function GroupsSettings() {
 
 				return matchesQuery && matchesCategory && matchesFavorites;
 			}),
-		[state.groups, state.searchQuery, state.selectedCategories, state.onlyFavorites]
+		[state.groups, state.searchQuery, state.selectedCategories, state.onlyFavorites],
 	);
 
 	const sortedGroups = useMemo(
@@ -151,18 +179,13 @@ export function GroupsSettings() {
 						return 0;
 				}
 			}),
-		[filteredGroups, state.sortBy]
+		[filteredGroups, state.sortBy],
 	);
 
 	const stats = useMemo(() => {
-		const totalElements = state.groups.reduce((acc, group) => {
-			if (!group._count) return acc;
-			return acc + Object.values(group._count).reduce((sum, count) => sum + (count ?? 0), 0);
-		}, 0);
+		const totalElements = state.groups.reduce((acc, group) => acc + (group.stats?.totalItems ?? 0), 0);
 
-		const emptyGroups = state.groups.filter(
-			(group) => !group._count || Object.values(group._count).every((count) => count === 0)
-		).length;
+		const emptyGroups = state.groups.filter((group) => (group.stats?.totalItems ?? 0) === 0).length;
 
 		return {
 			totalGroups: state.groups.length,
@@ -178,7 +201,8 @@ export function GroupsSettings() {
 			if (!newGroup) {
 				throw new Error('Error al crear grupo: respuesta vacía');
 			}
-			dispatch({ type: 'ADD_GROUP', payload: newGroup });
+			const transformedGroup = transformGroupCompleteToGroupWithStats(newGroup);
+			dispatch({ type: 'ADD_GROUP', payload: transformedGroup });
 			dispatch({ type: 'SET_CREATE_DIALOG', payload: false });
 			toastService.success('Grupo creado correctamente');
 		} catch (err) {
@@ -187,13 +211,14 @@ export function GroupsSettings() {
 		}
 	};
 
-	const handleUpdateGroup = async (id: string, data: Partial<CreateGroupInput>) => {
+	const handleUpdateGroup = async (id: string, data: GroupUpdateInput) => {
 		try {
 			const updatedGroup = await updateGroup(id, data);
 			if (!updatedGroup) {
 				throw new Error('Error al actualizar grupo: respuesta vacía');
 			}
-			dispatch({ type: 'UPDATE_GROUP', payload: updatedGroup });
+			const transformedGroup = transformGroupCompleteToGroupWithStats(updatedGroup);
+			dispatch({ type: 'UPDATE_GROUP', payload: transformedGroup });
 			dispatch({ type: 'SELECT_GROUP', payload: null });
 			dispatch({ type: 'SET_EDIT_MODE', payload: false });
 			toastService.success('Grupo actualizado correctamente');
@@ -205,10 +230,7 @@ export function GroupsSettings() {
 
 	const handleDeleteGroup = async (id: string) => {
 		try {
-			const success = await deleteGroup(id);
-			if (!success) {
-				throw new Error('Error al eliminar grupo');
-			}
+			await deleteGroup(id);
 			dispatch({ type: 'REMOVE_GROUP', payload: id });
 			toastService.success('Grupo eliminado correctamente');
 		} catch (err) {

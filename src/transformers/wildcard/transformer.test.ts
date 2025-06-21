@@ -1,14 +1,21 @@
-import { transformWildcard } from './transformer';
+import { fromPrismaWildcard } from './transformer';
 
 // ✅ Test actualizado: usa asserts directos y patrón moderno, sin wrappers legacy
 
-describe('transformWildcard', () => {
-	it('lanza error si el input es nulo', () => {
-		expect(() => transformWildcard(null as any)).toThrow('El objeto a transformar es nulo o indefinido');
+describe('fromPrismaWildcard', () => {
+	it('retorna null si el input es nulo', () => {
+		const result = fromPrismaWildcard(null);
+		expect(result).toBeNull();
 	});
 	it('transforma un objeto válido', () => {
-		const input = { id: '1', name: 'Test wildcard' };
-		const result = transformWildcard(input as any);
+		const input = {
+			id: '1',
+			name: 'Test wildcard',
+			content: '[]',
+			filters: '{}',
+			_count: {}
+		};
+		const result = fromPrismaWildcard(input as any);
 		expect(result).toHaveProperty('id', '1');
 		expect(result).toHaveProperty('name', 'Test wildcard');
 	});

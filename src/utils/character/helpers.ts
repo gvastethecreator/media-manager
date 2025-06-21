@@ -7,14 +7,14 @@ import { v4 as uuidv4 } from 'uuid';
 // Importación comentada porque las funciones no existen actualmente
 // import { getSuggestedAppearance, serializeObject } from '@/transformers/character';
 import {
-    CharacterBase,
-    CharacterCategory,
-    CharacterClass,
-    CharacterExtended,
-    CharacterRace,
-    CharacterRelationship,
-    CharacterRelationshipType,
-    CharacterSortOption
+	CharacterBase,
+	CharacterCategory,
+	CharacterClass,
+	CharacterExtended,
+	CharacterRace,
+	CharacterRelationship,
+	CharacterRelationshipType,
+	CharacterSortOption,
 } from '@/types/entities/character';
 
 /**
@@ -80,14 +80,7 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
  * @returns Cadena con datos normalizados para búsqueda
  */
 export function prepareCharacterSearchString(character: CharacterExtended): string {
-	return [
-		character.name,
-		character.class,
-		character.race,
-		character.alignment,
-		character.category,
-		character.emoji,
-	]
+	return [character.name, character.class, character.race, character.alignment, character.category, character.emoji]
 		.filter(Boolean)
 		.join(' ')
 		.toLowerCase();
@@ -171,9 +164,7 @@ export function compareCharacters(
  * @param characters Personajes a agrupar
  * @returns Mapa con personajes agrupados por categoría
  */
-export function groupCharactersByCategory(
-	characters: CharacterExtended[]
-): Record<string, CharacterExtended[]> {
+export function groupCharactersByCategory(characters: CharacterExtended[]): Record<string, CharacterExtended[]> {
 	const groups: Record<string, CharacterExtended[]> = {};
 
 	// Inicializar todas las categorías
@@ -198,9 +189,7 @@ export function groupCharactersByCategory(
  * @param characters Personajes a agrupar
  * @returns Mapa con personajes agrupados por clase
  */
-export function groupCharactersByClass(
-	characters: CharacterExtended[]
-): Record<string, CharacterExtended[]> {
+export function groupCharactersByClass(characters: CharacterExtended[]): Record<string, CharacterExtended[]> {
 	const groups: Record<string, CharacterExtended[]> = {};
 
 	// Inicializar todas las clases
@@ -225,9 +214,7 @@ export function groupCharactersByClass(
  * @param characters Personajes a agrupar
  * @returns Mapa con personajes agrupados por raza
  */
-export function groupCharactersByRace(
-	characters: CharacterExtended[]
-): Record<string, CharacterExtended[]> {
+export function groupCharactersByRace(characters: CharacterExtended[]): Record<string, CharacterExtended[]> {
 	const groups: Record<string, CharacterExtended[]> = {};
 
 	// Inicializar todas las razas

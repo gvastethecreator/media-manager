@@ -5,55 +5,81 @@ import { InfoItem } from './details-panel-info-item';
 import type { ItemComponentProps } from './details-panel-types';
 
 /**
- * Componente que muestra las entidades relacionadas con la imagen
+ * Componente que muestra las entidades relacionadas con el item seleccionado.
+ * Realiza comprobaciones de propiedad para manejar el tipo de unión `AnyFileItem`.
  */
 export function RelatedEntities({ item }: ItemComponentProps) {
+	// Helper para verificar si la propiedad existe y tiene elementos.
+	const hasRelation = (prop: string): boolean => {
+		return prop in item && Array.isArray(item[prop]) && item[prop].length > 0;
+	};
+
+	const relations = [
+		{
+			key: 'collections',
+			icon: <FileImage className="h-3.5 w-3.5 text-blue-400" />,
+			label: 'Colecciones',
+			singular: 'colección',
+			plural: 'colecciones',
+		},
+		{
+			key: 'tags',
+			icon: <Tag className="h-3.5 w-3.5 text-green-400" />,
+			label: 'Etiquetas',
+			singular: 'etiqueta',
+			plural: 'etiquetas',
+		},
+		{
+			key: 'albums',
+			icon: <Camera className="h-3.5 w-3.5 text-purple-400" />,
+			label: 'Álbumes',
+			singular: 'álbum',
+			plural: 'álbumes',
+		},
+		{
+			key: 'characters',
+			icon: <User2 className="h-3.5 w-3.5 text-yellow-400" />,
+			label: 'Personajes',
+			singular: 'personaje',
+			plural: 'personajes',
+		},
+		{
+			key: 'places',
+			icon: <MapPin className="h-3.5 w-3.5 text-orange-400" />,
+			label: 'Lugares',
+			singular: 'lugar',
+			plural: 'lugares',
+		},
+		{
+			key: 'worldItems',
+			icon: <HardDrive className="h-3.5 w-3.5 text-indigo-400" />,
+			label: 'Objetos',
+			singular: 'objeto',
+			plural: 'objetos',
+		},
+	];
+
+	const availableRelations = relations.filter(rel => hasRelation(rel.key));
+
+	if (availableRelations.length === 0) {
+		return null;
+	}
+
 	return (
 		<div className="flex flex-col gap-2">
 			<h3 className="text-xs font-medium text-muted-foreground">Entidades relacionadas</h3>
 			<div className="flex flex-col gap-1.5">
-				{item.collections?.length > 0 && (
-					<InfoItem
-						icon={<FileImage className="h-3.5 w-3.5 text-blue-400" />}
-						label="Colecciones"
-						value={`${item.collections.length} ${item.collections.length === 1 ? 'colección' : 'colecciones'}`}
-					/>
-				)}
-				{item.tags?.length > 0 && (
-					<InfoItem
-						icon={<Tag className="h-3.5 w-3.5 text-green-400" />}
-						label="Etiquetas"
-						value={`${item.tags.length} ${item.tags.length === 1 ? 'etiqueta' : 'etiquetas'}`}
-					/>
-				)}
-				{item.albums?.length > 0 && (
-					<InfoItem
-						icon={<Camera className="h-3.5 w-3.5 text-purple-400" />}
-						label="Álbumes"
-						value={`${item.albums.length} ${item.albums.length === 1 ? 'álbum' : 'álbumes'}`}
-					/>
-				)}
-				{item.characters?.length > 0 && (
-					<InfoItem
-						icon={<User2 className="h-3.5 w-3.5 text-yellow-400" />}
-						label="Personajes"
-						value={`${item.characters.length} ${item.characters.length === 1 ? 'personaje' : 'personajes'}`}
-					/>
-				)}
-				{item.places?.length > 0 && (
-					<InfoItem
-						icon={<MapPin className="h-3.5 w-3.5 text-orange-400" />}
-						label="Lugares"
-						value={`${item.places.length} ${item.places.length === 1 ? 'lugar' : 'lugares'}`}
-					/>
-				)}
-				{item.worldItems?.length > 0 && (
-					<InfoItem
-						icon={<HardDrive className="h-3.5 w-3.5 text-indigo-400" />}
-						label="Objetos"
-						value={`${item.worldItems.length} ${item.worldItems.length === 1 ? 'objeto' : 'objetos'}`}
-					/>
-				)}
+				{availableRelations.map(rel => {
+					const count = item[rel.key as keyof typeof item].length;
+					return (
+						<InfoItem
+							key={rel.key}
+							icon={rel.icon}
+							label={rel.label}
+							value={`${count} ${count === 1 ? rel.singular : rel.plural}`}
+						/>
+					);
+				})}
 			</div>
 		</div>
 	);

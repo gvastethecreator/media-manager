@@ -3,39 +3,28 @@
  * @module services/profile
  */
 
-import type { Profile } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { transformProfile, transformProfiles } from '@/transformers/profile/profile-transformers';
 import {
-	type CreateProfileInput,
-	createProfileSchema,
+	type ProfileCreateInput,
 	type ProfileExtended,
 	type ProfileFilters,
 	type ProfilePaginationOptions,
+	type ProfileUpdateInput,
 	profileFiltersSchema,
 	profilePaginationSchema,
-	type UpdateProfileInput,
-	updateProfileSchema,
 } from '@/types/entities/profile';
 import { toServiceError } from '@/utils/errors/service-errors';
-import { BaseService } from '../base.service';
 
 const SERVICE_NAME = 'ProfileService';
 
 /**
  * Servicio para gestionar perfiles de usuario
- * Extiende BaseService para operaciones CRUD básicas
  */
-class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileExtended> {
+class ProfileServiceImpl {
 	private static instance: ProfileServiceImpl;
 
 	private constructor() {
-		super(prisma.profile, 'Profile', {
-			toEntity: transformProfile,
-			toEntities: transformProfiles,
-			toResult: (entity) => entity,
-			toResults: (entities) => entities,
-		});
+		// Constructor privado para singleton
 	}
 
 	/**
@@ -69,14 +58,14 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 			if (theme) where.theme = theme;
 			if (language) where.language = language;
 
-			const profiles = await this.model.findMany({
+			const profiles = await prisma.profile.findMany({
 				where,
 				orderBy: { [sortBy]: sortDirection },
 				skip: (page - 1) * limit,
 				take: limit,
 			});
 
-			return this.transformer?.toEntities(profiles) || profiles;
+			return toEntities(profiles) || profiles;
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -85,15 +74,14 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 			});
 		}
 	}
-
 	/**
 	 * Crea un nuevo perfil
 	 */
-	async createProfile(data: CreateProfileInput): Promise<ProfileExtended> {
+	async createProfile(data: ProfileCreateInput): Promise<ProfileExtended> {
 		try {
-			const validatedData = createProfileSchema.parse(data);
-			const profile = await this.model.create({ data: validatedData });
-			return this.transformer?.toEntity(profile) || profile;
+			const validatedData = profileCreateInputSchema.parse(data);
+			const profile = await prisma.profile.create({ data: validatedData });
+			return toEntity(profile) || profile;
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -106,14 +94,14 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 	/**
 	 * Actualiza un perfil existente
 	 */
-	async updateProfile(id: string, data: UpdateProfileInput): Promise<ProfileExtended> {
+	async updateProfile(id: string, data: ProfileUpdateInput): Promise<ProfileExtended> {
 		try {
-			const validatedData = updateProfileSchema.parse(data);
-			const profile = await this.model.update({
+			const validatedData = profileUpdateInputSchema.parse(data);
+			const profile = await prisma.profile.update({
 				where: { id },
 				data: validatedData,
 			});
-			return this.transformer?.toEntity(profile) || profile;
+			return toEntity(profile) || profile;
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -129,13 +117,13 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 	async setActiveProfile(id: string): Promise<void> {
 		try {
 			// Desactivar todos los perfiles
-			await this.model.updateMany({
+			await prisma.profile.updateMany({
 				where: { isActive: true },
 				data: { isActive: false },
 			});
 
 			// Activar el perfil seleccionado
-			await this.model.update({
+			await prisma.profile.update({
 				where: { id },
 				data: { isActive: true },
 			});
@@ -153,14 +141,49 @@ class ProfileServiceImpl extends BaseService<Profile, ProfileExtended, ProfileEx
 	 */
 	async getActiveProfile(): Promise<ProfileExtended | null> {
 		try {
-			const profile = await this.model.findFirst({
+			const profile = await prisma.profile.findFirst({
 				where: { isActive: true },
 			});
-			return profile ? this.transformer?.toEntity(profile) || profile : null;
+			return profile ? toEntity(profile) || profile : null;
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
 				message: 'Error al obtener perfil activo',
+			});
+		}
+	}
+
+	/**
+	 * Obtiene un perfil por ID
+	 */
+	async getById(id: string): Promise<ProfileExtended | null> {
+		try {
+			const profile = await prisma.profile.findUnique({
+				where: { id },
+			});
+			return profile ? toEntity(profile) || profile : null;
+		} catch (error) {
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'Error al obtener perfil por ID',
+				context: { id },
+			});
+		}
+	}
+
+	/**
+	 * Elimina un perfil por ID
+	 */
+	async delete(id: string): Promise<void> {
+		try {
+			await prisma.profile.delete({
+				where: { id },
+			});
+		} catch (error) {
+			throw toServiceError(error, {
+				serviceName: SERVICE_NAME,
+				message: 'Error al eliminar perfil',
+				context: { id },
 			});
 		}
 	}

@@ -1,8 +1,9 @@
-import type { WildcardComplete as Wildcard } from '@prisma/client';
-import { ChevronRight, EditIcon, StarIcon, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import type { WildcardComplete as Wildcard } from '@prisma/client';
+import { ChevronRight, EditIcon, StarIcon, Trash } from 'lucide-react';
+import Image from 'next/image';
 
 interface WildcardPreviewProps {
 	wildcard: Wildcard & {
@@ -26,7 +27,6 @@ interface WildcardPreviewProps {
 	};
 	onEdit?: () => void;
 	onDelete?: () => void;
-	onFavoriteToggle?: () => void;
 	isDeleting?: boolean;
 }
 
@@ -34,7 +34,6 @@ export function WildcardPreview({
 	wildcard,
 	onEdit,
 	onDelete,
-	onFavoriteToggle,
 	isDeleting = false,
 }: WildcardPreviewProps) {
 	// Convertir el string JSON de children a array
@@ -42,8 +41,8 @@ export function WildcardPreview({
 
 	const totalElements = wildcard._count
 		? Object.entries(wildcard._count)
-				.filter(([key]) => key !== 'childWildcards')
-				.reduce((a, [_, b]) => a + b, 0)
+			.filter(([key]) => key !== 'childWildcards')
+			.reduce((a, [_, b]) => a + b, 0)
 		: 0;
 
 	return (
@@ -192,7 +191,7 @@ export function WildcardPreview({
 					<div className="space-y-2">
 						<h3 className="text-sm font-medium">Imagen destacada</h3>
 						<div className="relative w-full h-32 bg-muted rounded-md overflow-hidden">
-							<img src={wildcard.featuredImage} alt={wildcard.name} className="w-full h-full object-cover" />
+							<Image src={wildcard.featuredImage} alt={wildcard.name} className="w-full h-full object-cover" width={400} height={400} />
 						</div>
 					</div>
 				)}

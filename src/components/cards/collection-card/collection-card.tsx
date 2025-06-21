@@ -1,8 +1,16 @@
 'use client';
 
+// TODO: Refactorizar para usar un tipo canónico `CollectionWithStats`.
+// Este componente, al igual que los otros componentes de tarjeta, sufre de inconsistencias
+// de tipo porque la prop `collection` no garantiza la existencia de `_count`.
+// Se necesita una refactorización de la capa de datos (server actions, transformers) para que
+// devuelvan un tipo `CollectionWithStats` que incluya `totalEntities` y `totalMedia`
+// calculados. Esta tarea está bloqueada por problemas con la herramienta de edición
+// en los archivos de transformadores.
+
+import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import React, { useCallback, useMemo } from 'react';
-import { cn } from '@/lib/utils';
 // Importar tipos correctos de entities
 import type { CollectionWithRelations } from '@/types/entities/collection/types';
 import { CollectionCardContent } from './collection-card-content';

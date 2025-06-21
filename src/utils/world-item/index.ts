@@ -3,7 +3,9 @@
  * @module utils/world-item
  */
 
-import type { WorldItem, WorldItemFilters, WorldItemSortCriteria } from '@/types/entities/world-item';
+import type { WorldItemSortCriteria } from '@/types/entities/world-item/enums';
+import type { WorldItemExtended } from '@/types/entities/world-item/extended';
+import type { WorldItemFilters } from '@/types/entities/world-item/types';
 
 export * from './helpers';
 // Reexportar funciones específicas para facilitar el acceso
@@ -34,7 +36,7 @@ export {
  * @param sortBy Criterio de ordenamiento
  * @returns Lista ordenada de WorldItems
  */
-export function sortWorldItems(worldItems: WorldItem[], sortBy: WorldItemSortCriteria): WorldItem[] {
+export function sortWorldItems(worldItems: WorldItemExtended[], sortBy: WorldItemSortCriteria): WorldItemExtended[] {
 	const sorted = [...worldItems];
 
 	switch (sortBy) {
@@ -70,17 +72,20 @@ export function sortWorldItems(worldItems: WorldItem[], sortBy: WorldItemSortCri
  * @returns Objeto con WorldItems agrupados
  */
 export function groupWorldItems(
-	worldItems: WorldItem[],
+	worldItems: WorldItemExtended[],
 	groupBy: 'type' | 'category' | 'rarity'
-): Record<string, WorldItem[]> {
-	return worldItems.reduce((groups, item) => {
-		const key = item[groupBy] || 'Sin categoría';
-		if (!groups[key]) {
-			groups[key] = [];
-		}
-		groups[key].push(item);
-		return groups;
-	}, {} as Record<string, WorldItem[]>);
+): Record<string, WorldItemExtended[]> {
+	return worldItems.reduce(
+		(groups, item) => {
+			const key = item[groupBy] || 'Sin categoría';
+			if (!groups[key]) {
+				groups[key] = [];
+			}
+			groups[key].push(item);
+			return groups;
+		},
+		{} as Record<string, WorldItemExtended[]>
+	);
 }
 
 /**
@@ -89,16 +94,17 @@ export function groupWorldItems(
  * @param searchQuery Texto de búsqueda
  * @returns Lista filtrada de WorldItems
  */
-export function filterWorldItemsBySearch(worldItems: WorldItem[], searchQuery: string): WorldItem[] {
+export function filterWorldItemsBySearch(worldItems: WorldItemExtended[], searchQuery: string): WorldItemExtended[] {
 	if (!searchQuery.trim()) return worldItems;
 
 	const query = searchQuery.toLowerCase();
-	return worldItems.filter((item) =>
-		item.name.toLowerCase().includes(query) ||
-		item.description?.toLowerCase().includes(query) ||
-		item.type.toLowerCase().includes(query) ||
-		item.category?.toLowerCase().includes(query) ||
-		item.rarity.toLowerCase().includes(query)
+	return worldItems.filter(
+		(item) =>
+			item.name.toLowerCase().includes(query) ||
+			item.description?.toLowerCase().includes(query) ||
+			item.type.toLowerCase().includes(query) ||
+			item.category?.toLowerCase().includes(query) ||
+			item.rarity.toLowerCase().includes(query)
 	);
 }
 
@@ -107,26 +113,20 @@ export function filterWorldItemsBySearch(worldItems: WorldItem[], searchQuery: s
  * @param worldItems Lista de WorldItems
  * @returns Objeto con estadísticas
  */
-export function getWorldItemStats(worldItems: WorldItem[]) {
+export function getWorldItemStats(worldItems: WorldItemExtended[]) {
 	const total = worldItems.length;
 	const byType = groupWorldItems(worldItems, 'type');
 	const byCategory = groupWorldItems(worldItems, 'category');
 	const byRarity = groupWorldItems(worldItems, 'rarity');
-	const favorites = worldItems.filter(item => item.isFavorite).length;
+	const favorites = worldItems.filter((item) => item.isFavorite).length;
 
 	return {
 		total,
-		byType: Object.fromEntries(
-			Object.entries(byType).map(([key, items]) => [key, items.length])
-		),
-		byCategory: Object.fromEntries(
-			Object.entries(byCategory).map(([key, items]) => [key, items.length])
-		),
-		byRarity: Object.fromEntries(
-			Object.entries(byRarity).map(([key, items]) => [key, items.length])
-		),
+		byType: Object.fromEntries(Object.entries(byType).map(([key, items]) => [key, items.length])),
+		byCategory: Object.fromEntries(Object.entries(byCategory).map(([key, items]) => [key, items.length])),
+		byRarity: Object.fromEntries(Object.entries(byRarity).map(([key, items]) => [key, items.length])),
 		favorites,
-		withImages: worldItems.filter(item => item.featuredImage).length,
+		withImages: worldItems.filter((item) => item.featuredImage).length,
 	};
 }
 
@@ -137,14 +137,14 @@ export function getWorldItemStats(worldItems: WorldItem[]) {
  */
 export function generateWorldItemColor(rarity: string): string {
 	const rarityColors: Record<string, string> = {
-		common: '#9CA3AF',      // Gris
-		uncommon: '#10B981',    // Verde
-		rare: '#3B82F6',        // Azul
-		epic: '#8B5CF6',        // Púrpura
-		legendary: '#F59E0B',   // Amarillo
-		mythic: '#EF4444',      // Rojo
-		unique: '#EC4899',      // Rosa
-		artifact: '#F97316',    // Naranja
+		common: '#9CA3AF', // Gris
+		uncommon: '#10B981', // Verde
+		rare: '#3B82F6', // Azul
+		epic: '#8B5CF6', // Púrpura
+		legendary: '#F59E0B', // Amarillo
+		mythic: '#EF4444', // Rojo
+		unique: '#EC4899', // Rosa
+		artifact: '#F97316', // Naranja
 	};
 
 	return rarityColors[rarity.toLowerCase()] || rarityColors.common;
@@ -197,7 +197,7 @@ export function getRarityWeight(rarity: string): number {
  * @param filters Filtros a aplicar
  * @returns Lista filtrada de WorldItems
  */
-export function applyWorldItemFilters(worldItems: WorldItem[], filters: WorldItemFilters): WorldItem[] {
+export function applyWorldItemFilters(worldItems: WorldItemExtended[], filters: WorldItemFilters): WorldItemExtended[] {
 	return worldItems.filter((item) => {
 		// Filtro por búsqueda
 		if (filters.searchTerm) {

@@ -1,318 +1,134 @@
 /**
- * @file Transformadores principales para la entidad WorldItem
+ * @file Transformador principal para la entidad WorldItem.
  * @module transformers/world-item/transformer
+ * @description Contiene la lógica para transformar datos de Prisma a tipos canónicos de la aplicación.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { WorldItemExtended } from '@/types/entities/world-item/extended';
-import type { WorldItemDeserialized } from '@/types/entities/world-item/types';
-import { deserializeJsonField as parseJsonField } from '@/utils/transformers/common';
-import { TransformerError } from '@/utils/transformers/errors';
-import { extendWorldItem } from './serializers';
-import { fromPrismaWorldItem } from './server';
 
-const logger = serverLogger.withContext('WorldItemTransformer');
+import type { AlbumComplete } from '@/types/entities/album';
+import type { CharacterComplete } from '@/types/entities/character';
+import type { CollectionComplete } from '@/types/entities/collection';
+import type { ConceptComplete } from '@/types/entities/concept';
+import type { GroupComplete } from '@/types/entities/group';
+import type { ImageComplete } from '@/types/entities/image';
+import type { NoteComplete } from '@/types/entities/note';
+import type { PlaceComplete } from '@/types/entities/place';
+import type { PromptComplete } from '@/types/entities/prompt';
+import type { PropertyComplete } from '@/types/entities/property';
+import type { TagComplete } from '@/types/entities/tag';
+import type { VideoComplete } from '@/types/entities/video';
+import type { WildcardComplete } from '@/types/entities/wildcard';
+import type { WorldItemComplete } from '@/types/entities/world-item';
+import type { Prisma } from '@prisma/client';
+import { fromPrismaAlbum } from '../album/transformer';
+import { fromPrismaCharacter } from '../character/transformer';
+import { fromPrismaCollection } from '../collection/transformer';
+import { fromPrismaConcept } from '../concept/transformer';
+import { fromPrismaGroup } from '../group/transformer';
+import { fromPrismaImage } from '../image/transformer';
+import { fromPrismaNote } from '../note/transformer';
+import { fromPrismaPlace } from '../place/transformer';
+import { fromPrismaPrompt } from '../prompt/transformer';
+import { fromPrismaProperty } from '../property/transformer';
+import { fromPrismaTag } from '../tag/transformer';
+import { fromPrismaVideo } from '../video/transformer';
+import { fromPrismaWildcard } from '../wildcard/transformer';
+import {
+    deserializeAttributes,
+    deserializeEffects,
+    deserializeFilters,
+    deserializeRequirements,
+    deserializeStats
+} from './serializers';
 
-// 📊 Tipo local para WorldItem con estadísticas
-interface WorldItemWithStats extends WorldItemDeserialized {
-	_count?: {
-		images: number;
-		videos: number;
-		collections: number;
-		albums: number;
-		tags: number;
-		characters: number;
-		places: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
+// --- TIPO DE PAYLOAD DE PRISMA ---
+
+export const worldItemPayload = {
+	include: {
+		images: true,
+		videos: true,
+		albums: true,
+		collections: true,
+		tags: true,
+		characters: true,
+		places: true,
+		concepts: true,
+		prompts: true,
+		notes: true,
+		wildcards: true,
+		properties: true,
+		groups: true,
+		_count: true,
+	},
+};
+
+export type WorldItemFromPrisma = Prisma.WorldItemGetPayload<typeof worldItemPayload>;
+
+/**
+ * 🔄 Transforma un objeto WorldItem de Prisma a un WorldItemComplete.
+ * @param worldItem - El objeto WorldItem obtenido de Prisma.
+ * @returns Un objeto WorldItemComplete.
+ */
+export function fromPrismaWorldItem(worldItem: WorldItemFromPrisma | null): WorldItemComplete | null {
+	if (!worldItem) return null;
+
+	const { _count, tags: relationTags, properties: relationProperties, ...baseData } = worldItem;
+
+	return {
+		...baseData,
+
+		// Deserialización de campos JSON
+		attributes: deserializeAttributes(worldItem.attributes),
+		effects: deserializeEffects(worldItem.effects),
+		requirements: deserializeRequirements(worldItem.requirements),
+		stats: deserializeStats(worldItem.stats),
+		filters: deserializeFilters(worldItem.filters),
+
+		// Mapeo de relaciones
+		images: worldItem.images?.map(fromPrismaImage).filter((i): i is ImageComplete => i !== null) || [],
+		videos: worldItem.videos?.map(fromPrismaVideo).filter((v): v is VideoComplete => v !== null) || [],
+		albums: worldItem.albums?.map(fromPrismaAlbum).filter((a): a is AlbumComplete => a !== null) || [],
+		collections:
+			worldItem.collections?.map(fromPrismaCollection).filter((c): c is CollectionComplete => c !== null) || [],
+		characters:
+			worldItem.characters?.map(fromPrismaCharacter).filter((c): c is CharacterComplete => c !== null) || [],
+		places: worldItem.places?.map(fromPrismaPlace).filter((p): p is PlaceComplete => p !== null) || [],
+		concepts: worldItem.concepts?.map(fromPrismaConcept).filter((c): c is ConceptComplete => c !== null) || [],
+		prompts: worldItem.prompts?.map(fromPrismaPrompt).filter((p): p is PromptComplete => p !== null) || [],
+		notes: worldItem.notes?.map(fromPrismaNote).filter((n): n is NoteComplete => n !== null) || [],
+		wildcards:
+			worldItem.wildcards?.map(fromPrismaWildcard).filter((w): w is WildcardComplete => w !== null) || [],
+		groups: worldItem.groups?.map(fromPrismaGroup).filter((g): g is GroupComplete => g !== null) || [],
+
+		// Asignación correcta de relaciones
+		tags: relationTags?.map(fromPrismaTag).filter((t): t is TagComplete => t !== null) || [],
+		properties:
+			relationProperties?.map(fromPrismaProperty).filter((p): p is PropertyComplete => p !== null) || [],
+
+		// Conteo de relaciones
+		_count: {
+			images: _count?.images ?? 0,
+			videos: _count?.videos ?? 0,
+			albums: _count?.albums ?? 0,
+			collections: _count?.collections ?? 0,
+			tags: _count?.tags ?? 0,
+			characters: _count?.characters ?? 0,
+			places: _count?.places ?? 0,
+			concepts: _count?.concepts ?? 0,
+			prompts: _count?.prompts ?? 0,
+			notes: _count?.notes ?? 0,
+			wildcards: _count?.wildcards ?? 0,
+			properties: _count?.properties ?? 0,
+			groups: _count?.groups ?? 0,
+		},
 	};
-	lastUpdated: Date;
-	imageCount: number;
-	videoCount: number;
-	albumCount: number;
-	tagCount: number;
-	characterCount: number;
-	placeCount: number;
-	rarityLevel: number;
-	statsDisplay: Array<{ name: string; value: number }>;
-	distribution: Array<{ name: string; count: number }>;
 }
 
 /**
- * 🔄 Transforma un objeto a WorldItem, validando su estructura
- * @param worldItem Objeto a transformar
- * @returns WorldItem validado y estructurado
- * @throws TransformerError si la validación falla
+ * 🔄 Transforma una lista de objetos WorldItem de Prisma a un array de WorldItemComplete.
+ * @param worldItems - Los objetos WorldItem obtenidos de Prisma.
+ * @returns Un array de objetos WorldItemComplete.
  */
-export function transformWorldItem(worldItem: unknown): WorldItemDeserialized {
-	try {
-		if (!worldItem) {
-			throw new Error('El objeto WorldItem es nulo o indefinido');
-		}
-
-		// Si el item viene de Prisma, transformarlo
-		if ('images' in (worldItem as any) && 'videos' in (worldItem as any)) {
-			return fromPrismaWorldItem(worldItem as any);
-		}
-
-		// Si es un objeto simple, extenderlo
-		return extendWorldItem(worldItem as any);
-	} catch (error) {
-		logger.error('Error transformando WorldItem:', { error });
-		throw new TransformerError(
-			`Error al transformar WorldItem: ${error instanceof Error ? error.message : String(error)}`
-		);
-	}
-}
-
-/**
- * 🔄 Transforma una lista de objetos a WorldItems
- * @param worldItems Array de objetos a transformar
- * @returns Array de WorldItems validados
- * @throws TransformerError si la validación falla para algún elemento
- */
-export function transformWorldItems(worldItems: unknown[]): WorldItemDeserialized[] {
-	try {
-		if (!Array.isArray(worldItems)) {
-			throw new Error('El parámetro no es un array');
-		}
-
-		return worldItems.map((item) => transformWorldItem(item));
-	} catch (error) {
-		logger.error('Error transformando lista de WorldItems:', { error });
-		throw new TransformerError(
-			`Error al transformar lista de WorldItems: ${error instanceof Error ? error.message : String(error)}`
-		);
-	}
-}
-
-/**
- * 🔄 Transforma un WorldItem a su versión extendida con propiedades para UI
- * @param worldItem WorldItem base a extender
- * @returns WorldItem extendido con propiedades adicionales
- */
-export function transformWorldItemToExtended(worldItem: WorldItemDeserialized): WorldItemExtended {
-	try {
-		// 🛡️ Validación mejorada de entrada
-		if (!worldItem) {
-			throw new Error('El WorldItem de entrada es nulo o indefinido');
-		}
-
-		// 🛡️ Verificar que worldItem es un objeto válido
-		if (typeof worldItem !== 'object' || !worldItem.id) {
-			throw new Error('El WorldItem debe ser un objeto válido con un ID');
-		}
-
-		const baseItem = transformWorldItem(worldItem);
-
-		// Extender el WorldItem con propiedades para UI usando parseo seguro
-		const extendedItem: WorldItemExtended = {
-			...baseItem,
-			// Propiedades de UI básicas
-			isSelected: false,
-			isExpanded: false,
-			isEditing: false,
-			// Propiedades calculadas para UI con parseo seguro
-			stats: parseJsonField(baseItem.stats, {}),
-			attributes: parseJsonField(baseItem.attributes, []),
-			effects: parseJsonField(baseItem.effects, []),
-			requirements: parseJsonField(baseItem.requirements, {}),
-			filters: parseJsonField(baseItem.filters, {}),
-		};
-
-		logger.debug('✅ WorldItem transformado a versión extendida exitosamente:', {
-			worldItemId: baseItem.id,
-			attributesCount: extendedItem.attributes?.length || 0,
-			effectsCount: extendedItem.effects?.length || 0,
-		});
-
-		return extendedItem;
-	} catch (error) {
-		logger.error('Error transformando WorldItem a versión extendida:', {
-			error: error instanceof Error ? { message: error.message, stack: error.stack } : error,
-			worldItemId: (worldItem as any)?.id,
-			worldItemType: typeof worldItem,
-		});
-		throw new TransformerError(
-			`Error al transformar WorldItem a versión extendida: ${error instanceof Error ? error.message : String(error)}`
-		);
-	}
-}
-
-/**
- * 🔄 Transforma un WorldItem a su versión con estadísticas
- * @param worldItem WorldItem base
- * @returns WorldItem con estadísticas calculadas
- */
-export function transformWorldItemToWithStats(worldItem: any): WorldItemWithStats {
-	try {
-		const baseItem = transformWorldItem(worldItem);
-
-		// Calcular totales para las estadísticas - usar casting a any para acceder a _count
-		const counts = (baseItem as any)._count || {
-			images: 0,
-			videos: 0,
-			collections: 0,
-			albums: 0,
-			tags: 0,
-			characters: 0,
-			places: 0,
-			concepts: 0,
-			prompts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
-		};
-
-		// Determinar la última actualización
-		const lastUpdated = baseItem.updatedAt || new Date();
-
-		// Calcular nivel de rareza numérico
-		const rarityLevel = calculateRarityLevel(baseItem.rarity);
-
-		// Construir y devolver el objeto extendido
-		return {
-			...baseItem,
-			lastUpdated,
-			imageCount: counts.images,
-			videoCount: counts.videos,
-			albumCount: counts.albums,
-			tagCount: counts.tags,
-			characterCount: counts.characters,
-			placeCount: counts.places,
-			rarityLevel,
-			statsDisplay: generateStatsDisplay(baseItem),
-			distribution: [
-				{ name: 'images', count: counts.images },
-				{ name: 'videos', count: counts.videos },
-				{ name: 'characters', count: counts.characters },
-				{ name: 'places', count: counts.places },
-			],
-		};
-	} catch (error) {
-		logger.error('Error transformando WorldItem a versión con estadísticas:', {
-			error,
-			worldItemId: (worldItem as any)?.id,
-		});
-		throw new TransformerError(
-			`Error al transformar WorldItem a versión con estadísticas: ${error instanceof Error ? error.message : String(error)}`
-		);
-	}
-}
-
-/**
- * Calcula el nivel numérico de rareza basado en el string de rareza
- * @private
- */
-function calculateRarityLevel(rarity: string): number {
-	try {
-		// Mapeo de rareza a nivel numérico
-		const rarityMap: Record<string, number> = {
-			common: 1,
-			uncommon: 2,
-			rare: 3,
-			epic: 4,
-			legendary: 5,
-			mythic: 6,
-			artifact: 7,
-			unique: 8,
-		};
-
-		return rarityMap[rarity.toLowerCase()] || 1;
-	} catch (error) {
-		logger.warn('Error calculando nivel de rareza, usando valor por defecto:', error);
-		return 1; // Valor por defecto
-	}
-}
-
-/**
- * Genera presentación de estadísticas del item para visualización
- * @private
- */
-function generateStatsDisplay(worldItem: WorldItemDeserialized): Array<{ name: string; value: number }> {
-	try {
-		// Si ya tenemos stats como objeto, usar eso directamente
-		const stats = typeof worldItem.stats === 'string' ? JSON.parse(worldItem.stats || '{}') : worldItem.stats || {};
-
-		// Convertir a formato para gráfico
-		return Object.entries(stats).map(([name, value]) => ({
-			name,
-			value: typeof value === 'number' ? value : 0,
-		}));
-	} catch (error) {
-		logger.warn('Error generando datos de estadísticas, devolviendo array vacío:', error);
-		return []; // Valor por defecto
-	}
-}
-
-/**
- * Crea un filtro Prisma a partir de filtros de WorldItem
- * @param filters - Filtros de WorldItem
- * @returns Filtro para Prisma
- */
-export function createFilter(filters: WorldItemFilters): Record<string, any> {
-	try {
-		const where: Record<string, any> = {};
-		const conditions: any[] = [];
-
-		// Búsqueda por texto
-		if (filters.searchTerm) {
-			conditions.push({
-				OR: [
-					{ name: { contains: filters.searchTerm, mode: 'insensitive' } },
-					{ description: { contains: filters.searchTerm, mode: 'insensitive' } },
-				],
-			});
-		}
-
-		// Filtrar por tipos
-		if (filters.type) {
-			conditions.push({
-				type: { equals: filters.type },
-			});
-		}
-
-		// Filtrar por categorías
-		if (filters.category) {
-			conditions.push({
-				category: { equals: filters.category },
-			});
-		}
-
-		// Filtrar por rareza
-		if (filters.rarity) {
-			conditions.push({
-				rarity: { equals: filters.rarity },
-			});
-		}
-
-		// Filtrar por favoritos
-		if (filters.isFavorite !== undefined) {
-			conditions.push({
-				isFavorite: filters.isFavorite,
-			});
-		}
-
-		// Filtrar por presencia de imágenes
-		if (filters.hasImages) {
-			conditions.push({
-				images: { some: {} },
-			});
-		}
-
-		// Aplicar todos los filtros con AND
-		if (conditions.length > 0) {
-			where.AND = conditions;
-		}
-
-		return where;
-	} catch (error) {
-		logger.error('Error creando filtro de WorldItem', error);
-		return {}; // Filtro vacío por defecto
-	}
+export function fromPrismaWorldItems(worldItems: WorldItemFromPrisma[]): WorldItemComplete[] {
+	return worldItems.map(fromPrismaWorldItem).filter((w): w is WorldItemComplete => w !== null);
 }

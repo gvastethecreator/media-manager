@@ -4,11 +4,35 @@
  */
 
 import type { StateCreator } from 'zustand';
+import type { VideoStore } from '..';
 import { VideoPlayState } from '../../../../types/entities/video/enums';
-import type { VideoState } from '../types';
+
+export interface VideoPlayerState {
+	isFullscreen: boolean;
+	volume: number;
+	playbackRate: number;
+	isMuted: boolean;
+	playState: VideoPlayState;
+	currentTime: number;
+	duration: number;
+	bufferedPercentage: number;
+	quality: string;
+}
+
+export const initialPlayerState: VideoPlayerState = {
+	isFullscreen: false,
+	volume: 1,
+	playbackRate: 1,
+	isMuted: false,
+	playState: VideoPlayState.STOPPED,
+	currentTime: 0,
+	duration: 0,
+	bufferedPercentage: 0,
+	quality: 'auto',
+};
 
 // Slice para el reproductor de video
-export interface VideoPlayerSlice {
+export interface VideoPlayerSlice extends VideoPlayerState {
 	// Control de reproducción
 	play: () => void;
 	pause: () => void;
@@ -47,182 +71,47 @@ export interface VideoPlayerSlice {
 	onStateChange: (playState: VideoPlayState) => void;
 }
 
-export const createVideoPlayerSlice: StateCreator<VideoState, [], [], VideoPlayerSlice> = (set, get) => ({
+export const createVideoPlayerSlice: StateCreator<VideoStore, [], [], VideoPlayerSlice> = (set, get) => ({
+	...initialPlayerState,
 	// Control de reproducción
-	play: () => {
-		set((state) => ({
-			player: {
-				...state.player,
-				playState: VideoPlayState.PLAYING,
-			},
-		}));
-	},
-
-	pause: () => {
-		set((state) => ({
-			player: {
-				...state.player,
-				playState: VideoPlayState.PAUSED,
-			},
-		}));
-	},
-
-	stop: () => {
-		set((state) => ({
-			player: {
-				...state.player,
-				playState: VideoPlayState.STOPPED,
-				currentTime: 0,
-			},
-		}));
-	},
-
-	seek: (time) => {
-		set((state) => ({
-			player: {
-				...state.player,
-				currentTime: time,
-			},
-		}));
-	},
-
-	setPlaybackRate: (rate) => {
-		const playState = get().player.playState;
-		if (playState === VideoPlayState.PLAYING) {
-			// Lógica para cambiar la velocidad de reproducción
-		}
-		set((state) => ({
-			player: {
-				...state.player,
-				playbackRate: rate,
-			},
-		}));
-	},
+	play: () => set({ playState: VideoPlayState.PLAYING }),
+	pause: () => set({ playState: VideoPlayState.PAUSED }),
+	stop: () => set({ playState: VideoPlayState.STOPPED, currentTime: 0 }),
+	seek: (time) => set({ currentTime: time }),
+	setPlaybackRate: (rate) => set({ playbackRate: rate }),
 
 	// Control de volumen
 	setVolume: (volume) => {
 		const clampedVolume = Math.max(0, Math.min(1, volume));
-		set((state) => ({
-			player: {
-				...state.player,
-				volume: clampedVolume,
-				isMuted: clampedVolume === 0,
-			},
-		}));
+		set({ volume: clampedVolume, isMuted: clampedVolume === 0 });
 	},
-
-	mute: () => {
-		set((state) => ({
-			player: {
-				...state.player,
-				isMuted: true,
-			},
-		}));
-	},
-
-	unmute: () => {
-		set((state) => ({
-			player: {
-				...state.player,
-				isMuted: false,
-			},
-		}));
-	},
-
-	toggleMute: () => {
-		set((state) => ({
-			player: {
-				...state.player,
-				isMuted: !state.player.isMuted,
-			},
-		}));
-	},
+	mute: () => set({ isMuted: true }),
+	unmute: () => set({ isMuted: false }),
+	toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
 
 	// Control de pantalla completa
-	enterFullscreen: () => {
-		set((state) => ({
-			player: {
-				...state.player,
-				isFullscreen: true,
-			},
-		}));
-	},
-
-	exitFullscreen: () => {
-		set((state) => ({
-			player: {
-				...state.player,
-				isFullscreen: false,
-			},
-		}));
-	},
-
-	toggleFullscreen: () => {
-		set((state) => ({
-			player: {
-				...state.player,
-				isFullscreen: !state.player.isFullscreen,
-			},
-		}));
-	},
+	enterFullscreen: () => set({ isFullscreen: true }),
+	exitFullscreen: () => set({ isFullscreen: false }),
+	toggleFullscreen: () => set((state) => ({ isFullscreen: !state.isFullscreen })),
 
 	// Control de calidad
-	setQuality: (quality) => {
-		set((state) => ({
-			player: {
-				...state.player,
-				quality,
-			},
-		}));
-	},
-
+	setQuality: (quality) => set({ quality }),
 	getAvailableQualities: () => {
 		return ['auto', '240p', '360p', '480p', '720p', '1080p', '1440p', '2160p'];
 	},
 
 	// Información de reproducción
-	getCurrentTime: () => get().player.currentTime,
-	getDuration: () => get().player.duration,
-	getBufferedPercentage: () => get().player.bufferedPercentage,
-	getPlayState: () => get().player.playState,
-	getVolume: () => get().player.volume,
-	isFullscreen: () => get().player.isFullscreen,
-	isMuted: () => get().player.isMuted,
+	getCurrentTime: () => get().currentTime,
+	getDuration: () => get().duration,
+	getBufferedPercentage: () => get().bufferedPercentage,
+	getPlayState: () => get().playState,
+	getVolume: () => get().volume,
+	isFullscreen: () => get().isFullscreen,
+	isMuted: () => get().isMuted,
 
 	// Eventos de reproducción
-	onTimeUpdate: (currentTime) => {
-		set((state) => ({
-			player: {
-				...state.player,
-				currentTime,
-			},
-		}));
-	},
-
-	onDurationChange: (duration) => {
-		set((state) => ({
-			player: {
-				...state.player,
-				duration,
-			},
-		}));
-	},
-
-	onProgress: (bufferedPercentage) => {
-		set((state) => ({
-			player: {
-				...state.player,
-				bufferedPercentage,
-			},
-		}));
-	},
-
-	onStateChange: (playState) => {
-		set((state) => ({
-			player: {
-				...state.player,
-				playState,
-			},
-		}));
-	},
+	onTimeUpdate: (currentTime) => set({ currentTime }),
+	onDurationChange: (duration) => set({ duration }),
+	onProgress: (bufferedPercentage) => set({ bufferedPercentage }),
+	onStateChange: (playState) => set({ playState }),
 });

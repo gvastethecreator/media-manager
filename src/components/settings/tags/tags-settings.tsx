@@ -10,20 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import toastService from '@/services/toast.service';
-import type { TagBase } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag';
 import type { TagComplete } from '@/types/entities/tag/extended';
 import { Filter, Info, Loader2, PlusCircle, Save, TagBase as TagIcon, Trash } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { CreateTagForm } from './create-tag-form';
-
-// Definir tipo para el manejador de eventos del botón
-type ButtonClickHandler = React.MouseEventHandler<HTMLButtonElement>;
-
-// Definir el tipo localmente ya que no está exportado
-interface TagWithStats extends TagBase {
-	totalAssociations: number;
-}
 
 export function TagsSettings() {
 	const [tags, setTags] = useState<TagComplete[]>([]);
@@ -37,6 +28,10 @@ export function TagsSettings() {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [onlyFavorites, setOnlyFavorites] = useState(false);
+
+	// IDs para accesibilidad
+	const idSearch = useId();
+	const idFavorites = useId();
 
 	// Cargar etiquetas al montar el componente
 	useEffect(() => {
@@ -220,7 +215,7 @@ export function TagsSettings() {
 											<div className="space-y-2">
 												<Label htmlFor="search">Buscar</Label>
 												<Input
-													id="search"
+													id={idSearch}
 													placeholder="Buscar etiquetas..."
 													value={searchQuery}
 													onChange={(e) => setSearchQuery(e.target.value)}
@@ -254,7 +249,7 @@ export function TagsSettings() {
 
 											<div className="flex items-center space-x-2">
 												<Checkbox
-													id="favorites"
+													id={idFavorites}
 													checked={onlyFavorites}
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>

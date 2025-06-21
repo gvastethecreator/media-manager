@@ -302,7 +302,7 @@ export const createWildcardUISlice: StateCreator<
 
 		const getChildrenIds = (parentId: string): string[] => {
 			const children = get().getChildWildcards(parentId);
-			let allIds = children.map(c => c.id);
+			let allIds = children.map((c) => c.id);
 
 			for (const child of children) {
 				allIds = [...allIds, ...getChildrenIds(child.id)];
@@ -329,7 +329,7 @@ export const createWildcardUISlice: StateCreator<
 
 		const getChildrenIds = (parentId: string): string[] => {
 			const children = get().getChildWildcards(parentId);
-			let allIds = children.map(c => c.id);
+			let allIds = children.map((c) => c.id);
 
 			for (const child of children) {
 				allIds = [...allIds, ...getChildrenIds(child.id)];
@@ -345,7 +345,7 @@ export const createWildcardUISlice: StateCreator<
 			return {
 				ui: {
 					...state.ui,
-					expandedIds: currentExpandedIds.filter(expandedId => !branchIds.includes(expandedId)),
+					expandedIds: currentExpandedIds.filter((expandedId) => !branchIds.includes(expandedId)),
 				},
 			};
 		});

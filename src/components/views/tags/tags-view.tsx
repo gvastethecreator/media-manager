@@ -22,7 +22,7 @@ const MemoizedTagCard = memo(
 		// Solo re-renderizar si cambian estos valores
 		return (
 			prevProps.tag.id === nextProps.tag.id &&
-			prevProps.tag.updatedAt === nextProps.tag.updatedAt &&
+			prevProps.tag.updatedAt.getTime() === nextProps.tag.updatedAt.getTime() &&
 			prevProps.tag._count?.images === nextProps.tag._count?.images
 		);
 	}
@@ -52,15 +52,17 @@ export function TagsView({ className }: ViewProps) {
 				viewLogger.info('🔄 Cargando etiquetas...');
 				const fetchedTags = await getTagsAction();
 
-				// Transformar los datos para adaptarlos al formato esperado
-				const transformedTags = fetchedTags.map((tagData) => {
-					return {
-						...tagData,
-						createdAt: tagData.createdAt instanceof Date ? tagData.createdAt : new Date(tagData.createdAt),
-						updatedAt: tagData.updatedAt instanceof Date ? tagData.updatedAt : new Date(tagData.updatedAt),
-						lastUpdated: tagData.lastUpdated instanceof Date ? tagData.lastUpdated : new Date(tagData.lastUpdated),
-					};
-				});
+				if (!fetchedTags) {
+					throw new Error('La acción de obtener etiquetas no devolvió resultados.');
+				}
+
+				// FIXME: Las fechas vienen serializadas como strings. La corrección
+				// debe hacerse en la capa de datos/serialización.
+				const transformedTags = fetchedTags.map((tag) => ({
+					...tag,
+					createdAt: new Date(tag.createdAt),
+					updatedAt: new Date(tag.updatedAt),
+				}));
 
 				setTags(transformedTags);
 				viewLogger.info(`✅ ${transformedTags.length} etiquetas cargadas`);

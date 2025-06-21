@@ -1,39 +1,20 @@
 /**
- * @file Transformador principal para la entidad Tag
+ * @file Transformer para la entidad Tag
  * @module transformers/tag/transformer
- * @description Contiene la lógica para convertir un objeto Tag de Prisma a nuestro tipo canónico.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { TagWithRelations } from '@/types/entities/tag';
-import { TransformerError } from '@/utils/transformers/errors';
+import type { TagWithStats } from '@/types/entities/tag/types';
 import type { Prisma } from '@prisma/client';
 
-const logger = serverLogger.withContext('TagTransformer');
-
-// Define el tipo de payload de Prisma que esperamos, con las relaciones y conteos.
-type TagFromPrisma = Prisma.TagGetPayload<{
+export type PrismaTagWithCount = Prisma.TagGetPayload<{
 	include: {
-		images: true;
-		// videos: true; // ❌ ELIMINADO - No existe relación Tag-Video en Prisma
-		// albums: true; // ❌ ELIMINADO - No existe relación Tag-Album en Prisma
-		collections: true;
-		// characters: true; // ❌ ELIMINADO - No existe relación Tag-Character en Prisma
-		places: true;
-		worldItems: true;
-		concepts: true;
-		prompts: true;
-		notes: true;
-		wildcards: true;
-		properties: true;
-		groups: true;
 		_count: {
 			select: {
 				images: true;
-				// videos: true; // ❌ ELIMINADO - No existe relación Tag-Video en Prisma
-				// albums: true; // ❌ ELIMINADO - No existe relación Tag-Album en Prisma
+				videos: true;
+				albums: true;
 				collections: true;
-				// characters: true; // ❌ ELIMINADO - No existe relación Tag-Character en Prisma
+				characters: true;
 				places: true;
 				worldItems: true;
 				concepts: true;
@@ -48,66 +29,33 @@ type TagFromPrisma = Prisma.TagGetPayload<{
 }>;
 
 /**
- * 🔄 Transforma un objeto Tag de Prisma a nuestro tipo canónico TagWithRelations.
- *
- * @param prismaTag - El objeto Tag obtenido de Prisma.
- * @returns Un objeto TagWithRelations compatible con nuestra aplicación.
- * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
+ * Maps a Prisma Tag object (with counts) to the application-level TagWithStats type.
+ * @param prismaTag - The Prisma object for a tag, including relation counts.
+ * @returns The tag object with a calculated stats object, or null if input is null.
  */
-export function fromPrismaTag(prismaTag: TagFromPrisma | null): TagWithRelations {
+export function fromPrismaTag(prismaTag: PrismaTagWithCount | null): TagWithStats | null {
 	if (!prismaTag) {
-		throw new TransformerError('El objeto de tag de Prisma no puede ser nulo.');
+		return null;
 	}
 
-	try {
-		const { _count, sortBy, filters, ...baseData } = prismaTag;
+	const { _count, ...baseTag } = prismaTag;
 
-		return {
-			...baseData,
-			images: baseData.images ?? [],
-			// videos: baseData.videos ?? [], // ❌ ELIMINADO - No existe relación Tag-Video en Prisma
-			// albums: baseData.albums ?? [], // ❌ ELIMINADO - No existe relación Tag-Album en Prisma
-			collections: baseData.collections ?? [],
-			// characters: baseData.characters ?? [], // ❌ ELIMINADO - No existe relación Tag-Character en Prisma
-			places: baseData.places ?? [],
-			worldItems: baseData.worldItems ?? [],
-			concepts: baseData.concepts ?? [],
-			prompts: baseData.prompts ?? [],
-			notes: baseData.notes ?? [],
-			wildcards: baseData.wildcards ?? [],
-			properties: baseData.properties ?? [],
-			groups: baseData.groups ?? [],
-			_count: {
-				images: _count?.images ?? 0,
-				// videos: _count?.videos ?? 0, // ❌ ELIMINADO - No existe en esquema Prisma Tag
-				// albums: _count?.albums ?? 0, // ❌ ELIMINADO - No existe en esquema Prisma Tag
-				collections: _count?.collections ?? 0,
-				// characters: _count?.characters ?? 0, // ❌ ELIMINADO - No existe en esquema Prisma Tag
-				places: _count?.places ?? 0,
-				worldItems: _count?.worldItems ?? 0,
-				concepts: _count?.concepts ?? 0,
-				prompts: _count?.prompts ?? 0,
-				notes: _count?.notes ?? 0,
-				wildcards: _count?.wildcards ?? 0,
-				properties: _count?.properties ?? 0,
-				groups: _count?.groups ?? 0,
-			},
-		};
-	} catch (error) {
-		logger.error('Error transformando tag desde Prisma', {
-			error,
-			tagId: prismaTag.id,
-		});
-		throw new TransformerError(`Error al transformar el tag: ${(error as Error).message}`);
-	}
+	const totalAssociations = Object.values(_count).reduce((sum, count) => sum + (count || 0), 0);
+
+	return {
+		...baseTag,
+		// Aseguramos que los campos opcionales nulos se conviertan a undefined
+		description: baseTag.description ?? undefined,
+		shortcut: baseTag.shortcut ?? undefined,
+		featuredImage: baseTag.featuredImage ?? undefined,
+		_count,
+		totalAssociations,
+	};
 }
 
 /**
- * 🔄 Transforma una lista de tags de Prisma a una lista de TagWithRelations.
- *
- * @param prismaTags - Un array de objetos Tag de Prisma.
- * @returns Un array de objetos TagWithRelations.
+ * Transforma un array de Tag de Prisma a TagWithStats[]
  */
-export function fromPrismaTags(prismaTags: TagFromPrisma[]): TagWithRelations[] {
-	return prismaTags.map(fromPrismaTag);
+export function fromPrismaTags(prismaTags: PrismaTagWithCount[]): TagWithStats[] {
+	return prismaTags.map(fromPrismaTag).filter((t): t is TagWithStats => t !== null);
 }

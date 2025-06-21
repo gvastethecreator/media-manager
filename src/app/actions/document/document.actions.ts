@@ -2,7 +2,7 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { handlePrismaError } from '@/lib/errors';
-import { fromPrismaDocument, fromPrismaDocuments } from '@/transformers/document/transformer';
+import { fromPrismaDocument, fromPrismaDocuments } from '@/transformers/document';
 import type { DocumentFormData } from '@/types/entities/document/types';
 import { revalidatePath } from 'next/cache';
 

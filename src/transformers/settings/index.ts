@@ -144,7 +144,7 @@ export async function fromPrismaSettings<T>(settingsData: T): Promise<T> {
 	try {
 		return serializers.fromPrismaSettings(settingsData);
 	} catch (error) {
-		throw handleTransformerError(error);
+		throw handleTransformerError(error as Error);
 	}
 }
 
@@ -155,7 +155,7 @@ export async function toPrismaSettings<T>(settingsData: T): Promise<T> {
 	try {
 		return serializers.toPrismaSettings(settingsData);
 	} catch (error) {
-		throw handleTransformerError(error);
+		throw handleTransformerError(error as Error);
 	}
 }
 
@@ -166,7 +166,7 @@ export function deserializeSettingsJson<T>(settingsData: T): T {
 	try {
 		return serializers.deserializeSettingsJson(settingsData);
 	} catch (error) {
-		throw handleTransformerError(error);
+		throw handleTransformerError(error as Error);
 	}
 }
 
@@ -177,7 +177,7 @@ export function serializeSettingsJson<T>(settingsData: T): T {
 	try {
 		return serializers.serializeSettingsJson(settingsData);
 	} catch (error) {
-		throw handleTransformerError(error);
+		throw handleTransformerError(error as Error);
 	}
 }
 
@@ -188,7 +188,7 @@ export function validateSettings<T>(settingsData: T): T {
 	try {
 		return serializers.validateSettings(settingsData);
 	} catch (error) {
-		throw handleTransformerError(error);
+		throw handleTransformerError(error as Error);
 	}
 }
 
@@ -199,7 +199,7 @@ export function mapSettingsUpdateToPrisma<T, U>(updateData: T): U {
 	try {
 		return mappers.mapSettingsUpdateToPrisma(updateData);
 	} catch (error) {
-		throw handleTransformerError(error);
+		throw handleTransformerError(error as Error);
 	}
 }
 

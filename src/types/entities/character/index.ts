@@ -14,19 +14,11 @@ export {
     CharacterSortOption
 } from './enums';
 export type {
-    CharacterAttributes,
-    CharacterCard,
-    CharacterExtended,
-    CharacterInventoryItem,
-    CharacterListItem,
-    CharacterSummary,
-    CharacterViewConfig
-} from './extended';
-export type {
     CharacterWithRelations as Character, CharacterBase,
     CharacterComplete,
     CharacterCounts,
     CharacterCreateInput,
+    CharacterExtended,
     CharacterFilter,
     CharacterFilterItem,
     CharacterFilters,
@@ -34,7 +26,8 @@ export type {
     CharacterRelationship,
     CharacterSearchOptions,
     CharacterStats,
-    CharacterUpdateInput, CharacterWithRelations,
+    CharacterUpdateInput,
+    CharacterViewConfig, CharacterWithRelations,
     CreateCharacterData,
     UpdateCharacterData
 } from './types';

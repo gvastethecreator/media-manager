@@ -1,7 +1,8 @@
 // Mappers para JsonFile
 import type { JsonFileComplete } from '@/types/entities/json-file';
+import type { JsonFile as PrismaJsonFile } from '@prisma/client';
 
-export function fromPrismaJsonFile(prisma: any): JsonFileComplete {
+export function fromPrismaJsonFile(prisma: PrismaJsonFile): JsonFileComplete {
 	return {
 		id: prisma.id,
 		name: prisma.name,
@@ -12,7 +13,7 @@ export function fromPrismaJsonFile(prisma: any): JsonFileComplete {
 	};
 }
 
-export function toPrismaJsonFile(json: JsonFileComplete): any {
+export function toPrismaJsonFile(json: JsonFileComplete): PrismaJsonFile {
 	return {
 		id: json.id,
 		name: json.name,

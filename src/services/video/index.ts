@@ -4,4 +4,5 @@
  * @description Punto de entrada para el servicio de videos
  */
 
-export * from './video.service';
+// TODO: Implementar video.service.ts según la documentación en README.md
+// export * from './video.service';

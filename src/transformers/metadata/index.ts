@@ -3,15 +3,12 @@
  * @module transformers/metadata
  */
 
-import type { MetadataBase } from '@/types/entities/metadata/base';
-import type { MetadataExtended } from '@/types/entities/metadata/extended';
+import type { MetadataBase, MetadataExtended } from '@/types/entities/metadata';
 import {
-	extendMetadata,
-	formatBytes,
-	mapCreateMetadataDataToPrisma,
-	mapUpdateMetadataDataToPrisma,
-	toMetadataCard,
-	toMetadataListItem,
+    formatBytes,
+    fromPrismaMetadata,
+    mapCreateInputToPrisma,
+    mapUpdateInputToPrisma,
 } from './mappers';
 
 /**
@@ -23,7 +20,7 @@ export const transformMetadata = (metadata: MetadataBase | null): MetadataExtend
 	if (!metadata) return null;
 
 	try {
-		return extendMetadata(metadata);
+		return fromPrismaMetadata(metadata as any);
 	} catch (error) {
 		console.error('Error transformando metadata:', error);
 		return null;
@@ -45,10 +42,9 @@ export const transformMetadatas = (metadataArray: MetadataBase[] | null): Metada
 
 // Exportar todas las funciones útiles
 export {
-	extendMetadata,
-	formatBytes,
-	mapCreateMetadataDataToPrisma,
-	mapUpdateMetadataDataToPrisma,
-	toMetadataCard,
-	toMetadataListItem,
+    fromPrismaMetadata as extendMetadata,
+    formatBytes,
+    mapCreateInputToPrisma as mapCreateMetadataDataToPrisma,
+    mapUpdateInputToPrisma as mapUpdateMetadataDataToPrisma
 };
+

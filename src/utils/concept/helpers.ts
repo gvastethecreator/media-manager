@@ -128,8 +128,8 @@ export function calculateConceptsStats(concepts: ConceptBase[]): {
  * @returns Lista de conceptos relacionados
  */
 export function findRelatedConcepts(
-	concept: ConceptBase,
-	allConcepts: ConceptBase[],
+	concept: ConceptExtended,
+	allConcepts: ConceptExtended[],
 	maxResults = 5
 ): ConceptExtended[] {
 	try {
@@ -143,7 +143,7 @@ export function findRelatedConcepts(
 		const conceptTagsArray = Array.isArray(concept.tags)
 			? concept.tags
 			: typeof concept.tags === 'string'
-				? deserializeTags(concept.tags)
+				? deserializeTags(concept.tags as string)
 				: [];
 
 		const conceptCategory = concept.category || '';
@@ -158,10 +158,14 @@ export function findRelatedConcepts(
 			}
 
 			// Obtener las etiquetas del concepto a comparar
-			const cTagsArray = Array.isArray(c.tags) ? c.tags : typeof c.tags === 'string' ? deserializeTags(c.tags) : [];
+			const cTagsArray = Array.isArray(c.tags)
+				? c.tags
+				: typeof c.tags === 'string'
+					? deserializeTags(c.tags as string)
+					: [];
 
 			// Puntos por tags coincidentes
-			const commonTags = conceptTagsArray.filter((tag) => cTagsArray.includes(tag));
+			const commonTags = conceptTagsArray.filter((tag: string) => cTagsArray.includes(tag));
 			score += commonTags.length * 2;
 
 			return { concept: c, score };
@@ -185,24 +189,19 @@ export function findRelatedConcepts(
 
 		// Convertir a conceptos extendidos
 		return bestMatches.map((match) => {
-			// Desestructurar el concepto para extraer y manejar sus etiquetas
 			const { tags, ...rest } = match.concept;
+			const parsedTags = Array.isArray(tags) ? tags : typeof tags === 'string' ? deserializeTags(tags as string) : [];
 
-			// Parsear las etiquetas correctamente
-			const parsedTags = Array.isArray(tags) ? tags : typeof tags === 'string' ? deserializeTags(tags) : [];
-
-			// Construir el concepto extendido
 			return {
 				...rest,
 				tags,
 				parsedTags,
 				previewContent: match.concept.content ? `${match.concept.content.substring(0, 100)}...` : undefined,
-				lastUpdated:
-					match.concept.updatedAt instanceof Date ? match.concept.updatedAt : new Date(match.concept.updatedAt),
+				lastUpdated: match.concept.updatedAt,
 			};
 		});
 	} catch (error) {
-		helpersLogger.error('❌ Error al encontrar conceptos relacionados:', error);
+		helpersLogger.error('❌ Error al calcular conceptos relacionados:', error);
 		return [];
 	}
 }

@@ -1,4 +1,17 @@
 // Barrel de transformers para Workflow
-export * from './mappers';
+
+// Exportar desde mappers (renombrando la función conflictiva)
+export {
+    fromPrismaWorkflow as mapWorkflowFromPrisma,
+    toPrismaWorkflow
+} from './mappers';
+
+// Exportar desde serializers
 export * from './serializers';
-export * from './transformer';
+
+// Exportar desde transformer
+export {
+    fromPrismaWorkflow,
+    fromPrismaWorkflows
+} from './transformer';
+

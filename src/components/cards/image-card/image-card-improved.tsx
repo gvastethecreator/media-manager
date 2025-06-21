@@ -1,5 +1,9 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { formatDate } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import {
 	CalendarIcon,
 	CameraIcon,
@@ -14,10 +18,6 @@ import { motion } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { formatDate } from '@/lib/format';
-import { cn } from '@/lib/utils';
 import { getImageCardData, type ImageCardData } from './image-server-actions';
 
 interface ImageCardProps {
@@ -217,7 +217,7 @@ export function ImageCardImproved({
 				{imageData.thumbnailUrl ? (
 					<Image
 						src={imageData.thumbnailUrl}
-						alt={imageData.title || 'Imagen'}
+						alt={imageData.name || 'Imagen'}
 						fill
 						sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
 						className="object-cover rounded-t-lg"
@@ -239,7 +239,7 @@ export function ImageCardImproved({
 					{/* Información en overlay */}
 					<div className="absolute bottom-0 left-0 right-0 p-3">
 						<h3 className="text-white font-medium line-clamp-1 text-sm sm:text-base">
-							{imageData.title || 'Sin título'}
+							{imageData.name || 'Sin título'}
 						</h3>
 
 						{showDetails && (
@@ -288,7 +288,7 @@ export function ImageCardImproved({
 					{/* Título e información principal */}
 					<div className="flex justify-between items-start mb-2">
 						<h3 className={cn('font-medium line-clamp-1', isTcgMode ? 'text-white' : 'text-foreground')}>
-							{imageData.title || 'Sin título'}
+							{imageData.name || 'Sin título'}
 						</h3>
 
 						{imageData.isFavorite && !isTcgMode && <StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />}
@@ -306,7 +306,7 @@ export function ImageCardImproved({
 						{imageData.folderId && (
 							<div className="flex items-center text-xs text-muted-foreground gap-1">
 								<FolderIcon className="w-3 h-3" />
-								<span className="truncate">{imageData.folderName || 'Carpeta'}</span>
+								<span className="truncate">{'Carpeta'}</span>
 							</div>
 						)}
 
@@ -386,10 +386,10 @@ export function ImageCardImproved({
 		</motion.div>
 	);
 
-	// Si hay un enlace específico, envolver en un Link
-	if (imageData.href && !onClick) {
+	// Si no hay onClick, envolver en un Link para navegación
+	if (!onClick) {
 		return (
-			<Link href={imageData.href} className="block h-full">
+			<Link href={`/images/${imageData.id}`} className="block h-full">
 				{cardContent}
 			</Link>
 		);

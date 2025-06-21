@@ -1,22 +1,5 @@
 'use client';
 
-import {
-	FileSpreadsheet,
-	Filter,
-	FolderUp,
-	Grid3X3,
-	ImagePlus,
-	ImportIcon,
-	Plus,
-	RefreshCw,
-	SlidersHorizontal,
-	Trash2,
-	UploadCloud,
-	X,
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import type * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
 import { getUploadedImageStats, uploadImages } from '@/app/actions/uploaded-images/uploaded-images.actions';
 import {
 	AlertDialog,
@@ -47,6 +30,23 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import toastService from '@/services/toast.service';
 import type { UploadedImageStats } from '@/types/uploaded-images';
+import {
+	FileSpreadsheet,
+	Filter,
+	FolderUp,
+	Grid3X3,
+	ImagePlus,
+	ImportIcon,
+	Plus,
+	RefreshCw,
+	SlidersHorizontal,
+	Trash2,
+	UploadCloud,
+	X,
+} from 'lucide-react';
+import { motion } from 'motion/react';
+import type * as React from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 
 const sectionLogger = clientLogger.withContext('UploadedImagesSettings');
 
@@ -56,6 +56,14 @@ export function UploadedImagesSettings() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isUploading, setIsUploading] = useState(false);
 	const [showFilters, setShowFilters] = useState(false);
+
+	const idImageUpload = useId();
+	const idSearchImages = useId();
+	const idTypeFilter = useId();
+	const idBulkImageUpload = useId();
+	const idImportType = useId();
+	const idImportCategory = useId();
+	const idOptimizeImport = useId();
 
 	// Cargar estadísticas de imágenes
 	const loadStats = useCallback(async () => {
@@ -176,7 +184,7 @@ export function UploadedImagesSettings() {
 							{isUploading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
 						</Button>
 						<Input
-							id="image-upload"
+							id={idImageUpload}
 							type="file"
 							multiple
 							accept="image/*"
@@ -199,17 +207,17 @@ export function UploadedImagesSettings() {
 						<CardContent className="p-3 space-y-3">
 							<div className="grid grid-cols-2 gap-3">
 								<div className="space-y-1">
-									<Label htmlFor="search-images" className="text-xs">
+									<Label htmlFor={idSearchImages} className="text-xs">
 										Buscar
 									</Label>
-									<Input id="search-images" placeholder="Nombre de imagen..." className="h-8 text-xs" />
+									<Input id={idSearchImages} placeholder="Nombre de imagen..." className="h-8 text-xs" />
 								</div>
 								<div className="space-y-1">
-									<Label htmlFor="type-filter" className="text-xs">
+									<Label htmlFor={idTypeFilter} className="text-xs">
 										Tipo
 									</Label>
 									<select
-										id="type-filter"
+										id={idTypeFilter}
 										className="h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 									>
 										<option value="">Todos los tipos</option>
@@ -433,7 +441,7 @@ export function UploadedImagesSettings() {
 									<p className="text-sm font-medium">Arrastra y suelta imágenes aquí</p>
 									<p className="text-xs text-muted-foreground mt-1">O haz clic para seleccionar archivos</p>
 									<Input
-										id="bulk-image-upload"
+										id={idBulkImageUpload}
 										type="file"
 										multiple
 										accept="image/*"
@@ -457,10 +465,10 @@ export function UploadedImagesSettings() {
 									<Label className="text-sm font-medium">Ajustes de importación</Label>
 									<div className="grid grid-cols-2 gap-2">
 										<div className="space-y-1">
-											<Label htmlFor="import-type" className="text-xs">
+											<Label htmlFor={idImportType} className="text-xs">
 												Tipo predeterminado
 											</Label>
-											<select id="import-type" className="w-full h-8 rounded-md border text-xs">
+											<select id={idImportType} className="w-full h-8 rounded-md border text-xs">
 												<option value="thumbnail">Miniatura</option>
 												<option value="avatar">Avatar</option>
 												<option value="icon">Icono</option>
@@ -468,10 +476,10 @@ export function UploadedImagesSettings() {
 											</select>
 										</div>
 										<div className="space-y-1">
-											<Label htmlFor="import-category" className="text-xs">
+											<Label htmlFor={idImportCategory} className="text-xs">
 												Categoría predeterminada
 											</Label>
-											<select id="import-category" className="w-full h-8 rounded-md border text-xs">
+											<select id={idImportCategory} className="w-full h-8 rounded-md border text-xs">
 												<option value="user">Usuario</option>
 												<option value="system">Sistema</option>
 												<option value="ui">Interfaz</option>
@@ -479,8 +487,8 @@ export function UploadedImagesSettings() {
 										</div>
 									</div>
 									<div className="flex items-center space-x-2 mt-2">
-										<Switch id="optimize-import" />
-										<Label htmlFor="optimize-import" className="text-xs">
+										<Switch id={idOptimizeImport} />
+										<Label htmlFor={idOptimizeImport} className="text-xs">
 											Optimizar al importar
 										</Label>
 									</div>

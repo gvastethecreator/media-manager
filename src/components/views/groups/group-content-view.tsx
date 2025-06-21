@@ -1,8 +1,5 @@
 'use client';
 
-import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
-import { useParams } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
 import { getGroup } from '@/app/actions/groups/group.actions';
 import { LoadingScreen } from '@/components/core/feedback';
 import { useNavigationStore } from '@/components/navigation/navigation.store';
@@ -10,6 +7,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
+import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import type { ViewProps } from '../types';
 
 const logger = clientLogger.withContext('GroupContentView');
@@ -85,7 +85,7 @@ export function GroupContentView(_props: ViewProps) {
 				<div className="mb-6 flex items-center gap-4">
 					<div
 						className="flex items-center justify-center w-14 h-14 rounded-full text-3xl"
-						style={{ backgroundColor: `${group.color}25` || '#60a5fa25' }}
+						style={{ backgroundColor: `${group.color ?? '#60a5fa'}25` }}
 					>
 						{group.emoji || '📂'}
 					</div>
@@ -123,19 +123,19 @@ export function GroupContentView(_props: ViewProps) {
 					{/* Contenido de cada pestaña */}
 					<TabsContent value="all" className="space-y-4">
 						<p className="text-center text-muted-foreground py-10">
-							Este grupo contiene {group.totalEntities || 0} entidades en total
+							Este grupo contiene {group._count?.images ?? 0} entidades en total
 						</p>
 					</TabsContent>
 
 					<TabsContent value="images" className="space-y-4">
 						<p className="text-center text-muted-foreground py-10">
-							Este grupo contiene {group._count?.images || 0} imágenes
+							Este grupo contiene {group._count?.images ?? 0} imágenes
 						</p>
 					</TabsContent>
 
 					<TabsContent value="tags" className="space-y-4">
 						<p className="text-center text-muted-foreground py-10">
-							Este grupo contiene {group._count?.tags || 0} tags
+							Este grupo contiene {group._count?.tags ?? 0} tags
 						</p>
 					</TabsContent>
 
@@ -143,7 +143,7 @@ export function GroupContentView(_props: ViewProps) {
 						<p className="text-center text-muted-foreground py-10">Este grupo contiene entidades de diferentes tipos</p>
 						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 							{/* Álbums */}
-							{(group._count?.albums || 0) > 0 && (
+							{(group._count?.albums ?? 0) > 0 && (
 								<div className="p-4 rounded-lg border bg-background hover:shadow-md transition-shadow">
 									<p className="font-medium">Álbumes</p>
 									<p className="text-lg font-bold">{group._count?.albums}</p>
@@ -151,7 +151,7 @@ export function GroupContentView(_props: ViewProps) {
 							)}
 
 							{/* Colecciones */}
-							{(group._count?.collections || 0) > 0 && (
+							{(group._count?.collections ?? 0) > 0 && (
 								<div className="p-4 rounded-lg border bg-background hover:shadow-md transition-shadow">
 									<p className="font-medium">Colecciones</p>
 									<p className="text-lg font-bold">{group._count?.collections}</p>
@@ -159,7 +159,7 @@ export function GroupContentView(_props: ViewProps) {
 							)}
 
 							{/* Personajes */}
-							{(group._count?.characters || 0) > 0 && (
+							{(group._count?.characters ?? 0) > 0 && (
 								<div className="p-4 rounded-lg border bg-background hover:shadow-md transition-shadow">
 									<p className="font-medium">Personajes</p>
 									<p className="text-lg font-bold">{group._count?.characters}</p>
@@ -167,7 +167,7 @@ export function GroupContentView(_props: ViewProps) {
 							)}
 
 							{/* Lugares */}
-							{(group._count?.places || 0) > 0 && (
+							{(group._count?.places ?? 0) > 0 && (
 								<div className="p-4 rounded-lg border bg-background hover:shadow-md transition-shadow">
 									<p className="font-medium">Lugares</p>
 									<p className="text-lg font-bold">{group._count?.places}</p>

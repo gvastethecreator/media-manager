@@ -23,7 +23,7 @@ export interface VideoCoreState {
 	videos: Record<string, VideoComplete>;
 	isLoading: boolean;
 	error: string | null;
-	lastUpdated: number | null;
+	lastUpdated: Date | null;
 }
 
 /**

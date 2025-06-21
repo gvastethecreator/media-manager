@@ -3,19 +3,17 @@
  * @module types/entities/uploaded-image
  */
 
-export * from './transformers';
-export * from './types';
 export type {
-	UploadedImageBase,
-	UploadedImageCreateInput,
-	UploadedImageDimensions,
-	UploadedImageExtended,
-	UploadedImageUpdateInput,
+    UploadedImageBase,
+    UploadedImageCreateInput,
+    UploadedImageDimensions,
+    UploadedImageExtended,
+    UploadedImageUpdateInput
 } from './types';
 
 export {
-	UploadedFileType,
-	UploadedImageSchema,
-	// Alias para retrocompatibilidad
-	UploadedFileType as UploadedImageType,
+    UploadedFileType, UploadedImageSchema,
+    // Alias para retrocompatibilidad
+    UploadedFileType as UploadedImageType
 } from './types';
+

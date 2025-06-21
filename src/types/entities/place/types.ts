@@ -1,12 +1,23 @@
 /**
  * @file Tipos canónicos para la entidad Place
  * @module types/entities/place/types
- * @description Define las estructuras de datos, inputs de creación/actualización y filtros para la entidad Place.
+ * @description Define las estructuras de datos, inputs y tipos para la entidad Place.
  */
 
-/**
- * 🗺️ Tipo base canónico para Place - CORREGIDO para coincidir exactamente con Prisma
- */
+import type { AlbumComplete } from '../album';
+import type { CharacterComplete } from '../character';
+import type { CollectionComplete } from '../collection';
+import type { ConceptComplete } from '../concept';
+import type { GroupComplete } from '../group';
+import type { ImageComplete } from '../image';
+import type { NoteComplete } from '../note';
+import type { PromptComplete } from '../prompt';
+import type { PropertyComplete } from '../property';
+import type { TagComplete } from '../tag';
+import type { VideoComplete } from '../video';
+import type { WildcardComplete } from '../wildcard';
+import type { WorldItemComplete } from '../world-item';
+
 export interface PlaceBase {
 	id: string;
 	name: string;
@@ -16,147 +27,29 @@ export interface PlaceBase {
 	shortcut: string | null;
 	category: string | null;
 	sortBy: string;
-	filters: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+
 	// Atributos del lugar
 	region: string;
 	type: string;
 	climate: string;
 	population: number;
 	government: string;
-	// Características detalladas (JSON serializado)
-	dangers: string;
-	resources: string;
 	lore: string;
 	history: string;
-	stats: string;
-	// Propiedades de visualización
-	featuredImage: string | null;
-	isFavorite: boolean;
-	createdAt: Date;
-	updatedAt: Date;
+
+	// Campos JSON como strings
+	filters: string | null;
+	dangers: string | null;
+	resources: string | null;
+	stats: string | null;
 }
 
 /**
- * 🎯 Alias para compatibilidad
- */
-export type Place = PlaceBase;
-
-/**
- * 🛠️ Relaciones que puede tener un Lugar.
- * Define las entidades que pueden estar conectadas a un lugar.
- */
-export interface PlaceRelationInput {
-	images?: { id: string }[];
-	videos?: { id: string }[];
-	albums?: { id: string }[];
-	collections?: { id: string }[];
-	tags?: { id: string }[];
-	characters?: { id: string }[];
-	worldItems?: { id: string }[];
-	concepts?: { id: string }[];
-	prompts?: { id: string }[];
-	notes?: { id: string }[];
-	wildcards?: { id: string }[];
-	properties?: { id: string }[];
-	groups?: { id: string }[];
-}
-
-/**
- * ➕ Input para crear un nuevo lugar.
- * Hereda los campos escalares y añade las relaciones opcionales.
- */
-export interface PlaceCreateInput
-	extends Omit<Place, 'id' | 'createdAt' | 'updatedAt' | 'dangers' | 'resources' | 'stats'>,
-		PlaceRelationInput {
-	dangers?: string;
-	resources?: string;
-	stats?: string;
-}
-
-/**
- * 🔄 Input para actualizar un lugar existente.
- * Permite actualizar campos escalares y conectar/desconectar relaciones.
- */
-export interface PlaceUpdateInput extends Partial<Omit<Place, 'id' | 'createdAt' | 'updatedAt'>> {
-	connect?: PlaceRelationInput;
-	disconnect?: PlaceRelationInput;
-}
-
-/**
- * 🔍 Filtros para buscar y filtrar lugares.
- */
-export interface PlaceFilters {
-	search?: string;
-	category?: string;
-	type?: string;
-	region?: string;
-	isFavorite?: boolean;
-	tags?: string[];
-	characters?: string[];
-	minImageCount?: number;
-}
-
-/**
- * ⚙️ Opciones para las consultas de búsqueda de lugares.
- * Incluye paginación, ordenación y filtros.
- */
-export interface PlaceSearchOptions {
-	skip?: number;
-	take?: number;
-	orderBy?: Record<string, 'asc' | 'desc'>;
-	filters?: PlaceFilters;
-	include?: Record<string, boolean>;
-}
-
-/**
- * ✨ Tipo de un lugar con todas sus relaciones anidadas.
- * CORREGIDO: Solo incluye relaciones que existen en el esquema Prisma.
- */
-export type PlaceWithRelations = Place & {
-	images?: { id: string }[];
-	videos?: { id: string }[];
-	albums?: { id: string }[];
-	collections?: { id: string }[];
-	tags?: { id: string }[];
-	characters?: { id: string }[];
-	worldItems?: { id: string }[];
-	concepts?: { id: string }[];
-	prompts?: { id: string }[];
-	notes?: { id: string }[];
-	wildcards?: { id: string }[];
-	properties?: { id: string }[];
-	groups?: { id: string }[];
-};
-
-/**
- * 🔢 Tipo de un lugar con los conteos de sus relaciones.
- */
-export type PlaceWithCounts = Place & {
-	_count: {
-		images: number;
-		videos: number;
-		albums: number;
-		collections: number;
-		tags: number;
-		characters: number;
-		worldItems: number;
-		concepts: number;
-		prompts: number;
-		notes: number;
-		wildcards: number;
-		properties: number;
-		groups: number;
-	};
-};
-
-/**
- * 🌟 Tipo completo de un lugar, con relaciones y conteos.
- */
-export type PlaceComplete = PlaceWithRelations & PlaceWithCounts;
-
-/**
-/**
- * Tipos JSON utilizados en campos de lugar
+ * Tipos para los campos JSON serializados en el modelo Place
  */
 export interface PlaceDanger {
 	name: string;
@@ -181,6 +74,153 @@ export interface PlaceStats {
 	technology: number;
 	magic?: number;
 	influence?: number;
+}
+
+/**
+ * 🗺️ Tipo completo para Place con todas las relaciones y campos JSON deserializados.
+ */
+export interface PlaceComplete {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	description: string | null;
+	shortcut: string | null;
+	category: string | null;
+	sortBy: string;
+	featuredImage: string | null;
+	isFavorite: boolean;
+	createdAt: Date;
+	updatedAt: Date;
+
+	// Atributos del lugar
+	region: string;
+	type: string;
+	climate: string;
+	population: number;
+	government: string;
+	lore: string;
+	history: string;
+
+	// Campos JSON deserializados
+	filters: Record<string, any> | null;
+	dangers: PlaceDanger[];
+	resources: PlaceResource[];
+	stats: PlaceStats | null;
+
+	// Relaciones
+	images?: ImageComplete[];
+	videos?: VideoComplete[];
+	albums?: AlbumComplete[];
+	collections?: CollectionComplete[];
+	tags?: TagComplete[];
+	characters?: CharacterComplete[];
+	worldItems?: WorldItemComplete[];
+	concepts?: ConceptComplete[];
+	prompts?: PromptComplete[];
+	notes?: NoteComplete[];
+	wildcards?: WildcardComplete[];
+	properties?: PropertyComplete[];
+	groups?: GroupComplete[];
+
+	// Conteos
+	_count?: {
+		images?: number;
+		videos?: number;
+		albums?: number;
+		collections?: number;
+		tags?: number;
+		characters?: number;
+		worldItems?: number;
+		concepts?: number;
+		prompts?: number;
+		notes?: number;
+		wildcards?: number;
+		properties?: number;
+		groups?: number;
+	};
+}
+
+/**
+ * 📍 Tipo para items en listados de lugares.
+ */
+export interface PlaceListItem {
+	id: string;
+	name: string;
+	emoji: string;
+	color: string;
+	category: string | null;
+	type: string;
+	isFavorite: boolean;
+	itemType: 'place';
+}
+
+/**
+ * ➕ Input para crear un nuevo lugar.
+ */
+export interface PlaceCreateInput {
+	name: string;
+	emoji?: string;
+	color?: string;
+	description?: string | null;
+	shortcut?: string | null;
+	category?: string | null;
+	sortBy?: string;
+	region?: string;
+	type?: string;
+	climate?: string;
+	population?: number;
+	government?: string;
+	lore?: string;
+	history?: string;
+	featuredImage?: string | null;
+	isFavorite?: boolean;
+
+	// Campos JSON
+	filters?: Record<string, any>;
+	dangers?: PlaceDanger[];
+	resources?: PlaceResource[];
+	stats?: PlaceStats;
+
+	// IDs de relaciones
+	imageIds?: string[];
+	videoIds?: string[];
+	albumIds?: string[];
+	collectionIds?: string[];
+	tagIds?: string[];
+	characterIds?: string[];
+	worldItemIds?: string[];
+	conceptIds?: string[];
+	promptIds?: string[];
+	noteIds?: string[];
+	wildcardIds?: string[];
+	propertyIds?: string[];
+	groupIds?: string[];
+}
+
+/**
+ * 🔄 Input para actualizar un lugar existente.
+ */
+export type PlaceUpdateInput = Partial<PlaceCreateInput>;
+
+/**
+ * 🔍 Opciones para buscar y filtrar lugares.
+ */
+export interface PlaceSearchOptions {
+	skip?: number;
+	take?: number;
+	orderBy?: Record<string, 'asc' | 'desc'>;
+	filters?: {
+		search?: string;
+		category?: string;
+		type?: string;
+		region?: string;
+		isFavorite?: boolean;
+		tags?: string[];
+		characters?: string[];
+		minImageCount?: number;
+	};
+	includeRelations?: boolean;
 }
 
 // Re-exportar enums si es necesario
@@ -208,6 +248,17 @@ export enum PlaceType {
 	TEMPLE = 'temple',
 	CASTLE = 'castle',
 	OTHER = 'other',
+}
+
+export enum PlaceSortCriteria {
+	NAME_ASC = 'name_asc',
+	NAME_DESC = 'name_desc',
+	UPDATED_ASC = 'updatedAt_asc',
+	UPDATED_DESC = 'updatedAt_desc',
+	CREATED_ASC = 'createdAt_asc',
+	CREATED_DESC = 'createdAt_desc',
+	POPULATION_ASC = 'population_asc',
+	POPULATION_DESC = 'population_desc',
 }
 
 export enum PlaceViewMode {

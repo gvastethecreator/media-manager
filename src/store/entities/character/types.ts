@@ -4,19 +4,19 @@
  */
 
 import type {
-    CharacterBase,
-    CharacterExtended,
-    CharacterFilterItem,
-    CharacterViewConfig
+	CharacterBase,
+	CharacterExtended,
+	CharacterFilterItem,
+	CharacterViewConfig,
 } from '@/types/entities/character';
 
 // Importar enums desde el archivo de enums
 import {
-    CharacterAlignment,
-    CharacterCategory,
-    CharacterClass,
-    CharacterRace,
-    CharacterSortOption,
+	CharacterAlignment,
+	CharacterCategory,
+	CharacterClass,
+	CharacterRace,
+	CharacterSortOption,
 } from '@/types/entities/character/enums';
 
 /**

@@ -1,24 +1,9 @@
 /**
- * @file Punto de entrada para todos los transformadores de UploadedImage
+ * @file Punto de entrada para los módulos de transformación de UploadedImage
  * @module transformers/uploaded-image
+ * @description Exporta todos los componentes necesarios (mappers, serializers, transformers) para la entidad UploadedImage.
  */
 
-// Importar explícitamente lo necesario para los alias
-import { fromDBToBase, toDBRecord, toExtended } from './transformer';
-
-// Exportar transformadores (se puede excluir lo ya importado si se prefiere, pero no es necesario)
-export {
-	fromDBToBase,
-	toDBRecord,
-	toExtended,
-	transformUploadedImage,
-	transformUploadedImages,
-	type UploadedImageDBRecord,
-	type UploadedImageResult,
-} from './transformer';
-
-// Exportar alias para mayor compatibilidad con el código existente
-// Ahora 'toExtended', 'fromDBToBase' y 'toDBRecord' están definidos en este scope
-export const transformUploadedImageToExtended = toExtended;
-export const fromDB = fromDBToBase;
-export const toDB = toDBRecord;
+export * from './mappers';
+export * from './serializers';
+export * from './transformer';

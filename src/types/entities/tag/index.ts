@@ -5,10 +5,5 @@
  * @updated 2025-06-21
  */
 
-// Exportar esquemas de validación si existen
-export * from './schema';
-
-// Tipo principal para Tag (para compatibilidad con código legacy)
-export type { Tag, TagWithRelations } from './types';
-// Exportar todos los tipos canónicos
+// Exportar todos los tipos canónicos de la entidad.
 export * from './types';

@@ -4,18 +4,17 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-	FavoriteBase,
-	FavoriteCreateInput,
-	FavoriteExtended,
-	FavoriteFilters,
-	FavoriteUpdateInput,
-} from '@/types/entities/favorite';
 import {
-	FAVORITE_ENTITY_COLORS,
-	FAVORITE_ENTITY_DISPLAY_NAMES,
-	FAVORITE_ENTITY_EMOJIS,
+    FAVORITE_ENTITY_COLORS,
+    FAVORITE_ENTITY_DISPLAY_NAMES,
+    FAVORITE_ENTITY_EMOJIS,
+    type FavoriteBase,
+    type FavoriteCreateInput,
+    type FavoriteExtended,
+    type FavoriteFilters,
+    type FavoriteUpdateInput,
 } from '@/types/entities/favorite';
+import type { Prisma } from '@prisma/client';
 
 const mappersLogger = serverLogger.withContext('Favorite:Mappers');
 
@@ -53,8 +52,8 @@ export function toFavoritesExtended(favorites: FavoriteBase[]): FavoriteExtended
  * @param filters Filtros de favoritos
  * @returns Objeto de consulta para Prisma
  */
-export function mapFavoriteFiltersToPrisma(filters: FavoriteFilters): any {
-	const prismaQuery: any = {
+export function mapFavoriteFiltersToPrisma(filters: FavoriteFilters): Prisma.FavoriteFindManyArgs {
+	const prismaQuery: Prisma.FavoriteFindManyArgs = {
 		where: {},
 		take: filters.limit || 20,
 		skip: filters.offset || 0,
@@ -63,8 +62,8 @@ export function mapFavoriteFiltersToPrisma(filters: FavoriteFilters): any {
 		},
 	};
 
-	if (filters.entityType) {
-		prismaQuery.where.entityType = filters.entityType;
+	if (filters.entityType && filters.entityType.length > 0) {
+		prismaQuery.where.entityType = { in: filters.entityType };
 	}
 
 	if (filters.userId) {
@@ -79,7 +78,7 @@ export function mapFavoriteFiltersToPrisma(filters: FavoriteFilters): any {
  * @param data Datos de creación
  * @returns Datos formateados para Prisma
  */
-export function mapCreateFavoriteDataToPrisma(data: FavoriteCreateInput): any {
+export function mapCreateFavoriteDataToPrisma(data: FavoriteCreateInput): Prisma.FavoriteCreateInput {
 	return {
 		entityId: data.entityId,
 		entityType: data.entityType,
@@ -92,7 +91,7 @@ export function mapCreateFavoriteDataToPrisma(data: FavoriteCreateInput): any {
  * @param data Datos de actualización
  * @returns Datos formateados para Prisma
  */
-export function mapUpdateFavoriteDataToPrisma(data: FavoriteUpdateInput): any {
+export function mapUpdateFavoriteDataToPrisma(data: FavoriteUpdateInput): Prisma.FavoriteUpdateInput {
 	const { id, ...updateData } = data;
 	return updateData;
 }
