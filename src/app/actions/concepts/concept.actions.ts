@@ -51,7 +51,7 @@ export async function getConceptById(id: string): Promise<ConceptComplete | null
 		return fromPrismaConcept(concept);
 	} catch (error) {
 		console.error(`Error al obtener el concepto con ID ${id}:`, error);
-		throw new Error(`No se pudo obtener el concepto.`);
+		throw new Error('No se pudo obtener el concepto.');
 	}
 }
 
