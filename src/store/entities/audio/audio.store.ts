@@ -4,12 +4,54 @@
  * @description Store Zustand para gestionar el estado de audios
  */
 
-import { createAudio, deleteAudio, getAudios, updateAudio } from '@/app/actions/audio/audio.actions';
-import type { AudioComplete, AudioFilters, AudioFormData } from '@/types/entities/audio/types';
+import {
+    createAudio,
+    deleteAudio,
+    getAudios,
+    updateAudio,
+} from '@/app/actions/audio/audio.actions';
+import type { AudioWithStats } from '@/types/entities/audio';
 import { createSelectors } from '@/utils/store/create-selectors';
+import type { Prisma } from '@prisma/client';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type { AudioState } from './types';
+
+// Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
+export type AudioFilters = Record<string, any>;
+
+/**
+ * 🏪 Estado del store de Audio
+ */
+export interface AudioState {
+	// Estado de datos
+	audios: AudioWithStats[];
+	selectedAudios: AudioWithStats[];
+	currentAudio: AudioWithStats | null;
+
+	// Estado de UI
+	loading: boolean;
+	error: string | null;
+	filters: AudioFilters;
+
+	// Acciones de datos
+	fetchAudios: () => Promise<void>;
+	createAudio: (data: Prisma.AudioCreateInput) => Promise<AudioWithStats | undefined>;
+	updateAudio: (id: string, data: Prisma.AudioUpdateInput) => Promise<AudioWithStats | undefined>;
+	deleteAudio: (id: string) => Promise<void>;
+
+	// Acciones de selección
+	selectAudio: (audio: AudioWithStats) => void;
+	deselectAudio: (audioId: string) => void;
+	clearSelection: () => void;
+
+	// Acciones de filtrado
+	setFilters: (filters: Partial<AudioFilters>) => void;
+	clearFilters: () => void;
+
+	// Utilidades
+	getAudioById: (id: string) => AudioWithStats | undefined;
+	toggleFavorite: (id: string) => Promise<void>;
+}
 
 const useAudioStoreBase = create<AudioState>()(
 	devtools(
@@ -33,7 +75,7 @@ const useAudioStoreBase = create<AudioState>()(
 				}
 			},
 
-			createAudio: async (data: AudioFormData) => {
+			createAudio: async (data: Prisma.AudioCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newAudio = await createAudio(data);
@@ -48,7 +90,7 @@ const useAudioStoreBase = create<AudioState>()(
 				}
 			},
 
-			updateAudio: async (id: string, data: AudioFormData) => {
+			updateAudio: async (id: string, data: Prisma.AudioUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedAudio = await updateAudio(id, data);
@@ -80,7 +122,7 @@ const useAudioStoreBase = create<AudioState>()(
 			},
 
 			// Acciones de selección
-			selectAudio: (audio: AudioComplete) => {
+			selectAudio: (audio: AudioWithStats) => {
 				set((state) => ({
 					selectedAudios: [...state.selectedAudios, audio],
 					currentAudio: audio,
@@ -117,7 +159,6 @@ const useAudioStoreBase = create<AudioState>()(
 				const audio = get().getAudioById(id);
 				if (audio) {
 					await get().updateAudio(id, {
-						...audio,
 						isFavorite: !audio.isFavorite,
 					});
 				}

@@ -1,8 +1,7 @@
 import type { Prisma } from '@prisma/client';
-import type { JSONContent } from '@tiptap/core';
 
-import type { EntityWithStats } from '@/types/entities/entity.types';
-import type { WithCounts } from '@/types/prisma.types';
+// TODO: Estos tipos genéricos deben moverse a un archivo centralizado, por ejemplo, src/types/common/entities.ts
+export type EntityWithStats<T, S> = T & { stats: S };
 
 // ----------------------------------------------------------------
 
@@ -45,13 +44,19 @@ export interface PlaceStatistics {
  * Extiende el tipo de Prisma para incluir los conteos de relaciones.
  * Optimizado para consultas eficientes que solo necesitan los conteos, no los datos completos.
  */
-export type PrismaPlaceWithCounts = WithCounts<
-  PlaceBase,
-  'images' | 'tags' | 'notes' | 'characters' | 'collections' | 'concepts'
->;
+export type PrismaPlaceWithCounts = PlaceBase & {
+  _count: {
+    images?: number;
+    tags?: number;
+    notes?: number;
+    characters?: number;
+    collections?: number;
+    concepts?: number;
+  };
+};
 
 /**
- * 🗺️ PLACE WITH STATS
+ * ��️ PLACE WITH STATS
  *
  * El tipo principal y enriquecido para la entidad Place.
  * Combina el tipo base con las estadísticas calculadas, proporcionando una vista completa.
@@ -82,7 +87,7 @@ export type PlaceUpdateInput = Prisma.PlaceUncheckedUpdateInput;
  */
 export type PlacePreview = Pick<
   PlaceBase,
-  'id' | 'name' | 'description' | 'createdAt' | 'updatedAt' | 'latitude' | 'longitude'
+  'id' | 'name' | 'description' | 'createdAt' | 'updatedAt'
 > & {
   imageUrl?: string;
 };

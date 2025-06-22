@@ -1,20 +1,15 @@
 /**
- * @file Exportaciones principales de tipos para la entidad Audio
+ * @file Exportaciones principales de tipos para la entidad Audio.
  * @module types/entities/audio
- * @description Exportaciones simplificadas basadas en el schema real de Prisma
+ * @description
+ *   Este archivo centraliza todas las exportaciones de tipos para la entidad Audio.
+ *   El tipo canónico para usar en la aplicación es **`AudioWithStats`**.
  */
 
-// Exportar los tipos principales
 export type {
-	Audio,
-	AudioBase,
-	AudioComplete,
-	AudioCounts,
-	AudioCreateInput,
-	AudioFilters,
-	AudioFormData,
-	AudioSearchOptions,
-	AudioSearchResult,
-	AudioUpdateInput,
-	AudioWithCounts,
-} from './types';
+    AudioBase,
+    AudioStatistics,
+    AudioWithStats
+} from './base';
+
+// export * from './audio.schema'; // Descomentar cuando se creen los esquemas Zod

@@ -4,20 +4,29 @@
  * @description Store Zustand para gestionar el estado de archivos 3D
  */
 
-import { createFile3D, deleteFile3D, getFile3Ds, updateFile3D } from '@/app/actions/file3d/file-3d.actions';
-import type { File3DComplete, File3DFilters, File3DFormData } from '@/types/entities/file-3d/types';
+import {
+    createFile3D,
+    deleteFile3D,
+    getFile3Ds,
+    updateFile3D,
+} from '@/app/actions/file3d/file-3d.actions';
+import type { File3DWithStats } from '@/types/entities/file3d';
 import { createSelectors } from '@/utils/store/create-selectors';
+import type { Prisma } from '@prisma/client';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+
+// Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
+export type File3DFilters = Record<string, any>;
 
 /**
  * 🏪 Estado del store de File3D
  */
 export interface File3DState {
 	// Estado de datos
-	file3Ds: File3DComplete[];
-	selectedFile3Ds: File3DComplete[];
-	currentFile3D: File3DComplete | null;
+	file3Ds: File3DWithStats[];
+	selectedFile3Ds: File3DWithStats[];
+	currentFile3D: File3DWithStats | null;
 
 	// Estado de UI
 	loading: boolean;
@@ -26,12 +35,12 @@ export interface File3DState {
 
 	// Acciones de datos
 	fetchFile3Ds: () => Promise<void>;
-	createFile3D: (data: File3DFormData) => Promise<File3DComplete | undefined>;
-	updateFile3D: (id: string, data: File3DFormData) => Promise<File3DComplete | undefined>;
+	createFile3D: (data: Prisma.File3DCreateInput) => Promise<File3DWithStats | undefined>;
+	updateFile3D: (id: string, data: Prisma.File3DUpdateInput) => Promise<File3DWithStats | undefined>;
 	deleteFile3D: (id: string) => Promise<void>;
 
 	// Acciones de selección
-	selectFile3D: (file3D: File3DComplete) => void;
+	selectFile3D: (file3D: File3DWithStats) => void;
 	deselectFile3D: (file3DId: string) => void;
 	clearSelection: () => void;
 
@@ -40,7 +49,7 @@ export interface File3DState {
 	clearFilters: () => void;
 
 	// Utilidades
-	getFile3DById: (id: string) => File3DComplete | undefined;
+	getFile3DById: (id: string) => File3DWithStats | undefined;
 	toggleFavorite: (id: string) => Promise<void>;
 }
 
@@ -66,7 +75,7 @@ const useFile3DStoreBase = create<File3DState>()(
 				}
 			},
 
-			createFile3D: async (data: File3DFormData) => {
+			createFile3D: async (data: Prisma.File3DCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newFile3D = await createFile3D(data);
@@ -81,7 +90,7 @@ const useFile3DStoreBase = create<File3DState>()(
 				}
 			},
 
-			updateFile3D: async (id: string, data: File3DFormData) => {
+			updateFile3D: async (id: string, data: Prisma.File3DUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedFile3D = await updateFile3D(id, data);
@@ -113,7 +122,7 @@ const useFile3DStoreBase = create<File3DState>()(
 			},
 
 			// Acciones de selección
-			selectFile3D: (file3D: File3DComplete) => {
+			selectFile3D: (file3D: File3DWithStats) => {
 				set((state) => ({
 					selectedFile3Ds: [...state.selectedFile3Ds, file3D],
 					currentFile3D: file3D,
@@ -150,7 +159,6 @@ const useFile3DStoreBase = create<File3DState>()(
 				const file3D = get().getFile3DById(id);
 				if (file3D) {
 					await get().updateFile3D(id, {
-						...file3D,
 						isFavorite: !file3D.isFavorite,
 					});
 				}

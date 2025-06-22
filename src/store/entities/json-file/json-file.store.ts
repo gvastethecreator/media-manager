@@ -5,24 +5,28 @@
  */
 
 import {
-	createJsonFile,
-	deleteJsonFile,
-	getJsonFiles,
-	updateJsonFile,
+    createJsonFile,
+    deleteJsonFile,
+    getJsonFiles,
+    updateJsonFile,
 } from '@/app/actions/json-file/json-file.actions';
-import type { JsonFileComplete, JsonFileFilters, JsonFileFormData } from '@/types/entities/json-file/types';
+import type { JsonFileWithStats } from '@/types/entities/json-file';
 import { createSelectors } from '@/utils/store/create-selectors';
+import type { Prisma } from '@prisma/client';
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+
+// Definiendo un tipo de filtro genérico hasta que se creen los esquemas Zod
+export type JsonFileFilters = Record<string, any>;
 
 /**
  * 🏪 Estado del store de JsonFile
  */
 export interface JsonFileState {
 	// Estado de datos
-	jsonFiles: JsonFileComplete[];
-	selectedJsonFiles: JsonFileComplete[];
-	currentJsonFile: JsonFileComplete | null;
+	jsonFiles: JsonFileWithStats[];
+	selectedJsonFiles: JsonFileWithStats[];
+	currentJsonFile: JsonFileWithStats | null;
 
 	// Estado de UI
 	loading: boolean;
@@ -31,12 +35,12 @@ export interface JsonFileState {
 
 	// Acciones de datos
 	fetchJsonFiles: () => Promise<void>;
-	createJsonFile: (data: JsonFileFormData) => Promise<JsonFileComplete | undefined>;
-	updateJsonFile: (id: string, data: JsonFileFormData) => Promise<JsonFileComplete | undefined>;
+	createJsonFile: (data: Prisma.JsonFileCreateInput) => Promise<JsonFileWithStats | undefined>;
+	updateJsonFile: (id: string, data: Prisma.JsonFileUpdateInput) => Promise<JsonFileWithStats | undefined>;
 	deleteJsonFile: (id: string) => Promise<void>;
 
 	// Acciones de selección
-	selectJsonFile: (jsonFile: JsonFileComplete) => void;
+	selectJsonFile: (jsonFile: JsonFileWithStats) => void;
 	deselectJsonFile: (jsonFileId: string) => void;
 	clearSelection: () => void;
 
@@ -45,7 +49,7 @@ export interface JsonFileState {
 	clearFilters: () => void;
 
 	// Utilidades
-	getJsonFileById: (id: string) => JsonFileComplete | undefined;
+	getJsonFileById: (id: string) => JsonFileWithStats | undefined;
 	toggleFavorite: (id: string) => Promise<void>;
 }
 
@@ -71,7 +75,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 				}
 			},
 
-			createJsonFile: async (data: JsonFileFormData) => {
+			createJsonFile: async (data: Prisma.JsonFileCreateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const newJsonFile = await createJsonFile(data);
@@ -86,7 +90,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 				}
 			},
 
-			updateJsonFile: async (id: string, data: JsonFileFormData) => {
+			updateJsonFile: async (id: string, data: Prisma.JsonFileUpdateInput) => {
 				set({ loading: true, error: null });
 				try {
 					const updatedJsonFile = await updateJsonFile(id, data);
@@ -118,7 +122,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			},
 
 			// Acciones de selección
-			selectJsonFile: (jsonFile: JsonFileComplete) => {
+			selectJsonFile: (jsonFile: JsonFileWithStats) => {
 				set((state) => ({
 					selectedJsonFiles: [...state.selectedJsonFiles, jsonFile],
 					currentJsonFile: jsonFile,
@@ -155,7 +159,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 				const jsonFile = get().getJsonFileById(id);
 				if (jsonFile) {
 					await get().updateJsonFile(id, {
-						...jsonFile,
+						// @ts-ignore TODO: Arreglar el tipo isFavorite cuando se refactoricen las actions
 						isFavorite: !jsonFile.isFavorite,
 					});
 				}

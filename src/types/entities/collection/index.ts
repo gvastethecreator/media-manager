@@ -1,35 +1,27 @@
 /**
- * @file Exportaciones principales de tipos para la entidad Collection
+ * @file Exportaciones principales de tipos para la entidad Collection.
  * @module types/entities/collection
+ * @description
+ *   Centraliza la exportación del tipo canónico **`CollectionWithStats`**.
  *
- * ⚠️ Limpieza: Solo se exportan tipos canónicos desde './types' y enums desde './enums'.
- * Legacy eliminado.
+ *   - `CollectionBase`: Tipo base de Prisma.
+ *   - `CollectionStatistics`: Interfaz para las estadísticas de conteo.
+ *   - `CollectionWithStats`: El tipo enriquecido que se debe usar en la app.
+ *
+ * @see /src/types/entities/collection/base.ts
+ * @updated 2025-01-27
  */
 
-export {
-    CollectionCategory,
-    CollectionPlatform,
-    CollectionRarity,
-    CollectionSortOption
-} from './enums';
+// --- Tipos Canónicos ---
+export type { CollectionBase, CollectionStatistics, CollectionWithStats } from './base';
 
-export type {
-    // Tipos base
-    CollectionBase,
-    // Inputs para operaciones
-    CollectionCreateInput,
-    CollectionEdition,
-    CollectionFilter,
-    CollectionFilters,
-    CollectionSearchOptions,
-    // Estructuras auxiliares
-    CollectionSortBy,
-    CollectionUpdateInput,
-    // Configuración y filtros
-    CollectionViewConfig,
-    // Tipo principal para uso en la aplicación
-    CollectionWithStats,
-    PrismaCollectionWithCounts
-} from './types';
+// --- Esquemas de Validación (si existen) ---
+// export { CollectionCreateSchema, CollectionUpdateSchema } from './schema';
 
-// 📝 Documentación: Solo tipos canónicos. CollectionWithStats es el tipo principal para UI y lógica de negocio.
+// --- Tipos Legacy (OBSOLETOS) ---
+/**
+ * @deprecated Los tipos monolíticos de `types.ts` están obsoletos.
+ * Usar `CollectionWithStats` y otros tipos canónicos desde `base.ts`.
+ */
+// export * from './types';
+// export * from './enums';

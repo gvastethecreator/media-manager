@@ -1,10 +1,10 @@
 /**
  * @file Punto de entrada para los transformadores de la entidad Group.
  * @module transformers/group
- * @description Re-exporta todas las funciones de transformación y serialización para un acceso unificado.
+ * @description Exporta la función `toGroupWithStats` como el transformador canónico.
+ * @see /src/transformers/group/mappers.ts
+ * @updated 2025-01-27
  */
 
-export * from './mappers';
-export * from './serializers';
-export * from './transformer';
+export { toGroupWithStats } from './mappers';
 

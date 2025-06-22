@@ -1,26 +1,29 @@
 /**
- * @file Índice de tipos para la entidad Album
+ * @file Exportaciones principales de tipos para la entidad Album.
  * @module types/entities/album
- * @description Exportaciones centralizadas para tipos de Album
- * @updated 2025-06-21
+ * @description
+ *   Centraliza la exportación del tipo canónico **`AlbumWithStats`**.
+ *
+ *   - `AlbumBase`: Tipo base de Prisma.
+ *   - `AlbumStatistics`: Interfaz para las estadísticas de conteo.
+ *   - `AlbumWithStats`: El tipo enriquecido que se debe usar en la app.
+ *
+ * @see /src/types/entities/album/base.ts
+ * @updated 2025-01-27
  */
 
-// Exportar enumeraciones
-export * from './enums';
-// Re-exportación de tipos extendidos (para compatibilidad con código existente)
-export type {
-    AlbumComplete,
-    AlbumWithStats,
-    FolderDistribution,
-    ParsedAlbum,
-    ParsedAlbumWithRelations
-} from './extended';
-// Exportar esquemas de validación
-export * from './schema';
-// Exportar tipos estadísticos
-export * from './stats-types';
-// Tipo principal para Album (para compatibilidad con código legacy)
-export type { Album } from './types';
-// Exportar todos los tipos canónicos
-export * from './types';
+// --- Tipos Canónicos ---
+export type { AlbumBase, AlbumStatistics, AlbumWithStats } from './base';
+
+// --- Esquemas de Validación ---
+export { AlbumCreateSchema, AlbumUpdateSchema } from './schema';
+
+// --- Tipos Legacy (OBSOLETOS) ---
+/**
+ * @deprecated Los tipos monolíticos y fragmentados están obsoletos.
+ * Usar `AlbumWithStats` y otros tipos canónicos desde `base.ts`.
+ */
+// export * from './types';
+// export * from './extended';
+// export * from './stats-types';
 
