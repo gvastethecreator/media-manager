@@ -1,127 +1,60 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
-import { handlePrismaError } from '@/lib/errors';
+import { db } from '@/lib/db';
 import { fromPrismaAudio, fromPrismaAudios } from '@/transformers/audio/transformer';
-import type { AudioFormData } from '@/types/entities/audio/types';
+import type { AudioWithStats } from '@/types/entities/audio';
+import type { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
-// GET
-export async function getAudios() {
-	try {
-		const prisma = await getPrismaClient();
-		const audios = await prisma.audio.findMany({
-			orderBy: { createdAt: 'desc' },
-		});
-		return fromPrismaAudios(audios);
-	} catch (error) {
-		throw handlePrismaError(error);
-	}
+/**
+ * Crea un nuevo archivo de audio en la base de datos.
+ * @param data - Datos para crear el archivo de audio.
+ * @returns El archivo de audio creado con sus estadísticas.
+ */
+export async function createAudio(data: Prisma.AudioCreateInput): Promise<AudioWithStats> {
+	const newAudio = await db.audio.create({ data });
+	revalidatePath('/audios');
+	return fromPrismaAudio(newAudio);
 }
 
-export async function getAudioById(id: string) {
-	try {
-		const prisma = await getPrismaClient();
-		const audio = await prisma.audio.findUnique({
-			where: { id },
-		});
-		if (!audio) {
-			throw new Error('Audio no encontrado');
-		}
-		return fromPrismaAudio(audio);
-	} catch (error) {
-		throw handlePrismaError(error);
-	}
+/**
+ * Obtiene todos los archivos de audio de la base de datos.
+ * @returns Una lista de todos los archivos de audio con sus estadísticas.
+ */
+export async function getAudios(): Promise<AudioWithStats[]> {
+	const audios = await db.audio.findMany();
+	return fromPrismaAudios(audios);
 }
 
-// CREATE
-export async function createAudio(data: AudioFormData) {
-	const {
-		// Extraer relaciones que no se usan en el schema actual
-		images,
-		videos,
-		albums,
-		collections,
-		tags,
-		characters,
-		places,
-		worldItems,
-		concepts,
-		prompts,
-		notes,
-		wildcards,
-		properties,
-		groups,
-		file3d,
-		filePath,
-		...audioData
-	} = data;
-
-	try {
-		const prisma = await getPrismaClient();
-		const newAudio = await prisma.audio.create({
-			data: {
-				...audioData,
-				filePath: filePath || '',
-			},
-		});
-		revalidatePath('/audio');
-		return fromPrismaAudio(newAudio);
-	} catch (error) {
-		throw handlePrismaError(error);
-	}
+/**
+ * Obtiene un archivo de audio por su ID.
+ * @param id - El ID del archivo de audio a obtener.
+ * @returns El archivo de audio encontrado o null si no existe.
+ */
+export async function getAudioById(id: string): Promise<AudioWithStats | null> {
+	const audio = await db.audio.findUnique({ where: { id } });
+	if (!audio) return null;
+	return fromPrismaAudio(audio);
 }
 
-// UPDATE
-export async function updateAudio(id: string, data: AudioFormData) {
-	const {
-		// Extraer relaciones que no se usan en el schema actual
-		images,
-		videos,
-		albums,
-		collections,
-		tags,
-		characters,
-		places,
-		worldItems,
-		concepts,
-		prompts,
-		notes,
-		wildcards,
-		properties,
-		groups,
-		file3d,
-		filePath,
-		...audioData
-	} = data;
-
-	try {
-		const prisma = await getPrismaClient();
-		const updatedAudio = await prisma.audio.update({
-			where: { id },
-			data: {
-				...audioData,
-				filePath: filePath !== undefined ? filePath : undefined,
-			},
-		});
-		revalidatePath('/audio');
-		revalidatePath(`/audio/${id}`);
-		return fromPrismaAudio(updatedAudio);
-	} catch (error) {
-		throw handlePrismaError(error);
-	}
+/**
+ * Actualiza un archivo de audio existente.
+ * @param id - El ID del archivo de audio a actualizar.
+ * @param data - Los datos a actualizar.
+ * @returns El archivo de audio actualizado con sus estadísticas.
+ */
+export async function updateAudio(id: string, data: Prisma.AudioUpdateInput): Promise<AudioWithStats> {
+	const updatedAudio = await db.audio.update({ where: { id }, data });
+	revalidatePath('/audios');
+	revalidatePath(`/audios/${id}`);
+	return fromPrismaAudio(updatedAudio);
 }
 
-// DELETE
-export async function deleteAudio(id: string) {
-	try {
-		const prisma = await getPrismaClient();
-		await prisma.audio.delete({
-			where: { id },
-		});
-		revalidatePath('/audio');
-		return { success: true };
-	} catch (error) {
-		throw handlePrismaError(error);
-	}
+/**
+ * Elimina un archivo de audio de la base de datos.
+ * @param id - El ID del archivo de audio a eliminar.
+ */
+export async function deleteAudio(id: string): Promise<void> {
+	await db.audio.delete({ where: { id } });
+	revalidatePath('/audios');
 }

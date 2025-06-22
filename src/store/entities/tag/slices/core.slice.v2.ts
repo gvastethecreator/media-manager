@@ -14,14 +14,14 @@ import { toastService } from '@/services/toast.service';
 import type { TagWithStats } from '@/types/entities/tag';
 import type { Prisma } from '@prisma/client';
 import { StateCreator } from 'zustand';
-import type { TagCoreActions, TagCoreState, TagStore } from '../types';
+import type { TagStore } from '../types';
 
 const logger = clientLogger.withContext('TagCoreSlice');
 
 /**
  * 📊 Estado principal (core) del store de Tag - Patrón Record optimizado
  */
-export interface TagCoreState2 {
+export interface TagCoreState {
 	/** Tags organizados por ID para acceso O(1) */
 	tags: Record<string, TagWithStats>;
 	/** Si se están cargando datos */
@@ -53,6 +53,7 @@ export interface TagCoreActions {
 	/** Recarga los tags forzando una nueva petición */
 	refreshTags: () => Promise<TagWithStats[]>;
 }
+
 
 /**
  * 🔄 Convierte array de tags a Record para acceso O(1)

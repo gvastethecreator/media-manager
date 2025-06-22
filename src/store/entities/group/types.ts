@@ -1,10 +1,13 @@
 /**
- * @file Tipos para el store de Group
+ * @file Tipos para el store de la entidad Group.
  * @module store/entities/group/types
+ * @description Define la forma del estado y las acciones para el store de Group.
+ * @updated 2025-01-27
  */
 
-import type { GroupDisplayState, GroupWithStats } from '@/types/entities/group';
+import type { GroupWithStats } from '@/types/entities/group';
 import { GroupSortCriteria, GroupType, GroupViewMode } from '@/types/entities/group';
+import type { Prisma } from '@prisma/client';
 
 /**
  * Estado del core para el store de grupos
@@ -12,14 +15,12 @@ import { GroupSortCriteria, GroupType, GroupViewMode } from '@/types/entities/gr
 export interface GroupCoreState {
 	/** Mapa de grupos indexados por ID */
 	groups: Record<string, GroupWithStats>;
-	/** Items asociados a cada grupo */
-	groupItems: Record<string, Array<{ id: string; type: 'image' | 'video' | 'note' | 'tag' }>>;
 	/** Estado de carga */
 	isLoading: boolean;
 	/** Error si existe */
 	error: string | null;
 	/** Fecha de última actualización */
-	lastUpdated: Date | null;
+	lastUpdated: number | null;
 }
 
 /**
@@ -49,7 +50,7 @@ export interface GroupUIState {
 /**
  * Estado de filtros para el store de grupos
  */
-export interface GroupFiltersState {
+export interface GroupFilterState {
 	/** Criterio de ordenación */
 	sortBy: GroupSortCriteria;
 	/** Término de búsqueda */
@@ -68,10 +69,44 @@ export interface GroupFiltersState {
 }
 
 /**
+ * Acciones del core para el store de grupos
+ */
+export interface GroupCoreActions {
+	loadGroups: () => Promise<void>;
+	createGroup: (data: Prisma.GroupCreateInput) => Promise<void>;
+	updateGroup: (id: string, data: Prisma.GroupUpdateInput) => Promise<void>;
+	deleteGroup: (id: string) => Promise<void>;
+}
+
+/**
+ * Acciones de UI para el store de grupos
+ */
+export interface GroupUIActions {
+	setSelectedIds: (ids: string[]) => void;
+}
+
+/**
+ * Acciones de filtros para el store de grupos
+ */
+export interface GroupFilterActions {
+	setSearchQuery: (query: string) => void;
+}
+
+/**
  * Estado combinado del store de grupos
  */
 export interface GroupState {
 	core: GroupCoreState;
 	ui: GroupUIState;
-	filters: GroupFiltersState;
+	filters: GroupFilterState;
 }
+
+/**
+ * Store completo del store de grupos
+ */
+export type GroupStore = GroupCoreState &
+	GroupCoreActions &
+	GroupUIState &
+	GroupUIActions &
+	GroupFilterState &
+	GroupFilterActions;

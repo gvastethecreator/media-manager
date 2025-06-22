@@ -3,17 +3,61 @@
  * @module store/entities/tag/slices/filters.slice
  */
 
+import { TagWithStats } from '@/types/entities/tag';
 import { StateCreator } from 'zustand';
-import type { TagFilterActions, TagFilters, TagStore } from '../types';
-import { TagSortCriteria } from '../types';
+import type { TagStore } from '../types';
+
+/**
+ * Criterios de ordenación para etiquetas
+ */
+export enum TagSortCriteria {
+	NAME_ASC = 'name:asc',
+	NAME_DESC = 'name:desc',
+	USAGE_ASC = 'usage:asc',
+	USAGE_DESC = 'usage:desc',
+	CREATED_ASC = 'createdAt:asc',
+	CREATED_DESC = 'createdAt:desc',
+	UPDATED_ASC = 'updatedAt:desc',
+	UPDATED_DESC = 'updatedAt:desc',
+}
+
+/**
+ * 🔍 Filtros para tags
+ */
+export interface TagFilters {
+	/** Criterio de ordenación */
+	sortBy: TagSortCriteria;
+	/** Término de búsqueda */
+	searchTerm: string;
+	/** Filtro por categoría */
+	category: string | null; // Assuming category is a string
+	/** Filtro por rareza - @deprecated La rareza no es una propiedad del modelo de datos actual. */
+	rarity?: string | null;
+}
+
+/**
+ * 🔍 Acciones del filter slice
+ */
+export interface TagFilterActions {
+	/** Actualiza los filtros */
+	updateFilters: (filters: Partial<TagFilters>) => void;
+	/** Limpia todos los filtros */
+	clearFilters: () => void;
+	/** Obtiene tags filtrados */
+	getFilteredTags: () => TagWithStats[];
+	/** Obtiene tags filtrados y ordenados */
+	getSortedTags: () => TagWithStats[];
+}
 
 /**
  * 🔍 Creador del slice de filtros para el store de Tag
  */
-export const createTagFiltersSlice: StateCreator<TagStore, [], [], { filters: TagFilters } & TagFilterActions> = (
-	set,
-	get
-) => ({
+export const createTagFiltersSlice: StateCreator<
+	TagStore,
+	[],
+	[],
+	{ filters: TagFilters } & TagFilterActions
+> = (set, get) => ({
 	// Estado inicial de filtros
 	filters: {
 		sortBy: TagSortCriteria.NAME_ASC,

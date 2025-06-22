@@ -1,4 +1,4 @@
-import type { Prisma, Workflow } from '@prisma/client';
+import type { Workflow } from '@prisma/client';
 
 /**
  * 🗿 Modelo base de Workflow, directamente desde Prisma.
@@ -10,12 +10,7 @@ export type WorkflowBase = Workflow;
  * A diferencia de EntityWithStats, no usamos `_count` aquí, sino que calcularemos
  * las estadísticas a partir de las ejecuciones relacionadas.
  */
-export type PrismaWorkflow = Prisma.WorkflowGetPayload<{
-	include: {
-		tags: true;
-		prompts: true;
-	};
-}>;
+export type PrismaWorkflow = WorkflowBase;
 
 /**
  * 📊 Estadísticas calculadas para un Workflow.
