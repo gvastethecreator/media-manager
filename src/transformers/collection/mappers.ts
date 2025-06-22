@@ -1,111 +1,62 @@
 /**
- * @file Funciones de mapeo para la entidad Collection
+ * @file Mappers para la entidad Collection.
  * @module transformers/collection/mappers
+ * @description Contiene funciones para transformar datos de la entidad Collection.
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type {
-    CollectionCreateInput,
-    CollectionFilters,
-    CollectionSearchOptions,
-    CollectionUpdateInput,
-} from '@/types/entities/collection';
-import { TransformerError } from '@/utils/transformers/errors';
-import type { Prisma } from '@prisma/client';
-
-const logger = serverLogger.withContext('CollectionMapper');
+import type { CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
+import type { Collection } from '@prisma/client';
 
 /**
- * 🔄 Mapea un `CollectionCreateInput` a un `Prisma.CollectionCreateInput`.
+ * Representa la estructura del objeto de agregación de conteos de Prisma para una Collection.
  */
-export function mapCreateCollectionDataToPrisma(input: CollectionCreateInput): Prisma.CollectionCreateInput {
-	try {
-		const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = input;
-
-		return {
-			...rest,
-			images: imageIds ? { connect: imageIds.map((id) => ({ id })) } : undefined,
-			tags: tagIds ? { connect: tagIds.map((id) => ({ id })) } : undefined,
-			groups: groupIds ? { connect: groupIds.map((id) => ({ id })) } : undefined,
-			properties: propertyIds ? { connect: propertyIds.map((id) => ({ id })) } : undefined,
-			wildcards: wildcardIds ? { connect: wildcardIds.map((id) => ({ id })) } : undefined,
-		};
-	} catch (error) {
-		logger.error('Error mapeando datos de creación de colección', { error, input });
-		throw new TransformerError('Error al mapear datos de creación de colección.');
-	}
-}
+type CollectionCounts = {
+	_count: {
+		images: number;
+		videos: number;
+		albums: number;
+		tags: number;
+		characters: number;
+		places: number;
+		worldItems: number;
+		concepts: number;
+		prompts: number;
+		notes: number;
+		wildcards: number;
+		properties: number;
+		groups: number;
+	};
+};
 
 /**
- * 🔄 Mapea un `CollectionUpdateInput` a un `Prisma.CollectionUpdateInput`.
+ * Convierte un objeto Collection de Prisma y sus conteos a un objeto canónico CollectionWithStats.
+ *
+ * @param collection El objeto Collection de Prisma.
+ * @param counts Los conteos de las relaciones de la colección.
+ * @returns Un objeto CollectionWithStats.
  */
-export function mapUpdateCollectionDataToPrisma(input: CollectionUpdateInput): Prisma.CollectionUpdateInput {
-	try {
-		const { imageIds, tagIds, groupIds, propertyIds, wildcardIds, ...rest } = input;
-
-		return {
-			...rest,
-			images: imageIds ? { set: imageIds.map((id) => ({ id })) } : undefined,
-			tags: tagIds ? { set: tagIds.map((id) => ({ id })) } : undefined,
-			groups: groupIds ? { set: groupIds.map((id) => ({ id })) } : undefined,
-			properties: propertyIds ? { set: propertyIds.map((id) => ({ id })) } : undefined,
-			wildcards: wildcardIds ? { set: wildcardIds.map((id) => ({ id })) } : undefined,
-		};
-	} catch (error) {
-		logger.error('Error mapeando datos de actualización de colección', { error, input });
-		throw new TransformerError('Error al mapear datos de actualización de colección.');
-	}
-}
-
-/**
- * 🔄 Mapea `CollectionSearchOptions` a `Prisma.CollectionFindManyArgs`.
- */
-export function mapCollectionSearchOptionsToPrisma(options: CollectionSearchOptions): Prisma.CollectionFindManyArgs {
-	const { filters, skip, take, orderBy, include } = options;
+export function toCollectionWithStats(
+	collection: Collection,
+	counts: CollectionCounts['_count'],
+): CollectionWithStats {
+	const stats: CollectionStatistics = {
+		imageCount: counts.images,
+		videoCount: counts.videos,
+		albumCount: counts.albums,
+		tagCount: counts.tags,
+		characterCount: counts.characters,
+		placeCount: counts.places,
+		worldItemCount: counts.worldItems,
+		conceptCount: counts.concepts,
+		promptCount: counts.prompts,
+		noteCount: counts.notes,
+		wildcardCount: counts.wildcards,
+		propertyCount: counts.properties,
+		groupCount: counts.groups,
+	};
 
 	return {
-		where: filters ? mapCollectionFiltersToPrisma(filters) : undefined,
-		skip,
-		take,
-		orderBy,
-		include: include
-			? {
-					images: include.images || false,
-					tags: include.tags || false,
-					groups: include.groups || false,
-					properties: include.properties || false,
-					wildcards: include.wildcards || false,
-				}
-			: undefined,
+		...collection,
+		stats,
 	};
-}
-
-/**
- * 🔄 Mapea `CollectionFilters` a `Prisma.CollectionWhereInput`.
- */
-function mapCollectionFiltersToPrisma(filters: CollectionFilters): Prisma.CollectionWhereInput {
-	const where: Prisma.CollectionWhereInput = {};
-
-	if (filters.search) {
-		where.OR = [{ name: { contains: filters.search } }, { description: { contains: filters.search } }];
-	}
-	if (filters.isFavorite !== undefined) {
-		where.isFavorite = filters.isFavorite;
-	}
-	if (filters.category?.length) {
-		where.category = { in: filters.category };
-	}
-	if (filters.tagIds?.length) {
-		where.tags = { some: { id: { in: filters.tagIds } } };
-	}
-	if (filters.dateRange) {
-		if (filters.dateRange.start || filters.dateRange.end) {
-			where.createdAt = {
-				...(filters.dateRange.start ? { gte: filters.dateRange.start } : {}),
-				...(filters.dateRange.end ? { lte: filters.dateRange.end } : {}),
-			};
-		}
-	}
-
-	return where;
 }

@@ -1,113 +1,51 @@
 /**
- * @file Tipos para el store de álbumes
+ * @file Tipos para el store de la entidad Album.
  * @module store/entities/album/types
- * @description Define los tipos para el store Zustand de álbumes
- * @updated 2025-06-21
+ * @description Define la forma del estado y las acciones para el store de Album.
  */
 
-import type {
-    AlbumCreateInput,
-    AlbumUpdateInput,
-    AlbumWithStats,
-} from '@/types/entities/album';
-import type {
-    AlbumDisplayState,
-    AlbumSortCriteria,
-    AlbumType,
-    AlbumViewMode,
-} from '@/types/entities/album/enums';
+import type { AlbumWithStats } from '@/types/entities/album';
+import type { Prisma } from '@prisma/client';
 
-/**
- * 📊 Estado principal del store de álbumes
- */
-export interface AlbumState {
-	// 📋 Datos principales
+// --- Estado del Slice ---
+
+export interface AlbumCoreState {
 	albums: Record<string, AlbumWithStats>;
 	isLoading: boolean;
 	error: string | null;
 	lastUpdated: number | null;
-
-	// 🎮 UI y configuración
-	ui: AlbumUIState;
-	filters: AlbumFiltersState;
-
-	// 🔍 Selectores y getters
-	getAlbumById: (id: string) => AlbumWithStats | undefined;
-	getFilteredAlbums: () => AlbumWithStats[];
-	getSortedAlbums: () => AlbumWithStats[];
 }
 
-/**
- * 🎮 Estado de UI del store
- */
 export interface AlbumUIState {
-	selectedIds: string[];
-	viewMode: AlbumViewMode;
-	isViewerOpen: boolean;
-	currentAlbumId: string | null;
-	displayState: Record<string, AlbumDisplayState>;
-	draggedAlbumId: string | null;
-	dropTargetAlbumId: string | null;
-	highlightedId: string | null;
-	expandedIds: string[];
+	// ...p.ej., álbum seleccionado, modo de vista, etc.
 }
 
-/**
- * 🔍 Estado de filtros del store
- * Nota: No extiende AlbumFilters para evitar conflictos de propiedades
- */
-export interface AlbumFiltersState {
-	// Filtros básicos
-	query: string;
-	searchQuery: string; // Alias para compatibilidad
-
-	// Filtros específicos
-	sortBy: AlbumSortCriteria;
-	filterByType: AlbumType | null;
-	filterByParentId: string | null;
-	filterFavorites: boolean;
-	filterShared: boolean;
-	filterArchived: boolean;
-
-	// Filtros de contenido
-	hasImages?: boolean;
-	hasVideos?: boolean;
-	categories?: string[];
-	types?: string[];
-
-	// Rango de fechas
-	dateRange: {
-		from: Date | null;
-		to: Date | null;
-	};
+export interface AlbumFilterState {
+	// ...p.ej., filtros de búsqueda, ordenación, etc.
 }
 
-/**
- * 🔄 Acciones disponibles en el store
- */
-export interface AlbumActions {
-	// 📥 Carga de datos
+// --- Acciones del Slice ---
+
+export interface AlbumCoreActions {
 	loadAlbums: () => Promise<void>;
-	loadAlbumById: (id: string) => Promise<AlbumWithStats | undefined>;
-
-	// 📝 Gestión de álbumes
-	createAlbum: (album: AlbumCreateInput) => Promise<void>;
-	updateAlbum: (id: string, album: AlbumUpdateInput) => Promise<void>;
+	createAlbum: (data: Prisma.AlbumCreateInput) => Promise<void>;
+	updateAlbum: (id: string, data: Prisma.AlbumUpdateInput) => Promise<void>;
 	deleteAlbum: (id: string) => Promise<void>;
-
-	// 🎮 Acciones UI
-	selectAlbum: (id: string | null) => void;
-	selectMultipleAlbums: (ids: string[]) => void;
-	toggleSelection: (id: string) => void;
-	clearSelection: () => void;
-
-	// 🔍 Filtros
-	updateFilters: (filters: Partial<AlbumFiltersState>) => void;
-	clearFilters: () => void;
-	setSearchQuery: (query: string) => void;
 }
 
-/**
- * 🏗️ Tipo completo del store
- */
-export type AlbumStore = AlbumState & AlbumActions;
+export interface AlbumUIActions {
+	// ...
+}
+
+export interface AlbumFilterActions {
+	// ...
+}
+
+// --- Store Completo ---
+
+export type AlbumStore = AlbumCoreState &
+	AlbumCoreActions &
+	AlbumUIState &
+	AlbumUIActions &
+	AlbumFilterState &
+	AlbumFilterActions;

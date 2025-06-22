@@ -1,14 +1,15 @@
 /**
- * @file Exportaciones principales de tipos para la entidad File3D
+ * @file Exportaciones principales de tipos para la entidad File3D.
  * @module types/entities/file3d
+ * @description
+ *   Este archivo centraliza todas las exportaciones de tipos para la entidad File3D.
+ *   El tipo canónico para usar en la aplicación es **`File3DWithStats`**.
  */
 
-// Exportar el esquema de validación
-export { file3DSchema } from './file3d.schema';
-// Exportar los tipos principales
 export type {
-	File3DBase,
-	File3DComplete,
-	File3DCreateInput,
-	File3DUpdateInput,
-} from './types';
+    File3DBase,
+    File3DStatistics,
+    File3DWithStats
+} from './base';
+
+// export * from './file3d.schema'; // Descomentar cuando se creen los esquemas Zod

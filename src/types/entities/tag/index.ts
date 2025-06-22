@@ -13,14 +13,14 @@
  * @updated 2025-01-27
  */
 
-// --- Tipos Canónicos (NUEVO) ---
-export { TAG_COUNTS_RELATIONS, tagCounts } from './base';
 export type {
     PrismaTagWithCounts,
     TagBase,
     TagStatistics,
     TagWithStats
 } from './base';
+// --- Tipos Canónicos (NUEVO) ---
+export { TAG_COUNTS_RELATIONS, tagCounts } from './base';
 
 // --- Esquemas de Validación ---
 export {
@@ -30,44 +30,3 @@ export {
     TagSchema
 } from './schema';
 
-// --- Tipos Legacy (OBSOLETOS) ---
-/**
- * @deprecated Los tipos monolíticos de `types.ts` están obsoletos. Usar `TagWithStats` y otros tipos canónicos desde `base.ts`.
- * @see /src/types/entities/tag/base.ts
- */
-/*
-export type {
-    // Alias para retrocompatibilidad
-    CreateTagData,
-    PrismaTagWithCounts,
-    RelatedTag,
-    // Tipos principales
-    Tag,
-    // Tipos base
-    TagBase,
-    // Inputs para operaciones
-    TagCreateInput,
-    // Configuración y filtros
-    TagFilters,
-    TagImageRelationResponse,
-    TagSearchOptions,
-    TagSearchResult,
-    // Estructuras auxiliares
-    TagTransformerOptions,
-    TagUpdateInput,
-    TagValidated,
-    // Tipo principal para uso en la aplicación
-    TagWithStats,
-    UpdateTagData
-} from './types';
-
-export {
-    // Enums
-    TagCategory,
-    TagRarity,
-    // Schema de validación
-    TagSchema,
-    TagSortCriteria,
-    TagViewMode
-} from './types';
-*/

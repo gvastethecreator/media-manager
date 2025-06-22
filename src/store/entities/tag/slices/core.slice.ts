@@ -19,6 +19,42 @@ import type { TagCoreActions, TagCoreState, TagStore } from '../types';
 const logger = clientLogger.withContext('TagCoreSlice');
 
 /**
+ * 📊 Estado principal (core) del store de Tag - Patrón Record optimizado
+ */
+export interface TagCoreState2 {
+	/** Tags organizados por ID para acceso O(1) */
+	tags: Record<string, TagWithStats>;
+	/** Si se están cargando datos */
+	isLoading: boolean;
+	/** Mensaje de error si existe */
+	error: string | null;
+	/** Timestamp de última actualización */
+	lastUpdated: number | null;
+}
+
+/**
+ * 🔄 Acciones del core slice
+ */
+export interface TagCoreActions {
+	/** Carga todos los tags */
+	loadTags: () => Promise<TagWithStats[]>;
+	/** Obtiene todos los tags como array */
+	getTags: () => TagWithStats[];
+	/** Obtiene un tag por su ID */
+	getTagById: (id: string) => TagWithStats | undefined;
+	/** Crea un nuevo tag */
+	createTag: (data: Prisma.TagCreateInput) => Promise<TagWithStats | null>;
+	/** Actualiza un tag existente */
+	updateTag: (id: string, data: Prisma.TagUpdateInput) => Promise<void>;
+	/** Elimina un tag */
+	deleteTag: (id: string) => Promise<void>;
+	/** Actualiza múltiples tags */
+	setTags: (tags: TagWithStats[]) => void;
+	/** Recarga los tags forzando una nueva petición */
+	refreshTags: () => Promise<TagWithStats[]>;
+}
+
+/**
  * 🔄 Convierte array de tags a Record para acceso O(1)
  * @param tags - Array de tags
  * @returns Record de tags indexado por ID
