@@ -1,11 +1,10 @@
 /**
  * @file Punto de entrada para los transformadores de la entidad Album.
  * @module transformers/album
- * @description Exporta de forma controlada las funciones de mapeo y transformación para la entidad Album.
+ * @description Exporta la función `toAlbumWithStats` como el transformador canónico.
+ * @see /src/transformers/album/mappers.ts
+ * @updated 2025-01-27
  */
 
-// De mappers.ts
-export { mapCreateAlbumDataToPrisma, mapUpdateAlbumDataToPrisma } from './mappers';
+export { toAlbumWithStats } from './mappers';
 
-// De transformer.ts
-export { fromPrismaAlbum, fromPrismaAlbums } from './transformer';

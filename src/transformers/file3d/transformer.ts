@@ -5,52 +5,39 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { File3DComplete } from '@/types/entities/file-3d/types';
+import type { File3DBase, File3DWithStats } from '@/types/entities/file3d';
 import { TransformerError } from '@/utils/transformers/errors';
 
 const logger = serverLogger.withContext('File3DTransformer');
 
 /**
- * 🔄 Transforma un objeto File3D de Prisma a nuestro tipo canónico File3DComplete.
+ * 🔄 Transforma un objeto File3D de Prisma a nuestro tipo canónico File3DWithStats.
  *
- * @param prismaFile3D - El objeto File3D obtenido de Prisma.
- * @returns Un objeto File3DComplete compatible con nuestra aplicación.
+ * @param prismaFile3D - El objeto File3DBase obtenido de Prisma.
+ * @returns Un objeto File3DWithStats compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
-export function fromPrismaFile3D(prismaFile3D: any): File3DComplete {
+export function fromPrismaFile3D(prismaFile3D: File3DBase): File3DWithStats {
 	if (!prismaFile3D) {
 		throw new TransformerError('El objeto de archivo 3D de Prisma no puede ser nulo.');
 	}
 
 	try {
-		const { _count, ...file3DData } = prismaFile3D;
-
-		const file3DComplete: File3DComplete = {
-			...file3DData,
-			// Conteos
-			_count: {
-				images: _count?.images ?? 0,
-				videos: _count?.videos ?? 0,
-				audio: _count?.audio ?? 0,
-				documents: _count?.documents ?? 0,
-				jsonFiles: _count?.jsonFiles ?? 0,
-				workflows: _count?.workflows ?? 0,
-				albums: _count?.albums ?? 0,
-				collections: _count?.collections ?? 0,
-				tags: _count?.tags ?? 0,
-				characters: _count?.characters ?? 0,
-				places: _count?.places ?? 0,
-				worldItems: _count?.worldItems ?? 0,
-				concepts: _count?.concepts ?? 0,
-				prompts: _count?.prompts ?? 0,
-				notes: _count?.notes ?? 0,
-				wildcards: _count?.wildcards ?? 0,
-				properties: _count?.properties ?? 0,
-				groups: _count?.groups ?? 0,
-			},
+		// TODO: Implementar la lógica real para calcular estas estadísticas
+		const stats = {
+			polygonCount: 0,
+			textureSize: 0,
+			format: prismaFile3D.format,
+			vertexCount: 0,
+			materialCount: 0,
 		};
 
-		return file3DComplete;
+		const file3DWithStats: File3DWithStats = {
+			...prismaFile3D,
+			stats,
+		};
+
+		return file3DWithStats;
 	} catch (error) {
 		logger.error('Error transformando archivo 3D desde Prisma', {
 			error,
@@ -61,11 +48,11 @@ export function fromPrismaFile3D(prismaFile3D: any): File3DComplete {
 }
 
 /**
- * 🔄 Transforma una lista de archivos 3D de Prisma a una lista de File3DComplete.
+ * 🔄 Transforma una lista de archivos 3D de Prisma a una lista de File3DWithStats.
  *
  * @param prismaFile3Ds - Un array de objetos File3D de Prisma.
- * @returns Un array de objetos File3DComplete.
+ * @returns Un array de objetos File3DWithStats.
  */
-export function fromPrismaFile3Ds(prismaFile3Ds: any[]): File3DComplete[] {
+export function fromPrismaFile3Ds(prismaFile3Ds: File3DBase[]): File3DWithStats[] {
 	return prismaFile3Ds.map(fromPrismaFile3D);
 }

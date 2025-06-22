@@ -3,9 +3,9 @@
  * @module store/entities/group
  */
 
+import { GroupSortCriteria, GroupViewMode } from '@/types/entities/group';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { GroupSortCriteria, GroupViewMode } from '@/types/entities/group';
 import { createGroupCoreSlice, type GroupCoreSlice } from './slices/core';
 import { createGroupFiltersSlice, type GroupFiltersSlice } from './slices/filters';
 import { createGroupUISlice, type GroupUISlice } from './slices/ui';

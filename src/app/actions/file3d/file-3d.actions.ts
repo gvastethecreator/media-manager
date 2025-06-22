@@ -1,125 +1,60 @@
 'use server';
 
-import { getPrismaClient } from '@/lib/db';
-import { handlePrismaError } from '@/lib/errors';
+import { db } from '@/lib/db';
 import { fromPrismaFile3D, fromPrismaFile3Ds } from '@/transformers/file3d/transformer';
-import type { File3DFormData } from '@/types/entities/file-3d/types';
+import type { File3DWithStats } from '@/types/entities/file3d';
+import type { Prisma } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
-// GET
-export async function getFile3Ds() {
-	try {
-		const prisma = await getPrismaClient();
-		const file3ds = await prisma.file3D.findMany({
-			orderBy: { createdAt: 'desc' },
-		});
-		return fromPrismaFile3Ds(file3ds);
-	} catch (error) {
-		throw handlePrismaError(error);
-	}
+/**
+ * Crea un nuevo archivo 3D en la base de datos.
+ * @param data - Datos para crear el archivo 3D.
+ * @returns El archivo 3D creado con sus estadísticas.
+ */
+export async function createFile3D(data: Prisma.File3DCreateInput): Promise<File3DWithStats> {
+	const newFile3D = await db.file3D.create({ data });
+	revalidatePath('/file3ds');
+	return fromPrismaFile3D(newFile3D);
 }
 
-export async function getFile3DById(id: string) {
-	try {
-		const prisma = await getPrismaClient();
-		const file3d = await prisma.file3D.findUnique({
-			where: { id },
-		});
-		if (!file3d) {
-			throw new Error('Archivo 3D no encontrado');
-		}
-		return fromPrismaFile3D(file3d);
-	} catch (error) {
-		throw handlePrismaError(error);
-	}
+/**
+ * Obtiene todos los archivos 3D de la base de datos.
+ * @returns Una lista de todos los archivos 3D con sus estadísticas.
+ */
+export async function getFile3Ds(): Promise<File3DWithStats[]> {
+	const file3Ds = await db.file3D.findMany();
+	return fromPrismaFile3Ds(file3Ds);
 }
 
-// CREATE
-export async function createFile3D(data: File3DFormData) {
-	const {
-		images,
-		videos,
-		audio,
-		albums,
-		collections,
-		tags,
-		characters,
-		places,
-		worldItems,
-		concepts,
-		prompts,
-		notes,
-		wildcards,
-		properties,
-		groups,
-		filePath,
-		...file3dData
-	} = data;
-
-	try {
-		const prisma = await getPrismaClient();
-		const newFile3D = await prisma.file3D.create({
-			data: {
-				...file3dData,
-				filePath: filePath || '',
-			},
-		});
-		revalidatePath('/file3d');
-		return fromPrismaFile3D(newFile3D);
-	} catch (error) {
-		throw handlePrismaError(error);
-	}
+/**
+ * Obtiene un archivo 3D por su ID.
+ * @param id - El ID del archivo 3D a obtener.
+ * @returns El archivo 3D encontrado o null si no existe.
+ */
+export async function getFile3DById(id: string): Promise<File3DWithStats | null> {
+	const file3D = await db.file3D.findUnique({ where: { id } });
+	if (!file3D) return null;
+	return fromPrismaFile3D(file3D);
 }
 
-// UPDATE
-export async function updateFile3D(id: string, data: File3DFormData) {
-	const {
-		images,
-		videos,
-		audio,
-		albums,
-		collections,
-		tags,
-		characters,
-		places,
-		worldItems,
-		concepts,
-		prompts,
-		notes,
-		wildcards,
-		properties,
-		groups,
-		filePath,
-		...file3dData
-	} = data;
-
-	try {
-		const prisma = await getPrismaClient();
-		const updatedFile3D = await prisma.file3D.update({
-			where: { id },
-			data: {
-				...file3dData,
-				filePath: filePath !== undefined ? filePath : undefined,
-			},
-		});
-		revalidatePath('/file3d');
-		revalidatePath(`/file3d/${id}`);
-		return fromPrismaFile3D(updatedFile3D);
-	} catch (error) {
-		throw handlePrismaError(error);
-	}
+/**
+ * Actualiza un archivo 3D existente.
+ * @param id - El ID del archivo 3D a actualizar.
+ * @param data - Los datos a actualizar.
+ * @returns El archivo 3D actualizado con sus estadísticas.
+ */
+export async function updateFile3D(id: string, data: Prisma.File3DUpdateInput): Promise<File3DWithStats> {
+	const updatedFile3D = await db.file3D.update({ where: { id }, data });
+	revalidatePath('/file3ds');
+	revalidatePath(`/file3ds/${id}`);
+	return fromPrismaFile3D(updatedFile3D);
 }
 
-// DELETE
-export async function deleteFile3D(id: string) {
-	try {
-		const prisma = await getPrismaClient();
-		await prisma.file3D.delete({
-			where: { id },
-		});
-		revalidatePath('/file3d');
-		return { success: true };
-	} catch (error) {
-		throw handlePrismaError(error);
-	}
+/**
+ * Elimina un archivo 3D de la base de datos.
+ * @param id - El ID del archivo 3D a eliminar.
+ */
+export async function deleteFile3D(id: string): Promise<void> {
+	await db.file3D.delete({ where: { id } });
+	revalidatePath('/file3ds');
 }
