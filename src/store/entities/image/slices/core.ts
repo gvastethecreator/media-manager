@@ -14,13 +14,13 @@ import {
 } from '@/app/actions/images/image-crud.actions';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
-import type { ImageWithStats, ImageCreateInput, ImageUpdateInput } from '@/types/entities/image';
+import type { ImageCreateInput, ImageUpdateInput, ImageWithStats } from '@/types/entities/image';
 import type { StateCreator } from 'zustand';
 import type { ImageState } from '../types';
 
 const imageLogger = clientLogger.withContext('ImageStore');
 
-export interface ImageCoreSlice {
+export interface ImageCoreState {
 	images: Record<string, ImageWithStats>;
 	isLoading: boolean;
 	error: string | null;
@@ -41,13 +41,13 @@ export interface ImageCoreSlice {
 
 	// Acciones asíncronas
 	fetchImage: (id: string) => Promise<ImageWithStats | undefined>;
-	fetchImages: (options: { folderId?: string; refresh?: boolean } = {}) => Promise<ImageWithStats[]>;
+	fetchImages: (options?: { folderId?: string; refresh?: boolean }) => Promise<ImageWithStats[]>;
 	createImage: (data: ImageCreateInput) => Promise<ImageWithStats | undefined>;
 	updateImage: (id: string, data: ImageUpdateInput) => Promise<ImageWithStats | undefined>;
 	removeImage: (id: string) => Promise<boolean>;
 }
 
-export const createImageCoreSlice: StateCreator<ImageState & ImageCoreSlice, [], [], ImageCoreSlice> = (set, get) => ({
+export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [], [], ImageCoreState> = (set, get) => ({
 	images: {},
 	isLoading: false,
 	error: null,

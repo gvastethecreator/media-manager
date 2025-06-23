@@ -2,14 +2,14 @@
  * @jest-environment node
  */
 
-import {
-	createFolderError,
-	FOLDER_ERROR_CODES,
-	folderErrorToResponse,
-	fromError as folderFromError,
-} from '@/app/actions/folders/folder-types';
 
 import { getFolders } from '@/app/actions/folders/get.actions';
+import {
+    createFolderError,
+    FOLDER_ERROR_CODES,
+    folderErrorToResponse,
+    fromError as folderFromError,
+} from '@/app/actions/folders/types';
 import { folderService } from '@/services/folder/folder.service';
 
 // Mock de las acciones del servidor

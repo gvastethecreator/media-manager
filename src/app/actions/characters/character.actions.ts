@@ -8,19 +8,18 @@
 
 import { getPrismaClient } from '@/lib/db';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { mapCharacterSearchOptionsToPrisma } from '@/transformers/character/mappers';
 import {
     fromPrismaCharacter,
     fromPrismaCharacters,
     toPrismaCharacterCreate,
     toPrismaCharacterUpdate,
 } from '@/transformers/character/transformer';
-import { mapCharacterSearchOptionsToPrisma } from '@/transformers/character/mappers';
 import type {
-    CharacterBase,
-    CharacterWithStats,
     CharacterCreateInput,
     CharacterSearchOptions,
     CharacterUpdateInput,
+    CharacterWithStats
 } from '@/types/entities/character';
 import { revalidatePath } from 'next/cache';
 
@@ -226,3 +225,7 @@ async function revalidateCharacterPaths(): Promise<void> {
 // Alias para compatibilidad con código existente
 export const getCharacterById = getCharacter;
 export const searchCharacters = getCharacters;
+
+// Re-exportar tipos para uso externo
+export type { CharacterWithStats } from '@/types/entities/character';
+

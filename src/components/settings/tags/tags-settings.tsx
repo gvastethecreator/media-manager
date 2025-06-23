@@ -1,6 +1,6 @@
 'use client';
 
-import { searchTags, deleteTag as tagActionsDeleteTag } from '@/app/actions/tags/tag.actions';
+import { deleteTagAction as deleteTag, searchTagsAction as searchTags } from '@/app/actions/tags';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -74,7 +74,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	const handleDeleteTag = async (tagId: string) => {
 		try {
 			setDeletingTagId(tagId);
-			await tagActionsDeleteTag(tagId);
+			await deleteTag(tagId);
 			setTags(prev => prev.filter(tag => tag.id !== tagId));
 			toastService.system.success('Etiqueta eliminada correctamente');
 		} catch (error) {

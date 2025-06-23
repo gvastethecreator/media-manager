@@ -32,20 +32,18 @@ MemoizedJsonFileCard.displayName = 'MemoizedJsonFileCard';
 export function JsonFilesView(_props: ViewProps) {
 	const {
 		jsonFiles: jsonFilesRecord,
-		isLoading,
+		loading: isLoading,
 		error,
-		loadJsonFiles,
-		getSortedJsonFiles,
+		fetchJsonFiles: loadJsonFiles,
 	} = useJsonFileStore((s) => ({
 		jsonFiles: s.jsonFiles,
-		isLoading: s.isLoading,
+		loading: s.loading,
 		error: s.error,
-		loadJsonFiles: s.loadJsonFiles,
-		getSortedJsonFiles: s.getSortedJsonFiles,
+		fetchJsonFiles: s.fetchJsonFiles,
 	}));
 
 	useEffect(() => {
-		if (Object.keys(jsonFilesRecord).length === 0) {
+		if (Array.isArray(jsonFilesRecord) && jsonFilesRecord.length === 0) {
 			viewLogger.info('Store de archivos JSON vacío, cargando desde el servidor...');
 			loadJsonFiles();
 		}
@@ -64,11 +62,14 @@ export function JsonFilesView(_props: ViewProps) {
 		);
 	}
 
-	if (isLoading && Object.keys(jsonFilesRecord).length === 0) {
+	if (isLoading && (!Array.isArray(jsonFilesRecord) || jsonFilesRecord.length === 0)) {
 		return <LoadingScreen />;
 	}
 
-	const sortedJsonFiles = getSortedJsonFiles();
+	// Lógica de ordenamiento simple (por fecha de actualización, más recientes primero)
+	const sortedJsonFiles = Array.isArray(jsonFilesRecord) ? jsonFilesRecord.sort((a, b) =>
+		new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+	) : [];
 
 	if (sortedJsonFiles.length === 0) {
 		return (

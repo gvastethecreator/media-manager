@@ -9,7 +9,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { PropertyWithRelations } from '@/types/entities/property';
+import type { PropertyWithStats } from '@/types/entities/property';
 import { Microscope } from 'lucide-react';
 import Link from 'next/link';
 import React, { useMemo } from 'react';
@@ -17,17 +17,10 @@ import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 export interface PropertyCardProps {
-	property: PropertyWithRelations & {
-		_count?: {
-			images?: number;
-			videos?: number;
-			notes?: number;
-			concepts?: number;
-			prompts?: number;
-			wildcards?: number;
-		};
+	property: PropertyWithStats & {
+		totalAssociations?: number;
 	};
-	onClick?: (property: PropertyWithRelations) => void;
+	onClick?: (property: PropertyWithStats) => void;
 	className?: string;
 	showBadges?: boolean;
 }
@@ -59,14 +52,8 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 		}
 	}, [property.color]);
 
-	// Calcular número total de relaciones
-	const totalRelations =
-		(property._count?.images || 0) +
-		(property._count?.videos || 0) +
-		(property._count?.notes || 0) +
-		(property._count?.concepts || 0) +
-		(property._count?.prompts || 0) +
-		(property._count?.wildcards || 0);
+	// Calcular número total de relaciones desde stats o totalAssociations
+	const totalRelations = property.totalAssociations ?? property.stats.totalRelations;
 
 	const handleClick = () => {
 		if (onClick) {
@@ -105,18 +92,6 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 				{/* Estadísticas */}
 				{showBadges && (
 					<div className="mt-auto flex flex-wrap gap-1">
-						{property._count?.images ? (
-							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
-								{property._count.images} imágenes
-							</Badge>
-						) : null}
-
-						{property._count?.videos ? (
-							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
-								{property._count.videos} videos
-							</Badge>
-						) : null}
-
 						{totalRelations > 0 && (
 							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
 								{totalRelations} relaciones

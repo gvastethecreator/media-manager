@@ -345,9 +345,6 @@ async function parseJsonString(text: string): Promise<MediaMetadata | null> {
 	}
 }
 
-// Importar y exportar directamente la función de parsers
-export { extractAIGenerationInfo } from './parsers/index';
-
 // Función wrapper para compatibilidad con legacy code
 export async function getAIGenerationInfo(
 	metadata: Record<string, unknown> | null
