@@ -16,6 +16,7 @@
 - **Maximum efficiency in changes** - Show only necessary modifications, don't repeat complete code
 - **Precise technical documentation** - Clear but concise comments that explain the "why" of the code
 - **Focus on best practices** - Apply standard patterns and conventions of the language/framework
+- ** Don't run builds or servers automatically** - Always ask for explicit user confirmation before executing heavy commands.
 
 ### Knowledge Mode (Obsidian, Documentation, Research)
 
