@@ -1,6 +1,7 @@
 'use client';
 
 import { getAIGenerationInfo } from '@/app/actions/metadata/metadata-parsers.actions';
+import { getImageMetadata } from '@/app/actions/metadata/metadata.actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';

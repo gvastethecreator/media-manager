@@ -1,22 +1,20 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { createCollection, updateCollection } from '@/app/actions/collections/collection.actions';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import toastService from '@/services/toast.service';
-import type { CollectionBase as Collection, CreateCollectionData } from '@/types/entities/collection/base';
+import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import {
 	COLLECTION_CATEGORY_COLORS,
 	COLLECTION_CATEGORY_EMOJIS,
-	CollectionCategory,
-	CollectionPlatform,
-	CollectionRarity,
+	CollectionCategory
 } from '@/types/entities/collection/enums';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
 
 // Esquema de validación
@@ -41,9 +39,8 @@ const createCollectionSchema = z.object({
 	emoji: z.string().min(1, {
 		message: 'Debes seleccionar un emoji',
 	}),
-	category: z.nativeEnum(CollectionCategory).optional(),
-	rarity: z.nativeEnum(CollectionRarity).optional(),
-	platform: z.nativeEnum(CollectionPlatform).optional(),
+	category: z.string().optional(),
+	platform: z.string().optional(),
 	url: z.string().url({ message: 'La URL debe ser válida' }).optional().or(z.literal('')),
 	alternativeUrl: z.string().url({ message: 'La URL alternativa debe ser válida' }).optional().or(z.literal('')),
 	price: z.number().nonnegative().optional(),
@@ -53,10 +50,10 @@ const createCollectionSchema = z.object({
 type FormValues = z.infer<typeof createCollectionSchema>;
 
 interface CreateCollectionFormProps {
-	collection?: Collection | null;
+	collection?: CollectionWithStats | null;
 	isEditing?: boolean;
-	onCreated?: (collection: Collection) => void;
-	onUpdated?: (collection: Collection) => void;
+	onCreated?: (collection: CollectionWithStats) => void;
+	onUpdated?: (collection: CollectionWithStats) => void;
 	onCancel?: () => void;
 	onPreview?: (data: any) => void;
 }
@@ -79,7 +76,6 @@ export function CreateCollectionForm({
 			color: '#6b7280',
 			emoji: '📚',
 			category: undefined,
-			rarity: undefined,
 			platform: undefined,
 			url: '',
 			alternativeUrl: '',
@@ -96,9 +92,8 @@ export function CreateCollectionForm({
 				description: collection.description || '',
 				color: collection.color,
 				emoji: collection.emoji,
-				category: collection.category as CollectionCategory | undefined,
-				rarity: collection.rarity as CollectionRarity | undefined,
-				platform: collection.platform as CollectionPlatform | undefined,
+				category: collection.category || undefined,
+				platform: collection.platform || undefined,
 				url: collection.url || '',
 				alternativeUrl: collection.alternativeUrl || '',
 				price: collection.price || undefined,
@@ -112,10 +107,10 @@ export function CreateCollectionForm({
 		const category = form.getValues('category');
 		const name = form.getValues('name');
 
-		if (category && Object.values(CollectionCategory).includes(category)) {
+		if (category && COLLECTION_CATEGORY_COLORS[category as CollectionCategory]) {
 			// Usar colores y emojis predefinidos por categoría
-			const color = COLLECTION_CATEGORY_COLORS[category] || '#6b7280';
-			const emoji = COLLECTION_CATEGORY_EMOJIS[category] || '📚';
+			const color = COLLECTION_CATEGORY_COLORS[category as CollectionCategory] || '#6b7280';
+			const emoji = COLLECTION_CATEGORY_EMOJIS[category as CollectionCategory] || '📚';
 
 			form.setValue('color', color);
 			form.setValue('emoji', emoji);
@@ -177,13 +172,12 @@ export function CreateCollectionForm({
 		try {
 			setIsSubmitting(true);
 
-			const collectionData: CreateCollectionData = {
+			const collectionData: CollectionCreateInput = {
 				name: data.name,
 				description: data.description,
 				color: data.color,
 				emoji: data.emoji,
 				category: data.category,
-				rarity: data.rarity,
 				platform: data.platform,
 				url: data.url || undefined,
 				alternativeUrl: data.alternativeUrl || undefined,
@@ -195,7 +189,7 @@ export function CreateCollectionForm({
 				const updated = await updateCollection(collection.id, {
 					...collectionData,
 					isFavorite: data.isFavorite,
-				});
+				} as CollectionUpdateInput);
 				onUpdated?.(updated);
 			} else {
 				const created = await createCollection(collectionData);
@@ -261,17 +255,18 @@ export function CreateCollectionForm({
 			),
 		},
 		{
-			name: 'rarity',
-			label: 'Rareza',
+			name: 'platform',
+			label: 'Plataforma',
 			render: ({ value, onChange }: any) => (
 				<Select onValueChange={onChange} value={value || undefined}>
 					<SelectTrigger className="h-8 text-xs w-full">
 						<SelectValue placeholder="Seleccionar" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="common">Común</SelectItem>
-						<SelectItem value="rare">Raro</SelectItem>
-						<SelectItem value="epic">Épico</SelectItem>
+						<SelectItem value="web">Web</SelectItem>
+						<SelectItem value="nft">NFT</SelectItem>
+						<SelectItem value="physical">Físico</SelectItem>
+						<SelectItem value="digital">Digital</SelectItem>
 					</SelectContent>
 				</Select>
 			),
@@ -282,15 +277,7 @@ export function CreateCollectionForm({
 	return (
 		<DynamicCreateForm
 			optionalFields={optionalFields}
-			onSubmit={async (data) => {
-				if (isEditing && collection) {
-					await updateCollection(collection.id, data);
-					onUpdated?.({ ...collection, ...data });
-				} else {
-					const created = await createCollection(data);
-					onCreated?.(created);
-				}
-			}}
+			onSubmit={_onSubmit}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear colección'}
 		/>
 	);

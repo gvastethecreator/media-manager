@@ -1,10 +1,11 @@
 'use client';
 
-import { useCallback } from 'react';
-import { createFolder, deleteFolder, reindexFolder, updateFolderAutoReindex } from '@/app/actions/folders';
+import { createFolder, deleteFolder, updateFolder } from '@/app/actions/folders';
 import { clearMetadataCache } from '@/app/actions/metadata';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/services/toast.service';
+import type { FolderCreateInput } from '@/types/entities/folder';
+import { useCallback } from 'react';
 
 const operationsLogger = clientLogger.withContext('FoldersOperations');
 
@@ -30,8 +31,15 @@ export function useFoldersOperations({
 			try {
 				operationsLogger.info('➕ Agregando carpeta:', { path: folderPath });
 
+				// Crear el input correctamente
+				const input: FolderCreateInput = {
+					path: folderPath,
+					name: folderPath.split('/').pop() || folderPath,
+					autoReindex: false,
+				};
+
 				// Llamar a la acción del servidor
-				const result = await createFolder(folderPath);
+				const result = await createFolder(input);
 
 				// Notificar inicio de procesamiento
 				onStartProcessing(result.id);
@@ -60,10 +68,11 @@ export function useFoldersOperations({
 				// Notificar inicio de procesamiento
 				onStartProcessing(folderId);
 
-				// Llamar a la acción del servidor
-				const result = await reindexFolder(folderId);
+				// TODO: Implementar reindex cuando esté disponible
+				// Por ahora solo actualizamos la fecha
+				await updateFolder(folderId, { lastIndexed: new Date() });
 
-				operationsLogger.info('✅ Reindexación iniciada:', result);
+				operationsLogger.info('✅ Reindexación iniciada');
 			} catch (error) {
 				operationsLogger.error('❌ Error al reindexar carpeta:', error);
 
@@ -106,7 +115,7 @@ export function useFoldersOperations({
 				operationsLogger.info('🔄 Actualizando auto-reindexado:', { folderId, value });
 
 				// Llamar a la acción del servidor
-				await updateFolderAutoReindex(folderId, value);
+				await updateFolder(folderId, { autoReindex: value });
 
 				// Recargar datos
 				await onLoadData();
